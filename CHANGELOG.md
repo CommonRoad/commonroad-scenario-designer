@@ -1,15 +1,22 @@
-## [Unreleased]
+# Changelog
+
+## [1.0.1] - 2019-03-13
 ### Added
 - Command line options for opendrive2lanelet-visualize
 
 ### Changed
-- Slight adjustment of algorithm for join/split border movement
+- Slight adjustment of algorithm that determines new border points
+when lanelets join into or split from other lanelets
+- Minimum of 3 points per lanelet border are required
 
-## [1.0.0] - 2018-01-28
+### Fixed
+- Issue with selecting the proper width coefficients when calculating points on lanelet borders
+
+## [1.0.0] - 2019-01-28
 ### Added
-- Algorithm to generate proper lanelet borders for splitting or joining lanelets.
-- Command line tools to convert xodr files and visualize the results.
-- More inline code documentation.
+- Algorithm to generate proper lanelet borders for splitting or joining lanelets
+- Command line tools to convert xodr files and visualize the results
+- More inline code documentation
 - Unit tests for xodr files where edge cases appear
 - Sphinx documentation in docs/
 - Support for Jenkins and Gitlab-CI
