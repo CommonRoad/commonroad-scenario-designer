@@ -20,31 +20,12 @@ python37:
   script: tox -e py37 -- --junitxml=junit-{envname}.xml
   artifacts:
     reports:
-      junit: tools/opendrive2lanelet/junit-*.xml
+      junit: junit-*.xml
 
 docs:
   image: python:3.7
   stage: test
   script: tox -e docs
-
-code_quality:
-  stage: test
-  image: docker:stable
-  variables:
-    DOCKER_DRIVER: overlay2
-  allow_failure: true
-  services:
-    - docker:stable-dind
-  script:
-    - export SP_VERSION=$(echo "$CI_SERVER_VERSION" | sed 's/^\([0-9]*\)\.\([0-9]*\).*/\1-\2-stable/')
-    - docker run
-        --env SOURCE_CODE="$PWD"
-        --volume "$PWD":/code
-        --volume /var/run/docker.sock:/var/run/docker.sock
-        "registry.gitlab.com/gitlab-org/security-products/codequality:$SP_VERSION" /code
-  artifacts:
-    reports:
-      codequality: gl-code-quality-report.json
 
 build_package:
   stage: build
