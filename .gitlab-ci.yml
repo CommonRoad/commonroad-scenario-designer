@@ -1,0 +1,27 @@
+image: python
+
+stages:
+- test
+
+before_script:
+- curl -O https://bootstrap.pypa.io/get-pip.py
+- python get-pip.py
+- pip install tox coverage
+
+python36:
+  image: python:3.6
+  stage: test
+  script: tox -e py36
+
+python37:
+  image: python:3.7
+  stage: test
+  script: tox -e py37 -- --junitxml=junit-{envname}.xml
+  artifacts:
+    reports:
+      junit: tools/opendrive2lanelet/junit-*.xml
+
+docs:
+  image: python:3.7
+  stage: test
+  script: tox -e docs
