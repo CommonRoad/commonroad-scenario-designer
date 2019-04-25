@@ -31,4 +31,5 @@ build_package:
   stage: build
   only:
     - master
+    - develop
   script: python setup.py sdist bdist_wheel

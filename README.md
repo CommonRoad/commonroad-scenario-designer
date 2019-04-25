@@ -2,8 +2,8 @@
 
 We provide the code for an OpenDRIVE ([www.opendrive.org](http://www.opendrive.org)) to lanelets ([www.mrt.kit.edu/software/liblanelet](https://www.mrt.kit.edu/software/libLanelet/libLanelet.html)) converter, which has been introduced in our [paper](https://mediatum.ub.tum.de/doc/1449005/1449005.pdf): M. Althoff, S. Urban, and M. Koschi, "Automatic Conversion of Road Networks from OpenDRIVE to Lanelets," in Proc. of the IEEE International Conference on Service Operations and Logistics, and Informatics, 2018.
 
-[![pipeline status](https://gitlab.lrz.de/ga96zay/opendrive2lanelet/badges/master/pipeline.svg)](https://gitlab.lrz.de/ga96zay/opendrive2lanelet/commits/master)
-[![coverage report](https://gitlab.lrz.de/ga96zay/opendrive2lanelet/badges/master/coverage.svg)](https://gitlab.lrz.de/ga96zay/opendrive2lanelet/commits/master)
+[![pipeline status](https://gitlab.lrz.de/%{project_path}/badges/%{default_branch}/pipeline.svg)](https://gitlab.lrz.de/%{project_path}/commits/%{default_branch})
+[![coverage report](https://gitlab.lrz.de/%{project_path}/badges/%{default_branch}/coverage.svg)](https://gitlab.lrz.de/%{project_path}/commits/%{default_branch})
 
 [![Documentation Status](https://readthedocs.org/projects/opendrive2lanelet/badge/?version=latest)](https://opendrive2lanelet.readthedocs.io/en/latest/?badge=latest)
 [![PyPI version](https://badge.fury.io/py/opendrive2lanelet.svg)](https://badge.fury.io/py/opendrive2lanelet)
@@ -15,12 +15,12 @@ We provide the code for an OpenDRIVE ([www.opendrive.org](http://www.opendrive.o
 ### Installing from source
 
 ```bash
-git clone https://gitlab.lrz.de/ga96zay/opendrive2lanelet.git
+git clone https://gitlab.lrz.de/cps/opendrive2lanelet.git
 cd opendrive2lanelet
 python setup.py install
 ```
 
-Public source (only released versions): https://gitlab.com/cps_public/opendrive2lanelet.git
+Public source (only released versions): https://gitlab.com/tum-cps/opendrive2lanelet.git
 
 
 
