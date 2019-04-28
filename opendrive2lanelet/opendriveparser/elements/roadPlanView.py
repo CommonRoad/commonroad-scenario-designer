@@ -9,6 +9,7 @@ from opendrive2lanelet.opendriveparser.elements.geometry import (
     Spiral,
     ParamPoly3,
     Arc,
+    Poly3,
 )
 
 
@@ -114,6 +115,20 @@ class PlanView:
             ),
             True,
         )
+
+    def addPoly3(self, start_pos, heading, length, a, b, c, d):
+        """
+
+        Args:
+          start_pos:
+          heading:
+          length:
+          a:
+          b:
+          c:
+          d:
+        """
+        self._add_geometry(Poly3(start_pos, heading, length, a, b, c, d), True)
 
     def _add_geo_length(self, length: float):
         """Add length of a geometry to the array which keeps track at which position

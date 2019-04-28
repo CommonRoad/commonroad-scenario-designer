@@ -172,7 +172,7 @@ class Poly3(Geometry):
         self._d = d
         super().__init__(start_position=start_position, heading=heading, length=length)
 
-        raise NotImplementedError()
+        # raise NotImplementedError()
 
     def calc_position(self, s_pos):
         """

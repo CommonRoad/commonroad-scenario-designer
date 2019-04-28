@@ -127,8 +127,11 @@ class OpenDriveConverter:
                     parametric_lane = OpenDriveConverter.create_parametric_lane(
                         lane_borders, width, lane
                     )
-                    parametric_lane.reverse = True if lane.id > 0 else False
+                    parametric_lane.reverse = bool(lane.id > 0)
                     plane_group.append(parametric_lane)
+
+                # if lane borders are specified by offsets instead of widths
+                # for borders in lane.borders:
 
                 if plane_group.length > 0:
                     plane_groups.append(plane_group)
@@ -194,7 +197,10 @@ class OpenDriveConverter:
             border.ref_offset = lane.lane_section.sPos
 
         # last created border
-        border.reference = lane_borders[-1]
+        if lane.has_border_record:
+            border.reference = lane_borders[0]
+        else:
+            border.reference = lane_borders[-1]
 
         for width in lane.widths:
             border.width_coefficient_offsets.append(width.start_offset)
