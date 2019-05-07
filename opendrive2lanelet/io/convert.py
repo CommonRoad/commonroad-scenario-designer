@@ -19,6 +19,7 @@ from opendrive2lanelet.opendriveparser.elements.opendrive import OpenDrive
 from opendrive2lanelet.opendriveparser.parser import parse_opendrive
 from opendrive2lanelet.network import Network
 from opendrive2lanelet.io.extended_file_writer import ExtendedCommonRoadFileWriter
+from opendrive2lanelet.osm.lanelet2osm import OSMConverter
 
 __author__ = "Benjamin Orthen, Stefan Urban"
 __copyright__ = "TUM Cyber-Physical Systems Group"
@@ -38,31 +39,10 @@ def parse_arguments():
         action="store_true",
         help="overwrite existing file if it has same name as converted file",
     )
+    parser.add_argument("--osm", help="use proj-string to convert directly to osm")
     parser.add_argument("-o", "--output-name", help="specify name of outputed file")
     args = parser.parse_args()
     return args
-
-
-# def visualize(scenario: Scenario):
-#     """Visualize a created scenario by plotting it
-#     with matplotlib.
-
-#     Args:
-#       scenario: The scenario which should be plotted.
-
-#     Returns:
-#       None
-
-#     """
-
-#     # set plt settings
-#     plt.style.use("classic")
-#     plt.figure(figsize=(8, 4.5))
-#     plt.gca().axis("equal")
-#     # plot_limits = [-80, 80, -60, 30]
-#     # plot scenario
-#     draw_object(scenario)
-#     plt.show()
 
 
 def convert_opendrive(opendrive: OpenDrive) -> Scenario:
@@ -90,7 +70,9 @@ def main():
         output_name = args.output_name
     else:
         output_name = args.xodr_file.rpartition(".")[0]
-        output_name = f"{output_name}.xml"  # only name of file
+        output_name = (
+            f"{output_name}.osm" if args.osm else f"{output_name}.xml"
+        )  # only name of file
 
     if os.path.isfile(output_name) and not args.force_overwrite:
         print(

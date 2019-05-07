@@ -26,7 +26,10 @@ setup(
         "scipy>=1.1.0",
         "commonroad-io>=2018.1",
     ],
-    extras_require={"GUI": ["PyQt5>=5.11.3", "matplotlib>=3.0.0"]},
+    extras_require={
+        "GUI": ["PyQt5>=5.11.3", "matplotlib>=3.0.0"],
+        "OSM": ["pyproj>=2.1.3"],
+    },
     python_requires=">=3.6",
     entry_points={
         "console_scripts": [

@@ -548,8 +548,7 @@ def parse_opendrive_header(opendrive, header):
     )
     # Reference
     if header.find("geoReference") is not None:
-        pass
-        # TODO not implemented
+        parsed_header.geo_reference = header.find("geoReference").text
 
     opendrive.header = parsed_header
 

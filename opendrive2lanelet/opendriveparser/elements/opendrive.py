@@ -33,7 +33,7 @@ class OpenDrive:
         """
 
         Args:
-          id_: 
+          id_:
 
         Returns:
 
@@ -58,7 +58,7 @@ class OpenDrive:
         """
 
         Args:
-          junctionId: 
+          junctionId:
 
         Returns:
 
@@ -105,3 +105,4 @@ class Header:
         self.east = east
         self.west = west
         self.vendor = vendor
+        self.geo_reference = None
