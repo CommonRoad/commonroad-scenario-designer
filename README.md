@@ -2,9 +2,6 @@
 
 We provide the code for an OpenDRIVE ([www.opendrive.org](http://www.opendrive.org)) to lanelets ([www.mrt.kit.edu/software/liblanelet](https://www.mrt.kit.edu/software/libLanelet/libLanelet.html)) converter, which has been introduced in our [paper](https://mediatum.ub.tum.de/doc/1449005/1449005.pdf): M. Althoff, S. Urban, and M. Koschi, "Automatic Conversion of Road Networks from OpenDRIVE to Lanelets," in Proc. of the IEEE International Conference on Service Operations and Logistics, and Informatics, 2018.
 
-[![pipeline status](https://gitlab.lrz.de/%{project_path}/badges/%{default_branch}/pipeline.svg)](https://gitlab.lrz.de/%{project_path}/commits/%{default_branch})
-[![coverage report](https://gitlab.lrz.de/%{project_path}/badges/%{default_branch}/coverage.svg)](https://gitlab.lrz.de/%{project_path}/commits/%{default_branch})
-
 [![Documentation Status](https://readthedocs.org/projects/opendrive2lanelet/badge/?version=latest)](https://opendrive2lanelet.readthedocs.io/en/latest/?badge=latest)
 [![PyPI version](https://badge.fury.io/py/opendrive2lanelet.svg)](https://badge.fury.io/py/opendrive2lanelet)
 [![Supported python versions](https://img.shields.io/pypi/pyversions/opendrive2lanelet.svg)](https://pypi.org/project/opendrive2lanelet/)

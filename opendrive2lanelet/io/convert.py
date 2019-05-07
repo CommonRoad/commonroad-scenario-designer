@@ -83,9 +83,6 @@ def main():
     """Helper function to convert an xodr to a lanelet file
     script uses sys.argv[1] as file to be converted
 
-    Note:
-      This is still under development.
-
     """
     args = parse_arguments()
 

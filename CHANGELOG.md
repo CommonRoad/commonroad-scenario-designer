@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.2] - 2019-05-07
+### Fixed
+- Support for Poly3 was not fully implemented
+
 ## [1.0.1] - 2019-03-13
 ### Added
 - Command line options for opendrive2lanelet-visualize

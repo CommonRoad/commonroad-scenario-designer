@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!--
 XSD for CommonRoad benchmark scenarios
-commonRoadVersion="2018a" date="2018-06-19"
+commonRoadVersion="2018b" date="2018-06-19"
 author="Markus Koschi"
 affiliation="Technical University of Munich, Germany"
 website="commonroad.in.tum.de"
