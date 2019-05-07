@@ -20,7 +20,7 @@ from commonroad.common.file_writer import CommonRoadFileWriter, ctx
 __author__ = "Benjamin Orthen"
 __copyright__ = "TUM Cyber-Physical Systems Group"
 __credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles"]
-__version__ = "1.0.0"
+__version__ = "1.0.2"
 __maintainer__ = "Benjamin Orthen"
 __email__ = "commonroad-i06@in.tum.de"
 __status__ = "Released"
@@ -58,8 +58,11 @@ class ExtendedCommonRoadFileWriter(CommonRoadFileWriter):
           str: Serialized xml data.
 
         """
+        # output_string = etree.tostring(
+        # self._root_node, encoding="utf-8", pretty_print=True
+        # )
         output_string = et.tostring(self._root_node, encoding="unicode")
-        # TODO: find solution to be human readable -> lxml.prettyxml
+        # TODO: remove this method as soon as commonroad publishes new version
         return output_string
 
     def write_scenario_to_file_io(self, file_io: io.IOBase):
@@ -107,7 +110,8 @@ class ExtendedCommonRoadFileWriter(CommonRoadFileWriter):
 
         """
         with open(
-            os.path.dirname(os.path.abspath(__file__)) + "/XML_commonRoad_XSD.xsd", "rb"
+            os.path.dirname(os.path.abspath(__file__)) + "/commonroad_validity.xsd",
+            "rb",
         ) as schema_file:
             schema = etree.XMLSchema(etree.parse(schema_file))
 
