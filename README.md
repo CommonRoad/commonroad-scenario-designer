@@ -17,7 +17,7 @@ cd opendrive2lanelet
 python setup.py install
 ```
 
-Public source (only released versions): https://gitlab.com/tum-cps/opendrive2lanelet.git
+Public source (only released versions): https://gitlab.lrz.de/tum-cps/opendrive2lanelet.git
 
 
 
