@@ -23,7 +23,7 @@ from opendrive2lanelet.io.extended_file_writer import ExtendedCommonRoadFileWrit
 __author__ = "Benjamin Orthen, Stefan Urban"
 __copyright__ = "TUM Cyber-Physical Systems Group"
 __credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles"]
-__version__ = "1.0.0"
+__version__ = "1.0.2"
 __maintainer__ = "Benjamin Orthen"
 __email__ = "commonroad-i06@in.tum.de"
 __status__ = "Released"
@@ -83,9 +83,6 @@ def main():
     """Helper function to convert an xodr to a lanelet file
     script uses sys.argv[1] as file to be converted
 
-    Note:
-      This is still under development.
-
     """
     args = parse_arguments()
 
@@ -107,16 +104,19 @@ def main():
 
     scenario = convert_opendrive(opendrive)
 
-    writer = ExtendedCommonRoadFileWriter(
-        scenario, source="OpenDRIVE 2 Lanelet Converter"
-    )
-    # if len(sys.argv) == 3:
-    #     output_name = sys.argv[2]
-    # else:
-    #     output_name = sys.argv[1].rpartition(".")[0]  # only name of file
+    if not args.osm:
+        writer = ExtendedCommonRoadFileWriter(
+            scenario, source="OpenDRIVE 2 Lanelet Converter"
+        )
 
-    with open(f"{output_name}", "w") as file_out:
-        writer.write_scenario_to_file_io(file_out)
+        with open(f"{output_name}", "w") as file_out:
+            writer.write_scenario_to_file_io(file_out)
+
+    else:
+        l2osm = OSMConverter(args.osm)
+        osm = l2osm(scenario)
+        with open(f"{output_name}", "w") as file_out:
+            file_out.write(etree.tostring(osm, encoding="unicode", pretty_print=True))
 
 
 if __name__ == "__main__":

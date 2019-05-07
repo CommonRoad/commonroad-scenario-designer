@@ -118,6 +118,7 @@ class Lane:
         self._widths = []
         self._borders = []
         self.lane_section = lane_section
+        self.has_border_record = False
 
     @property
     def parentRoad(self):
@@ -167,6 +168,11 @@ class Lane:
         """ """
         self._widths.sort(key=lambda x: x.start_offset)
         return self._widths
+
+    @widths.setter
+    def widths(self, value):
+        """"""
+        self._widths = value
 
     def getWidth(self, widthIdx):
         """

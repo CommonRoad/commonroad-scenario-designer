@@ -10,7 +10,7 @@ from opendrive2lanelet.lanelet import ConversionLanelet
 __author__ = "Benjamin Orthen"
 __copyright__ = "TUM Cyber-Physical Systems Group"
 __credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles"]
-__version__ = "1.0.0"
+__version__ = "1.0.2"
 __maintainer__ = "Benjamin Orthen"
 __email__ = "commonroad-i06@in.tum.de"
 __status__ = "Released"
@@ -83,6 +83,7 @@ class ParametricLaneBorderGroup:
         Returns:
           The width coefficients in format [a, b, c, d].
         """
+        # TODO: expand implementation to consider border offset record
         return self.outer_border.get_next_width_coeffs(self.outer_border_offset)
 
 
@@ -163,6 +164,7 @@ class ParametricLane:
         Returns:
           True if every ParametricLane has width_coefficients equal to only zero.
         """
+        # TODO: expand this method to include border offset records
         return self.border_group.get_width_coefficients() == [0, 0, 0, 0]
 
     def to_lanelet_with_mirroring(
@@ -261,13 +263,10 @@ class ParametricLane:
            Created Lanelet, with left, center and right vertices and a lanelet_id.
 
         """
-        # if self.border_group.get_width_coefficients() == [0, 0, 0, 0]:
-        #     return None, None
 
         num_steps = int(max(3, np.ceil(self.length / float(precision))))
 
         poses = np.linspace(0, self.length, num_steps)
-        # last_pos_i = len(poses) - 1
 
         left_vertices = []
         right_vertices = []

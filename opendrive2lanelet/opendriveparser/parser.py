@@ -37,7 +37,7 @@ from opendrive2lanelet.opendriveparser.elements.junction import (
 __author__ = "Benjamin Orthen, Stefan Urban"
 __copyright__ = "TUM Cyber-Physical Systems Group"
 __credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles"]
-__version__ = "1.0.0"
+__version__ = "1.0.2"
 __maintainer__ = "Benjamin Orthen"
 __email__ = "commonroad-i06@in.tum.de"
 __status__ = "Released"
@@ -174,7 +174,16 @@ def parse_opendrive_road_geometry(newRoad, road_geometry):
         )
 
     elif road_geometry.find("poly3") is not None:
-        raise NotImplementedError()
+        newRoad.planView.addPoly3(
+            startCoord,
+            float(road_geometry.get("hdg")),
+            float(road_geometry.get("length")),
+            float(road_geometry.find("poly3").get("a")),
+            float(road_geometry.find("poly3").get("b")),
+            float(road_geometry.find("poly3").get("c")),
+            float(road_geometry.find("poly3").get("d")),
+        )
+        # raise NotImplementedError()
 
     elif road_geometry.find("paramPoly3") is not None:
         if road_geometry.find("paramPoly3").get("pRange"):
@@ -331,25 +340,27 @@ def parse_opendrive_road_lane_section(newRoad, lane_section_id, lane_section):
 
         for lane in side.findall("lane"):
 
-            newLane = RoadLaneSectionLane(
+            new_lane = RoadLaneSectionLane(
                 parentRoad=newRoad, lane_section=newLaneSection
             )
-            newLane.id = lane.get("id")
-            newLane.type = lane.get("type")
+            new_lane.id = lane.get("id")
+            new_lane.type = lane.get("type")
 
             # In some sample files the level is not specified according to the OpenDRIVE spec
-            newLane.level = "true" if lane.get("level") in [1, "1", "true"] else "false"
+            new_lane.level = (
+                "true" if lane.get("level") in [1, "1", "true"] else "false"
+            )
 
             # Lane Links
             if lane.find("link") is not None:
 
                 if lane.find("link").find("predecessor") is not None:
-                    newLane.link.predecessorId = (
+                    new_lane.link.predecessorId = (
                         lane.find("link").find("predecessor").get("id")
                     )
 
                 if lane.find("link").find("successor") is not None:
-                    newLane.link.successorId = (
+                    new_lane.link.successorId = (
                         lane.find("link").find("successor").get("id")
                     )
 
@@ -365,7 +376,7 @@ def parse_opendrive_road_lane_section(newRoad, lane_section_id, lane_section):
                     start_offset=float(width.get("sOffset")),
                 )
 
-                newLane.widths.append(newWidth)
+                new_lane.widths.append(newWidth)
 
             # Border
             for borderIdx, border in enumerate(lane.findall("border")):
@@ -379,7 +390,11 @@ def parse_opendrive_road_lane_section(newRoad, lane_section_id, lane_section):
                     start_offset=float(border.get("sOffset")),
                 )
 
-                newLane.borders.append(newBorder)
+                new_lane.borders.append(newBorder)
+
+            if lane.find("width") is None and lane.find("border") is not None:
+                new_lane.widths = new_lane.borders
+                new_lane.has_border_record = True
 
             # Road Marks
             # TODO implementation
@@ -402,7 +417,7 @@ def parse_opendrive_road_lane_section(newRoad, lane_section_id, lane_section):
             # Rules
             # TODO implementation
 
-            newSideLanes.append(newLane)
+            newSideLanes.append(new_lane)
 
     newRoad.lanes.lane_sections.append(newLaneSection)
 

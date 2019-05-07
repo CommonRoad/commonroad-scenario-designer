@@ -2,6 +2,7 @@ image: python
 
 stages:
 - test
+- build
 
 before_script:
 - curl -O https://bootstrap.pypa.io/get-pip.py
@@ -19,9 +20,16 @@ python37:
   script: tox -e py37 -- --junitxml=junit-{envname}.xml
   artifacts:
     reports:
-      junit: tools/opendrive2lanelet/junit-*.xml
+      junit: junit-*.xml
 
 docs:
   image: python:3.7
   stage: test
   script: tox -e docs
+
+build_package:
+  stage: build
+  only:
+    - master
+    - develop
+  script: python setup.py sdist bdist_wheel

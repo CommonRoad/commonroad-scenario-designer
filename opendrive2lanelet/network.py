@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+
 """Module to contain Network which can load an opendrive object and then export
 to lanelets. Iternally, the road network is represented by ParametricLanes."""
 
@@ -15,7 +16,7 @@ from opendrive2lanelet.converter import OpenDriveConverter
 __author__ = "Benjamin Orthen, Stefan Urban"
 __copyright__ = "TUM Cyber-Physical Systems Group"
 __credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles"]
-__version__ = "1.0.0"
+__version__ = "1.0.2"
 __maintainer__ = "Benjamin Orthen"
 __email__ = "commonroad-i06@in.tum.de"
 __status__ = "Released"

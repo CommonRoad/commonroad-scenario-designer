@@ -7,7 +7,7 @@ from opendrive2lanelet.opendriveparser.elements.eulerspiral import EulerSpiral
 __author__ = "Benjamin Orthen, Stefan Urban"
 __copyright__ = "TUM Cyber-Physical Systems Group"
 __credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles"]
-__version__ = "1.0.0"
+__version__ = "1.0.2"
 __maintainer__ = "Benjamin Orthen"
 __email__ = "commonroad-i06@in.tum.de"
 __status__ = "Released"
@@ -172,7 +172,7 @@ class Poly3(Geometry):
         self._d = d
         super().__init__(start_position=start_position, heading=heading, length=length)
 
-        raise NotImplementedError()
+        # raise NotImplementedError()
 
     def calc_position(self, s_pos):
         """
