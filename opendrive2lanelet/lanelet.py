@@ -22,9 +22,10 @@ optimal_join_split_factor = 20
 
 class ConversionLanelet(Lanelet):
     """Change some properties of the Lanelet class so that it can be used
-    to convert from OpenDrive to Lanelet. This means especially that lanelet_ids
+    to conversions to Lanelet. This means especially that lanelet_ids
     can be other types than a natural number and that these ids can be changed
     more than once.
+    Also adjacent neighbors and pre- and successor can be changed more than onc.
 
     Args:
 

@@ -22,37 +22,6 @@ __email__ = "commonroad-i06@in.tum.de"
 __status__ = "Released"
 
 
-def convert_to_new_lanelet_id(old_lanelet_id: str, ids_assigned: dict) -> int:
-    """Convert the old lanelet ids (format 501.1.-1.-1) to newer,
-    simpler ones (100, 101 etc.).
-
-    Do this by consecutively assigning
-    numbers, starting at 100, to the old_lanelet_id strings. Save the
-    assignments in the dict which is passed to the function as ids_assigned.
-
-    Args:
-      old_lanelet_id: Old id with format "501.1.-1.-1".
-      ids_assigned: Dict with all previous assignments
-
-    Returns:
-      The new lanelet id.
-
-    """
-
-    starting_lanelet_id = 100
-
-    if old_lanelet_id in ids_assigned.keys():
-        new_lanelet_id = ids_assigned[old_lanelet_id]
-    else:
-        try:
-            new_lanelet_id = max(ids_assigned.values()) + 1
-        except ValueError:
-            new_lanelet_id = starting_lanelet_id
-        ids_assigned[old_lanelet_id] = new_lanelet_id
-
-    return new_lanelet_id
-
-
 class Network:
     """Represents a network of parametric lanes, with a LinkIndex
     which stores the neighbor relations between the parametric lanes.
@@ -140,31 +109,32 @@ class Network:
 
         # dict where the connections between the old and new
         # ids are saved
-        new_lanelet_ids_assigned = {}
+        # new_lanelet_ids_assigned = {}
+        lanelet_network.convert_all_lanelet_ids()
 
-        for lanelet in lanelet_network.lanelets:
-            lanelet.description = lanelet.lanelet_id
-            lanelet_network.remove_lanelet(lanelet.lanelet_id)
-            lanelet.lanelet_id = convert_to_new_lanelet_id(
-                lanelet.lanelet_id, new_lanelet_ids_assigned
-            )
-            lanelet.predecessor = [
-                convert_to_new_lanelet_id(x, new_lanelet_ids_assigned)
-                for x in lanelet.predecessor
-            ]
-            lanelet.successor = [
-                convert_to_new_lanelet_id(x, new_lanelet_ids_assigned)
-                for x in lanelet.successor
-            ]
-            if lanelet.adj_left is not None:
-                lanelet.adj_left = convert_to_new_lanelet_id(
-                    lanelet.adj_left, new_lanelet_ids_assigned
-                )
-            if lanelet.adj_right is not None:
-                lanelet.adj_right = convert_to_new_lanelet_id(
-                    lanelet.adj_right, new_lanelet_ids_assigned
-                )
-            lanelet_network.add_lanelet(lanelet)
+        # for lanelet in lanelet_network.lanelets:
+        #     lanelet.description = lanelet.lanelet_id
+        #     lanelet_network.remove_lanelet(lanelet.lanelet_id)
+        #     lanelet.lanelet_id = convert_to_new_lanelet_id(
+        #         lanelet.lanelet_id, new_lanelet_ids_assigned
+        #     )
+        #     lanelet.predecessor = [
+        #         convert_to_new_lanelet_id(x, new_lanelet_ids_assigned)
+        #         for x in lanelet.predecessor
+        #     ]
+        #     lanelet.successor = [
+        #         convert_to_new_lanelet_id(x, new_lanelet_ids_assigned)
+        #         for x in lanelet.successor
+        #     ]
+        #     if lanelet.adj_left is not None:
+        #         lanelet.adj_left = convert_to_new_lanelet_id(
+        #             lanelet.adj_left, new_lanelet_ids_assigned
+        #         )
+        #     if lanelet.adj_right is not None:
+        #         lanelet.adj_right = convert_to_new_lanelet_id(
+        #             lanelet.adj_right, new_lanelet_ids_assigned
+        #         )
+        #     lanelet_network.add_lanelet(lanelet)
 
         return lanelet_network
 

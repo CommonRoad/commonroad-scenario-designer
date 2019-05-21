@@ -400,10 +400,17 @@ class MainWindow(QWidget):
             len(self.current_scenario.lanelet_network.lanelets)
         )
         self.laneletsList.setColumnCount(2)
-        lanelet_data = [
-            (lanelet.lanelet_id, lanelet.description)
-            for lanelet in self.current_scenario.lanelet_network.lanelets
-        ]
+        # lanelet_data = [
+        #     (lanelet.lanelet_id, lanelet.description)
+        #     for lanelet in self.current_scenario.lanelet_network.lanelets
+        # ]
+        lanelet_data = []
+        for lanelet in self.current_scenario.lanelet_network.lanelets:
+            try:
+                lanelet_data.append((lanelet.lanelet_id, lanelet.description))
+            except AttributeError:
+                lanelet_data.append((lanelet.lanelet_id, None))
+
         lanelet_data = sorted(lanelet_data)
         for idx, lanelet in enumerate(lanelet_data):
 

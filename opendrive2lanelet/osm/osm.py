@@ -27,16 +27,16 @@ class Way:
 
     def __init__(self, id_: str, *nodes):
         self.id_ = str(id_)
-        self._nodes = []
+        self.nodes = []
         for node in nodes:
-            self._nodes.append(node)
+            self.nodes.append(node)
 
     def serialize_to_xml(self):
         way = etree.Element("way")
         way.set("id", self.id_)
         way.set("action", "modify")
         way.set("visible", "true")
-        for node in self._nodes:
+        for node in self.nodes:
             xml_node = etree.SubElement(way, "nd")
             xml_node.set("ref", node.id_)
 
@@ -75,18 +75,31 @@ class OSM:
     """Basic OSM representation."""
 
     def __init__(self):
-        self._nodes = []
+        self.nodes = []
         self._ways = []
-        self._way_relations = []
+        self.way_relations = []
 
     def add_node(self, node: Node):
-        self._nodes.append(node)
+        self.nodes.append(node)
 
     def add_way(self, way: Way):
         self._ways.append(way)
 
     def add_way_relation(self, way_relation: WayRelation):
-        self._way_relations.append(way_relation)
+        self.way_relations.append(way_relation)
+
+    def find_way_by_id(self, way_id: str):
+        for way in self._ways:
+            if way.id_ == way_id:
+                return way
+        return None
+
+    def find_node_by_id(self, node_id: str) -> Node:
+        for nd in self.nodes:
+            if nd.id_ == node_id:
+                return nd
+
+        return None
 
     def serialize_to_xml(self):
         osm = etree.Element("osm")
@@ -94,13 +107,13 @@ class OSM:
         osm.set("upload", "true")
         osm.set("generator", "opendrive2lanelet")
 
-        for node in self._nodes:
+        for node in self.nodes:
             osm.append(node.serialize_to_xml())
 
         for way in self._ways:
             osm.append(way.serialize_to_xml())
 
-        for way_relation in self._way_relations:
+        for way_relation in self.way_relations:
             osm.append(way_relation.serialize_to_xml())
 
         return osm
