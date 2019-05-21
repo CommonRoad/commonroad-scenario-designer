@@ -9,19 +9,16 @@ import os
 import sys
 import argparse
 
-# import matplotlib.pyplot as plt
 from lxml import etree
 from commonroad.scenario.scenario import Scenario
-
-# from commonroad.visualization.draw_dispatch_cr import draw_object
 
 from opendrive2lanelet.opendriveparser.elements.opendrive import OpenDrive
 from opendrive2lanelet.opendriveparser.parser import parse_opendrive
 from opendrive2lanelet.network import Network
 from opendrive2lanelet.io.extended_file_writer import ExtendedCommonRoadFileWriter
-from opendrive2lanelet.osm.lanelet2osm import OSMConverter
+from opendrive2lanelet.osm.lanelet2osm import L2OSMConverter
 
-__author__ = "Benjamin Orthen, Stefan Urban"
+__author__ = "Benjamin Orthen"
 __copyright__ = "TUM Cyber-Physical Systems Group"
 __credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles"]
 __version__ = "1.0.2"
@@ -61,7 +58,6 @@ def convert_opendrive(opendrive: OpenDrive) -> Scenario:
 
 def main():
     """Helper function to convert an xodr to a lanelet file
-    script uses sys.argv[1] as file to be converted
 
     """
     args = parse_arguments()
@@ -95,10 +91,14 @@ def main():
             writer.write_scenario_to_file_io(file_out)
 
     else:
-        l2osm = OSMConverter(args.osm)
+        l2osm = L2OSMConverter(args.osm)
         osm = l2osm(scenario)
         with open(f"{output_name}", "w") as file_out:
-            file_out.write(etree.tostring(osm, encoding="unicode", pretty_print=True))
+            file_out.write(
+                etree.tostring(
+                    osm, xml_declaration=True, encoding="UTF-8", pretty_print=True
+                )
+            )
 
 
 if __name__ == "__main__":

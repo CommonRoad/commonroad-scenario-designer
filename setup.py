@@ -31,9 +31,10 @@ setup(
     python_requires=">=3.6",
     entry_points={
         "console_scripts": [
-            "opendrive2lanelet-convert=opendrive2lanelet.io.convert:main",
+            "opendrive2lanelet-convert=opendrive2lanelet.io.opendrive_convert:main",
             "opendrive2lanelet-gui=opendrive2lanelet.io.gui:main",
             "opendrive2lanelet-visualize=opendrive2lanelet.io.visualize_commonroad:main",
+            "osm-convert=opendrive2lanelet.io.osm_convert:main",
         ]
     },
     classifiers=[
