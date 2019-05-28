@@ -10,7 +10,7 @@ with open(f"{setup_dir}/README.md", "r") as fh:
 
 setup(
     name="opendrive2lanelet",
-    version="1.0.2",
+    version="1.0.3",
     description="Parser and converter from OpenDRIVE to lanelets",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -25,6 +25,7 @@ setup(
         "lxml>=4.3.3",
         "commonroad-io>=2019.1",
         "pyproj>=2.1.3",
+        "scipy>=1.3.0",
     ],
     extras_require={"GUI": ["PyQt5>=5.11.3", "matplotlib>=3.0.0"]},
     python_requires=">=3.6",

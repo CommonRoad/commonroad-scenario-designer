@@ -57,7 +57,7 @@ If you want to visualize the Commonroad file, use the ```opendrive2lanelet-visua
 from lxml import etree
 from opendrive2lanelet.opendriveparser.parser import parse_opendrive
 from opendrive2lanelet.network import Network
-from opendrive2lanelet.io.extended_file_writer import ExtendedCommonRoadFileWriter
+from from commonroad.common.file_writer import CommonRoadFileWriter
 
 # Import, parse and convert OpenDRIVE file
 with open("{}/opendrive-1.xodr".format(os.path.dirname(os.path.realpath(__file__))), "r") as fi:
@@ -68,7 +68,15 @@ road_network.load_opendrive(open_drive)
 
 scenario = road_network.export_commonroad_scenario()
 # Write CommonRoad scenario to file
-commonroad_writer = ExtendedCommonRoadFileWriter(scenario, source="OpenDRIVE 2 Lanelet Converter"
+from commonroad.common.file_writer import CommonRoadFileWriter
+commonroad_writer = CommonRoadFileWriter(
+            scenario=scenario,
+            planning_problem_set=None,
+            author="",
+            affiliation="",
+            source="OpenDRIVE 2 Lanelet Converter",
+            tags="",
+        )
 with open("{}/opendrive-1.xml".format(os.path.dirname(os.path.realpath(__file__))), "w") as fh:
 	commonroad_writer.write_scenario_to_file_io(file_io=fh)
 ```

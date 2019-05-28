@@ -9,10 +9,10 @@ import argparse
 
 from pyproj import Proj
 from lxml import etree
+from commonroad.common.file_writer import CommonRoadFileWriter
 
 from opendrive2lanelet.osm.osm2lanelet import OSM2LConverter
 from opendrive2lanelet.osm.parser import OSMParser
-from opendrive2lanelet.io.extended_file_writer import ExtendedCommonRoadFileWriter
 
 __author__ = "Benjamin Orthen"
 __copyright__ = "TUM Cyber-Physical Systems Group"
@@ -66,8 +66,14 @@ def main():
 
     osm2l = OSM2LConverter(args.proj)
     scenario = osm2l(osm)
-
-    writer = ExtendedCommonRoadFileWriter(scenario, source="OSM2Lanelet Converter")
+    writer = CommonRoadFileWriter(
+        scenario=scenario,
+        planning_problem_set=None,
+        author="",
+        affiliation="",
+        source="OpenDRIVE 2 Lanelet Converter",
+        tags="",
+    )
 
     with open(f"{output_name}", "w") as file_out:
         writer.write_scenario_to_file_io(file_out)

@@ -48,8 +48,13 @@ class TestOpenDriveBaseClass:
             parser = etree.XMLParser(remove_blank_text=True)
             tree_import = etree.parse(fh, parser=parser).getroot()
             string_io = StringIO()
-            writer = ExtendedCommonRoadFileWriter(
-                scenario=self.scenario, source="OpenDRIVE 2 Lanelet Converter"
+            writer = CommonRoadFileWriter(
+                scenario=self.scenario,
+                planning_problem_set=None,
+                author="",
+                affiliation="",
+                source="OpenDRIVE 2 Lanelet Converter",
+                tags="",
             )
             writer.write_scenario_to_file_io(string_io)
             tree_generated = etree.fromstring(string_io.getvalue(), parser=parser)
