@@ -7,8 +7,9 @@ import unittest
 from io import StringIO
 from lxml import etree
 
+from commonroad.common.file_writer import CommonRoadFileWriter
+
 from opendrive2lanelet.opendriveparser.parser import parse_opendrive
-from opendrive2lanelet.io.extended_file_writer import ExtendedCommonRoadFileWriter
 from opendrive2lanelet.io.convert import convert_opendrive
 from test.utils import elements_equal
 
@@ -47,8 +48,13 @@ class TestOpenDriveBaseClass:
             parser = etree.XMLParser(remove_blank_text=True)
             tree_import = etree.parse(fh, parser=parser).getroot()
             string_io = StringIO()
-            writer = ExtendedCommonRoadFileWriter(
-                self.scenario, source="OpenDRIVE 2 Lanelet Converter"
+            writer = CommonRoadFileWriter(
+                scenario=self.scenario,
+                planning_problem_set=None,
+                author="",
+                affiliation="",
+                source="OpenDRIVE 2 Lanelet Converter",
+                tags="",
             )
             writer.write_scenario_to_file_io(string_io)
             tree_generated = etree.fromstring(string_io.getvalue(), parser=parser)

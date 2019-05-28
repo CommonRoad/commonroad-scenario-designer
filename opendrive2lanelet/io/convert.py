@@ -9,16 +9,13 @@ import os
 import sys
 import argparse
 
-# import matplotlib.pyplot as plt
 from lxml import etree
 from commonroad.scenario.scenario import Scenario
-
-# from commonroad.visualization.draw_dispatch_cr import draw_object
+from commonroad.common.file_writer import CommonRoadFileWriter
 
 from opendrive2lanelet.opendriveparser.elements.opendrive import OpenDrive
 from opendrive2lanelet.opendriveparser.parser import parse_opendrive
 from opendrive2lanelet.network import Network
-from opendrive2lanelet.io.extended_file_writer import ExtendedCommonRoadFileWriter
 
 __author__ = "Benjamin Orthen, Stefan Urban"
 __copyright__ = "TUM Cyber-Physical Systems Group"
@@ -41,28 +38,6 @@ def parse_arguments():
     parser.add_argument("-o", "--output-name", help="specify name of outputed file")
     args = parser.parse_args()
     return args
-
-
-# def visualize(scenario: Scenario):
-#     """Visualize a created scenario by plotting it
-#     with matplotlib.
-
-#     Args:
-#       scenario: The scenario which should be plotted.
-
-#     Returns:
-#       None
-
-#     """
-
-#     # set plt settings
-#     plt.style.use("classic")
-#     plt.figure(figsize=(8, 4.5))
-#     plt.gca().axis("equal")
-#     # plot_limits = [-80, 80, -60, 30]
-#     # plot scenario
-#     draw_object(scenario)
-#     plt.show()
 
 
 def convert_opendrive(opendrive: OpenDrive) -> Scenario:
@@ -105,8 +80,13 @@ def main():
     scenario = convert_opendrive(opendrive)
 
     if not args.osm:
-        writer = ExtendedCommonRoadFileWriter(
-            scenario, source="OpenDRIVE 2 Lanelet Converter"
+        writer = CommonRoadFileWriter(
+            scenario=scenario,
+            planning_problem_set=None,
+            author="",
+            affiliation="",
+            source="OpenDRIVE 2 Lanelet Converter",
+            tags="",
         )
 
         with open(f"{output_name}", "w") as file_out:

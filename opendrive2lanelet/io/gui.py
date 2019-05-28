@@ -12,11 +12,12 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QApplication, QWidget, QLineEdit, QFileDialog, QMainWindow
 from PyQt5.QtWidgets import QPushButton, QMessageBox, QLabel
 
+from commonroad.common.file_writer import CommonRoadFileWriter
+
+
 from opendrive2lanelet.opendriveparser.parser import parse_opendrive
 from opendrive2lanelet.network import Network
-
 from opendrive2lanelet.io.viewer import MainWindow as ViewerWidget
-from opendrive2lanelet.io.extended_file_writer import ExtendedCommonRoadFileWriter
 
 __author__ = "Benjamin Orthen, Stefan Urban"
 __copyright__ = "TUM Cyber-Physical Systems Group"
@@ -122,7 +123,7 @@ class MainWindow(QWidget):
         """
 
         Args:
-          path: 
+          path:
 
         Returns:
 
@@ -200,9 +201,13 @@ class MainWindow(QWidget):
 
         try:
             with open(path, "w") as fh:
-                writer = ExtendedCommonRoadFileWriter(
-                    self.loadedRoadNetwork.export_commonroad_scenario(),
+                writer = CommonRoadFileWriter(
+                    scenario=self.loadedRoadNetwork.export_commonroad_scenario(),
+                    planning_problem_set=None,
+                    author="",
+                    affiliation="",
                     source="OpenDRIVE 2 Lanelet Converter",
+                    tags="",
                 )
                 writer.write_scenario_to_file_io(fh)
         except (IOError) as e:
