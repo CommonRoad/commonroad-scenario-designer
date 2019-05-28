@@ -12,10 +12,11 @@ import argparse
 from lxml import etree
 from commonroad.scenario.scenario import Scenario
 
+from commonroad.common.file_writer import CommonRoadFileWriter
+
 from opendrive2lanelet.opendriveparser.elements.opendrive import OpenDrive
 from opendrive2lanelet.opendriveparser.parser import parse_opendrive
 from opendrive2lanelet.network import Network
-from opendrive2lanelet.io.extended_file_writer import ExtendedCommonRoadFileWriter
 from opendrive2lanelet.osm.lanelet2osm import L2OSMConverter
 
 __author__ = "Benjamin Orthen"
@@ -83,8 +84,13 @@ def main():
     scenario = convert_opendrive(opendrive)
 
     if not args.osm:
-        writer = ExtendedCommonRoadFileWriter(
-            scenario, source="OpenDRIVE 2 Lanelet Converter"
+        writer = CommonRoadFileWriter(
+            scenario=scenario,
+            planning_problem_set=None,
+            author="",
+            affiliation="",
+            source="OpenDRIVE 2 Lanelet Converter",
+            tags="",
         )
 
         with open(f"{output_name}", "w") as file_out:

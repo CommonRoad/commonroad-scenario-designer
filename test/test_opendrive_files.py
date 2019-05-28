@@ -7,8 +7,9 @@ import unittest
 from io import StringIO
 from lxml import etree
 
+from commonroad.common.file_writer import CommonRoadFileWriter
+
 from opendrive2lanelet.opendriveparser.parser import parse_opendrive
-from opendrive2lanelet.io.extended_file_writer import ExtendedCommonRoadFileWriter
 from opendrive2lanelet.io.opendrive_convert import convert_opendrive
 from test.utils import elements_equal
 
