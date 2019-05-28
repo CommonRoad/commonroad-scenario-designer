@@ -407,33 +407,3 @@ class ParametricLaneGroup:
                 return pos, val
 
         return None, None
-
-    # FIXME: unused, candidate for deletion
-    def first_width_change_reversal_point(self, reverse: bool = False) -> float:
-        """Get the first point where width change is zero or point is between two ParametricLanes.
-
-        This method considers that not all positions where the derivative of the width
-        (which is a polynomial in s) is a position where the width derivative is zero.
-        The other option is that between two ParametricLanes of this Group the width
-        derivative changes not constant.
-
-        Args:
-          reverse: True if checking should start from end of lanelet.
-        Returns:
-          Position of ParametricLaneGroup (in curve parameter ds) where width derivate
-            changes from positive to negative.
-        """
-
-        width_derivative_zero = self.first_zero_width_change_position(reverse)
-        between_plane_width_dev_changes = [width_derivative_zero]
-        for i in range(len(self.parametric_lanes) - 1):
-            first_plane = self.parametric_lanes[i]
-            second_plane = self.parametric_lanes[i + 1]
-            if first_plane.calc_width(
-                0.99 * first_plane.length
-            ) > second_plane.calc_width(0 + 0.01 * second_plane.length):
-                between_plane_width_dev_changes.append(
-                    first_plane.length + self._geo_lengths[i]
-                )
-
-        return next(sorted(between_plane_width_dev_changes))

@@ -48,7 +48,7 @@ class TestOpenDriveBaseClass:
             tree_import = etree.parse(fh, parser=parser).getroot()
             string_io = StringIO()
             writer = ExtendedCommonRoadFileWriter(
-                self.scenario, source="OpenDRIVE 2 Lanelet Converter"
+                scenario=self.scenario, source="OpenDRIVE 2 Lanelet Converter"
             )
             writer.write_scenario_to_file_io(string_io)
             tree_generated = etree.fromstring(string_io.getvalue(), parser=parser)

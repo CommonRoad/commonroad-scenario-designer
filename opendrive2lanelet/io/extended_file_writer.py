@@ -15,8 +15,6 @@ from lxml import etree, objectify
 
 from commonroad.common.file_writer import CommonRoadFileWriter, ctx
 
-# TODO: use lxml in commonroad file_writer
-
 __author__ = "Benjamin Orthen"
 __copyright__ = "TUM Cyber-Physical Systems Group"
 __credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles"]
@@ -32,7 +30,6 @@ ctx.prec = 10
 class ExtendedCommonRoadFileWriter(CommonRoadFileWriter):
     """Extends CommonRoadFileWriter to write to file like objects."""
 
-    # TODO: integrate this in file_writer.py of commonroad?
     def __init__(
         self,
         scenario,

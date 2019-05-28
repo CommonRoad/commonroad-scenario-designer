@@ -110,26 +110,66 @@ class OSM2LConverter:
             )
 
             # check if there are adjacent right and lefts which share a same way
+            # and are in the same direction
             potential_right_adj = left_way_ids.get(way_rel.right_way)
             potential_left_adj = right_way_ids.get(way_rel.left_way)
             if potential_right_adj is not None:
-                lanelet.adj_right = potential_right_adj
-                right_adj = lanelet_network.find_lanelet_by_id(potential_right_adj)
-                right_adj.adj_left = way_rel.id_
+                lanelet_network.set_adjacent_right(lanelet, potential_right_adj, True)
 
             if potential_left_adj is not None:
-                lanelet.adj_left = potential_left_adj
-                left_adj = lanelet_network.find_lanelet_by_id(potential_left_adj)
-                left_adj.adj_right = way_rel.id_
+                lanelet_network.set_adjacent_left(lanelet, potential_left_adj, True)
 
-            potential_left_ahead = last_left_pts.get(first_left_node)
-            potential_right_ahead = last_right_pts.get(first_right_node)
-            potential_ahead = [
-                x for x in potential_left_ahead if x in potential_right_ahead
-            ]
+            # check if there are adjacent right and lefts which share a same way
+            # and are in the same direction
+            potential_left_adj = left_way_ids.get(way_rel.left_way)
+            potential_right_adj = right_way_ids.get(way_rel.right_way)
+            if potential_right_adj is not None:
+                lanelet_network.set_adjacent_right(lanelet, potential_right_adj, False)
 
-            potential_left_behind = first_left_pts.get(last_left_node)
-            # potential_right_behind = last_
+            if potential_left_adj is not None:
+                lanelet_network.set_adjacent_left(lanelet, potential_left_adj, False)
+
+            potential_left_successors = last_left_pts.get(first_left_node)
+            potential_right_successors = last_right_pts.get(first_right_node)
+            if potential_left_successors and potential_right_successors:
+                potential_successors = list(
+                    set(potential_left_successors) & set(potential_right_successors)
+                )
+                lanelet_network.add_successors_to_lanelet(lanelet, potential_successors)
+
+            potential_left_predecessors = first_left_pts.get(last_left_node)
+            potential_right_predecessors = first_right_pts.get(last_right_node)
+            if potential_left_predecessors and potential_right_predecessors:
+                potential_predecessors = list(
+                    set(potential_left_predecessors) & set(potential_right_predecessors)
+                )
+                lanelet_network.add_predecessors_to_lanelet(
+                    lanelet, potential_predecessors
+                )
+
+            # joining and splitting lanelets have to be adjacent rights or lefts
+            # splitting lanelets share both starting points and one last point
+            # joining lanelets share two last points and one start point
+            potential_split_start_left = first_left_pts.get(first_left_node, [])
+            potential_split_start_right = first_right_pts.get(first_right_node, [])
+            potential_split_end_left = last_right_pts.get(last_left_node, [])
+            potential_adj_left = list(
+                set(potential_split_start_left)
+                & set(potential_split_start_right)
+                & set(potential_split_end_left)
+            )
+            if potential_adj_left:
+                lanelet_network.set_adjacent_left(lanelet, potential_adj_left[0])
+                # lanelet.adj_left = potential_adj_left[0]
+            else:
+                potential_split_end_right = last_left_pts.get(last_right_node, [])
+                potential_adj_right = list(
+                    set(potential_split_start_left)
+                    & set(potential_split_start_right)
+                    & set(potential_split_end_right)
+                )
+                if potential_adj_right:
+                    lanelet_network.set_adjacent_right(lanelet, potential_adj_right[0])
 
             lanelet_network.add_lanelet(lanelet)
 

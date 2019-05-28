@@ -55,5 +55,5 @@ class L2OSMConverter:
         self.osm.add_way(left_way)
         self.osm.add_way(right_way)
         self.osm.add_way_relation(
-            WayRelation(self.id_count, left_way.id_, right_way.id_)
+            WayRelation(lanelet.lanelet_id, left_way.id_, right_way.id_)
         )
