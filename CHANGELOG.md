@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.0.3] - 2019-05.28
+## Changed
+- Updated dependencies
+- As commonroad-io has now better support for writing files, use CommonRoadFileWriter instead of ExtendedCommonRoadFileWriter
+
+### Added
+- First support for OSM-Lanelet to CommonRoad-Lanelet Conversion
+- Plot center as command line argument to visualize CommonRoad files
+
 ## [1.0.2] - 2019-05-07
 ### Fixed
 - Support for Poly3 was not fully implemented
