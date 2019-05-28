@@ -234,7 +234,7 @@ class MainWindow(QWidget):
                 self.selected_lanelet_id
             )
 
-        except AssertionError:
+        except (AssertionError, KeyError) as e:
             selected_lanelet = None
 
         ax = self.dynamic.get_axes()
@@ -371,7 +371,7 @@ class MainWindow(QWidget):
                 ml = lanelet.left_vertices[idx]
                 mr = lanelet.right_vertices[idx]
                 mc = lanelet.center_vertices[
-                    min(len(lanelet.center_vertices) - 1, idx + 10)
+                    min(len(lanelet.center_vertices) - 1, idx + 3)
                 ]
 
                 ax.plot(

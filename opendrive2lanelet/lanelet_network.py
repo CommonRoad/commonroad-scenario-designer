@@ -96,6 +96,10 @@ class ConversionLaneletNetwork(LaneletNetwork):
         return self._lanelets.get(lanelet_id)
 
     def convert_all_lanelet_ids(self):
+        """Convert lanelet ids to numbers which comply with the Commonroad specification.
+
+        These numbers have to be positive integers.
+        """
 
         new_lanelet_ids_assigned = {}
 
@@ -346,6 +350,54 @@ class ConversionLaneletNetwork(LaneletNetwork):
             lanelet.predecessor.append(predecessor_id)
             predecessor = self.find_lanelet_by_id(predecessor_id)
             predecessor.successor.append(lanelet.lanelet_id)
+
+    def set_adjacent_left(
+        self, lanelet: ConversionLanelet, adj_left_id: str, same_direction: bool = True
+    ):
+        """Set the adj_left of a lanelet to a new value.
+
+        Update also the lanelet which is the new adjacent left to
+        have new adjacent right.
+
+        Args:
+          lanelet: Lanelet which adjacent left should be updated.
+          adj_left_id: New value for update.
+          same_direction: New adjacent lanelet has same direction as lanelet.
+        Returns:
+          True if operation successful, else false.
+        """
+        new_adj_left = self.find_lanelet_by_id(adj_left_id)
+        if not new_adj_left:
+            return False
+        lanelet.adj_left = adj_left_id
+        lanelet.adj_left_same_direction = same_direction
+        new_adj_left.adj_right = lanelet.lanelet_id
+        new_adj_left.adj_right_same_direction = same_direction
+        return True
+
+    def set_adjacent_right(
+        self, lanelet: ConversionLanelet, adj_right_id: str, same_direction: bool = True
+    ):
+        """Set the adj_right of a lanelet to a new value.
+
+        Update also the lanelet which is the new adjacent right to
+        have new adjacent left.
+
+        Args:
+          lanelet: Lanelet which adjacent right should be updated.
+          adj_right_id: New value for update.
+          same_direction: New adjacent lanelet has same direction as lanelet.
+        Returns:
+          True if operation successful, else false.
+        """
+        new_adj_right = self.find_lanelet_by_id(adj_right_id)
+        if not new_adj_right:
+            return False
+        lanelet.adj_right = adj_right_id
+        lanelet.adj_right_same_direction = same_direction
+        new_adj_right.adj_left = lanelet.lanelet_id
+        new_adj_right.adj_left_same_direction = same_direction
+        return True
 
     def check_concatenation_potential(
         self, lanelet: ConversionLanelet, adjacent_direction: str

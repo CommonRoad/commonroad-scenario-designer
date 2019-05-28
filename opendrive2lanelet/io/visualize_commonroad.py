@@ -13,7 +13,9 @@ def parse_arguments():
     parser.add_argument(
         "-s", "--show-labels", action="store_true", help="show labels of lanelets"
     )
-    # TODO: add plot center as argument
+    parser.add_argument(
+        "-p", "--plot-center", help="set plot center with x and y position", nargs=2
+    )
     args = parser.parse_args()
     return args
 
@@ -34,7 +36,10 @@ def main():
         "scenario": {"lanelet_network": {"lanelet": {"show_label": args.show_labels}}}
     }
     # temporary fix to get a plotable view of the scenario
-    plot_center = scenario.lanelet_network.lanelets[0].left_vertices[0]
+    if args.plot_center:
+        plot_center = [int(x) for x in args.plot_center]
+    else:
+        plot_center = scenario.lanelet_network.lanelets[0].left_vertices[0]
     plt.style.use("classic")
     plt.figure(figsize=(10, 10))
     plt.gca().axis("equal")
