@@ -25,6 +25,7 @@ setup(
         "lxml>=4.3.3",
         "commonroad-io>=2019.1",
         "pyproj>=2.1.3",
+        "scipy>=1.3.0",
     ],
     extras_require={"GUI": ["PyQt5>=5.11.3", "matplotlib>=3.0.0"]},
     python_requires=">=3.6",
