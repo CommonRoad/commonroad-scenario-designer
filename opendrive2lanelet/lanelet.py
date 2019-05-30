@@ -196,22 +196,6 @@ class ConversionLanelet(Lanelet):
 
         """
 
-        # float_tolerance = 1e-6
-        # if (
-        #     np.linalg.norm(self.center_vertices[-1] - lanelet_conc.center_vertices[0])
-        #     > float_tolerance
-        #     or np.linalg.norm(self.left_vertices[-1] - lanelet_conc.left_vertices[0])
-        #     > float_tolerance
-        #     or np.linalg.norm(self.right_vertices[-1] - lanelet_conc.right_vertices[0])
-        #     > float_tolerance
-        # ):
-        #     pass
-        # raise Exception("no way {} {} {}".format(
-        #     np.linalg.norm(self.center_vertices[-1] - lanelet_conc.center_vertices[0]),
-        #     np.linalg.norm(self.left_vertices[-1] - lanelet_conc.left_vertices[0]),
-        #     np.linalg.norm(self.right_vertices[-1] - lanelet_conc.right_vertices[0])
-        # ))
-        # return None
         # check connectedness
         if np.isclose(self.left_vertices[-1], lanelet_conc.left_vertices[0]).all():
             idx = 1

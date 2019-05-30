@@ -14,7 +14,7 @@ from opendrive2lanelet.osm.osm import OSM, Node, Way, WayRelation
 
 
 class L2OSMConverter:
-    """Class to convert Lanelet to OSM."""
+    """Class to convert CommonRoad lanelet to the OSM representation."""
 
     def __init__(self, proj_string):
         self.proj = Proj(proj_string)
@@ -37,7 +37,11 @@ class L2OSMConverter:
         return self.osm.serialize_to_xml()
 
     def _convert_lanelet(self, lanelet):
-        """Convert a lanelet to a way relation."""
+        """Convert a lanelet to a way relation.
+
+        Args:
+          lanelet: Lanelet to be converted.
+        """
         left_nodes, right_nodes = [], []
         for vertice in lanelet.left_vertices:
             lon, lat = self.proj(vertice[0], vertice[1], inverse=True)
@@ -49,6 +53,11 @@ class L2OSMConverter:
             node = Node(self.id_count, lat, lon)
             right_nodes.append(node.id_)
             self.osm.add_node(node)
+
+        # if lanelet has predecessor or successor, end/start nodes
+        # could already be existing
+        if lanelet.predecessor:
+            pass
 
         left_way = Way(self.id_count, *left_nodes)
         right_way = Way(self.id_count, *right_nodes)
