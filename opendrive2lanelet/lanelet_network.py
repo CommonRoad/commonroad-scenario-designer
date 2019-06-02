@@ -3,7 +3,6 @@
 """Module to enhance LaneletNetwork class
 so it can be used for conversion from the opendrive format."""
 
-
 from typing import Tuple, List
 from queue import Queue
 import numpy as np
@@ -366,13 +365,17 @@ class ConversionLaneletNetwork(LaneletNetwork):
         Returns:
           True if operation successful, else false.
         """
-        new_adj_left = self.find_lanelet_by_id(adj_left_id)
-        if not new_adj_left:
+        new_adj = self.find_lanelet_by_id(adj_left_id)
+        if not new_adj:
             return False
         lanelet.adj_left = adj_left_id
         lanelet.adj_left_same_direction = same_direction
-        new_adj_left.adj_right = lanelet.lanelet_id
-        new_adj_left.adj_right_same_direction = same_direction
+        if same_direction:
+            new_adj.adj_right = lanelet.lanelet_id
+            new_adj.adj_right_same_direction = True
+        else:
+            new_adj.adj_left = lanelet.lanelet_id
+            new_adj.adj_left_same_direction = False
         return True
 
     def set_adjacent_right(
@@ -390,13 +393,17 @@ class ConversionLaneletNetwork(LaneletNetwork):
         Returns:
           True if operation successful, else false.
         """
-        new_adj_right = self.find_lanelet_by_id(adj_right_id)
-        if not new_adj_right:
+        new_adj = self.find_lanelet_by_id(adj_right_id)
+        if not new_adj:
             return False
         lanelet.adj_right = adj_right_id
         lanelet.adj_right_same_direction = same_direction
-        new_adj_right.adj_left = lanelet.lanelet_id
-        new_adj_right.adj_left_same_direction = same_direction
+        if same_direction:
+            new_adj.adj_left = lanelet.lanelet_id
+            new_adj.adj_left_same_direction = True
+        else:
+            new_adj.adj_right = lanelet.lanelet_id
+            new_adj.adj_right_same_direction = False
         return True
 
     def check_concatenation_potential(
