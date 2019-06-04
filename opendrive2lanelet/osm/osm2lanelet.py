@@ -11,8 +11,9 @@ __maintainer__ = "Benjamin Orthen"
 __email__ = "commonroad-i06@in.tum.de"
 __status__ = "Released"
 
+# import ipdb
 from collections import defaultdict
-from typing import List
+from typing import List, Tuple
 
 import numpy as np
 from pyproj import Proj
@@ -24,6 +25,8 @@ from opendrive2lanelet.osm.osm import OSM, WayRelation
 
 DEFAULT_PROJ_STRING = "+proj=utm +zone=32 +ellps=WGS84"
 NODE_DISTANCE_TOLERANCE = 0.01  # this is in meters
+
+adjacent_way_distance_tolerance = 0.05
 
 
 class OSM2LConverter:
@@ -38,6 +41,7 @@ class OSM2LConverter:
         self.first_left_pts, self.last_left_pts = None, None
         self.first_right_pts, self.last_right_pts = None, None
         self.osm = None
+        self.lanelet_network = None
 
     def __call__(self, osm: OSM) -> Scenario:
         """Convert OSM to Scenario.
@@ -61,20 +65,20 @@ class OSM2LConverter:
         self.first_right_pts, self.last_right_pts = defaultdict(list), defaultdict(list)
 
         scenario = Scenario(dt=0.1, benchmark_id="none")
-        lanelet_network = ConversionLaneletNetwork()
+        self.lanelet_network = ConversionLaneletNetwork()
 
         for way_rel in osm.way_relations:
-            lanelet = self._way_rel_to_lanelet(way_rel, lanelet_network)
-            lanelet_network.add_lanelet(lanelet)
+            lanelet = self._way_rel_to_lanelet(way_rel)
+            if lanelet is None:
+                return None
+            self.lanelet_network.add_lanelet(lanelet)
 
-        lanelet_network.convert_all_lanelet_ids()
-        scenario.add_objects(lanelet_network)
+        self.lanelet_network.convert_all_lanelet_ids()
+        scenario.add_objects(self.lanelet_network)
 
         return scenario
 
-    def _way_rel_to_lanelet(
-        self, way_rel: WayRelation, lanelet_network: ConversionLaneletNetwork
-    ) -> ConversionLanelet:
+    def _way_rel_to_lanelet(self, way_rel: WayRelation) -> ConversionLanelet:
         """Convert a WayRelation to a Lanelet, add additional adjacency information.
 
         The ConversionLaneletNetwork saves the adjacency and predecessor/successor
@@ -83,7 +87,6 @@ class OSM2LConverter:
         Args:
           way_rel: Relation of OSM to convert to Lanelet.
           osm: OSM object which contains info about nodes and ways.
-          lanelet_network: Network of which lanelets are part of.
 
         Returns:
           A lanelet with a right and left vertice.
@@ -96,7 +99,7 @@ class OSM2LConverter:
             )
             return None
         # set only if not set before
-        # one way can only have to lanelet relations which use it
+        # one way can only have two lanelet relations which use it
         if not self._left_way_ids.get(way_rel.left_way):
             self._left_way_ids[way_rel.left_way] = way_rel.id_
         if not self._right_way_ids.get(way_rel.right_way):
@@ -133,44 +136,108 @@ class OSM2LConverter:
             parametric_lane_group=None,
         )
 
-        self._check_right_and_left_neighbors(way_rel, lanelet, lanelet_network)
+        self._check_right_and_left_neighbors(way_rel, lanelet)
+
+        self._find_adjacencies_of_coinciding_ways(
+            lanelet, first_left_node, first_right_node, last_left_node, last_right_node
+        )
 
         potential_successors = self._check_for_successors(
             last_left_node=last_left_node, last_right_node=last_right_node
         )
-        lanelet_network.add_successors_to_lanelet(lanelet, potential_successors)
+        self.lanelet_network.add_successors_to_lanelet(lanelet, potential_successors)
 
         potential_predecessors = self._check_for_predecessors(
             first_left_node=first_left_node, first_right_node=first_right_node
         )
-        lanelet_network.add_predecessors_to_lanelet(lanelet, potential_predecessors)
+        self.lanelet_network.add_predecessors_to_lanelet(
+            lanelet, potential_predecessors
+        )
 
-        # joining and splitting lanelets have to be adjacent rights or lefts
-        # splitting lanelets share both starting points and one last point
-        # joining lanelets share two last points and one start point
-        potential_split_start_left = self.first_left_pts.get(first_left_node, [])
-        potential_split_start_right = self.first_right_pts.get(first_right_node, [])
-        potential_split_end_left = self.last_right_pts.get(last_left_node, [])
+        potential_adj_left, potential_adj_right = self._check_for_split_and_join_adjacencies(
+            first_left_node, first_right_node, last_left_node, last_right_node
+        )
+        if potential_adj_left:
+            self.lanelet_network.set_adjacent_left(lanelet, potential_adj_left[0], True)
+        if potential_adj_right:
+            self.lanelet_network.set_adjacent_right(
+                lanelet, potential_adj_right[0], True
+            )
+
+        return lanelet
+
+    def _check_for_split_and_join_adjacencies(
+        self, first_left_node, first_right_node, last_left_node, last_right_node
+    ) -> Tuple[List, List]:
+        """Check if there are adjacencies if there is a lanelet split or join.
+
+        joining and splitting lanelets have to be adjacent rights or lefts
+        splitting lanelets share both starting points and one last point
+        joining lanelets share two last points and one start point
+
+        Args:
+          first_left_node: First node of left way of the lanelet.
+          first_right_node: First node of right way of the lanelet.
+          last_left_node: Last node of left way of the lanelet.
+          last_right_node: Last node of right way of the lanelet.
+
+        Returns:
+          A tuple of lists which contain candidates for the
+          left and the right adjacency.
+        """
+        potential_split_start_left = self._find_lanelet_ids_of_suitable_nodes(
+            self.first_left_pts, first_left_node
+        )
+        potential_split_start_right = self._find_lanelet_ids_of_suitable_nodes(
+            self.first_right_pts, first_right_node
+        )
+        potential_split_end_left = self._find_lanelet_ids_of_suitable_nodes(
+            self.last_right_pts, last_left_node
+        )
+        potential_split_end_right = self._find_lanelet_ids_of_suitable_nodes(
+            self.last_left_pts, last_right_node
+        )
+
         potential_adj_left = list(
             set(potential_split_start_left)
             & set(potential_split_start_right)
             & set(potential_split_end_left)
         )
-        if potential_adj_left:
-            lanelet_network.set_adjacent_left(lanelet, potential_adj_left[0])
-        else:
-            potential_split_end_right = self.last_left_pts.get(last_right_node, [])
-            potential_adj_right = list(
-                set(potential_split_start_left)
-                & set(potential_split_start_right)
-                & set(potential_split_end_right)
+        potential_adj_right = list(
+            set(potential_split_start_left)
+            & set(potential_split_start_right)
+            & set(potential_split_end_right)
+        )
+
+        if not potential_adj_left or not potential_adj_right:
+            potential_join_end_left = self._find_lanelet_ids_of_suitable_nodes(
+                self.last_left_pts, last_left_node
             )
-            if potential_adj_right:
-                lanelet_network.set_adjacent_right(lanelet, potential_adj_right[0])
+            potential_join_end_right = self._find_lanelet_ids_of_suitable_nodes(
+                self.last_right_pts, last_right_node
+            )
 
-        # TODO: join has to implemented as well
+            if not potential_adj_left:
+                potential_join_start_left = self._find_lanelet_ids_of_suitable_nodes(
+                    self.first_right_pts, first_left_node
+                )
+                potential_adj_left = list(
+                    set(potential_join_start_left)
+                    & set(potential_join_end_left)
+                    & set(potential_join_end_right)
+                )
 
-        return lanelet
+            if not potential_adj_right:
+                potential_join_start_right = self._find_lanelet_ids_of_suitable_nodes(
+                    self.first_left_pts, first_right_node
+                )
+                potential_adj_right = list(
+                    set(potential_join_start_right)
+                    & set(potential_join_end_left)
+                    & set(potential_join_end_right)
+                )
+
+        return potential_adj_left, potential_adj_right
 
     def _check_for_predecessors(
         self, first_left_node: str, first_right_node: str
@@ -224,42 +291,142 @@ class OSM2LConverter:
 
         return []
 
-    def _nodes_are_close(self, node_one, node_two):
-        """Check if two nodes have a distance of less than """
+    def _find_adjacencies_of_coinciding_ways(
+        self,
+        lanelet,
+        first_left_node,
+        first_right_node,
+        last_left_node,
+        last_right_node,
+    ):
+        """Find adjacencies of a lanelet by checking if its vertices coincide with vertices of other lanelets.
+
+        Args: # TODO:
+        """
+        # first case: left adjacent, same direction
+        if lanelet.adj_left is None:
+            potential_left_front = self._find_lanelet_ids_of_suitable_nodes(
+                self.first_right_pts, first_left_node
+            )
+            potential_left_back = self._find_lanelet_ids_of_suitable_nodes(
+                self.last_right_pts, last_left_node
+            )
+            potential_left_same_direction = list(
+                set(potential_left_front) & set(potential_left_back)
+            )
+            for lanelet_id in potential_left_same_direction:
+                nb_lanelet = self.lanelet_network.find_lanelet_by_id(lanelet_id)
+                if nb_lanelet is not None:
+                    if _two_vertices_coincide(
+                        lanelet.left_vertices, nb_lanelet.right_vertices
+                    ):
+                        self.lanelet_network.set_adjacent_left(
+                            lanelet, nb_lanelet.lanelet_id, True
+                        )
+                        break
+
+        # second case: right adjacent, same direction
+        if lanelet.adj_right is None:
+            potential_right_front = self._find_lanelet_ids_of_suitable_nodes(
+                self.first_left_pts, first_right_node
+            )
+            potential_right_back = self._find_lanelet_ids_of_suitable_nodes(
+                self.last_left_pts, last_right_node
+            )
+            potential_right_same_direction = list(
+                set(potential_right_front) & set(potential_right_back)
+            )
+            for lanelet_id in potential_right_same_direction:
+                nb_lanelet = self.lanelet_network.find_lanelet_by_id(lanelet_id)
+                if nb_lanelet is not None:
+                    if _two_vertices_coincide(
+                        lanelet.right_vertices, nb_lanelet.left_vertices
+                    ):
+                        self.lanelet_network.set_adjacent_right(
+                            lanelet, nb_lanelet.lanelet_id, True
+                        )
+                        break
+
+        # third case: left adjacent, opposite direction
+        if lanelet.adj_left is None:
+            potential_left_front = self._find_lanelet_ids_of_suitable_nodes(
+                self.last_left_pts, first_left_node
+            )
+            potential_left_back = self._find_lanelet_ids_of_suitable_nodes(
+                self.first_left_pts, last_left_node
+            )
+            potential_left_other_direction = list(
+                set(potential_left_front) & set(potential_left_back)
+            )
+            for lanelet_id in potential_left_other_direction:
+                nb_lanelet = self.lanelet_network.find_lanelet_by_id(lanelet_id)
+                if nb_lanelet is not None:
+                    # compare right vertice of nb_lanelet with left vertice of lanelet
+                    if _two_vertices_coincide(
+                        lanelet.left_vertices, nb_lanelet.left_vertices[::-1]
+                    ):
+                        self.lanelet_network.set_adjacent_left(
+                            lanelet, nb_lanelet.lanelet_id, False
+                        )
+                        break
+
+        # fourth case: right adjacent, opposite direction
+        if lanelet.adj_right is None:
+            potential_right_front = self._find_lanelet_ids_of_suitable_nodes(
+                self.last_right_pts, first_right_node
+            )
+            potential_right_back = self._find_lanelet_ids_of_suitable_nodes(
+                self.first_right_pts, last_right_node
+            )
+            potential_right_other_direction = list(
+                set(potential_right_front) & set(potential_right_back)
+            )
+            for lanelet_id in potential_right_other_direction:
+                nb_lanelet = self.lanelet_network.find_lanelet_by_id(lanelet_id)
+                if nb_lanelet is not None:
+                    if _two_vertices_coincide(
+                        lanelet.right_vertices, nb_lanelet.right_vertices[::-1]
+                    ):
+                        self.lanelet_network.set_adjacent_right(
+                            lanelet, nb_lanelet.lanelet_id, True
+                        )
+                        break
 
     def _check_right_and_left_neighbors(
-        self,
-        way_rel: WayRelation,
-        lanelet: ConversionLanelet,
-        lanelet_network: ConversionLaneletNetwork,
+        self, way_rel: WayRelation, lanelet: ConversionLanelet
     ):
         """check if lanelet has adjacent right and lefts.
 
         Determines it by checking if they share a common way.
-        Either in opposite or in the common direction.
+        Either in opposite or in the same direction.
 
         Args:
           way_rel: Relation from which lanelet was created.
           lanelet: Lanelet for which to check adjacencies.
-          lanelet_network: Network where adjacencies are saved.
         """
         potential_right_adj = self._left_way_ids.get(way_rel.right_way)
         potential_left_adj = self._right_way_ids.get(way_rel.left_way)
         if potential_right_adj is not None:
-            lanelet_network.set_adjacent_right(lanelet, potential_right_adj, True)
+            self.lanelet_network.set_adjacent_right(lanelet, potential_right_adj, True)
 
         if potential_left_adj is not None:
-            lanelet_network.set_adjacent_left(lanelet, potential_left_adj, True)
+            self.lanelet_network.set_adjacent_left(lanelet, potential_left_adj, True)
 
         # check if there are adjacent right and lefts which share a same way
         # and are in the opposite direction
-        potential_left_adj = self._left_way_ids.get(way_rel.left_way)
-        potential_right_adj = self._right_way_ids.get(way_rel.right_way)
-        if potential_right_adj is not None:
-            lanelet_network.set_adjacent_right(lanelet, potential_right_adj, False)
+        if not potential_left_adj:
+            potential_left_adj = self._left_way_ids.get(way_rel.left_way)
+            if potential_left_adj is not None:
+                self.lanelet_network.set_adjacent_left(
+                    lanelet, potential_left_adj, False
+                )
 
-        if potential_left_adj is not None:
-            lanelet_network.set_adjacent_left(lanelet, potential_left_adj, False)
+        if not potential_right_adj:
+            potential_right_adj = self._right_way_ids.get(way_rel.right_way)
+            if potential_right_adj is not None:
+                self.lanelet_network.set_adjacent_right(
+                    lanelet, potential_right_adj, False
+                )
 
     def _convert_way_to_vertices(self, way) -> np.ndarray:
         """Convert a Way to a list of points.
@@ -315,3 +482,44 @@ class OSM2LConverter:
             if self.node_distance(nd, node_id) < NODE_DISTANCE_TOLERANCE:
                 suitable_lanelet_ids.extend(lanelet_ids)
         return suitable_lanelet_ids
+
+
+# def _values_for_distance_to_line(start_point, end_point):
+#     x_diff = end_point[0] - start_point[0]
+#     y_diff = end_point[1] - start_point[1]
+#     num = end_point[0] * start_point[1] - end_point[1] * start_point[0]
+
+#     den = math.sqrt(y_diff ** 2 + x_diff ** 2)
+#     return x_diff, y_diff, num, den
+
+
+def _two_vertices_coincide(vertices1, vertices2) -> bool:
+    """Check if two vertices coincide and describe the same trajectory.
+
+    Args: # TODO:
+    """
+    # segments1 = np.empty([len(vertices1) - 1, 4])
+    # for i in range(0, len(vertices1) - 1):
+    # segments1[i] = _values_for_distance_to_line(vertices1[i], vertices1[i + 1])
+    segments = np.diff(vertices1, axis=0)
+
+    for vert in vertices2:
+        distances = np.empty([len(vertices1) + 1])
+        distances[0] = np.linalg.norm(vert - vertices1[0])
+        distances[-1] = np.linalg.norm(vert - vertices1[-1])
+        for i, diff in enumerate(segments):
+            distances[i + 1] = np.abs(
+                np.cross(diff, vertices1[i] - vert)
+            ) / np.linalg.norm(diff)
+
+        # min_dist =
+        # print(np.min(distances))
+        # dist_sum += np.min(distances)
+        if np.min(distances) > adjacent_way_distance_tolerance:
+            return False
+
+    # avg_dist = dist_sum / len(vertices2)
+    # print(avg_dist)
+    # if avg_dist < adjacent_way_distance_tolerance:
+    # return True
+    return True
