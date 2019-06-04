@@ -38,7 +38,7 @@ class Way:
         way.set("visible", "true")
         for node in self.nodes:
             xml_node = etree.SubElement(way, "nd")
-            xml_node.set("ref", node.id_)
+            xml_node.set("ref", node)
 
         return way
 
@@ -58,11 +58,11 @@ class WayRelation:
         rel.set("visible", "true")
         right_way = etree.SubElement(rel, "member")
         right_way.set("type", "way")
-        right_way.set("ref", self.right_way.id_)
+        right_way.set("ref", self.right_way)
         right_way.set("role", "right")
         left_way = etree.SubElement(rel, "member")
         left_way.set("type", "way")
-        left_way.set("ref", self.left_way.id_)
+        left_way.set("ref", self.left_way)
         left_way.set("role", "left")
         tag = etree.SubElement(rel, "tag")
         tag.set("k", "type")
