@@ -66,14 +66,17 @@ def main():
 
     osm2l = OSM2LConverter(args.proj)
     scenario = osm2l(osm)
-    writer = CommonRoadFileWriter(
-        scenario=scenario,
-        planning_problem_set=None,
-        author="",
-        affiliation="",
-        source="OpenDRIVE 2 Lanelet Converter",
-        tags="",
-    )
+    if scenario:
+        writer = CommonRoadFileWriter(
+            scenario=scenario,
+            planning_problem_set=None,
+            author="",
+            affiliation="",
+            source="OSM 2 CommonRoad Converter",
+            tags="",
+        )
+        with open(f"{output_name}", "w") as file_out:
+            writer.write_scenario_to_file_io(file_out)
 
-    with open(f"{output_name}", "w") as file_out:
-        writer.write_scenario_to_file_io(file_out)
+    else:
+        print("Could not convert from OSM to CommonRoad format!")
