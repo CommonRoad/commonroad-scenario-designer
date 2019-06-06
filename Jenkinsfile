@@ -7,7 +7,7 @@ pipeline {
 				sh '''
 				git clean -fdx
 				pyenv versions;
-				pyenv global 3.7.1;
+				pyenv global 3.7.3;
 				pip install --upgrade pip;
 				pip install tox tox-pyenv;'''
 			}

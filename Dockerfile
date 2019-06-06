@@ -31,7 +31,7 @@ RUN echo 'export PATH=$PYENV_ROOT/bin:$PATH' >> $PROFILE
 RUN echo 'eval "$(pyenv init -)"' >> $PROFILE
 
 RUN pyenv install 3.6.7
-RUN pyenv install 3.7.1
+RUN pyenv install 3.7.3
 
 ENTRYPOINT ["/bin/bash", "--login", "-i", "-c"]
 CMD ["bash"]
