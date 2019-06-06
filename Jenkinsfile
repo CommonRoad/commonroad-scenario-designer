@@ -1,9 +1,6 @@
 #!groovy
 pipeline {
 	agent {dockerfile true }
-	// environment{
-		// my_workspace='tools/opendrive2lanelet'
-	// }
 	stages {
 		stage('Install Requirements'){
 			steps {
@@ -18,7 +15,7 @@ pipeline {
 
 		stage('Run py.test') {
 			steps {
-				sh 'pyenv local 3.6.7 3.7.1'
+				sh 'pyenv local 3.6.7 3.7.3'
 				sh 'tox -e py36 -- --junitxml=junit-{envname}.xml --cov-report xml'
 				sh 'tox -e py37 -- --junitxml=junit-{envname}.xml --cov-report xml'
 			}
