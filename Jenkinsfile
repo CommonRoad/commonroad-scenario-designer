@@ -7,7 +7,7 @@ pipeline {
 				sh '''
 				git clean -fdx
 				pyenv versions;
-				pyenv global 3.7.3;
+				pyenv global 3.7.1;
 				pip install --upgrade pip;
 				pip install tox tox-pyenv;'''
 			}
@@ -15,7 +15,7 @@ pipeline {
 
 		stage('Run py.test') {
 			steps {
-				sh 'pyenv local 3.6.7 3.7.3'
+				sh 'pyenv local 3.6.7 3.7.1'
 				sh 'tox -e py36 -- --junitxml=junit-{envname}.xml --cov-report xml'
 				sh 'tox -e py37 -- --junitxml=junit-{envname}.xml --cov-report xml'
 			}
