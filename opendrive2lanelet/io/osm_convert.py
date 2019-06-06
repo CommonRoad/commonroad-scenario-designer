@@ -29,7 +29,9 @@ def parse_arguments():
     Returns:
       args object
     """
-    parser = argparse.ArgumentParser(description="Provide ls")
+    parser = argparse.ArgumentParser(
+        description="Parse an OSM file containing lanelets and convert it to a CommonRoad scenario file."
+    )
     parser.add_argument("input_file", help="file to be converted")
     parser.add_argument(
         "-f",
@@ -39,6 +41,17 @@ def parse_arguments():
     )
     parser.add_argument("-o", "--output-name", help="specify name of outputed file")
     parser.add_argument("--proj", help="proj-string to specify conversion")
+    parser.add_argument(
+        "-a",
+        "--adjacencies",
+        action="store_true",
+        help="detect left and right adjacencies of lanelets if they do not share a common way",
+    )
+    parser.add_argument(
+        "--left-driving",
+        action="store_true",
+        help="set to true if map describes a left driving system (e.g. in Great Britain)",
+    )
     args = parser.parse_args()
     return args
 
@@ -65,7 +78,9 @@ def main():
         osm = parser.parse()
 
     osm2l = OSM2LConverter(args.proj)
-    scenario = osm2l(osm)
+    scenario = osm2l(
+        osm, detect_adjacencies=args.adjacencies, left_driving_system=args.left_driving
+    )
     if scenario:
         writer = CommonRoadFileWriter(
             scenario=scenario,

@@ -21,9 +21,8 @@ from commonroad.scenario.scenario import Scenario
 
 from opendrive2lanelet.lanelet import ConversionLanelet
 from opendrive2lanelet.lanelet_network import ConversionLaneletNetwork
-from opendrive2lanelet.osm.osm import OSM, WayRelation
+from opendrive2lanelet.osm.osm import OSM, WayRelation, DEFAULT_PROJ_STRING
 
-DEFAULT_PROJ_STRING = "+proj=utm +zone=32 +ellps=WGS84"
 NODE_DISTANCE_TOLERANCE = 0.01  # this is in meters
 
 adjacent_way_distance_tolerance = 0.05
@@ -43,7 +42,12 @@ class OSM2LConverter:
         self.osm = None
         self.lanelet_network = None
 
-    def __call__(self, osm: OSM) -> Scenario:
+    def __call__(
+        self,
+        osm: OSM,
+        detect_adjacencies: bool = True,
+        left_driving_system: bool = False,
+    ) -> Scenario:
         """Convert OSM to Scenario.
 
         For each lanelet in OSM format, we have to save their first and last
@@ -52,6 +56,9 @@ class OSM2LConverter:
 
         Args:
           osm: OSM object which includes nodes, ways and lanelet relations.
+          detect_adjacencies: Compare vertices which might be adjacent. Set
+            to false if you consider it too computationally intensive.
+          left_driving_system: Set to true if map describes a left_driving_system.
 
         Returns:
           A scenario with a lanelet network which describes the
@@ -68,17 +75,23 @@ class OSM2LConverter:
         self.lanelet_network = ConversionLaneletNetwork()
 
         for way_rel in osm.way_relations:
-            lanelet = self._way_rel_to_lanelet(way_rel)
-            if lanelet is None:
-                return None
-            self.lanelet_network.add_lanelet(lanelet)
+            lanelet = self._way_rel_to_lanelet(
+                way_rel, detect_adjacencies, left_driving_system
+            )
+            if lanelet is not None:
+                self.lanelet_network.add_lanelet(lanelet)
 
         self.lanelet_network.convert_all_lanelet_ids()
         scenario.add_objects(self.lanelet_network)
 
         return scenario
 
-    def _way_rel_to_lanelet(self, way_rel: WayRelation) -> ConversionLanelet:
+    def _way_rel_to_lanelet(
+        self,
+        way_rel: WayRelation,
+        detect_adjacencies: bool,
+        left_driving_system: bool = False,
+    ) -> ConversionLanelet:
         """Convert a WayRelation to a Lanelet, add additional adjacency information.
 
         The ConversionLaneletNetwork saves the adjacency and predecessor/successor
@@ -87,6 +100,9 @@ class OSM2LConverter:
         Args:
           way_rel: Relation of OSM to convert to Lanelet.
           osm: OSM object which contains info about nodes and ways.
+          detect_adjacencies: Compare vertices which might be adjacent. Set
+            to false if you consider it too computationally intensive.
+          left_driving_system: Set to true if map describes a left_driving_system.
 
         Returns:
           A lanelet with a right and left vertice.
@@ -95,9 +111,10 @@ class OSM2LConverter:
         right_way = self.osm.find_way_by_id(way_rel.right_way)
         if len(left_way.nodes) != len(right_way.nodes):
             print(
-                f"Error: Relation {way_rel.id_} has left and right ways which are not equally long!"
+                f"Error: Relation {way_rel.id_} has left and right ways which are not equally long! Please check your data! Discarding this lanelet relation."
             )
             return None
+
         # set only if not set before
         # one way can only have two lanelet relations which use it
         if not self._left_way_ids.get(way_rel.left_way):
@@ -113,13 +130,21 @@ class OSM2LConverter:
         first_right_node = right_way.nodes[0]
         last_right_node = right_way.nodes[-1]
 
-        # reverse left vertices if left_way is reversed
-        start_dist = np.linalg.norm(left_vertices[0] - right_vertices[0])
-        end_dist = np.linalg.norm(left_vertices[0] - right_vertices[-1])
+        start_dist = np.linalg.norm(
+            left_vertices[0] - right_vertices[0]
+        ) + np.linalg.norm(left_vertices[-1] - right_vertices[-1])
+        end_dist = np.linalg.norm(
+            left_vertices[0] - right_vertices[-1]
+        ) + np.linalg.norm(left_vertices[-1] - right_vertices[0])
         if start_dist > end_dist:
-            left_vertices = left_vertices[::-1]
-            first_left_node, last_left_node = (last_left_node, first_left_node)
-
+            if left_driving_system:
+                # reverse right vertices if right_way is reversed
+                right_vertices = right_vertices[::-1]
+                first_right_node, last_right_node = (last_right_node, first_right_node)
+            else:
+                # reverse left vertices if left_way is reversed
+                left_vertices = left_vertices[::-1]
+                first_left_node, last_left_node = (last_left_node, first_left_node)
         self.first_left_pts[first_left_node].append(way_rel.id_)
         self.last_left_pts[last_left_node].append(way_rel.id_)
         self.first_right_pts[first_right_node].append(way_rel.id_)
@@ -138,9 +163,14 @@ class OSM2LConverter:
 
         self._check_right_and_left_neighbors(way_rel, lanelet)
 
-        self._find_adjacencies_of_coinciding_ways(
-            lanelet, first_left_node, first_right_node, last_left_node, last_right_node
-        )
+        if detect_adjacencies:
+            self._find_adjacencies_of_coinciding_ways(
+                lanelet,
+                first_left_node,
+                first_right_node,
+                last_left_node,
+                last_right_node,
+            )
 
         potential_successors = self._check_for_successors(
             last_left_node=last_left_node, last_right_node=last_right_node
@@ -393,7 +423,10 @@ class OSM2LConverter:
                         break
 
     def _check_right_and_left_neighbors(
-        self, way_rel: WayRelation, lanelet: ConversionLanelet
+        self,
+        way_rel: WayRelation,
+        lanelet: ConversionLanelet,
+        left_driving_system: bool = False,
     ):
         """check if lanelet has adjacent right and lefts.
 

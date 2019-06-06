@@ -1,6 +1,17 @@
 """Module for OSM representation in python."""
 
+__author__ = "Benjamin Orthen"
+__copyright__ = "TUM Cyber-Physical Systems Group"
+__credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles"]
+__version__ = "1.0.3"
+__maintainer__ = "Benjamin Orthen"
+__email__ = "commonroad-i06@in.tum.de"
+__status__ = "Released"
+
+
 from lxml import etree
+
+DEFAULT_PROJ_STRING = "+proj=utm +zone=32 +ellps=WGS84"
 
 
 class Node:
