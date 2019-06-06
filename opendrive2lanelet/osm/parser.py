@@ -8,6 +8,8 @@ __maintainer__ = "Benjamin Orthen"
 __email__ = "commonroad-i06@in.tum.de"
 __status__ = "Released"
 
+import ipdb
+
 from lxml import etree
 from opendrive2lanelet.osm.osm import OSM, Node, Way, WayRelation
 
@@ -34,9 +36,19 @@ class OSMParser:
             osm.add_way(Way(way.get("id"), *node_ids))
 
         for way_rel in self.xml.xpath("//relation/tag[@v='lanelet' and @k='type']/.."):
-            left_way = way_rel.xpath("./member[@type='way' and @role='left']/@ref")[0]
-            right_way = way_rel.xpath("./member[@type='way' and @role='right']/@ref")[0]
-
-            osm.add_way_relation(WayRelation(way_rel.get("id"), left_way, right_way))
+            try:
+                left_way = way_rel.xpath("./member[@type='way' and @role='left']/@ref")[
+                    0
+                ]
+                right_way = way_rel.xpath(
+                    "./member[@type='way' and @role='right']/@ref"
+                )[0]
+                osm.add_way_relation(
+                    WayRelation(way_rel.get("id"), left_way, right_way)
+                )
+            except IndexError:
+                print(
+                    f"Lanelet relation {way_rel.attrib.get('id')} has either no left or no right way! Please check your data! Discarding this lanelet relation."
+                )
 
         return osm
