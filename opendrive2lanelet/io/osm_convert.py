@@ -77,7 +77,7 @@ def main():
         parser = OSMParser(etree.parse(file_in).getroot())
         osm = parser.parse()
 
-    osm2l = OSM2LConverter(args.proj)
+    osm2l = OSM2LConverter(proj_string=args.proj)
     scenario = osm2l(
         osm, detect_adjacencies=args.adjacencies, left_driving_system=args.left_driving
     )
