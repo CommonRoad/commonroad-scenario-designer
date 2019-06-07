@@ -20,7 +20,7 @@ from commonroad.common.file_writer import CommonRoadFileWriter
 
 from opendrive2lanelet.osm.parser import OSMParser
 from opendrive2lanelet.osm.osm2lanelet import OSM2LConverter
-from test.utils import elements_equal, xml_compare
+from test.utils import elements_equal
 
 
 class TestOSM2CRConversionBaseClass:
