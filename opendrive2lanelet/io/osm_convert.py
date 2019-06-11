@@ -7,7 +7,6 @@ import os
 import sys
 import argparse
 
-from pyproj import Proj
 from lxml import etree
 from commonroad.common.file_writer import CommonRoadFileWriter
 

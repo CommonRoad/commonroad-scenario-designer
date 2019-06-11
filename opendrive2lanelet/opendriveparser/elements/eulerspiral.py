@@ -68,20 +68,25 @@ class EulerSpiral:
 
         else:
             # Fresnel integrals
-            Sa, Ca = special.fresnel(
-                (kappa0 + self._gamma * s) / np.sqrt(np.pi * np.abs(self._gamma))
-            )
-            Sb, Cb = special.fresnel(kappa0 / np.sqrt(np.pi * np.abs(self._gamma)))
-
-            # Euler Spiral
-            Cs1 = np.sqrt(np.pi / np.abs(self._gamma)) * np.exp(
-                1j * (theta0 - kappa0 ** 2 / 2 / self._gamma)
-            )
-            Cs2 = np.sign(self._gamma) * (Ca - Cb) + 1j * Sa - 1j * Sb
-
-            Cs = C0 + Cs1 * Cs2
+            Cs = self._calc_fresnel_integral(s, kappa0, theta0, C0)
 
         # Tangent at each point
         theta = self._gamma * s ** 2 / 2 + kappa0 * s + theta0
 
         return (Cs.real, Cs.imag, theta)
+
+    def _calc_fresnel_integral(self, s, kappa0, theta0, C0):
+        Sa, Ca = special.fresnel(
+            (kappa0 + self._gamma * s) / np.sqrt(np.pi * np.abs(self._gamma))
+        )
+        Sb, Cb = special.fresnel(kappa0 / np.sqrt(np.pi * np.abs(self._gamma)))
+
+        # Euler Spiral
+        Cs1 = np.sqrt(np.pi / np.abs(self._gamma)) * np.exp(
+            1j * (theta0 - kappa0 ** 2 / 2 / self._gamma)
+        )
+        Cs2 = np.sign(self._gamma) * (Ca - Cb) + 1j * Sa - 1j * Sb
+
+        Cs = C0 + Cs1 * Cs2
+
+        return Cs

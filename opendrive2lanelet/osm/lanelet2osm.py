@@ -26,8 +26,9 @@ class L2OSMConverter:
         self.proj = Proj(proj_string)
         self.osm = None
         self._id_count = -1
-        self.first_left_nodes, self.first_right_nodes = None, None
-        self.last_left_nodes, self.last_right_nodes = None, None
+        self.first_nodes, self.first_nodes = None, None
+        self.left_ways, self.right_ways = None, None
+        self.lanelet_network = None
 
     @property
     def id_count(self) -> int:

@@ -224,7 +224,7 @@ class MainWindow(QWidget):
         self.update_plot()
 
     def update_plot(self):
-        """ """
+        """"""
         if self.current_scenario is None:
             self.dynamic.clear_axes()
             return
@@ -234,7 +234,7 @@ class MainWindow(QWidget):
                 self.selected_lanelet_id
             )
 
-        except (AssertionError, KeyError) as e:
+        except (AssertionError, KeyError):
             selected_lanelet = None
 
         ax = self.dynamic.get_axes()

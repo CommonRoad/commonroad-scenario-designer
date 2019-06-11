@@ -107,11 +107,13 @@ class OpenDriveConverter:
                 )
 
                 # Create outer lane border
-                outer_parametric_lane_border = OpenDriveConverter._create_outer_lane_border(
-                    lane_borders, lane, coeff_factor
-                )
+                # outer_parametric_lane_border =
 
-                lane_borders.append(outer_parametric_lane_border)
+                lane_borders.append(
+                    OpenDriveConverter._create_outer_lane_border(
+                        lane_borders, lane, coeff_factor
+                    )
+                )
 
                 plane_group = ParametricLaneGroup(
                     id_=encode_road_section_lane_width_id(

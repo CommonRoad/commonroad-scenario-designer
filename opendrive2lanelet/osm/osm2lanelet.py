@@ -423,10 +423,7 @@ class OSM2LConverter:
                         break
 
     def _check_right_and_left_neighbors(
-        self,
-        way_rel: WayRelation,
-        lanelet: ConversionLanelet,
-        left_driving_system: bool = False,
+        self, way_rel: WayRelation, lanelet: ConversionLanelet
     ):
         """check if lanelet has adjacent right and lefts.
 
@@ -517,23 +514,11 @@ class OSM2LConverter:
         return suitable_lanelet_ids
 
 
-# def _values_for_distance_to_line(start_point, end_point):
-#     x_diff = end_point[0] - start_point[0]
-#     y_diff = end_point[1] - start_point[1]
-#     num = end_point[0] * start_point[1] - end_point[1] * start_point[0]
-
-#     den = math.sqrt(y_diff ** 2 + x_diff ** 2)
-#     return x_diff, y_diff, num, den
-
-
 def _two_vertices_coincide(vertices1, vertices2) -> bool:
     """Check if two vertices coincide and describe the same trajectory.
 
     Args: # TODO:
     """
-    # segments1 = np.empty([len(vertices1) - 1, 4])
-    # for i in range(0, len(vertices1) - 1):
-    # segments1[i] = _values_for_distance_to_line(vertices1[i], vertices1[i + 1])
     segments = np.diff(vertices1, axis=0)
 
     for vert in vertices2:
@@ -544,15 +529,7 @@ def _two_vertices_coincide(vertices1, vertices2) -> bool:
             distances[i + 1] = np.abs(
                 np.cross(diff, vertices1[i] - vert)
             ) / np.linalg.norm(diff)
-
-        # min_dist =
-        # print(np.min(distances))
-        # dist_sum += np.min(distances)
         if np.min(distances) > adjacent_way_distance_tolerance:
             return False
 
-    # avg_dist = dist_sum / len(vertices2)
-    # print(avg_dist)
-    # if avg_dist < adjacent_way_distance_tolerance:
-    # return True
     return True

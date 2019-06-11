@@ -1,8 +1,13 @@
 # -*- coding: utf-8 -*-
 
+"""Module describe parametric lane groups, which are groups combining consecutive
+associated parametric lanes."""
+
 from typing import Tuple
 import math
+
 import numpy as np
+
 from opendrive2lanelet.lanelet import ConversionLanelet
 
 __author__ = "Benjamin Orthen, Stefan Urban"
@@ -298,8 +303,11 @@ class ParametricLaneGroup:
 
                     right_vertices.append(outer_pos)
 
-        left_vertices = np.array(left_vertices)
-        right_vertices = np.array(right_vertices)
+        left_vertices, right_vertices = (
+            np.array(left_vertices),
+            np.array(right_vertices),
+        )
+        # right_vertices = np.array(right_vertices)
 
         center_vertices = np.array(
             [(l + r) / 2 for (l, r) in zip(left_vertices, right_vertices)]
