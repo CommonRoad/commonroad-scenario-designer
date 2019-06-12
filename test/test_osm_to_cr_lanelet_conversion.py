@@ -39,7 +39,7 @@ class TestOSM2CRConversionBaseClass:
         """Load the osm file and convert it to a scenario."""
         with open(
             os.path.dirname(os.path.realpath(__file__))
-            + "/osm_xml_test_files/{}.osm".format(self.osm_file_name),
+            + f"/osm_xml_test_files/{self.osm_file_name}.osm",
             "r",
         ) as file_in:
             parser = OSMParser(etree.parse(file_in).getroot())
@@ -53,7 +53,7 @@ class TestOSM2CRConversionBaseClass:
         """
         with open(
             os.path.dirname(os.path.realpath(__file__))
-            + "/osm_xml_test_files/{}.xml".format(self.osm_file_name),
+            + f"/osm_xml_test_files/{self.osm_file_name}.xml",
             "r",
         ) as fh:
 
@@ -68,19 +68,7 @@ class TestOSM2CRConversionBaseClass:
             source="OSM 2 CommonRoad Converter",
             tags="",
         )
-        # with open(
-        #     os.path.dirname(os.path.realpath(__file__))
-        #     + "/osm_xml_test_files/{}.xml".format(self.osm_file_name),
-        #     "w",
-        # ) as fh:
-        #     writer.write_scenario_to_file_io(fh)
         writer.write_scenario_to_file_io(string_io)
-        # with open(
-        #     os.path.dirname(os.path.realpath(__file__))
-        #     + "/osm_xml_test_files/{}.xml".format(self.osm_file_name),
-        #     "w",
-        # ) as fh:
-        #     fh.write(string_io.getvalue())
         tree_generated = etree.fromstring(string_io.getvalue(), parser=parser)
 
         # set same date so this won't change the comparison
@@ -89,7 +77,6 @@ class TestOSM2CRConversionBaseClass:
 
         # compare both element trees
         trees_are_equal = elements_equal(tree_import, tree_generated)
-        # trees_are_equal = xml_compare(tree_import, tree_generated)
         self.assertTrue(trees_are_equal)
 
 

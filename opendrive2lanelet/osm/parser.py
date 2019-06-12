@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 """Module to parse OSM document."""
 
 __author__ = "Benjamin Orthen"
@@ -7,8 +9,6 @@ __version__ = "1.0.3"
 __maintainer__ = "Benjamin Orthen"
 __email__ = "commonroad-i06@in.tum.de"
 __status__ = "Released"
-
-import ipdb
 
 from lxml import etree
 from opendrive2lanelet.osm.osm import OSM, Node, Way, WayRelation

@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 """Logic to convert OSM to lanelets."""
@@ -11,7 +10,6 @@ __maintainer__ = "Benjamin Orthen"
 __email__ = "commonroad-i06@in.tum.de"
 __status__ = "Released"
 
-# import ipdb
 from collections import defaultdict
 from typing import List, Tuple
 
@@ -323,15 +321,23 @@ class OSM2LConverter:
 
     def _find_adjacencies_of_coinciding_ways(
         self,
-        lanelet,
-        first_left_node,
-        first_right_node,
-        last_left_node,
-        last_right_node,
+        lanelet: ConversionLanelet,
+        first_left_node: str,
+        first_right_node: str,
+        last_left_node: str,
+        last_right_node: str,
     ):
         """Find adjacencies of a lanelet by checking if its vertices coincide with vertices of other lanelets.
 
-        Args: # TODO:
+        Set new adjacent left or right if it finds neighbors.
+
+        Args:
+          lanelet: Lanelet to check potential adjacencies for.
+          first_left_node: Id of first left node of the lanelet relation in OSM.
+          first_right_node: Id of first right node of the lanelet relation in OSM.
+          last_left_node: Id of last left node of the lanelet relation in OSM.
+          last_right_node: Id of last right node of the lanelet relation in OSM.
+
         """
         # first case: left adjacent, same direction
         if lanelet.adj_left is None:
@@ -346,14 +352,13 @@ class OSM2LConverter:
             )
             for lanelet_id in potential_left_same_direction:
                 nb_lanelet = self.lanelet_network.find_lanelet_by_id(lanelet_id)
-                if nb_lanelet is not None:
-                    if _two_vertices_coincide(
-                        lanelet.left_vertices, nb_lanelet.right_vertices
-                    ):
-                        self.lanelet_network.set_adjacent_left(
-                            lanelet, nb_lanelet.lanelet_id, True
-                        )
-                        break
+                if nb_lanelet is not None and _two_vertices_coincide(
+                    lanelet.left_vertices, nb_lanelet.right_vertices
+                ):
+                    self.lanelet_network.set_adjacent_left(
+                        lanelet, nb_lanelet.lanelet_id, True
+                    )
+                    break
 
         # second case: right adjacent, same direction
         if lanelet.adj_right is None:
@@ -368,14 +373,13 @@ class OSM2LConverter:
             )
             for lanelet_id in potential_right_same_direction:
                 nb_lanelet = self.lanelet_network.find_lanelet_by_id(lanelet_id)
-                if nb_lanelet is not None:
-                    if _two_vertices_coincide(
-                        lanelet.right_vertices, nb_lanelet.left_vertices
-                    ):
-                        self.lanelet_network.set_adjacent_right(
-                            lanelet, nb_lanelet.lanelet_id, True
-                        )
-                        break
+                if nb_lanelet is not None and _two_vertices_coincide(
+                    lanelet.right_vertices, nb_lanelet.left_vertices
+                ):
+                    self.lanelet_network.set_adjacent_right(
+                        lanelet, nb_lanelet.lanelet_id, True
+                    )
+                    break
 
         # third case: left adjacent, opposite direction
         if lanelet.adj_left is None:
@@ -390,15 +394,14 @@ class OSM2LConverter:
             )
             for lanelet_id in potential_left_other_direction:
                 nb_lanelet = self.lanelet_network.find_lanelet_by_id(lanelet_id)
-                if nb_lanelet is not None:
-                    # compare right vertice of nb_lanelet with left vertice of lanelet
-                    if _two_vertices_coincide(
-                        lanelet.left_vertices, nb_lanelet.left_vertices[::-1]
-                    ):
-                        self.lanelet_network.set_adjacent_left(
-                            lanelet, nb_lanelet.lanelet_id, False
-                        )
-                        break
+                # compare right vertice of nb_lanelet with left vertice of lanelet
+                if nb_lanelet is not None and _two_vertices_coincide(
+                    lanelet.left_vertices, nb_lanelet.left_vertices[::-1]
+                ):
+                    self.lanelet_network.set_adjacent_left(
+                        lanelet, nb_lanelet.lanelet_id, False
+                    )
+                    break
 
         # fourth case: right adjacent, opposite direction
         if lanelet.adj_right is None:
@@ -413,14 +416,13 @@ class OSM2LConverter:
             )
             for lanelet_id in potential_right_other_direction:
                 nb_lanelet = self.lanelet_network.find_lanelet_by_id(lanelet_id)
-                if nb_lanelet is not None:
-                    if _two_vertices_coincide(
-                        lanelet.right_vertices, nb_lanelet.right_vertices[::-1]
-                    ):
-                        self.lanelet_network.set_adjacent_right(
-                            lanelet, nb_lanelet.lanelet_id, True
-                        )
-                        break
+                if nb_lanelet is not None and _two_vertices_coincide(
+                    lanelet.right_vertices, nb_lanelet.right_vertices[::-1]
+                ):
+                    self.lanelet_network.set_adjacent_right(
+                        lanelet, nb_lanelet.lanelet_id, True
+                    )
+                    break
 
     def _check_right_and_left_neighbors(
         self, way_rel: WayRelation, lanelet: ConversionLanelet
@@ -514,10 +516,21 @@ class OSM2LConverter:
         return suitable_lanelet_ids
 
 
-def _two_vertices_coincide(vertices1, vertices2) -> bool:
+def _two_vertices_coincide(
+    vertices1: List[np.ndarray], vertices2: List[np.ndarray]
+) -> bool:
     """Check if two vertices coincide and describe the same trajectory.
 
-    Args: # TODO:
+    For each vertice of vertices2 the minimal distance to the trajectory
+    described by vertices1 is calculated. If this distance crosses a certain
+    threshold, the vertices are deemed to be different.
+
+    Args:
+      vertices1: List of vertices which describe first trajectory.
+      vertices2: List of vertices which describe second trajectory.
+
+    Returns:
+      True if the vertices coincide, else False.
     """
     segments = np.diff(vertices1, axis=0)
 

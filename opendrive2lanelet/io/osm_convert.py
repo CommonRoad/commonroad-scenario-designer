@@ -9,9 +9,11 @@ import argparse
 
 from lxml import etree
 from commonroad.common.file_writer import CommonRoadFileWriter
+from commonroad.common.file_reader import CommonRoadFileReader
 
 from opendrive2lanelet.osm.osm2lanelet import OSM2LConverter
 from opendrive2lanelet.osm.parser import OSMParser
+from opendrive2lanelet.osm.lanelet2osm import L2OSMConverter
 
 __author__ = "Benjamin Orthen"
 __copyright__ = "TUM Cyber-Physical Systems Group"
@@ -29,7 +31,7 @@ def parse_arguments():
       args object
     """
     parser = argparse.ArgumentParser(
-        description="Parse an OSM file containing lanelets and convert it to a CommonRoad scenario file."
+        description="Parse an OSM file containing lanelets and convert it to a CommonRoad scenario file or vice versa."
     )
     parser.add_argument("input_file", help="file to be converted")
     parser.add_argument(
@@ -47,6 +49,12 @@ def parse_arguments():
         help="detect left and right adjacencies of lanelets if they do not share a common way",
     )
     parser.add_argument(
+        "-r",
+        "--reverse",
+        action="store_true",
+        help="convert in the reverse direction, i.e. from CommonRoad to OSM lanelets.",
+    )
+    parser.add_argument(
         "--left-driving",
         action="store_true",
         help="set to true if map describes a left driving system (e.g. in Great Britain)",
@@ -60,10 +68,12 @@ def main():
     args = parse_arguments()
     partition = args.input_file.rpartition(".")
 
+    file_ending = "osm" if args.reverse else "xml"
+
     if args.output_name:
         output_name = args.output_name
     else:
-        output_name = f"{partition[0]}.xml"  # only name of file
+        output_name = f"{partition[0]}.{file_ending}"  # only name of file
 
     if os.path.isfile(output_name) and not args.force_overwrite:
         print(
@@ -72,7 +82,19 @@ def main():
         )
         sys.exit(-1)
 
-    with open("{}".format(args.input_file), "r") as file_in:
+    if args.reverse:
+        commonroad_to_osm(args, output_name)
+    else:
+        osm_to_commonroad(args, output_name)
+
+
+def osm_to_commonroad(args, output_name: str):
+    """Convert from OSM to CommonRoad.
+    Args:
+      args: Object containing parsed arguments.
+      output_name: Name of file where result should be written to.
+    """
+    with open(f"{args.input_file}", "r") as file_in:
         parser = OSMParser(etree.parse(file_in).getroot())
         osm = parser.parse()
 
@@ -94,3 +116,29 @@ def main():
 
     else:
         print("Could not convert from OSM to CommonRoad format!")
+
+
+def commonroad_to_osm(args, output_name: str):
+    """Convert from CommonRoad to OSM.
+
+    Args:
+      args: Object containing parsed arguments.
+      output_name: Name of file where result should be written to.
+    """
+    try:
+        commonroad_reader = CommonRoadFileReader(args.input_file)
+        scenario, _ = commonroad_reader.open()
+
+    except etree.XMLSyntaxError as xml_error:
+        print(f"SyntaxERror: {xml_error}")
+        print(
+            "There was an error during the loading of the selected CommonRoad file.\n"
+        )
+    l2osm = L2OSMConverter(args.proj)
+    osm = l2osm(scenario)
+    with open(f"{output_name}", "wb") as file_out:
+        file_out.write(
+            etree.tostring(
+                osm, xml_declaration=True, encoding="UTF-8", pretty_print=True
+            )
+        )

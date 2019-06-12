@@ -14,7 +14,7 @@ import numpy as np
 from pyproj import Proj
 from commonroad.scenario.lanelet import Lanelet
 
-from opendrive2lanelet.osm.osm import OSM, Node, Way, WayRelation
+from opendrive2lanelet.osm.osm import OSM, Node, Way, WayRelation, DEFAULT_PROJ_STRING
 
 ways_are_equal_tolerance = 0.001
 
@@ -23,10 +23,13 @@ class L2OSMConverter:
     """Class to convert CommonRoad lanelet to the OSM representation."""
 
     def __init__(self, proj_string):
-        self.proj = Proj(proj_string)
+        if proj_string:
+            self.proj = Proj(proj_string)
+        else:
+            self.proj = Proj(DEFAULT_PROJ_STRING)
         self.osm = None
         self._id_count = -1
-        self.first_nodes, self.first_nodes = None, None
+        self.first_nodes, self.last_nodes = None, None
         self.left_ways, self.right_ways = None, None
         self.lanelet_network = None
 
@@ -74,8 +77,8 @@ class L2OSMConverter:
 
         left_nodes, right_nodes = self._create_nodes(lanelet, left_way_id, right_way_id)
 
-        self.first_nodes[lanelet.lanelet_id] = (left_nodes[0], right_nodes[0])
-        self.last_nodes[lanelet.lanelet_id] = (left_nodes[-1], right_nodes[-1])
+        self.first_nodes[f"{lanelet.lanelet_id}"] = (left_nodes[0], right_nodes[0])
+        self.last_nodes[f"{lanelet.lanelet_id}"] = (left_nodes[-1], right_nodes[-1])
 
         if not left_way_id:
             left_way = Way(self.id_count, *left_nodes)
@@ -134,12 +137,12 @@ class L2OSMConverter:
             first_right_node, last_right_node = self._get_first_and_last_nodes_from_way(
                 right_way_id, lanelet.adj_right_same_direction
             )
-            right_nodes = self._create_nodes_from_vertices(
-                lanelet.right_vertices[start_index:end_index]
-            )
         else:
             first_right_node = pot_first_right_node
             last_right_node = pot_last_right_node
+            right_nodes = self._create_nodes_from_vertices(
+                lanelet.right_vertices[start_index:end_index]
+            )
 
         if first_left_node:
             left_nodes.insert(0, first_left_node)
