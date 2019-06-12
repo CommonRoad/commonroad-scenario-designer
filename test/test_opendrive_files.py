@@ -13,6 +13,14 @@ from opendrive2lanelet.opendriveparser.parser import parse_opendrive
 from opendrive2lanelet.io.opendrive_convert import convert_opendrive
 from test.utils import elements_equal
 
+__author__ = "Benjamin Orthen"
+__copyright__ = "TUM Cyber-Physical Systems Group"
+__credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles"]
+__version__ = "1.1.0"
+__maintainer__ = "Benjamin Orthen"
+__email__ = "commonroad-i06@in.tum.de"
+__status__ = "Released"
+
 
 class TestOpenDriveBaseClass:
     """Test the conversion of specific xodr files by reading them in, converting them
@@ -21,14 +29,17 @@ class TestOpenDriveBaseClass:
     __test__ = False
 
     xodr_file_name = None
+    xml_output_name = None
 
     def setUp(self):
         """Load the xodr file and create the scenario.
 
         """
+        if not self.xml_output_name:
+            self.xml_output_name = self.xodr_file_name
         with open(
             os.path.dirname(os.path.realpath(__file__))
-            + "/xodr_xml_test_files/{}.xodr".format(self.xodr_file_name),
+            + f"/xodr_xml_test_files/{self.xodr_file_name}.xodr",
             "r",
         ) as fh:
             opendrive = parse_opendrive(etree.parse(fh).getroot())
@@ -41,7 +52,7 @@ class TestOpenDriveBaseClass:
         """
         with open(
             os.path.dirname(os.path.realpath(__file__))
-            + "/xodr_xml_test_files/{}.xml".format(self.xodr_file_name),
+            + f"/xodr_xml_test_files/{self.xml_output_name}.xml",
             "r",
         ) as fh:
 
@@ -111,6 +122,15 @@ class TestRightWidthCoefficients(TestOpenDriveBaseClass, unittest.TestCase):
 
     __test__ = True
     xodr_file_name = "town03_right_width_coefficient"
+
+
+class TestZeroWidthCoefficients(TestOpenDriveBaseClass, unittest.TestCase):
+    """Test if this converter discards lanes which have zero width everywhere.
+    In this case, it is the lane -1 of road 1."""
+
+    __test__ = True
+    xodr_file_name = "zero_width_lanes_map"
+    xml_output_name = "CulDeSac"
 
 
 if __name__ == "__main__":

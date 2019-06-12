@@ -34,4 +34,4 @@ Usage in own code
 
 Please refer to `README.md` where this is stated.
 
-A good file to take inspiration from is :py:mod:`opendrive2lanelet.io.convert`.
+A good file to take inspiration from is :py:mod:`opendrive2lanelet.io.opendrive_convert` or :py:mod:`opendrive2lanelet.io.osm_convert`.

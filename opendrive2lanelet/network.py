@@ -16,7 +16,7 @@ from opendrive2lanelet.converter import OpenDriveConverter
 __author__ = "Benjamin Orthen, Stefan Urban"
 __copyright__ = "TUM Cyber-Physical Systems Group"
 __credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles"]
-__version__ = "1.0.2"
+__version__ = "1.1.0"
 __maintainer__ = "Benjamin Orthen"
 __email__ = "commonroad-i06@in.tum.de"
 __status__ = "Released"
@@ -102,39 +102,9 @@ class Network:
         lanelet_network.concatenate_possible_lanelets()
 
         # Perform lane splits and joins
-        # Condition for lane merge:
-        # - Lanelet ends (has no successor or predecessor)
-        # - Has an adjacent (left or right) with same type
         lanelet_network.join_and_split_possible_lanes()
 
-        # dict where the connections between the old and new
-        # ids are saved
-        # new_lanelet_ids_assigned = {}
         lanelet_network.convert_all_lanelet_ids()
-
-        # for lanelet in lanelet_network.lanelets:
-        #     lanelet.description = lanelet.lanelet_id
-        #     lanelet_network.remove_lanelet(lanelet.lanelet_id)
-        #     lanelet.lanelet_id = convert_to_new_lanelet_id(
-        #         lanelet.lanelet_id, new_lanelet_ids_assigned
-        #     )
-        #     lanelet.predecessor = [
-        #         convert_to_new_lanelet_id(x, new_lanelet_ids_assigned)
-        #         for x in lanelet.predecessor
-        #     ]
-        #     lanelet.successor = [
-        #         convert_to_new_lanelet_id(x, new_lanelet_ids_assigned)
-        #         for x in lanelet.successor
-        #     ]
-        #     if lanelet.adj_left is not None:
-        #         lanelet.adj_left = convert_to_new_lanelet_id(
-        #             lanelet.adj_left, new_lanelet_ids_assigned
-        #         )
-        #     if lanelet.adj_right is not None:
-        #         lanelet.adj_right = convert_to_new_lanelet_id(
-        #             lanelet.adj_right, new_lanelet_ids_assigned
-        #         )
-        #     lanelet_network.add_lanelet(lanelet)
 
         return lanelet_network
 

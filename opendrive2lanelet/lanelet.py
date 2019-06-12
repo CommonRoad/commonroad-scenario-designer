@@ -12,7 +12,7 @@ from commonroad.scenario.lanelet import Lanelet
 __author__ = "Benjamin Orthen"
 __copyright__ = "TUM Cyber-Physical Systems Group"
 __credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles"]
-__version__ = "1.0.2"
+__version__ = "1.1.0"
 __maintainer__ = "Benjamin Orthen"
 __email__ = "commonroad-i06@in.tum.de"
 __status__ = "Released"
@@ -196,22 +196,6 @@ class ConversionLanelet(Lanelet):
 
         """
 
-        # float_tolerance = 1e-6
-        # if (
-        #     np.linalg.norm(self.center_vertices[-1] - lanelet_conc.center_vertices[0])
-        #     > float_tolerance
-        #     or np.linalg.norm(self.left_vertices[-1] - lanelet_conc.left_vertices[0])
-        #     > float_tolerance
-        #     or np.linalg.norm(self.right_vertices[-1] - lanelet_conc.right_vertices[0])
-        #     > float_tolerance
-        # ):
-        #     pass
-        # raise Exception("no way {} {} {}".format(
-        #     np.linalg.norm(self.center_vertices[-1] - lanelet_conc.center_vertices[0]),
-        #     np.linalg.norm(self.left_vertices[-1] - lanelet_conc.left_vertices[0]),
-        #     np.linalg.norm(self.right_vertices[-1] - lanelet_conc.right_vertices[0])
-        # ))
-        # return None
         # check connectedness
         if np.isclose(self.left_vertices[-1], lanelet_conc.left_vertices[0]).all():
             idx = 1

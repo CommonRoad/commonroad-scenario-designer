@@ -1,16 +1,20 @@
 # -*- coding: utf-8 -*-
 
+"""Module for parametric lanes, which is an intermediate step between OpenDRIVE lanes
+and lanelets."""
+
 import math
+from typing import Tuple
+
 import numpy as np
 from numpy.polynomial import polynomial as P
-from typing import Tuple
 
 from opendrive2lanelet.lanelet import ConversionLanelet
 
 __author__ = "Benjamin Orthen"
 __copyright__ = "TUM Cyber-Physical Systems Group"
 __credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles"]
-__version__ = "1.0.2"
+__version__ = "1.1.0"
 __maintainer__ = "Benjamin Orthen"
 __email__ = "commonroad-i06@in.tum.de"
 __status__ = "Released"
@@ -81,7 +85,7 @@ class ParametricLaneBorderGroup:
         """Get the width coefficients which apply to this ParametricLane.
 
         Returns:
-          The width coefficients in format [a, b, c, d].
+          The width coefficients in format [a, b, c, distance_from_other_border].
         """
         # TODO: expand implementation to consider border offset record
         return self.outer_border.get_next_width_coeffs(self.outer_border_offset)
@@ -200,7 +204,7 @@ class ParametricLane:
         last_width_difference = distance[2]
         distance_slope = (distance[1] - distance[0]) / self.length
         # calculate left and right vertices of lanelet
-        for i, pos in enumerate(poses):
+        for _, pos in enumerate(poses):
             inner_pos = self.calc_border("inner", pos)[0]
             outer_pos = self.calc_border("outer", pos)[0]
             original_width = np.linalg.norm(inner_pos - outer_pos)
@@ -214,31 +218,49 @@ class ParametricLane:
                 last_width_difference = 0
 
             else:
-                t = distance[0]
+                # t = distance[0]
 
-                d = distance_slope * pos + t
+                distance_from_other_border = distance_slope * pos + distance[0]
 
                 if mirror_border == "left":
-                    new_outer_pos = self.calc_border("inner", pos, d)[0]
+                    new_outer_pos = self.calc_border(
+                        "inner", pos, distance_from_other_border
+                    )[0]
                     modified_width = np.linalg.norm(new_outer_pos - inner_pos)
 
                     # change width s.t. it does not mirror inner border but instead
                     # outer border
-                    d = math.copysign(1, d) * last_width_difference
+                    distance_from_other_border = (
+                        math.copysign(1, distance_from_other_border)
+                        * last_width_difference
+                    )
                     if modified_width < original_width:
-                        right_vertices.append(self.calc_border("outer", pos, d)[0])
+                        right_vertices.append(
+                            self.calc_border("outer", pos, distance_from_other_border)[
+                                0
+                            ]
+                        )
                     else:
                         right_vertices.append(new_outer_pos)
                         last_width_difference = abs(modified_width - original_width)
 
                     left_vertices.append(inner_pos)
                 elif mirror_border == "right":
-                    new_inner_pos = self.calc_border("outer", pos, d)[0]
+                    new_inner_pos = self.calc_border(
+                        "outer", pos, distance_from_other_border
+                    )[0]
                     modified_width = np.linalg.norm(new_inner_pos - outer_pos)
 
-                    d = math.copysign(1, d) * last_width_difference
+                    distance_from_other_border = (
+                        math.copysign(1, distance_from_other_border)
+                        * last_width_difference
+                    )
                     if modified_width < original_width:
-                        left_vertices.append(self.calc_border("inner", pos, d)[0])
+                        left_vertices.append(
+                            self.calc_border("inner", pos, distance_from_other_border)[
+                                0
+                            ]
+                        )
                     else:
                         left_vertices.append(new_inner_pos)
                         last_width_difference = abs(modified_width - original_width)

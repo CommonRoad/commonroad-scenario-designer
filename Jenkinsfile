@@ -1,9 +1,6 @@
 #!groovy
 pipeline {
 	agent {dockerfile true }
-	// environment{
-		// my_workspace='tools/opendrive2lanelet'
-	// }
 	stages {
 		stage('Install Requirements'){
 			steps {

@@ -1,9 +1,11 @@
+# -*- coding: utf-8 -*-
+
 """Module to parse OSM document."""
 
 __author__ = "Benjamin Orthen"
 __copyright__ = "TUM Cyber-Physical Systems Group"
 __credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles"]
-__version__ = "1.0.2"
+__version__ = "1.1.0"
 __maintainer__ = "Benjamin Orthen"
 __email__ = "commonroad-i06@in.tum.de"
 __status__ = "Released"
@@ -34,9 +36,19 @@ class OSMParser:
             osm.add_way(Way(way.get("id"), *node_ids))
 
         for way_rel in self.xml.xpath("//relation/tag[@v='lanelet' and @k='type']/.."):
-            left_way = way_rel.xpath("./member[@type='way' and @role='left']/@ref")[0]
-            right_way = way_rel.xpath("./member[@type='way' and @role='right']/@ref")[0]
-
-            osm.add_way_relation(WayRelation(way_rel.get("id"), left_way, right_way))
+            try:
+                left_way = way_rel.xpath("./member[@type='way' and @role='left']/@ref")[
+                    0
+                ]
+                right_way = way_rel.xpath(
+                    "./member[@type='way' and @role='right']/@ref"
+                )[0]
+                osm.add_way_relation(
+                    WayRelation(way_rel.get("id"), left_way, right_way)
+                )
+            except IndexError:
+                print(
+                    f"Lanelet relation {way_rel.attrib.get('id')} has either no left or no right way! Please check your data! Discarding this lanelet relation."
+                )
 
         return osm

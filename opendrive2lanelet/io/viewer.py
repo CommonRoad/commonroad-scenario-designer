@@ -37,7 +37,7 @@ from commonroad.common.file_reader import CommonRoadFileReader
 __author__ = "Benjamin Orthen, Stefan Urban"
 __copyright__ = "TUM Cyber-Physical Systems Group"
 __credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles"]
-__version__ = "1.0.2"
+__version__ = "1.1.0"
 __maintainer__ = "Benjamin Orthen"
 __email__ = "commonroad-i06@in.tum.de"
 __status__ = "Released"
@@ -224,7 +224,7 @@ class MainWindow(QWidget):
         self.update_plot()
 
     def update_plot(self):
-        """ """
+        """"""
         if self.current_scenario is None:
             self.dynamic.clear_axes()
             return
@@ -234,7 +234,7 @@ class MainWindow(QWidget):
                 self.selected_lanelet_id
             )
 
-        except (AssertionError, KeyError) as e:
+        except (AssertionError, KeyError):
             selected_lanelet = None
 
         ax = self.dynamic.get_axes()

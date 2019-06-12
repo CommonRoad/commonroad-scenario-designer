@@ -3,7 +3,6 @@
 """Module to enhance LaneletNetwork class
 so it can be used for conversion from the opendrive format."""
 
-
 from typing import Tuple, List
 from queue import Queue
 import numpy as np
@@ -14,7 +13,7 @@ from opendrive2lanelet.lanelet import ConversionLanelet
 __author__ = "Benjamin Orthen"
 __copyright__ = "TUM Cyber-Physical Systems Group"
 __credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles"]
-__version__ = "1.0.2"
+__version__ = "1.1.0"
 __maintainer__ = "Benjamin Orthen"
 __email__ = "commonroad-i06@in.tum.de"
 __status__ = "Released"
@@ -136,7 +135,7 @@ class ConversionLaneletNetwork(LaneletNetwork):
         Returns:
 
         """
-        self._delete_zero_width_parametric_lanes()
+        self.delete_zero_width_parametric_lanes()
 
         lanelet_ids = [x.lanelet_id for x in self.lanelets]
 
@@ -152,7 +151,7 @@ class ConversionLaneletNetwork(LaneletNetwork):
             if lanelet.adj_right not in lanelet_ids:
                 lanelet.adj_right = None
 
-    def _delete_zero_width_parametric_lanes(self):
+    def delete_zero_width_parametric_lanes(self):
         """Remove all ParametricLaneGroup which have zero width at every point from
         this network.
         """
@@ -161,12 +160,30 @@ class ConversionLaneletNetwork(LaneletNetwork):
                 if lanelet.adj_right:
                     adj_right = self.find_lanelet_by_id(lanelet.adj_right)
                     if adj_right:
-                        adj_right.adj_left = lanelet.adj_left
+                        if adj_right.adj_left == lanelet.lanelet_id:
+                            adj_right.adj_left = lanelet.adj_left
+                            adj_right.adj_left_same_direction = (
+                                lanelet.adj_left_same_direction
+                            )
+                        else:
+                            adj_right.adj_right = lanelet.adj_left
+                            adj_right.adj_right_same_direction = (
+                                not lanelet.adj_left_same_direction
+                            )
 
                 if lanelet.adj_left:
                     adj_left = self.find_lanelet_by_id(lanelet.adj_left)
                     if adj_left:
-                        adj_left.adj_right = lanelet.adj_right
+                        if adj_left.adj_right == lanelet.lanelet_id:
+                            adj_left.adj_right = lanelet.adj_right
+                            adj_left.adj_right_same_direction = (
+                                lanelet.adj_right_same_direction
+                            )
+                        else:
+                            adj_left.adj_left = lanelet.adj_right
+                            adj_left.adj_left_same_direction = (
+                                not lanelet.adj_right_same_direction
+                            )
 
                 self.remove_lanelet(lanelet.lanelet_id, remove_references=True)
 
@@ -204,6 +221,7 @@ class ConversionLaneletNetwork(LaneletNetwork):
         concatenate_lanelets = []
         for lanelet in self.lanelets:
 
+            possible_concat_lanes = None
             if lanelet.adj_right is None:
                 possible_concat_lanes = self.check_concatenation_potential(
                     lanelet, "left"
@@ -366,13 +384,17 @@ class ConversionLaneletNetwork(LaneletNetwork):
         Returns:
           True if operation successful, else false.
         """
-        new_adj_left = self.find_lanelet_by_id(adj_left_id)
-        if not new_adj_left:
+        new_adj = self.find_lanelet_by_id(adj_left_id)
+        if not new_adj:
             return False
         lanelet.adj_left = adj_left_id
         lanelet.adj_left_same_direction = same_direction
-        new_adj_left.adj_right = lanelet.lanelet_id
-        new_adj_left.adj_right_same_direction = same_direction
+        if same_direction:
+            new_adj.adj_right = lanelet.lanelet_id
+            new_adj.adj_right_same_direction = True
+        else:
+            new_adj.adj_left = lanelet.lanelet_id
+            new_adj.adj_left_same_direction = False
         return True
 
     def set_adjacent_right(
@@ -390,13 +412,17 @@ class ConversionLaneletNetwork(LaneletNetwork):
         Returns:
           True if operation successful, else false.
         """
-        new_adj_right = self.find_lanelet_by_id(adj_right_id)
-        if not new_adj_right:
+        new_adj = self.find_lanelet_by_id(adj_right_id)
+        if not new_adj:
             return False
         lanelet.adj_right = adj_right_id
         lanelet.adj_right_same_direction = same_direction
-        new_adj_right.adj_left = lanelet.lanelet_id
-        new_adj_right.adj_left_same_direction = same_direction
+        if same_direction:
+            new_adj.adj_left = lanelet.lanelet_id
+            new_adj.adj_left_same_direction = True
+        else:
+            new_adj.adj_right = lanelet.lanelet_id
+            new_adj.adj_right_same_direction = False
         return True
 
     def check_concatenation_potential(

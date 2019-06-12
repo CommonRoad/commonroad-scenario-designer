@@ -22,7 +22,7 @@ from opendrive2lanelet.osm.lanelet2osm import L2OSMConverter
 __author__ = "Benjamin Orthen"
 __copyright__ = "TUM Cyber-Physical Systems Group"
 __credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles"]
-__version__ = "1.0.2"
+__version__ = "1.1.0"
 __maintainer__ = "Benjamin Orthen"
 __email__ = "commonroad-i06@in.tum.de"
 __status__ = "Released"
@@ -99,7 +99,7 @@ def main():
     else:
         l2osm = L2OSMConverter(args.osm)
         osm = l2osm(scenario)
-        with open(f"{output_name}", "w") as file_out:
+        with open(f"{output_name}", "wb") as file_out:
             file_out.write(
                 etree.tostring(
                     osm, xml_declaration=True, encoding="UTF-8", pretty_print=True
