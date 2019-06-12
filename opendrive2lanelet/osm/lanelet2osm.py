@@ -77,8 +77,8 @@ class L2OSMConverter:
 
         left_nodes, right_nodes = self._create_nodes(lanelet, left_way_id, right_way_id)
 
-        self.first_nodes[f"{lanelet.lanelet_id}"] = (left_nodes[0], right_nodes[0])
-        self.last_nodes[f"{lanelet.lanelet_id}"] = (left_nodes[-1], right_nodes[-1])
+        self.first_nodes[lanelet.lanelet_id] = (left_nodes[0], right_nodes[0])
+        self.last_nodes[lanelet.lanelet_id] = (left_nodes[-1], right_nodes[-1])
 
         if not left_way_id:
             left_way = Way(self.id_count, *left_nodes)
@@ -239,39 +239,6 @@ class L2OSMConverter:
                     return potential_left_way
 
         return None
-
-    # def _get_potential_way(self, lanelet, left_side: bool):
-    #     adj_lanelet_id = lanelet.adj_left if left_side else lanelet.adj_right
-    #     # if not adj_lanelet_id:
-    #         # return None
-    #     adj_same_direction = (
-    #         lanelet.adj_left_same_direction
-    #         if left_side
-    #         else lanelet.adj_right_same_direction
-    #     )
-    #     if left_side != adj_same_direction:
-    #         potential_way = self.left_ways.get(adj_lanelet_id)
-    #     else:
-    #         potential_way = self.right_ways.get(adj_lanelet_id)
-    #     if potential_way:
-    #         adj_lanelet = self.lanelet_network.find_lanelet_by_id(adj_lanelet_id)
-
-    #     if lanelet.adj_left:
-    #         if lanelet.adj_left_same_direction:
-    #             potential_left_way = self.right_ways.get(lanelet.adj_left)
-    #         else:
-    #             potential_left_way = self.left_ways.get(lanelet.adj_left)
-    #         if potential_left_way:
-    #             adj_left = self.lanelet_network.find_lanelet_by_id(lanelet.adj_left)
-    #             vertices = (
-    #                 adj_left.right_vertices
-    #                 if lanelet.adj_left_same_direction
-    #                 else adj_left.left_vertices[::-1]
-    #             )
-    #             if _vertices_are_equal(lanelet.left_vertices, vertices):
-    #                 return potential_left_way
-
-    #     return None
 
     def _get_shared_first_nodes_from_other_lanelets(
         self, lanelet: Lanelet
