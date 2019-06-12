@@ -1,9 +1,9 @@
 [MASTER]
-extension-pkg-whitelist=PyQt5,scipy
+extension-pkg-whitelist=PyQt5,scipy,lxml
 
 [MESSAGES CONTROL]
 
-disable= format, C0330,R0801
+disable= format,C0330,R0801
 	# format handled by black
 	# C0330: bad continuation
 	# R0801: similar lines in multiple files (warns at commonroad header

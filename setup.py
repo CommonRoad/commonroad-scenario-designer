@@ -21,13 +21,13 @@ setup(
     packages=find_packages(exclude=("test",)),
     include_package_data=True,
     install_requires=[
-        "numpy>=1.16.3",
-        "lxml>=4.3.3",
+        "numpy>=1.16.4",
+        "lxml>=4.3.4",
         "commonroad-io>=2019.1",
-        "pyproj>=2.1.3",
+        "pyproj>=2.2.0",
         "scipy>=1.3.0",
     ],
-    extras_require={"GUI": ["PyQt5>=5.11.3", "matplotlib>=3.0.0"]},
+    extras_require={"GUI": ["PyQt5>=5.12.2", "matplotlib>=3.1.0"]},
     python_requires=">=3.6",
     entry_points={
         "console_scripts": [

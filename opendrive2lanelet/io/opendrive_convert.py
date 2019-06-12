@@ -99,7 +99,7 @@ def main():
     else:
         l2osm = L2OSMConverter(args.osm)
         osm = l2osm(scenario)
-        with open(f"{output_name}", "w") as file_out:
+        with open(f"{output_name}", "wb") as file_out:
             file_out.write(
                 etree.tostring(
                     osm, xml_declaration=True, encoding="UTF-8", pretty_print=True
