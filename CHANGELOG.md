@@ -1,6 +1,18 @@
 # Changelog
 
-## [1.0.3] - 2019-05.28
+## [1.1.0] - 2019-06-12
+### Added
+- Conversion from OSM lanelets to CommonRoad lanelets
+- Conversion from CommonRoad lanelets to OSM lanelets
+- New command for OSM<->CommonRoad lanelets conversion
+
+### Changed
+- Update dependencies
+
+### Fixed
+- Slight changes to algorithm which removes lanes with zero width
+
+## [1.0.3] - 2019-05-28
 ## Changed
 - Updated dependencies
 - As commonroad-io has now better support for writing files, use CommonRoadFileWriter instead of ExtendedCommonRoadFileWriter

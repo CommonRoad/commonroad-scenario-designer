@@ -16,7 +16,7 @@ from opendrive2lanelet.converter import OpenDriveConverter
 __author__ = "Benjamin Orthen, Stefan Urban"
 __copyright__ = "TUM Cyber-Physical Systems Group"
 __credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles"]
-__version__ = "1.0.3"
+__version__ = "1.1.0"
 __maintainer__ = "Benjamin Orthen"
 __email__ = "commonroad-i06@in.tum.de"
 __status__ = "Released"
@@ -101,6 +101,7 @@ class Network:
         lanelet_network.prune_network()
         lanelet_network.concatenate_possible_lanelets()
 
+        # Perform lane splits and joins
         lanelet_network.join_and_split_possible_lanes()
 
         lanelet_network.convert_all_lanelet_ids()
