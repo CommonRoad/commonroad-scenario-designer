@@ -133,5 +133,13 @@ class TestZeroWidthCoefficients(TestOpenDriveBaseClass, unittest.TestCase):
     xml_output_name = "CulDeSac"
 
 
+class TestPoly3AndBorderRecord(TestOpenDriveBaseClass, unittest.TestCase):
+    """Test if the program convert Poly3 Geometry and wheter it can handle
+    border records instead of width records."""
+
+    __test__ = True
+    xodr_file_name = "poly3_and_border_record"
+
+
 if __name__ == "__main__":
     unittest.main()
