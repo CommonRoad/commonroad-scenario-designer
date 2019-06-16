@@ -3,7 +3,7 @@
 """Module to enhance LaneletNetwork class
 so it can be used for conversion from the opendrive format."""
 
-from typing import Tuple, List
+from typing import Optional, List
 from queue import Queue
 import numpy as np
 
@@ -947,7 +947,7 @@ class _JoinSplitTarget:
 
     def _check_next_adjacent_lanelet(
         self, potential_adjacent_lanelets: Queue
-    ) -> ConversionLanelet:
+    ) -> Optional[ConversionLanelet]:
         """Check next lanelet if it can act as adjacent lanelet to the main lanelet.
 
         If not, add its left and right neighbor, if they exists, to the potential_adjacent_lanelets Queue.

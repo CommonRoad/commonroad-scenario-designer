@@ -13,7 +13,6 @@ __status__ = "Released"
 
 import os
 import unittest
-from io import StringIO
 from lxml import etree
 
 from commonroad.common.file_reader import CommonRoadFileReader

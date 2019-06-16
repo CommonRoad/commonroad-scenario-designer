@@ -34,8 +34,8 @@ class Network:
         self._planes = []
         self._link_index = None
 
-    def __eq__(self, other):
-        return self.__dict__ == other.__dict__
+    # def __eq__(self, other):
+    # return self.__dict__ == other.__dict__
 
     def load_opendrive(self, opendrive: OpenDrive):
         """Load all elements of an OpenDRIVE network to a parametric lane representation
@@ -44,9 +44,6 @@ class Network:
           opendrive:
 
         """
-
-        if not isinstance(opendrive, OpenDrive):
-            raise TypeError()
 
         self._link_index = LinkIndex()
         self._link_index.create_from_opendrive(opendrive)

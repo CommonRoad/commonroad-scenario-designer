@@ -171,107 +171,107 @@ class ParametricLane:
         # TODO: expand this method to include border offset records
         return self.border_group.get_width_coefficients() == [0, 0, 0, 0]
 
-    def to_lanelet_with_mirroring(
-        self,
-        mirror_border: str,
-        distance: list,
-        mirror_interval: list,
-        precision: float = 0.5,
-    ) -> ConversionLanelet:
-        """Convert a ParametricLane to Lanelet.
+    # def to_lanelet_with_mirroring(
+    #     self,
+    #     mirror_border: str,
+    #     distance: list,
+    #     mirror_interval: list,
+    #     precision: float = 0.5,
+    # ) -> ConversionLanelet:
+    #     """Convert a ParametricLane to Lanelet.
 
-        Args:
-          plane_group: PlaneGroup which should be referenced by created Lanelet.
-          precision: Number which indicates at which space interval (in curve parameter ds)
-            the coordinates of the boundaries should be calculated.
-          mirror_border: Which lane to mirror, if performing merging or splitting of lanes.
-          distance: Distance at start and end of lanelet, which mirroring lane should
-            have from the other lane it mirrors.
+    #     Args:
+    #       plane_group: PlaneGroup which should be referenced by created Lanelet.
+    #       precision: Number which indicates at which space interval (in curve parameter ds)
+    #         the coordinates of the boundaries should be calculated.
+    #       mirror_border: Which lane to mirror, if performing merging or splitting of lanes.
+    #       distance: Distance at start and end of lanelet, which mirroring lane should
+    #         have from the other lane it mirrors.
 
-        Returns:
-           Created Lanelet, with left, center and right vertices and a lanelet_id.
+    #     Returns:
+    #        Created Lanelet, with left, center and right vertices and a lanelet_id.
 
-        """
+    #     """
 
-        num_steps = int(max(3, np.ceil(self.length / float(precision))))
+    #     num_steps = int(max(3, np.ceil(self.length / float(precision))))
 
-        poses = np.linspace(0, self.length, num_steps)
+    #     poses = np.linspace(0, self.length, num_steps)
 
-        left_vertices = []
-        right_vertices = []
+    #     left_vertices = []
+    #     right_vertices = []
 
-        # width difference between original_width and width with merge algo applied
-        last_width_difference = distance[2]
-        distance_slope = (distance[1] - distance[0]) / self.length
-        # calculate left and right vertices of lanelet
-        for _, pos in enumerate(poses):
-            inner_pos = self.calc_border("inner", pos)[0]
-            outer_pos = self.calc_border("outer", pos)[0]
-            original_width = np.linalg.norm(inner_pos - outer_pos)
+    #     # width difference between original_width and width with merge algo applied
+    #     last_width_difference = distance[2]
+    #     distance_slope = (distance[1] - distance[0]) / self.length
+    #     # calculate left and right vertices of lanelet
+    #     for _, pos in enumerate(poses):
+    #         inner_pos = self.calc_border("inner", pos)[0]
+    #         outer_pos = self.calc_border("outer", pos)[0]
+    #         original_width = np.linalg.norm(inner_pos - outer_pos)
 
-            # if not mirroring lane or outside of range
-            if (
-                pos < mirror_interval[0] or pos > mirror_interval[1]
-            ) and not np.isclose(pos, mirror_interval[1]):
-                left_vertices.append(inner_pos)
-                right_vertices.append(outer_pos)
-                last_width_difference = 0
+    #         # if not mirroring lane or outside of range
+    #         if (
+    #             pos < mirror_interval[0] or pos > mirror_interval[1]
+    #         ) and not np.isclose(pos, mirror_interval[1]):
+    #             left_vertices.append(inner_pos)
+    #             right_vertices.append(outer_pos)
+    #             last_width_difference = 0
 
-            else:
-                # t = distance[0]
+    #         else:
+    #             # t = distance[0]
 
-                distance_from_other_border = distance_slope * pos + distance[0]
+    #             distance_from_other_border = distance_slope * pos + distance[0]
 
-                if mirror_border == "left":
-                    new_outer_pos = self.calc_border(
-                        "inner", pos, distance_from_other_border
-                    )[0]
-                    modified_width = np.linalg.norm(new_outer_pos - inner_pos)
+    #             if mirror_border == "left":
+    #                 new_outer_pos = self.calc_border(
+    #                     "inner", pos, distance_from_other_border
+    #                 )[0]
+    #                 modified_width = np.linalg.norm(new_outer_pos - inner_pos)
 
-                    # change width s.t. it does not mirror inner border but instead
-                    # outer border
-                    distance_from_other_border = (
-                        math.copysign(1, distance_from_other_border)
-                        * last_width_difference
-                    )
-                    if modified_width < original_width:
-                        right_vertices.append(
-                            self.calc_border("outer", pos, distance_from_other_border)[
-                                0
-                            ]
-                        )
-                    else:
-                        right_vertices.append(new_outer_pos)
-                        last_width_difference = abs(modified_width - original_width)
+    #                 # change width s.t. it does not mirror inner border but instead
+    #                 # outer border
+    #                 distance_from_other_border = (
+    #                     math.copysign(1, distance_from_other_border)
+    #                     * last_width_difference
+    #                 )
+    #                 if modified_width < original_width:
+    #                     right_vertices.append(
+    #                         self.calc_border("outer", pos, distance_from_other_border)[
+    #                             0
+    #                         ]
+    #                     )
+    #                 else:
+    #                     right_vertices.append(new_outer_pos)
+    #                     last_width_difference = abs(modified_width - original_width)
 
-                    left_vertices.append(inner_pos)
-                elif mirror_border == "right":
-                    new_inner_pos = self.calc_border(
-                        "outer", pos, distance_from_other_border
-                    )[0]
-                    modified_width = np.linalg.norm(new_inner_pos - outer_pos)
+    #                 left_vertices.append(inner_pos)
+    #             elif mirror_border == "right":
+    #                 new_inner_pos = self.calc_border(
+    #                     "outer", pos, distance_from_other_border
+    #                 )[0]
+    #                 modified_width = np.linalg.norm(new_inner_pos - outer_pos)
 
-                    distance_from_other_border = (
-                        math.copysign(1, distance_from_other_border)
-                        * last_width_difference
-                    )
-                    if modified_width < original_width:
-                        left_vertices.append(
-                            self.calc_border("inner", pos, distance_from_other_border)[
-                                0
-                            ]
-                        )
-                    else:
-                        left_vertices.append(new_inner_pos)
-                        last_width_difference = abs(modified_width - original_width)
+    #                 distance_from_other_border = (
+    #                     math.copysign(1, distance_from_other_border)
+    #                     * last_width_difference
+    #                 )
+    #                 if modified_width < original_width:
+    #                     left_vertices.append(
+    #                         self.calc_border("inner", pos, distance_from_other_border)[
+    #                             0
+    #                         ]
+    #                     )
+    #                 else:
+    #                     left_vertices.append(new_inner_pos)
+    #                     last_width_difference = abs(modified_width - original_width)
 
-                    right_vertices.append(outer_pos)
+    #                 right_vertices.append(outer_pos)
 
-        return (
-            np.array(left_vertices),
-            np.array(right_vertices),
-            last_width_difference,
-        )
+    #     return (
+    #         np.array(left_vertices),
+    #         np.array(right_vertices),
+    #         last_width_difference,
+    #     )
 
     def calc_vertices(self, precision: float = 0.5) -> Tuple[np.ndarray, np.ndarray]:
         """Convert a ParametricLane to Lanelet.

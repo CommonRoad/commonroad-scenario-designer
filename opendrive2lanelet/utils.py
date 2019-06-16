@@ -26,32 +26,32 @@ def encode_road_section_lane_width_id(roadId, sectionId, laneId, widthId):
     return ".".join([str(roadId), str(sectionId), str(laneId), str(widthId)])
 
 
-def decode_road_section_lane_width_id(encodedString: str):
-    """
+# def decode_road_section_lane_width_id(encodedString: str):
+#     """
 
-    Args:
-      encodedString:
+#     Args:
+#       encodedString:
 
-    Returns:
+#     Returns:
 
-    """
+#     """
 
-    parts = encodedString.split(".")
+#     parts = encodedString.split(".")
 
-    if len(parts) != 4:
-        raise Exception()
+#     if len(parts) != 4:
+#         raise Exception()
 
-    return (int(parts[0]), int(parts[1]), int(parts[2]), int(parts[3]))
+#     return (int(parts[0]), int(parts[1]), int(parts[2]), int(parts[3]))
 
 
-def allCloseToZero(array):
-    """Tests if all elements of array are close to zero.
+# def allCloseToZero(array):
+#     """Tests if all elements of array are close to zero.
 
-    Args:
-      array:
+#     Args:
+#       array:
 
-    Returns:
+#     Returns:
 
-    """
+#     """
 
-    return numpy.allclose(array, numpy.zeros(numpy.shape(array)))
+#     return numpy.allclose(array, numpy.zeros(numpy.shape(array)))
