@@ -45,54 +45,15 @@ Start the GUI with ```opendrive2lanelet-gui```
 
 ![GUI screenshot](gui_screenshot.png "Screenshot of converter GUI")
 
-### Converting a file with the command line
+### Converting a file from OpenDRIVE with the command line
 
 Execute ```opendrive2lanelet-convert input_file.xodr -o output_file.xml```
 
 If you want to visualize the Commonroad file, use the ```opendrive2lanelet-visualize``` command.
 
-### Using the library in your own scripts
+### Converting from CommonRoad lanelets to OSM lanelets and vice versa
 
-```python
-from lxml import etree
-from opendrive2lanelet.opendriveparser.parser import parse_opendrive
-from opendrive2lanelet.network import Network
-from from commonroad.common.file_writer import CommonRoadFileWriter
-
-# Import, parse and convert OpenDRIVE file
-with open("{}/opendrive-1.xodr".format(os.path.dirname(os.path.realpath(__file__))), "r") as fi:
-	open_drive = parse_opendrive(etree.parse(fi).getroot())
-
-road_network = Network()
-road_network.load_opendrive(open_drive)
-
-scenario = road_network.export_commonroad_scenario()
-# Write CommonRoad scenario to file
-from commonroad.common.file_writer import CommonRoadFileWriter
-commonroad_writer = CommonRoadFileWriter(
-            scenario=scenario,
-            planning_problem_set=None,
-            author="",
-            affiliation="",
-            source="OpenDRIVE 2 Lanelet Converter",
-            tags="",
-        )
-with open("{}/opendrive-1.xml".format(os.path.dirname(os.path.realpath(__file__))), "w") as fh:
-	commonroad_writer.write_scenario_to_file_io(file_io=fh)
-```
-
-### Just parsing the OpenDrive .xodr file
-```python
-from lxml import etree
-from opendrive2lanelet.opendriveparser.parser import parse_opendrive
-
-with open("input_opendrive.xodr", 'r') as fh:
-	open_drive = parse_opendrive(etree.parse(fh).getroot())
-
-# Now do stuff with the data
-for road in open_drive.roads:
-	print("Road ID: {}".format(road.id))
-```
+Use the command ```osm-convert --help``` to see what is possible.
 
 ## Documentation
 

@@ -1,6 +1,18 @@
 """Module for OSM representation in python."""
 
+__author__ = "Benjamin Orthen"
+__copyright__ = "TUM Cyber-Physical Systems Group"
+__credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles"]
+__version__ = "1.1.0"
+__maintainer__ = "Benjamin Orthen"
+__email__ = "commonroad-i06@in.tum.de"
+__status__ = "Released"
+
+from typing import Optional
+
 from lxml import etree
+
+DEFAULT_PROJ_STRING = "+proj=utm +zone=32 +ellps=WGS84"
 
 
 class Node:
@@ -11,7 +23,7 @@ class Node:
         self.lat = str(lat)
         self.lon = str(lon)
 
-    def serialize_to_xml(self):
+    def serialize_to_xml(self) -> etree:
         node = etree.Element("node")
         node.set("id", self.id_)
         node.set("action", "modify")
@@ -38,7 +50,7 @@ class Way:
         way.set("visible", "true")
         for node in self.nodes:
             xml_node = etree.SubElement(way, "nd")
-            xml_node.set("ref", node.id_)
+            xml_node.set("ref", node)
 
         return way
 
@@ -51,18 +63,18 @@ class WayRelation:
         self.left_way = left_way
         self.right_way = right_way
 
-    def serialize_to_xml(self):
+    def serialize_to_xml(self) -> etree.Element:
         rel = etree.Element("relation")
         rel.set("id", self.id_)
         rel.set("action", "modify")
         rel.set("visible", "true")
         right_way = etree.SubElement(rel, "member")
         right_way.set("type", "way")
-        right_way.set("ref", self.right_way.id_)
+        right_way.set("ref", self.right_way)
         right_way.set("role", "right")
         left_way = etree.SubElement(rel, "member")
         left_way.set("type", "way")
-        left_way.set("ref", self.left_way.id_)
+        left_way.set("ref", self.left_way)
         left_way.set("role", "left")
         tag = etree.SubElement(rel, "tag")
         tag.set("k", "type")
@@ -80,6 +92,11 @@ class OSM:
         self.way_relations = []
 
     def add_node(self, node: Node):
+        """Add a new node to the OSM.
+
+        Args:
+          node: Node to be added.
+        """
         self.nodes.append(node)
 
     def add_way(self, way: Way):
@@ -88,20 +105,33 @@ class OSM:
     def add_way_relation(self, way_relation: WayRelation):
         self.way_relations.append(way_relation)
 
-    def find_way_by_id(self, way_id: str):
+    def find_way_by_id(self, way_id: str) -> Optional[Way]:
         for way in self._ways:
             if way.id_ == way_id:
                 return way
         return None
 
-    def find_node_by_id(self, node_id: str) -> Node:
+    def find_node_by_id(self, node_id: str) -> Optional[Node]:
         for nd in self.nodes:
             if nd.id_ == node_id:
                 return nd
 
         return None
 
-    def serialize_to_xml(self):
+    def find_way_rel_by_id(self, way_rel_id: str) -> Optional[WayRelation]:
+        """Find and return the WayRelation of the OSM if it matches the id.
+
+        Args:
+          way_rel_id: Id to be matched.
+        """
+        for wr in self.way_relations:
+            if wr.id_ == way_rel_id:
+                return wr
+
+        return None
+
+    def serialize_to_xml(self) -> etree.Element:
+        """Serialize the OSM to an XML document."""
         osm = etree.Element("osm")
         osm.set("version", "0.6")
         osm.set("upload", "true")

@@ -3,8 +3,7 @@
 """Module to enhance Lanelet class so it can be used
 for conversion from the opendrive format."""
 
-
-from typing import Tuple
+from typing import Tuple, Optional
 
 import numpy as np
 from commonroad.scenario.lanelet import Lanelet
@@ -12,12 +11,10 @@ from commonroad.scenario.lanelet import Lanelet
 __author__ = "Benjamin Orthen"
 __copyright__ = "TUM Cyber-Physical Systems Group"
 __credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles"]
-__version__ = "1.0.3"
+__version__ = "1.1.0"
 __maintainer__ = "Benjamin Orthen"
 __email__ = "commonroad-i06@in.tum.de"
 __status__ = "Released"
-
-optimal_join_split_factor = 20
 
 
 class ConversionLanelet(Lanelet):
@@ -32,6 +29,8 @@ class ConversionLanelet(Lanelet):
     Returns:
 
     """
+
+    # optimal_join_split_factor = 20
 
     def __init__(
         self,
@@ -67,16 +66,6 @@ class ConversionLanelet(Lanelet):
         )
         self.parametric_lane_group = parametric_lane_group
         self.lanelet_id = lanelet_id
-
-    def __eq__(self, lanelet: "ConversionLanelet") -> bool:
-        """Lanelets are equal if their id_ is equal.
-
-        Args:
-           lanelet: Lanelet to be compared to equality.
-        Returns:
-           True if id_ is equal.
-        """
-        return self.lanelet_id == lanelet.lanelet_id
 
     @property
     def lanelet_id(self) -> int:
@@ -180,38 +169,19 @@ class ConversionLanelet(Lanelet):
 
     def concatenate(
         self, lanelet_conc: "ConversionLanelet", extend_plane_group: bool = True
-    ) -> "ConversionLanelet":
+    ):
         """Concatenate this lanelet with lanelet_conc and assign the
         new lanelet_id to the resulting lanelet.
 
         Args:
           lanelet_conc: Lanelet which will be included.
           extend_plane_group: Whether to extend the parametric_lane_group of this lanelet
-        with the parametric lanes of the lanelet_conc.parametric_lane_group.
+            with the parametric lanes of the lanelet_conc.parametric_lane_group.
           lanelet_conc: "ConversionLanelet":
           # lanelet_id: str:  (Default value = -1)
           extend_plane_group: bool:  (Default value = True)
-
-        Returns:
-
         """
 
-        # float_tolerance = 1e-6
-        # if (
-        #     np.linalg.norm(self.center_vertices[-1] - lanelet_conc.center_vertices[0])
-        #     > float_tolerance
-        #     or np.linalg.norm(self.left_vertices[-1] - lanelet_conc.left_vertices[0])
-        #     > float_tolerance
-        #     or np.linalg.norm(self.right_vertices[-1] - lanelet_conc.right_vertices[0])
-        #     > float_tolerance
-        # ):
-        #     pass
-        # raise Exception("no way {} {} {}".format(
-        #     np.linalg.norm(self.center_vertices[-1] - lanelet_conc.center_vertices[0]),
-        #     np.linalg.norm(self.left_vertices[-1] - lanelet_conc.left_vertices[0]),
-        #     np.linalg.norm(self.right_vertices[-1] - lanelet_conc.right_vertices[0])
-        # ))
-        # return None
         # check connectedness
         if np.isclose(self.left_vertices[-1], lanelet_conc.left_vertices[0]).all():
             idx = 1
@@ -282,7 +252,7 @@ class ConversionLanelet(Lanelet):
 
     def first_zero_width_change_position(
         self, reverse: bool = False, reference_width: float = 0.0
-    ) -> float:
+    ) -> Tuple[Optional[float], Optional[float]]:
         """Get the earliest point of the lanelet where the width change is zero.
 
         Args:
@@ -297,6 +267,12 @@ class ConversionLanelet(Lanelet):
         )
 
     def maximum_width(self) -> float:
+        """Get maximum width of a the lanelet.
+
+        Get width by calculating maximum width of parametric lane group.
+        Returns:
+          Maximum width of lanelet.
+        """
         return self.parametric_lane_group.maximum_width()
 
     def optimal_join_split_values(
@@ -336,7 +312,7 @@ class ConversionLanelet(Lanelet):
         self,
         mirror_border: str,
         mirror_interval: Tuple[float, float],
-        distance: Tuple[float, float],
+        distance: np.ndarray,
         adjacent_lanelet: "ConversionLanelet",
     ):
         """Move vertices of one border by mirroring other border with

@@ -1,14 +1,19 @@
 # -*- coding: utf-8 -*-
 
-from typing import Tuple
+"""Module describe parametric lane groups, which are groups combining consecutive
+associated parametric lanes."""
+
+from typing import Tuple, Optional
 import math
+
 import numpy as np
+
 from opendrive2lanelet.lanelet import ConversionLanelet
 
 __author__ = "Benjamin Orthen, Stefan Urban"
 __copyright__ = "TUM Cyber-Physical Systems Group"
 __credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles"]
-__version__ = "1.0.3"
+__version__ = "1.1.0"
 __maintainer__ = "Benjamin Orthen"
 __email__ = "commonroad-i06@in.tum.de"
 __status__ = "Released"
@@ -298,8 +303,11 @@ class ParametricLaneGroup:
 
                     right_vertices.append(outer_pos)
 
-        left_vertices = np.array(left_vertices)
-        right_vertices = np.array(right_vertices)
+        left_vertices, right_vertices = (
+            np.array(left_vertices),
+            np.array(right_vertices),
+        )
+        # right_vertices = np.array(right_vertices)
 
         center_vertices = np.array(
             [(l + r) / 2 for (l, r) in zip(left_vertices, right_vertices)]
@@ -372,7 +380,7 @@ class ParametricLaneGroup:
 
     def first_zero_width_change_position(
         self, reverse: bool = False, reference_width: float = 0.0
-    ) -> float:
+    ) -> Tuple[Optional[float], Optional[float]]:
         """Get the earliest point of the ParametricLaneGroup where the width change is zero.
 
         Args:
@@ -404,6 +412,6 @@ class ParametricLaneGroup:
             if val > 0.9 * reference_width or val > 0.9 * self.maximum_width():
                 if (pos == 0.0 and not reverse) or (pos == self.length and reverse):
                     continue
-                return pos, val
+                return (pos, val)
 
-        return None, None
+        return (None, None)
