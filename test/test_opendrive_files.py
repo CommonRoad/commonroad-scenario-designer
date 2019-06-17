@@ -9,8 +9,8 @@ from lxml import etree
 
 from commonroad.common.file_writer import CommonRoadFileWriter
 
-from opendrive2lanelet.opendriveparser.parser import parse_opendrive
-from opendrive2lanelet.io.opendrive_convert import convert_opendrive
+from crmapconverter.opendriveparser.parser import parse_opendrive
+from crmapconverter.io.opendrive_convert import convert_opendrive
 from test.utils import elements_equal
 
 __author__ = "Benjamin Orthen"

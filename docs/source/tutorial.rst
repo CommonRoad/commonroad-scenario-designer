@@ -50,8 +50,8 @@ Converting an OpenDRIVE file to CommonRoad
 .. code:: python
 
 	from lxml import etree
-	from opendrive2lanelet.opendriveparser.parser import parse_opendrive
-	from opendrive2lanelet.network import Network
+	from crmapconverter.opendriveparser.parser import parse_opendrive
+	from crmapconverter.opendriveconversion.network import Network
 	from from commonroad.common.file_writer import CommonRoadFileWriter
 
 	# Import, parse and convert OpenDRIVE file
@@ -80,7 +80,7 @@ Just parsing the OpenDrive .xodr file
 .. code:: python
 
 	from lxml import etree
-	from opendrive2lanelet.opendriveparser.parser import parse_opendrive
+	from crmapconverter.opendriveparser.parser import parse_opendrive
 
 	with open("input_opendrive.xodr", 'r') as fh:
 		open_drive = parse_opendrive(etree.parse(fh).getroot())

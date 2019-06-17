@@ -17,8 +17,10 @@ from lxml import etree
 
 from commonroad.common.file_reader import CommonRoadFileReader
 
-from opendrive2lanelet.osm.lanelet2osm import L2OSMConverter
+from crmapconverter.osm.lanelet2osm import L2OSMConverter
 from test.utils import elements_equal
+
+# TODO: write osm_convert method analog to opendrive_convert
 
 
 class TestCR2OSMConversionBaseClass:
