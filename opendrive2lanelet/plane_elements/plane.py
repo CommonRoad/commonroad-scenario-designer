@@ -3,13 +3,10 @@
 """Module for parametric lanes, which is an intermediate step between OpenDRIVE lanes
 and lanelets."""
 
-import math
 from typing import Tuple
 
 import numpy as np
 from numpy.polynomial import polynomial as P
-
-from opendrive2lanelet.lanelet import ConversionLanelet
 
 __author__ = "Benjamin Orthen"
 __copyright__ = "TUM Cyber-Physical Systems Group"
