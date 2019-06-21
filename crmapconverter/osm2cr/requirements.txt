@@ -1,9 +1,4 @@
-pyqt5
 Pillow
 mercantile
 utm
-matplotlib
 cartopy
-scipy
-numpy
-commonroad-io

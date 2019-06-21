@@ -11,12 +11,14 @@ import numpy as np
 from matplotlib.axes import Axes
 from matplotlib.lines import Line2D
 
-import config
-from converter_modules.graph_operations import road_graph as rg
-from converter_modules.graph_operations.road_graph import Lane
-from converter_modules.gui_modules import plots_interactive as iplot
-from converter_modules.utility import geometry
-from converter_modules.utility.idgenerator import get_id
+from crmapconverter.osm2cr import config
+from crmapconverter.osm2cr.converter_modules.graph_operations import road_graph as rg
+from crmapconverter.osm2cr.converter_modules.graph_operations.road_graph import Lane
+from crmapconverter.osm2cr.converter_modules.gui_modules import (
+    plots_interactive as iplot,
+)
+from crmapconverter.osm2cr.converter_modules.utility import geometry
+from crmapconverter.osm2cr.converter_modules.utility.idgenerator import get_id
 
 
 class Action(ABC):
@@ -45,7 +47,14 @@ class LinkDeletion(Action):
     deletes a link between two lanes
     """
 
-    def __init__(self, from_lane: Lane, to_lane: Lane, ax: Axes, origin: np.ndarray, link_object: iplot.Link):
+    def __init__(
+        self,
+        from_lane: Lane,
+        to_lane: Lane,
+        ax: Axes,
+        origin: np.ndarray,
+        link_object: iplot.Link,
+    ):
         """
 
         :param from_lane: the predecessor lane
@@ -102,7 +111,9 @@ class LinkCreation(Action):
 
     def do(self):
         connect_lanes(self.from_lane, self.to_lane)
-        arrow = create_lane_link_arrow(self.from_lane, self.to_lane, self.ax, self.origin)
+        arrow = create_lane_link_arrow(
+            self.from_lane, self.to_lane, self.ax, self.origin
+        )
         self.link_object = arrow.ref
         super().do()
         print("LinkCreation.do()")
@@ -113,8 +124,14 @@ class EdgeWaypointDeletion(Action):
     deletes a waypoint of an edge
     """
 
-    def __init__(self, edge: iplot.Edge, index: int, ax: Axes, origin: np.ndarray,
-                 edge_picker: Callable[[iplot.Edge], None]):
+    def __init__(
+        self,
+        edge: iplot.Edge,
+        index: int,
+        ax: Axes,
+        origin: np.ndarray,
+        edge_picker: Callable[[iplot.Edge], None],
+    ):
         """
 
         :param edge: the edge on which the waypoint is
@@ -137,14 +154,18 @@ class EdgeWaypointDeletion(Action):
     def undo(self):
         super().undo()
         self.edge_picker(self.edge_plot)
-        self.edge.waypoints = self.edge.waypoints[:self.index] \
-                              + [self.deleted_waypoint] \
-                              + self.edge.waypoints[self.index:]
+        self.edge.waypoints = (
+            self.edge.waypoints[: self.index]
+            + [self.deleted_waypoint]
+            + self.edge.waypoints[self.index :]
+        )
         self.edge_plot.redraw()
         self.ax.figure.canvas.draw()
 
     def do(self):
-        self.edge.waypoints = self.edge.waypoints[:self.index] + self.edge.waypoints[self.index + 1:]
+        self.edge.waypoints = (
+            self.edge.waypoints[: self.index] + self.edge.waypoints[self.index + 1 :]
+        )
         self.edge_plot.redraw()
         self.ax.figure.canvas.draw()
         super().do()
@@ -155,8 +176,14 @@ class EdgeDeletion(Action):
     deletes an edge
     """
 
-    def __init__(self, edge: iplot.Edge, ax: Axes, graph: rg.Graph, edge_picker: Callable[[iplot.Edge], None],
-                 edge_sets_for_nodes: Dict[rg.GraphNode, Set[iplot.Edge]]):
+    def __init__(
+        self,
+        edge: iplot.Edge,
+        ax: Axes,
+        graph: rg.Graph,
+        edge_picker: Callable[[iplot.Edge], None],
+        edge_sets_for_nodes: Dict[rg.GraphNode, Set[iplot.Edge]],
+    ):
         """
 
         :param edge: the edge to delete
@@ -170,7 +197,9 @@ class EdgeDeletion(Action):
         self.ax = ax
         self.graph = graph
         self.edge_picker = edge_picker
-        self.edge_sets_for_nodes: Dict[rg.GraphNode, Set[iplot.Edge]] = edge_sets_for_nodes
+        self.edge_sets_for_nodes: Dict[
+            rg.GraphNode, Set[iplot.Edge]
+        ] = edge_sets_for_nodes
 
     def undo(self):
         super().undo()
@@ -196,8 +225,16 @@ class EdgeWaypointMove(Action):
     moves a waypoint of an edge to another position
     """
 
-    def __init__(self, edge: iplot.Edge, ax: Axes, index: int, origin: np.ndarray, position: np.ndarray,
-                 edge_picker: Callable[[iplot.Edge], None], waypoint_picker: Callable[[Tuple[iplot.Edge, int]], None]):
+    def __init__(
+        self,
+        edge: iplot.Edge,
+        ax: Axes,
+        index: int,
+        origin: np.ndarray,
+        position: np.ndarray,
+        edge_picker: Callable[[iplot.Edge], None],
+        waypoint_picker: Callable[[Tuple[iplot.Edge, int]], None],
+    ):
         """
 
         :param edge: the edge, the waypoint belongs to
@@ -242,8 +279,16 @@ class NodeDeletion(Action):
     deletes a Node in the graph
     """
 
-    def __init__(self, node_index: int, graph: rg.Graph, ax: Axes, origin: np.ndarray, node_plot: iplot.Node,
-                 node_setter: Callable[[iplot.Node], None], node_picker: Callable[[Optional[int]], None]):
+    def __init__(
+        self,
+        node_index: int,
+        graph: rg.Graph,
+        ax: Axes,
+        origin: np.ndarray,
+        node_plot: iplot.Node,
+        node_setter: Callable[[iplot.Node], None],
+        node_picker: Callable[[Optional[int]], None],
+    ):
         """
 
         :param node_index: index of the node in the gui list of nodes
@@ -290,9 +335,16 @@ class NodeMove(Action):
     moves a node in the gui
     """
 
-    def __init__(self, node_index: int, ax: Axes, origin: np.ndarray, position: np.ndarray, node_plot: iplot.Node,
-                 node_picker: Callable[[Optional[int]], None],
-                 edge_sets_for_nodes: Dict[rg.GraphNode, Set[iplot.Edge]]):
+    def __init__(
+        self,
+        node_index: int,
+        ax: Axes,
+        origin: np.ndarray,
+        position: np.ndarray,
+        node_plot: iplot.Node,
+        node_picker: Callable[[Optional[int]], None],
+        edge_sets_for_nodes: Dict[rg.GraphNode, Set[iplot.Edge]],
+    ):
         """
 
         :param node_index: index of the node in the gui list of nodes
@@ -310,7 +362,9 @@ class NodeMove(Action):
         self.new_position: np.ndarray = position
         self.node_plot: iplot.Node = node_plot
         self.node_picker: Callable[[Optional[int]], None] = node_picker
-        self.edge_sets_for_nodes: Dict[rg.GraphNode, Set[iplot.Edge]] = edge_sets_for_nodes
+        self.edge_sets_for_nodes: Dict[
+            rg.GraphNode, Set[iplot.Edge]
+        ] = edge_sets_for_nodes
 
         self.node: rg.GraphNode = node_plot.node_list[node_index]
         self.original_postition: np.ndarray = self.node.get_cooridnates()
@@ -342,9 +396,15 @@ class EdgeWaypointAddition(Action):
     adds a way point to an edge
     """
 
-    def __init__(self, edge: iplot.Edge, index: int, edge_picker: Callable[[iplot.Edge], None],
-                 waypoint_picker: Callable[[Optional[Tuple[iplot.Edge, int]]], None],
-                 ax: Axes, origin: np.ndarray):
+    def __init__(
+        self,
+        edge: iplot.Edge,
+        index: int,
+        edge_picker: Callable[[iplot.Edge], None],
+        waypoint_picker: Callable[[Optional[Tuple[iplot.Edge, int]]], None],
+        ax: Axes,
+        origin: np.ndarray,
+    ):
         """
 
         :param edge: the edge of the way point
@@ -359,14 +419,16 @@ class EdgeWaypointAddition(Action):
         # the new waypoint cannot be the starting or end point, and should be after the selected point
         self.index: int = min(max(1, index + 1), len(edge.edge.waypoints))
         self.edge_picker: Callable[[iplot.Edge], None] = edge_picker
-        self.waypoint_picker: Callable[[Optional[Tuple[iplot.Edge, int]]], None] = waypoint_picker
+        self.waypoint_picker: Callable[
+            [Optional[Tuple[iplot.Edge, int]]], None
+        ] = waypoint_picker
         self.ax: Axes = ax
         self.origin: np.ndarray = origin
 
     def undo(self):
         super().undo()
         waypoints = self.edge.edge.waypoints
-        self.edge.edge.waypoints = waypoints[:self.index] + waypoints[self.index + 1:]
+        self.edge.edge.waypoints = waypoints[: self.index] + waypoints[self.index + 1 :]
         self.edge.redraw()
         if self.edge.waypoint_plot is not None:
             self.edge.waypoint_plot.unhighlight()
@@ -376,8 +438,10 @@ class EdgeWaypointAddition(Action):
         self.ax.figure.canvas.draw()
 
     def do(self):
-        new_pos = (self.edge.edge.waypoints[self.index - 1].get_array() + self.edge.edge.waypoints[
-            self.index].get_array()) / 2
+        new_pos = (
+            self.edge.edge.waypoints[self.index - 1].get_array()
+            + self.edge.edge.waypoints[self.index].get_array()
+        ) / 2
         x, y = new_pos[0], new_pos[1]
         new_point = geometry.Point(get_id(), x, y)
         self.edge.edge.waypoints.insert(self.index, new_point)
@@ -393,11 +457,20 @@ class EdgeSplit(Action):
     splits an edge into two and creates a new node between them
     """
 
-    def __init__(self, split_index: int, edge_plot: iplot.Edge,
-                 origin: np.ndarray, ax: Axes, node_plot: iplot.Node, graph: rg.Graph, gui_edge_plot: List[Line2D],
-                 edge_sets_for_nodes, node_setter: Callable[[iplot.Node], None],
-                 node_picker: Callable[[Optional[int]], None],
-                 edge_picker: Callable[[Optional[iplot.Edge]], None]):
+    def __init__(
+        self,
+        split_index: int,
+        edge_plot: iplot.Edge,
+        origin: np.ndarray,
+        ax: Axes,
+        node_plot: iplot.Node,
+        graph: rg.Graph,
+        gui_edge_plot: List[Line2D],
+        edge_sets_for_nodes,
+        node_setter: Callable[[iplot.Node], None],
+        node_picker: Callable[[Optional[int]], None],
+        edge_picker: Callable[[Optional[iplot.Edge]], None],
+    ):
         """
 
         :param split_index: the index of the way point ant which the edge is split
@@ -439,25 +512,54 @@ class EdgeSplit(Action):
 
     def do(self):
         middle_waypoint = self.edge_plot.edge.waypoints[self.split_index]
-        middle_node = rg.GraphNode(get_id(), middle_waypoint.x, middle_waypoint.y, set())
-        waypoints1 = self.edge_plot.edge.waypoints[:self.split_index + 1]
+        middle_node = rg.GraphNode(
+            get_id(), middle_waypoint.x, middle_waypoint.y, set()
+        )
+        waypoints1 = self.edge_plot.edge.waypoints[: self.split_index + 1]
         waypoints1 = [point.get_array() for point in waypoints1]
         self.own_actions.add(
-            EdgeDeletion(self.edge_plot, self.ax, self.graph, self.edge_picker, self.edge_sets_for_nodes))
+            EdgeDeletion(
+                self.edge_plot,
+                self.ax,
+                self.graph,
+                self.edge_picker,
+                self.edge_sets_for_nodes,
+            )
+        )
         self.own_actions.add(
-            EdgeCreation(waypoints1, self.node1, middle_node, self.graph, self.intermediate_node_plot,
-                         self.gui_edge_plot,
-                         self.edge_sets_for_nodes, self.ax, self.origin, self.intermediate_node_setter,
-                         self.node_picker,
-                         self.edge_picker))
-        waypoints2 = self.edge_plot.edge.waypoints[self.split_index:]
+            EdgeCreation(
+                waypoints1,
+                self.node1,
+                middle_node,
+                self.graph,
+                self.intermediate_node_plot,
+                self.gui_edge_plot,
+                self.edge_sets_for_nodes,
+                self.ax,
+                self.origin,
+                self.intermediate_node_setter,
+                self.node_picker,
+                self.edge_picker,
+            )
+        )
+        waypoints2 = self.edge_plot.edge.waypoints[self.split_index :]
         waypoints2 = [point.get_array() for point in waypoints2]
         self.own_actions.add(
-            EdgeCreation(waypoints2, middle_node, self.node2, self.graph, self.intermediate_node_plot,
-                         self.gui_edge_plot,
-                         self.edge_sets_for_nodes, self.ax, self.origin, self.intermediate_node_setter,
-                         self.node_picker,
-                         self.edge_picker))
+            EdgeCreation(
+                waypoints2,
+                middle_node,
+                self.node2,
+                self.graph,
+                self.intermediate_node_plot,
+                self.gui_edge_plot,
+                self.edge_sets_for_nodes,
+                self.ax,
+                self.origin,
+                self.intermediate_node_setter,
+                self.node_picker,
+                self.edge_picker,
+            )
+        )
         middle_node_index = self.intermediate_node_plot.node_list.index(middle_node)
         self.node_setter(self.intermediate_node_plot)
         self.node_picker(middle_node_index)
@@ -475,11 +577,21 @@ class EdgeCreation(Action):
     creates a new edge
     """
 
-    def __init__(self, waypoints: List[np.ndarray], node1: rg.GraphNode, node2: rg.GraphNode, graph: rg.Graph,
-                 node_plot: iplot.Node, edge_plot: List[Line2D],
-                 edge_sets_for_nodes: Dict[rg.GraphNode, Set[iplot.Edge]], ax: Axes, origin: np.ndarray,
-                 node_setter: Callable[[iplot.Node], None], node_picker: Callable[[Optional[int]], None],
-                 edge_picker: Callable[[Optional[iplot.Edge]], None]):
+    def __init__(
+        self,
+        waypoints: List[np.ndarray],
+        node1: rg.GraphNode,
+        node2: rg.GraphNode,
+        graph: rg.Graph,
+        node_plot: iplot.Node,
+        edge_plot: List[Line2D],
+        edge_sets_for_nodes: Dict[rg.GraphNode, Set[iplot.Edge]],
+        ax: Axes,
+        origin: np.ndarray,
+        node_setter: Callable[[iplot.Node], None],
+        node_picker: Callable[[Optional[int]], None],
+        edge_picker: Callable[[Optional[iplot.Edge]], None],
+    ):
         """
 
         :param waypoints: the waypoints of the new edge
@@ -531,17 +643,30 @@ class EdgeCreation(Action):
         if self.node2 not in self.graph.nodes:
             self.graph.nodes.add(self.node2)
 
-        waypoints = [geometry.Point(get_id(), point[0], point[1]) for point in self.waypoints]
+        waypoints = [
+            geometry.Point(get_id(), point[0], point[1]) for point in self.waypoints
+        ]
         lane_info = 2, 1, 1, False, None, None, None
         assumptions = False, False, False
-        self.edge = rg.GraphEdge(get_id(), self.node1, self.node2, waypoints, lane_info, assumptions, 50, 'primary')
+        self.edge = rg.GraphEdge(
+            get_id(),
+            self.node1,
+            self.node2,
+            waypoints,
+            lane_info,
+            assumptions,
+            50,
+            "primary",
+        )
         self.edge.generate_lanes()
         self.graph.edges.add(self.edge)
         self.node1.edges.add(self.edge)
         self.node2.edges.add(self.edge)
 
         edge_plot = iplot.draw_edge(self.edge, self.ax, True, self.origin)
-        interactive_edge = iplot.Edge(edge_plot, self.edge, self.graph, True, self.ax, self.origin)
+        interactive_edge = iplot.Edge(
+            edge_plot, self.edge, self.graph, True, self.ax, self.origin
+        )
         self.interactive_edge = interactive_edge
         edge_plot.ref = interactive_edge
         if self.node1 not in self.edge_sets_for_nodes:
@@ -567,8 +692,13 @@ class LaneWidthEditing(Action):
     sets the width of lanes of an edge new
     """
 
-    def __init__(self, graph: rg.Graph, unhighlight_fun: Callable, ax: Axes,
-                 original_lanewidth_config: Dict[str, float]):
+    def __init__(
+        self,
+        graph: rg.Graph,
+        unhighlight_fun: Callable,
+        ax: Axes,
+        original_lanewidth_config: Dict[str, float],
+    ):
         """
 
         :param graph: the graph on which the gui operates
@@ -617,7 +747,7 @@ def connect_lanes(from_lane: Lane, to_lane: Lane) -> None:
     """
     print("to in from: {}".format(to_lane in from_lane.successors))
     print("from in to: {}".format(from_lane in to_lane.predecessors))
-    assert ((to_lane in from_lane.successors) == (from_lane in to_lane.predecessors))
+    assert (to_lane in from_lane.successors) == (from_lane in to_lane.predecessors)
     if to_lane in from_lane.successors:
         print("lanes are already connected")
         return
@@ -625,7 +755,9 @@ def connect_lanes(from_lane: Lane, to_lane: Lane) -> None:
     to_lane.predecessors.add(from_lane)
 
 
-def create_lane_link_arrow(from_lane: Lane, to_lane: Lane, ax: Axes, origin: np.ndarray) -> None:
+def create_lane_link_arrow(
+    from_lane: Lane, to_lane: Lane, ax: Axes, origin: np.ndarray
+) -> None:
     """
     creates an arrow between two lanes and draws it on ax
 
@@ -638,7 +770,9 @@ def create_lane_link_arrow(from_lane: Lane, to_lane: Lane, ax: Axes, origin: np.
     width, head_width, head_length = iplot.get_arrow_size(True)
     last_point = from_lane.waypoints[-1]
     last_point = geometry.cartesian_to_lon_lat(last_point, origin)
-    arrow = iplot.draw_single_arrow(from_lane, last_point, to_lane, True, origin, ax, width, head_width, head_length)
+    arrow = iplot.draw_single_arrow(
+        from_lane, last_point, to_lane, True, origin, ax, width, head_width, head_length
+    )
     ax.figure.canvas.draw()
     return arrow
 
@@ -659,6 +793,7 @@ class ActionHistory:
     """
     a class to easily keep a reversible history of all performed actions
     """
+
     def __init__(self):
         self.actions = []
         self.reverted_actions = []
@@ -666,7 +801,7 @@ class ActionHistory:
 
     def __getstate__(self):
         state = self.__dict__.copy()
-        del state['lock']
+        del state["lock"]
         return state
 
     def __setstate__(self, state):

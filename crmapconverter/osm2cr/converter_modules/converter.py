@@ -7,12 +7,18 @@ import sys
 
 import matplotlib.pyplot as plt
 
-import config
-from converter_modules.cr_operations import export
-from converter_modules.graph_operations import lane_linker, segment_clusters, offsetter, road_graph, intersection_merger
-from converter_modules.gui_modules import gui
-from converter_modules.osm_operations import osm_parser
-from converter_modules.utility import plots
+from crmapconverter.osm2cr import config
+from crmapconverter.osm2cr.converter_modules.cr_operations import export
+from crmapconverter.osm2cr.converter_modules.graph_operations import (
+    lane_linker,
+    segment_clusters,
+    offsetter,
+    road_graph,
+    intersection_merger,
+)
+from crmapconverter.osm2cr.converter_modules.gui_modules import gui
+from crmapconverter.osm2cr.converter_modules.osm_operations import osm_parser
+from crmapconverter.osm2cr.converter_modules.utility import plots
 
 
 class Scenario:
@@ -45,9 +51,13 @@ class Scenario:
     @staticmethod
     def step_collection_1(file) -> road_graph.Graph:
         print("reading File")
-        roads, points, restrictions, center_point, bounds = osm_parser.parse_file(file, config.ACCEPTED_HIGHWAYS)
+        roads, points, restrictions, center_point, bounds = osm_parser.parse_file(
+            file, config.ACCEPTED_HIGHWAYS
+        )
         print("creating graph")
-        g = osm_parser.roads_to_graph(roads, points, restrictions, center_point, bounds, center_point)
+        g = osm_parser.roads_to_graph(
+            roads, points, restrictions, center_point, bounds, center_point
+        )
         if config.MAKE_CONTIGUOUS:
             print("making graph contiguously")
             g.make_contiguous()
@@ -79,8 +89,12 @@ class Scenario:
         g.create_lane_link_segments()
         print("clustering segments")
         segment_clusters.cluster_segments(g)
-        print("changing to desired interpolation distance and creating borders of lanes")
-        g.create_lane_bounds(config.INTERPOLATION_DISTANCE_INTERNAL / config.INTERPOLATION_DISTANCE)
+        print(
+            "changing to desired interpolation distance and creating borders of lanes"
+        )
+        g.create_lane_bounds(
+            config.INTERPOLATION_DISTANCE_INTERNAL / config.INTERPOLATION_DISTANCE
+        )
         print("adjust common bound points")
         g.correct_start_end_points()
         print("done")
@@ -116,7 +130,7 @@ class Scenario:
         :return: None
         """
         sys.setrecursionlimit(10000)
-        with open(filename, 'wb') as handle:
+        with open(filename, "wb") as handle:
             pickle.dump(self, handle, protocol=pickle.HIGHEST_PROTOCOL)
         sys.setrecursionlimit(1000)
 
@@ -131,6 +145,6 @@ def load_from_file(filename: str) -> Scenario:
     :return: the loaded road network
     :rtype: Scenario
     """
-    with open(filename, 'rb') as handle:
+    with open(filename, "rb") as handle:
         scenario = pickle.load(handle)
         return scenario

@@ -20,12 +20,16 @@ from matplotlib.collections import Collection
 from matplotlib.lines import Line2D
 from matplotlib.backends.backend_agg import FigureCanvasAgg
 
-import config
-import converter_modules.graph_operations.road_graph as rg
-from converter_modules.gui_modules import aerial_data, actions, plots_interactive as iplot
-from converter_modules.gui_modules.settings import EditLaneWidth
-from converter_modules.utility import geometry
-from converter_modules.utility.idgenerator import get_id
+from crmapconverter.osm2cr import config
+import crmapconverter.osm2cr.converter_modules.graph_operations.road_graph as rg
+from crmapconverter.osm2cr.converter_modules.gui_modules import (
+    aerial_data,
+    actions,
+    plots_interactive as iplot,
+)
+from crmapconverter.osm2cr.converter_modules.gui_modules.settings import EditLaneWidth
+from crmapconverter.osm2cr.converter_modules.utility import geometry
+from crmapconverter.osm2cr.converter_modules.utility.idgenerator import get_id
 
 
 def check_dir(directory: str) -> None:
@@ -54,7 +58,7 @@ class GUI(ABC):
         self.fig, self.ax = plt.subplots()  # constrained_layout=True)
         self.projection = crs.Mercator()
         self.ax = plt.axes(projection=self.projection)
-        plt.axis('on')
+        plt.axis("on")
         self.origin: np.ndarray = np.array(graph.center_point)
         self.graph: rg.Graph = graph
 
@@ -65,7 +69,9 @@ class GUI(ABC):
         # plot aerial image
         lat1, lon1, lat2, lon2 = graph.bounds
         if config.AERIAL_IMAGES:
-            image, extents = aerial_data.get_aerial_image(lat1, lon1, lat2, lon2, zoom=config.ZOOM_LEVEL)
+            image, extents = aerial_data.get_aerial_image(
+                lat1, lon1, lat2, lon2, zoom=config.ZOOM_LEVEL
+            )
             iplot.plot_aerial_image(image, extents, self.ax, self.projection)
 
         # setup bounds of plot
@@ -90,7 +96,9 @@ class GUI(ABC):
         :param image_extent: coordinates of the image
         :return: None
         """
-        self.ax.imshow(image, origin='upper', extent=image_extent, transform=self.projection)
+        self.ax.imshow(
+            image, origin="upper", extent=image_extent, transform=self.projection
+        )
         return
 
     def save_state(self, filename: str) -> None:
@@ -105,7 +113,7 @@ class GUI(ABC):
         # the reloader must not be pickled
         tmp = self.reloader
         self.reloader = None
-        with open(filename, 'wb') as fd:
+        with open(filename, "wb") as fd:
             pickle.dump(self, fd, protocol=pickle.HIGHEST_PROTOCOL)
         self.reloader = tmp
 
@@ -119,7 +127,7 @@ class GUI(ABC):
         """
         old_fig = self.fig
         if os.path.exists(filename):
-            fd = open(filename, 'rb')
+            fd = open(filename, "rb")
             try:
                 new_gui = pickle.load(fd)
             except TypeError:
@@ -164,7 +172,9 @@ class LaneLinkGUI(GUI):
         # plot lanes and links with interactive start points
         iplot.draw_lanes(graph, False, self.ax, self.origin)
         iplot.draw_lane_links(graph, self.ax, True, self.origin)
-        start_points, end_points, lanelist = iplot.draw_all_lane_end_points(graph, self.ax, True, self.origin)
+        start_points, end_points, lanelist = iplot.draw_all_lane_end_points(
+            graph, self.ax, True, self.origin
+        )
         self.start_points: Collection = start_points
         self.end_points: Collection = end_points
         self.lanelist: List[rg.Lane] = lanelist
@@ -178,11 +188,11 @@ class LaneLinkGUI(GUI):
         :param canvas: canvas of the plot
         :return: None
         """
-        plt.rcParams['keymap.save'] = ''
-        canvas.mpl_connect('pick_event', self.on_pick)
-        canvas.mpl_connect('key_press_event', self.on_key)
-        canvas.mpl_connect('button_press_event', self.on_press)
-        canvas.mpl_connect('button_release_event', self.on_release)
+        plt.rcParams["keymap.save"] = ""
+        canvas.mpl_connect("pick_event", self.on_pick)
+        canvas.mpl_connect("key_press_event", self.on_key)
+        canvas.mpl_connect("button_press_event", self.on_press)
+        canvas.mpl_connect("button_release_event", self.on_release)
 
     def on_key(self, event: KeyEvent) -> None:
         """
@@ -193,15 +203,15 @@ class LaneLinkGUI(GUI):
         :return: None
         """
         # print_grey(event.key)
-        if event.key == u'delete':
+        if event.key == u"delete":
             self.delete()
-        elif event.key == 'ctrl+z':
+        elif event.key == "ctrl+z":
             self.undo()
-        elif event.key == 'ctrl+Z':
+        elif event.key == "ctrl+Z":
             self.redo()
-        elif event.key == 'ctrl+s':
+        elif event.key == "ctrl+s":
             self.save()
-        elif event.key == 'ctrl+l':
+        elif event.key == "ctrl+l":
             self.load()
 
     def delete(self) -> None:
@@ -213,8 +223,13 @@ class LaneLinkGUI(GUI):
         """
         if self.last_picked is not None:
             print_grey("deleting highlighted object")
-            del_action = actions.LinkDeletion(self.last_picked.from_lane, self.last_picked.to_lane, self.ax,
-                                              self.origin, self.last_picked)
+            del_action = actions.LinkDeletion(
+                self.last_picked.from_lane,
+                self.last_picked.to_lane,
+                self.ax,
+                self.origin,
+                self.last_picked,
+            )
             self.action_history.add(del_action)
             self.last_picked = None
         else:
@@ -245,11 +260,17 @@ class LaneLinkGUI(GUI):
 
         :return: None
         """
-        name = "link_save_{}.save".format(datetime.datetime.now().strftime("%y-%m-%d_%H-%M-%S"))
+        name = "link_save_{}.save".format(
+            datetime.datetime.now().strftime("%y-%m-%d_%H-%M-%S")
+        )
         check_dir("files/link_saves")
         Tk().withdraw()
-        file = asksaveasfilename(initialdir="files/link_saves", initialfile=name, defaultextension=".save",
-                                 filetypes=(("save file", "*.save"), ("All Files", "*.*")))
+        file = asksaveasfilename(
+            initialdir="files/link_saves",
+            initialfile=name,
+            defaultextension=".save",
+            filetypes=(("save file", "*.save"), ("All Files", "*.*")),
+        )
         if file != "" and file is not None:
             self.save_state(file)
 
@@ -261,8 +282,12 @@ class LaneLinkGUI(GUI):
         """
         Tk().withdraw()
         check_dir("files/link_saves")
-        self.load_state(askopenfilename(initialdir="files/link_saves",
-                                        filetypes=(("save files", "*.save"), ("all files", "*.*"))))
+        self.load_state(
+            askopenfilename(
+                initialdir="files/link_saves",
+                filetypes=(("save files", "*.save"), ("all files", "*.*")),
+            )
+        )
 
     def on_press(self, event: MouseEvent) -> None:
         """
@@ -275,7 +300,7 @@ class LaneLinkGUI(GUI):
             return
         contains, ind = self.end_points.contains(event)
         if contains:
-            self.from_lane = self.lanelist[ind['ind'][0]]
+            self.from_lane = self.lanelist[ind["ind"][0]]
             print_grey("pressed on end of a lane")
 
     def on_release(self, event: MouseEvent) -> None:
@@ -291,8 +316,10 @@ class LaneLinkGUI(GUI):
         if contains:
             print_grey("released on start of a lane")
             if self.from_lane is not None:
-                to_lane = self.lanelist[ind['ind'][0]]
-                self.action_history.add(actions.LinkCreation(self.from_lane, to_lane, self.ax, self.origin))
+                to_lane = self.lanelist[ind["ind"][0]]
+                self.action_history.add(
+                    actions.LinkCreation(self.from_lane, to_lane, self.ax, self.origin)
+                )
         self.from_lane = None
 
     def on_pick(self, event: PickEvent) -> None:
@@ -317,10 +344,13 @@ class EdgeEditGUI(GUI):
     GUI that allows the user to edit the course of edges, add new edges, delete edges and change all parameters of edges
     """
 
-    def __init__(self, graph: rg.Graph,
-                 reloader: Optional[Callable[[], None]],
-                 pick_listener: Optional[Callable[[rg.GraphEdge], None]],
-                 movement_updater: Optional[Callable[[bool], None]]):
+    def __init__(
+        self,
+        graph: rg.Graph,
+        reloader: Optional[Callable[[], None]],
+        pick_listener: Optional[Callable[[rg.GraphEdge], None]],
+        movement_updater: Optional[Callable[[bool], None]],
+    ):
         """
 
         :param graph: the graph to edit
@@ -339,7 +369,9 @@ class EdgeEditGUI(GUI):
         self.edges: List[Line2D]
         self.edge_sets_for_nodes: Dict[rg.GraphNode, Set[iplot.Edge]]
         self.node_plot: iplot.Node = iplot.draw_nodes(graph, self.ax, True, self.origin)
-        self.edges, self.edge_sets_for_nodes = iplot.draw_edges(graph, self.ax, True, self.origin, self.node_plot)
+        self.edges, self.edge_sets_for_nodes = iplot.draw_edges(
+            graph, self.ax, True, self.origin, self.node_plot
+        )
 
         # placeholder for waypoints of picked edges
         self.edge_waypoints: Optional[iplot.PointList] = None
@@ -363,11 +395,11 @@ class EdgeEditGUI(GUI):
         self.update_movement: Callable[[bool], None] = movement_updater
 
     def setup_event_listeners(self, canvas):
-        plt.rcParams['keymap.save'] = ''
-        canvas.mpl_connect('pick_event', self.on_pick)
-        canvas.mpl_connect('key_press_event', self.on_key)
-        canvas.mpl_connect('button_press_event', self.on_press)
-        canvas.mpl_connect('button_release_event', self.on_release)
+        plt.rcParams["keymap.save"] = ""
+        canvas.mpl_connect("pick_event", self.on_pick)
+        canvas.mpl_connect("key_press_event", self.on_key)
+        canvas.mpl_connect("button_press_event", self.on_press)
+        canvas.mpl_connect("button_release_event", self.on_release)
 
     def redraw(self) -> None:
         """
@@ -450,7 +482,9 @@ class EdgeEditGUI(GUI):
         :return: None
         """
         if waypoint is not None:
-            assert self.last_picked_edge is not None, "picked a waypoint without a selected edge"
+            assert (
+                self.last_picked_edge is not None
+            ), "picked a waypoint without a selected edge"
             edge, index = waypoint
             edge.redraw()
             edge.waypoint_plot.highlight_single_point(waypoint[1] - 1)
@@ -545,25 +579,25 @@ class EdgeEditGUI(GUI):
         if self.edge_create_mode:
             print_grey("cannot do that while creating new edge")
             return
-        if event.key == u'delete':
+        if event.key == u"delete":
             self.delete()
-        elif event.key == 'ctrl+z':
+        elif event.key == "ctrl+z":
             self.undo()
-        elif event.key == 'ctrl+Z':
+        elif event.key == "ctrl+Z":
             self.redo()
-        elif event.key == u'ctrl+m':
+        elif event.key == u"ctrl+m":
             self.move()
-        elif event.key == u'ctrl+n':
+        elif event.key == u"ctrl+n":
             self.new_waypoint()
-        elif event.key == u'ctrl+s':
+        elif event.key == u"ctrl+s":
             self.save()
-        elif event.key == u'ctrl+l':
+        elif event.key == u"ctrl+l":
             self.load()
-        elif event.key == u'ctrl+d':
+        elif event.key == u"ctrl+d":
             self.split()
-        elif event.key == u'ctrl+e':
+        elif event.key == u"ctrl+e":
             self.create_edge()
-        elif event.key == u'ctrl+w':
+        elif event.key == u"ctrl+w":
             self.edit_width()
 
     def edge_create_action(self, event: MouseEvent) -> None:
@@ -583,19 +617,36 @@ class EdgeEditGUI(GUI):
             contains, ind = self.node_plot.plot_object.contains(event)
             if contains:
                 # new edge ends at an existing node
-                ind = ind['ind'][0]
+                ind = ind["ind"][0]
                 node2 = self.node_plot.node_list[ind]
             else:
                 # new edge ends at click position
-                node2 = rg.GraphNode(get_id(), cartesian_pos[0], cartesian_pos[1], set())
+                node2 = rg.GraphNode(
+                    get_id(), cartesian_pos[0], cartesian_pos[1], set()
+                )
             for point in self.new_edge_waypoint_plots:
                 point.remove()
-            waypoints = [self.new_edge_start_node.get_cooridnates()] + self.new_edge_waypoints + \
-                        [node2.get_cooridnates()]
+            waypoints = (
+                [self.new_edge_start_node.get_cooridnates()]
+                + self.new_edge_waypoints
+                + [node2.get_cooridnates()]
+            )
             self.action_history.add(
-                actions.EdgeCreation(waypoints, self.new_edge_start_node, node2, self.graph, self.node_plot,
-                                     self.edges, self.edge_sets_for_nodes, self.ax, self.origin, self.set_nodes,
-                                     self.pick_node, self.pick_edge))
+                actions.EdgeCreation(
+                    waypoints,
+                    self.new_edge_start_node,
+                    node2,
+                    self.graph,
+                    self.node_plot,
+                    self.edges,
+                    self.edge_sets_for_nodes,
+                    self.ax,
+                    self.origin,
+                    self.set_nodes,
+                    self.pick_node,
+                    self.pick_edge,
+                )
+            )
             self.edge_create_mode = False
             self.new_edge_waypoint_plots = None
             self.new_edge_waypoints = None
@@ -629,7 +680,7 @@ class EdgeEditGUI(GUI):
         if self.last_picked_node is not None:
             contains, ind = self.node_plot.plot_object.contains(event)
             if contains:
-                ind = ind['ind'][0]
+                ind = ind["ind"][0]
                 self.last_pressed_node = ind
                 print_grey("pressed on a node")
 
@@ -637,7 +688,7 @@ class EdgeEditGUI(GUI):
             # assert self.edge_waypoints is not None, "waypoints of highligted edge are not registered in gui"
             contains, ind = self.edge_waypoints.plot_object.contains(event)
             if contains:
-                ind = ind['ind'][0] + 1
+                ind = ind["ind"][0] + 1
                 self.last_pressed_way_point = (self.last_picked_edge, ind)
                 print_grey("pressed on an edge waypoint")
 
@@ -651,18 +702,41 @@ class EdgeEditGUI(GUI):
         """
         if event.inaxes != self.ax:
             return
-        if self.last_pressed_node is not None and self.last_pressed_node == self.last_picked_node and self.move_objects:
+        if (
+            self.last_pressed_node is not None
+            and self.last_pressed_node == self.last_picked_node
+            and self.move_objects
+        ):
             position = np.array([event.ydata, event.xdata])
             self.action_history.add(
-                actions.NodeMove(self.last_pressed_node, self.ax, self.origin, position, self.node_plot,
-                                 self.pick_node, self.edge_sets_for_nodes))
-        if self.last_pressed_way_point is not None and self.last_pressed_way_point == self.last_picked_way_point \
-                and self.move_objects:
+                actions.NodeMove(
+                    self.last_pressed_node,
+                    self.ax,
+                    self.origin,
+                    position,
+                    self.node_plot,
+                    self.pick_node,
+                    self.edge_sets_for_nodes,
+                )
+            )
+        if (
+            self.last_pressed_way_point is not None
+            and self.last_pressed_way_point == self.last_picked_way_point
+            and self.move_objects
+        ):
             edge, index = self.last_pressed_way_point
             position = np.array([event.ydata, event.xdata])
             self.action_history.add(
-                actions.EdgeWaypointMove(edge, self.ax, index, self.origin, position, self.pick_edge,
-                                         self.pick_waypoint))
+                actions.EdgeWaypointMove(
+                    edge,
+                    self.ax,
+                    index,
+                    self.origin,
+                    position,
+                    self.pick_edge,
+                    self.pick_waypoint,
+                )
+            )
             print_grey("moved point")
         self.last_pressed_way_point = None
         self.last_pressed_node = None
@@ -678,13 +752,22 @@ class EdgeEditGUI(GUI):
                 print_grey("deleting waypoint")
                 edge_plot, point_index = self.last_picked_way_point
                 self.action_history.add(
-                    actions.EdgeWaypointDeletion(edge_plot, point_index, self.ax, self.origin, self.pick_edge))
+                    actions.EdgeWaypointDeletion(
+                        edge_plot, point_index, self.ax, self.origin, self.pick_edge
+                    )
+                )
                 self.last_picked_way_point = None
             else:
                 print_grey("deleting edge")
                 self.action_history.add(
-                    actions.EdgeDeletion(self.last_picked_edge, self.ax, self.graph, self.pick_edge,
-                                         self.edge_sets_for_nodes))
+                    actions.EdgeDeletion(
+                        self.last_picked_edge,
+                        self.ax,
+                        self.graph,
+                        self.pick_edge,
+                        self.edge_sets_for_nodes,
+                    )
+                )
                 self.last_picked_edge = None
         elif self.last_picked_node is not None:
             if len(self.node_plot.node_list[self.last_picked_node].edges) > 0:
@@ -692,8 +775,16 @@ class EdgeEditGUI(GUI):
             else:
                 print_grey("deleting Node")
                 self.action_history.add(
-                    actions.NodeDeletion(self.last_picked_node, self.graph, self.ax, self.origin, self.node_plot,
-                                         self.set_nodes, self.pick_node))
+                    actions.NodeDeletion(
+                        self.last_picked_node,
+                        self.graph,
+                        self.ax,
+                        self.origin,
+                        self.node_plot,
+                        self.set_nodes,
+                        self.pick_node,
+                    )
+                )
                 self.last_picked_node = None
         else:
             print_grey("no object to delete")
@@ -735,9 +826,20 @@ class EdgeEditGUI(GUI):
         """
         if self.last_picked_way_point is not None:
             self.action_history.add(
-                actions.EdgeSplit(self.last_picked_way_point[1], self.last_picked_edge, self.origin, self.ax,
-                                  self.node_plot, self.graph, self.edges, self.edge_sets_for_nodes, self.set_nodes,
-                                  self.pick_node, self.pick_edge))
+                actions.EdgeSplit(
+                    self.last_picked_way_point[1],
+                    self.last_picked_edge,
+                    self.origin,
+                    self.ax,
+                    self.node_plot,
+                    self.graph,
+                    self.edges,
+                    self.edge_sets_for_nodes,
+                    self.set_nodes,
+                    self.pick_node,
+                    self.pick_edge,
+                )
+            )
         else:
             print_grey("select a waypoint to split the edge at")
 
@@ -754,8 +856,15 @@ class EdgeEditGUI(GUI):
             else:
                 pos = 0
             self.action_history.add(
-                actions.EdgeWaypointAddition(self.last_picked_edge, pos, self.pick_edge, self.pick_waypoint,
-                                             self.ax, self.origin))
+                actions.EdgeWaypointAddition(
+                    self.last_picked_edge,
+                    pos,
+                    self.pick_edge,
+                    self.pick_waypoint,
+                    self.ax,
+                    self.origin,
+                )
+            )
         else:
             print_grey("waypoint cannot be created: no edge selected")
 
@@ -765,11 +874,17 @@ class EdgeEditGUI(GUI):
 
         :return None
         """
-        name = "edge_save_{}.save".format(datetime.datetime.now().strftime("%y-%m-%d_%H-%M-%S"))
+        name = "edge_save_{}.save".format(
+            datetime.datetime.now().strftime("%y-%m-%d_%H-%M-%S")
+        )
         check_dir("files/edge_edit_saves")
         Tk().withdraw()
-        file = asksaveasfilename(initialdir="files/edge_edit_saves", initialfile=name, defaultextension=".save",
-                                 filetypes=(("save file", "*.save"), ("All Files", "*.*")))
+        file = asksaveasfilename(
+            initialdir="files/edge_edit_saves",
+            initialfile=name,
+            defaultextension=".save",
+            filetypes=(("save file", "*.save"), ("All Files", "*.*")),
+        )
         if file != "" and file is not None:
             self.save_state(file)
 
@@ -781,8 +896,12 @@ class EdgeEditGUI(GUI):
         """
         Tk().withdraw()
         check_dir("files/edge_edit_saves")
-        self.load_state(askopenfilename(initialdir="files/edge_edit_saves",
-                                        filetypes=(("save files", "*.save"), ("all files", "*.*"))))
+        self.load_state(
+            askopenfilename(
+                initialdir="files/edge_edit_saves",
+                filetypes=(("save files", "*.save"), ("all files", "*.*")),
+            )
+        )
 
     def load_state(self, filename: str) -> None:
         """
@@ -824,7 +943,11 @@ class EdgeEditGUI(GUI):
 
         :return: None
         """
-        self.action_history.add(actions.LaneWidthEditing(self.graph, self.unhighlight, self.ax, self.old_lane_widths))
+        self.action_history.add(
+            actions.LaneWidthEditing(
+                self.graph, self.unhighlight, self.ax, self.old_lane_widths
+            )
+        )
 
 
 class EditLaneWidths(EditLaneWidth):

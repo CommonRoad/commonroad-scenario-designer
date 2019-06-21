@@ -5,7 +5,7 @@ It is not used in the conversion process.
 import matplotlib.pyplot as plt
 import matplotlib.axes as axis
 import numpy as np
-from converter_modules.graph_operations import road_graph as rg
+from crmapconverter.osm2cr.converter_modules.graph_operations import road_graph as rg
 
 
 def draw_laneborders(lane: rg.Lane, ax: axis):
@@ -28,7 +28,7 @@ def draw_laneborders(lane: rg.Lane, ax: axis):
             y_points.append(y_current)
         x_points.append(lane.left_bound[0][0])
         y_points.append(lane.left_bound[0][1])
-        ax.plot(x_points, y_points, color='black', linewidth=1.0)
+        ax.plot(x_points, y_points, color="black", linewidth=1.0)
         # plotter.scatter(x_points, y_points, color='grey', s=4)
     return
 
@@ -50,7 +50,7 @@ def draw_scenario(g: rg.Graph, ax: axis, links: bool = True):
         lanes += list(g.lanelinks)
     for lane in lanes:
         if counter % 100 == 0:
-            print('drawing lanelet {} of {}'.format(counter, len(lanes)))
+            print("drawing lanelet {} of {}".format(counter, len(lanes)))
         draw_laneborders(lane, ax)
         counter += 1
     return
@@ -101,7 +101,7 @@ def draw_edges(graph: rg.Graph, ax: axis):
         for waypoint in edge.waypoints:
             waypoints_x.append(waypoint.x)
             waypoints_y.append(waypoint.y)
-        ax.plot(waypoints_x, waypoints_y, color='black')
+        ax.plot(waypoints_x, waypoints_y, color="black")
     return
 
 
@@ -119,7 +119,7 @@ def draw_interpolated_edges(graph: rg.Graph, ax: axis):
         for waypoint in edge.interpolated_waypoints:
             waypoints_x.append(waypoint[0])
             waypoints_y.append(waypoint[1])
-        ax.plot(waypoints_x, waypoints_y, color='black')
+        ax.plot(waypoints_x, waypoints_y, color="black")
     return
 
 
@@ -174,16 +174,30 @@ def draw_edge_links(graph: rg.Graph, ax: axis):
             dx = to_point[0] - from_point[0]
             dy = to_point[1] - from_point[1]
             length = np.sqrt(dx ** 2 + dy ** 2)
-            ax.arrow(from_point[0], from_point[1], dx, dy,
-                     head_width=0.5, head_length=1, length_includes_head=(0.1 < length))
+            ax.arrow(
+                from_point[0],
+                from_point[1],
+                dx,
+                dy,
+                head_width=0.5,
+                head_length=1,
+                length_includes_head=(0.1 < length),
+            )
         if edge.backward_successor is not None:
             from_point = edge.interpolated_waypoints[0]
             to_point = edge.backward_successor.interpolated_waypoints[-1]
             dx = to_point[0] - from_point[0]
             dy = to_point[1] - from_point[1]
             length = np.sqrt(dx ** 2 + dy ** 2)
-            ax.arrow(from_point[0], from_point[1], dx, dy,
-                     head_width=0.5, head_length=1, length_includes_head=(0.1 < length))
+            ax.arrow(
+                from_point[0],
+                from_point[1],
+                dx,
+                dy,
+                head_width=0.5,
+                head_length=1,
+                length_includes_head=(0.1 < length),
+            )
     return
 
 
@@ -204,8 +218,15 @@ def draw_lane_links(graph: rg.Graph, ax: axis):
                 dx = first_point[0] - last_point[0]
                 dy = first_point[1] - last_point[1]
                 length = np.sqrt(dx ** 2 + dy ** 2)
-                ax.arrow(last_point[0], last_point[1], dx, dy,
-                         head_width=1, head_length=2, length_includes_head=(0.1 < length))
+                ax.arrow(
+                    last_point[0],
+                    last_point[1],
+                    dx,
+                    dy,
+                    head_width=1,
+                    head_length=2,
+                    length_includes_head=(0.1 < length),
+                )
     return
 
 
@@ -256,10 +277,10 @@ def save_fig(filename: str, x1: float, x2: float, y1: float, y2: float, ax: axis
     :param ax: the ax object to draw on
     :return: None
     """
-    plt.axis('off')
+    plt.axis("off")
     ax.get_xaxis().set_visible(False)
     ax.get_yaxis().set_visible(False)
     ax.set_xlim(x1, x2)
     ax.set_ylim(y1, y2)
-    plt.savefig(filename, bbox_inches='tight', pad_inches=0)
+    plt.savefig(filename, bbox_inches="tight", pad_inches=0)
     return

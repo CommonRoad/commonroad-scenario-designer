@@ -4,8 +4,11 @@ This module provides the main two methods to complete missing info of roads.
 from typing import Tuple
 from math import ceil
 
-import config
-from converter_modules.utility.custom_types import Road_info, Assumption_info
+from crmapconverter.osm2cr import config
+from crmapconverter.osm2cr.converter_modules.utility.custom_types import (
+    Road_info,
+    Assumption_info,
+)
 
 
 def extract_missing_info(info: Road_info) -> Tuple[Road_info, int]:
@@ -18,7 +21,9 @@ def extract_missing_info(info: Road_info) -> Tuple[Road_info, int]:
     :rtype: Tuple[Road_info, int]
     """
     flip = False
-    nr_of_lanes, forward_lanes, backward_lanes, oneway, turnlanes, turnlanes_forward, turnlanes_backward = info
+    nr_of_lanes, forward_lanes, backward_lanes, oneway, turnlanes, turnlanes_forward, turnlanes_backward = (
+        info
+    )
 
     # turnlanes in oneway
     if turnlanes_forward is None and turnlanes is not None and oneway:
@@ -69,8 +74,11 @@ def extract_missing_info(info: Road_info) -> Tuple[Road_info, int]:
         if nr_of_lanes is not None:
             if not forward_lanes + backward_lanes == nr_of_lanes:
                 # lane information inconsistent, overriding total number
-                print("lane error: {} forward lanes, {} backwardlanes and  {} total lanes, oneway: {}".format(
-                    forward_lanes, backward_lanes, nr_of_lanes, oneway))
+                print(
+                    "lane error: {} forward lanes, {} backwardlanes and  {} total lanes, oneway: {}".format(
+                        forward_lanes, backward_lanes, nr_of_lanes, oneway
+                    )
+                )
                 nr_of_lanes = forward_lanes + backward_lanes
         elif backward_lanes is not None:
             nr_of_lanes = forward_lanes + backward_lanes
@@ -91,14 +99,30 @@ def extract_missing_info(info: Road_info) -> Tuple[Road_info, int]:
                 # directions are flipped
                 flip = True
                 forward_lanes, backward_lanes = backward_lanes, forward_lanes
-                turnlanes_forward, turnlanes_backward = turnlanes_backward, turnlanes_forward
+                turnlanes_forward, turnlanes_backward = (
+                    turnlanes_backward,
+                    turnlanes_forward,
+                )
         if turnlanes_forward is not None and turnlanes_backward is not None:
             oneway = False
 
-    return (nr_of_lanes, forward_lanes, backward_lanes, oneway, turnlanes, turnlanes_forward, turnlanes_backward), flip
+    return (
+        (
+            nr_of_lanes,
+            forward_lanes,
+            backward_lanes,
+            oneway,
+            turnlanes,
+            turnlanes_forward,
+            turnlanes_backward,
+        ),
+        flip,
+    )
 
 
-def assume_missing_info(lane_info: Road_info, roadtype: str) -> Tuple[Road_info, Assumption_info]:
+def assume_missing_info(
+    lane_info: Road_info, roadtype: str
+) -> Tuple[Road_info, Assumption_info]:
     """
     assumes still missing info
 
@@ -109,7 +133,9 @@ def assume_missing_info(lane_info: Road_info, roadtype: str) -> Tuple[Road_info,
     :return: completed info and info about assumptions
     :rtype: Tuple[Road_info, Assumption_info]
     """
-    nr_of_lanes, forward_lanes, backward_lanes, oneway, turnlanes, turnlanes_forward, turnlanes_backward = lane_info
+    nr_of_lanes, forward_lanes, backward_lanes, oneway, turnlanes, turnlanes_forward, turnlanes_backward = (
+        lane_info
+    )
     lane_nr_assumed, lanes_assumed, oneway_assumed = False, False, False
 
     # oneway
@@ -130,7 +156,9 @@ def assume_missing_info(lane_info: Road_info, roadtype: str) -> Tuple[Road_info,
                 sum += forward_lanes
             if backward_lanes is not None:
                 sum += backward_lanes
-            nr_of_lanes = max(sum + ceil(config.LANECOUNTS[roadtype] / 2), config.LANECOUNTS[roadtype])
+            nr_of_lanes = max(
+                sum + ceil(config.LANECOUNTS[roadtype] / 2), config.LANECOUNTS[roadtype]
+            )
             if oneway:
                 nr_of_lanes = max(1, ceil(nr_of_lanes / 2))
         lane_nr_assumed = True
@@ -149,14 +177,28 @@ def assume_missing_info(lane_info: Road_info, roadtype: str) -> Tuple[Road_info,
             else:
                 backward_lanes = int(nr_of_lanes / 2)
                 forward_lanes = nr_of_lanes - backward_lanes
-    lane_info = nr_of_lanes, forward_lanes, backward_lanes, oneway, turnlanes, turnlanes_forward, turnlanes_backward
+    lane_info = (
+        nr_of_lanes,
+        forward_lanes,
+        backward_lanes,
+        oneway,
+        turnlanes,
+        turnlanes_forward,
+        turnlanes_backward,
+    )
     assumptions = lane_nr_assumed, lanes_assumed, oneway_assumed
 
     # assert number of turnlanes matches number of lanes, this should never happen!
     if turnlanes_forward is not None and not len(turnlanes_forward) == forward_lanes:
-        print("internal inconsistency! turnlanes {} do not match with {} lanes".format(turnlanes_forward,
-                                                                                       forward_lanes))
+        print(
+            "internal inconsistency! turnlanes {} do not match with {} lanes".format(
+                turnlanes_forward, forward_lanes
+            )
+        )
     if turnlanes_backward is not None and not len(turnlanes_backward) == backward_lanes:
-        print("internal inconsistency! turnlanes {} do not match with {} lanes".format(turnlanes_backward,
-                                                                                       backward_lanes))
+        print(
+            "internal inconsistency! turnlanes {} do not match with {} lanes".format(
+                turnlanes_backward, backward_lanes
+            )
+        )
     return lane_info, assumptions

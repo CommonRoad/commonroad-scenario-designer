@@ -9,10 +9,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 import utm
 
-import config
-from converter_modules.graph_operations import road_graph as rg
-from converter_modules.utility import geometry
-from converter_modules.utility.idgenerator import get_id
+from crmapconverter.osm2cr import config
+from crmapconverter.osm2cr.converter_modules.graph_operations import road_graph as rg
+from crmapconverter.osm2cr.converter_modules.utility import geometry
+from crmapconverter.osm2cr.converter_modules.utility.idgenerator import get_id
 
 # CommonRoad python tools are imported
 # sys.path.append(config.CR_TOOLS_PATH) # This is not necessary anymore as commonroad-io can be installed via pip
@@ -49,7 +49,7 @@ def get_lanelet(lane: rg.Lane) -> Lanelet:
         if lane.adjacent_left_direction_equal is not None:
             adjacent_left_direction_equal = lane.adjacent_left_direction_equal
         elif lane.edge is not None:
-            adjacent_left_direction_equal = (lane.forward == adjacent_left.forward)
+            adjacent_left_direction_equal = lane.forward == adjacent_left.forward
         else:
             raise ValueError("Lane has no direction info!")
     else:
@@ -61,16 +61,26 @@ def get_lanelet(lane: rg.Lane) -> Lanelet:
         if lane.adjacent_right_direction_equal is not None:
             adjacent_right_direction_equal = lane.adjacent_right_direction_equal
         elif lane.edge is not None:
-            adjacent_right_direction_equal = (lane.forward == adjacent_right.forward)
+            adjacent_right_direction_equal = lane.forward == adjacent_right.forward
         else:
             raise ValueError("Lane has no direction info!")
     else:
         adjacent_right = None
         adjacent_right_direction_equal = None
     # print("len of polylines: {}/{}/{}".format(len(left_bound), len(center_points), len(right_bound)))
-    lanelet = Lanelet(np.array(left_bound), np.array(center_points), np.array(right_bound), current_id, predecessors,
-                      successors, adjacent_left,
-                      adjacent_left_direction_equal, adjacent_right, adjacent_right_direction_equal, speedlimit)
+    lanelet = Lanelet(
+        np.array(left_bound),
+        np.array(center_points),
+        np.array(right_bound),
+        current_id,
+        predecessors,
+        successors,
+        adjacent_left,
+        adjacent_left_direction_equal,
+        adjacent_right,
+        adjacent_right_direction_equal,
+        speedlimit,
+    )
     return lanelet
 
 
@@ -116,7 +126,11 @@ def convert_coordinates_to_utm(scenario: Scenario, origin: np.ndarray) -> None:
     :return: None
     """
     for lanelet in scenario.lanelet_network.lanelets:
-        for bound in [lanelet._left_vertices, lanelet._right_vertices, lanelet._center_vertices]:
+        for bound in [
+            lanelet._left_vertices,
+            lanelet._right_vertices,
+            lanelet._center_vertices,
+        ]:
             for index, point in enumerate(bound):
                 point = geometry.cartesian_to_lon_lat(point, origin)
                 lon = point[0]
@@ -126,7 +140,9 @@ def convert_coordinates_to_utm(scenario: Scenario, origin: np.ndarray) -> None:
     return
 
 
-def export(graph: rg.Graph, file=config.SAVE_PATH + config.BENCHMARK_ID + '.xml') -> None:
+def export(
+    graph: rg.Graph, file=config.SAVE_PATH + config.BENCHMARK_ID + ".xml"
+) -> None:
     """
     converts a graph to a CR scenario and saves it to disk
 
@@ -142,7 +158,9 @@ def export(graph: rg.Graph, file=config.SAVE_PATH + config.BENCHMARK_ID + '.xml'
     source = config.SOURCE
     tags = config.TAGS
     # in the current commonroad version the following line works
-    file_writer = CommonRoadFileWriter(scenario, problemset, author, affiliation, source, tags, decimal_precision=16)
+    file_writer = CommonRoadFileWriter(
+        scenario, problemset, author, affiliation, source, tags, decimal_precision=16
+    )
     # file_writer = CommonRoadFileWriter(scenario, problemset, author, affiliation, source, tags)
     file_writer.write_scenario_to_file(file, OverwriteExistingFile.ALWAYS)
 
@@ -154,10 +172,30 @@ def find_bounds(scenario: Scenario) -> List[float]:
     :param scenario: the scenario of which the bounds are found
     :return: list of bounds
     """
-    x_min = min([min(point[0] for point in lanelet.center_vertices) for lanelet in scenario.lanelet_network.lanelets])
-    x_max = max([max(point[0] for point in lanelet.center_vertices) for lanelet in scenario.lanelet_network.lanelets])
-    y_min = min([min(point[1] for point in lanelet.center_vertices) for lanelet in scenario.lanelet_network.lanelets])
-    y_max = max([max(point[1] for point in lanelet.center_vertices) for lanelet in scenario.lanelet_network.lanelets])
+    x_min = min(
+        [
+            min(point[0] for point in lanelet.center_vertices)
+            for lanelet in scenario.lanelet_network.lanelets
+        ]
+    )
+    x_max = max(
+        [
+            max(point[0] for point in lanelet.center_vertices)
+            for lanelet in scenario.lanelet_network.lanelets
+        ]
+    )
+    y_min = min(
+        [
+            min(point[1] for point in lanelet.center_vertices)
+            for lanelet in scenario.lanelet_network.lanelets
+        ]
+    )
+    y_max = max(
+        [
+            max(point[1] for point in lanelet.center_vertices)
+            for lanelet in scenario.lanelet_network.lanelets
+        ]
+    )
     return [x_min, x_max, y_min, y_max]
 
 
@@ -179,9 +217,9 @@ def view_xml(filename: str, ax=None) -> None:
     limits = find_bounds(scenario)
     if ax is None:
         draw_object(scenario, plot_limits=limits)
-        plt.gca().set_aspect('equal')
+        plt.gca().set_aspect("equal")
         plt.show()
         return
     else:
         draw_object(scenario, plot_limits=limits, ax=ax)
-        ax.set_aspect('equal')
+        ax.set_aspect("equal")

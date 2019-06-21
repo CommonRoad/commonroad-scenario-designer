@@ -17,8 +17,8 @@ from matplotlib.lines import Line2D
 from matplotlib.patches import FancyArrow, Polygon, Patch, PathPatch
 from matplotlib.path import Path
 
-from converter_modules.graph_operations import road_graph as rg
-from converter_modules.utility import geometry
+from crmapconverter.osm2cr.converter_modules.graph_operations import road_graph as rg
+from crmapconverter.osm2cr.converter_modules.utility import geometry
 
 PICKER_SIZE = 2
 LINE_WIDTH = 2.5
@@ -136,8 +136,14 @@ class Node(InteractiveObject):
     Plot of set of all nodes
     """
 
-    def __init__(self, scatter_object: PathCollection, node_list: List[rg.GraphNode], ax: Axes, latlon: bool,
-                 origin: np.ndarray):
+    def __init__(
+        self,
+        scatter_object: PathCollection,
+        node_list: List[rg.GraphNode],
+        ax: Axes,
+        latlon: bool,
+        origin: np.ndarray,
+    ):
         """
 
         :param scatter_object: plot object of nodes
@@ -204,11 +210,18 @@ class Node(InteractiveObject):
 
         :return: None
         """
-        node_points = np.array([node.get_point().get_array() for node in self.node_list])
+        node_points = np.array(
+            [node.get_point().get_array() for node in self.node_list]
+        )
         if self.latlon:
             node_points = geometry.cartesian_to_lon_lat(node_points.T, self.origin).T
-        scatter_object = self.ax.scatter(node_points[:, 0], node_points[:, 1], picker=PICKER_SIZE,
-                                         color=[STANDARD_COLOR] * len(self.node_list), s=SCATTER_SIZE)
+        scatter_object = self.ax.scatter(
+            node_points[:, 0],
+            node_points[:, 1],
+            picker=PICKER_SIZE,
+            color=[STANDARD_COLOR] * len(self.node_list),
+            s=SCATTER_SIZE,
+        )
         scatter_object.ref = self
         self.plot_object = scatter_object
         if self.highlighted_node is not None:
@@ -262,8 +275,15 @@ class Edge(InteractiveObject):
     Used for plot of an edge.
     """
 
-    def __init__(self, polyline: Line2D, edge: rg.GraphEdge, graph: rg.Graph, latlon: bool, ax: Axes,
-                 origin: np.ndarray):
+    def __init__(
+        self,
+        polyline: Line2D,
+        edge: rg.GraphEdge,
+        graph: rg.Graph,
+        latlon: bool,
+        ax: Axes,
+        origin: np.ndarray,
+    ):
         """
 
         :param polyline: plot object of line
@@ -303,8 +323,12 @@ class Edge(InteractiveObject):
         :return: None
         """
         self.remove_highlight_patches()
-        dir_triangle = self.direction_triangle(self.edge.get_waypoints(), self.edge.lanewidth * 2, self.origin,
-                                               EDGE_DIRECTION_COLOR)
+        dir_triangle = self.direction_triangle(
+            self.edge.get_waypoints(),
+            self.edge.lanewidth * 2,
+            self.origin,
+            EDGE_DIRECTION_COLOR,
+        )
         self.highlight_patches.add(dir_triangle)
         self.draw_lanes()
         self.add_patches_to_ax()
@@ -367,10 +391,17 @@ class Edge(InteractiveObject):
         if len(waypoints) == 0:
             return
         if self.latlon:
-            waypoints = geometry.cartesian_to_lon_lat(waypoints.T, self.graph.center_point).T
+            waypoints = geometry.cartesian_to_lon_lat(
+                waypoints.T, self.graph.center_point
+            ).T
         # draw all waypoints
-        scatter_object = self.ax.scatter(waypoints[:, 0], waypoints[:, 1], picker=PICKER_SIZE,
-                                         color=[POINT_COLOR] * len(waypoints), s=SCATTER_SIZE)
+        scatter_object = self.ax.scatter(
+            waypoints[:, 0],
+            waypoints[:, 1],
+            picker=PICKER_SIZE,
+            color=[POINT_COLOR] * len(waypoints),
+            s=SCATTER_SIZE,
+        )
 
         self.waypoint_plot = PointList(scatter_object, len(waypoints))
         scatter_object.ref = self.waypoint_plot
@@ -381,8 +412,11 @@ class Edge(InteractiveObject):
 
         :return: None
         """
-        lane_waypoints = rg.get_lane_waypoints(self.edge.nr_of_lanes, self.edge.lanewidth,
-                                               self.edge.get_interpolated_waypoints(False))
+        lane_waypoints = rg.get_lane_waypoints(
+            self.edge.nr_of_lanes,
+            self.edge.lanewidth,
+            self.edge.get_interpolated_waypoints(False),
+        )
         assert len(self.edge.lanes) == self.edge.nr_of_lanes
         for i, waypoints in enumerate(lane_waypoints):
             line = [geometry.cartesian_to_lon_lat(p, self.origin) for p in waypoints]
@@ -390,14 +424,20 @@ class Edge(InteractiveObject):
             if not self.edge.lanes[i].forward:
                 line = line[::-1]
                 waypoints = waypoints[::-1]
-            dir_triangle = self.direction_triangle(np.array(waypoints), self.edge.lanewidth, self.origin,
-                                                   LANE_DIRECTION_COLOR)
+            dir_triangle = self.direction_triangle(
+                np.array(waypoints),
+                self.edge.lanewidth,
+                self.origin,
+                LANE_DIRECTION_COLOR,
+            )
             self.highlight_patches.add(dir_triangle)
             line = Path(np.array(line), closed=False)
             self.highlight_patches.add(PathPatch(line, fill=False))
 
     @staticmethod
-    def direction_triangle(line: np.ndarray, width: float, origin: np.ndarray, color: str) -> Polygon:
+    def direction_triangle(
+        line: np.ndarray, width: float, origin: np.ndarray, color: str
+    ) -> Polygon:
         """
         creates a triangle to visualize direction of the line
 
@@ -413,7 +453,11 @@ class Edge(InteractiveObject):
         p1 = line[0] + orthogonal_vector * width / 2
         p2 = line[0] - orthogonal_vector * width / 2
         p3 = line[0] + direction_vector * width
-        return Polygon([geometry.cartesian_to_lon_lat(p, origin) for p in [p1, p2, p3]], color=color, alpha=0.7)
+        return Polygon(
+            [geometry.cartesian_to_lon_lat(p, origin) for p in [p1, p2, p3]],
+            color=color,
+            alpha=0.7,
+        )
 
     def redraw(self) -> None:
         """
@@ -438,8 +482,7 @@ class Edge(InteractiveObject):
         self.highlight()
 
 
-def draw_nodes(graph: rg.Graph, ax: Axes, latlon: bool, origin: np.ndarray) \
-        -> Node:
+def draw_nodes(graph: rg.Graph, ax: Axes, latlon: bool, origin: np.ndarray) -> Node:
     """
     scatters nodes of a graph
 
@@ -453,13 +496,20 @@ def draw_nodes(graph: rg.Graph, ax: Axes, latlon: bool, origin: np.ndarray) \
     node_points = np.array([node.get_point().get_array() for node in node_list])
     if latlon:
         node_points = geometry.cartesian_to_lon_lat(node_points.T, origin).T
-    scatter_object = ax.scatter(node_points[:, 0], node_points[:, 1], picker=PICKER_SIZE,
-                                color=[STANDARD_COLOR] * len(node_list), s=SCATTER_SIZE)
+    scatter_object = ax.scatter(
+        node_points[:, 0],
+        node_points[:, 1],
+        picker=PICKER_SIZE,
+        color=[STANDARD_COLOR] * len(node_list),
+        s=SCATTER_SIZE,
+    )
     scatter_object.ref = Node(scatter_object, node_list, ax, latlon, origin)
     return scatter_object.ref
 
 
-def draw_lane_end_points(lane: rg.Lane, ax: Axes, latlon: bool, origin: np.ndarray) -> None:
+def draw_lane_end_points(
+    lane: rg.Lane, ax: Axes, latlon: bool, origin: np.ndarray
+) -> None:
     """
     scatters end points of lanes
     these points can be picked
@@ -472,7 +522,9 @@ def draw_lane_end_points(lane: rg.Lane, ax: Axes, latlon: bool, origin: np.ndarr
         point1 = geometry.cartesian_to_lon_lat(point1, origin)
         point2 = geometry.cartesian_to_lon_lat(point2, origin)
     for point in [point1, point2]:
-        scatter = ax.scatter(point[0], point[1], color=STANDARD_COLOR, picker=PICKER_SIZE, s=SCATTER_SIZE)
+        scatter = ax.scatter(
+            point[0], point[1], color=STANDARD_COLOR, picker=PICKER_SIZE, s=SCATTER_SIZE
+        )
         scatter.ref = EndPoint(scatter, lane)
 
 
@@ -502,8 +554,9 @@ def draw_lane(lane: rg.Lane, ax: Axes, latlon: bool, origin: np.ndarray) -> None
     return
 
 
-def draw_all_lane_end_points(graph: rg.Graph, ax: Axes, latlon: bool, origin: np.ndarray) \
-        -> Tuple[Collection, Collection, List[rg.Lane]]:
+def draw_all_lane_end_points(
+    graph: rg.Graph, ax: Axes, latlon: bool, origin: np.ndarray
+) -> Tuple[Collection, Collection, List[rg.Lane]]:
     """
     draws all lanes and end points of a graph
 
@@ -533,8 +586,15 @@ def draw_all_lane_end_points(graph: rg.Graph, ax: Axes, latlon: bool, origin: np
     points_at_start = np.array(points_at_start)
     points_at_end = np.array(points_at_end)
 
-    sc1 = ax.scatter(points_at_start[:, 0], points_at_start[:, 1], color=STANDARD_COLOR, s=SCATTER_SIZE)
-    sc2 = ax.scatter(points_at_end[:, 0], points_at_end[:, 1], color=STANDARD_COLOR, s=SCATTER_SIZE)
+    sc1 = ax.scatter(
+        points_at_start[:, 0],
+        points_at_start[:, 1],
+        color=STANDARD_COLOR,
+        s=SCATTER_SIZE,
+    )
+    sc2 = ax.scatter(
+        points_at_end[:, 0], points_at_end[:, 1], color=STANDARD_COLOR, s=SCATTER_SIZE
+    )
     return sc1, sc2, lane_list
 
 
@@ -557,8 +617,17 @@ def draw_lanes(graph: rg.Graph, links: bool, ax: Axes, origin: np.ndarray) -> No
     return
 
 
-def draw_single_arrow(lane: rg.Lane, last_point: np.ndarray, successor: rg.Lane, latlon: bool, origin: np.ndarray,
-                      ax: Axes, width: float, head_width: float, head_length: float) -> FancyArrow:
+def draw_single_arrow(
+    lane: rg.Lane,
+    last_point: np.ndarray,
+    successor: rg.Lane,
+    latlon: bool,
+    origin: np.ndarray,
+    ax: Axes,
+    width: float,
+    head_width: float,
+    head_length: float,
+) -> FancyArrow:
     """
     draw an arrow that represents the link between two lanes
 
@@ -580,8 +649,17 @@ def draw_single_arrow(lane: rg.Lane, last_point: np.ndarray, successor: rg.Lane,
     y = last_point[1]
     dx = first_point[0] - last_point[0]
     dy = first_point[1] - last_point[1]
-    arrow = ax.arrow(x, y, dx, dy, picker=PICKER_SIZE, head_width=head_width, head_length=head_length,
-                     width=width, length_includes_head=True)
+    arrow = ax.arrow(
+        x,
+        y,
+        dx,
+        dy,
+        picker=PICKER_SIZE,
+        head_width=head_width,
+        head_length=head_length,
+        width=width,
+        length_includes_head=True,
+    )
     arrow.ref = Link(arrow, lane, successor)
     return arrow
 
@@ -624,12 +702,24 @@ def draw_lane_links(graph: rg.Graph, ax: Axes, latlon: bool, origin: np.ndarray)
             if latlon:
                 last_point = geometry.cartesian_to_lon_lat(last_point, origin)
             for successor in lane.successors:
-                draw_single_arrow(lane, last_point, successor, latlon, origin, ax, width, head_width, head_length)
+                draw_single_arrow(
+                    lane,
+                    last_point,
+                    successor,
+                    latlon,
+                    origin,
+                    ax,
+                    width,
+                    head_width,
+                    head_length,
+                )
     ax.figure.canvas.draw()
     return
 
 
-def plot_aerial_image(image: Image, image_extent: List[float], ax: Axes, projection: crs.Mercator) -> None:
+def plot_aerial_image(
+    image: Image, image_extent: List[float], ax: Axes, projection: crs.Mercator
+) -> None:
     """
     plots an aerial image
 
@@ -639,11 +729,13 @@ def plot_aerial_image(image: Image, image_extent: List[float], ax: Axes, project
     :param projection: the projection used for the plot
     :return: None
     """
-    ax.imshow(image, origin='upper', extent=image_extent, transform=projection)
+    ax.imshow(image, origin="upper", extent=image_extent, transform=projection)
     return
 
 
-def draw_edge(edge: rg.GraphEdge, ax: Axes, latlon: bool, origin: np.ndarray, color=STANDARD_COLOR) -> Line2D:
+def draw_edge(
+    edge: rg.GraphEdge, ax: Axes, latlon: bool, origin: np.ndarray, color=STANDARD_COLOR
+) -> Line2D:
     """
     draws an edge with desired projection
 
@@ -657,13 +749,19 @@ def draw_edge(edge: rg.GraphEdge, ax: Axes, latlon: bool, origin: np.ndarray, co
     waypoints = geometry.points_to_array(edge.waypoints)
     if latlon:
         waypoints = geometry.cartesian_to_lon_lat(waypoints.T, origin).T
-    line = \
-        ax.plot(waypoints[:, 0], waypoints[:, 1], picker=PICKER_SIZE, color=color, linewidth=LINE_WIDTH)[0]
+    line = ax.plot(
+        waypoints[:, 0],
+        waypoints[:, 1],
+        picker=PICKER_SIZE,
+        color=color,
+        linewidth=LINE_WIDTH,
+    )[0]
     return line
 
 
-def draw_edges(graph: rg.Graph, ax: Axes, latlon: bool, origin: np.ndarray, node_plot: Node) \
-        -> Tuple[List[Line2D], Dict[rg.GraphNode, Set[Edge]]]:
+def draw_edges(
+    graph: rg.Graph, ax: Axes, latlon: bool, origin: np.ndarray, node_plot: Node
+) -> Tuple[List[Line2D], Dict[rg.GraphNode, Set[Edge]]]:
     """
     draws all edges of a graph
 
@@ -686,7 +784,9 @@ def draw_edges(graph: rg.Graph, ax: Axes, latlon: bool, origin: np.ndarray, node
     return lines, edge_sets_for_nodes
 
 
-def draw_point(position: np.ndarray, origin: np.ndarray, ax: Axes, latlon: bool) -> PointList:
+def draw_point(
+    position: np.ndarray, origin: np.ndarray, ax: Axes, latlon: bool
+) -> PointList:
     """
     draws a single point and returns a PointList containing it
 
@@ -698,5 +798,11 @@ def draw_point(position: np.ndarray, origin: np.ndarray, ax: Axes, latlon: bool)
     """
     if latlon:
         position = geometry.cartesian_to_lon_lat(position, origin)
-    plot_object = ax.scatter(position[0], position[1], color=HIGHLIGHT_COLOR, picker=PICKER_SIZE, s=SCATTER_SIZE)
+    plot_object = ax.scatter(
+        position[0],
+        position[1],
+        color=HIGHLIGHT_COLOR,
+        picker=PICKER_SIZE,
+        s=SCATTER_SIZE,
+    )
     return PointList(plot_object, 1)

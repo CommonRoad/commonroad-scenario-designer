@@ -7,12 +7,15 @@ from typing import List, Set, Tuple, Optional
 
 import numpy as np
 
-import config
-from converter_modules.utility import geometry, idgenerator
-from converter_modules.utility.custom_types import Road_info, Assumption_info
+from crmapconverter.osm2cr import config
+from crmapconverter.osm2cr.converter_modules.utility import geometry, idgenerator
+from crmapconverter.osm2cr.converter_modules.utility.custom_types import (
+    Road_info,
+    Assumption_info,
+)
 
 
-def graph_search(center_node: 'GraphNode') -> Tuple[Set['GraphNode'], Set['GraphEdge']]:
+def graph_search(center_node: "GraphNode") -> Tuple[Set["GraphNode"], Set["GraphEdge"]]:
     """
     searches all elements connected to center_node from a graph and returns them
 
@@ -37,7 +40,7 @@ def graph_search(center_node: 'GraphNode') -> Tuple[Set['GraphNode'], Set['Graph
     return nodes, edges
 
 
-def find_adjacents(newlane: 'Lane', lanes: Set['Lane']) -> Set['Lane']:
+def find_adjacents(newlane: "Lane", lanes: Set["Lane"]) -> Set["Lane"]:
     """
     finds all adjacent lanes to newlane
 
@@ -56,7 +59,7 @@ def find_adjacents(newlane: 'Lane', lanes: Set['Lane']) -> Set['Lane']:
     return lanes
 
 
-def sort_adjacent_lanes(lane: 'Lane') -> Tuple[List['Lane'], List[bool]]:
+def sort_adjacent_lanes(lane: "Lane") -> Tuple[List["Lane"], List[bool]]:
     """
     sorts the adjacent lanes as they are in edges
 
@@ -95,7 +98,9 @@ def sort_adjacent_lanes(lane: 'Lane') -> Tuple[List['Lane'], List[bool]]:
     return result, forward
 
 
-def get_lane_waypoints(nr_of_lanes: int, width: float, center_waypoints: List[np.ndarray]) -> List[List[np.ndarray]]:
+def get_lane_waypoints(
+    nr_of_lanes: int, width: float, center_waypoints: List[np.ndarray]
+) -> List[List[np.ndarray]]:
     """
     creates waypoints of lanes based on a center line and the width and count of lanes
 
@@ -121,7 +126,7 @@ def get_lane_waypoints(nr_of_lanes: int, width: float, center_waypoints: List[np
     return waypoints
 
 
-def set_points(predecessor: 'Lane', successor: 'Lane') -> List[np.ndarray]:
+def set_points(predecessor: "Lane", successor: "Lane") -> List[np.ndarray]:
     """
     sets the waypoints of a link segment between two lanes
 
@@ -143,12 +148,18 @@ def set_points(predecessor: 'Lane', successor: 'Lane') -> List[np.ndarray]:
     a1, a2, intersection_point = geometry.intersection(p1, p4, vector1, vector2)
     # use quadratic bezier if possible
     # do not use it if intersection point is to close to start or end point
-    distance_to_points = min(np.linalg.norm(intersection_point - p1), np.linalg.norm(intersection_point - p4))
+    distance_to_points = min(
+        np.linalg.norm(intersection_point - p1), np.linalg.norm(intersection_point - p4)
+    )
     total_distance = np.linalg.norm(p1 - p4)
     if not (distance_to_points > 1 or distance_to_points / total_distance > 0.1):
         # print("found something")
         pass
-    if a1 > 0 and a2 > 0 and (distance_to_points > 1 or distance_to_points / total_distance > 0.1):
+    if (
+        a1 > 0
+        and a2 > 0
+        and (distance_to_points > 1 or distance_to_points / total_distance > 0.1)
+    ):
         waypoints = geometry.evaluate_bezier(np.array([p1, intersection_point, p4]), n)
         waypoints.append(p4)
     # else use cubic bezier
@@ -164,7 +175,7 @@ class GraphNode:
 
     """
 
-    def __init__(self, id: int, x: float, y: float, edges: Set['GraphEdge']):
+    def __init__(self, id: int, x: float, y: float, edges: Set["GraphEdge"]):
         """
         creates a graph node
 
@@ -179,10 +190,10 @@ class GraphNode:
         self.edges = edges
 
     def __str__(self):
-        return 'Graph_node with id: {}'.format(self.id)
+        return "Graph_node with id: {}".format(self.id)
 
     def __repr__(self):
-        return 'Graph_node with id: {}'.format(self.id)
+        return "Graph_node with id: {}".format(self.id)
 
     def get_degree(self) -> int:
         """
@@ -208,7 +219,7 @@ class GraphNode:
         """
         return geometry.Point(None, self.x, self.y)
 
-    def get_distance(self, other: 'GraphNode') -> float:
+    def get_distance(self, other: "GraphNode") -> float:
         """
         calculates distance to other node
 
@@ -226,15 +237,19 @@ class GraphNode:
         result = 0.0
         for edge in self.edges:
             if edge.node1 == self:
-                distance = np.linalg.norm(edge.get_interpolated_waypoints()[0] - self.get_cooridnates())
+                distance = np.linalg.norm(
+                    edge.get_interpolated_waypoints()[0] - self.get_cooridnates()
+                )
             elif edge.node2 == self:
-                distance = np.linalg.norm(edge.get_interpolated_waypoints()[-1] - self.get_cooridnates())
+                distance = np.linalg.norm(
+                    edge.get_interpolated_waypoints()[-1] - self.get_cooridnates()
+                )
             else:
                 raise ValueError("Graph is malformed")
             result = max(result, distance)
         return result
 
-    def get_neighbors(self) -> Set['GraphNode']:
+    def get_neighbors(self) -> Set["GraphNode"]:
         """
         finds nodes which are connected to this node via a single edge
 
@@ -271,7 +286,9 @@ class GraphNode:
             elif edge.node2 == self:
                 edge.waypoints[-1].set_position(position)
             else:
-                raise ValueError("malformed graph, node has edges assigned to it, which start elsewhere")
+                raise ValueError(
+                    "malformed graph, node has edges assigned to it, which start elsewhere"
+                )
 
 
 class GraphEdge:
@@ -280,8 +297,17 @@ class GraphEdge:
 
     """
 
-    def __init__(self, id: int, node1: GraphNode, node2: GraphNode, waypoints: List[geometry.Point],
-                 lane_info: Road_info, assumptions: Assumption_info, speedlimit: float, roadtype: str):
+    def __init__(
+        self,
+        id: int,
+        node1: GraphNode,
+        node2: GraphNode,
+        waypoints: List[geometry.Point],
+        lane_info: Road_info,
+        assumptions: Assumption_info,
+        speedlimit: float,
+        roadtype: str,
+    ):
         """
         creates an edge
 
@@ -302,7 +328,9 @@ class GraphEdge:
         :param roadtype: type of road the edge represents
         :type roadtype: str
         """
-        nr_of_lanes, forward_lanes, backward_lanes, oneway, turnlanes, turnlanes_forward, turnlanes_backward = lane_info
+        nr_of_lanes, forward_lanes, backward_lanes, oneway, turnlanes, turnlanes_forward, turnlanes_backward = (
+            lane_info
+        )
         lane_nr_assumed, lanes_assumed, oneway_assumed = assumptions
         self.id: int = id
         self.node1: GraphNode = node1
@@ -347,7 +375,10 @@ class GraphEdge:
                 self.waypoints = self.waypoints[::-1]
             if self.interpolated_waypoints is not None:
                 self.interpolated_waypoints = self.interpolated_waypoints[::-1]
-            self.forward_successor, self.backward_successor = self.backward_successor, self.forward_successor
+            self.forward_successor, self.backward_successor = (
+                self.backward_successor,
+                self.forward_successor,
+            )
             self.forward_restrictions = set()
             self.backward_restrictions = set()
             self.turnlanes_forward = None
@@ -361,10 +392,22 @@ class GraphEdge:
                 self.waypoints = self.waypoints[::-1]
             if self.interpolated_waypoints is not None:
                 self.interpolated_waypoints = self.interpolated_waypoints[::-1]
-            self.forward_successor, self.backward_successor = self.backward_successor, self.forward_successor
-            self.forward_restrictions, self.backward_restrictions = self.backward_restrictions, self.forward_restrictions
-            self.forward_lanes, self.backward_lanes = self.backward_lanes, self.forward_lanes
-            self.turnlanes_forward, self.turnlanes_backward = self.turnlanes_backward, self.turnlanes_forward
+            self.forward_successor, self.backward_successor = (
+                self.backward_successor,
+                self.forward_successor,
+            )
+            self.forward_restrictions, self.backward_restrictions = (
+                self.backward_restrictions,
+                self.forward_restrictions,
+            )
+            self.forward_lanes, self.backward_lanes = (
+                self.backward_lanes,
+                self.forward_lanes,
+            )
+            self.turnlanes_forward, self.turnlanes_backward = (
+                self.turnlanes_backward,
+                self.turnlanes_forward,
+            )
         assert self.forward_lanes > 0
 
     def points_to(self, node: GraphNode) -> bool:
@@ -384,7 +427,9 @@ class GraphEdge:
         :return: orientation in radians
         """
         if len(self.waypoints) < 2:
-            raise ValueError('this edge has not enough waypoints to determine its orientation')
+            raise ValueError(
+                "this edge has not enough waypoints to determine its orientation"
+            )
         if node == self.node1:
             x = self.waypoints[1].x - self.waypoints[0].x
             y = self.waypoints[1].y - self.waypoints[0].y
@@ -392,10 +437,10 @@ class GraphEdge:
             x = self.waypoints[-2].x - self.waypoints[-1].x
             y = self.waypoints[-2].y - self.waypoints[-1].y
         else:
-            raise ValueError('the given node is not an endpoint of this edge')
+            raise ValueError("the given node is not an endpoint of this edge")
         return np.arctan2(y, x) + np.pi
 
-    def angle_to(self, edge: 'GraphEdge', node: GraphNode) -> float:
+    def angle_to(self, edge: "GraphEdge", node: GraphNode) -> float:
         """
         calculates the angle between two edges at a given node in radians
 
@@ -407,7 +452,7 @@ class GraphEdge:
         diff2 = np.pi * 2 - diff1
         return min(diff1, diff2)
 
-    def soft_angle(self, edge: 'GraphEdge', node: GraphNode) -> bool:
+    def soft_angle(self, edge: "GraphEdge", node: GraphNode) -> bool:
         """
         determines if the angle to another edge is soft
 
@@ -435,20 +480,38 @@ class GraphEdge:
         assert self.forward_lanes + self.backward_lanes == self.nr_of_lanes
         backwardlanes = []
         for count in range(self.backward_lanes):
-            turnlane = 'none'
+            turnlane = "none"
             if self.turnlanes_backward is not None:
                 turnlane = self.turnlanes_backward[-(count + 1)]
-            new_lane = Lane(self, set(), set(), turnlane, self.lanewidth, self.lanewidth, self.node2, self.node1,
-                            self.speedlimit)
+            new_lane = Lane(
+                self,
+                set(),
+                set(),
+                turnlane,
+                self.lanewidth,
+                self.lanewidth,
+                self.node2,
+                self.node1,
+                self.speedlimit,
+            )
             new_lane.forward = False
             backwardlanes.append(new_lane)
         forwardlanes = []
         for count in range(self.forward_lanes):
-            turnlane = 'none'
+            turnlane = "none"
             if self.turnlanes_forward is not None:
                 turnlane = self.turnlanes_forward[count]
-            new_lane = Lane(self, set(), set(), turnlane, self.lanewidth, self.lanewidth, self.node1, self.node2,
-                            self.speedlimit)
+            new_lane = Lane(
+                self,
+                set(),
+                set(),
+                turnlane,
+                self.lanewidth,
+                self.lanewidth,
+                self.node1,
+                self.node2,
+                self.speedlimit,
+            )
             new_lane.forward = True
             forwardlanes.append(new_lane)
 
@@ -498,19 +561,31 @@ class GraphEdge:
                 return result
             for index in range(len(self.waypoints) - 1):
                 if index == 0:
-                    p1, p4 = self.waypoints[0].get_array(), self.waypoints[1].get_array()
+                    p1, p4 = (
+                        self.waypoints[0].get_array(),
+                        self.waypoints[1].get_array(),
+                    )
                     p2 = p1 + (p4 - p1) * d
-                    p3 = geometry.get_inner_bezier_point(self.waypoints[2].get_array(), p4, p1, d)
+                    p3 = geometry.get_inner_bezier_point(
+                        self.waypoints[2].get_array(), p4, p1, d
+                    )
                 elif index == len(self.waypoints) - 2:
-                    p1, p4 = self.waypoints[index].get_array(), self.waypoints[index + 1].get_array()
-                    p2 = geometry.get_inner_bezier_point(self.waypoints[index - 1].get_array(), p1, p4, d)
+                    p1, p4 = (
+                        self.waypoints[index].get_array(),
+                        self.waypoints[index + 1].get_array(),
+                    )
+                    p2 = geometry.get_inner_bezier_point(
+                        self.waypoints[index - 1].get_array(), p1, p4, d
+                    )
                     p3 = p4 + (p1 - p4) * d
                 else:
                     segment_points = []
                     for i in range(4):
                         segment_points.append(self.waypoints[index + i - 1])
                     segment_points = [x.get_array() for x in segment_points]
-                    p1, p2, p3, p4 = geometry.get_bezier_points_of_segment(np.array(segment_points), d)
+                    p1, p2, p3, p4 = geometry.get_bezier_points_of_segment(
+                        np.array(segment_points), d
+                    )
                 n = max(int(np.linalg.norm(p1 - p4) / point_distance), 2)
                 result += geometry.evaluate_bezier(np.array([p1, p2, p3, p4]), n)
             if save:
@@ -535,11 +610,16 @@ class GraphEdge:
             return 0, index
         else:
             index = 0
-            while index < len(waypoints) and np.linalg.norm(waypoints[index] - point) < distance:
+            while (
+                index < len(waypoints)
+                and np.linalg.norm(waypoints[index] - point) < distance
+            ):
                 index += 1
             return index, len(waypoints) - 1
 
-    def crop(self, index1: int, index2: int, edges_to_delete: List['GraphEdge']) -> None:
+    def crop(
+        self, index1: int, index2: int, edges_to_delete: List["GraphEdge"]
+    ) -> None:
         """
         crops waypoints of edge to given indices
         if remaining interval is empty, it is set to the center two elements
@@ -562,7 +642,7 @@ class GraphEdge:
             index2 = index1 + 2
             assert index1 in range(len(waypoints))
             assert index2 in range(len(waypoints) + 1)
-        self.interpolated_waypoints = waypoints[index1: index2]
+        self.interpolated_waypoints = waypoints[index1:index2]
 
     def exchange_node(self, node_old: GraphNode, node_new: GraphNode) -> None:
         """
@@ -582,7 +662,7 @@ class GraphEdge:
             lane.exchange_node(node_old, node_new)
         return
 
-    def common_node(self, other_edge: 'GraphEdge') -> Optional[GraphNode]:
+    def common_node(self, other_edge: "GraphEdge") -> Optional[GraphNode]:
         """
         finds the common node between two edges
 
@@ -609,9 +689,18 @@ class Lane:
 
     """
 
-    def __init__(self, edge: Optional[GraphEdge], successors: Set['Lane'], predecessors: Set['Lane'],
-                 turnlane: str, width1: float, width2: float, from_node: GraphNode, to_node: GraphNode,
-                 speedlimit: float):
+    def __init__(
+        self,
+        edge: Optional[GraphEdge],
+        successors: Set["Lane"],
+        predecessors: Set["Lane"],
+        turnlane: str,
+        width1: float,
+        width2: float,
+        from_node: GraphNode,
+        to_node: GraphNode,
+        speedlimit: float,
+    ):
         """
         creates a lane
 
@@ -664,14 +753,16 @@ class Lane:
         if self.forward is not None and not keep_edge_dir:
             self.forward = not self.forward
 
-    def intersects(self, other: 'Lane') -> bool:
+    def intersects(self, other: "Lane") -> bool:
         """
         checks if lane intersects with another lane
 
         :param other: the other lane
         :return: True if lanes intersect, else False
         """
-        result = bool(self.successors & other.successors) or bool(self.predecessors & other.predecessors)
+        result = bool(self.successors & other.successors) or bool(
+            self.predecessors & other.predecessors
+        )
         return result
 
     def get_node(self, start: bool) -> GraphNode:
@@ -712,7 +803,9 @@ class Lane:
                 # do not copy bounds of faulty length
                 left_bound = None
         if left_bound is None:
-            left_bound, _ = geometry.create_tilted_parallels(self.waypoints, self.width1 / 2, self.width2 / 2)
+            left_bound, _ = geometry.create_tilted_parallels(
+                self.waypoints, self.width1 / 2, self.width2 / 2
+            )
         right_bound = None
         if self.adjacent_right is not None and not self.intersects(self.adjacent_right):
             assert self.adjacent_right_direction_equal is not None
@@ -724,7 +817,9 @@ class Lane:
                 # do not copy bounds of faulty length
                 right_bound = None
         if right_bound is None:
-            _, right_bound = geometry.create_tilted_parallels(self.waypoints, self.width1 / 2, self.width2 / 2)
+            _, right_bound = geometry.create_tilted_parallels(
+                self.waypoints, self.width1 / 2, self.width2 / 2
+            )
         assert left_bound is not None
         assert right_bound is not None
         self.left_bound = left_bound
@@ -748,13 +843,13 @@ class Lane:
         :param position: a string defining the corner
         :return: the corresponding waypoint
         """
-        if position == 'startleft':
+        if position == "startleft":
             return self.left_bound[0]
-        elif position == 'startright':
+        elif position == "startright":
             return self.right_bound[0]
-        elif position == 'endleft':
+        elif position == "endleft":
             return self.left_bound[-1]
-        elif position == 'endright':
+        elif position == "endright":
             return self.right_bound[-1]
         else:
             raise ValueError("invalid Position")
@@ -767,13 +862,13 @@ class Lane:
         :param point: newcoordinates of point
         :return: None
         """
-        if position == 'startleft':
+        if position == "startleft":
             self.left_bound[0] = point
-        elif position == 'startright':
+        elif position == "startright":
             self.right_bound[0] = point
-        elif position == 'endleft':
+        elif position == "endleft":
             self.left_bound[-1] = point
-        elif position == 'endright':
+        elif position == "endright":
             self.right_bound[-1] = point
         else:
             raise ValueError("invalid Position")
@@ -796,8 +891,13 @@ class Lane:
 
 
 class Graph:
-    def __init__(self, nodes: Set[GraphNode], edges: Set[GraphEdge], center_point: Tuple[float, float],
-                 bounds: Tuple[float, float, float, float]) -> None:
+    def __init__(
+        self,
+        nodes: Set[GraphNode],
+        edges: Set[GraphEdge],
+        center_point: Tuple[float, float],
+        bounds: Tuple[float, float, float, float],
+    ) -> None:
         """
         creates a new graph
 
@@ -851,7 +951,7 @@ class Graph:
             if node.get_degree() > 1:
                 edges = list(node.edges)
                 for index, edge in enumerate(edges):
-                    other_edges = edges[:index] + edges[index + 1:]
+                    other_edges = edges[:index] + edges[index + 1 :]
                     angles = []
                     for other_edge in other_edges:
                         angles.append(edge.angle_to(other_edge, node))
@@ -864,7 +964,7 @@ class Graph:
                         elif edge.node2 == node:
                             edge.forward_successor = link
                         else:
-                            raise ValueError('graph is malformed')
+                            raise ValueError("graph is malformed")
 
     def create_lane_waypoints(self) -> None:
         """
@@ -875,7 +975,9 @@ class Graph:
         for edge in self.edges:
             # width = config.LANEWIDTHS[edge.roadtype]
             width = edge.lanewidth
-            waypoints = get_lane_waypoints(edge.nr_of_lanes, width, edge.get_interpolated_waypoints())
+            waypoints = get_lane_waypoints(
+                edge.nr_of_lanes, width, edge.get_interpolated_waypoints()
+            )
             assert len(edge.lanes) == edge.nr_of_lanes
             assert len(waypoints) == len(edge.lanes)
             for index, lane in enumerate(edge.lanes):
@@ -885,7 +987,7 @@ class Graph:
                     waypoints[index].reverse()
                     lane.waypoints = waypoints[index]
                 if lane.waypoints is None:
-                    raise ValueError('graph is malformed, waypoints are None')
+                    raise ValueError("graph is malformed, waypoints are None")
 
     def interpolate(self) -> None:
         """
@@ -914,7 +1016,7 @@ class Graph:
                 edgewaypoints = edge.interpolated_waypoints
                 if edge.points_to(node):
                     edgewaypoints = edgewaypoints[::-1]
-                other_edges = node_edges[index + 1:] + node_edges[:index]
+                other_edges = node_edges[index + 1 :] + node_edges[:index]
                 if len(other_edges) <= 0:
                     # this node has degree of 1 and does not need to be cropped
                     pass
@@ -925,15 +1027,23 @@ class Graph:
                             otherwaypoints = otherwaypoints[::-1]
                         i = 0
                         if config.INTERSECTION_CROPPING_WITH_RESPECT_TO_ROADS:
-                            distance_to_edge = edge.get_width() / 2 + other_edge.get_width() / 2 \
-                                               + config.INTERSECTION_DISTANCE
-                            while i < min(len(edgewaypoints), len(otherwaypoints)) \
-                                    and np.linalg.norm(edgewaypoints[i] - otherwaypoints[i]) < distance_to_edge:
+                            distance_to_edge = (
+                                edge.get_width() / 2
+                                + other_edge.get_width() / 2
+                                + config.INTERSECTION_DISTANCE
+                            )
+                            while (
+                                i < min(len(edgewaypoints), len(otherwaypoints))
+                                and np.linalg.norm(edgewaypoints[i] - otherwaypoints[i])
+                                < distance_to_edge
+                            ):
                                 i += 1
                         else:
-                            while i < min(len(edgewaypoints), len(otherwaypoints)) \
-                                    and np.linalg.norm(
-                                edgewaypoints[i] - edgewaypoints[0]) < config.INTERSECTION_DISTANCE:
+                            while (
+                                i < min(len(edgewaypoints), len(otherwaypoints))
+                                and np.linalg.norm(edgewaypoints[i] - edgewaypoints[0])
+                                < config.INTERSECTION_DISTANCE
+                            ):
                                 i += 1
                         if i >= len(edgewaypoints):
                             if edge not in edges_to_delete:
@@ -942,7 +1052,9 @@ class Graph:
                             if other_edge not in edges_to_delete:
                                 edges_to_delete.append(other_edge)
                         i = min(i, len(edgewaypoints) - 1, len(otherwaypoints) - 1)
-                        distance = max(distance, np.linalg.norm(edgewaypoints[i] - node_point))
+                        distance = max(
+                            distance, np.linalg.norm(edgewaypoints[i] - node_point)
+                        )
                     to_delete.append((edge, distance, node))
         cropping = {}
         for edge, distance, node in to_delete:
@@ -1089,9 +1201,13 @@ class Graph:
         def update_forward(lane: Lane, forward: bool):
             lane.forward = forward
             if lane.adjacent_right is not None and lane.adjacent_right.forward is None:
-                update_forward(lane.adjacent_right, lane.adjacent_right_direction_equal == forward)
+                update_forward(
+                    lane.adjacent_right, lane.adjacent_right_direction_equal == forward
+                )
             if lane.adjacent_left is not None and lane.adjacent_left.forward is None:
-                update_forward(lane.adjacent_left, lane.adjacent_left_direction_equal == forward)
+                update_forward(
+                    lane.adjacent_left, lane.adjacent_left_direction_equal == forward
+                )
             return
 
         for lane in self.lanelinks:
@@ -1115,11 +1231,23 @@ class Graph:
                     to_node = successor.from_node
                     width1 = predecessor.width2
                     width2 = successor.width1
-                    segment = Lane(None, {successor}, {predecessor}, 'none', width1, width2, from_node, to_node,
-                                   predecessor.speedlimit)
+                    segment = Lane(
+                        None,
+                        {successor},
+                        {predecessor},
+                        "none",
+                        width1,
+                        width2,
+                        from_node,
+                        to_node,
+                        predecessor.speedlimit,
+                    )
                     segment.waypoints = waypoints
                     # segment is only added if it does not form a turn
-                    if successor.edge != predecessor.edge and geometry.curvature(waypoints) > config.LANE_SEGMENT_ANGLE:
+                    if (
+                        successor.edge != predecessor.edge
+                        and geometry.curvature(waypoints) > config.LANE_SEGMENT_ANGLE
+                    ):
                         self.lanelinks.add(segment)
 
         self.set_adjacents()
@@ -1133,8 +1261,9 @@ class Graph:
         """
         # nr of waypoints is set equal for all adjacent lanes
         if interpolation_scale is not None:
-            assert interpolation_scale <= 1, \
-                "scaling up with this function does not make sense and is probably not what you want"
+            assert (
+                interpolation_scale <= 1
+            ), "scaling up with this function does not make sense and is probably not what you want"
 
         # set number of way points equal for all adjacent lanes
         for edge in self.edges:
@@ -1179,22 +1308,32 @@ class Graph:
         if config.FILTER:
             print("filtering points")
             for edge in self.edges:
-                lines = [lane.waypoints if lane.forward else lane.waypoints[::-1] for lane in edge.lanes]
+                lines = [
+                    lane.waypoints if lane.forward else lane.waypoints[::-1]
+                    for lane in edge.lanes
+                ]
                 lines = geometry.pre_filter_points(lines)
                 lines = geometry.filter_points(lines, config.COMPRESSION_THRESHOLD)
                 for index, lane in enumerate(edge.lanes):
-                    lane.waypoints = lines[index] if lane.forward else lines[index][::-1]
+                    lane.waypoints = (
+                        lines[index] if lane.forward else lines[index][::-1]
+                    )
             visited = set()
             for lane_link in self.lanelinks:
                 if lane_link in visited:
                     continue
                 lane_list, forward = sort_adjacent_lanes(lane_link)
                 visited |= set(lane_list)
-                lines = [lane.waypoints if forward[i] else lane.waypoints[::-1] for i, lane in enumerate(lane_list)]
+                lines = [
+                    lane.waypoints if forward[i] else lane.waypoints[::-1]
+                    for i, lane in enumerate(lane_list)
+                ]
                 lines = geometry.pre_filter_points(lines)
                 lines = geometry.filter_points(lines, config.COMPRESSION_THRESHOLD)
                 for index, lane in enumerate(lane_list):
-                    lane.waypoints = lines[index] if forward[index] else lines[index][::-1]
+                    lane.waypoints = (
+                        lines[index] if forward[index] else lines[index][::-1]
+                    )
 
         # create_lane_bounds
         for lane in self.get_all_lanes():
@@ -1220,86 +1359,86 @@ class Graph:
         """
         for lane in self.get_all_lanes():
             # point at start and left
-            start_left = [(lane, 'startleft')]
+            start_left = [(lane, "startleft")]
             # point at start and right
-            start_right = [(lane, 'startright')]
+            start_right = [(lane, "startright")]
             # point at end and left
-            end_left = [(lane, 'endleft')]
+            end_left = [(lane, "endleft")]
             # point at end and right
-            end_right = [(lane, 'endright')]
+            end_right = [(lane, "endright")]
 
             # predecessors
             for predecessor in lane.predecessors:
-                start_left.append((predecessor, 'endleft'))
-                start_right.append((predecessor, 'endright'))
+                start_left.append((predecessor, "endleft"))
+                start_right.append((predecessor, "endright"))
                 # left adjacents of predecessors
                 if predecessor.adjacent_left is not None:
                     if predecessor.adjacent_left_direction_equal:
-                        start_left.append((predecessor.adjacent_left, 'endright'))
+                        start_left.append((predecessor.adjacent_left, "endright"))
                     else:
-                        start_left.append((predecessor.adjacent_left, 'startleft'))
+                        start_left.append((predecessor.adjacent_left, "startleft"))
                 # right adjacents of predecessors
                 if predecessor.adjacent_right is not None:
                     if predecessor.adjacent_right_direction_equal:
-                        start_right.append((predecessor.adjacent_right, 'endleft'))
+                        start_right.append((predecessor.adjacent_right, "endleft"))
                     else:
-                        start_right.append((predecessor.adjacent_right, 'startright'))
+                        start_right.append((predecessor.adjacent_right, "startright"))
             # successors
             for successor in lane.successors:
-                end_left.append((successor, 'startleft'))
-                end_right.append((successor, 'startright'))
+                end_left.append((successor, "startleft"))
+                end_right.append((successor, "startright"))
                 # left adjacents of successors
                 if successor.adjacent_left is not None:
                     if successor.adjacent_left_direction_equal:
-                        end_left.append((successor.adjacent_left, 'startright'))
+                        end_left.append((successor.adjacent_left, "startright"))
                     else:
-                        end_left.append((successor.adjacent_left, 'endleft'))
+                        end_left.append((successor.adjacent_left, "endleft"))
                 # right adjacents of successors
                 if successor.adjacent_right is not None:
                     if successor.adjacent_right_direction_equal:
-                        end_right.append((successor.adjacent_right, 'startleft'))
+                        end_right.append((successor.adjacent_right, "startleft"))
                     else:
-                        end_right.append((successor.adjacent_right, 'endright'))
+                        end_right.append((successor.adjacent_right, "endright"))
             # left adjacents
             if lane.adjacent_left is not None:
                 if lane.adjacent_left_direction_equal:
-                    start_left.append((lane.adjacent_left, 'startright'))
-                    end_left.append((lane.adjacent_left, 'endright'))
+                    start_left.append((lane.adjacent_left, "startright"))
+                    end_left.append((lane.adjacent_left, "endright"))
                     # successors of left adjacents
                     for successor in lane.adjacent_left.successors:
-                        end_left.append((successor, 'startright'))
+                        end_left.append((successor, "startright"))
                     # predecessors of left adjacents
                     for predecessor in lane.adjacent_left.predecessors:
-                        start_left.append((predecessor, 'endright'))
+                        start_left.append((predecessor, "endright"))
                 else:
-                    start_left.append((lane.adjacent_left, 'endleft'))
-                    end_left.append((lane.adjacent_left, 'startleft'))
+                    start_left.append((lane.adjacent_left, "endleft"))
+                    end_left.append((lane.adjacent_left, "startleft"))
                     # successors of left adjacents backwards
                     for successor in lane.adjacent_left.successors:
-                        start_left.append((successor, 'startleft'))
+                        start_left.append((successor, "startleft"))
                     # predecessors of left adjacents backwards
                     for predecessor in lane.adjacent_left.predecessors:
-                        end_left.append((predecessor, 'endleft'))
+                        end_left.append((predecessor, "endleft"))
             # right adjacents
             if lane.adjacent_right is not None:
                 if lane.adjacent_right_direction_equal:
-                    start_right.append((lane.adjacent_right, 'startleft'))
-                    end_right.append((lane.adjacent_right, 'endleft'))
+                    start_right.append((lane.adjacent_right, "startleft"))
+                    end_right.append((lane.adjacent_right, "endleft"))
                     # successors of right adjacents
                     for successor in lane.adjacent_right.successors:
-                        end_right.append((successor, 'startleft'))
+                        end_right.append((successor, "startleft"))
                     # predecessors of right adjacents
                     for predecessor in lane.adjacent_right.predecessors:
-                        start_right.append((predecessor, 'endleft'))
+                        start_right.append((predecessor, "endleft"))
                 else:
-                    start_right.append((lane.adjacent_right, 'endright'))
-                    end_right.append((lane.adjacent_right, 'startright'))
+                    start_right.append((lane.adjacent_right, "endright"))
+                    end_right.append((lane.adjacent_right, "startright"))
                     # successors of right adjacents backwards
                     for successor in lane.adjacent_right.successors:
-                        start_right.append((successor, 'startright'))
+                        start_right.append((successor, "startright"))
                     # predecessors of right adjacents backwards
                     for predecessor in lane.adjacent_right.predecessors:
-                        end_right.append((predecessor, 'endright'))
+                        end_right.append((predecessor, "endright"))
 
             for corner in [start_left, start_right, end_left, end_right]:
                 points: List[np.ndarray] = []

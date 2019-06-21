@@ -14,7 +14,7 @@ import mercantile
 from PIL import Image
 from PIL.JpegImagePlugin import JpegImageFile
 
-import config
+from crmapconverter.osm2cr import config
 
 IMAGE_RESOLUTION = 256
 
@@ -33,7 +33,7 @@ def store_tile(quadkey: str, image: JpegImageFile) -> None:
     :param image: the image
     :return: None
     """
-    file = config.IMAGE_SAVE_PATH + quadkey + '.jpeg'
+    file = config.IMAGE_SAVE_PATH + quadkey + ".jpeg"
     image.save(file, "JPEG")
     return
 
@@ -46,7 +46,7 @@ def load_tile(quadkey: str) -> Optional[JpegImageFile]:
     :return: the image if present, else None
     """
     try:
-        image = Image.open(config.IMAGE_SAVE_PATH + quadkey + '.jpeg')
+        image = Image.open(config.IMAGE_SAVE_PATH + quadkey + ".jpeg")
     except FileNotFoundError:
         image = None
     return image
@@ -62,11 +62,12 @@ def get_bin_maps_api_response() -> None:
     global bing_maps_api_response
     bingMapsKey = config.BING_MAPS_KEY
     request = "http://dev.virtualearth.net/REST/V1/Imagery/Metadata/Aerial?output=json&include=ImageryProviders&key={}".format(
-        bingMapsKey)
+        bingMapsKey
+    )
     # print(request)
     response = urlopen(request).read()
     response = json.loads(response)
-    response = response['resourceSets'][0]['resources'][0]
+    response = response["resourceSets"][0]["resources"][0]
     bing_maps_api_response = response
     return
 
@@ -87,8 +88,8 @@ def get_tile(quadkey: str) -> JpegImageFile:
         try:
             if bing_maps_api_response is None:
                 get_bin_maps_api_response()
-            request = bing_maps_api_response['imageUrl']
-            sub_domain = bing_maps_api_response['imageUrlSubdomains'][0]
+            request = bing_maps_api_response["imageUrl"]
+            sub_domain = bing_maps_api_response["imageUrlSubdomains"][0]
             request = request.replace("{subdomain}", sub_domain)
             request = request.replace("{quadkey}", quadkey)
             print(request)
@@ -100,8 +101,9 @@ def get_tile(quadkey: str) -> JpegImageFile:
     return image
 
 
-def get_required_quadkeys(west: float, south: float, east: float, north: float, zoom: int) -> Tuple[
-    List[str], int, int, List[float]]:
+def get_required_quadkeys(
+    west: float, south: float, east: float, north: float, zoom: int
+) -> Tuple[List[str], int, int, List[float]]:
     """
     gets quadkeys for all tiles in a region sorted by their x and y value
     returns also the number of different x and y values
@@ -148,7 +150,9 @@ def get_required_quadkeys(west: float, south: float, east: float, north: float, 
     vertical_max = lnglat_top_left.lat
 
     bbox_lower_right = mercantile.xy_bounds(tiles[-1])
-    lnglat_lower_right = mercantile.lnglat(bbox_lower_right.right, bbox_lower_right.bottom)
+    lnglat_lower_right = mercantile.lnglat(
+        bbox_lower_right.right, bbox_lower_right.bottom
+    )
     horizontal_max = lnglat_lower_right.lng
     vertical_min = lnglat_lower_right.lat
 
@@ -156,7 +160,9 @@ def get_required_quadkeys(west: float, south: float, east: float, north: float, 
     return quadkeys, x_length, y_length, extent
 
 
-def put_images_together(images: List[Image.Image], x_count: int, y_count: int) -> Image.Image:
+def put_images_together(
+    images: List[Image.Image], x_count: int, y_count: int
+) -> Image.Image:
     """
     puts tiles together to one image
 
@@ -167,7 +173,7 @@ def put_images_together(images: List[Image.Image], x_count: int, y_count: int) -
     """
     height = x_count * IMAGE_RESOLUTION
     width = y_count * IMAGE_RESOLUTION
-    new_im = Image.new('RGB', (width, height))
+    new_im = Image.new("RGB", (width, height))
     for index, image in enumerate(images):
         x = IMAGE_RESOLUTION * (index // x_count)
         y = IMAGE_RESOLUTION * (index % x_count)
@@ -218,8 +224,9 @@ def download_all_images(quadkeys: List[str]) -> List[Image.Image]:
     return result
 
 
-def get_aerial_image(lat1: float, lon1: float, lat2: float, lon2: float, zoom: int = 19) -> Tuple[
-    Image.Image, List[float]]:
+def get_aerial_image(
+    lat1: float, lon1: float, lat2: float, lon2: float, zoom: int = 19
+) -> Tuple[Image.Image, List[float]]:
     """
     gets the image and coordinates to a sepcified aera
 

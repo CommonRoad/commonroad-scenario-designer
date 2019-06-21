@@ -11,11 +11,19 @@ from typing import Dict, Union, List, Optional, Tuple
 
 from PyQt5.QtWidgets import QDialog
 
-import config
-from converter_modules.gui_modules.GUI_resources.lane_counts import Ui_Dialog as Lane_counts
-from converter_modules.gui_modules.GUI_resources.lane_width import Ui_Dialog as Lane_width
-from converter_modules.gui_modules.GUI_resources.settings_ui import Ui_MainWindow as Settings_window
-from converter_modules.gui_modules.GUI_resources.street_types import Ui_Dialog as Street_types
+from crmapconverter.osm2cr import config
+from crmapconverter.osm2cr.converter_modules.gui_modules.GUI_resources.lane_counts import (
+    Ui_Dialog as Lane_counts,
+)
+from crmapconverter.osm2cr.converter_modules.gui_modules.GUI_resources.lane_width import (
+    Ui_Dialog as Lane_width,
+)
+from crmapconverter.osm2cr.converter_modules.gui_modules.GUI_resources.settings_ui import (
+    Ui_MainWindow as Settings_window,
+)
+from crmapconverter.osm2cr.converter_modules.gui_modules.GUI_resources.street_types import (
+    Ui_Dialog as Street_types,
+)
 
 
 class EditStreetTypes:
@@ -71,15 +79,27 @@ class EditStreetTypes:
         :return: None
         """
         ui = self.dialog.ui
-        types = {ui.chk_motorway: "motorway", ui.chk_trunk: "trunk",
-                 ui.chk_primary: "primary", ui.chk_secondary: "secondary",
-                 ui.chk_tertiary: "tertiary", ui.chk_unclassified: "unclassified",
-                 ui.chk_residential: "residential", ui.chk_motorway_link: "motorway_link",
-                 ui.chk_trunk_link: "trunk_link", ui.chk_primary_link: "primary_link",
-                 ui.chk_secondary_link: "secondary_link", ui.chk_tertiary_link: "tertiary_link",
-                 ui.chk_living_street: "living_street", ui.chk_service: "service"}
-        config.ACCEPTED_HIGHWAYS = [current_type for check_box, current_type in types.items() if
-                                    check_box.isChecked()]
+        types = {
+            ui.chk_motorway: "motorway",
+            ui.chk_trunk: "trunk",
+            ui.chk_primary: "primary",
+            ui.chk_secondary: "secondary",
+            ui.chk_tertiary: "tertiary",
+            ui.chk_unclassified: "unclassified",
+            ui.chk_residential: "residential",
+            ui.chk_motorway_link: "motorway_link",
+            ui.chk_trunk_link: "trunk_link",
+            ui.chk_primary_link: "primary_link",
+            ui.chk_secondary_link: "secondary_link",
+            ui.chk_tertiary_link: "tertiary_link",
+            ui.chk_living_street: "living_street",
+            ui.chk_service: "service",
+        }
+        config.ACCEPTED_HIGHWAYS = [
+            current_type
+            for check_box, current_type in types.items()
+            if check_box.isChecked()
+        ]
 
 
 class EditLaneCounts:
@@ -134,14 +154,25 @@ class EditLaneCounts:
         :return: None
         """
         ui = self.dialog.ui
-        types = {ui.sb_motorway: "motorway", ui.sb_trunk: "trunk",
-                 ui.sb_primary: "primary", ui.sb_secondary: "secondary",
-                 ui.sb_tertiary: "tertiary", ui.sb_unclassified: "unclassified",
-                 ui.sb_residential: "residential", ui.sb_motorway_link: "motorway_link",
-                 ui.sb_trunk_link: "trunk_link", ui.sb_primary_link: "primary_link",
-                 ui.sb_secondary_link: "secondary_link", ui.sb_tertiary_link: "tertiary_link",
-                 ui.sb_living_street: "living_street", ui.sb_service: "service"}
-        config.LANECOUNTS = {current_type: spin_box.value() for spin_box, current_type in types.items()}
+        types = {
+            ui.sb_motorway: "motorway",
+            ui.sb_trunk: "trunk",
+            ui.sb_primary: "primary",
+            ui.sb_secondary: "secondary",
+            ui.sb_tertiary: "tertiary",
+            ui.sb_unclassified: "unclassified",
+            ui.sb_residential: "residential",
+            ui.sb_motorway_link: "motorway_link",
+            ui.sb_trunk_link: "trunk_link",
+            ui.sb_primary_link: "primary_link",
+            ui.sb_secondary_link: "secondary_link",
+            ui.sb_tertiary_link: "tertiary_link",
+            ui.sb_living_street: "living_street",
+            ui.sb_service: "service",
+        }
+        config.LANECOUNTS = {
+            current_type: spin_box.value() for spin_box, current_type in types.items()
+        }
 
 
 class EditLaneWidth:
@@ -196,14 +227,25 @@ class EditLaneWidth:
         :return: None
         """
         ui = self.dialog.ui
-        types = {ui.sb_motorway: "motorway", ui.sb_trunk: "trunk",
-                 ui.sb_primary: "primary", ui.sb_secondary: "secondary",
-                 ui.sb_tertiary: "tertiary", ui.sb_unclassified: "unclassified",
-                 ui.sb_residential: "residential", ui.sb_motorway_link: "motorway_link",
-                 ui.sb_trunk_link: "trunk_link", ui.sb_primary_link: "primary_link",
-                 ui.sb_secondary_link: "secondary_link", ui.sb_tertiary_link: "tertiary_link",
-                 ui.sb_living_street: "living_street", ui.sb_service: "service"}
-        config.LANEWIDTHS = {current_type: spin_box.value() for spin_box, current_type in types.items()}
+        types = {
+            ui.sb_motorway: "motorway",
+            ui.sb_trunk: "trunk",
+            ui.sb_primary: "primary",
+            ui.sb_secondary: "secondary",
+            ui.sb_tertiary: "tertiary",
+            ui.sb_unclassified: "unclassified",
+            ui.sb_residential: "residential",
+            ui.sb_motorway_link: "motorway_link",
+            ui.sb_trunk_link: "trunk_link",
+            ui.sb_primary_link: "primary_link",
+            ui.sb_secondary_link: "secondary_link",
+            ui.sb_tertiary_link: "tertiary_link",
+            ui.sb_living_street: "living_street",
+            ui.sb_service: "service",
+        }
+        config.LANEWIDTHS = {
+            current_type: spin_box.value() for spin_box, current_type in types.items()
+        }
 
 
 class EditSpeedLimits:
@@ -260,14 +302,25 @@ class EditSpeedLimits:
         :return: None
         """
         ui = self.dialog.ui
-        types = {ui.sb_motorway: "motorway", ui.sb_trunk: "trunk",
-                 ui.sb_primary: "primary", ui.sb_secondary: "secondary",
-                 ui.sb_tertiary: "tertiary", ui.sb_unclassified: "unclassified",
-                 ui.sb_residential: "residential", ui.sb_motorway_link: "motorway_link",
-                 ui.sb_trunk_link: "trunk_link", ui.sb_primary_link: "primary_link",
-                 ui.sb_secondary_link: "secondary_link", ui.sb_tertiary_link: "tertiary_link",
-                 ui.sb_living_street: "living_street", ui.sb_service: "service"}
-        config.SPEED_LIMITS = {current_type: spin_box.value() for spin_box, current_type in types.items()}
+        types = {
+            ui.sb_motorway: "motorway",
+            ui.sb_trunk: "trunk",
+            ui.sb_primary: "primary",
+            ui.sb_secondary: "secondary",
+            ui.sb_tertiary: "tertiary",
+            ui.sb_unclassified: "unclassified",
+            ui.sb_residential: "residential",
+            ui.sb_motorway_link: "motorway_link",
+            ui.sb_trunk_link: "trunk_link",
+            ui.sb_primary_link: "primary_link",
+            ui.sb_secondary_link: "secondary_link",
+            ui.sb_tertiary_link: "tertiary_link",
+            ui.sb_living_street: "living_street",
+            ui.sb_service: "service",
+        }
+        config.SPEED_LIMITS = {
+            current_type: spin_box.value() for spin_box, current_type in types.items()
+        }
 
 
 class SettingsMenu:
@@ -331,7 +384,11 @@ class SettingsMenu:
         window.le_bing_maps_key.setText(config.BING_MAPS_KEY)
 
         window.le_save_path.setText(config.SAVE_PATH)
-        window.le_coordinates.setText(str(config.DOWNLOAD_COORDINATES[0]) + ", " + str(config.DOWNLOAD_COORDINATES[1]))
+        window.le_coordinates.setText(
+            str(config.DOWNLOAD_COORDINATES[0])
+            + ", "
+            + str(config.DOWNLOAD_COORDINATES[1])
+        )
         window.sb_donwload_radius.setValue(config.DOWNLOAD_EDGE_LENGTH)
 
         window.chk_load_tunnels.setChecked(config.LOAD_TUNNELS)
@@ -346,10 +403,14 @@ class SettingsMenu:
 
         window.sb_eart_radius.setValue(config.EARTH_RADIUS)
         window.chk_delete_short_edges.setChecked(config.DELETE_SHORT_EDGES)
-        window.sb_internal_interpolation_distance.setValue(config.INTERPOLATION_DISTANCE_INTERNAL)
+        window.sb_internal_interpolation_distance.setValue(
+            config.INTERPOLATION_DISTANCE_INTERNAL
+        )
         window.sb_bezier_parameter.setValue(config.BEZIER_PARAMETER)
         window.sb_intersection_distance.setValue(config.INTERSECTION_DISTANCE)
-        window.chk_intersection_distance_respect.setChecked(config.INTERSECTION_CROPPING_WITH_RESPECT_TO_ROADS)
+        window.chk_intersection_distance_respect.setChecked(
+            config.INTERSECTION_CROPPING_WITH_RESPECT_TO_ROADS
+        )
         window.sb_soft_angle_treshold.setValue(config.SOFT_ANGLE_THRESHOLD)
         window.sb_lane_segment_angle_treshold.setValue(config.LANE_SEGMENT_ANGLE)
         window.sb_cluster_length.setValue(config.CLUSTER_LENGTH)
@@ -377,7 +438,9 @@ class SettingsMenu:
         config.BING_MAPS_KEY = window.le_bing_maps_key.text()
 
         config.SAVE_PATH = window.le_save_path.text()
-        config.DOWNLOAD_COORDINATES = coordinates_from_text(window.le_coordinates.text())[1]
+        config.DOWNLOAD_COORDINATES = coordinates_from_text(
+            window.le_coordinates.text()
+        )[1]
         config.DOWNLOAD_EDGE_LENGTH = window.sb_donwload_radius.value()
 
         config.LOAD_TUNNELS = window.chk_load_tunnels.isChecked()
@@ -392,10 +455,14 @@ class SettingsMenu:
 
         config.EARTH_RADIUS = window.sb_eart_radius.value()
         config.DELETE_SHORT_EDGES = window.chk_delete_short_edges.isChecked()
-        config.INTERPOLATION_DISTANCE_INTERNAL = window.sb_internal_interpolation_distance.value()
+        config.INTERPOLATION_DISTANCE_INTERNAL = (
+            window.sb_internal_interpolation_distance.value()
+        )
         config.BEZIER_PARAMETER = window.sb_bezier_parameter.value()
         config.INTERSECTION_DISTANCE = window.sb_intersection_distance.value()
-        config.INTERSECTION_CROPPING_WITH_RESPECT_TO_ROADS = window.chk_intersection_distance_respect.isChecked()
+        config.INTERSECTION_CROPPING_WITH_RESPECT_TO_ROADS = (
+            window.chk_intersection_distance_respect.isChecked()
+        )
         config.SOFT_ANGLE_THRESHOLD = window.sb_soft_angle_treshold.value()
         config.LANE_SEGMENT_ANGLE = window.sb_lane_segment_angle_treshold.value()
         config.CLUSTER_LENGTH = window.sb_cluster_length.value()
@@ -461,13 +528,18 @@ class SettingsMenu:
         """
         if not coordinates_from_text(self.window.le_coordinates.text())[0]:
             Tk().withdraw()
-            showwarning("Waring", "The entered coordinates are invalid! Settings could not be saved.")
+            showwarning(
+                "Waring",
+                "The entered coordinates are invalid! Settings could not be saved.",
+            )
             return
         self.save_to_config()
         write_config()
 
 
-def coordinates_from_text(coords: str) -> Tuple[bool, Tuple[Optional[float], Optional[float]]]:
+def coordinates_from_text(
+    coords: str
+) -> Tuple[bool, Tuple[Optional[float], Optional[float]]]:
     """
     reads coordinates from text
 
@@ -489,7 +561,7 @@ def write_config():
     :return: None
     """
     global config_string
-    with open('config.py', 'w', encoding='utf-8') as config_file:
+    with open("config.py", "w", encoding="utf-8") as config_file:
         config_file.write(config_string())
 
 
@@ -508,7 +580,9 @@ def object_to_string(obj: Union[str, int, float]) -> str:
         raise TypeError("Only dicts of type string, int or float are supported")
 
 
-def dict_to_string(dictionary: Dict[Union[str, int, float], Union[str, int, float]], indentation: int) -> str:
+def dict_to_string(
+    dictionary: Dict[Union[str, int, float], Union[str, int, float]], indentation: int
+) -> str:
     """
     outputs a structured, python parsable string of the dictionary
 
@@ -520,8 +594,14 @@ def dict_to_string(dictionary: Dict[Union[str, int, float], Union[str, int, floa
         return "{}"
     result = "{"
     for key, value in dictionary.items():
-        result += object_to_string(key) + ": " + object_to_string(value) + ",\n" + " " * indentation
-    return result[:-indentation - 2] + "}"
+        result += (
+            object_to_string(key)
+            + ": "
+            + object_to_string(value)
+            + ",\n"
+            + " " * indentation
+        )
+    return result[: -indentation - 2] + "}"
 
 
 def list_to_string(lst: List[Union[str, int, float]], indentation: int) -> str:
@@ -537,7 +617,7 @@ def list_to_string(lst: List[Union[str, int, float]], indentation: int) -> str:
     result = "["
     for element in lst:
         result += object_to_string(element) + ",\n" + " " * indentation
-    return result[:-indentation - 2] + "]"
+    return result[: -indentation - 2] + "]"
 
 
 def set_defaults() -> None:
@@ -578,22 +658,82 @@ def set_defaults() -> None:
     config.MAKE_CONTIGUOUS = False
     config.USE_RESTRICTIONS = True
     config.SPLIT_AT_CORNER = True
-    config.ACCEPTED_HIGHWAYS = ['motorway', 'trunk', 'primary', 'secondary', 'tertiary', 'unclassified', 'residential',
-                                'motorway_link', 'trunk_link', 'primary_link', 'secondary_link', 'tertiary_link',
-                                'living_street', 'service']
-    config.LANECOUNTS = {'motorway': 6, 'trunk': 4, 'primary': 2, 'secondary': 2, 'tertiary': 2, 'unclassified': 2,
-                         'residential': 2, 'motorway_link': 2, 'trunk_link': 2, 'primary_link': 2,
-                         'secondary_link': 2, 'tertiary_link': 2, 'living_street': 2, 'service': 2, }
-    config.LANEWIDTHS = {'motorway': 2.5, 'trunk': 2.5, 'primary': 2.5, 'secondary': 2.5, 'tertiary': 2.5,
-                         'unclassified': 2.5, 'residential': 2.5, 'motorway_link': 2.5,
-                         'trunk_link': 2.5, 'primary_link': 2.5, 'secondary_link': 2.5, 'tertiary_link': 2.5,
-                         'living_street': 2.5, 'service': 2.5}
-    config.SPEED_LIMITS = {'motorway': 120, 'trunk': 100, 'primary': 100, 'secondary': 100, 'tertiary': 100,
-                           'unclassified': 80, 'residential': 50, 'motorway_link': 80,
-                           'trunk_link': 80, 'primary_link': 80, 'secondary_link': 80, 'tertiary_link': 80,
-                           'living_street': 7, 'service': 10}
-    config.RECOGNIZED_TURNLANES = ['left', 'through', 'right', 'merge_to_left', 'merge_to_right', 'through;right',
-                                   'left;through', 'left;through;right', 'left;right', 'none']
+    config.ACCEPTED_HIGHWAYS = [
+        "motorway",
+        "trunk",
+        "primary",
+        "secondary",
+        "tertiary",
+        "unclassified",
+        "residential",
+        "motorway_link",
+        "trunk_link",
+        "primary_link",
+        "secondary_link",
+        "tertiary_link",
+        "living_street",
+        "service",
+    ]
+    config.LANECOUNTS = {
+        "motorway": 6,
+        "trunk": 4,
+        "primary": 2,
+        "secondary": 2,
+        "tertiary": 2,
+        "unclassified": 2,
+        "residential": 2,
+        "motorway_link": 2,
+        "trunk_link": 2,
+        "primary_link": 2,
+        "secondary_link": 2,
+        "tertiary_link": 2,
+        "living_street": 2,
+        "service": 2,
+    }
+    config.LANEWIDTHS = {
+        "motorway": 2.5,
+        "trunk": 2.5,
+        "primary": 2.5,
+        "secondary": 2.5,
+        "tertiary": 2.5,
+        "unclassified": 2.5,
+        "residential": 2.5,
+        "motorway_link": 2.5,
+        "trunk_link": 2.5,
+        "primary_link": 2.5,
+        "secondary_link": 2.5,
+        "tertiary_link": 2.5,
+        "living_street": 2.5,
+        "service": 2.5,
+    }
+    config.SPEED_LIMITS = {
+        "motorway": 120,
+        "trunk": 100,
+        "primary": 100,
+        "secondary": 100,
+        "tertiary": 100,
+        "unclassified": 80,
+        "residential": 50,
+        "motorway_link": 80,
+        "trunk_link": 80,
+        "primary_link": 80,
+        "secondary_link": 80,
+        "tertiary_link": 80,
+        "living_street": 7,
+        "service": 10,
+    }
+    config.RECOGNIZED_TURNLANES = [
+        "left",
+        "through",
+        "right",
+        "merge_to_left",
+        "merge_to_right",
+        "through;right",
+        "left;through",
+        "left;through;right",
+        "left;right",
+        "none",
+    ]
     # config.BING_MAPS_KEY = ""
 
 

@@ -9,21 +9,21 @@ These modules contain all operations performed on OSM maps and their data.
 
 downloader module
 #################
-.. automodule:: converter_modules.osm_operations.downloader
+.. automodule:: crmapconverter.osm2cr.converter_modules.osm_operations.downloader
     :members:
     :undoc-members:
     :show-inheritance:
 	
 osm_parser module
 #################
-.. automodule:: converter_modules.osm_operations.osm_parser
+.. automodule:: crmapconverter.osm2cr.converter_modules.osm_operations.osm_parser
     :members:
     :undoc-members:
     :show-inheritance:
 
 info_deduction module
 #####################
-.. automodule:: converter_modules.osm_operations.info_deduction
+.. automodule:: crmapconverter.osm2cr.converter_modules.osm_operations.info_deduction
     :members:
     :undoc-members:
     :show-inheritance:
@@ -34,42 +34,42 @@ These modules contain all operations performed on graph data.
 
 road_graph module
 #################
-.. automodule:: converter_modules.graph_operations.road_graph
+.. automodule:: crmapconverter.osm2cr.converter_modules.graph_operations.road_graph
     :members:
     :undoc-members:
     :show-inheritance:
 	
 lane_linker module
 ##################
-.. automodule:: converter_modules.graph_operations.lane_linker
+.. automodule:: crmapconverter.osm2cr.converter_modules.graph_operations.lane_linker
     :members:
     :undoc-members:
     :show-inheritance:
  
 offsetter module
 ################
-.. automodule:: converter_modules.graph_operations.offsetter
+.. automodule:: crmapconverter.osm2cr.converter_modules.graph_operations.offsetter
     :members:
     :undoc-members:
     :show-inheritance:
 
 restrictions module
 ###################
-.. automodule:: converter_modules.graph_operations.restrictions
+.. automodule:: crmapconverter.osm2cr.converter_modules.graph_operations.restrictions
     :members:
     :undoc-members:
     :show-inheritance:
 
 intersection_merger module
 ##########################
-.. automodule:: converter_modules.graph_operations.intersection_merger
+.. automodule:: crmapconverter.osm2cr.converter_modules.graph_operations.intersection_merger
     :members:
     :undoc-members:
     :show-inheritance:
 
 segment_clusters module
 #######################
-.. automodule:: converter_modules.graph_operations.segment_clusters
+.. automodule:: crmapconverter.osm2cr.converter_modules.graph_operations.segment_clusters
     :members:
     :undoc-members:
     :show-inheritance:
@@ -80,7 +80,7 @@ These modules contain all operations that interact with commonroad tools.
 
 export module
 #############
-.. automodule:: converter_modules.cr_operations.export
+.. automodule:: crmapconverter.osm2cr.converter_modules.cr_operations.export
     :members:
     :undoc-members:
     :show-inheritance:
@@ -91,35 +91,35 @@ These modules provide utilities which can be used by other modules.
 
 custom_types module
 ###################
-.. automodule:: converter_modules.utility.custom_types
+.. automodule:: crmapconverter.osm2cr.converter_modules.utility.custom_types
     :members:
     :undoc-members:
     :show-inheritance:
 
 geometry module
 ###############
-.. automodule:: converter_modules.utility.geometry
+.. automodule:: crmapconverter.osm2cr.converter_modules.utility.geometry
     :members:
     :undoc-members:
     :show-inheritance:
 
 graph_analysis module
 #####################
-.. automodule:: converter_modules.utility.graph_analysis
+.. automodule:: crmapconverter.osm2cr.converter_modules.utility.graph_analysis
     :members:
     :undoc-members:
     :show-inheritance:
 
 idgenerator module
 ##################
-.. automodule:: converter_modules.utility.idgenerator
+.. automodule:: crmapconverter.osm2cr.converter_modules.utility.idgenerator
     :members:
     :undoc-members:
     :show-inheritance:
 	
 plots module
 ############
-.. automodule:: converter_modules.utility.plots
+.. automodule:: crmapconverter.osm2cr.converter_modules.utility.plots
     :members:
     :undoc-members:
     :show-inheritance:
@@ -130,42 +130,42 @@ These modules contain all fuctionality of the GUI.
 
 actions module
 ##############
-.. automodule:: converter_modules.gui_modules.actions
+.. automodule:: crmapconverter.osm2cr.converter_modules.gui_modules.actions
     :members:
     :undoc-members:
     :show-inheritance:
 
 aerial_data module
 ##################
-.. automodule:: converter_modules.gui_modules.aerial_data
+.. automodule:: crmapconverter.osm2cr.converter_modules.gui_modules.aerial_data
     :members:
     :undoc-members:
     :show-inheritance:
 
 gui module
 ##########
-.. automodule:: converter_modules.gui_modules.gui
+.. automodule:: crmapconverter.osm2cr.converter_modules.gui_modules.gui
     :members:
     :undoc-members:
     :show-inheritance:
 
 gui_embedding module
 ####################
-.. automodule:: converter_modules.gui_modules.gui_embedding
+.. automodule:: crmapconverter.osm2cr.converter_modules.gui_modules.gui_embedding
     :members:
     :undoc-members:
     :show-inheritance:
 
 plots_interactive module
 ########################
-.. automodule:: converter_modules.gui_modules.plots_interactive
+.. automodule:: crmapconverter.osm2cr.converter_modules.gui_modules.plots_interactive
     :members:
     :undoc-members:
     :show-inheritance:
 
 settings module
 ###############
-.. automodule:: converter_modules.gui_modules.settings
+.. automodule:: crmapconverter.osm2cr.converter_modules.gui_modules.settings
     :members:
     :undoc-members:
     :show-inheritance:

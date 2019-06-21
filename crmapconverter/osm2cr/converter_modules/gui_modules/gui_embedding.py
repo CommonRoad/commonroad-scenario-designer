@@ -12,21 +12,39 @@ from typing import Optional, Union, Tuple
 
 import matplotlib.pyplot as plt
 from PyQt5 import QtCore
-from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QSpinBox, QCheckBox, QDoubleSpinBox, QComboBox
+from PyQt5.QtWidgets import (
+    QApplication,
+    QMainWindow,
+    QWidget,
+    QSpinBox,
+    QCheckBox,
+    QDoubleSpinBox,
+    QComboBox,
+)
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.pyplot import close
 
-import config
-from converter_modules import converter
-from converter_modules.cr_operations import export as ex
-from converter_modules.graph_operations import road_graph as rg
-from converter_modules.gui_modules import gui, settings
-from converter_modules.gui_modules.GUI_resources.edge_edit_embedding import Ui_EdgeEdit as eeGUI_frame
-from converter_modules.gui_modules.GUI_resources.lane_link_edit_embedding import Ui_LaneLinkEdit as llGUI_frame
-from converter_modules.gui_modules.GUI_resources.scenario_view import Ui_MainWindow as scenarioView
-from converter_modules.gui_modules.GUI_resources.start_window import Ui_MainWindow as startWindow
-from converter_modules.osm_operations.downloader import download_around_map
+from crmapconverter.osm2cr import config
+from crmapconverter.osm2cr.converter_modules import converter
+from crmapconverter.osm2cr.converter_modules.cr_operations import export as ex
+from crmapconverter.osm2cr.converter_modules.graph_operations import road_graph as rg
+from crmapconverter.osm2cr.converter_modules.gui_modules import gui, settings
+from crmapconverter.osm2cr.converter_modules.gui_modules.GUI_resources.edge_edit_embedding import (
+    Ui_EdgeEdit as eeGUI_frame,
+)
+from crmapconverter.osm2cr.converter_modules.gui_modules.GUI_resources.lane_link_edit_embedding import (
+    Ui_LaneLinkEdit as llGUI_frame,
+)
+from crmapconverter.osm2cr.converter_modules.gui_modules.GUI_resources.scenario_view import (
+    Ui_MainWindow as scenarioView,
+)
+from crmapconverter.osm2cr.converter_modules.gui_modules.GUI_resources.start_window import (
+    Ui_MainWindow as startWindow,
+)
+from crmapconverter.osm2cr.converter_modules.osm_operations.downloader import (
+    download_around_map,
+)
 
 
 class MainApp:
@@ -162,11 +180,14 @@ class StartMenu:
         :return: None
         """
         Tk().withdraw()
-        file = askopenfilename(initialdir="files/", filetypes=(("edit save", "*.save"), ("all files", "*.*")))
+        file = askopenfilename(
+            initialdir="files/",
+            filetypes=(("edit save", "*.save"), ("all files", "*.*")),
+        )
         if file == "" or file is None:
             print("no file picked")
         else:
-            with open(file, 'rb') as fd:
+            with open(file, "rb") as fd:
                 gui_state = pickle.load(fd)
             if type(gui_state) == gui.EdgeEditGUI:
                 EdgeEdit(self.app, None, gui_state)
@@ -185,7 +206,9 @@ class StartMenu:
         :return: None
         """
         Tk().withdraw()
-        file = askopenfilename(initialdir="files/", filetypes=(("CR files", "*.xml"), ("all files", "*.*")))
+        file = askopenfilename(
+            initialdir="files/", filetypes=(("CR files", "*.xml"), ("all files", "*.*"))
+        )
         if file != "":
             window = scenarioView()
             window.setupUi(self.app.main_window)
@@ -209,7 +232,7 @@ class StartMenu:
         :return: None
         """
         name = self.embedding.input_bench_id.text()
-        name = re.sub(r'[^a-zA-Z0-9._\-]', "", name)
+        name = re.sub(r"[^a-zA-Z0-9._\-]", "", name)
         self.embedding.input_bench_id.setText(name)
         config.BENCHMARK_ID = name
 
@@ -233,7 +256,9 @@ class StartMenu:
         if self.verify_coordinate_input():
             self.embedding.input_picked_output.setText("Map will be downloaded")
         else:
-            self.embedding.input_picked_output.setText("Cannot download, invalid Coordinates")
+            self.embedding.input_picked_output.setText(
+                "Cannot download, invalid Coordinates"
+            )
 
     def select_file(self) -> None:
         """
@@ -242,7 +267,10 @@ class StartMenu:
         :return: None
         """
         Tk().withdraw()
-        file = askopenfilename(initialdir="files/", filetypes=(("osm files", "*.osm"), ("all files", "*.*")))
+        file = askopenfilename(
+            initialdir="files/",
+            filetypes=(("osm files", "*.osm"), ("all files", "*.*")),
+        )
         if file != "":
             self.selected_file = file
             self.embedding.l_selected_file.setText(file)
@@ -260,8 +288,12 @@ class StartMenu:
         graph = converter.Scenario.step_collection_3(graph)
         name = config.BENCHMARK_ID
         Tk().withdraw()
-        file = asksaveasfilename(initialdir=config.SAVE_PATH, initialfile=name, defaultextension=".xml",
-                                 filetypes=(("xml file", "*.xml"), ("All Files", "*.*")))
+        file = asksaveasfilename(
+            initialdir=config.SAVE_PATH,
+            initialfile=name,
+            defaultextension=".xml",
+            filetypes=(("xml file", "*.xml"), ("All Files", "*.*")),
+        )
         if file != "":
             self.app.export(graph, file)
 
@@ -305,7 +337,9 @@ class StartMenu:
         except ValueError:
             self.embedding.l_region.setText("Coordinates Invalid")
             if self.embedding.rb_download_map.isChecked():
-                self.embedding.input_picked_output.setText("Cannot download, invalid Coordinates")
+                self.embedding.input_picked_output.setText(
+                    "Cannot download, invalid Coordinates"
+                )
             return False
 
     def download_map(self) -> Optional[str]:
@@ -320,7 +354,9 @@ class StartMenu:
             print("cannot download, coordinates invalid")
             return None
         else:
-            download_around_map(name, self.lat, self.lon, self.embedding.range_input.value())
+            download_around_map(
+                name, self.lat, self.lon, self.embedding.range_input.value()
+            )
             return name
 
     def download_and_open_osm_file(self) -> None:
@@ -348,7 +384,13 @@ class MapEdit(ABC):
     Abstract class for edit embeddings
     """
 
-    def __init__(self, app: MainApp, graph: rg.Graph, gui_plot: gui.GUI, embedding: Union[eeGUI_frame, llGUI_frame]):
+    def __init__(
+        self,
+        app: MainApp,
+        graph: rg.Graph,
+        gui_plot: gui.GUI,
+        embedding: Union[eeGUI_frame, llGUI_frame],
+    ):
         """
 
         :param app: main pyqt5 app
@@ -364,7 +406,9 @@ class MapEdit(ABC):
         self.embedding.setupUi(self.app.main_window)
         self.canvas: FigureCanvas
         self.toolbar: NavigationToolbar
-        self.canvas, self.toolbar = self.embed_plot_in_window(self.gui_plot, self.embedding)
+        self.canvas, self.toolbar = self.embed_plot_in_window(
+            self.gui_plot, self.embedding
+        )
 
         self.gui_plot.setup_event_listeners(self.canvas)
         self.bind_events()
@@ -379,8 +423,9 @@ class MapEdit(ABC):
     def finalize(self):
         pass
 
-    def embed_plot_in_window(self, plot: gui.GUI, window: Union[eeGUI_frame, llGUI_frame]) -> Tuple[
-        FigureCanvas, NavigationToolbar]:
+    def embed_plot_in_window(
+        self, plot: gui.GUI, window: Union[eeGUI_frame, llGUI_frame]
+    ) -> Tuple[FigureCanvas, NavigationToolbar]:
         """
         embeds mpl plot in given window
 
@@ -411,7 +456,9 @@ class MapEdit(ABC):
             self.gui_plot = self.gui_plot.new_gui
             assert self.gui_plot is not None
             assert type(self.gui_plot) == old_type
-            self.canvas, self.toolbar = self.embed_plot_in_window(self.gui_plot, self.embedding)
+            self.canvas, self.toolbar = self.embed_plot_in_window(
+                self.gui_plot, self.embedding
+            )
             self.gui_plot.setup_event_listeners(self.canvas)
             self.canvas.setFocusPolicy(QtCore.Qt.ClickFocus)
             self.canvas.setFocus()
@@ -428,7 +475,9 @@ class EdgeEdit(MapEdit):
     Also embeds an Attribute editor
     """
 
-    def __init__(self, app: MainApp, graph: Optional[rg.Graph], ee_gui: Optional[gui.EdgeEditGUI]):
+    def __init__(
+        self, app: MainApp, graph: Optional[rg.Graph], ee_gui: Optional[gui.EdgeEditGUI]
+    ):
         """
 
         :param app: main pyqt5 app
@@ -437,7 +486,9 @@ class EdgeEdit(MapEdit):
         """
         if ee_gui is None:
             assert graph is not None, "if no ee_gui provided, graph is needed"
-            gui_plot = gui.EdgeEditGUI(graph, self.reload_gui, None, self.update_movement)
+            gui_plot = gui.EdgeEditGUI(
+                graph, self.reload_gui, None, self.update_movement
+            )
             embedding = eeGUI_frame()
         else:
             assert graph is None, "graph is only used if no ee_gui is provided"
@@ -447,7 +498,9 @@ class EdgeEdit(MapEdit):
             graph = gui_plot.graph
         super().__init__(app, graph, gui_plot, embedding)
         self.embedding: eeGUI_frame
-        self.attribute_editor = AttributeEditor(self.embedding.widget, self.embedding, self.gui_plot)
+        self.attribute_editor = AttributeEditor(
+            self.embedding.widget, self.embedding, self.gui_plot
+        )
         self.gui_plot: gui.EdgeEditGUI = self.gui_plot
         self.gui_plot.pick_listener = self.attribute_editor.show_attributes
 
@@ -469,16 +522,18 @@ class EdgeEdit(MapEdit):
         :return: None
         """
         # disconnect all buttons connections
-        for handler in [self.embedding.b_save,
-                        self.embedding.b_load,
-                        self.embedding.b_undo,
-                        self.embedding.b_redo,
-                        self.embedding.b_delete,
-                        self.embedding.b_split,
-                        self.embedding.b_new_waypoint,
-                        self.embedding.b_new_edge,
-                        self.embedding.b_finalize,
-                        self.embedding.chk_move]:
+        for handler in [
+            self.embedding.b_save,
+            self.embedding.b_load,
+            self.embedding.b_undo,
+            self.embedding.b_redo,
+            self.embedding.b_delete,
+            self.embedding.b_split,
+            self.embedding.b_new_waypoint,
+            self.embedding.b_new_edge,
+            self.embedding.b_finalize,
+            self.embedding.chk_move,
+        ]:
             try:
                 handler.disconnect()
             except TypeError:
@@ -543,7 +598,9 @@ class LaneLinkEdit(MapEdit):
     Embedding for lane link GUI
     """
 
-    def __init__(self, app: MainApp, graph: Optional[rg.Graph], ll_gui: Optional[gui.LaneLinkGUI]):
+    def __init__(
+        self, app: MainApp, graph: Optional[rg.Graph], ll_gui: Optional[gui.LaneLinkGUI]
+    ):
         """
 
         :param app: main pyqt5 app
@@ -571,12 +628,14 @@ class LaneLinkEdit(MapEdit):
         """
         # disconnect all buttons connections
         try:
-            for handler in [self.embedding.b_save,
-                            self.embedding.b_load,
-                            self.embedding.b_undo,
-                            self.embedding.b_redo,
-                            self.embedding.b_delete,
-                            self.embedding.b_finalize]:
+            for handler in [
+                self.embedding.b_save,
+                self.embedding.b_load,
+                self.embedding.b_undo,
+                self.embedding.b_redo,
+                self.embedding.b_delete,
+                self.embedding.b_finalize,
+            ]:
                 handler.disconnect()
         except TypeError:
             # ignore if button is not connected
@@ -596,8 +655,12 @@ class LaneLinkEdit(MapEdit):
         """
         name = config.BENCHMARK_ID
         Tk().withdraw()
-        file = asksaveasfilename(initialdir=config.SAVE_PATH, initialfile=name, defaultextension=".xml",
-                                 filetypes=(("xml file", "*.xml"), ("All Files", "*.*")))
+        file = asksaveasfilename(
+            initialdir=config.SAVE_PATH,
+            initialfile=name,
+            defaultextension=".xml",
+            filetypes=(("xml file", "*.xml"), ("All Files", "*.*")),
+        )
         if file != "":
             graph = converter.Scenario.step_collection_3(self.graph)
             self.app.export(graph, file)
@@ -608,29 +671,36 @@ class AttributeEditor:
     An editor to edit the attributes of a single edge
     """
 
-    def __init__(self, edit_widget: QWidget, gui_frame: eeGUI_frame, ee_gui: gui.EdgeEditGUI):
+    def __init__(
+        self, edit_widget: QWidget, gui_frame: eeGUI_frame, ee_gui: gui.EdgeEditGUI
+    ):
         """
 
         :param edit_widget: the widget to display the attribute editor in
         :param gui_frame: the gui window to display the edge editor in
         :param ee_gui: the embedded gui
         """
-        self.road_type_indices = {'motorway': 0,
-                                  'motorway_link': 1,
-                                  'trunk': 2,
-                                  'trunk_link': 3,
-                                  'primary': 4,
-                                  'primary_link': 5,
-                                  'secondary': 6,
-                                  'secondary_link': 7,
-                                  'tertiary': 8,
-                                  'tertiary_link': 9,
-                                  'unclassified': 10,
-                                  'residential': 11,
-                                  'living_street': 12,
-                                  'service': 13}
+        self.road_type_indices = {
+            "motorway": 0,
+            "motorway_link": 1,
+            "trunk": 2,
+            "trunk_link": 3,
+            "primary": 4,
+            "primary_link": 5,
+            "secondary": 6,
+            "secondary_link": 7,
+            "tertiary": 8,
+            "tertiary_link": 9,
+            "unclassified": 10,
+            "residential": 11,
+            "living_street": 12,
+            "service": 13,
+        }
 
-        self.road_types = {self.road_type_indices[road_type]: road_type for road_type in self.road_type_indices}
+        self.road_types = {
+            self.road_type_indices[road_type]: road_type
+            for road_type in self.road_type_indices
+        }
 
         self.edit_widget: QWidget = edit_widget
         self.co_road_type: QComboBox = gui_frame.co_road_type
@@ -704,7 +774,9 @@ class AttributeEditor:
         """
         if self.selected_edge is not None:
             assert not self.editing
-            self.selected_edge.roadtype = self.road_types[self.co_road_type.currentIndex()]
+            self.selected_edge.roadtype = self.road_types[
+                self.co_road_type.currentIndex()
+            ]
             self.selected_edge.nr_of_lanes = self.sp_lane_count.value()
             self.selected_edge.forward_lanes = self.sp_forward_lanes.value()
             self.selected_edge.backward_lanes = self.sp_backward_lanes.value()
@@ -727,7 +799,10 @@ class AttributeEditor:
         :return: None
         """
         if not self.ch_oneway.isChecked():
-            forward, backward = self.sp_forward_lanes.value(), self.sp_backward_lanes.value()
+            forward, backward = (
+                self.sp_forward_lanes.value(),
+                self.sp_backward_lanes.value(),
+            )
             self.editing = True
             self.sp_forward_lanes.setValue(backward)
             self.sp_backward_lanes.setValue(forward)
@@ -745,10 +820,14 @@ class AttributeEditor:
             print("road type changed")
             self.editing = True
             roadtype = self.road_types[self.co_road_type.currentIndex()]
-            assert config.LANECOUNTS[roadtype] >= 1, "lane count must be >=1 ({})".format(roadtype)
+            assert (
+                config.LANECOUNTS[roadtype] >= 1
+            ), "lane count must be >=1 ({})".format(roadtype)
             self.sp_lane_count.setValue(config.LANECOUNTS[roadtype])
             self.sp_forward_lanes.setValue(int(self.sp_lane_count.value() / 2 + 0.5))
-            self.sp_backward_lanes.setValue(self.sp_lane_count.value() - self.sp_forward_lanes.value())
+            self.sp_backward_lanes.setValue(
+                self.sp_lane_count.value() - self.sp_forward_lanes.value()
+            )
             self.ch_oneway.setChecked(self.sp_lane_count.value() <= 1)
             self.sp_speed_limit.setValue(config.SPEED_LIMITS[roadtype] / 3.6)
             self.sp_lane_width.setValue(config.LANEWIDTHS[roadtype])
@@ -768,8 +847,12 @@ class AttributeEditor:
             if self.ch_oneway.isChecked():
                 self.sp_forward_lanes.setValue(self.sp_lane_count.value())
             else:
-                self.sp_forward_lanes.setValue(int(self.sp_lane_count.value() / 2 + 0.5))
-                self.sp_backward_lanes.setValue(self.sp_lane_count.value() - self.sp_forward_lanes.value())
+                self.sp_forward_lanes.setValue(
+                    int(self.sp_lane_count.value() / 2 + 0.5)
+                )
+                self.sp_backward_lanes.setValue(
+                    self.sp_lane_count.value() - self.sp_forward_lanes.value()
+                )
                 if self.sp_backward_lanes.value() == 0:
                     self.ch_oneway.setChecked(True)
             self.editing = False
@@ -785,7 +868,9 @@ class AttributeEditor:
             self.editing = True
             if self.sp_forward_lanes.value() + self.sp_backward_lanes.value() == 0:
                 self.sp_forward_lanes.setValue(1)
-            self.sp_lane_count.setValue(self.sp_forward_lanes.value() + self.sp_backward_lanes.value())
+            self.sp_lane_count.setValue(
+                self.sp_forward_lanes.value() + self.sp_backward_lanes.value()
+            )
             if self.sp_forward_lanes.value() == 0:
                 self.ch_oneway.setChecked(True)
             self.editing = False
@@ -799,7 +884,9 @@ class AttributeEditor:
         """
         if not self.editing:
             self.editing = True
-            self.sp_lane_count.setValue(self.sp_forward_lanes.value() + self.sp_backward_lanes.value())
+            self.sp_lane_count.setValue(
+                self.sp_forward_lanes.value() + self.sp_backward_lanes.value()
+            )
             if self.sp_backward_lanes.value() == 0:
                 self.ch_oneway.setChecked(True)
             else:
@@ -818,7 +905,9 @@ class AttributeEditor:
                 self.sp_backward_lanes.setValue(0)
             else:
                 self.sp_backward_lanes.setValue(1)
-            self.sp_lane_count.setValue(self.sp_forward_lanes.value() + self.sp_backward_lanes.value())
+            self.sp_lane_count.setValue(
+                self.sp_forward_lanes.value() + self.sp_backward_lanes.value()
+            )
             self.set_attributes()
 
     def lane_width_changed(self) -> None:

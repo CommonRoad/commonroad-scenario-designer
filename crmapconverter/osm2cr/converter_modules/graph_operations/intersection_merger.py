@@ -8,12 +8,14 @@ from typing import Set, Tuple
 
 import numpy as np
 
-import config
-from converter_modules.graph_operations import road_graph as rg
-from converter_modules.utility import idgenerator as id_gen
+from crmapconverter.osm2cr import config
+from crmapconverter.osm2cr.converter_modules.graph_operations import road_graph as rg
+from crmapconverter.osm2cr.converter_modules.utility import idgenerator as id_gen
 
 
-def redirect_edges(edges: Set[rg.GraphEdge], nodes: Set[rg.GraphNode], node: rg.GraphNode) -> None:
+def redirect_edges(
+    edges: Set[rg.GraphEdge], nodes: Set[rg.GraphNode], node: rg.GraphNode
+) -> None:
     """
     changes all nodes, which are in a set of nodes, of edges to a certain node
 
@@ -70,7 +72,9 @@ def collect_neighbors(node: rg.GraphNode, distance: float) -> Set[rg.GraphNode]:
     return merge_with
 
 
-def merge_nodes(nodes: Set[rg.GraphNode]) -> Tuple[rg.GraphNode, Set[rg.GraphEdge], Set[rg.GraphNode]]:
+def merge_nodes(
+    nodes: Set[rg.GraphNode]
+) -> Tuple[rg.GraphNode, Set[rg.GraphEdge], Set[rg.GraphNode]]:
     """
     merges a set of nodes to one
 
@@ -114,7 +118,9 @@ def merge_close_intersections(graph: rg.Graph) -> None:
                 updated = False
                 nodes_to_merge = collect_neighbors(node, config.MERGE_DISTANCE)
                 if len(nodes_to_merge) > 1:
-                    new_node, edges_to_delete, nodes_to_delete = merge_nodes(nodes_to_merge)
+                    new_node, edges_to_delete, nodes_to_delete = merge_nodes(
+                        nodes_to_merge
+                    )
                     graph.nodes -= nodes_to_delete
                     graph.edges -= edges_to_delete
                     graph.nodes.add(new_node)

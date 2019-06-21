@@ -7,11 +7,12 @@ from urllib.request import urlopen
 
 import numpy as np
 
-import config
-from config import EARTH_RADIUS
+from crmapconverter.osm2cr import config
 
 
-def write_bounds_to_file(filename: str, lon1: float, lat1: float, lon2: float, lat2: float):
+def write_bounds_to_file(
+    filename: str, lon1: float, lat1: float, lon2: float, lat2: float
+):
     """
     adds a tag to the downloaded osm file which defines the bounds of the downloaded window
     this is used in osm_parser.py to only extract points within these bounds
@@ -26,13 +27,13 @@ def write_bounds_to_file(filename: str, lon1: float, lat1: float, lon2: float, l
     """
     tree = xml.etree.ElementTree.parse(filename)
 
-    tag = xml.etree.ElementTree.SubElement(tree.getroot(), 'custom_bounds')
-    tag.attrib['lon1'] = str(lon1)
-    tag.attrib['lon2'] = str(lon2)
-    tag.attrib['lat1'] = str(lat1)
-    tag.attrib['lat2'] = str(lat2)
+    tag = xml.etree.ElementTree.SubElement(tree.getroot(), "custom_bounds")
+    tag.attrib["lon1"] = str(lon1)
+    tag.attrib["lon2"] = str(lon2)
+    tag.attrib["lat1"] = str(lat1)
+    tag.attrib["lat2"] = str(lat2)
 
-    tree.write(filename, encoding='utf-8', xml_declaration=True)
+    tree.write(filename, encoding="utf-8", xml_declaration=True)
 
 
 def download_map(filename: str, lon1: float, lat1: float, lon2: float, lat2: float):
@@ -51,16 +52,20 @@ def download_map(filename: str, lon1: float, lat1: float, lon2: float, lat2: flo
     :type lat2: float
     :return: None
     """
-    query = 'https://overpass-api.de/api/map?bbox={},{},{},{}'.format(lon1, lat1, lon2, lat2)
-    print('downloading map')
+    query = "https://overpass-api.de/api/map?bbox={},{},{},{}".format(
+        lon1, lat1, lon2, lat2
+    )
+    print("downloading map")
     data = urlopen(query).read()
-    with open(filename, 'wb') as file:
+    with open(filename, "wb") as file:
         file.write(data)
-    print('writing custom bounds')
+    print("writing custom bounds")
     write_bounds_to_file(filename, lon1, lat1, lon2, lat2)
 
 
-def get_frame(lon: float, lat: float, radius: float) -> Tuple[float, float, float, float]:
+def get_frame(
+    lon: float, lat: float, radius: float
+) -> Tuple[float, float, float, float]:
     """
     gets the frame of area to download
 
@@ -73,8 +78,8 @@ def get_frame(lon: float, lat: float, radius: float) -> Tuple[float, float, floa
     :return: frame of the area
     :rtype: Tuple[float, float, float, float]
     """
-    lon_constant = np.pi / 180 * EARTH_RADIUS * np.cos(np.radians(lat))
-    lat_constant = np.pi / 180 * EARTH_RADIUS
+    lon_constant = np.pi / 180 * config.EARTH_RADIUS * np.cos(np.radians(lat))
+    lat_constant = np.pi / 180 * config.EARTH_RADIUS
     lon1 = lon - radius / lon_constant
     lat1 = lat - radius / lat_constant
     lon2 = lon + radius / lon_constant

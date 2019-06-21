@@ -2,7 +2,7 @@
 This module provides functions to analyse the available data.
 It is not used in the conversion process.
 """
-from converter_modules.graph_operations import road_graph
+from crmapconverter.osm2cr.converter_modules.graph_operations import road_graph
 
 
 def count_given_lanes(graph: road_graph.Graph):
@@ -19,8 +19,10 @@ def count_given_lanes(graph: road_graph.Graph):
             given_nr_of_lanes += 1
         if edge.forward_lanes is not None:
             given_nr_and_directions_of_lanes += 1
-    print("Nr of {} lanes given, direction of {} lanes given, total: {} lanes"
-          "".format(given_nr_of_lanes, given_nr_and_directions_of_lanes, len(graph.edges)))
+    print(
+        "Nr of {} lanes given, direction of {} lanes given, total: {} lanes"
+        "".format(given_nr_of_lanes, given_nr_and_directions_of_lanes, len(graph.edges))
+    )
     return
 
 

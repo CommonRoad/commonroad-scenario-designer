@@ -8,6 +8,9 @@ setup_dir = os.path.dirname(os.path.realpath(__file__))
 with open(f"{setup_dir}/README.md", "r") as fh:
     long_description = fh.read()
 
+with open(f"{setup_dir}/crmapconverter/osm2cr/requirements.txt") as f:
+    osm2cr_requirements = f.read().splitlines()
+
 setup(
     name="commonroad-map-converter",
     version="1.1.0",
@@ -27,7 +30,10 @@ setup(
         "pyproj>=2.2.0",
         "scipy>=1.3.0",
     ],
-    extras_require={"GUI": ["PyQt5>=5.12.2", "matplotlib>=3.1.0"]},
+    extras_require={
+        "GUI": ["PyQt5>=5.12.2", "matplotlib>=3.1.0"],
+        "OSM2CR": osm2cr_requirements,
+    },
     python_requires=">=3.6",
     entry_points={
         "console_scripts": [
