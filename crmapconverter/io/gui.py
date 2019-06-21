@@ -17,7 +17,13 @@ from commonroad.common.file_writer import CommonRoadFileWriter
 
 from crmapconverter.opendriveparser.parser import parse_opendrive
 from crmapconverter.opendriveconversion.network import Network
-from opendrive2lanelet.io.viewer import MainWindow as ViewerWidget
+from crmapconverter.io.viewer import MainWindow as ViewerWidget
+
+try:
+    from crmapconverter.osm2cr.main import start_gui
+except ModuleNotFoundError as module_err:
+    print(module_err)
+    print("It seems like you did not install the dependencies for osm2cr.")
 
 __author__ = "Benjamin Orthen, Stefan Urban"
 __copyright__ = "TUM Cyber-Physical Systems Group"
@@ -42,15 +48,80 @@ def main():
 
     # Startup application
     app = QApplication(sys.argv)
-    _ = MainWindow(sys.argv)
+    _ = MainWindow()
+    sys.exit(app.exec_())
+
+
+def opendrive_gui():
+    """Execute the gui to convert xodr files and
+    visualize commonroad files.
+
+    Args:
+
+    Returns:
+
+    """
+    # Make it possible to exit application with ctrl+c on console
+    signal.signal(signal.SIGINT, signal.SIG_DFL)
+
+    # Startup application
+    app = QApplication(sys.argv)
+    _ = OpenDriveConvertWindow(sys.argv)
     sys.exit(app.exec_())
 
 
 class MainWindow(QWidget):
+    """Proper main window"""
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+
+        self._init_user_interface()
+        self.show()
+
+    def _init_user_interface(self):
+        self.setWindowTitle("CommonRoad Map Converter")
+        self.setFixedSize(500, 300)
+
+        self.open_opendrive = QPushButton("Open OpenDRIVE Conversion menu", self)
+        self.open_opendrive.clicked.connect(self.opendrive_conversion_menu)
+        self.open_opendrive.move(10, 10)
+        self.open_opendrive.resize(300, 60)
+
+        self.open_cr_visualization = QPushButton(
+            "Open CommonRoad Visualization menu", self
+        )
+        self.open_cr_visualization.clicked.connect(self.commonroad_visualization_menu)
+        self.open_cr_visualization.move(10, 60)
+        self.open_cr_visualization.resize(300, 60)
+
+        self.open_osm2cr = QPushButton("Open OSM2CR conversion tool menu.", self)
+        self.open_osm2cr.move(10, 110)
+        self.open_osm2cr.resize(300, 60)
+        try:
+            self.open_osm2cr.clicked.connect(start_gui)
+        except NameError:
+            self.open_osm2cr.setDisabled(True)
+
+    def opendrive_conversion_menu(self):
+        """Open the conversion tool for OpenDRIVE in a new window."""
+
+        viewer = QMainWindow(self)
+        viewer.setCentralWidget(OpenDriveConvertWindow(argv=[], parent=self))
+        viewer.show()
+
+    def commonroad_visualization_menu(self):
+        """Open the simple color-supported visualization of a CommonRoad file."""
+        viewer = QMainWindow(self)
+        viewer.setCentralWidget(ViewerWidget(self))
+        viewer.show()
+
+
+class OpenDriveConvertWindow(QWidget):
     """ """
 
-    def __init__(self, argv):
-        super().__init__()
+    def __init__(self, argv, parent=None):
+        super().__init__(parent=parent)
 
         self.loadedRoadNetwork = None
 
@@ -59,7 +130,7 @@ class MainWindow(QWidget):
 
         if len(argv) >= 2:
             self.load_opendriveFile(argv[1])
-            self.viewLaneletNetwork()
+            self.viewConvertedLaneletNetwork()
 
     def _initUserInterface(self):
         """ """
@@ -95,7 +166,7 @@ class MainWindow(QWidget):
         self.viewOutputButton.move(190, 300)
         self.viewOutputButton.resize(170, 35)
         self.viewOutputButton.setDisabled(True)
-        self.viewOutputButton.clicked.connect(self.viewLaneletNetwork)
+        self.viewOutputButton.clicked.connect(self.viewConvertedLaneletNetwork)
 
     def resetOutputElements(self):
         """ """
@@ -226,7 +297,7 @@ class MainWindow(QWidget):
             QMessageBox.Ok,
         )
 
-    def viewLaneletNetwork(self):
+    def viewConvertedLaneletNetwork(self):
         """ """
 
         class ViewerWindow(QMainWindow):

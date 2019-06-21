@@ -400,6 +400,9 @@ class MainWindow(QWidget):
             len(self.current_scenario.lanelet_network.lanelets)
         )
         self.laneletsList.setColumnCount(2)
+        self.laneletsList.setHorizontalHeaderLabels(
+            ["Lanelet-Id", "Description (optional)"]
+        )
         # lanelet_data = [
         #     (lanelet.lanelet_id, lanelet.description)
         #     for lanelet in self.current_scenario.lanelet_network.lanelets

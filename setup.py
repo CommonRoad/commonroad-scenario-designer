@@ -38,7 +38,8 @@ setup(
     entry_points={
         "console_scripts": [
             "opendrive2lanelet-convert=crmapconverter.io.opendrive_convert:main",
-            "opendrive2lanelet-gui=crmapconverter.io.gui:main",
+            "opendrive2lanelet-gui=crmapconverter.io.gui:opendrive_gui",
+            "cr-map-converter-gui=crmapconverter.io.gui:main",
             "opendrive2lanelet-visualize=crmapconverter.io.visualize_commonroad:main",
             "osm-convert=crmapconverter.io.osm_convert:main",
         ]
