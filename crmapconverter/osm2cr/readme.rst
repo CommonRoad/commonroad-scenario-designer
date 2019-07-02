@@ -16,5 +16,7 @@ Installation
 
 Documentation
 -------------
-A detailed Documentation and usage description can be found `here <documentation/build/html/index.html>`_.
-If you cannot render html files on gitlab, clone the repository and open *documentation/readme.html* directly.
+
+Change into :file:`documentation` and run ``make html`` to build the documentation with sphinx.
+
+A detailed Documentation and usage description can then be found `here <documentation/build/html/index.html>`_.
