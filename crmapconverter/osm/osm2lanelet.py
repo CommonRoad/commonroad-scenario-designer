@@ -30,7 +30,7 @@ class OSM2LConverter:
     "Class to convert OSM to the Commonroad representation of Lanelets."
 
     def __init__(self, proj_string: str = None):
-        if proj_string is not None:
+        if proj_string:
             self.proj = Proj(proj_string)
         else:
             self.proj = Proj(DEFAULT_PROJ_STRING)

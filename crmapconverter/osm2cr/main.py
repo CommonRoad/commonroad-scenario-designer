@@ -50,8 +50,8 @@ def download_and_convert():
     scenario.save_as_cr()
 
 
-def start_gui():
-    app = MainApp()
+def start_gui(parent=None):
+    app = MainApp(parent)
     app.start()
 
 

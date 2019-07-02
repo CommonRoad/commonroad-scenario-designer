@@ -2,8 +2,13 @@
 
 This software provides multiple converters from other map formats to the CommonRoad map, which is based on lanelets.
 
-## OpenDRIVE 2 Lanelet - Converter
+| Tool | Functionality |
+|:----:|:------------:|
+| [opendrive2lanelet](#opendrive2lanelet) | Convert OpenDRIVE files to Lanelet maps |
+| [osm-convert](#osm-convert) | Convert lanelet maps between the OSM and the CommonRoad format |
+| [osm2cr](#osm2cr) | Convert general OSM maps to CommonRoad Lanelet maps |
 
+## opendrive2lanelet
 
 We provide the code for an OpenDRIVE ([www.opendrive.org](http://www.opendrive.org)) to lanelets ([www.mrt.kit.edu/software/liblanelet](https://www.mrt.kit.edu/software/libLanelet/libLanelet.html)) converter, which has been introduced in our [paper](https://mediatum.ub.tum.de/doc/1449005/1449005.pdf): M. Althoff, S. Urban, and M. Koschi, "Automatic Conversion of Road Networks from OpenDRIVE to Lanelets," in Proc. of the IEEE International Conference on Service Operations and Logistics, and Informatics, 2018.
 
@@ -56,9 +61,6 @@ Execute ```opendrive2lanelet-convert input_file.xodr -o output_file.xml```
 
 If you want to visualize the Commonroad file, use the ```opendrive2lanelet-visualize``` command.
 
-#### Converting from CommonRoad lanelets to OSM lanelets and vice versa
-
-Use the command ```osm-convert --help``` to see what is possible.
 
 ### Documentation
 
@@ -92,3 +94,16 @@ for example.
 
 Benjamin Orthen (current maintainer)  
 Stefan Urban
+
+## osm-convert
+
+This tool can be used to convert from CommonRoad lanelets to OSM lanelets and vice versa.
+
+Use the command ```osm-convert --help``` to see what is possible.
+
+## osm2cr
+
+For the documentation of osm2cr, see the [README](./crmapconverter/osm2cr/readme.rst).
+
+### Author
+Maximilian Rieger

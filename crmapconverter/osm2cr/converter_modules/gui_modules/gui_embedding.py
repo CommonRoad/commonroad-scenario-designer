@@ -52,9 +52,13 @@ class MainApp:
     Main App to start the gui GUI
     """
 
-    def __init__(self):
-        self.app = QApplication(sys.argv)
-        self.main_window = QMainWindow()
+    def __init__(self, parent=None):
+        if not parent:
+            self.app = QApplication(sys.argv)
+            self.main_window = QMainWindow()
+        else:
+            self.main_window = QMainWindow(parent)
+            self.app = None
         self.start_menu = StartMenu(self)
         self.edge_edit_window: Optional[EdgeEdit] = None
         self.lane_link_window: Optional[LaneLinkEdit] = None
@@ -66,7 +70,8 @@ class MainApp:
         :return: None
         """
         self.main_window.show()
-        self.app.exec_()
+        if self.app:
+            self.app.exec_()
 
     def edge_edit_embedding(self, graph: rg.Graph) -> None:
         """
