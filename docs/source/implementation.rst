@@ -91,6 +91,7 @@ CommonRoad to OSM
 Converting back from cartesian to geographic coordinates requires, like mentioned in the above description of the reverse conversion, a projection.
 
 This code of this conversion take some points into account:
+
 #. If a lanelet has a successor, the converted nodes at the end of the lanelet have to be the same as the nodes of the converted successor.
 #. Same goes for a lanelet and its predecessor.
 #. If a lanelet is adjacent to another lanelet, and the vertices of the shared border coincide, they can share a way in the converted OSM document.
