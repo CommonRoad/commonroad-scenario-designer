@@ -4,9 +4,9 @@ This software provides multiple converters from other map formats to the CommonR
 
 | Tool | Functionality |
 |:----:|:------------:|
-| [opendrive2lanelet](##opendrive2lanelet) | Convert OpenDRIVE files to Lanelet maps |
-| [osm-convert](##osm-convert) | Convert lanelet maps between the OSM and the CommonRoad format |
-| [osm2cr](##osm2cr) | Convert general OSM maps to CommonRoad Lanelet maps |
+| [opendrive2lanelet](## opendrive2lanelet) | Convert OpenDRIVE files to Lanelet maps |
+| [osm-convert](## osm-convert) | Convert lanelet maps between the OSM and the CommonRoad format |
+| [osm2cr](## osm2cr) | Convert general OSM maps to CommonRoad Lanelet maps |
 
 ## opendrive2lanelet
 
