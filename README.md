@@ -4,9 +4,9 @@ This software provides multiple converters from other map formats to the CommonR
 
 | Tool | Functionality |
 |:----:|:------------:|
-| [opendrive2lanelet](#opendrive2lanelet) | Convert OpenDRIVE files to Lanelet maps |
-| [osm-convert](#osm-convert) | Convert lanelet maps between the OSM and the CommonRoad format |
-| [osm2cr](#osm2cr) | Convert general OSM maps to CommonRoad Lanelet maps |
+| [opendrive2lanelet](##opendrive2lanelet) | Convert OpenDRIVE files to Lanelet maps |
+| [osm-convert](##osm-convert) | Convert lanelet maps between the OSM and the CommonRoad format |
+| [osm2cr](##osm2cr) | Convert general OSM maps to CommonRoad Lanelet maps |
 
 ## opendrive2lanelet
 
@@ -90,10 +90,7 @@ for example.
   ```
   Set the platform to *xcb* using this command: ```export QT_QPA_PLATFORM="xcb"```
 
-### Authors
 
-Benjamin Orthen (current maintainer)  
-Stefan Urban
 
 ## osm-convert
 
@@ -105,5 +102,8 @@ Use the command ```osm-convert --help``` to see what is possible.
 
 For the documentation of osm2cr, see the [README](./crmapconverter/osm2cr/readme.rst).
 
-### Author
-Maximilian Rieger
+### Authors
+
+Sebastian Maierhofer (current maintainer)  
+Benjamin Orthen 
+Stefan Urban
