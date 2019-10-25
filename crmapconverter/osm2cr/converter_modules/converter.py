@@ -112,14 +112,18 @@ class Scenario:
         plots.draw_scenario(self.graph, ax)
         plots.show_plot()
 
-    def save_as_cr(self):
+    def save_as_cr(self, filename: str):
         """
         exports the road network to a CommonRoad scenario
 
+        :param filename: file name for scenario generation tool
         :return: None
         """
         print("writing scenario to XML file")
-        export.export(self.graph)
+        if filename is not None:
+            export.export(self.graph, filename)
+        else:
+            export.export(self.graph)
 
     def save_to_file(self, filename: str):
         """

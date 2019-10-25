@@ -17,16 +17,18 @@ from crmapconverter.osm2cr.converter_modules.gui_modules.gui_embedding import Ma
 matplotlib.use("Qt5Agg")
 
 
-def convert(filename):
+def convert(filename_open, filename_store=None):
     """
     opens and converts a map
 
-    :param filename: the file to open
-    :type filename: str
+    :param filename_open: the file to open
+    :type filename_open: str
+    :param filename_store: the file to open
+    :type filename_store: str
     :return: None
     """
-    scenario = converter.Scenario(filename)
-    scenario.save_as_cr()
+    scenario = converter.Scenario(filename_open)
+    scenario.save_as_cr(filename_store)
 
 
 def download_and_convert():
