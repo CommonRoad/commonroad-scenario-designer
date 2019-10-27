@@ -4,9 +4,9 @@ This software provides multiple converters from other map formats to the CommonR
 
 | Tool | Functionality |
 |:----:|:------------:|
-| [opendrive2lanelet](## opendrive2lanelet) | Convert OpenDRIVE files to Lanelet maps |
-| [osm-convert](## osm-convert) | Convert lanelet maps between the OSM and the CommonRoad format |
-| [osm2cr](## osm2cr) | Convert general OSM maps to CommonRoad Lanelet maps |
+| [opendrive2lanelet](##opendrive2lanelet) | Convert OpenDRIVE files to Lanelet maps |
+| [osm-convert](##osm-convert) | Convert lanelet maps between the OSM and the CommonRoad format |
+| [osm2cr](##osm2cr) | Convert general OSM maps to CommonRoad Lanelet maps |
 
 ## opendrive2lanelet
 
@@ -16,34 +16,6 @@ We provide the code for an OpenDRIVE ([www.opendrive.org](http://www.opendrive.o
 [![PyPI version](https://badge.fury.io/py/opendrive2lanelet.svg)](https://badge.fury.io/py/opendrive2lanelet)
 [![Supported python versions](https://img.shields.io/pypi/pyversions/opendrive2lanelet.svg)](https://pypi.org/project/opendrive2lanelet/)
 [![License](https://img.shields.io/pypi/l/opendrive2lanelet.svg)](https://www.gnu.org/licenses/gpl-3.0.de.html)
-
-### Installation
-
-#### Installing from source
-
-```bash
-git clone https://gitlab.lrz.de/cps/opendrive2lanelet.git
-cd opendrive2lanelet
-python setup.py install
-```
-
-Public source (only released versions): https://gitlab.lrz.de/tum-cps/opendrive2lanelet.git
-
-
-
-#### Using pip:
-
-```bash
-pip install opendrive2lanelet
-```
-
-Optionally, for using the gui packages:
-
-```bash
-pip install opendrive2lanelet[GUI]
-```
-
-### Example OpenDRIVE Files
 
 Download example files from: http://opendrive.org/download.html
 
@@ -67,18 +39,7 @@ If you want to visualize the Commonroad file, use the ```opendrive2lanelet-visua
 The documentation is published on [Read the Docs](https://opendrive2lanelet.readthedocs.io/en/latest/).
 
 
-To generate the documentation from source, first install the necessary dependencies with pip:
-```bash
-pip install -r docs_requirements.txt
-```
-
-Then you can run
-```bash
-cd docs && make html
-```
-for example.
-
-
+For the documentation of osm2cr, see the [README](./doc/opendrive2cr_osmlanelet2cr_cr2osmlanelet/readme.rst).
 
 ### Known Problems
 
@@ -100,7 +61,24 @@ Use the command ```osm-convert --help``` to see what is possible.
 
 ## osm2cr
 
-For the documentation of osm2cr, see the [README](./crmapconverter/osm2cr/readme.rst).
+For the documentation of osm2cr, see the [README](./doc/osm2cr/readme.rst).
+
+
+### Documentation
+
+The documentation is published on [Read the Docs](https://opendrive2lanelet.readthedocs.io/en/latest/).
+
+
+To generate the documentation from source, first install the necessary dependencies with pip:
+```bash
+pip install -r docs_requirements.txt
+```
+
+Then you can run
+```bash
+cd docs && make html
+```
+for example.
 
 ### Authors
 
