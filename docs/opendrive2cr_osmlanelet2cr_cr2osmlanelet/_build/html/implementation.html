@@ -1,0 +1,296 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Implementation &mdash; opendrive2lanelet 1.1.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Tutorial for opendrive2lanelet" href="tutorial.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> opendrive2lanelet
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Implementation explained</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#parsing-opendrive">Parsing OpenDRIVE</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#converting-to-network-of-parametriclanes">Converting to network of ParametricLanes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#converting-parametriclanes-to-lanelets">Converting ParametricLanes to Lanelets</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#challenge-splitting-and-joining-lanelets">Challenge: Splitting and joining lanelets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#smaller-issues">Smaller issues</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#converting-osm-lanelets-to-commonroad-lanelets-and-vice-versa">Converting OSM Lanelets to CommonRoad Lanelets and vice versa</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#osm-lanelet-to-commonroad">OSM lanelet to CommonRoad</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#commonroad-to-osm-lanelet">CommonRoad to OSM lanelet</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#osm-map-to-commonroad">OSM map to CommonRoad</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">opendrive2lanelet</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Implementation</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/implementation.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="implementation">
+<h1>Implementation<a class="headerlink" href="#implementation" title="Permalink to this headline">¶</a></h1>
+<p>This part contains explanations of the rationales behind the implementation
+of the opendrive2lanelet package.</p>
+<p>In detail, the parsing of a OpenDrive file to a Python object,
+the converting to a network of ParametricLane object and then the
+conversion from Parametric Lanes to Lanelets is explained.</p>
+<div class="section" id="parsing-opendrive">
+<h2>Parsing OpenDRIVE<a class="headerlink" href="#parsing-opendrive" title="Permalink to this headline">¶</a></h2>
+<p>Parsing the OpenDRIVE xodr file is pretty straightforward. We mirror the OpenDRIVE document
+with a Python class in this package. The XML is parsed and from the results a OpenDRIVE object is created.</p>
+</div>
+<div class="section" id="converting-to-network-of-parametriclanes">
+<h2>Converting to network of ParametricLanes<a class="headerlink" href="#converting-to-network-of-parametriclanes" title="Permalink to this headline">¶</a></h2>
+<img alt="Explaining the concept of lanes in OpenDRIVE." src="lane_explanation.png" />
+<p>Every width section in OpenDRIVE gets converted into a ParametricLane and
+in turn every lane section gets converted into a ParametricLaneGroup which consists of multiple ParametricLanes. ParametricLanes have a ParametricLaneBorderGroup which has references to the left and right border of the ParametricLane and to the offset of each borders, which indicate at which point of the border the ParametricLane starts, as a Border can be used by multiple ParametricLanes.</p>
+<p>Calculating cartesian coordinates at a position on a border works as follows:
+#. The border has a reference border which calculates its coordinates.
+#. The border has one or more tuples of width coefficients. With the width coefficients which apply at the position (determined by a width coefficients offset), it calculates the width of its reference border.
+#. The width is added to the coordinates of the reference border in orthogonal direction, which results in coordinates of the border at a specific position.</p>
+<p>The position on a border is always specified in a curve parameter ds which follows the path of the border. Each reference border is a border again, until the last reference border, which in turn is a reference path, a PlaneView object. This PlaneView consists of the basic geometries which constitute the reference path.</p>
+</div>
+<div class="section" id="converting-parametriclanes-to-lanelets">
+<h2>Converting ParametricLanes to Lanelets<a class="headerlink" href="#converting-parametriclanes-to-lanelets" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="challenge-splitting-and-joining-lanelets">
+<h3>Challenge: Splitting and joining lanelets<a class="headerlink" href="#challenge-splitting-and-joining-lanelets" title="Permalink to this headline">¶</a></h3>
+<p>As detailed in Figure 6 of the accompanying paper, if a lanelet splits from
+another lanelet (merge in the paper) or joins into another lanelet, an additional
+border has to be created, because the end points of the splitting or joining lanelet
+have to coincide with the the lanelet it splits from or joins into, respectively.
+Creating the new border works by offsetting the other, not to be recreated border of the lanelet
+by a linear varying distance, such that for e.g. a lanelet which joins into another lanelet,
+the new width at the start is equal to the old width at the start and the new width at the end is equal to the width of the lanelet it joins into at the end.</p>
+<img alt="Recalculating the border of a joining lanelet." src="lanelet_join.png" />
+<p>The difficulty in determining the parameters used to calculate the new border was amplified by following problems:
+* Determining the position from where to calculate the new border. In general, this position is where the width of the joining/splitting lanelet has a zero derivative.
+* The joining/splitting of a border could extend over multiple, successive lanelets.
+* The joining/splitting lanelet has to be adjacent all the time to the lanelet it joins into or splits from, respectively.</p>
+</div>
+<div class="section" id="smaller-issues">
+<h3>Smaller issues<a class="headerlink" href="#smaller-issues" title="Permalink to this headline">¶</a></h3>
+<ol class="arabic simple">
+<li><p>If lanelets have zero width everywhere, they are discarded.</p></li>
+<li><p>If a lanelet has an adjacent neighbor, and the successor of this neighbor and the lanelets successor are adjacent too, the lanelets and their successors can be each merged into one lanelet in most circumstances.</p></li>
+</ol>
+</div>
+</div>
+<div class="section" id="converting-osm-lanelets-to-commonroad-lanelets-and-vice-versa">
+<h2>Converting OSM Lanelets to CommonRoad Lanelets and vice versa<a class="headerlink" href="#converting-osm-lanelets-to-commonroad-lanelets-and-vice-versa" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="osm-lanelet-to-commonroad">
+<h3>OSM lanelet to CommonRoad<a class="headerlink" href="#osm-lanelet-to-commonroad" title="Permalink to this headline">¶</a></h3>
+<p>As OSM lanelet boundaries are saved as geographic coordinates (lat, lon) and CommonRoad saves the
+boundaries as cartesian (map projection) coordinates, a projection is needed for the conversion.
+This projection is provided as a proj-string, as defined by the PROJ library (<a class="reference external" href="https://proj.org/index.html">https://proj.org/index.html</a>). A proj-strings holds the parameters of a given coordinate transformation.</p>
+<p>This project uses pyproj (<a class="reference external" href="https://pypi.org/project/pyproj/">https://pypi.org/project/pyproj/</a>) which is a Python interface to the PROJ library. The default proj-string defined here is “+proj=utm +zone=32 +ellps=WGS84”, which describes a Universal Transversal Mercator projection.</p>
+<p>A few comments on the conversion:</p>
+<ol class="arabic simple">
+<li><p>A lanelet and its successor share two nodes (last ones of the lanelet, first ones of the successor). Therefore, to detect this relation and save it in the CommonRoad file, exist dicts which save the node-lanelet relation, e.g. “Node is first left node of which lanelet” (first_left_nodes[node_id] = lanelet_id).</p></li>
+<li><p>Same goes for a lanelet and its predecessor.</p></li>
+<li><p>If lanelets in OSM share a common way, they are adjacent to each other. As a way can have only one direction, and if it is shared by lanelets having opposite driving directions, the vertices of one boundary of one of the two lanelet have to be reversed after conversion. This boundary is by default the left boundary considering the right-driving system in most of the world. You can set it to right by using the argument “left_driving_system=True” when calling the Converter.</p></li>
+<li><p>Lanelets can be adjacent without sharing a common way, because two ways can describe the same trajectory, but with a different number of nodes. This converter can still compare two vertices which resulted from converting two possible adjacent ways to the CommonRoad lanelet format and determine if the corresponding lanelets are adjacent. However, this is computationally quite intensive and is thus disabled by default (enable it with “–adjacencies” in the command line tool or setting “detect_adjacencies=True” when calling the converter.)</p></li>
+</ol>
+</div>
+<div class="section" id="commonroad-to-osm-lanelet">
+<h3>CommonRoad to OSM lanelet<a class="headerlink" href="#commonroad-to-osm-lanelet" title="Permalink to this headline">¶</a></h3>
+<p>Converting back from cartesian to geographic coordinates requires, like mentioned in the above description of the reverse conversion, a projection.</p>
+<p>This code of this conversion take some points into account:</p>
+<ol class="arabic simple">
+<li><p>If a lanelet has a successor, the converted nodes at the end of the lanelet have to be the same as the nodes of the converted successor.</p></li>
+<li><p>Same goes for a lanelet and its predecessor.</p></li>
+<li><p>If a lanelet is adjacent to another lanelet, and the vertices of the shared border coincide, they can share a way in the converted OSM document.</p></li>
+</ol>
+</div>
+<div class="section" id="osm-map-to-commonroad">
+<h3>OSM map to CommonRoad<a class="headerlink" href="#osm-map-to-commonroad" title="Permalink to this headline">¶</a></h3>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="tutorial.html" class="btn btn-neutral float-left" title="Tutorial for opendrive2lanelet" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Technische Universität München
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
