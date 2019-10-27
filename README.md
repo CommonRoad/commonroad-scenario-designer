@@ -1,87 +1,70 @@
 # CommonRoad Map Converter
 
-This software provides multiple converters from other map formats to the CommonRoad map, which is based on lanelets.
+This software provides multiple converters from different map formats to the CommonRoad map, which is based on lanelets.
 
 | Tool | Functionality |
 |:----:|:------------:|
-| [opendrive2lanelet](##opendrive2lanelet) | Convert OpenDRIVE files to Lanelet maps |
-| [osm-convert](##osm-convert) | Convert lanelet maps between the OSM and the CommonRoad format |
-| [osm2cr](##osm2cr) | Convert general OSM maps to CommonRoad Lanelet maps |
+| opendrive2lanelet | Conversion from OpenDRIVE files to Lanelet maps. |
+| osm-convert | Conversion from CommonRoad lanelets to OSM lanelets and vice versa. |
+| osm2cr | Conversion from general OSM maps to CommonRoad Lanelet maps. |
 
-## opendrive2lanelet
+#### Installation
+Execute the following command within your activated Python environment:
+```bash
+python setup.py install
+```
 
-We provide the code for an OpenDRIVE ([www.opendrive.org](http://www.opendrive.org)) to lanelets ([www.mrt.kit.edu/software/liblanelet](https://www.mrt.kit.edu/software/libLanelet/libLanelet.html)) converter, which has been introduced in our [paper](https://mediatum.ub.tum.de/doc/1449005/1449005.pdf): M. Althoff, S. Urban, and M. Koschi, "Automatic Conversion of Road Networks from OpenDRIVE to Lanelets," in Proc. of the IEEE International Conference on Service Operations and Logistics, and Informatics, 2018.
+#### Usage
 
-[![Documentation Status](https://readthedocs.org/projects/opendrive2lanelet/badge/?version=latest)](https://opendrive2lanelet.readthedocs.io/en/latest/?badge=latest)
-[![PyPI version](https://badge.fury.io/py/opendrive2lanelet.svg)](https://badge.fury.io/py/opendrive2lanelet)
-[![Supported python versions](https://img.shields.io/pypi/pyversions/opendrive2lanelet.svg)](https://pypi.org/project/opendrive2lanelet/)
-[![License](https://img.shields.io/pypi/l/opendrive2lanelet.svg)](https://www.gnu.org/licenses/gpl-3.0.de.html)
+Opening of GUI from which you can start the different converters: 
+```bash
+cr-map-converter-gui
+```
 
-Download example files from: http://opendrive.org/download.html
+Converting a file from OpenDRIVE to CommonRoad with the command line:  
+```bash
+opendrive2lanelet-convert input_file.xodr -o output_file.xml
+```
 
-### Usage
+Opening OpenDRIVE to CommonRoad converter GUI: 
+```bash
+opendrive2lanelet-gui
+```
 
-#### Using our provided GUI
+Visualizing the results of the conversion from OpenDrive to CommonRoad:
+```bash
+opendrive2lanelet-visualize input-file.xml
+```
 
-Start the GUI with ```opendrive2lanelet-gui```
+Converting a file from OSM lanelets to CommonRoad lanelets with the command line (for description of input parameters see documentation):  
+```bash
+osm-convert inputfile.xml --reverse -o outputfile.osm --adjencies --proj "+proj=etmerc +lat_0=38 +lon_0=125 +ellps=bessel"
+```
+For the conversion of CommonRoad lanelets to OSM lanelets change the input and output file accordingly.
 
-![GUI screenshot](gui_screenshot.png "Screenshot of converter GUI")
-
-#### Converting a file from OpenDRIVE with the command line
-
-Execute ```opendrive2lanelet-convert input_file.xodr -o output_file.xml```
-
-If you want to visualize the Commonroad file, use the ```opendrive2lanelet-visualize``` command.
-
-
-### Documentation
-
-The documentation is published on [Read the Docs](https://opendrive2lanelet.readthedocs.io/en/latest/).
-
-
-For the documentation of osm2cr, see the [README](./doc/opendrive2cr_osmlanelet2cr_cr2osmlanelet/readme.rst).
-
-### Known Problems
-
-- When trying to use the gui.py under Wayland, the following error occurs:
-  ```
-  This application failed to start because it could not find or load the Qt platform plugin "wayland" in "".
-  Available platform plugins are: eglfs, linuxfb, minimal, minimalegl, offscreen, vnc, xcb.
-  Reinstalling the application may fix this problem.
-  ```
-  Set the platform to *xcb* using this command: ```export QT_QPA_PLATFORM="xcb"```
+For the conversion of a file from a OSM map to CommonRoad lanelets 
+open the general GUI and start from there the the OSM map to CommonRoad converter.  
 
 
-
-## osm-convert
-
-This tool can be used to convert from CommonRoad lanelets to OSM lanelets and vice versa.
-
-Use the command ```osm-convert --help``` to see what is possible.
-
-## osm2cr
-
-For the documentation of osm2cr, see the [README](./doc/osm2cr/readme.rst).
-
-
-### Documentation
-
-The documentation is published on [Read the Docs](https://opendrive2lanelet.readthedocs.io/en/latest/).
-
+#### Documentation
 
 To generate the documentation from source, first install the necessary dependencies with pip:
 ```bash
 pip install -r docs_requirements.txt
 ```
 
-Then you can run
+Afterward run:
 ```bash
 cd docs && make html
 ```
-for example.
+The documentation can be accessed by opening */docs/_build/html/index.html*.
 
-### Authors
+#### Bug and feature reporting
+In case you detect a bug or you want to suggest a new feature create an issue in the backlog of the project.
+
+#### Authors
 
 Sebastian Maierhofer (current maintainer)  
-Benjamin Orthen 
-Stefan Urban
+Benjamin Orthen  
+Stefan Urban  
+Maximilian Rieger
