@@ -19,7 +19,7 @@ from commonroad.scenario.scenario import Scenario
 
 from crmapconverter.opendriveconversion.lanelet import ConversionLanelet
 from crmapconverter.opendriveconversion.lanelet_network import ConversionLaneletNetwork
-from crmapconverter.osm.osm import OSM, WayRelation, DEFAULT_PROJ_STRING
+from crmapconverter.osm.osm import OSM, WayRelation, DEFAULT_PROJ_STRING, Node
 
 NODE_DISTANCE_TOLERANCE = 0.01  # this is in meters
 
@@ -108,6 +108,11 @@ class OSM2LConverter:
         left_way = self.osm.find_way_by_id(way_rel.left_way)
         right_way = self.osm.find_way_by_id(way_rel.right_way)
         if len(left_way.nodes) != len(right_way.nodes):
+            print(f"Trying to fix relation {way_rel.id_}...")
+            self._fix_relation_unequal_ways(left_way, right_way)
+
+        # If for some reason, relation couldn't be fixed, notify user
+        if len(left_way.nodes) != len(right_way.nodes):
             print(
                 f"Error: Relation {way_rel.id_} has left and right ways which are not equally long! Please check your data! Discarding this lanelet relation."
             )
@@ -193,6 +198,59 @@ class OSM2LConverter:
             )
 
         return lanelet
+
+    def _fix_relation_unequal_ways(self, left_way, right_way):
+        # Try to fix by adding some nodes by interpolation in the way with the least nodes...
+        # TODO: Maybe we should try to add the extra nodes close to the zone where the other way has extra nodes? Or distribute evenly...
+        # For now, add between two central nodes
+        if (len(left_way.nodes) == len(right_way.nodes)):
+            return
+        if (len(left_way.nodes) < len(right_way.nodes)):
+            n = len(right_way.nodes) - len(left_way.nodes)
+            # Coordinates of two nodes in the middle to interpolate and add n nodes in between
+            mid = int(len(left_way.nodes)/2)
+            start_node = self.osm.find_node_by_id(left_way.nodes[mid])
+            end_node = self.osm.find_node_by_id(left_way.nodes[mid - 1])
+            # Parse to nodes with numeric values
+            start_node_f = np.array([float(start_node.lat),float(start_node.lon)])
+            end_node_f = np.array([float(end_node.lat),float(end_node.lon)])
+            # Add n nodes, start from last one
+            for i in range(n, 0, -1):
+                # TODO: What to do with the node id? For now add some big number to start node id
+                k = 10
+                new_id = int(start_node.id_) + k*100 + i
+                while self.osm.find_node_by_id(str(new_id)) is not None:
+                    k = k+1
+                    new_id = int(start_node.id_) + k*100 + i
+                # For Getting n additional nodes, we need to split the segment into n+1 smaller segments
+                new_lat = round(start_node_f[0] + (end_node_f[0] - start_node_f[0])*i/(n+1), 11)
+                new_lon = round(start_node_f[1] + (end_node_f[1] - start_node_f[1])*i/(n+1), 11)
+                new_node = Node(new_id, new_lat, new_lon)
+                self.osm.add_node(new_node)
+                left_way.nodes.insert(mid, new_node.id_)
+        else:
+            n = len(left_way.nodes) - len(right_way.nodes)
+            # Coordinates of two nodes in the middle to interpolate and add n nodes in between
+            mid = int(len(right_way.nodes)/2)
+            start_node = self.osm.find_node_by_id(right_way.nodes[mid])
+            end_node = self.osm.find_node_by_id(right_way.nodes[mid - 1])
+            # Parse to nodes with numeric values
+            start_node_f = np.array([float(start_node.lat),float(start_node.lon)])
+            end_node_f = np.array([float(end_node.lat),float(end_node.lon)])
+            # Add n nodes, start from last one
+            for i in range(n, 0, -1):
+                # TODO: What to do with the node id? For now add some big number to start node id
+                k = 10
+                new_id = int(start_node.id_) + k*100 + i
+                while self.osm.find_node_by_id(str(new_id)) is not None:
+                    k = k+1
+                    new_id = int(start_node.id_) + k*100 + i
+                # For Getting n additional nodes, we need to split the segment into n+1 smaller segments
+                new_lat = round(start_node_f[0] + (end_node_f[0] - start_node_f[0])*i/(n+1), 11)
+                new_lon = round(start_node_f[1] + (end_node_f[1] - start_node_f[1])*i/(n+1), 11)
+                new_node = Node(new_id, new_lat, new_lon)
+                self.osm.add_node(new_node)
+                right_way.nodes.insert(mid, new_node.id_)
 
     def _check_for_split_and_join_adjacencies(
         self, first_left_node, first_right_node, last_left_node, last_right_node
