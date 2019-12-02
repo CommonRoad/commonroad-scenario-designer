@@ -79,19 +79,22 @@ class TrafficSignal(TrafficSign):
                  id: str,
                  position: geometry.Point,
                  cycle: List[(Signal, int)],
+                 offset: int,
                  direction: Direction,
                  active: bool):
         """
 
         :param id: string for the id
         :param position: point for the location
-        :param cycle: list of tuple of signal and respective timeoffset
+        :param cycle: list of tuple of signal and respective time segment
+        :param offset: time offset for the signal cycle
         :param direction: applicable direction
         :param active: is active or not
         """
         self.id = id
         self.position = position
         self.cycle = cycle
+        self.offset = offset
         self.direction = direction
         self.active = active
 
