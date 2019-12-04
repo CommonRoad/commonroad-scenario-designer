@@ -168,3 +168,17 @@ RECOGNIZED_TURNLANES = [
     "left;right",
     "none",
 ]
+
+TRAFFIC_SIGN_VALUES = [
+    "traffic_signals",
+    "stop",
+    "give_way",
+    "city_limit",
+]
+TRAFFIC_SIGN_KEYS = [
+    "traffic_sign",
+    "overtaking",
+    "traffic_signals:direction",
+    "maxspeed",
+]
+

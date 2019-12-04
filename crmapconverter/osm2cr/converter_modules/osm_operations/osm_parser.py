@@ -21,6 +21,7 @@ from crmapconverter.osm2cr.converter_modules.utility.geometry import (
     Area,
     lon_lat_to_cartesian,
 )
+from crmapconverter.osm2cr.converter_modules.utility.traffic_rules import create_sign_from_osm, TrafficSign
 
 
 def read_custom_bounds(root) -> Optional[Tuple[float, float, float, float]]:
@@ -98,6 +99,20 @@ def get_nodes(roads: Set[ElTree.Element], root) -> Dict[int, ElTree.Element]:
             road_nodes[node.attrib["id"]] = node
     assert len(road_nodes) == len(node_ids)
     return road_nodes
+
+
+def get_traffic_signs(nodes: Dict[int, ElTree.Element],
+                      accepted_traffic_sign_by_keys: List[str],
+                      accepted_traffic_sign_by_values: List[str]) -> List[Dict]:
+    traffic_signals = []
+    for node_id in nodes:
+        node = nodes[node_id]
+        tags = node.findall('tag')
+        for tag in tags:
+            if tag.attrib['k'] in accepted_traffic_sign_by_keys or tag.attrib['v'] in accepted_traffic_sign_by_values:
+                sign = {'k': tag.attrib['k'], 'v': tag.attrib['v']}
+                traffic_signals.append({node_id: sign})
+    return traffic_signals
 
 
 def parse_restrictions(
@@ -196,6 +211,7 @@ def parse_file(
     type(None),
     Tuple[float, float],
     Tuple[float, float, float, float],
+    Dict[int, TrafficSign],
 ]:
     """
     extracts all ways with streets and all the nodes in these streets of a given osm file
@@ -204,7 +220,7 @@ def parse_file(
     :type filename: str
     :param accepted_highways: a list of all highways that shall be extracted
     :type accepted_highways: List[str]
-    :return: roads, road_points: set of all way objects and dict of required nodes
+    :return: roads, road_points: set of all way objects, dict of required nodes and list of traffic signs
     :rtype: Tuple[Set[ElTree.Element], Dict[int, Point]]
     """
     tree = ElTree.parse(filename)
@@ -216,11 +232,13 @@ def parse_file(
     custom_bounds = read_custom_bounds(root)
     road_points, center_point, bounds = get_points(road_nodes, custom_bounds)
     restrictions = get_restrictions(root)
+    extracted_rules = get_traffic_signs(road_nodes, config.TRAFFIC_SIGN_KEYS, config.TRAFFIC_SIGN_VALUES)
+    traffic_signs = create_sign_from_osm(extracted_rules, road_points)
     # print("bounds", bounds, "custom_bounds", read_custom_bounds(root))
     if custom_bounds is not None:
         bounds = custom_bounds
 
-    return roads, road_points, restrictions, center_point, bounds
+    return roads, road_points, restrictions, center_point, bounds, traffic_signs
 
 
 def parse_turnlane(turnlane: str) -> str:
@@ -325,7 +343,7 @@ def extract_tag_info(road: ElTree.Element) -> Tuple[Road_info, int]:
 
 
 def get_graph_nodes(
-    roads: Set[ElTree.Element], points: Dict[int, Point]
+        roads: Set[ElTree.Element], points: Dict[int, Point]
 ) -> Dict[int, rg.GraphNode]:
     """
     gets graph nodes from set of osm ways
