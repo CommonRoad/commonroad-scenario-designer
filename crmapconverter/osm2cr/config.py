@@ -4,6 +4,8 @@ This module holds all parameters necessary for the conversion
 
 # Benchmark settings
 # name of the benchmark
+import enum
+
 BENCHMARK_ID = "test_bench"
 # author of the benchmark
 AUTHOR = "Automated converter by Maximilian Rieger"
@@ -181,4 +183,15 @@ TRAFFIC_SIGN_KEYS = [
     "traffic_signals:direction",
     "maxspeed",
 ]
+
+
+@enum.unique
+class TrafficSignID(enum.Enum):
+    MAXSPEED = '274'
+    OVERTAKING = '276'
+    CITYLIMIT = '310'
+    GIVEWAY = '205'
+    STOP = '206'
+    UNKNOWN = ''
+
 

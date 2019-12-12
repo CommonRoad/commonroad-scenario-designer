@@ -1,15 +1,19 @@
 """
 This module provides various classes to handle traffic rules.
 """
-from enum import Enum
-
+import enum
+from abc import ABC
 from typing import List
+
+from crmapconverter.osm2cr.config import TrafficSignID
+from crmapconverter.osm2cr.converter_modules.utility.geometry import Point
 from pyparsing import Dict
 
 from crmapconverter.osm2cr.converter_modules.utility import geometry
 
 
-class Direction(Enum):
+@enum.unique
+class Direction(enum.Enum):
     """
     Enum for all the possible directions for a traffic signal
     """
@@ -19,14 +23,16 @@ class Direction(Enum):
     BACKWARD = "backward"
 
 
-class Signal(Enum):
+@enum.unique
+class Signal(enum.Enum):
     """
     Enum for the possible types of traffic light in signals
     """
-    RED: "red"
-    YELLOW: "yellow"
-    REDYELLOW: "redYellow"
-    GREEN: "green"
+    RED = "red"
+    YELLOW = "yellow"
+    REDYELLOW = "redYellow"
+    GREEN = "green"
+
 
 class TrafficLight:
     """
@@ -42,49 +48,96 @@ class TrafficLight:
         self.time = time
 
 
+class TrafficSignElement:
+    """Class to represent one unit of traffic sign"""
+    def __init__(self, trafficSignID: str,
+                 additionalValue: List[int]):
+        self.trafficSignID = trafficSignID
+        self.additionalValue = additionalValue
+
+    def __str__(self):
+        return f"Sign Element with id {self.trafficSignID} and values {self.additionalValue} "
+
+    def __repr__(self):
+        return f"Sign Element with id {self.trafficSignID} and values {self.additionalValue} "
+
+
 class TrafficSign:
     """
     Class to represent Traffic Signs
     """
 
     def __init__(self,
-                 id: str,
+                 id: int,
                  position: geometry.Point,
-                 additional_values: Dict):
+                 traffic_sign_elements: List[TrafficSignElement],
+                 virtual = False):
         """
 
-        :param id: string for id of the sign: COUNTRYCODE:id
+        :param id: int for the id of the sign
         :param position: location of the signal
-        :param additional_values: key-value pair of additional values
+        :param traffic_sign_elements: list of traffic sign elements
+        :param virtual: boolean value
         """
         self.id = id
         self.position = position
-        self.additional_values = additional_values
+        self.traffic_sign_elements = traffic_sign_elements
+        self.virtual = virtual
 
     def update(self, data):
         key = data['k']
         value = data['v']
-        if key == 'traffic_sign' and value != "maxspeed":
-            self.additional_values.update({value: True})
+        has_value = True
+        sign_id = TrafficSign.map_sign_id(key)
+        if sign_id == TrafficSignID.UNKNOWN.value:
+            sign_id = TrafficSign.map_sign_id(value)
+            has_value = False
+
+        # add new element
+        added = False
+        for element in self.traffic_sign_elements:
+            if element.trafficSignID == sign_id and has_value:
+                element.additionalValue.append(value)
+                added = True
+                break
+        if not added:
+            # new element
+            values = []
+            if has_value:
+                values.append(value)
+            element = TrafficSignElement(sign_id, values)
+            self.traffic_sign_elements.append(element)
+
+    @classmethod
+    def map_sign_id(cls, value):
+        if value == 'stop':
+            return TrafficSignID.STOP.value
+        elif value == 'give_way':
+            return TrafficSignID.GIVEWAY.value
+        elif value == 'city_limit':
+            return TrafficSignID.CITYLIMIT.value
         else:
-            self.additional_values.update({key: value})
+            return TrafficSignID.UNKNOWN.value
 
     def __str__(self):
-        return f"Sign At {self.position} with {self.additional_values} "
+        return f"Sign At {self.position} with {self.traffic_sign_elements} "
 
 
-class TrafficSignal(TrafficSign):
+
+
+class TrafficLight:
     """
-    Class to represent the traffic signals
+    Class to represent the traffic lights
     """
 
-    def __init__(self, id: str, position: geometry.Point):
+    def __init__(self, id: int, position: geometry.Point):
         """
 
         :param id: id of the signal
         :param position: point coordinates of the signal
         """
-        super().__init__(id, position, {})
+        self.id = id
+        self.position = position
         self.cycle = []
         self.offset = 0
         self.direction = Direction.FORWARD
@@ -97,7 +150,8 @@ class TrafficSignal(TrafficSign):
             self.direction = Direction.FORWARD if value == "forward" else Direction.BACKWARD
 
     def __str__(self):
-        return f"Signal At {self.position}"
+        return f"Traffic Light At {self.position}"
+
 
 def get_traffic_sign_from_osm_data(data, position, id):
     """
@@ -111,13 +165,16 @@ def get_traffic_sign_from_osm_data(data, position, id):
     value = data['v']
     if value == "traffic_signals":
         # the data is pointing to a traffic signal
-        return TrafficSignal(id, position)
+        return TrafficLight(id, position)
     if key == "maxspeed":
         # the data consists of maxspeed limit
-        return TrafficSign(id, position, {key: value})
+        element = TrafficSignElement(TrafficSignID.MAXSPEED.value, [value])
+        return TrafficSign(id, position,  [element])
     if key == "traffic_sign":
         # the data is a sign
-        return TrafficSign(id, position, {value: True})
+        sign_id = TrafficSign.map_sign_id(value)
+        element = TrafficSignElement(sign_id, [])
+        return TrafficSign(id, position, [element])
 
 
 def create_sign_from_osm(extracted_rules, points):
