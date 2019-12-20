@@ -285,7 +285,7 @@ def extract_tag_info(road: ElTree.Element) -> Tuple[Road_info, int]:
                     pass
                 elif tag.attrib["v"].endswith("mph"):
                     try:
-                        speedlimit = int(tag.attrib["v"][:-3] / 1.60934)
+                        speedlimit = int(float(tag.attrib["v"][:-3]) / 1.60934)
                     except ValueError:
                         print("unreadable speedlimit: '{}'".format(tag.attrib["v"]))
                 else:
