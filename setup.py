@@ -28,7 +28,7 @@ setup(
         "pyproj>=2.2.0",
         "scipy>=1.3.0",
     ],
-    extras_require={"GUI": ["PyQt5>=5.12.2", "matplotlib>=3.1.0"]},
+    extras_require={"GUI": ["matplotlib>=3.1.0"]},
     python_requires=">=3.6",
     entry_points={
         "console_scripts": [
