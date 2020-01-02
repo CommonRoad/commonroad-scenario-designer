@@ -24,7 +24,7 @@ setup(
     install_requires=[
         "numpy>=1.16.4",
         "lxml>=4.3.4",
-        "commonroad-io>=2019.1",
+        "commonroad-io @ git+ssh://git@gitlab.lrz.de:cps/commonroad-io.git@feature_traffic_rules",
         "pyproj>=2.2.0",
         "scipy>=1.3.0",
     ],
