@@ -3,7 +3,7 @@ This module holds the classes required for the graph structure.
 It also provides several methods to perform operations on elements of the graph.
 """
 from queue import Queue
-from typing import List, Set, Tuple, Optional
+from typing import List, Set, Tuple, Optional, Dict
 
 import numpy as np
 
@@ -683,6 +683,20 @@ class GraphEdge:
         return np.array([p.get_array() for p in self.waypoints])
 
 
+class GraphTrafficSign:
+    def __init__(self, sign: Dict,
+                 node: GraphNode):
+        self.sign = sign
+        self.node = node
+
+
+class GraphTrafficLight:
+    def __init__(self, light: Dict,
+                 node: GraphNode):
+        self.light = light
+        self.node = node
+
+
 class Lane:
     """
     Class that represents a lane in the graph structure
@@ -897,6 +911,8 @@ class Graph:
         edges: Set[GraphEdge],
         center_point: Tuple[float, float],
         bounds: Tuple[float, float, float, float],
+        traffic_signs: List[GraphTrafficSign],
+        traffic_lights: List[GraphTrafficLight],
     ) -> None:
         """
         creates a new graph
@@ -911,6 +927,8 @@ class Graph:
         self.lanelinks: Set[Lane] = set()
         self.center_point = center_point
         self.bounds = bounds
+        self.traffic_signs = traffic_signs
+        self.traffic_lights = traffic_lights
 
     def get_central_node(self) -> GraphNode:
         """
@@ -1479,3 +1497,4 @@ class Graph:
         #   - common points of predecessors/successors are identical
         #   - directions of predecessors/successors are the same
         return False
+

@@ -21,7 +21,6 @@ from crmapconverter.osm2cr.converter_modules.utility.geometry import (
     Area,
     lon_lat_to_cartesian,
 )
-from crmapconverter.osm2cr.converter_modules.utility.traffic_rules import create_sign_from_osm, TrafficSign
 
 
 def read_custom_bounds(root) -> Optional[Tuple[float, float, float, float]]:
@@ -101,18 +100,33 @@ def get_nodes(roads: Set[ElTree.Element], root) -> Dict[int, ElTree.Element]:
     return road_nodes
 
 
-def get_traffic_signs(nodes: Dict[int, ElTree.Element],
+def get_traffic_rules(nodes: Dict[int, ElTree.Element],
                       accepted_traffic_sign_by_keys: List[str],
-                      accepted_traffic_sign_by_values: List[str]) -> List[Dict]:
-    traffic_signals = []
+                      accepted_traffic_sign_by_values: List[str]) -> Dict:
+    traffic_rules = {}
     for node_id in nodes:
         node = nodes[node_id]
         tags = node.findall('tag')
         for tag in tags:
             if tag.attrib['k'] in accepted_traffic_sign_by_keys or tag.attrib['v'] in accepted_traffic_sign_by_values:
-                sign = {'k': tag.attrib['k'], 'v': tag.attrib['v']}
-                traffic_signals.append({node_id: sign})
-    return traffic_signals
+                sign = { tag.attrib['k']: tag.attrib['v']}
+                if node_id in traffic_rules:
+                    traffic_rules[node_id].update(sign)
+                else:
+                    traffic_rules.update({node_id: sign})
+    return traffic_rules
+
+
+def get_traffic_signs_and_lights(traffic_rules: Dict) -> (List, List):
+    traffic_lights = []
+    traffic_signs = []
+    for node_id in traffic_rules:
+        rule = traffic_rules[node_id]
+        if 'traffic_sign' in rule.keys():
+            traffic_signs.append({node_id: rule})
+        else:
+            traffic_lights.append({node_id: rule})
+    return traffic_signs, traffic_lights
 
 
 def parse_restrictions(
@@ -211,7 +225,8 @@ def parse_file(
     type(None),
     Tuple[float, float],
     Tuple[float, float, float, float],
-    Dict[int, TrafficSign],
+    List,
+    List
 ]:
     """
     extracts all ways with streets and all the nodes in these streets of a given osm file
@@ -231,14 +246,14 @@ def parse_file(
     road_nodes = get_nodes(roads, root)
     custom_bounds = read_custom_bounds(root)
     road_points, center_point, bounds = get_points(road_nodes, custom_bounds)
+    traffic_rules = get_traffic_rules(road_nodes, config.TRAFFIC_SIGN_KEYS, config.TRAFFIC_SIGN_VALUES)
+    traffic_signs, traffic_lights = get_traffic_signs_and_lights(traffic_rules)
     restrictions = get_restrictions(root)
-    extracted_rules = get_traffic_signs(road_nodes, config.TRAFFIC_SIGN_KEYS, config.TRAFFIC_SIGN_VALUES)
-    traffic_signs = create_sign_from_osm(extracted_rules, road_points)
     # print("bounds", bounds, "custom_bounds", read_custom_bounds(root))
     if custom_bounds is not None:
         bounds = custom_bounds
 
-    return roads, road_points, restrictions, center_point, bounds, traffic_signs
+    return roads, road_points, restrictions, center_point, bounds, traffic_signs, traffic_lights
 
 
 def parse_turnlane(turnlane: str) -> str:
@@ -342,8 +357,27 @@ def extract_tag_info(road: ElTree.Element) -> Tuple[Road_info, int]:
     )
 
 
+def get_graph_traffic_signs(nodes: Dict, traffic_signs: List):
+    graph_traffic_signs = []
+    for traffic_sign in traffic_signs:
+        node_id = next(iter(traffic_sign))
+        graph_traffic_sign = rg.GraphTrafficSign( traffic_sign[node_id], nodes[node_id])
+        graph_traffic_signs.append(graph_traffic_sign)
+    return graph_traffic_signs
+
+
+def get_graph_traffic_lights(nodes: Dict, traffic_lights: List):
+    graph_traffic_lights = []
+    for traffic_light in traffic_lights:
+        node_id = next(iter(traffic_light))
+        graph_traffic_light = rg.GraphTrafficLight( traffic_light[node_id], nodes[node_id])
+        graph_traffic_lights.append(graph_traffic_light)
+    return graph_traffic_lights
+
+
 def get_graph_nodes(
-        roads: Set[ElTree.Element], points: Dict[int, Point]
+        roads: Set[ElTree.Element], points: Dict[int, Point], traffic_signs: List,
+        traffic_lights: List
 ) -> Dict[int, rg.GraphNode]:
     """
     gets graph nodes from set of osm ways
@@ -371,6 +405,20 @@ def get_graph_nodes(
                 nodes[id] = rg.GraphNode(
                     int(id), current_point.x, current_point.y, set()
                 )
+
+    for traffic_sign in traffic_signs:
+        id = next(iter(traffic_sign))
+        if id not in nodes:
+            current_point = points[id]
+            nodes[id] = rg.GraphNode(int(id), current_point.x, current_point.y, set())
+
+    for traffic_light in traffic_lights:
+        id = next(iter(traffic_light))
+        if id not in nodes:
+            if id not in nodes:
+                current_point = points[id]
+                nodes[id] = rg.GraphNode(int(id), current_point.x, current_point.y, set())
+
     for id in node_degree:
         current_point = points[id]
         if id not in nodes and node_degree[id] > 1:
@@ -598,6 +646,8 @@ def roads_to_graph(
     center_point: Tuple[float, float],
     bounds: Tuple[float, float, float, float],
     origin: tuple,
+    traffic_signs: List,
+    traffic_lights: List
 ) -> rg.Graph:
     """
     converts a set of roads and points to a road graph
@@ -610,10 +660,14 @@ def roads_to_graph(
     :type road_points: Dict[int, Point]
     :param restrictions: restrictions which will be applied to edges
     :param center_point: gps coordinates of the origin
+    :param traffic_signs: traffic signs to apply
+    :param traffic_lights: traffic lights to apply
     :return:
     """
     origin = np.array(origin)[::-1]
-    nodes = get_graph_nodes(roads, road_points)
+    nodes = get_graph_nodes(roads, road_points, traffic_signs, traffic_lights)
+    graph_traffic_signs = get_graph_traffic_signs(nodes, traffic_signs)
+    graph_traffic_lights = get_graph_traffic_lights(nodes, traffic_lights)
     edges = get_graph_edges_from_road(roads, nodes, road_points, bounds, origin)
     map_restrictions(edges, restrictions, nodes)
     edges = {elem for edge_set in edges.values() for elem in edge_set}
@@ -621,5 +675,5 @@ def roads_to_graph(
     # for node in nodes:
     #     node_set.add(nodes[node])
     node_set = get_node_set(edges)
-    graph = rg.Graph(node_set, edges, center_point, bounds)
+    graph = rg.Graph(node_set, edges, center_point, bounds, graph_traffic_signs, graph_traffic_lights)
     return graph
