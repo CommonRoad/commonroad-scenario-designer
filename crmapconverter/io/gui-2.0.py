@@ -47,6 +47,8 @@ class Design(Button):
         self.configure(activebackground='#003359')
         self.configure(background='#003359')
         self.configure(cursor='hand2')
+        self.configure(command=command)
+        self.configure(highlightbackground='#003359')
         self.grid(column=self.column, row=self.row)
 
 
@@ -55,14 +57,12 @@ class Interface(Frame):
 
     # osm2cr
     def osm2cr(self):
-        return 1
-        #start_gui()
+        start_gui()
 
     # OpenDrive2Lanelet
     def opendrive2Lanelet(self):
         """Open the conversion tool for OpenDRIVE in a new window."""
-        return 2
-        #G.opendrive_gui()
+        G.opendrive_gui()
 
     def __init__(self, fenetre, **kwargs):
         Frame.__init__(self, fenetre, bg="#003359", **kwargs)
@@ -82,16 +82,14 @@ class Interface(Frame):
         welcoming_text.image = welcoming_text_src
         welcoming_text.grid(row=1, pady=15)
 
-        # Button_display
-        active_color = '#003359'
 
         # First line - Canvas 1
-        button_canvas_1 = Canvas(self)
+        button_canvas_1 = Canvas(self, background='#003359', highlightbackground='#003359')
         button_canvas_1.grid(row=2)
 
         b1_src_pil = Image.open("gui_src/Groupe 1.png")
         b1_src = ImageTk.PhotoImage(b1_src_pil)
-        b1 = Design(button_canvas_1, 2, 0, b1_src)
+        b1 = Design(button_canvas_1, 2, 0, b1_src, command=start_gui)
 
         b2_src_pil = Image.open("gui_src/Groupe 2.png")
         b2_src = ImageTk.PhotoImage(b2_src_pil)
@@ -99,8 +97,7 @@ class Interface(Frame):
 
         b3_src_pil = Image.open("gui_src/Groupe 3.png")
         b3_src = ImageTk.PhotoImage(b3_src_pil)
-        b3 = Design(button_canvas_1, 2, 2, b3_src)
-        b3.grid(row=2, column=2)
+        b3 = Design(button_canvas_1, 2, 2, b3_src, command=G.opendrive_gui)
 
         button_canvas_2 = Canvas(self, background='#003359', highlightbackground = '#003359')
         button_canvas_2.grid(row=3, pady=30)
@@ -131,3 +128,5 @@ welcome.resizable(False, False)
 interface = Interface(welcome)
 interface.mainloop()
 
+#For next time : Focus on OSM2CR (with possibility to add
+#traffic rules)
