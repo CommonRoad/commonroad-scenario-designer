@@ -410,6 +410,7 @@ class OpenDriveConvertWindow(QWidget):
 
     def openOpenDriveFileDialog(self):
         """ """
+        print(15)
         self.reset_output_elements()
 
         path, _ = QFileDialog.getOpenFileName(
