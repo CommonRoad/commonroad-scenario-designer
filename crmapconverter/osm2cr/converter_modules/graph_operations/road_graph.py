@@ -188,6 +188,8 @@ class GraphNode:
         self.x = x
         self.y = y
         self.edges = edges
+        self.traffic_signs = []
+        self.traffic_lights = []
 
     def __str__(self):
         return "Graph_node with id: {}".format(self.id)
@@ -290,6 +292,8 @@ class GraphNode:
                     "malformed graph, node has edges assigned to it, which start elsewhere"
                 )
 
+    def add_traffic_sign(self, sign: "GraphTrafficSign"):
+        self.traffic_signs.append(sign)
 
 class GraphEdge:
     """
@@ -355,6 +359,8 @@ class GraphEdge:
         self.lanewidth: float = config.LANEWIDTHS[roadtype]
         self.forward_restrictions: Set[str] = set()
         self.backward_restrictions: Set[str] = set()
+        self.traffic_signs = []
+        self.traffic_lights = []
 
     def flip(self) -> None:
         """
@@ -682,12 +688,16 @@ class GraphEdge:
         """
         return np.array([p.get_array() for p in self.waypoints])
 
+    def add_traffic_sign(self, sign: "GraphTrafficSign"):
+        self.traffic_signs.append(sign)
+
 
 class GraphTrafficSign:
     def __init__(self, sign: Dict,
-                 node: GraphNode):
+                 node: GraphNode = None, edges: List = []):
         self.sign = sign
         self.node = node
+        self.edges = edges
 
 
 class GraphTrafficLight:
@@ -1497,4 +1507,14 @@ class Graph:
         #   - common points of predecessors/successors are identical
         #   - directions of predecessors/successors are the same
         return False
+
+    def apply_traffic_signs(self):
+        # for each traffic sign:
+            # add to node and roads
+        for sign in self.traffic_signs:
+            if sign.node is not None:
+                sign.node.add_traffic_sign(sign)
+            for edge in sign.edges:
+                for sub_edge in edge:
+                    sub_edge.add_traffic_sign(sign)
 
