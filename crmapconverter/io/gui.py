@@ -353,7 +353,9 @@ class OSMLaneletsConvertWindow(QWidget):
 
 
 class OpenDriveConvertWindow(QWidget):
-    """ """
+    """
+    GUI of the the tool to convert map from Open Drive to Common Road
+    """
 
     def __init__(self, argv, parent=None):
         super().__init__(parent=parent)
@@ -410,16 +412,17 @@ class OpenDriveConvertWindow(QWidget):
 
     def openOpenDriveFileDialog(self):
         """ """
-        print(15)
         self.reset_output_elements()
 
         path, _ = QFileDialog.getOpenFileName(
             self,
-            "QFileDialog.getOpenFileName()",
+            "Please select an Open Drive Map",
             "",
             "OpenDRIVE files *.xodr (*.xodr)",
             options=QFileDialog.Options(),
         )
+
+        print(path)
 
         if not path:
             return
