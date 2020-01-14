@@ -278,6 +278,8 @@ class StartMenu:
             initialdir=os.path.expanduser("~"),
             filetypes=(("osm files", "*.osm"), ("all files", "*.*")),
         )
+
+        self.embedding.input_bench_id.setText(file.split('/')[-1].split('.')[0])
         if file != "":
             self.selected_file = file
             self.embedding.l_selected_file.setText(file)
