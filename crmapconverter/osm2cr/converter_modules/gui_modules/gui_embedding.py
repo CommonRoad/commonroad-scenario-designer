@@ -21,7 +21,7 @@ from PyQt5.QtWidgets import (
     QCheckBox,
     QDoubleSpinBox,
     QComboBox,
-)
+    QFileDialog)
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.pyplot import close
@@ -125,7 +125,7 @@ class MainApp:
         self.start_menu = StartMenu(self)
 
 
-class StartMenu:
+class StartMenu(QWidget):
     """
     Menu to start GUI
     Links to menus and functions via buttons
@@ -136,6 +136,7 @@ class StartMenu:
 
         :param app: the main pyqt5 app, in which the Start Menu is running
         """
+        super().__init__(parent=None)
         self.app: MainApp = app
         self.embedding: startWindow = startWindow()
         self.embedding.setupUi(self.app.main_window)
@@ -272,11 +273,13 @@ class StartMenu:
 
         :return: None
         """
-        Tk().withdraw()
-        file = askopenfilename(
-            title="Select OSM map to convert",
-            initialdir=os.path.expanduser("~"),
-            filetypes=(("osm files", "*.osm"), ("all files", "*.*")),
+
+        file, _ = QFileDialog.getOpenFileName(
+            self,
+            "Select OpenStreetMap map",
+            "",
+            "OpenStreetMap files *.osm (*.osm)",
+            options=QFileDialog.Options(),
         )
 
         self.embedding.input_bench_id.setText(file.split('/')[-1].split('.')[0])

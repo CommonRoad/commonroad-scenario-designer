@@ -416,13 +416,11 @@ class OpenDriveConvertWindow(QWidget):
 
         path, _ = QFileDialog.getOpenFileName(
             self,
-            "Please select an Open Drive Map",
+            "Select an Open Drive Map",
             "",
             "OpenDRIVE files *.xodr (*.xodr)",
             options=QFileDialog.Options(),
         )
-
-        print(path)
 
         if not path:
             return
