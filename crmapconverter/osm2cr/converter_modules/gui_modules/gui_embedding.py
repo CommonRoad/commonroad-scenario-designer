@@ -2,6 +2,7 @@
 This module allows to embed the GUIs defined in gui.py in a pyqt5 window.
 It also provides a main window to start the conversion process, and the possibility to view CR scenarios
 """
+import os
 import pickle
 import re
 import sys
@@ -273,7 +274,8 @@ class StartMenu:
         """
         Tk().withdraw()
         file = askopenfilename(
-            initialdir="files/",
+            title="Select OSM map to convert",
+            initialdir=os.path.expanduser("~"),
             filetypes=(("osm files", "*.osm"), ("all files", "*.*")),
         )
         if file != "":
