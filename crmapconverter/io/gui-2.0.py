@@ -32,6 +32,14 @@ except ModuleNotFoundError as module_err:
 except:
     print("You need to install manually commonroad")
 
+# osm2cr
+def osm2cr():
+    start_gui()
+
+# OpenDrive2Lanelet
+def opendrive2Lanelet():
+    """Open the conversion tool for OpenDRIVE in a new window."""
+    G.opendrive_gui()
 
 class Design(Button):
     """Class defining the design of the buttons used in the interface defined below"""
@@ -55,14 +63,7 @@ class Design(Button):
 class Interface(Frame):
     """Class driving the interface of main window"""
 
-    # osm2cr
-    def osm2cr(self):
-        start_gui()
 
-    # OpenDrive2Lanelet
-    def opendrive2Lanelet(self):
-        """Open the conversion tool for OpenDRIVE in a new window."""
-        G.opendrive_gui()
 
     def __init__(self, fenetre, **kwargs):
         Frame.__init__(self, fenetre, bg="#003359", **kwargs)
@@ -89,7 +90,7 @@ class Interface(Frame):
 
         b1_src_pil = Image.open("gui_src/Groupe 1.png")
         b1_src = ImageTk.PhotoImage(b1_src_pil)
-        b1 = Design(button_canvas_1, 2, 0, b1_src, command=start_gui)
+        b1 = Design(button_canvas_1, 2, 0, b1_src, command=osm2cr)
 
         b2_src_pil = Image.open("gui_src/Groupe 2.png")
         b2_src = ImageTk.PhotoImage(b2_src_pil)
@@ -97,7 +98,7 @@ class Interface(Frame):
 
         b3_src_pil = Image.open("gui_src/Groupe 3.png")
         b3_src = ImageTk.PhotoImage(b3_src_pil)
-        b3 = Design(button_canvas_1, 2, 2, b3_src, command=G.opendrive_gui)
+        b3 = Design(button_canvas_1, 2, 2, b3_src, command=opendrive2Lanelet)
 
         button_canvas_2 = Canvas(self, background='#003359', highlightbackground = '#003359')
         button_canvas_2.grid(row=3, pady=30)
@@ -127,6 +128,3 @@ welcome.resizable(False, False)
 
 interface = Interface(welcome)
 interface.mainloop()
-
-#For next time : Focus on OSM2CR (with possibility to add
-#traffic rules)
