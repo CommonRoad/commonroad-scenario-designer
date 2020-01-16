@@ -3,6 +3,10 @@ import signal
 import sys
 import time
 
+from PyQt5.QtWidgets import QFileDialog, QWidget, QApplication, QMainWindow
+#crmapconverter/osm2cr/converter_modules/gui_modules/gui_embedding.py
+from crmapconverter.osm2cr.converter_modules.gui_modules.gui_embedding import StartMenu, MainApp
+
 try:
     import crmapconverter.io.gui as G
     from commonroad.common.file_writer import CommonRoadFileWriter
@@ -80,6 +84,10 @@ class My_Button(Button):
             sticky=W + N,
             padx=self.padx,
             pady=self.pady)
+
+    def set_icon(self, icon):
+        self.icon = image_encoding("V2.0/gui_src/" + icon)
+        self.configure(image=self.icon)
 
 
 class My_Canvas(Canvas):
@@ -205,10 +213,10 @@ class OSM2CRActivity1(OSM2CRFrame):
         #Answers
         answers = My_Canvas(self, 3)
         answers_padx = 40
-        self.open = My_Button(answers, 0, 0, default,
+        self.open = My_Button(answers, 0, 0, osm2cr,
                          "button_open.png",
                          padx=answers_padx)
-        self.download = My_Button(answers, 0, 1, default,
+        self.download = My_Button(answers, 0, 1, osm2cr,
                              "button_download.png",
                              padx=answers_padx)
 
@@ -220,6 +228,7 @@ class OD2CRFrame(InterfaceToolTemplate):
         #Head Text
         self.welcoming_text = My_Title(self.Can, "OD2CR_head.png",
                                  column=2, pady=10, padx=40)
+
 
 class OD2CRActivity1(OD2CRFrame):
     """Class driving the interface of the first Activity of OSM2CR"""
@@ -234,7 +243,10 @@ class OD2CRActivity1(OD2CRFrame):
                          "button_open.png",
                          padx=20)
         def open_OD():
-            self.open.configure(image=)
+            self.open.set_icon("icon.png")
+            openDRIVE2Lanelet()
+
+        self.open.configure(command=open_OD)
 
 
 # INITIALISATION
@@ -245,10 +257,11 @@ def initialise():
     try:
         window.iconbitmap("V2.0/gui_src/icon.ico")
     except TclError:
-        ico = PhotoImage(file="V2.0/gui_src/icon.png")
-        window.tk.call('wm', 'iconphoto', window._w, ico)
-    except:
-        print("Impossible to set icon")
+        try:
+            ico = PhotoImage(file="V2.0/gui_src/icon.png")
+            window.tk.call('wm', 'iconphoto', window._w, ico)
+        except:
+            print("Impossible to set icon")
     window.geometry(str(width)+'x'+str(high))
     window['bg'] = '#003359'
     window.resizable(False, False)
