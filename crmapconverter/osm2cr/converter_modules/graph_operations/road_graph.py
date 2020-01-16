@@ -690,6 +690,11 @@ class GraphEdge:
 
     def add_traffic_sign(self, sign: "GraphTrafficSign"):
         self.traffic_signs.append(sign)
+        # add to lanes
+        for lane in self.lanes:
+            # add to forward lanes
+            if lane.forward:
+                lane.add_traffic_sign(sign)
 
 
 class GraphTrafficSign:
@@ -756,6 +761,8 @@ class Lane:
         self.adjacent_left_direction_equal: Optional[bool] = None
         self.adjacent_right_direction_equal: Optional[bool] = None
         self.speedlimit = speedlimit
+        self.traffic_signs = None
+        self.traffic_lights = None
 
     def flip(self, keep_edge_dir: bool) -> None:
         """
@@ -912,6 +919,11 @@ class Lane:
         else:
             raise ValueError("node is not assigned to this edge")
         return
+
+    def add_traffic_sign(self, sign: GraphTrafficSign):
+        if self.traffic_signs is None:
+            self.traffic_signs = []
+        self.traffic_signs.append(sign)
 
 
 class Graph:
@@ -1510,7 +1522,7 @@ class Graph:
 
     def apply_traffic_signs(self):
         # for each traffic sign:
-            # add to node and roads
+            # add to node and roads and lanes
         for sign in self.traffic_signs:
             if sign.node is not None:
                 sign.node.add_traffic_sign(sign)
