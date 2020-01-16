@@ -35,9 +35,9 @@ def get_lanelet(lane: rg.Lane) -> Lanelet:
     right_bound = lane.right_bound
     center_points = lane.waypoints
     successors = []
-    speedlimit = lane.speedlimit
-    if speedlimit is None or speedlimit == 0:
-        speedlimit = np.infty
+    # speedlimit = lane.speedlimit
+    # if speedlimit is None or speedlimit == 0:
+    #     speedlimit = np.infty
     for successor in lane.successors:
         successors.append(successor.id)
     predecessors = []
@@ -79,7 +79,6 @@ def get_lanelet(lane: rg.Lane) -> Lanelet:
         adjacent_left_direction_equal,
         adjacent_right,
         adjacent_right_direction_equal,
-        speedlimit,
     )
     return lanelet
 

@@ -3,7 +3,7 @@ This module holds the classes required for the graph structure.
 It also provides several methods to perform operations on elements of the graph.
 """
 from queue import Queue
-from typing import List, Set, Tuple, Optional
+from typing import List, Set, Tuple, Optional, Dict
 
 import numpy as np
 
@@ -188,6 +188,8 @@ class GraphNode:
         self.x = x
         self.y = y
         self.edges = edges
+        self.traffic_signs = []
+        self.traffic_lights = []
 
     def __str__(self):
         return "Graph_node with id: {}".format(self.id)
@@ -290,6 +292,8 @@ class GraphNode:
                     "malformed graph, node has edges assigned to it, which start elsewhere"
                 )
 
+    def add_traffic_sign(self, sign: "GraphTrafficSign"):
+        self.traffic_signs.append(sign)
 
 class GraphEdge:
     """
@@ -355,6 +359,8 @@ class GraphEdge:
         self.lanewidth: float = config.LANEWIDTHS[roadtype]
         self.forward_restrictions: Set[str] = set()
         self.backward_restrictions: Set[str] = set()
+        self.traffic_signs = []
+        self.traffic_lights = []
 
     def flip(self) -> None:
         """
@@ -682,6 +688,29 @@ class GraphEdge:
         """
         return np.array([p.get_array() for p in self.waypoints])
 
+    def add_traffic_sign(self, sign: "GraphTrafficSign"):
+        self.traffic_signs.append(sign)
+        # add to lanes
+        for lane in self.lanes:
+            # add to forward lanes
+            if lane.forward:
+                lane.add_traffic_sign(sign)
+
+
+class GraphTrafficSign:
+    def __init__(self, sign: Dict,
+                 node: GraphNode = None, edges: List = []):
+        self.sign = sign
+        self.node = node
+        self.edges = edges
+
+
+class GraphTrafficLight:
+    def __init__(self, light: Dict,
+                 node: GraphNode):
+        self.light = light
+        self.node = node
+
 
 class Lane:
     """
@@ -732,6 +761,8 @@ class Lane:
         self.adjacent_left_direction_equal: Optional[bool] = None
         self.adjacent_right_direction_equal: Optional[bool] = None
         self.speedlimit = speedlimit
+        self.traffic_signs = None
+        self.traffic_lights = None
 
     def flip(self, keep_edge_dir: bool) -> None:
         """
@@ -889,6 +920,11 @@ class Lane:
             raise ValueError("node is not assigned to this edge")
         return
 
+    def add_traffic_sign(self, sign: GraphTrafficSign):
+        if self.traffic_signs is None:
+            self.traffic_signs = []
+        self.traffic_signs.append(sign)
+
 
 class Graph:
     def __init__(
@@ -897,6 +933,8 @@ class Graph:
         edges: Set[GraphEdge],
         center_point: Tuple[float, float],
         bounds: Tuple[float, float, float, float],
+        traffic_signs: List[GraphTrafficSign],
+        traffic_lights: List[GraphTrafficLight],
     ) -> None:
         """
         creates a new graph
@@ -911,6 +949,8 @@ class Graph:
         self.lanelinks: Set[Lane] = set()
         self.center_point = center_point
         self.bounds = bounds
+        self.traffic_signs = traffic_signs
+        self.traffic_lights = traffic_lights
 
     def get_central_node(self) -> GraphNode:
         """
@@ -1479,3 +1519,14 @@ class Graph:
         #   - common points of predecessors/successors are identical
         #   - directions of predecessors/successors are the same
         return False
+
+    def apply_traffic_signs(self):
+        # for each traffic sign:
+            # add to node and roads and lanes
+        for sign in self.traffic_signs:
+            if sign.node is not None:
+                sign.node.add_traffic_sign(sign)
+            for edge in sign.edges:
+                for sub_edge in edge:
+                    sub_edge.add_traffic_sign(sign)
+
