@@ -127,7 +127,7 @@ class Home(Frame):
         self.grid()
 
         # welcoming text
-        welcoming_text = My_Title(self,
+        self.welcoming_text = My_Title(self,
                                   image="welcoming_text.png",
                                   column=0,
                                   pady=15)
@@ -137,20 +137,25 @@ class Home(Frame):
             self.destroy()
             OSM2CRActivity1(window).mainloop()
 
+        def openDRIVE2cr_new():
+            """Function to access the new GUI of OpenDRIVE2Converter"""
+            self.destroy()
+            OD2CRActivity1(window).mainloop()
+
 
         # First line - Canvas 1
-        button_canvas_1 = My_Canvas(self, 2)
-        b1 = My_Button(button_canvas_1, 2, 0, osm2cr_new,
+        self.button_canvas_1 = My_Canvas(self, 2)
+        self.b1 = My_Button(self.button_canvas_1, 2, 0, osm2cr_new,
                        "Groupe 1.png")
-        b2 = My_Button(button_canvas_1, 2, 1, default,
+        self.b2 = My_Button(self.button_canvas_1, 2, 1, default,
                        "Groupe 2.png" )
-        b3 = My_Button(button_canvas_1, 2, 2, openDRIVE2Lanelet,
+        self.b3 = My_Button(self.button_canvas_1, 2, 2, openDRIVE2cr_new,
                        "Groupe 3.png")
 
-        button_canvas_2 = My_Canvas(self, 3, pady=30)
-        b4 = My_Button(button_canvas_2, 3, 0, default,
+        self.button_canvas_2 = My_Canvas(self, 3, pady=30)
+        b4 = My_Button(self.button_canvas_2, 3, 0, default,
                        "Groupe 4.png")
-        b5 = My_Button(button_canvas_2, 3, 1, default,
+        b5 = My_Button(self.button_canvas_2, 3, 1, default,
                        "Groupe 5.png")
 
 
@@ -172,11 +177,11 @@ class InterfaceToolTemplate(Frame):
         # Buttons Head
         self.Can = My_Canvas(self, 1, sticky=W)
 
-        home = My_Button(self.Can, 1, 0, go_home, "/button_home.png")
-        back = My_Button(self.Can, 1, 1, go_home,
+        self.home = My_Button(self.Can, 1, 0, go_home, "/button_home.png")
+        self.back = My_Button(self.Can, 1, 1, go_home,
                          "button_back.png",
                          padx=10)
-        self.help = My_Button(self.Can, 1, 3, go_help, "button_help.png", padx=30)
+        self.help = My_Button(self.Can, 1, 3, go_help, "button_help.png", padx=30, pady=5)
 
 
 class OSM2CRFrame(InterfaceToolTemplate):
@@ -185,10 +190,8 @@ class OSM2CRFrame(InterfaceToolTemplate):
     def __init__(self, window, **kwargs):
         InterfaceToolTemplate.__init__(self, window, **kwargs)
         #Head Text
-        welcoming_text = My_Title(self.Can, "OSM2CR_head.png",
+        self.welcoming_text = My_Title(self.Can, "OSM2CR_head.png",
                                  column=2, pady=10, padx=40)
-
-
 
 class OSM2CRActivity1(OSM2CRFrame):
     """Class driving the interface of the first Activity of OSM2CR"""
@@ -197,20 +200,41 @@ class OSM2CRActivity1(OSM2CRFrame):
         OSM2CRFrame.__init__(self, window, **kwargs)
 
         #Question
-        question = My_Title(self, "OSM2CR_question.png", 2, 0, pady=50)
+        self.question = My_Title(self, "OSM2CR_question.png", 2, 0, pady=50)
 
         #Answers
         answers = My_Canvas(self, 3)
         answers_padx = 40
-        open = My_Button(answers, 0, 0, default,
-                         "button_download.png",
+        self.open = My_Button(answers, 0, 0, default,
+                         "button_open.png",
                          padx=answers_padx)
-        download = My_Button(answers, 0, 1, default,
-                             "button_open.png",
+        self.download = My_Button(answers, 0, 1, default,
+                             "button_download.png",
                              padx=answers_padx)
 
+class OD2CRFrame(InterfaceToolTemplate):
+    """Class driving the frame of OSM2CR Converter"""
 
+    def __init__(self, window, **kwargs):
+        InterfaceToolTemplate.__init__(self, window, **kwargs)
+        #Head Text
+        self.welcoming_text = My_Title(self.Can, "OD2CR_head.png",
+                                 column=2, pady=10, padx=40)
 
+class OD2CRActivity1(OD2CRFrame):
+    """Class driving the interface of the first Activity of OSM2CR"""
+
+    def __init__(self, window, **kwargs):
+        OD2CRFrame.__init__(self, window, **kwargs)
+
+        #Open OpenDRIVE Map
+        self.open_canvas = My_Canvas(self, 2, pady=50)
+        self.question = My_Title(self.open_canvas, "OD2CR_question.png", 0, 0)
+        self.open = My_Button(self.open_canvas, 0, 1, default,
+                         "button_open.png",
+                         padx=20)
+        def open_OD():
+            self.open.configure(image=)
 
 
 # INITIALISATION
