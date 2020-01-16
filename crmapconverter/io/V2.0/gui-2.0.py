@@ -33,85 +33,125 @@ except ModuleNotFoundError as module_err:
 except:
     print("You need to install manually commonroad")
 
-# osm2cr
+#GLOBAL VARIABLES
+high = 600
+width = 640
+
+#GLOBAL FUNCTIONS
+def image_encoding(path):
+    """Loads an image in the right format to inster it in the Tkinter File System"""
+
+    return ImageTk.PhotoImage(Image.open(path))
+
 def osm2cr():
+    """Converter OSM2CR intial function (V1.0)"""
     start_gui()
 
-# OpenDrive2Lanelet
-def opendrive2Lanelet():
-    """Open the conversion tool for OpenDRIVE in a new window."""
+def openDRIVE2Lanelet():
+    """Converter OpenDRIVE2Lanelet intial function (V1.0)"""
     G.opendrive_gui()
 
 def default():
     print("coming soon")
 
-class Design(Button):
+
+class My_Button(Button):
     """Class defining the design of the buttons used in the interface defined below"""
 
-    def __init__(self, parent, row, column, icon, command=print("ok"), **kwargs):
+    def __init__(self, parent, row, column, command, icon=None, padx=0, pady=0, **kwargs):
         self.row = row
         self.column = column
-        self.icon = icon
         self.command = command
+        self.icon = image_encoding("V2.0/gui_src/" + icon)
+        self.padx = padx
+        self.pady = pady
         Button.__init__(self, parent, **kwargs)
-        self.configure(image=icon)
+        self.configure(image=self.icon)
         self.configure(borderwidth=0)
         self.configure(activebackground='#003359')
         self.configure(background='#003359')
         self.configure(cursor='hand2')
-        self.configure(command=command)
+        self.configure(command=self.command)
         self.configure(highlightbackground='#003359')
-        self.grid(column=self.column, row=self.row)
+        self.configure(anchor=W)
+        self.grid(
+            column=self.column,
+            row=self.row,
+            sticky=W + N,
+            padx=self.padx,
+            pady=self.pady)
 
 
-class Interface(Frame):
-    """Class driving the interface of main window"""
+class My_Canvas(Canvas):
+    """Class defining the design of the canvas used in the interface defined below"""
+
+    def __init__(self, parent, row, pady=0, sticky=None, **kwargs):
+        self.row = row
+        self.pady = pady
+        self.sticky = sticky
+        Canvas.__init__(self, parent, **kwargs)
+        self.configure(background = '#003359')
+        self.configure(highlightbackground = '#003359')
+        self.grid(
+            row= self.row,
+            pady = self.pady,
+            sticky= self.sticky)
+
+
+class My_Title(Label):
+    """Class defining the design of the window titles used in the interface defined below"""
+
+    def __init__(self, parent, image, row=1, column=2, pady=0, padx=0, sticky=None, **kwargs):
+        self.row = row
+        self.column = column
+        self.pady = pady
+        self.padx = padx
+        self.sticky = sticky
+        self.image = image_encoding("V2.0/gui_src/" + image)
+        Label.__init__(self, parent, image = self.image, **kwargs)
+        self.configure(background = '#003359')
+        self.configure(highlightbackground = '#003359')
+        self.grid(
+            row= self.row,
+            column= self.column,
+            pady= self.pady,
+            padx = self.padx,
+            sticky= self.sticky)
+
+
+class Home(Frame):
+    """Class driving the interface of welcoming window"""
 
     def __init__(self, window, **kwargs):
         Frame.__init__(self, window, bg="#003359", **kwargs)
         self.grid()
 
         # welcoming text
-        welcoming_text_src_pil = Image.open("V2.0/gui_src/welcoming_text.png")
-        welcoming_text_src = ImageTk.PhotoImage(welcoming_text_src_pil)
-        welcoming_text = Label(self, image=welcoming_text_src, background='#003359')
-        welcoming_text.image = welcoming_text_src
-        welcoming_text.grid(row=1, pady=15)
+        welcoming_text = My_Title(self,
+                                  image="welcoming_text.png",
+                                  column=0,
+                                  pady=15)
 
-        def hey():
+        def osm2cr_new():
+            """Function to access the new GUI of OSM2CR Converter"""
             self.destroy()
-
-        def rebuild():
-            self.destroy()
-            Interface2(window).mainloop()
+            OSM2CRActivity1(window).mainloop()
 
 
         # First line - Canvas 1
-        button_canvas_1 = Canvas(self, background='#003359', highlightbackground='#003359')
-        button_canvas_1.grid(row=2)
+        button_canvas_1 = My_Canvas(self, 2)
+        b1 = My_Button(button_canvas_1, 2, 0, osm2cr_new,
+                       "Groupe 1.png")
+        b2 = My_Button(button_canvas_1, 2, 1, default,
+                       "Groupe 2.png" )
+        b3 = My_Button(button_canvas_1, 2, 2, openDRIVE2Lanelet,
+                       "Groupe 3.png")
 
-        b1_src_pil = Image.open("V2.0/gui_src/Groupe 1.png")
-        b1_src = ImageTk.PhotoImage(b1_src_pil)
-        b1 = Design(button_canvas_1, 2, 0, b1_src, command=osm2cr)
-
-        b2_src_pil = Image.open("V2.0/gui_src/Groupe 2.png")
-        b2_src = ImageTk.PhotoImage(b2_src_pil)
-        b2 = Design(button_canvas_1, 2, 1, b2_src, command=default)
-
-        b3_src_pil = Image.open("V2.0/gui_src/Groupe 3.png")
-        b3_src = ImageTk.PhotoImage(b3_src_pil)
-        b3 = Design(button_canvas_1, 2, 2, b3_src, command=opendrive2Lanelet)
-
-        button_canvas_2 = Canvas(self, background='#003359', highlightbackground = '#003359')
-        button_canvas_2.grid(row=3, pady=30)
-
-        b4_src_pil = Image.open("V2.0/gui_src/Groupe 4.png")
-        b4_src = ImageTk.PhotoImage(b4_src_pil)
-        b4 = Design(button_canvas_2, 3, 0, b4_src, padx= 40, command=rebuild)
-
-        b5_src_pil = Image.open("V2.0/gui_src/Groupe 5.png")
-        b5_src = ImageTk.PhotoImage(b5_src_pil)
-        b5 = Design(button_canvas_2, 3, 1, b5_src, padx=40, command=hey)
+        button_canvas_2 = My_Canvas(self, 3, pady=30)
+        b4 = My_Button(button_canvas_2, 3, 0, default,
+                       "Groupe 4.png")
+        b5 = My_Button(button_canvas_2, 3, 1, default,
+                       "Groupe 5.png")
 
 
 class InterfaceToolTemplate(Frame):
@@ -121,44 +161,56 @@ class InterfaceToolTemplate(Frame):
         Frame.__init__(self, window, bg="#003359", **kwargs)
         self.grid()
 
-        def home():
+        def go_home():
             self.destroy()
-            Interface(window).mainloop()
+            Home(window).mainloop()
 
-        # button toujours là
-        a_pil = Image.open("V2.0/gui_src/icon.png")
-        a_src = ImageTk.PhotoImage(a_pil)
-        a = Design(self, 1, 0, a_src, home)
+        def go_help():
+            help_window= initialise()
+            OSM2CRFrame(help_window).mainloop()
 
+        # Buttons Head
+        self.Can = My_Canvas(self, 1, sticky=W)
 
-class Interface2(InterfaceToolTemplate):
-    """Class driving the interface of main window"""
-
-    def __init__(self, fenetre, **kwargs):
-        InterfaceToolTemplate.__init__(self, fenetre, **kwargs)
-
-        # welcoming text
-        welcoming_text_src_pil = Image.open("V2.0/gui_src/welcoming_text.png")
-        welcoming_text_src = ImageTk.PhotoImage(welcoming_text_src_pil)
-        welcoming_text = Label(self, image=welcoming_text_src, background='#003359')
-        welcoming_text.image = welcoming_text_src
-        welcoming_text.grid(row=1, pady=15)
-
-        def hey():
-            self.destroy()
+        home = My_Button(self.Can, 1, 0, go_home, "/button_home.png")
+        back = My_Button(self.Can, 1, 1, go_home,
+                         "button_back.png",
+                         padx=10)
+        self.help = My_Button(self.Can, 1, 3, go_help, "button_help.png", padx=30)
 
 
-        # First line - Canvas 1
-        button_canvas_1 = Canvas(self, background='#003359', highlightbackground='#003359')
-        button_canvas_1.grid(row=2)
+class OSM2CRFrame(InterfaceToolTemplate):
+    """Class driving the frame of OSM2CR Converter"""
 
-        b1_src_pil = Image.open("V2.0/gui_src/Groupe 1.png")
-        b1_src = ImageTk.PhotoImage(b1_src_pil)
-        b1 = Design(button_canvas_1, 2, 0, b1_src, command=osm2cr)
+    def __init__(self, window, **kwargs):
+        InterfaceToolTemplate.__init__(self, window, **kwargs)
+        #Head Text
+        welcoming_text = My_Title(self.Can, "OSM2CR_head.png",
+                                 column=2, pady=10, padx=40)
 
-        b2_src_pil = Image.open("V2.0/gui_src/Groupe 2.png")
-        b2_src = ImageTk.PhotoImage(b2_src_pil)
-        b2 = Design(button_canvas_1, 2, 1, b2_src, command=default)
+
+
+class OSM2CRActivity1(OSM2CRFrame):
+    """Class driving the interface of the first Activity of OSM2CR"""
+
+    def __init__(self, window, **kwargs):
+        OSM2CRFrame.__init__(self, window, **kwargs)
+
+        #Question
+        question = My_Title(self, "OSM2CR_question.png", 2, 0, pady=50)
+
+        #Answers
+        answers = My_Canvas(self, 3)
+        answers_padx = 40
+        open = My_Button(answers, 0, 0, default,
+                         "button_download.png",
+                         padx=answers_padx)
+        download = My_Button(answers, 0, 1, default,
+                             "button_open.png",
+                             padx=answers_padx)
+
+
+
 
 
 # INITIALISATION
@@ -171,13 +223,14 @@ def initialise():
     except TclError:
         ico = PhotoImage(file="V2.0/gui_src/icon.png")
         window.tk.call('wm', 'iconphoto', window._w, ico)
-    window.geometry('640x600')
+    except:
+        print("Impossible to set icon")
+    window.geometry(str(width)+'x'+str(high))
     window['bg'] = '#003359'
     window.resizable(False, False)
 
     # head
-    head_src_pil = Image.open("V2.0/gui_src/head.png")
-    head_src = ImageTk.PhotoImage(head_src_pil)
+    head_src = image_encoding("V2.0/gui_src/head.png")
     head = Label(window, image=head_src, background='#003359')
     head.image = head_src
     head.grid(row=0)
@@ -187,7 +240,7 @@ def initialise():
 
 welcome = initialise()
 
-Interface2(welcome).mainloop()
+Home(welcome).mainloop()
 
 
 
