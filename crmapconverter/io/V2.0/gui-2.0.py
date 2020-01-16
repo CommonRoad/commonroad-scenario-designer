@@ -4,7 +4,7 @@ import sys
 import time
 
 from PyQt5.QtWidgets import QFileDialog, QWidget, QApplication, QMainWindow
-#crmapconverter/osm2cr/converter_modules/gui_modules/gui_embedding.py
+#crmapconverter/osm2cr/converter_modulesgui_modulesgui_embedding.py
 from crmapconverter.osm2cr.converter_modules.gui_modules.gui_embedding import StartMenu, MainApp
 
 try:
@@ -66,7 +66,7 @@ class My_Button(Button):
         self.row = row
         self.column = column
         self.command = command
-        self.icon = image_encoding("V2.0/gui_src/" + icon)
+        self.icon = image_encoding("gui_src/" + icon)
         self.padx = padx
         self.pady = pady
         Button.__init__(self, parent, **kwargs)
@@ -86,7 +86,7 @@ class My_Button(Button):
             pady=self.pady)
 
     def set_icon(self, icon):
-        self.icon = image_encoding("V2.0/gui_src/" + icon)
+        self.icon = image_encoding("gui_src/" + icon)
         self.configure(image=self.icon)
 
 
@@ -115,7 +115,7 @@ class My_Title(Label):
         self.pady = pady
         self.padx = padx
         self.sticky = sticky
-        self.image = image_encoding("V2.0/gui_src/" + image)
+        self.image = image_encoding("gui_src/" + image)
         Label.__init__(self, parent, image = self.image, **kwargs)
         self.configure(background = '#003359')
         self.configure(highlightbackground = '#003359')
@@ -244,7 +244,8 @@ class OD2CRActivity1(OD2CRFrame):
                          padx=20)
         def open_OD():
             self.open.set_icon("icon.png")
-            openDRIVE2Lanelet()
+            A = G.MainWindow()
+            A.opendrive_conversion_menu()
 
         self.open.configure(command=open_OD)
 
@@ -255,10 +256,10 @@ def initialise():
     window = Tk()
     window.title("Common Road Tools")
     try:
-        window.iconbitmap("V2.0/gui_src/icon.ico")
+        window.iconbitmap("gui_src/icon.ico")
     except TclError:
         try:
-            ico = PhotoImage(file="V2.0/gui_src/icon.png")
+            ico = PhotoImage(file="gui_src/icon.png")
             window.tk.call('wm', 'iconphoto', window._w, ico)
         except:
             print("Impossible to set icon")
@@ -267,7 +268,7 @@ def initialise():
     window.resizable(False, False)
 
     # head
-    head_src = image_encoding("V2.0/gui_src/head.png")
+    head_src = image_encoding("gui_src/head.png")
     head = Label(window, image=head_src, background='#003359')
     head.image = head_src
     head.grid(row=0)
