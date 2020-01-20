@@ -40,8 +40,8 @@ except:
     print("You need to install manually commonroad")
 
 #GLOBAL VARIABLES
-high = 600
-width = 640
+high = 902
+width = 960
 
 #GLOBAL FUNCTIONS
 def image_encoding(path):
@@ -246,10 +246,28 @@ class OD2CRActivity1(OD2CRFrame):
         self.open = My_Button(self.open_canvas, 0, 1, default,
                          "button_open.png",
                          padx=20)
+
+        class FileOpener(QMainWindow):
+
+            def __init__(self):
+                super().__init__()
+
+            def open_file_dialog(self):
+                """"""
+
+                path, _ = QFileDialog.getOpenFileName(
+                    self,
+                    "QFileDialog.getOpenFileName()",
+                    "",
+                    "",
+                    options=QFileDialog.Options(),
+                )
+                print(path)
+
         def open_OD():
-            self.open.set_icon("icon.png")
-            A = G.MainWindow()
-            A.opendrive_conversion_menu()
+            self.open.set_icon("button_done.png")
+            ex = FileOpener()
+            ex.open_file_dialog()
 
         self.open.configure(command=open_OD)
 
@@ -280,6 +298,7 @@ def initialise():
     return window
 
 
+app = QApplication(sys.argv)
 welcome = initialise()
 
 Home(welcome).mainloop()
