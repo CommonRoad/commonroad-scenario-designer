@@ -3,10 +3,12 @@ import signal
 import sys
 import time
 
-from PyQt5.QtWidgets import QFileDialog, QWidget, QApplication, QMainWindow
-#crmapconverter/osm2cr/converter_modulesgui_modulesgui_embedding.py
-from crmapconverter.osm2cr.converter_modules.gui_modules.gui_embedding import StartMenu, MainApp
-
+try:
+    from PyQt5.QtWidgets import QFileDialog, QWidget, QApplication, QMainWindow
+    # crmapconverter/osm2cr/converter_modulesgui_modulesgui_embedding.py
+    from crmapconverter.osm2cr.converter_modules.gui_modules.gui_embedding import StartMenu, MainApp
+except:
+    print("You need manually to install your Qt distribution")
 try:
     import crmapconverter.io.gui as G
     from commonroad.common.file_writer import CommonRoadFileWriter
@@ -62,7 +64,7 @@ def default():
 class My_Button(Button):
     """Class defining the design of the buttons used in the interface defined below"""
 
-    def __init__(self, parent, row, column, command, icon=None, padx=0, pady=0, **kwargs):
+    def __init__(self, parent, row, column, command, icon=None, padx=5, pady=0, **kwargs):
         self.row = row
         self.column = column
         self.command = command
@@ -154,17 +156,19 @@ class Home(Frame):
         # First line - Canvas 1
         self.button_canvas_1 = My_Canvas(self, 2)
         self.b1 = My_Button(self.button_canvas_1, 2, 0, osm2cr_new,
-                       "Groupe 1.png")
+                            "Groupe 1.png")
         self.b2 = My_Button(self.button_canvas_1, 2, 1, default,
-                       "Groupe 2.png" )
+                            "Groupe 2.png" )
         self.b3 = My_Button(self.button_canvas_1, 2, 2, openDRIVE2cr_new,
-                       "Groupe 3.png")
+                            "Groupe 3.png")
 
         self.button_canvas_2 = My_Canvas(self, 3, pady=30)
-        b4 = My_Button(self.button_canvas_2, 3, 0, default,
-                       "Groupe 4.png")
-        b5 = My_Button(self.button_canvas_2, 3, 1, default,
-                       "Groupe 5.png")
+        self.b4 = My_Button(self.button_canvas_2, 3, 0, default,
+                            "Groupe 4.png")
+        self.b5 = My_Button(self.button_canvas_2, 3, 1, default,
+                            "Groupe 5.png")
+        self.b6 = My_Button(self.button_canvas_2, 3, 2, default,
+                            "Groupe 6.png")
 
 
 class InterfaceToolTemplate(Frame):
