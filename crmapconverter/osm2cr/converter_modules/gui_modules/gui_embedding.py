@@ -212,9 +212,12 @@ class StartMenu(QWidget):
 
         :return: None
         """
-        Tk().withdraw()
-        file = askopenfilename(
-            initialdir="files/", filetypes=(("CR files", "*.xml"), ("all files", "*.*"))
+        file, _ = QFileDialog.getOpenFileName(
+            self,
+            "Select CommonRoad scenario",
+            "",
+            "CommonRoad file *.xml (*.xml)",
+            options=QFileDialog.Options(),
         )
         if file != "":
             window = scenarioView()
@@ -278,7 +281,7 @@ class StartMenu(QWidget):
             self,
             "Select OpenStreetMap map",
             "",
-            "OpenStreetMap files *.osm (*.osm)",
+            "OpenStreetMap file *.osm (*.osm)",
             options=QFileDialog.Options(),
         )
 
@@ -299,15 +302,15 @@ class StartMenu(QWidget):
         graph = converter.Scenario.step_collection_2(graph)
         graph = converter.Scenario.step_collection_3(graph)
         name = config.BENCHMARK_ID
-        Tk().withdraw()
-        file = asksaveasfilename(
-            initialdir=config.SAVE_PATH,
-            initialfile=name,
-            defaultextension=".xml",
-            filetypes=(("xml file", "*.xml"), ("All Files", "*.*")),
+        file, _ = QFileDialog.getSaveFileName(
+            self,
+            "Save map in Common Road Format",
+            "",
+            "Common Road file *.xml (*.xml)",
+            options=QFileDialog.Options(),
         )
         if file != "":
-            self.app.export(graph, file)
+            self.app.export(graph, file+".xml")
 
     def start_conversion(self) -> None:
         """
@@ -666,16 +669,16 @@ class LaneLinkEdit(MapEdit):
         :return: None
         """
         name = config.BENCHMARK_ID
-        Tk().withdraw()
-        file = asksaveasfilename(
-            initialdir=config.SAVE_PATH,
-            initialfile=name,
-            defaultextension=".xml",
-            filetypes=(("xml file", "*.xml"), ("All Files", "*.*")),
+        file, _ = QFileDialog.getSaveFileName(
+            self,
+            "Save map in Common Road Format",
+            "",
+            "Common Road file *.xml (*.xml)",
+            options=QFileDialog.Options(),
         )
         if file != "":
             graph = converter.Scenario.step_collection_3(self.graph)
-            self.app.export(graph, file)
+            self.app.export(graph, file + ".xml")
 
 
 class AttributeEditor:

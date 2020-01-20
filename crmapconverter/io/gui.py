@@ -153,7 +153,7 @@ class MainWindow(QWidget):
         commonroad_viewer_widget = ViewerWidget(self)
         viewer.setCentralWidget(commonroad_viewer_widget)
         viewer.show()
-        commonroad_viewer_widget.openCommonRoadFile()
+        #commonroad_viewer_widget.openCommonRoadFile()
 
     def osm_cr_lanelets_menu(self):
         """Open the menu for the lanelet conversion between OSM and CR"""

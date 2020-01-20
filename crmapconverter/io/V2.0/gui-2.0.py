@@ -21,12 +21,12 @@ try:
     from crmapconverter.opendriveparser.parser import parse_opendrive
     from crmapconverter.opendriveconversion.network import Network
     from crmapconverter.io.viewer import MainWindow as ViewerWidget
+    import crmapconverter.io.viewer as CRViewerQT
 except:
     print("You need to install manually commonroad")
 
 from tkinter import *
-from tkinter import filedialog
-from tkinter.messagebox import *
+
 from PIL import Image
 from PIL import ImageTk
 
@@ -152,6 +152,11 @@ class Home(Frame):
             self.destroy()
             OD2CRActivity1(window).mainloop()
 
+        def CRViewer():
+            """Function to access the new GUI of Common Road Visualizer"""
+            self.destroy()
+            CRViewerActivity1(window).mainloop()
+
 
         # First line - Canvas 1
         self.button_canvas_1 = My_Canvas(self, 2)
@@ -167,7 +172,7 @@ class Home(Frame):
                             "Groupe 4.png")
         self.b5 = My_Button(self.button_canvas_2, 3, 1, default,
                             "Groupe 5.png")
-        self.b6 = My_Button(self.button_canvas_2, 3, 2, default,
+        self.b6 = My_Button(self.button_canvas_2, 3, 2, CRViewer,
                             "Groupe 6.png")
 
 
@@ -183,8 +188,11 @@ class InterfaceToolTemplate(Frame):
             Home(window).mainloop()
 
         def go_help():
-            help_window= initialise()
-            OSM2CRFrame(help_window).mainloop()
+            try:
+                help_window= initialise()
+                OSM2CRFrame(help_window).mainloop()
+            except TclError:
+                print("Error code 15")
 
         # Buttons Head
         self.Can = My_Canvas(self, 1, sticky=W)
@@ -205,6 +213,7 @@ class OSM2CRFrame(InterfaceToolTemplate):
         self.welcoming_text = My_Title(self.Can, "OSM2CR_head.png",
                                  column=2, pady=10, padx=40)
 
+
 class OSM2CRActivity1(OSM2CRFrame):
     """Class driving the interface of the first Activity of OSM2CR"""
 
@@ -223,6 +232,7 @@ class OSM2CRActivity1(OSM2CRFrame):
         self.download = My_Button(answers, 0, 1, osm2cr,
                              "button_download.png",
                              padx=answers_padx)
+
 
 class OD2CRFrame(InterfaceToolTemplate):
     """Class driving the frame of OSM2CR Converter"""
@@ -268,8 +278,48 @@ class OD2CRActivity1(OD2CRFrame):
             self.open.set_icon("button_done.png")
             ex = FileOpener()
             ex.open_file_dialog()
+            ex.destroy()
 
         self.open.configure(command=open_OD)
+
+
+class CRViewer(InterfaceToolTemplate):
+    """Class driving the frame of OSM2CR Converter"""
+
+    def __init__(self, window, **kwargs):
+        InterfaceToolTemplate.__init__(self, window, **kwargs)
+        #Head Text
+        self.welcoming_text = My_Title(self.Can, "OSM2CR_head.png",
+                                 column=2, pady=10, padx=40)
+
+
+class CRViewerActivity1(OD2CRFrame):
+    """Class driving the interface of the first Activity of OSM2CR"""
+
+    def __init__(self, window, **kwargs):
+        OD2CRFrame.__init__(self, window, **kwargs)
+
+        class ViewerQt(QWidget):
+            """Class used to provied the existant viewer in Qt"""
+
+            def __init__(self):
+                super().__init__()
+                self.show()
+
+            def commonroad_visualization_menu(self):
+                """Open the simple color-supported visualization of a CommonRoad file."""
+                viewer = QMainWindow(self)
+                commonroad_viewer_widget = ViewerWidget(self)
+                viewer.setCentralWidget(commonroad_viewer_widget)
+                viewer.show()
+                #commonroad_viewer_widget.openCommonRoadFile()
+
+        def CRviewer_run():
+            s = ViewerQt()
+            s.commonroad_visualization_menu()
+        CRviewer_run()
+
+
 
 
 # INITIALISATION
@@ -304,6 +354,5 @@ welcome = initialise()
 Home(welcome).mainloop()
 
 
-
-
-
+#For next time : Traffic signs (light, stop, yeld, priority)
+#Visualise a commonroad Map Button on the
