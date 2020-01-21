@@ -275,7 +275,7 @@ class OD2CRActivity1(OD2CRFrame):
                 print(path)
 
         def open_OD():
-            self.open.set_icon("button_done.png")
+            self.open.set_icon("button_done(.png")
             ex = FileOpener()
             ex.open_file_dialog()
             ex.destroy()
