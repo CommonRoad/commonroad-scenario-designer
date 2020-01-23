@@ -427,6 +427,8 @@ class OpenDriveConvertWindow(QWidget):
 
         self.load_opendriveFile(path)
 
+        return path
+
     def load_opendriveFile(self, path):
         """
 
@@ -527,12 +529,13 @@ class OpenDriveConvertWindow(QWidget):
             )
             return
 
-        QMessageBox.information(
+        # Hidden for the Tkinter conversion
+        """QMessageBox.information(
             self,
             "CommonRoad file created!",
             "The CommonRoad file was successfully exported.",
             QMessageBox.Ok,
-        )
+        )"""
 
     def viewConvertedLaneletNetwork(self):
         """ """

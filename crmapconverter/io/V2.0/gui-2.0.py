@@ -7,7 +7,6 @@ from PyQt5 import QtGui, QtCore, QtWidgets
 
 try:
     from PyQt5.QtWidgets import QFileDialog, QWidget, QApplication, QMainWindow
-    # crmapconverter/osm2cr/converter_modulesgui_modulesgui_embedding.py
     from crmapconverter.osm2cr.converter_modules.gui_modules.gui_embedding import StartMenu, MainApp
 except:
     print("You need manually to install your Qt distribution")
@@ -83,11 +82,11 @@ class My_Button(Button):
         self.configure(highlightbackground='#003359')
         self.configure(anchor=W)
         self.grid(
-            column=self.column,
-            row=self.row,
-            sticky=W + N,
-            padx=self.padx,
-            pady=self.pady)
+            column= self.column,
+            row= self.row,
+            sticky= W + N,
+            padx= self.padx,
+            pady= self.pady)
 
     def set_icon(self, icon):
         self.icon = image_encoding("gui_src/" + icon)
@@ -101,7 +100,7 @@ class My_Canvas(Canvas):
         self.row = row
         self.pady = pady
         self.sticky = sticky
-        Canvas.__init__(self, parent, **kwargs)
+        Canvas.__init__(self, parent,**kwargs)
         self.configure(background = '#003359')
         self.configure(highlightbackground = '#003359')
         self.grid(
@@ -130,6 +129,54 @@ class My_Title(Label):
             padx = self.padx,
             sticky= self.sticky)
 
+
+class My_Text(Canvas):
+    """Class defining the design of the text displays used in the interface defined below"""
+
+    def __init__(self, parent, row, text="", pady=0, **kwargs):
+        self.row = row
+        self.text = text
+        self.pady = pady
+        Canvas.__init__(self, parent, **kwargs)
+        self.configure(background = '#003359')
+        self.configure(highlightbackground='#003359')
+        self.grid(
+            row= self.row,
+            pady= self.pady,
+            sticky= W+E
+        )
+        self.height= 50
+        self.curve= 50
+        self.length= 800
+
+        self.create_oval(0, 0, self.curve, self.height, fill="White", outline="White" )
+        self.create_rectangle(self.curve/2, 0, self.length+self.curve/2, self.height, fill="White", outline="White")
+        self.create_oval(self.length, 0, self.length+self.curve, self.height, fill="White", outline="White")
+        self.create_text(self.curve/2,
+                         self.height/3,
+                         anchor=NW,
+                         font=('KacstDecorative', -20, 'italic'),
+                         text=text)
+
+class ViewerQt(QWidget):
+    """Class used to provied the existant viewer in Qt"""
+
+    def __init__(self, path=None):
+        self.path = path
+        super().__init__()
+
+    def commonroad_visualization_menu(self):
+        """Open the simple color-supported visualization of a CommonRoad file."""
+        viewer = QMainWindow(self)
+        commonroad_viewer_widget = ViewerWidget(self, path=self.path)
+        viewer.setCentralWidget(commonroad_viewer_widget)
+        viewer.show()
+
+def CRviewer_run(path=None):
+    app = QtWidgets.QApplication(sys.argv)
+    ui = ViewerQt(path)
+    ui.commonroad_visualization_menu()
+    app.exec_()
 
 class Home(Frame):
     """Class driving the interface of welcoming window"""
@@ -197,7 +244,7 @@ class InterfaceToolTemplate(Frame):
                 print("Error code 15")
 
         # Buttons Head
-        self.Can = My_Canvas(self, 1, sticky=W)
+        self.Can = My_Canvas(self, 1, sticky=W+E)
 
         self.home = My_Button(self.Can, 1, 0, go_home, "/button_home.png")
         self.back = My_Button(self.Can, 1, 1, go_home,
@@ -259,6 +306,13 @@ class OD2CRActivity1(OD2CRFrame):
                          "button_open.png",
                          padx=20)
 
+        #Read and Export OpenDRIVE Map
+        self.output_canvas = My_Canvas(self, 3)
+        self.export = My_Button(self.output_canvas, 0, 1, default,
+                              "button_open.png",
+                              padx=20)
+        self.output_canvas.grid_remove()
+
         class FileOpener(QWidget):
 
             def __init__(self, parent=None, path=None):
@@ -278,17 +332,29 @@ class OD2CRActivity1(OD2CRFrame):
                 )
                 print(self.path)
 
-        opener = FileOpener()
+        self.path = ""
 
-        def open_OD():
-            opener.open_file_dialog()
-            #appi= QtWidgets.QApplication(sys.argv)
-            #ex = FileOpener()
-            #ex.open_file_dialog()
-            #self.open.set_icon("button_done.png")
+        def open_OD2():
+            app = QApplication(sys.argv)
+            A = G.OpenDriveConvertWindow("")
+            app.disconnect()
+            self.path = A.openOpenDriveFileDialog()
+            app.exit()
+            A.destroy()
+            self.open_canvas.destroy()
+            self.output_canvas.grid()
+            My_Text(self, 2, self.path, pady=50)
+            print(welcome.grid_size())
 
+        def export_OD():
+            app = QApplication(sys.argv)
+            C = G.OpenDriveConvertWindow("")
+            C.load_opendriveFile(self.path)
+            C.exportAsCommonRoad()
+            print("hello")
 
-        self.open.configure(command=open_OD)
+        self.export.configure(command=export_OD)
+        self.open.configure(command=open_OD2)
 
 
 class CRViewer(InterfaceToolTemplate):
@@ -306,26 +372,6 @@ class CRViewerActivity1(OD2CRFrame):
 
     def __init__(self, window, **kwargs):
         OD2CRFrame.__init__(self, window, **kwargs)
-
-        class ViewerQt(QWidget):
-            """Class used to provied the existant viewer in Qt"""
-
-            def __init__(self):
-                super().__init__()
-
-            def commonroad_visualization_menu(self):
-                """Open the simple color-supported visualization of a CommonRoad file."""
-                viewer = QMainWindow(self)
-                commonroad_viewer_widget = ViewerWidget(self)
-                viewer.setCentralWidget(commonroad_viewer_widget)
-                viewer.show()
-
-        def CRviewer_run():
-            app = QtWidgets.QApplication(sys.argv)
-            ui = ViewerQt()
-            ui.commonroad_visualization_menu()
-            app.exec_()
-
         CRviewer_run()
 
 
