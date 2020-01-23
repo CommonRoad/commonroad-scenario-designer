@@ -17,7 +17,7 @@ class Ui_EdgeEdit(object):
         self.gridLayout = QtWidgets.QGridLayout(self.centralwidget)
         self.gridLayout.setObjectName("gridLayout")
         self.plot_groupBox = QtWidgets.QGroupBox(self.centralwidget)
-        self.plot_groupBox.setMinimumSize(QtCore.QSize(400, 400))
+        self.plot_groupBox.setMinimumSize(QtCore.QSize(800, 800))
         self.plot_groupBox.setTitle("")
         self.plot_groupBox.setObjectName("plot_groupBox")
         self.gridLayout_2 = QtWidgets.QGridLayout(self.plot_groupBox)
