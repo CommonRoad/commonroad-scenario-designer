@@ -409,3 +409,5 @@ Home(welcome).mainloop()
 
 #For next time : Traffic signs (light, stop, yeld, priority)
 #Visualise a commonroad Map Button on the
+#TODO Report : 9 pages (3 each) with TUM online, to be given the 4th February
+#TODO Presentation : 8 min per person
