@@ -15,8 +15,8 @@ from commonroad.scenario.traffic_sign import TrafficLight
 
 from pyparsing import Dict
 
-from crmapconverter.osm2cr.converter_modules.utility import geometry
-from crmapconverter.osm2cr.converter_modules.utility.traffic_rules import TrafficSign
+from build.lib.crmapconverter.osm2cr.converter_modules.graph_operations.road_graph import Graph
+from crmapconverter.osm2cr.converter_modules.utility import geometry, idgenerator
 
 
 class Edge:
@@ -31,7 +31,6 @@ class Edge:
                  left_bound: List[np.ndarray],
                  right_bound: List[np.ndarray],
                  center_points: List[np.ndarray],
-                 road_type: LaneletType,
                  adjacent_right: int,
                  adjacent_right_direction_equal: bool,
                  adjacent_left: int,
@@ -44,7 +43,6 @@ class Edge:
         self.left_bound = left_bound
         self.right_bound = right_bound
         self.center_points = center_points
-        self.road_type = road_type,
         self.adjacent_right = adjacent_right
         self.adjacent_left_direction_equal = adjacent_left_direction_equal
         self.adjacent_left = adjacent_left
@@ -108,7 +106,6 @@ class Edge:
         return Edge(current_id,
                     lane.from_node.get_point(),
                     lane.to_node.get_point(),
-                    lane.to_node.get_point(),
                     lane.left_bound,
                     lane.right_bound,
                     lane.waypoints,
@@ -153,6 +150,9 @@ class IntermediateFormat:
         for edge in self.edges:
             lanelet = edge.to_lanelet()
             net.add_lanelet(lanelet)
+
+        for sign in self.traffic_signs:
+            net.add_traffic_sign(sign, set())
         scenario.lanelet_network = net
         return scenario
 
@@ -166,5 +166,8 @@ class IntermediateFormat:
             edge = Edge.extract_from_lane(lane)
             edges.append(edge)
 
+        traffic_signs = [sign.to_traffic_sign_cr() for sign in graph.traffic_signs]
+        #traffic_lights = [light.to_traffic_light_cr() for light in graph.traffic_lights]
         return IntermediateFormat(nodes,
-                                  edges)
+                                  edges,
+                                  traffic_signs)

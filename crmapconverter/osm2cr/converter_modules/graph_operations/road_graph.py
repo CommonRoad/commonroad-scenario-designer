@@ -6,6 +6,7 @@ from queue import Queue
 from typing import List, Set, Tuple, Optional, Dict
 
 import numpy as np
+from commonroad.scenario.traffic_sign import TrafficSignElement, TrafficSign
 
 from crmapconverter.osm2cr import config
 from crmapconverter.osm2cr.converter_modules.utility import geometry, idgenerator
@@ -703,6 +704,33 @@ class GraphTrafficSign:
         self.sign = sign
         self.node = node
         self.edges = edges
+        self.id = idgenerator.get_id()
+
+    def to_traffic_sign_cr(self):
+        elements = []
+        position = None
+        values = []
+        if self.node is not None:
+            position_point = self.node.get_point()
+            position = np.array([position_point.x, position_point.y])
+
+        for key in config.TRAFFIC_SIGN_MAP.keys():
+            if 'traffic_sign' in self.sign and self.sign['traffic_sign'] == key:
+                sign_id = config.TRAFFIC_SIGN_MAP[key].value
+                values = []
+                if key in self.sign:
+                    values.append(self.sign[key])
+                elements.append(TrafficSignElement(sign_id, values))
+            elif key in self.sign:
+                sign_id = config.TRAFFIC_SIGN_MAP[key].value
+                value = self.sign[key]
+                elements.append(TrafficSignElement(sign_id, [value]))
+
+        virtual = False
+        if 'virtual' in self.sign:
+            virtual = self.sign['virtual']
+        return TrafficSign(self.id, elements, position, virtual)
+
 
 
 class GraphTrafficLight:
@@ -710,6 +738,11 @@ class GraphTrafficLight:
                  node: GraphNode):
         self.light = light
         self.node = node
+        self.id = idgenerator.get_id()
+
+    def to_traffic_light_cr(self):
+        pass
+
 
 
 class Lane:
