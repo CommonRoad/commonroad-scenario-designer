@@ -1,7 +1,7 @@
 """
 This module holds the classes required for the intermediate format
 """
-from commonroad.scenario.intersection import Intersection
+from commonroad.scenario.intersection import Intersection, IntersectionIncomingElement
 from commonroad.scenario.lanelet import LaneletType, Lanelet, LaneletNetwork
 from commonroad.scenario.obstacle import Obstacle
 from typing import List, Set
@@ -129,7 +129,8 @@ class IntermediateFormat:
                  edges: List[Edge],
                  traffic_signs: List[TrafficSign] = None,
                  traffic_lights: List[TrafficLight] = None,
-                 obstacles: List[Obstacle] = None):
+                 obstacles: List[Obstacle] = None,
+                 intersections: List[Intersection] = None,):
         """
 
         :param nodes: List of nodes in the format
@@ -140,9 +141,51 @@ class IntermediateFormat:
 
         self.nodes = nodes
         self.edges = edges
+        self.intersections = intersections
         self.traffic_signs = traffic_signs
         self.traffic_lights = traffic_lights
         self.obstacles = obstacles
+
+    @staticmethod
+    def get_intersections(graph) -> List[Intersection]:
+        intersections = {}
+        for lane in graph.lanelinks:
+            node = lane.to_node
+            incoming = lane.predecessors
+            if node.get_degree() > 2:
+                if node.id in intersections:
+                    # update
+                    intersections[node.id]['incoming'].extend([lane.id for lane in incoming])
+                else:
+                    intersections[node.id] = \
+                        {'incoming': [incoming_lane.id for incoming_lane in incoming],
+                         'right':[],
+                           'left': [],
+                        'through': [],
+                         'none':[]}
+                for incoming_lane in incoming:
+                    directions = incoming_lane.turnlane.split(";")
+                    successors = [successor.id for successor in lane.successors]
+                    for direction in directions:
+                        intersections[node.id][direction].extend(successors)
+
+        intersections_cr = []
+        for intersection_node_id in intersections:
+            incoming_elements = []
+            incoming_data = intersections[intersection_node_id]
+            incoming_lanelets = set(incoming_data['incoming'])
+            successors_right = set(incoming_data["right"])
+            successors_left = set(incoming_data["left"])
+            successors_straight = set(incoming_data['through']).union(set(incoming_data['none']))
+            incoming_element = IntersectionIncomingElement(idgenerator.get_id(),
+                                                           incoming_lanelets,
+                                                           successors_right,
+                                                           successors_straight,
+                                                           successors_left,
+                                                           )
+            incoming_elements.append(incoming_element)
+            intersections_cr.append(Intersection(idgenerator.get_id(), incoming_elements))
+        return intersections_cr
 
     def to_commonroad_scenario(self):
         scenario = Scenario(config.TIMESTEPSIZE, config.BENCHMARK_ID)
@@ -153,6 +196,10 @@ class IntermediateFormat:
 
         for sign in self.traffic_signs:
             net.add_traffic_sign(sign, set())
+
+        for intersection in self.intersections:
+            net.add_intersection(intersection)
+
         scenario.lanelet_network = net
         return scenario
 
@@ -165,9 +212,11 @@ class IntermediateFormat:
         for lane in lanes:
             edge = Edge.extract_from_lane(lane)
             edges.append(edge)
-
+        IntermediateFormat.get_intersections(graph)
         traffic_signs = [sign.to_traffic_sign_cr() for sign in graph.traffic_signs]
         #traffic_lights = [light.to_traffic_light_cr() for light in graph.traffic_lights]
+        intersections = IntermediateFormat.get_intersections(graph)
         return IntermediateFormat(nodes,
                                   edges,
-                                  traffic_signs)
+                                  traffic_signs,
+                                  intersections=intersections)
