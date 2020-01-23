@@ -195,3 +195,11 @@ class TrafficSignID(enum.Enum):
     UNKNOWN = ''
 
 
+TRAFFIC_SIGN_MAP = {
+    'maxspeed': TrafficSignID.MAXSPEED,
+    'overtaking': TrafficSignID.OVERTAKING,
+    'city_limit': TrafficSignID.CITYLIMIT,
+    'give_way': TrafficSignID.GIVEWAY,
+    'stop': TrafficSignID.STOP,
+}
+
