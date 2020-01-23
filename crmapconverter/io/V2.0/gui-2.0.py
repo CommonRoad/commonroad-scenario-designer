@@ -309,9 +309,8 @@ class OD2CRActivity1(OD2CRFrame):
         #Read and Export OpenDRIVE Map
         self.output_canvas = My_Canvas(self, 3)
         self.export = My_Button(self.output_canvas, 0, 1, default,
-                              "button_open.png",
+                              "Groupe 14.png",
                               padx=20)
-        self.output_canvas.grid_remove()
 
         class FileOpener(QWidget):
 
@@ -342,9 +341,8 @@ class OD2CRActivity1(OD2CRFrame):
             app.exit()
             A.destroy()
             self.open_canvas.destroy()
-            self.output_canvas.grid()
+            self.export.set_icon("Groupe 7.png")
             My_Text(self, 2, self.path, pady=50)
-            print(welcome.grid_size())
 
         def export_OD():
             app = QApplication(sys.argv)
