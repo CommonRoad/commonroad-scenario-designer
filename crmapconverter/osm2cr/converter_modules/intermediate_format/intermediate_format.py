@@ -7,15 +7,14 @@ from commonroad.scenario.obstacle import Obstacle
 from typing import List, Set
 
 import numpy as np
+from crmapconverter.osm2cr.converter_modules.graph_operations.road_graph import Graph
+
 from crmapconverter.osm2cr import config
 from commonroad.scenario.scenario import Scenario
 
 from commonroad.scenario.traffic_sign import TrafficSign
 from commonroad.scenario.traffic_sign import TrafficLight
 
-from pyparsing import Dict
-
-from build.lib.crmapconverter.osm2cr.converter_modules.graph_operations.road_graph import Graph
 from crmapconverter.osm2cr.converter_modules.utility import geometry, idgenerator
 
 
@@ -204,7 +203,7 @@ class IntermediateFormat:
         return scenario
 
     @staticmethod
-    def extract_road_graph(graph):
+    def extract_road_graph(graph: Graph):
         road_graph = graph
         nodes = [node.get_point() for node in road_graph.nodes]
         edges = []
