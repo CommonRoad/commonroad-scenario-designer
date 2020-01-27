@@ -145,44 +145,78 @@ class IntermediateFormat:
         self.traffic_lights = traffic_lights
         self.obstacles = obstacles
 
+
+    @staticmethod
+    def get_direction(a, b):
+        a_angle = geometry.curvature(a)
+        b_angle = geometry.curvature(b)
+        angle = a_angle - b_angle
+        forward = True
+        m = geometry.get_gradient(a)
+        if m<0:
+            forward = False
+        if angle < config.LANE_SEGMENT_ANGLE:
+            return 'through'
+        if forward:
+            if angle < 90:
+                return "right"
+            return 'left'
+        else:
+            if angle > 90:
+                return "right"
+            return 'left'
+
     @staticmethod
     def get_intersections(graph) -> List[Intersection]:
         intersections = {}
+        added_lanes = set()
         for lane in graph.lanelinks:
             node = lane.to_node
-            incoming = lane.predecessors
             if node.get_degree() > 2:
-                if node.id in intersections:
-                    # update
-                    intersections[node.id]['incoming'].extend([lane.id for lane in incoming])
-                else:
-                    intersections[node.id] = \
-                        {'incoming': [incoming_lane.id for incoming_lane in incoming],
-                         'right':[],
-                           'left': [],
-                        'through': [],
-                         'none':[]}
+                incoming = [p for p in lane.predecessors if p.id not in added_lanes]
+                incoming_element = {'incomingLanelet': set([incoming_lane.id for incoming_lane in incoming]),
+                                    'right': [],
+                                    'left': [],
+                                    'through': [],
+                                    'none': []}
                 for incoming_lane in incoming:
+                    print(str(incoming_lane.forward)+" With:"+str(incoming_lane.id))
                     directions = incoming_lane.turnlane.split(";")
-                    successors = [successor.id for successor in lane.successors]
                     for direction in directions:
-                        intersections[node.id][direction].extend(successors)
+                        if direction == 'none':
+
+                            for s in incoming_lane.successors:
+                                angle = IntermediateFormat.get_direction(incoming_lane.waypoints,
+                                                                         s.waypoints)
+                                incoming_element[angle].append(s.id)
+                        else:
+                            incoming_element[direction].extend([s.id for s in incoming_lane.successors])
+                    if node.id in intersections:
+                        # update
+                        intersections[node.id]['incoming'].append(incoming_element)
+                    else:
+                        intersections[node.id] = \
+                            {'incoming': [incoming_element]}
+                    added_lanes =added_lanes.union(incoming_element['incomingLanelet'])
+
 
         intersections_cr = []
         for intersection_node_id in intersections:
             incoming_elements = []
-            incoming_data = intersections[intersection_node_id]
-            incoming_lanelets = set(incoming_data['incoming'])
-            successors_right = set(incoming_data["right"])
-            successors_left = set(incoming_data["left"])
-            successors_straight = set(incoming_data['through']).union(set(incoming_data['none']))
-            incoming_element = IntersectionIncomingElement(idgenerator.get_id(),
-                                                           incoming_lanelets,
-                                                           successors_right,
-                                                           successors_straight,
-                                                           successors_left,
-                                                           )
-            incoming_elements.append(incoming_element)
+            incoming_data = intersections[intersection_node_id]['incoming']
+            for incoming in incoming_data:
+                incoming_lanelets = set(incoming['incomingLanelet'])
+                successors_right = set(incoming["right"])
+                successors_left = set(incoming["left"])
+                successors_straight = set(incoming['through']).union(set(incoming['none']))
+                incoming_element = IntersectionIncomingElement(idgenerator.get_id(),
+                                                               incoming_lanelets,
+                                                               successors_right,
+                                                               successors_straight,
+                                                               successors_left,
+                                                               )
+                incoming_elements.append(incoming_element)
+
             intersections_cr.append(Intersection(idgenerator.get_id(), incoming_elements))
         return intersections_cr
 
