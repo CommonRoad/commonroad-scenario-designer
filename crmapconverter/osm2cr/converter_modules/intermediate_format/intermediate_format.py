@@ -117,6 +117,33 @@ class Edge:
                     )
 
 
+def add_is_left_of(incoming_data, incoming_data_id):
+    ref = incoming_data[0]['waypoints'][0] - incoming_data[0]['waypoints'][-1]
+    angles = [(0, 0)]
+    # calculate all incoming angle from the reference incoming
+    for index in range(1, len(incoming_data)):
+        new_v = incoming_data[index]['waypoints'][0] -  incoming_data[index]['waypoints'][-1]
+        angles.append((index, geometry.angle_to(ref, new_v)))
+
+    #sort the angles from the reference to go clockwise
+    angles.sort(key = lambda tup: tup[1])
+    prev = -1
+
+    # take the incomings which have less than 90 degree in between
+    for index in range(0,len(incoming_data)):
+        angle = angles[index][1] - angles[prev][1]
+        if angle<0:
+            angle = 360+angle
+        if angle <= 90+ config.LANE_SEGMENT_ANGLE:
+            # is left of
+            is_left_of = angles[index][0]
+            data_index = angles[prev][0]
+            incoming_data[data_index].update({'isLeftOf': [incoming_data_id[is_left_of]]})
+        prev = index
+
+    return incoming_data
+
+
 class IntermediateFormat:
     """
     Class that represents the intermediate format
@@ -178,13 +205,15 @@ class IntermediateFormat:
                                     'right': [],
                                     'left': [],
                                     'through': [],
-                                    'none': []}
+                                    'none': [],
+                                    'isLeftOf':[],
+                                    'waypoints': []}
                 for incoming_lane in incoming:
-                    print(str(incoming_lane.forward)+" With:"+str(incoming_lane.id))
                     directions = incoming_lane.turnlane.split(";")
+                    if incoming_element['waypoints'] == []:
+                        incoming_element['waypoints'] = incoming_lane.waypoints
                     for direction in directions:
                         if direction == 'none':
-
                             for s in incoming_lane.successors:
                                 angle = IntermediateFormat.get_direction(incoming_lane.waypoints,
                                                                          s.waypoints)
@@ -197,25 +226,31 @@ class IntermediateFormat:
                     else:
                         intersections[node.id] = \
                             {'incoming': [incoming_element]}
-                    added_lanes =added_lanes.union(incoming_element['incomingLanelet'])
+                    added_lanes = added_lanes.union(incoming_element['incomingLanelet'])
 
 
         intersections_cr = []
         for intersection_node_id in intersections:
             incoming_elements = []
             incoming_data = intersections[intersection_node_id]['incoming']
+            incoming_ids = [idgenerator.get_id() for incoming in incoming_data]
+            incoming_data = add_is_left_of(incoming_data, incoming_ids)
+            index = 0
             for incoming in incoming_data:
                 incoming_lanelets = set(incoming['incomingLanelet'])
                 successors_right = set(incoming["right"])
                 successors_left = set(incoming["left"])
                 successors_straight = set(incoming['through']).union(set(incoming['none']))
-                incoming_element = IntersectionIncomingElement(idgenerator.get_id(),
+                is_left_of = set(incoming['isLeftOf'])
+                incoming_element = IntersectionIncomingElement(incoming_ids[index],
                                                                incoming_lanelets,
                                                                successors_right,
                                                                successors_straight,
                                                                successors_left,
+                                                               is_left_of
                                                                )
                 incoming_elements.append(incoming_element)
+                index+=1
 
             intersections_cr.append(Intersection(idgenerator.get_id(), incoming_elements))
         return intersections_cr
