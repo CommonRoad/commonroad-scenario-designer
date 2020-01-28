@@ -6,7 +6,7 @@ from queue import Queue
 from typing import List, Set, Tuple, Optional, Dict
 
 import numpy as np
-from commonroad.scenario.traffic_sign import TrafficSignElement, TrafficSign
+from commonroad.scenario.traffic_sign import TrafficSignElement, TrafficSign, TrafficLight
 
 from crmapconverter.osm2cr import config
 from crmapconverter.osm2cr.converter_modules.utility import geometry, idgenerator
@@ -697,6 +697,12 @@ class GraphEdge:
             if lane.forward:
                 lane.add_traffic_sign(sign)
 
+    def add_traffic_light(self, light: "GraphTrafficLight"):
+        self.traffic_lights.append(light)
+        for lane in self.lanes:
+            if lane.forward == True:
+                lane.add_traffic_light(light)
+
 
 class GraphTrafficSign:
     def __init__(self, sign: Dict,
@@ -732,16 +738,33 @@ class GraphTrafficSign:
         return TrafficSign(self.id, elements, position, virtual)
 
 
-
 class GraphTrafficLight:
     def __init__(self, light: Dict,
                  node: GraphNode):
         self.light = light
         self.node = node
         self.id = idgenerator.get_id()
+        self.crossing = False
+        self.highway = False
+        self.forward = True
+        self.parse_osm(light)
+
+    def parse_osm(self, data: Dict):
+        if 'crossing' in  data:
+            self.crossing = True
+        if 'highway' in data:
+            self.highway = True
+        if 'traffic_signals:direction' in data:
+            if data['traffic_signals:direction'] == 'backward':
+                self.forward = False
 
     def to_traffic_light_cr(self):
-        pass
+        position = None
+        if self.node is not  None:
+            position_point = self.node.get_point()
+            position = np.array([position_point.x, position_point.y])
+        traffic_light = TrafficLight(self.id, cycle=[], position=position)
+        return traffic_light
 
 
 
@@ -957,6 +980,11 @@ class Lane:
         if self.traffic_signs is None:
             self.traffic_signs = []
         self.traffic_signs.append(sign)
+
+    def add_traffic_light(self, light: GraphTrafficLight):
+        if self.traffic_lights is None:
+            self.traffic_lights = []
+        self.traffic_lights.append(light)
 
 
 class Graph:
@@ -1562,4 +1590,19 @@ class Graph:
             for edge in sign.edges:
                 for sub_edge in edge:
                     sub_edge.add_traffic_sign(sign)
+
+    def apply_traffic_lights(self):
+        # for each traffic light
+            #if forward:
+                # find edges going to node
+            # else:
+                # find edges going away from node
+        for light in self.traffic_lights:
+            edges = light.node.edges
+            for edge in edges:
+                if light.forward and edge.node2.id == light.node.id:
+                    edge.add_traffic_light(light)
+                if not light.forward and edge.node1.id == light.node.id:
+                    edge.add_traffic_light(light)
+
 
