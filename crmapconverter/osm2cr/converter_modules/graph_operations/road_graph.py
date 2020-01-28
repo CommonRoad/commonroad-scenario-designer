@@ -697,10 +697,10 @@ class GraphEdge:
             if lane.forward:
                 lane.add_traffic_sign(sign)
 
-    def add_traffic_light(self, light: "GraphTrafficLight"):
+    def add_traffic_light(self, light: "GraphTrafficLight", forward):
         self.traffic_lights.append(light)
         for lane in self.lanes:
-            if lane.forward == True:
+            if lane.forward == forward:
                 lane.add_traffic_light(light)
 
 
@@ -1593,16 +1593,13 @@ class Graph:
 
     def apply_traffic_lights(self):
         # for each traffic light
-            #if forward:
-                # find edges going to node
-            # else:
-                # find edges going away from node
+        # find edges going to node
         for light in self.traffic_lights:
             edges = light.node.edges
             for edge in edges:
                 if light.forward and edge.node2.id == light.node.id:
-                    edge.add_traffic_light(light)
+                    edge.add_traffic_light(light, light.forward)
                 if not light.forward and edge.node1.id == light.node.id:
-                    edge.add_traffic_light(light)
+                    edge.add_traffic_light(light, light.forward)
 
 
