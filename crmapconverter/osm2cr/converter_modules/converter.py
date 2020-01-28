@@ -81,6 +81,8 @@ class Scenario:
             g.delete_edges(edges_to_delete)
         print("applying traffic signs to edges and nodes")
         g.apply_traffic_signs()
+        print("applying traffic lights to edges")
+        g.apply_traffic_lights()
         print("creating waypoints of lanes")
         g.create_lane_waypoints()
         return g

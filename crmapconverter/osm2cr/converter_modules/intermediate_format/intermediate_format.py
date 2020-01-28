@@ -35,7 +35,9 @@ class Edge:
                  adjacent_left: int,
                  adjacent_left_direction_equal: bool,
                  successors: List[int],
-                 predecessors: List[int]):
+                 predecessors: List[int],
+                 traffic_signs: Set[int],
+                 traffic_lights: Set[int]):
         self.id = id
         self.node1 = node1
         self.node2 = node2
@@ -48,6 +50,8 @@ class Edge:
         self.adjacent_right_direction_equal = adjacent_right_direction_equal
         self.successors = successors
         self.predecessors = predecessors
+        self.traffic_signs = traffic_signs
+        self.traffic_lights = traffic_lights
 
     def to_lanelet(self) -> Lanelet:
         return Lanelet(
@@ -61,6 +65,8 @@ class Edge:
             self.adjacent_left_direction_equal,
             self.adjacent_right,
             self.adjacent_right_direction_equal,
+            traffic_signs=self.traffic_signs,
+            traffic_lights=self.traffic_lights
         )
 
     @staticmethod
@@ -102,6 +108,15 @@ class Edge:
 
         successors = [successor.id for successor in lane.successors]
         predecessors = [predecessor.id for predecessor in lane.predecessors]
+        traffic_lights = None
+        if lane.traffic_lights is not None:
+            traffic_lights = [light.id for light in lane.traffic_lights]
+            traffic_lights = set(traffic_lights)
+
+        traffic_signs = None
+        if lane.traffic_signs is not None:
+            traffic_signs = [sign.id for sign in lane.traffic_signs]
+            traffic_signs = set(traffic_signs)
         return Edge(current_id,
                     lane.from_node.get_point(),
                     lane.to_node.get_point(),
@@ -114,6 +129,8 @@ class Edge:
                     adjacent_left_direction_equal,
                     successors,
                     predecessors,
+                    traffic_signs,
+                    traffic_lights
                     )
 
 
@@ -265,6 +282,9 @@ class IntermediateFormat:
         for sign in self.traffic_signs:
             net.add_traffic_sign(sign, set())
 
+        for light in self.traffic_lights:
+            net.add_traffic_light(light, set())
+
         for intersection in self.intersections:
             net.add_intersection(intersection)
 
@@ -282,9 +302,10 @@ class IntermediateFormat:
             edges.append(edge)
         IntermediateFormat.get_intersections(graph)
         traffic_signs = [sign.to_traffic_sign_cr() for sign in graph.traffic_signs]
-        #traffic_lights = [light.to_traffic_light_cr() for light in graph.traffic_lights]
+        traffic_lights = [light.to_traffic_light_cr() for light in graph.traffic_lights]
         intersections = IntermediateFormat.get_intersections(graph)
         return IntermediateFormat(nodes,
                                   edges,
                                   traffic_signs,
+                                  traffic_lights,
                                   intersections=intersections)
