@@ -159,7 +159,7 @@ def get_traffic_signs_and_lights(traffic_rules: Dict) -> (List, List):
     traffic_signs = []
     for node_id in traffic_rules:
         rule = traffic_rules[node_id]
-        if 'traffic_sign' in rule.keys() or 'maxspeed' in rule.keys():
+        if 'traffic_sign' in rule.keys() or 'maxspeed' in rule.keys() or 'overtaking' in rule.keys():
             traffic_signs.append({node_id: rule})
         else:
             traffic_lights.append({node_id: rule})
