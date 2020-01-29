@@ -28,7 +28,6 @@ setup(
         "commonroad-io>=2019.1",
         "pyproj>=2.2.0",
         "scipy>=1.3.0",
-        "commonroad-io @ git+ssh://git@gitlab.lrz.de:cps/commonroad-io.git@feature_traffic_rules"
     ],
     extras_require={"GUI": ["matplotlib>=3.1.0"]},
     python_requires=">=3.6",
