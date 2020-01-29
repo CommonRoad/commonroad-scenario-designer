@@ -52,7 +52,12 @@ def image_encoding(path):
 
 def osm2cr():
     """Converter OSM2CR intial function (V1.0)"""
+    global welcome
+    welcome.destroy()
+    welcome = None
     start_gui()
+    welcome = initialise()
+    OSM2CRActivity1(welcome).mainloop()
 
 def openDRIVE2Lanelet():
     """Converter OpenDRIVE2Lanelet intial function (V1.0)"""
@@ -177,6 +182,7 @@ def CRviewer_run(path=None):
     ui = ViewerQt(path)
     ui.commonroad_visualization_menu()
     app.exec_()
+
 
 class Home(Frame):
     """Class driving the interface of welcoming window"""
@@ -349,14 +355,19 @@ class OD2CRActivity1(OD2CRFrame):
             C = G.OpenDriveConvertWindow("")
             C.load_opendriveFile(self.path)
             C.exportAsCommonRoad()
-            print("hello")
-
+            app.exit()
+            C.destroy()
+            global welcome
+            welcome.destroy()
+            welcome = None
+            welcome = initialise()
+            Home(welcome).mainloop()
         self.export.configure(command=export_OD)
         self.open.configure(command=open_OD2)
 
 
 class CRViewer(InterfaceToolTemplate):
-    """Class driving the frame of OSM2CR Converter"""
+    """Class driving the frame of CR Viewer"""
 
     def __init__(self, window, **kwargs):
         InterfaceToolTemplate.__init__(self, window, **kwargs)
@@ -366,11 +377,17 @@ class CRViewer(InterfaceToolTemplate):
 
 
 class CRViewerActivity1(OD2CRFrame):
-    """Class driving the interface of the first Activity of OSM2CR"""
+    """Class driving the interface of the first Activity of CRViewer"""
 
     def __init__(self, window, **kwargs):
         OD2CRFrame.__init__(self, window, **kwargs)
+        global welcome
+        welcome.destroy()
+        welcome = None
         CRviewer_run()
+        welcome = initialise()
+        Home(welcome).mainloop()
+        welcome = welcome
 
 
 
