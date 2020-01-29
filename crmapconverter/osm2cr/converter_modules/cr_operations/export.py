@@ -11,6 +11,7 @@ import utm
 
 from crmapconverter.osm2cr import config
 from crmapconverter.osm2cr.converter_modules.graph_operations import road_graph as rg
+from crmapconverter.osm2cr.converter_modules.intermediate_format.intermediate_format import IntermediateFormat
 from crmapconverter.osm2cr.converter_modules.utility import geometry
 from crmapconverter.osm2cr.converter_modules.utility.idgenerator import get_id
 
@@ -35,9 +36,9 @@ def get_lanelet(lane: rg.Lane) -> Lanelet:
     right_bound = lane.right_bound
     center_points = lane.waypoints
     successors = []
-    speedlimit = lane.speedlimit
-    if speedlimit is None or speedlimit == 0:
-        speedlimit = np.infty
+    # speedlimit = lane.speedlimit
+    # if speedlimit is None or speedlimit == 0:
+    #     speedlimit = np.infty
     for successor in lane.successors:
         successors.append(successor.id)
     predecessors = []
@@ -79,7 +80,6 @@ def get_lanelet(lane: rg.Lane) -> Lanelet:
         adjacent_left_direction_equal,
         adjacent_right,
         adjacent_right_direction_equal,
-        speedlimit,
     )
     return lanelet
 
@@ -149,7 +149,10 @@ def export(
     :param graph: the graph
     :return: None
     """
-    scenario = create_scenario(graph)
+    #scenario = create_scenario(graph)
+    # convert via intermediate format
+    intermediate_format = IntermediateFormat.extract_road_graph(graph)
+    scenario = intermediate_format.to_commonroad_scenario()
     if config.EXPORT_IN_UTM:
         convert_coordinates_to_utm(scenario, graph.center_point)
     problemset = PlanningProblemSet(None)

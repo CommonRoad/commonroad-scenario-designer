@@ -51,12 +51,12 @@ class Scenario:
     @staticmethod
     def step_collection_1(file) -> road_graph.Graph:
         print("reading File")
-        roads, points, restrictions, center_point, bounds = osm_parser.parse_file(
+        roads, points, restrictions, center_point, bounds, traffic_signs, traffic_lights = osm_parser.parse_file(
             file, config.ACCEPTED_HIGHWAYS
         )
         print("creating graph")
         g = osm_parser.roads_to_graph(
-            roads, points, restrictions, center_point, bounds, center_point
+            roads, points, restrictions, center_point, bounds, center_point, traffic_signs, traffic_lights
         )
         if config.MAKE_CONTIGUOUS:
             print("making graph contiguously")
@@ -79,6 +79,10 @@ class Scenario:
         if config.DELETE_SHORT_EDGES:
             print("deleting short edges")
             g.delete_edges(edges_to_delete)
+        print("applying traffic signs to edges and nodes")
+        g.apply_traffic_signs()
+        print("applying traffic lights to edges")
+        g.apply_traffic_lights()
         print("creating waypoints of lanes")
         g.create_lane_waypoints()
         return g

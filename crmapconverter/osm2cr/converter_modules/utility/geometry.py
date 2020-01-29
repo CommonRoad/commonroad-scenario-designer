@@ -825,3 +825,11 @@ def filter_points(
         )
 
     return result
+
+
+def get_gradient(polyline: List[np.ndarray]):
+    a = polyline[0]
+    b = polyline[-1]
+
+    m = (b[1] - a[1]) / (b[0] - a[0])
+    return m
