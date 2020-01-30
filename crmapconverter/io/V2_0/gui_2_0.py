@@ -140,7 +140,7 @@ class My_Text(Canvas):
                          text=text)
 
 
-class ViewerQt(QWidget):
+class CRViewerQt(QWidget):
     """Class used to provied the existant viewer in Qt"""
 
     def __init__(self, path=None):
@@ -156,7 +156,7 @@ class ViewerQt(QWidget):
 
 def CRviewer_run(path=None):
     app = QtWidgets.QApplication(sys.argv)
-    ui = ViewerQt(path)
+    ui = CRViewerQt(path)
     ui.commonroad_visualization_menu()
     app.exec_()
 
