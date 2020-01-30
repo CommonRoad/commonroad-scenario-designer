@@ -3,15 +3,19 @@ import signal
 import sys
 import time
 
+#Graphic libraries
 from PyQt5 import QtGui, QtCore, QtWidgets
-
 try:
     from PyQt5.QtWidgets import QFileDialog, QWidget, QApplication, QMainWindow
-    from crmapconverter.osm2cr.converter_modules.gui_modules.gui_embedding import StartMenu, MainApp
 except:
     print("You need manually to install your Qt distribution")
+from tkinter import *
+from crmapconverter.io.V2_0.gui_2_0_controller import *
+
+#Model libraries
 try:
     import crmapconverter.io.gui as G
+    from crmapconverter.osm2cr.converter_modules.gui_modules.gui_embedding import StartMenu, MainApp
     from commonroad.common.file_writer import CommonRoadFileWriter
     from commonroad.common.file_reader import CommonRoadFileReader
 
@@ -26,11 +30,6 @@ try:
 except:
     print("You need to install manually commonroad")
 
-from tkinter import *
-
-from PIL import Image
-from PIL import ImageTk
-
 
 try:
     from crmapconverter.osm2cr.main import start_gui
@@ -43,29 +42,6 @@ except:
 #GLOBAL VARIABLES
 high = 902
 width = 960
-
-#GLOBAL FUNCTIONS
-def image_encoding(path):
-    """Loads an image in the right format to inster it in the Tkinter File System"""
-
-    return ImageTk.PhotoImage(Image.open(path))
-
-def osm2cr():
-    """Converter OSM2CR intial function (V1.0)"""
-    global welcome
-    welcome.destroy()
-    welcome = None
-    start_gui()
-    welcome = initialise()
-    OSM2CRActivity1(welcome).mainloop()
-
-def openDRIVE2Lanelet():
-    """Converter OpenDRIVE2Lanelet intial function (V1.0)"""
-    G.opendrive_gui()
-
-def default():
-    print("coming soon")
-
 
 class My_Button(Button):
     """Class defining the design of the buttons used in the interface defined below"""
@@ -162,6 +138,7 @@ class My_Text(Canvas):
                          anchor=NW,
                          font=('KacstDecorative', -20, 'italic'),
                          text=text)
+
 
 class ViewerQt(QWidget):
     """Class used to provied the existant viewer in Qt"""
@@ -391,9 +368,7 @@ class CRViewerActivity1(OD2CRFrame):
 
 
 
-
 # INITIALISATION
-
 def initialise():
     window = Tk()
     window.title("Common Road Tools")
