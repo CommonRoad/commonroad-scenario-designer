@@ -338,5 +338,6 @@ class IntermediateFormat:
         pass
 
 
-    def get_node(self, output):
-        pass
+    def get_sumo(self):
+        s =Sumo(self)
+        s.write_net('files/sumo/')

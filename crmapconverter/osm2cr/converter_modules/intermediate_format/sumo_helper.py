@@ -2,6 +2,7 @@
 This module holds the classes and methods to convert to and from sumo
 """
 import os
+import subprocess
 import xml.etree.cElementTree as ET
 import xml.dom.minidom as minidom
 
@@ -187,7 +188,7 @@ class Sumo:
             nodes = ET.SubElement(root, 'nodes')
             for node in self.nodes:
                 ET.SubElement(nodes, 'node', id=str(node['id']), x=str(node['x']),
-                              y=str(node['y']), function='priority')   # TODO Add traffic signals
+                              y=str(node['y']), type=node['type'])   # TODO Add traffic signals
             output_str = ET.tostring(nodes, encoding='utf8', method='xml').decode("utf-8")
 
             reparsed = minidom.parseString(output_str)
@@ -214,16 +215,63 @@ class Sumo:
         with open(output_path+'_type.type.xml', 'w+') as output_file:
             root = ET.Element('root')
             types = ET.SubElement(root, 'types')
+            priority = 3 #TODO Set priority
             for type in self.types:
                 type_et = ET.SubElement(types, 'type')
                 type_et.set('id', str(type['id']))
                 type_et.set('numLanes', str(type['numLanes']))
                 if 'speed' in type:
                     type_et.set('speed', str(type['speed']))
-                type_et.set('priority', str(3))  #TODO Set priority
+                type_et.set('priority', str(priority))
             output_str = ET.tostring(types, encoding='utf8', method='xml').decode("utf-8")
             reparsed = minidom.parseString(output_str)
             output_file.write(reparsed.toprettyxml(indent="\t"))
+
+    def _write_trafficlight_file(self, output_path):
+        with open(output_path+'_traffic.xml', 'w+') as output_file:
+            root = ET.Element('root')
+            additional  = ET.SubElement(root, 'additional')
+            for traffic_light in self.traffic_lights:
+                traffic_light_et = ET.SubElement(additional, 'tlLogic')
+                traffic_light_et.set('id', str(traffic_light['id']))
+                traffic_light_et.set('programID', traffic_light['programID'])
+                traffic_light_et.set('offset', str(traffic_light['offset']))
+                traffic_light_et.set('type', traffic_light['type'])
+                for phase in traffic_light['phases']:
+                    phase_et = ET.SubElement(traffic_light_et, 'phase')
+                    phase_et.set('duration', str(phase['duration']))
+                    phase_et.set('state', str(phase['state']))
+            output_str = ET.tostring(additional, encoding='utf8', method='xml').decode("utf-8")
+            reparsed = minidom.parseString(output_str)
+            output_file.write(reparsed.toprettyxml(indent="\t"))
+
+
+    def merge_files(self, output_path:str):
+        """
+        Function that merges the edges and nodes files into one using netconvert
+        :param output_path: the relative path of the output
+        :return: nothing
+        """
+        # The header of the xml files must be removed
+        toRemove = ["options", "xml"]
+        os.chdir(os.path.dirname(output_path))
+
+        nodesFile = '_nodes.nod.xml'
+        edgesFile = '_edges.edg.xml'
+        typesFile = '_type.type.xml'
+        output = 'net.net.xml'
+
+        # Calling of Netconvert
+        bashCommand = "netconvert --plain.extend-edge-shape=false " \
+                      "--no-turnarounds=true " \
+                      "--junctions.internal-link-detail=10 " \
+                      "--offset.disable-normalization=true " \
+                      "--node-files=" + str(nodesFile) + \
+                      " --edge-files=" + str(edgesFile) + \
+                      " -t=" + str(typesFile) + \
+                      " --output-file=" + str(output)
+
+        process = subprocess.call(bashCommand.split(), stdout=subprocess.PIPE)
 
     def write_net(self, output_path):
         """
@@ -234,4 +282,6 @@ class Sumo:
         self._write_edges_file(output_path)
         self._write_nodes_file(output_path)
         self._write_types_file(output_path)
+        self._write_trafficlight_file(output_path)
+        self.merge_files(output_path)
         #self._write_connections_file(output_path)
