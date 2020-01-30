@@ -28,15 +28,16 @@ def graph_search(center_node: "GraphNode") -> Tuple[Set["GraphNode"], Set["Graph
     explore.put(center_node)
     while not explore.empty():
         node = explore.get()
-        for edge in node.edges:
-            if edge not in edges:
-                edges.add(edge)
-                if edge.node1 not in nodes:
-                    explore.put(edge.node1)
-                    nodes.add(edge.node1)
-                if edge.node2 not in nodes:
-                    explore.put(edge.node2)
-                    nodes.add(edge.node2)
+        if node:
+            for edge in node.edges:
+                if edge not in edges:
+                    edges.add(edge)
+                    if edge.node1 not in nodes:
+                        explore.put(edge.node1)
+                        nodes.add(edge.node1)
+                    if edge.node2 not in nodes:
+                        explore.put(edge.node2)
+                        nodes.add(edge.node2)
     return nodes, edges
 
 
