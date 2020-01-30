@@ -7,6 +7,9 @@ from commonroad.scenario.obstacle import Obstacle
 from typing import List, Set
 
 import numpy as np
+
+from crmapconverter.osm2cr.converter_modules.intermediate_format.sumo_helper import Sumo
+
 from crmapconverter.osm2cr.converter_modules.graph_operations.road_graph import Graph
 
 from crmapconverter.osm2cr import config
@@ -17,6 +20,11 @@ from commonroad.scenario.traffic_sign import TrafficLight
 
 from crmapconverter.osm2cr.converter_modules.utility import geometry, idgenerator
 
+
+class Node:
+    def __init__(self, id, point):
+        self.id = id
+        self.point = point
 
 class Edge:
     """
@@ -117,9 +125,12 @@ class Edge:
         if lane.traffic_signs is not None:
             traffic_signs = [sign.id for sign in lane.traffic_signs]
             traffic_signs = set(traffic_signs)
+
+        from_node = Node(lane.from_node.id, lane.from_node.get_point())
+        to_node = Node(lane.to_node.id, lane.to_node.get_point())
         return Edge(current_id,
-                    lane.from_node.get_point(),
-                    lane.to_node.get_point(),
+                    from_node,
+                    to_node,
                     lane.left_bound,
                     lane.right_bound,
                     lane.waypoints,
@@ -132,6 +143,8 @@ class Edge:
                     traffic_signs,
                     traffic_lights
                     )
+
+
 
 
 def add_is_left_of(incoming_data, incoming_data_id):
@@ -168,7 +181,7 @@ class IntermediateFormat:
     """
 
     def __init__(self,
-                 nodes: List[geometry.Point],
+                 nodes: List[Node],
                  edges: List[Edge],
                  traffic_signs: List[TrafficSign] = None,
                  traffic_lights: List[TrafficLight] = None,
@@ -189,6 +202,16 @@ class IntermediateFormat:
         self.traffic_lights = traffic_lights
         self.obstacles = obstacles
 
+
+    def find_edge_by_id(self, id):
+        for edge in self.edges:
+            if edge.id == id:
+                return edge
+
+    def find_traffic_sign_by_id(self, id):
+        for sign in self.traffic_signs:
+            if sign.traffic_sign_id == id:
+                return sign
 
     @staticmethod
     def get_direction(a, b):
@@ -294,7 +317,7 @@ class IntermediateFormat:
     @staticmethod
     def extract_road_graph(graph: Graph):
         road_graph = graph
-        nodes = [node.get_point() for node in road_graph.nodes]
+        nodes = [Node(node.id, node.get_point()) for node in road_graph.nodes]
         edges = []
         lanes = graph.get_all_lanes()
         for lane in lanes:
@@ -309,3 +332,12 @@ class IntermediateFormat:
                                   traffic_signs,
                                   traffic_lights,
                                   intersections=intersections)
+
+
+    def get_obstacles(self):
+        pass
+
+
+    def get_sumo(self):
+        s =Sumo(self)
+        s.write_net('files/sumo/')
