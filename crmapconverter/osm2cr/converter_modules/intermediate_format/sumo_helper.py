@@ -45,7 +45,6 @@ class Sumo:
     """Class that offers functionality to convert Intermediate format to SUMO and Vice-Versa. """
 
     def __init__(self, map):
-        print("Okay here")
         self.map = map
         self._convert_net()
 
@@ -56,16 +55,10 @@ class Sumo:
 
         for sign in edge.traffic_signs:
             sign_obj = self.map.find_traffic_sign_by_id(sign)
-            print("Has sign")
             #check if maxspeed
             for element in sign_obj.traffic_sign_elements:
                 if element.traffic_sign_element_id == TrafficSignIDGermany.MAXSPEED.value:
-                    print("Returning")
                     return element.additional_values[0]
-                else:
-                    print(element.traffic_sign_element_id)
-                    print("Not equal")
-                    print(TrafficSignIDGermany.MAXSPEED)
         return default_speedlimit
 
 
@@ -86,7 +79,6 @@ class Sumo:
 
 
     def _convert_net(self):
-        print("Converting map")
         explored_edges = set()
         explored_nodes = set()
         traffic_light_nodes = set()
