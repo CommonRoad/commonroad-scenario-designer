@@ -174,17 +174,17 @@ class Home(Frame):
                                   column=0,
                                   pady=15)
 
-        def osm2cr_new():
+        def osm2cr():
             """Function to access the new GUI of OSM2CR Converter"""
             self.destroy()
             OSM2CRActivity1(window).mainloop()
 
-        def openDRIVE2cr_new():
+        def opendrive2cr():
             """Function to access the new GUI of OpenDRIVE2Converter"""
             self.destroy()
             OD2CRActivity1(window).mainloop()
 
-        def CRViewer():
+        def crviewer():
             """Function to access the new GUI of Common Road Visualizer"""
             self.destroy()
             CRViewerActivity1(window).mainloop()
@@ -192,11 +192,11 @@ class Home(Frame):
 
         # First line - Canvas 1
         self.button_canvas_1 = My_Canvas(self, 2)
-        self.b1 = My_Button(self.button_canvas_1, 2, 0, osm2cr_new,
+        self.b1 = My_Button(self.button_canvas_1, 2, 0, osm2cr,
                             "Groupe 1.png")
         self.b2 = My_Button(self.button_canvas_1, 2, 1, default,
                             "Groupe 2.png" )
-        self.b3 = My_Button(self.button_canvas_1, 2, 2, openDRIVE2cr_new,
+        self.b3 = My_Button(self.button_canvas_1, 2, 2, opendrive2cr,
                             "Groupe 3.png")
 
         self.button_canvas_2 = My_Canvas(self, 3, pady=30)
@@ -204,7 +204,7 @@ class Home(Frame):
                             "Groupe 4.png")
         self.b5 = My_Button(self.button_canvas_2, 3, 1, default,
                             "Groupe 5.png")
-        self.b6 = My_Button(self.button_canvas_2, 3, 2, CRViewer,
+        self.b6 = My_Button(self.button_canvas_2, 3, 2, crviewer,
                             "Groupe 6.png")
 
 

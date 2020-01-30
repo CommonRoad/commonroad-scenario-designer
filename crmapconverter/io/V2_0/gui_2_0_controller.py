@@ -3,7 +3,7 @@ from tkinter import *
 from PIL import Image, ImageTk
 
 try:
-    import crmapconverter.io.gui as G
+    from crmapconverter.io.gui import opendrive_gui as gui_od2cr
     from crmapconverter.osm2cr.converter_modules.gui_modules.gui_embedding import StartMenu, MainApp
     from commonroad.common.file_writer import CommonRoadFileWriter
     from commonroad.common.file_reader import CommonRoadFileReader
@@ -20,7 +20,7 @@ except:
     print("You need to install manually commonroad")
 
 try:
-    from crmapconverter.osm2cr.main import start_gui
+    from crmapconverter.osm2cr.main import start_gui as gui_osm2cr
 except ModuleNotFoundError as module_err:
     print(module_err)
     print("It seems like you did not install the dependencies for osm2cr.")
@@ -39,13 +39,13 @@ def osm2cr():
     global welcome
     welcome.destroy()
     welcome = None
-    start_gui()
+    gui_osm2cr()
     welcome = initialise()
     OSM2CRActivity1(welcome).mainloop()
 
-def openDRIVE2Lanelet():
+def openDRIVE2CR():
     """Converter OpenDRIVE2Lanelet intial function (V1.0)"""
-    G.opendrive_gui()
+    gui_od2cr()
 
 def default():
     print("coming soon")
