@@ -343,7 +343,7 @@ class OD2CRActivity1(OD2CRFrame):
         self.open.configure(command=open_OD2)
 
 
-class CRViewer(InterfaceToolTemplate):
+class CRViewerFrame(InterfaceToolTemplate):
     """Class driving the frame of CR Viewer"""
 
     def __init__(self, window, **kwargs):
