@@ -6,7 +6,7 @@ import subprocess
 import xml.etree.cElementTree as ET
 import xml.dom.minidom as minidom
 
-from commonroad.scenario.traffic_rule import TrafficLightState
+from commonroad.scenario.traffic_sign import TrafficLightState
 from commonroad.scenario.traffic_sign import TrafficSignIDGermany
 
 
