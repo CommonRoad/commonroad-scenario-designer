@@ -34,15 +34,6 @@ def image_encoding(path):
 
     return ImageTk.PhotoImage(Image.open(path))
 
-def osm2cr():
-    """Converter OSM2CR intial function (V1.0)"""
-    global welcome
-    welcome.destroy()
-    welcome = None
-    gui_osm2cr()
-    welcome = initialise()
-    OSM2CRActivity1(welcome).mainloop()
-
 def openDRIVE2CR():
     """Converter OpenDRIVE2Lanelet intial function (V1.0)"""
     gui_od2cr()

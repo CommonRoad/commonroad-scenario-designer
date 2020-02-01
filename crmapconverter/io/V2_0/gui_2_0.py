@@ -32,7 +32,7 @@ except:
 
 
 try:
-    from crmapconverter.osm2cr.main import start_gui
+    from crmapconverter.osm2cr.main import start_gui as gui_osm2cr
 except ModuleNotFoundError as module_err:
     print(module_err)
     print("It seems like you did not install the dependencies for osm2cr.")
@@ -160,6 +160,14 @@ def CRviewer_run(path=None):
     ui.commonroad_visualization_menu()
     app.exec_()
 
+def osm2cr():
+    """Converter OSM2CR intial function (V1.0)"""
+    global welcome
+    welcome.destroy()
+    welcome = None
+    gui_osm2cr()
+    welcome = initialise()
+    OSM2CRActivity1(welcome).mainloop()
 
 class Home(Frame):
     """Class driving the interface of welcoming window"""
@@ -325,6 +333,7 @@ class OD2CRActivity1(OD2CRFrame):
             A.destroy()
             self.open_canvas.destroy()
             self.export.set_icon("Groupe 7.png")
+            self.export.configure(command=export_OD)
             My_Text(self, 2, self.path, pady=50)
 
         def export_OD():
@@ -339,7 +348,7 @@ class OD2CRActivity1(OD2CRFrame):
             welcome = None
             welcome = initialise()
             Home(welcome).mainloop()
-        self.export.configure(command=export_OD)
+
         self.open.configure(command=open_OD2)
 
 
