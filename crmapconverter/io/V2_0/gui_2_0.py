@@ -3,64 +3,47 @@ import signal
 import sys
 import time
 
+#Graphic libraries
 from PyQt5 import QtGui, QtCore, QtWidgets
-
 try:
     from PyQt5.QtWidgets import QFileDialog, QWidget, QApplication, QMainWindow
-    from crmapconverter.osm2cr.converter_modules.gui_modules.gui_embedding import StartMenu, MainApp
 except:
     print("You need manually to install your Qt distribution")
+from tkinter import *
+
+#Model libraries
 try:
-    import crmapconverter.io.gui as G
     from commonroad.common.file_writer import CommonRoadFileWriter
     from commonroad.common.file_reader import CommonRoadFileReader
+except:
+    print("You need first to install commonroad")
 
+try:
+    from crmapconverter.io.V2_0.gui_2_0_controller import *
+    import crmapconverter.io.gui as G
+    from crmapconverter.osm2cr.converter_modules.gui_modules.gui_embedding import StartMenu, MainApp
     from crmapconverter.osm.osm2lanelet import OSM2LConverter
     from crmapconverter.osm.parser import OSMParser
     from crmapconverter.osm.lanelet2osm import L2OSMConverter
-
     from crmapconverter.opendriveparser.parser import parse_opendrive
     from crmapconverter.opendriveconversion.network import Network
     from crmapconverter.io.viewer import MainWindow as ViewerWidget
     import crmapconverter.io.viewer as CRViewerQT
 except:
-    print("You need to install manually commonroad")
-
-from tkinter import *
-
-from PIL import Image
-from PIL import ImageTk
+    print("You need first to install crmapconverter")
 
 
 try:
-    from crmapconverter.osm2cr.main import start_gui
+    from crmapconverter.osm2cr.main import start_gui as gui_osm2cr
 except ModuleNotFoundError as module_err:
     print(module_err)
     print("It seems like you did not install the dependencies for osm2cr.")
 except:
-    print("You need to install manually commonroad")
+    print("You need first to install crmapconverter to get osm2cr converter")
 
 #GLOBAL VARIABLES
 high = 902
 width = 960
-
-#GLOBAL FUNCTIONS
-def image_encoding(path):
-    """Loads an image in the right format to inster it in the Tkinter File System"""
-
-    return ImageTk.PhotoImage(Image.open(path))
-
-def osm2cr():
-    """Converter OSM2CR intial function (V1.0)"""
-    start_gui()
-
-def openDRIVE2Lanelet():
-    """Converter OpenDRIVE2Lanelet intial function (V1.0)"""
-    G.opendrive_gui()
-
-def default():
-    print("coming soon")
-
 
 class My_Button(Button):
     """Class defining the design of the buttons used in the interface defined below"""
@@ -158,7 +141,8 @@ class My_Text(Canvas):
                          font=('KacstDecorative', -20, 'italic'),
                          text=text)
 
-class ViewerQt(QWidget):
+
+class CRViewerQt(QWidget):
     """Class used to provied the existant viewer in Qt"""
 
     def __init__(self, path=None):
@@ -174,9 +158,18 @@ class ViewerQt(QWidget):
 
 def CRviewer_run(path=None):
     app = QtWidgets.QApplication(sys.argv)
-    ui = ViewerQt(path)
+    ui = CRViewerQt(path)
     ui.commonroad_visualization_menu()
     app.exec_()
+
+def osm2cr():
+    """Converter OSM2CR intial function (V1.0)"""
+    global welcome
+    welcome.destroy()
+    welcome = None
+    gui_osm2cr()
+    welcome = initialise()
+    OSM2CRActivity1(welcome).mainloop()
 
 class Home(Frame):
     """Class driving the interface of welcoming window"""
@@ -191,17 +184,17 @@ class Home(Frame):
                                   column=0,
                                   pady=15)
 
-        def osm2cr_new():
+        def osm2cr():
             """Function to access the new GUI of OSM2CR Converter"""
             self.destroy()
             OSM2CRActivity1(window).mainloop()
 
-        def openDRIVE2cr_new():
+        def opendrive2cr():
             """Function to access the new GUI of OpenDRIVE2Converter"""
             self.destroy()
             OD2CRActivity1(window).mainloop()
 
-        def CRViewer():
+        def crviewer():
             """Function to access the new GUI of Common Road Visualizer"""
             self.destroy()
             CRViewerActivity1(window).mainloop()
@@ -209,11 +202,11 @@ class Home(Frame):
 
         # First line - Canvas 1
         self.button_canvas_1 = My_Canvas(self, 2)
-        self.b1 = My_Button(self.button_canvas_1, 2, 0, osm2cr_new,
+        self.b1 = My_Button(self.button_canvas_1, 2, 0, osm2cr,
                             "Groupe 1.png")
         self.b2 = My_Button(self.button_canvas_1, 2, 1, default,
                             "Groupe 2.png" )
-        self.b3 = My_Button(self.button_canvas_1, 2, 2, openDRIVE2cr_new,
+        self.b3 = My_Button(self.button_canvas_1, 2, 2, opendrive2cr,
                             "Groupe 3.png")
 
         self.button_canvas_2 = My_Canvas(self, 3, pady=30)
@@ -221,7 +214,7 @@ class Home(Frame):
                             "Groupe 4.png")
         self.b5 = My_Button(self.button_canvas_2, 3, 1, default,
                             "Groupe 5.png")
-        self.b6 = My_Button(self.button_canvas_2, 3, 2, CRViewer,
+        self.b6 = My_Button(self.button_canvas_2, 3, 2, crviewer,
                             "Groupe 6.png")
 
 
@@ -342,6 +335,7 @@ class OD2CRActivity1(OD2CRFrame):
             A.destroy()
             self.open_canvas.destroy()
             self.export.set_icon("Groupe 7.png")
+            self.export.configure(command=export_OD)
             My_Text(self, 2, self.path, pady=50)
 
         def export_OD():
@@ -349,14 +343,19 @@ class OD2CRActivity1(OD2CRFrame):
             C = G.OpenDriveConvertWindow("")
             C.load_opendriveFile(self.path)
             C.exportAsCommonRoad()
-            print("hello")
+            app.exit()
+            C.destroy()
+            global welcome
+            welcome.destroy()
+            welcome = None
+            welcome = initialise()
+            Home(welcome).mainloop()
 
-        self.export.configure(command=export_OD)
         self.open.configure(command=open_OD2)
 
 
-class CRViewer(InterfaceToolTemplate):
-    """Class driving the frame of OSM2CR Converter"""
+class CRViewerFrame(InterfaceToolTemplate):
+    """Class driving the frame of CR Viewer"""
 
     def __init__(self, window, **kwargs):
         InterfaceToolTemplate.__init__(self, window, **kwargs)
@@ -366,17 +365,21 @@ class CRViewer(InterfaceToolTemplate):
 
 
 class CRViewerActivity1(OD2CRFrame):
-    """Class driving the interface of the first Activity of OSM2CR"""
+    """Class driving the interface of the first Activity of CRViewer"""
 
     def __init__(self, window, **kwargs):
         OD2CRFrame.__init__(self, window, **kwargs)
+        global welcome
+        welcome.destroy()
+        welcome = None
         CRviewer_run()
-
+        welcome = initialise()
+        Home(welcome).mainloop()
+        welcome = welcome
 
 
 
 # INITIALISATION
-
 def initialise():
     window = Tk()
     window.title("Common Road Tools")
