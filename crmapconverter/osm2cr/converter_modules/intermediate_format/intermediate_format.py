@@ -343,4 +343,4 @@ class IntermediateFormat:
 
     def get_sumo(self):
         s =Sumo(self)
-        s.write_net('/home/behtarin/Documents/Praktikum Motion Planning/Repository/Repository/commonroad-map-tool/crmapconverter/files/sumo/')
+        s.write_net('/files/sumo/')
