@@ -462,6 +462,15 @@ def angle_to(v1: np.ndarray, v2: np.ndarray) -> float:
     angle = angle / np.pi * 180
     return angle
 
+def get_angle(v1: np.ndarray, v2:np.ndarray) -> float:
+    x = [v1[0], v2[0]]
+    y = [v1[1], v2[1]]
+    angles = np.arctan2(y, x) + np.pi
+    diff1 = angles[0] - angles[1]
+    # diff2 = np.pi * 2 - diff1
+    # angle = min(diff1, diff2)
+    angle = diff1 / np.pi * 180
+    return angle
 
 def curvature(polyline: List[np.ndarray]) -> float:
     """

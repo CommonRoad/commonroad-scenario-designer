@@ -6,6 +6,9 @@ import subprocess
 import xml.etree.cElementTree as ET
 import xml.dom.minidom as minidom
 
+from typing import List
+
+from commonroad.common.util import Interval
 from commonroad.scenario.traffic_sign import TrafficLightState
 from commonroad.scenario.traffic_sign import TrafficSignIDGermany
 
@@ -147,7 +150,7 @@ class Sumo:
                     'type': node_type
                 }
                 if from_node.id in traffic_light_nodes:
-                    node.update({'type': 'traffic_'})
+                    node.update({'type': 'traffic_light'})
                 self.nodes.append(node)
                 explored_nodes.add(from_node.id)
 
@@ -238,7 +241,7 @@ class Sumo:
             output_file.write(reparsed.toprettyxml(indent="\t"))
 
 
-    def merge_files(self, output_path:str):
+    def merge_files(self, output_path:str, scenario_name:str):
         """
         Function that merges the edges and nodes files into one using netconvert
         :param output_path: the relative path of the output
@@ -248,16 +251,13 @@ class Sumo:
         toRemove = ["options", "xml"]
         os.chdir(os.path.dirname(output_path))
 
-        nodesFile = '_nodes.nod.xml'
-        edgesFile = '_edges.edg.xml'
-        typesFile = '_type.type.xml'
-        output = 'net.net.xml'
+        nodesFile = scenario_name +'_nodes.nod.xml'
+        edgesFile = scenario_name +'_edges.edg.xml'
+        typesFile = scenario_name +'_type.type.xml'
+        output = scenario_name+'.net.xml'
 
         # Calling of Netconvert
-        bashCommand = "netconvert --plain.extend-edge-shape=false " \
-                      "--no-turnarounds=true " \
-                      "--junctions.internal-link-detail=10 " \
-                      "--offset.disable-normalization=true " \
+        bashCommand = "netconvert " + \
                       "--node-files=" + str(nodesFile) + \
                       " --edge-files=" + str(edgesFile) + \
                       " -t=" + str(typesFile) + \
@@ -271,9 +271,69 @@ class Sumo:
         :param output_path: the relative path of the output
         :return: nothing
         """
-        self._write_edges_file(output_path)
-        self._write_nodes_file(output_path)
-        self._write_types_file(output_path)
-        self._write_trafficlight_file(output_path)
-        self.merge_files(output_path)
+        scenario_name = "test"
+        self._write_edges_file(output_path+"test")
+        self._write_nodes_file(output_path+scenario_name)
+        self._write_types_file(output_path+scenario_name)
+        self._write_trafficlight_file(output_path+scenario_name)
+        self.merge_files(output_path, scenario_name)
+        self.generate_rou_file(output_path+scenario_name+".net.xml", scenario_name, 1, 50, Interval(0, 2000), 1, 0)
+
         #self._write_connections_file(output_path)
+
+    def generate_rou_file(self,net_file: str, scenario_name, dt: float, n_vehicles_max: int, departure_time: Interval,
+                          n_ego_vehicles: int, departure_time_ego: int, ego_ids: List[int] = None,
+                          veh_per_second: float = None, out_folder: str = None) -> str:
+        """
+        Creates route & trips files using randomTrips generator.
+
+        :param net_file: path of .net.xml file
+        :param dt: length of the time step
+        :param n_vehicles_max: max. number of vehicles in route file
+        :param departure_time: Interval of departure times for vehicles
+        :param n_ego_vehicles: number of ego vehicles
+        :param departure_time_ego: desired departure time ego vehicle
+        :param ego_ids: if desired ids of ego_vehicle known, specify here
+        :param veh_per_second: number of vehicle departures per second
+        :param out_folder: output folder of route file (same as net_file if None)
+
+        :return: path of route file
+        """
+        if out_folder is None:
+            out_folder = os.path.dirname(net_file)
+
+        # vehicles per second
+        if veh_per_second is not None:
+            period = 1 / (veh_per_second * dt)
+        else:
+            period = 1
+
+        # filenames
+        rou_file = os.path.join(out_folder, scenario_name + '.rou.xml')
+        trip_file = os.path.join(out_folder, scenario_name + '.trips.xml')
+
+        # create route file
+        step_per_departure = ((departure_time.end - departure_time.start) / n_vehicles_max)
+        try:
+            subprocess.check_output(
+                ['python', os.path.join(os.environ['SUMO_HOME'], 'tools/randomTrips.py'), '-n', net_file,
+                 '-e', "50" #, '-p', str(step_per_departure), '--allow-fringe',
+                 # '--vehicle-class', str('passenger'),
+                 # '--trip-attributes=departLane=\"free\" departSpeed=\"random\" departPos=\"base\"',
+                 # '--period', str(period) #'--fringe-factor', str(fringe_factor)
+                 ])
+        except subprocess.CalledProcessError as e:
+            raise RuntimeError("Command '{}' return with error (code {}): {}".format(e.cmd, e.returncode, e.output))
+        config_file = os.path.join(out_folder,'config.sumocfg')  #TODO Dynamic
+        try:
+            subprocess.check_output(
+                ['duarouter', '-c', config_file,
+                 '-o', rou_file
+                 ])
+        except subprocess.CalledProcessError as e:
+            raise RuntimeError("Command '{}' return with error (code {}): {}".format(e.cmd, e.returncode, e.output))
+        # get ego ids and add EGO_ID_START prefix
+        # ego_ids = find_ego_ids_by_departure_time(rou_file, n_ego_vehicles, departure_time_ego, ego_ids)
+        # write_ego_ids_to_rou_file(rou_file, ego_ids)
+
+        return rou_file
