@@ -152,8 +152,11 @@ def add_is_left_of(incoming_data, incoming_data_id):
     angles = [(0, 0)]
     # calculate all incoming angle from the reference incoming
     for index in range(1, len(incoming_data)):
-        new_v = incoming_data[index]['waypoints'][0] -  incoming_data[index]['waypoints'][-1]
-        angles.append((index, geometry.angle_to(ref, new_v)))
+        new_v = incoming_data[index]['waypoints'][0] - incoming_data[index]['waypoints'][-1]
+        angle = geometry.get_angle(ref, new_v)
+        if angle< 0:
+            angle+= 360
+        angles.append((index, angle))
 
     #sort the angles from the reference to go clockwise
     angles.sort(key = lambda tup: tup[1])
@@ -162,12 +165,12 @@ def add_is_left_of(incoming_data, incoming_data_id):
     # take the incomings which have less than 90 degree in between
     for index in range(0,len(incoming_data)):
         angle = angles[index][1] - angles[prev][1]
-        if angle<0:
-            angle = 360+angle
-        if angle <= 90+ config.LANE_SEGMENT_ANGLE:
+        if angle< 0:
+            angle+= 360
+        if config.LANE_SEGMENT_ANGLE<angle <= 90+ config.LANE_SEGMENT_ANGLE:
             # is left of
-            is_left_of = angles[index][0]
-            data_index = angles[prev][0]
+            is_left_of = angles[prev][0]
+            data_index = angles[index][0]
             incoming_data[data_index].update({'isLeftOf': [incoming_data_id[is_left_of]]})
         prev = index
 
@@ -252,6 +255,7 @@ class IntermediateFormat:
                     directions = incoming_lane.turnlane.split(";")
                     if incoming_element['waypoints'] == []:
                         incoming_element['waypoints'] = incoming_lane.waypoints
+
                     for direction in directions:
                         if direction == 'none':
                             for s in incoming_lane.successors:
@@ -323,7 +327,6 @@ class IntermediateFormat:
         for lane in lanes:
             edge = Edge.extract_from_lane(lane)
             edges.append(edge)
-        IntermediateFormat.get_intersections(graph)
         traffic_signs = [sign.to_traffic_sign_cr() for sign in graph.traffic_signs]
         traffic_lights = [light.to_traffic_light_cr() for light in graph.traffic_lights]
         intersections = IntermediateFormat.get_intersections(graph)
@@ -340,4 +343,4 @@ class IntermediateFormat:
 
     def get_sumo(self):
         s =Sumo(self)
-        s.write_net('files/sumo/')
+        s.write_net('/home/behtarin/Documents/Praktikum Motion Planning/Repository/Repository/commonroad-map-tool/crmapconverter/files/sumo/')
