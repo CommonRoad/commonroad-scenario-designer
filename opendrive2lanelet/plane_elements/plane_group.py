@@ -5,7 +5,7 @@ associated parametric lanes."""
 
 from typing import Tuple
 import math
-
+import copy
 import numpy as np
 
 from opendrive2lanelet.lanelet import ConversionLanelet
@@ -144,10 +144,8 @@ class ParametricLaneGroup:
             local_left_vertices, local_right_vertices = parametric_lane.calc_vertices(
                 precision=precision
             )
-
             if local_left_vertices is None:
                 continue
-
             try:
                 if np.isclose(left_vertices[-1], local_left_vertices[0]).all():
                     idx = 1
@@ -164,7 +162,7 @@ class ParametricLaneGroup:
         )
 
         lanelet = ConversionLanelet(
-            self, left_vertices, center_vertices, right_vertices, self.id_
+            copy.deepcopy(self), left_vertices, center_vertices, right_vertices, self.id_
         )
 
         # Adjacent lanes
