@@ -23,17 +23,18 @@ Opening of new GUI :
 python crmapconverter/io/V2_0/gui_2_0.py
 ```
 
+#### Examples
 
-Converting OSM File to CommonRoad Map with traffic sign and traffic signal:  
+An example to convert OSM File to CommonRoad Map with traffic sign and traffic signal:  
 ```bash
 python examples/osm2cr.py
 ```
 
-Converting OSM File to Sumo config file and run simulation
+An example to converting OSM File to Sumo config file and run simulation
 ```bash
 python examples/intermediateformat_to_sumo.py
 ```
-You will find the sumo file on examples/files/sumo/
+You will find the sumo files on examples/files/sumo/
 
 #### Authors
 
