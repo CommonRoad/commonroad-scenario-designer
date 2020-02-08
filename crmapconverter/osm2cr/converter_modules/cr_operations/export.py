@@ -151,7 +151,7 @@ def export(
     """
     #scenario = create_scenario(graph)
     # convert via intermediate format
-    intermediate_format = IntermediateFormat.extract_road_graph(graph)
+    intermediate_format = IntermediateFormat.extract_from_road_graph(graph)
     scenario = intermediate_format.to_commonroad_scenario()
     if config.EXPORT_IN_UTM:
         convert_coordinates_to_utm(scenario, graph.center_point)
@@ -218,11 +218,13 @@ def view_xml(filename: str, ax=None) -> None:
         print("empty scenario")
         return
     limits = find_bounds(scenario)
+    draw_params = { 'lanelet_network': {'draw_intersections': True, 'draw_traffic_signs_in_lanelet': True,
+                                        'draw_traffic_signs': True}}
     if ax is None:
-        draw_object(scenario, plot_limits=limits)
+        draw_object(scenario, plot_limits=limits, draw_params=draw_params)
         plt.gca().set_aspect("equal")
         plt.show()
         return
     else:
-        draw_object(scenario, plot_limits=limits, ax=ax)
+        draw_object(scenario, plot_limits=limits, ax=ax, draw_params=draw_params)
         ax.set_aspect("equal")

@@ -33,7 +33,7 @@ def convert(filename_open, filename_store=None):
     scenario = converter.Scenario(filename_open)
     #scenario.save_as_cr(filename_store)
 
-    format =IntermediateFormat.extract_road_graph(scenario.graph)
+    format =IntermediateFormat.extract_from_road_graph(scenario.graph)
     scenario_cr = format.to_commonroad_scenario()
     problemset = PlanningProblemSet(None)
     author = config.AUTHOR
