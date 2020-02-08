@@ -203,3 +203,8 @@ TRAFFIC_SIGN_MAP = {
     'stop': TrafficSignID.STOP,
 }
 
+
+# SUMO SAVE Files
+SUMO_SAVE_FILE = 'files/sumo/'
+
+

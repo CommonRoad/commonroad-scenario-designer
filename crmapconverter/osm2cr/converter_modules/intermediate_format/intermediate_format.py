@@ -9,6 +9,7 @@ from commonroad.scenario.intersection import Intersection, \
 from commonroad.scenario.lanelet import Lanelet, LaneletNetwork
 from commonroad.scenario.obstacle import Obstacle
 from typing import List, Set
+import os
 
 import numpy as np
 
@@ -462,9 +463,18 @@ class IntermediateFormat:
         # TODO Get obstacles from SUMO route file
         pass
 
-    def generate_net_file(self):
+    def generate_sumo_config_file(self):
         """
-        Method to Use Sumo to generate network file
+        Method to Use Sumo to generate config file
         """
         sumo = Sumo(self)
-        sumo.write_net('/files/sumo/')
+        path = config.SUMO_SAVE_FILE
+        if not os.path.exists(config.SUMO_SAVE_FILE):
+            os.makedirs(config.SUMO_SAVE_FILE)
+        sumo.write_net(path)
+        sumo.generate_trip_file(path)
+        sumo.write_config_file(path, 0, 2000)
+
+        print("See Sumo Config File Here: "+sumo.config_file)
+        return sumo.config_file
+
