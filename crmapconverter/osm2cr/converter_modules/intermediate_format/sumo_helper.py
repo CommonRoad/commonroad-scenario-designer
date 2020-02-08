@@ -1,19 +1,27 @@
 """
 This module holds the classes and methods to convert to and from sumo
 """
+__author__ = "Behtarin Ferdousi"
+
 import os
 import subprocess
 import xml.etree.cElementTree as ET
 import xml.dom.minidom as minidom
 
-from typing import List
+from typing import List, Set
 
 from commonroad.common.util import Interval
 from commonroad.scenario.traffic_sign import TrafficLightState
 from commonroad.scenario.traffic_sign import TrafficSignIDGermany
 
 
-def complement_traffic_light(light):
+def complement_traffic_light(light: TrafficLightState) -> TrafficLightState:
+    """
+    Return the complement of the traffic light state
+
+    :param light: TrafficLightState
+    :return: complement TrafficLightState
+    """
     light = light.value
     if light == TrafficLightState.RED.value:
         return TrafficLightState.GREEN
@@ -24,7 +32,14 @@ def complement_traffic_light(light):
     if light == TrafficLightState.YELLOW.value:
         return TrafficLightState.RED_YELLOW
 
+
 def map_traffic_light(light):
+    """
+    Map TrafficLightState to Sumo Traffic Light
+
+    :param light: TrafficLightState
+    :return: r,g, u or y
+    """
     light = light.value
     if light == TrafficLightState.RED.value:
         return 'r'
@@ -35,7 +50,13 @@ def map_traffic_light(light):
     if light == TrafficLightState.YELLOW.value:
         return 'y'
 
+
 def generate_state(light):
+    """
+    Generate traffic light phases on an intersection with 4 incomings
+    :param light: TrafficLightState
+    :return: str
+    """
     state = ""
     for i in range(4):
         if i%2 == 0:
@@ -44,28 +65,43 @@ def generate_state(light):
             state = state + map_traffic_light(complement_traffic_light(light))
     return state
 
+
 class Sumo:
-    """Class that offers functionality to convert Intermediate format to SUMO and Vice-Versa. """
+    """Class that offers functionality to convert Intermediate Format to SUMO
+    and Vice-Versa. """
 
     def __init__(self, map):
+        # Generate network file for the map
         self.map = map
         self._convert_net()
 
-    def find_speedlimit(self, edge):
+    def find_speedlimit(self, edge) -> float:
+        """
+        Find the speedlimit on the edge by traffic signs
+        :param edge: Edge in Intermediate Format
+        :return:
+        """
         default_speedlimit = -1
         if edge.traffic_signs is None or len(edge.traffic_signs) == 0:
             return default_speedlimit
 
         for sign in edge.traffic_signs:
             sign_obj = self.map.find_traffic_sign_by_id(sign)
-            #check if maxspeed
+
+            # check if maxspeed sign
             for element in sign_obj.traffic_sign_elements:
                 if element.traffic_sign_element_id == TrafficSignIDGermany.MAXSPEED.value:
                     return element.additional_values[0]
+
         return default_speedlimit
 
+    def group_edges(self, edge) -> Set[int]:
+        """
+        Group multiple lanes into one edge for Sumo
 
-    def group_edges(self, edge):
+        :param edge: Edge in Intermediate Format
+        :return: edge ids of the grouped edges
+        """
         edge_ids = set()
         edge_ids.add(edge.id)
         left_edge = edge

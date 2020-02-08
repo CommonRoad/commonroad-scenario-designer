@@ -224,7 +224,7 @@ def add_is_left_of(incoming_data, incoming_data_id):
             # is left of the previous incoming
             is_left_of = angles[prev][0]
             data_index = angles[index][0]
-            incoming_data[data_index].update({'isLeftOf': [incoming_data_id[is_left_of]]})
+            incoming_data[data_index].update({'isLeftOf': incoming_data_id[is_left_of]})
         prev = index
 
     return incoming_data
@@ -355,7 +355,7 @@ class IntermediateFormat:
                                 incoming_element[angle].append(s.id)
                         else:
                             # separate multiple direction from one lane
-                            possible_directions = direction.splits("|")
+                            possible_directions = direction.split("|")
                             for possible_direction in possible_directions:
                                 incoming_element[possible_direction].extend(
                                     [s.id for s in incoming_lane.successors])
@@ -383,7 +383,7 @@ class IntermediateFormat:
                 successors_right = set(incoming["right"])
                 successors_left = set(incoming["left"])
                 successors_straight = set(incoming['through']).union(set(incoming['none']))
-                is_left_of = set(incoming['isLeftOf'])
+                is_left_of = incoming['isLeftOf']
                 incoming_element = IntersectionIncomingElement(incoming_ids[index],
                                                                incoming_lanelets,
                                                                successors_right,
