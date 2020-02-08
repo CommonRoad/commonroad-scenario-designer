@@ -467,13 +467,14 @@ class IntermediateFormat:
         """
         Method to Use Sumo to generate config file
         """
-        sumo = Sumo(self)
         path = config.SUMO_SAVE_FILE
         if not os.path.exists(config.SUMO_SAVE_FILE):
             os.makedirs(config.SUMO_SAVE_FILE)
-        sumo.write_net(path)
-        sumo.generate_trip_file(path)
-        sumo.write_config_file(path, 0, 2000)
+
+        sumo = Sumo(self, path, 'test')
+        sumo.write_net()
+        sumo.generate_trip_file(0, 2000)
+        sumo.write_config_file(0, 2000)
 
         print("See Sumo Config File Here: "+sumo.config_file)
         return sumo.config_file

@@ -8,11 +8,12 @@ import subprocess
 import xml.etree.cElementTree as ET
 import xml.dom.minidom as minidom
 
-from typing import List, Set
+from typing import Set
 
-from commonroad.common.util import Interval
 from commonroad.scenario.traffic_sign import TrafficLightState
 from commonroad.scenario.traffic_sign import TrafficSignIDGermany
+
+from crmapconverter.osm2cr import config
 
 
 def complement_traffic_light(light: TrafficLightState) -> TrafficLightState:
@@ -54,6 +55,7 @@ def map_traffic_light(light):
 def generate_state(light):
     """
     Generate traffic light phases on an intersection with 4 incomings
+
     :param light: TrafficLightState
     :return: str
     """
@@ -70,11 +72,19 @@ class Sumo:
     """Class that offers functionality to convert Intermediate Format to SUMO
     and Vice-Versa. """
 
-    def __init__(self, map, scenario_name ="generated"):
-        # Generate network file for the map
+    def __init__(self, map,
+                 path=config.SUMO_SAVE_FILE,
+                 scenario_name="generated"):
+        """
+        Convert the data in map to format for Sumo
+        :param map: map in the form of Intermediate Format
+        :param path: Path to save the files
+        :param scenario_name: Scenario Name for the file names
+        """
         self.map = map
-
+        self.path = path
         self.scenario_name = scenario_name
+
         self.node_file = ""
         self.edge_file = ""
         self.type_file = ""
@@ -82,14 +92,18 @@ class Sumo:
         self.net_file = ""
         self.trip_file = ""
         self.route_file = ""
+
         # Default red and yellow light for traffic light
         self.red_light_duration = 60
         self.yellow_light_duration = 10
+
+        # Generate network file for the map
         self._convert_net()
 
     def find_speedlimit(self, edge) -> float:
         """
         Find the speedlimit on the edge by traffic signs
+
         :param edge: Edge in Intermediate Format
         :return:
         """
@@ -118,11 +132,13 @@ class Sumo:
         edge_ids.add(edge.id)
         left_edge = edge
         right_edge = edge
-        while left_edge.adjacent_left is not None and left_edge.adjacent_left_direction_equal:
+        while left_edge.adjacent_left is not None and \
+                left_edge.adjacent_left_direction_equal:
             left_edge = self.map.find_edge_by_id(left_edge.adjacent_left)
             edge_ids.add(left_edge.id)
 
-        while right_edge.adjacent_right is not None and left_edge.adjacent_right_direction_equal:
+        while right_edge.adjacent_right is not None and \
+                left_edge.adjacent_right_direction_equal:
             right_edge = self.map.find_edge_by_id(right_edge.adjacent_right)
             edge_ids.add(right_edge.id)
 
@@ -131,6 +147,7 @@ class Sumo:
     def add_node(self, node, is_traffic_light):
         """
         Add Intermediate Format Node to the sumo nodes
+
         :param node:
         :param is_traffic_light:
         """
@@ -149,7 +166,7 @@ class Sumo:
 
     def _convert_net(self):
         """
-        Generates Nodes, Edges, Traffic file for SUMO and Netconvert to net file
+        Extract nodes, edges and types for SUMO Format
         """
         explored_edges = set()
         explored_nodes = set()
@@ -207,13 +224,13 @@ class Sumo:
                 self.add_node(to_node, to_node.id in traffic_light_nodes)
                 explored_nodes.add(from_node.id)
 
-    def _write_nodes_file(self, output_path):
+    def _write_nodes_file(self) -> str:
         """
-        Function for writing the nodes file
-        :param output_path: path for the file
-        :return: nothing
+        Write the nodes in xml file
+
+        :return: node xml file path
         """
-        output = output_path+'_nodes.nod.xml'
+        output = self.path+self.scenario_name+'_nodes.nod.xml'
         with open(output, 'w+') as output_file:
             root = ET.Element('root')
             nodes = ET.SubElement(root, 'nodes')
@@ -226,12 +243,13 @@ class Sumo:
             output_file.write(reparsed.toprettyxml(indent="\t"))
             return output
 
-    def _write_edges_file(self, output_path):
+    def _write_edges_file(self) -> str:
         """
-        Write Edge file for Sumo
-        :param output_path: Path to save the file
+        Write edges in  xml file for Sumo
+
+        :return: path to the edges file
         """
-        output = output_path+'_edges.edg.xml'
+        output = self.path+self.scenario_name+'_edges.edg.xml'
         with open(output, 'w+') as output_file:
             root = ET.Element('root')
             edges = ET.SubElement(root, 'edges')
@@ -246,12 +264,13 @@ class Sumo:
             output_file.write(reparsed.toprettyxml(indent="\t"))
             return output
 
-    def _write_types_file(self, output_path):
+    def _write_types_file(self) -> str:
         """
         Write Type File
-        :param output_path: Path to save the file
+
+        :return: path to the types file
         """
-        output = output_path+'_types.type.xml'
+        output = self.path+self.scenario_name+'_types.type.xml'
         with open(output, 'w+') as output_file:
             root = ET.Element('root')
             types = ET.SubElement(root, 'types')
@@ -268,12 +287,13 @@ class Sumo:
             output_file.write(reparsed.toprettyxml(indent="\t"))
             return output
 
-    def _write_trafficlight_file(self, output_path):
+    def _write_trafficlight_file(self) -> str:
         """
         Write Traffic Light File
-        :param output_path: Path to save the file
+
+        :return: path to the traffic file
         """
-        output = output_path+'_traffic.xml'
+        output = self.path+self.scenario_name+'_traffic.xml'
         with open(output, 'w+') as output_file:
             root = ET.Element('root')
             additional = ET.SubElement(root, 'additional')
@@ -292,20 +312,19 @@ class Sumo:
             output_file.write(reparsed.toprettyxml(indent="\t"))
             return output
 
-    def merge_files(self, output_path:str, scenario_name:str,
-                    nodes_file, edges_file, types_file):
+    def _merge_files(self) -> str:
         """
         Function that merges the edges and nodes files into one using netconvert
-        :param output_path: the relative path of the output
-        :return: nothing
+
+        :return: path to the net file
         """
-        output = output_path+scenario_name+'_net.net.xml'
+        output = self.path+self.scenario_name+'_net.net.xml'
 
         # Calling of Netconvert
         bashCommand = "netconvert " + \
-                      "--node-files=" + str(nodes_file) + \
-                      " --edge-files=" + str(edges_file) + \
-                      " -t=" + str(types_file) + \
+                      "--node-files=" + str(self.node_file) + \
+                      " --edge-files=" + str(self.edge_file) + \
+                      " -t=" + str(self.type_file) + \
                       " --tls.red.time=" + str(self.red_light_duration) + \
                       " --tls.yellow.time=" + str(self.yellow_light_duration) +\
                       " --output-file=" + str(output)
@@ -313,22 +332,26 @@ class Sumo:
         process = subprocess.call(bashCommand.split(), stdout=subprocess.PIPE)
         return output
 
-    def write_net(self, output_path, scenario_name = "generated"):
+    def write_net(self) -> str:
         """
         Function for writing the edges and nodes files in xml format
-        :param output_path: the relative path of the output
-        :return: nothing
+
+        :return: path to the net file
         """
-        self.scenario_name = scenario_name
-        self.edge_file = self._write_edges_file(output_path+scenario_name)
-        self.node_file = self._write_nodes_file(output_path+scenario_name)
-        self.type_file = self._write_types_file(output_path+scenario_name)
-        self.net_file = self.merge_files(output_path, scenario_name, self.node_file,
-                         self.edge_file, self.type_file)
+        self.edge_file = self._write_edges_file()
+        self.node_file = self._write_nodes_file()
+        self.type_file = self._write_types_file()
+        self.net_file = self._merge_files()
         return self.net_file
 
-    def write_config_file(self, path, begin_time, end_time):
-        self.config_file = path+self.scenario_name+"_config.sumocfg"
+    def write_config_file(self, begin_time, end_time) -> str:
+        """
+        Write the Config file for Sumo
+        :param begin_time: begin time for the simulation
+        :param end_time: end time for the simulation
+        :return: path to the config file
+        """
+        self.config_file = self.path+self.scenario_name+"_config.sumocfg"
         with open(self.config_file, 'w+') as output_file:
             root = ET.Element('root')
             configuration = ET.SubElement(root, 'configuration')
@@ -352,19 +375,26 @@ class Sumo:
             output_file.write(reparsed.toprettyxml(indent="\t"))
             return self.config_file
 
-    def generate_trip_file(self, path):
-        trip_file = path+self.scenario_name+'_trip.trips.xml'
+    def generate_trip_file(self, begin_time, end_time) -> str:
+        """
+        Create Trip File using RandomTrips in Sumo
+        :param begin_time: begin time of trips
+        :param end_time: end Time of the trips
+        :return: path to the trip file
+        """
+        if self.net_file == "":
+            print("You need to write net file first")
+            return ""
+
+        trip_file = self.path + self.scenario_name + '_trip.trips.xml'
         try:
             subprocess.check_output(
                 ['python',
                  os.path.join(os.environ['SUMO_HOME'], 'tools/randomTrips.py'),
                  '-n', self.net_file,
-                 '-e', "50",
+                 '-b', str(begin_time),
+                 '-e', str(end_time),
                  '-o', trip_file
-                 # , '-p', str(step_per_departure), '--allow-fringe',
-                 # '--vehicle-class', str('passenger'),
-                 # '--trip-attributes=departLane=\"free\" departSpeed=\"random\" departPos=\"base\"',
-                 # '--period', str(period) #'--fringe-factor', str(fringe_factor)
                  ])
             self.trip_file = trip_file
             return trip_file
@@ -374,37 +404,13 @@ class Sumo:
                                                                       e.returncode,
                                                                       e.output))
 
-    def generate_rou_file(self,  scenario_name, dt: float,
-                          n_vehicles_max: int, departure_time: Interval,
-                          n_ego_vehicles: int, departure_time_ego: int,
-                          ego_ids: List[int] = None,veh_per_second: float = None,
-                          out_folder: str = None) -> str:
+    def generate_route_file(self) -> str:
         """
-        Creates route & trips files using randomTrips generator.
-
-        :param net_file: path of .net.xml file
-        :param dt: length of the time step
-        :param n_vehicles_max: max. number of vehicles in route file
-        :param departure_time: Interval of departure times for vehicles
-        :param n_ego_vehicles: number of ego vehicles
-        :param departure_time_ego: desired departure time ego vehicle
-        :param ego_ids: if desired ids of ego_vehicle known, specify here
-        :param veh_per_second: number of vehicle departures per second
-        :param out_folder: output folder of route file (same as net_file if None)
-
-        :return: path of route file
+        Create Route File using DuaRouter
+        :return: path to the generated route file
         """
-        if out_folder is None:
-            out_folder = os.path.dirname(self.net_file)
-
-        # vehicles per second
-        if veh_per_second is not None:
-            period = 1 / (veh_per_second * dt)
-        else:
-            period = 1
-
         # filenames
-        rou_file = os.path.join(out_folder, scenario_name + '.rou.xml')
+        rou_file = os.path.join(self.path+self.scenario_name + '_routes.rou.xml')
 
         try:
             subprocess.check_output(
@@ -413,9 +419,7 @@ class Sumo:
                  ])
             self.route_file = rou_file
         except subprocess.CalledProcessError as e:
-            raise RuntimeError("Command '{}' return with error (code {}): {}".format(e.cmd, e.returncode, e.output))
-        # get ego ids and add EGO_ID_START prefix
-        # ego_ids = find_ego_ids_by_departure_time(rou_file, n_ego_vehicles, departure_time_ego, ego_ids)
-        # write_ego_ids_to_rou_file(rou_file, ego_ids)
+            raise RuntimeError("Command '{}' return with error (code {}): {}".
+                               format(e.cmd, e.returncode, e.output))
 
         return rou_file
