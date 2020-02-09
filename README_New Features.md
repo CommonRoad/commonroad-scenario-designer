@@ -36,6 +36,21 @@ python examples/intermediateformat_to_sumo.py
 ```
 You will find the sumo files on examples/files/sumo/
 
+#### Documentation
+For documentation on Intermediate Format and helper methods for Sumo, run
+ ```bash
+pip install -r doc_requirements.txt
+```
+Then go to
+```bash
+cd crmapconverter/osm2cr/convertermodules/intermediate_format/docs
+```
+Then run
+```bash
+make html
+```
+The html file will be found on build/index.html
+
 #### Authors
 
 ##### Behtarin Ferdousi
