@@ -202,9 +202,3 @@ TRAFFIC_SIGN_MAP = {
     'give_way': TrafficSignID.GIVEWAY,
     'stop': TrafficSignID.STOP,
 }
-
-
-# SUMO SAVE Files
-SUMO_SAVE_FILE = 'files/sumo/'
-
-

@@ -13,7 +13,8 @@ from typing import Set
 from commonroad.scenario.traffic_sign import TrafficLightState
 from commonroad.scenario.traffic_sign import TrafficSignIDGermany
 
-from crmapconverter.osm2cr import config
+# SUMO SAVE Files
+SUMO_SAVE_FILE = 'files/sumo/'
 
 
 def complement_traffic_light(light: TrafficLightState) -> TrafficLightState:
@@ -73,7 +74,7 @@ class Sumo:
     and Vice-Versa. """
 
     def __init__(self, map,
-                 path=config.SUMO_SAVE_FILE,
+                 path= SUMO_SAVE_FILE,
                  scenario_name="generated"):
         """
         Convert the data in map to format for Sumo
