@@ -59,3 +59,9 @@ The html file will be found on build/index.html
     * Traffic Rule in CommonRoad
     * Intersection Extraction
     * Intermediate Format to SUMO config file
+    
+#### Vidhit Chandra
+    
+    1.Intermediate Format to SUMO converter and vice versa.(Code is in SumoIR branch of MPFAV-artificial scenario generation repository)(Has an import bug).
+    2.Intermediate Format to SUMO config file,route file,network file generation.
+    3.Convert roadgraph in OSM2CR to Intermediate format.
