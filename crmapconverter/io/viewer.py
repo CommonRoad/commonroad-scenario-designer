@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
 """Viewer module to visualize the created lanelet scenario."""
+#Updated by Rayane Zaibet
+
 
 import signal
 import sys
@@ -37,8 +39,8 @@ from commonroad.common.file_reader import CommonRoadFileReader
 __author__ = "Benjamin Orthen, Stefan Urban"
 __copyright__ = "TUM Cyber-Physical Systems Group"
 __credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles"]
-__version__ = "1.1.0"
-__maintainer__ = "Benjamin Orthen"
+__version__ = "1.2.0"
+__maintainer__ = "Rayane Zaibet"
 __email__ = "commonroad-i06@in.tum.de"
 __status__ = "Released"
 

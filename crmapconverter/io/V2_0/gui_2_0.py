@@ -1,3 +1,8 @@
+"""This module controls all the views from the GUI"""
+
+__author__ = "Rayane Zaibet"
+
+
 import os
 import signal
 import sys
@@ -20,6 +25,7 @@ except:
 
 try:
     from crmapconverter.io.V2_0.gui_2_0_controller import *
+    from crmapconverter.io.V2_0.gui_2_0_documentation import *
     import crmapconverter.io.gui as G
     from crmapconverter.osm2cr.converter_modules.gui_modules.gui_embedding import StartMenu, MainApp
     from crmapconverter.osm.osm2lanelet import OSM2LConverter
@@ -42,6 +48,7 @@ except:
     print("You need first to install crmapconverter to get osm2cr converter")
 
 #GLOBAL VARIABLES
+"""Those variables set the dimensions of the main window"""
 high = 902
 width = 960
 
@@ -72,6 +79,8 @@ class My_Button(Button):
             pady= self.pady)
 
     def set_icon(self, icon):
+        """Function used to modify while running the GUI the icon of a
+        button, for example to set it when it's disabled or clicked"""
         self.icon = image_encoding("gui_src/" + icon)
         self.configure(image=self.icon)
 
@@ -116,10 +125,12 @@ class My_Title(Label):
 class My_Text(Canvas):
     """Class defining the design of the text displays used in the interface defined below"""
 
-    def __init__(self, parent, row, text="", pady=0, **kwargs):
+    def __init__(self, parent, row, text="", pady=0,
+                 font_color = "white", type_text=None, **kwargs):
         self.row = row
         self.text = text
         self.pady = pady
+        self.font_color = font_color
         Canvas.__init__(self, parent, **kwargs)
         self.configure(background = '#003359')
         self.configure(highlightbackground='#003359')
@@ -132,35 +143,28 @@ class My_Text(Canvas):
         self.curve= 50
         self.length= 800
 
-        self.create_oval(0, 0, self.curve, self.height, fill="White", outline="White" )
-        self.create_rectangle(self.curve/2, 0, self.length+self.curve/2, self.height, fill="White", outline="White")
-        self.create_oval(self.length, 0, self.length+self.curve, self.height, fill="White", outline="White")
-        self.create_text(self.curve/2,
+        if type_text=="path":
+            """Special format used to display a path"""
+            self.create_rectangle(self.curve/2, 0, self.length+self.curve/2, self.height, fill="White", outline="White")
+            self.create_oval(self.length, 0, self.length+self.curve, self.height, fill="White", outline="White")
+            self.create_text(self.curve/2,
                          self.height/3,
                          anchor=NW,
                          font=('KacstDecorative', -20, 'italic'),
                          text=text)
+        else:
+            """default text format"""
+            self.my_text = Text(self,
+                                font=('KacstDecorative', -20),
+                                bg='#003359',
+                                fg='White',
+                                padx=20,
+                                pady=10,
+                                spacing1=30,
+                                spacing2=10,
+                                wrap=WORD)
 
-
-class CRViewerQt(QWidget):
-    """Class used to provied the existant viewer in Qt"""
-
-    def __init__(self, path=None):
-        self.path = path
-        super().__init__()
-
-    def commonroad_visualization_menu(self):
-        """Open the simple color-supported visualization of a CommonRoad file."""
-        viewer = QMainWindow(self)
-        commonroad_viewer_widget = ViewerWidget(self, path=self.path)
-        viewer.setCentralWidget(commonroad_viewer_widget)
-        viewer.show()
-
-def CRviewer_run(path=None):
-    app = QtWidgets.QApplication(sys.argv)
-    ui = CRViewerQt(path)
-    ui.commonroad_visualization_menu()
-    app.exec_()
+            self.my_text.grid(row=0)
 
 def osm2cr():
     """Converter OSM2CR intial function (V1.0)"""
@@ -170,6 +174,19 @@ def osm2cr():
     gui_osm2cr()
     welcome = initialise()
     OSM2CRActivity1(welcome).mainloop()
+
+def go_help(help_text="test"):
+    """Function which displays a help pop-up in each converter to help the user"""
+    try:
+        help_window = Tk()
+        help_window.title("Help")
+        help_window.resizable(False, False)
+        text= My_Text(help_window, 0, text=help_text)
+        text.my_text.delete(1.0, END)
+        text.my_text.insert(INSERT,help_text)
+        help_window.mainloop()
+    except TclError:
+        print("Error code 15")
 
 class Home(Frame):
     """Class driving the interface of welcoming window"""
@@ -226,15 +243,9 @@ class InterfaceToolTemplate(Frame):
         self.grid()
 
         def go_home():
+            """Function to get on the home window"""
             self.destroy()
             Home(window).mainloop()
-
-        def go_help():
-            try:
-                help_window= initialise()
-                OSM2CRFrame(help_window).mainloop()
-            except TclError:
-                print("Error code 15")
 
         # Buttons Head
         self.Can = My_Canvas(self, 1, sticky=W+E)
@@ -246,6 +257,7 @@ class InterfaceToolTemplate(Frame):
         self.help = My_Button(self.Can, 1, 3, go_help, "button_help.png", padx=30, pady=5)
 
 
+
 class OSM2CRFrame(InterfaceToolTemplate):
     """Class driving the frame of OSM2CR Converter"""
 
@@ -254,6 +266,13 @@ class OSM2CRFrame(InterfaceToolTemplate):
         #Head Text
         self.welcoming_text = My_Title(self.Can, "OSM2CR_head.png",
                                  column=2, pady=10, padx=40)
+
+        # Documentation
+        def go_help_local():
+            """Function uploading locally the help pop-up with the right documentation"""
+            go_help(OSM2CR_help_text)
+
+        self.help.configure(command=go_help_local)
 
 
 class OSM2CRActivity1(OSM2CRFrame):
@@ -284,6 +303,11 @@ class OD2CRFrame(InterfaceToolTemplate):
         #Head Text
         self.welcoming_text = My_Title(self.Can, "OD2CR_head.png",
                                  column=2, pady=10, padx=40)
+        # Documentation
+        def go_help_local():
+            """Function uploading locally the help pop-up with the right documentation"""
+            go_help(OD2CR_help_text)
+        self.help.configure(command=go_help_local)
 
 
 class OD2CRActivity1(OD2CRFrame):
@@ -306,6 +330,7 @@ class OD2CRActivity1(OD2CRFrame):
                               padx=20)
 
         class FileOpener(QWidget):
+            """Class providin a FileOpener pop-up in PyQt5"""
 
             def __init__(self, parent=None, path=None):
                 self.path = None
@@ -327,6 +352,7 @@ class OD2CRActivity1(OD2CRFrame):
         self.path = ""
 
         def open_OD2():
+            """Function driving the opening of an OpenDRIVE map in the converter"""
             app = QApplication(sys.argv)
             A = G.OpenDriveConvertWindow("")
             app.disconnect()
@@ -336,9 +362,11 @@ class OD2CRActivity1(OD2CRFrame):
             self.open_canvas.destroy()
             self.export.set_icon("Groupe 7.png")
             self.export.configure(command=export_OD)
-            My_Text(self, 2, self.path, pady=50)
+            My_Text(self, 2, self.path, pady=50, type_text="path")
 
         def export_OD():
+            """Function performing the conversion and opeing a save file pop-up
+            to save the CommonRoad map created"""
             app = QApplication(sys.argv)
             C = G.OpenDriveConvertWindow("")
             C.load_opendriveFile(self.path)
@@ -381,6 +409,7 @@ class CRViewerActivity1(OD2CRFrame):
 
 # INITIALISATION
 def initialise():
+    """Function initialising the GUI to the Home Window"""
     window = Tk()
     window.title("Common Road Tools")
     try:
@@ -408,9 +437,3 @@ app = QApplication(sys.argv)
 welcome = initialise()
 
 Home(welcome).mainloop()
-
-
-#For next time : Traffic signs (light, stop, yeld, priority)
-#Visualise a commonroad Map Button on the
-#TODO Report : 9 pages (3 each) with TUM online, to be given the 4th February
-#TODO Presentation : 8 min per person

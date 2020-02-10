@@ -1,10 +1,7 @@
-# -*- coding: utf-8 -*-
+"""This file controls the interface of the map editing tool in OSM2CR Converter"""
 
-# Form implementation generated from reading ui file 'edge_edit_embedding.ui'
-#
-# Created by: PyQt5 UI code generator 5.11.3
-#
-# WARNING! All changes made in this file will be lost!
+#Updated by
+__author__ = "Rayane Zaibet"
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 

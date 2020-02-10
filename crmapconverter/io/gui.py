@@ -1,6 +1,6 @@
-# -*- coding: utf-8 -*-
+"""This module controls the launch of the former GUI and its functionalities"""
 
-"""Module to execute the Qt Program for a GUI conversion."""
+#Updated by Rayane Zaibet
 
 import os
 import signal
@@ -41,7 +41,7 @@ __author__ = "Benjamin Orthen, Stefan Urban"
 __copyright__ = "TUM Cyber-Physical Systems Group"
 __credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles"]
 __version__ = "1.1.0"
-__maintainer__ = "Benjamin Orthen"
+__maintainer__ = "Rayane Zaibet"
 __email__ = "commonroad-i06@in.tum.de"
 __status__ = "Released"
 

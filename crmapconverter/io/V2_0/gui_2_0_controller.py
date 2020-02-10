@@ -1,6 +1,15 @@
-#from crmapconverter.io.V2_0.gui_2_0 import OSM2CRActivity1, initialise
+"""This module provides the controller functions of the GUI"""
+
+__author__ = "Rayane Zaibet"
+
 from tkinter import *
 from PIL import Image, ImageTk
+try:
+    from PyQt5 import QtGui, QtCore, QtWidgets
+    from PyQt5.QtWidgets import QFileDialog, QWidget, QApplication, QMainWindow
+except:
+    print("You need manually to install your Qt distribution")
+
 
 try:
     from commonroad.common.file_writer import CommonRoadFileWriter
@@ -35,9 +44,27 @@ def image_encoding(path):
 
     return ImageTk.PhotoImage(Image.open(path))
 
-def openDRIVE2CR():
-    """Converter OpenDRIVE2Lanelet intial function (V1.0)"""
-    gui_od2cr()
+class CRViewerQt(QWidget):
+    """Class used to provied the existant viewer deveopped in PyQt5"""
+
+    def __init__(self, path=None):
+        self.path = path
+        super().__init__()
+
+    def commonroad_visualization_menu(self):
+        """Open the simple color-supported visualization of a CommonRoad file."""
+        viewer = QMainWindow(self)
+        commonroad_viewer_widget = ViewerWidget(self, path=self.path)
+        viewer.setCentralWidget(commonroad_viewer_widget)
+        viewer.show()
+
+
+
+def CRviewer_run(path=None):
+    app = QtWidgets.QApplication(sys.argv)
+    ui = CRViewerQt(path)
+    ui.commonroad_visualization_menu()
+    app.exec_()
 
 def default():
     print("coming soon")
