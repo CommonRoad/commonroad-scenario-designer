@@ -355,10 +355,7 @@ class IntermediateFormat:
                                                                          s.waypoints)
                                 incoming_element[angle].append(s.id)
                         else:
-                            # separate multiple direction from one lane
-                            possible_directions = direction.split("|")
-                            for possible_direction in possible_directions:
-                                incoming_element[possible_direction].extend(
+                            incoming_element[direction].extend(
                                     [s.id for s in incoming_lane.successors])
 
                     if node.id in intersections:
