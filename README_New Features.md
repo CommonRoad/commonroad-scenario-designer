@@ -64,4 +64,25 @@ The html file will be found on build/index.html
     
     1.Intermediate Format to SUMO converter and vice versa.(Code is in SumoIR branch of MPFAV-artificial scenario generation repository)(Has an import bug).
     2.Intermediate Format to SUMO config file,route file,network file generation.
-    3.Convert roadgraph in OSM2CR to Intermediate format.
+    3.Conversion of roadgraph in OSM2CR to Intermediate format.
+    
+#### Software,Operating System and distributions used:
+
+   1.PyCharm IDE
+   2.Windows 10 Operating System
+   3.Anaconda 3(Python distribution)- Used commonroad-py36 environment.To switch to commonroad-py36 environment run "conda activate commonroad-py36"(without quotes) in Anaconda Prompt shell.
+
+#### Programming Language used:
+
+    Python 3.6.0
+    
+### Code Execution
+
+    1. To run intermediate format to sumo and sumo to intermediate format converter ,please execute IR2Sumo.py python file in PyCharm . Path is as follows:
+       sumo2ir->sumo->sumo->IR2Sumo.py
+       
+    2. Config file can be executed in SUMOGUI to generate a traffic scenario.
+       
+    3. To convert roadgraph in OSM2CR to intermediate format,please execute road_graph.py python file in PyCharm . Path is as follows:
+      commonroad-map-tool-GUI_2.0->crmapconverter->osm2cr->converter_modules->graph_operations->road_graph.py
+      
