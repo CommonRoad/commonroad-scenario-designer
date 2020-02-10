@@ -8,7 +8,7 @@ from queue import Queue
 import numpy as np
 
 from commonroad.scenario.lanelet import LaneletNetwork
-from opendrive2lanelet.lanelet import ConversionLanelet
+from opendrive2lanelet.conversion_lanelet import ConversionLanelet
 
 __author__ = "Benjamin Orthen"
 __copyright__ = "TUM Cyber-Physical Systems Group"

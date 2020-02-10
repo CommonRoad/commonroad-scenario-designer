@@ -9,7 +9,7 @@ from commonroad.scenario.scenario import Scenario
 from opendrive2lanelet.opendriveparser.elements.opendrive import OpenDrive
 
 from opendrive2lanelet.utils import encode_road_section_lane_width_id
-from opendrive2lanelet.lanelet_network import ConversionLaneletNetwork
+from opendrive2lanelet.conversion_lanelet_network import ConversionLaneletNetwork
 from opendrive2lanelet.converter import OpenDriveConverter
 
 
