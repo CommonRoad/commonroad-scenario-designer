@@ -145,6 +145,7 @@ class My_Text(Canvas):
 
         if type_text=="path":
             """Special format used to display a path"""
+            self.create_oval(0, 0, self.curve, self.height, fill="White", outline="White")
             self.create_rectangle(self.curve/2, 0, self.length+self.curve/2, self.height, fill="White", outline="White")
             self.create_oval(self.length, 0, self.length+self.curve, self.height, fill="White", outline="White")
             self.create_text(self.curve/2,
