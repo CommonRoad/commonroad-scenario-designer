@@ -10,7 +10,7 @@ with open(f"{setup_dir}/README.md", "r") as fh:
 
 setup(
     name="opendrive2lanelet",
-    version="1.1.0",
+    version="1.1.1",
     description="Parser and converter from OpenDRIVE to lanelets",
     long_description=long_description,
     long_description_content_type="text/markdown",

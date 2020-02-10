@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.1] - 2020-02-10
+### Changed
+- Renamed lanelet.py and lanelet_network.py to conversion_lanelet.py and conversion_lanelet_network.py
+
+### Fixed
+- Wrong adjacencies if same openDRIVE file is converted or visualized several times without reloading it
+
 ## [1.1.0] - 2019-06-12
 ### Added
 - Conversion from OSM lanelets to CommonRoad lanelets
