@@ -17,8 +17,8 @@ import numpy as np
 from pyproj import Proj
 from commonroad.scenario.scenario import Scenario
 
-from opendrive2lanelet.lanelet import ConversionLanelet
-from opendrive2lanelet.lanelet_network import ConversionLaneletNetwork
+from opendrive2lanelet.conversion_lanelet import ConversionLanelet
+from opendrive2lanelet.conversion_lanelet_network import ConversionLaneletNetwork
 from opendrive2lanelet.osm.osm import OSM, WayRelation, DEFAULT_PROJ_STRING
 
 NODE_DISTANCE_TOLERANCE = 0.01  # this is in meters
