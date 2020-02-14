@@ -52,9 +52,10 @@ def download_map(filename: str, lon1: float, lat1: float, lon2: float, lat2: flo
     :type lat2: float
     :return: None
     """
-    query = "https://overpass-api.de/api/map?bbox={},{},{},{}".format(
-        lon1, lat1, lon2, lat2
-    )
+    # query = "https://overpass-api.de/api/map?bbox={},{},{},{}".format(
+    #     lon1, lat1, lon2, lat2
+    # )
+    query = 'https://api.openstreetmap.org/api/0.6/map?bbox={},{},{},{}'.format(lon1, lat1, lon2, lat2)
     print("downloading map")
     data = urlopen(query).read()
     with open(filename, "wb") as file:
