@@ -2,6 +2,7 @@ from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.common.file_writer import CommonRoadFileWriter, \
     OverwriteExistingFile
 from commonroad.planning.planning_problem import PlanningProblemSet
+from commonroad.scenario.scenario import Location
 
 from crmapconverter.osm2cr import config
 
@@ -19,11 +20,13 @@ author = config.AUTHOR
 affiliation = config.AFFILIATION
 source = config.SOURCE
 tags = config.TAGS
+location = Location(country=config.Country, federal_state=config.FEDERAL_STATE, gps_latitude=config.GPS_LATITUDE,
+                    gps_longitude=config.GPS_LONGITUDE, zipcode=config.ZIPCODE, name=config.LOCATION_NAME,
+                    geo_transformation=None)
 file = config.SAVE_PATH + config.BENCHMARK_ID + ".xml"
 # in the current commonroad version the following line works
-file_writer = CommonRoadFileWriter(
-    scenario, problemset, author, affiliation, source, tags, decimal_precision=16
-)
+file_writer = CommonRoadFileWriter(scenario, problemset, author, affiliation, source, tags, location,
+                                   decimal_precision=16)
 print("Scenario saved to file "+file)
 
 print("loading scenario from XML")

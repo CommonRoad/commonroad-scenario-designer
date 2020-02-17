@@ -14,7 +14,19 @@ AFFILIATION = "Technical University of Munich, Germany"
 # source of the benchmark
 SOURCE = "OpenStreetMaps (OSM)"
 # additional tags for the benchmark
-TAGS = "..."
+TAGS = "urban"
+# Country
+Country = "ZAM"
+# Federal state
+FEDERAL_STATE = "ZA-M"
+# zipcode
+ZIPCODE = "12345"
+# GPS latitude
+GPS_LATITUDE = "123.45"
+# GPS longitude
+GPS_LONGITUDE = "123.45"
+# location name
+LOCATION_NAME = "123.45"
 # time step size for the benchmark in seconds
 TIMESTEPSIZE = 0.1
 

@@ -2,7 +2,6 @@
 This module holds all interaction between this application and the ***CommonRoad python tools**.
 It allows to export a scenario to CR or plot a CR scenario.
 """
-import sys
 from typing import List
 
 import matplotlib.pyplot as plt
@@ -21,7 +20,7 @@ from commonroad.visualization.draw_dispatch_cr import draw_object
 from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
 from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.planning.planning_problem import PlanningProblemSet
-from commonroad.scenario.scenario import Scenario, Lanelet, LaneletNetwork
+from commonroad.scenario.scenario import Scenario, Lanelet, LaneletNetwork, Tag, Location
 
 
 def get_lanelet(lane: rg.Lane) -> Lanelet:
@@ -159,13 +158,28 @@ def export(
     author = config.AUTHOR
     affiliation = config.AFFILIATION
     source = config.SOURCE
-    tags = config.TAGS
+    tags = create_tags(config.TAGS)
+    location = Location(country=config.Country, federal_state=config.FEDERAL_STATE, gps_latitude=config.GPS_LATITUDE,
+                        gps_longitude=config.GPS_LONGITUDE, zipcode=config.ZIPCODE, name=config.LOCATION_NAME,
+                        geo_transformation=None)
     # in the current commonroad version the following line works
     file_writer = CommonRoadFileWriter(
-        scenario, problemset, author, affiliation, source, tags, decimal_precision=16
-    )
+        scenario, problemset, author, affiliation, source, tags, location, decimal_precision=16)
     # file_writer = CommonRoadFileWriter(scenario, problemset, author, affiliation, source, tags)
     file_writer.write_scenario_to_file(file, OverwriteExistingFile.ALWAYS)
+
+def create_tags(tags: str):
+    """
+    creates tags out of a space separated list
+
+    :param tags: string of tags
+    :return: list of tags
+    """
+    splits = tags.split()
+    tags = set()
+    for tag in splits:
+        tags.add(Tag(tag))
+    return tags
 
 
 def find_bounds(scenario: Scenario) -> List[float]:
