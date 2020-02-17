@@ -168,9 +168,10 @@ def export(
     # file_writer = CommonRoadFileWriter(scenario, problemset, author, affiliation, source, tags)
     file_writer.write_scenario_to_file(file, OverwriteExistingFile.ALWAYS)
 
+
 def create_tags(tags: str):
     """
-    creates tags out of a space separated list
+    creates tags out of a space separated string
 
     :param tags: string of tags
     :return: list of tags
