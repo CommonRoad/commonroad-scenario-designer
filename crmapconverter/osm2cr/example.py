@@ -20,7 +20,7 @@ scenario = converter.Scenario(
 scenario.plot()
 
 # save the scenario as commonroad file
-scenario.save_as_cr()
+scenario.save_as_cr("files/test_bench.xml")
 # save the scenario as a binary
 scenario.save_to_file(config.SAVE_PATH + config.BENCHMARK_ID + ".pickle")
 

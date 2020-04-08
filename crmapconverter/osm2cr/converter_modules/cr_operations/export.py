@@ -159,8 +159,8 @@ def export(
     affiliation = config.AFFILIATION
     source = config.SOURCE
     tags = create_tags(config.TAGS)
-    location = Location(country=config.Country, federal_state=config.FEDERAL_STATE, gps_latitude=config.GPS_LATITUDE,
-                        gps_longitude=config.GPS_LONGITUDE, zipcode=config.ZIPCODE, name=config.LOCATION_NAME,
+    location = Location(gps_latitude=config.GPS_LATITUDE,
+                        gps_longitude=config.GPS_LONGITUDE,
                         geo_transformation=None)
     # in the current commonroad version the following line works
     file_writer = CommonRoadFileWriter(
