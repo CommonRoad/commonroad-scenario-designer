@@ -154,7 +154,7 @@ def export(
     # convert via intermediate format
     intermediate_format = IntermediateFormat.extract_from_road_graph(graph)
     scenario = intermediate_format.to_commonroad_scenario()
-    scenario = sanitize(scenario)
+    sanitize(scenario)
     if config.EXPORT_IN_UTM:
         convert_coordinates_to_utm(scenario, graph.center_point)
     problemset = PlanningProblemSet(None)

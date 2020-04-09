@@ -4,23 +4,24 @@ This module removes converting errors which occurred during the previous steps o
 import numpy as np
 from commonroad.scenario.scenario import Scenario, Lanelet, LaneletNetwork, Tag, Location
 
-def sanitize(scenario: Scenario) -> Scenario:
+def sanitize(scenario: Scenario) -> None:
     """
     Sanitize resulting scenarios before export
 
     :param1 scenario: Scenario where operations will be performed on
-    :return: Sanitized scenario
+    :return: None
     """
-    return merge_short_lanes(scenario)
+    merge_short_lanes(scenario)
+    #smoothen_scenario(scenario)
 
 
-def merge_short_lanes(scenario: Scenario, min_distance=1) -> Scenario:
+def merge_short_lanes(scenario: Scenario, min_distance=1) -> None:
     """
     Merges faulty short lanes with their longer successors
 
     :param1 scenario: Scenario whose short lanelets will be removed
     :param2 min_distance: Minimum distance a single lanelet has to have to not be merged
-    :return: Sanitized scenario
+    :return: None
     """
     lanelets = scenario.lanelet_network.lanelets
     net = scenario.lanelet_network
@@ -79,8 +80,6 @@ def merge_short_lanes(scenario: Scenario, min_distance=1) -> Scenario:
         # update scenario's road network
         scenario.lanelet_network = scenario.lanelet_network.create_from_lanelet_list(lanelets)
 
-    return scenario
-
 
 def merge_lanelets(lanelet1: Lanelet, lanelet2: Lanelet) -> Lanelet:
     """
@@ -120,6 +119,105 @@ def merge_lanelets(lanelet1: Lanelet, lanelet2: Lanelet) -> Lanelet:
     successor = suc.successor
 
     return create_lanelet(suc, left_vertices, right_vertices, center_vertices, predecessor=predecessor, successor=successor)
+
+
+def smoothen_scenario(scenario: Scenario):
+    """
+    Smoothens every lanelet in an scenario
+
+    :param1 scenario: Scenario whose lanelets shall be smoothended
+    :return: None
+    """
+    net = scenario.lanelet_network
+    lanelets = net.lanelets
+
+    # smoothen lanes
+    lanelets = list(map(smoothen_lane, lanelets))
+
+    # update scenario
+    scenario.lanelet_network = net.create_from_lanelet_list(lanelets)
+
+
+
+def b_spline(plist, max_nodes=10) -> np.array:
+    """
+    Performing b spline interpolation over a given point list.
+    Based on https://github.com/kawache/Python-B-spline-examples from Kaoua Cherif
+
+    :param1 plist: The point list b spline interpolation will be performed on
+    :param2: max_nodes: Number of nodes that should be created during interpolation process
+    :return: Interpolated point list
+    """
+
+    # round waypoints
+    ctr =np.around(plist, 4)
+
+    x=ctr[:,0]
+    y=ctr[:,1]
+
+    # return straight line if we have less or equal 3 waypoints
+    if len(x) <= 3:
+        x = np.linspace(x[0], x[-1], num=max_nodes)
+        y = np.linspace(y[0], y[-1], num=max_nodes)
+        return np.column_stack((x, y))
+
+    try:
+        # b_spline
+        tck,u = interpolate.splprep([x,y],k=3,s=0)
+        u=np.linspace(0,1,num=max_nodes,endpoint=True)
+        out = interpolate.splev(u,tck)
+    except:
+        return plist
+
+    return np.column_stack((out[0], out[1]))
+
+
+def smoothen_lane(l: Lanelet, min_dis=0.3, number_nodes=15) -> Lanelet:
+    """
+    Smoothens the vertices of a single lanelet
+
+    :param1 lanelet: The lanelet which is manipulated
+    :param2 min_dis: Minimum distance waypoints are supposed to have between each other
+    :param3 num_nodes: Number of nodes should be used if interpolation is applied
+    :return: Smoothend lanelet
+    """
+    rv = l.right_vertices
+    lv = l.left_vertices
+    cv = l.center_vertices
+    filtered_lv = [lv[0]]
+    filtered_rv = [rv[0]]
+    filtered_cv = [cv[0]]
+
+    # compute euclidean distance between last accepted way point and new waypoint
+    for i in range(0, len(l.left_vertices)):
+        if not np.linalg.norm(filtered_rv[-1] - rv[i]) < min_dis:
+            filtered_rv.append(rv[i])
+        if not np.linalg.norm(filtered_lv[-1] - lv[i]) < min_dis:
+            filtered_lv.append(lv[i])
+        if not np.linalg.norm(filtered_cv[-1] - cv[i]) < min_dis:
+            filtered_cv.append(cv[i])
+
+    filtered_lv = np.array(filtered_lv)
+    filtered_rv = np.array(filtered_rv)
+    filtered_cv = np.array(filtered_cv)
+
+    # minimum vertices of all way points
+    mv = min(len(filtered_lv), len(filtered_cv), len(filtered_rv))
+    # fallback, if errors have occurred
+    if mv <= 1:
+        return l
+
+    # create new waypoints using b_splines if old waypoints changed
+    length = len(lv)
+    if any(len(wp) != length for wp in [rv, cv, filtered_lv, filtered_rv, filtered_cv]):
+        num_nodes = max(mv, number_nodes)
+        filtered_lv = b_spline(filtered_lv, max_nodes=num_nodes)
+        filtered_rv = b_spline(filtered_rv, max_nodes=num_nodes)
+        filtered_cv = b_spline(filtered_cv, max_nodes=num_nodes)
+
+
+    assert len(filtered_lv) == len(filtered_rv), "error during b spline interpolation"
+    return create_lanelet(l, filtered_lv, filtered_rv, filtered_cv)
 
 
 def create_lanelet(l, left_vertices, right_vertices, center_vertices, predecessor=None, successor=None):
