@@ -13,6 +13,7 @@ from crmapconverter.osm2cr.converter_modules.graph_operations import road_graph 
 from crmapconverter.osm2cr.converter_modules.intermediate_format.intermediate_format import IntermediateFormat
 from crmapconverter.osm2cr.converter_modules.utility import geometry
 from crmapconverter.osm2cr.converter_modules.utility.idgenerator import get_id
+from crmapconverter.osm2cr.converter_modules.cr_operations.cleanup import sanitize
 
 # CommonRoad python tools are imported
 # sys.path.append(config.CR_TOOLS_PATH) # This is not necessary anymore as commonroad-io can be installed via pip
@@ -21,6 +22,7 @@ from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistin
 from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.planning.planning_problem import PlanningProblemSet
 from commonroad.scenario.scenario import Scenario, Lanelet, LaneletNetwork, Tag, Location
+
 
 
 def get_lanelet(lane: rg.Lane) -> Lanelet:
@@ -152,6 +154,7 @@ def export(
     # convert via intermediate format
     intermediate_format = IntermediateFormat.extract_from_road_graph(graph)
     scenario = intermediate_format.to_commonroad_scenario()
+    scenario = sanitize(scenario)
     if config.EXPORT_IN_UTM:
         convert_coordinates_to_utm(scenario, graph.center_point)
     problemset = PlanningProblemSet(None)
