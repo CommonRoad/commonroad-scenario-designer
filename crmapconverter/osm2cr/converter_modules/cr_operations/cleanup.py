@@ -1,9 +1,9 @@
 """
-This module removes converting errors which occurred during the previous steps of the osm2cr converter
+This module removes converting errors before exporting the scenario to XML
 """
-import numpy as np
 import json
-from commonroad.scenario.scenario import Scenario, Lanelet, LaneletNetwork, Tag, Location
+import numpy as np
+from commonroad.scenario.scenario import Scenario, Lanelet
 from scipy import interpolate
 
 def sanitize(scenario: Scenario) -> None:
@@ -250,7 +250,7 @@ def convert_to_lht(scenario: Scenario) -> None:
 def rht_to_lht(scenario: Scenario) -> None:
     """
     Converts scenario to left hand traffic.
-    WARNING! Use with caution. See thesis for more information
+    WARNING! Use with caution. See Globetrotter thesis for more information
 
     :return: None
     """
@@ -288,6 +288,7 @@ def create_lanelet(l, left_vertices, right_vertices, center_vertices, predecesso
     adjacent_right=None, adjacent_left=None, adjacent_right_same_direction=None, adjacent_left_same_direction=None):
     """
     Create a new lanelet given an old one. Vertices, successors and predecessors can be modified
+
     :param1 l: The old lanelet
     :param2 left_vertices: New left vertices
     :param3 right_vertices: New right vertices
