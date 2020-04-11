@@ -341,7 +341,7 @@ def extract_speedlimit(value):
             pass
         elif value.endswith("mph"):
             try:
-                speedlimit = int(value[:-3] / 1.60934)
+                speedlimit = int(float(value[:-3]) / 1.60934)
             except ValueError:
                 print("unreadable speedlimit: '{}'".format(value))
         elif value in config.SPEED_LIMITS:
