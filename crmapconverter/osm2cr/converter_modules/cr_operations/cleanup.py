@@ -3,6 +3,7 @@ This module removes converting errors which occurred during the previous steps o
 """
 import numpy as np
 from commonroad.scenario.scenario import Scenario, Lanelet, LaneletNetwork, Tag, Location
+from scipy import interpolate
 
 def sanitize(scenario: Scenario) -> None:
     """
@@ -12,7 +13,7 @@ def sanitize(scenario: Scenario) -> None:
     :return: None
     """
     merge_short_lanes(scenario)
-    #smoothen_scenario(scenario)
+    smoothen_scenario(scenario)
 
 
 def merge_short_lanes(scenario: Scenario, min_distance=1) -> None:
@@ -139,18 +140,15 @@ def smoothen_scenario(scenario: Scenario):
 
 
 
-def b_spline(plist, max_nodes=10) -> np.array:
+def b_spline(ctr, max_nodes=10) -> np.array:
     """
     Performing b spline interpolation over a given point list.
     Based on https://github.com/kawache/Python-B-spline-examples from Kaoua Cherif
 
-    :param1 plist: The point list b spline interpolation will be performed on
-    :param2: max_nodes: Number of nodes that should be created during interpolation process
+    :param1 ctr: The point list b spline interpolation will be performed on
+    :param2 max_nodes: Number of nodes that should be created during interpolation process
     :return: Interpolated point list
     """
-
-    # round waypoints
-    ctr =np.around(plist, 4)
 
     x=ctr[:,0]
     y=ctr[:,1]
@@ -167,20 +165,22 @@ def b_spline(plist, max_nodes=10) -> np.array:
         u=np.linspace(0,1,num=max_nodes,endpoint=True)
         out = interpolate.splev(u,tck)
     except:
-        return plist
+        print("error occurred in b spline interpolation")
+        return ctr
 
     return np.column_stack((out[0], out[1]))
 
 
-def smoothen_lane(l: Lanelet, min_dis=0.3, number_nodes=15) -> Lanelet:
+def smoothen_lane(l: Lanelet, min_dis=0.35, number_nodes=20) -> Lanelet:
     """
     Smoothens the vertices of a single lanelet
 
     :param1 lanelet: The lanelet which is manipulated
-    :param2 min_dis: Minimum distance waypoints are supposed to have between each other
-    :param3 num_nodes: Number of nodes should be used if interpolation is applied
+    :param2 min_dis: Minimum distance in metres waypoints are supposed to have between each other
+    :param3 number_nodes: Minimum number of nodes that shall be used for the b spline interpolation process
     :return: Smoothend lanelet
     """
+
     rv = l.right_vertices
     lv = l.left_vertices
     cv = l.center_vertices
@@ -214,7 +214,6 @@ def smoothen_lane(l: Lanelet, min_dis=0.3, number_nodes=15) -> Lanelet:
         filtered_lv = b_spline(filtered_lv, max_nodes=num_nodes)
         filtered_rv = b_spline(filtered_rv, max_nodes=num_nodes)
         filtered_cv = b_spline(filtered_cv, max_nodes=num_nodes)
-
 
     assert len(filtered_lv) == len(filtered_rv), "error during b spline interpolation"
     return create_lanelet(l, filtered_lv, filtered_rv, filtered_cv)
