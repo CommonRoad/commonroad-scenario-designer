@@ -1,0 +1,268 @@
+{
+    "data": [
+        {
+            "name": "Anguilla",
+            "pop2019": "14.8690"
+        },
+        {
+            "name": "Antigua and Barbuda",
+            "pop2019": "97.1180"
+        },
+        {
+            "name": "Australia",
+            "pop2019": "25203.1980"
+        },
+        {
+            "name": "Bahamas",
+            "pop2019": "389.4820"
+        },
+        {
+            "name": "Bangladesh",
+            "pop2019": "163046.1610"
+        },
+        {
+            "name": "Barbados",
+            "pop2019": "287.0250"
+        },
+        {
+            "name": "Bermuda",
+            "pop2019": "62.5060"
+        },
+        {
+            "name": "Bhutan",
+            "pop2019": "763.0920"
+        },
+        {
+            "name": "Botswana",
+            "pop2019": "2303.6970"
+        },
+        {
+            "name": "British Virgin Islands",
+            "pop2019": "30.0300"
+        },
+        {
+            "name": "Brunei",
+            "pop2019": "433.2850"
+        },
+        {
+            "name": "Cayman Islands",
+            "pop2019": "64.9480"
+        },
+        {
+            "name": "Cook Islands",
+            "pop2019": "17.5480"
+        },
+        {
+            "name": "Cyprus",
+            "pop2019": "1198.5750"
+        },
+        {
+            "name": "Dominica",
+            "pop2019": "71.8080"
+        },
+        {
+            "name": "Falkland Islands",
+            "pop2019": "3.3770"
+        },
+        {
+            "name": "Fiji",
+            "pop2019": "889.9530"
+        },
+        {
+            "name": "Grenada",
+            "pop2019": "112.0030"
+        },
+        {
+            "name": "Guyana",
+            "pop2019": "782.7660"
+        },
+        {
+            "name": "Hong Kong",
+            "pop2019": "7436.1540"
+        },
+        {
+            "name": "India",
+            "pop2019": "1366417.7540"
+        },
+        {
+            "name": "Indonesia",
+            "pop2019": "270625.5680"
+        },
+        {
+            "name": "Ireland",
+            "pop2019": "4882.4950"
+        },
+        {
+            "name": "Isle of Man",
+            "pop2019": "84.5840"
+        },
+        {
+            "name": "Jamaica",
+            "pop2019": "2948.2790"
+        },
+        {
+            "name": "Japan",
+            "pop2019": "126860.3010"
+        },
+        {
+            "name": "Kenya",
+            "pop2019": "52573.9730"
+        },
+        {
+            "name": "Kiribati",
+            "pop2019": "117.6060"
+        },
+        {
+            "name": "Lesotho",
+            "pop2019": "2125.2680"
+        },
+        {
+            "name": "Macau",
+            "pop2019": "640.4450"
+        },
+        {
+            "name": "Malawi",
+            "pop2019": "18628.7470"
+        },
+        {
+            "name": "Malaysia",
+            "pop2019": "31949.7770"
+        },
+        {
+            "name": "Maldives",
+            "pop2019": "530.9530"
+        },
+        {
+            "name": "Malta",
+            "pop2019": "440.3720"
+        },
+        {
+            "name": "Mauritius",
+            "pop2019": "1269.6680"
+        },
+        {
+            "name": "Montserrat",
+            "pop2019": "4.9890"
+        },
+        {
+            "name": "Mozambique",
+            "pop2019": "30366.0360"
+        },
+        {
+            "name": "Namibia",
+            "pop2019": "2494.5300"
+        },
+        {
+            "name": "Nauru",
+            "pop2019": "10.7560"
+        },
+        {
+            "name": "Nepal",
+            "pop2019": "28608.7100"
+        },
+        {
+            "name": "New Zealand",
+            "pop2019": "4783.0630"
+        },
+        {
+            "name": "Niue",
+            "pop2019": "1.6150"
+        },
+        {
+            "name": "Pakistan",
+            "pop2019": "216565.3180"
+        },
+        {
+            "name": "Papua New Guinea",
+            "pop2019": "8776.1090"
+        },
+        {
+            "name": "Saint Kitts and Nevis",
+            "pop2019": "52.8230"
+        },
+        {
+            "name": "Saint Lucia",
+            "pop2019": "182.7900"
+        },
+        {
+            "name": "Saint Vincent and the Grenadines",
+            "pop2019": "110.5890"
+        },
+        {
+            "name": "Samoa",
+            "pop2019": "197.0970"
+        },
+        {
+            "name": "Seychelles",
+            "pop2019": "97.7390"
+        },
+        {
+            "name": "Singapore",
+            "pop2019": "5804.3370"
+        },
+        {
+            "name": "Solomon Islands",
+            "pop2019": "669.8230"
+        },
+        {
+            "name": "South Africa",
+            "pop2019": "58558.2700"
+        },
+        {
+            "name": "Sri Lanka",
+            "pop2019": "21323.7330"
+        },
+        {
+            "name": "Suriname",
+            "pop2019": "581.3720"
+        },
+        {
+            "name": "Tanzania",
+            "pop2019": "58005.4630"
+        },
+        {
+            "name": "Thailand",
+            "pop2019": "69625.5820"
+        },
+        {
+            "name": "Timor-Leste",
+            "pop2019": "1293.1190"
+        },
+        {
+            "name": "Tokelau",
+            "pop2019": "1.3400"
+        },
+        {
+            "name": "Tonga",
+            "pop2019": "104.4940"
+        },
+        {
+            "name": "Trinidad and Tobago",
+            "pop2019": "1394.9730"
+        },
+        {
+            "name": "Turks and Caicos Islands",
+            "pop2019": "38.1910"
+        },
+        {
+            "name": "Tuvalu",
+            "pop2019": "11.6460"
+        },
+        {
+            "name": "Uganda",
+            "pop2019": "44269.5940"
+        },
+        {
+            "name": "United Kingdom",
+            "pop2019": "67530.1720"
+        },
+        {
+            "name": "Zambia",
+            "pop2019": "17861.0300"
+        },
+        {
+            "name": "Zimbabwe",
+            "pop2019": "14645.4680"
+        }
+    ]
+}

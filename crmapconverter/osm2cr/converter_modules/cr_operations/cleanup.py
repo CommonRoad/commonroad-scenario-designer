@@ -2,6 +2,7 @@
 This module removes converting errors which occurred during the previous steps of the osm2cr converter
 """
 import numpy as np
+import json
 from commonroad.scenario.scenario import Scenario, Lanelet, LaneletNetwork, Tag, Location
 from scipy import interpolate
 
@@ -12,8 +13,12 @@ def sanitize(scenario: Scenario) -> None:
     :param1 scenario: Scenario where operations will be performed on
     :return: None
     """
+    # merge too short and faulty lanes
     merge_short_lanes(scenario)
+    # interpolate waypoints to smoothen lanes
     smoothen_scenario(scenario)
+    # comvert to left hand driving scenario if necessary
+    convert_to_lht(scenario)
 
 
 def merge_short_lanes(scenario: Scenario, min_distance=1) -> None:
@@ -24,6 +29,8 @@ def merge_short_lanes(scenario: Scenario, min_distance=1) -> None:
     :param2 min_distance: Minimum distance a single lanelet has to have to not be merged
     :return: None
     """
+    print("merging short lanes")
+
     lanelets = scenario.lanelet_network.lanelets
     net = scenario.lanelet_network
 
@@ -129,6 +136,8 @@ def smoothen_scenario(scenario: Scenario):
     :param1 scenario: Scenario whose lanelets shall be smoothended
     :return: None
     """
+    print("smoothening all lanelets of the scenario")
+
     net = scenario.lanelet_network
     lanelets = net.lanelets
 
@@ -219,7 +228,64 @@ def smoothen_lane(l: Lanelet, min_dis=0.35, number_nodes=20) -> Lanelet:
     return create_lanelet(l, filtered_lv, filtered_rv, filtered_cv)
 
 
-def create_lanelet(l, left_vertices, right_vertices, center_vertices, predecessor=None, successor=None):
+def convert_to_lht(scenario: Scenario) -> None:
+    """
+    checks if scenario is from left hand traffic country and converts it if necessary
+
+    :param1 scenario: The scenario to be checked
+    :return: None
+    """
+
+    lht_json_file = "data/left_hand_traffic.json"
+    with open(lht_json_file, 'r') as json_file:
+        lht_countries = json.load(json_file)['data']
+    lht_countries = list(map(lambda i: i['name'], lht_countries))
+
+    # TODO Location does not contain country, API call needed
+
+    if scenario.location in lht_countries:
+        print("converting scenario to lht")
+        rht_to_lht(scenario)
+
+def rht_to_lht(scenario: Scenario) -> None:
+    """
+    Converts scenario to left hand traffic.
+    WARNING! Use with caution. See thesis for more information
+
+    :return: None
+    """
+
+    net = scenario.lanelet_network
+    lanelets = net.lanelets
+
+    lht_lanes = []
+    for l in lanelets:
+        adj_r_same = False
+        adj_l_same = False
+        if l.adj_right and l.adj_right_same_direction:
+            adj_r_same = True
+        if l.adj_left and l.adj_left_same_direction:
+            adj_l_same = True
+
+        lht_l = create_lanelet(
+            l=l,
+            left_vertices=l.right_vertices,
+            right_vertices=l.left_vertices,
+            center_vertices=l.center_vertices,
+            predecessor=l.successor,
+            successor=l.predecessor,
+            adjacent_right=l.adj_left,
+            adjacent_left=l.adj_right,
+            adjacent_right_same_direction=adj_l_same,
+            adjacent_left_same_direction=adj_r_same)
+
+        lht_lanes.append(lht_l)
+
+    scenario.lanelet_network = net.create_from_lanelet_list(lht_lanes)
+
+
+def create_lanelet(l, left_vertices, right_vertices, center_vertices, predecessor=None, successor=None,
+    adjacent_right=None, adjacent_left=None, adjacent_right_same_direction=None, adjacent_left_same_direction=None):
     """
     Create a new lanelet given an old one. Vertices, successors and predecessors can be modified
     :param1 l: The old lanelet
@@ -234,6 +300,14 @@ def create_lanelet(l, left_vertices, right_vertices, center_vertices, predecesso
         predecessor = l.predecessor
     if successor is None:
         successor = l.successor
+    if adjacent_left is None:
+        adjacent_left = l.adj_left
+    if adjacent_right is None:
+        adjacent_right = l.adj_right
+    if adjacent_left_same_direction is None:
+        adjacent_left_same_direction = l.adj_left_same_direction
+    if adjacent_right_same_direction is None:
+        adjacent_right_same_direction = l.adj_right_same_direction
 
     # create new lanelet in CommomRoad2020 format
     new_lanelet = Lanelet(
@@ -243,10 +317,10 @@ def create_lanelet(l, left_vertices, right_vertices, center_vertices, predecesso
         lanelet_id=l.lanelet_id,
         predecessor=predecessor,
         successor=successor,
-        adjacent_left=l.adj_left,
-        adjacent_left_same_direction=l.adj_left_same_direction,
-        adjacent_right=l.adj_right,
-        adjacent_right_same_direction=l.adj_right_same_direction,
+        adjacent_left=adjacent_left,
+        adjacent_left_same_direction=adjacent_left_same_direction,
+        adjacent_right=adjacent_right,
+        adjacent_right_same_direction=adjacent_right_same_direction,
         line_marking_left_vertices=l.line_marking_left_vertices,
         line_marking_right_vertices=l.line_marking_right_vertices,
         stop_line=l.stop_line,
