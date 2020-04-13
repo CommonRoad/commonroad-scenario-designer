@@ -15,18 +15,12 @@ AFFILIATION = "Technical University of Munich, Germany"
 SOURCE = "OpenStreetMaps (OSM)"
 # additional tags for the benchmark
 TAGS = "urban"
-# Country
-Country = "ZAM"
-# Federal state
-FEDERAL_STATE = "ZA-M"
-# zipcode
-ZIPCODE = "12345"
+# GeonameID
+GEONAME_ID = -999
 # GPS latitude
 GPS_LATITUDE = "123.45"
 # GPS longitude
 GPS_LONGITUDE = "123.45"
-# location name
-LOCATION_NAME = "123.45"
 # time step size for the benchmark in seconds
 TIMESTEPSIZE = 0.1
 
@@ -163,7 +157,7 @@ CLUSTER_LENGTH = 10.0
 # least length of cluster to be added in meters
 LEAST_CLUSTER_LENGTH = 10.0
 # maximal distance between two intersections to which they are merged, if zero, no intersections are merged
-MERGE_DISTANCE = 0.0
+MERGE_DISTANCE = 3.5
 
 # Toggle edit for user
 USER_EDIT = False
