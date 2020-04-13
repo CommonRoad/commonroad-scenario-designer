@@ -411,8 +411,6 @@ class IntermediateFormat:
             net.add_lanelet(lanelet)
 
         # Add Traffic Signs
-        """
-        TODO Add Traffic signs
         for sign in self.traffic_signs:
             net.add_traffic_sign(sign, set())
 
@@ -423,7 +421,7 @@ class IntermediateFormat:
         # Add Intersections
         for intersection in self.intersections:
             net.add_intersection(intersection)
-        """
+
         # TODO Add Obstacles
 
         scenario.lanelet_network = net
