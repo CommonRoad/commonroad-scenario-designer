@@ -6,7 +6,7 @@ from queue import Queue
 from typing import List, Set, Tuple, Optional, Dict
 
 import numpy as np
-from commonroad.scenario.traffic_sign import TrafficSignElement, TrafficSign, TrafficLight
+from commonroad.scenario.traffic_sign import TrafficSignElement, TrafficSign, TrafficLight, TrafficSignIDGermany
 
 from crmapconverter.osm2cr import config
 from crmapconverter.osm2cr.converter_modules.utility import geometry, idgenerator
@@ -716,26 +716,51 @@ class GraphTrafficSign:
         elements = []
         position = None
         values = []
+
+        traffic_sign_map = {
+            'maxspeed': TrafficSignIDGermany.MAX_SPEED,
+            'overtaking': TrafficSignIDGermany.NO_OVERTAKING_START,
+            'city_limit': TrafficSignIDGermany.TOWN_SIGN,
+            'give_way': TrafficSignIDGermany.YIELD,
+            'stop': TrafficSignIDGermany.STOP,
+        }
+
         if self.node is not None:
             position_point = self.node.get_point()
             position = np.array([position_point.x, position_point.y])
 
-        for key in config.TRAFFIC_SIGN_MAP.keys():
+        for key in traffic_sign_map.keys():
             if 'traffic_sign' in self.sign and self.sign['traffic_sign'] == key:
-                sign_id = config.TRAFFIC_SIGN_MAP[key].value
+                sign_id = traffic_sign_map[key]# .value
+                #print(sign_id)
+                #sign_id = TrafficSignIDGermany(str(sign_id))
+                #sign_id = TrafficSignIDGermany(sign_id)
+                #print(sign_id)
                 values = []
                 if key in self.sign:
                     values.append(self.sign[key])
                 elements.append(TrafficSignElement(sign_id, values))
             elif key in self.sign:
-                sign_id = config.TRAFFIC_SIGN_MAP[key].value
+                sign_id = traffic_sign_map[key] #.value
                 value = self.sign[key]
                 elements.append(TrafficSignElement(sign_id, [value]))
 
         virtual = False
         if 'virtual' in self.sign:
             virtual = self.sign['virtual']
-        return TrafficSign(self.id, elements, position, virtual)
+        # return TrafficSign(self.id, elements, position, virtual)
+
+        #elements = list(filter(lambda e: int(e.traffic_sign_element_id) != 310, elements))
+        #for e in elements:
+        #    print(type(e.traffic_sign_element_id))
+        #    print(e.traffic_sign_element_id)
+
+        return TrafficSign(
+            traffic_sign_id=self.id,
+            traffic_sign_elements=elements,
+            first_occurrence={},
+            position=position,
+            virtual=virtual)
 
 
 class GraphTrafficLight:
