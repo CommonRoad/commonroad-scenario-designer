@@ -121,7 +121,7 @@ class Edge:
             self.adjacent_right_direction_equal,
             traffic_signs=self.traffic_signs,
             traffic_lights=self.traffic_lights,
-            lanelet_type= {LaneletType(config.LANELETTYPE)}
+            lanelet_type={LaneletType(config.LANELETTYPE)}
         )
 
     @staticmethod
