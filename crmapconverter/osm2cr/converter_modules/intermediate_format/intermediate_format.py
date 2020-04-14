@@ -6,7 +6,7 @@ __author__ = "Behtarin Ferdousi"
 
 from commonroad.scenario.intersection import Intersection, \
     IntersectionIncomingElement
-from commonroad.scenario.lanelet import Lanelet, LaneletNetwork
+from commonroad.scenario.lanelet import Lanelet, LaneletNetwork, LaneletType
 from commonroad.scenario.obstacle import Obstacle
 from typing import List, Set
 import os
@@ -120,7 +120,8 @@ class Edge:
             self.adjacent_right,
             self.adjacent_right_direction_equal,
             traffic_signs=self.traffic_signs,
-            traffic_lights=self.traffic_lights
+            traffic_lights=self.traffic_lights,
+            lanelet_type= {LaneletType(config.LANELETTYPE)}
         )
 
     @staticmethod

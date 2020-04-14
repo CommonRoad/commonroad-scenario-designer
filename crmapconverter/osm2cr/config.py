@@ -6,7 +6,7 @@ This module holds all parameters necessary for the conversion
 # name of the benchmark
 import enum
 
-BENCHMARK_ID = "test_bench"
+BENCHMARK_ID = "DEU_test"
 # author of the benchmark
 AUTHOR = "Automated converter by Maximilian Rieger"
 # affiliation of the benchmark
@@ -23,6 +23,9 @@ GPS_LATITUDE = "123.45"
 GPS_LONGITUDE = "123.45"
 # time step size for the benchmark in seconds
 TIMESTEPSIZE = 0.1
+
+# Lanelet type each lanelet should have
+LANELETTYPE = 'urban'
 
 # Aerial Image Settings
 # Use aerial images for edit
