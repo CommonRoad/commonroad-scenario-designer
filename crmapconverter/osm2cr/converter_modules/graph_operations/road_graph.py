@@ -748,18 +748,25 @@ class GraphTrafficSign:
         virtual = False
         if 'virtual' in self.sign:
             virtual = self.sign['virtual']
+
+
         # return TrafficSign(self.id, elements, position, virtual)
 
-        #elements = list(filter(lambda e: int(e.traffic_sign_element_id) != 310, elements))
+        # elements = list(filter(lambda e: int(e.traffic_sign_element_id) != 310, elements))
         #for e in elements:
         #    print(type(e.traffic_sign_element_id))
         #    print(e.traffic_sign_element_id)
 
+        #for traffic_e in elements:
+        #    if int(traffic_e.traffic_sign_element_id.value) == 310:
+        #        return
         #first_occurrence = set()
         #for edge in self.edges:
         #    print(type(edge))
         #    first_occurrence.add(edge.lanes)
         first_occurrence = set()
+        """
+        FIRST OCCURRENCE
         if self.node is None:
             print("edge there")
             print(self.edges)
@@ -774,7 +781,7 @@ class GraphTrafficSign:
             print("node")
             #first_occurrence = self.node
         print(first_occurrence)
-
+        """
         return TrafficSign(
             traffic_sign_id=self.id,
             traffic_sign_elements=elements,
