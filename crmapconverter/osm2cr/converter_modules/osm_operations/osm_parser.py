@@ -429,7 +429,8 @@ def get_graph_traffic_signs(nodes: Dict, roads: Dict, traffic_signs: List):
                 graph_traffic_sign.edges.append(roads[road_id])
 
         #TODO skip city_limits for now, fautly implementation
-        if not('city_limit' in str(traffic_sign[node_id])):
+        print(traffic_sign[node_id])
+        if not('city_limit' or 'traffic_sign' in str(traffic_sign[node_id])):
             graph_traffic_signs.append(graph_traffic_sign)
     return graph_traffic_signs
 
