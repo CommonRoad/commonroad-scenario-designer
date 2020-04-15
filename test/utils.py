@@ -45,8 +45,6 @@ def elements_equal(e1: etree.Element, e2: etree.Element) -> bool:
             try:  # Only accuracy error
                 if abs(float(e2.attrib.get(name)) - float(value)) > tolerance:
                     print(f"Attributes do not match: {name}={value}, {name}={e2.attrib.get(name)}")
-                else:
-                    print(f"Attributes do not match: {name}={value}, {name}={e2.attrib.get(name)}")
                     return False
             except ValueError:
                 return False
