@@ -778,7 +778,7 @@ class GraphTrafficSign:
         return TrafficSign(
             traffic_sign_id=self.id,
             traffic_sign_elements=elements,
-            first_occurrence=None,
+            first_occurrence=first_occurrence,
             position=position,
             virtual=virtual)
 
