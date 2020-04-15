@@ -124,6 +124,6 @@ for example.
 
 ## Authors
 
-Sebastian Maierhofer (current maintainer) 
+Sebastian Maierhofer (current maintainer)  
 Benjamin Orthen  
 Stefan Urban
