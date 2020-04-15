@@ -1,10 +1,10 @@
 """
 This module removes converting errors before exporting the scenario to XML
 """
-import json
 import numpy as np
-from commonroad.scenario.scenario import Scenario, Lanelet
 from scipy import interpolate
+from commonroad.scenario.scenario import Scenario, Lanelet
+from commonroad.scenario.traffic_sign import LEFT_HAND_TRAFFIC
 
 def sanitize(scenario: Scenario) -> None:
     """
@@ -18,7 +18,7 @@ def sanitize(scenario: Scenario) -> None:
     # interpolate waypoints to smoothen lanes
     smoothen_scenario(scenario)
     # comvert to left hand driving scenario if necessary
-    convert_to_lht(scenario)
+    # convert_to_lht(scenario)
 
 
 def merge_short_lanes(scenario: Scenario, min_distance=1) -> None:
@@ -125,6 +125,8 @@ def merge_lanelets(lanelet1: Lanelet, lanelet2: Lanelet) -> Lanelet:
     center_vertices = np.concatenate((pred.center_vertices, suc.center_vertices[idx:]))
     predecessor = pred.predecessor
     successor = suc.successor
+
+    # TODO Merge also traffic signs
 
     return create_lanelet(suc, left_vertices, right_vertices, center_vertices, predecessor=predecessor, successor=successor)
 
@@ -236,14 +238,9 @@ def convert_to_lht(scenario: Scenario) -> None:
     :return: None
     """
 
-    lht_json_file = "data/left_hand_traffic.json"
-    with open(lht_json_file, 'r') as json_file:
-        lht_countries = json.load(json_file)['data']
-    lht_countries = list(map(lambda i: i['name'], lht_countries))
-
     # TODO Location does not contain country, API call needed
 
-    if scenario.location in lht_countries:
+    if scenario.location in LEFT_HAND_TRAFFIC:
         print("converting scenario to lht")
         rht_to_lht(scenario)
 
