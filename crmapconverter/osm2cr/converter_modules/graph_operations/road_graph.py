@@ -755,10 +755,30 @@ class GraphTrafficSign:
         #    print(type(e.traffic_sign_element_id))
         #    print(e.traffic_sign_element_id)
 
+        #first_occurrence = set()
+        #for edge in self.edges:
+        #    print(type(edge))
+        #    first_occurrence.add(edge.lanes)
+        first_occurrence = set()
+        if self.node is None:
+            print("edge there")
+            print(self.edges)
+            if str(self.edges) != '[set()]':
+                lane_edges = self.edges[0]
+                print(lane_edges)
+                for e in lane_edges:
+                    first_occurrence.add(e.id)
+            else:
+                print("only empty set")
+        else:
+            print("node")
+            #first_occurrence = self.node
+        print(first_occurrence)
+
         return TrafficSign(
             traffic_sign_id=self.id,
             traffic_sign_elements=elements,
-            first_occurrence={},
+            first_occurrence=None,
             position=position,
             virtual=virtual)
 

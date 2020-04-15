@@ -419,7 +419,7 @@ def get_graph_traffic_signs(nodes: Dict, roads: Dict, traffic_signs: List):
         node_id = next(iter(traffic_sign))
         if node_id.startswith('road'):
             road_id = node_id[4:]
-            graph_traffic_sign = rg.GraphTrafficSign(traffic_sign[node_id], node = None, edges= [roads[road_id]])
+            graph_traffic_sign = rg.GraphTrafficSign(traffic_sign[node_id], node=None, edges=[roads[road_id]])
         else:
             graph_traffic_sign = rg.GraphTrafficSign( traffic_sign[node_id], nodes[node_id])
         # extract road_ids to edges in sign
