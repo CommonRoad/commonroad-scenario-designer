@@ -41,11 +41,15 @@ def elements_equal(e1: etree.Element, e2: etree.Element) -> bool:
             _print_fail("text", e1.text, e2.text)
             return False
     for name, value in e1.attrib.items():
-        if e2.attrib.get(name) != value \
-                or isinstance(value, float) and isinstance(e2.attrib.get(name), float) \
-                and not float(e2.attrib.get(name)) - float(value) < tolerance:  # Only accuracy error
-            print(f"Attributes do not match: {name}={value}, {name}={e2.attrib.get(name)}")
-            return False
+        if e2.attrib.get(name) != value:
+            try:  # Only accuracy error
+                if abs(float(e2.attrib.get(name)) - float(value)) > tolerance:
+                    print(f"Attributes do not match: {name}={value}, {name}={e2.attrib.get(name)}")
+                else:
+                    print(f"Attributes do not match: {name}={value}, {name}={e2.attrib.get(name)}")
+                    return False
+            except ValueError:
+                return False
     for name in e2.attrib.keys():
         if name not in e1.attrib:
             print(f"e2 has an attribute e1 is missing: {name}")
