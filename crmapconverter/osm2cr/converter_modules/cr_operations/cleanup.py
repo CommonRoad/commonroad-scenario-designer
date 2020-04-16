@@ -14,6 +14,7 @@ def sanitize(scenario: Scenario) -> None:
     :return: None
     """
     # merge too short and faulty lanes
+    # TODO Deal with intersections
     # merge_short_lanes(scenario)
     # interpolate waypoints to smoothen lanes
     smoothen_scenario(scenario)
@@ -247,10 +248,7 @@ def convert_to_lht(scenario: Scenario) -> None:
     :param1 scenario: The scenario to be checked
     :return: None
     """
-
-    # TODO Location does not contain country, API call needed
-
-    if scenario.location in LEFT_HAND_TRAFFIC:
+    if scenario.benchmark_id[:3] in LEFT_HAND_TRAFFIC:
         print("converting scenario to lht")
         rht_to_lht(scenario)
 
