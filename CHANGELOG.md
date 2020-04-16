@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.1.3] - 2020-04-14
+## [1.2.0] - 2020-04-14
 ### Changed
 - Update to CommonRoad-io 2020.2
 

@@ -1,6 +1,7 @@
 # OpenDRIVE 2 Lanelet - Converter
 
 We provide the code for an OpenDRIVE ([www.opendrive.org](http://www.opendrive.org)) to lanelets ([www.mrt.kit.edu/software/liblanelet](https://www.mrt.kit.edu/software/libLanelet/libLanelet.html)) converter, which has been introduced in our [paper](https://mediatum.ub.tum.de/doc/1449005/1449005.pdf): M. Althoff, S. Urban, and M. Koschi, "Automatic Conversion of Road Networks from OpenDRIVE to Lanelets," in Proc. of the IEEE International Conference on Service Operations and Logistics, and Informatics, 2018.
+Additionally, we provide a converter from CommonRoad lanelets to OSM lanelets and vice versa.
 
 [![Documentation Status](https://readthedocs.org/projects/opendrive2lanelet/badge/?version=latest)](https://opendrive2lanelet.readthedocs.io/en/latest/?badge=latest)
 [![PyPI version](https://badge.fury.io/py/opendrive2lanelet.svg)](https://badge.fury.io/py/opendrive2lanelet)
@@ -13,7 +14,6 @@ We provide the code for an OpenDRIVE ([www.opendrive.org](http://www.opendrive.o
 
 ```bash
 git clone https://gitlab.lrz.de/cps/opendrive2lanelet.git
-cd opendrive2lanelet
 python setup.py install
 ```
 
@@ -27,11 +27,6 @@ Public source (only released versions): https://gitlab.lrz.de/tum-cps/opendrive2
 pip install opendrive2lanelet
 ```
 
-Optionally, for using the gui packages:
-
-```bash
-pip install opendrive2lanelet[GUI]
-```
 
 ## Example OpenDRIVE Files
 
@@ -41,62 +36,33 @@ Download example files from: http://opendrive.org/download.html
 
 ### Using our provided GUI
 
-Start the GUI with ```opendrive2lanelet-gui```
+Opening OpenDRIVE to CommonRoad converter GUI from the command line:
+```bash
+opendrive2lanelet-gui
+```
 
 ![GUI screenshot](gui_screenshot.png "Screenshot of converter GUI")
 
-### Converting a file with the command line
+### Converting files using the command line
 
-Execute ```opendrive2lanelet-convert input_file.xodr -o output_file.xml```
-
-If you want to visualize the Commonroad file, use the ```opendrive2lanelet-visualize``` command.
-
-### Using the library in your own scripts
-
-```python
-from lxml import etree
-from opendrive2lanelet.opendriveparser.parser import parse_opendrive
-from opendrive2lanelet.network import Network
-from from commonroad.common.file_writer import CommonRoadFileWriter
-
-# Import, parse and convert OpenDRIVE file
-with open("{}/opendrive-1.xodr".format(os.path.dirname(os.path.realpath(__file__))), "r") as fi:
-	open_drive = parse_opendrive(etree.parse(fi).getroot())
-
-road_network = Network()
-road_network.load_opendrive(open_drive)
-
-scenario = road_network.export_commonroad_scenario()
-# Write CommonRoad scenario to file
-from commonroad.common.file_writer import CommonRoadFileWriter
-commonroad_writer = CommonRoadFileWriter(
-            scenario=scenario,
-            planning_problem_set=None,
-            author="",
-            affiliation="",
-            source="OpenDRIVE 2 Lanelet Converter",
-            tags="",
-        )
-with open("{}/opendrive-1.xml".format(os.path.dirname(os.path.realpath(__file__))), "w") as fh:
-	commonroad_writer.write_scenario_to_file_io(file_io=fh)
+Converting a file from OpenDRIVE to CommonRoad with the command line:  
+```bash
+opendrive2lanelet-convert input_file.xodr -o output_file.xml
 ```
 
-### Just parsing the OpenDrive .xodr file
-```python
-from lxml import etree
-from opendrive2lanelet.opendriveparser.parser import parse_opendrive
-
-with open("input_opendrive.xodr", 'r') as fh:
-	open_drive = parse_opendrive(etree.parse(fh).getroot())
-
-# Now do stuff with the data
-for road in open_drive.roads:
-	print("Road ID: {}".format(road.id))
+Converting a file from OSM lanelets to CommonRoad lanelets with the command line (for description of input parameters see documentation):  
+```bash
+osm-convert inputfile.xml --reverse -o outputfile.osm --adjencies --proj "+proj=etmerc +lat_0=38 +lon_0=125 +ellps=bessel"
+```
+For the conversion of CommonRoad lanelets to OSM lanelets change the input and output file accordingly.
+Visualizing the results of the conversion to CommonRoad:
+```bash
+opendrive2lanelet-visualize input-file.xml
 ```
 
 ## Documentation
 
-The documentation is published on [Read the Docs](https://opendrive2lanelet.readthedocs.io/en/latest/).
+The documentation is published on the [CommonRoad](https://commonroad.in.tum.de/static/docs/opendrive2lanelet/index.html) homepage.
 
 
 To generate the documentation from source, first install the necessary dependencies with pip:
