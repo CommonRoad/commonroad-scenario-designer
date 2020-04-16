@@ -20,10 +20,6 @@ with a Python class in this package. The XML is parsed and from the results a Op
 
 Converting to network of ParametricLanes
 ========================================
-
-.. image:: /lane_explanation.png
-		   :alt: Explaining the concept of lanes in OpenDRIVE.
-
 Every width section in OpenDRIVE gets converted into a ParametricLane and
 in turn every lane section gets converted into a ParametricLaneGroup which consists of multiple ParametricLanes. ParametricLanes have a ParametricLaneBorderGroup which has references to the left and right border of the ParametricLane and to the offset of each borders, which indicate at which point of the border the ParametricLane starts, as a Border can be used by multiple ParametricLanes.
 
@@ -50,9 +46,6 @@ have to coincide with the the lanelet it splits from or joins into, respectively
 Creating the new border works by offsetting the other, not to be recreated border of the lanelet
 by a linear varying distance, such that for e.g. a lanelet which joins into another lanelet,
 the new width at the start is equal to the old width at the start and the new width at the end is equal to the width of the lanelet it joins into at the end.
-
-.. image:: /lanelet_join.png
-		   :alt: Recalculating the border of a joining lanelet.
 
 The difficulty in determining the parameters used to calculate the new border was amplified by following problems:
 * Determining the position from where to calculate the new border. In general, this position is where the width of the joining/splitting lanelet has a zero derivative.
