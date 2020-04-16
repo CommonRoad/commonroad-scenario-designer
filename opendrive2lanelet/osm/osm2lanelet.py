@@ -5,8 +5,8 @@
 __author__ = "Benjamin Orthen"
 __copyright__ = "TUM Cyber-Physical Systems Group"
 __credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles"]
-__version__ = "1.1.0"
-__maintainer__ = "Benjamin Orthen"
+__version__ = "1.2.0"
+__maintainer__ = "Sebastian Maierhofer"
 __email__ = "commonroad-i06@in.tum.de"
 __status__ = "Released"
 
@@ -17,8 +17,8 @@ import numpy as np
 from pyproj import Proj
 from commonroad.scenario.scenario import Scenario
 
-from opendrive2lanelet.lanelet import ConversionLanelet
-from opendrive2lanelet.lanelet_network import ConversionLaneletNetwork
+from opendrive2lanelet.conversion_lanelet import ConversionLanelet
+from opendrive2lanelet.conversion_lanelet_network import ConversionLaneletNetwork
 from opendrive2lanelet.osm.osm import OSM, WayRelation, DEFAULT_PROJ_STRING
 
 NODE_DISTANCE_TOLERANCE = 0.01  # this is in meters

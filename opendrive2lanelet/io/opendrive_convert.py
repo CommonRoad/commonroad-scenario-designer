@@ -12,7 +12,9 @@ import argparse
 from lxml import etree
 from commonroad.scenario.scenario import Scenario
 
-from commonroad.common.file_writer import CommonRoadFileWriter
+from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
+from commonroad.planning.planning_problem import PlanningProblemSet
+from commonroad.scenario.scenario import Tag
 
 from opendrive2lanelet.opendriveparser.elements.opendrive import OpenDrive
 from opendrive2lanelet.opendriveparser.parser import parse_opendrive
@@ -22,8 +24,8 @@ from opendrive2lanelet.osm.lanelet2osm import L2OSMConverter
 __author__ = "Benjamin Orthen"
 __copyright__ = "TUM Cyber-Physical Systems Group"
 __credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles"]
-__version__ = "1.1.0"
-__maintainer__ = "Benjamin Orthen"
+__version__ = "1.2.0"
+__maintainer__ = "Sebastian Maierhofer"
 __email__ = "commonroad-i06@in.tum.de"
 __status__ = "Released"
 
@@ -86,16 +88,13 @@ def main():
     if not args.osm:
         writer = CommonRoadFileWriter(
             scenario=scenario,
-            planning_problem_set=None,
+            planning_problem_set=PlanningProblemSet(),
             author="",
             affiliation="",
             source="OpenDRIVE 2 Lanelet Converter",
-            tags="",
+            tags={Tag.URBAN, Tag.HIGHWAY},
         )
-
-        with open(f"{output_name}", "w") as file_out:
-            writer.write_scenario_to_file_io(file_out)
-
+        writer.write_to_file(output_name, OverwriteExistingFile.ALWAYS)
     else:
         l2osm = L2OSMConverter(args.osm)
         osm = l2osm(scenario)

@@ -6,9 +6,11 @@
 import os
 import sys
 import argparse
-
 from lxml import etree
-from commonroad.common.file_writer import CommonRoadFileWriter
+
+from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
+from commonroad.planning.planning_problem import PlanningProblemSet
+from commonroad.scenario.scenario import Tag
 from commonroad.common.file_reader import CommonRoadFileReader
 
 from opendrive2lanelet.osm.osm2lanelet import OSM2LConverter
@@ -18,8 +20,8 @@ from opendrive2lanelet.osm.lanelet2osm import L2OSMConverter
 __author__ = "Benjamin Orthen"
 __copyright__ = "TUM Cyber-Physical Systems Group"
 __credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles"]
-__version__ = "1.1.0"
-__maintainer__ = "Benjamin Orthen"
+__version__ = "1.2.0"
+__maintainer__ = "Sebastian Maierhofer"
 __email__ = "commonroad-i06@in.tum.de"
 __status__ = "Released"
 
@@ -105,15 +107,13 @@ def osm_to_commonroad(args, output_name: str):
     if scenario:
         writer = CommonRoadFileWriter(
             scenario=scenario,
-            planning_problem_set=None,
+            planning_problem_set=PlanningProblemSet(),
             author="",
             affiliation="",
-            source="OSM 2 CommonRoad Converter",
-            tags="",
+            source="OpenDRIVE 2 Lanelet Converter",
+            tags={Tag.URBAN, Tag.HIGHWAY},
         )
-        with open(f"{output_name}", "w") as file_out:
-            writer.write_scenario_to_file_io(file_out)
-
+        writer.write_to_file(output_name, OverwriteExistingFile.ALWAYS)
     else:
         print("Could not convert from OSM to CommonRoad format!")
 

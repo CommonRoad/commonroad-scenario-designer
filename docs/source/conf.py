@@ -22,13 +22,13 @@ sys.path.insert(0, os.path.abspath("../.."))
 # -- Project information -----------------------------------------------------
 
 project = "opendrive2lanelet"
-copyright = "2018, Technische Universität München"
-author = "Benjamin Orthen, Stefan Urban"
+copyright = "2020, Technische Universität München"
+author = "Sebastian Maierhofer, Benjamin Orthen, Stefan Urban"
 
 # The short X.Y version
-version = "1.0"
+version = "1.2"
 # The full version, including alpha/beta/rc tags
-release = "1.1.0"
+release = "1.2.0"
 
 
 # -- General configuration ---------------------------------------------------
@@ -142,7 +142,7 @@ latex_documents = [
         master_doc,
         "opendrive2lanelet.tex",
         "opendrive2lanelet Documentation",
-        "Benjamin Orthen, Stefan Urban",
+        "Sebastian Maierhofer, Benjamin Orthen, Stefan Urban",
         "manual",
     )
 ]

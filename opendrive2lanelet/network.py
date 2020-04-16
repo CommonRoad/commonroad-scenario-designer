@@ -9,15 +9,15 @@ from commonroad.scenario.scenario import Scenario
 from opendrive2lanelet.opendriveparser.elements.opendrive import OpenDrive
 
 from opendrive2lanelet.utils import encode_road_section_lane_width_id
-from opendrive2lanelet.lanelet_network import ConversionLaneletNetwork
+from opendrive2lanelet.conversion_lanelet_network import ConversionLaneletNetwork
 from opendrive2lanelet.converter import OpenDriveConverter
 
 
 __author__ = "Benjamin Orthen, Stefan Urban"
 __copyright__ = "TUM Cyber-Physical Systems Group"
 __credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles"]
-__version__ = "1.1.0"
-__maintainer__ = "Benjamin Orthen"
+__version__ = "1.2.0"
+__maintainer__ = "Sebastian Maierhofer"
 __email__ = "commonroad-i06@in.tum.de"
 __status__ = "Released"
 

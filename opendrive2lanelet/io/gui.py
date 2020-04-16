@@ -12,18 +12,20 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QApplication, QWidget, QLineEdit, QFileDialog, QMainWindow
 from PyQt5.QtWidgets import QPushButton, QMessageBox, QLabel
 
-from commonroad.common.file_writer import CommonRoadFileWriter
+from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
+from commonroad.planning.planning_problem import PlanningProblemSet
+from commonroad.scenario.scenario import Tag
 
 
 from opendrive2lanelet.opendriveparser.parser import parse_opendrive
 from opendrive2lanelet.network import Network
 from opendrive2lanelet.io.viewer import MainWindow as ViewerWidget
 
-__author__ = "Benjamin Orthen, Stefan Urban"
+__author__ = "Benjamin Orthen, Stefan Urban, Sebastian Maierhofer"
 __copyright__ = "TUM Cyber-Physical Systems Group"
 __credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles"]
-__version__ = "1.1.0"
-__maintainer__ = "Benjamin Orthen"
+__version__ = "1.2.0"
+__maintainer__ = "Sebastian Maierhofer"
 __email__ = "commonroad-i06@in.tum.de"
 __status__ = "Released"
 
@@ -134,7 +136,7 @@ class MainWindow(QWidget):
 
         # Load road network and print some statistics
         try:
-            fh = open(path, "r")
+            fh = open(path, "r", encoding="utf-8")
             openDriveXml = parse_opendrive(etree.parse(fh).getroot())
             fh.close()
         except (etree.XMLSyntaxError) as e:
@@ -200,16 +202,15 @@ class MainWindow(QWidget):
             return
 
         try:
-            with open(path, "w") as fh:
-                writer = CommonRoadFileWriter(
-                    scenario=self.loadedRoadNetwork.export_commonroad_scenario(),
-                    planning_problem_set=None,
-                    author="",
-                    affiliation="",
-                    source="OpenDRIVE 2 Lanelet Converter",
-                    tags="",
-                )
-                writer.write_scenario_to_file_io(fh)
+            writer = CommonRoadFileWriter(
+                scenario=self.loadedRoadNetwork.export_commonroad_scenario(),
+                planning_problem_set=PlanningProblemSet(),
+                author="",
+                affiliation="",
+                source="OpenDRIVE 2 Lanelet Converter",
+                tags={Tag.URBAN, Tag.HIGHWAY},
+            )
+            writer.write_to_file(path, OverwriteExistingFile.ALWAYS)
         except (IOError) as e:
             QMessageBox.critical(
                 self,

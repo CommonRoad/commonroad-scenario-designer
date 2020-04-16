@@ -303,7 +303,7 @@ class LaneSection:
 
 class LaneWidth(RoadRecord):
     """Entry for a lane describing the width for a given position.
-    (Section 5.3.7.2.1.1.2 of OpenDRIVE 1.4)
+    (Section 5.3.7.2.1.2.0 of OpenDRIVE 1.4)
 
 
     start_offset being the offset of the entry relative to the preceding lane section record
@@ -335,7 +335,7 @@ class LaneWidth(RoadRecord):
 class LaneBorder(LaneWidth):
     """Describe lane by width in respect to reference path.
 
-    (Section 5.3.7.2.1.1.3 of OpenDRIVE 1.4)
+    (Section 5.3.7.2.1.2.0 of OpenDRIVE 1.4)
 
     Instead of describing lanes by their width entries and, thus,
     invariably depending on influences of inner
