@@ -766,7 +766,7 @@ class GraphTrafficSign:
         #    first_occurrence.add(edge.lanes)
         first_occurrence = set()
         """
-        FIRST OCCURRENCE
+        #FIRST OCCURRENCE
         if self.node is None:
             print("edge there")
             print(self.edges)

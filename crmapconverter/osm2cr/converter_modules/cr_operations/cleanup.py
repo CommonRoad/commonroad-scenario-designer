@@ -3,7 +3,7 @@ This module removes converting errors before exporting the scenario to XML
 """
 import numpy as np
 from scipy import interpolate
-from commonroad.scenario.scenario import Scenario, Lanelet
+from commonroad.scenario.scenario import Scenario, Lanelet, LaneletNetwork
 from commonroad.scenario.traffic_sign import LEFT_HAND_TRAFFIC
 
 def sanitize(scenario: Scenario) -> None:
@@ -14,11 +14,11 @@ def sanitize(scenario: Scenario) -> None:
     :return: None
     """
     # merge too short and faulty lanes
-    merge_short_lanes(scenario)
+    # merge_short_lanes(scenario)
     # interpolate waypoints to smoothen lanes
     smoothen_scenario(scenario)
     # comvert to left hand driving scenario if necessary
-    # convert_to_lht(scenario)
+    convert_to_lht(scenario)
 
 
 def merge_short_lanes(scenario: Scenario, min_distance=1) -> None:
@@ -86,8 +86,8 @@ def merge_short_lanes(scenario: Scenario, min_distance=1) -> None:
             lanelets.append(new_pre)
 
         # update scenario's road network
-        scenario.lanelet_network = scenario.lanelet_network.create_from_lanelet_list(lanelets)
 
+        scenario.lanelet_network = create_laneletnetwork(lanelets, scenario.lanelet_network.traffic_signs, scenario.lanelet_network.traffic_lights, scenario.lanelet_network.intersections)
 
 def merge_lanelets(lanelet1: Lanelet, lanelet2: Lanelet) -> Lanelet:
     """
@@ -126,9 +126,19 @@ def merge_lanelets(lanelet1: Lanelet, lanelet2: Lanelet) -> Lanelet:
     predecessor = pred.predecessor
     successor = suc.successor
 
-    # TODO Merge also traffic signs
+    # Merge also traffic signs
+    traffic_signs = set()
+    traffic_lights = set()
+    #print(lanelet1.traffic_signs)
+    #print(lanelet2.traffic_signs)
+    traffic_signs.update(lanelet1.traffic_signs)
+    traffic_signs.update(lanelet2.traffic_signs)
+    traffic_lights.update(lanelet1.traffic_lights)
+    traffic_lights.update(lanelet2.traffic_lights)
 
-    return create_lanelet(suc, left_vertices, right_vertices, center_vertices, predecessor=predecessor, successor=successor)
+    #print("merged:" + str(traffic_signs))
+
+    return create_lanelet(suc, left_vertices, right_vertices, center_vertices, predecessor=predecessor, successor=successor, traffic_signs=traffic_signs, traffic_lights=traffic_lights)
 
 
 def smoothen_scenario(scenario: Scenario):
@@ -147,7 +157,7 @@ def smoothen_scenario(scenario: Scenario):
     lanelets = list(map(smoothen_lane, lanelets))
 
     # update scenario
-    scenario.lanelet_network = net.create_from_lanelet_list(lanelets)
+    scenario.lanelet_network = create_laneletnetwork(lanelets, scenario.lanelet_network.traffic_signs, scenario.lanelet_network.traffic_lights, scenario.lanelet_network.intersections)
 
 
 
@@ -278,11 +288,11 @@ def rht_to_lht(scenario: Scenario) -> None:
 
         lht_lanes.append(lht_l)
 
-    scenario.lanelet_network = net.create_from_lanelet_list(lht_lanes)
+    scenario.lanelet_network = create_laneletnetwork(lht_lanes, scenario.lanelet_network.traffic_signs, scenario.lanelet_network.traffic_lights, scenario.lanelet_network.intersections)
 
 
 def create_lanelet(l, left_vertices, right_vertices, center_vertices, predecessor=None, successor=None,
-    adjacent_right=None, adjacent_left=None, adjacent_right_same_direction=None, adjacent_left_same_direction=None):
+    adjacent_right=None, adjacent_left=None, adjacent_right_same_direction=None, adjacent_left_same_direction=None, traffic_signs=None, traffic_lights=None):
     """
     Create a new lanelet given an old one. Vertices, successors and predecessors can be modified
 
@@ -306,6 +316,10 @@ def create_lanelet(l, left_vertices, right_vertices, center_vertices, predecesso
         adjacent_left_same_direction = l.adj_left_same_direction
     if adjacent_right_same_direction is None:
         adjacent_right_same_direction = l.adj_right_same_direction
+    if traffic_signs is None:
+        traffic_signs = l.traffic_signs
+    if traffic_lights is None:
+        traffic_lights = l.traffic_lights
 
     # create new lanelet in CommomRoad2020 format
     new_lanelet = Lanelet(
@@ -325,7 +339,37 @@ def create_lanelet(l, left_vertices, right_vertices, center_vertices, predecesso
         lanelet_type=l.lanelet_type,
         user_one_way=l.user_one_way,
         user_bidirectional=l.user_bidirectional,
-        traffic_signs=l.traffic_signs,
-        traffic_lights=l.traffic_lights
+        traffic_signs=traffic_signs,
+        traffic_lights=traffic_lights
     )
     return new_lanelet
+
+def create_laneletnetwork(lanelets, traffic_signs, traffic_lights, intersections) -> LaneletNetwork:
+    """
+    Create a new lanelet network
+
+    :param1 lanelets: Lanelets used for the new network
+    :param2 traffic_signs: Traffic signs used for the new network
+    :param3 traffic_lights: Traffic lights used for the new network
+    :param4 intersections: Intersections used for the new network
+    :return: New lanelet network
+    """
+    net = LaneletNetwork()
+
+    # Add lanelets
+    for lanelet in lanelets:
+        net.add_lanelet(lanelet)
+
+    # Add Traffic Signs
+    for sign in traffic_signs:
+        net.add_traffic_sign(sign, set())
+
+    # Add Traffic Lights
+    for light in traffic_lights:
+        net.add_traffic_light(light, set())
+
+    # Add Intersections
+    for intersection in intersections:
+        net.add_intersection(intersection)
+
+    return net
