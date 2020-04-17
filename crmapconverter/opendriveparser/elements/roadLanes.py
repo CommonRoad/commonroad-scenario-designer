@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from opendrive2lanelet.opendriveparser.elements.road_record import RoadRecord
+from crmapconverter.opendriveparser.elements.road_record import RoadRecord
 
 
 class Lanes:
