@@ -9,19 +9,12 @@ import sys
 from lxml import etree
 
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QApplication, QWidget, QLineEdit, QFileDialog, QMainWindow
-from PyQt5.QtWidgets import (
-    QPushButton,
-    QMessageBox,
-    QLabel,
-    QCheckBox,
-    QFormLayout,
-    QHBoxLayout,
-    QRadioButton,
-)
+from PyQt5.QtWidgets import QApplication, QWidget, QLineEdit, QFileDialog, QMainWindow, QPushButton, QMessageBox, \
+    QLabel, QCheckBox, QFormLayout, QHBoxLayout, QRadioButton
 
-from commonroad.common.file_writer import CommonRoadFileWriter
-from commonroad.common.file_reader import CommonRoadFileReader
+from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
+from commonroad.planning.planning_problem import PlanningProblemSet
+from commonroad.scenario.scenario import Tag
 
 from crmapconverter.osm.osm2lanelet import OSM2LConverter
 from crmapconverter.osm.parser import OSMParser
@@ -37,11 +30,11 @@ except ModuleNotFoundError as module_err:
     print(module_err)
     print("It seems like you did not install the dependencies for osm2cr.")
 
-__author__ = "Benjamin Orthen, Stefan Urban"
+__author__ = "Benjamin Orthen, Stefan Urban, Sebastian Maierhofer"
 __copyright__ = "TUM Cyber-Physical Systems Group"
 __credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles"]
-__version__ = "1.1.0"
-__maintainer__ = "Benjamin Orthen"
+__version__ = "1.2.0"
+__maintainer__ = "Sebastian Maierhofer"
 __email__ = "commonroad-i06@in.tum.de"
 __status__ = "Released"
 
@@ -312,15 +305,14 @@ class OSMLaneletsConvertWindow(QWidget):
         scenario = osm2l(self.loaded_osm)
         if scenario:
             writer = CommonRoadFileWriter(
-                scenario=scenario,
-                planning_problem_set=None,
+                scenario=self.loadedRoadNetwork.export_commonroad_scenario(),
+                planning_problem_set=PlanningProblemSet(),
                 author="",
                 affiliation="",
-                source="OSM 2 CommonRoad Converter",
-                tags="",
+                source="OpenDRIVE 2 Lanelet Converter",
+                tags={Tag.URBAN, Tag.HIGHWAY},
             )
-            with open(f"{path}", "w") as file_out:
-                writer.write_scenario_to_file_io(file_out)
+            writer.write_to_file(path, OverwriteExistingFile.ALWAYS)
 
         else:
             print("Could not convert from OSM to CommonRoad format!")
@@ -506,16 +498,15 @@ class OpenDriveConvertWindow(QWidget):
             return
 
         try:
-            with open(path, "w") as fh:
-                writer = CommonRoadFileWriter(
-                    scenario=self.loadedRoadNetwork.export_commonroad_scenario(),
-                    planning_problem_set=None,
-                    author="",
-                    affiliation="",
-                    source="OpenDRIVE 2 Lanelet Converter",
-                    tags="",
-                )
-                writer.write_scenario_to_file_io(fh)
+            writer = CommonRoadFileWriter(
+                scenario=self.loadedRoadNetwork.export_commonroad_scenario(),
+                planning_problem_set=PlanningProblemSet(),
+                author="",
+                affiliation="",
+                source="OpenDRIVE 2 Lanelet Converter",
+                tags={Tag.URBAN, Tag.HIGHWAY},
+            )
+            writer.write_to_file(path, OverwriteExistingFile.ALWAYS)
         except (IOError) as e:
             QMessageBox.critical(
                 self,
