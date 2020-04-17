@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
-from opendrive2lanelet.opendriveparser.elements.roadPlanView import PlanView
-from opendrive2lanelet.opendriveparser.elements.roadLink import Link
-from opendrive2lanelet.opendriveparser.elements.roadLanes import Lanes
-from opendrive2lanelet.opendriveparser.elements.roadElevationProfile import (
+from crmapconverter.opendriveparser.elements.roadPlanView import PlanView
+from crmapconverter.opendriveparser.elements.roadLink import Link
+from crmapconverter.opendriveparser.elements.roadLanes import Lanes
+from crmapconverter.opendriveparser.elements.roadElevationProfile import (
     ElevationProfile,
 )
-from opendrive2lanelet.opendriveparser.elements.roadLateralProfile import LateralProfile
-from opendrive2lanelet.opendriveparser.elements.junction import Junction
+from crmapconverter.opendriveparser.elements.roadLateralProfile import LateralProfile
+from crmapconverter.opendriveparser.elements.junction import Junction
 
 
 class Road:
