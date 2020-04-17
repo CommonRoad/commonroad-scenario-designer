@@ -13,6 +13,8 @@ def sanitize(scenario: Scenario) -> None:
     :param1 scenario: Scenario where operations will be performed on
     :return: None
     """
+    # remove non referenced traffic signs
+    remove_non_referenced_signs(scenario)
     # merge too short and faulty lanes
     # TODO Deal with intersections
     # merge_short_lanes(scenario)
@@ -21,6 +23,22 @@ def sanitize(scenario: Scenario) -> None:
     # comvert to left hand driving scenario if necessary
     convert_to_lht(scenario)
 
+def remove_non_referenced_signs(scenario: Scenario):
+    """
+    Removes non referenced traffic signs from scenario.
+
+    :param1 scenario: Scenario used to find non referenced traffic sings
+    :return: None
+    """
+    net = scenario.lanelet_network
+    filtered_signs = set()
+    for sign in net.traffic_signs:
+        for lanelet in net.lanelets:
+            if sign.traffic_sign_id in lanelet.traffic_signs:
+                filtered_signs.add(sign)
+                continue
+
+    scenario.lanelet_network = create_laneletnetwork(scenario.lanelet_network.lanelets, filtered_signs, scenario.lanelet_network.traffic_lights, scenario.lanelet_network.intersections)
 
 def merge_short_lanes(scenario: Scenario, min_distance=1) -> None:
     """
