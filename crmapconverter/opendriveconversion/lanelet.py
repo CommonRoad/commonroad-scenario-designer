@@ -6,13 +6,13 @@ for conversion from the opendrive format."""
 from typing import Tuple, Optional
 
 import numpy as np
-from commonroad.scenario.lanelet import Lanelet
+from commonroad.scenario.lanelet import Lanelet, LaneletType
 
-__author__ = "Benjamin Orthen"
+__author__ = "Benjamin Orthen, Sebastian Maierhofer"
 __copyright__ = "TUM Cyber-Physical Systems Group"
 __credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles"]
-__version__ = "1.1.0"
-__maintainer__ = "Benjamin Orthen"
+__version__ = "1.2.0"
+__maintainer__ = "Sebastian Maierhofer"
 __email__ = "commonroad-i06@in.tum.de"
 __status__ = "Released"
 
@@ -45,27 +45,50 @@ class ConversionLanelet(Lanelet):
         adjacent_left_same_direction=None,
         adjacent_right=None,
         adjacent_right_same_direction=None,
-        speed_limit=np.infty,
         line_marking_left_vertices=None,
         line_marking_right_vertices=None,
+        stop_line=None,
+        lanelet_type= None,
+        user_one_way=None,
+        user_bidirectional=None,
+        traffic_signs=None,
+        traffic_lights=None,
     ):
+        if lanelet_type is None:
+            lanelet_type = {LaneletType.UNKNOWN}
         super().__init__(
-            left_vertices,
-            center_vertices,
-            right_vertices,
-            1,
-            predecessor,
-            successor,
-            adjacent_left,
-            adjacent_left_same_direction,
-            adjacent_right,
-            adjacent_right_same_direction,
-            speed_limit,
-            line_marking_left_vertices,
-            line_marking_right_vertices,
+            left_vertices=left_vertices,
+            center_vertices=center_vertices,
+            right_vertices=right_vertices,
+            lanelet_id=1,
+            predecessor=predecessor,
+            successor=successor,
+            adjacent_left=adjacent_left,
+            adjacent_left_same_direction=adjacent_left_same_direction,
+            adjacent_right=adjacent_right,
+            adjacent_right_same_direction=adjacent_right_same_direction,
+            line_marking_left_vertices=line_marking_left_vertices,
+            line_marking_right_vertices=line_marking_right_vertices,
+            stop_line=stop_line,
+            lanelet_type=lanelet_type,
+            user_one_way=user_one_way,
+            user_bidirectional=user_bidirectional,
+            traffic_signs=traffic_signs,
+            traffic_lights=traffic_lights,
         )
+
         self.parametric_lane_group = parametric_lane_group
         self.lanelet_id = lanelet_id
+
+    def __eq__(self, lanelet: "ConversionLanelet") -> bool:
+        """Lanelets are equal if their id_ is equal.
+
+        Args:
+           lanelet: Lanelet to be compared to equality.
+        Returns:
+           True if id_ is equal.
+        """
+        return self.lanelet_id == lanelet.lanelet_id
 
     @property
     def lanelet_id(self) -> int:

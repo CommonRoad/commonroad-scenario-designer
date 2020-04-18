@@ -3,18 +3,19 @@
 """Module to enhance LaneletNetwork class
 so it can be used for conversion from the opendrive format."""
 
-from typing import Optional, List
+from typing import List, Optional
 from queue import Queue
 import numpy as np
 
 from commonroad.scenario.lanelet import LaneletNetwork
+
 from crmapconverter.opendriveconversion.lanelet import ConversionLanelet
 
 __author__ = "Benjamin Orthen"
 __copyright__ = "TUM Cyber-Physical Systems Group"
 __credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles"]
-__version__ = "1.1.0"
-__maintainer__ = "Benjamin Orthen"
+__version__ = "1.2.0"
+__maintainer__ = "Sebastian Maierhofer"
 __email__ = "commonroad-i06@in.tum.de"
 __status__ = "Released"
 

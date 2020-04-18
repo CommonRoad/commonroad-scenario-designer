@@ -5,7 +5,6 @@ associated parametric lanes."""
 
 from typing import Tuple, Optional
 import math
-
 import numpy as np
 
 from crmapconverter.opendriveconversion.lanelet import ConversionLanelet
@@ -13,8 +12,8 @@ from crmapconverter.opendriveconversion.lanelet import ConversionLanelet
 __author__ = "Benjamin Orthen, Stefan Urban"
 __copyright__ = "TUM Cyber-Physical Systems Group"
 __credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles"]
-__version__ = "1.1.0"
-__maintainer__ = "Benjamin Orthen"
+__version__ = "1.2.0"
+__maintainer__ = "Sebastian Maierhofer"
 __email__ = "commonroad-i06@in.tum.de"
 __status__ = "Released"
 
