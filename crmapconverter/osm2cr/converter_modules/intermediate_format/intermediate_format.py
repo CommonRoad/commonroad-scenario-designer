@@ -25,6 +25,12 @@ from commonroad.scenario.scenario import Scenario
 from commonroad.scenario.traffic_sign import TrafficSign
 from commonroad.scenario.traffic_sign import TrafficLight
 
+from commonroad.planning.planning_problem import PlanningProblem, PlanningProblemSet
+from commonroad.scenario.trajectory import State
+from commonroad.planning.goal import GoalRegion
+from commonroad.common.util import Interval
+from commonroad.geometry.shape import Rectangle, Circle
+
 from crmapconverter.osm2cr.converter_modules.utility import geometry,\
     idgenerator
 
@@ -460,6 +466,23 @@ class IntermediateFormat:
     def get_obstacles(self):
         # TODO Get obstacles from SUMO route file
         pass
+
+    def get_dummy_planning_problem_set(self):
+        """
+        Creates a dummy planning problem set for the export to XML
+
+        :return: Dummy planning problem set
+        """
+        pp_id = idgenerator.get_id()
+        print(pp_id)
+        rectangle = Rectangle(4.3, 8.9, center=np.array([0.1, 0.5]), orientation=1.7)
+        circ = Circle(2.0, np.array([0.0, 0.0]))
+        goal_region = GoalRegion([State(time_step=Interval(0, 1), velocity=Interval(0.0, 1), position=rectangle),
+                                  State(time_step=Interval(1, 2), velocity=Interval(0.0, 1), position=circ)])
+        planning_problem = PlanningProblem(pp_id, State(velocity=0.1, position=np.array([[0], [0]]), orientation=0,
+                                                       yaw_rate=0, slip_angle=0, time_step=0), goal_region)
+
+        return PlanningProblemSet(list([planning_problem]))
 
     def generate_sumo_config_file(self):
         """

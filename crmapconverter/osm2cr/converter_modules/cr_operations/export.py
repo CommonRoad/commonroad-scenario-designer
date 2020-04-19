@@ -157,7 +157,7 @@ def export(
     sanitize(scenario)
     if config.EXPORT_IN_UTM:
         convert_coordinates_to_utm(scenario, graph.center_point)
-    problemset = PlanningProblemSet(None)
+    problemset = intermediate_format.get_dummy_planning_problem_set()
     author = config.AUTHOR
     affiliation = config.AFFILIATION
     source = config.SOURCE
@@ -169,9 +169,12 @@ def export(
     # in the current commonroad version the following line works
     file_writer = CommonRoadFileWriter(
         scenario, problemset, author, affiliation, source, tags, location, decimal_precision=16)
-    # file_writer = CommonRoadFileWriter(scenario, problemset, author, affiliation, source, tags)
-    file_writer.write_scenario_to_file(file, OverwriteExistingFile.ALWAYS)
 
+    #write scenario to file with planning problem
+    file_writer.write_to_file(file, OverwriteExistingFile.ALWAYS)
+
+    # write scenario to file without planning problem
+    #file_writer.write_scenario_to_file(file, OverwriteExistingFile.ALWAYS)
 
 def create_tags(tags: str):
     """
