@@ -717,6 +717,8 @@ class GraphTrafficSign:
         position = None
         values = []
 
+
+        #print(self.sign)
         traffic_sign_map = {
             'maxspeed': TrafficSignIDGermany.MAX_SPEED,
             'overtaking': TrafficSignIDGermany.NO_OVERTAKING_START,
@@ -730,6 +732,7 @@ class GraphTrafficSign:
             position = np.array([position_point.x, position_point.y])
 
         for key in traffic_sign_map.keys():
+            """
             if 'traffic_sign' in self.sign and self.sign['traffic_sign'] == key:
                 sign_id = traffic_sign_map[key]# .value
                 #print(sign_id)
@@ -740,6 +743,17 @@ class GraphTrafficSign:
                 if key in self.sign:
                     values.append(self.sign[key])
                 elements.append(TrafficSignElement(sign_id, values))
+            """
+            if 'maxspeed' == key:
+                if 'maxspeed' in self.sign:
+                    sign_id = traffic_sign_map[key]
+                    value = int(self.sign[key])
+                    elements.append(TrafficSignElement(sign_id, [value]))
+                elif 'traffic_sign' in self.sign and 'DE:274' in str(self.sign['traffic_sign']):
+                    sign_id = traffic_sign_map[key]
+                    limit = str(self.sign['traffic_sign'])
+                    value = int(limit[limit.find("[")+1:limit.find("]")])
+                    elements.append(TrafficSignElement(sign_id, [value]))
             elif key in self.sign:
                 sign_id = traffic_sign_map[key] #.value
                 value = self.sign[key]
@@ -750,20 +764,6 @@ class GraphTrafficSign:
             virtual = self.sign['virtual']
 
 
-        # return TrafficSign(self.id, elements, position, virtual)
-
-        # elements = list(filter(lambda e: int(e.traffic_sign_element_id) != 310, elements))
-        #for e in elements:
-        #    print(type(e.traffic_sign_element_id))
-        #    print(e.traffic_sign_element_id)
-
-        #for traffic_e in elements:
-        #    if int(traffic_e.traffic_sign_element_id.value) == 310:
-        #        return
-        #first_occurrence = set()
-        #for edge in self.edges:
-        #    print(type(edge))
-        #    first_occurrence.add(edge.lanes)
         first_occurrence = set()
         """
         #FIRST OCCURRENCE
