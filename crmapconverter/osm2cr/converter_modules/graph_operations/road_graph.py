@@ -295,6 +295,13 @@ class GraphNode:
 
     def add_traffic_sign(self, sign: "GraphTrafficSign"):
         self.traffic_signs.append(sign)
+        # add to lanes
+        for edge in self.edges:
+            for lane in edge.lanes:
+                # add to forward lanes
+                # TODO determine in which direction
+                if lane.forward:
+                    lane.add_traffic_sign(sign)
 
 class GraphEdge:
     """
@@ -718,7 +725,13 @@ class GraphTrafficSign:
         values = []
 
 
-        #print(self.sign)
+        print(self.sign)
+
+        if self.node is not None:
+                print('has node')
+        for edge in self.edges:
+            for sub_edge in edge:
+                print('has edge')
         traffic_sign_map = {
             'maxspeed': TrafficSignIDGermany.MAX_SPEED,
             'overtaking': TrafficSignIDGermany.NO_OVERTAKING_START,
@@ -749,14 +762,17 @@ class GraphTrafficSign:
                 elements.append(TrafficSignElement(sign_id, [value]))
 
             elif key in traffic_sign_map:
-
                 sign_id = traffic_sign_map[key]
                 value = 'some traffic sign'
                 elements.append(TrafficSignElement(sign_id, [value]))
 
+        # determine if virtual
         virtual = False
         if 'virtual' in self.sign:
-            virtual = self.sign['virtual']
+            if not self.sign['virtual']:
+                virtual = True # especially for town signs nice
+            else:
+                virtual = self.sign['virtual']
 
 
         first_occurrence = set()
