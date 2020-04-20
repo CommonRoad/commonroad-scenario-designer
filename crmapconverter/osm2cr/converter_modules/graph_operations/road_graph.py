@@ -731,32 +731,27 @@ class GraphTrafficSign:
             position_point = self.node.get_point()
             position = np.array([position_point.x, position_point.y])
 
-        for key in traffic_sign_map.keys():
-            """
-            if 'traffic_sign' in self.sign and self.sign['traffic_sign'] == key:
-                sign_id = traffic_sign_map[key]# .value
-                #print(sign_id)
-                #sign_id = TrafficSignIDGermany(str(sign_id))
-                #sign_id = TrafficSignIDGermany(sign_id)
-                #print(sign_id)
-                values = []
-                if key in self.sign:
-                    values.append(self.sign[key])
-                elements.append(TrafficSignElement(sign_id, values))
-            """
-            if 'maxspeed' == key:
-                if 'maxspeed' in self.sign:
-                    sign_id = traffic_sign_map[key]
-                    value = int(self.sign[key])
-                    elements.append(TrafficSignElement(sign_id, [value]))
-                elif 'traffic_sign' in self.sign and 'DE:274' in str(self.sign['traffic_sign']):
-                    sign_id = traffic_sign_map[key]
-                    limit = str(self.sign['traffic_sign'])
-                    value = int(limit[limit.find("[")+1:limit.find("]")])
-                    elements.append(TrafficSignElement(sign_id, [value]))
-            elif key in self.sign:
-                sign_id = traffic_sign_map[key] #.value
-                value = self.sign[key]
+        # extract traffic sign values
+
+        # if only maxspeed
+        if 'maxspeed' in self.sign:
+            sign_id = traffic_sign_map['maxspeed']
+            value = int(self.sign['maxspeed'])
+            elements.append(TrafficSignElement(sign_id, [value]))
+
+        # if traffic sign
+        elif 'traffic_sign' in self.sign:
+            key = self.sign['traffic_sign']
+
+            if 'DE:274' in str(key):
+                sign_id = traffic_sign_map['maxspeed']
+                value = int(key[key.find("[")+1:key.find("]")])
+                elements.append(TrafficSignElement(sign_id, [value]))
+
+            elif key in traffic_sign_map:
+
+                sign_id = traffic_sign_map[key]
+                value = 'some traffic sign'
                 elements.append(TrafficSignElement(sign_id, [value]))
 
         virtual = False
