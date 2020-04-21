@@ -349,9 +349,8 @@ def extract_speedlimit(value):
             virtual = True
         else:
             print("unreadable speedlimit: '{}'".format(value))
-    # convert from km/h to m/s
+    
     if speedlimit is not None:
-        speedlimit /= 3.6
         virtual = True
 
     return speedlimit, virtual
@@ -427,7 +426,7 @@ def get_graph_traffic_signs(nodes: Dict, roads: Dict, traffic_signs: List):
             roads = traffic_sign['road_id']
             for road_id in roads:
                 graph_traffic_sign.edges.append(roads[road_id])
-                
+
         graph_traffic_signs.append(graph_traffic_sign)
 
     return graph_traffic_signs

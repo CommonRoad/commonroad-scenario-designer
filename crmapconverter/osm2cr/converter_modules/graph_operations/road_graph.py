@@ -724,14 +724,14 @@ class GraphTrafficSign:
         position = None
         values = []
 
-
+        """
         print(self.sign)
-
         if self.node is not None:
                 print('has node')
         for edge in self.edges:
             for sub_edge in edge:
                 print('has edge')
+        """
         traffic_sign_map = {
             'maxspeed': TrafficSignIDGermany.MAX_SPEED,
             'overtaking': TrafficSignIDGermany.NO_OVERTAKING_START,
@@ -761,7 +761,7 @@ class GraphTrafficSign:
 
             elif key in traffic_sign_map:
                 sign_id = traffic_sign_map[key]
-                value = 'some traffic sign'
+                value = ' ' # TODO add specific values for some traffic signs
                 elements.append(TrafficSignElement(sign_id, [value]))
 
         # determine if virtual
@@ -771,7 +771,6 @@ class GraphTrafficSign:
                 virtual = False
             else:
                 virtual = self.sign['virtual']
-
 
         first_occurrence = set()
         """
