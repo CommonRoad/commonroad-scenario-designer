@@ -724,6 +724,8 @@ class GraphTrafficSign:
         position = None
         values = []
 
+        # map OSM sign to country sign
+        # TODO Currently only Germany supported. Add more locations.
         traffic_sign_map = {
             'maxspeed': TrafficSignIDGermany.MAX_SPEED,
             'overtaking': TrafficSignIDGermany.NO_OVERTAKING_START,
@@ -732,6 +734,7 @@ class GraphTrafficSign:
             'stop': TrafficSignIDGermany.STOP,
         }
 
+        # get position
         if self.node is not None:
             position_point = self.node.get_cooridnates()
 
@@ -748,8 +751,10 @@ class GraphTrafficSign:
 
             if 'DE:274' in str(key):
                 sign_id = traffic_sign_map['maxspeed']
-                value = key[key.find("[")+1:key.find("]")]
-                elements.append(TrafficSignElement(sign_id, [value]))
+                max_speed = float(key[key.find("[")+1:key.find("]")])
+                # convert km/h to m/s
+                max_speed /= 3.6
+                elements.append(TrafficSignElement(sign_id, [max_speed]))
 
             elif key in traffic_sign_map:
                 sign_id = traffic_sign_map[key]
@@ -764,8 +769,8 @@ class GraphTrafficSign:
             else:
                 virtual = self.sign['virtual']
 
-        first_occurrence = set()
         # TODO Maybe improve this
+        first_occurrence = set()
 
         return TrafficSign(
             traffic_sign_id=self.id,
