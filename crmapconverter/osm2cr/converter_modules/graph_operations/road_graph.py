@@ -741,11 +741,9 @@ class GraphTrafficSign:
         }
 
         if self.node is not None:
-            position_point = self.node.get_point()
-            position = np.array([position_point.x, position_point.y])
+            position_point = self.node.get_cooridnates()
 
         # extract traffic sign values
-
         # if only maxspeed
         if 'maxspeed' in self.sign:
             sign_id = traffic_sign_map['maxspeed']
@@ -770,14 +768,14 @@ class GraphTrafficSign:
         virtual = False
         if 'virtual' in self.sign:
             if not self.sign['virtual']:
-                virtual = True # especially for town signs nice
+                virtual = False
             else:
                 virtual = self.sign['virtual']
 
 
         first_occurrence = set()
         """
-        #FIRST OCCURRENCE
+        #FIRST OCCURRENCE implementation idea
         if self.node is None:
             print("edge there")
             print(self.edges)
