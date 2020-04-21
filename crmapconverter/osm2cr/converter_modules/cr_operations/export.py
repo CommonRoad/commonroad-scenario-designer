@@ -154,7 +154,13 @@ def export(
     # convert via intermediate format
     intermediate_format = IntermediateFormat.extract_from_road_graph(graph)
     scenario = intermediate_format.to_commonroad_scenario()
+
+    # removing converting errors before writing to xml
     sanitize(scenario)
+
+    # writing everything to XML
+    print("writing scenario to XML file")
+
     if config.EXPORT_IN_UTM:
         convert_coordinates_to_utm(scenario, graph.center_point)
     problemset = intermediate_format.get_dummy_planning_problem_set()

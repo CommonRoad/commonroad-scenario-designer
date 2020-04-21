@@ -724,14 +724,6 @@ class GraphTrafficSign:
         position = None
         values = []
 
-        """
-        print(self.sign)
-        if self.node is not None:
-                print('has node')
-        for edge in self.edges:
-            for sub_edge in edge:
-                print('has edge')
-        """
         traffic_sign_map = {
             'maxspeed': TrafficSignIDGermany.MAX_SPEED,
             'overtaking': TrafficSignIDGermany.NO_OVERTAKING_START,
@@ -747,7 +739,7 @@ class GraphTrafficSign:
         # if only maxspeed
         if 'maxspeed' in self.sign:
             sign_id = traffic_sign_map['maxspeed']
-            value = int(self.sign['maxspeed'])
+            value = self.sign['maxspeed']
             elements.append(TrafficSignElement(sign_id, [value]))
 
         # if traffic sign
@@ -756,7 +748,7 @@ class GraphTrafficSign:
 
             if 'DE:274' in str(key):
                 sign_id = traffic_sign_map['maxspeed']
-                value = int(key[key.find("[")+1:key.find("]")])
+                value = key[key.find("[")+1:key.find("]")]
                 elements.append(TrafficSignElement(sign_id, [value]))
 
             elif key in traffic_sign_map:
@@ -773,23 +765,8 @@ class GraphTrafficSign:
                 virtual = self.sign['virtual']
 
         first_occurrence = set()
-        """
-        #FIRST OCCURRENCE implementation idea
-        if self.node is None:
-            print("edge there")
-            print(self.edges)
-            if str(self.edges) != '[set()]':
-                lane_edges = self.edges[0]
-                print(lane_edges)
-                for e in lane_edges:
-                    first_occurrence.add(e.id)
-            else:
-                print("only empty set")
-        else:
-            print("node")
-            #first_occurrence = self.node
-        print(first_occurrence)
-        """
+        # TODO Maybe improve this
+
         return TrafficSign(
             traffic_sign_id=self.id,
             traffic_sign_elements=elements,

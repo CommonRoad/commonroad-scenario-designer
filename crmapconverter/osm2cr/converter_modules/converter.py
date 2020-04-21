@@ -101,7 +101,7 @@ class Scenario:
         )
         print("adjust common bound points")
         g.correct_start_end_points()
-        print("done")
+        print("done converting")
         return g
 
     def plot(self):
@@ -123,7 +123,6 @@ class Scenario:
         :param filename: file name for scenario generation tool
         :return: None
         """
-        print("writing scenario to XML file")
         if filename is not None:
             export.export(self.graph, filename)
         else:

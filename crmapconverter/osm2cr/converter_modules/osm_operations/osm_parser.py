@@ -349,8 +349,10 @@ def extract_speedlimit(value):
             virtual = True
         else:
             print("unreadable speedlimit: '{}'".format(value))
-    
+
+    # convert from km/h to m/s
     if speedlimit is not None:
+        speedlimit /= 3.6
         virtual = True
 
     return speedlimit, virtual
