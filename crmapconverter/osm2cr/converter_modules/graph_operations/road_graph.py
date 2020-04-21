@@ -732,6 +732,7 @@ class GraphTrafficSign:
             'city_limit': TrafficSignIDGermany.TOWN_SIGN,
             'give_way': TrafficSignIDGermany.YIELD,
             'stop': TrafficSignIDGermany.STOP,
+            'unknown': TrafficSignIDGermany.UNKNOWN
         }
 
         # get position
@@ -739,7 +740,7 @@ class GraphTrafficSign:
             position_point = self.node.get_cooridnates()
 
         # extract traffic sign values
-        # if only maxspeed
+        # maxspeed
         if 'maxspeed' in self.sign:
             sign_id = traffic_sign_map['maxspeed']
             value = self.sign['maxspeed']
@@ -749,6 +750,7 @@ class GraphTrafficSign:
         elif 'traffic_sign' in self.sign:
             key = self.sign['traffic_sign']
 
+            # speed limit
             if 'DE:274' in str(key):
                 sign_id = traffic_sign_map['maxspeed']
                 max_speed = float(key[key.find("[")+1:key.find("]")])
@@ -756,9 +758,16 @@ class GraphTrafficSign:
                 max_speed /= 3.6
                 elements.append(TrafficSignElement(sign_id, [max_speed]))
 
+            # regular traffic sign
             elif key in traffic_sign_map:
                 sign_id = traffic_sign_map[key]
                 value = ' ' # TODO add specific values for some traffic signs
+                elements.append(TrafficSignElement(sign_id, [value]))
+
+            # unknown traffic sign
+            else:
+                sign_id = traffic_sign_map['unknown']
+                value = 'unknown sign'
                 elements.append(TrafficSignElement(sign_id, [value]))
 
         # determine if virtual
