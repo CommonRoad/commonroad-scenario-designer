@@ -17,7 +17,7 @@ scenario = converter.Scenario(
 )
 
 # draw and show the scenario
-#scenario.plot()
+scenario.plot()
 
 # save the scenario as commonroad file
 scenario.save_as_cr(config.SAVE_PATH + config.BENCHMARK_ID + ".xml")
@@ -26,4 +26,3 @@ scenario.save_to_file(config.SAVE_PATH + config.BENCHMARK_ID + ".pickle")
 
 # view the generated
 ex.view_xml(config.SAVE_PATH + config.BENCHMARK_ID + ".xml")
-
