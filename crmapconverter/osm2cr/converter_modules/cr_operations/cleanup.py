@@ -23,7 +23,7 @@ def sanitize(scenario: Scenario) -> None:
     # comvert to left hand driving scenario if necessary
     convert_to_lht(scenario)
 
-def remove_non_referenced_signs(scenario: Scenario):
+def remove_non_referenced_signs(scenario: Scenario) -> None:
     """
     Removes non referenced traffic signs from scenario.
 
@@ -160,7 +160,7 @@ def merge_lanelets(lanelet1: Lanelet, lanelet2: Lanelet) -> Lanelet:
     return create_lanelet(suc, left_vertices, right_vertices, center_vertices, predecessor=predecessor, successor=successor, traffic_signs=traffic_signs, traffic_lights=traffic_lights)
 
 
-def smoothen_scenario(scenario: Scenario):
+def smoothen_scenario(scenario: Scenario) -> None:
     """
     Smoothens every lanelet in an scenario
 
@@ -308,7 +308,7 @@ def rht_to_lht(scenario: Scenario) -> None:
 
 
 def create_lanelet(l, left_vertices, right_vertices, center_vertices, predecessor=None, successor=None,
-    adjacent_right=None, adjacent_left=None, adjacent_right_same_direction=None, adjacent_left_same_direction=None, traffic_signs=None, traffic_lights=None):
+    adjacent_right=None, adjacent_left=None, adjacent_right_same_direction=None, adjacent_left_same_direction=None, traffic_signs=None, traffic_lights=None) -> Lanelet:
     """
     Create a new lanelet given an old one. Vertices, successors and predecessors can be modified
 

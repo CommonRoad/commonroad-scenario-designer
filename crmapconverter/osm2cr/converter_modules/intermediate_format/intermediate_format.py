@@ -474,7 +474,6 @@ class IntermediateFormat:
         :return: Dummy planning problem set
         """
         pp_id = idgenerator.get_id()
-        print(pp_id)
         rectangle = Rectangle(4.3, 8.9, center=np.array([0.1, 0.5]), orientation=1.7)
         circ = Circle(2.0, np.array([0.0, 0.0]))
         goal_region = GoalRegion([State(time_step=Interval(0, 1), velocity=Interval(0.0, 1), position=rectangle),
