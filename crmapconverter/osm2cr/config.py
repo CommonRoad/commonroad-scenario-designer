@@ -180,34 +180,17 @@ RECOGNIZED_TURNLANES = [
     "none",
 ]
 
+# values to search for in OSM
 TRAFFIC_SIGN_VALUES = [
     "traffic_signals",
     "stop",
     "give_way",
     "city_limit",
 ]
+# keys to search for in OSM
 TRAFFIC_SIGN_KEYS = [
     "traffic_sign",
     "overtaking",
     "traffic_signals:direction",
     "maxspeed",
 ]
-
-
-@enum.unique
-class TrafficSignID(enum.Enum):
-    MAXSPEED = '274'
-    OVERTAKING = '276'
-    CITYLIMIT = '310'
-    GIVEWAY = '205'
-    STOP = '206'
-    UNKNOWN = ''
-
-
-TRAFFIC_SIGN_MAP = {
-    'maxspeed': TrafficSignID.MAXSPEED,
-    'overtaking': TrafficSignID.OVERTAKING,
-    'city_limit': TrafficSignID.CITYLIMIT,
-    'give_way': TrafficSignID.GIVEWAY,
-    'stop': TrafficSignID.STOP,
-}
