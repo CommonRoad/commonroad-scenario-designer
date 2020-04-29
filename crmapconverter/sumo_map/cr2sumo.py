@@ -143,7 +143,7 @@ class CR2SumoMapConverter:
                 # if tempx == node_x and tempy == node_y:
                 for node in start_node_list:
                     # if (temp_coord == node).all():
-                    if np.max(np.abs((temp_coord - node))) <= (lanelet_width + 0.8):
+                    if np.max(np.abs((temp_coord - node))) <= (lanelet_width + 1.0):
                         toAdd = False
                         nodeA = node_temp
                         break
@@ -162,7 +162,7 @@ class CR2SumoMapConverter:
                 tempy = temp_coord[1]
                 temp_coord = np.array([tempx,tempy])
                 for node in end_node_list:
-                    if np.max(np.abs((temp_coord - node))) <= (lanelet_width + 0.8):
+                    if np.max(np.abs((temp_coord - node))) <= (lanelet_width + 1.0):
                         toAdd = False
                         nodeB = node_temp
                         break
