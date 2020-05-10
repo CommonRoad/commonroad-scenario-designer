@@ -61,7 +61,7 @@ def parse_arguments():
         action="store_true",
         help="set to true if map describes a left driving system (e.g. in Great Britain)",
     )
-    args = parser.parse_args()
+    args = parser.parse_args(["/home/niels/git/ind_to_commonroad/inD_LaneletMaps/osm_tinkered_trafficsigns/aseag.osm"])
     return args
 
 
@@ -142,3 +142,5 @@ def commonroad_to_osm(args, output_name: str):
                 osm, xml_declaration=True, encoding="UTF-8", pretty_print=True
             )
         )
+if __name__ == '__main__':
+    main()

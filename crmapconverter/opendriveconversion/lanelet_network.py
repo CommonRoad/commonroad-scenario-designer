@@ -127,6 +127,7 @@ class ConversionLaneletNetwork(LaneletNetwork):
                 )
             self.add_lanelet(lanelet)
 
+
     def prune_network(self):
         """Remove references in predecessor, successor etc. to
         non existing lanelets.

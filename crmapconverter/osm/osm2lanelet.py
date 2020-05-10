@@ -15,11 +15,12 @@ from typing import List, Tuple
 
 import numpy as np
 from pyproj import Proj
-from commonroad.scenario.scenario import Scenario
+from commonroad.scenario.scenario import Scenario, TrafficSign
+from commonroad.scenario.traffic_sign import TrafficSignIDGermany, TrafficSignElement
 
 from crmapconverter.opendriveconversion.lanelet import ConversionLanelet
 from crmapconverter.opendriveconversion.lanelet_network import ConversionLaneletNetwork
-from crmapconverter.osm.osm import OSM, WayRelation, DEFAULT_PROJ_STRING, Node
+from crmapconverter.osm.osm import OSM, WayRelation, DEFAULT_PROJ_STRING, Node, RightOfWayRelation
 
 NODE_DISTANCE_TOLERANCE = 0.01  # this is in meters
 
@@ -79,10 +80,27 @@ class OSM2LConverter:
             if lanelet is not None:
                 self.lanelet_network.add_lanelet(lanelet)
 
+        for right_of_way_rel in osm.right_of_way_relations:
+            # TODO convert Lanelet2 to CR and add to network
+            traffic_sign, stop_line = self._right_of_way_to_traffic_sign(right_of_way_rel)
+
+        # TODO convert traffic signs as well
         self.lanelet_network.convert_all_lanelet_ids()
         scenario.add_objects(self.lanelet_network)
 
         return scenario
+
+    def _right_of_way_to_traffic_sign(self, right_of_way_rel: RightOfWayRelation):
+
+        # TODO distinguish right of way and stop sign
+        tsid = TrafficSignIDGermany.STOP if right_of_way_rel.tag_dict["subtype"] == "de206" else TrafficSignIDGermany.RIGHT_OF_WAY
+        traffic_sign_element = TrafficSignElement(tsid, [])
+        traffic_sign = TrafficSign(right_of_way_rel.id_, [traffic_sign_element], )
+
+        stop_line = None
+        if right_of_way_rel.ref_line is not None:
+            stop_line = self.osm.find_way_by_id(right_of_way_rel.ref_line)
+        return traffic_sign, stop_line
 
     def _way_rel_to_lanelet(
         self,
