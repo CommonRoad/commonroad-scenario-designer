@@ -231,13 +231,18 @@ class OSM2LConverter:
             lanelet_types.add(LaneletType.CROSSWALK)
         if subtype == "bicycle_lane" or subtype == "shared_walkway" or subtype == "road":
             users_one_way.add(RoadUser.BICYCLE)
-            lanelet_types.add(LaneletType.BIKE_LANE)
+            if subtype != "road":
+                lanelet_types.add(LaneletType.BIKE_LANE)
         if subtype == "bus_lane":
             users_one_way.add(RoadUser.BUS)
             lanelet_types.add(LaneletType.BUS_LANE)
         if subtype == "road" or subtype == "highway":
-            users_one_way.add(RoadUser.CAR)
-            users_one_way.add(RoadUser.MOTORCYCLE)
+            if bidirectional:
+                users_bidirectional.add(RoadUser.CAR)
+                users_bidirectional.add(RoadUser.MOTORCYCLE)
+            else:
+                users_one_way.add(RoadUser.CAR)
+                users_one_way.add(RoadUser.MOTORCYCLE)
             location_val = way_rel.tag_dict.get("location")
             if subtype == "highway":
                 lanelet_types.add(LaneletType.HIGHWAY)
