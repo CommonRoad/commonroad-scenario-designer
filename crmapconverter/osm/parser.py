@@ -68,7 +68,7 @@ class OSMParser:
                     traffic_sign = right_of_way_rel.xpath("./member[@role='refers']/@ref")[0]
                     # Reference line is optional
                     # defaults to last line of yield lanelets
-                    tag_dict = {tag.get("k"): tag.get("v") for tag in way.xpath("./tag[@k and @v]")
+                    tag_dict = {tag.get("k"): tag.get("v") for tag in right_of_way_rel.xpath("./tag[@k and @v]")
                                 if tag.get("k") in ALLOWED_TAGS}
                     ref_line = None
                     try:

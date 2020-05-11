@@ -126,6 +126,7 @@ class ConversionLaneletNetwork(LaneletNetwork):
                     lanelet.adj_right, new_lanelet_ids_assigned
                 )
             self.add_lanelet(lanelet)
+        return new_lanelet_ids_assigned
 
 
     def prune_network(self):

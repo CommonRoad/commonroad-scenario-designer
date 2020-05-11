@@ -16,10 +16,11 @@ from typing import List, Tuple
 import numpy as np
 from pyproj import Proj
 from commonroad.scenario.scenario import Scenario, TrafficSign
+from commonroad.scenario.lanelet import StopLine, LineMarking
 from commonroad.scenario.traffic_sign import TrafficSignIDGermany, TrafficSignElement
 
 from crmapconverter.opendriveconversion.lanelet import ConversionLanelet
-from crmapconverter.opendriveconversion.lanelet_network import ConversionLaneletNetwork
+from crmapconverter.opendriveconversion.lanelet_network import ConversionLaneletNetwork, convert_to_new_lanelet_id
 from crmapconverter.osm.osm import OSM, WayRelation, DEFAULT_PROJ_STRING, Node, RightOfWayRelation
 
 NODE_DISTANCE_TOLERANCE = 0.01  # this is in meters
@@ -73,34 +74,69 @@ class OSM2LConverter:
         scenario = Scenario(dt=0.1, benchmark_id="none")
         self.lanelet_network = ConversionLaneletNetwork()
 
-        for way_rel in osm.way_relations:
+        for way_rel in osm.way_relations.values():
             lanelet = self._way_rel_to_lanelet(
                 way_rel, detect_adjacencies, left_driving_system
             )
             if lanelet is not None:
                 self.lanelet_network.add_lanelet(lanelet)
 
-        for right_of_way_rel in osm.right_of_way_relations:
+        new_ids = self.lanelet_network.convert_all_lanelet_ids()
+
+        for right_of_way_rel in osm.right_of_way_relations.values():
             # TODO convert Lanelet2 to CR and add to network
-            traffic_sign, stop_line = self._right_of_way_to_traffic_sign(right_of_way_rel)
+            traffic_sign, stop_line, yieldlets = self._right_of_way_to_traffic_sign(right_of_way_rel, new_ids)
+            self.lanelet_network.add_traffic_sign(traffic_sign=traffic_sign, lanelet_ids=set(yieldlets))
+            for yieldlet in yieldlets:
+                l = self.lanelet_network.find_lanelet_by_id(yieldlet)
+                l.stop_line = stop_line
 
         # TODO convert traffic signs as well
-        self.lanelet_network.convert_all_lanelet_ids()
         scenario.add_objects(self.lanelet_network)
 
         return scenario
 
-    def _right_of_way_to_traffic_sign(self, right_of_way_rel: RightOfWayRelation):
+    def _right_of_way_to_traffic_sign(self, right_of_way_rel: RightOfWayRelation, new_lanelet_ids: dict):
 
-        # TODO distinguish right of way and stop sign
+        # distinguish right of way and stop sign
+        # todo internationalize
         tsid = TrafficSignIDGermany.STOP if right_of_way_rel.tag_dict["subtype"] == "de206" else TrafficSignIDGermany.RIGHT_OF_WAY
         traffic_sign_element = TrafficSignElement(tsid, [])
-        traffic_sign = TrafficSign(right_of_way_rel.id_, [traffic_sign_element], )
+        # extract position
+        traffic_sign_way = self.osm.find_way_by_id(right_of_way_rel.refers)
+        if traffic_sign_way is not None:
+            traffic_sign_node = self.osm.find_node_by_id(traffic_sign_way.nodes[0])
+        else:
+            traffic_sign_node = self.osm.find_node_by_id(right_of_way_rel.refers)
+        x, y = self.proj(float(traffic_sign_node.lon), float(traffic_sign_node.lat))
+
+        virtual = bool(right_of_way_rel.tag_dict.get("virtual"))
+
+        traffic_sign_id = convert_to_new_lanelet_id(right_of_way_rel.id_, new_lanelet_ids)
+        traffic_sign = TrafficSign(traffic_sign_id,
+                                   traffic_sign_elements=[traffic_sign_element],
+                                   first_occurrence={convert_to_new_lanelet_id(right_of_way_rel.yield_ways[0], new_lanelet_ids)},
+                                   position=np.array([x, y]),
+                                   virtual=virtual)
+
+        # hand out the lanelets affected by this yield sign
+        yieldlets = [convert_to_new_lanelet_id(i, new_lanelet_ids) for i in right_of_way_rel.yield_ways]
 
         stop_line = None
         if right_of_way_rel.ref_line is not None:
-            stop_line = self.osm.find_way_by_id(right_of_way_rel.ref_line)
-        return traffic_sign, stop_line
+            stop_line_way = self.osm.find_way_by_id(right_of_way_rel.ref_line)
+            stop_line_way_start = self.osm.find_node_by_id(stop_line_way.nodes[0])
+            start = np.array(tuple(self.proj(float(stop_line_way_start.lon), float(stop_line_way_start.lat))))
+            stop_line_way_end = self.osm.find_node_by_id(stop_line_way.nodes[-1])
+            end = np.array(tuple(self.proj(float(stop_line_way_end.lon), float(stop_line_way_end.lat))))
+            stop_line = StopLine(
+                start=start,
+                end=end,
+                traffic_light_ref=traffic_sign_id,
+                # TODO distinguish linemarking types
+                line_marking=LineMarking.SOLID
+            )
+        return traffic_sign, stop_line, yieldlets
 
     def _way_rel_to_lanelet(
         self,
