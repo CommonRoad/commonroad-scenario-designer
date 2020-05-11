@@ -16,7 +16,7 @@ from typing import List, Tuple
 import numpy as np
 from pyproj import Proj
 from commonroad.scenario.scenario import Scenario, TrafficSign
-from commonroad.scenario.lanelet import StopLine, LineMarking
+from commonroad.scenario.lanelet import StopLine, LineMarking, RoadUser, LaneletType
 from commonroad.scenario.traffic_sign import TrafficSignIDGermany, TrafficSignElement
 
 from crmapconverter.opendriveconversion.lanelet import ConversionLanelet
@@ -210,12 +210,56 @@ class OSM2LConverter:
         center_vertices = np.array(
             [(l + r) / 2 for (l, r) in zip(left_vertices, right_vertices)]
         )
+
+        # extract special meaning like one way, road type
+        lanelet_types = set()
+        users_one_way = set()
+        users_bidirectional = set()
+        one_way_val = way_rel.tag_dict.get("one_way")
+        bidirectional, one_way = one_way_val == "yes", one_way_val == "no"
+        if way_rel.tag_dict.get("bicycle") == "yes":
+            if one_way:
+                users_one_way.add(RoadUser.BICYCLE)
+            else:
+                users_bidirectional.add(RoadUser.BICYCLE)
+        subtype = way_rel.tag_dict.get("subtype")
+        if subtype == "walkway" or subtype == "shared_walkway":
+            users_bidirectional.add(RoadUser.PEDESTRIAN)
+            lanelet_types.add(LaneletType.SIDEWALK)
+        if subtype == "crosswalk":
+            users_bidirectional.add(RoadUser.PEDESTRIAN)
+            lanelet_types.add(LaneletType.CROSSWALK)
+        if subtype == "bicycle_lane" or subtype == "shared_walkway" or subtype == "road":
+            users_one_way.add(RoadUser.BICYCLE)
+            lanelet_types.add(LaneletType.BIKE_LANE)
+        if subtype == "bus_lane":
+            users_one_way.add(RoadUser.BUS)
+            lanelet_types.add(LaneletType.BUS_LANE)
+        if subtype == "road" or subtype == "highway":
+            users_one_way.add(RoadUser.CAR)
+            users_one_way.add(RoadUser.MOTORCYCLE)
+            location_val = way_rel.tag_dict.get("location")
+            if subtype == "highway":
+                lanelet_types.add(LaneletType.HIGHWAY)
+            elif location_val == "nonurban":
+                lanelet_types.add(LaneletType.COUNTRY)
+            else:
+                # todo default because of inD origin
+                lanelet_types.add(LaneletType.URBAN)
+
+        users_bidirectional.add(RoadUser.PRIORITY_VEHICLE)
+
+
+
         lanelet = ConversionLanelet(
             left_vertices=left_vertices,
             center_vertices=center_vertices,
             right_vertices=right_vertices,
             lanelet_id=way_rel.id_,
             parametric_lane_group=None,
+            user_one_way=users_one_way,
+            user_bidirectional=users_bidirectional,
+            lanelet_type=lanelet_types,
         )
 
         self._check_right_and_left_neighbors(way_rel, lanelet)

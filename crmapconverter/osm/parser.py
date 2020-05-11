@@ -17,7 +17,8 @@ ALLOWED_TAGS = {
     "type",
     "subtype",
     "one_way",
-    "virtual"
+    "virtual",
+    "location",
 }
 
 class OSMParser:
