@@ -85,11 +85,15 @@ class OSM2LConverter:
 
         for right_of_way_rel in osm.right_of_way_relations.values():
             # TODO convert Lanelet2 to CR and add to network
-            traffic_sign, stop_line, yieldlets = self._right_of_way_to_traffic_sign(right_of_way_rel, new_ids)
-            self.lanelet_network.add_traffic_sign(traffic_sign=traffic_sign, lanelet_ids=set(yieldlets))
-            for yieldlet in yieldlets:
-                l = self.lanelet_network.find_lanelet_by_id(yieldlet)
-                l.stop_line = stop_line
+            try:
+                traffic_sign, stop_line, audience_lanelets = self._right_of_way_to_traffic_sign(right_of_way_rel, new_ids)
+                self.lanelet_network.add_traffic_sign(traffic_sign=traffic_sign, lanelet_ids=set(audience_lanelets))
+                if stop_line is not None:
+                    for l_id in audience_lanelets:
+                        l = self.lanelet_network.find_lanelet_by_id(l_id)
+                        l.stop_line = stop_line
+            except NotImplementedError as e:
+                print(str(e))
 
         # TODO convert traffic signs as well
         scenario.add_objects(self.lanelet_network)
@@ -98,29 +102,47 @@ class OSM2LConverter:
 
     def _right_of_way_to_traffic_sign(self, right_of_way_rel: RightOfWayRelation, new_lanelet_ids: dict):
 
-        # distinguish right of way and stop sign
+        # distinguish yield and stop sign
+        # also handles right of way and priority road
         # todo internationalize
-        tsid = TrafficSignIDGermany.STOP if right_of_way_rel.tag_dict["subtype"] == "de206" else TrafficSignIDGermany.RIGHT_OF_WAY
+        if right_of_way_rel.tag_dict["subtype"] == "de206":
+            tsid = TrafficSignIDGermany.STOP
+        elif right_of_way_rel.tag_dict["subtype"] == "de205":
+            tsid = TrafficSignIDGermany.YIELD
+        elif right_of_way_rel.tag_dict["subtype"] == "de301":
+            tsid = TrafficSignIDGermany.RIGHT_OF_WAY
+        elif right_of_way_rel.tag_dict["subtype"] == "de306":
+            tsid = TrafficSignIDGermany.PRIORITY
+        elif right_of_way_rel.tag_dict["subtype"] == "de102":
+            tsid = TrafficSignIDGermany.RIGHT_BEFORE_LEFT
+        else:
+            raise NotImplementedError(f"Lanelet type {right_of_way_rel.tag_dict['subtype']} not implemented")
         traffic_sign_element = TrafficSignElement(tsid, [])
         # extract position
         traffic_sign_way = self.osm.find_way_by_id(right_of_way_rel.refers)
         if traffic_sign_way is not None:
+            virtual = bool(traffic_sign_way.tag_dict.get("virtual"))
             traffic_sign_node = self.osm.find_node_by_id(traffic_sign_way.nodes[0])
         else:
             traffic_sign_node = self.osm.find_node_by_id(right_of_way_rel.refers)
+            virtual = bool(traffic_sign_node.tag_dict.get("virtual"))
         x, y = self.proj(float(traffic_sign_node.lon), float(traffic_sign_node.lat))
 
-        virtual = bool(right_of_way_rel.tag_dict.get("virtual"))
+        # decide whether this sign is directed at yielding or prioritized lanelets
+        if tsid in [TrafficSignIDGermany.RIGHT_BEFORE_LEFT, TrafficSignIDGermany.PRIORITY, TrafficSignIDGermany.RIGHT_OF_WAY]:
+            audience_lanelet_ids = right_of_way_rel.right_of_ways
+        else:
+            audience_lanelet_ids = right_of_way_rel.yield_ways
 
         traffic_sign_id = convert_to_new_lanelet_id(right_of_way_rel.id_, new_lanelet_ids)
         traffic_sign = TrafficSign(traffic_sign_id,
                                    traffic_sign_elements=[traffic_sign_element],
-                                   first_occurrence={convert_to_new_lanelet_id(right_of_way_rel.yield_ways[0], new_lanelet_ids)},
+                                   first_occurrence={convert_to_new_lanelet_id(audience_lanelet_ids[0], new_lanelet_ids)},
                                    position=np.array([x, y]),
                                    virtual=virtual)
 
         # hand out the lanelets affected by this yield sign
-        yieldlets = [convert_to_new_lanelet_id(i, new_lanelet_ids) for i in right_of_way_rel.yield_ways]
+        audience_lanelets = [convert_to_new_lanelet_id(i, new_lanelet_ids) for i in audience_lanelet_ids]
 
         stop_line = None
         if right_of_way_rel.ref_line is not None:
@@ -136,7 +158,7 @@ class OSM2LConverter:
                 # TODO distinguish linemarking types
                 line_marking=LineMarking.SOLID
             )
-        return traffic_sign, stop_line, yieldlets
+        return traffic_sign, stop_line, audience_lanelets
 
     def _way_rel_to_lanelet(
         self,
