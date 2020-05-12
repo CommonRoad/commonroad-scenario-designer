@@ -101,31 +101,48 @@ class OSM2LConverter:
         return scenario
 
     def _right_of_way_to_traffic_sign(self, right_of_way_rel: RightOfWayRelation, new_lanelet_ids: dict):
+        """
+        one right_of_way regulatory element maps pretty well into commonroad scenarios
+        it contains
+         - a set of traffic signs active at the intersection (generally stop, yield, priority, ...)
+         - a set of last lanelets before the beginning of the intersection that have
+          - to yield
+          - the right of way
+         - a set of stop lines where vehicles crossing the yield line have to stop at
+
+        This will be converted as follows:
+         - the set of traffic signs is converted to a number of traffic signs
+           - yield lanelet get assigned the yield traffic sign closest to them
+           - right of way lanelets get assigned the priority traffic sign closest to them
+         - the stop lines are converted to stop lines
+           - they are assigned to the lanelets that overlap with the stop line
+         - TODO remainder? change following code accordingly
+        """
+
+        traffic_sign_way = self.osm.find_way_by_id(right_of_way_rel.refers)
+        # traffic signs will always be "ways"
+        # https://github.com/fzi-forschungszentrum-informatik/Lanelet2/blob/master/lanelet2_core/doc/LinestringTagging.md
+        traffic_sign_type = traffic_sign_way.tag_dict.get("subtype")
+        virtual = bool(traffic_sign_way.tag_dict.get("virtual"))
+        traffic_sign_node = self.osm.find_node_by_id(traffic_sign_way.nodes[0])
 
         # distinguish yield and stop sign
         # also handles right of way and priority road
         # todo internationalize
-        if right_of_way_rel.tag_dict["subtype"] == "de206":
+        if traffic_sign_type == "de206":
             tsid = TrafficSignIDGermany.STOP
-        elif right_of_way_rel.tag_dict["subtype"] == "de205":
+        elif traffic_sign_type == "de205":
             tsid = TrafficSignIDGermany.YIELD
-        elif right_of_way_rel.tag_dict["subtype"] == "de301":
+        elif traffic_sign_type == "de301":
             tsid = TrafficSignIDGermany.RIGHT_OF_WAY
-        elif right_of_way_rel.tag_dict["subtype"] == "de306":
+        elif traffic_sign_type == "de306":
             tsid = TrafficSignIDGermany.PRIORITY
-        elif right_of_way_rel.tag_dict["subtype"] == "de102":
+        elif traffic_sign_type == "de102":
             tsid = TrafficSignIDGermany.RIGHT_BEFORE_LEFT
         else:
             raise NotImplementedError(f"Lanelet type {right_of_way_rel.tag_dict['subtype']} not implemented")
         traffic_sign_element = TrafficSignElement(tsid, [])
         # extract position
-        traffic_sign_way = self.osm.find_way_by_id(right_of_way_rel.refers)
-        if traffic_sign_way is not None:
-            virtual = bool(traffic_sign_way.tag_dict.get("virtual"))
-            traffic_sign_node = self.osm.find_node_by_id(traffic_sign_way.nodes[0])
-        else:
-            traffic_sign_node = self.osm.find_node_by_id(right_of_way_rel.refers)
-            virtual = bool(traffic_sign_node.tag_dict.get("virtual"))
         x, y = self.proj(float(traffic_sign_node.lon), float(traffic_sign_node.lat))
 
         # decide whether this sign is directed at yielding or prioritized lanelets
