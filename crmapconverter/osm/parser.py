@@ -66,18 +66,14 @@ class OSMParser:
                 try:
                     yield_lanelets = right_of_way_rel.xpath("./member[@role='yield']/@ref")
                     right_of_way_lanelets = right_of_way_rel.xpath("./member[@role='right_of_way']/@ref")
-                    traffic_sign = right_of_way_rel.xpath("./member[@role='refers']/@ref")[0]
+                    traffic_signs = right_of_way_rel.xpath("./member[@role='refers']/@ref")
                     # Reference line is optional
                     # defaults to last line of yield lanelets
                     tag_dict = {tag.get("k"): tag.get("v") for tag in right_of_way_rel.xpath("./tag[@k and @v]")
                                 if tag.get("k") in ALLOWED_TAGS}
-                    ref_line = None
-                    try:
-                        ref_line = right_of_way_rel.xpath("./member[@role='ref_line']/@ref")[0]
-                    except IndexError:
-                        pass
+                    ref_lines = right_of_way_rel.xpath("./member[@role='ref_line']/@ref")
                     osm.add_right_of_way_relation(
-                        RightOfWayRelation(right_of_way_rel.get("id"), traffic_sign, yield_lanelets, right_of_way_lanelets, tag_dict, ref_line)
+                        RightOfWayRelation(right_of_way_rel.get("id"), traffic_signs, yield_lanelets, right_of_way_lanelets, tag_dict, ref_lines)
                     )
                 except IndexError:
                     print(

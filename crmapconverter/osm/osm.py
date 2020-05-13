@@ -92,12 +92,12 @@ class WayRelation:
 class RightOfWayRelation:
     """Relation for a right of way relation with yield and right of way lines."""
 
-    def __init__(self, id_, refers, yield_ways: list, right_of_ways: list, tag_dict: dict, ref_line=None):
+    def __init__(self, id_, refers: list, yield_ways: list, right_of_ways: list, tag_dict: dict, ref_line=[]):
         self.id_ = str(id_)
-        self.refers = refers
+        self.refers = [str(i) for i in refers]
         self.yield_ways = [str(i) for i in yield_ways]
         self.right_of_ways = [str(i) for i in right_of_ways]
-        self.ref_line = str(ref_line) if ref_line is not None else None
+        self.ref_line = [str(i) for i in ref_line]
         self.tag_dict = tag_dict
 
     def serialize_to_xml(self) -> etree.Element:
@@ -105,10 +105,11 @@ class RightOfWayRelation:
         rel.set("id", self.id_)
         rel.set("action", "modify")
         rel.set("visible", "true")
-        right_way = etree.SubElement(rel, "member")
-        right_way.set("type", "way")
-        right_way.set("ref", self.refers)
-        right_way.set("role", "refers")
+        for r in self.refers:
+            right_way = etree.SubElement(rel, "member")
+            right_way.set("type", "way")
+            right_way.set("ref", r)
+            right_way.set("role", "refers")
         for y in self.yield_ways:
             right_way = etree.SubElement(rel, "member")
             right_way.set("type", "relation")
@@ -119,10 +120,10 @@ class RightOfWayRelation:
             right_way.set("type", "relation")
             right_way.set("ref", r)
             right_way.set("role", "right_of_way")
-        if self.ref_line is not None:
+        for r in self.ref_line:
             right_way = etree.SubElement(rel, "member")
             right_way.set("type", "way")
-            right_way.set("ref", self.ref_line)
+            right_way.set("ref", r)
             right_way.set("role", "ref_line")
         for tag_key, tag_value in self.tag_dict.values():
             xml_node = etree.SubElement(rel, "tag")
