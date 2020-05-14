@@ -835,7 +835,7 @@ class CR2SumoMapConverter:
                       "--no-turnarounds=true " \
                       "--junctions.internal-link-detail=20 "\
                       "--geometry.avoid-overlap=true "\
-                      "--offset.disable-normalization=false " \
+                      "--offset.disable-normalization=true " \
                       "--node-files=" + str(nodesFile) + \
                       " --edge-files=" + str(edgesFile) + \
                       " --connection-files=" + str(connectionsFile) + \
