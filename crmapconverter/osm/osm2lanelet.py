@@ -175,7 +175,7 @@ class OSM2LConverter:
         # https://github.com/fzi-forschungszentrum-informatik/Lanelet2/blob/master/lanelet2_core/doc/LinestringTagging.md
         for traffic_sign_way in traffic_sign_ways:
             traffic_sign_type = traffic_sign_way.tag_dict.get("subtype")
-            virtual = bool(traffic_sign_way.tag_dict.get("virtual"))
+            virtual = traffic_sign_way.tag_dict.get("virtual", "no") == "yes"
             traffic_sign_node = self.osm.find_node_by_id(traffic_sign_way.nodes[0])
 
             # distinguish yield and stop sign
@@ -192,13 +192,13 @@ class OSM2LConverter:
             elif traffic_sign_type == "de102":
                 tsid = TrafficSignIDGermany.RIGHT_BEFORE_LEFT
             else:
-                raise NotImplementedError(f"Lanelet type {right_of_way_rel.tag_dict['subtype']} not implemented")
+                raise NotImplementedError(f"Lanelet type {traffic_sign_way.tag_dict['subtype']} not implemented")
             traffic_sign_element = TrafficSignElement(tsid, [])
 
             # extract position
             x, y = self.proj(float(traffic_sign_node.lon), float(traffic_sign_node.lat))
 
-            ref_t_id = convert_to_new_lanelet_id(right_of_way_rel.id_, new_lanelet_ids)
+            ref_t_id = convert_to_new_lanelet_id(traffic_sign_way.id_, new_lanelet_ids)
             traffic_sign = TrafficSign(ref_t_id,
                                        traffic_sign_elements=[traffic_sign_element],
                                        first_occurrence=set(),
@@ -216,10 +216,9 @@ class OSM2LConverter:
         for stop_line in right_of_way_rel.ref_line:
             # extract geometrical features
             stop_line_way = self.osm.find_way_by_id(stop_line)
-            stop_line_way_start = self.osm.find_node_by_id(stop_line_way.nodes[0])
-            start = np.array(tuple(self.proj(float(stop_line_way_start.lon), float(stop_line_way_start.lat))))
-            stop_line_way_end = self.osm.find_node_by_id(stop_line_way.nodes[-1])
-            end = np.array(tuple(self.proj(float(stop_line_way_end.lon), float(stop_line_way_end.lat))))
+            stop_line_way_vertices = self._convert_way_to_vertices(stop_line_way)
+            start = stop_line_way_vertices[0]
+            end = stop_line_way_vertices[-1]
 
             # retrieve closest yield traffic sign if any
             ref_t_id = None
