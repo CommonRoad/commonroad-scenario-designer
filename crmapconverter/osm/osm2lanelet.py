@@ -40,8 +40,9 @@ def _add_closest_traffic_sign_to_lanelet(lanelets: List[Lanelet], traffic_signs:
     Assumes that it is given traffic signs and lanelets that should get matched (all to each)
     Each lanelet gets assigned exactly the single traffic sign closest to it
     Does nothing if the list of traffic signs is empty
-    :return:
+    :return: the traffic signs that were assigned to any lanelet
     """
+    used_signs = set()
     for l in lanelets:
         closest_traffic_sign = None
         _min_distance = None
@@ -52,6 +53,8 @@ def _add_closest_traffic_sign_to_lanelet(lanelets: List[Lanelet], traffic_signs:
                 closest_traffic_sign = t
         if closest_traffic_sign is not None:
             l.add_traffic_sign_to_lanelet(closest_traffic_sign.traffic_sign_id)
+            used_signs.add(closest_traffic_sign)
+    return used_signs
 
 
 def _add_stop_line_to_lanelet(lanelets: List[Lanelet], stop_lines: List[StopLine]):
@@ -133,9 +136,10 @@ class OSM2LConverter:
                 # match stop lines on the yield lanelets
                 _add_stop_line_to_lanelet([self.lanelet_network.find_lanelet_by_id(i) for i in yield_lanelets], stop_lines)
                 # match traffic signs on the matching lanelets
-                _add_closest_traffic_sign_to_lanelet([self.lanelet_network.find_lanelet_by_id(i) for i in yield_lanelets], yield_signs)
-                _add_closest_traffic_sign_to_lanelet([self.lanelet_network.find_lanelet_by_id(i) for i in priority_lanelets], priority_signs)
-                for s in priority_signs + yield_signs:
+                # the overwrite makes sure we only add traffic signs in the network that are assigned to any lanelet
+                yield_signs = _add_closest_traffic_sign_to_lanelet([self.lanelet_network.find_lanelet_by_id(i) for i in yield_lanelets], yield_signs)
+                priority_signs = _add_closest_traffic_sign_to_lanelet([self.lanelet_network.find_lanelet_by_id(i) for i in priority_lanelets], priority_signs)
+                for s in priority_signs.union(yield_signs):
                     self.lanelet_network.add_traffic_sign(s, set())
             except NotImplementedError as e:
                 print(str(e))
