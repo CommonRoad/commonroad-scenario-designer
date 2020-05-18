@@ -1,6 +1,6 @@
-# -*- coding: utf-8 -*-
+"""This module controls the launch of the former GUI and its functionalities"""
 
-"""Module to execute the Qt Program for a GUI conversion."""
+#Updated by Rayane Zaibet
 
 import os
 import signal
@@ -146,7 +146,7 @@ class MainWindow(QWidget):
         commonroad_viewer_widget = ViewerWidget(self)
         viewer.setCentralWidget(commonroad_viewer_widget)
         viewer.show()
-        commonroad_viewer_widget.openCommonRoadFile()
+        #commonroad_viewer_widget.openCommonRoadFile()
 
     def osm_cr_lanelets_menu(self):
         """Open the menu for the lanelet conversion between OSM and CR"""
@@ -345,7 +345,9 @@ class OSMLaneletsConvertWindow(QWidget):
 
 
 class OpenDriveConvertWindow(QWidget):
-    """ """
+    """
+    GUI of the the tool to convert map from Open Drive to Common Road
+    """
 
     def __init__(self, argv, parent=None):
         super().__init__(parent=parent)
@@ -406,7 +408,7 @@ class OpenDriveConvertWindow(QWidget):
 
         path, _ = QFileDialog.getOpenFileName(
             self,
-            "QFileDialog.getOpenFileName()",
+            "Select an Open Drive Map",
             "",
             "OpenDRIVE files *.xodr (*.xodr)",
             options=QFileDialog.Options(),
@@ -416,6 +418,8 @@ class OpenDriveConvertWindow(QWidget):
             return
 
         self.load_opendriveFile(path)
+
+        return path
 
     def load_opendriveFile(self, path):
         """
@@ -516,12 +520,13 @@ class OpenDriveConvertWindow(QWidget):
             )
             return
 
-        QMessageBox.information(
+        # Hidden for the Tkinter conversion
+        """QMessageBox.information(
             self,
             "CommonRoad file created!",
             "The CommonRoad file was successfully exported.",
             QMessageBox.Ok,
-        )
+        )"""
 
     def viewConvertedLaneletNetwork(self):
         """ """

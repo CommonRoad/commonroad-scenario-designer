@@ -3,9 +3,10 @@ This module holds the classes required for the graph structure.
 It also provides several methods to perform operations on elements of the graph.
 """
 from queue import Queue
-from typing import List, Set, Tuple, Optional
+from typing import List, Set, Tuple, Optional, Dict
 
 import numpy as np
+from commonroad.scenario.traffic_sign import TrafficSignElement, TrafficSign, TrafficLight, TrafficSignIDGermany
 
 from crmapconverter.osm2cr import config
 from crmapconverter.osm2cr.converter_modules.utility import geometry, idgenerator
@@ -189,6 +190,8 @@ class GraphNode:
         self.x = x
         self.y = y
         self.edges = edges
+        self.traffic_signs = []
+        self.traffic_lights = []
 
     def __str__(self):
         return "Graph_node with id: {}".format(self.id)
@@ -291,6 +294,15 @@ class GraphNode:
                     "malformed graph, node has edges assigned to it, which start elsewhere"
                 )
 
+    def add_traffic_sign(self, sign: "GraphTrafficSign"):
+        self.traffic_signs.append(sign)
+        # add to lanes
+        for edge in self.edges:
+            for lane in edge.lanes:
+                # add to forward lanes
+                # TODO determine in which direction
+                if lane.forward:
+                    lane.add_traffic_sign(sign)
 
 class GraphEdge:
     """
@@ -356,6 +368,8 @@ class GraphEdge:
         self.lanewidth: float = config.LANEWIDTHS[roadtype]
         self.forward_restrictions: Set[str] = set()
         self.backward_restrictions: Set[str] = set()
+        self.traffic_signs = []
+        self.traffic_lights = []
 
     def flip(self) -> None:
         """
@@ -683,6 +697,128 @@ class GraphEdge:
         """
         return np.array([p.get_array() for p in self.waypoints])
 
+    def add_traffic_sign(self, sign: "GraphTrafficSign"):
+        self.traffic_signs.append(sign)
+        # add to lanes
+        for lane in self.lanes:
+            # add to forward lanes
+            if lane.forward:
+                lane.add_traffic_sign(sign)
+
+    def add_traffic_light(self, light: "GraphTrafficLight", forward):
+        self.traffic_lights.append(light)
+        for lane in self.lanes:
+            if lane.forward == forward:
+                lane.add_traffic_light(light)
+
+
+class GraphTrafficSign:
+    def __init__(self, sign: Dict,
+                 node: GraphNode = None, edges: List = []):
+        self.sign = sign
+        self.node = node
+        self.edges = edges
+        self.id = idgenerator.get_id()
+
+    def to_traffic_sign_cr(self):
+        elements = []
+        position = None
+        values = []
+
+        # map OSM sign to country sign
+        # TODO Currently only Germany supported. Add more locations.
+        traffic_sign_map = {
+            'maxspeed': TrafficSignIDGermany.MAX_SPEED,
+            'overtaking': TrafficSignIDGermany.NO_OVERTAKING_START,
+            'city_limit': TrafficSignIDGermany.TOWN_SIGN,
+            'give_way': TrafficSignIDGermany.YIELD,
+            'stop': TrafficSignIDGermany.STOP,
+            'unknown': TrafficSignIDGermany.UNKNOWN
+        }
+
+        # get position
+        if self.node is not None:
+            position_point = self.node.get_cooridnates()
+
+        # extract traffic sign values
+        # maxspeed
+        if 'maxspeed' in self.sign:
+            sign_id = traffic_sign_map['maxspeed']
+            value = self.sign['maxspeed']
+            elements.append(TrafficSignElement(sign_id, [value]))
+
+        # if traffic sign
+        elif 'traffic_sign' in self.sign:
+            key = self.sign['traffic_sign']
+
+            # speed limit
+            if 'DE:274' in str(key):
+                sign_id = traffic_sign_map['maxspeed']
+                max_speed = float(key[key.find("[")+1:key.find("]")])
+                # convert km/h to m/s
+                max_speed /= 3.6
+                elements.append(TrafficSignElement(sign_id, [max_speed]))
+
+            # regular traffic sign
+            elif key in traffic_sign_map:
+                sign_id = traffic_sign_map[key]
+                value = ' ' # TODO add specific values for some traffic signs
+                elements.append(TrafficSignElement(sign_id, [value]))
+
+            # unknown traffic sign
+            else:
+                sign_id = traffic_sign_map['unknown']
+                value = 'unknown sign'
+                elements.append(TrafficSignElement(sign_id, [value]))
+
+        # determine if virtual
+        virtual = False
+        if 'virtual' in self.sign:
+            if not self.sign['virtual']:
+                virtual = False
+            else:
+                virtual = self.sign['virtual']
+
+        # TODO Maybe improve this
+        first_occurrence = set()
+
+        return TrafficSign(
+            traffic_sign_id=self.id,
+            traffic_sign_elements=elements,
+            first_occurrence=first_occurrence,
+            position=position,
+            virtual=virtual)
+
+
+class GraphTrafficLight:
+    def __init__(self, light: Dict,
+                 node: GraphNode):
+        self.light = light
+        self.node = node
+        self.id = idgenerator.get_id()
+        self.crossing = False
+        self.highway = False
+        self.forward = True
+        self.parse_osm(light)
+
+    def parse_osm(self, data: Dict):
+        if 'crossing' in  data:
+            self.crossing = True
+        if 'highway' in data:
+            self.highway = True
+        if 'traffic_signals:direction' in data:
+            if data['traffic_signals:direction'] == 'backward':
+                self.forward = False
+
+    def to_traffic_light_cr(self):
+        position = None
+        if self.node is not  None:
+            position_point = self.node.get_point()
+            position = np.array([position_point.x, position_point.y])
+        traffic_light = TrafficLight(self.id, cycle=[], position=position)
+        return traffic_light
+
+
 
 class Lane:
     """
@@ -733,6 +869,8 @@ class Lane:
         self.adjacent_left_direction_equal: Optional[bool] = None
         self.adjacent_right_direction_equal: Optional[bool] = None
         self.speedlimit = speedlimit
+        self.traffic_signs = None
+        self.traffic_lights = None
 
     def flip(self, keep_edge_dir: bool) -> None:
         """
@@ -890,6 +1028,16 @@ class Lane:
             raise ValueError("node is not assigned to this edge")
         return
 
+    def add_traffic_sign(self, sign: GraphTrafficSign):
+        if self.traffic_signs is None:
+            self.traffic_signs = []
+        self.traffic_signs.append(sign)
+
+    def add_traffic_light(self, light: GraphTrafficLight):
+        if self.traffic_lights is None:
+            self.traffic_lights = []
+        self.traffic_lights.append(light)
+
 
 class Graph:
     def __init__(
@@ -898,6 +1046,8 @@ class Graph:
         edges: Set[GraphEdge],
         center_point: Tuple[float, float],
         bounds: Tuple[float, float, float, float],
+        traffic_signs: List[GraphTrafficSign],
+        traffic_lights: List[GraphTrafficLight],
     ) -> None:
         """
         creates a new graph
@@ -912,6 +1062,8 @@ class Graph:
         self.lanelinks: Set[Lane] = set()
         self.center_point = center_point
         self.bounds = bounds
+        self.traffic_signs = traffic_signs
+        self.traffic_lights = traffic_lights
 
     def get_central_node(self) -> GraphNode:
         """
@@ -1480,3 +1632,26 @@ class Graph:
         #   - common points of predecessors/successors are identical
         #   - directions of predecessors/successors are the same
         return False
+
+    def apply_traffic_signs(self):
+        # for each traffic sign:
+            # add to node and roads and lanes
+        for sign in self.traffic_signs:
+            if sign.node is not None:
+                sign.node.add_traffic_sign(sign)
+            for edge in sign.edges:
+                for sub_edge in edge:
+                    sub_edge.add_traffic_sign(sign)
+
+    def apply_traffic_lights(self):
+        # for each traffic light
+        # find edges going to node
+        for light in self.traffic_lights:
+            edges = light.node.edges
+            for edge in edges:
+                if light.forward and edge.node2.id == light.node.id:
+                    edge.add_traffic_light(light, light.forward)
+                if not light.forward and edge.node1.id == light.node.id:
+                    edge.add_traffic_light(light, light.forward)
+
+

@@ -1,10 +1,7 @@
-# -*- coding: utf-8 -*-
+"""This file controls the interface of the map editing tool in OSM2CR Converter"""
 
-# Form implementation generated from reading ui file 'edge_edit_embedding.ui'
-#
-# Created by: PyQt5 UI code generator 5.11.3
-#
-# WARNING! All changes made in this file will be lost!
+#Updated by
+__author__ = "Rayane Zaibet"
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
@@ -17,7 +14,7 @@ class Ui_EdgeEdit(object):
         self.gridLayout = QtWidgets.QGridLayout(self.centralwidget)
         self.gridLayout.setObjectName("gridLayout")
         self.plot_groupBox = QtWidgets.QGroupBox(self.centralwidget)
-        self.plot_groupBox.setMinimumSize(QtCore.QSize(400, 400))
+        self.plot_groupBox.setMinimumSize(QtCore.QSize(1200, 800))
         self.plot_groupBox.setTitle("")
         self.plot_groupBox.setObjectName("plot_groupBox")
         self.gridLayout_2 = QtWidgets.QGridLayout(self.plot_groupBox)
@@ -27,8 +24,8 @@ class Ui_EdgeEdit(object):
         self.gridLayout_2.addLayout(self.plot_frame, 0, 0, 1, 1)
         self.gridLayout.addWidget(self.plot_groupBox, 0, 1, 1, 1)
         self.Buttons = QtWidgets.QWidget(self.centralwidget)
-        self.Buttons.setMinimumSize(QtCore.QSize(70, 0))
-        self.Buttons.setMaximumSize(QtCore.QSize(60, 16777215))
+        self.Buttons.setMinimumSize(QtCore.QSize(100, 0))
+        self.Buttons.setMaximumSize(QtCore.QSize(100, 16777215))
         self.Buttons.setObjectName("Buttons")
         self.verticalLayout = QtWidgets.QVBoxLayout(self.Buttons)
         self.verticalLayout.setContentsMargins(0, -1, -1, 1)
@@ -77,8 +74,8 @@ class Ui_EdgeEdit(object):
         self.verticalLayout.addItem(spacerItem)
         self.gridLayout.addWidget(self.Buttons, 0, 0, 1, 1)
         self.verticalWidget = QtWidgets.QWidget(self.centralwidget)
-        self.verticalWidget.setMinimumSize(QtCore.QSize(200, 0))
-        self.verticalWidget.setMaximumSize(QtCore.QSize(200, 16777215))
+        self.verticalWidget.setMinimumSize(QtCore.QSize(300, 0))
+        self.verticalWidget.setMaximumSize(QtCore.QSize(300, 16777215))
         self.verticalWidget.setObjectName("verticalWidget")
         self.verticalLayout_2 = QtWidgets.QVBoxLayout(self.verticalWidget)
         self.verticalLayout_2.setObjectName("verticalLayout_2")
@@ -162,6 +159,48 @@ class Ui_EdgeEdit(object):
         self.b_finalize = QtWidgets.QPushButton(self.centralwidget)
         self.b_finalize.setObjectName("b_finalize")
         self.gridLayout.addWidget(self.b_finalize, 1, 2, 1, 1)
+        self.widget_2 = QtWidgets.QWidget(self.verticalWidget)
+        self.widget_2.setObjectName("widget_2")
+        self.gridLayout_4 = QtWidgets.QGridLayout(self.widget_2)
+        self.gridLayout_4.setObjectName("gridLayout_4")
+        self.label_9 = QtWidgets.QLabel(self.widget_2)
+        self.label_9.setObjectName("label_9")
+        self.gridLayout_4.addWidget(self.label_9, 0, 0)
+        self.traffic_sign_1 = QtWidgets.QPushButton(self.widget_2)
+        self.traffic_sign_1.setObjectName("traffic_sign_1")
+        icon1 = QtGui.QIcon()
+        icon1.addPixmap(QtGui.QPixmap("gui_src/button_traffic_light.png"),
+                        QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.traffic_sign_1.setIcon(icon1)
+        self.traffic_sign_1.setIconSize(QtCore.QSize(50, 50))
+        self.gridLayout_4.addWidget(self.traffic_sign_1, 1, 0)
+        self.traffic_sign_2 = QtWidgets.QPushButton(self.widget_2)
+        self.traffic_sign_2.setObjectName("traffic_sign_2")
+        icon2 = QtGui.QIcon()
+        icon2.addPixmap(QtGui.QPixmap("gui_src/button_yeld.png"),
+                        QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.traffic_sign_2.setIcon(icon2)
+        self.traffic_sign_2.setIconSize(QtCore.QSize(50, 50))
+        self.gridLayout_4.addWidget(self.traffic_sign_2, 1, 1)
+        self.traffic_sign_3 = QtWidgets.QPushButton(self.widget_2)
+        self.traffic_sign_3.setObjectName("traffic_sign_3")
+        icon3 = QtGui.QIcon()
+        icon3.addPixmap(QtGui.QPixmap("gui_src/button_stop.png"),
+                        QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.traffic_sign_3.setIcon(icon3)
+        self.traffic_sign_3.setIconSize(QtCore.QSize(50, 50))
+        self.gridLayout_4.addWidget(self.traffic_sign_3, 2, 0)
+        self.traffic_sign_4 = QtWidgets.QPushButton(self.widget_2)
+        self.traffic_sign_4.setObjectName("traffic_sign_4")
+        icon4 = QtGui.QIcon()
+        icon4.addPixmap(QtGui.QPixmap("gui_src/button_roundabout.png"),
+                        QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.traffic_sign_4.setIcon(icon4)
+        self.traffic_sign_4.setIconSize(QtCore.QSize(50, 50))
+        self.gridLayout_4.addWidget(self.traffic_sign_4, 2, 1)
+
+        self.gridLayout.addWidget(self.verticalWidget, 0, 2, 1, 1)
+        self.verticalLayout_2.addWidget(self.widget_2)
         EdgeEdit.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(EdgeEdit)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 730, 38))
@@ -219,4 +258,3 @@ class Ui_EdgeEdit(object):
         self.label_2.setText(_translate("EdgeEdit", "Nr of Lanes"))
         self.b_flip.setText(_translate("EdgeEdit", "flip direction"))
         self.b_finalize.setText(_translate("EdgeEdit", "Finalize Edit"))
-

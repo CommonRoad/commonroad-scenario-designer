@@ -2,6 +2,7 @@
 !test/**/*.xodr
 *.xml
 !test/**/*.xml
+test/.pytest_cache
 venv/
 .vscode/
 

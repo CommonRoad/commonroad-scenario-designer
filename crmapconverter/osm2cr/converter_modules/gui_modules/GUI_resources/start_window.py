@@ -152,7 +152,7 @@ class Ui_MainWindow(object):
         self.input_picked_output.setText(_translate("MainWindow", "No file picked"))
         self.b_start.setToolTip(_translate("MainWindow", "Start conversion with selected input"))
         self.b_start.setText(_translate("MainWindow", "Start Conversion"))
-        self.input_bench_id.setText(_translate("MainWindow", "test_bench"))
+        self.input_bench_id.setText(_translate("MainWindow", "unnamed"))
         self.label.setText(_translate("MainWindow", "BenchmarkID"))
         self.b_load_state.setToolTip(_translate("MainWindow", "Continue editing a scenario"))
         self.b_load_state.setText(_translate("MainWindow", "Load Edit State"))

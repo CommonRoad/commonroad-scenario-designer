@@ -2,6 +2,10 @@
 This module allows to embed the GUIs defined in gui.py in a pyqt5 window.
 It also provides a main window to start the conversion process, and the possibility to view CR scenarios
 """
+
+#Updated by Rayane Zaibet
+
+import os
 import pickle
 import re
 import sys
@@ -20,7 +24,7 @@ from PyQt5.QtWidgets import (
     QCheckBox,
     QDoubleSpinBox,
     QComboBox,
-)
+    QFileDialog)
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.pyplot import close
@@ -124,7 +128,7 @@ class MainApp:
         self.start_menu = StartMenu(self)
 
 
-class StartMenu:
+class StartMenu(QWidget):
     """
     Menu to start GUI
     Links to menus and functions via buttons
@@ -135,6 +139,7 @@ class StartMenu:
 
         :param app: the main pyqt5 app, in which the Start Menu is running
         """
+        super().__init__(parent=None)
         self.app: MainApp = app
         self.embedding: startWindow = startWindow()
         self.embedding.setupUi(self.app.main_window)
@@ -210,9 +215,12 @@ class StartMenu:
 
         :return: None
         """
-        Tk().withdraw()
-        file = askopenfilename(
-            initialdir="files/", filetypes=(("CR files", "*.xml"), ("all files", "*.*"))
+        file, _ = QFileDialog.getOpenFileName(
+            self,
+            "Select CommonRoad scenario",
+            "",
+            "CommonRoad file *.xml (*.xml)",
+            options=QFileDialog.Options(),
         )
         if file != "":
             window = scenarioView()
@@ -271,11 +279,16 @@ class StartMenu:
 
         :return: None
         """
-        Tk().withdraw()
-        file = askopenfilename(
-            initialdir="files/",
-            filetypes=(("osm files", "*.osm"), ("all files", "*.*")),
+
+        file, _ = QFileDialog.getOpenFileName(
+            self,
+            "Select OpenStreetMap map",
+            "",
+            "OpenStreetMap file *.osm (*.osm)",
+            options=QFileDialog.Options(),
         )
+
+        self.embedding.input_bench_id.setText(file.split('/')[-1].split('.')[0])
         if file != "":
             self.selected_file = file
             self.embedding.l_selected_file.setText(file)
@@ -292,15 +305,15 @@ class StartMenu:
         graph = converter.Scenario.step_collection_2(graph)
         graph = converter.Scenario.step_collection_3(graph)
         name = config.BENCHMARK_ID
-        Tk().withdraw()
-        file = asksaveasfilename(
-            initialdir=config.SAVE_PATH,
-            initialfile=name,
-            defaultextension=".xml",
-            filetypes=(("xml file", "*.xml"), ("All Files", "*.*")),
+        file, _ = QFileDialog.getSaveFileName(
+            self,
+            "Save map in Common Road Format",
+            "",
+            "Common Road file *.xml (*.xml)",
+            options=QFileDialog.Options(),
         )
         if file != "":
-            self.app.export(graph, file)
+            self.app.export(graph, file+".xml")
 
     def start_conversion(self) -> None:
         """
@@ -659,16 +672,16 @@ class LaneLinkEdit(MapEdit):
         :return: None
         """
         name = config.BENCHMARK_ID
-        Tk().withdraw()
-        file = asksaveasfilename(
-            initialdir=config.SAVE_PATH,
-            initialfile=name,
-            defaultextension=".xml",
-            filetypes=(("xml file", "*.xml"), ("All Files", "*.*")),
+        file, _ = QFileDialog.getSaveFileName(
+            self,
+            "Save map in Common Road Format",
+            "",
+            "Common Road file *.xml (*.xml)",
+            options=QFileDialog.Options(),
         )
         if file != "":
             graph = converter.Scenario.step_collection_3(self.graph)
-            self.app.export(graph, file)
+            self.app.export(graph, file + ".xml")
 
 
 class AttributeEditor:
