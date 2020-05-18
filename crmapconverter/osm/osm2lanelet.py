@@ -230,7 +230,7 @@ class OSM2LConverter:
             for ref_t in yield_signs:
                 d = point_to_line_distance(ref_t.position, start, end)
                 if _ref_t_min_dist is None or d <= _ref_t_min_dist:
-                    ref_t_id = ref_t.traffic_sign_id
+                    ref_t_id = {ref_t.traffic_sign_id}
                     _ref_t_min_dist = d
 
             # initialize stop line
