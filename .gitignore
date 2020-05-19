@@ -5,6 +5,7 @@
 test/.pytest_cache
 venv/
 .vscode/
+src/*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
