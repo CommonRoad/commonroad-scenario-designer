@@ -2,6 +2,7 @@ FROM debian:9.6
 
 ARG HOME="/root"
 ARG PROFILE="$HOME/.profile"
+ARG BASHRC="$HOME/.bashrc"
 ENV PYENV_ROOT="$HOME/pyenv"
 ENV PATH="$PYENV_ROOT/shims:$PYENV_ROOT/bin:${PATH}"
 
@@ -32,6 +33,7 @@ RUN git clone --recursive --shallow-submodules \
 RUN echo "export PYENV_ROOT=$PYENV_ROOT" >> $PROFILE
 RUN echo 'export PATH=$PYENV_ROOT/bin:$PATH' >> $PROFILE
 RUN echo 'eval "$(pyenv init -)"' >> $PROFILE
+RUN echo 'eval "$(pyenv init -)"' >> $BASHRC
 
 RUN pyenv install 3.6.7
 RUN pyenv install 3.7.1
@@ -40,15 +42,18 @@ RUN pyenv install 3.7.1
 RUN apt-get update && \
 	apt-get install -y libgeos++-dev libproj-dev
 
-# install pip dependencies
+# install dependencies for development & testing
 RUN /bin/bash -c "source ${PROFILE} &&\
 	pyenv shell 3.7.1 &&\
 	pip install --upgrade pip &&\
-	pip install tox pytest"
+	pip install tox pytest numpy"
 RUN /bin/bash -c "source ${PROFILE} &&\
 	pyenv shell 3.6.7 &&\
 	pip install --upgrade pip &&\
-	pip install tox pytest"
+	pip install tox pytest numpy"
 
+# on startup you need to run:
+# pip install -r requirements.txt 
+# pip install -r test_requirements.txt
 ENTRYPOINT ["/bin/bash", "--login", "-i", "-c"]
 CMD ["bash"]
