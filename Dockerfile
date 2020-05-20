@@ -42,6 +42,9 @@ RUN pyenv install 3.7.1
 RUN apt-get update && \
 	apt-get install -y libgeos++-dev libproj-dev
 
+ADD ./requirements.txt $HOME/requirements.txt
+ADD ./test_requirements.txt $HOME/test_requirements.txt
+
 # install dependencies for development & testing
 RUN /bin/bash -c "source ${PROFILE} &&\
 	pyenv shell 3.7.1 &&\
@@ -52,8 +55,11 @@ RUN /bin/bash -c "source ${PROFILE} &&\
 	pip install --upgrade pip &&\
 	pip install tox pytest numpy"
 
-# on startup you need to run:
-# pip install -r requirements.txt 
-# pip install -r test_requirements.txt
-ENTRYPOINT ["/bin/bash", "--login", "-i", "-c"]
-CMD ["bash"]
+ENTRYPOINT [ "/bin/bash", "--login", "-i", "-c" ]
+# ENTRYPOINT [
+	
+	
+CMD	"source .bashrc && pyenv shell 3.7.1 &&\
+ 	pip install -r $HOME/requirements.txt &&\
+ 	pip install -r test_requirements.txt &&\
+ 	/bin/bash", "--login", "-i", "-c"]
