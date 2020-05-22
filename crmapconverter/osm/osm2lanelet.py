@@ -65,11 +65,17 @@ def _add_stop_line_to_lanelet(lanelets: List[Lanelet], stop_lines: List[StopLine
     :param stop_lines:
     :return:
     """
+    yield_signs = set()
     for l in lanelets:
         for s in stop_lines:
             if l.convert_to_polygon().shapely_object.intersects(LineString([s.start, s.end])):
                 l.stop_line = s
+                # add the stop line traffic sign to the lanelet if set
+                if s.traffic_sign_ref is not None:
+                    l.traffic_signs.update(s.traffic_sign_ref)
+                    yield_signs.update(s.traffic_sign_ref)
                 break
+    return yield_signs
 
 
 class OSM2LConverter:
@@ -133,13 +139,17 @@ class OSM2LConverter:
                 yield_signs, priority_signs, yield_lanelets, priority_lanelets, stop_lines = (
                     self._right_of_way_to_traffic_sign(right_of_way_rel, new_ids)
                 )
-                # match stop lines on the yield lanelets
-                _add_stop_line_to_lanelet([self.lanelet_network.find_lanelet_by_id(i) for i in yield_lanelets], stop_lines)
                 # match traffic signs on the matching lanelets
                 # the overwrite makes sure we only add traffic signs in the network that are assigned to any lanelet
-                yield_signs = _add_closest_traffic_sign_to_lanelet([self.lanelet_network.find_lanelet_by_id(i) for i in yield_lanelets], yield_signs)
+                yield_signs_lanelets = _add_closest_traffic_sign_to_lanelet([self.lanelet_network.find_lanelet_by_id(i) for i in yield_lanelets], yield_signs)
                 priority_signs = _add_closest_traffic_sign_to_lanelet([self.lanelet_network.find_lanelet_by_id(i) for i in priority_lanelets], priority_signs)
-                for s in priority_signs.union(yield_signs):
+                # match stop lines on the yield lanelets
+                yield_signs_stop_lines_id = _add_stop_line_to_lanelet([self.lanelet_network.find_lanelet_by_id(i) for i in yield_lanelets], stop_lines)
+                # add any used traffic sign
+                for s in (priority_signs | yield_signs_lanelets | {
+                            y for y in yield_signs
+                            if y.traffic_sign_id in yield_signs_stop_lines_id
+                }):
                     self.lanelet_network.add_traffic_sign(s, set())
             except NotImplementedError as e:
                 print(str(e))
@@ -229,7 +239,7 @@ class OSM2LConverter:
             _ref_t_min_dist = None
             for ref_t in yield_signs:
                 d = point_to_line_distance(ref_t.position, start, end)
-                if _ref_t_min_dist is None or d <= _ref_t_min_dist:
+                if _ref_t_min_dist is None or d < _ref_t_min_dist:
                     ref_t_id = {ref_t.traffic_sign_id}
                     _ref_t_min_dist = d
 
