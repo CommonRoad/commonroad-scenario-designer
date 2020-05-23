@@ -4,7 +4,9 @@ This module holds all parameters necessary for the conversion
 
 # Benchmark settings
 # name of the benchmark
-BENCHMARK_ID = "test_bench"
+import enum
+
+BENCHMARK_ID = "DEU_test"
 # author of the benchmark
 AUTHOR = "Automated converter by Maximilian Rieger"
 # affiliation of the benchmark
@@ -12,9 +14,18 @@ AFFILIATION = "Technical University of Munich, Germany"
 # source of the benchmark
 SOURCE = "OpenStreetMaps (OSM)"
 # additional tags for the benchmark
-TAGS = "..."
+TAGS = "urban"
+# GeonameID
+GEONAME_ID = -999
+# GPS latitude
+GPS_LATITUDE = "123.45"
+# GPS longitude
+GPS_LONGITUDE = "123.45"
 # time step size for the benchmark in seconds
 TIMESTEPSIZE = 0.1
+
+# Lanelet type each lanelet should have
+LANELETTYPE = 'urban'
 
 # Aerial Image Settings
 # Use aerial images for edit
@@ -149,7 +160,7 @@ CLUSTER_LENGTH = 10.0
 # least length of cluster to be added in meters
 LEAST_CLUSTER_LENGTH = 10.0
 # maximal distance between two intersections to which they are merged, if zero, no intersections are merged
-MERGE_DISTANCE = 0.0
+MERGE_DISTANCE = 3.5
 
 # Toggle edit for user
 USER_EDIT = False
@@ -167,4 +178,19 @@ RECOGNIZED_TURNLANES = [
     "left;through;right",
     "left;right",
     "none",
+]
+
+# values to search for in OSM
+TRAFFIC_SIGN_VALUES = [
+    "traffic_signals",
+    "stop",
+    "give_way",
+    "city_limit",
+]
+# keys to search for in OSM
+TRAFFIC_SIGN_KEYS = [
+    "traffic_sign",
+    "overtaking",
+    "traffic_signals:direction",
+    "maxspeed",
 ]

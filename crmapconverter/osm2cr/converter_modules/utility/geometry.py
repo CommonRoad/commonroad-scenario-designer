@@ -463,6 +463,23 @@ def angle_to(v1: np.ndarray, v2: np.ndarray) -> float:
     return angle
 
 
+def get_angle(v1: np.ndarray, v2:np.ndarray) -> float:
+    """
+    Get clockwise angle between vectors
+    :param v1: one vector
+     :type v1: np.ndarray
+    :param v2: another vector
+    :type v2: np.ndarray
+    :return: clockwise angle between vectors in degrees
+    :rtype: float
+    """
+    x = [v1[0], v2[0]]
+    y = [v1[1], v2[1]]
+    angles = np.arctan2(y, x) + np.pi
+    diff1 = angles[0] - angles[1]
+    angle = diff1 / np.pi * 180
+    return angle
+
 def curvature(polyline: List[np.ndarray]) -> float:
     """
     calculates the angle between start and end of a polyline in degrees
@@ -825,3 +842,11 @@ def filter_points(
         )
 
     return result
+
+
+def get_gradient(polyline: List[np.ndarray]):
+    a = polyline[0]
+    b = polyline[-1]
+
+    m = (b[1] - a[1]) / (b[0] - a[0])
+    return m

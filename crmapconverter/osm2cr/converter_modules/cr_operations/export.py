@@ -2,7 +2,6 @@
 This module holds all interaction between this application and the ***CommonRoad python tools**.
 It allows to export a scenario to CR or plot a CR scenario.
 """
-import sys
 from typing import List
 
 import matplotlib.pyplot as plt
@@ -11,8 +10,10 @@ import utm
 
 from crmapconverter.osm2cr import config
 from crmapconverter.osm2cr.converter_modules.graph_operations import road_graph as rg
+from crmapconverter.osm2cr.converter_modules.intermediate_format.intermediate_format import IntermediateFormat
 from crmapconverter.osm2cr.converter_modules.utility import geometry
 from crmapconverter.osm2cr.converter_modules.utility.idgenerator import get_id
+from crmapconverter.osm2cr.converter_modules.cr_operations.cleanup import sanitize
 
 # CommonRoad python tools are imported
 # sys.path.append(config.CR_TOOLS_PATH) # This is not necessary anymore as commonroad-io can be installed via pip
@@ -20,7 +21,8 @@ from commonroad.visualization.draw_dispatch_cr import draw_object
 from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
 from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.planning.planning_problem import PlanningProblemSet
-from commonroad.scenario.scenario import Scenario, Lanelet, LaneletNetwork
+from commonroad.scenario.scenario import Scenario, Lanelet, LaneletNetwork, Tag, Location
+
 
 
 def get_lanelet(lane: rg.Lane) -> Lanelet:
@@ -35,9 +37,9 @@ def get_lanelet(lane: rg.Lane) -> Lanelet:
     right_bound = lane.right_bound
     center_points = lane.waypoints
     successors = []
-    speedlimit = lane.speedlimit
-    if speedlimit is None or speedlimit == 0:
-        speedlimit = np.infty
+    # speedlimit = lane.speedlimit
+    # if speedlimit is None or speedlimit == 0:
+    #     speedlimit = np.infty
     for successor in lane.successors:
         successors.append(successor.id)
     predecessors = []
@@ -79,7 +81,6 @@ def get_lanelet(lane: rg.Lane) -> Lanelet:
         adjacent_left_direction_equal,
         adjacent_right,
         adjacent_right_direction_equal,
-        speedlimit,
     )
     return lanelet
 
@@ -149,20 +150,50 @@ def export(
     :param graph: the graph
     :return: None
     """
-    scenario = create_scenario(graph)
+    #scenario = create_scenario(graph)
+    # convert via intermediate format
+    intermediate_format = IntermediateFormat.extract_from_road_graph(graph)
+    scenario = intermediate_format.to_commonroad_scenario()
+
+    # removing converting errors before writing to xml
+    sanitize(scenario)
+
+    # writing everything to XML
+    print("writing scenario to XML file")
+
     if config.EXPORT_IN_UTM:
         convert_coordinates_to_utm(scenario, graph.center_point)
-    problemset = PlanningProblemSet(None)
+    problemset = intermediate_format.get_dummy_planning_problem_set()
     author = config.AUTHOR
     affiliation = config.AFFILIATION
     source = config.SOURCE
-    tags = config.TAGS
+    tags = create_tags(config.TAGS)
+    location = Location(gps_latitude=config.GPS_LATITUDE,
+                        gps_longitude=config.GPS_LONGITUDE,
+                        geo_name_id=config.GEONAME_ID,
+                        geo_transformation=None)
     # in the current commonroad version the following line works
     file_writer = CommonRoadFileWriter(
-        scenario, problemset, author, affiliation, source, tags, decimal_precision=16
-    )
-    # file_writer = CommonRoadFileWriter(scenario, problemset, author, affiliation, source, tags)
-    file_writer.write_scenario_to_file(file, OverwriteExistingFile.ALWAYS)
+        scenario, problemset, author, affiliation, source, tags, location, decimal_precision=16)
+
+    #write scenario to file with planning problem
+    file_writer.write_to_file(file, OverwriteExistingFile.ALWAYS)
+
+    # write scenario to file without planning problem
+    #file_writer.write_scenario_to_file(file, OverwriteExistingFile.ALWAYS)
+
+def create_tags(tags: str):
+    """
+    creates tags out of a space separated string
+
+    :param tags: string of tags
+    :return: list of tags
+    """
+    splits = tags.split()
+    tags = set()
+    for tag in splits:
+        tags.add(Tag(tag))
+    return tags
 
 
 def find_bounds(scenario: Scenario) -> List[float]:
@@ -215,11 +246,13 @@ def view_xml(filename: str, ax=None) -> None:
         print("empty scenario")
         return
     limits = find_bounds(scenario)
+    draw_params = { 'lanelet_network': {'draw_intersections': True, 'draw_traffic_signs_in_lanelet': True,
+                                        'draw_traffic_signs': True, 'draw_traffic_lights': True,}}
     if ax is None:
-        draw_object(scenario, plot_limits=limits)
+        draw_object(scenario, plot_limits=limits, draw_params=draw_params)
         plt.gca().set_aspect("equal")
         plt.show()
         return
     else:
-        draw_object(scenario, plot_limits=limits, ax=ax)
+        draw_object(scenario, plot_limits=limits, ax=ax, draw_params=draw_params)
         ax.set_aspect("equal")

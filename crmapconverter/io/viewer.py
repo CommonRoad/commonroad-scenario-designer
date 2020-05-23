@@ -141,7 +141,7 @@ class MainWindow(QWidget):
 
         path, _ = QFileDialog.getOpenFileName(
             self,
-            "QFileDialog.getOpenFileName()",
+            "Open a CommonRoad scenario",
             "",
             "CommonRoad scenario files *.xml (*.xml)",
             options=QFileDialog.Options(),
