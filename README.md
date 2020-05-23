@@ -1,6 +1,8 @@
 # CommonRoad Map Converter
 
-This software provides multiple converters from different map formats to the CommonRoad map, which is based on lanelets.
+This software provides multiple converters from different map formats to the CommonRoad map, which is based on lanelets.  
+This branch is under development for CommonRoad 2020a. 
+Commit 4abf24d380b2ddac2c2c71b210764c4ae5759406 is the last stable version for CommonRoad 2018b.
 
 | Tool | Functionality |
 |:----:|:------------:|
