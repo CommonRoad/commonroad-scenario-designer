@@ -35,11 +35,8 @@ which in turn calls the :py:meth:`draw_object` function from :py:mod:`commonroad
 CommonRoad lanelets to OSM lanelets and vice versa
 -----------------------------------------------------
 
-Converting a CommonRoad file which details a map to an equivalent OSM file can be done via the command line.
-
-For example
-``osm-convert inputfile.xml --reverse -o outputfile.osm --adjencies --proj "+proj=etmerc +lat_0=38 +lon_0=125 +ellps=bessel"``
-
+Converting a CommonRoad file which details a map to an equivalent OSM file can be done via the command line, e.g.,
+``osm-convert inputfile.xml -o outputfile.osm``. Use ``osm-convert -h`` for an overview about all available parameters.
 
 Usage in own code
 ===================
@@ -49,31 +46,35 @@ Converting an OpenDRIVE file to CommonRoad
 
 .. code:: python
 
-	from lxml import etree
-	from crmapconverter.opendriveparser.parser import parse_opendrive
-	from crmapconverter.opendriveconversion.network import Network
-	from from commonroad.common.file_writer import CommonRoadFileWriter
+    from lxml import etree
 
-	# Import, parse and convert OpenDRIVE file
-	with open("{}/opendrive-1.xodr".format(os.path.dirname(os.path.realpath(__file__))), "r") as fi:
-		open_drive = parse_opendrive(etree.parse(fi).getroot())
+    from crmapconverter.opendriveparser.parser import parse_opendrive
+    from crmapconverter.opendriveconversion.network import Network
 
-	road_network = Network()
-	road_network.load_opendrive(open_drive)
+    from from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
+    from commonroad.planning.planning_problem import PlanningProblemSet
+    from commonroad.scenario.scenario import Tag
 
-	scenario = road_network.export_commonroad_scenario()
-	# Write CommonRoad scenario to file
-	from commonroad.common.file_writer import CommonRoadFileWriter
-	commonroad_writer = CommonRoadFileWriter(
-				scenario=scenario,
-				planning_problem_set=None,
-				author="",
-				affiliation="",
-				source="OpenDRIVE 2 Lanelet Converter",
-				tags="",
-			)
-	with open("{}/opendrive-1.xml".format(os.path.dirname(os.path.realpath(__file__))), "w") as fh:
-		commonroad_writer.write_scenario_to_file_io(file_io=fh)
+    # Import, parse and convert OpenDRIVE file
+    with open("{}/opendrive.xodr".format(os.path.dirname(os.path.realpath(__file__))), "r") as fi:
+        open_drive = parse_opendrive(etree.parse(fi).getroot())
+
+    road_network = Network()
+    road_network.load_opendrive(open_drive)
+
+    scenario = road_network.export_commonroad_scenario()
+    # Write CommonRoad scenario to file
+    from commonroad.common.file_writer import CommonRoadFileWriter
+    CommonRoadFileWriter(
+        scenario=self.scenario,
+        planning_problem_set=PlanningProblemSet(),
+        author="",
+        affiliation="",
+        source="OpenDRIVE 2 Lanelet Converter",
+        tags={Tag.URBAN, Tag.HIGHWAY},
+    )
+    writer.write_to_file(os.path.dirname(os.path.realpath(__file__)) + "/" + "opendrive.xml",
+        OverwriteExistingFile.ALWAYS)
 
 Just parsing the OpenDrive .xodr file
 ---------------------------------------------

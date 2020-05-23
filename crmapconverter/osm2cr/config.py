@@ -93,20 +93,20 @@ LANECOUNTS = {
 }
 # width of lanes for each type of road in meters
 LANEWIDTHS = {
-    "motorway": 2.5,
-    "trunk": 2.5,
-    "primary": 2.5,
-    "secondary": 2.5,
-    "tertiary": 2.5,
-    "unclassified": 2.5,
-    "residential": 2.5,
-    "motorway_link": 2.5,
-    "trunk_link": 2.5,
-    "primary_link": 2.5,
-    "secondary_link": 2.5,
-    "tertiary_link": 2.5,
-    "living_street": 2.5,
-    "service": 2.5,
+    "motorway": 3.5,
+    "trunk": 3.5,
+    "primary": 3.5,
+    "secondary": 3.5,
+    "tertiary": 3.5,
+    "unclassified": 3.5,
+    "residential": 3.5,
+    "motorway_link": 3.5,
+    "trunk_link": 3.5,
+    "primary_link": 3.5,
+    "secondary_link": 3.5,
+    "tertiary_link": 3.5,
+    "living_street": 3.5,
+    "service": 3.5,
 }
 # default speed limit for each type of road in km/h
 SPEED_LIMITS = {
@@ -132,7 +132,7 @@ INTERPOLATION_DISTANCE = 0.5
 # allowed inaccuracy of exported lines to reduce number of way points in meters
 COMPRESSION_THRESHOLD = 0.05
 # export the scenario in UTM coordinates
-EXPORT_IN_UTM = True
+EXPORT_IN_UTM = False
 # toggle filtering of negligible waypoints
 FILTER = True
 
@@ -146,7 +146,7 @@ INTERPOLATION_DISTANCE_INTERNAL = 0.25
 # bezier parameter for interpolation (should be within [0, 0.5])
 BEZIER_PARAMETER = 0.35
 # distance between roads at intersection used for cropping in meters
-INTERSECTION_DISTANCE = 5.0
+INTERSECTION_DISTANCE = 20.0
 # defines if the distance to other roads is used for cropping
 # if false the distance to the center of the intersection is used
 INTERSECTION_CROPPING_WITH_RESPECT_TO_ROADS = True

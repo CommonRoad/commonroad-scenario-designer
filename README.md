@@ -11,7 +11,7 @@ This software provides multiple converters from different map formats to the Com
 #### Installation
 Execute the following command within your activated Python environment:
 ```bash
-python setup.py install
+pip install -e .
 ```
 
 #### Usage
@@ -42,8 +42,11 @@ osm-convert inputfile.xml --reverse -o outputfile.osm --adjencies --proj "+proj=
 ```
 For the conversion of CommonRoad lanelets to OSM lanelets change the input and output file accordingly.
 
-For the conversion of a file from a OSM map to CommonRoad lanelets 
-open the general GUI and start from there the the OSM map to CommonRoad converter.  
+For the conversion of a file from a OSM map to CommonRoad lanelets you can
+open the general GUI and start from there the the OSM map to CommonRoad converter GUI. 
+Missing information such as the course of individual lanes is estimated during the process.
+These estimations are imperfect (the OSM maps as well) and often it is advisable to edit the scenarios by hand.
+This tool also provides a simple GUI, to edit scenarios by hand.
 
 
 #### Documentation

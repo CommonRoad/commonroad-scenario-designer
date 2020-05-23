@@ -5,14 +5,15 @@
 __author__ = "Benjamin Orthen"
 __copyright__ = "TUM Cyber-Physical Systems Group"
 __credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles"]
-__version__ = "1.1.0"
-__maintainer__ = "Benjamin Orthen"
+__version__ = "1.2.0"
+__maintainer__ = "Sebastian Maierhofer"
 __email__ = "commonroad-i06@in.tum.de"
 __status__ = "Released"
 
 
 import os
 import unittest
+from io import StringIO
 from lxml import etree
 
 from commonroad.common.file_reader import CommonRoadFileReader

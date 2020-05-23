@@ -3,13 +3,8 @@
 """Module for logic behind converting OpenDrive to ParametricLanes."""
 
 from typing import Tuple, List
-from crmapconverter.opendriveconversion.plane_elements.plane import (
-    ParametricLane,
-    ParametricLaneBorderGroup,
-)
-from crmapconverter.opendriveconversion.plane_elements.plane_group import (
-    ParametricLaneGroup,
-)
+from crmapconverter.opendriveconversion.plane_elements.plane import ParametricLane, ParametricLaneBorderGroup
+from crmapconverter.opendriveconversion.plane_elements.plane_group import ParametricLaneGroup
 from crmapconverter.opendriveconversion.plane_elements.border import Border
 from crmapconverter.opendriveconversion.utils import encode_road_section_lane_width_id
 
@@ -17,8 +12,8 @@ from crmapconverter.opendriveconversion.utils import encode_road_section_lane_wi
 __author__ = "Benjamin Orthen"
 __copyright__ = "TUM Cyber-Physical Systems Group"
 __credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles"]
-__version__ = "1.1.0"
-__maintainer__ = "Benjamin Orthen"
+__version__ = "1.2.0"
+__maintainer__ = "Sebastian Maierhofer"
 __email__ = "commonroad-i06@in.tum.de"
 __status__ = "Released"
 
