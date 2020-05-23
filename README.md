@@ -11,7 +11,7 @@ This software provides multiple converters from different map formats to the Com
 #### Installation
 Execute the following command within your activated Python environment:
 ```bash
-python setup.py install
+pip install -e .
 ```
 
 #### Usage
