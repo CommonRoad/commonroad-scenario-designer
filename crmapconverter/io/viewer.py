@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 
 """Viewer module to visualize the created lanelet scenario."""
-#Updated by Rayane Zaibet
-
 
 import signal
 import sys
@@ -145,7 +143,7 @@ class MainWindow(QWidget):
             self,
             "Open a CommonRoad scenario",
             "",
-            "CommonRoad files *.xml (*.xml)",
+            "CommonRoad scenario files *.xml (*.xml)",
             options=QFileDialog.Options(),
         )
 
