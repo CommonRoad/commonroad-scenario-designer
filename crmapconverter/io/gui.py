@@ -255,7 +255,7 @@ class OSMLaneletsConvertWindow(QWidget):
 
         path, _ = QFileDialog.getOpenFileName(
             self,
-            "QFileDialog.getOpenFileName()",
+            "Open Lanelet map file",
             "",
             "Lanelet map files (*.osm *.xml)",
             options=QFileDialog.Options(),
@@ -298,7 +298,7 @@ class OSMLaneletsConvertWindow(QWidget):
     def export_as_commonroad(self):
         path, _ = QFileDialog.getSaveFileName(
             self,
-            "QFileDialog.getSaveFileName()",
+            "Save Lanelet map file",
             "",
             "CommonRoad files (*.xml)",
             options=QFileDialog.Options(),

@@ -429,7 +429,7 @@ class MainWindow(QWidget):
     #    self.dynamic.fig.savefig("foo.pdf", bbox_inches='tight')
 
 
-if __name__ == "__main__":
+def main():
     # Make it possible to exit application with ctrl+c on console
     signal.signal(signal.SIGINT, signal.SIG_DFL)
 
@@ -437,8 +437,12 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
 
     if len(sys.argv) >= 2:
-        ex = MainWindow(path=sys.argv[1])
+        _ = MainWindow(path=sys.argv[1])
     else:
-        ex = MainWindow()
+        _ = MainWindow()
 
     sys.exit(app.exec_())
+
+
+if __name__ == "__main__":
+    main()

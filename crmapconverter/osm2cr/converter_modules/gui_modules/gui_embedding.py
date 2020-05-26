@@ -673,7 +673,7 @@ class LaneLinkEdit(MapEdit):
         """
         name = config.BENCHMARK_ID
         file, _ = QFileDialog.getSaveFileName(
-            self,
+            None, # self, was causing error:  argument 1 has unexpected type 'LaneLinkEdit'
             "Save map in Common Road Format",
             "",
             "Common Road file *.xml (*.xml)",
@@ -681,7 +681,10 @@ class LaneLinkEdit(MapEdit):
         )
         if file != "":
             graph = converter.Scenario.step_collection_3(self.graph)
-            self.app.export(graph, file + ".xml")
+            if not ".xml" in file:
+                self.app.export(graph, file + ".xml")
+            else:
+                self.app.export(graph, file)
 
 
 class AttributeEditor:

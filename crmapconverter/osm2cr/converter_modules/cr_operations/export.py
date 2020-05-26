@@ -142,7 +142,7 @@ def convert_coordinates_to_utm(scenario: Scenario, origin: np.ndarray) -> None:
 
 
 def export(
-    graph: rg.Graph, file=config.SAVE_PATH + config.BENCHMARK_ID + ".xml"
+    graph: rg.Graph, file_path=config.SAVE_PATH + config.BENCHMARK_ID + ".xml"
 ) -> None:
     """
     converts a graph to a CR scenario and saves it to disk
@@ -177,7 +177,7 @@ def export(
         scenario, problemset, author, affiliation, source, tags, location, decimal_precision=16)
 
     #write scenario to file with planning problem
-    file_writer.write_to_file(file, OverwriteExistingFile.ALWAYS)
+    file_writer.write_to_file(file_path, OverwriteExistingFile.ALWAYS)
 
     # write scenario to file without planning problem
     #file_writer.write_scenario_to_file(file, OverwriteExistingFile.ALWAYS)

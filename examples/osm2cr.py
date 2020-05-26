@@ -1,6 +1,5 @@
 from commonroad.common.file_reader import CommonRoadFileReader
-from commonroad.common.file_writer import CommonRoadFileWriter, \
-    OverwriteExistingFile
+from commonroad.common.file_writer import CommonRoadFileWriter
 from commonroad.planning.planning_problem import PlanningProblemSet
 
 from crmapconverter.osm2cr import config
@@ -12,8 +11,8 @@ from crmapconverter.osm2cr.converter_modules.cr_operations.export import find_bo
 import matplotlib.pyplot as plt
 
 s = converter.Scenario('files/intersection.osm')
-map = IntermediateFormat.extract_from_road_graph(s.graph)
-scenario = map.to_commonroad_scenario()
+interm_map = IntermediateFormat.extract_from_road_graph(s.graph)
+scenario = interm_map.to_commonroad_scenario()
 problemset = PlanningProblemSet(None)
 author = config.AUTHOR
 affiliation = config.AFFILIATION
