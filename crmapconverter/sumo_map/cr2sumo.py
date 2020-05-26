@@ -3,10 +3,11 @@ This class contains functions for converting a CommonRoad map into a .net.xml SU
 """
 from collections import defaultdict
 from copy import deepcopy
-from typing import Dict, Tuple, List
+from typing import Dict, Tuple, List, Set
 
 import matplotlib
 from commonroad.geometry.shape import Polygon
+from commonroad_cc.collision_detection.pycrcc_collision_dispatch import create_collision_object
 
 matplotlib.use('TkAgg')
 import itertools
@@ -36,14 +37,17 @@ from .sumolib_net.lane import Lane
 from crmapconverter.sumo_map.config import CR2SumoNetConfig
 from .util import compute_max_curvature_from_polyline
 
-try:
-    import pycrcc
-    from commonroad_cc.collision_detection.pycrcc_collision_dispatch import create_collision_object
-    use_pycrcc = True
-except ModuleNotFoundError:
-    warnings.warn('Commonroad Collision Checker not installed, use shapely instead (slower).')
-    import shapely as shl
-    use_pycrcc = False
+# try:
+#     import pycrcc
+#     from commonroad_cc.collision_detection.pycrcc_collision_dispatch import create_collision_object
+#     use_pycrcc = False
+# except ModuleNotFoundError:
+#     warnings.warn('Commonroad Collision Checker not installed, use shapely instead (slower).')
+#     import shapely as shl
+#     use_pycrcc = False
+import shapely as shl
+use_pycrcc = False
+
 
 class CR2SumoMapConverter:
     """Converts CommonRoad map to sumo map .net.xml"""
@@ -93,15 +97,7 @@ class CR2SumoMapConverter:
         self._filter_edges()
         # self._simplify_connections_new()
         self._create_lane_based_connections()
-        # self._detect_zippers(self.merged_dictionary)
-        # self._simplify_connections()
-        #self.simplified_connections = self.connections
 
-        # getting the parameters that will be returned
-        # number_of_junctions = self._calculate_number_junctions()
-        # speeds_list = self._get_speeds_list()
-
-        # return self.points_dict, total_lanes_length, number_of_junctions, speeds_list
 
     def _find_lanes(self):
         """
@@ -113,14 +109,15 @@ class CR2SumoMapConverter:
         node_id = 0  # running node_id, will be increased for every new node
         self.points_dict = {lanelet.lanelet_id: lanelet.center_vertices for lanelet in self.lanelet_network.lanelets}
 
-        plt.figure(figsize=[25,25])
-        draw_object(self.lanelet_network, draw_params={'lanelet':{'show_label':True}})
-        plt.draw()
-        plt.autoscale()
-        plt.ion()
-        plt.axis('equal')
-        plt.pause(0.001)
-
+        # plt.figure(figsize=[25,25])
+        # draw_object(self.lanelet_network, draw_params={'lanelet':{'show_label':False}, 'lanelet_network': {
+        #     'intersection': {
+        #         'draw_intersections': True}}})
+        # plt.draw()
+        # plt.autoscale()
+        # plt.ion()
+        # plt.axis('equal')
+        # plt.pause(0.001)
         for lanelet in self.lanelet_network.lanelets:
             edge_id = lanelet.lanelet_id
             successors = set(lanelet.successor)
@@ -161,8 +158,6 @@ class CR2SumoMapConverter:
                 rightmost_lanelet = right_lanelet
                 adj_right_id = right_lanelet._adj_right
                 right_same_direction = right_lanelet.adj_right_same_direction
-
-
 
             # find leftmost lanelet
             while adj_left_id is not None and left_same_direction is not False:
@@ -296,52 +291,6 @@ class CR2SumoMapConverter:
         """
 
         for edge_id, lanelet_ids in self.lanes_dict.items():
-            # new_nodes[node_id] =
-            # # create node
-            #
-            #
-            # end_node = Node(node_id, node_type, end_node_coordinates, [])
-            # self.nodes.update({str(node_id): end_node})
-            # nodeB = end_node
-            # node_id += 1
-            #
-            #
-            # toAdd = True
-            # for key, node_temp in self.nodes.items():
-            #     temp_coord = np.array(node_temp.getCoord())
-            #     # if tempx == node_x and tempy == node_y:
-            #     for node in start_node_list:
-            #         # if (temp_coord == node).all():
-            #         if np.max(np.linalg.norm(temp_coord - node)) <= 0.5:
-            #             toAdd = False
-            #             nodeA = node_temp
-            #             break
-            #
-            # if toAdd:
-            #     node_type = 'right_before_left'
-            #     start_node = Node(node_id, node_type, start_node_coordinates, [])
-            #     self.nodes.update({str(node_id): start_node})
-            #     nodeA = start_node
-            #     node_id += 1
-            #
-            # # end node
-            # toAdd = True
-            # for key, node_temp in self.nodes.items():
-            #     temp_coord = node_temp.getCoord()
-            #     tempx = temp_coord[0]
-            #     tempy = temp_coord[1]
-            #     temp_coord = np.array([tempx,tempy])
-            #     for node in end_node_list:
-            #         if np.max(np.linalg.norm(temp_coord - node)) <= 0.5:
-            #             toAdd = False
-            #             nodeB = node_temp
-            #             break
-            #
-            # if toAdd:
-
-
-            # calculation of the length of a lane, lanes that belong to the same edge have the same length
-
             # Creation of Edge, using id as name
             start_node = self.nodes[self.start_nodes[edge_id]]
             end_node = self.nodes[self.end_nodes[edge_id]]
@@ -590,13 +539,17 @@ class CR2SumoMapConverter:
         self.new_edges = {}  # new dictionary for the edges after the simplifications
         self.merged_dictionary = {}  # key is the merged node, value is a list of the nodes that form the merged node
         self.replaced_nodes = defaultdict(list)
-        erode_lanelet_network = _erode_lanelets(self.lanelet_network, 0.3)
+        intersecting_pairs = _find_intersecting_edges(self.lanes_dict, self.lanelet_network)
+        intersecting_edges = defaultdict(list)
+        for pair in intersecting_pairs:
+            intersecting_edges[pair[0]].append(pair[1])
+            intersecting_edges[pair[1]].append(pair[0])
 
         polygons_dict = {}
-        explored_nodes = []
+        explored_nodes = set()
         skip=0
         for node_id, current_node in self.nodes.items():
-            merged_nodes = [current_node]
+            merged_nodes = set([current_node])
             junction_shapes = {}
             if current_node not in explored_nodes:
                 queue = [current_node]
@@ -607,164 +560,21 @@ class CR2SumoMapConverter:
                     i += 1
                     expanded_node = queue.pop()
                     if expanded_node in explored_nodes: continue
-                    incomings: List[Edge] = expanded_node.getIncoming()
-                    outgoings: List[Edge] = expanded_node.getOutgoing()
-                    edge_shapes_dict = {}
-                    for edge_in in incomings:
-                        edge_shape = []
-                        for lanelet_id in (self.lanes_dict[edge_in.getID()][0], self.lanes_dict[edge_in.getID()][-1]):
-                            if not lanelet_id in polygons_dict:
-                                polygon = erode_lanelet_network.find_lanelet_by_id(lanelet_id).convert_to_polygon()
-                                if use_pycrcc:
-                                    polygons_dict[lanelet_id] = create_collision_object(polygon)
-                                else:
-                                    polygons_dict[lanelet_id] = polygon.shapely_object
+                    explored_nodes.add(expanded_node)
+                    incomings: List[int] = [edg.getID() for edg in expanded_node.getIncoming()]
+                    outgoings: List[int] = [edg.getID() for edg in expanded_node.getOutgoing()]
 
-                            edge_shape.append(polygons_dict[lanelet_id])
+                    for inc_edg in incomings:
+                        for intersecting_inc in intersecting_edges[inc_edg]:
+                            from_node = self.edges[str(intersecting_inc)].getFromNode()
+                            merged_nodes.add(from_node)
+                            queue.append(from_node)
 
-                        edge_shapes_dict[edge_in.getID()] = edge_shape
-
-                    for edge_id, edge_shape in edge_shapes_dict.items():
-                        for edge_id_other, junction_shape_other in junction_shapes.items():
-                            if edge_id == edge_id_other: continue
-                            edges_intersect = False
-                            for shape in edge_shape:
-                                if edges_intersect:
-                                    break
-                                for shape_other in junction_shape_other:
-                                    if use_pycrcc:
-                                        # pycrcc
-                                        if shape.collide(shape_other):
-                                            from_node = self.edges[str(edge_id)].getFromNode()
-                                            merged_nodes.append(from_node)
-                                            explored_nodes.append(from_node)
-                                            queue.append(from_node)
-                                            edges_intersect = True
-                                            break
-                                    else:
-                                        # shapely
-                                        if shape.intersection(shape_other).area > 0.0:
-                                            from_node = self.edges[str(edge_id)].getFromNode()
-                                            merged_nodes.append(from_node)
-                                            explored_nodes.append(from_node)
-                                            queue.append(from_node)
-                                            edges_intersect = True
-                                            break
-
-                        for edge_id_other, edge_shape_other in edge_shapes_dict.items():
-                            if edge_id == edge_id_other: continue
-                            edges_intersect = False
-                            for shape in edge_shape:
-                                if edges_intersect:
-                                    break
-                                for shape_other in edge_shape_other:
-                                    if use_pycrcc:
-                                        # pycrcc
-                                        if shape.collide(shape_other):
-                                            junction_shapes.update({edge_id: edge_shape})
-                                            junction_shapes.update({edge_id_other: edge_shape_other})
-                                            from_nodes = [self.edges[str(edge_id)].getFromNode(),
-                                                          self.edges[str(edge_id_other)].getFromNode()]
-                                            merged_nodes.extend(from_nodes)
-                                            explored_nodes.extend(from_nodes)
-                                            queue.extend(from_nodes)
-                                            edges_intersect = True
-                                            break
-                                    else:
-                                        # shapely
-                                        if shape.intersection(shape_other).area > 0.0:
-                                            junction_shapes.update({edge_id: edge_shape})
-                                            junction_shapes.update({edge_id_other: edge_shape_other})
-                                            from_nodes = [self.edges[str(edge_id)].getFromNode(),
-                                                          self.edges[str(edge_id_other)].getFromNode()]
-                                            merged_nodes.extend(from_nodes)
-                                            explored_nodes.extend(from_nodes)
-                                            queue.extend(from_nodes)
-                                            edges_intersect = True
-                                            break
-
-                    edge_shapes_dict = {}
-                    for edge_out in outgoings:
-                        edge_shape = []
-                        for lanelet_id in (self.lanes_dict[edge_out.getID()][0], self.lanes_dict[edge_out.getID()][-1]):
-                            if not lanelet_id in polygons_dict:
-                                polygon = erode_lanelet_network.find_lanelet_by_id(lanelet_id).convert_to_polygon()
-                                if use_pycrcc:
-                                    polygons_dict[lanelet_id] = create_collision_object(polygon)
-                                else:
-                                    polygons_dict[lanelet_id] = polygon.shapely_object
-
-                            edge_shape.append(polygons_dict[lanelet_id])
-
-                        edge_shapes_dict[edge_out.getID()] = edge_shape
-
-                    for edge_id, edge_shape in edge_shapes_dict.items():
-                        for edge_id_other, junction_shape_other in junction_shapes.items():
-                            if edge_id == edge_id_other: continue
-                            edges_intersect = False
-                            for shape in edge_shape:
-                                if edges_intersect:
-                                    break
-                                for shape_other in junction_shape_other:
-                                    if use_pycrcc:
-                                        # pycrcc
-                                        if shape.collide(shape_other):
-                                            to_node = self.edges[str(edge_id)].getToNode()
-                                            merged_nodes.append(to_node)
-                                            explored_nodes.append(to_node)
-                                            queue.append(to_node)
-                                            edges_intersect = True
-                                            break
-                                            plt.figure()
-                                            from commonroad_cc.visualization.draw_dispatch import draw_object as dr2
-                                            dr2(shape)
-                                            dr2(shape_other)
-                                            plt.draw()
-                                            plt.autoscale()
-                                            plt.axis('equal')
-                                            plt.pause(0.001)
-                                            print('sdf')
-                                    else:
-                                        # shapely
-                                        if shape.intersection(shape_other).area > 0.0:
-                                            to_node = self.edges[str(edge_id)].getToNode()
-                                            merged_nodes.append(to_node)
-                                            explored_nodes.append(to_node)
-                                            queue.append(to_node)
-                                            edges_intersect = True
-                                            break
-
-                        for edge_id_other, edge_shape_other in edge_shapes_dict.items():
-                            if edge_id == edge_id_other: continue
-                            edges_intersect = False
-                            for shape in edge_shape:
-                                if edges_intersect:
-                                    break
-                                for shape_other in edge_shape_other:
-                                    if use_pycrcc:
-                                        # pycrcc
-                                        if shape.collide(shape_other):
-                                            junction_shapes.update({edge_id: edge_shape})
-                                            junction_shapes.update({edge_id_other: edge_shape_other})
-                                            to_nodes = [self.edges[str(edge_id)].getToNode(),
-                                                        self.edges[str(edge_id_other)].getToNode()]
-                                            merged_nodes.extend(to_nodes)
-                                            explored_nodes.extend(to_nodes)
-                                            queue.extend(to_nodes)
-                                            edges_intersect = True
-                                            break
-                                    else:
-                                        # shapely
-                                        if shape.intersection(shape_other).area > 0.0:
-                                            junction_shapes.update({edge_id: edge_shape})
-                                            junction_shapes.update({edge_id_other: edge_shape_other})
-                                            to_nodes = [self.edges[str(edge_id)].getToNode(),
-                                                        self.edges[str(edge_id_other)].getToNode()]
-                                            merged_nodes.extend(to_nodes)
-                                            explored_nodes.extend(to_nodes)
-                                            queue.extend(to_nodes)
-                                            edges_intersect = True
-                                            break
+                    for out_edg in outgoings:
+                        for intersecting_out in intersecting_edges[out_edg]:
+                            to_node = self.edges[str(intersecting_out)].getFromNode()
+                            merged_nodes.add(to_node)
+                            queue.append(to_node)
 
                 x_coord, y_coord = self._calculate_avg_nodes(merged_nodes)
                 coordinates = []
@@ -810,8 +620,6 @@ class CR2SumoMapConverter:
                 explored_nodes_all = explored_nodes_all.union(merged_nodes)
                 for merged_node in merged_nodes:
                     self.replaced_nodes[merged_node] = [new_node]
-
-        print('tock ')
 
     # self._detect_zipper
 
@@ -879,28 +687,6 @@ class CR2SumoMapConverter:
                 remove_edge = True
 
         return remove_edge
-    # def _simplify_connections(self):
-    #     """
-    #     Instantiate a new dictionary with only the connections that are meaningful after the simplification of the net
-    #     :return: nothing
-    #     """
-    #     self.simplified_connections = {}
-    #     for keyEdge, connections in self.connections.items():
-    #         to_edges = []
-    #         for connection in connections:
-    #             next = self.connections[connection]
-    #             to_edges = to_edges + next
-    #         fromEdgeNew, toEdgesNew = self._redefine_connection(keyEdge, to_edges)
-    #         mustAdd = self._check_addition(toEdgesNew)
-    #         alreadyUpdated = False
-    #         if len(to_edges) != 0 and mustAdd and fromEdgeNew in self.new_edges.keys():
-    #             if fromEdgeNew in self.simplified_connections.keys():
-    #                 toUpdate = self.simplified_connections.get(fromEdgeNew)
-    #                 toUpdate = toUpdate + toEdgesNew
-    #                 self.simplified_connections.update({fromEdgeNew: toUpdate})
-    #                 alreadyUpdated = True
-    #             if alreadyUpdated is False:
-    #                 self.simplified_connections.update({fromEdgeNew: toEdgesNew})
 
     def _check_addition(self, to_edges):
         """
@@ -936,18 +722,13 @@ class CR2SumoMapConverter:
         :return: nothing
         """
         edge_ids = [str(edge.getID()) for edge in list(self.new_edges.values())]
-        # print(self.connections)
         for from_lane, connections in self.connections.items():
             if from_lane.split("_")[0] not in edge_ids:
                 continue
             explored_lanes = set()
             queue = [[via] for via in connections]  # list with edge ids to toLane
             paths = []
-            # TODO verify same node!!
-            # queue = set(copy.deepcopy(connections))
-            # expand successor until non-internal (i.e. not in merged_nodes_all) edge is found
             while queue:
-                # print(queue)
                 current_path = queue.pop()
                 succ_lane = current_path[-1]
                 explored_lanes.add(succ_lane)
@@ -969,69 +750,6 @@ class CR2SumoMapConverter:
                     via = None
                 self.connection_shapes.update({(from_lane, via, path[-1]): shape})
         return
-            # from_edge_new, to_edges_new = self._redifine_connection_new(from_lane, to_lanes) #25_1, [24_0]
-
-
-            # mustAdd = self._check_addition_new([pair[1] for pair in via_successors])
-            # alreadyUpdated = False
-            # if len(to_edges_new) != 0 and int(from_edge_new.split("_")[0]) in self.new_edges.keys():
-            #     if from_edge_new.split("_")[0] in self.simplified_connections.keys():
-            #         toUpdate = self.simplified_connections.get(from_edge_new)
-            #         toUpdate = toUpdate + to_edges_new
-            #         self.simplified_connections.update({from_edge_new: toUpdate})
-            #         for edge, shape in zip(to_edges_new, shapes):
-            #             self.connection_shapes.update({(from_edge_new, edge): shape})
-            #         alreadyUpdated = True
-            #     if alreadyUpdated is False:
-            #         self.simplified_connections.update({from_edge_new: to_edges_new})
-            #         for edge, shape in zip(to_edges_new, shapes):
-            #             self.connection_shapes.update({(from_edge_new,edge): shape})
-
-    def _check_addition_new(self, toEdges):
-        """
-        Check if the connection is really to add
-        :param toEdges: destination edges to check
-        :return: True if the connection must be added, False otherwise
-        """
-        mustAdd = True
-        for connection in toEdges:
-            if int(connection.split("_")[0]) not in list(self.new_edges):
-                mustAdd = False
-        return mustAdd
-
-    def _redifine_connection_new(self, fromEdge, toEdges, vias=None):
-        """
-        Substitute the ID of edges that were transformed into lanes with their corresponding edge ID and lane index
-        :param fromEdge: source Edge ID
-        :param toEdges: destinations edges IDs
-        :return: fromEdgeNew, toEdgesNew
-        """
-        newEdges = []
-        self.mapping = self._map_edgeID_to_laneIndex()
-        fromEdgeNew = self.mapping.get(fromEdge)
-        for edge_id in toEdges:
-            new_pair = [None,None]
-            newEdges.append(self.mapping.get(edge_id))
-
-        return fromEdgeNew, newEdges
-
-    def _map_edgeID_to_laneIndex(self):
-        """
-        Specify each lane with its edge_id and lane_index with the form {laneID: edgeID_ laneIndex}}
-        :return:
-        """
-        self.mapping = {}
-        for keyLane, lanes in self.lanes_dict.items():
-            if len(lanes) == 1 and keyLane == lanes[0]:
-                self.mapping.update({lanes[0]: str(keyLane) + '_0'}) #{keyLane: 0}})
-            elif len(lanes) == 1 and keyLane != lanes[0]:
-                raise ValueError('Wrongly named edge?')
-            else:
-                for laneIndex, lane in enumerate(lanes):
-                    if lane not in self.mapping.keys():
-                        self.mapping.update({lane: str(keyLane) + '_' + str(laneIndex)}) #TODO: Problem might exist w.r.t. index value. Better getIndex.
-
-        return self.mapping
 
     def _calculate_avg_nodes(self, nodes):
         """
@@ -1232,10 +950,10 @@ class CR2SumoMapConverter:
         output = output_path
 
         # Calling of Netconvert
-        bashCommand = "netconvert --plain.extend-edge-shape=false " \
+        bashCommand = "netconvert --plain.extend-edge-shape=true " \
                       "--no-turnarounds=true " \
                       "--junctions.internal-link-detail=20 "\
-                      "--geometry.avoid-overlap=true "\
+                      "--geometry.avoid-overlap=false "\
                       "--offset.disable-normalization=true " \
                       "--node-files=" + str(nodesFile) + \
                       " --edge-files=" + str(edgesFile) + \
@@ -1325,7 +1043,9 @@ class CR2SumoMapConverter:
         self.merge_files(output_file)
 
 
-def _erode_lanelets(lanelet_network: LaneletNetwork, radius: float) -> LaneletNetwork:
+
+
+def _erode_lanelets(lanelet_network: LaneletNetwork, radius: float=0.4) -> LaneletNetwork:
     """Erode shape of lanelet by given radius."""
 
     lanelets_ero = []
@@ -1381,3 +1101,49 @@ def _erode_lanelets(lanelet_network: LaneletNetwork, radius: float) -> LaneletNe
         lanelets_ero.append(lanelet_ero)
 
     return LaneletNetwork.create_from_lanelet_list(lanelets_ero)
+
+
+def _find_intersecting_edges(edges_dict: Dict[int, List[int]], lanelet_network: LaneletNetwork) -> List[List[int]]:
+    """
+
+    :param lanelet_network:
+    :return:
+    """
+    eroded_lanelet_network = _erode_lanelets(lanelet_network)
+    polygons_dict = {}
+    edge_shapes_dict = {}
+    for edge_id, lanelet_ids in edges_dict.items():
+        edge_shape = []
+        for lanelet_id in (lanelet_ids[0], lanelet_ids[-1]):
+            if lanelet_id not in polygons_dict:
+                polygon = eroded_lanelet_network.find_lanelet_by_id(lanelet_id).convert_to_polygon()
+                if use_pycrcc:
+                    polygons_dict[lanelet_id] = create_collision_object(polygon)
+                else:
+                    polygons_dict[lanelet_id] = polygon.shapely_object
+
+                edge_shape.append(polygons_dict[lanelet_id])
+
+        edge_shapes_dict[edge_id] = edge_shape
+
+    intersecting_edges = []
+    for edge_id, shape_list in edge_shapes_dict.items():
+        for edge_id_other, shape_list_other in edge_shapes_dict.items():
+            if edge_id == edge_id_other: continue
+            edges_intersect = False
+            for shape_0 in shape_list:
+                if edges_intersect: break
+                for shape_1 in shape_list_other:
+                    if use_pycrcc:
+                        if shape_0.collide(shape_1):
+                            edges_intersect = True
+                            intersecting_edges.append([edge_id, edge_id_other])
+                            break
+                    else:
+                        # shapely
+                        if shape_0.intersection(shape_1).area > 0.0:
+                            edges_intersect = True
+                            intersecting_edges.append([edge_id, edge_id_other])
+                            break
+
+    return intersecting_edges
