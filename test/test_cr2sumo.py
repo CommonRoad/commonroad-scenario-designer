@@ -1,5 +1,3 @@
-import matplotlib
-matplotlib.use('TkAgg')
 import os
 import unittest
 
