@@ -3,14 +3,8 @@ This class contains functions for converting a CommonRoad map into a .net.xml SU
 """
 from collections import defaultdict
 from copy import deepcopy
-from typing import Dict, Tuple, List, Set
+from typing import Dict, Tuple, List
 
-import matplotlib
-from commonroad.geometry.shape import Polygon
-from commonroad_cc.collision_detection.pycrcc_collision_dispatch import create_collision_object
-
-matplotlib.use('TkAgg')
-import itertools
 import os
 import random
 import subprocess
@@ -35,18 +29,7 @@ from .sumolib_net.edge import Edge
 from .sumolib_net.lane import Lane
 
 from crmapconverter.sumo_map.config import CR2SumoNetConfig
-from .util import compute_max_curvature_from_polyline
-
-# try:
-#     import pycrcc
-#     from commonroad_cc.collision_detection.pycrcc_collision_dispatch import create_collision_object
-#     use_pycrcc = False
-# except ModuleNotFoundError:
-#     warnings.warn('Commonroad Collision Checker not installed, use shapely instead (slower).')
-#     import shapely as shl
-#     use_pycrcc = False
-import shapely as shl
-use_pycrcc = False
+from .util import compute_max_curvature_from_polyline, _find_intersecting_edges
 
 
 class CR2SumoMapConverter:
@@ -55,29 +38,29 @@ class CR2SumoMapConverter:
                  country_id: SupportedTrafficSignCountry=SupportedTrafficSignCountry.ZAMUNDA):
         """
 
-        :param scenario: CommonRoad scenario to be converted
+        :param lanelet_network: lanelet network to be converted
         :param conf: configuration file for additional map conversion parameters
+        :param country_id: ID of the country, used to evaluate traffic signs
         """
-        self.lanelet_network = None
         self.lanelet_network = lanelet_network
         self.conf:CR2SumoNetConfig = conf
 
         self.nodes: Dict[int, Node] = {}  # all the nodes of the map, key is the node ID
         self.edges: Dict[str, Edge] = {}  # all the edges of the map, key is the edge ID
-        self.points_dict: Dict[int, np.ndarray] = {}  # dictionary for the shape of the edges
-        self.connections = defaultdict(list)  # all the connections of the map
-        self.connection_shapes: Dict[Tuple[str,str],np.ndarray] = {}
+        self._points_dict: Dict[int, np.ndarray] = {}  # dictionary for the shape of the edges
+        self._connections = defaultdict(list)  # all the connections of the map
+        self._connection_shapes: Dict[Tuple[str, str], np.ndarray] = {}
         self.lanes_dict: Dict[int, Tuple[int,...]] = {}  # key is the ID of the edges and value the ID of the lanelets that compose it
         self.lanes: Dict[str, Lane] = {}
         self.edge_lengths = {}
-        self.explored_lanelets = []  # list of the already explored lanelets
-        self.max_vehicle_width = max(self.conf.veh_params['width'].values())
-        self.trafic_sign_interpreter:TrafficSigInterpreter = TrafficSigInterpreter(country_id, self.lanelet_network)
+        self._explored_lanelets = []  # list of the already explored lanelets
+        self._max_vehicle_width = max(self.conf.veh_params['width'].values())
+        self._trafic_sign_interpreter:TrafficSigInterpreter = TrafficSigInterpreter(country_id, self.lanelet_network)
         self.lane_id2lanelet_id: Dict[str, int] = {}
         self.lanelet_id2lane_id: Dict[int, str] = {}
         self.lanelet_id2edge_id: Dict[int, int] = {}
-        self.start_nodes = {}
-        self.end_nodes = {}
+        self._start_nodes = {}
+        self._end_nodes = {}
 
 
     @classmethod
@@ -85,17 +68,14 @@ class CR2SumoMapConverter:
         scenario, _ = CommonRoadFileReader(file_path_cr).open()
         return cls(scenario.lanelet_network, conf)
 
-    def convert_net(self):
-        # simplification steps
-        # self._merge_junctions(self.conf.max_node_distance)
+    def _convert_map(self):
         self._find_lanes()
         self._init_nodes()
         self._create_sumo_edges_and_lanes()
         self._init_connections()
-        # self._merge_junction_clustering(self.conf.max_node_distance)
+        # self._merge_junction_clustering(20)
         self._merge_junctions_intersecting_lanelets()
         self._filter_edges()
-        # self._simplify_connections_new()
         self._create_lane_based_connections()
 
 
@@ -103,14 +83,14 @@ class CR2SumoMapConverter:
         """
         Convert a CommonRoad net into a SUMO net
         sumo_net contains the converted net
-        points_dict contains the shape of the edges
-        :return: sumo_net, points_dict
+        _points_dict contains the shape of the edges
+        :return: sumo_net, _points_dict
         """
         node_id = 0  # running node_id, will be increased for every new node
-        self.points_dict = {lanelet.lanelet_id: lanelet.center_vertices for lanelet in self.lanelet_network.lanelets}
+        self._points_dict = {lanelet.lanelet_id: lanelet.center_vertices for lanelet in self.lanelet_network.lanelets}
 
         # plt.figure(figsize=[25,25])
-        # draw_object(self.lanelet_network, draw_params={'lanelet':{'show_label':False}, 'lanelet_network': {
+        # draw_object(self.lanelet_network, draw_params={'lanelet':{'show_label':True}, 'lanelet_network': {
         #     'intersection': {
         #         'draw_intersections': True}}})
         # plt.draw()
@@ -123,10 +103,10 @@ class CR2SumoMapConverter:
             successors = set(lanelet.successor)
 
             # prevent the creation of  multiple edges instead of edges with multiple lanes
-            if edge_id in self.explored_lanelets:
+            if edge_id in self._explored_lanelets:
                 continue
 
-            self.explored_lanelets.append(edge_id)
+            self._explored_lanelets.append(edge_id)
             adj_right_id = lanelet._adj_right
             adj_left_id = lanelet._adj_left
             right_same_direction = lanelet.adj_right_same_direction
@@ -143,7 +123,7 @@ class CR2SumoMapConverter:
             rightmost_lanelet = lanelet
             zipper = False
             while adj_right_id is not None and right_same_direction is not False:
-                self.explored_lanelets.append(adj_right_id)
+                self._explored_lanelets.append(adj_right_id)
                 # Get start and end nodes of right adjacency.
                 right_lanelet = self.lanelet_network.find_lanelet_by_id(adj_right_id)
                 if right_lanelet.successor is not None:
@@ -161,7 +141,7 @@ class CR2SumoMapConverter:
 
             # find leftmost lanelet
             while adj_left_id is not None and left_same_direction is not False:
-                self.explored_lanelets.append(adj_left_id)
+                self._explored_lanelets.append(adj_left_id)
                 # Get start and end nodes of left adjacency.
                 left_lanelet = self.lanelet_network.find_lanelet_by_id(adj_left_id)
                 if left_lanelet.successor is not None:
@@ -204,12 +184,12 @@ class CR2SumoMapConverter:
         assert node_type == "from" or node_type == "to"
         if node_type == "from":
             index = 0
-            if edge_id in self.start_nodes:
+            if edge_id in self._start_nodes:
                 # already assigned to a node, see @REFERENCE_1
                 return
         else:
             index = -1
-            if edge_id in self.end_nodes:
+            if edge_id in self._end_nodes:
                 return
 
         conn_edges = set()
@@ -229,9 +209,9 @@ class CR2SumoMapConverter:
         if len(conn_edges) > 0:
             node_candidates = []
             if node_type == "from":
-                node_list_other = self.end_nodes
+                node_list_other = self._end_nodes
             else:
-                node_list_other = self.start_nodes
+                node_list_other = self._start_nodes
 
             # check if connected edges already have a start/end node
             for to_edg in conn_edges:
@@ -243,22 +223,22 @@ class CR2SumoMapConverter:
             if node_candidates:
                 # assign existing node
                 if node_type == "from":
-                    self.start_nodes[edge_id] = node_candidates[0]
+                    self._start_nodes[edge_id] = node_candidates[0]
                 else:
-                    self.end_nodes[edge_id] = node_candidates[0]
+                    self._end_nodes[edge_id] = node_candidates[0]
             else:
                 # create new node
                 coords = self._compute_node_coords(lanelets, index=index)
                 self.nodes[self.node_id_next] = Node(self.node_id_next, node_type, coords, [])
                 # @REFERENCE_1
                 if node_type == "from":
-                    self.start_nodes[edge_id] = self.node_id_next
+                    self._start_nodes[edge_id] = self.node_id_next
                     for conn_edg in conn_edges:
-                        self.end_nodes[conn_edg] = self.node_id_next
+                        self._end_nodes[conn_edg] = self.node_id_next
                 else:
-                    self.end_nodes[edge_id] = self.node_id_next
+                    self._end_nodes[edge_id] = self.node_id_next
                     for conn_edg in conn_edges:
-                        self.start_nodes[conn_edg] = self.node_id_next
+                        self._start_nodes[conn_edg] = self.node_id_next
 
                 self.node_id_next += 1
         else:
@@ -266,9 +246,9 @@ class CR2SumoMapConverter:
             coords = self._compute_node_coords(lanelets, index=index)
             self.nodes[self.node_id_next] = Node(self.node_id_next, node_type, coords, [])
             if node_type == "from":
-                self.start_nodes[edge_id] = self.node_id_next
+                self._start_nodes[edge_id] = self.node_id_next
             else:
-                self.end_nodes[edge_id] = self.node_id_next
+                self._end_nodes[edge_id] = self.node_id_next
 
             self.node_id_next += 1
 
@@ -278,8 +258,8 @@ class CR2SumoMapConverter:
         start_nodes = {}  # contains start nodes of each edge{edge_id: node_id}
         end_nodes = {}  # contains end nodes of each edge{edge_id: node_id}
         self.node_id_next = 1
-        self.start_nodes = {}
-        self.end_nodes = {}
+        self._start_nodes = {}
+        self._end_nodes = {}
         for edge_id, lanelet_ids in self.lanes_dict.items():
             self._create_node(edge_id, lanelet_ids, 'from')
             self._create_node(edge_id, lanelet_ids, 'to')
@@ -292,8 +272,8 @@ class CR2SumoMapConverter:
 
         for edge_id, lanelet_ids in self.lanes_dict.items():
             # Creation of Edge, using id as name
-            start_node = self.nodes[self.start_nodes[edge_id]]
-            end_node = self.nodes[self.end_nodes[edge_id]]
+            start_node = self.nodes[self._start_nodes[edge_id]]
+            end_node = self.nodes[self._end_nodes[edge_id]]
             # TODO: create priority from right of way rule in CR file
             edge = Edge(id=edge_id, fromN=start_node, toN=end_node,
                         prio=1, function='normal', name=edge_id)
@@ -301,20 +281,20 @@ class CR2SumoMapConverter:
             if self.conf.overwrite_speed_limit is not None:
                 speed_limit = self.conf.overwrite_speed_limit
             else:
-                speed_limit = self.trafic_sign_interpreter.speed_limit(frozenset([lanelet.lanelet_id]))
+                speed_limit = self._trafic_sign_interpreter.speed_limit(frozenset([lanelet.lanelet_id]))
                 if speed_limit is None or np.isinf(speed_limit):
                     speed_limit = self.conf.unrestricted_speed_limit_default
 
 
             for lanelet_id in lanelet_ids:
-                shape = self.points_dict.get(lanelet_id)
+                shape = self._points_dict.get(lanelet_id)
                 lanelet = self.lanelet_network.find_lanelet_by_id(lanelet_id)
                 lanelet_width = self._calculate_lanelet_width_from_cr(lanelet)
                 max_curvature = compute_max_curvature_from_polyline(shape)
-                # if lanelet_width <= self.max_vehicle_width:
+                # if lanelet_width <= self._max_vehicle_width:
                 #     raise ValueError(
                 #         "The lanelet width {} meters on lanelet {} is smaller than the allowed maximum vehicle width {} meters!".format(
-                #             lanelet_width, lanelet_id, self.max_vehicle_width))
+                #             lanelet_width, lanelet_id, self._max_vehicle_width))
                 disallow = self._filter_disallowed_vehicle_classes(max_curvature, lanelet_width, lanelet_id)
 
                 lane = Lane(edge, speed_limit, self.edge_lengths[edge_id], width=lanelet_width,
@@ -337,7 +317,7 @@ class CR2SumoMapConverter:
         """
         for l in self.lanelet_network.lanelets:
             if l.successor is not None:
-                self.connections[self.lanelet_id2lane_id[l.lanelet_id]].extend(
+                self._connections[self.lanelet_id2lane_id[l.lanelet_id]].extend(
                 [self.lanelet_id2lane_id[succ] for succ in l.successor])
 
     def _filter_disallowed_vehicle_classes(self, max_curvature:float, lanelet_width, lanelet_id) -> str:
@@ -350,7 +330,7 @@ class CR2SumoMapConverter:
         """
         if max_curvature > 0.001:  # not straight lanelet
             radius = 1 / max_curvature
-            max_vehicle_length_sq = 4 * ((radius + lanelet_width / 2) ** 2 - (radius + self.max_vehicle_width / 2) ** 2)
+            max_vehicle_length_sq = 4 * ((radius + lanelet_width / 2) ** 2 - (radius + self._max_vehicle_width / 2) ** 2)
 
             # select the disallowed vehicle classes
             disallow = None
@@ -376,8 +356,8 @@ class CR2SumoMapConverter:
         :return: average_width
         """
         helper_matrix = lanelet.right_vertices - lanelet.left_vertices
-        distance_array = np.sqrt(helper_matrix[:,0] ** 2 + helper_matrix[:,1] ** 2)
-        average_width = np.average(distance_array)
+        distance_array = helper_matrix[:,0] ** 2 + helper_matrix[:,1] ** 2
+        average_width = np.sqrt(np.min(distance_array))
         return average_width
 
     # def _calculate_total_lanes_length(self):
@@ -414,121 +394,6 @@ class CR2SumoMapConverter:
             if len(nodes) != 1:
                 number_of_junctions += 1
         return number_of_junctions
-
-    #todo: not used anymore
-    def _merge_junctions(self, max_node_distance):
-        """
-        Merging nodes into one junction based on the parameter max_node_distance
-        :param max_node_distance: nodes that are closer than this value will be merged (value in meters)
-        :return: nothing
-        """
-        warnings.warn('use _merge_junction_clustering instead', category=DeprecationWarning)
-        self.new_nodes = {} #new dictionary for the merged nodes
-        self.new_edges = {} #new dictionary for the edges after the simplifications
-        self.merged_dictionary = {} #key is the merged node, value is a list of the nodes that form the merged node
-
-        explored_nodes = []
-        for node_id, current_node in self.nodes.items():
-            merged_nodes = []
-            if current_node not in explored_nodes:
-                explored_nodes.append(current_node)
-                merged_nodes.append(current_node)
-                node_id = current_node.getID()
-                # find merge candidates first
-                for node in self.nodes.values():
-                    incomings = current_node.getIncoming()
-                    outgoings = current_node.getOutgoing()
-                    num_connected = len(incomings) + len(outgoings)
-                    if current_node == node or num_connected == 1:
-                        continue
-                    current_node_coordinates = np.asarray(current_node.getCoord())
-                    node_coordinates = np.asarray(node.getCoord())
-                    distance = np.linalg.norm(current_node_coordinates - node_coordinates)
-                    if distance < max_node_distance:
-                        merged_nodes.append(node)
-                        if len(merged_nodes) == 1:
-                            explored_nodes.append(node)
-
-                # detailed graph search for nodes to merge
-                if len(merged_nodes) > 1:
-                    # Create graph for candidate nodes
-                    Net = nx.Graph()
-                    for node in merged_nodes:
-                        Net.add_node(node.getID())
-                    for edge_id, edge in self.edges.items():
-                        fromNode = edge.getFromNode().getID()
-                        toNode = edge.getToNode().getID()
-                        if Net.has_node(fromNode) and Net.has_node(toNode):
-                            Net.add_edge(fromNode, toNode, length=edge.getLength())
-
-                    # Choose necessary nodes for merging using graph search
-                    merged_nodes_in_graph = [current_node]
-                    for node in merged_nodes:
-                        u = current_node.getID()
-                        v = node.getID()
-                        if current_node != node and nx.algorithms.has_path(Net, u,v):
-                            graph_distance = nx.algorithms.shortest_paths.dijkstra_path_length(Net, u, v, weight='length')
-                            if graph_distance < max_node_distance:
-                                merged_nodes_in_graph.append(node)
-                                explored_nodes.append(node)  # toModify
-                    merged_nodes = merged_nodes_in_graph
-
-                x_coord, y_coord = self._calculate_avg_nodes(merged_nodes)
-                coordinates = []
-                coordinates.append(x_coord)
-                coordinates.append(y_coord)
-                merged_node = Node(node_id, 'priority', coordinates, []) #new merged node
-                self.new_nodes.update({node_id: merged_node})
-                self.merged_dictionary.update({current_node: merged_nodes})
-
-    def _merge_junction_clustering(self, max_node_distance):
-        """
-        Merging nodes into one junction based on the parameter max_node_distance
-        :param max_node_distance: nodes that are closer than this value will be merged (value in meters)
-        :return: nothing
-        """
-        self.new_nodes = {} #new dictionary for the merged nodes
-        self.new_edges = {} #new dictionary for the edges after the simplifications
-        self.merged_dictionary = {} #key is the merged node, value is a list of the nodes that form the merged node
-
-        explored_nodes = []
-        for node_id, current_node in self.nodes.items():
-            merged_nodes = [current_node]
-
-            if current_node not in explored_nodes:
-                queue = [current_node]
-                i=0
-                # expand all connected nodes until length of connecting edge > max_node_distance
-                while len(queue) > 0:
-                    assert i < 10000, 'Something went wrong'
-                    i += 1
-                    expanded_node = queue.pop()
-                    incomings = expanded_node.getIncoming()
-                    outgoings = expanded_node.getOutgoing()
-                    for edge_in in incomings:
-                        if edge_in.getLength() < max_node_distance:
-                            to_node = edge_in.getFromNode()
-                            if not to_node in explored_nodes:
-                                merged_nodes.append(to_node)
-                                queue.append(to_node)
-                                explored_nodes.append(to_node)
-
-                    for edge_out in outgoings:
-                        if edge_out.getLength() < max_node_distance:
-                            from_node = edge_out.getToNode()
-                            if not from_node in explored_nodes:
-                                merged_nodes.append(from_node)
-                                queue.append(from_node)
-                                explored_nodes.append(from_node)
-
-                x_coord, y_coord = self._calculate_avg_nodes(merged_nodes)
-                coordinates = []
-                coordinates.append(x_coord)
-                coordinates.append(y_coord)
-                # self._detect_zipper()
-                merged_node = Node(node_id, 'priority', coordinates, []) #new merged node
-                self.new_nodes.update({node_id: merged_node})
-                self.merged_dictionary.update({current_node: merged_nodes})
 
     def _merge_junctions_intersecting_lanelets(self):
         """
@@ -581,7 +446,7 @@ class CR2SumoMapConverter:
                 coordinates.append(x_coord)
                 coordinates.append(y_coord)
                 # self._detect_zipper()
-                merged_node = Node(self.node_id_next, 'priority', coordinates, [])  # new merged node
+                merged_node = Node(self.node_id_next, 'unregulated', coordinates, [])  # new merged node
                 self.node_id_next += 1
                 self.new_nodes.update({merged_node.getID(): merged_node})
                 merged_nodes = set([n.getID() for n in merged_nodes])
@@ -722,7 +587,7 @@ class CR2SumoMapConverter:
         :return: nothing
         """
         edge_ids = [str(edge.getID()) for edge in list(self.new_edges.values())]
-        for from_lane, connections in self.connections.items():
+        for from_lane, connections in self._connections.items():
             if from_lane.split("_")[0] not in edge_ids:
                 continue
             explored_lanes = set()
@@ -733,7 +598,7 @@ class CR2SumoMapConverter:
                 succ_lane = current_path[-1]
                 explored_lanes.add(succ_lane)
                 if succ_lane.split("_")[0] not in edge_ids:
-                    for next_lane in self.connections[succ_lane]:
+                    for next_lane in self._connections[succ_lane]:
                         if next_lane not in explored_lanes:
                             queue.append(current_path + [next_lane])
                 else:
@@ -743,12 +608,12 @@ class CR2SumoMapConverter:
             # to_lanes = [path[-1] for path in paths]
             for path in paths:
                 if len(path) > 1:
-                    shape = np.vstack([self.points_dict[self.lane_id2lanelet_id[lane_id]] for lane_id in path[:-1]])
+                    shape = np.vstack([self._points_dict[self.lane_id2lanelet_id[lane_id]] for lane_id in path[:-1]])
                     via = path[1]
                 else:
                     shape = None
                     via = None
-                self.connection_shapes.update({(from_lane, via, path[-1]): shape})
+                self._connection_shapes.update({(from_lane, via, path[-1]): shape})
         return
 
     def _calculate_avg_nodes(self, nodes):
@@ -791,7 +656,7 @@ class CR2SumoMapConverter:
     #     self._write_nodes_file(output_path)
     #     self._write_connections_file(output_path)
 
-    def write_net_new(self, output_path):
+    def write_intermediate_files(self, output_path):
         """
         Function for writing the edges and nodes files in xml format
         :param output_path: the relative path of the output
@@ -807,7 +672,7 @@ class CR2SumoMapConverter:
         :param output_path: path for the file
         :return: nothing
         """
-        with open(os.path.join(os.path.dirname(output_path), '_edges.net.xml'), 'w+') as output_file:
+        with open(os.path.join(os.path.dirname(output_path), 'edges.net.xml'), 'w+') as output_file:
             sumolib.writeXMLHeader(output_file, '')
             root = ET.Element('root')
             edges = ET.SubElement(root, 'edges')
@@ -851,7 +716,7 @@ class CR2SumoMapConverter:
         :param output_path: path for the file
         :return: nothing
         """
-        with open(os.path.join(os.path.dirname(output_path), '_nodes.net.xml'), 'w+') as output_file:
+        with open(os.path.join(os.path.dirname(output_path), 'nodes.net.xml'), 'w+') as output_file:
             sumolib.writeXMLHeader(output_file, '')
             root = ET.Element('root')
             nodes = ET.SubElement(root, 'nodes')
@@ -859,28 +724,6 @@ class CR2SumoMapConverter:
                 ET.SubElement(nodes, 'node', id=str(node.getID()), x=str(node.getCoord()[0]),
                               y=str(node.getCoord()[1]), function=node.getType())
             output_str = ET.tostring(nodes, encoding='utf8', method='xml').decode("utf-8")
-            reparsed = minidom.parseString(output_str)
-            output_file.write(reparsed.toprettyxml(indent="\t"))
-
-    def _write_connections_file(self, output_path):
-        """
-        Function for writing the connections file
-        :param output_path: path for the file
-        :return: nothing
-        """
-        warnings.warn("deprecated", DeprecationWarning)
-        with open(os.path.join(os.path.dirname(output_path), '_connections.net.xml'), 'w+') as output_file:
-            sumolib.writeXMLHeader(output_file, '')
-            root = ET.Element('root')
-            connections = ET.SubElement(root, 'connections')
-            for key, via_successors in self.simplified_connections.items():
-                for pair in via_successors:
-                    connection = ET.SubElement(connections, 'connection')
-                    connection.set('from', str(key))
-                    connection.set('to', str(pair[1]))
-                    if pair[0] is not None:
-                        connection.set('via', str(pair[0]))
-            output_str = ET.tostring(connections, encoding='utf8', method='xml').decode("utf-8")
             reparsed = minidom.parseString(output_str)
             output_file.write(reparsed.toprettyxml(indent="\t"))
 
@@ -894,23 +737,26 @@ class CR2SumoMapConverter:
             sumolib.writeXMLHeader(output_file, '')
             root = ET.Element('root')
             connections = ET.SubElement(root, 'connections')
-            for path, shape in self.connection_shapes.items():
+            for path, shape in self._connection_shapes.items():
                 connection = ET.SubElement(connections, 'connection')
                 connection.set('from', str(path[0].split('_')[0]))
                 connection.set('to', str(path[2].split('_')[0]))
                 connection.set('fromLane', str(path[0].split('_')[1]))
                 connection.set('toLane', str(path[2].split('_')[1]))
+                if path[1] is not None:
+                    connection.set('via', str(path[1]))
+                    if shape is not None:
+                        connection.set('shape', self._getShapeString(shape))
+                # connection.set('pass', 'true')
+                connection.set('keepClear', 'true')
                 connection.set('contPos', str(self.conf.wait_pos_internal_junctions))
-                if shape is not None:
-                    connection.set('shape', self._getShapeString(shape))
-                # if path[1] is not None:
-                #     connection.set('via', str(path[1]))
+
             output_str = ET.tostring(connections, encoding='utf8', method='xml').decode("utf-8")
             reparsed = minidom.parseString(output_str)
             output_file.write(reparsed.toprettyxml(indent="\t"))
 
     @staticmethod
-    def merge_files(output_path:str, cleanup=True) -> bool:
+    def merge_intermediate_files(output_path:str, cleanup=True) -> bool:
         """
         Function that merges the edges and nodes files into one using netconvert
         :param output_path: the relative path of the output
@@ -921,17 +767,17 @@ class CR2SumoMapConverter:
         to_remove = ["options", "xml"]
 
         # Removing header in edges file
-        with open(os.path.join(os.path.dirname(output_path), '_edges.net.xml'), 'r') as file:
+        with open(os.path.join(os.path.dirname(output_path), 'edges.net.xml'), 'r') as file:
             lines = file.readlines()
-        with open(os.path.join(os.path.dirname(output_path), '_edges.net.xml'), 'w') as file:
+        with open(os.path.join(os.path.dirname(output_path), 'edges.net.xml'), 'w') as file:
             for line in lines:
                 if not any(word in line for word in to_remove):
                     file.write(line)
 
         # Removing header in nodes file
-        with open(os.path.join(os.path.dirname(output_path), '_nodes.net.xml'), 'r') as file:
+        with open(os.path.join(os.path.dirname(output_path), 'nodes.net.xml'), 'r') as file:
             lines = file.readlines()
-        with open(os.path.join(os.path.dirname(output_path), '_nodes.net.xml'), 'w') as file:
+        with open(os.path.join(os.path.dirname(output_path), 'nodes.net.xml'), 'w') as file:
             for line in lines:
                 if not any(word in line for word in to_remove):
                     file.write(line)
@@ -944,8 +790,8 @@ class CR2SumoMapConverter:
                 if not any(word in line for word in to_remove):
                     file.write(line)
 
-        nodesFile = os.path.join(os.path.dirname(output_path), '_nodes.net.xml')
-        edgesFile = os.path.join(os.path.dirname(output_path), '_edges.net.xml')
+        nodesFile = os.path.join(os.path.dirname(output_path), 'nodes.net.xml')
+        edgesFile = os.path.join(os.path.dirname(output_path), 'edges.net.xml')
         connectionsFile = os.path.join(os.path.dirname(output_path), '_connections.net.xml')
         output = output_path
 
@@ -953,7 +799,7 @@ class CR2SumoMapConverter:
         bashCommand = "netconvert --plain.extend-edge-shape=true " \
                       "--no-turnarounds=true " \
                       "--junctions.internal-link-detail=20 "\
-                      "--geometry.avoid-overlap=false "\
+                      "--geometry.avoid-overlap=true "\
                       "--offset.disable-normalization=true " \
                       "--node-files=" + str(nodesFile) + \
                       " --edge-files=" + str(edgesFile) + \
@@ -1036,114 +882,13 @@ class CR2SumoMapConverter:
                      verticalalignment='top')
         plt.show()
 
-    def convert_to_net_file(self, output_file:str):
-        """Convert the Commonroad scenario to a net.xml file, specified by the absolute  path output_file."""
-        self.convert_net()
-        self.write_net_new(output_file)
-        self.merge_files(output_file)
+    def convert_to_net_file(self, output_file:str) -> bool:
+        """
+        Convert the Commonroad scenario to a net.xml file, specified by the absolute  path output_file.
+        :param path of the returned net.xml file
+        :return returns whether conversion was successful
+        """
+        self._convert_map()
+        self.write_intermediate_files(output_file)
+        return self.merge_intermediate_files(output_file)
 
-
-
-
-def _erode_lanelets(lanelet_network: LaneletNetwork, radius: float=0.4) -> LaneletNetwork:
-    """Erode shape of lanelet by given radius."""
-
-    lanelets_ero = []
-    crop_meters = 0.3
-    min_factor = 0.1
-    for lanelet in lanelet_network.lanelets:
-        lanelet_ero = deepcopy(lanelet)
-
-        # shorten lanelet by radius
-        if len(lanelet_ero._center_vertices) > 3:
-            i_max = int(np.floor(len(lanelet_ero._center_vertices) - 1 / 2))
-
-            i_crop_0 = np.argmax(lanelet_ero.distance >= crop_meters)
-            i_crop_1 = len(lanelet_ero.distance) - np.argmax(
-                lanelet_ero.distance >= lanelet_ero.distance[-1] - crop_meters)
-            i_crop_0 = min(i_crop_0, i_max)
-            i_crop_1 = min(i_crop_1, i_max)
-
-            lanelet_ero._left_vertices = lanelet_ero._left_vertices[i_crop_0: -i_crop_1]
-            lanelet_ero._center_vertices = lanelet_ero._center_vertices[i_crop_0: -i_crop_1]
-            lanelet_ero._right_vertices = lanelet_ero._right_vertices[i_crop_0: -i_crop_1]
-        else:
-            factor_0 = min(1, crop_meters / lanelet_ero.distance[1])
-            lanelet_ero._left_vertices[0] = factor_0 * lanelet_ero._left_vertices[0]\
-                                            + (1-factor_0) * lanelet_ero._left_vertices[1]
-            lanelet_ero._right_vertices[0] = factor_0 * lanelet_ero._right_vertices[0] \
-                                            + (1 - factor_0) * lanelet_ero._right_vertices[1]
-            lanelet_ero._center_vertices[0] = factor_0 * lanelet_ero._center_vertices[0] \
-                                            + (1 - factor_0) * lanelet_ero._center_vertices[1]
-
-            factor_0 = min(1, crop_meters / (lanelet_ero.distance[-1] - lanelet_ero.distance[-2]))
-            lanelet_ero._left_vertices[-1] = factor_0 * lanelet_ero._left_vertices[-2] \
-                                            + (1 - factor_0) * lanelet_ero._left_vertices[-1]
-            lanelet_ero._right_vertices[-1] = factor_0 * lanelet_ero._right_vertices[-2] \
-                                             + (1 - factor_0) * lanelet_ero._right_vertices[-1]
-            lanelet_ero._center_vertices[-1] = factor_0 * lanelet_ero._center_vertices[-2] \
-                                              + (1 - factor_0) * lanelet_ero._center_vertices[-1]
-
-        # compute eroded vector from center
-        perp_vecs = (lanelet_ero.left_vertices - lanelet_ero.right_vertices) * 0.5
-        length = np.linalg.norm(perp_vecs, axis=1)
-        factors = np.divide(radius, length)  # 0.5 * np.ones_like(length))
-        factors = np.reshape(factors, newshape=[-1, 1])
-        factors = 1 - np.maximum(factors, np.ones_like(factors) * min_factor) # ensure minimum width of eroded lanelet
-        perp_vec_ero = np.multiply(perp_vecs, factors)
-
-        # recompute vertices
-        lanelet_ero._left_vertices = lanelet_ero.center_vertices + perp_vec_ero
-        lanelet_ero._right_vertices = lanelet_ero.center_vertices - perp_vec_ero
-        if lanelet_ero._polygon is not None:
-            lanelet_ero._polygon = Polygon(np.concatenate((lanelet_ero.right_vertices,
-                                                           np.flip(lanelet_ero.left_vertices, 0))))
-        lanelets_ero.append(lanelet_ero)
-
-    return LaneletNetwork.create_from_lanelet_list(lanelets_ero)
-
-
-def _find_intersecting_edges(edges_dict: Dict[int, List[int]], lanelet_network: LaneletNetwork) -> List[List[int]]:
-    """
-
-    :param lanelet_network:
-    :return:
-    """
-    eroded_lanelet_network = _erode_lanelets(lanelet_network)
-    polygons_dict = {}
-    edge_shapes_dict = {}
-    for edge_id, lanelet_ids in edges_dict.items():
-        edge_shape = []
-        for lanelet_id in (lanelet_ids[0], lanelet_ids[-1]):
-            if lanelet_id not in polygons_dict:
-                polygon = eroded_lanelet_network.find_lanelet_by_id(lanelet_id).convert_to_polygon()
-                if use_pycrcc:
-                    polygons_dict[lanelet_id] = create_collision_object(polygon)
-                else:
-                    polygons_dict[lanelet_id] = polygon.shapely_object
-
-                edge_shape.append(polygons_dict[lanelet_id])
-
-        edge_shapes_dict[edge_id] = edge_shape
-
-    intersecting_edges = []
-    for edge_id, shape_list in edge_shapes_dict.items():
-        for edge_id_other, shape_list_other in edge_shapes_dict.items():
-            if edge_id == edge_id_other: continue
-            edges_intersect = False
-            for shape_0 in shape_list:
-                if edges_intersect: break
-                for shape_1 in shape_list_other:
-                    if use_pycrcc:
-                        if shape_0.collide(shape_1):
-                            edges_intersect = True
-                            intersecting_edges.append([edge_id, edge_id_other])
-                            break
-                    else:
-                        # shapely
-                        if shape_0.intersection(shape_1).area > 0.0:
-                            edges_intersect = True
-                            intersecting_edges.append([edge_id, edge_id_other])
-                            break
-
-    return intersecting_edges

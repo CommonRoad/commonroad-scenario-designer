@@ -8,8 +8,6 @@ class CR2SumoNetConfig:
     overwrite_speed_limit = 130/3.6
     # [m/s] default max. speed for SUMO for unrestricted sped limits
     unrestricted_max_speed_default = 120 / 3.6
-    # [m] distance threshold under which nodes are merged to one junction
-    max_node_distance = 10
     # [m] shifted waiting position at junction (equivalent to SUMO's contPos parameter)
     wait_pos_internal_junctions = -4.0
     # [m/s] default speed limit when no speed_limit is given
