@@ -348,7 +348,7 @@ class OSM2LConverter:
         if subtype == "bicycle_lane" or subtype == "shared_walkway" or subtype == "road":
             users_one_way.add(RoadUser.BICYCLE)
             if subtype != "road":
-                lanelet_types.add(LaneletType.BIKE_LANE)
+                lanelet_types.add(LaneletType.BICYCLE_LANE)
         if subtype == "bus_lane":
             users_one_way.add(RoadUser.BUS)
             lanelet_types.add(LaneletType.BUS_LANE)
