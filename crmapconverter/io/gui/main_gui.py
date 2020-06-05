@@ -24,9 +24,9 @@ except:
     print("You need first to install commonroad")
 
 try:
-    from crmapconverter.io.V2_0.gui_2_0_controller import *
-    from crmapconverter.io.V2_0.gui_2_0_documentation import *
-    import crmapconverter.io.gui as G
+    from crmapconverter.io.gui.gui_controller import *
+    from crmapconverter.io.gui.gui_documentation import *
+    from crmapconverter.io.gui.opendrive_gui import OpenDriveConvertWindow
     from crmapconverter.osm2cr.converter_modules.gui_modules.gui_embedding import StartMenu, MainApp
     from crmapconverter.osm.osm2lanelet import OSM2LConverter
     from crmapconverter.osm.parser import OSMParser
@@ -355,7 +355,7 @@ class OD2CRActivity1(OD2CRFrame):
         def open_OD2():
             """Function driving the opening of an OpenDRIVE map in the converter"""
             app = QApplication(sys.argv)
-            A = G.OpenDriveConvertWindow("")
+            A = OpenDriveConvertWindow("")
             app.disconnect()
             self.path = A.openOpenDriveFileDialog()
             app.exit()
@@ -369,7 +369,7 @@ class OD2CRActivity1(OD2CRFrame):
             """Function performing the conversion and opeing a save file pop-up
             to save the CommonRoad map created"""
             app = QApplication(sys.argv)
-            C = G.OpenDriveConvertWindow("")
+            C = OpenDriveConvertWindow("")
             C.load_opendriveFile(self.path)
             C.exportAsCommonRoad()
             app.exit()

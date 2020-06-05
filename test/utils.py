@@ -26,7 +26,7 @@ def elements_equal(e1: etree.Element, e2: etree.Element) -> bool:
 
     """
 
-    if e1.tag != e2.tag:
+    if e1.tag != e2.tag and e1.text is not None and e2.text is not None:
         _print_fail("tag", e1.tag, e2.tag)
         return False
     if e1.text != e2.text:
@@ -42,10 +42,12 @@ def elements_equal(e1: etree.Element, e2: etree.Element) -> bool:
             return False
     for name, value in e1.attrib.items():
         if e2.attrib.get(name) != value:
-            print(
-                f"Attributes do not match: {name}={value}, {name}={e2.attrib.get(name)}"
-            )
-            return False
+            try:  # Only accuracy error
+                if abs(float(e2.attrib.get(name)) - float(value)) > tolerance:
+                    print(f"Attributes do not match: {name}={value}, {name}={e2.attrib.get(name)}")
+                    return False
+            except ValueError:
+                return False
     for name in e2.attrib.keys():
         if name not in e1.attrib:
             print(f"e2 has an attribute e1 is missing: {name}")
