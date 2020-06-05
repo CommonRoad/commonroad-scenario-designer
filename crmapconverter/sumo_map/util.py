@@ -55,8 +55,8 @@ def _erode_lanelets(lanelet_network: LaneletNetwork, radius: float=0.4) -> Lanel
         lanelet_ero = deepcopy(lanelet)
 
         # shorten lanelet by radius
-        if len(lanelet_ero._center_vertices) > 3:
-            i_max = int(np.floor(len(lanelet_ero._center_vertices) - 1 / 2))
+        if len(lanelet_ero._center_vertices) > 4:
+            i_max = int((np.floor(len(lanelet_ero._center_vertices) - 1) / 2)) - 1
 
             i_crop_0 = np.argmax(lanelet_ero.distance >= crop_meters)
             i_crop_1 = len(lanelet_ero.distance) - np.argmax(
@@ -117,6 +117,7 @@ def _find_intersecting_edges(edges_dict: Dict[int, List[int]], lanelet_network: 
         for lanelet_id in (lanelet_ids[0], lanelet_ids[-1]):
             if lanelet_id not in polygons_dict:
                 polygon = eroded_lanelet_network.find_lanelet_by_id(lanelet_id).convert_to_polygon()
+
                 if use_pycrcc:
                     polygons_dict[lanelet_id] = create_collision_object(polygon)
                 else:
