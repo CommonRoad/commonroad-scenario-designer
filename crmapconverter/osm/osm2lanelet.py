@@ -332,7 +332,7 @@ class OSM2LConverter:
         users_one_way = set()
         users_bidirectional = set()
         one_way_val = way_rel.tag_dict.get("one_way")
-        bidirectional, one_way = one_way_val == "yes", one_way_val == "no"
+        bidirectional, one_way = one_way_val == "no", one_way_val == "yes"
         if way_rel.tag_dict.get("bicycle") == "yes":
             if one_way:
                 users_one_way.add(RoadUser.BICYCLE)
