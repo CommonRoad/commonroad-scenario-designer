@@ -322,16 +322,16 @@ class IntermediateFormat:
 
         # sort after size
         sorted_angels = {k: v for k, v in sorted(angels.items(), key=lambda item: item[1])}
-        print(sorted_angels)
+        sorted_keys = list(sorted_angels.keys())
+        sorted_values = list(sorted_angels.values())
+
         # if 3 successors we assume the directions
         if len(sorted_angels) == 3:
-            directions = {sorted_angels.keys[0]: 'left', sorted_angels.keys[1]: 'through', sorted_angels.keys[2]: 'right'}
+            directions = {sorted_keys[0]: 'left', sorted_keys[1]: 'through', sorted_keys[2]: 'right'}
 
         # if 2 successors we assume that they both cannot have the same direction
         if len(sorted_angels) == 2:
-            sorted_keys = list(sorted_angels.keys())
 
-            sorted_values = list(sorted_angels.values())
             directions = dict.fromkeys(sorted_angels)
 
             if (abs(sorted_values[0]) > straight_threshold_angel) and (abs(sorted_values[1]) > straight_threshold_angel):
