@@ -74,6 +74,11 @@ ACCEPTED_HIGHWAYS = [
     "living_street",
     "service",
 ]
+ACCEPTED_PATHWAYS = [
+    "path",
+    "footway",
+    "cycleway"
+]
 # number of lanes for each type of road should be >=1
 LANECOUNTS = {
     "motorway": 6,
@@ -90,6 +95,9 @@ LANECOUNTS = {
     "tertiary_link": 2,
     "living_street": 2,
     "service": 2,
+    "path": 1,
+    "footway": 1,
+    "cycleway": 1
 }
 # width of lanes for each type of road in meters
 LANEWIDTHS = {
@@ -107,6 +115,9 @@ LANEWIDTHS = {
     "tertiary_link": 3.5,
     "living_street": 3.5,
     "service": 3.5,
+    "path": 2.0,
+    "footway": 2.0,
+    "cycleway": 2.0
 }
 # default speed limit for each type of road in km/h
 SPEED_LIMITS = {
@@ -124,6 +135,9 @@ SPEED_LIMITS = {
     "tertiary_link": 80,
     "living_street": 7,
     "service": 10,
+    "path": 8,
+    "footway": 8,
+    "cycleway": 20
 }
 
 # Export Settings
