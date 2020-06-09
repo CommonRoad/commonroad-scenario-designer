@@ -17,24 +17,22 @@ from xml.dom import minidom
 
 import networkx as nx
 import numpy as np
-import sumolib
 from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.scenario.lanelet import LaneletNetwork
 from commonroad.visualization.draw_dispatch_cr import draw_object
 from matplotlib import pyplot as plt
 
 # modified sumolib.net.* files
-from .sumolib_net.node import Node
-from .sumolib_net.edge import Edge
-from .sumolib_net.lane import Lane
+from ..sumolib_net import Node, Edge, Lane
+import sumolib
 
-from crmapconverter.sumo_map.config import CR2SumoNetConfig
 from .util import compute_max_curvature_from_polyline, _find_intersecting_edges
+from ..config import SumoConfig
 
 
 class CR2SumoMapConverter:
     """Converts CommonRoad map to sumo map .net.xml"""
-    def __init__(self, lanelet_network:LaneletNetwork, conf:CR2SumoNetConfig = CR2SumoNetConfig(),
+    def __init__(self, lanelet_network:LaneletNetwork, conf:SumoConfig = SumoConfig(),
                  country_id: SupportedTrafficSignCountry=SupportedTrafficSignCountry.ZAMUNDA):
         """
 
@@ -43,7 +41,7 @@ class CR2SumoMapConverter:
         :param country_id: ID of the country, used to evaluate traffic signs
         """
         self.lanelet_network = lanelet_network
-        self.conf:CR2SumoNetConfig = conf
+        self.conf:SumoConfig = conf
 
         self.nodes: Dict[int, Node] = {}  # all the nodes of the map, key is the node ID
         self.edges: Dict[str, Edge] = {}  # all the edges of the map, key is the edge ID
@@ -64,7 +62,7 @@ class CR2SumoMapConverter:
 
 
     @classmethod
-    def from_file(cls, file_path_cr, conf: CR2SumoNetConfig = CR2SumoNetConfig()):
+    def from_file(cls, file_path_cr, conf: SumoConfig = SumoConfig()):
         scenario, _ = CommonRoadFileReader(file_path_cr).open()
         return cls(scenario.lanelet_network, conf)
 

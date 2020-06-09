@@ -1,13 +1,13 @@
 import os
 import numpy as np
 
-from .cr2sumo import CR2SumoMapConverter
-from .scenario_wrapper import ScenarioWrapper
-from .config import SumoConfig
+from crmapconverter.sumo_map.cr2sumo import CR2SumoMapConverter, ScenarioWrapper
+from crmapconverter.sumo_map.config import SumoConfig
 from commonroad.common.file_reader import CommonRoadFileReader
 
-from .sumo_interface.sumo2cr.interface.sumo_simulation import SumoSimulation
+# from crmapconverter.sumo_map.sumo_interface.sumo2cr.interface.sumo_simulation import SumoSimulation
 
+# path config
 files_folder = os.path.abspath(
     os.path.join(os.path.dirname(__file__), 'test_files'))
 scenario_name = "merging_lanelets_utm"
@@ -26,21 +26,20 @@ planning_problem.translate_rotate(-centroid, 0)
 config = SumoConfig()
 # convert net to .net.xml
 converter = CR2SumoMapConverter(scenario.lanelet_network, config)
-converter.convert_net()
-converter.write_net(net_path)
+converter.convert_to_net_file(net_path)
 
 # create Scenario Wrapper
 # generate additional files
 scenario_wrapper = ScenarioWrapper.init_from_net_file(net_path, input_file)
 
-# run Simulation
-simulation = SumoSimulation()
-simulation.initialize(config, scenario_wrapper)
+# # run Simulation
+# simulation = SumoSimulation()
+# simulation.initialize(config, scenario_wrapper)
 
-for t in range(config.simulation_steps):
-    simulation.simulate_step()
+# for t in range(config.simulation_steps):
+#     simulation.simulate_step()
 
-simulation.stop()
+# simulation.stop()
 
-# save resulting scenario
-print(simulation.commonroad_scenarios_all_time_steps())
+# # save resulting scenario
+# print(simulation.commonroad_scenarios_all_time_steps())
