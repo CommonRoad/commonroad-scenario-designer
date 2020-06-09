@@ -1,0 +1,4 @@
+[submodule "crmapconverter/sumo_map/sumo_interface"]
+	path = crmapconverter/sumo_map/sumo_interface
+	url = ../sumo-interface
+	branch = develop
