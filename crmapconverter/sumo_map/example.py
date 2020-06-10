@@ -1,7 +1,7 @@
 import os
 import numpy as np
 
-from crmapconverter.sumo_map.cr2sumo import CR2SumoMapConverter, ScenarioWrapper
+from crmapconverter.sumo_map.cr2sumo import CR2SumoMapConverter
 from crmapconverter.sumo_map.config import SumoConfig
 from commonroad.common.file_reader import CommonRoadFileReader
 
@@ -25,12 +25,8 @@ planning_problem.translate_rotate(-centroid, 0)
 
 config = SumoConfig()
 # convert net to .net.xml
-converter = CR2SumoMapConverter(scenario.lanelet_network, config)
-converter.convert_to_net_file(net_path)
-
-# create Scenario Wrapper
-# generate additional files
-scenario_wrapper = ScenarioWrapper.init_from_net_file(net_path, input_file)
+scenario = CR2SumoMapConverter(scenario.lanelet_network, config)
+scenario.convert_to_net_file(net_path)
 
 # # run Simulation
 # simulation = SumoSimulation()
