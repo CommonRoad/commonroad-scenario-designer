@@ -30,7 +30,7 @@ from .sumolib_net import Node, Edge, Lane
 import sumolib
 
 from .util import compute_max_curvature_from_polyline, _find_intersecting_edges
-from .util import get_scenario_name_from_crfile, get_total_lane_length_from_netfile, write_ego_ids_to_rou_file
+from .util import get_scenario_name_from_crfile, get_total_lane_length_from_netfile, write_ego_ids_to_rou_file, get_scenario_name_from_netfile
 from .config import SumoConfig
 
 # This file is used as a template for the generated .sumo.cfg files
@@ -1011,7 +1011,7 @@ class CR2SumoMapConverter:
 
         logging.info("Merging Intermediate Files")
         self.write_intermediate_files(output_file)
-        conversion_possible = self.merge_intermediate_files(output_file)
+        conversion_possible = self.merge_intermediate_files(output_file, cleanup=True)
         if not conversion_possible:
             logging.error("Error converting map, see above for details")
             return False
@@ -1241,11 +1241,12 @@ class CR2SumoMapConverter:
 
         sumo_cfg_file = os.path.join(output_folder,
                                      scenario_name + '.sumo.cfg')
-        tree = ET.parse(os.path.join(__file__, DEFAULT_CFG_FILE))
+        tree = ET.parse(
+            os.path.join(os.path.dirname(__file__), DEFAULT_CFG_FILE))
 
         updated_fields = {
             '*/net-file': os.path.basename(net_file),
-            '*/route_files': os.path.basename(rou_file),
+            '*/route-files': os.path.basename(rou_file),
             '*/additional-files': os.path.basename(add_file),
         }
         for k, v in updated_fields.items():
