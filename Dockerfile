@@ -49,17 +49,15 @@ ADD ./test_requirements.txt $HOME/test_requirements.txt
 RUN /bin/bash -c "source ${PROFILE} &&\
 	pyenv shell 3.7.1 &&\
 	pip install --upgrade pip &&\
-	pip install tox pytest numpy"
+	pip install tox pytest numpy &&\
+	pip install -r $HOME/requirements.txt &&\
+	pip install -r $HOME/test_requirements.txt"
+
 RUN /bin/bash -c "source ${PROFILE} &&\
 	pyenv shell 3.6.7 &&\
 	pip install --upgrade pip &&\
-	pip install tox pytest numpy"
+	pip install tox pytest numpy &&\
+	pip install -r $HOME/requirements.txt &&\
+	pip install -r $HOME/test_requirements.txt"
 
-ENTRYPOINT [ "/bin/bash", "--login", "-i", "-c" ]
-# ENTRYPOINT [
-	
-	
-CMD	"source .bashrc && pyenv shell 3.7.1 &&\
- 	pip install -r $HOME/requirements.txt &&\
- 	pip install -r test_requirements.txt &&\
- 	/bin/bash", "--login", "-i", "-c"]
+WORKDIR ${HOME}

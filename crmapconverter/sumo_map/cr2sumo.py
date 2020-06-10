@@ -563,7 +563,7 @@ class CR2SumoMapConverter:
         """
         for edge in self.edges.values():
             # remove_edge = self._consider_edge(edge)
-            remove_edge = self._consider_edge_new(edge)
+            remove_edge = self._consider_edge(edge)
             if remove_edge:
                 continue
             edge_id = edge.getID()
@@ -583,27 +583,6 @@ class CR2SumoMapConverter:
             self.new_edges.update({edge_id: edge})
 
     def _consider_edge(self, edge):
-        """
-        returns True if the edge must be removed, False otherwise
-        :param edge: the edge to consider
-        :return: flag remove_edge
-        """
-        remove_edge = False
-        startNode = edge.getFromNode()
-        endNode = edge.getToNode()
-        startNodeID = startNode.getID()
-        endNodeID = endNode.getID()
-
-        for key, value in self.merged_dictionary.items():
-            listIDs = []
-            for node in value:
-                listIDs.append(node.getID())
-            if startNodeID in listIDs and endNodeID in listIDs:
-                remove_edge = True
-
-        return remove_edge
-
-    def _consider_edge_new(self, edge):
         """
         returns True if the edge must be removed, False otherwise
         :param edge: the edge to consider
@@ -741,7 +720,7 @@ class CR2SumoMapConverter:
         """
         self._write_edges_file(output_path)
         self._write_nodes_file(output_path)
-        self._write_connections_file_new(output_path)
+        self._write_connections_file(output_path)
 
     def _write_edges_file(self, output_path):
         """
@@ -811,7 +790,7 @@ class CR2SumoMapConverter:
             reparsed = minidom.parseString(output_str)
             output_file.write(reparsed.toprettyxml(indent="\t"))
 
-    def _write_connections_file_new(self, output_path):
+    def _write_connections_file(self, output_path):
         """
         Function for writing the connections file
         :param output_path: path for the file
@@ -1017,7 +996,7 @@ class CR2SumoMapConverter:
             return False
 
         logging.info("Generating Traffic Routes")
-        self._generate_routes(output_file)
+        return self._generate_routes(output_file)
 
     def _generate_routes(self, net_file: str) -> bool:
         """
