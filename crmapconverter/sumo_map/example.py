@@ -5,7 +5,7 @@ from crmapconverter.sumo_map.cr2sumo import CR2SumoMapConverter
 from crmapconverter.sumo_map.config import SumoConfig
 from commonroad.common.file_reader import CommonRoadFileReader
 
-# from crmapconverter.sumo_map.sumo_interface.sumo2cr.interface.sumo_simulation import SumoSimulation
+from crmapconverter.sumo_map.sumo_interface.sumo2cr.interface.sumo_simulation import SumoSimulation
 
 # path config
 files_folder = os.path.abspath(
@@ -29,13 +29,13 @@ scenario = CR2SumoMapConverter(scenario.lanelet_network, config)
 scenario.convert_to_net_file(net_path)
 
 # # run Simulation
-# simulation = SumoSimulation()
-# simulation.initialize(config, scenario_wrapper)
+simulation = SumoSimulation()
+simulation.initialize(config, scenario)
 
-# for t in range(config.simulation_steps):
-#     simulation.simulate_step()
+for t in range(config.simulation_steps):
+    simulation.simulate_step()
 
-# simulation.stop()
+simulation.stop()
 
-# # save resulting scenario
-# print(simulation.commonroad_scenarios_all_time_steps())
+# save resulting scenario
+print(simulation.commonroad_scenarios_all_time_steps())
