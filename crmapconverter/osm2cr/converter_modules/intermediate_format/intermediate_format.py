@@ -306,7 +306,7 @@ class IntermediateFormat:
         angels = {}
         directions = {}
         for s in successors:
-            a_angle = geometry.curvature(incoming_lane.waypoints)
+            a_angle = geometry.curvature(incoming_lane.waypoints[-3:]) # only use the last three waypoints of the incoming for angle calculation
             b_angle = geometry.curvature(s.waypoints)
             angle = a_angle - b_angle
             angels[s.id] = angle
@@ -343,8 +343,11 @@ class IntermediateFormat:
             elif abs(sorted_values[0]) > abs(sorted_values[1]):
                 directions[sorted_keys[0]] = 'left'
                 directions[sorted_keys[1]] = 'through'
+            else:
+                directions[sorted_keys[0]] = 'through'
+                directions[sorted_keys[1]] = 'through'
 
-        # if we have 1 or more than 3 successors it's hard to make predictions, therefore we use the straight_threshold_angel
+        # if we have 1 or more than 3 successors it's hard to make predictions, therefore only straight_threshold_angel is used
         if len(sorted_angels) == 1 or len(sorted_angels) > 3:
             directions = dict.fromkeys(sorted_angels, 'through')
             for key in sorted_angels:
