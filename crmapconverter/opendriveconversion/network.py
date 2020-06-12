@@ -66,6 +66,13 @@ class Network:
 
                 self._planes.extend(parametric_lane_groups)
 
+            #TODO Implementation
+            #Traffic Signs(Static Signals)
+
+
+            #TODO Implementation
+            #Traffic Lights(Dynamic Signals)
+
     def export_lanelet_network(
         self, filter_types: list = None
     ) -> "ConversionLaneletNetwork":
