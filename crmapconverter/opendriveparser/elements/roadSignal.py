@@ -114,6 +114,14 @@ class Signal:
         self._signalvalue = value
 
     @property
+    def type(self):
+        return self._type
+
+    @type.setter
+    def type(self, value):
+        self._type = str(value)
+
+    @property
     def subtype(self):
         return self._subtype
 
