@@ -13,7 +13,7 @@ from crmapconverter.osm2cr.converter_modules.osm_operations.downloader import (
 
 # open the map and convert it to a scenario
 scenario = converter.Scenario(
-    config.SAVE_PATH + config.BENCHMARK_ID + "_downloaded.osm"
+    config.SAVE_PATH + config.BENCHMARK_ID + ".osm"
 )
 
 # draw and show the scenario
