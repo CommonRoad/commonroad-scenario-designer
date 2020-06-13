@@ -265,9 +265,17 @@ class IntermediateFormat:
         self.nodes = nodes
         self.edges = edges
         self.intersections = intersections
+        if self.intersections == None:
+            self.intersections = []
         self.traffic_signs = traffic_signs
+        if self.traffic_signs == None:
+            self.traffic_signs = []
         self.traffic_lights = traffic_lights
+        if self.traffic_lights == None:
+            self.traffic_lights = []
         self.obstacles = obstacles
+        if self.obstacles == None:
+            self.obstacles = []
 
     def find_edge_by_id(self, edge_id):
         """
