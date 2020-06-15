@@ -265,46 +265,9 @@ def get_roads(accepted_highways: List[str], root) -> Set[ElTree.Element]:
     print("{} roads found".format(len(roads)))
     return roads
 
-def get_non_vehicule_roads(accepted_pathways: List[str],
-            root) -> Set[ElTree.Element]:
-    """
-    finds non vehicule roads of desired types in osm file
-
-    :param accepted_pathways:
-    :param root:
-    :return:
-    """
-    pathways = set()
-    ways = root.findall("way")
-    for way in ways:
-        is_pathway = False
-        is_tunnel = False
-        tags = way.findall("tag")
-        has_maxspeed = False
-        roadtype = None
-        for tag in tags:
-            if tag.attrib["k"] == "highway" and tag.attrib["v"] in accepted_pathways:
-                way.set("roadtype", tag.attrib["v"])
-                roadtype = tag.attrib["v"]
-                nodes = way.findall("nd")
-                if len(nodes) > 0:
-                    way.set("from", nodes[0].attrib["ref"])
-                    way.set("to", nodes[-1].attrib["ref"])
-                    is_pathway = True
-            if tag.attrib["k"] == "tunnel" and tag.attrib["v"] == "yes":
-                is_tunnel = True
-            if tag.attrib["k"] == "maxspeed":
-                has_maxspeed = True
-        if is_pathway and (config.LOAD_TUNNELS or not is_tunnel):
-            if not has_maxspeed:
-                way.set('maxspeed', roadtype)
-            pathways.add(way)
-    print("{} pathways found".format(len(pathways)))
-    return pathways
-
 
 def parse_file(
-    filename: str, accepted_highways: List[str], accepted_pathways: List[str]=[]
+    filename: str, accepted_highways: List[str], custom_bounds=None
 ) -> Tuple[
     Set[ElTree.Element],
     Dict[int, Point],
@@ -327,11 +290,10 @@ def parse_file(
     tree = ElTree.parse(filename)
     root = tree.getroot()
     # get all roads
-    roads = get_roads(accepted_highways, root).union(
-            get_non_vehicule_roads(accepted_pathways, root))
+    roads = get_roads(accepted_highways, root)
     # get all required nodes
     road_nodes = get_nodes(roads, root)
-    custom_bounds = read_custom_bounds(root)
+    # custom_bounds = read_custom_bounds(root)
     road_points, center_point, bounds = get_points(road_nodes, custom_bounds)
     traffic_rules = get_traffic_rules(road_nodes, roads, config.TRAFFIC_SIGN_KEYS,
             config.TRAFFIC_SIGN_VALUES)

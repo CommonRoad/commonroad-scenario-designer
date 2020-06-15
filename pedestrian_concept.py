@@ -3,14 +3,16 @@ import numpy as np
 
 from commonroad.visualization.draw_dispatch_cr import draw_object
 from crmapconverter.osm2cr import config
-from crmapconverter.osm2cr.converter_modules import converter
+from crmapconverter.osm2cr.converter_modules.converter import Scenario
 from crmapconverter.osm2cr.converter_modules.intermediate_format.intermediate_format import IntermediateFormat
 from crmapconverter.osm2cr.converter_modules.utility.geometry import lon_lat_to_cartesian
+from crmapconverter.osm2cr.converter_modules.osm_operations import osm_parser
+from crmapconverter.osm2cr.converter_modules.graph_operations import intersection_merger
 
-#scenario_file = "/home/max/Desktop/Planning/Maps/osm_files/garching_kreuzung.osm"
-scenario_file = "/home/max/Desktop/Planning/Maps/osm_files/only_straigt_test.osm"
+scenario_file = "/home/max/Desktop/Planning/Maps/osm_files/garching_kreuzung.osm"
+# scenario_file = "/home/max/Desktop/Planning/Maps/osm_files/only_straigt_test.osm"
 
-DRAW_LABELS = True
+DRAW_LABELS = False
 
 def draw_scenario(scenario, plot_center):
     draw_params = {
@@ -29,100 +31,75 @@ def draw_scenario(scenario, plot_center):
     draw_object(scenario, plot_limits=plot_limits, draw_params=draw_params)
     plt.show()
 
-temp_accepted_highways = config.ACCEPTED_HIGHWAYS
-config.ACCEPTED_HIGHWAYS = []
-path_graph = converter.Scenario(scenario_file).graph
-intermediate_path = IntermediateFormat.extract_from_road_graph(path_graph)
-print("******paths")
-path_scenario = intermediate_path.to_commonroad_scenario()
-plot_center = path_scenario.lanelet_network.lanelets[0].left_vertices[0]
-draw_scenario(path_scenario, plot_center)
+def convert_to_graph(file:str, accepted_highways, custom_bounds=None):
+    print("reading File")
+    (roads, points, restrictions, center_point, bounds, traffic_signs,
+        traffic_lights) = osm_parser.parse_file(
+            file, accepted_highways, custom_bounds
+    )
+    print("creating graph")
+    graph = osm_parser.roads_to_graph(
+        roads, points, restrictions, center_point, bounds, center_point,
+        traffic_signs, traffic_lights
+    )
+    return graph
 
-config.ACCEPTED_HIGHWAYS = temp_accepted_highways
-config.ACCEPTED_PATHWAYS = []
+def convert_to_intermediate(graph):
+    if config.MAKE_CONTIGUOUS:
+        print("making graph contiguously")
+        graph.make_contiguous()
+    print("merging close intersections")
+    intersection_merger.merge_close_intersections(graph)
+    graph.link_edges()
+    graph = Scenario.step_collection_2(graph)
+    graph = Scenario.step_collection_3(graph)
+    return IntermediateFormat.extract_from_road_graph(graph)
 
-# TODO use custom bounds
-road_graph = converter.Scenario(scenario_file).graph
+# get bounds
+all_highways = config.ACCEPTED_HIGHWAYS.copy()
+all_highways.extend(config.ACCEPTED_PATHWAYS)
+combined_graph = convert_to_graph(scenario_file, all_highways)
+combined_bounds = combined_graph.bounds
 
-
-intermediate_road =  IntermediateFormat.extract_from_road_graph(road_graph)
+# get intermediate of road network
+road_graph = convert_to_graph(scenario_file, config.ACCEPTED_HIGHWAYS,
+    custom_bounds=combined_bounds)
+interm_road = convert_to_intermediate(road_graph)
 print("******roads")
-road_scenario = intermediate_road.to_commonroad_scenario()
+road_scenario = interm_road.to_commonroad_scenario()
 plot_center = road_scenario.lanelet_network.lanelets[0].left_vertices[0]
-draw_scenario(road_scenario, plot_center)
+# draw_scenario(road_scenario, plot_center)
 
-# Adjust coordinate offset of path scenario
-path_offset = np.array(lon_lat_to_cartesian(
-    np.array(road_graph.center_point),
-    np.array(path_graph.center_point)
-))
-
-# move node positions
-nodes_to_move = []
-nodes_to_move.extend(intermediate_path.nodes)
-for e in intermediate_path.edges:
-    nodes_to_move.append(e.node1)
-    nodes_to_move.append(e.node2)
-print("to move:", sorted([int(p.id) for p in nodes_to_move]))
-for n in nodes_to_move:
-    n.point.x -= path_offset[0]
-    n.point.y -= path_offset[1]
-
-# move edge points
-points_to_move = []
-
-def contains(p_ref):
-    for p in points_to_move:
-        if p_ref is p:
-            return True
-    return False
-
-for e in intermediate_path.edges:
-    for point in e.left_bound:
-        if not contains(point):
-            points_to_move.append(point)
-    for point in e.center_points:
-        if not contains(point):
-            points_to_move.append(point)
-    for point in e.right_bound:
-        if not contains(point):
-            points_to_move.append(point)
-for point in points_to_move:
-    point[0] -= path_offset[0]
-    point[1] -= path_offset[1]
-
-assert not intermediate_path.obstacles, "obstacle mapping not implemented"
-for traffic_light in intermediate_path.traffic_lights:
-    if not (traffic_light._position is None):
-        traffic_light._position -= path_offset
-for traffic_sign in intermediate_path.traffic_signs:
-    if not (traffic_sign._position is None):
-        traffic_sign._position -= path_offset
+# get intermediate of path network
+path_graph = convert_to_graph(scenario_file, config.ACCEPTED_PATHWAYS,
+    custom_bounds=combined_bounds)
+interm_path = convert_to_intermediate(path_graph)
+print("******paths")
+path_scenario = interm_path.to_commonroad_scenario()
+plot_center = path_scenario.lanelet_network.lanelets[0].left_vertices[0]
+# draw_scenario(path_scenario, plot_center)
 
 # merge networks
-intermediate_path.nodes.extend(intermediate_road.nodes)
-intermediate_path.edges.extend(intermediate_road.edges)
-intermediate_path.traffic_signs.extend(intermediate_road.traffic_signs)
-intermediate_path.traffic_lights.extend(intermediate_road.traffic_lights)
-intermediate_path.obstacles.extend(intermediate_road.obstacles)
-intermediate_path.intersections.extend(intermediate_road.intersections)
-merged = IntermediateFormat(
-    intermediate_path.nodes,
-    intermediate_path.edges,
-    intermediate_path.traffic_signs,
-    intermediate_path.traffic_lights,
-    intermediate_path.obstacles,
-    intermediate_path.intersections
+interm_path.nodes.extend(interm_road.nodes)
+interm_path.edges.extend(interm_road.edges)
+interm_path.traffic_signs.extend(interm_road.traffic_signs)
+interm_path.traffic_lights.extend(interm_road.traffic_lights)
+interm_path.obstacles.extend(interm_road.obstacles)
+interm_path.intersections.extend(interm_road.intersections)
+interm_merged = IntermediateFormat(
+    interm_path.nodes,
+    interm_path.edges,
+    interm_path.traffic_signs,
+    interm_path.traffic_lights,
+    interm_path.obstacles,
+    interm_path.intersections
 )
 
 # TODO find crossings
 
-scenario_merged = merged.to_commonroad_scenario()
+scenario_merged = interm_merged.to_commonroad_scenario()
 
 # draw scenario
 
 plot_center = scenario_merged.lanelet_network.lanelets[0].left_vertices[0]
 draw_scenario(scenario_merged, plot_center)
-
-
-

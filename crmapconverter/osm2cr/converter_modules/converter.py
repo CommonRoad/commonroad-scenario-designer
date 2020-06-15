@@ -52,7 +52,7 @@ class Scenario:
     def step_collection_1(file) -> road_graph.Graph:
         print("reading File")
         roads, points, restrictions, center_point, bounds, traffic_signs, traffic_lights = osm_parser.parse_file(
-            file, config.ACCEPTED_HIGHWAYS, config.ACCEPTED_PATHWAYS
+            file, config.ACCEPTED_HIGHWAYS
         )
         print("creating graph")
         g = osm_parser.roads_to_graph(
