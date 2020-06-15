@@ -1,4 +1,5 @@
 from matplotlib import pyplot as plt
+import numpy as np
 
 from commonroad.visualization.draw_dispatch_cr import draw_object
 from crmapconverter.osm2cr import config
@@ -6,10 +7,10 @@ from crmapconverter.osm2cr.converter_modules import converter
 from crmapconverter.osm2cr.converter_modules.intermediate_format.intermediate_format import IntermediateFormat
 from crmapconverter.osm2cr.converter_modules.utility.geometry import lon_lat_to_cartesian
 
-scenario_file = "/home/max/Desktop/Planning/Maps/osm_files/garching_kreuzung.osm"
+#scenario_file = "/home/max/Desktop/Planning/Maps/osm_files/garching_kreuzung.osm"
+scenario_file = "/home/max/Desktop/Planning/Maps/osm_files/only_straigt_test.osm"
 
 DRAW_LABELS = True
-
 
 def draw_scenario(scenario, plot_center):
     draw_params = {
@@ -28,30 +29,35 @@ def draw_scenario(scenario, plot_center):
     draw_object(scenario, plot_limits=plot_limits, draw_params=draw_params)
     plt.show()
 
-
 temp_accepted_highways = config.ACCEPTED_HIGHWAYS
 config.ACCEPTED_HIGHWAYS = []
 path_graph = converter.Scenario(scenario_file).graph
 intermediate_path = IntermediateFormat.extract_from_road_graph(path_graph)
 print("******paths")
+path_scenario = intermediate_path.to_commonroad_scenario()
+plot_center = path_scenario.lanelet_network.lanelets[0].left_vertices[0]
+draw_scenario(path_scenario, plot_center)
 
 config.ACCEPTED_HIGHWAYS = temp_accepted_highways
 config.ACCEPTED_PATHWAYS = []
+
+# TODO use custom bounds
 road_graph = converter.Scenario(scenario_file).graph
+
+
 intermediate_road =  IntermediateFormat.extract_from_road_graph(road_graph)
 print("******roads")
+road_scenario = intermediate_road.to_commonroad_scenario()
+plot_center = road_scenario.lanelet_network.lanelets[0].left_vertices[0]
+draw_scenario(road_scenario, plot_center)
 
-# path center: (48.253634950000006, 11.653997050000001)
-# road center: (48.2554801, 11.6539853)
-# difference: (-0.001845149999994078, 1.1750000000532168e-05)
-import numpy as np
+# Adjust coordinate offset of path scenario
 path_offset = np.array(lon_lat_to_cartesian(
     np.array(road_graph.center_point),
     np.array(path_graph.center_point)
 ))
-print(path_offset)
 
-# Adjust coordinate offset of path scenario
+# move node positions
 nodes_to_move = []
 nodes_to_move.extend(intermediate_path.nodes)
 for e in intermediate_path.edges:
@@ -61,22 +67,9 @@ print("to move:", sorted([int(p.id) for p in nodes_to_move]))
 for n in nodes_to_move:
     n.point.x -= path_offset[0]
     n.point.y -= path_offset[1]
-# test
-successor = intermediate_path.edges[1]
-print("successor:", successor.id)
-precessor = None
-for e in intermediate_path.edges:
-    if int(successor.id) in [int(id) for id in e.successors]:
-        precessor = e
-        break
-if precessor:
-    print(
-        precessor.center_points[len(precessor.center_points)-1] 
-        is successor.center_points[0], "test"
-    )
 
+# move edge points
 points_to_move = []
-nb_all_points = 0
 
 def contains(p_ref):
     for p in points_to_move:
@@ -85,21 +78,15 @@ def contains(p_ref):
     return False
 
 for e in intermediate_path.edges:
-    nb_all_points += len(e.left_bound)
     for point in e.left_bound:
         if not contains(point):
             points_to_move.append(point)
-    nb_all_points += len(e.center_points)
     for point in e.center_points:
         if not contains(point):
             points_to_move.append(point)
-    nb_all_points += len(e.right_bound)
     for point in e.right_bound:
         if not contains(point):
             points_to_move.append(point)
-
-print("filtered:", len(points_to_move),'from', nb_all_points)
-
 for point in points_to_move:
     point[0] -= path_offset[0]
     point[1] -= path_offset[1]
@@ -127,13 +114,15 @@ merged = IntermediateFormat(
     intermediate_path.obstacles,
     intermediate_path.intersections
 )
-# TODO adjust ids
 
 # TODO find crossings
 
 scenario_merged = merged.to_commonroad_scenario()
 
+# draw scenario
 
 plot_center = scenario_merged.lanelet_network.lanelets[0].left_vertices[0]
 draw_scenario(scenario_merged, plot_center)
+
+
 
