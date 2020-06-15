@@ -40,7 +40,7 @@ def get_points(
     nodes: Dict[int, ElTree.Element], custom_bounds=None
 ) -> Tuple[Dict[int, Point], Tuple[float, float], Tuple[float, float, float, float]]:
     """
-    projects a set of osm nodes on a plane and returns their positions on that plane als Points
+    projects a set of osm nodes on a plane and returns their positions on that plane as Points
 
     :param custom_bounds:
     :param nodes: dict of osm nodes
