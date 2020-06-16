@@ -223,8 +223,10 @@ class OSM2LConverter:
             else:
                 yield_signs.append(traffic_sign)
 
-        priority_lanelets = [convert_to_new_lanelet_id(i, new_lanelet_ids) for i in right_of_way_rel.right_of_ways]
-        yield_lanelets = [convert_to_new_lanelet_id(i, new_lanelet_ids) for i in right_of_way_rel.yield_ways]
+        # never create new lanelet ids here,
+        # if they don't exist yet, they are never created
+        priority_lanelets = [new_lanelet_ids[i] for i in right_of_way_rel.right_of_ways if i in new_lanelet_ids.keys()]
+        yield_lanelets = [new_lanelet_ids[i] for i in right_of_way_rel.yield_ways if i in new_lanelet_ids.keys()]
 
         stop_lines = []
         for stop_line in right_of_way_rel.ref_line:
