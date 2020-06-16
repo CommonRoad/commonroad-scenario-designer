@@ -1,17 +1,19 @@
 from matplotlib import pyplot as plt
-import numpy as np
 
 from commonroad.visualization.draw_dispatch_cr import draw_object
+from commonroad.common import file_writer
 from crmapconverter.osm2cr import config
 from crmapconverter.osm2cr.converter_modules.converter import Scenario
 from crmapconverter.osm2cr.converter_modules.intermediate_format.intermediate_format import IntermediateFormat
-from crmapconverter.osm2cr.converter_modules.utility.geometry import lon_lat_to_cartesian
+# from crmapconverter.osm2cr.converter_modules.utility.geometry import lon_lat_to_cartesian
 from crmapconverter.osm2cr.converter_modules.osm_operations import osm_parser
 from crmapconverter.osm2cr.converter_modules.graph_operations import intersection_merger
+from crmapconverter.osm2cr.converter_modules.cr_operations import export
+from crmapconverter.osm2cr.converter_modules.cr_operations import cleanup
 
-scenario_file = "/home/max/Desktop/Planning/Maps/osm_files/garching_kreuzung.osm"
+scenario_file = "/home/max/Desktop/Planning/Maps/osm_files/garching_kreuzung_fixed.osm"
 # scenario_file = "/home/max/Desktop/Planning/Maps/osm_files/only_straigt_test.osm"
-
+target_file = "/home/max/Desktop/Planning/Maps/cr_files/garching_kreuzung_merged.xml"
 DRAW_LABELS = False
 
 def draw_scenario(scenario, plot_center):
@@ -79,6 +81,21 @@ path_scenario = interm_path.to_commonroad_scenario()
 plot_center = path_scenario.lanelet_network.lanelets[0].left_vertices[0]
 # draw_scenario(path_scenario, plot_center)
 
+# TODO find crossing positions
+def is_close_to_crossing(lanelet):
+    return True
+
+# TODO find crossings
+crossings = []
+for path_lane in path_scenario.lanelet_network.lanelets:
+    if is_close_to_crossing(path_lane):
+        poly = path_lane.convert_to_polygon()
+        intersected_lanes = road_scenario.lanelet_network.find_lanelet_by_shape(
+            poly)
+        if intersected_lanes:
+            crossings.append((path_lane, intersected_lanes))
+            print("path", path_lane.lanelet_id, "crossing", intersected_lanes)
+
 # merge networks
 interm_path.nodes.extend(interm_road.nodes)
 interm_path.edges.extend(interm_road.edges)
@@ -94,12 +111,22 @@ interm_merged = IntermediateFormat(
     interm_path.obstacles,
     interm_path.intersections
 )
-
-# TODO find crossings
-
 scenario_merged = interm_merged.to_commonroad_scenario()
+
+# integrate crossings
+# for path_lane
 
 # draw scenario
 
+cleanup.sanitize(scenario_merged)
 plot_center = scenario_merged.lanelet_network.lanelets[0].left_vertices[0]
 draw_scenario(scenario_merged, plot_center)
+
+planning_prob = interm_merged.get_dummy_planning_problem_set()
+author = config.AUTHOR
+affiliation = config.AFFILIATION
+source = config.SOURCE
+tags = export.create_tags(config.TAGS)
+cr_writer = file_writer.CommonRoadFileWriter(scenario_merged, planning_prob,
+    author, affiliation, source=source, tags=tags)
+cr_writer.write_scenario_to_file(target_file, file_writer.OverwriteExistingFile.ALWAYS)
