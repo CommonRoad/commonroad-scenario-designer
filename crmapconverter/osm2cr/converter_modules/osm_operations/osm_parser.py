@@ -229,20 +229,33 @@ def get_restrictions(root) -> Dict[int, Set[Restriction]]:
     return restrictions
 
 
-def get_roads(accepted_highways: List[str], root) -> Set[ElTree.Element]:
+def get_roads(accepted_highways: List[str], rejected_tags: Dict[str, str],
+              root) -> Set[ElTree.Element]:
     """
     finds roads of desired types in osm file
 
     :param accepted_highways:
+    :param rejedted_tags: reject ways with at least one of those tags
     :param root:
     :return:
     """
     roads = set()
     ways = root.findall("way")
     for way in ways:
+        tags = way.findall("tag")
+        reject_way = False
+        for tag in tags:
+            tag_key = tag.attrib["k"]
+            if tag_key in rejected_tags:
+                print(tag.attrib["v"], rejected_tags[tag.attrib["k"]], tag.attrib["v"] == rejected_tags[tag.attrib["k"]])
+                if tag.attrib["v"] == rejected_tags[tag.attrib["k"]]:
+                    reject_way = True
+                    break
+        if reject_way:
+            continue
+        
         is_road = False
         is_tunnel = False
-        tags = way.findall("tag")
         has_maxspeed = False
         roadtype = None
         for tag in tags:
@@ -267,8 +280,8 @@ def get_roads(accepted_highways: List[str], root) -> Set[ElTree.Element]:
 
 
 def parse_file(
-    filename: str, accepted_highways: List[str], custom_bounds=None
-) -> Tuple[
+    filename: str, accepted_highways: List[str], rejected_tags: Dict[str, str],
+    custom_bounds=None) -> Tuple[
     Set[ElTree.Element],
     Dict[int, Point],
     type(None),
@@ -290,7 +303,7 @@ def parse_file(
     tree = ElTree.parse(filename)
     root = tree.getroot()
     # get all roads
-    roads = get_roads(accepted_highways, root)
+    roads = get_roads(accepted_highways, rejected_tags, root)
     # get all required nodes
     road_nodes = get_nodes(roads, root)
     # custom_bounds = read_custom_bounds(root)

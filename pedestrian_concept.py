@@ -40,7 +40,7 @@ def convert_to_graph(file:str, accepted_highways, custom_bounds=None):
     print("reading File")
     (roads, points, restrictions, center_point, bounds, traffic_signs,
         traffic_lights) = osm_parser.parse_file(
-            file, accepted_highways, custom_bounds
+            file, accepted_highways, config.REJECTED_TAGS, custom_bounds
     )
     print("creating graph")
     graph = osm_parser.roads_to_graph(

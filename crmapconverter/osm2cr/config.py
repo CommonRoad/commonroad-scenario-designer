@@ -79,6 +79,9 @@ ACCEPTED_PATHWAYS = [
     "footway",
     "cycleway"
 ]
+REJECTED_TAGS = {
+    "area": "yes"
+}
 # number of lanes for each type of road should be >=1
 LANECOUNTS = {
     "motorway": 6,
