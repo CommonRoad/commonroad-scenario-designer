@@ -223,10 +223,22 @@ class OSM2LConverter:
             else:
                 yield_signs.append(traffic_sign)
 
-        # never create new lanelet ids here,
-        # if they don't exist yet, they are never created
-        priority_lanelets = [new_lanelet_ids[i] for i in right_of_way_rel.right_of_ways if i in new_lanelet_ids.keys()]
-        yield_lanelets = [new_lanelet_ids[i] for i in right_of_way_rel.yield_ways if i in new_lanelet_ids.keys()]
+        priority_lanelets = []
+        for i in right_of_way_rel.right_of_ways:
+            # never create new lanelet ids here,
+            # if they don't exist yet, they are never created
+            if i in new_lanelet_ids.keys():
+                priority_lanelets.append(new_lanelet_ids[i])
+            else:
+                print(f"Warning: some priority sign references non-existing lanelet {i}")
+        yield_lanelets = []
+        for i in right_of_way_rel.yield_ways:
+            # never create new lanelet ids here,
+            # if they don't exist yet, they are never created
+            if i in new_lanelet_ids.keys():
+                yield_lanelets.append(new_lanelet_ids[i])
+            else:
+                print(f"Warning: some yield sign references non-existing lanelet {i}")
 
         stop_lines = []
         for stop_line in right_of_way_rel.ref_line:
