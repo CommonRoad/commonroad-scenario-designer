@@ -379,7 +379,7 @@ class IntermediateFormat:
         added_lanes = set()
         for lane in graph.lanelinks:
             node = lane.to_node
-            # node with more than 2 edge is an intersection
+            # node with more than 2 edges is an intersection
             if node.get_degree() > 2:
                 # keep track of added lanes to consider unique intersections
                 incoming = [p for p in lane.predecessors if p.id not in added_lanes]
@@ -543,4 +543,3 @@ class IntermediateFormat:
 
         print("See Sumo Config File Here: "+sumo.config_file)
         return sumo.config_file
-

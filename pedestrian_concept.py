@@ -14,7 +14,10 @@ from crmapconverter.osm2cr.converter_modules.cr_operations import cleanup
 scenario_file = "/home/max/Desktop/Planning/Maps/osm_files/garching_kreuzung_fixed.osm"
 # scenario_file = "/home/max/Desktop/Planning/Maps/osm_files/only_straigt_test.osm"
 target_file = "/home/max/Desktop/Planning/Maps/cr_files/garching_kreuzung_merged.xml"
+#target_file = "/home/max/Desktop/Planning/Maps/cr_files/only_straigt_merged.xml"
+
 DRAW_LABELS = False
+
 
 def draw_scenario(scenario, plot_center):
     draw_params = {
@@ -73,28 +76,31 @@ plot_center = road_scenario.lanelet_network.lanelets[0].left_vertices[0]
 # draw_scenario(road_scenario, plot_center)
 
 # get intermediate of path network
+temp_intersec_dist = config.INTERSECTION_DISTANCE
+config.INTERSECTION_DISTANCE = 2.0
 path_graph = convert_to_graph(scenario_file, config.ACCEPTED_PATHWAYS,
     custom_bounds=combined_bounds)
 interm_path = convert_to_intermediate(path_graph)
+config.INTERSECTION_DISTANCE = temp_intersec_dist
 print("******paths")
 path_scenario = interm_path.to_commonroad_scenario()
 plot_center = path_scenario.lanelet_network.lanelets[0].left_vertices[0]
 # draw_scenario(path_scenario, plot_center)
 
-# TODO find crossing positions
+# TODO find crossing positions (range > config.intersetion_distance)
 def is_close_to_crossing(lanelet):
     return True
 
-# TODO find crossings
+# find crossings
 crossings = []
 for path_lane in path_scenario.lanelet_network.lanelets:
     if is_close_to_crossing(path_lane):
         poly = path_lane.convert_to_polygon()
-        intersected_lanes = road_scenario.lanelet_network.find_lanelet_by_shape(
+        intersected_road_ids = road_scenario.lanelet_network.find_lanelet_by_shape(
             poly)
-        if intersected_lanes:
-            crossings.append((path_lane, intersected_lanes))
-            print("path", path_lane.lanelet_id, "crossing", intersected_lanes)
+        if intersected_road_ids:
+            crossings.append((path_lane.lanelet_id, intersected_road_ids))
+            print("path", path_lane.lanelet_id, "crossing", intersected_road_ids)
 
 # merge networks
 interm_path.nodes.extend(interm_road.nodes)
@@ -111,13 +117,31 @@ interm_merged = IntermediateFormat(
     interm_path.obstacles,
     interm_path.intersections
 )
+
+# integrate crossings to existing intersections
+new_crossings = []
+for path_id, road_ids in crossings:
+    for intersection in interm_merged.intersections:
+        # TODO Can incomings also be crossed?
+        incomings_successors = []
+        for incoming in intersection.incomings:
+            incomings_successors.extend(incoming.successors_left)
+            incomings_successors.extend(incoming.successors_straight)
+            incomings_successors.extend(incoming.successors_right)
+        if set(road_ids) & set(incomings_successors):
+            intersection.crossings.add(path_id)
+            print("added path", path_id, "to intersection", intersection.intersection_id)
+        # raods that are not part of an intersection
+        not_part = set(road_ids) - set(incomings_successors)
+        if not_part:
+            new_crossings.append((path_id, not_part))
+
+# TODO create new crossings: split or use incomming for road lanelet
+# and IntermediateFormat.get_directions or always straigt?
+
 scenario_merged = interm_merged.to_commonroad_scenario()
 
-# integrate crossings
-# for path_lane
-
 # draw scenario
-
 cleanup.sanitize(scenario_merged)
 plot_center = scenario_merged.lanelet_network.lanelets[0].left_vertices[0]
 draw_scenario(scenario_merged, plot_center)
