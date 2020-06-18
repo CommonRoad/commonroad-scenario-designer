@@ -13,4 +13,4 @@ PyQt5>=5.12.2
 matplotlib>=3.1.0
 
 # for sumo_map converter
-git+ssh://git@gitlab.lrz.de/cps/sumo-interface.git@develop#egg=sumo-interface
+git+ssh://git@gitlab.lrz.de/cps/sumo-interface.git@develop#egg=sumocr

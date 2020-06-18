@@ -29,7 +29,7 @@ from matplotlib import pyplot as plt
 from .sumolib_net import Node, Edge, Lane
 import sumolib
 
-from sumo2cr.maps.scenario_wrapper import AbstractScenarioWrapper
+from sumocr.maps.scenario_wrapper import AbstractScenarioWrapper
 
 from .util import compute_max_curvature_from_polyline, _find_intersecting_edges
 from .util import get_scenario_name_from_crfile, get_total_lane_length_from_netfile, write_ego_ids_to_rou_file, get_scenario_name_from_netfile

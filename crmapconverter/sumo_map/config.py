@@ -6,7 +6,7 @@ from commonroad.common.util import Interval
 from commonroad.scenario.obstacle import ObstacleType
 from typing import List
 
-from sumo2cr.sumo_config.default import DefaultConfig
+from sumocr.sumo_config.default import DefaultConfig
 
 EGO_ID_START = 'egoVehicle'
 
@@ -25,8 +25,21 @@ TYPE_MAPPING = {
 
 
 class SumoConfig(DefaultConfig):
-    def __init__(self, scenario_name: str):
-        self.scenario_name = scenario_name
+    @classmethod
+    def from_scenario_name(cls, scenario_name: str):
+        """Initialize the config with a scenario name"""
+        obj = cls()
+        obj.scenario_name = scenario_name
+        return obj
+
+    @classmethod
+    def from_dict(cls, param_dict: dict):
+        """Initialize config from dictionary"""
+        obj = cls()
+        for param, value in param_dict.items():
+            if hasattr(obj, param):
+                setattr(obj, param, value)
+        return obj
 
     # logging level for logging module
     logging_level = 'INFO'  # select DEBUG, INFO, WARNING, ERROR, CRITICAL
@@ -196,12 +209,3 @@ class SumoConfig(DefaultConfig):
         'lcImpatience': Interval(0, 0.5),
         'impatience': Interval(0, 0.5)
     }
-
-    @classmethod
-    def from_dict(cls, param_dict: dict):
-        """Initialize config from dictionary"""
-        obj = cls()
-        for param, value in param_dict.items():
-            if hasattr(obj, param):
-                setattr(obj, param, value)
-        return obj

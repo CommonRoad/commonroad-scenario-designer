@@ -6,8 +6,8 @@ from crmapconverter.sumo_map.config import SumoConfig
 from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.common.file_writer import CommonRoadFileWriter
 
-from sumo2cr.interface.sumo_simulation import SumoSimulation
-from sumo2cr.visualization.video import create_video
+from sumocr.interface.sumo_simulation import SumoSimulation
+from sumocr.visualization.video import create_video
 
 # path config
 output_folder = os.path.join(os.path.dirname(__file__), 'test_files')
@@ -23,7 +23,7 @@ centroid = np.mean(np.concatenate(
 scenario.translate_rotate(-centroid, 0)
 planning_problem.translate_rotate(-centroid, 0)
 
-config = SumoConfig(scenario_name)
+config =SumoConfig.from_scenario_name(scenario_name)
 
 # convert CR to sumo net
 wrapper = CR2SumoMapConverter(scenario.lanelet_network, config)
@@ -41,7 +41,7 @@ simulation.stop()
 # save resulting scenario
 simulated_scenario = simulation.commonroad_scenarios_all_time_steps()
 CommonRoadFileWriter(simulated_scenario,
-                     None,
+                     planning_problem,
                      author=scenario.author,
                      affiliation=scenario.affiliation,
                      source=scenario.source,
