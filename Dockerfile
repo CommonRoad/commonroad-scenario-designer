@@ -45,19 +45,13 @@ RUN apt-get update && \
 ADD ./requirements.txt $HOME/requirements.txt
 ADD ./test_requirements.txt $HOME/test_requirements.txt
 
+WORKDIR ${HOME}
 # install dependencies for development & testing
-RUN /bin/bash -c "source ${PROFILE} &&\
+
+CMD /bin/bash -c "source ./.bashrc &&\
 	pyenv shell 3.7.1 &&\
 	pip install --upgrade pip &&\
-	pip install tox pytest numpy &&\
+	pip install wheel tox pytest numpy &&\
 	pip install -r $HOME/requirements.txt &&\
-	pip install -r $HOME/test_requirements.txt"
-
-RUN /bin/bash -c "source ${PROFILE} &&\
-	pyenv shell 3.6.7 &&\
-	pip install --upgrade pip &&\
-	pip install tox pytest numpy &&\
-	pip install -r $HOME/requirements.txt &&\
-	pip install -r $HOME/test_requirements.txt"
-
-WORKDIR ${HOME}
+	pip install -r $HOME/test_requirements.txt &&\
+	bash"
