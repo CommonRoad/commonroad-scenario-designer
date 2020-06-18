@@ -11,7 +11,7 @@ from sumocr.visualization.video import create_video
 
 # path config
 output_folder = os.path.join(os.path.dirname(__file__), 'test_files')
-scenario_name = "merging_lanelets_utm"
+scenario_name = "urban-1_lanelets_utm"
 input_file = os.path.join(output_folder, scenario_name + '.xml')
 
 scenario, planning_problem = CommonRoadFileReader(input_file).open()
@@ -23,7 +23,7 @@ centroid = np.mean(np.concatenate(
 scenario.translate_rotate(-centroid, 0)
 planning_problem.translate_rotate(-centroid, 0)
 
-config =SumoConfig.from_scenario_name(scenario_name)
+config = SumoConfig.from_scenario_name(scenario_name)
 
 # convert CR to sumo net
 wrapper = CR2SumoMapConverter(scenario.lanelet_network, config)
@@ -52,4 +52,5 @@ CommonRoadFileWriter(simulated_scenario,
                              config.scenario_name + ".simulated.cr.xml"),
                          overwrite_existing_file=True)
 
+print("creating video (this may take some time)")
 create_video(simulation, 1, config.simulation_steps, output_folder)

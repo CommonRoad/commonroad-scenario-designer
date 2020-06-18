@@ -1,1 +1,9 @@
-test_files/*
+# ignore intermediate test files
+test_files/*.mp4
+test_files/*.add.xml
+test_files/*.rou.xml
+test_files/*.rou.alt.xml
+test_files/*.net.xml
+test_files/*.sumo.cfg
+test_files/*.trips.xml
+test_files/output_lanechange.txt

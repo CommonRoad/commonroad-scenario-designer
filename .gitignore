@@ -1,6 +1,6 @@
 *.xodr
 !test/**/*.xodr
-*.xml
+#*.xml
 !test/**/*.xml
 test/.pytest_cache
 venv/
