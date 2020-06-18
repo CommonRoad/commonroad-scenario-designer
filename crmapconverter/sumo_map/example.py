@@ -4,15 +4,15 @@ import numpy as np
 from crmapconverter.sumo_map.cr2sumo import CR2SumoMapConverter
 from crmapconverter.sumo_map.config import SumoConfig
 from commonroad.common.file_reader import CommonRoadFileReader
+from commonroad.common.file_writer import CommonRoadFileWriter
 
-from crmapconverter.sumo_map.sumo_interface.sumo2cr.interface.sumo_simulation import SumoSimulation
+from sumo2cr.interface.sumo_simulation import SumoSimulation
+from sumo2cr.visualization.video import create_video
 
 # path config
-files_folder = os.path.abspath(
-    os.path.join(os.path.dirname(__file__), 'test_files'))
+output_folder = os.path.join(os.path.dirname(__file__), 'test_files')
 scenario_name = "merging_lanelets_utm"
-input_file = os.path.join(files_folder, scenario_name + '.xml')
-net_path = os.path.join(files_folder, scenario_name + ".net.xml")
+input_file = os.path.join(output_folder, scenario_name + '.xml')
 
 scenario, planning_problem = CommonRoadFileReader(input_file).open()
 
@@ -23,14 +23,15 @@ centroid = np.mean(np.concatenate(
 scenario.translate_rotate(-centroid, 0)
 planning_problem.translate_rotate(-centroid, 0)
 
-config = SumoConfig()
-# convert net to .net.xml
-scenario = CR2SumoMapConverter(scenario.lanelet_network, config)
-scenario.convert_to_net_file(net_path)
+config = SumoConfig(scenario_name)
+
+# convert CR to sumo net
+wrapper = CR2SumoMapConverter(scenario.lanelet_network, config)
+wrapper.convert_to_net_file(output_folder)
 
 # # run Simulation
 simulation = SumoSimulation()
-simulation.initialize(config, scenario)
+simulation.initialize(config, wrapper)
 
 for t in range(config.simulation_steps):
     simulation.simulate_step()
@@ -38,4 +39,17 @@ for t in range(config.simulation_steps):
 simulation.stop()
 
 # save resulting scenario
-print(simulation.commonroad_scenarios_all_time_steps())
+simulated_scenario = simulation.commonroad_scenarios_all_time_steps()
+CommonRoadFileWriter(simulated_scenario,
+                     None,
+                     author=scenario.author,
+                     affiliation=scenario.affiliation,
+                     source=scenario.source,
+                     tags=scenario.tags,
+                     location=scenario.location).write_scenario_to_file(
+                         os.path.join(
+                             output_folder,
+                             config.scenario_name + ".simulated.cr.xml"),
+                         overwrite_existing_file=True)
+
+create_video(simulation, 1, config.simulation_steps, output_folder)

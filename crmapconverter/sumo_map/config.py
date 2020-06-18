@@ -2,12 +2,11 @@
 Default configuration for CommonRoad to SUMO map converter
 """
 
-import os
-
 from commonroad.common.util import Interval
 from commonroad.scenario.obstacle import ObstacleType
 from typing import List
 
+from sumo2cr.sumo_config.default import DefaultConfig
 
 EGO_ID_START = 'egoVehicle'
 
@@ -25,9 +24,14 @@ TYPE_MAPPING = {
 }
 
 
-class SumoConfig:
+class SumoConfig(DefaultConfig):
+    def __init__(self, scenario_name: str):
+        self.scenario_name = scenario_name
+
     # logging level for logging module
     logging_level = 'INFO'  # select DEBUG, INFO, WARNING, ERROR, CRITICAL
+
+    scenario_name: str = ''
 
     # simulation
     dt = 0.1  # length of simulation step of the interface
@@ -192,8 +196,6 @@ class SumoConfig:
         'lcImpatience': Interval(0, 0.5),
         'impatience': Interval(0, 0.5)
     }
-
-
 
     @classmethod
     def from_dict(cls, param_dict: dict):

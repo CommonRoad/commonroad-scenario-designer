@@ -29,6 +29,8 @@ from matplotlib import pyplot as plt
 from .sumolib_net import Node, Edge, Lane
 import sumolib
 
+from sumo2cr.maps.scenario_wrapper import AbstractScenarioWrapper
+
 from .util import compute_max_curvature_from_polyline, _find_intersecting_edges
 from .util import get_scenario_name_from_crfile, get_total_lane_length_from_netfile, write_ego_ids_to_rou_file, get_scenario_name_from_netfile
 from .config import SumoConfig
@@ -37,12 +39,12 @@ from .config import SumoConfig
 DEFAULT_CFG_FILE = "default.sumo.cfg"
 
 
-class CR2SumoMapConverter:
+class CR2SumoMapConverter(AbstractScenarioWrapper):
     """Converts CommonRoad map to sumo map .net.xml"""
     def __init__(
         self,
         lanelet_network: LaneletNetwork,
-        conf: SumoConfig = SumoConfig(),
+        conf: SumoConfig,
         country_id: SupportedTrafficSignCountry = SupportedTrafficSignCountry.
         ZAMUNDA):
         """
@@ -83,7 +85,7 @@ class CR2SumoMapConverter:
         self.ego_start_time = self.conf.ego_start_time
 
     @classmethod
-    def from_file(cls, file_path_cr, conf: SumoConfig = SumoConfig()):
+    def from_file(cls, file_path_cr, conf: SumoConfig):
         scenario, _ = CommonRoadFileReader(file_path_cr).open()
         return cls(scenario.lanelet_network, conf)
 
@@ -979,24 +981,28 @@ class CR2SumoMapConverter:
                      verticalalignment='top')
         plt.show()
 
-    def convert_to_net_file(self, output_file: str) -> bool:
+    def convert_to_net_file(self, output_folder: str) -> bool:
         """
         Convert the Commonroad scenario to a net.xml file, specified by the absolute  path output_file.
         :param path of the returned net.xml file
         :return returns whether conversion was successful
         """
+
+        output_path = os.path.join(output_folder,
+                                   self.conf.scenario_name + '.net.xml')
         logging.info("Converting to SUMO Map")
         self._convert_map()
 
         logging.info("Merging Intermediate Files")
-        self.write_intermediate_files(output_file)
-        conversion_possible = self.merge_intermediate_files(output_file, cleanup=True)
+        self.write_intermediate_files(output_path)
+        conversion_possible = self.merge_intermediate_files(output_path,
+                                                            cleanup=True)
         if not conversion_possible:
             logging.error("Error converting map, see above for details")
             return False
 
         logging.info("Generating Traffic Routes")
-        return self._generate_routes(output_file)
+        return self._generate_routes(output_path)
 
     def _generate_routes(self, net_file: str) -> bool:
         """
