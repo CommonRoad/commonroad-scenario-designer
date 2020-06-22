@@ -74,6 +74,7 @@ ACCEPTED_HIGHWAYS = [
     "living_street",
     "service",
 ]
+# types of pathways extracted from the OSM file
 ACCEPTED_PATHWAYS = [
     "path",
     "footway",

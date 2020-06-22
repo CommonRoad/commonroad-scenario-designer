@@ -53,8 +53,8 @@ def get_points(
     ids = []
     lons = []
     lats = []
-    for id, node in nodes.items():
-        ids.append(id)
+    for node_id, node in nodes.items():
+        ids.append(node_id)
         lons.append(float(node.attrib["lon"]))
         lats.append(float(node.attrib["lat"]))
     if custom_bounds is not None:
@@ -77,14 +77,17 @@ def get_points(
     x = lon_constants * lons_d
     lat_constant = np.pi / 180 * config.EARTH_RADIUS
     y = lat_constant * lats_d
-    for index, id in enumerate(ids):
-        points[id] = Point(id, x[index], y[index])
+    for index, point_id in enumerate(ids):
+        points[point_id] = Point(point_id, x[index], y[index])
     print("{} required nodes found".format(len(points)))
     center_point = lat_center, lon_center
     return points, center_point, bounds
 
 
 def get_nodes(roads: Set[ElTree.Element], root) -> Dict[int, ElTree.Element]:
+    """
+    returns all nodes that are part of the specified roads
+    """
     node_ids = set()
     for road in roads:
         nodes = road.findall("nd")
@@ -229,12 +232,12 @@ def get_restrictions(root) -> Dict[int, Set[Restriction]]:
     return restrictions
 
 
-def get_roads(accepted_highways: List[str], rejected_tags: Dict[str, str],
+def get_ways(accepted_highways: List[str], rejected_tags: Dict[str, str],
               root) -> Set[ElTree.Element]:
     """
-    finds roads of desired types in osm file
+    finds ways of desired types in osm file.
 
-    :param accepted_highways:
+    :param accepted_highways: only ways with those highway tag will be considered
     :param rejedted_tags: reject ways with at least one of those tags
     :param root:
     :return:
@@ -243,11 +246,12 @@ def get_roads(accepted_highways: List[str], rejected_tags: Dict[str, str],
     ways = root.findall("way")
     for way in ways:
         tags = way.findall("tag")
+
+        # discard ways with a rejected tag
         reject_way = False
         for tag in tags:
             tag_key = tag.attrib["k"]
             if tag_key in rejected_tags:
-                print(tag.attrib["v"], rejected_tags[tag.attrib["k"]], tag.attrib["v"] == rejected_tags[tag.attrib["k"]])
                 if tag.attrib["v"] == rejected_tags[tag.attrib["k"]]:
                     reject_way = True
                     break
@@ -302,13 +306,11 @@ def parse_file(
     """
     tree = ElTree.parse(filename)
     root = tree.getroot()
-    # get all roads
-    roads = get_roads(accepted_highways, rejected_tags, root)
-    # get all required nodes
-    road_nodes = get_nodes(roads, root)
+    ways = get_ways(accepted_highways, rejected_tags, root)
+    road_nodes = get_nodes(ways, root)
     # custom_bounds = read_custom_bounds(root)
     road_points, center_point, bounds = get_points(road_nodes, custom_bounds)
-    traffic_rules = get_traffic_rules(road_nodes, roads, config.TRAFFIC_SIGN_KEYS,
+    traffic_rules = get_traffic_rules(road_nodes, ways, config.TRAFFIC_SIGN_KEYS,
             config.TRAFFIC_SIGN_VALUES)
     traffic_signs, traffic_lights = get_traffic_signs_and_lights(traffic_rules)
     restrictions = get_restrictions(root)
@@ -316,7 +318,7 @@ def parse_file(
     if custom_bounds is not None:
         bounds = custom_bounds
 
-    return roads, road_points, restrictions, center_point, bounds, traffic_signs, traffic_lights
+    return ways, road_points, restrictions, center_point, bounds, traffic_signs, traffic_lights
 
 
 def parse_turnlane(turnlane: str) -> str:
@@ -463,12 +465,13 @@ def get_graph_traffic_lights(nodes: Dict, traffic_lights: List):
 
 
 def get_graph_nodes(
-        roads: Set[ElTree.Element], points: Dict[int, Point], traffic_signs: List,
-        traffic_lights: List
+        roads: Set[ElTree.Element], points: Dict[int, Point],
+        traffic_signs: List, traffic_lights: List
 ) -> Dict[int, rg.GraphNode]:
     """
     gets graph nodes from set of osm ways
-    all points that are referenced by two or more ways or are at the end of a way are returned as nodes
+    all points that are referenced by traffic signs, by traffic lights or by
+    two or more ways or are at the end of a way are returned
 
     :param roads: set of osm ways
     :type roads: Set[ElTree.Element]
@@ -478,45 +481,57 @@ def get_graph_nodes(
     :rtype: Dict[int, GraphNode]
     """
     nodes = {}
-    node_degree = {}
+    point_degree = {} # number of roads sharing a point
     for road in roads:
         for waypoint in road.findall("nd"):
-            id = waypoint.attrib["ref"]
-            if id in node_degree:
-                node_degree[id] += 1
+            point_id = waypoint.attrib["ref"]
+            if point_id in point_degree:
+                point_degree[point_id] += 1
             else:
-                node_degree[id] = 1
-        for id in (road.attrib["from"], road.attrib["to"]):
-            current_point = points[id]
-            if id not in nodes:
-                nodes[id] = rg.GraphNode(
-                    int(id), current_point.x, current_point.y, set()
+                point_degree[point_id] = 1
+        # get nodes from endpoints of ways
+        for point_id in (road.attrib["from"], road.attrib["to"]):
+            current_point = points[point_id]
+            if point_id not in nodes:
+                nodes[point_id] = rg.GraphNode(
+                    int(point_id), current_point.x, current_point.y, set()
                 )
 
     for traffic_sign in traffic_signs:
-        id = next(iter(traffic_sign))
-        if id.startswith('road'):
+        point_id = next(iter(traffic_sign))
+        if point_id.startswith('road'):
             continue
-        if id not in nodes:
-            current_point = points[id]
-            nodes[id] = rg.GraphNode(int(id), current_point.x, current_point.y, set())
+        if point_id not in nodes:
+            current_point = points[point_id]
+            nodes[point_id] = rg.GraphNode(
+                int(point_id), current_point.x, current_point.y, set()
+            )
 
     for traffic_light in traffic_lights:
-        id = next(iter(traffic_light))
-        if id not in nodes:
-            current_point = points[id]
-            nodes[id] = rg.GraphNode(int(id), current_point.x, current_point.y, set())
+        point_id = next(iter(traffic_light))
+        if point_id not in nodes:
+            current_point = points[point_id]
+            nodes[point_id] = rg.GraphNode(
+                int(point_id), current_point.x, current_point.y, set()
+            )
 
-    for id in node_degree:
-        current_point = points[id]
-        if id not in nodes and node_degree[id] > 1:
-            nodes[id] = rg.GraphNode(int(id), current_point.x, current_point.y, set())
+    # get nodes from intersection points of roads
+    for point_id in point_degree:
+        current_point = points[point_id]
+        if point_id not in nodes and point_degree[point_id] > 1:
+            nodes[point_id] = rg.GraphNode(
+                int(point_id), current_point.x, current_point.y, set()
+            )
     return nodes
 
 
 def get_area_from_bounds(
     bounds: Tuple[float, float, float, float], origin: np.ndarray
 ) -> Area:
+    '''
+    returns a rectangular area in cartesian coordinates from given 
+    bounds and origin in longitude and latitude
+    '''
     max_point = lon_lat_to_cartesian(np.array([bounds[3], bounds[0]]), origin)
     min_point = lon_lat_to_cartesian(np.array([bounds[1], bounds[2]]), origin)
     # print("maxpoint", max_point, "minpoint", min_point)
@@ -557,7 +572,7 @@ def get_graph_edges_from_road(
 
     area = get_area_from_bounds(bounds, origin)
     edges = {}
-    for road_index, road in enumerate(roads):
+    for _, road in enumerate(roads):
         # get basic information of road
         # edge_id = road.attrib['id']
         edge_node_ids = []
@@ -582,8 +597,7 @@ def get_graph_edges_from_road(
         # get waypoints
         waypoints = []
         outside_waypoints = set()
-        point_list = road.findall("nd")
-        point_list = [points[point.attrib["ref"]] for point in point_list]
+        point_list = [points[nd.attrib["ref"]] for nd in road.findall("nd")]
         point_in_area_list = [point in area for point in point_list]
         for index, point in enumerate(point_list):
             # loading only inside of bounds
@@ -605,7 +619,7 @@ def get_graph_edges_from_road(
         osm_id = road.attrib["id"]
         edges[osm_id] = set()
 
-        # road is split and edges are created for each segment
+        # road is split at nodes and edges are created for each segment
         for index, waypoint in enumerate(waypoints):
             waypoint_id: int = waypoint.id
             if waypoint_id in nodes or waypoint_id in outside_waypoints:
@@ -624,7 +638,7 @@ def get_graph_edges_from_road(
                     print("edge could not be splitted at corner")
 
         new_edges = []
-        for index, node in enumerate(edge_nodes[:-1]):
+        for index, _ in enumerate(edge_nodes[:-1]):
             node1, index1 = edge_nodes[index]
             node2, index2 = edge_nodes[index + 1]
             current_waypoints = waypoints[index1 : index2 + 1]
@@ -656,6 +670,7 @@ def get_graph_edges_from_road(
         # add successors to edges
         for index, edge in enumerate(new_edges[:-1]):
             edge.forward_successor = new_edges[index + 1]
+
     return edges
 
 
@@ -735,7 +750,8 @@ def roads_to_graph(
     bounds: Tuple[float, float, float, float],
     origin: tuple,
     traffic_signs: List,
-    traffic_lights: List
+    traffic_lights: List,
+    crossing_nodes: List[rg.GraphNode]=[]
 ) -> rg.Graph:
     """
     converts a set of roads and points to a road graph
@@ -754,6 +770,9 @@ def roads_to_graph(
     """
     origin = np.array(origin)[::-1]
     nodes = get_graph_nodes(roads, road_points, traffic_signs, traffic_lights)
+    for c_node in crossing_nodes:
+        nodes[str(c_node.id)] = c_node
+        print("added crossing point", c_node)
     edges = get_graph_edges_from_road(roads, nodes, road_points, bounds, origin)
     graph_traffic_signs = get_graph_traffic_signs(nodes, edges, traffic_signs)
     graph_traffic_lights = get_graph_traffic_lights(nodes, traffic_lights)

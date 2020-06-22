@@ -379,13 +379,14 @@ class IntermediateFormat:
         added_lanes = set()
         for lane in graph.lanelinks:
             node = lane.to_node
-            # node with more than 2 edges is an intersection
-            if node.get_degree() > 2:
+            # node with more than 2 edges or marked as crossing is an intersection 
+            if node.get_degree() > 2 or (node.is_crossing and node.get_degree() == 2):
                 # keep track of added lanes to consider unique intersections
                 incoming = [p for p in lane.predecessors if p.id not in added_lanes]
 
                 # Initialize incomming element with properties to be filled in
-                incoming_element = {'incomingLanelet': set([incoming_lane.id for incoming_lane in incoming]),
+                incoming_lanelet_ids = set([incoming_lane.id for incoming_lane in incoming])
+                incoming_element = {'incomingLanelet': incoming_lanelet_ids,
                                     'right': [],
                                     'left': [],
                                     'through': [],

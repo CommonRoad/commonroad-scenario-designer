@@ -192,6 +192,7 @@ class GraphNode:
         self.edges = edges
         self.traffic_signs = []
         self.traffic_lights = []
+        self.is_crossing = False
 
     def __str__(self):
         return "Graph_node with id: {}".format(self.id)
@@ -370,6 +371,12 @@ class GraphEdge:
         self.backward_restrictions: Set[str] = set()
         self.traffic_signs = []
         self.traffic_lights = []
+
+    def __str__(self):
+        return "Graph_edge {}: {}->{}".format(self.id, self.node1.id, self.node2.id)
+
+    def __repr__(self):
+        return "Graph_edge {}: {}->{}".format(self.id, self.node1.id, self.node2.id)
 
     def flip(self) -> None:
         """
@@ -872,6 +879,12 @@ class Lane:
         self.traffic_signs = None
         self.traffic_lights = None
 
+    def __str__(self):
+        return "Lane with id: {}".format(self.id)
+
+    def __repr__(self):
+        return "Lane with id: {}".format(self.id)
+    
     def flip(self, keep_edge_dir: bool) -> None:
         """
         flips the direction of the lane
