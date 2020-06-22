@@ -192,6 +192,7 @@ class GraphNode:
         self.edges = edges
         self.traffic_signs = []
         self.traffic_lights = []
+        self.is_crossing = False
 
     def __str__(self):
         return "Graph_node with id: {}".format(self.id)

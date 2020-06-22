@@ -53,8 +53,8 @@ def get_points(
     ids = []
     lons = []
     lats = []
-    for id, node in nodes.items():
-        ids.append(id)
+    for node_id, node in nodes.items():
+        ids.append(node_id)
         lons.append(float(node.attrib["lon"]))
         lats.append(float(node.attrib["lat"]))
     if custom_bounds is not None:
@@ -478,45 +478,57 @@ def get_graph_nodes(
     :rtype: Dict[int, GraphNode]
     """
     nodes = {}
-    node_degree = {}
+    point_degree = {} # number of roads sharing a point
     for road in roads:
         for waypoint in road.findall("nd"):
-            id = waypoint.attrib["ref"]
-            if id in node_degree:
-                node_degree[id] += 1
+            point_id = waypoint.attrib["ref"]
+            if point_id in point_degree:
+                point_degree[point_id] += 1
             else:
-                node_degree[id] = 1
-        for id in (road.attrib["from"], road.attrib["to"]):
-            current_point = points[id]
-            if id not in nodes:
-                nodes[id] = rg.GraphNode(
-                    int(id), current_point.x, current_point.y, set()
+                point_degree[point_id] = 1
+        # get nodes from endpoints of ways
+        for point_id in (road.attrib["from"], road.attrib["to"]):
+            current_point = points[point_id]
+            if point_id not in nodes:
+                nodes[point_id] = rg.GraphNode(
+                    int(point_id), current_point.x, current_point.y, set()
                 )
 
     for traffic_sign in traffic_signs:
-        id = next(iter(traffic_sign))
-        if id.startswith('road'):
+        point_id = next(iter(traffic_sign))
+        if point_id.startswith('road'):
             continue
-        if id not in nodes:
-            current_point = points[id]
-            nodes[id] = rg.GraphNode(int(id), current_point.x, current_point.y, set())
+        if point_id not in nodes:
+            current_point = points[point_id]
+            nodes[point_id] = rg.GraphNode(
+                int(point_id), current_point.x, current_point.y, set()
+            )
 
     for traffic_light in traffic_lights:
-        id = next(iter(traffic_light))
-        if id not in nodes:
-            current_point = points[id]
-            nodes[id] = rg.GraphNode(int(id), current_point.x, current_point.y, set())
+        point_id = next(iter(traffic_light))
+        if point_id not in nodes:
+            current_point = points[point_id]
+            nodes[point_id] = rg.GraphNode(
+                int(point_id), current_point.x, current_point.y, set()
+            )
 
-    for id in node_degree:
-        current_point = points[id]
-        if id not in nodes and node_degree[id] > 1:
-            nodes[id] = rg.GraphNode(int(id), current_point.x, current_point.y, set())
+    # get nodes from intersection points of roads
+    for point_id in point_degree:
+        current_point = points[point_id]
+        if point_id not in nodes and point_degree[point_id] > 1:
+            nodes[point_id] = rg.GraphNode(
+                int(point_id), current_point.x, current_point.y, set()
+            )
     return nodes
 
 
 def get_area_from_bounds(
     bounds: Tuple[float, float, float, float], origin: np.ndarray
 ) -> Area:
+    '''
+    returns a rectangular area in cartesian coordinates from given 
+    bounds and origin in longitude and latitude
+    '''
     max_point = lon_lat_to_cartesian(np.array([bounds[3], bounds[0]]), origin)
     min_point = lon_lat_to_cartesian(np.array([bounds[1], bounds[2]]), origin)
     # print("maxpoint", max_point, "minpoint", min_point)
