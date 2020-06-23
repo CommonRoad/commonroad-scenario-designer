@@ -6278,12 +6278,6 @@
         <color>yellow</color>
       </cycleElement>
     </cycle>
-    <position>
-      <point>
-        <x>-11.96798290669162</x>
-        <y>-11.96798290669162</y>
-      </point>
-    </position>
     <active>true</active>
   </trafficLight>
   <trafficLight id="234">
@@ -6305,12 +6299,6 @@
         <color>yellow</color>
       </cycleElement>
     </cycle>
-    <position>
-      <point>
-        <x>-24.45057311468958</x>
-        <y>-24.45057311468958</y>
-      </point>
-    </position>
     <active>true</active>
   </trafficLight>
   <intersection id="52">
