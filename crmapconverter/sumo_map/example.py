@@ -5,13 +5,15 @@ from crmapconverter.sumo_map.cr2sumo import CR2SumoMapConverter
 from crmapconverter.sumo_map.config import SumoConfig
 from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.common.file_writer import CommonRoadFileWriter
+from commonroad.visualization.draw_dispatch_cr import draw_object
+import matplotlib.pyplot as plt
 
 from sumocr.interface.sumo_simulation import SumoSimulation
 from sumocr.visualization.video import create_video
 
 # path config
 output_folder = os.path.join(os.path.dirname(__file__), 'test_files')
-scenario_name = "urban-1_lanelets_utm"
+scenario_name = "garching"
 input_file = os.path.join(output_folder, scenario_name + '.xml')
 
 scenario, planning_problem = CommonRoadFileReader(input_file).open()
@@ -23,11 +25,19 @@ centroid = np.mean(np.concatenate(
 scenario.translate_rotate(-centroid, 0)
 planning_problem.translate_rotate(-centroid, 0)
 
-config = SumoConfig.from_scenario_name(scenario_name)
 
-# convert CR to sumo net
-wrapper = CR2SumoMapConverter(scenario.lanelet_network, config)
-wrapper.convert_to_net_file(output_folder)
+
+# draw scenario
+plt.figure(figsize=(25, 25))
+draw_object(scenario.lanelet_network)
+plt.autoscale()
+plt.show()
+
+# config = SumoConfig.from_scenario_name(scenario_name)
+
+# # convert CR to sumo net
+# wrapper = CR2SumoMapConverter(scenario.lanelet_network, config)
+# wrapper.convert_to_net_file(output_folder)
 
 # # run Simulation
 simulation = SumoSimulation()
