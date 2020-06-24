@@ -15,12 +15,9 @@
 # @version $Id$
 
 
-
 class Node:
-
     """ Nodes from a sumo network """
-
-    def __init__(self, id, type, coord, incLanes, intLanes=None):
+    def __init__(self, id, type, coord, incLanes, intLanes=None, tl=None):
         self._id = id
         self._type = type
         self._coord = coord
@@ -32,6 +29,7 @@ class Node:
         self._intLanes = intLanes
         self._shape3D = None
         self._shape = None
+        self._tl = tl
 
     def getID(self):
         return self._id
@@ -86,6 +84,9 @@ class Node:
 
     def getInternal(self):
         return self._intLanes
+
+    def getTl(self):
+        return self._tl
 
     def setFoes(self, index, foes, prohibits):
         self._foes[index] = foes

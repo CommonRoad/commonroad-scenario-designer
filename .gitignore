@@ -3,9 +3,11 @@
 #*.xml
 !test/**/*.xml
 test/.pytest_cache
+.pytest_cache
 venv/
 .vscode/
 src/*
+*.env
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
