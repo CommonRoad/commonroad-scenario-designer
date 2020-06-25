@@ -74,8 +74,8 @@ class OpenDriveConverter:
         """Convert a whole lane section into a list of ParametricLane objects.
 
         Args:
-          lane_section:
-          reference_border:
+          lane_section: opendriveparser.elements.road.lanes.lane_sections()
+          reference_border: crmapconverter.opendriveconversion.plane_elements.border.Border()
 
         Returns:
 
