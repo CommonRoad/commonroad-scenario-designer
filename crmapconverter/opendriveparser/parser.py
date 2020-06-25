@@ -505,9 +505,12 @@ def parse_opendrive_road(opendrive, road):
 
     # Signals
     # TODO implementation
-    for road_signal in road.find("signals").findall("signal"):
-        if road_signal is not None:
-            parse_opendrive_road_signal(newRoad, road_signal)
+    if road.find("signals") is not None:
+        for road_signal in road.find("signals").findall("signal"):
+            if road_signal is not None:
+                parse_opendrive_road_signal(newRoad, road_signal)
+    else:
+        pass
 
     calculate_lane_section_lengths(newRoad)
 

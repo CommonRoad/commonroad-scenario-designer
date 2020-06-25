@@ -3,6 +3,7 @@
 
 """Module to contain Network which can load an opendrive object and then export
 to lanelets. Iternally, the road network is represented by ParametricLanes."""
+import numpy as np
 
 from commonroad.scenario.scenario import Scenario
 
@@ -12,6 +13,12 @@ from crmapconverter.opendriveconversion.utils import encode_road_section_lane_wi
 from crmapconverter.opendriveconversion.lanelet_network import ConversionLaneletNetwork
 from crmapconverter.opendriveconversion.converter import OpenDriveConverter
 
+from commonroad.scenario.traffic_sign import (
+    TrafficSign, TrafficLight, TrafficSignElement,
+    SupportedTrafficSignCountry, TrafficSignIDZamunda, TrafficSignIDGermany, TrafficSignIDUsa, TrafficSignIDChina,
+    TrafficSignIDSpain, TrafficSignIDRussia, TrafficLightDirection
+
+)
 
 __author__ = "Benjamin Orthen, Stefan Urban"
 __copyright__ = "TUM Cyber-Physical Systems Group"
@@ -33,6 +40,8 @@ class Network:
     def __init__(self):
         self._planes = []
         self._link_index = None
+        self._traffic_lights = []
+        self._traffic_signs = []
 
     # def __eq__(self, other):
     # return self.__dict__ == other.__dict__
@@ -63,18 +72,71 @@ class Network:
                 parametric_lane_groups = OpenDriveConverter.lane_section_to_parametric_lanes(
                     lane_section, reference_border
                 )
+                # parametric_lane_groups is a list of ParametricLaneGroup()
+                # ParametricLaneGroup() contains a list of ParametricLane() s
 
                 self._planes.extend(parametric_lane_groups)
 
-            #TODO Implementation
-            #Traffic Signs(Static Signals)
+                for signal in road.signals:
 
+                    position, tangent = road.planView.calc(signal.s)
+                    position = np.array([position[0] + signal.t * np.cos(tangent + 3.1416/2),
+                                         position[1] + signal.t * np.sin(tangent + 3.1416/2)])
 
-            #TODO Implementation
-            #Traffic Lights(Dynamic Signals)
+                    if signal.dynamic == 'no':
+                        if signal.subtype == '-1' or 'none':
+                            additional_values = []
+                        else:
+                            additional_values = list([signal.subtype])
+
+                        if SupportedTrafficSignCountry(signal.country) not in SupportedTrafficSignCountry:
+                            print("country not identified, use default instead")
+                            try:
+                                element_id = TrafficSignIDZamunda(signal.type)
+                            except ValueError:
+                                print("sign type not understood")
+                                element_id = TrafficSignIDZamunda.UNKNOWN
+
+                        elif signal.country == 'DEU':
+                            try:
+                                element_id = TrafficSignIDGermany(signal.type)
+                            except ValueError:
+                                print("sign type not understood")
+                                element_id = TrafficSignIDGermany.UNKNOWN
+
+                        else:
+                            print("country not identified, use default instead")
+                            element_id = TrafficSignIDZamunda.UNKNOWN
+
+                        traffic_sign_element = TrafficSignElement(
+                            traffic_sign_element_id=element_id,
+                            additional_values=additional_values
+                        )
+
+                        traffic_sign = TrafficSign(
+                            traffic_sign_id=signal.id,
+                            traffic_sign_elements=list([traffic_sign_element]),
+                            first_occurrence=None,
+                            position=position,
+                            virtual=False
+                        )
+
+                        self._traffic_signs.append(traffic_sign)
+
+                    elif signal.dynamic == 'yes':
+                        traffic_light = TrafficLight(
+                            traffic_light_id=signal.id,
+                            cycle=[],
+                            position=position,
+                            time_offset=0,
+                            direction=TrafficLightDirection.ALL,
+                            active=True
+                        )
+
+                        self._traffic_lights.append(traffic_light)
 
     def export_lanelet_network(
-        self, filter_types: list = None
+            self, filter_types: list = None
     ) -> "ConversionLaneletNetwork":
         """Export network as lanelet network.
 
@@ -103,6 +165,7 @@ class Network:
         # successorIds get encoded with a non existing successorID
         # of the lane link
         lanelet_network.prune_network()
+        # concatenate possible lanelets with their successors
         lanelet_network.concatenate_possible_lanelets()
 
         # Perform lane splits and joins
@@ -110,10 +173,38 @@ class Network:
 
         lanelet_network.convert_all_lanelet_ids()
 
+        for traffic_light in self._traffic_lights:
+
+            distance = []
+            for lanelet in lanelet_network.lanelets:
+
+                pos_1 = traffic_light.position
+                n = len(lanelet.right_vertices[0]) - 1
+                pos_2 = np.array(lanelet.right_vertices[0][n], lanelet.right_vertices[1][n])
+                dist = np.linalg.norm(pos_1 - pos_2)
+                distance.append(dist)
+
+            id_for_adding = lanelet_network.lanelets[distance.index(min(distance))].lanelet_id
+            lanelet_network.add_traffic_light(traffic_light, {id_for_adding})
+
+        for traffic_sign in self._traffic_signs:
+
+            distance = []
+            for lanelet in lanelet_network.lanelets:
+
+                pos_1 = traffic_sign.position
+                n = len(lanelet.right_vertices[0]) - 1
+                pos_2 = np.array(lanelet.right_vertices[0][n], lanelet.right_vertices[1][n])
+                dist = np.linalg.norm(pos_1 - pos_2)
+                distance.append(dist)
+
+            id_for_adding = lanelet_network.lanelets[distance.index(min(distance))].lanelet_id
+            lanelet_network.add_traffic_sign(traffic_sign, {id_for_adding})
+
         return lanelet_network
 
     def export_commonroad_scenario(
-        self, dt: float = 0.1, benchmark_id=None, filter_types=None
+            self, dt: float = 0.1, benchmark_id=None, filter_types=None
     ):
         """Export a full CommonRoad scenario
 
@@ -176,8 +267,8 @@ class LinkIndex:
                     # Last lane section! > Next road in first lane section
                     # Try to get next road
                     elif (
-                        road.link.successor is not None
-                        and road.link.successor.elementType != "junction"
+                            road.link.successor is not None
+                            and road.link.successor.elementType != "junction"
                     ):
 
                         next_road = opendrive.getRoad(road.link.successor.element_id)
@@ -209,8 +300,8 @@ class LinkIndex:
                     # First lane section! > Previous road
                     # Try to get previous road
                     elif (
-                        road.link.predecessor is not None
-                        and road.link.predecessor.elementType != "junction"
+                            road.link.predecessor is not None
+                            and road.link.predecessor.elementType != "junction"
                     ):
 
                         prevRoad = opendrive.getRoad(road.link.predecessor.element_id)
