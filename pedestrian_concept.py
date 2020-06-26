@@ -10,19 +10,17 @@ from crmapconverter.osm2cr.converter_modules.osm_operations import osm_parser
 from crmapconverter.osm2cr.converter_modules.graph_operations import intersection_merger
 from crmapconverter.osm2cr.converter_modules.cr_operations import export
 from crmapconverter.osm2cr.converter_modules.cr_operations import cleanup
-from crmapconverter.osm2cr.converter_modules.utility.idgenerator import get_id
-from crmapconverter.osm2cr.converter_modules.utility import geometry
-from crmapconverter.osm2cr.converter_modules.graph_operations import road_graph as rg
 
-# scenario_file = "/home/max/Desktop/Planning/Maps/osm_files/garching_kreuzung_fixed.osm"
+scenario_file = "/home/max/Desktop/Planning/Maps/osm_files/garching_kreuzung_fixed.osm"
 # scenario_file = "/home/max/Desktop/Planning/Maps/osm_files/only_straigt_test.osm"
-scenario_file = "/home/max/Desktop/Planning/Maps/osm_files/intersect_and_crossing.osm"
-# target_file = "/home/max/Desktop/Planning/Maps/cr_files/garching_kreuzung_merged.xml"
+# scenario_file = "/home/max/Desktop/Planning/Maps/osm_files/intersect_and_crossing2.osm"
+target_file = "/home/max/Desktop/Planning/Maps/cr_files/garching_kreuzung_merged.xml"
 # target_file = "/home/max/Desktop/Planning/Maps/cr_files/only_straigt_merged.xml"
-target_file = "/home/max/Desktop/Planning/Maps/cr_files/intersect_and_crossing.xml"
+# target_file = "/home/max/Desktop/Planning/Maps/cr_files/intersect_and_crossing2.xml"
 
 
 DRAW_LABELS = False
+
 
 def draw_scenario(scenario):
     plot_center = scenario.lanelet_network.lanelets[0].left_vertices[0]
@@ -42,22 +40,20 @@ def draw_scenario(scenario):
     draw_object(scenario, plot_limits=plot_limits, draw_params=draw_params)
     plt.show()
 
-def draw_intermediate(interm_road_network):
-    scenario = interm_road_network.to_commonroad_scenario()
-    draw_scenario(scenario)
 
-def convert_to_graph(file:str, accepted_highways, custom_bounds=None):
+def convert_to_graph(file:str, accepted_ways, custom_bounds=None, crossing_nodes=[]):
     print("reading File")
     (roads, points, restrictions, center_point, bounds, traffic_signs,
         traffic_lights) = osm_parser.parse_file(
-            file, accepted_highways, config.REJECTED_TAGS, custom_bounds
+            file, accepted_ways, config.REJECTED_TAGS, custom_bounds
     )
     print("creating graph")
     graph = osm_parser.roads_to_graph(
         roads, points, restrictions, center_point, bounds, center_point,
-        traffic_signs, traffic_lights
+        traffic_signs, traffic_lights, crossing_nodes
     )
     return graph
+
 
 def convert_to_intermediate(graph):
     if config.MAKE_CONTIGUOUS:
@@ -70,154 +66,81 @@ def convert_to_intermediate(graph):
     graph = Scenario.step_collection_3(graph)
     return IntermediateFormat.extract_from_road_graph(graph)
 
-def split_graph_edge(edge, split_index, graph):
+
+def is_close_to_intersection(node):
+    for edge in node.edges:
+        if node == edge.node1:
+            neighbor = edge.node2
+        else:
+            neighbor = edge.node1
+        if neighbor.get_distance(node) < config.INTERSECTION_DISTANCE and neighbor.get_degree() > 2:
+            # close neighbor is intersection
+            print(node, "is too close to intersection at", neighbor)
+            return True
+    return False
+
+
+# create road/path networks
+all_highways = config.ACCEPTED_HIGHWAYS.copy()
+all_highways.extend(config.ACCEPTED_PATHWAYS)
+combined_graph = convert_to_graph(scenario_file, all_highways)
+road_graph = convert_to_graph(scenario_file, config.ACCEPTED_HIGHWAYS,
+    combined_graph.bounds)
+path_graph = convert_to_graph(scenario_file, config.ACCEPTED_PATHWAYS,
+    combined_graph.bounds)
     
-    def create_edge(waypoints, node1, node2):
-        if node1 not in graph.nodes:
-            graph.nodes.add(node1)
-        if node2 not in graph.nodes:
-            graph.nodes.add(node2)
+# get crossing points
+crossing_nodes = []
+for candidate_node in combined_graph.nodes:
+    is_contained = False
+    for node in road_graph.nodes:
+        is_contained |= node.id == candidate_node.id
+    for node in path_graph.nodes:
+        is_contained |= node.id == candidate_node.id
+    if not is_contained and not is_close_to_intersection(candidate_node):
+        # remove all information about edges from earlier linking
+        candidate_node.edges.clear()
+        candidate_node.is_crossing = True
+        crossing_nodes.append(candidate_node)
 
-        waypoints = [
-            geometry.Point(get_id(), point[0], point[1]) for point in waypoints
-        ]
-        lane_info = 2, 1, 1, False, None, None, None
-        assumptions = False, False, False
-        edge = rg.GraphEdge(
-            get_id(),
-            node1,
-            node2,
-            waypoints,
-            lane_info,
-            assumptions,
-            50,
-            "primary",
-        )
-        edge.generate_lanes()
-        graph.edges.add(edge)
-        node1.edges.add(edge)
-        node2.edges.add(edge)
+# recreate the road graph with the crossing nodes
+road_graph = convert_to_graph(scenario_file, config.ACCEPTED_HIGHWAYS,
+    combined_graph.bounds, crossing_nodes)
 
-    middle_waypoint = edge.waypoints[split_index]
-    middle_node = rg.GraphNode(
-            get_id(), middle_waypoint.x, middle_waypoint.y, set()
-        )
-
-    waypoints1 = edge.waypoints[: split_index + 1]
-    waypoints1 = [point.get_array() for point in waypoints1]
-    
-    graph.remove_edge(edge)
-
-    create_edge(waypoints1, edge.node1, middle_node)
-
-    waypoints2 = edge.waypoints[split_index :]
-    waypoints2 = [point.get_array() for point in waypoints2]
-
-    create_edge(waypoints2, middle_node, edge.node2)
-
-def get_graph_with_crossing_nodes(osm_file):
-    # combined road network
-    all_highways = config.ACCEPTED_HIGHWAYS.copy()
-    all_highways.extend(config.ACCEPTED_PATHWAYS)
-    (roads, points, restrictions, center_point, bounds, traffic_signs,
-        traffic_lights) = osm_parser.parse_file(
-            osm_file, all_highways, config.REJECTED_TAGS
-    )
-    # calculate combined bounds
-    combined_graph = osm_parser.roads_to_graph(
-        roads, points, restrictions, center_point, bounds, center_point,
-        traffic_signs, traffic_lights
-    )
-    combined_bounds = combined_graph.bounds
-    # road network
-    (roads, points, restrictions, center_point, bounds, traffic_signs,
-        traffic_lights) = osm_parser.parse_file(
-            osm_file, config.ACCEPTED_HIGHWAYS, config.REJECTED_TAGS, combined_bounds
-    )
-    # footpath network
-    (roads2, points2, restrictions2, center_point2, bounds2, traffic_signs2,
-        traffic_lights2) = osm_parser.parse_file(
-            osm_file, config.ACCEPTED_PATHWAYS, config.REJECTED_TAGS, combined_bounds
-    )
-    # get crossing points
-    road_graph = osm_parser.roads_to_graph(
-        roads, points, restrictions, center_point, bounds, center_point,
-        traffic_signs, traffic_lights
-    )
-    path_graph = osm_parser.roads_to_graph(
-        roads2, points2, restrictions2, center_point2, bounds2, center_point2,
-        traffic_signs2, traffic_lights2
-    )
-    crossing_nodes = []
-    for candidate_node in combined_graph.nodes:
-        is_contained = False
-        for node in road_graph.nodes:
-            is_contained |= node.id == candidate_node.id
-        for node in path_graph.nodes:
-            is_contained |= node.id == candidate_node.id
-        if not is_contained:
-            # remove all information about edges from earlier linking
-            candidate_node.edges.clear()
-            candidate_node.is_crossing = True
-            crossing_nodes.append(candidate_node)
-    # recreate the road graph with the crossing nodes
-    road_graph = osm_parser.roads_to_graph(
-        roads, points, restrictions, center_point, bounds, center_point,
-        traffic_signs, traffic_lights, crossing_nodes
-    )
-    return road_graph, path_graph, crossing_nodes
-
-# # get bounds
-# all_highways = config.ACCEPTED_HIGHWAYS.copy()
-# all_highways.extend(config.ACCEPTED_PATHWAYS)
-# combined_graph = convert_to_graph(scenario_file, all_highways)
-# combined_bounds = combined_graph.bounds
-
-# # get intermediate of road network
-# road_graph = convert_to_graph(scenario_file, config.ACCEPTED_HIGHWAYS,
-#     custom_bounds=combined_bounds)
-# interm_road = convert_to_intermediate(road_graph)
-# print("******roads")
-# draw_intermediate(interm_road)
-
-# # get intermediate of path network
-# temp_intersec_dist = config.INTERSECTION_DISTANCE
-# config.INTERSECTION_DISTANCE = 2.0
-# path_graph = convert_to_graph(scenario_file, config.ACCEPTED_PATHWAYS,
-#     custom_bounds=combined_bounds)
-# interm_path = convert_to_intermediate(path_graph)
-# config.INTERSECTION_DISTANCE = temp_intersec_dist
-# print("******paths")
-# draw_intermediate(interm_path)
-
-road_graph, path_graph, crossing_nodes = get_graph_with_crossing_nodes(scenario_file)
-
+# create intermediate format  and create scenario for road and path network
 interm_road = convert_to_intermediate(road_graph)
+temp_intersec_dist = config.INTERSECTION_DISTANCE
+config.INTERSECTION_DISTANCE = 2.0
 interm_path = convert_to_intermediate(path_graph)
+config.INTERSECTION_DISTANCE = temp_intersec_dist
 path_scenario = interm_path.to_commonroad_scenario()
+# draw_scenario(path_scenario)
 road_scenario = interm_road.to_commonroad_scenario()
+# draw_scenario(road_scenario)
 
-# TODO find crossing positions (range > config.intersetion_distance)
+
+# TODO performance: close if distance < config.intersetion_distance
 def is_close_to_crossing(lanelet):
     return True
 
+
 # merge networks
-interm_path.nodes.extend(interm_road.nodes)
-interm_path.edges.extend(interm_road.edges)
-interm_path.traffic_signs.extend(interm_road.traffic_signs)
-interm_path.traffic_lights.extend(interm_road.traffic_lights)
-interm_path.obstacles.extend(interm_road.obstacles)
-interm_path.intersections.extend(interm_road.intersections)
+interm_road.nodes.extend(interm_path.nodes)
+interm_road.edges.extend(interm_path.edges)
+interm_road.traffic_signs.extend(interm_path.traffic_signs)
+interm_road.traffic_lights.extend(interm_path.traffic_lights)
+interm_road.obstacles.extend(interm_path.obstacles)
+# interm_road.intersections.extend(interm_path.intersections) intersections only for roads
 interm_merged = IntermediateFormat(
-    interm_path.nodes,
-    interm_path.edges,
-    interm_path.traffic_signs,
-    interm_path.traffic_lights,
-    interm_path.obstacles,
-    interm_path.intersections
+    interm_road.nodes,
+    interm_road.edges,
+    interm_road.traffic_signs,
+    interm_road.traffic_lights,
+    interm_road.obstacles,
+    interm_road.intersections
 )
 
-# find crossings at existing intersections
+# find intersecting crossings at existing intersections
 crossings = []
 for path_lane in path_scenario.lanelet_network.lanelets:
     if is_close_to_crossing(path_lane):
@@ -246,13 +169,11 @@ for path_id, road_ids in crossings:
         if not_part:
             new_crossings.append((path_id, not_part))
 
-scenario_merged = interm_merged.to_commonroad_scenario()
-
-# draw scenario
-cleanup.sanitize(scenario_merged)
-draw_scenario(scenario_merged)
 
 # write scenario to file
+scenario_merged = interm_merged.to_commonroad_scenario()
+cleanup.sanitize(scenario_merged)
+draw_scenario(scenario_merged)
 planning_prob = interm_merged.get_dummy_planning_problem_set()
 author = config.AUTHOR
 affiliation = config.AFFILIATION
