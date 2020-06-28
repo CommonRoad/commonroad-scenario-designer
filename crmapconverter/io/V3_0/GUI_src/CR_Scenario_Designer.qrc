@@ -1,0 +1,35 @@
+<RCC>
+  <qresource prefix="icons">
+    <file>tools.ico</file>
+    <file>button_roundabout.png</file>
+    <file>button_stop.png</file>
+    <file>button_traffic_light.png</file>
+    <file>button_yeld.png</file>
+    <file>new_file.png</file>
+    <file>open_file.jpeg</file>
+    <file>open_file.png</file>
+    <file>cr2.ico</file>
+    <file>cr1.png</file>
+    <file>icon.ico</file>
+    <file>Groupe_1.png</file>
+    <file>Groupe_2.png</file>
+    <file>Groupe_3.png</file>
+    <file>Groupe_4.png</file>
+    <file>Groupe_5.png</file>
+    <file>Groupe_6.png</file>
+    <file>Groupe_4.ico</file>
+    <file>Groupe_5.ico</file>
+    <file>opendrive.ico</file>
+    <file>osm.ico</file>
+    <file>sumo.ico</file>
+    <file>cr1.ico</file>
+    <file>cr.ico</file>
+    <file>save.ico</file>
+    <file>save_file.png</file>
+    <file>close.png</file>
+    <file>play.png</file>
+    <file>botton_save.png</file>
+    <file>pause.png</file>
+    <file>import.png</file>
+  </qresource>
+</RCC>

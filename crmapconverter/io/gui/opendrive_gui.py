@@ -231,7 +231,7 @@ class OpenDriveConvertWindow(QWidget):
                     source="OpenDRIVE 2 Lanelet Converter",
                     tags="",
                 )
-                writer.write_scenario_to_file_io(fh)
+                writer.write_scenario_to_file(path)
         except (IOError) as e:
             QMessageBox.critical(
                 self,
