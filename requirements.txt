@@ -1,7 +1,7 @@
 numpy>=1.16.4
 lxml>=4.3.4
 # commonroad-io>=2020.2
-git+ssh://git@gitlab.lrz.de/cps/commonroad-io.git@develop
+git+https://gitlab.lrz.de/cps/commonroad-io.git@develop
 pyproj>=2.2.0
 scipy>=1.3.0
 Pillow >= 7.1.1
@@ -14,4 +14,4 @@ PyQt5>=5.12.2
 matplotlib>=3.1.0
 
 # for sumo_map converter
-git+ssh://git@gitlab.lrz.de/cps/sumo-interface.git@develop#egg=sumocr
+git+https://gitlab.lrz.de/cps/sumo-interface.git@develop#egg=sumocr
