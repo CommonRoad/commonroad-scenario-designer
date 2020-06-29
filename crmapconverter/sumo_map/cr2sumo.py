@@ -146,8 +146,8 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                     self.node_id_next,
                     "traffic_light",
                     # convert TrafficLight position if explicitly given
-                    tl.position
-                    if tl.position else from_edge.getToNode().getCoord3D(),
+                    tl.position if tl.position.size > 0 else
+                    from_edge.getToNode().getCoord3D(),
                     incLanes=None,
                     tl=tl.traffic_light_id)
                 self.node_id_next += 1

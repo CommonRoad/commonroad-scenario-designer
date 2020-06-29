@@ -1428,19 +1428,19 @@
   <trafficLight id="233">
     <cycle>
       <cycleElement>
-        <duration>10</duration>
+        <duration>5</duration>
         <color>red</color>
       </cycleElement>
       <cycleElement>
-        <duration>5</duration>
+        <duration>2</duration>
         <color>redYellow</color>
       </cycleElement>
       <cycleElement>
-        <duration>30</duration>
+        <duration>5</duration>
         <color>green</color>
       </cycleElement>
       <cycleElement>
-        <duration>5</duration>
+        <duration>2</duration>
         <color>yellow</color>
       </cycleElement>
     </cycle>
