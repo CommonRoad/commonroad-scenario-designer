@@ -73,7 +73,8 @@ def get_points(
     lons_d = lons - lon_center
     lats_d = lats - lat_center
     points = {}
-    lon_constants = np.pi / 180 * config.EARTH_RADIUS * np.cos(np.radians(lats))
+    lon_constants = np.pi / 180 * config.EARTH_RADIUS * np.cos(
+            np.radians(lats))
     x = lon_constants * lons_d
     lat_constant = np.pi / 180 * config.EARTH_RADIUS
     y = lat_constant * lats_d
@@ -128,10 +129,12 @@ def get_traffic_rules(nodes: Dict[int, ElTree.Element],
         road_id = road.attrib['id']
         tags = road.findall('tag')
         for tag in tags:
-            if tag.attrib['k'] in accepted_traffic_sign_by_keys or tag.attrib['v'] in accepted_traffic_sign_by_values or tag.attrib['k'] == 'highway':
+            if (tag.attrib['k'] in accepted_traffic_sign_by_keys 
+                    or tag.attrib['v'] in accepted_traffic_sign_by_values 
+                    or tag.attrib['k'] == 'highway'):
                 key = tag.attrib['k']
                 value = tag.attrib['v']
-                virtual= None
+                virtual = None
                 if key == 'maxspeed':
                     value, virtual = extract_speedlimit(value)
                 elif key == 'highway':
@@ -145,19 +148,20 @@ def get_traffic_rules(nodes: Dict[int, ElTree.Element],
                 for node in nodes:
                     if not added:
                         node_id = node.attrib['ref']
-                        if node_id in traffic_rules  \
-                                and key in traffic_rules[node_id].keys() and traffic_rules[node_id][key] == value:
+                        if (node_id in traffic_rules  
+                                and key in traffic_rules[node_id].keys() 
+                                and traffic_rules[node_id][key] == value):
                             # if already other roads exist
                             if 'road_id' in traffic_rules[node_id].keys():
                                 traffic_rules[node_id]['road_id'].append(road_id)
                             else:
-                                traffic_rules[node_id].update({'road_id': [road_id]})
+                                traffic_rules[node_id].update(
+                                    {'road_id': [road_id]})
                             added = True
                 if not added:
                     sign['road_id'] = road_id
                     sign['virtual'] = True
-                    traffic_rules.update({'road'+road_id: sign})
-
+                    traffic_rules.update({'road' + road_id: sign})
 
     return traffic_rules
 
@@ -167,7 +171,9 @@ def get_traffic_signs_and_lights(traffic_rules: Dict) -> (List, List):
     traffic_signs = []
     for node_id in traffic_rules:
         rule = traffic_rules[node_id]
-        if 'traffic_sign' in rule.keys() or 'maxspeed' in rule.keys() or 'overtaking' in rule.keys():
+        if ('traffic_sign' in rule.keys() 
+                or 'maxspeed' in rule.keys() 
+                or 'overtaking' in rule.keys()):
             traffic_signs.append({node_id: rule})
         else:
             traffic_lights.append({node_id: rule})
@@ -201,7 +207,8 @@ def parse_restrictions(
                 via_element_id = member.attrib["ref"]
                 via_element_type = member.attrib["type"]
 
-        if None not in [from_edge_id, to_edge_id, via_element_id, via_element_type]:
+        if None not in [from_edge_id, to_edge_id,
+                        via_element_id, via_element_type]:
             restriction_object = Restriction(
                 from_edge_id, via_element_id, via_element_type, to_edge_id, restriction
             )
@@ -347,6 +354,7 @@ def parse_turnlane(turnlane: str) -> str:
         return "none"
     return result
 
+
 def extract_speedlimit(value):
     virtual = False
     try:
@@ -403,7 +411,7 @@ def extract_tag_info(road: ElTree.Element) -> Tuple[Road_info, int]:
         if tag.attrib["k"] == "lanes:backward":
             backward_lanes = int(tag.attrib["v"])
         if tag.attrib["k"] == "maxspeed":
-            speedlimit, virtual = extract_speedlimit(tag.attrib['v'])
+            speedlimit, _ = extract_speedlimit(tag.attrib['v'])
         if tag.attrib["k"] == "oneway":
             oneway = tag.attrib["v"] == "yes"
         if tag.attrib["k"] == "junction":
@@ -441,9 +449,11 @@ def get_graph_traffic_signs(nodes: Dict, roads: Dict, traffic_signs: List):
         node_id = next(iter(traffic_sign))
         if node_id.startswith('road'):
             road_id = node_id[4:]
-            graph_traffic_sign = rg.GraphTrafficSign(traffic_sign[node_id], node=None, edges=[roads[road_id]])
+            graph_traffic_sign = rg.GraphTrafficSign(
+                traffic_sign[node_id], node=None, edges=[roads[road_id]])
         else:
-            graph_traffic_sign = rg.GraphTrafficSign( traffic_sign[node_id], nodes[node_id])
+            graph_traffic_sign = rg.GraphTrafficSign(
+                traffic_sign[node_id], nodes[node_id])
         # extract road_ids to edges in sign
         if 'road_id' in traffic_sign.keys():
             roads = traffic_sign['road_id']
@@ -459,7 +469,8 @@ def get_graph_traffic_lights(nodes: Dict, traffic_lights: List):
     graph_traffic_lights = []
     for traffic_light in traffic_lights:
         node_id = next(iter(traffic_light))
-        graph_traffic_light = rg.GraphTrafficLight( traffic_light[node_id], nodes[node_id])
+        graph_traffic_light = rg.GraphTrafficLight(
+            traffic_light[node_id], nodes[node_id])
         graph_traffic_lights.append(graph_traffic_light)
     return graph_traffic_lights
 
@@ -481,7 +492,7 @@ def get_graph_nodes(
     :rtype: Dict[int, GraphNode]
     """
     nodes = {}
-    point_degree = {} # number of roads sharing a point
+    point_degree = {}  # number of roads sharing a point
     for road in roads:
         for waypoint in road.findall("nd"):
             point_id = waypoint.attrib["ref"]
@@ -583,15 +594,11 @@ def get_graph_edges_from_road(
         # if speedlimit is None:
         #     speedlimit = config.SPEED_LIMITS[roadtype] / 3.6
         lane_info, flip = i_d.extract_missing_info(lane_info)
-        nr_of_lanes, forward_lanes, backward_lanes, oneway, turnlanes, turnlanes_forward, turnlanes_backward = (
-            lane_info
-        )
+        nr_of_lanes, forward_lanes, backward_lanes, _, _, _, _ = (lane_info)
         if forward_lanes is not None and backward_lanes is not None:
             assert forward_lanes + backward_lanes == nr_of_lanes
         lane_info, assumptions = i_d.assume_missing_info(lane_info, roadtype)
-        nr_of_lanes, forward_lanes, backward_lanes, oneway, turnlanes, turnlanes_forward, turnlanes_backward = (
-            lane_info
-        )
+        nr_of_lanes, forward_lanes, backward_lanes, _, _, _, _ = (lane_info)
         assert forward_lanes + backward_lanes == nr_of_lanes
 
         # get waypoints
@@ -608,7 +615,8 @@ def get_graph_edges_from_road(
                 # point is added, but edge is split
                 outside_waypoints.add(point.id)
                 waypoints.append(point)
-                nodes[point.id] = rg.GraphNode(point.id, point.x, point.y, set())
+                nodes[point.id] = rg.GraphNode(
+                    point.id, point.x, point.y, set())
             else:
                 # point is not added
                 pass
@@ -641,7 +649,7 @@ def get_graph_edges_from_road(
         for index, _ in enumerate(edge_nodes[:-1]):
             node1, index1 = edge_nodes[index]
             node2, index2 = edge_nodes[index + 1]
-            current_waypoints = waypoints[index1 : index2 + 1]
+            current_waypoints = waypoints[index1: index2 + 1]
             # only edges with sufficient nr of waypoint are added
             if len(current_waypoints) >= 2:
                 # create edge
@@ -704,7 +712,8 @@ def map_restrictions(
                             continue
                     elif restriction.via_element_type == "way":
                         if restriction.via_element_id in edges:
-                            via_edge = next(iter(edges[restriction.via_element_id]))
+                            via_edge = next(
+                                iter(edges[restriction.via_element_id]))
                             restriction_node = from_edge.common_node(via_edge)
                         else:
                             continue
@@ -773,7 +782,8 @@ def roads_to_graph(
     for c_node in crossing_nodes:
         nodes[str(c_node.id)] = c_node
         print("added crossing point", c_node)
-    edges = get_graph_edges_from_road(roads, nodes, road_points, bounds, origin)
+    edges = get_graph_edges_from_road(
+        roads, nodes, road_points, bounds, origin)
     graph_traffic_signs = get_graph_traffic_signs(nodes, edges, traffic_signs)
     graph_traffic_lights = get_graph_traffic_lights(nodes, traffic_lights)
     map_restrictions(edges, restrictions, nodes)
@@ -782,5 +792,11 @@ def roads_to_graph(
     # for node in nodes:
     #     node_set.add(nodes[node])
     node_set = get_node_set(edges)
-    graph = rg.Graph(node_set, edges, center_point, bounds, graph_traffic_signs, graph_traffic_lights)
+    graph = rg.Graph(
+        node_set,
+        edges,
+        center_point,
+        bounds,
+        graph_traffic_signs,
+        graph_traffic_lights)
     return graph

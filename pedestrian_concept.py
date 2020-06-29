@@ -41,7 +41,7 @@ def draw_scenario(scenario):
     plt.show()
 
 
-def convert_to_graph(file:str, accepted_ways, custom_bounds=None, crossing_nodes=[]):
+def convert_to_graph(file: str, accepted_ways, custom_bounds=None, crossing_nodes=[]):
     print("reading File")
     (roads, points, restrictions, center_point, bounds, traffic_signs,
         traffic_lights) = osm_parser.parse_file(
@@ -107,24 +107,20 @@ for candidate_node in combined_graph.nodes:
 road_graph = convert_to_graph(scenario_file, config.ACCEPTED_HIGHWAYS,
     combined_graph.bounds, crossing_nodes)
 
-# create intermediate format  and create scenario for road and path network
+# create intermediate format for road and path network
 interm_road = convert_to_intermediate(road_graph)
 temp_intersec_dist = config.INTERSECTION_DISTANCE
 config.INTERSECTION_DISTANCE = 2.0
 interm_path = convert_to_intermediate(path_graph)
 config.INTERSECTION_DISTANCE = temp_intersec_dist
+
+# create scenarios
 path_scenario = interm_path.to_commonroad_scenario()
-# draw_scenario(path_scenario)
+draw_scenario(path_scenario)
 road_scenario = interm_road.to_commonroad_scenario()
-# draw_scenario(road_scenario)
+draw_scenario(road_scenario)
 
-
-# TODO performance: close if distance < config.intersetion_distance
-def is_close_to_crossing(lanelet):
-    return True
-
-
-# merge networks
+# merge networks 
 interm_road.nodes.extend(interm_path.nodes)
 interm_road.edges.extend(interm_path.edges)
 interm_road.traffic_signs.extend(interm_path.traffic_signs)
@@ -139,6 +135,10 @@ interm_merged = IntermediateFormat(
     interm_road.obstacles,
     interm_road.intersections
 )
+
+# TODO performance: close if distance < config.intersetion_distance
+def is_close_to_crossing(lanelet):
+    return True
 
 # find intersecting crossings at existing intersections
 crossings = []
@@ -183,3 +183,31 @@ cr_writer = file_writer.CommonRoadFileWriter(scenario_merged, planning_prob,
     author, affiliation, source=source, tags=tags)
 cr_writer.write_scenario_to_file(target_file, file_writer.OverwriteExistingFile.ALWAYS)
 print("Wrote to", target_file)
+
+# integration concepts:
+# - difficult to integrate -> let as script
+# - subclass of Graph: multilayered graph: has pedestrian layer
+# - 
+
+# Facts
+# extra information has to be extracted from OSM: 
+#   - crossing node positions
+# no connection raods between paths and roads
+# 
+
+# problems: 
+# - some crossings will be added: polygon intersection close to intersections
+#   -> only use valid OSM content and make every overlapping a crossing 
+#   !!! no couls be valid AND not crossing (bridge)
+# - road network will be modified -> is a completely different map 
+#   -> can be fixed, but other concept
+# - need comparison of graph, intermediate format and scenario while building new combined scenario
+#   - graph for crossing nodes
+#   - intermediate for merging
+#   - scenario for polygon intersection
+# where insert the new intersections
+
+# Solution:
+# - extra functionality to merge lanelet networks: with specified offset
+# - 
+ 

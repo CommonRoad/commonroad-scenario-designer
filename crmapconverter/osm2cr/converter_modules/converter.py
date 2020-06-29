@@ -111,7 +111,7 @@ class Scenario:
         :return: None
         """
         print("plotting graph")
-        fig, ax = plt.subplots()
+        _, ax = plt.subplots()
         ax.set_aspect("equal")
         plots.draw_scenario(self.graph, ax)
         plots.show_plot()

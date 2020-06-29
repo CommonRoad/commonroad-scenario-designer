@@ -39,6 +39,7 @@ class Node:
     """
     Class to represent the nodes in the intermediate format
     """
+
     def __init__(self, node_id, point):
         """
         Initialize a node element
@@ -213,8 +214,8 @@ def add_is_left_of(incoming_data, incoming_data_id):
 
     # calculate all incoming angle from the reference incoming vector
     for index in range(1, len(incoming_data)):
-        new_v = incoming_data[index]['waypoints'][0] - incoming_data[index]['waypoints'][-1]
-        angle = geometry.get_angle(ref, new_v)
+        waypoints = incoming_data[index]['waypoints']
+        angle = geometry.get_angle(ref, waypoints[0]-waypoints[-1])
         if angle < 0:
             angle += 360
         angles.append((index, angle))
@@ -232,7 +233,8 @@ def add_is_left_of(incoming_data, incoming_data_id):
             # is left of the previous incoming
             is_left_of = angles[prev][0]
             data_index = angles[index][0]
-            incoming_data[data_index].update({'isLeftOf': incoming_data_id[is_left_of]})
+            incoming_data[data_index].update(
+                {'isLeftOf': incoming_data_id[is_left_of]})
         prev = index
 
     return incoming_data
@@ -265,16 +267,16 @@ class IntermediateFormat:
         self.nodes = nodes
         self.edges = edges
         self.intersections = intersections
-        if self.intersections == None:
+        if self.intersections is None:
             self.intersections = []
         self.traffic_signs = traffic_signs
-        if self.traffic_signs == None:
+        if self.traffic_signs is None:
             self.traffic_signs = []
         self.traffic_lights = traffic_lights
-        if self.traffic_lights == None:
+        if self.traffic_lights is None:
             self.traffic_lights = []
         self.obstacles = obstacles
-        if self.obstacles == None:
+        if self.obstacles is None:
             self.obstacles = []
 
     def find_edge_by_id(self, edge_id):
@@ -314,7 +316,9 @@ class IntermediateFormat:
         angels = {}
         directions = {}
         for s in successors:
-            a_angle = geometry.curvature(incoming_lane.waypoints[-3:]) # only use the last three waypoints of the incoming for angle calculation
+            # only use the last three waypoints of the incoming for angle
+            # calculation
+            a_angle = geometry.curvature(incoming_lane.waypoints[-3:])
             b_angle = geometry.curvature(s.waypoints)
             angle = a_angle - b_angle
             angels[s.id] = angle
@@ -329,20 +333,29 @@ class IntermediateFormat:
                 angels[s.id] = -abs(angels[s.id])
 
         # sort after size
-        sorted_angels = {k: v for k, v in sorted(angels.items(), key=lambda item: item[1])}
+        sorted_angels = {
+            k: v for k,
+            v in sorted(
+                angels.items(),
+                key=lambda item: item[1])}
         sorted_keys = list(sorted_angels.keys())
         sorted_values = list(sorted_angels.values())
 
         # if 3 successors we assume the directions
         if len(sorted_angels) == 3:
-            directions = {sorted_keys[0]: 'left', sorted_keys[1]: 'through', sorted_keys[2]: 'right'}
+            directions = {
+                sorted_keys[0]: 'left',
+                sorted_keys[1]: 'through',
+                sorted_keys[2]: 'right'}
 
-        # if 2 successors we assume that they both cannot have the same direction
+        # if 2 successors we assume that they both cannot have the same
+        # direction
         if len(sorted_angels) == 2:
 
             directions = dict.fromkeys(sorted_angels)
 
-            if (abs(sorted_values[0]) > straight_threshold_angel) and (abs(sorted_values[1]) > straight_threshold_angel):
+            if (abs(sorted_values[0]) > straight_threshold_angel
+                    and abs(sorted_values[1]) > straight_threshold_angel):
                 directions[sorted_keys[0]] = 'left'
                 directions[sorted_keys[1]] = 'right'
             elif abs(sorted_values[0]) < abs(sorted_values[1]):
@@ -355,7 +368,8 @@ class IntermediateFormat:
                 directions[sorted_keys[0]] = 'through'
                 directions[sorted_keys[1]] = 'through'
 
-        # if we have 1 or more than 3 successors it's hard to make predictions, therefore only straight_threshold_angel is used
+        # if we have 1 or more than 3 successors it's hard to make predictions,
+        # therefore only straight_threshold_angel is used
         if len(sorted_angels) == 1 or len(sorted_angels) > 3:
             directions = dict.fromkeys(sorted_angels, 'through')
             for key in sorted_angels:
@@ -365,7 +379,6 @@ class IntermediateFormat:
                     directions[key] = 'right'
 
         return directions
-
 
     @staticmethod
     def get_intersections(graph) -> List[Intersection]:
@@ -379,13 +392,17 @@ class IntermediateFormat:
         added_lanes = set()
         for lane in graph.lanelinks:
             node = lane.to_node
-            # node with more than 2 edges or marked as crossing is an intersection 
-            if node.get_degree() > 2 or (node.is_crossing and node.get_degree() == 2):
+            # node with more than 2 edges or marked as crossing is an
+            # intersection
+            if (node.get_degree() > 2 
+                    or (node.is_crossing and node.get_degree() == 2)):
                 # keep track of added lanes to consider unique intersections
-                incoming = [p for p in lane.predecessors if p.id not in added_lanes]
+                incoming = [
+                    p for p in lane.predecessors if p.id not in added_lanes]
 
                 # Initialize incomming element with properties to be filled in
-                incoming_lanelet_ids = set([incoming_lane.id for incoming_lane in incoming])
+                incoming_lanelet_ids = set(
+                    [incoming_lane.id for incoming_lane in incoming])
                 incoming_element = {'incomingLanelet': incoming_lanelet_ids,
                                     'right': [],
                                     'left': [],
@@ -395,7 +412,8 @@ class IntermediateFormat:
                                     'waypoints': []}
 
                 for incoming_lane in incoming:
-                    directions = incoming_lane.turnlane.split(";")  # find the turnlanes
+                    # find the turnlanes
+                    directions = incoming_lane.turnlane.split(";")
 
                     if not incoming_element['waypoints']:
                         # set incoming waypoints only once
@@ -404,12 +422,13 @@ class IntermediateFormat:
                     for direction in directions:
                         if direction == 'none':
                             # calculate the direction for each successor
-                            directions = IntermediateFormat.get_directions(incoming_lane)
+                            directions = IntermediateFormat.get_directions(
+                                incoming_lane)
                             for key in directions:
                                 incoming_element[directions[key]].append(key)
                         else:
                             incoming_element[direction].extend(
-                                    [s.id for s in incoming_lane.successors])
+                                [s.id for s in incoming_lane.successors])
 
                     if node.id in intersections:
                         # add new incoming element to existing intersection
@@ -419,7 +438,8 @@ class IntermediateFormat:
                         intersections[node.id] = \
                             {'incoming': [incoming_element]}
 
-                    added_lanes = added_lanes.union(incoming_element['incomingLanelet'])
+                    added_lanes = added_lanes.union(
+                        incoming_element['incomingLanelet'])
 
         # Convert to CommonRoad Intersections
         intersections_cr = []
@@ -433,7 +453,8 @@ class IntermediateFormat:
                 incoming_lanelets = set(incoming['incomingLanelet'])
                 successors_right = set(incoming["right"])
                 successors_left = set(incoming["left"])
-                successors_straight = set(incoming['through']).union(set(incoming['none']))
+                successors_straight = set(
+                    incoming['through']).union(set(incoming['none']))
                 is_left_of = incoming['isLeftOf']
                 incoming_element = IntersectionIncomingElement(incoming_ids[index],
                                                                incoming_lanelets,
@@ -520,12 +541,15 @@ class IntermediateFormat:
         :return: Dummy planning problem set
         """
         pp_id = idgenerator.get_id()
-        rectangle = Rectangle(4.3, 8.9, center=np.array([0.1, 0.5]), orientation=1.7)
+        rectangle = Rectangle(4.3, 
+                              8.9, 
+                              center=np.array([0.1, 0.5]),
+                              orientation=1.7)
         circ = Circle(2.0, np.array([0.0, 0.0]))
         goal_region = GoalRegion([State(time_step=Interval(0, 1), velocity=Interval(0.0, 1), position=rectangle),
                                   State(time_step=Interval(1, 2), velocity=Interval(0.0, 1), position=circ)])
         planning_problem = PlanningProblem(pp_id, State(velocity=0.1, position=np.array([[0], [0]]), orientation=0,
-                                                       yaw_rate=0, slip_angle=0, time_step=0), goal_region)
+                                                        yaw_rate=0, slip_angle=0, time_step=0), goal_region)
 
         return PlanningProblemSet(list([planning_problem]))
 
@@ -542,5 +566,5 @@ class IntermediateFormat:
         sumo.generate_trip_file(0, 2000)
         sumo.write_config_file(0, 2000)
 
-        print("See Sumo Config File Here: "+sumo.config_file)
+        print("See Sumo Config File Here: " + sumo.config_file)
         return sumo.config_file

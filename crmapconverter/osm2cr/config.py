@@ -80,6 +80,7 @@ ACCEPTED_PATHWAYS = [
     "footway",
     "cycleway"
 ]
+EXTRACT_PATHWAYS = True
 REJECTED_TAGS = {
     "area": "yes"
 }

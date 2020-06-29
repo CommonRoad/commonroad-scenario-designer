@@ -16,7 +16,8 @@ from crmapconverter.osm2cr.converter_modules.utility.custom_types import (
 )
 
 
-def graph_search(center_node: "GraphNode") -> Tuple[Set["GraphNode"], Set["GraphEdge"]]:
+def graph_search(
+        center_node: "GraphNode") -> Tuple[Set["GraphNode"], Set["GraphEdge"]]:
     """
     searches all elements connected to center_node from a graph and returns them
 
@@ -116,15 +117,19 @@ def get_lane_waypoints(
         left, right = geometry.create_parallels(center_waypoints, width / 2)
         waypoints = [left, right]
         for i in range(int((nr_of_lanes - 2) / 2)):
-            waypoints.append(geometry.create_parallels(waypoints[-1], width)[1])
+            waypoints.append(geometry.create_parallels(
+                waypoints[-1], width)[1])
         for i in range(int((nr_of_lanes - 2) / 2)):
-            waypoints.insert(0, geometry.create_parallels(waypoints[0], width)[0])
+            waypoints.insert(0, geometry.create_parallels(waypoints[0],
+                                                          width)[0])
     else:
         waypoints.append(center_waypoints)
         for i in range(int(nr_of_lanes / 2)):
-            waypoints.append(geometry.create_parallels(waypoints[-1], width)[1])
+            waypoints.append(geometry.create_parallels(
+                waypoints[-1], width)[1])
         for i in range(int(nr_of_lanes / 2)):
-            waypoints.insert(0, geometry.create_parallels(waypoints[0], width)[0])
+            waypoints.insert(0, geometry.create_parallels(waypoints[0],
+                                                          width)[0])
     return waypoints
 
 
@@ -147,22 +152,25 @@ def set_points(predecessor: "Lane", successor: "Lane") -> List[np.ndarray]:
     vector2 = vector2 / np.linalg.norm(vector2) * np.linalg.norm(p1 - p4) * d
     p3 = p4 + vector2
     n = max(int(np.linalg.norm(p1 - p4) / point_distance), 2)
-    a1, a2, intersection_point = geometry.intersection(p1, p4, vector1, vector2)
+    a1, a2, intersection_point = geometry.intersection(
+        p1, p4, vector1, vector2)
     # use quadratic bezier if possible
     # do not use it if intersection point is to close to start or end point
     distance_to_points = min(
-        np.linalg.norm(intersection_point - p1), np.linalg.norm(intersection_point - p4)
+        np.linalg.norm(intersection_point -p1), 
+        np.linalg.norm(intersection_point - p4)
     )
     total_distance = np.linalg.norm(p1 - p4)
     if not (distance_to_points > 1 or distance_to_points / total_distance > 0.1):
         # print("found something")
         pass
     if (
-        a1 > 0
-        and a2 > 0
+        a1 > 0 
+        and a2 > 0 
         and (distance_to_points > 1 or distance_to_points / total_distance > 0.1)
     ):
-        waypoints = geometry.evaluate_bezier(np.array([p1, intersection_point, p4]), n)
+        points = np.array([p1, intersection_point, p4])
+        waypoints = geometry.evaluate_bezier(points, n)
         waypoints.append(p4)
     # else use cubic bezier
     else:
@@ -305,6 +313,7 @@ class GraphNode:
                 if lane.forward:
                     lane.add_traffic_sign(sign)
 
+
 class GraphEdge:
     """
     Class that represents an edge in the graph structure
@@ -373,10 +382,12 @@ class GraphEdge:
         self.traffic_lights = []
 
     def __str__(self):
-        return "Graph_edge {}: {}->{}".format(self.id, self.node1.id, self.node2.id)
+        return "Graph_edge {}: {}->{}".format(
+            self.id,self.node1.id,self.node2.id)
 
     def __repr__(self):
-        return "Graph_edge {}: {}->{}".format(self.id, self.node1.id, self.node2.id)
+        return "Graph_edge {}: {}->{}".format(
+            self.id,self.node1.id,self.node2.id)
 
     def flip(self) -> None:
         """
@@ -579,7 +590,8 @@ class GraphEdge:
                 result.append(p2)
                 if save:
                     self.interpolated_waypoints = result
-                    self.central_points = int(len(result) / 2 - 1), int(len(result) / 2)
+                    self.central_points = (int(len(result) / 2 - 1),
+                                           int(len(result) / 2))
                 return result
             for index in range(len(self.waypoints) - 1):
                 if index == 0:
@@ -609,13 +621,16 @@ class GraphEdge:
                         np.array(segment_points), d
                     )
                 n = max(int(np.linalg.norm(p1 - p4) / point_distance), 2)
-                result += geometry.evaluate_bezier(np.array([p1, p2, p3, p4]), n)
+                result += geometry.evaluate_bezier(
+                    np.array([p1, p2, p3, p4]), n)
             if save:
                 self.interpolated_waypoints = result
-                self.central_points = int(len(result) / 2 - 1), int(len(result) / 2)
+                self.central_points = (int(len(result) / 2 - 1),
+                                       int(len(result) / 2))
             return result
 
-    def get_crop_index(self, node: GraphNode, distance: float) -> Tuple[int, int]:
+    def get_crop_index(self, node: GraphNode,
+                       distance: float) -> Tuple[int, int]:
         """
         calculates the index to which the edge needs to be cropped to have a specified distance to a node
 
@@ -627,7 +642,8 @@ class GraphEdge:
         waypoints = self.get_interpolated_waypoints()
         if self.node2 == node:
             index = len(waypoints) - 1
-            while index >= 0 and np.linalg.norm(waypoints[index] - point) < distance:
+            while (index >= 0 
+                    and np.linalg.norm(waypoints[index] - point) < distance):
                 index -= 1
             return 0, index
         else:
@@ -761,7 +777,7 @@ class GraphTrafficSign:
             # speed limit
             if 'DE:274' in str(key):
                 sign_id = traffic_sign_map['maxspeed']
-                max_speed = float(key[key.find("[")+1:key.find("]")])
+                max_speed = float(key[key.find("[") + 1:key.find("]")])
                 # convert km/h to m/s
                 max_speed /= 3.6
                 elements.append(TrafficSignElement(sign_id, [max_speed]))
@@ -769,7 +785,7 @@ class GraphTrafficSign:
             # regular traffic sign
             elif key in traffic_sign_map:
                 sign_id = traffic_sign_map[key]
-                value = ' ' # TODO add specific values for some traffic signs
+                value = ' '  # TODO add specific values for some traffic signs
                 elements.append(TrafficSignElement(sign_id, [value]))
 
             # unknown traffic sign
@@ -809,7 +825,7 @@ class GraphTrafficLight:
         self.parse_osm(light)
 
     def parse_osm(self, data: Dict):
-        if 'crossing' in  data:
+        if 'crossing' in data:
             self.crossing = True
         if 'highway' in data:
             self.highway = True
@@ -819,12 +835,11 @@ class GraphTrafficLight:
 
     def to_traffic_light_cr(self):
         position = None
-        if self.node is not  None:
+        if self.node is not None:
             position_point = self.node.get_point()
             position = np.array([position_point.x, position_point.y])
         traffic_light = TrafficLight(self.id, cycle=[], position=position)
         return traffic_light
-
 
 
 class Lane:
@@ -884,7 +899,7 @@ class Lane:
 
     def __repr__(self):
         return "Lane with id: {}".format(self.id)
-    
+
     def flip(self, keep_edge_dir: bool) -> None:
         """
         flips the direction of the lane
@@ -945,7 +960,8 @@ class Lane:
         """
         n = len(self.waypoints)
         left_bound = None
-        if self.adjacent_left is not None and not self.intersects(self.adjacent_left):
+        if self.adjacent_left is not None and not self.intersects(
+                self.adjacent_left):
             assert self.adjacent_left_direction_equal is not None
             if self.adjacent_left_direction_equal:
                 left_bound = self.adjacent_left.right_bound
@@ -959,7 +975,8 @@ class Lane:
                 self.waypoints, self.width1 / 2, self.width2 / 2
             )
         right_bound = None
-        if self.adjacent_right is not None and not self.intersects(self.adjacent_right):
+        if self.adjacent_right is not None and not self.intersects(
+                self.adjacent_right):
             assert self.adjacent_right_direction_equal is not None
             if self.adjacent_right_direction_equal:
                 right_bound = self.adjacent_right.left_bound
@@ -1117,7 +1134,7 @@ class Graph:
             if node.get_degree() > 1:
                 edges = list(node.edges)
                 for index, edge in enumerate(edges):
-                    other_edges = edges[:index] + edges[index + 1 :]
+                    other_edges = edges[:index] + edges[index + 1:]
                     angles = []
                     for other_edge in other_edges:
                         angles.append(edge.angle_to(other_edge, node))
@@ -1182,7 +1199,7 @@ class Graph:
                 edgewaypoints = edge.interpolated_waypoints
                 if edge.points_to(node):
                     edgewaypoints = edgewaypoints[::-1]
-                other_edges = node_edges[index + 1 :] + node_edges[:index]
+                other_edges = node_edges[index + 1:] + node_edges[:index]
                 if len(other_edges) <= 0:
                     # this node has degree of 1 and does not need to be cropped
                     pass
@@ -1217,9 +1234,11 @@ class Graph:
                         if i >= len(otherwaypoints):
                             if other_edge not in edges_to_delete:
                                 edges_to_delete.append(other_edge)
-                        i = min(i, len(edgewaypoints) - 1, len(otherwaypoints) - 1)
+                        i = min(i, len(edgewaypoints) - 1,
+                                len(otherwaypoints) - 1)
                         distance = max(
-                            distance, np.linalg.norm(edgewaypoints[i] - node_point)
+                            distance, np.linalg.norm(
+                                edgewaypoints[i] - node_point)
                         )
                     to_delete.append((edge, distance, node))
         cropping = {}
@@ -1418,7 +1437,8 @@ class Graph:
 
         self.set_adjacents()
 
-    def create_lane_bounds(self, interpolation_scale: Optional[float] = None) -> None:
+    def create_lane_bounds(
+            self, interpolation_scale: Optional[float] = None) -> None:
         """
         creates bounds for all lanes in the graph
         filters out negligible way points
@@ -1479,7 +1499,8 @@ class Graph:
                     for lane in edge.lanes
                 ]
                 lines = geometry.pre_filter_points(lines)
-                lines = geometry.filter_points(lines, config.COMPRESSION_THRESHOLD)
+                lines = geometry.filter_points(
+                    lines, config.COMPRESSION_THRESHOLD)
                 for index, lane in enumerate(edge.lanes):
                     lane.waypoints = (
                         lines[index] if lane.forward else lines[index][::-1]
@@ -1495,7 +1516,8 @@ class Graph:
                     for i, lane in enumerate(lane_list)
                 ]
                 lines = geometry.pre_filter_points(lines)
-                lines = geometry.filter_points(lines, config.COMPRESSION_THRESHOLD)
+                lines = geometry.filter_points(
+                    lines, config.COMPRESSION_THRESHOLD)
                 for index, lane in enumerate(lane_list):
                     lane.waypoints = (
                         lines[index] if forward[index] else lines[index][::-1]
@@ -1540,15 +1562,19 @@ class Graph:
                 # left adjacents of predecessors
                 if predecessor.adjacent_left is not None:
                     if predecessor.adjacent_left_direction_equal:
-                        start_left.append((predecessor.adjacent_left, "endright"))
+                        start_left.append(
+                            (predecessor.adjacent_left, "endright"))
                     else:
-                        start_left.append((predecessor.adjacent_left, "startleft"))
+                        start_left.append(
+                            (predecessor.adjacent_left, "startleft"))
                 # right adjacents of predecessors
                 if predecessor.adjacent_right is not None:
                     if predecessor.adjacent_right_direction_equal:
-                        start_right.append((predecessor.adjacent_right, "endleft"))
+                        start_right.append(
+                            (predecessor.adjacent_right, "endleft"))
                     else:
-                        start_right.append((predecessor.adjacent_right, "startright"))
+                        start_right.append(
+                            (predecessor.adjacent_right, "startright"))
             # successors
             for successor in lane.successors:
                 end_left.append((successor, "startleft"))
@@ -1556,15 +1582,18 @@ class Graph:
                 # left adjacents of successors
                 if successor.adjacent_left is not None:
                     if successor.adjacent_left_direction_equal:
-                        end_left.append((successor.adjacent_left, "startright"))
+                        end_left.append(
+                            (successor.adjacent_left, "startright"))
                     else:
                         end_left.append((successor.adjacent_left, "endleft"))
                 # right adjacents of successors
                 if successor.adjacent_right is not None:
                     if successor.adjacent_right_direction_equal:
-                        end_right.append((successor.adjacent_right, "startleft"))
+                        end_right.append(
+                            (successor.adjacent_right, "startleft"))
                     else:
-                        end_right.append((successor.adjacent_right, "endright"))
+                        end_right.append(
+                            (successor.adjacent_right, "endright"))
             # left adjacents
             if lane.adjacent_left is not None:
                 if lane.adjacent_left_direction_equal:
@@ -1633,7 +1662,8 @@ class Graph:
         :return: None
         """
         if node not in self.nodes:
-            raise ValueError("the provided node is not contained in this graph")
+            raise ValueError(
+                "the provided node is not contained in this graph")
         if len(node.edges) > 0:
             raise ValueError("the provided node has edges assigned to it")
         self.nodes.remove(node)
@@ -1648,7 +1678,7 @@ class Graph:
 
     def apply_traffic_signs(self):
         # for each traffic sign:
-            # add to node and roads and lanes
+        # add to node and roads and lanes
         for sign in self.traffic_signs:
             if sign.node is not None:
                 sign.node.add_traffic_sign(sign)
@@ -1666,5 +1696,3 @@ class Graph:
                     edge.add_traffic_light(light, light.forward)
                 if not light.forward and edge.node1.id == light.node.id:
                     edge.add_traffic_light(light, light.forward)
-
-
