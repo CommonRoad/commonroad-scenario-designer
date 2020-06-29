@@ -28,8 +28,6 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 import matplotlib.pyplot as plt
 
-from scenarios.a9.scenario_config import Conf
-
 
 class MyDynamicCanvas(FigureCanvas):
     """A canvas that updates itself every second with a new plot."""
