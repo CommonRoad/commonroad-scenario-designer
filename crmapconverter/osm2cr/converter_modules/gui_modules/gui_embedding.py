@@ -302,8 +302,8 @@ class StartMenu(QWidget):
         :param graph: graph to convert
         :return: None
         """
-        graph = converter.Scenario.step_collection_2(graph)
-        graph = converter.Scenario.step_collection_3(graph)
+        graph = converter.step_collection_2(graph)
+        graph = converter.step_collection_3(graph)
         name = config.BENCHMARK_ID
         file, _ = QFileDialog.getSaveFileName(
             self,
@@ -394,7 +394,8 @@ class StartMenu(QWidget):
         :param file: file name
         :return: None
         """
-        self.graph = converter.Scenario.step_collection_1(file)
+        self.graph = converter.osm_to_graph(file)
+        self.graph = converter.step_collection_1(self.graph)
 
 
 class MapEdit(ABC):
@@ -586,7 +587,7 @@ class EdgeEdit(MapEdit):
 
         :return: None
         """
-        graph = converter.Scenario.step_collection_2(self.graph)
+        graph = converter.step_collection_2(self.graph)
         self.app.lane_link_embedding(graph)
 
     def update_movement(self, value: bool) -> None:
@@ -680,7 +681,7 @@ class LaneLinkEdit(MapEdit):
             options=QFileDialog.Options(),
         )
         if file != "":
-            graph = converter.Scenario.step_collection_3(self.graph)
+            graph = converter.step_collection_3(self.graph)
             if not ".xml" in file:
                 self.app.export(graph, file + ".xml")
             else:

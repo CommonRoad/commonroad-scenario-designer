@@ -31,7 +31,7 @@ def convert(filename_open, filename_store=None):
     :type filename_store: str
     :return: None
     """
-    scenario = converter.Scenario(filename_open)
+    scenario = converter.GraphScenario(filename_open)
     #scenario.save_as_cr(filename_store)
 
     interm_format = IntermediateFormat.extract_from_road_graph(scenario.graph)
@@ -67,7 +67,7 @@ def download_and_convert():
         y,
         config.DOWNLOAD_EDGE_LENGTH,
     )
-    scenario = converter.Scenario(
+    scenario = converter.GraphScenario(
         config.SAVE_PATH + config.BENCHMARK_ID + "_downloaded.osm"
     )
     scenario.save_as_cr(None)

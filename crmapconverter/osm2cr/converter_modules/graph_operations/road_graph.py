@@ -1094,6 +1094,8 @@ class Graph:
         self.bounds = bounds
         self.traffic_signs = traffic_signs
         self.traffic_lights = traffic_lights
+        # graph that is connected by crossings only (e.g. pedestrian path)
+        self.sublayer: "Graph" = None
 
     def get_central_node(self) -> GraphNode:
         """

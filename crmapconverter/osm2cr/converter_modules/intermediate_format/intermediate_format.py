@@ -12,6 +12,7 @@ from typing import List, Set
 import os
 
 import numpy as np
+import copy
 
 from crmapconverter.osm2cr.converter_modules.intermediate_format.sumo_helper \
     import Sumo
@@ -568,3 +569,38 @@ class IntermediateFormat:
 
         print("See Sumo Config File Here: " + sumo.config_file)
         return sumo.config_file
+
+    def merge_sublayer(self, interm_sublayer:"IntermediateFormat"):
+        """
+        Merge two intermediate formats. Crossings are added to the main layer.
+        """
+        self.nodes.extend(interm_sublayer.nodes)
+        self.edges.extend(interm_sublayer.edges)
+        self.traffic_signs.extend(interm_sublayer.traffic_signs)
+        self.traffic_lights.extend(interm_sublayer.traffic_lights)
+        self.obstacles.extend(interm_sublayer.obstacles)
+        # intersections only for roads?
+
+        # add information about crossings to intersections of interm_main
+        # interm_main should already be prepared for this step
+        main_network = self.to_commonroad_scenario().lanelet_network
+        sub_network = interm_sublayer.to_commonroad_scenario().lanelet_network
+        crossings = []
+        for path_lane in sub_network.lanelets:
+            #if is_close_to_crossing(path_lane):
+            lanelet_polygon = path_lane.convert_to_polygon()
+            intersected_road_ids = main_network.find_lanelet_by_shape(
+                lanelet_polygon)
+            if intersected_road_ids:
+                crossings.append((path_lane.lanelet_id, intersected_road_ids))
+        for path_id, road_ids in crossings:
+            for intersection in self.intersections:
+                incomings_successors = []
+                for incoming in intersection.incomings:
+                    incomings_successors.extend(incoming.successors_left)
+                    incomings_successors.extend(incoming.successors_straight)
+                    incomings_successors.extend(incoming.successors_right)
+                if set(road_ids) & set(incomings_successors):
+                    intersection.crossings.add(path_id)
+                    print(path_id, "is crossing at intersection",
+                        intersection.intersection_id)

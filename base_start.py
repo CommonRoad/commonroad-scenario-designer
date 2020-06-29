@@ -8,4 +8,4 @@ from crmapconverter.osm2cr.converter_modules import converter
 
 scenario_file = "/home/max/Desktop/Planning/Maps/osm_files/only_straigt_test.osm"
 
-converter.Scenario(scenario_file)
+converter.GraphScenario(scenario_file)

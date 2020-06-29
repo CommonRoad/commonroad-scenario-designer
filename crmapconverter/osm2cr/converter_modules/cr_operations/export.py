@@ -153,6 +153,13 @@ def export(
     #scenario = create_scenario(graph)
     # convert via intermediate format
     intermediate_format = IntermediateFormat.extract_from_road_graph(graph)
+    if config.EXTRACT_PATHWAYS:
+        temp_intersec_dist = config.INTERSECTION_DISTANCE
+        config.INTERSECTION_DISTANCE = 2.0
+        interm_path = IntermediateFormat.extract_from_road_graph(graph.sublayer)
+        config.INTERSECTION_DISTANCE = temp_intersec_dist
+        intermediate_format.merge_sublayer(interm_path)
+
     scenario = intermediate_format.to_commonroad_scenario()
 
     # removing converting errors before writing to xml

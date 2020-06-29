@@ -760,7 +760,7 @@ def roads_to_graph(
     origin: tuple,
     traffic_signs: List,
     traffic_lights: List,
-    crossing_nodes: List[rg.GraphNode]=[]
+    additional_nodes: List[rg.GraphNode]=None
 ) -> rg.Graph:
     """
     converts a set of roads and points to a road graph
@@ -775,13 +775,15 @@ def roads_to_graph(
     :param center_point: gps coordinates of the origin
     :param traffic_signs: traffic signs to apply
     :param traffic_lights: traffic lights to apply
+    :param additional_nodes: nodes that should be considered additionally
     :return:
     """
     origin = np.array(origin)[::-1]
     nodes = get_graph_nodes(roads, road_points, traffic_signs, traffic_lights)
-    for c_node in crossing_nodes:
-        nodes[str(c_node.id)] = c_node
-        print("added crossing point", c_node)
+    if not additional_nodes is None:
+        for c_node in additional_nodes:
+            nodes[str(c_node.id)] = c_node
+            print("added crossing point", c_node)
     edges = get_graph_edges_from_road(
         roads, nodes, road_points, bounds, origin)
     graph_traffic_signs = get_graph_traffic_signs(nodes, edges, traffic_signs)
