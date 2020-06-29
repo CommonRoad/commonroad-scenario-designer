@@ -142,11 +142,14 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                 ## Only valid if the traffic light has not been created ##
 
                 # create a new node for the traffic light
-                traffic_light = Node(self.node_id_next,
-                                     "traffic_light",
-                                     from_edge.getToNode().getCoord3D(),
-                                     incLanes=None,
-                                     tl=tl.traffic_light_id)
+                traffic_light = Node(
+                    self.node_id_next,
+                    "traffic_light",
+                    # convert TrafficLight position if explicitly given
+                    tl.position
+                    if tl.position else from_edge.getToNode().getCoord3D(),
+                    incLanes=None,
+                    tl=tl.traffic_light_id)
                 self.node_id_next += 1
                 nodes_tl[tl.traffic_light_id] = traffic_light
 
@@ -188,10 +191,10 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
 
                 # TODO: Add proper lane modelling for the entire converter
                 for to_edge in successor_edges:
-
                     for from_lane in get_lanes(from_edge):
                         for to_lane in get_lanes(to_edge):
-                            if not connection_exists(from_lane.getID(), to_lane.getID()):
+                            if not connection_exists(from_lane.getID(),
+                                                     to_lane.getID()):
                                 continue
                             tls.addConnection(
                                 Connection(from_edge,
