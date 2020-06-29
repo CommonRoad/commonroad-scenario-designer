@@ -36,6 +36,7 @@ from .edge import Edge
 from .node import Node
 from .connection import Connection
 from .roundabout import Roundabout
+from .junction import Junction
 
 
 

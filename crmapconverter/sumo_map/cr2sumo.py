@@ -26,7 +26,7 @@ from commonroad.visualization.draw_dispatch_cr import draw_object
 from matplotlib import pyplot as plt
 
 # modified sumolib.net.* files
-from .sumolib_net import Node, Edge, Lane, TLS, TLSProgram, Connection
+from .sumolib_net import Node, Edge, Lane, TLS, TLSProgram, Connection, Junction
 import sumolib
 
 from sumocr.maps.scenario_wrapper import AbstractScenarioWrapper
@@ -76,10 +76,19 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         self.lane_id2lanelet_id: Dict[str, int] = {}
         self.lanelet_id2lane_id: Dict[int, str] = {}
         self.lanelet_id2edge_id: Dict[int, int] = {}
+        # generated junctions by NETCONVERT
+        self.lanelet_id2junction: Dict[int, Junction] = {}
         self._start_nodes = {}
         self._end_nodes = {}
         # tl (traffic_light_id) ->  TLS (Traffic Light Signal)
         self.traffic_light_signals: Dict[int, TLS] = {}
+
+        # NETCONVERT files
+        self._nodes_file = ""
+        self._edges_file = ""
+        self._connections_file = ""
+        self._tll_file = ""
+        self._output_file = ""
 
         # simulation params
         self.scenario_name = ""
@@ -826,15 +835,42 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
             shapeString += pointString + " "
         return shapeString
 
-    # def write_net(self, output_path):
-    #     """
-    #     Function for writing the edges and nodes files in xml format
-    #     :param output_path: the relative path of the output
-    #     :return: nothing
-    #     """
-    #     self._writeEdgesFile(output_path)
-    #     self._write_nodes_file(output_path)
-    #     self._write_connections_file(output_path)
+    def auto_generate_traffic_light_system(self, lanelet_id: int) -> bool:
+        """
+        Automatically generate a TLS for the given intersection
+        :reutrn: if the conversion was successful
+        """
+        if not self._output_file:
+            logging.error("Need to call convert_to_net_file first")
+            return False
+        if not lanelet_id in self.lanelet_id2junction:
+            logging.info("No junction fonud for lanelet {}".format(lanelet_id))
+            return False
+
+        # auto generate the TLS with netconvert
+        junction = self.lanelet_id2junction[lanelet_id]
+        command = "netconvert --sumo-net-file=" + self._output_file + \
+                    " --output-file=" + self._output_file + \
+                    " --tls-guess=true" + \
+                    " --tls.set=" + junction.id
+        try:
+            _ = subprocess.check_output(command.split(), timeout=5.)
+        except Exception as e:
+            logging.error(e)
+            return False
+
+        # add the generated tls to the lanelet_network
+        self._read_junctions_from_net_file(self._output_path)
+        with open(self._output_file, "r") as f:
+            xml = ET.parse(f)
+
+        for connection in xml.findall('connection'):
+            tl = connection.get('tl')
+            if not tl:
+                continue
+            
+
+        return True
 
     def write_intermediate_files(self, output_path):
         """
@@ -969,8 +1005,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                 minidom.parseString(ET.tostring(
                     tlLogics, method="xml")).toprettyxml(indent="\t"))
 
-    @staticmethod
-    def merge_intermediate_files(output_path: str, cleanup=True) -> bool:
+    def merge_intermediate_files(self, output_path: str, cleanup=True) -> bool:
         """
         Function that merges the edges and nodes files into one using netconvert
         :param output_path: the relative path of the output
@@ -1000,19 +1035,22 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                     if not any(word in line for word in to_remove):
                         file.write(line)
 
-        output = output_path
-
+        self._nodes_file = join(output_path, files["nodes"])
+        self._edges_file = join(output_path, files["edges"])
+        self._connections_file = join(output_path, files["connections"])
+        self._tll_file = join(output_path, files["tll"])
+        self._output_file = str(output_path)
         # Calling of Netconvert
         bashCommand = "netconvert --plain.extend-edge-shape=true" \
                       " --no-turnarounds=true" \
                       " --junctions.internal-link-detail=20"\
                       " --geometry.avoid-overlap=true" \
                       " --offset.disable-normalization=true" \
-                      " --node-files=" + join(output, files["nodes"]) + \
-                      " --edge-files=" + join(output, files["edges"]) + \
-                      " --connection-files=" + join(output,files["connections"]) + \
-                      " --tllogic-files=" + join(output, files['tll']) + \
-                      " --output-file=" + str(output) + \
+                      " --node-files=" + self._nodes_file + \
+                      " --edge-files=" + self._edges_file + \
+                      " --connection-files=" + self._connections_file + \
+                      " --tllogic-files=" + self._tll_file + \
+                      " --output-file=" + self._output_file + \
                       " --geometry.remove.keep-edges.explicit=true" + \
                       " --seed " + SumoConfig.random_seed
         # "--junctions.limit-turn-speed=6.5 " \
@@ -1020,6 +1058,8 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         success = True
         try:
             _ = subprocess.check_output(bashCommand.split(), timeout=5.0)
+            self._read_junctions_from_net_file(self._output_file)
+
         except FileNotFoundError as e:
             if 'netconvert' in e.filename:
                 warnings.warn("Is netconvert installed and added to PATH?")
@@ -1030,9 +1070,33 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
 
         if cleanup is True and success:
             for file in files.values():
-                os.remove(join(output, file))
-
+                os.remove(join(output_path, file))
         return success
+
+    def _read_junctions_from_net_file(self, filename: str):
+        # parse junctions from .net.xml
+        with open(filename, 'r') as f:
+            root = ET.parse(f)
+
+        for junction_xml in root.findall("junction"):
+            inc_lanes: List[Lane] = [
+                self.lanes[lane_id]
+                for lane_id in junction_xml.get('incLanes').split()
+            ]
+            shape = [
+                tuple([int(i) for i in s.split(",")])
+                for s in junction_xml.get('shape').split()
+            ]
+            junction = Junction(id=int(junction_xml.get('id')),
+                                j_type=junction_xml.get('type'),
+                                x=float(junction_xml.get('x')),
+                                y=float(junction_xml.get('y')),
+                                incLanes=inc_lanes,
+                                shape=shape)
+            for lanelet_id in [
+                    self.lane_id2lanelet_id[l.getID()] for l in inc_lanes
+            ]:
+                self.lanelet_id2junction[lanelet_id] = junction
 
     @staticmethod
     def rewrite_netfile(output: str):
