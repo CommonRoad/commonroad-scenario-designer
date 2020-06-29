@@ -39,28 +39,28 @@ config = SumoConfig.from_scenario_name(scenario_name)
 wrapper = CR2SumoMapConverter(scenario.lanelet_network, config)
 wrapper.convert_to_net_file(output_folder)
 
-# # # run Simulation
-# simulation = SumoSimulation()
-# simulation.initialize(config, wrapper)
+# # run Simulation
+simulation = SumoSimulation()
+simulation.initialize(config, wrapper)
 
-# for t in range(config.simulation_steps):
-#     simulation.simulate_step()
+for t in range(config.simulation_steps):
+    simulation.simulate_step()
 
-# simulation.stop()
+simulation.stop()
 
-# # save resulting scenario
-# simulated_scenario = simulation.commonroad_scenarios_all_time_steps()
-# CommonRoadFileWriter(simulated_scenario,
-#                      planning_problem,
-#                      author=scenario.author,
-#                      affiliation=scenario.affiliation,
-#                      source=scenario.source,
-#                      tags=scenario.tags,
-#                      location=scenario.location).write_scenario_to_file(
-#                          os.path.join(
-#                              output_folder,
-#                              config.scenario_name + ".simulated.cr.xml"),
-#                          overwrite_existing_file=True)
+# save resulting scenario
+simulated_scenario = simulation.commonroad_scenarios_all_time_steps()
+CommonRoadFileWriter(simulated_scenario,
+                     planning_problem,
+                     author=scenario.author,
+                     affiliation=scenario.affiliation,
+                     source=scenario.source,
+                     tags=scenario.tags,
+                     location=scenario.location).write_scenario_to_file(
+                         os.path.join(
+                             output_folder,
+                             config.scenario_name + ".simulated.cr.xml"),
+                         overwrite_existing_file=True)
 
-# print("creating video (this may take some time)")
-# create_video(simulation, 1, config.simulation_steps, output_folder)
+print("creating video (this may take some time)")
+create_video(simulation, 1, config.simulation_steps, output_folder)
