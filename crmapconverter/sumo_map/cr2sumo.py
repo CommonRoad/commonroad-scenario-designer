@@ -1013,7 +1013,8 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                       " --connection-files=" + join(output,files["connections"]) + \
                       " --tllogic-files=" + join(output, files['tll']) + \
                       " --output-file=" + str(output) + \
-                      " --geometry.remove.keep-edges.explicit=true"
+                      " --geometry.remove.keep-edges.explicit=true" + \
+                      " --seed " + SumoConfig.random_seed
         # "--junctions.limit-turn-speed=6.5 " \
         # "--geometry.max-segment-length=15 " \
         success = True

@@ -106,6 +106,8 @@ class SumoConfig(DefaultConfig):
     n_vehicles_max: int = 30
     # max. number of vehicles per km
     max_veh_per_km: int = 70
+    # random seed for deterministic sumo traffic generation
+    random_seed: int = 1234
 
     # other vehicles size bound (values are sampled from normal distribution within bounds)
     vehicle_length_interval = 0.4
