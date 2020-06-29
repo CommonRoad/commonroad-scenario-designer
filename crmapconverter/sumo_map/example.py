@@ -13,7 +13,7 @@ from sumocr.visualization.video import create_video
 
 # path config
 output_folder = os.path.join(os.path.dirname(__file__), 'test_files')
-scenario_name = "urban-1_lanelets_utm"
+scenario_name = "merging_lanelets_utm"
 input_file = os.path.join(output_folder, scenario_name + '.xml')
 
 scenario, planning_problem = CommonRoadFileReader(input_file).open()
@@ -40,27 +40,27 @@ wrapper = CR2SumoMapConverter(scenario.lanelet_network, config)
 wrapper.convert_to_net_file(output_folder)
 
 # # run Simulation
-simulation = SumoSimulation()
-simulation.initialize(config, wrapper)
+# simulation = SumoSimulation()
+# simulation.initialize(config, wrapper)
 
-for t in range(config.simulation_steps):
-    simulation.simulate_step()
+# for t in range(config.simulation_steps):
+#     simulation.simulate_step()
 
-simulation.stop()
+# simulation.stop()
 
-# save resulting scenario
-simulated_scenario = simulation.commonroad_scenarios_all_time_steps()
-CommonRoadFileWriter(simulated_scenario,
-                     planning_problem,
-                     author=scenario.author,
-                     affiliation=scenario.affiliation,
-                     source=scenario.source,
-                     tags=scenario.tags,
-                     location=scenario.location).write_scenario_to_file(
-                         os.path.join(
-                             output_folder,
-                             config.scenario_name + ".simulated.cr.xml"),
-                         overwrite_existing_file=True)
+# # save resulting scenario
+# simulated_scenario = simulation.commonroad_scenarios_all_time_steps()
+# CommonRoadFileWriter(simulated_scenario,
+#                      planning_problem,
+#                      author=scenario.author,
+#                      affiliation=scenario.affiliation,
+#                      source=scenario.source,
+#                      tags=scenario.tags,
+#                      location=scenario.location).write_scenario_to_file(
+#                          os.path.join(
+#                              output_folder,
+#                              config.scenario_name + ".simulated.cr.xml"),
+#                          overwrite_existing_file=True)
 
-print("creating video (this may take some time)")
-create_video(simulation, 1, config.simulation_steps, output_folder)
+# print("creating video (this may take some time)")
+# create_video(simulation, 1, config.simulation_steps, output_folder)

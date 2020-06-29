@@ -121,6 +121,13 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
             if not lanelet_lights_ids: continue
 
             edge_id = self.lanelet_id2edge_id[lanelet.lanelet_id]
+
+            if not edge_id in self.new_edges:
+                logging.warning(
+                    "Edge: {} has been removed in SUMO-NET but contained a traffic light"
+                    .format(edge_id))
+                continue
+
             from_edge: Edge = self.new_edges[edge_id]
             to_node: Node = from_edge.getToNode()
             successor_edges: List[Edge] = [
