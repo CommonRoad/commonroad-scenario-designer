@@ -280,63 +280,74 @@ def _find_intersecting_edges(
     return intersecting_edges
 
 
-class Connection:
-    """
-    Modeling a <connection> element in NETCONVERT input
-    """
-    # incoming node
-    from_node: int
-    # outcoming node
-    to_node: int
-    # incoming lane in edge
-    from_lane: int
-    # outgoing lane in edge
-    to_lane: int
-    # index in traffic light state
-    link_index: int
-    # traffic light id
-    tl: str
+# class Connection:
+#     """
+#     Modeling a <connection> element in NETCONVERT input
+#     """
+#     # incoming node
+#     from_node: int
+#     # outcoming node
+#     to_node: int
+#     # incoming lane in edge
+#     from_lane: int
+#     # outgoing lane in edge
+#     to_lane: int
+#     # index in traffic light state
+#     link_index: int
+#     # traffic light id
+#     tl: str
 
-    def __init__(self,
-                 from_node: int,
-                 to_node: int,
-                 from_lane: int,
-                 to_lane: int,
-                 tl: int = None,
-                 link_index: int = None):
-        self.from_node = from_node
-        self.to_node = to_node
-        self.from_lane = from_lane
-        self.to_lane = to_lane
-        self.tl = tl
-        self.link_index = link_index
+#     def __init__(self,
+#                  from_node: int,
+#                  to_node: int,
+#                  from_lane: int,
+#                  to_lane: int,
+#                  tl: int = None,
+#                  link_index: int = None):
+#         self.from_node = from_node
+#         self.to_node = to_node
+#         self.from_lane = from_lane
+#         self.to_lane = to_lane
+#         self.tl = tl
+#         self.link_index = link_index
 
-    def to_xml(self) -> str:
-        conn = ET.Element("connection")
+#     def to_xml(self) -> str:
+#         conn = ET.Element("connection")
 
-        conn.set("from", self.from_node)
-        conn.set("to", self.to_node)
-        conn.set("fromLane", self.from_lane)
-        conn.set("toLane", self.to_lane)
-        if self.link_index is not None:
-            conn.set("linkIndex", self.link_index)
-        if self.tl is not None:
-            conn.set("tl", self.tl)
+#         conn.set("from", self.from_node)
+#         conn.set("to", self.to_node)
+#         conn.set("fromLane", self.from_lane)
+#         conn.set("toLane", self.to_lane)
+#         if self.link_index is not None:
+#             conn.set("linkIndex", self.link_index)
+#         if self.tl is not None:
+#             conn.set("tl", self.tl)
 
-        return ET.tostring(conn)
+#         return ET.tostring(conn)
 
 
-class TlLogic:
-    def __init__(self,
-                 id: int,
-                 program_id: str,
-                 offset: int = 0,
-                 tl_type: str = "static"):
-        self.id = id
-        self.program_id = program_id
-        self.offset = offset
-        self.type = tl_type
-        self.phases = []
+# class TlLogic:
+#     def __init__(self,
+#                  id: int,
+#                  program_id: str,
+#                  offset: int = 0,
+#                  tl_type: str = "static"):
+#         self.id = id
+#         self.program_id = program_id
+#         self.offset = offset
+#         self.type = tl_type
+#         self.phases = []
 
-    def addPhase(self, duration: int, state: str):
-        self.phases.append({duration: duration, state: state})
+#     def addPhase(self, duration: int, state: str):
+#         self.phases.append({duration: duration, state: state})
+
+
+#     def to_xml(self):
+#         tlLogic = ET.Element("tlLogic")
+#         tlLogic.set("id", self.id)
+#         tlLogic.set("programID", self.program_id)
+#         tlLogic.set()
+
+
+
+

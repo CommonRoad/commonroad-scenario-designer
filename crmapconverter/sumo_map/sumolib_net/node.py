@@ -14,10 +14,18 @@
 # @date    2011-11-28
 # @version $Id$
 
+from xml.etree import cElementTree as ET
+
 
 class Node:
     """ Nodes from a sumo network """
-    def __init__(self, id, type, coord, incLanes, intLanes=None, tl=None):
+    def __init__(self,
+                 id: int,
+                 type: str,
+                 coord,
+                 incLanes,
+                 intLanes=None,
+                 tl=None):
         self._id = id
         self._type = type
         self._coord = coord
@@ -140,3 +148,17 @@ class Node:
                     outgoing = all_outgoing
                 conns.extend(outgoing)
         return conns
+
+    def toXML(self) -> str:
+        """
+        Converts this node to it's xml representation
+        TODO: Not all attributes are converted
+        """
+        node = ET.Element("node")
+        node.set("id", str(self._id))
+        node.set("type", str(self._type))
+        for key, value in zip(["x", "y", "z"][:len(self._coord)], self._coord):
+            node.set(key, str(value))
+        if self._tl:
+            node.set("tl", str(self._tl))
+        return ET.tostring(node)
