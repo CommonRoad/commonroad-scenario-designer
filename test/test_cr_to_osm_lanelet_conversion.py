@@ -5,8 +5,8 @@
 __author__ = "Benjamin Orthen"
 __copyright__ = "TUM Cyber-Physical Systems Group"
 __credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles"]
-__version__ = "1.1.0"
-__maintainer__ = "Benjamin Orthen"
+__version__ = "1.2.0"
+__maintainer__ = "Sebastian Maierhofer"
 __email__ = "commonroad-i06@in.tum.de"
 __status__ = "Released"
 
@@ -18,8 +18,10 @@ from lxml import etree
 
 from commonroad.common.file_reader import CommonRoadFileReader
 
-from opendrive2lanelet.osm.lanelet2osm import L2OSMConverter
+from crmapconverter.osm.lanelet2osm import L2OSMConverter
 from test.utils import elements_equal
+
+# TODO: write osm_convert method analog to opendrive_convert
 
 
 class TestCR2OSMConversionBaseClass:

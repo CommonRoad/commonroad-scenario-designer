@@ -1,128 +1,75 @@
-# OpenDRIVE 2 Lanelet - Converter
+# CommonRoad Map Converter
 
-We provide the code for an OpenDRIVE ([www.opendrive.org](http://www.opendrive.org)) to lanelets ([www.mrt.kit.edu/software/liblanelet](https://www.mrt.kit.edu/software/libLanelet/libLanelet.html)) converter, which has been introduced in our [paper](https://mediatum.ub.tum.de/doc/1449005/1449005.pdf): M. Althoff, S. Urban, and M. Koschi, "Automatic Conversion of Road Networks from OpenDRIVE to Lanelets," in Proc. of the IEEE International Conference on Service Operations and Logistics, and Informatics, 2018.
+This software provides multiple converters from different map formats to the CommonRoad map, which is based on lanelets.  
+This branch is under development for CommonRoad 2020a. 
+Commit 4abf24d380b2ddac2c2c71b210764c4ae5759406 is the last stable version for CommonRoad 2018b.
 
-[![Documentation Status](https://readthedocs.org/projects/opendrive2lanelet/badge/?version=latest)](https://opendrive2lanelet.readthedocs.io/en/latest/?badge=latest)
-[![PyPI version](https://badge.fury.io/py/opendrive2lanelet.svg)](https://badge.fury.io/py/opendrive2lanelet)
-[![Supported python versions](https://img.shields.io/pypi/pyversions/opendrive2lanelet.svg)](https://pypi.org/project/opendrive2lanelet/)
-[![License](https://img.shields.io/pypi/l/opendrive2lanelet.svg)](https://www.gnu.org/licenses/gpl-3.0.de.html)
+| Tool | Functionality |
+|:----:|:------------:|
+| opendrive2lanelet | Conversion from OpenDRIVE files to Lanelet maps. |
+| osm-convert | Conversion from CommonRoad lanelets to OSM lanelets and vice versa. |
+| osm2cr | Conversion from general OSM maps to CommonRoad Lanelet maps. |
 
-## Installation
-
-### Installing from source
-
+#### Installation
+Execute the following command within your activated Python environment:
 ```bash
-git clone https://gitlab.lrz.de/cps/opendrive2lanelet.git
-cd opendrive2lanelet
-python setup.py install
+pip install -e .
 ```
 
-Public source (only released versions): https://gitlab.lrz.de/tum-cps/opendrive2lanelet.git
+#### Usage
 
-
-
-### Using pip:
-
+Opening of GUI from which you can start the different converters: 
 ```bash
-pip install opendrive2lanelet
+cr-map-converter-gui
 ```
 
-Optionally, for using the gui packages:
-
+Converting a file from OpenDRIVE to CommonRoad with the command line:  
 ```bash
-pip install opendrive2lanelet[GUI]
+opendrive2lanelet-convert input_file.xodr -o output_file.xml
 ```
 
-## Example OpenDRIVE Files
-
-Download example files from: http://opendrive.org/download.html
-
-## Usage
-
-### Using our provided GUI
-
-Start the GUI with ```opendrive2lanelet-gui```
-
-![GUI screenshot](gui_screenshot.png "Screenshot of converter GUI")
-
-### Converting a file with the command line
-
-Execute ```opendrive2lanelet-convert input_file.xodr -o output_file.xml```
-
-If you want to visualize the Commonroad file, use the ```opendrive2lanelet-visualize``` command.
-
-### Using the library in your own scripts
-
-```python
-from lxml import etree
-from opendrive2lanelet.opendriveparser.parser import parse_opendrive
-from opendrive2lanelet.network import Network
-from from commonroad.common.file_writer import CommonRoadFileWriter
-
-# Import, parse and convert OpenDRIVE file
-with open("{}/opendrive-1.xodr".format(os.path.dirname(os.path.realpath(__file__))), "r") as fi:
-	open_drive = parse_opendrive(etree.parse(fi).getroot())
-
-road_network = Network()
-road_network.load_opendrive(open_drive)
-
-scenario = road_network.export_commonroad_scenario()
-# Write CommonRoad scenario to file
-from commonroad.common.file_writer import CommonRoadFileWriter
-commonroad_writer = CommonRoadFileWriter(
-            scenario=scenario,
-            planning_problem_set=None,
-            author="",
-            affiliation="",
-            source="OpenDRIVE 2 Lanelet Converter",
-            tags="",
-        )
-with open("{}/opendrive-1.xml".format(os.path.dirname(os.path.realpath(__file__))), "w") as fh:
-	commonroad_writer.write_scenario_to_file_io(file_io=fh)
+Opening OpenDRIVE to CommonRoad converter GUI: 
+```bash
+opendrive2lanelet-gui
 ```
 
-### Just parsing the OpenDrive .xodr file
-```python
-from lxml import etree
-from opendrive2lanelet.opendriveparser.parser import parse_opendrive
-
-with open("input_opendrive.xodr", 'r') as fh:
-	open_drive = parse_opendrive(etree.parse(fh).getroot())
-
-# Now do stuff with the data
-for road in open_drive.roads:
-	print("Road ID: {}".format(road.id))
+Visualizing the results of the conversion from OpenDrive to CommonRoad:
+```bash
+opendrive2lanelet-visualize input-file.xml
 ```
 
-## Documentation
+Converting a file from OSM lanelets to CommonRoad lanelets with the command line (for description of input parameters see documentation):  
+```bash
+osm-convert inputfile.xml --reverse -o outputfile.osm --adjencies --proj "+proj=etmerc +lat_0=38 +lon_0=125 +ellps=bessel"
+```
+For the conversion of CommonRoad lanelets to OSM lanelets change the input and output file accordingly.
 
-The documentation is published on [Read the Docs](https://opendrive2lanelet.readthedocs.io/en/latest/).
+For the conversion of a file from a OSM map to CommonRoad lanelets you can
+open the general GUI and start from there the the OSM map to CommonRoad converter GUI. 
+Missing information such as the course of individual lanes is estimated during the process.
+These estimations are imperfect (the OSM maps as well) and often it is advisable to edit the scenarios by hand.
+This tool also provides a simple GUI, to edit scenarios by hand.
 
+
+#### Documentation
 
 To generate the documentation from source, first install the necessary dependencies with pip:
 ```bash
 pip install -r docs_requirements.txt
 ```
 
-Then you can run
+Afterward run:
 ```bash
 cd docs && make html
 ```
-for example.
+The documentation can be accessed by opening */docs/_build/html/index.html*.
 
+#### Bug and feature reporting
+In case you detect a bug or you want to suggest a new feature create an issue in the backlog of the project.
 
+#### Authors
 
-## Known Problems
-
-- When trying to use the gui.py under Wayland, the following error occurs:
-  ```
-  This application failed to start because it could not find or load the Qt platform plugin "wayland" in "".
-  Available platform plugins are: eglfs, linuxfb, minimal, minimalegl, offscreen, vnc, xcb.
-  Reinstalling the application may fix this problem.
-  ```
-  Set the platform to *xcb* using this command: ```export QT_QPA_PLATFORM="xcb"```
-
-## Authors
-
-Benjamin Orthen (current maintainer)  
-Stefan Urban
+Sebastian Maierhofer (current maintainer)  
+Benjamin Orthen  
+Stefan Urban  
+Maximilian Rieger

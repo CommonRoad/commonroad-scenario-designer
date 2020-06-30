@@ -23,7 +23,7 @@ pipeline {
 
 		stage('Test code quality'){
 			steps {
-				sh 'tox -e flake8 | tee flake8.log|| true'
+				sh 'tox -e flake8 | tail -n +4 | head -n -3 | tee flake8.log|| true'
 				sh 'tox -e pylint | tee pylint.log|| true'
 			}
 		}

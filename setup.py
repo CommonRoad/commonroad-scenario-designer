@@ -8,10 +8,11 @@ setup_dir = os.path.dirname(os.path.realpath(__file__))
 with open(f"{setup_dir}/README.md", "r") as fh:
     long_description = fh.read()
 
+
 setup(
-    name="opendrive2lanelet",
+    name="commonroad-map-converter",
     version="1.1.0",
-    description="Parser and converter from OpenDRIVE to lanelets",
+    description="Convert maps to CommonRoad format",
     long_description=long_description,
     long_description_content_type="text/markdown",
     author="Technical University of Munich",
@@ -22,19 +23,21 @@ setup(
     include_package_data=True,
     install_requires=[
         "numpy>=1.16.4",
+        "PyQt5==5.9.2",
         "lxml>=4.3.4",
         "commonroad-io>=2019.1",
         "pyproj>=2.2.0",
         "scipy>=1.3.0",
     ],
-    extras_require={"GUI": ["PyQt5>=5.12.2", "matplotlib>=3.1.0"]},
+    extras_require={"GUI": ["matplotlib>=3.1.0"]},
     python_requires=">=3.6",
     entry_points={
         "console_scripts": [
-            "opendrive2lanelet-convert=opendrive2lanelet.io.opendrive_convert:main",
-            "opendrive2lanelet-gui=opendrive2lanelet.io.gui:main",
-            "opendrive2lanelet-visualize=opendrive2lanelet.io.visualize_commonroad:main",
-            "osm-convert=opendrive2lanelet.io.osm_convert:main",
+            "opendrive2lanelet-convert=crmapconverter.io.opendrive_convert:main",
+            "opendrive2lanelet-gui=crmapconverter.io.gui:opendrive_gui",
+            "cr-map-converter-gui=crmapconverter.io.gui:main",
+            "opendrive2lanelet-visualize=crmapconverter.io.visualize_commonroad:main",
+            "osm-convert=crmapconverter.io.osm_convert:main",
         ]
     },
     classifiers=[

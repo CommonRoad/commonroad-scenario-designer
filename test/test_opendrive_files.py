@@ -4,20 +4,21 @@
 
 import os
 import unittest
-from io import StringIO
 from lxml import etree
 
-from commonroad.common.file_writer import CommonRoadFileWriter
+from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
+from commonroad.planning.planning_problem import PlanningProblemSet
+from commonroad.scenario.scenario import Tag
 
-from opendrive2lanelet.opendriveparser.parser import parse_opendrive
-from opendrive2lanelet.io.opendrive_convert import convert_opendrive
+from crmapconverter.opendriveparser.parser import parse_opendrive
+from crmapconverter.io.opendrive_convert import convert_opendrive
 from test.utils import elements_equal
 
-__author__ = "Benjamin Orthen"
+__author__ = "Benjamin Orthen, Sebastian Maierhofer"
 __copyright__ = "TUM Cyber-Physical Systems Group"
 __credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles"]
-__version__ = "1.1.0"
-__maintainer__ = "Benjamin Orthen"
+__version__ = "1.2.0"
+__maintainer__ = "Sebastian Maierhofer"
 __email__ = "commonroad-i06@in.tum.de"
 __status__ = "Released"
 
@@ -30,6 +31,9 @@ class TestOpenDriveBaseClass:
 
     xodr_file_name = None
     xml_output_name = None
+    cwd_path = None
+    out_path = None
+    scenario = None
 
     def setUp(self):
         """Load the xodr file and create the scenario.
@@ -37,6 +41,16 @@ class TestOpenDriveBaseClass:
         """
         if not self.xml_output_name:
             self.xml_output_name = self.xodr_file_name
+        self.cwd_path = os.path.dirname(os.path.abspath(__file__))
+        self.out_path = self.cwd_path + "/.pytest_cache"
+        if not os.path.isdir(self.out_path):
+            os.makedirs(self.out_path)
+        else:
+            for (dirpath, dirnames, filenames) in os.walk(self.out_path):
+                for file in filenames:
+                    if file.endswith('.xml'):
+                        os.remove(os.path.join(dirpath, file))
+
         with open(
             os.path.dirname(os.path.realpath(__file__))
             + f"/xodr_xml_test_files/{self.xodr_file_name}.xodr",
@@ -58,24 +72,22 @@ class TestOpenDriveBaseClass:
 
             parser = etree.XMLParser(remove_blank_text=True)
             tree_import = etree.parse(fh, parser=parser).getroot()
-            string_io = StringIO()
             writer = CommonRoadFileWriter(
                 scenario=self.scenario,
-                planning_problem_set=None,
+                planning_problem_set=PlanningProblemSet(),
                 author="",
                 affiliation="",
                 source="OpenDRIVE 2 Lanelet Converter",
-                tags="",
+                tags={Tag.URBAN, Tag.HIGHWAY},
             )
-            writer.write_scenario_to_file_io(string_io)
-            tree_generated = etree.fromstring(string_io.getvalue(), parser=parser)
+            writer.write_to_file(self.out_path + "/" + self.xml_output_name + ".xml", OverwriteExistingFile.ALWAYS)
 
             # set same date so this won't change the comparison
-            tree_import.set("date", "2018-10-26")
-            tree_generated.set("date", "2018-10-26")
+            tree_import.set("date", "2020-04-14")
+            writer.root_node.set("date", "2020-04-14")
 
             # compare both element trees
-            trees_are_equal = elements_equal(tree_import, tree_generated)
+            trees_are_equal = elements_equal(tree_import, writer.root_node)
             self.assertTrue(trees_are_equal)
 
 
@@ -131,6 +143,14 @@ class TestZeroWidthCoefficients(TestOpenDriveBaseClass, unittest.TestCase):
     __test__ = True
     xodr_file_name = "zero_width_lanes_map"
     xml_output_name = "CulDeSac"
+
+
+class TestPoly3AndBorderRecord(TestOpenDriveBaseClass, unittest.TestCase):
+    """Test if the program convert Poly3 Geometry and wheter it can handle
+    border records instead of width records."""
+
+    __test__ = True
+    xodr_file_name = "poly3_and_border_record"
 
 
 if __name__ == "__main__":

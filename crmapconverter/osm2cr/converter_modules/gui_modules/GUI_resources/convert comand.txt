@@ -1,0 +1,10 @@
+these are the commands to compile the ui designs to python files:
+
+pyuic5 start_window.ui -o start_window.py
+pyuic5 edge_edit_embedding.ui -o edge_edit_embedding.py
+pyuic5 lane_link_edit_embedding.ui -o lane_link_edit_embedding.py
+pyuic5 scenario_view.ui -o scenario_view.py
+pyuic5 settings_ui.ui -o settings_ui.py
+pyuic5 street_types.ui -o street_types.py
+pyuic5 lane_counts.ui -o lane_counts.py
+pyuic5 lane_width.ui -o lane_width.py
