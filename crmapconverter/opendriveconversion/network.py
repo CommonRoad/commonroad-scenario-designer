@@ -9,11 +9,11 @@ from commonroad.scenario.scenario import Scenario
 from crmapconverter.opendriveparser.elements.opendrive import OpenDrive
 
 from crmapconverter.opendriveconversion.utils import encode_road_section_lane_width_id
-from crmapconverter.opendriveconversion.lanelet_network import ConversionLaneletNetwork
+from crmapconverter.opendriveconversion.conversion_lanelet_network import ConversionLaneletNetwork
 from crmapconverter.opendriveconversion.converter import OpenDriveConverter
 
 
-__author__ = "Benjamin Orthen, Stefan Urban"
+__author__ = "Benjamin Orthen, Stefan Urban, Sebastian Maierhofer"
 __copyright__ = "TUM Cyber-Physical Systems Group"
 __credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles"]
 __version__ = "1.2.0"

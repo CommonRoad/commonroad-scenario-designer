@@ -9,9 +9,9 @@ import numpy as np
 
 from commonroad.scenario.lanelet import LaneletNetwork
 
-from crmapconverter.opendriveconversion.lanelet import ConversionLanelet
+from crmapconverter.opendriveconversion.conversion_lanelet import ConversionLanelet
 
-__author__ = "Benjamin Orthen"
+__author__ = "Benjamin Orthen, Sebastian Maierhofer"
 __copyright__ = "TUM Cyber-Physical Systems Group"
 __credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles"]
 __version__ = "1.2.0"
