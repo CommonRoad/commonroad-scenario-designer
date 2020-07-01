@@ -39,10 +39,8 @@ from .roundabout import Roundabout
 from .junction import Junction
 
 
-
-
 class TLSProgram:
-    def __init__(self, id, offset, type):
+    def __init__(self, id: str, offset: int, type: str):
         self._id = id
         self._type = type
         self._offset = offset
@@ -60,8 +58,12 @@ class TLSProgram:
         ret = ret + '  </tlLogic>\n'
         return ret
 
+    def getOffset(self) -> int:
+        return self._offset
+
     def getPhases(self):
         return self._phases
+
 
 class TLS:
     """Traffic Light Signal for a sumo network"""
@@ -110,6 +112,7 @@ class TLS:
 
     def getPrograms(self):
         return self._programs
+
 
 class Net:
     """The whole sumo network."""

@@ -19,7 +19,7 @@ import numpy as np
 from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.common.util import Interval
 from commonroad.scenario.lanelet import LaneletNetwork
-from commonroad.scenario.traffic_sign import SupportedTrafficSignCountry, TrafficLight, TrafficLightState
+from commonroad.scenario.traffic_sign import SupportedTrafficSignCountry, TrafficLight, TrafficLightState, TrafficLightCycleElement
 from commonroad.scenario.traffic_sign_interpreter import TrafficSigInterpreter
 from commonroad.visualization.draw_dispatch_cr import draw_object
 
@@ -33,7 +33,7 @@ from sumocr.maps.scenario_wrapper import AbstractScenarioWrapper
 
 from .util import compute_max_curvature_from_polyline, _find_intersecting_edges
 from .util import get_scenario_name_from_crfile, get_total_lane_length_from_netfile, write_ego_ids_to_rou_file, get_scenario_name_from_netfile
-from .config import SumoConfig
+from .config import SumoConfig, traffic_light_states_CR2SUMO, traffic_light_states_SUMO2CR
 
 # This file is used as a template for the generated .sumo.cfg files
 DEFAULT_CFG_FILE = "default.sumo.cfg"
@@ -115,14 +115,6 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
 
         # tl (traffic_light_id) -> Node (Traffic Light)
         nodes_tl: Dict[int, Node] = {}
-        # Mapping from CR TrafficLightStates to SUMO Traffic Light states
-        traffic_light_states_CR2SUMO = {
-            TrafficLightState.RED: 'r',
-            TrafficLightState.YELLOW: 'y',
-            TrafficLightState.RED_YELLOW: 'u',
-            TrafficLightState.GREEN: 'G',
-            TrafficLightState.INACTIVE: 'O',
-        }
 
         # generate traffic lights in SUMO format
         for lanelet in self.lanelet_network.lanelets:
@@ -851,8 +843,8 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         junction = self.lanelet_id2junction[lanelet_id]
         command = "netconvert --sumo-net-file=" + self._output_file + \
                     " --output-file=" + self._output_file + \
-                    " --tls-guess=true" + \
-                    " --tls.set=" + junction.id
+                    " --tls.guess=true" + \
+                    " --tls.set=" + str(junction.id)
         try:
             _ = subprocess.check_output(command.split(), timeout=5.)
         except Exception as e:
@@ -860,16 +852,46 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
             return False
 
         # add the generated tls to the lanelet_network
-        self._read_junctions_from_net_file(self._output_path)
+        self._read_junctions_from_net_file(self._output_file)
+        # update the read junction
+        junction = self.lanelet_id2junction[lanelet_id]
+
         with open(self._output_file, "r") as f:
             xml = ET.parse(f)
 
-        for connection in xml.findall('connection'):
-            tl = connection.get('tl')
-            if not tl:
-                continue
-            
+        # parse TLS from generated xml file
+        def get_tls(xml, junction) -> TLSProgram:
+            for tl_logic in xml.findall("tlLogic"):
+                if not int(tl_logic.get("id")) == junction.id: continue
 
+                tls_program = TLSProgram(tl_logic.get("programID"),
+                                        int(tl_logic.get("offset")),
+                                        tl_logic.get("type"))
+                for phase in tl_logic.findall("phase"):
+                    tls_program.addPhase(phase.get("state"),
+                                        int(phase.get("duration")))
+                return tls_program
+        tls_program = get_tls(xml, junction)
+
+        # add Traffic Light to the corresponding lanelets
+        # TODO: somewhat hacky replay with proper connection reading
+        for c in xml.findall('connection'):
+            tl = c.get("tl")
+            if not (tl and int(tl) == junction.id): continue
+
+            lanelet_id = self.lane_id2lanelet_id["{}_{}".format(
+                c.get('from'), c.get("fromLane"))]
+            link_index = int(c.get("linkIndex"))
+
+            traffic_light = TrafficLight(self.node_id_next, [
+                TrafficLightCycleElement(
+                    traffic_light_states_SUMO2CR[state[link_index]], duration)
+                for state, duration in tls_program.getPhases()
+            ], np.array([junction.x, junction.y]), tls_program.getOffset())
+            self.node_id_next += 1
+
+            self.lanelet_network.add_traffic_light(traffic_light,
+                                                   set([lanelet_id]))
         return True
 
     def write_intermediate_files(self, output_path):
@@ -1052,7 +1074,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                       " --tllogic-files=" + self._tll_file + \
                       " --output-file=" + self._output_file + \
                       " --geometry.remove.keep-edges.explicit=true" + \
-                      " --seed " + SumoConfig.random_seed
+                      " --seed " + str(SumoConfig.random_seed)
         # "--junctions.limit-turn-speed=6.5 " \
         # "--geometry.max-segment-length=15 " \
         success = True
@@ -1084,7 +1106,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                 for lane_id in junction_xml.get('incLanes').split()
             ]
             shape = [
-                tuple([int(i) for i in s.split(",")])
+                tuple([float(i) for i in s.split(",")])
                 for s in junction_xml.get('shape').split()
             ]
             junction = Junction(id=int(junction_xml.get('id')),
