@@ -5,7 +5,9 @@
 to lanelets. Iternally, the road network is represented by ParametricLanes."""
 import numpy as np
 
-from commonroad.scenario.scenario import Scenario
+from commonroad.scenario.scenario import (
+    Scenario, GeoTransformation, Location
+)
 
 from crmapconverter.opendriveparser.elements.opendrive import OpenDrive
 
@@ -19,6 +21,8 @@ from commonroad.scenario.traffic_sign import (
     TrafficSignIDSpain, TrafficSignIDRussia, TrafficLightDirection
 
 )
+
+from crmapconverter.opendriveconversion.plane_elements.geo_reference import get_geo_reference
 
 __author__ = "Benjamin Orthen, Stefan Urban"
 __copyright__ = "TUM Cyber-Physical Systems Group"
@@ -42,6 +46,7 @@ class Network:
         self._link_index = None
         self._traffic_lights = []
         self._traffic_signs = []
+        self._geo_ref = None
 
     # def __eq__(self, other):
     # return self.__dict__ == other.__dict__
@@ -56,6 +61,7 @@ class Network:
 
         self._link_index = LinkIndex()
         self._link_index.create_from_opendrive(opendrive)
+        self._geo_ref = opendrive.header.geo_reference
 
         # Convert all parts of a road to parametric lanes (planes)
         for road in opendrive.roads:
@@ -80,41 +86,60 @@ class Network:
                 for signal in road.signals:
 
                     position, tangent = road.planView.calc(signal.s)
-                    position = np.array([position[0] + signal.t * np.cos(tangent + 3.1416/2),
-                                         position[1] + signal.t * np.sin(tangent + 3.1416/2)])
+                    position = np.array([position[0] + signal.t * np.cos(tangent + 3.1416 / 2),
+                                         position[1] + signal.t * np.sin(tangent + 3.1416 / 2)])
 
                     if signal.dynamic == 'no':
+
                         if signal.subtype == '-1' or 'none':
                             additional_values = []
                         else:
                             additional_values = list([signal.subtype])
 
-                        if SupportedTrafficSignCountry(signal.country) not in SupportedTrafficSignCountry:
-                            print("country not identified, use default instead")
-                            try:
-                                element_id = TrafficSignIDZamunda(signal.type)
-                            except ValueError:
-                                print("sign type not understood")
-                                element_id = TrafficSignIDZamunda.UNKNOWN
-
-                        elif signal.country == 'DEU':
+                        if signal.country == 'DEU':
                             try:
                                 element_id = TrafficSignIDGermany(signal.type)
                             except ValueError:
-                                print("sign type not understood")
                                 element_id = TrafficSignIDGermany.UNKNOWN
 
+                        elif signal.country == 'USA':
+                            try:
+                                element_id = TrafficSignIDUsa(signal.type)
+                            except ValueError:
+                                element_id = TrafficSignIDUsa.UNKNOWN
+
+                        elif signal.country == 'CHN':
+                            try:
+                                element_id = TrafficSignIDChina(signal.type)
+                            except ValueError:
+                                element_id = TrafficSignIDChina.UNKNOWN
+
+                        elif signal.country == 'ESP':
+                            try:
+                                element_id = TrafficSignIDSpain(signal.type)
+                            except ValueError:
+                                element_id = TrafficSignIDSpain.UNKNOWN
+
+                        elif signal.country == 'RUS':
+                            try:
+                                element_id = TrafficSignIDRussia(signal.type)
+                            except ValueError:
+                                element_id = TrafficSignIDRussia.UNKNOWN
+
                         else:
-                            print("country not identified, use default instead")
-                            element_id = TrafficSignIDZamunda.UNKNOWN
+                            try:
+                                element_id = TrafficSignIDZamunda(signal.type)
+                            except ValueError:
+                                element_id = TrafficSignIDZamunda.UNKNOWN
+                                additional_values = []
 
                         traffic_sign_element = TrafficSignElement(
-                            traffic_sign_element_id=element_id,
+                            traffic_sign_element_id=element_id + 1000,
                             additional_values=additional_values
                         )
 
                         traffic_sign = TrafficSign(
-                            traffic_sign_id=signal.id,
+                            traffic_sign_id=signal.id + 1000,
                             traffic_sign_elements=list([traffic_sign_element]),
                             first_occurrence=None,
                             position=position,
@@ -125,12 +150,12 @@ class Network:
 
                     elif signal.dynamic == 'yes':
                         traffic_light = TrafficLight(
-                            traffic_light_id=signal.id,
+                            traffic_light_id=signal.id + 1000,
                             cycle=[],
                             position=position,
                             time_offset=0,
                             direction=TrafficLightDirection.ALL,
-                            active=True
+                            active=False
                         )
 
                         self._traffic_lights.append(traffic_light)
@@ -177,10 +202,8 @@ class Network:
 
             distance = []
             for lanelet in lanelet_network.lanelets:
-
                 pos_1 = traffic_light.position
-                n = len(lanelet.right_vertices[0]) - 1
-                pos_2 = np.array(lanelet.right_vertices[0][n], lanelet.right_vertices[1][n])
+                pos_2 = np.array(lanelet.center_vertices[0][0], lanelet.center_vertices[1][0])
                 dist = np.linalg.norm(pos_1 - pos_2)
                 distance.append(dist)
 
@@ -191,10 +214,8 @@ class Network:
 
             distance = []
             for lanelet in lanelet_network.lanelets:
-
                 pos_1 = traffic_sign.position
-                n = len(lanelet.right_vertices[0]) - 1
-                pos_2 = np.array(lanelet.right_vertices[0][n], lanelet.right_vertices[1][n])
+                pos_2 = np.array(lanelet.center_vertices[0][0], lanelet.center_vertices[1][0])
                 dist = np.linalg.norm(pos_1 - pos_2)
                 distance.append(dist)
 
@@ -216,9 +237,21 @@ class Network:
         Returns:
 
         """
+        longitude, latitude = get_geo_reference(self._geo_ref)
+        geo_transformation = GeoTransformation(geo_reference=self._geo_ref)
+
+        if longitude is not None and latitude is not None:
+            location = Location(
+                geo_transformation=geo_transformation,
+                gps_latitude=latitude, gps_longitude=longitude
+            )
+
+        else:
+            location = Location(geo_transformation=geo_transformation)
 
         scenario = Scenario(
-            dt=dt, benchmark_id=benchmark_id if benchmark_id is not None else "none"
+            dt=dt, benchmark_id=benchmark_id if benchmark_id is not None else "none",
+            location=location
         )
 
         scenario.add_objects(
