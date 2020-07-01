@@ -24,7 +24,8 @@ class OpenDrive:
     def header(self):
         return self._header
 
-    def getHeader(self, value):
+    @header.setter
+    def header(self, value):
         self._header = value
 
     @property
