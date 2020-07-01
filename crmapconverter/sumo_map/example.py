@@ -30,6 +30,7 @@ planning_problem.translate_rotate(-centroid, 0)
 # draw scenario
 # plt.figure(figsize=(25, 25))
 # draw_object(scenario.lanelet_network)
+# plt.axis('equal')
 # plt.autoscale()
 # plt.show()
 
@@ -38,6 +39,13 @@ config = SumoConfig.from_scenario_name(scenario_name)
 # # convert CR to sumo net
 wrapper = CR2SumoMapConverter(scenario.lanelet_network, config)
 wrapper.convert_to_net_file(output_folder)
+wrapper.auto_generate_traffic_light_system(101)
+
+plt.figure(figsize=(25, 25))
+draw_object(wrapper.lanelet_network)
+plt.axis('equal')
+plt.autoscale()
+plt.show()
 
 # # run Simulation
 # simulation = SumoSimulation()

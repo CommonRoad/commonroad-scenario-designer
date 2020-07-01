@@ -4,6 +4,8 @@ Default configuration for CommonRoad to SUMO map converter
 
 from commonroad.common.util import Interval
 from commonroad.scenario.obstacle import ObstacleType
+
+from commonroad.scenario.traffic_sign import TrafficLightState
 from typing import List
 
 from sumocr.sumo_config.default import DefaultConfig
@@ -21,6 +23,20 @@ TYPE_MAPPING = {
     'bus': ObstacleType.BUS,
     'bicycle': ObstacleType.BICYCLE,
     'pedestrian': ObstacleType.PEDESTRIAN
+}
+
+# Mapping from CR TrafficLightStates to SUMO Traffic Light states
+traffic_light_states_CR2SUMO = {
+    TrafficLightState.RED: 'r',
+    TrafficLightState.YELLOW: 'y',
+    TrafficLightState.RED_YELLOW: 'u',
+    TrafficLightState.GREEN: 'G',
+    TrafficLightState.INACTIVE: 'O',
+}
+# inverted traffic_light_states_CR2SUMO dict
+traffic_light_states_SUMO2CR = {
+    v: k
+    for k, v in traffic_light_states_CR2SUMO.items()
 }
 
 
