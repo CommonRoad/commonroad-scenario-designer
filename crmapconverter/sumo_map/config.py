@@ -35,8 +35,14 @@ traffic_light_states_CR2SUMO = {
 }
 # inverted traffic_light_states_CR2SUMO dict
 traffic_light_states_SUMO2CR = {
-    v: k
-    for k, v in traffic_light_states_CR2SUMO.items()
+    'r': TrafficLightState.RED,
+    'y': TrafficLightState.YELLOW,
+    'g': TrafficLightState.GREEN,
+    'G': TrafficLightState.GREEN,
+    's': TrafficLightState.GREEN,
+    'u': TrafficLightState.RED_YELLOW,
+    'o': TrafficLightState.INACTIVE,
+    'O': TrafficLightState.INACTIVE
 }
 
 

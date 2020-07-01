@@ -865,15 +865,16 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                 if not int(tl_logic.get("id")) == junction.id: continue
 
                 tls_program = TLSProgram(tl_logic.get("programID"),
-                                        int(tl_logic.get("offset")),
-                                        tl_logic.get("type"))
+                                         int(tl_logic.get("offset")),
+                                         tl_logic.get("type"))
                 for phase in tl_logic.findall("phase"):
                     tls_program.addPhase(phase.get("state"),
-                                        int(phase.get("duration")))
+                                         int(phase.get("duration")))
                 return tls_program
+
         tls_program = get_tls(xml, junction)
 
-        # add Traffic Light to the corresponding lanelets
+        # add Traffic Lights to the corresponding lanelets
         # TODO: somewhat hacky replay with proper connection reading
         for c in xml.findall('connection'):
             tl = c.get("tl")
@@ -881,13 +882,16 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
 
             lanelet_id = self.lane_id2lanelet_id["{}_{}".format(
                 c.get('from'), c.get("fromLane"))]
+            lanelet = self.lanelet_network.find_lanelet_by_id(lanelet_id)
             link_index = int(c.get("linkIndex"))
+            # TODO: This assuems right-hand traffic
+            pos = lanelet.right_vertices[-1]
 
             traffic_light = TrafficLight(self.node_id_next, [
                 TrafficLightCycleElement(
                     traffic_light_states_SUMO2CR[state[link_index]], duration)
                 for state, duration in tls_program.getPhases()
-            ], np.array([junction.x, junction.y]), tls_program.getOffset())
+            ],pos, tls_program.getOffset())
             self.node_id_next += 1
 
             self.lanelet_network.add_traffic_light(traffic_light,

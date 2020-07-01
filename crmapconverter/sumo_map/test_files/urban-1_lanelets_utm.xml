@@ -1083,7 +1083,6 @@
     <successor ref="118" />
     <adjacentLeft ref="112" drivingDir="opposite" />
     <laneletType>unknown</laneletType>
-    <trafficLightRef ref="233" />
   </lanelet>
   <lanelet id="119">
     <leftBound>
@@ -1425,25 +1424,4 @@
     <adjacentLeft ref="113" drivingDir="opposite" />
     <laneletType>unknown</laneletType>
   </lanelet>
-  <trafficLight id="233">
-    <cycle>
-      <cycleElement>
-        <duration>5</duration>
-        <color>red</color>
-      </cycleElement>
-      <cycleElement>
-        <duration>2</duration>
-        <color>redYellow</color>
-      </cycleElement>
-      <cycleElement>
-        <duration>5</duration>
-        <color>green</color>
-      </cycleElement>
-      <cycleElement>
-        <duration>2</duration>
-        <color>yellow</color>
-      </cycleElement>
-    </cycle>
-    <active>true</active>
-  </trafficLight>
 </commonRoad>
