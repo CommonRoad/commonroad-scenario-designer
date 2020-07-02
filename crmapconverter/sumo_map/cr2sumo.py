@@ -18,7 +18,7 @@ import numpy as np
 
 from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.common.util import Interval
-from commonroad.scenario.lanelet import LaneletNetwork
+from commonroad.scenario.lanelet import LaneletNetwork, Lanelet
 from commonroad.scenario.traffic_sign import SupportedTrafficSignCountry, TrafficLight, TrafficLightState, TrafficLightCycleElement
 from commonroad.scenario.traffic_sign_interpreter import TrafficSigInterpreter
 from commonroad.visualization.draw_dispatch_cr import draw_object
@@ -835,9 +835,24 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         if not self._output_file:
             logging.error("Need to call convert_to_net_file first")
             return False
+
+        # did the user select an incoming lanelet to the junction?
         if not lanelet_id in self.lanelet_id2junction:
-            logging.info("No junction fonud for lanelet {}".format(lanelet_id))
-            return False
+            lanelet: Lanelet = self.lanelet_network.find_lanelet_by_id(
+                lanelet_id)
+            if not lanelet:
+                logging.warning("Invalid lanelet: {}".format(lanelet_id))
+                return False
+            # if the selected lanelet is not an incoming one, check the prececessors
+            pred_ids = [
+                pred for pred in lanelet.predecessor
+                if pred in self.lanelet_id2junction
+            ]
+            if len(pred_ids) == 0:
+                logging.info(
+                    "No junction fonud for lanelet {}".format(lanelet_id))
+                return False
+            lanelet_id = pred_ids[0]
 
         # auto generate the TLS with netconvert
         junction = self.lanelet_id2junction[lanelet_id]
@@ -891,7 +906,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                 TrafficLightCycleElement(
                     traffic_light_states_SUMO2CR[state[link_index]], duration)
                 for state, duration in tls_program.getPhases()
-            ],pos, tls_program.getOffset())
+            ], pos, tls_program.getOffset())
             self.node_id_next += 1
 
             self.lanelet_network.add_traffic_light(traffic_light,

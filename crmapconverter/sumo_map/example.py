@@ -13,7 +13,7 @@ from sumocr.visualization.video import create_video
 
 # path config
 output_folder = os.path.join(os.path.dirname(__file__), 'test_files')
-scenario_name = "urban-1_lanelets_utm"
+scenario_name = "garching"
 input_file = os.path.join(output_folder, scenario_name + '.xml')
 
 scenario, planning_problem = CommonRoadFileReader(input_file).open()
@@ -39,7 +39,7 @@ config = SumoConfig.from_scenario_name(scenario_name)
 # # convert CR to sumo net
 wrapper = CR2SumoMapConverter(scenario.lanelet_network, config)
 wrapper.convert_to_net_file(output_folder)
-tl_generated = wrapper.auto_generate_traffic_light_system(111)
+tl_generated = wrapper.auto_generate_traffic_light_system(35)
 
 plt.figure(figsize=(25, 25))
 draw_object(wrapper.lanelet_network)

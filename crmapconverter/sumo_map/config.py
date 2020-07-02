@@ -33,7 +33,7 @@ traffic_light_states_CR2SUMO = {
     TrafficLightState.GREEN: 'G',
     TrafficLightState.INACTIVE: 'O',
 }
-# inverted traffic_light_states_CR2SUMO dict
+# Mapping from  UMO Traffic Light to CR TrafficLightState sstates
 traffic_light_states_SUMO2CR = {
     'r': TrafficLightState.RED,
     'y': TrafficLightState.YELLOW,
