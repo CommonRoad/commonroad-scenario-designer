@@ -117,7 +117,7 @@ def is_close_to_intersection(node):
             neighbor = edge.node2
         else:
             neighbor = edge.node1
-        if (neighbor.get_distance(node) < config.INTERSECTION_DISTANCE/2.0
+        if (neighbor.get_distance(node) < config.INTERSECTION_DISTANCE
                 and neighbor.get_degree() > 2):
             # close neighbor is intersection
             print(node, "is too close to intersection at", neighbor)

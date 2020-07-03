@@ -8,11 +8,12 @@ from crmapconverter.io import viewer
 
 # convert("../Maps/mittlerer_Ring.osm")
 
-scenario_file = "/home/max/Desktop/Planning/Maps/osm_files/garching_kreuzung_fixed.osm"
-target = "/home/max/Desktop/Planning/Maps/cr_files/garching_kreuzung_types.xml"
+source_folder = "/home/max/Desktop/Planning/Maps/osm_files/"
+target_folder = "/home/max/Desktop/Planning/Maps/cr_files/ped/"
+file_name = "mittlerer_Ring"
 
 config.EXTRACT_PATHWAYS = True
-scen = converter.GraphScenario(scenario_file)
-scen.save_as_cr(target)
+scen = converter.GraphScenario(source_folder + file_name + ".osm")
+scen.save_as_cr(target_folder + file_name + ".xml")
 
 viewer.main()

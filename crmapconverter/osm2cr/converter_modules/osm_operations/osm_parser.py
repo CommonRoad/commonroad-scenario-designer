@@ -781,9 +781,9 @@ def roads_to_graph(
     origin = np.array(origin)[::-1]
     nodes = get_graph_nodes(roads, road_points, traffic_signs, traffic_lights)
     if not additional_nodes is None:
-        for c_node in additional_nodes:
-            nodes[str(c_node.id)] = c_node
-            print("added crossing point", c_node)
+        for node in additional_nodes:
+            nodes[str(node.id)] = node
+            print("added crossing point", node)
     edges = get_graph_edges_from_road(
         roads, nodes, road_points, bounds, origin)
     graph_traffic_signs = get_graph_traffic_signs(nodes, edges, traffic_signs)

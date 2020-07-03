@@ -1199,11 +1199,15 @@ class Graph:
         edges_to_delete = []
         to_delete = []
         for node in self.nodes:
+            if node.is_crossing:
+                cropping_dist = config.INTERSECTION_DISTANCE/10.0
+            else:
+                cropping_dist = config.INTERSECTION_DISTANCE
             node_point = np.array([node.x, node.y])
             node_edges = list(node.edges)
             for index, edge in enumerate(node_edges):
                 distance = 0
-                edgewaypoints = edge.interpolated_waypoints
+                edgewaypoints = edge.get_interpolated_waypoints()
                 if edge.points_to(node):
                     edgewaypoints = edgewaypoints[::-1]
                 other_edges = node_edges[index + 1:] + node_edges[:index]
@@ -1212,7 +1216,7 @@ class Graph:
                     pass
                 else:
                     for other_edge in other_edges:
-                        otherwaypoints = other_edge.interpolated_waypoints
+                        otherwaypoints = other_edge.get_interpolated_waypoints()
                         if other_edge.points_to(node):
                             otherwaypoints = otherwaypoints[::-1]
                         i = 0
@@ -1220,7 +1224,7 @@ class Graph:
                             distance_to_edge = (
                                 edge.get_width() / 2
                                 + other_edge.get_width() / 2
-                                + config.INTERSECTION_DISTANCE
+                                + cropping_dist
                             )
                             while (
                                 i < min(len(edgewaypoints), len(otherwaypoints))
@@ -1232,7 +1236,7 @@ class Graph:
                             while (
                                 i < min(len(edgewaypoints), len(otherwaypoints))
                                 and np.linalg.norm(edgewaypoints[i] - edgewaypoints[0])
-                                < config.INTERSECTION_DISTANCE
+                                < cropping_dist
                             ):
                                 i += 1
                         if i >= len(edgewaypoints):
