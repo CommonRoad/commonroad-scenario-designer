@@ -81,6 +81,8 @@ ACCEPTED_PATHWAYS = [
     "cycleway"
 ]
 EXTRACT_PATHWAYS = True
+# Lanelet type pathsways lanelet should have
+PATHWAY_LANELETTYPE = 'sidewalk'
 REJECTED_TAGS = {
     "area": "yes"
 }

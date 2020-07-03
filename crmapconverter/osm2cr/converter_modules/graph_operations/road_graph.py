@@ -6,7 +6,12 @@ from queue import Queue
 from typing import List, Set, Tuple, Optional, Dict
 
 import numpy as np
-from commonroad.scenario.traffic_sign import TrafficSignElement, TrafficSign, TrafficLight, TrafficSignIDGermany
+from commonroad.scenario.traffic_sign import (
+    TrafficSignElement,
+    TrafficSign,
+    TrafficLight,
+    TrafficSignIDGermany
+)
 
 from crmapconverter.osm2cr import config
 from crmapconverter.osm2cr.converter_modules.utility import geometry, idgenerator

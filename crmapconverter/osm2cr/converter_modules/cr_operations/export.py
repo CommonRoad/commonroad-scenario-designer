@@ -105,7 +105,7 @@ def get_lanelets(graph: rg.Graph) -> List[Lanelet]:
 
 def create_scenario(graph: rg.Graph) -> Scenario:
     """
-    creates a CR scenario ot of a graph
+    creates a CR scenario out of a graph
 
     :param graph: the graph to convert
     :return: CR scenario
@@ -154,10 +154,7 @@ def export(
     # convert via intermediate format
     intermediate_format = IntermediateFormat.extract_from_road_graph(graph)
     if config.EXTRACT_PATHWAYS:
-        temp_intersec_dist = config.INTERSECTION_DISTANCE
-        config.INTERSECTION_DISTANCE = 2.0
         interm_path = IntermediateFormat.extract_from_road_graph(graph.sublayer)
-        config.INTERSECTION_DISTANCE = temp_intersec_dist
         intermediate_format.merge_sublayer(interm_path)
 
     scenario = intermediate_format.to_commonroad_scenario()

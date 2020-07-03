@@ -9,7 +9,6 @@ from commonroad.scenario.intersection import Intersection, \
 from commonroad.scenario.lanelet import Lanelet, LaneletNetwork, LaneletType
 from commonroad.scenario.obstacle import Obstacle
 from typing import List, Set
-import os
 
 import numpy as np
 import copy
@@ -74,7 +73,8 @@ class Edge:
                  successors: List[int],
                  predecessors: List[int],
                  traffic_signs: Set[int],
-                 traffic_lights: Set[int]):
+                 traffic_lights: Set[int],
+                 edge_type: str=config.LANELETTYPE):
         """
         Initialize an edge
 
@@ -109,6 +109,7 @@ class Edge:
         self.predecessors = predecessors
         self.traffic_signs = traffic_signs
         self.traffic_lights = traffic_lights
+        self.edge_type = edge_type
 
     def to_lanelet(self) -> Lanelet:
         """
@@ -129,11 +130,11 @@ class Edge:
             self.adjacent_right_direction_equal,
             traffic_signs=self.traffic_signs,
             traffic_lights=self.traffic_lights,
-            lanelet_type={LaneletType(config.LANELETTYPE)}
+            lanelet_type={LaneletType(self.edge_type)}
         )
 
     @staticmethod
-    def extract_from_lane(lane):
+    def extract_from_lane(lane) -> "Edge":
         """
         Initialize edge from the RoadGraph lane element
         :param lane: Roadgraph.lane
@@ -554,45 +555,54 @@ class IntermediateFormat:
 
         return PlanningProblemSet(list([planning_problem]))
 
-    def generate_sumo_config_file(self):
-        """
-        Method to Use Sumo to generate config file
-        """
-        path = config.SUMO_SAVE_FILE
-        if not os.path.exists(config.SUMO_SAVE_FILE):
-            os.makedirs(config.SUMO_SAVE_FILE)
+    # def generate_sumo_config_file(self):
+    #     """
+    #     Method to Use Sumo to generate config file
+    #     """
+    #     path = config.SUMO_SAVE_FILE
+    #     if not os.path.exists(config.SUMO_SAVE_FILE):
+    #         os.makedirs(config.SUMO_SAVE_FILE)
 
-        sumo = Sumo(self, path, 'test')
-        sumo.write_net()
-        sumo.generate_trip_file(0, 2000)
-        sumo.write_config_file(0, 2000)
+    #     sumo = Sumo(self, path, 'test')
+    #     sumo.write_net()
+    #     sumo.generate_trip_file(0, 2000)
+    #     sumo.write_config_file(0, 2000)
 
-        print("See Sumo Config File Here: " + sumo.config_file)
-        return sumo.config_file
+    #     print("See Sumo Config File Here: " + sumo.config_file)
+    #     return sumo.config_file
 
-    def merge_sublayer(self, interm_sublayer:"IntermediateFormat"):
+    def merge_sublayer(self, other_interm:"IntermediateFormat"):
         """
-        Merge two intermediate formats. Crossings are added to the main layer.
+        Merge two instance of the intermediate formats.
+        The other instance is not changed.
+        The two instances have no connections but crossing are calculated.
         """
-        self.nodes.extend(interm_sublayer.nodes)
-        self.edges.extend(interm_sublayer.edges)
-        self.traffic_signs.extend(interm_sublayer.traffic_signs)
-        self.traffic_lights.extend(interm_sublayer.traffic_lights)
-        self.obstacles.extend(interm_sublayer.obstacles)
-        # intersections only for roads?
-
-        # add information about crossings to intersections of interm_main
-        # interm_main should already be prepared for this step
+        # find crossing lanelets
         main_network = self.to_commonroad_scenario().lanelet_network
-        sub_network = interm_sublayer.to_commonroad_scenario().lanelet_network
+        sub_network = other_interm.to_commonroad_scenario().lanelet_network
         crossings = []
-        for path_lane in sub_network.lanelets:
+        for path_lane in sorted(sub_network.lanelets, key=lambda x: x.lanelet_id):
             #if is_close_to_crossing(path_lane):
             lanelet_polygon = path_lane.convert_to_polygon()
             intersected_road_ids = main_network.find_lanelet_by_shape(
                 lanelet_polygon)
             if intersected_road_ids:
                 crossings.append((path_lane.lanelet_id, intersected_road_ids))
+                print(path_lane.lanelet_id, "is crossing", intersected_road_ids)
+        
+        # merge other into this
+        self.nodes.extend(copy.deepcopy(other_interm.nodes))
+        edges_to_merge = copy.deepcopy(other_interm.edges)
+        for edge in edges_to_merge:
+            edge.edge_type = config.PATHWAY_LANELETTYPE
+        self.edges.extend(edges_to_merge)
+        self.traffic_signs.extend(copy.deepcopy(other_interm.traffic_signs))
+        self.traffic_lights.extend(copy.deepcopy(other_interm.traffic_lights))
+        self.obstacles.extend(copy.deepcopy(other_interm.obstacles))
+        # intersections only for roads?
+
+        # add information about crossings to intersections
+        # interm_main should already be prepared for this step
         for path_id, road_ids in crossings:
             for intersection in self.intersections:
                 incomings_successors = []
@@ -602,5 +612,9 @@ class IntermediateFormat:
                     incomings_successors.extend(incoming.successors_right)
                 if set(road_ids) & set(incomings_successors):
                     intersection.crossings.add(path_id)
-                    print(path_id, "is crossing at intersection",
-                        intersection.intersection_id)
+                    
+        # adjust edge type of crossing edges
+        crossings_ids = [path_id for path_id, _ in crossings]
+        for edge in edges_to_merge:
+            if edge.id in crossings_ids:
+                edge.edge_type = LaneletType.CROSSWALK.value

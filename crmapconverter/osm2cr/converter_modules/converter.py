@@ -86,7 +86,10 @@ def step_collection_2(g: road_graph.Graph) -> road_graph.Graph:
     print("creating waypoints of lanes")
     g.create_lane_waypoints()
     if not g.sublayer is None:
+        temp_intersec_dist = config.INTERSECTION_DISTANCE
+        config.INTERSECTION_DISTANCE = 1.0
         g.sublayer = step_collection_2(g.sublayer)
+        config.INTERSECTION_DISTANCE = temp_intersec_dist
     return g
 
 def step_collection_3(g: road_graph.Graph) -> road_graph.Graph:
@@ -114,7 +117,8 @@ def is_close_to_intersection(node):
             neighbor = edge.node2
         else:
             neighbor = edge.node1
-        if neighbor.get_distance(node) < config.INTERSECTION_DISTANCE and neighbor.get_degree() > 2:
+        if (neighbor.get_distance(node) < config.INTERSECTION_DISTANCE/2.0
+                and neighbor.get_degree() > 2):
             # close neighbor is intersection
             print(node, "is too close to intersection at", neighbor)
             return True
