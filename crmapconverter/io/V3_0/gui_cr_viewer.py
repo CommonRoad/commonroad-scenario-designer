@@ -439,21 +439,17 @@ class Crviewer(QWidget):
         # ]
         lanelet_data = []
         for lanelet in self.current_scenario.lanelet_network.lanelets:
-            try:
-                lanelet_data.append((lanelet.lanelet_id, lanelet.description))
-            except AttributeError:
-                lanelet_data.append((lanelet.lanelet_id, None))
+            description = ", ".join([t.value for t in lanelet.lanelet_type])
+            lanelet_data.append((lanelet.lanelet_id, description))
 
         lanelet_data = sorted(lanelet_data)
         for idx, lanelet in enumerate(lanelet_data):
 
             # set lanelet_id
-            self.laneletsList.setItem(
-                idx, 0, QTableWidgetItem(f"{lanelet[0]}"))
+            self.laneletsList.setItem(idx, 0, QTableWidgetItem(str(lanelet[0])))
             try:
                 # set lanelet description (old id)
-                self.laneletsList.setItem(
-                    idx, 1, QTableWidgetItem(f"{lanelet[1]}"))
+                self.laneletsList.setItem(idx, 1, QTableWidgetItem(str(lanelet[1])))
             except AttributeError:
                 self.laneletsList.setItem(idx, 1, QTableWidgetItem("None"))
 
