@@ -182,6 +182,48 @@ def export(
     # write scenario to file without planning problem
     #file_writer.write_scenario_to_file(file, OverwriteExistingFile.ALWAYS)
 
+
+def export(
+    graph: rg.Graph, file=config.SAVE_PATH + config.BENCHMARK_ID + ".xml"
+) -> None:
+    """
+    converts a graph to a CR scenario and saves it to disk
+
+    :param graph: the graph
+    :return: None
+    """
+    #scenario = create_scenario(graph)
+    # convert via intermediate format
+    intermediate_format = IntermediateFormat.extract_from_road_graph(graph)
+    scenario = intermediate_format.to_commonroad_scenario()
+
+    # removing converting errors before writing to xml
+    sanitize(scenario)
+
+    # writing everything to XML
+    print("writing scenario to XML file")
+
+    if config.EXPORT_IN_UTM:
+        convert_coordinates_to_utm(scenario, graph.center_point)
+    problemset = intermediate_format.get_dummy_planning_problem_set()
+    author = config.AUTHOR
+    affiliation = config.AFFILIATION
+    source = config.SOURCE
+    tags = create_tags(config.TAGS)
+    location = Location(gps_latitude=config.GPS_LATITUDE,
+                        gps_longitude=config.GPS_LONGITUDE,
+                        geo_name_id=config.GEONAME_ID,
+                        geo_transformation=None)
+    # in the current commonroad version the following line works
+    file_writer = CommonRoadFileWriter(
+        scenario, problemset, author, affiliation, source, tags, location, decimal_precision=16)
+
+    #write scenario to file with planning problem
+    file_writer.write_to_file(file, OverwriteExistingFile.ALWAYS)
+
+    # write scenario to file without planning problem
+    #file_writer.write_scenario_to_file(file, OverwriteExistingFile.ALWAYS)
+
 def create_tags(tags: str):
     """
     creates tags out of a space separated string

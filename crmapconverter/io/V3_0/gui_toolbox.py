@@ -157,38 +157,48 @@ class Sumo_simulation_tool(QWidget):
         """reimplement this to define all your sections
         and add them as (title, widget) tuples to self.sections
         """
-        widget3 = QFrame(self.tree)
-        layout3 = QVBoxLayout(widget3)
-
-        """add Import button"""
-        self.button_import1 = QPushButton(self)
-        self.button_import1.setText("Import")
-        self.button_import1.setIcon(QIcon(":/icons/import.png"))
-        self.button_import1.setToolTip(
-            "Import a from sumo converted CR Scenario")
-        layout3.addWidget(self.button_import1)
-
-        """add Play button"""
-        self.button_play1 = QPushButton(self)
-        self.button_play1.setText("Play")
-        self.button_play1.setIcon(QIcon(":/icons/play.png"))
-        self.button_play1.setToolTip("Play the animation")
-        layout3.addWidget(self.button_play1)
-
-        """add Pause button"""
-        self.button_pause1 = QPushButton(self)
-        self.button_pause1.setText("Pause")
-        self.button_pause1.setIcon(QIcon(":/icons/pause.png"))
-        self.button_pause1.setToolTip("Pause the animation")
-        layout3.addWidget(self.button_pause1)
 
         """add Slider"""
+
+        widget1 = QFrame(self.tree)
+        layout3 = QVBoxLayout(widget1)
+
+        """add Import button"""
+        self.button_import = QPushButton(self)
+        self.button_import.setText("Import")
+        self.button_import.setIcon(QIcon(":/icons/import.png"))
+        self.button_import.setToolTip(
+            "Import a from sumo converted CR Scenario")
+        layout3.addWidget(self.button_import)
+
+        """add Play button"""
+        self.button_play = QPushButton(self)
+        self.button_play.setText("Play")
+        self.button_play.setIcon(QIcon(":/icons/play.png"))
+        self.button_play.setToolTip("Play the animation")
+        layout3.addWidget(self.button_play)
+
+        """add Pause button"""
+        self.button_pause = QPushButton(self)
+        self.button_pause.setText("Pause")
+        self.button_pause.setIcon(QIcon(":/icons/pause.png"))
+        self.button_pause.setToolTip("Pause the animation")
+        layout3.addWidget(self.button_pause)
+
         layout3.addItem(
             QSpacerItem(
                 0,
-                20,
+                10,
                 QSizePolicy.Minimum,
                 QSizePolicy.Expanding))
+
+        self.radioButton = QRadioButton()
+        self.radioButton.setText('Show Animation frame by frame')
+        self.radioButton.setChecked(False)
+        layout3.addWidget(self.radioButton)
+
+        #layout3.addChildLayout(layout1)
+
         self.slider = QSlider(Qt.Horizontal)
         self.slider.setValue(0)
         self.slider.setMinimum(0)
@@ -202,35 +212,6 @@ class Sumo_simulation_tool(QWidget):
         """add Label"""
         self.label = QLabel('Step: 0', self)
         layout3.addWidget(self.label)
-
-        layout3.addItem(self.spacerItem)
-        title3 = "Simu-timesteps settings"
-        self.sections.append((title3, widget3))
-
-        widget1 = QFrame(self.tree)
-        layout1 = QGridLayout(widget1)
-
-        """add Import button"""
-        self.button_import = QPushButton(self)
-        self.button_import.setText("Import")
-        self.button_import.setIcon(QIcon(":/icons/import.png"))
-        self.button_import.setToolTip(
-            "Import a from sumo converted CR Scenario")
-        layout1.addWidget(self.button_import, 0, 0)
-
-        """add Play button"""
-        self.button_play = QPushButton(self)
-        self.button_play.setText("Play")
-        self.button_play.setIcon(QIcon(":/icons/play.png"))
-        self.button_play.setToolTip("Play the animation")
-        layout1.addWidget(self.button_play, 1, 0)
-
-        """add Pause button"""
-        self.button_pause = QPushButton(self)
-        self.button_pause.setText("Pause")
-        self.button_pause.setIcon(QIcon(":/icons/pause.png"))
-        self.button_pause.setToolTip("Pause the animation")
-        layout1.addWidget(self.button_pause, 0, 1)
 
         # layout1.addItem(self.spacerItem)
         title1 = "Simulation settings"
