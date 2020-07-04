@@ -90,6 +90,17 @@ class ConversionLanelet(Lanelet):
         """
         return self.lanelet_id == lanelet.lanelet_id
 
+    """@property
+    def lanelet_type(self):
+        return self._lanelet_type
+
+    def getLaneletType(self, type):
+        if type == 'none':
+            self._lanelet_type = type
+        else:
+            self._lanelet_type = None"""
+
+
     @property
     def lanelet_id(self) -> int:
         """Get or set id of this lanelet."""

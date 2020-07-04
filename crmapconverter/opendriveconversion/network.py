@@ -61,7 +61,11 @@ class Network:
 
         self._link_index = LinkIndex()
         self._link_index.create_from_opendrive(opendrive)
-        self._geo_ref = opendrive.header.geo_reference
+
+        try:
+            self._geo_ref = opendrive.header.geo_reference
+        except TypeError:
+            self._geo_ref = None
 
         # Convert all parts of a road to parametric lanes (planes)
         for road in opendrive.roads:
@@ -86,8 +90,9 @@ class Network:
                 for signal in road.signals:
 
                     position, tangent = road.planView.calc(signal.s)
-                    position = np.array([position[0] + signal.t * np.cos(tangent + 3.1416 / 2),
-                                         position[1] + signal.t * np.sin(tangent + 3.1416 / 2)])
+                    """position = np.array([position[0] + signal.t * np.cos(tangent + 3.1416/2),
+                                         position[1] + signal.t * np.sin(tangent + 3.1416/2)])"""
+                    position = np.array([1, 1])
 
                     if signal.dynamic == 'no':
 
@@ -134,7 +139,7 @@ class Network:
                                 additional_values = []
 
                         traffic_sign_element = TrafficSignElement(
-                            traffic_sign_element_id=element_id + 1000,
+                            traffic_sign_element_id=element_id,
                             additional_values=additional_values
                         )
 
@@ -154,7 +159,7 @@ class Network:
                             cycle=[],
                             position=position,
                             time_offset=0,
-                            direction=TrafficLightDirection.ALL,
+                            direction=TrafficLightDirection.STRAIGHT,
                             active=False
                         )
 
@@ -198,30 +203,6 @@ class Network:
 
         lanelet_network.convert_all_lanelet_ids()
 
-        for traffic_light in self._traffic_lights:
-
-            distance = []
-            for lanelet in lanelet_network.lanelets:
-                pos_1 = traffic_light.position
-                pos_2 = np.array(lanelet.center_vertices[0][0], lanelet.center_vertices[1][0])
-                dist = np.linalg.norm(pos_1 - pos_2)
-                distance.append(dist)
-
-            id_for_adding = lanelet_network.lanelets[distance.index(min(distance))].lanelet_id
-            lanelet_network.add_traffic_light(traffic_light, {id_for_adding})
-
-        for traffic_sign in self._traffic_signs:
-
-            distance = []
-            for lanelet in lanelet_network.lanelets:
-                pos_1 = traffic_sign.position
-                pos_2 = np.array(lanelet.center_vertices[0][0], lanelet.center_vertices[1][0])
-                dist = np.linalg.norm(pos_1 - pos_2)
-                distance.append(dist)
-
-            id_for_adding = lanelet_network.lanelets[distance.index(min(distance))].lanelet_id
-            lanelet_network.add_traffic_sign(traffic_sign, {id_for_adding})
-
         return lanelet_network
 
     def export_commonroad_scenario(
@@ -237,17 +218,20 @@ class Network:
         Returns:
 
         """
-        longitude, latitude = get_geo_reference(self._geo_ref)
-        geo_transformation = GeoTransformation(geo_reference=self._geo_ref)
+        if self._geo_ref is not None:
+            longitude, latitude = get_geo_reference(self._geo_ref)
+            geo_transformation = GeoTransformation(geo_reference=self._geo_ref)
 
-        if longitude is not None and latitude is not None:
-            location = Location(
-                geo_transformation=geo_transformation,
-                gps_latitude=latitude, gps_longitude=longitude
-            )
+            if longitude is not None and latitude is not None:
+                location = Location(
+                    geo_transformation=geo_transformation,
+                    gps_latitude=latitude, gps_longitude=longitude
+                )
 
+            else:
+                location = Location(geo_transformation=geo_transformation)
         else:
-            location = Location(geo_transformation=geo_transformation)
+            location = None
 
         scenario = Scenario(
             dt=dt, benchmark_id=benchmark_id if benchmark_id is not None else "none",
@@ -261,6 +245,34 @@ class Network:
                 else ["driving", "onRamp", "offRamp", "exit", "entry"]
             )
         )
+
+        lanelet_network = scenario.lanelet_network
+
+        for traffic_light in self._traffic_lights:
+
+            distance = []
+            for lanelet in lanelet_network.lanelets:
+                pos_1 = traffic_light.position
+                n = len(lanelet.center_vertices[0])
+                pos_2 = np.array(lanelet.center_vertices[0][int(n/2)], lanelet.center_vertices[1][int(n/2)])
+                dist = np.linalg.norm(pos_1 - pos_2)
+                distance.append(dist)
+
+            id_for_adding = lanelet_network.lanelets[distance.index(min(distance))].lanelet_id
+            lanelet_network.add_traffic_light(traffic_light, {id_for_adding})
+
+        for traffic_sign in self._traffic_signs:
+
+            distance = []
+            for lanelet in lanelet_network.lanelets:
+                pos_1 = traffic_sign.position
+                n = len(lanelet.center_vertices[0])
+                pos_2 = np.array(lanelet.center_vertices[0][int(n/2)], lanelet.center_vertices[1][int(n/2)])
+                dist = np.linalg.norm(pos_1 - pos_2)
+                distance.append(dist)
+
+            id_for_adding = lanelet_network.lanelets[distance.index(min(distance))].lanelet_id
+            lanelet_network.add_traffic_sign(traffic_sign, {id_for_adding})
 
         return scenario
 
