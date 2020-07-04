@@ -216,6 +216,8 @@ class MWindow(QMainWindow, Ui_mainWindow):
         if self.lanelets_List is not None:
             self.lanelets_List.close()
             self.lanelets_List = None
+        if self.play is not None:
+            self.play.ani.event_source.stop()
 
         self.textBrowser.append("Opening the CR Scenario Simulation")
         self.play = Sumo_simulation_play(path)

@@ -6,7 +6,6 @@ from typing import List, Union
 from ffpyplayer.player import MediaPlayer
 from celluloid import Camera
 
-
 from commonroad.visualization.util import approximate_bounding_box_dyn_obstacles
 from matplotlib.animation import FuncAnimation
 from matplotlib import animation
@@ -87,7 +86,7 @@ class Sumo_simulation_play(QWidget):
             self,
             "Open a from SUMO converted CommonRoad scenario",
             "",
-            "CommonRoad scenario files *simulated.cr.xml (*simulated.cr.xml)",
+            "CommonRoad scenario files *.xml (*.xml)",
             options=QFileDialog.Options(),
         )
 
