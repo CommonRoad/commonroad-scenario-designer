@@ -31,5 +31,6 @@
     <file>botton_save.png</file>
     <file>pause.png</file>
     <file>import.png</file>
+    <file>next_step.png</file>
   </qresource>
 </RCC>

@@ -38,6 +38,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
     lanelets_List = None
     play_step = None
     timer = None
+    ani_path = None
 
     def __init__(self):
         super(MWindow, self).__init__()
@@ -135,53 +136,51 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.tool2.setWidget(self.sumobox)
         self.addDockWidget(Qt.LeftDockWidgetArea, self.tool2)
         self.tool2.setMinimumHeight(400)
-        self.sumobox.button_import.clicked.connect(self.importsumoanimation)
+        self.sumobox.button_import.clicked.connect(lambda:self.importsumoanimation(None))
         self.sumobox.button_save.clicked.connect(self.savesumoanimation)
         self.sumobox.button_pause.clicked.connect(self.pausesumoanimation)
         self.sumobox.button_play.clicked.connect(self.playsumoanimation)
 
         """for sumo frame by frame play"""
-        self.sumobox.button_import1.clicked.connect(
-            self.importsumoanimation_step)
-        # self.sumobox.button_pause1.clicked.connect(self.pausesumoanimation)
-        self.sumobox.button_play1.clicked.connect(self.play_consecutive)
         self.sumobox.slider.valueChanged[int].connect(self.timestepchange)
 
-    def play_consecutive(self):
-        if self.play_step is not None:
-            nums = 100
-            for step in range(nums):
-                self.timer = QTimer()
-                self.timer.setInterval(200)
-                self.timer.timeout.connect(
-                    lambda: self.sumobox.slider.setValue(step))
-                self.timer.start()
-            # self.timer.stop()
-
-    def importsumoanimation_step(self):
+    def activate_sumoanimation_step(self):
         if self.lanelets_List is not None:
             self.lanelets_List.close()
             self.lanelets_List = None
-
-        self.play_step = Sumo_simulation_step_play()
+        if self.play is not None:
+            self.play.ani.event_source.stop()
+        if self.ani_path != None:
+            self.textBrowser.append("Showing Simulation frame by frame")
+            self.play_step = Sumo_simulation_step_play(self.ani_path)
         if self.play_step.commonroad_filename is not None:
             # play.current_scenario = scenario_editing.current_scenario
             self.play_step.setWindowIcon(QIcon(":/icons/cr1.ico"))
             self.setCentralWidget(self.play_step)
             self.commoroad_filename = self.play_step.commonroad_filename
             self.play_step.play_timesteps(self.play_step.current_scenario, 0)
+            self.textBrowser.append("Ready")
 
     def timestepchange(self, value):
-        if self.play_step is not None:
-            # self.sumobox.slider.setValue(value)
-            self.sumobox.label.setText('Timestep: ' + str(value))
-            self.play_step.play_timesteps(
-                self.play_step.current_scenario, value)
+        if self.play is not None:
+            if self.play_step is None:
+                self.activate_sumoanimation_step()
+            if self.sumobox.radioButton.isChecked():
+                # self.sumobox.slider.setValue(value)
+                self.sumobox.label.setText('Timestep: ' + str(value))
+                self.play_step.play_timesteps(
+                    self.play_step.current_scenario, value)
 
     def playsumoanimation(self):
         """Function connected with the play button in the sumo-toolbox."""
         if self.play is not None:
-            self.play.ani.event_source.start()
+            if self.play_step is not None:
+                self.sumobox.radioButton.setChecked(False)
+                self.importsumoanimation(self.ani_path)
+                self.play.ani.event_source.start()
+                self.play_step = None
+            else:
+                self.play.ani.event_source.start()
         else:
             messbox = QMessageBox()
             reply = messbox.question(
@@ -212,15 +211,17 @@ class MWindow(QMainWindow, Ui_mainWindow):
             else:
                 messbox.close()
 
-    def importsumoanimation(self):
+    def importsumoanimation(self, path):
         """Function connected with the pause button in the sumo-toolbox."""
         if self.lanelets_List is not None:
             self.lanelets_List.close()
             self.lanelets_List = None
 
-        self.play = Sumo_simulation_play()
+        self.textBrowser.append("Opening the CR Scenario Simulation")
+        self.play = Sumo_simulation_play(path)
         if self.play.commonroad_filename is not None:
             # play.current_scenario = scenario_editing.current_scenario
+            self.ani_path = self.play.path
             self.play.setWindowIcon(QIcon(":/icons/cr1.ico"))
             self.setCentralWidget(self.play)
             self.play.setWindowFlags(Qt.WindowCloseButtonHint)
@@ -242,7 +243,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
                 QMessageBox.Ok | QMessageBox.No,
                 QMessageBox.Ok)
             if (reply == QtWidgets.QMessageBox.Ok):
-                self.playsumoanimation()
+                self.importsumoanimation()
             else:
                 messbox.close()
         else:

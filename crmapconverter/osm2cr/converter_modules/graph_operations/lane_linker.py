@@ -126,8 +126,8 @@ def get_incomings_outgoings(
                 incoming.append(lane)
             else:
                 outgoing.insert(0, lane)
-        else:
-            raise ValueError("malformed Graph, lanes are assigned to wrong nodes")
+        #else:
+            #raise ValueError("malformed Graph, lanes are assigned to wrong nodes")
     return incoming, outgoing
 
 

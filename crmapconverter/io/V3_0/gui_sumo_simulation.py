@@ -62,20 +62,24 @@ class MyDynamicCanvas(FigureCanvas):
 
 class Sumo_simulation_play(QWidget):
 
-    def __init__(self, parent=None, current_scenario=None):
+    def __init__(self, path, parent=None, current_scenario=None):
         super(Sumo_simulation_play, self).__init__()
         self.main_widget = QWidget(self)
         self.current_scenario = None
         self.commonroad_filename = None
         self.canvas = MyDynamicCanvas(self.main_widget)
         self.toolbar = NavigationToolbar(self.canvas, self)
+        self.path = path
 
         layout = QVBoxLayout()
         layout.addWidget(self.toolbar)
         layout.addWidget(self.canvas)
         self.setLayout(layout)
         self.canvas.fig.tight_layout()
-        self.openCommonRoadFile()
+        if self.path == None:
+            self.openCommonRoadFile()
+        else:
+            self.openPath(self.path)
 
     def openCommonRoadFile(self):
         """ """
@@ -90,7 +94,7 @@ class Sumo_simulation_play(QWidget):
         if not path:
             self.NoFileselected()
             return
-
+        self.path = path
         self.openPath(path)
 
     def openPath(self, path):
@@ -263,8 +267,9 @@ class Sumo_simulation_play(QWidget):
 
 class Sumo_simulation_step_play(QWidget):
 
-    def __init__(self, parent=None, current_scenario=None):
+    def __init__(self, path, parent=None, current_scenario=None):
         super(Sumo_simulation_step_play, self).__init__()
+        self.path = path
         self.main_widget = QWidget(self)
         self.current_scenario = None
         self.commonroad_filename = None
@@ -283,19 +288,8 @@ class Sumo_simulation_step_play(QWidget):
 
     def openCommonRoadFile(self):
         """ """
-        path, _ = QFileDialog.getOpenFileName(
-            self,
-            "Open a from SUMO converted CommonRoad scenario",
-            "",
-            "CommonRoad scenario files *simulated.cr.xml (*simulated.cr.xml)",
-            options=QFileDialog.Options(),
-        )
-
-        if not path:
-            self.NoFileselected()
-            return
-
-        self.openPath(path)
+        if self.path != None:
+            self.openPath(self.path)
 
     def openPath(self, path):
         """
@@ -351,6 +345,7 @@ class Sumo_simulation_step_play(QWidget):
         self.canvas.ax.autoscale()
         self.canvas.ax.set_aspect('equal')
         self.canvas.draw()
+
 
     def zoom(self, event):
         """
