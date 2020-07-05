@@ -420,12 +420,12 @@ class MainWindow(QWidget):
             verts.append([x, y])
             codes.append(Path.LINETO)
 
-            if color != 'gray':
-                self.xlim1 = min(self.xlim1, x)
-                self.xlim2 = max(self.xlim2, x)
+            # if color != 'gray':
+            self.xlim1 = min(self.xlim1, x)
+            self.xlim2 = max(self.xlim2, x)
 
-                self.ylim1 = min(self.ylim1, y)
-                self.ylim2 = max(self.ylim2, y)
+            self.ylim1 = min(self.ylim1, y)
+            self.ylim2 = max(self.ylim2, y)
 
         verts.append(verts[0])
         codes[-1] = Path.CLOSEPOLY
@@ -515,7 +515,7 @@ class MainWindow(QWidget):
 
 
 
-if __name__ == "__main__":
+def main():
     # Make it possible to exit application with ctrl+c on console
     signal.signal(signal.SIGINT, signal.SIG_DFL)
 
@@ -523,8 +523,12 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
 
     if len(sys.argv) >= 2:
-        ex = MainWindow(path=sys.argv[1])
+        _ = MainWindow(path=sys.argv[1])
     else:
-        ex = MainWindow()
+        _ = MainWindow()
 
     sys.exit(app.exec_())
+
+
+if __name__ == "__main__":
+    main()
