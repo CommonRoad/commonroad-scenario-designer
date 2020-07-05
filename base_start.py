@@ -10,7 +10,8 @@ from crmapconverter.io import viewer
 
 source_folder = "/home/max/Desktop/Planning/Maps/osm_files/"
 target_folder = "/home/max/Desktop/Planning/Maps/cr_files/ped/"
-file_name = "mittlerer_Ring"
+# intersect_and_crossing3, mittlerer_Ring, garching_kreuzung_fixed
+file_name = "garching_kreuzung_fixed" 
 
 config.EXTRACT_PATHWAYS = True
 scen = converter.GraphScenario(source_folder + file_name + ".osm")

@@ -22,11 +22,12 @@ from crmapconverter.osm2cr.converter_modules.utility import plots
 
 
 def osm_to_graph(osm_file) -> road_graph.Graph:
+
     def create_graph(
             file, accepted_highways, custom_bounds=None, additional_nodes=None):
         print("reading File")
         (roads, points, restrictions, center_point, bounds, traffic_signs,
-            traffic_lights) = osm_parser.parse_file(
+            traffic_lights, crossing_points) = osm_parser.parse_file(
             file, accepted_highways, config.REJECTED_TAGS, custom_bounds
         )
         print("creating graph")
@@ -34,26 +35,42 @@ def osm_to_graph(osm_file) -> road_graph.Graph:
             roads, points, restrictions, center_point, bounds, center_point,
             traffic_signs, traffic_lights, additional_nodes
         )
-        return graph
+        return graph, crossing_points
 
     if config.EXTRACT_PATHWAYS:
         all_accepted_ways = config.ACCEPTED_HIGHWAYS.copy()
         all_accepted_ways.extend(config.ACCEPTED_PATHWAYS)
-        combined_g = create_graph(osm_file, all_accepted_ways)
-        highway_g = create_graph(osm_file, config.ACCEPTED_HIGHWAYS,
-            combined_g.bounds)
-        pathway_g = create_graph(osm_file, config.ACCEPTED_PATHWAYS,
-            combined_g.bounds)
-        crossing_nodes = node_difference(combined_g.nodes, highway_g.nodes, pathway_g.nodes)
-        for n in crossing_nodes:
-            n.edges.clear()
-            n.is_crossing = True
-        g = create_graph(osm_file, config.ACCEPTED_HIGHWAYS, combined_g.bounds,
-            crossing_nodes)
-        g.sublayer = pathway_g
+        combined_g, _ = create_graph(osm_file, all_accepted_ways)
+        road_g, road_crossing_points = create_graph(osm_file,
+            config.ACCEPTED_HIGHWAYS, combined_g.bounds)
+        path_g, path_crossing_points = create_graph(osm_file,
+            config.ACCEPTED_PATHWAYS, combined_g.bounds)
+
+        crossing_nodes = set()
+        already_contained = set()
+        road_nodes = {node.id: node for node in road_g.nodes}
+        for p_id, point in road_crossing_points.items():
+            if p_id in path_crossing_points and not is_close_to_intersection2(
+                p_id, combined_g, road_g
+            ):
+                if p_id in road_nodes:
+                    already_contained.add(p_id)
+                else:
+                    crossing_node = road_graph.GraphNode(
+                        int(p_id), point.x, point.y, set()
+                    )
+                    crossing_node.is_crossing = True
+                    crossing_nodes.add(crossing_node)
+
+        graph, _ = create_graph(osm_file, config.ACCEPTED_HIGHWAYS,
+            combined_g.bounds, crossing_nodes)
+        for node in graph.nodes:
+            if node.id in already_contained:
+                node.is_crossing = True
+        graph.sublayer = path_g
     else:
-        g = create_graph(osm_file, config.ACCEPTED_HIGHWAYS)
-    return g
+        graph = create_graph(osm_file, config.ACCEPTED_HIGHWAYS)
+    return graph
 
 
 def step_collection_1(g: road_graph.Graph) -> road_graph.Graph:
@@ -111,36 +128,22 @@ def step_collection_3(g: road_graph.Graph) -> road_graph.Graph:
     return g
 
 
-def is_close_to_intersection(node):
+def is_close_to_intersection2(node_id, combined_graph, road_g):
+    node = [nd for nd in combined_graph.nodes if nd.id == node_id][0]
+    road_node_ids = [nd.id for nd in road_g.nodes]
+
     for edge in node.edges:
         if node == edge.node1:
             neighbor = edge.node2
         else:
             neighbor = edge.node1
-        if (neighbor.get_distance(node) < config.INTERSECTION_DISTANCE
-                and neighbor.get_degree() > 2):
+        if (neighbor.id in road_node_ids and neighbor.get_degree() > 2
+                and neighbor.get_distance(node) < config.INTERSECTION_DISTANCE/2.0
+        ):
             # close neighbor is intersection
             print(node, "is too close to intersection at", neighbor)
             return True
     return False
-
-
-def node_difference(nodes0, nodes1, nodes2):
-    """
-    Returns all nodes that are only part of the combined nodes.
-    """
-    # get crossing points
-    result_nodes = []
-    for candidate_node in nodes0:
-        is_contained = False
-        for node in nodes1:
-            is_contained |= node.id == candidate_node.id
-        for node in nodes2:
-            is_contained |= node.id == candidate_node.id
-        if not is_contained and not is_close_to_intersection(candidate_node):
-            # remove all information about edges from earlier linking
-            result_nodes.append(candidate_node)
-    return result_nodes
 
 
 class GraphScenario:
