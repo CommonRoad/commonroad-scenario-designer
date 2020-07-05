@@ -29,7 +29,9 @@ setup(
         "Pillow >= 7.1.1",
         "mercantile >= 1.1.3",
         "utm >= 0.5.0",
-        "cartopy >= 0.17.0",
+        # TODO: This dependency is required for this package but fails to build on the CI server
+        # therefore it is commented out for now
+        # "cartopy >= 0.17.0",
 
         # only for graphical display
         "PyQt5>=5.12.2",
