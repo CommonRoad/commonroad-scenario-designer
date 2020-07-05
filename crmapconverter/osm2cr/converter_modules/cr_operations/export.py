@@ -24,7 +24,6 @@ from commonroad.planning.planning_problem import PlanningProblemSet
 from commonroad.scenario.scenario import Scenario, Lanelet, LaneletNetwork, Tag, Location
 
 
-
 def get_lanelet(lane: rg.Lane) -> Lanelet:
     """
     converts a graph lane to a lanelet
@@ -185,6 +184,7 @@ def export(
 
     # write scenario to file without planning problem
     #file_writer.write_scenario_to_file(file, OverwriteExistingFile.ALWAYS)
+
 
 def create_tags(tags: str):
     """
