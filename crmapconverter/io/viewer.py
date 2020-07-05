@@ -381,6 +381,11 @@ class MainWindow(QWidget):
         elif selected_intersection is not None:
 
             incoming_ids = selected_intersection.map_incoming_lanelets.keys()
+            inc_succ_ids = set()
+            for inc in selected_intersection.incomings:
+                inc_succ_ids |= inc.successors_right
+                inc_succ_ids |= inc.successors_left
+                inc_succ_ids |= inc.successors_straight
             
             draw_arrow = True
             
@@ -394,6 +399,11 @@ class MainWindow(QWidget):
                 alpha = 0.5
                 zorder = 5
                 label = "{} crossing".format(lanelet.lanelet_id)
+            elif lanelet.lanelet_id in inc_succ_ids:
+                color = "green"
+                alpha = 0.3
+                zorder = 5
+                label = "{} intersection".format(lanelet.lanelet_id)
             else:
                 color = "gray"
                 alpha = 0.3
