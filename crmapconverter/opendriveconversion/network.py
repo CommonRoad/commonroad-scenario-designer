@@ -16,8 +16,7 @@ from crmapconverter.opendriveconversion.lanelet_network import ConversionLanelet
 from crmapconverter.opendriveconversion.converter import OpenDriveConverter
 
 from commonroad.scenario.traffic_sign import (
-    TrafficSign, TrafficLight, TrafficSignElement,
-    SupportedTrafficSignCountry, TrafficSignIDZamunda, TrafficSignIDGermany, TrafficSignIDUsa, TrafficSignIDChina,
+    TrafficSign, TrafficLight, TrafficSignElement, TrafficSignIDZamunda, TrafficSignIDGermany, TrafficSignIDUsa, TrafficSignIDChina,
     TrafficSignIDSpain, TrafficSignIDRussia, TrafficLightDirection
 
 )
@@ -90,9 +89,8 @@ class Network:
                 for signal in road.signals:
 
                     position, tangent = road.planView.calc(signal.s)
-                    """position = np.array([position[0] + signal.t * np.cos(tangent + 3.1416/2),
-                                         position[1] + signal.t * np.sin(tangent + 3.1416/2)])"""
-                    position = np.array([1, 1])
+                    position = np.array([position[0] + signal.t * np.cos(tangent + 3.14159/2),
+                                         position[1] + signal.t * np.sin(tangent + 3.14159/2)])
 
                     if signal.dynamic == 'no':
 
@@ -136,7 +134,6 @@ class Network:
                                 element_id = TrafficSignIDZamunda(signal.type)
                             except ValueError:
                                 element_id = TrafficSignIDZamunda.UNKNOWN
-                                additional_values = []
 
                         traffic_sign_element = TrafficSignElement(
                             traffic_sign_element_id=element_id,
@@ -159,8 +156,8 @@ class Network:
                             cycle=[],
                             position=position,
                             time_offset=0,
-                            direction=TrafficLightDirection.STRAIGHT,
-                            active=False
+                            direction=TrafficLightDirection.ALL,
+                            active=True
                         )
 
                         self._traffic_lights.append(traffic_light)
