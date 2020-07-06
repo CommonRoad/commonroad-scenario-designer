@@ -215,6 +215,9 @@ class MainWindow(QWidget):
 
         """
         self.current_scenario = scenario
+
+        self.dynamic.clear_axes()
+        
         self.update_plot()
 
     @pyqtSlot()
