@@ -4,7 +4,7 @@ This class contains functions for converting a CommonRoad map into a .net.xml SU
 import logging
 from collections import defaultdict
 from copy import deepcopy
-from typing import Dict, Tuple, List
+from typing import Dict, Tuple, List, Set
 
 import os
 import random
@@ -19,14 +19,14 @@ import numpy as np
 from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.common.util import Interval
 from commonroad.scenario.lanelet import LaneletNetwork
-from commonroad.scenario.traffic_sign import SupportedTrafficSignCountry
+from commonroad.scenario.traffic_sign import SupportedTrafficSignCountry, TrafficLight, TrafficLightState
 from commonroad.scenario.traffic_sign_interpreter import TrafficSigInterpreter
 from commonroad.visualization.draw_dispatch_cr import draw_object
 
 from matplotlib import pyplot as plt
 
 # modified sumolib.net.* files
-from .sumolib_net import Node, Edge, Lane
+from .sumolib_net import Node, Edge, Lane, TLS, TLSProgram, Connection
 import sumolib
 
 from sumocr.maps.scenario_wrapper import AbstractScenarioWrapper
@@ -53,7 +53,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         :param conf: configuration file for additional map conversion parameters
         :param country_id: ID of the country, used to evaluate traffic signs
         """
-        self.lanelet_network = lanelet_network
+        self.lanelet_network: LaneletNetwork = lanelet_network
         self.conf: SumoConfig = conf
 
         # all the nodes of the map, key is the node ID
@@ -78,6 +78,8 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         self.lanelet_id2edge_id: Dict[int, int] = {}
         self._start_nodes = {}
         self._end_nodes = {}
+        # tl (traffic_light_id) ->  TLS (Traffic Light Signal)
+        self.traffic_light_signals: Dict[int, TLS] = {}
 
         # simulation params
         self.scenario_name = ""
@@ -98,14 +100,131 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         self._merge_junctions_intersecting_lanelets()
         self._filter_edges()
         self._create_lane_based_connections()
+        self._create_traffic_lights()
+
+    def _create_traffic_lights(self):
+
+        # tl (traffic_light_id) -> Node (Traffic Light)
+        nodes_tl: Dict[int, Node] = {}
+        # Mapping from CR TrafficLightStates to SUMO Traffic Light states
+        traffic_light_states_CR2SUMO = {
+            TrafficLightState.RED: 'r',
+            TrafficLightState.YELLOW: 'y',
+            TrafficLightState.RED_YELLOW: 'u',
+            TrafficLightState.GREEN: 'G',
+            TrafficLightState.INACTIVE: 'O',
+        }
+
+        # generate traffic lights in SUMO format
+        for lanelet in self.lanelet_network.lanelets:
+            lanelet_lights_ids: Set[TrafficLight] = lanelet.traffic_lights
+            if not lanelet_lights_ids: continue
+
+            edge_id = self.lanelet_id2edge_id[lanelet.lanelet_id]
+
+            if not edge_id in self.new_edges:
+                logging.warning(
+                    "Edge: {} has been removed in SUMO-NET but contained a traffic light"
+                    .format(edge_id))
+                continue
+
+            from_edge: Edge = self.new_edges[edge_id]
+            to_node: Node = from_edge.getToNode()
+            successor_edges: List[Edge] = [
+                edge for id, edge in self.new_edges.items()
+                if edge.getFromNode().getID() == to_node.getID()
+            ]
+
+            for tl in [
+                    tl for tl in self.lanelet_network.traffic_lights
+                    if tl.traffic_light_id in lanelet_lights_ids
+            ]:
+                # is the traffic light active?
+                if not tl.active:
+                    logging.info(
+                        'Traffic Light: {} is inactive, skipping conversion'.
+                        format(tl.traffic_light_id))
+                    continue
+
+                ## Only valid if the traffic light has not been created ##
+
+                # create a new node for the traffic light
+                traffic_light = Node(
+                    self.node_id_next,
+                    "traffic_light",
+                    # convert TrafficLight position if explicitly given
+                    tl.position if tl.position.size > 0 else
+                    from_edge.getToNode().getCoord3D(),
+                    incLanes=None,
+                    tl=tl.traffic_light_id)
+                self.node_id_next += 1
+                nodes_tl[tl.traffic_light_id] = traffic_light
+
+                # have we already generated the tls for this traffic light?
+                if tl.traffic_light_id in self.traffic_light_signals:
+                    logging.warning(
+                        'TrafficLight: {} is referenced by multiple lanelets'.
+                        format(tl.traffic_light_id))
+                    continue
+
+                # create Traffic Light Signal
+                # give a testing program id:
+                tls_program = TLSProgram('cr2sumo', tl.time_offset, 'static')
+                for cycle in tl.cycle:
+                    state = traffic_light_states_CR2SUMO[cycle.state]
+                    tls_program.addPhase(state, cycle.duration)
+
+                tls = TLS(tl.traffic_light_id)
+                tls.addProgram(tls_program)
+
+                def get_lanes(edge) -> List[Lane]:
+                    """ 
+                    param: return: List of lanes for the given edge
+                    """
+                    return [
+                        lane for lane_id, lane in self.lanes.items()
+                        if edge.getID() == lane.getEdge().getID()
+                    ]
+
+                def connection_exists(from_lane: str, to_lane: str) -> bool:
+                    """
+                    param: return: True iff. a connection between from_lane -> to_lane exists
+                    """
+                    for connection in self._connection_shapes:
+                        if connection[0] == from_lane and connection[
+                                -1] == to_lane:
+                            return True
+                    return False
+
+                # TODO: Add proper lane modelling for the entire converter
+                for to_edge in successor_edges:
+                    for from_lane in get_lanes(from_edge):
+                        for to_lane in get_lanes(to_edge):
+                            if not connection_exists(from_lane.getID(),
+                                                     to_lane.getID()):
+                                continue
+                            tls.addConnection(
+                                Connection(from_edge,
+                                           to_edge,
+                                           from_lane,
+                                           to_lane,
+                                           direction=None,
+                                           tls=tl.traffic_light_id,
+                                           tllink=0,
+                                           state=None))
+
+                self.traffic_light_signals[tl.traffic_light_id] = tls
+
+        # save nodes to global state
+        for tl, node in nodes_tl.items():
+            self.new_nodes[node.getID()] = node
 
     def _find_lanes(self):
         """
         Convert a CommonRoad net into a SUMO net
         sumo_net contains the converted net
-        _points_dict contains the shape of the edges
-        :return: sumo_net, _points_dict
         """
+
         node_id = 0  # running node_id, will be increased for every new node
         self._points_dict = {
             lanelet.lanelet_id: lanelet.center_vertices
@@ -142,10 +261,11 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
             start_node_list.append(start_node_coordinates)
             end_node_coordinates = lanelet.center_vertices[-1]
             end_node_list.append(end_node_coordinates)
+
             # find rightmost lanelet
             rightmost_lanelet = lanelet
             zipper = False
-            while adj_right_id is not None and right_same_direction is not False:
+            while adj_right_id and right_same_direction:
                 self._explored_lanelets.append(adj_right_id)
                 # Get start and end nodes of right adjacency.
                 right_lanelet = self.lanelet_network.find_lanelet_by_id(
@@ -166,7 +286,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                 right_same_direction = right_lanelet.adj_right_same_direction
 
             # find leftmost lanelet
-            while adj_left_id is not None and left_same_direction is not False:
+            while adj_left_id and left_same_direction:
                 self._explored_lanelets.append(adj_left_id)
                 # Get start and end nodes of left adjacency.
                 left_lanelet = self.lanelet_network.find_lanelet_by_id(
@@ -292,11 +412,11 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
     def _init_nodes(self):
         # creation of the start and end nodes
         # start node
-        start_nodes = {}  # contains start nodes of each edge{edge_id: node_id}
-        end_nodes = {}  # contains end nodes of each edge{edge_id: node_id}
         self.node_id_next = 1
-        self._start_nodes = {}
-        self._end_nodes = {}
+        self._start_nodes = {
+        }  # contains start nodes of each edge{edge_id: node_id}
+        self._end_nodes = {
+        }  # contains end nodes of each edge{edge_id: node_id}
         for edge_id, lanelet_ids in self.lanes_dict.items():
             self._create_node(edge_id, lanelet_ids, 'from')
             self._create_node(edge_id, lanelet_ids, 'to')
@@ -482,13 +602,15 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                     assert i < 10000, 'Something went wrong'
                     i += 1
                     expanded_node = queue.pop()
+
                     if expanded_node in explored_nodes: continue
+
                     explored_nodes.add(expanded_node)
                     incomings: List[int] = [
-                        edg.getID() for edg in expanded_node.getIncoming()
+                        e.getID() for e in expanded_node.getIncoming()
                     ]
                     outgoings: List[int] = [
-                        edg.getID() for edg in expanded_node.getOutgoing()
+                        e.getID() for e in expanded_node.getOutgoing()
                     ]
 
                     for inc_edg in incomings:
@@ -514,7 +636,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                                    coordinates, [])  # new merged node
                 self.node_id_next += 1
                 self.new_nodes.update({merged_node.getID(): merged_node})
-                merged_nodes = set([n.getID() for n in merged_nodes])
+                merged_nodes = set(n.getID() for n in merged_nodes)
 
                 for old_node in merged_nodes:
                     # assert not old_node in self.replaced_nodes
@@ -528,11 +650,13 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         for old_node, new_nodes in replace_nodes_old.items():
             if old_node in explored_nodes_all:
                 continue
+
             if len(new_nodes) > 1:
                 new_candidates = deepcopy(new_nodes)
                 new_node = new_nodes[0]
                 merged_nodes = set()
                 explored_candidates = set()
+
                 while new_candidates:
                     # merge with merged junction
                     new_node_tmp = new_candidates.pop()
@@ -549,8 +673,9 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
 
                 for node_id in explored_candidates:
                     del self.merged_dictionary[node_id]
-                    if not node_id == new_node:
+                    if node_id != new_node:
                         del self.new_nodes[node_id]
+
                 self.merged_dictionary[new_node] = merged_nodes
                 explored_nodes_all = explored_nodes_all.union(merged_nodes)
                 for merged_node in merged_nodes:
@@ -564,7 +689,6 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         :return: nothing
         """
         for edge in self.edges.values():
-            # remove_edge = self._consider_edge(edge)
             remove_edge = self._consider_edge(edge)
             if remove_edge:
                 continue
@@ -590,7 +714,6 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         :param edge: the edge to consider
         :return: flag remove_edge
         """
-        remove_edge = False
         startNode = edge.getFromNode()
         endNode = edge.getToNode()
         startNodeID = startNode.getID()
@@ -598,9 +721,9 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
 
         for new_node_id, merged_nodes in self.merged_dictionary.items():
             if startNodeID in merged_nodes and endNodeID in merged_nodes:
-                remove_edge = True
+                return True
 
-        return remove_edge
+        return False
 
     def _check_addition(self, to_edges):
         """
@@ -672,7 +795,6 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                     (from_lane, via, path[-1]):
                     shape
                 })
-        return
 
     def _calculate_avg_nodes(self, nodes):
         """
@@ -723,6 +845,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         self._write_edges_file(output_path)
         self._write_nodes_file(output_path)
         self._write_connections_file(output_path)
+        self._write_traffic_file(output_path)
 
     def _write_edges_file(self, output_path):
         """
@@ -742,6 +865,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                 toNode = str(edge.getToNode().getID())
                 numLanes = str(edge.getLaneNumber())
                 function = str(edge.getFunction())
+
                 edge_et = ET.SubElement(edges, 'edge')
                 edge_et.set('from', fromNode)
                 edge_et.set('id', edgeID)
@@ -757,17 +881,20 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                     shape = lane.getShape()
                     shapeString = self._getShapeString(shape)
                     disallow = Lane.getDisallowed(lane)
+
                     lane = ET.SubElement(edge_et, 'lane')
                     lane.set('index', laneID)
                     lane.set('speed', speed)
                     lane.set('length', length)
                     lane.set('shape', shapeString)
                     lane.set('width', width)
-                    if disallow is not None:
+                    if disallow:
                         lane.set('disallow', disallow)
-            output_str = ET.tostring(edges)
-            reparsed = minidom.parseString(output_str)
-            output_file.write(reparsed.toprettyxml(indent="\t"))
+
+            # pretty print & write the generated xml
+            output_file.write(
+                minidom.parseString(ET.tostring(
+                    edges, method="xml")).toprettyxml(indent="\t"))
 
     def _write_nodes_file(self, output_path):
         """
@@ -780,17 +907,16 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
             sumolib.writeXMLHeader(output_file, '')
             root = ET.Element('root')
             nodes = ET.SubElement(root, 'nodes')
+
             for node in self.new_nodes.values():
-                ET.SubElement(nodes,
-                              'node',
-                              id=str(node.getID()),
-                              x=str(node.getCoord()[0]),
-                              y=str(node.getCoord()[1]),
-                              function=node.getType())
-            output_str = ET.tostring(nodes, encoding='utf8',
-                                     method='xml').decode("utf-8")
-            reparsed = minidom.parseString(output_str)
-            output_file.write(reparsed.toprettyxml(indent="\t"))
+                xml = node.toXML()
+                xml = ET.fromstring(xml)
+                nodes.append(xml)
+
+            # pretty print & write the generated xml
+            output_file.write(
+                minidom.parseString(ET.tostring(
+                    nodes, method="xml")).toprettyxml(indent="\t"))
 
     def _write_connections_file(self, output_path):
         """
@@ -819,11 +945,29 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                 connection.set('contPos',
                                str(self.conf.wait_pos_internal_junctions))
 
-            output_str = ET.tostring(connections,
-                                     encoding='utf8',
-                                     method='xml').decode("utf-8")
-            reparsed = minidom.parseString(output_str)
-            output_file.write(reparsed.toprettyxml(indent="\t"))
+            # pretty print & write the generated xml
+            output_file.write(
+                minidom.parseString(ET.tostring(
+                    connections, method="xml")).toprettyxml(indent="\t"))
+
+    def _write_traffic_file(self, output_path):
+        """
+        Writes the tll.net.xml file to disk
+        :param output_path: path for the file
+        """
+        with open(os.path.join(os.path.dirname(output_path), "_tll.net.xml"),
+                  "w+") as f:
+            sumolib.writeXMLHeader(f, '')
+            tlLogics = ET.Element('tlLogics')
+
+            for tls in self.traffic_light_signals.values():
+                tls_xml = ET.fromstring(tls.toXML())
+                tlLogics.append(tls_xml.find('tlLogic'))
+                for conn in tls_xml.findall('connection'):
+                    tlLogics.append(conn)
+            f.write(
+                minidom.parseString(ET.tostring(
+                    tlLogics, method="xml")).toprettyxml(indent="\t"))
 
     @staticmethod
     def merge_intermediate_files(output_path: str, cleanup=True) -> bool:
@@ -833,56 +977,41 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         :param cleanup: deletes temporary input files after creating net file (only deactivate for debugging)
         :return: bool: returns False if conversion fails
         """
+
+        files = {
+            "nodes": "nodes.net.xml",
+            "edges": "edges.net.xml",
+            "connections": "_connections.net.xml",
+            "tll": "_tll.net.xml"
+        }
+
+        def join(output_path, file_name):
+            return os.path.join(os.path.dirname(output_path), file_name)
+
         # The header of the xml files must be removed
         to_remove = ["options", "xml"]
+        for file_name in files.values():
+            # Removing header in file
+            path = join(output_path, file_name)
+            with open(path, 'r') as file:
+                lines = file.readlines()
+            with open(path, 'w') as file:
+                for line in lines:
+                    if not any(word in line for word in to_remove):
+                        file.write(line)
 
-        # Removing header in edges file
-        with open(os.path.join(os.path.dirname(output_path), 'edges.net.xml'),
-                  'r') as file:
-            lines = file.readlines()
-        with open(os.path.join(os.path.dirname(output_path), 'edges.net.xml'),
-                  'w') as file:
-            for line in lines:
-                if not any(word in line for word in to_remove):
-                    file.write(line)
-
-        # Removing header in nodes file
-        with open(os.path.join(os.path.dirname(output_path), 'nodes.net.xml'),
-                  'r') as file:
-            lines = file.readlines()
-        with open(os.path.join(os.path.dirname(output_path), 'nodes.net.xml'),
-                  'w') as file:
-            for line in lines:
-                if not any(word in line for word in to_remove):
-                    file.write(line)
-
-        # Removing header in connections file
-        with open(
-                os.path.join(os.path.dirname(output_path),
-                             '_connections.net.xml'), 'r') as file:
-            lines = file.readlines()
-        with open(
-                os.path.join(os.path.dirname(output_path),
-                             '_connections.net.xml'), 'w') as file:
-            for line in lines:
-                if not any(word in line for word in to_remove):
-                    file.write(line)
-
-        nodesFile = os.path.join(os.path.dirname(output_path), 'nodes.net.xml')
-        edgesFile = os.path.join(os.path.dirname(output_path), 'edges.net.xml')
-        connectionsFile = os.path.join(os.path.dirname(output_path),
-                                       '_connections.net.xml')
         output = output_path
 
         # Calling of Netconvert
-        bashCommand = "netconvert --plain.extend-edge-shape=true " \
-                      "--no-turnarounds=true " \
-                      "--junctions.internal-link-detail=20 "\
-                      "--geometry.avoid-overlap=true "\
-                      "--offset.disable-normalization=true " \
-                      "--node-files=" + str(nodesFile) + \
-                      " --edge-files=" + str(edgesFile) + \
-                      " --connection-files=" + str(connectionsFile) + \
+        bashCommand = "netconvert --plain.extend-edge-shape=true" \
+                      " --no-turnarounds=true" \
+                      " --junctions.internal-link-detail=20"\
+                      " --geometry.avoid-overlap=true" \
+                      " --offset.disable-normalization=true" \
+                      " --node-files=" + join(output, files["nodes"]) + \
+                      " --edge-files=" + join(output, files["edges"]) + \
+                      " --connection-files=" + join(output,files["connections"]) + \
+                      " --tllogic-files=" + join(output, files['tll']) + \
                       " --output-file=" + str(output) + \
                       " --geometry.remove.keep-edges.explicit=true"
         # "--junctions.limit-turn-speed=6.5 " \
@@ -895,13 +1024,12 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                 warnings.warn("Is netconvert installed and added to PATH?")
             else:
                 success = False
-        except BaseException:
+        except Exception:
             success = False
 
         if cleanup is True and success:
-            os.remove(nodesFile)
-            os.remove(edgesFile)
-            os.remove(connectionsFile)
+            for file in files.values():
+                os.remove(join(output, file))
 
         return success
 
@@ -996,7 +1124,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         logging.info("Merging Intermediate Files")
         self.write_intermediate_files(output_path)
         conversion_possible = self.merge_intermediate_files(output_path,
-                                                            cleanup=True)
+                                                            cleanup=False)
         if not conversion_possible:
             logging.error("Error converting map, see above for details")
             return False

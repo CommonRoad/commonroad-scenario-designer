@@ -50,7 +50,7 @@ class SumoConfig(DefaultConfig):
     dt = 0.1  # length of simulation step of the interface
     delta_steps = 2  # number of sub-steps simulated in SUMO during every dt
     presimulation_steps = 30  # number of time steps before simulation with ego vehicle starts
-    simulation_steps = 100  # number of simulated (and synchronized) time steps
+    simulation_steps = 200  # number of simulated (and synchronized) time steps
     with_sumo_gui = False
     # lateral resolution > 0 enables SUMO'S sublane model, see https://sumo.dlr.de/docs/Simulation/SublaneModel.html
     lateral_resolution = 0
