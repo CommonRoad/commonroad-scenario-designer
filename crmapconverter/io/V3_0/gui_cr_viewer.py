@@ -15,7 +15,6 @@ from commonroad.visualization.draw_dispatch_cr import draw_object
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 
-
 from matplotlib.animation import FuncAnimation
 from commonroad.visualization.draw_dispatch_cr import draw_object, plottable_types
 
@@ -27,11 +26,9 @@ from PyQt5.QtGui import *
 
 class Canvas(FigureCanvas):
     """Ultimately, this is a QWidget"""
-
     def __init__(self, parent=None, width=5, height=5, dpi=100):
 
         self.ax = None
-
         self.fig = Figure(figsize=(width, height), dpi=dpi)
 
         super(Canvas, self).__init__(self.fig)
@@ -60,6 +57,37 @@ class Canvas(FigureCanvas):
         """ """
         self.draw()
 
+    def draw_object(self, scenario, draw_params, plot_limits):
+        self.ax.clear()
+        draw_object(scenario,
+                    ax=self.ax,
+                    draw_params=draw_params,
+                    plot_limits=plot_limits)
+        self.ax.autoscale()
+        self.ax.set_aspect('equal')
+
+
+class Observable:
+    def __init__(self, value, observers=[]):
+        self._value = value
+        self._observers = observers
+
+    @property
+    def value(self):
+        return self._value
+
+    @value.setter
+    def value(self, value):
+        for obs in self._observers:
+            obs(value)
+        self._value = value
+
+    def silent_set(self, value):
+        self._value = value
+
+    def subscribe(self, observer):
+        self._observers.append(observer)
+
 
 class Crviewer(QWidget):
     def __init__(self, parent=None):
@@ -71,6 +99,13 @@ class Crviewer(QWidget):
         self.canvas = Canvas(self, width=10.8, height=7.2, dpi=100)
         self.toolbar = NavigationToolbar(self.canvas, self)
         self.setWindowFlag(Qt.WindowCloseButtonHint)
+
+        # FuncAnimation object
+        self.animation = None
+        # if playing or not
+        self.playing = False
+        # current time ste
+        self.timestep = Observable(0)
 
         layout = QVBoxLayout()
         layout.addWidget(self.toolbar)
@@ -84,7 +119,6 @@ class Crviewer(QWidget):
         self.canvas.mpl_connect('scroll_event', self.zoom)
         self.canvas.mpl_connect('button_press_event', self.zoom)
 
-        self.openCommonRoadFile()
 
     def openCommonRoadFile(self):
         """ """
@@ -127,9 +161,8 @@ class Crviewer(QWidget):
             QMessageBox.warning(
                 self,
                 "CommonRoad XML error",
-                "There was an error during the loading of the selected CommonRoad file.\n\n{}".format(
-                    errorMsg
-                ),
+                "There was an error during the loading of the selected CommonRoad file.\n\n{}"
+                .format(errorMsg),
                 QMessageBox.Ok,
             )
             return
@@ -138,9 +171,8 @@ class Crviewer(QWidget):
             QMessageBox.warning(
                 self,
                 "CommonRoad XML error",
-                "There was an error during the loading of the selected CommonRoad file.\n\n{}".format(
-                    errorMsg
-                ),
+                "There was an error during the loading of the selected CommonRoad file.\n\n{}"
+                .format(errorMsg),
                 QMessageBox.Ok,
             )
             return
@@ -190,7 +222,7 @@ class Crviewer(QWidget):
         Returns:
                 """
 
-        ax = event.inaxes   # get the axes which mouse is now
+        ax = event.inaxes  # get the axes which mouse is now
         x_min, x_max = ax.get_xlim()
         y_min, y_max = ax.get_ylim()
         scope_x = (x_max - x_min) / 10
@@ -212,12 +244,10 @@ class Crviewer(QWidget):
     def NoFileselected(self):
         messbox = QMessageBox()
         # self.center(messbox)
-        reply = messbox.information(
-            self,
-            "Information",
-            "Please select a CR file",
-            QMessageBox.Ok | QMessageBox.No,
-            QMessageBox.Ok)
+        reply = messbox.information(self, "Information",
+                                    "Please select a CR file",
+                                    QMessageBox.Ok | QMessageBox.No,
+                                    QMessageBox.Ok)
 
         if reply == QMessageBox.Ok:
             self.openCommonRoadFile()
@@ -289,31 +319,26 @@ class Crviewer(QWidget):
                     zorder = 10
                     label = "{} selected".format(lanelet.lanelet_id)
 
-                elif (
-                    lanelet.lanelet_id in selected_lanelet.predecessor
-                    and lanelet.lanelet_id in selected_lanelet.successor
-                ):
+                elif (lanelet.lanelet_id in selected_lanelet.predecessor
+                      and lanelet.lanelet_id in selected_lanelet.successor):
                     color = "purple"
                     alpha = 0.5
                     zorder = 5
                     label = "{} predecessor and successor of {}".format(
-                        lanelet.lanelet_id, selected_lanelet.lanelet_id
-                    )
+                        lanelet.lanelet_id, selected_lanelet.lanelet_id)
 
                 elif lanelet.lanelet_id in selected_lanelet.predecessor:
                     color = "blue"
                     alpha = 0.5
                     zorder = 5
                     label = "{} predecessor of {}".format(
-                        lanelet.lanelet_id, selected_lanelet.lanelet_id
-                    )
+                        lanelet.lanelet_id, selected_lanelet.lanelet_id)
                 elif lanelet.lanelet_id in selected_lanelet.successor:
                     color = "green"
                     alpha = 0.5
                     zorder = 5
                     label = "{} successor of {}".format(
-                        lanelet.lanelet_id, selected_lanelet.lanelet_id
-                    )
+                        lanelet.lanelet_id, selected_lanelet.lanelet_id)
                 elif lanelet.lanelet_id == selected_lanelet.adj_left:
                     color = "yellow"
                     alpha = 0.5
@@ -321,9 +346,8 @@ class Crviewer(QWidget):
                     label = "{} adj left of {} ({})".format(
                         lanelet.lanelet_id,
                         selected_lanelet.lanelet_id,
-                        "same"
-                        if selected_lanelet.adj_left_same_direction
-                        else "opposite",
+                        "same" if selected_lanelet.adj_left_same_direction else
+                        "opposite",
                     )
                 elif lanelet.lanelet_id == selected_lanelet.adj_right:
                     color = "orange"
@@ -332,8 +356,7 @@ class Crviewer(QWidget):
                     label = "{} adj right of {} ({})".format(
                         lanelet.lanelet_id,
                         selected_lanelet.lanelet_id,
-                        "same"
-                        if selected_lanelet.adj_right_same_direction
+                        "same" if selected_lanelet.adj_right_same_direction
                         else "opposite",
                     )
                 else:
@@ -356,8 +379,7 @@ class Crviewer(QWidget):
             # TODO efficiency
 
             for x, y in np.vstack(
-                [lanelet.left_vertices, lanelet.right_vertices[::-1]]
-            ):
+                [lanelet.left_vertices, lanelet.right_vertices[::-1]]):
                 verts.append([x, y])
                 codes.append(Path.LINETO)
 
@@ -382,8 +404,7 @@ class Crviewer(QWidget):
                     alpha=alpha,
                     zorder=zorder,
                     label=label,
-                )
-            )
+                ))
             ax.plot(
                 [x for x, y in lanelet.left_vertices],
                 [y for x, y in lanelet.left_vertices],
@@ -402,9 +423,8 @@ class Crviewer(QWidget):
 
                 ml = lanelet.left_vertices[idx]
                 mr = lanelet.right_vertices[idx]
-                mc = lanelet.center_vertices[
-                    min(len(lanelet.center_vertices) - 1, idx + 3)
-                ]
+                mc = lanelet.center_vertices[min(
+                    len(lanelet.center_vertices) - 1, idx + 3)]
 
                 ax.plot(
                     [ml[0], mr[0], mc[0], ml[0]],
@@ -417,22 +437,18 @@ class Crviewer(QWidget):
         handles, labels = self.canvas.get_axes().get_legend_handles_labels()
         self.canvas.get_axes().legend(handles, labels)
 
-        if (
-            xlim1 != float("Inf")
-            and xlim2 != float("Inf")
-            and ylim1 != float("Inf")
-            and ylim2 != float("Inf")
-        ):
+        if (xlim1 != float("Inf") and xlim2 != float("Inf")
+                and ylim1 != float("Inf") and ylim2 != float("Inf")):
             self.canvas.get_axes().set_xlim([xlim1, xlim2])
             self.canvas.get_axes().set_ylim([ylim1, ylim2])
 
         self.canvas.update_plot()
 
         self.laneletsList.setRowCount(
-            len(self.current_scenario.lanelet_network.lanelets)
-        )
+            len(self.current_scenario.lanelet_network.lanelets))
         self.laneletsList.setColumnCount(2)
-        self.laneletsList.setHorizontalHeaderLabels(["Lanelet-Id", "LaneletType"])
+        self.laneletsList.setHorizontalHeaderLabels(
+            ["Lanelet-Id", "LaneletType"])
         # lanelet_data = [
         #     (lanelet.lanelet_id, lanelet.description)
         #     for lanelet in self.current_scenario.lanelet_network.lanelets
@@ -446,20 +462,84 @@ class Crviewer(QWidget):
         for idx, lanelet in enumerate(lanelet_data):
 
             # set lanelet_id
-            self.laneletsList.setItem(idx, 0, QTableWidgetItem(str(lanelet[0])))
+            self.laneletsList.setItem(idx, 0,
+                                      QTableWidgetItem(str(lanelet[0])))
             try:
                 # set lanelet description (old id)
-                self.laneletsList.setItem(idx, 1, QTableWidgetItem(str(lanelet[1])))
+                self.laneletsList.setItem(idx, 1,
+                                          QTableWidgetItem(str(lanelet[1])))
             except AttributeError:
                 self.laneletsList.setItem(idx, 1, QTableWidgetItem("None"))
 
         self.canvas.fig.tight_layout()
 
+    def _init_animation(self):
+        print('init animation')
+        scenario = self.current_scenario
+
+        start: int = 0
+        end: int = 50
+        delta_time_steps: int = 1
+        plotting_horizon = 0
+        plot_limits: Union[list, None, str] = None
+        dt = 0.1
+        # ps = 25
+        # dpi = 120
+        # ln, = self.canvas.ax.plot([], [], animated=True)
+
+        assert start < end, '<video/create_scenario_video> time_begin=%i needs to smaller than time_end=%i.' % (
+            start, end)
+
+        def draw_frame(draw_params):
+            print('next frame')
+            time_begin = start + delta_time_steps * self.timestep.value
+            time_end = start + min(
+                frame_count,
+                delta_time_steps * self.timestep.value + plotting_horizon)
+            self.timestep.value += 1
+
+            draw_params = {'time_begin': time_begin, 'time_end': time_end}
+            print("draw frame ", self.timestep.value, draw_params)
+            # plot frame
+            self.canvas.draw_object(
+                scenario,
+                draw_params=draw_params,
+                plot_limits=None if plot_limits == 'auto' else plot_limits)
+
+        frame_count = (end - start) // delta_time_steps
+        # Interval determines the duration of each frame in ms
+        interval = 1000 * dt
+        self.animation = FuncAnimation(self.canvas.figure,
+                                       draw_frame,
+                                       blit=False,
+                                       interval=interval,
+                                       repeat=True)
+
+    def play(self):
+        """ plays the animation if existing """
+        if not self.animation:
+            self._init_animation()
+
+        self.animation.event_source.start()
+
+    def pause(self):
+        """ pauses the animation if playing """
+        if not self.animation:
+            self._init_animation()
+            return
+        self.animation.event_source.stop()
+
+    def set_time_step(self, timestep: int):
+        """ sets the animation to the current timestep """
+        print("set timestep: ", timestep)
+        if not self.animation:
+            self._init_animation()
+        self.timestep.silent_set(timestep)
+
     def closeEvent(self, event):
         messbox = QMessageBox()
         reply = messbox.question(
-            self,
-            "Warning",
+            self, "Warning",
             "Do you want to close the window? Please make sure you have saved your work",
             QMessageBox.Yes | QMessageBox.No)
         if (reply == QMessageBox.Yes):
