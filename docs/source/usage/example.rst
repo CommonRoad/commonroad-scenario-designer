@@ -1,7 +1,7 @@
 Usage example
 =============
 
-To start a conversion with osm2cr run main.py with either of the following arguments:
+To start a conversion with osm_2_cr run main.py with either of the following arguments:
 
 * **o** **filename** to open a osm file and convert it
 * **d** to download a area specified in **config.py**
