@@ -163,7 +163,7 @@ class ParametricLaneGroup:
         )
 
         lanelet = ConversionLanelet(
-            self, left_vertices, center_vertices, right_vertices, self.id_
+            self, left_vertices, center_vertices, right_vertices, self.id_, lanelet_type=self.type
         )
 
         # Adjacent lanes
