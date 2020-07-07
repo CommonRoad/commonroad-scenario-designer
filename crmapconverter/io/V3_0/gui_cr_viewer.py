@@ -89,10 +89,10 @@ class Observable:
         self._observers.append(observer)
 
 
-class Crviewer(QWidget):
+class CrViewer(QWidget):
     def __init__(self, parent=None):
-        super(Crviewer, self).__init__(parent)
-        self.commonroad_filename = None
+        super(CrViewer, self).__init__(parent)
+        self.filename = None
         self.current_scenario = None
         self.selected_lanelet_id = None
         #self.figure = plt.figure(figsize=(10.8, 7.2), dpi=100)
@@ -114,13 +114,13 @@ class Crviewer(QWidget):
 
         self.laneletsList = QTableWidget(self)
         self.laneletsList.setSelectionBehavior(QAbstractItemView.SelectRows)
-        self.laneletsList.clicked.connect(self.onClickLanelet)
+        self.laneletsList.clicked.connect(self.on_click_lanelet)
 
         self.canvas.mpl_connect('scroll_event', self.zoom)
         self.canvas.mpl_connect('button_press_event', self.zoom)
 
 
-    def openCommonRoadFile(self):
+    def open_commonroad_file(self):
         """ """
         path, _ = QFileDialog.getOpenFileName(
             self,
@@ -131,12 +131,12 @@ class Crviewer(QWidget):
         )
 
         if not path:
-            self.NoFileselected()
+            self.no_file_selected()
             return
 
-        self.openPath(path)
+        self.open_path(path)
 
-    def openPath(self, path):
+    def open_path(self, path):
         """
 
         Args:
@@ -147,7 +147,7 @@ class Crviewer(QWidget):
         """
 
         filename = os.path.basename(path)
-        self.commonroad_filename = filename
+        self.filename = filename
 
         try:
             # fh = open(path, "rb")
@@ -177,9 +177,9 @@ class Crviewer(QWidget):
             )
             return
 
-        self.openScenario(scenario)
+        self.open_scenario(scenario)
 
-    def openScenario(self, scenario):
+    def open_scenario(self, scenario):
         """
 
         Args:
@@ -241,7 +241,7 @@ class Crviewer(QWidget):
 
         self.canvas.draw_idle()
 
-    def NoFileselected(self):
+    def no_file_selected(self):
         messbox = QMessageBox()
         # self.center(messbox)
         reply = messbox.information(self, "Information",
@@ -250,7 +250,7 @@ class Crviewer(QWidget):
                                     QMessageBox.Ok)
 
         if reply == QMessageBox.Ok:
-            self.openCommonRoadFile()
+            self.open_commonroad_file()
         else:
             self.close
 
@@ -264,16 +264,7 @@ class Crviewer(QWidget):
         print((screen.width() - size.width()) / 100)
         print((screen.height() - size.height()) / 2)
 
-    def closeEvent(self, event):
-        result = QMessageBox.question(self, "Warning", "Do you want to exit?",
-                                      QMessageBox.Yes | QMessageBox.No)
-        if (result == QMessageBox.Yes):
-            event.accept()
-
-        else:
-            event.ignore()
-
-    def onClickLanelet(self):
+    def on_click_lanelet(self):
         """ """
         self.canvas.clear_axes()
 

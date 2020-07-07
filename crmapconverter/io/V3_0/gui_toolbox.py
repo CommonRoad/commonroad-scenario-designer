@@ -100,14 +100,14 @@ class UpperToolbox(QWidget):
 
         widget2 = QFrame(self.tree)
         layout2 = QGridLayout(widget2)
-        """ add simulation button """
+        """ add animation button """
         self.button_sumo_simulation = QPushButton()
-        self.button_sumo_simulation.setText("SUMO Simulation")
+        self.button_sumo_simulation.setText("Show Animation Setting")
         self.button_sumo_simulation.setIcon(QIcon(":/icons/Groupe_2.png"))
         layout2.addWidget(self.button_sumo_simulation, 0, 0)
 
         # layout2.addItem(self.spacerItem)
-        title2 = "Tools for SUMO Simulation"
+        title2 = "Tools for Animation"
         self.sections.append((title2, widget2))
 
     def add_button(self, title):
@@ -129,12 +129,12 @@ class UpperToolbox(QWidget):
         return section
 
 
-class Sumo_simulation_tool(QWidget):
+class AnimationTool(QWidget):
     """a widget to config the sumo silmulation tools
             """
 
     def __init__(self, parent=None):
-        super(Sumo_simulation_tool, self).__init__(parent)
+        super(AnimationTool, self).__init__(parent)
         self.initUI()
 
     def initUI(self):
@@ -168,7 +168,7 @@ class Sumo_simulation_tool(QWidget):
         self.button_import.setText("Import")
         self.button_import.setIcon(QIcon(":/icons/import.png"))
         self.button_import.setToolTip(
-            "Import a from sumo converted CR Scenario")
+            "Import a multiple time steps CR Scenario")
         layout3.addWidget(self.button_import)
 
         """add Play button"""
@@ -214,7 +214,7 @@ class Sumo_simulation_tool(QWidget):
         layout3.addWidget(self.label)
 
         # layout1.addItem(self.spacerItem)
-        title1 = "Simulation settings"
+        title1 = "Animation settings"
         self.sections.append((title1, widget1))
 
         widget2 = QFrame(self.tree)
@@ -225,7 +225,7 @@ class Sumo_simulation_tool(QWidget):
         self.save_menu = QComboBox()
         self.save_menu.addItem("Save as mp4")
         self.save_menu.addItem("Save as gif")
-        self.save_menu.currentIndexChanged.connect(self.selectionchange)
+        self.save_menu.currentIndexChanged.connect(self.selection_change)
         layout2.addWidget(self.save_menu)
         layout2.addWidget(self.lb)
 
@@ -239,7 +239,7 @@ class Sumo_simulation_tool(QWidget):
         title2 = "Save Settings"
         self.sections.append((title2, widget2))
 
-    def selectionchange(self):
+    def selection_change(self):
         self.lb.setText(self.save_menu.currentText())
 
     def add_sections(self):
@@ -274,6 +274,6 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = UpperToolbox()
     window.show()
-    sumo = Sumo_simulation_tool()
+    sumo = AnimationTool()
     sumo.show()
     sys.exit(app.exec_())

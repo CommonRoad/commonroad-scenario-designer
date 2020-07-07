@@ -1,9 +1,9 @@
-import signal
-import sys
 import os
 from lxml import etree
 import numpy as np
-import matplotlib.pyplot as plt
+from matplotlib.path import Path
+from matplotlib.figure import Figure
+from matplotlib.patches import PathPatch
 
 from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
@@ -24,16 +24,52 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 
+class Canvas(FigureCanvas):
+    """Ultimately, this is a QWidget"""
+
+    def __init__(self, parent=None, width=5, height=5, dpi=100):
+
+        self.ax = None
+
+        self.fig = Figure(figsize=(width, height), dpi=dpi)
+
+        super(Canvas, self).__init__(self.fig)
+        self.setParent(parent)
+        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+
+        self.clear_axes()
+
+    def clear_axes(self):
+        """ """
+        if self.ax is not None:
+            self.ax.clear()
+        else:
+
+            self.ax = self.fig.add_subplot(111)
+        self.ax.set_aspect("equal", "datalim")
+        self.ax.set_axis_off()
+
+        self.draw()
+
+    def get_axes(self):
+        """ """
+        return self.ax
+
+    def update_plot(self):
+        """ """
+        self.draw()
+
 
 class OD2CR(QDialog):
     def __init__(self, parent=None):
         super(OD2CR, self).__init__(parent)
         self.statsText = None
-        self.input_filename = None
+        self.filename = None
         self.current_scenario = None
-        self.figure = plt.figure(figsize=(10.8, 7.2), dpi=100)
-        self.canvas = FigureCanvas(self.figure)
+        self.selected_lanelet_id = None
+        self.canvas = Canvas(self, width=10.8, height=7.2, dpi=100)
         self.toolbar = NavigationToolbar(self.canvas, self)
+
 
         layout = QVBoxLayout()
         layout.addWidget(self.toolbar)
@@ -43,9 +79,13 @@ class OD2CR(QDialog):
         self.canvas.mpl_connect('scroll_event', self.zoom)
         self.canvas.mpl_connect('button_press_event', self.zoom)
 
-        self.openOpenDriveFileDialog()
+        self.laneletsList = QTableWidget(self)
+        self.laneletsList.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.laneletsList.clicked.connect(self.on_click_lanelet)
 
-    def openOpenDriveFileDialog(self):
+        self.open_opendrive_file_dialog()
+
+    def open_opendrive_file_dialog(self):
         """ """
         # self.reset_output_elements()
 
@@ -61,9 +101,9 @@ class OD2CR(QDialog):
             self.NoFileselected()
             return
 
-        self.load_opendriveFile(path)
+        self.load_opendrive_file(path)
 
-    def load_opendriveFile(self, path):
+    def load_opendrive_file(self, path):
         """
 
         Args:
@@ -74,7 +114,7 @@ class OD2CR(QDialog):
         """
 
         filename = os.path.basename(path)
-        self.input_filename = filename
+        self.filename = filename
 
         # Load road network and print some statistics
         try:
@@ -122,9 +162,10 @@ class OD2CR(QDialog):
                 sum([road.length for road in openDriveXml.roads]),
             )
         )
-        self.viewConvertedLaneletNetwork()
 
-    def exportAsCommonRoad(self):
+        self.open_scenario()
+
+    def export_as_commonroad(self):
         """ """
 
         if not self.loadedRoadNetwork:
@@ -167,29 +208,229 @@ class OD2CR(QDialog):
             QMessageBox.Ok,
         )
 
-    def viewConvertedLaneletNetwork(self):
-        """ """
+    def open_scenario(self):
+        """
 
+        Args:
+          scenario:
+
+        Returns:
+
+        """
         self.current_scenario = self.loadedRoadNetwork.export_commonroad_scenario()
+        self.update_plot()
 
-        # temporary fix to get a plotable view of the scenario
-        """if args.plot_center:
-            plot_center = [int(x) for x in args.plot_center]
-        else:"""
-        plot_center = self.current_scenario.lanelet_network.lanelets[0].left_vertices[0]
-        plt.style.use("classic")
-        # plt.figure(figsize=(10, 10))
-        plt.gca().axis("equal")
-        self.figure.tight_layout()
-        plot_displacement_x = plot_displacement_y = 200
-        plot_limits = [
-            plot_center[0] - plot_displacement_x,
-            plot_center[0] + plot_displacement_x,
-            plot_center[1] - plot_displacement_y,
-            plot_center[1] + plot_displacement_y,
-        ]
-        draw_object(self.current_scenario, plot_limits=plot_limits)
-        self.canvas.show()
+    def on_click_lanelet(self):
+        """ """
+        self.canvas.clear_axes()
+
+        selectedLanelets = self.laneletsList.selectedItems()
+
+        if not selectedLanelets:
+            self.selected_lanelet_id = None
+            return
+
+        self.selected_lanelet_id = int(selectedLanelets[0].text())
+        self.update_plot()
+
+    def update_plot(self):
+        """"""
+        if self.current_scenario is None:
+            self.canvas.clear_axes()
+            return
+
+        try:
+            selected_lanelet = self.current_scenario.lanelet_network.find_lanelet_by_id(
+                self.selected_lanelet_id)
+
+        except (AssertionError, KeyError):
+            selected_lanelet = None
+
+        ax = self.canvas.get_axes()
+
+        xlim1 = float("Inf")
+        xlim2 = -float("Inf")
+
+        ylim1 = float("Inf")
+        ylim2 = -float("Inf")
+
+        for lanelet in self.current_scenario.lanelet_network.lanelets:
+
+            # Selected lanelet
+            if selected_lanelet is not None:
+                draw_arrow = True
+
+                if lanelet.lanelet_id == selected_lanelet.lanelet_id:
+                    color = "red"
+                    alpha = 0.7
+                    zorder = 10
+                    label = "{} selected".format(lanelet.lanelet_id)
+
+                elif (
+                        lanelet.lanelet_id in selected_lanelet.predecessor
+                        and lanelet.lanelet_id in selected_lanelet.successor
+                ):
+                    color = "purple"
+                    alpha = 0.5
+                    zorder = 5
+                    label = "{} predecessor and successor of {}".format(
+                        lanelet.lanelet_id, selected_lanelet.lanelet_id
+                    )
+
+                elif lanelet.lanelet_id in selected_lanelet.predecessor:
+                    color = "blue"
+                    alpha = 0.5
+                    zorder = 5
+                    label = "{} predecessor of {}".format(
+                        lanelet.lanelet_id, selected_lanelet.lanelet_id
+                    )
+                elif lanelet.lanelet_id in selected_lanelet.successor:
+                    color = "green"
+                    alpha = 0.5
+                    zorder = 5
+                    label = "{} successor of {}".format(
+                        lanelet.lanelet_id, selected_lanelet.lanelet_id
+                    )
+                elif lanelet.lanelet_id == selected_lanelet.adj_left:
+                    color = "yellow"
+                    alpha = 0.5
+                    zorder = 5
+                    label = "{} adj left of {} ({})".format(
+                        lanelet.lanelet_id,
+                        selected_lanelet.lanelet_id,
+                        "same"
+                        if selected_lanelet.adj_left_same_direction
+                        else "opposite",
+                    )
+                elif lanelet.lanelet_id == selected_lanelet.adj_right:
+                    color = "orange"
+                    alpha = 0.5
+                    zorder = 5
+                    label = "{} adj right of {} ({})".format(
+                        lanelet.lanelet_id,
+                        selected_lanelet.lanelet_id,
+                        "same"
+                        if selected_lanelet.adj_right_same_direction
+                        else "opposite",
+                    )
+                else:
+                    color = "gray"
+                    alpha = 0.3
+                    zorder = 0
+                    label = None
+                    draw_arrow = False
+
+            else:
+                color = "gray"
+                alpha = 0.3
+                zorder = 0
+                label = None
+                draw_arrow = False
+
+            verts = []
+            codes = [Path.MOVETO]
+
+            # TODO efficiency
+
+            for x, y in np.vstack(
+                    [lanelet.left_vertices, lanelet.right_vertices[::-1]]
+            ):
+                verts.append([x, y])
+                codes.append(Path.LINETO)
+
+                # if color != 'gray':
+                xlim1 = min(xlim1, x)
+                xlim2 = max(xlim2, x)
+
+                ylim1 = min(ylim1, y)
+                ylim2 = max(ylim2, y)
+
+            verts.append(verts[0])
+            codes[-1] = Path.CLOSEPOLY
+
+            path = Path(verts, codes)
+
+            ax.add_patch(
+                PathPatch(
+                    path,
+                    facecolor=color,
+                    edgecolor="black",
+                    lw=0.0,
+                    alpha=alpha,
+                    zorder=zorder,
+                    label=label,
+                )
+            )
+            ax.plot(
+                [x for x, y in lanelet.left_vertices],
+                [y for x, y in lanelet.left_vertices],
+                color="black",
+                lw=0.1,
+            )
+            ax.plot(
+                [x for x, y in lanelet.right_vertices],
+                [y for x, y in lanelet.right_vertices],
+                color="black",
+                lw=0.1,
+            )
+
+            if draw_arrow:
+                idx = 0
+
+                ml = lanelet.left_vertices[idx]
+                mr = lanelet.right_vertices[idx]
+                mc = lanelet.center_vertices[
+                    min(len(lanelet.center_vertices) - 1, idx + 3)
+                ]
+
+                ax.plot(
+                    [ml[0], mr[0], mc[0], ml[0]],
+                    [ml[1], mr[1], mc[1], ml[1]],
+                    color="black",
+                    lw=0.3,
+                    zorder=15,
+                )
+
+        handles, labels = self.canvas.get_axes().get_legend_handles_labels()
+        self.canvas.get_axes().legend(handles, labels)
+
+        if (
+                xlim1 != float("Inf")
+                and xlim2 != float("Inf")
+                and ylim1 != float("Inf")
+                and ylim2 != float("Inf")
+        ):
+            self.canvas.get_axes().set_xlim([xlim1, xlim2])
+            self.canvas.get_axes().set_ylim([ylim1, ylim2])
+
+        self.canvas.update_plot()
+
+        self.laneletsList.setRowCount(
+            len(self.current_scenario.lanelet_network.lanelets)
+        )
+        self.laneletsList.setColumnCount(2)
+        self.laneletsList.setHorizontalHeaderLabels(["Lanelet-Id", "LaneletType"])
+        # lanelet_data = [
+        #     (lanelet.lanelet_id, lanelet.description)
+        #     for lanelet in self.current_scenario.lanelet_network.lanelets
+        # ]
+        lanelet_data = []
+        for lanelet in self.current_scenario.lanelet_network.lanelets:
+            description = ", ".join([t.value for t in lanelet.lanelet_type])
+            lanelet_data.append((lanelet.lanelet_id, description))
+
+        lanelet_data = sorted(lanelet_data)
+        for idx, lanelet in enumerate(lanelet_data):
+
+            # set lanelet_id
+            self.laneletsList.setItem(idx, 0, QTableWidgetItem(str(lanelet[0])))
+            try:
+                # set lanelet description (old id)
+                self.laneletsList.setItem(idx, 1, QTableWidgetItem(str(lanelet[1])))
+            except AttributeError:
+                self.laneletsList.setItem(idx, 1, QTableWidgetItem("None"))
+
+        self.canvas.fig.tight_layout()
 
     def zoom(self, event):
         """
@@ -228,7 +469,7 @@ class OD2CR(QDialog):
             QMessageBox.Ok | QMessageBox.No,
             QMessageBox.Ok)
         if reply == QMessageBox.Ok:
-            self.openOpenDriveFileDialog()
+            self.open_opendrive_file_dialog()
         else:
             self.close
 
