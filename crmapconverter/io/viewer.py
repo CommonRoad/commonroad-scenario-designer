@@ -33,6 +33,8 @@ from PyQt5.QtWidgets import (
 )
 
 from commonroad.common.file_reader import CommonRoadFileReader
+from commonroad.scenario.intersection import Intersection
+from commonroad.scenario.lanelet import Lanelet
 
 __author__ = "Benjamin Orthen, Stefan Urban"
 __copyright__ = "TUM Cyber-Physical Systems Group"
@@ -90,6 +92,7 @@ class MainWindow(QWidget):
 
         self.current_scenario = None
         self.selected_lanelet_id = None
+        self.selected_intersection_id = None
 
         self._initUserInterface()
         self.show()
@@ -130,9 +133,14 @@ class MainWindow(QWidget):
         self.laneletsList.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.laneletsList.clicked.connect(self.onClickLanelet)
 
+        self.intersection_list = QTableWidget(self)
+        self.intersection_list.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.intersection_list.clicked.connect(self.onClickIntersection)
+
         hbox2 = QHBoxLayout(self)
-        hbox2.addLayout(vbox, 1)
+        hbox2.addLayout(vbox, 2)
         hbox2.addWidget(self.laneletsList, 0)
+        hbox2.addWidget(self.intersection_list, 1)
 
         self.setLayout(hbox2)
 
@@ -207,6 +215,9 @@ class MainWindow(QWidget):
 
         """
         self.current_scenario = scenario
+
+        self.dynamic.clear_axes()
+        
         self.update_plot()
 
     @pyqtSlot()
@@ -221,96 +232,148 @@ class MainWindow(QWidget):
             return
 
         self.selected_lanelet_id = int(selectedLanelets[0].text())
+        self.selected_intersection_id = None
+        self.update_plot()
+
+    def onClickIntersection(self):
+        """ """
+        self.dynamic.clear_axes()
+
+        selected_intersection = self.intersection_list.selectedItems()
+
+        if not selected_intersection:
+            self.selected_intersection_id = None
+            return
+
+        self.selected_intersection_id = int(selected_intersection[0].text())
+        self.selected_lanelet_id = None
         self.update_plot()
 
     def update_plot(self):
-        """"""
+        """ """
+
+        # update canvas
         if self.current_scenario is None:
             self.dynamic.clear_axes()
             return
 
-        try:
+        # select intersection xor lanelet
+        if self.selected_lanelet_id is not None:
             selected_lanelet = self.current_scenario.lanelet_network.find_lanelet_by_id(
-                self.selected_lanelet_id
-            )
-
-        except (AssertionError, KeyError):
+                self.selected_lanelet_id)
+            selected_intersection = None
+        elif self.selected_intersection_id is not None:
+            selected_intersection = self.current_scenario.lanelet_network.find_intersection_by_id(
+                self.selected_intersection_id)
             selected_lanelet = None
+        else:
+            selected_lanelet = None
+            selected_intersection = None
 
         ax = self.dynamic.get_axes()
 
-        xlim1 = float("Inf")
-        xlim2 = -float("Inf")
+        self.xlim1 = float("Inf")
+        self.xlim2 = -float("Inf")
 
-        ylim1 = float("Inf")
-        ylim2 = -float("Inf")
+        self.ylim1 = float("Inf")
+        self.ylim2 = -float("Inf")
 
         for lanelet in self.current_scenario.lanelet_network.lanelets:
 
-            # Selected lanelet
-            if selected_lanelet is not None:
-                draw_arrow = True
+            draw_arrow, color, alpha, zorder, label = self.get_paint_parameters(
+                lanelet, selected_lanelet, selected_intersection)
 
-                if lanelet.lanelet_id == selected_lanelet.lanelet_id:
-                    color = "red"
-                    alpha = 0.7
-                    zorder = 10
-                    label = "{} selected".format(lanelet.lanelet_id)
+            self.draw_lanelet_polygon(
+                lanelet, ax, color, alpha, zorder, label)
 
-                elif (
-                    lanelet.lanelet_id in selected_lanelet.predecessor
-                    and lanelet.lanelet_id in selected_lanelet.successor
-                ):
-                    color = "purple"
-                    alpha = 0.5
-                    zorder = 5
-                    label = "{} predecessor and successor of {}".format(
-                        lanelet.lanelet_id, selected_lanelet.lanelet_id
-                    )
+            self.draw_lanelet_vertices(lanelet, ax)
 
-                elif lanelet.lanelet_id in selected_lanelet.predecessor:
-                    color = "blue"
-                    alpha = 0.5
-                    zorder = 5
-                    label = "{} predecessor of {}".format(
-                        lanelet.lanelet_id, selected_lanelet.lanelet_id
-                    )
-                elif lanelet.lanelet_id in selected_lanelet.successor:
-                    color = "green"
-                    alpha = 0.5
-                    zorder = 5
-                    label = "{} successor of {}".format(
-                        lanelet.lanelet_id, selected_lanelet.lanelet_id
-                    )
-                elif lanelet.lanelet_id == selected_lanelet.adj_left:
-                    color = "yellow"
-                    alpha = 0.5
-                    zorder = 5
-                    label = "{} adj left of {} ({})".format(
-                        lanelet.lanelet_id,
-                        selected_lanelet.lanelet_id,
-                        "same"
-                        if selected_lanelet.adj_left_same_direction
-                        else "opposite",
-                    )
-                elif lanelet.lanelet_id == selected_lanelet.adj_right:
-                    color = "orange"
-                    alpha = 0.5
-                    zorder = 5
-                    label = "{} adj right of {} ({})".format(
-                        lanelet.lanelet_id,
-                        selected_lanelet.lanelet_id,
-                        "same"
-                        if selected_lanelet.adj_right_same_direction
-                        else "opposite",
-                    )
-                else:
-                    color = "gray"
-                    alpha = 0.3
-                    zorder = 0
-                    label = None
-                    draw_arrow = False
+            if draw_arrow:
+                self.draw_arrow_on_lanelet(lanelet, ax)
 
+        handles, labels = self.dynamic.get_axes().get_legend_handles_labels()
+        self.dynamic.get_axes().legend(handles, labels)
+
+        if (
+            self.xlim1 != float("Inf")
+            and self.xlim2 != float("Inf")
+            and self.ylim1 != float("Inf")
+            and self.ylim2 != float("Inf")
+        ):
+            self.dynamic.get_axes().set_xlim([self.xlim1, self.xlim2])
+            self.dynamic.get_axes().set_ylim([self.ylim1, self.ylim2])
+
+        self.dynamic.update_plot()
+
+        self.update_intersection_list()
+        self.update_lanelet_list()
+
+        self.dynamic.fig.tight_layout()
+
+
+    def get_paint_parameters(self, lanelet: Lanelet, selected_lanelet: Lanelet,
+            selected_intersection: Intersection):
+        """
+        Return the parameters for painting a lanelet regarding the selected lanelet.
+        """
+
+        if selected_lanelet is not None:
+        
+            draw_arrow = True
+
+            if lanelet.lanelet_id == selected_lanelet.lanelet_id:
+                color = "red"
+                alpha = 0.7
+                zorder = 10
+                label = "{} selected".format(lanelet.lanelet_id)
+
+            elif (
+                lanelet.lanelet_id in selected_lanelet.predecessor
+                and lanelet.lanelet_id in selected_lanelet.successor
+            ):
+                color = "purple"
+                alpha = 0.5
+                zorder = 5
+                label = "{} predecessor and successor of {}".format(
+                    lanelet.lanelet_id, selected_lanelet.lanelet_id
+                )
+
+            elif lanelet.lanelet_id in selected_lanelet.predecessor:
+                color = "blue"
+                alpha = 0.5
+                zorder = 5
+                label = "{} predecessor of {}".format(
+                    lanelet.lanelet_id, selected_lanelet.lanelet_id
+                )
+            elif lanelet.lanelet_id in selected_lanelet.successor:
+                color = "green"
+                alpha = 0.5
+                zorder = 5
+                label = "{} successor of {}".format(
+                    lanelet.lanelet_id, selected_lanelet.lanelet_id
+                )
+            elif lanelet.lanelet_id == selected_lanelet.adj_left:
+                color = "yellow"
+                alpha = 0.5
+                zorder = 5
+                label = "{} adj left of {} ({})".format(
+                    lanelet.lanelet_id,
+                    selected_lanelet.lanelet_id,
+                    "same"
+                    if selected_lanelet.adj_left_same_direction
+                    else "opposite",
+                )
+            elif lanelet.lanelet_id == selected_lanelet.adj_right:
+                color = "orange"
+                alpha = 0.5
+                zorder = 5
+                label = "{} adj right of {} ({})".format(
+                    lanelet.lanelet_id,
+                    selected_lanelet.lanelet_id,
+                    "same"
+                    if selected_lanelet.adj_right_same_direction
+                    else "opposite",
+                )
             else:
                 color = "gray"
                 alpha = 0.3
@@ -318,116 +381,154 @@ class MainWindow(QWidget):
                 label = None
                 draw_arrow = False
 
-            verts = []
-            codes = [Path.MOVETO]
+        elif selected_intersection is not None:
 
-            # TODO efficiency
+            incoming_ids = selected_intersection.map_incoming_lanelets.keys()
+            inc_succ_ids = set()
+            for inc in selected_intersection.incomings:
+                inc_succ_ids |= inc.successors_right
+                inc_succ_ids |= inc.successors_left
+                inc_succ_ids |= inc.successors_straight
+            
+            draw_arrow = True
+            
+            if lanelet.lanelet_id in incoming_ids:
+                color = "red"
+                alpha = 0.7
+                zorder = 5
+                label = "{} incoming".format(lanelet.lanelet_id)
+            elif lanelet.lanelet_id in selected_intersection.crossings:
+                color = "blue"
+                alpha = 0.5
+                zorder = 5
+                label = "{} crossing".format(lanelet.lanelet_id)
+            elif lanelet.lanelet_id in inc_succ_ids:
+                color = "green"
+                alpha = 0.3
+                zorder = 5
+                label = "{} intersection".format(lanelet.lanelet_id)
+            else:
+                color = "gray"
+                alpha = 0.3
+                zorder = 0
+                label = None
+                draw_arrow = False
+        else:
+            color = "gray"
+            alpha = 0.3
+            zorder = 0
+            label = None
+            draw_arrow = False
 
-            for x, y in np.vstack(
-                [lanelet.left_vertices, lanelet.right_vertices[::-1]]
-            ):
-                verts.append([x, y])
-                codes.append(Path.LINETO)
+        return draw_arrow, color, alpha, zorder, label
 
-                # if color != 'gray':
-                xlim1 = min(xlim1, x)
-                xlim2 = max(xlim2, x)
+    def draw_lanelet_polygon(self, lanelet, ax, color, alpha, zorder, label):
+        # TODO efficiency
+        verts = []
+        codes = [Path.MOVETO]
 
-                ylim1 = min(ylim1, y)
-                ylim2 = max(ylim2, y)
-
-            verts.append(verts[0])
-            codes[-1] = Path.CLOSEPOLY
-
-            path = Path(verts, codes)
-
-            ax.add_patch(
-                PathPatch(
-                    path,
-                    facecolor=color,
-                    edgecolor="black",
-                    lw=0.0,
-                    alpha=alpha,
-                    zorder=zorder,
-                    label=label,
-                )
-            )
-            ax.plot(
-                [x for x, y in lanelet.left_vertices],
-                [y for x, y in lanelet.left_vertices],
-                color="black",
-                lw=0.1,
-            )
-            ax.plot(
-                [x for x, y in lanelet.right_vertices],
-                [y for x, y in lanelet.right_vertices],
-                color="black",
-                lw=0.1,
-            )
-
-            if draw_arrow:
-                idx = 0
-
-                ml = lanelet.left_vertices[idx]
-                mr = lanelet.right_vertices[idx]
-                mc = lanelet.center_vertices[
-                    min(len(lanelet.center_vertices) - 1, idx + 3)
-                ]
-
-                ax.plot(
-                    [ml[0], mr[0], mc[0], ml[0]],
-                    [ml[1], mr[1], mc[1], ml[1]],
-                    color="black",
-                    lw=0.3,
-                    zorder=15,
-                )
-
-        handles, labels = self.dynamic.get_axes().get_legend_handles_labels()
-        self.dynamic.get_axes().legend(handles, labels)
-
-        if (
-            xlim1 != float("Inf")
-            and xlim2 != float("Inf")
-            and ylim1 != float("Inf")
-            and ylim2 != float("Inf")
+        for x, y in np.vstack(
+            [lanelet.left_vertices, lanelet.right_vertices[::-1]]
         ):
-            self.dynamic.get_axes().set_xlim([xlim1, xlim2])
-            self.dynamic.get_axes().set_ylim([ylim1, ylim2])
+            verts.append([x, y])
+            codes.append(Path.LINETO)
 
-        self.dynamic.update_plot()
+            # if color != 'gray':
+            self.xlim1 = min(self.xlim1, x)
+            self.xlim2 = max(self.xlim2, x)
 
+            self.ylim1 = min(self.ylim1, y)
+            self.ylim2 = max(self.ylim2, y)
+
+        verts.append(verts[0])
+        codes[-1] = Path.CLOSEPOLY
+
+        path = Path(verts, codes)
+
+        ax.add_patch(
+            PathPatch(
+                path,
+                facecolor=color,
+                edgecolor="black",
+                lw=0.0,
+                alpha=alpha,
+                zorder=zorder,
+                label=label,
+            )
+        )
+
+    def draw_lanelet_vertices(self, lanelet, ax):
+        ax.plot(
+            [x for x, y in lanelet.left_vertices],
+            [y for x, y in lanelet.left_vertices],
+            color="black",
+            lw=0.1,
+        )
+        ax.plot(
+            [x for x, y in lanelet.right_vertices],
+            [y for x, y in lanelet.right_vertices],
+            color="black",
+            lw=0.1,
+        )
+
+    def draw_arrow_on_lanelet(self, lanelet, ax):
+        idx = 0
+        ml = lanelet.left_vertices[idx]
+        mr = lanelet.right_vertices[idx]
+        mc = lanelet.center_vertices[
+            min(len(lanelet.center_vertices) - 1, idx + 3)
+        ]
+        ax.plot(
+            [ml[0], mr[0], mc[0], ml[0]],
+            [ml[1], mr[1], mc[1], ml[1]],
+            color="black",
+            lw=0.3,
+            zorder=15,
+        )
+
+    def update_lanelet_list(self):
         self.laneletsList.setRowCount(
             len(self.current_scenario.lanelet_network.lanelets)
         )
         self.laneletsList.setColumnCount(2)
-        self.laneletsList.setHorizontalHeaderLabels(["Lanelet-Id", "Description"])
-        # lanelet_data = [
-        #     (lanelet.lanelet_id, lanelet.description)
-        #     for lanelet in self.current_scenario.lanelet_network.lanelets
-        # ]
+        self.laneletsList.setHorizontalHeaderLabels(["Lanelet-Id", "LaneletType"])
+        
         lanelet_data = []
         for lanelet in self.current_scenario.lanelet_network.lanelets:
-            try:
-                lanelet_data.append((lanelet.lanelet_id, lanelet.description))
-            except AttributeError:
-                lanelet_data.append((lanelet.lanelet_id, None))
+            description = ", ".join([t.value for t in lanelet.lanelet_type])
+            lanelet_data.append((lanelet.lanelet_id, description))
 
         lanelet_data = sorted(lanelet_data)
         for idx, lanelet in enumerate(lanelet_data):
-
+            
             # set lanelet_id
-            self.laneletsList.setItem(idx, 0, QTableWidgetItem(f"{lanelet[0]}"))
+            self.laneletsList.setItem(idx, 0, QTableWidgetItem(str(lanelet[0])))
             try:
                 # set lanelet description (old id)
-                self.laneletsList.setItem(idx, 1, QTableWidgetItem(f"{lanelet[1]}"))
+                self.laneletsList.setItem(idx, 1, QTableWidgetItem(str(lanelet[1])))
             except AttributeError:
                 self.laneletsList.setItem(idx, 1, QTableWidgetItem("None"))
 
-    # def testCmd(self):
-    #    self.dynamic.fig.savefig("foo.pdf", bbox_inches='tight')
+    def update_intersection_list(self):
+        self.intersection_list.setRowCount(
+            len(self.current_scenario.lanelet_network.intersections)
+        )
+        self.intersection_list.setColumnCount(2)
+        self.intersection_list.setHorizontalHeaderLabels(["Intersection-Id", "Description"])
+        
+        intersection_data = []
+        for intersection in self.current_scenario.lanelet_network.intersections:
+            description = None
+            intersection_data.append((intersection.intersection_id, description))
+        
+        intersection_data = sorted(intersection_data)
+        for idx, intersection in enumerate(intersection_data):
+            self.intersection_list.setItem(idx, 0, QTableWidgetItem(str(intersection[0])))
+            self.intersection_list.setItem(idx, 1, QTableWidgetItem(str(intersection[1])))
 
 
-if __name__ == "__main__":
+
+def main():
     # Make it possible to exit application with ctrl+c on console
     signal.signal(signal.SIGINT, signal.SIG_DFL)
 
@@ -435,8 +536,12 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
 
     if len(sys.argv) >= 2:
-        ex = MainWindow(path=sys.argv[1])
+        _ = MainWindow(path=sys.argv[1])
     else:
-        ex = MainWindow()
+        _ = MainWindow()
 
     sys.exit(app.exec_())
+
+
+if __name__ == "__main__":
+    main()
