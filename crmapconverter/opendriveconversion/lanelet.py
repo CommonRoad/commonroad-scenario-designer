@@ -90,16 +90,46 @@ class ConversionLanelet(Lanelet):
         """
         return self.lanelet_id == lanelet.lanelet_id
 
-    """@property
+    """
+    Only type supported by commonroad_io is recorded here;
+    waiting for future decelopment
+    """
+    @property
     def lanelet_type(self):
         return self._lanelet_type
 
-    def getLaneletType(self, type):
-        if type == 'none':
-            self._lanelet_type = type
+    @lanelet_type.setter
+    def lanelet_type(self, value: str):
+        if value == 'urban':
+            self._lanelet_type = {LaneletType.URBAN}
+        elif value == 'country':
+            self._lanelet_type = {LaneletType.COUNTRY}
+        elif value == 'highway':
+            self._lanelet_type = {LaneletType.HIGHWAY}
+        elif value == 'driveWay':
+            self._lanelet_type = {LaneletType.DRIVE_WAY}
+        elif value == 'mainCarriageWay':
+            self._lanelet_type = {LaneletType.MAIN_CARRIAGE_WAY}
+        elif value == 'accessRamp':
+            self._lanelet_type = {LaneletType.ACCESS_RAMP}
+        elif value == 'exitRamp':
+            self._lanelet_type = {LaneletType.EXIT_RAMP}
+        elif value == 'shoulder':
+            self._lanelet_type = {LaneletType.SHOULDER}
+        elif value == 'busLane':
+            self._lanelet_type = {LaneletType.BUS_LANE}
+        elif value == 'busStop':
+            self._lanelet_type = {LaneletType.BUS_STOP}
+        elif value == 'bikeLane':
+            self._lanelet_type = {LaneletType.BICYCLE_LANE}
+        elif value == 'sidewalk':
+            self._lanelet_type = {LaneletType.SIDEWALK}
+        elif value == 'crosswalk':
+            self._lanelet_type = {LaneletType.CROSSWALK}
+        elif value == 'interstate':
+            self._lanelet_type = {LaneletType.INTERSTATE}
         else:
-            self._lanelet_type = None"""
-
+            self._lanelet_type = {LaneletType.UNKNOWN}
 
     @property
     def lanelet_id(self) -> int:
