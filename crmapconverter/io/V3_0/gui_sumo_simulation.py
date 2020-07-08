@@ -27,10 +27,8 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 import matplotlib.pyplot as plt
 
-from scenarios.a9.scenario_config import Conf
 
-
-class MyDynamicCanvas(FigureCanvas):
+class DynamicCanvas(FigureCanvas):
     """A canvas that updates itself every second with a new plot."""
 
     def __init__(self, parent=None, width=10.8, height=7.2, dpi=100):
@@ -66,7 +64,7 @@ class AnimationPlay(QWidget):
         self.main_widget = QWidget(self)
         self.current_scenario = None
         self.commonroad_filename = None
-        self.canvas = MyDynamicCanvas(self.main_widget)
+        self.canvas = DynamicCanvas(self.main_widget)
         self.toolbar = NavigationToolbar(self.canvas, self)
         self.path = path
 
@@ -98,12 +96,10 @@ class AnimationPlay(QWidget):
 
     def open_path(self, path):
         """
-
         Args:
           path:
 
         Returns:
-
         """
 
         filename = os.path.basename(path)
@@ -272,7 +268,7 @@ class AnimationStepPlay(QWidget):
         self.main_widget = QWidget(self)
         self.current_scenario = None
         self.commonroad_filename = None
-        self.canvas = MyDynamicCanvas(self.main_widget)
+        self.canvas = DynamicCanvas(self.main_widget)
         self.toolbar = NavigationToolbar(self.canvas, self)
 
         self.canvas.mpl_connect('scroll_event', self.zoom)

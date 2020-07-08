@@ -18,7 +18,6 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 
-
 from commonroad.common.file_writer import CommonRoadFileWriter
 
 from crmapconverter.io.V3_0.GUI_src import CR_Scenario_Designer
@@ -26,28 +25,27 @@ from crmapconverter.io.V3_0.GUI_src import CR_Scenario_Designer
 
 class MWindow(QMainWindow, Ui_mainWindow):
     """The Mainwindow of CR Scenario Designer."""
-
-    count = 0
-    tool1 = None
-    tool2 = None
-    toolBox = None
-    console = None
-    textBrowser = None
-    sumobox = None
-    play = None
-    crviewer = None
-    lanelets_List = None
-    play_step = None
-    timer = None
-    ani_path = None
-    od2cr = None
-
     def __init__(self):
         super(MWindow, self).__init__()
         self.setupUi(self)
         self.setWindowIcon(QIcon(':/icons/cr.ico'))
         self.centralwidget.setStyleSheet('background-color:rgb(150,150,150)')
         self.setWindowFlag(True)
+
+        self.count = 0
+        self.tool1 = None
+        self.tool2 = None
+        self.toolBox = None
+        self.console = None
+        self.textBrowser = None
+        self.sumobox = None
+        self.play = None
+        self.crviewer = CrViewer()
+        self.lanelets_List = None
+        self.play_step = None
+        self.timer = None
+        self.ani_path = None
+        self.od2cr = None
 
         self.current_scenario = None
         self.commoroad_filename = None
@@ -104,20 +102,22 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.create_sumobox()
         self.uppertoolBox.button_sumo_simulation.clicked.connect(
             self.tool_box2_show)
-        self.uppertoolBox.button_lanlist.clicked.connect(self.show_laneletslist)
+        self.uppertoolBox.button_lanlist.clicked.connect(
+            self.show_laneletslist)
 
     def create_laneletslist(self, object):
         """Create the Laneletslist and put it into right Dockwidget area."""
         if self.lanelets_List is not None:
             self.lanelets_List.close()
             self.lanelets_List = None
-        self.lanelets_List = QDockWidget(
-            "Lanelets list " + object.filename)
+        self.lanelets_List = QDockWidget("Lanelets list " +
+                                         self.crviewer.filename)
         self.lanelets_List.setFloating(True)
         self.lanelets_List.setFeatures(QDockWidget.AllDockWidgetFeatures)
         self.lanelets_List.setAllowedAreas(Qt.RightDockWidgetArea)
         self.lanelets_List.setWidget(object.laneletsList)
         self.addDockWidget(Qt.RightDockWidgetArea, self.lanelets_List)
+
 
     def show_laneletslist(self):
         """Function connected with button 'Lanelets List' to show the lanelets list."""
@@ -125,15 +125,15 @@ class MWindow(QMainWindow, Ui_mainWindow):
             if self.od2cr is None:
                 messbox = QMessageBox()
                 reply = messbox.question(
-                    self,
-                    "Warning",
+                    self, "Warning",
                     "Please load or convert a CR Scenario or first",
                     QtWidgets.QMessageBox.Ok)
                 if (reply == QtWidgets.QMessageBox.Ok):
                     messbox.close()
                 else:
                     messbox.close()
-            else:self.lanelets_List.show()
+            else:
+                self.lanelets_List.show()
         else:
             self.lanelets_List.show()
 
@@ -146,13 +146,17 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.tool2.setWidget(self.sumobox)
         self.addDockWidget(Qt.LeftDockWidgetArea, self.tool2)
         self.tool2.setMinimumHeight(400)
-        self.sumobox.button_import.clicked.connect(lambda:self.import_animation(None))
+
+        self.sumobox.button_import.clicked.connect(
+            lambda: self.import_animation(None))
         self.sumobox.button_save.clicked.connect(self.save_animation)
         self.sumobox.button_pause.clicked.connect(self.pause_animation)
         self.sumobox.button_play.clicked.connect(self.play_animation)
-
-        """for sumo frame by frame play"""
-        self.sumobox.slider.valueChanged[int].connect(self.timestep_change)
+        # for sumo frame by frame play
+        self.sumobox.slider.valueChanged[int].connect(self.timestepchange)
+        # subscribe to changes in timestep
+        self.crviewer.timestep.subscribe(
+            lambda timestep: self.sumobox.slider.setValue(timestep))
 
     def activate_sumoanimation_step(self):
         if self.lanelets_List is not None:
@@ -171,62 +175,67 @@ class MWindow(QMainWindow, Ui_mainWindow):
             self.play_step.play_timesteps(self.play_step.current_scenario, 0)
             self.textBrowser.append("Ready")
 
-    def timestep_change(self, value):
-        if self.play is not None:
-            if self.play_step is None:
-                self.activate_sumoanimation_step()
-            if self.sumobox.radioButton.isChecked():
-                # self.sumobox.slider.setValue(value)
-                self.sumobox.label.setText('Timestep: ' + str(value))
-                self.play_step.play_timesteps(
-                    self.play_step.current_scenario, value)
+    def timestepchange(self, value):
+        self.crviewer.set_time_step(value)
+
+        # if self.play is not None:
+        #     if self.play_step is None:
+        #         self.activate_sumoanimation_step()
+        #     if self.sumobox.radioButton.isChecked():
+        #         # self.sumobox.slider.setValue(value)
+        #         self.sumobox.label.setText('Timestep: ' + str(value))
+        #         self.play_step.play_timesteps(self.play_step.current_scenario,
+        #                                       value)
 
     def play_animation(self):
         """Function connected with the play button in the sumo-toolbox."""
-        if self.play is not None:
-            if self.play_step is not None:
-                self.sumobox.radioButton.setChecked(False)
-                self.import_animation(self.ani_path)
-                self.play.ani.event_source.start()
-                self.play_step = None
-            else:
-                self.play.ani.event_source.start()
-        else:
-            messbox = QMessageBox()
-            reply = messbox.question(
-                self,
-                "Warning",
-                "You should firstly load an animation",
-                QMessageBox.Ok | QMessageBox.No,
-                QMessageBox.Ok)
-            if (reply == QtWidgets.QMessageBox.Ok):
-                self.play_animation()
-            else:
-                messbox.close()
+
+        self.crviewer.play()
+        # if self.play is not None:
+        #     if self.play_step is not None:
+        #         self.sumobox.radioButton.setChecked(False)
+        #         self.import_animation(self.ani_path)
+        #         self.play.ani.event_source.start()
+        #         self.play_step = None
+        #     else:
+        #         self.play.ani.event_source.start()
+        # else:
+        #     messbox = QMessageBox()
+        #     reply = messbox.question(
+        #         self,
+        #         "Warning",
+        #         "You should firstly load an animation",
+        #         QMessageBox.Ok | QMessageBox.No,
+        #         QMessageBox.Ok)
+        #     if (reply == QtWidgets.QMessageBox.Ok):
+        #         self.play_animation()
+        #     else:
+        #         messbox.close()
 
     def pause_animation(self):
         """Function connected with the pause button in the sumo-toolbox."""
-        if self.play is not None:
-            self.play.ani.event_source.stop()
-        else:
-            messbox = QMessageBox()
-            reply = messbox.question(
-                self,
-                "Warning",
-                "You should firstly load an animation",
-                QMessageBox.Ok | QMessageBox.No,
-                QMessageBox.Ok)
-            if (reply == QtWidgets.QMessageBox.Ok):
-                self.play_animation()
-            else:
-                messbox.close()
+        self.crviewer.pause()
+        # if self.play is not None:
+        #     self.play.ani.event_source.stop()
+        # else:
+        #     messbox = QMessageBox()
+        #     reply = messbox.question(
+        #         self,
+        #         "Warning",
+        #         "You should firstly load an animation",
+        #         QMessageBox.Ok | QMessageBox.No,
+        #         QMessageBox.Ok)
+        #     if (reply == QtWidgets.QMessageBox.Ok):
+        #         self.play_animation()
+        #     else:
+        #         messbox.close()
 
     def import_animation(self, path):
         """Function connected with the pause button in the sumo-toolbox."""
         if self.lanelets_List is not None:
             self.lanelets_List.close()
             self.lanelets_List = None
-        if self.play is not None:
+        if self.play:
             self.play.ani.event_source.stop()
 
         self.textBrowser.append("Opening the CR Scenario Simulation")
@@ -248,12 +257,10 @@ class MWindow(QMainWindow, Ui_mainWindow):
         """Function connected with the save button in the sumo-toolbox."""
         if self.play is None:
             messbox = QMessageBox()
-            reply = messbox.question(
-                self,
-                "Warning",
-                "You should firstly load an animation",
-                QMessageBox.Ok | QMessageBox.No,
-                QMessageBox.Ok)
+            reply = messbox.question(self, "Warning",
+                                     "You should firstly load an animation",
+                                     QMessageBox.Ok | QMessageBox.No,
+                                     QMessageBox.Ok)
             if (reply == QtWidgets.QMessageBox.Ok):
                 self.import_animation()
             else:
@@ -264,8 +271,8 @@ class MWindow(QMainWindow, Ui_mainWindow):
     def create_console(self):
         """Function to create the console."""
         self.console = QDockWidget(self)
-        self.console.setTitleBarWidget(
-            QWidget(self.console))  # no title of Dock
+        self.console.setTitleBarWidget(QWidget(
+            self.console))  # no title of Dock
         self.textBrowser = QtWidgets.QTextBrowser()
         self.textBrowser.setMaximumHeight(80)
         self.textBrowser.setObjectName("textBrowser")
@@ -288,18 +295,14 @@ class MWindow(QMainWindow, Ui_mainWindow):
         save.triggered.connect(self.file_save)
         tb1.addSeparator()
         tb2 = self.addToolBar("ToolBox")
-        toolbox = QAction(
-            QIcon(":/icons/tools.ico"),
-            "show Toolbox for CR Scenario",
-            self)
+        toolbox = QAction(QIcon(":/icons/tools.ico"),
+                          "show Toolbox for CR Scenario", self)
         tb2.addAction(toolbox)
         toolbox.triggered.connect(self.tool_box1_show)
         tb2.addSeparator()
         tb3 = self.addToolBar("Animation Play")
-        self.button_play = QAction(
-            QIcon(":/icons/play.png"),
-            "Play and Pause the animation",
-            self)
+        self.button_play = QAction(QIcon(":/icons/play.png"),
+                                   "Play and Pause the animation", self)
         tb3.addAction(self.button_play)
         self.slider = QSlider(Qt.Horizontal)
         self.slider.setMaximumWidth(300)
@@ -372,13 +375,12 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
     def create_setting_actions(self):
         """Function to create the export action in the menu bar."""
-        self.setting = self.create_action(
-            "Settings",
-            icon="",
-            checkable=False,
-            slot=self.setting_interface,
-            tip="Show settings for converters",
-            shortcut=None)
+        self.setting = self.create_action("Settings",
+                                          icon="",
+                                          checkable=False,
+                                          slot=self.setting_interface,
+                                          tip="Show settings for converters",
+                                          shortcut=None)
 
     def center(self):
         """Function that makes sure the main window is in the center of screen."""
@@ -414,22 +416,20 @@ class MWindow(QMainWindow, Ui_mainWindow):
             tip="Save Commonroad File",
             shortcut=QKeySequence.Save)
         self.separator.setSeparator(True)
-        self.exitAction = self.create_action(
-            "Quit",
-            icon=QIcon(":/icons/close.png"),
-            checkable=False,
-            slot=self.close_window,
-            tip="Quit",
-            shortcut=QKeySequence.Close)
+        self.exitAction = self.create_action("Quit",
+                                            icon=QIcon(":/icons/close.png"),
+                                            checkable=False,
+                                            slot=self.closeWindow,
+                                            tip="Quit",
+                                            shortcut=QKeySequence.Close)
 
-    def create_action(
-            self,
-            text,
-            icon=None,
-            checkable=False,
-            slot=None,
-            tip=None,
-            shortcut=None):
+    def create_action(self,
+                     text,
+                     icon=None,
+                     checkable=False,
+                     slot=None,
+                     tip=None,
+                     shortcut=None):
         """Function to create the action in the menu bar."""
         action = QAction(text, self)
         if icon is not None:
@@ -465,15 +465,16 @@ class MWindow(QMainWindow, Ui_mainWindow):
         if self.play is not None:
             self.play.ani._stop()
 
-        self.crviewer = CrViewer()
+        self.crviewer.open_commonroad_file()
+
         self.crviewer.setWindowIcon(QIcon(":/icons/cr1.ico"))
         if self.crviewer.filename is not None:
             self.create_laneletslist(self.crviewer)
-            # window.setWindowTitle(self.crviewer.commonroad_filename)  # set
+            # window.setWindowTitle(self.crviewer.filename)  # set
             # up the title
-            self.textBrowser.append(
-                "loading " + self.crviewer.filename)
-            # self.status.showMessage("Opening " + crviewer.commonroad_filename)
+            self.textBrowser.append("loading " +
+                                    self.crviewer.filename)
+            # self.status.showMessage("Opening " + crviewer.filename)
             self.setCentralWidget(self.crviewer)
             self.commoroad_filename = self.crviewer.filename
         else:
@@ -485,12 +486,9 @@ class MWindow(QMainWindow, Ui_mainWindow):
         fileEdit = self.centralWidget()
         if fileEdit is None:
             messbox = QMessageBox()
-            reply = messbox.warning(
-                self,
-                "Warning",
-                "There is no file to save!",
-                QMessageBox.Ok,
-                QMessageBox.Ok)
+            reply = messbox.warning(self, "Warning",
+                                    "There is no file to save!",
+                                    QMessageBox.Ok, QMessageBox.Ok)
 
             if reply == QMessageBox.Ok:
                 messbox.close()
@@ -498,7 +496,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
                 messbox.close()
 
         else:
-            # if self.commonroad_filename == "":
+            # if self.filename== "":
 
             if not fileEdit.current_scenario:
                 return
@@ -529,7 +527,8 @@ class MWindow(QMainWindow, Ui_mainWindow):
                 QMessageBox.critical(
                     self,
                     "CommonRoad file not created!",
-                    "The CommonRoad file was not saved due to an error.\n\n{}".format(e),
+                    "The CommonRoad file was not saved due to an error.\n\n{}".
+                    format(e),
                     QMessageBox.Ok,
                 )
                 return
@@ -537,21 +536,17 @@ class MWindow(QMainWindow, Ui_mainWindow):
     def processtrigger(self, q):
         self.status.showMessage(q.text() + ' is triggered')
 
-    def close_window(self):
-        reply = QMessageBox.warning(
-            self,
-            "Warning",
-            "Do you really want to quit?",
-            QMessageBox.Yes | QMessageBox.No,
-            QMessageBox.Yes)
+    def closeWindow(self):
+        reply = QMessageBox.warning(self, "Warning",
+                                    "Do you really want to quit?",
+                                    QMessageBox.Yes | QMessageBox.No,
+                                    QMessageBox.Yes)
         if reply == QMessageBox.Yes:
             qApp.quit()
 
     def closeEvent(self, event):
         result = QtWidgets.QMessageBox.question(
-            self,
-            "Warning",
-            "Do you want to exit?",
+            self, "Warning", "Do you want to exit?",
             QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
         if (result == QtWidgets.QMessageBox.Yes):
             event.accept()
@@ -566,12 +561,9 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
     def no_file_named(self):
         messbox = QMessageBox()
-        reply = messbox.warning(
-            self,
-            "Warning",
-            "You should name the file!",
-            QMessageBox.Ok | QMessageBox.No,
-            QMessageBox.Ok)
+        reply = messbox.warning(self, "Warning", "You should name the file!",
+                                QMessageBox.Ok | QMessageBox.No,
+                                QMessageBox.Ok)
 
         if reply == QMessageBox.Ok:
             self.file_save()
