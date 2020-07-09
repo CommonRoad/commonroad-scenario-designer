@@ -3,12 +3,9 @@ import sys
 import os
 from lxml import etree
 import numpy as np
-import matplotlib.pyplot as plt
-import time
 
 from crmapconverter.io.V3_0.GUI_resources.MainWindow import Ui_mainWindow
 from crmapconverter.io.V3_0.gui_toolbox import UpperToolbox, SumoTool
-from crmapconverter.io.V3_0.gui_sumo_simulation import AnimationPlay, AnimationStepPlay
 from crmapconverter.io.V3_0.gui_cr_viewer import CrViewer
 from crmapconverter.io.V3_0.gui_opendrive2cr import OD2CR
 from crmapconverter.io.V3_0.gui_osm2cr import OSM2CR
@@ -22,11 +19,11 @@ from commonroad.common.file_writer import CommonRoadFileWriter
 
 
 from crmapconverter.io.V3_0.GUI_src import CR_Scenario_Designer
-# from crmapconverter.osm2cr.converter_modules.gui_modules.settings import SettingsMenu
 
 
 class MWindow(QMainWindow, Ui_mainWindow):
     """The Mainwindow of CR Scenario Designer."""
+
     def __init__(self):
         super(MWindow, self).__init__()
         self.setupUi(self)
@@ -147,14 +144,13 @@ class MWindow(QMainWindow, Ui_mainWindow):
             self.intersection_List.close()
             self.intersection_List = None
         self.intersection_List = QDockWidget("Intersection list " +
-                                         self.crviewer.filename)
+                                             self.crviewer.filename)
         self.intersection_List.setFloating(True)
         self.intersection_List.setFeatures(QDockWidget.AllDockWidgetFeatures)
         self.intersection_List.setAllowedAreas(Qt.RightDockWidgetArea)
         self.intersection_List.setWidget(object.intersection_List)
         self.addDockWidget(Qt.RightDockWidgetArea, self.intersection_List)
         self.intersection_List.close()
-
 
     def show_intersection_list(self):
         """Function connected with button 'Lanelets List' to show the lanelets list."""
@@ -204,11 +200,11 @@ class MWindow(QMainWindow, Ui_mainWindow):
             self.crviewer.play()
 
     def pause_animation(self):
-        """Function connected with the pause button in the sumo-toolbox."""
+        """Function connected with the pause button in Toolbar."""
         self.crviewer.pause()
 
     def save_animation(self):
-        """Function connected with the save button in the sumo-toolbox."""
+        """Function connected with the save button in the Toolbar."""
         if self.crviewer is None:
             messbox = QMessageBox()
             reply = messbox.question(self, "Warning",
@@ -220,7 +216,8 @@ class MWindow(QMainWindow, Ui_mainWindow):
             else:
                 messbox.close()
         else:
-            self.crviewer.save_animation(self.uppertoolBox.save_menu.currentText())
+            self.crviewer.save_animation(
+                self.uppertoolBox.save_menu.currentText())
 
     def create_console(self):
         """Function to create the console."""
@@ -260,17 +257,16 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.button_play.triggered.connect(self.play_animation)
         tb3.addAction(self.button_play)
         self.button_pause = QAction(QIcon(":/icons/pause.png"),
-                                   "Pause the animation", self)
+                                    "Pause the animation", self)
         self.button_pause.triggered.connect(self.pause_animation)
         tb3.addAction(self.button_pause)
-
 
         self.slider = QSlider(Qt.Horizontal)
         self.slider.setMaximumWidth(300)
         self.slider.setValue(0)
         self.slider.setMinimum(0)
         self.slider.setMaximum(99)
-        #self.slider.setTickPosition(QSlider.TicksBelow)
+        # self.slider.setTickPosition(QSlider.TicksBelow)
         self.slider.setTickInterval(1)
         self.slider.setToolTip(
             "Show corresponding Scenario at selected timestep")
@@ -282,7 +278,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.label1 = QLabel('  Step: 0', self)
         tb3.addWidget(self.label1)
 
-        self.label2 = QLabel('      Total Step:' , self)
+        self.label2 = QLabel('      Total Step:', self)
         tb3.addWidget(self.label2)
 
     def update_max_step(self):
@@ -389,19 +385,19 @@ class MWindow(QMainWindow, Ui_mainWindow):
             shortcut=QKeySequence.Save)
         self.separator.setSeparator(True)
         self.exitAction = self.create_action("Quit",
-                                            icon=QIcon(":/icons/close.png"),
-                                            checkable=False,
-                                            slot=self.closeWindow,
-                                            tip="Quit",
-                                            shortcut=QKeySequence.Close)
+                                             icon=QIcon(":/icons/close.png"),
+                                             checkable=False,
+                                             slot=self.closeWindow,
+                                             tip="Quit",
+                                             shortcut=QKeySequence.Close)
 
     def create_action(self,
-                     text,
-                     icon=None,
-                     checkable=False,
-                     slot=None,
-                     tip=None,
-                     shortcut=None):
+                      text,
+                      icon=None,
+                      checkable=False,
+                      slot=None,
+                      tip=None,
+                      shortcut=None):
         """Function to create the action in the menu bar."""
         action = QAction(text, self)
         if icon is not None:
@@ -425,9 +421,9 @@ class MWindow(QMainWindow, Ui_mainWindow):
         """Function to create the action in the menu bar."""
         """Not Finished---"""
         #new = QTextEdit()
-        #new.setWindowTitle("New")
-        #new.setWindowIcon(QIcon(":/icons/cr.ico"))
-        #self.setCentralWidget(QTextEdit())  # setup new scenario file
+        # new.setWindowTitle("New")
+        # new.setWindowIcon(QIcon(":/icons/cr.ico"))
+        # self.setCentralWidget(QTextEdit())  # setup new scenario file
         #self.textBrowser.append("add new file")
         # show message in statusbar
         #self.status.showMessage("Creating New File")

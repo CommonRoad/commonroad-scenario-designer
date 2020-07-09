@@ -3,6 +3,7 @@ import sys
 import os
 from lxml import etree
 import numpy as np
+import time
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
 from typing import List, Union
@@ -12,7 +13,7 @@ from matplotlib import animation
 
 from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.scenario.intersection import Intersection
-from commonroad.scenario.lanelet import Lanelet
+from commonroad.scenario.lanelet import Lanelet, is_natural_number
 
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
@@ -288,7 +289,7 @@ class CrViewer(QWidget):
         self.update_plot()
 
     def update_plot(self):
-        """"""
+        """update the plot after select item in laneletslist"""
         if self.current_scenario is None:
             self.canvas.clear_axes()
             return
@@ -299,8 +300,8 @@ class CrViewer(QWidget):
                 self.selected_lanelet_id)
             selected_intersection = None
         elif self.selected_intersection_id is not None:
-            selected_intersection = self.current_scenario.lanelet_network.find_intersection_by_id(
-                self.selected_intersection_id)
+            selected_intersection = find_intersection_by_id(
+                self.current_scenario, self.selected_intersection_id)
             selected_lanelet = None
         else:
             selected_lanelet = None
@@ -561,7 +562,6 @@ class CrViewer(QWidget):
             self.intersection_List.setItem(idx, 0, QTableWidgetItem(str(intersection[0])))
             self.intersection_List.setItem(idx, 1, QTableWidgetItem(str(intersection[1])))
 
-
     def _init_animation(self):
         print('init animation')
         scenario = self.current_scenario
@@ -626,10 +626,11 @@ class CrViewer(QWidget):
         print("set timestep: ", timestep)
         if not self.animation:
             self._init_animation()
+        self.canvas.update_plot()
+        self.animation.event_source.start()
         self.timestep.silent_set(timestep)
 
-
-    def save_animation(self, save_file):
+    def save_animation(self, save_file: str):
         if save_file == "Save as mp4":
             if not self.current_scenario:
                 return
@@ -708,3 +709,16 @@ class CrViewer(QWidget):
             event.accept()
         else:
             event.ignore()
+
+def find_intersection_by_id(scenario, intersection_id: int) -> Lanelet:
+    """
+    Finds a intersection for a given intersection_id
+
+    :param intersection_id: The id of the lanelet to find
+    :return: The lanelet object if the id exists and None otherwise
+    """
+    assert is_natural_number(
+        intersection_id), '<LaneletNetwork/find_intersection_by_id>: provided id is not valid! id = {}'.format(
+        intersection_id)
+    intersections = scenario.lanelet_network._intersections
+    return intersections[intersection_id] if intersection_id in intersections else None
