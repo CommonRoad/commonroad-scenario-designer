@@ -54,6 +54,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.create_import_actions()
         self.create_export_actions()
         self.create_setting_actions()
+        self.create_help_actions()
         self.create_toolbar()
         self.create_console()
         self.create_toolbox()
@@ -82,6 +83,9 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
         menu_setting = menuBar.addMenu('Setting')  # add menu 'Setting'
         menu_setting.addAction(self.setting)
+
+        menu_help = menuBar.addMenu('Help')  # add menu 'Help'
+        menu_help.addAction(self.open_web)
 
         self.center()
 
@@ -376,6 +380,15 @@ class MWindow(QMainWindow, Ui_mainWindow):
                                           tip="Show settings for converters",
                                           shortcut=None)
 
+    def create_help_actions(self):
+        """Function to create the help action in the menu bar."""
+        self.open_web = self.create_action("Open CR Web",
+                                          icon="",
+                                          checkable=False,
+                                          slot=self.open_cr_web,
+                                          tip="Open CommonRoad Web",
+                                          shortcut=None)
+
     def center(self):
         """Function that makes sure the main window is in the center of screen."""
         screen = QDesktopWidget().screenGeometry()
@@ -442,6 +455,10 @@ class MWindow(QMainWindow, Ui_mainWindow):
         if shortcut is not None:
             action.setShortcut(shortcut)  # shortcut
         return action
+
+    def open_cr_web(self):
+        """Function to open the webseite of CommonRoad."""
+        QDesktopServices.openUrl(QUrl("https://commonroad.in.tum.de/"))
 
     def file_new(self):
         """Function to create the action in the menu bar."""
