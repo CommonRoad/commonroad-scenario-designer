@@ -305,7 +305,8 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
     def cr_2_osm(self):
         if self.crviewer.current_scenario is not None:
-            proj_string, ok = QInputDialog.getText(self, 'Export as OSM', 'Enter Proj-string:')
+            proj_string, ok = QInputDialog.getText(
+                self, 'Export as OSM', 'Enter Proj-string:')
             if ok:
                 path, _ = QFileDialog.getSaveFileName(
                     self,
@@ -323,9 +324,10 @@ class MWindow(QMainWindow, Ui_mainWindow):
                 with open(f"{path}", "wb") as file_out:
                     file_out.write(
                         etree.tostring(
-                            osm, xml_declaration=True, encoding="UTF-8", pretty_print=True
-                        )
-                    )
+                            osm,
+                            xml_declaration=True,
+                            encoding="UTF-8",
+                            pretty_print=True))
 
     def opendrive_2_cr(self):
         """Function to realize converter OD2CR and show the result."""
