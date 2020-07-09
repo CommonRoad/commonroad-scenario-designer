@@ -21,6 +21,7 @@ from PyQt5.QtGui import *
 from commonroad.common.file_writer import CommonRoadFileWriter
 
 from crmapconverter.io.V3_0.GUI_src import CR_Scenario_Designer
+# from crmapconverter.osm2cr.converter_modules.gui_modules.settings import SettingsMenu
 
 
 class MWindow(QMainWindow, Ui_mainWindow):
@@ -55,6 +56,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.createFileActions()
         self.createImportActions()
         self.createExportActions()
+        self.createSettingsActions()
         self.createtoolbar()
         self.createconsole()
         self.createtoolbox()
@@ -80,6 +82,10 @@ class MWindow(QMainWindow, Ui_mainWindow):
         menu_export.addAction(self.exportAsCommonRoad)
         # menu_export.addAction(self.exportAsOSM)
         # menu_export.addAction(self.export2SUMO)
+
+        menu_settings = menuBar.addMenu('Settings')
+        menu_settings.addAction(self.osm_settings)
+        menu_settings.addAction(self.opendrive_settings)
 
         self.center()
 
@@ -303,6 +309,23 @@ class MWindow(QMainWindow, Ui_mainWindow):
             shortcut=None)
         # self.importfromSUMO = self.createAction("From SUMO", icon="", checkable=False, slot=self.sumo2cr, tip="Convert from OSM to CommonRoad", shortcut=QKeySequence.Close)
 
+    def createSettingsActions(self):
+        """Function to create the settings action in the menu bar."""
+        self.opendrive_settings = self.createAction(
+            "OpenDrive settings",
+            icon="",
+            checkable=False,
+            # slot=self.osm2cr,
+            tip="Adjust conversion from OpenDrive to CommonRoad",
+            shortcut=None)
+        self.osm_settings = self.createAction(
+            "OSM settings",
+            icon="",
+            checkable=False,
+            # slot=self.osm_settings,
+            tip="Adjust conversion from OSM to CommonRoad",
+            shortcut=None)
+        
     def opendrive2cr(self):
         """Function to realize converter OD2CR and show the result."""
         od2cr = OD2CR()
