@@ -34,7 +34,7 @@ from PyQt5.QtWidgets import (
 
 from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.scenario.intersection import Intersection
-from commonroad.scenario.lanelet import Lanelet
+from commonroad.scenario.lanelet import Lanelet, is_natural_number
 
 __author__ = "Benjamin Orthen, Stefan Urban"
 __copyright__ = "TUM Cyber-Physical Systems Group"
@@ -263,8 +263,8 @@ class MainWindow(QWidget):
                 self.selected_lanelet_id)
             selected_intersection = None
         elif self.selected_intersection_id is not None:
-            selected_intersection = self.current_scenario.lanelet_network.find_intersection_by_id(
-                self.selected_intersection_id)
+            selected_intersection = find_intersection_by_id(
+                self.current_scenario, self.selected_intersection_id)
             selected_lanelet = None
         else:
             selected_lanelet = None
@@ -526,6 +526,18 @@ class MainWindow(QWidget):
             self.intersection_list.setItem(idx, 0, QTableWidgetItem(str(intersection[0])))
             self.intersection_list.setItem(idx, 1, QTableWidgetItem(str(intersection[1])))
 
+
+def find_intersection_by_id(scenario, intersection_id: int) -> Lanelet:
+    """
+    Finds a intersection for a given intersection_id
+
+    :param intersection_id: The id of the lanelet to find
+    :return: The lanelet object if the id exists and None otherwise
+    """
+    assert is_natural_number(
+        intersection_id), '<LaneletNetwork/find_intersection_by_id>: provided id is not valid! id = {}'.format(intersection_id)
+    intersections = scenario.lanelet_network._intersections
+    return intersections[intersection_id] if intersection_id in intersections else None
 
 
 def main():

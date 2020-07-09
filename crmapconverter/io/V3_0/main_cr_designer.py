@@ -22,6 +22,7 @@ from commonroad.common.file_writer import CommonRoadFileWriter
 
 
 from crmapconverter.io.V3_0.GUI_src import CR_Scenario_Designer
+# from crmapconverter.osm2cr.converter_modules.gui_modules.settings import SettingsMenu
 
 
 class MWindow(QMainWindow, Ui_mainWindow):

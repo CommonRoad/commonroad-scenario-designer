@@ -225,11 +225,11 @@ class CrViewer(QWidget):
         if event.button == 'up':
             ax.set(xlim=(x_min + scope_x, x_max - scope_x))
             ax.set(ylim=(y_min + scope_y, y_max - scope_y))
-            print('up')
+            # print('up')
         elif event.button == 'down':
             ax.set(xlim=(x_min - scope_x, x_max + scope_x))
             ax.set(ylim=(y_min - scope_y, y_max + scope_y))
-            print('down')
+            # print('down')
 
         self.canvas.draw_idle()
 
