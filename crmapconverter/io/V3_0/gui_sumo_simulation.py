@@ -27,10 +27,8 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 import matplotlib.pyplot as plt
 
-from scenarios.a9.scenario_config import Conf
 
-
-class MyDynamicCanvas(FigureCanvas):
+class DynamicCanvas(FigureCanvas):
     """A canvas that updates itself every second with a new plot."""
 
     def __init__(self, parent=None, width=10.8, height=7.2, dpi=100):
@@ -59,14 +57,14 @@ class MyDynamicCanvas(FigureCanvas):
         self.draw()
 
 
-class Sumo_simulation_play(QWidget):
+class AnimationPlay(QWidget):
 
     def __init__(self, path, parent=None, current_scenario=None):
-        super(Sumo_simulation_play, self).__init__()
+        super(AnimationPlay, self).__init__()
         self.main_widget = QWidget(self)
         self.current_scenario = None
         self.commonroad_filename = None
-        self.canvas = MyDynamicCanvas(self.main_widget)
+        self.canvas = DynamicCanvas(self.main_widget)
         self.toolbar = NavigationToolbar(self.canvas, self)
         self.path = path
 
@@ -76,11 +74,11 @@ class Sumo_simulation_play(QWidget):
         self.setLayout(layout)
         self.canvas.fig.tight_layout()
         if self.path == None:
-            self.openCommonRoadFile()
+            self.open_commonroad_file()
         else:
-            self.openPath(self.path)
+            self.open_path(self.path)
 
-    def openCommonRoadFile(self):
+    def open_commonroad_file(self):
         """ """
         path, _ = QFileDialog.getOpenFileName(
             self,
@@ -91,19 +89,17 @@ class Sumo_simulation_play(QWidget):
         )
 
         if not path:
-            self.NoFileselected()
+            self.no_file_selected()
             return
         self.path = path
-        self.openPath(path)
+        self.open_path(path)
 
-    def openPath(self, path):
+    def open_path(self, path):
         """
-
         Args:
           path:
 
         Returns:
-
         """
 
         filename = os.path.basename(path)
@@ -139,9 +135,9 @@ class Sumo_simulation_play(QWidget):
             )
             return
 
-        self.play(scenario)
+        self.play_animation(scenario)
 
-    def play(self, current_scenario):
+    def play_animation(self, current_scenario):
         self.current_scenario = current_scenario
         time_begin: int = 0
         time_end: int = 50
@@ -189,7 +185,7 @@ class Sumo_simulation_play(QWidget):
             interval=interval,
             repeat=True)
 
-    def saveanimation(self, save_file):
+    def save_animation(self, save_file):
         self.ani._stop()
         if save_file == "Save as mp4":
             if not self.current_scenario:
@@ -249,7 +245,7 @@ class Sumo_simulation_play(QWidget):
                 )
                 return
 
-    def NoFileselected(self):
+    def no_file_selected(self):
         messbox = QMessageBox()
         reply = messbox.information(
             self,
@@ -259,20 +255,20 @@ class Sumo_simulation_play(QWidget):
             QMessageBox.Ok)
 
         if reply == QMessageBox.Ok:
-            self.openCommonRoadFile()
+            self.open_commonroad_file()
         else:
             messbox.close()
 
 
-class Sumo_simulation_step_play(QWidget):
+class AnimationStepPlay(QWidget):
 
     def __init__(self, path, parent=None, current_scenario=None):
-        super(Sumo_simulation_step_play, self).__init__()
+        super(AnimationStepPlay, self).__init__()
         self.path = path
         self.main_widget = QWidget(self)
         self.current_scenario = None
         self.commonroad_filename = None
-        self.canvas = MyDynamicCanvas(self.main_widget)
+        self.canvas = DynamicCanvas(self.main_widget)
         self.toolbar = NavigationToolbar(self.canvas, self)
 
         self.canvas.mpl_connect('scroll_event', self.zoom)
@@ -283,14 +279,14 @@ class Sumo_simulation_step_play(QWidget):
         layout.addWidget(self.canvas)
         self.setLayout(layout)
         self.canvas.fig.tight_layout()
-        self.openCommonRoadFile()
+        self.open_commonroad_file()
 
-    def openCommonRoadFile(self):
+    def open_commonroad_file(self):
         """ """
         if self.path != None:
-            self.openPath(self.path)
+            self.open_path(self.path)
 
-    def openPath(self, path):
+    def open_path(self, path):
         """
 
         Args:
