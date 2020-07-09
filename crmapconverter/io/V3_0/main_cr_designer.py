@@ -119,7 +119,6 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.lanelets_List.setWidget(object.laneletsList)
         self.addDockWidget(Qt.RightDockWidgetArea, self.lanelets_List)
 
-
     def show_laneletslist(self):
         """Function connected with button 'Lanelets List' to show the lanelets list."""
         if self.crviewer is None:
@@ -466,7 +465,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         if self.play is not None:
             self.play.ani._stop()
 
-        self.crviewer.open_commonroad_file()
+        self.crviewer.open_CommonRoad_file()
 
         self.crviewer.setWindowIcon(QIcon(":/icons/cr1.ico"))
         if self.crviewer.filename is not None:
