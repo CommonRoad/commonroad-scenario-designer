@@ -49,6 +49,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.current_scenario = None
         self.commoroad_filename = None
         self.selected_lanelet_id = None
+        self.slider_clicked = False
 
         self.create_file_actions()
         self.create_import_actions()
@@ -185,9 +186,21 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.addDockWidget(Qt.LeftDockWidgetArea, self.tool2)
         self.tool2.setMinimumHeight(200)
 
+    def detect_slider_clicked(self):
+        self.slider_clicked = True
+        print(self.slider_clicked)
+        self.crviewer.pause()
+        self.crviewer.canvas.update_plot()
+
+    def detect_slider_release(self):
+        self.slider_clicked = False
+        print(self.slider_clicked)
+        self.crviewer.pause()
+
     def timestep_change(self, value):
         self.crviewer.set_time_step(value)
         self.label1.setText('Timestep: ' + str(value))
+        self.crviewer.animation.event_source.start()
 
     def play_animation(self):
         """Function connected with the play button in the sumo-toolbox."""
@@ -275,7 +288,9 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.slider.setTickInterval(1)
         self.slider.setToolTip(
             "Show corresponding Scenario at selected timestep")
-        self.slider.valueChanged[int].connect(self.timestep_change)
+        self.slider.valueChanged.connect(self.timestep_change)
+        self.slider.sliderPressed.connect(self.detect_slider_clicked)
+        self.slider.sliderReleased.connect(self.detect_slider_release)
         self.crviewer.timestep.subscribe(
             lambda timestep: self.slider.setValue(timestep))
         tb3.addWidget(self.slider)
@@ -345,6 +360,8 @@ class MWindow(QMainWindow, Ui_mainWindow):
             self.textBrowser.append("Converted from " + self.od2cr.filename)
             self.textBrowser.append(self.od2cr.statsText)
             self.textBrowser.setMaximumHeight(800)
+            self.current_scenario = self.od2cr.current_scenario
+            self.commoroad_filename = self.od2cr.filename
 
         else:
             self.textBrowser.append(
@@ -487,6 +504,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
             # self.status.showMessage("Opening " + crviewer.filename)
             self.setCentralWidget(self.crviewer)
             self.commoroad_filename = self.crviewer.filename
+            self.current_scenario = self.crviewer.current_scenario
         else:
             self.textBrowser.append(
                 "Terminated because no CommonRoad file selected")
@@ -494,7 +512,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
     def file_save(self):
         """Function to save a CR .xml file."""
         fileEdit = self.centralWidget()
-        if fileEdit is None:
+        if self.current_scenario is None:
             messbox = QMessageBox()
             reply = messbox.warning(self, "Warning",
                                     "There is no file to save!",
@@ -506,10 +524,6 @@ class MWindow(QMainWindow, Ui_mainWindow):
                 messbox.close()
 
         else:
-            # if self.filename== "":
-
-            if not fileEdit.current_scenario:
-                return
             path, _ = QFileDialog.getSaveFileName(
                 self,
                 "QFileDialog.getSaveFileName()",

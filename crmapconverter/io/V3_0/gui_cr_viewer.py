@@ -627,7 +627,7 @@ class CrViewer(QWidget):
         if not self.animation:
             self._init_animation()
         self.canvas.update_plot()
-        self.animation.event_source.start()
+        #self.animation.event_source.start()
         self.timestep.silent_set(timestep)
 
     def save_animation(self, save_file: str):
