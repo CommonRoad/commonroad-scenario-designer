@@ -15,7 +15,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 
-from commonroad.common.file_writer import CommonRoadFileWriter
+from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
 from crmapconverter.osm.lanelet2osm import L2OSMConverter
 
 
@@ -46,7 +46,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.ani_path = None
         self.od2cr = None
 
-        self.current_scenario = None
+        # self.current_scenario = None # is already defined in crviewer
         # self.commoroad_filename = None # is already defined in crviewer
         self.selected_lanelet_id = None
         self.slider_clicked = False
@@ -360,7 +360,6 @@ class MWindow(QMainWindow, Ui_mainWindow):
             self.textBrowser.append("Converted from " + self.od2cr.filename)
             self.textBrowser.append(self.od2cr.statsText)
             self.textBrowser.setMaximumHeight(800)
-            self.current_scenario = self.od2cr.current_scenario
             self.commoroad_filename = self.od2cr.filename
 
         else:
@@ -368,8 +367,13 @@ class MWindow(QMainWindow, Ui_mainWindow):
                 "Terminated because no OpenDrive file selected")
 
     def osm_2_cr(self):
-        """Function to realize converter OSM2CR and show the result."""
+        """
+        Function to realize converter OSM2CR and show the result.
+        It launches an asynchonous process that loads the resulting scenario
+        into the GUI if successfull.
+        """
         OSM_Interface(self)
+
 
     def create_export_actions(self):
         """Function to create the export action in the menu bar."""
@@ -516,7 +520,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
     def file_save(self):
         """Function to save a CR .xml file."""
         fileEdit = self.centralWidget()
-        if self.current_scenario is None:
+        if self.crviewer.current_scenario is None:
             messbox = QMessageBox()
             reply = messbox.warning(self, "Warning",
                                     "There is no file to save!",
@@ -550,7 +554,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
                         source="",
                         tags="",
                     )
-                    writer.write_scenario_to_file(path)
+                    writer.write_scenario_to_file(path, OverwriteExistingFile.ALWAYS)
             except (IOError) as e:
                 QMessageBox.critical(
                     self,

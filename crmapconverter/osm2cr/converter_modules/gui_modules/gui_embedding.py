@@ -207,10 +207,10 @@ class StartMenu(QWidget):
         else:
             with open(file, "rb") as fd:
                 gui_state = pickle.load(fd)
-            if type(gui_state) == gui.EdgeEditGUI:
+            if isinstance(gui_state, gui.EdgeEditGUI):
                 EdgeEdit(self.app, None, gui_state)
                 self.app.main_window.show()
-            elif type(gui_state) == gui.LaneLinkGUI:
+            elif isinstance(gui_state, gui.LaneLinkGUI):
                 LaneLinkEdit(self.app, None, gui_state)
                 self.app.main_window.show()
             else:
@@ -312,7 +312,7 @@ class StartMenu(QWidget):
         """
         graph = converter.Scenario.step_collection_2(graph)
         graph = converter.Scenario.step_collection_3(graph)
-        name = config.BENCHMARK_ID
+        # name = config.BENCHMARK_ID
         self.app.export(graph)
 
     def start_conversion(self) -> None:
@@ -671,7 +671,7 @@ class LaneLinkEdit(MapEdit):
 
         :return: None
         """
-        name = config.BENCHMARK_ID
+        # name = config.BENCHMARK_ID
 
         graph = converter.Scenario.step_collection_3(self.graph)
         self.app.export(graph)
