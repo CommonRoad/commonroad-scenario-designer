@@ -31,7 +31,7 @@ import sumolib
 
 from sumocr.maps.scenario_wrapper import AbstractScenarioWrapper
 
-from .util import compute_max_curvature_from_polyline, _find_intersecting_edges, get_scenario_name_from_crfile, get_total_lane_length_from_netfile, write_ego_ids_to_rou_file, get_scenario_name_from_netfile, remove_unreferenced_traffic_lights
+from .util import compute_max_curvature_from_polyline, _find_intersecting_edges, get_scenario_name_from_crfile, get_total_lane_length_from_netfile, write_ego_ids_to_rou_file, get_scenario_name_from_netfile, remove_unreferenced_traffic_lights, max_lanelet_network_id
 from .config import SumoConfig, traffic_light_states_CR2SUMO, traffic_light_states_SUMO2CR
 
 # This file is used as a template for the generated .sumo.cfg files
@@ -899,9 +899,12 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                 return tls_program
 
         tls_program = get_tls(xml, junction)
+        
+        # compute unused id value for the traffic lights
+        next_cr_id = max_lanelet_network_id(self.lanelet_network) + 1
 
         # add Traffic Lights to the corresponding lanelets
-        # TODO: somewhat hacky replay with proper connection reading
+        # TODO: somewhat hacky replace with proper connection reading
         for c in xml.findall('connection'):
             tl = c.get("tl")
             if not (tl and int(tl) == junction.id): continue
@@ -931,12 +934,12 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                 # remove old traffic light from lanelet
                 lanelet._traffic_lights -= set([tl.traffic_light_id])
 
-            traffic_light = TrafficLight(self.node_id_next, [
+            traffic_light = TrafficLight(next_cr_id, [
                 TrafficLightCycleElement(
                     traffic_light_states_SUMO2CR[state[link_index]], duration)
                 for state, duration in tls_program.getPhases()
             ], position, time_offset, direction, active)
-            self.node_id_next += 1
+            next_cr_id += 1
 
             self.lanelet_network.add_traffic_light(traffic_light,
                                                    set([lanelet_id]))

@@ -80,5 +80,5 @@ CommonRoadFileWriter(simulated_scenario,
                              config.scenario_name + ".simulated.xml"),
                          overwrite_existing_file=True)
 
-print("creating video (this may take some time)")
-create_video(simulation, 1, config.simulation_steps, output_folder)
+# print("creating video (this may take some time)")
+# create_video(simulation, 1, config.simulation_steps, output_folder)
