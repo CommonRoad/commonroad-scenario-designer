@@ -352,8 +352,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
     def osm_2_cr(self):
         """Function to realize converter OSM2CR and show the result."""
-        osm_interface = OSM_Interface(self)
-        osm_interface.start_import()
+        OSM_Interface(self)
 
     def create_export_actions(self):
         """Function to create the export action in the menu bar."""
