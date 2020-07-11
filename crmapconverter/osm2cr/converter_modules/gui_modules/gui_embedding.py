@@ -15,7 +15,6 @@ from tkinter.filedialog import askopenfilename, asksaveasfilename
 from typing import Optional, Union, Tuple
 
 import matplotlib.pyplot as plt
-from PyQt5.QtGui import *
 from PyQt5 import QtCore
 from PyQt5.QtWidgets import (
     QApplication,
@@ -38,7 +37,6 @@ from crmapconverter.osm2cr.converter_modules.gui_modules import gui, settings
 from crmapconverter.osm2cr.converter_modules.gui_modules.GUI_resources.edge_edit_embedding import (
     Ui_EdgeEdit as eeGUI_frame,
 )
-from crmapconverter.io.V3_0.GUI_src import CR_Scenario_Designer
 from crmapconverter.osm2cr.converter_modules.gui_modules.GUI_resources.lane_link_edit_embedding import (
     Ui_LaneLinkEdit as llGUI_frame,
 )
@@ -68,7 +66,6 @@ class MainApp:
         self.start_menu = StartMenu(self)
         self.edge_edit_window: Optional[EdgeEdit] = None
         self.lane_link_window: Optional[LaneLinkEdit] = None
-        self.path = None
 
     def start(self) -> None:
         """
@@ -104,18 +101,25 @@ class MainApp:
             self.lane_link_window = LaneLinkEdit(self, graph, None)
             self.main_window.show()
 
-    def export(self, graph: rg.Graph, file: str) -> None:
+    def export(self, graph: rg.Graph) -> None:
         """
-        exports the graph via export.py to a CR scenario
+        Asks a file path and exports the graph to a CR scenario.
 
         :param graph: the graph to export
-        :param file: filename of file to save
         :return: None
         """
         if graph is not None:
+
+            file, _ = QFileDialog.getSaveFileName(
+                caption="Save map in Common Road Format",
+                filter="Common Road file *.xml (*.xml)",
+                options=QFileDialog.Options(),
+            )
+            if file == "":
+                print("file not exported and not saved")
+                return
             ex.export(graph, file)
-            self.path = file
-            #self.show_start_menu()
+        self.show_start_menu()
 
     def show_start_menu(self) -> None:
         """
@@ -169,7 +173,7 @@ class StartMenu(QWidget):
         window.b_start.clicked.connect(self.start_conversion)
         window.b_load_file.clicked.connect(self.select_file)
         window.b_load_state.clicked.connect(self.load_edit_state)
-        #window.b_view_scenario.clicked.connect(self.view_scenario)
+        window.b_view_scenario.clicked.connect(self.view_scenario)
         window.b_download.clicked.connect(self.download_map)
         window.b_settings.clicked.connect(self.show_settings)
 
@@ -212,13 +216,13 @@ class StartMenu(QWidget):
             else:
                 print("invalid gui state")
                 return
-    """
-    def view_scenario(self) -> None:
         
+    def view_scenario(self) -> None:
+        """
         allows to display a cr file
 
         :return: None
-        
+        """
         file, _ = QFileDialog.getOpenFileName(
             self,
             "Select CommonRoad scenario",
@@ -241,7 +245,6 @@ class StartMenu(QWidget):
             window.b_back.clicked.connect(self.app.show_start_menu)
         else:
             print("no file picked")
-            """
 
     def bench_id_set(self) -> None:
         """
@@ -310,15 +313,7 @@ class StartMenu(QWidget):
         graph = converter.Scenario.step_collection_2(graph)
         graph = converter.Scenario.step_collection_3(graph)
         name = config.BENCHMARK_ID
-        file, _ = QFileDialog.getSaveFileName(
-            self,
-            "Save map in Common Road Format",
-            "",
-            "Common Road file *.xml (*.xml)",
-            options=QFileDialog.Options(),
-        )
-        if file != "":
-            self.app.export(graph, file+".xml")
+        self.app.export(graph)
 
     def start_conversion(self) -> None:
         """
@@ -438,8 +433,6 @@ class MapEdit(ABC):
         self.canvas.setFocusPolicy(QtCore.Qt.ClickFocus)
         self.canvas.setFocus()
 
-
-
     @abstractmethod
     def bind_events(self):
         pass
@@ -528,10 +521,6 @@ class EdgeEdit(MapEdit):
         )
         self.gui_plot: gui.EdgeEditGUI = self.gui_plot
         self.gui_plot.pick_listener = self.attribute_editor.show_attributes
-        self.embedding.pushButton.setStyleSheet("background-color: rgb(0, 255, 127);")
-        self.embedding.pushButton.setIcon(QIcon(":/icons/next_step.png"))
-        self.embedding.pushButton_2.setIcon(QIcon(":/icons/next_step.png"))
-        self.embedding.pushButton_3.setIcon(QIcon(":/icons/next_step.png"))
 
     def reload_gui(self) -> None:
         """
@@ -648,12 +637,6 @@ class LaneLinkEdit(MapEdit):
             graph = gui_plot.graph
         super().__init__(app, graph, gui_plot, embedding)
         self.gui_plot: gui.LaneLinkGUI = self.gui_plot
-        self.embedding.pushButton_2.setStyleSheet("background-color: rgb(0, 255, 127);")
-        self.embedding.pushButton.setStyleSheet("background-color: rgb(0, 255, 127);")
-        self.embedding.pushButton.setIcon(QIcon(":/icons/next_step.png"))
-        self.embedding.pushButton_2.setIcon(QIcon(":/icons/next_step.png"))
-        self.embedding.pushButton_3.setIcon(QIcon(":/icons/next_step.png"))
-
 
     def bind_events(self) -> None:
         """
@@ -690,19 +673,8 @@ class LaneLinkEdit(MapEdit):
         """
         name = config.BENCHMARK_ID
 
-        file, _ = QFileDialog.getSaveFileName(
-            None,
-            "Save map in Common Road Format",
-            "",
-            "Common Road file *.xml (*.xml)",
-            options=QFileDialog.Options(),
-        )
-        if file != "":
-            graph = converter.Scenario.step_collection_3(self.graph)
-            self.app.export(graph, file + ".xml")
-            self.app.path = file
-
-        return self.app.path
+        graph = converter.Scenario.step_collection_3(self.graph)
+        self.app.export(graph)
 
 
 class AttributeEditor:
