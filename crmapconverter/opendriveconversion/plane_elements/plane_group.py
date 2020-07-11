@@ -6,11 +6,10 @@ associated parametric lanes."""
 from typing import Tuple, Optional
 import math
 import numpy as np
-import copy
 
-from crmapconverter.opendriveconversion.conversion_lanelet import ConversionLanelet
+from crmapconverter.opendriveconversion.lanelet import ConversionLanelet
 
-__author__ = "Benjamin Orthen, Stefan Urban, Sebastian Maierhofer"
+__author__ = "Benjamin Orthen, Stefan Urban"
 __copyright__ = "TUM Cyber-Physical Systems Group"
 __credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles"]
 __version__ = "1.2.0"
@@ -163,7 +162,9 @@ class ParametricLaneGroup:
             [(l + r) / 2 for (l, r) in zip(left_vertices, right_vertices)]
         )
 
-        lanelet = ConversionLanelet(copy.deepcopy(self), left_vertices, center_vertices, right_vertices, self.id_)
+        lanelet = ConversionLanelet(
+            self, left_vertices, center_vertices, right_vertices, self.id_
+        )
 
         # Adjacent lanes
         self._set_adjacent_lanes(lanelet)

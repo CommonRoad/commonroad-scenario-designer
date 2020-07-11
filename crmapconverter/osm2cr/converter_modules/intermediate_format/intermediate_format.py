@@ -292,72 +292,34 @@ class IntermediateFormat:
                 return sign
 
     @staticmethod
-    def get_directions(incoming_lane):
+    def get_direction(a: List[np.ndarray], b: List[np.ndarray]):
         """
-        Find all directions of a incoming lane's successors
+        Return direction of waypoints b from waypoints a
 
-        :param incoming_lane: incoming lane from intersection
+        :param a: List of points
+        :param b: List of points
         :return: str: left or right or through
         """
-        straight_threshold_angel = config.INTERSECTION_STRAIGHT_THRESHOLD
-        assert 0 < straight_threshold_angel < 90
+        # Find angle between the line formed by a and line formed by b
+        a_angle = geometry.curvature(a)
+        b_angle = geometry.curvature(b)
+        angle = a_angle - b_angle
 
-        successors = incoming_lane.successors
-        angels = {}
-        directions = {}
-        for s in successors:
-            a_angle = geometry.curvature(incoming_lane.waypoints[-3:]) # only use the last three waypoints of the incoming for angle calculation
-            b_angle = geometry.curvature(s.waypoints)
-            angle = a_angle - b_angle
-            angels[s.id] = angle
-
-            # determine direction of waypoints
-
-            # right-turn
-            if geometry.is_clockwise(s.waypoints) > 0:
-                angels[s.id] = abs(angels[s.id])
-            # left-turn
-            if geometry.is_clockwise(s.waypoints) < 0:
-                angels[s.id] = -abs(angels[s.id])
-
-        # sort after size
-        sorted_angels = {k: v for k, v in sorted(angels.items(), key=lambda item: item[1])}
-        sorted_keys = list(sorted_angels.keys())
-        sorted_values = list(sorted_angels.values())
-
-        # if 3 successors we assume the directions
-        if len(sorted_angels) == 3:
-            directions = {sorted_keys[0]: 'left', sorted_keys[1]: 'through', sorted_keys[2]: 'right'}
-
-        # if 2 successors we assume that they both cannot have the same direction
-        if len(sorted_angels) == 2:
-
-            directions = dict.fromkeys(sorted_angels)
-
-            if (abs(sorted_values[0]) > straight_threshold_angel) and (abs(sorted_values[1]) > straight_threshold_angel):
-                directions[sorted_keys[0]] = 'left'
-                directions[sorted_keys[1]] = 'right'
-            elif abs(sorted_values[0]) < abs(sorted_values[1]):
-                directions[sorted_keys[0]] = 'through'
-                directions[sorted_keys[1]] = 'right'
-            elif abs(sorted_values[0]) > abs(sorted_values[1]):
-                directions[sorted_keys[0]] = 'left'
-                directions[sorted_keys[1]] = 'through'
-            else:
-                directions[sorted_keys[0]] = 'through'
-                directions[sorted_keys[1]] = 'through'
-
-        # if we have 1 or more than 3 successors it's hard to make predictions, therefore only straight_threshold_angel is used
-        if len(sorted_angels) == 1 or len(sorted_angels) > 3:
-            directions = dict.fromkeys(sorted_angels, 'through')
-            for key in sorted_angels:
-                if sorted_angels[key] < -straight_threshold_angel:
-                    directions[key] = 'left'
-                if sorted_angels[key] > straight_threshold_angel:
-                    directions[key] = 'right'
-
-        return directions
-
+        forward = True
+        m = geometry.get_gradient(a)
+        if m < 0:
+            # Line with downward slope
+            forward = False
+        if angle < config.LANE_SEGMENT_ANGLE:
+            return 'through'
+        if forward:
+            if angle < 90:
+                return "right"
+            return 'left'
+        else:
+            if angle > 90:
+                return "right"
+            return 'left'
 
     @staticmethod
     def get_intersections(graph) -> List[Intersection]:
@@ -395,9 +357,10 @@ class IntermediateFormat:
                     for direction in directions:
                         if direction == 'none':
                             # calculate the direction for each successor
-                            directions = IntermediateFormat.get_directions(incoming_lane)
-                            for key in directions:
-                                incoming_element[directions[key]].append(key)
+                            for s in incoming_lane.successors:
+                                angle = IntermediateFormat.get_direction(incoming_lane.waypoints,
+                                                                         s.waypoints)
+                                incoming_element[angle].append(s.id)
                         else:
                             incoming_element[direction].extend(
                                     [s.id for s in incoming_lane.successors])

@@ -2,7 +2,7 @@
 
 """Logic to convert OSM to lanelets."""
 
-__author__ = "Benjamin Orthen, Sebastian Maierhofer"
+__author__ = "Benjamin Orthen"
 __copyright__ = "TUM Cyber-Physical Systems Group"
 __credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles"]
 __version__ = "1.2.0"
@@ -17,8 +17,8 @@ import numpy as np
 from pyproj import Proj
 from commonroad.scenario.scenario import Scenario
 
-from crmapconverter.opendriveconversion.conversion_lanelet import ConversionLanelet
-from crmapconverter.opendriveconversion.conversion_lanelet_network import ConversionLaneletNetwork
+from crmapconverter.opendriveconversion.lanelet import ConversionLanelet
+from crmapconverter.opendriveconversion.lanelet_network import ConversionLaneletNetwork
 from crmapconverter.osm.osm import OSM, WayRelation, DEFAULT_PROJ_STRING, Node
 
 NODE_DISTANCE_TOLERANCE = 0.01  # this is in meters
