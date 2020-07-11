@@ -279,6 +279,15 @@ def _find_intersecting_edges(
 
     return intersecting_edges
 
+def remove_unreferenced_traffic_lights(lanelet_network: LaneletNetwork):
+    referenced_traffic_lights = set()
+    for lanelet in lanelet_network.lanelets:
+        referenced_traffic_lights |= lanelet.traffic_lights
+
+    lanelet_network._traffic_lights = {traffic_light.traffic_light_id: traffic_light for traffic_light in lanelet_network.traffic_lights 
+                                         if traffic_light.traffic_light_id in referenced_traffic_lights}
+    return lanelet_network
+
 
 # class Connection:
 #     """

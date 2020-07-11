@@ -19,7 +19,7 @@ import numpy as np
 from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.common.util import Interval
 from commonroad.scenario.lanelet import LaneletNetwork, Lanelet
-from commonroad.scenario.traffic_sign import SupportedTrafficSignCountry, TrafficLight, TrafficLightState, TrafficLightCycleElement
+from commonroad.scenario.traffic_sign import SupportedTrafficSignCountry, TrafficLight, TrafficLightState, TrafficLightCycleElement, TrafficLightDirection
 from commonroad.scenario.traffic_sign_interpreter import TrafficSigInterpreter
 from commonroad.visualization.draw_dispatch_cr import draw_object
 
@@ -31,8 +31,7 @@ import sumolib
 
 from sumocr.maps.scenario_wrapper import AbstractScenarioWrapper
 
-from .util import compute_max_curvature_from_polyline, _find_intersecting_edges
-from .util import get_scenario_name_from_crfile, get_total_lane_length_from_netfile, write_ego_ids_to_rou_file, get_scenario_name_from_netfile
+from .util import compute_max_curvature_from_polyline, _find_intersecting_edges, get_scenario_name_from_crfile, get_total_lane_length_from_netfile, write_ego_ids_to_rou_file, get_scenario_name_from_netfile, remove_unreferenced_traffic_lights
 from .config import SumoConfig, traffic_light_states_CR2SUMO, traffic_light_states_SUMO2CR
 
 # This file is used as a template for the generated .sumo.cfg files
@@ -170,7 +169,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
 
                 # create Traffic Light Signal
                 # give a testing program id:
-                tls_program = TLSProgram('cr2sumo', tl.time_offset, 'static')
+                tls_program = TLSProgram('cr_converted', tl.time_offset, 'static')
                 for cycle in tl.cycle:
                     state = traffic_light_states_CR2SUMO[cycle.state]
                     tls_program.addPhase(state, cycle.duration)
@@ -827,9 +826,11 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
             shapeString += pointString + " "
         return shapeString
 
-    def auto_generate_traffic_light_system(self, lanelet_id: int) -> bool:
+    def auto_generate_traffic_light_system(self, lanelet_id: int, cycle_time:int = 90) -> bool:
         """
         Automatically generate a TLS for the given intersection
+        param: lanelet_id: id of lanelet in junction to generate Traffic Lights for
+        param: cycle_time: total duration of a traffic light cycle in seconds
         :reutrn: if the conversion was successful
         """
         if not self._output_file:
@@ -850,15 +851,25 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
             ]
             if len(pred_ids) == 0:
                 logging.info(
-                    "No junction fonud for lanelet {}".format(lanelet_id))
+                    "No junction found for lanelet {}".format(lanelet_id))
                 return False
             lanelet_id = pred_ids[0]
+
+        # does the lanelet have predefined traffic light?
+        # If so guess signals for them and copy the corresponding position
+        guess_signals = False
+        if self.lanelet_network.find_lanelet_by_id(lanelet_id).traffic_lights:
+            guess_signals = True
+
 
         # auto generate the TLS with netconvert
         junction = self.lanelet_id2junction[lanelet_id]
         command = "netconvert --sumo-net-file=" + self._output_file + \
                     " --output-file=" + self._output_file + \
                     " --tls.guess=true" + \
+                    " --tls.guess-signals=" + ('true' if guess_signals else 'false') + \
+                    " --tls.group-signals=true" + \
+                    " --tls.cycle.time=" + str(cycle_time) + \
                     " --tls.set=" + str(junction.id)
         try:
             _ = subprocess.check_output(command.split(), timeout=5.)
@@ -899,19 +910,40 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                 c.get('from'), c.get("fromLane"))]
             lanelet = self.lanelet_network.find_lanelet_by_id(lanelet_id)
             link_index = int(c.get("linkIndex"))
+
+            # sensible defaults for newly generated traffic light
             # TODO: This assuems right-hand traffic
-            pos = lanelet.right_vertices[-1]
+            position = lanelet.right_vertices[-1]
+            time_offset= tls_program.getOffset()
+            direction = TrafficLightDirection.ALL
+            active = True
+            
+            # replace current traffic light if one exists on the lanelet
+            if lanelet.traffic_lights:
+                traffic_lights: List[TrafficLight] = [
+                    self.lanelet_network.find_traffic_light_by_id(id) for id in lanelet.traffic_lights
+                ]
+                tl = traffic_lights[0]
+                # copy attributes from old TrafficLight to new one
+                position = tl.position
+                direction = tl.direction
+                active = tl.active
+                # remove old traffic light from lanelet
+                lanelet._traffic_lights -= set([tl.traffic_light_id])
 
             traffic_light = TrafficLight(self.node_id_next, [
                 TrafficLightCycleElement(
                     traffic_light_states_SUMO2CR[state[link_index]], duration)
                 for state, duration in tls_program.getPhases()
-            ], pos, tls_program.getOffset())
+            ], position, time_offset, direction, active)
             self.node_id_next += 1
 
             self.lanelet_network.add_traffic_light(traffic_light,
                                                    set([lanelet_id]))
+
+        remove_unreferenced_traffic_lights(self.lanelet_network)
         return True
+
 
     def write_intermediate_files(self, output_path):
         """
@@ -1109,7 +1141,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         except Exception:
             success = False
 
-        if cleanup is True and success:
+        if cleanup and success:
             for file in files.values():
                 os.remove(join(output_path, file))
         return success
@@ -1230,7 +1262,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         logging.info("Merging Intermediate Files")
         self.write_intermediate_files(output_path)
         conversion_possible = self.merge_intermediate_files(output_path,
-                                                            cleanup=False)
+                                                            cleanup=True)
         if not conversion_possible:
             logging.error("Error converting map, see above for details")
             return False
