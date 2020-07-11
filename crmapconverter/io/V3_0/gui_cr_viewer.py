@@ -141,28 +141,17 @@ class CrViewer(QWidget):
         )
 
         if not path:
-            self.no_file_selected()
+            # self.no_file_selected()  # is not a common workflow
             return
 
         self.open_path(path)
 
     def open_path(self, path):
-        """
+        """ """
 
-        Args:
-          path:
-
-        Returns:
-
-        """
-
-        filename = os.path.basename(path)
-        self.filename = filename
+        self.filename = os.path.basename(path)
 
         try:
-            # fh = open(path, "rb")
-            # data = fh.read()
-            # fh.close()
             commonroad_reader = CommonRoadFileReader(path)
             scenario, _ = commonroad_reader.open()
 
@@ -190,30 +179,16 @@ class CrViewer(QWidget):
         self.open_scenario(scenario)
 
     def open_scenario(self, scenario):
-        """
-
-        Args:
-          scenario:
-
-        Returns:
-
-        """
-
-
+        """ """
         self.canvas.clear_axes()
         self.selected_lanelet_id = None
         self.selected_intersection_id = None
         self.current_scenario = scenario
-        self.get_max_timestep()
+        self.calc_max_timestep()
         self.update_plot()
 
     def zoom(self, event):
-        """
-        realize zoom in / out function in GUI
-        Args:
-          event
-        Returns:
-                """
+        """ realize zoom in / out function in GUI """
 
         ax = event.inaxes  # get the axes which mouse is now
         x_min, x_max = ax.get_xlim()
@@ -689,8 +664,8 @@ class CrViewer(QWidget):
                 )
                 return
 
-    def get_max_timestep(self):
-        """get max time step of current scenario"""
+    def calc_max_timestep(self):
+        """calculate maximal time step of current scenario"""
         max_num = 0
         for obstacle in self.current_scenario.dynamic_obstacles:
             num = obstacle.prediction.occupancy_set[-1].time_step

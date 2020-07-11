@@ -1,25 +1,40 @@
 import sys
 from lxml import etree
+from PyQt5.QtWidgets import (
+    QDialog,
+    QWidget,
+    QApplication,
+    QLineEdit,
+    QFormLayout,
+    QLabel,
+    QPushButton,
+    QFileDialog
+)
+
 from crmapconverter.osm.lanelet2osm import L2OSMConverter
 from crmapconverter.osm2cr.converter_modules.gui_modules.gui_embedding import MainApp
-from PyQt5.QtWidgets import *
+from crmapconverter.osm2cr.converter_modules.cr_operations import export
+from crmapconverter.io.V3_0.gui_cr_viewer import CrViewer
 
+class ConverterInterface(QDialog):
+    def __init__(self, parent=None):
+        super().__init__(parent)
 
-
-
-class OSM2CR(QDialog):
+class OSM_Interface(QDialog):
     """Call OSM converter GUI"""
 
-    def __init__(self, parent=None):
-        super(OSM2CR, self).__init__(parent)
-        self.start()
+    def __init__(self, main_window, parent=None):
+        super().__init__(parent)
+        self.main_window = main_window
 
-    def start(self):
-        self.osm = MainApp()
-        self.osm.start()
+    def start_import(self):
+        def pipe_graph_to_GUI(graph):
+            scenario, _ = export.convert_to_scenario(graph)
+            self.main_window.open_scenario(scenario)
 
-
-
+        osm_app = MainApp(self)
+        final_action = pipe_graph_to_GUI
+        osm_app.start(final_action)
 
 class ExportAsOSMWindow(QWidget):
     """Window for conversion between OSM and CommonRoad lanelets."""

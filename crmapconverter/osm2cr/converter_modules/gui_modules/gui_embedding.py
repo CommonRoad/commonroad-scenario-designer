@@ -69,8 +69,9 @@ class MainApp:
         self.edge_edit_window: Optional[EdgeEdit] = None
         self.lane_link_window: Optional[LaneLinkEdit] = None
         self.path = None
+        self.final_action = self.export
 
-    def start(self) -> None:
+    def start(self, final_action=None) -> None:
         """
         starts the graphical application
 
@@ -79,6 +80,8 @@ class MainApp:
         self.main_window.show()
         if self.app:
             self.app.exec_()
+        if final_action is not None:
+            self.final_action = final_action
 
     def edge_edit_embedding(self, graph: rg.Graph) -> None:
         """
@@ -104,18 +107,26 @@ class MainApp:
             self.lane_link_window = LaneLinkEdit(self, graph, None)
             self.main_window.show()
 
-    def export(self, graph: rg.Graph, file: str) -> None:
+    def export(self, graph: rg.Graph) -> None:
         """
-        exports the graph via export.py to a CR scenario
+        Asks a file path and exports the graph to a CR scenario.
 
         :param graph: the graph to export
-        :param file: filename of file to save
         :return: None
         """
         if graph is not None:
+
+            file, _ = QFileDialog.getSaveFileName(
+                caption="Save map in Common Road Format",
+                filter="Common Road file *.xml (*.xml)",
+                options=QFileDialog.Options(),
+            )
+            if file == "":
+                print("file not exported and not saved")
+                return
             ex.export(graph, file)
             self.path = file
-            #self.show_start_menu()
+        self.show_start_menu()
 
     def show_start_menu(self) -> None:
         """
@@ -310,15 +321,7 @@ class StartMenu(QWidget):
         graph = converter.Scenario.step_collection_2(graph)
         graph = converter.Scenario.step_collection_3(graph)
         name = config.BENCHMARK_ID
-        file, _ = QFileDialog.getSaveFileName(
-            self,
-            "Save map in Common Road Format",
-            "",
-            "Common Road file *.xml (*.xml)",
-            options=QFileDialog.Options(),
-        )
-        if file != "":
-            self.app.export(graph, file+".xml")
+        self.app.final_action(graph)
 
     def start_conversion(self) -> None:
         """
@@ -690,19 +693,8 @@ class LaneLinkEdit(MapEdit):
         """
         name = config.BENCHMARK_ID
 
-        file, _ = QFileDialog.getSaveFileName(
-            None,
-            "Save map in Common Road Format",
-            "",
-            "Common Road file *.xml (*.xml)",
-            options=QFileDialog.Options(),
-        )
-        if file != "":
-            graph = converter.Scenario.step_collection_3(self.graph)
-            self.app.export(graph, file + ".xml")
-            self.app.path = file
-
-        return self.app.path
+        graph = converter.Scenario.step_collection_3(self.graph)
+        self.app.final_action(graph)
 
 
 class AttributeEditor:
