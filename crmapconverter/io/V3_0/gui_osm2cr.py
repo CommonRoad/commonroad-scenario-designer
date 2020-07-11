@@ -4,52 +4,17 @@ This module contains the GUI of the osm -> CR converter
 
 #Updated by Rayane Zaibet
 
-import os
-import pickle
-import re
-import sys
-from abc import ABC, abstractmethod
-from tkinter import Tk
-from tkinter.filedialog import askopenfilename, asksaveasfilename
-from typing import Optional, Union, Tuple
+from typing import Optional
 
-import matplotlib.pyplot as plt
-from PyQt5.QtGui import *
-from PyQt5 import QtCore
-from PyQt5.QtWidgets import (
-    QApplication,
-    QMainWindow,
-    QWidget,
-    QSpinBox,
-    QCheckBox,
-    QDoubleSpinBox,
-    QComboBox,
-    QFileDialog)
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
-from matplotlib.pyplot import close
-
-from crmapconverter.osm2cr import config
-from crmapconverter.osm2cr.converter_modules import converter
+from PyQt5.QtWidgets import QMainWindow
+from PyQt5.QtGui import QIcon
 from crmapconverter.osm2cr.converter_modules.cr_operations import export as ex
 from crmapconverter.osm2cr.converter_modules.graph_operations import road_graph as rg
-from crmapconverter.osm2cr.converter_modules.gui_modules import gui, settings
-from crmapconverter.osm2cr.converter_modules.gui_modules.GUI_resources.edge_edit_embedding import (
-    Ui_EdgeEdit as eeGUI_frame,
-)
-from crmapconverter.io.V3_0.GUI_src import CR_Scenario_Designer
-from crmapconverter.osm2cr.converter_modules.gui_modules.GUI_resources.lane_link_edit_embedding import (
-    Ui_LaneLinkEdit as llGUI_frame,
-)
-from crmapconverter.osm2cr.converter_modules.gui_modules.GUI_resources.scenario_view import (
-    Ui_MainWindow as scenarioView,
-)
+from crmapconverter.osm2cr.converter_modules.gui_modules import gui
 from crmapconverter.osm2cr.converter_modules.gui_modules.GUI_resources.start_window import (
     Ui_MainWindow as startWindow,
 )
-from crmapconverter.osm2cr.converter_modules.osm_operations.downloader import (
-    download_around_map,
-)
+
 from crmapconverter.osm2cr.converter_modules.gui_modules import gui_embedding
 
 

@@ -5,13 +5,12 @@ It also provides a main window to start the conversion process, and the possibil
 
 #Updated by Rayane Zaibet
 
-import os
 import pickle
 import re
 import sys
 from abc import ABC, abstractmethod
 from tkinter import Tk
-from tkinter.filedialog import askopenfilename, asksaveasfilename
+from tkinter.filedialog import askopenfilename
 from typing import Optional, Union, Tuple
 
 import matplotlib.pyplot as plt

@@ -1,8 +1,4 @@
-import signal
 import sys
-import os
-from lxml import etree
-import numpy as np
 
 from crmapconverter.io.V3_0.GUI_resources.MainWindow import Ui_mainWindow
 from crmapconverter.io.V3_0.gui_toolbox import UpperToolbox, SumoTool
@@ -10,16 +6,28 @@ from crmapconverter.io.V3_0.gui_cr_viewer import CrViewer
 from crmapconverter.io.V3_0.gui_opendrive2cr import OD2CR
 from crmapconverter.io.V3_0.gui_osm2cr import OSM_Interface
 from crmapconverter.io.V3_0.gui_setting_interface import Setting
-from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import *
+
+from PyQt5.QtWidgets import (
+    QMainWindow,
+    QDockWidget,
+    QMessageBox,
+    QTextBrowser,
+    QDesktopWidget,
+    QAction,
+    QWidget,
+    QSlider,
+    QFileDialog,
+    QLabel,
+    QApplication
+)
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 
 from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
-from crmapconverter.osm.lanelet2osm import L2OSMConverter
+# from crmapconverter.osm.lanelet2osm import L2OSMConverter
 
 
-from crmapconverter.io.V3_0.GUI_src import CR_Scenario_Designer
+# from crmapconverter.io.V3_0.GUI_src import CR_Scenario_Designer
 
 
 class MWindow(QMainWindow, Ui_mainWindow):
@@ -134,8 +142,8 @@ class MWindow(QMainWindow, Ui_mainWindow):
                 reply = messbox.question(
                     self, "Warning",
                     "Please load or convert a CR Scenario or first",
-                    QtWidgets.QMessageBox.Ok)
-                if (reply == QtWidgets.QMessageBox.Ok):
+                    QMessageBox.Ok)
+                if (reply == QMessageBox.Ok):
                     messbox.close()
                 else:
                     messbox.close()
@@ -166,8 +174,8 @@ class MWindow(QMainWindow, Ui_mainWindow):
                 reply = messbox.question(
                     self, "Warning",
                     "Please load or convert a CR Scenario or first",
-                    QtWidgets.QMessageBox.Ok)
-                if (reply == QtWidgets.QMessageBox.Ok):
+                    QMessageBox.Ok)
+                if (reply == QMessageBox.Ok):
                     messbox.close()
                 else:
                     messbox.close()
@@ -212,7 +220,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
                 "You should firstly load a scenario",
                 QMessageBox.Ok | QMessageBox.No,
                 QMessageBox.Ok)
-            if (reply == QtWidgets.QMessageBox.Ok):
+            if (reply == QMessageBox.Ok):
                 self.file_open()
         else:
             self.crviewer.play()
@@ -229,7 +237,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
                                      "You should firstly load an animation",
                                      QMessageBox.Ok | QMessageBox.No,
                                      QMessageBox.Ok)
-            if (reply == QtWidgets.QMessageBox.Ok):
+            if (reply == QMessageBox.Ok):
                 self.file_open()
             else:
                 messbox.close()
@@ -242,7 +250,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.console = QDockWidget(self)
         self.console.setTitleBarWidget(QWidget(
             self.console))  # no title of Dock
-        self.textBrowser = QtWidgets.QTextBrowser()
+        self.textBrowser = QTextBrowser()
         self.textBrowser.setMaximumHeight(80)
         self.textBrowser.setObjectName("textBrowser")
         self.console.setWidget(self.textBrowser)
@@ -577,10 +585,10 @@ class MWindow(QMainWindow, Ui_mainWindow):
             qApp.quit()
 
     def closeEvent(self, event):
-        result = QtWidgets.QMessageBox.question(
+        result = QMessageBox.question(
             self, "Warning", "Do you want to exit?",
-            QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
-        if (result == QtWidgets.QMessageBox.Yes):
+            QMessageBox.Yes | QMessageBox.No)
+        if (result == QMessageBox.Yes):
             event.accept()
         else:
             event.ignore()
