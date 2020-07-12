@@ -168,6 +168,7 @@ INTERPOLATION_DISTANCE_INTERNAL = 0.25
 BEZIER_PARAMETER = 0.35
 # distance between roads at intersection used for cropping in meters
 INTERSECTION_DISTANCE = 20.0
+INTERSECTION_DISTANCE_PEDESTRIAN = 1.0
 # defines if the distance to other roads is used for cropping
 # if false the distance to the center of the intersection is used
 INTERSECTION_CROPPING_WITH_RESPECT_TO_ROADS = True

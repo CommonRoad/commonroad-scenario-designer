@@ -21,58 +21,6 @@ from crmapconverter.osm2cr.converter_modules.osm_operations import osm_parser
 from crmapconverter.osm2cr.converter_modules.utility import plots
 
 
-def osm_to_graph(osm_file) -> road_graph.Graph:
-
-    def create_graph(
-            file, accepted_highways, custom_bounds=None, additional_nodes=None):
-        print("reading File")
-        (roads, points, restrictions, center_point, bounds, traffic_signs,
-            traffic_lights, crossing_points) = osm_parser.parse_file(
-            file, accepted_highways, config.REJECTED_TAGS, custom_bounds
-        )
-        print("creating graph")
-        graph = osm_parser.roads_to_graph(
-            roads, points, restrictions, center_point, bounds, center_point,
-            traffic_signs, traffic_lights, additional_nodes
-        )
-        return graph, crossing_points
-
-    if config.EXTRACT_PATHWAYS:
-        all_accepted_ways = config.ACCEPTED_HIGHWAYS.copy()
-        all_accepted_ways.extend(config.ACCEPTED_PATHWAYS)
-        combined_g, _ = create_graph(osm_file, all_accepted_ways)
-        road_g, road_crossing_points = create_graph(osm_file,
-            config.ACCEPTED_HIGHWAYS, combined_g.bounds)
-        path_g, path_crossing_points = create_graph(osm_file,
-            config.ACCEPTED_PATHWAYS, combined_g.bounds)
-
-        crossing_nodes = set()
-        already_contained = set()
-        road_nodes = {node.id: node for node in road_g.nodes}
-        for p_id, point in road_crossing_points.items():
-            if p_id in path_crossing_points and not is_close_to_intersection2(
-                p_id, combined_g, road_g
-            ):
-                if p_id in road_nodes:
-                    already_contained.add(p_id)
-                else:
-                    crossing_node = road_graph.GraphNode(
-                        int(p_id), point.x, point.y, set()
-                    )
-                    crossing_node.is_crossing = True
-                    crossing_nodes.add(crossing_node)
-
-        graph, _ = create_graph(osm_file, config.ACCEPTED_HIGHWAYS,
-            combined_g.bounds, crossing_nodes)
-        for node in graph.nodes:
-            if node.id in already_contained:
-                node.is_crossing = True
-        graph.sublayer = path_g
-    else:
-        graph = create_graph(osm_file, config.ACCEPTED_HIGHWAYS)
-    return graph
-
-
 def step_collection_1(g: road_graph.Graph) -> road_graph.Graph:
     if config.MAKE_CONTIGUOUS:
         print("making graph contiguously")
@@ -80,9 +28,10 @@ def step_collection_1(g: road_graph.Graph) -> road_graph.Graph:
     print("merging close intersections")
     intersection_merger.merge_close_intersections(g)
     g.link_edges()
-    if not g.sublayer is None:
-        g.sublayer = step_collection_1(g.sublayer)
+    if isinstance(g.sublayer_graph, road_graph.SublayeredGraph):
+        g.sublayer_graph = step_collection_1(g.sublayer_graph)
     return g
+
 
 def step_collection_2(g: road_graph.Graph) -> road_graph.Graph:
     print("linking lanes")
@@ -92,22 +41,22 @@ def step_collection_2(g: road_graph.Graph) -> road_graph.Graph:
     print("offsetting roads")
     offsetter.offset_graph(g)
     print("cropping roads at intersections")
-    edges_to_delete = g.crop_waypoints_at_intersections()
+    g.crop_waypoints_at_intersections()
     if config.DELETE_SHORT_EDGES:
         print("deleting short edges")
-        g.delete_edges(edges_to_delete)
     print("applying traffic signs to edges and nodes")
     g.apply_traffic_signs()
     print("applying traffic lights to edges")
     g.apply_traffic_lights()
     print("creating waypoints of lanes")
     g.create_lane_waypoints()
-    if not g.sublayer is None:
+    if isinstance(g.sublayer_graph, road_graph.SublayeredGraph):
         temp_intersec_dist = config.INTERSECTION_DISTANCE
-        config.INTERSECTION_DISTANCE = 1.0
-        g.sublayer = step_collection_2(g.sublayer)
+        config.INTERSECTION_DISTANCE = config.INTERSECTION_DISTANCE_PEDESTRIAN
+        g.sublayer_graph = step_collection_2(g.sublayer_graph)
         config.INTERSECTION_DISTANCE = temp_intersec_dist
     return g
+
 
 def step_collection_3(g: road_graph.Graph) -> road_graph.Graph:
     print("creating segments at intersections")
@@ -123,27 +72,9 @@ def step_collection_3(g: road_graph.Graph) -> road_graph.Graph:
     print("adjust common bound points")
     g.correct_start_end_points()
     print("done converting")
-    if not g.sublayer is None:
-        g.sublayer = step_collection_3(g.sublayer)
+    if isinstance(g.sublayer_graph, road_graph.SublayeredGraph):
+        g.sublayer_graph = step_collection_3(g.sublayer_graph)
     return g
-
-
-def is_close_to_intersection2(node_id, combined_graph, road_g):
-    node = [nd for nd in combined_graph.nodes if nd.id == node_id][0]
-    road_node_ids = [nd.id for nd in road_g.nodes]
-
-    for edge in node.edges:
-        if node == edge.node1:
-            neighbor = edge.node2
-        else:
-            neighbor = edge.node1
-        if (neighbor.id in road_node_ids and neighbor.get_degree() > 2
-                and neighbor.get_distance(node) < config.INTERSECTION_DISTANCE/2.0
-        ):
-            # close neighbor is intersection
-            print(node, "is too close to intersection at", neighbor)
-            return True
-    return False
 
 
 class GraphScenario:
@@ -160,7 +91,8 @@ class GraphScenario:
         :param file: OSM file to be loaded
         :type file: str
         """
-        g = osm_to_graph(file)
+        print("reading File and creating graph")
+        g = osm_parser.create_graph(file)
         g = step_collection_1(g)
         # HERE WE CAN EDIT THE NODES AND EDGES OF THE GRAPH
         if config.USER_EDIT:
@@ -173,7 +105,6 @@ class GraphScenario:
             g = gui.edit_graph_links(g)
         g = step_collection_3(g)
         self.graph: road_graph.Graph = g
-
 
     def plot(self):
         """

@@ -815,3 +815,94 @@ def roads_to_graph(
         graph_traffic_signs,
         graph_traffic_lights)
     return graph
+
+
+def close_to_intersection(node_id, combined_graph, road_g) -> bool:
+    """ """
+    intersection_range = config.INTERSECTION_DISTANCE/2.0
+    node = [nd for nd in combined_graph.nodes if nd.id == node_id][0]
+    road_node_ids = [nd.id for nd in road_g.nodes]
+    for edge in node.edges:
+        if node == edge.node1:
+            neighbor = edge.node2
+        else:
+            neighbor = edge.node1
+        if (neighbor.id in road_node_ids and neighbor.get_degree() > 2
+            and neighbor.get_distance(node) < intersection_range
+        ):
+            # close neighbor is intersection
+            print(node, "is too close to intersection at", neighbor)
+            return True
+    return False
+
+
+def get_crossing_points(
+    comb_graph, road_graph, road_cross_points, ped_cross_points
+) -> Tuple[Set, Set]:
+    """ """
+    crossing_nodes = set()
+    already_contained = set()
+    road_nodes = {node.id: node for node in road_graph.nodes}
+    for p_id, point in road_cross_points.items():
+        if p_id in ped_cross_points and not close_to_intersection(
+            p_id, comb_graph, road_graph
+        ):
+            if p_id in road_nodes:
+                already_contained.add(p_id)
+            else:
+                crossing_node = rg.GraphNode(
+                    int(p_id), point.x, point.y, set()
+                )
+                crossing_node.is_crossing = True
+                crossing_nodes.add(crossing_node)
+    return crossing_nodes, already_contained
+
+
+def create_graph(file_path) -> rg.Graph:
+
+    def _create_graph(
+            file, accepted_ways, custom_bounds=None, additional_nodes=None):
+        (
+            roads, points, restrictions, center_point, bounds, traffic_signs,
+            traffic_lights, crossing_points
+        ) = parse_file(
+            file, accepted_ways, config.REJECTED_TAGS, custom_bounds
+        )
+        graph = roads_to_graph(
+            roads, points, restrictions, center_point, bounds, center_point,
+            traffic_signs, traffic_lights, additional_nodes
+        )
+        return graph, crossing_points
+
+    if config.EXTRACT_PATHWAYS:
+        all_accepted_ways = config.ACCEPTED_HIGHWAYS.copy()
+        all_accepted_ways.extend(config.ACCEPTED_PATHWAYS)
+        combined_g, _ = _create_graph(file_path, all_accepted_ways)
+        road_g, road_crossing_points = _create_graph(file_path,
+            config.ACCEPTED_HIGHWAYS, combined_g.bounds)
+        path_g, path_crossing_points = _create_graph(file_path,
+            config.ACCEPTED_PATHWAYS, combined_g.bounds)
+
+        crossing_nodes, already_contained = get_crossing_points(
+            combined_g, road_g, road_crossing_points, path_crossing_points
+        )
+        extended_graph, _ = _create_graph(
+            file_path,
+            config.ACCEPTED_HIGHWAYS,
+            combined_g.bounds,
+            crossing_nodes
+        )
+        for node in extended_graph.nodes:
+            if node.id in already_contained:
+                node.is_crossing = True
+        return rg.SublayeredGraph(
+            extended_graph.nodes,
+            extended_graph.edges,
+            extended_graph.center_point,
+            extended_graph.bounds,
+            extended_graph.traffic_signs,
+            extended_graph.traffic_lights,
+            path_g
+        )
+
+    return _create_graph(file_path, config.ACCEPTED_HIGHWAYS)

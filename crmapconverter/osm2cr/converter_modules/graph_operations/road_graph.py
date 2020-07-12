@@ -1099,8 +1099,6 @@ class Graph:
         self.bounds = bounds
         self.traffic_signs = traffic_signs
         self.traffic_lights = traffic_lights
-        # graph that is connected by crossings only (e.g. pedestrian path)
-        self.sublayer: "Graph" = None
 
     def get_central_node(self) -> GraphNode:
         """
@@ -1264,7 +1262,9 @@ class Graph:
         for edge in cropping:
             index1, index2 = cropping[edge]
             edge.crop(index1, index2, edges_to_delete)
-        return edges_to_delete
+        
+        if config.DELETE_SHORT_EDGES:
+            self.delete_edges(edges_to_delete)
 
     def remove_edge(self, edge: GraphEdge) -> None:
         """
@@ -1707,3 +1707,25 @@ class Graph:
                     edge.add_traffic_light(light, light.forward)
                 if not light.forward and edge.node1.id == light.node.id:
                     edge.add_traffic_light(light, light.forward)
+
+class SublayeredGraph(Graph):
+
+    def __init__(
+        self,
+        nodes: Set[GraphNode],
+        edges: Set[GraphEdge],
+        center_point: Tuple[float, float],
+        bounds: Tuple[float, float, float, float],
+        traffic_signs: List[GraphTrafficSign],
+        traffic_lights: List[GraphTrafficLight],
+        sublayer_graph: Graph
+    ):
+        super().__init__(
+            nodes, edges, center_point, bounds, traffic_signs, traffic_lights
+        )
+        # graph that is connected by crossings only (e.g. pedestrian path)
+        self.sublayer_graph = sublayer_graph
+
+    
+
+    
