@@ -830,8 +830,6 @@ def close_to_intersection(node_id, combined_graph, road_g) -> bool:
         if (neighbor.id in road_node_ids and neighbor.get_degree() > 2
             and neighbor.get_distance(node) < intersection_range
         ):
-            # close neighbor is intersection
-            print(node, "is too close to intersection at", neighbor)
             return True
     return False
 
@@ -859,7 +857,7 @@ def get_crossing_points(
 
 
 def create_graph(file_path) -> rg.Graph:
-
+    """ """
     def _create_graph(
             file, accepted_ways, custom_bounds=None, additional_nodes=None):
         (
@@ -874,17 +872,17 @@ def create_graph(file_path) -> rg.Graph:
         )
         return graph, crossing_points
 
-    if config.EXTRACT_PATHWAYS:
+    if config.EXTRACT_SUBLAYER:
         all_accepted_ways = config.ACCEPTED_HIGHWAYS.copy()
-        all_accepted_ways.extend(config.ACCEPTED_PATHWAYS)
+        all_accepted_ways.extend(config.ACCEPTED_HIGHWAYS_SUBLAYER)
         combined_g, _ = _create_graph(file_path, all_accepted_ways)
         road_g, road_crossing_points = _create_graph(file_path,
             config.ACCEPTED_HIGHWAYS, combined_g.bounds)
-        path_g, path_crossing_points = _create_graph(file_path,
-            config.ACCEPTED_PATHWAYS, combined_g.bounds)
+        sub_g, sub_crossing_points = _create_graph(file_path,
+            config.ACCEPTED_HIGHWAYS_SUBLAYER, combined_g.bounds)
 
         crossing_nodes, already_contained = get_crossing_points(
-            combined_g, road_g, road_crossing_points, path_crossing_points
+            combined_g, road_g, road_crossing_points, sub_crossing_points
         )
         extended_graph, _ = _create_graph(
             file_path,
@@ -902,7 +900,7 @@ def create_graph(file_path) -> rg.Graph:
             extended_graph.bounds,
             extended_graph.traffic_signs,
             extended_graph.traffic_lights,
-            path_g
+            sub_g
         )
 
     return _create_graph(file_path, config.ACCEPTED_HIGHWAYS)

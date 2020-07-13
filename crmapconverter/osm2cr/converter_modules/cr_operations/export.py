@@ -10,7 +10,10 @@ import utm
 
 from crmapconverter.osm2cr import config
 from crmapconverter.osm2cr.converter_modules.graph_operations import road_graph as rg
-from crmapconverter.osm2cr.converter_modules.intermediate_format.intermediate_format import IntermediateFormat
+from crmapconverter.osm2cr.converter_modules.intermediate_format.intermediate_format import (
+    IntermediateFormat,
+    extract_crossings
+)
 from crmapconverter.osm2cr.converter_modules.utility import geometry
 from crmapconverter.osm2cr.converter_modules.utility.idgenerator import get_id
 from crmapconverter.osm2cr.converter_modules.cr_operations.cleanup import sanitize
@@ -139,14 +142,21 @@ def convert_coordinates_to_utm(scenario: Scenario, origin: np.ndarray) -> None:
                 bound[index] = np.array([easting, northing])
     return
 
-def convert_to_scenario(graph):
-    intermediate_format = IntermediateFormat.extract_from_road_graph(graph)
-    if config.EXTRACT_PATHWAYS:
-        interm_path = IntermediateFormat.extract_from_road_graph(graph.sublayer_graph)
-        intermediate_format.merge_sublayer(interm_path)
 
-    scenario = intermediate_format.to_commonroad_scenario()
-    return intermediate_format, scenario
+def create_scenario2(graph):
+    """ Convert Scenario from RoadGraph via IntermediateFormat """
+    interm = IntermediateFormat.extract_from_road_graph(graph)
+    if isinstance(graph, rg.SublayeredGraph):
+        interm_sublayer = IntermediateFormat.extract_from_road_graph(graph.sublayer_graph)
+        crossings = extract_crossings(interm_sublayer, interm)
+        interm_sublayer.intersections = list()
+        interm_sublayer.traffic_lights = list()
+        interm_sublayer.traffic_lights = list()
+        interm.merge(interm_sublayer)
+        interm.add_crossing_information(crossings)
+    scenario = interm.to_commonroad_scenario()
+    return interm, scenario
+
 
 def export(
     graph: rg.Graph, file_path=config.SAVE_PATH + config.BENCHMARK_ID + ".xml"
@@ -158,8 +168,7 @@ def export(
     :return: None
     """
     #scenario = create_scenario(graph)
-    # convert via intermediate format
-    intermediate_format, scenario = convert_to_scenario(graph)
+    intermediate_format, scenario = create_scenario2(graph)
 
     # removing converting errors before writing to xml
     sanitize(scenario)

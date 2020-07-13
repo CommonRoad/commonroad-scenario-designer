@@ -74,15 +74,19 @@ ACCEPTED_HIGHWAYS = [
     "living_street",
     "service",
 ]
-# types of pathways extracted from the OSM file
-ACCEPTED_PATHWAYS = [
+EXTRACT_SUBLAYER = True
+# types of highways extracted from the OSM file as sublayer
+ACCEPTED_HIGHWAYS_SUBLAYER = [
     "path",
     "footway",
-    "cycleway"
+#    "cycleway"
 ]
-EXTRACT_PATHWAYS = True
-# Lanelet type pathsways lanelet should have
-PATHWAY_LANELETTYPE = 'sidewalk'
+# Lanelet type of the sublayer lanelets
+SUBLAYER_LANELETTYPE = 'sidewalk'
+# Lanelet type of the sublayer lanelets that cross the main layer
+# overwrites SUBLAYER_LANELETTYPE for lanelets applied on
+CROSSING_LANELETTYPE = 'crosswalk'
+# osm ways with these tags are not taken into account
 REJECTED_TAGS = {
     "area": "yes"
 }
@@ -168,7 +172,8 @@ INTERPOLATION_DISTANCE_INTERNAL = 0.25
 BEZIER_PARAMETER = 0.35
 # distance between roads at intersection used for cropping in meters
 INTERSECTION_DISTANCE = 20.0
-INTERSECTION_DISTANCE_PEDESTRIAN = 1.0
+# associated with pedestrian pathways by default
+INTERSECTION_DISTANCE_CROSSING = 1.0
 # defines if the distance to other roads is used for cropping
 # if false the distance to the center of the intersection is used
 INTERSECTION_CROPPING_WITH_RESPECT_TO_ROADS = True

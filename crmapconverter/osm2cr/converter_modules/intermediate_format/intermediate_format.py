@@ -4,35 +4,45 @@ This module holds the classes required for the intermediate format
 
 __author__ = "Behtarin Ferdousi"
 
-from commonroad.scenario.intersection import Intersection, \
-    IntersectionIncomingElement
-from commonroad.scenario.lanelet import Lanelet, LaneletNetwork, LaneletType
-from commonroad.scenario.obstacle import Obstacle
-from typing import List, Set
-
+from typing import List, Set, Tuple
 import numpy as np
 import copy
 
-from crmapconverter.osm2cr.converter_modules.intermediate_format.sumo_helper \
-    import Sumo
-
-from crmapconverter.osm2cr.converter_modules.graph_operations.road_graph \
-    import Graph
-
-from crmapconverter.osm2cr import config
+from commonroad.scenario.lanelet import (
+    Lanelet,
+    LaneletNetwork,
+    LaneletType
+)
+from commonroad.scenario.obstacle import Obstacle
 from commonroad.scenario.scenario import Scenario
-
 from commonroad.scenario.traffic_sign import TrafficSign
 from commonroad.scenario.traffic_sign import TrafficLight
+from commonroad.scenario.intersection import (
+    Intersection,
+    IntersectionIncomingElement
+)
 
-from commonroad.planning.planning_problem import PlanningProblem, PlanningProblemSet
-from commonroad.scenario.trajectory import State
+from commonroad.planning.planning_problem import (
+    PlanningProblem,
+    PlanningProblemSet
+)
 from commonroad.planning.goal import GoalRegion
+from commonroad.scenario.trajectory import State
 from commonroad.common.util import Interval
 from commonroad.geometry.shape import Rectangle, Circle
 
-from crmapconverter.osm2cr.converter_modules.utility import geometry,\
+from crmapconverter.osm2cr import config
+from crmapconverter.osm2cr.converter_modules.intermediate_format.sumo_helper \
+    import Sumo
+from crmapconverter.osm2cr.converter_modules.graph_operations.road_graph \
+    import Graph
+from crmapconverter.osm2cr.converter_modules.utility import (
+    geometry,
     idgenerator
+)
+
+
+CrossingList = List[Tuple[int, List[int]]]
 
 
 class Node:
@@ -240,6 +250,31 @@ def add_is_left_of(incoming_data, incoming_data_id):
         prev = index
 
     return incoming_data
+
+
+def extract_crossings(
+    interm_a: "IntermediateFormat", interm_b: "IntermediateFormat"
+) -> CrossingList:
+    """ 
+    Calculcate all crossings of the two networks.
+    For each lanelet of a return the crossed lanelets of b if existing.
+
+    :param interm_a: crossing network
+    :param interm_b: network to be crossed by a
+    :return: list of lanelets of a with the crossed lanelets of b
+    """
+    lane_network_a = interm_a.to_commonroad_scenario().lanelet_network
+    lane_network_b = interm_b.to_commonroad_scenario().lanelet_network
+    crossings = list()
+    for path_lane_a in lane_network_a.lanelets:
+        # TODO efficiency: only if is close to crossing point
+        lanelet_polygon_a = path_lane_a.convert_to_polygon()
+        id_lane_intersected_b = lane_network_b.find_lanelet_by_shape(
+            lanelet_polygon_a)
+        if id_lane_intersected_b:
+            crossings.append((path_lane_a.lanelet_id, id_lane_intersected_b))
+            # print(path_lane.lanelet_id, "is crossing", intersected_road_ids)
+    return crossings
 
 
 class IntermediateFormat:
@@ -571,50 +606,45 @@ class IntermediateFormat:
     #     print("See Sumo Config File Here: " + sumo.config_file)
     #     return sumo.config_file
 
-    def merge_sublayer(self, other_interm:"IntermediateFormat"):
+    def merge(self, other_interm:"IntermediateFormat"):
         """
-        Merge two instance of the intermediate formats.
+        Merge other instance of intermediate format into this.
         The other instance is not changed.
-        The two instances have no connections but crossing are calculated.
+
+        :param other_interm: the indtance of intermediate format to merge
         """
-        # find crossing lanelets
-        main_network = self.to_commonroad_scenario().lanelet_network
-        sub_network = other_interm.to_commonroad_scenario().lanelet_network
-        crossings = []
-        for path_lane in sorted(sub_network.lanelets, key=lambda x: x.lanelet_id):
-            #if is_close_to_crossing(path_lane):
-            lanelet_polygon = path_lane.convert_to_polygon()
-            intersected_road_ids = main_network.find_lanelet_by_shape(
-                lanelet_polygon)
-            if intersected_road_ids:
-                crossings.append((path_lane.lanelet_id, intersected_road_ids))
-                print(path_lane.lanelet_id, "is crossing", intersected_road_ids)
-        
-        # merge other into this
         self.nodes.extend(copy.deepcopy(other_interm.nodes))
         edges_to_merge = copy.deepcopy(other_interm.edges)
         for edge in edges_to_merge:
-            edge.edge_type = config.PATHWAY_LANELETTYPE
+            edge.edge_type = config.SUBLAYER_LANELETTYPE
         self.edges.extend(edges_to_merge)
+        self.obstacles.extend(copy.deepcopy(other_interm.obstacles))
         self.traffic_signs.extend(copy.deepcopy(other_interm.traffic_signs))
         self.traffic_lights.extend(copy.deepcopy(other_interm.traffic_lights))
-        self.obstacles.extend(copy.deepcopy(other_interm.obstacles))
-        # intersections only for roads?
+        self.intersections.extend(copy.deepcopy(other_interm.intersections))
+        
+    def add_crossing_information(self, crossings: CrossingList):
+        """ 
+        add information about crossings to intersections
+        A crossings lanelet will be set at the intersection the crossed
+        lanelet is part of not at the crossed lanelet.
 
-        # add information about crossings to intersections
+        :param crossings: list of crossing and crossed lanelets respectively
+        """
         # interm_main should already be prepared for this step
-        for path_id, road_ids in crossings:
+        crossing_ids = []
+        for crossing_id, crossed_ids in crossings:
+            crossing_ids.append(crossing_id)
             for intersection in self.intersections:
                 incomings_successors = []
                 for incoming in intersection.incomings:
                     incomings_successors.extend(incoming.successors_left)
                     incomings_successors.extend(incoming.successors_straight)
                     incomings_successors.extend(incoming.successors_right)
-                if set(road_ids) & set(incomings_successors):
-                    intersection.crossings.add(path_id)
+                if set(crossed_ids) & set(incomings_successors):
+                    intersection.crossings.add(crossing_id)
                     
         # adjust edge type of crossing edges
-        crossings_ids = [path_id for path_id, _ in crossings]
-        for edge in edges_to_merge:
-            if edge.id in crossings_ids:
-                edge.edge_type = LaneletType.CROSSWALK.value
+        for edge in self.edges:
+            if edge.id in crossing_ids:
+                edge.edge_type = config.CROSSING_LANELETTYPE

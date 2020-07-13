@@ -1187,7 +1187,9 @@ class Graph:
             edge.get_interpolated_waypoints()
         return
 
-    def crop_waypoints_at_intersections(self) -> List[GraphEdge]:
+    def crop_waypoints_at_intersections(
+        self, intersection_dist: float=config.INTERSECTION_DISTANCE
+    ) -> List[GraphEdge]:
         """
         crops all edges at intersections
         returns all edges that were too short for proper cropping
@@ -1198,9 +1200,9 @@ class Graph:
         to_delete = []
         for node in self.nodes:
             if node.is_crossing:
-                cropping_dist = config.INTERSECTION_DISTANCE/10.0
+                cropping_dist = intersection_dist/10.0
             else:
-                cropping_dist = config.INTERSECTION_DISTANCE
+                cropping_dist = intersection_dist
             node_point = np.array([node.x, node.y])
             node_edges = list(node.edges)
             for index, edge in enumerate(node_edges):
@@ -1263,8 +1265,7 @@ class Graph:
             index1, index2 = cropping[edge]
             edge.crop(index1, index2, edges_to_delete)
         
-        if config.DELETE_SHORT_EDGES:
-            self.delete_edges(edges_to_delete)
+        return edges_to_delete
 
     def remove_edge(self, edge: GraphEdge) -> None:
         """
@@ -1687,7 +1688,7 @@ class Graph:
         #   - directions of predecessors/successors are the same
         return False
 
-    def apply_traffic_signs(self):
+    def apply_traffic_signs(self) -> None:
         # for each traffic sign:
         # add to node and roads and lanes
         for sign in self.traffic_signs:
@@ -1697,7 +1698,7 @@ class Graph:
                 for sub_edge in edge:
                     sub_edge.add_traffic_sign(sign)
 
-    def apply_traffic_lights(self):
+    def apply_traffic_lights(self) -> None:
         # for each traffic light
         # find edges going to node
         for light in self.traffic_lights:
@@ -1725,7 +1726,51 @@ class SublayeredGraph(Graph):
         )
         # graph that is connected by crossings only (e.g. pedestrian path)
         self.sublayer_graph = sublayer_graph
+        self.apply_on_sublayer = True
 
+    def make_contiguous(self) -> None:
+        # TODO respective crossing nodes
+        super().make_contiguous()
+        if self.apply_on_sublayer:
+            self.sublayer_graph.make_contiguous()
     
+    def link_edges(self) -> None:
+        super().link_edges()
+        if self.apply_on_sublayer: 
+            self.sublayer_graph.link_edges()
 
+    def create_lane_waypoints(self) -> None:
+        super().create_lane_waypoints()
+        if self.apply_on_sublayer: 
+            self.sublayer_graph.create_lane_waypoints()
+
+    def interpolate(self) -> None:
+        super().interpolate()
+        if self.apply_on_sublayer: 
+            self.sublayer_graph.interpolate()
+
+    def create_lane_link_segments(self) -> None:
+        super().create_lane_link_segments()
+        if self.apply_on_sublayer: 
+            self.sublayer_graph.create_lane_link_segments()
+
+    def create_lane_bounds(
+            self, interpolation_scale: Optional[float] = None) -> None:
+        super().create_lane_bounds(interpolation_scale)
+        if self.apply_on_sublayer: 
+            self.sublayer_graph.create_lane_bounds(interpolation_scale)
     
+    def correct_start_end_points(self) -> None:
+        super().correct_start_end_points()
+        if self.apply_on_sublayer: 
+            self.sublayer_graph.correct_start_end_points()
+
+    def apply_traffic_signs(self) -> None:
+        super().apply_traffic_signs()
+        if self.apply_on_sublayer: 
+            self.sublayer_graph.apply_traffic_signs()
+    
+    def apply_traffic_lights(self) -> None:
+        super().apply_traffic_lights()
+        if self.apply_on_sublayer: 
+            self.sublayer_graph.apply_traffic_lights()
