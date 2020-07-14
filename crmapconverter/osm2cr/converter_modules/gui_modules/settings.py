@@ -71,6 +71,9 @@ class EditStreetTypes:
         ui.chk_tertiary_link.setChecked("tertiary_link" in config.ACCEPTED_HIGHWAYS)
         ui.chk_living_street.setChecked("living_street" in config.ACCEPTED_HIGHWAYS)
         ui.chk_service.setChecked("service" in config.ACCEPTED_HIGHWAYS)
+        ui.chk_path.setChecked("path" in config.ACCEPTED_HIGHWAYS)
+        ui.chk_footway.setChecked("footway" in config.ACCEPTED_HIGHWAYS)
+        ui.chk_cycleway.setChecked("cycleway" in config.ACCEPTED_HIGHWAYS)
 
     def save(self) -> None:
         """
@@ -94,6 +97,9 @@ class EditStreetTypes:
             ui.chk_tertiary_link: "tertiary_link",
             ui.chk_living_street: "living_street",
             ui.chk_service: "service",
+            ui.chk_path: "path",
+            ui.chk_footway: "footway",
+            ui.chk_cycleway: "cycleway",
         }
         config.ACCEPTED_HIGHWAYS = [
             current_type
@@ -146,6 +152,9 @@ class EditLaneCounts:
         ui.sb_tertiary_link.setValue(config.LANECOUNTS["tertiary_link"])
         ui.sb_living_street.setValue(config.LANECOUNTS["living_street"])
         ui.sb_service.setValue(config.LANECOUNTS["service"])
+        ui.sb_path.setValue(config.LANECOUNTS["path"])
+        ui.sb_footway.setValue(config.LANECOUNTS["footway"])
+        ui.sb_cycleway.setValue(config.LANECOUNTS["cycleway"])
 
     def save(self) -> None:
         """
@@ -169,6 +178,9 @@ class EditLaneCounts:
             ui.sb_tertiary_link: "tertiary_link",
             ui.sb_living_street: "living_street",
             ui.sb_service: "service",
+            ui.sb_path: "path",
+            ui.sb_footway: "footway",
+            ui.sb_cycleway: "cycleway",
         }
         config.LANECOUNTS = {
             current_type: spin_box.value() for spin_box, current_type in types.items()
@@ -219,6 +231,9 @@ class EditLaneWidth:
         ui.sb_tertiary_link.setValue(config.LANEWIDTHS["tertiary_link"])
         ui.sb_living_street.setValue(config.LANEWIDTHS["living_street"])
         ui.sb_service.setValue(config.LANEWIDTHS["service"])
+        ui.sb_path.setValue(config.LANEWIDTHS["path"])
+        ui.sb_footway.setValue(config.LANEWIDTHS["footway"])
+        ui.sb_cycleway.setValue(config.LANEWIDTHS["cycleway"])
 
     def save(self) -> None:
         """
@@ -242,6 +257,9 @@ class EditLaneWidth:
             ui.sb_tertiary_link: "tertiary_link",
             ui.sb_living_street: "living_street",
             ui.sb_service: "service",
+            ui.sb_path: "path",
+            ui.sb_footway: "footway",
+            ui.sb_cycleway: "cycleway",
         }
         config.LANEWIDTHS = {
             current_type: spin_box.value() for spin_box, current_type in types.items()
@@ -294,6 +312,9 @@ class EditSpeedLimits:
         ui.sb_tertiary_link.setValue(config.SPEED_LIMITS["tertiary_link"])
         ui.sb_living_street.setValue(config.SPEED_LIMITS["living_street"])
         ui.sb_service.setValue(config.SPEED_LIMITS["service"])
+        ui.sb_path.setValue(config.SPEED_LIMITS["path"])
+        ui.sb_footway.setValue(config.SPEED_LIMITS["footway"])
+        ui.sb_cycleway.setValue(config.SPEED_LIMITS["cycleway"])
 
     def save(self) -> None:
         """
@@ -317,10 +338,96 @@ class EditSpeedLimits:
             ui.sb_tertiary_link: "tertiary_link",
             ui.sb_living_street: "living_street",
             ui.sb_service: "service",
+            ui.sb_path: "path",
+            ui.sb_footway: "footway",
+            ui.sb_cycleway: "cycleway",
         }
         config.SPEED_LIMITS = {
             current_type: spin_box.value() for spin_box, current_type in types.items()
         }
+
+
+
+class EditSublayerWayTypes:
+    """
+    Window to edit sublayer way types
+    """
+
+    def __init__(self):
+        self.dialog = QDialog()
+        self.original_accept = self.dialog.accept
+        self.dialog.accept = self.accept
+        self.dialog.ui = Street_types()
+        self.dialog.ui.setupUi(self.dialog)
+        self.set_checkboxes()
+        self.dialog.exec_()
+
+    def accept(self) -> None:
+        """
+        accepts the values set in the window and saves them to config.py
+        then closes the dialog
+
+        :return: None
+        """
+        self.save()
+        self.original_accept()
+
+    def set_checkboxes(self) -> None:
+        """
+        initializes values of checkboxes
+
+        :return: None
+        """
+        ui: Street_types = self.dialog.ui
+        ui.chk_motorway.setChecked("motorway" in config.ACCEPTED_HIGHWAYS_SUBLAYER)
+        ui.chk_trunk.setChecked("trunk" in config.ACCEPTED_HIGHWAYS_SUBLAYER)
+        ui.chk_primary.setChecked("primary" in config.ACCEPTED_HIGHWAYS_SUBLAYER)
+        ui.chk_secondary.setChecked("secondary" in config.ACCEPTED_HIGHWAYS_SUBLAYER)
+        ui.chk_tertiary.setChecked("tertiary" in config.ACCEPTED_HIGHWAYS_SUBLAYER)
+        ui.chk_unclassified.setChecked("unclassified" in config.ACCEPTED_HIGHWAYS_SUBLAYER)
+        ui.chk_residential.setChecked("residential" in config.ACCEPTED_HIGHWAYS_SUBLAYER)
+        ui.chk_motorway_link.setChecked("motorway_link" in config.ACCEPTED_HIGHWAYS_SUBLAYER)
+        ui.chk_trunk_link.setChecked("trunk_link" in config.ACCEPTED_HIGHWAYS_SUBLAYER)
+        ui.chk_primary_link.setChecked("primary_link" in config.ACCEPTED_HIGHWAYS_SUBLAYER)
+        ui.chk_secondary_link.setChecked("secondary_link" in config.ACCEPTED_HIGHWAYS_SUBLAYER)
+        ui.chk_tertiary_link.setChecked("tertiary_link" in config.ACCEPTED_HIGHWAYS_SUBLAYER)
+        ui.chk_living_street.setChecked("living_street" in config.ACCEPTED_HIGHWAYS_SUBLAYER)
+        ui.chk_service.setChecked("service" in config.ACCEPTED_HIGHWAYS_SUBLAYER)
+        ui.chk_path.setChecked("path" in config.ACCEPTED_HIGHWAYS_SUBLAYER)
+        ui.chk_footway.setChecked("footway" in config.ACCEPTED_HIGHWAYS_SUBLAYER)
+        ui.chk_cycleway.setChecked("cycleway" in config.ACCEPTED_HIGHWAYS_SUBLAYER)
+
+    def save(self) -> None:
+        """
+        saves values of checkboxes to config.py
+
+        :return: None
+        """
+        ui = self.dialog.ui
+        types = {
+            ui.chk_motorway: "motorway",
+            ui.chk_trunk: "trunk",
+            ui.chk_primary: "primary",
+            ui.chk_secondary: "secondary",
+            ui.chk_tertiary: "tertiary",
+            ui.chk_unclassified: "unclassified",
+            ui.chk_residential: "residential",
+            ui.chk_motorway_link: "motorway_link",
+            ui.chk_trunk_link: "trunk_link",
+            ui.chk_primary_link: "primary_link",
+            ui.chk_secondary_link: "secondary_link",
+            ui.chk_tertiary_link: "tertiary_link",
+            ui.chk_living_street: "living_street",
+            ui.chk_service: "service",
+            ui.chk_path: "path",
+            ui.chk_footway: "footway",
+            ui.chk_cycleway: "cycleway",
+        }
+        config.ACCEPTED_HIGHWAYS_SUBLAYER = [
+            current_type
+            for check_box, current_type in types.items()
+            if check_box.isChecked()
+        ]
 
 
 class SettingsMenu:
@@ -358,6 +465,7 @@ class SettingsMenu:
         window.btn_edit_lane_counts.clicked.connect(self.edit_lane_counts)
         window.btn_edit_lane_widths.clicked.connect(self.edit_lane_width)
         window.btn_edit_speed_limits.clicked.connect(self.edit_speed_limits)
+        window.btn_edit_sublayer_way_types.clicked.connect(self.edit_sublayer_way_types)
 
         window.btn_restore_defaults.clicked.connect(self.restore_default_button)
         window.btn_close.clicked.connect(self.close_button)
@@ -408,6 +516,8 @@ class SettingsMenu:
         )
         window.sb_bezier_parameter.setValue(config.BEZIER_PARAMETER)
         window.sb_intersection_distance.setValue(config.INTERSECTION_DISTANCE)
+        window.sb_intersection_distance_sublayer.setValue(
+            config.INTERSECTION_DISTANCE_SUBLAYER)
         window.chk_intersection_distance_respect.setChecked(
             config.INTERSECTION_CROPPING_WITH_RESPECT_TO_ROADS
         )
@@ -460,6 +570,7 @@ class SettingsMenu:
         )
         config.BEZIER_PARAMETER = window.sb_bezier_parameter.value()
         config.INTERSECTION_DISTANCE = window.sb_intersection_distance.value()
+        config.INTERSECTION_DISTANCE_SUBLAYER = window.sb_intersection_distance_sublayer.value()
         config.INTERSECTION_CROPPING_WITH_RESPECT_TO_ROADS = (
             window.chk_intersection_distance_respect.isChecked()
         )
@@ -500,6 +611,14 @@ class SettingsMenu:
         :return: None
         """
         self.speed_limits_edit_dialog = EditSpeedLimits()
+
+    def edit_sublayer_way_types(self) -> None:
+        """
+        allows to edit the speed limit for street types
+
+        :return: None
+        """
+        self.edit_sublayer_way_types_dialog = EditSublayerWayTypes()
 
     def restore_default_button(self) -> None:
         """
@@ -626,115 +745,10 @@ def set_defaults() -> None:
 
     :return: None
     """
-    config.SAVE_PATH = "files/"
-    config.USER_EDIT = False
-    config.IMAGE_SAVE_PATH = "files/imagery/"
-    config.AERIAL_IMAGES = False
-    config.ZOOM_LEVEL = 19
-    config.DOWNLOAD_EDGE_LENGTH = 200
-    config.DOWNLOAD_COORDINATES = (48.262447, 11.657881)
-    config.BENCHMARK_ID = "test_bench"
-    config.AUTHOR = "Automated converter by Maximilian Rieger"
-    config.AFFILIATION = "Technical University of Munich, Germany"
-    config.SOURCE = "OpenStreetMaps (OSM)"
-    config.TAGS = "..."
-    config.TIMESTEPSIZE = 0.1
-    config.EARTH_RADIUS = 6371000
-    config.SOFT_ANGLE_THRESHOLD = 55
-    config.INTERPOLATION_DISTANCE = 0.5
-    config.INTERPOLATION_DISTANCE_INTERNAL = 0.25
-    config.COMPRESSION_THRESHOLD = 0.05
-    config.BEZIER_PARAMETER = 0.35
-    config.MERGE_DISTANCE = 0
-    config.INTERSECTION_DISTANCE = 5
-    config.INTERSECTION_CROPPING_WITH_RESPECT_TO_ROADS = True
-    config.CLUSTER_LENGTH = 10
-    config.LEAST_CLUSTER_LENGTH = 10
-    config.LANE_SEGMENT_ANGLE = 5
-    config.EXPORT_IN_UTM = True
-    config.FILTER = True
-    config.LOAD_TUNNELS = False
-    config.DELETE_SHORT_EDGES = False
-    config.MAKE_CONTIGUOUS = False
-    config.USE_RESTRICTIONS = True
-    config.SPLIT_AT_CORNER = True
-    config.ACCEPTED_HIGHWAYS = [
-        "motorway",
-        "trunk",
-        "primary",
-        "secondary",
-        "tertiary",
-        "unclassified",
-        "residential",
-        "motorway_link",
-        "trunk_link",
-        "primary_link",
-        "secondary_link",
-        "tertiary_link",
-        "living_street",
-        "service",
-    ]
-    config.LANECOUNTS = {
-        "motorway": 6,
-        "trunk": 4,
-        "primary": 2,
-        "secondary": 2,
-        "tertiary": 2,
-        "unclassified": 2,
-        "residential": 2,
-        "motorway_link": 2,
-        "trunk_link": 2,
-        "primary_link": 2,
-        "secondary_link": 2,
-        "tertiary_link": 2,
-        "living_street": 2,
-        "service": 2,
-    }
-    config.LANEWIDTHS = {
-        "motorway": 2.5,
-        "trunk": 2.5,
-        "primary": 2.5,
-        "secondary": 2.5,
-        "tertiary": 2.5,
-        "unclassified": 2.5,
-        "residential": 2.5,
-        "motorway_link": 2.5,
-        "trunk_link": 2.5,
-        "primary_link": 2.5,
-        "secondary_link": 2.5,
-        "tertiary_link": 2.5,
-        "living_street": 2.5,
-        "service": 2.5,
-    }
-    config.SPEED_LIMITS = {
-        "motorway": 120,
-        "trunk": 100,
-        "primary": 100,
-        "secondary": 100,
-        "tertiary": 100,
-        "unclassified": 80,
-        "residential": 50,
-        "motorway_link": 80,
-        "trunk_link": 80,
-        "primary_link": 80,
-        "secondary_link": 80,
-        "tertiary_link": 80,
-        "living_street": 7,
-        "service": 10,
-    }
-    config.RECOGNIZED_TURNLANES = [
-        "left",
-        "through",
-        "right",
-        "merge_to_left",
-        "merge_to_right",
-        "through;right",
-        "left;through",
-        "left;through;right",
-        "left;right",
-        "none",
-    ]
-    # config.BING_MAPS_KEY = ""
+    import config_default
+    for var_name in dir(config_default):
+        if not var_name.startswith('__'):
+            setattr(config, var_name, getattr(config_default, var_name))
 
 
 def config_string() -> str:

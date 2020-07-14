@@ -4,7 +4,6 @@ This module holds all parameters necessary for the conversion
 
 # Benchmark settings
 # name of the benchmark
-import enum
 
 BENCHMARK_ID = "DEU_test"
 # author of the benchmark
@@ -173,7 +172,7 @@ BEZIER_PARAMETER = 0.35
 # distance between roads at intersection used for cropping in meters
 INTERSECTION_DISTANCE = 20.0
 # associated with pedestrian pathways by default
-INTERSECTION_DISTANCE_SUBLAYER = 1.0
+INTERSECTION_DISTANCE_CROSSING = 1.0
 # defines if the distance to other roads is used for cropping
 # if false the distance to the center of the intersection is used
 INTERSECTION_CROPPING_WITH_RESPECT_TO_ROADS = True

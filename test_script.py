@@ -11,15 +11,16 @@ from crmapconverter.osm2cr.converter_modules.cr_operations import export
 source_folder = "test/osm_xml_test_files/"
 target_folder = "test_ouput/"
 # intersect_and_crossing3, mittlerer_Ring, garching_kreuzung_fixed
-file_name = "intersect_and_crossing2" 
+file_name = "intersection_and_crossing"
 
-config.EXTRACT_PATHWAYS = True
+config.EXTRACT_SUBLAYER = True
 graph_scen = converter.GraphScenario(source_folder + file_name + ".osm")
+# graph_scen.plot()
 # graph_scen.save_as_cr(target_folder + file_name + ".xml")
 
 
 app = QApplication(sys.argv)
 main_window = viewer.MainWindow()
-_, scenario = export.convert_to_scenario(graph_scen.graph)
+_, scenario = export.create_scenario2(graph_scen.graph)
 main_window.openScenario(scenario)
 sys.exit(app.exec_())

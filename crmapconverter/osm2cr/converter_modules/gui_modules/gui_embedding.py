@@ -717,6 +717,9 @@ class AttributeEditor:
             "residential": 11,
             "living_street": 12,
             "service": 13,
+            "path": 14,
+            "footway": 15,
+            "cycleway": 16
         }
 
         self.road_types = {

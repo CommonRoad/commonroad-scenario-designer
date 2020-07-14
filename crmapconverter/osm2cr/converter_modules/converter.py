@@ -51,7 +51,7 @@ def step_collection_2(graph: road_graph.Graph) -> road_graph.Graph:
         graph.delete_edges(edges_to_delete)
     if isinstance(graph, road_graph.SublayeredGraph):
         edges_to_delete = graph.sublayer_graph.crop_waypoints_at_intersections(
-            config.INTERSECTION_DISTANCE_CROSSING
+            config.INTERSECTION_DISTANCE_SUBLAYER
         )
         if config.DELETE_SHORT_EDGES:
             graph.sublayer_graph.delete_edges(edges_to_delete)
