@@ -119,7 +119,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
             self.lanelets_List.close()
             self.lanelets_List = None
         self.lanelets_List = QDockWidget("Lanelets list " +
-                                         self.crviewer.filename)
+                                         str(self.commoroad_filename))
         self.lanelets_List.setFloating(True)
         self.lanelets_List.setFeatures(QDockWidget.AllDockWidgetFeatures)
         self.lanelets_List.setAllowedAreas(Qt.RightDockWidgetArea)
@@ -150,7 +150,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
             self.intersection_List.close()
             self.intersection_List = None
         self.intersection_List = QDockWidget("Intersection list " +
-                                             self.crviewer.filename)
+                                             self.commoroad_filename)
         self.intersection_List.setFloating(True)
         self.intersection_List.setFeatures(QDockWidget.AllDockWidgetFeatures)
         self.intersection_List.setAllowedAreas(Qt.RightDockWidgetArea)
@@ -353,6 +353,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.od2cr = OD2CR()
         self.od2cr.setWindowIcon(QIcon(":/icons/Groupe_3.ico"))
         if self.od2cr.filename is not None:
+            self.commoroad_filename = self.od2cr.filename
             self.setCentralWidget(self.od2cr)  # setup mdi of CR File
             self.setWindowTitle(self.od2cr.filename)  # set up the title
             self.create_laneletslist(self.od2cr)
@@ -361,7 +362,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
             self.textBrowser.append(self.od2cr.statsText)
             self.textBrowser.setMaximumHeight(800)
             self.current_scenario = self.od2cr.current_scenario
-            self.commoroad_filename = self.od2cr.filename
+
 
         else:
             self.textBrowser.append(
@@ -495,6 +496,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.update_max_step()
         self.crviewer.setWindowIcon(QIcon(":/icons/cr1.ico"))
         if self.crviewer.filename is not None:
+            self.commoroad_filename = self.crviewer.filename
             self.create_laneletslist(self.crviewer)
             self.create_intersection_list(self.crviewer)
             # window.setWindowTitle(self.crviewer.filename)  # set
@@ -503,7 +505,6 @@ class MWindow(QMainWindow, Ui_mainWindow):
                                     self.crviewer.filename)
             # self.status.showMessage("Opening " + crviewer.filename)
             self.setCentralWidget(self.crviewer)
-            self.commoroad_filename = self.crviewer.filename
             self.current_scenario = self.crviewer.current_scenario
         else:
             self.textBrowser.append(

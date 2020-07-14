@@ -577,7 +577,18 @@ class CrViewer(QWidget):
         # dpi = 120
         # ln, = self.canvas.ax.plot([], [], animated=True)
 
-        assert start < end, '<video/create_scenario_video> time_begin=%i needs to smaller than time_end=%i.' % (
+        if start == end:
+            warning_dia = QMessageBox()
+            reply = warning_dia.warning(self, "Warning",
+                                        "This Scenario only has one time step!",
+                                        QMessageBox.Ok,
+                                        QMessageBox.Ok)
+            if reply == QMessageBox.Ok:
+                warning_dia.close()
+
+
+
+        assert start <= end, '<video/create_scenario_video> time_begin=%i needs to smaller than time_end=%i.' % (
             start, end)
 
         def draw_frame(draw_params):
