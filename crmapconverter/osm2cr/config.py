@@ -79,7 +79,7 @@ EXTRACT_SUBLAYER = True
 ACCEPTED_HIGHWAYS_SUBLAYER = [
     "path",
     "footway",
-#    "cycleway"
+    "cycleway"
 ]
 # Lanelet type of the sublayer lanelets
 SUBLAYER_LANELETTYPE = 'sidewalk'

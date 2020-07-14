@@ -12,6 +12,7 @@ from typing import Dict, Union, List, Optional, Tuple
 from PyQt5.QtWidgets import QDialog
 
 from crmapconverter.osm2cr import config
+from crmapconverter.osm2cr.converter_modules.gui_modules import config_default
 from crmapconverter.osm2cr.converter_modules.gui_modules.GUI_resources.lane_counts import (
     Ui_Dialog as Lane_counts,
 )
@@ -23,6 +24,9 @@ from crmapconverter.osm2cr.converter_modules.gui_modules.GUI_resources.settings_
 )
 from crmapconverter.osm2cr.converter_modules.gui_modules.GUI_resources.street_types import (
     Ui_Dialog as Street_types,
+)
+from crmapconverter.osm2cr.converter_modules.gui_modules.GUI_resources.sublayer_types import (
+    Ui_Dialog as Sublayer_types,
 )
 
 
@@ -56,24 +60,12 @@ class EditStreetTypes:
 
         :return: None
         """
-        ui: Street_types = self.dialog.ui
-        ui.chk_motorway.setChecked("motorway" in config.ACCEPTED_HIGHWAYS)
-        ui.chk_trunk.setChecked("trunk" in config.ACCEPTED_HIGHWAYS)
-        ui.chk_primary.setChecked("primary" in config.ACCEPTED_HIGHWAYS)
-        ui.chk_secondary.setChecked("secondary" in config.ACCEPTED_HIGHWAYS)
-        ui.chk_tertiary.setChecked("tertiary" in config.ACCEPTED_HIGHWAYS)
-        ui.chk_unclassified.setChecked("unclassified" in config.ACCEPTED_HIGHWAYS)
-        ui.chk_residential.setChecked("residential" in config.ACCEPTED_HIGHWAYS)
-        ui.chk_motorway_link.setChecked("motorway_link" in config.ACCEPTED_HIGHWAYS)
-        ui.chk_trunk_link.setChecked("trunk_link" in config.ACCEPTED_HIGHWAYS)
-        ui.chk_primary_link.setChecked("primary_link" in config.ACCEPTED_HIGHWAYS)
-        ui.chk_secondary_link.setChecked("secondary_link" in config.ACCEPTED_HIGHWAYS)
-        ui.chk_tertiary_link.setChecked("tertiary_link" in config.ACCEPTED_HIGHWAYS)
-        ui.chk_living_street.setChecked("living_street" in config.ACCEPTED_HIGHWAYS)
-        ui.chk_service.setChecked("service" in config.ACCEPTED_HIGHWAYS)
-        ui.chk_path.setChecked("path" in config.ACCEPTED_HIGHWAYS)
-        ui.chk_footway.setChecked("footway" in config.ACCEPTED_HIGHWAYS)
-        ui.chk_cycleway.setChecked("cycleway" in config.ACCEPTED_HIGHWAYS)
+        all_accepted_highways = config.ACCEPTED_HIGHWAYS.copy()
+        all_accepted_highways.extend(config.ACCEPTED_HIGHWAYS_SUBLAYER)
+        for highway_type in all_accepted_highways:
+            getattr(self.dialog.ui, 'chk_' + highway_type).setChecked(
+                highway_type in config.ACCEPTED_HIGHWAYS
+            )
 
     def save(self) -> None:
         """
@@ -81,26 +73,11 @@ class EditStreetTypes:
 
         :return: None
         """
-        ui = self.dialog.ui
-        types = {
-            ui.chk_motorway: "motorway",
-            ui.chk_trunk: "trunk",
-            ui.chk_primary: "primary",
-            ui.chk_secondary: "secondary",
-            ui.chk_tertiary: "tertiary",
-            ui.chk_unclassified: "unclassified",
-            ui.chk_residential: "residential",
-            ui.chk_motorway_link: "motorway_link",
-            ui.chk_trunk_link: "trunk_link",
-            ui.chk_primary_link: "primary_link",
-            ui.chk_secondary_link: "secondary_link",
-            ui.chk_tertiary_link: "tertiary_link",
-            ui.chk_living_street: "living_street",
-            ui.chk_service: "service",
-            ui.chk_path: "path",
-            ui.chk_footway: "footway",
-            ui.chk_cycleway: "cycleway",
-        }
+        types = dict()
+        all_accepted_highways = config.ACCEPTED_HIGHWAYS.copy()
+        all_accepted_highways.extend(config.ACCEPTED_HIGHWAYS_SUBLAYER)
+        for highway_type in all_accepted_highways:
+            types[getattr(self.dialog.ui, 'chk_' + highway_type)] = highway_type
         config.ACCEPTED_HIGHWAYS = [
             current_type
             for check_box, current_type in types.items()
@@ -137,24 +114,10 @@ class EditLaneCounts:
 
         :return: None
         """
-        ui: Lane_counts = self.dialog.ui
-        ui.sb_motorway.setValue(config.LANECOUNTS["motorway"])
-        ui.sb_trunk.setValue(config.LANECOUNTS["trunk"])
-        ui.sb_primary.setValue(config.LANECOUNTS["primary"])
-        ui.sb_secondary.setValue(config.LANECOUNTS["secondary"])
-        ui.sb_tertiary.setValue(config.LANECOUNTS["tertiary"])
-        ui.sb_unclassified.setValue(config.LANECOUNTS["unclassified"])
-        ui.sb_residential.setValue(config.LANECOUNTS["residential"])
-        ui.sb_motorway_link.setValue(config.LANECOUNTS["motorway_link"])
-        ui.sb_trunk_link.setValue(config.LANECOUNTS["trunk_link"])
-        ui.sb_primary_link.setValue(config.LANECOUNTS["primary_link"])
-        ui.sb_secondary_link.setValue(config.LANECOUNTS["secondary_link"])
-        ui.sb_tertiary_link.setValue(config.LANECOUNTS["tertiary_link"])
-        ui.sb_living_street.setValue(config.LANECOUNTS["living_street"])
-        ui.sb_service.setValue(config.LANECOUNTS["service"])
-        ui.sb_path.setValue(config.LANECOUNTS["path"])
-        ui.sb_footway.setValue(config.LANECOUNTS["footway"])
-        ui.sb_cycleway.setValue(config.LANECOUNTS["cycleway"])
+        for highway_type in list(config.LANECOUNTS.keys()):
+            getattr(self.dialog.ui, 'sb_' + highway_type).setValue(
+                config.LANECOUNTS[highway_type]
+            )
 
     def save(self) -> None:
         """
@@ -162,26 +125,9 @@ class EditLaneCounts:
 
         :return: None
         """
-        ui = self.dialog.ui
-        types = {
-            ui.sb_motorway: "motorway",
-            ui.sb_trunk: "trunk",
-            ui.sb_primary: "primary",
-            ui.sb_secondary: "secondary",
-            ui.sb_tertiary: "tertiary",
-            ui.sb_unclassified: "unclassified",
-            ui.sb_residential: "residential",
-            ui.sb_motorway_link: "motorway_link",
-            ui.sb_trunk_link: "trunk_link",
-            ui.sb_primary_link: "primary_link",
-            ui.sb_secondary_link: "secondary_link",
-            ui.sb_tertiary_link: "tertiary_link",
-            ui.sb_living_street: "living_street",
-            ui.sb_service: "service",
-            ui.sb_path: "path",
-            ui.sb_footway: "footway",
-            ui.sb_cycleway: "cycleway",
-        }
+        types = dict()
+        for highway_type in list(config.LANECOUNTS.keys()):
+            types[getattr(self.dialog.ui, 'sb_' + highway_type)] = highway_type
         config.LANECOUNTS = {
             current_type: spin_box.value() for spin_box, current_type in types.items()
         }
@@ -216,24 +162,10 @@ class EditLaneWidth:
 
         :return: None
         """
-        ui: Lane_width = self.dialog.ui
-        ui.sb_motorway.setValue(config.LANEWIDTHS["motorway"])
-        ui.sb_trunk.setValue(config.LANEWIDTHS["trunk"])
-        ui.sb_primary.setValue(config.LANEWIDTHS["primary"])
-        ui.sb_secondary.setValue(config.LANEWIDTHS["secondary"])
-        ui.sb_tertiary.setValue(config.LANEWIDTHS["tertiary"])
-        ui.sb_unclassified.setValue(config.LANEWIDTHS["unclassified"])
-        ui.sb_residential.setValue(config.LANEWIDTHS["residential"])
-        ui.sb_motorway_link.setValue(config.LANEWIDTHS["motorway_link"])
-        ui.sb_trunk_link.setValue(config.LANEWIDTHS["trunk_link"])
-        ui.sb_primary_link.setValue(config.LANEWIDTHS["primary_link"])
-        ui.sb_secondary_link.setValue(config.LANEWIDTHS["secondary_link"])
-        ui.sb_tertiary_link.setValue(config.LANEWIDTHS["tertiary_link"])
-        ui.sb_living_street.setValue(config.LANEWIDTHS["living_street"])
-        ui.sb_service.setValue(config.LANEWIDTHS["service"])
-        ui.sb_path.setValue(config.LANEWIDTHS["path"])
-        ui.sb_footway.setValue(config.LANEWIDTHS["footway"])
-        ui.sb_cycleway.setValue(config.LANEWIDTHS["cycleway"])
+        for highway_type in list(config.LANEWIDTHS.keys()):
+            getattr(self.dialog.ui, 'sb_' + highway_type).setValue(
+                config.LANEWIDTHS[highway_type]
+            )
 
     def save(self) -> None:
         """
@@ -241,26 +173,9 @@ class EditLaneWidth:
 
         :return: None
         """
-        ui = self.dialog.ui
-        types = {
-            ui.sb_motorway: "motorway",
-            ui.sb_trunk: "trunk",
-            ui.sb_primary: "primary",
-            ui.sb_secondary: "secondary",
-            ui.sb_tertiary: "tertiary",
-            ui.sb_unclassified: "unclassified",
-            ui.sb_residential: "residential",
-            ui.sb_motorway_link: "motorway_link",
-            ui.sb_trunk_link: "trunk_link",
-            ui.sb_primary_link: "primary_link",
-            ui.sb_secondary_link: "secondary_link",
-            ui.sb_tertiary_link: "tertiary_link",
-            ui.sb_living_street: "living_street",
-            ui.sb_service: "service",
-            ui.sb_path: "path",
-            ui.sb_footway: "footway",
-            ui.sb_cycleway: "cycleway",
-        }
+        types = dict()
+        for highway_type in list(config.LANEWIDTHS.keys()):
+            types[getattr(self.dialog.ui, 'sb_' + highway_type)] = highway_type
         config.LANEWIDTHS = {
             current_type: spin_box.value() for spin_box, current_type in types.items()
         }
@@ -297,24 +212,10 @@ class EditSpeedLimits:
 
         :return: None
         """
-        ui: Lane_counts = self.dialog.ui
-        ui.sb_motorway.setValue(config.SPEED_LIMITS["motorway"])
-        ui.sb_trunk.setValue(config.SPEED_LIMITS["trunk"])
-        ui.sb_primary.setValue(config.SPEED_LIMITS["primary"])
-        ui.sb_secondary.setValue(config.SPEED_LIMITS["secondary"])
-        ui.sb_tertiary.setValue(config.SPEED_LIMITS["tertiary"])
-        ui.sb_unclassified.setValue(config.SPEED_LIMITS["unclassified"])
-        ui.sb_residential.setValue(config.SPEED_LIMITS["residential"])
-        ui.sb_motorway_link.setValue(config.SPEED_LIMITS["motorway_link"])
-        ui.sb_trunk_link.setValue(config.SPEED_LIMITS["trunk_link"])
-        ui.sb_primary_link.setValue(config.SPEED_LIMITS["primary_link"])
-        ui.sb_secondary_link.setValue(config.SPEED_LIMITS["secondary_link"])
-        ui.sb_tertiary_link.setValue(config.SPEED_LIMITS["tertiary_link"])
-        ui.sb_living_street.setValue(config.SPEED_LIMITS["living_street"])
-        ui.sb_service.setValue(config.SPEED_LIMITS["service"])
-        ui.sb_path.setValue(config.SPEED_LIMITS["path"])
-        ui.sb_footway.setValue(config.SPEED_LIMITS["footway"])
-        ui.sb_cycleway.setValue(config.SPEED_LIMITS["cycleway"])
+        for highway_type in list(config.SPEED_LIMITS.keys()):
+            getattr(self.dialog.ui, 'sb_' + highway_type).setValue(
+                config.SPEED_LIMITS[highway_type]
+            )
 
     def save(self) -> None:
         """
@@ -322,30 +223,12 @@ class EditSpeedLimits:
 
         :return: None
         """
-        ui = self.dialog.ui
-        types = {
-            ui.sb_motorway: "motorway",
-            ui.sb_trunk: "trunk",
-            ui.sb_primary: "primary",
-            ui.sb_secondary: "secondary",
-            ui.sb_tertiary: "tertiary",
-            ui.sb_unclassified: "unclassified",
-            ui.sb_residential: "residential",
-            ui.sb_motorway_link: "motorway_link",
-            ui.sb_trunk_link: "trunk_link",
-            ui.sb_primary_link: "primary_link",
-            ui.sb_secondary_link: "secondary_link",
-            ui.sb_tertiary_link: "tertiary_link",
-            ui.sb_living_street: "living_street",
-            ui.sb_service: "service",
-            ui.sb_path: "path",
-            ui.sb_footway: "footway",
-            ui.sb_cycleway: "cycleway",
-        }
+        types = dict()
+        for highway_type in list(config.SPEED_LIMITS.keys()):
+            types[getattr(self.dialog.ui, 'sb_' + highway_type)] = highway_type
         config.SPEED_LIMITS = {
             current_type: spin_box.value() for spin_box, current_type in types.items()
         }
-
 
 
 class EditSublayerWayTypes:
@@ -357,7 +240,7 @@ class EditSublayerWayTypes:
         self.dialog = QDialog()
         self.original_accept = self.dialog.accept
         self.dialog.accept = self.accept
-        self.dialog.ui = Street_types()
+        self.dialog.ui = Sublayer_types()
         self.dialog.ui.setupUi(self.dialog)
         self.set_checkboxes()
         self.dialog.exec_()
@@ -378,24 +261,12 @@ class EditSublayerWayTypes:
 
         :return: None
         """
-        ui: Street_types = self.dialog.ui
-        ui.chk_motorway.setChecked("motorway" in config.ACCEPTED_HIGHWAYS_SUBLAYER)
-        ui.chk_trunk.setChecked("trunk" in config.ACCEPTED_HIGHWAYS_SUBLAYER)
-        ui.chk_primary.setChecked("primary" in config.ACCEPTED_HIGHWAYS_SUBLAYER)
-        ui.chk_secondary.setChecked("secondary" in config.ACCEPTED_HIGHWAYS_SUBLAYER)
-        ui.chk_tertiary.setChecked("tertiary" in config.ACCEPTED_HIGHWAYS_SUBLAYER)
-        ui.chk_unclassified.setChecked("unclassified" in config.ACCEPTED_HIGHWAYS_SUBLAYER)
-        ui.chk_residential.setChecked("residential" in config.ACCEPTED_HIGHWAYS_SUBLAYER)
-        ui.chk_motorway_link.setChecked("motorway_link" in config.ACCEPTED_HIGHWAYS_SUBLAYER)
-        ui.chk_trunk_link.setChecked("trunk_link" in config.ACCEPTED_HIGHWAYS_SUBLAYER)
-        ui.chk_primary_link.setChecked("primary_link" in config.ACCEPTED_HIGHWAYS_SUBLAYER)
-        ui.chk_secondary_link.setChecked("secondary_link" in config.ACCEPTED_HIGHWAYS_SUBLAYER)
-        ui.chk_tertiary_link.setChecked("tertiary_link" in config.ACCEPTED_HIGHWAYS_SUBLAYER)
-        ui.chk_living_street.setChecked("living_street" in config.ACCEPTED_HIGHWAYS_SUBLAYER)
-        ui.chk_service.setChecked("service" in config.ACCEPTED_HIGHWAYS_SUBLAYER)
-        ui.chk_path.setChecked("path" in config.ACCEPTED_HIGHWAYS_SUBLAYER)
-        ui.chk_footway.setChecked("footway" in config.ACCEPTED_HIGHWAYS_SUBLAYER)
-        ui.chk_cycleway.setChecked("cycleway" in config.ACCEPTED_HIGHWAYS_SUBLAYER)
+        all_accepted_highways = config.ACCEPTED_HIGHWAYS.copy()
+        all_accepted_highways.extend(config.ACCEPTED_HIGHWAYS_SUBLAYER)
+        for highway_type in all_accepted_highways:
+            getattr(self.dialog.ui, 'chk_' + highway_type).setChecked(
+                highway_type in config.ACCEPTED_HIGHWAYS_SUBLAYER
+            )
 
     def save(self) -> None:
         """
@@ -403,26 +274,11 @@ class EditSublayerWayTypes:
 
         :return: None
         """
-        ui = self.dialog.ui
-        types = {
-            ui.chk_motorway: "motorway",
-            ui.chk_trunk: "trunk",
-            ui.chk_primary: "primary",
-            ui.chk_secondary: "secondary",
-            ui.chk_tertiary: "tertiary",
-            ui.chk_unclassified: "unclassified",
-            ui.chk_residential: "residential",
-            ui.chk_motorway_link: "motorway_link",
-            ui.chk_trunk_link: "trunk_link",
-            ui.chk_primary_link: "primary_link",
-            ui.chk_secondary_link: "secondary_link",
-            ui.chk_tertiary_link: "tertiary_link",
-            ui.chk_living_street: "living_street",
-            ui.chk_service: "service",
-            ui.chk_path: "path",
-            ui.chk_footway: "footway",
-            ui.chk_cycleway: "cycleway",
-        }
+        types = dict()
+        all_accepted_highways = config.ACCEPTED_HIGHWAYS.copy()
+        all_accepted_highways.extend(config.ACCEPTED_HIGHWAYS_SUBLAYER)
+        for highway_type in all_accepted_highways:
+            types[getattr(self.dialog.ui, 'chk_' + highway_type)] = highway_type
         config.ACCEPTED_HIGHWAYS_SUBLAYER = [
             current_type
             for check_box, current_type in types.items()
@@ -516,8 +372,6 @@ class SettingsMenu:
         )
         window.sb_bezier_parameter.setValue(config.BEZIER_PARAMETER)
         window.sb_intersection_distance.setValue(config.INTERSECTION_DISTANCE)
-        window.sb_intersection_distance_sublayer.setValue(
-            config.INTERSECTION_DISTANCE_SUBLAYER)
         window.chk_intersection_distance_respect.setChecked(
             config.INTERSECTION_CROPPING_WITH_RESPECT_TO_ROADS
         )
@@ -526,6 +380,10 @@ class SettingsMenu:
         window.sb_cluster_length.setValue(config.CLUSTER_LENGTH)
         window.sb_cluster_length_treshold.setValue(config.LEAST_CLUSTER_LENGTH)
         window.sb_merge_distance.setValue(config.MERGE_DISTANCE)
+        
+        window.sb_intersection_distance_sublayer.setValue(
+            config.INTERSECTION_DISTANCE_SUBLAYER)
+        window.chk_extract_sublayer.setChecked(config.EXTRACT_SUBLAYER)
 
     def save_to_config(self) -> None:
         """
@@ -745,7 +603,6 @@ def set_defaults() -> None:
 
     :return: None
     """
-    import config_default
     for var_name in dir(config_default):
         if not var_name.startswith('__'):
             setattr(config, var_name, getattr(config_default, var_name))
