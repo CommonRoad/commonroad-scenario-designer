@@ -552,46 +552,45 @@ class CrViewer(QWidget):
         # dpi = 120
         # ln, = self.canvas.ax.plot([], [], animated=True)
 
-        if start == end:
-            warning_dia = QMessageBox()
-            reply = warning_dia.warning(self, "Warning",
-                                        "This Scenario only has one time step!",
-                                        QMessageBox.Ok,
-                                        QMessageBox.Ok)
-            if reply == QMessageBox.Ok:
-                warning_dia.close()
+        if self.current_scenario is not None:
+            if start == end:
+                warning_dia = QMessageBox()
+                reply = warning_dia.warning(self, "Warning",
+                                            "This Scenario only has one time step!",
+                                            QMessageBox.Ok,
+                                            QMessageBox.Ok)
+                if reply == QMessageBox.Ok:
+                    warning_dia.close()
 
+            assert start <= end, '<video/create_scenario_video> time_begin=%i needs to smaller than time_end=%i.' % (
+                start, end)
 
+            def draw_frame(draw_params):
+                print('next frame')
+                time_begin = start + delta_time_steps * self.timestep.value
+                time_end = start + min(
+                    frame_count,
+                    delta_time_steps * self.timestep.value + plotting_horizon)
+                self.timestep.value += 1
+                if time_begin > time_end:
+                    self.timestep.value=0
 
-        assert start <= end, '<video/create_scenario_video> time_begin=%i needs to smaller than time_end=%i.' % (
-            start, end)
+                draw_params = {'time_begin': time_begin, 'time_end': time_end}
+                print("draw frame ", self.timestep.value, draw_params)
+                # plot frame
+                self.canvas.draw_object(
+                    scenario,
+                    draw_params=draw_params,
+                    plot_limits=None if plot_limits == 'auto' else plot_limits)
 
-        def draw_frame(draw_params):
-            print('next frame')
-            time_begin = start + delta_time_steps * self.timestep.value
-            time_end = start + min(
-                frame_count,
-                delta_time_steps * self.timestep.value + plotting_horizon)
-            self.timestep.value += 1
-            if time_begin > time_end:
-                self.timestep.value=0
-
-            draw_params = {'time_begin': time_begin, 'time_end': time_end}
-            print("draw frame ", self.timestep.value, draw_params)
-            # plot frame
-            self.canvas.draw_object(
-                scenario,
-                draw_params=draw_params,
-                plot_limits=None if plot_limits == 'auto' else plot_limits)
-
-        frame_count = (end - start) // delta_time_steps
-        # Interval determines the duration of each frame in ms
-        interval = 1000 * dt
-        self.animation = FuncAnimation(self.canvas.figure,
-                                       draw_frame,
-                                       blit=False,
-                                       interval=interval,
-                                       repeat=True)
+            frame_count = (end - start) // delta_time_steps
+            # Interval determines the duration of each frame in ms
+            interval = 1000 * dt
+            self.animation = FuncAnimation(self.canvas.figure,
+                                           draw_frame,
+                                           blit=False,
+                                           interval=interval,
+                                           repeat=True)
 
     def play(self):
         """ plays the animation if existing """

@@ -5,19 +5,18 @@ from matplotlib.path import Path
 from matplotlib.figure import Figure
 from matplotlib.patches import PathPatch
 
-from commonroad.common.file_reader import CommonRoadFileReader
-from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
+
 from commonroad.scenario.intersection import Intersection
 from commonroad.scenario.lanelet import Lanelet, is_natural_number
-from commonroad.planning.planning_problem import PlanningProblemSet
-from commonroad.scenario.scenario import Tag
+
 
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 
+
 from crmapconverter.opendriveparser.parser import parse_opendrive
 from crmapconverter.opendriveconversion.network import Network
-
+from crmapconverter.io.V3_0.gui_cr_viewer import CrViewer
 
 from crmapconverter.io.V3_0.GUI_resources.MainWindow import Ui_mainWindow
 from PyQt5.QtWidgets import *
@@ -168,49 +167,6 @@ class OD2CR(QDialog):
         )
 
         self.open_scenario()
-
-    def export_as_commonroad(self):
-        """ """
-
-        if not self.loadedRoadNetwork:
-            return
-
-        path, _ = QFileDialog.getSaveFileName(
-            self,
-            "QFileDialog.getSaveFileName()",
-            "",
-            "CommonRoad files *.xml (*.xml)",
-            options=QFileDialog.Options(),
-        )
-
-        if not path:
-            return
-
-        try:
-            writer = CommonRoadFileWriter(
-                scenario=self.loadedRoadNetwork.export_commonroad_scenario(),
-                planning_problem_set=PlanningProblemSet(),
-                author="",
-                affiliation="",
-                source="OpenDRIVE 2 Lanelet Converter",
-                tags={Tag.URBAN, Tag.HIGHWAY},
-            )
-            writer.write_to_file(path, OverwriteExistingFile.ALWAYS)
-        except (IOError) as e:
-            QMessageBox.critical(
-                self,
-                "CommonRoad file not created!",
-                "The CommonRoad file was not exported due to an error.\n\n{}".format(e),
-                QMessageBox.Ok,
-            )
-            return
-
-        QMessageBox.information(
-            self,
-            "CommonRoad file created!",
-            "The CommonRoad file was successfully exported.",
-            QMessageBox.Ok,
-        )
 
     def open_scenario(self):
         """

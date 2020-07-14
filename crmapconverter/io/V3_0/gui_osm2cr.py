@@ -2,7 +2,6 @@
 This module contains the GUI of the osm -> CR converter
 """
 
-#Updated by Rayane Zaibet
 
 from typing import Optional
 

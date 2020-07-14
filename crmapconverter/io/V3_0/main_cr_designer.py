@@ -1,14 +1,12 @@
-import signal
+
 import sys
-import os
 from lxml import etree
-import numpy as np
 
 from crmapconverter.io.V3_0.GUI_resources.MainWindow import Ui_mainWindow
 from crmapconverter.io.V3_0.gui_toolbox import UpperToolbox, SumoTool
 from crmapconverter.io.V3_0.gui_cr_viewer import CrViewer
 from crmapconverter.io.V3_0.gui_opendrive2cr import OD2CR
-from crmapconverter.io.V3_0.gui_osm2cr import OSM2CR
+from crmapconverter.io.V3_0.gui_osm2cr import OSM_Interface
 from crmapconverter.io.V3_0.gui_setting_interface import Setting
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import *
@@ -129,7 +127,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
     def show_laneletslist(self):
         """Function connected with button 'Lanelets List' to show the lanelets list."""
         if self.lanelets_List is None:
-            if self.od2cr is None:
+            if self.commoroad_filename is None:
                 messbox = QMessageBox()
                 reply = messbox.question(
                     self, "Warning",
@@ -161,7 +159,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
     def show_intersection_list(self):
         """Function connected with button 'Lanelets List' to show the lanelets list."""
         if self.intersection_List is None:
-            if self.od2cr is None:
+            if self.commoroad_filename is None:
                 messbox = QMessageBox()
                 reply = messbox.question(
                     self, "Warning",
@@ -198,9 +196,10 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.crviewer.pause()
 
     def timestep_change(self, value):
-        self.crviewer.set_time_step(value)
-        self.label1.setText('Timestep: ' + str(value))
-        self.crviewer.animation.event_source.start()
+        if self.crviewer.current_scenario is not None:
+            self.crviewer.set_time_step(value)
+            self.label1.setText('Timestep: ' + str(value))
+            self.crviewer.animation.event_source.start()
 
     def play_animation(self):
         """Function connected with the play button in the sumo-toolbox."""
@@ -209,7 +208,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
             reply = messbox.question(
                 self,
                 "Warning",
-                "You should firstly load a scenario",
+                "You should firstly load a animated scenario",
                 QMessageBox.Ok | QMessageBox.No,
                 QMessageBox.Ok)
             if (reply == QtWidgets.QMessageBox.Ok):
@@ -370,7 +369,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
     def osm_2_cr(self):
         """Function to realize converter OSM2CR and show the result."""
-        osm2cr = OSM2CR()
+        OSM_Interface(self)
 
     def create_export_actions(self):
         """Function to create the export action in the menu bar."""
@@ -494,9 +493,15 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.crviewer = CrViewer()
         self.crviewer.open_commonroad_file()
         self.update_max_step()
+        self.update_to_new_scenario()
+
+    def update_to_new_scenario(self):
+        self.update_max_step()
         self.crviewer.setWindowIcon(QIcon(":/icons/cr1.ico"))
+
         if self.crviewer.filename is not None:
             self.commoroad_filename = self.crviewer.filename
+            self.current_scenario = self.crviewer.current_scenario
             self.create_laneletslist(self.crviewer)
             self.create_intersection_list(self.crviewer)
             # window.setWindowTitle(self.crviewer.filename)  # set
@@ -505,10 +510,15 @@ class MWindow(QMainWindow, Ui_mainWindow):
                                     self.crviewer.filename)
             # self.status.showMessage("Opening " + crviewer.filename)
             self.setCentralWidget(self.crviewer)
-            self.current_scenario = self.crviewer.current_scenario
         else:
             self.textBrowser.append(
                 "Terminated because no CommonRoad file selected")
+
+    def open_scenario(self, new_scenario):
+        self.crviewer = CrViewer()
+        self.crviewer.filename = "new scenario"  # TODO extract name from scenario
+        self.crviewer.open_scenario(new_scenario)
+        self.update_to_new_scenario()
 
     def file_save(self):
         """Function to save a CR .xml file."""
