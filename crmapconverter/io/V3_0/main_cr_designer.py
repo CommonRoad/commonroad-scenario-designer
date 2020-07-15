@@ -42,10 +42,8 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.intersection_List = None
         self.timer = None
         self.ani_path = None
-        self.od2cr = None
 
         self.current_scenario = None
-        self.commoroad_filename = None
         self.selected_lanelet_id = None
         self.slider_clicked = False
 
@@ -117,7 +115,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
             self.lanelets_List.close()
             self.lanelets_List = None
         self.lanelets_List = QDockWidget("Lanelets list " +
-                                         str(self.commoroad_filename))
+                                         str(self.crviewer.filename))
         self.lanelets_List.setFloating(True)
         self.lanelets_List.setFeatures(QDockWidget.AllDockWidgetFeatures)
         self.lanelets_List.setAllowedAreas(Qt.RightDockWidgetArea)
@@ -127,7 +125,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
     def show_laneletslist(self):
         """Function connected with button 'Lanelets List' to show the lanelets list."""
         if self.lanelets_List is None:
-            if self.commoroad_filename is None:
+            if self.crviewer.filename is None:
                 messbox = QMessageBox()
                 reply = messbox.question(
                     self, "Warning",
@@ -148,7 +146,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
             self.intersection_List.close()
             self.intersection_List = None
         self.intersection_List = QDockWidget("Intersection list " +
-                                             self.commoroad_filename)
+                                             self.crviewer.filename)
         self.intersection_List.setFloating(True)
         self.intersection_List.setFeatures(QDockWidget.AllDockWidgetFeatures)
         self.intersection_List.setAllowedAreas(Qt.RightDockWidgetArea)
@@ -159,7 +157,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
     def show_intersection_list(self):
         """Function connected with button 'Lanelets List' to show the lanelets list."""
         if self.intersection_List is None:
-            if self.commoroad_filename is None:
+            if self.crviewer.filename is None:
                 messbox = QMessageBox()
                 reply = messbox.question(
                     self, "Warning",
@@ -349,23 +347,8 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
     def opendrive_2_cr(self):
         """Function to realize converter OD2CR and show the result."""
-        self.od2cr = OD2CR()
-        self.od2cr.setWindowIcon(QIcon(":/icons/Groupe_3.ico"))
-        if self.od2cr.filename is not None:
-            self.commoroad_filename = self.od2cr.filename
-            self.setCentralWidget(self.od2cr)  # setup mdi of CR File
-            self.setWindowTitle(self.od2cr.filename)  # set up the title
-            self.create_laneletslist(self.od2cr)
-            self.create_intersection_list(self.od2cr)
-            self.textBrowser.append("Converted from " + self.od2cr.filename)
-            self.textBrowser.append(self.od2cr.statsText)
-            self.textBrowser.setMaximumHeight(800)
-            self.current_scenario = self.od2cr.current_scenario
+        OD2CR(self)
 
-
-        else:
-            self.textBrowser.append(
-                "Terminated because no OpenDrive file selected")
 
     def osm_2_cr(self):
         """Function to realize converter OSM2CR and show the result."""
@@ -500,7 +483,6 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.crviewer.setWindowIcon(QIcon(":/icons/cr1.ico"))
 
         if self.crviewer.filename is not None:
-            self.commoroad_filename = self.crviewer.filename
             self.current_scenario = self.crviewer.current_scenario
             self.create_laneletslist(self.crviewer)
             self.create_intersection_list(self.crviewer)
@@ -514,9 +496,9 @@ class MWindow(QMainWindow, Ui_mainWindow):
             self.textBrowser.append(
                 "Terminated because no CommonRoad file selected")
 
-    def open_scenario(self, new_scenario):
+    def open_scenario(self, new_scenario, filename):
         self.crviewer = CrViewer()
-        self.crviewer.filename = "new scenario"  # TODO extract name from scenario
+        self.crviewer.filename = filename  # TODO extract name from scenario(OSM)
         self.crviewer.open_scenario(new_scenario)
         self.update_to_new_scenario()
 
