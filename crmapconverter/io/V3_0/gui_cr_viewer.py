@@ -13,14 +13,22 @@ from matplotlib import animation
 
 from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.scenario.intersection import Intersection
-from commonroad.scenario.lanelet import Lanelet, is_natural_number
+from commonroad.scenario.lanelet import (
+    Lanelet,
+    is_natural_number,
+    LaneletNetwork
+)
 
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
+from matplotlib.backends.backend_qt5agg import (
+    FigureCanvasQTAgg as FigureCanvas
+)
+from matplotlib.backends.backend_qt5agg import (
+    NavigationToolbar2QT as NavigationToolbar
+)
 
 from matplotlib.animation import FuncAnimation
-from commonroad.visualization.draw_dispatch_cr import draw_object, plottable_types
-from commonroad.scenario.obstacle import DynamicObstacle
+from commonroad.visualization.draw_dispatch_cr import draw_object
+from commonroad.scenario.scenario import Scenario
 
 from crmapconverter.io.V3_0.GUI_resources.MainWindow import Ui_mainWindow
 from PyQt5.QtWidgets import *
@@ -97,6 +105,7 @@ class CrViewer(QWidget):
     def __init__(self, parent=None):
         super(CrViewer, self).__init__(parent)
         self.filename = None
+        self.name = None
         self.current_scenario = None
         self.selected_lanelet_id = None
         self.selected_intersection_id = None
@@ -139,43 +148,35 @@ class CrViewer(QWidget):
             "CommonRoad scenario files *.xml (*.xml)",
             options=QFileDialog.Options(),
         )
-
         if not path:
-            # self.no_file_selected()  # is not a common workflow
             return
-
         self.open_path(path)
 
     def open_path(self, path):
         """ """
 
         self.filename = os.path.basename(path)
-
         try:
             commonroad_reader = CommonRoadFileReader(path)
             scenario, _ = commonroad_reader.open()
-
         except etree.XMLSyntaxError as e:
-            errorMsg = "Syntax Error: {}".format(e)
             QMessageBox.warning(
                 self,
                 "CommonRoad XML error",
-                "There was an error during the loading of the selected CommonRoad file.\n\n{}"
-                .format(errorMsg),
+                "There was an error during the loading of the selected CommonRoad file.\n\n"
+                + "Syntax Error: {}".format(e),
                 QMessageBox.Ok,
             )
             return
         except Exception as e:
-            errorMsg = "{}".format(e)
             QMessageBox.warning(
                 self,
                 "CommonRoad XML error",
-                "There was an error during the loading of the selected CommonRoad file.\n\n{}"
-                .format(errorMsg),
+                "There was an error during the loading of the selected CommonRoad file.\n\n"
+                + "{}".format(e),
                 QMessageBox.Ok,
             )
             return
-
         self.open_scenario(scenario)
 
     def open_scenario(self, scenario):
@@ -184,6 +185,10 @@ class CrViewer(QWidget):
         self.selected_lanelet_id = None
         self.selected_intersection_id = None
         self.current_scenario = scenario
+        if scenario.benchmark_id:
+            self.name = scenario.benchmark_id
+        else:
+            self.name = "Unnamed scenario"
         self.calc_max_timestep()
         self.update_plot()
 
@@ -220,7 +225,7 @@ class CrViewer(QWidget):
         if reply == QMessageBox.Ok:
             self.open_commonroad_file()
         else:
-            self.close
+            self.close # behavior when called as inteded?
 
     def center(self, x):
         screen = QDesktopWidget().screenGeometry()
@@ -694,6 +699,14 @@ class CrViewer(QWidget):
             event.accept()
         else:
             event.ignore()
+
+    def load_empty_scenario(self):
+        """ called by button new scenario """
+        scenario = Scenario(0.1, 'new scenario')
+        net = LaneletNetwork()
+        scenario.lanelet_network = net
+        self.open_scenario(scenario)
+
 
 def find_intersection_by_id(scenario, intersection_id: int) -> Lanelet:
     """

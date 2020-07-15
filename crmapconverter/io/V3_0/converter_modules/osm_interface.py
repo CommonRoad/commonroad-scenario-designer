@@ -7,17 +7,23 @@ from typing import Optional
 
 from PyQt5.QtWidgets import QMainWindow
 from PyQt5.QtGui import QIcon
+from matplotlib.pyplot import close
+
 from crmapconverter.osm2cr.converter_modules.cr_operations import export as ex
 from crmapconverter.osm2cr.converter_modules.graph_operations import road_graph as rg
-from crmapconverter.osm2cr.converter_modules.gui_modules import gui
+from crmapconverter.osm2cr.converter_modules.gui_modules import (
+    gui_embedding,
+    settings,
+    gui
+)
 from crmapconverter.osm2cr.converter_modules.gui_modules.GUI_resources.start_window import (
-    Ui_MainWindow as startWindow,
+    Ui_MainWindow as startWindow
 )
 
-from crmapconverter.osm2cr.converter_modules.gui_modules import gui_embedding
+from crmapconverter.io.V3_0.converter_modules.converter_interface import ConverterInterface
 
 
-class OSM_Interface:
+class OSMInterface(ConverterInterface):
     """
     Import interface GUI for the osm converter.
     """
@@ -29,9 +35,12 @@ class OSM_Interface:
         self.edge_edit_window: Optional[EdgeEdit] = None
         self.lane_link_window: Optional[LaneLinkEdit] = None
         self.path = None
+        self.settings = None
+        
+    def start_import(self):
         self.main_window.show()
 
-    def edge_edit_embedding(self, graph: rg.Graph) -> None:
+    def edge_edit_embedding(self, graph: rg.Graph):
         """
         sets edge edit embedding as main window
 
@@ -44,7 +53,7 @@ class OSM_Interface:
         else:
             print("no graph loaded")
 
-    def lane_link_embedding(self, graph: rg.Graph) -> None:
+    def lane_link_embedding(self, graph: rg.Graph):
         """
         sets lane link embedding as main window
 
@@ -60,6 +69,23 @@ class OSM_Interface:
         scenario, _ = ex.convert_to_scenario(graph)
         self.cr_designer.open_scenario(scenario, '') #TODO: extract filename from osm file
         self.main_window.close()
+
+    def show_start_menu(self):
+        """
+        closes open figures and shows the start menu
+
+        :return: None
+        """
+        if self.edge_edit_window is not None:
+            close(self.edge_edit_window.gui_plot.fig)
+        if self.lane_link_window is not None:
+            close(self.lane_link_window.gui_plot.fig)
+        self.edge_edit_window = None
+        self.lane_link_window = None
+        self.start_menu = StartMenu(self)
+
+    def show_settings(self):
+        self.settings = settings.SettingsMenu(self)
 
 
 class StartMenu(gui_embedding.StartMenu):
@@ -95,7 +121,7 @@ class EdgeEdit(gui_embedding.EdgeEdit):
     """
 
     def __init__(
-        self, app: OSM_Interface, graph: Optional[rg.Graph], ee_gui: Optional[gui.EdgeEditGUI]
+        self, app: OSMInterface, graph: Optional[rg.Graph], ee_gui: Optional[gui.EdgeEditGUI]
     ):
         """
 
@@ -115,7 +141,7 @@ class LaneLinkEdit(gui_embedding.LaneLinkEdit):
     """
 
     def __init__(
-        self, app: OSM_Interface, graph: Optional[rg.Graph], ll_gui: Optional[gui.LaneLinkGUI]
+        self, app: OSMInterface, graph: Optional[rg.Graph], ll_gui: Optional[gui.LaneLinkGUI]
     ):
         """
 
