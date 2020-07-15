@@ -1,4 +1,6 @@
+import os
 from lxml import etree
+
 
 from PyQt5.QtWidgets import QFileDialog, QMessageBox
 
@@ -13,6 +15,7 @@ class OpenDRIVEInterface(ConverterInterface):
         self.cr_designer = parent
         self.loadedRoadNetwork = None
         self.stats_Text = None
+        self.filename = None
 
     def start_import(self):
         """  """
@@ -25,6 +28,7 @@ class OpenDRIVEInterface(ConverterInterface):
         )
 
         if not file_path:
+            self.NoFileselected()
             return
 
         # Load road network and print some statistics
@@ -54,6 +58,7 @@ class OpenDRIVEInterface(ConverterInterface):
 
         self.loadedRoadNetwork = Network()
         self.loadedRoadNetwork.load_opendrive(openDriveXml)
+        self.filename = os.path.basename(file_path)
 
         self.cr_designer.textBrowser.append(
             """Name: {}<br>Version: {}<br>Date: {}<br><br>OpenDRIVE
@@ -72,4 +77,17 @@ class OpenDRIVEInterface(ConverterInterface):
         )
 
         scenario = self.loadedRoadNetwork.export_commonroad_scenario()
-        self.cr_designer.open_scenario(scenario)
+        self.cr_designer.open_scenario(scenario, self.filename)
+
+    def NoFileselected(self):
+        mbox = QMessageBox()
+        reply = mbox.information(
+            None,
+            "Information",
+            "Please select a OpenDrive file",
+            QMessageBox.Ok | QMessageBox.No,
+            QMessageBox.Ok)
+        if reply == QMessageBox.Ok:
+            self.open_opendrive_file_dialog()
+        else:
+            mbox.close()

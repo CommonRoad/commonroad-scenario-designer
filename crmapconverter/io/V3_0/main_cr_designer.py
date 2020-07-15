@@ -125,7 +125,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         if self.lanelets_List is not None:
             self.lanelets_List.close()
             self.lanelets_List = None
-        self.lanelets_List = QDockWidget("Lanelets")
+        self.lanelets_List = QDockWidget("Lanelets " + self.crviewer.filename)
         self.lanelets_List.setFloating(True)
         self.lanelets_List.setFeatures(QDockWidget.AllDockWidgetFeatures)
         self.lanelets_List.setAllowedAreas(Qt.RightDockWidgetArea)
@@ -155,7 +155,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         if self.intersection_List is not None:
             self.intersection_List.close()
             self.intersection_List = None
-        self.intersection_List = QDockWidget("Intersections")
+        self.intersection_List = QDockWidget("Intersections " + self.crviewer.filename)
         self.intersection_List.setFloating(True)
         self.intersection_List.setFeatures(QDockWidget.AllDockWidgetFeatures)
         self.intersection_List.setAllowedAreas(Qt.RightDockWidgetArea)
@@ -511,12 +511,14 @@ class MWindow(QMainWindow, Ui_mainWindow):
             self.create_laneletslist(self.crviewer)
             self.create_intersection_list(self.crviewer)
             self.setWindowTitle(self.crviewer.name)
-            self.textBrowser.append("loading " + self.crviewer.current_scenario.benchmark_id)
+            self.textBrowser.append("loading " + self.crviewer.filename)
+            self.textBrowser.append("Benchmark-ID: " + self.crviewer.current_scenario.benchmark_id)
             self.setCentralWidget(self.crviewer)
 
-    def open_scenario(self, new_scenario):
+    def open_scenario(self, new_scenario, filename):
         """  """
         self.crviewer = CrViewer()
+        self.crviewer.filename = filename  # TODO extract name from scenario(OSM)
         self.crviewer.open_scenario(new_scenario)
         self.update_to_new_scenario()
 
