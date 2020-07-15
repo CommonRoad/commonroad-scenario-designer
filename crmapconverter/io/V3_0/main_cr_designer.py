@@ -5,10 +5,11 @@ from lxml import etree
 from crmapconverter.io.V3_0.GUI_resources.MainWindow import Ui_mainWindow
 from crmapconverter.io.V3_0.gui_toolbox import UpperToolbox, SumoTool
 from crmapconverter.io.V3_0.gui_cr_viewer import CrViewer
-from crmapconverter.io.V3_0.gui_opendrive2cr import OD2CR
-from crmapconverter.io.V3_0.gui_osm2cr import OSM_Interface
-from crmapconverter.io.V3_0.gui_setting_interface import Setting
-from PyQt5 import QtCore, QtGui, QtWidgets
+from crmapconverter.io.V3_0.converter_modules.osm_interface import OSMInterface
+from crmapconverter.io.V3_0.converter_modules.opendrive_interface import (
+    OpenDRIVEInterface
+)
+from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
@@ -81,15 +82,29 @@ class MWindow(QMainWindow, Ui_mainWindow):
         # menu_export.addAction(self.export2SUMO)
 
         menu_setting = menuBar.addMenu('Setting')  # add menu 'Setting'
-        menu_setting.addAction(self.setting)
+        menu_setting.addAction(self.gui_settings)
+        menu_setting.addAction(self.osm_settings)
+        menu_setting.addAction(self.opendrive_settings)
+        menu_setting.addAction(self.sumo_settings)
 
         menu_help = menuBar.addMenu('Help')  # add menu 'Help'
         menu_help.addAction(self.open_web)
 
         self.center()
 
-    def setting_interface(self):
-        self.set = Setting()
+    def show_osm_settings(self):
+        osm_interface = OSMInterface(self)
+        osm_interface.show_settings()
+
+    def show_opendrive_settings(self):
+        opendrive_interface = OpenDRIVEInterface(self)
+        opendrive_interface.show_settings()
+
+    def show_gui_settings(self):
+        print("not yet implemented")
+
+    def show_sumo_settings(self):
+        print("not yet implemented")
 
     def create_toolbox(self):
         """ Create the Upper toolbox."""
@@ -310,7 +325,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
             "From OpenDrive",
             icon="",
             checkable=False,
-            slot=self.opendrive_2_cr,
+            slot=self.od_2_cr,
             tip="Convert from OpenDrive to CommonRoad",
             shortcut=None)
         self.importfromOSM = self.create_action(
@@ -347,29 +362,14 @@ class MWindow(QMainWindow, Ui_mainWindow):
                             encoding="UTF-8",
                             pretty_print=True))
 
-    def opendrive_2_cr(self):
-        """Function to realize converter OD2CR and show the result."""
-        self.od2cr = OD2CR()
-        self.od2cr.setWindowIcon(QIcon(":/icons/Groupe_3.ico"))
-        if self.od2cr.filename is not None:
-            self.commoroad_filename = self.od2cr.filename
-            self.setCentralWidget(self.od2cr)  # setup mdi of CR File
-            self.setWindowTitle(self.od2cr.filename)  # set up the title
-            self.create_laneletslist(self.od2cr)
-            self.create_intersection_list(self.od2cr)
-            self.textBrowser.append("Converted from " + self.od2cr.filename)
-            self.textBrowser.append(self.od2cr.statsText)
-            self.textBrowser.setMaximumHeight(800)
-            self.current_scenario = self.od2cr.current_scenario
-
-
-        else:
-            self.textBrowser.append(
-                "Terminated because no OpenDrive file selected")
-
     def osm_2_cr(self):
         """Function to realize converter OSM2CR and show the result."""
-        OSM_Interface(self)
+        osm_interface = OSMInterface(self)
+        osm_interface.start_import()
+
+    def od_2_cr(self):
+        opendrive_interface = OpenDRIVEInterface(self)
+        opendrive_interface.start_import()
 
     def create_export_actions(self):
         """Function to create the export action in the menu bar."""
@@ -390,11 +390,29 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
     def create_setting_actions(self):
         """Function to create the export action in the menu bar."""
-        self.setting = self.create_action("Settings",
+        self.osm_settings = self.create_action("OSM Settings",
                                           icon="",
                                           checkable=False,
-                                          slot=self.setting_interface,
-                                          tip="Show settings for converters",
+                                          slot=self.show_osm_settings,
+                                          tip="Show settings for osm converter",
+                                          shortcut=None)
+        self.opendrive_settings = self.create_action("OpenDRIVE Settings",
+                                          icon="",
+                                          checkable=False,
+                                          slot=self.show_opendrive_settings,
+                                          tip="Show settings for OpenDRIVE converter",
+                                          shortcut=None)
+        self.gui_settings = self.create_action("GUI Settings",
+                                          icon="",
+                                          checkable=False,
+                                          slot=self.show_gui_settings,
+                                          tip="Show settings for the CR Scenario Designer",
+                                          shortcut=None)
+        self.sumo_settings = self.create_action("SUMO Settings",
+                                          icon="",
+                                          checkable=False,
+                                          slot=self.show_gui_settings,
+                                          tip="Show settings for the SUMO interface",
                                           shortcut=None)
 
     def create_help_actions(self):
