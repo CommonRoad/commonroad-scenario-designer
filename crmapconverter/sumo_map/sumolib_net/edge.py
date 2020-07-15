@@ -14,8 +14,9 @@
 # @date    2011-11-28
 # @version $Id$
 
+from xml.etree import cElementTree as ET
 from .connection import Connection
-from .lane import addJunctionPos
+from .lane import addJunctionPos, _to_shape_string
 
 
 class Edge:
@@ -230,4 +231,52 @@ class Edge:
             return '<edge id="%s" from="%s" to="%s"/>' % (self._id, self._from.getID(), self._to.getID())
         else:
             return '<edge id="%s" function="%s"/>' % (self._id, self.getFunction())
+
+    # def __init__(self, id, fromN, toN, prio, function, name):
+    #     self._id = id
+    #     self._from = fromN
+    #     self._to = toN
+    #     self._priority = prio
+    #     if fromN:
+    #         fromN.addOutgoing(self)
+    #     if toN:
+    #         toN.addIncoming(self)
+    #     self._lanes = []
+    #     self._speed = None
+    #     self._length = None
+    #     self._incoming = {}
+    #     self._outgoing = {}
+    #     self._shape = None
+    #     self._shapeWithJunctions = None
+    #     self._shape3D = None
+    #     self._shapeWithJunctions3D = None
+    #     self._rawShape = None
+    #     self._rawShape3D = None
+    #     self._function = function
+    #     self._tls = None
+    #     self._name = name
+
+    def toXML(self) -> str:
+        edge = ET.Element("edge")
+        edge.set("from", str(self.getFromNode().getID()))
+        edge.set("to", str(self.getToNode().getID()))
+        edge.set("id", str(self._id))
+        if self._priority:
+            edge.set("priority", str(self._priority))
+        if self._speed:
+            edge.set("speed", str(self._speed))
+        if self._length:
+            edge.set("length", str(self._length))
+        if self._shape:
+            edge.set("shape", _to_shape_string(self._shape))
+        if self._length:
+            edge.set("length", str(self._length))
+        edge.set("numLanes", str(self.getLaneNumber()))
+        edge.set("spreadType", "center")
+        edge.set("function", str(self._function))
+        for lane in self._lanes:
+            edge.append(ET.fromstring(lane.toXML()))
+
+        return ET.tostring(edge)
+
 

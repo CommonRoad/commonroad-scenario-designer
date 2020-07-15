@@ -4,8 +4,9 @@ Default configuration for CommonRoad to SUMO map converter
 
 from commonroad.common.util import Interval
 from commonroad.scenario.obstacle import ObstacleType
-
 from commonroad.scenario.traffic_sign import TrafficLightState
+from commonroad.scenario.lanelet import LaneletType
+
 from typing import List
 
 from sumocr.sumo_config.default import DefaultConfig
@@ -43,6 +44,25 @@ traffic_light_states_SUMO2CR = {
     'u': TrafficLightState.RED_YELLOW,
     'o': TrafficLightState.INACTIVE,
     'O': TrafficLightState.INACTIVE
+}
+
+# Mapping Commonroad LaneletType to SUMO vClass
+lanelet_type_CR2SUMO = {
+    LaneletType.URBAN: ["evehicle", "delivery","emergency","passenger", "truck", "trailer", "bus","coach", "moped", "motorcycle"],
+    LaneletType.COUNTRY: ["evehicle", "delivery","emergency","passenger", "truck", "trailer", "bus","coach", "moped", "motorcycle"],
+    LaneletType.HIGHWAY: ["evehicle", "delivery","emergency","passenger", "truck", "trailer", "bus","coach", "moped", "motorcycle"],
+    LaneletType.DRIVE_WAY: ["evehicle", "delivery","emergency","passenger", "truck", "trailer", "bus","coach", "moped", "motorcycle"],
+    LaneletType.MAIN_CARRIAGE_WAY: ["evehicle", "delivery","emergency","passenger", "truck", "trailer", "bus","coach", "moped", "motorcycle"],
+    LaneletType.ACCESS_RAMP: ["evehicle", "delivery","emergency","passenger", "truck", "trailer", "bus","coach", "moped", "motorcycle"],
+    LaneletType.EXIT_RAMP: ["evehicle", "delivery","emergency","passenger", "truck", "trailer", "bus","coach", "moped", "motorcycle"],
+    LaneletType.SHOULDER: ["evehicle", "delivery","emergency","passenger", "truck", "trailer", "bus","coach", "moped", "motorcycle"],
+    LaneletType.INTERSTATE: ["evehicle", "delivery","emergency","passenger", "truck", "trailer", "bus","coach", "moped", "motorcycle"],
+    LaneletType.UNKNOWN: ["evehicle", "delivery","emergency","passenger", "truck", "trailer", "bus","coach", "moped", "motorcycle"],
+    LaneletType.BUS_LANE: ["bus", "coach"],
+    LaneletType.BUS_STOP: ["bus", "coach"],
+    LaneletType.BICYCLE_LANE: ["pedestrian","bicycle", "moped"],
+    LaneletType.SIDEWALK: ["pedestrian", "bicycle"],
+    LaneletType.CROSSWALK: ["pedestrian"],
 }
 
 

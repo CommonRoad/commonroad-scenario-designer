@@ -15,19 +15,20 @@
 # @version $Id$
 
 
+from xml.etree import cElementTree as ET
 import sumolib.geomhelper
 
 # taken from sumo/src/utils/common/SUMOVehicleClass.cpp
 SUMO_VEHICLE_CLASSES = (
-    "public_emergency",  # deprecated
-    "public_authority",  # deprecated
-    "public_army",       # deprecated
-    "public_transport",  # deprecated
-    "transport",         # deprecated
-    "lightrail",         # deprecated
-    "cityrail",          # deprecated
-    "rail_slow",         # deprecated
-    "rail_fast",         # deprecated
+    # "public_emergency",  # deprecated
+    # "public_authority",  # deprecated
+    # "public_army",       # deprecated
+    # "public_transport",  # deprecated
+    # "transport",         # deprecated
+    # "lightrail",         # deprecated
+    # "cityrail",          # deprecated
+    # "rail_slow",         # deprecated
+    # "rail_fast",         # deprecated
 
     "private",
     "emergency",
@@ -58,12 +59,11 @@ SUMO_VEHICLE_CLASSES = (
 
 def get_allowed(allow, disallow):
     """ Normalize the given string attributes as a list of all allowed vClasses."""
-    if allow is None and disallow is None:
+    if not allow and not disallow:
         return SUMO_VEHICLE_CLASSES
-    elif disallow is None:
-        return allow.split()
+    elif not disallow:
+        return allow
     else:
-        disallow = disallow.split()
         return tuple([c for c in SUMO_VEHICLE_CLASSES if c not in disallow])
 
 
@@ -82,7 +82,7 @@ class Lane:
 
     """ Lanes from a sumo network """
 
-    def __init__(self, edge, speed, length, width, allow, disallow, shape):
+    def __init__(self, edge, speed:float, length:float, width:float, allow = [], disallow = [], shape = []):
         self._edge = edge
         self._speed = speed
         self._length = length
@@ -220,3 +220,31 @@ class Lane:
 
     def getDisallowed(self):  # added by Chu
         return self._disallowed
+    
+    def toXML(self) -> str:
+        """
+        Converts this lane to it's xml representation
+        """
+        lane = ET.Element("lane")
+        lane.set("index", str(self.getIndex()))
+        lane.set("speed", str(self._speed))
+        lane.set("length", str(self._length))
+        lane.set("shape", _to_shape_string(self._shape))
+        lane.set("shape", _to_shape_string(self._shape))
+        lane.set("width", str(self._width))
+        if self._allowed:
+            lane.set("allow", " ".join(self._allowed))
+        if self._disallowed:
+            lane.set("disallow", " ".join(self._disallowed))
+        for k, v in self._params:
+            lane.set(str(k), str(v))
+        return ET.tostring(lane)
+
+def _to_shape_string(shape):
+    """
+    Convert a collection of points from format shape  to string
+    :param shape: a collection of point defining and edge
+    :return: the same shape but in string format
+    """
+    return " ".join([",".join([str(pi) for pi in p]) for p in shape])
+

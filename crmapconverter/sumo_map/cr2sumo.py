@@ -27,12 +27,13 @@ from matplotlib import pyplot as plt
 
 # modified sumolib.net.* files
 from .sumolib_net import Node, Edge, Lane, TLS, TLSProgram, Connection, Junction
+from .sumolib_net.lane import SUMO_VEHICLE_CLASSES
 import sumolib
 
 from sumocr.maps.scenario_wrapper import AbstractScenarioWrapper
 
 from .util import compute_max_curvature_from_polyline, _find_intersecting_edges, get_scenario_name_from_crfile, get_total_lane_length_from_netfile, write_ego_ids_to_rou_file, get_scenario_name_from_netfile, remove_unreferenced_traffic_lights, max_lanelet_network_id
-from .config import SumoConfig, traffic_light_states_CR2SUMO, traffic_light_states_SUMO2CR
+from .config import SumoConfig, traffic_light_states_CR2SUMO, traffic_light_states_SUMO2CR, lanelet_type_CR2SUMO
 
 # This file is used as a template for the generated .sumo.cfg files
 DEFAULT_CFG_FILE = "default.sumo.cfg"
@@ -312,8 +313,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                 current_lanelet = self.lanelet_network.find_lanelet_by_id(
                     ordered_lanelet_ids[-1])
 
-            self.lanes_dict.update(
-                {rightmost_lanelet.lanelet_id: tuple(ordered_lanelet_ids)})
+            self.lanes_dict[rightmost_lanelet.lanelet_id] = tuple(ordered_lanelet_ids)
             self.edge_lengths[rightmost_lanelet.lanelet_id] = np.min(
                 [lanelet.distance[-1] for lanelet in lanelets])
 
@@ -458,17 +458,18 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                 #             lanelet_width, lanelet_id, self._max_vehicle_width))
                 disallow = self._filter_disallowed_vehicle_classes(
                     max_curvature, lanelet_width, lanelet_id)
+                allow = set([t for tpe in lanelet.lanelet_type for t in lanelet_type_CR2SUMO[tpe]]) 
+                allow = allow if len(allow) > 0 else set(SUMO_VEHICLE_CLASSES) - set(disallow)
 
                 lane = Lane(edge,
                             speed_limit,
                             self.edge_lengths[edge_id],
                             width=lanelet_width,
                             allow=None,
-                            disallow=disallow,
                             shape=shape)
                 self.lanes[lane.getID()] = lane
-                self.lane_id2lanelet_id.update({lane.getID(): lanelet_id})
-                self.lanelet_id2lane_id.update({lanelet_id: lane.getID()})
+                self.lane_id2lanelet_id[lane.getID()] = lanelet_id
+                self.lanelet_id2lane_id[lanelet_id] = lane.getID()
 
         # set oncoming lanes
         for edge_id, lanelet_ids in self.lanes_dict.items():
@@ -499,28 +500,22 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         :param lanelet_id:
         :return: string of disallowed classes
         """
+            
+        # select the disallowed vehicle classes
+        disallow = []
+
         if max_curvature > 0.001:  # not straight lanelet
             radius = 1 / max_curvature
             max_vehicle_length_sq = 4 * (
                 (radius + lanelet_width / 2)**2 -
                 (radius + self._max_vehicle_width / 2)**2)
 
-            # select the disallowed vehicle classes
-            disallow = None
-            for veh_class, veh_length in self.conf.veh_params['length'].items(
-            ):
+            for veh_class, veh_length in self.conf.veh_params['length'].items():
                 # only disallow vehicles longer than car (class passenger)
-                if veh_length**2 > max_vehicle_length_sq and veh_length > self.conf.veh_params[
-                        'length']['passenger']:
-                    if disallow is not None:
-                        disallow = veh_class + ' ' + disallow
-                    else:
-                        disallow = veh_class
+                if veh_length**2 > max_vehicle_length_sq and veh_length > self.conf.veh_params['length']['passenger']:
+                    disallow.append(veh_class)
                     # print("{} disallowed on lanelet {}, allowed max_vehicle_length={}".format(veh_class, lanelet_id,
                     #                                                                           max_vehicle_length))
-        else:
-            disallow = None
-
         return disallow
 
     @staticmethod
@@ -971,37 +966,23 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
             root = ET.Element('root')
             edges = ET.SubElement(root, 'edges')
             for edge in self.new_edges.values():
-                edge.getLanes()
-                fromNode = str(edge.getFromNode().getID())
-                edgeID = str(edge.getID())
-                toNode = str(edge.getToNode().getID())
-                numLanes = str(edge.getLaneNumber())
-                function = str(edge.getFunction())
+                edges.append(ET.fromstring(edge.toXML()))
+                # edge.getLanes()
+                # fromNode = str(edge.getFromNode().getID())
+                # edgeID = str(edge.getID())
+                # toNode = str(edge.getToNode().getID())
+                # numLanes = str(edge.getLaneNumber())
+                # function = str(edge.getFunction())
 
-                edge_et = ET.SubElement(edges, 'edge')
-                edge_et.set('from', fromNode)
-                edge_et.set('id', edgeID)
-                edge_et.set('to', toNode)
-                edge_et.set('numLanes', numLanes)
-                edge_et.set('spreadType', "center")
-                edge_et.set('function', function)
-                for lane in edge.getLanes():
-                    laneID = str(lane.getIndex())
-                    speed = str(lane.getSpeed())
-                    length = str(lane.getLength())
-                    width = str(lane.getWidth())
-                    shape = lane.getShape()
-                    shapeString = self._getShapeString(shape)
-                    disallow = Lane.getDisallowed(lane)
-
-                    lane = ET.SubElement(edge_et, 'lane')
-                    lane.set('index', laneID)
-                    lane.set('speed', speed)
-                    lane.set('length', length)
-                    lane.set('shape', shapeString)
-                    lane.set('width', width)
-                    if disallow:
-                        lane.set('disallow', disallow)
+                # edge_et = ET.SubElement(edges, 'edge')
+                # edge_et.set('from', fromNode)
+                # edge_et.set('id', edgeID)
+                # edge_et.set('to', toNode)
+                # edge_et.set('numLanes', numLanes)
+                # edge_et.set('spreadType', "center")
+                # edge_et.set('function', function)
+                # for lane in edge.getLanes():
+                #     edge_et.append(ET.fromstring(lane.toXML()))
 
             # pretty print & write the generated xml
             output_file.write(
@@ -1265,7 +1246,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         logging.info("Merging Intermediate Files")
         self.write_intermediate_files(output_path)
         conversion_possible = self.merge_intermediate_files(output_path,
-                                                            cleanup=True)
+                                                            cleanup=False)
         if not conversion_possible:
             logging.error("Error converting map, see above for details")
             return False
