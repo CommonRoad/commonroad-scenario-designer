@@ -18,7 +18,7 @@ class OpenDRIVEInterface(ConverterInterface):
         """  """
         file_path, _ = QFileDialog.getOpenFileName(
             self.cr_designer,
-            "QFileDialog.getOpenFileName()",
+            "select OpenDRIVE file to convert",
             "",
             "OpenDRIVE files *.xodr (*.xodr)",
             options=QFileDialog.Options(),
