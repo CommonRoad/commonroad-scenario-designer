@@ -179,16 +179,17 @@ class OSMLaneletsConvertWindow(QWidget):
             self.set_status("Loaded file.")
 
     def export_as_commonroad(self):
-        path, _ = QFileDialog.getSaveFileName(
+        file_path, _ = QFileDialog.getSaveFileName(
             self,
             "QFileDialog.getSaveFileName()",
             "",
             "CommonRoad files (*.xml)",
             options=QFileDialog.Options(),
         )
-
-        if not path:
+        if not file_path:
             return
+        if not file_path.endswith(".xml"):
+            file_path += ".xml"
 
         self.set_status("Converting.")
         osm2l = OSM2LConverter(proj_string=self.proj_string_line.text())
@@ -202,7 +203,7 @@ class OSMLaneletsConvertWindow(QWidget):
                 source="OSM 2 CommonRoad Converter",
                 tags="",
             )
-            with open(f"{path}", "w") as file_out:
+            with open(f"{file_path}", "w") as file_out:
                 writer.write_scenario_to_file_io(file_out)
 
         else:

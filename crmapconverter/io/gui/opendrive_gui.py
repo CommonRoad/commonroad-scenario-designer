@@ -217,10 +217,10 @@ class OpenDriveConvertWindow(QWidget):
             "CommonRoad files *.xml (*.xml)",
             options=QFileDialog.Options(),
         )
-
         if not path:
             return
-
+        if not path.endswith(".xml"):
+            path += ".xml"
         try:
             with open(path, "w") as fh:
                 writer = CommonRoadFileWriter(

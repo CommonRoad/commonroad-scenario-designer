@@ -5,11 +5,9 @@ If you want to add parameters to config.py you also need to add it here in the c
 
 """
 
-from tkinter import Tk
-from tkinter.messagebox import showwarning
 from typing import Dict, Union, List, Optional, Tuple
 
-from PyQt5.QtWidgets import QDialog
+from PyQt5.QtWidgets import QDialog, QFileDialog, QMessageBox
 
 from crmapconverter.osm2cr import config
 from crmapconverter.osm2cr.converter_modules.gui_modules import config_default
@@ -307,6 +305,7 @@ class SettingsMenu:
         self.lane_count_edit_dialog = None
         self.lane_width_edit_dialog = None
         self.speed_limits_edit_dialog = None
+        self.edit_sublayer_way_types_dialog = None
 
         main_app.main_window.show()
 
@@ -428,7 +427,6 @@ class SettingsMenu:
         )
         config.BEZIER_PARAMETER = window.sb_bezier_parameter.value()
         config.INTERSECTION_DISTANCE = window.sb_intersection_distance.value()
-        config.INTERSECTION_DISTANCE_SUBLAYER = window.sb_intersection_distance_sublayer.value()
         config.INTERSECTION_CROPPING_WITH_RESPECT_TO_ROADS = (
             window.chk_intersection_distance_respect.isChecked()
         )
@@ -437,6 +435,9 @@ class SettingsMenu:
         config.CLUSTER_LENGTH = window.sb_cluster_length.value()
         config.LEAST_CLUSTER_LENGTH = window.sb_cluster_length_treshold.value()
         config.MERGE_DISTANCE = window.sb_merge_distance.value()
+
+        config.EXTRACT_SUBLAYER = window.chk_extract_sublayer.isChecked()
+        config.INTERSECTION_DISTANCE_SUBLAYER = window.sb_intersection_distance_sublayer.value()
 
     def edit_street_types(self) -> None:
         """
@@ -484,8 +485,8 @@ class SettingsMenu:
 
         :return: None
         """
-        set_defaults()
-        write_config()
+        set_config_to_default()
+        # write_config()
         self.update_ui_values()
 
     def close_button(self) -> None:
@@ -494,7 +495,7 @@ class SettingsMenu:
 
         :return: None
         """
-        write_config()
+        self.save_to_config()
         self.close()
 
     def save_button(self) -> None:
@@ -504,10 +505,11 @@ class SettingsMenu:
         :return: None
         """
         if not coordinates_from_text(self.window.le_coordinates.text())[0]:
-            Tk().withdraw()
-            showwarning(
-                "Waring",
+            QMessageBox.warning(
+                self,
+                "Warning",
                 "The entered coordinates are invalid! Settings could not be saved.",
+                QMessageBox.Ok,
             )
             return
         self.save_to_config()
@@ -538,9 +540,20 @@ def write_config():
     :return: None
     """
     global config_string
-    with open("config.py", "w", encoding="utf-8") as config_file:
+    file_path, _ = QFileDialog.getSaveFileName(
+            None,
+            "Store Settings",
+            "",
+            "python file *.py (*.py)",
+            options=QFileDialog.Options(),
+        )
+    if not file_path:
+        return
+    if not file_path.endswith(".py"):
+        file_path += ".py"
+    with open(file_path, "w", encoding="utf-8") as config_file:
         config_file.write(config_string())
-
+        print("Settings saved")
 
 def object_to_string(obj: Union[str, int, float]) -> str:
     """
@@ -549,9 +562,9 @@ def object_to_string(obj: Union[str, int, float]) -> str:
     :param obj: object to convert
     :return: obj in parsable string from
     """
-    if type(obj) == str:
+    if isinstance(obj, str):
         return "'" + str(obj) + "'"
-    elif type(obj) in (int, float):
+    elif isinstance(obj, (int, float)):
         return str(obj)
     else:
         raise TypeError("Only dicts of type string, int or float are supported")
@@ -597,7 +610,7 @@ def list_to_string(lst: List[Union[str, int, float]], indentation: int) -> str:
     return result[: -indentation - 2] + "]"
 
 
-def set_defaults() -> None:
+def set_config_to_default() -> None:
     """
     sets the values of config to defaults
 

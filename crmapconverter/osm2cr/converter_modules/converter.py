@@ -21,7 +21,8 @@ from crmapconverter.osm2cr.converter_modules.osm_operations import osm_parser
 from crmapconverter.osm2cr.converter_modules.utility import plots
 
 
-def step_collection_1(graph: road_graph.Graph) -> road_graph.Graph:
+def step_collection_1(file: str) -> road_graph.Graph:
+    graph = osm_parser.create_graph(file)
     if config.MAKE_CONTIGUOUS:
         print("making graph contiguously")
         graph.make_contiguous()
@@ -97,8 +98,8 @@ class GraphScenario:
         :type file: str
         """
         print("reading File and creating graph")
-        graph = osm_parser.create_graph(file)
-        graph = step_collection_1(graph)
+        
+        graph = step_collection_1(file)
         # HERE WE CAN EDIT THE NODES AND EDGES OF THE GRAPH
         if config.USER_EDIT:
             print("editing the graph")

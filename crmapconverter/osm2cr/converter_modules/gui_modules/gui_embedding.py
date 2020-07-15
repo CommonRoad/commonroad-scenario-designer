@@ -305,15 +305,18 @@ class StartMenu(QWidget):
         graph = converter.step_collection_2(graph)
         graph = converter.step_collection_3(graph)
         name = config.BENCHMARK_ID
-        file, _ = QFileDialog.getSaveFileName(
+        file_path, _ = QFileDialog.getSaveFileName(
             self,
             "Save map in Common Road Format",
             "",
             "Common Road file *.xml (*.xml)",
             options=QFileDialog.Options(),
         )
-        if file != "":
-            self.app.export(graph, file+".xml")
+        if not file_path:
+            return
+        if not file_path.endswith(".xml"):
+            file_path += ".xml"
+        self.app.export(graph, file_path)
 
     def start_conversion(self) -> None:
         """
@@ -389,13 +392,12 @@ class StartMenu(QWidget):
 
     def read_osm_file(self, file: str) -> None:
         """
-        loads and osm file and performs first steps to create road graph
+        loads an osm file and performs first steps to create the road graph
 
         :param file: file name
         :return: None
         """
-        self.graph = converter.osm_to_graph(file)
-        self.graph = converter.step_collection_1(self.graph)
+        self.graph = converter.step_collection_1(file)
 
 
 class MapEdit(ABC):
@@ -673,19 +675,19 @@ class LaneLinkEdit(MapEdit):
         :return: None
         """
         name = config.BENCHMARK_ID
-        file, _ = QFileDialog.getSaveFileName(
+        file_path, _ = QFileDialog.getSaveFileName(
             None, # self, was causing error:  argument 1 has unexpected type 'LaneLinkEdit'
             "Save map in Common Road Format",
             "",
             "Common Road file *.xml (*.xml)",
             options=QFileDialog.Options(),
         )
-        if file != "":
-            graph = converter.step_collection_3(self.graph)
-            if not ".xml" in file:
-                self.app.export(graph, file + ".xml")
-            else:
-                self.app.export(graph, file)
+        if not file_path:
+            return
+        if not file_path.endswith(".xml"):
+            file_path += ".xml"
+        graph = converter.step_collection_3(self.graph)
+        self.app.export(graph, file_path)
 
 
 class AttributeEditor:

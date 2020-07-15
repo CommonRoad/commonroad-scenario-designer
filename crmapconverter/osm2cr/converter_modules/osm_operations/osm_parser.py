@@ -367,6 +367,7 @@ def parse_turnlane(turnlane: str) -> str:
 
 def extract_speedlimit(value):
     virtual = False
+    speedlimit = None
     try:
         speedlimit = float(value)
     except ValueError:
