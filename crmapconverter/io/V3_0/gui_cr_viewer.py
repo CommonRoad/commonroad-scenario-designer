@@ -105,7 +105,6 @@ class CrViewer(QWidget):
     def __init__(self, parent=None):
         super(CrViewer, self).__init__(parent)
         self.filename = None
-        self.name = None
         self.current_scenario = None
         self.selected_lanelet_id = None
         self.selected_intersection_id = None

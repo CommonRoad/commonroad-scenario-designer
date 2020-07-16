@@ -510,7 +510,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         if self.crviewer.current_scenario is not None:
             self.create_laneletslist(self.crviewer)
             self.create_intersection_list(self.crviewer)
-            self.setWindowTitle(self.crviewer.name)
+            self.setWindowTitle(self.crviewer.filename)
             self.textBrowser.append("loading " + self.crviewer.filename)
             self.textBrowser.append("Benchmark-ID: " + self.crviewer.current_scenario.benchmark_id)
             self.setCentralWidget(self.crviewer)
@@ -518,7 +518,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
     def open_scenario(self, new_scenario, filename):
         """  """
         self.crviewer = CrViewer()
-        self.crviewer.filename = filename  # TODO extract name from scenario(OSM)
+        self.crviewer.filename = filename
         self.crviewer.open_scenario(new_scenario)
         self.update_to_new_scenario()
 
@@ -539,7 +539,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         path, _ = QFileDialog.getSaveFileName(
             self,
             "Select file to save scenario",
-            self.crviewer.name + ".xml",
+            self.crviewer.filename + ".xml",
             "CommonRoad files *.xml (*.xml)",
             options=QFileDialog.Options(),
         )

@@ -287,7 +287,7 @@ class StartMenu(QWidget):
         :return: None
         """
 
-        file, _ = QFileDialog.getOpenFileName(
+        filename, _ = QFileDialog.getOpenFileName(
             self,
             "Select OpenStreetMap map",
             "",
@@ -295,10 +295,10 @@ class StartMenu(QWidget):
             options=QFileDialog.Options(),
         )
 
-        self.embedding.input_bench_id.setText(file.split('/')[-1].split('.')[0])
-        if file != "":
-            self.selected_file = file
-            self.embedding.l_selected_file.setText(file)
+        self.embedding.input_bench_id.setText(filename.split('/')[-1].split('.')[0])
+        if filename != "":
+            self.selected_file = filename
+            self.embedding.l_selected_file.setText(filename)
             if self.embedding.rb_load_file.isChecked():
                 self.embedding.input_picked_output.setText("File picked")
 

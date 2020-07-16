@@ -28,7 +28,7 @@ class OpenDRIVEInterface(ConverterInterface):
         )
 
         if not file_path:
-            self.NoFileselected()
+            # self.NoFileselected()
             return
 
         # Load road network and print some statistics
@@ -58,7 +58,6 @@ class OpenDRIVEInterface(ConverterInterface):
 
         self.loadedRoadNetwork = Network()
         self.loadedRoadNetwork.load_opendrive(openDriveXml)
-        self.filename = os.path.basename(file_path)
 
         self.cr_designer.textBrowser.append(
             """Name: {}<br>Version: {}<br>Date: {}<br><br>OpenDRIVE
@@ -77,17 +76,19 @@ class OpenDRIVEInterface(ConverterInterface):
         )
 
         scenario = self.loadedRoadNetwork.export_commonroad_scenario()
+        self.filename = os.path.basename(file_path)
+        self.filename = os.path.splitext(self.filename)[0]
         self.cr_designer.open_scenario(scenario, self.filename)
 
-    def NoFileselected(self):
-        mbox = QMessageBox()
-        reply = mbox.information(
-            None,
-            "Information",
-            "Please select a OpenDrive file",
-            QMessageBox.Ok | QMessageBox.No,
-            QMessageBox.Ok)
-        if reply == QMessageBox.Ok:
-            self.open_opendrive_file_dialog()
-        else:
-            mbox.close()
+    # def NoFileselected(self):
+    #     mbox = QMessageBox()
+    #     reply = mbox.information(
+    #         None,
+    #         "Information",
+    #         "Please select a OpenDrive file",
+    #         QMessageBox.Ok | QMessageBox.No,
+    #         QMessageBox.Ok)
+    #     if reply == QMessageBox.Ok:
+    #         self.open_opendrive_file_dialog()
+    #     else:
+    #         mbox.close()

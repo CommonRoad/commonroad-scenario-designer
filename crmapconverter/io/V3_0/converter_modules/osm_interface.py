@@ -3,6 +3,7 @@ This module contains the GUI of the osm -> CR converter
 """
 
 
+import os
 from typing import Optional
 
 from PyQt5.QtWidgets import QMainWindow
@@ -67,7 +68,9 @@ class OSMInterface(ConverterInterface):
     def export(self, graph):
         """ converts a graph to a scenario and loads it into the CrSD """
         scenario, _ = ex.convert_to_scenario(graph)
-        self.cr_designer.open_scenario(scenario, '') #TODO: extract filename from osm file
+        filename = os.path.basename(self.start_menu.selected_file)
+        filename = os.path.splitext(filename)[0]
+        self.cr_designer.open_scenario(scenario, filename)
         self.main_window.close()
 
     def show_start_menu(self):
