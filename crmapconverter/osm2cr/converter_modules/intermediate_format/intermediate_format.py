@@ -4,9 +4,10 @@ This module holds the classes required for the intermediate format
 
 __author__ = "Behtarin Ferdousi"
 
-from typing import List, Set, Tuple
-import numpy as np
 import copy
+import numpy as np
+from typing import List, Set, Tuple
+import warnings
 
 from commonroad.scenario.lanelet import (
     Lanelet,
@@ -62,6 +63,14 @@ class Node:
 
         self.id = node_id
         self.point = point
+
+
+def is_valid(lanelet):
+    polygon = lanelet.convert_to_polygon().shapely_object
+    if not polygon.is_valid:
+        warnings.warn("Lanelet " + str(lanelet.lanelet_id) + " invalid")
+        return False
+    return True
 
 
 class Edge:
@@ -127,7 +136,7 @@ class Edge:
 
         :return: CommonRoad Lanelet
         """
-        return Lanelet(
+        lanelet = Lanelet(
             np.array(self.left_bound),
             np.array(self.center_points),
             np.array(self.right_bound),
@@ -142,6 +151,8 @@ class Edge:
             traffic_lights=self.traffic_lights,
             lanelet_type={LaneletType(self.edge_type)}
         )
+        is_valid(lanelet)
+        return lanelet
 
     @staticmethod
     def extract_from_lane(lane) -> "Edge":
