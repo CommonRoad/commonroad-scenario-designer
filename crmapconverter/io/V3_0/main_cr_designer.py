@@ -492,7 +492,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         """Not Finished---"""
         self.crviewer = CrViewer()
         self.crviewer.load_empty_scenario()
-        self.update_to_new_scenario()
+        #self.update_to_new_scenario() #TODO finish the scenario creating in the furture with scenario manually editing
         # show message in statusbar
         self.status.showMessage("Creating New File")
 
