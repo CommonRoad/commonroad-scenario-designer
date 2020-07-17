@@ -37,7 +37,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.console = None
         self.textBrowser = None
         self.sumobox = None
-        self.crviewer = CrViewer(self)
+        self.crviewer = CrViewer()
         self.lanelets_List = None
         self.intersection_List = None
         self.timer = None
@@ -467,7 +467,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
     def file_open(self):
         """Function to open a CR .xml file."""
-        self.crviewer = CrViewer(self)
+        self.crviewer = CrViewer()
         self.crviewer.open_commonroad_file()
         self.update_max_step()
         self.update_to_new_scenario()
@@ -489,7 +489,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
     def open_scenario(self, new_scenario, filename):
         """  """
-        self.crviewer = CrViewer(self)
+        self.crviewer = CrViewer()
         self.crviewer.filename = filename
         self.crviewer.open_scenario(new_scenario)
         self.update_to_new_scenario()

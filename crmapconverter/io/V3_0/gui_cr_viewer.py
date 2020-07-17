@@ -13,7 +13,6 @@ from matplotlib import animation
 
 from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.scenario.intersection import Intersection
-from commonroad.scenario.scenario import Scenario
 from commonroad.scenario.lanelet import (
     Lanelet,
     is_natural_number,
@@ -103,13 +102,12 @@ class Observable:
 
 
 class CrViewer(QWidget):
-    def __init__(self, cr_designer):
-        super().__init__()
-        self.cr_designer = cr_designer
-        self.filename: str= None
-        self.current_scenario: Scenario = None
-        self.selected_lanelet_id: int = None
-        self.selected_intersection_id: int = None
+    def __init__(self, parent=None):
+        super(CrViewer, self).__init__(parent)
+        self.filename = None
+        self.current_scenario = None
+        self.selected_lanelet_id = None
+        self.selected_intersection_id = None
         self.max_step = 0
         #self.figure = plt.figure(figsize=(10.8, 7.2), dpi=100)
         self.canvas = Canvas(self, width=10.8, height=7.2, dpi=100)
@@ -192,26 +190,6 @@ class CrViewer(QWidget):
             self.name = "Unnamed scenario"
         self.calc_max_timestep()
         self.update_plot()
-        self.check_scenario()
-
-    def check_scenario(self) -> List[int]:
-        # check if lanelets are valid polylines
-        lanelet_ids = []
-        for lanelet in self.current_scenario.lanelet_network.lanelets:
-            polygon = lanelet.convert_to_polygon().shapely_object
-            if not polygon.is_valid:
-                lanelet_ids.append(lanelet.lanelet_id)
-                self.cr_designer.textBrowser.append(
-                    "Warning: Lanelet {} is invalid polygon!".format(
-                        lanelet.lanelet_id)
-                )
-        # QMessageBox.warning(
-        #         self,
-        #         "CommonRoad XML error",
-        #         "Scenario contains faulty lanelets: " + str(lanelet_ids),
-        #         QMessageBox.Ok,
-        #     )
-        return lanelet_ids
 
     def zoom(self, event):
         """ realize zoom in / out function in GUI """
