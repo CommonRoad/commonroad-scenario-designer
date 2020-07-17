@@ -15,8 +15,6 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 
 from commonroad.common.file_writer import CommonRoadFileWriter
-from crmapconverter.osm.lanelet2osm import L2OSMConverter
-
 
 from crmapconverter.io.V3_0.GUI_src import CR_Scenario_Designer
 
@@ -72,14 +70,13 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
         menu_export = menuBar.addMenu('Export')  # add menu 'Export'
         menu_export.addAction(self.exportAsCommonRoad)
-        menu_export.addAction(self.exportAsOSM)
         # menu_export.addAction(self.export2SUMO)
 
         menu_setting = menuBar.addMenu('Setting')  # add menu 'Setting'
-        menu_setting.addAction(self.gui_settings)
-        menu_setting.addAction(self.osm_settings)
-        menu_setting.addAction(self.opendrive_settings)
+        # menu_setting.addAction(self.gui_settings)
         menu_setting.addAction(self.sumo_settings)
+        menu_setting.addAction(self.osm_settings)
+        # menu_setting.addAction(self.opendrive_settings)
 
         menu_help = menuBar.addMenu('Help')  # add menu 'Help'
         menu_help.addAction(self.open_web)
@@ -329,37 +326,18 @@ class MWindow(QMainWindow, Ui_mainWindow):
             shortcut=None)
 
     def cr_2_osm(self):
-        if self.crviewer.current_scenario is not None:
-            proj_string, ok = QInputDialog.getText(
-                self, 'Export as OSM', 'Enter Proj-string:')
-            if ok:
-                path, _ = QFileDialog.getSaveFileName(
-                    self,
-                    "Select file to export as OSM",
-                    ".osm",
-                    "OSM files (*.osm)",
-                    options=QFileDialog.Options(),
-                )
-
-                if not path:
-                    return
-
-                l2osm = L2OSMConverter(proj_string=proj_string)
-                osm = l2osm(self.crviewer.current_scenario)
-                with open(f"{path}", "wb") as file_out:
-                    file_out.write(
-                        etree.tostring(
-                            osm,
-                            xml_declaration=True,
-                            encoding="UTF-8",
-                            pretty_print=True))
+        osm_interface = OSMInterface(self)
+        osm_interface.start_export()
 
     def osm_2_cr(self):
-        """Function to realize converter OSM2CR and show the result."""
         osm_interface = OSMInterface(self)
         osm_interface.start_import()
 
     def od_2_cr(self):
+        opendrive_interface = OpenDRIVEInterface(self)
+        opendrive_interface.start_import()
+
+    def cr_2_od(self):
         opendrive_interface = OpenDRIVEInterface(self)
         opendrive_interface.start_import()
 
@@ -371,13 +349,6 @@ class MWindow(QMainWindow, Ui_mainWindow):
             checkable=False,
             slot=self.file_save,
             tip="Save as CommonRoad File (the same function as Save)",
-            shortcut=None)
-        self.exportAsOSM = self.create_action(
-            "As OSM",
-            icon="",
-            checkable=False,
-            slot=self.cr_2_osm,
-            tip="Convert from OSM to CommonRoad",
             shortcut=None)
 
     def create_setting_actions(self):
