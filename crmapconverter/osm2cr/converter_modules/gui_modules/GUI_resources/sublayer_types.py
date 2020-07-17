@@ -1,11 +1,3 @@
-# -*- coding: utf-8 -*-
-
-# Form implementation generated from reading ui file 'street_types.ui'
-#
-# Created by: PyQt5 UI code generator 5.11.3
-#
-# WARNING! All changes made in this file will be lost!
-
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 class Ui_Dialog(object):
@@ -87,7 +79,7 @@ class Ui_Dialog(object):
 
     def retranslateUi(self, Dialog):
         _translate = QtCore.QCoreApplication.translate
-        Dialog.setWindowTitle(_translate("Dialog", "Select Street Types"))
+        Dialog.setWindowTitle(_translate("Dialog", "Select Sublayer Way Types"))
         self.chk_unclassified.setText(_translate("Dialog", "unclassified"))
         self.chk_primary.setText(_translate("Dialog", "primary"))
         self.chk_tertiary.setText(_translate("Dialog", "tertiary"))

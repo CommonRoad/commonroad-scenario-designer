@@ -10,7 +10,10 @@ import utm
 
 from crmapconverter.osm2cr import config
 from crmapconverter.osm2cr.converter_modules.graph_operations import road_graph as rg
-from crmapconverter.osm2cr.converter_modules.intermediate_format.intermediate_format import IntermediateFormat
+from crmapconverter.osm2cr.converter_modules.intermediate_format.intermediate_format import (
+    IntermediateFormat,
+    extract_crossings
+)
 from crmapconverter.osm2cr.converter_modules.utility import geometry
 from crmapconverter.osm2cr.converter_modules.utility.idgenerator import get_id
 from crmapconverter.osm2cr.converter_modules.cr_operations.cleanup import sanitize
@@ -22,7 +25,6 @@ from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistin
 from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.planning.planning_problem import PlanningProblemSet
 from commonroad.scenario.scenario import Scenario, Lanelet, LaneletNetwork, Tag, Location
-
 
 
 def get_lanelet(lane: rg.Lane) -> Lanelet:
@@ -105,7 +107,7 @@ def get_lanelets(graph: rg.Graph) -> List[Lanelet]:
 
 def create_scenario(graph: rg.Graph) -> Scenario:
     """
-    creates a CR scenario ot of a graph
+    creates a CR scenario out of a graph
 
     :param graph: the graph to convert
     :return: CR scenario
@@ -140,19 +142,24 @@ def convert_coordinates_to_utm(scenario: Scenario, origin: np.ndarray) -> None:
                 bound[index] = np.array([easting, northing])
     return
 
-def convert_to_scenario(graph) -> Tuple[Scenario, IntermediateFormat]:
-    #scenario = create_scenario(graph)
-    # convert via intermediate format
-    intermediate_format = IntermediateFormat.extract_from_road_graph(graph)
-    scenario = intermediate_format.to_commonroad_scenario()
+def create_scenario_intermediate(graph) -> Tuple[Scenario, IntermediateFormat]:
+    """ Convert Scenario from RoadGraph via IntermediateFormat """
+    interm = IntermediateFormat.extract_from_road_graph(graph)
+    if isinstance(graph, rg.SublayeredGraph):
+        interm_sublayer = IntermediateFormat.extract_from_road_graph(graph.sublayer_graph)
+        crossings = extract_crossings(interm_sublayer, interm)
+        interm_sublayer.intersections = list()
+        interm_sublayer.traffic_lights = list()
+        interm_sublayer.traffic_lights = list()
+        interm.merge(interm_sublayer)
+        interm.add_crossing_information(crossings)
+    scenario = interm.to_commonroad_scenario()
+    return scenario, interm
 
-    # removing converting errors before writing to xml
-    sanitize(scenario)
-    return scenario, intermediate_format
 
 def export(
         graph: rg.Graph,
-        file=config.SAVE_PATH + config.BENCHMARK_ID + ".xml"
+        file_path=config.SAVE_PATH + config.BENCHMARK_ID + ".xml"
 ) -> None:
     """
     converts a graph to a CR scenario and saves it to disk
@@ -160,7 +167,12 @@ def export(
     :param graph: the graph
     :return: None
     """
-    scenario, intermediate_format = convert_to_scenario(graph)
+    #scenario = create_scenario(graph)
+    scenario, intermediate_format = create_scenario_intermediate(graph)
+
+    # removing converting errors before writing to xml
+    sanitize(scenario)
+
     # writing everything to XML
     print("writing scenario to XML file")
 
@@ -180,7 +192,7 @@ def export(
         scenario, problemset, author, affiliation, source, tags, location, decimal_precision=16)
 
     #write scenario to file with planning problem
-    file_writer.write_to_file(file, OverwriteExistingFile.ALWAYS)
+    file_writer.write_to_file(file_path, OverwriteExistingFile.ALWAYS)
 
     # write scenario to file without planning problem
     #file_writer.write_scenario_to_file(file, OverwriteExistingFile.ALWAYS)

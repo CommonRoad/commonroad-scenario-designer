@@ -15,7 +15,8 @@ class CombinedEdge:
 
     """
 
-    def __init__(self, edge1: rg.GraphEdge, edge2: rg.GraphEdge, node: rg.GraphNode):
+    def __init__(self, edge1: rg.GraphEdge,
+                 edge2: rg.GraphEdge, node: rg.GraphNode):
         assert node == edge1.node1
         assert node == edge2.node2
         self.node1 = edge1.node1
@@ -30,19 +31,20 @@ class CombinedEdge:
     def angle_to(
         self, other_edge: Union[rg.GraphEdge, "CombinedEdge"], node: rg.GraphNode
     ) -> float:
-        if type(other_edge) == rg.GraphEdge:
+        if isinstance(other_edge, rg.GraphEdge):
             return self.edge1.angle_to(other_edge, node)
-        elif type(other_edge) == CombinedEdge:
+        elif isinstance(other_edge, CombinedEdge):
             return self.edge1.angle_to(other_edge.edge1, node)
         else:
-            raise ValueError("other edge must be of type GraphEdge or CombinedEdge")
+            raise ValueError(
+                "other edge must be of type GraphEdge or CombinedEdge")
 
     def soft_angle(
         self, edge: Union[rg.GraphEdge, "CombinedEdge"], node: rg.GraphNode
     ) -> bool:
-        if type(edge) == rg.GraphEdge:
+        if isinstance(edge, rg.GraphEdge):
             return self.edge1.soft_angle(edge, node)
-        elif type(edge) == CombinedEdge:
+        elif isinstance(edge, CombinedEdge):
             return self.edge1.soft_angle(edge.edge1, node)
         else:
             raise ValueError("edge must be of type GraphEdge or CombinedEdge")
@@ -99,7 +101,7 @@ def get_incomings_outgoings(
     :return: incoming, outgoing: lists of lanes
     :rtype: Tuple[List[Lane], List[Lane]]
     """
-    if type(edge) == CombinedEdge:
+    if isinstance(edge, CombinedEdge):
         if edge.node1 == node:
             incoming = edge.edge2.lanes
             outgoing = edge.edge1.lanes
@@ -113,7 +115,8 @@ def get_incomings_outgoings(
     outgoing = []
     for lane in edge.lanes:
         # lanes are sorted from left to right according to the direction of its edge
-        # incoming and outgoing lanes are sorted from left to right according to their driving direction
+        # incoming and outgoing lanes are sorted from left to right according
+        # to their driving direction
         if edge.node1 == node:
             # forward_lanes begin here
             if lane.forward:
@@ -127,7 +130,8 @@ def get_incomings_outgoings(
             else:
                 outgoing.insert(0, lane)
         else:
-            raise ValueError("malformed Graph, lanes are assigned to wrong nodes")
+            raise ValueError(
+                "malformed Graph, lanes are assigned to wrong nodes")
     return incoming, outgoing
 
 
@@ -168,7 +172,8 @@ def link_interval(
     :type: length: int
     :return: None
     """
-    if length > min(len(incoming) - start_incoming, len(outgoing) - start_outgoing):
+    if length > min(len(incoming) - start_incoming,
+                    len(outgoing) - start_outgoing):
         raise ValueError("interval is larger than set of lanes")
     if start_incoming < 0 or start_outgoing < 0:
         print("Info: length of outgoing lanes: {}".format(len(outgoing)))
@@ -520,13 +525,14 @@ def set_turnlane_borders(
 
     if not turnlane_useful:
         # Fallback if turnlanes of successor are the same, set all to through
-        if edge_through is not None and type(edge_through) == rg.GraphEdge:
+        if edge_through is not None and isinstance(edge_through, rg.GraphEdge):
             if edge_through.node1 == node:
                 next_turnlanes = edge_through.turnlanes_forward
             elif edge_through.node2 == node:
                 next_turnlanes = edge_through.turnlanes_backward
             else:
-                raise ValueError("malformed Graph, lanes are assigned to wrong nodes")
+                raise ValueError(
+                    "malformed Graph, lanes are assigned to wrong nodes")
             if next_turnlanes == turnlanes:
                 last_left = -1
                 first_through = 0
@@ -545,7 +551,8 @@ def set_turnlane_borders(
                 right_nr = min(len(incoming), len(outgoing_right))
             else:
                 right_nr = 0
-            first_through = max(0, min(left_nr, len(incoming) - through_nr - right_nr))
+            first_through = max(0, min(left_nr,
+                    len(incoming) - through_nr - right_nr))
             last_through = min(
                 len(incoming) - 1,
                 max(-1, len(incoming) - right_nr + 1),
@@ -570,7 +577,8 @@ def set_turnlane_borders(
     return last_left, first_through, last_through, first_right
 
 
-def find_next_linked_lane(lanes: List[rg.Lane], index: int, predecessor: bool) -> int:
+def find_next_linked_lane(
+        lanes: List[rg.Lane], index: int, predecessor: bool) -> int:
     """
     finds the nearest lane in a list which has a predecessor or successer
 
@@ -591,12 +599,14 @@ def find_next_linked_lane(lanes: List[rg.Lane], index: int, predecessor: bool) -
         if predecessor:
             if index - distance >= 0 and lanes[index - distance].predecessors:
                 return index - distance
-            if len(lanes) > index + distance and lanes[index + distance].predecessors:
+            if (len(lanes) > index + distance 
+                    and lanes[index + distance].predecessors):
                 return index + distance
         else:
             if index - distance >= 0 and lanes[index - distance].successors:
                 return index - distance
-            if len(lanes) > index + distance and lanes[index + distance].successors:
+            if (len(lanes) > index + distance 
+                    and lanes[index + distance].successors):
                 return index + distance
     return -1
 
@@ -613,16 +623,20 @@ def link_skipped_lanes(node: rg.GraphNode):
         incoming, outgoing = get_incomings_outgoings(edge, node)
         for lane_index, lane in enumerate(outgoing):
             if not lane.predecessors:
-                linked_lane_index = find_next_linked_lane(outgoing, lane_index, True)
+                linked_lane_index = find_next_linked_lane(
+                    outgoing, lane_index, True)
                 if linked_lane_index > -1:
-                    lane_to_link = next(iter(outgoing[linked_lane_index].predecessors))
+                    lane_to_link = next(
+                        iter(outgoing[linked_lane_index].predecessors))
                     lane_to_link.successors.add(lane)
                     lane.predecessors.add(lane_to_link)
         for lane_index, lane in enumerate(incoming):
             if not lane.successors:
-                linked_lane_index = find_next_linked_lane(incoming, lane_index, False)
+                linked_lane_index = find_next_linked_lane(
+                    incoming, lane_index, False)
                 if linked_lane_index > -1:
-                    lane_to_link = next(iter(incoming[linked_lane_index].successors))
+                    lane_to_link = next(
+                        iter(incoming[linked_lane_index].successors))
                     lane_to_link.predecessors.add(lane)
                     lane.successors.add(lane_to_link)
     return
@@ -723,7 +737,8 @@ def link_through_interval(
     """
     outgoing_through_nr = last_through - (first_through - 1)
     if outgoing_through_nr > 0:
-        start_outgoing = int(np.ceil((len(outgoing_through) - outgoing_through_nr) / 2))
+        start_outgoing = int(np.ceil(
+                (len(outgoing_through) - outgoing_through_nr) / 2))
         link_interval(
             incoming,
             outgoing_through,
@@ -748,7 +763,8 @@ def link_second_degree(node: rg.GraphNode):
     incoming2, outgoing2 = get_incomings_outgoings(edge2, node)
     # full link between streets
     for incoming, outgoing in [(incoming1, outgoing2), (incoming2, outgoing1)]:
-        link_full_incoming_outgoing(incoming, outgoing, merge_left(incoming, outgoing))
+        link_full_incoming_outgoing(incoming, outgoing, 
+                                    merge_left(incoming, outgoing))
 
 
 def link_third_degree(
@@ -770,7 +786,8 @@ def link_third_degree(
             turnlanes.append(lane.turnlane)
         edge_left, edge_right = edges[(index - 1) % 3], edges[(index + 1) % 3]
         incoming_left, outgoing_left = get_incomings_outgoings(edge_left, node)
-        incoming_right, outgoing_right = get_incomings_outgoings(edge_right, node)
+        incoming_right, outgoing_right = get_incomings_outgoings(
+            edge_right, node)
 
         turnlane_useful, rotate = get_turnlane_usefull(
             turnlanes,
@@ -785,15 +802,18 @@ def link_third_degree(
             node,
         )
 
-        # Only left and right turns are used for 3way intersections. Through lanes are rotated
+        # Only left and right turns are used for 3way intersections. Through
+        # lanes are rotated
         if turnlane_useful and rotate is not None:
             if rotate == "through_to_left":
                 for turnlane_index, turnlane in enumerate(turnlanes):
-                    turnlanes[turnlane_index] = turnlane.replace("through", "left")
+                    turnlanes[turnlane_index] = turnlane.replace(
+                        "through", "left")
                 rotate_restrictions(edge, node, "left")
             elif rotate == "through_to_right":
                 for turnlane_index, turnlane in enumerate(turnlanes):
-                    turnlanes[turnlane_index] = turnlane.replace("through", "right")
+                    turnlanes[turnlane_index] = turnlane.replace(
+                        "through", "right")
                 rotate_restrictions(edge, node, "right")
 
         last_left, first_through, last_through, first_right = set_turnlane_borders(
@@ -838,8 +858,10 @@ def link_fourth_degree(
         edge_through = edges[(index - 2) % 4]
         edge_right = edges[(index - 3) % 4]
         incoming_left, outgoing_left = get_incomings_outgoings(edge_left, node)
-        incoming_through, outgoing_through = get_incomings_outgoings(edge_through, node)
-        incoming_right, outgoing_right = get_incomings_outgoings(edge_right, node)
+        incoming_through, outgoing_through = get_incomings_outgoings(
+            edge_through, node)
+        incoming_right, outgoing_right = get_incomings_outgoings(
+            edge_right, node)
 
         forbidden_turns = get_forbidden_turns(edge, node)
         if config.USE_RESTRICTIONS:
@@ -880,7 +902,8 @@ def link_fourth_degree(
         # connect lanes
         linkleft_interval(last_left, incoming, outgoing_left)
         link_right_interval(first_right, incoming, outgoing_right)
-        link_through_interval(last_through, first_through, incoming, outgoing_through)
+        link_through_interval(last_through,first_through,incoming,
+                              outgoing_through)
     link_skipped_lanes(node)
 
 
@@ -902,7 +925,7 @@ def link_high_degree(
         for lane in incoming:
             turnlanes.append(lane.turnlane)
 
-        other_edges = edges[index + 1 :] + edges[:index]
+        other_edges = edges[index + 1:] + edges[:index]
         for other_edge_index, other_edge in enumerate(other_edges):
             if edge.soft_angle(other_edge, node):
                 incoming_other, outgoing_other = get_incomings_outgoings(
@@ -926,7 +949,8 @@ def link_high_degree(
     link_skipped_lanes(node)
 
 
-def get_forbidden_turns(edge: rg.GraphEdge, node: rg.GraphNode) -> Dict[str, bool]:
+def get_forbidden_turns(
+        edge: rg.GraphEdge, node: rg.GraphNode) -> Dict[str, bool]:
     if edge.node1 == node:
         restrictions = edge.backward_restrictions
     elif edge.node2 == node:
@@ -945,7 +969,8 @@ def get_forbidden_turns(edge: rg.GraphEdge, node: rg.GraphNode) -> Dict[str, boo
     return result
 
 
-def rotate_restrictions(edge: rg.GraphEdge, node: rg.GraphNode, direction: str):
+def rotate_restrictions(
+        edge: rg.GraphEdge, node: rg.GraphNode, direction: str):
     """
     rotates through restrictions to left or right according to direction parameter
 

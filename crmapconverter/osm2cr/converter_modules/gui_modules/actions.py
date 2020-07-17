@@ -473,7 +473,7 @@ class EdgeSplit(Action):
     ):
         """
 
-        :param split_index: the index of the way point ant which the edge is split
+        :param split_index: the index of the way point at which the edge is split
         :param edge_plot: the plot object of the edge
         :param origin: the coordinates of the origin of the coordinate system
         :param ax: the axes of the plot

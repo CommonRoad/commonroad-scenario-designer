@@ -40,6 +40,8 @@ class OSMInterface(ConverterInterface):
         
     def start_import(self):
         self.main_window.show()
+        self.cr_designer.textBrowser.append(
+            "For osm converter output please refer to console where you started this program")
 
     def edge_edit_embedding(self, graph: rg.Graph):
         """
@@ -67,7 +69,7 @@ class OSMInterface(ConverterInterface):
 
     def export(self, graph):
         """ converts a graph to a scenario and loads it into the CrSD """
-        scenario, _ = ex.convert_to_scenario(graph)
+        scenario, _ = ex.create_scenario_intermediate(graph)
         filename = os.path.basename(self.start_menu.selected_file)
         filename = os.path.splitext(filename)[0]
         self.cr_designer.open_scenario(scenario, filename)
@@ -88,7 +90,10 @@ class OSMInterface(ConverterInterface):
         self.start_menu = StartMenu(self)
 
     def show_settings(self):
-        self.settings = settings.SettingsMenu(self)
+        # TODO quit on apply
+        self.settings = settings.SettingsMenu(self, self.main_window.close)
+
+        
 
 
 class StartMenu(gui_embedding.StartMenu):
