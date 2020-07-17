@@ -1,3 +1,4 @@
+import sys
 from crmapconverter.io.V3_0.GUI_resources.Sumo_setting import Ui_MainWindow
 
 from PyQt5.QtWidgets import *
