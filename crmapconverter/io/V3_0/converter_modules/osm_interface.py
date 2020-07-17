@@ -88,7 +88,10 @@ class OSMInterface(ConverterInterface):
         self.start_menu = StartMenu(self)
 
     def show_settings(self):
-        self.settings = settings.SettingsMenu(self)
+        # TODO quit on apply
+        self.settings = settings.SettingsMenu(self, self.main_window.close)
+
+        
 
 
 class StartMenu(gui_embedding.StartMenu):

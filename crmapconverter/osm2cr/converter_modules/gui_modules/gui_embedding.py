@@ -188,7 +188,8 @@ class StartMenu(QWidget):
 
         :return: None
         """
-        self.settings_menu = settings.SettingsMenu(self.app)
+        self.settings_menu = settings.SettingsMenu(self.app,
+            self.app.show_start_menu)
 
     def load_edit_state(self) -> None:
         """

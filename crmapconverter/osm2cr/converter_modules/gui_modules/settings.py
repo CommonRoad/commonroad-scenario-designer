@@ -289,13 +289,13 @@ class SettingsMenu:
     Window to edit parameters in config.py
     """
 
-    def __init__(self, main_app):
+    def __init__(self, main_app, close_action):
         """
 
         :param main_app: main app
         """
         self.app = main_app
-        self.close = self.app.show_start_menu
+        self.close = close_action
         self.window = Settings_window()
         self.window.setupUi(self.app.main_window)
         self.update_ui_values()
