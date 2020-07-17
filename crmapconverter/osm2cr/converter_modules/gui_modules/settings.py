@@ -293,6 +293,7 @@ class SettingsMenu:
         """
 
         :param main_app: main app
+        :param close_action: a functio to call when closeEvent is triggered
         """
         self.app = main_app
         self.close = close_action

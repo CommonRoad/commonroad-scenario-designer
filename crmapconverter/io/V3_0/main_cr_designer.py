@@ -16,8 +16,8 @@ from crmapconverter.io.V3_0.converter_modules.osm_interface import OSMInterface
 from crmapconverter.io.V3_0.converter_modules.opendrive_interface import (
     OpenDRIVEInterface
 )
-from crmapconverter.io.V3_0.gui_settings import GUISettings
-from crmapconverter.io.V3_0.SUMO_modules.sumo_settings import SUMOSettings
+# from crmapconverter.io.V3_0.gui_settings import GUISettings
+# from crmapconverter.io.V3_0.SUMO_modules.sumo_settings import SUMOSettings
 from crmapconverter.io.V3_0.SUMO_modules.gui_sumo_simulation import SUMOSimulation
 
 
