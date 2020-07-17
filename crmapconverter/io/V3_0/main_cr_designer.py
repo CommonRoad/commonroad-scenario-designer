@@ -114,10 +114,10 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.create_sumobox()
         self.uppertoolBox.button_sumo_simulation.clicked.connect(
             self.tool_box2_show)
-        self.uppertoolBox.button_lanlist.clicked.connect(
-            self.show_laneletslist)
-        self.uppertoolBox.button_intersection_list.clicked.connect(
-            self.show_intersection_list)
+        #self.uppertoolBox.button_lanlist.clicked.connect(
+        #    self.show_laneletslist)
+        #self.uppertoolBox.button_intersection_list.clicked.connect(
+        #    self.show_intersection_list)
         self.uppertoolBox.button_save.clicked.connect(
             self.save_animation)
 

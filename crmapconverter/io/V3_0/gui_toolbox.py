@@ -92,14 +92,14 @@ class UpperToolbox(QWidget):
         self.sections.append((title1, widget1))
 
         """add button for lanelets list"""
-        self.button_lanlist = QPushButton("Lanelets list")
-        self.button_lanlist.setToolTip("Show Lanelets list")
-        layout1.addWidget(self.button_lanlist, 2, 0)
+        #self.button_lanlist = QPushButton("Lanelets list")
+        #self.button_lanlist.setToolTip("Show Lanelets list")
+        #layout1.addWidget(self.button_lanlist, 2, 0)
 
         """add button for Intersection list"""
-        self.button_intersection_list = QPushButton("Intersection list")
-        self.button_intersection_list.setToolTip("Show Intersection list")
-        layout1.addWidget(self.button_intersection_list, 2, 1)
+        #self.button_intersection_list = QPushButton("Intersection list")
+        #self.button_intersection_list.setToolTip("Show Intersection list")
+        #layout1.addWidget(self.button_intersection_list, 2, 1)
 
         """"""""""""""
 
