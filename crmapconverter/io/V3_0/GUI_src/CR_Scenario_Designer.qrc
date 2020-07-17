@@ -32,5 +32,7 @@
     <file>pause.png</file>
     <file>import.png</file>
     <file>next_step.png</file>
+    <file>intersection_list.ico</file>
+    <file>lanelet_list.ico</file>
   </qresource>
 </RCC>
