@@ -20,9 +20,7 @@ from .lane import addJunctionPos, _to_shape_string
 
 
 class Edge:
-
     """ Edges from a sumo network """
-
     def __init__(self, id, fromN, toN, prio, function, name):
         self._id = id
         self._from = fromN
@@ -138,7 +136,7 @@ class Edge:
             xmax = max(xmax, p[0])
             ymin = min(ymin, p[1])
             ymax = max(ymax, p[1])
-        assert(xmin != xmax or ymin != ymax or self._function == "internal")
+        assert (xmin != xmax or ymin != ymax or self._function == "internal")
         return (xmin, ymin, xmax, ymax)
 
     def getClosestLanePosDist(self, point, perpendicular=False):
@@ -183,11 +181,12 @@ class Edge:
                     x += l.getShape3D()[i][0]
                     y += l.getShape3D()[i][1]
                     z += l.getShape3D()[i][2]
-                self._shape3D.append(
-                    (x / float(numLanes), y / float(numLanes), z / float(numLanes)))
+                self._shape3D.append((x / float(numLanes), y / float(numLanes),
+                                      z / float(numLanes)))
 
         self._shapeWithJunctions3D = addJunctionPos(self._shape3D,
-                                                    self._from.getCoord3D(), self._to.getCoord3D())
+                                                    self._from.getCoord3D(),
+                                                    self._to.getCoord3D())
 
         if self._rawShape3D == []:
             self._rawShape3D = [self._from.getCoord3D(), self._to.getCoord3D()]
@@ -214,10 +213,13 @@ class Edge:
         """true if this edge has no incoming or no outgoing connections (except turnarounds)
            If connections is given, only those connections are considered"""
         if connections is None:
-            return self.is_fringe(self._incoming) or self.is_fringe(self._outgoing)
+            return self.is_fringe(self._incoming) or self.is_fringe(
+                self._outgoing)
         else:
             cons = sum([c for c in connections.values()], [])
-            return len([c for c in cons if c._direction != Connection.LINKDIR_TURN]) == 0
+            return len([
+                c for c in cons if c._direction != Connection.LINKDIR_TURN
+            ]) == 0
 
     def allows(self, vClass):
         """true if this edge has a lane which allows the given vehicle class"""
@@ -228,9 +230,11 @@ class Edge:
 
     def __repr__(self):
         if self.getFunction() == '':
-            return '<edge id="%s" from="%s" to="%s"/>' % (self._id, self._from.getID(), self._to.getID())
+            return '<edge id="%s" from="%s" to="%s"/>' % (
+                self._id, self._from.getID(), self._to.getID())
         else:
-            return '<edge id="%s" function="%s"/>' % (self._id, self.getFunction())
+            return '<edge id="%s" function="%s"/>' % (self._id,
+                                                      self.getFunction())
 
     # def __init__(self, id, fromN, toN, prio, function, name):
     #     self._id = id
@@ -278,5 +282,3 @@ class Edge:
             edge.append(ET.fromstring(lane.toXML()))
 
         return ET.tostring(edge)
-
-
