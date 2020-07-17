@@ -1,14 +1,6 @@
 
 import sys
-from lxml import etree
 
-from crmapconverter.io.V3_0.GUI_resources.MainWindow import Ui_mainWindow
-from crmapconverter.io.V3_0.gui_toolbox import UpperToolbox, SumoTool
-from crmapconverter.io.V3_0.gui_cr_viewer import CrViewer
-from crmapconverter.io.V3_0.converter_modules.osm_interface import OSMInterface
-from crmapconverter.io.V3_0.converter_modules.opendrive_interface import (
-    OpenDRIVEInterface
-)
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
@@ -17,6 +9,15 @@ from PyQt5.QtGui import *
 from commonroad.common.file_writer import CommonRoadFileWriter
 
 from crmapconverter.io.V3_0.GUI_src import CR_Scenario_Designer
+from crmapconverter.io.V3_0.GUI_resources.MainWindow import Ui_mainWindow
+from crmapconverter.io.V3_0.gui_toolbox import UpperToolbox, SumoTool
+from crmapconverter.io.V3_0.gui_cr_viewer import CrViewer
+from crmapconverter.io.V3_0.converter_modules.osm_interface import OSMInterface
+from crmapconverter.io.V3_0.converter_modules.opendrive_interface import (
+    OpenDRIVEInterface
+)
+from crmapconverter.io.V3_0.gui_settings import GUISettings
+from crmapconverter.io.V3_0.SUMO_modules.sumo_settings import SUMOSettings
 
 
 class MWindow(QMainWindow, Ui_mainWindow):
@@ -92,10 +93,11 @@ class MWindow(QMainWindow, Ui_mainWindow):
         opendrive_interface.show_settings()
 
     def show_gui_settings(self):
-        print("not yet implemented")
+        GUISettings(self)
 
     def show_sumo_settings(self):
-        print("not yet implemented")
+        SUMOSettings(self)
+
 
     def create_toolbox(self):
         """ Create the Upper toolbox."""
