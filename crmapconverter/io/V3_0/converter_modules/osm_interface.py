@@ -40,6 +40,8 @@ class OSMInterface(ConverterInterface):
         
     def start_import(self):
         self.main_window.show()
+        self.cr_designer.textBrowser.append(
+            "For osm converter output please refer to console where you started this program")
 
     def edge_edit_embedding(self, graph: rg.Graph):
         """
