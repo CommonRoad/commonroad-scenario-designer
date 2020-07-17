@@ -74,7 +74,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
         menu_setting = menuBar.addMenu('Setting')  # add menu 'Setting'
         # menu_setting.addAction(self.gui_settings)
-        menu_setting.addAction(self.sumo_settings)
+        # menu_setting.addAction(self.sumo_settings)
         menu_setting.addAction(self.osm_settings)
         # menu_setting.addAction(self.opendrive_settings)
 
@@ -134,14 +134,11 @@ class MWindow(QMainWindow, Ui_mainWindow):
         if self.lanelets_List is None:
             if self.crviewer.current_scenario is None:
                 messbox = QMessageBox()
-                reply = messbox.question(
+                messbox.question(
                     self, "Warning",
                     "Please load or convert a CR Scenario or first",
                     QtWidgets.QMessageBox.Ok)
-                if (reply == QtWidgets.QMessageBox.Ok):
-                    messbox.close()
-                else:
-                    messbox.close()
+                messbox.close()
             else:
                 self.lanelets_List.show()
         else:
@@ -165,14 +162,11 @@ class MWindow(QMainWindow, Ui_mainWindow):
         if self.intersection_List is None:
             if self.crviewer.current_scenario is None:
                 messbox = QMessageBox()
-                reply = messbox.question(
+                messbox.question(
                     self, "Warning",
                     "Please load or convert a CR Scenario or first",
                     QtWidgets.QMessageBox.Ok)
-                if (reply == QtWidgets.QMessageBox.Ok):
-                    messbox.close()
-                else:
-                    messbox.close()
+                messbox.close()
             else:
                 self.intersection_List.show()
         else:
@@ -461,11 +455,13 @@ class MWindow(QMainWindow, Ui_mainWindow):
     def file_new(self):
         """Function to create the action in the menu bar."""
         """Not Finished---"""
-        self.crviewer = CrViewer()
-        self.crviewer.load_empty_scenario()
-        #self.update_to_new_scenario() #TODO finish the scenario creating in the furture with scenario manually editing
-        # show message in statusbar
-        self.status.showMessage("Creating New File")
+        # self.crviewer = CrViewer()
+        # self.crviewer.load_empty_scenario()
+        # self.crviewer.current_scenario = None
+        # self.update_to_new_scenario() #TODO finish the scenario creating in the furture with scenario manually editing
+        # # show message in statusbar
+        # self.status.showMessage("Creating New File")
+        print("not yet implemented")
 
     def file_open(self):
         """Function to open a CR .xml file."""
@@ -485,6 +481,9 @@ class MWindow(QMainWindow, Ui_mainWindow):
             self.textBrowser.append("loading " + self.crviewer.filename)
             self.textBrowser.append("Benchmark-ID: " + self.crviewer.current_scenario.benchmark_id)
             self.setCentralWidget(self.crviewer)
+        else:
+            self.lanelets_List.close()
+            self.intersection_List.close()
 
     def open_scenario(self, new_scenario, filename):
         """  """
