@@ -15,66 +15,84 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <layout class="QGridLayout" name="gridLayout">
-     <item row="0" column="0">
-      <widget class="QLabel" name="label">
-       <property name="toolTip">
-        <string>length of simulation step of the interface</string>
-       </property>
-       <property name="text">
-        <string>dt</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="1">
-      <widget class="QDoubleSpinBox" name="doubleSpinBox_dt"/>
-     </item>
-     <item row="1" column="0">
-      <widget class="QLabel" name="label_2">
-       <property name="toolTip">
-        <string>number of time steps before simulation with ego vehicle starts</string>
-       </property>
-       <property name="text">
-        <string>Presimulation_steps</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="1">
-      <widget class="QSpinBox" name="spinBox_presimulation_steps"/>
-     </item>
-     <item row="2" column="0">
-      <widget class="QLabel" name="label_3">
-       <property name="toolTip">
-        <string>number of simulated (and synchronized) time steps</string>
-       </property>
-       <property name="text">
-        <string>Simulation_steps</string>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="1">
-      <widget class="QSpinBox" name="spinBox_simulation_steps"/>
-     </item>
-    </layout>
-   </item>
-   <item>
-    <spacer name="verticalSpacer">
-     <property name="orientation">
-      <enum>Qt::Vertical</enum>
+    <widget class="QFrame" name="frame">
+     <property name="autoFillBackground">
+      <bool>false</bool>
      </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>20</width>
-       <height>40</height>
-      </size>
+     <property name="styleSheet">
+      <string notr="true">background-color: rgb(255, 255, 255);</string>
      </property>
-    </spacer>
-   </item>
-   <item>
-    <widget class="QPushButton" name="pushButton_simulate">
-     <property name="text">
-      <string>Simulate</string>
+     <property name="frameShape">
+      <enum>QFrame::StyledPanel</enum>
      </property>
+     <property name="frameShadow">
+      <enum>QFrame::Plain</enum>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_2">
+      <item>
+       <layout class="QGridLayout" name="gridLayout">
+        <item row="0" column="0">
+         <widget class="QLabel" name="label">
+          <property name="toolTip">
+           <string>length of simulation step of the interface</string>
+          </property>
+          <property name="text">
+           <string>dt</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QDoubleSpinBox" name="doubleSpinBox_dt"/>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="label_2">
+          <property name="toolTip">
+           <string>number of time steps before simulation with ego vehicle starts</string>
+          </property>
+          <property name="text">
+           <string>Presimulation_steps</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QSpinBox" name="spinBox_presimulation_steps"/>
+        </item>
+        <item row="2" column="0">
+         <widget class="QLabel" name="label_3">
+          <property name="toolTip">
+           <string>number of simulated (and synchronized) time steps</string>
+          </property>
+          <property name="text">
+           <string>Simulation_steps</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <widget class="QSpinBox" name="spinBox_simulation_steps"/>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <spacer name="verticalSpacer">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>20</width>
+          <height>220</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pushButton_simulate">
+        <property name="text">
+         <string>Simulate</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </widget>
    </item>
   </layout>

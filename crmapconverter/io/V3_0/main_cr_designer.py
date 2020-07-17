@@ -18,6 +18,7 @@ from crmapconverter.io.V3_0.converter_modules.opendrive_interface import (
 )
 from crmapconverter.io.V3_0.gui_settings import GUISettings
 from crmapconverter.io.V3_0.SUMO_modules.sumo_settings import SUMOSettings
+from crmapconverter.io.V3_0.SUMO_modules.gui_sumo_simulation import SUMOSimulation
 
 
 class MWindow(QMainWindow, Ui_mainWindow):
@@ -99,7 +100,6 @@ class MWindow(QMainWindow, Ui_mainWindow):
         SUMOSettings(self)
 
 
-
     def create_toolbox(self):
         """ Create the Upper toolbox."""
         self.uppertoolBox = UpperToolbox()
@@ -109,6 +109,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.tool1.setFeatures(QDockWidget.AllDockWidgetFeatures)
         self.tool1.setAllowedAreas(Qt.LeftDockWidgetArea)
         self.tool1.setWidget(self.uppertoolBox)
+        self.tool1.setMinimumHeight(400)
         self.addDockWidget(Qt.LeftDockWidgetArea, self.tool1)
         self.create_sumobox()
         self.uppertoolBox.button_sumo_simulation.clicked.connect(
@@ -177,13 +178,13 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
     def create_sumobox(self):
         """Function to create the sumo toolbox(bottom toolbox)."""
-        self.sumobox = SumoTool()
+        self.sumobox = SUMOSimulation()
         self.tool2 = QDockWidget("Sumo Simulation", self)
         self.tool2.setFeatures(QDockWidget.AllDockWidgetFeatures)
         self.tool2.setAllowedAreas(Qt.LeftDockWidgetArea)
         self.tool2.setWidget(self.sumobox)
         self.addDockWidget(Qt.LeftDockWidgetArea, self.tool2)
-        self.tool2.setMinimumHeight(200)
+        self.tool2.setMinimumHeight(100)
 
     def detect_slider_clicked(self):
         self.slider_clicked = True
@@ -269,6 +270,15 @@ class MWindow(QMainWindow, Ui_mainWindow):
         tb2.addAction(toolbox)
         toolbox.triggered.connect(self.tool_box1_show)
         tb2.addSeparator()
+        lanelet_list = QAction(QIcon(":/icons/lanelet_list.ico"),
+                          "show Lanelet list", self)
+        intersection_list = QAction(QIcon(":/icons/intersection_list.ico"),
+                               "show Intersection list", self)
+        tb2.addAction(lanelet_list)
+        lanelet_list.triggered.connect(self.show_laneletslist)
+        tb2.addAction(intersection_list)
+        intersection_list.triggered.connect(self.show_intersection_list)
+
         tb3 = self.addToolBar("Animation Play")
         self.button_play = QAction(QIcon(":/icons/play.png"),
                                    "Play the animation", self)

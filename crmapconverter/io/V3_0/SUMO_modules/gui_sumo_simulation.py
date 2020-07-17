@@ -1,22 +1,17 @@
 import copy
 import os
+import sys
 from crmapconverter.io.V3_0.GUI_resources.Sumo_simulate import Ui_sumo_simulate
 
 from PyQt5.QtWidgets import *
 
 
 
-class SUMOSettings:
+class SUMOSimulation(QWidget, Ui_sumo_simulate):
 
-    def __init__(self, parent):
-        self.cr_designer = parent
-        self.window = QDialog()
-        self.sumo_setting = Ui_sumo_simulate()
-        self.sumo_setting.setupUi(self.window)
-        # self.update_ui_values()
-        # self.connect_events()
-        self.window.show()
-        # self.center()
+    def __init__(self):
+        super(SUMOSimulation, self).__init__()
+        self.setupUi(self)
 
     def connect_events(self) -> None:
         # window.btn_restore_defaults.clicked.connect(self.restore_default_button)
@@ -55,3 +50,4 @@ class SUMOSettings:
         """
         self.save_to_config()
         # and close
+
