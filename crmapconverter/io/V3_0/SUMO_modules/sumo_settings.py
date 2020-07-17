@@ -1,13 +1,17 @@
-# from ? import Ui_SettingsWindow 
+from crmapconverter.io.V3_0.GUI_resources.Sumo_setting import Ui_sumo_cfg_setting
+
+from PyQt5.QtWidgets import *
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
 
 class SUMOSettings:
 
     def __init__(self, parent):
+
         self.cr_designer = parent
-        self.window = Ui_SettingsWindow(cr_designer)
-        self.window.setupUi(self.app.main_window)
-        self.update_ui_values()
-        self.connect_events()
+        self.window = QDialog()
+        self.sumo_setting = Ui_sumo_cfg_setting()
+        self.sumo_setting.setupUi(self.window)
         self.window.show()
     
     def connect_events(self) -> None:

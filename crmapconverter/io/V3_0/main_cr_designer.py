@@ -75,7 +75,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
         menu_setting = menuBar.addMenu('Setting')  # add menu 'Setting'
         # menu_setting.addAction(self.gui_settings)
-        # menu_setting.addAction(self.sumo_settings)
+        menu_setting.addAction(self.sumo_settings)
         menu_setting.addAction(self.osm_settings)
         # menu_setting.addAction(self.opendrive_settings)
 
@@ -97,6 +97,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
     def show_sumo_settings(self):
         SUMOSettings(self)
+
 
 
     def create_toolbox(self):
@@ -370,7 +371,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.sumo_settings = self.create_action("SUMO Settings",
                                           icon="",
                                           checkable=False,
-                                          slot=self.show_gui_settings,
+                                          slot=self.show_sumo_settings,
                                           tip="Show settings for the SUMO interface",
                                           shortcut=None)
 
