@@ -323,8 +323,8 @@ class SettingsMenu:
         window.btn_edit_sublayer_way_types.clicked.connect(self.edit_sublayer_way_types)
 
         window.btn_restore_defaults.clicked.connect(self.restore_default_button)
-        window.btn_close.clicked.connect(self.close_button)
-        window.btn_save.clicked.connect(self.save_button)
+        window.btn_apply.clicked.connect(self.close_button)
+        # window.btn_save.clicked.connect(self.save_button)
 
     def update_ui_values(self) -> None:
         """
