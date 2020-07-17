@@ -1,7 +1,14 @@
 
 import sys
-from lxml import etree
 
+from PyQt5 import QtWidgets
+from PyQt5.QtWidgets import *
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
+
+from commonroad.common.file_writer import CommonRoadFileWriter
+
+from crmapconverter.io.V3_0.GUI_src import CR_Scenario_Designer
 from crmapconverter.io.V3_0.GUI_resources.MainWindow import Ui_mainWindow
 from crmapconverter.io.V3_0.gui_toolbox import UpperToolbox, SumoTool
 from crmapconverter.io.V3_0.gui_cr_viewer import CrViewer
@@ -9,16 +16,8 @@ from crmapconverter.io.V3_0.converter_modules.osm_interface import OSMInterface
 from crmapconverter.io.V3_0.converter_modules.opendrive_interface import (
     OpenDRIVEInterface
 )
-from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import *
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
-
-from commonroad.common.file_writer import CommonRoadFileWriter
-from crmapconverter.osm.lanelet2osm import L2OSMConverter
-
-
-from crmapconverter.io.V3_0.GUI_src import CR_Scenario_Designer
+from crmapconverter.io.V3_0.gui_settings import GUISettings
+from crmapconverter.io.V3_0.SUMO_modules.sumo_settings import SUMOSettings
 
 
 class MWindow(QMainWindow, Ui_mainWindow):
@@ -72,14 +71,13 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
         menu_export = menuBar.addMenu('Export')  # add menu 'Export'
         menu_export.addAction(self.exportAsCommonRoad)
-        menu_export.addAction(self.exportAsOSM)
         # menu_export.addAction(self.export2SUMO)
 
         menu_setting = menuBar.addMenu('Setting')  # add menu 'Setting'
-        menu_setting.addAction(self.gui_settings)
+        # menu_setting.addAction(self.gui_settings)
+        # menu_setting.addAction(self.sumo_settings)
         menu_setting.addAction(self.osm_settings)
-        menu_setting.addAction(self.opendrive_settings)
-        menu_setting.addAction(self.sumo_settings)
+        # menu_setting.addAction(self.opendrive_settings)
 
         menu_help = menuBar.addMenu('Help')  # add menu 'Help'
         menu_help.addAction(self.open_web)
@@ -95,10 +93,11 @@ class MWindow(QMainWindow, Ui_mainWindow):
         opendrive_interface.show_settings()
 
     def show_gui_settings(self):
-        print("not yet implemented")
+        GUISettings(self)
 
     def show_sumo_settings(self):
-        print("not yet implemented")
+        SUMOSettings(self)
+
 
     def create_toolbox(self):
         """ Create the Upper toolbox."""
@@ -137,14 +136,11 @@ class MWindow(QMainWindow, Ui_mainWindow):
         if self.lanelets_List is None:
             if self.crviewer.current_scenario is None:
                 messbox = QMessageBox()
-                reply = messbox.question(
+                messbox.question(
                     self, "Warning",
                     "Please load or convert a CR Scenario or first",
                     QtWidgets.QMessageBox.Ok)
-                if (reply == QtWidgets.QMessageBox.Ok):
-                    messbox.close()
-                else:
-                    messbox.close()
+                messbox.close()
             else:
                 self.lanelets_List.show()
         else:
@@ -168,14 +164,11 @@ class MWindow(QMainWindow, Ui_mainWindow):
         if self.intersection_List is None:
             if self.crviewer.current_scenario is None:
                 messbox = QMessageBox()
-                reply = messbox.question(
+                messbox.question(
                     self, "Warning",
                     "Please load or convert a CR Scenario or first",
                     QtWidgets.QMessageBox.Ok)
-                if (reply == QtWidgets.QMessageBox.Ok):
-                    messbox.close()
-                else:
-                    messbox.close()
+                messbox.close()
             else:
                 self.intersection_List.show()
         else:
@@ -329,37 +322,18 @@ class MWindow(QMainWindow, Ui_mainWindow):
             shortcut=None)
 
     def cr_2_osm(self):
-        if self.crviewer.current_scenario is not None:
-            proj_string, ok = QInputDialog.getText(
-                self, 'Export as OSM', 'Enter Proj-string:')
-            if ok:
-                path, _ = QFileDialog.getSaveFileName(
-                    self,
-                    "Select file to export as OSM",
-                    ".osm",
-                    "OSM files (*.osm)",
-                    options=QFileDialog.Options(),
-                )
-
-                if not path:
-                    return
-
-                l2osm = L2OSMConverter(proj_string=proj_string)
-                osm = l2osm(self.crviewer.current_scenario)
-                with open(f"{path}", "wb") as file_out:
-                    file_out.write(
-                        etree.tostring(
-                            osm,
-                            xml_declaration=True,
-                            encoding="UTF-8",
-                            pretty_print=True))
+        osm_interface = OSMInterface(self)
+        osm_interface.start_export()
 
     def osm_2_cr(self):
-        """Function to realize converter OSM2CR and show the result."""
         osm_interface = OSMInterface(self)
         osm_interface.start_import()
 
     def od_2_cr(self):
+        opendrive_interface = OpenDRIVEInterface(self)
+        opendrive_interface.start_import()
+
+    def cr_2_od(self):
         opendrive_interface = OpenDRIVEInterface(self)
         opendrive_interface.start_import()
 
@@ -371,13 +345,6 @@ class MWindow(QMainWindow, Ui_mainWindow):
             checkable=False,
             slot=self.file_save,
             tip="Save as CommonRoad File (the same function as Save)",
-            shortcut=None)
-        self.exportAsOSM = self.create_action(
-            "As OSM",
-            icon="",
-            checkable=False,
-            slot=self.cr_2_osm,
-            tip="Convert from OSM to CommonRoad",
             shortcut=None)
 
     def create_setting_actions(self):
@@ -490,11 +457,13 @@ class MWindow(QMainWindow, Ui_mainWindow):
     def file_new(self):
         """Function to create the action in the menu bar."""
         """Not Finished---"""
-        self.crviewer = CrViewer()
-        self.crviewer.load_empty_scenario()
-        #self.update_to_new_scenario() #TODO finish the scenario creating in the furture with scenario manually editing
-        # show message in statusbar
-        self.status.showMessage("Creating New File")
+        # self.crviewer = CrViewer()
+        # self.crviewer.load_empty_scenario()
+        # self.crviewer.current_scenario = None
+        # self.update_to_new_scenario() #TODO finish the scenario creating in the furture with scenario manually editing
+        # # show message in statusbar
+        # self.status.showMessage("Creating New File")
+        print("not yet implemented")
 
     def file_open(self):
         """Function to open a CR .xml file."""
@@ -514,6 +483,9 @@ class MWindow(QMainWindow, Ui_mainWindow):
             self.textBrowser.append("loading " + self.crviewer.filename)
             self.textBrowser.append("Benchmark-ID: " + self.crviewer.current_scenario.benchmark_id)
             self.setCentralWidget(self.crviewer)
+        else:
+            self.lanelets_List.close()
+            self.intersection_List.close()
 
     def open_scenario(self, new_scenario, filename):
         """  """
