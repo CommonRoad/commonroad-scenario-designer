@@ -172,7 +172,7 @@ class StartMenu(QWidget):
         window.b_start.clicked.connect(self.start_conversion)
         window.b_load_file.clicked.connect(self.select_file)
         window.b_load_state.clicked.connect(self.load_edit_state)
-        window.b_view_scenario.clicked.connect(self.view_scenario)
+        # window.b_view_scenario.clicked.connect(self.view_scenario)
         window.b_download.clicked.connect(self.download_map)
         window.b_settings.clicked.connect(self.show_settings)
 
@@ -309,8 +309,8 @@ class StartMenu(QWidget):
         :param graph: graph to convert
         :return: None
         """
-        graph = converter.Scenario.step_collection_2(graph)
-        graph = converter.Scenario.step_collection_3(graph)
+        graph = converter.step_collection_2(graph)
+        graph = converter.step_collection_3(graph)
         # name = config.BENCHMARK_ID
         self.app.export(graph)
 
@@ -326,10 +326,12 @@ class StartMenu(QWidget):
                     self.read_osm_file(self.selected_file)
                 else:
                     print("no file selected!")
+                    return
             else:
                 self.download_and_open_osm_file()
         except ValueError as e:
             print("Map unreadable: " + str(e))
+            return
         if self.embedding.chk_user_edit.isChecked():
             self.app.edge_edit_embedding(self.graph)
         else:
@@ -388,12 +390,12 @@ class StartMenu(QWidget):
 
     def read_osm_file(self, file: str) -> None:
         """
-        loads and osm file and performs first steps to create road graph
+        loads an osm file and performs first steps to create the road graph
 
         :param file: file name
         :return: None
         """
-        self.graph = converter.Scenario.step_collection_1(file)
+        self.graph = converter.step_collection_1(file)
 
 
 class MapEdit(ABC):
@@ -585,7 +587,7 @@ class EdgeEdit(MapEdit):
 
         :return: None
         """
-        graph = converter.Scenario.step_collection_2(self.graph)
+        graph = converter.step_collection_2(self.graph)
         self.app.lane_link_embedding(graph)
 
     def update_movement(self, value: bool) -> None:
@@ -671,8 +673,7 @@ class LaneLinkEdit(MapEdit):
         :return: None
         """
         # name = config.BENCHMARK_ID
-
-        graph = converter.Scenario.step_collection_3(self.graph)
+        graph = converter.step_collection_3(self.graph)
         self.app.export(graph)
 
 
@@ -705,6 +706,9 @@ class AttributeEditor:
             "residential": 11,
             "living_street": 12,
             "service": 13,
+            "path": 14,
+            "footway": 15,
+            "cycleway": 16
         }
 
         self.road_types = {

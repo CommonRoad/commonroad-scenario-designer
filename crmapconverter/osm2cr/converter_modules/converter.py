@@ -21,7 +21,69 @@ from crmapconverter.osm2cr.converter_modules.osm_operations import osm_parser
 from crmapconverter.osm2cr.converter_modules.utility import plots
 
 
-class Scenario:
+def step_collection_1(file: str) -> road_graph.Graph:
+    graph = osm_parser.create_graph(file)
+    if config.MAKE_CONTIGUOUS:
+        print("making graph contiguously")
+        graph.make_contiguous()
+    print("merging close intersections")
+    intersection_merger.merge_close_intersections(graph)
+    if isinstance(graph, road_graph.SublayeredGraph):
+        intersection_merger.merge_close_intersections(graph.sublayer_graph)
+    graph.link_edges()
+    return graph
+
+
+def step_collection_2(graph: road_graph.Graph) -> road_graph.Graph:
+    print("linking lanes")
+    lane_linker.link_graph(graph)
+    if isinstance(graph, road_graph.SublayeredGraph):
+        lane_linker.link_graph(graph.sublayer_graph)
+    print("interpolating waypoints")
+    graph.interpolate()
+    print("offsetting roads")
+    offsetter.offset_graph(graph)
+    if isinstance(graph, road_graph.SublayeredGraph):
+        offsetter.offset_graph(graph.sublayer_graph)
+    print("cropping roads at intersections")
+    edges_to_delete = graph.crop_waypoints_at_intersections()
+    if config.DELETE_SHORT_EDGES:
+        print("deleting short edges")
+        graph.delete_edges(edges_to_delete)
+    if isinstance(graph, road_graph.SublayeredGraph):
+        edges_to_delete = graph.sublayer_graph.crop_waypoints_at_intersections(
+            config.INTERSECTION_DISTANCE_SUBLAYER
+        )
+        if config.DELETE_SHORT_EDGES:
+            graph.sublayer_graph.delete_edges(edges_to_delete)
+    print("applying traffic signs to edges and nodes")
+    graph.apply_traffic_signs()
+    print("applying traffic lights to edges")
+    graph.apply_traffic_lights()
+    print("creating waypoints of lanes")
+    graph.create_lane_waypoints()
+    return graph
+
+
+def step_collection_3(graph: road_graph.Graph) -> road_graph.Graph:
+    print("creating segments at intersections")
+    graph.create_lane_link_segments()
+    print("clustering segments")
+    segment_clusters.cluster_segments(graph)
+    if isinstance(graph, road_graph.SublayeredGraph):
+        segment_clusters.cluster_segments(graph.sublayer_graph)
+    print("changing to desired interpolation distance and creating borders of"
+        + " lanes")
+    graph.create_lane_bounds(
+        config.INTERPOLATION_DISTANCE_INTERNAL / config.INTERPOLATION_DISTANCE
+    )
+    print("adjust common bound points")
+    graph.correct_start_end_points()
+    print("done converting")
+    return graph
+
+
+class GraphScenario:
     """
     Class that represents a road network
     data is saved by a graph structure (RoadGraph)
@@ -35,74 +97,20 @@ class Scenario:
         :param file: OSM file to be loaded
         :type file: str
         """
-        g = self.step_collection_1(file)
+        print("reading File and creating graph")
+        
+        graph = step_collection_1(file)
         # HERE WE CAN EDIT THE NODES AND EDGES OF THE GRAPH
         if config.USER_EDIT:
             print("editing the graph")
-            g = gui.edit_graph_edges(g)
-        g = self.step_collection_2(g)
+            graph = gui.edit_graph_edges(graph)
+        graph = step_collection_2(graph)
         # HERE WE CAN EDIT LINKS IN THE GRAPH
         if config.USER_EDIT:
             print("editing the graph")
-            g = gui.edit_graph_links(g)
-        g = self.step_collection_3(g)
-        self.graph: road_graph.Graph = g
-
-    @staticmethod
-    def step_collection_1(file) -> road_graph.Graph:
-        print("reading File")
-        roads, points, restrictions, center_point, bounds, traffic_signs, traffic_lights = osm_parser.parse_file(
-            file, config.ACCEPTED_HIGHWAYS
-        )
-        print("creating graph")
-        g = osm_parser.roads_to_graph(
-            roads, points, restrictions, center_point, bounds, center_point, traffic_signs, traffic_lights
-        )
-        if config.MAKE_CONTIGUOUS:
-            print("making graph contiguously")
-            g.make_contiguous()
-        print("merging close intersections")
-        intersection_merger.merge_close_intersections(g)
-        g.link_edges()
-        return g
-
-    @staticmethod
-    def step_collection_2(g: road_graph.Graph) -> road_graph.Graph:
-        print("linking lanes")
-        lane_linker.link_graph(g)
-        print("interpolating waypoints")
-        g.interpolate()
-        print("offsetting roads")
-        offsetter.offset_graph(g)
-        print("cropping roads at intersections")
-        edges_to_delete = g.crop_waypoints_at_intersections()
-        if config.DELETE_SHORT_EDGES:
-            print("deleting short edges")
-            g.delete_edges(edges_to_delete)
-        print("applying traffic signs to edges and nodes")
-        g.apply_traffic_signs()
-        print("applying traffic lights to edges")
-        g.apply_traffic_lights()
-        print("creating waypoints of lanes")
-        g.create_lane_waypoints()
-        return g
-
-    @staticmethod
-    def step_collection_3(g: road_graph.Graph) -> road_graph.Graph:
-        print("creating segments at intersections")
-        g.create_lane_link_segments()
-        print("clustering segments")
-        segment_clusters.cluster_segments(g)
-        print(
-            "changing to desired interpolation distance and creating borders of lanes"
-        )
-        g.create_lane_bounds(
-            config.INTERPOLATION_DISTANCE_INTERNAL / config.INTERPOLATION_DISTANCE
-        )
-        print("adjust common bound points")
-        g.correct_start_end_points()
-        print("done converting")
-        return g
+            graph = gui.edit_graph_links(graph)
+        graph = step_collection_3(graph)
+        self.graph: road_graph.Graph = graph
 
     def plot(self):
         """
@@ -111,9 +119,11 @@ class Scenario:
         :return: None
         """
         print("plotting graph")
-        fig, ax = plt.subplots()
+        _, ax = plt.subplots()
         ax.set_aspect("equal")
-        plots.draw_scenario(self.graph, ax)
+        plots.draw_graph(self.graph, ax)
+        if isinstance(self.graph, road_graph.SublayeredGraph):
+            plots.draw_graph(self.graph.sublayer_graph, ax)
         plots.show_plot()
 
     def save_as_cr(self, filename: str):
@@ -142,7 +152,7 @@ class Scenario:
         sys.setrecursionlimit(1000)
 
 
-def load_from_file(filename: str) -> Scenario:
+def load_from_file(filename: str) -> GraphScenario:
     """
     loads a road network from a file
     Warning! Do only load files you trust!
@@ -150,8 +160,8 @@ def load_from_file(filename: str) -> Scenario:
     :param filename: name of the file to load
     :type filename: str
     :return: the loaded road network
-    :rtype: Scenario
+    :rtype: graph_scenario
     """
     with open(filename, "rb") as handle:
-        scenario = pickle.load(handle)
-        return scenario
+        graph_scenario = pickle.load(handle)
+        return graph_scenario

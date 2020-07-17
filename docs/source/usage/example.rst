@@ -34,7 +34,7 @@ This example can be found in **example.py**::
 	download_around_map(config.BENCHMARK_ID + '_downloaded.osm', 48.140289, 11.566272)
 
 	# open the map and convert it to a scenario
-	scenario = converter.Scenario(config.SAVE_PATH + config.BENCHMARK_ID + '_downloaded.osm')
+	scenario = converter.GraphScenario(config.SAVE_PATH + config.BENCHMARK_ID + '_downloaded.osm')
 
 	# draw and show the scenario
 	scenario.plot()
