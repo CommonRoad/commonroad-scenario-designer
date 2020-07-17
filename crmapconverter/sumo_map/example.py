@@ -34,11 +34,11 @@ wrapper.convert_to_net_file(output_folder)
 # traffic_light_system_generated = wrapper.auto_generate_traffic_light_system(26, cycle_time=10)
 
 # # draw scenario after traffic light generation
-plt.figure(figsize=(25, 25))
-draw_object(wrapper.lanelet_network)
-plt.axis('equal')
-plt.autoscale()
-plt.show()
+# plt.figure(figsize=(25, 25))
+# draw_object(wrapper.lanelet_network)
+# plt.axis('equal')
+# plt.autoscale()
+# plt.show()
 
 # # write generated traffic lights back to commonroad file
 # scenario.lanelet_network = wrapper.lanelet_network

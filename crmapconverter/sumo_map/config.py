@@ -46,23 +46,30 @@ traffic_light_states_SUMO2CR = {
     'O': TrafficLightState.INACTIVE
 }
 
+_road_vehicles = [
+    "passenger", "private", "taxi", "bus", "coach", "delivery", "truck",
+    "trailer", "emergency", "motorcycle", "moped", "bicycle", "evehicle",
+    "army", "authority", "vip", "hov", "custom1", "custom2"
+]
+_bus_vehicles = ["bus", "coach"]
+_pedestrian_vehicles = ["pedestrian", "bicycle"]
 # Mapping Commonroad LaneletType to SUMO vClass
 lanelet_type_CR2SUMO = {
-    LaneletType.URBAN: ["evehicle", "delivery","emergency","passenger", "truck", "trailer", "bus","coach", "moped", "motorcycle"],
-    LaneletType.COUNTRY: ["evehicle", "delivery","emergency","passenger", "truck", "trailer", "bus","coach", "moped", "motorcycle"],
-    LaneletType.HIGHWAY: ["evehicle", "delivery","emergency","passenger", "truck", "trailer", "bus","coach", "moped", "motorcycle"],
-    LaneletType.DRIVE_WAY: ["evehicle", "delivery","emergency","passenger", "truck", "trailer", "bus","coach", "moped", "motorcycle"],
-    LaneletType.MAIN_CARRIAGE_WAY: ["evehicle", "delivery","emergency","passenger", "truck", "trailer", "bus","coach", "moped", "motorcycle"],
-    LaneletType.ACCESS_RAMP: ["evehicle", "delivery","emergency","passenger", "truck", "trailer", "bus","coach", "moped", "motorcycle"],
-    LaneletType.EXIT_RAMP: ["evehicle", "delivery","emergency","passenger", "truck", "trailer", "bus","coach", "moped", "motorcycle"],
-    LaneletType.SHOULDER: ["evehicle", "delivery","emergency","passenger", "truck", "trailer", "bus","coach", "moped", "motorcycle"],
-    LaneletType.INTERSTATE: ["evehicle", "delivery","emergency","passenger", "truck", "trailer", "bus","coach", "moped", "motorcycle"],
-    LaneletType.UNKNOWN: ["evehicle", "delivery","emergency","passenger", "truck", "trailer", "bus","coach", "moped", "motorcycle"],
-    LaneletType.BUS_LANE: ["bus", "coach"],
-    LaneletType.BUS_STOP: ["bus", "coach"],
-    LaneletType.BICYCLE_LANE: ["pedestrian","bicycle", "moped"],
-    LaneletType.SIDEWALK: ["pedestrian", "bicycle"],
-    LaneletType.CROSSWALK: ["pedestrian"],
+    LaneletType.URBAN: _road_vehicles,
+    LaneletType.COUNTRY: _road_vehicles,
+    LaneletType.HIGHWAY: _road_vehicles,
+    LaneletType.DRIVE_WAY: _road_vehicles,
+    LaneletType.MAIN_CARRIAGE_WAY: _road_vehicles,
+    LaneletType.ACCESS_RAMP: _road_vehicles,
+    LaneletType.EXIT_RAMP: _road_vehicles,
+    LaneletType.SHOULDER: _road_vehicles,
+    LaneletType.INTERSTATE: _road_vehicles,
+    LaneletType.UNKNOWN: _road_vehicles,
+    LaneletType.BUS_LANE: _bus_vehicles,
+    LaneletType.BUS_STOP: _bus_vehicles,
+    LaneletType.BICYCLE_LANE: ["bicycle", "moped"],
+    LaneletType.SIDEWALK: _pedestrian_vehicles,
+    LaneletType.CROSSWALK: _pedestrian_vehicles
 }
 
 

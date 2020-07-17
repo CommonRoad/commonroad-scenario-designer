@@ -368,7 +368,6 @@
     <adjacentLeft ref="207" drivingDir="opposite" />
     <laneletType>urban</laneletType>
     <trafficSignRef ref="235" />
-    <trafficLightRef ref="241" />
   </lanelet>
   <lanelet id="222">
     <leftBound>
@@ -442,7 +441,6 @@
     <adjacentLeft ref="222" drivingDir="opposite" />
     <laneletType>urban</laneletType>
     <trafficSignRef ref="238" />
-    <trafficLightRef ref="241" />
   </lanelet>
   <lanelet id="233">
     <leftBound>
@@ -659,7 +657,6 @@
     <adjacentLeft ref="204" drivingDir="opposite" />
     <laneletType>urban</laneletType>
     <trafficSignRef ref="235" />
-    <trafficLightRef ref="243" />
   </lanelet>
   <lanelet id="231">
     <leftBound>
@@ -936,7 +933,6 @@
     <adjacentLeft ref="210" drivingDir="opposite" />
     <laneletType>urban</laneletType>
     <trafficSignRef ref="236" />
-    <trafficLightRef ref="242" />
   </lanelet>
   <lanelet id="271">
     <leftBound>
@@ -2588,7 +2584,6 @@
     <successor ref="277" />
     <laneletType>crosswalk</laneletType>
     <trafficSignRef ref="196" />
-    <trafficLightRef ref="198" />
   </lanelet>
   <lanelet id="147">
     <leftBound>
@@ -3436,7 +3431,6 @@
     <successor ref="293" />
     <laneletType>crosswalk</laneletType>
     <trafficSignRef ref="187" />
-    <trafficLightRef ref="199" />
   </lanelet>
   <lanelet id="277">
     <leftBound>
@@ -4871,141 +4865,6 @@
     </trafficSignElement>
     <virtual>true</virtual>
   </trafficSign>
-  <trafficLight id="241">
-    <cycle>
-      <cycleElement>
-        <duration>60</duration>
-        <color>red</color>
-      </cycleElement>
-      <cycleElement>
-        <duration>10</duration>
-        <color>redYellow</color>
-      </cycleElement>
-      <cycleElement>
-        <duration>60</duration>
-        <color>green</color>
-      </cycleElement>
-      <cycleElement>
-        <duration>10</duration>
-        <color>yellow</color>
-      </cycleElement>
-    </cycle>
-    <position>
-      <point>
-        <x>-13.64493567926724</x>
-        <y>-13.64493567926724</y>
-      </point>
-    </position>
-    <active>true</active>
-  </trafficLight>
-  <trafficLight id="242">
-    <cycle>
-      <cycleElement>
-        <duration>60</duration>
-        <color>red</color>
-      </cycleElement>
-      <cycleElement>
-        <duration>10</duration>
-        <color>redYellow</color>
-      </cycleElement>
-      <cycleElement>
-        <duration>60</duration>
-        <color>green</color>
-      </cycleElement>
-      <cycleElement>
-        <duration>10</duration>
-        <color>yellow</color>
-      </cycleElement>
-    </cycle>
-    <position>
-      <point>
-        <x>-12.97117602989992</x>
-        <y>-12.97117602989992</y>
-      </point>
-    </position>
-    <active>true</active>
-  </trafficLight>
-  <trafficLight id="243">
-    <cycle>
-      <cycleElement>
-        <duration>60</duration>
-        <color>red</color>
-      </cycleElement>
-      <cycleElement>
-        <duration>10</duration>
-        <color>redYellow</color>
-      </cycleElement>
-      <cycleElement>
-        <duration>60</duration>
-        <color>green</color>
-      </cycleElement>
-      <cycleElement>
-        <duration>10</duration>
-        <color>yellow</color>
-      </cycleElement>
-    </cycle>
-    <position>
-      <point>
-        <x>-25.45376846871124</x>
-        <y>-25.45376846871124</y>
-      </point>
-    </position>
-    <active>true</active>
-  </trafficLight>
-  <trafficLight id="198">
-    <cycle>
-      <cycleElement>
-        <duration>60</duration>
-        <color>red</color>
-      </cycleElement>
-      <cycleElement>
-        <duration>10</duration>
-        <color>redYellow</color>
-      </cycleElement>
-      <cycleElement>
-        <duration>60</duration>
-        <color>green</color>
-      </cycleElement>
-      <cycleElement>
-        <duration>10</duration>
-        <color>yellow</color>
-      </cycleElement>
-    </cycle>
-    <position>
-      <point>
-        <x>-12.97117602989992</x>
-        <y>-12.97117602989992</y>
-      </point>
-    </position>
-    <active>true</active>
-  </trafficLight>
-  <trafficLight id="199">
-    <cycle>
-      <cycleElement>
-        <duration>60</duration>
-        <color>red</color>
-      </cycleElement>
-      <cycleElement>
-        <duration>10</duration>
-        <color>redYellow</color>
-      </cycleElement>
-      <cycleElement>
-        <duration>60</duration>
-        <color>green</color>
-      </cycleElement>
-      <cycleElement>
-        <duration>10</duration>
-        <color>yellow</color>
-      </cycleElement>
-    </cycle>
-    <position>
-      <point>
-        <x>-25.45376846871124</x>
-        <y>-25.45376846871124</y>
-      </point>
-    </position>
-    <active>true</active>
-  </trafficLight>
   <intersection id="298">
     <incoming id="294">
       <incomingLanelet ref="210" />
