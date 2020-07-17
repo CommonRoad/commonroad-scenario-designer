@@ -143,7 +143,7 @@ def convert_coordinates_to_utm(scenario: Scenario, origin: np.ndarray) -> None:
     return
 
 
-def create_scenario2(graph):
+def create_scenario_intermediate(graph) -> Tuple[Scenario, IntermediateFormat]:
     """ Convert Scenario from RoadGraph via IntermediateFormat """
     interm = IntermediateFormat.extract_from_road_graph(graph)
     if isinstance(graph, rg.SublayeredGraph):
@@ -155,11 +155,12 @@ def create_scenario2(graph):
         interm.merge(interm_sublayer)
         interm.add_crossing_information(crossings)
     scenario = interm.to_commonroad_scenario()
-    return interm, scenario
+    return scenario, interm
 
 
 def export(
-    graph: rg.Graph, file_path=config.SAVE_PATH + config.BENCHMARK_ID + ".xml"
+        graph: rg.Graph,
+        file_path=config.SAVE_PATH + config.BENCHMARK_ID + ".xml"
 ) -> None:
     """
     converts a graph to a CR scenario and saves it to disk
@@ -168,7 +169,7 @@ def export(
     :return: None
     """
     #scenario = create_scenario(graph)
-    intermediate_format, scenario = create_scenario2(graph)
+    scenario, intermediate_format = create_scenario_intermediate(graph)
 
     # removing converting errors before writing to xml
     sanitize(scenario)

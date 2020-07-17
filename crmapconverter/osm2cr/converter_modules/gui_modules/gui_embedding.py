@@ -330,10 +330,12 @@ class StartMenu(QWidget):
                     self.read_osm_file(self.selected_file)
                 else:
                     print("no file selected!")
+                    return
             else:
                 self.download_and_open_osm_file()
         except ValueError as e:
             print("Map unreadable: " + str(e))
+            return
         if self.embedding.chk_user_edit.isChecked():
             self.app.edge_edit_embedding(self.graph)
         else:

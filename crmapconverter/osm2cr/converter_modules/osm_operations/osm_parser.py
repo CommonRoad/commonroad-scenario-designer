@@ -106,7 +106,8 @@ def get_nodes(roads: Set[ElTree.Element], root
             road_nodes[node_id] = node
             tags = node.findall("tag")
             for tag in tags:
-                if tag.attrib["k"] == "highway" and tag.attrib["v"] == "crossing":
+                if (tag.attrib["k"] == "highway" and tag.attrib["v"] == "crossing"
+                    or tag.attrib["k"] == "crossing"):
                     crossing_nodes[node_id] = node
     assert len(road_nodes) == len(node_ids)
     return road_nodes, crossing_nodes
@@ -904,4 +905,5 @@ def create_graph(file_path) -> rg.Graph:
             sub_g
         )
 
-    return _create_graph(file_path, config.ACCEPTED_HIGHWAYS)
+    road_g, _ = _create_graph(file_path, config.ACCEPTED_HIGHWAYS)
+    return road_g
