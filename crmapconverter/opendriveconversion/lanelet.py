@@ -33,26 +33,26 @@ class ConversionLanelet(Lanelet):
     # optimal_join_split_factor = 20
 
     def __init__(
-        self,
-        parametric_lane_group,
-        left_vertices: np.ndarray,
-        center_vertices: np.ndarray,
-        right_vertices: np.ndarray,
-        lanelet_id,
-        predecessor=None,
-        successor=None,
-        adjacent_left=None,
-        adjacent_left_same_direction=None,
-        adjacent_right=None,
-        adjacent_right_same_direction=None,
-        line_marking_left_vertices=None,
-        line_marking_right_vertices=None,
-        stop_line=None,
-        lanelet_type= None,
-        user_one_way=None,
-        user_bidirectional=None,
-        traffic_signs=None,
-        traffic_lights=None,
+            self,
+            parametric_lane_group,
+            left_vertices: np.ndarray,
+            center_vertices: np.ndarray,
+            right_vertices: np.ndarray,
+            lanelet_id,
+            predecessor=None,
+            successor=None,
+            adjacent_left=None,
+            adjacent_left_same_direction=None,
+            adjacent_right=None,
+            adjacent_right_same_direction=None,
+            line_marking_left_vertices=None,
+            line_marking_right_vertices=None,
+            stop_line=None,
+            lanelet_type=None,
+            user_one_way=None,
+            user_bidirectional=None,
+            traffic_signs=None,
+            traffic_lights=None,
     ):
         if lanelet_type is None:
             lanelet_type = {LaneletType.UNKNOWN}
@@ -92,12 +92,14 @@ class ConversionLanelet(Lanelet):
 
     """
     Only type supported by commonroad_io is recorded here;
-    waiting for future decelopment
+    waiting for future development
     """
+
     @property
     def lanelet_type(self):
         return self._lanelet_type
 
+    # TODO
     @lanelet_type.setter
     def lanelet_type(self, value: str):
         if value == 'urban':
@@ -106,21 +108,21 @@ class ConversionLanelet(Lanelet):
             self._lanelet_type = {LaneletType.COUNTRY}
         elif value == 'highway':
             self._lanelet_type = {LaneletType.HIGHWAY}
-        elif value == 'driveWay':
+        elif value == 'driving':
             self._lanelet_type = {LaneletType.DRIVE_WAY}
         elif value == 'mainCarriageWay':
             self._lanelet_type = {LaneletType.MAIN_CARRIAGE_WAY}
-        elif value == 'accessRamp':
+        elif value == 'entry':
             self._lanelet_type = {LaneletType.ACCESS_RAMP}
-        elif value == 'exitRamp':
+        elif value == 'exit':
             self._lanelet_type = {LaneletType.EXIT_RAMP}
         elif value == 'shoulder':
             self._lanelet_type = {LaneletType.SHOULDER}
-        elif value == 'busLane':
+        elif value == 'bus':
             self._lanelet_type = {LaneletType.BUS_LANE}
-        elif value == 'busStop':
+        elif value == 'stop':
             self._lanelet_type = {LaneletType.BUS_STOP}
-        elif value == 'bikeLane':
+        elif value == 'biking':
             self._lanelet_type = {LaneletType.BICYCLE_LANE}
         elif value == 'sidewalk':
             self._lanelet_type = {LaneletType.SIDEWALK}
@@ -232,7 +234,7 @@ class ConversionLanelet(Lanelet):
         self._adj_right_same_direction = same
 
     def concatenate(
-        self, lanelet_conc: "ConversionLanelet", extend_plane_group: bool = True
+            self, lanelet_conc: "ConversionLanelet", extend_plane_group: bool = True
     ):
         """Concatenate this lanelet with lanelet_conc and assign the
         new lanelet_id to the resulting lanelet.
@@ -315,7 +317,7 @@ class ConversionLanelet(Lanelet):
         return self.parametric_lane_group.has_zero_width_everywhere()
 
     def first_zero_width_change_position(
-        self, reverse: bool = False, reference_width: float = 0.0
+            self, reverse: bool = False, reference_width: float = 0.0
     ) -> Tuple[Optional[float], Optional[float]]:
         """Get the earliest point of the lanelet where the width change is zero.
 
@@ -340,7 +342,7 @@ class ConversionLanelet(Lanelet):
         return self.parametric_lane_group.maximum_width()
 
     def optimal_join_split_values(
-        self, is_split: bool, split_and_join: bool, reference_width: float
+            self, is_split: bool, split_and_join: bool, reference_width: float
     ):
         """Calculate an optimal value, where the lanelet split or join starts
           or ends, respectively.
@@ -373,11 +375,11 @@ class ConversionLanelet(Lanelet):
         return merge_pos, merge_width
 
     def move_border(
-        self,
-        mirror_border: str,
-        mirror_interval: Tuple[float, float],
-        distance: np.ndarray,
-        adjacent_lanelet: "ConversionLanelet",
+            self,
+            mirror_border: str,
+            mirror_interval: Tuple[float, float],
+            distance: np.ndarray,
+            adjacent_lanelet: "ConversionLanelet",
     ):
         """Move vertices of one border by mirroring other border with
         a specified distance.

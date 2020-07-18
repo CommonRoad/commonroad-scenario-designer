@@ -27,6 +27,7 @@ from crmapconverter.opendriveparser.elements.roadLanes import (
     LaneSection as RoadLanesSection,
     LaneWidth as RoadLaneSectionLaneWidth,
     LaneBorder as RoadLaneSectionLaneBorder,
+    RoadMark as RoadLaneRoadMark
 )
 from crmapconverter.opendriveparser.elements.junction import (
     Junction,
@@ -390,7 +391,15 @@ def parse_opendrive_road_lane_section(newRoad, lane_section_id, lane_section):
                 new_lane.has_border_record = True
 
             # Road Marks
-            # TODO implementation
+            if lane.find("roadMark") is not None:
+                mark = lane.find("roadMark")
+                road_mark = RoadLaneRoadMark()
+
+                road_mark.type = mark.get("type")
+                road_mark.weight = mark.get("weight")
+                road_mark.SOffset = mark.get("SOffset")
+
+                new_lane.road_mark = road_mark
 
             # Material
             # TODO implementation
