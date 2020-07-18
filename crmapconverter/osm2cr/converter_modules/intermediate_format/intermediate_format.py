@@ -9,24 +9,16 @@ import numpy as np
 from typing import List, Set, Tuple
 import warnings
 
-from commonroad.scenario.lanelet import (
-    Lanelet,
-    LaneletNetwork,
-    LaneletType
-)
+from commonroad.scenario.lanelet import (Lanelet, LaneletNetwork, LaneletType)
 from commonroad.scenario.obstacle import Obstacle
 from commonroad.scenario.scenario import Scenario
 from commonroad.scenario.traffic_sign import TrafficSign
 from commonroad.scenario.traffic_sign import TrafficLight
-from commonroad.scenario.intersection import (
-    Intersection,
-    IntersectionIncomingElement
-)
+from commonroad.scenario.intersection import (Intersection,
+                                              IntersectionIncomingElement)
 
-from commonroad.planning.planning_problem import (
-    PlanningProblem,
-    PlanningProblemSet
-)
+from commonroad.planning.planning_problem import (PlanningProblem,
+                                                  PlanningProblemSet)
 from commonroad.planning.goal import GoalRegion
 from commonroad.scenario.trajectory import State
 from commonroad.common.util import Interval
@@ -37,11 +29,8 @@ from crmapconverter.osm2cr.converter_modules.intermediate_format.sumo_helper \
     import Sumo
 from crmapconverter.osm2cr.converter_modules.graph_operations.road_graph \
     import Graph
-from crmapconverter.osm2cr.converter_modules.utility import (
-    geometry,
-    idgenerator
-)
-
+from crmapconverter.osm2cr.converter_modules.utility import (geometry,
+                                                             idgenerator)
 
 CrossingList = List[Tuple[int, List[int]]]
 
@@ -50,7 +39,6 @@ class Node:
     """
     Class to represent the nodes in the intermediate format
     """
-
     def __init__(self, node_id, point):
         """
         Initialize a node element
@@ -77,7 +65,6 @@ class Edge:
     """
     Class to represent the edges in the intermediate format
     """
-
     def __init__(self,
                  edge_id: int,
                  node1: Node,
@@ -93,7 +80,7 @@ class Edge:
                  predecessors: List[int],
                  traffic_signs: Set[int],
                  traffic_lights: Set[int],
-                 edge_type: str=config.LANELETTYPE):
+                 edge_type: str = config.LANELETTYPE):
         """
         Initialize an edge
 
@@ -136,21 +123,19 @@ class Edge:
 
         :return: CommonRoad Lanelet
         """
-        lanelet = Lanelet(
-            np.array(self.left_bound),
-            np.array(self.center_points),
-            np.array(self.right_bound),
-            self.id,
-            self.predecessors,
-            self.successors,
-            self.adjacent_left,
-            self.adjacent_left_direction_equal,
-            self.adjacent_right,
-            self.adjacent_right_direction_equal,
-            traffic_signs=self.traffic_signs,
-            traffic_lights=self.traffic_lights,
-            lanelet_type={LaneletType(self.edge_type)}
-        )
+        lanelet = Lanelet(np.array(self.left_bound),
+                          np.array(self.center_points),
+                          np.array(self.right_bound),
+                          self.id,
+                          self.predecessors,
+                          self.successors,
+                          self.adjacent_left,
+                          self.adjacent_left_direction_equal,
+                          self.adjacent_right,
+                          self.adjacent_right_direction_equal,
+                          traffic_signs=self.traffic_signs,
+                          traffic_lights=self.traffic_lights,
+                          lanelet_type={LaneletType(self.edge_type)})
         is_valid(lanelet)
         return lanelet
 
@@ -205,21 +190,11 @@ class Edge:
         from_node = Node(lane.from_node.id, lane.from_node.get_point())
         to_node = Node(lane.to_node.id, lane.to_node.get_point())
 
-        return Edge(current_id,
-                    from_node,
-                    to_node,
-                    lane.left_bound,
-                    lane.right_bound,
-                    lane.waypoints,
-                    adjacent_right,
-                    adjacent_right_direction_equal,
-                    adjacent_left,
-                    adjacent_left_direction_equal,
-                    successors,
-                    predecessors,
-                    traffic_signs,
-                    traffic_lights
-                    )
+        return Edge(current_id, from_node, to_node, lane.left_bound,
+                    lane.right_bound, lane.waypoints, adjacent_right,
+                    adjacent_right_direction_equal, adjacent_left,
+                    adjacent_left_direction_equal, successors, predecessors,
+                    traffic_signs, traffic_lights)
 
 
 def add_is_left_of(incoming_data, incoming_data_id):
@@ -238,7 +213,7 @@ def add_is_left_of(incoming_data, incoming_data_id):
     # calculate all incoming angle from the reference incoming vector
     for index in range(1, len(incoming_data)):
         waypoints = incoming_data[index]['waypoints']
-        angle = geometry.get_angle(ref, waypoints[0]-waypoints[-1])
+        angle = geometry.get_angle(ref, waypoints[0] - waypoints[-1])
         if angle < 0:
             angle += 360
         angles.append((index, angle))
@@ -263,9 +238,8 @@ def add_is_left_of(incoming_data, incoming_data_id):
     return incoming_data
 
 
-def extract_crossings(
-    interm_a: "IntermediateFormat", interm_b: "IntermediateFormat"
-) -> CrossingList:
+def extract_crossings(interm_a: "IntermediateFormat",
+                      interm_b: "IntermediateFormat") -> CrossingList:
     """ 
     Calculcate all crossings of the two networks.
     For each lanelet of a return the crossed lanelets of b if existing.
@@ -293,14 +267,15 @@ class IntermediateFormat:
     Class that represents the intermediate format
 
     """
-
-    def __init__(self,
-                 nodes: List[Node],
-                 edges: List[Edge],
-                 traffic_signs: List[TrafficSign] = None,
-                 traffic_lights: List[TrafficLight] = None,
-                 obstacles: List[Obstacle] = None,
-                 intersections: List[Intersection] = None, ):
+    def __init__(
+        self,
+        nodes: List[Node],
+        edges: List[Edge],
+        traffic_signs: List[TrafficSign] = None,
+        traffic_lights: List[TrafficLight] = None,
+        obstacles: List[Obstacle] = None,
+        intersections: List[Intersection] = None,
+    ):
         """
         Initialize the Intermediate Format
 
@@ -350,11 +325,12 @@ class IntermediateFormat:
                 return sign
 
     @staticmethod
-    def get_directions(incoming_lane):
+    def get_direction(a: List[np.ndarray], b: List[np.ndarray]):
         """
-        Find all directions of a incoming lane's successors
+        Return direction of waypoints b from waypoints a
 
-        :param incoming_lane: incoming lane from intersection
+        :param a: List of points
+        :param b: List of points
         :return: str: left or right or through
         """
         straight_threshold_angel = config.INTERSECTION_STRAIGHT_THRESHOLD
@@ -382,10 +358,9 @@ class IntermediateFormat:
 
         # sort after size
         sorted_angels = {
-            k: v for k,
-            v in sorted(
-                angels.items(),
-                key=lambda item: item[1])}
+            k: v
+            for k, v in sorted(angels.items(), key=lambda item: item[1])
+        }
         sorted_keys = list(sorted_angels.keys())
         sorted_values = list(sorted_angels.values())
 
@@ -394,7 +369,8 @@ class IntermediateFormat:
             directions = {
                 sorted_keys[0]: 'left',
                 sorted_keys[1]: 'through',
-                sorted_keys[2]: 'right'}
+                sorted_keys[2]: 'right'
+            }
 
         # if 2 successors we assume that they both cannot have the same
         # direction
@@ -442,22 +418,25 @@ class IntermediateFormat:
             node = lane.to_node
             # node with more than 2 edges or marked as crossing is an
             # intersection
-            if (node.get_degree() > 2 
+            if (node.get_degree() > 2
                     or (node.is_crossing and node.get_degree() == 2)):
                 # keep track of added lanes to consider unique intersections
                 incoming = [
-                    p for p in lane.predecessors if p.id not in added_lanes]
+                    p for p in lane.predecessors if p.id not in added_lanes
+                ]
 
                 # Initialize incomming element with properties to be filled in
                 incoming_lanelet_ids = set(
                     [incoming_lane.id for incoming_lane in incoming])
-                incoming_element = {'incomingLanelet': incoming_lanelet_ids,
-                                    'right': [],
-                                    'left': [],
-                                    'through': [],
-                                    'none': [],
-                                    'isLeftOf': [],
-                                    'waypoints': []}
+                incoming_element = {
+                    'incomingLanelet': incoming_lanelet_ids,
+                    'right': [],
+                    'left': [],
+                    'through': [],
+                    'none': [],
+                    'isLeftOf': [],
+                    'waypoints': []
+                }
 
                 for incoming_lane in incoming:
                     # find the turnlanes
@@ -480,7 +459,8 @@ class IntermediateFormat:
 
                     if node.id in intersections:
                         # add new incoming element to existing intersection
-                        intersections[node.id]['incoming'].append(incoming_element)
+                        intersections[node.id]['incoming'].append(
+                            incoming_element)
                     else:
                         # add new intersection
                         intersections[node.id] = \
@@ -501,21 +481,17 @@ class IntermediateFormat:
                 incoming_lanelets = set(incoming['incomingLanelet'])
                 successors_right = set(incoming["right"])
                 successors_left = set(incoming["left"])
-                successors_straight = set(
-                    incoming['through']).union(set(incoming['none']))
+                successors_straight = set(incoming['through']).union(
+                    set(incoming['none']))
                 is_left_of = incoming['isLeftOf']
-                incoming_element = IntersectionIncomingElement(incoming_ids[index],
-                                                               incoming_lanelets,
-                                                               successors_right,
-                                                               successors_straight,
-                                                               successors_left,
-                                                               is_left_of
-                                                               )
+                incoming_element = IntersectionIncomingElement(
+                    incoming_ids[index], incoming_lanelets, successors_right,
+                    successors_straight, successors_left, is_left_of)
                 incoming_elements.append(incoming_element)
                 index += 1
 
-            intersections_cr.append(Intersection(idgenerator.get_id(),
-                                                 incoming_elements))
+            intersections_cr.append(
+                Intersection(idgenerator.get_id(), incoming_elements))
         return intersections_cr
 
     def to_commonroad_scenario(self):
@@ -565,11 +541,13 @@ class IntermediateFormat:
             edge = Edge.extract_from_lane(lane)
             edges.append(edge)
 
-        traffic_signs = [sign.to_traffic_sign_cr()
-                         for sign in graph.traffic_signs]
+        traffic_signs = [
+            sign.to_traffic_sign_cr() for sign in graph.traffic_signs
+        ]
 
-        traffic_lights = [light.to_traffic_light_cr()
-                          for light in graph.traffic_lights]
+        traffic_lights = [
+            light.to_traffic_light_cr() for light in graph.traffic_lights
+        ]
 
         intersections = IntermediateFormat.get_intersections(graph)
         return IntermediateFormat(nodes,
@@ -589,15 +567,27 @@ class IntermediateFormat:
         :return: Dummy planning problem set
         """
         pp_id = idgenerator.get_id()
-        rectangle = Rectangle(4.3, 
-                              8.9, 
+        rectangle = Rectangle(4.3,
+                              8.9,
                               center=np.array([0.1, 0.5]),
                               orientation=1.7)
         circ = Circle(2.0, np.array([0.0, 0.0]))
-        goal_region = GoalRegion([State(time_step=Interval(0, 1), velocity=Interval(0.0, 1), position=rectangle),
-                                  State(time_step=Interval(1, 2), velocity=Interval(0.0, 1), position=circ)])
-        planning_problem = PlanningProblem(pp_id, State(velocity=0.1, position=np.array([[0], [0]]), orientation=0,
-                                                        yaw_rate=0, slip_angle=0, time_step=0), goal_region)
+        goal_region = GoalRegion([
+            State(time_step=Interval(0, 1),
+                  velocity=Interval(0.0, 1),
+                  position=rectangle),
+            State(time_step=Interval(1, 2),
+                  velocity=Interval(0.0, 1),
+                  position=circ)
+        ])
+        planning_problem = PlanningProblem(
+            pp_id,
+            State(velocity=0.1,
+                  position=np.array([[0], [0]]),
+                  orientation=0,
+                  yaw_rate=0,
+                  slip_angle=0,
+                  time_step=0), goal_region)
 
         return PlanningProblemSet(list([planning_problem]))
 
@@ -617,7 +607,7 @@ class IntermediateFormat:
     #     print("See Sumo Config File Here: " + sumo.config_file)
     #     return sumo.config_file
 
-    def merge(self, other_interm:"IntermediateFormat"):
+    def merge(self, other_interm: "IntermediateFormat"):
         """
         Merge other instance of intermediate format into this.
         The other instance is not changed.
@@ -633,7 +623,7 @@ class IntermediateFormat:
         self.traffic_signs.extend(copy.deepcopy(other_interm.traffic_signs))
         self.traffic_lights.extend(copy.deepcopy(other_interm.traffic_lights))
         self.intersections.extend(copy.deepcopy(other_interm.intersections))
-        
+
     def add_crossing_information(self, crossings: CrossingList):
         """ 
         add information about crossings to intersections
@@ -654,7 +644,7 @@ class IntermediateFormat:
                     incomings_successors.extend(incoming.successors_right)
                 if set(crossed_ids) & set(incomings_successors):
                     intersection.crossings.add(crossing_id)
-                    
+
         # adjust edge type of crossing edges
         for edge in self.edges:
             if edge.id in crossing_ids:

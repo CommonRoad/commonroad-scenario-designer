@@ -18,6 +18,11 @@ pip install -e .
 
 #### Usage
 
+To run the converters, load the corresponding environment variabels (defined in `.env` file):
+```bash
+$ source .env
+```
+
 Opening of GUI from which you can start the different converters: 
 ```bash
 cr-map-converter-gui
