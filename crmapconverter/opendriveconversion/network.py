@@ -15,12 +15,7 @@ from crmapconverter.opendriveconversion.utils import encode_road_section_lane_wi
 from crmapconverter.opendriveconversion.lanelet_network import ConversionLaneletNetwork
 from crmapconverter.opendriveconversion.converter import OpenDriveConverter
 
-from commonroad.scenario.traffic_sign import (
-    TrafficSign, TrafficLight, TrafficSignElement, TrafficSignIDZamunda, TrafficSignIDGermany, TrafficSignIDUsa, TrafficSignIDChina,
-    TrafficSignIDSpain, TrafficSignIDRussia, TrafficLightDirection
-
-)
-
+from crmapconverter.opendriveconversion.plane_elements.traffic_signals import get_traffic_signals
 from crmapconverter.opendriveconversion.plane_elements.geo_reference import get_geo_reference
 
 __author__ = "Benjamin Orthen, Stefan Urban"
@@ -86,81 +81,9 @@ class Network:
 
                 self._planes.extend(parametric_lane_groups)
 
-                for signal in road.signals:
-
-                    position, tangent = road.planView.calc(signal.s)
-                    position = np.array([position[0] + signal.t * np.cos(tangent + 3.14159/2),
-                                         position[1] + signal.t * np.sin(tangent + 3.14159/2)])
-
-                    if signal.dynamic == 'no':
-
-                        if signal.subtype == '-1' or 'none':
-                            additional_values = []
-                        else:
-                            additional_values = list([signal.subtype])
-
-                        if signal.country == 'DEU':
-                            try:
-                                element_id = TrafficSignIDGermany(signal.type)
-                            except ValueError:
-                                element_id = TrafficSignIDGermany.UNKNOWN
-
-                        elif signal.country == 'USA':
-                            try:
-                                element_id = TrafficSignIDUsa(signal.type)
-                            except ValueError:
-                                element_id = TrafficSignIDUsa.UNKNOWN
-
-                        elif signal.country == 'CHN':
-                            try:
-                                element_id = TrafficSignIDChina(signal.type)
-                            except ValueError:
-                                element_id = TrafficSignIDChina.UNKNOWN
-
-                        elif signal.country == 'ESP':
-                            try:
-                                element_id = TrafficSignIDSpain(signal.type)
-                            except ValueError:
-                                element_id = TrafficSignIDSpain.UNKNOWN
-
-                        elif signal.country == 'RUS':
-                            try:
-                                element_id = TrafficSignIDRussia(signal.type)
-                            except ValueError:
-                                element_id = TrafficSignIDRussia.UNKNOWN
-
-                        else:
-                            try:
-                                element_id = TrafficSignIDZamunda(signal.type)
-                            except ValueError:
-                                element_id = TrafficSignIDZamunda.UNKNOWN
-
-                        traffic_sign_element = TrafficSignElement(
-                            traffic_sign_element_id=element_id,
-                            additional_values=additional_values
-                        )
-
-                        traffic_sign = TrafficSign(
-                            traffic_sign_id=signal.id + 1000,
-                            traffic_sign_elements=list([traffic_sign_element]),
-                            first_occurrence=None,
-                            position=position,
-                            virtual=False
-                        )
-
-                        self._traffic_signs.append(traffic_sign)
-
-                    elif signal.dynamic == 'yes':
-                        traffic_light = TrafficLight(
-                            traffic_light_id=signal.id + 1000,
-                            cycle=[],
-                            position=position,
-                            time_offset=0,
-                            direction=TrafficLightDirection.ALL,
-                            active=True
-                        )
-
-                        self._traffic_lights.append(traffic_light)
+            traffic_lights, traffic_signs = get_traffic_signals(road)
+            self._traffic_lights.extend(traffic_lights)
+            self._traffic_signs.extend(traffic_signs)
 
     def export_lanelet_network(
             self, filter_types: list = None
