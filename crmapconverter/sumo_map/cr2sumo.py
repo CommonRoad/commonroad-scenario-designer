@@ -1297,9 +1297,10 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         out_folder = os.path.dirname(net_file)
 
         add_file = self._generate_add_file(scenario_name, out_folder)
-        rou_file = self._generate_rou_file(net_file, scenario_name, out_folder)
+        rou_files = self._generate_rou_file(net_file, scenario_name,
+                                            out_folder)
         self.sumo_cfg_file = self._generate_cfg_file(scenario_name, net_file,
-                                                     rou_file, add_file,
+                                                     rou_files, add_file,
                                                      out_folder)
         return True
 
@@ -1327,7 +1328,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         driving_params = self.conf.driving_params
 
         for veh_type, probability in veh_distribution.items():
-            if probability != 0:
+            if probability > 0:
                 vType_node = domTree.createElement("vType")
                 vType_node.setAttribute("id", veh_type)
                 vType_node.setAttribute("guiShape", veh_type)
@@ -1396,37 +1397,57 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         #step_per_departure = ((conf.departure_interval_vehicles.end - conf.departure_interval_vehicles.start) / n_vehicles_max)
 
         # filenames
-        rou_file = os.path.join(out_folder, scenario_name + '.rou.xml')
+        route_files: Dict[str, str] = {
+            'vehicle':
+            os.path.join(out_folder, scenario_name + ".vehicles" + '.rou.xml'),
+            "pedestrian":
+            os.path.join(out_folder,
+                         scenario_name + ".pedestrians" + '.rou.xml')
+        }
         trip_file = os.path.join(out_folder, scenario_name + '.trips.xml')
         add_file = os.path.join(out_folder, scenario_name + '.add.xml')
 
-        # create route file
-        cmd = [
+        def run(cmd):
+            try:
+                subprocess.check_output(cmd)
+            except subprocess.CalledProcessError as e:
+                raise RuntimeError(
+                    "Command '{}' return with error (code {}): {}".format(
+                        e.cmd, e.returncode, e.output))
+
+        # create vehicle route file
+        run([
             'python',
             os.path.join(os.environ['SUMO_HOME'], 'tools/randomTrips.py'),
-            '-n', net_file, '-o', trip_file, '-r', rou_file, '-b',
+            '-n', net_file, '-r', route_files["vehicle"], '-b',
             str(self.conf.departure_interval_vehicles.start), '-e',
             str(self.conf.departure_interval_vehicles.end), '-p',
             str(period), '--allow-fringe', '--fringe-factor',
-            str(self.conf.fringe_factor),
-            '--trip-attributes=departLane=\"best\" departSpeed=\"max\" departPos=\"base\" '
-        ]
-        # if os.path.isfile(add_file):
-        #     cmd.extend(['--additional-files', add_file])
-
-        try:
-            subprocess.check_output(cmd)
-        except subprocess.CalledProcessError as e:
-            raise RuntimeError(
-                "Command '{}' return with error (code {}): {}".format(
-                    e.cmd, e.returncode, e.output))
+            str(self.conf.fringe_factor), "--seed",
+            str(self.conf.random_seed),
+            '--trip-attributes=departLane=\"best\" departSpeed=\"max\" departPos=\"base\"'
+        ])
+        # create pedestrian routes
+        run([
+            'python',
+            os.path.join(os.environ['SUMO_HOME'], 'tools/randomTrips.py'),
+            '-n', net_file, '-r', route_files["pedestrian"], '-b',
+            str(self.conf.departure_interval_vehicles.start), '-e',
+            str(self.conf.departure_interval_vehicles.end), "-p",
+            str(1 - self.conf.veh_distribution['pedestrian']),
+            '--allow-fringe', '--fringe-factor',
+            str(self.conf.fringe_factor), "--persontrips", "--seed",
+            str(self.conf.random_seed),
+            '--trip-attributes= modes=\"public car\" departPos=\"base\"'
+        ])
 
         if self.conf.n_ego_vehicles != 0:
             #get ego ids and add EGO_ID_START prefix
-            ego_ids = self._find_ego_ids_by_departure_time(rou_file)
-            write_ego_ids_to_rou_file(rou_file, ego_ids)
+            ego_ids = self._find_ego_ids_by_departure_time(
+                route_files["vehicle"])
+            write_ego_ids_to_rou_file(route_files["vehicle"], ego_ids)
 
-        return rou_file
+        return route_files
 
     def _find_ego_ids_by_departure_time(self, rou_file: str) -> list:
         """
@@ -1481,7 +1502,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         return self.conf.ego_ids
 
     def _generate_cfg_file(self, scenario_name: str, net_file: str,
-                           rou_file: str, add_file: str,
+                           route_files: Dict[str, str], add_file: str,
                            output_folder: str) -> str:
         """
         Generates the configuration file according to the scenario name to the specified output folder.
@@ -1501,9 +1522,12 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
             os.path.join(os.path.dirname(__file__), DEFAULT_CFG_FILE))
 
         updated_fields = {
-            '*/net-file': os.path.basename(net_file),
-            '*/route-files': os.path.basename(rou_file),
-            '*/additional-files': os.path.basename(add_file),
+            '*/net-file':
+            os.path.basename(net_file),
+            '*/route-files':
+            ",".join([os.path.basename(f) for f in route_files.values()]),
+            '*/additional-files':
+            os.path.basename(add_file),
         }
         for k, v in updated_fields.items():
             tree.findall(k)[0].attrib['value'] = v

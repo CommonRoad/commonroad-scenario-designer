@@ -168,7 +168,7 @@ class SumoConfig(DefaultConfig):
         'truck': 0.8,
         'bus': 0.3,
         'bicycle': 0.2,
-        'pedestrian': 0
+        'pedestrian': 0.0
     }
 
     # default vehicle attributes to determine edge restrictions
