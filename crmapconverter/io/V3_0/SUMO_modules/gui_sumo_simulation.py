@@ -1,26 +1,75 @@
-import copy
+import uuid
 import os
-import sys
+import pathlib
+
+from commonroad.scenario.scenario import Scenario
+
 from crmapconverter.io.V3_0.GUI_resources.Sumo_simulate import Ui_sumo_simulate
+from crmapconverter.io.V3_0.errors import error, warning
+from crmapconverter.io.V3_0.observable import Observable
+
+from crmapconverter.sumo_map.config import SumoConfig
+from crmapconverter.sumo_map.cr2sumo import CR2SumoMapConverter
+from sumocr.interface.sumo_simulation import SumoSimulation
 
 from PyQt5.QtWidgets import *
 
 
-
 class SUMOSimulation(QWidget, Ui_sumo_simulate):
-
     def __init__(self):
+        # set random uuid as name for the scneario files
+        self._config = SumoConfig.from_scenario_name(str(uuid.uuid4()))
+        self._scenario: Scenario = None
+
+        # observable giving the simulated scenario once done
+        self.simulated_scenario = Observable(None)
+
+        # set path to chache folder and creat it if not already existing
+        self._output_folder = os.path.abspath(
+            os.path.join(os.path.dirname(__file__), "..", "tmp"))
+        pathlib.Path(self._output_folder).mkdir(parents=True, exist_ok=True)
+
         super(SUMOSimulation, self).__init__()
         self.setupUi(self)
+        self._connect_events()
 
-    def connect_events(self) -> None:
+    @property
+    def scenario(self) -> Scenario:
+        return self._scenario
+
+    @scenario.setter
+    def scenario(self, scenario: Scenario):
+        self._scenario = scenario
+
+    def _connect_events(self) -> None:
+        """
+        Connecting valueChanged events of the SpinBoxes to the SumoConfig
+        """
+
         # window.btn_restore_defaults.clicked.connect(self.restore_default_button)
         # window.btn_close.clicked.connect(self.close_button)
-        return
 
-    def update_ui_values(self) -> None:
+        self._update_ui_values()
+
+        def set_dt(value):
+            self._config.dt = value
+
+        def set_presimulation_steps(value):
+            self._config.presimulation_steps = value
+
+        def set_simulation_steps(value):
+            self._config.simulation_steps = value
+
+        self.doubleSpinBox_dt.valueChanged.connect(set_dt)
+        self.spinBox_presimulation_steps.valueChanged.connect(
+            set_presimulation_steps)
+        self.spinBox_simulation_steps.valueChanged.connect(
+            set_simulation_steps)
+        self.pushButton_simulate.clicked.connect(self.simulate)
+
+    def _update_ui_values(self) -> None:
         """
-        sets the values of the settings window to the current values of config.py
+        sets the values of the settings window to the current values of the SumoConfig file
 
         :return: None
         """
@@ -28,19 +77,50 @@ class SUMOSimulation(QWidget, Ui_sumo_simulate):
         # window.le_benchmark_id.setText(config.BENCHMARK_ID)
         # window.sb_compression_threshold.setValue(config.COMPRESSION_THRESHOLD)
         # window.chk_delete_short_edges.setChecked(config.DELETE_SHORT_EDGES)
-        return
 
-    def save_to_config(self) -> None:
-        """
-        saves the values in the settings window to config.py
+        # load values from config
+        self.doubleSpinBox_dt.setValue(self._config.dt)
+        self.spinBox_presimulation_steps.setValue(
+            self._config.presimulation_steps)
+        self.spinBox_simulation_steps.setValue(self._config.simulation_steps)
 
-        :return: None
+    def simulate(self) -> bool:
         """
-        # example code:
-        # config.BENCHMARK_ID = window.le_benchmark_id.text()
-        # config.AERIAL_IMAGES = swindow.chb_aerial.isChecked()
-        # config.DOWNLOAD_EDGE_LENGTH = window.sb_donwload_radius.value()
-        return
+        simulates the current scenario and returns the simulated version
+        """
+        if not self._scenario:
+            error(
+                self,
+                "No Scenario loaded, load a valid commonroad scenario to simulate"
+            )
+            return False
+
+        # convert scenario to SUMO
+        wrapper = CR2SumoMapConverter(self._scenario.lanelet_network,
+                                      self._config)
+        wrapper.convert_to_net_file(self._output_folder)
+
+        simulation = SumoSimulation()
+        simulation.initialize(self._config, wrapper)
+        for _ in range(self._config.simulation_steps):
+            simulation.simulate_step()
+        simulation.stop()
+
+        self.simulated_scenario.value = simulation.commonroad_scenarios_all_time_steps(
+        )
+        return True
+
+    # def save_to_config(self) -> None:
+    #     """
+    #     saves the values in the settings window to config.py
+
+    #     :return: None
+    #     """
+    #     # example code:
+    #     # config.BENCHMARK_ID = window.le_benchmark_id.text()
+    #     # config.AERIAL_IMAGES = swindow.chb_aerial.isChecked()
+    #     # config.DOWNLOAD_EDGE_LENGTH = window.sb_donwload_radius.value()
+    #     return
 
     def close_button(self) -> None:
         """
@@ -48,6 +128,4 @@ class SUMOSimulation(QWidget, Ui_sumo_simulate):
 
         :return: None
         """
-        self.save_to_config()
         # and close
-

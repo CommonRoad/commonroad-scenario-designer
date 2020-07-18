@@ -1,4 +1,3 @@
-
 import sys
 
 from PyQt5 import QtWidgets
@@ -14,8 +13,7 @@ from crmapconverter.io.V3_0.gui_toolbox import UpperToolbox, SumoTool
 from crmapconverter.io.V3_0.gui_cr_viewer import CrViewer
 from crmapconverter.io.V3_0.converter_modules.osm_interface import OSMInterface
 from crmapconverter.io.V3_0.converter_modules.opendrive_interface import (
-    OpenDRIVEInterface
-)
+    OpenDRIVEInterface)
 from crmapconverter.io.V3_0.gui_settings import GUISettings
 from crmapconverter.io.V3_0.SUMO_modules.sumo_settings import SUMOSettings
 from crmapconverter.io.V3_0.SUMO_modules.gui_sumo_simulation import SUMOSimulation
@@ -23,7 +21,6 @@ from crmapconverter.io.V3_0.SUMO_modules.gui_sumo_simulation import SUMOSimulati
 
 class MWindow(QMainWindow, Ui_mainWindow):
     """The Mainwindow of CR Scenario Designer."""
-
     def __init__(self):
         super(MWindow, self).__init__()
         self.setupUi(self)
@@ -37,13 +34,18 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.toolBox = None
         self.console = None
         self.textBrowser = None
-        self.sumobox = None
+        self.sumobox = SUMOSimulation()
         self.crviewer = CrViewer()
         self.lanelets_List = None
         self.intersection_List = None
         self.timer = None
         self.ani_path = None
         self.slider_clicked = False
+
+        # when the current scenario was simulated, load it in the gui
+        self.sumobox.simulated_scenario.subscribe(
+            lambda scenario: self.open_scenario(scenario, self.crviewer.
+                                                filename))
 
         self.create_file_actions()
         self.create_import_actions()
@@ -99,7 +101,6 @@ class MWindow(QMainWindow, Ui_mainWindow):
     def show_sumo_settings(self):
         SUMOSettings(self)
 
-
     def create_toolbox(self):
         """ Create the Upper toolbox."""
         self.uppertoolBox = UpperToolbox()
@@ -118,8 +119,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         #    self.show_laneletslist)
         #self.uppertoolBox.button_intersection_list.clicked.connect(
         #    self.show_intersection_list)
-        self.uppertoolBox.button_save.clicked.connect(
-            self.save_animation)
+        self.uppertoolBox.button_save.clicked.connect(self.save_animation)
 
     def create_laneletslist(self, cr_viewer):
         """Create the Laneletslist and put it into right Dockwidget area."""
@@ -153,7 +153,8 @@ class MWindow(QMainWindow, Ui_mainWindow):
         if self.intersection_List is not None:
             self.intersection_List.close()
             self.intersection_List = None
-        self.intersection_List = QDockWidget("Intersections " + self.crviewer.filename)
+        self.intersection_List = QDockWidget("Intersections " +
+                                             self.crviewer.filename)
         self.intersection_List.setFloating(True)
         self.intersection_List.setFeatures(QDockWidget.AllDockWidgetFeatures)
         self.intersection_List.setAllowedAreas(Qt.RightDockWidgetArea)
@@ -178,7 +179,6 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
     def create_sumobox(self):
         """Function to create the sumo toolbox(bottom toolbox)."""
-        self.sumobox = SUMOSimulation()
         self.tool2 = QDockWidget("Sumo Simulation", self)
         self.tool2.setFeatures(QDockWidget.AllDockWidgetFeatures)
         self.tool2.setAllowedAreas(Qt.LeftDockWidgetArea)
@@ -208,11 +208,8 @@ class MWindow(QMainWindow, Ui_mainWindow):
         if self.crviewer.current_scenario is None:
             messbox = QMessageBox()
             reply = messbox.question(
-                self,
-                "Warning",
-                "You should firstly load a animated scenario",
-                QMessageBox.Ok | QMessageBox.No,
-                QMessageBox.Ok)
+                self, "Warning", "You should firstly load a animated scenario",
+                QMessageBox.Ok | QMessageBox.No, QMessageBox.Ok)
             if (reply == QtWidgets.QMessageBox.Ok):
                 self.file_open()
         else:
@@ -271,9 +268,9 @@ class MWindow(QMainWindow, Ui_mainWindow):
         toolbox.triggered.connect(self.tool_box1_show)
         tb2.addSeparator()
         lanelet_list = QAction(QIcon(":/icons/lanelet_list.ico"),
-                          "show Lanelet list", self)
+                               "show Lanelet list", self)
         intersection_list = QAction(QIcon(":/icons/intersection_list.ico"),
-                               "show Intersection list", self)
+                                    "show Intersection list", self)
         tb2.addAction(lanelet_list)
         lanelet_list.triggered.connect(self.show_laneletslist)
         tb2.addAction(intersection_list)
@@ -360,39 +357,43 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
     def create_setting_actions(self):
         """Function to create the export action in the menu bar."""
-        self.osm_settings = self.create_action("OSM Settings",
-                                          icon="",
-                                          checkable=False,
-                                          slot=self.show_osm_settings,
-                                          tip="Show settings for osm converter",
-                                          shortcut=None)
-        self.opendrive_settings = self.create_action("OpenDRIVE Settings",
-                                          icon="",
-                                          checkable=False,
-                                          slot=self.show_opendrive_settings,
-                                          tip="Show settings for OpenDRIVE converter",
-                                          shortcut=None)
-        self.gui_settings = self.create_action("GUI Settings",
-                                          icon="",
-                                          checkable=False,
-                                          slot=self.show_gui_settings,
-                                          tip="Show settings for the CR Scenario Designer",
-                                          shortcut=None)
-        self.sumo_settings = self.create_action("SUMO Settings",
-                                          icon="",
-                                          checkable=False,
-                                          slot=self.show_sumo_settings,
-                                          tip="Show settings for the SUMO interface",
-                                          shortcut=None)
+        self.osm_settings = self.create_action(
+            "OSM Settings",
+            icon="",
+            checkable=False,
+            slot=self.show_osm_settings,
+            tip="Show settings for osm converter",
+            shortcut=None)
+        self.opendrive_settings = self.create_action(
+            "OpenDRIVE Settings",
+            icon="",
+            checkable=False,
+            slot=self.show_opendrive_settings,
+            tip="Show settings for OpenDRIVE converter",
+            shortcut=None)
+        self.gui_settings = self.create_action(
+            "GUI Settings",
+            icon="",
+            checkable=False,
+            slot=self.show_gui_settings,
+            tip="Show settings for the CR Scenario Designer",
+            shortcut=None)
+        self.sumo_settings = self.create_action(
+            "SUMO Settings",
+            icon="",
+            checkable=False,
+            slot=self.show_sumo_settings,
+            tip="Show settings for the SUMO interface",
+            shortcut=None)
 
     def create_help_actions(self):
         """Function to create the help action in the menu bar."""
         self.open_web = self.create_action("Open CR Web",
-                                          icon="",
-                                          checkable=False,
-                                          slot=self.open_cr_web,
-                                          tip="Open CommonRoad Web",
-                                          shortcut=None)
+                                           icon="",
+                                           checkable=False,
+                                           slot=self.open_cr_web,
+                                           tip="Open CommonRoad Web",
+                                           shortcut=None)
 
     def center(self):
         """Function that makes sure the main window is in the center of screen."""
@@ -478,21 +479,23 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
     def file_open(self):
         """Function to open a CR .xml file."""
-        self.crviewer = CrViewer()
         self.crviewer.open_commonroad_file()
-        self.update_max_step()
         self.update_to_new_scenario()
 
     def update_to_new_scenario(self):
         """  """
         self.update_max_step()
+        # pass sceenario reference to sumobox
+        self.sumobox.scenario = self.crviewer.current_scenario
+
         self.crviewer.setWindowIcon(QIcon(":/icons/cr1.ico"))
-        if self.crviewer.current_scenario is not None:
+        if self.crviewer.current_scenario:
             self.create_laneletslist(self.crviewer)
             self.create_intersection_list(self.crviewer)
             self.setWindowTitle(self.crviewer.filename)
             self.textBrowser.append("loading " + self.crviewer.filename)
-            self.textBrowser.append("Benchmark-ID: " + self.crviewer.current_scenario.benchmark_id)
+            self.textBrowser.append(
+                "Benchmark-ID: " + self.crviewer.current_scenario.benchmark_id)
             self.setCentralWidget(self.crviewer)
         else:
             self.lanelets_List.close()
@@ -508,8 +511,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
                 lanelet_ids.append(lanelet.lanelet_id)
                 self.textBrowser.append(
                     "Warning: Lanelet {} is invalid polygon!".format(
-                        lanelet.lanelet_id)
-                )
+                        lanelet.lanelet_id))
         # if lanelet_ids:
         #     QMessageBox.warning(
         #         self,
@@ -517,7 +519,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         #         "Scenario contains faulty lanelets: " + str(lanelet_ids),
         #         QMessageBox.Ok,
         #     )
-        self.crviewer = CrViewer()
+        # self.crviewer = CrViewer()
         self.crviewer.filename = filename
         self.crviewer.open_scenario(new_scenario)
         self.update_to_new_scenario()
@@ -525,14 +527,11 @@ class MWindow(QMainWindow, Ui_mainWindow):
     def file_save(self):
         """Function to save a CR .xml file."""
         fileEdit = self.centralWidget()
-        
+
         if self.crviewer.current_scenario is None:
             messbox = QMessageBox()
-            messbox.warning(
-                self, 
-                "Warning",
-                "There is no file to save!",
-                QMessageBox.Ok, QMessageBox.Ok)
+            messbox.warning(self, "Warning", "There is no file to save!",
+                            QMessageBox.Ok, QMessageBox.Ok)
             messbox.close()
             return
 
@@ -561,8 +560,8 @@ class MWindow(QMainWindow, Ui_mainWindow):
             QMessageBox.critical(
                 self,
                 "CommonRoad file not created!",
-                "The CommonRoad file was not saved due to an error.\n\n"
-                + "{}".format(e),
+                "The CommonRoad file was not saved due to an error.\n\n" +
+                "{}".format(e),
                 QMessageBox.Ok,
             )
             return

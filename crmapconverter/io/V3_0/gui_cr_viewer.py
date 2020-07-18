@@ -13,18 +13,13 @@ from matplotlib import animation
 
 from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.scenario.intersection import Intersection
-from commonroad.scenario.lanelet import (
-    Lanelet,
-    is_natural_number,
-    LaneletNetwork
-)
+from commonroad.scenario.lanelet import (Lanelet, is_natural_number,
+                                         LaneletNetwork)
 
-from matplotlib.backends.backend_qt5agg import (
-    FigureCanvasQTAgg as FigureCanvas
-)
-from matplotlib.backends.backend_qt5agg import (
-    NavigationToolbar2QT as NavigationToolbar
-)
+from matplotlib.backends.backend_qt5agg import (FigureCanvasQTAgg as
+                                                FigureCanvas)
+from matplotlib.backends.backend_qt5agg import (NavigationToolbar2QT as
+                                                NavigationToolbar)
 
 from matplotlib.animation import FuncAnimation
 from commonroad.visualization.draw_dispatch_cr import draw_object
@@ -34,6 +29,8 @@ from crmapconverter.io.V3_0.GUI_resources.MainWindow import Ui_mainWindow
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
+
+from .observable import Observable
 
 
 class Canvas(FigureCanvas):
@@ -79,28 +76,6 @@ class Canvas(FigureCanvas):
         self.ax.set_aspect('equal')
 
 
-class Observable:
-    def __init__(self, value, observers=[]):
-        self._value = value
-        self._observers = observers
-
-    @property
-    def value(self):
-        return self._value
-
-    @value.setter
-    def value(self, value):
-        for obs in self._observers:
-            obs(value)
-        self._value = value
-
-    def silent_set(self, value):
-        self._value = value
-
-    def subscribe(self, observer):
-        self._observers.append(observer)
-
-
 class CrViewer(QWidget):
     def __init__(self, parent=None):
         super(CrViewer, self).__init__(parent)
@@ -131,12 +106,12 @@ class CrViewer(QWidget):
         self.laneletsList.clicked.connect(self.on_click_lanelet)
 
         self.intersection_List = QTableWidget(self)
-        self.intersection_List.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.intersection_List.setSelectionBehavior(
+            QAbstractItemView.SelectRows)
         self.intersection_List.clicked.connect(self.onClickIntersection)
 
         self.canvas.mpl_connect('scroll_event', self.zoom)
         self.canvas.mpl_connect('button_press_event', self.zoom)
-
 
     def open_commonroad_file(self):
         """ """
@@ -224,7 +199,7 @@ class CrViewer(QWidget):
         if reply == QMessageBox.Ok:
             self.open_commonroad_file()
         else:
-            self.close # behavior when called as inteded?
+            self.close  # behavior when called as inteded?
 
     def center(self, x):
         screen = QDesktopWidget().screenGeometry()
@@ -299,8 +274,7 @@ class CrViewer(QWidget):
             draw_arrow, color, alpha, zorder, label = self.get_paint_parameters(
                 lanelet, selected_lanelet, selected_intersection)
 
-            self.draw_lanelet_polygon(
-                lanelet, ax, color, alpha, zorder, label)
+            self.draw_lanelet_polygon(lanelet, ax, color, alpha, zorder, label)
 
             self.draw_lanelet_vertices(lanelet, ax)
 
@@ -310,12 +284,8 @@ class CrViewer(QWidget):
         handles, labels = self.canvas.get_axes().get_legend_handles_labels()
         self.canvas.get_axes().legend(handles, labels)
 
-        if (
-                self.xlim1 != float("Inf")
-                and self.xlim2 != float("Inf")
-                and self.ylim1 != float("Inf")
-                and self.ylim2 != float("Inf")
-        ):
+        if (self.xlim1 != float("Inf") and self.xlim2 != float("Inf")
+                and self.ylim1 != float("Inf") and self.ylim2 != float("Inf")):
             self.canvas.get_axes().set_xlim([self.xlim1, self.xlim2])
             self.canvas.get_axes().set_ylim([self.ylim1, self.ylim2])
 
@@ -342,31 +312,26 @@ class CrViewer(QWidget):
                 zorder = 10
                 label = "{} selected".format(lanelet.lanelet_id)
 
-            elif (
-                    lanelet.lanelet_id in selected_lanelet.predecessor
-                    and lanelet.lanelet_id in selected_lanelet.successor
-            ):
+            elif (lanelet.lanelet_id in selected_lanelet.predecessor
+                  and lanelet.lanelet_id in selected_lanelet.successor):
                 color = "purple"
                 alpha = 0.5
                 zorder = 5
                 label = "{} predecessor and successor of {}".format(
-                    lanelet.lanelet_id, selected_lanelet.lanelet_id
-                )
+                    lanelet.lanelet_id, selected_lanelet.lanelet_id)
 
             elif lanelet.lanelet_id in selected_lanelet.predecessor:
                 color = "blue"
                 alpha = 0.5
                 zorder = 5
                 label = "{} predecessor of {}".format(
-                    lanelet.lanelet_id, selected_lanelet.lanelet_id
-                )
+                    lanelet.lanelet_id, selected_lanelet.lanelet_id)
             elif lanelet.lanelet_id in selected_lanelet.successor:
                 color = "green"
                 alpha = 0.5
                 zorder = 5
                 label = "{} successor of {}".format(
-                    lanelet.lanelet_id, selected_lanelet.lanelet_id
-                )
+                    lanelet.lanelet_id, selected_lanelet.lanelet_id)
             elif lanelet.lanelet_id == selected_lanelet.adj_left:
                 color = "yellow"
                 alpha = 0.5
@@ -374,9 +339,8 @@ class CrViewer(QWidget):
                 label = "{} adj left of {} ({})".format(
                     lanelet.lanelet_id,
                     selected_lanelet.lanelet_id,
-                    "same"
-                    if selected_lanelet.adj_left_same_direction
-                    else "opposite",
+                    "same" if selected_lanelet.adj_left_same_direction else
+                    "opposite",
                 )
             elif lanelet.lanelet_id == selected_lanelet.adj_right:
                 color = "orange"
@@ -385,9 +349,8 @@ class CrViewer(QWidget):
                 label = "{} adj right of {} ({})".format(
                     lanelet.lanelet_id,
                     selected_lanelet.lanelet_id,
-                    "same"
-                    if selected_lanelet.adj_right_same_direction
-                    else "opposite",
+                    "same" if selected_lanelet.adj_right_same_direction else
+                    "opposite",
                 )
             else:
                 color = "gray"
@@ -443,8 +406,7 @@ class CrViewer(QWidget):
         codes = [Path.MOVETO]
 
         for x, y in np.vstack(
-                [lanelet.left_vertices, lanelet.right_vertices[::-1]]
-        ):
+            [lanelet.left_vertices, lanelet.right_vertices[::-1]]):
             verts.append([x, y])
             codes.append(Path.LINETO)
 
@@ -469,8 +431,7 @@ class CrViewer(QWidget):
                 alpha=alpha,
                 zorder=zorder,
                 label=label,
-            )
-        )
+            ))
 
     def draw_lanelet_vertices(self, lanelet, ax):
         ax.plot(
@@ -490,9 +451,8 @@ class CrViewer(QWidget):
         idx = 0
         ml = lanelet.left_vertices[idx]
         mr = lanelet.right_vertices[idx]
-        mc = lanelet.center_vertices[
-            min(len(lanelet.center_vertices) - 1, idx + 3)
-        ]
+        mc = lanelet.center_vertices[min(
+            len(lanelet.center_vertices) - 1, idx + 3)]
         ax.plot(
             [ml[0], mr[0], mc[0], ml[0]],
             [ml[1], mr[1], mc[1], ml[1]],
@@ -503,10 +463,10 @@ class CrViewer(QWidget):
 
     def update_lanelet_list(self):
         self.laneletsList.setRowCount(
-            len(self.current_scenario.lanelet_network.lanelets)
-        )
+            len(self.current_scenario.lanelet_network.lanelets))
         self.laneletsList.setColumnCount(2)
-        self.laneletsList.setHorizontalHeaderLabels(["Lanelet-Id", "LaneletType"])
+        self.laneletsList.setHorizontalHeaderLabels(
+            ["Lanelet-Id", "LaneletType"])
 
         lanelet_data = []
         for lanelet in self.current_scenario.lanelet_network.lanelets:
@@ -517,29 +477,34 @@ class CrViewer(QWidget):
         for idx, lanelet in enumerate(lanelet_data):
 
             # set lanelet_id
-            self.laneletsList.setItem(idx, 0, QTableWidgetItem(str(lanelet[0])))
+            self.laneletsList.setItem(idx, 0,
+                                      QTableWidgetItem(str(lanelet[0])))
             try:
                 # set lanelet description (old id)
-                self.laneletsList.setItem(idx, 1, QTableWidgetItem(str(lanelet[1])))
+                self.laneletsList.setItem(idx, 1,
+                                          QTableWidgetItem(str(lanelet[1])))
             except AttributeError:
                 self.laneletsList.setItem(idx, 1, QTableWidgetItem("None"))
 
     def update_intersection_list(self):
         self.intersection_List.setRowCount(
-            len(self.current_scenario.lanelet_network.intersections)
-        )
+            len(self.current_scenario.lanelet_network.intersections))
         self.intersection_List.setColumnCount(2)
-        self.intersection_List.setHorizontalHeaderLabels(["Intersection-Id", "Description"])
+        self.intersection_List.setHorizontalHeaderLabels(
+            ["Intersection-Id", "Description"])
 
         intersection_data = []
         for intersection in self.current_scenario.lanelet_network.intersections:
             description = None
-            intersection_data.append((intersection.intersection_id, description))
+            intersection_data.append(
+                (intersection.intersection_id, description))
 
         intersection_data = sorted(intersection_data)
         for idx, intersection in enumerate(intersection_data):
-            self.intersection_List.setItem(idx, 0, QTableWidgetItem(str(intersection[0])))
-            self.intersection_List.setItem(idx, 1, QTableWidgetItem(str(intersection[1])))
+            self.intersection_List.setItem(
+                idx, 0, QTableWidgetItem(str(intersection[0])))
+            self.intersection_List.setItem(
+                idx, 1, QTableWidgetItem(str(intersection[1])))
 
     def _init_animation(self):
         print('init animation')
@@ -559,10 +524,9 @@ class CrViewer(QWidget):
         if self.current_scenario is not None:
             if start == end:
                 warning_dia = QMessageBox()
-                reply = warning_dia.warning(self, "Warning",
-                                            "This Scenario only has one time step!",
-                                            QMessageBox.Ok,
-                                            QMessageBox.Ok)
+                reply = warning_dia.warning(
+                    self, "Warning", "This Scenario only has one time step!",
+                    QMessageBox.Ok, QMessageBox.Ok)
                 if reply == QMessageBox.Ok:
                     warning_dia.close()
 
@@ -577,7 +541,7 @@ class CrViewer(QWidget):
                     delta_time_steps * self.timestep.value + plotting_horizon)
                 self.timestep.value += 1
                 if time_begin > time_end:
-                    self.timestep.value=0
+                    self.timestep.value = 0
 
                 draw_params = {'time_begin': time_begin, 'time_end': time_end}
                 print("draw frame ", self.timestep.value, draw_params)
@@ -645,7 +609,8 @@ class CrViewer(QWidget):
                 QMessageBox.critical(
                     self,
                     "CommonRoad file not created!",
-                    "The CommonRoad file was not saved due to an error.\n\n{}".format(e),
+                    "The CommonRoad file was not saved due to an error.\n\n{}".
+                    format(e),
                     QMessageBox.Ok,
                 )
                 return
@@ -673,7 +638,8 @@ class CrViewer(QWidget):
                 QMessageBox.critical(
                     self,
                     "CommonRoad file not created!",
-                    "The CommonRoad file was not saved due to an error.\n\n{}".format(e),
+                    "The CommonRoad file was not saved due to an error.\n\n{}".
+                    format(e),
                     QMessageBox.Ok,
                 )
                 return
@@ -686,7 +652,6 @@ class CrViewer(QWidget):
             if num > max_num:
                 max_num = num
         self.max_step = max_num
-
 
     def closeEvent(self, event):
         messbox = QMessageBox()
@@ -715,7 +680,9 @@ def find_intersection_by_id(scenario, intersection_id: int) -> Lanelet:
     :return: The lanelet object if the id exists and None otherwise
     """
     assert is_natural_number(
-        intersection_id), '<LaneletNetwork/find_intersection_by_id>: provided id is not valid! id = {}'.format(
+        intersection_id
+    ), '<LaneletNetwork/find_intersection_by_id>: provided id is not valid! id = {}'.format(
         intersection_id)
     intersections = scenario.lanelet_network._intersections
-    return intersections[intersection_id] if intersection_id in intersections else None
+    return intersections[
+        intersection_id] if intersection_id in intersections else None
