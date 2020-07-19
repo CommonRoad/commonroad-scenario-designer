@@ -1,4 +1,3 @@
-
 import sys
 
 from PyQt5 import QtWidgets
@@ -99,7 +98,6 @@ class MWindow(QMainWindow, Ui_mainWindow):
     def show_sumo_settings(self):
         SUMOSettings(self)
 
-
     def create_toolbox(self):
         """ Create the Upper toolbox."""
         self.uppertoolBox = UpperToolbox()
@@ -114,9 +112,9 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.create_sumobox()
         self.uppertoolBox.button_sumo_simulation.clicked.connect(
             self.tool_box2_show)
-        #self.uppertoolBox.button_lanlist.clicked.connect(
+        # self.uppertoolBox.button_lanlist.clicked.connect(
         #    self.show_laneletslist)
-        #self.uppertoolBox.button_intersection_list.clicked.connect(
+        # self.uppertoolBox.button_intersection_list.clicked.connect(
         #    self.show_intersection_list)
         self.uppertoolBox.button_save.clicked.connect(
             self.save_animation)
@@ -271,9 +269,9 @@ class MWindow(QMainWindow, Ui_mainWindow):
         toolbox.triggered.connect(self.tool_box1_show)
         tb2.addSeparator()
         lanelet_list = QAction(QIcon(":/icons/lanelet_list.ico"),
-                          "show Lanelet list", self)
+                               "show Lanelet list", self)
         intersection_list = QAction(QIcon(":/icons/intersection_list.ico"),
-                               "show Intersection list", self)
+                                    "show Intersection list", self)
         tb2.addAction(lanelet_list)
         lanelet_list.triggered.connect(self.show_laneletslist)
         tb2.addAction(intersection_list)
@@ -361,38 +359,38 @@ class MWindow(QMainWindow, Ui_mainWindow):
     def create_setting_actions(self):
         """Function to create the export action in the menu bar."""
         self.osm_settings = self.create_action("OSM Settings",
-                                          icon="",
-                                          checkable=False,
-                                          slot=self.show_osm_settings,
-                                          tip="Show settings for osm converter",
-                                          shortcut=None)
+                                               icon="",
+                                               checkable=False,
+                                               slot=self.show_osm_settings,
+                                               tip="Show settings for osm converter",
+                                               shortcut=None)
         self.opendrive_settings = self.create_action("OpenDRIVE Settings",
-                                          icon="",
-                                          checkable=False,
-                                          slot=self.show_opendrive_settings,
-                                          tip="Show settings for OpenDRIVE converter",
-                                          shortcut=None)
+                                                     icon="",
+                                                     checkable=False,
+                                                     slot=self.show_opendrive_settings,
+                                                     tip="Show settings for OpenDRIVE converter",
+                                                     shortcut=None)
         self.gui_settings = self.create_action("GUI Settings",
-                                          icon="",
-                                          checkable=False,
-                                          slot=self.show_gui_settings,
-                                          tip="Show settings for the CR Scenario Designer",
-                                          shortcut=None)
+                                               icon="",
+                                               checkable=False,
+                                               slot=self.show_gui_settings,
+                                               tip="Show settings for the CR Scenario Designer",
+                                               shortcut=None)
         self.sumo_settings = self.create_action("SUMO Settings",
-                                          icon="",
-                                          checkable=False,
-                                          slot=self.show_sumo_settings,
-                                          tip="Show settings for the SUMO interface",
-                                          shortcut=None)
+                                                icon="",
+                                                checkable=False,
+                                                slot=self.show_sumo_settings,
+                                                tip="Show settings for the SUMO interface",
+                                                shortcut=None)
 
     def create_help_actions(self):
         """Function to create the help action in the menu bar."""
         self.open_web = self.create_action("Open CR Web",
-                                          icon="",
-                                          checkable=False,
-                                          slot=self.open_cr_web,
-                                          tip="Open CommonRoad Web",
-                                          shortcut=None)
+                                           icon="",
+                                           checkable=False,
+                                           slot=self.open_cr_web,
+                                           tip="Open CommonRoad Web",
+                                           shortcut=None)
 
     def center(self):
         """Function that makes sure the main window is in the center of screen."""
@@ -525,11 +523,11 @@ class MWindow(QMainWindow, Ui_mainWindow):
     def file_save(self):
         """Function to save a CR .xml file."""
         fileEdit = self.centralWidget()
-        
+
         if self.crviewer.current_scenario is None:
             messbox = QMessageBox()
             messbox.warning(
-                self, 
+                self,
                 "Warning",
                 "There is no file to save!",
                 QMessageBox.Ok, QMessageBox.Ok)
@@ -589,9 +587,14 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.tool2.show()
 
 
-if __name__ == '__main__':
+def main():
+
     # application
     app = QApplication(sys.argv)
     w = MWindow()
     w.show()
     sys.exit(app.exec_())
+
+
+if __name__ == '__main__':
+    main()
