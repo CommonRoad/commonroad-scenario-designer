@@ -1,13 +1,13 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<commonRoad timeStepSize="0.1" commonRoadVersion="2020a" author="" affiliation="" source="OpenDRIVE 2 Lanelet Converter" benchmarkID="none" date="2020-04-15">
+<commonRoad timeStepSize="0.1" commonRoadVersion="2020a" author="" affiliation="" source="OpenDRIVE 2 Lanelet Converter" benchmarkID="none" date="2020-07-10">
   <location>
     <geoNameId>-999</geoNameId>
     <gpsLatitude>999</gpsLatitude>
     <gpsLongitude>999</gpsLongitude>
   </location>
   <scenarioTags>
-    <urban/>
     <highway/>
+    <urban/>
   </scenarioTags>
   <lanelet id="100">
     <leftBound>
@@ -18150,6 +18150,10 @@
     <successor ref="102"/>
     <adjacentLeft ref="111" drivingDir="opposite"/>
     <laneletType>unknown</laneletType>
+    <trafficLightRef ref="1040"/>
+    <trafficLightRef ref="1041"/>
+    <trafficLightRef ref="1042"/>
+    <trafficLightRef ref="1043"/>
   </lanelet>
   <lanelet id="112">
     <leftBound>
@@ -36011,6 +36015,10 @@
     <successor ref="113"/>
     <adjacentLeft ref="101" drivingDir="opposite"/>
     <laneletType>unknown</laneletType>
+    <trafficLightRef ref="1032"/>
+    <trafficLightRef ref="1033"/>
+    <trafficLightRef ref="1030"/>
+    <trafficLightRef ref="1031"/>
   </lanelet>
   <lanelet id="110">
     <leftBound>
@@ -36966,6 +36974,10 @@
     <predecessor ref="111"/>
     <successor ref="106"/>
     <laneletType>unknown</laneletType>
+    <trafficLightRef ref="1021"/>
+    <trafficLightRef ref="1020"/>
+    <trafficLightRef ref="1012"/>
+    <trafficLightRef ref="1013"/>
   </lanelet>
   <lanelet id="105">
     <leftBound>
@@ -37303,6 +37315,10 @@
     <predecessor ref="101"/>
     <successor ref="108"/>
     <laneletType>unknown</laneletType>
+    <trafficLightRef ref="1010"/>
+    <trafficLightRef ref="1011"/>
+    <trafficLightRef ref="1022"/>
+    <trafficLightRef ref="1023"/>
   </lanelet>
   <lanelet id="113">
     <leftBound>
@@ -38186,6 +38202,7 @@
     <predecessor ref="106"/>
     <successor ref="106"/>
     <laneletType>unknown</laneletType>
+    <trafficSignRef ref="1000"/>
   </lanelet>
   <lanelet id="103">
     <leftBound>
@@ -38733,4 +38750,448 @@
     <successor ref="108"/>
     <laneletType>unknown</laneletType>
   </lanelet>
+  <trafficSign id="1000">
+    <trafficSignElement>
+      <trafficSignID>306</trafficSignID>
+    </trafficSignElement>
+    <position>
+      <point>
+        <x>-5.8689923</x>
+        <y>-13.788588</y>
+      </point>
+    </position>
+    <virtual>false</virtual>
+  </trafficSign>
+  <trafficLight id="1040">
+    <cycle>
+      <cycleElement>
+        <duration>60</duration>
+        <color>red</color>
+      </cycleElement>
+      <cycleElement>
+        <duration>10</duration>
+        <color>redYellow</color>
+      </cycleElement>
+      <cycleElement>
+        <duration>60</duration>
+        <color>green</color>
+      </cycleElement>
+      <cycleElement>
+        <duration>10</duration>
+        <color>yellow</color>
+      </cycleElement>
+    </cycle>
+    <position>
+      <point>
+        <x>-3.1819862</x>
+        <y>-11.101583</y>
+      </point>
+    </position>
+    <active>true</active>
+  </trafficLight>
+  <trafficLight id="1041">
+    <cycle>
+      <cycleElement>
+        <duration>60</duration>
+        <color>red</color>
+      </cycleElement>
+      <cycleElement>
+        <duration>10</duration>
+        <color>redYellow</color>
+      </cycleElement>
+      <cycleElement>
+        <duration>60</duration>
+        <color>green</color>
+      </cycleElement>
+      <cycleElement>
+        <duration>10</duration>
+        <color>yellow</color>
+      </cycleElement>
+    </cycle>
+    <position>
+      <point>
+        <x>-3.1819862</x>
+        <y>-11.101583</y>
+      </point>
+    </position>
+    <active>true</active>
+  </trafficLight>
+  <trafficLight id="1042">
+    <cycle>
+      <cycleElement>
+        <duration>60</duration>
+        <color>red</color>
+      </cycleElement>
+      <cycleElement>
+        <duration>10</duration>
+        <color>redYellow</color>
+      </cycleElement>
+      <cycleElement>
+        <duration>60</duration>
+        <color>green</color>
+      </cycleElement>
+      <cycleElement>
+        <duration>10</duration>
+        <color>yellow</color>
+      </cycleElement>
+    </cycle>
+    <position>
+      <point>
+        <x>-11.101571</x>
+        <y>-3.1819754</y>
+      </point>
+    </position>
+    <active>true</active>
+  </trafficLight>
+  <trafficLight id="1043">
+    <cycle>
+      <cycleElement>
+        <duration>60</duration>
+        <color>red</color>
+      </cycleElement>
+      <cycleElement>
+        <duration>10</duration>
+        <color>redYellow</color>
+      </cycleElement>
+      <cycleElement>
+        <duration>60</duration>
+        <color>green</color>
+      </cycleElement>
+      <cycleElement>
+        <duration>10</duration>
+        <color>yellow</color>
+      </cycleElement>
+    </cycle>
+    <position>
+      <point>
+        <x>-11.101571</x>
+        <y>-3.1819754</y>
+      </point>
+    </position>
+    <active>true</active>
+  </trafficLight>
+  <trafficLight id="1010">
+    <cycle>
+      <cycleElement>
+        <duration>60</duration>
+        <color>red</color>
+      </cycleElement>
+      <cycleElement>
+        <duration>10</duration>
+        <color>redYellow</color>
+      </cycleElement>
+      <cycleElement>
+        <duration>60</duration>
+        <color>green</color>
+      </cycleElement>
+      <cycleElement>
+        <duration>10</duration>
+        <color>yellow</color>
+      </cycleElement>
+    </cycle>
+    <position>
+      <point>
+        <x>11.101583</x>
+        <y>-3.1819862</y>
+      </point>
+    </position>
+    <active>true</active>
+  </trafficLight>
+  <trafficLight id="1011">
+    <cycle>
+      <cycleElement>
+        <duration>60</duration>
+        <color>red</color>
+      </cycleElement>
+      <cycleElement>
+        <duration>10</duration>
+        <color>redYellow</color>
+      </cycleElement>
+      <cycleElement>
+        <duration>60</duration>
+        <color>green</color>
+      </cycleElement>
+      <cycleElement>
+        <duration>10</duration>
+        <color>yellow</color>
+      </cycleElement>
+    </cycle>
+    <position>
+      <point>
+        <x>11.101583</x>
+        <y>-3.1819862</y>
+      </point>
+    </position>
+    <active>true</active>
+  </trafficLight>
+  <trafficLight id="1012">
+    <cycle>
+      <cycleElement>
+        <duration>60</duration>
+        <color>red</color>
+      </cycleElement>
+      <cycleElement>
+        <duration>10</duration>
+        <color>redYellow</color>
+      </cycleElement>
+      <cycleElement>
+        <duration>60</duration>
+        <color>green</color>
+      </cycleElement>
+      <cycleElement>
+        <duration>10</duration>
+        <color>yellow</color>
+      </cycleElement>
+    </cycle>
+    <position>
+      <point>
+        <x>3.1819754</x>
+        <y>-11.101571</y>
+      </point>
+    </position>
+    <active>true</active>
+  </trafficLight>
+  <trafficLight id="1013">
+    <cycle>
+      <cycleElement>
+        <duration>60</duration>
+        <color>red</color>
+      </cycleElement>
+      <cycleElement>
+        <duration>10</duration>
+        <color>redYellow</color>
+      </cycleElement>
+      <cycleElement>
+        <duration>60</duration>
+        <color>green</color>
+      </cycleElement>
+      <cycleElement>
+        <duration>10</duration>
+        <color>yellow</color>
+      </cycleElement>
+    </cycle>
+    <position>
+      <point>
+        <x>3.1819754</x>
+        <y>-11.101571</y>
+      </point>
+    </position>
+    <active>true</active>
+  </trafficLight>
+  <trafficLight id="1030">
+    <cycle>
+      <cycleElement>
+        <duration>60</duration>
+        <color>red</color>
+      </cycleElement>
+      <cycleElement>
+        <duration>10</duration>
+        <color>redYellow</color>
+      </cycleElement>
+      <cycleElement>
+        <duration>60</duration>
+        <color>green</color>
+      </cycleElement>
+      <cycleElement>
+        <duration>10</duration>
+        <color>yellow</color>
+      </cycleElement>
+    </cycle>
+    <position>
+      <point>
+        <x>3.1819862</x>
+        <y>11.101583</y>
+      </point>
+    </position>
+    <active>true</active>
+  </trafficLight>
+  <trafficLight id="1031">
+    <cycle>
+      <cycleElement>
+        <duration>60</duration>
+        <color>red</color>
+      </cycleElement>
+      <cycleElement>
+        <duration>10</duration>
+        <color>redYellow</color>
+      </cycleElement>
+      <cycleElement>
+        <duration>60</duration>
+        <color>green</color>
+      </cycleElement>
+      <cycleElement>
+        <duration>10</duration>
+        <color>yellow</color>
+      </cycleElement>
+    </cycle>
+    <position>
+      <point>
+        <x>3.1819862</x>
+        <y>11.101583</y>
+      </point>
+    </position>
+    <active>true</active>
+  </trafficLight>
+  <trafficLight id="1032">
+    <cycle>
+      <cycleElement>
+        <duration>60</duration>
+        <color>red</color>
+      </cycleElement>
+      <cycleElement>
+        <duration>10</duration>
+        <color>redYellow</color>
+      </cycleElement>
+      <cycleElement>
+        <duration>60</duration>
+        <color>green</color>
+      </cycleElement>
+      <cycleElement>
+        <duration>10</duration>
+        <color>yellow</color>
+      </cycleElement>
+    </cycle>
+    <position>
+      <point>
+        <x>11.101571</x>
+        <y>3.1819754</y>
+      </point>
+    </position>
+    <active>true</active>
+  </trafficLight>
+  <trafficLight id="1033">
+    <cycle>
+      <cycleElement>
+        <duration>60</duration>
+        <color>red</color>
+      </cycleElement>
+      <cycleElement>
+        <duration>10</duration>
+        <color>redYellow</color>
+      </cycleElement>
+      <cycleElement>
+        <duration>60</duration>
+        <color>green</color>
+      </cycleElement>
+      <cycleElement>
+        <duration>10</duration>
+        <color>yellow</color>
+      </cycleElement>
+    </cycle>
+    <position>
+      <point>
+        <x>11.101571</x>
+        <y>3.1819754</y>
+      </point>
+    </position>
+    <active>true</active>
+  </trafficLight>
+  <trafficLight id="1020">
+    <cycle>
+      <cycleElement>
+        <duration>60</duration>
+        <color>red</color>
+      </cycleElement>
+      <cycleElement>
+        <duration>10</duration>
+        <color>redYellow</color>
+      </cycleElement>
+      <cycleElement>
+        <duration>60</duration>
+        <color>green</color>
+      </cycleElement>
+      <cycleElement>
+        <duration>10</duration>
+        <color>yellow</color>
+      </cycleElement>
+    </cycle>
+    <position>
+      <point>
+        <x>-11.101583</x>
+        <y>3.1819862</y>
+      </point>
+    </position>
+    <active>true</active>
+  </trafficLight>
+  <trafficLight id="1021">
+    <cycle>
+      <cycleElement>
+        <duration>60</duration>
+        <color>red</color>
+      </cycleElement>
+      <cycleElement>
+        <duration>10</duration>
+        <color>redYellow</color>
+      </cycleElement>
+      <cycleElement>
+        <duration>60</duration>
+        <color>green</color>
+      </cycleElement>
+      <cycleElement>
+        <duration>10</duration>
+        <color>yellow</color>
+      </cycleElement>
+    </cycle>
+    <position>
+      <point>
+        <x>-11.101583</x>
+        <y>3.1819862</y>
+      </point>
+    </position>
+    <active>true</active>
+  </trafficLight>
+  <trafficLight id="1022">
+    <cycle>
+      <cycleElement>
+        <duration>60</duration>
+        <color>red</color>
+      </cycleElement>
+      <cycleElement>
+        <duration>10</duration>
+        <color>redYellow</color>
+      </cycleElement>
+      <cycleElement>
+        <duration>60</duration>
+        <color>green</color>
+      </cycleElement>
+      <cycleElement>
+        <duration>10</duration>
+        <color>yellow</color>
+      </cycleElement>
+    </cycle>
+    <position>
+      <point>
+        <x>-3.1819754</x>
+        <y>11.101571</y>
+      </point>
+    </position>
+    <active>true</active>
+  </trafficLight>
+  <trafficLight id="1023">
+    <cycle>
+      <cycleElement>
+        <duration>60</duration>
+        <color>red</color>
+      </cycleElement>
+      <cycleElement>
+        <duration>10</duration>
+        <color>redYellow</color>
+      </cycleElement>
+      <cycleElement>
+        <duration>60</duration>
+        <color>green</color>
+      </cycleElement>
+      <cycleElement>
+        <duration>10</duration>
+        <color>yellow</color>
+      </cycleElement>
+    </cycle>
+    <position>
+      <point>
+        <x>-3.1819754</x>
+        <y>11.101571</y>
+      </point>
+    </position>
+    <active>true</active>
+  </trafficLight>
 </commonRoad>

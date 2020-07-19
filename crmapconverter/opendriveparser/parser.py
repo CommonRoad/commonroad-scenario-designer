@@ -27,11 +27,15 @@ from crmapconverter.opendriveparser.elements.roadLanes import (
     LaneSection as RoadLanesSection,
     LaneWidth as RoadLaneSectionLaneWidth,
     LaneBorder as RoadLaneSectionLaneBorder,
+    RoadMark as RoadLaneRoadMark
 )
 from crmapconverter.opendriveparser.elements.junction import (
     Junction,
     Connection as JunctionConnection,
     LaneLink as JunctionConnectionLaneLink,
+)
+from crmapconverter.opendriveparser.elements.roadSignal import (
+    Signal as RoadSignal
 )
 
 __author__ = "Benjamin Orthen, Stefan Urban"
@@ -87,7 +91,6 @@ def parse_opendrive_road_link(newRoad, opendrive_road_link):
     predecessor = opendrive_road_link.find("predecessor")
 
     if predecessor is not None:
-
         newRoad.link.predecessor = RoadLinkPredecessor(
             predecessor.get("elementType"),
             predecessor.get("elementId"),
@@ -97,7 +100,6 @@ def parse_opendrive_road_link(newRoad, opendrive_road_link):
     successor = opendrive_road_link.find("successor")
 
     if successor is not None:
-
         newRoad.link.successor = RoadLinkSuccessor(
             successor.get("elementType"),
             successor.get("elementId"),
@@ -105,7 +107,6 @@ def parse_opendrive_road_link(newRoad, opendrive_road_link):
         )
 
     for neighbor in opendrive_road_link.findall("neighbor"):
-
         newNeighbor = RoadLinkNeighbor(
             neighbor.get("side"), neighbor.get("elementId"), neighbor.get("direction")
         )
@@ -124,7 +125,6 @@ def parse_opendrive_road_type(road, opendrive_xml_road_type: etree.ElementTree):
     """
     speed = None
     if opendrive_xml_road_type.find("speed") is not None:
-
         speed = RoadTypeSpeed(
             max_speed=opendrive_xml_road_type.find("speed").get("max"),
             unit=opendrive_xml_road_type.find("speed").get("unit"),
@@ -224,7 +224,6 @@ def parse_opendrive_road_elevation_profile(newRoad, road_elevation_profile):
     """
 
     for elevation in road_elevation_profile.findall("elevation"):
-
         newElevation = (
             RoadElevationProfile(
                 float(elevation.get("a")),
@@ -248,7 +247,6 @@ def parse_opendrive_road_lateral_profile(newRoad, road_lateral_profile):
     """
 
     for superelevation in road_lateral_profile.findall("superelevation"):
-
         newSuperelevation = RoadLateralProfileSuperelevation(
             float(superelevation.get("a")),
             float(superelevation.get("b")),
@@ -260,7 +258,6 @@ def parse_opendrive_road_lateral_profile(newRoad, road_lateral_profile):
         newRoad.lateralProfile.superelevations.append(newSuperelevation)
 
     for crossfall in road_lateral_profile.findall("crossfall"):
-
         newCrossfall = RoadLateralProfileCrossfall(
             float(crossfall.get("a")),
             float(crossfall.get("b")),
@@ -273,7 +270,6 @@ def parse_opendrive_road_lateral_profile(newRoad, road_lateral_profile):
         newRoad.lateralProfile.crossfalls.append(newCrossfall)
 
     for shape in road_lateral_profile.findall("shape"):
-
         newShape = RoadLateralProfileShape(
             float(shape.get("a")),
             float(shape.get("b")),
@@ -366,7 +362,6 @@ def parse_opendrive_road_lane_section(newRoad, lane_section_id, lane_section):
 
             # Width
             for widthIdx, width in enumerate(lane.findall("width")):
-
                 newWidth = RoadLaneSectionLaneWidth(
                     float(width.get("a")),
                     float(width.get("b")),
@@ -380,7 +375,6 @@ def parse_opendrive_road_lane_section(newRoad, lane_section_id, lane_section):
 
             # Border
             for borderIdx, border in enumerate(lane.findall("border")):
-
                 newBorder = RoadLaneSectionLaneBorder(
                     float(border.get("a")),
                     float(border.get("b")),
@@ -397,7 +391,15 @@ def parse_opendrive_road_lane_section(newRoad, lane_section_id, lane_section):
                 new_lane.has_border_record = True
 
             # Road Marks
-            # TODO implementation
+            if lane.find("roadMark") is not None:
+                mark = lane.find("roadMark")
+                road_mark = RoadLaneRoadMark()
+
+                road_mark.type = mark.get("type")
+                road_mark.weight = mark.get("weight")
+                road_mark.SOffset = mark.get("SOffset")
+
+                new_lane.road_mark = road_mark
 
             # Material
             # TODO implementation
@@ -420,6 +422,31 @@ def parse_opendrive_road_lane_section(newRoad, lane_section_id, lane_section):
             newSideLanes.append(new_lane)
 
     newRoad.lanes.lane_sections.append(newLaneSection)
+
+
+def parse_opendrive_road_signal(newRoad, road_signal):
+    """
+
+    :param newRoad: class Road
+    :param road_signal: class Signal
+    :return: Attributes of signal element in xodr
+
+    """
+    newSignal = RoadSignal()
+    newSignal.id = road_signal.get("id")
+    newSignal.s = road_signal.get("s")  # position along the reference curve
+    newSignal.t = road_signal.get("t")  # position away from the reference curve
+    newSignal.name = road_signal.get("name")
+    newSignal.country = road_signal.get("country")
+    newSignal.type = road_signal.get("type")
+    newSignal.subtype = road_signal.get("subtype")
+    newSignal.orientation = road_signal.get("orientation")
+    newSignal.dynamic = road_signal.get("dynamic")
+    newSignal.signalvalue = road_signal.get("value")
+    newSignal.unit = road_signal.get("unit")
+    newSignal.text = road_signal.get("text")
+
+    newRoad.addSignal(newSignal)
 
 
 def parse_opendrive_road(opendrive, road):
@@ -456,7 +483,6 @@ def parse_opendrive_road(opendrive, road):
     # Plan view
     for road_geometry in road.find("planView").findall("geometry"):
         parse_opendrive_road_geometry(newRoad, road_geometry)
-
     # Elevation profile
     road_elevation_profile = road.find("elevationProfile")
     if road_elevation_profile is not None:
@@ -479,7 +505,7 @@ def parse_opendrive_road(opendrive, road):
 
     # Lane sections
     for lane_section_id, lane_section in enumerate(
-        road.find("lanes").findall("laneSection")
+            road.find("lanes").findall("laneSection")
     ):
         parse_opendrive_road_lane_section(newRoad, lane_section_id, lane_section)
 
@@ -488,6 +514,13 @@ def parse_opendrive_road(opendrive, road):
 
     # Signals
     # TODO implementation
+    if road.find("signals") is not None:
+        for road_signal in road.find("signals").findall("signal"):
+            if road_signal is not None:
+                parse_opendrive_road_signal(newRoad, road_signal)
+    else:
+        pass
+
     calculate_lane_section_lengths(newRoad)
 
     opendrive.roads.append(newRoad)
@@ -510,8 +543,8 @@ def calculate_lane_section_lengths(newRoad):
         # All but the last lane section end at the succeeding one
         else:
             lane_section.length = (
-                newRoad.lanes.lane_sections[lane_section.idx + 1].sPos
-                - lane_section.sPos
+                    newRoad.lanes.lane_sections[lane_section.idx + 1].sPos
+                    - lane_section.sPos
             )
 
     # OpenDRIVE does not provide lane width lengths by itself, calculate them by ourselves
@@ -576,7 +609,6 @@ def parse_opendrive_junction(opendrive, junction):
         newConnection.contactPoint = connection.get("contactPoint")
 
         for laneLink in connection.findall("laneLink"):
-
             newLaneLink = JunctionConnectionLaneLink()
 
             newLaneLink.fromId = laneLink.get("from")
