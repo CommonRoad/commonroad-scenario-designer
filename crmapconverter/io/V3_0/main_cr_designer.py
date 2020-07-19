@@ -140,7 +140,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
                 messbox = QMessageBox()
                 messbox.question(
                     self, "Warning",
-                    "Please load or convert a CR Scenario or first",
+                    "Please load or convert a CR Scenario firstly",
                     QtWidgets.QMessageBox.Ok)
                 messbox.close()
             else:
