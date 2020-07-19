@@ -109,7 +109,6 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.tool1.setFeatures(QDockWidget.AllDockWidgetFeatures)
         self.tool1.setAllowedAreas(Qt.LeftDockWidgetArea)
         self.tool1.setWidget(self.uppertoolBox)
-        self.tool1.setMinimumHeight(400)
         self.addDockWidget(Qt.LeftDockWidgetArea, self.tool1)
         self.create_sumobox()
         self.uppertoolBox.button_sumo_simulation.clicked.connect(
@@ -184,7 +183,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.tool2.setAllowedAreas(Qt.LeftDockWidgetArea)
         self.tool2.setWidget(self.sumobox)
         self.addDockWidget(Qt.LeftDockWidgetArea, self.tool2)
-        self.tool2.setMinimumHeight(100)
+        self.tool2.setMaximumHeight(400)
 
     def detect_slider_clicked(self):
         self.slider_clicked = True
@@ -593,5 +592,5 @@ if __name__ == '__main__':
     # application
     app = QApplication(sys.argv)
     w = MWindow()
-    w.show()
+    w.showMaximized()
     sys.exit(app.exec_())
