@@ -38,7 +38,7 @@ class UpperToolbox(QWidget):
         layout.addWidget(self.tree)
         self.setLayout(layout)
         self.tree.setIndentation(0)
-        self.setGeometry(0, 0, 280, 300)
+        self.setGeometry(0, 0, 280, 500)
         self.spacerItem = QSpacerItem(
             0, 50, QSizePolicy.Minimum, QSizePolicy.Expanding)
         # layout.addItem(self.spacerItem)
@@ -92,23 +92,48 @@ class UpperToolbox(QWidget):
         self.sections.append((title1, widget1))
 
         """add button for lanelets list"""
-        self.button_lanlist = QPushButton("Lanelets list")
-        self.button_lanlist.setToolTip("Show Lanelets list")
-        layout1.addWidget(self.button_lanlist, 2, 0)
+        #self.button_lanlist = QPushButton("Lanelets list")
+        #self.button_lanlist.setToolTip("Show Lanelets list")
+        #layout1.addWidget(self.button_lanlist, 2, 0)
+
+        """add button for Intersection list"""
+        #self.button_intersection_list = QPushButton("Intersection list")
+        #self.button_intersection_list.setToolTip("Show Intersection list")
+        #layout1.addWidget(self.button_intersection_list, 2, 1)
 
         """"""""""""""
 
         widget2 = QFrame(self.tree)
         layout2 = QGridLayout(widget2)
-        """ add simulation button """
+        """ add animation button """
         self.button_sumo_simulation = QPushButton()
-        self.button_sumo_simulation.setText("SUMO Simulation")
+        self.button_sumo_simulation.setText("Show SUMO Setting")
         self.button_sumo_simulation.setIcon(QIcon(":/icons/Groupe_2.png"))
         layout2.addWidget(self.button_sumo_simulation, 0, 0)
 
+        """add Save menu"""
+        self.lb = QLabel("")
+        self.save_menu = QComboBox()
+        self.save_menu.addItem("Save as mp4")
+        self.save_menu.addItem("Save as gif")
+        self.save_menu.currentIndexChanged.connect(self.selection_change)
+        layout2.addWidget(self.save_menu)
+        layout2.addWidget(self.lb)
+
+        """add SAVE button"""
+        self.button_save = QPushButton(self)
+        self.button_save.setText("Save animation")
+        self.button_save.setIcon(QIcon(":/icons/botton_save.png"))
+        layout2.addWidget(self.button_save)
+
+        layout2.addItem(self.spacerItem)
+
         # layout2.addItem(self.spacerItem)
-        title2 = "Tools for SUMO Simulation"
+        title2 = "Tools for Animation"
         self.sections.append((title2, widget2))
+
+    def selection_change(self):
+        self.lb.setText(self.save_menu.currentText())
 
     def add_button(self, title):
         """creates a QTreeWidgetItem containing a button
@@ -129,12 +154,12 @@ class UpperToolbox(QWidget):
         return section
 
 
-class Sumo_simulation_tool(QWidget):
+class SumoTool(QWidget):
     """a widget to config the sumo silmulation tools
             """
 
     def __init__(self, parent=None):
-        super(Sumo_simulation_tool, self).__init__(parent)
+        super(SumoTool, self).__init__(parent)
         self.initUI()
 
     def initUI(self):
@@ -157,109 +182,7 @@ class Sumo_simulation_tool(QWidget):
         """reimplement this to define all your sections
         and add them as (title, widget) tuples to self.sections
         """
-        widget3 = QFrame(self.tree)
-        layout3 = QVBoxLayout(widget3)
 
-        """add Import button"""
-        self.button_import1 = QPushButton(self)
-        self.button_import1.setText("Import")
-        self.button_import1.setIcon(QIcon(":/icons/import.png"))
-        self.button_import1.setToolTip(
-            "Import a from sumo converted CR Scenario")
-        layout3.addWidget(self.button_import1)
-
-        """add Play button"""
-        self.button_play1 = QPushButton(self)
-        self.button_play1.setText("Play")
-        self.button_play1.setIcon(QIcon(":/icons/play.png"))
-        self.button_play1.setToolTip("Play the animation")
-        layout3.addWidget(self.button_play1)
-
-        """add Pause button"""
-        self.button_pause1 = QPushButton(self)
-        self.button_pause1.setText("Pause")
-        self.button_pause1.setIcon(QIcon(":/icons/pause.png"))
-        self.button_pause1.setToolTip("Pause the animation")
-        layout3.addWidget(self.button_pause1)
-
-        """add Slider"""
-        layout3.addItem(
-            QSpacerItem(
-                0,
-                20,
-                QSizePolicy.Minimum,
-                QSizePolicy.Expanding))
-        self.slider = QSlider(Qt.Horizontal)
-        self.slider.setValue(0)
-        self.slider.setMinimum(0)
-        self.slider.setMaximum(99)
-        self.slider.setTickPosition(QSlider.TicksBelow)
-        self.slider.setTickInterval(1)
-        self.slider.setToolTip(
-            "Show corresponding Scenario at selected timestep")
-        layout3.addWidget(self.slider)
-
-        """add Label"""
-        self.label = QLabel('Step: 0', self)
-        layout3.addWidget(self.label)
-
-        layout3.addItem(self.spacerItem)
-        title3 = "Simu-timesteps settings"
-        self.sections.append((title3, widget3))
-
-        widget1 = QFrame(self.tree)
-        layout1 = QGridLayout(widget1)
-
-        """add Import button"""
-        self.button_import = QPushButton(self)
-        self.button_import.setText("Import")
-        self.button_import.setIcon(QIcon(":/icons/import.png"))
-        self.button_import.setToolTip(
-            "Import a from sumo converted CR Scenario")
-        layout1.addWidget(self.button_import, 0, 0)
-
-        """add Play button"""
-        self.button_play = QPushButton(self)
-        self.button_play.setText("Play")
-        self.button_play.setIcon(QIcon(":/icons/play.png"))
-        self.button_play.setToolTip("Play the animation")
-        layout1.addWidget(self.button_play, 1, 0)
-
-        """add Pause button"""
-        self.button_pause = QPushButton(self)
-        self.button_pause.setText("Pause")
-        self.button_pause.setIcon(QIcon(":/icons/pause.png"))
-        self.button_pause.setToolTip("Pause the animation")
-        layout1.addWidget(self.button_pause, 0, 1)
-
-        # layout1.addItem(self.spacerItem)
-        title1 = "Simulation settings"
-        self.sections.append((title1, widget1))
-
-        widget2 = QFrame(self.tree)
-        layout2 = QVBoxLayout(widget2)
-
-        """add Save menu"""
-        self.lb = QLabel("")
-        self.save_menu = QComboBox()
-        self.save_menu.addItem("Save as mp4")
-        self.save_menu.addItem("Save as gif")
-        self.save_menu.currentIndexChanged.connect(self.selectionchange)
-        layout2.addWidget(self.save_menu)
-        layout2.addWidget(self.lb)
-
-        """add SAVE button"""
-        self.button_save = QPushButton(self)
-        self.button_save.setText("Save animation")
-        self.button_save.setIcon(QIcon(":/icons/botton_save.png"))
-        layout2.addWidget(self.button_save)
-
-        layout2.addItem(self.spacerItem)
-        title2 = "Save Settings"
-        self.sections.append((title2, widget2))
-
-    def selectionchange(self):
-        self.lb.setText(self.save_menu.currentText())
 
     def add_sections(self):
         """adds a collapsible sections for every
@@ -293,6 +216,6 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = UpperToolbox()
     window.show()
-    sumo = Sumo_simulation_tool()
+    sumo = SumoTool()
     sumo.show()
     sys.exit(app.exec_())

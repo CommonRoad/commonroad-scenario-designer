@@ -1,7 +1,7 @@
 Usage example
 =============
 
-To start a conversion with osm2cr run main.py with either of the following arguments:
+To start a conversion with osm_2_cr run main.py with either of the following arguments:
 
 * **o** **filename** to open a osm file and convert it
 * **d** to download a area specified in **config.py**
@@ -34,7 +34,7 @@ This example can be found in **example.py**::
 	download_around_map(config.BENCHMARK_ID + '_downloaded.osm', 48.140289, 11.566272)
 
 	# open the map and convert it to a scenario
-	scenario = converter.Scenario(config.SAVE_PATH + config.BENCHMARK_ID + '_downloaded.osm')
+	scenario = converter.GraphScenario(config.SAVE_PATH + config.BENCHMARK_ID + '_downloaded.osm')
 
 	# draw and show the scenario
 	scenario.plot()
