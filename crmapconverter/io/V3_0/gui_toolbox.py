@@ -38,7 +38,7 @@ class UpperToolbox(QWidget):
         layout.addWidget(self.tree)
         self.setLayout(layout)
         self.tree.setIndentation(0)
-        self.setGeometry(0, 0, 280, 500)
+        self.setGeometry(0, 0, 250, 500)
         self.spacerItem = QSpacerItem(
             0, 50, QSizePolicy.Minimum, QSizePolicy.Expanding)
         # layout.addItem(self.spacerItem)
