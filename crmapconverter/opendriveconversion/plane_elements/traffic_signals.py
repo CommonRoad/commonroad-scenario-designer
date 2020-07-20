@@ -72,7 +72,7 @@ def get_traffic_signals(road: Road):
             )
 
             traffic_sign = TrafficSign(
-                traffic_sign_id=signal.id + 2000,
+                traffic_sign_id=signal.id + 1000,
                 traffic_sign_elements=list([traffic_sign_element]),
                 first_occurrence=None,
                 position=position,
@@ -88,7 +88,7 @@ def get_traffic_signals(road: Road):
             if signal.type != ("1000002" or "1000007" or "1000013"):
 
                 traffic_light = TrafficLight(
-                    traffic_light_id=signal.id + 3000,
+                    traffic_light_id=signal.id + 2000,
                     cycle=[],
                     position=position,
                     time_offset=0,

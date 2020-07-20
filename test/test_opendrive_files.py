@@ -92,6 +92,12 @@ class TestOpenDriveBaseClass:
             trees_are_equal = elements_equal(tree_import, writer.root_node)
             self.assertTrue(trees_are_equal)
 
+class TestBasicOpenDrive(TestOpenDriveBaseClass, unittest.TestCase):
+    """Basic test with a junction in the middle."""
+
+    __test__ = True
+    xodr_file_name = "opendrive-1"
+
 
 class TestSuedTangente(TestOpenDriveBaseClass, unittest.TestCase):
     """Includes roads with multiple lane sections and
@@ -100,13 +106,6 @@ class TestSuedTangente(TestOpenDriveBaseClass, unittest.TestCase):
 
     __test__ = False
     xodr_file_name = "KA-Suedtangente-atlatec"
-
-
-class TestBasicOpenDrive(TestOpenDriveBaseClass, unittest.TestCase):
-    """Basic test with a junction in the middle."""
-
-    __test__ = True
-    xodr_file_name = "opendrive-1"
 
 
 class TestCulDeSac(TestOpenDriveBaseClass, unittest.TestCase):

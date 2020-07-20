@@ -6,8 +6,8 @@
     <gpsLongitude>999</gpsLongitude>
   </location>
   <scenarioTags>
-    <urban/>
     <highway/>
+    <urban/>
   </scenarioTags>
   <lanelet id="100">
     <leftBound>
@@ -36613,29 +36613,29 @@
     <predecessor ref="123"/>
     <successor ref="115"/>
     <laneletType>driveWay</laneletType>
-    <trafficSignRef ref="2144"/>
-    <trafficSignRef ref="2113"/>
-    <trafficSignRef ref="2147"/>
-    <trafficSignRef ref="2116"/>
-    <trafficSignRef ref="2148"/>
-    <trafficSignRef ref="2119"/>
-    <trafficSignRef ref="2120"/>
-    <trafficSignRef ref="2121"/>
-    <trafficSignRef ref="2155"/>
-    <trafficSignRef ref="2124"/>
-    <trafficSignRef ref="2125"/>
-    <trafficSignRef ref="2156"/>
-    <trafficSignRef ref="2141"/>
-    <trafficLightRef ref="3267"/>
-    <trafficLightRef ref="3268"/>
-    <trafficLightRef ref="3204"/>
-    <trafficLightRef ref="3270"/>
-    <trafficLightRef ref="3207"/>
-    <trafficLightRef ref="3269"/>
-    <trafficLightRef ref="3211"/>
-    <trafficLightRef ref="3213"/>
-    <trafficLightRef ref="3217"/>
-    <trafficLightRef ref="3218"/>
+    <trafficSignRef ref="1120"/>
+    <trafficSignRef ref="1121"/>
+    <trafficSignRef ref="1155"/>
+    <trafficSignRef ref="1124"/>
+    <trafficSignRef ref="1125"/>
+    <trafficSignRef ref="1156"/>
+    <trafficSignRef ref="1148"/>
+    <trafficSignRef ref="1141"/>
+    <trafficSignRef ref="1144"/>
+    <trafficSignRef ref="1113"/>
+    <trafficSignRef ref="1147"/>
+    <trafficSignRef ref="1116"/>
+    <trafficSignRef ref="1119"/>
+    <trafficLightRef ref="2211"/>
+    <trafficLightRef ref="2213"/>
+    <trafficLightRef ref="2217"/>
+    <trafficLightRef ref="2218"/>
+    <trafficLightRef ref="2204"/>
+    <trafficLightRef ref="2267"/>
+    <trafficLightRef ref="2268"/>
+    <trafficLightRef ref="2269"/>
+    <trafficLightRef ref="2270"/>
+    <trafficLightRef ref="2207"/>
   </lanelet>
   <lanelet id="108">
     <leftBound>
@@ -78218,7 +78218,7 @@
     <adjacentLeft ref="102" drivingDir="opposite"/>
     <laneletType>driveWay</laneletType>
   </lanelet>
-  <trafficSign id="2113">
+  <trafficSign id="1113">
     <trafficSignElement>
       <trafficSignID></trafficSignID>
     </trafficSignElement>
@@ -78230,7 +78230,7 @@
     </position>
     <virtual>false</virtual>
   </trafficSign>
-  <trafficSign id="2116">
+  <trafficSign id="1116">
     <trafficSignElement>
       <trafficSignID></trafficSignID>
     </trafficSignElement>
@@ -78242,7 +78242,7 @@
     </position>
     <virtual>false</virtual>
   </trafficSign>
-  <trafficSign id="2119">
+  <trafficSign id="1119">
     <trafficSignElement>
       <trafficSignID></trafficSignID>
     </trafficSignElement>
@@ -78254,7 +78254,7 @@
     </position>
     <virtual>false</virtual>
   </trafficSign>
-  <trafficSign id="2120">
+  <trafficSign id="1120">
     <trafficSignElement>
       <trafficSignID>306</trafficSignID>
     </trafficSignElement>
@@ -78266,7 +78266,7 @@
     </position>
     <virtual>false</virtual>
   </trafficSign>
-  <trafficSign id="2121">
+  <trafficSign id="1121">
     <trafficSignElement>
       <trafficSignID></trafficSignID>
     </trafficSignElement>
@@ -78278,7 +78278,7 @@
     </position>
     <virtual>false</virtual>
   </trafficSign>
-  <trafficSign id="2124">
+  <trafficSign id="1124">
     <trafficSignElement>
       <trafficSignID></trafficSignID>
     </trafficSignElement>
@@ -78290,7 +78290,7 @@
     </position>
     <virtual>false</virtual>
   </trafficSign>
-  <trafficSign id="2125">
+  <trafficSign id="1125">
     <trafficSignElement>
       <trafficSignID>306</trafficSignID>
     </trafficSignElement>
@@ -78302,7 +78302,7 @@
     </position>
     <virtual>false</virtual>
   </trafficSign>
-  <trafficSign id="2141">
+  <trafficSign id="1141">
     <trafficSignElement>
       <trafficSignID></trafficSignID>
     </trafficSignElement>
@@ -78314,7 +78314,7 @@
     </position>
     <virtual>false</virtual>
   </trafficSign>
-  <trafficSign id="2144">
+  <trafficSign id="1144">
     <trafficSignElement>
       <trafficSignID></trafficSignID>
     </trafficSignElement>
@@ -78326,7 +78326,7 @@
     </position>
     <virtual>false</virtual>
   </trafficSign>
-  <trafficSign id="2147">
+  <trafficSign id="1147">
     <trafficSignElement>
       <trafficSignID></trafficSignID>
     </trafficSignElement>
@@ -78338,7 +78338,7 @@
     </position>
     <virtual>false</virtual>
   </trafficSign>
-  <trafficSign id="2148">
+  <trafficSign id="1148">
     <trafficSignElement>
       <trafficSignID>205</trafficSignID>
     </trafficSignElement>
@@ -78350,7 +78350,7 @@
     </position>
     <virtual>false</virtual>
   </trafficSign>
-  <trafficSign id="2155">
+  <trafficSign id="1155">
     <trafficSignElement>
       <trafficSignID></trafficSignID>
     </trafficSignElement>
@@ -78362,7 +78362,7 @@
     </position>
     <virtual>false</virtual>
   </trafficSign>
-  <trafficSign id="2156">
+  <trafficSign id="1156">
     <trafficSignElement>
       <trafficSignID>205</trafficSignID>
     </trafficSignElement>
@@ -78374,7 +78374,7 @@
     </position>
     <virtual>false</virtual>
   </trafficSign>
-  <trafficLight id="3211">
+  <trafficLight id="2211">
     <cycle>
       <cycleElement>
         <duration>60</duration>
@@ -78401,7 +78401,7 @@
     </position>
     <active>true</active>
   </trafficLight>
-  <trafficLight id="3213">
+  <trafficLight id="2213">
     <cycle>
       <cycleElement>
         <duration>60</duration>
@@ -78428,7 +78428,7 @@
     </position>
     <active>true</active>
   </trafficLight>
-  <trafficLight id="3267">
+  <trafficLight id="2267">
     <cycle>
       <cycleElement>
         <duration>60</duration>
@@ -78455,7 +78455,7 @@
     </position>
     <active>true</active>
   </trafficLight>
-  <trafficLight id="3217">
+  <trafficLight id="2217">
     <cycle>
       <cycleElement>
         <duration>60</duration>
@@ -78482,7 +78482,7 @@
     </position>
     <active>true</active>
   </trafficLight>
-  <trafficLight id="3268">
+  <trafficLight id="2268">
     <cycle>
       <cycleElement>
         <duration>60</duration>
@@ -78509,7 +78509,7 @@
     </position>
     <active>true</active>
   </trafficLight>
-  <trafficLight id="3218">
+  <trafficLight id="2218">
     <cycle>
       <cycleElement>
         <duration>60</duration>
@@ -78536,7 +78536,7 @@
     </position>
     <active>true</active>
   </trafficLight>
-  <trafficLight id="3207">
+  <trafficLight id="2207">
     <cycle>
       <cycleElement>
         <duration>60</duration>
@@ -78563,7 +78563,7 @@
     </position>
     <active>true</active>
   </trafficLight>
-  <trafficLight id="3270">
+  <trafficLight id="2270">
     <cycle>
       <cycleElement>
         <duration>60</duration>
@@ -78590,7 +78590,7 @@
     </position>
     <active>true</active>
   </trafficLight>
-  <trafficLight id="3204">
+  <trafficLight id="2204">
     <cycle>
       <cycleElement>
         <duration>60</duration>
@@ -78617,7 +78617,7 @@
     </position>
     <active>true</active>
   </trafficLight>
-  <trafficLight id="3269">
+  <trafficLight id="2269">
     <cycle>
       <cycleElement>
         <duration>60</duration>

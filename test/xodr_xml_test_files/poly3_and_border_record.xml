@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<commonRoad timeStepSize="0.1" commonRoadVersion="2020a" author="" affiliation="" source="OpenDRIVE 2 Lanelet Converter" benchmarkID="none" date="2020-07-10">
+<commonRoad timeStepSize="0.1" commonRoadVersion="2020a" author="" affiliation="" source="OpenDRIVE 2 Lanelet Converter" benchmarkID="none" date="2020-07-20">
   <location>
     <geoNameId>-999</geoNameId>
     <gpsLatitude>999</gpsLatitude>
@@ -17,8 +17,8 @@
     </geoTransformation>
   </location>
   <scenarioTags>
-    <highway/>
     <urban/>
+    <highway/>
   </scenarioTags>
   <lanelet id="100">
     <leftBound>
@@ -866,7 +866,7 @@
       </point>
     </rightBound>
     <adjacentLeft ref="101" drivingDir="opposite"/>
-    <laneletType>unknown</laneletType>
+    <laneletType>driveWay</laneletType>
   </lanelet>
   <lanelet id="101">
     <leftBound>
@@ -1722,7 +1722,7 @@
       </point>
     </rightBound>
     <adjacentLeft ref="100" drivingDir="opposite"/>
-    <laneletType>unknown</laneletType>
+    <laneletType>driveWay</laneletType>
   </lanelet>
   <lanelet id="102">
     <leftBound>
@@ -2112,9 +2112,10 @@
         <x>361870.04</x>
         <y>5296836.4</y>
       </point>
+      <lineMarking>dashed</lineMarking>
     </rightBound>
     <adjacentLeft ref="103" drivingDir="opposite"/>
-    <laneletType>unknown</laneletType>
+    <laneletType>driveWay</laneletType>
   </lanelet>
   <lanelet id="103">
     <leftBound>
@@ -2482,7 +2483,7 @@
       </point>
     </rightBound>
     <adjacentLeft ref="102" drivingDir="opposite"/>
-    <laneletType>unknown</laneletType>
+    <laneletType>driveWay</laneletType>
   </lanelet>
   <lanelet id="104">
     <leftBound>
@@ -2514,7 +2515,7 @@
       </point>
     </rightBound>
     <adjacentLeft ref="105" drivingDir="opposite"/>
-    <laneletType>unknown</laneletType>
+    <laneletType>driveWay</laneletType>
   </lanelet>
   <lanelet id="105">
     <leftBound>
@@ -2546,7 +2547,7 @@
       </point>
     </rightBound>
     <adjacentLeft ref="104" drivingDir="opposite"/>
-    <laneletType>unknown</laneletType>
+    <laneletType>driveWay</laneletType>
   </lanelet>
   <lanelet id="106">
     <leftBound>
@@ -3962,7 +3963,7 @@
       </point>
     </rightBound>
     <adjacentLeft ref="107" drivingDir="opposite"/>
-    <laneletType>unknown</laneletType>
+    <laneletType>driveWay</laneletType>
   </lanelet>
   <lanelet id="107">
     <leftBound>
@@ -5386,7 +5387,7 @@
       </point>
     </rightBound>
     <adjacentLeft ref="106" drivingDir="opposite"/>
-    <laneletType>unknown</laneletType>
+    <laneletType>driveWay</laneletType>
   </lanelet>
   <lanelet id="108">
     <leftBound>
@@ -6098,7 +6099,7 @@
       </point>
     </rightBound>
     <adjacentLeft ref="109" drivingDir="opposite"/>
-    <laneletType>unknown</laneletType>
+    <laneletType>driveWay</laneletType>
   </lanelet>
   <lanelet id="109">
     <leftBound>
@@ -6450,6 +6451,7 @@
         <x>361928.36</x>
         <y>5296766.9</y>
       </point>
+      <lineMarking>dashed</lineMarking>
     </leftBound>
     <rightBound>
       <point>
@@ -6802,7 +6804,7 @@
       </point>
     </rightBound>
     <adjacentLeft ref="108" drivingDir="opposite"/>
-    <laneletType>unknown</laneletType>
+    <laneletType>driveWay</laneletType>
   </lanelet>
   <lanelet id="110">
     <leftBound>
@@ -7002,7 +7004,7 @@
       </point>
     </rightBound>
     <adjacentLeft ref="111" drivingDir="opposite"/>
-    <laneletType>unknown</laneletType>
+    <laneletType>driveWay</laneletType>
   </lanelet>
   <lanelet id="111">
     <leftBound>
@@ -7106,6 +7108,7 @@
         <x>361955.66</x>
         <y>5296731.9</y>
       </point>
+      <lineMarking>dashed</lineMarking>
     </leftBound>
     <rightBound>
       <point>
@@ -7210,7 +7213,7 @@
       </point>
     </rightBound>
     <adjacentLeft ref="110" drivingDir="opposite"/>
-    <laneletType>unknown</laneletType>
+    <laneletType>driveWay</laneletType>
   </lanelet>
   <lanelet id="112">
     <leftBound>
@@ -7906,7 +7909,7 @@
       </point>
     </rightBound>
     <adjacentLeft ref="113" drivingDir="opposite"/>
-    <laneletType>unknown</laneletType>
+    <laneletType>driveWay</laneletType>
   </lanelet>
   <lanelet id="113">
     <leftBound>
@@ -8254,6 +8257,7 @@
         <x>361962.38</x>
         <y>5296722.3</y>
       </point>
+      <lineMarking>solid</lineMarking>
     </leftBound>
     <rightBound>
       <point>
@@ -8602,6 +8606,6 @@
       </point>
     </rightBound>
     <adjacentLeft ref="112" drivingDir="opposite"/>
-    <laneletType>unknown</laneletType>
+    <laneletType>driveWay</laneletType>
   </lanelet>
 </commonRoad>
