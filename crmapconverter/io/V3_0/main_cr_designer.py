@@ -1,10 +1,13 @@
 import sys
+import os
+from lxml import etree
 
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 
+from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.common.file_writer import CommonRoadFileWriter
 
 from crmapconverter.io.V3_0.GUI_src import CR_Scenario_Designer
@@ -30,6 +33,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.centralwidget.setStyleSheet('background-color:rgb(150,150,150)')
         self.setWindowFlag(True)
 
+        self.filename = None
         self.count = 0
         self.tool1 = None
         self.tool2 = None
@@ -125,7 +129,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         if self.lanelet_list is not None:
             self.lanelet_list.close()
             self.lanelet_list = None
-        self.lanelet_list = QDockWidget("Lanelets " + self.crviewer.filename)
+        self.lanelet_list = QDockWidget("Lanelets")
         self.lanelet_list.setFloating(True)
         self.lanelet_list.setFeatures(QDockWidget.AllDockWidgetFeatures)
         self.lanelet_list.setAllowedAreas(Qt.RightDockWidgetArea)
@@ -152,7 +156,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         if self.intersection_list is not None:
             self.intersection_list.close()
             self.intersection_list = None
-        self.intersection_list = QDockWidget("Intersections " + self.crviewer.filename)
+        self.intersection_list = QDockWidget("Intersections")
         self.intersection_list.setFloating(True)
         self.intersection_list.setFeatures(QDockWidget.AllDockWidgetFeatures)
         self.intersection_list.setAllowedAreas(Qt.RightDockWidgetArea)
@@ -258,7 +262,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         new.triggered.connect(self.file_new)
         open = QAction(QIcon(":/icons/open_file.png"), "open CR File", self)
         tb1.addAction(open)
-        open.triggered.connect(self.file_open)
+        open.triggered.connect(self.open_commonroad_file)
         save = QAction(QIcon(":/icons/save_file.png"), "save CR File", self)
         tb1.addAction(save)
         save.triggered.connect(self.file_save)
@@ -413,7 +417,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
             "Open",
             icon=QIcon(":/icons/open_file.png"),
             checkable=False,
-            slot=self.file_open,
+            slot=self.open_commonroad_file,
             tip="Open Commonroad File",
             shortcut=QKeySequence.Open)
         self.separator = QAction(self)
@@ -475,29 +479,38 @@ class MWindow(QMainWindow, Ui_mainWindow):
         # self.status.showMessage("Creating New File")
         print("not yet implemented")
 
-    def file_open(self):
-        """Function to open a CR .xml file."""
-        self.crviewer = CrViewer()
-        self.crviewer.open_commonroad_file()
-        self.update_max_step()
-        self.update_to_new_scenario()
+    def open_commonroad_file(self):
+        """ """
+        path, _ = QFileDialog.getOpenFileName(
+            self,
+            "Open a CommonRoad scenario",
+            "",
+            "CommonRoad scenario files *.xml (*.xml)",
+            options=QFileDialog.Options(),
+        )
+        if not path:
+            return
+        self.open_path(path)
 
-    def update_to_new_scenario(self):
-        """  """
-        self.update_max_step()
-        self.crviewer.setWindowIcon(QIcon(":/icons/cr1.ico"))
-        if self.crviewer.current_scenario is not None:
-            self.create_lanelet_list(self.crviewer)
-            self.create_intersection_list(self.crviewer)
-            self.setWindowTitle(self.crviewer.filename)
-            self.textBrowser.append("loading " + self.crviewer.filename)
-            self.textBrowser.append("Benchmark-ID: " + self.crviewer.current_scenario.benchmark_id)
-            self.setCentralWidget(self.crviewer)
-        else:
-            self.lanelet_list.close()
-            self.intersection_list.close()
+    def open_path(self, path):
+        """ """
 
-    def open_scenario(self, new_scenario, filename):
+        filename = os.path.basename(path)
+        try:
+            commonroad_reader = CommonRoadFileReader(path)
+            scenario, _ = commonroad_reader.open()
+        except etree.XMLSyntaxError as e:
+            QMessageBox.warning(
+                self,
+                "CommonRoad XML error",
+                "There was an error during the loading of the selected CommonRoad file.\n\n"
+                + "Syntax Error: {}".format(e),
+                QMessageBox.Ok,
+            )
+            return
+        self.open_scenario(scenario, filename)
+
+    def open_scenario(self, new_scenario, filename="new_scenario"):
         """  """
         # check if lanelets are valid polylines
         lanelet_ids = []
@@ -516,10 +529,24 @@ class MWindow(QMainWindow, Ui_mainWindow):
         #         "Scenario contains faulty lanelets: " + str(lanelet_ids),
         #         QMessageBox.Ok,
         #     )
-        self.crviewer = CrViewer()
-        self.crviewer.filename = filename
         self.crviewer.open_scenario(new_scenario)
+        self.filename = filename
         self.update_to_new_scenario()
+
+    def update_to_new_scenario(self):
+        """  """
+        self.update_max_step()
+        self.crviewer.setWindowIcon(QIcon(":/icons/cr1.ico"))
+        if self.crviewer.current_scenario is not None:
+            self.create_lanelet_list(self.crviewer)
+            self.create_intersection_list(self.crviewer)
+            self.setWindowTitle(self.filename)
+            self.textBrowser.append("loading " + self.filename)
+            self.textBrowser.append("Benchmark-ID: " + self.crviewer.current_scenario.benchmark_id)
+            self.setCentralWidget(self.crviewer)
+        else:
+            self.lanelet_list.close()
+            self.intersection_list.close()
 
     def file_save(self):
         """Function to save a CR .xml file."""
@@ -594,6 +621,7 @@ def main():
     app = QApplication(sys.argv)
     w = MWindow()
     w.showMaximized()
+    w.open_path("/home/max/Desktop/Planning/Maps/cr_files/ped/garching_kreuzung_fixed.xml")
     sys.exit(app.exec_())
 
 

@@ -1,34 +1,13 @@
 """ """
 
-import os
-from lxml import etree
-import numpy as np
-from matplotlib.figure import Figure
 from typing import Union
-from matplotlib.path import Path
-from matplotlib.patches import PathPatch
 from matplotlib import animation
 
-from commonroad.common.file_reader import CommonRoadFileReader
-from commonroad.scenario.intersection import Intersection
-from commonroad.scenario.lanelet import (
-    Lanelet,
-    is_natural_number,
-    LaneletNetwork
-)
-
-from matplotlib.backends.backend_qt5agg import (
-    FigureCanvasQTAgg as FigureCanvas
-)
 from matplotlib.backends.backend_qt5agg import (
     NavigationToolbar2QT as NavigationToolbar
 )
 
 from matplotlib.animation import FuncAnimation
-from commonroad.visualization.draw_dispatch_cr import draw_object
-from commonroad.scenario.scenario import Scenario
-
-from crmapconverter.io.V3_0.GUI_resources.MainWindow import Ui_mainWindow
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
@@ -69,7 +48,6 @@ class CrViewer(QWidget):
         super().__init__(parent)
         self.viewer = Viewer(self)
         
-        self.filename = None
         self.current_scenario = None
         self.max_step = 0
         # current time ste
@@ -93,49 +71,8 @@ class CrViewer(QWidget):
         self.lanelet_list = LaneletList(self.update, self)
         self.intersection_list = IntersectionList(self.update, self)
 
-    def open_commonroad_file(self):
+    def open_scenario(self, scenario):
         """ """
-        path, _ = QFileDialog.getOpenFileName(
-            self,
-            "Open a CommonRoad scenario",
-            "",
-            "CommonRoad scenario files *.xml (*.xml)",
-            options=QFileDialog.Options(),
-        )
-        if not path:
-            return
-        self.open_path(path)
-
-    def open_path(self, path):
-        """ """
-
-        filename = os.path.basename(path)
-        try:
-            commonroad_reader = CommonRoadFileReader(path)
-            scenario, _ = commonroad_reader.open()
-        except etree.XMLSyntaxError as e:
-            QMessageBox.warning(
-                self,
-                "CommonRoad XML error",
-                "There was an error during the loading of the selected CommonRoad file.\n\n"
-                + "Syntax Error: {}".format(e),
-                QMessageBox.Ok,
-            )
-            return
-        except Exception as e:
-            QMessageBox.warning(
-                self,
-                "CommonRoad XML error",
-                "There was an error during the loading of the selected CommonRoad file.\n\n"
-                + "{}".format(e),
-                QMessageBox.Ok,
-            )
-            return
-        self.open_scenario(scenario, filename)
-
-    def open_scenario(self, scenario, filename="new_scenario"):
-        """ """
-        self.filename = filename
         self.current_scenario = scenario
         self.calc_max_timestep()
         self.update()
@@ -279,7 +216,7 @@ class CrViewer(QWidget):
                     writer = FFMpegWriter()
                     self.animation.save(path, dpi=120, writer=writer)
 
-            except (IOError) as e:
+            except IOError as e:
                 QMessageBox.critical(
                     self,
                     "CommonRoad file not created!",
