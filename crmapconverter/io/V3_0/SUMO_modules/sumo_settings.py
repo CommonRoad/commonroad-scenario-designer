@@ -1,26 +1,27 @@
-import sys
+from PyQt5.QtWidgets import QMessageBox, QMainWindow
+
+from commonroad.common.util import Interval
+
 from crmapconverter.io.V3_0.GUI_resources.sumo_settings_ui import Ui_MainWindow
 from crmapconverter.sumo_map.config import SumoConfig as config
 
-from PyQt5.QtWidgets import *
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
 
 class SUMOSettings:
 
     def __init__(self, parent):
 
-        self.cr_designer = parent
+        self.parent = parent
+        self.settings_window = QMainWindow()
         self.window = Ui_MainWindow()
-        self.window.setupUi(self.window)
+        self.window.setupUi(self.settings_window)
+        self.window.setupUi(self.settings_window)
         
         # connect events
-        self.window.botton_restore_defaults.clicked(self.restore_defaults)
-        self.window.botton_close.clicked(self.close_button)
+        self.window.botton_restore_defaults.clicked.connect(self.restore_defaults)
+        self.window.botton_close.clicked.connect(self.close_button)
 
         self.update_ui_values()
-
-        self.window.show()
+        self.settings_window.show()
 
     def update_ui_values(self) -> None:
         """
@@ -29,10 +30,11 @@ class SUMOSettings:
         :return: None
         """
         # line edits
-        # self.window.le_ego_ids.setText(config.ego_ids) # List but why?
-        # self.window.lineEdit_departure_interval_vehicles.setText(
-        #     config.departure_interval_vehicles ) # Intervall
-            
+        self.window.le_ego_ids.setText(",".join([str(e) for e in config.ego_ids]))
+        interv = config.departure_interval_vehicles
+        self.window.le_departure_interval_vehicles.setText(
+            str(interv.start) + "," + str(interv.end))            
+
         # spin boxes
         # self.window.spinBox.setValue(config.
         self.window.sb_random_seed.setValue(config.random_seed)
@@ -63,7 +65,6 @@ class SUMOSettings:
         self.window.sb_ego_veh_length.setValue(config.ego_veh_length)
         self.window.sb_vehicle_width_interval.setValue(
             config.vehicle_width_interval)
-        # TODO veh dist to extra window
         self.window.sb_passenger.setValue(config.veh_distribution['passenger'])
         self.window.sb_truck.setValue(config.veh_distribution['truck'])
         self.window.sb_bus.setValue(config.veh_distribution['bus'])
@@ -71,50 +72,75 @@ class SUMOSettings:
         self.window.sb_pedestrian.setValue(
             config.veh_distribution['pedestrian'])
             
-        # combo boxes
-        # comboBox_lane_change_window.
-        # comboBox_compute_orientation
+        # check boxes
+        self.window.chk_lane_change_sync.setChecked(config.lane_change_sync)
+        self.window.chk_compute_orientation.setChecked(config.compute_orientation)
 
-    def save_to_config(self) -> None:
+    def save_to_config(self) -> bool:
         """
         saves the values in the settings window to config.py
 
         :return: None
         """
-        # config.ego_ids = le_ego_ids.text()
-        # config.departure_interval_vehicles = lineEdit_departure_interval_vehicles.text()
+
+        window = self.window
+
+        try:
+            config.ego_ids = [
+                int(e) for e in window.le_ego_ids.text().split(",")
+            ]
+        except ValueError:
+            self.warn("invalid settings: ego_ids")
+            return False
+        interv_str = window.le_departure_interval_vehicles.text().split(",")
+        try:
+            config.departure_interval_vehicles = Interval(
+                float(interv_str[0]), float(interv_str[1])
+            )
+        except ValueError:
+            self.warn("invalid settings: departure_interval_vehicles")
+            return False
+
         # spin boxes
-        # config. = sb.value() # ?
-        config.random_seed = sb_random_seed.value()
-        # config. = sb_2.value() # ?
-        config.ego_start_time = sb_ego_start_time.value()
-        configsb_n_ego_vehicles. = sb_num_ego_vehicles.value()
-        config.overwrite_speed_limit = sb_overwrite_speed_limit.value()
-        config.lanelet_check_time_window = sb_lanelet_check_time_window.value()
-        config.unrestricted_max_speed_default = sb_unrestricted_max_speed_default.value()
-        config.delta_steps = sb_delta_steps.value()
-        config.n_vehicles_max = sb_n_vehicles_max.value()
-        config.consistency_window = sb_consistency_window.value()
-        config.max_veh_per_km = sb_max_veh_per_km.value()
-        config.veh_per_second = sb_veh_per_second.value()
-        config.unrestricted_speed_limit_default = sb_unrestricted_speed_limit_default.value()
-        config.fringe_factor = sb_fringe_factor.value()
-        config.wait_pos_internal_junctions = sb_wait_pos_internal_junctions.value()
-        config.ego_veh_width = sb_ego_veh_width.value()
-        config.protection_margin = sb_protection_margin.value()
-        config.lane_change_tol = sb_lane_change_tol.value()
-        config.vehicle_length_interval = sb_vehicle_length_interval.value()
-        config.ego_veh_length = sb_ego_veh_length.value()
-        config.vehicle_width_interval = sb_vehicle_width_interval.value()
-        # TODO to extra window
-        config.passenger = sb_passenger.value()
-        config.truck = sb_truck.value()
-        config.bus = sb_bus.value()
-        config.bicycle = sb_bicycle.value()
-        config.pedestrian = sb_pedestrian.value()
+        # config. =window.sb.value() # ?
+        config.random_seed =window.sb_random_seed.value()
+        # config. = window.sb_2.value() # ?
+        config.ego_start_time = window.sb_ego_start_time.value()
+        config.n_ego_vehicles = window.sb_num_ego_vehicles.value()
+        config.overwrite_speed_limit = window.sb_overwrite_speed_limit.value()
+        config.lanelet_check_time_window = (
+            window.sb_lanelet_check_time_window.value()
+        )
+        config.unrestricted_max_speed_default = (
+            window.sb_unrestricted_max_speed_default.value()
+        )
+        config.delta_steps = window.sb_delta_steps.value()
+        config.n_vehicles_max = window.sb_n_vehicles_max.value()
+        config.consistency_window = window.sb_consistency_window.value()
+        config.max_veh_per_km = window.sb_max_veh_per_km.value()
+        config.veh_per_second = window.sb_veh_per_second.value()
+        config.unrestricted_speed_limit_default = (
+            window.sb_unrestricted_speed_limit_default.value()
+        )
+        config.fringe_factor = window.sb_fringe_factor.value()
+        config.wait_pos_internal_junctions = (
+            window.sb_wait_pos_internal_junctions.value()
+        )
+        config.ego_veh_width = window.sb_ego_veh_width.value()
+        config.protection_margin = window.sb_protection_margin.value()
+        config.lane_change_tol = window.sb_lane_change_tol.value()
+        config.vehicle_length_interval = window.sb_vehicle_length_interval.value()
+        config.ego_veh_length = window.sb_ego_veh_length.value()
+        config.vehicle_width_interval = window.sb_vehicle_width_interval.value()
+        config.passenger = window.sb_passenger.value()
+        config.truck = window.sb_truck.value()
+        config.bus = window.sb_bus.value()
+        config.bicycle = window.sb_bicycle.value()
+        config.pedestrian = window.sb_pedestrian.value()
         # combo boxes
-        # config. = comboBox_lane_change_window
-        # config. = comboBox_compute_orientation
+        config.lane_change_sync = window.chk_lane_change_sync.isChecked()
+        config.compute_orientation = window.chk_compute_orientation.isChecked()
+        return True
 
     def close_button(self) -> None:
         """
@@ -122,8 +148,8 @@ class SUMOSettings:
 
         :return: None
         """
-        self.save_to_config()
-        self.window.close()
+        if self.save_to_config():
+            self.settings_window.close()
 
     def restore_defaults(self):
         """
@@ -134,3 +160,10 @@ class SUMOSettings:
         # for var_name in dir(config_default):
         #     if not var_name.startswith('__'):
         #         setattr(config, var_name, getattr(config_default, var_name))
+
+    def warn(self, msg):
+        messbox = QMessageBox()
+        messbox.warning(None, 
+                        "Warning",
+                        msg,
+                        QMessageBox.Ok, QMessageBox.Ok)
