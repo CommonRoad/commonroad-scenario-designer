@@ -8,7 +8,8 @@ from crmapconverter.opendriveparser.elements.roadElevationProfile import (
 )
 from crmapconverter.opendriveparser.elements.roadLateralProfile import LateralProfile
 from crmapconverter.opendriveparser.elements.junction import Junction
-
+from crmapconverter.opendriveparser.elements.roadObject import Object
+from crmapconverter.opendriveparser.elements.roadSignal import Signal
 
 class Road:
     """ """
@@ -26,6 +27,8 @@ class Road:
         self._elevationProfile = ElevationProfile()
         self._lateralProfile = LateralProfile()
         self._lanes = Lanes()
+        self._objects = []
+        self._signals = []
 
     def __eq__(self, other):
         return self.__dict__ == other.__dict__
@@ -116,3 +119,26 @@ class Road:
     def lanes(self):
         """ """
         return self._lanes
+
+    @property
+    def objects(self):
+        """ """
+        return self._objects
+
+    def addObject(self, object):
+
+        if not isinstance(object, Object):
+            raise TypeError("Has to be of instance Object")
+
+        self._objects.append(object)
+
+    @property
+    def signals(self):
+        return self._signals
+
+    def addSignal(self, signal):
+
+        if not isinstance(signal, Signal):
+            raise TypeError("Has to be of instance Signal")
+
+        self._signals.append(signal)
