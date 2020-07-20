@@ -54,6 +54,7 @@ class AnimatedViewer(Viewer):
     def open_scenario(self, scenario):
         """ """
         self.current_scenario = scenario
+        # TODO reset animation
 
     def _init_animation(self):
         print('init animation')
@@ -201,10 +202,3 @@ class AnimatedViewer(Viewer):
             if num > max_num:
                 max_num = num
         self.max_step = max_num
-
-    # def load_empty_scenario(self):
-    #     """ called by button new scenario """
-    #     scenario = Scenario(0.1, 'new scenario')
-    #     net = LaneletNetwork()
-    #     scenario.lanelet_network = net
-    #     self.open_scenario(scenario)

@@ -12,6 +12,7 @@ from matplotlib.backends.backend_qt5agg import (
 
 from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.common.file_writer import CommonRoadFileWriter
+from commonroad.scenario.scenario import Scenario, LaneletNetwork
 
 from crmapconverter.io.V3_0.GUI_src import CR_Scenario_Designer
 from crmapconverter.io.V3_0.GUI_resources.MainWindow import Ui_mainWindow
@@ -495,12 +496,12 @@ class MWindow(QMainWindow, Ui_mainWindow):
     def file_new(self):
         """Function to create the action in the menu bar."""
         """Not Finished---"""
-        # self.crviewer.load_empty_scenario()
-        # self.crviewer.current_scenario = None
-        # self.update_to_new_scenario() #TODO finish the scenario creating in the furture with scenario manually editing
-        # # show message in statusbar
-        # self.status.showMessage("Creating New File")
-        print("not yet implemented")
+        """ called by button new scenario """
+        scenario = Scenario(0.1, 'new scenario')
+        net = LaneletNetwork()
+        scenario.lanelet_network = net
+        self.open_scenario(scenario)
+        self.status.showMessage("Creating New File")
 
     def open_commonroad_file(self):
         """ """
@@ -545,13 +546,13 @@ class MWindow(QMainWindow, Ui_mainWindow):
                     "Warning: Lanelet {} is invalid polygon!".format(
                         lanelet.lanelet_id)
                 )
-        # if lanelet_ids:
-        #     QMessageBox.warning(
-        #         self,
-        #         "CommonRoad XML error",
-        #         "Scenario contains faulty lanelets: " + str(lanelet_ids),
-        #         QMessageBox.Ok,
-        #     )
+        if lanelet_ids:
+            QMessageBox.warning(
+                self,
+                "CommonRoad XML error",
+                "Scenario contains faulty lanelets: " + str(lanelet_ids),
+                QMessageBox.Ok,
+            )
         self.filename = filename
         self.crviewer.open_scenario(new_scenario)
         self.update_view()
@@ -683,7 +684,7 @@ def main():
     app = QApplication(sys.argv)
     w = MWindow()
     w.showMaximized()
-    w.open_path("/home/max/Desktop/Planning/Maps/cr_files/ped/garching_kreuzung_fixed.xml")
+    # w.open_path("/home/max/Desktop/Planning/Maps/cr_files/ped/garching_kreuzung_fixed.xml")
     sys.exit(app.exec_())
 
 
