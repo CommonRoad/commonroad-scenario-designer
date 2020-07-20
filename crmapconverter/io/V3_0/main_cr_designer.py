@@ -38,8 +38,8 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.textBrowser = None
         self.sumobox = None
         self.crviewer = CrViewer()
-        self.lanelets_List = None
-        self.intersection_List = None
+        self.lanelet_list = None
+        self.intersection_list = None
         self.timer = None
         self.ani_path = None
         self.slider_clicked = False
@@ -114,27 +114,27 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.uppertoolBox.button_sumo_simulation.clicked.connect(
             self.tool_box2_show)
         # self.uppertoolBox.button_lanlist.clicked.connect(
-        #    self.show_laneletslist)
+        #    self.show_lanelet_list)
         # self.uppertoolBox.button_intersection_list.clicked.connect(
         #    self.show_intersection_list)
         self.uppertoolBox.button_save.clicked.connect(
             self.save_animation)
 
-    def create_laneletslist(self, cr_viewer):
-        """Create the Laneletslist and put it into right Dockwidget area."""
-        if self.lanelets_List is not None:
-            self.lanelets_List.close()
-            self.lanelets_List = None
-        self.lanelets_List = QDockWidget("Lanelets " + self.crviewer.filename)
-        self.lanelets_List.setFloating(True)
-        self.lanelets_List.setFeatures(QDockWidget.AllDockWidgetFeatures)
-        self.lanelets_List.setAllowedAreas(Qt.RightDockWidgetArea)
-        self.lanelets_List.setWidget(cr_viewer.laneletsList)
-        self.addDockWidget(Qt.RightDockWidgetArea, self.lanelets_List)
+    def create_lanelet_list(self, cr_viewer):
+        """Create the lanelet_list and put it into right Dockwidget area."""
+        if self.lanelet_list is not None:
+            self.lanelet_list.close()
+            self.lanelet_list = None
+        self.lanelet_list = QDockWidget("Lanelets " + self.crviewer.filename)
+        self.lanelet_list.setFloating(True)
+        self.lanelet_list.setFeatures(QDockWidget.AllDockWidgetFeatures)
+        self.lanelet_list.setAllowedAreas(Qt.RightDockWidgetArea)
+        self.lanelet_list.setWidget(cr_viewer.lanelet_list)
+        self.addDockWidget(Qt.RightDockWidgetArea, self.lanelet_list)
 
-    def show_laneletslist(self):
+    def show_lanelet_list(self):
         """Function connected with button 'Lanelets List' to show the lanelets list."""
-        if self.lanelets_List is None:
+        if self.lanelet_list is None:
             if self.crviewer.current_scenario is None:
                 messbox = QMessageBox()
                 messbox.question(
@@ -143,26 +143,26 @@ class MWindow(QMainWindow, Ui_mainWindow):
                     QtWidgets.QMessageBox.Ok)
                 messbox.close()
             else:
-                self.lanelets_List.show()
+                self.lanelet_list.show()
         else:
-            self.lanelets_List.show()
+            self.lanelet_list.show()
 
     def create_intersection_list(self, cr_viewer):
-        """Create the Laneletslist and put it into right Dockwidget area."""
-        if self.intersection_List is not None:
-            self.intersection_List.close()
-            self.intersection_List = None
-        self.intersection_List = QDockWidget("Intersections " + self.crviewer.filename)
-        self.intersection_List.setFloating(True)
-        self.intersection_List.setFeatures(QDockWidget.AllDockWidgetFeatures)
-        self.intersection_List.setAllowedAreas(Qt.RightDockWidgetArea)
-        self.intersection_List.setWidget(cr_viewer.intersection_List)
-        self.addDockWidget(Qt.RightDockWidgetArea, self.intersection_List)
-        self.intersection_List.close()
+        """Create the lanelet_list and put it into right Dockwidget area."""
+        if self.intersection_list is not None:
+            self.intersection_list.close()
+            self.intersection_list = None
+        self.intersection_list = QDockWidget("Intersections " + self.crviewer.filename)
+        self.intersection_list.setFloating(True)
+        self.intersection_list.setFeatures(QDockWidget.AllDockWidgetFeatures)
+        self.intersection_list.setAllowedAreas(Qt.RightDockWidgetArea)
+        self.intersection_list.setWidget(cr_viewer.intersection_list)
+        self.addDockWidget(Qt.RightDockWidgetArea, self.intersection_list)
+        self.intersection_list.close()
 
     def show_intersection_list(self):
         """Function connected with button 'Lanelets List' to show the lanelets list."""
-        if self.intersection_List is None:
+        if self.intersection_list is None:
             if self.crviewer.current_scenario is None:
                 messbox = QMessageBox()
                 messbox.question(
@@ -171,9 +171,9 @@ class MWindow(QMainWindow, Ui_mainWindow):
                     QtWidgets.QMessageBox.Ok)
                 messbox.close()
             else:
-                self.intersection_List.show()
+                self.intersection_list.show()
         else:
-            self.intersection_List.show()
+            self.intersection_list.show()
 
     def create_sumobox(self):
         """Function to create the sumo toolbox(bottom toolbox)."""
@@ -274,7 +274,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         intersection_list = QAction(QIcon(":/icons/intersection_list.ico"),
                                     "show Intersection list", self)
         tb2.addAction(lanelet_list)
-        lanelet_list.triggered.connect(self.show_laneletslist)
+        lanelet_list.triggered.connect(self.show_lanelet_list)
         tb2.addAction(intersection_list)
         intersection_list.triggered.connect(self.show_intersection_list)
 
@@ -487,15 +487,15 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.update_max_step()
         self.crviewer.setWindowIcon(QIcon(":/icons/cr1.ico"))
         if self.crviewer.current_scenario is not None:
-            self.create_laneletslist(self.crviewer)
+            self.create_lanelet_list(self.crviewer)
             self.create_intersection_list(self.crviewer)
             self.setWindowTitle(self.crviewer.filename)
             self.textBrowser.append("loading " + self.crviewer.filename)
             self.textBrowser.append("Benchmark-ID: " + self.crviewer.current_scenario.benchmark_id)
             self.setCentralWidget(self.crviewer)
         else:
-            self.lanelets_List.close()
-            self.intersection_List.close()
+            self.lanelet_list.close()
+            self.intersection_list.close()
 
     def open_scenario(self, new_scenario, filename):
         """  """

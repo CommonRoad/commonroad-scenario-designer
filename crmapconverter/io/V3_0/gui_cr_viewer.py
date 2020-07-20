@@ -1,12 +1,10 @@
-import signal
-import sys
+""" """
+
 import os
 from lxml import etree
 import numpy as np
-import time
-import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
-from typing import List, Union
+from typing import Union
 from matplotlib.path import Path
 from matplotlib.patches import PathPatch
 from matplotlib import animation
@@ -35,48 +33,12 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 
-
-class Canvas(FigureCanvas):
-    """Ultimately, this is a QWidget"""
-    def __init__(self, parent=None, width=5, height=5, dpi=100):
-
-        self.ax = None
-        self.fig = Figure(figsize=(width, height), dpi=dpi)
-
-        super(Canvas, self).__init__(self.fig)
-        self.setParent(parent)
-        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-
-        self.clear_axes()
-
-    def clear_axes(self):
-        """ """
-        if self.ax is not None:
-            self.ax.clear()
-        else:
-
-            self.ax = self.fig.add_subplot(111)
-        self.ax.set_aspect("equal", "datalim")
-        self.ax.set_axis_off()
-
-        self.draw()
-
-    def get_axes(self):
-        """ """
-        return self.ax
-
-    def update_plot(self):
-        """ """
-        self.draw()
-
-    def draw_object(self, scenario, draw_params, plot_limits):
-        self.ax.clear()
-        draw_object(scenario,
-                    ax=self.ax,
-                    draw_params=draw_params,
-                    plot_limits=plot_limits)
-        self.ax.autoscale()
-        self.ax.set_aspect('equal')
+from crmapconverter.io.viewer import (
+    LaneletList,
+    IntersectionList,
+    Viewer,
+    find_intersection_by_id
+)
 
 
 class Observable:
@@ -102,41 +64,34 @@ class Observable:
 
 
 class CrViewer(QWidget):
+
     def __init__(self, parent=None):
-        super(CrViewer, self).__init__(parent)
+        super().__init__(parent)
+        self.viewer = Viewer(self)
+        
         self.filename = None
         self.current_scenario = None
-        self.selected_lanelet_id = None
-        self.selected_intersection_id = None
         self.max_step = 0
-        #self.figure = plt.figure(figsize=(10.8, 7.2), dpi=100)
-        self.canvas = Canvas(self, width=10.8, height=7.2, dpi=100)
-        self.toolbar = NavigationToolbar(self.canvas, self)
-        self.setWindowFlag(Qt.WindowCloseButtonHint)
-
+        # current time ste
+        self.timestep = Observable(0)
         # FuncAnimation object
         self.animation = None
         # if playing or not
         self.playing = False
-        # current time ste
-        self.timestep = Observable(0)
+
+        self._init_user_interface()
+
+    def _init_user_interface(self):
+        self.toolbar = NavigationToolbar(self.viewer.dynamic, self)
+        self.setWindowFlag(Qt.WindowCloseButtonHint)
 
         layout = QVBoxLayout()
         layout.addWidget(self.toolbar)
-        layout.addWidget(self.canvas)
+        layout.addWidget(self.viewer.dynamic)
         self.setLayout(layout)
 
-        self.laneletsList = QTableWidget(self)
-        self.laneletsList.setSelectionBehavior(QAbstractItemView.SelectRows)
-        self.laneletsList.clicked.connect(self.on_click_lanelet)
-
-        self.intersection_List = QTableWidget(self)
-        self.intersection_List.setSelectionBehavior(QAbstractItemView.SelectRows)
-        self.intersection_List.clicked.connect(self.onClickIntersection)
-
-        self.canvas.mpl_connect('scroll_event', self.zoom)
-        self.canvas.mpl_connect('button_press_event', self.zoom)
-
+        self.lanelet_list = LaneletList(self.update, self)
+        self.intersection_list = IntersectionList(self.update, self)
 
     def open_commonroad_file(self):
         """ """
@@ -154,7 +109,7 @@ class CrViewer(QWidget):
     def open_path(self, path):
         """ """
 
-        self.filename = os.path.basename(path)
+        filename = os.path.basename(path)
         try:
             commonroad_reader = CommonRoadFileReader(path)
             scenario, _ = commonroad_reader.open()
@@ -176,375 +131,58 @@ class CrViewer(QWidget):
                 QMessageBox.Ok,
             )
             return
-        self.open_scenario(scenario)
+        self.open_scenario(scenario, filename)
 
-    def open_scenario(self, scenario):
+    def open_scenario(self, scenario, filename="new_scenario"):
         """ """
-        self.canvas.clear_axes()
-        self.selected_lanelet_id = None
-        self.selected_intersection_id = None
+        self.filename = filename
         self.current_scenario = scenario
-        if scenario.benchmark_id:
-            self.name = scenario.benchmark_id
-        else:
-            self.name = "Unnamed scenario"
         self.calc_max_timestep()
-        self.update_plot()
+        self.update()
 
-    def zoom(self, event):
-        """ realize zoom in / out function in GUI """
+    def update(self):
+        """ update all compoments """
+        self.make_trigger_exclusive()
+        self.lanelet_list.update(self.current_scenario)
+        self.intersection_list.update(self.current_scenario)
 
-        ax = event.inaxes  # get the axes which mouse is now
-        x_min, x_max = ax.get_xlim()
-        y_min, y_max = ax.get_ylim()
-        scope_x = (x_max - x_min) / 10
-        scope_y = (y_max - y_min) / 10
-        # xdata = event.xdata  # get event x location
-        # ydata = event.ydata  # get event y location
-
-        if event.button == 'up':
-            ax.set(xlim=(x_min + scope_x, x_max - scope_x))
-            ax.set(ylim=(y_min + scope_y, y_max - scope_y))
-            # print('up')
-        elif event.button == 'down':
-            ax.set(xlim=(x_min - scope_x, x_max + scope_x))
-            ax.set(ylim=(y_min - scope_y, y_max + scope_y))
-            # print('down')
-
-        self.canvas.draw_idle()
-
-    def no_file_selected(self):
-        messbox = QMessageBox()
-        # self.center(messbox)
-        reply = messbox.information(self, "Information",
-                                    "Please select a CR file",
-                                    QMessageBox.Ok | QMessageBox.No,
-                                    QMessageBox.Ok)
-
-        if reply == QMessageBox.Ok:
-            self.open_commonroad_file()
-        else:
-            self.close # behavior when called as inteded?
-
-    def center(self, x):
-        screen = QDesktopWidget().screenGeometry()
-        size = x.geometry()
-        print(screen)
-        print(size)
-        x.move((screen.width() - size.width()) / 2,
-               (screen.height() - size.height()) / 2)
-        print((screen.width() - size.width()) / 100)
-        print((screen.height() - size.height()) / 2)
-
-    def on_click_lanelet(self):
-        """ """
-        self.canvas.clear_axes()
-        if self.animation is not None:
-            self.pause()
-
-        selectedLanelets = self.laneletsList.selectedItems()
-
-        if not selectedLanelets:
-            self.selected_lanelet_id = None
-            return
-
-        self.selected_lanelet_id = int(selectedLanelets[0].text())
-        self.update_plot()
-
-    def onClickIntersection(self):
-        """ """
-        self.canvas.clear_axes()
-        if self.animation is not None:
-            self.pause()
-
-        selected_intersection = self.intersection_List.selectedItems()
-
-        if not selected_intersection:
-            self.selected_intersection_id = None
-            return
-
-        self.selected_intersection_id = int(selected_intersection[0].text())
-        self.selected_lanelet_id = None
-        self.update_plot()
-
-    def update_plot(self):
-        """update the plot after select item in laneletslist"""
         if self.current_scenario is None:
-            self.canvas.clear_axes()
             return
-
-        # select intersection xor lanelet
-        if self.selected_lanelet_id is not None:
-            selected_lanelet = self.current_scenario.lanelet_network.find_lanelet_by_id(
-                self.selected_lanelet_id)
-            selected_intersection = None
-        elif self.selected_intersection_id is not None:
+        if self.intersection_list.selected_id is not None:
             selected_intersection = find_intersection_by_id(
-                self.current_scenario, self.selected_intersection_id)
-            selected_lanelet = None
+                self.current_scenario, self.intersection_list.selected_id)
         else:
-            selected_lanelet = None
             selected_intersection = None
-
-        ax = self.canvas.get_axes()
-
-        self.xlim1 = float("Inf")
-        self.xlim2 = -float("Inf")
-
-        self.ylim1 = float("Inf")
-        self.ylim2 = -float("Inf")
-
-        for lanelet in self.current_scenario.lanelet_network.lanelets:
-
-            draw_arrow, color, alpha, zorder, label = self.get_paint_parameters(
-                lanelet, selected_lanelet, selected_intersection)
-
-            self.draw_lanelet_polygon(
-                lanelet, ax, color, alpha, zorder, label)
-
-            self.draw_lanelet_vertices(lanelet, ax)
-
-            if draw_arrow:
-                self.draw_arrow_on_lanelet(lanelet, ax)
-
-        handles, labels = self.canvas.get_axes().get_legend_handles_labels()
-        self.canvas.get_axes().legend(handles, labels)
-
-        if (
-                self.xlim1 != float("Inf")
-                and self.xlim2 != float("Inf")
-                and self.ylim1 != float("Inf")
-                and self.ylim2 != float("Inf")
-        ):
-            self.canvas.get_axes().set_xlim([self.xlim1, self.xlim2])
-            self.canvas.get_axes().set_ylim([self.ylim1, self.ylim2])
-
-        self.canvas.update_plot()
-
-        self.update_intersection_list()
-        self.update_lanelet_list()
-
-        self.canvas.fig.tight_layout()
-
-    def get_paint_parameters(self, lanelet: Lanelet, selected_lanelet: Lanelet,
-                             selected_intersection: Intersection):
-        """
-        Return the parameters for painting a lanelet regarding the selected lanelet.
-        """
-
-        if selected_lanelet is not None:
-
-            draw_arrow = True
-
-            if lanelet.lanelet_id == selected_lanelet.lanelet_id:
-                color = "red"
-                alpha = 0.7
-                zorder = 10
-                label = "{} selected".format(lanelet.lanelet_id)
-
-            elif (
-                    lanelet.lanelet_id in selected_lanelet.predecessor
-                    and lanelet.lanelet_id in selected_lanelet.successor
-            ):
-                color = "purple"
-                alpha = 0.5
-                zorder = 5
-                label = "{} predecessor and successor of {}".format(
-                    lanelet.lanelet_id, selected_lanelet.lanelet_id
-                )
-
-            elif lanelet.lanelet_id in selected_lanelet.predecessor:
-                color = "blue"
-                alpha = 0.5
-                zorder = 5
-                label = "{} predecessor of {}".format(
-                    lanelet.lanelet_id, selected_lanelet.lanelet_id
-                )
-            elif lanelet.lanelet_id in selected_lanelet.successor:
-                color = "green"
-                alpha = 0.5
-                zorder = 5
-                label = "{} successor of {}".format(
-                    lanelet.lanelet_id, selected_lanelet.lanelet_id
-                )
-            elif lanelet.lanelet_id == selected_lanelet.adj_left:
-                color = "yellow"
-                alpha = 0.5
-                zorder = 5
-                label = "{} adj left of {} ({})".format(
-                    lanelet.lanelet_id,
-                    selected_lanelet.lanelet_id,
-                    "same"
-                    if selected_lanelet.adj_left_same_direction
-                    else "opposite",
-                )
-            elif lanelet.lanelet_id == selected_lanelet.adj_right:
-                color = "orange"
-                alpha = 0.5
-                zorder = 5
-                label = "{} adj right of {} ({})".format(
-                    lanelet.lanelet_id,
-                    selected_lanelet.lanelet_id,
-                    "same"
-                    if selected_lanelet.adj_right_same_direction
-                    else "opposite",
-                )
-            else:
-                color = "gray"
-                alpha = 0.3
-                zorder = 0
-                label = None
-                draw_arrow = False
-
-        elif selected_intersection is not None:
-
-            incoming_ids = selected_intersection.map_incoming_lanelets.keys()
-            inc_succ_ids = set()
-            for inc in selected_intersection.incomings:
-                inc_succ_ids |= inc.successors_right
-                inc_succ_ids |= inc.successors_left
-                inc_succ_ids |= inc.successors_straight
-
-            draw_arrow = True
-
-            if lanelet.lanelet_id in incoming_ids:
-                color = "red"
-                alpha = 0.7
-                zorder = 5
-                label = "{} incoming".format(lanelet.lanelet_id)
-            elif lanelet.lanelet_id in selected_intersection.crossings:
-                color = "blue"
-                alpha = 0.5
-                zorder = 5
-                label = "{} crossing".format(lanelet.lanelet_id)
-            elif lanelet.lanelet_id in inc_succ_ids:
-                color = "green"
-                alpha = 0.3
-                zorder = 5
-                label = "{} intersection".format(lanelet.lanelet_id)
-            else:
-                color = "gray"
-                alpha = 0.3
-                zorder = 0
-                label = None
-                draw_arrow = False
+        if self.lanelet_list.selected_id is not None:
+            selected_lanelet = self.current_scenario.lanelet_network.find_lanelet_by_id(
+                self.lanelet_list.selected_id)
         else:
-            color = "gray"
-            alpha = 0.3
-            zorder = 0
-            label = None
-            draw_arrow = False
-
-        return draw_arrow, color, alpha, zorder, label
-
-    def draw_lanelet_polygon(self, lanelet, ax, color, alpha, zorder, label):
-        # TODO efficiency
-        verts = []
-        codes = [Path.MOVETO]
-
-        for x, y in np.vstack(
-                [lanelet.left_vertices, lanelet.right_vertices[::-1]]
-        ):
-            verts.append([x, y])
-            codes.append(Path.LINETO)
-
-            # if color != 'gray':
-            self.xlim1 = min(self.xlim1, x)
-            self.xlim2 = max(self.xlim2, x)
-
-            self.ylim1 = min(self.ylim1, y)
-            self.ylim2 = max(self.ylim2, y)
-
-        verts.append(verts[0])
-        codes[-1] = Path.CLOSEPOLY
-
-        path = Path(verts, codes)
-
-        ax.add_patch(
-            PathPatch(
-                path,
-                facecolor=color,
-                edgecolor="black",
-                lw=0.0,
-                alpha=alpha,
-                zorder=zorder,
-                label=label,
-            )
+            selected_lanelet = None
+        self.viewer.update_plot(
+            scenario=self.current_scenario,
+            sel_lanelet=selected_lanelet,
+            sel_intersection=selected_intersection
         )
 
-    def draw_lanelet_vertices(self, lanelet, ax):
-        ax.plot(
-            [x for x, y in lanelet.left_vertices],
-            [y for x, y in lanelet.left_vertices],
-            color="black",
-            lw=0.1,
-        )
-        ax.plot(
-            [x for x, y in lanelet.right_vertices],
-            [y for x, y in lanelet.right_vertices],
-            color="black",
-            lw=0.1,
-        )
-
-    def draw_arrow_on_lanelet(self, lanelet, ax):
-        idx = 0
-        ml = lanelet.left_vertices[idx]
-        mr = lanelet.right_vertices[idx]
-        mc = lanelet.center_vertices[
-            min(len(lanelet.center_vertices) - 1, idx + 3)
-        ]
-        ax.plot(
-            [ml[0], mr[0], mc[0], ml[0]],
-            [ml[1], mr[1], mc[1], ml[1]],
-            color="black",
-            lw=0.3,
-            zorder=15,
-        )
-
-    def update_lanelet_list(self):
-        self.laneletsList.setRowCount(
-            len(self.current_scenario.lanelet_network.lanelets)
-        )
-        self.laneletsList.setColumnCount(2)
-        self.laneletsList.setHorizontalHeaderLabels(["Lanelet-Id", "LaneletType"])
-
-        lanelet_data = []
-        for lanelet in self.current_scenario.lanelet_network.lanelets:
-            description = ", ".join([t.value for t in lanelet.lanelet_type])
-            lanelet_data.append((lanelet.lanelet_id, description))
-
-        lanelet_data = sorted(lanelet_data)
-        for idx, lanelet in enumerate(lanelet_data):
-
-            # set lanelet_id
-            self.laneletsList.setItem(idx, 0, QTableWidgetItem(str(lanelet[0])))
-            try:
-                # set lanelet description (old id)
-                self.laneletsList.setItem(idx, 1, QTableWidgetItem(str(lanelet[1])))
-            except AttributeError:
-                self.laneletsList.setItem(idx, 1, QTableWidgetItem("None"))
-
-    def update_intersection_list(self):
-        self.intersection_List.setRowCount(
-            len(self.current_scenario.lanelet_network.intersections)
-        )
-        self.intersection_List.setColumnCount(2)
-        self.intersection_List.setHorizontalHeaderLabels(["Intersection-Id", "Description"])
-
-        intersection_data = []
-        for intersection in self.current_scenario.lanelet_network.intersections:
-            description = None
-            intersection_data.append((intersection.intersection_id, description))
-
-        intersection_data = sorted(intersection_data)
-        for idx, intersection in enumerate(intersection_data):
-            self.intersection_List.setItem(idx, 0, QTableWidgetItem(str(intersection[0])))
-            self.intersection_List.setItem(idx, 1, QTableWidgetItem(str(intersection[1])))
+    def make_trigger_exclusive(self):
+        """ 
+        Only one component can trigger the plot update
+        """
+        if self.lanelet_list.new:
+            self.lanelet_list.new = False
+            self.intersection_list.reset_selection()
+        elif self.intersection_list.new:
+            self.intersection_list.new = False
+            self.lanelet_list.reset_selection()
+        else:
+            # triggered by click on canvas
+            self.lanelet_list.reset_selection()
+            self.intersection_list.reset_selection()
 
     def _init_animation(self):
         print('init animation')
         scenario = self.current_scenario
-        self.canvas.ax.clear()
+        self.viewer.dynamic.ax.clear()
 
         start: int = 0
         end: int = self.max_step
@@ -554,9 +192,9 @@ class CrViewer(QWidget):
         dt = 0.1
         # ps = 25
         # dpi = 120
-        # ln, = self.canvas.ax.plot([], [], animated=True)
+        # ln, = self.viewer.dynamic.ax.plot([], [], animated=True)
 
-        if self.current_scenario is not None:
+        if scenario is not None:
             if start == end:
                 warning_dia = QMessageBox()
                 reply = warning_dia.warning(self, "Warning",
@@ -582,7 +220,7 @@ class CrViewer(QWidget):
                 draw_params = {'time_begin': time_begin, 'time_end': time_end}
                 print("draw frame ", self.timestep.value, draw_params)
                 # plot frame
-                self.canvas.draw_object(
+                self.viewer.dynamic.draw_object(
                     scenario,
                     draw_params=draw_params,
                     plot_limits=None if plot_limits == 'auto' else plot_limits)
@@ -590,7 +228,7 @@ class CrViewer(QWidget):
             frame_count = (end - start) // delta_time_steps
             # Interval determines the duration of each frame in ms
             interval = 1000 * dt
-            self.animation = FuncAnimation(self.canvas.figure,
+            self.animation = FuncAnimation(self.viewer.dynamic.figure,
                                            draw_frame,
                                            blit=False,
                                            interval=interval,
@@ -600,7 +238,7 @@ class CrViewer(QWidget):
         """ plays the animation if existing """
         if not self.animation:
             self._init_animation()
-        self.canvas.update_plot()
+        self.viewer.dynamic.update_plot()
         self.animation.event_source.start()
 
     def pause(self):
@@ -615,7 +253,7 @@ class CrViewer(QWidget):
         print("set timestep: ", timestep)
         if not self.animation:
             self._init_animation()
-        self.canvas.update_plot()
+        self.viewer.dynamic.update_plot()
         #self.animation.event_source.start()
         self.timestep.silent_set(timestep)
 
@@ -687,35 +325,9 @@ class CrViewer(QWidget):
                 max_num = num
         self.max_step = max_num
 
-
-    def closeEvent(self, event):
-        messbox = QMessageBox()
-        reply = messbox.question(
-            self, "Warning",
-            "Do you want to close the window? Please make sure you have saved your work",
-            QMessageBox.Yes | QMessageBox.No)
-        if (reply == QMessageBox.Yes):
-            event.accept()
-        else:
-            event.ignore()
-
-    def load_empty_scenario(self):
-        """ called by button new scenario """
-        scenario = Scenario(0.1, 'new scenario')
-        net = LaneletNetwork()
-        scenario.lanelet_network = net
-        self.open_scenario(scenario)
-
-
-def find_intersection_by_id(scenario, intersection_id: int) -> Lanelet:
-    """
-    Finds a intersection for a given intersection_id
-
-    :param intersection_id: The id of the lanelet to find
-    :return: The lanelet object if the id exists and None otherwise
-    """
-    assert is_natural_number(
-        intersection_id), '<LaneletNetwork/find_intersection_by_id>: provided id is not valid! id = {}'.format(
-        intersection_id)
-    intersections = scenario.lanelet_network._intersections
-    return intersections[intersection_id] if intersection_id in intersections else None
+    # def load_empty_scenario(self):
+    #     """ called by button new scenario """
+    #     scenario = Scenario(0.1, 'new scenario')
+    #     net = LaneletNetwork()
+    #     scenario.lanelet_network = net
+    #     self.open_scenario(scenario)
