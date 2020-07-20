@@ -1,3 +1,5 @@
+""" """
+
 from PyQt5.QtWidgets import QMessageBox, QMainWindow
 
 from commonroad.common.util import Interval
@@ -25,7 +27,7 @@ class SUMOSettings:
 
     def update_ui_values(self) -> None:
         """
-        sets the values of the settings window to the current values of config.py
+        sets the values of the settings window to the current values of config
 
         :return: None
         """
@@ -76,31 +78,25 @@ class SUMOSettings:
         self.window.chk_lane_change_sync.setChecked(config.lane_change_sync)
         self.window.chk_compute_orientation.setChecked(config.compute_orientation)
 
-    def save_to_config(self) -> bool:
+    def save_to_config(self) -> None:
         """
-        saves the values in the settings window to config.py
+        saves the values in the settings window to config 
 
         :return: None
         """
 
         window = self.window
 
+        if not self.has_valid_entries():
+            return
+
+        # line edits
         ego_ids_str = window.le_ego_ids.text()
         if ego_ids_str:
-            try:
-                config.ego_ids = [int(e) for e in ego_ids_str.split(",")]
-            except ValueError:
-                self.warn("invalid settings: ego_ids")
-                return False
-
+            config.ego_ids = [int(e) for e in ego_ids_str.split(",")]
         interv_str = window.le_departure_interval_vehicles.text().split(",")
-        try:
-            config.departure_interval_vehicles = Interval(
-                float(interv_str[0]), float(interv_str[1])
-            )
-        except ValueError:
-            self.warn("invalid settings: departure_interval_vehicles")
-            return False
+        config.departure_interval_vehicles = Interval(
+            float(interv_str[0]), float(interv_str[1]))
 
         # spin boxes
         # config. =window.sb.value() # ?
@@ -141,6 +137,30 @@ class SUMOSettings:
         # combo boxes
         config.lane_change_sync = window.chk_lane_change_sync.isChecked()
         config.compute_orientation = window.chk_compute_orientation.isChecked()
+
+    def has_valid_entries(self) -> bool:
+        """ 
+        Check if the user input is valid. Otherwise warn the user.
+
+        :return: bool weather the input is valid
+        """
+        window = self.window
+
+        ego_ids_str = window.le_ego_ids.text()
+        if ego_ids_str:
+            try:
+                [int(e) for e in ego_ids_str.split(",")]
+            except ValueError:
+                self.warn("invalid settings: ego_ids")
+                return False
+
+        interv_str = window.le_departure_interval_vehicles.text().split(",")
+        try:
+            Interval(float(interv_str[0]), float(interv_str[1]))
+        except ValueError:
+            self.warn("invalid settings: departure_interval_vehicles")
+            return False
+        
         return True
 
     def close_button(self) -> None:
