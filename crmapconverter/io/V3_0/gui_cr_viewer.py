@@ -12,12 +12,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 
-from crmapconverter.io.viewer import (
-    LaneletList,
-    IntersectionList,
-    Viewer,
-    find_intersection_by_id
-)
+from crmapconverter.io.viewer import Viewer
 
 
 class Observable:
@@ -68,53 +63,11 @@ class CrViewer(QWidget):
         layout.addWidget(self.viewer.dynamic)
         self.setLayout(layout)
 
-        self.lanelet_list = LaneletList(self.update, self)
-        self.intersection_list = IntersectionList(self.update, self)
-
     def open_scenario(self, scenario):
         """ """
         self.current_scenario = scenario
+        self.viewer.update_plot(self.current_scenario)
         self.calc_max_timestep()
-        self.update()
-
-    def update(self):
-        """ update all compoments """
-        self.make_trigger_exclusive()
-        self.lanelet_list.update(self.current_scenario)
-        self.intersection_list.update(self.current_scenario)
-
-        if self.current_scenario is None:
-            return
-        if self.intersection_list.selected_id is not None:
-            selected_intersection = find_intersection_by_id(
-                self.current_scenario, self.intersection_list.selected_id)
-        else:
-            selected_intersection = None
-        if self.lanelet_list.selected_id is not None:
-            selected_lanelet = self.current_scenario.lanelet_network.find_lanelet_by_id(
-                self.lanelet_list.selected_id)
-        else:
-            selected_lanelet = None
-        self.viewer.update_plot(
-            scenario=self.current_scenario,
-            sel_lanelet=selected_lanelet,
-            sel_intersection=selected_intersection
-        )
-
-    def make_trigger_exclusive(self):
-        """ 
-        Only one component can trigger the plot update
-        """
-        if self.lanelet_list.new:
-            self.lanelet_list.new = False
-            self.intersection_list.reset_selection()
-        elif self.intersection_list.new:
-            self.intersection_list.new = False
-            self.lanelet_list.reset_selection()
-        else:
-            # triggered by click on canvas
-            self.lanelet_list.reset_selection()
-            self.intersection_list.reset_selection()
 
     def _init_animation(self):
         print('init animation')

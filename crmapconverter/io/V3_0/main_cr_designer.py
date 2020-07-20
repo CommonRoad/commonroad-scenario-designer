@@ -21,6 +21,7 @@ from crmapconverter.io.V3_0.converter_modules.opendrive_interface import (
 # from crmapconverter.io.V3_0.gui_settings import GUISettings
 from crmapconverter.io.V3_0.SUMO_modules.sumo_settings import SUMOSettings
 from crmapconverter.io.V3_0.SUMO_modules.gui_sumo_simulation import SUMOSimulation
+from crmapconverter.io.viewer import LaneletList, IntersectionList, find_intersection_by_id
 
 
 class MWindow(QMainWindow, Ui_mainWindow):
@@ -33,8 +34,16 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.centralwidget.setStyleSheet('background-color:rgb(150,150,150)')
         self.setWindowFlag(True)
 
+        # attributes
         self.filename = None
+        self.lanelet_list = LaneletList(self.selection_update, self)
+        self.intersection_list = IntersectionList(self.selection_update, self)
         self.count = 0
+        self.timer = None
+        self.ani_path = None
+        self.slider_clicked = False
+
+        # GUI attributes 
         self.tool1 = None
         self.tool2 = None
         self.toolBox = None
@@ -42,13 +51,12 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.textBrowser = None
         self.sumobox = None
         self.crviewer = CrViewer()
-        self.lanelet_list = None
-        self.intersection_list = None
-        self.timer = None
-        self.ani_path = None
-        self.slider_clicked = False
+        self.setCentralWidget(self.crviewer)
+        self.lanelet_list_dock = None
+        self.intersection_list_dock = None
         self.sumo_settings = None
 
+        # build and connect GUI
         self.create_file_actions()
         self.create_import_actions()
         self.create_export_actions()
@@ -124,21 +132,21 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.uppertoolBox.button_save.clicked.connect(
             self.save_animation)
 
-    def create_lanelet_list(self, cr_viewer):
+    def create_lanelet_list(self):
         """Create the lanelet_list and put it into right Dockwidget area."""
-        if self.lanelet_list is not None:
-            self.lanelet_list.close()
-            self.lanelet_list = None
-        self.lanelet_list = QDockWidget("Lanelets")
-        self.lanelet_list.setFloating(True)
-        self.lanelet_list.setFeatures(QDockWidget.AllDockWidgetFeatures)
-        self.lanelet_list.setAllowedAreas(Qt.RightDockWidgetArea)
-        self.lanelet_list.setWidget(cr_viewer.lanelet_list)
-        self.addDockWidget(Qt.RightDockWidgetArea, self.lanelet_list)
+        if self.lanelet_list_dock is not None:
+            self.lanelet_list_dock.close()
+            self.lanelet_list_dock = None
+        self.lanelet_list_dock = QDockWidget("Lanelets")
+        self.lanelet_list_dock.setFloating(True)
+        self.lanelet_list_dock.setFeatures(QDockWidget.AllDockWidgetFeatures)
+        self.lanelet_list_dock.setAllowedAreas(Qt.RightDockWidgetArea)
+        self.lanelet_list_dock.setWidget(self.lanelet_list)
+        self.addDockWidget(Qt.RightDockWidgetArea, self.lanelet_list_dock)
 
     def show_lanelet_list(self):
         """Function connected with button 'Lanelets List' to show the lanelets list."""
-        if self.lanelet_list is None:
+        if self.lanelet_list_dock is None:
             if self.crviewer.current_scenario is None:
                 messbox = QMessageBox()
                 messbox.question(
@@ -147,26 +155,26 @@ class MWindow(QMainWindow, Ui_mainWindow):
                     QtWidgets.QMessageBox.Ok)
                 messbox.close()
             else:
-                self.lanelet_list.show()
+                self.lanelet_list_dock.show()
         else:
-            self.lanelet_list.show()
+            self.lanelet_list_dock.show()
 
-    def create_intersection_list(self, cr_viewer):
+    def create_intersection_list(self):
         """Create the lanelet_list and put it into right Dockwidget area."""
-        if self.intersection_list is not None:
-            self.intersection_list.close()
-            self.intersection_list = None
-        self.intersection_list = QDockWidget("Intersections")
-        self.intersection_list.setFloating(True)
-        self.intersection_list.setFeatures(QDockWidget.AllDockWidgetFeatures)
-        self.intersection_list.setAllowedAreas(Qt.RightDockWidgetArea)
-        self.intersection_list.setWidget(cr_viewer.intersection_list)
-        self.addDockWidget(Qt.RightDockWidgetArea, self.intersection_list)
-        self.intersection_list.close()
+        if self.intersection_list_dock is not None:
+            self.intersection_list_dock.close()
+            self.intersection_list_dock = None
+        self.intersection_list_dock = QDockWidget("Intersections")
+        self.intersection_list_dock.setFloating(True)
+        self.intersection_list_dock.setFeatures(QDockWidget.AllDockWidgetFeatures)
+        self.intersection_list_dock.setAllowedAreas(Qt.RightDockWidgetArea)
+        self.intersection_list_dock.setWidget(self.intersection_list)
+        self.addDockWidget(Qt.RightDockWidgetArea, self.intersection_list_dock)
+        self.intersection_list_dock.close()
 
     def show_intersection_list(self):
         """Function connected with button 'Lanelets List' to show the lanelets list."""
-        if self.intersection_list is None:
+        if self.intersection_list_dock is None:
             if self.crviewer.current_scenario is None:
                 messbox = QMessageBox()
                 messbox.question(
@@ -175,9 +183,9 @@ class MWindow(QMainWindow, Ui_mainWindow):
                     QtWidgets.QMessageBox.Ok)
                 messbox.close()
             else:
-                self.intersection_list.show()
+                self.intersection_list_dock.show()
         else:
-            self.intersection_list.show()
+            self.intersection_list_dock.show()
 
     def create_sumobox(self):
         """Function to create the sumo toolbox(bottom toolbox)."""
@@ -529,8 +537,9 @@ class MWindow(QMainWindow, Ui_mainWindow):
         #         "Scenario contains faulty lanelets: " + str(lanelet_ids),
         #         QMessageBox.Ok,
         #     )
-        self.crviewer.open_scenario(new_scenario)
         self.filename = filename
+        self.crviewer.open_scenario(new_scenario)
+        self.selection_update()
         self.update_to_new_scenario()
 
     def update_to_new_scenario(self):
@@ -538,15 +547,14 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.update_max_step()
         self.crviewer.setWindowIcon(QIcon(":/icons/cr1.ico"))
         if self.crviewer.current_scenario is not None:
-            self.create_lanelet_list(self.crviewer)
-            self.create_intersection_list(self.crviewer)
+            self.create_lanelet_list()
+            self.create_intersection_list()
             self.setWindowTitle(self.filename)
             self.textBrowser.append("loading " + self.filename)
             self.textBrowser.append("Benchmark-ID: " + self.crviewer.current_scenario.benchmark_id)
-            self.setCentralWidget(self.crviewer)
         else:
-            self.lanelet_list.close()
-            self.intersection_list.close()
+            self.lanelet_list_dock.close()
+            self.intersection_list_dock.close()
 
     def file_save(self):
         """Function to save a CR .xml file."""
@@ -613,6 +621,45 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
     def tool_box2_show(self):
         self.tool2.show()
+
+    def selection_update(self):
+        """ update all compoments when clicking a scenario element"""
+        self.make_trigger_exclusive()
+        self.lanelet_list.update(self.crviewer.current_scenario)
+        self.intersection_list.update(self.crviewer.current_scenario)
+
+        if self.crviewer.current_scenario is None:
+            return
+        if self.intersection_list.selected_id is not None:
+            selected_intersection = find_intersection_by_id(
+                self.crviewer.current_scenario, self.intersection_list.selected_id)
+        else:
+            selected_intersection = None
+        if self.lanelet_list.selected_id is not None:
+            selected_lanelet = self.crviewer.current_scenario.lanelet_network.find_lanelet_by_id(
+                self.lanelet_list.selected_id)
+        else:
+            selected_lanelet = None
+        self.crviewer.viewer.update_plot(
+            scenario=self.crviewer.current_scenario,
+            sel_lanelet=selected_lanelet,
+            sel_intersection=selected_intersection
+        )
+
+    def make_trigger_exclusive(self):
+        """ 
+        Only one component can trigger the plot update
+        """
+        if self.lanelet_list.new:
+            self.lanelet_list.new = False
+            self.intersection_list.reset_selection()
+        elif self.intersection_list.new:
+            self.intersection_list.new = False
+            self.lanelet_list.reset_selection()
+        else:
+            # triggered by click on canvas
+            self.lanelet_list.reset_selection()
+            self.intersection_list.reset_selection()
 
 
 def main():
