@@ -97,7 +97,8 @@ class MWindow(QMainWindow, Ui_mainWindow):
         GUISettings(self)
 
     def show_sumo_settings(self):
-        self.sumo_settings = SUMOSettings(self)
+        print("integrate sumo config file first")
+        # self.sumo_settings = SUMOSettings(self)
 
     def create_toolbox(self):
         """ Create the Upper toolbox."""

@@ -85,13 +85,14 @@ class SUMOSettings:
 
         window = self.window
 
-        try:
-            config.ego_ids = [
-                int(e) for e in window.le_ego_ids.text().split(",")
-            ]
-        except ValueError:
-            self.warn("invalid settings: ego_ids")
-            return False
+        ego_ids_str = window.le_ego_ids.text()
+        if ego_ids_str:
+            try:
+                config.ego_ids = [int(e) for e in ego_ids_str.split(",")]
+            except ValueError:
+                self.warn("invalid settings: ego_ids")
+                return False
+
         interv_str = window.le_departure_interval_vehicles.text().split(",")
         try:
             config.departure_interval_vehicles = Interval(
