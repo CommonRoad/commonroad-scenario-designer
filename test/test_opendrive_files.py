@@ -28,7 +28,7 @@ class TestOpenDriveBaseClass:
     """Test the conversion of specific xodr files by reading them in, converting them
    and then comparing the outcome."""
 
-    __test__ = True
+    __test__ = False
 
     xodr_file_name = None
     xml_output_name = None
