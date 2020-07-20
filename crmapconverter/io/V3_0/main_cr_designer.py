@@ -6,6 +6,9 @@ from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
+from matplotlib.backends.backend_qt5agg import (
+    NavigationToolbar2QT as NavigationToolbar
+)
 
 from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.common.file_writer import CommonRoadFileWriter
@@ -13,7 +16,7 @@ from commonroad.common.file_writer import CommonRoadFileWriter
 from crmapconverter.io.V3_0.GUI_src import CR_Scenario_Designer
 from crmapconverter.io.V3_0.GUI_resources.MainWindow import Ui_mainWindow
 from crmapconverter.io.V3_0.gui_toolbox import UpperToolbox, SumoTool
-from crmapconverter.io.V3_0.gui_cr_viewer import CrViewer
+from crmapconverter.io.V3_0.gui_cr_viewer import AnimatedViewer
 from crmapconverter.io.V3_0.converter_modules.osm_interface import OSMInterface
 from crmapconverter.io.V3_0.converter_modules.opendrive_interface import (
     OpenDRIVEInterface
@@ -27,7 +30,7 @@ from crmapconverter.io.viewer import LaneletList, IntersectionList, find_interse
 class MWindow(QMainWindow, Ui_mainWindow):
     """The Mainwindow of CR Scenario Designer."""
 
-    def __init__(self):
+    def __init__(self, path=None):
         super(MWindow, self).__init__()
         self.setupUi(self)
         self.setWindowIcon(QIcon(':/icons/cr.ico'))
@@ -36,8 +39,9 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
         # attributes
         self.filename = None
-        self.lanelet_list = LaneletList(self.selection_update, self)
-        self.intersection_list = IntersectionList(self.selection_update, self)
+        self.crviewer = AnimatedViewer(self)
+        self.lanelet_list = LaneletList(self.update_view, self)
+        self.intersection_list = IntersectionList(self.update_view, self)
         self.count = 0
         self.timer = None
         self.ani_path = None
@@ -50,8 +54,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.console = None
         self.textBrowser = None
         self.sumobox = None
-        self.crviewer = CrViewer()
-        self.setCentralWidget(self.crviewer)
+        self.viewer_dock = None
         self.lanelet_list_dock = None
         self.intersection_list_dock = None
         self.sumo_settings = None
@@ -62,6 +65,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.create_export_actions()
         self.create_setting_actions()
         self.create_help_actions()
+        self.create_viewer_dock()
         self.create_toolbar()
         self.create_console()
         self.create_toolbox()
@@ -96,6 +100,9 @@ class MWindow(QMainWindow, Ui_mainWindow):
         menu_help.addAction(self.open_web)
 
         self.center()
+
+        if path is not None:
+            self.open_path(path)
 
     def show_osm_settings(self):
         osm_interface = OSMInterface(self)
@@ -201,7 +208,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.slider_clicked = True
         print(self.slider_clicked)
         self.crviewer.pause()
-        self.crviewer.canvas.update_plot()
+        self.crviewer.dynamic.update_plot()
 
     def detect_slider_release(self):
         self.slider_clicked = False
@@ -235,7 +242,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
     def save_animation(self):
         """Function connected with the save button in the Toolbar."""
-        if self.crviewer is None:
+        if self.crviewer.current_scenario is None:
             messbox = QMessageBox()
             reply = messbox.question(self, "Warning",
                                      "You should firstly load an animation",
@@ -405,6 +412,15 @@ class MWindow(QMainWindow, Ui_mainWindow):
                                            tip="Open CommonRoad Web",
                                            shortcut=None)
 
+    def create_viewer_dock(self):
+        self.viewer_dock = QWidget(self)
+        toolbar = NavigationToolbar(self.crviewer.dynamic, self.viewer_dock)
+        layout = QVBoxLayout()
+        layout.addWidget(toolbar)
+        layout.addWidget(self.crviewer.dynamic)
+        self.viewer_dock.setLayout(layout)
+        self.setCentralWidget(self.viewer_dock)
+
     def center(self):
         """Function that makes sure the main window is in the center of screen."""
         screen = QDesktopWidget().screenGeometry()
@@ -479,7 +495,6 @@ class MWindow(QMainWindow, Ui_mainWindow):
     def file_new(self):
         """Function to create the action in the menu bar."""
         """Not Finished---"""
-        # self.crviewer = CrViewer()
         # self.crviewer.load_empty_scenario()
         # self.crviewer.current_scenario = None
         # self.update_to_new_scenario() #TODO finish the scenario creating in the furture with scenario manually editing
@@ -539,13 +554,13 @@ class MWindow(QMainWindow, Ui_mainWindow):
         #     )
         self.filename = filename
         self.crviewer.open_scenario(new_scenario)
-        self.selection_update()
+        self.update_view()
         self.update_to_new_scenario()
 
     def update_to_new_scenario(self):
         """  """
         self.update_max_step()
-        self.crviewer.setWindowIcon(QIcon(":/icons/cr1.ico"))
+        self.viewer_dock.setWindowIcon(QIcon(":/icons/cr1.ico"))
         if self.crviewer.current_scenario is not None:
             self.create_lanelet_list()
             self.create_intersection_list()
@@ -573,7 +588,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         path, _ = QFileDialog.getSaveFileName(
             self,
             "Select file to save scenario",
-            self.crviewer.filename + ".xml",
+            self.filename + ".xml",
             "CommonRoad files *.xml (*.xml)",
             options=QFileDialog.Options(),
         )
@@ -622,7 +637,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
     def tool_box2_show(self):
         self.tool2.show()
 
-    def selection_update(self):
+    def update_view(self):
         """ update all compoments when clicking a scenario element"""
         self.make_trigger_exclusive()
         self.lanelet_list.update(self.crviewer.current_scenario)
@@ -640,7 +655,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
                 self.lanelet_list.selected_id)
         else:
             selected_lanelet = None
-        self.crviewer.viewer.update_plot(
+        self.crviewer.update_plot(
             scenario=self.crviewer.current_scenario,
             sel_lanelet=selected_lanelet,
             sel_intersection=selected_intersection

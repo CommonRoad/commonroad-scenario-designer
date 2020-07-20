@@ -37,11 +37,10 @@ class Observable:
         self._observers.append(observer)
 
 
-class CrViewer(QWidget):
+class AnimatedViewer(Viewer):
 
-    def __init__(self, parent=None):
+    def __init__(self, parent):
         super().__init__(parent)
-        self.viewer = Viewer(self)
         
         self.current_scenario = None
         self.max_step = 0
@@ -52,27 +51,14 @@ class CrViewer(QWidget):
         # if playing or not
         self.playing = False
 
-        self._init_user_interface()
-
-    def _init_user_interface(self):
-        self.toolbar = NavigationToolbar(self.viewer.dynamic, self)
-        self.setWindowFlag(Qt.WindowCloseButtonHint)
-
-        layout = QVBoxLayout()
-        layout.addWidget(self.toolbar)
-        layout.addWidget(self.viewer.dynamic)
-        self.setLayout(layout)
-
     def open_scenario(self, scenario):
         """ """
         self.current_scenario = scenario
-        self.viewer.update_plot(self.current_scenario)
-        self.calc_max_timestep()
 
     def _init_animation(self):
         print('init animation')
         scenario = self.current_scenario
-        self.viewer.dynamic.ax.clear()
+        self.dynamic.ax.clear()
 
         start: int = 0
         end: int = self.max_step
@@ -82,12 +68,12 @@ class CrViewer(QWidget):
         dt = 0.1
         # ps = 25
         # dpi = 120
-        # ln, = self.viewer.dynamic.ax.plot([], [], animated=True)
+        # ln, = self.dynamic.ax.plot([], [], animated=True)
 
         if scenario is not None:
             if start == end:
                 warning_dia = QMessageBox()
-                reply = warning_dia.warning(self, "Warning",
+                reply = warning_dia.warning(None, "Warning",
                                             "This Scenario only has one time step!",
                                             QMessageBox.Ok,
                                             QMessageBox.Ok)
@@ -110,7 +96,7 @@ class CrViewer(QWidget):
                 draw_params = {'time_begin': time_begin, 'time_end': time_end}
                 print("draw frame ", self.timestep.value, draw_params)
                 # plot frame
-                self.viewer.dynamic.draw_object(
+                self.dynamic.draw_object(
                     scenario,
                     draw_params=draw_params,
                     plot_limits=None if plot_limits == 'auto' else plot_limits)
@@ -118,7 +104,7 @@ class CrViewer(QWidget):
             frame_count = (end - start) // delta_time_steps
             # Interval determines the duration of each frame in ms
             interval = 1000 * dt
-            self.animation = FuncAnimation(self.viewer.dynamic.figure,
+            self.animation = FuncAnimation(self.dynamic.figure,
                                            draw_frame,
                                            blit=False,
                                            interval=interval,
@@ -128,7 +114,7 @@ class CrViewer(QWidget):
         """ plays the animation if existing """
         if not self.animation:
             self._init_animation()
-        self.viewer.dynamic.update_plot()
+        self.dynamic.update_plot()
         self.animation.event_source.start()
 
     def pause(self):
@@ -143,16 +129,19 @@ class CrViewer(QWidget):
         print("set timestep: ", timestep)
         if not self.animation:
             self._init_animation()
-        self.viewer.dynamic.update_plot()
+        self.dynamic.update_plot()
         #self.animation.event_source.start()
         self.timestep.silent_set(timestep)
 
     def save_animation(self, save_file: str):
+        if self.animation is None:
+            print("no animation loaded")
+            return
         if save_file == "Save as mp4":
             if not self.current_scenario:
                 return
             path, _ = QFileDialog.getSaveFileName(
-                self,
+                None,
                 "QFileDialog.getSaveFileName()",
                 ".mp4",
                 "CommonRoad scenario video *.mp4 (*.mp4)",
@@ -160,7 +149,6 @@ class CrViewer(QWidget):
             )
 
             if not path:
-                self.NoFilenamed()
                 return
 
             try:
@@ -171,7 +159,7 @@ class CrViewer(QWidget):
 
             except IOError as e:
                 QMessageBox.critical(
-                    self,
+                    None,
                     "CommonRoad file not created!",
                     "The CommonRoad file was not saved due to an error.\n\n{}".format(e),
                     QMessageBox.Ok,
@@ -182,7 +170,7 @@ class CrViewer(QWidget):
             if not self.current_scenario:
                 return
             path, _ = QFileDialog.getSaveFileName(
-                self,
+                None,
                 "QFileDialog.getSaveFileName()",
                 ".gif",
                 "CommonRoad scenario video *.gif (*.gif)",
@@ -190,14 +178,13 @@ class CrViewer(QWidget):
             )
 
             if not path:
-                self.NoFilenamed()
                 return
 
             try:
                 with open(path, "w") as fh:
                     self.animation.save(path, writer='imagemagick', fps=30)
 
-            except (IOError) as e:
+            except IOError as e:
                 QMessageBox.critical(
                     self,
                     "CommonRoad file not created!",
