@@ -88,7 +88,7 @@ class SUMOSettings:
         window = self.window
 
         if not self.has_valid_entries():
-            return
+            return False
 
         # line edits
         ego_ids_str = window.le_ego_ids.text()
@@ -137,6 +137,7 @@ class SUMOSettings:
         # combo boxes
         config.lane_change_sync = window.chk_lane_change_sync.isChecked()
         config.compute_orientation = window.chk_compute_orientation.isChecked()
+        return True
 
     def has_valid_entries(self) -> bool:
         """ 
