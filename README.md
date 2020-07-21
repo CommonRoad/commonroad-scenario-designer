@@ -29,7 +29,7 @@ To run the new GUI of multifunctional tool "CR Designer" with the command line:
 cr-designer
 ```
 The new GUI looks like the following:
-[](https://gitlab.lrz.de/cps/commonroad-map-tool/-/blob/GUI_CR_Scenario_Designer/pics/CR_Designer_Screenshot.png)
+![Alt text](https://gitlab.lrz.de/cps/commonroad-map-tool/-/blob/GUI_CR_Scenario_Designer/pics/CR_Designer_Screenshot.png)
 
 Opening of GUI from which you can start the different converters: 
 ```bash
