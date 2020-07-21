@@ -188,8 +188,6 @@ CLUSTER_LENGTH = 10.0
 LEAST_CLUSTER_LENGTH = 10.0
 # maximal distance between two intersections to which they are merged, if zero, no intersections are merged
 MERGE_DISTANCE = 3.5
-# threshold which is used to determine if a successor of an incoming lane is considered as straight
-INTERSECTION_STRAIGHT_THRESHOLD = 35.0
 
 # Toggle edit for user
 USER_EDIT = False

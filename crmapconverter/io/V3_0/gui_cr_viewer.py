@@ -3,45 +3,20 @@
 from typing import Union
 from matplotlib import animation
 
-from matplotlib.backends.backend_qt5agg import (
-    NavigationToolbar2QT as NavigationToolbar
-)
+from matplotlib.backends.backend_qt5agg import (NavigationToolbar2QT as
+                                                NavigationToolbar)
 
 from matplotlib.animation import FuncAnimation
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
-
 from crmapconverter.io.viewer import Viewer
-
-
-class Observable:
-    def __init__(self, value, observers=[]):
-        self._value = value
-        self._observers = observers
-
-    @property
-    def value(self):
-        return self._value
-
-    @value.setter
-    def value(self, value):
-        for obs in self._observers:
-            obs(value)
-        self._value = value
-
-    def silent_set(self, value):
-        self._value = value
-
-    def subscribe(self, observer):
-        self._observers.append(observer)
+from .observable import Observable
 
 
 class AnimatedViewer(Viewer):
-
     def __init__(self, parent):
         super().__init__(parent)
-        
         self.current_scenario = None
         self.max_step = 0
         # current time ste
@@ -74,10 +49,9 @@ class AnimatedViewer(Viewer):
         if scenario is not None:
             if start == end:
                 warning_dia = QMessageBox()
-                reply = warning_dia.warning(None, "Warning",
-                                            "This Scenario only has one time step!",
-                                            QMessageBox.Ok,
-                                            QMessageBox.Ok)
+                reply = warning_dia.warning(
+                    None, "Warning", "This Scenario only has one time step!",
+                    QMessageBox.Ok, QMessageBox.Ok)
                 if reply == QMessageBox.Ok:
                     warning_dia.close()
 
@@ -92,7 +66,7 @@ class AnimatedViewer(Viewer):
                     delta_time_steps * self.timestep.value + plotting_horizon)
                 self.timestep.value += 1
                 if time_begin > time_end:
-                    self.timestep.value=0
+                    self.timestep.value = 0
 
                 draw_params = {'time_begin': time_begin, 'time_end': time_end}
                 print("draw frame ", self.timestep.value, draw_params)
@@ -162,7 +136,8 @@ class AnimatedViewer(Viewer):
                 QMessageBox.critical(
                     None,
                     "CommonRoad file not created!",
-                    "The CommonRoad file was not saved due to an error.\n\n{}".format(e),
+                    "The CommonRoad file was not saved due to an error.\n\n{}".
+                    format(e),
                     QMessageBox.Ok,
                 )
                 return
@@ -189,7 +164,8 @@ class AnimatedViewer(Viewer):
                 QMessageBox.critical(
                     self,
                     "CommonRoad file not created!",
-                    "The CommonRoad file was not saved due to an error.\n\n{}".format(e),
+                    "The CommonRoad file was not saved due to an error.\n\n{}".
+                    format(e),
                     QMessageBox.Ok,
                 )
                 return
