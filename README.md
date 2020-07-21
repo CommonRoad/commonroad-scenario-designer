@@ -9,6 +9,7 @@ Commit 4abf24d380b2ddac2c2c71b210764c4ae5759406 is the last stable version for C
 | opendrive2lanelet | Conversion from OpenDRIVE files to Lanelet maps. |
 | osm-convert | Conversion from CommonRoad lanelets to OSM lanelets and vice versa. |
 | osm_2_cr | Conversion from general OSM maps to CommonRoad Lanelet maps. |
+| cr-designer | Multi-functional GUI for map conversion and traffic siimulation. |
 
 #### Installation
 Execute the following command within your activated Python environment:
@@ -21,6 +22,11 @@ pip install -e .
 To run the converters, load the corresponding environment variabels (defined in `.env` file):
 ```bash
 $ source .env
+```
+
+To run the new GUI of multifunctional tool "CR Designer" with the command line:
+```bash
+cr-designer
 ```
 
 Opening of GUI from which you can start the different converters: 
