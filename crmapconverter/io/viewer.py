@@ -34,8 +34,9 @@ from PyQt5.QtWidgets import (
 
 from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.scenario.intersection import Intersection
+from commonroad.common.util import Interval
 from commonroad.scenario.lanelet import Lanelet, is_natural_number
-from commonroad.visualization.plot_helper import draw_object, redraw_obstacles
+from commonroad.visualization.draw_dispatch_cr import draw_object
 
 __author__ = "Benjamin Orthen, Stefan Urban"
 __copyright__ = "TUM Cyber-Physical Systems Group"
@@ -53,10 +54,10 @@ class DynamicCanvas(FigureCanvas):
     def __init__(self, parent=None, width=5, height=5, dpi=100):
 
         self.ax = None
-        self.redraw_obstacles = Figure(figsize=(width, height), dpi=dpi)
+        self.drawer = Figure(figsize=(width, height), dpi=dpi)
         self._handles = {}
 
-        super().__init__(self.redraw_obstacles)
+        super().__init__(self.drawer)
         self.setParent(parent)
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
@@ -70,7 +71,7 @@ class DynamicCanvas(FigureCanvas):
         if self.ax:
             self.ax.clear()
         else:
-            self.ax = self.redraw_obstacles.add_subplot(111)
+            self.ax = self.drawer.add_subplot(111)
 
         self.ax.set_aspect("equal", "datalim")
         self.ax.set_axis_off()
@@ -106,23 +107,30 @@ class DynamicCanvas(FigureCanvas):
 
         self.draw_idle()
 
-    def initial_draw(self, scenario, draw_params, plot_limits):
-        self.ax.clear()
-        draw_object(scenario,
-                    ax=self.ax,
-                    draw_params=draw_params,
-                    plot_limits=plot_limits,
-                    handles=self._handles)
-        self.ax.autoscale()
-        self.ax.set_aspect('equal')
+    def draw_obstracles(self, scenario, draw_params, plot_limits):
+        # remove dynamic obstacles
+        for handles_i in self._handles.values():
+            for handle in handles_i:
+                if handle:
+                    handle.remove()
+        self._handles.clear()
 
-    def redraw(self, scenario, draw_params, plot_limits):
-        # self.ax.clear()
-        redraw_obstacles(scenario,
-                         handles=self._handles,
-                         figure_handle=self.redraw_obstacles,
-                         draw_params=draw_params,
-                         plot_limits=plot_limits)
+        # redraw dynamic obstacles
+        if plot_limits:
+            draw_object(scenario.obstacles_by_position_intervals([
+                Interval(plot_limits[0], plot_limits[1]),
+                Interval(plot_limits[2], plot_limits[3])
+            ]),
+                        ax=self.ax,
+                        draw_params=draw_params,
+                        plot_limits=plot_limits,
+                        handles=self._handles)
+        else:
+            draw_object(scenario.obstacles,
+                        ax=self.ax,
+                        draw_params=draw_params,
+                        plot_limits=plot_limits,
+                        handles=self._handles)
         # self.ax.autoscale()
         # self.ax.set_aspect('equal')
 
@@ -248,7 +256,7 @@ class Viewer:
 
         self.dynamic.update_plot()
 
-        self.dynamic.redraw_obstacles.tight_layout()
+        self.dynamic.drawer.tight_layout()
 
     def get_paint_parameters(self, lanelet: Lanelet, selected_lanelet: Lanelet,
                              selected_intersection: Intersection):

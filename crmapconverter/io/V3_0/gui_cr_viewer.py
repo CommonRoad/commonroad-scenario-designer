@@ -90,21 +90,18 @@ class AnimatedViewer(Viewer):
                     'show_label': True
                 }
             }
-            print("drawing frame ", self.timestep.value, draw_params)
-            # plot frame
-            self.dynamic.initial_draw(
+            # plot dynamic obstracles
+            if self.timestep.value <= 1:
+                self.update_plot(scenario)
+
+            self.dynamic.draw_obstracles(
                 scenario,
                 draw_params=draw_params,
                 plot_limits=None if plot_limits == 'auto' else plot_limits)
-            # if self.timestep.value == 0:
-            # else:
-            #     self.dynamic.redraw(
-            #         scenario,
-            #         draw_params=draw_params,
-            #         plot_limits=None if plot_limits == 'auto' else plot_limits)
 
         # Interval determines the duration of each frame in ms
         interval = 1000 * dt
+        self.dynamic.clear_axes()
         self.animation = FuncAnimation(self.dynamic.figure,
                                        draw_frame,
                                        blit=False,
