@@ -29,7 +29,7 @@ def elements_equal(e1: etree.Element, e2: etree.Element) -> bool:
     if e1.tag != e2.tag and e1.text is not None and e2.text is not None:
         _print_fail("tag", e1.tag, e2.tag)
         return False
-    if e1.text != e2.text:
+    if e1.text != e2.text and e1.text is not None and e2.text is not None:
         try:
             if abs(float(e1.text) - float(e2.text)) < tolerance:
                 # print("Only accuracy error!")

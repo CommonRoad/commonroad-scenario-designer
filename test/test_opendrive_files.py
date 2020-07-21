@@ -92,16 +92,6 @@ class TestOpenDriveBaseClass:
             trees_are_equal = elements_equal(tree_import, writer.root_node)
             self.assertTrue(trees_are_equal)
 
-
-class TestSuedTangente(TestOpenDriveBaseClass, unittest.TestCase):
-    """Includes roads with multiple lane sections and
-    lane sections with multiple width sections.
-    This should be split into multiple tests in the future."""
-
-    __test__ = False
-    xodr_file_name = "KA-Suedtangente-atlatec"
-
-
 class TestBasicOpenDrive(TestOpenDriveBaseClass, unittest.TestCase):
     """Basic test with a junction in the middle."""
 
@@ -109,11 +99,20 @@ class TestBasicOpenDrive(TestOpenDriveBaseClass, unittest.TestCase):
     xodr_file_name = "opendrive-1"
 
 
+class TestSuedTangente(TestOpenDriveBaseClass, unittest.TestCase):
+    """Includes roads with multiple lane sections and
+    lane sections with multiple width sections.
+    This should be split into multiple tests in the future."""
+
+    __test__ = True
+    xodr_file_name = "KA-Suedtangente-atlatec"
+
+
 class TestCulDeSac(TestOpenDriveBaseClass, unittest.TestCase):
     """Two adjacent lanes with same successor should not be mistaken
     as merging lanes!"""
 
-    __test__ = False
+    __test__ = True
     xodr_file_name = "CulDeSac"
 
 
@@ -123,7 +122,7 @@ class TestComplexCrossing(TestOpenDriveBaseClass, unittest.TestCase):
 
 
 class TestRoundabout(TestOpenDriveBaseClass, unittest.TestCase):
-    __test__ = False
+    __test__ = True
     xodr_file_name = "Roundabout8Course"
 
 
@@ -134,7 +133,7 @@ class TestRightWidthCoefficients(TestOpenDriveBaseClass, unittest.TestCase):
     both could apply and it was previously not rightly determined which to select.
     """
 
-    __test__ = False
+    __test__ = True
     xodr_file_name = "town03_right_width_coefficient"
 
 
@@ -142,7 +141,7 @@ class TestZeroWidthCoefficients(TestOpenDriveBaseClass, unittest.TestCase):
     """Test if this converter discards lanes which have zero width everywhere.
     In this case, it is the lane -1 of road 1."""
 
-    __test__ = False
+    __test__ = True
     xodr_file_name = "zero_width_lanes_map"
     xml_output_name = "CulDeSac"
 
@@ -151,7 +150,7 @@ class TestPoly3AndBorderRecord(TestOpenDriveBaseClass, unittest.TestCase):
     """Test if the program convert Poly3 Geometry and wheter it can handle
     border records instead of width records."""
 
-    __test__ = False
+    __test__ = True
     xodr_file_name = "poly3_and_border_record"
 
 
