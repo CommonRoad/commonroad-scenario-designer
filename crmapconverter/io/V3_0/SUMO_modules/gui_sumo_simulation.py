@@ -18,7 +18,7 @@ from PyQt5.QtWidgets import *
 class SUMOSimulation(QWidget, Ui_sumo_simulate):
     def __init__(self):
         # set random uuid as name for the scneario files
-        self._config = SumoConfig.from_scenario_name(str(uuid.uuid4()))
+        self.config = SumoConfig.from_scenario_name(str(uuid.uuid4()))
         self._scenario: Scenario = None
 
         # observable giving the simulated scenario once done
@@ -52,13 +52,13 @@ class SUMOSimulation(QWidget, Ui_sumo_simulate):
         self._update_ui_values()
 
         def set_dt(value):
-            self._config.dt = value
+            self.config.dt = value
 
         def set_presimulation_steps(value):
-            self._config.presimulation_steps = value
+            self.config.presimulation_steps = value
 
         def set_simulation_steps(value):
-            self._config.simulation_steps = value
+            self.config.simulation_steps = value
 
         self.doubleSpinBox_dt.valueChanged.connect(set_dt)
         self.spinBox_presimulation_steps.valueChanged.connect(
@@ -79,10 +79,10 @@ class SUMOSimulation(QWidget, Ui_sumo_simulate):
         # window.chk_delete_short_edges.setChecked(config.DELETE_SHORT_EDGES)
 
         # load values from config
-        self.doubleSpinBox_dt.setValue(self._config.dt)
+        self.doubleSpinBox_dt.setValue(self.config.dt)
         self.spinBox_presimulation_steps.setValue(
-            self._config.presimulation_steps)
-        self.spinBox_simulation_steps.setValue(self._config.simulation_steps)
+            self.config.presimulation_steps)
+        self.spinBox_simulation_steps.setValue(self.config.simulation_steps)
 
     def simulate(self) -> bool:
         """
@@ -97,12 +97,12 @@ class SUMOSimulation(QWidget, Ui_sumo_simulate):
 
         # convert scenario to SUMO
         wrapper = CR2SumoMapConverter(self._scenario.lanelet_network,
-                                      self._config)
+                                      self.config)
         wrapper.convert_to_net_file(self._output_folder)
 
         simulation = SumoSimulation()
-        simulation.initialize(self._config, wrapper)
-        for _ in range(self._config.simulation_steps):
+        simulation.initialize(self.config, wrapper)
+        for _ in range(self.config.simulation_steps):
             simulation.simulate_step()
         simulation.stop()
 

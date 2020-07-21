@@ -232,7 +232,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
             if (reply == QtWidgets.QMessageBox.Ok):
                 self.file_open()
         else:
-            self.crviewer.play()
+            self.crviewer.play(config=self.sumobox.config)
 
     def pause_animation(self):
         """Function connected with the pause button in Toolbar."""
@@ -328,8 +328,9 @@ class MWindow(QMainWindow, Ui_mainWindow):
         tb3.addWidget(self.label2)
 
     def update_max_step(self):
-        self.label2.setText('      Total Step: ' + str(self.crviewer.max_step))
-        self.slider.setMaximum(self.crviewer.max_step)
+        self.label2.setText('      Total Step: ' +
+                            str(self.crviewer.max_timestep))
+        self.slider.setMaximum(self.crviewer.max_timestep)
 
     def create_import_actions(self):
         """Function to create the import action in the menu bar."""
@@ -537,6 +538,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
     def open_scenario(self, new_scenario, filename="new_scenario"):
         """  """
+        print("opening scneario")
         # check if lanelets are valid polylines
         lanelet_ids = []
         for lanelet in new_scenario.lanelet_network.lanelets:

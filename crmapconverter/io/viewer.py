@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 """Viewer module to visualize the created lanelet scenario."""
 
 import signal
@@ -36,7 +35,7 @@ from PyQt5.QtWidgets import (
 from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.scenario.intersection import Intersection
 from commonroad.scenario.lanelet import Lanelet, is_natural_number
-from commonroad.visualization.draw_dispatch_cr import draw_object
+from commonroad.visualization.plot_helper import draw_object, redraw_obstacles
 
 __author__ = "Benjamin Orthen, Stefan Urban"
 __copyright__ = "TUM Cyber-Physical Systems Group"
@@ -46,19 +45,18 @@ __maintainer__ = "Sebastian Maierhofer"
 __email__ = "commonroad-i06@in.tum.de"
 __status__ = "Released"
 
-
 matplotlib.use("Qt5Agg")
 
 
 class DynamicCanvas(FigureCanvas):
     """Ultimately, this is a QWidget"""
-
     def __init__(self, parent=None, width=5, height=5, dpi=100):
 
         self.ax = None
-        self.fig = Figure(figsize=(width, height), dpi=dpi)
+        self.redraw_obstacles = Figure(figsize=(width, height), dpi=dpi)
+        self._handles = {}
 
-        super().__init__(self.fig)
+        super().__init__(self.redraw_obstacles)
         self.setParent(parent)
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
@@ -69,14 +67,13 @@ class DynamicCanvas(FigureCanvas):
 
     def clear_axes(self):
         """ """
-        if self.ax is not None:
+        if self.ax:
             self.ax.clear()
         else:
+            self.ax = self.redraw_obstacles.add_subplot(111)
 
-            self.ax = self.fig.add_subplot(111)
         self.ax.set_aspect("equal", "datalim")
         self.ax.set_axis_off()
-
         self.draw()
 
     def get_axes(self):
@@ -109,14 +106,25 @@ class DynamicCanvas(FigureCanvas):
 
         self.draw_idle()
 
-    def draw_object(self, scenario, draw_params, plot_limits):
+    def initial_draw(self, scenario, draw_params, plot_limits):
         self.ax.clear()
         draw_object(scenario,
                     ax=self.ax,
                     draw_params=draw_params,
-                    plot_limits=plot_limits)
+                    plot_limits=plot_limits,
+                    handles=self._handles)
         self.ax.autoscale()
         self.ax.set_aspect('equal')
+
+    def redraw(self, scenario, draw_params, plot_limits):
+        # self.ax.clear()
+        redraw_obstacles(scenario,
+                         handles=self._handles,
+                         figure_handle=self.redraw_obstacles,
+                         draw_params=draw_params,
+                         plot_limits=plot_limits)
+        # self.ax.autoscale()
+        # self.ax.set_aspect('equal')
 
 
 class ScenarioElementList(QTableWidget):
@@ -130,14 +138,11 @@ class ScenarioElementList(QTableWidget):
         self.header_labels: List = None
         self.new = False
 
-
     def _update(self, data: List[Tuple]):
         # set dimesions
         if data and not len(self.header_labels) == len(data[0]):
             raise RuntimeError()
-        self.setRowCount(
-            len(data)
-        )
+        self.setRowCount(len(data))
         self.setColumnCount(len(self.header_labels))
         # set content
         self.setHorizontalHeaderLabels(self.header_labels)
@@ -146,7 +151,7 @@ class ScenarioElementList(QTableWidget):
             for element in row:
                 self.setItem(y, x, QTableWidgetItem(str(element)))
                 x += 1
-    
+
     @pyqtSlot()
     def onClick(self):
         """ """
@@ -175,7 +180,8 @@ class IntersectionList(ScenarioElementList):
         intersection_data = []
         for intersection in scenario.lanelet_network.intersections:
             description = None
-            intersection_data.append((intersection.intersection_id, description))
+            intersection_data.append(
+                (intersection.intersection_id, description))
         super()._update(sorted(intersection_data))
 
 
@@ -194,24 +200,20 @@ class LaneletList(ScenarioElementList):
         super()._update(sorted(lanelet_data))
 
 
-
 class Viewer:
     """ """
-
     def __init__(self, parent):
         self.xlim1 = float("Inf")
         self.xlim2 = -float("Inf")
         self.ylim1 = float("Inf")
-        self.ylim2 = -float("Inf")      
+        self.ylim2 = -float("Inf")
 
         self.dynamic = DynamicCanvas(parent, width=5, height=10, dpi=100)
 
-    def openScenario(self, scenario):
-        self.current_scenario = scenario
-        self.update_plot()
-
-    def update_plot(self, scenario: "Scenario", sel_lanelet: Lanelet=None,
-            sel_intersection: Intersection=None):
+    def update_plot(self,
+                    scenario: "Scenario",
+                    sel_lanelet: Lanelet = None,
+                    sel_intersection: Intersection = None):
         """ Update the plot accordinly to the selection of scenario elements"""
 
         self.dynamic.clear_axes()
@@ -229,8 +231,7 @@ class Viewer:
             draw_arrow, color, alpha, zorder, label = self.get_paint_parameters(
                 lanelet, sel_lanelet, sel_intersection)
 
-            self.draw_lanelet_polygon(
-                lanelet, ax, color, alpha, zorder, label)
+            self.draw_lanelet_polygon(lanelet, ax, color, alpha, zorder, label)
 
             self.draw_lanelet_vertices(lanelet, ax)
 
@@ -240,21 +241,17 @@ class Viewer:
         handles, labels = self.dynamic.get_axes().get_legend_handles_labels()
         self.dynamic.get_axes().legend(handles, labels)
 
-        if (
-            self.xlim1 != float("Inf")
-            and self.xlim2 != float("Inf")
-            and self.ylim1 != float("Inf")
-            and self.ylim2 != float("Inf")
-        ):
+        if (self.xlim1 != float("Inf") and self.xlim2 != float("Inf")
+                and self.ylim1 != float("Inf") and self.ylim2 != float("Inf")):
             self.dynamic.get_axes().set_xlim([self.xlim1, self.xlim2])
             self.dynamic.get_axes().set_ylim([self.ylim1, self.ylim2])
 
         self.dynamic.update_plot()
 
-        self.dynamic.fig.tight_layout()
+        self.dynamic.redraw_obstacles.tight_layout()
 
     def get_paint_parameters(self, lanelet: Lanelet, selected_lanelet: Lanelet,
-            selected_intersection: Intersection): 
+                             selected_intersection: Intersection):
         """
         Return the parameters for painting a lanelet regarding the selected lanelet.
         """
@@ -268,31 +265,26 @@ class Viewer:
                 zorder = 10
                 label = "{} selected".format(lanelet.lanelet_id)
 
-            elif (
-                lanelet.lanelet_id in selected_lanelet.predecessor
-                and lanelet.lanelet_id in selected_lanelet.successor
-            ):
+            elif (lanelet.lanelet_id in selected_lanelet.predecessor
+                  and lanelet.lanelet_id in selected_lanelet.successor):
                 color = "purple"
                 alpha = 0.5
                 zorder = 5
                 label = "{} predecessor and successor of {}".format(
-                    lanelet.lanelet_id, selected_lanelet.lanelet_id
-                )
+                    lanelet.lanelet_id, selected_lanelet.lanelet_id)
 
             elif lanelet.lanelet_id in selected_lanelet.predecessor:
                 color = "blue"
                 alpha = 0.5
                 zorder = 5
                 label = "{} predecessor of {}".format(
-                    lanelet.lanelet_id, selected_lanelet.lanelet_id
-                )
+                    lanelet.lanelet_id, selected_lanelet.lanelet_id)
             elif lanelet.lanelet_id in selected_lanelet.successor:
                 color = "green"
                 alpha = 0.5
                 zorder = 5
                 label = "{} successor of {}".format(
-                    lanelet.lanelet_id, selected_lanelet.lanelet_id
-                )
+                    lanelet.lanelet_id, selected_lanelet.lanelet_id)
             elif lanelet.lanelet_id == selected_lanelet.adj_left:
                 color = "yellow"
                 alpha = 0.5
@@ -300,9 +292,8 @@ class Viewer:
                 label = "{} adj left of {} ({})".format(
                     lanelet.lanelet_id,
                     selected_lanelet.lanelet_id,
-                    "same"
-                    if selected_lanelet.adj_left_same_direction
-                    else "opposite",
+                    "same" if selected_lanelet.adj_left_same_direction else
+                    "opposite",
                 )
             elif lanelet.lanelet_id == selected_lanelet.adj_right:
                 color = "orange"
@@ -311,9 +302,8 @@ class Viewer:
                 label = "{} adj right of {} ({})".format(
                     lanelet.lanelet_id,
                     selected_lanelet.lanelet_id,
-                    "same"
-                    if selected_lanelet.adj_right_same_direction
-                    else "opposite",
+                    "same" if selected_lanelet.adj_right_same_direction else
+                    "opposite",
                 )
             else:
                 color = "gray"
@@ -329,9 +319,9 @@ class Viewer:
                 inc_succ_ids |= inc.successors_right
                 inc_succ_ids |= inc.successors_left
                 inc_succ_ids |= inc.successors_straight
-            
+
             draw_arrow = True
-            
+
             if lanelet.lanelet_id in incoming_ids:
                 color = "red"
                 alpha = 0.7
@@ -368,8 +358,7 @@ class Viewer:
         codes = [Path.MOVETO]
 
         for x, y in np.vstack(
-            [lanelet.left_vertices, lanelet.right_vertices[::-1]]
-        ):
+            [lanelet.left_vertices, lanelet.right_vertices[::-1]]):
             verts.append([x, y])
             codes.append(Path.LINETO)
 
@@ -394,8 +383,7 @@ class Viewer:
                 alpha=alpha,
                 zorder=zorder,
                 label=label,
-            )
-        )
+            ))
 
     def draw_lanelet_vertices(self, lanelet, ax):
         ax.plot(
@@ -415,9 +403,8 @@ class Viewer:
         idx = 0
         ml = lanelet.left_vertices[idx]
         mr = lanelet.right_vertices[idx]
-        mc = lanelet.center_vertices[
-            min(len(lanelet.center_vertices) - 1, idx + 3)
-        ]
+        mc = lanelet.center_vertices[min(
+            len(lanelet.center_vertices) - 1, idx + 3)]
         ax.plot(
             [ml[0], mr[0], mc[0], ml[0]],
             [ml[1], mr[1], mc[1], ml[1]],
@@ -426,8 +413,8 @@ class Viewer:
             zorder=15,
         )
 
-class MainWindow(QWidget):
 
+class MainWindow(QWidget):
     def __init__(self, parent=None, path=None):
         super().__init__(parent)
         self.filename: str = None
@@ -438,7 +425,7 @@ class MainWindow(QWidget):
 
         if path is not None:
             self.openPath(path)
-    
+
     def _initUserInterface(self):
         """ """
 
@@ -450,7 +437,8 @@ class MainWindow(QWidget):
         # self.testButton.clicked.connect(self.testCmd)
 
         self.loadButton = QPushButton("Load CommonRoad", self)
-        self.loadButton.setToolTip("Load a CommonRoad scenario within a *.xml file")
+        self.loadButton.setToolTip(
+            "Load a CommonRoad scenario within a *.xml file")
         self.loadButton.clicked.connect(self.openCommonRoadFile)
 
         self.inputCommonRoadFile = QLineEdit(self)
@@ -459,7 +447,6 @@ class MainWindow(QWidget):
         hbox = QHBoxLayout()
         hbox.addWidget(self.loadButton)
         hbox.addWidget(self.inputCommonRoadFile)
-
 
         vbox = QVBoxLayout()
         vbox.addLayout(hbox, 0)
@@ -507,9 +494,8 @@ class MainWindow(QWidget):
             QMessageBox.warning(
                 self,
                 "CommonRoad XML error",
-                "There was an error during the loading of the selected CommonRoad file.\n\n{}".format(
-                    errorMsg
-                ),
+                "There was an error during the loading of the selected CommonRoad file.\n\n{}"
+                .format(errorMsg),
                 QMessageBox.Ok,
             )
             return
@@ -518,9 +504,8 @@ class MainWindow(QWidget):
             QMessageBox.warning(
                 self,
                 "CommonRoad XML error",
-                "There was an error during the loading of the selected CommonRoad file.\n\n{}".format(
-                    errorMsg
-                ),
+                "There was an error during the loading of the selected CommonRoad file.\n\n{}"
+                .format(errorMsg),
                 QMessageBox.Ok,
             )
             return
@@ -551,11 +536,9 @@ class MainWindow(QWidget):
                 self.lanelet_list.selected_id)
         else:
             selected_lanelet = None
-        self.viewer.update_plot(
-            scenario=self.current_scenario,
-            sel_lanelet=selected_lanelet,
-            sel_intersection=selected_intersection
-        )
+        self.viewer.update_plot(scenario=self.current_scenario,
+                                sel_lanelet=selected_lanelet,
+                                sel_intersection=selected_intersection)
 
     def make_trigger_exclusive(self):
         """ 
@@ -572,6 +555,7 @@ class MainWindow(QWidget):
             self.lanelet_list.reset_selection()
             self.intersection_list.reset_selection()
 
+
 def find_intersection_by_id(scenario, intersection_id: int) -> Lanelet:
     """
     Finds a intersection for a given intersection_id
@@ -580,9 +564,12 @@ def find_intersection_by_id(scenario, intersection_id: int) -> Lanelet:
     :return: The lanelet object if the id exists and None otherwise
     """
     assert is_natural_number(
-        intersection_id), '<LaneletNetwork/find_intersection_by_id>: provided id is not valid! id = {}'.format(intersection_id)
+        intersection_id
+    ), '<LaneletNetwork/find_intersection_by_id>: provided id is not valid! id = {}'.format(
+        intersection_id)
     intersections = scenario.lanelet_network._intersections
-    return intersections[intersection_id] if intersection_id in intersections else None
+    return intersections[
+        intersection_id] if intersection_id in intersections else None
 
 
 def main():
