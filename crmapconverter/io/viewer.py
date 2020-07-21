@@ -8,6 +8,7 @@ import os
 from lxml import etree
 import numpy as np
 import matplotlib
+from typing import List, Tuple
 
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
@@ -35,6 +36,7 @@ from PyQt5.QtWidgets import (
 from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.scenario.intersection import Intersection
 from commonroad.scenario.lanelet import Lanelet, is_natural_number
+from commonroad.visualization.draw_dispatch_cr import draw_object
 
 __author__ = "Benjamin Orthen, Stefan Urban"
 __copyright__ = "TUM Cyber-Physical Systems Group"
@@ -48,18 +50,20 @@ __status__ = "Released"
 matplotlib.use("Qt5Agg")
 
 
-class Canvas(FigureCanvas):
+class DynamicCanvas(FigureCanvas):
     """Ultimately, this is a QWidget"""
 
     def __init__(self, parent=None, width=5, height=5, dpi=100):
 
         self.ax = None
-
         self.fig = Figure(figsize=(width, height), dpi=dpi)
 
-        super(Canvas, self).__init__(self.fig)
+        super().__init__(self.fig)
         self.setParent(parent)
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+
+        self.mpl_connect('scroll_event', self.zoom)
+        self.mpl_connect('button_press_event', self.zoom)
 
         self.clear_axes()
 
@@ -83,192 +87,134 @@ class Canvas(FigureCanvas):
         """ """
         self.draw()
 
+    def zoom(self, event):
+        """ realize zoom in / out function in GUI """
 
-class MainWindow(QWidget):
+        ax = event.inaxes  # get the axes which mouse is now
+        x_min, x_max = ax.get_xlim()
+        y_min, y_max = ax.get_ylim()
+        scope_x = (x_max - x_min) / 10
+        scope_y = (y_max - y_min) / 10
+        # xdata = event.xdata  # get event x location
+        # ydata = event.ydata  # get event y location
+
+        if event.button == 'up':
+            ax.set(xlim=(x_min + scope_x, x_max - scope_x))
+            ax.set(ylim=(y_min + scope_y, y_max - scope_y))
+            # print('up')
+        elif event.button == 'down':
+            ax.set(xlim=(x_min - scope_x, x_max + scope_x))
+            ax.set(ylim=(y_min - scope_y, y_max + scope_y))
+            # print('down')
+
+        self.draw_idle()
+
+    def draw_object(self, scenario, draw_params, plot_limits):
+        self.ax.clear()
+        draw_object(scenario,
+                    ax=self.ax,
+                    draw_params=draw_params,
+                    plot_limits=plot_limits)
+        self.ax.autoscale()
+        self.ax.set_aspect('equal')
+
+
+class ScenarioElementList(QTableWidget):
+    def __init__(self, action_on_click, parent=None):
+        super().__init__(parent)
+        self.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.clicked.connect(self.onClick)
+        self.update_action = action_on_click
+
+        self.selected_id: int = None
+        self.header_labels: List = None
+        self.new = False
+
+
+    def _update(self, data: List[Tuple]):
+        # set dimesions
+        if data and not len(self.header_labels) == len(data[0]):
+            raise RuntimeError()
+        self.setRowCount(
+            len(data)
+        )
+        self.setColumnCount(len(self.header_labels))
+        # set content
+        self.setHorizontalHeaderLabels(self.header_labels)
+        for y, row in enumerate(data):
+            x = 0
+            for element in row:
+                self.setItem(y, x, QTableWidgetItem(str(element)))
+                x += 1
+    
+    @pyqtSlot()
+    def onClick(self):
+        """ """
+        selected_item = self.selectedItems()
+        if not selected_item:
+            self.selected_id = None
+            return
+        self.selected_id = int(selected_item[0].text())
+
+        self.new = True
+        self.update_action()
+
+    def reset_selection(self):
+        self.selected_id = None
+        self.clearSelection()
+
+
+class IntersectionList(ScenarioElementList):
+    def __init__(self, action_on_click, parent=None):
+        super().__init__(action_on_click, parent)
+        self.header_labels = ["Intersection-Id", "Description"]
+
+    def update(self, scenario):
+        if scenario is None:
+            self.close()
+        intersection_data = []
+        for intersection in scenario.lanelet_network.intersections:
+            description = None
+            intersection_data.append((intersection.intersection_id, description))
+        super()._update(sorted(intersection_data))
+
+
+class LaneletList(ScenarioElementList):
+    def __init__(self, action_on_click, parent=None):
+        super().__init__(action_on_click, parent)
+        self.header_labels = ["Lanelet-Id", "LaneletType"]
+
+    def update(self, scenario):
+        if scenario is None:
+            self.close()
+        lanelet_data = []
+        for lanelet in scenario.lanelet_network.lanelets:
+            description = ", ".join([t.value for t in lanelet.lanelet_type])
+            lanelet_data.append((lanelet.lanelet_id, description))
+        super()._update(sorted(lanelet_data))
+
+
+
+class Viewer:
     """ """
 
-    def __init__(self, parent=None, path=None):
-        super().__init__(parent)
+    def __init__(self, parent):
+        self.xlim1 = float("Inf")
+        self.xlim2 = -float("Inf")
+        self.ylim1 = float("Inf")
+        self.ylim2 = -float("Inf")      
 
-        self.current_scenario = None
-        self.selected_lanelet_id = None
-        self.selected_intersection_id = None
-
-        self._initUserInterface()
-        self.show()
-
-        if path is not None:
-            self.openPath(path)
-
-    def _initUserInterface(self):
-        """ """
-
-        self.setWindowTitle("CommonRoad XML Viewer")
-
-        self.setMinimumSize(1000, 600)
-
-        # self.testButton = QPushButton('test', self)
-        # self.testButton.clicked.connect(self.testCmd)
-
-        self.loadButton = QPushButton("Load CommonRoad", self)
-        self.loadButton.setToolTip("Load a CommonRoad scenario within a *.xml file")
-        self.loadButton.clicked.connect(self.openCommonRoadFile)
-
-        self.inputCommonRoadFile = QLineEdit(self)
-        self.inputCommonRoadFile.setReadOnly(True)
-
-        hbox = QHBoxLayout()
-        hbox.addWidget(self.loadButton)
-        hbox.addWidget(self.inputCommonRoadFile)
-
-        self.dynamic = Canvas(self, width=5, height=10, dpi=100)
-
-        vbox = QVBoxLayout()
-        vbox.addLayout(hbox, 0)
-        vbox.addWidget(self.dynamic, 1)
-
-        vbox.setAlignment(Qt.AlignTop)
-
-        self.laneletsList = QTableWidget(self)
-        self.laneletsList.setSelectionBehavior(QAbstractItemView.SelectRows)
-        self.laneletsList.clicked.connect(self.onClickLanelet)
-
-        self.intersection_list = QTableWidget(self)
-        self.intersection_list.setSelectionBehavior(QAbstractItemView.SelectRows)
-        self.intersection_list.clicked.connect(self.onClickIntersection)
-
-        hbox2 = QHBoxLayout(self)
-        hbox2.addLayout(vbox, 2)
-        hbox2.addWidget(self.laneletsList, 0)
-        hbox2.addWidget(self.intersection_list, 1)
-
-        self.setLayout(hbox2)
-
-    def openCommonRoadFile(self):
-        """ """
-
-        path, _ = QFileDialog.getOpenFileName(
-            self,
-            "Open a CommonRoad scenario",
-            "",
-            "CommonRoad scenario files *.xml (*.xml)",
-            options=QFileDialog.Options(),
-        )
-
-        if not path:
-            return
-
-        self.openPath(path)
-
-    def openPath(self, path):
-        """
-
-        Args:
-          path:
-
-        Returns:
-
-        """
-
-        filename = os.path.basename(path)
-        self.inputCommonRoadFile.setText(filename)
-
-        try:
-            # fh = open(path, "rb")
-            # data = fh.read()
-            # fh.close()
-            commonroad_reader = CommonRoadFileReader(path)
-            scenario, _ = commonroad_reader.open()
-
-        except etree.XMLSyntaxError as e:
-            errorMsg = "Syntax Error: {}".format(e)
-            QMessageBox.warning(
-                self,
-                "CommonRoad XML error",
-                "There was an error during the loading of the selected CommonRoad file.\n\n{}".format(
-                    errorMsg
-                ),
-                QMessageBox.Ok,
-            )
-            return
-        except Exception as e:
-            errorMsg = "{}".format(e)
-            QMessageBox.warning(
-                self,
-                "CommonRoad XML error",
-                "There was an error during the loading of the selected CommonRoad file.\n\n{}".format(
-                    errorMsg
-                ),
-                QMessageBox.Ok,
-            )
-            return
-
-        self.openScenario(scenario)
+        self.dynamic = DynamicCanvas(parent, width=5, height=10, dpi=100)
 
     def openScenario(self, scenario):
-        """
-
-        Args:
-          scenario:
-
-        Returns:
-
-        """
         self.current_scenario = scenario
-
-        self.dynamic.clear_axes()
-        
         self.update_plot()
 
-    @pyqtSlot()
-    def onClickLanelet(self):
-        """ """
+    def update_plot(self, scenario: "Scenario", sel_lanelet: Lanelet=None,
+            sel_intersection: Intersection=None):
+        """ Update the plot accordinly to the selection of scenario elements"""
+
         self.dynamic.clear_axes()
-
-        selectedLanelets = self.laneletsList.selectedItems()
-
-        if not selectedLanelets:
-            self.selected_lanelet_id = None
-            return
-
-        self.selected_lanelet_id = int(selectedLanelets[0].text())
-        self.selected_intersection_id = None
-        self.update_plot()
-
-    def onClickIntersection(self):
-        """ """
-        self.dynamic.clear_axes()
-
-        selected_intersection = self.intersection_list.selectedItems()
-
-        if not selected_intersection:
-            self.selected_intersection_id = None
-            return
-
-        self.selected_intersection_id = int(selected_intersection[0].text())
-        self.selected_lanelet_id = None
-        self.update_plot()
-
-    def update_plot(self):
-        """ """
-
-        # update canvas
-        if self.current_scenario is None:
-            self.dynamic.clear_axes()
-            return
-
-        # select intersection xor lanelet
-        if self.selected_lanelet_id is not None:
-            selected_lanelet = self.current_scenario.lanelet_network.find_lanelet_by_id(
-                self.selected_lanelet_id)
-            selected_intersection = None
-        elif self.selected_intersection_id is not None:
-            selected_intersection = find_intersection_by_id(
-                self.current_scenario, self.selected_intersection_id)
-            selected_lanelet = None
-        else:
-            selected_lanelet = None
-            selected_intersection = None
 
         ax = self.dynamic.get_axes()
 
@@ -278,10 +224,10 @@ class MainWindow(QWidget):
         self.ylim1 = float("Inf")
         self.ylim2 = -float("Inf")
 
-        for lanelet in self.current_scenario.lanelet_network.lanelets:
+        for lanelet in scenario.lanelet_network.lanelets:
 
             draw_arrow, color, alpha, zorder, label = self.get_paint_parameters(
-                lanelet, selected_lanelet, selected_intersection)
+                lanelet, sel_lanelet, sel_intersection)
 
             self.draw_lanelet_polygon(
                 lanelet, ax, color, alpha, zorder, label)
@@ -305,20 +251,15 @@ class MainWindow(QWidget):
 
         self.dynamic.update_plot()
 
-        self.update_intersection_list()
-        self.update_lanelet_list()
-
         self.dynamic.fig.tight_layout()
 
-
     def get_paint_parameters(self, lanelet: Lanelet, selected_lanelet: Lanelet,
-            selected_intersection: Intersection):
+            selected_intersection: Intersection): 
         """
         Return the parameters for painting a lanelet regarding the selected lanelet.
         """
 
         if selected_lanelet is not None:
-        
             draw_arrow = True
 
             if lanelet.lanelet_id == selected_lanelet.lanelet_id:
@@ -382,7 +323,6 @@ class MainWindow(QWidget):
                 draw_arrow = False
 
         elif selected_intersection is not None:
-
             incoming_ids = selected_intersection.map_incoming_lanelets.keys()
             inc_succ_ids = set()
             for inc in selected_intersection.incomings:
@@ -486,46 +426,151 @@ class MainWindow(QWidget):
             zorder=15,
         )
 
-    def update_lanelet_list(self):
-        self.laneletsList.setRowCount(
-            len(self.current_scenario.lanelet_network.lanelets)
+class MainWindow(QWidget):
+
+    def __init__(self, parent=None, path=None):
+        super().__init__(parent)
+        self.filename: str = None
+        self.current_scenario = None
+        self.viewer = Viewer(self)
+
+        self._initUserInterface()
+
+        if path is not None:
+            self.openPath(path)
+    
+    def _initUserInterface(self):
+        """ """
+
+        self.setWindowTitle("CommonRoad XML Viewer")
+
+        self.setMinimumSize(1000, 600)
+
+        # self.testButton = QPushButton('test', self)
+        # self.testButton.clicked.connect(self.testCmd)
+
+        self.loadButton = QPushButton("Load CommonRoad", self)
+        self.loadButton.setToolTip("Load a CommonRoad scenario within a *.xml file")
+        self.loadButton.clicked.connect(self.openCommonRoadFile)
+
+        self.inputCommonRoadFile = QLineEdit(self)
+        self.inputCommonRoadFile.setReadOnly(True)
+
+        hbox = QHBoxLayout()
+        hbox.addWidget(self.loadButton)
+        hbox.addWidget(self.inputCommonRoadFile)
+
+
+        vbox = QVBoxLayout()
+        vbox.addLayout(hbox, 0)
+        vbox.addWidget(self.viewer.dynamic, 1)
+
+        vbox.setAlignment(Qt.AlignTop)
+
+        self.lanelet_list = LaneletList(self.update, self)
+        self.intersection_list = IntersectionList(self.update, self)
+
+        hbox2 = QHBoxLayout(self)
+        hbox2.addLayout(vbox, 2)
+        hbox2.addWidget(self.lanelet_list, 0)
+        hbox2.addWidget(self.intersection_list, 1)
+        self.setLayout(hbox2)
+
+    def openCommonRoadFile(self):
+        """ """
+
+        path, _ = QFileDialog.getOpenFileName(
+            self,
+            "Open a CommonRoad scenario",
+            "",
+            "CommonRoad scenario files *.xml (*.xml)",
+            options=QFileDialog.Options(),
         )
-        self.laneletsList.setColumnCount(2)
-        self.laneletsList.setHorizontalHeaderLabels(["Lanelet-Id", "LaneletType"])
-        
-        lanelet_data = []
-        for lanelet in self.current_scenario.lanelet_network.lanelets:
-            description = ", ".join([t.value for t in lanelet.lanelet_type])
-            lanelet_data.append((lanelet.lanelet_id, description))
 
-        lanelet_data = sorted(lanelet_data)
-        for idx, lanelet in enumerate(lanelet_data):
-            
-            # set lanelet_id
-            self.laneletsList.setItem(idx, 0, QTableWidgetItem(str(lanelet[0])))
-            try:
-                # set lanelet description (old id)
-                self.laneletsList.setItem(idx, 1, QTableWidgetItem(str(lanelet[1])))
-            except AttributeError:
-                self.laneletsList.setItem(idx, 1, QTableWidgetItem("None"))
+        if not path:
+            return
 
-    def update_intersection_list(self):
-        self.intersection_list.setRowCount(
-            len(self.current_scenario.lanelet_network.intersections)
+        self.openPath(path)
+
+    def openPath(self, path):
+        """ """
+
+        filename = os.path.basename(path)
+        self.inputCommonRoadFile.setText(filename)
+
+        try:
+            commonroad_reader = CommonRoadFileReader(path)
+            scenario, _ = commonroad_reader.open()
+
+        except etree.XMLSyntaxError as e:
+            errorMsg = "Syntax Error: {}".format(e)
+            QMessageBox.warning(
+                self,
+                "CommonRoad XML error",
+                "There was an error during the loading of the selected CommonRoad file.\n\n{}".format(
+                    errorMsg
+                ),
+                QMessageBox.Ok,
+            )
+            return
+        except Exception as e:
+            errorMsg = "{}".format(e)
+            QMessageBox.warning(
+                self,
+                "CommonRoad XML error",
+                "There was an error during the loading of the selected CommonRoad file.\n\n{}".format(
+                    errorMsg
+                ),
+                QMessageBox.Ok,
+            )
+            return
+
+        self.openScenario(scenario, filename)
+
+    def openScenario(self, new_scenario, filename="new_scenario"):
+        """ open a new CommonRoad Scenario and update the viewer"""
+        self.filename = filename
+        self.current_scenario = new_scenario
+        self.update()
+
+    def update(self):
+        """ update all compoments """
+        self.make_trigger_exclusive()
+        self.lanelet_list.update(self.current_scenario)
+        self.intersection_list.update(self.current_scenario)
+
+        if self.current_scenario is None:
+            return
+        if self.intersection_list.selected_id is not None:
+            selected_intersection = find_intersection_by_id(
+                self.current_scenario, self.intersection_list.selected_id)
+        else:
+            selected_intersection = None
+        if self.lanelet_list.selected_id is not None:
+            selected_lanelet = self.current_scenario.lanelet_network.find_lanelet_by_id(
+                self.lanelet_list.selected_id)
+        else:
+            selected_lanelet = None
+        self.viewer.update_plot(
+            scenario=self.current_scenario,
+            sel_lanelet=selected_lanelet,
+            sel_intersection=selected_intersection
         )
-        self.intersection_list.setColumnCount(2)
-        self.intersection_list.setHorizontalHeaderLabels(["Intersection-Id", "Description"])
-        
-        intersection_data = []
-        for intersection in self.current_scenario.lanelet_network.intersections:
-            description = None
-            intersection_data.append((intersection.intersection_id, description))
-        
-        intersection_data = sorted(intersection_data)
-        for idx, intersection in enumerate(intersection_data):
-            self.intersection_list.setItem(idx, 0, QTableWidgetItem(str(intersection[0])))
-            self.intersection_list.setItem(idx, 1, QTableWidgetItem(str(intersection[1])))
 
+    def make_trigger_exclusive(self):
+        """ 
+        Only one component can trigger the plot update
+        """
+        if self.lanelet_list.new:
+            self.lanelet_list.new = False
+            self.intersection_list.reset_selection()
+        elif self.intersection_list.new:
+            self.intersection_list.new = False
+            self.lanelet_list.reset_selection()
+        else:
+            # triggered by click on canvas
+            self.lanelet_list.reset_selection()
+            self.intersection_list.reset_selection()
 
 def find_intersection_by_id(scenario, intersection_id: int) -> Lanelet:
     """
@@ -548,9 +593,10 @@ def main():
     app = QApplication(sys.argv)
 
     if len(sys.argv) >= 2:
-        _ = MainWindow(path=sys.argv[1])
+        viewer = MainWindow(path=sys.argv[1])
     else:
-        _ = MainWindow()
+        viewer = MainWindow()
+    viewer.show()
 
     sys.exit(app.exec_())
 

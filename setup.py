@@ -38,7 +38,7 @@ setup(
             "cr-map-converter-gui=crmapconverter.io.gui:main_gui",
             "opendrive2lanelet-visualize=crmapconverter.io.visualize_commonroad:main",
             "osm-convert=crmapconverter.io.osm_convert:main",
-            "cr-designer=crmapconverter.io.V3_0.main_cr_designer:main",
+            "cr-designer=crmapconverter.io.V3_0.main_cr_designer:main"
         ]
     },
     classifiers=[
