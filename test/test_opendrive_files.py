@@ -95,7 +95,7 @@ class TestOpenDriveBaseClass:
 class TestBasicOpenDrive(TestOpenDriveBaseClass, unittest.TestCase):
     """Basic test with a junction in the middle."""
 
-    __test__ = True
+    __test__ = False
     xodr_file_name = "opendrive-1"
 
 
