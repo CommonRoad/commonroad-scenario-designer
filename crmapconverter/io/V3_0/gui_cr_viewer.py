@@ -85,19 +85,23 @@ class AnimatedViewer(Viewer):
             draw_params = {
                 'time_begin': time_start,
                 'time_end': time_end,
-                'lanelet': {
-                    'draw_start_and_direction': False,
-                    'draw_center_bound': False
-                },
+                'antialiased': True,
                 'dynamic_obstacle': {
                     'show_label': True
                 }
             }
+
             # plot dynamic obstracles
-            self.dynamic.update_obstacles(
-                scenario,
-                draw_params=draw_params,
-                plot_limits=None if plot_limits == 'auto' else plot_limits)
+            if self.timestep.value == 1:
+                self.dynamic.draw_scenario(
+                    scenario,
+                    draw_params=draw_params,
+                    plot_limits=None if plot_limits == 'auto' else plot_limits)
+            else:
+                self.dynamic.update_obstacles(
+                    scenario,
+                    draw_params=draw_params,
+                    plot_limits=None if plot_limits == 'auto' else plot_limits)
 
         # Interval determines the duration of each frame in ms
         interval = 1000 * dt

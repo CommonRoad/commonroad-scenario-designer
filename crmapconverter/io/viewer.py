@@ -128,7 +128,6 @@ class DynamicCanvas(FigureCanvas):
         :param plot_limits: [description], defaults to None
         :type plot_limits: [type], optional
         """
-        self._handles.clear()
         self.clear_axes()
         draw_object(scenario,
                     ax=self.ax,
@@ -148,7 +147,7 @@ class DynamicCanvas(FigureCanvas):
         :param draw_params: CommonRoad draw_object() DrawParams
         :param plot_limits: Matplotlib plot limits
         """
-        # remove dynamic obstacles
+        # # remove dynamic obstacles
         for handles_i in self._handles.values():
             for handle in handles_i:
                 if handle:
@@ -160,11 +159,19 @@ class DynamicCanvas(FigureCanvas):
             Interval(plot_limits[0], plot_limits[1]),
             Interval(plot_limits[2], plot_limits[3])
         ]) if plot_limits else scenario.obstacles
-        draw_object(obstacles,
-                    ax=self.ax,
-                    draw_params=draw_params,
-                    plot_limits=plot_limits,
-                    handles=self._handles)
+
+        traffic_lights = scenario.lanelet_network.traffic_lights
+        traffic_light_lanelets = [
+            lanelet for lanelet in scenario.lanelet_network.lanelets
+            if lanelet.traffic_lights
+        ]
+
+        for obj in [obstacles, traffic_lights]:
+            draw_object(obstacles,
+                        ax=self.ax,
+                        draw_params=draw_params,
+                        plot_limits=plot_limits,
+                        handles=self._handles)
 
 
 class ScenarioElementList(QTableWidget):
@@ -276,8 +283,9 @@ class Viewer:
 
         draw_params = {
             'scenario': {
-                'dynamic_obstracle': {
+                'dynamic_obstacle': {
                     'trajectory': {
+                        'show_label': True,
                         'draw_trajectory': False
                     }
                 }

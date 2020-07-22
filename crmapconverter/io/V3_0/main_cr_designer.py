@@ -157,7 +157,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         if self.lanelet_list_dock is None:
             if self.crviewer.current_scenario is None:
                 messbox = QMessageBox()
-                messbox.question(
+                messbox.warning(
                     self, "Warning",
                     "Please load or convert a CR Scenario firstly",
                     QtWidgets.QMessageBox.Ok)
@@ -186,7 +186,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         if self.intersection_list_dock is None:
             if self.crviewer.current_scenario is None:
                 messbox = QMessageBox()
-                messbox.question(
+                messbox.warning(
                     self, "Warning",
                     "Please load or convert a CR Scenario or first",
                     QtWidgets.QMessageBox.Ok)
@@ -226,7 +226,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         """Function connected with the play button in the sumo-toolbox."""
         if self.crviewer.current_scenario is None:
             messbox = QMessageBox()
-            reply = messbox.question(
+            reply = messbox.warning(
                 self, "Warning", "You should firstly load a animated scenario",
                 QMessageBox.Ok | QMessageBox.No, QMessageBox.Ok)
             if (reply == QtWidgets.QMessageBox.Ok):
@@ -242,12 +242,11 @@ class MWindow(QMainWindow, Ui_mainWindow):
         """Function connected with the save button in the Toolbar."""
         if self.crviewer.current_scenario is None:
             messbox = QMessageBox()
-            reply = messbox.question(self, "Warning",
-                                     "You should firstly load an animation",
-                                     QMessageBox.Ok | QMessageBox.No,
-                                     QMessageBox.Ok)
+            reply = messbox.warning(self, "Warning",
+                                    "You should firstly load an animation",
+                                    QMessageBox.Ok | QMessageBox.No,
+                                    QMessageBox.Ok)
             if (reply == QtWidgets.QMessageBox.Ok):
-                self.file_open()
                 self.open_commonroad_file()
             else:
                 messbox.close()
@@ -526,7 +525,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         try:
             commonroad_reader = CommonRoadFileReader(path)
             scenario, _ = commonroad_reader.open()
-        except etree.XMLSyntaxError as e:
+        except Exception as e:
             QMessageBox.warning(
                 self,
                 "CommonRoad XML error",
