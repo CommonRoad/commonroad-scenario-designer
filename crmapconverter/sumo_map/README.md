@@ -8,13 +8,7 @@
    conda activate commonroad
    ```
 
-2. Install the python requirements at the root of the project
-
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-3. Install our patched SUMO Version form [here](https://github.com/octavdragoi/sumo).
+1) Install our patched SUMO Version form [here](https://github.com/octavdragoi/sumo).
    Step by step:
 
    ```bash
@@ -45,7 +39,7 @@
    cd $HOME
    ```
 
-4. Install the commonroad-collision-checker from [here](https://gitlab.lrz.de/tum-cps/commonroad-collision-checker):
+1) Install the commonroad-collision-checker from [here](https://gitlab.lrz.de/tum-cps/commonroad-collision-checker):
 
    Install [libccd](https://github.com/danfis/libccd) (from master branch):
 
@@ -89,10 +83,20 @@
    cd $HOME
    ```
 
-5. Install [cartopy](https://scitools.org.uk/cartopy/docs/latest/installing.html):
+1) Install [cartopy](https://scitools.org.uk/cartopy/docs/latest/installing.html):
 
    ```bash
    conda install -c conda-forge cartopy
+   ```
+
+1) Install the python requirements at the root of the project
+
+   ```bash
+   git clone git@gitlab.lrz.de:cps/commonroad-map-tool.git
+   pip install -r requirements.txt
+   cd commonroad-map-tool
+   # install the requirements
+   pip install -r requirements.txt
    ```
 
 # Getting started
@@ -100,10 +104,6 @@
 Run the example file to convert a commonroad `.xml` file to sumo, simulate on traffic on it and save the result to disk:
 
 ```bash
-git clone git@gitlab.lrz.de:cps/commonroad-map-tool.git
-cd commonroad-map-tool
-# install the requirements
-pip install -r requirements.txt
 # add the current module to the python path
 export $PYTHONPATH="$PYTHONPATH:$(pwd)"
 python crmapconverter/sumo_map/example.py
