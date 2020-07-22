@@ -173,14 +173,17 @@ class DynamicCanvas(FigureCanvas):
 
 class ScenarioElementList(QTableWidget):
     def __init__(self, action_on_click, parent=None):
+        """ 
+        :param action_on_click: action to call when an list item is clicked.
+            reference to self will be passed as first argument
+        """
         super().__init__(parent)
         self.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.clicked.connect(self.onClick)
-        self.update_action = action_on_click
+        self.update_action = lambda: action_on_click(self)
 
         self.selected_id: int = None
         self.header_labels: List = None
-        self.new = False
 
     def _update(self, data: List[Tuple]):
         # set dimesions
@@ -205,7 +208,6 @@ class ScenarioElementList(QTableWidget):
             return
         self.selected_id = int(selected_item[0].text())
 
-        self.new = True
         self.update_action()
 
     def reset_selection(self):
@@ -565,14 +567,26 @@ class MainWindow(QWidget):
         self.openScenario(scenario, filename)
 
     def openScenario(self, new_scenario, filename="new_scenario"):
-        """ open a new CommonRoad Scenario and update the viewer"""
+        """ 
+        Open a new CommonRoad Scenario and update the viewer
+        """
         self.filename = filename
         self.current_scenario = new_scenario
         self.update()
 
-    def update(self):
-        """ update all compoments """
-        self.make_trigger_exclusive()
+    def update(self, caller=None):
+        """ 
+        Update all compoments. Reset all other selections if this method was
+        triggered by a component.
+        """
+
+        # reset selection of all other selectable elements
+        if caller is not None:
+            if caller is not self.intersection_list:
+                self.intersection_list.reset_selection()
+            if caller is not self.lanelet_list:
+                self.lanelet_list.reset_selection()
+        
         self.lanelet_list.update(self.current_scenario)
         self.intersection_list.update(self.current_scenario)
 
@@ -592,22 +606,6 @@ class MainWindow(QWidget):
                                 sel_lanelet=selected_lanelet,
                                 sel_intersection=selected_intersection,
                                 focus_on_network=True)
-        
-
-    def make_trigger_exclusive(self):
-        """ 
-        Only one component can trigger the plot update
-        """
-        if self.lanelet_list.new:
-            self.lanelet_list.new = False
-            self.intersection_list.reset_selection()
-        elif self.intersection_list.new:
-            self.intersection_list.new = False
-            self.lanelet_list.reset_selection()
-        else:
-            # triggered by click on canvas
-            self.lanelet_list.reset_selection()
-            self.intersection_list.reset_selection()
 
 
 def find_intersection_by_id(scenario, intersection_id: int) -> Lanelet:

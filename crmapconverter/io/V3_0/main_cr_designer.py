@@ -155,12 +155,10 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
     def create_lanelet_list(self):
         """Create the lanelet_list and put it into right Dockwidget area."""
-        def custom_close(_):
+
+        def remove_selection_and_close(_):
             """ remove selection from plot when list is closed"""
             self.lanelet_list.reset_selection()
-            # don't overwrite other selections
-            self.intersection_list.new = (
-                self.intersection_list.selected_id is not None)
             self.update_view()
 
         if self.lanelet_list_dock is not None:
@@ -171,7 +169,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.lanelet_list_dock.setFeatures(QDockWidget.AllDockWidgetFeatures)
         self.lanelet_list_dock.setAllowedAreas(Qt.RightDockWidgetArea)
         self.lanelet_list_dock.setWidget(self.lanelet_list)
-        self.lanelet_list_dock.closeEvent = custom_close
+        self.lanelet_list_dock.closeEvent = remove_selection_and_close
         self.addDockWidget(Qt.RightDockWidgetArea, self.lanelet_list_dock)
 
     def show_lanelet_list(self):
@@ -191,12 +189,10 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
     def create_intersection_list(self):
         """Create the lanelet_list and put it into right Dockwidget area."""
-        def custom_close(_):
+
+        def remove_selection_and_close(_):
             """ remove selection from plot when list is closed"""
             self.intersection_list.reset_selection()
-            # don't overwrite other selections
-            self.lanelet_list.new = (
-                self.lanelet_list.selected_id is not None)
             self.update_view()
 
         if self.intersection_list_dock is not None:
@@ -208,7 +204,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
             QDockWidget.AllDockWidgetFeatures)
         self.intersection_list_dock.setAllowedAreas(Qt.RightDockWidgetArea)
         self.intersection_list_dock.setWidget(self.intersection_list)
-        self.intersection_list_dock.closeEvent = custom_close
+        self.intersection_list_dock.closeEvent = remove_selection_and_close
         self.addDockWidget(Qt.RightDockWidgetArea, self.intersection_list_dock)
 
     def show_intersection_list(self):
@@ -683,9 +679,16 @@ class MWindow(QMainWindow, Ui_mainWindow):
     def tool_box2_show(self):
         self.tool2.show()
 
-    def update_view(self, focus_on_network=None):
-        """ update all compoments when clicking a scenario element"""
-        self.make_trigger_exclusive()
+    def update_view(self, caller=None, focus_on_network=None):
+        """ update all compoments. triggered by the component caller"""
+
+        # reset selection of all other selectable elements
+        if caller is not None:
+            if caller is not self.intersection_list:
+                self.intersection_list.reset_selection()
+            if caller is not self.lanelet_list:
+                self.lanelet_list.reset_selection()
+        
         self.lanelet_list.update(self.crviewer.current_scenario)
         self.intersection_list.update(self.crviewer.current_scenario)
 
