@@ -565,23 +565,9 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
     def open_scenario(self, new_scenario, filename="new_scenario"):
         """  """
+        if self.check_scenario(new_scenario) > 2:
+            return
         print("opening scneario")
-        # check if lanelets are valid polylines
-        lanelet_ids = []
-        for lanelet in new_scenario.lanelet_network.lanelets:
-            polygon = lanelet.convert_to_polygon().shapely_object
-            if not polygon.is_valid:
-                lanelet_ids.append(lanelet.lanelet_id)
-                self.textBrowser.append(
-                    "Warning: Lanelet {} is invalid polygon!".format(
-                        lanelet.lanelet_id))
-        if lanelet_ids:
-            QMessageBox.warning(
-                self,
-                "CommonRoad XML error",
-                "Scenario contains faulty lanelets: " + str(lanelet_ids),
-                QMessageBox.Ok,
-            )
         self.filename = filename
         self.crviewer.open_scenario(new_scenario)
         self.sumobox.scenario = self.crviewer.current_scenario
@@ -602,6 +588,38 @@ class MWindow(QMainWindow, Ui_mainWindow):
         else:
             self.lanelet_list_dock.close()
             self.intersection_list_dock.close()
+
+    def check_scenario(self, scenario) -> int:
+        """ 
+        Check the scenario to validity and calculate a quality score.
+        The higher the score the higher the data faults.
+
+        :return: score
+        """
+        POSSIBLE_ERROR_CAUSE = 1
+        verbose = True
+        
+        error_score = 0
+
+        # check if lanelets are valid polylines
+        lanelet_ids = []
+        for lanelet in scenario.lanelet_network.lanelets:
+            polygon = lanelet.convert_to_polygon().shapely_object
+            if not polygon.is_valid:
+                lanelet_ids.append(lanelet.lanelet_id)
+                self.textBrowser.append(
+                    "Warning: Lanelet {} is invalid polygon!".format(
+                        lanelet.lanelet_id))
+                error_score = max(error_score, POSSIBLE_ERROR_CAUSE)
+        if lanelet_ids and verbose:
+            QMessageBox.warning(
+                self,
+                "CommonRoad XML error",
+                "Scenario contains faulty lanelet(s): " + str(lanelet_ids),
+                QMessageBox.Ok,
+            )
+
+        return error_score
 
     def file_save(self):
         """Function to save a CR .xml file."""
