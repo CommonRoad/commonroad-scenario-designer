@@ -567,7 +567,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.filename = filename
         self.crviewer.open_scenario(new_scenario)
         self.sumobox.scenario = self.crviewer.current_scenario
-        self.update_view()
+        self.update_view(focus=True)
         self.update_to_new_scenario()
 
     def update_to_new_scenario(self):
@@ -647,7 +647,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
     def tool_box2_show(self):
         self.tool2.show()
 
-    def update_view(self):
+    def update_view(self, focus=False):
         """ update all compoments when clicking a scenario element"""
         self.make_trigger_exclusive()
         self.lanelet_list.update(self.crviewer.current_scenario)
@@ -668,7 +668,8 @@ class MWindow(QMainWindow, Ui_mainWindow):
             selected_lanelet = None
         self.crviewer.update_plot(scenario=self.crviewer.current_scenario,
                                   sel_lanelet=selected_lanelet,
-                                  sel_intersection=selected_intersection)
+                                  sel_intersection=selected_intersection,
+                                  focus_on_network=focus)
 
     def make_trigger_exclusive(self):
         """ 
@@ -692,7 +693,7 @@ def main():
     app = QApplication(sys.argv)
     w = MWindow()
     w.showMaximized()
-    # w.open_path("/home/max/Desktop/Planning/Maps/cr_files/ped/garching_kreuzung_fixed.xml")
+    w.open_path("/home/max/Desktop/Planning/Maps/cr_files/ped/garching_kreuzung_fixed.xml")
     sys.exit(app.exec_())
 
 

@@ -49,6 +49,10 @@ __status__ = "Released"
 matplotlib.use("Qt5Agg")
 
 
+ZOOM_FACTOR = 1.2
+AUTOFOCUS = False
+
+
 class DynamicCanvas(FigureCanvas):
     """Ultimately, this is a QWidget"""
     def __init__(self, parent=None, width=5, height=5, dpi=100):
@@ -81,31 +85,40 @@ class DynamicCanvas(FigureCanvas):
         """ """
         return self.ax
 
-    def update_plot(self):
+    def update_plot(self, limits: List[float]=None):
         """ """
-        self.draw()
+        if limits:
+            self.ax.set(xlim=limits[0:2])
+            self.ax.set(ylim=limits[2:4])
+        self.draw_idle()
 
     def zoom(self, event):
         """ realize zoom in / out function in GUI """
-
-        ax = event.inaxes  # get the axes which mouse is now
-        x_min, x_max = ax.get_xlim()
-        y_min, y_max = ax.get_ylim()
-        scope_x = (x_max - x_min) / 10
-        scope_y = (y_max - y_min) / 10
-        # xdata = event.xdata  # get event x location
-        # ydata = event.ydata  # get event y location
-
+        x_min, x_max = self.ax.get_xlim()
+        y_min, y_max = self.ax.get_ylim()
+        center = ((x_min + x_max)/2, (y_min + y_max)/2)
+        x_dim = (x_max - x_min)/2
+        y_dim = (y_max - y_min)/2
+        
+        # do zoom
         if event.button == 'up':
-            ax.set(xlim=(x_min + scope_x, x_max - scope_x))
-            ax.set(ylim=(y_min + scope_y, y_max - scope_y))
-            # print('up')
+            new_x_dim = x_dim / ZOOM_FACTOR
+            new_y_dim = y_dim / ZOOM_FACTOR
         elif event.button == 'down':
-            ax.set(xlim=(x_min - scope_x, x_max + scope_x))
-            ax.set(ylim=(y_min - scope_y, y_max + scope_y))
-            # print('down')
+            new_x_dim = x_dim * ZOOM_FACTOR
+            new_y_dim = y_dim * ZOOM_FACTOR
 
-        self.draw_idle()
+        # 'TODO enhance mouse sensitive new position
+        mouse_pos = (event.xdata, event.ydata)  # get event location
+        new_center_x = (3*center[0] + mouse_pos[0])/4
+        new_center_y = (3*center[1] + mouse_pos[1])/4
+
+        self.update_plot([
+            new_center_x - new_x_dim,
+            new_center_x + new_x_dim,
+            new_center_y - new_y_dim,
+            new_center_y + new_y_dim
+        ])
 
     def draw_obstracles(self, scenario, draw_params, plot_limits):
         # remove dynamic obstacles
@@ -131,6 +144,7 @@ class DynamicCanvas(FigureCanvas):
                         draw_params=draw_params,
                         plot_limits=plot_limits,
                         handles=self._handles)
+
         # self.ax.autoscale()
         # self.ax.set_aspect('equal')
 
@@ -211,50 +225,57 @@ class LaneletList(ScenarioElementList):
 class Viewer:
     """ """
     def __init__(self, parent):
-        self.xlim1 = float("Inf")
-        self.xlim2 = -float("Inf")
-        self.ylim1 = float("Inf")
-        self.ylim2 = -float("Inf")
-
         self.dynamic = DynamicCanvas(parent, width=5, height=10, dpi=100)
 
     def update_plot(self,
                     scenario: "Scenario",
                     sel_lanelet: Lanelet = None,
-                    sel_intersection: Intersection = None):
+                    sel_intersection: Intersection = None,
+                    focus_on_network: bool = AUTOFOCUS):
         """ Update the plot accordinly to the selection of scenario elements"""
 
-        self.dynamic.clear_axes()
+        x_lim = self.dynamic.get_axes().get_xlim()
+        y_lim = self.dynamic.get_axes().get_ylim()
 
+        self.dynamic.clear_axes()
         ax = self.dynamic.get_axes()
 
-        self.xlim1 = float("Inf")
-        self.xlim2 = -float("Inf")
 
-        self.ylim1 = float("Inf")
-        self.ylim2 = -float("Inf")
+        network_limits = [
+            float("Inf"),
+            -float("Inf"),
+            float("Inf"),
+            -float("Inf")
+        ]
 
         for lanelet in scenario.lanelet_network.lanelets:
 
             draw_arrow, color, alpha, zorder, label = self.get_paint_parameters(
                 lanelet, sel_lanelet, sel_intersection)
 
-            self.draw_lanelet_polygon(lanelet, ax, color, alpha, zorder, label)
+            lanelet_limits = self.draw_lanelet_polygon(
+                lanelet, ax, color, alpha, zorder, label)
+            network_limits[0] = min(network_limits[0], lanelet_limits[0])
+            network_limits[1] = max(network_limits[1], lanelet_limits[1])
+            network_limits[2] = min(network_limits[2], lanelet_limits[2])
+            network_limits[3] = max(network_limits[3], lanelet_limits[3])
 
             self.draw_lanelet_vertices(lanelet, ax)
 
             if draw_arrow:
                 self.draw_arrow_on_lanelet(lanelet, ax)
 
-        handles, labels = self.dynamic.get_axes().get_legend_handles_labels()
-        self.dynamic.get_axes().legend(handles, labels)
+        handles, labels = ax.get_legend_handles_labels()
+        ax.legend(handles, labels)
 
-        if (self.xlim1 != float("Inf") and self.xlim2 != float("Inf")
-                and self.ylim1 != float("Inf") and self.ylim2 != float("Inf")):
-            self.dynamic.get_axes().set_xlim([self.xlim1, self.xlim2])
-            self.dynamic.get_axes().set_ylim([self.ylim1, self.ylim2])
-
-        self.dynamic.update_plot()
+        if (focus_on_network 
+                and all([abs(l) != float("Inf") for l in network_limits])):
+            self.dynamic.update_plot(network_limits)
+        else:
+            self.dynamic.update_plot([x_lim[0], x_lim[1], y_lim[0], y_lim[1]])
+            ax.set(xlim=x_lim)
+            ax.set(ylim=y_lim)
+           
 
         self.dynamic.drawer.tight_layout()
 
@@ -360,10 +381,17 @@ class Viewer:
 
         return draw_arrow, color, alpha, zorder, label
 
-    def draw_lanelet_polygon(self, lanelet, ax, color, alpha, zorder, label):
+    def draw_lanelet_polygon(
+        self, lanelet, ax, color, alpha, zorder, label
+    )-> Tuple[float, float, float, float]:
         # TODO efficiency
         verts = []
         codes = [Path.MOVETO]
+
+        xlim1 = float("Inf")
+        xlim2 = -float("Inf")
+        ylim1 = float("Inf")
+        ylim2 = -float("Inf")
 
         for x, y in np.vstack(
             [lanelet.left_vertices, lanelet.right_vertices[::-1]]):
@@ -371,11 +399,10 @@ class Viewer:
             codes.append(Path.LINETO)
 
             # if color != 'gray':
-            self.xlim1 = min(self.xlim1, x)
-            self.xlim2 = max(self.xlim2, x)
-
-            self.ylim1 = min(self.ylim1, y)
-            self.ylim2 = max(self.ylim2, y)
+            xlim1 = min(xlim1, x)
+            xlim2 = max(xlim2, x)
+            ylim1 = min(ylim1, y)
+            ylim2 = max(ylim2, y)
 
         verts.append(verts[0])
         codes[-1] = Path.CLOSEPOLY
@@ -392,6 +419,8 @@ class Viewer:
                 zorder=zorder,
                 label=label,
             ))
+
+        return [xlim1, xlim2, ylim1, ylim2]
 
     def draw_lanelet_vertices(self, lanelet, ax):
         ax.plot(
@@ -486,7 +515,6 @@ class MainWindow(QWidget):
 
     def openPath(self, path):
         """ """
-
         filename = os.path.basename(path)
         self.inputCommonRoadFile.setText(filename)
 
@@ -543,7 +571,9 @@ class MainWindow(QWidget):
             selected_lanelet = None
         self.viewer.update_plot(scenario=self.current_scenario,
                                 sel_lanelet=selected_lanelet,
-                                sel_intersection=selected_intersection)
+                                sel_intersection=selected_intersection,
+                                focus_on_network=True)
+        
 
     def make_trigger_exclusive(self):
         """ 
@@ -585,10 +615,10 @@ def main():
     app = QApplication(sys.argv)
 
     if len(sys.argv) >= 2:
-        viewer = MainWindow(path=sys.argv[1])
+        main_window = MainWindow(path=sys.argv[1])
     else:
-        viewer = MainWindow()
-    viewer.show()
+        main_window = MainWindow() # path="/home/max/Desktop/Planning/Maps/cr_files/ped/garching_kreuzung_fixed.xml")
+    main_window.show()
 
     sys.exit(app.exec_())
 
