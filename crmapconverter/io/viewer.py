@@ -119,8 +119,16 @@ class DynamicCanvas(FigureCanvas):
 
         # 'TODO enhance mouse sensitive new position
         mouse_pos = (event.xdata, event.ydata)  # get event location
-        new_center_x = (3*center[0] + mouse_pos[0])/4
-        new_center_y = (3*center[1] + mouse_pos[1])/4
+        if mouse_pos[0] and mouse_pos[1]:
+            dim_diff_x = abs(new_x_dim - x_dim)
+            dim_diff_y = abs(new_y_dim - y_dim)
+            new_center_x = (6*center[0] + mouse_pos[0])/7
+            new_center_x = min(max(center[0] - dim_diff_x, new_center_x), center[0] + dim_diff_x)
+            new_center_y = (6*center[1] + mouse_pos[1])/7
+            new_center_y = min(max(center[1] - dim_diff_y, new_center_y), center[1] + dim_diff_y)
+        else:
+            new_center_x = center[0]
+            new_center_y = center[1]
 
         self.update_plot([
             new_center_x - new_x_dim,
@@ -622,7 +630,7 @@ def main():
     if len(sys.argv) >= 2:
         main_window = MainWindow(path=sys.argv[1])
     else:
-        main_window = MainWindow() # path="/home/max/Desktop/Planning/Maps/cr_files/ped/garching_kreuzung_fixed.xml")
+        main_window = MainWindow(path="/home/max/Desktop/Planning/Maps/cr_files/ped/garching_kreuzung_fixed.xml")
     main_window.show()
 
     sys.exit(app.exec_())
