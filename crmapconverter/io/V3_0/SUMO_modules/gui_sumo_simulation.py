@@ -28,8 +28,8 @@ class SimulationWorker(QThread):
         self.error = None
 
     def run(self):
-        # convert scenario to SUMO
         try:
+            # convert scenario to SUMO
             wrapper = CR2SumoMapConverter(self.scenario.lanelet_network,
                                           self.config)
             wrapper.convert_to_net_file(self.output_folder)
@@ -44,6 +44,7 @@ class SimulationWorker(QThread):
             self.simulated_scenario = simulation.commonroad_scenarios_all_time_steps(
             )
         except Exception as e:
+            # log error and save it for display to the user
             logging.error(e)
             self.error = e
 
@@ -159,16 +160,15 @@ class SUMOSimulation(QWidget, Ui_sumo_simulate):
         return True
 
     def simulation_done(self):
-        print('done simulating')
         self.waiting_msg.close_window = True
         self.waiting_msg.close()
-        if self.worker.simulated_scenario:
+        if not self.worker.error:
             self.simulated_scenario.value = self.worker.simulated_scenario
         else:
             QMessageBox.critical(
                 None,
                 "SUMO Simulation",
-                "The SUMO Simulation encountered an error: {}".format(
+                "The SUMO Simulation encountered an error:\n{}".format(
                     self.worker.error),
                 QMessageBox.Ok,
             )
