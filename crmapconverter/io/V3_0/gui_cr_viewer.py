@@ -30,19 +30,28 @@ class AnimatedViewer(Viewer):
         # if playing or not
         self.playing = False
 
-    def open_scenario(self, scenario):
-        """ """
+    def open_scenario(self, scenario, config: SumoConfig):
+        """[summary]
+
+        :param scenario: [description]
+        :type scenario: [type]
+        :param config: [description], defaults to None
+        :type config: SumoConfig, optional
+        """
         self.current_scenario = scenario
+        self._config = config if config else self._config
+
         self._calc_max_timestep()
-
         if self.animation:
-            self.pause()
             self.timestep.value = 0
+            self.animation.event_source.stop()
             self.animation = None
-
         self.update_plot(scenario)
 
     def _init_animation(self):
+        if not self.current_scenario:
+            return
+
         print('init animation')
         scenario = self.current_scenario
         self.dynamic.ax.clear()
@@ -56,14 +65,11 @@ class AnimatedViewer(Viewer):
         # ln, = self.dynamic.ax.plot([], [], animated=True)
         anim_frames = end - start
 
-        if not scenario:
-            return
-
         if start == end:
             warning_dialog = QMessageBox()
-            warning_dialog.warning(
-                None, "Warning", "This Scenario only has one time step!",
-                QMessageBox.Ok, QMessageBox.Ok)
+            warning_dialog.warning(None, "Warning",
+                                   "This Scenario only has one time step!",
+                                   QMessageBox.Ok, QMessageBox.Ok)
             warning_dialog.close()
 
         assert start <= end, '<video/create_scenario_video> time_begin=%i needs to smaller than time_end=%i.' % (
@@ -88,10 +94,7 @@ class AnimatedViewer(Viewer):
                 }
             }
             # plot dynamic obstracles
-            if self.timestep.value <= 1:
-                self.update_plot(scenario)
-
-            self.dynamic.draw_obstracles(
+            self.dynamic.update_obstacles(
                 scenario,
                 draw_params=draw_params,
                 plot_limits=None if plot_limits == 'auto' else plot_limits)
@@ -105,19 +108,17 @@ class AnimatedViewer(Viewer):
                                        interval=interval,
                                        repeat=True)
 
-    def play(self, config: SumoConfig = None):
+    def play(self):
         """ plays the animation if existing """
         if not self.animation:
-            self._config = config if config else self._config
             self._init_animation()
 
         self.dynamic.update_plot()
         self.animation.event_source.start()
 
-    def pause(self, config: SumoConfig = None):
+    def pause(self):
         """ pauses the animation if playing """
         if not self.animation:
-            self._config = config if config else self._config
             self._init_animation()
             return
 
