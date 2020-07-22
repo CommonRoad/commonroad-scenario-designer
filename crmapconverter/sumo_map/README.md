@@ -74,6 +74,7 @@
    cd commonroad-collision-checker/
    mkdir build
    cd build
+   # YOU NEED TO CHANGE THE PATH TO YOUR CONDA ENVIRONMENT AS WELL AS THE PYTHON VERSION HERE
    cmake -DADD_PYTHON_BINDINGS=TRUE -DPATH_TO_PYTHON_ENVIRONMENT="/path/to/your/anaconda3/envs/ commonroad-py37" -DPYTHON_VERSION="3.7" -DCMAKE_BUILD_TYPE=Release ..
    make -j8
 
