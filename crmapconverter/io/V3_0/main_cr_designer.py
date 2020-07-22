@@ -155,6 +155,14 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
     def create_lanelet_list(self):
         """Create the lanelet_list and put it into right Dockwidget area."""
+        def custom_close(_):
+            """ remove selection from plot when list is closed"""
+            self.lanelet_list.reset_selection()
+            # don't overwrite other selections
+            self.intersection_list.new = (
+                self.intersection_list.selected_id is not None)
+            self.update_view()
+
         if self.lanelet_list_dock is not None:
             self.lanelet_list_dock.close()
             self.lanelet_list_dock = None
@@ -163,6 +171,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.lanelet_list_dock.setFeatures(QDockWidget.AllDockWidgetFeatures)
         self.lanelet_list_dock.setAllowedAreas(Qt.RightDockWidgetArea)
         self.lanelet_list_dock.setWidget(self.lanelet_list)
+        self.lanelet_list_dock.closeEvent = custom_close
         self.addDockWidget(Qt.RightDockWidgetArea, self.lanelet_list_dock)
 
     def show_lanelet_list(self):
@@ -182,6 +191,14 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
     def create_intersection_list(self):
         """Create the lanelet_list and put it into right Dockwidget area."""
+        def custom_close(_):
+            """ remove selection from plot when list is closed"""
+            self.intersection_list.reset_selection()
+            # don't overwrite other selections
+            self.lanelet_list.new = (
+                self.lanelet_list.selected_id is not None)
+            self.update_view()
+
         if self.intersection_list_dock is not None:
             self.intersection_list_dock.close()
             self.intersection_list_dock = None
@@ -191,8 +208,8 @@ class MWindow(QMainWindow, Ui_mainWindow):
             QDockWidget.AllDockWidgetFeatures)
         self.intersection_list_dock.setAllowedAreas(Qt.RightDockWidgetArea)
         self.intersection_list_dock.setWidget(self.intersection_list)
+        self.intersection_list_dock.closeEvent = custom_close
         self.addDockWidget(Qt.RightDockWidgetArea, self.intersection_list_dock)
-        self.intersection_list_dock.close()
 
     def show_intersection_list(self):
         """Function connected with button 'Lanelets List' to show the lanelets list."""
@@ -689,14 +706,13 @@ class MWindow(QMainWindow, Ui_mainWindow):
             self.lanelet_list.reset_selection()
             self.intersection_list.reset_selection()
 
-
 def main():
 
     # application
     app = QApplication(sys.argv)
     w = MWindow()
     w.showMaximized()
-    # w.open_path("/home/max/Desktop/Planning/Maps/cr_files/ped/intersect_and_crossing3.xml")
+    w.open_path("/home/max/Desktop/Planning/Maps/cr_files/ped/intersect_and_crossing3.xml")
     sys.exit(app.exec_())
 
 

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Viewer module to visualize the created lanelet scenario."""
+"""Viewer module to visualize and inspect the created lanelet scenario."""
 
 import signal
 import sys
@@ -53,7 +53,7 @@ ZOOM_FACTOR = 1.2
 
 
 class DynamicCanvas(FigureCanvas):
-    """Ultimately, this is a QWidget"""
+    """ this canvas provides zoom with the mouse wheel """
     def __init__(self, parent=None, width=5, height=5, dpi=100):
 
         self.ax = None
@@ -84,31 +84,32 @@ class DynamicCanvas(FigureCanvas):
         if keep_limits and limits:
             self.update_plot(limits)
 
-    def get_axes(self):
-        """ """
+    def get_axes(self) -> "Ax":
+        """ return the axes of this canvas """
         return self.ax
 
     def get_limits(self) -> List[float]:
+        """ return the current limits of the canvas """
         x_lim = self.ax.get_xlim()
         y_lim = self.ax.get_ylim()
         return [x_lim[0], x_lim[1], y_lim[0], y_lim[1]]
 
     def update_plot(self, limits: List[float]=None):
-        """ """
+        """ draw the canvas. optional with new limits"""
         if limits:
             self.ax.set(xlim=limits[0:2])
             self.ax.set(ylim=limits[2:4])
         self.draw_idle()
 
     def zoom(self, event):
-        """ realize zoom in / out function in GUI """
+        """ zoom in / out function in GUI by using mouse wheel """
         x_min, x_max = self.ax.get_xlim()
         y_min, y_max = self.ax.get_ylim()
         center = ((x_min + x_max)/2, (y_min + y_max)/2)
         x_dim = (x_max - x_min)/2
         y_dim = (y_max - y_min)/2
 
-        # do zoom
+        # enlarge / shrink limits
         if event.button == 'up':
             new_x_dim = x_dim / ZOOM_FACTOR
             new_y_dim = y_dim / ZOOM_FACTOR
@@ -116,14 +117,16 @@ class DynamicCanvas(FigureCanvas):
             new_x_dim = x_dim * ZOOM_FACTOR
             new_y_dim = y_dim * ZOOM_FACTOR
 
-        # 'TODO enhance mouse sensitive new position
-        mouse_pos = (event.xdata, event.ydata)  # get event location
+        # new center sensitive to mouse position of zoom event
+        mouse_pos = (event.xdata, event.ydata)  
         if mouse_pos[0] and mouse_pos[1]:
+            new_center_x = (6*center[0] + mouse_pos[0])/7
+            new_center_y = (6*center[1] + mouse_pos[1])/7
+            # new limits should include old limits if zooming out
+            # old limits should include new limits if zooming in
             dim_diff_x = abs(new_x_dim - x_dim)
             dim_diff_y = abs(new_y_dim - y_dim)
-            new_center_x = (6*center[0] + mouse_pos[0])/7
             new_center_x = min(max(center[0] - dim_diff_x, new_center_x), center[0] + dim_diff_x)
-            new_center_y = (6*center[1] + mouse_pos[1])/7
             new_center_y = min(max(center[1] - dim_diff_y, new_center_y), center[1] + dim_diff_y)
         else:
             new_center_x = center[0]
@@ -137,6 +140,9 @@ class DynamicCanvas(FigureCanvas):
         ])
 
     def draw_obstracles(self, scenario, draw_params, plot_limits):
+        """
+        draw CommonRoad obstacles on the canvas.
+        """
         # remove dynamic obstacles
         for handles_i in self._handles.values():
             for handle in handles_i:
@@ -203,6 +209,7 @@ class ScenarioElementList(QTableWidget):
         self.update_action()
 
     def reset_selection(self):
+        """ unselect all elements """
         self.selected_id = None
         self.clearSelection()
 
@@ -239,7 +246,7 @@ class LaneletList(ScenarioElementList):
 
 
 class Viewer:
-    """ """
+    """ functionality to draw a Scenario onto a Canvas """
     def __init__(self, parent):
         self.dynamic = DynamicCanvas(parent, width=5, height=10, dpi=100)
 
