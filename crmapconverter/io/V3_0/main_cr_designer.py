@@ -20,7 +20,7 @@ from crmapconverter.io.V3_0.gui_cr_viewer import AnimatedViewer
 from crmapconverter.io.V3_0.converter_modules.osm_interface import OSMInterface
 from crmapconverter.io.V3_0.converter_modules.opendrive_interface import (
     OpenDRIVEInterface)
-# from crmapconverter.io.V3_0.gui_settings import GUISettings
+from crmapconverter.io.V3_0.gui_settings import GUISettings
 from crmapconverter.io.V3_0.SUMO_modules.sumo_settings import SUMOSettings
 from crmapconverter.io.V3_0.SUMO_modules.gui_sumo_simulation import SUMOSimulation
 from crmapconverter.io.viewer import LaneletList, IntersectionList, find_intersection_by_id
@@ -56,10 +56,10 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.lanelet_list_dock = None
         self.intersection_list_dock = None
         self.sumo_settings = None
+        self.gui_settings = None
 
         # when the current scenario was simulated, load it in the gui
-        self.sumobox.simulated_scenario.subscribe(
-            lambda scenario: self.open_scenario(scenario))
+        self.sumobox.simulated_scenario.subscribe(self.open_scenario)
 
         # build and connect GUI
         self.create_file_actions()
@@ -75,30 +75,30 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.status = self.statusbar
         self.status.showMessage("Welcome to CR Scenario Designer")
 
-        menuBar = self.menuBar()  # instant of menu
-        menu_file = menuBar.addMenu('File')  # add menu 'file'
+        menu_bar = self.menuBar()  # instant of menu
+        menu_file = menu_bar.addMenu('File')  # add menu 'file'
         menu_file.addAction(self.fileNewAction)
         menu_file.addAction(self.fileOpenAction)
         menu_file.addAction(self.fileSaveAction)
         menu_file.addAction(self.separator)
         menu_file.addAction(self.exitAction)
 
-        menu_import = menuBar.addMenu('Import')  # add menu 'Import'
+        menu_import = menu_bar.addMenu('Import')  # add menu 'Import'
         menu_import.addAction(self.importfromOpendrive)
         menu_import.addAction(self.importfromOSM)
         # menu_import.addAction(self.importfromSUMO)
 
-        menu_export = menuBar.addMenu('Export')  # add menu 'Export'
+        menu_export = menu_bar.addMenu('Export')  # add menu 'Export'
         menu_export.addAction(self.exportAsCommonRoad)
         # menu_export.addAction(self.export2SUMO)
 
-        menu_setting = menuBar.addMenu('Setting')  # add menu 'Setting'
-        # menu_setting.addAction(self.gui_settings)
+        menu_setting = menu_bar.addMenu('Setting')  # add menu 'Setting'
+        menu_setting.addAction(self.gui_settings)
         menu_setting.addAction(self.sumo_settings)
         menu_setting.addAction(self.osm_settings)
         # menu_setting.addAction(self.opendrive_settings)
 
-        menu_help = menuBar.addMenu('Help')  # add menu 'Help'
+        menu_help = menu_bar.addMenu('Help')  # add menu 'Help'
         menu_help.addAction(self.open_web)
 
         self.center()
@@ -115,7 +115,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         opendrive_interface.show_settings()
 
     def show_gui_settings(self):
-        GUISettings(self)
+        self.gui_settings = GUISettings(self)
 
     def show_sumo_settings(self):
         self.sumo_settings = SUMOSettings(self)
@@ -577,7 +577,6 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
     def file_save(self):
         """Function to save a CR .xml file."""
-        fileEdit = self.centralWidget()
 
         if self.crviewer.current_scenario is None:
             messbox = QMessageBox()
@@ -586,28 +585,28 @@ class MWindow(QMainWindow, Ui_mainWindow):
             messbox.close()
             return
 
-        path, _ = QFileDialog.getSaveFileName(
+        file_path, _ = QFileDialog.getSaveFileName(
             self,
             "Select file to save scenario",
             self.filename + ".xml",
             "CommonRoad files *.xml (*.xml)",
             options=QFileDialog.Options(),
         )
-        if not path:
+        if not file_path:
             return
 
         try:
-            with open(path, "w") as fh:
+            with open(file_path, "w") as fh:
                 writer = CommonRoadFileWriter(
-                    scenario=fileEdit.current_scenario,
+                    scenario=self.crviewer.current_scenario,
                     planning_problem_set=None,
                     author="",
                     affiliation="",
                     source="",
                     tags="",
                 )
-                writer.write_scenario_to_file(path)
-        except (IOError) as e:
+                writer.write_scenario_to_file(file_path)
+        except IOError as e:
             QMessageBox.critical(
                 self,
                 "CommonRoad file not created!",
@@ -615,7 +614,6 @@ class MWindow(QMainWindow, Ui_mainWindow):
                 "{}".format(e),
                 QMessageBox.Ok,
             )
-            return
 
     def processtrigger(self, q):
         self.status.showMessage(q.text() + ' is triggered')

@@ -4,8 +4,6 @@ from typing import Union
 import numpy as np
 from matplotlib import animation
 
-from matplotlib.backends.backend_qt5agg import (NavigationToolbar2QT as
-                                                NavigationToolbar)
 
 from matplotlib.animation import FuncAnimation
 from PyQt5.QtWidgets import *
@@ -13,7 +11,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from crmapconverter.io.viewer import Viewer
 from crmapconverter.sumo_map.config import SumoConfig
-from .observable import Observable
+from crmapconverter.io.V3_0.observable import Observable
 
 
 class AnimatedViewer(Viewer):
@@ -199,7 +197,7 @@ class AnimatedViewer(Viewer):
 
     def _calc_max_timestep(self):
         """calculate maximal time step of current scenario"""
-        print('test')
+        print('_calc_max_timestep')
         timesteps = [
             obstacle.prediction.occupancy_set[-1].time_step
             for obstacle in self.current_scenario.dynamic_obstacles

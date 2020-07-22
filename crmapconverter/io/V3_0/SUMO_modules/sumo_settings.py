@@ -16,16 +16,16 @@ class SUMOSettings:
         self.settings_window = QMainWindow()
         self.window = Ui_MainWindow()
         self.window.setupUi(self.settings_window)
-        self.window.setupUi(self.settings_window)
-        
-        # connect events
-        self.window.botton_restore_defaults.clicked.connect(self.restore_defaults)
-        self.window.botton_close.clicked.connect(self.close_button)
-
+        self.connect_events()
         self.update_ui_values()
         self.settings_window.show()
 
-    def update_ui_values(self) -> None:
+    def connect_events(self):
+        """ connect buttons to callables """
+        self.window.botton_restore_defaults.clicked.connect(self.restore_defaults)
+        self.window.botton_close.clicked.connect(self.apply_close)
+
+    def update_ui_values(self):
         """
         sets the values of the settings window to the current values of config
 
@@ -78,17 +78,16 @@ class SUMOSettings:
         self.window.chk_lane_change_sync.setChecked(config.lane_change_sync)
         self.window.chk_compute_orientation.setChecked(config.compute_orientation)
 
-    def save_to_config(self) -> None:
+    def save_to_config(self) -> bool:
         """
         saves the values in the settings window to config 
 
-        :return: None
+        :return: True is successful, False if not
         """
-
-        window = self.window
-
         if not self.has_valid_entries():
             return False
+        
+        window = self.window
 
         # line edits
         ego_ids_str = window.le_ego_ids.text()
@@ -164,11 +163,9 @@ class SUMOSettings:
         
         return True
 
-    def close_button(self) -> None:
+    def apply_close(self) -> None:
         """
-        closes settings without saving
-
-        :return: None
+        closes settings if settings could be saved to config
         """
         if self.save_to_config():
             self.settings_window.close()

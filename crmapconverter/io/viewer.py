@@ -441,9 +441,6 @@ class MainWindow(QWidget):
 
         self.setMinimumSize(1000, 600)
 
-        # self.testButton = QPushButton('test', self)
-        # self.testButton.clicked.connect(self.testCmd)
-
         self.loadButton = QPushButton("Load CommonRoad", self)
         self.loadButton.setToolTip(
             "Load a CommonRoad scenario within a *.xml file")

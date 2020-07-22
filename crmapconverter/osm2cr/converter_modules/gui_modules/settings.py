@@ -324,7 +324,7 @@ class SettingsMenu:
         window.btn_edit_sublayer_way_types.clicked.connect(self.edit_sublayer_way_types)
 
         window.btn_restore_defaults.clicked.connect(self.restore_default_button)
-        window.btn_apply.clicked.connect(self.close_button)
+        window.btn_apply.clicked.connect(self.apply_close)
         # window.btn_save.clicked.connect(self.save_button)
 
     def update_ui_values(self) -> None:
@@ -385,12 +385,15 @@ class SettingsMenu:
             config.INTERSECTION_DISTANCE_SUBLAYER)
         window.chk_extract_sublayer.setChecked(config.EXTRACT_SUBLAYER)
 
-    def save_to_config(self) -> None:
+    def save_to_config(self) -> bool:
         """
-        saves the values in the settings window to config.py
+        saves the values in the settings window to config
 
-        :return: None
+        :return: True is successful, False if not
         """
+        if not self.has_valid_entries():
+            return False
+
         window = self.window
 
         config.BENCHMARK_ID = window.le_benchmark_id.text()
@@ -439,6 +442,14 @@ class SettingsMenu:
 
         config.EXTRACT_SUBLAYER = window.chk_extract_sublayer.isChecked()
         config.INTERSECTION_DISTANCE_SUBLAYER = window.sb_intersection_distance_sublayer.value()
+
+    def has_valid_entries(self) -> bool:
+        """ 
+        Check if the user input is valid. Otherwise warn the user.
+
+        :return: bool weather the input is valid
+        """
+        return True
 
     def edit_street_types(self) -> None:
         """
@@ -490,14 +501,12 @@ class SettingsMenu:
         # write_config()
         self.update_ui_values()
 
-    def close_button(self) -> None:
+    def apply_close(self) -> None:
         """
-        closes settings without saving
-
-        :return: None
+        closes settings if settings could be saved to config
         """
-        self.save_to_config()
-        self.close()
+        if self.save_to_config():
+            self.close()
 
     def save_button(self) -> None:
         """

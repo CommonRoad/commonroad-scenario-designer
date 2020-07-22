@@ -1,20 +1,26 @@
-# from ? import Ui_SettingsWindow 
+""" """
+from PyQt5.QtWidgets import QMainWindow
+
+from crmapconverter.io.V3_0.GUI_resources.gui_settings_ui import Ui_MainWindow
+
+
 class GUISettings:
     
     def __init__(self, parent):
         self.cr_designer = parent
-        self.window = Ui_SettingsWindow(cr_designer)
-        self.window.setupUi(self.app.main_window)
-        self.update_ui_values()
+        self.settings_window = QMainWindow()
+        self.window = Ui_MainWindow()
+        self.window.setupUi(self.settings_window)
         self.connect_events()
-        self.window.show()
+        self.update_ui_values()
+        self.settings_window.show()
     
-    def connect_events(self) -> None:
-        # window.btn_restore_defaults.clicked.connect(self.restore_default_button)
-        # window.btn_close.clicked.connect(self.close_button)
-        return
+    def connect_events(self):
+        """ connect buttons to callables """
+        # self.window.btn_restore_defaults.clicked.connect(self.restore_default_button)
+        self.window.botton_close.clicked.connect(self.apply_close)
 
-    def update_ui_values(self) -> None:
+    def update_ui_values(self):
         """
         sets the values of the settings window to the current values of config.py
 
@@ -26,23 +32,23 @@ class GUISettings:
         # window.chk_delete_short_edges.setChecked(config.DELETE_SHORT_EDGES)
         return
 
-    def save_to_config(self) -> None:
+    def save_to_config(self) -> bool:
         """
         saves the values in the settings window to config.py
-
-        :return: None
         """
         # example code:
         # config.BENCHMARK_ID = window.le_benchmark_id.text()
         # config.AERIAL_IMAGES = swindow.chb_aerial.isChecked()
         # config.DOWNLOAD_EDGE_LENGTH = window.sb_donwload_radius.value()
-        return
+        return True
 
-    def close_button(self) -> None:
-        """
-        closes settings without saving
+    
+    def has_valid_entries(self) -> bool:
+        return True
 
-        :return: None
+    def apply_close(self) -> None:
         """
-        self.save_to_config()
-        # and close
+        closes settings if settings could be saved to config
+        """
+        if self.save_to_config():
+            self.settings_window.close()
