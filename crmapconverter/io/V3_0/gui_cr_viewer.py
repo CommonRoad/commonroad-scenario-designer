@@ -4,11 +4,11 @@ from typing import Union
 import numpy as np
 from matplotlib import animation
 
-
+from PyQt5.QtWidgets import (
+    QMessageBox,
+    QFileDialog,
+)
 from matplotlib.animation import FuncAnimation
-from PyQt5.QtWidgets import *
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
 from crmapconverter.io.viewer import Viewer
 from crmapconverter.sumo_map.config import SumoConfig
 from crmapconverter.io.V3_0.observable import Observable
@@ -60,12 +60,11 @@ class AnimatedViewer(Viewer):
             return
 
         if start == end:
-            warning_dia = QMessageBox()
-            reply = warning_dia.warning(
+            warning_dialog = QMessageBox()
+            warning_dialog.warning(
                 None, "Warning", "This Scenario only has one time step!",
                 QMessageBox.Ok, QMessageBox.Ok)
-            if reply == QMessageBox.Ok:
-                warning_dia.close()
+            warning_dialog.close()
 
         assert start <= end, '<video/create_scenario_video> time_begin=%i needs to smaller than time_end=%i.' % (
             start, end)
@@ -152,7 +151,7 @@ class AnimatedViewer(Viewer):
                 return
 
             try:
-                with open(path, "w") as fh:
+                with open(path, "w"):
                     FFMpegWriter = animation.writers['ffmpeg']
                     writer = FFMpegWriter()
                     self.animation.save(path, dpi=120, writer=writer)
@@ -182,7 +181,7 @@ class AnimatedViewer(Viewer):
                 return
 
             try:
-                with open(path, "w") as fh:
+                with open(path, "w"):
                     self.animation.save(path, writer='imagemagick', fps=30)
 
             except IOError as e:

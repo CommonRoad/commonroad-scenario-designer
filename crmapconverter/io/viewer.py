@@ -504,16 +504,16 @@ class MainWindow(QWidget):
                 QMessageBox.Ok,
             )
             return
-        except Exception as e:
-            errorMsg = "{}".format(e)
-            QMessageBox.warning(
-                self,
-                "CommonRoad XML error",
-                "There was an error during the loading of the selected CommonRoad file.\n\n{}"
-                .format(errorMsg),
-                QMessageBox.Ok,
-            )
-            return
+        # except Exception as e:
+        #     errorMsg = "{}".format(e)
+        #     QMessageBox.warning(
+        #         self,
+        #         "CommonRoad XML error",
+        #         "There was an error during the loading of the selected CommonRoad file.\n\n{}"
+        #         .format(errorMsg),
+        #         QMessageBox.Ok,
+        #     )
+        #     return
 
         self.openScenario(scenario, filename)
 

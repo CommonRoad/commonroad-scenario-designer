@@ -3,9 +3,22 @@ import os
 from lxml import etree
 
 from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import *
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
+from PyQt5.QtWidgets import (
+    QMainWindow,
+    QDockWidget,
+    QMessageBox,
+    QAction,
+    QLabel,
+    QFileDialog, 
+    QDesktopWidget, 
+    QVBoxLayout, 
+    QSlider,
+    QWidget,
+    QApplication,
+    qApp
+)
+from PyQt5.QtCore import Qt, QUrl
+from PyQt5.QtGui import QIcon, QKeySequence, QDesktopServices
 from matplotlib.backends.backend_qt5agg import (NavigationToolbar2QT as
                                                 NavigationToolbar)
 
@@ -13,9 +26,9 @@ from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.common.file_writer import CommonRoadFileWriter
 from commonroad.scenario.scenario import Scenario, LaneletNetwork
 
-from crmapconverter.io.V3_0.GUI_src import CR_Scenario_Designer
+
 from crmapconverter.io.V3_0.GUI_resources.MainWindow import Ui_mainWindow
-from crmapconverter.io.V3_0.gui_toolbox import UpperToolbox, SumoTool
+from crmapconverter.io.V3_0.gui_toolbox import UpperToolbox
 from crmapconverter.io.V3_0.gui_cr_viewer import AnimatedViewer
 from crmapconverter.io.V3_0.converter_modules.osm_interface import OSMInterface
 from crmapconverter.io.V3_0.converter_modules.opendrive_interface import (
@@ -269,15 +282,15 @@ class MWindow(QMainWindow, Ui_mainWindow):
     def create_toolbar(self):
         """Function to create toolbar of the main Window."""
         tb1 = self.addToolBar("File")
-        new = QAction(QIcon(":/icons/new_file.png"), "new CR File", self)
-        tb1.addAction(new)
-        new.triggered.connect(self.file_new)
-        open = QAction(QIcon(":/icons/open_file.png"), "open CR File", self)
-        tb1.addAction(open)
-        open.triggered.connect(self.open_commonroad_file)
-        save = QAction(QIcon(":/icons/save_file.png"), "save CR File", self)
-        tb1.addAction(save)
-        save.triggered.connect(self.file_save)
+        action_new = QAction(QIcon(":/icons/new_file.png"), "new CR File", self)
+        tb1.addAction(action_new)
+        action_new.triggered.connect(self.file_new)
+        action_open = QAction(QIcon(":/icons/open_file.png"), "open CR File", self)
+        tb1.addAction(action_open)
+        action_open.triggered.connect(self.open_commonroad_file)
+        action_save = QAction(QIcon(":/icons/save_file.png"), "save CR File", self)
+        tb1.addAction(action_save)
+        action_save.triggered.connect(self.file_save)
         tb1.addSeparator()
         tb2 = self.addToolBar("ToolBox")
         toolbox = QAction(QIcon(":/icons/tools.ico"),
@@ -316,8 +329,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.slider.valueChanged.connect(self.timestep_change)
         self.slider.sliderPressed.connect(self.detect_slider_clicked)
         self.slider.sliderReleased.connect(self.detect_slider_release)
-        self.crviewer.timestep.subscribe(
-            lambda timestep: self.slider.setValue(timestep))
+        self.crviewer.timestep.subscribe(self.slider.setValue)
         tb3.addWidget(self.slider)
 
         self.label1 = QLabel('  Step: 0', self)
@@ -496,8 +508,6 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
     def file_new(self):
         """Function to create the action in the menu bar."""
-        """Not Finished---"""
-        """ called by button new scenario """
         scenario = Scenario(0.1, 'new scenario')
         net = LaneletNetwork()
         scenario.lanelet_network = net
@@ -596,16 +606,17 @@ class MWindow(QMainWindow, Ui_mainWindow):
             return
 
         try:
-            with open(file_path, "w") as fh:
-                writer = CommonRoadFileWriter(
-                    scenario=self.crviewer.current_scenario,
-                    planning_problem_set=None,
-                    author="",
-                    affiliation="",
-                    source="",
-                    tags="",
-                )
-                writer.write_scenario_to_file(file_path)
+            fd = open(file_path, "w")
+            fd.close()
+            writer = CommonRoadFileWriter(
+                scenario=self.crviewer.current_scenario,
+                planning_problem_set=None,
+                author="",
+                affiliation="",
+                source="",
+                tags="",
+            )
+            writer.write_scenario_to_file(file_path)
         except IOError as e:
             QMessageBox.critical(
                 self,
