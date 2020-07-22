@@ -37,6 +37,7 @@ from crmapconverter.io.V3_0.gui_settings import GUISettings
 from crmapconverter.io.V3_0.SUMO_modules.sumo_settings import SUMOSettings
 from crmapconverter.io.V3_0.SUMO_modules.gui_sumo_simulation import SUMOSimulation
 from crmapconverter.io.viewer import LaneletList, IntersectionList, find_intersection_by_id
+from crmapconverter.io.V3_0 import config
 
 
 class MWindow(QMainWindow, Ui_mainWindow):
@@ -567,7 +568,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.filename = filename
         self.crviewer.open_scenario(new_scenario)
         self.sumobox.scenario = self.crviewer.current_scenario
-        self.update_view(focus=True)
+        self.update_view(focus_on_network=True)
         self.update_to_new_scenario()
 
     def update_to_new_scenario(self):
@@ -647,7 +648,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
     def tool_box2_show(self):
         self.tool2.show()
 
-    def update_view(self, focus=False):
+    def update_view(self, focus_on_network=None):
         """ update all compoments when clicking a scenario element"""
         self.make_trigger_exclusive()
         self.lanelet_list.update(self.crviewer.current_scenario)
@@ -666,10 +667,12 @@ class MWindow(QMainWindow, Ui_mainWindow):
                 self.lanelet_list.selected_id)
         else:
             selected_lanelet = None
+        if focus_on_network is None:
+            focus_on_network = config.AUTOFOCUS
         self.crviewer.update_plot(scenario=self.crviewer.current_scenario,
                                   sel_lanelet=selected_lanelet,
                                   sel_intersection=selected_intersection,
-                                  focus_on_network=focus)
+                                  focus_on_network=focus_on_network)
 
     def make_trigger_exclusive(self):
         """ 
@@ -693,7 +696,7 @@ def main():
     app = QApplication(sys.argv)
     w = MWindow()
     w.showMaximized()
-    w.open_path("/home/max/Desktop/Planning/Maps/cr_files/ped/garching_kreuzung_fixed.xml")
+    # w.open_path("/home/max/Desktop/Planning/Maps/cr_files/ped/intersect_and_crossing3.xml")
     sys.exit(app.exec_())
 
 

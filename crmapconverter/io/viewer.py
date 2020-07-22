@@ -50,7 +50,6 @@ matplotlib.use("Qt5Agg")
 
 
 ZOOM_FACTOR = 1.2
-AUTOFOCUS = False
 
 
 class DynamicCanvas(FigureCanvas):
@@ -248,7 +247,7 @@ class Viewer:
                     scenario: "Scenario",
                     sel_lanelet: Lanelet = None,
                     sel_intersection: Intersection = None,
-                    focus_on_network: bool = AUTOFOCUS):
+                    focus_on_network: bool = False):
         """ Update the plot accordinly to the selection of scenario elements"""
 
         x_lim = self.dynamic.get_axes().get_xlim()

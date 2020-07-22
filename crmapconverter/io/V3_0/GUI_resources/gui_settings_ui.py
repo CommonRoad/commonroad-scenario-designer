@@ -11,7 +11,7 @@ from PyQt5 import QtCore, QtWidgets
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(990, 807)
+        MainWindow.resize(500, 200)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.verticalLayout = QtWidgets.QVBoxLayout(self.centralwidget)
@@ -24,6 +24,15 @@ class Ui_MainWindow(object):
         self.scrollAreaWidgetContents.setObjectName("scrollAreaWidgetContents")
         self.gridLayout_2 = QtWidgets.QGridLayout(self.scrollAreaWidgetContents)
         self.gridLayout_2.setObjectName("gridLayout_2")
+
+        self.label_autofocus = QtWidgets.QLabel(self.scrollAreaWidgetContents)
+        self.label_autofocus.setObjectName("label_autofocus")
+        self.gridLayout_2.addWidget(self.label_autofocus, 0, 0, 1, 1)
+        
+        self.chk_autofocus = QtWidgets.QCheckBox(self.scrollAreaWidgetContents)
+        self.chk_autofocus.setText("")
+        self.chk_autofocus.setObjectName("chk_autofocus")
+        self.gridLayout_2.addWidget(self.chk_autofocus, 0, 2, 1, 1)
         
         self.scrollArea.setWidget(self.scrollAreaWidgetContents)
         self.verticalLayout.addWidget(self.scrollArea)
@@ -55,6 +64,10 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "GUI Settings"))
+
+        self.label_autofocus.setText(_translate("MainWindow", "autofocus"))
+        self.label_autofocus.setToolTip(_translate("MainWindow", 
+            "activate zoom reset when selecting an item from the list"))
         
         # self.botton_restore_defaults.setText(_translate("MainWindow", "Restore Defaults"))
         self.botton_close.setText(_translate("MainWindow", "Appy and close"))

@@ -2,6 +2,7 @@
 from PyQt5.QtWidgets import QMainWindow
 
 from crmapconverter.io.V3_0.GUI_resources.gui_settings_ui import Ui_MainWindow
+from crmapconverter.io.V3_0 import config
 
 
 class GUISettings:
@@ -22,24 +23,20 @@ class GUISettings:
 
     def update_ui_values(self):
         """
-        sets the values of the settings window to the current values of config.py
-
-        :return: None
+        sets the values of the settings window to the current values of config
         """
-        # example code:
-        # window.le_benchmark_id.setText(config.BENCHMARK_ID)
-        # window.sb_compression_threshold.setValue(config.COMPRESSION_THRESHOLD)
-        # window.chk_delete_short_edges.setChecked(config.DELETE_SHORT_EDGES)
+        self.window.chk_autofocus.setChecked(config.AUTOFOCUS)
         return
 
     def save_to_config(self) -> bool:
         """
         saves the values in the settings window to config.py
         """
-        # example code:
-        # config.BENCHMARK_ID = window.le_benchmark_id.text()
-        # config.AERIAL_IMAGES = swindow.chb_aerial.isChecked()
-        # config.DOWNLOAD_EDGE_LENGTH = window.sb_donwload_radius.value()
+        if not self.has_valid_entries():
+            return False
+
+        config.AUTOFOCUS = self.window.chk_autofocus.isChecked()
+        
         return True
 
     
@@ -52,3 +49,4 @@ class GUISettings:
         """
         if self.save_to_config():
             self.settings_window.close()
+            print("saved")

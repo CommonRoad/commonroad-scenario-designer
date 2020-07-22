@@ -24,6 +24,7 @@ class Ui_MainWindow(object):
         self.scrollAreaWidgetContents.setObjectName("scrollAreaWidgetContents")
         self.gridLayout_2 = QtWidgets.QGridLayout(self.scrollAreaWidgetContents)
         self.gridLayout_2.setObjectName("gridLayout_2")
+        
         self.label_9 = QtWidgets.QLabel(self.scrollAreaWidgetContents)
         self.label_9.setObjectName("label_9")
         self.gridLayout_2.addWidget(self.label_9, 27, 0, 1, 1)
@@ -359,6 +360,7 @@ class Ui_MainWindow(object):
         self.sb_pedestrian.setLocale(QtCore.QLocale(QtCore.QLocale.English, QtCore.QLocale.UnitedStates))
         self.sb_pedestrian.setObjectName("doubleSpinBox_pedestrian")
         self.gridLayout_2.addWidget(self.sb_pedestrian, 37, 2, 1, 1)
+        
         self.scrollArea.setWidget(self.scrollAreaWidgetContents)
         self.verticalLayout.addWidget(self.scrollArea)
         self.frame = QtWidgets.QFrame(self.centralwidget)
