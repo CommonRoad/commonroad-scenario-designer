@@ -18,7 +18,7 @@
    git clone https://github.com/octavdragoi/sumo
    cd sumo
    git checkout smooth-lane-change
-   sudo apt-get install cmake python g++ libxerces-c-dev libfox-1.6-dev libgdal-dev libproj-dev libgl2ps-dev swig
+   sudo apt-get install -y cmake python g++ libxerces-c-dev libfox-1.6-dev libgdal-dev libproj-dev libgl2ps-dev swig
    export SUMO_HOME="$(pwd)"
    echo "export SUMO_HOME=$(pwd)" >> ~/.bashrc
    cd build
@@ -32,7 +32,7 @@
    ```bash
    sudo add-apt-repository ppa:sumo/stable
    sudo apt-get update
-   sudo apt-get install sumo sumo-tools sumo-doc
+   sudo apt-get install -y sumo sumo-tools sumo-doc
    export SUMO_HOME="/usr/share/sumo"
    # add $SUMO_HOME to .bashrc (change if you're not using bash)
    echo "export SUMO_HOME=/usr/share/sumo" >> ~/.bashrc
@@ -45,7 +45,7 @@
 
    ```bash
    # install dependencies
-   git clone git@github.com:danfis/libccd.git
+   git clone https://github.com/danfis/libccd.git
    cd libccd
    mkdir build && cd build
    cmake -G "Unix Makefiles" -DENABLE_DOUBLE_PRECISION=ON -DBUILD_SHARED_LIBS=ON ..
@@ -57,9 +57,9 @@
    Install [FCL -- The Flexible Collision Library](https://github.com/flexible-collision-library/fcl) (from master branch):
 
    ```bash
-   git clone git@github.com:flexible-collision-library/fcl.git
+   git clone https://github.com/flexible-collision-library/fcl.git
    cd fcl
-   sudo apt-get install libboost-dev libboost-thread-dev libboost-test-dev libboost-filesystem-dev libeigen3-dev
+   sudo apt-get install -y libboost-dev libboost-thread-dev libboost-test-dev libboost-filesystem-dev libeigen3-dev
    # build FCL
    mkdir build && cd build
    cmake ..
@@ -70,7 +70,7 @@
    Install the [commonroad-collision-checker](https://gitlab.lrz.de/tum-cps/commonroad-collision-checker):
 
    ```bash
-   git clone git@gitlab.lrz.de:tum-cps/commonroad-collision-checker.git
+   git clone https://gitlab.lrz.de/tum-cps/commonroad-collision-checker.git
    cd commonroad-collision-checker/
    mkdir build
    cd build
@@ -92,8 +92,7 @@
 1) Install the python requirements at the root of the project
 
    ```bash
-   git clone git@gitlab.lrz.de:cps/commonroad-map-tool.git
-   pip install -r requirements.txt
+   git clone https://gitlab.lrz.de/cps/commonroad-map-tool.git
    cd commonroad-map-tool
    # install the requirements
    pip install -r requirements.txt
