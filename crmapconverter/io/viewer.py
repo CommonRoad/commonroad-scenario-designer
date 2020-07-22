@@ -70,20 +70,29 @@ class DynamicCanvas(FigureCanvas):
 
         self.clear_axes()
 
-    def clear_axes(self):
+    def clear_axes(self, keep_limits=False):
         """ """
         if self.ax:
+            limits = self.get_limits()
             self.ax.clear()
         else:
+            limits = None
             self.ax = self.drawer.add_subplot(111)
 
         self.ax.set_aspect("equal", "datalim")
         self.ax.set_axis_off()
-        self.draw()
+        self.draw_idle()
+        if keep_limits and limits:
+            self.update_plot(limits)
 
     def get_axes(self):
         """ """
         return self.ax
+
+    def get_limits(self) -> List[float]:
+        x_lim = self.ax.get_xlim()
+        y_lim = self.ax.get_ylim()
+        return [x_lim[0], x_lim[1], y_lim[0], y_lim[1]]
 
     def update_plot(self, limits: List[float]=None):
         """ """
@@ -99,7 +108,7 @@ class DynamicCanvas(FigureCanvas):
         center = ((x_min + x_max)/2, (y_min + y_max)/2)
         x_dim = (x_max - x_min)/2
         y_dim = (y_max - y_min)/2
-        
+
         # do zoom
         if event.button == 'up':
             new_x_dim = x_dim / ZOOM_FACTOR
@@ -240,7 +249,6 @@ class Viewer:
         self.dynamic.clear_axes()
         ax = self.dynamic.get_axes()
 
-
         network_limits = [
             float("Inf"),
             -float("Inf"),
@@ -273,9 +281,6 @@ class Viewer:
             self.dynamic.update_plot(network_limits)
         else:
             self.dynamic.update_plot([x_lim[0], x_lim[1], y_lim[0], y_lim[1]])
-            ax.set(xlim=x_lim)
-            ax.set(ylim=y_lim)
-           
 
         self.dynamic.drawer.tight_layout()
 

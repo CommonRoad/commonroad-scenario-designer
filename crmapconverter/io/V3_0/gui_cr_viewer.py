@@ -45,7 +45,7 @@ class AnimatedViewer(Viewer):
     def _init_animation(self):
         print('init animation')
         scenario = self.current_scenario
-        self.dynamic.ax.clear()
+        self.dynamic.clear_axes(keep_limits=True)
 
         start = self.min_timestep
         end = self.max_timestep
@@ -87,23 +87,27 @@ class AnimatedViewer(Viewer):
                     'show_label': True
                 }
             }
+            
             # plot dynamic obstracles
             if self.timestep.value <= 1:
                 self.update_plot(scenario)
 
+            limits = self.dynamic.get_limits()
             self.dynamic.draw_obstracles(
                 scenario,
                 draw_params=draw_params,
                 plot_limits=None if plot_limits == 'auto' else plot_limits)
+            self.dynamic.update_plot(limits)     
 
         # Interval determines the duration of each frame in ms
         interval = 1000 * dt
-        self.dynamic.clear_axes()
+        self.dynamic.clear_axes(keep_limits=True)
         self.animation = FuncAnimation(self.dynamic.figure,
                                        draw_frame,
                                        blit=False,
                                        interval=interval,
                                        repeat=True)
+        
 
     def play(self, config: SumoConfig = None):
         """ plays the animation if existing """
