@@ -875,17 +875,21 @@ def create_graph(file_path) -> rg.Graph:
         return graph, crossing_points
 
     if config.EXTRACT_SUBLAYER:
+        # 
         all_accepted_ways = config.ACCEPTED_HIGHWAYS.copy()
         all_accepted_ways.extend(config.ACCEPTED_HIGHWAYS_SUBLAYER)
         combined_g, _ = _create_graph(file_path, all_accepted_ways)
+        
+        # get crossing nodes
         road_g, road_crossing_points = _create_graph(file_path,
             config.ACCEPTED_HIGHWAYS, combined_g.bounds)
         sub_g, sub_crossing_points = _create_graph(file_path,
             config.ACCEPTED_HIGHWAYS_SUBLAYER, combined_g.bounds)
-
         crossing_nodes, already_contained = get_crossing_points(
             combined_g, road_g, road_crossing_points, sub_crossing_points
         )
+
+        # create the main graph with additional crossing nodes
         extended_graph, _ = _create_graph(
             file_path,
             config.ACCEPTED_HIGHWAYS,
@@ -895,6 +899,7 @@ def create_graph(file_path) -> rg.Graph:
         for node in extended_graph.nodes:
             if node.id in already_contained:
                 node.is_crossing = True
+
         return rg.SublayeredGraph(
             extended_graph.nodes,
             extended_graph.edges,

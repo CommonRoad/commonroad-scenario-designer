@@ -12,7 +12,7 @@ from crmapconverter.osm2cr import config
 from crmapconverter.osm2cr.converter_modules.graph_operations import road_graph as rg
 from crmapconverter.osm2cr.converter_modules.intermediate_format.intermediate_format import (
     IntermediateFormat,
-    extract_crossings
+    get_lanelet_intersections
 )
 from crmapconverter.osm2cr.converter_modules.utility import geometry
 from crmapconverter.osm2cr.converter_modules.utility.idgenerator import get_id
@@ -148,7 +148,7 @@ def create_scenario_intermediate(graph) -> Tuple[Scenario, IntermediateFormat]:
     interm = IntermediateFormat.extract_from_road_graph(graph)
     if isinstance(graph, rg.SublayeredGraph):
         interm_sublayer = IntermediateFormat.extract_from_road_graph(graph.sublayer_graph)
-        crossings = extract_crossings(interm_sublayer, interm)
+        crossings = get_lanelet_intersections(interm_sublayer, interm)
         interm_sublayer.intersections = list()
         interm_sublayer.traffic_lights = list()
         interm_sublayer.traffic_lights = list()
