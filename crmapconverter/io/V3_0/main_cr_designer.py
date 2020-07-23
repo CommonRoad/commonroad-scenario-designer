@@ -120,7 +120,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.gui_settings = GUISettings(self)
 
     def show_sumo_settings(self):
-        self.sumo_settings = SUMOSettings(self)
+        self.sumo_settings = SUMOSettings(self, config=self.suombox.config)
 
     def create_toolbox(self):
         """ Create the Upper toolbox."""

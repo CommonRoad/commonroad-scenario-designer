@@ -30,7 +30,7 @@ class AnimatedViewer(Viewer):
         # if playing or not
         self.playing = False
 
-    def open_scenario(self, scenario, config: SumoConfig):
+    def open_scenario(self, scenario, config: Observable):
         """[summary]
 
         :param scenario: [description]
@@ -39,7 +39,14 @@ class AnimatedViewer(Viewer):
         :type config: SumoConfig, optional
         """
         self.current_scenario = scenario
-        self._config = config if config else self._config
+
+        # if we have not subscribed already, subscribe now
+        if not self._config:
+
+            def set_config(config):
+                self._config = config
+
+            config.subscribe(set_config)
 
         self._calc_max_timestep()
         if self.animation:

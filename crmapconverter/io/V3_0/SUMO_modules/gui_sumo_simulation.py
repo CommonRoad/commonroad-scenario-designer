@@ -69,7 +69,13 @@ class WaitingDialog(QtWidgets.QDialog):
 class SUMOSimulation(QWidget, Ui_sumo_simulate):
     def __init__(self):
         # set random uuid as name for the scneario files
-        self.config = SumoConfig.from_scenario_name(str(uuid.uuid4()))
+        self._config = SumoConfig.from_scenario_name(str(uuid.uuid4()))
+        self._config_obs = Observable(self._config)
+
+        def set_config(config):
+            self._config = config
+
+        self._config_obs.subscribe(set_config)
         self._scenario: Scenario = None
 
         # observable giving the simulated scenario once done
@@ -83,6 +89,10 @@ class SUMOSimulation(QWidget, Ui_sumo_simulate):
         super(SUMOSimulation, self).__init__()
         self.setupUi(self)
         self._connect_events()
+
+    @property
+    def config(self) -> Observable:
+        return self._config_obs
 
     @property
     def scenario(self) -> Scenario:
@@ -130,10 +140,10 @@ class SUMOSimulation(QWidget, Ui_sumo_simulate):
         # window.chk_delete_short_edges.setChecked(config.DELETE_SHORT_EDGES)
 
         # load values from config
-        self.doubleSpinBox_dt.setValue(self.config.dt)
+        self.doubleSpinBox_dt.setValue(self._config.dt)
         self.spinBox_presimulation_steps.setValue(
-            self.config.presimulation_steps)
-        self.spinBox_simulation_steps.setValue(self.config.simulation_steps)
+            self._config.presimulation_steps)
+        self.spinBox_simulation_steps.setValue(self._config.simulation_steps)
 
     def simulate(self) -> bool:
         """
@@ -148,7 +158,7 @@ class SUMOSimulation(QWidget, Ui_sumo_simulate):
 
         self.waiting_msg = WaitingDialog()
         self.worker: SimulationWorker = SimulationWorker(
-            self._scenario, self.config, self._output_folder)
+            self._scenario, self._config, self._output_folder)
         self.worker.finished.connect(self.simulation_done)
         self.worker.start()
 
