@@ -3,20 +3,9 @@ import os
 from lxml import etree
 
 from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import (
-    QMainWindow,
-    QDockWidget,
-    QMessageBox,
-    QAction,
-    QLabel,
-    QFileDialog, 
-    QDesktopWidget, 
-    QVBoxLayout, 
-    QSlider,
-    QWidget,
-    QApplication,
-    qApp
-)
+from PyQt5.QtWidgets import (QMainWindow, QDockWidget, QMessageBox, QAction,
+                             QLabel, QFileDialog, QDesktopWidget, QVBoxLayout,
+                             QSlider, QWidget, QApplication, qApp)
 from PyQt5.QtCore import Qt, QUrl
 from PyQt5.QtGui import QIcon, QKeySequence, QDesktopServices
 from matplotlib.backends.backend_qt5agg import (NavigationToolbar2QT as
@@ -25,7 +14,6 @@ from matplotlib.backends.backend_qt5agg import (NavigationToolbar2QT as
 from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.common.file_writer import CommonRoadFileWriter
 from commonroad.scenario.scenario import Scenario, LaneletNetwork
-
 
 from crmapconverter.io.V3_0.GUI_resources.MainWindow import Ui_mainWindow
 from crmapconverter.io.V3_0.gui_toolbox import UpperToolbox
@@ -170,7 +158,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         if self.lanelet_list_dock is None:
             if self.crviewer.current_scenario is None:
                 messbox = QMessageBox()
-                messbox.question(
+                messbox.warning(
                     self, "Warning",
                     "Please load or convert a CR Scenario firstly",
                     QtWidgets.QMessageBox.Ok)
@@ -199,7 +187,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         if self.intersection_list_dock is None:
             if self.crviewer.current_scenario is None:
                 messbox = QMessageBox()
-                messbox.question(
+                messbox.warning(
                     self, "Warning",
                     "Please load or convert a CR Scenario or first",
                     QtWidgets.QMessageBox.Ok)
@@ -239,13 +227,13 @@ class MWindow(QMainWindow, Ui_mainWindow):
         """Function connected with the play button in the sumo-toolbox."""
         if self.crviewer.current_scenario is None:
             messbox = QMessageBox()
-            reply = messbox.question(
+            reply = messbox.warning(
                 self, "Warning", "You should firstly load a animated scenario",
                 QMessageBox.Ok | QMessageBox.No, QMessageBox.Ok)
             if (reply == QtWidgets.QMessageBox.Ok):
-                self.file_open()
+                self.open_commonroad_file()
         else:
-            self.crviewer.play(config=self.sumobox.config)
+            self.crviewer.play()
 
     def pause_animation(self):
         """Function connected with the pause button in Toolbar."""
@@ -255,12 +243,12 @@ class MWindow(QMainWindow, Ui_mainWindow):
         """Function connected with the save button in the Toolbar."""
         if self.crviewer.current_scenario is None:
             messbox = QMessageBox()
-            reply = messbox.question(self, "Warning",
-                                     "You should firstly load an animation",
-                                     QMessageBox.Ok | QMessageBox.No,
-                                     QMessageBox.Ok)
+            reply = messbox.warning(self, "Warning",
+                                    "You should firstly load an animation",
+                                    QMessageBox.Ok | QMessageBox.No,
+                                    QMessageBox.Ok)
             if (reply == QtWidgets.QMessageBox.Ok):
-                self.file_open()
+                self.open_commonroad_file()
             else:
                 messbox.close()
         else:
@@ -283,13 +271,16 @@ class MWindow(QMainWindow, Ui_mainWindow):
     def create_toolbar(self):
         """Function to create toolbar of the main Window."""
         tb1 = self.addToolBar("File")
-        action_new = QAction(QIcon(":/icons/new_file.png"), "new CR File", self)
+        action_new = QAction(QIcon(":/icons/new_file.png"), "new CR File",
+                             self)
         tb1.addAction(action_new)
         action_new.triggered.connect(self.file_new)
-        action_open = QAction(QIcon(":/icons/open_file.png"), "open CR File", self)
+        action_open = QAction(QIcon(":/icons/open_file.png"), "open CR File",
+                              self)
         tb1.addAction(action_open)
         action_open.triggered.connect(self.open_commonroad_file)
-        action_save = QAction(QIcon(":/icons/save_file.png"), "save CR File", self)
+        action_save = QAction(QIcon(":/icons/save_file.png"), "save CR File",
+                              self)
         tb1.addAction(action_save)
         action_save.triggered.connect(self.file_save)
         tb1.addSeparator()
@@ -535,7 +526,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         try:
             commonroad_reader = CommonRoadFileReader(path)
             scenario, _ = commonroad_reader.open()
-        except etree.XMLSyntaxError as e:
+        except Exception as e:
             QMessageBox.warning(
                 self,
                 "CommonRoad XML error",
@@ -566,7 +557,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
                 QMessageBox.Ok,
             )
         self.filename = filename
-        self.crviewer.open_scenario(new_scenario)
+        self.crviewer.open_scenario(new_scenario, self.sumobox.config)
         self.sumobox.scenario = self.crviewer.current_scenario
         self.update_view(focus_on_network=True)
         self.update_to_new_scenario()
