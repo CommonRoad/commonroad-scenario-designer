@@ -325,12 +325,11 @@ class IntermediateFormat:
                 return sign
 
     @staticmethod
-    def get_direction(a: List[np.ndarray], b: List[np.ndarray]):
+    def get_directions(incoming_lane):
         """
-        Return direction of waypoints b from waypoints a
+        Find all directions of a incoming lane's successors
 
-        :param a: List of points
-        :param b: List of points
+        :param incoming_lane: incoming lane from intersection
         :return: str: left or right or through
         """
         straight_threshold_angel = config.INTERSECTION_STRAIGHT_THRESHOLD
@@ -358,9 +357,10 @@ class IntermediateFormat:
 
         # sort after size
         sorted_angels = {
-            k: v
-            for k, v in sorted(angels.items(), key=lambda item: item[1])
-        }
+            k: v for k,
+            v in sorted(
+                angels.items(),
+                key=lambda item: item[1])}
         sorted_keys = list(sorted_angels.keys())
         sorted_values = list(sorted_angels.values())
 
@@ -369,8 +369,7 @@ class IntermediateFormat:
             directions = {
                 sorted_keys[0]: 'left',
                 sorted_keys[1]: 'through',
-                sorted_keys[2]: 'right'
-            }
+                sorted_keys[2]: 'right'}
 
         # if 2 successors we assume that they both cannot have the same
         # direction

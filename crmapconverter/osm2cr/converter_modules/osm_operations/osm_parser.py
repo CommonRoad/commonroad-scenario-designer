@@ -146,6 +146,10 @@ def get_traffic_rules(nodes: Dict[int, ElTree.Element],
                 virtual = None
                 if key == 'maxspeed':
                     value, virtual = extract_speedlimit(value)
+                elif key == 'highway':
+                    # fallback if no speedlimit was found
+                    value, virtual = extract_speedlimit(value)
+                    key = 'maxspeed'
                 sign = {key: value, 'virtual': virtual}
                 # check if traffic rule exists
                 nodes = road.findall("nd")
