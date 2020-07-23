@@ -105,19 +105,19 @@ def get_lanelets(graph: rg.Graph) -> List[Lanelet]:
     return result
 
 
-def create_scenario(graph: rg.Graph) -> Scenario:
-    """
-    creates a CR scenario out of a graph
+# def create_scenario(graph: rg.Graph) -> Scenario:
+#     """
+#     creates a CR scenario out of a graph
 
-    :param graph: the graph to convert
-    :return: CR scenario
-    """
-    scenario = Scenario(config.TIMESTEPSIZE, config.BENCHMARK_ID)
-    net = LaneletNetwork()
-    for lanelet in get_lanelets(graph):
-        net.add_lanelet(lanelet)
-    scenario.lanelet_network = net
-    return scenario
+#     :param graph: the graph to convert
+#     :return: CR scenario
+#     """
+#     scenario = Scenario(config.TIMESTEPSIZE, config.BENCHMARK_ID)
+#     net = LaneletNetwork()
+#     for lanelet in get_lanelets(graph):
+#         net.add_lanelet(lanelet)
+#     scenario.lanelet_network = net
+#     return scenario
 
 
 def convert_coordinates_to_utm(scenario: Scenario, origin: np.ndarray) -> None:

@@ -281,7 +281,7 @@ def get_lanelet_intersections(
     crossings = dict()
     for crossed_lanelet in crossed_lane_network.lanelets:
         crossing_lanelet_ids = crossing_lane_network.find_lanelet_by_shape(
-            crossed_lanelet)
+            crossed_lanelet.convert_to_polygon())
         crossings[crossed_lanelet.lanelet_id] = set(crossing_lanelet_ids)
     return crossings
 
@@ -640,20 +640,20 @@ class IntermediateFormat:
         :param crossings: dcict of crossed and crossing lanelets
         """
 
-        all_crossed_ids = set([crossed for crossed, intersecting 
-            in crossings if intersecting])
+        all_crossed_ids = set([crossed for crossed 
+            in crossings if crossings[crossed]])
         all_crossing_ids = set()
         for i in self.intersections:
             # find all lanelets of the intersection that are crossed
             intersection_lanelet_ids = set()
             for incoming in i.incomings:
-                intersection_lanelet_ids += set(incoming.successors_left)
-                intersection_lanelet_ids += set(incoming.successors_straight)
-                intersection_lanelet_ids += set(incoming.successors_right)
+                intersection_lanelet_ids |= set(incoming.successors_left)
+                intersection_lanelet_ids |= set(incoming.successors_straight)
+                intersection_lanelet_ids |= set(incoming.successors_right)
             intersected_lanelets_of_i = intersection_lanelet_ids & all_crossed_ids
             # add information about crossings to intersection
             for intersected in intersected_lanelets_of_i:
-                i.crossings += crossings[intersected]
+                i.crossings.union(crossings[intersected])
                     
         # adjust edge type of crossing edges
         for edge in self.edges:
