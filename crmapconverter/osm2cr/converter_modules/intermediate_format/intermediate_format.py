@@ -6,7 +6,7 @@ __author__ = "Behtarin Ferdousi"
 
 import copy
 import numpy as np
-from typing import List, Set, Tuple
+from typing import List, Set, Tuple, Dict
 import warnings
 
 from commonroad.scenario.lanelet import (Lanelet, LaneletNetwork, LaneletType)
@@ -29,17 +29,21 @@ from crmapconverter.osm2cr.converter_modules.intermediate_format.sumo_helper \
     import Sumo
 from crmapconverter.osm2cr.converter_modules.graph_operations.road_graph \
     import Graph
+
 from crmapconverter.osm2cr.converter_modules.utility import (geometry,
                                                              idgenerator)
+from crmapconverter.osm2cr.converter_modules.utility import geometry
 
-CrossingList = List[Tuple[int, List[int]]]
+# mapping from crossed lanelet ids to the crossing ones
+Crossings = Dict[int, Set[int]] 
 
 
 class Node:
     """
     Class to represent the nodes in the intermediate format
     """
-    def __init__(self, node_id, point):
+
+    def __init__(self, node_id:int , point: geometry.Point):
         """
         Initialize a node element
 
@@ -238,27 +242,23 @@ def add_is_left_of(incoming_data, incoming_data_id):
     return incoming_data
 
 
-def extract_crossings(interm_a: "IntermediateFormat",
-                      interm_b: "IntermediateFormat") -> CrossingList:
+def get_lanelet_intersections(crossing_interm: "IntermediateFormat", 
+                              crossed_interm: "IntermediateFormat") -> Crossings:
     """ 
-    Calculcate all crossings of the two networks.
-    For each lanelet of a return the crossed lanelets of b if existing.
+    Calculcate all polygon intersections of the lanelets of the two networks.
+    For each lanelet of b return the crossing lanelets of a as a list.
 
-    :param interm_a: crossing network
-    :param interm_b: network to be crossed by a
-    :return: list of lanelets of a with the crossed lanelets of b
+    :param crossing_interm: crossing network
+    :param crossed_interm: network crossed by crossing_interm
+    :return: Dict of crossing lanelet ids for each lanelet
     """
-    lane_network_a = interm_a.to_commonroad_scenario().lanelet_network
-    lane_network_b = interm_b.to_commonroad_scenario().lanelet_network
-    crossings = list()
-    for path_lane_a in lane_network_a.lanelets:
-        # TODO efficiency: only if is close to crossing point
-        lanelet_polygon_a = path_lane_a.convert_to_polygon()
-        id_lane_intersected_b = lane_network_b.find_lanelet_by_shape(
-            lanelet_polygon_a)
-        if id_lane_intersected_b:
-            crossings.append((path_lane_a.lanelet_id, id_lane_intersected_b))
-            # print(path_lane.lanelet_id, "is crossing", intersected_road_ids)
+    crossing_lane_network = crossing_interm.to_commonroad_scenario().lanelet_network
+    crossed_lane_network = crossed_interm.to_commonroad_scenario().lanelet_network
+    crossings = dict()
+    for crossed_lanelet in crossed_lane_network.lanelets:
+        crossing_lanelet_ids = crossing_lane_network.find_lanelet_by_shape(
+            crossed_lanelet.convert_to_polygon())
+        crossings[crossed_lanelet.lanelet_id] = set(crossing_lanelet_ids)
     return crossings
 
 
@@ -623,29 +623,31 @@ class IntermediateFormat:
         self.traffic_signs.extend(copy.deepcopy(other_interm.traffic_signs))
         self.traffic_lights.extend(copy.deepcopy(other_interm.traffic_lights))
         self.intersections.extend(copy.deepcopy(other_interm.intersections))
-
-    def add_crossing_information(self, crossings: CrossingList):
+        
+    def add_crossing_information(self, crossings: Crossings):
         """ 
-        add information about crossings to intersections
-        A crossings lanelet will be set at the intersection the crossed
-        lanelet is part of not at the crossed lanelet.
+        Add information about crossings to the intersections.
+        The parameter maps each lanelet id to the crossing lanelet ids.
 
-        :param crossings: list of crossing and crossed lanelets respectively
+        :param crossings: dcict of crossed and crossing lanelets
         """
-        # interm_main should already be prepared for this step
-        crossing_ids = []
-        for crossing_id, crossed_ids in crossings:
-            crossing_ids.append(crossing_id)
-            for intersection in self.intersections:
-                incomings_successors = []
-                for incoming in intersection.incomings:
-                    incomings_successors.extend(incoming.successors_left)
-                    incomings_successors.extend(incoming.successors_straight)
-                    incomings_successors.extend(incoming.successors_right)
-                if set(crossed_ids) & set(incomings_successors):
-                    intersection.crossings.add(crossing_id)
 
+        all_crossed_ids = set([crossed for crossed 
+            in crossings if crossings[crossed]])
+        all_crossing_ids = set()
+        for i in self.intersections:
+            # find all lanelets of the intersection that are crossed
+            intersection_lanelet_ids = set()
+            for incoming in i.incomings:
+                intersection_lanelet_ids |= set(incoming.successors_left)
+                intersection_lanelet_ids |= set(incoming.successors_straight)
+                intersection_lanelet_ids |= set(incoming.successors_right)
+            intersected_lanelets_of_i = intersection_lanelet_ids & all_crossed_ids
+            # add information about crossings to intersection
+            for intersected in intersected_lanelets_of_i:
+                i.crossings.union(crossings[intersected])
+                    
         # adjust edge type of crossing edges
         for edge in self.edges:
-            if edge.id in crossing_ids:
+            if edge.id in all_crossing_ids:
                 edge.edge_type = config.CROSSING_LANELETTYPE

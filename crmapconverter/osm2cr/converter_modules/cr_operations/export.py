@@ -12,7 +12,7 @@ from crmapconverter.osm2cr import config
 from crmapconverter.osm2cr.converter_modules.graph_operations import road_graph as rg
 from crmapconverter.osm2cr.converter_modules.intermediate_format.intermediate_format import (
     IntermediateFormat,
-    extract_crossings
+    get_lanelet_intersections
 )
 from crmapconverter.osm2cr.converter_modules.utility import geometry
 from crmapconverter.osm2cr.converter_modules.utility.idgenerator import get_id
@@ -105,19 +105,19 @@ def get_lanelets(graph: rg.Graph) -> List[Lanelet]:
     return result
 
 
-def create_scenario(graph: rg.Graph) -> Scenario:
-    """
-    creates a CR scenario out of a graph
+# def create_scenario(graph: rg.Graph) -> Scenario:
+#     """
+#     creates a CR scenario out of a graph
 
-    :param graph: the graph to convert
-    :return: CR scenario
-    """
-    scenario = Scenario(config.TIMESTEPSIZE, config.BENCHMARK_ID)
-    net = LaneletNetwork()
-    for lanelet in get_lanelets(graph):
-        net.add_lanelet(lanelet)
-    scenario.lanelet_network = net
-    return scenario
+#     :param graph: the graph to convert
+#     :return: CR scenario
+#     """
+#     scenario = Scenario(config.TIMESTEPSIZE, config.BENCHMARK_ID)
+#     net = LaneletNetwork()
+#     for lanelet in get_lanelets(graph):
+#         net.add_lanelet(lanelet)
+#     scenario.lanelet_network = net
+#     return scenario
 
 
 def convert_coordinates_to_utm(scenario: Scenario, origin: np.ndarray) -> None:
@@ -147,7 +147,7 @@ def create_scenario_intermediate(graph) -> Tuple[Scenario, IntermediateFormat]:
     interm = IntermediateFormat.extract_from_road_graph(graph)
     if isinstance(graph, rg.SublayeredGraph):
         interm_sublayer = IntermediateFormat.extract_from_road_graph(graph.sublayer_graph)
-        crossings = extract_crossings(interm_sublayer, interm)
+        crossings = get_lanelet_intersections(interm_sublayer, interm)
         interm_sublayer.intersections = list()
         interm_sublayer.traffic_lights = list()
         interm_sublayer.traffic_lights = list()
