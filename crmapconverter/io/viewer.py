@@ -12,6 +12,7 @@ from typing import List, Tuple
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from matplotlib.path import Path
+import matplotlib.pyplot as plt
 from matplotlib.patches import PathPatch
 
 from PyQt5.QtCore import Qt, pyqtSlot
@@ -35,6 +36,7 @@ from PyQt5.QtWidgets import (
 from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.scenario.intersection import Intersection
 from commonroad.common.util import Interval
+from commonroad.scenario.scenario import Scenario
 from commonroad.scenario.lanelet import Lanelet, is_natural_number
 from commonroad.visualization.draw_dispatch_cr import draw_object
 
@@ -48,7 +50,6 @@ __status__ = "Released"
 
 matplotlib.use("Qt5Agg")
 
-
 ZOOM_FACTOR = 1.2
 
 
@@ -58,6 +59,9 @@ class DynamicCanvas(FigureCanvas):
 
         self.ax = None
         self.drawer = Figure(figsize=(width, height), dpi=dpi)
+        # select pan tool by default
+        plt.get_current_fig_manager().toolbar.pan()
+
         self._handles = {}
 
         super().__init__(self.drawer)
@@ -84,8 +88,11 @@ class DynamicCanvas(FigureCanvas):
         if keep_limits and limits:
             self.update_plot(limits)
 
-    def get_axes(self) -> "Ax":
-        """ return the axes of this canvas """
+    def get_axes(self):
+        """Gives the plots Axes
+
+        :return: matplotlib axis
+        """
         return self.ax
 
     def get_limits(self) -> List[float]:
@@ -105,9 +112,9 @@ class DynamicCanvas(FigureCanvas):
         """ zoom in / out function in GUI by using mouse wheel """
         x_min, x_max = self.ax.get_xlim()
         y_min, y_max = self.ax.get_ylim()
-        center = ((x_min + x_max)/2, (y_min + y_max)/2)
-        x_dim = (x_max - x_min)/2
-        y_dim = (y_max - y_min)/2
+        center = ((x_min + x_max) / 2, (y_min + y_max) / 2)
+        x_dim = (x_max - x_min) / 2
+        y_dim = (y_max - y_min) / 2
 
         # enlarge / shrink limits
         if event.button == 'up':
@@ -126,24 +133,52 @@ class DynamicCanvas(FigureCanvas):
             # old limits should include new limits if zooming in
             dim_diff_x = abs(new_x_dim - x_dim)
             dim_diff_y = abs(new_y_dim - y_dim)
-            new_center_x = min(max(center[0] - dim_diff_x, new_center_x), center[0] + dim_diff_x)
-            new_center_y = min(max(center[1] - dim_diff_y, new_center_y), center[1] + dim_diff_y)
+            new_center_x = min(max(center[0] - dim_diff_x, new_center_x),
+                center[0] + dim_diff_x)
+            new_center_y = min(max(center[1] - dim_diff_y, new_center_y),
+                center[1] + dim_diff_y)
         else:
             new_center_x = center[0]
             new_center_y = center[1]
 
         self.update_plot([
-            new_center_x - new_x_dim,
-            new_center_x + new_x_dim,
-            new_center_y - new_y_dim,
-            new_center_y + new_y_dim
+            new_center_x - new_x_dim, new_center_x + new_x_dim,
+            new_center_y - new_y_dim, new_center_y + new_y_dim
         ])
 
-    def draw_obstracles(self, scenario, draw_params, plot_limits):
+    def draw_scenario(self,
+                      scenario: Scenario,
+                      draw_params=None,
+                      plot_limits=None):
+        """[summary]
+
+        :param scenario: [description]
+        :type scenario: Scenario
+        :param draw_params: [description], defaults to None
+        :type draw_params: [type], optional
+        :param plot_limits: [description], defaults to None
+        :type plot_limits: [type], optional
         """
-        draw CommonRoad obstacles on the canvas.
+        self.clear_axes()
+        draw_object(scenario,
+                    ax=self.ax,
+                    draw_params=draw_params,
+                    plot_limits=plot_limits,
+                    handles=self._handles)
+        self.ax.autoscale()
+        self.ax.set_aspect('equal')
+
+    def update_obstacles(self,
+                         scenario: Scenario,
+                         draw_params=None,
+                         plot_limits=None):
         """
-        # remove dynamic obstacles
+        Redraw only the dynamic obstacles. This gives a large performance boost, when playing an animation
+        :param scenario: The scneario containing the dynamic obstacles 
+        :param draw_params: CommonRoad draw_object() DrawParams
+        :param plot_limits: Matplotlib plot limits
+        """
+        # # remove dynamic obstacles
         for handles_i in self._handles.values():
             for handle in handles_i:
                 if handle:
@@ -151,24 +186,23 @@ class DynamicCanvas(FigureCanvas):
         self._handles.clear()
 
         # redraw dynamic obstacles
-        if plot_limits:
-            draw_object(scenario.obstacles_by_position_intervals([
-                Interval(plot_limits[0], plot_limits[1]),
-                Interval(plot_limits[2], plot_limits[3])
-            ]),
-                        ax=self.ax,
-                        draw_params=draw_params,
-                        plot_limits=plot_limits,
-                        handles=self._handles)
-        else:
-            draw_object(scenario.obstacles,
-                        ax=self.ax,
-                        draw_params=draw_params,
-                        plot_limits=plot_limits,
-                        handles=self._handles)
+        obstacles = scenario.obstacles_by_position_intervals([
+            Interval(plot_limits[0], plot_limits[1]),
+            Interval(plot_limits[2], plot_limits[3])
+        ]) if plot_limits else scenario.obstacles
 
-        # self.ax.autoscale()
-        # self.ax.set_aspect('equal')
+        traffic_lights = scenario.lanelet_network.traffic_lights
+        traffic_light_lanelets = [
+            lanelet for lanelet in scenario.lanelet_network.lanelets
+            if lanelet.traffic_lights
+        ]
+
+        for obj in [obstacles, traffic_lights]:
+            draw_object(obstacles,
+                        ax=self.ax,
+                        draw_params=draw_params,
+                        plot_limits=plot_limits,
+                        handles=self._handles)
 
 
 class ScenarioElementList(QTableWidget):
@@ -253,11 +287,18 @@ class Viewer:
         self.dynamic = DynamicCanvas(parent, width=5, height=10, dpi=100)
 
     def update_plot(self,
-                    scenario: "Scenario",
+                    scenario: Scenario,
                     sel_lanelet: Lanelet = None,
                     sel_intersection: Intersection = None,
                     focus_on_network: bool = False):
-        """ Update the plot accordinly to the selection of scenario elements"""
+        """ Update the plot accordinly to the selection of scenario elements
+        :param scenario: Scenario to draw
+        :type scenario: Scenario
+        :param sel_lanelet: selected lanelet, defaults to None
+        :type sel_lanelet: Lanelet, optional
+        :param sel_intersection: selected intersection, defaults to None
+        :type sel_intersection: Intersection, optional
+        """
 
         x_lim = self.dynamic.get_axes().get_xlim()
         y_lim = self.dynamic.get_axes().get_ylim()
@@ -266,33 +307,44 @@ class Viewer:
         ax = self.dynamic.get_axes()
 
         network_limits = [
-            float("Inf"),
-            -float("Inf"),
-            float("Inf"),
-            -float("Inf")
+            float("Inf"), -float("Inf"),
+            float("Inf"), -float("Inf")
         ]
+
+        draw_params = {
+            'scenario': {
+                'dynamic_obstacle': {
+                    'trajectory': {
+                        'show_label': True,
+                        'draw_trajectory': False
+                    }
+                }
+            }
+        }
+        self.dynamic.draw_scenario(scenario, draw_params=draw_params)
 
         for lanelet in scenario.lanelet_network.lanelets:
 
             draw_arrow, color, alpha, zorder, label = self.get_paint_parameters(
                 lanelet, sel_lanelet, sel_intersection)
+            if color == "gray": continue
 
-            lanelet_limits = self.draw_lanelet_polygon(
-                lanelet, ax, color, alpha, zorder, label)
+            lanelet_limits = self.draw_lanelet_polygon(lanelet, ax, color,
+                                                       alpha, zorder, label)
             network_limits[0] = min(network_limits[0], lanelet_limits[0])
             network_limits[1] = max(network_limits[1], lanelet_limits[1])
             network_limits[2] = min(network_limits[2], lanelet_limits[2])
             network_limits[3] = max(network_limits[3], lanelet_limits[3])
 
             self.draw_lanelet_vertices(lanelet, ax)
-
             if draw_arrow:
                 self.draw_arrow_on_lanelet(lanelet, ax)
 
         handles, labels = ax.get_legend_handles_labels()
-        ax.legend(handles, labels)
+        legend = ax.legend(handles, labels)
+        legend.set_zorder(50)
 
-        if (focus_on_network 
+        if (focus_on_network
                 and all([abs(l) != float("Inf") for l in network_limits])):
             self.dynamic.update_plot(network_limits)
         else:
@@ -306,39 +358,39 @@ class Viewer:
         Return the parameters for painting a lanelet regarding the selected lanelet.
         """
 
-        if selected_lanelet is not None:
+        if selected_lanelet:
             draw_arrow = True
 
             if lanelet.lanelet_id == selected_lanelet.lanelet_id:
                 color = "red"
                 alpha = 0.7
-                zorder = 10
+                zorder = 20
                 label = "{} selected".format(lanelet.lanelet_id)
 
             elif (lanelet.lanelet_id in selected_lanelet.predecessor
                   and lanelet.lanelet_id in selected_lanelet.successor):
                 color = "purple"
                 alpha = 0.5
-                zorder = 5
+                zorder = 10
                 label = "{} predecessor and successor of {}".format(
                     lanelet.lanelet_id, selected_lanelet.lanelet_id)
 
             elif lanelet.lanelet_id in selected_lanelet.predecessor:
                 color = "blue"
                 alpha = 0.5
-                zorder = 5
+                zorder = 10
                 label = "{} predecessor of {}".format(
                     lanelet.lanelet_id, selected_lanelet.lanelet_id)
             elif lanelet.lanelet_id in selected_lanelet.successor:
                 color = "green"
                 alpha = 0.5
-                zorder = 5
+                zorder = 10
                 label = "{} successor of {}".format(
                     lanelet.lanelet_id, selected_lanelet.lanelet_id)
             elif lanelet.lanelet_id == selected_lanelet.adj_left:
                 color = "yellow"
                 alpha = 0.5
-                zorder = 5
+                zorder = 10
                 label = "{} adj left of {} ({})".format(
                     lanelet.lanelet_id,
                     selected_lanelet.lanelet_id,
@@ -348,7 +400,7 @@ class Viewer:
             elif lanelet.lanelet_id == selected_lanelet.adj_right:
                 color = "orange"
                 alpha = 0.5
-                zorder = 5
+                zorder = 10
                 label = "{} adj right of {} ({})".format(
                     lanelet.lanelet_id,
                     selected_lanelet.lanelet_id,
@@ -362,7 +414,7 @@ class Viewer:
                 label = None
                 draw_arrow = False
 
-        elif selected_intersection is not None:
+        elif selected_intersection:
             incoming_ids = selected_intersection.map_incoming_lanelets.keys()
             inc_succ_ids = set()
             for inc in selected_intersection.incomings:
@@ -375,17 +427,17 @@ class Viewer:
             if lanelet.lanelet_id in incoming_ids:
                 color = "red"
                 alpha = 0.7
-                zorder = 5
+                zorder = 10
                 label = "{} incoming".format(lanelet.lanelet_id)
             elif lanelet.lanelet_id in selected_intersection.crossings:
                 color = "blue"
                 alpha = 0.5
-                zorder = 5
+                zorder = 10
                 label = "{} crossing".format(lanelet.lanelet_id)
             elif lanelet.lanelet_id in inc_succ_ids:
                 color = "green"
                 alpha = 0.3
-                zorder = 5
+                zorder = 10
                 label = "{} intersection".format(lanelet.lanelet_id)
             else:
                 color = "gray"
@@ -402,9 +454,8 @@ class Viewer:
 
         return draw_arrow, color, alpha, zorder, label
 
-    def draw_lanelet_polygon(
-        self, lanelet, ax, color, alpha, zorder, label
-    )-> Tuple[float, float, float, float]:
+    def draw_lanelet_polygon(self, lanelet, ax, color, alpha, zorder,
+                             label) -> Tuple[float, float, float, float]:
         # TODO efficiency
         verts = []
         codes = [Path.MOVETO]
@@ -634,7 +685,10 @@ def main():
     if len(sys.argv) >= 2:
         main_window = MainWindow(path=sys.argv[1])
     else:
-        main_window = MainWindow(path="/home/max/Desktop/Planning/Maps/cr_files/ped/garching_kreuzung_fixed.xml")
+        main_window = MainWindow(
+            path=
+            "/home/max/Desktop/Planning/Maps/cr_files/ped/garching_kreuzung_fixed.xml"
+        )
     main_window.show()
 
     sys.exit(app.exec_())
