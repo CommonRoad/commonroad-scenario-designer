@@ -743,7 +743,6 @@ def map_restrictions(
                     "several edges have the same id, we cannot apply restrictions to it"
                 )
                 # TODO implement restrictions for mutliple edges with same id
-                pass
         else:
             print(
                 "unknown id '{}' for restriction element. skipping restriction".format(
@@ -837,29 +836,41 @@ def close_to_intersection(node_id, combined_graph, road_g) -> bool:
 
 
 def get_crossing_points(
-    comb_graph, road_graph, road_cross_points, ped_cross_points
-) -> Tuple[Set, Set]:
-    """ """
-    crossing_nodes = set()
+    comb_graph, main_graph, main_cross_points, sub_cross_points
+) -> Tuple[Set[rg.GraphNode], Set[rg.GraphNode]]:
+    """ 
+    Get the nodes where the sub network is crossing the main network.
+
+    :param comb_graph: parsed with accepted highways both of main and sub
+    :param main_graph: parsed with accepted highways of main
+    :param main_cross_points: points of the main layer tagged as crossing
+    :param sub_cross_points: points of the main layer tagged as crossing
+    :return: a set of new nodes and a set of contained nodes
+        where both networks cross
+    """
+    new_crossing_nodes = set()
     already_contained = set()
-    road_nodes = {node.id: node for node in road_graph.nodes}
-    for p_id, point in road_cross_points.items():
-        if p_id in ped_cross_points and not close_to_intersection(
-            p_id, comb_graph, road_graph
-        ):
-            if p_id in road_nodes:
-                already_contained.add(p_id)
+    main_node_dict = {node.id: node for node in main_graph.nodes}
+    for point_id, point in main_cross_points.items():
+        if (point_id in sub_cross_points 
+                and not close_to_intersection(point_id, comb_graph, main_graph)):
+            if point_id in main_node_dict:
+                already_contained.add(point_id)
             else:
                 crossing_node = rg.GraphNode(
-                    int(p_id), point.x, point.y, set()
+                    int(point_id), point.x, point.y, set()
                 )
                 crossing_node.is_crossing = True
-                crossing_nodes.add(crossing_node)
-    return crossing_nodes, already_contained
+                new_crossing_nodes.add(crossing_node)
+    return new_crossing_nodes, already_contained
 
 
-def create_graph(file_path) -> rg.Graph:
-    """ """
+def create_graph(file_path: str) -> rg.Graph:
+    """ 
+    Create a graph from the given osm file.
+    If a sublayer should be extracted the graph will be a SublayeredGraph.
+    """
+
     def _create_graph(
             file, accepted_ways, custom_bounds=None, additional_nodes=None):
         (
@@ -881,34 +892,36 @@ def create_graph(file_path) -> rg.Graph:
         combined_g, _ = _create_graph(file_path, all_accepted_ways)
         
         # get crossing nodes
-        road_g, road_crossing_points = _create_graph(file_path,
+        main_g, main_crossing_points = _create_graph(file_path,
             config.ACCEPTED_HIGHWAYS, combined_g.bounds)
         sub_g, sub_crossing_points = _create_graph(file_path,
             config.ACCEPTED_HIGHWAYS_SUBLAYER, combined_g.bounds)
         crossing_nodes, already_contained = get_crossing_points(
-            combined_g, road_g, road_crossing_points, sub_crossing_points
+            combined_g, main_g, main_crossing_points, sub_crossing_points
         )
 
         # create the main graph with additional crossing nodes
-        extended_graph, _ = _create_graph(
+        extended_main_graph, _ = _create_graph(
             file_path,
             config.ACCEPTED_HIGHWAYS,
             combined_g.bounds,
             crossing_nodes
         )
-        for node in extended_graph.nodes:
+        for node in extended_main_graph.nodes:
             if node.id in already_contained:
                 node.is_crossing = True
 
-        return rg.SublayeredGraph(
-            extended_graph.nodes,
-            extended_graph.edges,
-            extended_graph.center_point,
-            extended_graph.bounds,
-            extended_graph.traffic_signs,
-            extended_graph.traffic_lights,
+        main_g =  rg.SublayeredGraph(
+            extended_main_graph.nodes,
+            extended_main_graph.edges,
+            extended_main_graph.center_point,
+            extended_main_graph.bounds,
+            extended_main_graph.traffic_signs,
+            extended_main_graph.traffic_lights,
             sub_g
         )
 
-    road_g, _ = _create_graph(file_path, config.ACCEPTED_HIGHWAYS)
-    return road_g
+    else:
+        main_g, _ = _create_graph(file_path, config.ACCEPTED_HIGHWAYS)
+
+    return main_g
