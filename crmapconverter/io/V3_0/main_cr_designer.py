@@ -120,7 +120,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.gui_settings = GUISettings(self)
 
     def show_sumo_settings(self):
-        self.sumo_settings = SUMOSettings(self, config=self.suombox.config)
+        self.sumo_settings = SUMOSettings(self, config=self.sumobox.config)
 
     def create_toolbox(self):
         """ Create the Upper toolbox."""
@@ -724,7 +724,7 @@ def main():
     app = QApplication(sys.argv)
     w = MWindow()
     w.showMaximized()
-    w.open_path("/home/max/Desktop/Planning/Maps/cr_files/ped/intersect_and_crossing3.xml")
+    # w.open_path("/home/max/Desktop/Planning/Maps/cr_files/ped/intersect_and_crossing3.xml")
     sys.exit(app.exec_())
 
 

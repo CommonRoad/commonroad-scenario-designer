@@ -64,7 +64,7 @@ class Ui_MainWindow(object):
         self.sb_departure_time_ego.setMaximum(99999)
         self.sb_departure_time_ego.setProperty("value", 3)
         self.sb_departure_time_ego.setObjectName("sb")
-        self.gridLayout_2.addWidget(self.sb, 15, 2, 1, 1)
+        self.gridLayout_2.addWidget(self.sb_departure_time_ego, 15, 2, 1, 1)
         self.label_3 = QtWidgets.QLabel(self.scrollAreaWidgetContents)
         self.label_3.setObjectName("label_3")
         self.gridLayout_2.addWidget(self.label_3, 11, 0, 1, 1)
