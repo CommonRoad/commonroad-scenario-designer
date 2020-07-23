@@ -18,21 +18,22 @@ import numpy as np
 
 from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.common.util import Interval
-from commonroad.scenario.lanelet import LaneletNetwork, Lanelet
-from commonroad.scenario.traffic_sign import SupportedTrafficSignCountry, TrafficLight, TrafficLightState, TrafficLightCycleElement, TrafficLightDirection
+from commonroad.scenario.lanelet import LaneletNetwork
+from commonroad.scenario.traffic_sign import SupportedTrafficSignCountry, TrafficLight, TrafficLightState
 from commonroad.scenario.traffic_sign_interpreter import TrafficSigInterpreter
 from commonroad.visualization.draw_dispatch_cr import draw_object
 
 from matplotlib import pyplot as plt
 
 # modified sumolib.net.* files
-from .sumolib_net import Node, Edge, Lane, TLS, TLSProgram, Connection, Junction
+from .sumolib_net import Node, Edge, Lane, TLS, TLSProgram, Connection
 import sumolib
 
 from sumocr.maps.scenario_wrapper import AbstractScenarioWrapper
 
-from .util import compute_max_curvature_from_polyline, _find_intersecting_edges, get_scenario_name_from_crfile, get_total_lane_length_from_netfile, write_ego_ids_to_rou_file, get_scenario_name_from_netfile, remove_unreferenced_traffic_lights, max_lanelet_network_id
-from .config import SumoConfig, traffic_light_states_CR2SUMO, traffic_light_states_SUMO2CR
+from .util import compute_max_curvature_from_polyline, _find_intersecting_edges
+from .util import get_scenario_name_from_crfile, get_total_lane_length_from_netfile, write_ego_ids_to_rou_file, get_scenario_name_from_netfile
+from .config import SumoConfig
 
 # This file is used as a template for the generated .sumo.cfg files
 DEFAULT_CFG_FILE = "default.sumo.cfg"
@@ -75,19 +76,10 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         self.lane_id2lanelet_id: Dict[str, int] = {}
         self.lanelet_id2lane_id: Dict[int, str] = {}
         self.lanelet_id2edge_id: Dict[int, int] = {}
-        # generated junctions by NETCONVERT
-        self.lanelet_id2junction: Dict[int, Junction] = {}
         self._start_nodes = {}
         self._end_nodes = {}
         # tl (traffic_light_id) ->  TLS (Traffic Light Signal)
         self.traffic_light_signals: Dict[int, TLS] = {}
-
-        # NETCONVERT files
-        self._nodes_file = ""
-        self._edges_file = ""
-        self._connections_file = ""
-        self._tll_file = ""
-        self._output_file = ""
 
         # simulation params
         self.scenario_name = ""
@@ -114,6 +106,14 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
 
         # tl (traffic_light_id) -> Node (Traffic Light)
         nodes_tl: Dict[int, Node] = {}
+        # Mapping from CR TrafficLightStates to SUMO Traffic Light states
+        traffic_light_states_CR2SUMO = {
+            TrafficLightState.RED: 'r',
+            TrafficLightState.YELLOW: 'y',
+            TrafficLightState.RED_YELLOW: 'u',
+            TrafficLightState.GREEN: 'G',
+            TrafficLightState.INACTIVE: 'O',
+        }
 
         # generate traffic lights in SUMO format
         for lanelet in self.lanelet_network.lanelets:
@@ -169,7 +169,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
 
                 # create Traffic Light Signal
                 # give a testing program id:
-                tls_program = TLSProgram('cr_converted', tl.time_offset, 'static')
+                tls_program = TLSProgram('cr2sumo', tl.time_offset, 'static')
                 for cycle in tl.cycle:
                     state = traffic_light_states_CR2SUMO[cycle.state]
                     tls_program.addPhase(state, cycle.duration)
@@ -826,127 +826,15 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
             shapeString += pointString + " "
         return shapeString
 
-    def auto_generate_traffic_light_system(self, lanelet_id: int, cycle_time:int = 90) -> bool:
-        """
-        Automatically generate a TLS for the given intersection
-        param: lanelet_id: id of lanelet in junction to generate Traffic Lights for
-        param: cycle_time: total duration of a traffic light cycle in seconds
-        :reutrn: if the conversion was successful
-        """
-        if not self._output_file:
-            logging.error("Need to call convert_to_net_file first")
-            return False
-
-        # did the user select an incoming lanelet to the junction?
-        if not lanelet_id in self.lanelet_id2junction:
-            lanelet: Lanelet = self.lanelet_network.find_lanelet_by_id(
-                lanelet_id)
-            if not lanelet:
-                logging.warning("Invalid lanelet: {}".format(lanelet_id))
-                return False
-            # if the selected lanelet is not an incoming one, check the prececessors
-            pred_ids = [
-                pred for pred in lanelet.predecessor
-                if pred in self.lanelet_id2junction
-            ]
-            if len(pred_ids) == 0:
-                logging.info(
-                    "No junction found for lanelet {}".format(lanelet_id))
-                return False
-            lanelet_id = pred_ids[0]
-
-        # does the lanelet have predefined traffic light?
-        # If so guess signals for them and copy the corresponding position
-        guess_signals = False
-        if self.lanelet_network.find_lanelet_by_id(lanelet_id).traffic_lights:
-            guess_signals = True
-
-
-        # auto generate the TLS with netconvert
-        junction = self.lanelet_id2junction[lanelet_id]
-        command = "netconvert --sumo-net-file=" + self._output_file + \
-                    " --output-file=" + self._output_file + \
-                    " --tls.guess=true" + \
-                    " --tls.guess-signals=" + ('true' if guess_signals else 'false') + \
-                    " --tls.group-signals=true" + \
-                    " --tls.cycle.time=" + str(cycle_time) + \
-                    " --tls.set=" + str(junction.id)
-        try:
-            _ = subprocess.check_output(command.split(), timeout=5.)
-        except Exception as e:
-            logging.error(e)
-            return False
-
-        # add the generated tls to the lanelet_network
-        self._read_junctions_from_net_file(self._output_file)
-        # update the read junction
-        junction = self.lanelet_id2junction[lanelet_id]
-
-        with open(self._output_file, "r") as f:
-            xml = ET.parse(f)
-
-        # parse TLS from generated xml file
-        def get_tls(xml, junction) -> TLSProgram:
-            for tl_logic in xml.findall("tlLogic"):
-                if not int(tl_logic.get("id")) == junction.id: continue
-
-                tls_program = TLSProgram(tl_logic.get("programID"),
-                                         int(tl_logic.get("offset")),
-                                         tl_logic.get("type"))
-                for phase in tl_logic.findall("phase"):
-                    tls_program.addPhase(phase.get("state"),
-                                         int(phase.get("duration")))
-                return tls_program
-
-        tls_program = get_tls(xml, junction)
-        
-        # compute unused id value for the traffic lights
-        next_cr_id = max_lanelet_network_id(self.lanelet_network) + 1
-
-        # add Traffic Lights to the corresponding lanelets
-        # TODO: somewhat hacky replace with proper connection reading
-        for c in xml.findall('connection'):
-            tl = c.get("tl")
-            if not (tl and int(tl) == junction.id): continue
-
-            lanelet_id = self.lane_id2lanelet_id["{}_{}".format(
-                c.get('from'), c.get("fromLane"))]
-            lanelet = self.lanelet_network.find_lanelet_by_id(lanelet_id)
-            link_index = int(c.get("linkIndex"))
-
-            # sensible defaults for newly generated traffic light
-            # TODO: This assuems right-hand traffic
-            position = lanelet.right_vertices[-1]
-            time_offset= tls_program.getOffset()
-            direction = TrafficLightDirection.ALL
-            active = True
-            
-            # replace current traffic light if one exists on the lanelet
-            if lanelet.traffic_lights:
-                traffic_lights: List[TrafficLight] = [
-                    self.lanelet_network.find_traffic_light_by_id(id) for id in lanelet.traffic_lights
-                ]
-                tl = traffic_lights[0]
-                # copy attributes from old TrafficLight to new one
-                position = tl.position
-                direction = tl.direction
-                active = tl.active
-                # remove old traffic light from lanelet
-                lanelet._traffic_lights -= set([tl.traffic_light_id])
-
-            traffic_light = TrafficLight(next_cr_id, [
-                TrafficLightCycleElement(
-                    traffic_light_states_SUMO2CR[state[link_index]], duration)
-                for state, duration in tls_program.getPhases()
-            ], position, time_offset, direction, active)
-            next_cr_id += 1
-
-            self.lanelet_network.add_traffic_light(traffic_light,
-                                                   set([lanelet_id]))
-
-        remove_unreferenced_traffic_lights(self.lanelet_network)
-        return True
-
+    # def write_net(self, output_path):
+    #     """
+    #     Function for writing the edges and nodes files in xml format
+    #     :param output_path: the relative path of the output
+    #     :return: nothing
+    #     """
+    #     self._writeEdgesFile(output_path)
+    #     self._write_nodes_file(output_path)
+    #     self._write_connections_file(output_path)
 
     def write_intermediate_files(self, output_path):
         """
@@ -1081,7 +969,8 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                 minidom.parseString(ET.tostring(
                     tlLogics, method="xml")).toprettyxml(indent="\t"))
 
-    def merge_intermediate_files(self, output_path: str, cleanup=True) -> bool:
+    @staticmethod
+    def merge_intermediate_files(output_path: str, cleanup=True) -> bool:
         """
         Function that merges the edges and nodes files into one using netconvert
         :param output_path: the relative path of the output
@@ -1111,31 +1000,25 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                     if not any(word in line for word in to_remove):
                         file.write(line)
 
-        self._nodes_file = join(output_path, files["nodes"])
-        self._edges_file = join(output_path, files["edges"])
-        self._connections_file = join(output_path, files["connections"])
-        self._tll_file = join(output_path, files["tll"])
-        self._output_file = str(output_path)
+        output = output_path
+
         # Calling of Netconvert
         bashCommand = "netconvert --plain.extend-edge-shape=true" \
                       " --no-turnarounds=true" \
                       " --junctions.internal-link-detail=20"\
                       " --geometry.avoid-overlap=true" \
                       " --offset.disable-normalization=true" \
-                      " --node-files=" + self._nodes_file + \
-                      " --edge-files=" + self._edges_file + \
-                      " --connection-files=" + self._connections_file + \
-                      " --tllogic-files=" + self._tll_file + \
-                      " --output-file=" + self._output_file + \
-                      " --geometry.remove.keep-edges.explicit=true" + \
-                      " --seed " + str(SumoConfig.random_seed)
+                      " --node-files=" + join(output, files["nodes"]) + \
+                      " --edge-files=" + join(output, files["edges"]) + \
+                      " --connection-files=" + join(output,files["connections"]) + \
+                      " --tllogic-files=" + join(output, files['tll']) + \
+                      " --output-file=" + str(output) + \
+                      " --geometry.remove.keep-edges.explicit=true"
         # "--junctions.limit-turn-speed=6.5 " \
         # "--geometry.max-segment-length=15 " \
         success = True
         try:
             _ = subprocess.check_output(bashCommand.split(), timeout=5.0)
-            self._read_junctions_from_net_file(self._output_file)
-
         except FileNotFoundError as e:
             if 'netconvert' in e.filename:
                 warnings.warn("Is netconvert installed and added to PATH?")
@@ -1144,35 +1027,11 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         except Exception:
             success = False
 
-        if cleanup and success:
+        if cleanup is True and success:
             for file in files.values():
-                os.remove(join(output_path, file))
+                os.remove(join(output, file))
+
         return success
-
-    def _read_junctions_from_net_file(self, filename: str):
-        # parse junctions from .net.xml
-        with open(filename, 'r') as f:
-            root = ET.parse(f)
-
-        for junction_xml in root.findall("junction"):
-            inc_lanes: List[Lane] = [
-                self.lanes[lane_id]
-                for lane_id in junction_xml.get('incLanes').split()
-            ]
-            shape = [
-                tuple([float(i) for i in s.split(",")])
-                for s in junction_xml.get('shape').split()
-            ]
-            junction = Junction(id=int(junction_xml.get('id')),
-                                j_type=junction_xml.get('type'),
-                                x=float(junction_xml.get('x')),
-                                y=float(junction_xml.get('y')),
-                                incLanes=inc_lanes,
-                                shape=shape)
-            for lanelet_id in [
-                    self.lane_id2lanelet_id[l.getID()] for l in inc_lanes
-            ]:
-                self.lanelet_id2junction[lanelet_id] = junction
 
     @staticmethod
     def rewrite_netfile(output: str):
@@ -1265,7 +1124,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         logging.info("Merging Intermediate Files")
         self.write_intermediate_files(output_path)
         conversion_possible = self.merge_intermediate_files(output_path,
-                                                            cleanup=True)
+                                                            cleanup=False)
         if not conversion_possible:
             logging.error("Error converting map, see above for details")
             return False

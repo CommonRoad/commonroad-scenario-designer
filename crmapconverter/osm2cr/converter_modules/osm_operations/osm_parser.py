@@ -124,12 +124,16 @@ def get_traffic_rules(nodes: Dict[int, ElTree.Element], roads: Dict[int, ElTree.
         road_id = road.attrib['id']
         tags = road.findall('tag')
         for tag in tags:
-            if tag.attrib['k'] in accepted_traffic_sign_by_keys or tag.attrib['v'] in accepted_traffic_sign_by_values:
+            if tag.attrib['k'] in accepted_traffic_sign_by_keys or tag.attrib['v'] in accepted_traffic_sign_by_values or tag.attrib['k'] == 'highway':
                 key = tag.attrib['k']
                 value = tag.attrib['v']
                 virtual= None
                 if key == 'maxspeed':
                     value, virtual = extract_speedlimit(value)
+                elif key == 'highway':
+                    # fallback if no speedlimit was found
+                    value, virtual = extract_speedlimit(value)
+                    key = 'maxspeed'
                 sign = {key: value, 'virtual': virtual}
                 # check if traffic rule exists
                 nodes = road.findall("nd")
