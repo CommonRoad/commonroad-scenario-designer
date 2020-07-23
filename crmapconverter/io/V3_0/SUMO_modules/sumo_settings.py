@@ -38,9 +38,9 @@ class SUMOSettings:
             str(interv.start) + "," + str(interv.end))            
 
         # spin boxes
-        # self.window.spinBox.setValue(config.
+        self.window.sb_departure_time_ego.setValue(config.departure_time_ego)
         self.window.sb_random_seed.setValue(config.random_seed)
-        # self.window.sb_2.setValue(config.
+        self.window.sb_lateral_resolution.setValue(config.lateral_resolution)
         self.window.sb_ego_start_time.setValue(config.ego_start_time)
         self.window.sb_num_ego_vehicles.setValue(config.n_ego_vehicles) # rename
         self.window.sb_overwrite_speed_limit.setValue(
@@ -98,9 +98,9 @@ class SUMOSettings:
             float(interv_str[0]), float(interv_str[1]))
 
         # spin boxes
-        # config. =window.sb.value() # ?
+        config.departure_time_ego =window.sb_departure_time_ego.value()
         config.random_seed =window.sb_random_seed.value()
-        # config. = window.sb_2.value() # ?
+        config.lateral_resolution = window.sb_lateral_resolution.value()
         config.ego_start_time = window.sb_ego_start_time.value()
         config.n_ego_vehicles = window.sb_num_ego_vehicles.value()
         config.overwrite_speed_limit = window.sb_overwrite_speed_limit.value()
