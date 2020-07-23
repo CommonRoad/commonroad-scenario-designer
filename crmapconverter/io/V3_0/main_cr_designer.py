@@ -243,7 +243,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
                 self, "Warning", "You should firstly load a animated scenario",
                 QMessageBox.Ok | QMessageBox.No, QMessageBox.Ok)
             if (reply == QtWidgets.QMessageBox.Ok):
-                self.file_open()
+                self.open_commonroad_file()
         else:
             self.crviewer.play(config=self.sumobox.config)
 
@@ -260,7 +260,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
                                      QMessageBox.Ok | QMessageBox.No,
                                      QMessageBox.Ok)
             if (reply == QtWidgets.QMessageBox.Ok):
-                self.file_open()
+                self.open_commonroad_file()
             else:
                 messbox.close()
         else:
