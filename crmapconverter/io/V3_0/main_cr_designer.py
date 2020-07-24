@@ -31,7 +31,7 @@ from crmapconverter.io.V3_0 import config
 class MWindow(QMainWindow, Ui_mainWindow):
     """The Mainwindow of CR Scenario Designer."""
     def __init__(self, path=None):
-        super(MWindow, self).__init__()
+        super().__init__()
         self.setupUi(self)
         self.setWindowIcon(QIcon(':/icons/cr.ico'))
         self.centralwidget.setStyleSheet('background-color:rgb(150,150,150)')
@@ -232,7 +232,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
     def timestep_change(self, value):
         if self.crviewer.current_scenario is not None:
-            self.crviewer.set_time_step(value)
+            self.crviewer.set_timestep(value)
             self.label1.setText('Timestep: ' + str(value))
             self.crviewer.animation.event_source.start()
 
@@ -558,7 +558,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.filename = filename
         self.crviewer.open_scenario(new_scenario, self.sumobox.config)
         self.sumobox.scenario = self.crviewer.current_scenario
-        self.update_view(focus_on_network=True)
+        self.update_view()
         self.update_to_new_scenario()
 
     def update_to_new_scenario(self):
@@ -698,8 +698,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
             selected_lanelet = None
         if focus_on_network is None:
             focus_on_network = config.AUTOFOCUS
-        self.crviewer.update_plot(scenario=self.crviewer.current_scenario,
-                                  sel_lanelet=selected_lanelet,
+        self.crviewer.update_plot(sel_lanelet=selected_lanelet,
                                   sel_intersection=selected_intersection,
                                   focus_on_network=focus_on_network)
 
@@ -724,7 +723,7 @@ def main():
     app = QApplication(sys.argv)
     w = MWindow()
     w.showMaximized()
-    # w.open_path("/home/max/Desktop/Planning/Maps/cr_files/ped/intersect_and_crossing3.xml")
+    # w.open_path("/home/max/Desktop/Planning/Maps/cr_files/ped/intersect_and_crossing2.xml")
     sys.exit(app.exec_())
 
 

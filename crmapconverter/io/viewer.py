@@ -127,6 +127,7 @@ class DynamicCanvas(FigureCanvas):
         # new center sensitive to mouse position of zoom event
         mouse_pos = (event.xdata, event.ydata)  
         if mouse_pos[0] and mouse_pos[1]:
+            # TODO enhance zoom center
             new_center_x = (6*center[0] + mouse_pos[0])/7
             new_center_y = (6*center[1] + mouse_pos[1])/7
             # new limits should include old limits if zooming out
@@ -284,10 +285,15 @@ class LaneletList(ScenarioElementList):
 class Viewer:
     """ functionality to draw a Scenario onto a Canvas """
     def __init__(self, parent):
+        self.current_scenario = None
         self.dynamic = DynamicCanvas(parent, width=5, height=10, dpi=100)
 
+    def open_scenario(self, scenario):
+        """ """
+        self.current_scenario = scenario
+        self.update_plot(focus_on_network=True)
+
     def update_plot(self,
-                    scenario: Scenario,
                     sel_lanelet: Lanelet = None,
                     sel_intersection: Intersection = None,
                     focus_on_network: bool = False):
@@ -321,9 +327,10 @@ class Viewer:
                 }
             }
         }
-        self.dynamic.draw_scenario(scenario, draw_params=draw_params)
+        self.dynamic.draw_scenario(self.current_scenario, 
+                                   draw_params=draw_params)
 
-        for lanelet in scenario.lanelet_network.lanelets:
+        for lanelet in self.current_scenario.lanelet_network.lanelets:
 
             draw_arrow, color, alpha, zorder, label = self.get_paint_parameters(
                 lanelet, sel_lanelet, sel_intersection)
@@ -470,7 +477,6 @@ class Viewer:
             verts.append([x, y])
             codes.append(Path.LINETO)
 
-            # if color != 'gray':
             xlim1 = min(xlim1, x)
             xlim2 = max(xlim2, x)
             ylim1 = min(ylim1, y)
@@ -527,7 +533,6 @@ class MainWindow(QWidget):
     def __init__(self, parent=None, path=None):
         super().__init__(parent)
         self.filename: str = None
-        self.current_scenario = None
         self.viewer = Viewer(self)
 
         self._initUserInterface()
@@ -622,7 +627,7 @@ class MainWindow(QWidget):
         Open a new CommonRoad Scenario and update the viewer
         """
         self.filename = filename
-        self.current_scenario = new_scenario
+        self.viewer.open_scenario(new_scenario)
         self.update()
 
     def update(self, caller=None):
@@ -638,25 +643,24 @@ class MainWindow(QWidget):
             if caller is not self.lanelet_list:
                 self.lanelet_list.reset_selection()
         
-        self.lanelet_list.update(self.current_scenario)
-        self.intersection_list.update(self.current_scenario)
+        self.lanelet_list.update(self.viewer.current_scenario)
+        self.intersection_list.update(self.viewer.current_scenario)
 
-        if self.current_scenario is None:
+        if self.viewer.current_scenario is None:
             return
         if self.intersection_list.selected_id is not None:
             selected_intersection = find_intersection_by_id(
-                self.current_scenario, self.intersection_list.selected_id)
+                self.viewer.current_scenario, self.intersection_list.selected_id)
         else:
             selected_intersection = None
         if self.lanelet_list.selected_id is not None:
-            selected_lanelet = self.current_scenario.lanelet_network.find_lanelet_by_id(
+            selected_lanelet = self.viewer.current_scenario.lanelet_network.find_lanelet_by_id(
                 self.lanelet_list.selected_id)
         else:
             selected_lanelet = None
-        self.viewer.update_plot(scenario=self.current_scenario,
-                                sel_lanelet=selected_lanelet,
+        self.viewer.update_plot(sel_lanelet=selected_lanelet,
                                 sel_intersection=selected_intersection,
-                                focus_on_network=True)
+                                focus_on_network=False)
 
 
 def find_intersection_by_id(scenario, intersection_id: int) -> Lanelet:

@@ -20,7 +20,6 @@ class AnimatedViewer(Viewer):
 
         # sumo config giving dt etc
         self._config: SumoConfig = None
-        self.current_scenario = None
         self.min_timestep = 0
         self.max_timestep = 0
         # current time step
@@ -53,7 +52,7 @@ class AnimatedViewer(Viewer):
             self.timestep.value = 0
             self.animation.event_source.stop()
             self.animation = None
-        self.update_plot(scenario)
+        self.update_plot(focus_on_network=True)
 
     def _init_animation(self):
         if not self.current_scenario:
@@ -135,7 +134,7 @@ class AnimatedViewer(Viewer):
 
         self.animation.event_source.stop()
 
-    def set_time_step(self, timestep: int):
+    def set_timestep(self, timestep: int):
         """ sets the animation to the current timestep """
         print("set timestep: ", timestep)
         if not self.animation:
