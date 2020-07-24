@@ -159,16 +159,20 @@ class DynamicCanvas(FigureCanvas):
         :param plot_limits: [description], defaults to None
         :type plot_limits: [type], optional
         """
-        self.clear_axes()
+        xlim = self.ax.get_xlim()
+        ylim = self.ax.get_ylim()
+
+        self.ax.clear()
         self._handles.clear()
+
         draw_object(scenario,
                     ax=self.ax,
                     draw_params=draw_params,
                     plot_limits=plot_limits,
                     handles=self._handles)
         if not plot_limits:
-            self.ax.autoscale()
-            self.ax.set_aspect('equal')
+            self.ax.set(xlim=xlim)
+            self.ax.set(ylim=ylim)
 
     def update_obstacles(self,
                          scenario: Scenario,

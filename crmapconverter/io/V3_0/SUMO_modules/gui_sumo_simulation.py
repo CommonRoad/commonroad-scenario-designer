@@ -76,7 +76,7 @@ class SUMOSimulation(QWidget, Ui_sumo_simulate):
             self._config = config
 
         self._config_obs.subscribe(set_config)
-        self._scenario: Scenario = None
+        self._scenario_obs: Scenario = None
 
         # observable giving the simulated scenario once done
         self.simulated_scenario = Observable(None)
@@ -100,7 +100,7 @@ class SUMOSimulation(QWidget, Ui_sumo_simulate):
 
     @scenario.setter
     def scenario(self, scenario: Scenario):
-        self._scenario = scenario
+        self._scenario_obs = scenario
 
     def _connect_events(self) -> None:
         """
@@ -114,12 +114,15 @@ class SUMOSimulation(QWidget, Ui_sumo_simulate):
 
         def set_dt(value):
             self.config.dt = value
+            self._config_obs.value = self._config
 
         def set_presimulation_steps(value):
             self.config.presimulation_steps = value
+            self._config_obs.value = self._config
 
         def set_simulation_steps(value):
             self.config.simulation_steps = value
+            self._config_obs.value = self._config
 
         self.doubleSpinBox_dt.valueChanged.connect(set_dt)
         self.spinBox_presimulation_steps.valueChanged.connect(
@@ -158,7 +161,7 @@ class SUMOSimulation(QWidget, Ui_sumo_simulate):
 
         self.waiting_msg = WaitingDialog()
         self.worker: SimulationWorker = SimulationWorker(
-            self._scenario, self._config, self._output_folder)
+            self._scenario_obs, self._config, self._output_folder)
         self.worker.finished.connect(self.simulation_done)
         self.worker.start()
 

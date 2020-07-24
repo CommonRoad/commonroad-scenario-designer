@@ -1,6 +1,7 @@
 import sys
 import os
 from lxml import etree
+import logging
 
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import (QMainWindow, QDockWidget, QMessageBox, QAction,
@@ -62,6 +63,9 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
         # when the current scenario was simulated, load it in the gui
         self.sumobox.simulated_scenario.subscribe(self.open_scenario)
+        # when the maximum simulation steps change, update the slider
+        self.sumobox.config.subscribe(
+            lambda config: self.update_max_step(config.simulation_steps))
 
         # build and connect GUI
         self.create_file_actions()
@@ -143,7 +147,6 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
     def create_lanelet_list(self):
         """Create the lanelet_list and put it into right Dockwidget area."""
-
         def remove_selection_and_close(_):
             """ remove selection from plot when list is closed"""
             self.lanelet_list.reset_selection()
@@ -177,7 +180,6 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
     def create_intersection_list(self):
         """Create the lanelet_list and put it into right Dockwidget area."""
-
         def remove_selection_and_close(_):
             """ remove selection from plot when list is closed"""
             self.intersection_list.reset_selection()
@@ -231,17 +233,18 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.crviewer.pause()
 
     def timestep_change(self, value):
-        if self.crviewer.current_scenario is not None:
+        if self.crviewer.current_scenario:
             self.crviewer.set_time_step(value)
-            self.label1.setText('Timestep: ' + str(value))
+            self.label1.setText('  Frame: 0' + str(value))
             self.crviewer.animation.event_source.start()
 
     def play_animation(self):
         """Function connected with the play button in the sumo-toolbox."""
-        if self.crviewer.current_scenario is None:
+        if not self.crviewer.current_scenario:
             messbox = QMessageBox()
             reply = messbox.warning(
-                self, "Warning", "You should firstly load a animated scenario",
+                self, "Warning",
+                "Please load an animation before attempting to play",
                 QMessageBox.Ok | QMessageBox.No, QMessageBox.Ok)
             if (reply == QtWidgets.QMessageBox.Ok):
                 self.open_commonroad_file()
@@ -254,10 +257,10 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
     def save_animation(self):
         """Function connected with the save button in the Toolbar."""
-        if self.crviewer.current_scenario is None:
+        if not self.crviewer.current_scenario:
             messbox = QMessageBox()
             reply = messbox.warning(self, "Warning",
-                                    "You should firstly load an animation",
+                                    "Please load an animation before saving",
                                     QMessageBox.Ok | QMessageBox.No,
                                     QMessageBox.Ok)
             if (reply == QtWidgets.QMessageBox.Ok):
@@ -337,16 +340,17 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.crviewer.timestep.subscribe(self.slider.setValue)
         tb3.addWidget(self.slider)
 
-        self.label1 = QLabel('  Step: 0', self)
+        self.label1 = QLabel('  Frame: 0', self)
         tb3.addWidget(self.label1)
 
-        self.label2 = QLabel('      Total Step:', self)
+        self.label2 = QLabel(' / 0', self)
         tb3.addWidget(self.label2)
 
-    def update_max_step(self):
-        self.label2.setText('      Total Step: ' +
-                            str(self.crviewer.max_timestep))
-        self.slider.setMaximum(self.crviewer.max_timestep)
+    def update_max_step(self, value: int = -1):
+        logging.info('update_max_step')
+        value = value if value > -1 else self.crviewer.max_timestep
+        self.label2.setText(' / ' + str(value))
+        self.slider.setMaximum(value)
 
     def create_import_actions(self):
         """Function to create the import action in the menu bar."""
@@ -585,7 +589,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         """
         POSSIBLE_ERROR_CAUSE = 1
         verbose = True
-        
+
         error_score = 0
 
         # check if lanelets are valid polylines
@@ -679,7 +683,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
                 self.intersection_list.reset_selection()
             if caller is not self.lanelet_list:
                 self.lanelet_list.reset_selection()
-        
+
         self.lanelet_list.update(self.crviewer.current_scenario)
         self.intersection_list.update(self.crviewer.current_scenario)
 
@@ -717,6 +721,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
             # triggered by click on canvas
             self.lanelet_list.reset_selection()
             self.intersection_list.reset_selection()
+
 
 def main():
 

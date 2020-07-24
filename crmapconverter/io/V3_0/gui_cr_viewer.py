@@ -45,9 +45,11 @@ class AnimatedViewer(Viewer):
 
             def set_config(config):
                 self._config = config
+                self._calc_max_timestep()
 
             config.subscribe(set_config)
 
+        self._config = config.value
         self._calc_max_timestep()
         if self.animation:
             self.timestep.value = 0
@@ -100,10 +102,7 @@ class AnimatedViewer(Viewer):
 
             # plot dynamic obstracles
             # if self.timestep.value == 1:
-            self.dynamic.draw_scenario(
-                scenario,
-                draw_params=draw_params,
-                plot_limits=None if plot_limits == 'auto' else plot_limits)
+            self.dynamic.draw_scenario(scenario, draw_params=draw_params)
             # else:
             #     self.dynamic.update_obstacles(
             #         scenario,
