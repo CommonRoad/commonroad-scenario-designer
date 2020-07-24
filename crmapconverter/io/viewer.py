@@ -128,8 +128,12 @@ class DynamicCanvas(FigureCanvas):
         mouse_pos = (event.xdata, event.ydata)
         if mouse_pos[0] and mouse_pos[1]:
             # TODO enhance zoom center
-            new_center_x = (6 * center[0] + mouse_pos[0]) / 7
-            new_center_y = (6 * center[1] + mouse_pos[1]) / 7
+            if event.button == 'up':
+                new_center_x = (6 * center[0] + mouse_pos[0]) / 7
+                new_center_y = (6 * center[1] + mouse_pos[1]) / 7
+            else:
+                new_center_x = (6 * center[0] - mouse_pos[0]) / 7
+                new_center_y = (6 * center[1] - mouse_pos[1]) / 7
             # new limits should include old limits if zooming out
             # old limits should include new limits if zooming in
             dim_diff_x = abs(new_x_dim - x_dim)
@@ -357,7 +361,7 @@ class Viewer:
         legend = ax.legend(handles, labels)
         legend.set_zorder(50)
 
-        if focus_on_network or sel_lanelet or sel_intersection:
+        if focus_on_network: # or sel_lanelet or sel_intersection:
             # can we focus on a selection?
             if all([abs(l) < float("Inf") for l in network_limits]):
                 self.dynamic.update_plot(network_limits)
