@@ -11,17 +11,24 @@ from crmapconverter.sumo_map.config import SumoConfig
 
 class SUMOSettings:
     def __init__(self, parent, config: Observable = None):
-
         self.parent = parent
         self.settings_window = QMainWindow()
         self.window = Ui_MainWindow()
+        self.config = config
+
+        def on_config_change(config):
+            self._config = config
+            self.update_ui_values()
+
+        self.config.subscribe(on_config_change)
+
+        self._config = SumoConfig.from_scenario_name(
+            'new_scenario') if not config else config.value
+
         self.window.setupUi(self.settings_window)
         self.connect_events()
         self.update_ui_values()
         self.settings_window.show()
-        self.config = config
-        self._config = SumoConfig.from_scenario_name(
-            'new_scenario') if not config else config.value
 
     def connect_events(self):
         """ connect buttons to callables """
@@ -195,7 +202,7 @@ class SUMOSettings:
         :return: None
         """
         self._config = SumoConfig.from_scenario_name(
-            self._config.scneario_name)
+            self._config.scenario_name)
         self.update_ui_values()
 
     def warn(self, msg):
