@@ -346,8 +346,6 @@ class Viewer:
         legend = ax.legend(handles, labels)
         legend.set_zorder(50)
 
-        print(focus_on_network, network_limits, x_lim, y_lim)
-
         if focus_on_network or sel_lanelet or sel_intersection:
             # can we focus on a selection?
             if all([abs(l) < float("Inf") for l in network_limits]):
