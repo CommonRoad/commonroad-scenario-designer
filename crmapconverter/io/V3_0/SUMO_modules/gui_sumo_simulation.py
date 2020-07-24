@@ -76,7 +76,7 @@ class SUMOSimulation(QWidget, Ui_sumo_simulate):
             self._config = config
 
         self._config_obs.subscribe(set_config)
-        self._scenario_obs: Scenario = None
+        self._scenario: Scenario = None
 
         # observable giving the simulated scenario once done
         self.simulated_scenario = Observable(None)
@@ -100,7 +100,7 @@ class SUMOSimulation(QWidget, Ui_sumo_simulate):
 
     @scenario.setter
     def scenario(self, scenario: Scenario):
-        self._scenario_obs = scenario
+        self._scenario = scenario
 
     def _connect_events(self) -> None:
         """
@@ -161,7 +161,7 @@ class SUMOSimulation(QWidget, Ui_sumo_simulate):
 
         self.waiting_msg = WaitingDialog()
         self.worker: SimulationWorker = SimulationWorker(
-            self._scenario_obs, self._config, self._output_folder)
+            self._scenario, self._config, self._output_folder)
         self.worker.finished.connect(self.simulation_done)
         self.worker.start()
 
