@@ -42,8 +42,10 @@ class MWindow(QMainWindow, Ui_mainWindow):
         # attributes
         self.filename = None
         self.crviewer = AnimatedViewer(self)
-        self.lanelet_list = LaneletList(self.update_view, self)
-        self.intersection_list = IntersectionList(self.update_view, self)
+        #self.lanelet_list = LaneletList(self.update_view, self)
+        #self.intersection_list = IntersectionList(self.update_view, self)
+        self.lanelet_list = None
+        self.intersection_list = None
         self.count = 0
         self.timer = None
         self.ani_path = None
@@ -563,6 +565,8 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.filename = filename
         self.crviewer.open_scenario(new_scenario, self.sumobox.config)
         self.sumobox.scenario = self.crviewer.current_scenario
+        self.lanelet_list = LaneletList(self.update_view, self)
+        self.intersection_list = IntersectionList(self.update_view, self)
         self.update_view(focus_on_network=True)
         self.update_to_new_scenario()
 
@@ -684,6 +688,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
                 self.intersection_list.reset_selection()
             if caller is not self.lanelet_list:
                 self.lanelet_list.reset_selection()
+
 
         self.lanelet_list.update(self.crviewer.current_scenario)
         self.intersection_list.update(self.crviewer.current_scenario)
