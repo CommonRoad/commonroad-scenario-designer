@@ -68,7 +68,10 @@ class AnimatedViewer(Viewer):
         start = self.min_timestep
         end = self.max_timestep
         plot_limits: Union[list, None, str] = None
-        dt = self._config.dt
+        if self._config is not None:
+            dt = self._config.dt
+        else:
+            dt = 0        
         # ps = 25
         # dpi = 120
         # ln, = self.dynamic.ax.plot([], [], animated=True)
