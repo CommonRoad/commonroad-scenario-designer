@@ -59,8 +59,6 @@ class DynamicCanvas(FigureCanvas):
 
         self.ax = None
         self.drawer = Figure(figsize=(width, height), dpi=dpi)
-        # select pan tool by default
-        plt.get_current_fig_manager().toolbar.pan()
 
         self._handles = {}
 
@@ -101,7 +99,7 @@ class DynamicCanvas(FigureCanvas):
         y_lim = self.ax.get_ylim()
         return [x_lim[0], x_lim[1], y_lim[0], y_lim[1]]
 
-    def update_plot(self, limits: List[float]=None):
+    def update_plot(self, limits: List[float] = None):
         """ draw the canvas. optional with new limits"""
         if limits:
             self.ax.set(xlim=limits[0:2])
@@ -123,20 +121,22 @@ class DynamicCanvas(FigureCanvas):
         elif event.button == 'down':
             new_x_dim = x_dim * ZOOM_FACTOR
             new_y_dim = y_dim * ZOOM_FACTOR
+        else:
+            return
 
         # new center sensitive to mouse position of zoom event
-        mouse_pos = (event.xdata, event.ydata)  
+        mouse_pos = (event.xdata, event.ydata)
         if mouse_pos[0] and mouse_pos[1]:
-            new_center_x = (6*center[0] + mouse_pos[0])/7
-            new_center_y = (6*center[1] + mouse_pos[1])/7
+            new_center_x = (6 * center[0] + mouse_pos[0]) / 7
+            new_center_y = (6 * center[1] + mouse_pos[1]) / 7
             # new limits should include old limits if zooming out
             # old limits should include new limits if zooming in
             dim_diff_x = abs(new_x_dim - x_dim)
             dim_diff_y = abs(new_y_dim - y_dim)
             new_center_x = min(max(center[0] - dim_diff_x, new_center_x),
-                center[0] + dim_diff_x)
+                               center[0] + dim_diff_x)
             new_center_y = min(max(center[1] - dim_diff_y, new_center_y),
-                center[1] + dim_diff_y)
+                               center[1] + dim_diff_y)
         else:
             new_center_x = center[0]
             new_center_y = center[1]
@@ -160,13 +160,15 @@ class DynamicCanvas(FigureCanvas):
         :type plot_limits: [type], optional
         """
         self.clear_axes()
+        self._handles.clear()
         draw_object(scenario,
                     ax=self.ax,
                     draw_params=draw_params,
                     plot_limits=plot_limits,
                     handles=self._handles)
-        self.ax.autoscale()
-        self.ax.set_aspect('equal')
+        if not plot_limits:
+            self.ax.autoscale()
+            self.ax.set_aspect('equal')
 
     def update_obstacles(self,
                          scenario: Scenario,
@@ -344,9 +346,15 @@ class Viewer:
         legend = ax.legend(handles, labels)
         legend.set_zorder(50)
 
-        if (focus_on_network
-                and all([abs(l) != float("Inf") for l in network_limits])):
-            self.dynamic.update_plot(network_limits)
+        print(focus_on_network, network_limits, x_lim, y_lim)
+
+        if focus_on_network or sel_lanelet or sel_intersection:
+            # can we focus on a selection?
+            if all([abs(l) < float("Inf") for l in network_limits]):
+                self.dynamic.update_plot(network_limits)
+            # otherwise focus on the network
+            else:
+                self.dynamic.ax.autoscale()
         else:
             self.dynamic.update_plot([x_lim[0], x_lim[1], y_lim[0], y_lim[1]])
 
@@ -637,7 +645,7 @@ class MainWindow(QWidget):
                 self.intersection_list.reset_selection()
             if caller is not self.lanelet_list:
                 self.lanelet_list.reset_selection()
-        
+
         self.lanelet_list.update(self.current_scenario)
         self.intersection_list.update(self.current_scenario)
 
