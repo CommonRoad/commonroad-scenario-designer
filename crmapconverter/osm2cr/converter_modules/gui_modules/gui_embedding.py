@@ -23,7 +23,8 @@ from PyQt5.QtWidgets import (
     QCheckBox,
     QDoubleSpinBox,
     QComboBox,
-    QFileDialog)
+    QFileDialog,
+    QMessageBox)
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.pyplot import close
@@ -117,7 +118,17 @@ class MainApp:
             if file == "":
                 print("file not exported and not saved")
                 return
-            ex.export(graph, file)
+            try:
+                ex.export(graph, file)
+            except Exception as e:
+                QMessageBox.warning(
+                    self,
+                    "Internal Error",
+                    "There was an error during the conversion to CR scenario.\n\n{}"
+                    .format(e),
+                    QMessageBox.Ok,
+                )
+                raise e
         self.show_start_menu()
 
     def show_start_menu(self) -> None:
@@ -310,8 +321,18 @@ class StartMenu(QWidget):
         :param graph: graph to convert
         :return: None
         """
-        graph = converter.step_collection_2(graph)
-        graph = converter.step_collection_3(graph)
+        try:
+            graph = converter.step_collection_2(graph)
+            graph = converter.step_collection_3(graph)
+        except Exception as e:
+            QMessageBox.warning(
+                self,
+                "Internal Error",
+                "There was an error during the processing of the graph.\n\n{}"
+                .format(e),
+                QMessageBox.Ok,
+            )
+            raise e
         # name = config.BENCHMARK_ID
         self.app.export(graph)
 
@@ -396,7 +417,17 @@ class StartMenu(QWidget):
         :param file: file name
         :return: None
         """
-        self.graph = converter.step_collection_1(file)
+        try:
+            self.graph = converter.step_collection_1(file)
+        except Exception as e:
+            QMessageBox.warning(
+                self,
+                "Internal Error",
+                "There was an error during the loading of the selected osm file.\n\n{}"
+                .format(e),
+                QMessageBox.Ok,
+            )
+            raise e
 
 
 class MapEdit(ABC):
@@ -588,7 +619,17 @@ class EdgeEdit(MapEdit):
 
         :return: None
         """
-        graph = converter.step_collection_2(self.graph)
+        try:
+            graph = converter.step_collection_2(self.graph)
+        except Exception as e:
+            QMessageBox.warning(
+                self,
+                "Internal Error",
+                "There was an error during the processing of the graph.\n\n{}"
+                .format(e),
+                QMessageBox.Ok,
+            )
+            raise e
         self.app.lane_link_embedding(graph)
 
     def update_movement(self, value: bool) -> None:
@@ -674,7 +715,17 @@ class LaneLinkEdit(MapEdit):
         :return: None
         """
         # name = config.BENCHMARK_ID
-        graph = converter.step_collection_3(self.graph)
+        try:
+            graph = converter.step_collection_3(self.graph)
+        except Exception as e:
+            QMessageBox.warning(
+                self,
+                "Internal Error",
+                "There was an error during the processing of the graph.\n\n{}"
+                .format(e),
+                QMessageBox.Ok,
+            )
+            raise e
         self.app.export(graph)
 
 

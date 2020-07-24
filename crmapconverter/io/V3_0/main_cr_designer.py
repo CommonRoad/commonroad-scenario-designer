@@ -588,6 +588,8 @@ class MWindow(QMainWindow, Ui_mainWindow):
         
         error_score = 0
 
+        # check for invalid references
+
         # check if lanelets are valid polylines
         lanelet_ids = []
         for lanelet in scenario.lanelet_network.lanelets:
