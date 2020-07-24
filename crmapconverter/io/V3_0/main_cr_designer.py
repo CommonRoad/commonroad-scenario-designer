@@ -14,6 +14,7 @@ from matplotlib.backends.backend_qt5agg import (NavigationToolbar2QT as
 
 from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.common.file_writer import CommonRoadFileWriter
+from commonroad.common.file_writer import OverwriteExistingFile
 from commonroad.scenario.scenario import Scenario, LaneletNetwork
 
 from crmapconverter.io.V3_0.GUI_resources.MainWindow import Ui_mainWindow
@@ -643,7 +644,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
                 source="",
                 tags="",
             )
-            writer.write_scenario_to_file(file_path)
+            writer.write_scenario_to_file(file_path, OverwriteExistingFile.ALWAYS)
         except IOError as e:
             QMessageBox.critical(
                 self,
