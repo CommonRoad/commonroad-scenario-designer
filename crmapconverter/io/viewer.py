@@ -39,6 +39,7 @@ from commonroad.common.util import Interval
 from commonroad.scenario.scenario import Scenario
 from commonroad.scenario.lanelet import Lanelet, is_natural_number
 from commonroad.visualization.draw_dispatch_cr import draw_object
+from commonroad.geometry.shape import Circle
 
 __author__ = "Benjamin Orthen, Stefan Urban"
 __copyright__ = "TUM Cyber-Physical Systems Group"
@@ -67,7 +68,6 @@ class DynamicCanvas(FigureCanvas):
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
         self.mpl_connect('scroll_event', self.zoom)
-        self.mpl_connect('button_press_event', self.zoom)
 
         self.clear_axes()
 
@@ -297,6 +297,7 @@ class Viewer:
     def __init__(self, parent):
         self.current_scenario = None
         self.dynamic = DynamicCanvas(parent, width=5, height=10, dpi=100)
+        self.dynamic.mpl_connect('button_press_event', self.select_lanelets)
 
     def open_scenario(self, scenario):
         """ """
@@ -361,7 +362,7 @@ class Viewer:
         legend = ax.legend(handles, labels)
         legend.set_zorder(50)
 
-        if focus_on_network: # or sel_lanelet or sel_intersection:
+        if focus_on_network:
             # can we focus on a selection?
             if all([abs(l) < float("Inf") for l in network_limits]):
                 self.dynamic.update_plot(network_limits)
@@ -542,6 +543,23 @@ class Viewer:
             zorder=15,
         )
 
+    def select_lanelets(self, mouse_clicked_event):
+        """ 
+        Selecet lanelets by clicking on the canvas. Selects only one of the 
+        lanelets that contains the click position.
+        """
+        mouse_pos = np.array([mouse_clicked_event.xdata,
+                              mouse_clicked_event.ydata])
+        click_shape = Circle(radius=0.01, center=mouse_pos)
+
+        l_network = self.current_scenario.lanelet_network
+        selected_l_ids = l_network.find_lanelet_by_shape(click_shape)
+        selected_lanelets = [l_network.find_lanelet_by_id(lid) 
+                             for lid in selected_l_ids]
+        if selected_lanelets: 
+            self.update_plot(sel_lanelet=selected_lanelets[0])
+        else:
+            self.update_plot(sel_lanelet=None)
 
 class MainWindow(QWidget):
     def __init__(self, parent=None, path=None):
