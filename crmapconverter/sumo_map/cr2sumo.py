@@ -651,8 +651,8 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                 # coordinates.append(x_coord)
                 # coordinates.append(y_coord)
                 # self._detect_zipper()
-                merged_node = Node(self.node_id_next, 'unregulated',
-                                   coordinates, [])  # new merged node
+                merged_node = Node(self.node_id_next, 'priority', coordinates,
+                                   [])  # new merged node
                 self.node_id_next += 1
                 self.new_nodes[merged_node.getID()] = merged_node
                 merged_nodes = set(n.getID() for n in merged_nodes)
@@ -1399,12 +1399,16 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         # filenames
         route_files: Dict[str, str] = {
             'vehicle':
-            os.path.join(out_folder, scenario_name + ".vehicles" + '.rou.xml'),
+            os.path.join(out_folder, scenario_name + ".vehicles.rou.xml"),
             "pedestrian":
-            os.path.join(out_folder,
-                         scenario_name + ".pedestrians" + '.rou.xml')
+            os.path.join(out_folder, scenario_name + ".pedestrians.rou.xml")
         }
-        trip_file = os.path.join(out_folder, scenario_name + '.trips.xml')
+        trip_files: Dict[str, str] = {
+            'vehicle':
+            os.path.join(out_folder, scenario_name + 'vehicles.trips.xml'),
+            'pedestrian':
+            os.path.join(out_folder, scenario_name + 'pedestrian.trips.xml')
+        }
         add_file = os.path.join(out_folder, scenario_name + '.add.xml')
 
         def run(cmd):
@@ -1418,8 +1422,9 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         # create vehicle route file
         run([
             'python',
-            os.path.join(os.environ['SUMO_HOME'], 'tools/randomTrips.py'),
-            '-n', net_file, '-r', route_files["vehicle"], '-b',
+            os.path.join(os.environ['SUMO_HOME'],
+                         'tools/randomTrips.py'), '-n', net_file, '-o',
+            trip_files['vehicle'], '-r', route_files["vehicle"], '-b',
             str(self.conf.departure_interval_vehicles.start), '-e',
             str(self.conf.departure_interval_vehicles.end), '-p',
             str(period), '--allow-fringe', '--fringe-factor',
@@ -1430,8 +1435,9 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         # create pedestrian routes
         run([
             'python',
-            os.path.join(os.environ['SUMO_HOME'], 'tools/randomTrips.py'),
-            '-n', net_file, '-r', route_files["pedestrian"], '-b',
+            os.path.join(os.environ['SUMO_HOME'],
+                         'tools/randomTrips.py'), '-n', net_file, '-o',
+            trip_files['pedestrian'], '-r', route_files["pedestrian"], '-b',
             str(self.conf.departure_interval_vehicles.start), '-e',
             str(self.conf.departure_interval_vehicles.end), "-p",
             str(1 - self.conf.veh_distribution['pedestrian']),

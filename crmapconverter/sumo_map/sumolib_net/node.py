@@ -21,13 +21,13 @@ class Node:
     """ Nodes from a sumo network """
     def __init__(self,
                  id: int,
-                 type: str,
+                 node_type: str,
                  coord,
                  incLanes,
                  intLanes=None,
                  tl=None):
         self._id = id
-        self._type = type
+        self._type = node_type
         self._coord = coord
         self._incoming = []
         self._outgoing = []
