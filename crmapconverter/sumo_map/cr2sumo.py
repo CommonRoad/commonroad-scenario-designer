@@ -625,6 +625,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                         for intersecting_inc in intersecting_edges[inc_edg]:
                             from_node: Node = self.edges[str(
                                 intersecting_inc)].getFromNode()
+                            # if the lanelet types have an emtpy intersection, don't merge
                             if not lanelet_type(inc_edg) & lanelet_type(
                                     intersecting_inc):
                                 continue
@@ -636,6 +637,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                         for intersecting_out in intersecting_edges[out_edg]:
                             to_node = self.edges[str(
                                 intersecting_out)].getToNode()
+                            # if the lanelet types have an emtpy intersection, don't merge
                             if not lanelet_type(out_edg) & lanelet_type(
                                     intersecting_out):
                                 continue
