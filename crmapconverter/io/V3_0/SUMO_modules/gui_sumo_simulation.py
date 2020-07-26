@@ -2,6 +2,7 @@ import uuid
 import os
 import pathlib
 import logging
+import json
 
 from commonroad.scenario.scenario import Scenario
 
@@ -21,13 +22,15 @@ from PyQt5.QtCore import QThread
 class SimulationWorker(QThread):
     def __init__(self, scenario, config, output_folder):
         super(SimulationWorker, self).__init__()
-        self.scenario = scenario
-        self.config = config
-        self.output_folder = output_folder
-        self.simulated_scenario = None
+        self.scenario: Scenario = scenario
+        self.config: SumoConfig = config
+        self.output_folder: str = output_folder
+        self.simulated_scenario: Scenario = None
         self.error = None
 
     def run(self):
+        print(self.config.presimulation_steps, self.config.simulation_steps,
+              self.config.dt)
         try:
             # convert scenario to SUMO
             wrapper = CR2SumoMapConverter(self.scenario.lanelet_network,
@@ -113,15 +116,15 @@ class SUMOSimulation(QWidget, Ui_sumo_simulate):
         self._update_ui_values()
 
         def set_dt(value):
-            self.config.dt = value
+            self._config.dt = value
             self._config_obs.value = self._config
 
         def set_presimulation_steps(value):
-            self.config.presimulation_steps = value
+            self._config.presimulation_steps = value
             self._config_obs.value = self._config
 
         def set_simulation_steps(value):
-            self.config.simulation_steps = value
+            self._config.simulation_steps = value
             self._config_obs.value = self._config
 
         self.doubleSpinBox_dt.valueChanged.connect(set_dt)
