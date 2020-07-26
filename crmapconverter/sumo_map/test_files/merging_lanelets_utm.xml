@@ -1,13 +1,13 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<commonRoad timeStepSize="0.1" commonRoadVersion="2020a" author="" affiliation="" source="OpenDRIVE 2 Lanelet Converter" benchmarkID="none" date="2020-07-11">
+<commonRoad timeStepSize="0.1" commonRoadVersion="2020a" author="" affiliation="" source="OpenDRIVE 2 Lanelet Converter" benchmarkID="none" date="2020-07-26">
   <location>
     <geoNameId>-999</geoNameId>
     <gpsLatitude>999.0</gpsLatitude>
     <gpsLongitude>999.0</gpsLongitude>
   </location>
   <scenarioTags>
-    <highway/>
     <urban/>
+    <highway/>
   </scenarioTags>
   <lanelet id="100">
     <leftBound>
@@ -61,11 +61,11 @@
       </point>
       <point>
         <x>92.269270</x>
-        <y>-0.32668546</y>
+        <y>-0.32668543</y>
       </point>
       <point>
         <x>85.879270</x>
-        <y>0.87331454</y>
+        <y>0.87331457</y>
       </point>
     </leftBound>
     <rightBound>
@@ -107,11 +107,11 @@
       </point>
       <point>
         <x>113.85927</x>
-        <y>-0.92668546</y>
+        <y>-0.92668543</y>
       </point>
       <point>
         <x>106.86927</x>
-        <y>0.67331454</y>
+        <y>0.67331457</y>
       </point>
       <point>
         <x>99.489270</x>
@@ -240,11 +240,11 @@
       </point>
       <point>
         <x>92.269270</x>
-        <y>-0.32668546</y>
+        <y>-0.32668543</y>
       </point>
       <point>
         <x>85.879270</x>
-        <y>0.87331454</y>
+        <y>0.87331457</y>
       </point>
     </rightBound>
     <successor ref="103"/>
@@ -256,7 +256,7 @@
     <leftBound>
       <point>
         <x>85.879270</x>
-        <y>0.87331454</y>
+        <y>0.87331457</y>
       </point>
       <point>
         <x>80.809270</x>
@@ -349,6 +349,7 @@
     <successor ref="105"/>
     <adjacentLeft ref="103" drivingDir="same"/>
     <laneletType>unknown</laneletType>
+    <trafficLightRef ref="125"/>
   </lanelet>
   <lanelet id="103">
     <leftBound>
@@ -362,15 +363,15 @@
       </point>
       <point>
         <x>75.349270</x>
-        <y>-0.92668546</y>
+        <y>-0.92668543</y>
       </point>
       <point>
         <x>69.559270</x>
-        <y>0.073314540</y>
+        <y>0.073314573</y>
       </point>
       <point>
         <x>64.609270</x>
-        <y>0.77331454</y>
+        <y>0.77331457</y>
       </point>
       <point>
         <x>58.079270</x>
@@ -400,7 +401,7 @@
     <rightBound>
       <point>
         <x>85.879270</x>
-        <y>0.87331454</y>
+        <y>0.87331457</y>
       </point>
       <point>
         <x>80.809270</x>
@@ -448,7 +449,7 @@
     <adjacentLeft ref="104" drivingDir="same"/>
     <adjacentRight ref="101" drivingDir="same"/>
     <laneletType>unknown</laneletType>
-    <trafficLightRef ref="19"/>
+    <trafficLightRef ref="126"/>
   </lanelet>
   <lanelet id="104">
     <leftBound>
@@ -470,19 +471,19 @@
       </point>
       <point>
         <x>64.159270</x>
-        <y>-0.52668546</y>
+        <y>-0.52668543</y>
       </point>
       <point>
         <x>58.089270</x>
-        <y>0.073314540</y>
+        <y>0.073314573</y>
       </point>
       <point>
         <x>53.639270</x>
-        <y>0.37331454</y>
+        <y>0.37331457</y>
       </point>
       <point>
         <x>48.749270</x>
-        <y>0.77331454</y>
+        <y>0.77331457</y>
       </point>
       <point>
         <x>43.089270</x>
@@ -504,7 +505,7 @@
     <rightBound>
       <point>
         <x>85.879270</x>
-        <y>0.87331454</y>
+        <y>0.87331457</y>
       </point>
       <point>
         <x>80.859270</x>
@@ -556,7 +557,7 @@
     <successor ref="108"/>
     <adjacentRight ref="103" drivingDir="same"/>
     <laneletType>unknown</laneletType>
-    <trafficLightRef ref="21"/>
+    <trafficLightRef ref="128"/>
   </lanelet>
   <lanelet id="105">
     <leftBound>
@@ -615,7 +616,7 @@
     <successor ref="109"/>
     <adjacentLeft ref="106" drivingDir="same"/>
     <laneletType>unknown</laneletType>
-    <trafficLightRef ref="22"/>
+    <trafficLightRef ref="121"/>
   </lanelet>
   <lanelet id="106">
     <leftBound>
@@ -675,7 +676,7 @@
     <adjacentLeft ref="107" drivingDir="same"/>
     <adjacentRight ref="105" drivingDir="same"/>
     <laneletType>unknown</laneletType>
-    <trafficLightRef ref="23"/>
+    <trafficLightRef ref="122"/>
   </lanelet>
   <lanelet id="107">
     <leftBound>
@@ -735,7 +736,7 @@
     <adjacentLeft ref="108" drivingDir="same"/>
     <adjacentRight ref="106" drivingDir="same"/>
     <laneletType>unknown</laneletType>
-    <trafficLightRef ref="24"/>
+    <trafficLightRef ref="123"/>
   </lanelet>
   <lanelet id="108">
     <leftBound>
@@ -745,11 +746,11 @@
       </point>
       <point>
         <x>29.599270</x>
-        <y>0.67331454</y>
+        <y>0.67331457</y>
       </point>
       <point>
         <x>26.099270</x>
-        <y>-0.72668546</y>
+        <y>-0.72668543</y>
       </point>
       <point>
         <x>21.819270</x>
@@ -794,7 +795,7 @@
     <successor ref="112"/>
     <adjacentRight ref="107" drivingDir="same"/>
     <laneletType>unknown</laneletType>
-    <trafficLightRef ref="25"/>
+    <trafficLightRef ref="124"/>
   </lanelet>
   <lanelet id="109">
     <leftBound>
@@ -807,19 +808,19 @@
         <y>7.9733145</y>
       </point>
       <point>
-        <x>8.0592694</x>
+        <x>8.0592686</x>
         <y>7.9733145</y>
       </point>
       <point>
-        <x>3.8692694</x>
+        <x>3.8692686</x>
         <y>7.8733145</y>
       </point>
       <point>
-        <x>-0.84073065</x>
+        <x>-0.84073142</x>
         <y>7.7733145</y>
       </point>
       <point>
-        <x>-6.3907306</x>
+        <x>-6.3907314</x>
         <y>7.6733145</y>
       </point>
       <point>
@@ -901,19 +902,19 @@
         <y>11.173315</y>
       </point>
       <point>
-        <x>7.9792694</x>
+        <x>7.9792686</x>
         <y>11.173315</y>
       </point>
       <point>
-        <x>3.7692694</x>
+        <x>3.7692686</x>
         <y>11.073315</y>
       </point>
       <point>
-        <x>-0.85073065</x>
+        <x>-0.85073142</x>
         <y>11.073315</y>
       </point>
       <point>
-        <x>-6.4307306</x>
+        <x>-6.4307314</x>
         <y>10.973315</y>
       </point>
       <point>
@@ -970,7 +971,7 @@
       </point>
       <point>
         <x>-162.85073</x>
-        <y>-0.42668546</y>
+        <y>-0.42668543</y>
       </point>
       <point>
         <x>-214.44073</x>
@@ -1000,19 +1001,19 @@
         <y>4.9733145</y>
       </point>
       <point>
-        <x>8.0692694</x>
+        <x>8.0692686</x>
         <y>4.9733145</y>
       </point>
       <point>
-        <x>3.9192694</x>
+        <x>3.9192686</x>
         <y>4.8733145</y>
       </point>
       <point>
-        <x>-0.78073065</x>
+        <x>-0.78073142</x>
         <y>4.7733145</y>
       </point>
       <point>
-        <x>-6.2907306</x>
+        <x>-6.2907314</x>
         <y>4.5733145</y>
       </point>
       <point>
@@ -1053,11 +1054,11 @@
       </point>
       <point>
         <x>-59.450730</x>
-        <y>0.87331454</y>
+        <y>0.87331457</y>
       </point>
       <point>
         <x>-65.470730</x>
-        <y>0.17331454</y>
+        <y>0.17331457</y>
       </point>
       <point>
         <x>-83.870730</x>
@@ -1094,19 +1095,19 @@
         <y>7.9733145</y>
       </point>
       <point>
-        <x>8.0592694</x>
+        <x>8.0592686</x>
         <y>7.9733145</y>
       </point>
       <point>
-        <x>3.8692694</x>
+        <x>3.8692686</x>
         <y>7.8733145</y>
       </point>
       <point>
-        <x>-0.84073065</x>
+        <x>-0.84073142</x>
         <y>7.7733145</y>
       </point>
       <point>
-        <x>-6.3907306</x>
+        <x>-6.3907314</x>
         <y>7.6733145</y>
       </point>
       <point>
@@ -1194,19 +1195,19 @@
         <y>1.8733145</y>
       </point>
       <point>
-        <x>8.0892694</x>
+        <x>8.0892686</x>
         <y>1.7733145</y>
       </point>
       <point>
-        <x>4.1392694</x>
+        <x>4.1392686</x>
         <y>1.6733145</y>
       </point>
       <point>
-        <x>-0.50073065</x>
+        <x>-0.50073142</x>
         <y>1.5733145</y>
       </point>
       <point>
-        <x>-5.9907306</x>
+        <x>-5.9907314</x>
         <y>1.3733145</y>
       </point>
       <point>
@@ -1219,23 +1220,23 @@
       </point>
       <point>
         <x>-19.590730</x>
-        <y>0.97331454</y>
+        <y>0.97331457</y>
       </point>
       <point>
         <x>-24.060730</x>
-        <y>0.77331454</y>
+        <y>0.77331457</y>
       </point>
       <point>
         <x>-31.700730</x>
-        <y>0.57331454</y>
+        <y>0.57331457</y>
       </point>
       <point>
         <x>-36.230730</x>
-        <y>0.27331454</y>
+        <y>0.27331457</y>
       </point>
       <point>
         <x>-41.400730</x>
-        <y>-0.12668546</y>
+        <y>-0.12668543</y>
       </point>
       <point>
         <x>-48.360730</x>
@@ -1288,19 +1289,19 @@
         <y>4.9733145</y>
       </point>
       <point>
-        <x>8.0692694</x>
+        <x>8.0692686</x>
         <y>4.9733145</y>
       </point>
       <point>
-        <x>3.9192694</x>
+        <x>3.9192686</x>
         <y>4.8733145</y>
       </point>
       <point>
-        <x>-0.78073065</x>
+        <x>-0.78073142</x>
         <y>4.7733145</y>
       </point>
       <point>
-        <x>-6.2907306</x>
+        <x>-6.2907314</x>
         <y>4.5733145</y>
       </point>
       <point>
@@ -1341,11 +1342,11 @@
       </point>
       <point>
         <x>-59.450730</x>
-        <y>0.87331454</y>
+        <y>0.87331457</y>
       </point>
       <point>
         <x>-65.470730</x>
-        <y>0.17331454</y>
+        <y>0.17331457</y>
       </point>
       <point>
         <x>-83.870730</x>
@@ -1388,19 +1389,19 @@
         <y>-1.1266855</y>
       </point>
       <point>
-        <x>8.1692694</x>
+        <x>8.1692686</x>
         <y>-1.2266855</y>
       </point>
       <point>
-        <x>4.2192694</x>
+        <x>4.2192686</x>
         <y>-1.3266855</y>
       </point>
       <point>
-        <x>-0.40073065</x>
+        <x>-0.40073142</x>
         <y>-1.5266855</y>
       </point>
       <point>
-        <x>-5.8607306</x>
+        <x>-5.8607314</x>
         <y>-1.6266855</y>
       </point>
       <point>
@@ -1482,19 +1483,19 @@
         <y>1.8733145</y>
       </point>
       <point>
-        <x>8.0892694</x>
+        <x>8.0892686</x>
         <y>1.7733145</y>
       </point>
       <point>
-        <x>4.1392694</x>
+        <x>4.1392686</x>
         <y>1.6733145</y>
       </point>
       <point>
-        <x>-0.50073065</x>
+        <x>-0.50073142</x>
         <y>1.5733145</y>
       </point>
       <point>
-        <x>-5.9907306</x>
+        <x>-5.9907314</x>
         <y>1.3733145</y>
       </point>
       <point>
@@ -1507,23 +1508,23 @@
       </point>
       <point>
         <x>-19.590730</x>
-        <y>0.97331454</y>
+        <y>0.97331457</y>
       </point>
       <point>
         <x>-24.060730</x>
-        <y>0.77331454</y>
+        <y>0.77331457</y>
       </point>
       <point>
         <x>-31.700730</x>
-        <y>0.57331454</y>
+        <y>0.57331457</y>
       </point>
       <point>
         <x>-36.230730</x>
-        <y>0.27331454</y>
+        <y>0.27331457</y>
       </point>
       <point>
         <x>-41.400730</x>
-        <y>-0.12668546</y>
+        <y>-0.12668543</y>
       </point>
       <point>
         <x>-48.360730</x>
@@ -1570,56 +1571,10 @@
     <adjacentRight ref="111" drivingDir="same"/>
     <laneletType>unknown</laneletType>
   </lanelet>
-  <trafficLight id="19">
+  <trafficLight id="121">
     <cycle>
       <cycleElement>
-        <duration>31</duration>
-        <color>green</color>
-      </cycleElement>
-      <cycleElement>
-        <duration>7</duration>
-        <color>yellow</color>
-      </cycleElement>
-      <cycleElement>
-        <duration>5</duration>
-        <color>red</color>
-      </cycleElement>
-    </cycle>
-    <position>
-      <point>
-        <x>31.979270</x>
-        <y>7.0733145</y>
-      </point>
-    </position>
-    <active>true</active>
-  </trafficLight>
-  <trafficLight id="21">
-    <cycle>
-      <cycleElement>
-        <duration>31</duration>
-        <color>green</color>
-      </cycleElement>
-      <cycleElement>
-        <duration>7</duration>
-        <color>yellow</color>
-      </cycleElement>
-      <cycleElement>
-        <duration>5</duration>
-        <color>red</color>
-      </cycleElement>
-    </cycle>
-    <position>
-      <point>
-        <x>31.699270</x>
-        <y>4.1733145</y>
-      </point>
-    </position>
-    <active>true</active>
-  </trafficLight>
-  <trafficLight id="22">
-    <cycle>
-      <cycleElement>
-        <duration>31</duration>
+        <duration>78</duration>
         <color>green</color>
       </cycleElement>
       <cycleElement>
@@ -1639,10 +1594,10 @@
     </position>
     <active>true</active>
   </trafficLight>
-  <trafficLight id="23">
+  <trafficLight id="122">
     <cycle>
       <cycleElement>
-        <duration>31</duration>
+        <duration>78</duration>
         <color>green</color>
       </cycleElement>
       <cycleElement>
@@ -1662,10 +1617,10 @@
     </position>
     <active>true</active>
   </trafficLight>
-  <trafficLight id="24">
+  <trafficLight id="123">
     <cycle>
       <cycleElement>
-        <duration>31</duration>
+        <duration>78</duration>
         <color>green</color>
       </cycleElement>
       <cycleElement>
@@ -1685,10 +1640,10 @@
     </position>
     <active>true</active>
   </trafficLight>
-  <trafficLight id="25">
+  <trafficLight id="124">
     <cycle>
       <cycleElement>
-        <duration>31</duration>
+        <duration>78</duration>
         <color>green</color>
       </cycleElement>
       <cycleElement>
@@ -1704,6 +1659,75 @@
       <point>
         <x>14.659270</x>
         <y>1.9733145</y>
+      </point>
+    </position>
+    <active>true</active>
+  </trafficLight>
+  <trafficLight id="125">
+    <cycle>
+      <cycleElement>
+        <duration>78</duration>
+        <color>green</color>
+      </cycleElement>
+      <cycleElement>
+        <duration>7</duration>
+        <color>yellow</color>
+      </cycleElement>
+      <cycleElement>
+        <duration>5</duration>
+        <color>red</color>
+      </cycleElement>
+    </cycle>
+    <position>
+      <point>
+        <x>31.999270</x>
+        <y>10.273315</y>
+      </point>
+    </position>
+    <active>true</active>
+  </trafficLight>
+  <trafficLight id="126">
+    <cycle>
+      <cycleElement>
+        <duration>78</duration>
+        <color>green</color>
+      </cycleElement>
+      <cycleElement>
+        <duration>7</duration>
+        <color>yellow</color>
+      </cycleElement>
+      <cycleElement>
+        <duration>5</duration>
+        <color>red</color>
+      </cycleElement>
+    </cycle>
+    <position>
+      <point>
+        <x>31.979270</x>
+        <y>7.0733145</y>
+      </point>
+    </position>
+    <active>true</active>
+  </trafficLight>
+  <trafficLight id="128">
+    <cycle>
+      <cycleElement>
+        <duration>78</duration>
+        <color>green</color>
+      </cycleElement>
+      <cycleElement>
+        <duration>7</duration>
+        <color>yellow</color>
+      </cycleElement>
+      <cycleElement>
+        <duration>5</duration>
+        <color>red</color>
+      </cycleElement>
+    </cycle>
+    <position>
+      <point>
+        <x>31.699270</x>
+        <y>4.1733145</y>
       </point>
     </position>
     <active>true</active>

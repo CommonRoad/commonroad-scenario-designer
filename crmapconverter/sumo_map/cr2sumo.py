@@ -1407,47 +1407,53 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         }
         trip_files: Dict[str, str] = {
             'vehicle':
-            os.path.join(out_folder, scenario_name + 'vehicles.trips.xml'),
+            os.path.join(out_folder, scenario_name + '.vehicles.trips.xml'),
             'pedestrian':
-            os.path.join(out_folder, scenario_name + 'pedestrian.trips.xml')
+            os.path.join(out_folder, scenario_name + '.pedestrian.trips.xml')
         }
         add_file = os.path.join(out_folder, scenario_name + '.add.xml')
 
-        def run(cmd):
+        def run(cmd) -> bool:
             try:
                 subprocess.check_output(cmd)
+                return True
             except subprocess.CalledProcessError as e:
                 raise RuntimeError(
                     "Command '{}' return with error (code {}): {}".format(
                         e.cmd, e.returncode, e.output))
+                return False
 
         # create vehicle route file
-        run([
-            'python',
-            os.path.join(os.environ['SUMO_HOME'],
-                         'tools/randomTrips.py'), '-n', net_file, '-o',
-            trip_files['vehicle'], '-r', route_files["vehicle"], '-b',
-            str(self.conf.departure_interval_vehicles.start), '-e',
-            str(self.conf.departure_interval_vehicles.end), '-p',
-            str(period), '--allow-fringe', '--fringe-factor',
-            str(self.conf.fringe_factor), "--seed",
-            str(self.conf.random_seed),
-            '--trip-attributes=departLane=\"best\" departSpeed=\"max\" departPos=\"base\"'
-        ])
-        # create pedestrian routes
-        run([
-            'python',
-            os.path.join(os.environ['SUMO_HOME'],
-                         'tools/randomTrips.py'), '-n', net_file, '-o',
-            trip_files['pedestrian'], '-r', route_files["pedestrian"], '-b',
-            str(self.conf.departure_interval_vehicles.start), '-e',
-            str(self.conf.departure_interval_vehicles.end), "-p",
-            str(1 - self.conf.veh_distribution['pedestrian']),
-            '--allow-fringe', '--fringe-factor',
-            str(self.conf.fringe_factor), "--persontrips", "--seed",
-            str(self.conf.random_seed),
-            '--trip-attributes= modes=\"public car\" departPos=\"base\"'
-        ])
+        try:
+            run([
+                'python',
+                os.path.join(os.environ['SUMO_HOME'],
+                             'tools/randomTrips.py'), '-n', net_file, '-o',
+                trip_files['vehicle'], '-r', route_files["vehicle"], '-b',
+                str(self.conf.departure_interval_vehicles.start), '-e',
+                str(self.conf.departure_interval_vehicles.end), '-p',
+                str(period), '--allow-fringe', '--fringe-factor',
+                str(self.conf.fringe_factor), "--seed",
+                str(self.conf.random_seed),
+                '--trip-attributes=departLane=\"best\" departSpeed=\"max\" departPos=\"base\"'
+            ])
+            # create pedestrian routes
+            run([
+                'python',
+                os.path.join(os.environ['SUMO_HOME'], 'tools/randomTrips.py'),
+                '-n', net_file, '-o', trip_files['pedestrian'], '-r',
+                route_files["pedestrian"], '-b',
+                str(self.conf.departure_interval_vehicles.start), '-e',
+                str(self.conf.departure_interval_vehicles.end), "-p",
+                str(1 - self.conf.veh_distribution['pedestrian']),
+                '--allow-fringe', '--fringe-factor',
+                str(self.conf.fringe_factor), "--persontrips", "--seed",
+                str(self.conf.random_seed),
+                '--trip-attributes= modes=\"public car\" departPos=\"base\"'
+            ])
+        except RuntimeError as e:
+            # ignore any upcoming erorrs, but log them to the console as errors in route generation are considered non-critical
+            logging.warning(e)
 
         if self.conf.n_ego_vehicles != 0:
             #get ego ids and add EGO_ID_START prefix
