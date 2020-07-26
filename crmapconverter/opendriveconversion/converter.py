@@ -74,8 +74,8 @@ class OpenDriveConverter:
         """Convert a whole lane section into a list of ParametricLane objects.
 
         Args:
-          lane_section:
-          reference_border:
+          lane_section: opendriveparser.elements.road.lanes.lane_sections()
+          reference_border: crmapconverter.opendriveconversion.plane_elements.border.Border()
 
         Returns:
 
@@ -124,7 +124,7 @@ class OpenDriveConverter:
                 # Create new lane for each width segment
                 for width in lane.widths:
                     parametric_lane = OpenDriveConverter.create_parametric_lane(
-                        lane_borders, width, lane
+                        lane_borders, width, lane, side
                     )
                     parametric_lane.reverse = bool(lane.id > 0)
                     plane_group.append(parametric_lane)
@@ -138,7 +138,7 @@ class OpenDriveConverter:
         return plane_groups
 
     @staticmethod
-    def create_parametric_lane(lane_borders, width, lane) -> ParametricLane:
+    def create_parametric_lane(lane_borders, width, lane, side) -> ParametricLane:
         """Create a parametric lane for a certain width section.
 
         Args:
@@ -146,6 +146,7 @@ class OpenDriveConverter:
           width: Width section with offset and coefficient information.
           lane: Lane in which new parametric lane is created.
           prev_inner_neighbours: Inner neighbours of parametric lane.
+          side: Which side of the lane section where the Parametric lane is created.
 
         Returns:
           A ParametricLane object with specified borders and a unique id.
@@ -167,6 +168,8 @@ class OpenDriveConverter:
             type_=lane.type,
             length=width.length,
             border_group=border_group,
+            line_marking=lane.road_mark,
+            side=side
         )
         return parametric_lane
 

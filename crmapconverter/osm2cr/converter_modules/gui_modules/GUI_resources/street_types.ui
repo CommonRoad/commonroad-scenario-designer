@@ -121,6 +121,27 @@
         </property>
        </widget>
       </item>
+      <item row="14" column="0">
+       <widget class="QCheckBox" name="chk_path">
+        <property name="text">
+         <string>path</string>
+        </property>
+       </widget>
+      </item>
+      <item row="15" column="0">
+       <widget class="QCheckBox" name="chk_footway">
+        <property name="text">
+         <string>footway</string>
+        </property>
+       </widget>
+      </item>
+      <item row="16" column="0">
+       <widget class="QCheckBox" name="chk_cycleway">
+        <property name="text">
+         <string>cycleway</string>
+        </property>
+       </widget>
+      </item>
      </layout>
     </widget>
    </item>

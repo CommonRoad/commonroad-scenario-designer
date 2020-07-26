@@ -217,10 +217,10 @@ class OpenDriveConvertWindow(QWidget):
             "CommonRoad files *.xml (*.xml)",
             options=QFileDialog.Options(),
         )
-
         if not path:
             return
-
+        if not path.endswith(".xml"):
+            path += ".xml"
         try:
             with open(path, "w") as fh:
                 writer = CommonRoadFileWriter(
@@ -231,7 +231,7 @@ class OpenDriveConvertWindow(QWidget):
                     source="OpenDRIVE 2 Lanelet Converter",
                     tags="",
                 )
-                writer.write_scenario_to_file_io(fh)
+                writer.write_scenario_to_file(path)
         except (IOError) as e:
             QMessageBox.critical(
                 self,

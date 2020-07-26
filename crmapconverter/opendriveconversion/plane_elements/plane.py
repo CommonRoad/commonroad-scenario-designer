@@ -37,11 +37,11 @@ class ParametricLaneBorderGroup:
     # NOTE: not checking types with getter/setter because duck typing
     # should be possible
     def __init__(
-        self,
-        inner_border=None,
-        inner_border_offset=None,
-        outer_border=None,
-        outer_border_offset=None,
+            self,
+            inner_border=None,
+            inner_border_offset=None,
+            outer_border=None,
+            outer_border_offset=None,
     ):
         self.inner_border = inner_border
         self.inner_border_offset = inner_border_offset
@@ -49,7 +49,7 @@ class ParametricLaneBorderGroup:
         self.outer_border_offset = outer_border_offset
 
     def calc_border_position(
-        self, border: str, s_pos: float, width_offset: float, is_last_pos: bool = False
+            self, border: str, s_pos: float, width_offset: float, is_last_pos: bool = False
     ) -> Tuple[Tuple[float, float], float]:
         """Calc vertices point of inner or outer Border.
 
@@ -98,24 +98,30 @@ class ParametricLane:
       id_ (str): Unique string identifier.
       type_ (str): Identifies type of ParametricLane.
       length (float): Length of ParametricLane.
+      line_marking (class: RoadMark)
+      side: the "side" in lane section. Used for determining the line marking side.
 
     """
 
     def __init__(
-        self,
-        id_: str,
-        type_: str,
-        border_group: ParametricLaneBorderGroup,
-        length: float = None,
+            self,
+            id_: str,
+            type_: str,
+            border_group: ParametricLaneBorderGroup,
+            length: float = None,
+            line_marking = None,
+            side: str = None
     ):
         self.border_group = border_group
         self.id_ = id_
         self.type_ = type_
         self.length = length
         self.reverse = False
+        self.line_marking = line_marking
+        self.side = side
 
     def calc_border(
-        self, border: str, s_pos: float, width_offset: float = 0.0
+            self, border: str, s_pos: float, width_offset: float = 0.0
     ) -> Tuple[Tuple[float, float], float]:
         """Calc vertices point of inner or outer Border.
 
@@ -309,7 +315,7 @@ class ParametricLane:
 
         width_coefficients = self.border_group.get_width_coefficients()
         if width_coefficients[0] > 0.0 and all(
-            coeff == 0.0 for coeff in width_coefficients
+                coeff == 0.0 for coeff in width_coefficients
         ):
             # this is not correct as it should be an interval
             return [0, self.length]
@@ -344,7 +350,7 @@ class ParametricLane:
             & (roots >= 0)
             # & (is_local_maximum)
             & (roots <= self.length)
-        ]
+            ]
 
         # append start and end of ParametricLane because maximum could be there, too
         restricted_roots = np.append(restricted_roots, [0, self.length])

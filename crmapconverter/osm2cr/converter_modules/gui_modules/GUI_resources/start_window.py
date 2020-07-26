@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'start_window.ui'
 #
-# Created by: PyQt5 UI code generator 5.11.3
+# Created by: PyQt5 UI code generator 5.9.2
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -11,7 +11,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(287, 537)
+        MainWindow.resize(453, 573)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.gridLayout = QtWidgets.QGridLayout(self.centralwidget)
@@ -101,25 +101,22 @@ class Ui_MainWindow(object):
         self.gridLayout_4.addWidget(self.frame_4, 0, 0, 1, 1)
         self.gridLayout.addWidget(self.frame_3, 2, 0, 1, 1)
         spacerItem3 = QtWidgets.QSpacerItem(0, 0, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
-        self.gridLayout.addItem(spacerItem3, 9, 0, 1, 1)
+        self.gridLayout.addItem(spacerItem3, 8, 0, 1, 1)
         self.b_load_state = QtWidgets.QPushButton(self.centralwidget)
         self.b_load_state.setObjectName("b_load_state")
         self.gridLayout.addWidget(self.b_load_state, 5, 0, 1, 1)
         spacerItem4 = QtWidgets.QSpacerItem(20, 20, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
         self.gridLayout.addItem(spacerItem4, 4, 0, 1, 1)
-        self.b_view_scenario = QtWidgets.QPushButton(self.centralwidget)
-        self.b_view_scenario.setObjectName("b_view_scenario")
-        self.gridLayout.addWidget(self.b_view_scenario, 6, 0, 1, 1)
         self.b_download = QtWidgets.QPushButton(self.centralwidget)
         self.b_download.setObjectName("b_download")
-        self.gridLayout.addWidget(self.b_download, 7, 0, 1, 1)
+        self.gridLayout.addWidget(self.b_download, 6, 0, 1, 1)
         self.b_settings = QtWidgets.QPushButton(self.centralwidget)
         self.b_settings.setToolTip("")
         self.b_settings.setObjectName("b_settings")
-        self.gridLayout.addWidget(self.b_settings, 8, 0, 1, 1)
+        self.gridLayout.addWidget(self.b_settings, 7, 0, 1, 1)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 287, 21))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 453, 23))
         font = QtGui.QFont()
         font.setBold(False)
         font.setWeight(50)
@@ -142,7 +139,7 @@ class Ui_MainWindow(object):
         MainWindow.setWindowTitle(_translate("MainWindow", "osm2cr"))
         self.label_5.setText(_translate("MainWindow", "Range"))
         self.l_region.setText(_translate("MainWindow", "Coordinates Valid"))
-        self.label_3.setText(_translate("MainWindow", "Coordinates:"))
+        self.label_3.setText(_translate("MainWindow", "Coordinates (Lat-Long):"))
         self.coordinate_input.setText(_translate("MainWindow", "48.262545, 11.668124"))
         self.l_selected_file.setText(_translate("MainWindow", "No File"))
         self.b_load_file.setText(_translate("MainWindow", "Select File"))
@@ -152,12 +149,10 @@ class Ui_MainWindow(object):
         self.input_picked_output.setText(_translate("MainWindow", "No file picked"))
         self.b_start.setToolTip(_translate("MainWindow", "Start conversion with selected input"))
         self.b_start.setText(_translate("MainWindow", "Start Conversion"))
-        self.input_bench_id.setText(_translate("MainWindow", "unnamed"))
+        self.input_bench_id.setText(_translate("MainWindow", "test_bench"))
         self.label.setText(_translate("MainWindow", "BenchmarkID"))
         self.b_load_state.setToolTip(_translate("MainWindow", "Continue editing a scenario"))
         self.b_load_state.setText(_translate("MainWindow", "Load Edit State"))
-        self.b_view_scenario.setToolTip(_translate("MainWindow", "View plot of a CR scenario"))
-        self.b_view_scenario.setText(_translate("MainWindow", "View Scenario"))
         self.b_download.setToolTip(_translate("MainWindow", "Download the selected Region as OSM map"))
         self.b_download.setText(_translate("MainWindow", "Download OSM"))
         self.b_settings.setText(_translate("MainWindow", "Edit Settings"))

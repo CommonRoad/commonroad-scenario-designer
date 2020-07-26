@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'lane_link_edit_embedding.ui'
 #
-# Created by: PyQt5 UI code generator 5.11.3
+# Created by: PyQt5 UI code generator 5.9.2
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -11,7 +11,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_LaneLinkEdit(object):
     def setupUi(self, LaneLinkEdit):
         LaneLinkEdit.setObjectName("LaneLinkEdit")
-        LaneLinkEdit.resize(494, 508)
+        LaneLinkEdit.resize(1027, 737)
         self.centralwidget = QtWidgets.QWidget(LaneLinkEdit)
         self.centralwidget.setObjectName("centralwidget")
         self.gridLayout = QtWidgets.QGridLayout(self.centralwidget)
@@ -67,16 +67,25 @@ class Ui_LaneLinkEdit(object):
         self.frame.setObjectName("frame")
         self.gridLayout_3 = QtWidgets.QGridLayout(self.frame)
         self.gridLayout_3.setObjectName("gridLayout_3")
+        self.pushButton = QtWidgets.QPushButton(self.frame)
+        self.pushButton.setObjectName("pushButton")
+        self.gridLayout_3.addWidget(self.pushButton, 0, 0, 1, 1)
+        spacerItem1 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        self.gridLayout_3.addItem(spacerItem1, 0, 3, 1, 1)
         self.b_finalize = QtWidgets.QPushButton(self.frame)
         self.b_finalize.setMinimumSize(QtCore.QSize(200, 0))
         self.b_finalize.setObjectName("b_finalize")
-        self.gridLayout_3.addWidget(self.b_finalize, 0, 1, 1, 1)
-        spacerItem1 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-        self.gridLayout_3.addItem(spacerItem1, 0, 0, 1, 1)
+        self.gridLayout_3.addWidget(self.b_finalize, 0, 4, 1, 1)
+        self.pushButton_2 = QtWidgets.QPushButton(self.frame)
+        self.pushButton_2.setObjectName("pushButton_2")
+        self.gridLayout_3.addWidget(self.pushButton_2, 0, 1, 1, 1)
+        self.pushButton_3 = QtWidgets.QPushButton(self.frame)
+        self.pushButton_3.setObjectName("pushButton_3")
+        self.gridLayout_3.addWidget(self.pushButton_3, 0, 2, 1, 1)
         self.gridLayout.addWidget(self.frame, 1, 1, 1, 1)
         LaneLinkEdit.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(LaneLinkEdit)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 494, 21))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 1027, 28))
         self.menubar.setObjectName("menubar")
         LaneLinkEdit.setMenuBar(self.menubar)
         self.statusbar = QtWidgets.QStatusBar(LaneLinkEdit)
@@ -100,5 +109,8 @@ class Ui_LaneLinkEdit(object):
         self.b_redo.setText(_translate("LaneLinkEdit", "redo"))
         self.b_delete.setToolTip(_translate("LaneLinkEdit", "del"))
         self.b_delete.setText(_translate("LaneLinkEdit", "delete"))
+        self.pushButton.setText(_translate("LaneLinkEdit", "Parsing"))
         self.b_finalize.setText(_translate("LaneLinkEdit", "Finalize Edit"))
+        self.pushButton_2.setText(_translate("LaneLinkEdit", "Edge Editing"))
+        self.pushButton_3.setText(_translate("LaneLinkEdit", "Lane Link Editing"))
 

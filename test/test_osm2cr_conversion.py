@@ -23,7 +23,7 @@ from test.utils import elements_equal
 #     xml_output_name = None
 #     cwd_path = None
 #     out_path = None
-#     scenario: converter.Scenario = None
+#     scenario: converter.GraphScenario = None
 
 #     def setUp(self):
 #         """Load the osm file and convert it to a scenario."""
@@ -43,12 +43,12 @@ from test.utils import elements_equal
 
 #         path = os.path.dirname(os.path.realpath(
 #             __file__)) + f"/osm_xml_test_files/{self.osm_file_name}.osm"
-#         self.scenario = converter.Scenario(path)
+#         self.scenario = converter.GraphScenario(path)
 
 #     def test_osm2_cr_conversion(self):
 #         """Test if the converted scenario is equal to the loaded xml file"""
 
-#         # Save scenario to xml file, as converter.Scenario offers no way
+#         # Save scenario to xml file, as converter.GraphScenario offers no way
 #         # to access the underlying CommonRoadfileWriter
 #         converted_path = os.path.join(
 #             self.out_path, self.osm_file_name + "_converted_scenario.xml")

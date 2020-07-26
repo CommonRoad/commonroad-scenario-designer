@@ -74,6 +74,22 @@ ACCEPTED_HIGHWAYS = [
     "living_street",
     "service",
 ]
+EXTRACT_SUBLAYER = True
+# types of highways extracted from the OSM file as sublayer
+ACCEPTED_HIGHWAYS_SUBLAYER = [
+    "path",
+    "footway",
+    "cycleway"
+]
+# Lanelet type of the sublayer lanelets
+SUBLAYER_LANELETTYPE = 'sidewalk'
+# Lanelet type of the sublayer lanelets that cross the main layer
+# overwrites SUBLAYER_LANELETTYPE for lanelets applied on
+CROSSING_LANELETTYPE = 'crosswalk'
+# osm ways with these tags are not taken into account
+REJECTED_TAGS = {
+    "area": "yes"
+}
 # number of lanes for each type of road should be >=1
 LANECOUNTS = {
     "motorway": 6,
@@ -90,6 +106,9 @@ LANECOUNTS = {
     "tertiary_link": 2,
     "living_street": 2,
     "service": 2,
+    "path": 1,
+    "footway": 1,
+    "cycleway": 1
 }
 # width of lanes for each type of road in meters
 LANEWIDTHS = {
@@ -107,6 +126,9 @@ LANEWIDTHS = {
     "tertiary_link": 3.5,
     "living_street": 3.5,
     "service": 3.5,
+    "path": 2.0,
+    "footway": 2.0,
+    "cycleway": 2.0
 }
 # default speed limit for each type of road in km/h
 SPEED_LIMITS = {
@@ -124,6 +146,9 @@ SPEED_LIMITS = {
     "tertiary_link": 80,
     "living_street": 7,
     "service": 10,
+    "path": 8,
+    "footway": 8,
+    "cycleway": 20
 }
 
 # Export Settings
@@ -147,6 +172,8 @@ INTERPOLATION_DISTANCE_INTERNAL = 0.25
 BEZIER_PARAMETER = 0.35
 # distance between roads at intersection used for cropping in meters
 INTERSECTION_DISTANCE = 20.0
+# associated with pedestrian pathways by default
+INTERSECTION_DISTANCE_SUBLAYER = 1.0
 # defines if the distance to other roads is used for cropping
 # if false the distance to the center of the intersection is used
 INTERSECTION_CROPPING_WITH_RESPECT_TO_ROADS = True
@@ -161,6 +188,8 @@ CLUSTER_LENGTH = 10.0
 LEAST_CLUSTER_LENGTH = 10.0
 # maximal distance between two intersections to which they are merged, if zero, no intersections are merged
 MERGE_DISTANCE = 3.5
+# threshold which is used to determine if a successor of an incoming lane is considered as straight
+INTERSECTION_STRAIGHT_THRESHOLD = 35.0
 
 # Toggle edit for user
 USER_EDIT = False
