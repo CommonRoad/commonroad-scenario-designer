@@ -58,7 +58,7 @@ USE_RESTRICTIONS = True
 # types of roads extracted from the OSM file
 # suitable types: 'motorway', 'trunk', 'primary', 'secondary', 'tertiary', 'unclassified', 'residential',
 # 'motorway_link', 'trunk_link', 'primary_link', 'secondary_link', 'tertiary_link', 'living_street', 'service'
-ACCEPTED_HIGHWAYS = [
+ACCEPTED_HIGHWAYS_MAINLAYER = [
     "motorway",
     "trunk",
     "primary",
@@ -72,7 +72,7 @@ ACCEPTED_HIGHWAYS = [
     "secondary_link",
     "tertiary_link",
     "living_street",
-    "service",
+    "service"
 ]
 EXTRACT_SUBLAYER = True
 # types of highways extracted from the OSM file as sublayer
