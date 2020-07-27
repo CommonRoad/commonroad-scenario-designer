@@ -43,6 +43,7 @@ def parse_arguments():
         help="overwrite existing file if it has same name as converted file",
     )
     parser.add_argument("-o", "--output-name", help="specify name of outputed file")
+    parser.add_argument("-t", "--tags", nargs="+", type=Tag, help="tags of the created scenarios", default=set())
     parser.add_argument("--proj", help="proj-string to specify conversion")
     parser.add_argument(
         "-a",
@@ -96,9 +97,8 @@ def osm_to_commonroad(args, output_name: str):
       args: Object containing parsed arguments.
       output_name: Name of file where result should be written to.
     """
-    with open(f"{args.input_file}", "r") as file_in:
-        parser = OSMParser(etree.parse(file_in).getroot())
-        osm = parser.parse()
+    parser = OSMParser(etree.parse(args.input_file).getroot())
+    osm = parser.parse()
 
     osm2l = OSM2LConverter(proj_string=args.proj)
     scenario = osm2l(
@@ -111,7 +111,7 @@ def osm_to_commonroad(args, output_name: str):
             author="",
             affiliation="",
             source="OpenDRIVE 2 Lanelet Converter",
-            tags={Tag.URBAN, Tag.HIGHWAY},
+            tags=set(args.tags),
         )
         writer.write_to_file(output_name, OverwriteExistingFile.ALWAYS)
     else:
