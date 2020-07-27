@@ -886,14 +886,18 @@ def create_graph(file_path: str) -> rg.Graph:
         return graph, crossing_points
 
     if config.EXTRACT_SUBLAYER:
-        # 
-        all_accepted_ways = config.ACCEPTED_HIGHWAYS.copy()
+        if set(config.ACCEPTED_HIGHWAYS_MAINLAYER) & set(config.ACCEPTED_HIGHWAYS_SUBLAYER):
+            raise RuntimeError(
+                "main layer types and sublayer types have equal elements")
+
+        #  get combined graph
+        all_accepted_ways = config.ACCEPTED_HIGHWAYS_MAINLAYER.copy()
         all_accepted_ways.extend(config.ACCEPTED_HIGHWAYS_SUBLAYER)
         combined_g, _ = _create_graph(file_path, all_accepted_ways)
         
         # get crossing nodes
         main_g, main_crossing_points = _create_graph(file_path,
-            config.ACCEPTED_HIGHWAYS, combined_g.bounds)
+            config.ACCEPTED_HIGHWAYS_MAINLAYER, combined_g.bounds)
         sub_g, sub_crossing_points = _create_graph(file_path,
             config.ACCEPTED_HIGHWAYS_SUBLAYER, combined_g.bounds)
         crossing_nodes, already_contained = get_crossing_points(
@@ -903,7 +907,7 @@ def create_graph(file_path: str) -> rg.Graph:
         # create the main graph with additional crossing nodes
         extended_main_graph, _ = _create_graph(
             file_path,
-            config.ACCEPTED_HIGHWAYS,
+            config.ACCEPTED_HIGHWAYS_MAINLAYER,
             combined_g.bounds,
             crossing_nodes
         )
@@ -922,6 +926,6 @@ def create_graph(file_path: str) -> rg.Graph:
         )
 
     else:
-        main_g, _ = _create_graph(file_path, config.ACCEPTED_HIGHWAYS)
+        main_g, _ = _create_graph(file_path, config.ACCEPTED_HIGHWAYS_MAINLAYER)
 
     return main_g
