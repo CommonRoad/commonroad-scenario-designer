@@ -18,10 +18,8 @@ pip install -e .
 
 #### Usage
 
-Opening of GUI from which you can start the different converters: 
-```bash
-cr-map-converter-gui
-```
+To open the GUI from which you can start the different converters, you have to go to crmapconverter/io/gui and execute main_gui.py
+
 
 Converting a file from OpenDRIVE to CommonRoad with the command line:  
 ```bash

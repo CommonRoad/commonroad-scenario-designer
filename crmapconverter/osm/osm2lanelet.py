@@ -2,7 +2,7 @@
 
 """Logic to convert OSM to lanelets."""
 
-__author__ = "Benjamin Orthen"
+__author__ = "Benjamin Orthen, Sebastian Maierhofer"
 __copyright__ = "TUM Cyber-Physical Systems Group"
 __credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles"]
 __version__ = "1.2.0"
@@ -20,10 +20,9 @@ from commonroad.scenario.lanelet import StopLine, LineMarking, RoadUser, Lanelet
 from commonroad.scenario.traffic_sign import TrafficSignIDGermany, TrafficSignElement
 from shapely.geometry import LineString
 
-from crmapconverter.opendriveconversion.lanelet import ConversionLanelet
-from crmapconverter.opendriveconversion.lanelet_network import ConversionLaneletNetwork, convert_to_new_lanelet_id
+from crmapconverter.opendriveconversion.conversion_lanelet import ConversionLanelet
+from crmapconverter.opendriveconversion.conversion_lanelet_network import ConversionLaneletNetwork, convert_to_new_lanelet_id
 from crmapconverter.osm.osm import OSM, WayRelation, DEFAULT_PROJ_STRING, Node, RightOfWayRelation
-
 from crmapconverter.osm2cr.converter_modules.utility.geometry import (
     point_to_line_distance,
     distance as point_to_polyline_distance
