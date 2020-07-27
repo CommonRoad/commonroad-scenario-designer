@@ -24,7 +24,7 @@ from crmapconverter.osm.osm2lanelet import OSM2LConverter
 from test.utils import elements_equal
 
 
-class TestOSM2CRConversionBaseClass:
+class TestOSM2CRConversionBaseClass(unittest.TestCase):
     """Test the conversion of a specific osm file by reading it, parsing it
     and then converting it to a CommonRoad file including a scenario.
 
@@ -73,7 +73,7 @@ class TestOSM2CRConversionBaseClass:
             author="",
             affiliation="",
             source="OpenDRIVE 2 Lanelet Converter",
-            tags={},
+            tags=set(),
         )
         writer.write_to_file(self.out_path + "/" + self.xml_output_name + ".xml", OverwriteExistingFile.ALWAYS)
 
@@ -86,7 +86,7 @@ class TestOSM2CRConversionBaseClass:
         self.assertTrue(trees_are_equal)
 
 
-class TestUrbanLanelets(TestOSM2CRConversionBaseClass, unittest.TestCase):
+class TestUrbanLanelets(TestOSM2CRConversionBaseClass):
     """Simple test case file which includes succesors and
     predecessors and adjacencies."""
 
@@ -94,7 +94,7 @@ class TestUrbanLanelets(TestOSM2CRConversionBaseClass, unittest.TestCase):
     osm_file_name = "urban-1_lanelets_utm"
 
 
-class TestMergingLanelets(TestOSM2CRConversionBaseClass, unittest.TestCase):
+class TestMergingLanelets(TestOSM2CRConversionBaseClass):
     """Basic test file including some splits and joins."""
 
     __test__ = True

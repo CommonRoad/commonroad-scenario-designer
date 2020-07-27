@@ -8,7 +8,7 @@ __maintainer__ = "Sebastian Maierhofer"
 __email__ = "commonroad-i06@in.tum.de"
 __status__ = "Released"
 
-from typing import Optional
+from typing import Optional, Union
 
 from lxml import etree
 from typing import List
@@ -38,10 +38,10 @@ class Node:
 class Way:
     """OSM Way."""
 
-    def __init__(self, id_: str, nodes: list, tag_dict: dict):
+    def __init__(self, id_, nodes: list, tag_dict: Optional[dict] = None):
         self.id_ = str(id_)
         self.nodes = [str(node) for node in nodes]
-        self.tag_dict = tag_dict
+        self.tag_dict = tag_dict if tag_dict is not None else {}
 
     def serialize_to_xml(self):
         way = etree.Element("way")
@@ -51,7 +51,7 @@ class Way:
         for node in self.nodes:
             xml_node = etree.SubElement(way, "nd")
             xml_node.set("ref", node)
-        for tag_key, tag_value in self.tag_dict.values():
+        for tag_key, tag_value in self.tag_dict.items():
             xml_node = etree.SubElement(way, "tag")
             xml_node.set("k", tag_key)
             xml_node.set("v", tag_value)
@@ -62,11 +62,11 @@ class Way:
 class WayRelation:
     """Relation for a lanelet with a left and a right way."""
 
-    def __init__(self, id_, left_way, right_way, tag_dict):
+    def __init__(self, id_, left_way, right_way, tag_dict: Optional[dict] = None):
         self.id_ = str(id_)
         self.left_way = str(left_way)
         self.right_way = str(right_way)
-        self.tag_dict = tag_dict
+        self.tag_dict = tag_dict if tag_dict is not None else {}
 
     def serialize_to_xml(self) -> etree.Element:
         rel = etree.Element("relation")
@@ -81,7 +81,7 @@ class WayRelation:
         left_way.set("type", "way")
         left_way.set("ref", self.left_way)
         left_way.set("role", "left")
-        for tag_key, tag_value in self.tag_dict.values():
+        for tag_key, tag_value in self.tag_dict.items():
             xml_node = etree.SubElement(rel, "tag")
             xml_node.set("k", tag_key)
             xml_node.set("v", tag_value)
@@ -92,13 +92,13 @@ class WayRelation:
 class RightOfWayRelation:
     """Relation for a right of way relation with yield and right of way lines."""
 
-    def __init__(self, id_, refers: list, yield_ways: list, right_of_ways: list, tag_dict: dict, ref_line=[]):
+    def __init__(self, id_, refers: list, yield_ways: list, right_of_ways: list, tag_dict: Optional[dict] = None, ref_line: Optional[list] = None):
         self.id_ = str(id_)
         self.refers = [str(i) for i in refers]
         self.yield_ways = [str(i) for i in yield_ways]
         self.right_of_ways = [str(i) for i in right_of_ways]
-        self.ref_line = [str(i) for i in ref_line]
-        self.tag_dict = tag_dict
+        self.ref_line = [str(i) for i in ref_line] if ref_line is not None else []
+        self.tag_dict = tag_dict if tag_dict is not None else {}
 
     def serialize_to_xml(self) -> etree.Element:
         rel = etree.Element("relation")
@@ -125,7 +125,7 @@ class RightOfWayRelation:
             right_way.set("type", "way")
             right_way.set("ref", r)
             right_way.set("role", "ref_line")
-        for tag_key, tag_value in self.tag_dict.values():
+        for tag_key, tag_value in self.tag_dict.items():
             xml_node = etree.SubElement(rel, "tag")
             xml_node.set("k", tag_key)
             xml_node.set("v", tag_value)
