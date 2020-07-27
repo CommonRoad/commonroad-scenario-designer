@@ -886,7 +886,11 @@ def create_graph(file_path: str) -> rg.Graph:
         return graph, crossing_points
 
     if config.EXTRACT_SUBLAYER:
-        # 
+        if set(config.ACCEPTED_HIGHWAYS) & set(config.ACCEPTED_HIGHWAYS_SUBLAYER):
+            raise RuntimeError(
+                "main layer types and sublayer types have equal elements")
+
+        #  get combined graph
         all_accepted_ways = config.ACCEPTED_HIGHWAYS.copy()
         all_accepted_ways.extend(config.ACCEPTED_HIGHWAYS_SUBLAYER)
         combined_g, _ = _create_graph(file_path, all_accepted_ways)

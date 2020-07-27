@@ -76,6 +76,7 @@ ACCEPTED_HIGHWAYS = [
 ]
 EXTRACT_SUBLAYER = True
 # types of highways extracted from the OSM file as sublayer
+# elements mustn't be in ACCEPTED_HIGHWAYS
 ACCEPTED_HIGHWAYS_SUBLAYER = [
     "path",
     "footway",
