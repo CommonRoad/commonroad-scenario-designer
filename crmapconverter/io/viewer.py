@@ -12,7 +12,6 @@ from typing import List, Tuple
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from matplotlib.path import Path
-import matplotlib.pyplot as plt
 from matplotlib.patches import PathPatch
 
 from PyQt5.QtCore import Qt, pyqtSlot
@@ -128,20 +127,22 @@ class DynamicCanvas(FigureCanvas):
         mouse_pos = (event.xdata, event.ydata)
         if mouse_pos[0] and mouse_pos[1]:
             # TODO enhance zoom center
+            new_center_diff_x = (center[0] - mouse_pos[0])/6
+            new_center_diff_y = (center[1] - mouse_pos[1])/6
             if event.button == 'up':
-                new_center_x = (6 * center[0] + mouse_pos[0]) / 7
-                new_center_y = (6 * center[1] + mouse_pos[1]) / 7
-            else:
-                new_center_x = (6 * center[0] - mouse_pos[0]) / 7
-                new_center_y = (6 * center[1] - mouse_pos[1]) / 7
+                new_center_x = center[0] - new_center_diff_x
+                new_center_y = center[1] - new_center_diff_y
+            else: 
+                new_center_x = center[0] + new_center_diff_x
+                new_center_y = center[1] + new_center_diff_y
             # new limits should include old limits if zooming out
             # old limits should include new limits if zooming in
-            # dim_diff_x = abs(new_x_dim - x_dim)
-            # dim_diff_y = abs(new_y_dim - y_dim)
-            # new_center_x = min(max(center[0] - dim_diff_x, new_center_x),
-            #                    center[0] + dim_diff_x)
-            # new_center_y = min(max(center[1] - dim_diff_y, new_center_y),
-            #                    center[1] + dim_diff_y)
+            dim_diff_x = abs(new_x_dim - x_dim)
+            dim_diff_y = abs(new_y_dim - y_dim)
+            new_center_x = min(max(center[0] - dim_diff_x, new_center_x),
+                               center[0] + dim_diff_x)
+            new_center_y = min(max(center[1] - dim_diff_y, new_center_y),
+                               center[1] + dim_diff_y)
         else:
             new_center_x = center[0]
             new_center_y = center[1]

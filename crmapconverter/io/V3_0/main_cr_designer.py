@@ -1,6 +1,5 @@
 import sys
 import os
-from lxml import etree
 import logging
 
 from PyQt5 import QtWidgets
@@ -773,7 +772,7 @@ def main():
     app = QApplication(sys.argv)
     w = MWindow()
     w.showMaximized()
-    w.open_path("/home/max/Desktop/Planning/Maps/cr_files/ped/intersect_and_crossing3.xml")
+    # w.open_path("/home/max/Desktop/Planning/Maps/cr_files/ped/intersect_and_crossing3.xml")
     sys.exit(app.exec_())
 
 
