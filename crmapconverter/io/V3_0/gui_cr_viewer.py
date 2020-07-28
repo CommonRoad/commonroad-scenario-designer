@@ -11,7 +11,7 @@ from PyQt5.QtWidgets import (
 from matplotlib.animation import FuncAnimation
 from crmapconverter.io.viewer import Viewer
 from crmapconverter.sumo_map.config import SumoConfig
-from crmapconverter.io.V3_0.observable import Observable
+from crmapconverter.io.V3_0.util import Observable
 
 
 class AnimatedViewer(Viewer):

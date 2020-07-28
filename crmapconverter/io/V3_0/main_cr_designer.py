@@ -28,6 +28,7 @@ from crmapconverter.io.V3_0.SUMO_modules.sumo_settings import SUMOSettings
 from crmapconverter.io.V3_0.SUMO_modules.gui_sumo_simulation import SUMOSimulation
 from crmapconverter.io.viewer import LaneletList, IntersectionList, find_intersection_by_id
 from crmapconverter.io.V3_0 import config
+from crmapconverter.io.V3_0 import util
 
 
 class MWindow(QMainWindow, Ui_mainWindow):
@@ -588,6 +589,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
             self.lanelet_list_dock.close()
             self.intersection_list_dock.close()
 
+    
     def check_scenario(self, scenario) -> int:
         """ 
         Check the scenario to validity and calculate a quality score.
@@ -595,64 +597,50 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
         :return: score
         """
-        POSSIBLE_ERROR_CAUSE = 1
+
+        WARNING = 1
         FATAL_ERROR = 2
         verbose = True
 
         error_score = 0
 
-        # check for invalid references
-        invalid_traffic_light_refs = []
-        invalid_traffic_sign_refs = []
-        for lanelet in scenario.lanelet_network.lanelets:
-            for t_light_ref in set(lanelet.traffic_lights):
-                if not scenario.lanelet_network.find_traffic_light_by_id(
-                        t_light_ref):
-                    self.textBrowser.append("invalid traffic light ref " +
-                                            str(t_light_ref) + " of lanelet " +
-                                            str(lanelet.lanelet_id))
-                    invalid_traffic_light_refs.append(t_light_ref)
-                    error_score = max(error_score, FATAL_ERROR)
-            for t_sign_ref in set(lanelet.traffic_signs):
-                if not scenario.lanelet_network.find_traffic_sign_by_id(
-                        t_sign_ref):
-                    self.textBrowser.append("invalid traffic sign ref " +
-                                            str(t_sign_ref) + " of lanelet " +
-                                            str(lanelet.lanelet_id))
-                    invalid_traffic_sign_refs.append(t_sign_ref)
-                    error_score = max(error_score, FATAL_ERROR)
-        if invalid_traffic_light_refs and verbose:
+        found_ids = util.find_invalid_ref_of_traffic_lights(scenario)
+        if found_ids and verbose:
+            error_score = max(error_score, FATAL_ERROR)
+            self.textBrowser.append(
+                "invalid traffic light refs: " + str(found_ids))
             QMessageBox.warning(
                 self,
                 "CommonRoad XML error",
-                "Scenario contains invalid traffic light refenence(s): " +
-                str(invalid_traffic_light_refs),
-                QMessageBox.Ok,
-            )
-        if invalid_traffic_sign_refs and verbose:
-            QMessageBox.warning(
-                self,
-                "CommonRoad XML error",
-                "Scenario contains invalid traffic sign refenence(s): " +
-                str(invalid_traffic_sign_refs),
+                "Scenario contains invalid traffic light refenence(s): "
+                    + str(found_ids),
                 QMessageBox.Ok,
             )
 
-        # check if lanelets are valid polylines
-        lanelet_ids = []
-        for lanelet in scenario.lanelet_network.lanelets:
-            polygon = lanelet.convert_to_polygon().shapely_object
-            if not polygon.is_valid:
-                lanelet_ids.append(lanelet.lanelet_id)
+        found_ids = util.find_invalid_ref_of_traffic_signs(scenario)
+        if found_ids and verbose:
+            error_score = max(error_score, FATAL_ERROR)
+            for lanelet_id in found_ids:
                 self.textBrowser.append(
-                    "Warning: Lanelet {} is invalid polygon!".format(
-                        lanelet.lanelet_id))
-                error_score = max(error_score, POSSIBLE_ERROR_CAUSE)
-        if lanelet_ids and verbose:
+                    "invalid traffic sign refs: " + str(found_ids))
             QMessageBox.warning(
                 self,
                 "CommonRoad XML error",
-                "Scenario contains faulty lanelet(s): " + str(lanelet_ids),
+                "Scenario contains invalid traffic sign refenence(s): "
+                    + str(found_ids),
+                QMessageBox.Ok,
+            )
+
+        found_ids = util.find_invalid_lanelet_polygons(scenario)
+        if found_ids and verbose:
+            error_score = max(error_score, WARNING)
+            self.textBrowser.append(
+                "Warning: Lanelet(s) with invalid polygon:" + str(found_ids))
+            QMessageBox.warning(
+                self,
+                "CommonRoad XML error",
+                "Scenario contains lanelet(s) with invalid polygon: "
+                    + str(found_ids),
                 QMessageBox.Ok,
             )
 
