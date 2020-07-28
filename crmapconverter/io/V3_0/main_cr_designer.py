@@ -251,10 +251,12 @@ class MWindow(QMainWindow, Ui_mainWindow):
                 self.open_commonroad_file()
         else:
             self.crviewer.play()
+            self.textBrowser.append("Playing the animation")
 
     def pause_animation(self):
         """Function connected with the pause button in Toolbar."""
         self.crviewer.pause()
+        self.textBrowser.append("Pause the animation")
 
     def save_animation(self):
         """Function connected with the save button in the Toolbar."""
@@ -269,8 +271,12 @@ class MWindow(QMainWindow, Ui_mainWindow):
             else:
                 messbox.close()
         else:
+            self.textBrowser.append("Exporting animation: " +
+                                    self.uppertoolBox.save_menu.currentText() + " ...")
             self.crviewer.save_animation(
                 self.uppertoolBox.save_menu.currentText())
+            self.textBrowser.append("Exporting finished")
+
 
     def create_console(self):
         """Function to create the console."""

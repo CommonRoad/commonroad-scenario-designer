@@ -41,7 +41,6 @@ class AnimatedViewer(Viewer):
 
         # if we have not subscribed already, subscribe now
         if not self._config:
-
             def set_config(config):
                 self._config = config
                 self._calc_max_timestep()
@@ -70,7 +69,7 @@ class AnimatedViewer(Viewer):
         if self._config is not None:
             dt = self._config.dt
         else:
-            dt = 0        
+            dt = 0
         # ps = 25
         # dpi = 120
         # ln, = self.dynamic.ax.plot([], [], animated=True)
@@ -142,13 +141,14 @@ class AnimatedViewer(Viewer):
         if not self.animation:
             self._init_animation()
         self.dynamic.update_plot()
-        #self.animation.event_source.start()
+        # self.animation.event_source.start()
         self.timestep.silent_set(timestep)
 
     def save_animation(self, save_file: str):
-        if self.animation is None:
-            print("no animation loaded")
-            return
+        # if self.animation is None:
+        # print("no animation loaded")
+        # return
+        self.play()
         if save_file == "Save as mp4":
             if not self.current_scenario:
                 return
@@ -165,16 +165,20 @@ class AnimatedViewer(Viewer):
 
             try:
                 with open(path, "w"):
+                    messbox = QMessageBox.about(None, "Information",
+                                                "Exporting as Mp4 file will take a while, please wait until process "
+                                                "finished ")
                     FFMpegWriter = animation.writers['ffmpeg']
                     writer = FFMpegWriter()
                     self.animation.save(path, dpi=120, writer=writer)
+
 
             except IOError as e:
                 QMessageBox.critical(
                     None,
                     "CommonRoad file not created!",
                     "The CommonRoad file was not saved due to an error.\n\n{}".
-                    format(e),
+                        format(e),
                     QMessageBox.Ok,
                 )
                 return
@@ -195,6 +199,9 @@ class AnimatedViewer(Viewer):
 
             try:
                 with open(path, "w"):
+                    messbox = QMessageBox.about(None, "Information",
+                                                "Exporting as Gif file will take few minutes, please wait until "
+                                                "process finished")
                     self.animation.save(path, writer='imagemagick', fps=30)
 
             except IOError as e:
@@ -202,7 +209,7 @@ class AnimatedViewer(Viewer):
                     self,
                     "CommonRoad file not created!",
                     "The CommonRoad file was not saved due to an error.\n\n{}".
-                    format(e),
+                        format(e),
                     QMessageBox.Ok,
                 )
                 return
