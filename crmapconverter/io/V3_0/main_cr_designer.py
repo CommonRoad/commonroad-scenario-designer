@@ -529,7 +529,6 @@ class MWindow(QMainWindow, Ui_mainWindow):
         net = LaneletNetwork()
         scenario.lanelet_network = net
         self.open_scenario(scenario)
-        self.status.showMessage("Creating New File")
 
     def open_commonroad_file(self):
         """ """
