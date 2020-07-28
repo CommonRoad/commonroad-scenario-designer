@@ -1188,8 +1188,7 @@ class Graph:
         return
 
     def crop_waypoints_at_intersections(
-        self, intersection_dist: float=config.INTERSECTION_DISTANCE
-    ) -> List[GraphEdge]:
+            self, intersection_dist: float) -> List[GraphEdge]:
         """
         crops all edges at intersections
         returns all edges that were too short for proper cropping
