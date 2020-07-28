@@ -617,13 +617,13 @@ class IntermediateFormat:
             for t_light_ref in set(edge.traffic_lights):
                 if not t_light_ref in traffic_light_ids:
                     edge.traffic_lights.remove(t_light_ref)
-                    print("removed traffic light ref", t_light_ref, "from edge",
-                        edge.id)
+                    # print("removed traffic light ref", t_light_ref, "from edge",
+                    #     edge.id)
             for t_sign_ref in set(edge.traffic_signs):
                 if not t_sign_ref in traffic_sign_ids:
                     edge.traffic_signs.remove(t_sign_ref)
-                    print("removed traffic sign ref", t_sign_ref, "from lanelet",
-                        edge.lanelet_id)
+                    # print("removed traffic sign ref", t_sign_ref, "from lanelet",
+                    #     edge.lanelet_id)
 
     def merge(self, other_interm: "IntermediateFormat"):
         """
