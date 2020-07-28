@@ -146,11 +146,14 @@ def create_scenario_intermediate(graph) -> Tuple[Scenario, IntermediateFormat]:
     """ Convert Scenario from RoadGraph via IntermediateFormat """
     interm = IntermediateFormat.extract_from_road_graph(graph)
     if isinstance(graph, rg.SublayeredGraph):
-        interm_sublayer = IntermediateFormat.extract_from_road_graph(graph.sublayer_graph)
+        interm_sublayer = IntermediateFormat.extract_from_road_graph(
+            graph.sublayer_graph)
         crossings = get_lanelet_intersections(interm_sublayer, interm)
+        # TODO merge information of traffic lights/signs and intersections
         interm_sublayer.intersections = list()
         interm_sublayer.traffic_lights = list()
         interm_sublayer.traffic_lights = list()
+        interm_sublayer.remove_invalid_references()
         interm.merge(interm_sublayer)
         interm.add_crossing_information(crossings)
     scenario = interm.to_commonroad_scenario()

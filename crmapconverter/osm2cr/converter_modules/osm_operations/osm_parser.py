@@ -900,7 +900,7 @@ def create_graph(file_path: str) -> rg.Graph:
             config.ACCEPTED_HIGHWAYS_MAINLAYER, combined_g.bounds)
         sub_g, sub_crossing_points = _create_graph(file_path,
             config.ACCEPTED_HIGHWAYS_SUBLAYER, combined_g.bounds)
-        crossing_nodes, already_contained = get_crossing_points(
+        new_crossing_nodes, already_contained = get_crossing_points(
             combined_g, main_g, main_crossing_points, sub_crossing_points
         )
 
@@ -909,7 +909,7 @@ def create_graph(file_path: str) -> rg.Graph:
             file_path,
             config.ACCEPTED_HIGHWAYS_MAINLAYER,
             combined_g.bounds,
-            crossing_nodes
+            new_crossing_nodes
         )
         for node in extended_main_graph.nodes:
             if node.id in already_contained:

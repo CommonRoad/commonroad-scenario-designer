@@ -181,15 +181,13 @@ class Edge:
             adjacent_right = None
             adjacent_right_direction_equal = None
 
-        traffic_lights = None
+        traffic_lights = set()
         if lane.traffic_lights is not None:
-            traffic_lights = [light.id for light in lane.traffic_lights]
-            traffic_lights = set(traffic_lights)
+            traffic_lights = {light.id for light in lane.traffic_lights}
 
-        traffic_signs = None
+        traffic_signs = set()
         if lane.traffic_signs is not None:
-            traffic_signs = [sign.id for sign in lane.traffic_signs]
-            traffic_signs = set(traffic_signs)
+            traffic_signs = {sign.id for sign in lane.traffic_signs}
 
         from_node = Node(lane.from_node.id, lane.from_node.get_point())
         to_node = Node(lane.to_node.id, lane.to_node.get_point())
@@ -605,6 +603,27 @@ class IntermediateFormat:
 
     #     print("See Sumo Config File Here: " + sumo.config_file)
     #     return sumo.config_file
+
+    def remove_invalid_references(self):
+        """
+        remove references of traffic lights and signs that point to 
+        non existing elements.
+        """
+        traffic_light_ids = {tlight.traffic_light_id for tlight in 
+                        self.traffic_lights}
+        traffic_sign_ids = {tsign.traffic_sign_id for tsign in 
+                        self.traffic_signs}
+        for edge in self.edges:
+            for t_light_ref in set(edge.traffic_lights):
+                if not t_light_ref in traffic_light_ids:
+                    edge.traffic_lights.remove(t_light_ref)
+                    print("removed traffic light ref", t_light_ref, "from edge",
+                        edge.id)
+            for t_sign_ref in set(edge.traffic_signs):
+                if not t_sign_ref in traffic_sign_ids:
+                    edge.traffic_signs.remove(t_sign_ref)
+                    print("removed traffic sign ref", t_sign_ref, "from lanelet",
+                        edge.lanelet_id)
 
     def merge(self, other_interm: "IntermediateFormat"):
         """
