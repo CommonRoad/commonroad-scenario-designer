@@ -97,7 +97,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
         menu_export = menu_bar.addMenu('Export')  # add menu 'Export'
         menu_export.addAction(self.exportAsCommonRoad)
-        # menu_export.addAction(self.export2SUMO)
+        menu_export.addAction(self.exportAsOpendrive)
 
         menu_setting = menu_bar.addMenu('Setting')  # add menu 'Setting'
         menu_setting.addAction(self.gui_settings)
@@ -394,6 +394,14 @@ class MWindow(QMainWindow, Ui_mainWindow):
             checkable=False,
             slot=self.file_save,
             tip="Save as CommonRoad File (the same function as Save)",
+            shortcut=None)
+
+        self.exportAsOpendrive = self.create_action(
+            "As Opendrive",
+            icon="",
+            checkable=False,
+            slot= None,
+            tip="Save as Opendrive File",
             shortcut=None)
 
     def create_setting_actions(self):
