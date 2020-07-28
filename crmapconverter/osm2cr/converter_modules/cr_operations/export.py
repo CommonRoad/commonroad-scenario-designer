@@ -201,6 +201,14 @@ def export(
     #file_writer.write_scenario_to_file(file, OverwriteExistingFile.ALWAYS)
 
 
+def convert_to_scenario(graph: rg.Graph) -> Scenario:
+    #scenario = create_scenario(graph)
+    scenario, intermediate_format = create_scenario_intermediate(graph)
+    # removing converting errors before writing to xml
+    sanitize(scenario)
+    return scenario
+
+
 def create_tags(tags: str):
     """
     creates tags out of a space separated string
