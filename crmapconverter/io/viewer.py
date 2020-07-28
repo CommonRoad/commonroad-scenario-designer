@@ -82,13 +82,13 @@ class DynamicCanvas(FigureCanvas):
                     }
                 },
                 'lanelet_network': {
-                    'traffic_light': {
-                        'scale_factor': 0.2
-                    },
+                    # 'traffic_light': {
+                    #     'scale_factor': 0.2
+                    # },
                     'traffic_sign': {
                         'draw_traffic_signs': True,
                         'show_traffic_signs': 'all',
-                        'scale_factor': 0.2
+                        # 'scale_factor': 0.2
                     },
                 }
             }
@@ -161,12 +161,12 @@ class DynamicCanvas(FigureCanvas):
         mouse_pos = (event.xdata, event.ydata)
         if mouse_pos[0] and mouse_pos[1]:
             # TODO enhance zoom center
-            new_center_diff_x = (center[0] - mouse_pos[0])/6
-            new_center_diff_y = (center[1] - mouse_pos[1])/6
+            new_center_diff_x = (center[0] - mouse_pos[0]) / 6
+            new_center_diff_y = (center[1] - mouse_pos[1]) / 6
             if event.button == 'up':
                 new_center_x = center[0] - new_center_diff_x
                 new_center_y = center[1] - new_center_diff_y
-            else: 
+            else:
                 new_center_x = center[0] + new_center_diff_x
                 new_center_y = center[1] + new_center_diff_y
             # new limits should include old limits if zooming out
