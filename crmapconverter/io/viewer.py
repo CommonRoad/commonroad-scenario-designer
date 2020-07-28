@@ -404,6 +404,13 @@ class Viewer:
         if focus_on_network:
             # can we focus on a selection?
             if all([abs(l) < float("Inf") for l in network_limits]):
+                # enlarge limits
+                border_x = (network_limits[1] - network_limits[0]) * 0.1 + 1
+                border_y = (network_limits[3] - network_limits[2]) * 0.1 + 1
+                network_limits[0] -= border_x
+                network_limits[1] += border_x
+                network_limits[2] -= border_y
+                network_limits[3] += border_y
                 self.dynamic.update_plot(network_limits)
             # otherwise focus on the network
             else:

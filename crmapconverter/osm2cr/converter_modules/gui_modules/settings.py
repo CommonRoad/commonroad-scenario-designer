@@ -499,7 +499,6 @@ class SettingsMenu:
         :return: None
         """
         set_config_to_default()
-        # write_config()
         self.update_ui_values()
 
     def apply_close(self) -> None:

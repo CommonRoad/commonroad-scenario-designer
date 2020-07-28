@@ -567,7 +567,6 @@ class MWindow(QMainWindow, Ui_mainWindow):
         if self.check_scenario(new_scenario) >= 2:
             self.textBrowser.append("loading aborted")
             return
-        print("opening scneario")
         self.filename = filename
         self.crviewer.open_scenario(new_scenario, self.sumobox.config)
         self.sumobox.scenario = self.crviewer.current_scenario
@@ -585,8 +584,6 @@ class MWindow(QMainWindow, Ui_mainWindow):
             self.create_intersection_list()
             self.setWindowTitle(self.filename)
             self.textBrowser.append("loading " + self.filename)
-            self.textBrowser.append(
-                "Benchmark-ID: " + self.crviewer.current_scenario.benchmark_id)
         else:
             self.lanelet_list_dock.close()
             self.intersection_list_dock.close()
