@@ -54,12 +54,42 @@ matplotlib.use("Qt5Agg")
 ZOOM_FACTOR = 1.2
 
 
+def _merge_dict(source, destination):
+    """deeply merges two dicts
+    """
+    for key, value in source.items():
+        if isinstance(value, dict):
+            # get node or create one
+            node = destination.setdefault(key, {})
+            _merge_dict(value, node)
+        else:
+            destination[key] = value
+    return destination
+
+
 class DynamicCanvas(FigureCanvas):
     """ this canvas provides zoom with the mouse wheel """
     def __init__(self, parent=None, width=5, height=5, dpi=100):
 
         self.ax = None
         self.drawer = Figure(figsize=(width, height), dpi=dpi)
+
+        self.draw_params = {
+            'scenario': {
+                'dynamic_obstacle': {
+                    'trajectory': {
+                        'show_label': True,
+                        'draw_trajectory': False
+                    }
+                },
+                'lanelet_network': {
+                    'traffic_sign': {
+                        'draw_traffic_signs': True,
+                        'show_traffic_signs': 'all'
+                    }
+                }
+            }
+        }
 
         self._handles = {}
 
@@ -170,9 +200,11 @@ class DynamicCanvas(FigureCanvas):
         self.ax.clear()
         self._handles.clear()
 
+        draw_params_merged = _merge_dict(self.draw_params.copy(), draw_params)
+
         draw_object(scenario,
                     ax=self.ax,
-                    draw_params=draw_params,
+                    draw_params=draw_params_merged,
                     plot_limits=plot_limits,
                     handles=self._handles)
         if not plot_limits:
@@ -208,10 +240,12 @@ class DynamicCanvas(FigureCanvas):
             if lanelet.traffic_lights
         ]
 
+        draw_params_merged = _merge_dict(self.draw_params.copy(), draw_params)
+
         for obj in [obstacles, traffic_lights]:
             draw_object(obstacles,
                         ax=self.ax,
-                        draw_params=draw_params,
+                        draw_params=draw_params_merged,
                         plot_limits=plot_limits,
                         handles=self._handles)
 
@@ -338,7 +372,7 @@ class Viewer:
                 }
             }
         }
-        self.dynamic.draw_scenario(self.current_scenario, 
+        self.dynamic.draw_scenario(self.current_scenario,
                                    draw_params=draw_params)
 
         for lanelet in self.current_scenario.lanelet_network.lanelets:
@@ -548,18 +582,20 @@ class Viewer:
         Selecet lanelets by clicking on the canvas. Selects only one of the 
         lanelets that contains the click position.
         """
-        mouse_pos = np.array([mouse_clicked_event.xdata,
-                              mouse_clicked_event.ydata])
+        mouse_pos = np.array(
+            [mouse_clicked_event.xdata, mouse_clicked_event.ydata])
         click_shape = Circle(radius=0.01, center=mouse_pos)
 
         l_network = self.current_scenario.lanelet_network
         selected_l_ids = l_network.find_lanelet_by_shape(click_shape)
-        selected_lanelets = [l_network.find_lanelet_by_id(lid) 
-                             for lid in selected_l_ids]
-        if selected_lanelets: 
+        selected_lanelets = [
+            l_network.find_lanelet_by_id(lid) for lid in selected_l_ids
+        ]
+        if selected_lanelets:
             self.update_plot(sel_lanelet=selected_lanelets[0])
         else:
             self.update_plot(sel_lanelet=None)
+
 
 class MainWindow(QWidget):
     def __init__(self, parent=None, path=None):
@@ -674,7 +710,7 @@ class MainWindow(QWidget):
                 self.intersection_list.reset_selection()
             if caller is not self.lanelet_list:
                 self.lanelet_list.reset_selection()
-        
+
         self.lanelet_list.update(self.viewer.current_scenario)
         self.intersection_list.update(self.viewer.current_scenario)
 
@@ -682,7 +718,8 @@ class MainWindow(QWidget):
             return
         if self.intersection_list.selected_id is not None:
             selected_intersection = find_intersection_by_id(
-                self.viewer.current_scenario, self.intersection_list.selected_id)
+                self.viewer.current_scenario,
+                self.intersection_list.selected_id)
         else:
             selected_intersection = None
         if self.lanelet_list.selected_id is not None:
