@@ -83,10 +83,14 @@ class DynamicCanvas(FigureCanvas):
                     }
                 },
                 'lanelet_network': {
+                    'traffic_light': {
+                        'scale_factor': 0.2
+                    },
                     'traffic_sign': {
                         'draw_traffic_signs': True,
-                        'show_traffic_signs': 'all'
-                    }
+                        'show_traffic_signs': 'all',
+                        'scale_factor': 0.2
+                    },
                 }
             }
         }

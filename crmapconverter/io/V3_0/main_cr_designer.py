@@ -110,7 +110,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
         self.center()
 
-        if path is not None:
+        if path:
             self.open_path(path)
 
     def show_osm_settings(self):
@@ -148,7 +148,6 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
     def create_lanelet_list(self):
         """Create the lanelet_list and put it into right Dockwidget area."""
-
         def remove_selection_and_close(_):
             """ remove selection from plot when list is closed"""
             self.lanelet_list.reset_selection()
@@ -182,7 +181,6 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
     def create_intersection_list(self):
         """Create the lanelet_list and put it into right Dockwidget area."""
-
         def remove_selection_and_close(_):
             """ remove selection from plot when list is closed"""
             self.intersection_list.reset_selection()
@@ -606,33 +604,33 @@ class MWindow(QMainWindow, Ui_mainWindow):
             for t_light_ref in set(lanelet.traffic_lights):
                 if not scenario.lanelet_network.find_traffic_light_by_id(
                         t_light_ref):
-                    self.textBrowser.append(
-                        "invalid traffic light ref " + str(t_light_ref) 
-                            + " of lanelet " + str(lanelet.lanelet_id))
+                    self.textBrowser.append("invalid traffic light ref " +
+                                            str(t_light_ref) + " of lanelet " +
+                                            str(lanelet.lanelet_id))
                     invalid_traffic_light_refs.append(t_light_ref)
                     error_score = max(error_score, FATAL_ERROR)
             for t_sign_ref in set(lanelet.traffic_signs):
                 if not scenario.lanelet_network.find_traffic_sign_by_id(
                         t_sign_ref):
-                    self.textBrowser.append(
-                        "invalid traffic sign ref " + str(t_sign_ref) 
-                            + " of lanelet " + str(lanelet.lanelet_id))
+                    self.textBrowser.append("invalid traffic sign ref " +
+                                            str(t_sign_ref) + " of lanelet " +
+                                            str(lanelet.lanelet_id))
                     invalid_traffic_sign_refs.append(t_sign_ref)
                     error_score = max(error_score, FATAL_ERROR)
         if invalid_traffic_light_refs and verbose:
             QMessageBox.warning(
                 self,
                 "CommonRoad XML error",
-                "Scenario contains invalid traffic light refenence(s): "
-                    + str(invalid_traffic_light_refs),
+                "Scenario contains invalid traffic light refenence(s): " +
+                str(invalid_traffic_light_refs),
                 QMessageBox.Ok,
             )
         if invalid_traffic_sign_refs and verbose:
             QMessageBox.warning(
                 self,
                 "CommonRoad XML error",
-                "Scenario contains invalid traffic sign refenence(s): "
-                    + str(invalid_traffic_sign_refs),
+                "Scenario contains invalid traffic sign refenence(s): " +
+                str(invalid_traffic_sign_refs),
                 QMessageBox.Ok,
             )
 
@@ -687,7 +685,8 @@ class MWindow(QMainWindow, Ui_mainWindow):
                 source="",
                 tags="",
             )
-            writer.write_scenario_to_file(file_path, OverwriteExistingFile.ALWAYS)
+            writer.write_scenario_to_file(file_path,
+                                          OverwriteExistingFile.ALWAYS)
         except IOError as e:
             QMessageBox.critical(
                 self,
@@ -727,7 +726,6 @@ class MWindow(QMainWindow, Ui_mainWindow):
                 self.intersection_list.reset_selection()
             if caller is not self.lanelet_list:
                 self.lanelet_list.reset_selection()
-
 
         self.lanelet_list.update(self.crviewer.current_scenario)
         self.intersection_list.update(self.crviewer.current_scenario)
@@ -773,7 +771,6 @@ def main():
     app = QApplication(sys.argv)
     w = MWindow()
     w.showMaximized()
-    w.open_path("/home/max/Desktop/Planning/Maps/cr_files/ped/intersect_and_crossing3.xml")
     sys.exit(app.exec_())
 
 
