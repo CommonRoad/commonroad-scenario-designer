@@ -181,15 +181,13 @@ class Edge:
             adjacent_right = None
             adjacent_right_direction_equal = None
 
-        traffic_lights = None
+        traffic_lights = set()
         if lane.traffic_lights is not None:
-            traffic_lights = [light.id for light in lane.traffic_lights]
-            traffic_lights = set(traffic_lights)
+            traffic_lights = {light.id for light in lane.traffic_lights}
 
-        traffic_signs = None
+        traffic_signs = set()
         if lane.traffic_signs is not None:
-            traffic_signs = [sign.id for sign in lane.traffic_signs]
-            traffic_signs = set(traffic_signs)
+            traffic_signs = {sign.id for sign in lane.traffic_signs}
 
         from_node = Node(lane.from_node.id, lane.from_node.get_point())
         to_node = Node(lane.to_node.id, lane.to_node.get_point())
@@ -246,7 +244,7 @@ def get_lanelet_intersections(crossing_interm: "IntermediateFormat",
                               crossed_interm: "IntermediateFormat") -> Crossings:
     """ 
     Calculcate all polygon intersections of the lanelets of the two networks.
-    For each lanelet of b return the crossing lanelets of a as a list.
+    For each lanelet of b return the crossing lanelets of a as list.
 
     :param crossing_interm: crossing network
     :param crossed_interm: network crossed by crossing_interm
@@ -606,6 +604,27 @@ class IntermediateFormat:
     #     print("See Sumo Config File Here: " + sumo.config_file)
     #     return sumo.config_file
 
+    def remove_invalid_references(self):
+        """
+        remove references of traffic lights and signs that point to 
+        non existing elements.
+        """
+        traffic_light_ids = {tlight.traffic_light_id for tlight in 
+                        self.traffic_lights}
+        traffic_sign_ids = {tsign.traffic_sign_id for tsign in 
+                        self.traffic_signs}
+        for edge in self.edges:
+            for t_light_ref in set(edge.traffic_lights):
+                if not t_light_ref in traffic_light_ids:
+                    edge.traffic_lights.remove(t_light_ref)
+                    # print("removed traffic light ref", t_light_ref, "from edge",
+                    #     edge.id)
+            for t_sign_ref in set(edge.traffic_signs):
+                if not t_sign_ref in traffic_sign_ids:
+                    edge.traffic_signs.remove(t_sign_ref)
+                    # print("removed traffic sign ref", t_sign_ref, "from lanelet",
+                    #     edge.lanelet_id)
+
     def merge(self, other_interm: "IntermediateFormat"):
         """
         Merge other instance of intermediate format into this.
@@ -644,7 +663,9 @@ class IntermediateFormat:
             intersected_lanelets_of_i = intersection_lanelet_ids & all_crossed_ids
             # add information about crossings to intersection
             for intersected in intersected_lanelets_of_i:
-                i.crossings.union(crossings[intersected])
+                all_crossing_ids |= crossings[intersected]
+                for crossing_id in crossings[intersected]:
+                    i.crossings.add(crossing_id)
                     
         # adjust edge type of crossing edges
         for edge in self.edges:

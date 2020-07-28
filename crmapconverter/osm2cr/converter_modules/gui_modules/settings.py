@@ -58,11 +58,11 @@ class EditStreetTypes:
 
         :return: None
         """
-        all_accepted_highways = config.ACCEPTED_HIGHWAYS.copy()
+        all_accepted_highways = config.ACCEPTED_HIGHWAYS_MAINLAYER.copy()
         all_accepted_highways.extend(config.ACCEPTED_HIGHWAYS_SUBLAYER)
         for highway_type in all_accepted_highways:
             getattr(self.dialog.ui, 'chk_' + highway_type).setChecked(
-                highway_type in config.ACCEPTED_HIGHWAYS
+                highway_type in config.ACCEPTED_HIGHWAYS_MAINLAYER
             )
 
     def save(self) -> None:
@@ -72,11 +72,11 @@ class EditStreetTypes:
         :return: None
         """
         types = dict()
-        all_accepted_highways = config.ACCEPTED_HIGHWAYS.copy()
+        all_accepted_highways = config.ACCEPTED_HIGHWAYS_MAINLAYER.copy()
         all_accepted_highways.extend(config.ACCEPTED_HIGHWAYS_SUBLAYER)
         for highway_type in all_accepted_highways:
             types[getattr(self.dialog.ui, 'chk_' + highway_type)] = highway_type
-        config.ACCEPTED_HIGHWAYS = [
+        config.ACCEPTED_HIGHWAYS_MAINLAYER = [
             current_type
             for check_box, current_type in types.items()
             if check_box.isChecked()
@@ -259,7 +259,7 @@ class EditSublayerWayTypes:
 
         :return: None
         """
-        all_accepted_highways = config.ACCEPTED_HIGHWAYS.copy()
+        all_accepted_highways = config.ACCEPTED_HIGHWAYS_MAINLAYER.copy()
         all_accepted_highways.extend(config.ACCEPTED_HIGHWAYS_SUBLAYER)
         for highway_type in all_accepted_highways:
             getattr(self.dialog.ui, 'chk_' + highway_type).setChecked(
@@ -273,7 +273,7 @@ class EditSublayerWayTypes:
         :return: None
         """
         types = dict()
-        all_accepted_highways = config.ACCEPTED_HIGHWAYS.copy()
+        all_accepted_highways = config.ACCEPTED_HIGHWAYS_MAINLAYER.copy()
         all_accepted_highways.extend(config.ACCEPTED_HIGHWAYS_SUBLAYER)
         for highway_type in all_accepted_highways:
             types[getattr(self.dialog.ui, 'chk_' + highway_type)] = highway_type

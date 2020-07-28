@@ -559,7 +559,8 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
     def open_scenario(self, new_scenario, filename="new_scenario"):
         """  """
-        if self.check_scenario(new_scenario) > 2:
+        if self.check_scenario(new_scenario) >= 2:
+            self.textBrowser.append("loading aborted")
             return
         print("opening scneario")
         self.filename = filename
@@ -593,11 +594,47 @@ class MWindow(QMainWindow, Ui_mainWindow):
         :return: score
         """
         POSSIBLE_ERROR_CAUSE = 1
+        FATAL_ERROR = 2
         verbose = True
 
         error_score = 0
 
         # check for invalid references
+        invalid_traffic_light_refs = []
+        invalid_traffic_sign_refs = []
+        for lanelet in scenario.lanelet_network.lanelets:
+            for t_light_ref in set(lanelet.traffic_lights):
+                if not scenario.lanelet_network.find_traffic_light_by_id(
+                        t_light_ref):
+                    self.textBrowser.append(
+                        "invalid traffic light ref " + str(t_light_ref) 
+                            + " of lanelet " + str(lanelet.lanelet_id))
+                    invalid_traffic_light_refs.append(t_light_ref)
+                    error_score = max(error_score, FATAL_ERROR)
+            for t_sign_ref in set(lanelet.traffic_signs):
+                if not scenario.lanelet_network.find_traffic_sign_by_id(
+                        t_sign_ref):
+                    self.textBrowser.append(
+                        "invalid traffic sign ref " + str(t_sign_ref) 
+                            + " of lanelet " + str(lanelet.lanelet_id))
+                    invalid_traffic_sign_refs.append(t_sign_ref)
+                    error_score = max(error_score, FATAL_ERROR)
+        if invalid_traffic_light_refs and verbose:
+            QMessageBox.warning(
+                self,
+                "CommonRoad XML error",
+                "Scenario contains invalid traffic light refenence(s): "
+                    + str(invalid_traffic_light_refs),
+                QMessageBox.Ok,
+            )
+        if invalid_traffic_sign_refs and verbose:
+            QMessageBox.warning(
+                self,
+                "CommonRoad XML error",
+                "Scenario contains invalid traffic sign refenence(s): "
+                    + str(invalid_traffic_sign_refs),
+                QMessageBox.Ok,
+            )
 
         # check if lanelets are valid polylines
         lanelet_ids = []
@@ -736,7 +773,7 @@ def main():
     app = QApplication(sys.argv)
     w = MWindow()
     w.showMaximized()
-    # w.open_path("/home/max/Desktop/Planning/Maps/cr_files/ped/intersect_and_crossing2.xml")
+    w.open_path("/home/max/Desktop/Planning/Maps/cr_files/ped/intersect_and_crossing3.xml")
     sys.exit(app.exec_())
 
 
