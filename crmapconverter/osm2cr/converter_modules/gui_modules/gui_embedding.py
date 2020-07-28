@@ -128,7 +128,6 @@ class MainApp:
                     .format(e),
                     QMessageBox.Ok,
                 )
-                raise e
         self.show_start_menu()
 
     def show_start_menu(self) -> None:
@@ -332,7 +331,7 @@ class StartMenu(QWidget):
                 .format(e),
                 QMessageBox.Ok,
             )
-            raise e
+            return
         # name = config.BENCHMARK_ID
         self.app.export(graph)
 
@@ -427,7 +426,6 @@ class StartMenu(QWidget):
                 .format(e),
                 QMessageBox.Ok,
             )
-            raise e
 
 
 class MapEdit(ABC):
@@ -629,7 +627,7 @@ class EdgeEdit(MapEdit):
                 .format(e),
                 QMessageBox.Ok,
             )
-            raise e
+            return
         self.app.lane_link_embedding(graph)
 
     def update_movement(self, value: bool) -> None:
@@ -725,7 +723,7 @@ class LaneLinkEdit(MapEdit):
                 .format(e),
                 QMessageBox.Ok,
             )
-            raise e
+            return
         self.app.export(graph)
 
 

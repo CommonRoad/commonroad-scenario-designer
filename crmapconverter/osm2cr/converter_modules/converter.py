@@ -46,7 +46,9 @@ def step_collection_2(graph: road_graph.Graph) -> road_graph.Graph:
     if isinstance(graph, road_graph.SublayeredGraph):
         offsetter.offset_graph(graph.sublayer_graph)
     print("cropping roads at intersections")
-    edges_to_delete = graph.crop_waypoints_at_intersections()
+    edges_to_delete = graph.crop_waypoints_at_intersections(
+        config.INTERSECTION_DISTANCE
+    )
     if config.DELETE_SHORT_EDGES:
         print("deleting short edges")
         graph.delete_edges(edges_to_delete)

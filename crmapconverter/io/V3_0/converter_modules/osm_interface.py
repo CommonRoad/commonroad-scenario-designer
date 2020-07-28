@@ -10,7 +10,7 @@ from PyQt5.QtWidgets import QMainWindow
 from PyQt5.QtGui import QIcon
 from matplotlib.pyplot import close
 
-from crmapconverter.osm2cr.converter_modules.cr_operations import export as ex
+from crmapconverter.osm2cr.converter_modules.cr_operations import export
 from crmapconverter.osm2cr.converter_modules.graph_operations import road_graph as rg
 from crmapconverter.osm2cr.converter_modules.gui_modules import (
     gui_embedding,
@@ -67,7 +67,7 @@ class OSMInterface(ConverterInterface):
 
     def export(self, graph):
         """ converts a graph to a scenario and loads it into the CrSD """
-        scenario, _ = ex.create_scenario_intermediate(graph)
+        scenario = export.convert_to_scenario(graph)
         filename = os.path.basename(self.start_menu.selected_file)
         filename = os.path.splitext(filename)[0]
         self.cr_designer.open_scenario(scenario, filename)

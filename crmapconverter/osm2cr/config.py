@@ -4,8 +4,6 @@ This module holds all parameters necessary for the conversion
 
 # Benchmark settings
 # name of the benchmark
-import enum
-
 BENCHMARK_ID = "DEU_test"
 # author of the benchmark
 AUTHOR = "Automated converter by Maximilian Rieger"
