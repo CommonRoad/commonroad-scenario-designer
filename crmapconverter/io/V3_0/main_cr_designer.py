@@ -1,5 +1,6 @@
-import sys
+from argparse import ArgumentParser
 import os
+import sys
 import logging
 
 from PyQt5 import QtWidgets
@@ -772,14 +773,19 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
 
 def main():
+    parser = ArgumentParser()
+    parser.add_argument("--input_file", "-i", default=None,
+                        help="load this file after startup")
+    args = parser.parse_args()
 
     # application
     app = QApplication(sys.argv)
-    w = MWindow()
+    if args.input_file:
+        w = MWindow(args.input_file)
+    else:
+        w = MWindow()
     w.showMaximized()
-    # w.open_path("/home/max/Desktop/Planning/Maps/cr_files/ped/intersect_and_crossing3.xml")
     sys.exit(app.exec_())
-
 
 if __name__ == '__main__':
     main()
