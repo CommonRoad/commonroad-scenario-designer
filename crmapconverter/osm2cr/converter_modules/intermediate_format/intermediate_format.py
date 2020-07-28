@@ -268,7 +268,7 @@ def get_lanelet_intersections(
 ) -> Crossings:
     """ 
     Calculcate all polygon intersections of the lanelets of the two networks.
-    For each lanelet of b return the crossing lanelets of a as a list.
+    For each lanelet of b return the crossing lanelets of a as list.
 
     :param crossing_interm: crossing network
     :param crossed_interm: network crossed by crossing_interm
@@ -671,7 +671,9 @@ class IntermediateFormat:
             intersected_lanelets_of_i = intersection_lanelet_ids & all_crossed_ids
             # add information about crossings to intersection
             for intersected in intersected_lanelets_of_i:
-                i.crossings.union(crossings[intersected])
+                all_crossing_ids |= crossings[intersected]
+                for crossing_id in crossings[intersected]:
+                    i.crossings.add(crossing_id)
                     
         # adjust edge type of crossing edges
         for edge in self.edges:
