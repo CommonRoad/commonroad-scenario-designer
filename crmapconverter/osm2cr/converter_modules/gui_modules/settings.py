@@ -442,6 +442,7 @@ class SettingsMenu:
 
         config.EXTRACT_SUBLAYER = window.chk_extract_sublayer.isChecked()
         config.INTERSECTION_DISTANCE_SUBLAYER = window.sb_intersection_distance_sublayer.value()
+        return True
 
     def has_valid_entries(self) -> bool:
         """ 
@@ -626,6 +627,9 @@ def set_config_to_default() -> None:
 
     :return: None
     """
+    if not dir(config) == dir(config_default):
+        print("config_default and config have different names in it's scope")
+        return
     for var_name in dir(config_default):
         if not var_name.startswith('__'):
             setattr(config, var_name, getattr(config_default, var_name))

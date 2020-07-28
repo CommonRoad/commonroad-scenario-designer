@@ -372,7 +372,7 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "Settings"))
-        self.btn_apply.setText(_translate("MainWindow", "Apply Settings"))
+        self.btn_apply.setText(_translate("MainWindow", "Apply and close"))
         # self.btn_save.setText(_translate("MainWindow", "Save"))
         self.btn_restore_defaults.setText(_translate("MainWindow", "Restore Defaults"))
         self.label_2.setText(_translate("MainWindow", "Save Path"))
