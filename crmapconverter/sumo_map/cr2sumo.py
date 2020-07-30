@@ -174,7 +174,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                                          'static')
                 for cycle in tl.cycle:
                     state = traffic_light_states_CR2SUMO[cycle.state]
-                    tls_program.addPhase(state, cycle.duration)
+                    tls_program.addPhase(state, cycle.duration * self.conf.dt)
 
                 tls = TLS(tl.traffic_light_id)
                 tls.addProgram(tls_program)
@@ -955,7 +955,8 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
 
             traffic_light = TrafficLight(next_cr_id, [
                 TrafficLightCycleElement(
-                    traffic_light_states_SUMO2CR[state[link_index]], duration)
+                    traffic_light_states_SUMO2CR[state[link_index]],
+                    duration / self.conf.dt)
                 for state, duration in tls_program.getPhases()
             ], position, time_offset, direction, active)
             next_cr_id += 1

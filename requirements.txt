@@ -14,4 +14,4 @@ PyQt5>=5.12.2
 matplotlib>=3.1.0
 
 # for sumo_map converter
--e git+https://gitlab.lrz.de/cps/sumo-interface.git@develop#egg=sumocr
+-e git+https://gitlab.lrz.de/cps/sumo-interface.git@3-convert-pedestrains#egg=sumocr
