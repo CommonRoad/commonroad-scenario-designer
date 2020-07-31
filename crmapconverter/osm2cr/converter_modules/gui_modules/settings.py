@@ -24,7 +24,7 @@ from crmapconverter.osm2cr.converter_modules.gui_modules.GUI_resources.street_ty
     Ui_Dialog as Street_types,
 )
 from crmapconverter.osm2cr.converter_modules.gui_modules.GUI_resources.sublayer_types import (
-    Ui_Dialog as Sublayer_types,
+    Ui_Dialog as Sublayer_street_types,
 )
 
 
@@ -238,7 +238,7 @@ class EditSublayerWayTypes:
         self.dialog = QDialog()
         self.original_accept = self.dialog.accept
         self.dialog.accept = self.accept
-        self.dialog.ui = Sublayer_types()
+        self.dialog.ui = Sublayer_street_types()
         self.dialog.ui.setupUi(self.dialog)
         self.set_checkboxes()
         self.dialog.exec_()

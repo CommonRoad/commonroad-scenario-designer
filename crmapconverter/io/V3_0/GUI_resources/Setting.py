@@ -386,7 +386,7 @@ class Ui_SettingUi(object):
         self.label_112.setText(_translate("SettingUi", "Interpolation Distance"))
         self.label_113.setText(_translate("SettingUi", "UTM Coordinates"))
         self.label_114.setText(_translate("SettingUi", "Delete Short Edges"))
-        self.label_115.setText(_translate("SettingUi", "Converted Street Types"))
+        self.label_115.setText(_translate("SettingUi", "Converted Street Types (Main)"))
         self.label_116.setText(_translate("SettingUi", "Bing Maps Key"))
         self.label_117.setText(_translate("SettingUi", "Speed Limits"))
         self.label_118.setText(_translate("SettingUi", "Lane Widths"))

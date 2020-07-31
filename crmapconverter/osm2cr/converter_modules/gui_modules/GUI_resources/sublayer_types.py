@@ -79,7 +79,7 @@ class Ui_Dialog(object):
 
     def retranslateUi(self, Dialog):
         _translate = QtCore.QCoreApplication.translate
-        Dialog.setWindowTitle(_translate("Dialog", "Select Sublayer Way Types"))
+        Dialog.setWindowTitle(_translate("Dialog", "Select Street Types"))
         self.chk_unclassified.setText(_translate("Dialog", "unclassified"))
         self.chk_primary.setText(_translate("Dialog", "primary"))
         self.chk_tertiary.setText(_translate("Dialog", "tertiary"))

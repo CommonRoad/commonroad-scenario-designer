@@ -610,12 +610,13 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
         error_score = 0
 
+        # handle fatal errors
         found_ids = util.find_invalid_ref_of_traffic_lights(scenario)
         if found_ids and verbose:
             error_score = max(error_score, FATAL_ERROR)
             self.textBrowser.append(
                 "invalid traffic light refs: " + str(found_ids))
-            QMessageBox.warning(
+            QMessageBox.critical(
                 self,
                 "CommonRoad XML error",
                 "Scenario contains invalid traffic light refenence(s): "
@@ -629,14 +630,18 @@ class MWindow(QMainWindow, Ui_mainWindow):
             for lanelet_id in found_ids:
                 self.textBrowser.append(
                     "invalid traffic sign refs: " + str(found_ids))
-            QMessageBox.warning(
+            QMessageBox.critical(
                 self,
                 "CommonRoad XML error",
                 "Scenario contains invalid traffic sign refenence(s): "
                     + str(found_ids),
                 QMessageBox.Ok,
             )
+        
+        if error_score >= FATAL_ERROR:
+            return error_score
 
+        # handle warnings
         found_ids = util.find_invalid_lanelet_polygons(scenario)
         if found_ids and verbose:
             error_score = max(error_score, WARNING)
