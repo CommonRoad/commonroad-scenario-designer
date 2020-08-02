@@ -99,3 +99,10 @@ class TestMergingLanelets(TestOSM2CRConversionBaseClass):
 
     __test__ = True
     osm_file_name = "merging_lanelets_utm"
+
+
+class TestFeatureLanelet2Lanelets(TestOSM2CRConversionBaseClass):
+    """Basic test file including some splits and joins."""
+
+    __test__ = True
+    osm_file_name = "traffic_priority_lanelets_utm"
