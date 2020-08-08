@@ -553,8 +553,6 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
     def open_path(self, path):
         """ """
-
-        filename = os.path.basename(path)
         try:
             commonroad_reader = CommonRoadFileReader(path)
             scenario, _ = commonroad_reader.open()
@@ -567,6 +565,8 @@ class MWindow(QMainWindow, Ui_mainWindow):
                 QMessageBox.Ok,
             )
             return
+
+        filename = os.path.splitext(os.path.basename(path))[0]
         self.open_scenario(scenario, filename)
 
     def open_scenario(self, new_scenario, filename="new_scenario"):

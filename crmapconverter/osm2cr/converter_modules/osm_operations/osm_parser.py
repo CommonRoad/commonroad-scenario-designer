@@ -467,7 +467,7 @@ def get_graph_traffic_signs(nodes: Dict[int, rg.GraphNode],
                 traffic_sign[node_id], node=None, edges=[roads[road_id]])
         else:
             graph_traffic_sign = rg.GraphTrafficSign(
-                traffic_sign[node_id], nodes[node_id])
+                traffic_sign[node_id], nodes[int(node_id)])
         # extract road_ids to edges in sign
         if 'road_id' in traffic_sign.keys():
             roads = traffic_sign['road_id']
@@ -528,8 +528,8 @@ def get_graph_nodes(
         if point_id.startswith('road'): # ? TODO use int
             continue
         if int(point_id) not in nodes:
-            current_point = points[point_id]
-            nodes[point_id] = rg.GraphNode(
+            current_point = points[int(point_id)]
+            nodes[int(point_id)] = rg.GraphNode(
                 int(point_id), current_point.x, current_point.y, set()
             )
 
