@@ -88,7 +88,11 @@ class MainApp:
             self.edge_edit_window = EdgeEdit(self, graph, None)
             self.main_window.show()
         else:
-            print("no graph loaded")
+            QMessageBox.warning(
+                self,
+                "Warning",
+                "No graph loaded.",
+                QMessageBox.Ok)
 
     def lane_link_embedding(self, graph: rg.Graph) -> None:
         """
@@ -224,7 +228,11 @@ class StartMenu(QWidget):
                 LaneLinkEdit(self.app, None, gui_state)
                 self.app.main_window.show()
             else:
-                print("invalid gui state")
+                QMessageBox.critical(
+                    self,
+                    "Warning",
+                    "Invalid GUI state.",
+                    QMessageBox.Ok)
                 return
         
     def view_scenario(self) -> None:
@@ -240,7 +248,9 @@ class StartMenu(QWidget):
             "CommonRoad file *.xml (*.xml)",
             options=QFileDialog.Options(),
         )
-        if file != "":
+        if file == "":
+            print("no file picked")
+        else:
             window = scenarioView()
             window.setupUi(self.app.main_window)
             fig, ax = plt.subplots()
@@ -253,8 +263,6 @@ class StartMenu(QWidget):
             ex.view_xml(file, ax)
             self.app.main_window.show()
             window.b_back.clicked.connect(self.app.show_start_menu)
-        else:
-            print("no file picked")
 
     def bench_id_set(self) -> None:
         """
@@ -346,12 +354,20 @@ class StartMenu(QWidget):
                 if self.selected_file is not None:
                     self.read_osm_file(self.selected_file)
                 else:
-                    print("no file selected!")
+                    QMessageBox.warning(
+                        self,
+                        "Warning",
+                        "No file selected.",
+                        QMessageBox.Ok)
                     return
             else:
                 self.download_and_open_osm_file()
         except ValueError as e:
-            print("Map unreadable: " + str(e))
+            QMessageBox.critical(
+                self,
+                "Warning",
+                "Map unreadable: " + str(e),
+                QMessageBox.Ok)
             return
         if self.embedding.chk_user_edit.isChecked():
             self.app.edge_edit_embedding(self.graph)
@@ -391,7 +407,11 @@ class StartMenu(QWidget):
         # TODO maybe ask for filename
         name = config.BENCHMARK_ID + ".osm"
         if not self.verify_coordinate_input():
-            print("cannot download, coordinates invalid")
+            QMessageBox.critical(
+                self,
+                "Warning",
+                "cannot download, coordinates invalid",
+                QMessageBox.Ok)
             return None
         else:
             download_around_map(
