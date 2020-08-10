@@ -1,38 +1,27 @@
-# -*- coding: utf-8 -*-
 """Viewer module to visualize and inspect the created lanelet scenario."""
 
-import signal
-import sys
-import os
-from lxml import etree
+from typing import Union, List, Tuple
 import numpy as np
-import matplotlib
-from typing import List, Tuple
 
+import matplotlib
+from matplotlib.animation import FuncAnimation, writers
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from matplotlib.path import Path
 from matplotlib.patches import PathPatch
 
-from PyQt5.QtCore import Qt, pyqtSlot
+from PyQt5.QtCore import pyqtSlot
 from PyQt5.QtWidgets import (
-    QApplication,
-    QWidget,
     QTableWidget,
-    QPushButton,
-    QLineEdit,
     QFileDialog,
     QMessageBox,
 )
 from PyQt5.QtWidgets import (
     QSizePolicy,
-    QHBoxLayout,
-    QVBoxLayout,
     QTableWidgetItem,
     QAbstractItemView,
 )
 
-from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.scenario.intersection import Intersection
 from commonroad.common.util import Interval
 from commonroad.scenario.scenario import Scenario
@@ -40,7 +29,10 @@ from commonroad.scenario.lanelet import Lanelet, is_natural_number
 from commonroad.visualization.draw_dispatch_cr import draw_object
 from commonroad.geometry.shape import Circle
 
-__author__ = "Benjamin Orthen, Stefan Urban"
+from crmapconverter.sumo_map.config import SumoConfig
+from crmapconverter.io.scenario_designer.util import Observable
+
+__author__ = "Benjamin Orthen, Stefan Urban, Max Winklhofer, Guyue Huang, Max Fruehauf"
 __copyright__ = "TUM Cyber-Physical Systems Group"
 __credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles"]
 __version__ = "1.2.0"
@@ -609,140 +601,214 @@ class Viewer:
             self.update_plot(sel_lanelet=None)
 
 
-class MainWindow(QWidget):
-    def __init__(self, parent=None, path=None):
+class AnimatedViewer(Viewer):
+    def __init__(self, parent):
         super().__init__(parent)
-        self.filename: str = None
-        self.viewer = Viewer(self)
 
-        self._initUserInterface()
+        # sumo config giving dt etc
+        self._config: SumoConfig = None
+        self.min_timestep = 0
+        self.max_timestep = 0
+        # current time step
+        self.timestep = Observable(0)
+        # FuncAnimation object
+        self.animation: FuncAnimation = None
+        # if playing or not
+        self.playing = False
 
-        if path is not None:
-            self.openPath(path)
+    def open_scenario(self, scenario, config: Observable):
+        """[summary]
 
-    def _initUserInterface(self):
-        """ """
+        :param scenario: [description]
+        :type scenario: [type]
+        :param config: [description], defaults to None
+        :type config: SumoConfig, optional
+        """
+        self.current_scenario = scenario
 
-        self.setWindowTitle("CommonRoad XML Viewer")
+        # if we have not subscribed already, subscribe now
+        if not self._config:
+            def set_config(config):
+                self._config = config
+                self._calc_max_timestep()
 
-        self.setMinimumSize(1000, 600)
+            config.subscribe(set_config)
 
-        self.loadButton = QPushButton("Load CommonRoad", self)
-        self.loadButton.setToolTip(
-            "Load a CommonRoad scenario within a *.xml file")
-        self.loadButton.clicked.connect(self.openCommonRoadFile)
+        self._config = config.value
+        self._calc_max_timestep()
+        if self.animation:
+            self.timestep.value = 0
+            self.animation.event_source.stop()
+            self.animation = None
+        self.update_plot(focus_on_network=True)
 
-        self.inputCommonRoadFile = QLineEdit(self)
-        self.inputCommonRoadFile.setReadOnly(True)
-
-        hbox = QHBoxLayout()
-        hbox.addWidget(self.loadButton)
-        hbox.addWidget(self.inputCommonRoadFile)
-
-        vbox = QVBoxLayout()
-        vbox.addLayout(hbox, 0)
-        vbox.addWidget(self.viewer.dynamic, 1)
-
-        vbox.setAlignment(Qt.AlignTop)
-
-        self.lanelet_list = LaneletList(self.update, self)
-        self.intersection_list = IntersectionList(self.update, self)
-
-        hbox2 = QHBoxLayout(self)
-        hbox2.addLayout(vbox, 2)
-        hbox2.addWidget(self.lanelet_list, 0)
-        hbox2.addWidget(self.intersection_list, 1)
-        self.setLayout(hbox2)
-
-    def openCommonRoadFile(self):
-        """ """
-
-        path, _ = QFileDialog.getOpenFileName(
-            self,
-            "Open a CommonRoad scenario",
-            "",
-            "CommonRoad scenario files *.xml (*.xml)",
-            options=QFileDialog.Options(),
-        )
-
-        if not path:
+    def _init_animation(self):
+        if not self.current_scenario:
             return
 
-        self.openPath(path)
+        print('init animation')
+        scenario = self.current_scenario
+        self.dynamic.clear_axes(keep_limits=True)
 
-    def openPath(self, path):
-        """ """
-        filename = os.path.basename(path)
-        self.inputCommonRoadFile.setText(filename)
+        start = self.min_timestep
+        end = self.max_timestep
+        plot_limits: Union[list, None, str] = None
+        if self._config is not None:
+            dt = self._config.dt
+        else:
+            dt = 0
+        # ps = 25
+        # dpi = 120
+        # ln, = self.dynamic.ax.plot([], [], animated=True)
+        anim_frames = end - start
 
-        try:
-            commonroad_reader = CommonRoadFileReader(path)
-            scenario, _ = commonroad_reader.open()
+        if start == end:
+            warning_dialog = QMessageBox()
+            warning_dialog.warning(None, "Warning",
+                                   "This Scenario only has one time step!",
+                                   QMessageBox.Ok, QMessageBox.Ok)
+            warning_dialog.close()
 
-        except etree.XMLSyntaxError as e:
-            errorMsg = "Syntax Error: {}".format(e)
-            QMessageBox.warning(
-                self,
-                "CommonRoad XML error",
-                "There was an error during the loading of the selected CommonRoad file.\n\n{}"
-                .format(errorMsg),
-                QMessageBox.Ok,
+        assert start <= end, '<video/create_scenario_video> time_begin=%i needs to smaller than time_end=%i.' % (
+            start, end)
+
+        def draw_frame(draw_params):
+            time_start = start + self.timestep.value
+            time_end = start + min(anim_frames, self.timestep.value)
+            self.timestep.value += 1
+            if time_start > time_end:
+                self.timestep.value = 0
+
+            draw_params = {
+                'time_begin': time_start,
+                'time_end': time_end,
+                'antialiased': True,
+                'dynamic_obstacle': {
+                    'show_label': True
+                }
+            }
+
+            # plot dynamic obstracles
+            # if self.timestep.value == 1:
+            self.dynamic.draw_scenario(scenario, draw_params=draw_params)
+            # else:
+            #     self.dynamic.update_obstacles(
+            #         scenario,
+            #         draw_params=draw_params,
+            #         plot_limits=None if plot_limits == 'auto' else plot_limits)
+
+        # Interval determines the duration of each frame in ms
+        interval = 1000 * dt
+        self.dynamic.clear_axes(keep_limits=True)
+        self.animation = FuncAnimation(self.dynamic.figure,
+                                       draw_frame,
+                                       blit=False,
+                                       interval=interval,
+                                       repeat=True)
+
+    def play(self):
+        """ plays the animation if existing """
+        if not self.animation:
+            self._init_animation()
+
+        self.dynamic.update_plot()
+        self.animation.event_source.start()
+
+    def pause(self):
+        """ pauses the animation if playing """
+        if not self.animation:
+            self._init_animation()
+            return
+
+        self.animation.event_source.stop()
+
+    def set_timestep(self, timestep: int):
+        """ sets the animation to the current timestep """
+        print("set timestep: ", timestep)
+        if not self.animation:
+            self._init_animation()
+        self.dynamic.update_plot()
+        # self.animation.event_source.start()
+        self.timestep.silent_set(timestep)
+
+    def save_animation(self, save_file: str):
+        # if self.animation is None:
+        # print("no animation loaded")
+        # return
+        self.play()
+        if save_file == "Save as mp4":
+            if not self.current_scenario:
+                return
+            path, _ = QFileDialog.getSaveFileName(
+                None,
+                "QFileDialog.getSaveFileName()",
+                ".mp4",
+                "CommonRoad scenario video *.mp4 (*.mp4)",
+                options=QFileDialog.Options(),
             )
-            return
-        # except Exception as e:
-        #     errorMsg = "{}".format(e)
-        #     QMessageBox.warning(
-        #         self,
-        #         "CommonRoad XML error",
-        #         "There was an error during the loading of the selected CommonRoad file.\n\n{}"
-        #         .format(errorMsg),
-        #         QMessageBox.Ok,
-        #     )
-        #     return
 
-        self.openScenario(scenario, filename)
+            if not path:
+                return
 
-    def openScenario(self, new_scenario, filename="new_scenario"):
-        """ 
-        Open a new CommonRoad Scenario and update the viewer
-        """
-        self.filename = filename
-        self.viewer.open_scenario(new_scenario)
-        self.update()
+            try:
+                with open(path, "w"):
+                    messbox = QMessageBox.about(None, "Information",
+                                                "Exporting as Mp4 file will take a while, please wait until process "
+                                                "finished ")
+                    FFMpegWriter = writers['ffmpeg']
+                    writer = FFMpegWriter()
+                    self.animation.save(path, dpi=120, writer=writer)
 
-    def update(self, caller=None):
-        """ 
-        Update all compoments. Reset all other selections if this method was
-        triggered by a component.
-        """
 
-        # reset selection of all other selectable elements
-        if caller is not None:
-            if caller is not self.intersection_list:
-                self.intersection_list.reset_selection()
-            if caller is not self.lanelet_list:
-                self.lanelet_list.reset_selection()
+            except IOError as e:
+                QMessageBox.critical(
+                    None,
+                    "CommonRoad file not created!",
+                    "The CommonRoad file was not saved due to an error.\n\n{}".
+                        format(e),
+                    QMessageBox.Ok,
+                )
+                return
 
-        self.lanelet_list.update(self.viewer.current_scenario)
-        self.intersection_list.update(self.viewer.current_scenario)
+        elif save_file == "Save as gif":
+            if not self.current_scenario:
+                return
+            path, _ = QFileDialog.getSaveFileName(
+                None,
+                "QFileDialog.getSaveFileName()",
+                ".gif",
+                "CommonRoad scenario video *.gif (*.gif)",
+                options=QFileDialog.Options(),
+            )
 
-        if self.viewer.current_scenario is None:
-            return
-        if self.intersection_list.selected_id is not None:
-            selected_intersection = find_intersection_by_id(
-                self.viewer.current_scenario,
-                self.intersection_list.selected_id)
-        else:
-            selected_intersection = None
-        if self.lanelet_list.selected_id is not None:
-            selected_lanelet = self.viewer.current_scenario.lanelet_network.find_lanelet_by_id(
-                self.lanelet_list.selected_id)
-        else:
-            selected_lanelet = None
-        self.viewer.update_plot(sel_lanelet=selected_lanelet,
-                                sel_intersection=selected_intersection,
-                                focus_on_network=False)
+            if not path:
+                return
 
+            try:
+                with open(path, "w"):
+                    messbox = QMessageBox.about(None, "Information",
+                                                "Exporting as Gif file will take few minutes, please wait until "
+                                                "process finished")
+                    self.animation.save(path, writer='imagemagick', fps=30)
+
+            except IOError as e:
+                QMessageBox.critical(
+                    self,
+                    "CommonRoad file not created!",
+                    "The CommonRoad file was not saved due to an error.\n\n{}".
+                        format(e),
+                    QMessageBox.Ok,
+                )
+                return
+
+    def _calc_max_timestep(self):
+        """calculate maximal time step of current scenario"""
+        timesteps = [
+            obstacle.prediction.occupancy_set[-1].time_step
+            for obstacle in self.current_scenario.dynamic_obstacles
+        ]
+        self.max_timestep = np.max(timesteps) if timesteps else 0
+        return self.max_timestep
 
 def find_intersection_by_id(scenario, intersection_id: int) -> Lanelet:
     """
@@ -758,26 +824,3 @@ def find_intersection_by_id(scenario, intersection_id: int) -> Lanelet:
     intersections = scenario.lanelet_network._intersections
     return intersections[
         intersection_id] if intersection_id in intersections else None
-
-
-def main():
-    # Make it possible to exit application with ctrl+c on console
-    signal.signal(signal.SIGINT, signal.SIG_DFL)
-
-    # Startup application
-    app = QApplication(sys.argv)
-
-    if len(sys.argv) >= 2:
-        main_window = MainWindow(path=sys.argv[1])
-    else:
-        main_window = MainWindow(
-            path=
-            "/home/max/Desktop/Planning/Maps/cr_files/ped/garching_kreuzung_fixed.xml"
-        )
-    main_window.show()
-
-    sys.exit(app.exec_())
-
-
-if __name__ == "__main__":
-    main()

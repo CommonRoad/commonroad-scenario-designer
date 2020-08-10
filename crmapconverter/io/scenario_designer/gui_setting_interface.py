@@ -1,4 +1,4 @@
-from crmapconverter.io.V3_0.GUI_resources.Setting import Ui_SettingUi
+from crmapconverter.io.scenario_designer.GUI_resources.Setting import Ui_SettingUi
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *

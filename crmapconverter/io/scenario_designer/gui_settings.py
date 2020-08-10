@@ -1,8 +1,8 @@
 """ """
 from PyQt5.QtWidgets import QMainWindow
 
-from crmapconverter.io.V3_0.GUI_resources.gui_settings_ui import Ui_MainWindow
-from crmapconverter.io.V3_0 import config
+from crmapconverter.io.scenario_designer.GUI_resources.gui_settings_ui import Ui_MainWindow
+from crmapconverter.io.scenario_designer import config
 
 
 class GUISettings:

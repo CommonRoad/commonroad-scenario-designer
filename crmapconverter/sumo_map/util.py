@@ -12,7 +12,7 @@ import numpy as np
 
 from commonroad.geometry.shape import Polygon
 from commonroad.scenario.lanelet import LaneletNetwork
-from commonroad_cc.collision_detection.pycrcc_collision_dispatch import create_collision_object
+# from commonroad_cc.collision_detection.pycrcc_collision_dispatch import create_collision_object
 
 import matplotlib.pyplot as plt
 from commonroad.visualization.draw_dispatch_cr import draw_object

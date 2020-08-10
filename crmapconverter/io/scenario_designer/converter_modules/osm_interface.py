@@ -21,7 +21,7 @@ from crmapconverter.osm2cr.converter_modules.gui_modules.GUI_resources.start_win
     Ui_MainWindow as startWindow
 )
 
-from crmapconverter.io.V3_0.converter_modules.converter_interface import ConverterInterface
+from crmapconverter.io.scenario_designer.converter_modules.converter_interface import ConverterInterface
 
 
 class OSMInterface(ConverterInterface):
