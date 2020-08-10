@@ -1,4 +1,4 @@
-""" """
+""" window with settings for the Scenario Designer """
 from PyQt5.QtWidgets import QMainWindow
 
 from crmapconverter.io.scenario_designer.GUI_resources.gui_settings_ui import Ui_MainWindow
@@ -28,25 +28,29 @@ class GUISettings:
         self.window.chk_autofocus.setChecked(config.AUTOFOCUS)
         return
 
-    def save_to_config(self) -> bool:
+    def save_to_config(self):
         """
         saves the values in the settings window to config.py
         """
-        if not self.has_valid_entries():
-            return False
-
         config.AUTOFOCUS = self.window.chk_autofocus.isChecked()
-        
-        return True
 
     
     def has_valid_entries(self) -> bool:
+        """ 
+        Check if the user input is valid. Otherwise warn the user.
+
+        :return: bool wether the input is valid
+        """
+        # use if settings get extended
         return True
 
     def apply_close(self) -> None:
         """
         closes settings if settings could be saved to config
         """
-        if self.save_to_config():
+        if self.has_valid_entries():
+            self.save_to_config()
             self.settings_window.close()
             self.cr_designer.textBrowser.append("settings saved")
+        else:
+            print("invalid settings")

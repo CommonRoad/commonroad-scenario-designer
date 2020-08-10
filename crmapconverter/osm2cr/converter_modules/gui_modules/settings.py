@@ -385,14 +385,10 @@ class SettingsMenu:
             config.INTERSECTION_DISTANCE_SUBLAYER)
         window.chk_extract_sublayer.setChecked(config.EXTRACT_SUBLAYER)
 
-    def save_to_config(self) -> bool:
+    def save_to_config(self):
         """
         saves the values in the settings window to config
-
-        :return: True is successful, False if not
         """
-        if not self.has_valid_entries():
-            return False
 
         window = self.window
 
@@ -442,13 +438,12 @@ class SettingsMenu:
 
         config.EXTRACT_SUBLAYER = window.chk_extract_sublayer.isChecked()
         config.INTERSECTION_DISTANCE_SUBLAYER = window.sb_intersection_distance_sublayer.value()
-        return True
 
     def has_valid_entries(self) -> bool:
         """ 
         Check if the user input is valid. Otherwise warn the user.
 
-        :return: bool weather the input is valid
+        :return: bool wether the input is valid
         """
         return True
 
@@ -505,8 +500,11 @@ class SettingsMenu:
         """
         closes settings if settings could be saved to config
         """
-        if self.save_to_config():
+        if self.has_valid_entries():
+            self.save_to_config()
             self.close()
+        else:
+            print("invalid settings")
 
     def save_button(self) -> None:
         """
@@ -640,6 +638,8 @@ def config_string() -> str:
 
     :return: string to write config.py
     """
+    raise RuntimeError("calling deprecated function")
+    # TODO update to new config or find better solution
     return f"""\"\"\"
 This module holds all parameters necessary for the conversion
 \"\"\"
