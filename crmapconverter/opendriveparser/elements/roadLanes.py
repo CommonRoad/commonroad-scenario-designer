@@ -119,6 +119,7 @@ class Lane:
         self._borders = []
         self.lane_section = lane_section
         self.has_border_record = False
+        self._road_mark = None
 
     @property
     def parentRoad(self):
@@ -203,6 +204,14 @@ class Lane:
     def borders(self):
         """ """
         return self._borders
+
+    @property
+    def road_mark(self):
+        return self._road_mark
+
+    @road_mark.setter
+    def road_mark(self, value):
+        self._road_mark = value
 
 
 class LaneLink:
@@ -343,3 +352,67 @@ class LaneBorder(LaneWidth):
     the outer border of each lane
     independent of any inner lanes’ parameters.
     """
+
+class RoadMark:
+
+    def __init__(self):
+        self._SOffset = None
+        self._type = None
+        self._weight = None
+        self._color = None
+        self._material = None
+        self._width = None
+        self._lane_change = None
+        self._height = None
+
+    @property
+    def SOffset(self):
+        return self._SOffset
+
+    @SOffset.setter
+    def SOffset(self, value):
+        self._SOffset = value
+
+    @property
+    def type(self):
+        return self._type
+
+    @type.setter
+    def type(self, value):
+        self._type = str(value)
+
+    @property
+    def weight(self):
+        return self._weight
+
+    @weight.setter
+    def weight(self, value):
+        self._weight = str(value)
+
+    @property
+    def color(self):
+        return self._color
+
+    @color.setter
+    def color(self, value):
+        self._color = str(value)
+
+    @property
+    def material(self):
+        return self._material
+
+    @property
+    def width(self):
+        return self._width
+
+    @property
+    def lane_change(self):
+        return self._lane_change
+
+    @lane_change.setter
+    def lane_change(self, value):
+        self._lane_change = value
+
+    @property
+    def height(self):
+        return self._height

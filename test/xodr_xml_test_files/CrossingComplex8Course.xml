@@ -1,13 +1,13 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<commonRoad timeStepSize="0.1" commonRoadVersion="2020a" author="" affiliation="" source="OpenDRIVE 2 Lanelet Converter" benchmarkID="none" date="2020-04-15">
+<commonRoad timeStepSize="0.1" commonRoadVersion="2020a" author="" affiliation="" source="OpenDRIVE 2 Lanelet Converter" benchmarkID="none" date="2020-07-20">
   <location>
     <geoNameId>-999</geoNameId>
     <gpsLatitude>999</gpsLatitude>
     <gpsLongitude>999</gpsLongitude>
   </location>
   <scenarioTags>
-    <urban/>
     <highway/>
+    <urban/>
   </scenarioTags>
   <lanelet id="100">
     <leftBound>
@@ -448,7 +448,7 @@
     </rightBound>
     <predecessor ref="101"/>
     <successor ref="102"/>
-    <laneletType>unknown</laneletType>
+    <laneletType>driveWay</laneletType>
   </lanelet>
   <lanelet id="102">
     <leftBound>
@@ -13390,7 +13390,7 @@
     <successor ref="106"/>
     <successor ref="101"/>
     <adjacentLeft ref="107" drivingDir="opposite"/>
-    <laneletType>unknown</laneletType>
+    <laneletType>driveWay</laneletType>
   </lanelet>
   <lanelet id="103">
     <leftBound>
@@ -13831,7 +13831,7 @@
     </rightBound>
     <predecessor ref="108"/>
     <successor ref="102"/>
-    <laneletType>unknown</laneletType>
+    <laneletType>driveWay</laneletType>
   </lanelet>
   <lanelet id="109">
     <leftBound>
@@ -14336,7 +14336,7 @@
     </rightBound>
     <predecessor ref="110"/>
     <successor ref="111"/>
-    <laneletType>unknown</laneletType>
+    <laneletType>driveWay</laneletType>
   </lanelet>
   <lanelet id="112">
     <leftBound>
@@ -14849,7 +14849,7 @@
     </rightBound>
     <predecessor ref="105"/>
     <successor ref="113"/>
-    <laneletType>unknown</laneletType>
+    <laneletType>driveWay</laneletType>
   </lanelet>
   <lanelet id="114">
     <leftBound>
@@ -15346,7 +15346,7 @@
     </rightBound>
     <predecessor ref="115"/>
     <successor ref="111"/>
-    <laneletType>unknown</laneletType>
+    <laneletType>driveWay</laneletType>
   </lanelet>
   <lanelet id="116">
     <leftBound>
@@ -15891,7 +15891,7 @@
     </rightBound>
     <predecessor ref="107"/>
     <successor ref="111"/>
-    <laneletType>unknown</laneletType>
+    <laneletType>driveWay</laneletType>
   </lanelet>
   <lanelet id="117">
     <leftBound>
@@ -16308,7 +16308,7 @@
     </rightBound>
     <predecessor ref="107"/>
     <successor ref="113"/>
-    <laneletType>unknown</laneletType>
+    <laneletType>driveWay</laneletType>
   </lanelet>
   <lanelet id="118">
     <leftBound>
@@ -16797,7 +16797,7 @@
     </rightBound>
     <predecessor ref="119"/>
     <successor ref="120"/>
-    <laneletType>unknown</laneletType>
+    <laneletType>driveWay</laneletType>
   </lanelet>
   <lanelet id="121">
     <leftBound>
@@ -17427,10 +17427,11 @@
         <x>480.05725</x>
         <y>516.48215</y>
       </point>
+      <lineMarking>solid</lineMarking>
     </rightBound>
     <predecessor ref="106"/>
     <successor ref="120"/>
-    <laneletType>unknown</laneletType>
+    <laneletType>driveWay</laneletType>
   </lanelet>
   <lanelet id="122">
     <leftBound>
@@ -18148,10 +18149,11 @@
         <x>480.05725</x>
         <y>516.48215</y>
       </point>
+      <lineMarking>solid</lineMarking>
     </rightBound>
     <predecessor ref="107"/>
     <successor ref="120"/>
-    <laneletType>unknown</laneletType>
+    <laneletType>driveWay</laneletType>
   </lanelet>
   <lanelet id="120">
     <leftBound>
@@ -33341,7 +33343,7 @@
     <successor ref="108"/>
     <successor ref="119"/>
     <adjacentLeft ref="115" drivingDir="opposite"/>
-    <laneletType>unknown</laneletType>
+    <laneletType>driveWay</laneletType>
   </lanelet>
   <lanelet id="123">
     <leftBound>
@@ -33958,7 +33960,7 @@
     </rightBound>
     <predecessor ref="115"/>
     <successor ref="113"/>
-    <laneletType>unknown</laneletType>
+    <laneletType>driveWay</laneletType>
   </lanelet>
   <lanelet id="104">
     <leftBound>
@@ -34679,7 +34681,7 @@
     </rightBound>
     <predecessor ref="115"/>
     <successor ref="102"/>
-    <laneletType>unknown</laneletType>
+    <laneletType>driveWay</laneletType>
   </lanelet>
   <lanelet id="113">
     <leftBound>
@@ -36610,7 +36612,30 @@
     <predecessor ref="117"/>
     <predecessor ref="123"/>
     <successor ref="115"/>
-    <laneletType>unknown</laneletType>
+    <laneletType>driveWay</laneletType>
+    <trafficSignRef ref="1120"/>
+    <trafficSignRef ref="1121"/>
+    <trafficSignRef ref="1155"/>
+    <trafficSignRef ref="1124"/>
+    <trafficSignRef ref="1125"/>
+    <trafficSignRef ref="1156"/>
+    <trafficSignRef ref="1148"/>
+    <trafficSignRef ref="1141"/>
+    <trafficSignRef ref="1144"/>
+    <trafficSignRef ref="1113"/>
+    <trafficSignRef ref="1147"/>
+    <trafficSignRef ref="1116"/>
+    <trafficSignRef ref="1119"/>
+    <trafficLightRef ref="2211"/>
+    <trafficLightRef ref="2213"/>
+    <trafficLightRef ref="2217"/>
+    <trafficLightRef ref="2218"/>
+    <trafficLightRef ref="2204"/>
+    <trafficLightRef ref="2267"/>
+    <trafficLightRef ref="2268"/>
+    <trafficLightRef ref="2269"/>
+    <trafficLightRef ref="2270"/>
+    <trafficLightRef ref="2207"/>
   </lanelet>
   <lanelet id="108">
     <leftBound>
@@ -37566,6 +37591,7 @@
         <x>453.90265</x>
         <y>495.27524</y>
       </point>
+      <lineMarking>solid</lineMarking>
     </leftBound>
     <rightBound>
       <point>
@@ -38524,7 +38550,7 @@
     <predecessor ref="120"/>
     <successor ref="103"/>
     <adjacentRight ref="110" drivingDir="same"/>
-    <laneletType>unknown</laneletType>
+    <laneletType>driveWay</laneletType>
   </lanelet>
   <lanelet id="110">
     <leftBound>
@@ -39488,6 +39514,7 @@
         <x>457.65261</x>
         <y>495.29380</y>
       </point>
+      <lineMarking>solid</lineMarking>
     </leftBound>
     <rightBound>
       <point>
@@ -40455,7 +40482,7 @@
     <successor ref="109"/>
     <adjacentLeft ref="108" drivingDir="same"/>
     <adjacentRight ref="119" drivingDir="same"/>
-    <laneletType>unknown</laneletType>
+    <laneletType>driveWay</laneletType>
   </lanelet>
   <lanelet id="119">
     <leftBound>
@@ -42369,7 +42396,7 @@
     <predecessor ref="120"/>
     <successor ref="118"/>
     <adjacentLeft ref="110" drivingDir="same"/>
-    <laneletType>unknown</laneletType>
+    <laneletType>driveWay</laneletType>
   </lanelet>
   <lanelet id="111">
     <leftBound>
@@ -44300,7 +44327,7 @@
     <predecessor ref="114"/>
     <predecessor ref="116"/>
     <successor ref="107"/>
-    <laneletType>unknown</laneletType>
+    <laneletType>driveWay</laneletType>
   </lanelet>
   <lanelet id="106">
     <leftBound>
@@ -45256,6 +45283,7 @@
         <x>457.49912</x>
         <y>526.29342</y>
       </point>
+      <lineMarking>solid</lineMarking>
     </leftBound>
     <rightBound>
       <point>
@@ -46214,7 +46242,7 @@
     <predecessor ref="102"/>
     <successor ref="121"/>
     <adjacentRight ref="105" drivingDir="same"/>
-    <laneletType>unknown</laneletType>
+    <laneletType>driveWay</laneletType>
   </lanelet>
   <lanelet id="105">
     <leftBound>
@@ -47178,6 +47206,7 @@
         <x>453.74917</x>
         <y>526.27486</y>
       </point>
+      <lineMarking>solid</lineMarking>
     </leftBound>
     <rightBound>
       <point>
@@ -48145,7 +48174,7 @@
     <successor ref="112"/>
     <adjacentLeft ref="106" drivingDir="same"/>
     <adjacentRight ref="101" drivingDir="same"/>
-    <laneletType>unknown</laneletType>
+    <laneletType>driveWay</laneletType>
   </lanelet>
   <lanelet id="101">
     <leftBound>
@@ -50059,7 +50088,7 @@
     <predecessor ref="102"/>
     <successor ref="100"/>
     <adjacentLeft ref="105" drivingDir="same"/>
-    <laneletType>unknown</laneletType>
+    <laneletType>driveWay</laneletType>
   </lanelet>
   <lanelet id="115">
     <leftBound>
@@ -65247,7 +65276,7 @@
     <successor ref="104"/>
     <successor ref="123"/>
     <adjacentLeft ref="120" drivingDir="opposite"/>
-    <laneletType>unknown</laneletType>
+    <laneletType>driveWay</laneletType>
   </lanelet>
   <lanelet id="107">
     <leftBound>
@@ -78187,6 +78216,432 @@
     <successor ref="117"/>
     <successor ref="122"/>
     <adjacentLeft ref="102" drivingDir="opposite"/>
-    <laneletType>unknown</laneletType>
+    <laneletType>driveWay</laneletType>
   </lanelet>
+  <trafficSign id="1113">
+    <trafficSignElement>
+      <trafficSignID></trafficSignID>
+    </trafficSignElement>
+    <position>
+      <point>
+        <x>449.99921</x>
+        <y>526.25629</y>
+      </point>
+    </position>
+    <virtual>false</virtual>
+  </trafficSign>
+  <trafficSign id="1116">
+    <trafficSignElement>
+      <trafficSignID></trafficSignID>
+    </trafficSignElement>
+    <position>
+      <point>
+        <x>453.90265</x>
+        <y>495.27524</y>
+      </point>
+    </position>
+    <virtual>false</virtual>
+  </trafficSign>
+  <trafficSign id="1119">
+    <trafficSignElement>
+      <trafficSignID></trafficSignID>
+    </trafficSignElement>
+    <position>
+      <point>
+        <x>457.65261</x>
+        <y>495.29380</y>
+      </point>
+    </position>
+    <virtual>false</virtual>
+  </trafficSign>
+  <trafficSign id="1120">
+    <trafficSignElement>
+      <trafficSignID>306</trafficSignID>
+    </trafficSignElement>
+    <position>
+      <point>
+        <x>467.03813</x>
+        <y>498.24030</y>
+      </point>
+    </position>
+    <virtual>false</virtual>
+  </trafficSign>
+  <trafficSign id="1121">
+    <trafficSignElement>
+      <trafficSignID></trafficSignID>
+    </trafficSignElement>
+    <position>
+      <point>
+        <x>457.63775</x>
+        <y>498.29377</y>
+      </point>
+    </position>
+    <virtual>false</virtual>
+  </trafficSign>
+  <trafficSign id="1124">
+    <trafficSignElement>
+      <trafficSignID></trafficSignID>
+    </trafficSignElement>
+    <position>
+      <point>
+        <x>453.74917</x>
+        <y>526.27486</y>
+      </point>
+    </position>
+    <virtual>false</virtual>
+  </trafficSign>
+  <trafficSign id="1125">
+    <trafficSignElement>
+      <trafficSignID>306</trafficSignID>
+    </trafficSignElement>
+    <position>
+      <point>
+        <x>444.36364</x>
+        <y>523.32837</y>
+      </point>
+    </position>
+    <virtual>false</virtual>
+  </trafficSign>
+  <trafficSign id="1141">
+    <trafficSignElement>
+      <trafficSignID></trafficSignID>
+    </trafficSignElement>
+    <position>
+      <point>
+        <x>461.40256</x>
+        <y>495.31237</y>
+      </point>
+    </position>
+    <virtual>false</virtual>
+  </trafficSign>
+  <trafficSign id="1144">
+    <trafficSignElement>
+      <trafficSignID></trafficSignID>
+    </trafficSignElement>
+    <position>
+      <point>
+        <x>457.49912</x>
+        <y>526.29342</y>
+      </point>
+    </position>
+    <virtual>false</virtual>
+  </trafficSign>
+  <trafficSign id="1147">
+    <trafficSignElement>
+      <trafficSignID></trafficSignID>
+    </trafficSignElement>
+    <position>
+      <point>
+        <x>437.08849</x>
+        <y>508.19215</y>
+      </point>
+    </position>
+    <virtual>false</virtual>
+  </trafficSign>
+  <trafficSign id="1148">
+    <trafficSignElement>
+      <trafficSignID>205</trafficSignID>
+    </trafficSignElement>
+    <position>
+      <point>
+        <x>441.01666</x>
+        <y>502.51153</y>
+      </point>
+    </position>
+    <virtual>false</virtual>
+  </trafficSign>
+  <trafficSign id="1155">
+    <trafficSignElement>
+      <trafficSignID></trafficSignID>
+    </trafficSignElement>
+    <position>
+      <point>
+        <x>473.51896</x>
+        <y>515.23183</y>
+      </point>
+    </position>
+    <virtual>false</virtual>
+  </trafficSign>
+  <trafficSign id="1156">
+    <trafficSignElement>
+      <trafficSignID>205</trafficSignID>
+    </trafficSignElement>
+    <position>
+      <point>
+        <x>466.86410</x>
+        <y>519.31996</y>
+      </point>
+    </position>
+    <virtual>false</virtual>
+  </trafficSign>
+  <trafficLight id="2211">
+    <cycle>
+      <cycleElement>
+        <duration>60</duration>
+        <color>red</color>
+      </cycleElement>
+      <cycleElement>
+        <duration>10</duration>
+        <color>redYellow</color>
+      </cycleElement>
+      <cycleElement>
+        <duration>60</duration>
+        <color>green</color>
+      </cycleElement>
+      <cycleElement>
+        <duration>10</duration>
+        <color>yellow</color>
+      </cycleElement>
+    </cycle>
+    <position>
+      <point>
+        <x>448.23787</x>
+        <y>498.24724</y>
+      </point>
+    </position>
+    <active>true</active>
+  </trafficLight>
+  <trafficLight id="2213">
+    <cycle>
+      <cycleElement>
+        <duration>60</duration>
+        <color>red</color>
+      </cycleElement>
+      <cycleElement>
+        <duration>10</duration>
+        <color>redYellow</color>
+      </cycleElement>
+      <cycleElement>
+        <duration>60</duration>
+        <color>green</color>
+      </cycleElement>
+      <cycleElement>
+        <duration>10</duration>
+        <color>yellow</color>
+      </cycleElement>
+    </cycle>
+    <position>
+      <point>
+        <x>467.03764</x>
+        <y>498.34030</y>
+      </point>
+    </position>
+    <active>true</active>
+  </trafficLight>
+  <trafficLight id="2267">
+    <cycle>
+      <cycleElement>
+        <duration>60</duration>
+        <color>red</color>
+      </cycleElement>
+      <cycleElement>
+        <duration>10</duration>
+        <color>redYellow</color>
+      </cycleElement>
+      <cycleElement>
+        <duration>60</duration>
+        <color>green</color>
+      </cycleElement>
+      <cycleElement>
+        <duration>10</duration>
+        <color>yellow</color>
+      </cycleElement>
+    </cycle>
+    <position>
+      <point>
+        <x>459.43773</x>
+        <y>498.30268</y>
+      </point>
+    </position>
+    <active>true</active>
+  </trafficLight>
+  <trafficLight id="2217">
+    <cycle>
+      <cycleElement>
+        <duration>60</duration>
+        <color>red</color>
+      </cycleElement>
+      <cycleElement>
+        <duration>10</duration>
+        <color>redYellow</color>
+      </cycleElement>
+      <cycleElement>
+        <duration>60</duration>
+        <color>green</color>
+      </cycleElement>
+      <cycleElement>
+        <duration>10</duration>
+        <color>yellow</color>
+      </cycleElement>
+    </cycle>
+    <position>
+      <point>
+        <x>444.36414</x>
+        <y>523.22837</y>
+      </point>
+    </position>
+    <active>true</active>
+  </trafficLight>
+  <trafficLight id="2268">
+    <cycle>
+      <cycleElement>
+        <duration>60</duration>
+        <color>red</color>
+      </cycleElement>
+      <cycleElement>
+        <duration>10</duration>
+        <color>redYellow</color>
+      </cycleElement>
+      <cycleElement>
+        <duration>60</duration>
+        <color>green</color>
+      </cycleElement>
+      <cycleElement>
+        <duration>10</duration>
+        <color>yellow</color>
+      </cycleElement>
+    </cycle>
+    <position>
+      <point>
+        <x>451.96404</x>
+        <y>523.26598</y>
+      </point>
+    </position>
+    <active>true</active>
+  </trafficLight>
+  <trafficLight id="2218">
+    <cycle>
+      <cycleElement>
+        <duration>60</duration>
+        <color>red</color>
+      </cycleElement>
+      <cycleElement>
+        <duration>10</duration>
+        <color>redYellow</color>
+      </cycleElement>
+      <cycleElement>
+        <duration>60</duration>
+        <color>green</color>
+      </cycleElement>
+      <cycleElement>
+        <duration>10</duration>
+        <color>yellow</color>
+      </cycleElement>
+    </cycle>
+    <position>
+      <point>
+        <x>463.16391</x>
+        <y>523.32142</y>
+      </point>
+    </position>
+    <active>true</active>
+  </trafficLight>
+  <trafficLight id="2207">
+    <cycle>
+      <cycleElement>
+        <duration>60</duration>
+        <color>red</color>
+      </cycleElement>
+      <cycleElement>
+        <duration>10</duration>
+        <color>redYellow</color>
+      </cycleElement>
+      <cycleElement>
+        <duration>60</duration>
+        <color>green</color>
+      </cycleElement>
+      <cycleElement>
+        <duration>10</duration>
+        <color>yellow</color>
+      </cycleElement>
+    </cycle>
+    <position>
+      <point>
+        <x>441.11666</x>
+        <y>502.51202</y>
+      </point>
+    </position>
+    <active>true</active>
+  </trafficLight>
+  <trafficLight id="2270">
+    <cycle>
+      <cycleElement>
+        <duration>60</duration>
+        <color>red</color>
+      </cycleElement>
+      <cycleElement>
+        <duration>10</duration>
+        <color>redYellow</color>
+      </cycleElement>
+      <cycleElement>
+        <duration>60</duration>
+        <color>green</color>
+      </cycleElement>
+      <cycleElement>
+        <duration>10</duration>
+        <color>yellow</color>
+      </cycleElement>
+    </cycle>
+    <position>
+      <point>
+        <x>441.06023</x>
+        <y>513.91188</y>
+      </point>
+    </position>
+    <active>true</active>
+  </trafficLight>
+  <trafficLight id="2204">
+    <cycle>
+      <cycleElement>
+        <duration>60</duration>
+        <color>red</color>
+      </cycleElement>
+      <cycleElement>
+        <duration>10</duration>
+        <color>redYellow</color>
+      </cycleElement>
+      <cycleElement>
+        <duration>60</duration>
+        <color>green</color>
+      </cycleElement>
+      <cycleElement>
+        <duration>10</duration>
+        <color>yellow</color>
+      </cycleElement>
+    </cycle>
+    <position>
+      <point>
+        <x>466.79353</x>
+        <y>519.24911</y>
+      </point>
+    </position>
+    <active>true</active>
+  </trafficLight>
+  <trafficLight id="2269">
+    <cycle>
+      <cycleElement>
+        <duration>60</duration>
+        <color>red</color>
+      </cycleElement>
+      <cycleElement>
+        <duration>10</duration>
+        <color>redYellow</color>
+      </cycleElement>
+      <cycleElement>
+        <duration>60</duration>
+        <color>green</color>
+      </cycleElement>
+      <cycleElement>
+        <duration>10</duration>
+        <color>yellow</color>
+      </cycleElement>
+    </cycle>
+    <position>
+      <point>
+        <x>471.18903</x>
+        <y>504.63175</y>
+      </point>
+    </position>
+    <active>true</active>
+  </trafficLight>
 </commonRoad>

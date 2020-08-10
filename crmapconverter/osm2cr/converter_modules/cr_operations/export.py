@@ -2,7 +2,7 @@
 This module holds all interaction between this application and the ***CommonRoad python tools**.
 It allows to export a scenario to CR or plot a CR scenario.
 """
-from typing import List
+from typing import List, Tuple
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -10,7 +10,10 @@ import utm
 
 from crmapconverter.osm2cr import config
 from crmapconverter.osm2cr.converter_modules.graph_operations import road_graph as rg
-from crmapconverter.osm2cr.converter_modules.intermediate_format.intermediate_format import IntermediateFormat
+from crmapconverter.osm2cr.converter_modules.intermediate_format.intermediate_format import (
+    IntermediateFormat,
+    get_lanelet_intersections
+)
 from crmapconverter.osm2cr.converter_modules.utility import geometry
 from crmapconverter.osm2cr.converter_modules.utility.idgenerator import get_id
 from crmapconverter.osm2cr.converter_modules.cr_operations.cleanup import sanitize
@@ -22,7 +25,6 @@ from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistin
 from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.planning.planning_problem import PlanningProblemSet
 from commonroad.scenario.scenario import Scenario, Lanelet, LaneletNetwork, Tag, Location
-
 
 
 def get_lanelet(lane: rg.Lane) -> Lanelet:
@@ -103,19 +105,19 @@ def get_lanelets(graph: rg.Graph) -> List[Lanelet]:
     return result
 
 
-def create_scenario(graph: rg.Graph) -> Scenario:
-    """
-    creates a CR scenario ot of a graph
+# def create_scenario(graph: rg.Graph) -> Scenario:
+#     """
+#     creates a CR scenario out of a graph
 
-    :param graph: the graph to convert
-    :return: CR scenario
-    """
-    scenario = Scenario(config.TIMESTEPSIZE, config.BENCHMARK_ID)
-    net = LaneletNetwork()
-    for lanelet in get_lanelets(graph):
-        net.add_lanelet(lanelet)
-    scenario.lanelet_network = net
-    return scenario
+#     :param graph: the graph to convert
+#     :return: CR scenario
+#     """
+#     scenario = Scenario(config.TIMESTEPSIZE, config.BENCHMARK_ID)
+#     net = LaneletNetwork()
+#     for lanelet in get_lanelets(graph):
+#         net.add_lanelet(lanelet)
+#     scenario.lanelet_network = net
+#     return scenario
 
 
 def convert_coordinates_to_utm(scenario: Scenario, origin: np.ndarray) -> None:
@@ -140,9 +142,27 @@ def convert_coordinates_to_utm(scenario: Scenario, origin: np.ndarray) -> None:
                 bound[index] = np.array([easting, northing])
     return
 
+def create_scenario_intermediate(graph) -> Tuple[Scenario, IntermediateFormat]:
+    """ Convert Scenario from RoadGraph via IntermediateFormat """
+    interm = IntermediateFormat.extract_from_road_graph(graph)
+    if isinstance(graph, rg.SublayeredGraph):
+        interm_sublayer = IntermediateFormat.extract_from_road_graph(
+            graph.sublayer_graph)
+        crossings = get_lanelet_intersections(interm_sublayer, interm)
+        interm_sublayer.intersections = list()
+        interm_sublayer.traffic_lights = list()
+        interm_sublayer.traffic_lights = list()
+        interm_sublayer.remove_invalid_references()
+        print("removed intersections, traffic lights, traffic signs from sublayer")
+        interm.merge(interm_sublayer)
+        interm.add_crossing_information(crossings)
+    scenario = interm.to_commonroad_scenario()
+    return scenario, interm
+
 
 def export(
-    graph: rg.Graph, file=config.SAVE_PATH + config.BENCHMARK_ID + ".xml"
+        graph: rg.Graph,
+        file_path=config.SAVE_PATH + config.BENCHMARK_ID + ".xml"
 ) -> None:
     """
     converts a graph to a CR scenario and saves it to disk
@@ -151,9 +171,7 @@ def export(
     :return: None
     """
     #scenario = create_scenario(graph)
-    # convert via intermediate format
-    intermediate_format = IntermediateFormat.extract_from_road_graph(graph)
-    scenario = intermediate_format.to_commonroad_scenario()
+    scenario, intermediate_format = create_scenario_intermediate(graph)
 
     # removing converting errors before writing to xml
     sanitize(scenario)
@@ -177,10 +195,19 @@ def export(
         scenario, problemset, author, affiliation, source, tags, location, decimal_precision=16)
 
     #write scenario to file with planning problem
-    file_writer.write_to_file(file, OverwriteExistingFile.ALWAYS)
+    file_writer.write_to_file(file_path, OverwriteExistingFile.ALWAYS)
 
     # write scenario to file without planning problem
     #file_writer.write_scenario_to_file(file, OverwriteExistingFile.ALWAYS)
+
+
+def convert_to_scenario(graph: rg.Graph) -> Scenario:
+    #scenario = create_scenario(graph)
+    scenario, intermediate_format = create_scenario_intermediate(graph)
+    # removing converting errors before writing to xml
+    sanitize(scenario)
+    return scenario
+
 
 def create_tags(tags: str):
     """

@@ -3,8 +3,11 @@
 
 """Module to contain Network which can load an opendrive object and then export
 to lanelets. Iternally, the road network is represented by ParametricLanes."""
+import numpy as np
 
-from commonroad.scenario.scenario import Scenario
+from commonroad.scenario.scenario import (
+    Scenario, GeoTransformation, Location
+)
 
 from crmapconverter.opendriveparser.elements.opendrive import OpenDrive
 
@@ -12,6 +15,8 @@ from crmapconverter.opendriveconversion.utils import encode_road_section_lane_wi
 from crmapconverter.opendriveconversion.lanelet_network import ConversionLaneletNetwork
 from crmapconverter.opendriveconversion.converter import OpenDriveConverter
 
+from crmapconverter.opendriveconversion.plane_elements.traffic_signals import get_traffic_signals
+from crmapconverter.opendriveconversion.plane_elements.geo_reference import get_geo_reference
 
 __author__ = "Benjamin Orthen, Stefan Urban"
 __copyright__ = "TUM Cyber-Physical Systems Group"
@@ -33,6 +38,9 @@ class Network:
     def __init__(self):
         self._planes = []
         self._link_index = None
+        self._traffic_lights = []
+        self._traffic_signs = []
+        self._geo_ref = None
 
     # def __eq__(self, other):
     # return self.__dict__ == other.__dict__
@@ -47,6 +55,11 @@ class Network:
 
         self._link_index = LinkIndex()
         self._link_index.create_from_opendrive(opendrive)
+
+        try:
+            self._geo_ref = opendrive.header.geo_reference
+        except TypeError:
+            self._geo_ref = None
 
         # Convert all parts of a road to parametric lanes (planes)
         for road in opendrive.roads:
@@ -63,11 +76,17 @@ class Network:
                 parametric_lane_groups = OpenDriveConverter.lane_section_to_parametric_lanes(
                     lane_section, reference_border
                 )
+                # parametric_lane_groups is a list of ParametricLaneGroup()
+                # ParametricLaneGroup() contains a list of ParametricLane() s
 
                 self._planes.extend(parametric_lane_groups)
 
+            traffic_lights, traffic_signs = get_traffic_signals(road)
+            self._traffic_lights.extend(traffic_lights)
+            self._traffic_signs.extend(traffic_signs)
+
     def export_lanelet_network(
-        self, filter_types: list = None
+            self, filter_types: list = None
     ) -> "ConversionLaneletNetwork":
         """Export network as lanelet network.
 
@@ -96,6 +115,7 @@ class Network:
         # successorIds get encoded with a non existing successorID
         # of the lane link
         lanelet_network.prune_network()
+        # concatenate possible lanelets with their successors
         lanelet_network.concatenate_possible_lanelets()
 
         # Perform lane splits and joins
@@ -106,7 +126,7 @@ class Network:
         return lanelet_network
 
     def export_commonroad_scenario(
-        self, dt: float = 0.1, benchmark_id=None, filter_types=None
+            self, dt: float = 0.1, benchmark_id=None, filter_types=None
     ):
         """Export a full CommonRoad scenario
 
@@ -118,9 +138,24 @@ class Network:
         Returns:
 
         """
+        if self._geo_ref is not None:
+            longitude, latitude = get_geo_reference(self._geo_ref)
+            geo_transformation = GeoTransformation(geo_reference=self._geo_ref)
+
+            if longitude is not None and latitude is not None:
+                location = Location(
+                    geo_transformation=geo_transformation,
+                    gps_latitude=latitude, gps_longitude=longitude
+                )
+
+            else:
+                location = Location(geo_transformation=geo_transformation)
+        else:
+            location = None
 
         scenario = Scenario(
-            dt=dt, benchmark_id=benchmark_id if benchmark_id is not None else "none"
+            dt=dt, benchmark_id=benchmark_id if benchmark_id is not None else "none",
+            location=location
         )
 
         scenario.add_objects(
@@ -130,6 +165,34 @@ class Network:
                 else ["driving", "onRamp", "offRamp", "exit", "entry"]
             )
         )
+
+        lanelet_network = scenario.lanelet_network
+
+        for traffic_light in self._traffic_lights:
+
+            distance = []
+            for lanelet in lanelet_network.lanelets:
+                pos_1 = traffic_light.position
+                n = len(lanelet.center_vertices[0])
+                pos_2 = np.array(lanelet.center_vertices[0][int(n/2)], lanelet.center_vertices[1][int(n/2)])
+                dist = np.linalg.norm(pos_1 - pos_2)
+                distance.append(dist)
+
+            id_for_adding = lanelet_network.lanelets[distance.index(min(distance))].lanelet_id
+            lanelet_network.add_traffic_light(traffic_light, {id_for_adding})
+
+        for traffic_sign in self._traffic_signs:
+
+            distance = []
+            for lanelet in lanelet_network.lanelets:
+                pos_1 = traffic_sign.position
+                n = len(lanelet.center_vertices[0])
+                pos_2 = np.array(lanelet.center_vertices[0][int(n/2)], lanelet.center_vertices[1][int(n/2)])
+                dist = np.linalg.norm(pos_1 - pos_2)
+                distance.append(dist)
+
+            id_for_adding = lanelet_network.lanelets[distance.index(min(distance))].lanelet_id
+            lanelet_network.add_traffic_sign(traffic_sign, {id_for_adding})
 
         return scenario
 
@@ -169,8 +232,8 @@ class LinkIndex:
                     # Last lane section! > Next road in first lane section
                     # Try to get next road
                     elif (
-                        road.link.successor is not None
-                        and road.link.successor.elementType != "junction"
+                            road.link.successor is not None
+                            and road.link.successor.elementType != "junction"
                     ):
 
                         next_road = opendrive.getRoad(road.link.successor.element_id)
@@ -202,8 +265,8 @@ class LinkIndex:
                     # First lane section! > Previous road
                     # Try to get previous road
                     elif (
-                        road.link.predecessor is not None
-                        and road.link.predecessor.elementType != "junction"
+                            road.link.predecessor is not None
+                            and road.link.predecessor.elementType != "junction"
                     ):
 
                         prevRoad = opendrive.getRoad(road.link.predecessor.element_id)

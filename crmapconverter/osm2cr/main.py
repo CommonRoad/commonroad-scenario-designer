@@ -7,6 +7,7 @@ import os
 import matplotlib
 from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
 from commonroad.planning.planning_problem import PlanningProblemSet
+from commonroad.scenario.scenario import Tag
 
 import crmapconverter.osm2cr.converter_modules.converter as converter
 import crmapconverter.osm2cr.converter_modules.cr_operations.export as ex
@@ -30,23 +31,26 @@ def convert(filename_open, filename_store=None):
     :type filename_store: str
     :return: None
     """
-    scenario = converter.Scenario(filename_open)
+    scenario = converter.GraphScenario(filename_open)
     #scenario.save_as_cr(filename_store)
 
-    format =IntermediateFormat.extract_from_road_graph(scenario.graph)
-    scenario_cr = format.to_commonroad_scenario()
+    interm_format = IntermediateFormat.extract_from_road_graph(scenario.graph)
+    scenario_cr = interm_format.to_commonroad_scenario()
     problemset = PlanningProblemSet(None)
     author = config.AUTHOR
     affiliation = config.AFFILIATION
     source = config.SOURCE
-    tags = config.TAGS
-    file = config.SAVE_PATH + config.BENCHMARK_ID + ".xml"
+    tags_str = config.TAGS
+    tags = []
+    for tag_str in tags_str.split():
+        tags.append(Tag[tag_str.upper()])
+    file_path = config.SAVE_PATH + config.BENCHMARK_ID + ".xml"
     # in the current commonroad version the following line works
     file_writer = CommonRoadFileWriter(
         scenario_cr, problemset, author, affiliation, source, tags, decimal_precision=16
     )
     # file_writer = CommonRoadFileWriter(scenario, problemset, author, affiliation, source, tags)
-    file_writer.write_scenario_to_file(file, OverwriteExistingFile.ALWAYS)
+    file_writer.write_scenario_to_file(file_path, OverwriteExistingFile.ALWAYS)
 
 def download_and_convert():
     """
@@ -63,10 +67,10 @@ def download_and_convert():
         y,
         config.DOWNLOAD_EDGE_LENGTH,
     )
-    scenario = converter.Scenario(
+    scenario = converter.GraphScenario(
         config.SAVE_PATH + config.BENCHMARK_ID + "_downloaded.osm"
     )
-    scenario.save_as_cr()
+    scenario.save_as_cr(None)
 
 
 def start_gui(parent=None):
@@ -78,8 +82,11 @@ def main():
     parser = argparse.ArgumentParser(
         description="download or open an OSM file and convert it to CR or use GUI"
     )
-    parser.add_argument("action", type=str)
-    parser.add_argument("file", nargs="?")
+    parser.add_argument("action", 
+                        choices=["g", "gui", "d","download", "o", "open"],
+                        help="g or gui for starting the gui, d or download to "
+                            + "download a OSM file, o or open to convert files")
+    parser.add_argument("file", nargs="?", help="file input for the converter")
     args = parser.parse_args()
     if args.action == "d" or args.action == "download":
         download_and_convert()
@@ -93,9 +100,6 @@ def main():
             return
     elif args.action == "g" or args.action == "gui":
         start_gui()
-    else:
-        print("invalid arguments")
-        return
 
 
 if __name__ == "__main__":

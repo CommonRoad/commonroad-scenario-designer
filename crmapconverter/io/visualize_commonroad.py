@@ -33,7 +33,7 @@ def main():
     scenario, _ = CommonRoadFileReader(filename).open()
 
     draw_params = {
-        "scenario": {"lanelet_network": {"lanelet": {"show_label": args.show_labels}}}
+        "scenario": {"lanelet_network": {'draw_traffic_signs': True, "lanelet": {"show_label": args.show_labels}}}
     }
     # temporary fix to get a plotable view of the scenario
     if args.plot_center:
@@ -54,5 +54,5 @@ def main():
     plt.show()
 
 
-if __name__ == "__main":
+if __name__ == "__main__":
     main()

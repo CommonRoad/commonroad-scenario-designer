@@ -31,7 +31,7 @@ class Geometry(abc.ABC):
 
     @property
     def start_position(self) -> float:
-        """Returns the overall geometry length"""
+        """Returns the overall geometry start position"""
         return self._start_position
 
     @property

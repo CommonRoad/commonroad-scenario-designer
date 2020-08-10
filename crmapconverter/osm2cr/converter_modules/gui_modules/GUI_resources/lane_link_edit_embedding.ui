@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>494</width>
-    <height>508</height>
+    <width>1027</width>
+    <height>737</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -154,20 +154,14 @@
        <enum>QFrame::Raised</enum>
       </property>
       <layout class="QGridLayout" name="gridLayout_3">
-       <item row="0" column="1">
-        <widget class="QPushButton" name="b_finalize">
-         <property name="minimumSize">
-          <size>
-           <width>200</width>
-           <height>0</height>
-          </size>
-         </property>
+       <item row="0" column="0">
+        <widget class="QPushButton" name="pushButton">
          <property name="text">
-          <string>Finalize Edit</string>
+          <string>Parsing</string>
          </property>
         </widget>
        </item>
-       <item row="0" column="0">
+       <item row="0" column="3">
         <spacer name="horizontalSpacer">
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
@@ -180,6 +174,33 @@
          </property>
         </spacer>
        </item>
+       <item row="0" column="4">
+        <widget class="QPushButton" name="b_finalize">
+         <property name="minimumSize">
+          <size>
+           <width>200</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>Finalize Edit</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QPushButton" name="pushButton_2">
+         <property name="text">
+          <string>Edge Editing</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="2">
+        <widget class="QPushButton" name="pushButton_3">
+         <property name="text">
+          <string>Lane Link Editing</string>
+         </property>
+        </widget>
+       </item>
       </layout>
      </widget>
     </item>
@@ -190,8 +211,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>494</width>
-     <height>21</height>
+     <width>1027</width>
+     <height>28</height>
     </rect>
    </property>
   </widget>
