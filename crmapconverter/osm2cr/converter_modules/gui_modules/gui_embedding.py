@@ -5,12 +5,10 @@ It also provides a main window to start the conversion process, and the possibil
 
 #Updated by Rayane Zaibet
 
+from abc import ABC, abstractmethod
 import pickle
 import re
 import sys
-from abc import ABC, abstractmethod
-from tkinter import Tk
-from tkinter.filedialog import askopenfilename
 from typing import Optional, Union, Tuple
 
 import matplotlib.pyplot as plt
@@ -211,15 +209,17 @@ class StartMenu(QWidget):
 
         :return: None
         """
-        Tk().withdraw()
-        file = askopenfilename(
-            initialdir="files/",
-            filetypes=(("edit save", "*.save"), ("all files", "*.*")),
+        filename, _ = QFileDialog.getOpenFileName(
+            self,
+            "Select a edit state file",
+            "",
+            "edit save *.save (*.save)",
+            options=QFileDialog.Options(),
         )
-        if file == "" or file is None:
+        if filename == "" or filename is None:
             print("no file picked")
         else:
-            with open(file, "rb") as fd:
+            with open(filename, "rb") as fd:
                 gui_state = pickle.load(fd)
             if isinstance(gui_state, gui.EdgeEditGUI):
                 EdgeEdit(self.app, None, gui_state)
