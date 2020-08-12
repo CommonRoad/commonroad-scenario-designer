@@ -187,6 +187,8 @@ def parse_restrictions(
             None,
             None,
         )
+        if not "restriction" in restriction_element.attrib:
+            continue
         restriction = restriction_element.attrib["restriction"]
         for member in restriction_element.findall("member"):
             if member.attrib["role"] == "from":
@@ -224,6 +226,7 @@ def get_restrictions(root) -> Dict[int, Set[Restriction]]:
                 restrictions.add(relation)
             if tag.attrib["k"] == "restriction":
                 relation.set("restriction", tag.attrib["v"])
+                #TODO Handle vehicle specific restrictions, e.g. restriction:hgv
     restrictions = parse_restrictions(restrictions)
     return restrictions
 
