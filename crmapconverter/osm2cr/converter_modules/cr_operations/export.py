@@ -168,8 +168,8 @@ def export(
     affiliation = config.AFFILIATION
     source = config.SOURCE
     tags = create_tags(config.TAGS)
-    location = Location(gps_latitude=config.GPS_LATITUDE,
-                        gps_longitude=config.GPS_LONGITUDE,
+    location = Location(gps_latitude=graph.center_point[0],
+                        gps_longitude=graph.center_point[1],
                         geo_name_id=config.GEONAME_ID,
                         geo_transformation=None)
     # in the current commonroad version the following line works

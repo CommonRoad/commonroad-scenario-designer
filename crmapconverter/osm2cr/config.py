@@ -17,10 +17,6 @@ SOURCE = "OpenStreetMaps (OSM)"
 TAGS = "urban"
 # GeonameID
 GEONAME_ID = -999
-# GPS latitude
-GPS_LATITUDE = "123.45"
-# GPS longitude
-GPS_LONGITUDE = "123.45"
 # time step size for the benchmark in seconds
 TIMESTEPSIZE = 0.1
 
