@@ -15,17 +15,13 @@ AFFILIATION = "Technical University of Munich, Germany"
 SOURCE = "OpenStreetMaps (OSM)"
 # additional tags for the benchmark
 TAGS = "urban"
-# GeonameID
-GEONAME_ID = -999
-# GPS latitude
-GPS_LATITUDE = "123.45"
-# GPS longitude
-GPS_LONGITUDE = "123.45"
+# Geonames username to retrieve geonamesID for created scenarios
+GEONAMES_USERNAME = "demo"
 # time step size for the benchmark in seconds
 TIMESTEPSIZE = 0.1
 
 # Lanelet type each lanelet should have
-LANELETTYPE = 'urban'
+LANELETTYPE = "urban"
 
 # Aerial Image Settings
 # Use aerial images for edit

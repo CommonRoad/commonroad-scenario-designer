@@ -13,6 +13,7 @@ from crmapconverter.osm2cr.converter_modules.graph_operations import road_graph 
 from crmapconverter.osm2cr.converter_modules.intermediate_format.intermediate_format import IntermediateFormat
 from crmapconverter.osm2cr.converter_modules.utility import geometry
 from crmapconverter.osm2cr.converter_modules.utility.idgenerator import get_id
+from crmapconverter.osm2cr.converter_modules.utility.geonamesID import get_geonamesID
 from crmapconverter.osm2cr.converter_modules.cr_operations.cleanup import sanitize
 
 # CommonRoad python tools are imported
@@ -155,7 +156,7 @@ def export(
     intermediate_format = IntermediateFormat.extract_from_road_graph(graph)
     scenario = intermediate_format.to_commonroad_scenario()
 
-    # removing converting errors before writing to xml
+    # remove converting errors before writing to xml
     sanitize(scenario)
 
     # writing everything to XML
@@ -168,9 +169,10 @@ def export(
     affiliation = config.AFFILIATION
     source = config.SOURCE
     tags = create_tags(config.TAGS)
-    location = Location(gps_latitude=config.GPS_LATITUDE,
-                        gps_longitude=config.GPS_LONGITUDE,
-                        geo_name_id=config.GEONAME_ID,
+    # create location tag automatically. Retreive geonamesID from the Internet.
+    location = Location(gps_latitude=graph.center_point[0],
+                        gps_longitude=graph.center_point[1],
+                        geo_name_id=get_geonamesID(graph.center_point[0], graph.center_point[1]),
                         geo_transformation=None)
     # in the current commonroad version the following line works
     file_writer = CommonRoadFileWriter(
