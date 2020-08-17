@@ -15,8 +15,8 @@ AFFILIATION = "Technical University of Munich, Germany"
 SOURCE = "OpenStreetMaps (OSM)"
 # additional tags for the benchmark
 TAGS = "urban"
-# GeonameID
-GEONAME_ID = -999
+# Geonames username to retrieve geonamesID for created scenarios
+GEONAMES_USERNAME = "globetrotter"
 # time step size for the benchmark in seconds
 TIMESTEPSIZE = 0.1
 
