@@ -1,11 +1,9 @@
 """
-This module provides is used to retrieve a geonames ID for a given coordinate.
-An Internet connection is needed and a valid geonames user name has to be provided in the config.py file
+This module is used to retrieve a geonamesID for a given coordinate.
+An Internet connection is needed and a valid geonames username has to be provided in the config.py file
 """
 
 import json
-import traceback
-
 from urllib.request import urlopen
 from urllib.error import URLError
 from crmapconverter.osm2cr import config
@@ -13,7 +11,7 @@ from crmapconverter.osm2cr import config
 
 def get_geonamesID(lat: float, lng: float):
     """
-    Retrive specific location to extract intersections from based on coordinate bounding box
+    Retrive a geonamesID for a given scenario coordinate center
 
     :param1 lat: Latitude of scenario center
     :param2 lng: Longitude of scenario center
@@ -34,15 +32,18 @@ def get_geonamesID(lat: float, lng: float):
 
         return code
 
+    # catch connection error
     except URLError:
-        print('No Internet connection could be established. Using fallback GeonamesID')
+        print("No Internet connection could be established for retrieving a GeonamesID. Using fallback GeonamesID instead.")
         return -999
+    # catch account errors
     except KeyError:
         try:
-            print("message from Geonames server: " + response['status']['message'])
+            print("Couldn't retrieve a valid GeonamesID. Using fallback GeonamesID instead. Message from Geonames server: " + response['status']['message'])
         except KeyError:
-            print("Error retrieving a valid GeonamesID. Using fallback GeonamesID")
+            print("Couldn't retrieve a valid GeonamesID. Using fallback GeonamesID instead.")
         return -999
+    # catch errors we don't know about yet
     except Exception:
-        print("Couldn't retrieve a GeonamesID")
+        print("Couldn't retrieve a GeonamesID. Using fallback GeonamesID instead.")
         return -999

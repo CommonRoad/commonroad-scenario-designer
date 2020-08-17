@@ -156,7 +156,7 @@ def export(
     intermediate_format = IntermediateFormat.extract_from_road_graph(graph)
     scenario = intermediate_format.to_commonroad_scenario()
 
-    # removing converting errors before writing to xml
+    # remove converting errors before writing to xml
     sanitize(scenario)
 
     # writing everything to XML
@@ -169,6 +169,7 @@ def export(
     affiliation = config.AFFILIATION
     source = config.SOURCE
     tags = create_tags(config.TAGS)
+    # create location tag automatically. Retreive geonamesID from the Internet.
     location = Location(gps_latitude=graph.center_point[0],
                         gps_longitude=graph.center_point[1],
                         geo_name_id=get_geonamesID(graph.center_point[0], graph.center_point[1]),
