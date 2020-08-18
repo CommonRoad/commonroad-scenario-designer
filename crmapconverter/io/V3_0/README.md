@@ -13,4 +13,5 @@ The Sumo Tool is in charge of traffic generation and simulation.
 This GUI is designed to be able to import different types of map files and automatically convert them into CR files, 
 to display them in the central area of the window and to provide functions such as manual lanelet creation and editing, 
 adding of traffic signs and obstacles, as well as traffic simulation through SUMO tools. The layout of the GUI is illustrated in the following.
-![image](https://gitlab.lrz.de/cps/commonroad-map-tool/-/blob/GUI_CR_Scenario_Designer/crmapconverter/io/V3_0/Layout_cr_designer.png)
+
+![Layout](https://gitlab.lrz.de/cps/commonroad-map-tool/-/blob/GUI_CR_Scenario_Designer/crmapconverter/io/V3_0/Layout_cr_designer.png)
