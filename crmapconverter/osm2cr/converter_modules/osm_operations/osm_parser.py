@@ -121,7 +121,7 @@ def get_traffic_rules(nodes: Dict[int, ElTree.Element],
                       roads: Dict[int, ElTree.Element],
                       accepted_traffic_sign_by_keys: List[str],
                       accepted_traffic_sign_by_values: List[str]
-) -> Dict[str, Dict]:
+) -> Dict[str, Dict[str, 'different types']]:
     """ 
     Extract traffic rules from nodes and roads.
     
