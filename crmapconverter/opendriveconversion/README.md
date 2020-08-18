@@ -1,8 +1,13 @@
-#Opendrive converter
+Opendrive converter
+===================
 
 This is the converter module for opendrive used in CRSD. It can also run outside CRSD for convenient development.
 
-The main part is 'Network' class in 'network.py'. Functions for conversion are defined as instant methods.
+The main part is `Network` class in 'network.py'. Functions for conversion are defined as instant methods. `self._planes` stores a list of `parametric_lane` objects,
+which is  an intermediate format for conversion. If you want to check or edit the methods for geometry conversion, or add any attributes of the road itself, should first implement
+them within this format. About how the converter creates this format, see 'converter.py'
+
+The modifications of the network, check 'lanelet_network.py'
 
 To see if information from opendrive is recorded, please check 'crmapconverter/opendriveparser/elements'. Names of the elements are corresponding to names in Opendrive.
 
@@ -26,4 +31,4 @@ lanelet_network = network.export_lanelet_network()
 scenario = network.export_commonroad_scenario()
 ```
 
-The out put is a CommonRoad sceario object.
+The out put is a CommonRoad sceario object. Which can then be written to file. You can do editing or analysis using any methods in CommonRoad.
