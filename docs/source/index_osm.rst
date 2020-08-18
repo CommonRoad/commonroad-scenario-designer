@@ -56,6 +56,7 @@ The full documentation of the package is visible in **converter package**.
    :maxdepth: 1
    
    usage/example
+   system_design
    automation
    gui_guide
    converter

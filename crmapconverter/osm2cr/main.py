@@ -82,8 +82,11 @@ def main():
     parser = argparse.ArgumentParser(
         description="download or open an OSM file and convert it to CR or use GUI"
     )
-    parser.add_argument("action", type=str)
-    parser.add_argument("file", nargs="?")
+    parser.add_argument("action", 
+                        choices=["g", "gui", "d","download", "o", "open"],
+                        help="g or gui for starting the gui, d or download to "
+                            + "download a OSM file, o or open to convert files")
+    parser.add_argument("file", nargs="?", help="file input for the converter")
     args = parser.parse_args()
     if args.action == "d" or args.action == "download":
         download_and_convert()
@@ -97,9 +100,6 @@ def main():
             return
     elif args.action == "g" or args.action == "gui":
         start_gui()
-    else:
-        print("invalid arguments")
-        return
 
 
 if __name__ == "__main__":

@@ -4,8 +4,8 @@ from PyQt5.QtWidgets import QMessageBox, QMainWindow
 
 from commonroad.common.util import Interval
 
-from crmapconverter.io.V3_0.GUI_resources.sumo_settings_ui import Ui_MainWindow
-from crmapconverter.io.V3_0.util import Observable
+from crmapconverter.io.scenario_designer.GUI_resources.sumo_settings_ui import Ui_MainWindow
+from crmapconverter.io.scenario_designer.util import Observable
 from crmapconverter.sumo_map.config import SumoConfig
 
 
@@ -100,14 +100,10 @@ class SUMOSettings:
         self.window.chk_compute_orientation.setChecked(
             self._config.compute_orientation)
 
-    def save_to_config(self) -> bool:
+    def save_to_config(self):
         """
         saves the values in the settings window to config 
-
-        :return: True is successful, False if not
         """
-        if not self.has_valid_entries():
-            return False
 
         window = self.window
 
@@ -161,7 +157,6 @@ class SUMOSettings:
         )
 
         self.config.value = self._config
-        return True
 
     def has_valid_entries(self) -> bool:
         """ 
@@ -192,8 +187,11 @@ class SUMOSettings:
         """
         closes settings if settings could be saved to config
         """
-        if self.save_to_config():
+        if self.has_valid_entries():
+            self.save_to_config()
             self.settings_window.close()
+        else:
+            print("invalid settings")
 
     def restore_defaults(self):
         """

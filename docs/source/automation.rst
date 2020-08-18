@@ -24,18 +24,10 @@ will also be converted correctly most times.
 A few positive examples can be seen in the following:
 
 .. image::
- images/satellite_1.png
- :width: 500
-
-.. image::
  images/positive_1.png
  :width: 500
 
 Simple straight roads intersecting.
-
-.. image::
- images/satellite_2.png
- :width: 500
 
 .. image::
  images/positive_2.png
@@ -44,18 +36,10 @@ Simple straight roads intersecting.
 A larger intersection with many lanes.
 
 .. image::
- images/satellite_3.png
- :width: 500
-
-.. image::
  images/positive_3.png
  :width: 500
 
 An example for a small town.
-
-.. image::
- images/satellite_4.png
- :width: 500
 
 .. image::
  images/positive_4.png
@@ -64,18 +48,10 @@ An example for a small town.
 A simple roundabout.
 
 .. image::
- images/motorway_sat.png
- :width: 500
-
-.. image::
  images/motorway.png
  :width: 500
 
 A large motorway intersection.
-
-.. image::
- images/motorway_2_sat.png
- :width: 500
 
 .. image::
  images/motorway_2.png
@@ -95,11 +71,6 @@ faulty OSM data.
 This seems obvious, but it is easy to overlook small flaws that will cause the result to be surprisingly erroneous.
 For example, it occurs frequently, that small segments of roads do not have lane count information.
 This causes the result to have a different count of lanes for these small segments as visible in the following example:
-
-
-.. image::
- images/munich_20_sat.png
- :width: 500
 
 .. image::
  images/munich_20_osm.png
@@ -132,10 +103,6 @@ direction but will most likely produce insufficient results otherwise.
 Example:
 
 .. image::
- images/large_intersection_sat.png
- :width: 500
-
-.. image::
  images/large_intersection.png
  :width: 500
 
@@ -148,10 +115,6 @@ The tool creates the course of lanes by offsetting the central course of roads.
 This offsetting procedure will not work well for wide roads with tight curves.
 
 Example:
-
-.. image::
- images/garching_27_sat.png
- :width: 500
 
 .. image::
  images/garching_27_osm.png
@@ -182,10 +145,6 @@ This results in oddly long turning lanes.
 Example:
 
 .. image::
- images/biberach_69_sat.png
- :width: 500
-
-.. image::
  images/close_roads.png
  :width: 500
 
@@ -202,10 +161,6 @@ We see most problems when there are many large intersections (containing many la
 In such cases many things can go wrong.
 
 Example:
-
-.. image::
- images/sao_paulo_6_sat.png
- :width: 500
 
 .. image::
  images/complex_osm.png

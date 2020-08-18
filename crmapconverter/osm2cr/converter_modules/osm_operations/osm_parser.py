@@ -22,8 +22,12 @@ from crmapconverter.osm2cr.converter_modules.utility.geometry import (
     lon_lat_to_cartesian,
 )
 
+# type def
+RestrictionDict =  Dict[int, Set[Restriction]]
+Bounds = Tuple[float, float, float, float]
 
-def read_custom_bounds(root) -> Optional[Tuple[float, float, float, float]]:
+
+def read_custom_bounds(root) -> Optional[Bounds]:
     bounds = None
     for bound in root.findall("custom_bounds"):
         bounds = (
@@ -38,7 +42,7 @@ def read_custom_bounds(root) -> Optional[Tuple[float, float, float, float]]:
 
 def get_points(
     nodes: Dict[int, ElTree.Element], custom_bounds=None
-) -> Tuple[Dict[int, Point], Tuple[float, float], Tuple[float, float, float, float]]:
+) -> Tuple[Dict[int, Point], Tuple[float, float], Bounds]:
     """
     projects a set of osm nodes on a plane and returns their positions on that plane as Points
 
@@ -116,7 +120,13 @@ def get_nodes(roads: Set[ElTree.Element], root
 def get_traffic_rules(nodes: Dict[int, ElTree.Element], 
                       roads: Dict[int, ElTree.Element],
                       accepted_traffic_sign_by_keys: List[str],
-                      accepted_traffic_sign_by_values: List[str]) -> Dict:
+                      accepted_traffic_sign_by_values: List[str]
+) -> Dict[str, Dict[str, 'different types']]:
+    """ 
+    Extract traffic rules from nodes and roads.
+    
+    :return: a Dict with type and value of the rules
+    """
     traffic_rules = {}
     for node_id in nodes:
         node = nodes[node_id]
@@ -188,9 +198,7 @@ def get_traffic_signs_and_lights(traffic_rules: Dict) -> (List, List):
     return traffic_signs, traffic_lights
 
 
-def parse_restrictions(
-    restrictions: Set[ElTree.Element]
-) -> Dict[int, Set[Restriction]]:
+def parse_restrictions(restrictions: Set[ElTree.Element]) -> RestrictionDict:
     """
     parses a set of restrictions in tree form to restriction objects
 
@@ -227,7 +235,7 @@ def parse_restrictions(
     return result
 
 
-def get_restrictions(root) -> Dict[int, Set[Restriction]]:
+def get_restrictions(root) -> RestrictionDict:
     """
     finds restrictions in osm file and returns it as dict mapping from from_edge to restriction object
 
@@ -298,14 +306,16 @@ def get_ways(accepted_highways: List[str], rejected_tags: Dict[str, str],
     return roads
 
 
-def parse_file(
-    filename: str, accepted_highways: List[str], rejected_tags: Dict[str, str],
-    custom_bounds=None) -> Tuple[
+def parse_file(filename: str, 
+               accepted_highways: List[str],
+               rejected_tags: Dict[str, str], 
+               custom_bounds: Bounds=None
+) -> Tuple[
     Set[ElTree.Element],
     Dict[int, Point],
     type(None),
     Tuple[float, float],
-    Tuple[float, float, float, float],
+    Bounds,
     List,
     List,
     Dict[int, Point]
@@ -317,21 +327,22 @@ def parse_file(
     :type filename: str
     :param accepted_highways: a list of all highways that shall be extracted
     :type accepted_highways: List[str]
-    :return: roads, road_points: set of all way objects, dict of required nodes and list of traffic signs
-    :rtype: Tuple[Set[ElTree.Element], Dict[int, Point]]
+    :return: roads, road_points: set of all way objects, dict of required nodes and list of traffic signs and more
     """
     tree = ElTree.parse(filename)
     root = tree.getroot()
     ways = get_ways(accepted_highways, rejected_tags, root)
     road_nodes, crossing_nodes = get_nodes(ways, root)
-    # custom_bounds = read_custom_bounds(root)
+    # custom bounds were originally used this way. 
+    # Now they are used for sublayer extraction
+    # custom_bounds = read_custom_bounds(root) 
+    # print("bounds", bounds, "custom_bounds", custom_bounds)
     road_points, center_point, bounds = get_points(road_nodes, custom_bounds)
     crossing_points, _, _ = get_points(crossing_nodes, bounds)
     traffic_rules = get_traffic_rules(road_nodes, ways,
         config.TRAFFIC_SIGN_KEYS, config.TRAFFIC_SIGN_VALUES)
     traffic_signs, traffic_lights = get_traffic_signs_and_lights(traffic_rules)
     restrictions = get_restrictions(root)
-    # print("bounds", bounds, "custom_bounds", read_custom_bounds(root))
     if custom_bounds is not None:
         bounds = custom_bounds
 
@@ -366,7 +377,10 @@ def parse_turnlane(turnlane: str) -> str:
     return result
 
 
-def extract_speedlimit(value):
+def extract_speedlimit(value) -> Tuple[float, bool]:
+    """
+    Returns a speedlimit and flag if it is virtual.
+    """
     virtual = False
     speedlimit = None
     try:
@@ -405,8 +419,8 @@ def extract_tag_info(road: ElTree.Element) -> Tuple[Road_info, int]:
 
     :param road: osm road object
     :type road: ElTree.Element
-    :return: (nr_of_lanes, forward_lanes, backward_lanes, oneway, turnlanes, turnlanes_forward, turnlanes_backward),
-        speedlimit
+    :return: (nr_of_lanes, forward_lanes, backward_lanes, oneway, turnlanes,
+        turnlanes_forward, turnlanes_backward), speedlimit
     :rtype: Tuple[Road_info, int]
     """
     nr_of_lanes, forward_lanes, backward_lanes = None, None, None
@@ -456,8 +470,12 @@ def extract_tag_info(road: ElTree.Element) -> Tuple[Road_info, int]:
 
 
 def get_graph_traffic_signs(nodes: Dict[int, rg.GraphNode],
-        roads: Dict[int, rg.GraphEdge], traffic_signs: List[Dict]
+                            roads: Dict[int, rg.GraphEdge], 
+                            traffic_signs: List[Dict]
 ) -> List[rg.GraphTrafficSign]:
+    """
+    Create the extracted traffic signs.
+    """
     graph_traffic_signs = []
     for traffic_sign in traffic_signs:
         node_id = next(iter(traffic_sign))
@@ -480,7 +498,11 @@ def get_graph_traffic_signs(nodes: Dict[int, rg.GraphNode],
 
 
 def get_graph_traffic_lights(nodes: Dict[int, rg.GraphNode],
-        traffic_lights: List[Dict]):
+                             traffic_lights: List[Dict]
+) -> List[rg.TrafficLight]:
+    """
+    Create the extracted traffic lights.
+    """
     graph_traffic_lights = []
     for traffic_light in traffic_lights:
         node_id = next(iter(traffic_light))
@@ -490,9 +512,8 @@ def get_graph_traffic_lights(nodes: Dict[int, rg.GraphNode],
     return graph_traffic_lights
 
 
-def get_graph_nodes(
-        roads: Set[ElTree.Element], points: Dict[int, Point],
-        traffic_signs: List, traffic_lights: List
+def get_graph_nodes(roads: Set[ElTree.Element], points: Dict[int, Point],
+                    traffic_signs: List, traffic_lights: List
 ) -> Dict[int, rg.GraphNode]:
     """
     gets graph nodes from set of osm ways
@@ -551,9 +572,7 @@ def get_graph_nodes(
     return nodes
 
 
-def get_area_from_bounds(
-    bounds: Tuple[float, float, float, float], origin: np.ndarray
-) -> Area:
+def get_area_from_bounds(bounds: Bounds, origin: np.ndarray) -> Area:
     '''
     returns a rectangular area in cartesian coordinates from given 
     bounds and origin in longitude and latitude
@@ -566,12 +585,11 @@ def get_area_from_bounds(
     return Area(min_point[0], max_point[0], min_point[1], max_point[1])
 
 
-def get_graph_edges_from_road(
-    roads: Set[ElTree.Element],
-    nodes: Dict[int, rg.GraphNode],
-    points: Dict[int, Point],
-    bounds: Tuple[float, float, float, float],
-    origin: np.ndarray,
+def get_graph_edges_from_road(roads: Set[ElTree.Element],
+                              nodes: Dict[int, rg.GraphNode],
+                              points: Dict[int, Point],
+                              bounds: Bounds,
+                              origin: np.ndarray,
 ) -> Dict[int, Set[rg.GraphEdge]]:
     """
     gets graph edges from set of roads
@@ -697,18 +715,15 @@ def get_graph_edges_from_road(
     return edges
 
 
-def map_restrictions(
-    edges: Dict[int, Set[rg.GraphEdge]],
-    restrictions: Dict[int, Set[Restriction]],
-    nodes: Dict[int, rg.GraphNode],
-):
+def map_restrictions(edges: Dict[int, Set[rg.GraphEdge]],
+                     restrictions: RestrictionDict,
+                     nodes: Dict[int, rg.GraphNode]):
     """
     assigns restriction string to corresponding edges
 
     :param edges: dict mapping from edge ids to edges
     :param restrictions: dict mapping from from_edge ids to restrictions
     :param nodes: dict mapping from node_id to node
-    :return:
     """
     for from_id, restrictions in restrictions.items():
         if from_id in edges:
@@ -765,17 +780,15 @@ def get_node_set(edges: Set[rg.GraphEdge]) -> Set[rg.GraphNode]:
     return nodes
 
 
-def roads_to_graph(
-    roads: Set[ElTree.Element],
-    road_points: Dict[int, Point],
-    restrictions: Dict[int, Set[Restriction]],
-    center_point: Tuple[float, float],
-    bounds: Tuple[float, float, float, float],
-    origin: tuple,
-    traffic_signs: List,
-    traffic_lights: List,
-    additional_nodes: List[rg.GraphNode]=None
-) -> rg.Graph:
+def roads_to_graph(roads: Set[ElTree.Element],
+                   road_points: Dict[int, Point],
+                   restrictions: RestrictionDict,
+                   center_point: Tuple[float, float],
+                   bounds: Bounds,
+                   origin: tuple,
+                   traffic_signs: List,
+                   traffic_lights: List,
+                   additional_nodes: List[rg.GraphNode]=None) -> rg.Graph:
     """
     converts a set of roads and points to a road graph
 
@@ -818,23 +831,6 @@ def roads_to_graph(
     return graph
 
 
-def close_to_intersection(node_id, combined_graph, road_g) -> bool:
-    """ """
-    intersection_range = config.INTERSECTION_DISTANCE/2.0
-    node = [nd for nd in combined_graph.nodes if nd.id == node_id][0]
-    road_node_ids = [nd.id for nd in road_g.nodes]
-    for edge in node.edges:
-        if node == edge.node1:
-            neighbor = edge.node2
-        else:
-            neighbor = edge.node1
-        if (neighbor.id in road_node_ids and neighbor.get_degree() > 2
-            and neighbor.get_distance(node) < intersection_range
-        ):
-            return True
-    return False
-
-
 def get_crossing_points(
     comb_graph, main_graph, main_cross_points, sub_cross_points
 ) -> Tuple[Set[rg.GraphNode], Set[rg.GraphNode]]:
@@ -848,6 +844,22 @@ def get_crossing_points(
     :return: a set of new nodes and a set of contained nodes
         where both networks cross
     """
+
+    def close_to_intersection(node_id, combined_graph, road_g):
+        intersection_range = config.INTERSECTION_DISTANCE/2.0
+        node = [nd for nd in combined_graph.nodes if nd.id == node_id][0]
+        road_node_ids = [nd.id for nd in road_g.nodes]
+        for edge in node.edges:
+            if node == edge.node1:
+                neighbor = edge.node2
+            else:
+                neighbor = edge.node1
+            if (neighbor.id in road_node_ids and neighbor.get_degree() > 2
+                and neighbor.get_distance(node) < intersection_range
+            ):
+                return True
+        return False
+        
     new_crossing_nodes = set()
     already_contained = set()
     main_node_dict = {node.id: node for node in main_graph.nodes}

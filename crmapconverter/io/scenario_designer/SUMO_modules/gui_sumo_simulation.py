@@ -6,9 +6,9 @@ import json
 
 from commonroad.scenario.scenario import Scenario
 
-from crmapconverter.io.V3_0.GUI_resources.Sumo_simulate import Ui_sumo_simulate
-from crmapconverter.io.V3_0.errors import error, warning
-from crmapconverter.io.V3_0.util import Observable
+from crmapconverter.io.scenario_designer.GUI_resources.Sumo_simulate import Ui_sumo_simulate
+from crmapconverter.io.scenario_designer.errors import error, warning
+from crmapconverter.io.scenario_designer.util import Observable
 
 from crmapconverter.sumo_map.config import SumoConfig
 from crmapconverter.sumo_map.cr2sumo import CR2SumoMapConverter

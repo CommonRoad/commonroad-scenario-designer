@@ -1,3 +1,5 @@
+""" main window of the GUI Scenario Designer """
+
 from argparse import ArgumentParser
 import os
 import sys
@@ -13,22 +15,24 @@ from matplotlib.backends.backend_qt5agg import (NavigationToolbar2QT as
                                                 NavigationToolbar)
 
 from commonroad.common.file_reader import CommonRoadFileReader
-from commonroad.common.file_writer import CommonRoadFileWriter
-from commonroad.common.file_writer import OverwriteExistingFile
+from commonroad.common.file_writer import (CommonRoadFileWriter, 
+                                           OverwriteExistingFile)
 from commonroad.scenario.scenario import Scenario, LaneletNetwork
 
-from crmapconverter.io.V3_0.GUI_resources.MainWindow import Ui_mainWindow
-from crmapconverter.io.V3_0.gui_toolbox import UpperToolbox
-from crmapconverter.io.V3_0.gui_cr_viewer import AnimatedViewer
-from crmapconverter.io.V3_0.converter_modules.osm_interface import OSMInterface
-from crmapconverter.io.V3_0.converter_modules.opendrive_interface import (
+from crmapconverter.io.scenario_designer.GUI_resources.MainWindow import Ui_mainWindow
+from crmapconverter.io.scenario_designer.gui_toolbox import UpperToolbox
+from crmapconverter.io.scenario_designer.converter_modules.osm_interface import OSMInterface
+from crmapconverter.io.scenario_designer.converter_modules.opendrive_interface import (
     OpenDRIVEInterface)
-from crmapconverter.io.V3_0.gui_settings import GUISettings
-from crmapconverter.io.V3_0.SUMO_modules.sumo_settings import SUMOSettings
-from crmapconverter.io.V3_0.SUMO_modules.gui_sumo_simulation import SUMOSimulation
-from crmapconverter.io.viewer import LaneletList, IntersectionList, find_intersection_by_id
-from crmapconverter.io.V3_0 import config
-from crmapconverter.io.V3_0 import util
+from crmapconverter.io.scenario_designer.gui_settings import GUISettings
+from crmapconverter.io.scenario_designer.SUMO_modules.sumo_settings import SUMOSettings
+from crmapconverter.io.scenario_designer.SUMO_modules.gui_sumo_simulation import SUMOSimulation
+from crmapconverter.io.scenario_designer.gui_viewer import (LaneletList, 
+                                                            IntersectionList, 
+                                                            find_intersection_by_id,
+                                                            AnimatedViewer)
+from crmapconverter.io.scenario_designer import config
+from crmapconverter.io.scenario_designer import util
 
 
 class MWindow(QMainWindow, Ui_mainWindow):
@@ -627,9 +631,8 @@ class MWindow(QMainWindow, Ui_mainWindow):
         found_ids = util.find_invalid_ref_of_traffic_signs(scenario)
         if found_ids and verbose:
             error_score = max(error_score, FATAL_ERROR)
-            for lanelet_id in found_ids:
-                self.textBrowser.append(
-                    "invalid traffic sign refs: " + str(found_ids))
+            self.textBrowser.append("invalid traffic sign refs: " 
+                + str(found_ids))
             QMessageBox.critical(
                 self,
                 "CommonRoad XML error",

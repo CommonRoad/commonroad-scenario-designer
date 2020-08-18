@@ -467,7 +467,7 @@ def get_angle(v1: np.ndarray, v2:np.ndarray) -> float:
     """
     Get clockwise angle between vectors
     :param v1: one vector
-     :type v1: np.ndarray
+    :type v1: np.ndarray
     :param v2: another vector
     :type v2: np.ndarray
     :return: clockwise angle between vectors in degrees
