@@ -23,11 +23,11 @@ Please see [the Usage of CR Scenario Designer](https://gitlab.lrz.de/cps/commonr
 
 | Python File or Folder | Functionalities |
 | ------ | ------ |
-| [main_cr_designer.py](https://gitlab.lrz.de/cps/commonroad-map-tool/-/blob/GUI_CR_Scenario_Designer/crmapconverter/io/V3_0/main_cr_designer.py) | The class MWindow is the main GUI window based on PyQt |
-| [gui_cr_viewer.py](https://gitlab.lrz.de/cps/commonroad-map-tool/-/blob/GUI_CR_Scenario_Designer/crmapconverter/io/V3_0/gui_cr_viewer.py) | The class AnimatedViewer manages the functionalities of animation|
-| [gui_toolbox.py](https://gitlab.lrz.de/cps/commonroad-map-tool/-/blob/GUI_CR_Scenario_Designer/crmapconverter/io/V3_0/gui_toolbox.py) | The class UpperToolbox corresponds to Qt Widgets and manages Toolbox|
-| [gui_settings.py](https://gitlab.lrz.de/cps/commonroad-map-tool/-/blob/GUI_CR_Scenario_Designer/crmapconverter/io/V3_0/gui_settings.py) | This class manages the setting panel for GUI|
-| [Converter_modules](https://gitlab.lrz.de/cps/commonroad-map-tool/-/tree/GUI_CR_Scenario_Designer/crmapconverter/io/V3_0/converter_modules) | This folder contains converter modules - OSM and OpenDrive|
-| [SUMO_module](https://gitlab.lrz.de/cps/commonroad-map-tool/-/tree/GUI_CR_Scenario_Designer/crmapconverter/io/V3_0/SUMO_modules) | This folder contains python files for sumo tools and sumo settings|
-| [GUI_resources](https://gitlab.lrz.de/cps/commonroad-map-tool/-/tree/GUI_CR_Scenario_Designer/crmapconverter/io/V3_0/GUI_resources) | This folder contains the Ui files generated from Qt Designer and the converted python files for GUI design|
-| [GUI_src](https://gitlab.lrz.de/cps/commonroad-map-tool/-/tree/GUI_CR_Scenario_Designer/crmapconverter/io/V3_0/GUI_src) | This folder contains the icons and images used in GUI|
+| [main_cr_designer.py](https://gitlab.lrz.de/cps/commonroad-map-tool/-/blob/GUI_CR_Scenario_Designer/crmapconverter/io/scenario_designer/main_cr_designer.py) | The class MWindow is the main GUI window based on PyQt |
+| [gui_viewer.py](https://gitlab.lrz.de/cps/commonroad-map-tool/-/blob/GUI_CR_Scenario_Designer/crmapconverter/io/scenario_designer/gui_viewer.py) | The class AnimatedViewer manages the functionalities of animation|
+| [gui_toolbox.py](https://gitlab.lrz.de/cps/commonroad-map-tool/-/blob/GUI_CR_Scenario_Designer/crmapconverter/io/scenario_designer/gui_toolbox.py) | The class UpperToolbox corresponds to Qt Widgets and manages Toolbox|
+| [gui_settings.py](https://gitlab.lrz.de/cps/commonroad-map-tool/-/blob/GUI_CR_Scenario_Designer/crmapconverter/io/scenario_designer/gui_settings.py) | This class manages the setting panel for GUI|
+| [Converter_modules](https://gitlab.lrz.de/cps/commonroad-map-tool/-/tree/GUI_CR_Scenario_Designer/crmapconverter/io/scenario_designer/converter_modules) | This folder contains converter modules - OSM and OpenDrive|
+| [SUMO_module](https://gitlab.lrz.de/cps/commonroad-map-tool/-/tree/GUI_CR_Scenario_Designer/crmapconverter/io/scenario_designer/SUMO_modules) | This folder contains python files for sumo tools and sumo settings|
+| [GUI_resources](https://gitlab.lrz.de/cps/commonroad-map-tool/-/tree/GUI_CR_Scenario_Designer/crmapconverter/io/scenario_designer/GUI_resources) | This folder contains the Ui files generated from Qt Designer and the converted python files for GUI design|
+| [GUI_src](https://gitlab.lrz.de/cps/commonroad-map-tool/-/tree/GUI_CR_Scenario_Designer/crmapconverter/io/scenario_designer/GUI_src) | This folder contains the icons and images used in GUI|
