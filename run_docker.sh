@@ -1,13 +1,11 @@
 #!/bin/bash
 
+# run docker with the ability to display GUIs
 docker run -it \
-    --user=$(id -u $USER):$(id -g $USER) \
     --env="DISPLAY" \
+    --net=host \
+    --volume="$HOME/.Xauthority:/root/.Xauthority:rw" \
     --workdir="/home/$USER" \
     --volume="/home/$USER:/home/$USER" \
-    --volume="/etc/group:/etc/group:ro" \
-    --volume="/etc/passwd:/etc/passwd:ro" \
-    --volume="/etc/shadow:/etc/shadow:ro" \
-    --volume="/etc/sudoers.d:/etc/sudoers.d:ro" \
-    --volume="/tmp/.X11-unix:/tmp/.X11-unix:rw" \
-    ubuntu:20.04
+    commonroad
+
