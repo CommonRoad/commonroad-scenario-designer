@@ -7,8 +7,8 @@ The main part is 'Network' class in 'network.py'. Functions for conversion are d
 To see if information from opendrive is recorded, please check 'crmapconverter/opendriveparser/elements'. Names of the elements are corresponding to names in Opendrive.
 
 To check the functionality, set working directory to folder 'commonroad-map-tool' and run following code.
-
-'''python
+ 
+```python
 from lxml import etree
 from crmapconverter.opendriveconversion.network import Network
 from crmapconverter.opendriveparser.parser import parse_opendrive
@@ -24,6 +24,6 @@ network.load_opendrive(opendrive)
 network.export_lanelet_network()
 lanelet_network = network.export_lanelet_network()
 scenario = network.export_commonroad_scenario()
-'''
+```
 
 The out put is a CommonRoad sceario object.
