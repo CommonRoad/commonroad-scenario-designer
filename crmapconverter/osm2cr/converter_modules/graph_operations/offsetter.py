@@ -58,10 +58,9 @@ def offset_graph(graph: rg.Graph) -> None:
                     edge.node2 == node
                     and edge.oneway
                     and edge.forward_successor is not None
+                    and edge.forward_successor.node1 == node
                 ):
-                    _, outgoing = lane_linker.get_incomings_outgoings(
-                        edge.forward_successor, node
-                    )
+                    _, outgoing = lane_linker.get_incomings_outgoings(edge.forward_successor, node)
                     incoming, _ = lane_linker.get_incomings_outgoings(edge, node)
                     if edge.forward_successor == other_edges[0]:
                         to_right = True
