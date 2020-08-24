@@ -78,13 +78,13 @@ def child_elements_equal(e1: etree.Element, e2: etree.Element) -> bool:
     ch1_pred = e1.xpath("./*[local-name() = 'predecessor']")
     ch2_pred = e2.xpath("./*[local-name() = 'predecessor']")
     if len(ch1) != len(ch2):
-        _print_fail("length", len(ch1), len(ch2))
+        _print_fail("length", str(len(ch1)),  str(len(ch2)))
         return False
     if len(ch1_succ) != len(ch2_succ):
-        _print_fail("length", len(ch1_succ), len(ch2_succ))
+        _print_fail("length",  str(len(ch1_succ)),  str(len(ch2_succ)))
         return False
     if len(ch1_pred) != len(ch2_pred):
-        _print_fail("length", len(ch1_pred), len(ch2_pred))
+        _print_fail("length",  str(len(ch1_pred)),  str(len(ch2_pred)))
         return False
     for c1, c2 in zip(ch1, ch2):
         if not elements_equal(c1, c2):  # i = 0

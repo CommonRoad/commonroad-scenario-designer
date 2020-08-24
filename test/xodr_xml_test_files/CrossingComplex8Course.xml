@@ -1,13 +1,13 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<commonRoad timeStepSize="0.1" commonRoadVersion="2020a" author="" affiliation="" source="OpenDRIVE 2 Lanelet Converter" benchmarkID="none" date="2020-07-20">
+<commonRoad timeStepSize="0.1" commonRoadVersion="2020a" author="" affiliation="" source="OpenDRIVE 2 Lanelet Converter" benchmarkID="none" date="2020-08-24">
   <location>
     <geoNameId>-999</geoNameId>
     <gpsLatitude>999</gpsLatitude>
     <gpsLongitude>999</gpsLongitude>
   </location>
   <scenarioTags>
-    <highway/>
     <urban/>
+    <highway/>
   </scenarioTags>
   <lanelet id="100">
     <leftBound>
@@ -36613,19 +36613,10 @@
     <predecessor ref="123"/>
     <successor ref="115"/>
     <laneletType>driveWay</laneletType>
-    <trafficSignRef ref="1120"/>
-    <trafficSignRef ref="1121"/>
-    <trafficSignRef ref="1155"/>
-    <trafficSignRef ref="1124"/>
-    <trafficSignRef ref="1125"/>
-    <trafficSignRef ref="1156"/>
-    <trafficSignRef ref="1148"/>
-    <trafficSignRef ref="1141"/>
-    <trafficSignRef ref="1144"/>
-    <trafficSignRef ref="1113"/>
-    <trafficSignRef ref="1147"/>
-    <trafficSignRef ref="1116"/>
-    <trafficSignRef ref="1119"/>
+    <trafficSignRef ref="741254445232"/>
+    <trafficSignRef ref="871564665197"/>
+    <trafficSignRef ref="731204674982"/>
+    <trafficSignRef ref="811484415023"/>
     <trafficLightRef ref="2211"/>
     <trafficLightRef ref="2213"/>
     <trafficLightRef ref="2217"/>
@@ -78218,151 +78209,43 @@
     <adjacentLeft ref="102" drivingDir="opposite"/>
     <laneletType>driveWay</laneletType>
   </lanelet>
-  <trafficSign id="1113">
-    <trafficSignElement>
-      <trafficSignID></trafficSignID>
-    </trafficSignElement>
-    <position>
-      <point>
-        <x>449.99921</x>
-        <y>526.25629</y>
-      </point>
-    </position>
-    <virtual>false</virtual>
-  </trafficSign>
-  <trafficSign id="1116">
-    <trafficSignElement>
-      <trafficSignID></trafficSignID>
-    </trafficSignElement>
-    <position>
-      <point>
-        <x>453.90265</x>
-        <y>495.27524</y>
-      </point>
-    </position>
-    <virtual>false</virtual>
-  </trafficSign>
-  <trafficSign id="1119">
-    <trafficSignElement>
-      <trafficSignID></trafficSignID>
-    </trafficSignElement>
-    <position>
-      <point>
-        <x>457.65261</x>
-        <y>495.29380</y>
-      </point>
-    </position>
-    <virtual>false</virtual>
-  </trafficSign>
-  <trafficSign id="1120">
+  <trafficSign id="731204674982">
     <trafficSignElement>
       <trafficSignID>306</trafficSignID>
     </trafficSignElement>
     <position>
       <point>
         <x>467.03813</x>
-        <y>498.24030</y>
+        <y>498.24031</y>
       </point>
     </position>
     <virtual>false</virtual>
   </trafficSign>
-  <trafficSign id="1121">
-    <trafficSignElement>
-      <trafficSignID></trafficSignID>
-    </trafficSignElement>
-    <position>
-      <point>
-        <x>457.63775</x>
-        <y>498.29377</y>
-      </point>
-    </position>
-    <virtual>false</virtual>
-  </trafficSign>
-  <trafficSign id="1124">
-    <trafficSignElement>
-      <trafficSignID></trafficSignID>
-    </trafficSignElement>
-    <position>
-      <point>
-        <x>453.74917</x>
-        <y>526.27486</y>
-      </point>
-    </position>
-    <virtual>false</virtual>
-  </trafficSign>
-  <trafficSign id="1125">
+  <trafficSign id="741254445232">
     <trafficSignElement>
       <trafficSignID>306</trafficSignID>
     </trafficSignElement>
     <position>
       <point>
         <x>444.36364</x>
-        <y>523.32837</y>
+        <y>523.32835</y>
       </point>
     </position>
     <virtual>false</virtual>
   </trafficSign>
-  <trafficSign id="1141">
-    <trafficSignElement>
-      <trafficSignID></trafficSignID>
-    </trafficSignElement>
-    <position>
-      <point>
-        <x>461.40256</x>
-        <y>495.31237</y>
-      </point>
-    </position>
-    <virtual>false</virtual>
-  </trafficSign>
-  <trafficSign id="1144">
-    <trafficSignElement>
-      <trafficSignID></trafficSignID>
-    </trafficSignElement>
-    <position>
-      <point>
-        <x>457.49912</x>
-        <y>526.29342</y>
-      </point>
-    </position>
-    <virtual>false</virtual>
-  </trafficSign>
-  <trafficSign id="1147">
-    <trafficSignElement>
-      <trafficSignID></trafficSignID>
-    </trafficSignElement>
-    <position>
-      <point>
-        <x>437.08849</x>
-        <y>508.19215</y>
-      </point>
-    </position>
-    <virtual>false</virtual>
-  </trafficSign>
-  <trafficSign id="1148">
+  <trafficSign id="811484415023">
     <trafficSignElement>
       <trafficSignID>205</trafficSignID>
     </trafficSignElement>
     <position>
       <point>
-        <x>441.01666</x>
+        <x>441.01667</x>
         <y>502.51153</y>
       </point>
     </position>
     <virtual>false</virtual>
   </trafficSign>
-  <trafficSign id="1155">
-    <trafficSignElement>
-      <trafficSignID></trafficSignID>
-    </trafficSignElement>
-    <position>
-      <point>
-        <x>473.51896</x>
-        <y>515.23183</y>
-      </point>
-    </position>
-    <virtual>false</virtual>
-  </trafficSign>
-  <trafficSign id="1156">
+  <trafficSign id="871564665197">
     <trafficSignElement>
       <trafficSignID>205</trafficSignID>
     </trafficSignElement>
@@ -78396,7 +78279,7 @@
     <position>
       <point>
         <x>448.23787</x>
-        <y>498.24724</y>
+        <y>498.24723</y>
       </point>
     </position>
     <active>true</active>
@@ -78423,7 +78306,7 @@
     <position>
       <point>
         <x>467.03764</x>
-        <y>498.34030</y>
+        <y>498.34031</y>
       </point>
     </position>
     <active>true</active>
@@ -78477,7 +78360,7 @@
     <position>
       <point>
         <x>444.36414</x>
-        <y>523.22837</y>
+        <y>523.22835</y>
       </point>
     </position>
     <active>true</active>
@@ -78531,7 +78414,7 @@
     <position>
       <point>
         <x>463.16391</x>
-        <y>523.32142</y>
+        <y>523.32143</y>
       </point>
     </position>
     <active>true</active>
@@ -78584,7 +78467,7 @@
     </cycle>
     <position>
       <point>
-        <x>441.06023</x>
+        <x>441.06022</x>
         <y>513.91188</y>
       </point>
     </position>

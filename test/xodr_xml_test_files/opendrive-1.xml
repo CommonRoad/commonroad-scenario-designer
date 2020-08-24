@@ -36978,6 +36978,7 @@
     <predecessor ref="111"/>
     <successor ref="106"/>
     <laneletType>driveWay</laneletType>
+    <trafficSignRef ref="50201353"/>
     <trafficLightRef ref="2012"/>
     <trafficLightRef ref="2020"/>
   </lanelet>
@@ -37317,6 +37318,7 @@
     <predecessor ref="101"/>
     <successor ref="108"/>
     <laneletType>driveWay</laneletType>
+    <trafficSignRef ref="51601353"/>
     <trafficLightRef ref="2010"/>
     <trafficLightRef ref="2022"/>
   </lanelet>
@@ -38202,7 +38204,7 @@
     <predecessor ref="106"/>
     <successor ref="106"/>
     <laneletType>driveWay</laneletType>
-    <trafficSignRef ref="1000"/>
+    <trafficSignRef ref="51405133"/>
   </lanelet>
   <lanelet id="103">
     <leftBound>
@@ -38749,8 +38751,9 @@
     <predecessor ref="108"/>
     <successor ref="108"/>
     <laneletType>driveWay</laneletType>
+    <trafficSignRef ref="50105133"/>
   </lanelet>
-  <trafficSign id="1000">
+  <trafficSign id="51405133">
     <trafficSignElement>
       <trafficSignID>306</trafficSignID>
     </trafficSignElement>
@@ -38758,6 +38761,42 @@
       <point>
         <x>-5.8689923</x>
         <y>-13.788588</y>
+      </point>
+    </position>
+    <virtual>false</virtual>
+  </trafficSign>
+  <trafficSign id="51601353">
+    <trafficSignElement>
+      <trafficSignID>205</trafficSignID>
+    </trafficSignElement>
+    <position>
+      <point>
+        <x>13.788588</x>
+        <y>-5.8689923</y>
+      </point>
+    </position>
+    <virtual>false</virtual>
+  </trafficSign>
+  <trafficSign id="50105133">
+    <trafficSignElement>
+      <trafficSignID>306</trafficSignID>
+    </trafficSignElement>
+    <position>
+      <point>
+        <x>5.8689923</x>
+        <y>13.788588</y>
+      </point>
+    </position>
+    <virtual>false</virtual>
+  </trafficSign>
+  <trafficSign id="50201353">
+    <trafficSignElement>
+      <trafficSignID>205</trafficSignID>
+    </trafficSignElement>
+    <position>
+      <point>
+        <x>-13.788588</x>
+        <y>5.8689923</y>
       </point>
     </position>
     <virtual>false</virtual>

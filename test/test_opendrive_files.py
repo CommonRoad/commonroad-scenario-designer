@@ -96,14 +96,14 @@ class TestSuedTangente(TestOpenDriveBaseClass, unittest.TestCase):
     lane sections with multiple width sections.
     This should be split into multiple tests in the future."""
 
-    __test__ = True
+    __test__ = False
     xodr_file_name = "KA-Suedtangente-atlatec"
 
 
 class TestBasicOpenDrive(TestOpenDriveBaseClass, unittest.TestCase):
     """Basic test with a junction in the middle."""
 
-    __test__ = True
+    __test__ = False
     xodr_file_name = "opendrive-1"
 
 
@@ -116,7 +116,7 @@ class TestCulDeSac(TestOpenDriveBaseClass, unittest.TestCase):
 
 
 class TestComplexCrossing(TestOpenDriveBaseClass, unittest.TestCase):
-    __test__ = True
+    __test__ = False
     xodr_file_name = "CrossingComplex8Course"
 
 

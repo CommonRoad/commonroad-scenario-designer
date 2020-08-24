@@ -196,7 +196,8 @@ class Network:
 
 
 class LinkIndex:
-    """Overall index of all links in the file, save everything as successors, predecessors can be found via a reverse search"""
+    """Overall index of all links in the file, save everything as successors, predecessors can be
+    found via a reverse search"""
 
     def __init__(self):
         self._successors = {}

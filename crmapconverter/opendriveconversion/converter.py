@@ -99,9 +99,8 @@ class OpenDriveConverter:
 
             for lane in lanes:
 
-                inner_neighbour_id, outer_neighbour_id, inner_neighbour_same_dir = OpenDriveConverter.determine_neighbours(
-                    lane
-                )
+                inner_neighbour_id, outer_neighbour_id, inner_neighbour_same_dir = \
+                    OpenDriveConverter.determine_neighbours(lane)
 
                 # Create outer lane border
                 # outer_parametric_lane_border =
@@ -145,7 +144,6 @@ class OpenDriveConverter:
           lane_borders: Array with already created lane borders.
           width: Width section with offset and coefficient information.
           lane: Lane in which new parametric lane is created.
-          prev_inner_neighbours: Inner neighbours of parametric lane.
           side: Which side of the lane section where the Parametric lane is created.
 
         Returns:

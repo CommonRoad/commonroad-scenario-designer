@@ -26544,8 +26544,8 @@
     <successor ref="102"/>
     <adjacentRight ref="123" drivingDir="same"/>
     <laneletType>driveWay</laneletType>
-    <trafficSignRef ref="1041"/>
-    <trafficSignRef ref="1042"/>
+    <trafficSignRef ref="1024120217"/>
+    <trafficSignRef ref="1024220217"/>
   </lanelet>
   <lanelet id="123">
     <leftBound>
@@ -27071,8 +27071,8 @@
     <successor ref="125"/>
     <adjacentRight ref="104" drivingDir="same"/>
     <laneletType>driveWay</laneletType>
-    <trafficSignRef ref="1001"/>
-    <trafficSignRef ref="1002"/>
+    <trafficSignRef ref="100221207"/>
+    <trafficSignRef ref="100121207"/>
   </lanelet>
   <lanelet id="104">
     <leftBound>
@@ -28448,8 +28448,8 @@
     <successor ref="120"/>
     <adjacentLeft ref="111" drivingDir="same"/>
     <laneletType>driveWay</laneletType>
-    <trafficSignRef ref="1064"/>
-    <trafficSignRef ref="1063"/>
+    <trafficSignRef ref="1106328149"/>
+    <trafficSignRef ref="1106428149"/>
   </lanelet>
   <lanelet id="125">
     <leftBound>
@@ -28836,8 +28836,8 @@
     <successor ref="111"/>
     <adjacentRight ref="126" drivingDir="same"/>
     <laneletType>driveWay</laneletType>
-    <trafficSignRef ref="1003"/>
-    <trafficSignRef ref="1004"/>
+    <trafficSignRef ref="100414289"/>
+    <trafficSignRef ref="100314289"/>
   </lanelet>
   <lanelet id="126">
     <leftBound>
@@ -31526,8 +31526,8 @@
     <successor ref="118"/>
     <adjacentRight ref="128" drivingDir="same"/>
     <laneletType>driveWay</laneletType>
-    <trafficSignRef ref="1061"/>
-    <trafficSignRef ref="1062"/>
+    <trafficSignRef ref="1106120217"/>
+    <trafficSignRef ref="1106220217"/>
   </lanelet>
   <lanelet id="128">
     <leftBound>
@@ -32053,8 +32053,8 @@
     <successor ref="129"/>
     <adjacentRight ref="119" drivingDir="same"/>
     <laneletType>driveWay</laneletType>
-    <trafficSignRef ref="1051"/>
-    <trafficSignRef ref="1052"/>
+    <trafficSignRef ref="1075221207"/>
+    <trafficSignRef ref="1075121207"/>
   </lanelet>
   <lanelet id="119">
     <leftBound>
@@ -33536,8 +33536,8 @@
     <successor ref="122"/>
     <adjacentRight ref="130" drivingDir="same"/>
     <laneletType>driveWay</laneletType>
-    <trafficSignRef ref="1053"/>
-    <trafficSignRef ref="1054"/>
+    <trafficSignRef ref="1075414289"/>
+    <trafficSignRef ref="1075314289"/>
   </lanelet>
   <lanelet id="130">
     <leftBound>
@@ -34204,8 +34204,8 @@
     <successor ref="106"/>
     <adjacentLeft ref="122" drivingDir="same"/>
     <laneletType>driveWay</laneletType>
-    <trafficSignRef ref="1043"/>
-    <trafficSignRef ref="1044"/>
+    <trafficSignRef ref="1024328149"/>
+    <trafficSignRef ref="1024428149"/>
   </lanelet>
   <lanelet id="108">
     <leftBound>
@@ -42921,7 +42921,7 @@
     <adjacentLeft ref="105" drivingDir="opposite"/>
     <laneletType>driveWay</laneletType>
   </lanelet>
-  <trafficSign id="1004">
+  <trafficSign id="100414289">
     <trafficSignElement>
       <trafficSignID>205</trafficSignID>
     </trafficSignElement>
@@ -42933,7 +42933,7 @@
     </position>
     <virtual>false</virtual>
   </trafficSign>
-  <trafficSign id="1003">
+  <trafficSign id="100314289">
     <trafficSignElement>
       <trafficSignID></trafficSignID>
     </trafficSignElement>
@@ -42945,7 +42945,7 @@
     </position>
     <virtual>false</virtual>
   </trafficSign>
-  <trafficSign id="1001">
+  <trafficSign id="100121207">
     <trafficSignElement>
       <trafficSignID>205</trafficSignID>
     </trafficSignElement>
@@ -42957,7 +42957,7 @@
     </position>
     <virtual>false</virtual>
   </trafficSign>
-  <trafficSign id="1002">
+  <trafficSign id="100221207">
     <trafficSignElement>
       <trafficSignID></trafficSignID>
     </trafficSignElement>
@@ -42969,7 +42969,7 @@
     </position>
     <virtual>false</virtual>
   </trafficSign>
-  <trafficSign id="1044">
+  <trafficSign id="1024428149">
     <trafficSignElement>
       <trafficSignID>205</trafficSignID>
     </trafficSignElement>
@@ -42981,7 +42981,7 @@
     </position>
     <virtual>false</virtual>
   </trafficSign>
-  <trafficSign id="1043">
+  <trafficSign id="1024328149">
     <trafficSignElement>
       <trafficSignID></trafficSignID>
     </trafficSignElement>
@@ -42993,7 +42993,7 @@
     </position>
     <virtual>false</virtual>
   </trafficSign>
-  <trafficSign id="1041">
+  <trafficSign id="1024120217">
     <trafficSignElement>
       <trafficSignID>205</trafficSignID>
     </trafficSignElement>
@@ -43005,7 +43005,7 @@
     </position>
     <virtual>false</virtual>
   </trafficSign>
-  <trafficSign id="1042">
+  <trafficSign id="1024220217">
     <trafficSignElement>
       <trafficSignID></trafficSignID>
     </trafficSignElement>
@@ -43017,7 +43017,7 @@
     </position>
     <virtual>false</virtual>
   </trafficSign>
-  <trafficSign id="1054">
+  <trafficSign id="1075414289">
     <trafficSignElement>
       <trafficSignID>205</trafficSignID>
     </trafficSignElement>
@@ -43029,7 +43029,7 @@
     </position>
     <virtual>false</virtual>
   </trafficSign>
-  <trafficSign id="1053">
+  <trafficSign id="1075314289">
     <trafficSignElement>
       <trafficSignID></trafficSignID>
     </trafficSignElement>
@@ -43041,7 +43041,7 @@
     </position>
     <virtual>false</virtual>
   </trafficSign>
-  <trafficSign id="1051">
+  <trafficSign id="1075121207">
     <trafficSignElement>
       <trafficSignID>205</trafficSignID>
     </trafficSignElement>
@@ -43053,7 +43053,7 @@
     </position>
     <virtual>false</virtual>
   </trafficSign>
-  <trafficSign id="1052">
+  <trafficSign id="1075221207">
     <trafficSignElement>
       <trafficSignID></trafficSignID>
     </trafficSignElement>
@@ -43065,7 +43065,7 @@
     </position>
     <virtual>false</virtual>
   </trafficSign>
-  <trafficSign id="1064">
+  <trafficSign id="1106428149">
     <trafficSignElement>
       <trafficSignID>205</trafficSignID>
     </trafficSignElement>
@@ -43077,7 +43077,7 @@
     </position>
     <virtual>false</virtual>
   </trafficSign>
-  <trafficSign id="1063">
+  <trafficSign id="1106328149">
     <trafficSignElement>
       <trafficSignID></trafficSignID>
     </trafficSignElement>
@@ -43089,7 +43089,7 @@
     </position>
     <virtual>false</virtual>
   </trafficSign>
-  <trafficSign id="1061">
+  <trafficSign id="1106120217">
     <trafficSignElement>
       <trafficSignID>205</trafficSignID>
     </trafficSignElement>
@@ -43101,7 +43101,7 @@
     </position>
     <virtual>false</virtual>
   </trafficSign>
-  <trafficSign id="1062">
+  <trafficSign id="1106220217">
     <trafficSignElement>
       <trafficSignID></trafficSignID>
     </trafficSignElement>
