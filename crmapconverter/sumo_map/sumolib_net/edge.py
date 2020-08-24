@@ -14,14 +14,13 @@
 # @date    2011-11-28
 # @version $Id$
 
+from xml.etree import cElementTree as ET
 from .connection import Connection
-from .lane import addJunctionPos
+from .lane import addJunctionPos, _to_shape_string
 
 
 class Edge:
-
     """ Edges from a sumo network """
-
     def __init__(self, id, fromN, toN, prio, function, name):
         self._id = id
         self._from = fromN
@@ -137,7 +136,7 @@ class Edge:
             xmax = max(xmax, p[0])
             ymin = min(ymin, p[1])
             ymax = max(ymax, p[1])
-        assert(xmin != xmax or ymin != ymax or self._function == "internal")
+        assert (xmin != xmax or ymin != ymax or self._function == "internal")
         return (xmin, ymin, xmax, ymax)
 
     def getClosestLanePosDist(self, point, perpendicular=False):
@@ -182,11 +181,12 @@ class Edge:
                     x += l.getShape3D()[i][0]
                     y += l.getShape3D()[i][1]
                     z += l.getShape3D()[i][2]
-                self._shape3D.append(
-                    (x / float(numLanes), y / float(numLanes), z / float(numLanes)))
+                self._shape3D.append((x / float(numLanes), y / float(numLanes),
+                                      z / float(numLanes)))
 
         self._shapeWithJunctions3D = addJunctionPos(self._shape3D,
-                                                    self._from.getCoord3D(), self._to.getCoord3D())
+                                                    self._from.getCoord3D(),
+                                                    self._to.getCoord3D())
 
         if self._rawShape3D == []:
             self._rawShape3D = [self._from.getCoord3D(), self._to.getCoord3D()]
@@ -213,10 +213,13 @@ class Edge:
         """true if this edge has no incoming or no outgoing connections (except turnarounds)
            If connections is given, only those connections are considered"""
         if connections is None:
-            return self.is_fringe(self._incoming) or self.is_fringe(self._outgoing)
+            return self.is_fringe(self._incoming) or self.is_fringe(
+                self._outgoing)
         else:
             cons = sum([c for c in connections.values()], [])
-            return len([c for c in cons if c._direction != Connection.LINKDIR_TURN]) == 0
+            return len([
+                c for c in cons if c._direction != Connection.LINKDIR_TURN
+            ]) == 0
 
     def allows(self, vClass):
         """true if this edge has a lane which allows the given vehicle class"""
@@ -227,7 +230,55 @@ class Edge:
 
     def __repr__(self):
         if self.getFunction() == '':
-            return '<edge id="%s" from="%s" to="%s"/>' % (self._id, self._from.getID(), self._to.getID())
+            return '<edge id="%s" from="%s" to="%s"/>' % (
+                self._id, self._from.getID(), self._to.getID())
         else:
-            return '<edge id="%s" function="%s"/>' % (self._id, self.getFunction())
+            return '<edge id="%s" function="%s"/>' % (self._id,
+                                                      self.getFunction())
 
+    # def __init__(self, id, fromN, toN, prio, function, name):
+    #     self._id = id
+    #     self._from = fromN
+    #     self._to = toN
+    #     self._priority = prio
+    #     if fromN:
+    #         fromN.addOutgoing(self)
+    #     if toN:
+    #         toN.addIncoming(self)
+    #     self._lanes = []
+    #     self._speed = None
+    #     self._length = None
+    #     self._incoming = {}
+    #     self._outgoing = {}
+    #     self._shape = None
+    #     self._shapeWithJunctions = None
+    #     self._shape3D = None
+    #     self._shapeWithJunctions3D = None
+    #     self._rawShape = None
+    #     self._rawShape3D = None
+    #     self._function = function
+    #     self._tls = None
+    #     self._name = name
+
+    def toXML(self) -> str:
+        edge = ET.Element("edge")
+        edge.set("from", str(self.getFromNode().getID()))
+        edge.set("to", str(self.getToNode().getID()))
+        edge.set("id", str(self._id))
+        if self._priority:
+            edge.set("priority", str(self._priority))
+        if self._speed:
+            edge.set("speed", str(self._speed))
+        if self._length:
+            edge.set("length", str(self._length))
+        if self._shape:
+            edge.set("shape", _to_shape_string(self._shape))
+        if self._length:
+            edge.set("length", str(self._length))
+        edge.set("numLanes", str(self.getLaneNumber()))
+        edge.set("spreadType", "center")
+        edge.set("function", str(self._function))
+        for lane in self._lanes:
+            edge.append(ET.fromstring(lane.toXML()))
+
+        return ET.tostring(edge)
