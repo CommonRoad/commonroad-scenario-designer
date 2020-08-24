@@ -6,12 +6,12 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>287</width>
-    <height>537</height>
+    <width>453</width>
+    <height>573</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>osm2cr</string>
+   <string>osm_2_cr</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
@@ -56,7 +56,7 @@
           <item row="0" column="1">
            <widget class="QLabel" name="label_3">
             <property name="text">
-             <string>Coordinates:</string>
+             <string>Coordinates (Lat-Long):</string>
             </property>
            </widget>
           </item>
@@ -239,7 +239,7 @@
       </layout>
      </widget>
     </item>
-    <item row="9" column="0">
+    <item row="8" column="0">
      <spacer name="verticalSpacer">
       <property name="orientation">
        <enum>Qt::Vertical</enum>
@@ -279,16 +279,6 @@
      </spacer>
     </item>
     <item row="6" column="0">
-     <widget class="QPushButton" name="b_view_scenario">
-      <property name="toolTip">
-       <string>View plot of a CR scenario</string>
-      </property>
-      <property name="text">
-       <string>View Scenario</string>
-      </property>
-     </widget>
-    </item>
-    <item row="7" column="0">
      <widget class="QPushButton" name="b_download">
       <property name="toolTip">
        <string>Download the selected Region as OSM map</string>
@@ -298,7 +288,7 @@
       </property>
      </widget>
     </item>
-    <item row="8" column="0">
+    <item row="7" column="0">
      <widget class="QPushButton" name="b_settings">
       <property name="toolTip">
        <string/>
@@ -315,8 +305,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>287</width>
-     <height>21</height>
+     <width>453</width>
+     <height>23</height>
     </rect>
    </property>
    <property name="font">
