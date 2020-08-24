@@ -3,10 +3,10 @@
 """Module for logic behind converting OpenDrive to ParametricLanes."""
 
 from typing import Tuple, List
-from crmapconverter.opendriveconversion.plane_elements.plane import ParametricLane, ParametricLaneBorderGroup
-from crmapconverter.opendriveconversion.plane_elements.plane_group import ParametricLaneGroup
-from crmapconverter.opendriveconversion.plane_elements.border import Border
-from crmapconverter.opendriveconversion.utils import encode_road_section_lane_width_id
+from crmapconverter.opendrive.opendriveconversion.plane_elements.plane import ParametricLane, ParametricLaneBorderGroup
+from crmapconverter.opendrive.opendriveconversion.plane_elements.plane_group import ParametricLaneGroup
+from crmapconverter.opendrive.opendriveconversion.plane_elements.border import Border
+from crmapconverter.opendrive.opendriveconversion.utils import encode_road_section_lane_width_id
 
 
 __author__ = "Benjamin Orthen"
@@ -75,7 +75,7 @@ class OpenDriveConverter:
 
         Args:
           lane_section: opendriveparser.elements.road.lanes.lane_sections()
-          reference_border: crmapconverter.opendriveconversion.plane_elements.border.Border()
+          reference_border: crmapconverter.opendrive.opendriveconversion.plane_elements.border.Border()
 
         Returns:
 

@@ -7,7 +7,7 @@ import warnings
 import enum
 from typing import Union
 
-from crmapconverter.opendriveparser.elements.road import Road
+from crmapconverter.opendrive.opendriveparser.elements.road import Road
 
 from commonroad.scenario.traffic_sign import TrafficSign, TrafficLight, TrafficSignElement, TrafficSignIDZamunda, \
     TrafficSignIDGermany, TrafficSignIDUsa, TrafficSignIDChina, TrafficSignIDSpain, TrafficSignIDRussia

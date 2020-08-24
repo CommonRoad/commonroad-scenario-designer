@@ -27,8 +27,8 @@ from crmapconverter.osm.osm2lanelet import OSM2LConverter
 from crmapconverter.osm.parser import OSMParser
 from crmapconverter.osm.lanelet2osm import L2OSMConverter
 
-from crmapconverter.opendriveparser.parser import parse_opendrive
-from crmapconverter.opendriveconversion.network import Network
+from crmapconverter.opendrive.opendriveparser.parser import parse_opendrive
+from crmapconverter.opendrive.opendriveconversion.network import Network
 from crmapconverter.io.viewer import MainWindow as ViewerWidget
 
 try:

@@ -3,7 +3,7 @@
 from typing import Tuple
 import numpy as np
 
-from crmapconverter.opendriveparser.elements.geometry import (
+from crmapconverter.opendrive.opendriveparser.elements.geometry import (
     Geometry,
     Line,
     Spiral,

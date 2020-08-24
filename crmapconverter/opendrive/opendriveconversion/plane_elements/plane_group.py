@@ -8,7 +8,7 @@ import math
 import numpy as np
 import copy
 
-from crmapconverter.opendriveconversion.conversion_lanelet import ConversionLanelet
+from crmapconverter.opendrive.opendriveconversion.conversion_lanelet import ConversionLanelet
 from commonroad.scenario.lanelet import LineMarking
 
 __author__ = "Benjamin Orthen, Stefan Urban, Sebastian Maierhofer"

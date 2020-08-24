@@ -10,7 +10,7 @@ from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistin
 from commonroad.planning.planning_problem import PlanningProblemSet
 from commonroad.scenario.scenario import Tag
 
-from crmapconverter.opendriveparser.parser import parse_opendrive
+from crmapconverter.opendrive.opendriveparser.parser import parse_opendrive
 from crmapconverter.io.opendrive_convert import convert_opendrive
 from test.utils import elements_equal
 

@@ -7,14 +7,14 @@ import numpy as np
 
 from commonroad.scenario.scenario import Scenario, GeoTransformation, Location
 
-from crmapconverter.opendriveparser.elements.opendrive import OpenDrive
+from crmapconverter.opendrive.opendriveparser.elements.opendrive import OpenDrive
 
-from crmapconverter.opendriveconversion.utils import encode_road_section_lane_width_id
-from crmapconverter.opendriveconversion.conversion_lanelet_network import ConversionLaneletNetwork
-from crmapconverter.opendriveconversion.converter import OpenDriveConverter
+from crmapconverter.opendrive.opendriveconversion.utils import encode_road_section_lane_width_id
+from crmapconverter.opendrive.opendriveconversion.conversion_lanelet_network import ConversionLaneletNetwork
+from crmapconverter.opendrive.opendriveconversion.converter import OpenDriveConverter
 
-from crmapconverter.opendriveconversion.plane_elements.traffic_signals import get_traffic_signals
-from crmapconverter.opendriveconversion.plane_elements.geo_reference import get_geo_reference
+from crmapconverter.opendrive.opendriveconversion.plane_elements.traffic_signals import get_traffic_signals
+from crmapconverter.opendrive.opendriveconversion.plane_elements.geo_reference import get_geo_reference
 
 __author__ = "Benjamin Orthen, Stefan Urban, Sebastian Maierhofer"
 __copyright__ = "TUM Cyber-Physical Systems Group"

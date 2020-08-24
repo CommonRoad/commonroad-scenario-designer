@@ -9,7 +9,7 @@ import numpy as np
 
 from commonroad.scenario.lanelet import LaneletNetwork
 
-from crmapconverter.opendriveconversion.conversion_lanelet import ConversionLanelet
+from crmapconverter.opendrive.opendriveconversion.conversion_lanelet import ConversionLanelet
 
 __author__ = "Benjamin Orthen, Sebastian Maierhofer"
 __copyright__ = "TUM Cyber-Physical Systems Group"

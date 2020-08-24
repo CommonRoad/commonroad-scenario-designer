@@ -2,26 +2,26 @@
 
 import numpy as np
 from lxml import etree
-from crmapconverter.opendriveparser.elements.opendrive import OpenDrive, Header
-from crmapconverter.opendriveparser.elements.road import Road
-from crmapconverter.opendriveparser.elements.roadLink import (
+from crmapconverter.opendrive.opendriveparser.elements.opendrive import OpenDrive, Header
+from crmapconverter.opendrive.opendriveparser.elements.road import Road
+from crmapconverter.opendrive.opendriveparser.elements.roadLink import (
     Predecessor as RoadLinkPredecessor,
     Successor as RoadLinkSuccessor,
     Neighbor as RoadLinkNeighbor,
 )
-from crmapconverter.opendriveparser.elements.roadtype import (
+from crmapconverter.opendrive.opendriveparser.elements.roadtype import (
     RoadType,
     Speed as RoadTypeSpeed,
 )
-from crmapconverter.opendriveparser.elements.roadElevationProfile import (
+from crmapconverter.opendrive.opendriveparser.elements.roadElevationProfile import (
     ElevationRecord as RoadElevationProfile,
 )
-from crmapconverter.opendriveparser.elements.roadLateralProfile import (
+from crmapconverter.opendrive.opendriveparser.elements.roadLateralProfile import (
     Superelevation as RoadLateralProfileSuperelevation,
     Crossfall as RoadLateralProfileCrossfall,
     Shape as RoadLateralProfileShape,
 )
-from crmapconverter.opendriveparser.elements.roadLanes import (
+from crmapconverter.opendrive.opendriveparser.elements.roadLanes import (
     LaneOffset as RoadLanesLaneOffset,
     Lane as RoadLaneSectionLane,
     LaneSection as RoadLanesSection,
@@ -29,12 +29,12 @@ from crmapconverter.opendriveparser.elements.roadLanes import (
     LaneBorder as RoadLaneSectionLaneBorder,
     RoadMark as RoadLaneRoadMark
 )
-from crmapconverter.opendriveparser.elements.junction import (
+from crmapconverter.opendrive.opendriveparser.elements.junction import (
     Junction,
     Connection as JunctionConnection,
     LaneLink as JunctionConnectionLaneLink,
 )
-from crmapconverter.opendriveparser.elements.roadSignal import (
+from crmapconverter.opendrive.opendriveparser.elements.roadSignal import (
     Signal as RoadSignal
 )
 
