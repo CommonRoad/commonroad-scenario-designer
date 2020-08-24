@@ -148,6 +148,11 @@ def set_points(predecessor: "Lane", successor: "Lane") -> List[np.ndarray]:
     p3 = p4 + vector2
     n = max(int(np.linalg.norm(p1 - p4) / point_distance), 2)
     a1, a2, intersection_point = geometry.intersection(p1, p4, vector1, vector2)
+    # check if intersection point could be created and the vectors intersect, else use cubic bezier
+    if intersection_point is None:
+        waypoints = geometry.evaluate_bezier(np.array([p1, p2, p3, p4]), n)
+        waypoints.append(p4)
+        return waypoints
     # use quadratic bezier if possible
     # do not use it if intersection point is to close to start or end point
     distance_to_points = min(
