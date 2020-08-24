@@ -48,7 +48,7 @@ class ConversionLanelet(Lanelet):
         line_marking_left_vertices=None,
         line_marking_right_vertices=None,
         stop_line=None,
-        lanelet_type= None,
+        lanelet_type=None,
         user_one_way=None,
         user_bidirectional=None,
         traffic_signs=None,
@@ -89,6 +89,48 @@ class ConversionLanelet(Lanelet):
            True if id_ is equal.
         """
         return self.lanelet_id == lanelet.lanelet_id
+
+    """
+    Only type supported by commonroad_io is recorded here;
+    waiting for future development
+    """
+
+    @property
+    def lanelet_type(self):
+        return self._lanelet_type
+
+    @lanelet_type.setter
+    def lanelet_type(self, value: str):
+        if value == 'urban':
+            self._lanelet_type = {LaneletType.URBAN}
+        elif value == 'country':
+            self._lanelet_type = {LaneletType.COUNTRY}
+        elif value == 'highway':
+            self._lanelet_type = {LaneletType.HIGHWAY}
+        elif value == 'driving':
+            self._lanelet_type = {LaneletType.DRIVE_WAY}
+        elif value == 'mainCarriageWay':
+            self._lanelet_type = {LaneletType.MAIN_CARRIAGE_WAY}
+        elif value == 'entry':
+            self._lanelet_type = {LaneletType.ACCESS_RAMP}
+        elif value == 'exit':
+            self._lanelet_type = {LaneletType.EXIT_RAMP}
+        elif value == 'shoulder':
+            self._lanelet_type = {LaneletType.SHOULDER}
+        elif value == 'bus':
+            self._lanelet_type = {LaneletType.BUS_LANE}
+        elif value == 'stop':
+            self._lanelet_type = {LaneletType.BUS_STOP}
+        elif value == 'biking':
+            self._lanelet_type = {LaneletType.BICYCLE_LANE}
+        elif value == 'sidewalk':
+            self._lanelet_type = {LaneletType.SIDEWALK}
+        elif value == 'crosswalk':
+            self._lanelet_type = {LaneletType.CROSSWALK}
+        elif value == 'interstate':
+            self._lanelet_type = {LaneletType.INTERSTATE}
+        else:
+            self._lanelet_type = {LaneletType.UNKNOWN}
 
     @property
     def lanelet_id(self) -> int:

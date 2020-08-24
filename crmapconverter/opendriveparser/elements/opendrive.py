@@ -13,16 +13,20 @@ class OpenDrive:
     """ """
 
     def __init__(self):
-        self.header = None
+        self._header = None
         self._roads = []
         self._controllers = []
         self._junctions = []
         self._junctionGroups = []
         self._stations = []
 
-    # @property
-    # def header(self):
-    #     return self._header
+    @property
+    def header(self):
+        return self._header
+
+    @header.setter
+    def header(self, value):
+        self._header = value
 
     @property
     def roads(self):

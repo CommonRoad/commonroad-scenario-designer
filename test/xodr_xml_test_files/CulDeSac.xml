@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<commonRoad timeStepSize="0.1" commonRoadVersion="2020a" author="" affiliation="" source="OpenDRIVE 2 Lanelet Converter" benchmarkID="none" date="2020-04-15">
+<commonRoad timeStepSize="0.1" commonRoadVersion="2020a" author="" affiliation="" source="OpenDRIVE 2 Lanelet Converter" benchmarkID="none" date="2020-07-20">
   <location>
     <geoNameId>-999</geoNameId>
     <gpsLatitude>999</gpsLatitude>
@@ -1693,10 +1693,11 @@
         <x>31.962294</x>
         <y>-7.6086554</y>
       </point>
+      <lineMarking>solid</lineMarking>
     </rightBound>
     <successor ref="101"/>
     <adjacentLeft ref="102" drivingDir="opposite"/>
-    <laneletType>unknown</laneletType>
+    <laneletType>driveWay</laneletType>
   </lanelet>
   <lanelet id="102">
     <leftBound>
@@ -2540,6 +2541,7 @@
         <x>-72.841576</x>
         <y>-5.1969824</y>
       </point>
+      <lineMarking>solid</lineMarking>
     </leftBound>
     <rightBound>
       <point>
@@ -3385,7 +3387,7 @@
     </rightBound>
     <predecessor ref="101"/>
     <adjacentLeft ref="100" drivingDir="opposite"/>
-    <laneletType>unknown</laneletType>
+    <laneletType>driveWay</laneletType>
   </lanelet>
   <lanelet id="101">
     <leftBound>
@@ -5063,9 +5065,10 @@
         <x>31.910296</x>
         <y>-1.1088634</y>
       </point>
+      <lineMarking>solid</lineMarking>
     </rightBound>
     <predecessor ref="100"/>
     <successor ref="102"/>
-    <laneletType>unknown</laneletType>
+    <laneletType>driveWay</laneletType>
   </lanelet>
 </commonRoad>

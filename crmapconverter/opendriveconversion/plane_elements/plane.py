@@ -98,6 +98,8 @@ class ParametricLane:
       id_ (str): Unique string identifier.
       type_ (str): Identifies type of ParametricLane.
       length (float): Length of ParametricLane.
+      line_marking (class: RoadMark)
+      side: the "side" in lane section. Used for determining the line marking side.
 
     """
 
@@ -107,12 +109,16 @@ class ParametricLane:
         type_: str,
         border_group: ParametricLaneBorderGroup,
         length: float = None,
+        line_marking = None,
+        side: str = None
     ):
         self.border_group = border_group
         self.id_ = id_
         self.type_ = type_
         self.length = length
         self.reverse = False
+        self.line_marking = line_marking
+        self.side = side
 
     def calc_border(
         self, border: str, s_pos: float, width_offset: float = 0.0

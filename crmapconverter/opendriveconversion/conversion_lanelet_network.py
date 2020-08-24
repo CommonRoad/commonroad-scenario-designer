@@ -55,6 +55,10 @@ class ConversionLaneletNetwork(LaneletNetwork):
     """Add functions to LaneletNetwork which
     further enable it to modify its Lanelets."""
 
+    def __init__(self):
+        super().__init__()
+        self._old_lanelet_ids = {}
+
     def remove_lanelet(self, lanelet_id: str, remove_references: bool = False):
         """Remove a lanelets with the specific lanelet_id
         from the _lanelets dict.
@@ -101,29 +105,27 @@ class ConversionLaneletNetwork(LaneletNetwork):
         These numbers have to be positive integers.
         """
 
-        new_lanelet_ids_assigned = {}
-
         for lanelet in self.lanelets:
             lanelet.description = lanelet.lanelet_id
             self.remove_lanelet(lanelet.lanelet_id)
             lanelet.lanelet_id = convert_to_new_lanelet_id(
-                lanelet.lanelet_id, new_lanelet_ids_assigned
+                lanelet.lanelet_id, self._old_lanelet_ids
             )
             lanelet.predecessor = [
-                convert_to_new_lanelet_id(x, new_lanelet_ids_assigned)
+                convert_to_new_lanelet_id(x, self._old_lanelet_ids)
                 for x in lanelet.predecessor
             ]
             lanelet.successor = [
-                convert_to_new_lanelet_id(x, new_lanelet_ids_assigned)
+                convert_to_new_lanelet_id(x, self._old_lanelet_ids)
                 for x in lanelet.successor
             ]
             if lanelet.adj_left is not None:
                 lanelet.adj_left = convert_to_new_lanelet_id(
-                    lanelet.adj_left, new_lanelet_ids_assigned
+                    lanelet.adj_left, self._old_lanelet_ids
                 )
             if lanelet.adj_right is not None:
                 lanelet.adj_right = convert_to_new_lanelet_id(
-                    lanelet.adj_right, new_lanelet_ids_assigned
+                    lanelet.adj_right, self._old_lanelet_ids
                 )
             self.add_lanelet(lanelet)
 

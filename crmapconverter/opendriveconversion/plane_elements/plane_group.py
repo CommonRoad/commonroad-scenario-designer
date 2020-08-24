@@ -9,6 +9,7 @@ import numpy as np
 import copy
 
 from crmapconverter.opendriveconversion.conversion_lanelet import ConversionLanelet
+from commonroad.scenario.lanelet import LineMarking
 
 __author__ = "Benjamin Orthen, Stefan Urban, Sebastian Maierhofer"
 __copyright__ = "TUM Cyber-Physical Systems Group"
@@ -159,11 +160,61 @@ class ParametricLaneGroup:
                 left_vertices = local_left_vertices
                 right_vertices = local_right_vertices
 
+        for parametric_lane in self.parametric_lanes:
+            mark = None
+            line_marking_left_vertices = None
+            line_marking_right_vertices = None
+            line_marking = parametric_lane.line_marking
+
+            if line_marking is not None:
+
+                if parametric_lane.side == "left":
+
+                    if line_marking.type == "solid":
+                        if line_marking.weight == "standard":
+                            mark = LineMarking.SOLID
+                        elif line_marking.weight == "bold":
+                            mark = LineMarking.BROAD_SOLID
+
+                    elif line_marking.type == "broken":
+                        if line_marking.weight == "standard":
+                            mark = LineMarking.DASHED
+                        elif line_marking.weight == "bold":
+                            mark = LineMarking.BROAD_DASHED
+
+                    else:
+                        mark = None
+
+                    line_marking_left_vertices = mark
+
+                elif parametric_lane.side == "right":
+
+                    if line_marking.type == "solid":
+                        if line_marking.weight == "standard":
+                            mark = LineMarking.SOLID
+                        elif line_marking.weight == "bold":
+                            mark = LineMarking.BROAD_SOLID
+
+                    elif line_marking.type == "broken":
+                        if line_marking.weight == "standard":
+                            mark = LineMarking.DASHED
+                        elif line_marking.weight == "bold":
+                            mark = LineMarking.BROAD_DASHED
+
+                    else:
+                        mark = None
+
+                    line_marking_right_vertices = mark
+            else:
+                pass
+
         center_vertices = np.array(
             [(l + r) / 2 for (l, r) in zip(left_vertices, right_vertices)]
         )
 
-        lanelet = ConversionLanelet(copy.deepcopy(self), left_vertices, center_vertices, right_vertices, self.id_)
+        lanelet = ConversionLanelet(copy.deepcopy(self), left_vertices, center_vertices, right_vertices, self.id_,
+                                    lanelet_type=self.type, line_marking_left_vertices=line_marking_left_vertices,
+                                    line_marking_right_vertices=line_marking_right_vertices)
 
         # Adjacent lanes
         self._set_adjacent_lanes(lanelet)
@@ -197,7 +248,7 @@ class ParametricLaneGroup:
             else:
                 raise Exception(
                     f"Tried to calculate a position outside of the borders of the reference path at s={s_pos}"
-                    f", but path has only length of l={ self._geo_lengths[-1]}"
+                    f", but path has only length of l={self._geo_lengths[-1]}"
                 )
 
         return self.parametric_lanes[plane_idx].calc_border(
