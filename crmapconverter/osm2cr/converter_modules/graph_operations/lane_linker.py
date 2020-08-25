@@ -30,9 +30,9 @@ class CombinedEdge:
     def angle_to(
         self, other_edge: Union[rg.GraphEdge, "CombinedEdge"], node: rg.GraphNode
     ) -> float:
-        if type(other_edge) == rg.GraphEdge:
+        if isinstance(other_edge, rg.GraphEdge):
             return self.edge1.angle_to(other_edge, node)
-        elif type(other_edge) == CombinedEdge:
+        elif isinstance(other_edge, CombinedEdge):
             return self.edge1.angle_to(other_edge.edge1, node)
         else:
             raise ValueError("other edge must be of type GraphEdge or CombinedEdge")
@@ -40,9 +40,9 @@ class CombinedEdge:
     def soft_angle(
         self, edge: Union[rg.GraphEdge, "CombinedEdge"], node: rg.GraphNode
     ) -> bool:
-        if type(edge) == rg.GraphEdge:
+        if isinstance(edge, rg.GraphEdge):
             return self.edge1.soft_angle(edge, node)
-        elif type(edge) == CombinedEdge:
+        elif isinstance(edge, CombinedEdge):
             return self.edge1.soft_angle(edge.edge1, node)
         else:
             raise ValueError("edge must be of type GraphEdge or CombinedEdge")
@@ -99,7 +99,7 @@ def get_incomings_outgoings(
     :return: incoming, outgoing: lists of lanes
     :rtype: Tuple[List[Lane], List[Lane]]
     """
-    if type(edge) == CombinedEdge:
+    if isinstance(edge, CombinedEdge):
         if edge.node1 == node:
             incoming = edge.edge2.lanes
             outgoing = edge.edge1.lanes
@@ -520,7 +520,7 @@ def set_turnlane_borders(
 
     if not turnlane_useful:
         # Fallback if turnlanes of successor are the same, set all to through
-        if edge_through is not None and type(edge_through) == rg.GraphEdge:
+        if edge_through is not None and isinstance(edge_through, rg.GraphEdge):
             if edge_through.node1 == node:
                 next_turnlanes = edge_through.turnlanes_forward
             elif edge_through.node2 == node:
@@ -902,7 +902,7 @@ def link_high_degree(
         for lane in incoming:
             turnlanes.append(lane.turnlane)
 
-        other_edges = edges[index + 1 :] + edges[:index]
+        other_edges = edges[index + 1:] + edges[:index]
         for other_edge_index, other_edge in enumerate(other_edges):
             if edge.soft_angle(other_edge, node):
                 incoming_other, outgoing_other = get_incomings_outgoings(
