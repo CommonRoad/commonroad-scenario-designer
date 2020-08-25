@@ -14,6 +14,8 @@ from commonroad.geometry.shape import Polygon
 from commonroad.scenario.lanelet import LaneletNetwork
 from commonroad_cc.collision_detection.pycrcc_collision_dispatch import create_collision_object
 
+import matplotlib.pyplot as plt
+from commonroad.visualization.draw_dispatch_cr import draw_object
 # try:
 #     import pycrcc
 #     use_pycrcc = True
@@ -238,6 +240,14 @@ def _find_intersecting_edges(
     :return:
     """
     eroded_lanelet_network = _erode_lanelets(lanelet_network)
+
+    # visualize eroded lanelets
+    # plt.figure(figsize=(25, 25))
+    # draw_object(eroded_lanelet_network.lanelets)
+    # plt.axis('equal')
+    # plt.autoscale()
+    # plt.show()
+
     polygons_dict = {}
     edge_shapes_dict = {}
     for edge_id, lanelet_ids in edges_dict.items():
@@ -278,6 +288,36 @@ def _find_intersecting_edges(
                             break
 
     return intersecting_edges
+
+
+def remove_unreferenced_traffic_lights(
+        lanelet_network: LaneletNetwork) -> LaneletNetwork:
+    referenced_traffic_lights = set()
+    for lanelet in lanelet_network.lanelets:
+        referenced_traffic_lights |= lanelet.traffic_lights
+
+    lanelet_network._traffic_lights = {
+        traffic_light.traffic_light_id: traffic_light
+        for traffic_light in lanelet_network.traffic_lights
+        if traffic_light.traffic_light_id in referenced_traffic_lights
+    }
+    return lanelet_network
+
+
+def max_lanelet_network_id(lanelet_network: LaneletNetwork) -> int:
+    max_lanelet = np.max([l.lanelet_id for l in lanelet_network.lanelets
+                          ]) if lanelet_network.lanelets else 0
+    max_intersection = np.max([
+        i.intersection_id for i in lanelet_network.intersections
+    ]) if lanelet_network.intersections else 0
+    max_traffic_light = np.max([
+        t.traffic_light_id for t in lanelet_network.traffic_lights
+    ]) if lanelet_network.traffic_lights else 0
+    max_traffic_sign = np.max([
+        t.traffic_sign_id for t in lanelet_network.traffic_signs
+    ]) if lanelet_network.traffic_signs else 0
+    return np.max(
+        [max_lanelet, max_intersection, max_traffic_light, max_traffic_sign])
 
 
 # class Connection:
@@ -325,7 +365,6 @@ def _find_intersecting_edges(
 
 #         return ET.tostring(conn)
 
-
 # class TlLogic:
 #     def __init__(self,
 #                  id: int,
@@ -341,13 +380,8 @@ def _find_intersecting_edges(
 #     def addPhase(self, duration: int, state: str):
 #         self.phases.append({duration: duration, state: state})
 
-
 #     def to_xml(self):
 #         tlLogic = ET.Element("tlLogic")
 #         tlLogic.set("id", self.id)
 #         tlLogic.set("programID", self.program_id)
 #         tlLogic.set()
-
-
-
-

@@ -4,6 +4,9 @@ Default configuration for CommonRoad to SUMO map converter
 
 from commonroad.common.util import Interval
 from commonroad.scenario.obstacle import ObstacleType
+from commonroad.scenario.traffic_sign import TrafficLightState
+from commonroad.scenario.lanelet import LaneletType
+
 from typing import List
 
 from sumocr.sumo_config.default import DefaultConfig
@@ -21,6 +24,52 @@ TYPE_MAPPING = {
     'bus': ObstacleType.BUS,
     'bicycle': ObstacleType.BICYCLE,
     'pedestrian': ObstacleType.PEDESTRIAN
+}
+
+# Mapping from CR TrafficLightStates to SUMO Traffic Light states
+traffic_light_states_CR2SUMO = {
+    TrafficLightState.RED: 'r',
+    TrafficLightState.YELLOW: 'y',
+    TrafficLightState.RED_YELLOW: 'u',
+    TrafficLightState.GREEN: 'G',
+    TrafficLightState.INACTIVE: 'O',
+}
+# Mapping from  UMO Traffic Light to CR TrafficLightState sstates
+traffic_light_states_SUMO2CR = {
+    'r': TrafficLightState.RED,
+    'y': TrafficLightState.YELLOW,
+    'g': TrafficLightState.GREEN,
+    'G': TrafficLightState.GREEN,
+    's': TrafficLightState.GREEN,
+    'u': TrafficLightState.RED_YELLOW,
+    'o': TrafficLightState.INACTIVE,
+    'O': TrafficLightState.INACTIVE
+}
+
+_road_vehicles = [
+    "passenger", "private", "taxi", "bus", "coach", "delivery", "truck",
+    "trailer", "emergency", "motorcycle", "moped", "bicycle", "evehicle",
+    "army", "authority", "vip", "hov", "custom1", "custom2"
+]
+_bus_vehicles = ["bus", "coach"]
+_pedestrian_vehicles = ["pedestrian", "bicycle"]
+# Mapping Commonroad LaneletType to SUMO vClass
+lanelet_type_CR2SUMO = {
+    LaneletType.URBAN: _road_vehicles,
+    LaneletType.COUNTRY: _road_vehicles,
+    LaneletType.HIGHWAY: _road_vehicles,
+    LaneletType.DRIVE_WAY: _road_vehicles,
+    LaneletType.MAIN_CARRIAGE_WAY: _road_vehicles,
+    LaneletType.ACCESS_RAMP: _road_vehicles,
+    LaneletType.EXIT_RAMP: _road_vehicles,
+    LaneletType.SHOULDER: _road_vehicles,
+    LaneletType.INTERSTATE: _road_vehicles,
+    LaneletType.UNKNOWN: _road_vehicles,
+    LaneletType.BUS_LANE: _bus_vehicles,
+    LaneletType.BUS_STOP: _bus_vehicles,
+    LaneletType.BICYCLE_LANE: ["bicycle", "moped"],
+    LaneletType.SIDEWALK: _pedestrian_vehicles,
+    LaneletType.CROSSWALK: _pedestrian_vehicles
 }
 
 
@@ -106,6 +155,8 @@ class SumoConfig(DefaultConfig):
     n_vehicles_max: int = 30
     # max. number of vehicles per km
     max_veh_per_km: int = 70
+    # random seed for deterministic sumo traffic generation
+    random_seed: int = 1234
 
     # other vehicles size bound (values are sampled from normal distribution within bounds)
     vehicle_length_interval = 0.4
@@ -117,7 +168,7 @@ class SumoConfig(DefaultConfig):
         'truck': 0.8,
         'bus': 0.3,
         'bicycle': 0.2,
-        'pedestrian': 0
+        'pedestrian': 0.0
     }
 
     # default vehicle attributes to determine edge restrictions

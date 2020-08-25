@@ -1,20 +1,17 @@
 """
-This module provides an example of how theavailable methods of the crmapconverter.osm2cr.converter_modules package can be used.
+This module provides an example of how theavailable methods of the crmapconverter.osm2cr.converter_modules package
+can be used.
 """
 import crmapconverter.osm2cr.converter_modules.converter as converter
 import crmapconverter.osm2cr.converter_modules.cr_operations.export as ex
 from crmapconverter.osm2cr import config
-from crmapconverter.osm2cr.converter_modules.osm_operations.downloader import (
-    download_around_map,
-)
+from crmapconverter.osm2cr.converter_modules.osm_operations.downloader import download_around_map
 
 # download a map
 # download_around_map(config.BENCHMARK_ID + '_downloaded.osm', 48.140289, 11.566272)
 
 # open the map and convert it to a scenario
-scenario = converter.Scenario(
-    config.SAVE_PATH + config.BENCHMARK_ID + ".osm"
-)
+scenario = converter.GraphScenario(config.SAVE_PATH + config.BENCHMARK_ID + ".osm")
 
 # draw and show the scenario
 scenario.plot()

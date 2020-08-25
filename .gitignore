@@ -7,7 +7,7 @@ test/.pytest_cache
 venv/
 .vscode/
 src/*
-*.env
+# *.env
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -91,7 +91,7 @@ celerybeat-schedule
 *.sage.py
 
 # Environments
-.env
+# .env
 .venv
 env/
 venv/
@@ -112,3 +112,4 @@ ENV/
 
 # projectile
 .projectile
+*.save

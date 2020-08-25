@@ -20,6 +20,7 @@ class Ui_Dialog(object):
         self.frame.setObjectName("frame")
         self.gridLayout_2 = QtWidgets.QGridLayout(self.frame)
         self.gridLayout_2.setObjectName("gridLayout_2")
+
         self.chk_unclassified = QtWidgets.QCheckBox(self.frame)
         self.chk_unclassified.setObjectName("chk_unclassified")
         self.gridLayout_2.addWidget(self.chk_unclassified, 5, 0, 1, 1)
@@ -62,6 +63,16 @@ class Ui_Dialog(object):
         self.chk_service = QtWidgets.QCheckBox(self.frame)
         self.chk_service.setObjectName("chk_service")
         self.gridLayout_2.addWidget(self.chk_service, 13, 0, 1, 1)
+        self.chk_path = QtWidgets.QCheckBox(self.frame)
+        self.chk_path.setObjectName("chk_path")
+        self.gridLayout_2.addWidget(self.chk_path, 14, 0, 1, 1)
+        self.chk_footway = QtWidgets.QCheckBox(self.frame)
+        self.chk_footway.setObjectName("chk_footway")
+        self.gridLayout_2.addWidget(self.chk_footway, 15, 0, 1, 1)
+        self.chk_cycleway = QtWidgets.QCheckBox(self.frame)
+        self.chk_cycleway.setObjectName("chk_cycleway")
+        self.gridLayout_2.addWidget(self.chk_cycleway, 16, 0, 1, 1)
+
         self.gridLayout.addWidget(self.frame, 0, 0, 1, 1)
         self.buttonBox = QtWidgets.QDialogButtonBox(Dialog)
         self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
@@ -91,4 +102,7 @@ class Ui_Dialog(object):
         self.chk_motorway.setText(_translate("Dialog", "motorway"))
         self.chk_living_street.setText(_translate("Dialog", "living_street"))
         self.chk_service.setText(_translate("Dialog", "service"))
+        self.chk_path.setText(_translate("Dialog", "path"))
+        self.chk_footway.setText(_translate("Dialog", "footway"))
+        self.chk_cycleway.setText(_translate("Dialog", "cycleway"))
 

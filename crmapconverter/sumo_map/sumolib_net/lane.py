@@ -14,21 +14,20 @@
 # @date    2011-11-28
 # @version $Id$
 
-
+from xml.etree import cElementTree as ET
 import sumolib.geomhelper
 
 # taken from sumo/src/utils/common/SUMOVehicleClass.cpp
 SUMO_VEHICLE_CLASSES = (
-    "public_emergency",  # deprecated
-    "public_authority",  # deprecated
-    "public_army",       # deprecated
-    "public_transport",  # deprecated
-    "transport",         # deprecated
-    "lightrail",         # deprecated
-    "cityrail",          # deprecated
-    "rail_slow",         # deprecated
-    "rail_fast",         # deprecated
-
+    # "public_emergency",  # deprecated
+    # "public_authority",  # deprecated
+    # "public_army",       # deprecated
+    # "public_transport",  # deprecated
+    # "transport",         # deprecated
+    # "lightrail",         # deprecated
+    # "cityrail",          # deprecated
+    # "rail_slow",         # deprecated
+    # "rail_fast",         # deprecated
     "private",
     "emergency",
     "authority",
@@ -58,12 +57,11 @@ SUMO_VEHICLE_CLASSES = (
 
 def get_allowed(allow, disallow):
     """ Normalize the given string attributes as a list of all allowed vClasses."""
-    if allow is None and disallow is None:
+    if not allow and not disallow:
         return SUMO_VEHICLE_CLASSES
-    elif disallow is None:
-        return allow.split()
+    elif not disallow:
+        return allow
     else:
-        disallow = disallow.split()
         return tuple([c for c in SUMO_VEHICLE_CLASSES if c not in disallow])
 
 
@@ -79,14 +77,19 @@ def addJunctionPos(shape, fromPos, toPos):
 
 
 class Lane:
-
     """ Lanes from a sumo network """
-
-    def __init__(self, edge, speed, length, width, allow, disallow, shape):
+    def __init__(self,
+                 edge,
+                 speed: float,
+                 length: float,
+                 width: float,
+                 allow=[],
+                 disallow=[],
+                 shape=[]):
         self._edge = edge
         self._speed = speed
         self._length = length
-        self._width = 3.2 if width == 'default' else width         # added by Lisa, 3.2 is sumo default lane width
+        self._width = 3.2 if width == 'default' else width  # added by Lisa, 3.2 is sumo default lane width
         self._shape = shape
         self._shape3D = None
         self._shapeWithJunctions = None
@@ -94,8 +97,8 @@ class Lane:
         self._outgoing = []
         self._adjacent_opposite = None  # added by Lisa
         self._params = {}
-        self._allowed = get_allowed(allow, disallow)
-        self._disallowed = disallow
+        self._allowed = allow
+        self._disallowed = []
         edge.addLane(self)
 
     def getSpeed(self):
@@ -145,9 +148,10 @@ class Lane:
 
         if includeJunctions and not self._edge.isSpecial():
             if self._shapeWithJunctions is None:
-                self._shapeWithJunctions = addJunctionPos(self._shape,
-                                                          self._edge.getFromNode().getCoord(),
-                                                          self._edge.getToNode().getCoord())
+                self._shapeWithJunctions = addJunctionPos(
+                    self._shape,
+                    self._edge.getFromNode().getCoord(),
+                    self._edge.getToNode().getCoord())
             return self._shapeWithJunctions
         return self._shape
 
@@ -170,10 +174,10 @@ class Lane:
 
         if includeJunctions and not self._edge.isSpecial():
             if self._shapeWithJunctions3D is None:
-                self._shapeWithJunctions3D = addJunctionPos(self._shape3D,
-                                                            self._edge.getFromNode(
-                                                            ).getCoord3D(),
-                                                            self._edge.getToNode().getCoord3D())
+                self._shapeWithJunctions3D = addJunctionPos(
+                    self._shape3D,
+                    self._edge.getFromNode().getCoord3D(),
+                    self._edge.getToNode().getCoord3D())
             return self._shapeWithJunctions3D
         return self._shape3D
 
@@ -188,11 +192,12 @@ class Lane:
             xmax = max(xmax, p[0])
             ymin = min(ymin, p[1])
             ymax = max(ymax, p[1])
-        assert(xmin != xmax or ymin != ymax)
+        assert (xmin != xmax or ymin != ymax)
         return (xmin, ymin, xmax, ymax)
 
     def getClosestLanePosAndDist(self, point, perpendicular=False):
-        return sumolib.geomhelper.polygonOffsetAndDistanceToPoint(point, self.getShape(), perpendicular)
+        return sumolib.geomhelper.polygonOffsetAndDistanceToPoint(
+            point, self.getShape(), perpendicular)
 
     def getIndex(self):
         return self._edge._lanes.index(self)
@@ -215,8 +220,36 @@ class Lane:
     def getParam(self, key, default=None):
         return self._params.get(key, default)
 
-    def getAllowed(self): # added by Lea
+    def getAllowed(self):  # added by Lea
         return self._allowed
 
     def getDisallowed(self):  # added by Chu
         return self._disallowed
+
+    def toXML(self) -> str:
+        """
+        Converts this lane to it's xml representation
+        """
+        lane = ET.Element("lane")
+        lane.set("index", str(self.getIndex()))
+        lane.set("speed", str(self._speed))
+        lane.set("length", str(self._length))
+        lane.set("shape", _to_shape_string(self._shape))
+        lane.set("shape", _to_shape_string(self._shape))
+        lane.set("width", str(self._width))
+        if self._allowed:
+            lane.set("allow", " ".join(self._allowed))
+        if self._disallowed:
+            lane.set("disallow", " ".join(self._disallowed))
+        for k, v in self._params:
+            lane.set(str(k), str(v))
+        return ET.tostring(lane)
+
+
+def _to_shape_string(shape):
+    """
+    Convert a collection of points from format shape  to string
+    :param shape: a collection of point defining and edge
+    :return: the same shape but in string format
+    """
+    return " ".join([",".join([str(pi) for pi in p]) for p in shape])

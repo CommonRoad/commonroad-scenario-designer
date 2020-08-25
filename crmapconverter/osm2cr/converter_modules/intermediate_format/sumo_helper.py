@@ -5,7 +5,7 @@ __author__ = "Behtarin Ferdousi"
 
 import os
 import subprocess
-import xml.etree.cElementTree as ET
+import xml.etree.ElementTree as ET
 import xml.dom.minidom as minidom
 
 from typing import Set
@@ -117,7 +117,7 @@ class Sumo:
 
             # check if maxspeed sign
             for element in sign_obj.traffic_sign_elements:
-                if element.traffic_sign_element_id == TrafficSignIDGermany.MAXSPEED.value:
+                if element.traffic_sign_element_id == TrafficSignIDGermany.MAXSPEED.value: # TODO MAX_SPEED
                     return element.additional_values[0]
 
         return default_speedlimit

@@ -33,21 +33,21 @@ def draw_laneborders(lane: rg.Lane, ax: axis):
     return
 
 
-def draw_scenario(g: rg.Graph, ax: axis, links: bool = True):
+def draw_graph(graph: rg.Graph, ax: axis, links: bool = True):
     """
     draws lanelets of a graph in a plot
 
     :param ax: the ax object to draw on
-    :param g: road graph
-    :type g: Graph
+    :param graph: road graph
+    :type graph: Graph
     :return: None
     """
     counter = 0
     lanes = []
-    for edge in g.edges:
+    for edge in graph.edges:
         lanes += edge.lanes
     if links:
-        lanes += list(g.lanelinks)
+        lanes += list(graph.lanelinks)
     for lane in lanes:
         if counter % 100 == 0:
             print("drawing lanelet {} of {}".format(counter, len(lanes)))

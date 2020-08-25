@@ -17,14 +17,13 @@ import numpy as np
 from pyproj import Proj
 from commonroad.scenario.scenario import Scenario
 
-from crmapconverter.opendriveconversion.conversion_lanelet import ConversionLanelet
-from crmapconverter.opendriveconversion.conversion_lanelet_network import ConversionLaneletNetwork
+from crmapconverter.opendrive.opendriveconversion.conversion_lanelet import ConversionLanelet
+from crmapconverter.opendrive.opendriveconversion.conversion_lanelet_network import ConversionLaneletNetwork
 from crmapconverter.osm.osm import OSM, WayRelation, DEFAULT_PROJ_STRING, Node
 
 NODE_DISTANCE_TOLERANCE = 0.01  # this is in meters
 
-adjacent_way_distance_tolerance = 0.05
-
+ADJACENT_WAY_DISTANCE_TOLERANCE = 0.05
 
 class OSM2LConverter:
     "Class to convert OSM to the Commonroad representation of Lanelets."
@@ -600,7 +599,7 @@ def _two_vertices_coincide(
             distances[i + 1] = np.abs(
                 np.cross(diff, vertices1[i] - vert)
             ) / np.linalg.norm(diff)
-        if np.min(distances) > adjacent_way_distance_tolerance:
+        if np.min(distances) > ADJACENT_WAY_DISTANCE_TOLERANCE:
             return False
 
     return True

@@ -136,6 +136,13 @@
           </property>
          </widget>
         </item>
+        <item row="42" column="2">
+         <widget class="QDoubleSpinBox" name="sb_intersection_distance_sublayer">
+          <property name="maximum">
+           <double>1000.000000000000000</double>
+          </property>
+         </widget>
+        </item>
         <item row="0" column="0">
          <widget class="QLabel" name="label_10">
           <property name="font">
@@ -622,6 +629,67 @@ respect to other roads</string>
           </property>
          </widget>
         </item>
+        
+        <item row="42" column="0">
+         <widget class="QLabel" name="label_44">
+          <property name="font">
+           <font>
+            <weight>75</weight>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="text">
+           <string>Crossing Sublayer Settings</string>
+          </property>
+         </widget>
+        </item>
+        
+        <item row="43" column="0">
+         <widget class="QLabel" name="label_45">
+          <property name="text">
+           <string>Extract Sublayer</string>
+          </property>
+         </widget>
+        </item>
+        <item row="43" column="2">
+         <widget class="QCheckBox" name="chk_extract_sublayer">
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
+
+        <item row="44" column="0">
+         <widget class="QLabel" name="label_46">
+          <property name="text">
+           <string>Extracted Way Types</string>
+          </property>
+         </widget>
+        </item>
+        <item row="44" column="2">
+         <widget class="QPushButton" name="btn_edit_sublayer_way_types">
+          <property name="text">
+           <string>Show</string>
+          </property>
+         </widget>
+        </item>
+        
+        <item row="45" column="0">
+         <widget class="QLabel" name="label_47">
+          <property name="text">
+           <string>Intersection Distance Sublayer</string>
+          </property>
+         </widget>
+         <item row="45" column="2">
+         <widget class="QDoubleSpinBox" name="sb_intersection_distance_sublayer">
+          <property name="maximum">
+           <double>1000.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+
+        </item>
+
        </layout>
       </widget>
      </widget>
