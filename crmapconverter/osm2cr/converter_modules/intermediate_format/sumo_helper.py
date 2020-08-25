@@ -117,7 +117,7 @@ class Sumo:
 
             # check if maxspeed sign
             for element in sign_obj.traffic_sign_elements:
-                if element.traffic_sign_element_id == TrafficSignIDGermany.MAXSPEED.value:
+                if element.traffic_sign_element_id == TrafficSignIDGermany.MAXSPEED.value: # TODO MAX_SPEED
                     return element.additional_values[0]
 
         return default_speedlimit
