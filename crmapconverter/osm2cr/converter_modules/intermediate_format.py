@@ -260,7 +260,7 @@ class IntermediateFormat:
                  traffic_signs: List[TrafficSign] = None,
                  traffic_lights: List[TrafficLight] = None,
                  obstacles: List[Obstacle] = None,
-                 intersections: List[Intersection] = None, ):
+                 intersections: List[Intersection] = None):
         """
         Initialize the Intermediate Format
 
@@ -485,8 +485,6 @@ class IntermediateFormat:
         for intersection in self.intersections:
             net.add_intersection(intersection)
 
-        # TODO Add Obstacles
-
         scenario.lanelet_network = net
         return scenario
 
@@ -517,10 +515,6 @@ class IntermediateFormat:
                                   traffic_lights,
                                   intersections=intersections)
 
-    def get_obstacles(self):
-        # TODO Get obstacles from SUMO route file
-        pass
-
     def get_dummy_planning_problem_set(self):
         """
         Creates a dummy planning problem set for the export to XML
@@ -536,22 +530,6 @@ class IntermediateFormat:
                                                        yaw_rate=0, slip_angle=0, time_step=0), goal_region)
 
         return PlanningProblemSet(list([planning_problem]))
-
-    # def generate_sumo_config_file(self):
-    #     """
-    #     Method to Use Sumo to generate config file
-    #     """
-    #     path = config.SUMO_SAVE_FILE
-    #     if not os.path.exists(config.SUMO_SAVE_FILE):
-    #         os.makedirs(config.SUMO_SAVE_FILE)
-
-    #     sumo = Sumo(self, path, 'test')
-    #     sumo.write_net()
-    #     sumo.generate_trip_file(0, 2000)
-    #     sumo.write_config_file(0, 2000)
-
-    #     print("See Sumo Config File Here: " + sumo.config_file)
-    #     return sumo.config_file
 
     def remove_invalid_references(self):
         """
