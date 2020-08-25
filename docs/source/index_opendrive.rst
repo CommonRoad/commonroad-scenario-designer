@@ -24,7 +24,6 @@ Since the release of the paper, various updates have been implemented in the cod
 
    OpenDRIVE Tutorial <tutorial>
    Implementation explained <implementation>
-   API <api/opendrive2lanelet>
 
 Indices and tables
 ==================
