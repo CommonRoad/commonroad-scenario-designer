@@ -5,7 +5,7 @@ __author__ = "Behtarin Ferdousi"
 
 import os
 import subprocess
-import xml.etree.cElementTree as ET
+import xml.etree.ElementTree as ET
 import xml.dom.minidom as minidom
 
 from typing import Set
