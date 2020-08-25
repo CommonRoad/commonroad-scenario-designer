@@ -19,14 +19,14 @@ from commonroad.common.file_writer import (CommonRoadFileWriter,
                                            OverwriteExistingFile)
 from commonroad.scenario.scenario import Scenario, LaneletNetwork
 
-from crmapconverter.io.scenario_designer.GUI_resources.MainWindow import Ui_mainWindow
+from crmapconverter.io.scenario_designer.gui_resources.MainWindow import Ui_mainWindow
 from crmapconverter.io.scenario_designer.gui_toolbox import UpperToolbox
 from crmapconverter.io.scenario_designer.converter_modules.osm_interface import OSMInterface
 from crmapconverter.io.scenario_designer.converter_modules.opendrive_interface import (
     OpenDRIVEInterface)
 from crmapconverter.io.scenario_designer.gui_settings import GUISettings
-from crmapconverter.io.scenario_designer.SUMO_modules.sumo_settings import SUMOSettings
-from crmapconverter.io.scenario_designer.SUMO_modules.gui_sumo_simulation import SUMOSimulation
+from crmapconverter.io.scenario_designer.sumo_gui_modules.sumo_settings import SUMOSettings
+from crmapconverter.io.scenario_designer.sumo_gui_modules.gui_sumo_simulation import SUMOSimulation
 from crmapconverter.io.scenario_designer.gui_viewer import (LaneletList, 
                                                             IntersectionList, 
                                                             find_intersection_by_id,

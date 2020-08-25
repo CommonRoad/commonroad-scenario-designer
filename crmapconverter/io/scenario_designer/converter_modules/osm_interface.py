@@ -12,15 +12,8 @@ from matplotlib.pyplot import close
 
 from crmapconverter.osm2cr.converter_modules.cr_operations import export
 from crmapconverter.osm2cr.converter_modules.graph_operations import road_graph as rg
-from crmapconverter.osm2cr.converter_modules.gui_modules import (
-    gui_embedding,
-    settings,
-    gui
-)
-from crmapconverter.osm2cr.converter_modules.gui_modules.GUI_resources.start_window import (
-    Ui_MainWindow as startWindow
-)
-
+from crmapconverter.io.scenario_designer.osm_gui_modules import gui_embedding, settings, gui
+from crmapconverter.io.scenario_designer.osm_gui_modules.GUI_resources.start_window import Ui_MainWindow as startWindow
 from crmapconverter.io.scenario_designer.converter_modules.converter_interface import ConverterInterface
 
 

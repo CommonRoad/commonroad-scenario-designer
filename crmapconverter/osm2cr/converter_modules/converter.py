@@ -9,14 +9,9 @@ import matplotlib.pyplot as plt
 
 from crmapconverter.osm2cr import config
 from crmapconverter.osm2cr.converter_modules.cr_operations import export
-from crmapconverter.osm2cr.converter_modules.graph_operations import (
-    lane_linker,
-    segment_clusters,
-    offsetter,
-    road_graph,
-    intersection_merger,
-)
-from crmapconverter.osm2cr.converter_modules.gui_modules import gui
+from crmapconverter.osm2cr.converter_modules.graph_operations import lane_linker, segment_clusters, offsetter, \
+    road_graph, intersection_merger
+from crmapconverter.io.scenario_designer.osm_gui_modules import gui
 from crmapconverter.osm2cr.converter_modules.osm_operations import osm_parser
 from crmapconverter.osm2cr.converter_modules.utility import plots
 

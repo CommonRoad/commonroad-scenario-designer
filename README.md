@@ -33,7 +33,7 @@ _If `cartopy` gives an error while installing try to use conda: `conda install -
 
 ### GUI (CR Scenario Designer)
 
-![GUI_Screenshot](./img/GUI_screenshot.png)
+![GUI_Screenshot](./files/img/GUI_screenshot.png)
 
 First you need to activate your python environment with the installed dependencies and load the environment variables.
 Then you can run _CR Scenario Designer_:

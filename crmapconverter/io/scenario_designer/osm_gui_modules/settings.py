@@ -10,22 +10,14 @@ from typing import Dict, Union, List, Optional, Tuple
 from PyQt5.QtWidgets import QDialog, QFileDialog, QMessageBox
 
 from crmapconverter.osm2cr import config
-from crmapconverter.osm2cr.converter_modules.gui_modules import config_default
-from crmapconverter.osm2cr.converter_modules.gui_modules.GUI_resources.lane_counts import (
-    Ui_Dialog as Lane_counts,
-)
-from crmapconverter.osm2cr.converter_modules.gui_modules.GUI_resources.lane_width import (
-    Ui_Dialog as Lane_width,
-)
-from crmapconverter.osm2cr.converter_modules.gui_modules.GUI_resources.settings_ui import (
-    Ui_MainWindow as Settings_window,
-)
-from crmapconverter.osm2cr.converter_modules.gui_modules.GUI_resources.street_types import (
-    Ui_Dialog as Street_types,
-)
-from crmapconverter.osm2cr.converter_modules.gui_modules.GUI_resources.sublayer_types import (
-    Ui_Dialog as Sublayer_street_types,
-)
+from crmapconverter.io.scenario_designer.osm_gui_modules import config_default
+from crmapconverter.io.scenario_designer.osm_gui_modules.GUI_resources.lane_counts import Ui_Dialog as Lane_counts
+from crmapconverter.io.scenario_designer.osm_gui_modules.GUI_resources.lane_width import Ui_Dialog as Lane_width
+from crmapconverter.io.scenario_designer.osm_gui_modules.GUI_resources.settings_ui import Ui_MainWindow \
+    as Settings_window
+from crmapconverter.io.scenario_designer.osm_gui_modules.GUI_resources.street_types import Ui_Dialog as Street_types
+from crmapconverter.io.scenario_designer.osm_gui_modules.GUI_resources.sublayer_types import Ui_Dialog \
+    as Sublayer_street_types
 
 
 class EditStreetTypes:

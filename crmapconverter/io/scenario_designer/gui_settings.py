@@ -1,7 +1,7 @@
 """ window with settings for the Scenario Designer """
 from PyQt5.QtWidgets import QMainWindow
 
-from crmapconverter.io.scenario_designer.GUI_resources.gui_settings_ui import Ui_MainWindow
+from crmapconverter.io.scenario_designer.gui_resources.gui_settings_ui import Ui_MainWindow
 from crmapconverter.io.scenario_designer import config
 
 

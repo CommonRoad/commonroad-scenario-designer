@@ -2,7 +2,7 @@ import sys
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
-from crmapconverter.io.scenario_designer.GUI_src import CR_Scenario_Designer
+from crmapconverter.io.scenario_designer.gui_src import CR_Scenario_Designer
 
 
 class SectionExpandButton(QPushButton):

@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import QMessageBox, QMainWindow
 
 from commonroad.common.util import Interval
 
-from crmapconverter.io.scenario_designer.GUI_resources.sumo_settings_ui import Ui_MainWindow
+from crmapconverter.io.scenario_designer.gui_resources.sumo_settings_ui import Ui_MainWindow
 from crmapconverter.io.scenario_designer.util import Observable
 from crmapconverter.sumo_map.config import SumoConfig
 

@@ -22,12 +22,8 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg
 
 from crmapconverter.osm2cr import config
 import crmapconverter.osm2cr.converter_modules.graph_operations.road_graph as rg
-from crmapconverter.osm2cr.converter_modules.gui_modules import (
-    aerial_data,
-    actions,
-    plots_interactive as iplot,
-)
-from crmapconverter.osm2cr.converter_modules.gui_modules.settings import EditLaneWidth
+from crmapconverter.io.scenario_designer.osm_gui_modules import aerial_data, actions, plots_interactive as iplot
+from crmapconverter.io.scenario_designer.osm_gui_modules.settings import EditLaneWidth
 from crmapconverter.osm2cr.converter_modules.utility import geometry
 from crmapconverter.osm2cr.converter_modules.utility.idgenerator import get_id
 

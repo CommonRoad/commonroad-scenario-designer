@@ -10,7 +10,7 @@ import utm
 
 from crmapconverter.osm2cr import config
 from crmapconverter.osm2cr.converter_modules.graph_operations import road_graph as rg
-from crmapconverter.osm2cr.converter_modules.intermediate_format.intermediate_format import IntermediateFormat, \
+from crmapconverter.osm2cr.converter_modules.intermediate_format import IntermediateFormat, \
     get_lanelet_intersections
 from crmapconverter.osm2cr.converter_modules.utility import geometry
 from crmapconverter.osm2cr.converter_modules.utility.idgenerator import get_id

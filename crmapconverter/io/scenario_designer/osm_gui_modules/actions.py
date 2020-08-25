@@ -14,9 +14,7 @@ from matplotlib.lines import Line2D
 from crmapconverter.osm2cr import config
 from crmapconverter.osm2cr.converter_modules.graph_operations import road_graph as rg
 from crmapconverter.osm2cr.converter_modules.graph_operations.road_graph import Lane
-from crmapconverter.osm2cr.converter_modules.gui_modules import (
-    plots_interactive as iplot,
-)
+from crmapconverter.io.scenario_designer.osm_gui_modules import plots_interactive as iplot
 from crmapconverter.osm2cr.converter_modules.utility import geometry
 from crmapconverter.osm2cr.converter_modules.utility.idgenerator import get_id
 
