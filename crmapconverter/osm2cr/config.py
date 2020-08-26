@@ -68,7 +68,7 @@ ACCEPTED_HIGHWAYS_MAINLAYER = [
     "living_street",
     "service"
 ]
-EXTRACT_SUBLAYER = True
+EXTRACT_SUBLAYER = False
 # types of highways extracted from the OSM file as sublayer
 # elements mustn't be in ACCEPTED_HIGHWAYS
 ACCEPTED_HIGHWAYS_SUBLAYER = [
