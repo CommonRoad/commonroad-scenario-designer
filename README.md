@@ -8,8 +8,8 @@ Commit 4abf24d380b2ddac2c2c71b210764c4ae5759406 is the last stable version for C
 | :------------------------------: | :-----------------------------------------------------------------: |
 |        opendrive2lanelet         |          Conversion from OpenDRIVE files to Lanelet maps.           |
 |           osm-convert            | Conversion from CommonRoad lanelets to OSM lanelets and vice versa. |
-|             `osm2cr`             |    Conversion from general OSM maps to CommonRoad Lanelet maps.     |
-| `io/V3_0` (CR Scenario Designer) |  Multi-functional GUI for map conversion and traffic siimulation.   |
+|             osm2cr             |    Conversion from general OSM maps to CommonRoad Lanelet maps.     |
+| CR Scenario Designer |  Multi-functional GUI for map conversion and traffic simulation.   |
 
 ## Installation
 
@@ -42,7 +42,7 @@ Then you can run _CR Scenario Designer_:
 $ conda activate commonroad
 $ source .env
 # Run CR Scenario designer
-$ python crmapconverter/io/V3_0/main_cr_designer.py
+$ python crmapconverter/io/scenario_designer/main_cr_designer.py
 ```
 
 ### Command Line
