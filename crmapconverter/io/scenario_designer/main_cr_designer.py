@@ -241,7 +241,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
     def timestep_change(self, value):
         if self.crviewer.current_scenario:
             self.crviewer.set_timestep(value)
-            self.label1.setText('  Frame: 0' + str(value))
+            self.label1.setText('  Frame: ' + str(value))
             self.crviewer.animation.event_source.start()
 
     def play_animation(self):
