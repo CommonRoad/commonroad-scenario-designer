@@ -1,7 +1,7 @@
 System Design
 =============
 
-Fromat differences
+Format differences
 ------------------
 
 OpenStreetMap (OSM) files and CommonRoad (CR) scenarios are formats that can both represent road networks with additional elements. While they both use XML to be stored on disk the internal structure has many differences. 

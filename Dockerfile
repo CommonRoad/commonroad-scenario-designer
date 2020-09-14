@@ -1,9 +1,7 @@
 FROM ubuntu:20.04
 
-
 # Install miniconda3
-## Copied from https://hub.docker.com/r/continuumio/miniconda3/dockerfile
-ENV DEBIAN_FRONTEND=noninteractive
+## Copied from https://hub.docker.cocomm/r/continuumio/miniconda3/dockerfile
 ENV LANG=C.UTF-8 LC_ALL=C.UTF-8
 ENV PATH /opt/conda/bin:$PATH
 
@@ -27,19 +25,22 @@ RUN chmod +x /usr/bin/tini
 ENTRYPOINT [ "/usr/bin/tini", "--" ]
 CMD [ "/bin/bash" ]
 
+# Run all commands as cruser
 RUN apt-get update && apt-get install -y sudo
-RUN adduser --quiet --disabled-password cruser \
+RUN useradd --create-home --shell /bin/bash cruser \
 	&& usermod -aG sudo cruser \
 	&& echo "cruser ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 USER cruser
-
 ENV HOME="/home/cruser"
 ARG PROFILE="$HOME/.profile"
 ARG BASHRC="$HOME/.bashrc"
 ENV PYENV_ROOT="$HOME/pyenv"
+WORKDIR $HOME
 # ENV PATH="$PYENV_ROOT/shims:$PYENV_ROOT/bin:${PATH}"
 
-
+## the following two lines are required to make tzdata configuration non-interactive
+ARG DEBIAN_FRONTEND=noninteractive
+ENV TZ=Europe/Berlin
 RUN sudo apt-get update \
 	&& sudo apt-get -y upgrade \
 	&& sudo apt-get -y install git gcc g++ cmake make
@@ -51,9 +52,9 @@ RUN echo "source activate commonroad" > ~/.bashrc
 ENV PATH /opt/conda/envs/commonroad/bin:$PATH
 SHELL ["/bin/bash", "-c"]
 
-WORKDIR $HOME
 
 # install SUMO
+## add environment variables / update $PATH
 ENV SUMO_HOME=$HOME/sumo
 ENV PATH=$PATH:$SUMO_HOME/bin
 RUN sudo apt-get install -y ffmpeg \
@@ -89,7 +90,7 @@ RUN git clone https://gitlab.lrz.de/tum-cps/commonroad-collision-checker.git \
 	&& cd commonroad-collision-checker/ \
 	&& mkdir build \
 	&& cd build \
-	&& cmake -DADD_PYTHON_BINDINGS=TRUE -DPATH_TO_PYTHON_ENVIRONMENT="/opt/conda/envs/commonroad" -DPYTHON_VERSION="3.7" -DCMAKE_BUILD_TYPE=Release .. \
+	&& cmake -DADD_PYTHON_BINDINGS=TRUE -DPATH_TO_PYTHON_ENVIRONMENT="$HOME/miniconda3/envs/commonroad" -DPYTHON_VERSION="3.7" -DCMAKE_BUILD_TYPE=Release .. \
 	&& make -j8 \
 	&& cd .. \
 	&& source activate commonroad \

@@ -1,5 +1,4 @@
 #!/bin/bash
-
 # run docker with the ability to display GUIs
 docker run -it \
     --env="DISPLAY" \
