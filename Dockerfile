@@ -25,6 +25,9 @@ RUN chmod +x /usr/bin/tini
 ENTRYPOINT [ "/usr/bin/tini", "--" ]
 CMD [ "/bin/bash" ]
 
+## the following two lines are required to make tzdata configuration non-interactive
+ENV TZ=Europe/Berlin
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 # Run all commands as cruser
 RUN apt-get update && apt-get install -y sudo
 RUN useradd --create-home --shell /bin/bash cruser \
@@ -38,9 +41,6 @@ ENV PYENV_ROOT="$HOME/pyenv"
 WORKDIR $HOME
 # ENV PATH="$PYENV_ROOT/shims:$PYENV_ROOT/bin:${PATH}"
 
-## the following two lines are required to make tzdata configuration non-interactive
-ARG DEBIAN_FRONTEND=noninteractive
-ENV TZ=Europe/Berlin
 RUN sudo apt-get update \
 	&& sudo apt-get -y upgrade \
 	&& sudo apt-get -y install git gcc g++ cmake make
@@ -74,7 +74,7 @@ RUN git clone https://github.com/danfis/libccd.git \
 	&& mkdir build && cd build \
 	&& cmake -G "Unix Makefiles" -DENABLE_DOUBLE_PRECISION=ON -DBUILD_SHARED_LIBS=ON .. \
 	&& make -j8 \
-	&& make install
+	&& sudo make install
 
 # install fcl
 RUN git clone https://github.com/flexible-collision-library/fcl.git \
@@ -83,14 +83,14 @@ RUN git clone https://github.com/flexible-collision-library/fcl.git \
 	&& mkdir build && cd build \
 	&& cmake .. \
 	&& make -j8 \
-	&& make install
+	&& sudo make install
 
 # install commonroad -collision checker
 RUN git clone https://gitlab.lrz.de/tum-cps/commonroad-collision-checker.git \
 	&& cd commonroad-collision-checker/ \
 	&& mkdir build \
 	&& cd build \
-	&& cmake -DADD_PYTHON_BINDINGS=TRUE -DPATH_TO_PYTHON_ENVIRONMENT="$HOME/miniconda3/envs/commonroad" -DPYTHON_VERSION="3.7" -DCMAKE_BUILD_TYPE=Release .. \
+	&& cmake -DADD_PYTHON_BINDINGS=TRUE -DPATH_TO_PYTHON_ENVIRONMENT="$HOME/.conda/envs/commonroad" -DPYTHON_VERSION="3.7" -DCMAKE_BUILD_TYPE=Release .. \
 	&& make -j8 \
 	&& cd .. \
 	&& source activate commonroad \
