@@ -10,6 +10,7 @@
   ^ for subsubsections
   " for paragraphs
 
+.. _installation:
 
 Installation
 ############
