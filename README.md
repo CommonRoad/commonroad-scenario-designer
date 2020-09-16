@@ -13,44 +13,16 @@ Commit 4abf24d380b2ddac2c2c71b210764c4ae5759406 is the last stable version for C
 
 ## Installation
 
-### Recommended Installation
-We recommend to install the provided docker image and execute the tool from within there. 
-
-The following command will download the commonroad-map-tool Docker image (if not already existing)
-and run it. 
-
-```bash
-$ ./run_docker.sh
-```
-Using this script the user's home directory is mounted and GUI windows can be displayed from within the container.
-
-### Manual Installation
-When manually installing this tool, you need to install it's dependencies via you package manager. 
-Currently we provide validated installation steps **only for Ubuntu >= 18.04**.
-Firstly you need to install the dependencies for SUMO from [here](https://gitlab.lrz.de/cps/commonroad-map-tool/-/blob/GUI_CR_Scenario_Designer/crmapconverter/sumo_map/README.md).
-
-Then activate your python environment (py 3.6 or 3.7):
-
-```bash
-conda activate commonroad
-```
-
-And install the dependencies:
-
-```bash
-pip install -r requirements.txt
-```
-
-_If `cartopy` gives an error while installing try to use conda: `conda install -c conda-forge cartopy`_
+Installation instructions are given in the documentation in the section "Installation"
 
 ## Usage
 
-### GUI (CR Scenario Designer)
+### GUI (CommonRoad Scenario Designer / CRSD)
 
 ![GUI_Screenshot](./files/img/GUI_screenshot.png)
 
 First you need to activate your python environment with the installed dependencies and load the environment variables.
-Then you can run _CR Scenario Designer_:
+Then you can start _CommonRoad Scenario Designer_:
 
 ```bash
 $ conda activate commonroad
@@ -113,7 +85,7 @@ Afterward run:
 cd docs && make html
 ```
 
-The documentation can be accessed by opening _/docs/\_build/html/index.html_.
+The documentation can be accessed by opening `docs/_build/html/index.html`.
 
 ## Bug and feature reporting
 
