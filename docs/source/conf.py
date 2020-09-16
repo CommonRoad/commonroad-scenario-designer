@@ -21,9 +21,9 @@ sys.path.insert(0, os.path.abspath("../.."))
 
 # -- Project information -----------------------------------------------------
 
-project = "opendrive2lanelet"
-copyright = "2018, Technische Universität München"
-author = "Benjamin Orthen, Stefan Urban"
+project = "commonroad-map-tool"
+copyright = "2020, Technische Universität München"
+author = "Maximilian Frühauf, Benjamin Orthen, Stefan Urban"
 
 # The short X.Y version
 version = "1.0"
