@@ -17,6 +17,7 @@ before_script:
   - grep -v "git" requirements.txt | pip install -r /dev/stdin
   - export PATH="$PATH:$HOME/.local/bin"
   - pip install -r test_requirements.txt
+  - pip install tox-current-env
 
 # python36:
 #   stage: test
@@ -24,7 +25,7 @@ before_script:
 
 python37:
   stage: test
-  script: tox -e py37 -- --junitxml=junit-{envname}.xml
+  script: tox --current-env -e py37 -- --junitxml=junit-{envname}.xml
   artifacts:
     reports:
       junit: junit-*.xml
