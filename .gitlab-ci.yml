@@ -1,13 +1,14 @@
-image: python
+image: rasaford/commonroad-map-tool:latest
 
 stages:
-- test
-- build
+  - test
+  - build
 
 before_script:
-- curl -O https://bootstrap.pypa.io/get-pip.py
-- python get-pip.py
-- pip install tox coverage
+  - curl -O https://bootstrap.pypa.io/get-pip.py
+  - python get-pip.py
+  - pip install tox coverage
+  - pip install -r requirements.txt
 
 python36:
   image: python:3.6

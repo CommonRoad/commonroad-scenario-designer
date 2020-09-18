@@ -111,9 +111,11 @@ RUN source activate commonroad \
 # install commonroad-map-tool dependencies
 ADD ./requirements.txt $HOME/requirements.txt
 ADD ./test_requirements.txt $HOME/test_requirements.txt
+# RUN sudo chown cruser.cruser $HOME/requirements.txt  && \
+# 	sudo chown cruser.cruser $HOME/test_requirements.txt
 
-# ENTRYPOINT ["conda", "activate", "commonroad"]
-CMD /bin/bash -c "source activate commonroad \
-	&& pip install -r /root/requirements.txt \
-	&& pip install -r /root/test_requirements.txt \
-	&& bash"
+# ENTRYPOINT /bin/bash -c "source activate commonroad"
+# CMD /bin/bash -c "source activate commonroad \
+# 	&& pip install -r $HOME/requirements.txt \
+# 	&& pip install -r $HOME/test_requirements.txt \
+# 	&& bash"

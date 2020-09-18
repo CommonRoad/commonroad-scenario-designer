@@ -3,7 +3,7 @@
 docker run -it \
     --env="DISPLAY" \
     --net=host \
-    --volume="$HOME/.Xauthority:/root/.Xauthority:rw" \
+    --volume="$HOME/.Xauthority:/home/cruser/.Xauthority:rw" \
     --workdir="/home/$USER" \
     --volume="/home/$USER:/home/$USER" \
     commonroad
