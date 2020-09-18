@@ -13,7 +13,8 @@ before_script:
   - pip install -e commonroad-io
   - git clone --branch develop git@gitlab.lrz.de:cps/sumo-interface.git
   - pip install -e sumo-interface
-  - pip install -r requirements.txt
+  # install all requirements but ignore the git versions as we have already installed them previously
+  - grep -v "git" requirements.txt | pip install -r /dev/stdin
 
 python36:
   image: python:3.6
