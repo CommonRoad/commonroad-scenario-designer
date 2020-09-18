@@ -14,6 +14,7 @@ before_script:
   - pip install -e sumo-interface
   # install all requirements but ignore the git versions as we have already installed them previously
   - grep -v "git" requirements.txt | pip install -r /dev/stdin
+  - export PATH="$PATH:$HOME/.local/bin"
   - pip install -r test_requirements.txt
 
 python36:
