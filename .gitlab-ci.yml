@@ -1,4 +1,4 @@
-image: rasaford/commonroad-map-tool
+image: rasaford/commonroad-map-tool:v0.1
 
 stages:
   - test
