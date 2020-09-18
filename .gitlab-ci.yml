@@ -6,10 +6,9 @@ stages:
 
 before_script:
   - source activate commonroad
-  - curl -O https://bootstrap.pypa.io/get-pip.py
-  - python get-pip.py
   # This is required for the GitLab runner to have permissions to all the repos the user stating the job has. 
   - git config --global url."https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.lrz.de/".insteadOf "git@gitlab.lrz.de:"
+  # Install commonroad-io & sumo-interface manually as installing though does not respect the JOB_TOKEN
   - git clone --branch develop git@gitlab.lrz.de:cps/commonroad-io.git $HOME/commonroad-io
   - pip install -e $HOME/commonroad-io
   - git clone --branch develop git@gitlab.lrz.de:cps/sumo-interface.git $HOME/sumo-interface
@@ -18,6 +17,7 @@ before_script:
   - grep -v "git" requirements.txt | pip install -r /dev/stdin
   - export PATH="$PATH:$HOME/.local/bin"
   - pip install -r test_requirements.txt
+  # use the current conda environment in tox, as we have manually installed all required dependencies there
   - pip install tox-current-env
 
 # python36:
