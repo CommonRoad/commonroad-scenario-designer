@@ -5,6 +5,7 @@ stages:
   - build
 
 before_script:
+  - source activate commonroad
   - curl -O https://bootstrap.pypa.io/get-pip.py
   - python get-pip.py
   - git config --global url."https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.lrz.de/".insteadOf "git@gitlab.lrz.de:"
