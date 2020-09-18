@@ -9,7 +9,10 @@ before_script:
   - python get-pip.py
   - pip install tox coverage
   - git config --global url."https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.lrz.de/".insteadOf "git@gitlab.lrz.de:"
- # - git clone git@gitlab.lrz.de:cps/commonroad-io.git
+  - git clone --branch develop git@gitlab.lrz.de:cps/commonroad-io.git
+  - pip install -e commonroad-io
+  - git clone --branch develop git@gitlab.lrz.de:cps/sumo-interface.git
+  - pip install -e sumo-interface
   - pip install -r requirements.txt
 
 python36:
