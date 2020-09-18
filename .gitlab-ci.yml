@@ -1,4 +1,4 @@
-image: rasaford/commonroad-map-tool:latest
+image: rasaford/commonroad-map-tool
 
 stages:
   - test
@@ -17,12 +17,10 @@ before_script:
   - grep -v "git" requirements.txt | pip install -r /dev/stdin
 
 python36:
-  image: python:3.6
   stage: test
   script: tox -e py36
 
 python37:
-  image: python:3.7
   stage: test
   script: tox -e py37 -- --junitxml=junit-{envname}.xml
   artifacts:
@@ -30,7 +28,6 @@ python37:
       junit: junit-*.xml
 
 docs:
-  image: python:3.7
   stage: test
   script: tox -e docs
 
