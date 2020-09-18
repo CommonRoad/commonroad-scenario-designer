@@ -17,9 +17,9 @@ before_script:
   - export PATH="$PATH:$HOME/.local/bin"
   - pip install -r test_requirements.txt
 
-python36:
-  stage: test
-  script: tox -e py36
+# python36:
+#   stage: test
+#   script: tox -e py36
 
 python37:
   stage: test
