@@ -14,7 +14,7 @@ from crmapconverter.sumo_map.config import SumoConfig
 from sumocr.interface.sumo_simulation import SumoSimulation
 
 
-class TestCR2SUMOScenarioBaseClass:
+class TestCR2SUMOScenarioBaseClass(unittest.TestCase):
     """Test the conversion from an CommonRoad map to a SUMO .net.xml file
     """
     __test__ = False
@@ -62,7 +62,9 @@ class TestCR2SUMOScenarioBaseClass:
         wrapper = CR2SumoMapConverter(self.scenario.lanelet_network,
                                       self.config)
         # was the conversion successful?
-        assert wrapper.convert_to_net_file(os.path.dirname(self.path))
+        conversion_successfull = wrapper.convert_to_net_file(os.path.dirname(
+            self.path))
+        self.assertTrue(conversion_successfull)
 
         simulation = SumoSimulation()
         simulation.initialize(self.config, wrapper)
@@ -72,7 +74,9 @@ class TestCR2SUMOScenarioBaseClass:
         simulation.stop()
 
         simulated_scenario = simulation.commonroad_scenarios_all_time_steps()
-        assert simulated_scenario
+        self.assertIsNotNone(simulated_scenario)
+        
+        # write simulated scenario to disk 
         CommonRoadFileWriter(
             simulated_scenario,
             None,
@@ -84,36 +88,34 @@ class TestCR2SUMOScenarioBaseClass:
                 os.path.join(os.path.dirname(self.path),
                              self.scenario_name + ".simulated.xml"),
                 overwrite_existing_file=True)
+        # check validity of written file
 
 
-class TestConversionComplexIntersection(TestCR2SUMOScenarioBaseClass,
-                                        unittest.TestCase):
+class TestConversionComplexIntersection(TestCR2SUMOScenarioBaseClass):
     """Test conversion of a CR scenario to SUMO for a complex intersection"""
     __test__ = True
     cr_file_name = 'USA_Peach-3_3_T-1'
 
 
-class TestConversionGarching(TestCR2SUMOScenarioBaseClass, unittest.TestCase):
+class TestConversionGarching(TestCR2SUMOScenarioBaseClass):
     """Test conversion of a CR scenario to SUMO for an intersection in garching with pedestrian path ways"""
     __test__ = True
     cr_file_name = "garching"
 
 
-class TestConversionIntersectAndCrossing(TestCR2SUMOScenarioBaseClass,
-                                         unittest.TestCase):
+class TestConversionIntersectAndCrossing(TestCR2SUMOScenarioBaseClass):
     """Test conversion of a CR scenario to SUMO for a simple intersection crossing a pedestrian path way"""
     __test__ = True
     cr_file_name = "intersect_and_crossing"
 
 
-class TestConversionMergingLanelets(TestCR2SUMOScenarioBaseClass,
-                                    unittest.TestCase):
+class TestConversionMergingLanelets(TestCR2SUMOScenarioBaseClass):
     """Test conversion of a CR scenario to SUMO for merging lanelets"""
     __test__ = True
     cr_file_name = "merging_lanelets_utm"
 
 
-class TestConversionUrban1(TestCR2SUMOScenarioBaseClass, unittest.TestCase):
+class TestConversionUrban1(TestCR2SUMOScenarioBaseClass):
     """Test conversion of a CR scenario to SUMO for a simple crossing"""
     __test__ = True
     cr_file_name = "urban-1_lanelets_utm"
