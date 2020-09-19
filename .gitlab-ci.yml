@@ -1,4 +1,4 @@
-image: rasaford/commonroad-map-tool:v0.1
+image: rasaford/commonroad-map-tool:v0.1.2
 
 stages:
   - test
@@ -6,6 +6,7 @@ stages:
 
 before_script:
   - pip install -r test_requirements.txt
+  - source .env
 
 # python36:
 #   stage: test
