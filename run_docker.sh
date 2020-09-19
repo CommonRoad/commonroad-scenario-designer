@@ -4,7 +4,5 @@ docker run -it \
     --env="DISPLAY" \
     --net=host \
     --volume="$HOME/.Xauthority:/home/cruser/.Xauthority:rw" \
-    --workdir="/home/$USER" \
-    --volume="/home/$USER:/home/$USER" \
+    --volume="$PWD:/home/cruser/commonroad-map-tool" \
     commonroad
-

@@ -1,15 +1,15 @@
-# -*- coding: utf-8 -*-
-"""Test the conversion from an osm file to a CommonRoad Scenario file."""
+# # -*- coding: utf-8 -*-
+# """Test the conversion from an osm file to a CommonRoad Scenario file."""
 
-__author__ = "Max Frühauf"
-__copyright__ = "TUM Cyber-Physical Systems Group"
+# __author__ = "Max Frühauf"
+# __copyright__ = "TUM Cyber-Physical Systems Group"
 
-import os
-import unittest
-from lxml import etree
+# import os
+# import unittest
+# from lxml import etree
 
 # import crmapconverter.osm2cr.converter_modules.converter as converter
-from test.utils import elements_equal
+# from test.utils import elements_equal
 
 
 # class TestOSM2CRScenarioBaseClass(unittest.TestCase):

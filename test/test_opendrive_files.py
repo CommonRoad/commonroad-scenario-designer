@@ -4,8 +4,8 @@
 
 import os
 import unittest
-from lxml import etree
 import time
+from lxml import etree
 
 from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
 from commonroad.planning.planning_problem import PlanningProblemSet

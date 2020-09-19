@@ -104,18 +104,7 @@ RUN source activate commonroad \
 
 # update pip
 RUN source activate commonroad \
-	&& pip install --upgrade pip \
-	&& pip install wheel tox pytest numpy
+	&& pip install --upgrade pip
 
-
-# install commonroad-map-tool dependencies
-ADD ./requirements.txt $HOME/requirements.txt
-ADD ./test_requirements.txt $HOME/test_requirements.txt
-# RUN sudo chown cruser.cruser $HOME/requirements.txt  && \
-# 	sudo chown cruser.cruser $HOME/test_requirements.txt
-
-# ENTRYPOINT /bin/bash -c "source activate commonroad"
-# CMD /bin/bash -c "source activate commonroad \
-# 	&& pip install -r $HOME/requirements.txt \
-# 	&& pip install -r $HOME/test_requirements.txt \
-# 	&& bash"
+# update path to include packages installed by conda
+ENV PATH $HOME/.local/bin:$PATH
