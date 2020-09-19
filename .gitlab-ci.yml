@@ -5,7 +5,18 @@ stages:
   - build
 
 before_script:
-  - pip install -r test_requirements.txt
+  - source activate commonroad
+  # This is required for the GitLab runner to have permissions to all the repos the user stating the job has. 
+  - git config --global url."https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.lrz.de/".insteadOf "git@gitlab.lrz.de:"
+  # Install commonroad-io & sumo-interface manually as installing though does not respect the JOB_TOKEN
+  - git clone --branch develop git@gitlab.lrz.de:cps/commonroad-io.git $HOME/commonroad-io
+  - pip install -e $HOME/commonroad-io
+  - git clone --branch develop git@gitlab.lrz.de:cps/sumo-interface.git $HOME/sumo-interface
+  - pip install -e $HOME/sumo-interface
+  # install all requirements but ignore the git versions as we have already installed them previously
+  - grep -v "git" requirements.txt | pip install -r /dev/stdin
+  # use the current conda environment in tox, as we have manually installed all required dependencies there
+  - pip install tox-current-env -r test_requirements.txt
   - source .env
 
 # python36:
@@ -15,18 +26,6 @@ before_script:
 python37:
   stage: test
   script: 
-    - source activate commonroad
-    # This is required for the GitLab runner to have permissions to all the repos the user stating the job has. 
-    - git config --global url."https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.lrz.de/".insteadOf "git@gitlab.lrz.de:"
-    # Install commonroad-io & sumo-interface manually as installing though does not respect the JOB_TOKEN
-    - git clone --branch develop git@gitlab.lrz.de:cps/commonroad-io.git $HOME/commonroad-io
-    - pip install -e $HOME/commonroad-io
-    - git clone --branch develop git@gitlab.lrz.de:cps/sumo-interface.git $HOME/sumo-interface
-    - pip install -e $HOME/sumo-interface
-    # install all requirements but ignore the git versions as we have already installed them previously
-    - grep -v "git" requirements.txt | pip install -r /dev/stdin
-    # use the current conda environment in tox, as we have manually installed all required dependencies there
-    - pip install tox-current-env
     # run tests
     - tox --current-env -e py37 -- --junitxml=junit-{envname}.xml
   artifacts:

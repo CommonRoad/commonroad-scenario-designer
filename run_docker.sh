@@ -5,4 +5,5 @@ docker run -it \
     --net=host \
     --volume="$HOME/.Xauthority:/home/cruser/.Xauthority:rw" \
     --volume="$PWD:/home/cruser/commonroad-map-tool" \
+    --volume="$HOME/.ssh/:/home/cruser/.ssh" \
     commonroad
