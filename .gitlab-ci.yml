@@ -20,7 +20,7 @@ python36:
     - pip install tox-current-env -r test_requirements.txt
     - source .env
     # run tests
-    - tox --current-env -- --junitxml=junit-{envname}.xml
+    - tox --current-env -e py36 -- --junitxml=junit-{envname}.xml
   artifacts:
     reports:
       junit: junit-*.xml
@@ -43,7 +43,7 @@ python37:
     - pip install tox-current-env -r test_requirements.txt
     - source .env
     # run tests
-    - tox --current-env -- --junitxml=junit-{envname}.xml
+    - tox --current-env -e py37 -- --junitxml=junit-{envname}.xml
   artifacts:
     reports:
       junit: junit-*.xml
@@ -56,7 +56,7 @@ docs:
     - source activate commonroad
     # use the current conda environment in tox, as we have manually installed all required dependencies there
     - pip install tox-current-env -r test_requirements.txt
-    - pip install -r docs_requirements
+    - pip install -r docs_requirements.txt
     - source .env
     - tox -e docs
 
