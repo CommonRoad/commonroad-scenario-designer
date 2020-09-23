@@ -25,8 +25,22 @@ Currently we provide validated installation steps **only for Ubuntu >= 18.04**.
 
 A fully working setup requires installation of all the following dependencies.
 
-SUMO
-====
+Partial Installation
+====================
+When you just want to try the map conversion, but **not** simulate traffic on the resulting scenarios,
+it suffices to just install the python requirements
+
+.. code-block:: bash
+
+  git clone https://gitlab.lrz.de/cps/commonroad-map-tool.git
+  cd commonroad-map-tool
+  # install the requirements
+  pip install -r requirements.txt
+
+However this also hides all SUMO related features from the GUI. For a full installation see the following section.
+
+Full installation
+=================
 SUMO is required for simulating vehicle on a CommonRoad Scenario. Firstly it's dependencies need to be installed:
 
 
@@ -118,9 +132,6 @@ Install `cartopy <https://scitools.org.uk/cartopy/docs/latest/installing.html>`_
   conda install -c conda-forge cartopy
 
 
-Python dependencies
-===========
-
 Install the python requirements at the root of the project:
 
 .. code-block:: bash
@@ -128,17 +139,4 @@ Install the python requirements at the root of the project:
   git clone https://gitlab.lrz.de/cps/commonroad-map-tool.git
   cd commonroad-map-tool
   # install the requirements
-  pip install -r requirements.txt
-
-
-Then activate your python environment (py 3.6 or 3.7):
-
-.. code-block:: bash
-
-  conda activate commonroad
-
-And install the python dependencies:
-
-.. code-block:: bash
-
   pip install -r requirements.txt
