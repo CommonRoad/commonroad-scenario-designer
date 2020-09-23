@@ -28,7 +28,22 @@ A fully working setup requires installation of all the following dependencies.
 Partial Installation
 ====================
 When you just want to try the map conversion, but **not** simulate traffic on the resulting scenarios,
-it suffices to just install the python requirements
+it suffices to just install the following requirements:
+
+You need to firstly install ``cartopy`` either using conda:
+
+.. code-block:: bash
+
+  conda install -c conda-forge cartopy
+
+**or** install the required libs manually (tested only on ubuntu 18:04)
+
+.. code-block:: bash
+
+  apt-get install -y libproj-dev proj-data proj-bin libgeos++-dev gcc g++  # Cartopy dependencies
+  apt-get install -y libgl1-mesa-glx # PyQt dependencies
+
+Then install the python dependencies as usual:
 
 .. code-block:: bash
 
