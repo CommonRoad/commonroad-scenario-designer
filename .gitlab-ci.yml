@@ -16,7 +16,7 @@ python36:
   stage: test
   script:
     - source activate commonroad-py36
-    - pip install $HOME/sumo-interface $HOME/commonroad-io tox-current-env -r test_requirements.txt -r requirements.txt
+    - pip install tox-current-env -r test_requirements.txt -r requirements.txt
     # install all requirements but ignore the git versions as we have already installed them previously
     # - grep -v "git" requirements.txt | pip install -r /dev/stdin
     # use the current conda environment in tox, as we have manually installed all required dependencies there
