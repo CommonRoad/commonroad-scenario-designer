@@ -12,18 +12,9 @@ import numpy as np
 
 from commonroad.geometry.shape import Polygon
 from commonroad.scenario.lanelet import LaneletNetwork
-from commonroad_cc.collision_detection.pycrcc_collision_dispatch import create_collision_object
 
 import matplotlib.pyplot as plt
 from commonroad.visualization.draw_dispatch_cr import draw_object
-# try:
-#     import pycrcc
-#     use_pycrcc = True
-# except ModuleNotFoundError:
-#     warnings.warn('Commonroad Collision Checker not installed, use shapely instead (slower).')
-#     import shapely as shl
-#    use_pycrcc = False
-use_pycrcc = False
 
 from .config import SumoConfig, EGO_ID_START
 
@@ -257,11 +248,7 @@ def _find_intersecting_edges(
                 polygon = eroded_lanelet_network.find_lanelet_by_id(
                     lanelet_id).convert_to_polygon()
 
-                if use_pycrcc:
-                    polygons_dict[lanelet_id] = create_collision_object(
-                        polygon)
-                else:
-                    polygons_dict[lanelet_id] = polygon.shapely_object
+                polygons_dict[lanelet_id] = polygon.shapely_object
 
                 edge_shape.append(polygons_dict[lanelet_id])
 
@@ -275,17 +262,11 @@ def _find_intersecting_edges(
             for shape_0 in shape_list:
                 if edges_intersect: break
                 for shape_1 in shape_list_other:
-                    if use_pycrcc:
-                        if shape_0.collide(shape_1):
-                            edges_intersect = True
-                            intersecting_edges.append([edge_id, edge_id_other])
-                            break
-                    else:
                         # shapely
-                        if shape_0.intersection(shape_1).area > 0.0:
-                            edges_intersect = True
-                            intersecting_edges.append([edge_id, edge_id_other])
-                            break
+                    if shape_0.intersection(shape_1).area > 0.0:
+                        edges_intersect = True
+                        intersecting_edges.append([edge_id, edge_id_other])
+                        break
 
     return intersecting_edges
 

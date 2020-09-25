@@ -63,50 +63,28 @@ RUN sudo apt-get install -y ffmpeg \
 	&& cmake .. \
 	&& make -j8
 
-# install libccd
-RUN git clone https://github.com/danfis/libccd.git \
-	&& cd libccd \
-	&& mkdir build && cd build \
-	&& cmake -G "Unix Makefiles" -DENABLE_DOUBLE_PRECISION=ON -DBUILD_SHARED_LIBS=ON .. \
-	&& make -j8 \
-	&& sudo make install
 
-# install fcl
-RUN git clone https://github.com/flexible-collision-library/fcl.git \
-	&& cd fcl \
-	&& sudo apt-get install -y libboost-dev libboost-thread-dev libboost-test-dev libboost-filesystem-dev libeigen3-dev \
-	&& mkdir build && cd build \
-	&& cmake .. \
-	&& make -j8 \
-	&& sudo make install
-
-ARG PYTHON_VERSION
 # activate conda environment
-RUN conda create --name commonroad python=$PYTHON_VERSION
+RUN conda create --name commonroad-py36 python=3.6
+RUN conda create --name commonroad-py37 python=3.7
+RUN conda create --name commonroad-py38 python=3.8
 # setup conda env
-RUN echo "source activate commonroad" > ~/.bashrc
-ENV PATH /opt/conda/envs/commonroad/bin:$PATH
-
-# install commonroad -collision checker
-RUN git clone https://gitlab.lrz.de/tum-cps/commonroad-collision-checker.git \
-	&& cd commonroad-collision-checker/ \
-	&& mkdir build \
-	&& cd build \
-	&& cmake -DADD_PYTHON_BINDINGS=TRUE -DPATH_TO_PYTHON_ENVIRONMENT="$HOME/.conda/envs/commonroad" -DPYTHON_VERSION=$PYTHON_VERSION -DCMAKE_BUILD_TYPE=Release .. \
-	&& make -j8 \
-	&& cd .. \
-	&& source activate commonroad \
-	&& python setup.py install
+RUN echo "source activate commonroad-py38" > ~/.bashrc
+ENV PATH /opt/conda/envs/commonroad-py38/bin:$PATH
 
 # Install cartopy
-RUN source activate commonroad \
+RUN source activate commonroad-py36 \
+	&& echo "Successfully installed Python version:" \
 	&& python --version \
  	&& conda install -c conda-forge cartopy
-
-
-# update pip
-RUN source activate commonroad \
-	&& pip install --upgrade pip
+RUN source activate commonroad-py37 \
+	&& echo "Successfully installed Python version:" \
+	&& python --version \
+ 	&& conda install -c conda-forge cartopy
+RUN source activate commonroad-py38 \
+	&& echo "Successfully installed Python version:" \
+	&& python --version \
+ 	&& conda install -c conda-forge cartopy
 
 # update path to include packages installed by conda
 ENV PATH $HOME/.local/bin:$PATH
