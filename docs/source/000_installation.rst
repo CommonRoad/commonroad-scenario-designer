@@ -95,51 +95,6 @@ Install our patched SUMO Version from `GitHub <https://github.com/octavdragoi/su
   echo "export SUMO_HOME=/usr/share/sumo" >> ~/.bashrc
   cd $HOME
 
-.. Install the `commonroad-collision-checker <https://gitlab.lrz.de/tum-cps/commonroad-collision-checker>`_:
-
-Install `libccd <https://github.com/danfis/libccd>`_ (from master branch):
-
-.. code-block:: bash
-  # install dependencies
-  git clone https://github.com/danfis/libccd.git
-  cd libccd
-  mkdir build && cd build
-  cmake -G "Unix Makefiles" -DENABLE_DOUBLE_PRECISION=ON -DBUILD_SHARED_LIBS=ON ..
-  make
-  sudo make install
-  cd $HOME
-
-Install `FCL -- The Flexible Collision Library <https://github.com/flexible-collision-library/fcl>`_ (from master branch):
-
-.. code-block:: bash
-
-  git clone https://github.com/flexible-collision-library/fcl.git
-  cd fcl
-  sudo apt-get install -y libboost-dev libboost-thread-dev libboost-test-dev libboost-filesystem-dev libeigen3-dev
-  # build FCL
-  mkdir build && cd build
-  cmake ..
-  make
-  sudo make install
-
-Install the `commonroad-collision-checker <https://gitlab.lrz.de/tum-cps/commonroad-collision-checker>`_:
-**Make sure to change the path to you conda environment & python version when calling cmake**
-
-.. code-block:: bash
-
-  git clone https://gitlab.lrz.de/tum-cps/commonroad-collision-checker.git
-  cd commonroad-collision-checker/
-  mkdir build
-  cd build
-  # YOU NEED TO CHANGE THE PATH TO YOUR CONDA ENVIRONMENT AS WELL AS THE PYTHON VERSION HERE
-  cmake -DADD_PYTHON_BINDINGS=TRUE -DPATH_TO_PYTHON_ENVIRONMENT="/path/to/your/anaconda3/envs/ commonroad-py37" -DPYTHON_VERSION="3.7" -DCMAKE_BUILD_TYPE=Release ..
-  make -j8
-
-  # Install pyrcc
-  cd ..
-  python setup.py install
-  cd $HOME
-
 Install `cartopy <https://scitools.org.uk/cartopy/docs/latest/installing.html>`_:
 
 .. code-block:: bash

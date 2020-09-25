@@ -14,6 +14,23 @@
 Development
 ###########
 
+Unit Testing
+************
+
+Unit tests for testing expected behaviour are found in ``/tests``. To execute them locally run the following commands:
+
+
+.. code-block:: bash
+
+  # install test dependencies
+  pip install -r test_requirements.txt
+  # run tests in current environment
+  tox --current-env -e $PY_VERSION -- test/
+
+Where you will need to replace ``$PY_VERSION`` with your current python version (e.g ``py36``, ``py37`` or ``py38``).
+This will install all the required dependencies for testing, assuming you already have installed the tool as described in :ref:`installation`
+and run the full test suite on you current code base. 
+
 Continuous Integration
 **********************
 
@@ -55,8 +72,6 @@ Prebuild Images
 
 We also provide a prebuild version of the aforementioned docker image `here <https://hub.docker.com/repository/docker/rasaford/commonroad-map-tool>`_.
 You can run it with:
-
-You can run any of the versions above with:
 
 .. code-block:: bash
 
