@@ -15,7 +15,7 @@ from matplotlib.backends.backend_qt5agg import (NavigationToolbar2QT as
                                                 NavigationToolbar)
 
 from commonroad.common.file_reader import CommonRoadFileReader
-from commonroad.common.file_writer import (CommonRoadFileWriter, 
+from commonroad.common.file_writer import (CommonRoadFileWriter,
                                            OverwriteExistingFile)
 from commonroad.scenario.scenario import Scenario, LaneletNetwork
 
@@ -27,10 +27,9 @@ from crmapconverter.io.scenario_designer.converter_modules.opendrive_interface i
 from crmapconverter.io.scenario_designer.gui_settings import GUISettings
 from crmapconverter.io.scenario_designer.sumo_gui_modules.sumo_settings import SUMOSettings
 from crmapconverter.io.scenario_designer.sumo_gui_modules.gui_sumo_simulation import SUMOSimulation
-from crmapconverter.io.scenario_designer.gui_viewer import (LaneletList, 
-                                                            IntersectionList, 
-                                                            find_intersection_by_id,
-                                                            AnimatedViewer)
+from crmapconverter.io.scenario_designer.sumo_gui_modules.gui_sumo_simulation import SUMO_AVAILABLE
+from crmapconverter.io.scenario_designer.gui_viewer import (
+    LaneletList, IntersectionList, find_intersection_by_id, AnimatedViewer)
 from crmapconverter.io.scenario_designer import config
 from crmapconverter.io.scenario_designer import util
 
@@ -142,9 +141,12 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.tool1.setAllowedAreas(Qt.LeftDockWidgetArea)
         self.tool1.setWidget(self.uppertoolBox)
         self.addDockWidget(Qt.LeftDockWidgetArea, self.tool1)
-        self.create_sumobox()
-        self.uppertoolBox.button_sumo_simulation.clicked.connect(
-            self.tool_box2_show)
+
+        if SUMO_AVAILABLE:
+            self.create_sumobox()
+            self.uppertoolBox.button_sumo_simulation.clicked.connect(
+                self.tool_box2_show)
+
         # self.uppertoolBox.button_lanlist.clicked.connect(
         #    self.show_lanelet_list)
         # self.uppertoolBox.button_intersection_list.clicked.connect(
@@ -277,11 +279,11 @@ class MWindow(QMainWindow, Ui_mainWindow):
                 messbox.close()
         else:
             self.textBrowser.append("Exporting animation: " +
-                                    self.uppertoolBox.save_menu.currentText() + " ...")
+                                    self.uppertoolBox.save_menu.currentText() +
+                                    " ...")
             self.crviewer.save_animation(
                 self.uppertoolBox.save_menu.currentText())
             self.textBrowser.append("Exporting finished")
-
 
     def create_console(self):
         """Function to create the console."""
@@ -411,7 +413,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
             "As Opendrive",
             icon="",
             checkable=False,
-            slot= None,
+            slot=None,
             tip="Save as Opendrive File",
             shortcut=None)
 
@@ -438,13 +440,14 @@ class MWindow(QMainWindow, Ui_mainWindow):
             slot=self.show_gui_settings,
             tip="Show settings for the CR Scenario Designer",
             shortcut=None)
-        self.sumo_settings = self.create_action(
-            "SUMO Settings",
-            icon="",
-            checkable=False,
-            slot=self.show_sumo_settings,
-            tip="Show settings for the SUMO interface",
-            shortcut=None)
+        if SUMO_AVAILABLE:
+            self.sumo_settings = self.create_action(
+                "SUMO Settings",
+                icon="",
+                checkable=False,
+                slot=self.show_sumo_settings,
+                tip="Show settings for the SUMO interface",
+                shortcut=None)
 
     def create_help_actions(self):
         """Function to create the help action in the menu bar."""
@@ -599,7 +602,6 @@ class MWindow(QMainWindow, Ui_mainWindow):
             self.lanelet_list_dock.close()
             self.intersection_list_dock.close()
 
-    
     def check_scenario(self, scenario) -> int:
         """ 
         Check the scenario to validity and calculate a quality score.
@@ -618,29 +620,29 @@ class MWindow(QMainWindow, Ui_mainWindow):
         found_ids = util.find_invalid_ref_of_traffic_lights(scenario)
         if found_ids and verbose:
             error_score = max(error_score, FATAL_ERROR)
-            self.textBrowser.append(
-                "invalid traffic light refs: " + str(found_ids))
+            self.textBrowser.append("invalid traffic light refs: " +
+                                    str(found_ids))
             QMessageBox.critical(
                 self,
                 "CommonRoad XML error",
-                "Scenario contains invalid traffic light refenence(s): "
-                    + str(found_ids),
+                "Scenario contains invalid traffic light refenence(s): " +
+                str(found_ids),
                 QMessageBox.Ok,
             )
 
         found_ids = util.find_invalid_ref_of_traffic_signs(scenario)
         if found_ids and verbose:
             error_score = max(error_score, FATAL_ERROR)
-            self.textBrowser.append("invalid traffic sign refs: " 
-                + str(found_ids))
+            self.textBrowser.append("invalid traffic sign refs: " +
+                                    str(found_ids))
             QMessageBox.critical(
                 self,
                 "CommonRoad XML error",
-                "Scenario contains invalid traffic sign refenence(s): "
-                    + str(found_ids),
+                "Scenario contains invalid traffic sign refenence(s): " +
+                str(found_ids),
                 QMessageBox.Ok,
             )
-        
+
         if error_score >= FATAL_ERROR:
             return error_score
 
@@ -653,8 +655,8 @@ class MWindow(QMainWindow, Ui_mainWindow):
             QMessageBox.warning(
                 self,
                 "CommonRoad XML error",
-                "Scenario contains lanelet(s) with invalid polygon: "
-                    + str(found_ids),
+                "Scenario contains lanelet(s) with invalid polygon: " +
+                str(found_ids),
                 QMessageBox.Ok,
             )
 
@@ -773,7 +775,9 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
 def main():
     parser = ArgumentParser()
-    parser.add_argument("--input_file", "-i", default=None,
+    parser.add_argument("--input_file",
+                        "-i",
+                        default=None,
                         help="load this file after startup")
     args = parser.parse_args()
 
@@ -785,6 +789,7 @@ def main():
         w = MWindow()
     w.showMaximized()
     sys.exit(app.exec_())
+
 
 if __name__ == '__main__':
     main()
