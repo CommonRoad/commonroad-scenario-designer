@@ -56,7 +56,7 @@
 
 #         ground_truth_path = os.path.dirname(
 #             os.path.realpath(__file__)
-#         ) + f"/osm_xml_test_files/{self.osm_file_name}_osm2cr.xml"
+#         ) + f"/osm_xml_test_files/{self.osm_file_name}.xml"
 
 #         # load saved file & compare to ground truth
 #         with open(ground_truth_path, "r") as gt, open(converted_path,
@@ -75,7 +75,7 @@
 
 # class TestUrbanScenario(TestOSM2CRScenarioBaseClass):
 #     """Copied to prevent regression from test_osm_to_cr_lanelet_conversion.py"""
-#     __test__ = True
+#     __test__ = False
 #     osm_file_name = "urban-1_lanelets_utm"
 
 # class TestMergingLaneletsScenario(TestOSM2CRScenarioBaseClass):
@@ -88,5 +88,5 @@
 #     """Testing if a small town with traffic lights, complicated road networks 
 #     and large osm filesize can be correctly converted"""
 
-#     __test__ = True
+#     __test__ = False
 #     osm_file_name = "eichstaett"

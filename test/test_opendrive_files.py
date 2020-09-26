@@ -117,7 +117,7 @@ class TestCulDeSac(TestOpenDriveBaseClass):
 
 
 class TestComplexCrossing(TestOpenDriveBaseClass):
-    __test__ = False
+    __test__ = True
     xodr_file_name = "CrossingComplex8Course"
 
 
