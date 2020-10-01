@@ -1,42 +1,28 @@
 # CommonRoad Map Converter
 
-This software provides multiple converters from different map formats to the CommonRoad map, which is based on lanelets.  
+This software provides multiple converters from different map formats to the CommonRoad map format.
 This branch is under development for CommonRoad 2020a.
 Commit 4abf24d380b2ddac2c2c71b210764c4ae5759406 is the last stable version for CommonRoad 2018b.
 
-|               Tool               |                            Functionality                            |
-| :------------------------------: | :-----------------------------------------------------------------: |
-|        opendrive2lanelet         |          Conversion from OpenDRIVE files to Lanelet maps.           |
-|           osm-convert            | Conversion from CommonRoad lanelets to OSM lanelets and vice versa. |
-|             osm2cr             |    Conversion from general OSM maps to CommonRoad Lanelet maps.     |
-| CR Scenario Designer |  Multi-functional GUI for map conversion and traffic simulation.   |
+|         Tool         |                 Path                  |                            Functionality                            |
+| :------------------: | :-----------------------------------: | :-----------------------------------------------------------------: |
+|  opendrive2lanelet   |      `crmapconverter/opendrive`       |          Conversion from OpenDRIVE files to Lanelet maps.           |
+|     osm-convert      |         `crmapconverter/osm`          | Conversion from CommonRoad lanelets to OSM lanelets and vice versa. |
+|        osm2cr        |        `crmapconverter/osm2cr`        |    Conversion from general OSM maps to CommonRoad Lanelet maps.     |
+| CR Scenario Designer | `crmapconverter/io/scenario_designer` |   Multi-functional GUI for map conversion and traffic simulation.   |
 
 ## Installation
 
-It is recommended to install all dependencies for all Tools. Firstly install the dependencies for SUMO from [here](https://gitlab.lrz.de/cps/commonroad-map-tool/-/blob/GUI_CR_Scenario_Designer/crmapconverter/sumo_map/README.md).
-
-Then activate your python environment (py 3.6 or 3.7):
-
-```bash
-conda activate commonroad
-```
-
-And install the dependencies:
-
-```bash
-pip install -r requirements.txt
-```
-
-_If `cartopy` gives an error while installing try to use conda: `conda install -c conda-forge cartopy`_
+Installation instructions are given in the documentation in the section "Installation"
 
 ## Usage
 
-### GUI (CR Scenario Designer)
+### GUI (CommonRoad Scenario Designer / CRSD)
 
-![GUI_Screenshot](./files/img/GUI_screenshot.png)
+![GUI_Screenshot](./docs/source/images/gui/GUI_screenshot.png)
 
 First you need to activate your python environment with the installed dependencies and load the environment variables.
-Then you can run _CR Scenario Designer_:
+Then you can start _CommonRoad Scenario Designer_:
 
 ```bash
 $ conda activate commonroad
@@ -80,11 +66,10 @@ osm-convert inputfile.xml --reverse -o outputfile.osm --adjencies --proj "+proj=
 For the conversion of CommonRoad lanelets to OSM lanelets change the input and output file accordingly.
 
 For the conversion of a file from a OSM map to CommonRoad lanelets you can
-open the general GUI and start from there the the OSM map to CommonRoad converter GUI. 
+open the general GUI and start from there the the OSM map to CommonRoad converter GUI.
 Missing information such as the course of individual lanes is estimated during the process.
 These estimations are imperfect (the OSM maps as well) and often it is advisable to edit the scenarios by hand.
 This tool also provides a simple GUI, to edit scenarios by hand.
-
 
 ## Documentation
 
@@ -100,7 +85,7 @@ Afterward run:
 cd docs && make html
 ```
 
-The documentation can be accessed by opening _/docs/\_build/html/index.html_.
+The documentation can be accessed by opening `docs/_build/html/index.html`.
 
 ## Bug and feature reporting
 
@@ -111,4 +96,5 @@ In case you detect a bug or you want to suggest a new feature create an issue in
 Sebastian Maierhofer (current maintainer)  
 Benjamin Orthen  
 Stefan Urban  
-Maximilian Rieger
+Maximilian Rieger  
+Maximilian Fruehauf @rasaford

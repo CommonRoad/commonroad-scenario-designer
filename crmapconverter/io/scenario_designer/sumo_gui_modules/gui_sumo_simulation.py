@@ -10,9 +10,15 @@ from crmapconverter.io.scenario_designer.gui_resources.Sumo_simulate import Ui_s
 from crmapconverter.io.scenario_designer.errors import error, warning
 from crmapconverter.io.scenario_designer.util import Observable
 
-from crmapconverter.sumo_map.config import SumoConfig
-from crmapconverter.sumo_map.cr2sumo import CR2SumoMapConverter
-from sumocr.interface.sumo_simulation import SumoSimulation
+# try to import sumo functionality
+try:
+    from crmapconverter.sumo_map.config import SumoConfig
+    from crmapconverter.sumo_map.cr2sumo import CR2SumoMapConverter
+    from sumocr.interface.sumo_simulation import SumoSimulation
+    SUMO_AVAILABLE = True
+except ImportError:
+    logging.warning("Cannot import SUMO, simulation will not be offered in Scenario Designer")
+    SUMO_AVAILABLE = False
 
 from PyQt5.QtWidgets import QWidget, QMessageBox
 from PyQt5 import QtWidgets

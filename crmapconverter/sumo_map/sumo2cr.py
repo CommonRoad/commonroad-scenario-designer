@@ -4,8 +4,8 @@ import subprocess
 from commonroad.common.file_writer import CommonRoadFileWriter
 from commonroad.scenario.scenario import Tag
 from lxml import etree
-from opendrive2lanelet.network import Network
-from opendrive2lanelet.opendriveparser.parser import parse_opendrive
+from crmapconverter.opendrive.opendriveconversion.network import Network
+from crmapconverter.opendrive.opendriveparser.parser import parse_opendrive
 
 
 def convert_net_to_cr(net_file:str, out_folder:str=None, verbose=False) -> str:
