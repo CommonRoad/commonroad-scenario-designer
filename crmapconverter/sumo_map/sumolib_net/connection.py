@@ -15,7 +15,6 @@
 # @version $Id$
 
 
-
 class Connection:
     # constants as defined in sumo/src/utils/xml/SUMOXMLDefinitions.cpp
     LINKDIR_STRAIGHT = "s"
@@ -24,10 +23,17 @@ class Connection:
     LINKDIR_RIGHT = "r"
     LINKDIR_PARTLEFT = "L"
     LINKDIR_PARTRIGHT = "R"
-
     """edge connection for a sumo network"""
-
-    def __init__(self, fromEdge, toEdge, fromLane, toLane, direction, tls, tllink, state, viaLaneID=None):
+    def __init__(self,
+                 fromEdge,
+                 toEdge,
+                 fromLane,
+                 toLane,
+                 direction,
+                 tls,
+                 tllink,
+                 state,
+                 viaLaneID=None):
         self._from = fromEdge
         self._to = toEdge
         self._fromLane = fromLane
@@ -39,14 +45,11 @@ class Connection:
         self._via = viaLaneID
 
     def __str__(self):
-        return '<connection from="%s" to="%s" fromLane="%s" toLane="%s" %sdirection="%s">' % (
-            self._from.getID(),
-            self._to.getID(),
-            self._fromLane.getIndex(),
+        return '<connection from="%s" to="%s" fromLane="%s" toLane="%s" %s/>' % (
+            self._from.getID(), self._to.getID(), self._fromLane.getIndex(),
             self._toLane.getIndex(),
             ('' if self._tls == '' else 'tl="%s" linkIndex="%s" ' %
-             (self._tls, self._tlLink)),
-            self._direction)
+             (self._tls, self._tlLink)))
 
     def getFrom(self):
         return self._fromLane.getEdge()
@@ -80,3 +83,6 @@ class Connection:
 
     def getState(self):
         return self._state
+
+    def toXML(self):
+        return str(self)

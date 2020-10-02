@@ -16,9 +16,9 @@ from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistin
 from commonroad.planning.planning_problem import PlanningProblemSet
 from commonroad.scenario.scenario import Tag
 
-from crmapconverter.opendriveparser.elements.opendrive import OpenDrive
-from crmapconverter.opendriveparser.parser import parse_opendrive
-from crmapconverter.opendriveconversion.network import Network
+from crmapconverter.opendrive.opendriveparser.elements.opendrive import OpenDrive
+from crmapconverter.opendrive.opendriveparser.parser import parse_opendrive
+from crmapconverter.opendrive.opendriveconversion.network import Network
 from crmapconverter.osm.lanelet2osm import L2OSMConverter
 
 __author__ = "Benjamin Orthen"

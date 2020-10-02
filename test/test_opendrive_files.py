@@ -4,13 +4,14 @@
 
 import os
 import unittest
+import time
 from lxml import etree
 
 from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
 from commonroad.planning.planning_problem import PlanningProblemSet
 from commonroad.scenario.scenario import Tag
 
-from crmapconverter.opendriveparser.parser import parse_opendrive
+from crmapconverter.opendrive.opendriveparser.parser import parse_opendrive
 from crmapconverter.io.opendrive_convert import convert_opendrive
 from test.utils import elements_equal
 
@@ -23,7 +24,7 @@ __email__ = "commonroad-i06@in.tum.de"
 __status__ = "Released"
 
 
-class TestOpenDriveBaseClass:
+class TestOpenDriveBaseClass(unittest.TestCase):
     """Test the conversion of specific xodr files by reading them in, converting them
    and then comparing the outcome."""
 
@@ -83,31 +84,31 @@ class TestOpenDriveBaseClass:
             writer.write_to_file(self.out_path + "/" + self.xml_output_name + ".xml", OverwriteExistingFile.ALWAYS)
 
             # set same date so this won't change the comparison
-            tree_import.set("date", "2020-04-14")
-            writer.root_node.set("date", "2020-04-14")
+            date = time.strftime("%Y-%m-%d", time.localtime())
+            tree_import.set("date", date)
+            writer.root_node.set("date", date)
 
             # compare both element trees
             trees_are_equal = elements_equal(tree_import, writer.root_node)
             self.assertTrue(trees_are_equal)
 
+class TestBasicOpenDrive(TestOpenDriveBaseClass):
+    """Basic test with a junction in the middle."""
 
-class TestSuedTangente(TestOpenDriveBaseClass, unittest.TestCase):
+    __test__ = False
+    xodr_file_name = "opendrive-1"
+
+
+class TestSuedTangente(TestOpenDriveBaseClass):
     """Includes roads with multiple lane sections and
     lane sections with multiple width sections.
     This should be split into multiple tests in the future."""
 
-    __test__ = True
+    __test__ = False
     xodr_file_name = "KA-Suedtangente-atlatec"
 
 
-class TestBasicOpenDrive(TestOpenDriveBaseClass, unittest.TestCase):
-    """Basic test with a junction in the middle."""
-
-    __test__ = True
-    xodr_file_name = "opendrive-1"
-
-
-class TestCulDeSac(TestOpenDriveBaseClass, unittest.TestCase):
+class TestCulDeSac(TestOpenDriveBaseClass):
     """Two adjacent lanes with same successor should not be mistaken
     as merging lanes!"""
 
@@ -115,17 +116,17 @@ class TestCulDeSac(TestOpenDriveBaseClass, unittest.TestCase):
     xodr_file_name = "CulDeSac"
 
 
-class TestComplexCrossing(TestOpenDriveBaseClass, unittest.TestCase):
+class TestComplexCrossing(TestOpenDriveBaseClass):
     __test__ = True
     xodr_file_name = "CrossingComplex8Course"
 
 
-class TestRoundabout(TestOpenDriveBaseClass, unittest.TestCase):
+class TestRoundabout(TestOpenDriveBaseClass):
     __test__ = True
     xodr_file_name = "Roundabout8Course"
 
 
-class TestRightWidthCoefficients(TestOpenDriveBaseClass, unittest.TestCase):
+class TestRightWidthCoefficients(TestOpenDriveBaseClass):
     """Test if algorithm selects the right width index if it is ambiguous.
     This was an error of an github issue for town03.xodr.
     For multiple width coefficients, at the border between the interval of two
@@ -136,7 +137,7 @@ class TestRightWidthCoefficients(TestOpenDriveBaseClass, unittest.TestCase):
     xodr_file_name = "town03_right_width_coefficient"
 
 
-class TestZeroWidthCoefficients(TestOpenDriveBaseClass, unittest.TestCase):
+class TestZeroWidthCoefficients(TestOpenDriveBaseClass):
     """Test if this converter discards lanes which have zero width everywhere.
     In this case, it is the lane -1 of road 1."""
 
@@ -145,7 +146,7 @@ class TestZeroWidthCoefficients(TestOpenDriveBaseClass, unittest.TestCase):
     xml_output_name = "CulDeSac"
 
 
-class TestPoly3AndBorderRecord(TestOpenDriveBaseClass, unittest.TestCase):
+class TestPoly3AndBorderRecord(TestOpenDriveBaseClass):
     """Test if the program convert Poly3 Geometry and wheter it can handle
     border records instead of width records."""
 

@@ -1,1 +1,5 @@
-ipdb
+pytest
+pytest-cov
+tox
+tox-current-env
+coverage
