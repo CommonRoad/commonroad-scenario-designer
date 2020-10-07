@@ -12,11 +12,11 @@ from commonroad.scenario.scenario import Tag
 import crmapconverter.osm2cr.converter_modules.converter as converter
 import crmapconverter.osm2cr.converter_modules.cr_operations.export as ex
 from crmapconverter.osm2cr import config
-from crmapconverter.osm2cr.converter_modules.intermediate_format.intermediate_format import IntermediateFormat
+from crmapconverter.osm2cr.converter_modules.intermediate_format import IntermediateFormat
 from crmapconverter.osm2cr.converter_modules.osm_operations.downloader import (
     download_around_map,
 )
-from crmapconverter.osm2cr.converter_modules.gui_modules.gui_embedding import MainApp
+from crmapconverter.io.scenario_designer.osm_gui_modules.gui_embedding import MainApp
 
 matplotlib.use("Qt5Agg")
 
