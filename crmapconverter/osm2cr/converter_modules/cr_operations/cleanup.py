@@ -1,6 +1,7 @@
 """
 This module removes converting errors before exporting the scenario to XML
 """
+from ordered_set import OrderedSet
 import numpy as np
 from scipy import interpolate
 from commonroad.scenario.scenario import Scenario, Lanelet, LaneletNetwork
@@ -31,7 +32,7 @@ def remove_non_referenced_signs(scenario: Scenario) -> None:
     :return: None
     """
     net = scenario.lanelet_network
-    filtered_signs = set()
+    filtered_signs = OrderedSet()
     for sign in net.traffic_signs:
         for lanelet in net.lanelets:
             if sign.traffic_sign_id in lanelet.traffic_signs:

@@ -23,8 +23,8 @@ def graph_search(center_node: "GraphNode") -> Tuple[Set["GraphNode"], Set["Graph
     :param center_node: the node to search from
     :return: a tuple of all nodes and edges found
     """
-    nodes = OrderedSet()
-    edges = OrderedSet()
+    nodes = set()
+    edges = set()
     explore = Queue()
     explore.put(center_node)
     while not explore.empty():
