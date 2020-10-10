@@ -33,6 +33,7 @@ setup(
         # only for graphical display
         "PyQt5>=5.12.2",
         "matplotlib>=3.1.0",
+        "ordered-set>=4.0.2"
     ],
     extras_require={"GUI": ["matplotlib>=3.1.0"]},
     python_requires=">=3.6",

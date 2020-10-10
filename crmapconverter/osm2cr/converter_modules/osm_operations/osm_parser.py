@@ -4,6 +4,8 @@ It also provides a method to project OSM nodes to cartesian coordinates.
 """
 import xml.etree.ElementTree as ElTree
 from typing import List, Dict, Tuple, Set, Optional
+from ordered_set import OrderedSet
+from collections import OrderedDict
 
 import numpy as np
 
@@ -262,7 +264,7 @@ def get_ways(accepted_highways: List[str], rejected_tags: Dict[str, str],
     :param root:
     :return:
     """
-    roads = set()
+    roads = OrderedSet()
     ways = root.findall("way")
     for way in ways:
         tags = way.findall("tag")
@@ -504,8 +506,8 @@ def get_graph_nodes(roads: Set[ElTree.Element], points: Dict[int, Point], traffi
     :return: nodes, set of graph node objects
     :rtype: Dict[int, GraphNode]
     """
-    nodes = {}
-    point_degree = {}  # number of roads sharing a point
+    nodes = OrderedDict()
+    point_degree = OrderedDict()  # number of roads sharing a point
     for road in roads:
         for waypoint in road.findall("nd"):
             point_id = int(waypoint.attrib["ref"])
@@ -592,7 +594,7 @@ def get_graph_edges_from_road(roads: Set[ElTree.Element],
         return result
 
     area = get_area_from_bounds(bounds, origin)
-    edges = {}
+    edges = OrderedDict()
     for road_index, road in enumerate(roads):
         # get basic information of road
         # edge_id = road.attrib['id']
@@ -638,7 +640,7 @@ def get_graph_edges_from_road(roads: Set[ElTree.Element],
             waypoints.reverse()
 
         osm_id = int(road.attrib["id"])
-        edges[osm_id] = set()
+        edges[osm_id] = OrderedSet()
 
         # road is split at nodes and edges are created for each segment
         for index, waypoint in enumerate(waypoints):
@@ -752,7 +754,7 @@ def get_node_set(edges: Set[rg.GraphEdge]) -> Set[rg.GraphNode]:
     :param edges:
     :return:
     """
-    nodes = set()
+    nodes = OrderedSet()
     for edge in edges:
         nodes.add(edge.node1)
         nodes.add(edge.node2)
@@ -794,7 +796,7 @@ def roads_to_graph(roads: Set[ElTree.Element],
     graph_traffic_signs = get_graph_traffic_signs(nodes, edges, traffic_signs)
     graph_traffic_lights = get_graph_traffic_lights(nodes, traffic_lights)
     map_restrictions(edges, restrictions, nodes)
-    edges = {elem for edge_set in edges.values() for elem in edge_set}
+    edges = OrderedSet([elem for edge_set in edges.values() for elem in edge_set])
     # node_set = set()
     # for node in nodes:
     #     node_set.add(nodes[node])
@@ -834,7 +836,7 @@ def get_crossing_points(
 
     new_crossing_nodes = set()
     already_contained = set()
-    main_node_dict = {node.id: node for node in main_graph.nodes}
+    main_node_dict = OrderedDict((node.id, node) for node in main_graph.nodes)
     for point_id, point in main_cross_points.items():
         if (point_id in sub_cross_points
                 and not close_to_intersection(point_id, comb_graph, main_graph)):
