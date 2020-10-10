@@ -871,6 +871,9 @@ def create_graph(file_path: str) -> rg.Graph:
         )
         return graph, crossing_points
 
+    #  reset id generator for new graph
+    idgenerator.reset()
+
     if config.EXTRACT_SUBLAYER:
         if set(config.ACCEPTED_HIGHWAYS_MAINLAYER) & set(config.ACCEPTED_HIGHWAYS_SUBLAYER):
             raise RuntimeError(
