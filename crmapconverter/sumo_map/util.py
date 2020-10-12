@@ -9,6 +9,7 @@ from typing import Dict, List
 from xml.dom import minidom
 from xml.etree import ElementTree as et, cElementTree as ET
 import numpy as np
+from shapely.validation import explain_validity
 
 from commonroad.geometry.shape import Polygon
 from commonroad.scenario.lanelet import LaneletNetwork
@@ -250,7 +251,14 @@ def _find_intersecting_edges(
 
                 polygons_dict[lanelet_id] = polygon.shapely_object
 
-                edge_shape.append(polygons_dict[lanelet_id])
+                if polygons_dict[lanelet_id].is_valid:
+                    shape = polygons_dict[lanelet_id]
+                else:
+                    warnings.warn(f"Invalid lanelet shape! Please check the scenario, "
+                                  f"because invalid lanelet has been found: "
+                                  f"{explain_validity(polygons_dict[lanelet_id])}")
+                    shape = polygons_dict[lanelet_id].buffer(0)
+                edge_shape.append(shape)
 
         edge_shapes_dict[edge_id] = edge_shape
 
