@@ -153,71 +153,29 @@ def compute_max_curvature_from_polyline(polyline: np.ndarray) -> float:
 
 
 def _erode_lanelets(lanelet_network: LaneletNetwork,
-                    radius: float = 0.4) -> LaneletNetwork:
-    """Erode shape of lanelet by given radius."""
+                    offset: float = 0.4) -> LaneletNetwork:
+    """erodes the lanelets width wise in the network by the given offset
 
+    Args:
+        lanelet_network (LaneletNetwork): [description]
+        offset (float, optional): width offset 0: no offset, 1: infinitely small line. Defaults to 0.4.
+
+    Returns:
+        LaneletNetwork: [description]
+    """
     lanelets_ero = []
-    crop_meters = 0.3
-    min_factor = 0.1
     for lanelet in lanelet_network.lanelets:
-        lanelet_ero = deepcopy(lanelet)
-
-        # shorten lanelet by radius
-        if len(lanelet_ero._center_vertices) > 4:
-            i_max = int(
-                (np.floor(len(lanelet_ero._center_vertices) - 1) / 2)) - 1
-
-            i_crop_0 = np.argmax(lanelet_ero.distance >= crop_meters)
-            i_crop_1 = len(lanelet_ero.distance) - np.argmax(
-                lanelet_ero.distance >= lanelet_ero.distance[-1] - crop_meters)
-            i_crop_0 = min(i_crop_0, i_max)
-            i_crop_1 = min(i_crop_1, i_max)
-
-            lanelet_ero._left_vertices = lanelet_ero._left_vertices[
-                i_crop_0:-i_crop_1]
-            lanelet_ero._center_vertices = lanelet_ero._center_vertices[
-                i_crop_0:-i_crop_1]
-            lanelet_ero._right_vertices = lanelet_ero._right_vertices[
-                i_crop_0:-i_crop_1]
-        else:
-            factor_0 = min(1, crop_meters / lanelet_ero.distance[1])
-            lanelet_ero._left_vertices[0] = factor_0 * lanelet_ero._left_vertices[0]\
-                                            + (1-factor_0) * lanelet_ero._left_vertices[1]
-            lanelet_ero._right_vertices[0] = factor_0 * lanelet_ero._right_vertices[0] \
-                                            + (1 - factor_0) * lanelet_ero._right_vertices[1]
-            lanelet_ero._center_vertices[0] = factor_0 * lanelet_ero._center_vertices[0] \
-                                            + (1 - factor_0) * lanelet_ero._center_vertices[1]
-
-            factor_0 = min(
-                1, crop_meters /
-                (lanelet_ero.distance[-1] - lanelet_ero.distance[-2]))
-            lanelet_ero._left_vertices[-1] = factor_0 * lanelet_ero._left_vertices[-2] \
-                                            + (1 - factor_0) * lanelet_ero._left_vertices[-1]
-            lanelet_ero._right_vertices[-1] = factor_0 * lanelet_ero._right_vertices[-2] \
-                                             + (1 - factor_0) * lanelet_ero._right_vertices[-1]
-            lanelet_ero._center_vertices[-1] = factor_0 * lanelet_ero._center_vertices[-2] \
-                                              + (1 - factor_0) * lanelet_ero._center_vertices[-1]
-
-        # compute eroded vector from center
-        perp_vecs = (lanelet_ero.left_vertices -
-                     lanelet_ero.right_vertices) * 0.5
-        length = np.linalg.norm(perp_vecs, axis=1)
-        factors = np.divide(radius, length)  # 0.5 * np.ones_like(length))
-        factors = np.reshape(factors, newshape=[-1, 1])
-        factors = 1 - np.maximum(
-            factors,
-            np.ones_like(factors) *
-            min_factor)  # ensure minimum width of eroded lanelet
-        perp_vec_ero = np.multiply(perp_vecs, factors)
-
-        # recompute vertices
-        lanelet_ero._left_vertices = lanelet_ero.center_vertices + perp_vec_ero
-        lanelet_ero._right_vertices = lanelet_ero.center_vertices - perp_vec_ero
-        if lanelet_ero._polygon is not None:
-            lanelet_ero._polygon = Polygon(
-                np.concatenate((lanelet_ero.right_vertices,
-                                np.flip(lanelet_ero.left_vertices, 0))))
-        lanelets_ero.append(lanelet_ero)
+        lanelet_copy = deepcopy(lanelet)
+        lanelet_copy._left_vertices = np.array([
+            l + offset * (c - l)
+            for l, c in zip(lanelet.left_vertices, lanelet.center_vertices)
+        ])
+        lanelet_copy._right_vertices = np.array([
+            r + offset * (c - r)
+            for r, c in zip(lanelet.right_vertices, lanelet.center_vertices)
+        ])
+        lanelet_copy._polygon = None
+        lanelets_ero.append(lanelet_copy)
 
     return LaneletNetwork.create_from_lanelet_list(lanelets_ero)
 
@@ -262,7 +220,7 @@ def _find_intersecting_edges(
             for shape_0 in shape_list:
                 if edges_intersect: break
                 for shape_1 in shape_list_other:
-                        # shapely
+                    # shapely
                     if shape_0.intersection(shape_1).area > 0.0:
                         edges_intersect = True
                         intersecting_edges.append([edge_id, edge_id_other])

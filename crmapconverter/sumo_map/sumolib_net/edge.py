@@ -33,8 +33,8 @@ class Edge:
         self._lanes = []
         self._speed = None
         self._length = None
-        self._incoming = {}
-        self._outgoing = {}
+        self._incoming = set()
+        self._outgoing = set()
         self._shape = None
         self._shapeWithJunctions = None
         self._shape3D = None
