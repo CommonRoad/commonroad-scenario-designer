@@ -2,6 +2,7 @@
 This class contains functions for converting a CommonRoad map into a .net.xml SUMO map
 """
 import logging
+import sys
 from collections import defaultdict
 from copy import deepcopy
 from typing import Dict, Tuple, List, Set
@@ -12,13 +13,21 @@ import subprocess
 import warnings
 from xml.etree import cElementTree as ET
 from xml.dom import minidom
+from itertools import groupby
 
 # import networkx as nx
 import numpy as np
+try:
+    import pycrccosy
+    from commonroad_ccosy.geometry.util import resample_polyline
+except ImportError:
+    warnings.warn(f"Unable to import pycrccosy, converting static scenario into interactive is not supported!")
 
 from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.common.util import Interval
 from commonroad.scenario.lanelet import LaneletNetwork, Lanelet
+from commonroad.scenario.obstacle import ObstacleType, ObstacleRole
+from commonroad.scenario.scenario import Scenario
 from commonroad.scenario.traffic_sign import SupportedTrafficSignCountry, TrafficLight, TrafficLightState, TrafficLightCycleElement, TrafficLightDirection
 from commonroad.scenario.traffic_sign_interpreter import TrafficSigInterpreter
 from commonroad.visualization.draw_dispatch_cr import draw_object
@@ -33,7 +42,9 @@ import sumolib
 from sumocr.maps.scenario_wrapper import AbstractScenarioWrapper
 
 from .util import compute_max_curvature_from_polyline, _find_intersecting_edges, get_scenario_name_from_crfile, get_total_lane_length_from_netfile, write_ego_ids_to_rou_file, get_scenario_name_from_netfile, remove_unreferenced_traffic_lights, max_lanelet_network_id
-from .config import SumoConfig, traffic_light_states_CR2SUMO, traffic_light_states_SUMO2CR, lanelet_type_CR2SUMO
+from .config import SumoConfig, \
+    VEHICLE_TYPE_CR2SUMO, traffic_light_states_CR2SUMO, traffic_light_states_SUMO2CR, lanelet_type_CR2SUMO, \
+    VEHICLE_NODE_TYPE_CR2SUMO
 
 # This file is used as a template for the generated .sumo.cfg files
 DEFAULT_CFG_FILE = "default.sumo.cfg"
@@ -76,6 +87,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         self.lane_id2lanelet_id: Dict[str, int] = {}
         self.lanelet_id2lane_id: Dict[int, str] = {}
         self.lanelet_id2edge_id: Dict[int, int] = {}
+        self.lanelet_id2edge_lane_id: Dict[int, int] = {}
         # generated junctions by NETCONVERT
         self.lanelet_id2junction: Dict[int, Junction] = {}
         self._start_nodes = {}
@@ -321,6 +333,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
 
             for i_lane, l_id in enumerate(ordered_lanelet_ids):
                 self.lanelet_id2edge_id[l_id] = rightmost_lanelet.lanelet_id
+                self.lanelet_id2edge_lane_id[l_id] = i_lane
 
     def _compute_node_coords(self, lanelets, index: int):
         vertices = np.array([l.center_vertices[index] for l in lanelets])
@@ -1278,6 +1291,44 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         logging.info("Generating Traffic Routes")
         return self._generate_routes(output_path)
 
+    def convert_scenario_to_net_file(self, scenario: Scenario, output_folder: str) -> bool:
+        """
+        Convert the Commonroad scenario to SUMO format.
+        The routes will be initialized according to the trajectories defined in the CR scenario
+        :param scenario: the scenario to be converted
+        :param output_folder: path to the output folder
+        :return returns whether conversion was successful
+        """
+        output_path = os.path.join(output_folder, self.conf.scenario_name + '.net.xml')
+        logging.info("Converting to SUMO Map")
+        self._convert_map()
+
+        logging.info("Merging Intermediate Files")
+        self.write_intermediate_files(output_path)
+        conversion_possible = self.merge_intermediate_files(output_path,
+                                                            cleanup=False)
+        if not conversion_possible:
+            logging.error("Error converting map, see above for details")
+            return False
+
+        logging.info("Converting Traffic Routes")
+        return self._convert_routes(scenario, output_folder)
+
+    def _convert_routes(self, scenario: Scenario, output_folder: str) -> bool:
+        """
+        Convert the Commonroad trajectories to SUMO routes. Next to the route files add file will be created as well
+        :param scenario: the scenario to be converted
+        :param output_folder: path to the output folder
+        :return returns whether conversion was successful
+        """
+        scenario_name = str(scenario.scenario_id)
+        net_file = os.path.join(output_folder, scenario_name + '.net.xml')
+
+        add_file = self._convert_to_add_file(scenario, output_folder)
+        rou_files = self._convert_to_rou_file(scenario, output_folder)
+        self.sumo_cfg_file = self._generate_cfg_file(scenario_name, net_file, rou_files, add_file, output_folder)
+        return True
+
     def _generate_routes(self, net_file: str) -> bool:
         """
         Automatically generates traffic routes from the given .net.xml file
@@ -1306,6 +1357,69 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                                                      rou_files, add_file,
                                                      out_folder)
         return True
+
+    def _convert_to_add_file(self, scenario: Scenario, output_folder: str) -> str:
+        """
+        During converting the Commonroad trajectories to SUMO routes add file is required for SUMO.
+        :param scenario: the scenario to be converted
+        :param output_folder: path to the output folder
+        :return: the path of the created add file
+        """
+        add_file = os.path.join(output_folder, str(scenario.scenario_id) + '.add.xml')
+
+        # create file
+        domTree = minidom.Document()
+        additional_node = domTree.createElement("additional")
+        domTree.appendChild(additional_node)
+        vType_dist_node = domTree.createElement("vTypeDistribution")
+        vType_dist_node.setAttribute("id", "DEFAULT_VEHTYPE")
+        additional_node.appendChild(vType_dist_node)
+
+        # config parameters for easy access
+        vehicle_params = self.conf.veh_params
+        driving_params = self.conf.driving_params
+
+        def get_grouped_obstacles(obstacle_list):
+            return {obstacle_id: list(obstacles)
+                                  for obstacle_id, obstacles in groupby(sorted(obstacle_list,
+                                                                   key=lambda obstacle: obstacle.obstacle_type.value),
+                                                            key=lambda obstacle: obstacle.obstacle_type)}
+
+        num_all_obstacles = len(scenario.obstacles)
+        grouped_obstacles = {ObstacleRole.STATIC: get_grouped_obstacles(scenario.dynamic_obstacles),
+                             ObstacleRole.DYNAMIC: get_grouped_obstacles(scenario.static_obstacles)}
+
+        for veh_role, type_grouped_obstacles in grouped_obstacles.items():
+            for veh_type, obstacle_list in type_grouped_obstacles.items():
+                sumo_veh_type = VEHICLE_TYPE_CR2SUMO[veh_type]
+                if veh_role == ObstacleRole.STATIC:
+                    sumo_veh_type = sumo_veh_type + "_static"
+                vType_node = domTree.createElement("vType")
+                vType_node.setAttribute("id", sumo_veh_type)
+                vType_node.setAttribute("guiShape", sumo_veh_type)
+                vType_node.setAttribute("vClass", sumo_veh_type)
+                vType_node.setAttribute("probability", str(len(obstacle_list) / num_all_obstacles))
+
+                for att_name, setting in vehicle_params.items():
+                    att_value = setting[sumo_veh_type]
+                    if type(att_value) is Interval:
+                        raise ValueError(f"Converting a CommonRoad scenario does not support using Interval "
+                                         f"as value for parameter {att_name}.{veh_type}")
+                    else:
+                        att_value = str(att_value)
+                    vType_node.setAttribute(att_name, att_value)
+                for att_name, att_value in driving_params.items():
+                    vType_node.setAttribute(att_name, str("{0:.2f}".format(att_value)))
+                if veh_role == ObstacleRole.STATIC:
+                    vType_node.setAttribute("maxSpeed", str(f"{sys.float_info.min}"))
+
+                vType_dist_node.appendChild(vType_node)
+
+        with open(add_file, "w") as f:
+            domTree.documentElement.writexml(f, addindent="\t", newl="\n")
+
+        logging.info("Additional file written to {}".format(add_file))
+        return add_file
 
     def _generate_add_file(self, scenario_name: str,
                            output_folder: str) -> str:
@@ -1361,6 +1475,154 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
 
         logging.info("Additional file written to {}".format(add_file))
         return add_file
+
+    def _convert_to_rou_file(
+        self,
+        scenario: Scenario,
+        out_folder: str,
+    ) -> Dict[str, str]:
+        """
+        Creates route files from CommonRoad scenario.
+
+        :param scenario: the scenario to be converted
+        :param out_folder: output folder of route file
+        :return: path of route file
+        """
+
+        # TODO: The following methods are coming from the route-planner repository.
+        #  These functions are currently required only for this method, however, this functionality
+        #  is useful over the whole CommonRoad framework, therefore it should be placed
+        #  in the pycrccosy or commonroad-io repository
+        #  The future of these methods needs to be discussed
+        def relative_orientation(from_angle1_in_rad, to_angle2_in_rad):
+            phi = (to_angle2_in_rad - from_angle1_in_rad) % (2 * np.pi)
+            if phi > np.pi:
+                phi -= (2 * np.pi)
+
+            return phi
+
+        def lanelet_orientation_at_position(lanelet: Lanelet, position: np.ndarray):
+            """
+            Finds the lanelet orientation with the two closest point to the given state
+
+            :param lanelet: Lanelet on which the orientation at the given state should be calculated
+            :param position: Position where the lanelet's orientation should be calculated
+            :return: An orientation in interval [-pi,pi]
+            """
+            ccosy = create_coordinate_system_from_polyline(lanelet.center_vertices)
+            long, lat = ccosy.convert_to_curvilinear_coords(position[0], position[1])
+            tangent = ccosy.tangent(long)
+            return np.arctan2(tangent[1], tangent[0])
+
+        def sorted_lanelet_ids(lanelet_ids: List[int], orientation: float, position: np.ndarray, scenario: Scenario) \
+                -> List[int]:
+            """
+            return the lanelets sorted by relative orientation to the position and orientation given
+            """
+
+            if len(lanelet_ids) <= 1:
+                return lanelet_ids
+            else:
+                lanelet_id_list = np.array(lanelet_ids)
+
+                def get_lanelet_relative_orientation(lanelet_id):
+                    lanelet = scenario.lanelet_network.find_lanelet_by_id(lanelet_id)
+                    lanelet_orientation = lanelet_orientation_at_position(lanelet, position)
+                    return np.abs(relative_orientation(lanelet_orientation, orientation))
+
+                orientation_differences = np.array(list(map(get_lanelet_relative_orientation, lanelet_id_list)))
+                sorted_indices = np.argsort(orientation_differences)
+                return list(lanelet_id_list[sorted_indices])
+
+        def create_coordinate_system_from_polyline(polyline):
+            if len(polyline) <= 4:
+                last_point = polyline[-1]
+                length = np.linalg.norm(polyline[-1] - polyline[0])
+                polyline = resample_polyline(polyline, length / 4.0)
+                # make sure that the original vertices are all contained
+                if not np.all(np.isclose(polyline[-1], last_point)):
+                    polyline = np.append(polyline, [last_point], axis=0)
+            return pycrccosy.TrapezoidCoordinateSystem(polyline)
+
+        def get_long_dist(lanelet: Lanelet, position):
+            ccosy = create_coordinate_system_from_polyline(lanelet.center_vertices)
+            long, lat = ccosy.convert_to_curvilinear_coords(position[0], position[1])
+            return long
+
+        scenario_name = str(scenario.scenario_id)
+
+        grouped_obstacles = {k: list(g) for k, g in groupby(sorted(scenario.obstacles,
+                                                                   key=lambda obstacle: obstacle.obstacle_type.value),
+                                                            key=lambda obstacle: obstacle.obstacle_type)}
+
+        # filenames
+        route_files: Dict[str, str] = {
+            'vehicle':
+            os.path.join(out_folder, scenario_name + ".vehicles.rou.xml"),
+            "pedestrian":
+            os.path.join(out_folder, scenario_name + ".pedestrians.rou.xml")
+        }
+
+        for route_type, route_file in route_files.items():
+            domTree = minidom.Document()
+            routes_node = domTree.createElement("routes")
+            domTree.appendChild(routes_node)
+            vType_dist_node = domTree.createElement("vTypeDistribution")
+            vType_dist_node.setAttribute("id", "DEFAULT_VEHTYPE")
+
+            flatten = lambda l: [item for sublist in l for item in sublist]
+            route_obstacles = flatten([obstacles
+                                 for obstacle_type, obstacles in grouped_obstacles.items()
+                                 if VEHICLE_NODE_TYPE_CR2SUMO[obstacle_type] == route_type])
+
+            for obstacle in route_obstacles:
+                vehicle_node = domTree.createElement("vehicle")
+
+                vehicle_node.setAttribute("id", str(obstacle.obstacle_id))
+                vehicle_node.setAttribute("depart", str(obstacle.prediction.initial_time_step * scenario.dt))
+                vehicle_node.setAttribute("departSpeed", str(obstacle.initial_state.velocity))
+
+                lanelet_ids = []
+                last_lanelet_id = None
+                for state in obstacle.prediction.trajectory.state_list:
+                    possible_lanelet_ids = scenario.lanelet_network.find_lanelet_by_position([state.position])[0]
+                    sorted_lanelet_id_list = sorted_lanelet_ids(possible_lanelet_ids, state.orientation, state.position,
+                                                                scenario)
+
+                    best_lanelet_id = sorted_lanelet_id_list[0]
+
+                    if best_lanelet_id != last_lanelet_id:
+                        lanelet_ids.append(best_lanelet_id)
+                        last_lanelet_id = best_lanelet_id
+
+                last_lanelet = scenario.lanelet_network.find_lanelet_by_id(lanelet_ids[-1])
+                _, all_successor_lanelet_ids = Lanelet.all_lanelets_by_merging_successors_from_lanelet(last_lanelet,
+                                                                                                       scenario.lanelet_network)
+                successor_lanelet_ids = all_successor_lanelet_ids[0]
+
+                lanelet_ids.extend(successor_lanelet_ids[1:])
+
+                starting_lanelet_id = lanelet_ids[0]
+                depart_lane = self.lanelet_id2edge_lane_id[starting_lanelet_id]
+                vehicle_node.setAttribute("departLane", str(depart_lane))
+
+                starting_lanelet = scenario.lanelet_network.find_lanelet_by_id(starting_lanelet_id)
+                depart_pos = get_long_dist(starting_lanelet, obstacle.initial_state.position)
+                vehicle_node.setAttribute("departPos", str(depart_pos))
+
+                vehicle_route_node = domTree.createElement("route")
+                edges = [str(self.lanelet_id2edge_id[lanelet_id]) for lanelet_id in lanelet_ids]
+                vehicle_route_node.setAttribute("edges", " ".join(edges))
+                vehicle_node.appendChild(vehicle_route_node)
+
+                routes_node.appendChild(vehicle_node)
+
+            with open(route_file, "w") as f:
+                domTree.documentElement.writexml(f, addindent="\t", newl="\n")
+
+            logging.info("Route file written to {}".format(route_file))
+
+        return route_files
 
     def _generate_rou_file(
         self,
