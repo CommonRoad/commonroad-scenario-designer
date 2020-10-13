@@ -5,4 +5,5 @@
 *.net.xml
 *.sumo.cfg
 *.trips.xml
+*.mp4
 output_lanechange.txt
