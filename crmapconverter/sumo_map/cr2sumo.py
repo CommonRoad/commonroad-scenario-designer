@@ -1386,14 +1386,16 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                                                             key=lambda obstacle: obstacle.obstacle_type)}
 
         num_all_obstacles = len(scenario.obstacles)
-        grouped_obstacles = {ObstacleRole.STATIC: get_grouped_obstacles(scenario.dynamic_obstacles),
-                             ObstacleRole.DYNAMIC: get_grouped_obstacles(scenario.static_obstacles)}
+        grouped_obstacles = {ObstacleRole.STATIC: get_grouped_obstacles(scenario.static_obstacles),
+                             ObstacleRole.DYNAMIC: get_grouped_obstacles(scenario.dynamic_obstacles)}
 
         for veh_role, type_grouped_obstacles in grouped_obstacles.items():
             for veh_type, obstacle_list in type_grouped_obstacles.items():
                 sumo_veh_type = VEHICLE_TYPE_CR2SUMO[veh_type]
                 if veh_role == ObstacleRole.STATIC:
-                    sumo_veh_type = sumo_veh_type + "_static"
+                    sumo_veh_type_name = sumo_veh_type + "_static"
+                else:
+                    sumo_veh_type_name = sumo_veh_type
                 vType_node = domTree.createElement("vType")
                 vType_node.setAttribute("id", sumo_veh_type)
                 vType_node.setAttribute("guiShape", sumo_veh_type)
