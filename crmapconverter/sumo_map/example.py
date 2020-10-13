@@ -31,7 +31,7 @@ config = SumoConfig.from_scenario_name(scenario_name)
 # # convert CR to sumo net
 wrapper = CR2SumoMapConverter(scenario.lanelet_network, config)
 wrapper.convert_to_net_file(output_folder)
-traffic_light_system_generated = wrapper.auto_generate_traffic_light_system(61)
+# traffic_light_system_generated = wrapper.auto_generate_traffic_light_system(61)
 
 # draw scenario after traffic light generation
 # plt.figure(figsize=(25, 25))
