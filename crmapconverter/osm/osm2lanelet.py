@@ -15,7 +15,7 @@ from typing import List, Tuple
 
 import numpy as np
 from pyproj import Proj
-from commonroad.scenario.scenario import Scenario
+from commonroad.scenario.scenario import Scenario, ScenarioID
 
 from crmapconverter.opendrive.opendriveconversion.conversion_lanelet import ConversionLanelet
 from crmapconverter.opendrive.opendriveconversion.conversion_lanelet_network import ConversionLaneletNetwork
@@ -24,6 +24,7 @@ from crmapconverter.osm.osm import OSM, WayRelation, DEFAULT_PROJ_STRING, Node
 NODE_DISTANCE_TOLERANCE = 0.01  # this is in meters
 
 ADJACENT_WAY_DISTANCE_TOLERANCE = 0.05
+
 
 class OSM2LConverter:
     "Class to convert OSM to the Commonroad representation of Lanelets."
@@ -68,7 +69,12 @@ class OSM2LConverter:
         self.first_left_pts, self.last_left_pts = defaultdict(list), defaultdict(list)
         self.first_right_pts, self.last_right_pts = defaultdict(list), defaultdict(list)
 
-        scenario = Scenario(dt=0.1, benchmark_id="none")
+
+        # TODO create default scenario ID or implement workaround in commonroad-io
+        scenario_id = ScenarioID(cooperative=False, country_id="ZAM", map_name="OpenDrive", map_id=123,
+                                 configuration_id=None, prediction_type=None, prediction_id=None)
+
+        scenario = Scenario(dt=0.1, scenario_id=scenario_id)
         self.lanelet_network = ConversionLaneletNetwork()
 
         for way_rel in osm.way_relations:

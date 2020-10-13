@@ -19,7 +19,7 @@ Installation instructions are given in the documentation in the section "Install
 
 ### GUI (CommonRoad Scenario Designer / CRSD)
 
-![GUI_Screenshot](./files/img/GUI_screenshot.png)
+![GUI_Screenshot](./docs/source/images/gui/GUI_screenshot.png)
 
 First you need to activate your python environment with the installed dependencies and load the environment variables.
 Then you can start _CommonRoad Scenario Designer_:
