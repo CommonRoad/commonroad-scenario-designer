@@ -194,7 +194,7 @@ def add_is_left_of(incoming_data, incoming_data_id):
 
     :param incoming_data: incomings without isLeftOf
     :param incoming_data_id: List of the id of the incomings
-    :return: incomigs with the isLeftOf assigned
+    :return: incomings with the isLeftOf assigned
     """
 
     # Choose a reference incoming vector
