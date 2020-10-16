@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Test the conversion from an osm file to a CommonRoad Scenario file."""
 
-__author__ = "Max Frühauf"
+__author__ = "Max Frühauf, Fabian Höltke"
 __copyright__ = "TUM Cyber-Physical Systems Group"
 
 import os
@@ -9,7 +9,7 @@ import unittest
 from lxml import etree
 
 import crmapconverter.osm2cr.converter_modules.converter as converter
-from utils import elements_equal
+from test.utils import elements_equal, validate
 
 
 class TestOSM2CRScenarioBaseClass(unittest.TestCase):
@@ -25,6 +25,8 @@ class TestOSM2CRScenarioBaseClass(unittest.TestCase):
     out_path = None
     scenario: converter.GraphScenario = None
 
+    xsd_file_name = "documentation_XML_commonRoad_XSD"
+
     def setUp(self):
         """Load the osm file and convert it to a scenario."""
         if not self.xml_output_name:
@@ -36,11 +38,11 @@ class TestOSM2CRScenarioBaseClass(unittest.TestCase):
         path = os.path.dirname(os.path.realpath(
             __file__)) + f"/osm_xml_test_files/{self.osm_file_name}.osm"
 
-        print("input: " + path)
-        print("output: " + self.out_path)
+        #print("input: " + path)
+        #print("output: " + self.out_path)
         self.scenario = converter.GraphScenario(path)
 
-    def test_osm2_cr_conversion(self):
+    def test_osm2_cr_conversion_equal(self):
         """Test if the converted scenario is equal to the loaded xml file"""
 
         # Save scenario to xml file, as converter.GraphScenario offers no way
@@ -52,7 +54,7 @@ class TestOSM2CRScenarioBaseClass(unittest.TestCase):
         ground_truth_path = os.path.dirname(
             os.path.realpath(__file__)
         ) + f"/osm_xml_test_files/{self.osm_file_name}.xml"
-        print("ground truth: "+ground_truth_path)
+        #print("ground truth: "+ground_truth_path)
 
         # load saved file & compare to ground truth
         with open(ground_truth_path, "r") as gt, open(converted_path,
@@ -70,21 +72,33 @@ class TestOSM2CRScenarioBaseClass(unittest.TestCase):
             # compare both element trees
             self.assertTrue(elements_equal(ground_truth, converted))
 
+    def test_osm2_cr_conversion_validates(self):
+        """Test if XML format is correct and validates against xsd schema """
 
-class TestUrbanScenario(TestOSM2CRScenarioBaseClass):
-    """Copied to prevent regression from test_osm_to_cr_lanelet_conversion.py"""
-    __test__ = False
-    osm_file_name = "urban-1_lanelets_utm"
+        converted_path = os.path.join(
+            self.out_path, self.osm_file_name + "_converted_scenario.xml")
 
-class TestMergingLaneletsScenario(TestOSM2CRScenarioBaseClass):
-    """Copied to prevent regression from test_osm_to_cr_lanelet_conversion.py"""
+        xsd_path = path = os.path.dirname(os.path.realpath(
+            __file__)) + f"/osm_xml_test_files/{self.xsd_file_name}.xsd"
+
+        xmlschema_doc = etree.parse(xsd_path)
+        xmlschema = etree.XMLSchema(xmlschema_doc)
+        xml_doc = etree.parse(converted_path)
+
+        xmlschema.assertValid(xml_doc)
+
+
+
+class TestGarchingIntersection(TestOSM2CRScenarioBaseClass):
+    """Testing if a single small intersection can be converted without error"""
+    # Don't test, currently not able to convert correctly
     __test__ = False
-    osm_file_name = "merging_lanelets_utm"
+    osm_file_name = "garching_intersection"
 
 
 class TestEichstaett(TestOSM2CRScenarioBaseClass):
     """Testing if a small town with traffic lights, complicated road networks
-    and large osm filesize can be correctly converted"""
+    and large osm filesize can be converted on default settings"""
 
     __test__ = True
     osm_file_name = "eichstaett"
