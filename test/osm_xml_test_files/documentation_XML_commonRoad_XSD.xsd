@@ -1,0 +1,623 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+__author__ = "Markus Koschi, Anna-Katharina Rettinger, Sebastian Maierhofer"
+__copyright__ = "TUM Cyber-Physical System Group"
+__credits__ = ["BMW Group CAR@TUM"]
+__version__ = "2020b"
+__maintainer__ = "Markus Koschi"
+__email__ = "commonroad-i06@in.tum.de"
+__status__ = "released"
+
+""" XSD for CommonRoad benchmark scenarios """
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <!-- %%%%%%%%%%%%%%% auxiliary xsd elements %%%%%%%%%%%%%%% -->
+  <!-- distance in meter (positive decimals) -->
+  <xs:simpleType name="positiveDecimal">
+    <xs:restriction base="xs:decimal">
+      <xs:minExclusive value="0.0"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <!-- decimal value: either exact or interval -->
+  <xs:complexType name="decimalExact">
+    <xs:all>
+      <xs:element name="exact" type="xs:decimal"/>
+    </xs:all>
+  </xs:complexType>
+  <xs:complexType name="decimalInterval">
+    <xs:sequence>
+      <xs:element name="intervalStart" type="xs:decimal"/>
+      <xs:element name="intervalEnd" type="xs:decimal"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="decimalExactOrInterval">
+    <xs:choice>
+      <xs:element name="exact" type="xs:decimal"/>
+      <xs:sequence>
+        <xs:element name="intervalStart" type="xs:decimal"/>
+        <xs:element name="intervalEnd" type="xs:decimal"/>
+      </xs:sequence>
+    </xs:choice>
+  </xs:complexType>
+  <!-- integer value exact zero -->
+  <xs:complexType name="integerExactZero">
+    <xs:all>
+      <xs:element name="exact" type="integerZero"/>
+    </xs:all>
+  </xs:complexType>
+  <xs:simpleType name="integerZero">
+    <xs:restriction base="xs:nonNegativeInteger">
+      <xs:minInclusive value="0"/>
+      <xs:maxInclusive value="0"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <!-- integer value greater than zero: either exact or interval -->
+  <xs:complexType name="integerIntervalGreaterZero">
+    <xs:sequence>
+      <xs:element name="intervalStart" type="xs:nonNegativeInteger"/>
+      <xs:element name="intervalEnd" type="xs:positiveInteger"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="integerExactOrIntervalGreaterZero">
+    <xs:choice>
+      <xs:element name="exact" type="xs:positiveInteger"/>
+      <xs:sequence>
+        <xs:element name="intervalStart" type="xs:nonNegativeInteger"/>
+        <xs:element name="intervalEnd" type="xs:positiveInteger"/>
+      </xs:sequence>
+    </xs:choice>
+  </xs:complexType>
+  <!-- %%%%%%%%%%%%%%% auxiliary CommonRoad elements %%%%%%%%%%%%%%% -->
+  <xs:complexType name="point">
+    <xs:sequence>
+      <xs:element name="x" type="xs:decimal"/>
+      <xs:element name="y" type="xs:decimal"/>
+      <xs:element name="z" type="xs:decimal" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="rectangle">
+    <xs:sequence>
+      <xs:element name="length" type="positiveDecimal"/>
+      <xs:element name="width" type="positiveDecimal"/>
+      <xs:element name="orientation" type="xs:decimal" minOccurs="0"/>
+      <xs:element name="center" type="point" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="circle">
+    <xs:sequence>
+      <xs:element name="radius" type="positiveDecimal"/>
+      <xs:element name="center" type="point" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="polygon">
+    <xs:sequence>
+      <xs:element name="point" type="point" minOccurs="3" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="shape">
+    <xs:choice maxOccurs="unbounded">
+      <xs:element name="rectangle" type="rectangle"/>
+      <xs:element name="circle" type="circle"/>
+      <xs:element name="polygon" type="polygon"/>
+    </xs:choice>
+  </xs:complexType>
+  <xs:complexType name="position">
+    <xs:choice>
+      <xs:element name="point" type="point"/>
+      <xs:element name="rectangle" type="rectangle" maxOccurs="unbounded"/>
+      <xs:element name="circle" type="circle" maxOccurs="unbounded"/>
+      <xs:element name="polygon" type="polygon" maxOccurs="unbounded"/>
+      <xs:element name="lanelet" type="laneletRef" maxOccurs="unbounded"/>
+    </xs:choice>
+  </xs:complexType>
+  <xs:complexType name="positionExact">
+    <xs:all>
+      <xs:element name="point" type="point"/>
+    </xs:all>
+  </xs:complexType>
+  <xs:complexType name="positionInterval">
+    <xs:choice>
+      <xs:element name="rectangle" type="rectangle" maxOccurs="unbounded"/>
+      <xs:element name="circle" type="circle" maxOccurs="unbounded"/>
+      <xs:element name="polygon" type="polygon" maxOccurs="unbounded"/>
+      <xs:element name="lanelet" type="laneletRef" maxOccurs="unbounded"/>
+    </xs:choice>
+  </xs:complexType>
+  <xs:complexType name="state">
+    <xs:all>
+      <xs:element name="position" type="position"/>
+      <xs:element name="orientation" type="decimalExactOrInterval"/>
+      <xs:element name="time" type="integerExactOrIntervalGreaterZero"/>
+      <xs:element name="velocity" type="decimalExactOrInterval" minOccurs="0"/>
+      <xs:element name="acceleration" type="decimalExactOrInterval" minOccurs="0"/>
+      <xs:element name="yawRate" type="decimalExactOrInterval" minOccurs="0"/>
+      <xs:element name="slipAngle" type="decimalExactOrInterval" minOccurs="0"/>
+      <xs:element name="steeringAngle" type="decimalExactOrInterval" minOccurs="0"/>
+      <xs:element name="rollAngle" type="decimalExactOrInterval" minOccurs="0"/>
+      <xs:element name="rollRate" type="decimalExactOrInterval" minOccurs="0"/>
+      <xs:element name="pitchAngle" type="decimalExactOrInterval" minOccurs="0"/>
+      <xs:element name="pitchRate" type="decimalExactOrInterval" minOccurs="0"/>
+      <xs:element name="velocityY" type="decimalExactOrInterval" minOccurs="0"/>
+      <xs:element name="positionZ" type="decimalExactOrInterval" minOccurs="0"/>
+      <xs:element name="velocityZ" type="decimalExactOrInterval" minOccurs="0"/>
+      <xs:element name="rollAngleFront" type="decimalExactOrInterval" minOccurs="0"/>
+      <xs:element name="rollRateFront" type="decimalExactOrInterval" minOccurs="0"/>
+      <xs:element name="velocityYFront" type="decimalExactOrInterval" minOccurs="0"/>
+      <xs:element name="positionZFront" type="decimalExactOrInterval" minOccurs="0"/>
+      <xs:element name="velocityZFront" type="decimalExactOrInterval" minOccurs="0"/>
+      <xs:element name="rollAngleRear" type="decimalExactOrInterval" minOccurs="0"/>
+      <xs:element name="rollRateRear" type="decimalExactOrInterval" minOccurs="0"/>
+      <xs:element name="velocityYRear" type="decimalExactOrInterval" minOccurs="0"/>
+      <xs:element name="positionZRear" type="decimalExactOrInterval" minOccurs="0"/>
+      <xs:element name="velocityZRear" type="decimalExactOrInterval" minOccurs="0"/>
+      <xs:element name="leftFrontWheelAngularSpeed" type="decimalExactOrInterval" minOccurs="0"/>
+      <xs:element name="rightFrontWheelAngularSpeed" type="decimalExactOrInterval" minOccurs="0"/>
+      <xs:element name="leftRearWheelAngularSpeed" type="decimalExactOrInterval" minOccurs="0"/>
+      <xs:element name="rightRearWheelAngularSpeed" type="decimalExactOrInterval" minOccurs="0"/>
+      <xs:element name="deltaYFront" type="decimalExactOrInterval" minOccurs="0"/>
+      <xs:element name="deltaYRear" type="decimalExactOrInterval" minOccurs="0"/>
+      <xs:element name="curvature" type="decimalExactOrInterval" minOccurs="0"/>
+      <xs:element name="curvatureChange" type="decimalExactOrInterval" minOccurs="0"/>
+      <xs:element name="jerk" type="decimalExactOrInterval" minOccurs="0"/>
+      <xs:element name="jounce" type="decimalExactOrInterval" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+  <xs:complexType name="initialState">
+    <xs:all>
+      <xs:element name="position" type="position"/>
+      <xs:element name="orientation" type="decimalExactOrInterval"/>
+      <xs:element name="time" type="integerExactZero"/>
+      <xs:element name="velocity" type="decimalExactOrInterval" minOccurs="0"/>
+      <xs:element name="acceleration" type="decimalExactOrInterval" minOccurs="0"/>
+      <xs:element name="yawRate" type="decimalExactOrInterval" minOccurs="0"/>
+      <xs:element name="slipAngle" type="decimalExactOrInterval" minOccurs="0"/>
+      <xs:element name="steeringAngle" type="decimalExactOrInterval" minOccurs="0"/>
+      <xs:element name="rollAngle" type="decimalExactOrInterval" minOccurs="0"/>
+      <xs:element name="rollRate" type="decimalExactOrInterval" minOccurs="0"/>
+      <xs:element name="pitchAngle" type="decimalExactOrInterval" minOccurs="0"/>
+      <xs:element name="pitchRate" type="decimalExactOrInterval" minOccurs="0"/>
+      <xs:element name="velocityY" type="decimalExactOrInterval" minOccurs="0"/>
+      <xs:element name="positionZ" type="decimalExactOrInterval" minOccurs="0"/>
+      <xs:element name="velocityZ" type="decimalExactOrInterval" minOccurs="0"/>
+      <xs:element name="rollAngleFront" type="decimalExactOrInterval" minOccurs="0"/>
+      <xs:element name="rollRateFront" type="decimalExactOrInterval" minOccurs="0"/>
+      <xs:element name="velocityYFront" type="decimalExactOrInterval" minOccurs="0"/>
+      <xs:element name="positionZFront" type="decimalExactOrInterval" minOccurs="0"/>
+      <xs:element name="velocityZFront" type="decimalExactOrInterval" minOccurs="0"/>
+      <xs:element name="rollAngleRear" type="decimalExactOrInterval" minOccurs="0"/>
+      <xs:element name="rollRateRear" type="decimalExactOrInterval" minOccurs="0"/>
+      <xs:element name="velocityYRear" type="decimalExactOrInterval" minOccurs="0"/>
+      <xs:element name="positionZRear" type="decimalExactOrInterval" minOccurs="0"/>
+      <xs:element name="velocityZRear" type="decimalExactOrInterval" minOccurs="0"/>
+      <xs:element name="leftFrontWheelAngularSpeed" type="decimalExactOrInterval" minOccurs="0"/>
+      <xs:element name="rightFrontWheelAngularSpeed" type="decimalExactOrInterval" minOccurs="0"/>
+      <xs:element name="leftRearWheelAngularSpeed" type="decimalExactOrInterval" minOccurs="0"/>
+      <xs:element name="rightRearWheelAngularSpeed" type="decimalExactOrInterval" minOccurs="0"/>
+      <xs:element name="deltaYFront" type="decimalExactOrInterval" minOccurs="0"/>
+      <xs:element name="deltaYRear" type="decimalExactOrInterval" minOccurs="0"/>
+      <xs:element name="curvature" type="decimalExactOrInterval" minOccurs="0"/>
+      <xs:element name="curvatureChange" type="decimalExactOrInterval" minOccurs="0"/>
+      <xs:element name="jerk" type="decimalExactOrInterval" minOccurs="0"/>
+      <xs:element name="jounce" type="decimalExactOrInterval" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+  <xs:complexType name="initialSignalState">
+    <xs:all>
+      <xs:element name="time" type="integerExactZero"/>
+      <xs:element name="horn" type="xs:boolean" minOccurs="0"/>
+      <xs:element name="indicatorLeft" type="xs:boolean" minOccurs="0"/>
+      <xs:element name="indicatorRight" type="xs:boolean" minOccurs="0"/>
+      <xs:element name="brakingLights" type="xs:boolean" minOccurs="0"/>
+      <xs:element name="hazardWarningLights" type="xs:boolean" minOccurs="0"/>
+      <xs:element name="flashingBlueLights" type="xs:boolean" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+  <xs:complexType name="signalState">
+    <xs:all>
+      <xs:element name="time" type="integerExactOrIntervalGreaterZero"/>
+      <xs:element name="horn" type="xs:boolean" minOccurs="0"/>
+      <xs:element name="indicatorLeft" type="xs:boolean" minOccurs="0"/>
+      <xs:element name="indicatorRight" type="xs:boolean" minOccurs="0"/>
+      <xs:element name="brakingLights" type="xs:boolean" minOccurs="0"/>
+      <xs:element name="hazardWarningLights" type="xs:boolean" minOccurs="0"/>
+      <xs:element name="flashingBlueLights" type="xs:boolean" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+  <xs:complexType name="initialStateExact">
+    <xs:all>
+      <xs:element name="position" type="positionExact"/>
+      <xs:element name="velocity" type="decimalExact"/>
+      <xs:element name="orientation" type="decimalExact"/>
+      <xs:element name="yawRate" type="decimalExact"/>
+      <xs:element name="slipAngle" type="decimalExact"/>
+      <xs:element name="time" type="integerExactZero"/>
+      <xs:element name="acceleration" type="decimalExact" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+  <xs:complexType name="goalState">
+    <xs:all>
+      <xs:element name="time" type="integerIntervalGreaterZero"/>
+      <xs:element name="position" type="positionInterval" minOccurs="0"/>
+      <xs:element name="orientation" type="decimalInterval" minOccurs="0"/>
+      <xs:element name="velocity" type="decimalInterval" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+  <xs:complexType name="occupancy">
+    <xs:sequence>
+      <xs:element name="shape" type="shape"/>
+      <xs:element name="time" type="integerExactOrIntervalGreaterZero"/>
+    </xs:sequence>
+  </xs:complexType>
+  <!-- %%%%%%%%%%%%%%% main CommonRoad elements %%%%%%%%%%%%%%% -->
+  <!-- lanelet -->
+  <xs:simpleType name="lineMarking">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="dashed"/>
+      <xs:enumeration value="solid"/>
+      <xs:enumeration value="broad_dashed"/>
+      <xs:enumeration value="broad_solid"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="bound">
+    <xs:sequence>
+      <xs:element name="point" type="point" minOccurs="2" maxOccurs="unbounded"/>
+      <xs:element name="lineMarking" type="lineMarking" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="laneletRef">
+    <xs:attribute name="ref" type="xs:integer" use="required"/>
+  </xs:complexType>
+  <xs:complexType name="trafficLightRef">
+    <xs:attribute name="ref" type="xs:integer" use="required"/>
+  </xs:complexType>
+   <xs:complexType name="trafficSignRef">
+    <xs:attribute name="ref" type="xs:integer" use="required"/>
+  </xs:complexType>
+  <xs:simpleType name="drivingDir">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="same"/>
+      <xs:enumeration value="opposite"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="laneletAdjacentRef">
+    <xs:attribute name="ref" type="xs:integer" use="required"/>
+    <xs:attribute name="drivingDir" type="drivingDir" use="required"/>
+  </xs:complexType>
+  <xs:complexType name="stopLine">
+    <xs:sequence>
+      <xs:element name="point" type="point" minOccurs="0" maxOccurs="2"/>
+      <xs:element name="lineMarking" type="lineMarking"/>
+      <xs:element name="trafficSignRef" type="trafficSignRef" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="trafficLightRef" type="trafficLightRef" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:simpleType name="laneletType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="urban"/>
+      <xs:enumeration value="interstate"/>
+      <xs:enumeration value="country"/>
+      <xs:enumeration value="highway"/>
+      <xs:enumeration value="sidewalk"/>
+      <xs:enumeration value="crosswalk"/>
+      <xs:enumeration value="busLane"/>
+      <xs:enumeration value="bicycleLane"/>
+      <xs:enumeration value="exitRamp"/>
+      <xs:enumeration value="mainCarriageWay"/>
+      <xs:enumeration value="accessRamp"/>
+      <xs:enumeration value="driveWay"/>
+      <xs:enumeration value="busStop"/>
+      <xs:enumeration value="unknown"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="vehicleType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="vehicle"/>
+      <xs:enumeration value="car"/>
+      <xs:enumeration value="truck"/>
+      <xs:enumeration value="bus"/>
+       <xs:enumeration value="motorcycle"/>
+      <xs:enumeration value="bicycle"/>
+      <xs:enumeration value="pedestrian"/>
+      <xs:enumeration value="priorityVehicle"/>
+      <xs:enumeration value="train"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="lanelet">
+    <xs:sequence>
+      <xs:element name="leftBound" type="bound"/>
+      <xs:element name="rightBound" type="bound"/>
+      <xs:element name="predecessor" type="laneletRef" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="successor" type="laneletRef" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="adjacentLeft" type="laneletAdjacentRef" minOccurs="0"/>
+      <xs:element name="adjacentRight" type="laneletAdjacentRef" minOccurs="0"/>
+      <xs:element name="stopLine" type="stopLine" minOccurs="0"/>
+      <xs:element name="laneletType" type="laneletType" maxOccurs="unbounded"/>
+      <xs:element name="userOneWay" type="vehicleType" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="userBidirectional" type="vehicleType" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="trafficSignRef" type="trafficSignRef" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="trafficLightRef" type="trafficLightRef" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute name="id" type="xs:positiveInteger" use="required"/>
+  </xs:complexType>
+  <!-- intersections -->
+  <xs:simpleType name="trafficSignID">
+      <xs:restriction base="xs:string">
+          <xs:enumeration value="102"/>
+	  <xs:enumeration value="205"/>
+	  <xs:enumeration value="206"/>
+	  <xs:enumeration value="260"/>
+          <xs:enumeration value="272"/>
+          <xs:enumeration value="274"/>
+	  <xs:enumeration value="275"/>
+          <xs:enumeration value="276"/>
+	  <xs:enumeration value="301"/>
+	  <xs:enumeration value="306"/>
+          <xs:enumeration value="310"/>
+          <xs:enumeration value="720"/>
+	  <xs:enumeration value="1002-10"/>
+	  <xs:enumeration value="1002-12"/>
+	  <xs:enumeration value="1002-13"/>
+	  <xs:enumeration value="1002-20"/>
+	  <xs:enumeration value="1002-22"/>
+	  <xs:enumeration value="1002-23"/>
+	  <xs:enumeration value="1002-11"/>
+	  <xs:enumeration value="1002-14"/>
+	  <xs:enumeration value="1002-21"/>
+	  <xs:enumeration value="1002-24"/>
+    <xs:enumeration value=""/>
+          <xs:enumeration value="R2-1"/>
+          <xs:enumeration value="R3-4"/>
+      </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="trafficSign">
+    <xs:sequence>
+      <xs:element name= "trafficSignElement" maxOccurs="unbounded">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="trafficSignID" type="trafficSignID"/>
+            <xs:element name="additionalValue" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="position" type="positionExact" minOccurs="0"/>
+      <xs:element name="virtual" type="xs:boolean" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute name="id" type="xs:positiveInteger" use="required" />
+  </xs:complexType>
+  <xs:simpleType name="trafficLightColor">
+   <xs:restriction base="xs:string">
+    <xs:enumeration value="red"/>
+    <xs:enumeration value="redYellow"/>
+    <xs:enumeration value="green"/>
+    <xs:enumeration value="yellow"/>
+    <xs:enumeration value="inactive"/>
+   </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="trafficCycleElement">
+  	<xs:sequence>
+  	  <xs:element name="duration" type="xs:positiveInteger"/>
+  	  <xs:element name="color" type="trafficLightColor"/>
+  	</xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="trafficLightCycle">
+    <xs:sequence>
+      <xs:element name="cycleElement" type="trafficCycleElement" maxOccurs="unbounded"/>
+      <xs:element name="timeOffset" type="xs:positiveInteger" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="trafficLight">
+    <xs:sequence>
+      <xs:element name="cycle" type="trafficLightCycle"/>
+      <xs:element name="position" type="positionExact" minOccurs="0"/>
+      <xs:element name="direction" minOccurs="0">
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="right"/>
+            <xs:enumeration value="straight"/>
+            <xs:enumeration value="left"/>
+            <xs:enumeration value="leftStraight"/>
+            <xs:enumeration value="straightRight"/>
+            <xs:enumeration value="leftRight"/>
+            <xs:enumeration value="all"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="active" type="xs:boolean" minOccurs="0"/>
+    </xs:sequence>
+    <xs:attribute name="id" type="xs:positiveInteger" use="required" />
+  </xs:complexType>
+  <xs:complexType name="incoming">
+    <xs:sequence>
+	  <xs:element name="incomingLanelet" type="laneletRef" minOccurs="1" maxOccurs="unbounded"/>
+	  <xs:element name="successorsRight" type="laneletRef" minOccurs="0" maxOccurs="unbounded"/>
+	  <xs:element name="successorsStraight" type="laneletRef" minOccurs="0" maxOccurs="unbounded"/>
+	  <xs:element name="successorsLeft" type="laneletRef" minOccurs="0" maxOccurs="unbounded"/>
+	  <xs:element name="isLeftOf" type="incomingRef" minOccurs="0"/>
+    </xs:sequence>
+    <xs:attribute name="id" type="xs:positiveInteger" use="required"/>
+  </xs:complexType>
+  <xs:complexType name="crossing">
+  	<xs:sequence>
+	  <xs:element name="crossingLanelet" type="laneletRef" minOccurs="1" maxOccurs="unbounded"/>
+  	</xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="incomingRef">
+    <xs:attribute name="ref" type="xs:integer" use="required"/>
+  </xs:complexType>
+  <xs:complexType name="intersection">
+    <xs:sequence>
+  	  <xs:element name="incoming" type="incoming" minOccurs="1" maxOccurs="unbounded"/>
+    </xs:sequence>
+  	<xs:attribute name="id" type="xs:positiveInteger" use="required"/>
+  </xs:complexType>
+  <!-- obstacle -->
+  <xs:simpleType name="obstacleRole">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="static"/>
+      <xs:enumeration value="dynamic"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="obstacleTypeStatic">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="unknown"/>
+      <xs:enumeration value="parkedVehicle"/>
+      <xs:enumeration value="constructionZone"/>
+      <xs:enumeration value="roadBoundary"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="staticObstacle">
+    <xs:sequence>
+      <xs:element name="type" type="obstacleTypeStatic"/>
+      <xs:element name="shape" type="shape"/>
+      <xs:element name="initialState" type="initialState"/>
+    </xs:sequence>
+    <xs:attribute name="id" type="xs:positiveInteger" use="required"/>
+  </xs:complexType>
+  <xs:simpleType name="obstacleTypeDynamic">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="unknown"/>
+      <xs:enumeration value="car"/>
+      <xs:enumeration value="truck"/>
+      <xs:enumeration value="bus"/>
+      <xs:enumeration value="motorcycle"/>
+      <xs:enumeration value="bicycle"/>
+      <xs:enumeration value="pedestrian"/>
+      <xs:enumeration value="priorityVehicle"/>
+      <xs:enumeration value="train"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="dynamicObstacle">
+    <xs:sequence>
+      <xs:element name="type" type="obstacleTypeDynamic"/>
+      <xs:element name="shape" type="shape"/>
+      <xs:element name="initialState" type="initialState"/>
+      <xs:element name="initialSignalState" type="initialSignalState" minOccurs="0"/>
+      <xs:choice>
+        <xs:element name="trajectory">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="state" type="state" maxOccurs="unbounded"/>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="occupancySet">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="occupancy" type="occupancy" maxOccurs="unbounded"/>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:choice>
+      <xs:element name="signalSeries" minOccurs="0">
+      	<xs:complexType>
+      	  <xs:sequence>
+      	    <xs:element name="signalState" type="signalState" maxOccurs="unbounded"/>
+      	  </xs:sequence>
+      	</xs:complexType>
+      </xs:element>
+    </xs:sequence>
+    <xs:attribute name="id" type="xs:positiveInteger" use="required"/>
+  </xs:complexType>
+  <!-- planning problem -->
+  <xs:complexType name="planningProblem">
+    <xs:sequence>
+      <xs:element name="initialState" type="initialStateExact"/>
+      <xs:element name="goalState" type="goalState" minOccurs="1" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute name="id" type="xs:positiveInteger" use="required"/>
+  </xs:complexType>
+  <xs:complexType name="geoReference" mixed="true">
+    <!-- mixed="true" allows text content AND elements like userData -->
+  </xs:complexType>
+  <xs:complexType name="additionalTransformation">
+    <xs:sequence>
+      <xs:element name="xTranslation" type="xs:decimal"/>
+      <xs:element name="yTranslation" type="xs:decimal"/>
+      <xs:element name="zRotation" type="xs:decimal"/>
+      <xs:element name="scaling" type="positiveDecimal"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="geoTransformation">
+    <xs:sequence minOccurs="0" maxOccurs="1">
+      <xs:element name="geoReference" type="geoReference"/>
+      <xs:element name="additionalTransformation" type="additionalTransformation"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="location">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element name="geoNameId" type="xs:integer"/>
+      <xs:element name="gpsLatitude" type="xs:decimal"/>
+      <xs:element name="gpsLongitude" type="xs:decimal"/>
+      <xs:element name="geoTransformation" type="geoTransformation" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="tag">
+    <xs:all>
+      <xs:element name="interstate" type="xs:string" minOccurs="0"/>
+      <xs:element name="highway" type="xs:string" minOccurs="0"/>
+      <xs:element name="urban" type="xs:string" minOccurs="0"/>
+      <xs:element name="comfort" type="xs:string" minOccurs="0"/>
+      <xs:element name="critical" type="xs:string" minOccurs="0"/>
+      <xs:element name="evasive" type="xs:string" minOccurs="0"/>
+      <xs:element name="cut_in" type="xs:string" minOccurs="0"/>
+      <xs:element name="illegal_cutin" type="xs:string" minOccurs="0"/>
+      <xs:element name="intersection" type="xs:string" minOccurs="0"/>
+      <xs:element name="lane_change" type="xs:string" minOccurs="0"/>
+      <xs:element name="lane_following" type="xs:string" minOccurs="0"/>
+      <xs:element name="merging_lanes" type="xs:string" minOccurs="0"/>
+      <xs:element name="multi_lane" type="xs:string" minOccurs="0"/>
+      <xs:element name="no_oncoming_traffic" type="xs:string" minOccurs="0"/>
+      <xs:element name="oncoming_traffic" type="xs:string" minOccurs="0"/>
+      <xs:element name="parallel_lanes" type="xs:string" minOccurs="0"/>
+      <xs:element name="race_track" type="xs:string" minOccurs="0"/>
+      <xs:element name="roundabout" type="xs:string" minOccurs="0"/>
+      <xs:element name="rural" type="xs:string" minOccurs="0"/>
+      <xs:element name="simulated" type="xs:string" minOccurs="0"/>
+      <xs:element name="single_lane" type="xs:string" minOccurs="0"/>
+      <xs:element name="slip_road" type="xs:string" minOccurs="0"/>
+      <xs:element name="speed_limit" type="xs:string" minOccurs="0"/>
+      <xs:element name="traffic_jam" type="xs:string" minOccurs="0"/>
+      <xs:element name="turn_left" type="xs:string" minOccurs="0"/>
+      <xs:element name="turn_right" type="xs:string" minOccurs="0"/>
+      <xs:element name="two_lane" type="xs:string" minOccurs="0"/>
+      <xs:element name="emergency_braking" type="xs:string" minOccurs="0"/>
+    </xs:all>
+  </xs:complexType>
+  <!-- %%%%%%%%%%%%%%% root CommonRoad element %%%%%%%%%%%%%%% -->
+  <xs:element name="commonRoad">
+    <xs:complexType>
+      <xs:sequence>
+	<xs:element name="location" type="location"/>
+	<xs:element name="scenarioTags" type="tag"/>
+        <xs:element name="lanelet" type="lanelet" minOccurs="1" maxOccurs="unbounded"/>
+        <xs:element name="trafficSign" type="trafficSign" minOccurs="0" maxOccurs="unbounded"/>
+        <xs:element name="trafficLight" type="trafficLight" minOccurs="0" maxOccurs="unbounded"/>
+        <xs:element name="intersection" type="intersection" minOccurs="0" maxOccurs="unbounded"/>
+        <xs:element name="staticObstacle" type="staticObstacle" minOccurs="0" maxOccurs="unbounded"/>
+        <xs:element name="dynamicObstacle" type="dynamicObstacle" minOccurs="0" maxOccurs="unbounded"/>
+        <xs:element name="planningProblem" type="planningProblem" minOccurs="1" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attribute name="commonRoadVersion" use="required">
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="2020a"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:attribute>
+      <xs:attribute name="benchmarkID" type="xs:string" use="required"/>
+      <xs:attribute name="date" type="xs:date" use="required"/>
+      <xs:attribute name="author" type="xs:string" use="required"/>
+      <xs:attribute name="affiliation" type="xs:string" use="required"/>
+      <xs:attribute name="source" type="xs:string" use="required"/>
+      <xs:attribute name="timeStepSize" type="xs:decimal" use="required"/>
+    </xs:complexType>
+    <xs:key name="id">
+      <xs:selector xpath="./lanelet | ./trafficSign | ./trafficLight | ./trafficSign | ./trafficLight | ./intersection | ./staticObstacle | ./dynamicObstacle | ./planningProblem | ./intersection/incoming"/>
+      <xs:field xpath="@id"/>
+    </xs:key>
+    <xs:keyref name="idref" refer="id">
+      <xs:selector xpath=".//*"/>
+      <xs:field xpath="@ref"/>
+    </xs:keyref>
+  </xs:element>
+</xs:schema>
