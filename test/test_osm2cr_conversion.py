@@ -42,36 +42,36 @@ class TestOSM2CRScenarioBaseClass(unittest.TestCase):
         #print("output: " + self.out_path)
         self.scenario = converter.GraphScenario(path)
 
-    # def test_osm2_cr_conversion_equal(self):
-    #     """Test if the converted scenario is equal to the loaded xml file"""
+    def test_osm2_cr_conversion_equal(self):
+        """Test if the converted scenario is equal to the loaded xml file"""
             # Don't test, ground truth has converting errors
 
-    #     # Save scenario to xml file, as converter.GraphScenario offers no way
-    #     # to access the underlying CommonRoadfileWriter
-    #     converted_path = os.path.join(
-    #         self.out_path, self.osm_file_name + "_converted_scenario.xml")
-    #     self.scenario.save_as_cr(converted_path)
+        # Save scenario to xml file, as converter.GraphScenario offers no way
+        # to access the underlying CommonRoadfileWriter
+        converted_path = os.path.join(
+            self.out_path, self.osm_file_name + "_converted_scenario.xml")
+        self.scenario.save_as_cr(converted_path)
 
-    #     ground_truth_path = os.path.dirname(
-    #         os.path.realpath(__file__)
-    #     ) + f"/osm_xml_test_files/{self.osm_file_name}.xml"
-    #     #print("ground truth: "+ground_truth_path)
+        ground_truth_path = os.path.dirname(
+            os.path.realpath(__file__)
+        ) + f"/osm_xml_test_files/{self.osm_file_name}.xml"
+        #print("ground truth: "+ground_truth_path)
 
-    #     # load saved file & compare to ground truth
-    #     with open(ground_truth_path, "r") as gt, open(converted_path,
-    #                                                   "r") as cv:
-    #         parser = etree.XMLParser(remove_blank_text=True)
-    #         ground_truth = etree.parse(gt, parser=parser).getroot()
-    #         converted = etree.parse(cv, parser=parser).getroot()
+        # load saved file & compare to ground truth
+        with open(ground_truth_path, "r") as gt, open(converted_path,
+                                                      "r") as cv:
+            parser = etree.XMLParser(remove_blank_text=True)
+            ground_truth = etree.parse(gt, parser=parser).getroot()
+            converted = etree.parse(cv, parser=parser).getroot()
 
-    #         # set same date so this won't change the comparison
-    #         ground_truth.set("date", "2020-04-14")
-    #         converted.set("date", "2020-04-14")
-    #         ground_truth.set("benchmarkID", "DEU_test")
-    #         converted.set("benchmarkID", "DEU_test")
+            # set same date so this won't change the comparison
+            ground_truth.set("date", "2020-04-14")
+            converted.set("date", "2020-04-14")
+            ground_truth.set("benchmarkID", "DEU_test")
+            converted.set("benchmarkID", "DEU_test")
 
-    #         # compare both element trees
-    #         self.assertTrue(elements_equal(ground_truth, converted))
+            # compare both element trees
+            self.assertTrue(elements_equal(ground_truth, converted))
 
     def test_osm2_cr_conversion_validates(self):
         """Test if XML format is correct and validates against xsd schema"""
@@ -90,6 +90,7 @@ class TestOSM2CRScenarioBaseClass(unittest.TestCase):
 
     def test_osm2_cr_conversion_ids(self):
         """Test if Scenario IDs are ordered correctly in ascending"""
+
         converted_path = os.path.join(
             self.out_path, self.osm_file_name + "_converted_scenario.xml")
 
@@ -114,6 +115,23 @@ class TestOSM2CRScenarioBaseClass(unittest.TestCase):
         for element in converted.iter('intersection'):
             self.assertGreater(int(element.attrib['id']), id_counter)
             id_counter = int(element.attrib['id'])
+
+    def test_osm2_cr_conversion_geonames(self):
+        """Test if Geonames username is set in config"""
+        converted_path = os.path.join(
+            self.out_path, self.osm_file_name + "_converted_scenario.xml")
+
+        parser = etree.XMLParser(remove_blank_text=True)
+        converted = etree.parse(converted_path, parser=parser).getroot()
+
+        location = converted.find('location')
+        # test geonamesID
+        self.assertNotEqual(location.find('geoNameId').text, '-999')
+        # test lat
+        self.assertNotEqual(location.find('gpsLatitude').text, '999')
+        # test lng
+        self.assertNotEqual(location.find('gpsLongitude').text, '999')
+
 
 
 #class TestGarchingIntersection(TestOSM2CRScenarioBaseClass):

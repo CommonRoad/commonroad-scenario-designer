@@ -14,7 +14,7 @@ SOURCE = "OpenStreetMaps (OSM)"
 # additional tags for the benchmark
 TAGS = "urban"
 # Geonames username to retrieve geonamesID for created scenarios
-GEONAMES_USERNAME = "demo"
+GEONAMES_USERNAME = "globetrotter"
 # time step size for the benchmark in seconds
 TIMESTEPSIZE = 0.1
 
