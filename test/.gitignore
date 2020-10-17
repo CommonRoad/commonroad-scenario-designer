@@ -6,4 +6,5 @@
 *.sumo.cfg
 *.trips.xml
 *.mp4
+*.simulated.xml
 output_lanechange.txt

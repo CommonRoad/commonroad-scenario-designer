@@ -5,6 +5,7 @@ import logging
 from collections import defaultdict
 from copy import deepcopy
 from typing import Dict, Tuple, List, Set
+import re
 
 import os
 import random
@@ -595,7 +596,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         explored_nodes = set()
         skip = 0
 
-        self.new_nodes= self.nodes
+        self.new_nodes = self.nodes
 
         for intersection in self.lanelet_network.intersections:
             successors = {
@@ -625,7 +626,6 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                 self.replaced_nodes[old_node].append(merged_node.getID())
 
             self.merged_dictionary[merged_node.getID()] = merged_nodes
-
 
         replace_nodes_old = deepcopy(self.replaced_nodes)
         explored_nodes_all = set()
@@ -847,7 +847,12 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                     " --tls.cycle.time=" + str(cycle_time) + \
                     " --tls.set=" + str(junction.id)
         try:
-            _ = subprocess.check_output(command.split(), timeout=5.)
+            out = subprocess.check_output(command.split(),
+                                          timeout=5.,
+                                          stderr=subprocess.STDOUT,
+                                          shell=True)
+            if "error" in str(out).lower():
+                return False
         except Exception as e:
             logging.error(e)
             return False
