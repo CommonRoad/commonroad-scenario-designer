@@ -15,8 +15,7 @@
 # @version $Id$
 
 from xml.etree import cElementTree as ET
-from .connection import Connection
-from .lane import addJunctionPos, _to_shape_string
+import crmapconverter.sumo_map.sumolib_net.lane
 
 
 class Edge:
@@ -184,7 +183,7 @@ class Edge:
                 self._shape3D.append((x / float(numLanes), y / float(numLanes),
                                       z / float(numLanes)))
 
-        self._shapeWithJunctions3D = addJunctionPos(self._shape3D,
+        self._shapeWithJunctions3D = lane.addJunctionPos(self._shape3D,
                                                     self._from.getCoord3D(),
                                                     self._to.getCoord3D())
 
@@ -272,7 +271,7 @@ class Edge:
         if self._length:
             edge.set("length", str(self._length))
         if self._shape:
-            edge.set("shape", _to_shape_string(self._shape))
+            edge.set("shape", lane._to_shape_string(self._shape))
         if self._length:
             edge.set("length", str(self._length))
         edge.set("numLanes", str(self.getLaneNumber()))
