@@ -673,19 +673,19 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         clusters = [cluster for cluster in clusters if len(cluster) > 1]
 
         for cluster in clusters:
-            logging.info(f"Merging nodes: {[n.getID() for n in merged_nodes]}")
+            logging.info(f"Merging nodes: {[n.getID() for n in cluster]}")
             # create new merged node
             merged_node = Node(id=self.node_id_next,
                                node_type='priority',
-                               coord=self._calculate_centroid(merged_nodes),
+                               coord=self._calculate_centroid(cluster),
                                incLanes=[])
             self.node_id_next += 1
             self.new_nodes[merged_node.getID()] = merged_node
-            merged_nodes = {n.getID() for n in merged_nodes}
-            for old_node in merged_nodes:
+            cluster = {n.getID() for n in cluster}
+            for old_node in cluster:
                 assert not old_node in self.replaced_nodes
                 self.replaced_nodes[old_node].append(merged_node.getID())
-            self.merged_dictionary[merged_node.getID()] = merged_nodes
+            self.merged_dictionary[merged_node.getID()] = cluster
 
         replace_nodes_old = deepcopy(self.replaced_nodes)
         explored_nodes_all = set()
@@ -1432,42 +1432,38 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                 subprocess.check_output(cmd)
                 return True
             except subprocess.CalledProcessError as e:
-                raise RuntimeError(
-                    "Command '{}' return with error (code {}): {}".format(
-                        e.cmd, e.returncode, e.output))
                 return False
+                # raise RuntimeError(
+                #     "Command '{}' return with error (code {}): {}".format(
+                #         e.cmd, e.returncode, e.output)) from e
 
         # create vehicle route file
-        try:
-            run([
-                'python',
-                os.path.join(os.environ['SUMO_HOME'],
-                             'tools/randomTrips.py'), '-n', net_file, '-o',
-                trip_files['vehicle'], '-r', route_files["vehicle"], '-b',
-                str(self.conf.departure_interval_vehicles.start), '-e',
-                str(self.conf.departure_interval_vehicles.end), '-p',
-                str(period), '--allow-fringe', '--fringe-factor',
-                str(self.conf.fringe_factor), "--seed",
-                str(self.conf.random_seed),
-                '--trip-attributes=departLane=\"best\" departSpeed=\"max\" departPos=\"base\"'
-            ])
-            # create pedestrian routes
-            run([
-                'python',
-                os.path.join(os.environ['SUMO_HOME'], 'tools/randomTrips.py'),
-                '-n', net_file, '-o', trip_files['pedestrian'], '-r',
-                route_files["pedestrian"], '-b',
-                str(self.conf.departure_interval_vehicles.start), '-e',
-                str(self.conf.departure_interval_vehicles.end), "-p",
-                str(1 - self.conf.veh_distribution['pedestrian']),
-                '--allow-fringe', '--fringe-factor',
-                str(self.conf.fringe_factor), "--persontrips", "--seed",
-                str(self.conf.random_seed),
-                '--trip-attributes= modes=\"public car\" departPos=\"base\"'
-            ])
-        except RuntimeError as e:
-            # ignore any upcoming errors, but log them to the console as errors in route generation are considered non-critical
-            logging.warning(e)
+        run([
+            'python',
+            os.path.join(os.environ['SUMO_HOME'],
+                            'tools','randomTrips.py'), '-n', net_file, '-o',
+            trip_files['vehicle'], '-r', route_files["vehicle"], '-b',
+            str(self.conf.departure_interval_vehicles.start), '-e',
+            str(self.conf.departure_interval_vehicles.end), '-p',
+            str(period), '--allow-fringe', '--fringe-factor',
+            str(self.conf.fringe_factor), "--seed",
+            str(self.conf.random_seed),
+            '--trip-attributes=departLane=\"best\" departSpeed=\"max\" departPos=\"base\"'
+        ])
+        # create pedestrian routes
+        run([
+            'python',
+            os.path.join(os.environ['SUMO_HOME'], 'tools','randomTrips.py'),
+            '-n', net_file, '-o', trip_files['pedestrian'], '-r',
+            route_files["pedestrian"], '-b',
+            str(self.conf.departure_interval_vehicles.start), '-e',
+            str(self.conf.departure_interval_vehicles.end), "-p",
+            str(1 - self.conf.veh_distribution['pedestrian']),
+            '--allow-fringe', '--fringe-factor',
+            str(self.conf.fringe_factor), "--persontrips", "--seed",
+            str(self.conf.random_seed),
+            '--trip-attributes= modes=\"public car\" departPos=\"base\"'
+        ])
 
         if self.conf.n_ego_vehicles != 0:
             #get ego ids and add EGO_ID_START prefix
