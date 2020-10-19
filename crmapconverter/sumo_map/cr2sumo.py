@@ -107,7 +107,6 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         self._init_nodes()
         self._create_sumo_edges_and_lanes()
         self._init_connections()
-        # self._merge_junction_clustering(20)
         self._merge_junctions_intersecting_lanelets()
         self._filter_edges()
         self._create_lane_based_connections()
@@ -589,6 +588,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         self.replaced_nodes = defaultdict(list)
 
         def _merge_nodes(merged_nodes):
+            logging.info(f"Merging nodes: {[n.getID() for n in merged_nodes]}")
             # create new merged node
             merged_node = Node(id=self.node_id_next,
                                node_type='priority',
@@ -603,6 +603,8 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
 
             self.merged_dictionary[merged_node.getID()] = merged_nodes
 
+
+        clusters: List[Set[Node]] = list(set())
         # select lanelets to merge in intersections (different type)
         # merging based on intersection relations
         for intersection in self.lanelet_network.intersections:
@@ -623,7 +625,8 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                 for e_id in edges for node in
                 [self.edges[e_id].getFromNode(), self.edges[e_id].getToNode()]
             }
-            _merge_nodes(merged_nodes)
+            # _merge_nodes(merged_nodes)
+            clusters.append(merged_nodes)
 
         # select overlapping lanelets to merge (same type)
         # merging based on intersecing lanelets
@@ -635,14 +638,16 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
             intersecting_edges[pair[1]].add(pair[0])
 
         explored_nodes = set()
-        skip = 0
         for node_id, current_node in self.nodes.items():
-            if current_node.getID(
-            ) in self.replaced_nodes or current_node in explored_nodes:
+            if current_node in explored_nodes:
                 continue
-
             merged_nodes = {current_node}
             queue = [current_node]
+
+            current_supercluster = next((cluster for cluster in clusters if current_node in cluster), None)
+            if current_supercluster:
+                merged_nodes = current_supercluster
+                clusters = [cluster for cluster in clusters if cluster != current_supercluster]
             # expand all connected nodes until length of connecting edge > max_node_distance
             while len(queue) > 0:
                 expanded_node = queue.pop()
@@ -656,7 +661,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                     for intersecting_inc in intersecting_edges[inc_edg]:
                         from_node: Node = self.edges[str(
                             intersecting_inc)].getFromNode()
-                        if from_node.getID() in self.replaced_nodes:
+                        if from_node.getID() in {node.getID() for cluster in clusters for node in cluster}:
                             continue
                         merged_nodes.add(from_node)
                         queue.append(from_node)
@@ -664,14 +669,22 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                 for out_edg in outgoings:
                     for intersecting_out in intersecting_edges[out_edg]:
                         to_node = self.edges[str(intersecting_out)].getToNode()
-                        if to_node.getID() in self.replaced_nodes:
+                        if to_node.getID() in {node.getID() for cluster in clusters for node in cluster}:
                             continue
                         merged_nodes.add(to_node)
                         queue.append(to_node)
+            
+            clusters.append(merged_nodes)
 
-            # only merge if we found more than one node to merge
-            if len(merged_nodes) > 1:
-                _merge_nodes(merged_nodes)
+        # only merge if we found more than one node to merge
+        # if len(merged_nodes) > 1: _merge_nodes(merged_nodes)
+        clusters = [cluster for cluster in clusters if len(cluster) > 1]
+        c = [[c.getID() for c in cluster] for cluster in clusters]
+        isc = [(i,j) for i,a in enumerate(clusters) for j, b in enumerate(clusters) if a & b and i != j]
+
+        for cluster in clusters:
+            _merge_nodes(cluster)
+
 
         replace_nodes_old = deepcopy(self.replaced_nodes)
         explored_nodes_all = set()
@@ -1452,7 +1465,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                 '--trip-attributes= modes=\"public car\" departPos=\"base\"'
             ])
         except RuntimeError as e:
-            # ignore any upcoming erorrs, but log them to the console as errors in route generation are considered non-critical
+            # ignore any upcoming errors, but log them to the console as errors in route generation are considered non-critical
             logging.warning(e)
 
         if self.conf.n_ego_vehicles != 0:

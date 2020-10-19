@@ -147,7 +147,7 @@ class TestSimulationAAH2(TestCR2SUMOScenarioBaseClass):
     """Test conversion & simulation of a CR scenario to SUMO for a complex crossing"""
     __test__ = True
     cr_file_name = "DEU_AAH-2_19000_T-1"
-    tls_lanelet_ids = [114]
+    tls_lanelet_ids = [108]
 
 
 if __name__ == "__main__":
