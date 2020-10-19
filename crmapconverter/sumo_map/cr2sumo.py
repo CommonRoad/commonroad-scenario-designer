@@ -579,34 +579,17 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         Merge nodes when their connecting edges intersect.
         :return:
         """
-        self.new_nodes = self.nodes.copy(
-        )  # new dictionary for the merged nodes
-        self.new_edges = {
-        }  # new dictionary for the edges after the simplifications
-        self.merged_dictionary = {
-        }  # key is the merged node, value is a list of the nodes that form the merged node
+        # new dictionary for the merged nodes
+        self.new_nodes = self.nodes.copy()
+        # new dictionary for the edges after the simplifications
+        self.new_edges = {}
+        # key is the merged node, value is a list of the nodes that form the merged node
+        self.merged_dictionary = {}
         self.replaced_nodes = defaultdict(list)
 
-        def _merge_nodes(merged_nodes):
-            logging.info(f"Merging nodes: {[n.getID() for n in merged_nodes]}")
-            # create new merged node
-            merged_node = Node(id=self.node_id_next,
-                               node_type='priority',
-                               coord=self._calculate_centroid(merged_nodes),
-                               incLanes=[])
-            self.node_id_next += 1
-            self.new_nodes[merged_node.getID()] = merged_node
-            merged_nodes = {n.getID() for n in merged_nodes}
-            for old_node in merged_nodes:
-                assert not old_node in self.replaced_nodes
-                self.replaced_nodes[old_node].append(merged_node.getID())
-
-            self.merged_dictionary[merged_node.getID()] = merged_nodes
-
-
         clusters: List[Set[Node]] = list(set())
-        # select lanelets to merge in intersections (different type)
-        # merging based on intersection relations
+        # Merge Lanelets lying in the same CR intersection
+        # merging based on specified Lanelets in intersection
         for intersection in self.lanelet_network.intersections:
             intersecting_lanelets = {
                 lanelet_id
@@ -625,11 +608,10 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                 for e_id in edges for node in
                 [self.edges[e_id].getFromNode(), self.edges[e_id].getToNode()]
             }
-            # _merge_nodes(merged_nodes)
             clusters.append(merged_nodes)
 
-        # select overlapping lanelets to merge (same type)
-        # merging based on intersecing lanelets
+        # Expand merged clusters by all lanelets intersecting each other.
+        # merging based on Lanelets intersecting each other
         intersecting_pairs = _find_intersecting_edges(self.lanes_dict,
                                                       self.lanelet_network)
         intersecting_edges = defaultdict(set)
@@ -644,11 +626,16 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
             merged_nodes = {current_node}
             queue = [current_node]
 
-            current_supercluster = next((cluster for cluster in clusters if current_node in cluster), None)
+            current_supercluster = next(
+                (cluster for cluster in clusters if current_node in cluster),
+                None)
             if current_supercluster:
                 merged_nodes = current_supercluster
-                clusters = [cluster for cluster in clusters if cluster != current_supercluster]
-            # expand all connected nodes until length of connecting edge > max_node_distance
+                clusters = [
+                    cluster for cluster in clusters
+                    if cluster != current_supercluster
+                ]
+            # expand current cluster of intersecting lanelets
             while len(queue) > 0:
                 expanded_node = queue.pop()
                 if expanded_node in explored_nodes: continue
@@ -661,7 +648,10 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                     for intersecting_inc in intersecting_edges[inc_edg]:
                         from_node: Node = self.edges[str(
                             intersecting_inc)].getFromNode()
-                        if from_node.getID() in {node.getID() for cluster in clusters for node in cluster}:
+                        if from_node.getID() in {
+                                node.getID()
+                                for cluster in clusters for node in cluster
+                        }:
                             continue
                         merged_nodes.add(from_node)
                         queue.append(from_node)
@@ -669,22 +659,33 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                 for out_edg in outgoings:
                     for intersecting_out in intersecting_edges[out_edg]:
                         to_node = self.edges[str(intersecting_out)].getToNode()
-                        if to_node.getID() in {node.getID() for cluster in clusters for node in cluster}:
+                        if to_node.getID() in {
+                                node.getID()
+                                for cluster in clusters for node in cluster
+                        }:
                             continue
                         merged_nodes.add(to_node)
                         queue.append(to_node)
-            
+
             clusters.append(merged_nodes)
 
         # only merge if we found more than one node to merge
-        # if len(merged_nodes) > 1: _merge_nodes(merged_nodes)
         clusters = [cluster for cluster in clusters if len(cluster) > 1]
-        c = [[c.getID() for c in cluster] for cluster in clusters]
-        isc = [(i,j) for i,a in enumerate(clusters) for j, b in enumerate(clusters) if a & b and i != j]
 
         for cluster in clusters:
-            _merge_nodes(cluster)
-
+            logging.info(f"Merging nodes: {[n.getID() for n in merged_nodes]}")
+            # create new merged node
+            merged_node = Node(id=self.node_id_next,
+                               node_type='priority',
+                               coord=self._calculate_centroid(merged_nodes),
+                               incLanes=[])
+            self.node_id_next += 1
+            self.new_nodes[merged_node.getID()] = merged_node
+            merged_nodes = {n.getID() for n in merged_nodes}
+            for old_node in merged_nodes:
+                assert not old_node in self.replaced_nodes
+                self.replaced_nodes[old_node].append(merged_node.getID())
+            self.merged_dictionary[merged_node.getID()] = merged_nodes
 
         replace_nodes_old = deepcopy(self.replaced_nodes)
         explored_nodes_all = set()
