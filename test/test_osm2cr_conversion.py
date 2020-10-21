@@ -9,7 +9,10 @@ import unittest
 from lxml import etree
 
 import crmapconverter.osm2cr.converter_modules.converter as converter
+from commonroad.common.file_reader import CommonRoadFileReader
+
 from test.utils import elements_equal
+import math
 
 
 class TestOSM2CRScenarioBaseClass(unittest.TestCase):
@@ -24,6 +27,8 @@ class TestOSM2CRScenarioBaseClass(unittest.TestCase):
     cwd_path = None
     out_path = None
     scenario: converter.GraphScenario = None
+
+    commonRoad_scenario = None
 
     xsd_file_name = "documentation_XML_commonRoad_XSD"
 
@@ -41,9 +46,12 @@ class TestOSM2CRScenarioBaseClass(unittest.TestCase):
         self.converted_path = os.path.join(
             self.out_path, self.osm_file_name + "_converted_scenario.xml")
 
-        # create and save scenario
+        # create and save converter scenario
         self.scenario = converter.GraphScenario(path)
         self.scenario.save_as_cr(self.converted_path)
+
+        self.commonRoad_scenario, planning_problem = CommonRoadFileReader(
+            self.converted_path).open()
 
     # def test_osm2cr_conversion_equal(self):
     #     """Test if the converted scenario is equal to the loaded xml file"""
@@ -107,34 +115,42 @@ class TestOSM2CRScenarioBaseClass(unittest.TestCase):
             id_counter = int(element.attrib['id'])
 
     def test_osm2cr_conversion_geonames(self):
-        """Test if Geonames username is set in config"""
+        """Test if Geonames username is set in config. In default settings, it should be not"""
 
         parser = etree.XMLParser(remove_blank_text=True)
         converted = etree.parse(self.converted_path, parser=parser).getroot()
 
         location = converted.find('location')
         # test geonamesID
-        self.assertNotEqual(location.find('geoNameId').text, '-999')
+        self.assertEqual(location.find('geoNameId').text, '-999')
         # test lat
-        self.assertNotEqual(location.find('gpsLatitude').text, '999')
+        self.assertEqual(location.find('gpsLatitude').text, '999')
         # test lng
-        self.assertNotEqual(location.find('gpsLongitude').text, '999')
+        self.assertEqual(location.find('gpsLongitude').text, '999')
 
     def test_osm2cr_conversion_lanewith(self):
-        pass
-        # lanewith > 2.5
+        """Test if every lanelet is wider than the given minimum distance of 2.5 meters"""
 
-    def test_osm2cr_conversion_min_vertices_lane(self):
-        pass
+        min_distance = 2.5
 
-        #len(vertices) > 2
+        for lanelet in self.commonRoad_scenario.lanelet_network.lanelets:
+            for l_v, r_v in zip(lanelet.left_vertices, lanelet.right_vertices):
+                distance = math.sqrt((r_v[0]-l_v[0])**2 + (r_v[1]-l_v[1])**2)
+                self.assertGreaterEqual(distance, min_distance)
+
+    # def test_osm2cr_conversion_min_vertices_lane(self):
+    #     """Test if every lanelet has at least 3 vertices"""
+        #TODO Make sure this is actually the case
+
+    #     for lanelet in self.commonRoad_scenario.lanelet_network.lanelets:
+    #         self.assertGreater(len(lanelet.left_vertices), 2)
 
     def test_osm2cr_scenarioID(self):
-        pass
-        # benchmark/name includes 3 letter country code
+        """Test if generated scenario benchmarkID starts with 3 letter capitalized country code"""
 
-
-
+        for letter in self.commonRoad_scenario.benchmark_id[:3]:
+            self.assertTrue(letter.isupper())
+        self.assertTrue(self.commonRoad_scenario.benchmark_id[3] =='_')
 
 
 class TestGarchingIntersection(TestOSM2CRScenarioBaseClass):
