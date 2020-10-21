@@ -748,6 +748,7 @@ class GraphTrafficSign:
             'city_limit': TrafficSignIDGermany.TOWN_SIGN,
             'give_way': TrafficSignIDGermany.YIELD,
             'stop': TrafficSignIDGermany.STOP,
+            '260': TrafficSignIDGermany.BAN_CAR_TRUCK_BUS_MOTORCYCLE,
             'unknown': TrafficSignIDGermany.UNKNOWN
         }
 
