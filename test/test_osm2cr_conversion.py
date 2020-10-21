@@ -9,7 +9,7 @@ import unittest
 from lxml import etree
 
 import crmapconverter.osm2cr.converter_modules.converter as converter
-#from commonroad.common.file_reader import CommonRoadFileReader
+from commonroad.common.file_reader import CommonRoadFileReader
 
 from test.utils import elements_equal
 import math
@@ -50,8 +50,8 @@ class TestOSM2CRScenarioBaseClass(unittest.TestCase):
         self.scenario = converter.GraphScenario(path)
         self.scenario.save_as_cr(self.converted_path)
 
-        #self.commonRoad_scenario, planning_problem = CommonRoadFileReader(
-        #    self.converted_path).open()
+        self.commonRoad_scenario, planning_problem = CommonRoadFileReader(
+            self.converted_path).open()
 
     # def test_osm2cr_conversion_equal(self):
     #     """Test if the converted scenario is equal to the loaded xml file"""
@@ -123,11 +123,11 @@ class TestOSM2CRScenarioBaseClass(unittest.TestCase):
         location = converted.find('location')
         # test geonamesID
         self.assertEqual(location.find('geoNameId').text, '-999')
-        # test lat
-        self.assertEqual(location.find('gpsLatitude').text, '999')
-        # test lng
-        self.assertEqual(location.find('gpsLongitude').text, '999')
-    '''
+        # test if lat was set
+        self.assertNotEqual(location.find('gpsLatitude').text, '999')
+        # test if lng was set
+        self.assertNotEqual(location.find('gpsLongitude').text, '999')
+
     def test_osm2cr_conversion_lanewith(self):
         """Test if every lanelet is wider than the given minimum distance of 2.5 meters"""
 
@@ -137,7 +137,7 @@ class TestOSM2CRScenarioBaseClass(unittest.TestCase):
             for l_v, r_v in zip(lanelet.left_vertices, lanelet.right_vertices):
                 distance = math.sqrt((r_v[0]-l_v[0])**2 + (r_v[1]-l_v[1])**2)
                 self.assertGreaterEqual(distance, min_distance)
-    '''
+
     # def test_osm2cr_scenarioID(self):
     #     """Test if generated scenario benchmarkID starts with 3 letter capitalized country code"""
 
@@ -154,12 +154,12 @@ class TestGarchingIntersection(TestOSM2CRScenarioBaseClass):
     osm_file_name = "garching_intersection"
 
 
-class TestEichstaett(TestOSM2CRScenarioBaseClass):
+class TestHaimhausen(TestOSM2CRScenarioBaseClass):
     """Testing if a small town with traffic lights, complicated road networks
     and large osm filesize can be converted on default settings"""
 
     __test__ = True
-    osm_file_name = "eichstaett"
+    osm_file_name = "haimhausen"
 
 class TestMunich(TestOSM2CRScenarioBaseClass):
     """Testing if a larger intersection with many lanes, traffic lights and signs

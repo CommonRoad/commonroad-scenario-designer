@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <commonRoad timeStepSize="0.1" commonRoadVersion="2020a" author="Automated converter by Maximilian Rieger" affiliation="Technical University of Munich, Germany" source="OpenStreetMaps (OSM)" benchmarkID="DEU_test" date="2020-10-10">
   <location>
-    <geoNameId>11610705</geoNameId>
+    <geoNameId>-999</geoNameId>
     <gpsLatitude>48.18584445</gpsLatitude>
     <gpsLongitude>11.552519449999998</gpsLongitude>
   </location>
