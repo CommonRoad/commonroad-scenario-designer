@@ -1,19 +1,19 @@
 import os
-import numpy as np
 
-from crmapconverter.sumo_map.cr2sumo import CR2SumoMapConverter
-from crmapconverter.sumo_map.config import SumoConfig
+import matplotlib.pyplot as plt
+import numpy as np
 from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.common.file_writer import CommonRoadFileWriter
 from commonroad.scenario.scenario import Scenario
 from commonroad.visualization.draw_dispatch_cr import draw_object
-import matplotlib.pyplot as plt
-
+from crmapconverter.sumo_map.config import SumoConfig
+from crmapconverter.sumo_map.cr2sumo import CR2SumoMapConverter
 from sumocr.interface.sumo_simulation import SumoSimulation
 from sumocr.visualization.video import create_video
 
 # path config
-output_folder = os.path.join(os.path.dirname(__file__), "..", "..", 'test', "sumo_xml_test_files")
+output_folder = os.path.join(os.path.dirname(__file__), "..", "..", 'test',
+                             "sumo_xml_test_files")
 scenario_name = "USA_Peach-3_3_T-1"
 input_file = os.path.join(output_folder, scenario_name + '.xml')
 
@@ -31,7 +31,8 @@ config = SumoConfig.from_scenario_name(scenario_name)
 # # convert CR to sumo net
 wrapper = CR2SumoMapConverter(scenario.lanelet_network, config)
 wrapper.convert_to_net_file(output_folder)
-traffic_light_system_generated = wrapper.auto_generate_traffic_light_system(43513)
+traffic_light_system_generated = wrapper.auto_generate_traffic_light_system(
+    43513)
 
 print(traffic_light_system_generated)
 

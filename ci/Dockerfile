@@ -53,7 +53,7 @@ SHELL ["/bin/bash", "-c"]
 ENV SUMO_HOME=$HOME/sumo
 ENV PATH=$PATH:$SUMO_HOME/bin
 RUN sudo apt-get install -y ffmpeg \
-	&& git clone https://github.com/eclipse/sumo \
+	&& git clone --depth 1 --recurse-submodules --shallow-submodules https://github.com/eclipse/sumo \
 	&& cd sumo \
 #	&& git checkout smooth-lane-change \
 	&& sudo apt-get install -y cmake python g++ libxerces-c-dev libfox-1.6-dev libgdal-dev libproj-dev libgl2ps-dev swig \
@@ -61,7 +61,7 @@ RUN sudo apt-get install -y ffmpeg \
 	&& echo "export SUMO_HOME=$(pwd)" >> ~/.bashrc \
 	&& cd build \
 	&& cmake .. \
-	&& make -j8
+	&& make -j$(nproc)
 
 
 # activate conda environment
