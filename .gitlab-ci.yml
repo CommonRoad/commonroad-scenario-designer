@@ -2,7 +2,7 @@ stages:
   - test
   - build
 
-image: rasaford/commonroad-map-tool:v0.3
+image: rasaford/commonroad-map-tool:v0.3.1
 
 before_script:
   # This is required for the GitLab runner to have permissions to all the repos the user stating the job has.
