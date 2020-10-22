@@ -31,14 +31,14 @@ from collections import defaultdict
 import sumolib
 import sumolib.files
 # from . import lane, edge, node, connection, roundabout
-from .lane import Lane
-from .edge import Edge
-from .node import Node
-from .connection import Connection
-from .roundabout import Roundabout
-from .junction import Junction
-from .crossing import Crossing
-from .tls import TLS, TLSProgram
+from crmapconverter.sumo_map.sumolib_net.lane import Lane
+from crmapconverter.sumo_map.sumolib_net.edge import Edge
+from crmapconverter.sumo_map.sumolib_net.node import Node
+from crmapconverter.sumo_map.sumolib_net.connection import Connection
+from crmapconverter.sumo_map.sumolib_net.roundabout import Roundabout
+from crmapconverter.sumo_map.sumolib_net.junction import Junction
+from crmapconverter.sumo_map.sumolib_net.crossing import Crossing
+from crmapconverter.sumo_map.sumolib_net.tls import TLS, TLSProgram
 
 
 

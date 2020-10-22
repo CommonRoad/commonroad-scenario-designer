@@ -15,7 +15,7 @@
 # @version $Id$
 
 from xml.etree import cElementTree as ET
-import crmapconverter.sumo_map.sumolib_net.lane
+from crmapconverter.sumo_map.sumolib_net.lane import Lane
 
 
 class Edge:

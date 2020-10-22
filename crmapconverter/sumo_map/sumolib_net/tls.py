@@ -1,4 +1,4 @@
-import crmapconverter.sumo_map.sumolib_net.connection as connection
+from crmapconverter.sumo_map.sumolib_net.connection import Connection
 
 
 class TLSProgram:
@@ -35,7 +35,7 @@ class TLS:
         self._maxConnectionNo = -1
         self._programs = {}
 
-    def addConnection(self, connection: connection.Connection):
+    def addConnection(self, connection:Connection):
         self._connections.append(connection)
 
     def getConnections(self):

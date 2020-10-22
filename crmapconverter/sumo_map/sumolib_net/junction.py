@@ -1,5 +1,5 @@
 from typing import List
-import crmapconverter.sumo_map.sumolib_net.lane as lane
+from crmapconverter.sumo_map.sumolib_net.lane import Lane
 
 
 class Junction:
@@ -8,8 +8,8 @@ class Junction:
                  j_type: str = "priority",
                  x: float = -1,
                  y: float = -1,
-                 incLanes: List[lane.Lane] = [],
-                 intLanes: List[lane.Lane] = [],
+                 incLanes: List[Lane] = [],
+                 intLanes: List[Lane] = [],
                  shape: List[tuple] = ""):
         self.id = id
         self.type = j_type
