@@ -19,4 +19,4 @@ matplotlib>=3.1.0
 # -e git+https://gitlab.lrz.de/cps/sumo-interface.git@3-convert-pedestrains#egg=sumocr
 
 # determinism in osm2cr converter
- ordered-set>=4.0.2
+ordered-set>=4.0.2
