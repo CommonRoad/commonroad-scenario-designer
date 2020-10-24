@@ -10,8 +10,9 @@ from lxml import etree
 
 import crmapconverter.osm2cr.converter_modules.converter as converter
 from commonroad.common.file_reader import CommonRoadFileReader
+from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
 
-from test.utils import elements_equal
+from utils import elements_equal
 import math
 
 
@@ -26,11 +27,11 @@ class TestOSM2CRScenarioBaseClass(unittest.TestCase):
     xml_output_name = None
     cwd_path = None
     out_path = None
+    converted_path = None
     scenario: converter.GraphScenario = None
 
     commonRoad_scenario = None
-
-    xsd_file_name = "documentation_XML_commonRoad_XSD"
+    commonRoad_planning_problem = None
 
     def setUp(self):
         """Load the osm file and convert it to a scenario."""
@@ -50,7 +51,7 @@ class TestOSM2CRScenarioBaseClass(unittest.TestCase):
         self.scenario = converter.GraphScenario(path)
         self.scenario.save_as_cr(self.converted_path)
 
-        self.commonRoad_scenario, planning_problem = CommonRoadFileReader(
+        self.commonRoad_scenario, self.commonRoad_planning_problem = CommonRoadFileReader(
             self.converted_path).open()
 
     # def test_osm2cr_conversion_equal(self):
@@ -76,18 +77,6 @@ class TestOSM2CRScenarioBaseClass(unittest.TestCase):
 
     #         # compare both element trees
     #         self.assertTrue(elements_equal(ground_truth, converted))
-
-    def test_osm2cr_conversion_validates(self):
-        """Test if XML format is correct and validates against xsd schema"""
-
-        xsd_path = path = os.path.dirname(os.path.realpath(
-            __file__)) + f"/osm_xml_test_files/{self.xsd_file_name}.xsd"
-
-        xmlschema_doc = etree.parse(xsd_path)
-        xmlschema = etree.XMLSchema(xmlschema_doc)
-        xml_doc = etree.parse(self.converted_path)
-
-        xmlschema.assertValid(xml_doc)
 
     def test_osm2cr_conversion_ids(self):
         """Test if Scenario IDs are ordered correctly in ascending"""
@@ -138,12 +127,16 @@ class TestOSM2CRScenarioBaseClass(unittest.TestCase):
                 distance = math.sqrt((r_v[0]-l_v[0])**2 + (r_v[1]-l_v[1])**2)
                 self.assertGreaterEqual(distance, min_distance)
 
-    # def test_osm2cr_scenarioID(self):
-    #     """Test if generated scenario benchmarkID starts with 3 letter capitalized country code"""
+    def test_osm2cr_scenerio_write_validates(self):
+        """Test if created CommonRoad scenario validates"""
 
-    #     for letter in self.commonRoad_scenario.benchmark_id[:3]:
-    #         self.assertTrue(letter.isupper())
-    #     self.assertTrue(self.commonRoad_scenario.benchmark_id[3] =='_')
+        fw = CommonRoadFileWriter(
+            scenario=self.commonRoad_scenario,
+            planning_problem_set=self.commonRoad_planning_problem)
+        fw.write_to_file(
+            filename=self.converted_path+"_written",
+            overwrite_existing_file=OverwriteExistingFile.ALWAYS,
+            check_validity=True)
 
 
 class TestGarchingIntersection(TestOSM2CRScenarioBaseClass):
