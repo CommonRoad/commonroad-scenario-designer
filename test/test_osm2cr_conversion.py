@@ -6,14 +6,14 @@ __copyright__ = "TUM Cyber-Physical Systems Group"
 
 import os
 import unittest
+import math
 from lxml import etree
 
 import crmapconverter.osm2cr.converter_modules.converter as converter
 from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
 
-from utils import elements_equal
-import math
+from test.utils import elements_equal
 
 
 class TestOSM2CRScenarioBaseClass(unittest.TestCase):
