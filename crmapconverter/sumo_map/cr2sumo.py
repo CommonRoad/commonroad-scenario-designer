@@ -3,7 +3,7 @@ This class contains functions for converting a CommonRoad map into a .net.xml SU
 """
 import logging
 from collections import defaultdict
-from copy import deepcopy
+from copy import deepcopy, copy
 from typing import Dict, Tuple, List, Set
 import re
 
@@ -65,7 +65,8 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         self._points_dict: Dict[int, np.ndarray] = {}
         self._connections = defaultdict(list)  # all the connections of the map
         self._new_connections: List[Connection] = []
-        self._crossings: List[Crossing] = []
+        # dict of merged_node_id and Crossing
+        self._crossings: Dict[int, List[Crossing]] = dict()
         # key is the ID of the edges and value the ID of the lanelets that compose it
         self.lanes_dict: Dict[int, Tuple[int, ...]] = {}
         self.lanes: Dict[str, Lane] = {}
@@ -110,6 +111,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         self._merge_junctions_intersecting_lanelets()
         self._filter_edges()
         self._create_lane_based_connections()
+        self._create_crossings()
         self._create_traffic_lights()
 
     def _create_traffic_lights(self):
@@ -181,7 +183,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                 tls.addProgram(tls_program)
 
                 def get_lanes(edge) -> List[Lane]:
-                    """ 
+                    """
                     param: return: List of lanes for the given edge
                     """
                     return [
@@ -427,7 +429,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
     def _create_sumo_edges_and_lanes(self):
         """
         Creates edges for net file with previously collected edges and nodes.
-        :return: 
+        :return:
         """
 
         for edge_id, lanelet_ids in self.lanes_dict.items():
@@ -587,7 +589,11 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         self.merged_dictionary = {}
         self.replaced_nodes = defaultdict(list)
 
-        clusters: List[Set[Node]] = list(set())
+        # merged node clustering
+        clusters: Dict[int, Set[Node]] = defaultdict(set)
+        next_cluster_id = 0
+        # crossings are additional info for a cluster
+        clusters_crossing: Dict[int, Crossing] = dict()
         # Merge Lanelets lying in the same CR intersection
         # merging based on specified Lanelets in intersection
         for intersection in self.lanelet_network.intersections:
@@ -608,7 +614,21 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                 for e_id in edges for node in
                 [self.edges[e_id].getFromNode(), self.edges[e_id].getToNode()]
             }
-            clusters.append(merged_nodes)
+            clusters[next_cluster_id] = merged_nodes
+
+            # generate partial Crossings
+            crossings = []
+            for lanelet_id in intersection.crossings:
+                lanelet = self.lanelet_network.find_lanelet_by_id(lanelet_id)
+                crossings.append(
+                    Crossing(node=None,
+                             edges=None,
+                             shape=lanelet.center_vertices,
+                             width=2.0))
+            if crossings:
+                clusters_crossing[next_cluster_id] = crossings
+
+            next_cluster_id += 1
 
         # Expand merged clusters by all lanelets intersecting each other.
         # merging based on Lanelets intersecting each other
@@ -626,15 +646,14 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
             merged_nodes = {current_node}
             queue = [current_node]
 
-            current_supercluster = next(
-                (cluster for cluster in clusters if current_node in cluster),
-                None)
-            if current_supercluster:
-                merged_nodes = current_supercluster
-                clusters = [
-                    cluster for cluster in clusters
-                    if cluster != current_supercluster
-                ]
+            current_cluster_id = next(
+                (cluster_id for cluster_id, cluster in clusters.items()
+                 if current_node in cluster), None)
+            current_cluster = clusters[current_cluster_id]
+            # delete current_cluster from dict
+            if current_cluster:
+                merged_nodes = current_cluster
+                clusters[current_cluster_id] = set()
             # expand current cluster of intersecting lanelets
             while len(queue) > 0:
                 expanded_node = queue.pop()
@@ -650,7 +669,8 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                             intersecting_inc)].getFromNode()
                         if from_node.getID() in {
                                 node.getID()
-                                for cluster in clusters for node in cluster
+                                for cluster in clusters.values()
+                                for node in cluster
                         }:
                             continue
                         merged_nodes.add(from_node)
@@ -661,18 +681,22 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                         to_node = self.edges[str(intersecting_out)].getToNode()
                         if to_node.getID() in {
                                 node.getID()
-                                for cluster in clusters for node in cluster
+                                for cluster in clusters.values()
+                                for node in cluster
                         }:
                             continue
                         merged_nodes.add(to_node)
                         queue.append(to_node)
 
-            clusters.append(merged_nodes)
+            clusters[current_cluster_id] = merged_nodes
 
         # only merge if we found more than one node to merge
-        clusters = [cluster for cluster in clusters if len(cluster) > 1]
+        clusters = {
+            id: cluster
+            for id, cluster in clusters.items() if len(cluster) > 1
+        }
 
-        for cluster in clusters:
+        for cluster_id, cluster in clusters.items():
             logging.info(f"Merging nodes: {[n.getID() for n in cluster]}")
             # create new merged node
             merged_node = Node(id=self.node_id_next,
@@ -686,6 +710,13 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                 assert not old_node in self.replaced_nodes
                 self.replaced_nodes[old_node].append(merged_node.getID())
             self.merged_dictionary[merged_node.getID()] = cluster
+
+            # provide full definition of every crossing. Then make globally available
+            if cluster_id in clusters_crossing:
+                crossings = clusters_crossing[cluster_id]
+                for crossing in crossings:
+                    crossing.node = merged_node
+                self._crossings[merged_node.getID()] = crossings
 
         replace_nodes_old = deepcopy(self.replaced_nodes)
         explored_nodes_all = set()
@@ -727,15 +758,16 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         Remove edges that lie inside a junction. Those will be replaced by internal edges
         :return: nothing
         """
+        # self.new_edges = {e.getID():e for e in self.edges.values()}
         for edge in self.edges.values():
-            remove_edge = self._is_merged_edge(edge)
-
-            if remove_edge:
+            if self._is_merged_edge(edge):
                 continue
+
             edge_id = edge.getID()
             start_id = edge.getFromNode().getID()
             end_id = edge.getToNode().getID()
 
+            # update merged edges to from/to the merged node
             for new_node_id, merged_nodes in self.merged_dictionary.items():
                 if start_id in merged_nodes:
                     edge.setFrom(self.new_nodes[new_node_id])
@@ -747,19 +779,6 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                     break
 
             self.new_edges[edge_id] = edge
-
-        # filter removed edges from crossings
-        # tmp_crossings = []
-        # for crossing in self._crossings:
-        #     e = crossing.edges & self.new_edges.keys()
-        #     crossing.edges = {
-        #         edge_id
-        #         for edge_id in crossing.edges if edge_id in self.new_edges
-        #     }
-        #     if len(crossing.edges) == 0:
-        #         continue
-        #     tmp_crossings.append(crossing)
-        # self._crossings = tmp_crossings
 
     def _create_lane_based_connections(self):
         """
@@ -807,6 +826,104 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                     keepClear=True,
                     contPos=self.conf.wait_pos_internal_junctions)
                 self._new_connections.append(connection)
+
+    def _create_crossings(self):
+        new_crossings = dict()
+
+        for merged_node_id, crossings in self._crossings.items():
+            merged_node = self.new_nodes[merged_node_id]
+            adjacent_edges = {
+                edge
+                for edge in self.new_edges.values()
+                if edge.getToNode() == merged_node
+                or edge.getFromNode() == merged_node
+            }
+            pedestrian_edges = {
+                edge
+                for edge in adjacent_edges if all([
+                    "pedestrian" in lane.getAllowed()
+                    for lane in edge.getLanes()
+                ])
+            }
+
+            def edge_angle(edge1: Edge, edge2: Edge):
+                v1 = np.array(edge1.getToNode().getCoord()) - np.array(
+                    edge1.getFromNode().getCoord())
+                v2 = np.array(edge2.getToNode().getCoord()) - np.array(
+                    edge2.getFromNode().getCoord())
+                v1 /= np.linalg.norm(v1)
+                v2 /= np.linalg.norm(v2)
+                return np.arccos(np.dot(v1, v2))
+
+            def min_cluster(items, condition, comp):
+                clusters = [{items.pop()}]
+                while items:
+                    item = items.pop()
+                    min_idx = 0
+                    min_val = float("inf")
+                    for idx, cluster in enumerate(clusters):
+                        current = np.min([comp(item, e) for e in cluster])
+                        if current < min_val:
+                            min_idx = idx
+                            min_val = current
+                    if condition(min_val):
+                        clusters[min_idx].add(item)
+                    else:
+                        clusters.append({item})
+                return clusters
+
+            def merge_crossings(crossings: List[Crossing]):
+                old = set(crossings)
+                new = old
+
+                def eq(a, b):
+                    return all(np.isclose(a, b))
+
+                do = True
+                while do or len(new) < len(old):
+                    do = False
+                    old = new
+                    for current in old:
+                        match = next(
+                            (other for other in old
+                             if (eq(current.shape[-1], other.shape[0])
+                                 or eq(other.shape[-1], current.shape[0]))
+                             and other != current), None)
+                        if not match: continue
+
+                        if eq(current.shape[-1], match.shape[0]):
+                            match.shape = np.concatenate(
+                                (current.shape[:-1], match.shape), axis=0)
+                        elif eq(match.shape[-1], current.shape[0]):
+                            match.shape = np.concatenate(
+                                (match.shape[:-1], current.shape), axis=0)
+                        new = old - {current}
+                        break
+                return list(new)
+
+            non_pedestrian_edges = adjacent_edges - pedestrian_edges
+            if non_pedestrian_edges:
+                clusters = min_cluster(non_pedestrian_edges,
+                                       lambda min: min < np.pi / 2, edge_angle)
+                # merged_crossings = merge_crossings(crossings)
+                # # choose the crossing with maximal length
+                # crossing = merged_crossings[np.argmax([
+                #     np.linalg.norm(m.shape[-1] - m.shape[0])
+                #     for m in merged_crossings
+                # ])]
+                crossing = crossings[np.argmax([
+                    np.linalg.norm(m.shape[-1] - m.shape[0]) for m in crossings
+                ])]
+                split_crossings = []
+                for cluster in clusters:
+                    c = copy(crossing)
+                    c.edges = cluster
+                    c.shape = np.flip(c.shape, axis=0)
+                    split_crossings.append(c)
+
+                new_crossings[merged_node_id] = split_crossings
+
+        self._crossings = new_crossings
 
     def _is_merged_edge(self, edge: Edge):
         """
@@ -1072,8 +1189,9 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
             connections = ET.SubElement(root, 'connections')
             for connection in self._new_connections:
                 connections.append(ET.fromstring(connection.toXML()))
-            for crossing in self._crossings:
-                connections.append(ET.fromstring(crossing.toXML()))
+            for crossings in self._crossings.values():
+                for crossing in crossings:
+                    connections.append(ET.fromstring(crossing.toXML()))
 
             # pretty print & write the generated xml
             output_file.write(
@@ -1217,7 +1335,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                           with_speed=False,
                           figure_title=None):
         """
-        Debug function for showing input CommonRoad map to be converted 
+        Debug function for showing input CommonRoad map to be converted
         :param with_lane_id: specifies if printing the lane id or not
         :param with_succ_pred: specifies if showing the predecessors or not
         :param with_adj: specifies if showing the adjacents edges or not
@@ -1440,8 +1558,8 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         # create vehicle route file
         run([
             'python',
-            os.path.join(os.environ['SUMO_HOME'],
-                            'tools','randomTrips.py'), '-n', net_file, '-o',
+            os.path.join(os.environ['SUMO_HOME'], 'tools',
+                         'randomTrips.py'), '-n', net_file, '-o',
             trip_files['vehicle'], '-r', route_files["vehicle"], '-b',
             str(self.conf.departure_interval_vehicles.start), '-e',
             str(self.conf.departure_interval_vehicles.end), '-p',
@@ -1453,9 +1571,9 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         # create pedestrian routes
         run([
             'python',
-            os.path.join(os.environ['SUMO_HOME'], 'tools','randomTrips.py'),
-            '-n', net_file, '-o', trip_files['pedestrian'], '-r',
-            route_files["pedestrian"], '-b',
+            os.path.join(os.environ['SUMO_HOME'], 'tools',
+                         'randomTrips.py'), '-n', net_file, '-o',
+            trip_files['pedestrian'], '-r', route_files["pedestrian"], '-b',
             str(self.conf.departure_interval_vehicles.start), '-e',
             str(self.conf.departure_interval_vehicles.end), "-p",
             str(1 - self.conf.veh_distribution['pedestrian']),

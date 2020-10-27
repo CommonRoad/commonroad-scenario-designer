@@ -11,15 +11,17 @@
 
 from typing import List, Iterable
 from xml.etree import cElementTree as ET
+from crmapconverter.sumo_map.sumolib_net.edge import Edge
+from crmapconverter.sumo_map.sumolib_net.node import Node
 
 
 class Crossing:
     def __init__(self,
-                 node: str,
-                 edges: Iterable[str],
+                 node: Node,
+                 edges: Iterable[Edge],
                  priority: bool = None,
                  width: float = None,
-                 shape: Iterable[str] = None,
+                 shape = None,
                  linkIndex: int = None,
                  linkIndex2: int = None,
                  discard: bool = None):
@@ -37,14 +39,16 @@ class Crossing:
 
     def toXML(self) -> str:
         c = ET.Element("crossing")
-        c.set("node", str(self.node))
-        c.set("edges", " ".join(str(edge) for edge in self.edges))
+        c.set("node", str(self.node.getID()))
+        c.set("edges", " ".join(str(edge.getID()) for edge in self.edges))
         if self.priority:
             c.set("priority", str(self.priority))
         if self.width:
             c.set("width", str(self.width))
-        if self.shape:
-            c.set("shape", str(self.shape))
+        if self.shape is not None:
+            c.set(
+                "shape",
+                " ".join([",".join(str(coord) for coord in v) for v in self.shape]))
         if self.linkIndex:
             c.set("linkIndex", str(self.linkIndex))
         if self.linkIndex2:
