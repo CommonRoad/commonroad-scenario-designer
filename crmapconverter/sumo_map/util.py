@@ -1,22 +1,21 @@
 import os
 import subprocess
 import warnings
-
-import sumolib
-
 from copy import deepcopy
 from typing import Dict, List
 from xml.dom import minidom
-from xml.etree import ElementTree as et, cElementTree as ET
-import numpy as np
-
-from commonroad.geometry.shape import Polygon
-from commonroad.scenario.lanelet import LaneletNetwork
+from xml.etree import ElementTree as et
+from xml.etree import cElementTree as ET
 
 import matplotlib.pyplot as plt
+import numpy as np
+import sumolib
+from commonroad.geometry.shape import Polygon
+from commonroad.scenario.lanelet import LaneletNetwork
 from commonroad.visualization.draw_dispatch_cr import draw_object
+from crmapconverter.sumo_map.sumolib_net import Crossing, Edge
 
-from .config import SumoConfig, EGO_ID_START
+from .config import EGO_ID_START, SumoConfig
 
 
 def get_scenario_name_from_crfile(filepath: str) -> str:
@@ -299,3 +298,58 @@ def max_lanelet_network_id(lanelet_network: LaneletNetwork) -> int:
     return np.max(
         [max_lanelet, max_intersection, max_traffic_light, max_traffic_sign])
 
+
+def edge_angle(edge1: Edge, edge2: Edge):
+    v1 = np.array(edge1.getToNode().getCoord()) - np.array(
+        edge1.getFromNode().getCoord())
+    v2 = np.array(edge2.getToNode().getCoord()) - np.array(
+        edge2.getFromNode().getCoord())
+    v1 /= np.linalg.norm(v1)
+    v2 /= np.linalg.norm(v2)
+    return np.arccos(np.dot(v1, v2))
+
+def min_cluster(items, condition, comp):
+    clusters = [{items.pop()}]
+    while items:
+        item = items.pop()
+        min_idx = 0
+        min_val = float("inf")
+        for idx, cluster in enumerate(clusters):
+            current = np.min([comp(item, e) for e in cluster])
+            if current < min_val:
+                min_idx = idx
+                min_val = current
+        if condition(min_val):
+            clusters[min_idx].add(item)
+        else:
+            clusters.append({item})
+    return clusters
+
+def merge_crossings(crossings: List[Crossing]):
+    old = set(crossings)
+    new = old
+
+    def eq(a, b):
+        return all(np.isclose(a, b))
+
+    do = True
+    while do or len(new) < len(old):
+        do = False
+        old = new
+        for current in old:
+            match = next(
+                (other for other in old
+                    if (eq(current.shape[-1], other.shape[0])
+                        or eq(other.shape[-1], current.shape[0]))
+                    and other != current), None)
+            if not match: continue
+
+            if eq(current.shape[-1], match.shape[0]):
+                match.shape = np.concatenate(
+                    (current.shape[:-1], match.shape), axis=0)
+            elif eq(match.shape[-1], current.shape[0]):
+                match.shape = np.concatenate(
+                    (match.shape[:-1], current.shape), axis=0)
+            new = old - {current}
+            break
+    return list(new)

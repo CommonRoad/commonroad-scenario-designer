@@ -2,39 +2,47 @@
 This class contains functions for converting a CommonRoad map into a .net.xml SUMO map
 """
 import logging
-from collections import defaultdict
-from copy import deepcopy, copy
-from typing import Dict, Tuple, List, Set
-import re
-
 import os
 import random
+import re
 import subprocess
 import warnings
-from xml.etree import cElementTree as ET
+from collections import defaultdict
+from copy import copy, deepcopy
+from typing import Dict, List, Set, Tuple
 from xml.dom import minidom
+from xml.etree import cElementTree as ET
 
 # import networkx as nx
 import numpy as np
-
+import sumolib
 from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.common.util import Interval
-from commonroad.scenario.lanelet import LaneletNetwork, Lanelet
-from commonroad.scenario.traffic_sign import SupportedTrafficSignCountry, TrafficLight, TrafficLightState, TrafficLightCycleElement, TrafficLightDirection
+from commonroad.scenario.lanelet import Lanelet, LaneletNetwork
+from commonroad.scenario.traffic_sign import (SupportedTrafficSignCountry,
+                                              TrafficLight,
+                                              TrafficLightCycleElement,
+                                              TrafficLightDirection,
+                                              TrafficLightState)
 from commonroad.scenario.traffic_sign_interpreter import TrafficSigInterpreter
 from commonroad.visualization.draw_dispatch_cr import draw_object
-
 from matplotlib import pyplot as plt
-
-# modified sumolib.net.* files
-from .sumolib_net import Node, Edge, Lane, TLS, TLSProgram, Connection, Junction, Crossing
-from .sumolib_net.lane import SUMO_VEHICLE_CLASSES
-import sumolib
-
 from sumocr.maps.scenario_wrapper import AbstractScenarioWrapper
 
-from .util import compute_max_curvature_from_polyline, _find_intersecting_edges, get_scenario_name_from_crfile, get_total_lane_length_from_netfile, write_ego_ids_to_rou_file, get_scenario_name_from_netfile, remove_unreferenced_traffic_lights, max_lanelet_network_id
-from .config import SumoConfig, traffic_light_states_CR2SUMO, traffic_light_states_SUMO2CR, lanelet_type_CR2SUMO
+from .config import (SumoConfig, lanelet_type_CR2SUMO,
+                     traffic_light_states_CR2SUMO,
+                     traffic_light_states_SUMO2CR)
+from .sumolib_net import (TLS, Connection, Crossing, Edge, Junction, Lane,
+                          Node, TLSProgram)
+from .sumolib_net.lane import SUMO_VEHICLE_CLASSES
+from .util import (_find_intersecting_edges,
+                   compute_max_curvature_from_polyline, edge_angle,
+                   get_scenario_name_from_crfile,
+                   get_scenario_name_from_netfile,
+                   get_total_lane_length_from_netfile, max_lanelet_network_id,
+                   merge_crossings, min_cluster,
+                   remove_unreferenced_traffic_lights,
+                   write_ego_ids_to_rou_file)
 
 # This file is used as a template for the generated .sumo.cfg files
 DEFAULT_CFG_FILE = "default.sumo.cfg"
@@ -845,61 +853,6 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                     for lane in edge.getLanes()
                 ])
             }
-
-            def edge_angle(edge1: Edge, edge2: Edge):
-                v1 = np.array(edge1.getToNode().getCoord()) - np.array(
-                    edge1.getFromNode().getCoord())
-                v2 = np.array(edge2.getToNode().getCoord()) - np.array(
-                    edge2.getFromNode().getCoord())
-                v1 /= np.linalg.norm(v1)
-                v2 /= np.linalg.norm(v2)
-                return np.arccos(np.dot(v1, v2))
-
-            def min_cluster(items, condition, comp):
-                clusters = [{items.pop()}]
-                while items:
-                    item = items.pop()
-                    min_idx = 0
-                    min_val = float("inf")
-                    for idx, cluster in enumerate(clusters):
-                        current = np.min([comp(item, e) for e in cluster])
-                        if current < min_val:
-                            min_idx = idx
-                            min_val = current
-                    if condition(min_val):
-                        clusters[min_idx].add(item)
-                    else:
-                        clusters.append({item})
-                return clusters
-
-            def merge_crossings(crossings: List[Crossing]):
-                old = set(crossings)
-                new = old
-
-                def eq(a, b):
-                    return all(np.isclose(a, b))
-
-                do = True
-                while do or len(new) < len(old):
-                    do = False
-                    old = new
-                    for current in old:
-                        match = next(
-                            (other for other in old
-                             if (eq(current.shape[-1], other.shape[0])
-                                 or eq(other.shape[-1], current.shape[0]))
-                             and other != current), None)
-                        if not match: continue
-
-                        if eq(current.shape[-1], match.shape[0]):
-                            match.shape = np.concatenate(
-                                (current.shape[:-1], match.shape), axis=0)
-                        elif eq(match.shape[-1], current.shape[0]):
-                            match.shape = np.concatenate(
-                                (match.shape[:-1], current.shape), axis=0)
-                        new = old - {current}
-                        break
-                return list(new)
 
             non_pedestrian_edges = adjacent_edges - pedestrian_edges
             if non_pedestrian_edges:
