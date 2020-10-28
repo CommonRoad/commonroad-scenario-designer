@@ -925,7 +925,6 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                     cw = np.flip(cw, axis=0)
                     return np.concatenate((cw, ccw), axis=0)
 
-
                 # choose the crossing with maximal length
                 crossing = merged_crossings[np.argmax([
                     np.linalg.norm(m.shape[-1] - m.shape[0])
@@ -1295,9 +1294,9 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         except FileNotFoundError as e:
             if 'netconvert' in e.filename:
                 warnings.warn("Is netconvert installed and added to PATH?")
-            else:
-                success = False
-        except Exception:
+            success = False
+        except Exception as e:
+            logging.error(e)
             success = False
 
         if cleanup and success:
@@ -1314,6 +1313,8 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
             inc_lanes: List[Lane] = [
                 self.lanes[lane_id]
                 for lane_id in junction_xml.get('incLanes').split()
+                # we don't care about internal junction added by netconvert
+                if lane_id in self.lanes
             ]
             shape = [
                 tuple([float(i) for i in s.split(",")])
