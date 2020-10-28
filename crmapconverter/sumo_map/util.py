@@ -299,16 +299,32 @@ def max_lanelet_network_id(lanelet_network: LaneletNetwork) -> int:
         [max_lanelet, max_intersection, max_traffic_light, max_traffic_sign])
 
 
-def edge_angle(edge1: Edge, edge2: Edge):
-    v1 = np.array(edge1.getToNode().getCoord()) - np.array(
-        edge1.getFromNode().getCoord())
-    v2 = np.array(edge2.getToNode().getCoord()) - np.array(
-        edge2.getFromNode().getCoord())
+def vector_angle(v1: np.array, v2: np.array) -> float:
+    """Computes the angle between two vectors, in radians
+
+    Args:
+        v1 (np.array): [description]
+        v2 (np.array): [description]
+
+    Returns:
+        float: [description]
+    """
     v1 /= np.linalg.norm(v1)
     v2 /= np.linalg.norm(v2)
-    return np.arccos(np.dot(v1, v2))
+    return np.arccos(np.clip(np.dot(v1, v2), -1.0, 1.0))
+
 
 def min_cluster(items, condition, comp):
+    """clusters the items according to the comparator() of size minimally condition()
+
+    Args:
+        items ([type]): [description]
+        condition ([type]): [description]
+        comp ([type]): [description]
+
+    Returns:
+        [type]: List of clusters
+    """
     clusters = [{items.pop()}]
     while items:
         item = items.pop()
@@ -325,7 +341,17 @@ def min_cluster(items, condition, comp):
             clusters.append({item})
     return clusters
 
-def merge_crossings(crossings: List[Crossing]):
+
+def merge_crossings(crossings: List[Crossing]) -> List[Crossing]:
+    """Merges crossings whose share the same point in their
+    shape at either the beginning or end.
+
+    Args:
+        crossings (List[Crossing]): list of crossings to merge
+
+    Returns:
+        List[Crossing]: merged crossings
+    """
     old = set(crossings)
     new = old
 
@@ -339,17 +365,17 @@ def merge_crossings(crossings: List[Crossing]):
         for current in old:
             match = next(
                 (other for other in old
-                    if (eq(current.shape[-1], other.shape[0])
-                        or eq(other.shape[-1], current.shape[0]))
-                    and other != current), None)
+                 if (eq(current.shape[-1], other.shape[0]) or eq(
+                     other.shape[-1], current.shape[0])) and other != current),
+                None)
             if not match: continue
 
             if eq(current.shape[-1], match.shape[0]):
-                match.shape = np.concatenate(
-                    (current.shape[:-1], match.shape), axis=0)
+                match.shape = np.concatenate((current.shape[:-1], match.shape),
+                                             axis=0)
             elif eq(match.shape[-1], current.shape[0]):
-                match.shape = np.concatenate(
-                    (match.shape[:-1], current.shape), axis=0)
+                match.shape = np.concatenate((match.shape[:-1], current.shape),
+                                             axis=0)
             new = old - {current}
             break
     return list(new)

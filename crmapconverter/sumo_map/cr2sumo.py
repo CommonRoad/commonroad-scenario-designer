@@ -35,14 +35,12 @@ from .config import (SumoConfig, lanelet_type_CR2SUMO,
 from .sumolib_net import (TLS, Connection, Crossing, Edge, Junction, Lane,
                           Node, TLSProgram)
 from .sumolib_net.lane import SUMO_VEHICLE_CLASSES
-from .util import (_find_intersecting_edges,
-                   compute_max_curvature_from_polyline, edge_angle,
-                   get_scenario_name_from_crfile,
-                   get_scenario_name_from_netfile,
-                   get_total_lane_length_from_netfile, max_lanelet_network_id,
-                   merge_crossings, min_cluster,
-                   remove_unreferenced_traffic_lights,
-                   write_ego_ids_to_rou_file)
+from .util import (
+    _find_intersecting_edges, compute_max_curvature_from_polyline,
+    vector_angle, get_scenario_name_from_crfile,
+    get_scenario_name_from_netfile, get_total_lane_length_from_netfile,
+    max_lanelet_network_id, merge_crossings, min_cluster,
+    remove_unreferenced_traffic_lights, write_ego_ids_to_rou_file)
 
 # This file is used as a template for the generated .sumo.cfg files
 DEFAULT_CFG_FILE = "default.sumo.cfg"
@@ -856,22 +854,71 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
             non_pedestrian_edges = adjacent_edges - pedestrian_edges
 
             if non_pedestrian_edges:
-                clusters = min_cluster(non_pedestrian_edges,
-                                       lambda min: min < np.pi / 2, edge_angle)
-                # merged_crossings = merge_crossings(crossings)
-                # # choose the crossing with maximal length
-                # crossing = merged_crossings[np.argmax([
-                #     np.linalg.norm(m.shape[-1] - m.shape[0])
-                #     for m in merged_crossings
-                # ])]
-                crossing = crossings[np.argmax([
-                    np.linalg.norm(m.shape[-1] - m.shape[0]) for m in crossings
+
+                def edge_angle(e1: Edge, e2: Edge) -> float:
+                    """Compute the angle between two vectors
+                    Returns:
+                        [float]: Angle in radians
+                    """
+                    v1 = np.array(e1.getToNode().getCoord()) - np.array(
+                        e1.getFromNode().getCoord())
+                    v2 = np.array(e2.getToNode().getCoord()) - np.array(
+                        e2.getFromNode().getCoord())
+                    # return vector_angle(v1, v2)
+
+                def relative_angle(a):
+                    return 1 - np.abs(2 * a / np.pi - 1) < 0.5
+
+                clusters = min_cluster(non_pedestrian_edges, relative_angle,
+                                       edge_angle)
+
+                merged_crossings = merge_crossings(crossings)
+                # filter all crossings close to parallel to any of the clusters
+                # if we have more than merged crossing
+                # min angle: PI/4
+                merged_crossings = [
+                    c for c in merged_crossings if np.min([
+                        vector_angle(
+                            np.array(e.getToNode().getCoord()) -
+                            np.array(e.getFromNode().getCoord()), c.shape[-1] -
+                            c.shape[0]) for cluster in clusters
+                        for e in cluster
+                    ]) > np.pi / 4
+                ] if len(merged_crossings) > 1 else merged_crossings
+                # choose the crossing with maximal length
+                crossing = merged_crossings[np.argmax([
+                    np.linalg.norm(m.shape[-1] - m.shape[0])
+                    for m in merged_crossings
                 ])]
+
+                def order_counter_clockwise(ndarray):
+                    z = np.sort(ndarray, axis=0)
+                    cw = z[0:1]  # first point in clockwise direction
+                    ccw = z[1:2]  # first point in counter clockwise direction
+                    # reverse the above assignment depending on how first 2 points relate
+                    if z[1][1] > z[0][1]:
+                        cw = z[1:2]
+                        ccw = z[0:1]
+
+                    for p in z[2:]:
+                        # append to the list to which the next point is closest
+                        if np.linalg.norm(cw[-1] -
+                                          p) < np.linalg.norm(ccw[-1] - p):
+                            cw = np.append(cw, [p], axis=0)
+                        else:
+                            ccw = np.append(cw, [p], axis=0)
+
+                    cw = np.flip(cw, axis=0)
+                    return np.concatenate((cw, ccw), axis=0)
+
+                # assign each cluster the same crossing
                 split_crossings = []
                 for cluster in clusters:
                     c = copy(crossing)
                     c.edges = cluster
-                    c.shape = np.flip(c.shape, axis=0)
+                    c.shape = order_counter_clockwise(c.shape)
+                    c.shape=None
+
                     split_crossings.append(c)
 
                 new_crossings[merged_node_id] = split_crossings
