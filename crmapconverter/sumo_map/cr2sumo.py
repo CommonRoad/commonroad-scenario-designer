@@ -855,24 +855,43 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
 
             if non_pedestrian_edges:
 
-                def edge_angle(e1: Edge, e2: Edge) -> float:
-                    """Compute the angle between two vectors
+                def opp_distance(e1: Edge, e2: Edge) -> float:
+                    """Computes the maximum distance between 
+                    opposite points of two edges
+
+                    Args:
+                        e1 (Edge): edge1
+                        e2 (Edge): edge2
+
                     Returns:
-                        [float]: Angle in radians
+                        float: maximum distance between opposing ends of
+                        the two edges
                     """
-                    v1 = np.array(e1.getToNode().getCoord()) - np.array(
-                        e1.getFromNode().getCoord())
-                    v2 = np.array(e2.getToNode().getCoord()) - np.array(
-                        e2.getFromNode().getCoord())
-                    # return vector_angle(v1, v2)
+                    d1 = np.linalg.norm(
+                        np.array(e1.getFromNode().getCoord()) -
+                        np.array(e2.getToNode().getCoord()))
+                    d2 = np.linalg.norm(
+                        np.array(e1.getToNode().getCoord()) -
+                        np.array(e2.getFromNode().getCoord()))
+                    return max(d1, d2)
 
-                def relative_angle(a):
-                    return 1 - np.abs(2 * a / np.pi - 1) < 0.5
+                def max_distance(dist: float) -> bool:
+                    """Limits the distance for clustering 
+                    to 4m.
 
-                clusters = min_cluster(non_pedestrian_edges, relative_angle,
-                                       edge_angle)
+                    Args:
+                        dist (float): distance
+
+                    Returns:
+                        bool: distance in limit
+                    """
+                    return dist < 4
+
+                clusters = min_cluster(non_pedestrian_edges, max_distance,
+                                       opp_distance)
 
                 merged_crossings = merge_crossings(crossings)
+
                 # filter all crossings close to parallel to any of the clusters
                 # if we have more than merged crossing
                 # min angle: PI/4
@@ -885,11 +904,6 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                         for e in cluster
                     ]) > np.pi / 4
                 ] if len(merged_crossings) > 1 else merged_crossings
-                # choose the crossing with maximal length
-                crossing = merged_crossings[np.argmax([
-                    np.linalg.norm(m.shape[-1] - m.shape[0])
-                    for m in merged_crossings
-                ])]
 
                 def order_counter_clockwise(ndarray):
                     z = np.sort(ndarray, axis=0)
@@ -911,14 +925,20 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                     cw = np.flip(cw, axis=0)
                     return np.concatenate((cw, ccw), axis=0)
 
+
+                # choose the crossing with maximal length
+                crossing = merged_crossings[np.argmax([
+                    np.linalg.norm(m.shape[-1] - m.shape[0])
+                    for m in merged_crossings
+                ])]
+
                 # assign each cluster the same crossing
                 split_crossings = []
                 for cluster in clusters:
                     c = copy(crossing)
                     c.edges = cluster
-                    c.shape = order_counter_clockwise(c.shape)
-                    c.shape=None
-
+                    # TODO: somewho figure out how to compute a proper crossing shape
+                    c.shape = None
                     split_crossings.append(c)
 
                 new_crossings[merged_node_id] = split_crossings
