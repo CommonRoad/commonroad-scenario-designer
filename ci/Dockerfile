@@ -50,18 +50,24 @@ SHELL ["/bin/bash", "-c"]
 
 # install SUMO
 ## add environment variables / update $PATH
-ENV SUMO_HOME=$HOME/sumo
+# ENV SUMO_HOME=$HOME/sumo
+ENV SUMO_HOME=/usr/share/sumo
 ENV PATH=$PATH:$SUMO_HOME/bin
-RUN sudo apt-get install -y ffmpeg \
-	&& git clone --depth 1 --recurse-submodules --shallow-submodules https://github.com/eclipse/sumo \
-	&& cd sumo \
-#	&& git checkout smooth-lane-change \
-	&& sudo apt-get install -y cmake python g++ libxerces-c-dev libfox-1.6-dev libgdal-dev libproj-dev libgl2ps-dev swig \
-	&& export SUMO_HOME="$(pwd)" \
-	&& echo "export SUMO_HOME=$(pwd)" >> ~/.bashrc \
-	&& cd build \
-	&& cmake .. \
-	&& make -j$(nproc)
+# RUN sudo apt-get install -y ffmpeg \
+# 	&& git clone --depth 1 --recurse-submodules --shallow-submodules https://github.com/eclipse/sumo \
+# 	&& cd sumo \
+# #	&& git checkout smooth-lane-change \
+# 	&& sudo apt-get install -y cmake python g++ libxerces-c-dev libfox-1.6-dev libgdal-dev libproj-dev libgl2ps-dev swig \
+# 	&& export SUMO_HOME="$(pwd)" \
+# 	&& echo "export SUMO_HOME=$(pwd)" >> ~/.bashrc \
+# 	&& cd build \
+# 	&& cmake .. \
+# 	&& make -j$(nproc)
+RUN sudo apt-get install -y software-properties-common \
+	&& sudo add-apt-repository -y ppa:sumo/stable \
+	&& sudo apt-get update \
+	&& sudo apt-get install -y ffmpeg sumo sumo-tools sumo-doc \
+	&& echo "export SUMO_HOME=/usr/share/sumo" >> ~/.bashrc
 
 
 # activate conda environment

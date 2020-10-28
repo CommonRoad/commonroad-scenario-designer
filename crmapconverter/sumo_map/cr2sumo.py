@@ -853,8 +853,8 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                     for lane in edge.getLanes()
                 ])
             }
-
             non_pedestrian_edges = adjacent_edges - pedestrian_edges
+
             if non_pedestrian_edges:
                 clusters = min_cluster(non_pedestrian_edges,
                                        lambda min: min < np.pi / 2, edge_angle)
