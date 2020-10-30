@@ -2,34 +2,37 @@
 This class contains functions for converting a CommonRoad map into a .net.xml SUMO map
 """
 import logging
-import sys
-from collections import defaultdict
-from copy import deepcopy
-from typing import Dict, Tuple, List, Set
-import re
-
 import os
 import random
 import subprocess
+import sys
 import warnings
-from xml.etree import cElementTree as ET
-from xml.dom import minidom
+from collections import defaultdict
+from copy import deepcopy
 from itertools import groupby
+from typing import Dict, Tuple, List, Set
+from xml.dom import minidom
+from xml.etree import cElementTree as ET
 
 # import networkx as nx
 import numpy as np
+
+from commonroad.prediction.prediction import TrajectoryPrediction
+
 try:
     import pycrccosy
     from commonroad_ccosy.geometry.util import resample_polyline
 except ImportError:
-    warnings.warn(f"Unable to import pycrccosy, converting static scenario into interactive is not supported!")
+    warnings.warn(
+        f"Unable to import pycrccosy, converting static scenario into interactive is not supported!")
 
 from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.common.util import Interval
 from commonroad.scenario.lanelet import LaneletNetwork, Lanelet
-from commonroad.scenario.obstacle import ObstacleType, ObstacleRole
+from commonroad.scenario.obstacle import ObstacleRole
 from commonroad.scenario.scenario import Scenario
-from commonroad.scenario.traffic_sign import SupportedTrafficSignCountry, TrafficLight, TrafficLightState, TrafficLightCycleElement, TrafficLightDirection
+from commonroad.scenario.traffic_sign import SupportedTrafficSignCountry, TrafficLight, \
+    TrafficLightCycleElement, TrafficLightDirection
 from commonroad.scenario.traffic_sign_interpreter import TrafficSigInterpreter
 from commonroad.visualization.draw_dispatch_cr import draw_object
 
@@ -42,9 +45,12 @@ import sumolib
 
 from sumocr.maps.scenario_wrapper import AbstractScenarioWrapper
 
-from .util import compute_max_curvature_from_polyline, _find_intersecting_edges, get_scenario_name_from_crfile, get_total_lane_length_from_netfile, write_ego_ids_to_rou_file, get_scenario_name_from_netfile, remove_unreferenced_traffic_lights, max_lanelet_network_id
+from .util import compute_max_curvature_from_polyline, _find_intersecting_edges, \
+    get_total_lane_length_from_netfile, write_ego_ids_to_rou_file, get_scenario_name_from_netfile, \
+    remove_unreferenced_traffic_lights, max_lanelet_network_id
 from .config import SumoConfig, \
-    VEHICLE_TYPE_CR2SUMO, traffic_light_states_CR2SUMO, traffic_light_states_SUMO2CR, lanelet_type_CR2SUMO, \
+    VEHICLE_TYPE_CR2SUMO, traffic_light_states_CR2SUMO, traffic_light_states_SUMO2CR, \
+    lanelet_type_CR2SUMO, \
     VEHICLE_NODE_TYPE_CR2SUMO
 
 # This file is used as a template for the generated .sumo.cfg files
@@ -53,12 +59,13 @@ DEFAULT_CFG_FILE = "default.sumo.cfg"
 
 class CR2SumoMapConverter(AbstractScenarioWrapper):
     """Converts CommonRoad map to sumo map .net.xml"""
+
     def __init__(
-        self,
-        lanelet_network: LaneletNetwork,
-        conf: SumoConfig,
-        country_id: SupportedTrafficSignCountry = SupportedTrafficSignCountry.
-        ZAMUNDA):
+            self,
+            lanelet_network: LaneletNetwork,
+            conf: SumoConfig,
+            country_id: SupportedTrafficSignCountry = SupportedTrafficSignCountry.
+                ZAMUNDA):
         """
 
         :param lanelet_network: lanelet network to be converted
@@ -139,7 +146,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
             if not edge_id in self.new_edges:
                 logging.warning(
                     "Edge: {} has been removed in SUMO-NET but contained a traffic light"
-                    .format(edge_id))
+                        .format(edge_id))
                 continue
 
             from_edge: Edge = self.new_edges[edge_id]
@@ -150,14 +157,14 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
             ]
 
             for tl in [
-                    tl for tl in self.lanelet_network.traffic_lights
-                    if tl.traffic_light_id in lanelet_lights_ids
+                tl for tl in self.lanelet_network.traffic_lights
+                if tl.traffic_light_id in lanelet_lights_ids
             ]:
                 # is the traffic light active?
                 if not tl.active:
                     logging.info(
                         'Traffic Light: {} is inactive, skipping conversion'.
-                        format(tl.traffic_light_id))
+                            format(tl.traffic_light_id))
                     continue
 
                 ## Only valid if the traffic light has not been created ##
@@ -178,7 +185,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                 if tl.traffic_light_id in self.traffic_light_signals:
                     logging.warning(
                         'TrafficLight: {} is referenced by multiple lanelets'.
-                        format(tl.traffic_light_id))
+                            format(tl.traffic_light_id))
                     continue
 
                 # create Traffic Light Signal
@@ -207,7 +214,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                     """
                     for connection in self._connection_shapes:
                         if connection[0] == from_lane and connection[
-                                -1] == to_lane:
+                            -1] == to_lane:
                             return True
                     return False
 
@@ -496,7 +503,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
             leftmost_lanelet = self.lanelet_network.find_lanelet_by_id(
                 lanelet_ids[-1])
             if leftmost_lanelet.adj_left is not None:
-                self.lanes[self.lanelet_id2lane_id[lanelet_ids[-1]]]\
+                self.lanes[self.lanelet_id2lane_id[lanelet_ids[-1]]] \
                     .setAdjacentOpposite(self.lanelet_id2lane_id[leftmost_lanelet.adj_left])
 
     def _init_connections(self):
@@ -508,8 +515,8 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
             if l.successor:
                 self._connections[self.lanelet_id2lane_id[
                     l.lanelet_id]].extend([
-                        self.lanelet_id2lane_id[succ] for succ in l.successor
-                    ])
+                    self.lanelet_id2lane_id[succ] for succ in l.successor
+                ])
 
     def _filter_disallowed_vehicle_classes(self, max_curvature: float,
                                            lanelet_width, lanelet_id) -> str:
@@ -527,14 +534,14 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         if max_curvature > 0.001:  # not straight lanelet
             radius = 1 / max_curvature
             max_vehicle_length_sq = 4 * (
-                (radius + lanelet_width / 2)**2 -
-                (radius + self._max_vehicle_width / 2)**2)
+                    (radius + lanelet_width / 2) ** 2 -
+                    (radius + self._max_vehicle_width / 2) ** 2)
 
             for veh_class, veh_length in self.conf.veh_params['length'].items(
             ):
                 # only disallow vehicles longer than car (class passenger)
-                if veh_length**2 > max_vehicle_length_sq and veh_length > self.conf.veh_params[
-                        'length']['passenger']:
+                if veh_length ** 2 > max_vehicle_length_sq and veh_length > self.conf.veh_params[
+                    'length']['passenger']:
                     disallow.append(veh_class)
                     # print("{} disallowed on lanelet {}, allowed max_vehicle_length={}".format(veh_class, lanelet_id,
                     #                                                                           max_vehicle_length))
@@ -548,7 +555,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         :return: average_width
         """
         helper_matrix = lanelet.right_vertices - lanelet.left_vertices
-        distance_array = helper_matrix[:, 0]**2 + helper_matrix[:, 1]**2
+        distance_array = helper_matrix[:, 0] ** 2 + helper_matrix[:, 1] ** 2
         average_width = np.sqrt(np.min(distance_array))
         return average_width
 
@@ -569,7 +576,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         Return a set of the speed limits of the edges
         :return: speeds_list
         """
-        speeds_list = []  #list of speed that will be returned by the method
+        speeds_list = []  # list of speed that will be returned by the method
         for edge in self.new_edges.values():
             speed = edge.getSpeed()
             speeds_list.append(speed)
@@ -616,8 +623,8 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                 lanelet_id
                 for incoming in intersection.incomings
                 for lanelet_id in incoming.successors_right
-                | incoming.successors_left
-                | incoming.successors_straight
+                                  | incoming.successors_left
+                                  | incoming.successors_straight
             }
             intersecting = successors | intersection.crossings
             edges = {str(self.lanelet_id2edge_id[i]) for i in intersecting}
@@ -663,7 +670,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                             new_candidates = list(
                                 set(new_candidates +
                                     self.replaced_nodes[merged_node]).
-                                difference(explored_candidates))
+                                    difference(explored_candidates))
 
                 for node_id in explored_candidates:
                     del self.merged_dictionary[node_id]
@@ -853,12 +860,12 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         # auto generate the TLS with netconvert
         junction = self.lanelet_id2junction[lanelet_id]
         command = "netconvert --sumo-net-file=" + self._output_file + \
-                    " --output-file=" + self._output_file + \
-                    " --tls.guess=true" + \
-                    " --tls.guess-signals=" + ('true' if guess_signals else 'false') + \
-                    " --tls.group-signals=true" + \
-                    " --tls.cycle.time=" + str(cycle_time) + \
-                    " --tls.set=" + str(junction.id)
+                  " --output-file=" + self._output_file + \
+                  " --tls.guess=true" + \
+                  " --tls.guess-signals=" + ('true' if guess_signals else 'false') + \
+                  " --tls.group-signals=true" + \
+                  " --tls.cycle.time=" + str(cycle_time) + \
+                  " --tls.set=" + str(junction.id)
         try:
             out = subprocess.check_output(command.split(),
                                           timeout=5.,
@@ -1099,7 +1106,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         # Calling of Netconvert
         bashCommand = "netconvert --plain.extend-edge-shape=true" \
                       " --no-turnarounds=true" \
-                      " --junctions.internal-link-detail=20"\
+                      " --junctions.internal-link-detail=20" \
                       " --geometry.avoid-overlap=true" \
                       " --offset.disable-normalization=true" \
                       " --node-files=" + self._nodes_file + \
@@ -1150,7 +1157,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                                 incLanes=inc_lanes,
                                 shape=shape)
             for lanelet_id in [
-                    self.lane_id2lanelet_id[l.getID()] for l in inc_lanes
+                self.lane_id2lanelet_id[l.getID()] for l in inc_lanes
             ]:
                 self.lanelet_id2junction[lanelet_id] = junction
 
@@ -1215,10 +1222,10 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
             if with_adj:
                 info = info + ' \nadj_l: ' + str(
                     l.adj_left) + '; adj_l_same_dir: ' + str(
-                        l.adj_left_same_direction)
+                    l.adj_left_same_direction)
                 info = info + ' \nadj_r: ' + str(
                     l.adj_right) + '; adj_r_same_dir: ' + str(
-                        l.adj_right_same_direction)
+                    l.adj_right_same_direction)
             if with_speed:
                 info = info + '\nspeed limit: ' + str(l.speed_limit)
             plt.plot(l.center_vertices[0, 0], l.center_vertices[0, 1], 'x')
@@ -1288,7 +1295,8 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
 
         add_file = self._convert_to_add_file(scenario, output_folder)
         rou_files = self._convert_to_rou_file(scenario, output_folder)
-        self.sumo_cfg_file = self._generate_cfg_file(scenario_name, net_file, rou_files, add_file, output_folder)
+        self.sumo_cfg_file = self._generate_cfg_file(scenario_name, net_file, rou_files, add_file,
+                                                     output_folder)
         return True
 
     def _generate_routes(self, net_file: str) -> bool:
@@ -1299,14 +1307,15 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         :return bool: If the conversion was successful
         """
         if len(self.conf.ego_ids) > self.conf.n_ego_vehicles:
-            logging.error("total number of given ego_vehicles must be <= n_ego_vehicles, but {}not<={}"\
-            .format(len(self.conf.ego_ids),self.conf.n_ego_vehicles))
+            logging.error(
+                "total number of given ego_vehicles must be <= n_ego_vehicles, but {}not<={}" \
+                .format(len(self.conf.ego_ids), self.conf.n_ego_vehicles))
             return False
 
         if self.conf.n_ego_vehicles > self.conf.n_vehicles_max:
             logging.error(
                 "Number of ego vehicles needs to be <= than the total number of vehicles. n_ego_vehicles: {} > n_vehicles_max: {}"
-                .format(self.conf.n_ego_vehicles, self.conf.n_vehicles_max))
+                    .format(self.conf.n_ego_vehicles, self.conf.n_vehicles_max))
             return False
 
         scenario_name = get_scenario_name_from_netfile(net_file)
@@ -1343,13 +1352,16 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
 
         def get_grouped_obstacles(obstacle_list):
             return {obstacle_id: list(obstacles)
-                                  for obstacle_id, obstacles in groupby(sorted(obstacle_list,
-                                                                   key=lambda obstacle: obstacle.obstacle_type.value),
-                                                            key=lambda obstacle: obstacle.obstacle_type)}
+                    for obstacle_id, obstacles in groupby(sorted(obstacle_list,
+                                                                 key=lambda
+                                                                     obstacle: obstacle.obstacle_type.value),
+                                                          key=lambda
+                                                              obstacle: obstacle.obstacle_type)}
 
         num_all_obstacles = len(scenario.obstacles)
         grouped_obstacles = {ObstacleRole.STATIC: get_grouped_obstacles(scenario.static_obstacles),
-                             ObstacleRole.DYNAMIC: get_grouped_obstacles(scenario.dynamic_obstacles)}
+                             ObstacleRole.DYNAMIC: get_grouped_obstacles(
+                                 scenario.dynamic_obstacles)}
 
         for veh_role, type_grouped_obstacles in grouped_obstacles.items():
             for veh_type, obstacle_list in type_grouped_obstacles.items():
@@ -1367,8 +1379,9 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                 for att_name, setting in vehicle_params.items():
                     att_value = setting[sumo_veh_type]
                     if type(att_value) is Interval:
-                        raise ValueError(f"Converting a CommonRoad scenario does not support using Interval "
-                                         f"as value for parameter {att_name}.{veh_type}")
+                        raise ValueError(
+                            f"Converting a CommonRoad scenario does not support using Interval "
+                            f"as value for parameter {att_name}.{veh_type}")
                     else:
                         att_value = str(att_value)
                     vType_node.setAttribute(att_name, att_value)
@@ -1441,9 +1454,9 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         return add_file
 
     def _convert_to_rou_file(
-        self,
-        scenario: Scenario,
-        out_folder: str,
+            self,
+            scenario: Scenario,
+            out_folder: str,
     ) -> Dict[str, str]:
         """
         Creates route files from CommonRoad scenario.
@@ -1474,11 +1487,12 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
             :return: An orientation in interval [-pi,pi]
             """
             ccosy = create_coordinate_system_from_polyline(lanelet.center_vertices)
-            long, lat = ccosy.convert_to_curvilinear_coords(position[0], position[1])
-            tangent = ccosy.tangent(long)
+            # long, lat = ccosy.convert_to_curvilinear_coords(position[0], position[1])
+            tangent = [0, 0]  # ccosy.tangent(long)
             return np.arctan2(tangent[1], tangent[0])
 
-        def sorted_lanelet_ids(lanelet_ids: List[int], orientation: float, position: np.ndarray, scenario: Scenario) \
+        def sorted_lanelet_ids(lanelet_ids: List[int], orientation: float, position: np.ndarray,
+                               scenario: Scenario) \
                 -> List[int]:
             """
             return the lanelets sorted by relative orientation to the position and orientation given
@@ -1494,7 +1508,8 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                     lanelet_orientation = lanelet_orientation_at_position(lanelet, position)
                     return np.abs(relative_orientation(lanelet_orientation, orientation))
 
-                orientation_differences = np.array(list(map(get_lanelet_relative_orientation, lanelet_id_list)))
+                orientation_differences = np.array(
+                    list(map(get_lanelet_relative_orientation, lanelet_id_list)))
                 sorted_indices = np.argsort(orientation_differences)
                 return list(lanelet_id_list[sorted_indices])
 
@@ -1516,15 +1531,17 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         scenario_name = str(scenario.scenario_id)
 
         grouped_obstacles = {k: list(g) for k, g in groupby(sorted(scenario.obstacles,
-                                                                   key=lambda obstacle: obstacle.obstacle_type.value),
-                                                            key=lambda obstacle: obstacle.obstacle_type)}
+                                                                   key=lambda
+                                                                       obstacle: obstacle.obstacle_type.value),
+                                                            key=lambda
+                                                                obstacle: obstacle.obstacle_type)}
 
         # filenames
         route_files: Dict[str, str] = {
             'vehicle':
-            os.path.join(out_folder, scenario_name + ".vehicles.rou.xml"),
+                os.path.join(out_folder, scenario_name + ".vehicles.rou.xml"),
             "pedestrian":
-            os.path.join(out_folder, scenario_name + ".pedestrians.rou.xml")
+                os.path.join(out_folder, scenario_name + ".pedestrians.rou.xml")
         }
 
         for route_type, route_file in route_files.items():
@@ -1536,22 +1553,41 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
 
             flatten = lambda l: [item for sublist in l for item in sublist]
             route_obstacles = flatten([obstacles
-                                 for obstacle_type, obstacles in grouped_obstacles.items()
-                                 if VEHICLE_NODE_TYPE_CR2SUMO[obstacle_type] == route_type])
+                                       for obstacle_type, obstacles in grouped_obstacles.items()
+                                       if VEHICLE_NODE_TYPE_CR2SUMO[obstacle_type] == route_type])
 
             for obstacle in route_obstacles:
                 vehicle_node = domTree.createElement("vehicle")
 
                 vehicle_node.setAttribute("id", str(obstacle.obstacle_id))
-                vehicle_node.setAttribute("depart", str(obstacle.prediction.initial_time_step * scenario.dt))
+                vehicle_node.setAttribute("depart",
+                                          str(obstacle.prediction.initial_time_step * scenario.dt))
                 vehicle_node.setAttribute("departSpeed", str(obstacle.initial_state.velocity))
 
                 lanelet_ids = []
                 last_lanelet_id = None
+
+                assert isinstance(obstacle.prediction, TrajectoryPrediction), \
+                    f"Only scenario with TrajectoryPrediction is supported for rou file generation, " \
+                    f"the current obstacle was {type(obstacle.prediction)}"
+
+                skip_obstacle = False
                 for state in obstacle.prediction.trajectory.state_list:
-                    possible_lanelet_ids = scenario.lanelet_network.find_lanelet_by_position([state.position])[0]
-                    sorted_lanelet_id_list = sorted_lanelet_ids(possible_lanelet_ids, state.orientation, state.position,
+                    possible_lanelet_ids = \
+                    scenario.lanelet_network.find_lanelet_by_position([state.position])[0]
+
+                    if len(possible_lanelet_ids) == 0:
+                        possible_lanelet_ids = scenario.lanelet_network.find_lanelet_by_shape(
+                            obstacle.occupancy_at_time(state.time_step).shape)
+
+                    sorted_lanelet_id_list = sorted_lanelet_ids(possible_lanelet_ids,
+                                                                state.orientation, state.position,
                                                                 scenario)
+
+                    if len(sorted_lanelet_id_list)==0:
+                        logging.warning("Skipping obstacle %s, because left the lanelet network in the scenario %s", obstacle.obstacle_id, scenario.scenario_id)
+                        skip_obstacle = True
+                        break
 
                     best_lanelet_id = sorted_lanelet_id_list[0]
 
@@ -1559,9 +1595,13 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                         lanelet_ids.append(best_lanelet_id)
                         last_lanelet_id = best_lanelet_id
 
+                if skip_obstacle:
+                    continue
+
                 last_lanelet = scenario.lanelet_network.find_lanelet_by_id(lanelet_ids[-1])
-                _, all_successor_lanelet_ids = Lanelet.all_lanelets_by_merging_successors_from_lanelet(last_lanelet,
-                                                                                                       scenario.lanelet_network)
+                _, all_successor_lanelet_ids = Lanelet.all_lanelets_by_merging_successors_from_lanelet(
+                    last_lanelet,
+                    scenario.lanelet_network)
                 successor_lanelet_ids = all_successor_lanelet_ids[0]
 
                 lanelet_ids.extend(successor_lanelet_ids[1:])
@@ -1589,10 +1629,10 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         return route_files
 
     def _generate_rou_file(
-        self,
-        net_file: str,
-        scenario_name: str,
-        out_folder: str = None,
+            self,
+            net_file: str,
+            scenario_name: str,
+            out_folder: str = None,
     ) -> str:
         """
         Creates route & trips files using randomTrips generator.
@@ -1623,20 +1663,20 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
             logging.info(
                 'SUMO traffic generation: neither total_lane_length nor veh_per_second is defined. '
                 'For each second there are two vehicles generated.')
-        #step_per_departure = ((conf.departure_interval_vehicles.end - conf.departure_interval_vehicles.start) / n_vehicles_max)
+        # step_per_departure = ((conf.departure_interval_vehicles.end - conf.departure_interval_vehicles.start) / n_vehicles_max)
 
         # filenames
         route_files: Dict[str, str] = {
             'vehicle':
-            os.path.join(out_folder, scenario_name + ".vehicles.rou.xml"),
+                os.path.join(out_folder, scenario_name + ".vehicles.rou.xml"),
             "pedestrian":
-            os.path.join(out_folder, scenario_name + ".pedestrians.rou.xml")
+                os.path.join(out_folder, scenario_name + ".pedestrians.rou.xml")
         }
         trip_files: Dict[str, str] = {
             'vehicle':
-            os.path.join(out_folder, scenario_name + '.vehicles.trips.xml'),
+                os.path.join(out_folder, scenario_name + '.vehicles.trips.xml'),
             'pedestrian':
-            os.path.join(out_folder, scenario_name + '.pedestrian.trips.xml')
+                os.path.join(out_folder, scenario_name + '.pedestrian.trips.xml')
         }
         add_file = os.path.join(out_folder, scenario_name + '.add.xml')
 
@@ -1683,7 +1723,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
             logging.warning(e)
 
         if self.conf.n_ego_vehicles != 0:
-            #get ego ids and add EGO_ID_START prefix
+            # get ego ids and add EGO_ID_START prefix
             ego_ids = self._find_ego_ids_by_departure_time(
                 route_files["vehicle"])
             write_ego_ids_to_rou_file(route_files["vehicle"], ego_ids)
@@ -1764,11 +1804,11 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
 
         updated_fields = {
             '*/net-file':
-            os.path.basename(net_file),
+                os.path.basename(net_file),
             '*/route-files':
-            ",".join([os.path.basename(f) for f in route_files.values()]),
+                ",".join([os.path.basename(f) for f in route_files.values()]),
             '*/additional-files':
-            os.path.basename(add_file),
+                os.path.basename(add_file),
         }
         for k, v in updated_fields.items():
             tree.findall(k)[0].attrib['value'] = v
