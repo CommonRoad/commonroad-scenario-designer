@@ -4,7 +4,7 @@ It also provides several methods to perform operations on elements of the graph.
 """
 from queue import Queue
 from typing import List, Set, Tuple, Optional, Dict
-
+from ordered_set import OrderedSet
 import numpy as np
 from commonroad.scenario.traffic_sign import TrafficSignElement, TrafficSign, TrafficLight, TrafficSignIDGermany
 
@@ -515,8 +515,8 @@ class GraphEdge:
                 turnlane = self.turnlanes_backward[-(count + 1)]
             new_lane = Lane(
                 self,
-                set(),
-                set(),
+                OrderedSet(),
+                OrderedSet(),
                 turnlane,
                 self.lanewidth,
                 self.lanewidth,
@@ -533,8 +533,8 @@ class GraphEdge:
                 turnlane = self.turnlanes_forward[count]
             new_lane = Lane(
                 self,
-                set(),
-                set(),
+                OrderedSet(),
+                OrderedSet(),
                 turnlane,
                 self.lanewidth,
                 self.lanewidth,
@@ -748,6 +748,7 @@ class GraphTrafficSign:
             'city_limit': TrafficSignIDGermany.TOWN_SIGN,
             'give_way': TrafficSignIDGermany.YIELD,
             'stop': TrafficSignIDGermany.STOP,
+            '260': TrafficSignIDGermany.BAN_CAR_TRUCK_BUS_MOTORCYCLE,
             'unknown': TrafficSignIDGermany.UNKNOWN
         }
 
@@ -775,16 +776,21 @@ class GraphTrafficSign:
                 elements.append(TrafficSignElement(sign_id, [max_speed]))
 
             # regular traffic sign
-            elif key in traffic_sign_map:
-                sign_id = traffic_sign_map[key]
-                value = ' '  # TODO add specific values for some traffic signs
-                elements.append(TrafficSignElement(sign_id, [value]))
-
-            # unknown traffic sign
             else:
-                sign_id = traffic_sign_map['unknown']
-                value = 'unknown sign'
-                elements.append(TrafficSignElement(sign_id, [value]))
+                found_sign = False
+                for traffic_sign in traffic_sign_map:
+                    if traffic_sign in str(key):
+                        sign_id = traffic_sign_map[traffic_sign]
+                        value = ' '  # TODO add specific values for some traffic signs
+                        elements.append(TrafficSignElement(sign_id, [value]))
+                        found_sign = True
+                        break
+
+                # unknown traffic sign
+                if not found_sign:
+                    sign_id = traffic_sign_map['unknown']
+                    value = 'unknown sign'
+                    elements.append(TrafficSignElement(sign_id, [value]))
 
         # determine if virtual
         virtual = False
@@ -1079,7 +1085,7 @@ class Graph:
         """
         self.nodes = nodes
         self.edges = edges
-        self.lanelinks: Set[Lane] = set()
+        self.lanelinks: Set[Lane] = OrderedSet()
         self.center_point = center_point
         self.bounds = bounds
         self.traffic_signs = traffic_signs
@@ -1324,8 +1330,8 @@ class Graph:
         # delete all old predecessors and successors
         for edge in self.edges:
             for lane in edge.lanes:
-                lane.predecessors = set()
-                lane.successors = set()
+                lane.predecessors = OrderedSet()
+                lane.successors = OrderedSet()
         # set all predecessors and successors correctly
         for lane in self.lanelinks:
             for successor in lane.successors:
@@ -1463,7 +1469,7 @@ class Graph:
                 if new_nr != len(lane.waypoints):
                     lane.set_nr_of_way_points(new_nr)
         for link_lane in self.lanelinks:
-            adjacents = find_adjacents(link_lane, set())
+            adjacents = find_adjacents(link_lane, OrderedSet())
             min_nr = None
             max_nr = None
             for lane in adjacents:

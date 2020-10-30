@@ -21,6 +21,9 @@ def get_geonamesID(lat: float, lng: float):
 
     # try to request information for the given scenario center
     try:
+        if config.GEONAMES_USERNAME == 'demo':
+            raise ValueError('geonames demo ID used')
+
         query = "http://api.geonames.org/findNearbyPlaceNameJSON?lat={}&lng={}&username={}".format(
             lat, lng, config.GEONAMES_USERNAME
         )
@@ -33,6 +36,9 @@ def get_geonamesID(lat: float, lng: float):
         return code
 
     # catch connection error
+    except ValueError:
+        print("Fallback GeonamesID used.")
+        return -999
     except URLError:
         print("No Internet connection could be established for retrieving a GeonamesID. Using fallback GeonamesID instead.")
         return -999

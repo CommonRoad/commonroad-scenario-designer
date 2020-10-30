@@ -6,6 +6,7 @@ import sys
 from collections import defaultdict
 from copy import deepcopy
 from typing import Dict, Tuple, List, Set
+import re
 
 import os
 import random
@@ -607,76 +608,37 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         polygons_dict = {}
         explored_nodes = set()
         skip = 0
-        for node_id, current_node in self.nodes.items():
-            merged_nodes = set([current_node])
-            junction_shapes = {}
-            if current_node not in explored_nodes:
-                queue = [current_node]
-                i = 0
-                # expand all connected nodes until length of connecting edge > max_node_distance
-                while len(queue) > 0:
-                    assert i < 10000, 'Something went wrong'
-                    i += 1
-                    expanded_node = queue.pop()
 
-                    if expanded_node in explored_nodes: continue
+        self.new_nodes = self.nodes
 
-                    explored_nodes.add(expanded_node)
-                    incomings: List[int] = [
-                        e.getID() for e in expanded_node.getIncoming()
-                    ]
-                    outgoings: List[int] = [
-                        e.getID() for e in expanded_node.getOutgoing()
-                    ]
+        for intersection in self.lanelet_network.intersections:
+            successors = {
+                lanelet_id
+                for incoming in intersection.incomings
+                for lanelet_id in incoming.successors_right
+                | incoming.successors_left
+                | incoming.successors_straight
+            }
+            intersecting = successors | intersection.crossings
+            edges = {str(self.lanelet_id2edge_id[i]) for i in intersecting}
+            merged_nodes = {
+                node
+                for e_id in edges for node in
+                [self.edges[e_id].getFromNode(), self.edges[e_id].getToNode()]
+            }
 
-                    def lanelet_type(lanelet_id: int):
-                        lanelet = self.lanelet_network.find_lanelet_by_id(
-                            lanelet_id)
-                        return lanelet.lanelet_type if lanelet else None
+            # new merged node
+            merged_node = Node(self.node_id_next, 'priority',
+                               self._calculate_centroid(merged_nodes), [])
+            self.node_id_next += 1
+            self.new_nodes[merged_node.getID()] = merged_node
+            merged_nodes = set(n.getID() for n in merged_nodes)
 
-                    for inc_edg in incomings:
-                        for intersecting_inc in intersecting_edges[inc_edg]:
-                            from_node: Node = self.edges[str(
-                                intersecting_inc)].getFromNode()
-                            # if the lanelet types have an emtpy intersection, don't merge
-                            if not lanelet_type(inc_edg) & lanelet_type(
-                                    intersecting_inc):
-                                continue
+            for old_node in merged_nodes:
+                assert not old_node in self.replaced_nodes
+                self.replaced_nodes[old_node].append(merged_node.getID())
 
-                            merged_nodes.add(from_node)
-                            queue.append(from_node)
-
-                    for out_edg in outgoings:
-                        for intersecting_out in intersecting_edges[out_edg]:
-                            to_node = self.edges[str(
-                                intersecting_out)].getToNode()
-                            # if the lanelet types have an emtpy intersection, don't merge
-                            if not lanelet_type(out_edg) & lanelet_type(
-                                    intersecting_out):
-                                continue
-
-                            merged_nodes.add(to_node)
-                            queue.append(to_node)
-
-                if self.node_id_next == 95:
-                    print("§$")
-
-                coordinates = self._calculate_centroid(merged_nodes)
-                # coordinates = []
-                # coordinates.append(x_coord)
-                # coordinates.append(y_coord)
-                # self._detect_zipper()
-                merged_node = Node(self.node_id_next, 'priority', coordinates,
-                                   [])  # new merged node
-                self.node_id_next += 1
-                self.new_nodes[merged_node.getID()] = merged_node
-                merged_nodes = set(n.getID() for n in merged_nodes)
-
-                for old_node in merged_nodes:
-                    # assert not old_node in self.replaced_nodes
-                    self.replaced_nodes[old_node].append(merged_node.getID())
-
-                self.merged_dictionary[merged_node.getID()] = merged_nodes
+            self.merged_dictionary[merged_node.getID()] = merged_nodes
 
         replace_nodes_old = deepcopy(self.replaced_nodes)
         explored_nodes_all = set()
@@ -695,8 +657,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                     new_node_tmp = new_candidates.pop()
                     if new_node_tmp in explored_candidates: continue
                     explored_candidates.add(new_node_tmp)
-                    merged_nodes = merged_nodes.union(
-                        self.merged_dictionary[new_node_tmp])
+                    merged_nodes |= self.merged_dictionary[new_node_tmp]
                     for merged_node in self.merged_dictionary[new_node_tmp]:
                         if len(self.replaced_nodes[merged_node]) > 1:
                             new_candidates = list(
@@ -710,11 +671,9 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                         del self.new_nodes[node_id]
 
                 self.merged_dictionary[new_node] = merged_nodes
-                explored_nodes_all = explored_nodes_all.union(merged_nodes)
+                explored_nodes_all |= merged_nodes
                 for merged_node in merged_nodes:
                     self.replaced_nodes[merged_node] = [new_node]
-
-    # self._detect_zipper
 
     def _filter_edges(self):
         """
@@ -791,10 +750,8 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         Instantiate a new dictionary with only the connections that are meaningful after the simplification of the net
         :return: nothing
         """
-        edge_ids = [
-            str(edge.getID()) for edge in list(self.new_edges.values())
-        ]
-        for from_lane, connections in self._connections.items():
+        edge_ids = [str(edge.getID()) for edge in self.new_edges.values()]
+        for from_lane, connections in self._connections.copy().items():
             if from_lane.split("_")[0] not in edge_ids:
                 continue
             explored_lanes = set()
@@ -903,7 +860,12 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                     " --tls.cycle.time=" + str(cycle_time) + \
                     " --tls.set=" + str(junction.id)
         try:
-            _ = subprocess.check_output(command.split(), timeout=5.)
+            out = subprocess.check_output(command.split(),
+                                          timeout=5.,
+                                          stderr=subprocess.STDOUT,
+                                          shell=True)
+            if "error" in str(out).lower():
+                return False
         except Exception as e:
             logging.error(e)
             return False
