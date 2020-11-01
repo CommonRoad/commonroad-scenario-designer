@@ -59,17 +59,26 @@ def step_collection_2(graph: road_graph.Graph) -> road_graph.Graph:
 
 
 def step_collection_3(graph: road_graph.Graph) -> road_graph.Graph:
-    print("creating segments at intersections")
-    graph.create_lane_link_segments()
-    print("clustering segments")
-    segment_clusters.cluster_segments(graph)
-    if isinstance(graph, road_graph.SublayeredGraph):
-        segment_clusters.cluster_segments(graph.sublayer_graph)
-    print("changing to desired interpolation distance and creating borders of lanes")
-    graph.create_lane_bounds(config.INTERPOLATION_DISTANCE_INTERNAL / config.INTERPOLATION_DISTANCE)
-    print("adjust common bound points")
-    graph.correct_start_end_points()
-    print("done converting")
+    while True:
+        print("creating segments at intersections")
+        graph.create_lane_link_segments()
+        print("clustering segments")
+        segment_clusters.cluster_segments(graph)
+        if isinstance(graph, road_graph.SublayeredGraph):
+            segment_clusters.cluster_segments(graph.sublayer_graph)
+        print("changing to desired interpolation distance and creating borders of lanes")
+        graph.create_lane_bounds(config.INTERPOLATION_DISTANCE_INTERNAL / config.INTERPOLATION_DISTANCE)
+        print("adjust common bound points")
+        graph.correct_start_end_points()
+        print("done converting")
+        invalid_edges = graph.is_valid()
+        if len(invalid_edges) == 0:
+            break
+        else:
+            graph.fix_invalid(invalid_edges)
+        # outcomment to break loop
+        break
+
     return graph
 
 
@@ -94,11 +103,13 @@ class GraphScenario:
         if config.USER_EDIT:
             print("editing the graph")
             graph = gui.edit_graph_edges(graph)
+            print('first plot')
         graph = step_collection_2(graph)
         # HERE WE CAN EDIT LINKS IN THE GRAPH
         if config.USER_EDIT:
             print("editing the graph")
             graph = gui.edit_graph_links(graph)
+            print('second plot')
         graph = step_collection_3(graph)
         self.graph: road_graph.Graph = graph
 

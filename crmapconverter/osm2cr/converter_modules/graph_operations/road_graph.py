@@ -2,11 +2,13 @@
 This module holds the classes required for the graph structure.
 It also provides several methods to perform operations on elements of the graph.
 """
+from os import truncate
 from queue import Queue
 from typing import List, Set, Tuple, Optional, Dict
 from ordered_set import OrderedSet
 import numpy as np
 from commonroad.scenario.traffic_sign import TrafficSignElement, TrafficSign, TrafficLight, TrafficSignIDGermany
+from commonroad.geometry.shape import Polygon
 
 from crmapconverter.osm2cr import config
 from crmapconverter.osm2cr.converter_modules.utility import geometry, idgenerator
@@ -1054,6 +1056,15 @@ class Lane:
             raise ValueError("node is not assigned to this edge")
         return
 
+    def convert_to_polygon(self) -> Polygon:
+        """
+        Converts the given lanelet to a polygon representation
+
+        :return: The polygon of the lanelet
+        """
+        polygon = Polygon(np.concatenate((self.right_bound, np.flip(self.left_bound, 0))))
+        return polygon
+
     def add_traffic_sign(self, sign: GraphTrafficSign):
         if self.traffic_signs is None:
             self.traffic_signs = []
@@ -1428,9 +1439,23 @@ class Graph:
                     )
                     segment.waypoints = waypoints
                     # segment is only added if it does not form a turn
+                    # TODO check for validity
+                    # Choose a reference incoming vector
+                    ref_pre = predecessor.waypoints[-1] - predecessor.waypoints[-2]
+                    ref_suc = successor.waypoints[1] - successor.waypoints[0]
+                    #segment_ref = np.array([segment.from_node.x, segment.from_node.y]) - np.array([segment.to_node.x, segment.to_node.y])
+
+                    #angle = geometry.curvature(waypoints)
+                    angle = geometry.get_angle(ref_pre, ref_suc)
+                    if angle < 0:
+                        angle += 360
+                    print(angle)
+
                     if (
                         successor.edge != predecessor.edge
                         and geometry.curvature(waypoints) > config.LANE_SEGMENT_ANGLE
+                        #and angle > 45.0
+                        #and (angle < 90 or angle > 270)
                     ):
                         self.lanelinks.add(segment)
 
@@ -1685,6 +1710,21 @@ class Graph:
                 if not light.forward and edge.node1.id == light.node.id:
                     edge.add_traffic_light(light, light.forward)
 
+
+    def is_valid(self) -> List[GraphEdge]:
+        invalid_edges = []
+        for edge in self.edges:
+            for lane in edge.lanes:
+                if not lane.convert_to_polygon().shapely_object.is_valid:
+                    print('invalid lane')
+                    invalid_edges.append(edge)
+
+        return invalid_edges
+
+    def fix_invalid(self, invalid_edges):
+        for edge in invalid_edges:
+            continue
+       
 
 class SublayeredGraph(Graph):
 

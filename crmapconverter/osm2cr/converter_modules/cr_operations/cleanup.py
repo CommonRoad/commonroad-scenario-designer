@@ -20,7 +20,7 @@ def sanitize(scenario: Scenario) -> None:
     # TODO Deal with intersections
     # merge_short_lanes(scenario)
     # interpolate waypoints to smoothen lanes
-    smoothen_scenario(scenario)
+    # smoothen_scenario(scenario)
     # comvert to left hand driving scenario if necessary
     convert_to_lht(scenario)
 
