@@ -18,6 +18,7 @@ from xml.etree import cElementTree as ET
 import numpy as np
 
 from commonroad.prediction.prediction import TrajectoryPrediction
+from commonroad.scenario.trajectory import State
 
 try:
     import pycrccosy
@@ -46,7 +47,7 @@ import sumolib
 from sumocr.maps.scenario_wrapper import AbstractScenarioWrapper
 
 from .util import compute_max_curvature_from_polyline, _find_intersecting_edges, \
-    get_total_lane_length_from_netfile, write_ego_ids_to_rou_file, get_scenario_name_from_netfile, \
+    get_total_lane_length_from_netfile, write_ego_ids_to_rou_file, \
     remove_unreferenced_traffic_lights, max_lanelet_network_id
 from .config import SumoConfig, \
     VEHICLE_TYPE_CR2SUMO, traffic_light_states_CR2SUMO, traffic_light_states_SUMO2CR, \
@@ -378,10 +379,13 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                     conn_lanelet = lanelet_tmp.predecessor
 
                 if conn_lanelet is not None:
-                    [
-                        conn_edges.add(self.lanelet_id2edge_id[succ])
-                        for succ in conn_lanelet
-                    ]
+                    try:
+                        [
+                            conn_edges.add(self.lanelet_id2edge_id[succ])
+                            for succ in conn_lanelet
+                        ]
+                    except KeyError as exp:
+                        raise ScenarioException(f"The lanelet network is inconsistent in scenario {self.scenario_name}, there is a problem with adjacency of the lanelet {exp}")
 
         if len(conn_edges) > 0:
             node_candidates = []
@@ -1290,7 +1294,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         :param output_folder: path to the output folder
         :return returns whether conversion was successful
         """
-        scenario_name = str(scenario.scenario_id)
+        scenario_name = self.conf.scenario_name
         net_file = os.path.join(output_folder, scenario_name + '.net.xml')
 
         add_file = self._convert_to_add_file(scenario, output_folder)
@@ -1309,7 +1313,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         if len(self.conf.ego_ids) > self.conf.n_ego_vehicles:
             logging.error(
                 "total number of given ego_vehicles must be <= n_ego_vehicles, but {}not<={}" \
-                .format(len(self.conf.ego_ids), self.conf.n_ego_vehicles))
+                    .format(len(self.conf.ego_ids), self.conf.n_ego_vehicles))
             return False
 
         if self.conf.n_ego_vehicles > self.conf.n_vehicles_max:
@@ -1318,7 +1322,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                     .format(self.conf.n_ego_vehicles, self.conf.n_vehicles_max))
             return False
 
-        scenario_name = get_scenario_name_from_netfile(net_file)
+        scenario_name = self.conf.scenario_name
         out_folder = os.path.dirname(net_file)
 
         add_file = self._generate_add_file(scenario_name, out_folder)
@@ -1336,7 +1340,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         :param output_folder: path to the output folder
         :return: the path of the created add file
         """
-        add_file = os.path.join(output_folder, str(scenario.scenario_id) + '.add.xml')
+        add_file = os.path.join(output_folder, self.conf.scenario_name + '.add.xml')
 
         # create file
         domTree = minidom.Document()
@@ -1371,7 +1375,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                 else:
                     sumo_veh_type_name = sumo_veh_type
                 vType_node = domTree.createElement("vType")
-                vType_node.setAttribute("id", sumo_veh_type)
+                vType_node.setAttribute("id", sumo_veh_type_name)
                 vType_node.setAttribute("guiShape", sumo_veh_type)
                 vType_node.setAttribute("vClass", sumo_veh_type)
                 vType_node.setAttribute("probability", str(len(obstacle_list) / num_all_obstacles))
@@ -1466,6 +1470,14 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         :return: path of route file
         """
 
+        ccosy_cache = {}
+
+        def get_ccosy(lanelet: Lanelet):
+            if lanelet.lanelet_id not in ccosy_cache:
+                ccosy_cache[lanelet.lanelet_id] = create_coordinate_system_from_polyline(
+                    lanelet.center_vertices)
+            return ccosy_cache[lanelet.lanelet_id]
+
         # TODO: The following methods are coming from the route-planner repository.
         #  These functions are currently required only for this method, however, this functionality
         #  is useful over the whole CommonRoad framework, therefore it should be placed
@@ -1486,9 +1498,9 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
             :param position: Position where the lanelet's orientation should be calculated
             :return: An orientation in interval [-pi,pi]
             """
-            ccosy = create_coordinate_system_from_polyline(lanelet.center_vertices)
-            # long, lat = ccosy.convert_to_curvilinear_coords(position[0], position[1])
-            tangent = [0, 0]  # ccosy.tangent(long)
+            ccosy = get_ccosy(lanelet)
+            long, rel_pos_to_domain = get_long_dist(ccosy, position)
+            tangent = ccosy.tangent(long)
             return np.arctan2(tangent[1], tangent[0])
 
         def sorted_lanelet_ids(lanelet_ids: List[int], orientation: float, position: np.ndarray,
@@ -1521,14 +1533,53 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                 # make sure that the original vertices are all contained
                 if not np.all(np.isclose(polyline[-1], last_point)):
                     polyline = np.append(polyline, [last_point], axis=0)
-            return pycrccosy.TrapezoidCoordinateSystem(polyline)
+            return pycrccosy.CurvilinearCoordinateSystem(polyline)
 
-        def get_long_dist(lanelet: Lanelet, position):
-            ccosy = create_coordinate_system_from_polyline(lanelet.center_vertices)
-            long, lat = ccosy.convert_to_curvilinear_coords(position[0], position[1])
-            return long
+        def get_long_dist(ccosy, position):
+            try:
+                rel_pos_to_domain = 0
+                long_dist, lat_dist = ccosy.convert_to_curvilinear_coords(position[0], position[1])
+                return long_dist, rel_pos_to_domain
+            except ValueError:
+                eps = 0.1
+                curvi_coords_of_projection_domain = np.array(ccosy.curvilinear_projection_domain())
 
-        scenario_name = str(scenario.scenario_id)
+                longitudinal_min, normal_min = np.min(curvi_coords_of_projection_domain,
+                                                      axis=0) + eps
+                longitudinal_max, normal_max = np.max(curvi_coords_of_projection_domain,
+                                                      axis=0) - eps
+                normal_center = (normal_min + normal_max) / 2
+
+                bounding_points = np.array(
+                    [ccosy.convert_to_cartesian_coords(longitudinal_min, normal_center),
+                     ccosy.convert_to_cartesian_coords(longitudinal_max, normal_center)])
+                rel_positions = position - np.array(
+                    [bounding_point for bounding_point in bounding_points])
+                distances = np.linalg.norm(rel_positions, axis=1)
+
+                if distances[0] < distances[1]:
+                    # Nearer to the first bounding point
+                    rel_pos_to_domain = -1
+                    return 0, rel_pos_to_domain
+                else:
+                    # Nearer to the last bounding point
+                    rel_pos_to_domain = 1
+                    return ccosy.length(), rel_pos_to_domain
+
+        def find_lanelet_id(state: State):
+            possible_lanelet_ids = \
+                scenario.lanelet_network.find_lanelet_by_position([state.position])[0]
+
+            if len(possible_lanelet_ids) == 0:
+                possible_lanelet_ids = scenario.lanelet_network.find_lanelet_by_shape(
+                    obstacle.occupancy_at_time(state.time_step).shape)
+
+            sorted_lanelet_id_list = sorted_lanelet_ids(possible_lanelet_ids,
+                                                        state.orientation, state.position,
+                                                        scenario)
+            if len(sorted_lanelet_id_list) == 0:
+                return None
+            return sorted_lanelet_id_list[0]
 
         grouped_obstacles = {k: list(g) for k, g in groupby(sorted(scenario.obstacles,
                                                                    key=lambda
@@ -1539,87 +1590,117 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         # filenames
         route_files: Dict[str, str] = {
             'vehicle':
-                os.path.join(out_folder, scenario_name + ".vehicles.rou.xml"),
+                os.path.join(out_folder, self.conf.scenario_name + ".vehicles.rou.xml"),
             "pedestrian":
-                os.path.join(out_folder, scenario_name + ".pedestrians.rou.xml")
+                os.path.join(out_folder, self.conf.scenario_name + ".pedestrians.rou.xml")
         }
 
         for route_type, route_file in route_files.items():
+            flatten = lambda l: [item for sublist in l for item in sublist]
+            route_obstacles = flatten([obstacles
+                                       for obstacle_type, obstacles in grouped_obstacles.items()
+                                       if VEHICLE_NODE_TYPE_CR2SUMO[obstacle_type] == route_type])
+
             domTree = minidom.Document()
             routes_node = domTree.createElement("routes")
             domTree.appendChild(routes_node)
             vType_dist_node = domTree.createElement("vTypeDistribution")
             vType_dist_node.setAttribute("id", "DEFAULT_VEHTYPE")
 
-            flatten = lambda l: [item for sublist in l for item in sublist]
-            route_obstacles = flatten([obstacles
-                                       for obstacle_type, obstacles in grouped_obstacles.items()
-                                       if VEHICLE_NODE_TYPE_CR2SUMO[obstacle_type] == route_type])
-
             for obstacle in route_obstacles:
                 vehicle_node = domTree.createElement("vehicle")
 
                 vehicle_node.setAttribute("id", str(obstacle.obstacle_id))
-                vehicle_node.setAttribute("depart",
-                                          str(obstacle.prediction.initial_time_step * scenario.dt))
-                vehicle_node.setAttribute("departSpeed", str(obstacle.initial_state.velocity))
 
-                lanelet_ids = []
-                last_lanelet_id = None
+                sumo_veh_type = VEHICLE_TYPE_CR2SUMO[obstacle.obstacle_type]
 
-                assert isinstance(obstacle.prediction, TrajectoryPrediction), \
-                    f"Only scenario with TrajectoryPrediction is supported for rou file generation, " \
-                    f"the current obstacle was {type(obstacle.prediction)}"
+                if obstacle.obstacle_role == ObstacleRole.STATIC:
+                    vehicle_node.setAttribute("depart", str(scenario.dt))
+                    vehicle_node.setAttribute("departSpeed", str(0))
+                    vehicle_node.setAttribute("type", f"{sumo_veh_type}_static")
 
-                skip_obstacle = False
-                for state in obstacle.prediction.trajectory.state_list:
-                    possible_lanelet_ids = \
-                    scenario.lanelet_network.find_lanelet_by_position([state.position])[0]
+                    starting_lanelet_id = find_lanelet_id(obstacle.initial_state)
+                    depart_lane = self.lanelet_id2edge_lane_id[starting_lanelet_id]
+                    vehicle_node.setAttribute("departLane", str(depart_lane))
 
-                    if len(possible_lanelet_ids) == 0:
-                        possible_lanelet_ids = scenario.lanelet_network.find_lanelet_by_shape(
-                            obstacle.occupancy_at_time(state.time_step).shape)
+                    starting_lanelet = scenario.lanelet_network.find_lanelet_by_id(
+                        starting_lanelet_id)
+                    depart_pos, _ = get_long_dist(get_ccosy(starting_lanelet), obstacle.initial_state.position)
+                    vehicle_node.setAttribute("departPos", str(depart_pos))
 
-                    sorted_lanelet_id_list = sorted_lanelet_ids(possible_lanelet_ids,
-                                                                state.orientation, state.position,
-                                                                scenario)
+                    vehicle_route_node = domTree.createElement("route")
+                    edge = str(self.lanelet_id2edge_id[starting_lanelet_id])
+                    vehicle_route_node.setAttribute("edges", edge)
+                    vehicle_node.appendChild(vehicle_route_node)
 
-                    if len(sorted_lanelet_id_list)==0:
-                        logging.warning("Skipping obstacle %s, because left the lanelet network in the scenario %s", obstacle.obstacle_id, scenario.scenario_id)
-                        skip_obstacle = True
-                        break
+                    routes_node.appendChild(vehicle_node)
 
-                    best_lanelet_id = sorted_lanelet_id_list[0]
+                elif obstacle.obstacle_role == ObstacleRole.DYNAMIC:
+                    if obstacle.prediction is None:
+                        raise ScenarioException(
+                            f"Obstacle {obstacle.obstacle_id} in scenario {scenario.scenario_id} "
+                            f"has no trajectory")
 
-                    if best_lanelet_id != last_lanelet_id:
-                        lanelet_ids.append(best_lanelet_id)
-                        last_lanelet_id = best_lanelet_id
+                    vehicle_node.setAttribute("depart",
+                                              str(
+                                                  obstacle.prediction.initial_time_step * scenario.dt))
+                    vehicle_node.setAttribute("departSpeed", str(obstacle.initial_state.velocity))
+                    vehicle_node.setAttribute("type", sumo_veh_type)
 
-                if skip_obstacle:
-                    continue
+                    lanelet_ids = []
+                    last_lanelet_id = None
 
-                last_lanelet = scenario.lanelet_network.find_lanelet_by_id(lanelet_ids[-1])
-                _, all_successor_lanelet_ids = Lanelet.all_lanelets_by_merging_successors_from_lanelet(
-                    last_lanelet,
-                    scenario.lanelet_network)
-                successor_lanelet_ids = all_successor_lanelet_ids[0]
+                    if not isinstance(obstacle.prediction, TrajectoryPrediction):
+                        raise ScenarioException(
+                            f"Only scenario with TrajectoryPrediction is supported for rou file generation, " \
+                            f"the current obstacle was {type(obstacle.prediction)}")
 
-                lanelet_ids.extend(successor_lanelet_ids[1:])
+                    skip_obstacle = False
+                    for state in obstacle.prediction.trajectory.state_list:
 
-                starting_lanelet_id = lanelet_ids[0]
-                depart_lane = self.lanelet_id2edge_lane_id[starting_lanelet_id]
-                vehicle_node.setAttribute("departLane", str(depart_lane))
+                        lanelet_id = find_lanelet_id(state)
+                        if lanelet_id is None:
+                            logging.warning(
+                                "Skipping obstacle %s, because left the lanelet network in the scenario %s",
+                                obstacle.obstacle_id, scenario.scenario_id)
+                            skip_obstacle = True
+                            break
 
-                starting_lanelet = scenario.lanelet_network.find_lanelet_by_id(starting_lanelet_id)
-                depart_pos = get_long_dist(starting_lanelet, obstacle.initial_state.position)
-                vehicle_node.setAttribute("departPos", str(depart_pos))
+                        if lanelet_id != last_lanelet_id:
+                            lanelet_ids.append(lanelet_id)
+                            last_lanelet_id = lanelet_id
 
-                vehicle_route_node = domTree.createElement("route")
-                edges = [str(self.lanelet_id2edge_id[lanelet_id]) for lanelet_id in lanelet_ids]
-                vehicle_route_node.setAttribute("edges", " ".join(edges))
-                vehicle_node.appendChild(vehicle_route_node)
+                    if skip_obstacle:
+                        continue
 
-                routes_node.appendChild(vehicle_node)
+                    last_lanelet = scenario.lanelet_network.find_lanelet_by_id(lanelet_ids[-1])
+                    _, all_successor_lanelet_ids = Lanelet.all_lanelets_by_merging_successors_from_lanelet(
+                        last_lanelet,
+                        scenario.lanelet_network)
+                    successor_lanelet_ids = all_successor_lanelet_ids[0]
+
+                    lanelet_ids.extend(successor_lanelet_ids[1:])
+
+                    starting_lanelet_id = lanelet_ids[0]
+                    depart_lane = self.lanelet_id2edge_lane_id[starting_lanelet_id]
+                    vehicle_node.setAttribute("departLane", str(depart_lane))
+
+                    starting_lanelet = scenario.lanelet_network.find_lanelet_by_id(
+                        starting_lanelet_id)
+                    depart_pos, _ = get_long_dist(get_ccosy(starting_lanelet), obstacle.initial_state.position)
+                    vehicle_node.setAttribute("departPos", str(depart_pos))
+
+                    vehicle_route_node = domTree.createElement("route")
+                    edges = [str(self.lanelet_id2edge_id[lanelet_id]) for lanelet_id in lanelet_ids]
+                    vehicle_route_node.setAttribute("edges", " ".join(edges))
+                    vehicle_node.appendChild(vehicle_route_node)
+
+                    routes_node.appendChild(vehicle_node)
+                else:
+                    logging.warning("Obstacle %s in scenario %s has unknown role %s, "
+                                    "skipping this obstacle",
+                                    obstacle.obstacle_id, scenario.scenario_id,
+                                    obstacle.obstacle_role)
 
             with open(route_file, "w") as f:
                 domTree.documentElement.writexml(f, addindent="\t", newl="\n")
@@ -1825,3 +1906,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
             f.write(reparsed.toprettyxml(indent="\t", newl="\n"))
 
         return sumo_cfg_file
+
+
+class ScenarioException(Exception):
+    pass

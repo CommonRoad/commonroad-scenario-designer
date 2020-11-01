@@ -28,15 +28,15 @@ VEHICLE_TYPE_SUMO2CR = {
 
 # CommonRoad obstacle type to sumo type
 VEHICLE_TYPE_CR2SUMO = {
-    ObstacleType.UNKNOWN : "unknown",
+    ObstacleType.UNKNOWN : "passenger",
     ObstacleType.CAR : "passenger",
     ObstacleType.TRUCK : "truck",
     ObstacleType.BUS : "bus",
     ObstacleType.BICYCLE : "bicycle",
     ObstacleType.PEDESTRIAN : "pedestrian",
     ObstacleType.PRIORITY_VEHICLE : "vip",
-    ObstacleType.PARKED_VEHICLE : "custom1",
-    ObstacleType.CONSTRUCTION_ZONE : "custom2",
+    ObstacleType.PARKED_VEHICLE : "passenger",
+    ObstacleType.CONSTRUCTION_ZONE : "passenger",
     ObstacleType.TRAIN : "rail",
     ObstacleType.ROAD_BOUNDARY : "custom2",
     ObstacleType.MOTORCYCLE : "motorcycle",
@@ -47,7 +47,7 @@ VEHICLE_TYPE_CR2SUMO = {
 }
 
 VEHICLE_NODE_TYPE_CR2SUMO = {
-    ObstacleType.UNKNOWN: "unknown",
+    ObstacleType.UNKNOWN: "vehicle",
     ObstacleType.CAR: "vehicle",
     ObstacleType.TRUCK: "vehicle",
     ObstacleType.BUS: "vehicle",
