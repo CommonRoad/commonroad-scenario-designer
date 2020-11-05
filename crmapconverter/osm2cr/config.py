@@ -160,9 +160,9 @@ FILTER = True
 # radius of the earth used for calculation in meters
 EARTH_RADIUS = 6371000
 # delete short edges after cropping
-DELETE_SHORT_EDGES = False
+DELETE_SHORT_EDGES = True
 # distance between waypoints used internally in meters
-INTERPOLATION_DISTANCE_INTERNAL = 0.25
+INTERPOLATION_DISTANCE_INTERNAL = 0.5
 # bezier parameter for interpolation (should be within [0, 0.5])
 BEZIER_PARAMETER = 0.35
 # distance between roads at intersection used for cropping in meters
