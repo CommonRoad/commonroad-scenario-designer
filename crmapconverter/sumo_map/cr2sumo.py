@@ -22,7 +22,8 @@ from commonroad.scenario.trajectory import State
 
 try:
     import pycrccosy
-    from commonroad_ccosy.geometry.util import resample_polyline
+    from commonroad_ccosy.geometry.util import resample_polyline, compute_curvature_from_polyline, chaikins_corner_cutting
+
 except ImportError:
     warnings.warn(
         f"Unable to import pycrccosy, converting static scenario into interactive is not supported!")
@@ -824,6 +825,12 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
             shapeString += pointString + " "
         return shapeString
 
+    def rebase_paths(self, scenario_root_folder: str):
+        """
+        Rebases all the member paths to the given root folder
+        """
+        self.sumo_cfg_file = os.path.join(scenario_root_folder, os.path.split(self.sumo_cfg_file)[1])
+
     def auto_generate_traffic_light_system(self,
                                            lanelet_id: int,
                                            cycle_time: int = 90) -> bool:
@@ -1525,14 +1532,68 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                 sorted_indices = np.argsort(orientation_differences)
                 return list(lanelet_id_list[sorted_indices])
 
-        def create_coordinate_system_from_polyline(polyline):
-            if len(polyline) <= 4:
-                last_point = polyline[-1]
+        def create_coordinate_system_from_polyline(
+                polyline) -> pycrccosy.CurvilinearCoordinateSystem:
+
+            def compute_polyline_length(polyline: np.ndarray) -> float:
+                """
+                Computes the path length s of a given polyline
+                :param polyline: The polyline
+                :return: The path length of the polyline
+                """
+                assert isinstance(polyline, np.ndarray) and polyline.ndim == 2 and len(
+                    polyline[:,
+                    0]) > 2, 'Polyline malformed for path length computation p={}'.format(polyline)
+
+                distance_between_points = np.diff(polyline, axis=0)
+                # noinspection PyTypeChecker
+                return np.sum(np.sqrt(np.sum(distance_between_points ** 2, axis=1)))
+
+            def resample_polyline_with_length_check(polyline):
                 length = np.linalg.norm(polyline[-1] - polyline[0])
-                polyline = resample_polyline(polyline, length / 4.0)
-                # make sure that the original vertices are all contained
-                if not np.all(np.isclose(polyline[-1], last_point)):
-                    polyline = np.append(polyline, [last_point], axis=0)
+                if length > 2.0:
+                    polyline = resample_polyline(polyline, 1.0)
+                else:
+                    polyline = resample_polyline(polyline, length / 10.0)
+
+                return polyline
+
+            def chaikins_corner_cutting2(coords, refinements=2):
+                coords = np.array(coords)
+
+                for _ in range(refinements):
+                    L = coords.repeat(2, axis=0)
+                    R = np.empty_like(L)
+                    R[0] = L[0]
+                    R[2::2] = L[1:-1:2]
+                    R[1:-1:2] = L[2::2]
+                    R[-1] = L[-1]
+                    coords = L * 0.75 + R * 0.25
+
+                return coords
+
+            polyline = resample_polyline_with_length_check(polyline)
+
+            abs_curvature = abs(compute_curvature_from_polyline(polyline))
+            max_curvature = max(abs_curvature)
+            infinite_loop_counter = 0
+            while max_curvature > 0.1:
+                polyline = np.array(chaikins_corner_cutting2(polyline))
+
+                length = compute_polyline_length(polyline)
+                if length > 10:
+                    polyline = resample_polyline(polyline, 1.0)
+                else:
+                    polyline = resample_polyline(polyline, length / 10.0)
+
+                abs_curvature = abs(compute_curvature_from_polyline(polyline))
+                max_curvature = max(abs_curvature)
+
+                infinite_loop_counter += 1
+
+                if infinite_loop_counter > 20:
+                    break
+
             return pycrccosy.CurvilinearCoordinateSystem(polyline)
 
         def get_long_dist(ccosy, position):

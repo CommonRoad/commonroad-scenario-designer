@@ -45,7 +45,7 @@ print(traffic_light_system_generated)
 # write generated traffic lights back to commonroad file
 # scenario.lanelet_network = wrapper.lanelet_network
 # CommonRoadFileWriter(scenario,
-#                      planning_problem,
+#                      planning_problem_set,
 #                      author=scenario.author,
 #                      affiliation=scenario.affiliation,
 #                      source=scenario.source,
@@ -67,7 +67,7 @@ print(traffic_light_system_generated)
 # # save resulting scenario
 # simulated_scenario = simulation.commonroad_scenarios_all_time_steps()
 # CommonRoadFileWriter(simulated_scenario,
-#                      planning_problem,
+#                      planning_problem_set,
 #                      author=scenario.author,
 #                      affiliation=scenario.affiliation,
 #                      source=scenario.source,
