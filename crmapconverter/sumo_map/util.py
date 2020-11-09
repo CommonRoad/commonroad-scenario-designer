@@ -11,6 +11,7 @@ from commonroad.scenario.lanelet import LaneletNetwork
 from crmapconverter.sumo_map.sumolib_net import Crossing
 from shapely.geometry import LineString
 from shapely.ops import unary_union
+from crmapconverter.sumo_map.sumolib_net.edge import Edge
 
 from .config import EGO_ID_START, SumoConfig
 
@@ -404,3 +405,9 @@ def intersect_lanelets_line(lanelets: Iterable[Lanelet],
     # plt.plot(*res.xy)
     # plt.show()
     return res
+
+
+def edge_centroid(e: Edge) -> np.array:
+    """Computes the centroid of an edge based on the vertices of it's lanes"""
+    pts = np.array([v for lane in e.getLanes() for v in lane._shape])
+    return np.sum(pts, axis=0) / pts.shape[0]

@@ -4,17 +4,14 @@ This class contains functions for converting a CommonRoad map into a .net.xml SU
 import logging
 import os
 import random
-import re
 import subprocess
 import warnings
 from collections import defaultdict
 from copy import copy, deepcopy
 from typing import Dict, List, Set, Tuple
-import shapely
 from xml.dom import minidom
 from xml.etree import cElementTree as ET
 
-# import networkx as nx
 import numpy as np
 import sumolib
 from commonroad.common.file_reader import CommonRoadFileReader
@@ -23,8 +20,7 @@ from commonroad.scenario.lanelet import Lanelet, LaneletNetwork
 from commonroad.scenario.traffic_sign import (SupportedTrafficSignCountry,
                                               TrafficLight,
                                               TrafficLightCycleElement,
-                                              TrafficLightDirection,
-                                              TrafficLightState)
+                                              TrafficLightDirection)
 from commonroad.scenario.traffic_sign_interpreter import TrafficSigInterpreter
 from commonroad.visualization.draw_dispatch_cr import draw_object
 from matplotlib import pyplot as plt
@@ -38,8 +34,7 @@ from .sumolib_net import (TLS, Connection, Crossing, Edge, Junction, Lane,
 from .sumolib_net.lane import SUMO_VEHICLE_CLASSES
 from .util import (_find_intersecting_edges,
                    compute_max_curvature_from_polyline, vector_angle,
-                   get_scenario_name_from_crfile,
-                   get_scenario_name_from_netfile,
+                   edge_centroid, get_scenario_name_from_netfile,
                    get_total_lane_length_from_netfile, max_lanelet_network_id,
                    merge_crossings, min_cluster,
                    remove_unreferenced_traffic_lights,
@@ -900,12 +895,6 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
             for cluster in clusters:
                 c = copy(crossing)
 
-                def edge_centroid(e: Edge) -> np.array:
-                    """Computes the centroid of an edge based on the vertices of it's lanes"""
-                    pts = np.array(
-                        [v for lane in e.getLanes() for v in lane._shape])
-                    return np.sum(pts, axis=0) / pts.shape[0]
-
                 def compute_edge_angle(e: Edge, pivot: np.array) -> float:
                     """computes angle between edge and the x axis, when moved into the pivot"""
                     center = edge_centroid(e)
@@ -919,7 +908,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                 logging.info(
                     f"ordered ccw direction {[e.getID() for e in cluster]} -> {[e.getID() for e in c.edges]}"
                 )
-                # make sure that points in lc.shape and c.edges are ordered in the same direction
+                # make sure that points in c.shape and c.edges are ordered in the same direction
                 # i.e. for edge direction vector e, and shape direction vector s:
                 # assure np.dot(e,s) > 0
                 if len(c.edges) > 1:
@@ -929,8 +918,6 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                     shape_dir = c.shape[-1] - c.shape[0]
                     shape_dir /= np.linalg.norm(shape_dir)
                     if np.dot(edge_dir, shape_dir) < 0:
-                        print("flip", np.dot(edge_dir, shape_dir), edge_dir,
-                              shape_dir)
                         c.shape = np.flip(c.shape, axis=0)
 
                 c.shape = np.array([c.shape[0], c.shape[-1]])
