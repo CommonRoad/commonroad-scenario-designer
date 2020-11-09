@@ -633,7 +633,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                     Crossing(node=None,
                              edges=None,
                              shape=lanelet.center_vertices,
-                             width=2.0))
+                             width=3.0))
             if crossings:
                 clusters_crossing[next_cluster_id] = crossings
 
@@ -856,117 +856,83 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
             }
             non_pedestrian_edges = adjacent_edges - pedestrian_edges
 
-            if non_pedestrian_edges:
+            if not non_pedestrian_edges:
+                continue
 
-                def opp_distance(e1: Edge, e2: Edge) -> float:
-                    """Computes the maximum distance between
-                    opposite points of two edges
+            clusters = min_cluster(
+                non_pedestrian_edges, lambda dist: dist < 4,
+                lambda e1, e2: max(
+                    np.linalg.norm(
+                        np.array(e1.getFromNode().getCoord()) - np.array(
+                            e2.getToNode().getCoord())),
+                    np.linalg.norm(
+                        np.array(e1.getToNode().getCoord()) - np.array(
+                            e2.getFromNode().getCoord()))))
+            merged_crossings = merge_crossings(crossings)
 
-                    Args:
-                        e1 (Edge): edge1
-                        e2 (Edge): edge2
+            # filter all crossings close to parallel to any of the clusters
+            # if we have more than merged crossing
+            # min angle: PI/4
+            merged_crossings = [
+                c for c in merged_crossings if np.min([
+                    vector_angle(
+                        np.array(e.getToNode().getCoord()) -
+                        np.array(e.getFromNode().getCoord()), c.shape[-1] -
+                        c.shape[0]) for cluster in clusters for e in cluster
+                ]) > np.pi / 4
+            ] if len(merged_crossings) > 1 else merged_crossings
+            # choose the crossing with maximal length
+            crossing = merged_crossings[np.argmax([
+                np.linalg.norm(m.shape[-1] - m.shape[0])
+                for m in merged_crossings
+            ])]
+            crossing.shape = intersect_lanelets_line(
+                {
+                    self.lanelet_network.find_lanelet_by_id(l_id)
+                    for l_id, e_id in self.lanelet_id2edge_id.items()
+                    if e_id in
+                    {edge.getID()
+                     for cluster in clusters for edge in cluster}
+                }, crossing.shape)
 
-                    Returns:
-                        float: maximum distance between opposing ends of
-                        the two edges
-                    """
-                    d1 = np.linalg.norm(
-                        np.array(e1.getFromNode().getCoord()) -
-                        np.array(e2.getToNode().getCoord()))
-                    d2 = np.linalg.norm(
-                        np.array(e1.getToNode().getCoord()) -
-                        np.array(e2.getFromNode().getCoord()))
-                    return max(d1, d2)
+            # assign each cluster the same crossing shape
+            split_crossings = []
+            for cluster in clusters:
+                c = copy(crossing)
 
-                def max_distance(dist: float) -> bool:
-                    """Limits the distance for clustering
-                    to 4m.
+                def edge_centroid(e: Edge):
+                    pts = np.array(
+                        [v for lane in e.getLanes() for v in lane._shape])
+                    return np.sum(pts, axis=0) / pts.shape[0]
 
-                    Args:
-                        dist (float): distance
+                def sort_edges(e: Edge):
+                    center = edge_centroid(e)
+                    return np.arctan2(-(center[1] - pivot[1]),
+                                      -(center[0] - pivot[0]))
 
-                    Returns:
-                        bool: distance in limit
-                    """
-                    return dist < 4
+                pivot = c.shape[0]
+                c.edges = sorted(cluster, key=sort_edges)
+                print(
+                    f"reordered ccw direction {[e.getID() for e in cluster]} -> {[e.getID() for e in c.edges]}"
+                )
+                # make sure that points in lc.shape and c.edges are ordered in the same direction
+                # i.e. for edge direction vector e, and shape direction vector s:
+                # assure np.dot(e,s) > 0
+                if len(c.edges) > 1:
+                    edge_dir = edge_centroid(c.edges[-1]) - edge_centroid(
+                        c.edges[0])
+                    edge_dir /= np.linalg.norm(edge_dir)
+                    shape_dir = c.shape[-1] - c.shape[0]
+                    shape_dir /= np.linalg.norm(shape_dir)
+                    if np.dot(edge_dir, shape_dir) < 0:
+                        print("flip", np.dot(edge_dir, shape_dir), edge_dir,
+                              shape_dir)
+                        c.shape = np.flip(c.shape, axis=0)
 
-                clusters = min_cluster(non_pedestrian_edges, max_distance,
-                                       opp_distance)
+                c.shape = np.array([c.shape[0], c.shape[-1]])
+                split_crossings.append(c)
 
-                merged_crossings = merge_crossings(crossings)
-
-                # filter all crossings close to parallel to any of the clusters
-                # if we have more than merged crossing
-                # min angle: PI/4
-                merged_crossings = [
-                    c for c in merged_crossings if np.min([
-                        vector_angle(
-                            np.array(e.getToNode().getCoord()) -
-                            np.array(e.getFromNode().getCoord()), c.shape[-1] -
-                            c.shape[0]) for cluster in clusters
-                        for e in cluster
-                    ]) > np.pi / 4
-                ] if len(merged_crossings) > 1 else merged_crossings
-
-                def order_counter_clockwise(ndarray):
-                    z = np.sort(ndarray, axis=0)
-                    cw = z[0:1]  # first point in clockwise direction
-                    ccw = z[1:2]  # first point in counter clockwise direction
-                    # reverse the above assignment depending on how first 2 points relate
-                    if z[1][1] > z[0][1]:
-                        cw = z[1:2]
-                        ccw = z[0:1]
-
-                    for p in z[2:]:
-                        # append to the list to which the next point is closest
-                        if np.linalg.norm(cw[-1] -
-                                          p) < np.linalg.norm(ccw[-1] - p):
-                            cw = np.append(cw, [p], axis=0)
-                        else:
-                            ccw = np.append(cw, [p], axis=0)
-
-                    cw = np.flip(cw, axis=0)
-                    return np.concatenate((cw, ccw), axis=0)
-
-                # choose the crossing with maximal length
-                crossing = merged_crossings[np.argmax([
-                    np.linalg.norm(m.shape[-1] - m.shape[0])
-                    for m in merged_crossings
-                ])]
-
-                crossing.shape = intersect_lanelets_line(
-                    {
-                        self.lanelet_network.find_lanelet_by_id(l_id)
-                        for l_id, e_id in self.lanelet_id2edge_id.items()
-                        if e_id in {
-                            edge.getID()
-                            for cluster in clusters for edge in cluster
-                        }
-                    }, crossing.shape)
-
-                # assign each cluster the same crossing
-                split_crossings = []
-                for cluster in clusters:
-                    c = copy(crossing)
-
-                    def edge_dist(e: Edge):
-                        pts = np.array([
-                            v for lane in e.getLanes()
-                            for v in lane.getShape()
-                        ])
-                        center = np.sum(pts, axis=0) / pts.shape[0]
-                        return np.linalg.norm(center - c.shape[0])
-
-                    edges = list(cluster)
-                    print(edges)
-                    edges.sort(key=edge_dist)
-                    print(edges)
-                    c.edges = edges
-                    split_crossings.append(c)
-                    break
-
-                new_crossings[merged_node_id] = split_crossings
-
+            new_crossings[merged_node_id] = split_crossings
         self._crossings = new_crossings
 
     def _is_merged_edge(self, edge: Edge):

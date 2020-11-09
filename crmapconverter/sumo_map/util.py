@@ -379,12 +379,22 @@ def merge_crossings(crossings: List[Crossing]) -> List[Crossing]:
 
 
 def intersect_lanelets_line(lanelets: Iterable[Lanelet],
-                            line: np.array) -> np.array:
+                            line: np.array,
+                            push_back_factor=0.25) -> np.array:
+    # intersect line with convex hull of lanelets
     convex_hull = unary_union([
         lanelet.convert_to_polygon().shapely_object for lanelet in lanelets
     ]).convex_hull
     shapely_line = LineString(line)
-    res = convex_hull.intersection(shapely_line)
+    intersect = convex_hull.intersection(shapely_line)
+    res = np.array(intersect)
+
+    # push back the line end points to give waiting space in crossing
+    line_direction = res[-1] - res[0]
+    line_direction /= np.linalg.norm(line_direction)
+    assert push_back_factor >= 0, "push_back_factor has to be >= 0"
+    res[0] -= line_direction * push_back_factor
+    res[-1] += line_direction * push_back_factor
 
     # plt.figure(figsize=(25, 25))
     # plt.plot(*convex_hull.exterior.xy)
@@ -393,4 +403,4 @@ def intersect_lanelets_line(lanelets: Iterable[Lanelet],
     # plt.autoscale()
     # plt.plot(*res.xy)
     # plt.show()
-    return np.array(res)
+    return res
