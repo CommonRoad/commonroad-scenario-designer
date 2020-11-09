@@ -900,20 +900,24 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
             for cluster in clusters:
                 c = copy(crossing)
 
-                def edge_centroid(e: Edge):
+                def edge_centroid(e: Edge) -> np.array:
+                    """Computes the centroid of an edge based on the vertices of it's lanes"""
                     pts = np.array(
                         [v for lane in e.getLanes() for v in lane._shape])
                     return np.sum(pts, axis=0) / pts.shape[0]
 
-                def sort_edges(e: Edge):
+                def compute_edge_angle(e: Edge, pivot: np.array) -> float:
+                    """computes angle between edge and the x axis, when moved into the pivot"""
                     center = edge_centroid(e)
                     return np.arctan2(-(center[1] - pivot[1]),
                                       -(center[0] - pivot[0]))
 
+                # order edges in counter-clock-wise direction
                 pivot = c.shape[0]
-                c.edges = sorted(cluster, key=sort_edges)
-                print(
-                    f"reordered ccw direction {[e.getID() for e in cluster]} -> {[e.getID() for e in c.edges]}"
+                c.edges = sorted(
+                    cluster, key=lambda edge: compute_edge_angle(edge, pivot))
+                logging.info(
+                    f"ordered ccw direction {[e.getID() for e in cluster]} -> {[e.getID() for e in c.edges]}"
                 )
                 # make sure that points in lc.shape and c.edges are ordered in the same direction
                 # i.e. for edge direction vector e, and shape direction vector s:
