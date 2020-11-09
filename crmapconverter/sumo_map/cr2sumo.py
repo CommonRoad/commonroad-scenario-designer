@@ -10,6 +10,7 @@ import warnings
 from collections import defaultdict
 from copy import copy, deepcopy
 from typing import Dict, List, Set, Tuple
+import shapely
 from xml.dom import minidom
 from xml.etree import cElementTree as ET
 
@@ -35,12 +36,14 @@ from .config import (SumoConfig, lanelet_type_CR2SUMO,
 from .sumolib_net import (TLS, Connection, Crossing, Edge, Junction, Lane,
                           Node, TLSProgram)
 from .sumolib_net.lane import SUMO_VEHICLE_CLASSES
-from .util import (
-    _find_intersecting_edges, compute_max_curvature_from_polyline,
-    vector_angle, get_scenario_name_from_crfile,
-    get_scenario_name_from_netfile, get_total_lane_length_from_netfile,
-    max_lanelet_network_id, merge_crossings, min_cluster,
-    remove_unreferenced_traffic_lights, write_ego_ids_to_rou_file)
+from .util import (_find_intersecting_edges,
+                   compute_max_curvature_from_polyline, vector_angle,
+                   get_scenario_name_from_crfile,
+                   get_scenario_name_from_netfile,
+                   get_total_lane_length_from_netfile, max_lanelet_network_id,
+                   merge_crossings, min_cluster,
+                   remove_unreferenced_traffic_lights,
+                   write_ego_ids_to_rou_file, intersect_lanelets_line)
 
 # This file is used as a template for the generated .sumo.cfg files
 DEFAULT_CFG_FILE = "default.sumo.cfg"
@@ -491,7 +494,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
             leftmost_lanelet = self.lanelet_network.find_lanelet_by_id(
                 lanelet_ids[-1])
             if leftmost_lanelet.adj_left is not None:
-                self.lanes[self.lanelet_id2lane_id[lanelet_ids[-1]]]\
+                self.lanes[self.lanelet_id2lane_id[lanelet_ids[-1]]] \
                     .setAdjacentOpposite(self.lanelet_id2lane_id[leftmost_lanelet.adj_left])
 
     def _init_connections(self):
@@ -564,7 +567,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         Return a set of the speed limits of the edges
         :return: speeds_list
         """
-        speeds_list = []  #list of speed that will be returned by the method
+        speeds_list = []  # list of speed that will be returned by the method
         for edge in self.new_edges.values():
             speed = edge.getSpeed()
             speeds_list.append(speed)
@@ -856,7 +859,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
             if non_pedestrian_edges:
 
                 def opp_distance(e1: Edge, e2: Edge) -> float:
-                    """Computes the maximum distance between 
+                    """Computes the maximum distance between
                     opposite points of two edges
 
                     Args:
@@ -876,7 +879,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                     return max(d1, d2)
 
                 def max_distance(dist: float) -> bool:
-                    """Limits the distance for clustering 
+                    """Limits the distance for clustering
                     to 4m.
 
                     Args:
@@ -931,14 +934,36 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                     for m in merged_crossings
                 ])]
 
+                crossing.shape = intersect_lanelets_line(
+                    {
+                        self.lanelet_network.find_lanelet_by_id(l_id)
+                        for l_id, e_id in self.lanelet_id2edge_id.items()
+                        if e_id in {
+                            edge.getID()
+                            for cluster in clusters for edge in cluster
+                        }
+                    }, crossing.shape)
+
                 # assign each cluster the same crossing
                 split_crossings = []
                 for cluster in clusters:
                     c = copy(crossing)
-                    c.edges = cluster
-                    # TODO: somewho figure out how to compute a proper crossing shape
-                    c.shape = None
+
+                    def edge_dist(e: Edge):
+                        pts = np.array([
+                            v for lane in e.getLanes()
+                            for v in lane.getShape()
+                        ])
+                        center = np.sum(pts, axis=0) / pts.shape[0]
+                        return np.linalg.norm(center - c.shape[0])
+
+                    edges = list(cluster)
+                    print(edges)
+                    edges.sort(key=edge_dist)
+                    print(edges)
+                    c.edges = edges
                     split_crossings.append(c)
+                    break
 
                 new_crossings[merged_node_id] = split_crossings
 
@@ -1055,12 +1080,12 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         # auto generate the TLS with netconvert
         junction = self.lanelet_id2junction[lanelet_id]
         command = "netconvert --sumo-net-file=" + self._output_file + \
-                    " --output-file=" + self._output_file + \
-                    " --tls.guess=true" + \
-                    " --tls.guess-signals=" + ('true' if guess_signals else 'false') + \
-                    " --tls.group-signals=true" + \
-                    " --tls.cycle.time=" + str(cycle_time) + \
-                    " --tls.set=" + str(junction.id)
+                  " --output-file=" + self._output_file + \
+                  " --tls.guess=true" + \
+                  " --tls.guess-signals=" + ('true' if guess_signals else 'false') + \
+                  " --tls.group-signals=true" + \
+                  " --tls.cycle.time=" + str(cycle_time) + \
+                  " --tls.set=" + str(junction.id)
         try:
             out = subprocess.check_output(command.split(),
                                           timeout=5.,
@@ -1274,7 +1299,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         # Calling of Netconvert
         bashCommand = "netconvert --plain.extend-edge-shape=true" \
                       " --no-turnarounds=true" \
-                      " --junctions.internal-link-detail=20"\
+                      " --junctions.internal-link-detail=20" \
                       " --geometry.avoid-overlap=true" \
                       " --offset.disable-normalization=true" \
                       " --node-files=" + self._nodes_file + \
@@ -1438,8 +1463,8 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         :return bool: If the conversion was successful
         """
         if len(self.conf.ego_ids) > self.conf.n_ego_vehicles:
-            logging.error("total number of given ego_vehicles must be <= n_ego_vehicles, but {}not<={}"\
-            .format(len(self.conf.ego_ids),self.conf.n_ego_vehicles))
+            logging.error("total number of given ego_vehicles must be <= n_ego_vehicles, but {}not<={}" \
+                          .format(len(self.conf.ego_ids), self.conf.n_ego_vehicles))
             return False
 
         if self.conf.n_ego_vehicles > self.conf.n_vehicles_max:
@@ -1549,7 +1574,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
             logging.info(
                 'SUMO traffic generation: neither total_lane_length nor veh_per_second is defined. '
                 'For each second there are two vehicles generated.')
-        #step_per_departure = ((conf.departure_interval_vehicles.end - conf.departure_interval_vehicles.start) / n_vehicles_max)
+        # step_per_departure = ((conf.departure_interval_vehicles.end - conf.departure_interval_vehicles.start) / n_vehicles_max)
 
         # filenames
         route_files: Dict[str, str] = {
@@ -1605,7 +1630,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         ])
 
         if self.conf.n_ego_vehicles != 0:
-            #get ego ids and add EGO_ID_START prefix
+            # get ego ids and add EGO_ID_START prefix
             ego_ids = self._find_ego_ids_by_departure_time(
                 route_files["vehicle"])
             write_ego_ids_to_rou_file(route_files["vehicle"], ego_ids)

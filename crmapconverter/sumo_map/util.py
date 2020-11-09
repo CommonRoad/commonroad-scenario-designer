@@ -1,19 +1,16 @@
 import os
-import subprocess
-import warnings
 from copy import deepcopy
-from typing import Dict, List
+from typing import Dict, List, Iterable, Set
 from xml.dom import minidom
 from xml.etree import ElementTree as et
-from xml.etree import cElementTree as ET
 
-import matplotlib.pyplot as plt
 import numpy as np
-import sumolib
 from commonroad.geometry.shape import Polygon
+from commonroad.scenario.lanelet import Lanelet
 from commonroad.scenario.lanelet import LaneletNetwork
-from commonroad.visualization.draw_dispatch_cr import draw_object
-from crmapconverter.sumo_map.sumolib_net import Crossing, Edge
+from crmapconverter.sumo_map.sumolib_net import Crossing
+from shapely.geometry import LineString
+from shapely.ops import unary_union
 
 from .config import EGO_ID_START, SumoConfig
 
@@ -179,22 +176,22 @@ def _erode_lanelets(lanelet_network: LaneletNetwork,
                 i_crop_0:-i_crop_1]
         else:
             factor_0 = min(1, crop_meters / lanelet_ero.distance[1])
-            lanelet_ero._left_vertices[0] = factor_0 * lanelet_ero._left_vertices[0]\
-                                            + (1-factor_0) * lanelet_ero._left_vertices[1]
+            lanelet_ero._left_vertices[0] = factor_0 * lanelet_ero._left_vertices[0] \
+                                            + (1 - factor_0) * lanelet_ero._left_vertices[1]
             lanelet_ero._right_vertices[0] = factor_0 * lanelet_ero._right_vertices[0] \
-                                            + (1 - factor_0) * lanelet_ero._right_vertices[1]
+                                             + (1 - factor_0) * lanelet_ero._right_vertices[1]
             lanelet_ero._center_vertices[0] = factor_0 * lanelet_ero._center_vertices[0] \
-                                            + (1 - factor_0) * lanelet_ero._center_vertices[1]
+                                              + (1 - factor_0) * lanelet_ero._center_vertices[1]
 
             factor_0 = min(
                 1, crop_meters /
                 (lanelet_ero.distance[-1] - lanelet_ero.distance[-2]))
             lanelet_ero._left_vertices[-1] = factor_0 * lanelet_ero._left_vertices[-2] \
-                                            + (1 - factor_0) * lanelet_ero._left_vertices[-1]
+                                             + (1 - factor_0) * lanelet_ero._left_vertices[-1]
             lanelet_ero._right_vertices[-1] = factor_0 * lanelet_ero._right_vertices[-2] \
-                                             + (1 - factor_0) * lanelet_ero._right_vertices[-1]
+                                              + (1 - factor_0) * lanelet_ero._right_vertices[-1]
             lanelet_ero._center_vertices[-1] = factor_0 * lanelet_ero._center_vertices[-2] \
-                                              + (1 - factor_0) * lanelet_ero._center_vertices[-1]
+                                               + (1 - factor_0) * lanelet_ero._center_vertices[-1]
 
         # compute eroded vector from center
         perp_vecs = (lanelet_ero.left_vertices -
@@ -379,3 +376,21 @@ def merge_crossings(crossings: List[Crossing]) -> List[Crossing]:
             new = old - {current}
             break
     return list(new)
+
+
+def intersect_lanelets_line(lanelets: Iterable[Lanelet],
+                            line: np.array) -> np.array:
+    convex_hull = unary_union([
+        lanelet.convert_to_polygon().shapely_object for lanelet in lanelets
+    ]).convex_hull
+    shapely_line = LineString(line)
+    res = convex_hull.intersection(shapely_line)
+
+    # plt.figure(figsize=(25, 25))
+    # plt.plot(*convex_hull.exterior.xy)
+    # plt.plot(*shapely_line.xy)
+    # plt.axis('equal')
+    # plt.autoscale()
+    # plt.plot(*res.xy)
+    # plt.show()
+    return np.array(res)

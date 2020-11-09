@@ -43,40 +43,40 @@ print(f"Generated Traffic Light System at {tls_lanelet_id}, {traffic_light_syste
 # plt.autoscale()
 # plt.show()
 
-# write generated traffic lights back to commonroad file
-scenario.lanelet_network = wrapper.lanelet_network
-CommonRoadFileWriter(scenario,
-                     planning_problem,
-                     author=scenario.author,
-                     affiliation=scenario.affiliation,
-                     source=scenario.source,
-                     tags=scenario.tags,
-                     location=scenario.location).write_scenario_to_file(
-                         os.path.join(output_folder,
-                                      config.scenario_name + ".xml"),
-                         overwrite_existing_file=True)
+# # write generated traffic lights back to commonroad file
+# scenario.lanelet_network = wrapper.lanelet_network
+# CommonRoadFileWriter(scenario,
+#                      planning_problem,
+#                      author=scenario.author,
+#                      affiliation=scenario.affiliation,
+#                      source=scenario.source,
+#                      tags=scenario.tags,
+#                      location=scenario.location).write_scenario_to_file(
+#                          os.path.join(output_folder,
+#                                       config.scenario_name + ".xml"),
+#                          overwrite_existing_file=True)
 
-# run Simulation
-simulation = SumoSimulation()
-simulation.initialize(config, wrapper)
+# # run Simulation
+# simulation = SumoSimulation()
+# simulation.initialize(config, wrapper)
 
-for t in range(config.simulation_steps):
-    simulation.simulate_step()
+# for t in range(config.simulation_steps):
+#     simulation.simulate_step()
 
-simulation.stop()
+# simulation.stop()
 
-# save resulting scenario
-simulated_scenario = simulation.commonroad_scenarios_all_time_steps()
-CommonRoadFileWriter(simulated_scenario,
-                     planning_problem,
-                     author=scenario.author,
-                     affiliation=scenario.affiliation,
-                     source=scenario.source,
-                     tags=scenario.tags,
-                     location=scenario.location).write_scenario_to_file(
-                         os.path.join(output_folder,
-                                      config.scenario_name + ".simulated.xml"),
-                         overwrite_existing_file=True)
+# # save resulting scenario
+# simulated_scenario = simulation.commonroad_scenarios_all_time_steps()
+# CommonRoadFileWriter(simulated_scenario,
+#                      planning_problem,
+#                      author=scenario.author,
+#                      affiliation=scenario.affiliation,
+#                      source=scenario.source,
+#                      tags=scenario.tags,
+#                      location=scenario.location).write_scenario_to_file(
+#                          os.path.join(output_folder,
+#                                       config.scenario_name + ".simulated.xml"),
+#                          overwrite_existing_file=True)
 
-print("creating video (this may take some time)")
-# create_video(simulation, 1, config.simulation_steps, output_folder)
+# print("creating video (this may take some time)")
+# # create_video(simulation, 1, config.simulation_steps, output_folder)
