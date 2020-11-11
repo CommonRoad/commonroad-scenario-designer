@@ -6,6 +6,7 @@ test/.pytest_cache
 .pytest_cache
 venv/
 .vscode/
+.idea/
 src/*
 # *.env
 

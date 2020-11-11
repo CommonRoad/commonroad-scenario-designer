@@ -39,6 +39,7 @@ def convert_net_to_cr(net_file:str, out_folder:str=None, verbose=False) -> str:
     with open(opendrive_file, "r") as fi:
         open_drive = parse_opendrive(etree.parse(fi).getroot())
 
+
     road_network = Network()
     road_network.load_opendrive(open_drive)
     scenario = road_network.export_commonroad_scenario()
