@@ -427,3 +427,21 @@ def edge_centroid(e: Edge) -> np.ndarray:
     """Computes the centroid of an edge based on the vertices of it's lanes"""
     pts = np.array([v for lane in e.getLanes() for v in lane._shape])
     return np.sum(pts, axis=0) / pts.shape[0]
+
+
+def orthogonal_ccw_vector(start: np.ndarray, end: np.ndarray) -> np.ndarray:
+    """
+    computes the counter clock wise orthogonal vector to the vector spanned by (centre -> point)
+    :param start:
+    :type start:
+    :param end:
+    :type end:
+    :return: counter clockwise orthogonal vector
+    :rtype:
+    """
+    # this only works in 2D
+    assert start.shape == (2,) and end.shape == (2,)
+    direction = end - start
+    ccw_direction = np.array([-direction[1], direction[0]])
+    ccw_direction /= np.linalg.norm(ccw_direction)
+    return ccw_direction

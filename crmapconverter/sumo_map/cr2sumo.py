@@ -38,7 +38,7 @@ from .util import (_find_intersecting_edges,
                    get_total_lane_length_from_netfile, max_lanelet_network_id,
                    merge_crossings, min_cluster,
                    remove_unreferenced_traffic_lights,
-                   write_ego_ids_to_rou_file, intersect_lanelets_line)
+                   write_ego_ids_to_rou_file, intersect_lanelets_line, orthogonal_ccw_vector)
 
 # This file is used as a template for the generated .sumo.cfg files
 DEFAULT_CFG_FILE = "default.sumo.cfg"
@@ -902,25 +902,27 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                                       -(center[0] - pivot[0]))
 
                 # order edges in counter-clock-wise direction
-                pivot = c.shape[0]
                 c.edges = sorted(
-                    cluster, key=lambda edge: compute_edge_angle(edge, pivot))
-                logging.info(
-                    f"ordered ccw direction {[e.getID() for e in cluster]} -> {[e.getID() for e in c.edges]}"
+                    cluster, key=lambda edge: compute_edge_angle(edge, c.shape[0])
                 )
-                # make sure that points in c.shape and c.edges are ordered in the same direction
-                # i.e. for edge direction vector e, and shape direction vector s:
-                # assure np.dot(e,s) > 0
-                if len(c.edges) > 1:
-                    edge_dir = edge_centroid(c.edges[-1]) - edge_centroid(
-                        c.edges[0])
-                    edge_dir /= np.linalg.norm(edge_dir)
-                    shape_dir = c.shape[-1] - c.shape[0]
-                    shape_dir /= np.linalg.norm(shape_dir)
-                    if np.dot(edge_dir, shape_dir) < 0:
-                        c.shape = np.flip(c.shape, axis=0)
+                logging.info(
+                    f"ordered edges ccw direction {[e.getID() for e in cluster]} -> {[e.getID() for e in c.edges]}"
+                )
 
-                c.shape = np.array([c.shape[0], c.shape[-1]])
+                # Assure that c.shape is in counter clockwise direction within the junction
+                # Move c.shape to the centroid of it's edges, them make sure it is in ccw direction
+                edge_ends = np.array(
+                    [node.getCoord() for edge in c.edges for node in [edge.getFromNode(), edge.getToNode()]]
+                )
+                edge_centre = np.mean(edge_ends, axis=0)
+                crossing_centre = np.mean(c.shape, axis=0)
+                junction_centre = edge_ends[np.argmin(np.linalg.norm(edge_ends - crossing_centre, axis=1))]
+                orthogonal = orthogonal_ccw_vector(junction_centre, edge_centre)
+                centered_crossing = c.shape + (edge_centre - crossing_centre)
+                # is the centered crossing going the same direction as the ccw vector
+                # if not flip it's elements
+                if np.dot(orthogonal, centered_crossing[-1] - centered_crossing[0]) < 0:
+                    c.shape = np.flip(c.shape, axis=0)
                 split_crossings.append(c)
 
             new_crossings[merged_node_id] = split_crossings
