@@ -39,7 +39,7 @@ class Node:
         self._shape = None
         self._tl = tl
 
-    def getID(self):
+    def getID(self) -> int:
         return self._id
 
     def setShape(self, shape):
