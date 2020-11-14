@@ -55,15 +55,6 @@ SUMO_VEHICLE_CLASSES = (
     "custom2")
 
 
-def get_allowed(allow, disallow):
-    """ Normalize the given string attributes as a list of all allowed vClasses."""
-    if not allow and not disallow:
-        return SUMO_VEHICLE_CLASSES
-    elif not disallow:
-        return allow
-    else:
-        return tuple([c for c in SUMO_VEHICLE_CLASSES if c not in disallow])
-
 
 def addJunctionPos(shape, fromPos, toPos):
     """Extends shape with the given positions in case they differ from the
@@ -97,8 +88,14 @@ class Lane:
         self._outgoing = []
         self._adjacent_opposite = None  # added by Lisa
         self._params = {}
-        self._allowed = allow
-        self._disallowed = []
+        if allow and disallow:
+            self._allowed = allow
+            self._disallowed = disallow
+        elif allow:
+            self._disallowed = list(set(SUMO_VEHICLE_CLASSES) - set(allow))
+        elif disallow:
+            self._allowed = list(set(SUMO_VEHICLE_CLASSES) - set(disallow))
+
         edge.addLane(self)
 
     def getSpeed(self):

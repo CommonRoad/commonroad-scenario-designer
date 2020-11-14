@@ -26,9 +26,9 @@ from commonroad.visualization.draw_dispatch_cr import draw_object
 from matplotlib import pyplot as plt
 from sumocr.maps.scenario_wrapper import AbstractScenarioWrapper
 
-from .config import (SumoConfig, lanelet_type_CR2SUMO,
-                     traffic_light_states_CR2SUMO,
-                     traffic_light_states_SUMO2CR)
+from .config import SumoConfig
+
+from .mapping import (get_sumo_edge_type, traffic_light_states_CR2SUMO, traffic_light_states_SUMO2CR)
 from .sumolib_net import (TLS, Connection, Crossing, Edge, Junction, Lane,
                           Node, TLSProgram)
 from .sumolib_net.lane import SUMO_VEHICLE_CLASSES
@@ -41,7 +41,7 @@ from .util import (_find_intersecting_edges,
                    write_ego_ids_to_rou_file, intersect_lanelets_line, orthogonal_ccw_vector)
 
 # This file is used as a template for the generated .sumo.cfg files
-DEFAULT_CFG_FILE = "default.sumo.cfg"
+DEFAULT_CFG_FILE = os.path.join("templates", "default.sumo.cfg")
 
 
 class CR2SumoMapConverter(AbstractScenarioWrapper):
@@ -52,15 +52,16 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         lanelet_network: LaneletNetwork,
         conf: SumoConfig,
         country_id: SupportedTrafficSignCountry = SupportedTrafficSignCountry.
-            ZAMUNDA):
+            GERMANY):
         """
 
         :param lanelet_network: lanelet network to be converted
         :param conf: configuration file for additional map conversion parameters
-        :param country_id: ID of the country, used to evaluate traffic signs
+        :param country_id: ID of the country, used to generate traffic signs and highway speed limits for
         """
         self.lanelet_network: LaneletNetwork = lanelet_network
         self.conf: SumoConfig = conf
+        self.country_id = country_id
 
         # all the nodes of the map, key is the node ID
         self.nodes: Dict[int, Node] = {}
@@ -445,6 +446,9 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
             edge = Edge(id=edge_id,
                         fromN=start_node,
                         toN=end_node,
+                        type=get_sumo_edge_type(self.country_id,
+                                                list(self.lanelet_network.find_lanelet_by_id(
+                                                    lanelet_ids[0]).lanelet_type)[0]),
                         prio=1,
                         function='normal',
                         name=edge_id)
@@ -466,20 +470,11 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                 #     raise ValueError(
                 #         "The lanelet width {} meters on lanelet {} is smaller than the allowed maximum vehicle width {} meters!".format(
                 #             lanelet_width, lanelet_id, self._max_vehicle_width))
-                disallow = self._filter_disallowed_vehicle_classes(
-                    max_curvature, lanelet_width, lanelet_id)
-                allow = set([
-                    t for tpe in lanelet.lanelet_type
-                    for t in lanelet_type_CR2SUMO[tpe]
-                ])
-                allow = allow if len(
-                    allow) > 0 else set(SUMO_VEHICLE_CLASSES) - set(disallow)
 
                 lane = Lane(edge,
                             speed_limit,
                             self.edge_lengths[edge_id],
                             width=lanelet_width,
-                            allow=allow,
                             shape=shape)
                 self.lanes[lane.getID()] = lane
                 self.lane_id2lanelet_id[lane.getID()] = lanelet_id

@@ -20,10 +20,12 @@ from crmapconverter.sumo_map.sumolib_net.lane import Lane
 
 class Edge:
     """ Edges from a sumo network """
-    def __init__(self, id, fromN, toN, prio, function, name):
+
+    def __init__(self, id, fromN, toN, type="", function="normal", name="", prio=0):
         self._id = id
         self._from = fromN
         self._to = toN
+        self._type = type
         self._priority = prio
         if fromN:
             fromN.addOutgoing(self)
@@ -184,8 +186,8 @@ class Edge:
                                       z / float(numLanes)))
 
         self._shapeWithJunctions3D = lane.addJunctionPos(self._shape3D,
-                                                    self._from.getCoord3D(),
-                                                    self._to.getCoord3D())
+                                                         self._from.getCoord3D(),
+                                                         self._to.getCoord3D())
 
         if self._rawShape3D == []:
             self._rawShape3D = [self._from.getCoord3D(), self._to.getCoord3D()]
@@ -235,35 +237,13 @@ class Edge:
             return '<edge id="%s" function="%s"/>' % (self._id,
                                                       self.getFunction())
 
-    # def __init__(self, id, fromN, toN, prio, function, name):
-    #     self._id = id
-    #     self._from = fromN
-    #     self._to = toN
-    #     self._priority = prio
-    #     if fromN:
-    #         fromN.addOutgoing(self)
-    #     if toN:
-    #         toN.addIncoming(self)
-    #     self._lanes = []
-    #     self._speed = None
-    #     self._length = None
-    #     self._incoming = {}
-    #     self._outgoing = {}
-    #     self._shape = None
-    #     self._shapeWithJunctions = None
-    #     self._shape3D = None
-    #     self._shapeWithJunctions3D = None
-    #     self._rawShape = None
-    #     self._rawShape3D = None
-    #     self._function = function
-    #     self._tls = None
-    #     self._name = name
-
     def toXML(self) -> str:
         edge = ET.Element("edge")
         edge.set("from", str(self.getFromNode().getID()))
         edge.set("to", str(self.getToNode().getID()))
         edge.set("id", str(self._id))
+        if self._type:
+            edge.set("type", str(self._type))
         if self._priority:
             edge.set("priority", str(self._priority))
         if self._speed:
