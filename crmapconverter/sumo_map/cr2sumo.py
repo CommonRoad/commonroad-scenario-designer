@@ -1033,12 +1033,6 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
             shapeString += pointString + " "
         return shapeString
 
-    def rebase_paths(self, scenario_root_folder: str):
-        """
-        Rebases all the member paths to the given root folder
-        """
-        self.sumo_cfg_file = os.path.join(scenario_root_folder, os.path.split(self.sumo_cfg_file)[1])
-
     def auto_generate_traffic_light_system(self,
                                            lanelet_id: int,
                                            cycle_time: int = 90) -> bool:
