@@ -9,6 +9,7 @@ import sys
 import warnings
 from collections import defaultdict
 from copy import copy, deepcopy
+from itertools import groupby
 from typing import Dict, List, Set, Tuple
 from xml.dom import minidom
 from xml.etree import cElementTree as ET
@@ -849,7 +850,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                         self._points_dict[self.lane_id2lanelet_id[lane_id]]
                         for lane_id in path[:-1]
                     ])
-                    via = path[1]
+                    via = " ".join(path[0:-1])
                 else:
                     shape = None
                     via = None
@@ -1259,11 +1260,12 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                 minidom.parseString(ET.tostring(
                     tlLogics, method="xml")).toprettyxml(indent="\t"))
 
-    def merge_intermediate_files(self, output_path: str, cleanup=True) -> bool:
+    def merge_intermediate_files(self, output_path: str, cleanup=True, update_internal_IDs=True) -> bool:
         """
         Function that merges the edges and nodes files into one using netconvert
         :param output_path: the relative path of the output
         :param cleanup: deletes temporary input files after creating net file (only deactivate for debugging)
+        :param update_IDs: Updates the internal Edge IDs from the newly generated net file
         :return: bool: returns False if conversion fails
         """
 
@@ -1313,6 +1315,8 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         try:
             _ = subprocess.check_output(bashCommand.split(), timeout=5.0)
             self._read_junctions_from_net_file(self._output_file)
+            if update_internal_IDs:
+                self._update_internal_IDs_from_net_file(self._output_file)
 
         except FileNotFoundError as e:
             if 'netconvert' in e.filename:
@@ -1325,7 +1329,80 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         if cleanup and success:
             for file in files.values():
                 os.remove(join(output_path, file))
+
         return success
+
+    def _update_internal_IDs_from_net_file(self, net_file_path: str):
+        with open(net_file_path, 'r') as f:
+            root = ET.parse(f)
+
+        original_connection_map = {str(from_edge):
+                                       {str(from_lane):
+                                            {str(to_edge):
+                                                 {str(to_lane):
+                                                      [connection.getViaLaneID() for connection in to_lane_connections]
+                                                  for to_lane, to_lane_connections in groupby(to_edge_connections, key=lambda connection: connection.getToLane())}
+                                             for to_edge, to_edge_connections in groupby(from_lane_connections, key=lambda connection: connection.getTo())}
+                                        for from_lane, from_lane_connections in groupby(from_edge_connections, key=lambda connection: connection.getFromLane())}
+                                   for from_edge, from_edge_connections in groupby(self._new_connections, key=lambda connection: connection.getFrom())}
+
+        for connection_xml in root.findall("connection"):
+            from_edge_id = connection_xml.get('from')
+            to_edge_id = connection_xml.get('to')
+
+            from_lane_id = connection_xml.get('fromLane')
+            to_lane_id = connection_xml.get('toLane')
+
+            # Skip the connections from internal edges
+            if from_edge_id.startswith(':'):
+                continue
+
+            # Skip the normal connection
+            new_internal_connection_ID = connection_xml.get('via')
+            if not new_internal_connection_ID.startswith(':'):
+                continue
+
+            # if new_internal_connection_ID.contains(' '):
+            #     raise ScenarioException("There is no lanelet between intersections/junctions, which causes that these intersections must be merged in SUMO, therefore multiple internal edges would be in this merged intersection, which is not supported!")
+
+            new_internal_connection_ID_splitted = new_internal_connection_ID.split('_')
+            new_internal_edge_ID = f"{new_internal_connection_ID_splitted[0]}_{new_internal_connection_ID_splitted[1]}"
+            new_internal_lane_ID = new_internal_connection_ID_splitted[2]
+
+            try:
+                original_internal_connection_IDs = original_connection_map[from_edge_id][from_lane_id][to_edge_id][to_lane_id]
+            except KeyError as exp:
+                raise ScenarioException(f"Inconsistent scenario, there is no connection between from {from_edge_id}_{from_lane_id} to  {to_edge_id}_{to_lane_id}, {exp}")
+
+            if len(original_internal_connection_IDs) > 1:
+                raise RuntimeError(f"The connection is ambigous between from {from_edge_id}_{from_lane_id} to {to_edge_id}_{to_lane_id}")
+            original_internal_connection_IDs = original_internal_connection_IDs[0]
+
+            # If there is no internal connection, continue
+            if original_internal_connection_IDs is None:
+                continue
+
+            for original_internal_connection_ID in original_internal_connection_IDs.split(" "):
+                original_internal_connection_ID_splitted = original_internal_connection_ID.split('_')
+                original_internal_edge_ID = original_internal_connection_ID_splitted[0]
+                original_internal_lane_ID = original_internal_connection_ID_splitted[1]
+
+                original_lanelet_ID = self.lane_id2lanelet_id[original_internal_connection_ID]
+
+                # Update the dictionaries
+                if new_internal_connection_ID  in self.lane_id2lanelet_id:
+                    if not isinstance(self.lane_id2lanelet_id[new_internal_connection_ID], list):
+                        self.lane_id2lanelet_id[new_internal_connection_ID] = [self.lane_id2lanelet_id[new_internal_connection_ID]]
+                    self.lane_id2lanelet_id[new_internal_connection_ID].append(original_lanelet_ID)
+                else:
+                    self.lane_id2lanelet_id[new_internal_connection_ID] = original_lanelet_ID
+                # del self.lane_id2lanelet_id[original_internal_connection_ID]
+
+                self.lanelet_id2edge_id[original_lanelet_ID] = new_internal_edge_ID
+
+                self.lanelet_id2edge_lane_id[original_lanelet_ID] = new_internal_lane_ID
+
+                self.lanelet_id2lane_id[original_lanelet_ID] = new_internal_connection_ID
 
     def _read_junctions_from_net_file(self, filename: str):
         # parse junctions from .net.xml
@@ -1433,6 +1510,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
     def convert_to_net_file(self, output_folder: str) -> bool:
         """
         Convert the Commonroad scenario to a net.xml file, specified by the absolute  path output_file.
+        NOTE: This method regenerates the traffic!
         :param path of the returned net.xml file
         :return returns whether conversion was successful
         """
@@ -1467,8 +1545,8 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
 
         logging.info("Merging Intermediate Files")
         self.write_intermediate_files(output_path)
-        conversion_possible = self.merge_intermediate_files(output_path,
-                                                            cleanup=False)
+        conversion_possible = self.merge_intermediate_files(output_path, cleanup=True,
+                                                            update_internal_IDs=True)
         if not conversion_possible:
             logging.error("Error converting map, see above for details")
             return False
@@ -1823,6 +1901,23 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                 return None
             return sorted_lanelet_id_list[0]
 
+        def get_position_in_lane(lanelet_id, position):
+            # If the lanelet is merged in one SUMO lane, the lanelets must be merged too
+            lane_id = self.lanelet_id2lane_id[lanelet_id]
+            merged_lanelet_ids = self.lane_id2lanelet_id[lane_id]
+            if isinstance(merged_lanelet_ids, list):
+                starting_lanelet = scenario.lanelet_network.find_lanelet_by_id(merged_lanelet_ids[0])
+                for succ_lanelet_id in merged_lanelet_ids[1:]:
+                    succ_lanelet = scenario.lanelet_network.find_lanelet_by_id(succ_lanelet_id)
+                    starting_lanelet = Lanelet.merge_lanelets(starting_lanelet, succ_lanelet)
+            else:
+                starting_lanelet = scenario.lanelet_network.find_lanelet_by_id(lanelet_id)
+            # In SUMO the starting point of the vehicle is used as position, not the center
+            depart_pos, _ = get_long_dist(get_ccosy(starting_lanelet), position)
+            depart_pos += sumo_veh_length_center
+
+            return depart_pos
+
         grouped_obstacles = {k: list(g) for k, g in groupby(sorted(scenario.obstacles,
                                                                    key=lambda
                                                                        obstacle: obstacle.obstacle_type.value),
@@ -1855,6 +1950,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                 vehicle_node.setAttribute("id", str(obstacle.obstacle_id))
 
                 sumo_veh_type = VEHICLE_TYPE_CR2SUMO[obstacle.obstacle_type]
+                sumo_veh_length_center = self.conf.veh_params['length'][sumo_veh_type] / 2
 
                 if obstacle.obstacle_role == ObstacleRole.STATIC:
                     vehicle_node.setAttribute("depart", str(scenario.dt))
@@ -1865,9 +1961,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                     depart_lane = self.lanelet_id2edge_lane_id[starting_lanelet_id]
                     vehicle_node.setAttribute("departLane", str(depart_lane))
 
-                    starting_lanelet = scenario.lanelet_network.find_lanelet_by_id(
-                        starting_lanelet_id)
-                    depart_pos, _ = get_long_dist(get_ccosy(starting_lanelet), obstacle.initial_state.position)
+                    depart_pos = get_position_in_lane(starting_lanelet_id, obstacle.initial_state.position)
                     vehicle_node.setAttribute("departPos", str(depart_pos))
 
                     vehicle_route_node = domTree.createElement("route")
@@ -1909,32 +2003,57 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                             break
 
                         if lanelet_id != last_lanelet_id:
+                            if last_lanelet_id is not None:
+                                prev_lanelet = scenario.lanelet_network.find_lanelet_by_id(last_lanelet_id)
+                                if len(prev_lanelet.successor) == 0:
+                                    break
+                                if lanelet_id not in prev_lanelet.successor:
+                                    if len(prev_lanelet.successor) == 1:
+                                        logging.warning(f"The lanelet ID {lanelet_id} of the state at timestep {state.time_step} of obstacle {obstacle.obstacle_id} "
+                                                        f"was not found within the successors {prev_lanelet.successor} of the previous state, using {prev_lanelet.successor[0]}")
+                                        lanelet_id = prev_lanelet.successor[0]
+                                    else:
+                                        continue
                             lanelet_ids.append(lanelet_id)
                             last_lanelet_id = lanelet_id
 
                     if skip_obstacle:
                         continue
 
+                    # Add one successor to force the obstacle to leave the lanelet
                     last_lanelet = scenario.lanelet_network.find_lanelet_by_id(lanelet_ids[-1])
-                    _, all_successor_lanelet_ids = Lanelet.all_lanelets_by_merging_successors_from_lanelet(
-                        last_lanelet,
-                        scenario.lanelet_network)
-                    successor_lanelet_ids = all_successor_lanelet_ids[0]
+                    if len(last_lanelet.successor) > 0:
+                        lanelet_ids.append(last_lanelet.successor[0])
 
-                    lanelet_ids.extend(successor_lanelet_ids[1:])
+                    # Add successors until not ending in internal edge
+                    while str(self.lanelet_id2edge_id[lanelet_ids[-1]]).startswith(':'):
+                        last_lanelet = scenario.lanelet_network.find_lanelet_by_id(lanelet_ids[-1])
+                        lanelet_ids.append(last_lanelet.successor[0])
+                        # _, all_successor_lanelet_ids = Lanelet.all_lanelets_by_merging_successors_from_lanelet(
+                        #     last_lanelet,
+                        #     scenario.lanelet_network)
+                        #
+                        # successor_lanelet_ids = all_successor_lanelet_ids[0]
+                        # lanelet_ids.extend(successor_lanelet_ids[1:])
 
                     starting_lanelet_id = lanelet_ids[0]
                     depart_lane = self.lanelet_id2edge_lane_id[starting_lanelet_id]
                     vehicle_node.setAttribute("departLane", str(depart_lane))
 
-                    starting_lanelet = scenario.lanelet_network.find_lanelet_by_id(
-                        starting_lanelet_id)
-                    depart_pos, _ = get_long_dist(get_ccosy(starting_lanelet), obstacle.initial_state.position)
+                    depart_pos = get_position_in_lane(starting_lanelet_id, obstacle.initial_state.position)
                     vehicle_node.setAttribute("departPos", str(depart_pos))
 
                     vehicle_route_node = domTree.createElement("route")
                     edges = [str(self.lanelet_id2edge_id[lanelet_id]) for lanelet_id in lanelet_ids]
-                    vehicle_route_node.setAttribute("edges", " ".join(edges))
+                    # Remove internal edges
+                    if edges[0].startswith(':'):
+                        idx = next(idx for idx, (current_edge, next_edge) in enumerate(zip(edges[0:-1], edges[1:])) if not next_edge.startswith(':'))
+                    else:
+                        idx = 0
+                    filtered_edges = [edges[idx]]
+                    filtered_edges.extend([edge_id for edge_id in edges[idx+1:] if not edge_id.startswith(':')])
+
+                    vehicle_route_node.setAttribute("edges", " ".join(filtered_edges))
                     vehicle_node.appendChild(vehicle_route_node)
 
                     routes_node.appendChild(vehicle_node)
