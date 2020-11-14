@@ -1353,7 +1353,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
 
             # Skip the normal connection
             new_internal_connection_ID = connection_xml.get('via')
-            if not new_internal_connection_ID.startswith(':'):
+            if new_internal_connection_ID is None or not new_internal_connection_ID.startswith(':'):
                 continue
 
             # if new_internal_connection_ID.contains(' '):
