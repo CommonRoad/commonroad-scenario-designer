@@ -68,14 +68,14 @@ def step_collection_3(graph: road_graph.Graph) -> road_graph.Graph:
         segment_clusters.cluster_segments(graph.sublayer_graph)
     print("changing to desired interpolation distance and creating borders of lanes")
     graph.create_lane_bounds(config.INTERPOLATION_DISTANCE_INTERNAL / config.INTERPOLATION_DISTANCE)
-    print("adjust common bound points")
-    graph.correct_start_end_points()
     if config.DELETE_INVALID_LANES:
         print("deleting invalid lanes")
         graph.delete_invalid_lanes()
     if isinstance(graph, road_graph.SublayeredGraph):
         if config.DELETE_INVALID_LANES:
             graph.sublayer_graph.delete_invalid_lanes()
+    print("adjust common bound points")
+    graph.correct_start_end_points()
     print("done converting")
     return graph
 

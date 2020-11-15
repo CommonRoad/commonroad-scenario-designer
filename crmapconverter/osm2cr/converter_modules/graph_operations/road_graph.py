@@ -1722,11 +1722,30 @@ class Graph:
         :param lanes_to_delete: the lane to delete
         :return: None
         """
+        # remove pre/suc relations
+        for pre in lane.predecessors:
+            pre.successors.remove(lane)
+        for suc in lane.successors:
+            suc.predecessors.remove(lane)
+
+        # remove lane
         if lane in self.lanelinks:
             self.lanelinks.remove(lane)
         for edge in self.edges:
             if lane in edge.lanes:
                 edge.lanes.remove(lane)
+
+        # remove adjacent lane references
+        for adj_lane in self.get_all_lanes():
+            if adj_lane.adjacent_left is not None:
+                if adj_lane.adjacent_left == lane:
+                    adj_lane.adjacent_left = None
+                    adj_lane.adjacent_left_direction_equal = None
+            if adj_lane.adjacent_right is not None:
+                if adj_lane.adjacent_right == lane:
+                    adj_lane.adjacent_right = None
+                    adj_lane.adjacent_right_direction_equal = None
+
 
     def delete_invalid_lanes(self) -> None:
         """
@@ -1737,7 +1756,7 @@ class Graph:
         invalid_lanes = self.find_invalid_lanes()
         for lane in invalid_lanes:
             self.delete_lane(lane)
-        self.set_adjacents()
+        #self.set_adjacents()
 
 class SublayeredGraph(Graph):
 
