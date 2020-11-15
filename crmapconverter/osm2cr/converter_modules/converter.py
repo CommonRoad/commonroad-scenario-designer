@@ -101,13 +101,11 @@ class GraphScenario:
         if config.USER_EDIT:
             print("editing the graph")
             graph = gui.edit_graph_edges(graph)
-            print('first plot')
         graph = step_collection_2(graph)
         # HERE WE CAN EDIT LINKS IN THE GRAPH
         if config.USER_EDIT:
             print("editing the graph")
             graph = gui.edit_graph_links(graph)
-            print('second plot')
         graph = step_collection_3(graph)
         self.graph: road_graph.Graph = graph
 

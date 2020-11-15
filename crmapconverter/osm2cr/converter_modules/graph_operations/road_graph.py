@@ -2,7 +2,6 @@
 This module holds the classes required for the graph structure.
 It also provides several methods to perform operations on elements of the graph.
 """
-from os import truncate
 from queue import Queue
 from typing import List, Set, Tuple, Optional, Dict
 from ordered_set import OrderedSet
@@ -1444,6 +1443,7 @@ class Graph:
                     )
                     segment.waypoints = waypoints
 
+                    # segment is only added if it does not form a turn
                     if (
                         successor.edge != predecessor.edge
                         and geometry.curvature(waypoints) > config.LANE_SEGMENT_ANGLE
@@ -1817,4 +1817,3 @@ class SublayeredGraph(Graph):
         super().delete_invalid_lanes()
         if self.apply_on_sublayer:
             self.sublayer_graph.delete_invalid_lanes()
-

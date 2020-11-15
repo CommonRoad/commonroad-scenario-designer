@@ -20,7 +20,7 @@ def sanitize(scenario: Scenario) -> None:
     # TODO Deal with intersections
     # merge_short_lanes(scenario)
     # interpolate waypoints to smoothen lanes
-    # smoothen_scenario(scenario)
+    smoothen_scenario(scenario)
     # comvert to left hand driving scenario if necessary
     convert_to_lht(scenario)
 
@@ -203,7 +203,7 @@ def b_spline(ctr, max_nodes=10) -> np.array:
     try:
         # b_spline
         tck,u = interpolate.splprep([x,y],k=3,s=0)
-        u=np.linspace(0,1,num=max_nodes,endpoint=True)
+        u = np.linspace(0,1,num=max_nodes,endpoint=True)
         out = interpolate.splev(u,tck)
     except:
         print("error occurred in b spline interpolation")
@@ -212,15 +212,18 @@ def b_spline(ctr, max_nodes=10) -> np.array:
     return np.column_stack((out[0], out[1]))
 
 
-def smoothen_lane(l: Lanelet, min_dis=0.35, number_nodes=30) -> Lanelet:
+def smoothen_lane(l: Lanelet, min_dis=0.7, number_nodes=50) -> Lanelet:
     """
     Smoothens the vertices of a single lanelet
 
     :param1 lanelet: The lanelet which is manipulated
-    :param2 min_dis: Minimum distance in metres waypoints are supposed to have between each other
+    :param2 min_dis: Minimum distance waypoints are supposed to have between each other
     :param3 number_nodes: Minimum number of nodes that shall be used for the b spline interpolation process
     :return: Smoothend lanelet
     """
+
+    if not number_nodes:
+        number_nodes = len(l.left_vertices)
 
     rv = l.right_vertices
     lv = l.left_vertices
@@ -238,6 +241,15 @@ def smoothen_lane(l: Lanelet, min_dis=0.35, number_nodes=30) -> Lanelet:
         if not np.linalg.norm(filtered_cv[-1] - cv[i]) < min_dis:
             filtered_cv.append(cv[i])
 
+    # add end waypoints in case they were filtered out in earlier step
+    if not (rv[-1]==filtered_rv[-1]).all():
+        filtered_rv.append(rv[-1])
+    if not (lv[-1]==filtered_lv[-1]).all():
+        filtered_lv.append(lv[-1])
+    if not (cv[-1]==filtered_cv[-1]).all():
+        filtered_cv.append(cv[-1])
+
+    # convert to np.array
     filtered_lv = np.array(filtered_lv)
     filtered_rv = np.array(filtered_rv)
     filtered_cv = np.array(filtered_cv)
