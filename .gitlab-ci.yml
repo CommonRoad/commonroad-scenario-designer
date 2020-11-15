@@ -2,7 +2,7 @@ stages:
   - test
   - build
 
-image: rasaford/commonroad-map-tool:v0.3
+image: $CI_REGISTRY/cps/commonroad-map-tool/ci:v0.3.2
 
 before_script:
   # This is required for the GitLab runner to have permissions to all the repos the user stating the job has.
@@ -21,10 +21,10 @@ python36:
     - grep -v "git" requirements.txt | pip install -r /dev/stdin
     # use the current conda environment in tox, as we have manually installed all required dependencies there
     # run tests
-    - tox --current-env -e py36 -- --junitxml=junit-{envname}.xml
+    - tox --current-env -e py36
   artifacts:
     reports:
-      junit: junit-*.xml
+      cobertura: coverage.xml
 
 python37:
   stage: test
@@ -35,10 +35,10 @@ python37:
     - grep -v "git" requirements.txt | pip install -r /dev/stdin
     # use the current conda environment in tox, as we have manually installed all required dependencies there
     # run tests
-    - tox --current-env -e py37 -- --junitxml=junit-{envname}.xml
+    - tox --current-env -e py37
   artifacts:
     reports:
-      junit: junit-*.xml
+      cobertura: coverage.xml
 
 python38:
   stage: test
@@ -49,10 +49,10 @@ python38:
     - grep -v "git" requirements.txt | pip install -r /dev/stdin
     # use the current conda environment in tox, as we have manually installed all required dependencies there
     # run tests
-    - tox --current-env -e py38 -- --junitxml=junit-{envname}.xml
+    - tox --current-env -e py38
   artifacts:
     reports:
-      junit: junit-*.xml
+      cobertura: coverage.xml
 
 docs:
   stage: test
