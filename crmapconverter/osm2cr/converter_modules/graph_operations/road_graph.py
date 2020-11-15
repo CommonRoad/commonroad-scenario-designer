@@ -1062,6 +1062,11 @@ class Lane:
 
         :return: The polygon of the lanelet
         """
+        if (not self.right_bound) or (not self.left_bound):
+            self.create_bounds()
+        assert self.right_bound is not None
+        assert self.left_bound is not None
+
         polygon = Polygon(np.concatenate((self.right_bound, np.flip(self.left_bound, 0))))
         return polygon
 
@@ -1084,7 +1089,7 @@ class Graph:
         center_point: Tuple[float, float],
         bounds: Tuple[float, float, float, float],
         traffic_signs: List[GraphTrafficSign],
-        traffic_lights: List[GraphTrafficLight],
+        traffic_lights: List[GraphTrafficLight]
     ) -> None:
         """
         creates a new graph
@@ -1438,24 +1443,10 @@ class Graph:
                         predecessor.speedlimit,
                     )
                     segment.waypoints = waypoints
-                    # segment is only added if it does not form a turn
-                    # TODO check for validity
-                    # Choose a reference incoming vector
-                    ref_pre = predecessor.waypoints[-1] - predecessor.waypoints[-2]
-                    ref_suc = successor.waypoints[1] - successor.waypoints[0]
-                    #segment_ref = np.array([segment.from_node.x, segment.from_node.y]) - np.array([segment.to_node.x, segment.to_node.y])
-
-                    #angle = geometry.curvature(waypoints)
-                    angle = geometry.get_angle(ref_pre, ref_suc)
-                    if angle < 0:
-                        angle += 360
-                    print(angle)
 
                     if (
                         successor.edge != predecessor.edge
                         and geometry.curvature(waypoints) > config.LANE_SEGMENT_ANGLE
-                        #and angle > 45.0
-                        #and (angle < 90 or angle > 270)
                     ):
                         self.lanelinks.add(segment)
 
@@ -1711,20 +1702,50 @@ class Graph:
                     edge.add_traffic_light(light, light.forward)
 
 
-    def is_valid(self) -> List[GraphEdge]:
-        invalid_edges = []
+    def find_invalid_lanes(self) -> List[Lane]:
+        """
+        checks every lane for validity, using the shapely_object.is_valid method
+
+        :return: List of invalid lanes
+        """
+        invalid_lanes = []
+        for lane in self.get_all_lanes():
+            if not lane.convert_to_polygon().shapely_object.is_valid:
+                invalid_lanes.append(lane)
+        return invalid_lanes
+
+
+    def delete_lane(self, lane) -> None:
+        """
+        removes given lane from the graph
+
+        :param lanes_to_delete: the lane to delete
+        :return: None
+        """
+        for pre in lane.predecessors:
+            pre.successors.remove(lane)
+        for suc in lane.successors:
+            suc.predecessors.remove(lane)
+        if lane.adjacent_left:
+            lane.adjacent_left.adjacent_right = None
+        if lane.adjacent_right:
+            lane.adjacent_right.adjacent_left = None
+
+        if lane in self.lanelinks:
+            self.lanelinks.remove(lane)
         for edge in self.edges:
-            for lane in edge.lanes:
-                if not lane.convert_to_polygon().shapely_object.is_valid:
-                    print('invalid lane')
-                    invalid_edges.append(edge)
+            if lane in edge.lanes:
+                edge.lanes.remove(lane)
 
-        return invalid_edges
+    def delete_invalid_lanes(self) -> None:
+        """
+        finds and deletes invalid lanes in the RoadGraph
 
-    def fix_invalid(self, invalid_edges):
-        for edge in invalid_edges:
-            continue
-       
+        :return: None
+        """
+        invalid_lanes = self.find_invalid_lanes()
+        for lane in invalid_lanes:
+            self.delete_lane(lane)
 
 class SublayeredGraph(Graph):
 
@@ -1791,3 +1812,9 @@ class SublayeredGraph(Graph):
         super().apply_traffic_lights()
         if self.apply_on_sublayer:
             self.sublayer_graph.apply_traffic_lights()
+
+    def delete_invalid_lanes(self) -> None:
+        super().delete_invalid_lanes()
+        if self.apply_on_sublayer:
+            self.sublayer_graph.delete_invalid_lanes()
+

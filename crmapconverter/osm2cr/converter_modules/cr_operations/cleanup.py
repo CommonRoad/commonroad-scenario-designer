@@ -212,7 +212,7 @@ def b_spline(ctr, max_nodes=10) -> np.array:
     return np.column_stack((out[0], out[1]))
 
 
-def smoothen_lane(l: Lanelet, min_dis=0.35, number_nodes=20) -> Lanelet:
+def smoothen_lane(l: Lanelet, min_dis=0.35, number_nodes=30) -> Lanelet:
     """
     Smoothens the vertices of a single lanelet
 

@@ -43,7 +43,7 @@ DOWNLOAD_COORDINATES = (48.262447, 11.657881)
 # include tunnels in result
 LOAD_TUNNELS = False
 # delete unconnected edges
-MAKE_CONTIGUOUS = False
+MAKE_CONTIGUOUS = True
 # split edges at corners (~90° between two waypoint segments)
 # this can help to model the course of roads on parking lots better
 SPLIT_AT_CORNER = True
@@ -155,6 +155,8 @@ COMPRESSION_THRESHOLD = 0.05
 EXPORT_IN_UTM = False
 # toggle filtering of negligible waypoints
 FILTER = True
+# delete invalid lanes before export
+DELETE_INVALID_LANES = True
 
 # Internal settings (these can be used to improve the conversion process for individual scenarios)
 # radius of the earth used for calculation in meters
