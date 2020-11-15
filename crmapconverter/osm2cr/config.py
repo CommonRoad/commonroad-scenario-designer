@@ -43,7 +43,7 @@ DOWNLOAD_COORDINATES = (48.262447, 11.657881)
 # include tunnels in result
 LOAD_TUNNELS = False
 # delete unconnected edges
-MAKE_CONTIGUOUS = True
+MAKE_CONTIGUOUS = False
 # split edges at corners (~90° between two waypoint segments)
 # this can help to model the course of roads on parking lots better
 SPLIT_AT_CORNER = True
@@ -162,7 +162,7 @@ DELETE_INVALID_LANES = True
 # radius of the earth used for calculation in meters
 EARTH_RADIUS = 6371000
 # delete short edges after cropping
-DELETE_SHORT_EDGES = True
+DELETE_SHORT_EDGES = False
 # distance between waypoints used internally in meters
 INTERPOLATION_DISTANCE_INTERNAL = 0.5
 # bezier parameter for interpolation (should be within [0, 0.5])
