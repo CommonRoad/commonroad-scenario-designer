@@ -1318,19 +1318,19 @@ class Graph:
         :return: None
         """
         for edge in edges:
-            self.edges -= {edge}
-            edge.node1.edges -= {edge}
-            edge.node2.edges -= {edge}
+            self.edges -= OrderedSet([edge])
+            edge.node1.edges -= OrderedSet([edge])
+            edge.node2.edges -= OrderedSet([edge])
 
             for lane in edge.lanes:
                 successors = lane.successors.copy()
                 predecessors = lane.predecessors.copy()
                 for successor in successors:
                     successor.predecessors |= predecessors
-                    successor.predecessors -= {lane}
+                    successor.predecessors -= OrderedSet([lane])
                 for predecessor in predecessors:
                     predecessor.successors |= successors
-                    predecessor.successors -= {lane}
+                    predecessor.successors -= OrderedSet([lane])
                 lane.successors = []
                 lane.predecessors = []
 
@@ -1722,15 +1722,6 @@ class Graph:
         :param lanes_to_delete: the lane to delete
         :return: None
         """
-        for pre in lane.predecessors:
-            pre.successors.remove(lane)
-        for suc in lane.successors:
-            suc.predecessors.remove(lane)
-        if lane.adjacent_left:
-            lane.adjacent_left.adjacent_right = None
-        if lane.adjacent_right:
-            lane.adjacent_right.adjacent_left = None
-
         if lane in self.lanelinks:
             self.lanelinks.remove(lane)
         for edge in self.edges:
@@ -1746,6 +1737,7 @@ class Graph:
         invalid_lanes = self.find_invalid_lanes()
         for lane in invalid_lanes:
             self.delete_lane(lane)
+        self.set_adjacents()
 
 class SublayeredGraph(Graph):
 
