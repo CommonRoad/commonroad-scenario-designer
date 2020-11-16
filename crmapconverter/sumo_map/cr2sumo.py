@@ -1316,6 +1316,8 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
             if 'netconvert' in e.filename:
                 warnings.warn("Is netconvert installed and added to PATH?")
             success = False
+        except ScenarioException:
+            raise
         except Exception as e:
             logging.error(e)
             success = False
@@ -1330,15 +1332,20 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         with open(net_file_path, 'r') as f:
             root = ET.parse(f)
 
+        def grouped_list(list, criterion):
+            return groupby(sorted(list, key=criterion), key=criterion)
+
         original_connection_map = {str(from_edge):
                                        {str(from_lane):
                                             {str(to_edge):
                                                  {str(to_lane):
                                                       [connection.getViaLaneID() for connection in to_lane_connections]
-                                                  for to_lane, to_lane_connections in groupby(to_edge_connections, key=lambda connection: connection.getToLane())}
-                                             for to_edge, to_edge_connections in groupby(from_lane_connections, key=lambda connection: connection.getTo())}
-                                        for from_lane, from_lane_connections in groupby(from_edge_connections, key=lambda connection: connection.getFromLane())}
-                                   for from_edge, from_edge_connections in groupby(self._new_connections, key=lambda connection: connection.getFrom())}
+                                                  for to_lane, to_lane_connections in grouped_list(to_edge_connections, lambda connection: connection.getToLane())}
+                                             for to_edge, to_edge_connections in grouped_list(from_lane_connections, lambda connection: connection.getTo())}
+                                        for from_lane, from_lane_connections in grouped_list(from_edge_connections, lambda connection: connection.getFromLane())}
+                                   for from_edge, from_edge_connections in grouped_list(self._new_connections, lambda connection: connection.getFrom())}
+
+        available_lane_ids = set()
 
         for connection_xml in root.findall("connection"):
             from_edge_id = connection_xml.get('from')
@@ -1347,8 +1354,12 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
             from_lane_id = connection_xml.get('fromLane')
             to_lane_id = connection_xml.get('toLane')
 
-            # Skip the connections from internal edges
-            if from_edge_id.startswith(':'):
+            # Add seen lane ids to the available set
+            available_lane_ids.update({f"{from_edge_id}_{from_lane_id}",
+                                       f"{to_edge_id}_{to_lane_id}"})
+
+            # Skip the connections from or to internal edges
+            if from_edge_id.startswith(':') or to_lane_id.startswith(':'):
                 continue
 
             # Skip the normal connection
@@ -1397,6 +1408,16 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                 self.lanelet_id2edge_lane_id[original_lanelet_ID] = new_internal_lane_ID
 
                 self.lanelet_id2lane_id[original_lanelet_ID] = new_internal_connection_ID
+
+        # available_lanelet_ids = {self.lane_id2lanelet_id[available_lane_id] for available_lane_id in available_lane_ids if available_lane_id in self.lane_id2lanelet_id}
+
+        for lanelet in self.lanelet_network.lanelets:
+            lanelet_id = lanelet.lanelet_id
+            lane_id = self.lanelet_id2lane_id[lanelet_id]
+            if lane_id not in available_lane_ids:
+                del self.lanelet_id2edge_id[lanelet_id]
+                del self.lanelet_id2edge_lane_id[lanelet_id]
+                del self.lanelet_id2lane_id[lanelet_id]
 
     def _read_junctions_from_net_file(self, filename: str):
         # parse junctions from .net.xml
@@ -1952,6 +1973,10 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                     vehicle_node.setAttribute("type", f"{sumo_veh_type}_static")
 
                     starting_lanelet_id = find_lanelet_id(obstacle.initial_state)
+                    if starting_lanelet_id not in self.lanelet_id2edge_lane_id:
+                        logging.warning(f"The used starting lanelet {starting_lanelet_id} of the static obstacle "
+                                                          f"{obstacle.obstacle_id} was not converted into the SUMO map, the obstacle will be skipped!")
+                        continue
                     depart_lane = self.lanelet_id2edge_lane_id[starting_lanelet_id]
                     vehicle_node.setAttribute("departLane", str(depart_lane))
 
@@ -2020,7 +2045,8 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                         lanelet_ids.append(last_lanelet.successor[0])
 
                     # Add successors until not ending in internal edge
-                    while str(self.lanelet_id2edge_id[lanelet_ids[-1]]).startswith(':'):
+                    while lanelet_ids[-1] in self.lanelet_id2edge_id and \
+                            str(self.lanelet_id2edge_id[lanelet_ids[-1]]).startswith(':'):
                         last_lanelet = scenario.lanelet_network.find_lanelet_by_id(lanelet_ids[-1])
                         lanelet_ids.append(last_lanelet.successor[0])
                         # _, all_successor_lanelet_ids = Lanelet.all_lanelets_by_merging_successors_from_lanelet(
@@ -2029,6 +2055,15 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                         #
                         # successor_lanelet_ids = all_successor_lanelet_ids[0]
                         # lanelet_ids.extend(successor_lanelet_ids[1:])
+
+                    # Remove all the not converted lanelets
+                    lanelet_ids_tmp = [lanelet_id for lanelet_id in lanelet_ids if lanelet_id in self.lanelet_id2edge_id]
+
+                    if len(lanelet_ids_tmp) == 0:
+                        logging.warning(f"None of the used lanelets of the vehicle {obstacle.obstacle_id} has been converted, original lanelet IDs was: {lanelet_ids}, the vehicle will be skipped")
+                        continue
+                    lanelet_ids = lanelet_ids_tmp
+
 
                     starting_lanelet_id = lanelet_ids[0]
                     depart_lane = self.lanelet_id2edge_lane_id[starting_lanelet_id]

@@ -1,4 +1,5 @@
 import os
+import warnings
 from copy import deepcopy
 from typing import Dict, List, Iterable, Set
 from xml.dom import minidom
@@ -11,6 +12,7 @@ from commonroad.scenario.lanelet import LaneletNetwork
 from crmapconverter.sumo_map.sumolib_net import Crossing
 from shapely.geometry import LineString
 from shapely.ops import unary_union
+from shapely.validation import explain_validity
 from crmapconverter.sumo_map.sumolib_net.edge import Edge
 from matplotlib.pyplot import plot as plt
 
