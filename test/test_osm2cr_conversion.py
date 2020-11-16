@@ -79,7 +79,7 @@ class TestOSM2CRScenarioBaseClass(unittest.TestCase):
     #         self.assertTrue(elements_equal(ground_truth, converted))
 
     def test_osm2cr_conversion_ids(self):
-        """Test if Scenario IDs are ordered correctly in ascending"""
+        """Test if Scenario IDs are correctly ordered ascending """
 
         parser = etree.XMLParser(remove_blank_text=True)
         converted = etree.parse(self.converted_path, parser=parser).getroot()
