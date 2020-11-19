@@ -12,6 +12,8 @@ from crmapconverter.sumo_map.cr2sumo import CR2SumoMapConverter
 from crmapconverter.sumo_map.config import SumoConfig
 
 from sumocr.interface.sumo_simulation import SumoSimulation
+
+
 # force test execution to be in specified order
 # unittest.TestLoader.sortTestMethodsUsing = lambda _, x, y: cmp(y, x)
 
@@ -56,7 +58,7 @@ class TestCR2SUMOScenarioBaseClass(unittest.TestCase):
         centroid = np.mean(np.concatenate([
             l.center_vertices for l in self.scenario.lanelet_network.lanelets
         ]),
-                           axis=0)
+            axis=0)
         self.scenario.translate_rotate(-centroid, 0)
         planning_problem.translate_rotate(-centroid, 0)
         self.config = SumoConfig.from_scenario_name(self.scenario_name)
@@ -96,9 +98,9 @@ class TestCR2SUMOScenarioBaseClass(unittest.TestCase):
             source=self.scenario.source,
             tags=self.scenario.tags,
             location=self.scenario.location).write_scenario_to_file(
-                os.path.join(os.path.dirname(self.path),
-                             self.scenario_name + ".simulated.xml"),
-                overwrite_existing_file=True)
+            os.path.join(os.path.dirname(self.path),
+                         self.scenario_name + ".simulated.xml"),
+            overwrite_existing_file=True)
         # check validity of written file
 
 
@@ -148,6 +150,16 @@ class TestSimulationAAH2(TestCR2SUMOScenarioBaseClass):
     __test__ = True
     cr_file_name = "DEU_AAH-2_19000_T-1"
     tls_lanelet_ids = [118]
+
+
+class TestDEU_Guetersloh(TestCR2SUMOScenarioBaseClass):
+    __test__ = True
+    cr_file_name = "DEU_Guetersloh-20_4_T-1"
+
+
+class TestDEU_Muc(TestCR2SUMOScenarioBaseClass):
+    __test__ = True
+    cr_file_name = "DEU_Muc-13_1_T-1"
 
 
 if __name__ == "__main__":

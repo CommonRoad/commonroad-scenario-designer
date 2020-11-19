@@ -1,6 +1,6 @@
 class NetError(Exception):
-    """ 
-    Exception raised if there is no net-file or multiple net-files. 
+    """
+    Exception raised if there is no net-file or multiple net-files.
 
     """
     def __init__(self, len):
@@ -11,3 +11,8 @@ class NetError(Exception):
             return repr('There is no net-file.')
         else:
             return repr('There are more than one net-files.')
+
+
+
+class ScenarioException(Exception):
+    pass
