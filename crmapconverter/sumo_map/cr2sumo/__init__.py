@@ -46,29 +46,31 @@ from commonroad.visualization.draw_dispatch_cr import draw_object
 from matplotlib import pyplot as plt
 from sumocr.maps.scenario_wrapper import AbstractScenarioWrapper
 
-from .config import (SumoConfig, lanelet_type_CR2SUMO,
-                     traffic_light_states_CR2SUMO,
-                     traffic_light_states_SUMO2CR)
-from .sumolib_net import (TLS, Connection, Crossing, Edge, Junction, Lane,
-                          Node, TLSProgram)
-from .sumolib_net.lane import SUMO_VEHICLE_CLASSES
-from .util import (_find_intersecting_edges,
-                   compute_max_curvature_from_polyline, vector_angle,
-                   edge_centroid, get_scenario_name_from_netfile,
-                   get_total_lane_length_from_netfile, max_lanelet_network_id,
-                   merge_crossings, min_cluster,
-                   remove_unreferenced_traffic_lights,
-                   write_ego_ids_to_rou_file, intersect_lanelets_line, orthogonal_ccw_vector)
+from crmapconverter.sumo_map.config import (SumoConfig, lanelet_type_CR2SUMO,
+                                            traffic_light_states_CR2SUMO,
+                                            traffic_light_states_SUMO2CR)
+from crmapconverter.sumo_map.sumolib_net import (TLS, Connection, Crossing, Edge, Junction, Lane,
+                                                 Node, TLSProgram)
+from crmapconverter.sumo_map.sumolib_net.lane import SUMO_VEHICLE_CLASSES
+from crmapconverter.sumo_map.errors import ScenarioException
+from crmapconverter.sumo_map.util import (_find_intersecting_edges,
+                                          compute_max_curvature_from_polyline, vector_angle,
+                                          edge_centroid, get_scenario_name_from_netfile,
+                                          get_total_lane_length_from_netfile, max_lanelet_network_id,
+                                          merge_crossings, min_cluster,
+                                          remove_unreferenced_traffic_lights,
+                                          write_ego_ids_to_rou_file, intersect_lanelets_line, orthogonal_ccw_vector)
 
 from sumocr.maps.scenario_wrapper import AbstractScenarioWrapper
 
-from .util import compute_max_curvature_from_polyline, _find_intersecting_edges, \
+from crmapconverter.sumo_map.util import compute_max_curvature_from_polyline, _find_intersecting_edges, \
     get_total_lane_length_from_netfile, write_ego_ids_to_rou_file, \
     remove_unreferenced_traffic_lights, max_lanelet_network_id
-from .config import SumoConfig, \
+from crmapconverter.sumo_map.config import SumoConfig, \
     VEHICLE_TYPE_CR2SUMO, traffic_light_states_CR2SUMO, traffic_light_states_SUMO2CR, \
     lanelet_type_CR2SUMO, \
     VEHICLE_NODE_TYPE_CR2SUMO
+from .crossings import get_intersection_clusters
 
 # This file is used as a template for the generated .sumo.cfg files
 DEFAULT_CFG_FILE = "default.sumo.cfg"
@@ -630,13 +632,12 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         self.merged_dictionary = {}
         self.replaced_nodes = defaultdict(list)
 
-        # merged node clustering
         clusters: Dict[int, Set[Node]] = defaultdict(set)
         next_cluster_id = 0
         # crossings are additional info for a cluster
-        clusters_crossing: Dict[int, Crossing] = dict()
-        # Merge Lanelets lying in the same CR intersection
-        # merging based on specified Lanelets in intersection
+        clusters_crossing: Dict[int, List[Crossing]] = dict()
+
+        # INTERSECTION BASED CLUSTERING
         for intersection in self.lanelet_network.intersections:
             intersecting_lanelets = {
                 lanelet_id
@@ -646,19 +647,19 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                                   | incoming.successors_straight
             }
             intersecting = intersecting_lanelets | intersection.crossings
-            edges = {
+            intersecting_edges = {
                 str(self.lanelet_id2edge_id[step])
                 for step in intersecting
             }
             merged_nodes = {
                 node
-                for e_id in edges for node in
+                for e_id in intersecting_edges for node in
                 [self.edges[e_id].getFromNode(), self.edges[e_id].getToNode()]
             }
             clusters[next_cluster_id] = merged_nodes
 
             # generate partial Crossings
-            crossings = []
+            crossings: List[Crossing] = []
             for lanelet_id in intersection.crossings:
                 lanelet = self.lanelet_network.find_lanelet_by_id(lanelet_id)
                 crossings.append(
@@ -668,11 +669,10 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                              width=3.0))
             if crossings:
                 clusters_crossing[next_cluster_id] = crossings
-
             next_cluster_id += 1
 
         # Expand merged clusters by all lanelets intersecting each other.
-        # merging based on Lanelets intersecting each other
+        # merging based on Lanelets intersecting
         intersecting_pairs = _find_intersecting_edges(self.lanes_dict,
                                                       self.lanelet_network)
         intersecting_edges = defaultdict(set)
@@ -2310,6 +2310,3 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
             f.write(reparsed.toprettyxml(indent="\t", newl="\n"))
 
         return sumo_cfg_file
-
-    class ScenarioException(Exception):
-        pass
