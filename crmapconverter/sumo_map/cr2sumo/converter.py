@@ -666,8 +666,9 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
             intersecting_edges[pair[1]].add(pair[0])
 
         explored_nodes = set()
-        for node_id, current_node in self.nodes.items():
-            if current_node in explored_nodes:
+        for current_node in self.nodes.values():
+            clusters_flat = {n for cluster in clusters.values() for n in cluster}
+            if current_node in explored_nodes | clusters_flat:
                 continue
             queue = [current_node]
             try:
@@ -693,14 +694,14 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
 
                 incomings = {e.getID() for e in expanded_node.getIncoming()}
                 outgoings = {e.getID() for e in expanded_node.getOutgoing()}
-                clusters_flat = {n for cluster in clusters.values() for n in cluster}
                 neighbor_nodes = {node
                                   for edge_id in incomings | outgoings
                                   for intersecting in intersecting_edges[edge_id]
                                   for node in [self.edges[str(intersecting)].getFromNode(),
                                                self.edges[str(intersecting)].getToNode()]}
                 neighbor_nodes -= clusters_flat
-                queue += list(neighbor_nodes - current_cluster)
+                queue += list(neighbor_nodes)
+                current_cluster |= neighbor_nodes
 
             clusters[current_cluster_id] = current_cluster
 
@@ -1522,8 +1523,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
 
         logging.info("Merging Intermediate Files")
         self.write_intermediate_files(output_path)
-        conversion_possible = self.merge_intermediate_files(output_path,
-                                                            cleanup=False)
+        conversion_possible = self.merge_intermediate_files(output_path)
         if not conversion_possible:
             logging.error("Error converting map, see above for details")
             return False
@@ -1545,7 +1545,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
 
         logging.info("Merging Intermediate Files")
         self.write_intermediate_files(output_path)
-        conversion_possible = self.merge_intermediate_files(output_path, cleanup=True,
+        conversion_possible = self.merge_intermediate_files(output_path,
                                                             update_internal_IDs=True)
         if not conversion_possible:
             logging.error("Error converting map, see above for details")
