@@ -10,11 +10,12 @@ from commonroad.geometry.shape import Polygon
 from commonroad.scenario.lanelet import Lanelet
 from commonroad.scenario.lanelet import LaneletNetwork
 from crmapconverter.sumo_map.sumolib_net import Crossing
+from commonroad.visualization.plot_helper import draw_object
 from shapely.geometry import LineString
 from shapely.ops import unary_union
 from shapely.validation import explain_validity
 from crmapconverter.sumo_map.sumolib_net.edge import Edge
-from matplotlib.pyplot import plot as plt
+import matplotlib.pyplot as plt
 
 from .config import EGO_ID_START, SumoConfig
 

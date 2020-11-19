@@ -104,62 +104,63 @@ class TestCR2SUMOScenarioBaseClass(unittest.TestCase):
         # check validity of written file
 
 
-# class TestConversionComplexIntersection(TestCR2SUMOScenarioBaseClass):
-#     """Test conversion of a CR scenario to SUMO for a complex intersection"""
-#     __test__ = True
-#     cr_file_name = 'USA_Peach-3_3_T-1'
-#     # tls_lanelet_ids = [43513]
-#
-#
-# class TestConversionGarching(TestCR2SUMOScenarioBaseClass):
-#     """Test conversion of a CR scenario to SUMO for an intersection in garching with pedestrian path ways"""
-#     __test__ = True
-#     cr_file_name = "garching"
-#     tls_lanelet_ids = [270]
-#
-#
-# class TestConversionIntersectAndCrossing(TestCR2SUMOScenarioBaseClass):
-#     """Test conversion of a CR scenario to SUMO for a simple intersection crossing a pedestrian path way"""
-#     __test__ = True
-#     cr_file_name = "intersect_and_crossing"
-#     tls_lanelet_ids = [56]
-#
-#
-# class TestConversionMergingLanelets(TestCR2SUMOScenarioBaseClass):
-#     """Test conversion of a CR scenario to SUMO for merging lanelets"""
-#     __test__ = True
-#     cr_file_name = "merging_lanelets_utm"
-#     tls_lanelet_ids = [107]
-#
-#
-# class TestConversionUrban1(TestCR2SUMOScenarioBaseClass):
-#     """Test conversion of a CR scenario to SUMO for a simple crossing"""
-#     __test__ = True
-#     cr_file_name = "urban-1_lanelets_utm"
-#     tls_lanelet_ids = [105]
-#
-#
-# class TestSimulationAAH1(TestCR2SUMOScenarioBaseClass):
-#     __test__ = False
-#     cr_file_name = "DEU_AAH-1_8007_T-1"
-#     tls_lanelet_ids = [154]
-#
-#
-# class TestSimulationAAH2(TestCR2SUMOScenarioBaseClass):
-#     """Test conversion & simulation of a CR scenario to SUMO for a complex crossing"""
-#     __test__ = True
-#     cr_file_name = "DEU_AAH-2_19000_T-1"
-#     tls_lanelet_ids = [118]
+class TestConversionComplexIntersection(TestCR2SUMOScenarioBaseClass):
+    """Test conversion of a CR scenario to SUMO for a complex intersection"""
+    __test__ = True
+    cr_file_name = 'USA_Peach-3_3_T-1'
+    # tls_lanelet_ids = [43513]
+
+
+class TestConversionGarching(TestCR2SUMOScenarioBaseClass):
+    """Test conversion of a CR scenario to SUMO for an intersection in garching with pedestrian path ways"""
+    __test__ = True
+    cr_file_name = "garching"
+    tls_lanelet_ids = [270]
+
+
+class TestConversionIntersectAndCrossing(TestCR2SUMOScenarioBaseClass):
+    """Test conversion of a CR scenario to SUMO for a simple intersection crossing a pedestrian path way"""
+    __test__ = True
+    cr_file_name = "intersect_and_crossing"
+    tls_lanelet_ids = [56]
+
+
+class TestConversionMergingLanelets(TestCR2SUMOScenarioBaseClass):
+    """Test conversion of a CR scenario to SUMO for merging lanelets"""
+    __test__ = True
+    cr_file_name = "merging_lanelets_utm"
+    tls_lanelet_ids = [107]
+
+
+class TestConversionUrban1(TestCR2SUMOScenarioBaseClass):
+    """Test conversion of a CR scenario to SUMO for a simple crossing"""
+    __test__ = True
+    cr_file_name = "urban-1_lanelets_utm"
+    tls_lanelet_ids = [105]
+
+
+class TestSimulationAAH1(TestCR2SUMOScenarioBaseClass):
+    __test__ = False
+    cr_file_name = "DEU_AAH-1_8007_T-1"
+    tls_lanelet_ids = [154]
+
+
+class TestSimulationAAH2(TestCR2SUMOScenarioBaseClass):
+    """Test conversion & simulation of a CR scenario to SUMO for a complex crossing"""
+    __test__ = True
+    cr_file_name = "DEU_AAH-2_19000_T-1"
+    tls_lanelet_ids = [118]
 
 
 class TestDEU_Guetersloh(TestCR2SUMOScenarioBaseClass):
     __test__ = True
-    cr_file_name = "../xml_files/DEU_Guetersloh-20_4_T-1"
+    cr_file_name = "DEU_Guetersloh-20_4_T-1"
 
 
 class TestDEU_Muc(TestCR2SUMOScenarioBaseClass):
     __test__ = True
-    cr_file_name = "../xml_files/DEU_Muc-13_1_T-1"
+    cr_file_name = "DEU_Muc-13_1_T-1"
+
 
 
 if __name__ == "__main__":
