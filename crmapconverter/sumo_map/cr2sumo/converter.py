@@ -16,7 +16,6 @@ from xml.etree import cElementTree as ET
 
 import numpy as np
 import sumolib
-
 from commonroad.prediction.prediction import TrajectoryPrediction
 from commonroad.scenario.trajectory import State
 
@@ -31,11 +30,6 @@ except ImportError:
 
 from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.common.util import Interval
-from commonroad.scenario.lanelet import Lanelet, LaneletNetwork
-from commonroad.scenario.traffic_sign import (SupportedTrafficSignCountry,
-                                              TrafficLight,
-                                              TrafficLightCycleElement,
-                                              TrafficLightDirection)
 from commonroad.scenario.lanelet import LaneletNetwork, Lanelet
 from commonroad.scenario.obstacle import ObstacleRole
 from commonroad.scenario.scenario import Scenario
@@ -44,22 +38,14 @@ from commonroad.scenario.traffic_sign import SupportedTrafficSignCountry, Traffi
 from commonroad.scenario.traffic_sign_interpreter import TrafficSigInterpreter
 from commonroad.visualization.draw_dispatch_cr import draw_object
 from matplotlib import pyplot as plt
-from sumocr.maps.scenario_wrapper import AbstractScenarioWrapper
 
-from crmapconverter.sumo_map.config import (SumoConfig, lanelet_type_CR2SUMO,
-                                            traffic_light_states_CR2SUMO,
-                                            traffic_light_states_SUMO2CR)
 from crmapconverter.sumo_map.sumolib_net import (TLS, Connection, Crossing, Edge, Junction, Lane,
                                                  Node, TLSProgram)
 from crmapconverter.sumo_map.sumolib_net.lane import SUMO_VEHICLE_CLASSES
 from crmapconverter.sumo_map.errors import ScenarioException
-from crmapconverter.sumo_map.util import (_find_intersecting_edges,
-                                          compute_max_curvature_from_polyline, vector_angle,
-                                          edge_centroid, get_scenario_name_from_netfile,
-                                          get_total_lane_length_from_netfile, max_lanelet_network_id,
-                                          merge_crossings, min_cluster,
-                                          remove_unreferenced_traffic_lights,
-                                          write_ego_ids_to_rou_file, intersect_lanelets_line, orthogonal_ccw_vector)
+from crmapconverter.sumo_map.util import (vector_angle,
+                                          edge_centroid, merge_crossings, min_cluster,
+                                          intersect_lanelets_line, orthogonal_ccw_vector)
 
 from sumocr.maps.scenario_wrapper import AbstractScenarioWrapper
 
@@ -70,7 +56,6 @@ from crmapconverter.sumo_map.config import SumoConfig, \
     VEHICLE_TYPE_CR2SUMO, traffic_light_states_CR2SUMO, traffic_light_states_SUMO2CR, \
     lanelet_type_CR2SUMO, \
     VEHICLE_NODE_TYPE_CR2SUMO
-from .crossings import get_intersection_clusters
 
 # This file is used as a template for the generated .sumo.cfg files
 DEFAULT_CFG_FILE = "default.sumo.cfg"
