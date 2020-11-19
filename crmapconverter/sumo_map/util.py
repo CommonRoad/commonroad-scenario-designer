@@ -224,7 +224,7 @@ def _erode_lanelets(lanelet_network: LaneletNetwork,
 
 def _find_intersecting_edges(
     edges_dict: Dict[int, List[int]],
-    lanelet_network: LaneletNetwork) -> List[List[int]]:
+    lanelet_network: LaneletNetwork, visualize=False) -> List[List[int]]:
     """
 
     :param lanelet_network:
@@ -233,11 +233,12 @@ def _find_intersecting_edges(
     eroded_lanelet_network = _erode_lanelets(lanelet_network)
 
     # visualize eroded lanelets
-    # plt.figure(figsize=(25, 25))
-    # draw_object(eroded_lanelet_network.lanelets)
-    # plt.axis('equal')
-    # plt.autoscale()
-    # plt.show()
+    if visualize:
+        plt.figure(figsize=(25, 25))
+        draw_object(eroded_lanelet_network.lanelets)
+        plt.axis('equal')
+        plt.autoscale()
+        plt.show()
 
     polygons_dict = {}
     edge_shapes_dict = {}

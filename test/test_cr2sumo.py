@@ -162,6 +162,5 @@ class TestDEU_Muc(TestCR2SUMOScenarioBaseClass):
     cr_file_name = "DEU_Muc-13_1_T-1"
 
 
-
 if __name__ == "__main__":
     unittest.main()
