@@ -659,7 +659,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         # Expand merged clusters by all lanelets intersecting each other.
         # merging based on Lanelets intersecting
         intersecting_pairs = _find_intersecting_edges(self.lanes_dict,
-                                                      self.lanelet_network)
+                                                      self.lanelet_network, visualize=True)
         intersecting_edges = defaultdict(set)
         for pair in intersecting_pairs:
             intersecting_edges[pair[0]].add(pair[1])
