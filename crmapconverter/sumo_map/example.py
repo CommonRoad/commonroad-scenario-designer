@@ -37,11 +37,11 @@ traffic_light_system_generated = wrapper.auto_generate_traffic_light_system(tls_
 print(f"Generated Traffic Light System at {tls_lanelet_id}, {traffic_light_system_generated}")
 
 # draw scenario after traffic light generation
-# plt.figure(figsize=(25, 25))
-# draw_object(wrapper.lanelet_network)
-# plt.axis('equal')
-# plt.autoscale()
-# plt.show()
+plt.figure(figsize=(25, 25))
+draw_object(wrapper.lanelet_network)
+plt.axis('equal')
+plt.autoscale()
+plt.show()
 
 # write generated traffic lights back to commonroad file
 scenario.lanelet_network = wrapper.lanelet_network
@@ -79,4 +79,4 @@ CommonRoadFileWriter(simulated_scenario,
                          overwrite_existing_file=True)
 
 print("creating video (this may take some time)")
-# create_video(simulation, 1, config.simulation_steps, output_folder)
+create_video(simulation, 1, config.simulation_steps, output_folder)

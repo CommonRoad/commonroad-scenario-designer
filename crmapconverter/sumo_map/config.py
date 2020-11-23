@@ -17,13 +17,52 @@ EGO_ID_START = 'egoVehicle'
 ID_DICT = {'obstacleVehicle': 3, 'egoVehicle': 4}
 
 # sumo type to CommonRoad obstacle type
-TYPE_MAPPING = {
+VEHICLE_TYPE_SUMO2CR = {
     'DEFAULT_VEHTYPE': ObstacleType.CAR,
     'passenger': ObstacleType.CAR,
     'truck': ObstacleType.TRUCK,
     'bus': ObstacleType.BUS,
     'bicycle': ObstacleType.BICYCLE,
     'pedestrian': ObstacleType.PEDESTRIAN
+}
+
+# CommonRoad obstacle type to sumo type
+VEHICLE_TYPE_CR2SUMO = {
+    ObstacleType.UNKNOWN : "passenger",
+    ObstacleType.CAR : "passenger",
+    ObstacleType.TRUCK : "truck",
+    ObstacleType.BUS : "bus",
+    ObstacleType.BICYCLE : "bicycle",
+    ObstacleType.PEDESTRIAN : "pedestrian",
+    ObstacleType.PRIORITY_VEHICLE : "vip",
+    ObstacleType.PARKED_VEHICLE : "passenger",
+    ObstacleType.CONSTRUCTION_ZONE : "passenger",
+    ObstacleType.TRAIN : "rail",
+    ObstacleType.ROAD_BOUNDARY : "custom2",
+    ObstacleType.MOTORCYCLE : "motorcycle",
+    ObstacleType.TAXI : "taxi",
+    ObstacleType.BUILDING : "custom2",
+    ObstacleType.PILLAR : "custom2",
+    ObstacleType.MEDIAN_STRIP : "custom1"
+}
+
+VEHICLE_NODE_TYPE_CR2SUMO = {
+    ObstacleType.UNKNOWN: "vehicle",
+    ObstacleType.CAR: "vehicle",
+    ObstacleType.TRUCK: "vehicle",
+    ObstacleType.BUS: "vehicle",
+    ObstacleType.BICYCLE: "vehicle",
+    ObstacleType.PEDESTRIAN: "pedestrian",
+    ObstacleType.PRIORITY_VEHICLE: "vehicle",
+    ObstacleType.PARKED_VEHICLE: "vehicle",
+    ObstacleType.CONSTRUCTION_ZONE: "vehicle",
+    ObstacleType.TRAIN: "vehicle",
+    ObstacleType.ROAD_BOUNDARY: "vehicle",
+    ObstacleType.MOTORCYCLE: "vehicle",
+    ObstacleType.TAXI: "vehicle",
+    ObstacleType.BUILDING: "vehicle",
+    ObstacleType.PILLAR: "vehicle",
+    ObstacleType.MEDIAN_STRIP: "vehicle"
 }
 
 # Mapping from CR TrafficLightStates to SUMO Traffic Light states
