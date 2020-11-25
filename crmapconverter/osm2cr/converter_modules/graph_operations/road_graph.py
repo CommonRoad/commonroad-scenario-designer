@@ -741,81 +741,76 @@ class GraphTrafficSign:
     def to_traffic_sign_cr(self):
         elements = []
         position = None
-        values = []
-
-        # map OSM sign to country sign
-        # TODO Currently only Germany supported. Add more locations.
-        traffic_sign_map = {
-            'maxspeed': TrafficSignIDGermany.MAX_SPEED,
-            'overtaking': TrafficSignIDGermany.NO_OVERTAKING_START,
-            'city_limit': TrafficSignIDGermany.TOWN_SIGN,
-            'give_way': TrafficSignIDGermany.YIELD,
-            'stop': TrafficSignIDGermany.STOP,
-            '260': TrafficSignIDGermany.BAN_CAR_TRUCK_BUS_MOTORCYCLE,
-            'unknown': TrafficSignIDGermany.UNKNOWN
-        }
 
         # get position
         if self.node is not None:
-            position_point = self.node.get_cooridnates()
+            position = self.node.get_cooridnates()
 
         # extract traffic sign values
         # maxspeed
         if 'maxspeed' in self.sign:
-            sign_id = traffic_sign_map['maxspeed']
+            sign_id = TrafficSignIDGermany.MAX_SPEED
             value = self.sign['maxspeed']
             elements.append(TrafficSignElement(sign_id, [value]))
 
         # if traffic sign
         elif 'traffic_sign' in self.sign:
 
-            for sign_data in str(self.sign['traffic_sign']).split(';'):
-                country = sign_data[:2]
-                sign = sign_data[3:]
+            for unrelated_sign in str(self.sign['traffic_sign']).split(';'):
+                country = unrelated_sign[:2]
+                sign_data = unrelated_sign[3:]
 
-                # speed limit sign
-                if sign.startswith('274'):
-                    max_speed = -99.0
-                    sign_id = traffic_sign_map['maxspeed']
-                    if sign[4] == '[':
-                        max_speed = float(sign[sign.find("[") + 1:sign.find("]")])
-                    elif sign[4] == '-':
-                        max_speed = float(sign[5:])
+                for sign in sign_data.split(','):
 
-                    # speed limit zone
-                    elif sign[3:5] == '.1':
-                        max_speed = float(sign[6:])
+                    # speed limit sign
+                    if sign.startswith('274'):
+                        zone = False
+                        max_speed = -99.0
+                        if sign[4] == '[':
+                            max_speed = float(sign[sign.find("[") + 1:sign.find("]")])
+                        elif sign[4] == '-':
+                            max_speed = float(sign[5:])
 
-                    # debugging
-                    # if max_speed == -99:
-                    #     print(sign)
-                    # else:
-                    #     print(max_speed)
+                        # speed limit zone
+                        elif sign[3:5] == '.1':
+                            zone = True
+                            if sign[6] == '-':
+                                max_speed = float(sign[6:])
+                            else:
+                                max_speed = float(sign[sign.find("[") + 1:sign.find("]")])
 
-                    # convert km/h to m/s and add to traffic sign elements
-                    if max_speed != -99:
-                        max_speed /= 3.6
-                        elements.append(TrafficSignElement(sign_id, [max_speed]))
+                        # debugging
+                        # if max_speed == -99:
+                        #     print(sign)
+                        # else:
+                        #     print(max_speed)
 
-                # regular traffic sign
-                else:
-                    found_sign = False
-                    for traffic_sign in traffic_sign_map:
-                        if traffic_sign in str(sign):
-                            sign_id = traffic_sign_map[traffic_sign]
-                            value = ' '  # TODO add specific values for some traffic signs
-                            elements.append(TrafficSignElement(sign_id, [value]))
-                            found_sign = True
-                            break
+                        if max_speed != -99:
+                            if not zone:
+                                # convert km/h to m/s and add to traffic sign elements
+                                max_speed /= 3.6
+                                elements.append(TrafficSignElement(TrafficSignIDGermany.MAX_SPEED, [max_speed]))
+                            else:
+                                elements.append(TrafficSignElement(TrafficSignIDGermany.MAX_SPEED_ZONE_START, [max_speed]))
 
-                    # unknown traffic sign
-                    if not found_sign:
-                        print("Unknown traffic sign " + str(sign_data) + " found")
-                        #sign_id = traffic_sign_map['unknown']
-                        #value = 'unknown sign'
-                        #elements.append(TrafficSignElement(sign_id, [value]))
+                    # city limit edge case
+                    elif sign == 'y_limit':
+                        elements.append(TrafficSignElement(TrafficSignIDGermany.TOWN_SIGN, [' ']))
 
-        # determine if virtual
+                    # regular traffic sign
+                    else:
+                        try:
+                            traffic_sign_de = TrafficSignIDGermany(sign)
+                            #additional_value = float(sign[sign.find("[") + 1:sign.find("]")])
+                            elements.append(TrafficSignElement(traffic_sign_de, [' ']))
+                        # unknown traffic sign
+                        except ValueError:
+                            print("Unknown traffic sign in" +str(sign_data) + " found")
+                            #sign_id = traffic_sign_map['unknown']
+                            #value = 'unknown sign'
+                            #elements.append(TrafficSignElement(sign_id, [value]))
+
+
         virtual = False
         if 'virtual' in self.sign:
             if not self.sign['virtual']:
