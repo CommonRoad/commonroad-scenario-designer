@@ -801,15 +801,17 @@ class GraphTrafficSign:
                     else:
                         try:
                             traffic_sign_de = TrafficSignIDGermany(sign)
-                            #additional_value = float(sign[sign.find("[") + 1:sign.find("]")])
-                            elements.append(TrafficSignElement(traffic_sign_de, [' ']))
+                            value = ' '
+                            # add a value if found in sign
+                            if '[' in sign and ']' in sign:
+                                value = float(sign[sign.find('[') + 1:sign.find(']')])
+                            elements.append(TrafficSignElement(traffic_sign_de, [value]))
                         # unknown traffic sign
                         except ValueError:
                             print("Unknown traffic sign in" +str(sign_data) + " found")
                             #sign_id = traffic_sign_map['unknown']
                             #value = 'unknown sign'
                             #elements.append(TrafficSignElement(sign_id, [value]))
-
 
         virtual = False
         if 'virtual' in self.sign:
