@@ -410,7 +410,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                 # create new node
                 coords = self._compute_node_coords(lanelets, index=index)
                 self.nodes[self.node_id_next] = Node(self.node_id_next,
-                                                     node_type, coords, [])
+                                                     node_type, coords, [], right_of_way="edgePriority")
                 # @REFERENCE_1
                 if node_type == "from":
                     self._start_nodes[edge_id] = self.node_id_next
@@ -426,7 +426,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
             # dead end
             coords = self._compute_node_coords(lanelets, index=index)
             self.nodes[self.node_id_next] = Node(self.node_id_next, node_type,
-                                                 coords, [])
+                                                 coords, [], right_of_way="edgePriority")
             if node_type == "from":
                 self._start_nodes[edge_id] = self.node_id_next
             else:
@@ -632,11 +632,13 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
             crossings: List[Crossing] = []
             for lanelet_id in intersection.crossings:
                 lanelet = self.lanelet_network.find_lanelet_by_id(lanelet_id)
+                avg_width = np.mean(np.linalg.norm(lanelet.left_vertices - lanelet.right_vertices, axis=1))
                 crossings.append(
                     Crossing(node=None,
                              edges=None,
+                             priority=False,
                              shape=lanelet.center_vertices,
-                             width=3.0))
+                             width=float(avg_width)))
             if crossings:
                 clusters_crossing[next_cluster_id] = crossings
             next_cluster_id += 1
@@ -862,6 +864,11 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
 
             if not non_pedestrian_edges:
                 continue
+
+            # set any nodes referencing a crossing to "priority_stop"
+            # this forces lanes with low priority (e.g. the crossing)
+            # to wait for lanes with priority (cars)
+            merged_node.setType("priority_stop")
 
             clusters = min_cluster(
                 non_pedestrian_edges, lambda dist: dist < 4,
