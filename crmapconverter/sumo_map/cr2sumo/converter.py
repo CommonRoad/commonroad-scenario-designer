@@ -260,16 +260,6 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
             lanelet.lanelet_id: lanelet.center_vertices
             for lanelet in self.lanelet_network.lanelets
         }
-
-        # plt.figure(figsize=[25,25])
-        # draw_object(self.lanelet_network, draw_params={'lanelet':{'show_label':True}, 'lanelet_network': {
-        #     'intersection': {
-        #         'draw_intersections': True}}})
-        # plt.draw()
-        # plt.autoscale()
-        # plt.ion()
-        # plt.axis('equal')
-        # plt.pause(0.001)
         for lanelet in self.lanelet_network.lanelets:
             edge_id = lanelet.lanelet_id
             successors = set(lanelet.successor)
@@ -486,17 +476,12 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                 shape = self._points_dict.get(lanelet_id)
                 lanelet = self.lanelet_network.find_lanelet_by_id(lanelet_id)
                 lanelet_width = self._calculate_lanelet_width_from_cr(lanelet)
-                max_curvature = compute_max_curvature_from_polyline(shape)
-
-                disallow = set(self._filter_disallowed_vehicle_classes(
-                    max_curvature, lanelet_width, lanelet_id))
 
                 allow = {v_class for l_type in lanelet.lanelet_type
                          for v_class in lanelet_type_CR2SUMO[l_type]}
                 # if lanelet_type is unspecified use a default (URBAN)
-                if not lanelet.lanelet_type:
+                if not allow:
                     allow = {*lanelet_type_CR2SUMO[LaneletType.URBAN]}
-                allow -= disallow
 
                 lane = Lane(edge,
                             speed_limit,
@@ -698,30 +683,14 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                                   for edge_id in incomings | outgoings
                                   for intersecting in intersecting_edges[edge_id]
                                   for node in [self.edges[str(intersecting)].getFromNode(),
-                                               self.edges[str(intersecting)].getToNode()]
-                                  # only consider internal nodes (i.e. with incoming and outgoing) to be merged
-                                  # otherwise boundary nodes are merged, changing the overall layout
-                                  if node.getIncoming() and node.getOutgoing()}
+                                               self.edges[str(intersecting)].getToNode()]}
                 neighbor_nodes -= clusters_flat
                 queue += list(neighbor_nodes)
                 current_cluster |= neighbor_nodes
 
             clusters[current_cluster_id] = current_cluster
 
-        # filter clusters: Only merge if we found more than one node to merge
-        # tmp_clusters: Dict[int, Set[Node]] = dict()
-        # for cluster_id, cluster in clusters.items():
-        #     # filter clusters with <= 1 Node in them
-        #     if len(cluster) <= 1:
-        #         continue
-        #     no_incoming = next((node for node in cluster if not node.getIncoming()), None)
-        #     no_incoming = {no_incoming} if no_incoming else set()
-        #     no_outgoing = next((node for node in cluster if not node.getOutgoing()), None)
-        #     no_outgoing = {no_outgoing} if no_outgoing else set()
-        #     cluster_internal = {node for node in cluster if node.getIncoming() and node.getOutgoing()}
-        #     tmp_clusters[cluster_id] = cluster_internal | no_incoming | no_outgoing
-
-        # clusters = tmp_clusters
+        # filter clusters with only one node
         clusters = {
             cluster_id: cluster
             for cluster_id, cluster in clusters.items() if len(cluster) > 1
@@ -729,25 +698,39 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
 
         for cluster_id, cluster in clusters.items():
             logging.info(f"Merging nodes: {[n.getID() for n in cluster]}")
-            # create new merged node
-            merged_node = Node(id=self.node_id_next,
-                               node_type='priority',
-                               coord=self._calculate_centroid(cluster),
-                               incLanes=[])
-            self.node_id_next += 1
-            self.new_nodes[merged_node.getID()] = merged_node
-            cluster = {n.getID() for n in cluster}
-            for old_node in cluster:
-                assert not old_node in self.replaced_nodes
-                self.replaced_nodes[old_node].append(merged_node.getID())
-            self.merged_dictionary[merged_node.getID()] = cluster
 
-            # provide full definition of every crossing. Then make globally available
-            if cluster_id in clusters_crossing:
-                crossings = clusters_crossing[cluster_id]
-                for crossing in crossings:
-                    crossing.node = merged_node
-                self._crossings[merged_node.getID()] = crossings
+            # create new merged node
+            def merge_cluster(cluster: Set[Node]) -> Node:
+                merged_node = Node(id=self.node_id_next,
+                                   node_type='priority',
+                                   coord=self._calculate_centroid(cluster),
+                                   incLanes=[])
+                self.node_id_next += 1
+                self.new_nodes[merged_node.getID()] = merged_node
+                cluster_ids = {n.getID() for n in cluster}
+                for old_node_id in cluster_ids:
+                    assert old_node_id not in self.replaced_nodes
+                    self.replaced_nodes[old_node_id].append(merged_node.getID())
+                self.merged_dictionary[merged_node.getID()] = cluster_ids
+                return merged_node
+
+            # clustered nodes at the border of a network need to be merged
+            # separately, to junctions at network boundaries are converted correctly
+            no_outgoing = {node for node in cluster if not node.getOutgoing()}
+            no_incoming = {node for node in cluster if not node.getIncoming()}
+            inner_cluster = cluster - no_outgoing - no_incoming
+            if inner_cluster:
+                merged_node = merge_cluster(inner_cluster)
+                # provide full definition of every crossing. Then make globally available
+                if cluster_id in clusters_crossing:
+                    crossings = clusters_crossing[cluster_id]
+                    for crossing in crossings:
+                        crossing.node = merged_node
+                    self._crossings[merged_node.getID()] = crossings
+            if no_outgoing:
+                merge_cluster(no_outgoing)
+            if no_incoming:
+                merge_cluster(no_incoming)
 
         replace_nodes_old = deepcopy(self.replaced_nodes)
         explored_nodes_all = set()
@@ -783,8 +766,6 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                 explored_nodes_all |= merged_nodes
                 for merged_node in merged_nodes:
                     self.replaced_nodes[merged_node] = [new_node]
-
-        self.display_network(list(self.nodes.values()), list(self.edges.values()))
 
     def _filter_edges(self):
         """
@@ -1470,64 +1451,6 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
 
         tree.write(output, encoding='utf-8', xml_declaration=True)
 
-    def debug_lanelet_net(self,
-                          with_lane_id=True,
-                          with_succ_pred=False,
-                          with_adj=False,
-                          with_speed=False,
-                          figure_title=None):
-        """
-        Debug function for showing input CommonRoad map to be converted
-        :param with_lane_id: specifies if printing the lane id or not
-        :param with_succ_pred: specifies if showing the predecessors or not
-        :param with_adj: specifies if showing the adjacents edges or not
-        :param with_speed: specifies if showing the speed limit or not
-        :param figure_title: specifies the title of the figure
-        :return: nothing
-        """
-        plt.figure(figsize=(25, 25))
-        if figure_title is not None:
-            plt.title(figure_title)
-        plt.gca().set_aspect('equal')
-        draw_object(self.lanelet_network)
-
-        # add annotations
-        for l in self.lanelet_network.lanelets:
-            # assure that text for two different lanelets starting on same position is placed differently
-            noise = random.random()
-            info = ''
-            if with_lane_id:
-                id = 'id: ' + str(l.lanelet_id)
-                centroid = np.array(
-                    l.convert_to_polygon().shapely_object.centroid)
-                plt.text(centroid[0],
-                         centroid[1],
-                         id,
-                         zorder=100,
-                         size=8,
-                         color='r',
-                         verticalalignment='top')
-            if with_succ_pred:
-                info = info + '\nsucc: ' + str(l.successor) + ' pred: ' + str(
-                    l.predecessor)
-            if with_adj:
-                info = info + ' \nadj_l: ' + str(
-                    l.adj_left) + '; adj_l_same_dir: ' + str(
-                    l.adj_left_same_direction)
-                info = info + ' \nadj_r: ' + str(
-                    l.adj_right) + '; adj_r_same_dir: ' + str(
-                    l.adj_right_same_direction)
-            if with_speed:
-                info = info + '\nspeed limit: ' + str(l.speed_limit)
-            plt.plot(l.center_vertices[0, 0], l.center_vertices[0, 1], 'x')
-            plt.text(l.center_vertices[0, 0] + noise,
-                     l.center_vertices[0, 1] + noise,
-                     info,
-                     zorder=100,
-                     size=8,
-                     verticalalignment='top')
-        plt.show()
-
     def convert_to_net_file(self, output_folder: str) -> bool:
         """
         Convert the Commonroad scenario to a net.xml file, specified by the absolute  path output_file.
@@ -1539,10 +1462,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         output_path = os.path.join(output_folder,
                                    self.conf.scenario_name + '.net.xml')
         logging.info("Converting to SUMO Map")
-        # draw network
         self._convert_map()
-
-        self.display_network(list(self.new_nodes.values()), list(self.new_edges.values()))
 
         logging.info("Merging Intermediate Files")
         self.write_intermediate_files(output_path)
@@ -2304,7 +2224,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
 
         return sumo_cfg_file
 
-    def display_network(self, nodes: List[Node], edges: List[Edge]):
+    def draw_network(self, nodes: List[Node], edges: List[Edge]):
         plt.figure(figsize=(10, 10))
         G = nx.DiGraph()
         graph_nodes = [node.getID() for node in nodes]
