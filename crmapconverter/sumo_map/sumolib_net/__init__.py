@@ -41,9 +41,9 @@ from crmapconverter.sumo_map.sumolib_net.crossing import Crossing
 from crmapconverter.sumo_map.sumolib_net.tls import TLS, TLSProgram
 
 
-
 class Net:
     """The whole sumo network."""
+
     def __init__(self):
         self._location = {}
         self._id2node = {}
@@ -59,6 +59,18 @@ class Net:
         self._allLanes = []
         self._origIdx = None
         self.hasWarnedAboutMissingRTree = False
+
+    @classmethod
+    def from_net_xml(cls, filename: str, **others):
+        netreader = NetReader(**others)
+        try:
+            if not os.path.isfile(filename):
+                raise Exception(f"Network file {filename} not found")
+            parse(filename, netreader)
+        except Exception as e:
+            raise Exception(
+                "Please mind that the network format has changed in 0.13.0, you may need to update your network!") from e
+        return netreader.getNet()
 
     def setLocation(self, netOffset, convBoundary, origBoundary,
                     projParameter):
@@ -297,8 +309,8 @@ class Net:
 
     # the diagonal of the bounding box of all nodes
     def getBBoxDiameter(self):
-        return math.sqrt((self._ranges[0][0] - self._ranges[0][1])**2 +
-                         (self._ranges[1][0] - self._ranges[1][1])**2)
+        return math.sqrt((self._ranges[0][0] - self._ranges[0][1]) ** 2 +
+                         (self._ranges[1][0] - self._ranges[1][1]) ** 2)
 
     def getGeoProj(self):
         import pyproj
@@ -343,6 +355,7 @@ class Net:
 
 class NetReader(handler.ContentHandler):
     """Reads a network, storing the edge geometries, lane numbers and max. speeds"""
+
     def __init__(self, **others):
         self._net = others.get('net', Net())
         self._currentEdge = None
@@ -443,7 +456,7 @@ class NetReader(handler.ContentHandler):
                     self._currentEdge._lanes[self._currentLane], tolane,
                     attrs['dir'], tl, tllink, attrs['state'], viaLaneID)
         if name == 'connection' and self._withConnections and (
-                attrs['from'][0] != ":" or self._withInternal):
+            attrs['from'][0] != ":" or self._withInternal):
             fromEdgeID = attrs['from']
             toEdgeID = attrs['to']
             if not (fromEdgeID in self._net._crossings_and_walkingAreas
@@ -534,18 +547,3 @@ def convertShape(shapeString):
                 'Invalid shape point "%s", should be either 2d or 3d' %
                 pointString)
     return cshape
-
-
-def readNet(filename, **others):
-    netreader = NetReader(**others)
-    try:
-        if not os.path.isfile(filename):
-            print("Network file '%s' not found" % filename, file=sys.stderr)
-            sys.exit(1)
-        parse(filename, netreader)
-    except None:
-        print(
-            "Please mind that the network format has changed in 0.13.0, you may need to update your network!",
-            file=sys.stderr)
-        sys.exit(1)
-    return netreader.getNet()

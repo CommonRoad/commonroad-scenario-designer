@@ -16,7 +16,6 @@
 
 from xml.etree import cElementTree as ET
 
-
 class Node:
     """ Nodes from a sumo network """
 
@@ -169,3 +168,6 @@ class Node:
             node.set("tl", str(self._tl))
         node.set("rightOfWay", str(self._right_of_way))
         return ET.tostring(node)
+
+    def __str__(self):
+        return str(self.toXML())
