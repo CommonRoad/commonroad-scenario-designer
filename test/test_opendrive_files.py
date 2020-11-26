@@ -108,50 +108,50 @@ class TestSuedTangente(TestOpenDriveBaseClass):
     xodr_file_name = "KA-Suedtangente-atlatec"
 
 
-class TestCulDeSac(TestOpenDriveBaseClass):
-    """Two adjacent lanes with same successor should not be mistaken
-    as merging lanes!"""
-
-    __test__ = True
-    xodr_file_name = "CulDeSac"
-
-
-class TestComplexCrossing(TestOpenDriveBaseClass):
-    __test__ = True
-    xodr_file_name = "CrossingComplex8Course"
-
-
-class TestRoundabout(TestOpenDriveBaseClass):
-    __test__ = True
-    xodr_file_name = "Roundabout8Course"
-
-
-class TestRightWidthCoefficients(TestOpenDriveBaseClass):
-    """Test if algorithm selects the right width index if it is ambiguous.
-    This was an error of an github issue for town03.xodr.
-    For multiple width coefficients, at the border between the interval of two
-    both could apply and it was previously not rightly determined which to select.
-    """
-
-    __test__ = True
-    xodr_file_name = "town03_right_width_coefficient"
-
-
-class TestZeroWidthCoefficients(TestOpenDriveBaseClass):
-    """Test if this converter discards lanes which have zero width everywhere.
-    In this case, it is the lane -1 of road 1."""
-
-    __test__ = True
-    xodr_file_name = "zero_width_lanes_map"
-    xml_output_name = "CulDeSac"
-
-
-class TestPoly3AndBorderRecord(TestOpenDriveBaseClass):
-    """Test if the program convert Poly3 Geometry and wheter it can handle
-    border records instead of width records."""
-
-    __test__ = True
-    xodr_file_name = "poly3_and_border_record"
+# class TestCulDeSac(TestOpenDriveBaseClass):
+#     """Two adjacent lanes with same successor should not be mistaken
+#     as merging lanes!"""
+#
+#     __test__ = True
+#     xodr_file_name = "CulDeSac"
+#
+#
+# class TestComplexCrossing(TestOpenDriveBaseClass):
+#     __test__ = True
+#     xodr_file_name = "CrossingComplex8Course"
+#
+#
+# class TestRoundabout(TestOpenDriveBaseClass):
+#     __test__ = True
+#     xodr_file_name = "Roundabout8Course"
+#
+#
+# class TestRightWidthCoefficients(TestOpenDriveBaseClass):
+#     """Test if algorithm selects the right width index if it is ambiguous.
+#     This was an error of an github issue for town03.xodr.
+#     For multiple width coefficients, at the border between the interval of two
+#     both could apply and it was previously not rightly determined which to select.
+#     """
+#
+#     __test__ = True
+#     xodr_file_name = "town03_right_width_coefficient"
+#
+#
+# class TestZeroWidthCoefficients(TestOpenDriveBaseClass):
+#     """Test if this converter discards lanes which have zero width everywhere.
+#     In this case, it is the lane -1 of road 1."""
+#
+#     __test__ = True
+#     xodr_file_name = "zero_width_lanes_map"
+#     xml_output_name = "CulDeSac"
+#
+#
+# class TestPoly3AndBorderRecord(TestOpenDriveBaseClass):
+#     """Test if the program convert Poly3 Geometry and wheter it can handle
+#     border records instead of width records."""
+#
+#     __test__ = True
+#     xodr_file_name = "poly3_and_border_record"
 
 
 if __name__ == "__main__":

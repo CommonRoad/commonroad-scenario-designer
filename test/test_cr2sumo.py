@@ -5,6 +5,7 @@ import os
 import unittest
 from parameterized import parameterized
 from typing import List
+import pytest
 
 import numpy as np
 from commonroad.common.file_reader import CommonRoadFileReader
@@ -16,7 +17,6 @@ from sumocr.interface.sumo_simulation import SumoSimulation
 
 # force test execution to be in specified order
 # unittest.TestLoader.sortTestMethodsUsing = lambda _, x, y: cmp(y, x)
-
 
 class BaseClass(unittest.TestCase):
     """Test the conversion from an CommonRoad map to a SUMO .net.xml file
@@ -121,7 +121,7 @@ class BaseClass(unittest.TestCase):
     ["DEU_Hennigsdorf-1_2_T-1", []],
     ["DEU_Hennigsdorf-16_3_T-1", []],
     ["DEU_Hennigsdorf-18_2_T-1", []],
-    ["DEU_Hennigdorf-9_3_T-1", []],
+    ["DEU_Hennigsdorf-9_3_T-1", []],
     ["DEU_Meckenheim-2_4_T-1", []],
     ["DEU_Moabit-6_1_T-1", []],
     ["DEU_Moelln-12_1_T-1", []],
@@ -151,6 +151,7 @@ class BaseClass(unittest.TestCase):
     ["ZAM_Tjunction-1_56_T-1", []],
     ["ZAM_Zip-1_54_T-1", []]
 ])
+@pytest.mark.parallel
 def test_parameterized_sumo_run(cr_file_name: str, tls: List[int]):
     tester = BaseClass()
     config, wrapper = tester.read_cr_file(cr_file_name)

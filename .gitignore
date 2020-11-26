@@ -8,7 +8,7 @@ venv/
 .vscode/
 .idea/
 src/*
-unittest.xml
+unittest_*.xml
 # *.env
 
 # Byte-compiled / optimized / DLL files
