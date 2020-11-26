@@ -147,7 +147,7 @@ class BaseClass(unittest.TestCase):
     ["HRV_Pula-4_5_T-1", []],
     ["ITA_Siderno-1_2_T-1", []],
     ["ITA_Siderno-8_2_T-1", []],
-    ["USA_US101-3_1_T-1", []],
+    # ["USA_US101-3_1_T-1", []],
     ["ZAM_Tjunction-1_56_T-1", []],
     ["ZAM_Zip-1_54_T-1", []]
 ])
