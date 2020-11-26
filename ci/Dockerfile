@@ -105,3 +105,6 @@ RUN source activate commonroad-py38 \
 ENV PATH $HOME/.local/bin:$PATH
 # install usefull tools
 RUN sudo apt-get install -y vim nano
+
+ADD ci/test.sh $HOME/
+
