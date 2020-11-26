@@ -1144,25 +1144,26 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         remove_unreferenced_traffic_lights(self.lanelet_network)
         return True
 
-    def write_intermediate_files(self, output_path):
+    def write_intermediate_files(self, output_path: str) -> Tuple[str, ...]:
         """
         Function for writing the edges and nodes files in xml format
         :param output_path: the relative path of the output
         :return: None
         """
-        self._write_edges_file(output_path)
-        self._write_nodes_file(output_path)
-        self._write_connections_file(output_path)
-        self._write_traffic_file(output_path)
 
-    def _write_edges_file(self, output_path):
+        return (self._write_nodes_file(output_path),
+                self._write_edges_file(output_path),
+                self._write_connections_file(output_path),
+                self._write_traffic_file(output_path))
+
+    def _write_edges_file(self, output_path: str) -> str:
         """
         Function for writing the edges file
         :param output_path: path for the file
         :return: nothing
         """
-        with open(os.path.join(os.path.dirname(output_path), 'edges.net.xml'),
-                  'w+') as output_file:
+        file_path = os.path.join(os.path.dirname(output_path), f"{self.conf.scenario_name}.edg.xml")
+        with open(file_path, 'w+') as output_file:
             sumolib.writeXMLHeader(output_file, '')
             root = ET.Element('root')
             edges = ET.SubElement(root, 'edges')
@@ -1173,15 +1174,16 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
             output_file.write(
                 minidom.parseString(ET.tostring(
                     edges, method="xml")).toprettyxml(indent="\t"))
+        return file_path
 
-    def _write_nodes_file(self, output_path):
+    def _write_nodes_file(self, output_path: str) -> str:
         """
         Functio for writing the nodes file
         :param output_path: path for the file
         :return: nothing
         """
-        with open(os.path.join(os.path.dirname(output_path), 'nodes.net.xml'),
-                  'w+') as output_file:
+        file_path = os.path.join(os.path.dirname(output_path), f"{self.conf.scenario_name}.nod.xml")
+        with open(file_path, 'w+') as output_file:
             sumolib.writeXMLHeader(output_file, '')
             root = ET.Element('root')
             nodes = ET.SubElement(root, 'nodes')
@@ -1194,15 +1196,16 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                 minidom.parseString(ET.tostring(
                     nodes, method="xml")).toprettyxml(indent="\t"))
 
-    def _write_connections_file(self, output_path):
+        return file_path
+
+    def _write_connections_file(self, output_path: str) -> str:
         """
         Function for writing the connections file
         :param output_path: path for the file
         :return: nothing
         """
-        with open(
-            os.path.join(os.path.dirname(output_path),
-                         '_connections.net.xml'), 'w+') as output_file:
+        file_path = os.path.join(os.path.dirname(output_path), f"{self.conf.scenario_name}.con.xml")
+        with open(file_path, 'w+') as output_file:
             sumolib.writeXMLHeader(output_file, '')
             root = ET.Element('root')
             connections = ET.SubElement(root, 'connections')
@@ -1216,14 +1219,15 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
             output_file.write(
                 minidom.parseString(ET.tostring(
                     connections, method="xml")).toprettyxml(indent="\t"))
+        return file_path
 
-    def _write_traffic_file(self, output_path):
+    def _write_traffic_file(self, output_path: str) -> str:
         """
         Writes the tll.net.xml file to disk
         :param output_path: path for the file
         """
-        with open(os.path.join(os.path.dirname(output_path), "_tll.net.xml"),
-                  "w+") as f:
+        file_path = os.path.join(os.path.dirname(output_path), f"{self.conf.scenario_name}.tll.xml")
+        with open(file_path, "w+") as f:
             sumolib.writeXMLHeader(f, '')
             tlLogics = ET.Element('tlLogics')
 
@@ -1235,31 +1239,30 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
             f.write(
                 minidom.parseString(ET.tostring(
                     tlLogics, method="xml")).toprettyxml(indent="\t"))
+        return file_path
 
-    def merge_intermediate_files(self, output_path: str, cleanup=True, update_internal_IDs=True) -> bool:
+    def merge_intermediate_files(self, output_path: str, nodes_path: str, edges_path: str, connections_path: str,
+                                 traffic_path: str, cleanup=True, update_internal_ids=True) -> bool:
         """
         Function that merges the edges and nodes files into one using netconvert
+        :param traffic_path:
+        :type traffic_path:
+        :param connections_path:
+        :type connections_path:
+        :param edges_path:
+        :type edges_path:
+        :param nodes_path:
+        :type nodes_path:
         :param output_path: the relative path of the output
         :param cleanup: deletes temporary input files after creating net file (only deactivate for debugging)
-        :param update_IDs: Updates the internal Edge IDs from the newly generated net file
+        :param update_internal_ids: Updates the internal Edge IDs from the newly generated net file
         :return: bool: returns False if conversion fails
         """
 
-        files = {
-            "nodes": "nodes.net.xml",
-            "edges": "edges.net.xml",
-            "connections": "_connections.net.xml",
-            "tll": "_tll.net.xml"
-        }
-
-        def join(output_path, file_name):
-            return os.path.join(os.path.dirname(output_path), file_name)
-
         # The header of the xml files must be removed
         to_remove = ["options", "xml"]
-        for file_name in files.values():
+        for path in [nodes_path, edges_path, connections_path, traffic_path]:
             # Removing header in file
-            path = join(output_path, file_name)
             with open(path, 'r') as file:
                 lines = file.readlines()
             with open(path, 'w') as file:
@@ -1267,10 +1270,10 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                     if not any(word in line for word in to_remove):
                         file.write(line)
 
-        self._nodes_file = join(output_path, files["nodes"])
-        self._edges_file = join(output_path, files["edges"])
-        self._connections_file = join(output_path, files["connections"])
-        self._tll_file = join(output_path, files["tll"])
+        self._nodes_file = nodes_path
+        self._edges_file = edges_path
+        self._connections_file = connections_path
+        self._tll_file = traffic_path
         self._output_file = str(output_path)
         # Calling of Netconvert
         bashCommand = "netconvert --plain.extend-edge-shape=true" \
@@ -1291,7 +1294,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         try:
             _ = subprocess.check_output(bashCommand.split(), timeout=5.0)
             self._read_junctions_from_net_file(self._output_file)
-            if update_internal_IDs:
+            if update_internal_ids:
                 self._update_internal_IDs_from_net_file(self._output_file)
 
         except FileNotFoundError as e:
@@ -1305,8 +1308,8 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
             success = False
 
         if cleanup and success:
-            for file in files.values():
-                os.remove(join(output_path, file))
+            for path in [nodes_path, edges_path, connections_path, traffic_path]:
+                os.remove(path)
 
         return success
 
@@ -1472,8 +1475,8 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         self._convert_map()
 
         logging.info("Merging Intermediate Files")
-        self.write_intermediate_files(output_path)
-        conversion_possible = self.merge_intermediate_files(output_path, cleanup=False)
+        intermediary_files = self.write_intermediate_files(output_path)
+        conversion_possible = self.merge_intermediate_files(output_path, *intermediary_files)
         if not conversion_possible:
             logging.error("Error converting map, see above for details")
             return False
@@ -1494,9 +1497,9 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         self._convert_map()
 
         logging.info("Merging Intermediate Files")
-        self.write_intermediate_files(output_path)
-        conversion_possible = self.merge_intermediate_files(output_path,
-                                                            update_internal_IDs=True)
+        intermediary_files = self.write_intermediate_files(output_path)
+        conversion_possible = self.merge_intermediate_files(output_path, *intermediary_files,
+                                                            update_internal_ids=True)
         if not conversion_possible:
             logging.error("Error converting map, see above for details")
             return False
