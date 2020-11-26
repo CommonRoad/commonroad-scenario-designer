@@ -79,19 +79,27 @@ RUN conda create --name commonroad-py38 python=3.8
 RUN echo "source activate commonroad-py38" > ~/.bashrc
 ENV PATH /opt/conda/envs/commonroad-py38/bin:$PATH
 
+ADD requirements.txt test_requirements.txt $HOME/
+
 # Install cartopy
 RUN source activate commonroad-py36 \
 	&& echo "Successfully installed Python version:" \
 	&& python --version \
- 	&& conda install -c conda-forge cartopy
+ 	&& conda install -c conda-forge cartopy \
+ 	&& grep -v "git" requirements.txt | pip install -r /dev/stdin \
+ 	&& grep -v "git" test_requirements.txt | pip install -r /dev/stdin
 RUN source activate commonroad-py37 \
 	&& echo "Successfully installed Python version:" \
 	&& python --version \
- 	&& conda install -c conda-forge cartopy
+ 	&& conda install -c conda-forge cartopy \
+ 	&& grep -v "git" requirements.txt | pip install -r /dev/stdin \
+ 	&& grep -v "git" test_requirements.txt | pip install -r /dev/stdin
 RUN source activate commonroad-py38 \
 	&& echo "Successfully installed Python version:" \
 	&& python --version \
- 	&& conda install -c conda-forge cartopy
+ 	&& conda install -c conda-forge cartopy \
+ 	&& grep -v "git" requirements.txt | pip install -r /dev/stdin \
+ 	&& grep -v "git" test_requirements.txt | pip install -r /dev/stdin
 
 # update path to include packages installed by conda
 ENV PATH $HOME/.local/bin:$PATH
