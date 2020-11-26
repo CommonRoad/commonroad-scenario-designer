@@ -33,15 +33,6 @@ class BaseClass(unittest.TestCase):
             self.scenario_name = cr_file_name
 
         self.cwd_path = os.path.dirname(os.path.abspath(__file__))
-        self.out_path = os.path.join(self.cwd_path, ".pytest_cache")
-
-        if not os.path.isdir(self.out_path):
-            os.makedirs(self.out_path)
-        else:
-            for (dirpath, _, filenames) in os.walk(self.out_path):
-                for file in filenames:
-                    if file.endswith('.xml'):
-                        os.remove(os.path.join(dirpath, file))
 
         self.path = os.path.join(self.cwd_path, "sumo_xml_test_files",
                                  cr_file_name + ".xml")
