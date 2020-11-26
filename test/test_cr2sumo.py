@@ -122,7 +122,7 @@ class ParametrizedTestSequence(BaseClass):
         ["DEU_Hennigsdorf-1_2_T-1", []],
         ["DEU_Hennigsdorf-16_3_T-1", []],
         ["DEU_Hennigsdorf-18_2_T-1", []],
-        ["DEU_Hennigsdorf-9_3_T-1", []],
+        ["DEU_Hennigdorf-9_3_T-1", []],
         ["DEU_Meckenheim-2_4_T-1", []],
         ["DEU_Moabit-6_1_T-1", []],
         ["DEU_Moelln-12_1_T-1", []],
@@ -148,7 +148,7 @@ class ParametrizedTestSequence(BaseClass):
         ["HRV_Pula-4_5_T-1", []],
         ["ITA_Siderno-1_2_T-1", []],
         ["ITA_Siderno-8_2_T-1", []],
-        ["USA_US101-3_1_T-1", []],
+        # ["USA_US101-3_1_T-1", []],
         ["ZAM_Tjunction-1_56_T-1", []],
         ["ZAM_Zip-1_54_T-1", []]
 
