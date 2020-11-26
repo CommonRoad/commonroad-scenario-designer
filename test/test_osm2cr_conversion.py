@@ -139,25 +139,25 @@ class TestOSM2CRScenarioBaseClass(unittest.TestCase):
             check_validity=True)
 
 
-# class TestGarchingIntersection(TestOSM2CRScenarioBaseClass):
-#     """Testing if a single small intersection can be converted without error"""
-#     # Warning, ground truth has mayor converting errors
-#
-#     __test__ = True
-#     osm_file_name = "garching_intersection"
-#
-#
-# class TestHaimhausen(TestOSM2CRScenarioBaseClass):
-#     """Testing if a small town with traffic lights, complicated road networks
-#     and large osm filesize can be converted on default settings"""
-#
-#     __test__ = True
-#     osm_file_name = "haimhausen"
+class TestGarchingIntersection(TestOSM2CRScenarioBaseClass):
+    """Testing if a single small intersection can be converted without error"""
+    # Warning, ground truth has mayor converting errors
+
+    __test__ = True
+    osm_file_name = "garching_intersection"
+
+
+class TestHaimhausen(TestOSM2CRScenarioBaseClass):
+    """Testing if a small town with traffic lights, complicated road networks
+    and large osm filesize can be converted on default settings"""
+
+    __test__ = True
+    osm_file_name = "haimhausen"
 
 # class TestMunich(TestOSM2CRScenarioBaseClass):
 #     """Testing if a larger intersection with many lanes, traffic lights and signs
 #     can be converted on default settings"""
-
+#
 #     __test__ = True
 #     osm_file_name = "munich"
 
