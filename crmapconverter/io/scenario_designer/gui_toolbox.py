@@ -87,19 +87,90 @@ class UpperToolbox(QWidget):
         button_yield.setIcon(QIcon(":/icons/button_yeld.png"))
         layout1.addWidget(button_yield, 1, 1)
 
+        "add show more button for lanelets list"""
+        self.button_lanlist = QPushButton("show more")
+        self.button_lanlist.setToolTip("Show more Traffic Signs")
+        layout1.addWidget(self.button_lanlist, 2, 0)
+        # TODO: add list of more traffic signs
+
         layout1.addItem(self.spacerItem)
-        title1 = "Tools for Lanelet editing"
+        title1 = "Traffic Signs"
         self.sections.append((title1, widget1))
 
-        """add button for lanelets list"""
-        #self.button_lanlist = QPushButton("Lanelets list")
-        #self.button_lanlist.setToolTip("Show Lanelets list")
-        #layout1.addWidget(self.button_lanlist, 2, 0)
 
-        """add button for Intersection list"""
-        #self.button_intersection_list = QPushButton("Intersection list")
-        #self.button_intersection_list.setToolTip("Show Intersection list")
-        #layout1.addWidget(self.button_intersection_list, 2, 1)
+        #--Section lanelets--
+
+        widgetlanelets = QFrame(self.tree)
+        layoutlanelets = QGridLayout(widgetlanelets)
+
+        button_forwards = QPushButton()
+        button_forwards.setText("forwards")
+        button_forwards.setIcon(QIcon(":/icons/forwards.PNG"))
+        layoutlanelets.addWidget(button_forwards, 1, 0)
+
+        button_backwards = QPushButton()
+        button_backwards.setText("backwards")
+        layoutlanelets.addWidget(button_backwards, 1, 1)
+        button_backwards.setIcon(QIcon(":/gui_src/forwards.PNG"))
+
+        button_turn_right = QPushButton()
+        button_turn_right.setText("turn right")
+        layoutlanelets.addWidget(button_turn_right, 2, 0)
+        button_turn_right.setIcon(QIcon(":/gui_src/forwards.PNG"))
+
+        button_turn_left = QPushButton()
+        button_turn_left.setText("turn left")
+        layoutlanelets.addWidget(button_turn_left, 2, 1)
+        button_turn_right.setIcon(QIcon(":/gui_src/forwards.PNG"))
+
+        button_turn_left_45 = QPushButton()
+        button_turn_left_45.setText("show more")
+        # button_turn_right.setIcon(QIcon(":/icons/Groupe_2.png"))
+        layoutlanelets.addWidget(button_turn_left_45, 3, 0)
+        # widgetlanelets.addItem(spacerItem)
+
+        titlelanelets = "Lanelets"
+        self.sections.append((titlelanelets, widgetlanelets))
+
+        #--Section intersections--
+
+        widgetintersection = QFrame(self.tree)
+        layoutintersection = QGridLayout(widgetintersection)
+
+        button_X = QPushButton()
+        button_X.setText("X")
+        button_X.setIcon(QIcon(":/icons/forwards.PNG"))
+        layoutintersection.addWidget(button_X, 1, 0)
+
+        button_T = QPushButton()
+        button_T.setText("T")
+        layoutintersection.addWidget(button_T, 1, 1)
+        button_T.setIcon(QIcon(":/gui_src/forwards.PNG"))
+
+        # button_T_2 = QPushButton()
+        # button_T_2.setText("T_2")
+        # button_turn_right.setIcon(QIcon(":/icons/Groupe_2.png"))
+        # layoutintersection.addWidget(button_T_2, 1, 2)
+        # button_T_2.setIcon(QIcon(":/gui_src/forwards.PNG"))
+
+        button_T_3 = QPushButton()
+        button_T_3.setText("T_3")
+        layoutintersection.addWidget(button_T_3, 2, 0)
+        button_T_3.setIcon(QIcon(":/gui_src/forwards.PNG"))
+
+        button_T_4 = QPushButton()
+        button_T_4.setText("T_4")
+        layoutintersection.addWidget(button_T_4, 2, 1)
+        button_T_4.setIcon(QIcon(":/gui_src/forwards.PNG"))
+
+        button_T_5 = QPushButton()
+        button_T_5.setText("show more")
+        layoutintersection.addWidget(button_T_5, 3, 0)
+        button_T_4.setIcon(QIcon(":/gui_src/forwards.PNG"))
+
+        titleintersection = "Intersections"
+        self.sections.append((titleintersection, widgetintersection))
+
 
         """"""""""""""
 
