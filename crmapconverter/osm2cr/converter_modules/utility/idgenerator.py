@@ -26,8 +26,14 @@ class IdGenerator:
         self.counter += 1
         return res
 
+    def reset(self):
+        """
+        resets id generator
 
-generator = IdGenerator()
+        :return: None
+        """
+
+        self.counter = 0
 
 
 def get_id():
@@ -38,3 +44,14 @@ def get_id():
     :rtype: int
     """
     return generator.get()
+
+def reset():
+    """
+    resets id generator
+
+    :return: None
+    """
+    generator.reset()
+
+
+generator = IdGenerator()

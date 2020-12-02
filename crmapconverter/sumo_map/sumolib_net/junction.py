@@ -1,5 +1,5 @@
-from .lane import Lane
 from typing import List
+from crmapconverter.sumo_map.sumolib_net.lane import Lane
 
 
 class Junction:

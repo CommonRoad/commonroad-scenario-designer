@@ -4,9 +4,10 @@ It also provides several methods to perform operations on elements of the graph.
 """
 from queue import Queue
 from typing import List, Set, Tuple, Optional, Dict
-
+from ordered_set import OrderedSet
 import numpy as np
 from commonroad.scenario.traffic_sign import TrafficSignElement, TrafficSign, TrafficLight, TrafficSignIDGermany
+from commonroad.geometry.shape import Polygon
 
 from crmapconverter.osm2cr import config
 from crmapconverter.osm2cr.converter_modules.utility import geometry, idgenerator
@@ -515,8 +516,8 @@ class GraphEdge:
                 turnlane = self.turnlanes_backward[-(count + 1)]
             new_lane = Lane(
                 self,
-                set(),
-                set(),
+                OrderedSet(),
+                OrderedSet(),
                 turnlane,
                 self.lanewidth,
                 self.lanewidth,
@@ -533,8 +534,8 @@ class GraphEdge:
                 turnlane = self.turnlanes_forward[count]
             new_lane = Lane(
                 self,
-                set(),
-                set(),
+                OrderedSet(),
+                OrderedSet(),
                 turnlane,
                 self.lanewidth,
                 self.lanewidth,
@@ -748,6 +749,7 @@ class GraphTrafficSign:
             'city_limit': TrafficSignIDGermany.TOWN_SIGN,
             'give_way': TrafficSignIDGermany.YIELD,
             'stop': TrafficSignIDGermany.STOP,
+            '260': TrafficSignIDGermany.BAN_CAR_TRUCK_BUS_MOTORCYCLE,
             'unknown': TrafficSignIDGermany.UNKNOWN
         }
 
@@ -775,16 +777,21 @@ class GraphTrafficSign:
                 elements.append(TrafficSignElement(sign_id, [max_speed]))
 
             # regular traffic sign
-            elif key in traffic_sign_map:
-                sign_id = traffic_sign_map[key]
-                value = ' '  # TODO add specific values for some traffic signs
-                elements.append(TrafficSignElement(sign_id, [value]))
-
-            # unknown traffic sign
             else:
-                sign_id = traffic_sign_map['unknown']
-                value = 'unknown sign'
-                elements.append(TrafficSignElement(sign_id, [value]))
+                found_sign = False
+                for traffic_sign in traffic_sign_map:
+                    if traffic_sign in str(key):
+                        sign_id = traffic_sign_map[traffic_sign]
+                        value = ' '  # TODO add specific values for some traffic signs
+                        elements.append(TrafficSignElement(sign_id, [value]))
+                        found_sign = True
+                        break
+
+                # unknown traffic sign
+                if not found_sign:
+                    sign_id = traffic_sign_map['unknown']
+                    value = 'unknown sign'
+                    elements.append(TrafficSignElement(sign_id, [value]))
 
         # determine if virtual
         virtual = False
@@ -1048,6 +1055,20 @@ class Lane:
             raise ValueError("node is not assigned to this edge")
         return
 
+    def convert_to_polygon(self) -> Polygon:
+        """
+        Converts the given lanelet to a polygon representation
+
+        :return: The polygon of the lanelet
+        """
+        if (not self.right_bound) or (not self.left_bound):
+            self.create_bounds()
+        assert self.right_bound is not None
+        assert self.left_bound is not None
+
+        polygon = Polygon(np.concatenate((self.right_bound, np.flip(self.left_bound, 0))))
+        return polygon
+
     def add_traffic_sign(self, sign: GraphTrafficSign):
         if self.traffic_signs is None:
             self.traffic_signs = []
@@ -1067,7 +1088,7 @@ class Graph:
         center_point: Tuple[float, float],
         bounds: Tuple[float, float, float, float],
         traffic_signs: List[GraphTrafficSign],
-        traffic_lights: List[GraphTrafficLight],
+        traffic_lights: List[GraphTrafficLight]
     ) -> None:
         """
         creates a new graph
@@ -1079,7 +1100,7 @@ class Graph:
         """
         self.nodes = nodes
         self.edges = edges
-        self.lanelinks: Set[Lane] = set()
+        self.lanelinks: Set[Lane] = OrderedSet()
         self.center_point = center_point
         self.bounds = bounds
         self.traffic_signs = traffic_signs
@@ -1297,19 +1318,19 @@ class Graph:
         :return: None
         """
         for edge in edges:
-            self.edges -= {edge}
-            edge.node1.edges -= {edge}
-            edge.node2.edges -= {edge}
+            self.edges -= OrderedSet([edge])
+            edge.node1.edges -= OrderedSet([edge])
+            edge.node2.edges -= OrderedSet([edge])
 
             for lane in edge.lanes:
                 successors = lane.successors.copy()
                 predecessors = lane.predecessors.copy()
                 for successor in successors:
                     successor.predecessors |= predecessors
-                    successor.predecessors -= {lane}
+                    successor.predecessors -= OrderedSet([lane])
                 for predecessor in predecessors:
                     predecessor.successors |= successors
-                    predecessor.successors -= {lane}
+                    predecessor.successors -= OrderedSet([lane])
                 lane.successors = []
                 lane.predecessors = []
 
@@ -1324,8 +1345,8 @@ class Graph:
         # delete all old predecessors and successors
         for edge in self.edges:
             for lane in edge.lanes:
-                lane.predecessors = set()
-                lane.successors = set()
+                lane.predecessors = OrderedSet()
+                lane.successors = OrderedSet()
         # set all predecessors and successors correctly
         for lane in self.lanelinks:
             for successor in lane.successors:
@@ -1421,6 +1442,7 @@ class Graph:
                         predecessor.speedlimit,
                     )
                     segment.waypoints = waypoints
+
                     # segment is only added if it does not form a turn
                     if (
                         successor.edge != predecessor.edge
@@ -1463,7 +1485,7 @@ class Graph:
                 if new_nr != len(lane.waypoints):
                     lane.set_nr_of_way_points(new_nr)
         for link_lane in self.lanelinks:
-            adjacents = find_adjacents(link_lane, set())
+            adjacents = find_adjacents(link_lane, OrderedSet())
             min_nr = None
             max_nr = None
             for lane in adjacents:
@@ -1680,6 +1702,62 @@ class Graph:
                     edge.add_traffic_light(light, light.forward)
 
 
+    def find_invalid_lanes(self) -> List[Lane]:
+        """
+        checks every lane for validity, using the shapely_object.is_valid method
+
+        :return: List of invalid lanes
+        """
+        invalid_lanes = []
+        for lane in self.get_all_lanes():
+            if not lane.convert_to_polygon().shapely_object.is_valid:
+                invalid_lanes.append(lane)
+        return invalid_lanes
+
+
+    def delete_lane(self, lane) -> None:
+        """
+        removes given lane from the graph
+
+        :param lanes_to_delete: the lane to delete
+        :return: None
+        """
+        # remove pre/suc relations
+        for pre in lane.predecessors:
+            pre.successors.remove(lane)
+        for suc in lane.successors:
+            suc.predecessors.remove(lane)
+
+        # remove lane
+        if lane in self.lanelinks:
+            self.lanelinks.remove(lane)
+        for edge in self.edges:
+            if lane in edge.lanes:
+                edge.lanes.remove(lane)
+
+        # remove adjacent lane references
+        for adj_lane in self.get_all_lanes():
+            if adj_lane.adjacent_left is not None:
+                if adj_lane.adjacent_left == lane:
+                    adj_lane.adjacent_left = None
+                    adj_lane.adjacent_left_direction_equal = None
+            if adj_lane.adjacent_right is not None:
+                if adj_lane.adjacent_right == lane:
+                    adj_lane.adjacent_right = None
+                    adj_lane.adjacent_right_direction_equal = None
+
+
+    def delete_invalid_lanes(self) -> None:
+        """
+        finds and deletes invalid lanes in the RoadGraph
+
+        :return: None
+        """
+        invalid_lanes = self.find_invalid_lanes()
+        for lane in invalid_lanes:
+            self.delete_lane(lane)
+        #self.set_adjacents()
+
 class SublayeredGraph(Graph):
 
     def __init__(
@@ -1745,3 +1823,8 @@ class SublayeredGraph(Graph):
         super().apply_traffic_lights()
         if self.apply_on_sublayer:
             self.sublayer_graph.apply_traffic_lights()
+
+    def delete_invalid_lanes(self) -> None:
+        super().delete_invalid_lanes()
+        if self.apply_on_sublayer:
+            self.sublayer_graph.delete_invalid_lanes()

@@ -6,7 +6,9 @@ test/.pytest_cache
 .pytest_cache
 venv/
 .vscode/
+.idea/
 src/*
+unittest_*.xml
 # *.env
 
 # Byte-compiled / optimized / DLL files
@@ -55,6 +57,7 @@ nosetests.xml
 coverage.xml
 *.cover
 .hypothesis/
+unittest.xml
 
 # Translations
 *.mo

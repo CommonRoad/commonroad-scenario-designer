@@ -194,7 +194,7 @@ def add_is_left_of(incoming_data, incoming_data_id):
 
     :param incoming_data: incomings without isLeftOf
     :param incoming_data_id: List of the id of the incomings
-    :return: incomigs with the isLeftOf assigned
+    :return: incomings with the isLeftOf assigned
     """
 
     # Choose a reference incoming vector
@@ -574,7 +574,7 @@ class IntermediateFormat:
         Add information about crossings to the intersections.
         The parameter maps each lanelet id to the crossing lanelet ids.
 
-        :param crossings: dcict of crossed and crossing lanelets
+        :param crossings: dict of crossed and crossing lanelets
         """
 
         all_crossed_ids = set([crossed for crossed in crossings if crossings[crossed]])

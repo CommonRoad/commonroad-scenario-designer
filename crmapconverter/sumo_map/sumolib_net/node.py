@@ -16,16 +16,17 @@
 
 from xml.etree import cElementTree as ET
 
-
 class Node:
     """ Nodes from a sumo network """
+
     def __init__(self,
                  id: int,
                  node_type: str,
                  coord,
                  incLanes,
                  intLanes=None,
-                 tl=None):
+                 tl=None,
+                 right_of_way="default"):
         self._id = id
         self._type = node_type
         self._coord = coord
@@ -38,8 +39,9 @@ class Node:
         self._shape3D = None
         self._shape = None
         self._tl = tl
+        self._right_of_way = right_of_way
 
-    def getID(self):
+    def getID(self) -> int:
         return self._id
 
     def setShape(self, shape):
@@ -131,6 +133,9 @@ class Node:
     def getType(self):
         return self._type
 
+    def setType(self, type: str):
+        self._type = type
+
     def getConnections(self, source=None, target=None):
         incoming = list(self.getIncoming())
         if source:
@@ -161,4 +166,8 @@ class Node:
             node.set(key, str(value))
         if self._tl:
             node.set("tl", str(self._tl))
+        node.set("rightOfWay", str(self._right_of_way))
         return ET.tostring(node)
+
+    def __str__(self):
+        return str(self.toXML())

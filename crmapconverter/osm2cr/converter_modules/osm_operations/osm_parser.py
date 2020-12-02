@@ -4,6 +4,8 @@ It also provides a method to project OSM nodes to cartesian coordinates.
 """
 import xml.etree.ElementTree as ElTree
 from typing import List, Dict, Tuple, Set, Optional
+from ordered_set import OrderedSet
+from collections import OrderedDict
 
 import numpy as np
 
@@ -75,7 +77,7 @@ def get_points(nodes: Dict[int, ElTree.Element], custom_bounds=None) \
     lats = np.array(lats)
     lons_d = lons - lon_center
     lats_d = lats - lat_center
-    points = {}
+    points = OrderedDict()
     lon_constants = np.pi / 180 * config.EARTH_RADIUS * np.cos(np.radians(lats))
     x = lon_constants * lons_d
     lat_constant = np.pi / 180 * config.EARTH_RADIUS
@@ -92,15 +94,15 @@ def get_nodes(roads: Set[ElTree.Element], root) -> Tuple[Dict[int, ElTree.Elemen
     returns all nodes that are part of the specified roads and a subset
     of nodes that are crossings
     """
-    node_ids = set()
+    node_ids = OrderedSet()
     for road in roads:
         nodes = road.findall("nd")
         for node in nodes:
             current_id = int(node.attrib["ref"])
             node_ids.add(current_id)
     nodes = root.findall("node")
-    road_nodes = {}
-    crossing_nodes = {}
+    road_nodes = OrderedDict()
+    crossing_nodes = OrderedDict()
     for node in nodes:
         node_id = int(node.attrib["id"])
         if node_id in node_ids:
@@ -123,7 +125,7 @@ def get_traffic_rules(nodes: Dict[int, ElTree.Element],
 
     :return: a Dict with type and value of the rules
     """
-    traffic_rules = {}
+    traffic_rules = OrderedDict()
     for node_id in nodes:
         node = nodes[node_id]
         tags = node.findall('tag')
@@ -200,7 +202,7 @@ def parse_restrictions(restrictions: Set[ElTree.Element]) -> RestrictionDict:
     :param restrictions:
     :return:
     """
-    result = {}
+    result = OrderedDict()
     for restriction_element in restrictions:
         from_edge_id, to_edge_id, via_element_id, via_element_type = (
             None,
@@ -238,7 +240,7 @@ def get_restrictions(root) -> RestrictionDict:
     :param root:
     :return:
     """
-    restrictions = set()
+    restrictions = OrderedSet()
     relations = root.findall("relation")
     for relation in relations:
         tags = relation.findall("tag")
@@ -262,7 +264,7 @@ def get_ways(accepted_highways: List[str], rejected_tags: Dict[str, str],
     :param root:
     :return:
     """
-    roads = set()
+    roads = OrderedSet()
     ways = root.findall("way")
     for way in ways:
         tags = way.findall("tag")
@@ -504,8 +506,8 @@ def get_graph_nodes(roads: Set[ElTree.Element], points: Dict[int, Point], traffi
     :return: nodes, set of graph node objects
     :rtype: Dict[int, GraphNode]
     """
-    nodes = {}
-    point_degree = {}  # number of roads sharing a point
+    nodes = OrderedDict()
+    point_degree = OrderedDict()  # number of roads sharing a point
     for road in roads:
         for waypoint in road.findall("nd"):
             point_id = int(waypoint.attrib["ref"])
@@ -518,7 +520,7 @@ def get_graph_nodes(roads: Set[ElTree.Element], points: Dict[int, Point], traffi
             current_point = points[point_id]
             if point_id not in nodes:
                 nodes[point_id] = rg.GraphNode(
-                    point_id, current_point.x, current_point.y, set()
+                    point_id, current_point.x, current_point.y, OrderedSet()
                 )
 
     for traffic_sign in traffic_signs:
@@ -528,7 +530,7 @@ def get_graph_nodes(roads: Set[ElTree.Element], points: Dict[int, Point], traffi
         if int(point_id) not in nodes:
             current_point = points[int(point_id)]
             nodes[int(point_id)] = rg.GraphNode(
-                int(point_id), current_point.x, current_point.y, set()
+                int(point_id), current_point.x, current_point.y, OrderedSet()
             )
 
     for traffic_light in traffic_lights:
@@ -536,7 +538,7 @@ def get_graph_nodes(roads: Set[ElTree.Element], points: Dict[int, Point], traffi
         if point_id not in nodes:
             current_point = points[point_id]
             nodes[point_id] = rg.GraphNode(
-                point_id, current_point.x, current_point.y, set()
+                point_id, current_point.x, current_point.y, OrderedSet()
             )
 
     # get nodes from intersection points of roads
@@ -544,7 +546,7 @@ def get_graph_nodes(roads: Set[ElTree.Element], points: Dict[int, Point], traffi
         current_point = points[point_id]
         if point_id not in nodes and point_degree[point_id] > 1:
             nodes[point_id] = rg.GraphNode(
-                point_id, current_point.x, current_point.y, set()
+                point_id, current_point.x, current_point.y, OrderedSet()
             )
     return nodes
 
@@ -592,7 +594,7 @@ def get_graph_edges_from_road(roads: Set[ElTree.Element],
         return result
 
     area = get_area_from_bounds(bounds, origin)
-    edges = {}
+    edges = OrderedDict()
     for road_index, road in enumerate(roads):
         # get basic information of road
         # edge_id = road.attrib['id']
@@ -617,7 +619,7 @@ def get_graph_edges_from_road(roads: Set[ElTree.Element],
 
         # get waypoints
         waypoints = []
-        outside_waypoints = set()
+        outside_waypoints = OrderedSet()
         point_list = [points[int(nd.attrib["ref"])] for nd in road.findall("nd")]
         point_in_area_list = [point in area for point in point_list]
         for index, point in enumerate(point_list):
@@ -629,7 +631,7 @@ def get_graph_edges_from_road(roads: Set[ElTree.Element],
                 # point is added, but edge is split
                 outside_waypoints.add(point.id)
                 waypoints.append(point)
-                nodes[point.id] = rg.GraphNode(point.id, point.x, point.y, set())
+                nodes[point.id] = rg.GraphNode(point.id, point.x, point.y, OrderedSet())
             else:
                 # point is not added
                 pass
@@ -638,7 +640,7 @@ def get_graph_edges_from_road(roads: Set[ElTree.Element],
             waypoints.reverse()
 
         osm_id = int(road.attrib["id"])
-        edges[osm_id] = set()
+        edges[osm_id] = OrderedSet()
 
         # road is split at nodes and edges are created for each segment
         for index, waypoint in enumerate(waypoints):
@@ -652,7 +654,7 @@ def get_graph_edges_from_road(roads: Set[ElTree.Element],
                     if waypoint_id not in nodes:
                         id_int = int(waypoint_id)
                         nodes[waypoint_id] = rg.GraphNode(
-                            id_int, waypoint.x, waypoint.y, set()
+                            id_int, waypoint.x, waypoint.y, OrderedSet()
                         )
                     edge_nodes.append((nodes[waypoint_id], index))
                 except ValueError:
@@ -752,7 +754,7 @@ def get_node_set(edges: Set[rg.GraphEdge]) -> Set[rg.GraphNode]:
     :param edges:
     :return:
     """
-    nodes = set()
+    nodes = OrderedSet()
     for edge in edges:
         nodes.add(edge.node1)
         nodes.add(edge.node2)
@@ -794,7 +796,7 @@ def roads_to_graph(roads: Set[ElTree.Element],
     graph_traffic_signs = get_graph_traffic_signs(nodes, edges, traffic_signs)
     graph_traffic_lights = get_graph_traffic_lights(nodes, traffic_lights)
     map_restrictions(edges, restrictions, nodes)
-    edges = {elem for edge_set in edges.values() for elem in edge_set}
+    edges = OrderedSet([elem for edge_set in edges.values() for elem in edge_set])
     # node_set = set()
     # for node in nodes:
     #     node_set.add(nodes[node])
@@ -832,9 +834,9 @@ def get_crossing_points(
                 return True
         return False
 
-    new_crossing_nodes = set()
-    already_contained = set()
-    main_node_dict = {node.id: node for node in main_graph.nodes}
+    new_crossing_nodes = OrderedSet()
+    already_contained = OrderedSet()
+    main_node_dict = OrderedDict((node.id, node) for node in main_graph.nodes)
     for point_id, point in main_cross_points.items():
         if (point_id in sub_cross_points
                 and not close_to_intersection(point_id, comb_graph, main_graph)):
@@ -842,7 +844,7 @@ def get_crossing_points(
                 already_contained.add(point_id)
             else:
                 crossing_node = rg.GraphNode(
-                    int(point_id), point.x, point.y, set()
+                    int(point_id), point.x, point.y, OrderedSet()
                 )
                 crossing_node.is_crossing = True
                 new_crossing_nodes.add(crossing_node)
@@ -868,6 +870,9 @@ def create_graph(file_path: str) -> rg.Graph:
             traffic_signs, traffic_lights, additional_nodes
         )
         return graph, crossing_points
+
+    #  reset id generator for new graph
+    idgenerator.reset()
 
     if config.EXTRACT_SUBLAYER:
         if set(config.ACCEPTED_HIGHWAYS_MAINLAYER) & set(config.ACCEPTED_HIGHWAYS_SUBLAYER):

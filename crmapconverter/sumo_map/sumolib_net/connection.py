@@ -14,6 +14,8 @@
 # @date    2011-11-28
 # @version $Id$
 
+from xml.etree import cElementTree as ET
+
 
 class Connection:
     # constants as defined in sumo/src/utils/xml/SUMOXMLDefinitions.cpp
@@ -29,33 +31,35 @@ class Connection:
                  toEdge,
                  fromLane,
                  toLane,
-                 direction,
-                 tls,
-                 tllink,
-                 state,
-                 viaLaneID=None):
+                 direction = None,
+                 tls = None,
+                 tllink = None,
+                 state = None,
+                 viaLaneID=None,
+                 shape=None,
+                 keepClear=None,
+                 contPos=None):
         self._from = fromEdge
         self._to = toEdge
-        self._fromLane = fromLane
-        self._toLane = toLane
+        self._fromLane = int(fromLane)
+        self._toLane = int(toLane)
         self._direction = direction
         self._tls = tls
         self._tlLink = tllink
         self._state = state
         self._via = viaLaneID
+        self._shape = shape
+        self._keepClear = keepClear
+        self._contPos = contPos
 
     def __str__(self):
-        return '<connection from="%s" to="%s" fromLane="%s" toLane="%s" %s/>' % (
-            self._from.getID(), self._to.getID(), self._fromLane.getIndex(),
-            self._toLane.getIndex(),
-            ('' if self._tls == '' else 'tl="%s" linkIndex="%s" ' %
-             (self._tls, self._tlLink)))
+        return str(self.toXML())
 
     def getFrom(self):
-        return self._fromLane.getEdge()
+        return self._from
 
     def getTo(self):
-        return self._toLane.getEdge()
+        return self._to
 
     def getFromLane(self):
         return self._fromLane
@@ -84,5 +88,33 @@ class Connection:
     def getState(self):
         return self._state
 
+    def getShape(self):
+        return self._shape
+
     def toXML(self):
-        return str(self)
+        """
+        Converts this connection to it's xml representation
+        """
+        c = ET.Element("connection")
+        c.set("from", str(self._from))
+        c.set("to", str(self._to))
+        c.set("fromLane", str(self._fromLane))
+        c.set("toLane", str(self._toLane))
+        if self._via:
+            c.set("via", str(self._via))
+        if self._direction:
+            c.set("dir", str(self._direction))
+        if self._tls:
+            c.set("tl", str(self._tls))
+        if self._tlLink:
+            c.set("linkIndex", str(self._tlLink))
+        if self._state:
+            c.set("state", str(self._state))
+        if self._shape:
+            c.set("shape", str(self._shape))
+        if self._keepClear:
+            c.set("keepClear", str(self._keepClear))
+        if self._contPos:
+            c.set("contPos", str(self._contPos))
+
+        return ET.tostring(c)

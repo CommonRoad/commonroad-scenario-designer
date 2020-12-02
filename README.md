@@ -13,7 +13,7 @@ Commit 4abf24d380b2ddac2c2c71b210764c4ae5759406 is the last stable version for C
 
 ## Installation
 
-Installation instructions are given in the documentation in the section "Installation"
+Installation instructions are given in the documentation in the section "Installation" (*./docs/source/000_installation.rst*).
 
 ## Usage
 
