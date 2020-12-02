@@ -17,43 +17,7 @@
 from xml.etree import cElementTree as ET
 import sumolib.geomhelper
 
-# taken from sumo/src/utils/common/SUMOVehicleClass.cpp
-SUMO_VEHICLE_CLASSES = (
-    # "public_emergency",  # deprecated
-    # "public_authority",  # deprecated
-    # "public_army",       # deprecated
-    # "public_transport",  # deprecated
-    # "transport",         # deprecated
-    # "lightrail",         # deprecated
-    # "cityrail",          # deprecated
-    # "rail_slow",         # deprecated
-    # "rail_fast",         # deprecated
-    "private",
-    "emergency",
-    "authority",
-    "army",
-    "vip",
-    "passenger",
-    "hov",
-    "taxi",
-    "bus",
-    "coach",
-    "delivery",
-    "truck",
-    "trailer",
-    "tram",
-    "rail_urban",
-    "rail",
-    "rail_electric",
-    "motorcycle",
-    "moped",
-    "bicycle",
-    "pedestrian",
-    "evehicle",
-    "ship",
-    "custom1",
-    "custom2")
-
+from .constants import SUMO_VEHICLE_CLASSES
 
 
 def addJunctionPos(shape, fromPos, toPos):
@@ -69,6 +33,7 @@ def addJunctionPos(shape, fromPos, toPos):
 
 class Lane:
     """ Lanes from a sumo network """
+
     def __init__(self,
                  edge,
                  speed: float,
@@ -88,6 +53,8 @@ class Lane:
         self._outgoing = []
         self._adjacent_opposite = None  # added by Lisa
         self._params = {}
+        self._allowed = []
+        self._disallowed = []
         if allow and disallow:
             self._allowed = allow
             self._disallowed = disallow
@@ -119,12 +86,12 @@ class Lane:
         shape must be a list containing x,y,z coords as numbers
         to represent the shape of the lane
         """
-        #for pp in shape:
+        # for pp in shape:
         #    if len(pp) != 3:
         #        raise ValueError('shape point must consist of x,y,z')
 
-        #self._shape3D = shape
-        #self._shape = [(x, y) for x, y, z in shape]
+        # self._shape3D = shape
+        # self._shape = [(x, y) for x, y, z in shape]
         self._shape = shape
 
     def getShape(self, includeJunctions=False):

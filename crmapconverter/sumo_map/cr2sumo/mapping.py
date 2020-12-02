@@ -2,7 +2,8 @@ from commonroad.scenario.obstacle import ObstacleType
 from commonroad.scenario.traffic_sign import TrafficLightState
 from commonroad.scenario.lanelet import LaneletType
 from commonroad.scenario.traffic_sign import SupportedTrafficSignCountry
-from typing import Tuple, Dict
+from crmapconverter.sumo_map.sumolib_net.constants import SUMO_VEHICLE_CLASSES
+from typing import Tuple, Dict, Set
 from xml.etree import ElementTree as ET
 import logging
 import os
@@ -46,14 +47,6 @@ traffic_light_states_SUMO2CR = {
     'O': TrafficLightState.INACTIVE
 }
 
-_road_vehicles = [
-    "passenger", "private", "taxi", "bus", "coach", "delivery", "truck",
-    "trailer", "emergency", "motorcycle", "moped", "bicycle", "evehicle",
-    "army", "authority", "vip", "hov", "custom1", "custom2"
-]
-_bus_vehicles = ["bus", "coach"]
-_pedestrian_vehicles = ["pedestrian", "bicycle"]
-
 # ISO-3166 country code mapping to SUMO type file fond in templates/
 _lanelet_type_CR2SUMO = {
     SupportedTrafficSignCountry.GERMANY: {
@@ -72,7 +65,19 @@ _lanelet_type_CR2SUMO = {
         LaneletType.BICYCLE_LANE: "highway.cycleway",
         LaneletType.SIDEWALK: "highway.track",
         LaneletType.CROSSWALK: "highway.track"
-    }
+    },
+    SupportedTrafficSignCountry.USA: {},
+    SupportedTrafficSignCountry.CHINA: {},
+    SupportedTrafficSignCountry.SPAIN: {},
+    SupportedTrafficSignCountry.RUSSIA: {},
+    SupportedTrafficSignCountry.ARGENTINA: {},
+    SupportedTrafficSignCountry.BELGIUM: {},
+    SupportedTrafficSignCountry.FRANCE: {},
+    SupportedTrafficSignCountry.GREECE: {},
+    SupportedTrafficSignCountry.CROATIA: {},
+    SupportedTrafficSignCountry.ITALY: {},
+    SupportedTrafficSignCountry.PUERTO_RICO: {},
+    SupportedTrafficSignCountry.ZAMUNDA: {}
 }
 
 # CommonRoad obstacle type to sumo type
@@ -114,12 +119,15 @@ VEHICLE_NODE_TYPE_CR2SUMO = {
     ObstacleType.MEDIAN_STRIP: "vehicle"
 }
 
-TEMPLATES_DIR = os.path.join(__file__, "templates")
+TEMPLATES_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "templates"))
+DEFAULT_CFG_FILE = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "templates", "default.sumo.cfg"))
 
 
-def get_sumo_edge_type(country_id: SupportedTrafficSignCountry, lanelet_type: LaneletType) -> Tuple[str, str]:
+def get_sumo_edge_type(country_id: SupportedTrafficSignCountry, *lanelet_types: LaneletType) -> Tuple[str, str]:
+    lanelet_type = max(set(lanelet_types), key=lanelet_types.count)
+
     if country_id in _lanelet_type_CR2SUMO and lanelet_type in _lanelet_type_CR2SUMO[country_id]:
-        filename = os.path.join(TEMPLATES_DIR, f"{country_id}.typ.xml")
+        filename = os.path.join(TEMPLATES_DIR, f"{country_id.value}.typ.xml")
         return _lanelet_type_CR2SUMO[country_id][lanelet_type], filename
     elif lanelet_type not in _lanelet_type_CR2SUMO[SupportedTrafficSignCountry.GERMANY]:
         raise RuntimeError(f"LaneletType {str(lanelet_type)} is invalid")
@@ -128,10 +136,35 @@ def get_sumo_edge_type(country_id: SupportedTrafficSignCountry, lanelet_type: La
         return get_sumo_edge_type(SupportedTrafficSignCountry.GERMANY, lanelet_type)
 
 
-def get_type_attributes(type_id: str, filename: str) -> Dict[str, str]:
-    xml = ET.parse(filename)
+def _get_type_attributes(type_id: str, type_path: str) -> Dict[str, str]:
+    xml = ET.parse(type_path)
     if not xml:
-        return None
-    return {
-        tpe.tag: tpe.attrib for tpe in xml.getroot().findall("type")
-    }
+        return dict()
+    tpe = xml.getroot().find(f".//type[@id='{type_id}']")
+    return tpe.attrib
+
+
+def edge_type_allowed(type_id: str, type_path: str) -> Set[str]:
+    """
+    Set of allowed vClasses for type_id from the given type_path .typ.xml
+    :return: vClasses
+    :rtype:
+    """
+    attrib = _get_type_attributes(type_id, type_path)
+    try:
+        return set(attrib["allow"].split(" "))
+    except Exception:
+        return set(SUMO_VEHICLE_CLASSES) - set(attrib["disallow"].split(" "))
+
+
+def edge_type_disallowed(self) -> Set[str]:
+    """
+    Set of disallowed vClasses for type_id from the given type_path .typ.xml
+    :return: vClasses
+    :rtype:
+    """
+    attrib = _get_type_attributes(type_id, type_path)
+    try:
+        return set(attrib["allow"].split(" "))
+    except Exception:
+        return set(SUMO_VEHICLE_CLASSES) - set(attrib["disallow"].split(" "))

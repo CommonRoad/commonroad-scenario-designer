@@ -15,22 +15,24 @@
 # @version $Id$
 
 from xml.etree import cElementTree as ET
-from crmapconverter.sumo_map.sumolib_net.lane import Lane
+from typing import Set
+from .constants import SUMO_VEHICLE_CLASSES
 
 
 class Edge:
     """ Edges from a sumo network """
 
-    def __init__(self, id, fromN, toN, type="", function="normal", name="", prio=0):
+    def __init__(self, id: int, from_node, to_node, type_id: str = "", function: str = "normal", name: str = "",
+                 priority: int = 0):
         self._id = id
-        self._from = fromN
-        self._to = toN
-        self._type = type
-        self._priority = prio
-        if fromN:
-            fromN.addOutgoing(self)
-        if toN:
-            toN.addIncoming(self)
+        self._from = from_node
+        self._to = to_node
+        self._type = type_id
+        self._priority = priority
+        if from_node:
+            from_node.addOutgoing(self)
+        if to_node:
+            to_node.addIncoming(self)
         self._lanes = []
         self._speed = None
         self._length = None
@@ -229,6 +231,12 @@ class Edge:
                 return True
         return False
 
+    def getType(self):
+        return self._type
+
+    def setType(self, value: str):
+        self._type = value
+
     def __repr__(self):
         if self.getFunction() == '':
             return '<edge id="%s" from="%s" to="%s"/>' % (
@@ -251,7 +259,7 @@ class Edge:
         if self._length:
             edge.set("length", str(self._length))
         if self._shape:
-            edge.set("shape", lane._to_shape_string(self._shape))
+            edge.set("shape", str(self.getShape()))
         if self._length:
             edge.set("length", str(self._length))
         edge.set("numLanes", str(self.getLaneNumber()))
