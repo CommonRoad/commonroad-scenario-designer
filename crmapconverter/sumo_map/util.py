@@ -1,4 +1,5 @@
 import os
+import warnings
 from copy import deepcopy
 from typing import Dict, List, Iterable, Set
 from xml.dom import minidom
@@ -9,10 +10,12 @@ from commonroad.geometry.shape import Polygon
 from commonroad.scenario.lanelet import Lanelet
 from commonroad.scenario.lanelet import LaneletNetwork
 from crmapconverter.sumo_map.sumolib_net import Crossing
+from commonroad.visualization.plot_helper import draw_object
 from shapely.geometry import LineString
 from shapely.ops import unary_union
+from shapely.validation import explain_validity
 from crmapconverter.sumo_map.sumolib_net.edge import Edge
-from matplotlib.pyplot import plot as plt
+import matplotlib.pyplot as plt
 
 from .config import EGO_ID_START, SumoConfig
 
@@ -221,7 +224,7 @@ def _erode_lanelets(lanelet_network: LaneletNetwork,
 
 def _find_intersecting_edges(
     edges_dict: Dict[int, List[int]],
-    lanelet_network: LaneletNetwork) -> List[List[int]]:
+    lanelet_network: LaneletNetwork, visualize=False) -> List[List[int]]:
     """
 
     :param lanelet_network:
@@ -230,11 +233,12 @@ def _find_intersecting_edges(
     eroded_lanelet_network = _erode_lanelets(lanelet_network)
 
     # visualize eroded lanelets
-    # plt.figure(figsize=(25, 25))
-    # draw_object(eroded_lanelet_network.lanelets)
-    # plt.axis('equal')
-    # plt.autoscale()
-    # plt.show()
+    if visualize:
+        plt.figure(figsize=(25, 25))
+        draw_object(eroded_lanelet_network.lanelets)
+        plt.axis('equal')
+        plt.autoscale()
+        plt.show()
 
     polygons_dict = {}
     edge_shapes_dict = {}
@@ -247,7 +251,14 @@ def _find_intersecting_edges(
 
                 polygons_dict[lanelet_id] = polygon.shapely_object
 
-                edge_shape.append(polygons_dict[lanelet_id])
+                if polygons_dict[lanelet_id].is_valid:
+                    shape = polygons_dict[lanelet_id]
+                else:
+                    warnings.warn(f"Invalid lanelet shape! Please check the scenario, "
+                                  f"because invalid lanelet has been found: "
+                                  f"{explain_validity(polygons_dict[lanelet_id])}")
+                    shape = polygons_dict[lanelet_id].buffer(0)
+                edge_shape.append(shape)
 
         edge_shapes_dict[edge_id] = edge_shape
 

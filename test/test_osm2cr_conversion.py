@@ -79,7 +79,7 @@ class TestOSM2CRScenarioBaseClass(unittest.TestCase):
     #         self.assertTrue(elements_equal(ground_truth, converted))
 
     def test_osm2cr_conversion_ids(self):
-        """Test if Scenario IDs are ordered correctly in ascending"""
+        """Test if Scenario IDs are correctly ordered ascending """
 
         parser = etree.XMLParser(remove_blank_text=True)
         converted = etree.parse(self.converted_path, parser=parser).getroot()
@@ -157,7 +157,7 @@ class TestHaimhausen(TestOSM2CRScenarioBaseClass):
 # class TestMunich(TestOSM2CRScenarioBaseClass):
 #     """Testing if a larger intersection with many lanes, traffic lights and signs
 #     can be converted on default settings"""
-
+#
 #     __test__ = True
 #     osm_file_name = "munich"
 

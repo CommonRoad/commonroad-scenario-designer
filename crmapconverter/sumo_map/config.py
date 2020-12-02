@@ -17,7 +17,6 @@ EGO_ID_START = 'egoVehicle'
 ID_DICT = {'obstacleVehicle': 3, 'egoVehicle': 4}
 
 
-
 class SumoConfig(DefaultConfig):
     @classmethod
     def from_scenario_name(cls, scenario_name: str):

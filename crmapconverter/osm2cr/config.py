@@ -155,6 +155,8 @@ COMPRESSION_THRESHOLD = 0.05
 EXPORT_IN_UTM = False
 # toggle filtering of negligible waypoints
 FILTER = True
+# delete invalid lanes before export
+DELETE_INVALID_LANES = True
 
 # Internal settings (these can be used to improve the conversion process for individual scenarios)
 # radius of the earth used for calculation in meters
@@ -162,7 +164,7 @@ EARTH_RADIUS = 6371000
 # delete short edges after cropping
 DELETE_SHORT_EDGES = False
 # distance between waypoints used internally in meters
-INTERPOLATION_DISTANCE_INTERNAL = 0.25
+INTERPOLATION_DISTANCE_INTERNAL = 0.5
 # bezier parameter for interpolation (should be within [0, 0.5])
 BEZIER_PARAMETER = 0.35
 # distance between roads at intersection used for cropping in meters
