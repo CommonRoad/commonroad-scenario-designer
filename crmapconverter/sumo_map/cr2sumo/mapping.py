@@ -47,39 +47,6 @@ traffic_light_states_SUMO2CR = {
     'O': TrafficLightState.INACTIVE
 }
 
-# ISO-3166 country code mapping to SUMO type file fond in templates/
-_lanelet_type_CR2SUMO = {
-    SupportedTrafficSignCountry.GERMANY: {
-        LaneletType.URBAN: "highway.residential",
-        LaneletType.COUNTRY: "highway.primary",
-        LaneletType.HIGHWAY: "highway.motorway",
-        LaneletType.DRIVE_WAY: "highway.living_street",
-        LaneletType.MAIN_CARRIAGE_WAY: "highway.primary",
-        LaneletType.ACCESS_RAMP: "highway.secondary",
-        LaneletType.EXIT_RAMP: "highway.secondary",
-        LaneletType.SHOULDER: "highway.secondary",
-        LaneletType.INTERSTATE: "highway.motorway",
-        LaneletType.UNKNOWN: "highway.primary",
-        LaneletType.BUS_LANE: "highway.bus_guideway",
-        LaneletType.BUS_STOP: "highway.bus_guideway",
-        LaneletType.BICYCLE_LANE: "highway.cycleway",
-        LaneletType.SIDEWALK: "highway.track",
-        LaneletType.CROSSWALK: "highway.track"
-    },
-    SupportedTrafficSignCountry.USA: {},
-    SupportedTrafficSignCountry.CHINA: {},
-    SupportedTrafficSignCountry.SPAIN: {},
-    SupportedTrafficSignCountry.RUSSIA: {},
-    SupportedTrafficSignCountry.ARGENTINA: {},
-    SupportedTrafficSignCountry.BELGIUM: {},
-    SupportedTrafficSignCountry.FRANCE: {},
-    SupportedTrafficSignCountry.GREECE: {},
-    SupportedTrafficSignCountry.CROATIA: {},
-    SupportedTrafficSignCountry.ITALY: {},
-    SupportedTrafficSignCountry.PUERTO_RICO: {},
-    SupportedTrafficSignCountry.ZAMUNDA: {}
-}
-
 # CommonRoad obstacle type to sumo type
 VEHICLE_TYPE_CR2SUMO = {
     ObstacleType.UNKNOWN: "passenger",
@@ -119,20 +86,58 @@ VEHICLE_NODE_TYPE_CR2SUMO = {
     ObstacleType.MEDIAN_STRIP: "vehicle"
 }
 
+# ISO-3166 country code mapping to SUMO type file fond in templates/
+_lanelet_type_CR2SUMO = {
+    SupportedTrafficSignCountry.GERMANY: {
+        LaneletType.URBAN: "highway.secondary",
+        LaneletType.COUNTRY: "highway.primary",
+        LaneletType.HIGHWAY: "highway.motorway",
+        LaneletType.DRIVE_WAY: "highway.living_street",
+        LaneletType.MAIN_CARRIAGE_WAY: "highway.primary",
+        LaneletType.ACCESS_RAMP: "highway.primary_link",
+        LaneletType.EXIT_RAMP: "highway.primary_link",
+        LaneletType.SHOULDER: "highway.primary_link",
+        LaneletType.INTERSTATE: "highway.motorway",
+        LaneletType.UNKNOWN: "highway.unclassified",
+        LaneletType.BUS_LANE: "highway.bus_guideway",
+        LaneletType.BUS_STOP: "highway.bus_guideway",
+        LaneletType.BICYCLE_LANE: "highway.cycleway",
+        LaneletType.SIDEWALK: "highway.track",
+        LaneletType.CROSSWALK: "highway.track"
+    },
+    SupportedTrafficSignCountry.USA: {},
+    SupportedTrafficSignCountry.CHINA: {},
+    SupportedTrafficSignCountry.SPAIN: {},
+    SupportedTrafficSignCountry.RUSSIA: {},
+    SupportedTrafficSignCountry.ARGENTINA: {},
+    SupportedTrafficSignCountry.BELGIUM: {},
+    SupportedTrafficSignCountry.FRANCE: {},
+    SupportedTrafficSignCountry.GREECE: {},
+    SupportedTrafficSignCountry.CROATIA: {},
+    SupportedTrafficSignCountry.ITALY: {},
+    SupportedTrafficSignCountry.PUERTO_RICO: {},
+    SupportedTrafficSignCountry.ZAMUNDA: {}
+}
+
 TEMPLATES_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "templates"))
 DEFAULT_CFG_FILE = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "templates", "default.sumo.cfg"))
 
 
 def get_sumo_edge_type(country_id: SupportedTrafficSignCountry, *lanelet_types: LaneletType) -> Tuple[str, str]:
+    if not lanelet_types:
+        logging.warning("No Lanelet Type given for sumo_edge_type conversion, falling back to LaneletType.URBAN")
+        return get_sumo_edge_type(country_id, LaneletType.URBAN)
     lanelet_type = max(set(lanelet_types), key=lanelet_types.count)
 
     if country_id in _lanelet_type_CR2SUMO and lanelet_type in _lanelet_type_CR2SUMO[country_id]:
         filename = os.path.join(TEMPLATES_DIR, f"{country_id.value}.typ.xml")
         return _lanelet_type_CR2SUMO[country_id][lanelet_type], filename
+
     elif lanelet_type not in _lanelet_type_CR2SUMO[SupportedTrafficSignCountry.GERMANY]:
-        raise RuntimeError(f"LaneletType {str(lanelet_type)} is invalid")
+        raise KeyError(f"LaneletType {str(lanelet_type)} is invalid")
+
     else:
-        logging.warning("SupportedTrafficSignCountry is invalid, using GERMANY instead")
+        logging.warning(f"SupportedTrafficSignCountry {country_id} is invalid, using GERMANY instead")
         return get_sumo_edge_type(SupportedTrafficSignCountry.GERMANY, lanelet_type)
 
 
@@ -157,7 +162,7 @@ def edge_type_allowed(type_id: str, type_path: str) -> Set[str]:
         return set(SUMO_VEHICLE_CLASSES) - set(attrib["disallow"].split(" "))
 
 
-def edge_type_disallowed(self) -> Set[str]:
+def edge_type_disallowed(type_id: str, type_path: str) -> Set[str]:
     """
     Set of disallowed vClasses for type_id from the given type_path .typ.xml
     :return: vClasses
@@ -165,6 +170,6 @@ def edge_type_disallowed(self) -> Set[str]:
     """
     attrib = _get_type_attributes(type_id, type_path)
     try:
-        return set(attrib["allow"].split(" "))
+        return set(attrib["disallow"].split(" "))
     except Exception:
-        return set(SUMO_VEHICLE_CLASSES) - set(attrib["disallow"].split(" "))
+        return set(SUMO_VEHICLE_CLASSES) - set(attrib["allow"].split(" "))
