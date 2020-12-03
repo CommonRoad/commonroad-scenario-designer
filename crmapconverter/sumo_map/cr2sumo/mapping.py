@@ -89,7 +89,7 @@ VEHICLE_NODE_TYPE_CR2SUMO = {
 # ISO-3166 country code mapping to SUMO type file fond in templates/
 _lanelet_type_CR2SUMO = {
     SupportedTrafficSignCountry.GERMANY: {
-        LaneletType.URBAN: "highway.secondary",
+        LaneletType.URBAN: "highway.residential",
         LaneletType.COUNTRY: "highway.primary",
         LaneletType.HIGHWAY: "highway.motorway",
         LaneletType.DRIVE_WAY: "highway.living_street",
@@ -102,10 +102,26 @@ _lanelet_type_CR2SUMO = {
         LaneletType.BUS_LANE: "highway.bus_guideway",
         LaneletType.BUS_STOP: "highway.bus_guideway",
         LaneletType.BICYCLE_LANE: "highway.cycleway",
-        LaneletType.SIDEWALK: "highway.track",
-        LaneletType.CROSSWALK: "highway.track"
+        LaneletType.SIDEWALK: "highway.path",
+        LaneletType.CROSSWALK: "highway.path"
     },
-    SupportedTrafficSignCountry.USA: {},
+    SupportedTrafficSignCountry.USA: {
+        LaneletType.URBAN: "highway.residential",
+        LaneletType.COUNTRY: "highway.primary",
+        LaneletType.HIGHWAY: "highway.motorway",
+        LaneletType.DRIVE_WAY: "highway.living_street",
+        LaneletType.MAIN_CARRIAGE_WAY: "highway.primary",
+        LaneletType.ACCESS_RAMP: "highway.primary_link",
+        LaneletType.EXIT_RAMP: "highway.primary_link",
+        LaneletType.SHOULDER: "highway.primary_link",
+        LaneletType.INTERSTATE: "highway.motorway",
+        LaneletType.UNKNOWN: "highway.unclassified",
+        LaneletType.BUS_LANE: "highway.bus_guideway",
+        LaneletType.BUS_STOP: "highway.bus_guideway",
+        LaneletType.BICYCLE_LANE: "highway.cycleway",
+        LaneletType.SIDEWALK: "highway.path",
+        LaneletType.CROSSWALK: "highway.path"
+    },
     SupportedTrafficSignCountry.CHINA: {},
     SupportedTrafficSignCountry.SPAIN: {},
     SupportedTrafficSignCountry.RUSSIA: {},
@@ -120,7 +136,7 @@ _lanelet_type_CR2SUMO = {
 }
 
 TEMPLATES_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "templates"))
-DEFAULT_CFG_FILE = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "templates", "default.sumo.cfg"))
+DEFAULT_CFG_FILE = os.path.join(TEMPLATES_DIR, "default.sumo.cfg")
 
 
 def get_sumo_edge_type(country_id: SupportedTrafficSignCountry, *lanelet_types: LaneletType) -> Tuple[str, str]:
