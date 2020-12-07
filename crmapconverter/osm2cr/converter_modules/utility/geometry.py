@@ -467,7 +467,7 @@ def get_angle(v1: np.ndarray, v2:np.ndarray) -> float:
     """
     Get clockwise angle between vectors
     :param v1: one vector
-     :type v1: np.ndarray
+    :type v1: np.ndarray
     :param v2: another vector
     :type v2: np.ndarray
     :return: clockwise angle between vectors in degrees
@@ -479,7 +479,6 @@ def get_angle(v1: np.ndarray, v2:np.ndarray) -> float:
     diff1 = angles[0] - angles[1]
     angle = diff1 / np.pi * 180
     return angle
-
 
 def curvature(polyline: List[np.ndarray]) -> float:
     """
@@ -851,6 +850,7 @@ def get_gradient(polyline: List[np.ndarray]):
 
     m = (b[1] - a[1]) / (b[0] - a[0])
     return m
+
 
 def is_clockwise(polyline: List[np.ndarray]):
     """

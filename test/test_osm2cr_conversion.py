@@ -1,15 +1,15 @@
-# -*- coding: utf-8 -*-
-"""Test the conversion from an osm file to a CommonRoad Scenario file."""
+# # -*- coding: utf-8 -*-
+# """Test the conversion from an osm file to a CommonRoad Scenario file."""
 
-__author__ = "Max Frühauf"
-__copyright__ = "TUM Cyber-Physical Systems Group"
+# __author__ = "Max Frühauf"
+# __copyright__ = "TUM Cyber-Physical Systems Group"
 
-import os
-import unittest
-from lxml import etree
+# import os
+# import unittest
+# from lxml import etree
 
 # import crmapconverter.osm2cr.converter_modules.converter as converter
-from test.utils import elements_equal
+# from test.utils import elements_equal
 
 
 # class TestOSM2CRScenarioBaseClass(unittest.TestCase):
@@ -23,7 +23,7 @@ from test.utils import elements_equal
 #     xml_output_name = None
 #     cwd_path = None
 #     out_path = None
-#     scenario: converter.Scenario = None
+#     scenario: converter.GraphScenario = None
 
 #     def setUp(self):
 #         """Load the osm file and convert it to a scenario."""
@@ -43,12 +43,12 @@ from test.utils import elements_equal
 
 #         path = os.path.dirname(os.path.realpath(
 #             __file__)) + f"/osm_xml_test_files/{self.osm_file_name}.osm"
-#         self.scenario = converter.Scenario(path)
+#         self.scenario = converter.GraphScenario(path)
 
 #     def test_osm2_cr_conversion(self):
 #         """Test if the converted scenario is equal to the loaded xml file"""
 
-#         # Save scenario to xml file, as converter.Scenario offers no way
+#         # Save scenario to xml file, as converter.GraphScenario offers no way
 #         # to access the underlying CommonRoadfileWriter
 #         converted_path = os.path.join(
 #             self.out_path, self.osm_file_name + "_converted_scenario.xml")
@@ -56,7 +56,7 @@ from test.utils import elements_equal
 
 #         ground_truth_path = os.path.dirname(
 #             os.path.realpath(__file__)
-#         ) + f"/osm_xml_test_files/{self.osm_file_name}_osm2cr.xml"
+#         ) + f"/osm_xml_test_files/{self.osm_file_name}.xml"
 
 #         # load saved file & compare to ground truth
 #         with open(ground_truth_path, "r") as gt, open(converted_path,
@@ -75,7 +75,7 @@ from test.utils import elements_equal
 
 # class TestUrbanScenario(TestOSM2CRScenarioBaseClass):
 #     """Copied to prevent regression from test_osm_to_cr_lanelet_conversion.py"""
-#     __test__ = True
+#     __test__ = False
 #     osm_file_name = "urban-1_lanelets_utm"
 
 # class TestMergingLaneletsScenario(TestOSM2CRScenarioBaseClass):
@@ -88,5 +88,5 @@ from test.utils import elements_equal
 #     """Testing if a small town with traffic lights, complicated road networks 
 #     and large osm filesize can be correctly converted"""
 
-#     __test__ = True
+#     __test__ = False
 #     osm_file_name = "eichstaett"

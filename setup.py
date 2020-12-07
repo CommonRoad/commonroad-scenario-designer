@@ -29,10 +29,7 @@ setup(
         "Pillow >= 7.1.1",
         "mercantile >= 1.1.3",
         "utm >= 0.5.0",
-        # TODO: This dependency is required for this package but fails to build on the CI server
-        # therefore it is commented out for now
-        # "cartopy >= 0.17.0",
-
+        "cartopy >= 0.17.0",
         # only for graphical display
         "PyQt5>=5.12.2",
         "matplotlib>=3.1.0",
@@ -42,10 +39,8 @@ setup(
     entry_points={
         "console_scripts": [
             "opendrive2lanelet-convert=crmapconverter.io.opendrive_convert:main",
-            "opendrive2lanelet-gui=crmapconverter.io.gui:opendrive_gui",
-            "cr-map-converter-gui=crmapconverter.io.gui:main",
-            "opendrive2lanelet-visualize=crmapconverter.io.visualize_commonroad:main",
             "osm-convert=crmapconverter.io.osm_convert:main",
+            "cr-designer=crmapconverter.io.scenario_designer.main_cr_designer:main"
         ]
     },
     classifiers=[

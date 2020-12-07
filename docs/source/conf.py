@@ -21,9 +21,9 @@ sys.path.insert(0, os.path.abspath("../.."))
 
 # -- Project information -----------------------------------------------------
 
-project = "opendrive2lanelet"
-copyright = "2018, Technische Universität München"
-author = "Benjamin Orthen, Stefan Urban"
+project = "commonroad-map-tool"
+copyright = "2020, Technische Universität München"
+author = "Maximilian Frühauf, Benjamin Orthen, Stefan Urban"
 
 # The short X.Y version
 version = "1.0"
@@ -58,8 +58,6 @@ templates_path = ["_templates"]
 
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
-#
-# source_suffix = ['.rst', '.md']
 source_suffix = ".rst"
 
 # The master toctree document.
@@ -79,6 +77,8 @@ exclude_patterns = ["api/modules.rst"]
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = None
+
+numfig = True
 
 
 # -- Options for HTML output -------------------------------------------------

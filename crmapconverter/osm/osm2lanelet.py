@@ -20,9 +20,9 @@ from commonroad.scenario.lanelet import StopLine, LineMarking, RoadUser, Lanelet
 from commonroad.scenario.traffic_sign import TrafficSignIDGermany, TrafficSignElement
 from shapely.geometry import LineString
 
-from crmapconverter.opendriveconversion.conversion_lanelet import ConversionLanelet
-from crmapconverter.opendriveconversion.conversion_lanelet_network import ConversionLaneletNetwork, convert_to_new_lanelet_id
-from crmapconverter.osm.osm import OSM, WayRelation, DEFAULT_PROJ_STRING, Node, RightOfWayRelation
+from crmapconverter.opendrive.opendriveconversion.conversion_lanelet import ConversionLanelet
+from crmapconverter.opendrive.opendriveconversion.conversion_lanelet_network import ConversionLaneletNetwork
+from crmapconverter.osm.osm import OSM, WayRelation, DEFAULT_PROJ_STRING, Node
 from crmapconverter.osm2cr.converter_modules.utility.geometry import (
     point_to_line_distance,
     distance as point_to_polyline_distance
@@ -31,7 +31,7 @@ from crmapconverter.osm2cr.converter_modules.utility.geometry import (
 NODE_DISTANCE_TOLERANCE = 0.01  # this is in meters
 PRIORITY_SIGNS = [TrafficSignIDGermany.RIGHT_BEFORE_LEFT, TrafficSignIDGermany.PRIORITY, TrafficSignIDGermany.RIGHT_OF_WAY]
 
-adjacent_way_distance_tolerance = 0.05
+ADJACENT_WAY_DISTANCE_TOLERANCE = 0.05
 
 
 def _add_closest_traffic_sign_to_lanelet(lanelets: List[Lanelet], traffic_signs: List[TrafficSign]):
@@ -832,7 +832,7 @@ def _two_vertices_coincide(
             distances[i + 1] = np.abs(
                 np.cross(diff, vertices1[i] - vert)
             ) / np.linalg.norm(diff)
-        if np.min(distances) > adjacent_way_distance_tolerance:
+        if np.min(distances) > ADJACENT_WAY_DISTANCE_TOLERANCE:
             return False
 
     return True

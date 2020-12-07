@@ -1,0 +1,466 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>EdgeEdit</class>
+ <widget class="QMainWindow" name="EdgeEdit">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1137</width>
+    <height>756</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Edge Edit</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QGridLayout" name="gridLayout">
+    <item row="0" column="1">
+     <widget class="QGroupBox" name="plot_groupBox">
+      <property name="minimumSize">
+       <size>
+        <width>400</width>
+        <height>600</height>
+       </size>
+      </property>
+      <property name="title">
+       <string/>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout" stretch="12,1">
+       <item>
+        <layout class="QVBoxLayout" name="plot_frame"/>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout">
+         <item>
+          <widget class="QPushButton" name="pushButton">
+           <property name="text">
+            <string>Parsing</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="pushButton_2">
+           <property name="text">
+            <string>Edge Editing</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="pushButton_3">
+           <property name="text">
+            <string>Lane Link Editing</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>30</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QPushButton" name="b_finalize">
+           <property name="text">
+            <string>Finalize Edit</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item row="0" column="0" rowspan="2">
+     <widget class="QWidget" name="Buttons" native="true">
+      <property name="minimumSize">
+       <size>
+        <width>235</width>
+        <height>0</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>235</width>
+        <height>16777215</height>
+       </size>
+      </property>
+      <widget class="QLabel" name="label">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>9</y>
+         <width>55</width>
+         <height>17</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>Actions</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="chk_move">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>230</y>
+         <width>63</width>
+         <height>23</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Move</string>
+       </property>
+      </widget>
+      <widget class="QWidget" name="widget" native="true">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>270</y>
+         <width>231</width>
+         <height>293</height>
+        </rect>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>182</width>
+         <height>0</height>
+        </size>
+       </property>
+       <layout class="QGridLayout" name="gridLayout_3" columnstretch="3,1">
+        <item row="3" column="0">
+         <widget class="QLabel" name="label_3">
+          <property name="text">
+           <string>Nr of forward</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="label_5">
+          <property name="text">
+           <string>Road Type</string>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="0">
+         <widget class="QLabel" name="label_4">
+          <property name="text">
+           <string>Nr of backward</string>
+          </property>
+         </widget>
+        </item>
+        <item row="7" column="0">
+         <widget class="QLabel" name="label_8">
+          <property name="text">
+           <string>Speed Limit</string>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="1">
+         <widget class="QSpinBox" name="sp_backward_lanes"/>
+        </item>
+        <item row="1" column="1">
+         <widget class="QComboBox" name="co_road_type">
+          <item>
+           <property name="text">
+            <string>Motorway</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Motorway Link</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Trunk</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Trunk Link</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Primary</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Primary Link</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Secondary</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Secondary Link</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Tertiary</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Tertiary Link</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Unclassified</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Residential</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Living Street</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Service</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item row="3" column="1">
+         <widget class="QSpinBox" name="sp_forward_lanes"/>
+        </item>
+        <item row="7" column="1">
+         <widget class="QSpinBox" name="sp_speed_limit">
+          <property name="minimum">
+           <number>1</number>
+          </property>
+          <property name="maximum">
+           <number>1000</number>
+          </property>
+          <property name="singleStep">
+           <number>10</number>
+          </property>
+          <property name="value">
+           <number>50</number>
+          </property>
+         </widget>
+        </item>
+        <item row="8" column="0" colspan="2">
+         <widget class="QPushButton" name="b_flip">
+          <property name="text">
+           <string>flip direction</string>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="0">
+         <widget class="QLabel" name="label_6">
+          <property name="text">
+           <string>Oneway</string>
+          </property>
+         </widget>
+        </item>
+        <item row="6" column="0">
+         <widget class="QLabel" name="label_7">
+          <property name="text">
+           <string>Lane width</string>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="1">
+         <widget class="QCheckBox" name="ch_oneway">
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <widget class="QSpinBox" name="sp_lane_count">
+          <property name="minimum">
+           <number>1</number>
+          </property>
+         </widget>
+        </item>
+        <item row="6" column="1">
+         <widget class="QDoubleSpinBox" name="sp_lane_width">
+          <property name="decimals">
+           <number>3</number>
+          </property>
+          <property name="maximum">
+           <double>1000.000000000000000</double>
+          </property>
+          <property name="singleStep">
+           <double>0.100000000000000</double>
+          </property>
+          <property name="value">
+           <double>2.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0">
+         <widget class="QLabel" name="label_2">
+          <property name="text">
+           <string>Nr of Lanes</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0" colspan="2">
+         <widget class="QLabel" name="label_9">
+          <property name="text">
+           <string>Road Information</string>
+          </property>
+          <property name="textFormat">
+           <enum>Qt::AutoText</enum>
+          </property>
+          <property name="scaledContents">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="layoutWidget">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>30</y>
+         <width>211</width>
+         <height>191</height>
+        </rect>
+       </property>
+       <layout class="QGridLayout" name="gridLayout_4">
+        <item row="0" column="0">
+         <widget class="QPushButton" name="b_save">
+          <property name="toolTip">
+           <string>ctrl+s</string>
+          </property>
+          <property name="text">
+           <string>save</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0">
+         <widget class="QPushButton" name="b_undo">
+          <property name="toolTip">
+           <string>ctrl + z</string>
+          </property>
+          <property name="text">
+           <string>undo</string>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="0">
+         <widget class="QPushButton" name="b_delete">
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>del</string>
+          </property>
+          <property name="text">
+           <string>delete</string>
+          </property>
+         </widget>
+        </item>
+        <item row="7" column="0">
+         <widget class="QPushButton" name="b_new_edge">
+          <property name="toolTip">
+           <string>ctrl + e</string>
+          </property>
+          <property name="text">
+           <string>new edge</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QPushButton" name="b_load">
+          <property name="toolTip">
+           <string>ctrl + l</string>
+          </property>
+          <property name="text">
+           <string>load</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <widget class="QPushButton" name="b_redo">
+          <property name="toolTip">
+           <string>ctrl + shift + z</string>
+          </property>
+          <property name="text">
+           <string>redo</string>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="1">
+         <widget class="QPushButton" name="b_new_waypoint">
+          <property name="toolTip">
+           <string>ctrl + n</string>
+          </property>
+          <property name="text">
+           <string>new point</string>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="0">
+         <widget class="QPushButton" name="b_split">
+          <property name="toolTip">
+           <string>ctrl + d</string>
+          </property>
+          <property name="text">
+           <string>split</string>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="1">
+         <widget class="QPushButton" name="b_set_widths">
+          <property name="text">
+           <string>set widths</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1137</width>
+     <height>28</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
