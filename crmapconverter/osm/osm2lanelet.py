@@ -21,8 +21,8 @@ from commonroad.scenario.traffic_sign import TrafficSignIDGermany, TrafficSignEl
 from shapely.geometry import LineString
 
 from crmapconverter.opendrive.opendriveconversion.conversion_lanelet import ConversionLanelet
-from crmapconverter.opendrive.opendriveconversion.conversion_lanelet_network import ConversionLaneletNetwork
-from crmapconverter.osm.osm import OSM, WayRelation, DEFAULT_PROJ_STRING, Node
+from crmapconverter.opendrive.opendriveconversion.conversion_lanelet_network import ConversionLaneletNetwork, convert_to_new_lanelet_id
+from crmapconverter.osm.osm import OSM, WayRelation, DEFAULT_PROJ_STRING, Node, RightOfWayRelation
 from crmapconverter.osm2cr.converter_modules.utility.geometry import (
     point_to_line_distance,
     distance as point_to_polyline_distance
