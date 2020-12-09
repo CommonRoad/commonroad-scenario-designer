@@ -4,6 +4,7 @@ from argparse import ArgumentParser
 import os
 import sys
 import logging
+import numpy as np
 
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import (QMainWindow, QDockWidget, QMessageBox, QAction,
@@ -17,7 +18,7 @@ from matplotlib.backends.backend_qt5agg import (NavigationToolbar2QT as
 from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.common.file_writer import (CommonRoadFileWriter,
                                            OverwriteExistingFile)
-from commonroad.scenario.scenario import Scenario, LaneletNetwork
+from commonroad.scenario.scenario import Scenario, LaneletNetwork, Lanelet
 
 from crmapconverter.io.scenario_designer.gui_resources.MainWindow import Ui_mainWindow
 from crmapconverter.io.scenario_designer.gui_toolbox import UpperToolbox
@@ -32,6 +33,10 @@ from crmapconverter.io.scenario_designer.gui_viewer import (
     LaneletList, IntersectionList, find_intersection_by_id, AnimatedViewer)
 from crmapconverter.io.scenario_designer import config
 from crmapconverter.io.scenario_designer import util
+
+from commonroad.scenario.lanelet import Lanelet
+from commonroad.scenario.lanelet import LaneletType
+from commonroad.scenario.lanelet import LaneletNetwork
 
 
 class MWindow(QMainWindow, Ui_mainWindow):
@@ -52,6 +57,11 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.timer = None
         self.ani_path = None
         self.slider_clicked = False
+
+        self.network = LaneletNetwork()
+        self.file_path = "/home/aaron/Downloads/ZAM_Tutorial-1_2_T-3.xml"  # "/home/marcu/MPFAV/ZAM_Tutorial-1_2_T-3.xml"  #
+        self.scenario, self.planning_problem_set = CommonRoadFileReader(self.file_path).open()
+        self.id = None
 
         # GUI attributes
         self.tool1 = None
@@ -131,6 +141,22 @@ class MWindow(QMainWindow, Ui_mainWindow):
     def show_sumo_settings(self):
         self.sumo_settings = SUMOSettings(self, config=self.sumobox.config)
 
+    def click_straight(self,width=3,length=50,vertices=10, rot_angle=0):
+        lanelet = self.create_straight(width,length,vertices,self.network)
+        lanelet.translate_rotate(np.array([0, 0]), rot_angle)
+        self.network.add_lanelet(lanelet)
+        self.scenario._lanelet_network = self.network
+        self.open_scenario(self.scenario)
+        self.update_to_new_scenario()
+
+    def click_curve(self,width=3,radius=50, angle=np.pi/2, num_vertices=30, rot_angle=0):
+        lanelet = self.create_curve(width, radius, angle, num_vertices, self.network)
+        lanelet.translate_rotate(np.array([0, 0]), rot_angle)
+        self.network.add_lanelet(lanelet)
+        self.scenario._lanelet_network = self.network
+        self.open_scenario(self.scenario)
+        self.update_to_new_scenario()
+
     def create_toolbox(self):
         """ Create the Upper toolbox."""
         self.uppertoolBox = UpperToolbox()
@@ -141,6 +167,11 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.tool1.setAllowedAreas(Qt.LeftDockWidgetArea)
         self.tool1.setWidget(self.uppertoolBox)
         self.addDockWidget(Qt.LeftDockWidgetArea, self.tool1)
+        self.uppertoolBox.button_forwards.clicked.connect(lambda: self.click_straight())
+        self.uppertoolBox.button_backwards.clicked.connect(lambda: self.click_straight(rot_angle=np.pi))
+        self.uppertoolBox.button_turn_right.clicked.connect(lambda: self.click_curve(angle=-np.pi/2))
+        self.uppertoolBox.button_turn_left.clicked.connect(lambda: self.click_curve())
+        #self.uppertoolBox.button_fit_to_predecessor.clicked.connect(lambda: self.click_fit_to_predecessor())
 
         if SUMO_AVAILABLE:
             self.create_sumobox()
@@ -771,6 +802,94 @@ class MWindow(QMainWindow, Ui_mainWindow):
             # triggered by click on canvas
             self.lanelet_list.reset_selection()
             self.intersection_list.reset_selection()
+
+    def create_straight(self, width, length, num_vertices, network):
+
+        eps = 0.1e-15
+        length_div = length / num_vertices
+        left_vertices = []
+        center_vertices = []
+        right_vertices = []
+        for i in range(num_vertices + 1):
+            left_vertices.append([length_div * i + eps, width / 2 + eps])
+            center_vertices.append([length_div * i + eps, eps])
+            right_vertices.append([length_div * i + eps, -(width / 2) + eps])
+
+        left_vertices = np.array(left_vertices)
+        center_vertices = np.array(center_vertices)
+        right_vertices = np.array(right_vertices)
+
+        idl = self.scenario.generate_object_id()
+        lanelet = Lanelet(left_vertices=left_vertices, right_vertices=right_vertices, lanelet_id=idl,
+                          center_vertices=center_vertices, lanelet_type={LaneletType.URBAN})
+
+        network.add_lanelet(lanelet=lanelet)
+        return lanelet
+
+    def create_curve(self, width, radius, angle, num_vertices, network):
+        angle_div = angle / (num_vertices - 1)
+        radius_left = radius - (width / 2)
+        radius_right = radius + (width / 2)
+        left_vert = []
+        center_vert = []
+        right_vert = []
+        for i in range(num_vertices):
+            left_vert.append([np.cos(i * angle_div) * radius_left, np.sin(i * angle_div) * radius_left])
+            center_vert.append([np.cos(i * angle_div) * radius, np.sin(i * angle_div) * radius])
+            right_vert.append([np.cos(i * angle_div) * radius_right, np.sin(i * angle_div) * radius_right])
+
+        left_vertices = np.array(left_vert)
+        center_vertices = np.array(center_vert)
+        right_vertices = np.array(right_vert)
+
+        if angle < 0:
+            left_vertices = np.array(right_vert)
+            center_vertices = np.array(center_vert)
+            right_vertices = np.array(left_vert)
+
+        idl = self.scenario.generate_object_id()
+        lanelet = Lanelet(left_vertices=left_vertices, right_vertices=right_vertices, lanelet_id=idl,
+                          center_vertices=center_vertices, lanelet_type={LaneletType.URBAN})
+
+        network.add_lanelet(lanelet=lanelet)
+        return lanelet
+
+    def set_predecessor_successor_relation(self, predecessor, successor):
+        a = successor.predecessor
+        a.append(predecessor.lanelet_id)
+        a = set(a)
+        successor._predecessor = list(a)
+        b = predecessor.successor
+        b.append(successor.lanelet_id)
+        b = set(b)
+        predecessor._successor = list(b)
+
+    def calc_angle_between(self, predecessor, lanelet):
+        last_element = len(predecessor.left_vertices) - 1
+        line_predecessor = predecessor.left_vertices[last_element] - predecessor.right_vertices[last_element]
+        line_lanelet = lanelet.left_vertices[0] - lanelet.right_vertices[0]
+        norm_predecessor = np.linalg.norm(line_predecessor)
+        norm_lanelet = np.linalg.norm(line_lanelet)
+        dot_prod = np.dot(line_predecessor, line_lanelet)
+        sign = line_lanelet[1] * line_predecessor[0] - line_lanelet[0] * line_predecessor[1]
+        angle = np.arccos(dot_prod / (norm_predecessor * norm_lanelet))
+        if sign >= 0:
+            angle = 2 * np.pi - angle
+
+        return angle
+
+    def fit_to_predecessor(self, predecessor=None, lanelet=None):
+        if predecessor:
+            last_element = len(predecessor.center_vertices) - 1
+            ang = self.calc_angle_between(predecessor, lanelet)
+            lanelet.translate_rotate(np.array([0, 0]), ang)
+            trans = predecessor.center_vertices[last_element] - lanelet.center_vertices[0]
+            lanelet.translate_rotate(trans, 0)
+
+            # Relation
+            self.set_predecessor_successor_relation(predecessor, lanelet)
+
+        return lanelet
 
 
 def main():

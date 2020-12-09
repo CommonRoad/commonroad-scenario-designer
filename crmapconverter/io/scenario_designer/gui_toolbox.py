@@ -29,6 +29,7 @@ class UpperToolbox(QWidget):
     add them as (title, widget) tuples to self.sections
         """
     button_sumo_simulation = None
+    button_forwards = None
 
     def __init__(self):
         super().__init__()
@@ -55,6 +56,9 @@ class UpperToolbox(QWidget):
             button1 = self.add_button(title)
             section1 = self.add_widget(button1, widget)
             button1.addChild(section1)
+
+    #def clicked(self):
+        #print("clicked")
 
     def define_sections(self):
         """reimplement this to define all your sections
@@ -103,25 +107,33 @@ class UpperToolbox(QWidget):
         widgetlanelets = QFrame(self.tree)
         layoutlanelets = QGridLayout(widgetlanelets)
 
-        button_forwards = QPushButton()
-        button_forwards.setText("forwards")
-        button_forwards.setIcon(QIcon(":/icons/forwards.PNG"))
-        layoutlanelets.addWidget(button_forwards, 1, 0)
+        self.button_forwards = QPushButton()
+        self.button_forwards.setText("forwards")
+        self.button_forwards.setIcon(QIcon(":/forwards.PNG"))
+        layoutlanelets.addWidget(self.button_forwards, 1, 0)
+        #button_forwards.clicked.connect(self.clicked)
 
-        button_backwards = QPushButton()
-        button_backwards.setText("backwards")
-        layoutlanelets.addWidget(button_backwards, 1, 1)
-        button_backwards.setIcon(QIcon(":/gui_src/forwards.PNG"))
+        self.button_backwards = QPushButton()
+        self.button_backwards.setText("backwards")
+        layoutlanelets.addWidget(self.button_backwards, 1, 1)
+        self.button_backwards.setIcon(QIcon(":/gui_src/forwards.PNG"))
 
-        button_turn_right = QPushButton()
-        button_turn_right.setText("turn right")
-        layoutlanelets.addWidget(button_turn_right, 2, 0)
-        button_turn_right.setIcon(QIcon(":/gui_src/forwards.PNG"))
+        self.button_turn_right = QPushButton()
+        self.button_turn_right.setText("turn right")
+        layoutlanelets.addWidget(self.button_turn_right, 2, 0)
+        self.button_turn_right.setIcon(QIcon(":/gui_src/forwards.PNG"))
 
-        button_turn_left = QPushButton()
-        button_turn_left.setText("turn left")
-        layoutlanelets.addWidget(button_turn_left, 2, 1)
-        button_turn_right.setIcon(QIcon(":/gui_src/forwards.PNG"))
+        self.button_turn_left = QPushButton()
+        self.button_turn_left.setText("turn left")
+        layoutlanelets.addWidget(self.button_turn_left, 2, 1)
+        self.button_turn_right.setIcon(QIcon(":/gui_src/forwards.PNG"))
+
+        #Fit to Predecessor
+        self.button_fit_to_predecessor = QPushButton()
+        self.button_fit_to_predecessor.setText("Fit to Predecessor")
+        layoutlanelets.addWidget(self.button_fit_to_predecessor, 3, 1)
+        self.button_fit_to_predecessor.setIcon(QIcon(":/gui_src/forwards.PNG"))
+
 
         button_turn_left_45 = QPushButton()
         button_turn_left_45.setText("show more")
@@ -171,6 +183,28 @@ class UpperToolbox(QWidget):
         titleintersection = "Intersections"
         self.sections.append((titleintersection, widgetintersection))
 
+        # --Section Obstacles--
+
+        widgetobstacles = QFrame(self.tree)
+        layoutobstacles = QGridLayout(widgetobstacles)
+
+        button_obstacle1 = QPushButton()
+        button_obstacle1.setText("Obstacle1")
+        button_obstacle1.setIcon(QIcon(":/icons/forwards.PNG"))
+        layoutobstacles.addWidget(button_obstacle1, 1, 0)
+
+        button_obstacle2 = QPushButton()
+        button_obstacle2.setText("Obstacle2")
+        button_obstacle2.setIcon(QIcon(":/icons/forwards.PNG"))
+        layoutobstacles.addWidget(button_obstacle2, 2, 0)
+
+        button_obstacle3 = QPushButton()
+        button_obstacle3.setText("Obstacle3")
+        button_obstacle3.setIcon(QIcon(":/icons/forwards.PNG"))
+        layoutobstacles.addWidget(button_obstacle3, 3, 0)
+
+        titleobstacles = "Obstacles"
+        self.sections.append((titleobstacles, widgetobstacles))
 
         """"""""""""""
 
