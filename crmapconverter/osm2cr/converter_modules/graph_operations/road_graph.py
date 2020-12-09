@@ -6,7 +6,7 @@ from queue import Queue
 from typing import List, Set, Tuple, Optional, Dict
 from ordered_set import OrderedSet
 import numpy as np
-from commonroad.scenario.traffic_sign import TrafficSignElement, TrafficSign, TrafficLight, TrafficSignIDGermany
+from commonroad.scenario.traffic_sign import TrafficSignElement, TrafficSign, TrafficLight, TrafficSignIDGermany, TrafficSignIDZamunda
 from commonroad.geometry.shape import Polygon
 
 from crmapconverter.osm2cr import config
@@ -310,6 +310,8 @@ class GraphNode:
                 # TODO determine in which direction
                 if lane.forward:
                     lane.add_traffic_sign(sign)
+
+
 
 
 class GraphEdge:
@@ -738,7 +740,80 @@ class GraphTrafficSign:
 
         print(self.sign)
 
+    def parse_maxspeed(self):
+        sign_id = TrafficSignIDZamunda.MAX_SPEED
+        value = self.sign['maxspeed']
+        return TrafficSignElement(sign_id, [value])
+
+    def parse_traffic_sign(self):
+
+        elements = []
+        for unrelated_sign in str(self.sign['traffic_sign']).split(';'):
+            country = unrelated_sign[:2]
+            sign_data = unrelated_sign[3:]
+
+            for sign in sign_data.split(','):
+
+                # speed limit sign
+                if sign.startswith('274'):
+                    zone = False
+                    max_speed = -99.0
+                    if sign[4] == '[':
+                        max_speed = float(sign[sign.find("[") + 1:sign.find("]")])
+                    elif sign[4] == '-':
+                        max_speed = float(sign[5:])
+
+                    # speed limit zone
+                    elif sign[3:].startswith('.1'):
+                        zone = True
+                        if sign[5] == '-' or sign[5] == ':':
+                            max_speed = float(sign[6:])
+                        else:
+                            max_speed = float(sign[sign.find("[") + 1:sign.find("]")])
+
+                    # debugging
+                    # if max_speed == -99:
+                    #     print(sign)
+                    # else:
+                    #     print(max_speed)
+
+                    if max_speed != -99:
+                        if not zone:
+                            # convert km/h to m/s and add to traffic sign elements
+                            max_speed /= 3.6
+                            elements.append(TrafficSignElement(TrafficSignIDZamunda.MAX_SPEED, [max_speed]))
+                        else:
+                            elements.append(TrafficSignElement(TrafficSignIDZamunda.MAX_SPEED_ZONE_START, [max_speed]))
+
+                # city limit edge case
+                elif sign == 'y_limit':
+                    elements.append(TrafficSignElement(TrafficSignIDZamunda.TOWN_SIGN, [' ']))
+
+                # regular traffic sign
+                else:
+                    try:
+                        traffic_sign_de = TrafficSignIDZamunda(sign)
+                        value = ' '
+                        # add a value if found in sign
+                        if '[' in sign and ']' in sign:
+                            value = float(sign[sign.find('[') + 1:sign.find(']')])
+                        elements.append(TrafficSignElement(traffic_sign_de, [value]))
+                    # unknown traffic sign
+                    except ValueError:
+                        print("Unknown traffic sign in" +str(sign_data) + " found")
+                        #sign_id = traffic_sign_map['unknown']
+                        #value = 'unknown sign'
+                        #elements.append(TrafficSignElement(sign_id, [value]))
+        return elements
+
+    def parse_mapillary(self):
+        sign_id = TrafficSignIDZamunda.WARNING_ANIMAL_CROSSING_RIGHT
+        value = ' '#self.sign['mapillary']
+        return TrafficSignElement(sign_id, [value])
+        #TODO mapping to signs
+
     def to_traffic_sign_cr(self):
+        print(self.sign)
         elements = []
         position = None
 
@@ -746,72 +821,18 @@ class GraphTrafficSign:
         if self.node is not None:
             position = self.node.get_cooridnates()
 
-        # extract traffic sign values
+
+        # parse sign values
         # maxspeed
         if 'maxspeed' in self.sign:
-            sign_id = TrafficSignIDGermany.MAX_SPEED
-            value = self.sign['maxspeed']
-            elements.append(TrafficSignElement(sign_id, [value]))
-
-        # if traffic sign
+            elements.append(self.parse_maxspeed())
+        # mapillary sign
+        elif 'mapillary' in self.sign:
+            elements.append(self.parse_mapillary())
+        # traffic sign
         elif 'traffic_sign' in self.sign:
+            elements.extend(self.parse_traffic_sign())
 
-            for unrelated_sign in str(self.sign['traffic_sign']).split(';'):
-                country = unrelated_sign[:2]
-                sign_data = unrelated_sign[3:]
-
-                for sign in sign_data.split(','):
-
-                    # speed limit sign
-                    if sign.startswith('274'):
-                        zone = False
-                        max_speed = -99.0
-                        if sign[4] == '[':
-                            max_speed = float(sign[sign.find("[") + 1:sign.find("]")])
-                        elif sign[4] == '-':
-                            max_speed = float(sign[5:])
-
-                        # speed limit zone
-                        elif sign[3:5] == '.1':
-                            zone = True
-                            if sign[6] == '-':
-                                max_speed = float(sign[6:])
-                            else:
-                                max_speed = float(sign[sign.find("[") + 1:sign.find("]")])
-
-                        # debugging
-                        # if max_speed == -99:
-                        #     print(sign)
-                        # else:
-                        #     print(max_speed)
-
-                        if max_speed != -99:
-                            if not zone:
-                                # convert km/h to m/s and add to traffic sign elements
-                                max_speed /= 3.6
-                                elements.append(TrafficSignElement(TrafficSignIDGermany.MAX_SPEED, [max_speed]))
-                            else:
-                                elements.append(TrafficSignElement(TrafficSignIDGermany.MAX_SPEED_ZONE_START, [max_speed]))
-
-                    # city limit edge case
-                    elif sign == 'y_limit':
-                        elements.append(TrafficSignElement(TrafficSignIDGermany.TOWN_SIGN, [' ']))
-
-                    # regular traffic sign
-                    else:
-                        try:
-                            traffic_sign_de = TrafficSignIDGermany(sign)
-                            value = ' '
-                            # add a value if found in sign
-                            if '[' in sign and ']' in sign:
-                                value = float(sign[sign.find('[') + 1:sign.find(']')])
-                            elements.append(TrafficSignElement(traffic_sign_de, [value]))
-                        # unknown traffic sign
-                        except ValueError:
-                            print("Unknown traffic sign in" +str(sign_data) + " found")
-                            #sign_id = traffic_sign_map['unknown']
-                            #value = 'unknown sign'
-                            #elements.append(TrafficSignElement(sign_id, [value]))
 
         virtual = False
         if 'virtual' in self.sign:
@@ -1776,6 +1797,44 @@ class Graph:
         for lane in invalid_lanes:
             self.delete_lane(lane)
         #self.set_adjacents()
+
+    def find_closest_node_by_lat_lng(self, lat_lng) -> GraphNode:
+        """
+        finds the closest GraphNode in Graph to a given lat_lng
+
+        :param lat_lng: np.array including lat_lng
+        :return: GraphNode which is closest to the given lat_lng coordinates
+        """
+        given_point = np.asarray(lat_lng)
+        nodes = list(self.nodes)
+
+        # node coordinates need to be converted to lat lng before comparsion
+        points = np.asarray(list(map(lambda x: geometry.cartesian_to_lon_lat(x.get_cooridnates(), self.center_point), nodes)))
+
+        # https://codereview.stackexchange.com/a/28210
+        dist_2 = np.sum((points - given_point)**2, axis=1)
+        closest_node_index = np.argmin(dist_2)
+        return nodes[closest_node_index]
+
+
+    def find_closest_edge_by_lat_lng(self, lat_lng) -> GraphNode:
+        """
+        finds the closest GraphEdge in Graph to a given lat_lng
+
+        :param lat_lng: np.array including lat_lng
+        :return: GraphEdge which is closest to the given lat_lng coordinates
+        """
+        given_point = np.asarray(lat_lng)
+        edges = list(self.edges)
+
+        # edge coordinates need to be converted to lat lng before comparsion
+        points = np.asarray(list(map(lambda x: geometry.cartesian_to_lon_lat(x.get_waypoints()[0], self.center_point), edges)))
+
+        # https://codereview.stackexchange.com/a/28210
+        dist_2 = np.sum((points - given_point)**2, axis=1)
+        closest_edge_index = np.argmin(dist_2)
+        return edges[closest_edge_index]
+
 
 class SublayeredGraph(Graph):
 
