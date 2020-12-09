@@ -58,10 +58,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.ani_path = None
         self.slider_clicked = False
 
-        #self.network = LaneletNetwork()
-        #self.file_path = "/home/aaron/Downloads/ZAM_Tutorial-1_2_T-3.xml"  # "/home/marcu/MPFAV/ZAM_Tutorial-1_2_T-3.xml"  #
-        #self.scenario, self.planning_problem_set = CommonRoadFileReader(self.file_path).open()
-        #self.id = None
+
         self.scenario = None
         self.latestid = None
         self.selected_lanelet = None
