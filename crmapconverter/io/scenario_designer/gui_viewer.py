@@ -59,7 +59,7 @@ def _merge_dict(source, destination):
 
 
 class DynamicCanvas(FigureCanvas):
-    """ this canvas provides zoom with the mouse wheel """
+    """ this canvas provides m with the mouse wheel """
     def __init__(self, parent=None, width=5, height=5, dpi=100):
 
         self.ax = None
@@ -312,6 +312,7 @@ class LaneletList(ScenarioElementList):
     def __init__(self, action_on_click, parent=None):
         super().__init__(action_on_click, parent)
         self.header_labels = ["Lanelet-Id", "LaneletType"]
+        #self.lanelet_data
 
     def update(self, scenario):
         if scenario is None:
@@ -321,6 +322,7 @@ class LaneletList(ScenarioElementList):
             description = ", ".join([t.value for t in lanelet.lanelet_type])
             lanelet_data.append((lanelet.lanelet_id, description))
         super()._update(sorted(lanelet_data))
+        #self.lanelet_data = sorted(lanelet_data)
 
 
 class Viewer:
@@ -329,6 +331,7 @@ class Viewer:
         self.current_scenario = None
         self.dynamic = DynamicCanvas(parent, width=5, height=10, dpi=100)
         self.dynamic.mpl_connect('button_press_event', self.select_lanelets)
+        self.selected_lanelet_use = None
 
     def open_scenario(self, scenario):
         """ """
@@ -586,6 +589,7 @@ class Viewer:
         Selecet lanelets by clicking on the canvas. Selects only one of the 
         lanelets that contains the click position.
         """
+        self.selected_lanelet_use = None
         mouse_pos = np.array(
             [mouse_clicked_event.xdata, mouse_clicked_event.ydata])
         click_shape = Circle(radius=0.01, center=mouse_pos)
@@ -599,6 +603,9 @@ class Viewer:
             self.update_plot(sel_lanelet=selected_lanelets[0])
         else:
             self.update_plot(sel_lanelet=None)
+        self.selected_lanelet_use = selected_lanelets
+
+        return selected_lanelets
 
 
 class AnimatedViewer(Viewer):

@@ -58,10 +58,13 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.ani_path = None
         self.slider_clicked = False
 
-        self.network = LaneletNetwork()
-        self.file_path = "/home/aaron/Downloads/ZAM_Tutorial-1_2_T-3.xml"  # "/home/marcu/MPFAV/ZAM_Tutorial-1_2_T-3.xml"  #
-        self.scenario, self.planning_problem_set = CommonRoadFileReader(self.file_path).open()
-        self.id = None
+        #self.network = LaneletNetwork()
+        #self.file_path = "/home/aaron/Downloads/ZAM_Tutorial-1_2_T-3.xml"  # "/home/marcu/MPFAV/ZAM_Tutorial-1_2_T-3.xml"  #
+        #self.scenario, self.planning_problem_set = CommonRoadFileReader(self.file_path).open()
+        #self.id = None
+        self.scenario = None
+        self.latestid = None
+        self.selected_lanelet = None
 
         # GUI attributes
         self.tool1 = None
@@ -142,20 +145,57 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.sumo_settings = SUMOSettings(self, config=self.sumobox.config)
 
     def click_straight(self,width=3,length=50,vertices=10, rot_angle=0):
-        lanelet = self.create_straight(width,length,vertices,self.network)
+        lanelet = self.create_straight(width,length,vertices,self.scenario.lanelet_network)
         lanelet.translate_rotate(np.array([0, 0]), rot_angle)
-        self.network.add_lanelet(lanelet)
-        self.scenario._lanelet_network = self.network
-        self.open_scenario(self.scenario)
+        self.scenario.lanelet_network.add_lanelet(lanelet)
+        self.scenario._lanelet_network = self.scenario.lanelet_network
+        self.crviewer.open_scenario(self.scenario, self.sumobox.config)
+        self.update_view()
         self.update_to_new_scenario()
 
     def click_curve(self,width=3,radius=50, angle=np.pi/2, num_vertices=30, rot_angle=0):
-        lanelet = self.create_curve(width, radius, angle, num_vertices, self.network)
+        lanelet = self.create_curve(width, radius, angle, num_vertices, self.scenario.lanelet_network)
         lanelet.translate_rotate(np.array([0, 0]), rot_angle)
-        self.network.add_lanelet(lanelet)
-        self.scenario._lanelet_network = self.network
-        self.open_scenario(self.scenario)
+        self.scenario.lanelet_network.add_lanelet(lanelet)
+        self.scenario._lanelet_network = self.scenario.lanelet_network
+        self.crviewer.open_scenario(self.scenario, self.sumobox.config)
+        self.update_view()
         self.update_to_new_scenario()
+
+    """def selected_lanelet(self, event):
+        lan = self.crviewer.select_lanelets(Qt.LeftButton) #if event.button() == Qt.LeftButton
+        print(lan)"""
+
+    def fit_func(self):
+        selected_lanelet = None
+        selected_lanelet = self.crviewer.selected_lanelet_use
+        if selected_lanelet:
+            predecessor = selected_lanelet[0]
+            successor = self.scenario.lanelet_network.find_lanelet_by_id(self.latestid)
+            self.fit_to_predecessor(predecessor, successor)
+            self.crviewer.open_scenario(self.scenario, self.sumobox.config)
+            self.update_view()
+            self.update_to_new_scenario()
+
+    def adjacent_left(self):
+        selected_lanelet = None
+        selected_lanelet = self.crviewer.selected_lanelet_use
+        if selected_lanelet:
+            current_lanelet = selected_lanelet[0]
+            adjacent_lanelet = self.adjacent_lanelet_left(current_lanelet, self.scenario.lanelet_network, same_direction=True)
+            self.crviewer.open_scenario(self.scenario, self.sumobox.config)
+            self.update_view()
+            self.update_to_new_scenario()
+
+    def adjacent_right(self):
+        selected_lanelet = None
+        selected_lanelet = self.crviewer.selected_lanelet_use
+        if selected_lanelet:
+            current_lanelet = selected_lanelet[0]
+            adjacent_lanelet = self.adjacent_lanelet_right(current_lanelet, self.scenario.lanelet_network, same_direction=True)
+            self.crviewer.open_scenario(self.scenario, self.sumobox.config)
+            self.update_view()
+            self.update_to_new_scenario()
 
     def create_toolbox(self):
         """ Create the Upper toolbox."""
@@ -171,7 +211,9 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.uppertoolBox.button_backwards.clicked.connect(lambda: self.click_straight(rot_angle=np.pi))
         self.uppertoolBox.button_turn_right.clicked.connect(lambda: self.click_curve(angle=-np.pi/2))
         self.uppertoolBox.button_turn_left.clicked.connect(lambda: self.click_curve())
-        #self.uppertoolBox.button_fit_to_predecessor.clicked.connect(lambda: self.click_fit_to_predecessor())
+        self.uppertoolBox.button_fit_to_predecessor.clicked.connect(lambda: self.fit_func())
+        self.uppertoolBox.button_adjacent_left.clicked.connect(lambda: self.adjacent_left())
+        self.uppertoolBox.button_adjacent_right.clicked.connect(lambda: self.adjacent_right())
 
         if SUMO_AVAILABLE:
             self.create_sumobox()
@@ -574,6 +616,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         scenario = Scenario(0.1, 'new scenario')
         net = LaneletNetwork()
         scenario.lanelet_network = net
+        self.scenario = scenario
         self.open_scenario(scenario)
 
     def open_commonroad_file(self):
@@ -822,7 +865,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         idl = self.scenario.generate_object_id()
         lanelet = Lanelet(left_vertices=left_vertices, right_vertices=right_vertices, lanelet_id=idl,
                           center_vertices=center_vertices, lanelet_type={LaneletType.URBAN})
-
+        self.latestid = idl
         network.add_lanelet(lanelet=lanelet)
         return lanelet
 
@@ -850,7 +893,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         idl = self.scenario.generate_object_id()
         lanelet = Lanelet(left_vertices=left_vertices, right_vertices=right_vertices, lanelet_id=idl,
                           center_vertices=center_vertices, lanelet_type={LaneletType.URBAN})
-
+        self.latestid = idl
         network.add_lanelet(lanelet=lanelet)
         return lanelet
 
@@ -890,6 +933,122 @@ class MWindow(QMainWindow, Ui_mainWindow):
             self.set_predecessor_successor_relation(predecessor, lanelet)
 
         return lanelet
+
+    def adjacent_lanelet_left(self, adjacent_lanelet, network, same_direction=True):
+        if adjacent_lanelet.adj_left is None:
+            # Translation
+            left_vertices = adjacent_lanelet.left_vertices - (
+                    adjacent_lanelet.right_vertices - adjacent_lanelet.left_vertices)
+            center_vertices = adjacent_lanelet.center_vertices - (
+                    adjacent_lanelet.right_vertices - adjacent_lanelet.left_vertices)
+            right_vertices = adjacent_lanelet.left_vertices
+
+            idl = self.scenario.generate_object_id()
+            self.latestid = idl
+            lanelet = Lanelet(left_vertices=left_vertices, right_vertices=right_vertices, lanelet_id=idl,
+                              center_vertices=center_vertices, lanelet_type={LaneletType.URBAN},
+                              adjacent_right=adjacent_lanelet.lanelet_id, adjacent_right_same_direction=True)
+
+            # Relation
+            adjacent_lanelet._adj_left = lanelet.lanelet_id
+            adjacent_lanelet._adj_left_same_direction = True
+
+            # Find Predecessors
+            preds = adjacent_lanelet.predecessor
+            succs = adjacent_lanelet.successor
+
+            for i in preds:
+                lanelet_find = LaneletNetwork.find_lanelet_by_id(network, lanelet_id=i)
+                if lanelet_find.adj_left is not None:
+                    lanelet_adj_left = LaneletNetwork.find_lanelet_by_id(network, lanelet_id=lanelet_find.adj_left)
+                    if lanelet_find.adj_left_same_direction is True:
+                        self.set_predecessor_successor_relation(lanelet_adj_left, lanelet)
+
+                    else:
+                        self.set_predecessor_successor_relation(lanelet, lanelet_adj_left)
+
+            for i in succs:
+                lanelet_find = LaneletNetwork.find_lanelet_by_id(network, lanelet_id=i)
+                if lanelet_find.adj_left is not None:
+                    lanelet_adj_left = LaneletNetwork.find_lanelet_by_id(network, lanelet_id=lanelet_find.adj_left)
+                    if lanelet_find.adj_left_same_direction is True:
+                        self.set_predecessor_successor_relation(lanelet, lanelet_adj_left)
+
+                    else:
+                        self.set_predecessor_successor_relation(lanelet_adj_left, lanelet)
+
+            if same_direction is False:
+                lanelet._left_vertices = np.flip(right_vertices, 0)
+                lanelet._center_vertices = np.flip(center_vertices, 0)
+                lanelet._right_vertices = np.flip(left_vertices, 0)
+                lanelet._adjacent_right_same_direction = None
+                lanelet._adj_right = None
+                lanelet._adj_left = adjacent_lanelet.lanelet_id
+                lanelet._adj_left_same_direction = False
+                adjacent_lanelet._adj_left_same_direction = False
+
+            network.add_lanelet(lanelet=lanelet)
+            return lanelet
+        else:
+            print("Adjacent lanelet already exists")
+
+    def adjacent_lanelet_right(self, adjacent_lanelet, network, same_direction=True):
+        if adjacent_lanelet.adj_right is None:
+            # Translation
+            left_vertices = adjacent_lanelet.right_vertices
+            center_vertices = adjacent_lanelet.center_vertices + (
+                    adjacent_lanelet.right_vertices - adjacent_lanelet.left_vertices)
+            right_vertices = adjacent_lanelet.right_vertices + (
+                    adjacent_lanelet.right_vertices - adjacent_lanelet.left_vertices)
+
+            idl = self.scenario.generate_object_id()
+            self.latestid = idl
+            lanelet = Lanelet(left_vertices=left_vertices, right_vertices=right_vertices, lanelet_id=idl,
+                              center_vertices=center_vertices, lanelet_type={LaneletType.URBAN},
+                              adjacent_left=adjacent_lanelet.lanelet_id, adjacent_left_same_direction=True)
+
+            # Relation
+            adjacent_lanelet._adj_right = lanelet.lanelet_id
+            adjacent_lanelet._adj_right_same_direction = True
+
+            # Find Predecessors
+            preds = adjacent_lanelet.predecessor
+            succs = adjacent_lanelet.successor
+
+            for i in preds:
+                lanelet_find = LaneletNetwork.find_lanelet_by_id(network, lanelet_id=i)
+                if lanelet_find.adj_right is not None:
+                    lanelet_adj_right = LaneletNetwork.find_lanelet_by_id(network, lanelet_id=lanelet_find.adj_right)
+                    if lanelet_find.adj_right_same_direction is True:
+                        self.set_predecessor_successor_relation(lanelet_adj_right, lanelet)
+
+                    else:
+                        self.set_predecessor_successor_relation(lanelet, lanelet_adj_right)
+
+            for i in succs:
+                lanelet_find = LaneletNetwork.find_lanelet_by_id(network, lanelet_id=i)
+                if lanelet_find.adj_right is not None:
+                    lanelet_adj_right = LaneletNetwork.find_lanelet_by_id(network, lanelet_id=lanelet_find.adj_right)
+                    if lanelet_find.adj_right_same_direction is True:
+                        self.set_predecessor_successor_relation(lanelet, lanelet_adj_right)
+
+                    else:
+                        self.set_predecessor_successor_relation(lanelet_adj_right, lanelet)
+
+            if same_direction is False:
+                lanelet._left_vertices = np.flip(right_vertices, 0)
+                lanelet._center_vertices = np.flip(center_vertices, 0)
+                lanelet._right_vertices = np.flip(left_vertices, 0)
+                lanelet._adjacent_left_same_direction = None
+                lanelet._adj_left = None
+                lanelet._adj_right = adjacent_lanelet.lanelet_id
+                lanelet._adj_right_same_direction = False
+                adjacent_lanelet._adj_right_same_direction = False
+
+            network.add_lanelet(lanelet=lanelet)
+            return lanelet
+        else:
+            print("Adjacent lanelet already exists")
 
 
 def main():

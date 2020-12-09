@@ -134,6 +134,18 @@ class UpperToolbox(QWidget):
         layoutlanelets.addWidget(self.button_fit_to_predecessor, 3, 1)
         self.button_fit_to_predecessor.setIcon(QIcon(":/gui_src/forwards.PNG"))
 
+        #adjacent_left
+        self.button_adjacent_right = QPushButton()
+        self.button_adjacent_right.setText("Create Adjacent Right")
+        layoutlanelets.addWidget(self.button_adjacent_right, 4, 0)
+        self.button_adjacent_right.setIcon(QIcon(":/gui_src/forwards.PNG"))
+
+        # adjacent_right
+        self.button_adjacent_left = QPushButton()
+        self.button_adjacent_left.setText("Create Adjacent Left")
+        layoutlanelets.addWidget(self.button_adjacent_left, 4, 1)
+        self.button_adjacent_left.setIcon(QIcon(":/gui_src/forwards.PNG"))
+
 
         button_turn_left_45 = QPushButton()
         button_turn_left_45.setText("show more")

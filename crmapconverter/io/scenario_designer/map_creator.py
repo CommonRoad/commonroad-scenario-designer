@@ -247,13 +247,14 @@ def adjacent_lanelet_right(adjacent_lanelet, network, same_direction=True):
         print("Adjacent lanelet already exists")
 
 
-"""lanelet_1 = create_straight(20,100,10,network)
+lanelet_1 = create_straight(20,100,10,network)
 #rotate_lanelet(np.pi*0.9,lanelet_1)
 lanelet_2 = create_curve(20,90,np.pi*-0.5,20,network)
 fit_to_predecessor(lanelet_1,lanelet_2)
 lanelet_3 = create_curve(20,90,np.pi*-0.5,20,network)
 fit_to_predecessor(lanelet_2,lanelet_3)
 lanelet_4 = create_straight(20,100,10,network)
+rotate_lanelet(np.pi,lanelet_4)
 fit_to_predecessor(lanelet_3,lanelet_4)
 lanelet_4_1 = adjacent_lanelet_right(lanelet_2,network, False)
 lanelet_5 = create_curve(20,130,-np.pi*0.6,20,network)
@@ -264,7 +265,7 @@ lanelet_7 = create_curve(20,150,-np.pi*0.6,20,network)
 fit_to_predecessor(lanelet_1,lanelet_7)
 lanelet_8 = adjacent_lanelet_left(lanelet_5,network, False)
 lanelet_9 = adjacent_lanelet_right(lanelet_5,network, False)
-lanelet_10 = adjacent_lanelet_right(lanelet_6,network, False)"""
+lanelet_10 = adjacent_lanelet_right(lanelet_6,network, False)
 
 
 # x crossing
@@ -383,11 +384,11 @@ def t_crossing(width, diameter_crossing, network):
     return intersection
 
 
-intersection_1 = t_crossing(3, 50, network)
+#intersection_1 = t_crossing(3, 50, network)
 
 
 
-scenario.add_objects([network, intersection_1])
+scenario.add_objects([network])
 
 author = 'Max Mustermann'
 affiliation = 'Technical University of Munich, Germany'
