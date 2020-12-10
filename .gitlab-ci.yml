@@ -2,7 +2,7 @@ stages:
     - test
     - build
 
-image: $CI_REGISTRY/cps/commonroad-map-tool/ci:v0.3.2
+image: $CI_REGISTRY/cps/commonroad-map-tool/ci:v0.3.4
 
 before_script:
     # This is required for the GitLab runner to have permissions to all the repos the user stating the job has.
@@ -24,7 +24,7 @@ python36:
         - tox --current-env -e py36
     artifacts:
         reports:
-            junit: unittest.xml
+            junit: unittest*.xml
             cobertura: coverage.xml
 
 python37:
@@ -39,7 +39,7 @@ python37:
         - tox --current-env -e py37
     artifacts:
         reports:
-            junit: unittest.xml
+            junit: unittest*.xml
             cobertura: coverage.xml
 
 python38:
@@ -55,7 +55,7 @@ python38:
     artifacts:
         when: always
         reports:
-            junit: unittest.xml
+            junit: unittest*.xml
             cobertura: coverage.xml
 
 docs:

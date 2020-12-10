@@ -78,3 +78,29 @@ You can run it with:
     docker run -it rasaford/commonroad-map-tool:VERSION
 
 Replacing ``VERSION`` with the latest version of the docker image.
+
+Add a new GUI element
+*********************
+
+Button
+======
+- QPushButton (https://doc.qt.io/qt-5/qpushbutton.html) 
+- Example: add button to toolbox
+  1. define layout
+  2. create button:
+  .. code-block:: bash
+
+    button_forwards = QPushButton()  
+
+    button_forwards.setText("forwards")
+
+    button_forwards.setIcon(QIcon("PATH"))  
+
+    layoutlanelets.addWidget(button_forwards, 1, 0)    
+    
+    button_forwards.clicked.connect("METHOD")
+
+Replacing ``PATH`` with the path to the icon and ``METHOD`` with an corresponding method 
+
+
+
