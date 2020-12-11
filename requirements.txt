@@ -1,6 +1,6 @@
 numpy>=1.16.4
 lxml>=4.3.4
-# commonroad-io>=2020.2
+# commonroad-io>=2020.3
 -e git+ssh://git@gitlab.lrz.de/cps/commonroad-io.git@develop#egg=commonroad
 # -e git+https://gitlab.lrz.de/cps/commonroad-io.git@develop#egg=commonroad
 pyproj>=2.2.0
