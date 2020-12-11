@@ -5126,21 +5126,6 @@
       <crossingLanelet ref="279"/>
     </crossing>
   </intersection>
-  <intersection id="310">
-    <incoming id="307">
-      <incomingLanelet ref="226253229"/>
-      <successorsStraight ref="267"/>
-      <isLeftOf ref="308"/>
-    </incoming>
-    <incoming id="308">
-      <incomingLanelet ref="233"/>
-      <successorsStraight ref="262"/>
-    </incoming>
-    <incoming id="309">
-      <incomingLanelet ref="216"/>
-      <successorsStraight ref="247"/>
-    </incoming>
-  </intersection>
   <intersection id="313">
     <incoming id="311">
       <incomingLanelet ref="205"/>

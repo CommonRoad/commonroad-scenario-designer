@@ -13,9 +13,11 @@ from typing import Dict, List, Set, Tuple
 from xml.dom import minidom
 from xml.etree import cElementTree as ET
 from matplotlib import pyplot as plt
+import matplotlib.colors as mcolors
 import networkx as nx
 import numpy as np
 import sumolib
+import itertools
 
 try:
     import pycrccosy
@@ -60,11 +62,11 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
     """Converts CommonRoad map to sumo map .net.xml"""
 
     def __init__(
-            self,
-            lanelet_network: LaneletNetwork,
-            conf: SumoConfig,
-            country_id: SupportedTrafficSignCountry = SupportedTrafficSignCountry.
-                GERMANY):
+        self,
+        lanelet_network: LaneletNetwork,
+        conf: SumoConfig,
+        country_id: SupportedTrafficSignCountry = SupportedTrafficSignCountry.
+            GERMANY):
         """
 
         :param lanelet_network: lanelet network to be converted
@@ -180,8 +182,8 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                     adj_right_id)
                 if right_lanelet.successor is not None:
                     if len(
-                            successors.intersection(
-                                set(right_lanelet.successor))) > 0:
+                        successors.intersection(
+                            set(right_lanelet.successor))) > 0:
                         zipper = True
                     successors = successors.union(set(right_lanelet.successor))
                 adj_right_start = right_lanelet.center_vertices[0]
@@ -413,8 +415,8 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         if max_curvature > 0.001:  # not straight lanelet
             radius = 1 / max_curvature
             max_vehicle_length_sq = 4 * (
-                    (radius + lanelet_width / 2) ** 2 -
-                    (radius + self._max_vehicle_width / 2) ** 2)
+                (radius + lanelet_width / 2) ** 2 -
+                (radius + self._max_vehicle_width / 2) ** 2)
 
             for veh_class, veh_length in self.conf.veh_params['length'].items(
             ):
@@ -500,23 +502,46 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                                   | incoming.successors_left
                                   | incoming.successors_straight
             }
-            intersecting = intersecting_lanelets | intersection.crossings
-            intersecting_edges = {
-                str(self.lanelet_id2edge_id[step])
-                for step in intersecting
-            }
-            merged_nodes = {
-                node
-                for e_id in intersecting_edges for node in
-                [self.edges[e_id].getFromNode(), self.edges[e_id].getToNode()]
-            }
-            clusters[next_cluster_id] = merged_nodes
+            intersecting_edges: Set[Edge] = {self.edges[str(self.lanelet_id2edge_id[step])] for step in
+                                             intersecting_lanelets}
+            intersecting_crossings: Set[Edge] = {self.edges[str(self.lanelet_id2edge_id[step])] for step in
+                                                 intersection.crossings}
+            to_merge = {node for e in intersecting_edges | intersecting_crossings
+                        for node in [e.getFromNode(), e.getToNode()]}
+            # if intersecting_crossings:
+            #     old_clusters: List[List[Edge]] = [[e] for e in intersecting_crossings]
+            #     while True:
+            #         cluster = old_clusters.pop()
+            #         new_clusters: List[List[Edge]] = []
+            #         for c in old_clusters:
+            #             if cluster:
+            #                 if cluster[-1].getToNode() == c[0].getFromNode():
+            #                     new_clusters.append(cluster + c)
+            #                     cluster = None
+            #                 elif c[-1].getToNode() == cluster[0].getFromNode():
+            #                     new_clusters.append(c + cluster)
+            #                     cluster = None
+            #                 else:
+            #                     new_clusters.append(c)
+            #             else:
+            #                 new_clusters.append(c)
+            #         old_clusters = new_clusters
+            #         if cluster:
+            #             old_clusters.append(cluster)
+            #             break
+
+            # cluster_nodes = [[edge.getFromNode() for edge in cluster] + [cluster[-1].getToNode()]
+            #                  for cluster in old_clusters]
+            # for nodes in cluster_nodes:
+            #     to_merge |= set(nodes[1:len(nodes) - 1])
+
+            clusters[next_cluster_id] = to_merge
 
             # generate partial Crossings
             crossings: List[Crossing] = []
             for lanelet_id in intersection.crossings:
                 lanelet = self.lanelet_network.find_lanelet_by_id(lanelet_id)
-                avg_width = np.mean(np.linalg.norm(lanelet.left_vertices - lanelet.right_vertices, axis=1))
+                avg_width = np.median(np.linalg.norm(lanelet.left_vertices - lanelet.right_vertices, axis=1))
                 crossings.append(
                     Crossing(node=None,
                              edges=None,
@@ -527,12 +552,21 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                 clusters_crossing[next_cluster_id] = crossings
             next_cluster_id += 1
 
+        # merge overlapping clusters
+        while True:
+            try:
+                a_id, b_id = next((a_id, b_id) for a_id, a in clusters.items()
+                                  for b_id, b in clusters.items()
+                                  if a_id < b_id and a & b)
+                clusters[a_id] |= clusters[b_id]
+                del clusters[b_id]
+            except StopIteration:
+                break
+
         # Expand merged clusters by all lanelets intersecting each other.
         # merging based on Lanelets intersecting
-        intersecting_pairs = _find_intersecting_edges(self.lanes_dict,
-                                                      self.lanelet_network, visualize=True)
         intersecting_edges = defaultdict(set)
-        for pair in intersecting_pairs:
+        for pair in _find_intersecting_edges(self.lanes_dict, self.lanelet_network):
             intersecting_edges[pair[0]].add(pair[1])
             intersecting_edges[pair[1]].add(pair[0])
 
@@ -575,25 +609,16 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
 
             clusters[current_cluster_id] = current_cluster
 
-        # filter clusters with only one node
-        clusters = {
-            cluster_id: cluster
-            for cluster_id, cluster in clusters.items() if len(cluster) > 1
-        }
+        # filter clusters with 0 nodes
+        clusters = {cluster_id: cluster for cluster_id, cluster in clusters.items() if len(cluster) > 1}
 
+        # MERGE COMPUTED CLUSTERS
         for cluster_id, cluster in clusters.items():
             logging.info(f"Merging nodes: {[n.getID() for n in cluster]}")
 
             # create new merged node
             def merge_cluster(cluster: Set[Node]) -> Node:
                 cluster_ids = {n.getID() for n in cluster}
-                if cluster_ids & set(self.replaced_nodes.keys()):
-                    merged_node_id = next(
-                        merged for node_id, merged in self.replaced_nodes.items() if node_id in cluster_ids)[0]
-                    merged_node = self.new_nodes[merged_node_id]
-                    for old_node_id in cluster_ids - set(self.replaced_nodes.keys()):
-                        self.replaced_nodes[old_node_id].append(merged_node.getID())
-                    return merged_node
                 merged_node = Node(id=self.node_id_next,
                                    node_type='priority',
                                    coord=self._calculate_centroid(cluster),
@@ -601,7 +626,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                 self.node_id_next += 1
                 self.new_nodes[merged_node.getID()] = merged_node
                 for old_node_id in cluster_ids:
-                    # assert old_node_id not in self.replaced_nodes
+                    assert old_node_id not in self.replaced_nodes
                     self.replaced_nodes[old_node_id].append(merged_node.getID())
                 self.merged_dictionary[merged_node.getID()] = cluster_ids
                 return merged_node
@@ -633,7 +658,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
             if len(new_nodes) > 1:
                 new_candidates = deepcopy(new_nodes)
                 new_node = new_nodes[0]
-                merged_nodes = set()
+                to_merge = set()
                 explored_candidates = set()
 
                 while new_candidates:
@@ -641,7 +666,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                     new_node_tmp = new_candidates.pop()
                     if new_node_tmp in explored_candidates: continue
                     explored_candidates.add(new_node_tmp)
-                    merged_nodes |= self.merged_dictionary[new_node_tmp]
+                    to_merge |= self.merged_dictionary[new_node_tmp]
                     for merged_node in self.merged_dictionary[new_node_tmp]:
                         if len(self.replaced_nodes[merged_node]) > 1:
                             new_candidates = list(
@@ -654,9 +679,9 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                     if node_id != new_node:
                         del self.new_nodes[node_id]
 
-                self.merged_dictionary[new_node] = merged_nodes
-                explored_nodes_all |= merged_nodes
-                for merged_node in merged_nodes:
+                self.merged_dictionary[new_node] = to_merge
+                explored_nodes_all |= to_merge
+                for merged_node in to_merge:
                     self.replaced_nodes[merged_node] = [new_node]
 
     def _filter_edges(self):
@@ -914,7 +939,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                     """
                     for c in self._new_connections:
                         if str(c.getFromLane()) == from_lane and str(
-                                c.getToLane()) == to_lane:
+                            c.getToLane()) == to_lane:
                             return True
                     return False
 
@@ -1675,9 +1700,9 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         return add_file
 
     def _convert_to_rou_file(
-            self,
-            scenario: Scenario,
-            out_folder: str,
+        self,
+        scenario: Scenario,
+        out_folder: str,
     ) -> Dict[str, str]:
         """
         Creates route files from CommonRoad scenario.
@@ -1722,7 +1747,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
 
         def sorted_lanelet_ids(lanelet_ids: List[int], orientation: float, position: np.ndarray,
                                scenario: Scenario) \
-                -> List[int]:
+            -> List[int]:
             """
             return the lanelets sorted by relative orientation to the position and orientation given
             """
@@ -1743,7 +1768,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                 return list(lanelet_id_list[sorted_indices])
 
         def create_coordinate_system_from_polyline(
-                polyline) -> pycrccosy.CurvilinearCoordinateSystem:
+            polyline) -> pycrccosy.CurvilinearCoordinateSystem:
 
             def compute_polyline_length(polyline: np.ndarray) -> float:
                 """
@@ -1981,7 +2006,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
 
                     # Add successors until not ending in internal edge
                     while lanelet_ids[-1] in self.lanelet_id2edge_id and \
-                            str(self.lanelet_id2edge_id[lanelet_ids[-1]]).startswith(':'):
+                        str(self.lanelet_id2edge_id[lanelet_ids[-1]]).startswith(':'):
                         last_lanelet = scenario.lanelet_network.find_lanelet_by_id(lanelet_ids[-1])
                         lanelet_ids.append(last_lanelet.successor[0])
                         # _, all_successor_lanelet_ids = Lanelet.all_lanelets_by_merging_successors_from_lanelet(
@@ -2037,10 +2062,10 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         return route_files
 
     def _generate_rou_file(
-            self,
-            net_file: str,
-            scenario_name: str,
-            out_folder: str = None,
+        self,
+        net_file: str,
+        scenario_name: str,
+        out_folder: str = None,
     ) -> str:
         """
         Creates route & trips files using randomTrips generator.
@@ -2229,8 +2254,9 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         G.add_nodes_from(graph_nodes)
         G.add_edges_from(graph_edges)
         nx.draw(G, graph_nodes_pos)
+        colors = itertools.cycle(set(mcolors.TABLEAU_COLORS) - {"tab:blue"})
         for cluster in self.merged_dictionary.values():
-            nx.draw_networkx_nodes(G, graph_nodes_pos, nodelist=cluster, node_color="red")
+            nx.draw_networkx_nodes(G, graph_nodes_pos, nodelist=cluster, node_color=next(colors))
 
         labels = nx.get_edge_attributes(G, "label")
         nx.draw_networkx_edge_labels(G, pos=graph_nodes_pos, edge_labels=labels)

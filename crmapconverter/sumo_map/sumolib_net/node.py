@@ -16,6 +16,7 @@
 
 from xml.etree import cElementTree as ET
 
+
 class Node:
     """ Nodes from a sumo network """
 
@@ -154,7 +155,7 @@ class Node:
                 conns.extend(outgoing)
         return conns
 
-    def toXML(self) -> str:
+    def toXML(self) -> bytes:
         """
         Converts this node to it's xml representation
         TODO: Not all attributes are converted
@@ -170,4 +171,16 @@ class Node:
         return ET.tostring(node)
 
     def __str__(self):
-        return str(self.toXML())
+        return "Node: " + str(self._id)
+
+    def __hash__(self):
+        return hash((self._id, self._type))
+
+    def __eq__(self, other):
+        return self._id == other._id \
+               and self._type == other._type \
+               and self._tl == other._tl \
+               and self._right_of_way == other._right_of_way
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
