@@ -502,40 +502,11 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                                   | incoming.successors_left
                                   | incoming.successors_straight
             }
-            intersecting_edges: Set[Edge] = {self.edges[str(self.lanelet_id2edge_id[step])] for step in
-                                             intersecting_lanelets}
-            intersecting_crossings: Set[Edge] = {self.edges[str(self.lanelet_id2edge_id[step])] for step in
-                                                 intersection.crossings}
-            to_merge = {node for e in intersecting_edges | intersecting_crossings
-                        for node in [e.getFromNode(), e.getToNode()]}
-            # if intersecting_crossings:
-            #     old_clusters: List[List[Edge]] = [[e] for e in intersecting_crossings]
-            #     while True:
-            #         cluster = old_clusters.pop()
-            #         new_clusters: List[List[Edge]] = []
-            #         for c in old_clusters:
-            #             if cluster:
-            #                 if cluster[-1].getToNode() == c[0].getFromNode():
-            #                     new_clusters.append(cluster + c)
-            #                     cluster = None
-            #                 elif c[-1].getToNode() == cluster[0].getFromNode():
-            #                     new_clusters.append(c + cluster)
-            #                     cluster = None
-            #                 else:
-            #                     new_clusters.append(c)
-            #             else:
-            #                 new_clusters.append(c)
-            #         old_clusters = new_clusters
-            #         if cluster:
-            #             old_clusters.append(cluster)
-            #             break
-
-            # cluster_nodes = [[edge.getFromNode() for edge in cluster] + [cluster[-1].getToNode()]
-            #                  for cluster in old_clusters]
-            # for nodes in cluster_nodes:
-            #     to_merge |= set(nodes[1:len(nodes) - 1])
-
-            clusters[next_cluster_id] = to_merge
+            intersecting_edges: Set[Edge] = {self.edges[str(self.lanelet_id2edge_id[step])]
+                                             for step in intersecting_lanelets | intersection.crossings}
+            clusters[next_cluster_id] = {node
+                                         for e in intersecting_edges
+                                         for node in [e.getFromNode(), e.getToNode()]}
 
             # generate partial Crossings
             crossings: Set[Crossing] = set()
@@ -548,14 +519,14 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                              priority=False,
                              shape=lanelet.center_vertices,
                              width=float(avg_width)))
-            if crossings:
-                clusters_crossing[next_cluster_id] = crossings
+            clusters_crossing[next_cluster_id] = crossings
             next_cluster_id += 1
 
         # merge overlapping clusters
         while True:
             try:
-                a_id, b_id = next((a_id, b_id) for a_id, a in clusters.items()
+                a_id, b_id = next((a_id, b_id)
+                                  for a_id, a in clusters.items()
                                   for b_id, b in clusters.items()
                                   if a_id < b_id and a & b)
                 clusters[a_id] |= clusters[b_id]
@@ -634,7 +605,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                 return merged_node
 
             # clustered nodes at the border of a network need to be merged
-            # separately, to junctions at network boundaries are converted correctly
+            # separately, so junctions at network boundaries are converted correctly
             no_outgoing = {node for node in cluster if not node.getOutgoing()}
             no_incoming = {node for node in cluster if not node.getIncoming()}
             inner_cluster = cluster - no_outgoing - no_incoming
