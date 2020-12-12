@@ -29,7 +29,9 @@ from commonroad.scenario.lanelet import Lanelet, is_natural_number
 from commonroad.visualization.draw_dispatch_cr import draw_object
 from commonroad.geometry.shape import Circle
 
-from crmapconverter.sumo_map.config import SumoConfig
+from crmapconverter.io.scenario_designer.sumo_gui_modules.gui_sumo_simulation import SUMO_AVAILABLE
+if SUMO_AVAILABLE:
+    from crmapconverter.sumo_map.config import SumoConfig
 from crmapconverter.io.scenario_designer.util import Observable
 
 __author__ = "Benjamin Orthen, Stefan Urban, Max Winklhofer, Guyue Huang, Max Fruehauf"
@@ -616,7 +618,7 @@ class AnimatedViewer(Viewer):
         # if playing or not
         self.playing = False
 
-    def open_scenario(self, scenario, config: Observable):
+    def open_scenario(self, scenario, config: Observable = None):
         """[summary]
 
         :param scenario: [description]
@@ -627,14 +629,14 @@ class AnimatedViewer(Viewer):
         self.current_scenario = scenario
 
         # if we have not subscribed already, subscribe now
-        if not self._config:
-            def set_config(config):
-                self._config = config
-                self._calc_max_timestep()
+        if config is not None:
+            if  not self._config:
+                def set_config(config):
+                    self._config = config
+                    self._calc_max_timestep()
+                config.subscribe(set_config)
+            self._config = config.value
 
-            config.subscribe(set_config)
-
-        self._config = config.value
         self._calc_max_timestep()
         if self.animation:
             self.timestep.value = 0
