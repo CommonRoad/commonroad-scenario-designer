@@ -15,20 +15,24 @@
 # @version $Id$
 
 from xml.etree import cElementTree as ET
-from crmapconverter.sumo_map.sumolib_net.lane import Lane
+from typing import Set
+from .constants import SUMO_VEHICLE_CLASSES
 
 
 class Edge:
     """ Edges from a sumo network """
-    def __init__(self, id, fromN, toN, prio, function, name):
+
+    def __init__(self, id: int, from_node, to_node, type_id: str = "", function: str = "normal", name: str = "",
+                 priority: int = 0):
         self._id = id
-        self._from = fromN
-        self._to = toN
-        self._priority = prio
-        if fromN:
-            fromN.addOutgoing(self)
-        if toN:
-            toN.addIncoming(self)
+        self._from = from_node
+        self._to = to_node
+        self._type = type_id
+        self._priority = priority
+        if from_node:
+            from_node.addOutgoing(self)
+        if to_node:
+            to_node.addIncoming(self)
         self._lanes = []
         self._speed = None
         self._length = None
@@ -184,8 +188,8 @@ class Edge:
                                       z / float(numLanes)))
 
         self._shapeWithJunctions3D = lane.addJunctionPos(self._shape3D,
-                                                    self._from.getCoord3D(),
-                                                    self._to.getCoord3D())
+                                                         self._from.getCoord3D(),
+                                                         self._to.getCoord3D())
 
         if self._rawShape3D == []:
             self._rawShape3D = [self._from.getCoord3D(), self._to.getCoord3D()]
@@ -227,6 +231,12 @@ class Edge:
                 return True
         return False
 
+    def getType(self):
+        return self._type
+
+    def setType(self, value: str):
+        self._type = value
+
     def __repr__(self):
         if self.getFunction() == '':
             return '<edge id="%s" from="%s" to="%s"/>' % (
@@ -235,35 +245,13 @@ class Edge:
             return '<edge id="%s" function="%s"/>' % (self._id,
                                                       self.getFunction())
 
-    # def __init__(self, id, fromN, toN, prio, function, name):
-    #     self._id = id
-    #     self._from = fromN
-    #     self._to = toN
-    #     self._priority = prio
-    #     if fromN:
-    #         fromN.addOutgoing(self)
-    #     if toN:
-    #         toN.addIncoming(self)
-    #     self._lanes = []
-    #     self._speed = None
-    #     self._length = None
-    #     self._incoming = {}
-    #     self._outgoing = {}
-    #     self._shape = None
-    #     self._shapeWithJunctions = None
-    #     self._shape3D = None
-    #     self._shapeWithJunctions3D = None
-    #     self._rawShape = None
-    #     self._rawShape3D = None
-    #     self._function = function
-    #     self._tls = None
-    #     self._name = name
-
     def toXML(self) -> str:
         edge = ET.Element("edge")
         edge.set("from", str(self.getFromNode().getID()))
         edge.set("to", str(self.getToNode().getID()))
         edge.set("id", str(self._id))
+        if self._type:
+            edge.set("type", str(self._type))
         if self._priority:
             edge.set("priority", str(self._priority))
         if self._speed:
@@ -271,7 +259,7 @@ class Edge:
         if self._length:
             edge.set("length", str(self._length))
         if self._shape:
-            edge.set("shape", lane._to_shape_string(self._shape))
+            edge.set("shape", str(self.getShape()))
         if self._length:
             edge.set("length", str(self._length))
         edge.set("numLanes", str(self.getLaneNumber()))

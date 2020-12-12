@@ -4,8 +4,10 @@ from copy import deepcopy
 from typing import Dict, List, Iterable, Set
 from xml.dom import minidom
 from xml.etree import ElementTree as et
+from shapely.geometry import LineString
 
 import numpy as np
+from copy import deepcopy
 from commonroad.geometry.shape import Polygon
 from commonroad.scenario.lanelet import Lanelet
 from commonroad.scenario.lanelet import LaneletNetwork
@@ -155,70 +157,51 @@ def compute_max_curvature_from_polyline(polyline: np.ndarray) -> float:
 
 def _erode_lanelets(lanelet_network: LaneletNetwork,
                     radius: float = 0.4) -> LaneletNetwork:
-    """Erode shape of lanelet by given radius."""
+    """
+    Erodes the given lanelet_network by the radius.
+    :param lanelet_network:
+    :param radius:
+    :return:
+    """
+    assert radius > 0
+
+    # erode length
+    def shorten(vertices: np.ndarray, length: float) -> np.ndarray:
+        line = LineString(vertices)
+        n = vertices.shape[0]
+        offsets = list(np.arange(radius, line.length, (line.length - length) / n))
+        if max(offsets) < line.length - length:
+            offsets.append(line.length - length)
+        return np.array([np.array(line.interpolate(offset).xy).T[0] for offset in offsets])
+
+    def length(vertices: np.ndarray) -> float:
+        return LineString(vertices).length
+
     lanelets_ero = []
-    crop_meters = 0.3
-    min_factor = 0.1
     for lanelet in lanelet_network.lanelets:
-        lanelet_ero = deepcopy(lanelet)
+        lanelet = deepcopy(lanelet)
 
-        # shorten lanelet by radius
-        if len(lanelet_ero._center_vertices) > 4:
-            i_max = int(
-                (np.floor(len(lanelet_ero._center_vertices) - 1) / 2)) - 1
+        # erode width
+        # make sure lanelets are not self intersecting after erosion
+        if np.min(np.linalg.norm(lanelet.left_vertices - lanelet.right_vertices, axis=1)) > radius:
+            left = lanelet.center_vertices - lanelet.left_vertices
+            lanelet._left_vertices += left / np.linalg.norm(left, axis=1)[np.newaxis].T * radius
+            right = lanelet.center_vertices - lanelet.right_vertices
+            lanelet._right_vertices += right / np.linalg.norm(right, axis=1)[np.newaxis].T * radius
 
-            i_crop_0 = np.argmax(lanelet_ero.distance >= crop_meters)
-            i_crop_1 = len(lanelet_ero.distance) - np.argmax(
-                lanelet_ero.distance >= lanelet_ero.distance[-1] - crop_meters)
-            i_crop_0 = min(i_crop_0, i_max)
-            i_crop_1 = min(i_crop_1, i_max)
+        # erode length
+        # make sure lanelets are not self intersecting after erosion
+        if min(length(lanelet.center_vertices), length(lanelet.left_vertices), length(lanelet.right_vertices)) > radius:
+            lanelet._center_vertices = shorten(lanelet._center_vertices, radius)
+            lanelet._left_vertices = shorten(lanelet._left_vertices, radius)
+            lanelet._right_vertices = shorten(lanelet._right_vertices, radius)
 
-            lanelet_ero._left_vertices = lanelet_ero._left_vertices[
-                                         i_crop_0:-i_crop_1]
-            lanelet_ero._center_vertices = lanelet_ero._center_vertices[
-                                           i_crop_0:-i_crop_1]
-            lanelet_ero._right_vertices = lanelet_ero._right_vertices[
-                                          i_crop_0:-i_crop_1]
-        else:
-            factor_0 = min(1, crop_meters / lanelet_ero.distance[1])
-            lanelet_ero._left_vertices[0] = factor_0 * lanelet_ero._left_vertices[0] \
-                                            + (1 - factor_0) * lanelet_ero._left_vertices[1]
-            lanelet_ero._right_vertices[0] = factor_0 * lanelet_ero._right_vertices[0] \
-                                             + (1 - factor_0) * lanelet_ero._right_vertices[1]
-            lanelet_ero._center_vertices[0] = factor_0 * lanelet_ero._center_vertices[0] \
-                                              + (1 - factor_0) * lanelet_ero._center_vertices[1]
+        # recompute polyon if present
+        if lanelet._polygon:
+            lanelet._polygon = Polygon(
+                np.concatenate((lanelet.right_vertices, np.flip(lanelet.left_vertices, axis=0))))
 
-            factor_0 = min(
-                1, crop_meters /
-                   (lanelet_ero.distance[-1] - lanelet_ero.distance[-2]))
-            lanelet_ero._left_vertices[-1] = factor_0 * lanelet_ero._left_vertices[-2] \
-                                             + (1 - factor_0) * lanelet_ero._left_vertices[-1]
-            lanelet_ero._right_vertices[-1] = factor_0 * lanelet_ero._right_vertices[-2] \
-                                              + (1 - factor_0) * lanelet_ero._right_vertices[-1]
-            lanelet_ero._center_vertices[-1] = factor_0 * lanelet_ero._center_vertices[-2] \
-                                               + (1 - factor_0) * lanelet_ero._center_vertices[-1]
-
-        # compute eroded vector from center
-        perp_vecs = (lanelet_ero.left_vertices -
-                     lanelet_ero.right_vertices) * 0.5
-        length = np.linalg.norm(perp_vecs, axis=1)
-        factors = np.divide(radius, length)  # 0.5 * np.ones_like(length))
-        factors = np.reshape(factors, newshape=[-1, 1])
-        factors = 1 - np.maximum(
-            factors,
-            np.ones_like(factors) *
-            min_factor)  # ensure minimum width of eroded lanelet
-        perp_vec_ero = np.multiply(perp_vecs, factors)
-
-        # recompute vertices
-        lanelet_ero._left_vertices = lanelet_ero.center_vertices + perp_vec_ero
-        lanelet_ero._right_vertices = lanelet_ero.center_vertices - perp_vec_ero
-        if lanelet_ero._polygon is not None:
-            lanelet_ero._polygon = Polygon(
-                np.concatenate((lanelet_ero.right_vertices,
-                                np.flip(lanelet_ero.left_vertices, 0))))
-        lanelets_ero.append(lanelet_ero)
-
+        lanelets_ero.append(lanelet)
     return LaneletNetwork.create_from_lanelet_list(lanelets_ero)
 
 
@@ -246,8 +229,7 @@ def _find_intersecting_edges(
         edge_shape = []
         for lanelet_id in (lanelet_ids[0], lanelet_ids[-1]):
             if lanelet_id not in polygons_dict:
-                polygon = eroded_lanelet_network.find_lanelet_by_id(
-                    lanelet_id).convert_to_polygon()
+                polygon = eroded_lanelet_network.find_lanelet_by_id(lanelet_id).convert_to_polygon()
 
                 polygons_dict[lanelet_id] = polygon.shapely_object
 
@@ -256,7 +238,7 @@ def _find_intersecting_edges(
                 else:
                     warnings.warn(f"Invalid lanelet shape! Please check the scenario, "
                                   f"because invalid lanelet has been found: "
-                                  f"{explain_validity(polygons_dict[lanelet_id])}")
+                                  f"{lanelet_id}: {explain_validity(polygons_dict[lanelet_id])}")
                     shape = polygons_dict[lanelet_id].buffer(0)
                 edge_shape.append(shape)
 
@@ -352,42 +334,37 @@ def min_cluster(items, condition, comp):
     return clusters
 
 
-def merge_crossings(crossings: List[Crossing]) -> List[Crossing]:
-    """Merges crossings whose share the same point in their
-    shape at either the beginning or end.
-
-    Args:
-        crossings (List[Crossing]): list of crossings to merge
-
-    Returns:
-        List[Crossing]: merged crossings
+def merge_lanelets(lanelets: List[Lanelet]) -> List[Lanelet]:
     """
-    old = set(crossings)
+    Merges lanelets which are successors of each other.
+    :param lanelets: list of lanelets to merge
+    :return: list of merged lanelets
+    """
+    old = set(lanelets)
     new = old
-
-    def eq(a, b):
-        return all(np.isclose(a, b))
 
     do = True
     while do or len(new) < len(old):
         do = False
         old = new
         for current in old:
-            match = next(
-                (other for other in old
-                 if (eq(current.shape[-1], other.shape[0]) or eq(
-                    other.shape[-1], current.shape[0])) and other != current),
-                None)
-            if not match: continue
-
-            if eq(current.shape[-1], match.shape[0]):
-                match.shape = np.concatenate((current.shape[:-1], match.shape),
-                                             axis=0)
-            elif eq(match.shape[-1], current.shape[0]):
-                match.shape = np.concatenate((match.shape[:-1], current.shape),
-                                             axis=0)
-            new = old - {current}
-            break
+            try:
+                match = next(
+                    other for other in old
+                    if other.lanelet_id != current.lanelet_id
+                    and (other.lanelet_id in current.successor or current.lanelet_id in other.successor)
+                )
+                merging_ids = {match.lanelet_id, current.lanelet_id}
+                merged = Lanelet.merge_lanelets(match, current)
+                for lanelet in old:
+                    lanelet._predecessor = [p if p not in merging_ids else merged.lanelet_id
+                                            for p in lanelet.predecessor]
+                    lanelet._successor = [s if s not in merging_ids else merged.lanelet_id
+                                          for s in lanelet.successor]
+                new = old - {current, match} | {merged}
+                break
+            except StopIteration:
+                continue
     return list(new)
 
 
@@ -437,7 +414,7 @@ def intersect_lanelets_line(lanelets: Iterable[Lanelet],
 def edge_centroid(e: Edge) -> np.ndarray:
     """Computes the centroid of an edge based on the vertices of it's lanes"""
     pts = np.array([v for lane in e.getLanes() for v in lane._shape])
-    return np.sum(pts, axis=0) / pts.shape[0]
+    return np.mean(pts, axis=0)
 
 
 def orthogonal_ccw_vector(start: np.ndarray, end: np.ndarray) -> np.ndarray:
@@ -456,5 +433,3 @@ def orthogonal_ccw_vector(start: np.ndarray, end: np.ndarray) -> np.ndarray:
     ccw_direction = np.array([-direction[1], direction[0]])
     ccw_direction /= np.linalg.norm(ccw_direction)
     return ccw_direction
-
-
