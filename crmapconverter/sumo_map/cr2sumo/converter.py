@@ -137,7 +137,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         self._create_lane_based_connections()
         self._create_crossings()
         self._create_traffic_lights()
-        self.draw_network(self.new_nodes.values(), self.new_edges.values())
+        # self.draw_network(self.new_nodes.values(), self.new_edges.values())
 
     def _find_lanes(self):
         """
@@ -491,7 +491,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         clusters: Dict[int, Set[Node]] = defaultdict(set)
         next_cluster_id = 0
         # crossings are additional info for a cluster
-        clusters_crossing: Dict[int, List[Crossing]] = dict()
+        clusters_crossing: Dict[int, Set[Crossing]] = defaultdict(set)
 
         # INTERSECTION BASED CLUSTERING
         for intersection in self.lanelet_network.intersections:
@@ -538,11 +538,11 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
             clusters[next_cluster_id] = to_merge
 
             # generate partial Crossings
-            crossings: List[Crossing] = []
+            crossings: Set[Crossing] = set()
             for lanelet_id in intersection.crossings:
                 lanelet = self.lanelet_network.find_lanelet_by_id(lanelet_id)
                 avg_width = np.median(np.linalg.norm(lanelet.left_vertices - lanelet.right_vertices, axis=1))
-                crossings.append(
+                crossings.add(
                     Crossing(node=None,
                              edges=None,
                              priority=False,
@@ -560,6 +560,8 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                                   if a_id < b_id and a & b)
                 clusters[a_id] |= clusters[b_id]
                 del clusters[b_id]
+                clusters_crossing[a_id] |= clusters_crossing[b_id]
+                del clusters_crossing[b_id]
             except StopIteration:
                 break
 
@@ -590,7 +592,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                 clusters[current_cluster_id] = set()
                 queue = list(current_cluster)
 
-            while len(queue) > 0:
+            while queue:
                 expanded_node = queue.pop()
                 if expanded_node in explored_nodes:
                     continue
@@ -782,41 +784,43 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
             # to wait for lanes with priority (cars)
             merged_node.setType("priority_stop")
 
+            def cluster_metric(e1: Edge, e2: Edge) -> float:
+                return np.min([np.linalg.norm(pt1 - pt2)
+                               for lane1 in e1.getLanes()
+                               for lane2 in e2.getLanes()
+                               for pt1 in np.array(lane1.getShape())
+                               for pt2 in np.array(lane2.getShape())])
+
             clusters = min_cluster(
                 non_pedestrian_edges, lambda dist: dist < 4,
-                lambda e1, e2: max(
-                    np.linalg.norm(
-                        np.array(e1.getFromNode().getCoord()) - np.array(
-                            e2.getToNode().getCoord())),
-                    np.linalg.norm(
-                        np.array(e1.getToNode().getCoord()) - np.array(
-                            e2.getFromNode().getCoord()))))
+                cluster_metric
+            )
             merged_crossings = merge_crossings(crossings)
 
             # filter all crossings close to parallel to any of the clusters
             # if we have more than merged crossing
             # min angle: PI/4
-            merged_crossings = [
-                c for c in merged_crossings if np.min([
-                    vector_angle(
-                        np.array(e.getToNode().getCoord()) -
-                        np.array(e.getFromNode().getCoord()), c.shape[-1] -
-                        c.shape[0]) for cluster in clusters for e in cluster
-                ]) > np.pi / 4
-            ] if len(merged_crossings) > 1 else merged_crossings
+            # merged_crossings = [
+            #     c for c in merged_crossings if np.min([
+            #         vector_angle(
+            #             np.array(e.getToNode().getCoord()) -
+            #             np.array(e.getFromNode().getCoord()), c.shape[-1] -
+            #             c.shape[0]) for cluster in clusters for e in cluster
+            #     ]) > np.pi / 4
+            # ] if len(merged_crossings) > 1 else merged_crossings
             # choose the crossing with maximal length
             crossing = merged_crossings[np.argmax([
                 np.linalg.norm(m.shape[-1] - m.shape[0])
                 for m in merged_crossings
             ])]
-            crossing.shape = intersect_lanelets_line(
-                {
-                    self.lanelet_network.find_lanelet_by_id(l_id)
-                    for l_id, e_id in self.lanelet_id2edge_id.items()
-                    if e_id in
-                       {edge.getID()
-                        for cluster in clusters for edge in cluster}
-                }, crossing.shape)
+            # crossing.shape = intersect_lanelets_line(
+            #     {
+            #         self.lanelet_network.find_lanelet_by_id(l_id)
+            #         for l_id, e_id in self.lanelet_id2edge_id.items()
+            #         if e_id in
+            #            {edge.getID()
+            #             for cluster in clusters for edge in cluster}
+            #     }, crossing.shape)
 
             # assign each cluster the same crossing shape
             split_crossings = []
@@ -839,18 +843,19 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
 
                 # Assure that c.shape is in counter clockwise direction within the junction
                 # Move c.shape to the centroid of it's edges, them make sure it is in ccw direction
-                edge_ends = np.array(
-                    [node.getCoord() for edge in c.edges for node in [edge.getFromNode(), edge.getToNode()]]
-                )
-                edge_centre = np.mean(edge_ends, axis=0)
-                crossing_centre = np.mean(c.shape, axis=0)
-                junction_centre = edge_ends[np.argmin(np.linalg.norm(edge_ends - crossing_centre, axis=1))]
-                orthogonal = orthogonal_ccw_vector(junction_centre, edge_centre)
-                centered_crossing = c.shape + (edge_centre - crossing_centre)
+                # edge_ends = np.array(
+                #     [node.getCoord() for edge in c.edges for node in [edge.getFromNode(), edge.getToNode()]]
+                # )
+                # edge_centre = np.mean(edge_ends, axis=0)
+                # crossing_centre = np.mean(c.shape, axis=0)
+                # junction_centre = edge_ends[np.argmin(np.linalg.norm(edge_ends - crossing_centre, axis=1))]
+                # orthogonal = orthogonal_ccw_vector(junction_centre, edge_centre)
+                # centered_crossing = c.shape + (edge_centre - crossing_centre)
                 # is the centered crossing going the same direction as the ccw vector
                 # if not flip it's elements
-                if np.dot(orthogonal, centered_crossing[-1] - centered_crossing[0]) < 0:
-                    c.shape = np.flip(c.shape, axis=0)
+                # if np.dot(orthogonal, centered_crossing[-1] - centered_crossing[0]) < 0:
+                #     c.shape = np.flip(c.shape, axis=0)
+                c.shape = None
                 split_crossings.append(c)
 
             new_crossings[merged_node_id] = split_crossings
