@@ -133,11 +133,19 @@ class mapcreator:
 
     def fit_to_predecessor(self, predecessor, successor):
         if predecessor:
-            last_element = len(predecessor.center_vertices) - 1
+            #last_element = len(predecessor.center_vertices) - 1
+            factor = (np.linalg.norm(successor.left_vertices[0, :] - successor.right_vertices[0, :])
+                      / np.linalg.norm((predecessor.left_vertices[-1, :] - predecessor.right_vertices[-1, :])))
+
+            successor._left_vertices = successor.left_vertices / factor
+            successor._right_vertices = successor.right_vertices / factor
+            successor._center_vertices = successor.center_vertices / factor
+
             ang = mapcreator.calc_angle_between(self, predecessor, successor)
             successor.translate_rotate(np.array([0, 0]), ang)
-            trans = predecessor.center_vertices[last_element] - successor.center_vertices[0]
+            trans = predecessor.center_vertices[-1] - successor.center_vertices[0]
             successor.translate_rotate(trans, 0)
+
 
             # Relation
             mapcreator.set_predecessor_successor_relation(self, predecessor, successor)
