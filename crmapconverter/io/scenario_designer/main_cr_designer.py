@@ -5,13 +5,14 @@ import os
 import sys
 import logging
 import numpy as np
+import time
 
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import (QMainWindow, QDockWidget, QMessageBox, QAction,
                              QLabel, QFileDialog, QDesktopWidget, QVBoxLayout,
-                             QSlider, QWidget, QApplication, qApp)
+                             QSlider, QWidget, QApplication, qApp, QLineEdit, QFormLayout, QPushButton, QDialog)
 from PyQt5.QtCore import Qt, QUrl
-from PyQt5.QtGui import QIcon, QKeySequence, QDesktopServices
+from PyQt5.QtGui import QIcon, QKeySequence, QDesktopServices, QIntValidator
 from matplotlib.backends.backend_qt5agg import (NavigationToolbar2QT as
                                                 NavigationToolbar)
 
@@ -33,11 +34,11 @@ from crmapconverter.io.scenario_designer.gui_viewer import (
     LaneletList, IntersectionList, find_intersection_by_id, AnimatedViewer)
 from crmapconverter.io.scenario_designer import config
 from crmapconverter.io.scenario_designer import util
+from crmapconverter.io.scenario_designer.lanelet_settings import LaneletSettings
 
 from commonroad.scenario.lanelet import Lanelet
 from commonroad.scenario.lanelet import LaneletType
 from commonroad.scenario.lanelet import LaneletNetwork
-
 
 class MWindow(QMainWindow, Ui_mainWindow):
     """The Mainwindow of CR Scenario Designer."""
@@ -75,6 +76,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.intersection_list_dock = None
         self.sumo_settings = None
         self.gui_settings = None
+        self.lanelet_settings = None
 
         # when the current scenario was simulated, load it in the gui
         self.sumobox.simulated_scenario.subscribe(self.open_scenario)
@@ -92,6 +94,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.create_toolbar()
         self.create_console()
         self.create_toolbox()
+        #self.create_laneletsettings()
 
         self.status = self.statusbar
         self.status.showMessage("Welcome to CR Scenario Designer")
@@ -127,6 +130,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         if path:
             self.open_path(path)
 
+
     def show_osm_settings(self):
         osm_interface = OSMInterface(self)
         osm_interface.show_settings()
@@ -141,7 +145,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
     def show_sumo_settings(self):
         self.sumo_settings = SUMOSettings(self, config=self.sumobox.config)
 
-    def click_straight(self,width=3,length=50,vertices=10, rot_angle=0):
+    def click_straight(self,width, length, vertices, rot_angle):
         lanelet = self.create_straight(width,length,vertices,self.scenario.lanelet_network)
         lanelet.translate_rotate(np.array([0, 0]), rot_angle)
         self.scenario.lanelet_network.add_lanelet(lanelet)
@@ -194,6 +198,31 @@ class MWindow(QMainWindow, Ui_mainWindow):
             self.update_view()
             self.update_to_new_scenario()
 
+    def create_laneletsettings(self):
+        self.lanelet_settings = LaneletSettings()
+        #self.lanelet_settings.show()
+
+    def forwards(self):
+        #self.create_laneletsettings()
+        self.LL = LaneletSettings()
+        self.LL.exec()
+
+        len = self.LL.getLanletLength()
+        wid = self.LL.getLaneletWidth()
+
+        self.click_straight(width=wid,length=len, vertices=10, rot_angle=0)
+
+        print("TEST")
+        #self.openDialog()
+        #self.click_straight()
+
+
+        #self.click_straight(self.lanelet_settings.getLaneletWidth(), length=50, vertices=10, rot_angle=0)
+    def openDialog(self):
+        mydialog = QDialog()
+        mydialog.setModal(True)
+        mydialog.exec()
+
     def create_toolbox(self):
         """ Create the Upper toolbox."""
         self.uppertoolBox = UpperToolbox()
@@ -204,7 +233,8 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.tool1.setAllowedAreas(Qt.LeftDockWidgetArea)
         self.tool1.setWidget(self.uppertoolBox)
         self.addDockWidget(Qt.LeftDockWidgetArea, self.tool1)
-        self.uppertoolBox.button_forwards.clicked.connect(lambda: self.click_straight())
+        #self.uppertoolBox.button_forwards.clicked.connect(lambda: self.click_straight())
+        self.uppertoolBox.button_forwards.clicked.connect(self.forwards)
         self.uppertoolBox.button_backwards.clicked.connect(lambda: self.click_straight(rot_angle=np.pi))
         self.uppertoolBox.button_turn_right.clicked.connect(lambda: self.click_curve(angle=-np.pi/2))
         self.uppertoolBox.button_turn_left.clicked.connect(lambda: self.click_curve())
