@@ -312,7 +312,6 @@ class LaneletList(ScenarioElementList):
     def __init__(self, action_on_click, parent=None):
         super().__init__(action_on_click, parent)
         self.header_labels = ["Lanelet-Id", "LaneletType"]
-        #self.lanelet_data
 
     def update(self, scenario):
         if scenario is None:
