@@ -1,40 +1,11 @@
-
-from argparse import ArgumentParser
-import os
-import sys
-import logging
-import numpy as np
-
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import (QMainWindow, QDockWidget, QMessageBox, QAction,
                              QLabel, QFileDialog, QDesktopWidget, QVBoxLayout,
                              QSlider, QWidget, QApplication, qApp, QLineEdit, QFormLayout, QPushButton, QDialog, QRadioButton)
-from PyQt5.QtCore import Qt, QUrl
-from PyQt5.QtGui import QIcon, QKeySequence, QDesktopServices, QIntValidator
-from matplotlib.backends.backend_qt5agg import (NavigationToolbar2QT as
-                                                NavigationToolbar)
+from PyQt5.QtGui import QIcon, QIntValidator
+from PyQt5.QtCore import Qt
 
-from commonroad.common.file_reader import CommonRoadFileReader
-from commonroad.common.file_writer import (CommonRoadFileWriter,
-                                           OverwriteExistingFile)
-from commonroad.scenario.scenario import Scenario, LaneletNetwork, Lanelet
 
-from crmapconverter.io.scenario_designer.gui_resources.MainWindow import Ui_mainWindow
-from crmapconverter.io.scenario_designer.gui_toolbox import UpperToolbox
-from crmapconverter.io.scenario_designer.converter_modules.osm_interface import OSMInterface
-from crmapconverter.io.scenario_designer.converter_modules.opendrive_interface import (
-    OpenDRIVEInterface)
-from crmapconverter.io.scenario_designer.gui_settings import GUISettings
-from crmapconverter.io.scenario_designer.sumo_gui_modules.sumo_settings import SUMOSettings
-from crmapconverter.io.scenario_designer.sumo_gui_modules.gui_sumo_simulation import SUMOSimulation
-from crmapconverter.io.scenario_designer.sumo_gui_modules.gui_sumo_simulation import SUMO_AVAILABLE
-from crmapconverter.io.scenario_designer.gui_viewer import (
-    LaneletList, IntersectionList, find_intersection_by_id, AnimatedViewer)
-from crmapconverter.io.scenario_designer import config
-from crmapconverter.io.scenario_designer import util
-
-from commonroad.scenario.lanelet import Lanelet
-from commonroad.scenario.lanelet import LaneletType
 class LaneletSettings(QDialog):
     def __init__(self):
         super().__init__()
