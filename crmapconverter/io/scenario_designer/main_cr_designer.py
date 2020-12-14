@@ -35,6 +35,7 @@ from crmapconverter.io.scenario_designer.gui_viewer import (
 from crmapconverter.io.scenario_designer import config
 from crmapconverter.io.scenario_designer import util
 from crmapconverter.io.scenario_designer.lanelet_settings import LaneletSettings
+from crmapconverter.io.scenario_designer.curve_settings import CurveSettings
 
 from commonroad.scenario.lanelet import Lanelet
 from commonroad.scenario.lanelet import LaneletType
@@ -163,9 +164,6 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.update_view()
         self.update_to_new_scenario()
 
-    """def selected_lanelet(self, event):
-        lan = self.crviewer.select_lanelets(Qt.LeftButton) #if event.button() == Qt.LeftButton
-        print(lan)"""
 
     def fit_func(self):
         selected_lanelet = None
@@ -210,6 +208,22 @@ class MWindow(QMainWindow, Ui_mainWindow):
         adj = self.LL.getAdjacentLanelet()
         self.click_straight(width=wid,length=len, vertices=10, rot_angle=0)
 
+    def curve(self):
+        self.CU = CurveSettings()
+        self.CU.exec()
+        rad = self.CU.getCurveRadius()
+        wid = self.CU.getCurveWidth()
+        num = self.CU.getNumberVertices()
+        angl = self.CU.getAngle()
+        pred = self.CU.getPredecessor()
+        adj = self.CU.getAdjacentCurve()
+
+       #click_curve(self, width=3, radius=50, angle=np.pi / 2, num_vertices=30, rot_angle=0):
+
+        self.click_curve(width=wid,radius=rad, angle=angl, num_vertices=num, rot_angle=0)
+        print(angl)
+        print(np.pi/2)
+
     def create_toolbox(self):
         """ Create the Upper toolbox."""
         self.uppertoolBox = UpperToolbox()
@@ -223,7 +237,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         #self.uppertoolBox.button_forwards.clicked.connect(lambda: self.click_straight())
         self.uppertoolBox.button_forwards.clicked.connect(self.forwards)
         self.uppertoolBox.button_backwards.clicked.connect(lambda: self.click_straight(rot_angle=np.pi))
-        self.uppertoolBox.button_turn_right.clicked.connect(lambda: self.click_curve(angle=-np.pi/2))
+        self.uppertoolBox.button_turn_right.clicked.connect(self.curve)
         self.uppertoolBox.button_turn_left.clicked.connect(lambda: self.click_curve())
         self.uppertoolBox.button_fit_to_predecessor.clicked.connect(lambda: self.fit_func())
         self.uppertoolBox.button_adjacent_left.clicked.connect(lambda: self.adjacent_left())
