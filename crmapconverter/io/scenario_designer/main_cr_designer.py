@@ -200,28 +200,15 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
     def create_laneletsettings(self):
         self.lanelet_settings = LaneletSettings()
-        #self.lanelet_settings.show()
 
     def forwards(self):
-        #self.create_laneletsettings()
         self.LL = LaneletSettings()
         self.LL.exec()
-
         len = self.LL.getLanletLength()
         wid = self.LL.getLaneletWidth()
-
+        pred = self.LL.getPredecessor()
+        adj = self.LL.getAdjacentLanelet()
         self.click_straight(width=wid,length=len, vertices=10, rot_angle=0)
-
-        print("TEST")
-        #self.openDialog()
-        #self.click_straight()
-
-
-        #self.click_straight(self.lanelet_settings.getLaneletWidth(), length=50, vertices=10, rot_angle=0)
-    def openDialog(self):
-        mydialog = QDialog()
-        mydialog.setModal(True)
-        mydialog.exec()
 
     def create_toolbox(self):
         """ Create the Upper toolbox."""

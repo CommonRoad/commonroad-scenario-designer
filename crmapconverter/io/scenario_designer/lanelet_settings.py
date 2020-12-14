@@ -71,8 +71,6 @@ class LaneletSettings(QDialog):
             self.lanelet_width = int(self.width.text())
         else:
             self.lanelet_width = 12
-        print(self.lanelet_length)
-        print(self.lanelet_width)
         self.close()
 
     def set_default_click(self):
