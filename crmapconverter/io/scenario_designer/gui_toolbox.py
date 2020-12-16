@@ -59,6 +59,7 @@ class UpperToolbox(QWidget):
 
     #def clicked(self):
         #print("clicked")
+       #click_curve(self, width=3, radius=50, angle=np.pi / 2, num_vertices=30, rot_angle=0):
 
     def define_sections(self):
         """reimplement this to define all your sections
@@ -113,44 +114,77 @@ class UpperToolbox(QWidget):
         layoutlanelets.addWidget(self.button_forwards, 1, 0)
         #button_forwards.clicked.connect(self.clicked)
 
-        self.button_backwards = QPushButton()
-        self.button_backwards.setText("backwards")
-        layoutlanelets.addWidget(self.button_backwards, 1, 1)
-        self.button_backwards.setIcon(QIcon(":/gui_src/forwards.PNG"))
+        self.button_lanelet_settings = QPushButton()
+        self.button_lanelet_settings.setText("settings")
+        layoutlanelets.addWidget(self.button_lanelet_settings, 1, 1)
+        self.button_lanelet_settings.setIcon(QIcon(":/gui_src/forwards.PNG"))
 
         self.button_turn_right = QPushButton()
         self.button_turn_right.setText("turn right")
         layoutlanelets.addWidget(self.button_turn_right, 2, 0)
         self.button_turn_right.setIcon(QIcon(":/gui_src/forwards.PNG"))
 
+        self.button_curve_settings = QPushButton()
+        self.button_curve_settings.setText("settings")
+        layoutlanelets.addWidget(self.button_curve_settings, 2, 1)
+        self.button_curve_settings.setIcon(QIcon(":/gui_src/forwards.PNG"))
+
         self.button_turn_left = QPushButton()
         self.button_turn_left.setText("turn left")
-        layoutlanelets.addWidget(self.button_turn_left, 2, 1)
-        self.button_turn_right.setIcon(QIcon(":/gui_src/forwards.PNG"))
+        layoutlanelets.addWidget(self.button_turn_left, 3, 0)
+        self.button_turn_left.setIcon(QIcon(":/gui_src/forwards.PNG"))
+
+        self.button_curve_settings2 = QPushButton()
+        self.button_curve_settings2.setText("settings")
+        #layoutlanelets.addWidget(self.button_curve_settings2, 3, 1)
+        self.button_curve_settings2.setIcon(QIcon(":/gui_src/forwards.PNG"))
 
         #Fit to Predecessor
         self.button_fit_to_predecessor = QPushButton()
         self.button_fit_to_predecessor.setText("Fit to Predecessor")
-        layoutlanelets.addWidget(self.button_fit_to_predecessor, 3, 1)
+        layoutlanelets.addWidget(self.button_fit_to_predecessor, 4, 0)
         self.button_fit_to_predecessor.setIcon(QIcon(":/gui_src/forwards.PNG"))
 
         #adjacent_left
         self.button_adjacent_right = QPushButton()
         self.button_adjacent_right.setText("Create Adjacent Right")
-        layoutlanelets.addWidget(self.button_adjacent_right, 4, 0)
+        layoutlanelets.addWidget(self.button_adjacent_right, 5, 0)
         self.button_adjacent_right.setIcon(QIcon(":/gui_src/forwards.PNG"))
 
         # adjacent_right
         self.button_adjacent_left = QPushButton()
         self.button_adjacent_left.setText("Create Adjacent Left")
-        layoutlanelets.addWidget(self.button_adjacent_left, 4, 1)
+        layoutlanelets.addWidget(self.button_adjacent_left, 5, 1)
         self.button_adjacent_left.setIcon(QIcon(":/gui_src/forwards.PNG"))
 
+        # select_predecessor
+        self.button_select_predecessor = QPushButton()
+        self.button_select_predecessor.setText("Select Predecessor")
+        layoutlanelets.addWidget(self.button_select_predecessor, 6, 0)
+        self.button_select_predecessor.setIcon(QIcon(":/gui_src/forwards.PNG"))
 
-        button_turn_left_45 = QPushButton()
-        button_turn_left_45.setText("show more")
+        # select_successor
+        self.button_select_successor = QPushButton()
+        self.button_select_successor.setText("Select Successor")
+        layoutlanelets.addWidget(self.button_select_successor, 6, 1)
+        self.button_select_successor.setIcon(QIcon(":/gui_src/forwards.PNG"))
+
+        # connect lanelets
+        self.button_connect_lanelets = QPushButton()
+        self.button_connect_lanelets.setText("Connect Lanelets")
+        layoutlanelets.addWidget(self.button_connect_lanelets, 7, 0)
+        self.button_connect_lanelets.setIcon(QIcon(":/gui_src/forwards.PNG"))
+
+        # remove lanelet
+        self.button_remove_lanelet = QPushButton()
+        self.button_remove_lanelet.setText("Remove Lanelet")
+        layoutlanelets.addWidget(self.button_remove_lanelet, 7, 1)
+        self.button_remove_lanelet.setIcon(QIcon(":/gui_src/forwards.PNG"))
+
+        #button_turn_left_45 = QPushButton()
+        #button_turn_left_45.setText("show more")
         # button_turn_right.setIcon(QIcon(":/icons/Groupe_2.png"))
-        layoutlanelets.addWidget(button_turn_left_45, 3, 0)
+        #layoutlanelets.addWidget(button_turn_left_45, 3, 0)
         # widgetlanelets.addItem(spacerItem)
 
         titlelanelets = "Lanelets"
