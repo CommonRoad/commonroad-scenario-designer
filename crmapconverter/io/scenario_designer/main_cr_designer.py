@@ -65,6 +65,18 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.latestid = None
         self.selected_lanelet = None
 
+        self.lenfor = 50
+        self.widfor = 20
+        self.predfor = None
+        self.adjfor = None
+
+        self.radcurve = 50
+        self.widcurve = 20
+        self.numcurve = 30
+        self.anglcurve = np.pi/2
+        self.predcurve = None
+        self.adjcurve = None
+
         # GUI attributes
         self.tool1 = None
         self.tool2 = None
@@ -146,7 +158,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
     def show_sumo_settings(self):
         self.sumo_settings = SUMOSettings(self, config=self.sumobox.config)
 
-    def click_straight(self,width, length, vertices, rot_angle):
+    def click_straight(self,width=self.widfor, length=self.lenfor, vertices=10, rot_angle=0):
         lanelet = self.create_straight(width,length,vertices,self.scenario.lanelet_network)
         lanelet.translate_rotate(np.array([0, 0]), rot_angle)
         self.scenario.lanelet_network.add_lanelet(lanelet)
@@ -155,7 +167,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.update_view()
         self.update_to_new_scenario()
 
-    def click_curve(self,width=3,radius=50, angle=np.pi/2, num_vertices=30, rot_angle=0):
+    def click_curve(self,width=self.widcurve,radius=self.radcurve, angle=self.anglcurve, num_vertices=self.numcurve, rot_angle=0):
         lanelet = self.create_curve(width, radius, angle, num_vertices, self.scenario.lanelet_network)
         lanelet.translate_rotate(np.array([0, 0]), rot_angle)
         self.scenario.lanelet_network.add_lanelet(lanelet)
@@ -202,27 +214,25 @@ class MWindow(QMainWindow, Ui_mainWindow):
     def forwards(self):
         self.LL = LaneletSettings()
         self.LL.exec()
-        len = self.LL.getLanletLength()
-        wid = self.LL.getLaneletWidth()
-        pred = self.LL.getPredecessor()
-        adj = self.LL.getAdjacentLanelet()
-        self.click_straight(width=wid,length=len, vertices=10, rot_angle=0)
+        self.lenfor = self.LL.getLanletLength()
+        self.widfor = self.LL.getLaneletWidth()
+        self.predfor = self.LL.getPredecessor()
+        self.adjfor = self.LL.getAdjacentLanelet()
+        self.click_straight(width=self.widfor,length=self.lenfor, vertices=10, rot_angle=0)
 
     def curve(self):
         self.CU = CurveSettings()
         self.CU.exec()
-        rad = self.CU.getCurveRadius()
-        wid = self.CU.getCurveWidth()
-        num = self.CU.getNumberVertices()
-        angl = self.CU.getAngle()
-        pred = self.CU.getPredecessor()
-        adj = self.CU.getAdjacentCurve()
+        self.radcurve = self.CU.getCurveRadius()
+        self.widcurve = self.CU.getCurveWidth()
+        self.numcurve = self.CU.getNumberVertices()
+        self.anglcurve = self.CU.getAngle()
+        self.predcurve = self.CU.getPredecessor()
+        self.adjcurve = self.CU.getAdjacentCurve()
 
-       #click_curve(self, width=3, radius=50, angle=np.pi / 2, num_vertices=30, rot_angle=0):
-
-        self.click_curve(width=wid,radius=rad, angle=angl, num_vertices=num, rot_angle=0)
-        print(angl)
-        print(np.pi/2)
+        self.click_curve(width=self.widcurve,radius=self.radcurve, angle=self.anglcurve, num_vertices=self.numcurve, rot_angle=0)
+        """print(angl)
+        print(np.pi/2)"""
 
     def create_toolbox(self):
         """ Create the Upper toolbox."""
@@ -235,10 +245,10 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.tool1.setWidget(self.uppertoolBox)
         self.addDockWidget(Qt.LeftDockWidgetArea, self.tool1)
         #self.uppertoolBox.button_forwards.clicked.connect(lambda: self.click_straight())
-        self.uppertoolBox.button_forwards.clicked.connect(self.forwards)
-        self.uppertoolBox.button_backwards.clicked.connect(lambda: self.click_straight(rot_angle=np.pi))
-        self.uppertoolBox.button_turn_right.clicked.connect(self.curve)
-        self.uppertoolBox.button_turn_left.clicked.connect(lambda: self.click_curve())
+        self.uppertoolBox.button_forwards.clicked.connect(self.click_straight)
+        self.uppertoolBox.button_lanelet_settings.clicked.connect(self.forwards)
+        self.uppertoolBox.button_turn_right.clicked.connect(self.click_curve)
+        self.uppertoolBox.button_curve_settings.clicked.connect(self.curve)
         self.uppertoolBox.button_fit_to_predecessor.clicked.connect(lambda: self.fit_func())
         self.uppertoolBox.button_adjacent_left.clicked.connect(lambda: self.adjacent_left())
         self.uppertoolBox.button_adjacent_right.clicked.connect(lambda: self.adjacent_right())
