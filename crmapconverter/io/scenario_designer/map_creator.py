@@ -18,10 +18,6 @@ from commonroad.scenario.intersection import IntersectionIncomingElement
 
 # from commonroad.scenario.lanelet import LineMarking
 
-file_path = "/home/aaron/Downloads/ZAM_Tutorial-1_2_T-3.xml"  #
-scenario, planning_problem_set = CommonRoadFileReader(file_path).open()
-network = LaneletNetwork()
-
 
 class mapcreator:
     """ functionality to create lanelets and Obstacles for a Scenario """
@@ -50,7 +46,7 @@ class mapcreator:
         b = set(b)
         predecessor._successor = list(b)
 
-    def create_straight(self, width, length, num_vertices, network):
+    def create_straight(self, width, length, num_vertices, network, pred):
         eps = 0.1e-15
         length_div = length / num_vertices
         left_vertices = []
@@ -68,11 +64,14 @@ class mapcreator:
         idl = self.scenario.generate_object_id()
         lanelet = Lanelet(left_vertices=left_vertices, right_vertices=right_vertices, lanelet_id=idl,
                           center_vertices=center_vertices, lanelet_type={LaneletType.URBAN})
+        if pred:
+            if self.latestid != None:
+                self.fit_to_predecessor(network.find_lanelet_by_id(self.latestid),lanelet)
         self.latestid = idl
         network.add_lanelet(lanelet=lanelet)
         return lanelet
 
-    def create_curve(self, width, radius, angle, num_vertices, network):
+    def create_curve(self, width, radius, angle, num_vertices, network, pred):
         angle_div = angle / (num_vertices - 1)
         radius_left = radius - (width / 2)
         radius_right = radius + (width / 2)
@@ -96,6 +95,10 @@ class mapcreator:
         idl = self.scenario.generate_object_id()
         lanelet = Lanelet(left_vertices=left_vertices, right_vertices=right_vertices, lanelet_id=idl,
                           center_vertices=center_vertices, lanelet_type={LaneletType.URBAN})
+        if pred:
+            if self.latestid != None:
+                self.fit_to_predecessor(network.find_lanelet_by_id(self.latestid), lanelet)
+
         self.latestid = idl
         network.add_lanelet(lanelet=lanelet)
         return lanelet

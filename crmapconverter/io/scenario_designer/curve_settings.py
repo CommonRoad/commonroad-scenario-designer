@@ -3,7 +3,7 @@ import numpy as np
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import (QMainWindow, QDockWidget, QMessageBox, QAction,
                              QLabel, QFileDialog, QDesktopWidget, QVBoxLayout,
-                             QSlider, QWidget, QApplication, qApp, QLineEdit, QFormLayout, QPushButton, QDialog, QRadioButton)
+                             QSlider, QWidget, QApplication, qApp, QLineEdit, QFormLayout, QPushButton, QDialog, QRadioButton, QCheckBox)
 from PyQt5.QtGui import QIcon, QIntValidator
 from PyQt5.QtCore import Qt
 
@@ -48,6 +48,9 @@ class CurveSettings(QDialog):
         self.Predecessor.setText("set predecessor automatically")
         self.Predecessor.toggled.connect(self.predecessor_button)
 
+        self.pred = QCheckBox("set predecessor automatically")
+        self.pred.stateChanged.connect(self.predecessor_button)
+
         self.apply_button = QPushButton()
         self.apply_button.setText("apply")
         self.apply_button.clicked.connect(self.apply_button_click)
@@ -62,15 +65,15 @@ class CurveSettings(QDialog):
         layout.addRow("Curve angle ", self.angle)
         layout.addRow("Number of vertices ", self.vertices)
 
-        layout.addWidget(self.adjacentCurve)
-        layout.addWidget(self.Predecessor)
+        #layout.addWidget(self.adjacentCurve)
+        layout.addWidget(self.pred)
         layout.addWidget(self.apply_button)
         layout.addWidget(self.set_default)
 
         self.setLayout(layout)
 
     def predecessor_button(self):
-        self.setPredecessor = self.Predecessor.isChecked()
+        self.setPredecessor = self.pred.isChecked()
 
     def adjacent_button(self):
         if self.adjacentCurve.isChecked() == True:
@@ -91,6 +94,8 @@ class CurveSettings(QDialog):
             self.curve_angle = int(self.angle.text())
         else:
             self.curve_angle = 90
+        self.setPredecessor = self.pred.isChecked()
+
         self.close()
 
     def set_default_click(self):
@@ -104,7 +109,7 @@ class CurveSettings(QDialog):
         self.vertices.insert("10")
         self.setadjacent = False
         self.adjacentCurve.setChecked(False)
-        self.Predecessor.setChecked(True)
+        self.pred.setChecked(True)
         self.setPredecessor = True
 
     def showsettings(self):

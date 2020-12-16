@@ -1,7 +1,7 @@
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import (QMainWindow, QDockWidget, QMessageBox, QAction,
                              QLabel, QFileDialog, QDesktopWidget, QVBoxLayout,
-                             QSlider, QWidget, QApplication, qApp, QLineEdit, QFormLayout, QPushButton, QDialog, QRadioButton)
+                             QSlider, QWidget, QApplication, qApp, QLineEdit, QFormLayout, QPushButton, QDialog, QRadioButton, QCheckBox)
 from PyQt5.QtGui import QIcon, QIntValidator
 from PyQt5.QtCore import Qt
 
@@ -34,6 +34,8 @@ class LaneletSettings(QDialog):
         self.Predecessor.setText("set predecessor automatically")
         self.Predecessor.toggled.connect(self.predecessor_button)
 
+        self.pred = QCheckBox("set predecessor automatically")
+        self.pred.stateChanged.connect(self.predecessor_button)
 
         self.apply_button = QPushButton()
         self.apply_button.setText("apply")
@@ -46,15 +48,19 @@ class LaneletSettings(QDialog):
         layout = QFormLayout()
         layout.addRow("Lanelet length", self.length)
         layout.addRow("Lanelet width ", self.width)
-        layout.addWidget(self.adjacentLanelet)
-        layout.addWidget(self.Predecessor)
+        #layout.addWidget(self.adjacentLanelet)
+        layout.addWidget(self.pred)
+        #layout.addWidget(self.Predecessor)
         layout.addWidget(self.apply_button)
         layout.addWidget(self.set_default)
 
         self.setLayout(layout)
 
     def predecessor_button(self):
-        self.setPredecessor = self.Predecessor.isChecked()
+        if self.pred.isChecked():
+            self.setPredecessor = True
+        else:
+            self.setPredecessor = False
 
     def adjacent_button(self):
         if self.adjacentLanelet.isChecked() == True:
@@ -71,6 +77,7 @@ class LaneletSettings(QDialog):
             self.lanelet_width = int(self.width.text())
         else:
             self.lanelet_width = 12
+        self.setPredecessor = self.pred.isChecked()
         self.close()
 
     def set_default_click(self):
@@ -80,7 +87,7 @@ class LaneletSettings(QDialog):
         self.width.insert("20")
         self.setadjacent = False
         self.adjacentLanelet.setChecked(False)
-        self.Predecessor.setChecked(True)
+        self.pred.setChecked(True)
         self.setPredecessor = True
 
     def showsettings(self):

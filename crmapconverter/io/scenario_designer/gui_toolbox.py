@@ -129,22 +129,32 @@ class UpperToolbox(QWidget):
         layoutlanelets.addWidget(self.button_curve_settings, 2, 1)
         self.button_curve_settings.setIcon(QIcon(":/gui_src/forwards.PNG"))
 
+        self.button_turn_left = QPushButton()
+        self.button_turn_left.setText("turn left")
+        layoutlanelets.addWidget(self.button_turn_left, 3, 0)
+        self.button_turn_left.setIcon(QIcon(":/gui_src/forwards.PNG"))
+
+        self.button_curve_settings2 = QPushButton()
+        self.button_curve_settings2.setText("settings")
+        #layoutlanelets.addWidget(self.button_curve_settings2, 3, 1)
+        self.button_curve_settings2.setIcon(QIcon(":/gui_src/forwards.PNG"))
+
         #Fit to Predecessor
         self.button_fit_to_predecessor = QPushButton()
         self.button_fit_to_predecessor.setText("Fit to Predecessor")
-        layoutlanelets.addWidget(self.button_fit_to_predecessor, 3, 1)
+        layoutlanelets.addWidget(self.button_fit_to_predecessor, 4, 0)
         self.button_fit_to_predecessor.setIcon(QIcon(":/gui_src/forwards.PNG"))
 
         #adjacent_left
         self.button_adjacent_right = QPushButton()
         self.button_adjacent_right.setText("Create Adjacent Right")
-        layoutlanelets.addWidget(self.button_adjacent_right, 4, 0)
+        layoutlanelets.addWidget(self.button_adjacent_right, 5, 0)
         self.button_adjacent_right.setIcon(QIcon(":/gui_src/forwards.PNG"))
 
         # adjacent_right
         self.button_adjacent_left = QPushButton()
         self.button_adjacent_left.setText("Create Adjacent Left")
-        layoutlanelets.addWidget(self.button_adjacent_left, 4, 1)
+        layoutlanelets.addWidget(self.button_adjacent_left, 5, 1)
         self.button_adjacent_left.setIcon(QIcon(":/gui_src/forwards.PNG"))
 
 

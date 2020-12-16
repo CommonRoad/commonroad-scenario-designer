@@ -67,16 +67,16 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.latestid = None
         self.selected_lanelet = None
 
+        self.pred = False
+
         self.lenfor = 50
         self.widfor = 20
-        self.predfor = None
         self.adjfor = None
 
         self.radcurve = 50
         self.widcurve = 20
         self.numcurve = 30
         self.anglcurve = np.pi/2
-        self.predcurve = None
         self.adjcurve = None
 
         # GUI attributes
@@ -160,13 +160,9 @@ class MWindow(QMainWindow, Ui_mainWindow):
     def show_sumo_settings(self):
         self.sumo_settings = SUMOSettings(self, config=self.sumobox.config)
 
-<<<<<<< HEAD
-    def click_straight(self,width=self.widfor, length=self.lenfor, vertices=10, rot_angle=0):
-        lanelet = self.create_straight(width,length,vertices,self.scenario.lanelet_network)
-=======
-    def click_straight(self,width, length, vertices, rot_angle):
-        lanelet = mapcreator.create_straight(self, width,length,vertices,self.scenario.lanelet_network)
->>>>>>> 912aead09243e29ad6a0db866ec85c93a19c0c55
+
+    def click_straight(self, width=20, length=50, vertices=10, rot_angle=0):
+        lanelet = mapcreator.create_straight(self, width,length,vertices,self.scenario.lanelet_network, self.pred)
         lanelet.translate_rotate(np.array([0, 0]), rot_angle)
         self.scenario.lanelet_network.add_lanelet(lanelet)
         self.scenario._lanelet_network = self.scenario.lanelet_network
@@ -174,13 +170,11 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.update_view()
         self.update_to_new_scenario()
 
-<<<<<<< HEAD
-    def click_curve(self,width=self.widcurve,radius=self.radcurve, angle=self.anglcurve, num_vertices=self.numcurve, rot_angle=0):
-        lanelet = self.create_curve(width, radius, angle, num_vertices, self.scenario.lanelet_network)
-=======
-    def click_curve(self,width=3,radius=50, angle=np.pi/2, num_vertices=30, rot_angle=0):
-        lanelet = mapcreator.create_curve(self, width, radius, angle, num_vertices, self.scenario.lanelet_network)
->>>>>>> 912aead09243e29ad6a0db866ec85c93a19c0c55
+    def fit_to_predecessor(self, predecessor, successor):
+        mapcreator.fit_to_predecessor(self,predecessor=predecessor, successor=successor)
+
+    def click_curve(self, width,radius, angle, num_vertices, rot_angle):
+        lanelet = mapcreator.create_curve(self, width, radius, angle, num_vertices, self.scenario.lanelet_network, self.pred)
         lanelet.translate_rotate(np.array([0, 0]), rot_angle)
         self.scenario.lanelet_network.add_lanelet(lanelet)
         self.scenario._lanelet_network = self.scenario.lanelet_network
@@ -230,9 +224,10 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.LL.exec()
         self.lenfor = self.LL.getLanletLength()
         self.widfor = self.LL.getLaneletWidth()
-        self.predfor = self.LL.getPredecessor()
+        self.pred = self.LL.getPredecessor()
         self.adjfor = self.LL.getAdjacentLanelet()
-        self.click_straight(width=self.widfor,length=self.lenfor, vertices=10, rot_angle=0)
+       # self.click_straight(width=self.widfor,length=self.lenfor, vertices=10, rot_angle=0)
+        #self.click_straight(width=20,length=50, vertices=10, rot_angle=0)
 
     def curve(self):
         self.CU = CurveSettings()
@@ -241,12 +236,19 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.widcurve = self.CU.getCurveWidth()
         self.numcurve = self.CU.getNumberVertices()
         self.anglcurve = self.CU.getAngle()
-        self.predcurve = self.CU.getPredecessor()
-        self.adjcurve = self.CU.getAdjacentCurve()
+        self.pred = self.CU.getPredecessor()
+        #self.adjcurve = self.CU.getAdjacentCurve()
 
-        self.click_curve(width=self.widcurve,radius=self.radcurve, angle=self.anglcurve, num_vertices=self.numcurve, rot_angle=0)
-        """print(angl)
-        print(np.pi/2)"""
+
+    def click(self):
+        self.click_straight(width=self.widfor,length=self.lenfor, vertices=10, rot_angle=0)
+
+    def curclick(self, turnright=True):
+        if turnright:
+            self.click_curve(width=self.widcurve, radius=self.radcurve, angle=self.anglcurve,
+                             num_vertices=self.numcurve, rot_angle=0)
+        else:
+            self.click_curve(width=self.widcurve,radius=self.radcurve, angle=self.anglcurve, num_vertices=self.numcurve, rot_angle=0)
 
     def create_toolbox(self):
         """ Create the Upper toolbox."""
@@ -259,10 +261,12 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.tool1.setWidget(self.uppertoolBox)
         self.addDockWidget(Qt.LeftDockWidgetArea, self.tool1)
         #self.uppertoolBox.button_forwards.clicked.connect(lambda: self.click_straight())
-        self.uppertoolBox.button_forwards.clicked.connect(self.click_straight)
+        self.uppertoolBox.button_forwards.clicked.connect(self.click)
         self.uppertoolBox.button_lanelet_settings.clicked.connect(self.forwards)
-        self.uppertoolBox.button_turn_right.clicked.connect(self.click_curve)
+        self.uppertoolBox.button_turn_right.clicked.connect(self.curclick)
         self.uppertoolBox.button_curve_settings.clicked.connect(self.curve)
+        self.uppertoolBox.button_turn_left.clicked.connect(self.curclick)
+        self.uppertoolBox.button_curve_settings2.clicked.connect(self.curve)
         self.uppertoolBox.button_fit_to_predecessor.clicked.connect(lambda: self.fit_func())
         self.uppertoolBox.button_adjacent_left.clicked.connect(lambda: self.adjacent_left())
         self.uppertoolBox.button_adjacent_right.clicked.connect(lambda: self.adjacent_right())
