@@ -148,7 +148,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
     def show_sumo_settings(self):
         self.sumo_settings = SUMOSettings(self, config=self.sumobox.config)
 
-    def click_straight(self,width, length, vertices, rot_angle):
+    def click_straight(self, width=self.widfor, length=50, vertices=10, rot_angle=0):
         lanelet = mapcreator.create_straight(self, width,length,vertices,self.scenario.lanelet_network)
         lanelet.translate_rotate(np.array([0, 0]), rot_angle)
         self.scenario.lanelet_network.add_lanelet(lanelet)
@@ -239,7 +239,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.tool1.setWidget(self.uppertoolBox)
         self.addDockWidget(Qt.LeftDockWidgetArea, self.tool1)
         #self.uppertoolBox.button_forwards.clicked.connect(lambda: self.click_straight())
-        self.uppertoolBox.button_forwards.clicked.connect(self.forwards)
+        self.uppertoolBox.button_forwards.clicked.connect(self.click_straight())
         self.uppertoolBox.button_backwards.clicked.connect(lambda: self.click_straight(rot_angle=np.pi))
         self.uppertoolBox.button_turn_right.clicked.connect(self.curve)
         self.uppertoolBox.button_turn_left.clicked.connect(lambda: self.click_curve())
