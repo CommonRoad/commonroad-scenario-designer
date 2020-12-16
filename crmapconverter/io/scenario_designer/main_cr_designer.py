@@ -41,6 +41,8 @@ from commonroad.scenario.lanelet import Lanelet
 from commonroad.scenario.lanelet import LaneletType
 from commonroad.scenario.lanelet import LaneletNetwork
 
+from crmapconverter.io.scenario_designer.map_creator import mapcreator
+
 class MWindow(QMainWindow, Ui_mainWindow):
     """The Mainwindow of CR Scenario Designer."""
     def __init__(self, path=None):
@@ -158,8 +160,13 @@ class MWindow(QMainWindow, Ui_mainWindow):
     def show_sumo_settings(self):
         self.sumo_settings = SUMOSettings(self, config=self.sumobox.config)
 
+<<<<<<< HEAD
     def click_straight(self,width=self.widfor, length=self.lenfor, vertices=10, rot_angle=0):
         lanelet = self.create_straight(width,length,vertices,self.scenario.lanelet_network)
+=======
+    def click_straight(self,width, length, vertices, rot_angle):
+        lanelet = mapcreator.create_straight(self, width,length,vertices,self.scenario.lanelet_network)
+>>>>>>> 912aead09243e29ad6a0db866ec85c93a19c0c55
         lanelet.translate_rotate(np.array([0, 0]), rot_angle)
         self.scenario.lanelet_network.add_lanelet(lanelet)
         self.scenario._lanelet_network = self.scenario.lanelet_network
@@ -167,8 +174,13 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.update_view()
         self.update_to_new_scenario()
 
+<<<<<<< HEAD
     def click_curve(self,width=self.widcurve,radius=self.radcurve, angle=self.anglcurve, num_vertices=self.numcurve, rot_angle=0):
         lanelet = self.create_curve(width, radius, angle, num_vertices, self.scenario.lanelet_network)
+=======
+    def click_curve(self,width=3,radius=50, angle=np.pi/2, num_vertices=30, rot_angle=0):
+        lanelet = mapcreator.create_curve(self, width, radius, angle, num_vertices, self.scenario.lanelet_network)
+>>>>>>> 912aead09243e29ad6a0db866ec85c93a19c0c55
         lanelet.translate_rotate(np.array([0, 0]), rot_angle)
         self.scenario.lanelet_network.add_lanelet(lanelet)
         self.scenario._lanelet_network = self.scenario.lanelet_network
@@ -183,7 +195,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         if selected_lanelet:
             predecessor = selected_lanelet[0]
             successor = self.scenario.lanelet_network.find_lanelet_by_id(self.latestid)
-            self.fit_to_predecessor(predecessor, successor)
+            successor = mapcreator.fit_to_predecessor(self, predecessor, successor)
             self.crviewer.open_scenario(self.scenario, self.sumobox.config)
             self.update_view()
             self.update_to_new_scenario()
@@ -193,7 +205,8 @@ class MWindow(QMainWindow, Ui_mainWindow):
         selected_lanelet = self.crviewer.selected_lanelet_use
         if selected_lanelet:
             current_lanelet = selected_lanelet[0]
-            adjacent_lanelet = self.adjacent_lanelet_left(current_lanelet, self.scenario.lanelet_network, same_direction=True)
+            adjacent_lanelet = mapcreator.adjacent_lanelet_left(self, current_lanelet, self.scenario.lanelet_network,
+                                                                same_direction=True)
             self.crviewer.open_scenario(self.scenario, self.sumobox.config)
             self.update_view()
             self.update_to_new_scenario()
@@ -203,7 +216,8 @@ class MWindow(QMainWindow, Ui_mainWindow):
         selected_lanelet = self.crviewer.selected_lanelet_use
         if selected_lanelet:
             current_lanelet = selected_lanelet[0]
-            adjacent_lanelet = self.adjacent_lanelet_right(current_lanelet, self.scenario.lanelet_network, same_direction=True)
+            adjacent_lanelet = mapcreator.adjacent_lanelet_right(self, current_lanelet, self.scenario.lanelet_network,
+                                                                 same_direction=True)
             self.crviewer.open_scenario(self.scenario, self.sumobox.config)
             self.update_view()
             self.update_to_new_scenario()
@@ -883,210 +897,6 @@ class MWindow(QMainWindow, Ui_mainWindow):
             # triggered by click on canvas
             self.lanelet_list.reset_selection()
             self.intersection_list.reset_selection()
-
-    def create_straight(self, width, length, num_vertices, network):
-
-        eps = 0.1e-15
-        length_div = length / num_vertices
-        left_vertices = []
-        center_vertices = []
-        right_vertices = []
-        for i in range(num_vertices + 1):
-            left_vertices.append([length_div * i + eps, width / 2 + eps])
-            center_vertices.append([length_div * i + eps, eps])
-            right_vertices.append([length_div * i + eps, -(width / 2) + eps])
-
-        left_vertices = np.array(left_vertices)
-        center_vertices = np.array(center_vertices)
-        right_vertices = np.array(right_vertices)
-
-        idl = self.scenario.generate_object_id()
-        lanelet = Lanelet(left_vertices=left_vertices, right_vertices=right_vertices, lanelet_id=idl,
-                          center_vertices=center_vertices, lanelet_type={LaneletType.URBAN})
-        self.latestid = idl
-        network.add_lanelet(lanelet=lanelet)
-        return lanelet
-
-    def create_curve(self, width, radius, angle, num_vertices, network):
-        angle_div = angle / (num_vertices - 1)
-        radius_left = radius - (width / 2)
-        radius_right = radius + (width / 2)
-        left_vert = []
-        center_vert = []
-        right_vert = []
-        for i in range(num_vertices):
-            left_vert.append([np.cos(i * angle_div) * radius_left, np.sin(i * angle_div) * radius_left])
-            center_vert.append([np.cos(i * angle_div) * radius, np.sin(i * angle_div) * radius])
-            right_vert.append([np.cos(i * angle_div) * radius_right, np.sin(i * angle_div) * radius_right])
-
-        left_vertices = np.array(left_vert)
-        center_vertices = np.array(center_vert)
-        right_vertices = np.array(right_vert)
-
-        if angle < 0:
-            left_vertices = np.array(right_vert)
-            center_vertices = np.array(center_vert)
-            right_vertices = np.array(left_vert)
-
-        idl = self.scenario.generate_object_id()
-        lanelet = Lanelet(left_vertices=left_vertices, right_vertices=right_vertices, lanelet_id=idl,
-                          center_vertices=center_vertices, lanelet_type={LaneletType.URBAN})
-        self.latestid = idl
-        network.add_lanelet(lanelet=lanelet)
-        return lanelet
-
-    def set_predecessor_successor_relation(self, predecessor, successor):
-        a = successor.predecessor
-        a.append(predecessor.lanelet_id)
-        a = set(a)
-        successor._predecessor = list(a)
-        b = predecessor.successor
-        b.append(successor.lanelet_id)
-        b = set(b)
-        predecessor._successor = list(b)
-
-    def calc_angle_between(self, predecessor, lanelet):
-        last_element = len(predecessor.left_vertices) - 1
-        line_predecessor = predecessor.left_vertices[last_element] - predecessor.right_vertices[last_element]
-        line_lanelet = lanelet.left_vertices[0] - lanelet.right_vertices[0]
-        norm_predecessor = np.linalg.norm(line_predecessor)
-        norm_lanelet = np.linalg.norm(line_lanelet)
-        dot_prod = np.dot(line_predecessor, line_lanelet)
-        sign = line_lanelet[1] * line_predecessor[0] - line_lanelet[0] * line_predecessor[1]
-        angle = np.arccos(dot_prod / (norm_predecessor * norm_lanelet))
-        if sign >= 0:
-            angle = 2 * np.pi - angle
-
-        return angle
-
-    def fit_to_predecessor(self, predecessor=None, lanelet=None):
-        if predecessor:
-            last_element = len(predecessor.center_vertices) - 1
-            ang = self.calc_angle_between(predecessor, lanelet)
-            lanelet.translate_rotate(np.array([0, 0]), ang)
-            trans = predecessor.center_vertices[last_element] - lanelet.center_vertices[0]
-            lanelet.translate_rotate(trans, 0)
-
-            # Relation
-            self.set_predecessor_successor_relation(predecessor, lanelet)
-
-        return lanelet
-
-    def adjacent_lanelet_left(self, adjacent_lanelet, network, same_direction=True):
-        if adjacent_lanelet.adj_left is None:
-            # Translation
-            left_vertices = adjacent_lanelet.left_vertices - (
-                    adjacent_lanelet.right_vertices - adjacent_lanelet.left_vertices)
-            center_vertices = adjacent_lanelet.center_vertices - (
-                    adjacent_lanelet.right_vertices - adjacent_lanelet.left_vertices)
-            right_vertices = adjacent_lanelet.left_vertices
-
-            idl = self.scenario.generate_object_id()
-            self.latestid = idl
-            lanelet = Lanelet(left_vertices=left_vertices, right_vertices=right_vertices, lanelet_id=idl,
-                              center_vertices=center_vertices, lanelet_type={LaneletType.URBAN},
-                              adjacent_right=adjacent_lanelet.lanelet_id, adjacent_right_same_direction=True)
-
-            # Relation
-            adjacent_lanelet._adj_left = lanelet.lanelet_id
-            adjacent_lanelet._adj_left_same_direction = True
-
-            # Find Predecessors
-            preds = adjacent_lanelet.predecessor
-            succs = adjacent_lanelet.successor
-
-            for i in preds:
-                lanelet_find = LaneletNetwork.find_lanelet_by_id(network, lanelet_id=i)
-                if lanelet_find.adj_left is not None:
-                    lanelet_adj_left = LaneletNetwork.find_lanelet_by_id(network, lanelet_id=lanelet_find.adj_left)
-                    if lanelet_find.adj_left_same_direction is True:
-                        self.set_predecessor_successor_relation(lanelet_adj_left, lanelet)
-
-                    else:
-                        self.set_predecessor_successor_relation(lanelet, lanelet_adj_left)
-
-            for i in succs:
-                lanelet_find = LaneletNetwork.find_lanelet_by_id(network, lanelet_id=i)
-                if lanelet_find.adj_left is not None:
-                    lanelet_adj_left = LaneletNetwork.find_lanelet_by_id(network, lanelet_id=lanelet_find.adj_left)
-                    if lanelet_find.adj_left_same_direction is True:
-                        self.set_predecessor_successor_relation(lanelet, lanelet_adj_left)
-
-                    else:
-                        self.set_predecessor_successor_relation(lanelet_adj_left, lanelet)
-
-            if same_direction is False:
-                lanelet._left_vertices = np.flip(right_vertices, 0)
-                lanelet._center_vertices = np.flip(center_vertices, 0)
-                lanelet._right_vertices = np.flip(left_vertices, 0)
-                lanelet._adjacent_right_same_direction = None
-                lanelet._adj_right = None
-                lanelet._adj_left = adjacent_lanelet.lanelet_id
-                lanelet._adj_left_same_direction = False
-                adjacent_lanelet._adj_left_same_direction = False
-
-            network.add_lanelet(lanelet=lanelet)
-            return lanelet
-        else:
-            print("Adjacent lanelet already exists")
-
-    def adjacent_lanelet_right(self, adjacent_lanelet, network, same_direction=True):
-        if adjacent_lanelet.adj_right is None:
-            # Translation
-            left_vertices = adjacent_lanelet.right_vertices
-            center_vertices = adjacent_lanelet.center_vertices + (
-                    adjacent_lanelet.right_vertices - adjacent_lanelet.left_vertices)
-            right_vertices = adjacent_lanelet.right_vertices + (
-                    adjacent_lanelet.right_vertices - adjacent_lanelet.left_vertices)
-
-            idl = self.scenario.generate_object_id()
-            self.latestid = idl
-            lanelet = Lanelet(left_vertices=left_vertices, right_vertices=right_vertices, lanelet_id=idl,
-                              center_vertices=center_vertices, lanelet_type={LaneletType.URBAN},
-                              adjacent_left=adjacent_lanelet.lanelet_id, adjacent_left_same_direction=True)
-
-            # Relation
-            adjacent_lanelet._adj_right = lanelet.lanelet_id
-            adjacent_lanelet._adj_right_same_direction = True
-
-            # Find Predecessors
-            preds = adjacent_lanelet.predecessor
-            succs = adjacent_lanelet.successor
-
-            for i in preds:
-                lanelet_find = LaneletNetwork.find_lanelet_by_id(network, lanelet_id=i)
-                if lanelet_find.adj_right is not None:
-                    lanelet_adj_right = LaneletNetwork.find_lanelet_by_id(network, lanelet_id=lanelet_find.adj_right)
-                    if lanelet_find.adj_right_same_direction is True:
-                        self.set_predecessor_successor_relation(lanelet_adj_right, lanelet)
-
-                    else:
-                        self.set_predecessor_successor_relation(lanelet, lanelet_adj_right)
-
-            for i in succs:
-                lanelet_find = LaneletNetwork.find_lanelet_by_id(network, lanelet_id=i)
-                if lanelet_find.adj_right is not None:
-                    lanelet_adj_right = LaneletNetwork.find_lanelet_by_id(network, lanelet_id=lanelet_find.adj_right)
-                    if lanelet_find.adj_right_same_direction is True:
-                        self.set_predecessor_successor_relation(lanelet, lanelet_adj_right)
-
-                    else:
-                        self.set_predecessor_successor_relation(lanelet_adj_right, lanelet)
-
-            if same_direction is False:
-                lanelet._left_vertices = np.flip(right_vertices, 0)
-                lanelet._center_vertices = np.flip(center_vertices, 0)
-                lanelet._right_vertices = np.flip(left_vertices, 0)
-                lanelet._adjacent_left_same_direction = None
-                lanelet._adj_left = None
-                lanelet._adj_right = adjacent_lanelet.lanelet_id
-                lanelet._adj_right_same_direction = False
-                adjacent_lanelet._adj_right_same_direction = False
-
-            network.add_lanelet(lanelet=lanelet)
-            return lanelet
-        else:
-            print("Adjacent lanelet already exists")
 
 
 def main():
