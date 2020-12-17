@@ -66,6 +66,8 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.scenario = None
         self.latestid = None
         self.selected_lanelet = None
+        self.selected_predecessor = None
+        self.selected_successor = None
 
         self.pred = False
 
@@ -182,7 +184,6 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.update_view()
         self.update_to_new_scenario()
 
-
     def fit_func(self):
         selected_lanelet = None
         selected_lanelet = self.crviewer.selected_lanelet_use
@@ -226,8 +227,6 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.widfor = self.LL.getLaneletWidth()
         self.pred = self.LL.getPredecessor()
         self.adjfor = self.LL.getAdjacentLanelet()
-       # self.click_straight(width=self.widfor,length=self.lenfor, vertices=10, rot_angle=0)
-        #self.click_straight(width=20,length=50, vertices=10, rot_angle=0)
 
     def curve(self):
         self.CU = CurveSettings()
@@ -237,18 +236,32 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.numcurve = self.CU.getNumberVertices()
         self.anglcurve = self.CU.getAngle()
         self.pred = self.CU.getPredecessor()
-        #self.adjcurve = self.CU.getAdjacentCurve()
-
 
     def click(self):
         self.click_straight(width=self.widfor,length=self.lenfor, vertices=10, rot_angle=0)
 
     def curclick(self, turnright=True):
         if turnright:
-            self.click_curve(width=self.widcurve, radius=self.radcurve, angle=self.anglcurve,
+            self.click_curve(width=self.widcurve, radius=self.radcurve, angle=-self.anglcurve,
                              num_vertices=self.numcurve, rot_angle=0)
         else:
             self.click_curve(width=self.widcurve,radius=self.radcurve, angle=self.anglcurve, num_vertices=self.numcurve, rot_angle=0)
+
+    def select_predecessor(self):
+        self.selected_predecessor = self.crviewer.selected_lanelet_use[0]
+
+    def select_successor(self):
+        self.selected_successor = self.crviewer.selected_lanelet_use[0]
+
+    def connect_lanelets(self):
+        if self.selected_predecessor and self.selected_successor:
+            connecting_lanelet = mapcreator.connect_lanelets2(self, self.selected_predecessor, self.selected_successor,
+                                                             self.scenario.lanelet_network)
+            self.scenario.lanelet_network.add_lanelet(connecting_lanelet)
+            self.scenario._lanelet_network = self.scenario.lanelet_network
+            self.crviewer.open_scenario(self.scenario, self.sumobox.config)
+            self.update_view()
+            self.update_to_new_scenario()
 
     def create_toolbox(self):
         """ Create the Upper toolbox."""
@@ -263,13 +276,16 @@ class MWindow(QMainWindow, Ui_mainWindow):
         #self.uppertoolBox.button_forwards.clicked.connect(lambda: self.click_straight())
         self.uppertoolBox.button_forwards.clicked.connect(self.click)
         self.uppertoolBox.button_lanelet_settings.clicked.connect(self.forwards)
-        self.uppertoolBox.button_turn_right.clicked.connect(self.curclick)
+        self.uppertoolBox.button_turn_right.clicked.connect(lambda: self.curclick(True))
         self.uppertoolBox.button_curve_settings.clicked.connect(self.curve)
-        self.uppertoolBox.button_turn_left.clicked.connect(self.curclick)
+        self.uppertoolBox.button_turn_left.clicked.connect(lambda: self.curclick(False))
         self.uppertoolBox.button_curve_settings2.clicked.connect(self.curve)
         self.uppertoolBox.button_fit_to_predecessor.clicked.connect(lambda: self.fit_func())
         self.uppertoolBox.button_adjacent_left.clicked.connect(lambda: self.adjacent_left())
         self.uppertoolBox.button_adjacent_right.clicked.connect(lambda: self.adjacent_right())
+        self.uppertoolBox.button_select_predecessor.clicked.connect(lambda: self.select_predecessor())
+        self.uppertoolBox.button_select_successor.clicked.connect(lambda: self.select_successor())
+        self.uppertoolBox.button_connect_lanelets.clicked.connect(lambda: self.connect_lanelets())
 
         if SUMO_AVAILABLE:
             self.create_sumobox()
