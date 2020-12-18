@@ -10,7 +10,7 @@ from commonroad.scenario.traffic_sign import TrafficSignElement, TrafficSign, Tr
 from commonroad.geometry.shape import Polygon
 
 from crmapconverter.osm2cr import config
-from crmapconverter.osm2cr.converter_modules.utility import geometry, idgenerator
+from crmapconverter.osm2cr.converter_modules.utility import geometry, idgenerator, traffic_sign_parser
 from crmapconverter.osm2cr.converter_modules.utility.custom_types import (
     Road_info,
     Assumption_info,
@@ -308,6 +308,8 @@ class GraphNode:
             for lane in edge.lanes:
                 # add to forward lanes
                 # TODO determine in which direction
+                # TODO remove duplicates
+                sign.traffic
                 if lane.forward:
                     lane.add_traffic_sign(sign)
 
@@ -737,201 +739,7 @@ class GraphTrafficSign:
         self.node = node
         self.edges = edges
         self.id = idgenerator.get_id()
-
-        print(self.sign)
-
-    def parse_maxspeed(self):
-        sign_id = TrafficSignIDZamunda.MAX_SPEED
-        value = self.sign['maxspeed']
-        return TrafficSignElement(sign_id, [value])
-
-    def parse_traffic_sign(self):
-
-        elements = []
-        for unrelated_sign in str(self.sign['traffic_sign']).split(';'):
-            country = unrelated_sign[:2]
-            sign_data = unrelated_sign[3:]
-
-            for sign in sign_data.split(','):
-
-                # speed limit sign
-                if sign.startswith('274'):
-                    zone = False
-                    max_speed = -99.0
-                    if sign[4] == '[':
-                        max_speed = float(sign[sign.find("[") + 1:sign.find("]")])
-                    elif sign[4] == '-':
-                        max_speed = float(sign[5:])
-
-                    # speed limit zone
-                    elif sign[3:].startswith('.1'):
-                        zone = True
-                        if sign[5] == '-' or sign[5] == ':':
-                            max_speed = float(sign[6:])
-                        else:
-                            max_speed = float(sign[sign.find("[") + 1:sign.find("]")])
-
-                    # debugging
-                    # if max_speed == -99:
-                    #     print(sign)
-                    # else:
-                    #     print(max_speed)
-
-                    if max_speed != -99:
-                        if not zone:
-                            # convert km/h to m/s and add to traffic sign elements
-                            max_speed /= 3.6
-                            elements.append(TrafficSignElement(TrafficSignIDZamunda.MAX_SPEED, [max_speed]))
-                        else:
-                            elements.append(TrafficSignElement(TrafficSignIDZamunda.MAX_SPEED_ZONE_START, [max_speed]))
-
-                # city limit edge case
-                elif sign == 'y_limit':
-                    elements.append(TrafficSignElement(TrafficSignIDZamunda.TOWN_SIGN, [' ']))
-
-                # regular traffic sign
-                else:
-                    try:
-                        traffic_sign_de = TrafficSignIDZamunda(sign)
-                        value = ' '
-                        # add a value if found in sign
-                        if '[' in sign and ']' in sign:
-                            value = float(sign[sign.find('[') + 1:sign.find(']')])
-                        elements.append(TrafficSignElement(traffic_sign_de, [value]))
-                    # unknown traffic sign
-                    except ValueError:
-                        print("Unknown traffic sign in" +str(sign_data) + " found")
-                        #sign_id = traffic_sign_map['unknown']
-                        #value = 'unknown sign'
-                        #elements.append(TrafficSignElement(sign_id, [value]))
-        return elements
-
-    def parse_mapillary(self):
-        sign_id = TrafficSignIDZamunda.WARNING_ANIMAL_CROSSING_RIGHT
-        value = ' '#self.sign['mapillary']
-
-        category = str(self.sign['mapillary']).split('--')[0]
-        name = str(self.sign['mapillary']).split('--')[1]
-        group = str(self.sign['mapillary']).split('--')[2]
-
-        # start parsing
-
-        #TODO mapping to signs
-        # warnings
-        if category == 'warning':
-
-            if 'crossroads-with-priority-to-the-right' in name:
-                sign_id = TrafficSignIDZamunda.WARNING_RIGHT_BEFORE_LEFT
-            elif 'warning--steep-ascent' in name:
-                sign_id = TrafficSignIDZamunda.WARNING_STEEP_HILL_DOWNWARDS
-            elif 'slippery-road-surface' in name:
-                sign_id = TrafficSignIDZamunda.WARNING_SLIPPERY_ROAD
-            elif 'roadworks' in name:
-                sign_id = TrafficSignIDZamunda.WARNING_CONSTRUCTION_SITE
-            elif 'construction' in name:
-                sign_id = TrafficSignIDZamunda.WARNING_CONSTRUCTION_SITE
-            elif 'animals' in name:
-                sign_id = TrafficSignIDZamunda.WARNING_ANIMAL_CROSSING_RIGHT
-            elif name == 'crossroads':
-                sign_id = TrafficSignIDZamunda.RIGHT_OF_WAY
-            else:
-                sign_id = TrafficSignIDZamunda.WARNING_DANGER_SPOT
-
-        # regulatory
-        elif category == 'regulatory':
-            if name == 'yield':
-                sign_id = TrafficSignIDZamunda.YIELD
-            elif name == 'stop':
-                sign_id = TrafficSignIDZamunda.STOP
-            elif 'give-way-to-oncoming-traffic' in name:
-                sign_id = TrafficSignIDZamunda.PRIORITY_OPPOSITE_DIRECTION
-            elif 'turn-right-ahead' in name:
-                sign_id = TrafficSignIDZamunda.TURN_RIGHT_AHEAD
-            elif 'turn-left-ahead' in name:
-                sign_id = TrafficSignIDZamunda.TURN_RIGHT_AHEAD
-            elif 'roundabout' in name:
-                sign_id = TrafficSignIDZamunda.ROUNDABOUT
-            elif 'one-way-right' in name:
-                sign_id = TrafficSignIDZamunda.ONEWAY_RIGHT
-            elif 'one-way-left' in name:
-                sign_id = TrafficSignIDZamunda.ONEWAY_LEFT
-            elif name == 'keep_left':
-                sign_id = TrafficSignIDZamunda.PRESCRIBED_PASSING_LEFT
-            elif name == 'keep_right':
-                sign_id = TrafficSignIDZamunda.PRESCRIBED_PASSING_RIGHT
-            elif name == 'bicycles-only':
-                sign_id = TrafficSignIDZamunda.BIKEWAY
-            elif name == 'pedestrians-only':
-                sign_id = TrafficSignIDZamunda.SIDEWALK
-            elif name == 'buses-only':
-                sign_id = TrafficSignIDZamunda.BUSLANE
-            elif name == 'no-motor-vehicles-except-motorcycles':
-                sign_id = TrafficSignIDZamunda.BAN_CARS
-            elif name == 'no-heavy-goods-vehicles':
-                sign_id = TrafficSignIDZamunda.BAN_TRUCKS
-            elif name == 'no-bicycles':
-                sign_id = TrafficSignIDZamunda.BAN_BICYCLE
-            elif name == 'no-motorcycles':
-                sign_id = TrafficSignIDZamunda.BAN_MOTORCYCLE
-            elif name == 'no-buses':
-                sign_id = TrafficSignIDZamunda.BAN_BUS
-            elif name == 'no-pedestrians':
-                sign_id = TrafficSignIDZamunda.BAN_PEDESTRIAN
-            elif 'road-closed-to-vehicles' in name:
-                sign_id = TrafficSignIDZamunda.BAN_ALL_VEHICLES
-            elif name == 'weight-limit':
-                sign_id = TrafficSignIDZamunda.MAX_WEIGHT
-            elif name == 'width-limit':
-                sign_id = TrafficSignIDZamunda.MAX_WIDTH
-            elif name == 'height-limit':
-                sign_id = TrafficSignIDZamunda.MAX_HEIGHT
-            elif name == 'length-limit':
-                sign_id = TrafficSignIDZamunda.MAX_LENGTH
-            elif name == 'no-entry':
-                sign_id = TrafficSignIDZamunda.NO_ENTRY
-            elif name == 'no-u-turn':
-                sign_id = TrafficSignIDZamunda.U_TURN
-            elif 'no-motor-vehicles' in name:
-                sign_id = TrafficSignIDZamunda.BAN_CAR_TRUCK_BUS_MOTORCYCLE
-            elif 'end-of-maximum-speed' in name:
-                sign_id = TrafficSignIDZamunda.MAX_SPEED_END
-                value = name.split('-')[-1]
-            elif 'maximum-speed-limit' in name:
-                sign_id = TrafficSignIDZamunda.MAX_SPEED
-                value = str(float(name.split('-')[-1]) / 3.6)
-            elif 'end-of-speed-limit-zone' in name:
-                sign_id = TrafficSignIDZamunda.MAX_SPEED_ZONE_END
-            elif 'speed-limit-zone' in name:
-                sign_id = TrafficSignIDZamunda.MAX_SPEED_ZONE_START
-            elif name == 'no-overtaking':
-                sign_id = TrafficSignIDZamunda.NO_OVERTAKING_START
-            elif name == 'no-overtaking-by-heavy-goods-vehicles':
-                sign_id = TrafficSignIDZamunda.NO_OVERTAKING_TRUCKS_START
-            elif 'end-of-maximum-speed-limit' in name:
-                sign_id = TrafficSignIDZamunda.MAX_SPEED_END
-                value = name.split('-')[-1]
-            elif name == 'end-of-no-overtaking-by-heavy-goods-vehicles':
-                sign_id = TrafficSignIDZamunda.NO_OVERTAKING_TRUCKS_END
-            elif name == 'end-of-prohibition':
-                sign_id = TrafficSignIDZamunda.ALL_MAX_SPEED_AND_OVERTAKING_END
-            elif name == 'priority-road':
-                sign_id = TrafficSignIDZamunda.PRIORITY
-            elif name == 'priority-over-oncoming-vehicles':
-                sign_id  = TrafficSignIDZamunda.PRIORITY_OVER_ONCOMING
-            # TODO more signs
-
-
-        # information
-        elif category == 'information':
-            if 'minimum-speed' in name:
-                sign_id = TrafficSignIDZamunda.MIN_SPEED
-                value = str(float(name.split('-')[-1]) / 3.6)
-
-
-        return TrafficSignElement(sign_id, [value])
-
-
-
+        #print(self.sign)
 
     def to_traffic_sign_cr(self):
         print(self.sign)
@@ -944,16 +752,18 @@ class GraphTrafficSign:
 
 
         # parse sign values
+        tsp = traffic_sign_parser.TrafficSignParser(self.sign)
         # maxspeed
         if 'maxspeed' in self.sign:
-            elements.append(self.parse_maxspeed())
+            elements.append(tsp.parse_maxspeed())
         # mapillary sign
         elif 'mapillary' in self.sign:
-            elements.append(self.parse_mapillary())
+            mapillary_sign = tsp.parse_mapillary()
+            if mapillary_sign is not None:
+                elements.append(mapillary_sign)
         # traffic sign
         elif 'traffic_sign' in self.sign:
-            elements.extend(self.parse_traffic_sign())
-
+            elements.extend(tsp.parse_traffic_sign())
 
         virtual = False
         if 'virtual' in self.sign:
@@ -965,6 +775,7 @@ class GraphTrafficSign:
         # TODO Maybe improve this
         first_occurrence = set()
 
+        print(elements)
         return TrafficSign(
             traffic_sign_id=self.id,
             traffic_sign_elements=elements,
