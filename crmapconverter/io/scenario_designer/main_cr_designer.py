@@ -245,7 +245,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
     def connect_lanelets(self):
         if self.selected_predecessor and self.selected_successor:
-            connecting_lanelet = mapcreator.connect_lanelets3(self, self.selected_predecessor, self.selected_successor,
+            connecting_lanelet = mapcreator.connect_lanelets4(self, self.selected_predecessor, self.selected_successor,
                                                              self.scenario.lanelet_network, self.scenario)
             self.crviewer.open_scenario(self.scenario, self.sumobox.config)
             self.update_view()

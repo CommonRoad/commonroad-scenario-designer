@@ -380,7 +380,7 @@ class mapcreator:
             diff_dist = diff_dist / dist_sum
 
             # Calculate number of vertices that must be removed
-            num_points = 6
+            num_points = 15
             points_too_much = diff_dist * num_points
             points_too_much = np.round(points_too_much, 0)
 
@@ -451,6 +451,111 @@ class mapcreator:
             idl = scenario.generate_object_id()
             self.latestid = idl
             connecting_lanelet = Lanelet(interpolated_left2, interpolated_center2, interpolated_right2, idl,
+                                  predecessor=[predecessor.lanelet_id], successor=[successor.lanelet_id])
+            network.add_lanelet(lanelet=connecting_lanelet)
+            mapcreator.set_predecessor_successor_relation(self, predecessor, connecting_lanelet)
+            mapcreator.set_predecessor_successor_relation(self, connecting_lanelet, successor)
+            return connecting_lanelet
+
+    def connect_lanelets4(self, predecessor, successor, network, scenario):
+        if predecessor and successor:
+            connecting_vec = successor.center_vertices[0] - predecessor.center_vertices[-1]
+            length_con_vec = np.linalg.norm(connecting_vec)
+            connecting_vec = connecting_vec / length_con_vec
+            vec_width_pred = predecessor.left_vertices[-1] - predecessor.right_vertices[-1]
+            vec_width_succ = successor.left_vertices[0] - successor.right_vertices[0]
+            width_pred = np.linalg.norm(vec_width_pred)
+            width_succ = np.linalg.norm(vec_width_succ)
+            norm_vec_pred = np.array([vec_width_pred[1],-vec_width_pred[0]])
+            norm_vec_succ = np.array([vec_width_succ[1],-vec_width_succ[0]])
+            print(norm_vec_pred)
+            print(norm_vec_succ)
+            con_vec_factor = (length_con_vec) * 0.5
+
+            center_vertices = np.concatenate(([predecessor.center_vertices[-1]],
+                                              [predecessor.center_vertices[-1] + norm_vec_pred],
+                                              [predecessor.center_vertices[-1] + 2 * norm_vec_pred + con_vec_factor *
+                                               connecting_vec], [successor.center_vertices[0] - 2 * norm_vec_succ -
+                                               (con_vec_factor * connecting_vec)],
+                                              [successor.center_vertices[0] - norm_vec_succ],
+                                              [successor.center_vertices[0]]))
+
+            center_vertices = np.concatenate(([predecessor.center_vertices[-1]],
+                                              [predecessor.center_vertices[-1] + con_vec_factor * norm_vec_pred /
+                                               width_pred + con_vec_factor * connecting_vec],
+                                              [successor.center_vertices[0] -  con_vec_factor * norm_vec_succ /
+                                               width_succ - (con_vec_factor * connecting_vec)],
+                                              [successor.center_vertices[0]]))
+
+            middle_point = (predecessor.center_vertices[-1] + 0.5 * con_vec_factor * norm_vec_pred /
+                                               width_pred - 0.5 * con_vec_factor * norm_vec_succ / width_succ +
+                                               con_vec_factor * connecting_vec)
+            center_vertices = np.concatenate(([predecessor.center_vertices[-1]],
+                                              [predecessor.center_vertices[-1] + 0.000001 * norm_vec_pred / width_pred],
+                                              [middle_point],
+                                              [successor.center_vertices[0] - 0.000001 * norm_vec_succ / width_succ],
+                                              [successor.center_vertices[0]]))
+            print(center_vertices)
+
+            # Linear length along the line:
+            distance_center = np.cumsum(np.sqrt(np.sum(np.diff(center_vertices, axis=0) ** 2, axis=1)))
+            distance_center = np.insert(distance_center, 0, 0) / distance_center[-1]
+
+            # Linear distance between points
+            diff_dist = np.sqrt(np.sum(np.diff(center_vertices, axis=0) ** 2, axis=1))
+            dist_sum = np.sum(diff_dist)
+            diff_dist = diff_dist / dist_sum
+
+            # Interpolation for different methods:
+            num_points = 20
+            alpha = np.linspace(0, 1, num_points)
+
+            interpolator_center = interp1d(distance_center, center_vertices, kind='cubic', axis=0)
+            interpolated_center = interpolator_center(alpha)
+
+            # Create matrix for vectorized calculation
+            lenght = len(interpolated_center) - 2
+            a = np.zeros((lenght, lenght))
+            b = np.zeros((lenght, lenght))
+            np.fill_diagonal(a, 1)
+            np.fill_diagonal(b, -1)
+            d = np.zeros((lenght, 2))
+            a = np.c_[d, a]
+            b = np.c_[b, d]
+            a = a + b       #Constructed matrix for calculation
+            c = np.dot(a, interpolated_center)    #calculate tangent at point
+            #Create normalvectors and normalize them
+            e = np.zeros((c.shape))
+            e[:, 0] = c[:, 1]
+            e[:, 1] = -c[:, 0]
+            f = np.sum(np.abs(e) ** 2, axis=-1) ** (1. / 2)
+            f = np.array([f])
+            e = e / f.T
+
+            distance2 = np.cumsum(np.sqrt(np.sum(np.diff(interpolated_center, axis=0) ** 2, axis=1)))
+            distance2 = np.insert(distance2, 0, 0) / distance2[-1]
+            distance2 = np.array([distance2])
+
+            h = ((width_pred - (distance2 * (width_pred - width_succ))) / 2).T
+            h = h[1:-1]
+            e = e * h
+
+            e = np.concatenate((np.array([[0, 0]]), e), axis=0)
+            e = np.concatenate((e, np.array([[0, 0]])), axis=0)
+
+            interpolated_left = interpolated_center
+            interpolated_left = interpolated_left - e
+            interpolated_left[0] = predecessor.left_vertices[-1]
+            interpolated_left[-1] = successor.left_vertices[0]
+
+            interpolated_right = interpolated_center
+            interpolated_right = interpolated_right + e
+            interpolated_right[0] = predecessor.right_vertices[-1]
+            interpolated_right[-1] = successor.right_vertices[0]
+
+            idl = scenario.generate_object_id()
+            self.latestid = idl
+            connecting_lanelet = Lanelet(interpolated_left, interpolated_center, interpolated_right, idl,
                                   predecessor=[predecessor.lanelet_id], successor=[successor.lanelet_id])
             network.add_lanelet(lanelet=connecting_lanelet)
             mapcreator.set_predecessor_successor_relation(self, predecessor, connecting_lanelet)
