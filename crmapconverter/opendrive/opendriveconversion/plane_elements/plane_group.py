@@ -161,9 +161,9 @@ class ParametricLaneGroup:
                 right_vertices = local_right_vertices
 
         for parametric_lane in self.parametric_lanes:
-            mark = None
-            line_marking_left_vertices = None
-            line_marking_right_vertices = None
+            mark = LineMarking.NO_MARKING
+            line_marking_left_vertices = LineMarking.NO_MARKING
+            line_marking_right_vertices = LineMarking.NO_MARKING
             line_marking = parametric_lane.line_marking
 
             if line_marking is not None:
