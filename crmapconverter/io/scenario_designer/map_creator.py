@@ -457,6 +457,11 @@ class mapcreator:
             mapcreator.set_predecessor_successor_relation(self, connecting_lanelet, successor)
             return connecting_lanelet
 
+    def remove_lanelet(self, lanelet, network, scenario):
+        del network._lanelets[lanelet.lanelet_id]
+        network.cleanup_lanelet_references()
+        scenario._lanelet_network = network
+
     # x crossing
     def x_crossing(self, width, diameter_crossing, network, scenario):
         rad = (diameter_crossing + width) / 2

@@ -169,11 +169,17 @@ class UpperToolbox(QWidget):
         layoutlanelets.addWidget(self.button_select_successor, 6, 1)
         self.button_select_successor.setIcon(QIcon(":/gui_src/forwards.PNG"))
 
-        # connect_lanelets
+        # connect lanelets
         self.button_connect_lanelets = QPushButton()
         self.button_connect_lanelets.setText("Connect Lanelets")
         layoutlanelets.addWidget(self.button_connect_lanelets, 7, 0)
         self.button_connect_lanelets.setIcon(QIcon(":/gui_src/forwards.PNG"))
+
+        # remove lanelet
+        self.button_remove_lanelet = QPushButton()
+        self.button_remove_lanelet.setText("Remove Lanelet")
+        layoutlanelets.addWidget(self.button_remove_lanelet, 7, 1)
+        self.button_remove_lanelet.setIcon(QIcon(":/gui_src/forwards.PNG"))
 
         #button_turn_left_45 = QPushButton()
         #button_turn_left_45.setText("show more")

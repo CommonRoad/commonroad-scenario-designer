@@ -188,7 +188,6 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.update_to_new_scenario()
 
     def fit_func(self):
-        selected_lanelet = None
         selected_lanelet = self.crviewer.selected_lanelet_use
         if selected_lanelet:
             predecessor = selected_lanelet[0]
@@ -199,7 +198,6 @@ class MWindow(QMainWindow, Ui_mainWindow):
             self.update_to_new_scenario()
 
     def adjacent_left(self):
-        selected_lanelet = None
         selected_lanelet = self.crviewer.selected_lanelet_use
         if selected_lanelet:
             current_lanelet = selected_lanelet[0]
@@ -210,7 +208,6 @@ class MWindow(QMainWindow, Ui_mainWindow):
             self.update_to_new_scenario()
 
     def adjacent_right(self):
-        selected_lanelet = None
         selected_lanelet = self.crviewer.selected_lanelet_use
         if selected_lanelet:
             current_lanelet = selected_lanelet[0]
@@ -254,6 +251,14 @@ class MWindow(QMainWindow, Ui_mainWindow):
             self.update_view()
             self.update_to_new_scenario()
 
+    def remove_lanelet(self):
+        lanelet = self.crviewer.selected_lanelet_use[0]
+        network = self.scenario.lanelet_network
+        mapcreator.remove_lanelet(self, lanelet, network, self.scenario)
+        self.crviewer.open_scenario(self.scenario, self.sumobox.config)
+        self.update_view()
+        self.update_to_new_scenario()
+
     def create_toolbox(self):
         """ Create the Upper toolbox."""
         self.uppertoolBox = UpperToolbox()
@@ -276,6 +281,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.uppertoolBox.button_select_predecessor.clicked.connect(lambda: self.select_predecessor())
         self.uppertoolBox.button_select_successor.clicked.connect(lambda: self.select_successor())
         self.uppertoolBox.button_connect_lanelets.clicked.connect(lambda: self.connect_lanelets())
+        self.uppertoolBox.button_remove_lanelet.clicked.connect(lambda: self.remove_lanelet())
 
         if SUMO_AVAILABLE:
             self.create_sumobox()
