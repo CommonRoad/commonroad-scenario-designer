@@ -62,7 +62,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.ani_path = None
         self.slider_clicked = False
 
-
+        #Senario + Lanelet variables
         self.scenario = None
         self.latestid = None
         self.selected_lanelet = None
@@ -70,9 +70,12 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.selected_successor = None
 
         self.pred = False
+        self.rot_angle_straight = 0
+        self.rot_angle_curve = 0
 
         self.lenfor = 50
         self.widfor = 20
+        self.vertfor = 20
         self.adjfor = None
 
         self.radcurve = 50
@@ -162,24 +165,24 @@ class MWindow(QMainWindow, Ui_mainWindow):
     def show_sumo_settings(self):
         self.sumo_settings = SUMOSettings(self, config=self.sumobox.config)
 
-
-    def click_straight(self, width=20, length=50, vertices=10, rot_angle=0):
-        lanelet = mapcreator.create_straight(self, width,length,vertices,self.scenario.lanelet_network, self.pred)
-        lanelet.translate_rotate(np.array([0, 0]), rot_angle)
-        self.scenario.lanelet_network.add_lanelet(lanelet)
-        self.scenario._lanelet_network = self.scenario.lanelet_network
+    # Toolbox functionality
+    def click_straight(self):
+        lanelet = mapcreator.create_straight(self, self.widfor, self.lenfor, self.vertfor,
+                                             self.scenario.lanelet_network, self.scenario, self.pred)
+        lanelet.translate_rotate(np.array([0, 0]), self.rot_angle_straight)
         self.crviewer.open_scenario(self.scenario, self.sumobox.config)
         self.update_view()
         self.update_to_new_scenario()
 
-    def fit_to_predecessor(self, predecessor, successor):
-        mapcreator.fit_to_predecessor(self,predecessor=predecessor, successor=successor)
+    def click_curve(self, turnright=True):
+        if turnright:
+            lanelet = mapcreator.create_curve(self, self.widcurve, self.radcurve, -self.anglcurve, self.numcurve,
+                                              self.scenario.lanelet_network, self.scenario, self.pred)
+        else:
+            lanelet = mapcreator.create_curve(self, self.widcurve, self.radcurve, self.anglcurve, self.numcurve,
+                                              self.scenario.lanelet_network, self.scenario, self.pred)
+        lanelet.translate_rotate(np.array([0, 0]), self.rot_angle_curve)
 
-    def click_curve(self, width,radius, angle, num_vertices, rot_angle):
-        lanelet = mapcreator.create_curve(self, width, radius, angle, num_vertices, self.scenario.lanelet_network, self.pred)
-        lanelet.translate_rotate(np.array([0, 0]), rot_angle)
-        self.scenario.lanelet_network.add_lanelet(lanelet)
-        self.scenario._lanelet_network = self.scenario.lanelet_network
         self.crviewer.open_scenario(self.scenario, self.sumobox.config)
         self.update_view()
         self.update_to_new_scenario()
@@ -201,7 +204,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         if selected_lanelet:
             current_lanelet = selected_lanelet[0]
             adjacent_lanelet = mapcreator.adjacent_lanelet_left(self, current_lanelet, self.scenario.lanelet_network,
-                                                                same_direction=True)
+                                                                self.scenario, same_direction=True)
             self.crviewer.open_scenario(self.scenario, self.sumobox.config)
             self.update_view()
             self.update_to_new_scenario()
@@ -212,7 +215,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         if selected_lanelet:
             current_lanelet = selected_lanelet[0]
             adjacent_lanelet = mapcreator.adjacent_lanelet_right(self, current_lanelet, self.scenario.lanelet_network,
-                                                                 same_direction=True)
+                                                                 self.scenario, same_direction=True)
             self.crviewer.open_scenario(self.scenario, self.sumobox.config)
             self.update_view()
             self.update_to_new_scenario()
@@ -237,16 +240,6 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.anglcurve = self.CU.getAngle()
         self.pred = self.CU.getPredecessor()
 
-    def click(self):
-        self.click_straight(width=self.widfor,length=self.lenfor, vertices=10, rot_angle=0)
-
-    def curclick(self, turnright=True):
-        if turnright:
-            self.click_curve(width=self.widcurve, radius=self.radcurve, angle=-self.anglcurve,
-                             num_vertices=self.numcurve, rot_angle=0)
-        else:
-            self.click_curve(width=self.widcurve,radius=self.radcurve, angle=self.anglcurve, num_vertices=self.numcurve, rot_angle=0)
-
     def select_predecessor(self):
         self.selected_predecessor = self.crviewer.selected_lanelet_use[0]
 
@@ -255,10 +248,8 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
     def connect_lanelets(self):
         if self.selected_predecessor and self.selected_successor:
-            connecting_lanelet = mapcreator.connect_lanelets2(self, self.selected_predecessor, self.selected_successor,
-                                                             self.scenario.lanelet_network)
-            self.scenario.lanelet_network.add_lanelet(connecting_lanelet)
-            self.scenario._lanelet_network = self.scenario.lanelet_network
+            connecting_lanelet = mapcreator.connect_lanelets3(self, self.selected_predecessor, self.selected_successor,
+                                                             self.scenario.lanelet_network, self.scenario)
             self.crviewer.open_scenario(self.scenario, self.sumobox.config)
             self.update_view()
             self.update_to_new_scenario()
@@ -273,12 +264,11 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.tool1.setAllowedAreas(Qt.LeftDockWidgetArea)
         self.tool1.setWidget(self.uppertoolBox)
         self.addDockWidget(Qt.LeftDockWidgetArea, self.tool1)
-        #self.uppertoolBox.button_forwards.clicked.connect(lambda: self.click_straight())
-        self.uppertoolBox.button_forwards.clicked.connect(self.click)
-        self.uppertoolBox.button_lanelet_settings.clicked.connect(self.forwards)
-        self.uppertoolBox.button_turn_right.clicked.connect(lambda: self.curclick(True))
+        self.uppertoolBox.button_forwards.clicked.connect(lambda: self.click_straight())
+        self.uppertoolBox.button_lanelet_settings.clicked.connect(lambda: self.forwards())
+        self.uppertoolBox.button_turn_right.clicked.connect(lambda: self.click_curve(True))
         self.uppertoolBox.button_curve_settings.clicked.connect(self.curve)
-        self.uppertoolBox.button_turn_left.clicked.connect(lambda: self.curclick(False))
+        self.uppertoolBox.button_turn_left.clicked.connect(lambda: self.click_curve(False))
         self.uppertoolBox.button_curve_settings2.clicked.connect(self.curve)
         self.uppertoolBox.button_fit_to_predecessor.clicked.connect(lambda: self.fit_func())
         self.uppertoolBox.button_adjacent_left.clicked.connect(lambda: self.adjacent_left())
