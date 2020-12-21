@@ -34,7 +34,7 @@ from commonroad.common.util import Interval
 from commonroad.prediction.prediction import TrajectoryPrediction
 from commonroad.scenario.trajectory import State
 from commonroad.scenario.lanelet import LaneletNetwork, Lanelet, LaneletType
-from commonroad.scenario.obstacle import ObstacleRole
+from commonroad.scenario.obstacle import ObstacleRole, ObstacleType
 from commonroad.scenario.scenario import Scenario
 from commonroad.scenario.traffic_sign import SupportedTrafficSignCountry, TrafficLight, \
     TrafficLightCycleElement, TrafficLightDirection
@@ -1598,9 +1598,9 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         for veh_type, probability in veh_distribution.items():
             if probability > 0:
                 vType_node = domTree.createElement("vType")
-                vType_node.setAttribute("id", veh_type)
-                vType_node.setAttribute("guiShape", veh_type)
-                vType_node.setAttribute("vClass", veh_type)
+                vType_node.setAttribute("id", VEHICLE_TYPE_CR2SUMO[veh_type])
+                vType_node.setAttribute("guiShape", VEHICLE_TYPE_CR2SUMO[veh_type])
+                vType_node.setAttribute("vClass", VEHICLE_TYPE_CR2SUMO[veh_type])
                 vType_node.setAttribute("probability", str(probability))
                 for att_name, setting in veh_params.items():
                     att_value = setting[veh_type]
@@ -2068,7 +2068,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
             trip_files['pedestrian'], '-r', route_files["pedestrian"], '-b',
             str(self.conf.departure_interval_vehicles.start), '-e',
             str(self.conf.departure_interval_vehicles.end), "-p",
-            str(1 - self.conf.veh_distribution['pedestrian']),
+            str(1 - self.conf.veh_distribution[ObstacleType.PEDESTRIAN]),
             '--allow-fringe', '--fringe-factor',
             str(self.conf.fringe_factor), "--persontrips", "--seed",
             str(self.conf.random_seed),
