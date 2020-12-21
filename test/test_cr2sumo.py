@@ -96,7 +96,7 @@ class BaseClass(unittest.TestCase):
     ("garching_merged", []),
     ("intersect_and_crossing", [56]),
     ("merging_lanelets_utm", [107]),
-    ("urban-1_lanelets_utm", [105]),
+    ("USA_urban_1", [105]),
     ("DEU_AAH-1_8007_T-1", [154]),
     ("DEU_AAH-2_19000_T-1", [118]),
     ("DEU_Guetersloh-20_4_T-1", []),
