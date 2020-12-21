@@ -156,7 +156,7 @@ class TrafficSignParser:
                 value = name.split('-')[-1]
             elif 'maximum-speed-limit' in name:
                 sign_id = TrafficSignIDZamunda.MAX_SPEED
-                value = str(float(name.split('-')[-1]) / 3.6)
+                value = float(name.split('-')[-1]) / 3.6
             elif 'end-of-speed-limit-zone' in name:
                 sign_id = TrafficSignIDZamunda.MAX_SPEED_ZONE_END
             elif 'speed-limit-zone' in name:
@@ -219,3 +219,4 @@ class TrafficSignParser:
         sign_id = TrafficSignIDZamunda.MAX_SPEED
         value = self.sign['maxspeed']
         return TrafficSignElement(sign_id, [value])
+        

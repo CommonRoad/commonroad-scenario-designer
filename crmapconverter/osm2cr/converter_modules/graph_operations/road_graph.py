@@ -302,14 +302,10 @@ class GraphNode:
                 )
 
     def add_traffic_sign(self, sign: "GraphTrafficSign"):
-        self.traffic_signs.append(sign)
-        # add to lanes
         for edge in self.edges:
             for lane in edge.lanes:
                 # add to forward lanes
                 # TODO determine in which direction
-                # TODO remove duplicates
-                sign.traffic
                 if lane.forward:
                     lane.add_traffic_sign(sign)
 
