@@ -4,10 +4,11 @@ from PyQt5.QtWidgets import (QMainWindow, QDockWidget, QMessageBox, QAction,
                              QSlider, QWidget, QApplication, qApp, QLineEdit, QFormLayout, QPushButton, QDialog, QRadioButton, QCheckBox, QComboBox)
 from PyQt5.QtGui import QIcon, QIntValidator
 from PyQt5.QtCore import Qt
-from commonroad.scenario.lanelet import LaneletType, RoadUser
+from commonroad.scenario.lanelet import LaneletType, RoadUser, LineMarking
+from commonroad.scenario.traffic_sign import *
 
 
-class LaneletSettings(QDialog):
+class TrafficSignsSettings(QDialog):
     def __init__(self):
         super().__init__()
         self.lanelet_length = 50
@@ -46,6 +47,14 @@ class LaneletSettings(QDialog):
         roaduser_list = [r.value for r in RoadUser]
         self.roaduser.addItems(roaduser_list)
 
+        self.line_marking_right = QComboBox()
+        line_marking_right_list = [right.value for right in LineMarking]
+        self.line_marking_right.addItems(line_marking_right_list)
+
+        self.line_marking_left = QComboBox()
+        line_marking_left_list = [left.value for left in LineMarking]
+        self.line_marking_left.addItems(line_marking_left_list)
+
         self.apply_button = QPushButton()
         self.apply_button.setText("apply")
         self.apply_button.clicked.connect(self.apply_button_click)
@@ -64,65 +73,9 @@ class LaneletSettings(QDialog):
 
         layout.addRow("Lanelet type", self.lanelet_type)
         layout.addRow("Roaduser", self.roaduser)
+        layout.addRow("Linemarking right", self.line_marking_right)
+        layout.addRow("Linemarking left", self.line_marking_left)
         layout.addWidget(self.apply_button)
         layout.addWidget(self.set_default)
 
         self.setLayout(layout)
-
-    def predecessor_button(self):
-        if self.pred.isChecked():
-            self.setPredecessor = True
-        else:
-            self.setPredecessor = False
-
-    def adjacent_button(self):
-        if self.adjacentLanelet.isChecked() == True:
-            self.setadjacent = True
-        else:
-            self.setadjacent = False
-
-    def apply_button_click(self):
-        if self.length.text():
-            self.lanelet_length = int(self.length.text())
-        else:
-            self.lanelet_length = 50
-        if self.width.text():
-            self.lanelet_width = int(self.width.text())
-        else:
-            self.lanelet_width = 12
-        self.setPredecessor = self.pred.isChecked()
-        self.getLaneletType()
-        self.close()
-
-    def set_default_click(self):
-        self.length.clear()
-        self.width.clear()
-        self.length.insert("50")
-        self.width.insert("20")
-        self.setadjacent = False
-        self.adjacentLanelet.setChecked(False)
-        self.pred.setChecked(True)
-        self.setPredecessor = True
-
-    def showsettings(self):
-        self.show()
-
-    def getLanletLength(self):
-        return self.lanelet_length
-
-    def getLaneletWidth(self):
-        return self.lanelet_width
-
-    def getAdjacentLanelet(self):
-        return self.setadjacent
-
-    def getPredecessor(self):
-        return self.setPredecessor
-
-    def getLaneletType(self):
-        print(self.lanelet_type.currentText())
-        return self.lanelet_type.currentText()
-
-    def getRoadUser(self):
-        print(self.roaduser.currentText())
-        return self.roaduser.currentText()

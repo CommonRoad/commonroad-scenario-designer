@@ -3,9 +3,10 @@ import numpy as np
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import (QMainWindow, QDockWidget, QMessageBox, QAction,
                              QLabel, QFileDialog, QDesktopWidget, QVBoxLayout,
-                             QSlider, QWidget, QApplication, qApp, QLineEdit, QFormLayout, QPushButton, QDialog, QRadioButton, QCheckBox)
+                             QSlider, QWidget, QApplication, qApp, QLineEdit, QFormLayout, QPushButton, QDialog, QRadioButton, QCheckBox, QComboBox)
 from PyQt5.QtGui import QIcon, QIntValidator
 from PyQt5.QtCore import Qt
+from commonroad.scenario.lanelet import LaneletType, RoadUser, LineMarking
 
 
 class CurveSettings(QDialog):
@@ -51,6 +52,22 @@ class CurveSettings(QDialog):
         self.pred = QCheckBox("set predecessor automatically")
         self.pred.stateChanged.connect(self.predecessor_button)
 
+        self.lanelet_type = QComboBox()
+        enumlist = [e.value for e in LaneletType]
+        self.lanelet_type.addItems(enumlist)
+
+        self.roaduser = QComboBox()
+        roaduser_list = [r.value for r in RoadUser]
+        self.roaduser.addItems(roaduser_list)
+
+        self.line_marking_right = QComboBox()
+        line_marking_right_list = [right.value for right in LineMarking]
+        self.line_marking_right.addItems(line_marking_right_list)
+
+        self.line_marking_left = QComboBox()
+        line_marking_left_list = [left.value for left in LineMarking]
+        self.line_marking_left.addItems(line_marking_left_list)
+
         self.apply_button = QPushButton()
         self.apply_button.setText("apply")
         self.apply_button.clicked.connect(self.apply_button_click)
@@ -67,6 +84,10 @@ class CurveSettings(QDialog):
 
         #layout.addWidget(self.adjacentCurve)
         layout.addWidget(self.pred)
+        layout.addRow("Lanelet type", self.lanelet_type)
+        layout.addRow("Roaduser", self.roaduser)
+        layout.addRow("Linemarking right", self.line_marking_right)
+        layout.addRow("Linemarking left", self.line_marking_left)
         layout.addWidget(self.apply_button)
         layout.addWidget(self.set_default)
 
@@ -133,4 +154,18 @@ class CurveSettings(QDialog):
 
     def getPredecessor(self):
         return self.setPredecessor
+
+    def getLaneletType(self):
+        #print(self.lanelet_type.currentText())
+        return self.lanelet_type.currentText()
+
+    def getRoadUser(self):
+        #print(self.roaduser.currentText())
+        return self.roaduser.currentText()
+
+    def getLineMarkingRight(self):
+        return self.line_marking_right.currentText()
+
+    def getLineMarkingLeft(self):
+        return self.line_marking_left.currentText()
 

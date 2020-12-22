@@ -8,11 +8,8 @@ from commonroad.visualization.draw_dispatch_cr import draw_object
 from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.common.file_writer import CommonRoadFileWriter
 from commonroad.common.file_writer import OverwriteExistingFile
-from commonroad.scenario.scenario import Location
-from commonroad.scenario.scenario import Tag
-from commonroad.scenario.lanelet import Lanelet
-from commonroad.scenario.lanelet import LaneletType
-from commonroad.scenario.lanelet import LaneletNetwork
+from commonroad.scenario.scenario import Location, Tag
+from commonroad.scenario.lanelet import LaneletType, RoadUser, LaneletNetwork, Lanelet, LineMarking
 from commonroad.scenario.intersection import Intersection
 from commonroad.scenario.intersection import IntersectionIncomingElement
 
@@ -47,7 +44,8 @@ class mapcreator:
         b = set(b)
         predecessor._successor = list(b)
 
-    def create_straight(self, width, length, num_vertices, network, scenario, pred):
+    def create_straight(self, width, length, num_vertices, network, scenario, pred, lanelettype="urban", roaduser="vehicle",
+                        linemarkingleft="no_marking", linemarkingright="no_marking"):
         eps = 0.1e-15
         length_div = length / num_vertices
         left_vertices = []
@@ -64,7 +62,9 @@ class mapcreator:
 
         idl = scenario.generate_object_id()
         lanelet = Lanelet(left_vertices=left_vertices, right_vertices=right_vertices, lanelet_id=idl,
-                          center_vertices=center_vertices, lanelet_type={LaneletType.URBAN})
+                          center_vertices=center_vertices, lanelet_type={LaneletType(lanelettype)},
+                          user_one_way={RoadUser(roaduser)}, line_marking_right_vertices=LineMarking(linemarkingright),
+                          line_marking_left_vertices=LineMarking(linemarkingleft))
         if pred:
             if self.latestid != None:
                 mapcreator.fit_to_predecessor(self, network.find_lanelet_by_id(self.latestid),lanelet)
@@ -72,7 +72,8 @@ class mapcreator:
         network.add_lanelet(lanelet=lanelet)
         return lanelet
 
-    def create_curve(self, width, radius, angle, num_vertices, network, scenario, pred):
+    def create_curve(self, width, radius, angle, num_vertices, network, scenario, pred, lanelettype="urban", roaduser="vehicle",
+                        linemarkingleft="no_marking", linemarkingright="no_marking"):
         angle_div = angle / (num_vertices - 1)
         radius_left = radius - (width / 2)
         radius_right = radius + (width / 2)
@@ -95,7 +96,9 @@ class mapcreator:
 
         idl = scenario.generate_object_id()
         lanelet = Lanelet(left_vertices=left_vertices, right_vertices=right_vertices, lanelet_id=idl,
-                          center_vertices=center_vertices, lanelet_type={LaneletType.URBAN})
+                          center_vertices=center_vertices, lanelet_type={LaneletType(lanelettype)},
+                          user_one_way={RoadUser(roaduser)}, line_marking_right_vertices=LineMarking(linemarkingright),
+                          line_marking_left_vertices=LineMarking(linemarkingleft))
         if pred:
             if self.latestid != None:
                 mapcreator.fit_to_predecessor(self, network.find_lanelet_by_id(self.latestid), lanelet)

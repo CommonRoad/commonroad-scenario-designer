@@ -37,12 +37,11 @@ from crmapconverter.io.scenario_designer import config
 from crmapconverter.io.scenario_designer import util
 from crmapconverter.io.scenario_designer.lanelet_settings import LaneletSettings
 from crmapconverter.io.scenario_designer.curve_settings import CurveSettings
-from crmapconverter.io.scenario_designer.traffic_signs_settings import LaneletSettings
+from crmapconverter.io.scenario_designer.traffic_signs_settings import *
 
-from commonroad.scenario.lanelet import Lanelet
-from commonroad.scenario.lanelet import LaneletType
-from commonroad.scenario.lanelet import LaneletNetwork
-
+from commonroad.scenario.lanelet import Lanelet, LaneletType, LaneletNetwork
+from commonroad.scenario.traffic_sign import *
+from commonroad.scenario.traffic_sign_interpreter import TrafficSigInterpreter
 
 from crmapconverter.io.scenario_designer.map_creator import mapcreator
 
@@ -80,12 +79,20 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.widfor = 20
         self.vertfor = 20
         self.adjfor = None
+        self.lanelettype ="urban"
+        self.roaduser ="vehicle"
+        self.linemarkingleft = "no_marking"
+        self.linemarkingright = "no_marking"
 
         self.radcurve = 50
         self.widcurve = 20
         self.numcurve = 30
         self.anglcurve = np.pi/2
         self.adjcurve = None
+        self.curvetype = "urban"
+        self.roaduser_curve = "vehicle"
+        self.linemarkingright_curve = "no_marking"
+        self.linemarkingleft_curve = "no_marking"
 
         # GUI attributes
         self.tool1 = None
@@ -176,7 +183,8 @@ class MWindow(QMainWindow, Ui_mainWindow):
     # Toolbox functionality
     def click_straight(self):
         lanelet = mapcreator.create_straight(self, self.widfor, self.lenfor, self.vertfor,
-                                             self.scenario.lanelet_network, self.scenario, self.pred)
+                                             self.scenario.lanelet_network, self.scenario, self.pred, self.lanelettype,
+                                             self.roaduser, self.linemarkingleft, self.linemarkingright)
         lanelet.translate_rotate(np.array([0, 0]), self.rot_angle_straight)
 
         self.crviewer.open_scenario(self.scenario, self.sumobox.config)
@@ -186,10 +194,12 @@ class MWindow(QMainWindow, Ui_mainWindow):
     def click_curve(self, turnright=True):
         if turnright:
             lanelet = mapcreator.create_curve(self, self.widcurve, self.radcurve, -self.anglcurve, self.numcurve,
-                                              self.scenario.lanelet_network, self.scenario, self.pred)
+                                              self.scenario.lanelet_network, self.scenario, self.pred, self.curvetype,
+                                             self.roaduser_curve, self.linemarkingleft_curve, self.linemarkingright_curve)
         else:
-            lanelet = mapcreator.create_curve(self, self.widcurve, self.radcurve, self.anglcurve, self.numcurve,
-                                              self.scenario.lanelet_network, self.scenario, self.pred)
+            lanelet = mapcreator.create_curve(self, self.widcurve, self.radcurve, -self.anglcurve, self.numcurve,
+                                              self.scenario.lanelet_network, self.scenario, self.pred, self.curvetype,
+                                             self.roaduser_curve, self.linemarkingleft_curve, self.linemarkingright_curve)
         lanelet.translate_rotate(np.array([0, 0]), self.rot_angle_curve)
 
         self.crviewer.open_scenario(self.scenario, self.sumobox.config)
@@ -236,6 +246,10 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.widfor = self.LL.getLaneletWidth()
         self.pred = self.LL.getPredecessor()
         self.adjfor = self.LL.getAdjacentLanelet()
+        self.lanelettype = self.LL.getLaneletType()
+        self.roaduser = self.LL.getRoadUser()
+        self.linemarkingright = self.LL.getLineMarkingRight()
+        self.linemarkingleft = self.LL.getLineMarkingLeft()
 
     def curve(self):
         self.CU = CurveSettings()
@@ -245,6 +259,10 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.numcurve = self.CU.getNumberVertices()
         self.anglcurve = self.CU.getAngle()
         self.pred = self.CU.getPredecessor()
+        self.curvetype = self.CU.getLaneletType()
+        self.roaduser_curve = self.CU.getRoadUser()
+        self.linemarkingright_curve = self.CU.getLineMarkingRight()
+        self.linemarkingleft_curve = self.CU.getLineMarkingLeft()
 
     def select_predecessor(self):
         self.selected_predecessor = self.crviewer.selected_lanelet_use[0]
@@ -269,7 +287,16 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.update_to_new_scenario()
 
     def create_traffic_signs_settings(self):
+        print("TEST1")
         self.traffic_signs_settings = 0
+        self.traffic1 = TrafficSign(201, [TrafficSignElement(TrafficSignIDZamunda.MAX_SPEED, ["20"])],{1},np.array([0.0,2]))
+        self.scenario.lanelet_network.add_traffic_sign(self.traffic1, {1})
+
+        self.crviewer.open_scenario(self.scenario, self.sumobox.config)
+        self.update_view()
+        self.update_to_new_scenario()
+        print("Test")
+        print(self.traffic1)
 
     def create_toolbox(self):
         """ Create the Upper toolbox."""
@@ -282,7 +309,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.tool1.setWidget(self.uppertoolBox)
         self.addDockWidget(Qt.LeftDockWidgetArea, self.tool1)
 
-        self.uppertoolBox.button_traffic_signs_settings.clicked.connect(lambda: self.create_traffic_signs_settings)
+        self.uppertoolBox.button_traffic_signs_settings.clicked.connect(lambda: self.create_traffic_signs_settings())
 
         self.uppertoolBox.button_forwards.clicked.connect(lambda: self.click_straight())
         self.uppertoolBox.button_lanelet_settings.clicked.connect(lambda: self.forwards())

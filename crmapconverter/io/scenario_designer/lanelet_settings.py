@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import (QMainWindow, QDockWidget, QMessageBox, QAction,
                              QSlider, QWidget, QApplication, qApp, QLineEdit, QFormLayout, QPushButton, QDialog, QRadioButton, QCheckBox, QComboBox)
 from PyQt5.QtGui import QIcon, QIntValidator
 from PyQt5.QtCore import Qt
-from commonroad.scenario.lanelet import LaneletType, RoadUser
+from commonroad.scenario.lanelet import LaneletType, RoadUser, LineMarking
 
 
 class LaneletSettings(QDialog):
@@ -46,6 +46,14 @@ class LaneletSettings(QDialog):
         roaduser_list = [r.value for r in RoadUser]
         self.roaduser.addItems(roaduser_list)
 
+        self.line_marking_right = QComboBox()
+        line_marking_right_list = [right.value for right in LineMarking]
+        self.line_marking_right.addItems(line_marking_right_list)
+
+        self.line_marking_left = QComboBox()
+        line_marking_left_list = [left.value for left in LineMarking]
+        self.line_marking_left.addItems(line_marking_left_list)
+
         self.apply_button = QPushButton()
         self.apply_button.setText("apply")
         self.apply_button.clicked.connect(self.apply_button_click)
@@ -64,6 +72,8 @@ class LaneletSettings(QDialog):
 
         layout.addRow("Lanelet type", self.lanelet_type)
         layout.addRow("Roaduser", self.roaduser)
+        layout.addRow("Linemarking right", self.line_marking_right)
+        layout.addRow("Linemarking left", self.line_marking_left)
         layout.addWidget(self.apply_button)
         layout.addWidget(self.set_default)
 
@@ -120,9 +130,15 @@ class LaneletSettings(QDialog):
         return self.setPredecessor
 
     def getLaneletType(self):
-        print(self.lanelet_type.currentText())
+        #print(self.lanelet_type.currentText())
         return self.lanelet_type.currentText()
 
     def getRoadUser(self):
-        print(self.roaduser.currentText())
+        #print(self.roaduser.currentText())
         return self.roaduser.currentText()
+
+    def getLineMarkingRight(self):
+        return self.line_marking_right.currentText()
+
+    def getLineMarkingLeft(self):
+        return self.line_marking_left.currentText()
