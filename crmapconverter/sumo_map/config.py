@@ -108,11 +108,11 @@ class SumoConfig(DefaultConfig):
 
     # probability distribution of different vehicle classes. Do not need to sum up to 1.
     veh_distribution = {
-        'passenger': 4,
-        'truck': 0.8,
-        'bus': 0.3,
-        'bicycle': 0.2,
-        'pedestrian': 0.0
+        ObstacleType.CAR: 4,
+        ObstacleType.TRUCK: 0.8,
+        ObstacleType.BUS: 0.3,
+        ObstacleType.BICYCLE: 0.2,
+        ObstacleType.PEDESTRIAN: 0
     }
 
     # default vehicle attributes to determine edge restrictions
@@ -121,63 +121,63 @@ class SumoConfig(DefaultConfig):
     veh_params = {
         # maximum length
         'length': {
-            'passenger': 5.0,
-            'truck': 7.5,
-            'bus': 12.4,
-            'bicycle': 2.,
-            'pedestrian': 0.415
+            ObstacleType.CAR: 5.0,
+            ObstacleType.TRUCK: 7.5,
+            ObstacleType.BUS: 12.4,
+            ObstacleType.BICYCLE: 2.,
+            ObstacleType.PEDESTRIAN: 0.415
         },
         # maximum width
         'width': {
-            'passenger': 2.0,
-            'truck': 2.6,
-            'bus': 2.7,
-            'bicycle': 0.68,
-            'pedestrian': 0.678
+            ObstacleType.CAR: 2.0,
+            ObstacleType.TRUCK: 2.6,
+            ObstacleType.BUS: 2.7,
+            ObstacleType.BICYCLE: 0.68,
+            ObstacleType.PEDESTRIAN: 0.678
         },
         'minGap': {
-            'passenger': 2.5,
-            'truck': 2.5,
-            'bus': 2.5,
+            ObstacleType.CAR: 2.5,
+            ObstacleType.TRUCK: 2.5,
+            ObstacleType.BUS: 2.5,
             # default 0.5
-            'bicycle': 1.,
-            'pedestrian': 0.25
+            ObstacleType.BICYCLE: 1.,
+            ObstacleType.PEDESTRIAN: 0.25
         },
         'accel': {
             # default 2.9 m/s²
-            'passenger': Interval(2, 2.9),
+            ObstacleType.CAR: Interval(2, 2.9),
             # default 1.3
-            'truck': Interval(1, 1.5),
+            ObstacleType.TRUCK: Interval(1, 1.5),
             # default 1.2
-            'bus': Interval(1, 1.4),
+            ObstacleType.BUS: Interval(1, 1.4),
             # default 1.2
-            'bicycle': Interval(1, 1.4),
+            ObstacleType.BICYCLE: Interval(1, 1.4),
             # default 1.5
-            'pedestrian': Interval(1.3, 1.7),
+            ObstacleType.PEDESTRIAN: Interval(1.3, 1.7),
         },
         'decel': {
             # default 7.5 m/s²
-            'passenger': Interval(4, 6.5),
+            ObstacleType.CAR: Interval(4, 6.5),
             # default 4
-            'truck': Interval(3, 4.5),
+            ObstacleType.TRUCK: Interval(3, 4.5),
             # default 4
-            'bus': Interval(3, 4.5),
+            ObstacleType.BUS: Interval(3, 4.5),
             # default 3
-            'bicycle': Interval(2.5, 3.5),
+            ObstacleType.BICYCLE: Interval(2.5, 3.5),
             # default 2
-            'pedestrian': Interval(1.5, 2.5),
+            ObstacleType.PEDESTRIAN: Interval(1.5, 2.5),
         },
         'maxSpeed': {
             # default 180/3.6 m/s
-            'passenger': 180 / 3.6,
+            ObstacleType.CAR: 180 / 3.6,
             # default 130/3.6
-            'truck': 130 / 3.6,
+            ObstacleType.TRUCK: 130 / 3.6,
             # default 85/3.6
-            'bus': 85 / 3.6,
+            ObstacleType.BUS: 85 / 3.6,
             # default 85/3.6
-            'bicycle': 25 / 3.6,
+            ObstacleType.BICYCLE: 25 / 3.6,
             # default 5.4/3.6
-            'pedestrian': 5.4 / 3.6,
+            ObstacleType.PEDESTRIAN: 5.4 / 3.6,
         }
     }
 
