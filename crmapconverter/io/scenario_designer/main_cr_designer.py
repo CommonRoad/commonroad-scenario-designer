@@ -4,20 +4,22 @@ from argparse import ArgumentParser
 import os
 import sys
 import logging
+import numpy as np
+import time
 
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import (QMainWindow, QDockWidget, QMessageBox, QAction,
                              QLabel, QFileDialog, QDesktopWidget, QVBoxLayout,
-                             QSlider, QWidget, QApplication, qApp)
+                             QSlider, QWidget, QApplication, qApp, QLineEdit, QFormLayout, QPushButton, QDialog)
 from PyQt5.QtCore import Qt, QUrl
-from PyQt5.QtGui import QIcon, QKeySequence, QDesktopServices
+from PyQt5.QtGui import QIcon, QKeySequence, QDesktopServices, QIntValidator
 from matplotlib.backends.backend_qt5agg import (NavigationToolbar2QT as
                                                 NavigationToolbar)
 
 from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.common.file_writer import (CommonRoadFileWriter,
                                            OverwriteExistingFile)
-from commonroad.scenario.scenario import Scenario, LaneletNetwork
+from commonroad.scenario.scenario import Scenario, LaneletNetwork, Lanelet
 
 from crmapconverter.io.scenario_designer.gui_resources.MainWindow import Ui_mainWindow
 from crmapconverter.io.scenario_designer.gui_toolbox import UpperToolbox
@@ -33,7 +35,15 @@ from crmapconverter.io.scenario_designer.gui_viewer import (
     LaneletList, IntersectionList, find_intersection_by_id, AnimatedViewer)
 from crmapconverter.io.scenario_designer import config
 from crmapconverter.io.scenario_designer import util
+from crmapconverter.io.scenario_designer.lanelet_settings import LaneletSettings
+from crmapconverter.io.scenario_designer.curve_settings import CurveSettings
 
+from commonroad.scenario.lanelet import Lanelet
+from commonroad.scenario.lanelet import LaneletType
+from commonroad.scenario.lanelet import LaneletNetwork
+
+
+from crmapconverter.io.scenario_designer.map_creator import mapcreator
 
 class MWindow(QMainWindow, Ui_mainWindow):
     """The Mainwindow of CR Scenario Designer."""
@@ -54,6 +64,28 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.ani_path = None
         self.slider_clicked = False
 
+        #Senario + Lanelet variables
+        self.scenario = None
+        self.latestid = None
+        self.selected_lanelet = None
+        self.selected_predecessor = None
+        self.selected_successor = None
+
+        self.pred = False
+        self.rot_angle_straight = 0
+        self.rot_angle_curve = 0
+
+        self.lenfor = 50
+        self.widfor = 20
+        self.vertfor = 20
+        self.adjfor = None
+
+        self.radcurve = 50
+        self.widcurve = 20
+        self.numcurve = 30
+        self.anglcurve = np.pi/2
+        self.adjcurve = None
+
         # GUI attributes
         self.tool1 = None
         self.tool2 = None
@@ -69,6 +101,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.intersection_list_dock = None
         self.sumo_settings = None
         self.gui_settings = None
+        self.lanelet_settings = None
 
         if SUMO_AVAILABLE:
             # when the current scenario was simulated, load it in the gui
@@ -87,6 +120,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.create_toolbar()
         self.create_console()
         self.create_toolbox()
+        #self.create_laneletsettings()
 
         self.status = self.statusbar
         self.status.showMessage("Welcome to CR Scenario Designer")
@@ -122,6 +156,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         if path:
             self.open_path(path)
 
+
     def show_osm_settings(self):
         osm_interface = OSMInterface(self)
         osm_interface.show_settings()
@@ -136,6 +171,102 @@ class MWindow(QMainWindow, Ui_mainWindow):
     def show_sumo_settings(self):
         self.sumo_settings = SUMOSettings(self, config=self.sumobox.config)
 
+
+    # Toolbox functionality
+    def click_straight(self):
+        lanelet = mapcreator.create_straight(self, self.widfor, self.lenfor, self.vertfor,
+                                             self.scenario.lanelet_network, self.scenario, self.pred)
+        lanelet.translate_rotate(np.array([0, 0]), self.rot_angle_straight)
+
+        self.crviewer.open_scenario(self.scenario, self.sumobox.config)
+        self.update_view()
+        self.update_to_new_scenario()
+
+    def click_curve(self, turnright=True):
+        if turnright:
+            lanelet = mapcreator.create_curve(self, self.widcurve, self.radcurve, -self.anglcurve, self.numcurve,
+                                              self.scenario.lanelet_network, self.scenario, self.pred)
+        else:
+            lanelet = mapcreator.create_curve(self, self.widcurve, self.radcurve, self.anglcurve, self.numcurve,
+                                              self.scenario.lanelet_network, self.scenario, self.pred)
+        lanelet.translate_rotate(np.array([0, 0]), self.rot_angle_curve)
+
+        self.crviewer.open_scenario(self.scenario, self.sumobox.config)
+        self.update_view()
+        self.update_to_new_scenario()
+
+    def fit_func(self):
+        selected_lanelet = self.crviewer.selected_lanelet_use
+        if selected_lanelet:
+            predecessor = selected_lanelet[0]
+            successor = self.scenario.lanelet_network.find_lanelet_by_id(self.latestid)
+            successor = mapcreator.fit_to_predecessor(self, predecessor, successor)
+            self.crviewer.open_scenario(self.scenario, self.sumobox.config)
+            self.update_view()
+            self.update_to_new_scenario()
+
+    def adjacent_left(self):
+        selected_lanelet = self.crviewer.selected_lanelet_use
+        if selected_lanelet:
+            current_lanelet = selected_lanelet[0]
+            adjacent_lanelet = mapcreator.adjacent_lanelet_left(self, current_lanelet, self.scenario.lanelet_network,
+                                                                self.scenario, same_direction=True)
+            self.crviewer.open_scenario(self.scenario, self.sumobox.config)
+            self.update_view()
+            self.update_to_new_scenario()
+
+    def adjacent_right(self):
+        selected_lanelet = self.crviewer.selected_lanelet_use
+        if selected_lanelet:
+            current_lanelet = selected_lanelet[0]
+            adjacent_lanelet = mapcreator.adjacent_lanelet_right(self, current_lanelet, self.scenario.lanelet_network,
+                                                                 self.scenario, same_direction=True)
+            self.crviewer.open_scenario(self.scenario, self.sumobox.config)
+            self.update_view()
+            self.update_to_new_scenario()
+
+    def create_laneletsettings(self):
+        self.lanelet_settings = LaneletSettings()
+
+    def forwards(self):
+        self.LL = LaneletSettings()
+        self.LL.exec()
+        self.lenfor = self.LL.getLanletLength()
+        self.widfor = self.LL.getLaneletWidth()
+        self.pred = self.LL.getPredecessor()
+        self.adjfor = self.LL.getAdjacentLanelet()
+
+    def curve(self):
+        self.CU = CurveSettings()
+        self.CU.exec()
+        self.radcurve = self.CU.getCurveRadius()
+        self.widcurve = self.CU.getCurveWidth()
+        self.numcurve = self.CU.getNumberVertices()
+        self.anglcurve = self.CU.getAngle()
+        self.pred = self.CU.getPredecessor()
+
+    def select_predecessor(self):
+        self.selected_predecessor = self.crviewer.selected_lanelet_use[0]
+
+    def select_successor(self):
+        self.selected_successor = self.crviewer.selected_lanelet_use[0]
+
+    def connect_lanelets(self):
+        if self.selected_predecessor and self.selected_successor:
+            connecting_lanelet = mapcreator.connect_lanelets4(self, self.selected_predecessor, self.selected_successor,
+                                                             self.scenario.lanelet_network, self.scenario)
+            self.crviewer.open_scenario(self.scenario, self.sumobox.config)
+            self.update_view()
+            self.update_to_new_scenario()
+
+    def remove_lanelet(self):
+        lanelet = self.crviewer.selected_lanelet_use[0]
+        network = self.scenario.lanelet_network
+        mapcreator.remove_lanelet(self, lanelet, network, self.scenario)
+        self.crviewer.open_scenario(self.scenario, self.sumobox.config)
+        self.update_view()
+        self.update_to_new_scenario()
+
     def create_toolbox(self):
         """ Create the Upper toolbox."""
         self.uppertoolBox = UpperToolbox()
@@ -146,6 +277,21 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.tool1.setAllowedAreas(Qt.LeftDockWidgetArea)
         self.tool1.setWidget(self.uppertoolBox)
         self.addDockWidget(Qt.LeftDockWidgetArea, self.tool1)
+
+        self.uppertoolBox.button_forwards.clicked.connect(lambda: self.click_straight())
+        self.uppertoolBox.button_lanelet_settings.clicked.connect(lambda: self.forwards())
+        self.uppertoolBox.button_turn_right.clicked.connect(lambda: self.click_curve(True))
+        self.uppertoolBox.button_curve_settings.clicked.connect(self.curve)
+        self.uppertoolBox.button_turn_left.clicked.connect(lambda: self.click_curve(False))
+        self.uppertoolBox.button_curve_settings2.clicked.connect(self.curve)
+
+        self.uppertoolBox.button_fit_to_predecessor.clicked.connect(lambda: self.fit_func())
+        self.uppertoolBox.button_adjacent_left.clicked.connect(lambda: self.adjacent_left())
+        self.uppertoolBox.button_adjacent_right.clicked.connect(lambda: self.adjacent_right())
+        self.uppertoolBox.button_select_predecessor.clicked.connect(lambda: self.select_predecessor())
+        self.uppertoolBox.button_select_successor.clicked.connect(lambda: self.select_successor())
+        self.uppertoolBox.button_connect_lanelets.clicked.connect(lambda: self.connect_lanelets())
+        self.uppertoolBox.button_remove_lanelet.clicked.connect(lambda: self.remove_lanelet())
 
         if SUMO_AVAILABLE:
             self.create_sumobox()
@@ -548,6 +694,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         scenario = Scenario(0.1, 'new scenario')
         net = LaneletNetwork()
         scenario.lanelet_network = net
+        self.scenario = scenario
         self.open_scenario(scenario)
 
     def open_commonroad_file(self):

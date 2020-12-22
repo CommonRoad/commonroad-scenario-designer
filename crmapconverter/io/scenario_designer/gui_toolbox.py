@@ -29,6 +29,7 @@ class UpperToolbox(QWidget):
     add them as (title, widget) tuples to self.sections
         """
     button_sumo_simulation = None
+    button_forwards = None
 
     def __init__(self):
         super().__init__()
@@ -55,6 +56,10 @@ class UpperToolbox(QWidget):
             button1 = self.add_button(title)
             section1 = self.add_widget(button1, widget)
             button1.addChild(section1)
+
+    #def clicked(self):
+        #print("clicked")
+       #click_curve(self, width=3, radius=50, angle=np.pi / 2, num_vertices=30, rot_angle=0):
 
     def define_sections(self):
         """reimplement this to define all your sections
@@ -87,19 +92,165 @@ class UpperToolbox(QWidget):
         button_yield.setIcon(QIcon(":/icons/button_yeld.png"))
         layout1.addWidget(button_yield, 1, 1)
 
+        "add show more button for lanelets list"""
+        self.button_lanlist = QPushButton("show more")
+        self.button_lanlist.setToolTip("Show more Traffic Signs")
+        layout1.addWidget(self.button_lanlist, 2, 0)
+        # TODO: add list of more traffic signs
+
         layout1.addItem(self.spacerItem)
-        title1 = "Tools for Lanelet editing"
+        title1 = "Traffic Signs"
         self.sections.append((title1, widget1))
 
-        """add button for lanelets list"""
-        #self.button_lanlist = QPushButton("Lanelets list")
-        #self.button_lanlist.setToolTip("Show Lanelets list")
-        #layout1.addWidget(self.button_lanlist, 2, 0)
 
-        """add button for Intersection list"""
-        #self.button_intersection_list = QPushButton("Intersection list")
-        #self.button_intersection_list.setToolTip("Show Intersection list")
-        #layout1.addWidget(self.button_intersection_list, 2, 1)
+        #--Section lanelets--
+
+        widgetlanelets = QFrame(self.tree)
+        layoutlanelets = QGridLayout(widgetlanelets)
+
+        self.button_forwards = QPushButton()
+        self.button_forwards.setText("forwards")
+        self.button_forwards.setIcon(QIcon(":/forwards.PNG"))
+        layoutlanelets.addWidget(self.button_forwards, 1, 0)
+        #button_forwards.clicked.connect(self.clicked)
+
+        self.button_lanelet_settings = QPushButton()
+        self.button_lanelet_settings.setText("settings")
+        layoutlanelets.addWidget(self.button_lanelet_settings, 1, 1)
+        self.button_lanelet_settings.setIcon(QIcon(":/gui_src/forwards.PNG"))
+
+        self.button_turn_right = QPushButton()
+        self.button_turn_right.setText("turn right")
+        layoutlanelets.addWidget(self.button_turn_right, 2, 0)
+        self.button_turn_right.setIcon(QIcon(":/gui_src/forwards.PNG"))
+
+        self.button_curve_settings = QPushButton()
+        self.button_curve_settings.setText("settings")
+        layoutlanelets.addWidget(self.button_curve_settings, 2, 1)
+        self.button_curve_settings.setIcon(QIcon(":/gui_src/forwards.PNG"))
+
+        self.button_turn_left = QPushButton()
+        self.button_turn_left.setText("turn left")
+        layoutlanelets.addWidget(self.button_turn_left, 3, 0)
+        self.button_turn_left.setIcon(QIcon(":/gui_src/forwards.PNG"))
+
+        self.button_curve_settings2 = QPushButton()
+        self.button_curve_settings2.setText("settings")
+        #layoutlanelets.addWidget(self.button_curve_settings2, 3, 1)
+        self.button_curve_settings2.setIcon(QIcon(":/gui_src/forwards.PNG"))
+
+        #Fit to Predecessor
+        self.button_fit_to_predecessor = QPushButton()
+        self.button_fit_to_predecessor.setText("Fit to Predecessor")
+        layoutlanelets.addWidget(self.button_fit_to_predecessor, 4, 0)
+        self.button_fit_to_predecessor.setIcon(QIcon(":/gui_src/forwards.PNG"))
+
+        #adjacent_left
+        self.button_adjacent_right = QPushButton()
+        self.button_adjacent_right.setText("Create Adjacent Right")
+        layoutlanelets.addWidget(self.button_adjacent_right, 5, 0)
+        self.button_adjacent_right.setIcon(QIcon(":/gui_src/forwards.PNG"))
+
+        # adjacent_right
+        self.button_adjacent_left = QPushButton()
+        self.button_adjacent_left.setText("Create Adjacent Left")
+        layoutlanelets.addWidget(self.button_adjacent_left, 5, 1)
+        self.button_adjacent_left.setIcon(QIcon(":/gui_src/forwards.PNG"))
+
+        # select_predecessor
+        self.button_select_predecessor = QPushButton()
+        self.button_select_predecessor.setText("Select Predecessor")
+        layoutlanelets.addWidget(self.button_select_predecessor, 6, 0)
+        self.button_select_predecessor.setIcon(QIcon(":/gui_src/forwards.PNG"))
+
+        # select_successor
+        self.button_select_successor = QPushButton()
+        self.button_select_successor.setText("Select Successor")
+        layoutlanelets.addWidget(self.button_select_successor, 6, 1)
+        self.button_select_successor.setIcon(QIcon(":/gui_src/forwards.PNG"))
+
+        # connect lanelets
+        self.button_connect_lanelets = QPushButton()
+        self.button_connect_lanelets.setText("Connect Lanelets")
+        layoutlanelets.addWidget(self.button_connect_lanelets, 7, 0)
+        self.button_connect_lanelets.setIcon(QIcon(":/gui_src/forwards.PNG"))
+
+        # remove lanelet
+        self.button_remove_lanelet = QPushButton()
+        self.button_remove_lanelet.setText("Remove Lanelet")
+        layoutlanelets.addWidget(self.button_remove_lanelet, 7, 1)
+        self.button_remove_lanelet.setIcon(QIcon(":/gui_src/forwards.PNG"))
+
+        #button_turn_left_45 = QPushButton()
+        #button_turn_left_45.setText("show more")
+        # button_turn_right.setIcon(QIcon(":/icons/Groupe_2.png"))
+        #layoutlanelets.addWidget(button_turn_left_45, 3, 0)
+        # widgetlanelets.addItem(spacerItem)
+
+        titlelanelets = "Lanelets"
+        self.sections.append((titlelanelets, widgetlanelets))
+
+        #--Section intersections--
+
+        widgetintersection = QFrame(self.tree)
+        layoutintersection = QGridLayout(widgetintersection)
+
+        button_X = QPushButton()
+        button_X.setText("X")
+        button_X.setIcon(QIcon(":/icons/forwards.PNG"))
+        layoutintersection.addWidget(button_X, 1, 0)
+
+        button_T = QPushButton()
+        button_T.setText("T")
+        layoutintersection.addWidget(button_T, 1, 1)
+        button_T.setIcon(QIcon(":/gui_src/forwards.PNG"))
+
+        # button_T_2 = QPushButton()
+        # button_T_2.setText("T_2")
+        # button_turn_right.setIcon(QIcon(":/icons/Groupe_2.png"))
+        # layoutintersection.addWidget(button_T_2, 1, 2)
+        # button_T_2.setIcon(QIcon(":/gui_src/forwards.PNG"))
+
+        button_T_3 = QPushButton()
+        button_T_3.setText("T_3")
+        layoutintersection.addWidget(button_T_3, 2, 0)
+        button_T_3.setIcon(QIcon(":/gui_src/forwards.PNG"))
+
+        button_T_4 = QPushButton()
+        button_T_4.setText("T_4")
+        layoutintersection.addWidget(button_T_4, 2, 1)
+        button_T_4.setIcon(QIcon(":/gui_src/forwards.PNG"))
+
+        button_T_5 = QPushButton()
+        button_T_5.setText("show more")
+        layoutintersection.addWidget(button_T_5, 3, 0)
+        button_T_4.setIcon(QIcon(":/gui_src/forwards.PNG"))
+
+        titleintersection = "Intersections"
+        self.sections.append((titleintersection, widgetintersection))
+
+        # --Section Obstacles--
+
+        widgetobstacles = QFrame(self.tree)
+        layoutobstacles = QGridLayout(widgetobstacles)
+
+        button_obstacle1 = QPushButton()
+        button_obstacle1.setText("Obstacle1")
+        button_obstacle1.setIcon(QIcon(":/icons/forwards.PNG"))
+        layoutobstacles.addWidget(button_obstacle1, 1, 0)
+
+        button_obstacle2 = QPushButton()
+        button_obstacle2.setText("Obstacle2")
+        button_obstacle2.setIcon(QIcon(":/icons/forwards.PNG"))
+        layoutobstacles.addWidget(button_obstacle2, 2, 0)
+
+        button_obstacle3 = QPushButton()
+        button_obstacle3.setText("Obstacle3")
+        button_obstacle3.setIcon(QIcon(":/icons/forwards.PNG"))
+        layoutobstacles.addWidget(button_obstacle3, 3, 0)
+
+        titleobstacles = "Obstacles"
+        self.sections.append((titleobstacles, widgetobstacles))
 
         """"""""""""""
 
