@@ -37,6 +37,7 @@ from crmapconverter.io.scenario_designer import config
 from crmapconverter.io.scenario_designer import util
 from crmapconverter.io.scenario_designer.lanelet_settings import LaneletSettings
 from crmapconverter.io.scenario_designer.curve_settings import CurveSettings
+from crmapconverter.io.scenario_designer.traffic_signs_settings import LaneletSettings
 
 from commonroad.scenario.lanelet import Lanelet
 from commonroad.scenario.lanelet import LaneletType
@@ -267,6 +268,9 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.update_view()
         self.update_to_new_scenario()
 
+    def create_traffic_signs_settings(self):
+        self.traffic_signs_settings = 0
+
     def create_toolbox(self):
         """ Create the Upper toolbox."""
         self.uppertoolBox = UpperToolbox()
@@ -277,6 +281,8 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.tool1.setAllowedAreas(Qt.LeftDockWidgetArea)
         self.tool1.setWidget(self.uppertoolBox)
         self.addDockWidget(Qt.LeftDockWidgetArea, self.tool1)
+
+        self.uppertoolBox.button_traffic_signs_settings.clicked.connect(lambda: self.create_traffic_signs_settings)
 
         self.uppertoolBox.button_forwards.clicked.connect(lambda: self.click_straight())
         self.uppertoolBox.button_lanelet_settings.clicked.connect(lambda: self.forwards())

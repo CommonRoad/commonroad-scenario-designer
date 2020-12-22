@@ -65,32 +65,41 @@ class UpperToolbox(QWidget):
         """reimplement this to define all your sections
         and add them as (title, widget) tuples to self.sections
         """
+
+        """Section Traffic Signs/ Traffic Lights"""
         widget1 = QFrame(self.tree)
         layout1 = QGridLayout(widget1)
 
-        """add Roundabout button"""
+        self.button_traffic_signs = QPushButton()
+        self.button_traffic_signs.setText("Traffic signs")
+        layout1.addWidget(self.button_traffic_signs, 0, 0)
+
+        self.button_traffic_signs_settings = QPushButton()
+        self.button_traffic_signs_settings.setText("Settings")
+        layout1.addWidget(self.button_traffic_signs_settings, 0, 1)
+
+        """add Roundabout button
         button_roundabout = QPushButton()
         button_roundabout.setText("Roundabout")
         button_roundabout.setIcon(QIcon(":/icons/button_roundabout.png"))
         layout1.addWidget(button_roundabout, 0, 0)
 
-        """add traffic light button"""
+        add traffic light button
         button_traffic_light = QPushButton()
         button_traffic_light.setText("Traffic Light")
         button_traffic_light.setIcon(QIcon(":/icons/button_traffic_light.png"))
         layout1.addWidget(button_traffic_light, 0, 1)
 
-        """add stop button"""
         button_stop = QPushButton()
         button_stop.setText("Stop")
         button_stop.setIcon(QIcon(":/icons/button_stop.png"))
         layout1.addWidget(button_stop, 1, 0)
 
-        """add yield button"""
+       
         button_yield = QPushButton()
         button_yield.setText("Yield")
         button_yield.setIcon(QIcon(":/icons/button_yeld.png"))
-        layout1.addWidget(button_yield, 1, 1)
+        layout1.addWidget(button_yield, 1, 1)"""
 
         "add show more button for lanelets list"""
         self.button_lanlist = QPushButton("show more")
@@ -112,7 +121,6 @@ class UpperToolbox(QWidget):
         self.button_forwards.setText("forwards")
         self.button_forwards.setIcon(QIcon(":/forwards.PNG"))
         layoutlanelets.addWidget(self.button_forwards, 1, 0)
-        #button_forwards.clicked.connect(self.clicked)
 
         self.button_lanelet_settings = QPushButton()
         self.button_lanelet_settings.setText("settings")
