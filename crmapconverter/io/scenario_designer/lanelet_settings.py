@@ -35,6 +35,16 @@ class LaneletSettings(QDialog):
         self.Predecessor.setText("set predecessor automatically")
         self.Predecessor.toggled.connect(self.predecessor_button)
 
+        self.posX = QLineEdit()
+        self.posX.setValidator(QIntValidator())
+        self.posX.setMaxLength(3)
+        self.posX.setAlignment(Qt.AlignRight)
+
+        self.posY = QLineEdit()
+        self.posY.setValidator(QIntValidator())
+        self.posY.setMaxLength(3)
+        self.posY.setAlignment(Qt.AlignRight)
+
         self.pred = QCheckBox("set predecessor automatically")
         self.pred.stateChanged.connect(self.predecessor_button)
 
@@ -66,6 +76,8 @@ class LaneletSettings(QDialog):
         layout.addRow("Lanelet length", self.length)
         layout.addRow("Lanelet width ", self.width)
         #layout.addWidget(self.adjacentLanelet)
+        layout.addRow("X position", self.posX)
+        layout.addRow("Y position", self.posY)
         layout.addWidget(self.pred)
 
         #layout.addWidget(self.Predecessor)
@@ -113,6 +125,8 @@ class LaneletSettings(QDialog):
         self.adjacentLanelet.setChecked(False)
         self.pred.setChecked(True)
         self.setPredecessor = True
+        self.posX.insert("0")
+        self.posY.insert("0")
 
     def showsettings(self):
         self.show()
@@ -142,3 +156,15 @@ class LaneletSettings(QDialog):
 
     def getLineMarkingLeft(self):
         return self.line_marking_left.currentText()
+
+    def getPosX(self):
+        if self.posX.text():
+            return int(self.posX.text())
+        else:
+            return 0
+
+    def getPosY(self):
+        if self.posY.text():
+            return int(self.posY.text())
+        else:
+            return 0

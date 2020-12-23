@@ -37,7 +37,7 @@ from crmapconverter.io.scenario_designer import config
 from crmapconverter.io.scenario_designer import util
 from crmapconverter.io.scenario_designer.lanelet_settings import LaneletSettings
 from crmapconverter.io.scenario_designer.curve_settings import CurveSettings
-from crmapconverter.io.scenario_designer.traffic_signs_settings import *
+from crmapconverter.io.scenario_designer.traffic_signs_settings import TrafficSignsSettings, TrafficSignsSelection
 
 from commonroad.scenario.lanelet import Lanelet, LaneletType, LaneletNetwork
 from commonroad.scenario.traffic_sign import *
@@ -67,6 +67,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         #Senario + Lanelet variables
         self.scenario = None
         self.latestid = None
+        self.traffic_signs_id = 200
         self.selected_lanelet = None
         self.selected_predecessor = None
         self.selected_successor = None
@@ -83,6 +84,8 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.roaduser ="vehicle"
         self.linemarkingleft = "no_marking"
         self.linemarkingright = "no_marking"
+        self.lanelet_pos_x = 0
+        self.lanelet_pos_y = 0
 
         self.radcurve = 50
         self.widcurve = 20
@@ -181,11 +184,11 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
 
     # Toolbox functionality
-    def click_straight(self):
+    def click_straight(self, posX, posY):
         lanelet = mapcreator.create_straight(self, self.widfor, self.lenfor, self.vertfor,
                                              self.scenario.lanelet_network, self.scenario, self.pred, self.lanelettype,
                                              self.roaduser, self.linemarkingleft, self.linemarkingright)
-        lanelet.translate_rotate(np.array([0, 0]), self.rot_angle_straight)
+        lanelet.translate_rotate(np.array([posX, posY]), self.rot_angle_straight)
 
         self.crviewer.open_scenario(self.scenario, self.sumobox.config)
         self.update_view()
@@ -193,7 +196,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
     def click_curve(self, turnright=True):
         if turnright:
-            lanelet = mapcreator.create_curve(self, self.widcurve, self.radcurve, -self.anglcurve, self.numcurve,
+            lanelet = mapcreator.create_curve(self, self.widcurve, self.radcurve, self.anglcurve, self.numcurve,
                                               self.scenario.lanelet_network, self.scenario, self.pred, self.curvetype,
                                              self.roaduser_curve, self.linemarkingleft_curve, self.linemarkingright_curve)
         else:
@@ -250,6 +253,8 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.roaduser = self.LL.getRoadUser()
         self.linemarkingright = self.LL.getLineMarkingRight()
         self.linemarkingleft = self.LL.getLineMarkingLeft()
+        self.lanelet_pos_x = self.LL.getPosX()
+        self.lanelet_pos_y = self.LL.getPosY()
 
     def curve(self):
         self.CU = CurveSettings()
@@ -286,17 +291,52 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.update_view()
         self.update_to_new_scenario()
 
+    def traffic_signs(self):
+        self.showTS = TrafficSignsSelection()
+        self.showTS.exec()
+        print(self.showTS.getSign())
+        sig = self.showTS.getSign()
+        vals = self.showTS.getAdditionalValues()
+        x = self.showTS.getPosX()
+        y = self.showTS.getPosY()
+        print(self.showTS.getLaneletID())
+        print(TrafficSignIDGermany(sig))
+        #sigid = 201
+        #signID = int(self.showTS.getSign())
+        if self.showTS.getLaneletID():
+            lanelet_id = int(self.showTS.getLaneletID())
+        else:
+            return
+
+        self.traffic1 = TrafficSign(self.traffic_signs_id, [TrafficSignElement(TrafficSignIDGermany(sig), [vals])], {lanelet_id},
+                                    np.array([x, y]))
+        self.scenario.lanelet_network.add_traffic_sign(self.traffic1, {lanelet_id})
+        if lanelet_id:
+            lanelet = self.scenario.lanelet_network.find_lanelet_by_id(lanelet_id)
+            lanelet.add_traffic_sign_to_lanelet(self.traffic_signs_id)
+            print(lanelet.traffic_signs)
+        self.crviewer.open_scenario(self.scenario, self.sumobox.config)
+        self.update_view()
+        self.update_to_new_scenario()
+        self.traffic_signs_id = self.traffic_signs_id + 1
+
     def create_traffic_signs_settings(self):
-        print("TEST1")
+
+        print("TESTbefore")
+        self.TS = TrafficSignsSettings()
+        self.TS.exec()
+        self.country = self.TS.getCountry()
+        print("Country:")
+        print(self.country)
         self.traffic_signs_settings = 0
-        self.traffic1 = TrafficSign(201, [TrafficSignElement(TrafficSignIDZamunda.MAX_SPEED, ["20"])],{1},np.array([0.0,2]))
+        """self.traffic1 = TrafficSign(201, [TrafficSignElement(TrafficSignIDZamunda.MAX_SPEED, ["20"])],{1},np.array([0.0,2]))
         self.scenario.lanelet_network.add_traffic_sign(self.traffic1, {1})
 
         self.crviewer.open_scenario(self.scenario, self.sumobox.config)
         self.update_view()
         self.update_to_new_scenario()
         print("Test")
-        print(self.traffic1)
+        print(self.traffic1)"""
 
     def create_toolbox(self):
         """ Create the Upper toolbox."""
@@ -310,8 +350,9 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.addDockWidget(Qt.LeftDockWidgetArea, self.tool1)
 
         self.uppertoolBox.button_traffic_signs_settings.clicked.connect(lambda: self.create_traffic_signs_settings())
+        self.uppertoolBox.button_traffic_signs.clicked.connect(lambda: self.traffic_signs())
 
-        self.uppertoolBox.button_forwards.clicked.connect(lambda: self.click_straight())
+        self.uppertoolBox.button_forwards.clicked.connect(lambda: self.click_straight(self.lanelet_pos_x, self.lanelet_pos_y))
         self.uppertoolBox.button_lanelet_settings.clicked.connect(lambda: self.forwards())
         self.uppertoolBox.button_turn_right.clicked.connect(lambda: self.click_curve(True))
         self.uppertoolBox.button_curve_settings.clicked.connect(self.curve)
