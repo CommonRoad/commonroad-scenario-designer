@@ -41,6 +41,16 @@ class CurveSettings(QDialog):
         self.vertices.setMaxLength(2)
         self.vertices.setAlignment(Qt.AlignRight)
 
+        self.posX = QLineEdit()
+        self.posX.setValidator(QIntValidator())
+        self.posX.setMaxLength(3)
+        self.posX.setAlignment(Qt.AlignRight)
+
+        self.posY = QLineEdit()
+        self.posY.setValidator(QIntValidator())
+        self.posY.setMaxLength(3)
+        self.posY.setAlignment(Qt.AlignRight)
+
         self.adjacentCurve = QRadioButton()
         self.adjacentCurve.setText("set ajacent Curve")
         self.adjacentCurve.toggled.connect(self.adjacent_button)
@@ -81,7 +91,8 @@ class CurveSettings(QDialog):
         layout.addRow("Curve width ", self.width)
         layout.addRow("Curve angle ", self.angle)
         layout.addRow("Number of vertices ", self.vertices)
-
+        layout.addRow("X position", self.posX)
+        layout.addRow("Y position", self.posY)
         #layout.addWidget(self.adjacentCurve)
         layout.addWidget(self.pred)
         layout.addRow("Lanelet type", self.lanelet_type)
@@ -132,6 +143,8 @@ class CurveSettings(QDialog):
         self.adjacentCurve.setChecked(False)
         self.pred.setChecked(True)
         self.setPredecessor = True
+        self.posX.insert("0")
+        self.posY.insert("0")
 
     def showsettings(self):
         self.show()
@@ -169,3 +182,14 @@ class CurveSettings(QDialog):
     def getLineMarkingLeft(self):
         return self.line_marking_left.currentText()
 
+    def getPosX(self):
+        if self.posX.text():
+            return int(self.posX.text())
+        else:
+            return 0
+
+    def getPosY(self):
+        if self.posY.text():
+            return int(self.posY.text())
+        else:
+            return 0

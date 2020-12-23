@@ -96,6 +96,8 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.roaduser_curve = "vehicle"
         self.linemarkingright_curve = "no_marking"
         self.linemarkingleft_curve = "no_marking"
+        self.curve_pos_x = 0
+        self.curve_pos_y = 0
 
         # GUI attributes
         self.tool1 = None
@@ -194,7 +196,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.update_view()
         self.update_to_new_scenario()
 
-    def click_curve(self, turnright=True):
+    def click_curve(self, turnright=True, curve_posX=0, curve_posY=0):
         if turnright:
             lanelet = mapcreator.create_curve(self, self.widcurve, self.radcurve, self.anglcurve, self.numcurve,
                                               self.scenario.lanelet_network, self.scenario, self.pred, self.curvetype,
@@ -203,7 +205,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
             lanelet = mapcreator.create_curve(self, self.widcurve, self.radcurve, -self.anglcurve, self.numcurve,
                                               self.scenario.lanelet_network, self.scenario, self.pred, self.curvetype,
                                              self.roaduser_curve, self.linemarkingleft_curve, self.linemarkingright_curve)
-        lanelet.translate_rotate(np.array([0, 0]), self.rot_angle_curve)
+        lanelet.translate_rotate(np.array([curve_posX, curve_posY]), self.rot_angle_curve)
 
         self.crviewer.open_scenario(self.scenario, self.sumobox.config)
         self.update_view()
@@ -268,6 +270,8 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.roaduser_curve = self.CU.getRoadUser()
         self.linemarkingright_curve = self.CU.getLineMarkingRight()
         self.linemarkingleft_curve = self.CU.getLineMarkingLeft()
+        self.curve_pos_x = self.CU.getPosX()
+        self.curve_pos_y = self.CU.getPosY()
 
     def select_predecessor(self):
         self.selected_predecessor = self.crviewer.selected_lanelet_use[0]
@@ -354,10 +358,10 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
         self.uppertoolBox.button_forwards.clicked.connect(lambda: self.click_straight(self.lanelet_pos_x, self.lanelet_pos_y))
         self.uppertoolBox.button_lanelet_settings.clicked.connect(lambda: self.forwards())
-        self.uppertoolBox.button_turn_right.clicked.connect(lambda: self.click_curve(True))
+        self.uppertoolBox.button_turn_right.clicked.connect(lambda: self.click_curve(True, self.curve_pos_x, self.curve_pos_y))
         self.uppertoolBox.button_curve_settings.clicked.connect(self.curve)
-        self.uppertoolBox.button_turn_left.clicked.connect(lambda: self.click_curve(False))
-        self.uppertoolBox.button_curve_settings2.clicked.connect(self.curve)
+        self.uppertoolBox.button_turn_left.clicked.connect(lambda: self.click_curve(False, self.curve_pos_x, self.curve_pos_y))
+        #self.uppertoolBox.button_curve_settings2.clicked.connect(self.curve)
 
         self.uppertoolBox.button_fit_to_predecessor.clicked.connect(lambda: self.fit_func())
         self.uppertoolBox.button_adjacent_left.clicked.connect(lambda: self.adjacent_left())
