@@ -46,7 +46,6 @@ __maintainer__ = "Sebastian Maierhofer"
 __email__ = "commonroad-i06@in.tum.de"
 __status__ = "Released"
 
-
 def parse_opendrive(root_node) -> OpenDrive:
     """Tries to parse XML tree, returns OpenDRIVE object
 
@@ -314,7 +313,7 @@ def parse_opendrive_road_lane_section(newRoad, lane_section_id, lane_section):
 
     newLaneSection = RoadLanesSection(road=newRoad)
 
-    # Manually enumerate lane sections for referencing purposes
+    # NOTE: Manually enumerate lane sections for referencing purposes
     newLaneSection.idx = lane_section_id
 
     newLaneSection.sPos = float(lane_section.get("s"))
@@ -432,6 +431,7 @@ def parse_opendrive_road_signal(newRoad, road_signal):
     :return: Attributes of signal element in xodr
 
     """
+
     newSignal = RoadSignal()
     newSignal.id = road_signal.get("id")
     newSignal.s = road_signal.get("s")  # position along the reference curve
@@ -567,7 +567,7 @@ def parse_opendrive_header(opendrive, header):
       header:
 
     """
-
+    # Generates object out of the attributes of the header
     parsed_header = Header(
         header.get("revMajor"),
         header.get("revMinor"),
@@ -579,6 +579,7 @@ def parse_opendrive_header(opendrive, header):
         header.get("west"),
         header.get("vendor"),
     )
+
     # Reference
     if header.find("geoReference") is not None:
         parsed_header.geo_reference = header.find("geoReference").text

@@ -139,8 +139,9 @@ class PlanView:
           length: Length of geometry to be added.
 
         """
-        self._geo_lengths = np.append(self._geo_lengths, length + self._geo_lengths[-1])
 
+        self._geo_lengths = np.append(self._geo_lengths, length + self._geo_lengths[-1])
+        # print("Adding geo length",self._geo_lengths)
     @property
     def length(self) -> float:
         """Get length of whole plan view"""
@@ -265,6 +266,9 @@ class PlanView:
           precision: Precision with which to calculate points on the line
 
         """
+
+#        print("Checking required lanelet mesh", self._geo_lengths)
+
         # start = time.time()
         # this threshold was determined by quick prototyping tests
         # (trying different numbers and minimizing runtime)
@@ -272,6 +276,7 @@ class PlanView:
             return
 
         num_steps = int(max(2, np.ceil(self.length / precision)))
+        # print("Checking required lanelet mesh", self._geo_lengths, num_steps)
         positions = np.linspace(0, self.length, num_steps)
         self._precalculation = np.empty([num_steps, 4])
         for i, pos in enumerate(positions):

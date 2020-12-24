@@ -133,7 +133,6 @@ class OpenDriveConverter:
 
                 if plane_group.length > 0:
                     plane_groups.append(plane_group)
-
         return plane_groups
 
     @staticmethod

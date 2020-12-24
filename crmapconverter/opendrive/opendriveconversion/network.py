@@ -4,8 +4,9 @@
 """Module to contain Network which can load an opendrive object and then export
 to lanelets. Iternally, the road network is represented by ParametricLanes."""
 import numpy as np
-
+import inspect
 from commonroad.scenario.scenario import Scenario, GeoTransformation, Location, ScenarioID
+from commonroad.scenario.traffic_sign import TrafficSignElement
 
 from crmapconverter.opendrive.opendriveparser.elements.opendrive import OpenDrive
 
@@ -38,6 +39,7 @@ class Network:
         self._link_index = None
         self._traffic_lights = []
         self._traffic_signs = []
+        self._stop_lines = []
         self._geo_ref = None
 
     # def __eq__(self, other):
@@ -53,7 +55,6 @@ class Network:
 
         self._link_index = LinkIndex()
         self._link_index.create_from_opendrive(opendrive)
-
         try:
             self._geo_ref = opendrive.header.geo_reference
         except TypeError:
@@ -61,27 +62,27 @@ class Network:
 
         # Convert all parts of a road to parametric lanes (planes)
         for road in opendrive.roads:
+            # for signal in road.signals:
             road.planView.precalculate()
-
             # The reference border is the base line for the whole road
             reference_border = OpenDriveConverter.create_reference_border(
                 road.planView, road.lanes.laneOffsets
             )
-
             # A lane section is the smallest part that can be converted at once
             for lane_section in road.lanes.lane_sections:
 
                 parametric_lane_groups = OpenDriveConverter.lane_section_to_parametric_lanes(
                     lane_section, reference_border
                 )
+
                 # parametric_lane_groups is a list of ParametricLaneGroup()
                 # ParametricLaneGroup() contains a list of ParametricLane() s
-
                 self._planes.extend(parametric_lane_groups)
 
-            traffic_lights, traffic_signs = get_traffic_signals(road)
+            traffic_lights, traffic_signs, stop_lines = get_traffic_signals(road)
             self._traffic_lights.extend(traffic_lights)
             self._traffic_signs.extend(traffic_signs)
+            self._stop_lines.extend(stop_lines)
 
     def export_lanelet_network(
         self, filter_types: list = None
@@ -97,16 +98,13 @@ class Network:
 
         # Convert groups to lanelets
         lanelet_network = ConversionLaneletNetwork()
-
         for parametric_lane in self._planes:
             if filter_types is not None and parametric_lane.type not in filter_types:
                 continue
 
             lanelet = parametric_lane.to_lanelet()
-
             lanelet.predecessor = self._link_index.get_predecessors(parametric_lane.id_)
             lanelet.successor = self._link_index.get_successors(parametric_lane.id_)
-
             lanelet_network.add_lanelet(lanelet)
 
         # prune because some
@@ -169,7 +167,6 @@ class Network:
         )
 
         lanelet_network = scenario.lanelet_network
-
         for traffic_light in self._traffic_lights:
 
             distance = []
@@ -192,10 +189,22 @@ class Network:
                 pos_2 = np.array(lanelet.center_vertices[0][int(n/2)], lanelet.center_vertices[1][int(n/2)])
                 dist = np.linalg.norm(pos_1 - pos_2)
                 distance.append(dist)
-
             id_for_adding = lanelet_network.lanelets[distance.index(min(distance))].lanelet_id
             lanelet_network.add_traffic_sign(traffic_sign, {id_for_adding})
 
+        # Adding stop lines to lanelets
+        for stop_line in self._stop_lines:
+            distance = []
+            for lanelet in lanelet_network.lanelets:
+                pos_1 = stop_line.start
+                n = len(lanelet.center_vertices[0])
+                pos_2 = np.array(lanelet.center_vertices[0][int(n / 2)], lanelet.center_vertices[1][int(n / 2)])
+                dist = np.linalg.norm(pos_1 - pos_2)
+                distance.append(dist)
+
+            print(distance.index(min(distance)))
+            id_for_adding = lanelet_network.lanelets[distance.index(min(distance))].lanelet_id
+            lanelet_network.lanelets[distance.index(min(distance))].stop_line = stop_line
         return scenario
 
 

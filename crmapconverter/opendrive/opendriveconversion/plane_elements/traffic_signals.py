@@ -11,7 +11,7 @@ from crmapconverter.opendrive.opendriveparser.elements.road import Road
 
 from commonroad.scenario.traffic_sign import TrafficSign, TrafficLight, TrafficSignElement, TrafficSignIDZamunda, \
     TrafficSignIDGermany, TrafficSignIDUsa, TrafficSignIDChina, TrafficSignIDSpain, TrafficSignIDRussia
-
+from commonroad.scenario.lanelet import StopLine, LineMarking
 
 def extract_traffic_element_id(signal_type: str, singal_subtype: str, traffic_sign_enum: enum) \
         -> Union[TrafficSignIDZamunda, TrafficSignIDGermany, TrafficSignIDUsa, TrafficSignIDChina,
@@ -32,14 +32,14 @@ def get_traffic_signals(road: Road):
 
     traffic_signs = []
     traffic_lights = []
+    stop_lines = []
 
     for signal in road.signals:
-
         position, tangent = road.planView.calc(signal.s)
         position = np.array([position[0] + signal.t * np.cos(tangent + np.pi/2),
                              position[1] + signal.t * np.sin(tangent + np.pi/2)])
-
         if signal.dynamic == 'no':
+
             if signal.value == '-1' or 'none':
                 additional_values = []
             else:
@@ -58,6 +58,8 @@ def get_traffic_signals(road: Road):
                 element_id = extract_traffic_element_id(signal.type, str(signal.subtype), TrafficSignIDRussia)
             else:
                 if signal.type == '294' or signal.type == "1000003" or signal.type == "1000004":
+                    stop_line = StopLine(position, position, LineMarking.SOLID)
+                    stop_lines.append(stop_line)
                     continue  # stop line
                 element_id = extract_traffic_element_id(signal.type, str(signal.subtype), TrafficSignIDZamunda)
             traffic_sign_element = TrafficSignElement(
@@ -76,14 +78,12 @@ def get_traffic_signals(road: Road):
             traffic_signs.append(traffic_sign)
 
         elif signal.dynamic == 'yes':
-
-            # the three listed here are hard to interpret in commonroad.
+#           # the three listed here are hard to interpret in commonroad.
             # we ignore such signals in order not cause trouble in traffic simulation
             if signal.type != ("1000002" or "1000007" or "1000013"):
-
                 traffic_light = TrafficLight(traffic_light_id=signal.id + 2000, cycle=[], position=position)
                 traffic_lights.append(traffic_light)
             else:
                 continue
 
-    return traffic_lights, traffic_signs
+    return traffic_lights, traffic_signs, stop_lines
