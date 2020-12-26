@@ -40,6 +40,9 @@ class ParametricLaneGroup:
         self.inner_neighbour = inner_neighbour
         self.inner_neighbour_same_direction = inner_neighbour_same_direction
         self.outer_neighbour = outer_neighbour
+        self.traffic_lights = []
+        self.traffic_signs = []
+        self.stop_lines = []
 
         if parametric_lanes is not None:
             if isinstance(parametric_lanes, list):

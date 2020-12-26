@@ -75,6 +75,7 @@ def get_traffic_signals(road: Road):
                 position=position,
                 virtual=False
             )
+
             traffic_signs.append(traffic_sign)
 
         elif signal.dynamic == 'yes':
