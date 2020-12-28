@@ -255,6 +255,7 @@ class ConversionLaneletNetwork(LaneletNetwork):
                 )
                 for pair in possible_concat_lanes
             ]
+
             replacement_ids.update(
                 self._concatenate_lanelet_pairs_group(possible_concat_lanes)
             )
@@ -277,7 +278,9 @@ class ConversionLaneletNetwork(LaneletNetwork):
                 continue
             lanelet_1 = self.find_lanelet_by_id(pair[0])
             lanelet_2 = self.find_lanelet_by_id(pair[1])
+
             lanelet_1.concatenate(lanelet_2)
+
 
             self.remove_lanelet(pair[1])
 

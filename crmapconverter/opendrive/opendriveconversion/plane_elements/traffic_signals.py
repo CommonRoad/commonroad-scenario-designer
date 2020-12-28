@@ -58,6 +58,7 @@ def get_traffic_signals(road: Road):
                 element_id = extract_traffic_element_id(signal.type, str(signal.subtype), TrafficSignIDRussia)
             else:
                 if signal.type == '294' or signal.type == "1000003" or signal.type == "1000004":
+                    # TODO: fix stopline position, currently default position added twice
                     stop_line = StopLine(position, position, LineMarking.SOLID)
                     stop_lines.append(stop_line)
                     continue  # stop line

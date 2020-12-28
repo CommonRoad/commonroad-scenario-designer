@@ -246,7 +246,6 @@ class ConversionLanelet(Lanelet):
           # lanelet_id: str:  (Default value = -1)
           extend_plane_group: bool:  (Default value = True)
         """
-
         # check connectedness
         if np.isclose(self.left_vertices[-1], lanelet_conc.left_vertices[0]).all():
             idx = 1
@@ -267,6 +266,16 @@ class ConversionLanelet(Lanelet):
                 lanelet_conc.parametric_lane_group.parametric_lanes
             )
         self.successor = lanelet_conc.successor.copy()
+
+        # Adding traffic light and signal references
+        if lanelet_conc.traffic_lights is not None:
+            for traffic_light in lanelet_conc.traffic_lights:
+                if traffic_light not in self.traffic_lights:
+                    self.add_traffic_light_to_lanelet(traffic_light)
+        if lanelet_conc.traffic_signs is not None:
+            for traffic_sign in lanelet_conc.traffic_signs:
+                if traffic_sign not in self.traffic_signs:
+                    self.add_traffic_sign_to_lanelet(traffic_sign)
 
     def calc_width_at_end(self) -> float:
         """Calc width of lanelet at its end.
