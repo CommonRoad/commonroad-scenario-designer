@@ -9,7 +9,7 @@ before_script:
     - git config --global url."https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.lrz.de/".insteadOf "git@gitlab.lrz.de:"
     # # Install commonroad-io & sumo-interface manually as installing though pip does not respect the JOB_TOKEN
     - git clone --branch develop git@gitlab.lrz.de:cps/commonroad-io.git $HOME/commonroad-io
-    - git clone --branch 3-convert-pedestrains git@gitlab.lrz.de:cps/sumo-interface.git $HOME/sumo-interface
+    - git clone --branch develop git@gitlab.lrz.de:cps/sumo-interface.git $HOME/sumo-interface
     - source .env
 
 python36:
