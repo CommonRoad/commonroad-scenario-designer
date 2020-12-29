@@ -25,9 +25,10 @@ from crmapconverter.io.scenario_designer.converter_modules.osm_interface import 
 from crmapconverter.io.scenario_designer.converter_modules.opendrive_interface import (
     OpenDRIVEInterface)
 from crmapconverter.io.scenario_designer.gui_settings import GUISettings
-from crmapconverter.io.scenario_designer.sumo_gui_modules.sumo_settings import SUMOSettings
-from crmapconverter.io.scenario_designer.sumo_gui_modules.gui_sumo_simulation import SUMOSimulation
 from crmapconverter.io.scenario_designer.sumo_gui_modules.gui_sumo_simulation import SUMO_AVAILABLE
+if SUMO_AVAILABLE:
+    from crmapconverter.io.scenario_designer.sumo_gui_modules.sumo_settings import SUMOSettings
+    from crmapconverter.io.scenario_designer.sumo_gui_modules.gui_sumo_simulation import SUMOSimulation
 from crmapconverter.io.scenario_designer.gui_viewer import (
     LaneletList, IntersectionList, find_intersection_by_id, AnimatedViewer)
 from crmapconverter.io.scenario_designer import config
@@ -59,18 +60,22 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.toolBox = None
         self.console = None
         self.textBrowser = None
-        self.sumobox = SUMOSimulation()
+        if SUMO_AVAILABLE:
+            self.sumobox = SUMOSimulation()
+        else:
+            self.sumobox = None
         self.viewer_dock = None
         self.lanelet_list_dock = None
         self.intersection_list_dock = None
         self.sumo_settings = None
         self.gui_settings = None
 
-        # when the current scenario was simulated, load it in the gui
-        self.sumobox.simulated_scenario.subscribe(self.open_scenario)
-        # when the maximum simulation steps change, update the slider
-        self.sumobox.config.subscribe(
-            lambda config: self.update_max_step(config.simulation_steps))
+        if SUMO_AVAILABLE:
+            # when the current scenario was simulated, load it in the gui
+            self.sumobox.simulated_scenario.subscribe(self.open_scenario)
+            # when the maximum simulation steps change, update the slider
+            self.sumobox.config.subscribe(
+                lambda config: self.update_max_step(config.simulation_steps))
 
         # build and connect GUI
         self.create_file_actions()
@@ -582,8 +587,11 @@ class MWindow(QMainWindow, Ui_mainWindow):
             self.textBrowser.append("loading aborted")
             return
         self.filename = filename
-        self.crviewer.open_scenario(new_scenario, self.sumobox.config)
-        self.sumobox.scenario = self.crviewer.current_scenario
+        if SUMO_AVAILABLE:
+            self.crviewer.open_scenario(new_scenario, self.sumobox.config)
+            self.sumobox.scenario = self.crviewer.current_scenario
+        else:
+            self.crviewer.open_scenario(new_scenario)
         self.lanelet_list = LaneletList(self.update_view, self)
         self.intersection_list = IntersectionList(self.update_view, self)
         self.update_view()
