@@ -1,13 +1,13 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<commonRoad timeStepSize="0.1" commonRoadVersion="2020a" author="" affiliation="" source="OpenDRIVE 2 Lanelet Converter" benchmarkID="ZAM_OpenDrive-123" date="2020-12-19">
+<commonRoad timeStepSize="0.1" commonRoadVersion="2020a" author="commonroads team" affiliation="TUM" source="OpenDRIVE 2 Lanelet Converter" benchmarkID="ZAM_OpenDrive-123" date="2020-12-29">
   <location>
     <geoNameId>-999</geoNameId>
     <gpsLatitude>999</gpsLatitude>
     <gpsLongitude>999</gpsLongitude>
   </location>
   <scenarioTags>
-    <highway/>
     <urban/>
+    <highway/>
   </scenarioTags>
   <lanelet id="100">
     <leftBound>
@@ -14341,6 +14341,10 @@
     <predecessor ref="110"/>
     <successor ref="111"/>
     <laneletType>driveWay</laneletType>
+    <trafficSignRef ref="731204674982"/>
+    <trafficLightRef ref="2211"/>
+    <trafficLightRef ref="2213"/>
+    <trafficLightRef ref="2267"/>
   </lanelet>
   <lanelet id="112">
     <leftBound>
@@ -14855,6 +14859,10 @@
     <predecessor ref="105"/>
     <successor ref="113"/>
     <laneletType>driveWay</laneletType>
+    <trafficSignRef ref="741254445232"/>
+    <trafficLightRef ref="2217"/>
+    <trafficLightRef ref="2218"/>
+    <trafficLightRef ref="2268"/>
   </lanelet>
   <lanelet id="114">
     <leftBound>
@@ -18165,6 +18173,9 @@
     <predecessor ref="107"/>
     <successor ref="120"/>
     <laneletType>driveWay</laneletType>
+    <trafficSignRef ref="811484415023"/>
+    <trafficLightRef ref="2270"/>
+    <trafficLightRef ref="2207"/>
   </lanelet>
   <lanelet id="120">
     <leftBound>
@@ -34696,6 +34707,9 @@
     <predecessor ref="115"/>
     <successor ref="102"/>
     <laneletType>driveWay</laneletType>
+    <trafficSignRef ref="871564665197"/>
+    <trafficLightRef ref="2204"/>
+    <trafficLightRef ref="2269"/>
   </lanelet>
   <lanelet id="113">
     <leftBound>
@@ -36628,20 +36642,6 @@
     <predecessor ref="123"/>
     <successor ref="115"/>
     <laneletType>driveWay</laneletType>
-    <trafficSignRef ref="741254445232"/>
-    <trafficSignRef ref="871564665197"/>
-    <trafficSignRef ref="731204674982"/>
-    <trafficSignRef ref="811484415023"/>
-    <trafficLightRef ref="2211"/>
-    <trafficLightRef ref="2213"/>
-    <trafficLightRef ref="2217"/>
-    <trafficLightRef ref="2218"/>
-    <trafficLightRef ref="2204"/>
-    <trafficLightRef ref="2267"/>
-    <trafficLightRef ref="2268"/>
-    <trafficLightRef ref="2269"/>
-    <trafficLightRef ref="2270"/>
-    <trafficLightRef ref="2207"/>
   </lanelet>
   <lanelet id="108">
     <leftBound>
