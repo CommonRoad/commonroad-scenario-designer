@@ -37,8 +37,6 @@ class Network:
     def __init__(self):
         self._planes = []
         self._link_index = None
-        self._traffic_lights = []
-        self._traffic_signs = []
         self._stop_lines = []
         self._geo_ref = None
 
