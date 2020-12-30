@@ -53,7 +53,6 @@ def convert_opendrive(opendrive: OpenDrive) -> Scenario:
     Returns:
       A commonroad scenario with the map represented by lanelets.
     """
-    print("Status", "Sign ID", "Sign Type")
     road_network = Network()
     road_network.load_opendrive(opendrive)
 
@@ -92,8 +91,8 @@ def main():
         writer = CommonRoadFileWriter(
             scenario=scenario,
             planning_problem_set=PlanningProblemSet(),
-            author="commonroads team",
-            affiliation="TUM",
+            author="",
+            affiliation="",
             source="OpenDRIVE 2 Lanelet Converter",
             tags={Tag.URBAN, Tag.HIGHWAY},
         )
