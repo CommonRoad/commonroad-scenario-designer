@@ -60,7 +60,6 @@ class Network:
 
         # Convert all parts of a road to parametric lanes (planes)
         for road in opendrive.roads:
-            # for signal in road.signals:
             road.planView.precalculate()
             # The reference border is the base line for the whole road
             reference_border = OpenDriveConverter.create_reference_border(
@@ -101,6 +100,7 @@ class Network:
         lanelet_network = ConversionLaneletNetwork()
         traffic_sign_to_lanelet_mapper = defaultdict(list)
         traffic_light_to_lanelet_mapper = defaultdict(list)
+        # stopline_to_lanelet_mapper = defaultdict(list)
         for parametric_lane in self._planes:
 
             if filter_types is not None and parametric_lane.type not in filter_types:
@@ -120,18 +120,25 @@ class Network:
             if bool(parametric_lane.traffic_lights):
                 for traffic_light in parametric_lane.traffic_lights:
                     traffic_light_to_lanelet_mapper[traffic_light].append(lanelet.lanelet_id)
-
+            # TODO: Map stoplines to respective lanelet
+            # if bool(parametric_lane.stop_lines):
+            #   for stopline in parametric_lane.stop_lines:
+            #       stopline_to_lanelet_mapper[stopline].append(lanelet.lanelet_id)
         # prune because some
         # successorIds get encoded with a non existing successorID
         # of the lane link
         lanelet_network.prune_network()
 
         # Adding traffic signs and lights to lanelets
-        # TODO: Add stoplines to lanelets
+
         for traffic_light in traffic_light_to_lanelet_mapper:
             lanelet_network.add_traffic_light(traffic_light, traffic_light_to_lanelet_mapper[traffic_light])
         for traffic_sign in traffic_sign_to_lanelet_mapper:
             lanelet_network.add_traffic_sign(traffic_sign, traffic_sign_to_lanelet_mapper[traffic_sign])
+        # TODO: Add stoplines to lanelets
+        # for stopline, lanelets in stopline_to_lanelet_mapper.items():
+        #   for lanelet in lanelets:
+        #       lanelet_network.find_lanelet_by_id(lanelet).stop_line = stopline
 
         # concatenate possible lanelets with their successors
         lanelet_network.concatenate_possible_lanelets()

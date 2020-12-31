@@ -57,9 +57,16 @@ def get_traffic_signals(road: Road):
             elif signal.country == 'RUS':
                 element_id = extract_traffic_element_id(signal.type, str(signal.subtype), TrafficSignIDRussia)
             else:
-                if signal.type == '294' or signal.type == "1000003" or signal.type == "1000004":
-                    # TODO: fix stopline position, currently default position added twice
-                    stop_line = StopLine(position, position, LineMarking.SOLID)
+                if signal.type == "1000003" or signal.type == "1000004":
+                    continue
+
+                # Stop lines have a signal type of 294 and are handled differently in the commonroad format
+                if signal.type == '294':
+
+                    # Creating stop line object
+                    position_1, position_2 = calculate_stop_line_position(road.lanes.lane_sections, signal,
+                                                                          position, tangent)
+                    stop_line = StopLine(position_1, position_2, LineMarking.SOLID)
                     stop_lines.append(stop_line)
                     continue  # stop line
                 element_id = extract_traffic_element_id(signal.type, str(signal.subtype), TrafficSignIDZamunda)
@@ -89,3 +96,22 @@ def get_traffic_signals(road: Road):
                 continue
 
     return traffic_lights, traffic_signs, stop_lines
+
+def calculate_stop_line_position(lane_sections, signal, position, tangent):
+    total_width = 0
+    for lane_section in lane_sections:
+        for lane in lane_section.allLanes:
+            # Stop line width only depends on drivable lanes
+            if lane.id != 0 and lane.type in ["driving", "onRamp", "offRamp", "exit", "entry"]:
+                for width in lane.widths:
+                    # Calculating total width of stop line
+                    coefficients = width.polynomial_coefficients
+                    lane_width = coefficients[0] + coefficients[1] * signal.s + coefficients[2] * signal.s ** 2 + \
+                                 coefficients[3] * signal.s ** 2
+
+                    total_width += lane_width
+    position_1 = position
+    # Calculating second point of stop line using trigonometry
+    position_2 = np.array([position[0] - total_width * np.cos(tangent + np.pi / 2),
+                           position[1] - total_width * np.sin(tangent + np.pi / 2)])
+    return position_1, position_2
