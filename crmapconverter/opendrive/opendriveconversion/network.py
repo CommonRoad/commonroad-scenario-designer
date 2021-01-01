@@ -116,14 +116,14 @@ class Network:
             # Associating corresponding traffic sign, light and stopline ids with respective lanelets
             if bool(parametric_lane.traffic_signs):
                 for traffic_sign in parametric_lane.traffic_signs:
-                    traffic_sign_to_lanelet_mapper[traffic_sign].append(lanelet.lanelet_id)
+                    traffic_sign_to_lanelet_mapper[traffic_sign].extend(lanelet.predecessor)
             if bool(parametric_lane.traffic_lights):
                 for traffic_light in parametric_lane.traffic_lights:
-                    traffic_light_to_lanelet_mapper[traffic_light].append(lanelet.lanelet_id)
+                    traffic_light_to_lanelet_mapper[traffic_light].extend(lanelet.predecessor)
             # TODO: Map stoplines to respective lanelet
             # if bool(parametric_lane.stop_lines):
             #   for stopline in parametric_lane.stop_lines:
-            #       stopline_to_lanelet_mapper[stopline].append(lanelet.lanelet_id)
+            #       stopline_to_lanelet_mapper[stopline].append(lanelet.predecessor)
         # prune because some
         # successorIds get encoded with a non existing successorID
         # of the lane link

@@ -87,7 +87,7 @@ def get_traffic_signals(road: Road):
             traffic_signs.append(traffic_sign)
 
         elif signal.dynamic == 'yes':
-#           # the three listed here are hard to interpret in commonroad.
+            # the three listed here are hard to interpret in commonroad.
             # we ignore such signals in order not cause trouble in traffic simulation
             if signal.type != ("1000002" or "1000007" or "1000013"):
                 traffic_light = TrafficLight(traffic_light_id=signal.id + 2000, cycle=[], position=position)
