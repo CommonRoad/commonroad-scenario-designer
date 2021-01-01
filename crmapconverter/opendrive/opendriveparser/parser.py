@@ -35,7 +35,8 @@ from crmapconverter.opendrive.opendriveparser.elements.junction import (
     LaneLink as JunctionConnectionLaneLink,
 )
 from crmapconverter.opendrive.opendriveparser.elements.roadSignal import (
-    Signal as RoadSignal
+    Signal as RoadSignal,
+    SignalReference,
 )
 
 __author__ = "Benjamin Orthen, Stefan Urban"
@@ -449,6 +450,15 @@ def parse_opendrive_road_signal(newRoad, road_signal):
     newRoad.addSignal(newSignal)
 
 
+def parse_opendrive_road_signal_reference(newRoad, road_signal_reference):
+    new_signal_reference = SignalReference()
+    new_signal_reference.id = road_signal_reference.get("id")
+    new_signal_reference.s = road_signal_reference.get("s")  # position along the reference curve
+    new_signal_reference.t = road_signal_reference.get("t")  # position away from the reference curve
+    new_signal_reference.orientation = road_signal_reference.get("orientation")
+
+    newRoad.addSignalReference(new_signal_reference)
+
 def parse_opendrive_road(opendrive, road):
     """
 
@@ -518,6 +528,10 @@ def parse_opendrive_road(opendrive, road):
         for road_signal in road.find("signals").findall("signal"):
             if road_signal is not None:
                 parse_opendrive_road_signal(newRoad, road_signal)
+        for road_signal_reference in road.find("signals").findall("signalReference"):
+            # Parsing signal reference element
+            parse_opendrive_road_signal_reference(newRoad, road_signal_reference)
+            continue
     else:
         pass
 
