@@ -29,7 +29,7 @@ from crmapconverter.osm2cr.converter_modules.utility.geometry import (
 )
 
 NODE_DISTANCE_TOLERANCE = 0.01  # this is in meters
-PRIORITY_SIGNS = [TrafficSignIDGermany.RIGHT_BEFORE_LEFT, TrafficSignIDGermany.PRIORITY, TrafficSignIDGermany.RIGHT_OF_WAY]
+PRIORITY_SIGNS = [TrafficSignIDGermany.WARNING_RIGHT_BEFORE_LEFT, TrafficSignIDGermany.PRIORITY, TrafficSignIDGermany.RIGHT_OF_WAY]
 
 ADJACENT_WAY_DISTANCE_TOLERANCE = 0.05
 
