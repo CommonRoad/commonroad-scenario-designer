@@ -1773,16 +1773,30 @@ class Graph:
         :param lat_lng: np.array including lat_lng
         :return: GraphEdge which is closest to the given lat_lng coordinates
         """
+        # TODO clean up and decide which approach works best
         given_point = np.asarray(lat_lng)
         edges = list(self.edges)
 
         # edge coordinates need to be converted to lat lng before comparsion
-        points = np.asarray(list(map(lambda x: geometry.cartesian_to_lon_lat(x.get_waypoints()[0], self.center_point), edges)))
+        points = list()
+        points_to_edge = dict()
+        for edge in edges:
+            for waypoint in edge.get_waypoints():
+                cartesian_waypoint = geometry.cartesian_to_lon_lat(waypoint, self.center_point)
+                points.append(cartesian_waypoint)
+                points_to_edge[tuple(cartesian_waypoint)] = edge
+
+        points = np.asarray(points)
+        #points = np.asarray(list(map(lambda x: geometry.cartesian_to_lon_lat(x.get_waypoints()[0], self.center_point), edges)))
 
         # https://codereview.stackexchange.com/a/28210
         dist_2 = np.sum((points - given_point)**2, axis=1)
         closest_edge_index = np.argmin(dist_2)
-        return edges[closest_edge_index]
+
+        found_point = points[closest_edge_index]
+        return points_to_edge[tuple(found_point)]
+        #return edges[closest_edge_index]
+
 
 
 class SublayeredGraph(Graph):
