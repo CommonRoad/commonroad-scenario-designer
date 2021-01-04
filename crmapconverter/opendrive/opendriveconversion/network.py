@@ -14,7 +14,8 @@ from crmapconverter.opendrive.opendriveconversion.utils import encode_road_secti
 from crmapconverter.opendrive.opendriveconversion.conversion_lanelet_network import ConversionLaneletNetwork
 from crmapconverter.opendrive.opendriveconversion.converter import OpenDriveConverter
 
-from crmapconverter.opendrive.opendriveconversion.plane_elements.traffic_signals import get_traffic_signals
+from crmapconverter.opendrive.opendriveconversion.plane_elements.traffic_signals import get_traffic_signals, \
+    get_traffic_signal_references
 from crmapconverter.opendrive.opendriveconversion.plane_elements.geo_reference import get_geo_reference
 
 __author__ = "Benjamin Orthen, Stefan Urban, Sebastian Maierhofer"
@@ -37,8 +38,8 @@ class Network:
     def __init__(self):
         self._planes = []
         self._link_index = None
-        self._stop_lines = []
         self._geo_ref = None
+        self._signal_id_mapper = dict()
 
     # def __eq__(self, other):
     # return self.__dict__ == other.__dict__
@@ -66,10 +67,12 @@ class Network:
                 road.planView, road.lanes.laneOffsets
             )
             # Extracting signals, signs and stop lines from each road
-            traffic_lights, traffic_signs, stop_lines = get_traffic_signals(road)
+            traffic_lights, traffic_signs, stop_lines, old_signal_id_to_new_id_mapper = get_traffic_signals(road)
+            self._signal_id_mapper.update(old_signal_id_to_new_id_mapper)
+
+            signal_references = get_traffic_signal_references(road)
             # A lane section is the smallest part that can be converted at once
             for lane_section in road.lanes.lane_sections:
-
                 parametric_lane_groups = OpenDriveConverter.lane_section_to_parametric_lanes(
                     lane_section, reference_border
                 )
@@ -81,11 +84,12 @@ class Network:
                     parametric_lane.traffic_lights.extend(traffic_lights)
                     parametric_lane.traffic_signs.extend(traffic_signs)
                     parametric_lane.stop_lines.extend(stop_lines)
+                    parametric_lane.signal_references.extend(signal_references)
 
                 self._planes.extend(parametric_lane_groups)
 
     def export_lanelet_network(
-        self, filter_types: list = None
+            self, filter_types: list = None
     ) -> "ConversionLaneletNetwork":
         """Export network as lanelet network.
 
@@ -100,7 +104,7 @@ class Network:
         lanelet_network = ConversionLaneletNetwork()
         traffic_sign_to_lanelet_mapper = defaultdict(list)
         traffic_light_to_lanelet_mapper = defaultdict(list)
-        # stopline_to_lanelet_mapper = defaultdict(list)
+        stopline_to_lanelet_mapper = defaultdict(list)
         for parametric_lane in self._planes:
 
             if filter_types is not None and parametric_lane.type not in filter_types:
@@ -121,9 +125,9 @@ class Network:
                 for traffic_light in parametric_lane.traffic_lights:
                     traffic_light_to_lanelet_mapper[traffic_light].extend(lanelet.predecessor)
             # TODO: Map stoplines to respective lanelet
-            # if bool(parametric_lane.stop_lines):
-            #   for stopline in parametric_lane.stop_lines:
-            #       stopline_to_lanelet_mapper[stopline].append(lanelet.predecessor)
+            if bool(parametric_lane.stop_lines):
+                for stopline in parametric_lane.stop_lines:
+                    stopline_to_lanelet_mapper[stopline].extend(lanelet.predecessor)
         # prune because some
         # successorIds get encoded with a non existing successorID
         # of the lane link
@@ -136,9 +140,9 @@ class Network:
         for traffic_sign in traffic_sign_to_lanelet_mapper:
             lanelet_network.add_traffic_sign(traffic_sign, traffic_sign_to_lanelet_mapper[traffic_sign])
         # TODO: Add stoplines to lanelets
-        # for stopline, lanelets in stopline_to_lanelet_mapper.items():
-        #   for lanelet in lanelets:
-        #       lanelet_network.find_lanelet_by_id(lanelet).stop_line = stopline
+        for stopline, lanelets in stopline_to_lanelet_mapper.items():
+            for lanelet in lanelets:
+                lanelet_network.find_lanelet_by_id(lanelet).stop_line = stopline
 
         # concatenate possible lanelets with their successors
         lanelet_network.concatenate_possible_lanelets()
@@ -153,7 +157,7 @@ class Network:
         return lanelet_network
 
     def export_commonroad_scenario(
-        self, dt: float = 0.1, benchmark_id=None, filter_types=None
+            self, dt: float = 0.1, benchmark_id=None, filter_types=None
     ):
         """Export a full CommonRoad scenario
 
@@ -236,8 +240,8 @@ class LinkIndex:
                     # Last lane section! > Next road in first lane section
                     # Try to get next road
                     elif (
-                        road.link.successor is not None
-                        and road.link.successor.elementType != "junction"
+                            road.link.successor is not None
+                            and road.link.successor.elementType != "junction"
                     ):
 
                         next_road = opendrive.getRoad(road.link.successor.element_id)
@@ -269,8 +273,8 @@ class LinkIndex:
                     # First lane section! > Previous road
                     # Try to get previous road
                     elif (
-                        road.link.predecessor is not None
-                        and road.link.predecessor.elementType != "junction"
+                            road.link.predecessor is not None
+                            and road.link.predecessor.elementType != "junction"
                     ):
 
                         prevRoad = opendrive.getRoad(road.link.predecessor.element_id)

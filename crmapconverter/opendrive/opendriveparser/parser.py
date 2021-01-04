@@ -530,8 +530,8 @@ def parse_opendrive_road(opendrive, road):
                 parse_opendrive_road_signal(newRoad, road_signal)
         for road_signal_reference in road.find("signals").findall("signalReference"):
             # Parsing signal reference element
-            parse_opendrive_road_signal_reference(newRoad, road_signal_reference)
-            continue
+            if road_signal_reference is not None:
+                parse_opendrive_road_signal_reference(newRoad, road_signal_reference)
     else:
         pass
 

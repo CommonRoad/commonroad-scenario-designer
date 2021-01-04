@@ -43,6 +43,7 @@ class ParametricLaneGroup:
         self.traffic_lights = []
         self.traffic_signs = []
         self.stop_lines = []
+        self.signal_references = []
 
         if parametric_lanes is not None:
             if isinstance(parametric_lanes, list):
