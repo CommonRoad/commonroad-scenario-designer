@@ -15,7 +15,7 @@ from crmapconverter.osm2cr.converter_modules.utility.custom_types import (
     Road_info,
     Assumption_info,
 )
-
+import math
 
 def graph_search(center_node: "GraphNode") -> Tuple[Set["GraphNode"], Set["GraphEdge"]]:
     """
@@ -302,13 +302,13 @@ class GraphNode:
                 )
 
     def add_traffic_sign(self, sign: "GraphTrafficSign"):
+        # this method is never called
         for edge in self.edges:
             for lane in edge.lanes:
                 # add to forward lanes
                 # TODO determine in which direction
                 if lane.forward:
                     lane.add_traffic_sign(sign)
-
 
 
 
@@ -714,11 +714,31 @@ class GraphEdge:
         return np.array([p.get_array() for p in self.waypoints])
 
     def add_traffic_sign(self, sign: "GraphTrafficSign"):
+
+        #TODO still testing
+
         self.traffic_signs.append(sign)
+        #print(sign.sign)
+        #print(sign.direction)
+
+        # signs are only added to forward lanes if no direction is available
+        forward = True
+        if sign.direction is not None:
+            sign_direction = sign.direction
+            edge_orientation = 90 - math.degrees(self.get_orientation(self.node1))
+            if edge_orientation < 0.0:
+                edge_orientation+= 360.0
+            #print("edge orientation: {}".format(edge_orientation))
+            if abs(sign_direction-edge_orientation) > 180:
+                forward = False
+
         # add to lanes
         for lane in self.lanes:
             # add to forward lanes
-            if lane.forward:
+            if lane.forward and forward:
+                lane.add_traffic_sign(sign)
+            # add to backward lanes
+            elif (not lane.forward) and (not forward):
                 lane.add_traffic_sign(sign)
 
     def add_traffic_light(self, light: "GraphTrafficLight", forward):
@@ -730,15 +750,16 @@ class GraphEdge:
 
 class GraphTrafficSign:
     def __init__(self, sign: Dict,
-                 node: GraphNode = None, edges: List = []):
+                 node: GraphNode = None, edges: List = [], direction: float = None):
         self.sign = sign
         self.node = node
         self.edges = edges
+        self.direction = direction
         self.id = idgenerator.get_id()
         #print(self.sign)
 
     def to_traffic_sign_cr(self):
-        print(self.sign)
+        #print(self.sign)
         elements = []
         position = None
 
@@ -771,7 +792,7 @@ class GraphTrafficSign:
         # TODO Maybe improve this
         first_occurrence = set()
 
-        print(elements)
+        #print(elements)
         return TrafficSign(
             traffic_sign_id=self.id,
             traffic_sign_elements=elements,
@@ -1747,7 +1768,7 @@ class Graph:
 
     def find_closest_edge_by_lat_lng(self, lat_lng) -> GraphNode:
         """
-        finds the closest GraphEdge in Graph to a given lat_lng
+        finds the closest GraphEdge in Graph to a given lat_lng tuple/list
 
         :param lat_lng: np.array including lat_lng
         :return: GraphEdge which is closest to the given lat_lng coordinates
