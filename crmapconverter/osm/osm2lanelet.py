@@ -120,7 +120,7 @@ class OSM2LConverter:
         self.first_left_pts, self.last_left_pts = defaultdict(list), defaultdict(list)
         self.first_right_pts, self.last_right_pts = defaultdict(list), defaultdict(list)
 
-        scenario = Scenario(dt=0.1, benchmark_id="none")
+        scenario = Scenario(dt=0.1, benchmark_id="none", scenario_id="none")
         self.lanelet_network = ConversionLaneletNetwork()
 
         for way_rel in osm.way_relations.values():
