@@ -105,6 +105,7 @@ class Network:
         traffic_sign_to_lanelet_mapper = defaultdict(list)
         traffic_light_to_lanelet_mapper = defaultdict(list)
         stopline_to_lanelet_mapper = defaultdict(list)
+        signal_reference_to_lanelet_id_mapper = defaultdict(list)
         for parametric_lane in self._planes:
 
             if filter_types is not None and parametric_lane.type not in filter_types:
@@ -124,10 +125,15 @@ class Network:
             if bool(parametric_lane.traffic_lights):
                 for traffic_light in parametric_lane.traffic_lights:
                     traffic_light_to_lanelet_mapper[traffic_light].extend(lanelet.predecessor)
-            # TODO: Map stoplines to respective lanelet
             if bool(parametric_lane.stop_lines):
                 for stopline in parametric_lane.stop_lines:
                     stopline_to_lanelet_mapper[stopline].extend(lanelet.predecessor)
+
+            # Adding traffic data stored in signal references to the lanelet
+            if bool(parametric_lane.signal_references):
+                for signal_reference in parametric_lane.signal_references:
+                    signal_reference_to_lanelet_id_mapper[signal_reference].extend(lanelet.predecessor)
+
         # prune because some
         # successorIds get encoded with a non existing successorID
         # of the lane link
@@ -139,10 +145,19 @@ class Network:
             lanelet_network.add_traffic_light(traffic_light, traffic_light_to_lanelet_mapper[traffic_light])
         for traffic_sign in traffic_sign_to_lanelet_mapper:
             lanelet_network.add_traffic_sign(traffic_sign, traffic_sign_to_lanelet_mapper[traffic_sign])
-        # TODO: Add stoplines to lanelets
         for stopline, lanelets in stopline_to_lanelet_mapper.items():
             for lanelet in lanelets:
                 lanelet_network.find_lanelet_by_id(lanelet).stop_line = stopline
+
+        for signal_reference, lanelet_ids in signal_reference_to_lanelet_id_mapper.items():
+            updated_id = self._signal_id_mapper[signal_reference.id]
+            if updated_id[1] == "traffic light":
+                for lanelet_id in lanelet_ids:
+                    lanelet_network.find_lanelet_by_id(lanelet_id).add_traffic_light_to_lanelet(updated_id[0])
+            if updated_id[1] == "traffic sign":
+                for lanelet_id in lanelet_ids:
+                    lanelet_network.find_lanelet_by_id(lanelet_id).add_traffic_sign_to_lanelet(updated_id[0])
+            # TODO: Add stop lines that are stored in signal references
 
         # concatenate possible lanelets with their successors
         lanelet_network.concatenate_possible_lanelets()

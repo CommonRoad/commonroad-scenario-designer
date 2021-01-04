@@ -84,15 +84,17 @@ def get_traffic_signals(road: Road):
                                                                           position, tangent)
                     stop_line = StopLine(position_1, position_2, LineMarking.SOLID)
                     stop_lines.append(stop_line)
+                    old_signal_id_to_new_id_mapper[signal.id] = [stop_line, "stop line"]
+
                     continue  # stop line
                 element_id = extract_traffic_element_id(signal.type, str(signal.subtype), TrafficSignIDZamunda)
             traffic_sign_element = TrafficSignElement(
                 traffic_sign_element_id=element_id,
                 additional_values=additional_values
             )
-            old_signal_id_to_new_id_mapper[signal.id] = int(
+            old_signal_id_to_new_id_mapper[signal.id] = [int(
                 "".join([str(road.id), str(signal.id), str(abs(int(position[0]))),
-                         str(abs(int(position[1]))), str(abs(int(signal.s)))]))
+                         str(abs(int(position[1]))), str(abs(int(signal.s)))])), "traffic sign"]
 
             traffic_sign = TrafficSign(
                 traffic_sign_id=int("".join([str(road.id), str(signal.id), str(abs(int(position[0]))),
@@ -109,7 +111,7 @@ def get_traffic_signals(road: Road):
             # the three listed here are hard to interpret in commonroad.
             # we ignore such signals in order not cause trouble in traffic simulation
             if signal.type != ("1000002" or "1000007" or "1000013"):
-                old_signal_id_to_new_id_mapper[signal.id] = signal.id + 2000
+                old_signal_id_to_new_id_mapper[signal.id] = [signal.id + 2000, "traffic light"]
 
                 traffic_light = TrafficLight(traffic_light_id=signal.id + 2000, cycle=[], position=position)
 
