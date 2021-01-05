@@ -86,6 +86,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.linemarkingright = "no_marking"
         self.lanelet_pos_x = 0
         self.lanelet_pos_y = 0
+        self.backwards = False
 
         self.radcurve = 50
         self.widcurve = 20
@@ -98,6 +99,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.linemarkingleft_curve = "no_marking"
         self.curve_pos_x = 0
         self.curve_pos_y = 0
+        self.curve_direction = False
 
         # GUI attributes
         self.tool1 = None
@@ -189,27 +191,27 @@ class MWindow(QMainWindow, Ui_mainWindow):
     def click_straight(self, posX, posY):
         lanelet = mapcreator.create_straight(self, self.widfor, self.lenfor, self.vertfor,
                                              self.scenario.lanelet_network, self.scenario, self.pred, self.lanelettype,
-                                             self.roaduser, self.linemarkingleft, self.linemarkingright)
+                                             self.roaduser, self.linemarkingleft, self.linemarkingright, backwards=self.backwards)
         lanelet.translate_rotate(np.array([posX, posY]), self.rot_angle_straight)
 
-        self.crviewer.open_scenario(self.scenario, self.sumobox.config)
-        self.update_view()
-        self.update_to_new_scenario()
+        self.update_view(focus_on_network=True)
 
     def click_curve(self, turnright=True, curve_posX=0, curve_posY=0):
         if turnright:
             lanelet = mapcreator.create_curve(self, self.widcurve, self.radcurve, self.anglcurve, self.numcurve,
                                               self.scenario.lanelet_network, self.scenario, self.pred, self.curvetype,
-                                             self.roaduser_curve, self.linemarkingleft_curve, self.linemarkingright_curve)
+                                              self.roaduser_curve, self.linemarkingleft_curve, self.linemarkingright_curve)
+
+            #lanelet.translate_rotate(np.array([curve_posX, curve_posY]), -np.pi/2)
+
         else:
             lanelet = mapcreator.create_curve(self, self.widcurve, self.radcurve, -self.anglcurve, self.numcurve,
                                               self.scenario.lanelet_network, self.scenario, self.pred, self.curvetype,
                                              self.roaduser_curve, self.linemarkingleft_curve, self.linemarkingright_curve)
+            #lanelet.translate_rotate(np.array([curve_posX, curve_posY]), np.pi/2)
         lanelet.translate_rotate(np.array([curve_posX, curve_posY]), self.rot_angle_curve)
 
-        self.crviewer.open_scenario(self.scenario, self.sumobox.config)
-        self.update_view()
-        self.update_to_new_scenario()
+        self.update_view(focus_on_network=True)
 
     def fit_func(self):
         selected_lanelet = self.crviewer.selected_lanelet_use
@@ -217,9 +219,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
             predecessor = selected_lanelet[0]
             successor = self.scenario.lanelet_network.find_lanelet_by_id(self.latestid)
             successor = mapcreator.fit_to_predecessor(self, predecessor, successor)
-            self.crviewer.open_scenario(self.scenario, self.sumobox.config)
-            self.update_view()
-            self.update_to_new_scenario()
+            self.update_view(focus_on_network=True)
 
     def adjacent_left(self):
         selected_lanelet = self.crviewer.selected_lanelet_use
@@ -227,19 +227,19 @@ class MWindow(QMainWindow, Ui_mainWindow):
             current_lanelet = selected_lanelet[0]
             adjacent_lanelet = mapcreator.adjacent_lanelet_left(self, current_lanelet, self.scenario.lanelet_network,
                                                                 self.scenario, same_direction=True)
-            self.crviewer.open_scenario(self.scenario, self.sumobox.config)
-            self.update_view()
-            self.update_to_new_scenario()
+            self.update_view(focus_on_network=True)
 
     def adjacent_right(self):
         selected_lanelet = self.crviewer.selected_lanelet_use
         if selected_lanelet:
             current_lanelet = selected_lanelet[0]
+
+            """lanelet_type = current_lanelet.lanelet_type()
+            print(lanelet_type)"""
             adjacent_lanelet = mapcreator.adjacent_lanelet_right(self, current_lanelet, self.scenario.lanelet_network,
                                                                  self.scenario, same_direction=True)
-            self.crviewer.open_scenario(self.scenario, self.sumobox.config)
-            self.update_view()
-            self.update_to_new_scenario()
+            self.update_view(focus_on_network=True)
+
 
     def create_laneletsettings(self):
         self.lanelet_settings = LaneletSettings()
@@ -257,6 +257,8 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.linemarkingleft = self.LL.getLineMarkingLeft()
         self.lanelet_pos_x = self.LL.getPosX()
         self.lanelet_pos_y = self.LL.getPosY()
+        self.backwards = self.LL.getDirection()
+        self.vertfor = self.LL.getNumVertices()
 
     def curve(self):
         self.CU = CurveSettings()
@@ -272,6 +274,8 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.linemarkingleft_curve = self.CU.getLineMarkingLeft()
         self.curve_pos_x = self.CU.getPosX()
         self.curve_pos_y = self.CU.getPosY()
+        self.curve_direction = self.CU.getCurveDirection()
+        print(self.CU.getCurveDirection())
 
     def select_predecessor(self):
         self.selected_predecessor = self.crviewer.selected_lanelet_use[0]
@@ -283,17 +287,13 @@ class MWindow(QMainWindow, Ui_mainWindow):
         if self.selected_predecessor and self.selected_successor:
             connecting_lanelet = mapcreator.connect_lanelets4(self, self.selected_predecessor, self.selected_successor,
                                                              self.scenario.lanelet_network, self.scenario)
-            self.crviewer.open_scenario(self.scenario, self.sumobox.config)
-            self.update_view()
-            self.update_to_new_scenario()
+            self.update_view(focus_on_network=True)
 
     def remove_lanelet(self):
         lanelet = self.crviewer.selected_lanelet_use[0]
         network = self.scenario.lanelet_network
         mapcreator.remove_lanelet(self, lanelet, network, self.scenario)
-        self.crviewer.open_scenario(self.scenario, self.sumobox.config)
-        self.update_view()
-        self.update_to_new_scenario()
+        self.update_view(focus_on_network=True)
 
     def traffic_signs(self):
         self.showTS = TrafficSignsSelection()
@@ -319,9 +319,8 @@ class MWindow(QMainWindow, Ui_mainWindow):
             lanelet = self.scenario.lanelet_network.find_lanelet_by_id(lanelet_id)
             lanelet.add_traffic_sign_to_lanelet(self.traffic_signs_id)
             print(lanelet.traffic_signs)
-        self.crviewer.open_scenario(self.scenario, self.sumobox.config)
-        self.update_view()
-        self.update_to_new_scenario()
+        self.update_view(focus_on_network=True)
+
         self.traffic_signs_id = self.traffic_signs_id + 1
 
     def create_traffic_signs_settings(self):
@@ -333,14 +332,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         print("Country:")
         print(self.country)
         self.traffic_signs_settings = 0
-        """self.traffic1 = TrafficSign(201, [TrafficSignElement(TrafficSignIDZamunda.MAX_SPEED, ["20"])],{1},np.array([0.0,2]))
-        self.scenario.lanelet_network.add_traffic_sign(self.traffic1, {1})
 
-        self.crviewer.open_scenario(self.scenario, self.sumobox.config)
-        self.update_view()
-        self.update_to_new_scenario()
-        print("Test")
-        print(self.traffic1)"""
 
     def create_toolbox(self):
         """ Create the Upper toolbox."""
@@ -358,9 +350,9 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
         self.uppertoolBox.button_forwards.clicked.connect(lambda: self.click_straight(self.lanelet_pos_x, self.lanelet_pos_y))
         self.uppertoolBox.button_lanelet_settings.clicked.connect(lambda: self.forwards())
-        self.uppertoolBox.button_turn_right.clicked.connect(lambda: self.click_curve(True, self.curve_pos_x, self.curve_pos_y))
+        self.uppertoolBox.button_turn_right.clicked.connect(lambda: self.click_curve(self.curve_direction, self.curve_pos_x, self.curve_pos_y))
         self.uppertoolBox.button_curve_settings.clicked.connect(self.curve)
-        self.uppertoolBox.button_turn_left.clicked.connect(lambda: self.click_curve(False, self.curve_pos_x, self.curve_pos_y))
+        #self.uppertoolBox.button_turn_left.clicked.connect(lambda: self.click_curve(self.curve_direction, self.curve_pos_x, self.curve_pos_y))
         #self.uppertoolBox.button_curve_settings2.clicked.connect(self.curve)
 
         self.uppertoolBox.button_fit_to_predecessor.clicked.connect(lambda: self.fit_func())

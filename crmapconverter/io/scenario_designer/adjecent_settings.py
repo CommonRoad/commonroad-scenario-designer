@@ -7,7 +7,7 @@ from PyQt5.QtCore import Qt
 from commonroad.scenario.lanelet import LaneletType, RoadUser, LineMarking
 
 
-class LaneletSettings(QDialog):
+class AdjecentSettings(QDialog):
     def __init__(self):
         super().__init__()
         self.lanelet_length = 50
@@ -104,17 +104,7 @@ class LaneletSettings(QDialog):
 
         self.setLayout(layout)
 
-    def predecessor_button(self):
-        if self.pred.isChecked():
-            self.setPredecessor = True
-        else:
-            self.setPredecessor = False
 
-    def adjacent_button(self):
-        if self.adjacentLanelet.isChecked() == True:
-            self.setadjacent = True
-        else:
-            self.setadjacent = False
 
     def apply_button_click(self):
         if self.length.text():
@@ -134,65 +124,4 @@ class LaneletSettings(QDialog):
 
         self.close()
 
-    def set_default_click(self):
-        self.length.clear()
-        self.width.clear()
-        self.length.insert("50")
-        self.width.insert("20")
-        self.setadjacent = False
-        self.adjacentLanelet.setChecked(False)
-        self.pred.setChecked(True)
-        self.setPredecessor = True
-        self.posX.insert("0")
-        self.posY.insert("0")
-        self.number_vertices.insert("20")
 
-    def showsettings(self):
-        self.show()
-
-    def getLanletLength(self):
-        return self.lanelet_length
-
-    def getLaneletWidth(self):
-        return self.lanelet_width
-
-    def getAdjacentLanelet(self):
-        return self.setadjacent
-
-    def getPredecessor(self):
-        return self.setPredecessor
-
-    def getLaneletType(self):
-        #print(self.lanelet_type.currentText())
-        return self.lanelet_type.currentText()
-
-    def getRoadUser(self):
-        #print(self.roaduser.currentText())
-        return self.roaduser.currentText()
-
-    def getLineMarkingRight(self):
-        return self.line_marking_right.currentText()
-
-    def getLineMarkingLeft(self):
-        return self.line_marking_left.currentText()
-
-    def getDirection(self):
-        return self.direction_bool
-
-    def getNumVertices(self):
-        if self.number_vertices.text():
-            return int(self.number_vertices.text())
-        else:
-            return 20
-
-    def getPosX(self):
-        if self.posX.text():
-            return int(self.posX.text())
-        else:
-            return 0
-
-    def getPosY(self):
-        if self.posY.text():
-            return int(self.posY.text())
-        else:
-            return 0

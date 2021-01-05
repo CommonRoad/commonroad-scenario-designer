@@ -20,6 +20,11 @@ class CurveSettings(QDialog):
         self.setPredecessor = False
         self.setWindowTitle("Curve settings")
         self.setGeometry(100, 100, 500, 300)
+        self.curve_direction_bool = False
+
+        self.curve_direction = QComboBox()
+        self.curve_direction.addItems(["right curve", "left curve"])
+
 
         self.radius = QLineEdit()
         self.radius.setValidator(QIntValidator())
@@ -87,10 +92,11 @@ class CurveSettings(QDialog):
         self.set_default.clicked.connect(self.set_default_click)
 
         layout = QFormLayout()
+        layout.addRow("Curve direction", self.curve_direction)
         layout.addRow("Curve radius", self.radius)
-        layout.addRow("Curve width ", self.width)
-        layout.addRow("Curve angle ", self.angle)
-        layout.addRow("Number of vertices ", self.vertices)
+        layout.addRow("Curve width", self.width)
+        layout.addRow("Curve angle", self.angle)
+        layout.addRow("Number of vertices", self.vertices)
         layout.addRow("X position", self.posX)
         layout.addRow("Y position", self.posY)
         #layout.addWidget(self.adjacentCurve)
@@ -127,6 +133,14 @@ class CurveSettings(QDialog):
         else:
             self.curve_angle = 90
         self.setPredecessor = self.pred.isChecked()
+
+
+        #Left curves: set curve_direction_bool to false
+        #Todo:
+        if self.curve_direction.currentText() == "left curve":
+            self.curve_direction_bool = True
+        else:
+            self.curve_direction_bool = False
 
         self.close()
 
@@ -181,6 +195,9 @@ class CurveSettings(QDialog):
 
     def getLineMarkingLeft(self):
         return self.line_marking_left.currentText()
+
+    def getCurveDirection(self):
+        return self.curve_direction_bool
 
     def getPosX(self):
         if self.posX.text():

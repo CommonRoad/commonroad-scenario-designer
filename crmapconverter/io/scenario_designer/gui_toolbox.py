@@ -128,7 +128,7 @@ class UpperToolbox(QWidget):
         self.button_lanelet_settings.setIcon(QIcon(":/gui_src/forwards.PNG"))
 
         self.button_turn_right = QPushButton()
-        self.button_turn_right.setText("turn right")
+        self.button_turn_right.setText("curve")
         layoutlanelets.addWidget(self.button_turn_right, 2, 0)
         self.button_turn_right.setIcon(QIcon(":/gui_src/forwards.PNG"))
 
@@ -139,7 +139,7 @@ class UpperToolbox(QWidget):
 
         self.button_turn_left = QPushButton()
         self.button_turn_left.setText("turn left")
-        layoutlanelets.addWidget(self.button_turn_left, 3, 0)
+        #layoutlanelets.addWidget(self.button_turn_left, 3, 0)
         self.button_turn_left.setIcon(QIcon(":/gui_src/forwards.PNG"))
 
         self.button_curve_settings2 = QPushButton()

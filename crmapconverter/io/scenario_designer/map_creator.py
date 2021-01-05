@@ -45,7 +45,7 @@ class mapcreator:
         predecessor._successor = list(b)
 
     def create_straight(self, width, length, num_vertices, network, scenario, pred, lanelettype="urban", roaduser="vehicle",
-                        linemarkingleft="no_marking", linemarkingright="no_marking"):
+                        linemarkingleft="no_marking", linemarkingright="no_marking", backwards=False):
         eps = 0.1e-15
         length_div = length / num_vertices
         left_vertices = []
@@ -65,6 +65,9 @@ class mapcreator:
                           center_vertices=center_vertices, lanelet_type={LaneletType(lanelettype)},
                           user_one_way={RoadUser(roaduser)}, line_marking_right_vertices=LineMarking(linemarkingright),
                           line_marking_left_vertices=LineMarking(linemarkingleft))
+        if backwards:
+            lanelet.translate_rotate(-lanelet.center_vertices[0], np.pi)
+
         if pred:
             if self.latestid != None:
                 mapcreator.fit_to_predecessor(self, network.find_lanelet_by_id(self.latestid),lanelet)
@@ -89,16 +92,21 @@ class mapcreator:
         center_vertices = np.array(center_vert)
         right_vertices = np.array(right_vert)
 
+        angle_start = -np.pi/2
         if angle < 0:
             left_vertices = np.array(right_vert)
             center_vertices = np.array(center_vert)
             right_vertices = np.array(left_vert)
+            angle_start = -angle_start
 
         idl = scenario.generate_object_id()
         lanelet = Lanelet(left_vertices=left_vertices, right_vertices=right_vertices, lanelet_id=idl,
                           center_vertices=center_vertices, lanelet_type={LaneletType(lanelettype)},
                           user_one_way={RoadUser(roaduser)}, line_marking_right_vertices=LineMarking(linemarkingright),
                           line_marking_left_vertices=LineMarking(linemarkingleft))
+        lanelet.translate_rotate(np.array([0,0]),angle_start)
+        lanelet.translate_rotate(-lanelet.center_vertices[0],0)
+
         if pred:
             if self.latestid != None:
                 mapcreator.fit_to_predecessor(self, network.find_lanelet_by_id(self.latestid), lanelet)
@@ -169,8 +177,12 @@ class mapcreator:
             idl = scenario.generate_object_id()
             self.latestid = idl
             lanelet = Lanelet(left_vertices=left_vertices, right_vertices=right_vertices, lanelet_id=idl,
-                              center_vertices=center_vertices, lanelet_type={LaneletType.URBAN},
-                              adjacent_right=adjacent_lanelet.lanelet_id, adjacent_right_same_direction=True)
+                              center_vertices=center_vertices, lanelet_type=adjacent_lanelet._lanelet_type,
+                              user_one_way=adjacent_lanelet._user_one_way, line_marking_right_vertices=adjacent_lanelet._line_marking_right_vertices,
+                              line_marking_left_vertices=adjacent_lanelet._line_marking_left_vertices,
+                              adjacent_left=adjacent_lanelet.lanelet_id, adjacent_left_same_direction=True)
+
+
 
             # Relation
             adjacent_lanelet._adj_left = lanelet.lanelet_id
@@ -227,8 +239,11 @@ class mapcreator:
             idl = scenario.generate_object_id()
             self.latestid = idl
             lanelet = Lanelet(left_vertices=left_vertices, right_vertices=right_vertices, lanelet_id=idl,
-                              center_vertices=center_vertices, lanelet_type={LaneletType.URBAN},
+                              center_vertices=center_vertices, lanelet_type=adjacent_lanelet._lanelet_type,
+                              user_one_way=adjacent_lanelet._user_one_way, line_marking_right_vertices=adjacent_lanelet._line_marking_right_vertices,
+                              line_marking_left_vertices=adjacent_lanelet._line_marking_left_vertices,
                               adjacent_left=adjacent_lanelet.lanelet_id, adjacent_left_same_direction=True)
+
 
             # Relation
             adjacent_lanelet._adj_right = lanelet.lanelet_id
