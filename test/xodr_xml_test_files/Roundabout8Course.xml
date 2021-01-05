@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<commonRoad timeStepSize="0.1" commonRoadVersion="2020a" author="" affiliation="" source="OpenDRIVE 2 Lanelet Converter" benchmarkID="ZAM_OpenDrive-123" date="2020-12-29">
+<commonRoad timeStepSize="0.1" commonRoadVersion="2020a" author="" affiliation="" source="OpenDRIVE 2 Lanelet Converter" benchmarkID="ZAM_OpenDrive-123" date="2021-01-05">
   <location>
     <geoNameId>-999</geoNameId>
     <gpsLatitude>999</gpsLatitude>
@@ -989,9 +989,9 @@
     <adjacentRight ref="103" drivingDir="same"/>
     <laneletType>driveWay</laneletType>
     <trafficSignRef ref="100414289"/>
+    <trafficSignRef ref="100121207"/>
     <trafficSignRef ref="100314289"/>
     <trafficSignRef ref="100221207"/>
-    <trafficSignRef ref="100121207"/>
   </lanelet>
   <lanelet id="103">
     <leftBound>
@@ -1973,9 +1973,9 @@
     <adjacentLeft ref="100" drivingDir="same"/>
     <laneletType>driveWay</laneletType>
     <trafficSignRef ref="100414289"/>
+    <trafficSignRef ref="100121207"/>
     <trafficSignRef ref="100314289"/>
     <trafficSignRef ref="100221207"/>
-    <trafficSignRef ref="100121207"/>
   </lanelet>
   <lanelet id="105">
     <leftBound>
@@ -9713,9 +9713,9 @@
     <successor ref="111"/>
     <adjacentRight ref="112" drivingDir="same"/>
     <laneletType>driveWay</laneletType>
-    <trafficSignRef ref="1024328149"/>
     <trafficSignRef ref="1024120217"/>
     <trafficSignRef ref="1024428149"/>
+    <trafficSignRef ref="1024328149"/>
     <trafficSignRef ref="1024220217"/>
   </lanelet>
   <lanelet id="112">
@@ -10705,9 +10705,9 @@
     <successor ref="113"/>
     <adjacentLeft ref="109" drivingDir="same"/>
     <laneletType>driveWay</laneletType>
-    <trafficSignRef ref="1024328149"/>
     <trafficSignRef ref="1024120217"/>
     <trafficSignRef ref="1024428149"/>
+    <trafficSignRef ref="1024328149"/>
     <trafficSignRef ref="1024220217"/>
   </lanelet>
   <lanelet id="114">
@@ -18447,9 +18447,9 @@
     <adjacentRight ref="116" drivingDir="same"/>
     <laneletType>driveWay</laneletType>
     <trafficSignRef ref="1075414289"/>
-    <trafficSignRef ref="1075221207"/>
-    <trafficSignRef ref="1075314289"/>
     <trafficSignRef ref="1075121207"/>
+    <trafficSignRef ref="1075314289"/>
+    <trafficSignRef ref="1075221207"/>
   </lanelet>
   <lanelet id="116">
     <leftBound>
@@ -19431,9 +19431,9 @@
     <adjacentLeft ref="117" drivingDir="same"/>
     <laneletType>driveWay</laneletType>
     <trafficSignRef ref="1075414289"/>
-    <trafficSignRef ref="1075221207"/>
-    <trafficSignRef ref="1075314289"/>
     <trafficSignRef ref="1075121207"/>
+    <trafficSignRef ref="1075314289"/>
+    <trafficSignRef ref="1075221207"/>
   </lanelet>
   <lanelet id="110">
     <leftBound>
