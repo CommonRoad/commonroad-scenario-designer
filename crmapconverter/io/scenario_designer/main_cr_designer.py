@@ -38,6 +38,8 @@ from crmapconverter.io.scenario_designer import util
 from crmapconverter.io.scenario_designer.lanelet_settings import LaneletSettings
 from crmapconverter.io.scenario_designer.curve_settings import CurveSettings
 from crmapconverter.io.scenario_designer.traffic_signs_settings import TrafficSignsSettings, TrafficSignsSelection
+from crmapconverter.io.scenario_designer.adjecent_settings import AdjecentSettings
+
 
 from commonroad.scenario.lanelet import Lanelet, LaneletType, LaneletNetwork
 from commonroad.scenario.traffic_sign import *
@@ -221,26 +223,6 @@ class MWindow(QMainWindow, Ui_mainWindow):
             successor = mapcreator.fit_to_predecessor(self, predecessor, successor)
             self.update_view(focus_on_network=True)
 
-    def adjacent_left(self):
-        selected_lanelet = self.crviewer.selected_lanelet_use
-        if selected_lanelet:
-            current_lanelet = selected_lanelet[0]
-            adjacent_lanelet = mapcreator.adjacent_lanelet_left(self, current_lanelet, self.scenario.lanelet_network,
-                                                                self.scenario, same_direction=True)
-            self.update_view(focus_on_network=True)
-
-    def adjacent_right(self):
-        selected_lanelet = self.crviewer.selected_lanelet_use
-        if selected_lanelet:
-            current_lanelet = selected_lanelet[0]
-
-            """lanelet_type = current_lanelet.lanelet_type()
-            print(lanelet_type)"""
-            adjacent_lanelet = mapcreator.adjacent_lanelet_right(self, current_lanelet, self.scenario.lanelet_network,
-                                                                 self.scenario, same_direction=True)
-            self.update_view(focus_on_network=True)
-
-
     def create_laneletsettings(self):
         self.lanelet_settings = LaneletSettings()
 
@@ -276,6 +258,28 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.curve_pos_y = self.CU.getPosY()
         self.curve_direction = self.CU.getCurveDirection()
         print(self.CU.getCurveDirection())
+
+    def adjacent(self):
+        if self.scenario == None:
+            self.textBrowser.append("create a new file")
+            return
+        
+        self.ADJ = AdjecentSettings()
+        self.ADJ.exec()
+        id = self.ADJ.getLaneletId()
+        forwards = self.ADJ.isForwards()
+        left = self.ADJ.isAdjacentSideLeft()
+        lanelet = self.scenario.lanelet_network.find_lanelet_by_id(id)
+        if lanelet == None:
+            self.textBrowser.append("select a valid lanelet id")
+            return
+        if left:
+            adjacent_lanelet = mapcreator.adjacent_lanelet_left(self, lanelet, self.scenario.lanelet_network,
+                                                                self.scenario, same_direction=forwards)
+        else:
+            adjacent_lanelet = mapcreator.adjacent_lanelet_right(self, lanelet, self.scenario.lanelet_network,
+                                                                self.scenario, same_direction=forwards)
+        self.update_view(focus_on_network=True)
 
     def select_predecessor(self):
         self.selected_predecessor = self.crviewer.selected_lanelet_use[0]
@@ -352,12 +356,10 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.uppertoolBox.button_lanelet_settings.clicked.connect(lambda: self.forwards())
         self.uppertoolBox.button_turn_right.clicked.connect(lambda: self.click_curve(self.curve_direction, self.curve_pos_x, self.curve_pos_y))
         self.uppertoolBox.button_curve_settings.clicked.connect(self.curve)
-        #self.uppertoolBox.button_turn_left.clicked.connect(lambda: self.click_curve(self.curve_direction, self.curve_pos_x, self.curve_pos_y))
-        #self.uppertoolBox.button_curve_settings2.clicked.connect(self.curve)
 
         self.uppertoolBox.button_fit_to_predecessor.clicked.connect(lambda: self.fit_func())
-        self.uppertoolBox.button_adjacent_left.clicked.connect(lambda: self.adjacent_left())
-        self.uppertoolBox.button_adjacent_right.clicked.connect(lambda: self.adjacent_right())
+
+        self.uppertoolBox.button_adjacent.clicked.connect(lambda: self.adjacent())
         self.uppertoolBox.button_select_predecessor.clicked.connect(lambda: self.select_predecessor())
         self.uppertoolBox.button_select_successor.clicked.connect(lambda: self.select_successor())
         self.uppertoolBox.button_connect_lanelets.clicked.connect(lambda: self.connect_lanelets())
