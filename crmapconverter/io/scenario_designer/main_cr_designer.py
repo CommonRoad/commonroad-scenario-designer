@@ -38,7 +38,7 @@ from crmapconverter.io.scenario_designer import util
 from crmapconverter.io.scenario_designer.lanelet_settings import LaneletSettings
 from crmapconverter.io.scenario_designer.curve_settings import CurveSettings
 from crmapconverter.io.scenario_designer.traffic_signs_settings import TrafficSignsSettings, TrafficSignsSelection
-from crmapconverter.io.scenario_designer.adjecent_settings import AdjecentSettings
+from crmapconverter.io.scenario_designer.adjecent_settings import AdjecentSettings, ConnectSettings, FitSettings, RemoveSettings
 
 
 from commonroad.scenario.lanelet import Lanelet, LaneletType, LaneletNetwork
@@ -191,6 +191,9 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
     # Toolbox functionality
     def click_straight(self, posX, posY):
+        if self.scenario == None:
+            self.textBrowser.append("create a new file")
+            return
         lanelet = mapcreator.create_straight(self, self.widfor, self.lenfor, self.vertfor,
                                              self.scenario.lanelet_network, self.scenario, self.pred, self.lanelettype,
                                              self.roaduser, self.linemarkingleft, self.linemarkingright, backwards=self.backwards)
@@ -199,6 +202,9 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.update_view(focus_on_network=True)
 
     def click_curve(self, turnright=True, curve_posX=0, curve_posY=0):
+        if self.scenario == None:
+            self.textBrowser.append("create a new file")
+            return
         if turnright:
             lanelet = mapcreator.create_curve(self, self.widcurve, self.radcurve, self.anglcurve, self.numcurve,
                                               self.scenario.lanelet_network, self.scenario, self.pred, self.curvetype,
@@ -216,11 +222,20 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.update_view(focus_on_network=True)
 
     def fit_func(self):
-        selected_lanelet = self.crviewer.selected_lanelet_use
-        if selected_lanelet:
-            predecessor = selected_lanelet[0]
-            successor = self.scenario.lanelet_network.find_lanelet_by_id(self.latestid)
-            successor = mapcreator.fit_to_predecessor(self, predecessor, successor)
+        if self.scenario == None:
+            self.textBrowser.append("create a new file")
+            return
+        self.FIT = FitSettings()
+        self.FIT.exec()
+        pred = self.FIT.getPredecessor()
+        succ = self.FIT.getSuccessor()
+        pred_lanelet = self.scenario.lanelet_network.find_lanelet_by_id(pred)
+        succ_lanelet = self.scenario.lanelet_network.find_lanelet_by_id(succ)
+        if pred_lanelet == None or succ_lanelet == None:
+            self.textBrowser.append("select valid lanelet IDs")
+            return
+        else:
+            mapcreator.fit_to_predecessor(self, pred_lanelet, succ_lanelet)
             self.update_view(focus_on_network=True)
 
     def create_laneletsettings(self):
@@ -263,7 +278,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         if self.scenario == None:
             self.textBrowser.append("create a new file")
             return
-        
+
         self.ADJ = AdjecentSettings()
         self.ADJ.exec()
         id = self.ADJ.getLaneletId()
@@ -288,15 +303,37 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.selected_successor = self.crviewer.selected_lanelet_use[0]
 
     def connect_lanelets(self):
-        if self.selected_predecessor and self.selected_successor:
-            connecting_lanelet = mapcreator.connect_lanelets4(self, self.selected_predecessor, self.selected_successor,
+        if self.scenario == None:
+            self.textBrowser.append("create a new file")
+            return
+
+        self.CONNECT = ConnectSettings()
+        self.CONNECT.exec()
+        pred = self.CONNECT.getPredecessor()
+        succ = self.CONNECT.getSuccessor()
+        pred_lanelet = self.scenario.lanelet_network.find_lanelet_by_id(pred)
+        succ_lanelet = self.scenario.lanelet_network.find_lanelet_by_id(succ)
+        if pred_lanelet == None or succ_lanelet == None:
+            self.textBrowser.append("select valid lanelet IDs")
+            return
+        else:
+            connecting_lanelet = mapcreator.connect_lanelets4(self, pred_lanelet, succ_lanelet,
                                                              self.scenario.lanelet_network, self.scenario)
             self.update_view(focus_on_network=True)
 
     def remove_lanelet(self):
-        lanelet = self.crviewer.selected_lanelet_use[0]
-        network = self.scenario.lanelet_network
-        mapcreator.remove_lanelet(self, lanelet, network, self.scenario)
+        if self.scenario == None:
+            self.textBrowser.append("create a new file")
+            return
+        self.REMOVE = RemoveSettings()
+        self.REMOVE.exec()
+        id = self.REMOVE.getLaneletId()
+        lanelet = self.scenario.lanelet_network.find_lanelet_by_id(id)
+        if lanelet == None:
+            self.textBrowser.append("select valid lanelet ID")
+            return
+
+        mapcreator.remove_lanelet(self, lanelet, self.scenario.lanelet_network, self.scenario)
         self.update_view(focus_on_network=True)
 
     def traffic_signs(self):
@@ -307,8 +344,6 @@ class MWindow(QMainWindow, Ui_mainWindow):
         vals = self.showTS.getAdditionalValues()
         x = self.showTS.getPosX()
         y = self.showTS.getPosY()
-        print(self.showTS.getLaneletID())
-        print(TrafficSignIDGermany(sig))
         #sigid = 201
         #signID = int(self.showTS.getSign())
         if self.showTS.getLaneletID():
@@ -322,19 +357,14 @@ class MWindow(QMainWindow, Ui_mainWindow):
         if lanelet_id:
             lanelet = self.scenario.lanelet_network.find_lanelet_by_id(lanelet_id)
             lanelet.add_traffic_sign_to_lanelet(self.traffic_signs_id)
-            print(lanelet.traffic_signs)
         self.update_view(focus_on_network=True)
 
         self.traffic_signs_id = self.traffic_signs_id + 1
 
     def create_traffic_signs_settings(self):
-
-        print("TESTbefore")
         self.TS = TrafficSignsSettings()
         self.TS.exec()
         self.country = self.TS.getCountry()
-        print("Country:")
-        print(self.country)
         self.traffic_signs_settings = 0
 
 
@@ -358,10 +388,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.uppertoolBox.button_curve_settings.clicked.connect(self.curve)
 
         self.uppertoolBox.button_fit_to_predecessor.clicked.connect(lambda: self.fit_func())
-
         self.uppertoolBox.button_adjacent.clicked.connect(lambda: self.adjacent())
-        self.uppertoolBox.button_select_predecessor.clicked.connect(lambda: self.select_predecessor())
-        self.uppertoolBox.button_select_successor.clicked.connect(lambda: self.select_successor())
         self.uppertoolBox.button_connect_lanelets.clicked.connect(lambda: self.connect_lanelets())
         self.uppertoolBox.button_remove_lanelet.clicked.connect(lambda: self.remove_lanelet())
 

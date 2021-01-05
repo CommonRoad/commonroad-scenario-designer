@@ -62,3 +62,128 @@ class AdjecentSettings(QDialog):
             return int(self.lanelet_id.text())
         else:
             return 0
+
+
+class ConnectSettings(QDialog):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Connect lanelets")
+        self.setGeometry(100, 100, 500, 300)
+
+        self.label = QLabel("connect two laneletes with an connection lanelet")
+
+
+        self.predecessor = QLineEdit()
+        self.predecessor.setValidator(QIntValidator())
+        self.predecessor.setMaxLength(2)
+        self.predecessor.setAlignment(Qt.AlignRight)
+
+        self.successor = QLineEdit()
+        self.successor.setValidator(QIntValidator())
+        self.successor.setMaxLength(2)
+        self.successor.setAlignment(Qt.AlignRight)
+
+        self.apply_button = QPushButton()
+        self.apply_button.setText("apply")
+        self.apply_button.clicked.connect(self.apply_button_click)
+
+        layout = QFormLayout()
+        layout.addWidget(self.label)
+        layout.addRow("start lanelet ID", self.predecessor)
+        layout.addRow("goal lanelet ID", self.successor)
+
+        layout.addWidget(self.apply_button)
+        self.setLayout(layout)
+
+    def apply_button_click(self):
+        self.close()
+
+    def getPredecessor(self):
+        if self.predecessor.text():
+            return int(self.predecessor.text())
+        else:
+            return -1
+
+    def getSuccessor(self):
+        if self.successor.text():
+            return int(self.successor.text())
+        else:
+            return -1
+
+class FitSettings(QDialog):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Fit lanelets")
+        self.setGeometry(100, 100, 500, 300)
+
+        self.label = QLabel("Fit two laneletes")
+
+        self.predecessor = QLineEdit()
+        self.predecessor.setValidator(QIntValidator())
+        self.predecessor.setMaxLength(2)
+        self.predecessor.setAlignment(Qt.AlignRight)
+
+        self.successor = QLineEdit()
+        self.successor.setValidator(QIntValidator())
+        self.successor.setMaxLength(2)
+        self.successor.setAlignment(Qt.AlignRight)
+
+        self.apply_button = QPushButton()
+        self.apply_button.setText("apply")
+        self.apply_button.clicked.connect(self.apply_button_click)
+
+        layout = QFormLayout()
+        layout.addWidget(self.label)
+        layout.addRow("predecessor lanelet ID", self.predecessor)
+        layout.addRow("successor lanelet ID", self.successor)
+        layout.addWidget(self.apply_button)
+        self.setLayout(layout)
+
+    def apply_button_click(self):
+        self.close()
+
+
+    def getPredecessor(self):
+        if self.predecessor.text():
+            return int(self.predecessor.text())
+        else:
+            return -1
+
+    def getSuccessor(self):
+        if self.successor.text():
+            return int(self.successor.text())
+        else:
+            return -1
+
+
+class RemoveSettings(QDialog):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Remove lanelet")
+        self.setGeometry(100, 100, 500, 300)
+
+        self.label = QLabel("remove selected lanelet")
+
+        self.lanelet = QLineEdit()
+        self.lanelet.setValidator(QIntValidator())
+        self.lanelet.setMaxLength(2)
+        self.lanelet.setAlignment(Qt.AlignRight)
+
+        self.apply_button = QPushButton()
+        self.apply_button.setText("apply")
+        self.apply_button.clicked.connect(self.apply_button_click)
+
+        layout = QFormLayout()
+        layout.addWidget(self.label)
+        layout.addRow("remove lanelet ID", self.lanelet)
+        layout.addWidget(self.apply_button)
+        self.setLayout(layout)
+
+    def apply_button_click(self):
+        self.close()
+
+    def getLaneletId(self):
+        if self.lanelet.text():
+            return int(self.lanelet.text())
+        else:
+            return 0

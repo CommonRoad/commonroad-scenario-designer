@@ -101,10 +101,12 @@ class TrafficSignsSelection(QDialog):
         return self.sign_list.currentText()
 
     def getLaneletID(self):
-        return int(self.lanelet_id.text())
+        if self.lanelet_id.text():
+            return int(self.lanelet_id.text())
 
     def getAdditionalValues(self):
-        return self.additionalvalue.text()
+        if self.additionalvalue.text():
+            return self.additionalvalue.text()
 
     def getPosX(self):
         if self.posX.text():
