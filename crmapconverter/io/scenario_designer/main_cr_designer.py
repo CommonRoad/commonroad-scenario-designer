@@ -272,7 +272,6 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.curve_pos_x = self.CU.getPosX()
         self.curve_pos_y = self.CU.getPosY()
         self.curve_direction = self.CU.getCurveDirection()
-        print(self.CU.getCurveDirection())
 
     def adjacent(self):
         if self.scenario == None:
@@ -339,7 +338,6 @@ class MWindow(QMainWindow, Ui_mainWindow):
     def traffic_signs(self):
         self.showTS = TrafficSignsSelection()
         self.showTS.exec()
-        print(self.showTS.getSign())
         sig = self.showTS.getSign()
         vals = self.showTS.getAdditionalValues()
         x = self.showTS.getPosX()
