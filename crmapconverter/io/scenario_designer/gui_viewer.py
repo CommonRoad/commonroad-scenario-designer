@@ -61,7 +61,7 @@ def _merge_dict(source, destination):
 
 
 class DynamicCanvas(FigureCanvas):
-    """ this canvas provides m with the mouse wheel """
+    """ this canvas provides zoom with the mouse wheel """
     def __init__(self, parent=None, width=5, height=5, dpi=100):
 
         self.ax = None
