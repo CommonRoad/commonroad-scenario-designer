@@ -15,10 +15,11 @@ class TrafficSignsSettings(QDialog):
 
         self.setWindowTitle("Traffic signs settings")
         self.setGeometry(100, 100, 300, 100)
+        self.selected_country = None
 
 
         self.country = QComboBox()
-        enumlist = [e.value for e in SupportedTrafficSignCountry]
+        enumlist = [e.name for e in SupportedTrafficSignCountry]
         self.country.addItems(enumlist)
 
         self.apply_button = QPushButton()
@@ -37,7 +38,7 @@ class TrafficSignsSettings(QDialog):
         self.close()
 
     def getCountry(self):
-        if self.selected_country:
+        if self.selected_country != None:
             return self.selected_country
         else:
             return self.country.currentText()
@@ -55,7 +56,7 @@ class TrafficSignsSelection(QDialog):
         self.setGeometry(100, 100, 500, 300)
 
         self.sign_list = QComboBox()
-        enumlist = [e.value for e in TrafficSignIDGermany]
+        enumlist = [e.name for e in TrafficSignIDGermany]
         self.sign_list.addItems(enumlist)
         #self.sign_list.addItem(QIcon(":/101.png"), "TEST")
 
