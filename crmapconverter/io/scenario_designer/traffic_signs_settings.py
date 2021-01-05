@@ -6,7 +6,7 @@ from PyQt5.QtGui import QIcon, QIntValidator
 from PyQt5.QtCore import Qt
 from commonroad.scenario.lanelet import LaneletType, RoadUser, LineMarking
 from commonroad.scenario.traffic_sign import *
-from commonroad_io.commonroad.visualization.traffic_signs.TrafficSignIDGermany import *
+from commonroad.visualization.traffic_signs.TrafficSignIDGermany import *
 
 
 class TrafficSignsSettings(QDialog):
