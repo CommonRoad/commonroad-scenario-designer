@@ -147,7 +147,8 @@ class Network:
             lanelet_network.add_traffic_sign(traffic_sign, traffic_sign_to_lanelet_mapper[traffic_sign])
         for stopline, lanelets in stopline_to_lanelet_mapper.items():
             for lanelet in lanelets:
-                lanelet_network.find_lanelet_by_id(lanelet).stop_line = stopline
+                if lanelet_network.find_lanelet_by_id(lanelet).stop_line is None:
+                    lanelet_network.find_lanelet_by_id(lanelet).stop_line = stopline
 
         for signal_reference, lanelet_ids in signal_reference_to_lanelet_id_mapper.items():
             updated_id = self._signal_id_mapper[signal_reference.id]
@@ -157,7 +158,10 @@ class Network:
             if updated_id[1] == "traffic sign":
                 for lanelet_id in lanelet_ids:
                     lanelet_network.find_lanelet_by_id(lanelet_id).add_traffic_sign_to_lanelet(updated_id[0])
-            # TODO: Add stop lines that are stored in signal references
+            if updated_id[1] == "stop line":
+                for lanelet_id in lanelet_ids:
+                    if lanelet_network.find_lanelet_by_id(lanelet_id).stop_line is None:
+                        lanelet_network.find_lanelet_by_id(lanelet_id).stop_line = updated_id[0]
 
         # concatenate possible lanelets with their successors
         lanelet_network.concatenate_possible_lanelets()

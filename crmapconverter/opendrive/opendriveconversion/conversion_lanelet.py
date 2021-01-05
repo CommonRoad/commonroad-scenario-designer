@@ -276,6 +276,8 @@ class ConversionLanelet(Lanelet):
             for traffic_sign in lanelet_conc.traffic_signs:
                 if traffic_sign not in self.traffic_signs:
                     self.add_traffic_sign_to_lanelet(traffic_sign)
+        if lanelet_conc.stop_line is not None:
+            self.stop_line = lanelet_conc.stop_line
 
     def calc_width_at_end(self) -> float:
         """Calc width of lanelet at its end.

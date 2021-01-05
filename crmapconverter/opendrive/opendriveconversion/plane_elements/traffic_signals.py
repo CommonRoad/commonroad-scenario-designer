@@ -154,5 +154,4 @@ def get_traffic_signal_references(road: Road):
     signal_references = []
     for signal_reference in road.signalReference:
         signal_references.append(signal_reference)
-
     return signal_references
