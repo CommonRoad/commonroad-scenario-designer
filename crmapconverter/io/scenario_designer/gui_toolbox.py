@@ -353,6 +353,38 @@ class SumoTool(QWidget):
         return section
 
 
+class LaneletInformationToolbox(QWidget):
+
+    def __init__(self):
+        super().__init__()
+        layout = QFormLayout()
+        self.setLayout(layout)
+        self.laneletID = QLineEdit()
+        self.laneletID.setReadOnly(True)
+        self.laneletID.setValidator(QIntValidator())
+        self.laneletID.setAlignment(Qt.AlignRight)
+
+        self.length = QLineEdit()
+        self.length.setValidator(QIntValidator())
+        self.length.setMaxLength(4)
+        self.length.setAlignment(Qt.AlignRight)
+
+        self.width = QLineEdit()
+        self.width.setValidator(QIntValidator())
+        self.width.setMaxLength(4)
+        self.width.setAlignment(Qt.AlignRight)
+
+        self.number_vertices = QLineEdit()
+        self.number_vertices.setValidator(QIntValidator())
+        self.number_vertices.setMaxLength(2)
+        self.number_vertices.setAlignment(Qt.AlignRight)
+
+        layout.addRow("Lanelet ID", self.laneletID)
+        layout.addRow("Lanelet width", self.width)
+        layout.addRow("Lanelet height", self.length)
+        layout.addRow("Number Vertices", self.number_vertices)
+
+
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = UpperToolbox()

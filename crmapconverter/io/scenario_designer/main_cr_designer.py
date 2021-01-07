@@ -22,7 +22,7 @@ from commonroad.common.file_writer import (CommonRoadFileWriter,
 from commonroad.scenario.scenario import Scenario, LaneletNetwork, Lanelet
 
 from crmapconverter.io.scenario_designer.gui_resources.MainWindow import Ui_mainWindow
-from crmapconverter.io.scenario_designer.gui_toolbox import UpperToolbox
+from crmapconverter.io.scenario_designer.gui_toolbox import UpperToolbox, LaneletInformationToolbox
 from crmapconverter.io.scenario_designer.converter_modules.osm_interface import OSMInterface
 from crmapconverter.io.scenario_designer.converter_modules.opendrive_interface import (
     OpenDRIVEInterface)
@@ -137,6 +137,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.create_toolbar()
         self.create_console()
         self.create_toolbox()
+        self.create_laneletinformation()
         #self.create_laneletsettings()
 
         self.status = self.statusbar
@@ -390,16 +391,6 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.uppertoolBox.button_connect_lanelets.clicked.connect(lambda: self.connect_lanelets())
         self.uppertoolBox.button_remove_lanelet.clicked.connect(lambda: self.remove_lanelet())
 
-        if SUMO_AVAILABLE:
-            self.create_sumobox()
-            self.uppertoolBox.button_sumo_simulation.clicked.connect(
-                self.tool_box2_show)
-
-        # self.uppertoolBox.button_lanlist.clicked.connect(
-        #    self.show_lanelet_list)
-        # self.uppertoolBox.button_intersection_list.clicked.connect(
-        #    self.show_intersection_list)
-        self.uppertoolBox.button_save.clicked.connect(self.save_animation)
 
     def create_lanelet_list(self):
         """Create the lanelet_list and put it into right Dockwidget area."""
@@ -468,14 +459,27 @@ class MWindow(QMainWindow, Ui_mainWindow):
         else:
             self.intersection_list_dock.show()
 
+    def create_laneletinformation(self):
+        """ Create the Upper toolbox."""
+        self.lowertoolBox = LaneletInformationToolbox()
+
+        self.tool2 = QDockWidget("Lanelet Information")
+        self.tool2.setFloating(True)
+        self.tool2.setFeatures(QDockWidget.AllDockWidgetFeatures)
+        self.tool2.setAllowedAreas(Qt.LeftDockWidgetArea)
+        self.tool2.setWidget(self.lowertoolBox)
+        self.addDockWidget(Qt.LeftDockWidgetArea, self.tool2)
+
+        self.lowertoolBox.width.insert("123")
+
     def create_sumobox(self):
         """Function to create the sumo toolbox(bottom toolbox)."""
-        self.tool2 = QDockWidget("Sumo Simulation", self)
+        """self.tool2 = QDockWidget("Sumo Simulation", self)
         self.tool2.setFeatures(QDockWidget.AllDockWidgetFeatures)
         self.tool2.setAllowedAreas(Qt.LeftDockWidgetArea)
         self.tool2.setWidget(self.sumobox)
         self.addDockWidget(Qt.LeftDockWidgetArea, self.tool2)
-        self.tool2.setMaximumHeight(400)
+        self.tool2.setMaximumHeight(400)"""
 
     def detect_slider_clicked(self):
         self.slider_clicked = True
