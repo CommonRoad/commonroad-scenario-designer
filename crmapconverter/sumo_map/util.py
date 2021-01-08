@@ -1,23 +1,20 @@
 import os
 import warnings
 from copy import deepcopy
-from typing import Dict, List, Iterable, Set
+from typing import Dict, List, Iterable
 from xml.dom import minidom
 from xml.etree import ElementTree as et
-from shapely.geometry import LineString
 
+import matplotlib.pyplot as plt
 import numpy as np
-from copy import deepcopy
 from commonroad.geometry.shape import Polygon
 from commonroad.scenario.lanelet import Lanelet
 from commonroad.scenario.lanelet import LaneletNetwork
-from crmapconverter.sumo_map.sumolib_net import Crossing
 from commonroad.visualization.plot_helper import draw_object
+from crmapconverter.sumo_map.sumolib_net.edge import Edge
 from shapely.geometry import LineString
 from shapely.ops import unary_union
 from shapely.validation import explain_validity
-from crmapconverter.sumo_map.sumolib_net.edge import Edge
-import matplotlib.pyplot as plt
 
 from .config import EGO_ID_START, SumoConfig
 
@@ -93,6 +90,51 @@ def add_params_in_rou_file(
                                              value_interval.end, 1)[0]
             vType.set(key, str("{0:.2f}".format(random_value)))
     tree.write(rou_file)
+
+
+def update_edge_lengths(net_file_path: str) -> bool:
+    """
+    Recomputes lane lengths based on their shapes and updates lane & edge lengths accordingly
+    This is a workaround to a bug in netedit, caused by updating lane shapes, but not their lengths
+    :param net_file_path: file path to a SUMO .net.xml file
+    :return: success
+    """
+    tree = et.parse(net_file_path)
+    root = tree.getroot()
+
+    for edge in root.iter('edge'):
+        lengths = []
+        for lane in edge.iter("lane"):
+            shape_str = lane.get("shape")
+            if not shape_str:
+                continue
+            shape = parse_shape_string(shape_str)
+            length = polyline_length(shape)
+            lane.set("length", f"{length:.2f}")
+            lengths.append(length)
+        if not lengths:
+            continue
+        edge.set("length", f"{np.min(lengths):.2f}")
+
+    tree.write(net_file_path)
+
+
+def parse_shape_string(shape_string: str) -> np.ndarray:
+    """
+    Parses a SUMO shape string to numpy array
+    :param shape_string: SUMO shape string
+    :return: parsed shape string
+    """
+    return np.array([[float(c) for c in pos.split(",")] for pos in shape_string.split(" ")])
+
+
+def polyline_length(line: np.ndarray) -> float:
+    """
+    Computes the length of a line of n-dim vertices
+    :param line: array of vertices
+    :return: length of the line (L2-norm)
+    """
+    return np.sum(np.linalg.norm(np.diff(line, axis=0), axis=1))
 
 
 def write_ego_ids_to_rou_file(rou_file: str, ego_ids: List[int]) -> None:
