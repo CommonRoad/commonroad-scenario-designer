@@ -1,6 +1,7 @@
 import os
 import warnings
 from copy import deepcopy
+from pathlib import Path
 from typing import Dict, List, Iterable
 from xml.dom import minidom
 from xml.etree import ElementTree as et
@@ -99,8 +100,7 @@ def update_edge_lengths(net_file_path: str) -> bool:
     :param net_file_path: file path to a SUMO .net.xml file
     :return: success
     """
-    with open(net_file_path, "r") as f:
-        tree = et.parse(f)
+    tree = et.parse(net_file_path)
     root = tree.getroot()
 
     for edge in root.iter('edge'):
@@ -117,8 +117,8 @@ def update_edge_lengths(net_file_path: str) -> bool:
             continue
         edge.set("length", f"{np.min(lengths):.2f}")
 
-    with open(net_file_path, "w") as f:
-        tree.write(f)
+    Path(net_file_path).unlink()
+    tree.write(net_file_path)
 
 
 def parse_shape_string(shape_string: str) -> np.ndarray:
