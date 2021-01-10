@@ -4,7 +4,7 @@ from copy import deepcopy
 from pathlib import Path
 from typing import Dict, List, Iterable
 from xml.dom import minidom
-from xml.etree import ElementTree as et
+import lxml.etree as et
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -107,18 +107,16 @@ def update_edge_lengths(net_file_path: str) -> bool:
         lengths = []
         for lane in edge.iter("lane"):
             shape_str = lane.get("shape")
-            if not shape_str:
+            length = polyline_length(parse_shape_string(shape_str))
+            # if length ~= 0 do not update, as SUMO then discards this lane
+            if not shape_str or not lane.get("length") or np.isclose(length, 0):
                 continue
-            shape = parse_shape_string(shape_str)
-            length = polyline_length(shape)
             lane.set("length", f"{length:.2f}")
             lengths.append(length)
-        if not lengths:
-            continue
-        edge.set("length", f"{np.min(lengths):.2f}")
+        if lengths and edge.get("length"):
+            edge.set("length", f"{np.min(lengths):.2f}")
 
-    Path(net_file_path).unlink()
-    tree.write(net_file_path)
+    tree.write(net_file_path, encoding="utf-8")
 
 
 def parse_shape_string(shape_string: str) -> np.ndarray:
