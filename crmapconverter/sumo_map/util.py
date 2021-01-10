@@ -99,7 +99,8 @@ def update_edge_lengths(net_file_path: str) -> bool:
     :param net_file_path: file path to a SUMO .net.xml file
     :return: success
     """
-    tree = et.parse(net_file_path)
+    with open(net_file_path, "r") as f:
+        tree = et.parse(f)
     root = tree.getroot()
 
     for edge in root.iter('edge'):
@@ -116,7 +117,8 @@ def update_edge_lengths(net_file_path: str) -> bool:
             continue
         edge.set("length", f"{np.min(lengths):.2f}")
 
-    tree.write(net_file_path)
+    with open(net_file_path, "w") as f:
+        tree.write(f)
 
 
 def parse_shape_string(shape_string: str) -> np.ndarray:
