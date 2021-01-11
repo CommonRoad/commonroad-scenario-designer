@@ -71,12 +71,16 @@ class UpperToolbox(QWidget):
         layout1 = QGridLayout(widget1)
 
         self.button_traffic_signs = QPushButton()
-        self.button_traffic_signs.setText("Traffic signs")
+        self.button_traffic_signs.setText("Traffic sign")
         layout1.addWidget(self.button_traffic_signs, 0, 0)
 
         self.button_traffic_signs_settings = QPushButton()
         self.button_traffic_signs_settings.setText("Settings")
         layout1.addWidget(self.button_traffic_signs_settings, 0, 1)
+
+        self.button_traffic_light = QPushButton()
+        self.button_traffic_light.setText("Traffic light")
+        layout1.addWidget(self.button_traffic_light, 1, 0)
 
         """add Roundabout button
         button_roundabout = QPushButton()
@@ -104,7 +108,7 @@ class UpperToolbox(QWidget):
         "add show more button for lanelets list"""
         self.button_lanlist = QPushButton("show more")
         self.button_lanlist.setToolTip("Show more Traffic Signs")
-        layout1.addWidget(self.button_lanlist, 2, 0)
+        #layout1.addWidget(self.button_lanlist, 2, 0)
         # TODO: add list of more traffic signs
 
         layout1.addItem(self.spacerItem)
@@ -379,11 +383,19 @@ class LaneletInformationToolbox(QWidget):
         self.number_vertices.setMaxLength(2)
         self.number_vertices.setAlignment(Qt.AlignRight)
 
+        self.refresh_button = QPushButton()
+        self.refresh_button.setText("refresh")
+
+        self.edit_button = QPushButton()
+        self.edit_button.setText("edit")
+
+
         layout.addRow("Lanelet ID", self.laneletID)
         layout.addRow("Lanelet width", self.width)
         layout.addRow("Lanelet height", self.length)
         layout.addRow("Number Vertices", self.number_vertices)
-
+        layout.addWidget(self.refresh_button)
+        layout.addWidget(self.edit_button)
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

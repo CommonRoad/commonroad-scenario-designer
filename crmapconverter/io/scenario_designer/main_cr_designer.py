@@ -37,7 +37,7 @@ from crmapconverter.io.scenario_designer import config
 from crmapconverter.io.scenario_designer import util
 from crmapconverter.io.scenario_designer.lanelet_settings import LaneletSettings
 from crmapconverter.io.scenario_designer.curve_settings import CurveSettings
-from crmapconverter.io.scenario_designer.traffic_signs_settings import TrafficSignsSettings, TrafficSignsSelection
+from crmapconverter.io.scenario_designer.traffic_signs_settings import TrafficSignsSettings, TrafficSignsSelection, TrafficLightSelection
 from crmapconverter.io.scenario_designer.adjecent_settings import AdjecentSettings, ConnectSettings, FitSettings, RemoveSettings
 
 
@@ -360,6 +360,11 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
         self.traffic_signs_id = self.traffic_signs_id + 1
 
+    def traffic_light(self):
+        self.showTL = TrafficLightSelection()
+        self.showTL.exec()
+        return
+
     def create_traffic_signs_settings(self):
         self.TS = TrafficSignsSettings()
         self.TS.exec()
@@ -380,6 +385,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
         self.uppertoolBox.button_traffic_signs_settings.clicked.connect(lambda: self.create_traffic_signs_settings())
         self.uppertoolBox.button_traffic_signs.clicked.connect(lambda: self.traffic_signs())
+        self.uppertoolBox.button_traffic_light.clicked.connect(lambda: self.traffic_light())
 
         self.uppertoolBox.button_forwards.clicked.connect(lambda: self.click_straight(self.lanelet_pos_x, self.lanelet_pos_y))
         self.uppertoolBox.button_lanelet_settings.clicked.connect(lambda: self.forwards())
@@ -459,6 +465,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         else:
             self.intersection_list_dock.show()
 
+
     def create_laneletinformation(self):
         """ Create the Upper toolbox."""
         self.lowertoolBox = LaneletInformationToolbox()
@@ -469,8 +476,44 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.tool2.setAllowedAreas(Qt.LeftDockWidgetArea)
         self.tool2.setWidget(self.lowertoolBox)
         self.addDockWidget(Qt.LeftDockWidgetArea, self.tool2)
+        self.lowertoolBox.refresh_button.clicked.connect(lambda: self.refresh_information())
 
-        self.lowertoolBox.width.insert("123")
+
+#        if self.crviewer.selected_lanelet_use[0]:
+ #           self.selected_lanelet = self.crviewer.selected_lanelet_use[0]
+
+
+        #selected_lanelet = self.crviewer.current_scenario.lanelet_network.find_lanelet_by_id(
+          #  self.lanelet_list.selected_id)
+
+    def refresh_information(self):
+        if self.crviewer.current_scenario is None:
+            messbox = QMessageBox()
+            messbox.warning(
+                self, "Warning",
+                "Please load or convert a CR Scenario firstly",
+                QtWidgets.QMessageBox.Ok)
+            messbox.close()
+        else:
+            self.selected_lanelet = self.crviewer.selected_lanelet_use[0]
+            id = str(self.selected_lanelet._lanelet_id)
+            #distance = self.selected_lanelet._distance
+            num_vertices = len(self.selected_lanelet._distance) - 1
+            length = self.selected_lanelet._distance[num_vertices]
+            width_array = self.selected_lanelet.left_vertices[-1] - self.selected_lanelet.right_vertices[-1]
+            width = width_array[len(width_array) - 1]
+            self.lowertoolBox.laneletID.clear()
+            self.lowertoolBox.laneletID.insert(id)
+            self.lowertoolBox.number_vertices.clear()
+            self.lowertoolBox.number_vertices.insert(str(num_vertices))
+            self.lowertoolBox.length.clear()
+            self.lowertoolBox.length.insert(str(int(length)))
+            self.lowertoolBox.width.clear()
+            self.lowertoolBox.width.insert((str(int(width))))
+
+
+        return 0
+
 
     def create_sumobox(self):
         """Function to create the sumo toolbox(bottom toolbox)."""
