@@ -15,10 +15,12 @@ from typing import List, Tuple
 
 import numpy as np
 from pyproj import Proj
-from commonroad.scenario.scenario import Scenario, TrafficSign
+
 from commonroad.scenario.lanelet import StopLine, LineMarking, RoadUser, LaneletType, Lanelet
 from commonroad.scenario.traffic_sign import TrafficSignIDGermany, TrafficSignElement
 from shapely.geometry import LineString
+
+from commonroad.scenario.scenario import Scenario, ScenarioID, TrafficSign
 
 from crmapconverter.opendrive.opendriveconversion.conversion_lanelet import ConversionLanelet
 from crmapconverter.opendrive.opendriveconversion.conversion_lanelet_network import ConversionLaneletNetwork, convert_to_new_lanelet_id
@@ -120,7 +122,11 @@ class OSM2LConverter:
         self.first_left_pts, self.last_left_pts = defaultdict(list), defaultdict(list)
         self.first_right_pts, self.last_right_pts = defaultdict(list), defaultdict(list)
 
-        scenario = Scenario(dt=0.1, benchmark_id="none", scenario_id="none")
+        # TODO create default scenario ID or implement workaround in commonroad-io
+        scenario_id = ScenarioID(cooperative=False, country_id="ZAM", map_name="OpenDrive", map_id=123,
+                                 configuration_id=None, prediction_type=None, prediction_id=None)
+
+        scenario = Scenario(dt=0.1, scenario_id=scenario_id)
         self.lanelet_network = ConversionLaneletNetwork()
 
         for way_rel in osm.way_relations.values():

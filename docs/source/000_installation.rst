@@ -18,6 +18,14 @@ Installation
 Recommended Installation
 ************************
 
+Prerequisites
+*************
+Install library commonroad-io: https://gitlab.lrz.de/cps/commonroad-io 
+
+Install library Sumo-Interface: https://gitlab.lrz.de/cps/sumo-interface/-/tree/develop
+
+Make sure to checkout the branch develop.
+
 Manual Installation
 *******************
 When manually installing this tool, you need to install it's dependencies via you package manager. 
@@ -100,7 +108,6 @@ Install `cartopy <https://scitools.org.uk/cartopy/docs/latest/installing.html>`_
 .. code-block:: bash
 
   conda install -c conda-forge cartopy
-
 
 Install the python requirements at the root of the project:
 
