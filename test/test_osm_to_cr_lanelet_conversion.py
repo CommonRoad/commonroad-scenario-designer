@@ -64,7 +64,6 @@ class TestOSM2CRConversionBaseClass(unittest.TestCase):
         """Test if converted scenario is equal to the loaded xml file.
         Disregard the different dates.
         """
-        self.scenario.scenario_id = 'none'
         fh = f"{os.path.dirname(os.path.realpath(__file__))}/osm_xml_test_files/{self.xml_output_name}.xml"
         parser = etree.XMLParser(remove_blank_text=True)
         tree_import = etree.parse(fh, parser=parser).getroot()
