@@ -20,6 +20,7 @@ ALLOWED_TAGS = {
     "virtual",
     "location",
     "bicycle",
+    'highway',
 }
 
 class OSMParser:

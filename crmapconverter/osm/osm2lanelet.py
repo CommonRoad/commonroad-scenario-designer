@@ -31,7 +31,7 @@ from crmapconverter.osm2cr.converter_modules.utility.geometry import (
 )
 
 NODE_DISTANCE_TOLERANCE = 0.01  # this is in meters
-PRIORITY_SIGNS = [ TrafficSignIDGermany.PRIORITY, TrafficSignIDGermany.RIGHT_OF_WAY] # removed TrafficSignIDGermany.RIGHT_BEFORE_LEFT
+PRIORITY_SIGNS = [ TrafficSignIDGermany.WARNING_RIGHT_BEFORE_LEFT, TrafficSignIDGermany.PRIORITY, TrafficSignIDGermany.RIGHT_OF_WAY] # removed TrafficSignIDGermany.RIGHT_BEFORE_LEFT
 
 ADJACENT_WAY_DISTANCE_TOLERANCE = 0.05
 
@@ -138,26 +138,26 @@ class OSM2LConverter:
 
         new_ids = self.lanelet_network.convert_all_lanelet_ids()
 
-        # for right_of_way_rel in osm.right_of_way_relations.values():
-        #     # TODO convert Lanelet2 to CR and add to network
-        #     try:
-        #         yield_signs, priority_signs, yield_lanelets, priority_lanelets, stop_lines = (
-        #             self._right_of_way_to_traffic_sign(right_of_way_rel, new_ids)
-        #         )
-        #         # match traffic signs on the matching lanelets
-        #         # the overwrite makes sure we only add traffic signs in the network that are assigned to any lanelet
-        #         yield_signs_lanelets = _add_closest_traffic_sign_to_lanelet([self.lanelet_network.find_lanelet_by_id(i) for i in yield_lanelets], yield_signs)
-        #         priority_signs = _add_closest_traffic_sign_to_lanelet([self.lanelet_network.find_lanelet_by_id(i) for i in priority_lanelets], priority_signs)
-        #         # match stop lines on the yield lanelets
-        #         yield_signs_stop_lines_id = _add_stop_line_to_lanelet([self.lanelet_network.find_lanelet_by_id(i) for i in yield_lanelets], stop_lines)
-        #         # add any used traffic sign
-        #         for s in (priority_signs | yield_signs_lanelets | {
-        #                     y for y in yield_signs
-        #                     if y.traffic_sign_id in yield_signs_stop_lines_id
-        #         }):
-        #             self.lanelet_network.add_traffic_sign(s, set())
-        #     except NotImplementedError as e:
-        #         print(str(e))
+        for right_of_way_rel in osm.right_of_way_relations.values():
+            # TODO convert Lanelet2 to CR and add to network
+            try:
+                yield_signs, priority_signs, yield_lanelets, priority_lanelets, stop_lines = (
+                    self._right_of_way_to_traffic_sign(right_of_way_rel, new_ids)
+                )
+                # match traffic signs on the matching lanelets
+                # the overwrite makes sure we only add traffic signs in the network that are assigned to any lanelet
+                yield_signs_lanelets = _add_closest_traffic_sign_to_lanelet([self.lanelet_network.find_lanelet_by_id(i) for i in yield_lanelets], yield_signs)
+                priority_signs = _add_closest_traffic_sign_to_lanelet([self.lanelet_network.find_lanelet_by_id(i) for i in priority_lanelets], priority_signs)
+                # match stop lines on the yield lanelets
+                yield_signs_stop_lines_id = _add_stop_line_to_lanelet([self.lanelet_network.find_lanelet_by_id(i) for i in yield_lanelets], stop_lines)
+                # add any used traffic sign
+                for s in (priority_signs | yield_signs_lanelets | {
+                            y for y in yield_signs
+                            if y.traffic_sign_id in yield_signs_stop_lines_id
+                }):
+                    self.lanelet_network.add_traffic_sign(s, set())
+            except NotImplementedError as e:
+                print(str(e))
 
         # TODO convert traffic signs as well
         scenario.add_objects(self.lanelet_network)
@@ -348,46 +348,46 @@ class OSM2LConverter:
 
         # niels change
         # extract special meaning like one way, road type
-        # lanelet_types = set()
-        # users_one_way = set()
+        lanelet_type = None
+        users_one_way = set()
         users_bidirectional = set()
-        # one_way_val = way_rel.tag_dict.get("one_way")
-        # bidirectional, one_way = one_way_val == "no", one_way_val == "yes"
-        # if way_rel.tag_dict.get("bicycle") == "yes":
-        #     if one_way:
-        #         users_one_way.add(RoadUser.BICYCLE)
-        #     else:
-        #         users_bidirectional.add(RoadUser.BICYCLE)
-        # subtype = way_rel.tag_dict.get("subtype")
-        # if subtype == "walkway" or subtype == "shared_walkway":
-        #     users_bidirectional.add(RoadUser.PEDESTRIAN)
-        #     lanelet_types.add(LaneletType.SIDEWALK)
-        # if subtype == "crosswalk":
-        #     users_bidirectional.add(RoadUser.PEDESTRIAN)
-        #     lanelet_types.add(LaneletType.CROSSWALK)
-        # if subtype == "bicycle_lane" or subtype == "shared_walkway" or subtype == "road":
-        #     users_one_way.add(RoadUser.BICYCLE)
-        #     if subtype != "road":
-        #         lanelet_types.add(LaneletType.BICYCLE_LANE)
-        # if subtype == "bus_lane":
-        #     users_one_way.add(RoadUser.BUS)
-        #     lanelet_types.add(LaneletType.BUS_LANE)
-        # if subtype == "road" or subtype == "highway":
-        #     if bidirectional:
-        #         users_bidirectional.add(RoadUser.CAR)
-        #         users_bidirectional.add(RoadUser.MOTORCYCLE)
-        #     else:
-        #         users_one_way.add(RoadUser.CAR)
-        #         users_one_way.add(RoadUser.MOTORCYCLE)
-        #     location_val = way_rel.tag_dict.get("location")
-        #     if subtype == "highway":
-        #         lanelet_types.add(LaneletType.HIGHWAY)
-        #     elif location_val == "nonurban":
-        #         lanelet_types.add(LaneletType.COUNTRY)
-        #     else:
-        #         # todo default because of inD origin
-        #         lanelet_types.add(LaneletType.URBAN)
-        #
+        one_way_val = way_rel.tag_dict.get("one_way")
+        bidirectional, one_way = one_way_val == "no", one_way_val == "yes"
+        if way_rel.tag_dict.get("bicycle") == "yes":
+            if one_way:
+                users_one_way.add(RoadUser.BICYCLE)
+            else:
+                users_bidirectional.add(RoadUser.BICYCLE)
+        subtype = way_rel.tag_dict.get("subtype")
+        if subtype == "bicycle_lane" or subtype == "shared_walkway" or subtype == "road":
+            users_one_way.add(RoadUser.BICYCLE)
+            if subtype != "road":
+                lanelet_type = 'biking'
+        if subtype == "walkway" or subtype == "shared_walkway":
+            users_bidirectional.add(RoadUser.PEDESTRIAN)
+            lanelet_type = "sidewalk"
+        if subtype == "crosswalk":
+            users_bidirectional.add(RoadUser.PEDESTRIAN)
+            lanelet_type= "crosswalk"
+        if subtype == "bus_lane":
+            users_one_way.add(RoadUser.BUS)
+            lanelet_type = "bus"
+        if subtype == "road" or subtype == "highway":
+            if bidirectional:
+                users_bidirectional.add(RoadUser.CAR)
+                users_bidirectional.add(RoadUser.MOTORCYCLE)
+            else:
+                users_one_way.add(RoadUser.CAR)
+                users_one_way.add(RoadUser.MOTORCYCLE)
+            location_val = way_rel.tag_dict.get("location")
+            if subtype == "highway":
+                lanelet_type = "highway"
+            elif location_val == "nonurban":
+                lanelet_type = 'country'
+            else:
+                # todo default because of inD origin
+                lanelet_type = 'urban'
+
         users_bidirectional.add(RoadUser.PRIORITY_VEHICLE)
 
 
@@ -398,9 +398,9 @@ class OSM2LConverter:
             right_vertices=right_vertices,
             lanelet_id=way_rel.id_,
             parametric_lane_group=None,
-            # user_one_way=users_one_way,
+            user_one_way=users_one_way,
             user_bidirectional=users_bidirectional,
-            # lanelet_type=lanelet_types,
+            lanelet_type=lanelet_type,
         )
 
         self._check_right_and_left_neighbors(way_rel, lanelet)
