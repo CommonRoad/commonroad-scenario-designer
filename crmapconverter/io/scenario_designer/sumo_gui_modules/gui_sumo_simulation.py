@@ -2,7 +2,6 @@ import uuid
 import os
 import pathlib
 import logging
-import json
 
 from commonroad.scenario.scenario import Scenario
 
@@ -63,7 +62,7 @@ class WaitingDialog(QtWidgets.QDialog):
         super(WaitingDialog, self).__init__()
         self.layout = QtWidgets.QVBoxLayout(self)
         self.textBrowser = QtWidgets.QTextBrowser()
-        self.textBrowser.setText("Simulating, plase wait ...")
+        self.textBrowser.setText("Simulating, please wait ...")
         self.layout.addWidget(self.textBrowser)
 
         self.close_window = False
@@ -77,7 +76,7 @@ class WaitingDialog(QtWidgets.QDialog):
 
 class SUMOSimulation(QWidget, Ui_sumo_simulate):
     def __init__(self):
-        # set random uuid as name for the scneario files
+        # set random uuid as name for the scenario files
         self._config = SumoConfig.from_scenario_name(str(uuid.uuid4()))
         self._config_obs = Observable(self._config)
 
