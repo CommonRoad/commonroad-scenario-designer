@@ -344,7 +344,7 @@ class OSM2LConverter:
         # extract special meaning like one way, road type
         # lanelet_types = set()
         # users_one_way = set()
-        # users_bidirectional = set()
+        users_bidirectional = set()
         # one_way_val = way_rel.tag_dict.get("one_way")
         # bidirectional, one_way = one_way_val == "no", one_way_val == "yes"
         # if way_rel.tag_dict.get("bicycle") == "yes":
@@ -382,7 +382,7 @@ class OSM2LConverter:
         #         # todo default because of inD origin
         #         lanelet_types.add(LaneletType.URBAN)
         #
-        # users_bidirectional.add(RoadUser.PRIORITY_VEHICLE)
+        users_bidirectional.add(RoadUser.PRIORITY_VEHICLE)
 
 
 
@@ -393,7 +393,7 @@ class OSM2LConverter:
             lanelet_id=way_rel.id_,
             parametric_lane_group=None,
             # user_one_way=users_one_way,
-            # user_bidirectional=users_bidirectional,
+            user_bidirectional=users_bidirectional,
             # lanelet_type=lanelet_types,
         )
 
