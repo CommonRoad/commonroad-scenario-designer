@@ -82,4 +82,21 @@ class OSMParser:
                         f"Right of way relation {right_of_way_rel.attrib.get('id')} has no traffic sign. Please check your data! Discarding."
                     )
 
+            for speed_limit in reg_element_rel.xpath("./tag[@v='speed_limit' and @k='subtype']/.."):
+                traffic_sign_id = '274'
+
+                '''
+                create a traffic sign 
+                commonroad.scenario.traffic_sign
+                
+                TrafficSignElement with speed limit as additional value
+                
+                wrap in a traffic sign or later wrap all sign in a Traffic Sign 
+                
+                each lanelet with a relation to this speed limit needs a reference
+                '''
+                pass
+
+
+
         return osm

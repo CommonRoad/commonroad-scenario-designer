@@ -130,6 +130,9 @@ class OSM2LConverter:
         self.lanelet_network = ConversionLaneletNetwork()
 
         for way_rel in osm.way_relations.values():
+            # add traffic sign id to traffic signs for speed limit
+            # create dictionary for mapping of osm id to cr id and keep id constant
+            # later add speed limit as traffic sign
             lanelet = self._way_rel_to_lanelet(
                 way_rel, detect_adjacencies, left_driving_system
             )
@@ -160,6 +163,7 @@ class OSM2LConverter:
                 print(str(e))
 
         # TODO convert traffic signs as well
+
         scenario.add_objects(self.lanelet_network)
 
         return scenario
@@ -204,7 +208,7 @@ class OSM2LConverter:
                 tsid = TrafficSignIDGermany.STOP
             elif traffic_sign_type == "de205":
                 tsid = TrafficSignIDGermany.YIELD
-            elif traffic_sign_type == "de301":
+            elif traffic_sign_type == "de301" or traffic_sign_type == 'right_of_way':
                 tsid = TrafficSignIDGermany.RIGHT_OF_WAY
             elif traffic_sign_type == "de306":
                 tsid = TrafficSignIDGermany.PRIORITY

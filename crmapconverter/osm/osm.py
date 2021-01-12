@@ -62,7 +62,7 @@ class Way:
 class WayRelation:
     """Relation for a lanelet with a left and a right way."""
 
-    def __init__(self, id_, left_way, right_way, tag_dict: Optional[dict] = None):
+    def __init__(self, id_, left_way, right_way, tag_dict: Optional[dict] = None): #add a spot for traffic signs especially speed limit
         self.id_ = str(id_)
         self.left_way = str(left_way)
         self.right_way = str(right_way)
