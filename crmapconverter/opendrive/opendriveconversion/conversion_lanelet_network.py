@@ -602,13 +602,18 @@ class ConversionLaneletNetwork(LaneletNetwork):
         return True
 
     def create_intersection(self, intersection_map, intersection_id):
+        """
+        Creates an intersection inside the lanelet network object
+        param: intersection_map - information about the successors of a lanelet in a junction
+        param: intersection_id - The unique id used to reference the intersection
+        Return: void
+        """
         # TODO: Define criterion for intersection ID
         incoming_id_counter = 0
         # If different incoming lanelets have same successors, combine into set
         intersection_map_combined = self.combine_lanelets_with_common_successors(intersection_map)
         intersection_incoming_lanes = list()
         for key, item in intersection_map_combined.items():
-            print(key, item)
             incoming_lane_ids = key
             incoming_lanes = key
 
@@ -648,6 +653,10 @@ class ConversionLaneletNetwork(LaneletNetwork):
         the intersection dictionary is manipulated such that it has
         multiple keys as the incoming lanelets and the values define
         the successor lanelets.
+        param: intersection_map - information about the successors of a lanelet in a junction
+        return: intersection_map_summarized - information about the successors of a lanelet in a junction
+                with lanelets with common successors grouped together
+
         """
         list_of_successors = list(intersection_map.values())
 
