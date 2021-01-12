@@ -113,6 +113,7 @@ class Network:
         for parametric_lane in self._planes:
 
             if filter_types is not None and parametric_lane.type not in filter_types:
+                self._link_index.clean_intersections(parametric_lane.id_)
                 continue
 
             lanelet = parametric_lane.to_lanelet()
@@ -140,7 +141,10 @@ class Network:
 
         # generating intersections
         for intersection_map in self._link_index.intersection_maps():
-            lanelet_network.create_intersection(intersection_map)
+            # Remove lanelets that are not part of the network (as they are of a different type)
+            intersection_id_counter = 0
+            lanelet_network.create_intersection(intersection_map, intersection_id_counter)
+            intersection_id_counter += 1
 
         # prune because some
         # successorIds get encoded with a non existing successorID
@@ -467,3 +471,13 @@ class LinkIndex:
             predecessors.append(successor_plane_id)
 
         return predecessors
+
+    def clean_intersections(self, parametric_lane_id):
+        """
+        Remove lanes that are not part of the lanelet network
+        """
+        for intersection in self._intersections:
+            if parametric_lane_id in intersection.keys():
+                del intersection[parametric_lane_id]
+        return
+
