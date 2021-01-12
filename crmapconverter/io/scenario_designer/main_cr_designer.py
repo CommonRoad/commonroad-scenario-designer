@@ -70,6 +70,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.scenario = None
         self.latestid = None
         self.traffic_signs_id = 200
+        self.traffic_light_id = 300
         self.selected_lanelet = None
         self.selected_predecessor = None
         self.selected_successor = None
@@ -363,7 +364,42 @@ class MWindow(QMainWindow, Ui_mainWindow):
     def traffic_light(self):
         self.showTL = TrafficLightSelection()
         self.showTL.exec()
+        if self.showTL.getLaneletID():
+            lanelet_id = int(self.showTL.getLaneletID())
+        else:
+            return
+        direction = self.showTL.getDirection()
+        isactive = self.showTL.get_isactive()
+        x = self.showTL.getPosX()
+        y = self.showTL.getPosY()
+        time_offset = self.showTL.getTimeOffset()
+        tl = TrafficLight(traffic_light_id=self.traffic_light_id, cycle=[], position=np.array([x,y]),
+                          direction=direction, time_offset=time_offset, active=isactive)
+
+        if lanelet_id:
+            lanelet = self.scenario.lanelet_network.find_lanelet_by_id(lanelet_id)
+            self.scenario.lanelet_network.add_traffic_light(tl, [lanelet_id])
+        self.traffic_light_id = self.traffic_light_id + 1
+        self.update_view(focus_on_network=True)
+
         return
+
+    def traffic_light_exec(self):
+        x = 0
+        y = 0
+        id = 1
+        tl = TrafficLight(traffic_light_id=id, cycle=[], position=np.array([x, y]), direction=TrafficLightDirection.ALL)
+        lanelet = self.scenario.lanelet_network.find_lanelet_by_id(1)
+        #lanelet.add_traffic_light_to_lanelet(id)
+        self.scenario.lanelet_network.add_traffic_light(tl, [1,2])
+        id = id + 1
+        x = 10
+        y = 10
+        tl2 = TrafficLight(traffic_light_id=id, cycle=[], position=np.array([x, y]), direction=TrafficLightDirection.ALL)
+        self.scenario.lanelet_network.add_traffic_light(tl2, [2])
+
+
+        self.update_view(focus_on_network=True)
 
     def create_traffic_signs_settings(self):
         self.TS = TrafficSignsSettings()
@@ -487,6 +523,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
           #  self.lanelet_list.selected_id)
 
     def refresh_information(self):
+
         if self.crviewer.current_scenario is None:
             messbox = QMessageBox()
             messbox.warning(
@@ -495,21 +532,22 @@ class MWindow(QMainWindow, Ui_mainWindow):
                 QtWidgets.QMessageBox.Ok)
             messbox.close()
         else:
-            self.selected_lanelet = self.crviewer.selected_lanelet_use[0]
-            id = str(self.selected_lanelet._lanelet_id)
-            #distance = self.selected_lanelet._distance
-            num_vertices = len(self.selected_lanelet._distance) - 1
-            length = self.selected_lanelet._distance[num_vertices]
-            width_array = self.selected_lanelet.left_vertices[-1] - self.selected_lanelet.right_vertices[-1]
-            width = width_array[len(width_array) - 1]
-            self.lowertoolBox.laneletID.clear()
-            self.lowertoolBox.laneletID.insert(id)
-            self.lowertoolBox.number_vertices.clear()
-            self.lowertoolBox.number_vertices.insert(str(num_vertices))
-            self.lowertoolBox.length.clear()
-            self.lowertoolBox.length.insert(str(int(length)))
-            self.lowertoolBox.width.clear()
-            self.lowertoolBox.width.insert((str(int(width))))
+            if self.crviewer.selected_lanelet_use[0] != None:
+                self.selected_lanelet = self.crviewer.selected_lanelet_use[0]
+                id = str(self.selected_lanelet._lanelet_id)
+                #distance = self.selected_lanelet._distance
+                num_vertices = len(self.selected_lanelet._distance) - 1
+                length = self.selected_lanelet._distance[num_vertices]
+                width_array = self.selected_lanelet.left_vertices[-1] - self.selected_lanelet.right_vertices[-1]
+                width = width_array[len(width_array) - 1]
+                self.lowertoolBox.laneletID.clear()
+                self.lowertoolBox.laneletID.insert(id)
+                self.lowertoolBox.number_vertices.clear()
+                self.lowertoolBox.number_vertices.insert(str(num_vertices))
+                self.lowertoolBox.length.clear()
+                self.lowertoolBox.length.insert(str(int(length)))
+                self.lowertoolBox.width.clear()
+                self.lowertoolBox.width.insert((str(int(width))))
 
 
         return 0
@@ -608,6 +646,11 @@ class MWindow(QMainWindow, Ui_mainWindow):
                               self)
         tb1.addAction(action_save)
         action_save.triggered.connect(self.file_save)
+
+        #TODO: undo button
+        """action_undo = QAction(QIcon(":/icons/save_file.png"), "undo last action", self)
+        tb1.addAction(action_undo)"""
+
         tb1.addSeparator()
         tb2 = self.addToolBar("ToolBox")
         toolbox = QAction(QIcon(":/icons/tools.ico"),

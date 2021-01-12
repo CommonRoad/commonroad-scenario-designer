@@ -128,10 +128,12 @@ class TrafficLightSelection(QDialog):
 
         self.setWindowTitle("Traffic light")
         self.setGeometry(100, 100, 500, 300)
+        self.isactive = True
 
-        self.sign_list = QComboBox()
-        enumlist = [e.name for e in TrafficSignIDGermany]
-        self.sign_list.addItems(enumlist)
+        self.direction = QComboBox()
+        enumlist = [e.name for e in TrafficLightDirection]
+        self.direction.addItems(enumlist)
+        self.direction.setCurrentIndex(len(enumlist)-1)
         #self.sign_list.addItem(QIcon(":/101.png"), "TEST")
 
         self.lanelet_id = QLineEdit()
@@ -139,10 +141,10 @@ class TrafficLightSelection(QDialog):
         self.lanelet_id.setMaxLength(3)
         self.lanelet_id.setAlignment(Qt.AlignRight)
 
-        self.additionalvalue = QLineEdit()
-        self.additionalvalue.setValidator(QIntValidator())
-        self.additionalvalue.setMaxLength(3)
-        self.additionalvalue.setAlignment(Qt.AlignRight)
+        self.time_offset = QLineEdit()
+        self.time_offset.setValidator(QIntValidator())
+        self.time_offset.setMaxLength(3)
+        self.time_offset.setAlignment(Qt.AlignRight)
 
         self.posX = QLineEdit()
         self.posX.setValidator(QIntValidator())
@@ -159,29 +161,46 @@ class TrafficLightSelection(QDialog):
         self.apply_button.clicked.connect(self.apply_button_click)
 
 
+        self.active = QRadioButton()
+        self.active.toggled.connect(self.active_button)
+        self.active.setChecked(True)
+
+
         layout = QFormLayout()
-        layout.addRow("select sign", self.sign_list)
-        layout.addRow("select laneletID", self.lanelet_id)
-        layout.addRow("speed limit", self.additionalvalue)
+        layout.addRow("corresponding lanelet ID", self.lanelet_id)
+        layout.addRow("select direction", self.direction)
+        layout.addRow("time offset", self.time_offset)
+        layout.addRow("active", self.active)
         layout.addRow("X position", self.posX)
         layout.addRow("Y position", self.posY)
+        #layout.addRow("TODO: cycle options", test=2)
+
         layout.addWidget(self.apply_button)
 
         self.setLayout(layout)
 
+    def active_button(self):
+        if self.active.isCheckable() == True:
+            self.isactive = True
+        else:
+            self.isactive = False
+
+    def get_isactive(self):
+        return self.isactive
+
     def apply_button_click(self):
         self.close()
 
-    def getSign(self):
-        return self.sign_list.currentText()
+    def getDirection(self):
+        return self.direction.currentText()
+
+    def getTimeOffset(self):
+        if self.time_offset.text():
+            return(int(self.time_offset.text()))
 
     def getLaneletID(self):
         if self.lanelet_id.text():
             return int(self.lanelet_id.text())
-
-    def getAdditionalValues(self):
-        if self.additionalvalue.text():
-            return self.additionalvalue.text()
 
     def getPosX(self):
         if self.posX.text():
