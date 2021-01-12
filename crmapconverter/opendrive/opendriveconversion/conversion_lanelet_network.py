@@ -10,6 +10,7 @@ import numpy as np
 from commonroad.scenario.lanelet import LaneletNetwork
 
 from crmapconverter.opendrive.opendriveconversion.conversion_lanelet import ConversionLanelet
+from commonroad.scenario.intersection import IntersectionIncomingElement, Intersection
 
 __author__ = "Benjamin Orthen, Sebastian Maierhofer"
 __copyright__ = "TUM Cyber-Physical Systems Group"
@@ -18,6 +19,8 @@ __version__ = "1.2.0"
 __maintainer__ = "Sebastian Maierhofer"
 __email__ = "commonroad-i06@in.tum.de"
 __status__ = "Released"
+
+
 
 
 def convert_to_new_lanelet_id(old_lanelet_id: str, ids_assigned: dict) -> int:
@@ -599,6 +602,33 @@ class ConversionLaneletNetwork(LaneletNetwork):
         else:
             return successor.adj_left is None
         return True
+
+    def create_intersection(self, intersection_map):
+        intersection_incoming_lanes = []
+        # TODO: Define criterion for intersection ID
+        intersection_id = 1
+        id_counter = 0
+        for key, item in intersection_map.items():
+            # TODO: Find if particular successor is successorLeft successorRight or successorStraight
+            incoming_lane = self.find_lanelet_by_id(key)
+            self.get_successor_directions(incoming_lane)
+            # intersection_incoming_lane = IntersectionIncomingElement(id_counter)
+            # TODO: Add crossings to intersections
+            id_counter += 1
+            continue
+
+        # intersection = Intersection(intersection_id, intersection_incoming_lanes)
+        # self.create_intersection(intersection)
+
+    def get_successor_directions(self, incoming_lane):
+        """
+        Find all directions of a incoming lane's successors
+
+        :param incoming_lane: incoming lane from intersection
+        :return: str: left or right or through
+        """
+        # TODO: Find the direction of the successors of a particular lanelet.
+        
 
 
 class _JoinSplitTarget:

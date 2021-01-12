@@ -3,6 +3,8 @@
 
 """Module to contain Network which can load an opendrive object and then export
 to lanelets. Iternally, the road network is represented by ParametricLanes."""
+import copy
+
 import numpy as np
 import inspect
 from commonroad.scenario.scenario import Scenario, GeoTransformation, Location, ScenarioID
@@ -10,13 +12,13 @@ from collections import defaultdict
 
 from crmapconverter.opendrive.opendriveparser.elements.opendrive import OpenDrive
 
-from crmapconverter.opendrive.opendriveconversion.utils import encode_road_section_lane_width_id
 from crmapconverter.opendrive.opendriveconversion.conversion_lanelet_network import ConversionLaneletNetwork
 from crmapconverter.opendrive.opendriveconversion.converter import OpenDriveConverter
 
 from crmapconverter.opendrive.opendriveconversion.plane_elements.traffic_signals import get_traffic_signals, \
     get_traffic_signal_references
 from crmapconverter.opendrive.opendriveconversion.plane_elements.geo_reference import get_geo_reference
+from crmapconverter.opendrive.opendriveconversion.utils import encode_road_section_lane_width_id
 
 __author__ = "Benjamin Orthen, Stefan Urban, Sebastian Maierhofer"
 __copyright__ = "TUM Cyber-Physical Systems Group"
@@ -54,6 +56,7 @@ class Network:
 
         self._link_index = LinkIndex()
         self._link_index.create_from_opendrive(opendrive)
+
         try:
             self._geo_ref = opendrive.header.geo_reference
         except TypeError:
@@ -102,6 +105,7 @@ class Network:
 
         # Convert groups to lanelets
         lanelet_network = ConversionLaneletNetwork()
+
         traffic_sign_to_lanelet_mapper = defaultdict(list)
         traffic_light_to_lanelet_mapper = defaultdict(list)
         stopline_to_lanelet_mapper = defaultdict(list)
@@ -133,6 +137,10 @@ class Network:
             if bool(parametric_lane.signal_references):
                 for signal_reference in parametric_lane.signal_references:
                     signal_reference_to_lanelet_id_mapper[signal_reference].extend(lanelet.predecessor)
+
+        # generating intersections
+        for intersection_map in self._link_index.intersection_maps():
+            lanelet_network.create_intersection(intersection_map)
 
         # prune because some
         # successorIds get encoded with a non existing successorID
@@ -170,8 +178,6 @@ class Network:
         lanelet_network.join_and_split_possible_lanes()
 
         lanelet_network.convert_all_lanelet_ids()
-
-        # Generating a map between the original lanelet_id's which are now called descriptions and their respective ids
 
         return lanelet_network
 
@@ -229,6 +235,10 @@ class LinkIndex:
 
     def __init__(self):
         self._successors = {}
+        self._intersections = []
+
+    def intersection_maps(self):
+        return self._intersections
 
     def create_from_opendrive(self, opendrive):
         """Create a LinkIndex from an OpenDrive object.
@@ -240,6 +250,7 @@ class LinkIndex:
 
         """
         self._add_junctions(opendrive)
+
         # Extract link information from road lanes
         for road in opendrive.roads:
             for lane_section in road.lanes.lane_sections:
@@ -400,6 +411,9 @@ class LinkIndex:
                         self.add_link(
                             incoming_road_id, connecting_road_id, lane_link.toId < 0
                         )
+            # Extracting opendrive junction links to formulate commonroad intersections
+            intersection_map = copy.copy(self._successors)
+            self._intersections.append(intersection_map)
 
     def remove(self, parametric_lane_id):
         """
