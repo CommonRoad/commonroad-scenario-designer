@@ -50,7 +50,7 @@ from crmapconverter.sumo_map.util import (_find_intersecting_edges,
                                           edge_centroid, get_total_lane_length_from_netfile, max_lanelet_network_id,
                                           merge_lanelets, min_cluster,
                                           remove_unreferenced_traffic_lights,
-                                          write_ego_ids_to_rou_file, intersect_lanelets_line, orthogonal_ccw_vector)
+                                          write_ego_ids_to_rou_file, intersect_lanelets_line, orthogonal_ccw_vector, update_edge_lengths)
 from crmapconverter.sumo_map.config import SumoConfig
 from .mapping import (get_sumo_edge_type, traffic_light_states_CR2SUMO,
                       traffic_light_states_SUMO2CR, VEHICLE_TYPE_CR2SUMO, VEHICLE_NODE_TYPE_CR2SUMO, DEFAULT_CFG_FILE,
@@ -91,6 +91,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         # key is the ID of the edges and value the ID of the lanelets that compose it
         self.lanes_dict: Dict[int, List[int]] = {}
         self.lanes: Dict[str, Lane] = {}
+        # edge_id -> length (float)
         self.edge_lengths = {}
         # list of the already explored lanelets
         self._explored_lanelets = []
@@ -1226,7 +1227,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         self._tll_file = traffic_path
         self._output_file = str(output_path)
         # Calling of Netconvert
-        command = f"netconvert --plain.extend-edge-shape=true" \
+        command = f"netconvert " \
                   f" --no-turnarounds=true" \
                   f" --junctions.internal-link-detail=20" \
                   f" --geometry.avoid-overlap=true" \
@@ -1239,12 +1240,13 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                   f" --output-file={self._output_file}" \
                   f" --geometry.remove.keep-edges.explicit=true" + \
                   f" --seed={SumoConfig.random_seed}"
-        # "--junctions.limit-turn-speed=6.5 " \
-        # "--geometry.max-segment-length=15 " \
         success = True
         try:
             _ = subprocess.check_output(command.split(), timeout=5.0)
             self._read_junctions_from_net_file(self._output_file)
+            # update lengths
+            update_edge_lengths(self._output_file)
+
             if update_internal_ids:
                 self._update_internal_IDs_from_net_file(self._output_file)
 
@@ -1263,6 +1265,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                 os.remove(path)
 
         return success
+
 
     def _update_internal_IDs_from_net_file(self, net_file_path: str):
         with open(net_file_path, 'r') as f:
