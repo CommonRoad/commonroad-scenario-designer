@@ -1,9 +1,20 @@
 from typing import Dict
 from commonroad.scenario.traffic_sign import TrafficSignElement, TrafficSignIDZamunda
+from crmapconverter.osm2cr import config
 
 class TrafficSignParser:
     def __init__(self, sign: Dict):
         self.sign = sign
+
+    def accept_Traffic_sign_element(self, signElement: TrafficSignElement) -> bool:
+        if signElement.traffic_sign_element_id.name in config.ACCEPTED_TRAFFIC_SIGNS:
+            return True
+        if signElement.traffic_sign_element_id.name in config.EXCLUDED_TRAFFIC_SIGNS:
+            return False
+        if "ALL" in config.ACCEPTED_TRAFFIC_SIGNS:
+            return True
+        else:
+            return False
 
     def parse_traffic_sign(self):
 
@@ -30,13 +41,11 @@ class TrafficSignParser:
                             max_speed = float(sign[6:])
                         else:
                             max_speed = float(sign[sign.find("[") + 1:sign.find("]")])
-
                     # debugging
                     # if max_speed == -99:
                     #     print(sign)
                     # else:
                     #     print(max_speed)
-
                     if max_speed != -99:
                         if not zone:
                             # convert km/h to m/s and add to traffic sign elements
@@ -64,6 +73,8 @@ class TrafficSignParser:
                         #sign_id = traffic_sign_map['unknown']
                         #value = 'unknown sign'
                         #elements.append(TrafficSignElement(sign_id, [value]))
+
+        elements = list(filter(self.accept_Traffic_sign_element, elements))
         return elements
 
     def parse_mapillary(self) -> TrafficSignElement or None:
@@ -77,7 +88,7 @@ class TrafficSignParser:
         # start parsing
 
         # warnings
-        if category == 'warning':
+        if category == 'warning' and category in config.MAPILLARY_CATEGORIES:
             if 'crossroads-with-priority-to-the-right' in name:
                 sign_id = TrafficSignIDZamunda.WARNING_RIGHT_BEFORE_LEFT
             elif 'warning--steep-ascent' in name:
@@ -96,7 +107,7 @@ class TrafficSignParser:
                 sign_id = TrafficSignIDZamunda.WARNING_DANGER_SPOT
 
         # regulatory
-        elif category == 'regulatory':
+        elif category == 'regulatory' and category in config.MAPILLARY_CATEGORIES:
             if name == 'yield':
                 sign_id = TrafficSignIDZamunda.YIELD
             elif name == 'stop':
@@ -178,7 +189,7 @@ class TrafficSignParser:
                 sign_id  = TrafficSignIDZamunda.PRIORITY_OVER_ONCOMING
 
         # information
-        elif category == 'information':
+        elif category == 'information' and category in config.MAPILLARY_CATEGORIES:
             if 'minimum-speed' in name:
                 sign_id = TrafficSignIDZamunda.MIN_SPEED
                 value = str(float(name.split('-')[-1]) / 3.6)
@@ -204,19 +215,23 @@ class TrafficSignParser:
                 sign_id = TrafficSignIDZamunda.DEAD_END
 
         # complementary
-        elif category == 'complementary':
+        elif category == 'complementary' and category in config.MAPILLARY_CATEGORIES:
             if name == 'chevron-left':
                 sign_id = TrafficSignIDZamunda.DIRECTION_SIGN_LEFT_SINGLE
             elif name == 'chevron-right':
                 sign_id = TrafficSignIDZamunda.DIRECTION_SIGN_RIGHT_SINGLE
 
         if sign_id:
-            return TrafficSignElement(sign_id, [value])
-        else:
-            return None
+            mapillary_element = TrafficSignElement(sign_id, [value])
+            if self.accept_Traffic_sign_element(mapillary_element):
+                return mapillary_element
+        return None
 
     def parse_maxspeed(self):
         sign_id = TrafficSignIDZamunda.MAX_SPEED
         value = self.sign['maxspeed']
-        return TrafficSignElement(sign_id, [value])
-        
+        maxspeed_element = TrafficSignElement(sign_id, [value])
+        if self.accept_Traffic_sign_element(maxspeed_element):
+            return maxspeed_element
+        else:
+            return None

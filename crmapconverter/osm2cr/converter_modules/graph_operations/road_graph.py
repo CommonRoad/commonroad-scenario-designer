@@ -767,20 +767,23 @@ class GraphTrafficSign:
         if self.node is not None:
             position = self.node.get_cooridnates()
 
-
         # parse sign values
         tsp = traffic_sign_parser.TrafficSignParser(self.sign)
-        # maxspeed
+        # osm maxspeed
         if 'maxspeed' in self.sign:
-            elements.append(tsp.parse_maxspeed())
+            osm_maxspeed = tsp.parse_maxspeed()
+            if osm_maxspeed is not None:
+                elements.append(osm_maxspeed)
         # mapillary sign
         elif 'mapillary' in self.sign:
             mapillary_sign = tsp.parse_mapillary()
             if mapillary_sign is not None:
                 elements.append(mapillary_sign)
-        # traffic sign
+        # osm traffic sign
         elif 'traffic_sign' in self.sign:
-            elements.extend(tsp.parse_traffic_sign())
+            osm_signs = tsp.parse_traffic_sign()
+            if osm_signs is not None:
+                elements.extend(osm_signs)
 
         virtual = False
         if 'virtual' in self.sign:
@@ -792,7 +795,6 @@ class GraphTrafficSign:
         # TODO Maybe improve this
         first_occurrence = set()
 
-        #print(elements)
         return TrafficSign(
             traffic_sign_id=self.id,
             traffic_sign_elements=elements,

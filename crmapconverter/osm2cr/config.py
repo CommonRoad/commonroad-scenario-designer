@@ -15,6 +15,9 @@ SOURCE = "OpenStreetMaps (OSM)"
 TAGS = "urban"
 # Geonames username to retrieve geonamesID for created scenarios
 GEONAMES_USERNAME = "demo"
+# Mapillary Client ID which can be set to extract additional traffic signs. If set to "demo", mapillary signs will be disabled
+# "demo"
+MAPILLARY_CLIENT_ID = "dVY5ZFZiclhmM256endnTTk3TDRIYjphYmNmNDg0YTEwNmFmZGM2"
 # time step size for the benchmark in seconds
 TIMESTEPSIZE = 0.1
 
@@ -162,7 +165,7 @@ DELETE_INVALID_LANES = True
 # radius of the earth used for calculation in meters
 EARTH_RADIUS = 6371000
 # delete short edges after cropping
-DELETE_SHORT_EDGES = False
+DELETE_SHORT_EDGES = True
 # distance between waypoints used internally in meters
 INTERPOLATION_DISTANCE_INTERNAL = 0.5
 # bezier parameter for interpolation (should be within [0, 0.5])
@@ -219,4 +222,16 @@ TRAFFIC_SIGN_KEYS = [
     "overtaking",
     "traffic_signals:direction",
     "maxspeed",
+]
+# include traffic signs based on their id, e.g. "Max_SPEED". Keep "ALL" to accept all found traffic sings
+ACCEPTED_TRAFFIC_SIGNS = ["ALL"]
+# exclude traffic signs based on their id, e.g. "MAX_SPEED". "ALL" has to be set in ACCEPTED_TRAFFIC_SIGNS
+EXCLUDED_TRAFFIC_SIGNS = []
+
+# categories to include if mapillary is used for sign extraction
+MAPILLARY_CATEGORIES = [
+    "warning",
+    "regulatory",
+    "information",
+    "complementary"
 ]
