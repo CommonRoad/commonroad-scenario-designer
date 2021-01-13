@@ -141,6 +141,10 @@ class TrafficLightSelection(QDialog):
         self.lanelet_id.setMaxLength(3)
         self.lanelet_id.setAlignment(Qt.AlignRight)
 
+        self.further_lanelet_id = QPushButton("add further lanelet IDs")
+        self.further_lanelet_id.clicked.connect(self.addButton)
+        self.num = 2
+
         self.time_offset = QLineEdit()
         self.time_offset.setValidator(QIntValidator())
         self.time_offset.setMaxLength(3)
@@ -165,6 +169,25 @@ class TrafficLightSelection(QDialog):
         self.active.toggled.connect(self.active_button)
         self.active.setChecked(True)
 
+        self.red = QLineEdit()
+        self.red.setValidator(QIntValidator())
+        self.red.setMaxLength(3)
+        self.red.setAlignment(Qt.AlignRight)
+
+        self.red_yellow = QLineEdit()
+        self.red_yellow.setValidator(QIntValidator())
+        self.red_yellow.setMaxLength(3)
+        self.red_yellow.setAlignment(Qt.AlignRight)
+
+        self.green = QLineEdit()
+        self.green.setValidator(QIntValidator())
+        self.green.setMaxLength(3)
+        self.green.setAlignment(Qt.AlignRight)
+
+        self.yellow = QLineEdit()
+        self.yellow.setValidator(QIntValidator())
+        self.yellow.setMaxLength(3)
+        self.yellow.setAlignment(Qt.AlignRight)
 
         layout = QFormLayout()
         layout.addRow("corresponding lanelet ID", self.lanelet_id)
@@ -173,11 +196,21 @@ class TrafficLightSelection(QDialog):
         layout.addRow("active", self.active)
         layout.addRow("X position", self.posX)
         layout.addRow("Y position", self.posY)
+        layout.addRow("time red", self.red)
+        layout.addRow("time red-yellow", self.red_yellow)
+        layout.addRow("time green", self.green)
+        layout.addRow("time yellow", self.yellow)
+
+
+
         #layout.addRow("TODO: cycle options", test=2)
 
         layout.addWidget(self.apply_button)
 
         self.setLayout(layout)
+
+    def addButton(self):
+        return
 
     def active_button(self):
         if self.active.isCheckable() == True:
@@ -213,3 +246,27 @@ class TrafficLightSelection(QDialog):
             return int(self.posY.text())
         else:
             return 0
+
+    def getRed(self):
+        if self.red.text():
+            return int(self.red.text())
+        else:
+            return 60
+
+    def getRed_Yellow(self):
+        if self.red_yellow.text():
+            return int(self.red_yellow.text())
+        else:
+            return 10
+
+    def getGreen(self):
+        if self.green.text():
+            return int(self.green.text())
+        else:
+            return 60
+
+    def getYellow(self):
+        if self.yellow.text():
+            return int(self.yellow.text())
+        else:
+            return 10

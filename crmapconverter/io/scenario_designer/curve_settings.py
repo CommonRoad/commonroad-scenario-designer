@@ -120,6 +120,10 @@ class CurveSettings(QDialog):
             self.setadjacent = False
 
     def apply_button_click(self):
+        if self.vertices.text():
+            self.number_vertices = int(self.vertices.text())
+        else:
+            self.number_vertices = 10
         if self.radius.text():
             self.curve_radius = int(self.radius.text())
         else:
