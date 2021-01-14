@@ -49,7 +49,8 @@ class BaseClass(unittest.TestCase):
         planning_problem.translate_rotate(-centroid, 0)
         config = SumoConfig.from_scenario_name(self.scenario_name)
         # convert to SUMO
-        wrapper = CR2SumoMapConverter(self.scenario.lanelet_network, config)
+        wrapper = CR2SumoMapConverter(self.scenario.lanelet_network, config,
+                                      country_id=self.scenario.scenario_id.country_id)
         return config, wrapper
 
     def sumo_run(self, config: SumoConfig, wrapper: CR2SumoMapConverter, tls_lanelet_ids: List[int]):
