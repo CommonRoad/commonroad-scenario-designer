@@ -12,8 +12,11 @@ from copy import deepcopy
 from functools import reduce
 from itertools import groupby
 from typing import Dict, List, Set, Tuple
+
+# TODO: Move to a single XML lib
 from xml.dom import minidom
 from xml.etree import cElementTree as ET
+import lxml.etree as etree
 
 import matplotlib.colors as mcolors
 import networkx as nx
@@ -1124,17 +1127,14 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         """
         file_path = os.path.join(os.path.dirname(output_path), f"{self.conf.scenario_name}.nod.xml")
         with open(file_path, 'w+') as output_file:
-            sumolib.writeXMLHeader(output_file, '')
-            root = ET.Element('root')
-            nodes = ET.SubElement(root, 'nodes')
+            sumolib.writeXMLHeader(output_file, 'CommonRoad Map Tool')
+            nodes = etree.Element("nodes")
 
             for node in self.new_nodes.values():
-                nodes.append(ET.fromstring(node.toXML()))
+                nodes.append(etree.fromstring(node.toXML()))
 
             # pretty print & write the generated xml
-            output_file.write(
-                minidom.parseString(ET.tostring(
-                    nodes, method="xml")).toprettyxml(indent="\t"))
+            output_file.write(str(etree.tostring(nodes, pretty_print=True, encoding="utf-8"), encoding="utf-8"))
 
         self._nodes_file = file_path
         return file_path
@@ -1147,16 +1147,13 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         """
         file_path = os.path.join(os.path.dirname(output_path), f"{self.conf.scenario_name}.edg.xml")
         with open(file_path, 'w+') as output_file:
-            sumolib.writeXMLHeader(output_file, '')
-            root = ET.Element('root')
-            edges = ET.SubElement(root, 'edges')
+            sumolib.writeXMLHeader(output_file, 'CommonRoad Map Tool')
+            edges = etree.Element('edges')
             for edge in self.new_edges.values():
-                edges.append(ET.fromstring(edge.toXML()))
+                edges.append(etree.fromstring(edge.toXML()))
 
             # pretty print & write the generated xml
-            output_file.write(
-                minidom.parseString(ET.tostring(
-                    edges, method="xml")).toprettyxml(indent="\t"))
+            output_file.write(str(etree.tostring(edges, pretty_print=True, encoding="utf-8"), encoding="utf-8"))
 
         self._edges_file = file_path
         return file_path
@@ -1169,19 +1166,16 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         """
         file_path = os.path.join(os.path.dirname(output_path), f"{self.conf.scenario_name}.con.xml")
         with open(file_path, 'w+') as output_file:
-            sumolib.writeXMLHeader(output_file, '')
-            root = ET.Element('root')
-            connections = ET.SubElement(root, 'connections')
+            sumolib.writeXMLHeader(output_file, 'CommonRoad Map Tool')
+            connections = etree.Element('connections')
             for connection in self._new_connections:
-                connections.append(ET.fromstring(connection.toXML()))
+                connections.append(etree.fromstring(connection.toXML()))
             for crossings in self._crossings.values():
                 for crossing in crossings:
-                    connections.append(ET.fromstring(crossing.toXML()))
+                    connections.append(etree.fromstring(crossing.toXML()))
 
             # pretty print & write the generated xml
-            output_file.write(
-                minidom.parseString(ET.tostring(
-                    connections, method="xml")).toprettyxml(indent="\t"))
+            output_file.write(str(etree.tostring(connections, pretty_print=True, encoding="utf-8"), encoding="utf-8"))
 
         self._connections_file = file_path
         return file_path
@@ -1193,17 +1187,16 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         """
         file_path = os.path.join(os.path.dirname(output_path), f"{self.conf.scenario_name}.tll.xml")
         with open(file_path, "w+") as f:
-            sumolib.writeXMLHeader(f, '')
-            tlLogics = ET.Element('tlLogics')
+            sumolib.writeXMLHeader(f, 'CommonRoad Map Tool')
+            tlLogics = etree.Element('tlLogics')
 
             for tls in self.traffic_light_signals.values():
-                tls_xml = ET.fromstring(tls.toXML())
+                tls_xml = etree.fromstring(tls.toXML())
                 tlLogics.append(tls_xml.find('tlLogic'))
                 for conn in tls_xml.findall('connection'):
                     tlLogics.append(conn)
             f.write(
-                minidom.parseString(ET.tostring(
-                    tlLogics, method="xml")).toprettyxml(indent="\t"))
+                str(etree.tostring(tlLogics, pretty_print=True, encoding="utf-8"), encoding="utf-8"))
 
         self._traffic_file = file_path
         return file_path
@@ -1215,9 +1208,9 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         """
         file_path = os.path.join(os.path.dirname(output_path), f"{self.conf.scenario_name}.typ.xml")
         with open(file_path, "w+") as f:
-            sumolib.writeXMLHeader(f, '')
-            types = self.edge_types.to_XML()
-            f.write(minidom.parseString(types).toprettyxml(indent="\t"))
+            sumolib.writeXMLHeader(f, 'CommonRoad Map Tool')
+            types = etree.fromstring(self.edge_types.to_XML())
+            f.write(str(etree.tostring(types, pretty_print=True, encoding="utf-8"), encoding="utf-8"))
         self._type_file = file_path
         return file_path
 
@@ -1225,14 +1218,11 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                                  traffic_path: str, type_path: str, cleanup=True, update_internal_ids=True) -> bool:
         """
         Function that merges the edges and nodes files into one using netconvert
-        :param traffic_path:
-        :type traffic_path:
         :param connections_path:
-        :type connections_path:
-        :param edges_path:
-        :type edges_path:
         :param nodes_path:
-        :type nodes_path:
+        :param edges_path:
+        :param traffic_path:
+        :param type_path:
         :param output_path: the relative path of the output
         :param cleanup: deletes temporary input files after creating net file (only deactivate for debugging)
         :param update_internal_ids: Updates the internal Edge IDs from the newly generated net file
