@@ -181,9 +181,9 @@ class Network:
         self._link_index.update_intersection_lane_id(lanelet_network.old_lanelet_ids())
 
         # generating intersections
+        intersection_id_counter = 0
         for intersection_map in self._link_index.intersection_maps():
             # Remove lanelets that are not part of the network (as they are of a different type)
-            intersection_id_counter = 0
             lanelet_network.create_intersection(intersection_map, intersection_id_counter)
             intersection_id_counter += 1
 
@@ -373,6 +373,7 @@ class LinkIndex:
         # if contact_point is start, and laneId from connecting_road is positive
         # the connecting_road is the predecessor
         # for contact_point == end it's exactly the other way
+        intersection_map = dict()
         for junction in opendrive.junctions:
             for connection in junction.connections:
                 incoming_road = opendrive.getRoad(connection.incomingRoad)
