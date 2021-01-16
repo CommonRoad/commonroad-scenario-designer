@@ -176,18 +176,16 @@ class Network:
         # Perform lane splits and joins
         lanelet_network.join_and_split_possible_lanes()
 
-        old_id_to_new_id_map = lanelet_network.convert_all_lanelet_ids()
+        lanelet_network.convert_all_lanelet_ids()
 
+        self._link_index.update_intersection_lane_id(lanelet_network.old_lanelet_ids())
 
-        """
-        APPLYING INTERSECTION: ACTIVATE LATER
         # generating intersections
         for intersection_map in self._link_index.intersection_maps():
             # Remove lanelets that are not part of the network (as they are of a different type)
             intersection_id_counter = 0
             lanelet_network.create_intersection(intersection_map, intersection_id_counter)
             intersection_id_counter += 1
-        """
 
         return lanelet_network
 
@@ -492,14 +490,36 @@ class LinkIndex:
         Lanelets are concatenated if possible, hence some lanelets ids that exist in intersections
         are no longer valid and also need to be replaced with the lanelet id they are concatenated with.
         """
-        for old_id, new_id in replacement_id_map.items():
-            intersection_maps = self.intersection_maps()
-            for intersection_map in self.intersection_maps():
-                # Check if old lanelet is in keys
+        updated_intersection_maps = []
+        for intersection_map in self.intersection_maps():
+            intersection_map_concatenated_lanelets = intersection_map
+            # Check if old lanelet is in keys
+            for old_id, new_id in replacement_id_map.items():
                 if old_id in intersection_map.keys():
-                    intersection_map[new_id] = intersection_map[old_id]
-                    del intersection_map[old_id]
+                    intersection_map_concatenated_lanelets[new_id] = intersection_map[old_id]
+                    del intersection_map_concatenated_lanelets[old_id]
                 # Check if old lanelet is in values
-                # TODO: Confirm if it is necessary to update values. Not necessary if
-                #  connecting lanes are never concatenated
+            updated_intersection_maps.append(intersection_map_concatenated_lanelets)
+        self._intersections = updated_intersection_maps
+
+        # TODO: Confirm if it is necessary to update values. Not necessary if connecting lanes are never concatenated
+
+    def update_intersection_lane_id(self, old_id_to_new_id_map):
+        """
+        Updates the  ids in the lanelet map
+        """
+
+        updated_intersection_maps = []
+        for intersection_map in self.intersection_maps():
+            intersection_map_new_id = dict()
+            for incoming, connecting in intersection_map.items():
+                # Replacing keys/incoming ids with new ids
+                # print("from", incoming, "to", old_id_to_new_id_map[incoming])
+                new_incoming_id = old_id_to_new_id_map[incoming]
+                connecting = [old_id_to_new_id_map.get(item ) for item in connecting]
+                intersection_map_new_id[new_incoming_id] = connecting
+
+            updated_intersection_maps.append(intersection_map_new_id)
+        self._intersections = updated_intersection_maps
+
 

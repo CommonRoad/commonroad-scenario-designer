@@ -61,6 +61,9 @@ class ConversionLaneletNetwork(LaneletNetwork):
         super().__init__()
         self._old_lanelet_ids = {}
 
+    def old_lanelet_ids(self):
+        return self._old_lanelet_ids
+
     def remove_lanelet(self, lanelet_id: str, remove_references: bool = False):
         """Remove a lanelets with the specific lanelet_id
         from the _lanelets dict.
@@ -106,10 +109,8 @@ class ConversionLaneletNetwork(LaneletNetwork):
 
         These numbers have to be positive integers.
         """
-        old_id_to_new_id_map = dict()
         for lanelet in self.lanelets:
             lanelet.description = lanelet.lanelet_id
-            old_id_to_new_id_map[lanelet.description] = lanelet.lanelet_id
             self.remove_lanelet(lanelet.lanelet_id)
             lanelet.lanelet_id = convert_to_new_lanelet_id(
                 lanelet.lanelet_id, self._old_lanelet_ids
@@ -131,7 +132,6 @@ class ConversionLaneletNetwork(LaneletNetwork):
                     lanelet.adj_right, self._old_lanelet_ids
                 )
             self.add_lanelet(lanelet)
-        return old_id_to_new_id_map
 
     def prune_network(self):
         """Remove references in predecessor, successor etc. to
@@ -264,7 +264,7 @@ class ConversionLaneletNetwork(LaneletNetwork):
                 self._concatenate_lanelet_pairs_group(possible_concat_lanes)
             )
 
-            return replacement_ids
+        return replacement_ids
 
     def _concatenate_lanelet_pairs_group(self, lanelet_pairs: list) -> dict:
         """Concatenate a group of lanelet_pairs, with setting correctly the new lanelet_ids
@@ -618,7 +618,7 @@ class ConversionLaneletNetwork(LaneletNetwork):
         intersection_map_combined = self.combine_lanelets_with_common_successors(intersection_map)
         intersection_incoming_lanes = list()
         for key, item in intersection_map_combined.items():
-            incoming_lane_ids = key
+            incoming_lane_ids = [key]
             incoming_lanes = key
 
             # Since all the lanes have the same successors,
@@ -640,6 +640,7 @@ class ConversionLaneletNetwork(LaneletNetwork):
                 elif direction == "straight":
                     successor_straight.add(successor)
                 else:
+                    print(direction)
                     warnings.warn("Incorrect direction assigned to successor of incoming lanelet in intersection")
 
             intersection_incoming_lane = IntersectionIncomingElement(incoming_id_counter, incoming_lane_ids,
@@ -721,7 +722,7 @@ class ConversionLaneletNetwork(LaneletNetwork):
 
         # if 3 successors we assume the directions
         if len(sorted_angels) == 3:
-            directions = {sorted_keys[0]: 'left', sorted_keys[1]: 'through', sorted_keys[2]: 'right'}
+            directions = {sorted_keys[0]: 'left', sorted_keys[1]: 'straight', sorted_keys[2]: 'right'}
 
         # if 2 successors we assume that they both cannot have the same direction
         if len(sorted_angels) == 2:
