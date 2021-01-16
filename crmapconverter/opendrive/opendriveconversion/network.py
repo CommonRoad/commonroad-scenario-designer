@@ -492,17 +492,22 @@ class LinkIndex:
         """
         updated_intersection_maps = []
         for intersection_map in self.intersection_maps():
-            intersection_map_concatenated_lanelets = intersection_map
+            intersection_map_concatenated_lanelets = copy.copy(intersection_map)
             # Check if old lanelet is in keys
             for old_id, new_id in replacement_id_map.items():
+                # TODO: Update values along with keys
+                for incoming, successors in intersection_map.items():
+                    updated_successors = [new_id if x == old_id else x for x in successors]
+                    intersection_map[incoming] = updated_successors
+
                 if old_id in intersection_map.keys():
                     intersection_map_concatenated_lanelets[new_id] = intersection_map[old_id]
                     del intersection_map_concatenated_lanelets[old_id]
+
                 # Check if old lanelet is in values
             updated_intersection_maps.append(intersection_map_concatenated_lanelets)
         self._intersections = updated_intersection_maps
 
-        # TODO: Confirm if it is necessary to update values. Not necessary if connecting lanes are never concatenated
 
     def update_intersection_lane_id(self, old_id_to_new_id_map):
         """

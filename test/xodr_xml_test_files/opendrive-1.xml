@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<commonRoad timeStepSize="0.1" commonRoadVersion="2020a" author="" affiliation="" source="OpenDRIVE 2 Lanelet Converter" benchmarkID="ZAM_OpenDrive-123" date="2021-01-05">
+<commonRoad timeStepSize="0.1" commonRoadVersion="2020a" author="" affiliation="" source="OpenDRIVE 2 Lanelet Converter" benchmarkID="ZAM_OpenDrive-123" date="2021-01-16">
   <location>
     <geoNameId>-999</geoNameId>
     <gpsLatitude>999</gpsLatitude>
@@ -39069,4 +39069,30 @@
     </position>
     <active>true</active>
   </trafficLight>
+  <intersection id="0">
+    <incoming id="0">
+      <incomingLanelet ref="106"/>
+      <successorsRight ref="107"/>
+      <successorsStraight ref="113"/>
+      <successorsLeft ref="115"/>
+    </incoming>
+    <incoming id="1">
+      <incomingLanelet ref="111"/>
+      <successorsRight ref="112"/>
+      <successorsStraight ref="114"/>
+      <successorsLeft ref="103"/>
+    </incoming>
+    <incoming id="2">
+      <incomingLanelet ref="108"/>
+      <successorsRight ref="110"/>
+      <successorsStraight ref="102"/>
+      <successorsLeft ref="109"/>
+    </incoming>
+    <incoming id="3">
+      <incomingLanelet ref="101"/>
+      <successorsRight ref="100"/>
+      <successorsStraight ref="105"/>
+      <successorsLeft ref="104"/>
+    </incoming>
+  </intersection>
 </commonRoad>
