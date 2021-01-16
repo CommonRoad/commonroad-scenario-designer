@@ -620,7 +620,6 @@ class ConversionLaneletNetwork(LaneletNetwork):
         for key, item in intersection_map_combined.items():
             incoming_lane_ids = [key]
             incoming_lanes = key
-
             # Since all the lanes have the same successors,
             # we simply use the first one to check for the successor directions
             # if more than one incoming lanes exist
@@ -702,17 +701,18 @@ class ConversionLaneletNetwork(LaneletNetwork):
         for successor in incoming_lane.successor:
             # only use the last three waypoints of the incoming for angle calculation
             succeeding_lane = self.find_lanelet_by_id(successor)
-            a_angle = geometry.curvature(incoming_lane.left_vertices[-3:])
-            b_angle = geometry.curvature(succeeding_lane.left_vertices[-3:])
+            a_angle = geometry.curvature(incoming_lane.center_vertices[-3:])
+            b_angle = geometry.curvature(succeeding_lane.center_vertices)
             angle = a_angle - b_angle
             angels[succeeding_lane.lanelet_id] = angle
 
             # determine direction of trajectory
             # right-turn
-            if geometry.is_clockwise(succeeding_lane.left_vertices) > 0:
+
+            if geometry.is_clockwise(list(succeeding_lane.center_vertices)) > 0:
                 angels[succeeding_lane.lanelet_id] = abs(angels[succeeding_lane.lanelet_id])
             # left-turn
-            if geometry.is_clockwise(succeeding_lane.left_vertices) < 0:
+            if geometry.is_clockwise(list(succeeding_lane.center_vertices)) < 0:
                 angels[succeeding_lane.lanelet_id] = -abs(angels[succeeding_lane.lanelet_id])
 
         # sort after size

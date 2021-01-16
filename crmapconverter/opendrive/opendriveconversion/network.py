@@ -516,7 +516,7 @@ class LinkIndex:
                 # Replacing keys/incoming ids with new ids
                 # print("from", incoming, "to", old_id_to_new_id_map[incoming])
                 new_incoming_id = old_id_to_new_id_map[incoming]
-                connecting = [old_id_to_new_id_map.get(item ) for item in connecting]
+                connecting = [old_id_to_new_id_map.get(item) for item in connecting]
                 intersection_map_new_id[new_incoming_id] = connecting
 
             updated_intersection_maps.append(intersection_map_new_id)
