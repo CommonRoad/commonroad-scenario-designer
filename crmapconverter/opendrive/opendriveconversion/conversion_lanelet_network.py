@@ -106,9 +106,10 @@ class ConversionLaneletNetwork(LaneletNetwork):
 
         These numbers have to be positive integers.
         """
-
+        old_id_to_new_id_map = dict()
         for lanelet in self.lanelets:
             lanelet.description = lanelet.lanelet_id
+            old_id_to_new_id_map[lanelet.description] = lanelet.lanelet_id
             self.remove_lanelet(lanelet.lanelet_id)
             lanelet.lanelet_id = convert_to_new_lanelet_id(
                 lanelet.lanelet_id, self._old_lanelet_ids
@@ -130,6 +131,7 @@ class ConversionLaneletNetwork(LaneletNetwork):
                     lanelet.adj_right, self._old_lanelet_ids
                 )
             self.add_lanelet(lanelet)
+        return old_id_to_new_id_map
 
     def prune_network(self):
         """Remove references in predecessor, successor etc. to
@@ -261,6 +263,8 @@ class ConversionLaneletNetwork(LaneletNetwork):
             replacement_ids.update(
                 self._concatenate_lanelet_pairs_group(possible_concat_lanes)
             )
+
+            return replacement_ids
 
     def _concatenate_lanelet_pairs_group(self, lanelet_pairs: list) -> dict:
         """Concatenate a group of lanelet_pairs, with setting correctly the new lanelet_ids

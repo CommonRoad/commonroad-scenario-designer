@@ -139,13 +139,6 @@ class Network:
                 for signal_reference in parametric_lane.signal_references:
                     signal_reference_to_lanelet_id_mapper[signal_reference].extend(lanelet.predecessor)
 
-        # generating intersections
-        for intersection_map in self._link_index.intersection_maps():
-            # Remove lanelets that are not part of the network (as they are of a different type)
-            intersection_id_counter = 0
-            lanelet_network.create_intersection(intersection_map, intersection_id_counter)
-            intersection_id_counter += 1
-
         # prune because some
         # successorIds get encoded with a non existing successorID
         # of the lane link
@@ -176,12 +169,25 @@ class Network:
                         lanelet_network.find_lanelet_by_id(lanelet_id).stop_line = updated_id[0]
 
         # concatenate possible lanelets with their successors
-        lanelet_network.concatenate_possible_lanelets()
+        replacement_id_map = lanelet_network.concatenate_possible_lanelets()
+
+        self._link_index.concatenate_lanes_in_intersection_map(replacement_id_map)
 
         # Perform lane splits and joins
         lanelet_network.join_and_split_possible_lanes()
 
-        lanelet_network.convert_all_lanelet_ids()
+        old_id_to_new_id_map = lanelet_network.convert_all_lanelet_ids()
+
+
+        """
+        APPLYING INTERSECTION: ACTIVATE LATER
+        # generating intersections
+        for intersection_map in self._link_index.intersection_maps():
+            # Remove lanelets that are not part of the network (as they are of a different type)
+            intersection_id_counter = 0
+            lanelet_network.create_intersection(intersection_map, intersection_id_counter)
+            intersection_id_counter += 1
+        """
 
         return lanelet_network
 
@@ -239,7 +245,7 @@ class LinkIndex:
 
     def __init__(self):
         self._successors = {}
-        self._intersections = []
+        self._intersections = list()
 
     def intersection_maps(self):
         return self._intersections
@@ -480,4 +486,20 @@ class LinkIndex:
             if parametric_lane_id in intersection.keys():
                 del intersection[parametric_lane_id]
         return
+
+    def concatenate_lanes_in_intersection_map(self, replacement_id_map):
+        """
+        Lanelets are concatenated if possible, hence some lanelets ids that exist in intersections
+        are no longer valid and also need to be replaced with the lanelet id they are concatenated with.
+        """
+        for old_id, new_id in replacement_id_map.items():
+            intersection_maps = self.intersection_maps()
+            for intersection_map in self.intersection_maps():
+                # Check if old lanelet is in keys
+                if old_id in intersection_map.keys():
+                    intersection_map[new_id] = intersection_map[old_id]
+                    del intersection_map[old_id]
+                # Check if old lanelet is in values
+                # TODO: Confirm if it is necessary to update values. Not necessary if
+                #  connecting lanes are never concatenated
 
