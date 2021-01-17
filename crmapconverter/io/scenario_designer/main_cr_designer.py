@@ -84,7 +84,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.widfor = 20
         self.vertfor = 20
         self.adjfor = None
-        self.lanelettype ="urban"
+        self.lanelettype = set()
         self.roaduser ="vehicle"
         self.linemarkingleft = "no_marking"
         self.linemarkingright = "no_marking"
@@ -251,7 +251,13 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.widfor = self.LL.getLaneletWidth()
         self.pred = self.LL.getPredecessor()
         self.adjfor = self.LL.getAdjacentLanelet()
-        self.lanelettype = self.LL.getLaneletType()
+        indexlist = self.LL.getLaneletType()
+        self.lanelettype = set()
+        for i in range(0, len(indexlist)):
+            lt = LaneletType(indexlist[i])
+            print(indexlist[i])
+            self.lanelettype.add(LaneletType(indexlist[i]))
+
         self.roaduser = self.LL.getRoadUser()
         self.linemarkingright = self.LL.getLineMarkingRight()
         self.linemarkingleft = self.LL.getLineMarkingLeft()
@@ -259,6 +265,8 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.lanelet_pos_y = self.LL.getPosY()
         self.backwards = self.LL.getDirection()
         self.vertfor = self.LL.getNumVertices()
+
+        print(self.lanelettype)
 
     def curve(self):
         self.CU = CurveSettings()
@@ -538,7 +546,8 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.tool2.setWidget(self.lowertoolBox)
         self.addDockWidget(Qt.LeftDockWidgetArea, self.tool2)
         self.lowertoolBox.refresh_button.clicked.connect(lambda: self.refresh_information())
-
+        self.tool2.setMaximumHeight(400)
+        self.lowertoolBox.edit_button.clicked.connect(lambda: self.edit_lanelet())
 
 #        if self.crviewer.selected_lanelet_use[0]:
  #           self.selected_lanelet = self.crviewer.selected_lanelet_use[0]
@@ -560,6 +569,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
             if self.crviewer.selected_lanelet_use[0] != None:
                 self.selected_lanelet = self.crviewer.selected_lanelet_use[0]
                 id = str(self.selected_lanelet._lanelet_id)
+                self.selected_id = int(id)
                 #distance = self.selected_lanelet._distance
                 num_vertices = len(self.selected_lanelet.center_vertices)
                 length = self.selected_lanelet._distance[-1]
@@ -575,7 +585,25 @@ class MWindow(QMainWindow, Ui_mainWindow):
                 self.lowertoolBox.width.insert((str(int(width))))
 
 
+
         return 0
+
+
+    def edit_lanelet(self):
+        posX = 0
+        posY = 0
+        if self.scenario == None:
+            self.textBrowser.append("create a new file")
+            return
+        self.selected_width = int(self.lowertoolBox.width.text())
+        self.selected_length = int(self.lowertoolBox.length.text())
+        lanelet = self.mapcreator.edit_straight(self.selected_id, self.selected_width, self.selected_length, self.vertfor,
+                                             self.scenario.lanelet_network, self.scenario, self.pred, self.lanelettype,
+                                             self.roaduser, self.linemarkingleft, self.linemarkingright, backwards=self.backwards)
+        lanelet.translate_rotate(np.array([posX, posY]), self.rot_angle_straight)
+
+        self.update_view(focus_on_network=True)
+
 
 
     def create_sumobox(self):

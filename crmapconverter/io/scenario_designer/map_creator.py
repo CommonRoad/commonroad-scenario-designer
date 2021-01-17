@@ -44,14 +44,14 @@ class mapcreator:
         b = set(b)
         predecessor._successor = list(b)
 
-    def create_straight(self, width, length, num_vertices, network, scenario, pred, lanelettype="urban", roaduser="vehicle",
+    def create_straight(self, width, length, num_vertices, network, scenario, pred, lanelettype, roaduser="vehicle",
                         linemarkingleft="no_marking", linemarkingright="no_marking", backwards=False):
         eps = 0.1e-15
-        length_div = length / num_vertices
+        length_div = length / (num_vertices-1)
         left_vertices = []
         center_vertices = []
         right_vertices = []
-        for i in range(num_vertices + 1):
+        for i in range(num_vertices):
             left_vertices.append([length_div * i + eps, width / 2 + eps])
             center_vertices.append([length_div * i + eps, eps])
             right_vertices.append([length_div * i + eps, -(width / 2) + eps])
@@ -62,7 +62,7 @@ class mapcreator:
 
         idl = scenario.generate_object_id()
         lanelet = Lanelet(left_vertices=left_vertices, right_vertices=right_vertices, lanelet_id=idl,
-                          center_vertices=center_vertices, lanelet_type={LaneletType(lanelettype)},
+                          center_vertices=center_vertices, lanelet_type=lanelettype,
                           user_one_way={RoadUser(roaduser)}, line_marking_right_vertices=LineMarking(linemarkingright),
                           line_marking_left_vertices=LineMarking(linemarkingleft))
         if backwards:
@@ -74,6 +74,41 @@ class mapcreator:
         self.latestid = idl
         network.add_lanelet(lanelet=lanelet)
         return lanelet
+
+    def edit_straight(self, id, width, length, num_vertices, network, scenario, pred, lanelettype={LaneletType("urban")}, roaduser="vehicle",
+                        linemarkingleft="no_marking", linemarkingright="no_marking", backwards=False):
+        eps = 0.1e-15
+        length_div = length / (num_vertices-1)
+        left_vertices = []
+        center_vertices = []
+        right_vertices = []
+        for i in range(num_vertices):
+            left_vertices.append([length_div * i + eps, width / 2 + eps])
+            center_vertices.append([length_div * i + eps, eps])
+            right_vertices.append([length_div * i + eps, -(width / 2) + eps])
+
+        left_vertices = np.array(left_vertices)
+        center_vertices = np.array(center_vertices)
+        right_vertices = np.array(right_vertices)
+
+        lanelet = network.find_lanelet_by_id(id)
+        lanelet._left_vertices = left_vertices
+        lanelet._right_vertices = right_vertices
+        lanelet._center_vertices = center_vertices
+        """lanelet = Lanelet(left_vertices=left_vertices, right_vertices=right_vertices, lanelet_id=idl,
+                          center_vertices=center_vertices, lanelet_type=lanelettype,
+                          user_one_way={RoadUser(roaduser)}, line_marking_right_vertices=LineMarking(linemarkingright),
+                          line_marking_left_vertices=LineMarking(linemarkingleft))"""
+        if backwards:
+            lanelet.translate_rotate(-lanelet.center_vertices[0], np.pi)
+
+        if pred:
+            if self.latestid != None:
+                mapcreator.fit_to_predecessor(self, network.find_lanelet_by_id(self.latestid),lanelet)
+        self.latestid = id
+        #network.add_lanelet(lanelet=lanelet)
+        return lanelet
+
 
     def create_curve(self, width, radius, angle, num_vertices, network, scenario, pred, lanelettype="urban", roaduser="vehicle",
                         linemarkingleft="no_marking", linemarkingright="no_marking"):
@@ -101,7 +136,7 @@ class mapcreator:
 
         idl = scenario.generate_object_id()
         lanelet = Lanelet(left_vertices=left_vertices, right_vertices=right_vertices, lanelet_id=idl,
-                          center_vertices=center_vertices, lanelet_type={LaneletType(lanelettype)},
+                          center_vertices=center_vertices, lanelet_type={LaneletType(lanelettype), LaneletType("busLane")},
                           user_one_way={RoadUser(roaduser)}, line_marking_right_vertices=LineMarking(linemarkingright),
                           line_marking_left_vertices=LineMarking(linemarkingleft))
         lanelet.translate_rotate(np.array([0,0]),angle_start)

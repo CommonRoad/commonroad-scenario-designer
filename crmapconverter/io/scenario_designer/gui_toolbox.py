@@ -82,6 +82,10 @@ class UpperToolbox(QWidget):
         self.button_traffic_light.setText("Traffic light")
         layout1.addWidget(self.button_traffic_light, 1, 0)
 
+        self.edit_button_traffic_light = QPushButton()
+        self.edit_button_traffic_light.setText("edit Traffic light")
+        layout1.addWidget(self.edit_button_traffic_light, 1, 1)
+
         """add Roundabout button
         button_roundabout = QPushButton()
         button_roundabout.setText("Roundabout")
@@ -223,30 +227,8 @@ class UpperToolbox(QWidget):
         titleintersection = "Intersections"
         self.sections.append((titleintersection, widgetintersection))
 
-        # --Section Obstacles--
 
-        widgetobstacles = QFrame(self.tree)
-        layoutobstacles = QGridLayout(widgetobstacles)
 
-        button_obstacle1 = QPushButton()
-        button_obstacle1.setText("Obstacle1")
-        button_obstacle1.setIcon(QIcon(":/icons/forwards.PNG"))
-        layoutobstacles.addWidget(button_obstacle1, 1, 0)
-
-        button_obstacle2 = QPushButton()
-        button_obstacle2.setText("Obstacle2")
-        button_obstacle2.setIcon(QIcon(":/icons/forwards.PNG"))
-        layoutobstacles.addWidget(button_obstacle2, 2, 0)
-
-        button_obstacle3 = QPushButton()
-        button_obstacle3.setText("Obstacle3")
-        button_obstacle3.setIcon(QIcon(":/icons/forwards.PNG"))
-        layoutobstacles.addWidget(button_obstacle3, 3, 0)
-
-        titleobstacles = "Obstacles"
-        self.sections.append((titleobstacles, widgetobstacles))
-
-        """"""""""""""
 
         widget2 = QFrame(self.tree)
         layout2 = QGridLayout(widget2)
@@ -383,17 +365,28 @@ class LaneletInformationToolbox(QWidget):
         self.number_vertices.setMaxLength(2)
         self.number_vertices.setAlignment(Qt.AlignRight)
 
+        self.radius = QLineEdit()
+        self.radius.setValidator(QIntValidator())
+        self.radius.setMaxLength(4)
+        self.radius.setAlignment(Qt.AlignRight)
+
+        self.angle = QLineEdit()
+        self.angle.setValidator(QIntValidator())
+        self.angle.setMaxLength(4)
+        self.angle.setAlignment(Qt.AlignRight)
+
         self.refresh_button = QPushButton()
         self.refresh_button.setText("refresh")
-
         self.edit_button = QPushButton()
         self.edit_button.setText("edit")
 
 
         layout.addRow("Lanelet ID", self.laneletID)
         layout.addRow("Lanelet width", self.width)
-        layout.addRow("Lanelet height", self.length)
+        layout.addRow("Lanelet length", self.length)
         layout.addRow("Number Vertices", self.number_vertices)
+        layout.addRow("Curve radius", self.radius)
+        layout.addRow("Curve angle", self.angle)
         layout.addWidget(self.refresh_button)
         layout.addWidget(self.edit_button)
 
