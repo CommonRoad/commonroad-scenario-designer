@@ -692,6 +692,7 @@
     <adjacentLeft ref="106" drivingDir="opposite"/>
     <laneletType>unknown</laneletType>
     <userBidirectional>priorityVehicle</userBidirectional>
+    <trafficSignRef ref="1"/>
   </lanelet>
   <lanelet id="117">
     <leftBound>
