@@ -62,11 +62,12 @@ class Way:
 class WayRelation:
     """Relation for a lanelet with a left and a right way."""
 
-    def __init__(self, id_, left_way, right_way, tag_dict: Optional[dict] = None): #add a spot for traffic signs especially speed limit
+    def __init__(self, id_, left_way, right_way, tag_dict: Optional[dict] = None, regulatory_elements: List[str] = []): #add a spot for traffic signs especially speed limit
         self.id_ = str(id_)
         self.left_way = str(left_way)
         self.right_way = str(right_way)
         self.tag_dict = tag_dict if tag_dict is not None else {}
+        self.regulatory_elements = regulatory_elements
 
     def serialize_to_xml(self) -> etree.Element:
         rel = etree.Element("relation")
@@ -141,6 +142,7 @@ class OSM:
         self._ways = {}
         self.way_relations = {}
         self.right_of_way_relations = {}
+        self.speed_limit_signs = {}
 
     def add_node(self, node: Node):
         """Add a new node to the OSM.
@@ -158,6 +160,9 @@ class OSM:
 
     def add_right_of_way_relation(self, right_of_way_relation: RightOfWayRelation):
         self.right_of_way_relations[right_of_way_relation.id_] = right_of_way_relation
+
+    def add_speed_limit_sign(self, speed_limit_id: str, speed_limit_speed: str, traffic_sign_id):
+        self.speed_limit_signs[speed_limit_id] = (speed_limit_speed, traffic_sign_id)
 
     def find_way_by_id(self, way_id: str) -> Optional[Way]:
         return self._ways.get(way_id)

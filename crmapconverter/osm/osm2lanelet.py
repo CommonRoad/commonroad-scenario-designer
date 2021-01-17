@@ -129,12 +129,20 @@ class OSM2LConverter:
         scenario = Scenario(dt=0.1, scenario_id=scenario_id)
         self.lanelet_network = ConversionLaneletNetwork()
 
+        speed_limits = {}
+        speed_limit_lanelets = {}
+        for speed_limit_key in osm.speed_limit_signs.keys():
+            light_id = scenario.generate_object_id()
+            speed_limits[speed_limit_key] = light_id
+            speed_limit_lanelets[speed_limit_key] = []
+            # scenario.add_objects(speed_limit)
+
         for way_rel in osm.way_relations.values():
             # add traffic sign id to traffic signs for speed limit
             # create dictionary for mapping of osm id to cr id and keep id constant
             # later add speed limit as traffic sign
             lanelet = self._way_rel_to_lanelet(
-                way_rel, detect_adjacencies, left_driving_system
+                way_rel, detect_adjacencies, left_driving_system, speed_limits, speed_limit_lanelets
             )
             if lanelet is not None:
                 self.lanelet_network.add_lanelet(lanelet)
@@ -163,6 +171,15 @@ class OSM2LConverter:
                 print(str(e))
 
         # TODO convert traffic signs as well
+        for speed_limit_key in osm.speed_limit_signs.keys():
+            speed, traffic_sign_id = osm.speed_limit_signs[speed_limit_key]
+            light_id = speed_limits[speed_limit_key]
+            first_occurrence = set([self.lanelet_network._old_lanelet_ids[l_id] for l_id in speed_limit_lanelets[speed_limit_key]])
+            # TODO find better way to position speed limit
+            position = self.lanelet_network.find_lanelet_by_id(self.lanelet_network._old_lanelet_ids[speed_limit_lanelets[speed_limit_key][0]]).left_vertices[0]
+            speed_limit = TrafficSign(light_id, [TrafficSignElement(traffic_sign_id,[speed])],first_occurrence, position, True)
+            self.lanelet_network.add_traffic_sign(speed_limit, first_occurrence)
+            # scenario.add_objects(speed_limit, first_occurrence)
 
         scenario.add_objects(self.lanelet_network)
 
@@ -282,6 +299,8 @@ class OSM2LConverter:
         way_rel: WayRelation,
         detect_adjacencies: bool,
         left_driving_system: bool = False,
+        speed_limit_dict: dict = {},
+        speed_limit_lanelts: dict = {},
     ) -> ConversionLanelet:
         """Convert a WayRelation to a Lanelet, add additional adjacency information.
 
@@ -294,6 +313,8 @@ class OSM2LConverter:
           detect_adjacencies: Compare vertices which might be adjacent. Set
             to false if you consider it too computationally intensive.
           left_driving_system: Set to true if map describes a left_driving_system.
+          speed_limit_dict: Dictionary with reglatory_element_id to TrafficSign mapping
+          speed_limit_lanelts: mapping from speed_limit_ids to lanelets that use speed Limit
 
         Returns:
           A lanelet with a right and left vertice.
@@ -394,7 +415,16 @@ class OSM2LConverter:
 
         users_bidirectional.add(RoadUser.PRIORITY_VEHICLE)
 
+        traffic_signs = []
+        for key in way_rel.regulatory_elements:
+            if not speed_limit_dict.get(key) is None:
+                traffic_signs.append(speed_limit_dict[key])
+                speed_limit_lanelts[key].append(way_rel.id_)
 
+        if len(traffic_signs) == 0:
+            traffic_signs = None
+        else:
+            traffic_signs = set(traffic_signs)
 
         lanelet = ConversionLanelet(
             left_vertices=left_vertices,
@@ -405,6 +435,7 @@ class OSM2LConverter:
             user_one_way=users_one_way,
             user_bidirectional=users_bidirectional,
             lanelet_type=lanelet_type,
+            traffic_signs=traffic_signs
         )
 
         self._check_right_and_left_neighbors(way_rel, lanelet)

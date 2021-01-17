@@ -13,6 +13,8 @@ __status__ = "Released"
 from lxml import etree
 from crmapconverter.osm.osm import OSM, Node, Way, WayRelation, RightOfWayRelation
 
+from commonroad.scenario.traffic_sign import TrafficSignIDGermany
+
 ALLOWED_TAGS = {
     "type",
     "subtype",
@@ -54,8 +56,9 @@ class OSMParser:
                 )[0]
                 tag_dict = {tag.get("k"): tag.get("v") for tag in way_rel.xpath("./tag[@k and @v]")
                             if tag.get("k") in ALLOWED_TAGS}
+                regulatory_elements = [ref for ref in way_rel.xpath("./member[@role='regulatory_element']/@ref")]
                 osm.add_way_relation(
-                    WayRelation(way_rel.get("id"), left_way, right_way, tag_dict)
+                    WayRelation(way_rel.get("id"), left_way, right_way, tag_dict, regulatory_elements)
                 )
             except IndexError:
                 print(
@@ -83,9 +86,8 @@ class OSMParser:
                     )
 
             for speed_limit in reg_element_rel.xpath("./tag[@v='speed_limit' and @k='subtype']/.."):
-                traffic_sign_id = '274'
-
                 '''
+                TODO 
                 create a traffic sign 
                 commonroad.scenario.traffic_sign
                 
@@ -95,8 +97,10 @@ class OSMParser:
                 
                 each lanelet with a relation to this speed limit needs a reference
                 '''
-                pass
-
-
+                # TODO find out if required to remove kmh or mph
+                speed = speed_limit.xpath("./tag[@k='sign_type']/@v")[0] #[:-3]
+                speed_limit_id = speed_limit.attrib['id']
+                traffic_sign_id = TrafficSignIDGermany.MAX_SPEED
+                osm.add_speed_limit_sign(speed_limit_id, speed, traffic_sign_id)
 
         return osm
