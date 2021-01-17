@@ -107,4 +107,8 @@ class TestFeatureLanelet2Lanelets(TestOSM2CRConversionBaseClass):
     __test__ = True
     osm_file_name = "traffic_priority_lanelets_utm"
 
-#TODO add speed_limit unit test
+class TestSpeedLimitConversion(TestOSM2CRConversionBaseClass):
+    """Basic test file including some splits and joins."""
+
+    __test__ = True
+    osm_file_name = "traffic_speed_limit_utm"
