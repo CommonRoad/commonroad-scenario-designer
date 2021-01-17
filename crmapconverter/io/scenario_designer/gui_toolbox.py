@@ -193,15 +193,15 @@ class UpperToolbox(QWidget):
         widgetintersection = QFrame(self.tree)
         layoutintersection = QGridLayout(widgetintersection)
 
-        button_X = QPushButton()
-        button_X.setText("X")
-        button_X.setIcon(QIcon(":/icons/forwards.PNG"))
-        layoutintersection.addWidget(button_X, 1, 0)
+        self.button_X = QPushButton()
+        self.button_X.setText("X")
+        self.button_X.setIcon(QIcon(":/icons/forwards.PNG"))
+        layoutintersection.addWidget(self.button_X, 1, 0)
 
-        button_T = QPushButton()
-        button_T.setText("T")
-        layoutintersection.addWidget(button_T, 1, 1)
-        button_T.setIcon(QIcon(":/gui_src/forwards.PNG"))
+        self.button_T = QPushButton()
+        self.button_T.setText("T")
+        layoutintersection.addWidget(self.button_T, 1, 1)
+        self.button_T.setIcon(QIcon(":/gui_src/forwards.PNG"))
 
         # button_T_2 = QPushButton()
         # button_T_2.setText("T_2")

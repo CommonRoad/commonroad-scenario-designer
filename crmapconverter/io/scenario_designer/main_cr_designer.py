@@ -39,6 +39,7 @@ from crmapconverter.io.scenario_designer.lanelet_settings import LaneletSettings
 from crmapconverter.io.scenario_designer.curve_settings import CurveSettings
 from crmapconverter.io.scenario_designer.traffic_signs_settings import TrafficSignsSettings, TrafficSignsSelection, TrafficLightSelection
 from crmapconverter.io.scenario_designer.adjecent_settings import AdjecentSettings, ConnectSettings, FitSettings, RemoveSettings
+from crmapconverter.io.scenario_designer.intersection_settings import *
 
 
 from commonroad.scenario.lanelet import Lanelet, LaneletType, LaneletNetwork
@@ -426,10 +427,29 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.traffic_signs_settings = 0
 
     def click_x_crossing(self):
-        x_crossing = self.mapcreator.x_crossing(20, 80, self.crviewer.current_scenario.lanelet_network,
+        XC = XCrossing()
+        XC.exec()
+        width = 20
+        diameter = 80
+        width = XC.getWidth()
+        diameter = XC.getDiameter()
+        self.mapcreator.x_crossing(width, diameter, self.crviewer.current_scenario.lanelet_network,
                                                 self.crviewer.current_scenario)
         # lanelet.translate_rotate(np.array([0, 0]), self.rot_angle_curve)
         self.update_view(focus_on_network=True)
+
+
+    def click_t_crossing(self):
+        TC = TCrossing()
+        TC.exec()
+        width = 20
+        diameter = 80
+        width = TC.getWidth()
+        diameter = TC.getDiameter()
+        self.mapcreator.t_crossing(width, diameter, self.crviewer.current_scenario.lanelet_network,
+                                                self.crviewer.current_scenario)
+        self.update_view(focus_on_network=True)
+
 
     def fit_intersection(self):
         if self.selected_predecessor and self.selected_successor and self.selected_intersection:
@@ -466,6 +486,8 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.uppertoolBox.button_connect_lanelets.clicked.connect(lambda: self.connect_lanelets())
         self.uppertoolBox.button_remove_lanelet.clicked.connect(lambda: self.remove_lanelet())
 
+        self.uppertoolBox.button_X.clicked.connect(lambda: self.click_x_crossing())
+        self.uppertoolBox.button_T.clicked.connect(lambda: self.click_t_crossing())
 
     def create_lanelet_list(self):
         """Create the lanelet_list and put it into right Dockwidget area."""

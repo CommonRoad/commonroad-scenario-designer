@@ -44,7 +44,7 @@ class mapcreator:
         b = set(b)
         predecessor._successor = list(b)
 
-    def create_straight(self, width, length, num_vertices, network, scenario, pred, lanelettype, roaduser="vehicle",
+    def create_straight(self, width, length, num_vertices, network, scenario, pred, lanelettype=set(), roaduser="vehicle",
                         linemarkingleft="no_marking", linemarkingright="no_marking", backwards=False):
         eps = 0.1e-15
         length_div = length / (num_vertices-1)
@@ -544,7 +544,7 @@ class mapcreator:
         intersection_id = scenario.generate_object_id()
 
 
-        intersection = Intersection(intersection_id=intersection_id, incomings=map_incoming, crossings=crossings)
+        intersection = Intersection(intersection_id=intersection_id, incomings=map_incoming)
         scenario.add_objects([intersection])
         return intersection
 
