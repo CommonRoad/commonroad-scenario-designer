@@ -615,7 +615,7 @@ class ConversionLaneletNetwork(LaneletNetwork):
         # TODO: Define criterion for intersection ID
         incoming_id_counter = 0
         # If different incoming lanelets have same successors, combine into set
-        intersection_map_combined = self.combine_lanelets_with_common_successors(intersection_map)
+        intersection_map_combined = self.combine_common_incoming_lanelets(intersection_map)
         intersection_incoming_lanes = list()
         for key, item in intersection_map_combined.items():
             incoming_lane_ids = [key]
@@ -642,47 +642,73 @@ class ConversionLaneletNetwork(LaneletNetwork):
                     print(direction)
                     warnings.warn("Incorrect direction assigned to successor of incoming lanelet in intersection")
 
+            # TODO: Add left of to incoming lanelets in intersection
             intersection_incoming_lane = IntersectionIncomingElement(incoming_id_counter, incoming_lane_ids,
                                                                      successor_right, successor_straight,
                                                                      successor_left)
+
             intersection_incoming_lanes.append(intersection_incoming_lane)
-            # TODO: Add left of to incoming lanelets in intersection
             # TODO: Add crossings to intersections
             incoming_id_counter += 1
         intersection = Intersection(intersection_id, intersection_incoming_lanes)
+        self.find_left_of(intersection.incomings)
         self.add_intersection(intersection)
 
-    def combine_lanelets_with_common_successors(self, intersection_map):
+    def find_left_of(self, incomings):
         """
-        the intersection dictionary is manipulated such that it has
-        multiple keys as the incoming lanelets and the values define
-        the successor lanelets.
-        param: intersection_map - information about the successors of a lanelet in a junction
-        return: intersection_map_summarized - information about the successors of a lanelet in a junction
-                with lanelets with common successors grouped together
+            Find and add isLeftOf property for the incomings
 
+            :param incoming_data: incomings without isLeftOf
+            :param incoming_data_id: List of the id of the incomings
+            :return: incomings with the isLeftOf assigned
         """
-        list_of_successors = list(intersection_map.values())
+        incoming_lanelets = list()
+        for incoming in incomings:
+            for incoming_lane in incoming.incoming_lanelets:
+                incoming_lanelets.append(incoming_lane)
 
-        intersection_map_summarized = defaultdict(list)
+        # Choose a reference incoming vector
+        ref = self.find_lanelet_by_id(incoming_lanelets[0]).center_vertices[-1] - self.find_lanelet_by_id(incoming_lanelets[0]).center_vertices[-5]
+        angles = [(0, 0)]
+        # calculate all incoming angle from the reference incoming vector
+        for index in range(1, len(incoming_lanelets)):
+            new_v = self.find_lanelet_by_id(incoming_lanelets[index]).center_vertices[-1] - self.find_lanelet_by_id(incoming_lanelets[index]).center_vertices[-5]
+            angle = geometry.get_angle(ref, new_v)
+            if angle < 0:
+                angle += 360
+            angles.append((index, angle))
+        angles.sort(key=lambda tup: tup[1])
+        prev = -1
 
-        # Traverse dict to see if more than one lane has the same successor
-        for key, values in intersection_map.items():
-            if list_of_successors.count(values) > 1 and key not in [item for t in
-                                                                    intersection_map_summarized
-                                                                    for item in t]:
-                shared_successor = [key]
-                for key2, values2 in intersection_map.items():
-                    if (values2 == values) and (key2 != key) and (
-                            key2 not in [item for t in intersection_map_summarized
-                                         for item in t]):
-                        shared_successor.append(key2)
+        is_left_of_map = dict()
+        # take the incomings which have less than 90 degrees in between
+        index = 0
+        while index < len(incoming_lanelets):
+            print(incoming_lanelets[index], "vs", incoming_lanelets[angles[prev][0]])
+            print(angles[index][1], "minus", angles[prev][1])
+            angle = angles[index][1] - angles[prev][1]
+            if angle < 0:
+                angle += 360
+            if angle > config.LANE_SEGMENT_ANGLE and angle <= 180 - config.LANE_SEGMENT_ANGLE:
+                # is left of the previous incoming
+                print("Success?")
+                is_left_of = angles[prev][0]
+                data_index = angles[index][0]
+                is_left_of_map[incoming_lanelets[data_index]] = incoming_lanelets[is_left_of]
+                index += 1
+                prev = -1
+            else:
+                if abs(prev) >= len(incoming_lanelets):
+                    index += 1
+                    prev = -1
+                else:
+                    prev -= 1
 
-                intersection_map_summarized[tuple(shared_successor)] = values
-            elif list_of_successors.count(values) <= 1:
-                intersection_map_summarized[key] = values
+        return
 
-        return intersection_map_summarized
+    def combine_common_incoming_lanelets(self, intersection_map):
+
+        return
 
     def get_successor_directions(self, incoming_lane):
         """
