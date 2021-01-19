@@ -728,15 +728,25 @@ class ConversionLaneletNetwork(LaneletNetwork):
             adj_right = incoming_lane.adj_right
             adj_left = incoming_lane.adj_left
             while adj_right is not None:
+                print("Infinite regress", adj_right)
                 if adj_right in incoming_lane_ids:
-                    intersection_incoming_set.append(adj_right)
-                    adj_right = self.find_lanelet_by_id(adj_right).adj_right
+                    adj_right_lane = self.find_lanelet_by_id(adj_right)
+                    if adj_right_lane.adj_right_same_direction:
+                        intersection_incoming_set.append(adj_right)
+                        adj_right = adj_right_lane.adj_right
+                    else:
+                        adj_right = None
                 else:
                     adj_right = None
+
             while adj_left is not None:
                 if adj_left in incoming_lane_ids:
-                    intersection_incoming_set.append(adj_left)
-                    adj_left = self.find_lanelet_by_id(adj_left).adj_left
+                    adj_left_lane = self.find_lanelet_by_id(adj_left)
+                    if adj_left_lane.adj_left_same_direction:
+                        intersection_incoming_set.append(adj_left)
+                        adj_left = adj_left_lane.adj_left
+                    else:
+                        adj_left = None
                 else:
                     adj_left = None
             intersection_incoming_set.sort()
