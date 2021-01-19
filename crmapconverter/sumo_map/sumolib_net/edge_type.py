@@ -139,9 +139,12 @@ class EdgeTypes:
         if old_id not in self.types:
             return None
         edge_type = self.types[old_id]
+        new_id = f"{edge_type.id}_{attr}_{value}"
+        if new_id in self.types:
+            return self.types[new_id]
 
         new_type = deepcopy(edge_type)
-        new_type.id = f"{new_type.id}_{attr}_{value}"
+        new_type.id = new_id
         setattr(new_type, attr, value)
         self.types[new_type.id] = new_type
         return new_type
@@ -150,7 +153,7 @@ class EdgeTypes:
         return self._create_from_update(old_id, "priority", priority)
 
     def create_from_update_speed(self, old_id: str, speed: float) -> Union[EdgeType, None]:
-        return self._create_from_update(old_id, "speed", speed)
+        return self._create_from_update(old_id, "speed", round(speed, 2))
 
     def create_from_update_oneway(self, old_id: str, oneway: bool) -> Union[EdgeType, None]:
         return self._create_from_update(old_id, "oneway", oneway)

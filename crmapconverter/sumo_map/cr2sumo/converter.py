@@ -1,5 +1,4 @@
-"""
-This class contains functions for converting a CommonRoad map into a .net.xml SUMO map
+""" This class contains functions for converting a CommonRoad map into a .net.xml SUMO map
 """
 import itertools
 import logging
@@ -41,7 +40,7 @@ from commonroad.scenario.lanelet import LaneletNetwork, Lanelet
 from commonroad.scenario.obstacle import ObstacleRole, ObstacleType
 from commonroad.scenario.scenario import Scenario
 from commonroad.scenario.traffic_sign import SupportedTrafficSignCountry, TrafficLight, \
-    TrafficLightCycleElement, TrafficLightDirection
+    TrafficLightCycleElement, TrafficLightDirection, TrafficSign
 from commonroad.scenario.traffic_sign_interpreter import TrafficSigInterpreter
 
 from sumocr.maps.scenario_wrapper import AbstractScenarioWrapper
@@ -58,6 +57,7 @@ from crmapconverter.sumo_map.config import SumoConfig
 from .mapping import (get_sumo_edge_type, traffic_light_states_CR2SUMO,
                       traffic_light_states_SUMO2CR, VEHICLE_TYPE_CR2SUMO, VEHICLE_NODE_TYPE_CR2SUMO, DEFAULT_CFG_FILE,
                       TEMPLATES_DIR, lanelet_type_CR2SUMO)
+from .traffic_sign import TrafficSignEncoder
 
 
 # This file is used as a template for the generated .sumo.cfg files
@@ -151,12 +151,11 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         self._create_sumo_edges_and_lanes()
         self._init_connections()
         self._merge_junctions_intersecting_lanelets()
-        # self.draw_network(self.nodes.values(), self.edges.values())
+        self._encode_traffic_signs()
         self._filter_edges()
         self._create_lane_based_connections()
         self._create_crossings()
         self._create_traffic_lights()
-        # self.draw_network(self.new_nodes.values(), self.new_edges.values())
 
     def _find_lanes(self):
         """
@@ -488,6 +487,15 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
             if len(nodes) != 1:
                 number_of_junctions += 1
         return number_of_junctions
+
+    def _encode_traffic_signs(self):
+        encoder = TrafficSignEncoder(self.edge_types)
+        traffic_signs: Dict[int, TrafficSign] = {t.traffic_sign_id: t for t in self.lanelet_network.traffic_signs}
+        for lanelet in self.lanelet_network.lanelets:
+            edge = self.edges[str(self.lanelet_id2edge_id[lanelet.lanelet_id])]
+            for traffic_sign_id in lanelet.traffic_signs:
+                sign = traffic_signs[traffic_sign_id]
+                encoder.encode(sign, lanelet, edge)
 
     def _merge_junctions_intersecting_lanelets(self):
         """
@@ -1215,7 +1223,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         return file_path
 
     def merge_intermediate_files(self, output_path: str, nodes_path: str, edges_path: str, connections_path: str,
-                                 traffic_path: str, type_path: str, cleanup=True, update_internal_ids=True) -> bool:
+                                 traffic_path: str, type_path: str, cleanup=False, update_internal_ids=True) -> bool:
         """
         Function that merges the edges and nodes files into one using netconvert
         :param connections_path:
