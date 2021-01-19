@@ -2,6 +2,7 @@
 
 """Module to enhance LaneletNetwork class
 so it can be used for conversion from the opendrive format."""
+import itertools
 import warnings
 from collections import defaultdict
 from typing import List, Optional
@@ -615,35 +616,32 @@ class ConversionLaneletNetwork(LaneletNetwork):
         # TODO: Define criterion for intersection ID
         incoming_id_counter = 0
         # If different incoming lanelets have same successors, combine into set
-        intersection_map_combined = self.combine_common_incoming_lanelets(intersection_map)
+        incoming_lanelet_ids = self.combine_common_incoming_lanelets(intersection_map)
         intersection_incoming_lanes = list()
-        for key, item in intersection_map_combined.items():
-            incoming_lane_ids = [key]
-            incoming_lanes = key
+
+        for incoming_lanelet_set in incoming_lanelet_ids:
             # Since all the lanes have the same successors,
             # we simply use the first one to check for the successor directions
             # if more than one incoming lanes exist
-            if type(incoming_lanes) is tuple:
-                successor_directions = self.get_successor_directions(self.find_lanelet_by_id(incoming_lanes[0]))
-            else:
-                successor_directions = self.get_successor_directions(self.find_lanelet_by_id(incoming_lanes))
-
             successor_right = set()
             successor_left = set()
             successor_straight = set()
-            for successor, direction in successor_directions.items():
-                if direction == "right":
-                    successor_right.add(successor)
-                elif direction == "left":
-                    successor_left.add(successor)
-                elif direction == "straight":
-                    successor_straight.add(successor)
-                else:
-                    print(direction)
-                    warnings.warn("Incorrect direction assigned to successor of incoming lanelet in intersection")
 
-            # TODO: Add left of to incoming lanelets in intersection
-            intersection_incoming_lane = IntersectionIncomingElement(incoming_id_counter, incoming_lane_ids,
+            for incoming_lane in incoming_lanelet_set:
+                successor_directions = self.get_successor_directions(self.find_lanelet_by_id(incoming_lane))
+
+                for successor, direction in successor_directions.items():
+                    if direction == "right":
+                        successor_right.add(successor)
+                    elif direction == "left":
+                        successor_left.add(successor)
+                    elif direction == "straight":
+                        successor_straight.add(successor)
+                    else:
+                        print(direction)
+                        warnings.warn("Incorrect direction assigned to successor of incoming lanelet in intersection")
+
+            intersection_incoming_lane = IntersectionIncomingElement(incoming_id_counter, incoming_lanelet_set,
                                                                      successor_right, successor_straight,
                                                                      successor_left)
 
@@ -651,7 +649,8 @@ class ConversionLaneletNetwork(LaneletNetwork):
             # TODO: Add crossings to intersections
             incoming_id_counter += 1
         intersection = Intersection(intersection_id, intersection_incoming_lanes)
-        self.find_left_of(intersection.incomings)
+        is_left_of_map = self.find_left_of(intersection.incomings)
+
         self.add_intersection(intersection)
 
     def find_left_of(self, incomings):
@@ -662,53 +661,89 @@ class ConversionLaneletNetwork(LaneletNetwork):
             :param incoming_data_id: List of the id of the incomings
             :return: incomings with the isLeftOf assigned
         """
-        incoming_lanelets = list()
-        for incoming in incomings:
-            for incoming_lane in incoming.incoming_lanelets:
-                incoming_lanelets.append(incoming_lane)
-
         # Choose a reference incoming vector
-        ref = self.find_lanelet_by_id(incoming_lanelets[0]).center_vertices[-1] - self.find_lanelet_by_id(incoming_lanelets[0]).center_vertices[-5]
+        ref = self.find_lanelet_by_id(incomings[0].incoming_lanelets[0]).center_vertices[-1] - self.find_lanelet_by_id(incomings[0].incoming_lanelets[0]).center_vertices[-5]
         angles = [(0, 0)]
         # calculate all incoming angle from the reference incoming vector
-        for index in range(1, len(incoming_lanelets)):
-            new_v = self.find_lanelet_by_id(incoming_lanelets[index]).center_vertices[-1] - self.find_lanelet_by_id(incoming_lanelets[index]).center_vertices[-5]
+        for index in range(1, len(incomings)):
+            new_v = self.find_lanelet_by_id(incomings[index].incoming_lanelets[0]).center_vertices[-1] - \
+                    self.find_lanelet_by_id(incomings[index].incoming_lanelets[0]).center_vertices[-5]
             angle = geometry.get_angle(ref, new_v)
             if angle < 0:
                 angle += 360
             angles.append((index, angle))
-        angles.sort(key=lambda tup: tup[1])
+        # angles.sort(key=lambda tup: tup[1])
         prev = -1
 
         is_left_of_map = dict()
         # take the incomings which have less than 90 degrees in between
         index = 0
-        while index < len(incoming_lanelets):
-            print(incoming_lanelets[index], "vs", incoming_lanelets[angles[prev][0]])
-            print(angles[index][1], "minus", angles[prev][1])
+        min_angle = 360
+        while index < len(incomings):
             angle = angles[index][1] - angles[prev][1]
+            print("for incoming", incomings[index].incoming_lanelets, "vs", incomings[prev].incoming_lanelets)
+            print(angles[index][1], "vs", angles[prev][1])
             if angle < 0:
                 angle += 360
-            if angle > config.LANE_SEGMENT_ANGLE and angle <= 180 - config.LANE_SEGMENT_ANGLE:
+            print(angle)
+            if angle > config.LANE_SEGMENT_ANGLE and angle <= 180 - config.LANE_SEGMENT_ANGLE and angle<min_angle:
                 # is left of the previous incoming
-                print("Success?")
                 is_left_of = angles[prev][0]
                 data_index = angles[index][0]
-                is_left_of_map[incoming_lanelets[data_index]] = incoming_lanelets[is_left_of]
-                index += 1
-                prev = -1
+                # is_left_of_map[incomings[data_index]] = incomings[is_left_of]
+                incomings[data_index].left_of = incomings[is_left_of].incoming_id
+                min_angle = angle
+                if abs(prev) >= len(incomings):
+                    max_angle = 360
+ #                   print(incomings[data_index].incoming_lanelets, "is left of",
+ #                         incomings[is_left_of].incoming_lanelets)
+ #                   print("success", prev, index)
+                    prev = -1
+                    index += 1
+                else:
+                    prev -= 1
             else:
-                if abs(prev) >= len(incoming_lanelets):
+                if abs(prev) >= len(incomings):
+                    min_angle = 360
                     index += 1
                     prev = -1
+#                    print(incomings[data_index].incoming_lanelets, "is left of",
+#                          incomings[is_left_of].incoming_lanelets)
+#                    print("success")
                 else:
                     prev -= 1
 
-        return
+        return is_left_of_map
 
     def combine_common_incoming_lanelets(self, intersection_map):
-
-        return
+        """
+        Returns a list of tuples which are pairs of adj incoming lanelets and the union of their successors
+        """
+        incoming_lane_ids = intersection_map.keys()
+        combined_incoming_lane_ids = []
+        for incoming_lane_id, successors in intersection_map.items():
+            intersection_incoming_set = list()
+            incoming_lane = self.find_lanelet_by_id(incoming_lane_id)
+            intersection_incoming_set.append(incoming_lane_id)
+            adj_right = incoming_lane.adj_right
+            adj_left = incoming_lane.adj_left
+            while adj_right is not None:
+                if adj_right in incoming_lane_ids:
+                    intersection_incoming_set.append(adj_right)
+                    adj_right = self.find_lanelet_by_id(adj_right).adj_right
+                else:
+                    adj_right = None
+            while adj_left is not None:
+                if adj_left in incoming_lane_ids:
+                    intersection_incoming_set.append(adj_left)
+                    adj_left = self.find_lanelet_by_id(adj_left).adj_left
+                else:
+                    adj_left = None
+            intersection_incoming_set.sort()
+            combined_incoming_lane_ids.append(intersection_incoming_set)
+            combined_incoming_lane_ids.sort()
+        combined_incoming_lane_ids = list(k for k, _ in itertools.groupby(combined_incoming_lane_ids))
+        return combined_incoming_lane_ids
 
     def get_successor_directions(self, incoming_lane):
         """
