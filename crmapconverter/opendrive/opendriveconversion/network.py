@@ -244,6 +244,7 @@ class LinkIndex:
     def __init__(self):
         self._successors = {}
         self._intersections = list()
+        self._intersection_dict = dict()
 
     def intersection_maps(self):
         return self._intersections
@@ -335,6 +336,20 @@ class LinkIndex:
                                 predecessorId, parametric_lane_id, lane.id >= 0
                             )
 
+    def add_intersection_link(self, parametric_lane_id, successor, reverse: bool = False):
+        """
+        Similar to add_link, adds successors only in an intersection
+        """
+        if reverse:
+            self.add_intersection_link(successor, parametric_lane_id)
+            return
+
+        if parametric_lane_id not in self._intersection_dict:
+            self._intersection_dict[parametric_lane_id] = []
+
+        if successor not in self._intersection_dict[parametric_lane_id]:
+            self._intersection_dict[parametric_lane_id].append(successor)
+
     def add_link(self, parametric_lane_id, successor, reverse: bool = False):
         """
 
@@ -358,6 +373,7 @@ class LinkIndex:
         if successor not in self._successors[parametric_lane_id]:
             self._successors[parametric_lane_id].append(successor)
 
+
     def _add_junctions(self, opendrive):
         """
 
@@ -373,7 +389,6 @@ class LinkIndex:
         # if contact_point is start, and laneId from connecting_road is positive
         # the connecting_road is the predecessor
         # for contact_point == end it's exactly the other way
-        intersection_map = dict()
         for junction in opendrive.junctions:
             for connection in junction.connections:
                 incoming_road = opendrive.getRoad(connection.incomingRoad)
@@ -399,6 +414,10 @@ class LinkIndex:
                         self.add_link(
                             incoming_road_id, connecting_road_id, lane_link.toId > 0
                         )
+                        self.add_intersection_link(
+                            incoming_road_id, connecting_road_id, lane_link.toId > 0
+                        )
+
                     else:
                         # decide which lane section to use (first or last)
                         if lane_link.fromId < 0:
@@ -420,9 +439,13 @@ class LinkIndex:
                         self.add_link(
                             incoming_road_id, connecting_road_id, lane_link.toId < 0
                         )
+                        self.add_intersection_link(
+                            incoming_road_id, connecting_road_id, lane_link.toId < 0
+                        )
             # Extracting opendrive junction links to formulate commonroad intersections
-            intersection_map = copy.copy(self._successors)
-            self._intersections.append(intersection_map)
+            # intersection_map = copy.copy(self._successors)
+            self._intersections.append(self._intersection_dict)
+            self._intersection_dict = dict()
 
     def remove(self, parametric_lane_id):
         """
