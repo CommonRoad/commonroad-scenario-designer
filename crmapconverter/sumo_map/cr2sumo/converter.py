@@ -1259,7 +1259,6 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         # Calling of Netconvert
         command = f"netconvert --plain.extend-edge-shape=true" \
                   f" --no-turnarounds=true" \
-                  f" --ramps.guess=true" \
                   f" --junctions.internal-link-detail=20" \
                   f" --geometry.avoid-overlap=true" \
                   f" --offset.disable-normalization=true" \
