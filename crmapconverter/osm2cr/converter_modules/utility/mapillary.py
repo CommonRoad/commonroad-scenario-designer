@@ -27,7 +27,7 @@ def get_mappilary_traffic_signs(bbox):
     Retrive traffic signs found with Mapillary in a given bounding box
 
     :param1 bbox: Bounding box
-    :return: listof traffic signs with lat,lng position
+    :return: list of traffic signs with lat,lng position
     """
 
 
@@ -80,7 +80,8 @@ def add_mapillary_signs_to_graph(graph:rg.Graph):
             #node = graph.find_closest_node_by_lat_lng(sign[1])
             #traffic_sign = rg.GraphTrafficSign({'traffic_sign': 'DE:114'}, node)
             # find edge
-            edge = graph.find_closest_edge_by_lat_lng(sign[1])
+            #print(sign[0])
+            edge = graph.find_closest_edge_by_lat_lng(sign[1], direction=sign[2])
             # add to graph traffic signs
             traffic_sign = rg.GraphTrafficSign({'mapillary': sign[0]}, node=None, edges=[[edge]], direction=sign[2]) # TODO virutal
             graph.traffic_signs.append(traffic_sign)

@@ -3,10 +3,15 @@ from commonroad.scenario.traffic_sign import TrafficSignElement, TrafficSignIDZa
 from crmapconverter.osm2cr import config
 
 class TrafficSignParser:
+    """
+    This class provides several methods to parse traffic signs, which are extracted from the osm file or mapillary.com
+
+    """
+
     def __init__(self, sign: Dict):
         self.sign = sign
 
-    def accept_Traffic_sign_element(self, signElement: TrafficSignElement) -> bool:
+    def accept_traffic_sign_element(self, signElement: TrafficSignElement) -> bool:
         if signElement.traffic_sign_element_id.name in config.ACCEPTED_TRAFFIC_SIGNS:
             return True
         if signElement.traffic_sign_element_id.name in config.EXCLUDED_TRAFFIC_SIGNS:
@@ -17,7 +22,6 @@ class TrafficSignParser:
             return False
 
     def parse_traffic_sign(self):
-
         elements = []
         for unrelated_sign in str(self.sign['traffic_sign']).split(';'):
             country = unrelated_sign[:2]
@@ -74,7 +78,7 @@ class TrafficSignParser:
                         #value = 'unknown sign'
                         #elements.append(TrafficSignElement(sign_id, [value]))
 
-        elements = list(filter(self.accept_Traffic_sign_element, elements))
+        elements = list(filter(self.accept_traffic_sign_element, elements))
         return elements
 
     def parse_mapillary(self) -> TrafficSignElement or None:
@@ -223,7 +227,7 @@ class TrafficSignParser:
 
         if sign_id:
             mapillary_element = TrafficSignElement(sign_id, [value])
-            if self.accept_Traffic_sign_element(mapillary_element):
+            if self.accept_traffic_sign_element(mapillary_element):
                 return mapillary_element
         return None
 
@@ -231,7 +235,6 @@ class TrafficSignParser:
         sign_id = TrafficSignIDZamunda.MAX_SPEED
         value = self.sign['maxspeed']
         maxspeed_element = TrafficSignElement(sign_id, [value])
-        if self.accept_Traffic_sign_element(maxspeed_element):
+        if self.accept_traffic_sign_element(maxspeed_element):
             return maxspeed_element
-        else:
-            return None
+        return None

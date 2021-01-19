@@ -471,6 +471,16 @@ class GraphEdge:
             raise ValueError("the given node is not an endpoint of this edge")
         return np.arctan2(y, x) + np.pi
 
+    def get_compass_degrees(self):
+        """
+        calculates the compass degrees of an edge as in https://en.wikipedia.org/wiki/Points_of_the_compass#/media/File:Compass_Card_B+W.svg
+        :return: compass orientation in degrees
+        """
+        edge_compass_degrees = math.degrees(self.get_orientation(self.node1)) - 45
+        if edge_compass_degrees < 0.0:
+            edge_compass_degrees+= 360.0
+        return edge_compass_degrees
+
     def angle_to(self, edge: "GraphEdge", node: GraphNode) -> float:
         """
         calculates the angle between two edges at a given node in radians
@@ -715,28 +725,39 @@ class GraphEdge:
 
     def add_traffic_sign(self, sign: "GraphTrafficSign"):
 
-        #TODO still testing
-
         self.traffic_signs.append(sign)
-        #print(sign.sign)
-        #print(sign.direction)
 
-        # signs are only added to forward lanes if no direction is available
         forward = True
-        if sign.direction is not None:
-            sign_direction = sign.direction
-            edge_orientation = 90 - math.degrees(self.get_orientation(self.node1))
-            if edge_orientation < 0.0:
-                edge_orientation+= 360.0
-            #print("edge orientation: {}".format(edge_orientation))
-            if abs(sign_direction-edge_orientation) > 180:
+        sign_direction = sign.direction
+        if sign_direction is not None:
+            edge_orientation = self.get_compass_degrees()
+            # Debugging
+            # print(sign.sign)
+            # print("edge orientation: {}".format(edge_orientation))
+            # print("sign direction {} ".format(sign.direction))
+            if abs(sign_direction-edge_orientation) < 180:
                 forward = False
 
-        # add to lanes
+        # add traffic signs to lanes
+
+        # approach 1, works only if sign direction is provided
+        # if sign_direction is not None:
+        #     favorable_lane = self.lanes[0]
+        #     for lane in self.lanes:
+        #         print("lane degrees: "+ str(lane.get_compass_degrees()))
+        #         if abs(sign_direction - lane.get_compass_degrees()) < abs(sign_direction - favorable_lane.get_compass_degrees()) :
+        #             favorable_lane = lane
+
+        #     if abs(sign_direction - favorable_lane.get_compass_degrees()) < 70: # threshold in degrees
+        #         favorable_lane.add_traffic_sign(sign)
+        #         return
+
+        # approach 2 if no sign direction could be
+        # Warning! Sometimes edge forward direction != lane forward direction, this leads to wrongfully assigned traffic signs
+        # add to forward lanes.
         for lane in self.lanes:
-            # add to forward lanes
             if lane.forward and forward:
-                lane.add_traffic_sign(sign)
+                    lane.add_traffic_sign(sign)
             # add to backward lanes
             elif (not lane.forward) and (not forward):
                 lane.add_traffic_sign(sign)
@@ -1059,6 +1080,21 @@ class Lane:
 
         polygon = Polygon(np.concatenate((self.right_bound, np.flip(self.left_bound, 0))))
         return polygon
+
+    def get_compass_degrees(self):
+        """
+        calculates the compass degrees of a lane as in https://en.wikipedia.org/wiki/Points_of_the_compass#/media/File:Compass_Card_B+W.svg
+        :return: compass orientation in degrees
+        """
+        def get_orientation():
+            # since self.waypoints is not always available, self.from_node and self.to_node are used instead.
+            x = self.from_node.x - self.to_node.x
+            y = self.from_node.y - self.to_node.y
+            return np.arctan2(y, x) + np.pi
+        lane_compass_degrees = math.degrees(get_orientation()) - 45
+        if lane_compass_degrees < 0.0:
+            lane_compass_degrees+= 360.0
+        return lane_compass_degrees
 
     def add_traffic_sign(self, sign: GraphTrafficSign):
         if self.traffic_signs is None:
@@ -1749,33 +1785,15 @@ class Graph:
             self.delete_lane(lane)
         #self.set_adjacents()
 
-    def find_closest_node_by_lat_lng(self, lat_lng) -> GraphNode:
+    def find_closest_edge_by_lat_lng(self, lat_lng, direction=None) -> GraphNode:
         """
-        finds the closest GraphNode in Graph to a given lat_lng
+        finds the closest GraphEdge in Graph to a given lat_lng tuple/list and a optional direction
 
-        :param lat_lng: np.array including lat_lng
-        :return: GraphNode which is closest to the given lat_lng coordinates
-        """
-        given_point = np.asarray(lat_lng)
-        nodes = list(self.nodes)
-
-        # node coordinates need to be converted to lat lng before comparsion
-        points = np.asarray(list(map(lambda x: geometry.cartesian_to_lon_lat(x.get_cooridnates(), self.center_point), nodes)))
-
-        # https://codereview.stackexchange.com/a/28210
-        dist_2 = np.sum((points - given_point)**2, axis=1)
-        closest_node_index = np.argmin(dist_2)
-        return nodes[closest_node_index]
-
-
-    def find_closest_edge_by_lat_lng(self, lat_lng) -> GraphNode:
-        """
-        finds the closest GraphEdge in Graph to a given lat_lng tuple/list
-
-        :param lat_lng: np.array including lat_lng
+        :param1 lat_lng: np.array storing latitude and longitude
+        :param2 direction: optional filter to only return edge with corresponding direction
         :return: GraphEdge which is closest to the given lat_lng coordinates
         """
-        # TODO clean up and decide which approach works best
+
         given_point = np.asarray(lat_lng)
         edges = list(self.edges)
 
@@ -1783,22 +1801,32 @@ class Graph:
         points = list()
         points_to_edge = dict()
         for edge in edges:
-            for waypoint in edge.get_waypoints():
-                cartesian_waypoint = geometry.cartesian_to_lon_lat(waypoint, self.center_point)
-                points.append(cartesian_waypoint)
-                points_to_edge[tuple(cartesian_waypoint)] = edge
 
-        points = np.asarray(points)
-        #points = np.asarray(list(map(lambda x: geometry.cartesian_to_lon_lat(x.get_waypoints()[0], self.center_point), edges)))
+            edge_orientation = edge.get_compass_degrees()
+            if direction is not None and abs(edge_orientation-direction) < 90: # degrees threshold
+                for waypoint in edge.get_waypoints():
+                    cartesian_waypoint = geometry.cartesian_to_lon_lat(waypoint, self.center_point)
+                    points.append(cartesian_waypoint)
+                    points_to_edge[tuple(cartesian_waypoint)] = edge
+            elif direction is None:
+                for waypoint in edge.get_waypoints():
+                    cartesian_waypoint = geometry.cartesian_to_lon_lat(waypoint, self.center_point)
+                    points.append(cartesian_waypoint)
+                    points_to_edge[tuple(cartesian_waypoint)] = edge
 
-        # https://codereview.stackexchange.com/a/28210
-        dist_2 = np.sum((points - given_point)**2, axis=1)
-        closest_edge_index = np.argmin(dist_2)
+        try:
+            points = np.asarray(points)
+            # https://codereview.stackexchange.com/a/28210
+            dist_2 = np.sum((points - given_point)**2, axis=1)
+            closest_edge_index = np.argmin(dist_2)
+        except ValueError(
+                "No edge found. Using fallback calculation."
+            ):
+            return self.find_closest_edge_by_lat_lng(lat_lng)
 
+        # second_closest_index = np.argpartition(dist_2, 1)[1]
         found_point = points[closest_edge_index]
         return points_to_edge[tuple(found_point)]
-        #return edges[closest_edge_index]
-
 
 
 class SublayeredGraph(Graph):
