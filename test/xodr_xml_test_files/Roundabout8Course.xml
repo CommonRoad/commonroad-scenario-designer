@@ -1,13 +1,13 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<commonRoad timeStepSize="0.1" commonRoadVersion="2020a" author="" affiliation="" source="OpenDRIVE 2 Lanelet Converter" benchmarkID="ZAM_OpenDrive-123" date="2021-01-05">
+<commonRoad timeStepSize="0.1" commonRoadVersion="2020a" author="" affiliation="" source="OpenDRIVE 2 Lanelet Converter" benchmarkID="ZAM_OpenDrive-123" date="2021-01-19">
   <location>
     <geoNameId>-999</geoNameId>
     <gpsLatitude>999</gpsLatitude>
     <gpsLongitude>999</gpsLongitude>
   </location>
   <scenarioTags>
-    <highway/>
     <urban/>
+    <highway/>
   </scenarioTags>
   <lanelet id="100">
     <leftBound>
@@ -43161,4 +43161,106 @@
     </position>
     <virtual>false</virtual>
   </trafficSign>
+  <intersection id="0">
+    <incoming id="0">
+      <incomingLanelet ref="107"/>
+      <successorsStraight ref="124"/>
+    </incoming>
+    <incoming id="1">
+      <incomingLanelet ref="107"/>
+      <incomingLanelet ref="108"/>
+      <successorsStraight ref="122"/>
+      <successorsStraight ref="124"/>
+    </incoming>
+    <incoming id="2">
+      <incomingLanelet ref="118"/>
+      <incomingLanelet ref="119"/>
+      <successorsRight ref="131"/>
+      <successorsLeft ref="129"/>
+      <successorsLeft ref="130"/>
+      <isLeftOf ref="1"/>
+    </incoming>
+    <incoming id="3">
+      <incomingLanelet ref="119"/>
+      <successorsRight ref="131"/>
+      <successorsLeft ref="130"/>
+      <isLeftOf ref="1"/>
+    </incoming>
+  </intersection>
+  <intersection id="1">
+    <incoming id="0">
+      <incomingLanelet ref="111"/>
+      <incomingLanelet ref="113"/>
+      <successorsRight ref="120"/>
+      <successorsLeft ref="128"/>
+      <successorsLeft ref="127"/>
+      <isLeftOf ref="3"/>
+    </incoming>
+    <incoming id="1">
+      <incomingLanelet ref="113"/>
+      <successorsRight ref="120"/>
+      <successorsLeft ref="128"/>
+      <isLeftOf ref="3"/>
+    </incoming>
+    <incoming id="2">
+      <incomingLanelet ref="116"/>
+      <successorsStraight ref="119"/>
+    </incoming>
+    <incoming id="3">
+      <incomingLanelet ref="116"/>
+      <incomingLanelet ref="117"/>
+      <successorsStraight ref="118"/>
+      <successorsStraight ref="119"/>
+    </incoming>
+  </intersection>
+  <intersection id="2">
+    <incoming id="0">
+      <incomingLanelet ref="102"/>
+      <incomingLanelet ref="104"/>
+      <successorsRight ref="115"/>
+      <successorsLeft ref="125"/>
+      <successorsLeft ref="126"/>
+      <isLeftOf ref="2"/>
+    </incoming>
+    <incoming id="1">
+      <incomingLanelet ref="104"/>
+      <successorsRight ref="115"/>
+      <successorsLeft ref="126"/>
+      <isLeftOf ref="2"/>
+    </incoming>
+    <incoming id="2">
+      <incomingLanelet ref="109"/>
+      <incomingLanelet ref="112"/>
+      <successorsStraight ref="113"/>
+      <successorsStraight ref="111"/>
+    </incoming>
+    <incoming id="3">
+      <incomingLanelet ref="112"/>
+      <successorsStraight ref="113"/>
+    </incoming>
+  </intersection>
+  <intersection id="3">
+    <incoming id="0">
+      <incomingLanelet ref="100"/>
+      <incomingLanelet ref="103"/>
+      <successorsStraight ref="104"/>
+      <successorsStraight ref="102"/>
+    </incoming>
+    <incoming id="1">
+      <incomingLanelet ref="103"/>
+      <successorsStraight ref="104"/>
+    </incoming>
+    <incoming id="2">
+      <incomingLanelet ref="122"/>
+      <incomingLanelet ref="124"/>
+      <successorsRight ref="106"/>
+      <successorsLeft ref="121"/>
+      <successorsLeft ref="123"/>
+    </incoming>
+    <incoming id="3">
+      <incomingLanelet ref="124"/>
+      <successorsRight ref="106"/>
+      <successorsLeft ref="123"/>
+    </incoming>
+  </intersection>
 </commonRoad>

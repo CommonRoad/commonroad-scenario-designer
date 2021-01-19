@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<commonRoad timeStepSize="0.1" commonRoadVersion="2020a" author="" affiliation="" source="OpenDRIVE 2 Lanelet Converter" benchmarkID="ZAM_OpenDrive-123" date="2021-01-16">
+<commonRoad timeStepSize="0.1" commonRoadVersion="2020a" author="" affiliation="" source="OpenDRIVE 2 Lanelet Converter" benchmarkID="ZAM_OpenDrive-123" date="2021-01-19">
   <location>
     <geoNameId>-999</geoNameId>
     <gpsLatitude>999</gpsLatitude>
@@ -78657,36 +78657,31 @@
   </trafficLight>
   <intersection id="0">
     <incoming id="0">
-      <incomingLanelet ref="119"/>
-      <successorsRight ref="118"/>
+      <incomingLanelet ref="101"/>
+      <incomingLanelet ref="105"/>
+      <incomingLanelet ref="106"/>
+      <successorsRight ref="100"/>
+      <successorsStraight ref="112"/>
+      <successorsLeft ref="121"/>
+      <isLeftOf ref="1"/>
     </incoming>
     <incoming id="1">
-      <incomingLanelet ref="110"/>
-      <successorsStraight ref="109"/>
-    </incoming>
-    <incoming id="2">
-      <incomingLanelet ref="108"/>
-      <successorsLeft ref="103"/>
-    </incoming>
-    <incoming id="3">
-      <incomingLanelet ref="101"/>
-      <successorsRight ref="100"/>
-    </incoming>
-    <incoming id="4">
-      <incomingLanelet ref="105"/>
-      <successorsStraight ref="112"/>
-    </incoming>
-    <incoming id="5">
-      <incomingLanelet ref="106"/>
-      <successorsLeft ref="121"/>
-    </incoming>
-    <incoming id="6">
       <incomingLanelet ref="107"/>
       <successorsRight ref="117"/>
       <successorsStraight ref="122"/>
       <successorsLeft ref="116"/>
+      <isLeftOf ref="2"/>
     </incoming>
-    <incoming id="7">
+    <incoming id="2">
+      <incomingLanelet ref="108"/>
+      <incomingLanelet ref="110"/>
+      <incomingLanelet ref="119"/>
+      <successorsRight ref="118"/>
+      <successorsStraight ref="109"/>
+      <successorsLeft ref="103"/>
+      <isLeftOf ref="3"/>
+    </incoming>
+    <incoming id="3">
       <incomingLanelet ref="115"/>
       <successorsRight ref="114"/>
       <successorsStraight ref="104"/>

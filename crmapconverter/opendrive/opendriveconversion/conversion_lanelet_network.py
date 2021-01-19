@@ -681,11 +681,8 @@ class ConversionLaneletNetwork(LaneletNetwork):
         min_angle = 360
         while index < len(incomings):
             angle = angles[index][1] - angles[prev][1]
-            print("for incoming", incomings[index].incoming_lanelets, "vs", incomings[prev].incoming_lanelets)
-            print(angles[index][1], "vs", angles[prev][1])
             if angle < 0:
                 angle += 360
-            print(angle)
             if angle > config.LANE_SEGMENT_ANGLE and angle <= 180 - config.LANE_SEGMENT_ANGLE and angle<min_angle:
                 # is left of the previous incoming
                 is_left_of = angles[prev][0]
@@ -695,9 +692,6 @@ class ConversionLaneletNetwork(LaneletNetwork):
                 min_angle = angle
                 if abs(prev) >= len(incomings):
                     max_angle = 360
- #                   print(incomings[data_index].incoming_lanelets, "is left of",
- #                         incomings[is_left_of].incoming_lanelets)
- #                   print("success", prev, index)
                     prev = -1
                     index += 1
                 else:
@@ -707,9 +701,6 @@ class ConversionLaneletNetwork(LaneletNetwork):
                     min_angle = 360
                     index += 1
                     prev = -1
-#                    print(incomings[data_index].incoming_lanelets, "is left of",
-#                          incomings[is_left_of].incoming_lanelets)
-#                    print("success")
                 else:
                     prev -= 1
 
@@ -728,7 +719,6 @@ class ConversionLaneletNetwork(LaneletNetwork):
             adj_right = incoming_lane.adj_right
             adj_left = incoming_lane.adj_left
             while adj_right is not None:
-                print("Infinite regress", adj_right)
                 if adj_right in incoming_lane_ids:
                     adj_right_lane = self.find_lanelet_by_id(adj_right)
                     if adj_right_lane.adj_right_same_direction:
