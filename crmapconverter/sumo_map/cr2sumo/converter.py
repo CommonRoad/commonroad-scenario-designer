@@ -370,6 +370,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                         type_id=edge_type.id,
                         function="normal",
                         name=f"edge_{edge_id}")
+
             self.edges.update({str(edge_id): edge})
             if self.conf.overwrite_speed_limit:
                 speed_limit = self.conf.overwrite_speed_limit
@@ -400,6 +401,12 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
             if leftmost_lanelet.adj_left is not None:
                 self.lanes[self.lanelet_id2lane_id[lanelet_ids[-1]]] \
                     .setAdjacentOpposite(self.lanelet_id2lane_id[leftmost_lanelet.adj_left])
+
+        for edge in self.edges.values():
+            for e in edge.getToNode().getOutgoing():
+                edge.addOutgoing(e)
+            for e in edge.getFromNode().getIncoming():
+                edge.addIncoming(e)
 
     def _init_connections(self):
         """
@@ -1223,7 +1230,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         return file_path
 
     def merge_intermediate_files(self, output_path: str, nodes_path: str, edges_path: str, connections_path: str,
-                                 traffic_path: str, type_path: str, cleanup=False, update_internal_ids=True) -> bool:
+                                 traffic_path: str, type_path: str, cleanup=True, update_internal_ids=True) -> bool:
         """
         Function that merges the edges and nodes files into one using netconvert
         :param connections_path:
@@ -1252,6 +1259,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         # Calling of Netconvert
         command = f"netconvert --plain.extend-edge-shape=true" \
                   f" --no-turnarounds=true" \
+                  f" --ramps.guess=true" \
                   f" --junctions.internal-link-detail=20" \
                   f" --geometry.avoid-overlap=true" \
                   f" --offset.disable-normalization=true" \

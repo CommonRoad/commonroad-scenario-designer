@@ -141,7 +141,7 @@ class Net:
                                      direction, tls, tllink, state, viaLaneID)
         fromEdge.addOutgoing(conn)
         fromlane.addOutgoing(conn)
-        toEdge._addIncoming(conn)
+        toEdge.addIncoming(conn)
 
     def getEdges(self):
         return self._edges

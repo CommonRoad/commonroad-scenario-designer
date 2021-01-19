@@ -30,11 +30,20 @@ class TrafficSignEncoder:
         else:
             logging.warning(f"TrafficSignIDGermany: {element.traffic_sign_element_id} cannot be converted.")
 
-    def _encode_usa_traffic_sign_element(self, traffic_sign_element: TrafficSignElement):
-        pass
+    def _encode_usa_traffic_sign_element(self, element: TrafficSignElement, lanelet: Lanelet, edge: Edge):
+        id = element.traffic_sign_element_id
+        if id == TrafficSignIDUsa.MAX_SPEED:
+            self._set_max_speed(element, edge)
+        else:
+            logging.warning(f"TrafficSignIDUsa: {element.traffic_sign_element_id} cannot be converted.")
 
-    def _encode_zamunda_traffic_sign_element(self, traffic_sign_element: TrafficSignElement):
-        pass
+    def _encode_zamunda_traffic_sign_element(self, element: TrafficSignElement, lanelet: Lanelet,
+                                             edge: Edge):
+        id = element.traffic_sign_element_id
+        if id == TrafficSignIDUsa.MAX_SPEED:
+            self._set_max_speed(element, edge)
+        else:
+            logging.warning(f"TrafficSignIDZamunda: {element.traffic_sign_element_id} cannot be converted.")
 
     def _set_max_speed(self, traffic_sign_element: TrafficSignElement, edge: Edge):
         assert len(traffic_sign_element.additional_values) == 1, \
@@ -43,7 +52,9 @@ class TrafficSignEncoder:
         new_type = self.edge_types.create_from_update_speed(edge.getType(), max_speed)
         # According to https://gitlab.lrz.de/tum-cps/commonroad-scenarios/-/blob/master/documentation/XML_commonRoad_2020a.pdf
         # MAX_SPEED is valid from the start of the specified lanelet, as well the succeeding one.
-        for e in [edge] + list(edge.getOutgoing()):
+        for e in [edge] + edge.getOutgoing():
             e.setType(new_type.id)
             for lane in e.getLanes():
-                lane.speed = 0.
+                lane.speed = max_speed
+
+    # def _set_priority(self, ):

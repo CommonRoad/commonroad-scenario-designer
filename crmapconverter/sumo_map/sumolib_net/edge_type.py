@@ -1,5 +1,5 @@
 from xml.etree import ElementTree as ET
-from typing import List, Dict, Union, TypeVar, Callable
+from typing import List, Dict, Union, TypeVar, Callable, Optional
 from .constants import SUMO_VEHICLE_CLASSES
 from copy import deepcopy
 
@@ -135,7 +135,7 @@ class EdgeTypes:
             types.append(ET.fromstring(type.to_XML()))
         return str(ET.tostring(types), encoding="utf-8")
 
-    def _create_from_update(self, old_id: str, attr: str, value: any) -> Union[EdgeType, None]:
+    def _create_from_update(self, old_id: str, attr: str, value: any) -> Optional[EdgeType]:
         if old_id not in self.types:
             return None
         edge_type = self.types[old_id]
@@ -149,17 +149,17 @@ class EdgeTypes:
         self.types[new_type.id] = new_type
         return new_type
 
-    def create_from_update_priority(self, old_id: str, priority: int) -> Union[EdgeType, None]:
+    def create_from_update_priority(self, old_id: str, priority: int) -> Optional[EdgeType]:
         return self._create_from_update(old_id, "priority", priority)
 
-    def create_from_update_speed(self, old_id: str, speed: float) -> Union[EdgeType, None]:
+    def create_from_update_speed(self, old_id: str, speed: float) -> Optional[EdgeType]:
         return self._create_from_update(old_id, "speed", round(speed, 2))
 
-    def create_from_update_oneway(self, old_id: str, oneway: bool) -> Union[EdgeType, None]:
+    def create_from_update_oneway(self, old_id: str, oneway: bool) -> Optional[EdgeType]:
         return self._create_from_update(old_id, "oneway", oneway)
 
-    def create_from_update_allow(self, old_id: str, allow: List[str]) -> Union[EdgeType, None]:
+    def create_from_update_allow(self, old_id: str, allow: List[str]) -> Optional[EdgeType]:
         return self._create_from_update(old_id, "allow", allow)
 
-    def create_from_update_disallow(self, old_id: str, disallow: List[str]) -> Union[EdgeType, None]:
+    def create_from_update_disallow(self, old_id: str, disallow: List[str]) -> Optional[EdgeType]:
         return self._create_from_update(old_id, "allow", disallow)
