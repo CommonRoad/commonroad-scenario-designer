@@ -12,14 +12,21 @@ import numpy as np
 from dataclasses import dataclass
 from crmapconverter.osm2cr.converter_modules.graph_operations import road_graph as rg
 
-@dataclass
 class Bbox:
+    """
+    Helper class for Bbox representation
+    """
     west: float
     south: float
     east: float
     north: float
+    def __init__(self, west: float, south: float, east: float, north: float):
+        self.west = west
+        self.south = south
+        self.east = east
+        self.north = north
 
-def get_mappilary_traffic_signs(bbox):
+def get_mappilary_traffic_signs(bbox: Bbox):
     """
     Retrive traffic signs found with Mapillary in a given bounding box. Mapillary key needs to be provided in config file
 
