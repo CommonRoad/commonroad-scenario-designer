@@ -61,7 +61,7 @@ ACCEPTED_HIGHWAYS_MAINLAYER = [
     "primary",
     "secondary",
     "tertiary",
-    "unclassified",
+    #"unclassified",
     "residential",
     "motorway_link",
     "trunk_link",
@@ -69,7 +69,7 @@ ACCEPTED_HIGHWAYS_MAINLAYER = [
     "secondary_link",
     "tertiary_link",
     "living_street",
-    "service"
+    #"service"
 ]
 EXTRACT_SUBLAYER = False
 # types of highways extracted from the OSM file as sublayer

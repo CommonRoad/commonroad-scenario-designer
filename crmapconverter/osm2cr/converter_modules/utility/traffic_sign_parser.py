@@ -4,8 +4,9 @@ from crmapconverter.osm2cr import config
 
 class TrafficSignParser:
     """
-    This class provides several methods to parse traffic signs, which are extracted from the osm file or mapillary.com
-
+    This class provides several methods to parse traffic signs, which are extracted
+    from the osm file or retrieved from mapillary.com
+    
     """
 
     def __init__(self, sign: Dict):

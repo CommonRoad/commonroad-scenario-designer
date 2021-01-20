@@ -171,6 +171,7 @@ def export(
     scenario, intermediate_format = create_scenario_intermediate(graph)
 
     # removing converting errors before writing to xml
+
     sanitize(scenario)
 
     # writing everything to XML
@@ -271,8 +272,18 @@ def view_xml(filename: str, ax=None) -> None:
         print("empty scenario")
         return
     limits = find_bounds(scenario)
+    #draw_params = { 'lanelet_network': {'draw_intersections': True, 'draw_traffic_signs_in_lanelet': True,
+    #                                   'draw_traffic_signs': True, 'draw_traffic_lights': True,}}
+
     draw_params = { 'lanelet_network': {'draw_intersections': True, 'draw_traffic_signs_in_lanelet': True,
-                                        'draw_traffic_signs': True, 'draw_traffic_lights': True,}}
+                                        'draw_traffic_signs': True, 'draw_traffic_lights': True,
+                                        'intersection': {'draw_intersections': True},
+                                        'traffic_sign':{'draw_traffic_signs': True,
+                                                        'show_label':False,
+                                                        'show_traffic_signs':'all',
+
+                                                        'scale_factor': 0.15}},
+                    'lanelet': {'show_label': False}}
     if ax is None:
         draw_object(scenario, plot_limits=limits, draw_params=draw_params)
         plt.gca().set_aspect("equal")
