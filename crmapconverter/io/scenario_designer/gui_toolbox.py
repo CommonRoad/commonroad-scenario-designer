@@ -3,6 +3,8 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from crmapconverter.io.scenario_designer.gui_src import CR_Scenario_Designer
+from commonroad.scenario.lanelet import LaneletType, RoadUser, LineMarking
+
 
 
 class SectionExpandButton(QPushButton):
@@ -85,6 +87,10 @@ class UpperToolbox(QWidget):
         self.edit_button_traffic_light = QPushButton()
         self.edit_button_traffic_light.setText("edit Traffic light")
         layout1.addWidget(self.edit_button_traffic_light, 1, 1)
+
+        self.delete_traffic_sign = QPushButton()
+        self.delete_traffic_sign.setText("delete Traffic element")
+        layout1.addWidget(self.delete_traffic_sign,2,0)
 
         """add Roundabout button
         button_roundabout = QPushButton()
@@ -375,6 +381,31 @@ class LaneletInformationToolbox(QWidget):
         self.angle.setMaxLength(4)
         self.angle.setAlignment(Qt.AlignRight)
 
+        self.roaduser_oneway = CheckableComboBox()
+        self.roaduser_oneway_list = [r.value for r in RoadUser]
+        for i in range(0, len(self.roaduser_oneway_list) - 1):
+            self.roaduser_oneway.addItem(self.roaduser_oneway_list[i])
+            item = self.roaduser_oneway.model().item(i, 0)
+            item.setCheckState(Qt.Unchecked)
+
+        self.roaduser_bidirectional = CheckableComboBox()
+        self.roaduser_bidirectional_list = [r.value for r in RoadUser]
+        for i in range(0, len(self.roaduser_bidirectional_list) - 1):
+            self.roaduser_bidirectional.addItem(self.roaduser_bidirectional_list[i])
+            item = self.roaduser_bidirectional.model().item(i, 0)
+            item.setCheckState(Qt.Unchecked)
+
+        self.type = CheckableComboBox()
+        self.enumlist = [e.value for e in LaneletType]
+        for i in range(0, len(self.enumlist) - 1):
+            # adding item
+            self.type.addItem(self.enumlist[i])
+            item = self.type.model().item(i, 0)
+            item.setCheckState(Qt.Unchecked)
+
+        self.traffic_sign_ids = QLineEdit()
+        self.traffic_sign_ids.setAlignment(Qt.AlignRight)
+
         self.refresh_button = QPushButton()
         self.refresh_button.setText("refresh")
         self.edit_button = QPushButton()
@@ -387,6 +418,10 @@ class LaneletInformationToolbox(QWidget):
         layout.addRow("Number Vertices", self.number_vertices)
         layout.addRow("Curve radius", self.radius)
         layout.addRow("Curve angle", self.angle)
+        layout.addRow("Type", self.type)
+        layout.addRow("Roaduser oneway", self.roaduser_oneway)
+        layout.addRow("Roaduser bidirectional", self.roaduser_bidirectional)
+        layout.addRow("Traffic Sign Ids", self.traffic_sign_ids)
         layout.addWidget(self.refresh_button)
         layout.addWidget(self.edit_button)
 
@@ -397,3 +432,88 @@ if __name__ == "__main__":
     sumo = SumoTool()
     sumo.show()
     sys.exit(app.exec_())
+
+
+class CheckableComboBox(QComboBox):
+    def __init__(self):
+        super(CheckableComboBox, self).__init__()
+        self.view().pressed.connect(self.handle_item_pressed)
+        self.setModel(QStandardItemModel(self))
+
+        # when any item get pressed
+
+    def handle_item_pressed(self, index):
+
+        # getting which item is pressed
+        item = self.model().itemFromIndex(index)
+
+        # make it check if unchecked and vice-versa
+        if item.checkState() == Qt.Checked:
+            item.setCheckState(Qt.Unchecked)
+        else:
+            item.setCheckState(Qt.Checked)
+
+            # calling method
+        self.check_items()
+
+        # method called by check_items
+
+    def item_checked(self, index):
+
+        # getting item at index
+        item = self.model().item(index, 0)
+
+        # return true if checked else false
+        return item.checkState() == Qt.Checked
+
+
+
+    def get_checked_items(self):
+        # blank list
+        checkedItems = []
+
+        # traversing the items
+        for i in range(self.count()):
+
+            # if item is checked add it to the list
+            if self.item_checked(i):
+                checkedItems.append(i)
+
+        return checkedItems
+
+    def check_items(self):
+        # blank list
+        checkedItems = []
+
+        # traversing the items
+        for i in range(self.count()):
+
+            # if item is checked add it to the list
+            if self.item_checked(i):
+                checkedItems.append(i)
+
+                # call this method
+        self.update_labels(checkedItems)
+
+        # method to update the label
+
+    def update_labels(self, item_list):
+
+        n = ''
+        count = 0
+
+        # traversing the list
+        for i in item_list:
+
+            # if count value is 0 don't add comma
+            if count == 0:
+                n += ' % s' % i
+                # else value is greater then 0
+            # add comma
+            else:
+                n += ', % s' % i
+
+                # increment count
+            count += 1
+
+

@@ -145,3 +145,37 @@ class TCrossing(QDialog):
 
     def getDiameter(self):
         return self.diameter
+
+
+
+class FitIntersection(QDialog):
+    def __init__(self):
+        super().__init__()
+        self.predecessor = QLineEdit()
+        self.predecessor.setValidator(QIntValidator())
+        self.predecessor.setMaxLength(4)
+        self.predecessor.setAlignment(Qt.AlignRight)
+
+        self.successor = QLineEdit()
+        self.successor.setValidator(QIntValidator())
+        self.successor.setMaxLength(4)
+        self.successor.setAlignment(Qt.AlignRight)
+
+        self.intersectionID = QLineEdit()
+        self.intersectionID.setValidator(QIntValidator())
+        self.intersectionID.setMaxLength(4)
+        self.intersectionID.setAlignment(Qt.AlignRight)
+
+        self.apply_button = QPushButton()
+        self.apply_button.setText("apply")
+        self.apply_button.clicked.connect(self.apply_button_click)
+
+        layout = QFormLayout()
+        layout.addRow("Predecessor ID", self.predecessor)
+        layout.addRow("Sucessor ID", self.successor)
+        layout.addRow("Intersection ID", self.intersectionID)
+
+        layout.addWidget(self.apply_button)
+        layout.addWidget(self.set_default)
+
+        self.setLayout(layout)

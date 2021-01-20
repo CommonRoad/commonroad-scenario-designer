@@ -270,3 +270,44 @@ class TrafficLightSelection(QDialog):
             return int(self.yellow.text())
         else:
             return 10
+
+
+class DeleteTrafficElement(QDialog):
+    def __init__(self):
+        super().__init__()
+
+        self.id = 0
+
+        self.element_id = QLineEdit()
+        self.element_id.setValidator(QIntValidator())
+        self.element_id.setMaxLength(3)
+        self.element_id.setAlignment(Qt.AlignRight)
+
+        self.lanelet_id = QLineEdit()
+        self.lanelet_id.setValidator(QIntValidator())
+        self.lanelet_id.setMaxLength(3)
+        self.lanelet_id.setAlignment(Qt.AlignRight)
+
+        self.apply_button = QPushButton()
+        self.apply_button.setText("apply")
+        self.apply_button.clicked.connect(self.apply_button_click)
+
+        layout = QFormLayout()
+        layout.addRow("Lanelet ID", self.lanelet_id)
+        layout.addRow("Traffic Element ID", self.element_id)
+        layout.addWidget(self.apply_button)
+
+        self.setLayout(layout)
+
+    def apply_button_click(self):
+        if self.element_id.text():
+            self.id = int(self.element_id.text())
+        self.close()
+
+    def getTrafficElement(self):
+        return self.id
+
+    def getLaneletId(self):
+        return int(self.lanelet_id.text())
+
+
