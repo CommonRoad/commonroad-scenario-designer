@@ -1793,7 +1793,6 @@ class Graph:
         :param2 direction: optional filter to only return edge with corresponding direction
         :return: GraphEdge which is closest to the given lat_lng coordinates
         """
-
         given_point = np.asarray(lat_lng)
         edges = list(self.edges)
 
@@ -1801,9 +1800,8 @@ class Graph:
         points = list()
         points_to_edge = dict()
         for edge in edges:
-
             edge_orientation = edge.get_compass_degrees()
-            if direction is not None and abs(edge_orientation-direction) < 90: # degrees threshold
+            if direction is not None and abs(edge_orientation-direction) < 60: # degrees threshold
                 for waypoint in edge.get_waypoints():
                     cartesian_waypoint = geometry.cartesian_to_lon_lat(waypoint, self.center_point)
                     points.append(cartesian_waypoint)
@@ -1813,20 +1811,23 @@ class Graph:
                     cartesian_waypoint = geometry.cartesian_to_lon_lat(waypoint, self.center_point)
                     points.append(cartesian_waypoint)
                     points_to_edge[tuple(cartesian_waypoint)] = edge
-
+                    # second_closest_index = np.argpartition(dist_2, 1)[1]
         try:
             points = np.asarray(points)
             # https://codereview.stackexchange.com/a/28210
             dist_2 = np.sum((points - given_point)**2, axis=1)
             closest_edge_index = np.argmin(dist_2)
-        except ValueError(
-                "No edge found. Using fallback calculation."
-            ):
-            return self.find_closest_edge_by_lat_lng(lat_lng)
+            found_point = points[closest_edge_index]
 
-        # second_closest_index = np.argpartition(dist_2, 1)[1]
-        found_point = points[closest_edge_index]
-        return points_to_edge[tuple(found_point)]
+            # recalculate if direction input moves signs more than 20m away from its original found position
+            if direction is not None and geometry.distance(found_point, [given_point]) > 0.0002:
+                return self.find_closest_edge_by_lat_lng(lat_lng)
+
+            return points_to_edge[tuple(found_point)]
+        # catch value errors if not enough points were given
+        except ValueError:
+            print("No edge found. Using fallback calculation.")
+            return self.find_closest_edge_by_lat_lng(lat_lng)
 
 
 class SublayeredGraph(Graph):
