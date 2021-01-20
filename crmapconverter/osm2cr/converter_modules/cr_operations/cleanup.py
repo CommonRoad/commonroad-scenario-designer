@@ -15,6 +15,7 @@ def sanitize(scenario: Scenario) -> None:
     :return: None
     """
     # remove non referenced traffic signs
+    remove_duplicate_traffic_signs(scenario)
     remove_non_referenced_signs(scenario)
     # merge too short and faulty lanes
     # TODO Deal with intersections
@@ -23,6 +24,31 @@ def sanitize(scenario: Scenario) -> None:
     smoothen_scenario(scenario)
     # comvert to left hand driving scenario if necessary
     convert_to_lht(scenario)
+
+
+def remove_duplicate_traffic_signs(scenario: Scenario) -> None:
+    """
+    Removes duplicate traffic signs at same lanelet.
+
+    :param1 scenario: Scenario used to find duplicate traffic sings
+    :return: None
+    """
+    net = scenario.lanelet_network
+    filtered_signs = OrderedSet()
+    
+    for l in net.lanelets:
+        sign_elements = set()
+        for lanelet_sign in l.traffic_signs:
+            already_added = False
+            for element in net.find_traffic_sign_by_id(lanelet_sign).traffic_sign_elements:
+                if element not in sign_elements:
+                    sign_elements.add(element)
+                else:
+                    already_added = True
+            if not already_added:
+                filtered_signs.add(net.find_traffic_sign_by_id(lanelet_sign))
+
+    scenario.lanelet_network = create_laneletnetwork(scenario.lanelet_network.lanelets, filtered_signs, scenario.lanelet_network.traffic_lights, scenario.lanelet_network.intersections)
 
 def remove_non_referenced_signs(scenario: Scenario) -> None:
     """
