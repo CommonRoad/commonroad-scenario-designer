@@ -157,7 +157,7 @@ class TestHaimhausen(TestOSM2CRScenarioBaseClass):
 # class TestMunich(TestOSM2CRScenarioBaseClass):
 #     """Testing if a larger intersection with many lanes, traffic lights and signs
 #     can be converted on default settings"""
-
+#
 #     __test__ = True
 #     osm_file_name = "munich"
 

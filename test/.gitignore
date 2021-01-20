@@ -7,4 +7,8 @@
 *.trips.xml
 *.mp4
 *.simulated.xml
+*.nod.xml
+*.edg.xml
+*.tll.xml
+*.con.xml
 output_lanechange.txt

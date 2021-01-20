@@ -3,6 +3,7 @@
 from PyQt5.QtWidgets import QMessageBox, QMainWindow
 
 from commonroad.common.util import Interval
+from commonroad.scenario.obstacle import ObstacleType
 
 from crmapconverter.io.scenario_designer.gui_resources.sumo_settings_ui import Ui_MainWindow
 from crmapconverter.io.scenario_designer.util import Observable
@@ -86,13 +87,13 @@ class SUMOSettings:
         self.window.sb_vehicle_width_interval.setValue(
             self._config.vehicle_width_interval)
         self.window.sb_passenger.setValue(
-            self._config.veh_distribution['passenger'])
-        self.window.sb_truck.setValue(self._config.veh_distribution['truck'])
-        self.window.sb_bus.setValue(self._config.veh_distribution['bus'])
+            self._config.veh_distribution[ObstacleType.CAR])
+        self.window.sb_truck.setValue(self._config.veh_distribution[ObstacleType.TRUCK])
+        self.window.sb_bus.setValue(self._config.veh_distribution[ObstacleType.BUS])
         self.window.sb_bicycle.setValue(
-            self._config.veh_distribution['bicycle'])
+            self._config.veh_distribution[ObstacleType.PEDESTRIAN])
         self.window.sb_pedestrian.setValue(
-            self._config.veh_distribution['pedestrian'])
+            self._config.veh_distribution[ObstacleType.PEDESTRIAN])
 
         # check boxes
         self.window.chk_lane_change_sync.setChecked(

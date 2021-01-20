@@ -199,3 +199,136 @@ detailed information about this scenario and then can choose if he/she
 wants to simulate traffic with sumo, after that the created animation is
 updated in the GUI and the user can save the scenario as a cr file.
 
+GUI functionalities
+==================
+
+main_cr_desinger:                                  
+-----------------
+- menu-bar:
+   - create_setting_actions
+   - show_settings
+      - OSM
+      - OpenDrive
+      - GUI
+      - SUMO
+   - create_import_actions
+      - cr_2_osm
+      - cr_2_od
+      - osm_2_cr
+      - od_2_cr
+   - create_export_actions
+   - create_help_actions
+      - open_cr_web
+   - create_file_actions
+      - file_new
+      - open_commonroad_file
+      - open_path
+      - open_scenario 
+      - update_to_new_scenario
+      - check_scenario
+      - fil_save
+   - create_action
+- toolbar:
+   - create_toolbar
+   - play_animation
+   - pause_animation
+   - save_animation
+- toolbox:
+   - create_toolbox
+- lanelet list:
+   - create_lanelet_list
+   - show_lanelet_list
+- intersection list:
+   - create_intersection_list
+   - show_interstection_list
+- sumobox:
+   - create_sumobox
+   - play_animation 
+- viewer dock:
+   - create_viewer_dock
+- console:
+   - create_console
+- mouse operations
+   - detect_slider_clicked
+   - detect_slider_released
+- others:
+   - timestep_change
+   - update_max_step
+   - center 
+   - processtrigger
+   - closeWindow
+   - closeEvent
+   - tool_box1_show
+   - tool_box2_show
+   - update_view
+   - make_trigger_exclusive
+
+gui_viewer:
+-----------
+viewer module to visualize and inspect the created lanelet scenario
+
+- zoom:
+   - dynamicCanvas: provides zoom with the mouse wheel
+   - zoom: zoom in/ out function in GUI by using mouse wheel
+- scenario:
+   - draw_scenario
+   - update_obstacles
+   - scenarioElementList
+      - init
+      - update
+      - onClick
+      - reset_selection: unselect all elements
+- intersection list
+   - init
+   - update
+- lanelet list
+   - init
+   - update
+- viewer: functionality to draw a scenario onto a Canvas (Class)
+   - init
+   - open_scenario
+   - update_plot: updates plot accordinly to the selection of scenario elements
+   - get_paint_parameters: return the parameters for painting a lanelet regarding the selected lanelet
+   - draw_lanelet_polygon
+   - draw_lanelet_vertices
+   - draw_arrow_on_lanelet
+   - select_lanelets
+- AnimatedViewer
+   - init
+   - open_scenario
+   - init_animation
+   - draw_frame
+   - play: plays animation
+   - pause
+   - set_timestep
+   - save_animation
+   - calc_max_timestep
+- others:
+   - merge_dict: deeply merges two dicts
+   - clear_axes
+   - get_axes
+   - git_limits
+   - update_plot: draw canvas
+
+gui_toolbox:
+------------
+- SectionExpandButton: QPushbutton that can expand or collabse its section
+   - init
+   - on_clicked: toggle/expand section
+- UpperToolbox: Class
+   - init
+   - add_section: adds a collapsible section
+   - clicked
+   - define_section
+   - selection_change
+   - add_button
+   - add_widget
+- SumoTool: Class: widget to config the sumo simulation tools
+   - init
+   - initUI
+   - define_sections
+   - add_selections
+   - add_button
+   - add_widget
+
+
