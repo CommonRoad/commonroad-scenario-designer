@@ -4,12 +4,9 @@ An Internet connection is needed and a valid Mapillary ClinetID has to be provid
 """
 
 import json
-from urllib.request import urlopen
 from urllib.error import URLError
+from urllib.request import urlopen
 from crmapconverter.osm2cr import config
-import enum
-import numpy as np
-from dataclasses import dataclass
 from crmapconverter.osm2cr.converter_modules.graph_operations import road_graph as rg
 
 class Bbox:
@@ -50,6 +47,9 @@ def get_mappilary_traffic_signs(bbox: Bbox):
 
     except ValueError:
         print("Mapillary Device ID is not set.")
+        return None
+    except URLError:
+        print("error while connecting to mapillary servers. Skipping Mapillary signs")
         return None
 
 def add_mapillary_signs_to_graph(graph:rg.Graph):
