@@ -496,13 +496,18 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         return number_of_junctions
 
     def _encode_traffic_signs(self):
+        """
+        Encodes all traffic signs and writes the according changes to relevant nodes / edges
+        :return:
+        """
         encoder = TrafficSignEncoder(self.edge_types)
-        traffic_signs: Dict[int, TrafficSign] = {t.traffic_sign_id: t for t in self.lanelet_network.traffic_signs}
+        traffic_signs: Dict[int, TrafficSign] = {t.traffic_sign_id: t
+                                                 for t in self.lanelet_network.traffic_signs}
         for lanelet in self.lanelet_network.lanelets:
             edge = self.edges[str(self.lanelet_id2edge_id[lanelet.lanelet_id])]
             for traffic_sign_id in lanelet.traffic_signs:
-                sign = traffic_signs[traffic_sign_id]
-                encoder.encode(sign, lanelet, edge)
+                traffic_sign = traffic_signs[traffic_sign_id]
+                encoder.encode(traffic_sign, edge)
 
     def _merge_junctions_intersecting_lanelets(self):
         """
