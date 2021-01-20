@@ -17,7 +17,7 @@ TAGS = "urban"
 GEONAMES_USERNAME = "demo"
 # Mapillary Client ID which can be set to extract additional traffic signs. If set to "demo", mapillary signs will be disabled
 # "demo"
-MAPILLARY_CLIENT_ID = "dVY5ZFZiclhmM256endnTTk3TDRIYjphYmNmNDg0YTEwNmFmZGM2"
+MAPILLARY_CLIENT_ID = "demo"
 # time step size for the benchmark in seconds
 TIMESTEPSIZE = 0.1
 
@@ -165,7 +165,7 @@ DELETE_INVALID_LANES = True
 # radius of the earth used for calculation in meters
 EARTH_RADIUS = 6371000
 # delete short edges after cropping
-DELETE_SHORT_EDGES = True
+DELETE_SHORT_EDGES = False
 # distance between waypoints used internally in meters
 INTERPOLATION_DISTANCE_INTERNAL = 0.5
 # bezier parameter for interpolation (should be within [0, 0.5])

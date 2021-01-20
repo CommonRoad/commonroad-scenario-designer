@@ -311,7 +311,6 @@ class GraphNode:
                     lane.add_traffic_sign(sign)
 
 
-
 class GraphEdge:
     """
     Class that represents an edge in the graph structure
@@ -752,9 +751,8 @@ class GraphEdge:
         #         favorable_lane.add_traffic_sign(sign)
         #         return
 
-        # approach 2 if no sign direction could be
+        # use approach 2 if no sign direction could be provided
         # Warning! Sometimes edge forward direction != lane forward direction, this leads to wrongfully assigned traffic signs
-        # add to forward lanes.
         for lane in self.lanes:
             if lane.forward and forward:
                     lane.add_traffic_sign(sign)
@@ -813,9 +811,7 @@ class GraphTrafficSign:
             else:
                 virtual = self.sign['virtual']
 
-        # TODO Maybe improve this
         first_occurrence = set()
-
         return TrafficSign(
             traffic_sign_id=self.id,
             traffic_sign_elements=elements,

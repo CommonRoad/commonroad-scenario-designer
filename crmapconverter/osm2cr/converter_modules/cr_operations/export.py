@@ -171,7 +171,6 @@ def export(
     scenario, intermediate_format = create_scenario_intermediate(graph)
 
     # removing converting errors before writing to xml
-
     sanitize(scenario)
 
     # writing everything to XML
@@ -272,8 +271,6 @@ def view_xml(filename: str, ax=None) -> None:
         print("empty scenario")
         return
     limits = find_bounds(scenario)
-    #draw_params = { 'lanelet_network': {'draw_intersections': True, 'draw_traffic_signs_in_lanelet': True,
-    #                                   'draw_traffic_signs': True, 'draw_traffic_lights': True,}}
 
     draw_params = { 'lanelet_network': {'draw_intersections': True, 'draw_traffic_signs_in_lanelet': True,
                                         'draw_traffic_signs': True, 'draw_traffic_lights': True,

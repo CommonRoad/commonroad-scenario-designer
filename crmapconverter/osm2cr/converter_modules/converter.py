@@ -103,7 +103,6 @@ class GraphScenario:
             print("editing the graph")
             graph = gui.edit_graph_edges(graph)
         graph = step_collection_2(graph)
-
         # HERE WE CAN EDIT LINKS IN THE GRAPH
         if config.USER_EDIT:
             print("editing the graph")
