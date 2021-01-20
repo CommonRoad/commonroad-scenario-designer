@@ -16,7 +16,6 @@ TAGS = "urban"
 # Geonames username to retrieve geonamesID for created scenarios
 GEONAMES_USERNAME = "demo"
 # Mapillary Client ID which can be set to extract additional traffic signs. If set to "demo", mapillary signs will be disabled
-# "demo"
 MAPILLARY_CLIENT_ID = "demo"
 # time step size for the benchmark in seconds
 TIMESTEPSIZE = 0.1
