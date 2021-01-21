@@ -14,7 +14,7 @@ from sumocr.visualization.video import create_video
 # path config
 output_folder = os.path.join(os.path.dirname(__file__), "..", "..", 'test',
                              "sumo_xml_test_files")
-scenario_name = "garching"
+scenario_name = "garching_merged"
 input_file = os.path.join(output_folder, scenario_name + '.xml')
 
 scenario, planning_problem = CommonRoadFileReader(input_file).open()
