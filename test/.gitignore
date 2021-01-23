@@ -11,4 +11,5 @@
 *.edg.xml
 *.tll.xml
 *.con.xml
+*.typ.xml
 output_lanechange.txt
