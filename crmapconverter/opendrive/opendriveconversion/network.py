@@ -187,6 +187,10 @@ class Network:
             lanelet_network.create_intersection(intersection_map, intersection_id_counter)
             intersection_id_counter += 1
 
+        # TODO: Add directions to traffic lights
+        # TODO: Remove duplicate references to traffic signals/lights/stop lines
+        # lanelet_network.remove_duplicate_traffic_lights()
+
         return lanelet_network
 
     def export_commonroad_scenario(

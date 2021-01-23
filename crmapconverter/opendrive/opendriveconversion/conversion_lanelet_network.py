@@ -816,6 +816,11 @@ class ConversionLaneletNetwork(LaneletNetwork):
 
         return directions
 
+    def remove_duplicate_traffic_lights(self):
+        return
+
+    def assign_directions_to_traffic_lights(self):
+        return
 
 class _JoinSplitTarget:
     """Class to integrate joining/splitting of lanelet borders.
