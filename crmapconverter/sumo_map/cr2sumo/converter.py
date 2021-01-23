@@ -52,7 +52,8 @@ from crmapconverter.sumo_map.util import (_find_intersecting_edges,
                                           get_total_lane_length_from_netfile, max_lanelet_network_id,
                                           merge_lanelets, min_cluster,
                                           remove_unreferenced_traffic_lights,
-                                          write_ego_ids_to_rou_file, intersect_lanelets_line, orthogonal_ccw_vector, update_edge_lengths)
+                                          write_ego_ids_to_rou_file, intersect_lanelets_line, orthogonal_ccw_vector,
+                                          update_edge_lengths)
 
 from crmapconverter.sumo_map.config import SumoConfig
 from .mapping import (get_sumo_edge_type, traffic_light_states_CR2SUMO,
@@ -509,7 +510,8 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
             edge = self.edges[str(self.lanelet_id2edge_id[lanelet.lanelet_id])]
             for traffic_sign_id in lanelet.traffic_signs:
                 traffic_sign = traffic_signs[traffic_sign_id]
-                encoder.encode(traffic_sign, edge)
+                encoder.apply(traffic_sign, edge)
+        encoder.encode()
 
     def _merge_junctions_intersecting_lanelets(self):
         """
@@ -1302,7 +1304,6 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                 os.remove(path)
 
         return success
-
 
     def _update_internal_IDs_from_net_file(self, net_file_path: str):
         with open(net_file_path, 'r') as f:

@@ -15,7 +15,7 @@
 # @version $Id$
 
 from xml.etree import cElementTree as ET
-from typing import Set
+from typing import Set, List
 from .constants import SUMO_VEHICLE_CLASSES
 
 
@@ -79,12 +79,12 @@ class Edge:
         self._speed = lane.getSpeed()
         self._length = lane.getLength()
 
-    def addOutgoing(self, edge):
+    def addOutgoing(self, edge: 'Edge'):
         if edge._to not in self._outgoing:
             self._outgoing[edge._to] = []
         self._outgoing[edge._to].append(edge)
 
-    def addIncoming(self, edge):
+    def addIncoming(self, edge: 'Edge'):
         if edge._from not in self._incoming:
             self._incoming[edge._from] = []
         self._incoming[edge._from].append(edge)
@@ -92,13 +92,13 @@ class Edge:
     def setRawShape(self, shape):
         self._rawShape3D = shape
 
-    def getID(self):
+    def getID(self) -> int:
         return self._id
 
-    def getIncoming(self):
+    def getIncoming(self) -> List['Edge']:
         return [e for edges in self._incoming.values() for e in edges]
 
-    def getOutgoing(self):
+    def getOutgoing(self) -> List['Edge']:
         return [e for edges in self._outgoing.values() for e in edges]
 
     def getRawShape(self):

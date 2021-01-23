@@ -6,7 +6,8 @@ from crmapconverter.sumo_map.util import compute_max_curvature_from_polyline
 import logging
 import numpy as np
 from collections import defaultdict
-from typing import Optional, Dict, List
+from typing import Optional, Dict, List, Set
+from copy import copy
 
 
 class TrafficSignEncoder:
@@ -14,68 +15,44 @@ class TrafficSignEncoder:
         self.edge_types = edge_types
         self.traffic_sign: Optional[TrafficSign] = None
         self.lanelet: Optional[Lanelet] = None
+        self.edge_traffic_signs: Dict[Edge, Set[TrafficSignElement]] = defaultdict(set)
         self.edge: Optional[Edge] = None
 
-    def encode(self, traffic_sign: TrafficSign, edge: Edge):
+    def apply(self, traffic_sign: TrafficSign, edge: Edge):
+        """
+        Adds the given traffic sign to be encoded.
+        Needs to be called for _all_ traffic signs before encode()
+        :param traffic_sign:
+        :param edge:
+        :return:
+        """
         for element in traffic_sign.traffic_sign_elements:
-            id = element.traffic_sign_element_id
-            # TODO: Add all supported Traffic Sign Countries
-            if isinstance(id, TrafficSignIDGermany):
-                self._encode_german_traffic_sign_element(element, edge)
-            elif isinstance(id, TrafficSignIDUsa):
-                self._encode_usa_traffic_sign_element(element, edge)
-            else:
-                self._encode_zamunda_traffic_sign_element(element, edge)
+            self.edge_traffic_signs[edge].add(element)
 
-    def _encode_german_traffic_sign_element(self, element: TrafficSignElement, edge: Edge):
-        id = element.traffic_sign_element_id
-        if id == TrafficSignIDGermany.MAX_SPEED:
-            self._set_max_speed(element, edge)
-        elif id == TrafficSignIDGermany.PRIORITY:
-            self._set_priority(element, edge)
-        elif id == TrafficSignIDGermany.STOP:
-            self._set_all_way_stop(element, edge)
-        elif id == TrafficSignIDGermany.YIELD:
-            self._set_yield(element, edge)
-        elif id == TrafficSignIDGermany.RIGHT_BEFORE_LEFT:
-            self._set_right_before_left(element, edge)
-        else:
-            logging.warning(f"{element.traffic_sign_element_id} cannot be converted.")
-
-    def _encode_usa_traffic_sign_element(self, element: TrafficSignElement, edge: Edge):
-        id = element.traffic_sign_element_id
-        if id == TrafficSignIDUsa.MAX_SPEED:
-            self._set_max_speed(element, edge)
-        elif id == TrafficSignIDUsa.PRIORITY:
-            self._set_priority(element, edge)
-        elif id == TrafficSignIDUsa.STOP:
-            self._set_all_way_stop(element, edge)
-        elif id == TrafficSignIDUsa.YIELD:
-            self._set_yield(element, edge)
-        elif id == TrafficSignIDUsa.RIGHT_BEFORE_LEFT:
-            self._set_right_before_left(element, edge)
-        else:
-            logging.warning(f"{element.traffic_sign_element_id} cannot be converted.")
-
-    def _encode_zamunda_traffic_sign_element(self, element: TrafficSignElement,
-                                             edge: Edge):
-        id = element.traffic_sign_element_id
-        if id == TrafficSignIDZamunda.MAX_SPEED:
-            self._set_max_speed(element, edge)
-        elif id == TrafficSignIDZamunda.PRIORITY:
-            self._set_priority(element, edge)
-        elif id == TrafficSignIDZamunda.STOP:
-            self._set_all_way_stop(element, edge)
-        elif id == TrafficSignIDZamunda.YIELD:
-            self._set_yield(element, edge)
-        elif id == TrafficSignIDZamunda.RIGHT_BEFORE_LEFT:
-            self._set_right_before_left(element, edge)
-        else:
-            logging.warning(f"{element.traffic_sign_element_id} cannot be converted.")
+    def encode(self):
+        """
+        Encodes the given traffic sign to the edge / adjacent ones
+        :return:
+        """
+        for edge, elements in copy(self.edge_traffic_signs).items():
+            for element in elements:
+                id = element.traffic_sign_element_id
+                if id == TrafficSignIDGermany.MAX_SPEED:
+                    self._set_max_speed(element, edge)
+                elif id == TrafficSignIDGermany.PRIORITY:
+                    self._set_priority(element, edge)
+                elif id == TrafficSignIDGermany.STOP:
+                    self._set_all_way_stop(element, edge)
+                elif id == TrafficSignIDGermany.YIELD:
+                    self._set_yield(element, edge)
+                elif id == TrafficSignIDGermany.RIGHT_BEFORE_LEFT:
+                    self._set_right_before_left(element, edge)
+                else:
+                    logging.warning(f"{element.traffic_sign_element_id} cannot be converted.")
 
     def _set_max_speed(self, traffic_sign_element: TrafficSignElement, edge: Edge):
         """
-        Sets max_speed of this edge and it's outgoings to the elements value.
+        Sets max_speed of this edge and all reachable outgoing edges, until another traffic sign is set
         :param traffic_sign_element:
         :param edge:
         :return:
@@ -85,11 +62,28 @@ class TrafficSignEncoder:
         max_speed = float(traffic_sign_element.additional_values[0])  # in m/s
         new_type = self.edge_types.create_from_update_speed(edge.getType(), max_speed)
         # According to https://gitlab.lrz.de/tum-cps/commonroad-scenarios/-/blob/master/documentation/XML_commonRoad_2020a.pdf
-        # MAX_SPEED is valid from the start of the specified lanelet, as well the succeeding one.
-        for e in [edge] + edge.getOutgoing():
+        # MAX_SPEED is valid from the start of the specified lanelet, until another speed sign is set
+        for e in self._bfs_until(edge, traffic_sign_element):
             e.setType(new_type.id)
             for lane in e.getLanes():
                 lane.speed = max_speed
+
+    def _bfs_until(self, start: Edge, element: TrafficSignElement) -> List[Edge]:
+        start_id = element.traffic_sign_element_id
+        queue = [start]
+        visited = set()
+        res = []
+        while queue:
+            edge = queue.pop()
+            if edge in visited:
+                continue
+            visited.add(edge)
+            if any(elem.traffic_sign_element_id == start_id for elem in self.edge_traffic_signs[edge]
+                   if edge != start):
+                continue
+            res.append(edge)
+            queue += edge.getOutgoing()
+        return res
 
     def _set_priority(self, element: TrafficSignElement, edge: Edge, max_curvature: float = 1):
         """
