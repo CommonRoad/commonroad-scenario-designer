@@ -119,7 +119,7 @@ def get_traffic_signals(road: Road):
             else:
                 continue
 
-    return traffic_lights, traffic_signs, stop_lines, old_signal_id_to_new_id_mapper
+    return traffic_lights, traffic_signs
 
 
 def calculate_stop_line_position(lane_sections, signal, position, tangent):

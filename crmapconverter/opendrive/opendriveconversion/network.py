@@ -41,8 +41,11 @@ class Network:
         self._planes = []
         self._link_index = None
         self._geo_ref = None
-        self.traffic_signal_elements = None
-        self._signal_id_mapper = dict()
+        self._traffic_lights = []
+        self._traffic_signs = []
+
+#        self.traffic_signal_elements = None
+#        self._signal_id_mapper = dict()
 
     # def __eq__(self, other):
     # return self.__dict__ == other.__dict__
@@ -71,26 +74,19 @@ class Network:
                 road.planView, road.lanes.laneOffsets
             )
             # Extracting signals, signs and stop lines from each road
-            traffic_lights, traffic_signs, stop_lines, old_signal_id_to_new_id_mapper = get_traffic_signals(road)
-            self._signal_id_mapper.update(old_signal_id_to_new_id_mapper)
 
-            signal_references = get_traffic_signal_references(road)
+            # signal_references = get_traffic_signal_references(road)
             # A lane section is the smallest part that can be converted at once
             for lane_section in road.lanes.lane_sections:
                 parametric_lane_groups = OpenDriveConverter.lane_section_to_parametric_lanes(
                     lane_section, reference_border
                 )
 
-                # parametric_lane_groups is a list of ParametricLaneGroup()
-                # ParametricLaneGroup() contains a list of ParametricLane()
-                # Adding traffic signs, lights and stop lines as part of Network._planes()
-                for parametric_lane in parametric_lane_groups:
-                    parametric_lane.traffic_lights.extend(traffic_lights)
-                    parametric_lane.traffic_signs.extend(traffic_signs)
-                    parametric_lane.stop_lines.extend(stop_lines)
-                    parametric_lane.signal_references.extend(signal_references)
-
                 self._planes.extend(parametric_lane_groups)
+
+            traffic_lights, traffic_signs = get_traffic_signals(road)
+            self._traffic_lights.extend(traffic_lights)
+            self._traffic_signs.extend(traffic_signs)
 
     def export_lanelet_network(
             self, filter_types: list = None
@@ -103,7 +99,7 @@ class Network:
         Returns:
           The converted LaneletNetwork object.
         """
-        self.traffic_signal_elements = TrafficSignalElements()
+
         # Convert groups to lanelets
         lanelet_network = ConversionLaneletNetwork()
 
@@ -120,6 +116,7 @@ class Network:
 
             # Create a map of lanelet_description to traffic signs/lights so that they can be assigned as
             # reference to the correct lanelets later
+            """
             # Associating corresponding traffic sign, light and stopline ids with respective lanelets
             if bool(parametric_lane.traffic_signs):
                 for traffic_sign in parametric_lane.traffic_signs:
@@ -135,6 +132,7 @@ class Network:
 #            if bool(parametric_lane.signal_references):
 #                for signal_reference in parametric_lane.signal_references:
 #                    self.traffic_signal_elements.signal_reference_to_lanelet_id_mapper[signal_reference].extend(lanelet.predecessor)
+            """
 
         # prune because some
         # successorIds get encoded with a non existing successorID
@@ -144,14 +142,14 @@ class Network:
         # concatenate possible lanelets with their successors
         replacement_id_map = lanelet_network.concatenate_possible_lanelets()
         self._link_index.concatenate_lanes_in_intersection_map(replacement_id_map)
-        self.traffic_signal_elements.replace_concatenated_lanes_for_traffic_signs_map(replacement_id_map)
+        # self.traffic_signal_elements.replace_concatenated_lanes_for_traffic_signs_map(replacement_id_map)
 
         # Perform lane splits and joins
         lanelet_network.join_and_split_possible_lanes()
 
         lanelet_network.convert_all_lanelet_ids()
         self._link_index.update_intersection_lane_id(lanelet_network.old_lanelet_ids())
-        self.traffic_signal_elements.update_traffic_signs_map_lane_id(lanelet_network.old_lanelet_ids())
+        # self.traffic_signal_elements.update_traffic_signs_map_lane_id(lanelet_network.old_lanelet_ids())
 
         # generating intersections
         intersection_id_counter = 0
@@ -163,7 +161,7 @@ class Network:
         # TODO: Add directions to traffic lights
         # TODO: Remove duplicate references to traffic signals/lights/stop lines
             # Adding traffic signs and lights to lanelets
-
+        """
         for traffic_light in self.traffic_signal_elements.traffic_light_to_lanelet_mapper:
             lanelet_network.add_traffic_light(traffic_light, self.traffic_signal_elements.traffic_light_to_lanelet_mapper[traffic_light])
         for traffic_sign in self.traffic_signal_elements.traffic_sign_to_lanelet_mapper:
@@ -173,8 +171,6 @@ class Network:
                 if lanelet_network.find_lanelet_by_id(lanelet).stop_line is None:
                     lanelet_network.find_lanelet_by_id(lanelet).stop_line = stopline
 
-
-        """
         for signal_reference, lanelet_ids in self.traffic_signal_elements.signal_reference_to_lanelet_id_mapper.items():
             updated_id = self._signal_id_mapper[signal_reference.id]
             if updated_id[1] == "traffic light":
@@ -188,7 +184,6 @@ class Network:
                     if lanelet_network.find_lanelet_by_id(lanelet_id).stop_line is None:
                         lanelet_network.find_lanelet_by_id(lanelet_id).stop_line = updated_id[0]
         """
-        # lanelet_network.remove_duplicate_traffic_lights()
         return lanelet_network
 
     def export_commonroad_scenario(
@@ -235,6 +230,41 @@ class Network:
                 else ["driving", "onRamp", "offRamp", "exit", "entry"]
             )
         )
+
+        lanelet_network = scenario.lanelet_network
+
+        # Assign traffic lights to lanelets
+        for traffic_light in self._traffic_lights:
+
+            min_distance = float("inf")
+            for intersection in lanelet_network.intersections:
+                for incoming in intersection.incomings:
+                    for lanelet in incoming.incoming_lanelets:
+                        lane = lanelet_network.find_lanelet_by_id(lanelet)
+                        # Lanelet cannot have more traffic lights than number of successors
+                        no_successors = len(lane.successor)
+                        no_lights = len(lane.traffic_lights)
+                        if len(lane.successor) > len(lane.traffic_lights):
+                            pos_1 = traffic_light.position
+                            pos_2 = lane.center_vertices[-1]
+                            dist = np.linalg.norm(pos_1 - pos_2)
+                            if dist < min_distance:
+                                min_distance = dist
+                                id_for_adding = lanelet
+
+            lanelet_network.add_traffic_light(traffic_light, {id_for_adding})
+
+        for traffic_sign in self._traffic_signs:
+
+            distance = []
+            for lanelet in lanelet_network.lanelets:
+                pos_1 = traffic_sign.position
+                pos_2 = lanelet.center_vertices[-1]
+                dist = np.linalg.norm(pos_1 - pos_2)
+                distance.append(dist)
+
+            id_for_adding = lanelet_network.lanelets[distance.index(min(distance))].lanelet_id
+            lanelet_network.add_traffic_sign(traffic_sign, {id_for_adding})
 
         return scenario
 
