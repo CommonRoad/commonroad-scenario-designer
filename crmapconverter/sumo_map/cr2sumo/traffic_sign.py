@@ -61,8 +61,7 @@ class TrafficSignEncoder:
                     else:
                         raise NotImplementedError(f"Attribute {t_type} not implemented")
                 except NotImplementedError as e:
-                    # logging.warning(f"{element} cannot be converted. Reason: {e}")
-                    raise RuntimeError(f"{element} cannot be converted. Reason: {e}")
+                    logging.warning(f"{element} cannot be converted. Reason: {e}")
 
     def _set_max_speed(self, traffic_sign_element: TrafficSignElement, edge: Edge):
         """

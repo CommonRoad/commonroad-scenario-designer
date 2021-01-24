@@ -1239,7 +1239,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         return file_path
 
     def merge_intermediate_files(self, output_path: str, nodes_path: str, edges_path: str, connections_path: str,
-                                 traffic_path: str, type_path: str, cleanup=False, update_internal_ids=True) -> bool:
+                                 traffic_path: str, type_path: str, cleanup=True, update_internal_ids=True) -> bool:
         """
         Function that merges the edges and nodes files into one using netconvert
         :param connections_path:
