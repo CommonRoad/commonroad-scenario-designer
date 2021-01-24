@@ -1239,7 +1239,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         return file_path
 
     def merge_intermediate_files(self, output_path: str, nodes_path: str, edges_path: str, connections_path: str,
-                                 traffic_path: str, type_path: str, cleanup=True, update_internal_ids=True) -> bool:
+                                 traffic_path: str, type_path: str, cleanup=False, update_internal_ids=True) -> bool:
         """
         Function that merges the edges and nodes files into one using netconvert
         :param connections_path:
@@ -1270,6 +1270,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                   f" --no-turnarounds=true" \
                   f" --junctions.internal-link-detail=20" \
                   f" --geometry.avoid-overlap=true" \
+                  f" --geometry.remove.keep-edges.explicit=true" + \
                   f" --offset.disable-normalization=true" \
                   f" --node-files={nodes_path}" \
                   f" --edge-files={edges_path}" \
@@ -1277,7 +1278,6 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                   f" --tllogic-files={traffic_path}" \
                   f" --type-files={type_path}" \
                   f" --output-file={output_path}" \
-                  f" --geometry.remove.keep-edges.explicit=true" + \
                   f" --seed={SumoConfig.random_seed}"
         success = True
         try:

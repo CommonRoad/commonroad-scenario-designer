@@ -1,12 +1,12 @@
 from commonroad.scenario.traffic_sign import TrafficSign, TrafficSignElement, TrafficSignIDGermany, TrafficSignIDUsa, \
-    TrafficSignIDZamunda
+    TrafficSignIDZamunda, TrafficSignIDSpain, TrafficSignIDChina, TrafficSignIDRussia
 from commonroad.scenario.lanelet import Lanelet
-from crmapconverter.sumo_map.sumolib_net import Edge, EdgeType, EdgeTypes, SumoNodeType
+from crmapconverter.sumo_map.sumolib_net import Edge, EdgeType, EdgeTypes, SumoNodeType, SumoVehicles
 from crmapconverter.sumo_map.util import compute_max_curvature_from_polyline
 import logging
 import numpy as np
 from collections import defaultdict
-from typing import Optional, Dict, List, Set
+from typing import Optional, Dict, List, Set, Generator
 from copy import copy
 
 
@@ -36,19 +36,33 @@ class TrafficSignEncoder:
         """
         for edge, elements in copy(self.edge_traffic_signs).items():
             for element in elements:
-                id = element.traffic_sign_element_id
-                if id == TrafficSignIDGermany.MAX_SPEED:
-                    self._set_max_speed(element, edge)
-                elif id == TrafficSignIDGermany.PRIORITY:
-                    self._set_priority(element, edge)
-                elif id == TrafficSignIDGermany.STOP:
-                    self._set_all_way_stop(element, edge)
-                elif id == TrafficSignIDGermany.YIELD:
-                    self._set_yield(element, edge)
-                elif id == TrafficSignIDGermany.RIGHT_BEFORE_LEFT:
-                    self._set_right_before_left(element, edge)
-                else:
-                    logging.warning(f"{element.traffic_sign_element_id} cannot be converted.")
+                try:
+                    t_type = element.traffic_sign_element_id
+                    if t_type == t_type.MAX_SPEED:
+                        self._set_max_speed(element, edge)
+                    elif t_type == t_type.PRIORITY:
+                        self._set_priority(element, edge)
+                    elif t_type == t_type.STOP:
+                        self._set_all_way_stop(element, edge)
+                    elif t_type == t_type.YIELD:
+                        self._set_yield(element, edge)
+                    elif t_type == t_type.RIGHT_BEFORE_LEFT:
+                        self._set_right_before_left(element, edge)
+                    elif t_type == t_type.BAN_CAR_TRUCK_BUS_MOTORCYCLE:
+                        self._set_ban_car_truck_bus_motorcycle(element, edge)
+                    elif t_type == t_type.TOWN_SIGN:
+                        if isinstance(t_type, TrafficSignIDGermany):
+                            element = copy(element)
+                            element._additional_values = [str(50 / 3.6)]
+                            self._set_max_speed(element, edge)
+                        # TODO: Implement speed limits for additional countries
+                        else:
+                            raise NotImplementedError("TOWN_SIGN for this country is not implemented")
+                    else:
+                        raise NotImplementedError(f"Attribute {t_type} not implemented")
+                except NotImplementedError as e:
+                    # logging.warning(f"{element} cannot be converted. Reason: {e}")
+                    raise RuntimeError(f"{element} cannot be converted. Reason: {e}")
 
     def _set_max_speed(self, traffic_sign_element: TrafficSignElement, edge: Edge):
         """
@@ -68,11 +82,16 @@ class TrafficSignEncoder:
             for lane in e.getLanes():
                 lane.speed = max_speed
 
-    def _bfs_until(self, start: Edge, element: TrafficSignElement) -> List[Edge]:
+    def _bfs_until(self, start: Edge, element: TrafficSignElement) -> Generator[Edge, None, None]:
+        """
+        Find all Edges which are not assigned to have the same element. Includes start Edge
+        :param start: starting Edge
+        :param element: find Edges with different element than the given one
+        :return:
+        """
         start_id = element.traffic_sign_element_id
         queue = [start]
         visited = set()
-        res = []
         while queue:
             edge = queue.pop()
             if edge in visited:
@@ -81,9 +100,8 @@ class TrafficSignEncoder:
             if any(elem.traffic_sign_element_id == start_id for elem in self.edge_traffic_signs[edge]
                    if edge != start):
                 continue
-            res.append(edge)
             queue += edge.getOutgoing()
-        return res
+            yield edge
 
     def _set_priority(self, element: TrafficSignElement, edge: Edge, max_curvature: float = 1):
         """
@@ -148,7 +166,7 @@ class TrafficSignEncoder:
         """
         assert len(element.additional_values) == 0, \
             f"GIVEWAY can only have none additional attribute, has: {element.additional_values}"
-        edge.getToNode().setType(SumoNodeType.PRIORITY_STOP)
+        edge.getToNode().setType(SumoNodeType.PRIORITY_STOP.value)
         for outgoing in edge.getOutgoing():
             old_type = self.edge_types.types[outgoing.getType()]
             new_type = self.edge_types.create_from_update_priority(old_type.id, max(old_type.priority - 1, 0))
@@ -164,3 +182,22 @@ class TrafficSignEncoder:
         assert len(element.additional_values) == 0, \
             f"RIGHT_BEFORE_LEFT can only have none additional attribute, has: {element.additional_values}"
         edge.getToNode().setType(SumoNodeType.RIGHT_BEFORE_LEFT.value)
+
+    def _set_ban_car_truck_bus_motorcycle(self, element: TrafficSignElement, edge: Edge):
+        """
+        Removes all multi-lane vehicles from the edge's allowed list.
+        :param element:
+        :param edge:
+        :return:
+        """
+        assert len(element.additional_values) == 0, \
+            f"BAN_CAR_TRUCK_BUS_MOTORCYCLE can only have none additional attribute, has: {element.additional_values}"
+        old_type = self.edge_types.types[edge.getType()]
+        disallow = set(old_type.disallow) | {
+            SumoVehicles.PASSENGER.value, SumoVehicles.HOV.value, SumoVehicles.TAXI.value,
+            SumoVehicles.BUS.value, SumoVehicles.COACH.value, SumoVehicles.DELIVERY.value,
+            SumoVehicles.TRUCK.value, SumoVehicles.TRAILER.value, SumoVehicles.MOTORCYCLE.value
+        }
+        new_type = self.edge_types.create_from_update_disallow(old_type.id, list(disallow))
+        for successor in self._bfs_until(edge, element):
+            successor.setType(new_type.id)

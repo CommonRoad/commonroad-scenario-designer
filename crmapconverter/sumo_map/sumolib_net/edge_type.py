@@ -1,6 +1,6 @@
 from xml.etree import ElementTree as ET
 from typing import List, Dict, Union, TypeVar, Callable, Optional
-from .constants import SUMO_VEHICLE_CLASSES
+from .constants import SUMO_VEHICLE_CLASSES, SumoVehicles
 from copy import deepcopy
 
 
@@ -40,21 +40,20 @@ class EdgeType:
         :param sidewalk_width: The default width for added sidewalks (defaults to -1 which disables extra sidewalks).
         """
         self.id = id
-
         assert not (allow and disallow and set(allow) & set(disallow)), \
             f"allow and disallow contain common elements {set(allow) & set(disallow)}"
+
+        self.allow: List[str] = []
         if allow:
             assert set(allow).issubset(SUMO_VEHICLE_CLASSES), \
                 f"allow contains invalid classes {set(allow) - set(SUMO_VEHICLE_CLASSES)}"
-            self.allow = allow
-        else:
-            self.allow = []
+            self.allow: List = allow
+
+        self.disallow: List[str] = []
         if disallow:
             assert set(disallow).issubset(SUMO_VEHICLE_CLASSES), \
                 f"disallow contains invalid classes {set(disallow) - set(SUMO_VEHICLE_CLASSES)}"
-            self.disallow = disallow
-        else:
-            self.disallow = []
+            self.disallow: List[str] = disallow
 
         self.discard = discard
         self.num_lanes = num_lanes
@@ -159,7 +158,11 @@ class EdgeTypes:
         return self._create_from_update(old_id, "oneway", oneway)
 
     def create_from_update_allow(self, old_id: str, allow: List[str]) -> Optional[EdgeType]:
-        return self._create_from_update(old_id, "allow", allow)
+        new_type = self._create_from_update(old_id, "allow", allow)
+        setattr(new_type, "disallow", list(set(new_type.disallow) - set(new_type.allow)))
+        return new_type
 
     def create_from_update_disallow(self, old_id: str, disallow: List[str]) -> Optional[EdgeType]:
-        return self._create_from_update(old_id, "allow", disallow)
+        new_type = self._create_from_update(old_id, "disallow", disallow)
+        setattr(new_type, "allow", list(set(new_type.allow) - set(new_type.disallow)))
+        return new_type
