@@ -19,8 +19,8 @@ class TrafficSignsSettings(QDialog):
 
 
         self.country = QComboBox()
-        enumlist = [e.name for e in SupportedTrafficSignCountry]
-        self.country.addItems(enumlist)
+        self.enumlist = [e.value for e in SupportedTrafficSignCountry]
+        self.country.addItems(self.enumlist)
 
         self.apply_button = QPushButton()
         self.apply_button.setText("apply")
@@ -56,8 +56,9 @@ class TrafficSignsSelection(QDialog):
         self.setGeometry(100, 100, 500, 300)
 
         self.sign_list = QComboBox()
-        enumlist = [e.name for e in TrafficSignIDGermany]
+        enumlist = [e.value for e in TrafficSignIDGermany]
         self.sign_list.addItems(enumlist)
+
         #self.sign_list.addItem(QIcon(":/101.png"), "TEST")
 
         self.lanelet_id = QLineEdit()
@@ -97,6 +98,13 @@ class TrafficSignsSelection(QDialog):
 
     def apply_button_click(self):
         self.close()
+
+    def getSignNumber(self):
+        name = self.sign_list.currentText()
+        member = TrafficSignIDGermany.name
+        number = member.value
+        print(number)
+        return
 
     def getSign(self):
         return self.sign_list.currentText()
@@ -308,6 +316,9 @@ class DeleteTrafficElement(QDialog):
         return self.id
 
     def getLaneletId(self):
-        return int(self.lanelet_id.text())
+        if self.lanelet_id.text():
+            return int(self.lanelet_id.text())
+        else:
+            return None
 
 

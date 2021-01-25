@@ -376,7 +376,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         else:
             return
 
-        self.traffic1 = TrafficSign(self.traffic_signs_id, [TrafficSignElement(TrafficSignIDZamunda(sig), [vals])], {lanelet_id},
+        self.traffic1 = TrafficSign(self.traffic_signs_id, [TrafficSignElement(TrafficSignIDGermany(sig), [vals])], {lanelet_id},
                                     np.array([x, y]))
         self.scenario.lanelet_network.add_traffic_sign(self.traffic1, {lanelet_id})
         if lanelet_id:
@@ -450,12 +450,20 @@ class MWindow(QMainWindow, Ui_mainWindow):
         else:
             laneletid = self.crviewer.selected_lanelet_use[0]._lanelet_id
 
-        print(laneletid)
-
         lanelet = self.scenario.lanelet_network.find_lanelet_by_id(laneletid)
-        trafficelement = self.scenario.lanelet_network.find_traffic_sign_by_id(element_id)
-        print(lanelet)
-        print(trafficelement)
+        trafficelementset = lanelet._traffic_signs
+        trafficlightset = lanelet._traffic_lights
+        if element_id in trafficelementset:
+            trafficelementset.remove(element_id)
+            del self.scenario.lanelet_network._traffic_signs[element_id]
+
+        if element_id in trafficlightset:
+            trafficlightset.remove(element_id)
+            del self.scenario.lanelet_network._traffic_lights[element_id]
+
+        self.scenario.lanelet_network.cleanup_lanelet_references()
+        self.update_view(focus_on_network=True)
+
 
 
 
@@ -645,13 +653,20 @@ class MWindow(QMainWindow, Ui_mainWindow):
                 angle = (angle/np.pi) * 180
                 self.lowertoolBox.radius.clear()
                 rad = self.mapcreator.calc_radius(self.selected_lanelet)
+                self.lowertoolBox.traffic_sign_ids.clear()
                 traffic_ids = self.selected_lanelet.traffic_signs
+                for t in traffic_ids:
+                    t = str(t)
+                    self.lowertoolBox.traffic_sign_ids.insert(t)
+                    self.lowertoolBox.traffic_sign_ids.insert(", ")
+                print(traffic_ids)
                 if int(angle) != 0:
                     self.lowertoolBox.angle.clear()
                     self.lowertoolBox.angle.insert(str(int(angle)))
                     self.lowertoolBox.length.clear()
                     self.lowertoolBox.radius.clear()
                     self.lowertoolBox.radius.insert(str(int(rad)))
+
 
     def edit_lanelet(self):
         posX = 0
