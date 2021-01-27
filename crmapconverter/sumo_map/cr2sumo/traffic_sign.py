@@ -34,23 +34,24 @@ class TrafficSignEncoder:
         Encodes the given traffic sign to the edge / adjacent ones
         :return:
         """
+
         for edge, elements in copy(self.edge_traffic_signs).items():
             for element in elements:
                 try:
                     t_type = element.traffic_sign_element_id
-                    if t_type == t_type.MAX_SPEED:
+                    if t_type.MAX_SPEED and t_type == t_type.MAX_SPEED:
                         self._set_max_speed(element, edge)
-                    elif t_type == t_type.PRIORITY:
+                    elif t_type.PRIORITY and t_type == t_type.PRIORITY:
                         self._set_priority(element, edge)
-                    elif t_type == t_type.STOP:
+                    elif t_type.STOP and t_type == t_type.STOP:
                         self._set_all_way_stop(element, edge)
-                    elif t_type == t_type.YIELD:
+                    elif t_type.YIELD and t_type == t_type.YIELD:
                         self._set_yield(element, edge)
-                    elif t_type == t_type.RIGHT_BEFORE_LEFT:
+                    elif t_type.RIGHT_BEFORE_LEFT and t_type == t_type.RIGHT_BEFORE_LEFT:
                         self._set_right_before_left(element, edge)
-                    elif t_type == t_type.BAN_CAR_TRUCK_BUS_MOTORCYCLE:
+                    elif t_type.BAN_CAR_TRUCK_BUS_MOTORCYCLE and t_type == t_type.BAN_CAR_TRUCK_BUS_MOTORCYCLE:
                         self._set_ban_car_truck_bus_motorcycle(element, edge)
-                    elif t_type == t_type.TOWN_SIGN:
+                    elif t_type.TOWN_SIGN and t_type == t_type.TOWN_SIGN:
                         if isinstance(t_type, TrafficSignIDGermany):
                             element = copy(element)
                             element._additional_values = [str(50 / 3.6)]
