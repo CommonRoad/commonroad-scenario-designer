@@ -34,18 +34,25 @@ class TrafficSignEncoder:
         Encodes the given traffic sign to the edge / adjacent ones
         :return:
         """
+
+        def safe_eq(traffic_type, attr) -> bool:
+            try:
+                return getattr(traffic_type, attr) == traffic_type
+            except AttributeError:
+                return False
+
         for edge, elements in copy(self.edge_traffic_signs).items():
             for element in elements:
-                id = element.traffic_sign_element_id
-                if id == TrafficSignIDGermany.MAX_SPEED:
+                t_type = element.traffic_sign_element_id
+                if safe_eq(t_type, "MAX_SPEED"):
                     self._set_max_speed(element, edge)
-                elif id == TrafficSignIDGermany.PRIORITY:
+                elif safe_eq(t_type, "PRIORITY"):
                     self._set_priority(element, edge)
-                elif id == TrafficSignIDGermany.STOP:
+                elif safe_eq(t_type, "STOP"):
                     self._set_all_way_stop(element, edge)
-                elif id == TrafficSignIDGermany.YIELD:
+                elif safe_eq(t_type, "YIELD"):
                     self._set_yield(element, edge)
-                elif id == TrafficSignIDGermany.RIGHT_BEFORE_LEFT:
+                elif safe_eq(t_type, "RIGHT_BEFORE_LEFT"):
                     self._set_right_before_left(element, edge)
                 else:
                     logging.warning(f"{element.traffic_sign_element_id} cannot be converted.")
