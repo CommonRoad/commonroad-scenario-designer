@@ -9,4 +9,4 @@ cd commonroad-map-tool \
 && tox --current-env -e py37 -- test/ \
 && source activate commonroad-py38 \
 && pip install -r test_requirements.txt -r requirements.txt \
-&& tox --current-env -e py38 -- test/ \
+&& tox --current-env -e py38 -- test/ || /bin/bash
