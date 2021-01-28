@@ -6,4 +6,4 @@ docker run -it \
     --volume="$HOME/.Xauthority:/home/cruser/.Xauthority:rw" \
     --volume="$PWD/../:/home/cruser/commonroad-map-tool" \
     --volume="$HOME/.ssh/:/home/cruser/.ssh" \
-    "commonroad:latest" /bin/bash
+    "commonroad:latest" /home/cruser/commonroad-map-tool/ci/test.sh

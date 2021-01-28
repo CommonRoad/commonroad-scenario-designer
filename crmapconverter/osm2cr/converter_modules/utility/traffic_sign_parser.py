@@ -93,7 +93,7 @@ class TrafficSignParser:
         group = str(self.sign['mapillary']).split('--')[2]
 
         # start parsing
-       
+
         # warnings
         if category == 'warning' and category in config.MAPILLARY_CATEGORIES:
             if 'crossroads-with-priority-to-the-right' in name:
