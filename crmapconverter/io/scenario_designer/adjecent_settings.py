@@ -26,6 +26,11 @@ class AdjecentSettings(QDialog):
         self.lanelet_id.setMaxLength(6)
         self.lanelet_id.setAlignment(Qt.AlignRight)
 
+        self.width = QLineEdit()
+        self.width.setValidator(QIntValidator())
+        self.width.setMaxLength(6)
+        self.width.setAlignment(Qt.AlignRight)
+
         self.apply_button = QPushButton()
         self.apply_button.setText("apply")
         self.apply_button.clicked.connect(self.apply_button_click)
@@ -34,6 +39,7 @@ class AdjecentSettings(QDialog):
         layout.addRow("Lanelet direction", self.direction)
         layout.addRow("Adjacet position", self.position)
         layout.addRow("Lanelet ID", self.lanelet_id)
+        layout.addRow("constant widht", self.width)
         layout.addWidget(self.apply_button)
         self.setLayout(layout)
 

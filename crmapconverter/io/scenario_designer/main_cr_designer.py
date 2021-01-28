@@ -316,11 +316,25 @@ class MWindow(QMainWindow, Ui_mainWindow):
         if lanelet == None:
             self.textBrowser.append("select a valid lanelet id")
             return
-        if left:
-            adjacent_lanelet = self.mapcreator.adjacent_lanelet_left(lanelet, self.crviewer.current_scenario.lanelet_network,
-                                                                self.crviewer.current_scenario, same_direction=forwards, width=5)
+
+        if self.ADJ.width.text():
+            width = int(self.ADJ.width.text())
+            if left:
+                adjacent_lanelet = self.mapcreator.adjacent_lanelet_left(lanelet,
+                                                                         self.crviewer.current_scenario.lanelet_network,
+                                                                         self.crviewer.current_scenario,
+                                                                         same_direction=forwards, width=width)
+            else:
+                adjacent_lanelet = self.mapcreator.adjacent_lanelet_right(lanelet,
+                                                                          self.crviewer.current_scenario.lanelet_network,
+                                                                          self.crviewer.current_scenario,
+                                                                          same_direction=forwards, width=width)
         else:
-            adjacent_lanelet = self.mapcreator.adjacent_lanelet_right(lanelet, self.crviewer.current_scenario.lanelet_network,
+            if left:
+                adjacent_lanelet = self.mapcreator.adjacent_lanelet_left(lanelet, self.crviewer.current_scenario.lanelet_network,
+                                                                self.crviewer.current_scenario, same_direction=forwards, width=5)
+            else:
+                adjacent_lanelet = self.mapcreator.adjacent_lanelet_right(lanelet, self.crviewer.current_scenario.lanelet_network,
                                                                 self.crviewer.current_scenario, same_direction=forwards)
         self.update_view(focus_on_network=True)
 
