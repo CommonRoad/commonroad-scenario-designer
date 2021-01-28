@@ -675,13 +675,19 @@ class MWindow(QMainWindow, Ui_mainWindow):
                     t = str(t)
                     self.lowertoolBox.traffic_sign_ids.insert(t)
                     self.lowertoolBox.traffic_sign_ids.insert(", ")
-                print(traffic_ids)
+                self.lowertoolBox.traffic_light_ids.clear()
+                trafficlight_ids = self.selected_lanelet.traffic_lights
+                for t in trafficlight_ids:
+                    t = str(t)
+                    self.lowertoolBox.traffic_light_ids.insert(t)
+                    self.lowertoolBox.traffic_light_ids.insert(", ")
                 if int(angle) != 0:
                     self.lowertoolBox.angle.clear()
                     self.lowertoolBox.angle.insert(str(int(angle)))
                     self.lowertoolBox.length.clear()
                     self.lowertoolBox.radius.clear()
                     self.lowertoolBox.radius.insert(str(int(rad)))
+
 
 
     def edit_lanelet(self):

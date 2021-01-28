@@ -406,6 +406,9 @@ class LaneletInformationToolbox(QWidget):
         self.traffic_sign_ids = QLineEdit()
         self.traffic_sign_ids.setAlignment(Qt.AlignRight)
 
+        self.traffic_light_ids = QLineEdit()
+        self.traffic_light_ids.setAlignment(Qt.AlignRight)
+
         self.refresh_button = QPushButton()
         self.refresh_button.setText("refresh")
         self.edit_button = QPushButton()
@@ -422,6 +425,7 @@ class LaneletInformationToolbox(QWidget):
         layout.addRow("Roaduser oneway", self.roaduser_oneway)
         layout.addRow("Roaduser bidirectional", self.roaduser_bidirectional)
         layout.addRow("Traffic Sign Ids", self.traffic_sign_ids)
+        layout.addRow("Traffic Light Ids", self.traffic_light_ids)
         layout.addWidget(self.refresh_button)
         layout.addWidget(self.edit_button)
 
