@@ -38,7 +38,7 @@ from crmapconverter.io.scenario_designer import config
 from crmapconverter.io.scenario_designer import util
 from crmapconverter.io.scenario_designer.lanelet_settings import LaneletSettings
 from crmapconverter.io.scenario_designer.curve_settings import CurveSettings
-from crmapconverter.io.scenario_designer.traffic_signs_settings import TrafficSignsSettings, TrafficSignsSelection, TrafficLightSelection, DeleteTrafficElement
+from crmapconverter.io.scenario_designer.traffic_signs_settings import TrafficSignsSettings, TrafficSignsSelection, TrafficLightSelection, DeleteTrafficElement, EditTrafficLight
 
 from crmapconverter.io.scenario_designer.adjecent_settings import AdjecentSettings, ConnectSettings, FitSettings, RemoveSettings
 from crmapconverter.io.scenario_designer.intersection_settings import *
@@ -110,6 +110,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.curve_direction = False
 
         self.LL = LaneletSettings()
+        self.EL = EditTrafficLight()
 
 
         # GUI attributes
@@ -480,8 +481,34 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.scenario.lanelet_network.cleanup_lanelet_references()
         self.update_view(focus_on_network=True)
 
-
-
+    def edittrafficlight(self):
+        self.EL.exec()
+        if self.EL.getLaneletID() != None:
+            tlid = int(self.EL.getLaneletID())
+        else:
+            return
+        direction = self.EL.getDirection()
+        isactive = self.EL.get_isactive()
+        x = self.EL.getPosX()
+        y = self.EL.getPosY()
+        position = np.array([x,y])
+        time_offset = self.EL.getTimeOffset()
+        red = self.EL.getRed()
+        red_yellow = self.EL.getRed_Yellow()
+        green = self.EL.getGreen()
+        yellow = self.EL.getYellow()
+        cycle = [(TrafficLightState.RED, red),
+                 (TrafficLightState.RED_YELLOW, red_yellow),
+                 (TrafficLightState.GREEN, green),
+                 (TrafficLightState.YELLOW, yellow)]
+        cycle_element_list = [TrafficLightCycleElement(state[0], state[1]) for state in cycle]
+        TL = self.scenario.lanelet_network.find_traffic_light_by_id(tlid)
+        TL._time_offset = time_offset
+        TL._position = position
+        TL._direction = direction
+        TL._acvite = isactive
+        TL._cycle = cycle_element_list
+        self.update_view(focus_on_network=True)
 
 
     def click_x_crossing(self):
@@ -534,6 +561,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.uppertoolBox.button_traffic_signs.clicked.connect(lambda: self.traffic_signs())
         self.uppertoolBox.button_traffic_light.clicked.connect(lambda: self.traffic_light())
         self.uppertoolBox.delete_traffic_sign.clicked.connect(lambda: self.delete_traffic_element())
+        self.uppertoolBox.edit_button_traffic_light.clicked.connect(lambda: self.edittrafficlight())
 
         self.uppertoolBox.button_forwards.clicked.connect(lambda: self.click_straight(self.lanelet_pos_x, self.lanelet_pos_y))
         self.uppertoolBox.button_lanelet_settings.clicked.connect(lambda: self.forwards())
