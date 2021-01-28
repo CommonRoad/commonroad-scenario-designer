@@ -23,7 +23,7 @@ class AdjecentSettings(QDialog):
 
         self.lanelet_id = QLineEdit()
         self.lanelet_id.setValidator(QIntValidator())
-        self.lanelet_id.setMaxLength(2)
+        self.lanelet_id.setMaxLength(6)
         self.lanelet_id.setAlignment(Qt.AlignRight)
 
         self.apply_button = QPushButton()

@@ -109,6 +109,9 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.curve_pos_y = 0
         self.curve_direction = False
 
+        self.LL = LaneletSettings()
+
+
         # GUI attributes
         self.tool1 = None
         self.tool2 = None
@@ -250,7 +253,6 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.lanelet_settings = LaneletSettings()
 
     def forwards(self):
-        self.LL = LaneletSettings()
         self.LL.exec()
         self.lenfor = self.LL.getLanletLength()
         self.widfor = self.LL.getLaneletWidth()
@@ -310,16 +312,16 @@ class MWindow(QMainWindow, Ui_mainWindow):
         id = self.ADJ.getLaneletId()
         forwards = self.ADJ.isForwards()
         left = self.ADJ.isAdjacentSideLeft()
-        lanelet = self.scenario.lanelet_network.find_lanelet_by_id(id)
+        lanelet = self.crviewer.current_scenario.lanelet_network.find_lanelet_by_id(id)
         if lanelet == None:
             self.textBrowser.append("select a valid lanelet id")
             return
         if left:
-            adjacent_lanelet = self.mapcreator.adjacent_lanelet_left(lanelet, self.scenario.lanelet_network,
-                                                                self.scenario, same_direction=forwards)
+            adjacent_lanelet = self.mapcreator.adjacent_lanelet_left(lanelet, self.crviewer.current_scenario.lanelet_network,
+                                                                self.crviewer.current_scenario, same_direction=forwards, width=5)
         else:
-            adjacent_lanelet = self.mapcreator.adjacent_lanelet_right(lanelet, self.scenario.lanelet_network,
-                                                                self.scenario, same_direction=forwards)
+            adjacent_lanelet = self.mapcreator.adjacent_lanelet_right(lanelet, self.crviewer.current_scenario.lanelet_network,
+                                                                self.crviewer.current_scenario, same_direction=forwards)
         self.update_view(focus_on_network=True)
 
     def select_predecessor(self):

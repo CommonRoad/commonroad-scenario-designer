@@ -296,14 +296,22 @@ class mapcreator:
             successor._predecessor = []
             self.set_predecessor_successor_relation(predecessor, successor)
 
-    def adjacent_lanelet_left(self, adjacent_lanelet, network, scenario, same_direction=True):
+    def adjacent_lanelet_left(self, adjacent_lanelet, network, scenario, same_direction=True, width=None):
         if adjacent_lanelet.adj_left is None:
-            # Translation
-            left_vertices = adjacent_lanelet.left_vertices - (
-                    adjacent_lanelet.right_vertices - adjacent_lanelet.left_vertices)
-            center_vertices = adjacent_lanelet.center_vertices - (
-                    adjacent_lanelet.right_vertices - adjacent_lanelet.left_vertices)
-            right_vertices = adjacent_lanelet.left_vertices
+            if width is None:
+                # Translation
+                diff_left_vert_right_vert = adjacent_lanelet.right_vertices - adjacent_lanelet.left_vertices
+                left_vertices = adjacent_lanelet.left_vertices - diff_left_vert_right_vert
+                center_vertices = adjacent_lanelet.center_vertices - diff_left_vert_right_vert
+                right_vertices = adjacent_lanelet.left_vertices
+            else:
+                diff_left_vert_right_vert = adjacent_lanelet.right_vertices - adjacent_lanelet.left_vertices
+                norm_left = np.array([np.linalg.norm(diff_left_vert_right_vert, axis=1)])
+                left_vertices = adjacent_lanelet.left_vertices - (diff_left_vert_right_vert / norm_left.T) * width
+                center_vertices = adjacent_lanelet.left_vertices - (diff_left_vert_right_vert / norm_left.T) * width / 2
+                right_vertices = adjacent_lanelet.left_vertices
+
+
 
             idl = scenario.generate_object_id()
             self.latestid = idl
@@ -358,14 +366,26 @@ class mapcreator:
         else:
             print("Adjacent lanelet already exists")
 
-    def adjacent_lanelet_right(self, adjacent_lanelet, network, scenario, same_direction=True):
+    def adjacent_lanelet_right(self, adjacent_lanelet, network, scenario, same_direction=True, width=None):
+
+
+
         if adjacent_lanelet.adj_right is None:
             # Translation
-            left_vertices = adjacent_lanelet.right_vertices
-            center_vertices = adjacent_lanelet.center_vertices + (
-                    adjacent_lanelet.right_vertices - adjacent_lanelet.left_vertices)
-            right_vertices = adjacent_lanelet.right_vertices + (
-                    adjacent_lanelet.right_vertices - adjacent_lanelet.left_vertices)
+
+            if width is None:
+                # Translation
+                diff_left_vert_right_vert = adjacent_lanelet.right_vertices - adjacent_lanelet.left_vertices
+                left_vertices = adjacent_lanelet.right_vertices
+                center_vertices = adjacent_lanelet.center_vertices + diff_left_vert_right_vert
+                right_vertices = adjacent_lanelet.right_vertices + diff_left_vert_right_vert
+            else:
+                diff_left_vert_right_vert = adjacent_lanelet.right_vertices - adjacent_lanelet.left_vertices
+                norm_left = np.array([np.linalg.norm(diff_left_vert_right_vert, axis=1)])
+                left_vertices = adjacent_lanelet.right_vertices
+                center_vertices = adjacent_lanelet.right_vertices + (diff_left_vert_right_vert / norm_left.T) * width / 2
+                right_vertices = adjacent_lanelet.right_vertices + (diff_left_vert_right_vert / norm_left.T) * width
+
 
             idl = scenario.generate_object_id()
             self.latestid = idl

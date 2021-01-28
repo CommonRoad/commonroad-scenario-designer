@@ -21,6 +21,10 @@ class CurveSettings(QDialog):
         self.setWindowTitle("Curve settings")
         self.setGeometry(100, 100, 500, 300)
         self.curve_direction_bool = False
+        self.posXval = 0
+        self.posYval = 0
+        self.right = "solid"
+        self.left = "solid"
 
         self.curve_direction = QComboBox()
         self.curve_direction.addItems(["right curve", "left curve"])
@@ -30,31 +34,43 @@ class CurveSettings(QDialog):
         self.radius.setValidator(QIntValidator())
         self.radius.setMaxLength(4)
         self.radius.setAlignment(Qt.AlignRight)
+        self.radius.clear()
+        self.radius.insert(str(self.curve_radius))
 
         self.width = QLineEdit()
         self.width.setValidator(QIntValidator())
         self.width.setMaxLength(4)
         self.width.setAlignment(Qt.AlignRight)
+        self.width.clear()
+        self.width.insert(str(self.curve_width))
 
         self.angle = QLineEdit()
         self.angle.setValidator(QIntValidator())
         self.angle.setMaxLength(3)
         self.angle.setAlignment(Qt.AlignRight)
+        self.angle.clear()
+        self.angle.insert(str(self.curve_angle))
 
         self.vertices = QLineEdit()
         self.vertices.setValidator(QIntValidator())
         self.vertices.setMaxLength(2)
         self.vertices.setAlignment(Qt.AlignRight)
+        self.vertices.clear()
+        self.vertices.insert((str(self.number_vertices)))
 
         self.posX = QLineEdit()
         self.posX.setValidator(QIntValidator())
         self.posX.setMaxLength(3)
         self.posX.setAlignment(Qt.AlignRight)
+        self.posX.clear()
+        self.posX.insert(str(self.posXval))
 
         self.posY = QLineEdit()
         self.posY.setValidator(QIntValidator())
         self.posY.setMaxLength(3)
         self.posY.setAlignment(Qt.AlignRight)
+        self.posY.clear()
+        self.posY.insert(str(self.posYval))
 
         self.adjacentCurve = QRadioButton()
         self.adjacentCurve.setText("set ajacent Curve")
@@ -78,10 +94,12 @@ class CurveSettings(QDialog):
         self.line_marking_right = QComboBox()
         line_marking_right_list = [right.value for right in LineMarking]
         self.line_marking_right.addItems(line_marking_right_list)
+        self.line_marking_right.setCurrentText(self.right)
 
         self.line_marking_left = QComboBox()
         line_marking_left_list = [left.value for left in LineMarking]
         self.line_marking_left.addItems(line_marking_left_list)
+        self.line_marking_left.setCurrentText(self.left)
 
         self.apply_button = QPushButton()
         self.apply_button.setText("apply")
@@ -131,12 +149,21 @@ class CurveSettings(QDialog):
         if self.width.text():
             self.curve_width = int(self.width.text())
         else:
-            self.curve_width = 12
+            self.curve_width = 20
         if self.angle.text():
             self.curve_angle = int(self.angle.text())
         else:
             self.curve_angle = 90
+
+        if self.posX.text():
+            self.posXval = int(self.posX.text())
+        if self.posY.text():
+            self.posYval = int(self.posY.text())
         self.setPredecessor = self.pred.isChecked()
+
+        self.right = self.line_marking_right.currentText()
+        self.left = self.line_marking_left.currentText()
+
 
 
         #Left curves: set curve_direction_bool to false
@@ -152,6 +179,8 @@ class CurveSettings(QDialog):
         self.radius.clear()
         self.width.clear()
         self.angle.clear()
+        self.posX.clear()
+        self.posY.clear()
         self.vertices.clear()
         self.radius.insert("50")
         self.width.insert("20")
@@ -163,6 +192,9 @@ class CurveSettings(QDialog):
         self.setPredecessor = True
         self.posX.insert("0")
         self.posY.insert("0")
+        self.line_marking_left.setCurrentText("solid")
+        self.line_marking_right.setCurrentText("solid")
+
 
     def showsettings(self):
         self.show()
@@ -204,12 +236,14 @@ class CurveSettings(QDialog):
         return self.curve_direction_bool
 
     def getPosX(self):
+        return self.posXval
         if self.posX.text():
             return int(self.posX.text())
         else:
             return 0
 
     def getPosY(self):
+        return self.posYval
         if self.posY.text():
             return int(self.posY.text())
         else:

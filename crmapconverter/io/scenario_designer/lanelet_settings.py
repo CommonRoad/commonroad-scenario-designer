@@ -17,7 +17,9 @@ class LaneletSettings(QDialog):
         self.setWindowTitle("Lanelet settings")
         self.setGeometry(100, 100, 500, 300)
         self.direction_bool = False
-
+        self.numverts = 10
+        self.right = "solid"
+        self.left = "solid"
 
         self.direction = QComboBox()
         self.direction.addItems(["forwards", "backwards"])
@@ -26,16 +28,23 @@ class LaneletSettings(QDialog):
         self.length.setValidator(QIntValidator())
         self.length.setMaxLength(4)
         self.length.setAlignment(Qt.AlignRight)
+        self.length.clear()
+        self.length.insert(str(self.lanelet_length))
+
 
         self.width = QLineEdit()
         self.width.setValidator(QIntValidator())
         self.width.setMaxLength(4)
         self.width.setAlignment(Qt.AlignRight)
+        self.width.clear()
+        self.width.insert(str(self.lanelet_width))
 
         self.number_vertices = QLineEdit()
         self.number_vertices.setValidator(QIntValidator())
         self.number_vertices.setMaxLength(2)
         self.number_vertices.setAlignment(Qt.AlignRight)
+        self.number_vertices.clear()
+        self.number_vertices.insert(str(self.numverts))
 
         self.adjacentLanelet = QRadioButton()
         self.adjacentLanelet.setText("set ajacent lanelet")
@@ -49,11 +58,15 @@ class LaneletSettings(QDialog):
         self.posX.setValidator(QIntValidator())
         self.posX.setMaxLength(3)
         self.posX.setAlignment(Qt.AlignRight)
+        self.posX.clear()
+        self.posX.insert("0")
 
         self.posY = QLineEdit()
         self.posY.setValidator(QIntValidator())
         self.posY.setMaxLength(3)
         self.posY.setAlignment(Qt.AlignRight)
+        self.posY.clear()
+        self.posY.insert("0")
 
         self.pred = QCheckBox("set predecessor automatically")
         self.pred.stateChanged.connect(self.predecessor_button)
@@ -75,10 +88,14 @@ class LaneletSettings(QDialog):
         self.line_marking_right = QComboBox()
         line_marking_right_list = [right.value for right in LineMarking]
         self.line_marking_right.addItems(line_marking_right_list)
+        self.line_marking_right.setCurrentText(self.right)
+
 
         self.line_marking_left = QComboBox()
         line_marking_left_list = [left.value for left in LineMarking]
         self.line_marking_left.addItems(line_marking_left_list)
+        self.line_marking_left.setCurrentText(self.left)
+
 
         self.apply_button = QPushButton()
         self.apply_button.setText("apply")
@@ -141,13 +158,21 @@ class LaneletSettings(QDialog):
         if self.width.text():
             self.lanelet_width = int(self.width.text())
         else:
-            self.lanelet_width = 12
+            self.lanelet_width = 20
         self.setPredecessor = self.pred.isChecked()
         self.getLaneletType()
         if self.direction.currentText() == "backwards":
             self.direction_bool = True
         else:
             self.direction_bool = False
+
+        if self.number_vertices.text():
+            self.numverts = int(self.number_vertices.text())
+
+        self.right = self.line_marking_right.currentText()
+        self.left = self.line_marking_left.currentText()
+
+        print(self.left)
 
         self.close()
 
@@ -160,9 +185,13 @@ class LaneletSettings(QDialog):
         self.adjacentLanelet.setChecked(False)
         self.pred.setChecked(True)
         self.setPredecessor = True
+        self.posX.clear()
+        self.posY.clear()
         self.posX.insert("0")
         self.posY.insert("0")
         self.number_vertices.insert("20")
+        self.line_marking_left.setCurrentText("solid")
+        self.line_marking_right.setCurrentText("solid")
 
     def showsettings(self):
         self.show()
@@ -204,19 +233,16 @@ class LaneletSettings(QDialog):
         return strlist3
 
     def getLineMarkingRight(self):
-        return self.line_marking_right.currentText()
+        return self.right
 
     def getLineMarkingLeft(self):
-        return self.line_marking_left.currentText()
+        return self.left
 
     def getDirection(self):
         return self.direction_bool
 
     def getNumVertices(self):
-        if self.number_vertices.text():
-            return int(self.number_vertices.text())
-        else:
-            return 20
+        return self.numverts
 
     def getPosX(self):
         if self.posX.text():
