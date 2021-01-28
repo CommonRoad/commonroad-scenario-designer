@@ -2,14 +2,13 @@ stages:
     - test
     - build
 
-image: $CI_REGISTRY/cps/commonroad-map-tool/ci:v0.4
+image: $CI_REGISTRY/cps/commonroad-map-tool/ci:v0.4.1
 
 before_script:
     # This is required for the GitLab runner to have permissions to all the repos the user stating the job has.
     - git config --global url."https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.lrz.de/".insteadOf "git@gitlab.lrz.de:"
     # # Install sumo-interface manually as installing though pip does not respect the JOB_TOKEN
     - git clone --branch develop git@gitlab.lrz.de:cps/sumo-interface.git $HOME/sumo-interface
-    - git clone --branch develop git@gitlab.lrz.de:cps/commonroad-io.git "$HOME"/commonroad-io
     - source .env
 
 python36:
@@ -17,7 +16,6 @@ python36:
     script:
         - source activate commonroad-py36
         - pip install $HOME/sumo-interface tox-current-env -r test_requirements.txt
-        - pip install -e "$HOME"/commonroad-io
         # install all requirements but ignore the git versions as we have already installed them previously
         - grep -v "git" requirements.txt | pip install -r /dev/stdin
         # use the current conda environment in tox, as we have manually installed all required dependencies there
@@ -33,7 +31,6 @@ python37:
     script:
         - source activate commonroad-py37
         - pip install $HOME/sumo-interface tox-current-env -r test_requirements.txt
-        - pip install -e "$HOME"/commonroad-io
         # install all requirements but ignore the git versions as we have already installed them previously
         - grep -v "git" requirements.txt | pip install -r /dev/stdin
         # use the current conda environment in tox, as we have manually installed all required dependencies there
@@ -49,7 +46,6 @@ python38:
     script:
         - source activate commonroad-py38
         - pip install $HOME/sumo-interface tox-current-env -r test_requirements.txt
-        - pip install -e "$HOME"/commonroad-io
         # install all requirements but ignore the git versions as we have already installed them previously
         - grep -v "git" requirements.txt | pip install -r /dev/stdin
         # use the current conda environment in tox, as we have manually installed all required dependencies there
