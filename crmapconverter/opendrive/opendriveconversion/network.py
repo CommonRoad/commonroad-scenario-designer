@@ -179,7 +179,7 @@ class Network:
                         # Lanelet cannot have more traffic lights than number of successors
                         if len(lane.successor) > len(lane.traffic_signs):
                             # Find closest lanelet to traffic signal
-                            pos_1 = traffic_light.position
+                            pos_1 = traffic_sign.position
                             pos_2 = lane.center_vertices[-1]
                             dist = np.linalg.norm(pos_1 - pos_2)
                             if dist < min_distance:
@@ -189,6 +189,7 @@ class Network:
             lanelet_network.add_traffic_sign(traffic_sign, {id_for_adding})
 
         # Assign stop lines to lanelets
+
         for stop_line in self._stop_lines:
             min_start = float("inf")
             min_end = float("inf")
@@ -212,9 +213,6 @@ class Network:
             if stop_line.traffic_sign_ref is None:
                 stop_line.traffic_sign_ref = lane_to_add_stop_line.traffic_signs
             lane_to_add_stop_line.stop_line = stop_line
-
-            continue
-
 
         return lanelet_network
 

@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<commonRoad timeStepSize="0.1" commonRoadVersion="2020a" author="" affiliation="" source="OpenDRIVE 2 Lanelet Converter" benchmarkID="ZAM_OpenDrive-123" date="2021-01-19">
+<commonRoad timeStepSize="0.1" commonRoadVersion="2020a" author="" affiliation="" source="OpenDRIVE 2 Lanelet Converter" benchmarkID="ZAM_OpenDrive-123" date="2021-01-29">
   <location>
     <geoNameId>-999</geoNameId>
     <gpsLatitude>999</gpsLatitude>
@@ -38553,12 +38553,10 @@
         <y>495.29380</y>
       </point>
       <lineMarking>solid</lineMarking>
+      <trafficLightRef ref="2211"/>
     </stopLine>
     <laneletType>driveWay</laneletType>
-    <trafficSignRef ref="731204674982"/>
     <trafficLightRef ref="2211"/>
-    <trafficLightRef ref="2213"/>
-    <trafficLightRef ref="2267"/>
   </lanelet>
   <lanelet id="110">
     <leftBound>
@@ -40501,11 +40499,9 @@
         <y>495.31237</y>
       </point>
       <lineMarking>solid</lineMarking>
+      <trafficLightRef ref="2267"/>
     </stopLine>
     <laneletType>driveWay</laneletType>
-    <trafficSignRef ref="731204674982"/>
-    <trafficLightRef ref="2211"/>
-    <trafficLightRef ref="2213"/>
     <trafficLightRef ref="2267"/>
   </lanelet>
   <lanelet id="119">
@@ -42431,12 +42427,12 @@
         <y>495.33094</y>
       </point>
       <lineMarking>solid</lineMarking>
+      <trafficSignRef ref="731204674982"/>
+      <trafficLightRef ref="2213"/>
     </stopLine>
     <laneletType>driveWay</laneletType>
     <trafficSignRef ref="731204674982"/>
-    <trafficLightRef ref="2211"/>
     <trafficLightRef ref="2213"/>
-    <trafficLightRef ref="2267"/>
   </lanelet>
   <lanelet id="111">
     <leftBound>
@@ -46294,12 +46290,10 @@
         <y>526.27486</y>
       </point>
       <lineMarking>solid</lineMarking>
+      <trafficLightRef ref="2218"/>
     </stopLine>
     <laneletType>driveWay</laneletType>
-    <trafficSignRef ref="741254445232"/>
-    <trafficLightRef ref="2217"/>
     <trafficLightRef ref="2218"/>
-    <trafficLightRef ref="2268"/>
   </lanelet>
   <lanelet id="105">
     <leftBound>
@@ -48242,11 +48236,9 @@
         <y>526.25629</y>
       </point>
       <lineMarking>solid</lineMarking>
+      <trafficLightRef ref="2268"/>
     </stopLine>
     <laneletType>driveWay</laneletType>
-    <trafficSignRef ref="741254445232"/>
-    <trafficLightRef ref="2217"/>
-    <trafficLightRef ref="2218"/>
     <trafficLightRef ref="2268"/>
   </lanelet>
   <lanelet id="101">
@@ -50172,12 +50164,12 @@
         <y>526.23772</y>
       </point>
       <lineMarking>solid</lineMarking>
+      <trafficSignRef ref="741254445232"/>
+      <trafficLightRef ref="2217"/>
     </stopLine>
     <laneletType>driveWay</laneletType>
     <trafficSignRef ref="741254445232"/>
     <trafficLightRef ref="2217"/>
-    <trafficLightRef ref="2218"/>
-    <trafficLightRef ref="2268"/>
   </lanelet>
   <lanelet id="115">
     <leftBound>
@@ -65376,6 +65368,9 @@
         <y>517.87826</y>
       </point>
       <lineMarking>solid</lineMarking>
+      <trafficSignRef ref="871564665197"/>
+      <trafficLightRef ref="2204"/>
+      <trafficLightRef ref="2269"/>
     </stopLine>
     <laneletType>driveWay</laneletType>
     <trafficSignRef ref="871564665197"/>
@@ -78331,6 +78326,9 @@
         <y>504.44219</y>
       </point>
       <lineMarking>solid</lineMarking>
+      <trafficSignRef ref="811484415023"/>
+      <trafficLightRef ref="2270"/>
+      <trafficLightRef ref="2207"/>
     </stopLine>
     <laneletType>driveWay</laneletType>
     <trafficSignRef ref="811484415023"/>

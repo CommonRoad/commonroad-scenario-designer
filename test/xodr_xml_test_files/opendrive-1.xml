@@ -1,13 +1,13 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<commonRoad timeStepSize="0.1" commonRoadVersion="2020a" author="" affiliation="" source="OpenDRIVE 2 Lanelet Converter" benchmarkID="ZAM_OpenDrive-123" date="2021-01-19">
+<commonRoad timeStepSize="0.1" commonRoadVersion="2020a" author="" affiliation="" source="OpenDRIVE 2 Lanelet Converter" benchmarkID="ZAM_OpenDrive-123" date="2021-01-29">
   <location>
     <geoNameId>-999</geoNameId>
     <gpsLatitude>999</gpsLatitude>
     <gpsLongitude>999</gpsLongitude>
   </location>
   <scenarioTags>
-    <highway/>
     <urban/>
+    <highway/>
   </scenarioTags>
   <lanelet id="100">
     <leftBound>
@@ -291,9 +291,6 @@
     <predecessor ref="101"/>
     <successor ref="101"/>
     <laneletType>driveWay</laneletType>
-    <trafficSignRef ref="51405133"/>
-    <trafficLightRef ref="2040"/>
-    <trafficLightRef ref="2042"/>
   </lanelet>
   <lanelet id="101">
     <leftBound>
@@ -9372,9 +9369,6 @@
     <predecessor ref="106"/>
     <successor ref="108"/>
     <laneletType>driveWay</laneletType>
-    <trafficSignRef ref="51601353"/>
-    <trafficLightRef ref="2010"/>
-    <trafficLightRef ref="2012"/>
   </lanelet>
   <lanelet id="108">
     <leftBound>
@@ -18453,9 +18447,6 @@
     <predecessor ref="111"/>
     <successor ref="111"/>
     <laneletType>driveWay</laneletType>
-    <trafficSignRef ref="50105133"/>
-    <trafficLightRef ref="2032"/>
-    <trafficLightRef ref="2030"/>
   </lanelet>
   <lanelet id="111">
     <leftBound>
@@ -36329,9 +36320,6 @@
     <predecessor ref="108"/>
     <successor ref="106"/>
     <laneletType>driveWay</laneletType>
-    <trafficSignRef ref="50201353"/>
-    <trafficLightRef ref="2020"/>
-    <trafficLightRef ref="2022"/>
   </lanelet>
   <lanelet id="102">
     <leftBound>
@@ -36670,9 +36658,6 @@
     <predecessor ref="108"/>
     <successor ref="101"/>
     <laneletType>driveWay</laneletType>
-    <trafficSignRef ref="51405133"/>
-    <trafficLightRef ref="2040"/>
-    <trafficLightRef ref="2042"/>
   </lanelet>
   <lanelet id="114">
     <leftBound>
@@ -37011,9 +36996,6 @@
     <predecessor ref="111"/>
     <successor ref="106"/>
     <laneletType>driveWay</laneletType>
-    <trafficSignRef ref="50201353"/>
-    <trafficLightRef ref="2020"/>
-    <trafficLightRef ref="2022"/>
   </lanelet>
   <lanelet id="105">
     <leftBound>
@@ -37352,9 +37334,6 @@
     <predecessor ref="101"/>
     <successor ref="108"/>
     <laneletType>driveWay</laneletType>
-    <trafficSignRef ref="51601353"/>
-    <trafficLightRef ref="2010"/>
-    <trafficLightRef ref="2012"/>
   </lanelet>
   <lanelet id="113">
     <leftBound>
@@ -37693,9 +37672,6 @@
     <predecessor ref="106"/>
     <successor ref="111"/>
     <laneletType>driveWay</laneletType>
-    <trafficSignRef ref="50105133"/>
-    <trafficLightRef ref="2032"/>
-    <trafficLightRef ref="2030"/>
   </lanelet>
   <lanelet id="104">
     <leftBound>
@@ -37970,9 +37946,6 @@
     <predecessor ref="101"/>
     <successor ref="111"/>
     <laneletType>driveWay</laneletType>
-    <trafficSignRef ref="50105133"/>
-    <trafficLightRef ref="2032"/>
-    <trafficLightRef ref="2030"/>
   </lanelet>
   <lanelet id="115">
     <leftBound>
@@ -38247,9 +38220,6 @@
     <predecessor ref="106"/>
     <successor ref="106"/>
     <laneletType>driveWay</laneletType>
-    <trafficSignRef ref="50201353"/>
-    <trafficLightRef ref="2020"/>
-    <trafficLightRef ref="2022"/>
   </lanelet>
   <lanelet id="103">
     <leftBound>
@@ -38524,9 +38494,6 @@
     <predecessor ref="111"/>
     <successor ref="101"/>
     <laneletType>driveWay</laneletType>
-    <trafficSignRef ref="51405133"/>
-    <trafficLightRef ref="2040"/>
-    <trafficLightRef ref="2042"/>
   </lanelet>
   <lanelet id="109">
     <leftBound>
@@ -38801,9 +38768,6 @@
     <predecessor ref="108"/>
     <successor ref="108"/>
     <laneletType>driveWay</laneletType>
-    <trafficSignRef ref="51601353"/>
-    <trafficLightRef ref="2010"/>
-    <trafficLightRef ref="2012"/>
   </lanelet>
   <trafficSign id="51405133">
     <trafficSignElement>
