@@ -62,7 +62,7 @@ def get_traffic_signals(road: Road):
                                                                           position, tangent)
                     stop_line = StopLine(position_1, position_2, LineMarking.SOLID)
                     stop_lines.append(stop_line)
-                    continue  # stop line
+                    continue
 
                 element_id = extract_traffic_element_id(signal.type, str(signal.subtype), TrafficSignIDGermany)
             elif signal.country == 'USA':
@@ -84,9 +84,8 @@ def get_traffic_signals(road: Road):
                                                                           position, tangent)
                     stop_line = StopLine(position_1, position_2, LineMarking.SOLID)
                     stop_lines.append(stop_line)
-                    old_signal_id_to_new_id_mapper[signal.id] = [stop_line, "stop line"]
+                    continue
 
-                    continue  # stop line
                 element_id = extract_traffic_element_id(signal.type, str(signal.subtype), TrafficSignIDZamunda)
             traffic_sign_element = TrafficSignElement(
                 traffic_sign_element_id=element_id,
@@ -119,7 +118,7 @@ def get_traffic_signals(road: Road):
             else:
                 continue
 
-    return traffic_lights, traffic_signs
+    return traffic_lights, traffic_signs, stop_lines
 
 
 def calculate_stop_line_position(lane_sections, signal, position, tangent):
