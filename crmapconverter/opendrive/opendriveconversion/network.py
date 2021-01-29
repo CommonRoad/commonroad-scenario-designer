@@ -4,6 +4,7 @@
 """Module to contain Network which can load an opendrive object and then export
 to lanelets. Iternally, the road network is represented by ParametricLanes."""
 import copy
+import warnings
 
 import numpy as np
 import inspect
@@ -14,11 +15,10 @@ from crmapconverter.opendrive.opendriveparser.elements.opendrive import OpenDriv
 
 from crmapconverter.opendrive.opendriveconversion.conversion_lanelet_network import ConversionLaneletNetwork
 from crmapconverter.opendrive.opendriveconversion.converter import OpenDriveConverter
-
-from crmapconverter.opendrive.opendriveconversion.plane_elements.traffic_signals import get_traffic_signals, \
-    get_traffic_signal_references
+from crmapconverter.opendrive.opendriveconversion.plane_elements.traffic_signals import get_traffic_signals
 from crmapconverter.opendrive.opendriveconversion.plane_elements.geo_reference import get_geo_reference
 from crmapconverter.opendrive.opendriveconversion.utils import encode_road_section_lane_width_id
+from commonroad.scenario.lanelet import StopLine
 
 __author__ = "Benjamin Orthen, Stefan Urban, Sebastian Maierhofer"
 __copyright__ = "TUM Cyber-Physical Systems Group"
@@ -118,23 +118,6 @@ class Network:
 
             # Create a map of lanelet_description to traffic signs/lights so that they can be assigned as
             # reference to the correct lanelets later
-            """
-            # Associating corresponding traffic sign, light and stopline ids with respective lanelets
-            if bool(parametric_lane.traffic_signs):
-                for traffic_sign in parametric_lane.traffic_signs:
-                    self.traffic_signal_elements.traffic_sign_to_lanelet_mapper[traffic_sign].extend(lanelet.predecessor)
-            if bool(parametric_lane.traffic_lights):
-                for traffic_light in parametric_lane.traffic_lights:
-                    self.traffic_signal_elements.traffic_light_to_lanelet_mapper[traffic_light].extend(lanelet.predecessor)
-            if bool(parametric_lane.stop_lines):
-                for stopline in parametric_lane.stop_lines:
-                    self.traffic_signal_elements.stopline_to_lanelet_mapper[stopline].extend(lanelet.predecessor)
-
-            # Adding traffic data stored in signal references to the lanelet
-#            if bool(parametric_lane.signal_references):
-#                for signal_reference in parametric_lane.signal_references:
-#                    self.traffic_signal_elements.signal_reference_to_lanelet_id_mapper[signal_reference].extend(lanelet.predecessor)
-            """
 
         # prune because some
         # successorIds get encoded with a non existing successorID
@@ -206,6 +189,32 @@ class Network:
             lanelet_network.add_traffic_sign(traffic_sign, {id_for_adding})
 
         # Assign stop lines to lanelets
+        for stop_line in self._stop_lines:
+            min_start = float("inf")
+            min_end = float("inf")
+            for intersection in lanelet_network.intersections:
+                for incoming in intersection.incomings:
+                    for lanelet in incoming.incoming_lanelets:
+                        lane = lanelet_network.find_lanelet_by_id(lanelet)
+                        lanelet_position_left = lane.left_vertices[-1]
+                        lanelet_position_right = lane.right_vertices[-1]
+                        stop_line_position_end = stop_line.start
+                        stop_line_position_start = stop_line.end
+                        if (np.linalg.norm(lanelet_position_right - stop_line_position_start) < min_start and np.linalg.norm(lanelet_position_left - stop_line_position_end ) < min_end):
+                            lane_to_add_stop_line = lane
+                            min_start = np.linalg.norm(lanelet_position_right - stop_line_position_start)
+                            min_end = np.linalg.norm(lanelet_position_left - stop_line_position_end)
+            if lane_to_add_stop_line is None:
+                warnings.warn("No lanelet was matched with a stop line")
+                continue
+            if stop_line.traffic_light_ref is None:
+                stop_line.traffic_light_ref = lane_to_add_stop_line.traffic_lights
+            if stop_line.traffic_sign_ref is None:
+                stop_line.traffic_sign_ref = lane_to_add_stop_line.traffic_signs
+            lane_to_add_stop_line.stop_line = stop_line
+
+            continue
+
 
         return lanelet_network
 
