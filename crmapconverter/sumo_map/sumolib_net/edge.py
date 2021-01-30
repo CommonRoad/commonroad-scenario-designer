@@ -15,7 +15,7 @@
 # @version $Id$
 
 from xml.etree import cElementTree as ET
-from typing import Set
+from typing import Set, List
 from .constants import SUMO_VEHICLE_CLASSES
 
 
@@ -36,8 +36,8 @@ class Edge:
         self._lanes = []
         self._speed = None
         self._length = None
-        self._incoming = set()
-        self._outgoing = set()
+        self._incoming = {}
+        self._outgoing = {}
         self._shape = None
         self._shapeWithJunctions = None
         self._shape3D = None
@@ -79,27 +79,27 @@ class Edge:
         self._speed = lane.getSpeed()
         self._length = lane.getLength()
 
-    def addOutgoing(self, conn):
-        if conn._to not in self._outgoing:
-            self._outgoing[conn._to] = []
-        self._outgoing[conn._to].append(conn)
+    def addOutgoing(self, edge: 'Edge'):
+        if edge._to not in self._outgoing:
+            self._outgoing[edge._to] = []
+        self._outgoing[edge._to].append(edge)
 
-    def _addIncoming(self, conn):
-        if conn._from not in self._incoming:
-            self._incoming[conn._from] = []
-        self._incoming[conn._from].append(conn)
+    def addIncoming(self, edge: 'Edge'):
+        if edge._from not in self._incoming:
+            self._incoming[edge._from] = []
+        self._incoming[edge._from].append(edge)
 
     def setRawShape(self, shape):
         self._rawShape3D = shape
 
-    def getID(self):
+    def getID(self) -> int:
         return self._id
 
-    def getIncoming(self):
-        return self._incoming
+    def getIncoming(self) -> List['Edge']:
+        return [e for edges in self._incoming.values() for e in edges]
 
-    def getOutgoing(self):
-        return self._outgoing
+    def getOutgoing(self) -> List['Edge']:
+        return [e for edges in self._outgoing.values() for e in edges]
 
     def getRawShape(self):
         """Return the shape that was used in cr_net_generator for building this edge (2D)."""

@@ -245,8 +245,7 @@ class Network:
             location = None
 
         # TODO create default scenario ID or implement workaround in commonroad-io
-        scenario_id = ScenarioID(cooperative=False, country_id="ZAM", map_name="OpenDrive", map_id=123,
-                                 configuration_id=None, prediction_type=None, prediction_id=None)
+        scenario_id = ScenarioID(country_id="ZAM", map_name="OpenDrive", map_id=123)
 
         scenario = Scenario(
             dt=dt, scenario_id=scenario_id,
