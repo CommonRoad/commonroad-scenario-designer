@@ -18,7 +18,7 @@ from crmapconverter.opendrive.opendriveconversion.converter import OpenDriveConv
 from crmapconverter.opendrive.opendriveconversion.plane_elements.traffic_signals import get_traffic_signals
 from crmapconverter.opendrive.opendriveconversion.plane_elements.geo_reference import get_geo_reference
 from crmapconverter.opendrive.opendriveconversion.utils import encode_road_section_lane_width_id
-from commonroad.scenario.lanelet import StopLine
+from commonroad.scenario.traffic_sign import TrafficLightDirection
 
 __author__ = "Benjamin Orthen, Stefan Urban, Sebastian Maierhofer"
 __copyright__ = "TUM Cyber-Physical Systems Group"
@@ -163,12 +163,20 @@ class Network:
                             if dist < min_distance:
                                 min_distance = dist
                                 id_for_adding = lanelet
+            # TODO: Add directions to traffic lights
+            successor_directions = lanelet_network.get_successor_directions(lanelet_network.find_lanelet_by_id(id_for_adding))
+            # If incoming lanelet only has one successor then the traffic light assigned should only have one direction
+            if len(successor_directions) == 1:
+                if list(successor_directions.values())[0] == 'left':
+                    traffic_light.direction = TrafficLightDirection.LEFT
+                elif list(successor_directions.values())[0] == 'right':
+                    traffic_light.direction = TrafficLightDirection.LEFT
+                elif list(successor_directions.values())[0] == 'straight':
+                    traffic_light.direction = TrafficLightDirection.STRAIGHT
 
             lanelet_network.add_traffic_light(traffic_light, {id_for_adding})
-            # TODO: Add directions to traffic lights
 
         # Assign traffic signs to lanelets
-
         for traffic_sign in self._traffic_signs:
 
             min_distance = float("inf")
@@ -177,14 +185,13 @@ class Network:
                     for lanelet in incoming.incoming_lanelets:
                         lane = lanelet_network.find_lanelet_by_id(lanelet)
                         # Lanelet cannot have more traffic lights than number of successors
-                        if len(lane.successor) > len(lane.traffic_signs):
-                            # Find closest lanelet to traffic signal
-                            pos_1 = traffic_sign.position
-                            pos_2 = lane.center_vertices[-1]
-                            dist = np.linalg.norm(pos_1 - pos_2)
-                            if dist < min_distance:
-                                min_distance = dist
-                                id_for_adding = lanelet
+                        # Find closest lanelet to traffic signal
+                        pos_1 = traffic_sign.position
+                        pos_2 = lane.center_vertices[-1]
+                        dist = np.linalg.norm(pos_1 - pos_2)
+                        if dist < min_distance:
+                            min_distance = dist
+                            id_for_adding = lanelet
 
             lanelet_network.add_traffic_sign(traffic_sign, {id_for_adding})
 
