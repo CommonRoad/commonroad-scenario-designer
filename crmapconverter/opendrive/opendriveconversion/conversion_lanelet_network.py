@@ -13,6 +13,7 @@ from commonroad.scenario.lanelet import LaneletNetwork
 from crmapconverter.osm2cr.converter_modules.utility import geometry
 from crmapconverter.opendrive.opendriveconversion.conversion_lanelet import ConversionLanelet
 from commonroad.scenario.intersection import IntersectionIncomingElement, Intersection
+from commonroad.scenario.traffic_sign import TrafficLightDirection
 
 __author__ = "Benjamin Orthen, Sebastian Maierhofer"
 __copyright__ = "TUM Cyber-Physical Systems Group"
@@ -662,7 +663,8 @@ class ConversionLaneletNetwork(LaneletNetwork):
             :return: incomings with the isLeftOf assigned
         """
         # Choose a reference incoming vector
-        ref = self.find_lanelet_by_id(incomings[0].incoming_lanelets[0]).center_vertices[-1] - self.find_lanelet_by_id(incomings[0].incoming_lanelets[0]).center_vertices[-5]
+        ref = self.find_lanelet_by_id(incomings[0].incoming_lanelets[0]).center_vertices[-1] - \
+              self.find_lanelet_by_id(incomings[0].incoming_lanelets[0]).center_vertices[-5]
         angles = [(0, 0)]
         # calculate all incoming angle from the reference incoming vector
         for index in range(1, len(incomings)):
@@ -683,7 +685,7 @@ class ConversionLaneletNetwork(LaneletNetwork):
             angle = angles[index][1] - angles[prev][1]
             if angle < 0:
                 angle += 360
-            if angle > config.LANE_SEGMENT_ANGLE and angle <= 180 - config.LANE_SEGMENT_ANGLE and angle<min_angle:
+            if angle > config.LANE_SEGMENT_ANGLE and angle <= 180 - config.LANE_SEGMENT_ANGLE and angle < min_angle:
                 # is left of the previous incoming
                 is_left_of = angles[prev][0]
                 data_index = angles[index][0]
@@ -816,11 +818,94 @@ class ConversionLaneletNetwork(LaneletNetwork):
 
         return directions
 
-    def remove_duplicate_traffic_lights(self):
-        return
+    def add_traffic_lights_to_network(self, traffic_lights: List):
+        """
+        Adds all the traffic lights in the network object to the lanelet network
+        Requires a list of all the traffic lights in the entire map
+        """
+        for traffic_light in traffic_lights:
+            min_distance = float("inf")
+            for intersection in self.intersections:
+                for incoming in intersection.incomings:
+                    for lanelet in incoming.incoming_lanelets:
+                        lane = self.find_lanelet_by_id(lanelet)
+                        # Lanelet cannot have more traffic lights than number of successors
+                        if len(lane.successor) > len(lane.traffic_lights):
+                            pos_1 = traffic_light.position
+                            pos_2 = lane.center_vertices[-1]
+                            dist = np.linalg.norm(pos_1 - pos_2)
+                            if dist < min_distance:
+                                min_distance = dist
+                                id_for_adding = lanelet
+            # TODO: Add directions to traffic lights
+            successor_directions = self.get_successor_directions(self.find_lanelet_by_id(id_for_adding))
+            # If incoming lanelet only has one successor then the traffic light assigned should only have one direction
+            if len(successor_directions) == 1:
+                if list(successor_directions.values())[0] == 'left':
+                    traffic_light.direction = TrafficLightDirection.LEFT
+                elif list(successor_directions.values())[0] == 'right':
+                    traffic_light.direction = TrafficLightDirection.LEFT
+                elif list(successor_directions.values())[0] == 'straight':
+                    traffic_light.direction = TrafficLightDirection.STRAIGHT
 
-    def assign_directions_to_traffic_lights(self):
-        return
+            self.add_traffic_light(traffic_light, {id_for_adding})
+
+    def add_traffic_signs_to_network(self, traffic_signs):
+        """
+        Adds all the traffic signs in the network object to the lanelet network
+        Requires a list of all the traffic signs in the entire map
+        """
+
+        # Assign traffic signs to lanelets
+        for traffic_sign in traffic_signs:
+            min_distance = float("inf")
+            for intersection in self.intersections:
+                for incoming in intersection.incomings:
+                    for lanelet in incoming.incoming_lanelets:
+                        lane = self.find_lanelet_by_id(lanelet)
+                        # Lanelet cannot have more traffic lights than number of successors
+                        # Find closest lanelet to traffic signal
+                        pos_1 = traffic_sign.position
+                        pos_2 = lane.center_vertices[-1]
+                        dist = np.linalg.norm(pos_1 - pos_2)
+                        if dist < min_distance:
+                            min_distance = dist
+                            id_for_adding = lanelet
+
+            self.add_traffic_sign(traffic_sign, {id_for_adding})
+
+    def add_stop_lines_to_network(self, stop_lines):
+        """
+        Adds all the stop lines in the network object to the lanelet network
+        Requires a list of all the stop lines in the entire map
+        """
+        # Assign stop lines to lanelets
+
+        for stop_line in stop_lines:
+            min_start = float("inf")
+            min_end = float("inf")
+            for intersection in self.intersections:
+                for incoming in intersection.incomings:
+                    for lanelet in incoming.incoming_lanelets:
+                        lane = self.find_lanelet_by_id(lanelet)
+                        lanelet_position_left = lane.left_vertices[-1]
+                        lanelet_position_right = lane.right_vertices[-1]
+                        stop_line_position_end = stop_line.start
+                        stop_line_position_start = stop_line.end
+                        if np.linalg.norm(lanelet_position_right - stop_line_position_start) < min_start and \
+                                np.linalg.norm(lanelet_position_left - stop_line_position_end) < min_end:
+                            lane_to_add_stop_line = lane
+                            min_start = np.linalg.norm(lanelet_position_right - stop_line_position_start)
+                            min_end = np.linalg.norm(lanelet_position_left - stop_line_position_end)
+            if lane_to_add_stop_line is None:
+                warnings.warn("No lanelet was matched with a stop line")
+                continue
+            if stop_line.traffic_light_ref is None:
+                stop_line.traffic_light_ref = lane_to_add_stop_line.traffic_lights
+            if stop_line.traffic_sign_ref is None:
+                stop_line.traffic_sign_ref = lane_to_add_stop_line.traffic_signs
+            lane_to_add_stop_line.stop_line = stop_line
+
 
 class _JoinSplitTarget:
     """Class to integrate joining/splitting of lanelet borders.
