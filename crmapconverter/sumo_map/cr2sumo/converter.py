@@ -1270,6 +1270,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                   f" --no-turnarounds=true" \
                   f" --junctions.internal-link-detail=20" \
                   f" --geometry.avoid-overlap=true" \
+                  f" --geometry.remove.keep-edges.explicit=true" + \
                   f" --offset.disable-normalization=true" \
                   f" --node-files={nodes_path}" \
                   f" --edge-files={edges_path}" \
@@ -1277,7 +1278,6 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                   f" --tllogic-files={traffic_path}" \
                   f" --type-files={type_path}" \
                   f" --output-file={output_path}" \
-                  f" --geometry.remove.keep-edges.explicit=true" + \
                   f" --seed={SumoConfig.random_seed}"
         success = True
         try:
