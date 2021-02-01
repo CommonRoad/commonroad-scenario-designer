@@ -34,24 +34,29 @@ class TrafficSignEncoder:
         Encodes the given traffic sign to the edge / adjacent ones
         :return:
         """
+        def safe_eq(traffic_type, attr) -> bool:
+            try:
+                return getattr(traffic_type, attr) == traffic_type
+            except AttributeError:
+                return False
 
         for edge, elements in copy(self.edge_traffic_signs).items():
             for element in elements:
                 try:
                     t_type = element.traffic_sign_element_id
-                    if t_type.MAX_SPEED and t_type == t_type.MAX_SPEED:
+                    if safe_eq(t_type, "MAX_SPEED"):
                         self._set_max_speed(element, edge)
-                    elif t_type.PRIORITY and t_type == t_type.PRIORITY:
+                    elif safe_eq(t_type, "PRIORITY"):
                         self._set_priority(element, edge)
-                    elif t_type.STOP and t_type == t_type.STOP:
+                    elif safe_eq(t_type, "STOP"):
                         self._set_all_way_stop(element, edge)
-                    elif t_type.YIELD and t_type == t_type.YIELD:
+                    elif safe_eq(t_type, "YIELD"):
                         self._set_yield(element, edge)
-                    elif t_type.RIGHT_BEFORE_LEFT and t_type == t_type.RIGHT_BEFORE_LEFT:
+                    elif safe_eq(t_type, "RIGHT_BEFORE_LEFT"):
                         self._set_right_before_left(element, edge)
-                    elif t_type.BAN_CAR_TRUCK_BUS_MOTORCYCLE and t_type == t_type.BAN_CAR_TRUCK_BUS_MOTORCYCLE:
+                    elif safe_eq(t_type, "BAN_CAR_TRUCK_BUS_MOTORCYCLE"):
                         self._set_ban_car_truck_bus_motorcycle(element, edge)
-                    elif t_type.TOWN_SIGN and t_type == t_type.TOWN_SIGN:
+                    elif safe_eq(t_type, "TOWN_SIGN"):
                         if isinstance(t_type, TrafficSignIDGermany):
                             element = copy(element)
                             element._additional_values = [str(50 / 3.6)]
@@ -65,22 +70,22 @@ class TrafficSignEncoder:
                     logging.warning(f"{element} cannot be converted. Reason: {e}")
 
     def _set_max_speed(self, traffic_sign_element: TrafficSignElement, edge: Edge):
-        """
-        Sets max_speed of this edge and all reachable outgoing edges, until another traffic sign is set
-        :param traffic_sign_element:
-        :param edge:
-        :return:
-        """
-        assert len(traffic_sign_element.additional_values) == 1, \
-            f"MAX_SPEED, can only have one additional attribute, has: {traffic_sign_element.additional_values}"
-        max_speed = float(traffic_sign_element.additional_values[0])  # in m/s
-        new_type = self.edge_types.create_from_update_speed(edge.getType(), max_speed)
-        # According to https://gitlab.lrz.de/tum-cps/commonroad-scenarios/-/blob/master/documentation/XML_commonRoad_2020a.pdf
-        # MAX_SPEED is valid from the start of the specified lanelet, until another speed sign is set
-        for e in self._bfs_until(edge, traffic_sign_element):
-            e.setType(new_type.id)
-            for lane in e.getLanes():
-                lane.speed = max_speed
+            """
+            Sets max_speed of this edge and all reachable outgoing edges, until another traffic sign is set
+            :param traffic_sign_element:
+            :param edge:
+            :return:
+            """
+            assert len(traffic_sign_element.additional_values) == 1, \
+                f"MAX_SPEED, can only have one additional attribute, has: {traffic_sign_element.additional_values}"
+            max_speed = float(traffic_sign_element.additional_values[0])  # in m/s
+            new_type = self.edge_types.create_from_update_speed(edge.getType(), max_speed)
+            # According to https://gitlab.lrz.de/tum-cps/commonroad-scenarios/-/blob/master/documentation/XML_commonRoad_2020a.pdf
+            # MAX_SPEED is valid from the start of the specified lanelet, until another speed sign is set
+            for e in self._bfs_until(edge, traffic_sign_element):
+                e.setType(new_type.id)
+                for lane in e.getLanes():
+                    lane.speed = max_speed
 
     def _bfs_until(self, start: Edge, element: TrafficSignElement) -> Generator[Edge, None, None]:
         """

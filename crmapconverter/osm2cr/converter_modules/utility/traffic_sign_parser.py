@@ -2,11 +2,12 @@ from typing import Dict
 from commonroad.scenario.traffic_sign import TrafficSignElement, TrafficSignIDZamunda
 from crmapconverter.osm2cr import config
 
+
 class TrafficSignParser:
     """
     This class provides several methods to parse traffic signs, which are extracted
     from the osm file or retrieved from mapillary.com
-    
+
     """
 
     def __init__(self, sign: Dict):
@@ -55,9 +56,10 @@ class TrafficSignParser:
                         if not zone:
                             # convert km/h to m/s and add to traffic sign elements
                             max_speed /= 3.6
-                            elements.append(TrafficSignElement(TrafficSignIDZamunda.MAX_SPEED, [max_speed]))
+                            elements.append(TrafficSignElement(TrafficSignIDZamunda.MAX_SPEED, [str(max_speed)]))
                         else:
-                            elements.append(TrafficSignElement(TrafficSignIDZamunda.MAX_SPEED_ZONE_START, [max_speed]))
+                            elements.append(
+                                TrafficSignElement(TrafficSignIDZamunda.MAX_SPEED_ZONE_START, [str(max_speed)]))
 
                 # city limit edge case
                 elif sign == 'y_limit':
@@ -74,17 +76,17 @@ class TrafficSignParser:
                         elements.append(TrafficSignElement(traffic_sign_de, [value]))
                     # unknown traffic sign
                     except ValueError:
-                        print("Unknown traffic sign in" +str(sign_data) + " found")
-                        #sign_id = traffic_sign_map['unknown']
-                        #value = 'unknown sign'
-                        #elements.append(TrafficSignElement(sign_id, [value]))
+                        print("Unknown traffic sign in" + str(sign_data) + " found")
+                        # sign_id = traffic_sign_map['unknown']
+                        # value = 'unknown sign'
+                        # elements.append(TrafficSignElement(sign_id, [value]))
 
         elements = list(filter(self.accept_traffic_sign_element, elements))
         return elements
 
     def parse_mapillary(self) -> TrafficSignElement or None:
-        sign_id = None #TrafficSignIDZamunda.WARNING_ANIMAL_CROSSING_RIGHT
-        value = ' '#self.sign['mapillary']
+        sign_id = None  # TrafficSignIDZamunda.WARNING_ANIMAL_CROSSING_RIGHT
+        value = ' '  # self.sign['mapillary']
 
         category = str(self.sign['mapillary']).split('--')[0]
         name = str(self.sign['mapillary']).split('--')[1]
@@ -110,7 +112,6 @@ class TrafficSignParser:
                 sign_id = TrafficSignIDZamunda.RIGHT_OF_WAY
             else:
                 sign_id = TrafficSignIDZamunda.WARNING_DANGER_SPOT
-
         # regulatory
         elif category == 'regulatory' and category in config.MAPILLARY_CATEGORIES:
             if name == 'yield':
@@ -191,8 +192,7 @@ class TrafficSignParser:
             elif name == 'priority-road':
                 sign_id = TrafficSignIDZamunda.PRIORITY
             elif name == 'priority-over-oncoming-vehicles':
-                sign_id  = TrafficSignIDZamunda.PRIORITY_OVER_ONCOMING
-
+                sign_id = TrafficSignIDZamunda.PRIORITY_OVER_ONCOMING
         # information
         elif category == 'information' and category in config.MAPILLARY_CATEGORIES:
             if 'minimum-speed' in name:
@@ -218,7 +218,6 @@ class TrafficSignParser:
                 sign_id = TrafficSignIDZamunda.PEDESTRIANS_CROSSING
             elif name == 'dead-end':
                 sign_id = TrafficSignIDZamunda.DEAD_END
-
         # complementary
         elif category == 'complementary' and category in config.MAPILLARY_CATEGORIES:
             if name == 'chevron-left':
