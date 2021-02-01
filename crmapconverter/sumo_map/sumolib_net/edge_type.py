@@ -1,5 +1,5 @@
 from xml.etree import ElementTree as ET
-from typing import List, Dict, Union, TypeVar, Callable, Optional
+from typing import List, Dict, Union, TypeVar, Callable, Optional, Iterable
 from .constants import SUMO_VEHICLE_CLASSES, SumoVehicles
 from copy import deepcopy
 
@@ -138,7 +138,12 @@ class EdgeTypes:
         if old_id not in self.types:
             return None
         edge_type = self.types[old_id]
-        new_id = f"{edge_type.id}_{attr}_{value}"
+
+        val_rep = str(value)
+        if isinstance(value, Iterable):
+            val_rep = "_".join([str(v) for v in value])
+
+        new_id = f"{edge_type.id}_{attr}_{val_rep}"
         if new_id in self.types:
             return self.types[new_id]
 

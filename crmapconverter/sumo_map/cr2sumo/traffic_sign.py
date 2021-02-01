@@ -34,6 +34,7 @@ class TrafficSignEncoder:
         Encodes the given traffic sign to the edge / adjacent ones
         :return:
         """
+
         def safe_eq(traffic_type, attr) -> bool:
             try:
                 return getattr(traffic_type, attr) == traffic_type
@@ -57,7 +58,7 @@ class TrafficSignEncoder:
                     elif safe_eq(t_type, "BAN_CAR_TRUCK_BUS_MOTORCYCLE"):
                         self._set_ban_car_truck_bus_motorcycle(element, edge)
                     elif safe_eq(t_type, "TOWN_SIGN"):
-                        if isinstance(t_type, TrafficSignIDGermany):
+                        if isinstance(t_type, TrafficSignIDGermany) or isinstance(t_type, TrafficSignIDZamunda):
                             element = copy(element)
                             element._additional_values = [str(50 / 3.6)]
                             self._set_max_speed(element, edge)
@@ -70,22 +71,22 @@ class TrafficSignEncoder:
                     logging.warning(f"{element} cannot be converted. Reason: {e}")
 
     def _set_max_speed(self, traffic_sign_element: TrafficSignElement, edge: Edge):
-            """
-            Sets max_speed of this edge and all reachable outgoing edges, until another traffic sign is set
-            :param traffic_sign_element:
-            :param edge:
-            :return:
-            """
-            assert len(traffic_sign_element.additional_values) == 1, \
-                f"MAX_SPEED, can only have one additional attribute, has: {traffic_sign_element.additional_values}"
-            max_speed = float(traffic_sign_element.additional_values[0])  # in m/s
-            new_type = self.edge_types.create_from_update_speed(edge.getType(), max_speed)
-            # According to https://gitlab.lrz.de/tum-cps/commonroad-scenarios/-/blob/master/documentation/XML_commonRoad_2020a.pdf
-            # MAX_SPEED is valid from the start of the specified lanelet, until another speed sign is set
-            for e in self._bfs_until(edge, traffic_sign_element):
-                e.setType(new_type.id)
-                for lane in e.getLanes():
-                    lane.speed = max_speed
+        """
+        Sets max_speed of this edge and all reachable outgoing edges, until another traffic sign is set
+        :param traffic_sign_element:
+        :param edge:
+        :return:
+        """
+        assert len(traffic_sign_element.additional_values) == 1, \
+            f"MAX_SPEED, can only have one additional attribute, has: {traffic_sign_element.additional_values}"
+        max_speed = float(traffic_sign_element.additional_values[0])  # in m/s
+        new_type = self.edge_types.create_from_update_speed(edge.getType(), max_speed)
+        # According to https://gitlab.lrz.de/tum-cps/commonroad-scenarios/-/blob/master/documentation/XML_commonRoad_2020a.pdf
+        # MAX_SPEED is valid from the start of the specified lanelet, until another speed sign is set
+        for e in self._bfs_until(edge, traffic_sign_element):
+            e.setType(new_type.id)
+            for lane in e.getLanes():
+                lane.speed = max_speed
 
     def _bfs_until(self, start: Edge, element: TrafficSignElement) -> Generator[Edge, None, None]:
         """
@@ -201,7 +202,8 @@ class TrafficSignEncoder:
         disallow = set(old_type.disallow) | {
             SumoVehicles.PASSENGER.value, SumoVehicles.HOV.value, SumoVehicles.TAXI.value,
             SumoVehicles.BUS.value, SumoVehicles.COACH.value, SumoVehicles.DELIVERY.value,
-            SumoVehicles.TRUCK.value, SumoVehicles.TRAILER.value, SumoVehicles.MOTORCYCLE.value
+            SumoVehicles.TRUCK.value, SumoVehicles.TRAILER.value, SumoVehicles.MOTORCYCLE.value,
+            SumoVehicles.EVEHICLE.value
         }
         new_type = self.edge_types.create_from_update_disallow(old_type.id, list(disallow))
         for successor in self._bfs_until(edge, element):
