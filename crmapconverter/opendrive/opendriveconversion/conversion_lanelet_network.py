@@ -106,6 +106,7 @@ class ConversionLaneletNetwork(LaneletNetwork):
         """
         return self._lanelets.get(lanelet_id)
 
+
     def convert_all_lanelet_ids(self):
         """Convert lanelet ids to numbers which comply with the Commonroad specification.
 
@@ -838,17 +839,29 @@ class ConversionLaneletNetwork(LaneletNetwork):
                                 min_distance = dist
                                 id_for_adding = lanelet
             # TODO: Add directions to traffic lights
-            successor_directions = self.get_successor_directions(self.find_lanelet_by_id(id_for_adding))
-            # If incoming lanelet only has one successor then the traffic light assigned should only have one direction
-            if len(successor_directions) == 1:
-                if list(successor_directions.values())[0] == 'left':
-                    traffic_light.direction = TrafficLightDirection.LEFT
-                elif list(successor_directions.values())[0] == 'right':
-                    traffic_light.direction = TrafficLightDirection.LEFT
-                elif list(successor_directions.values())[0] == 'straight':
-                    traffic_light.direction = TrafficLightDirection.STRAIGHT
+            target_lanelet = self.find_lanelet_by_id(id_for_adding)
+            successor_directions = self.get_successor_directions(target_lanelet)
 
             self.add_traffic_light(traffic_light, {id_for_adding})
+
+        # Traffic light directions are assigned once all traffic lights are assigned to lanelets so that it can be
+        # determined how directions need to be divided (i.e. the decision between left to one light and straight to
+        # one light instead of left-striaght)
+        self.add_traffic_light_directions()
+
+
+    def add_traffic_light_directions(self):
+        """
+        Assigns directions to the traffic lights based on the directions of the lanelet successors
+        """
+        for intersection in self.intersections:
+            for incoming in intersection.incomings:
+                for lanelet in incoming.incoming_lanelets:
+                    target_lanelet = self.find_lanelet_by_id(lanelet)
+                    x = target_lanelet.traffic_lights
+                    y = self.traffic_lights
+                    continue
+        return
 
     def add_traffic_signs_to_network(self, traffic_signs):
         """
