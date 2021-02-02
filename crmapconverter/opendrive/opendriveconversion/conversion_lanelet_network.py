@@ -9,11 +9,11 @@ from typing import List, Optional
 from queue import Queue
 import numpy as np
 from crmapconverter.osm2cr import config
-from commonroad.scenario.lanelet import LaneletNetwork
+from commonroad.scenario.lanelet import LaneletNetwork, StopLine
 from crmapconverter.osm2cr.converter_modules.utility import geometry
 from crmapconverter.opendrive.opendriveconversion.conversion_lanelet import ConversionLanelet
 from commonroad.scenario.intersection import IntersectionIncomingElement, Intersection
-from commonroad.scenario.traffic_sign import TrafficLightDirection
+from commonroad.scenario.traffic_sign import TrafficLightDirection, TrafficLight, TrafficSign
 
 __author__ = "Benjamin Orthen, Sebastian Maierhofer"
 __copyright__ = "TUM Cyber-Physical Systems Group"
@@ -105,6 +105,42 @@ class ConversionLaneletNetwork(LaneletNetwork):
 
         """
         return self._lanelets.get(lanelet_id)
+
+    def find_traffic_light_by_id(self, traffic_light_id) -> TrafficLight:
+        """Find a traffic light for a given traffic light id.
+
+        Args:
+          Traffic Light id: The id of the traffic light to find
+
+        Returns:
+          The traffic light object if the id exists and None otherwise
+
+        """
+        return self._traffic_lights.get(traffic_light_id)
+
+    def find_traffic_sign_by_id(self, traffic_sign_id) -> TrafficSign:
+        """Find a traffic sign for a given traffic sign id.
+
+        Args:
+          Traffic Sign id: The id of the traffic sign to find
+
+        Returns:
+          The traffic sign object if the id exists and None otherwise
+
+        """
+        return self._traffic_signs.get(traffic_sign_id)
+
+    def find_stop_linee_by_id(self, stop_line_id) -> StopLine:
+        """Find a stop line for a given stop line id.
+
+        Args:
+          Stop line id: The id of the stop line to find
+
+        Returns:
+          The stop line object if the id exists and None otherwise
+
+        """
+        return self._stop_linees.get(stop_line_id)
 
 
     def convert_all_lanelet_ids(self):
@@ -859,7 +895,7 @@ class ConversionLaneletNetwork(LaneletNetwork):
                 for lanelet in incoming.incoming_lanelets:
                     target_lanelet = self.find_lanelet_by_id(lanelet)
                     x = target_lanelet.traffic_lights
-                    y = self.traffic_lights
+                    y = self.find_traffic_light_by_id(list(x)[0])
                     continue
         return
 
