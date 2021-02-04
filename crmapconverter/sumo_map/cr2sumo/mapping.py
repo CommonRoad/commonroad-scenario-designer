@@ -145,7 +145,7 @@ def get_sumo_edge_type(edge_types: EdgeTypes,
                        *lanelet_types: LaneletType) -> EdgeType:
     if not lanelet_types:
         logging.warning("No Lanelet Type given for sumo_edge_type conversion, falling back to LaneletType.URBAN")
-        return get_sumo_edge_type(edge_types, country_id, LaneletType.URBAN)
+        return get_sumo_edge_type(edge_types, country_id, LaneletType.COUNTRY)
     lanelet_type = max(set(lanelet_types), key=lanelet_types.count)
 
     if country_id in lanelet_type_CR2SUMO and lanelet_type in lanelet_type_CR2SUMO[country_id]:
