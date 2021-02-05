@@ -4,6 +4,7 @@ from commonroad.scenario.lanelet import LaneletType
 from commonroad.scenario.traffic_sign import SupportedTrafficSignCountry
 from crmapconverter.sumo_map.sumolib_net.constants import SUMO_VEHICLE_CLASSES
 from typing import Tuple, Dict, Set
+from crmapconverter.sumo_map.sumolib_net import EdgeTypes, EdgeType
 from xml.etree import ElementTree as ET
 import logging
 import os
@@ -87,7 +88,7 @@ VEHICLE_NODE_TYPE_CR2SUMO = {
 }
 
 # ISO-3166 country code mapping to SUMO type file fond in templates/
-_lanelet_type_CR2SUMO = {
+lanelet_type_CR2SUMO = {
     SupportedTrafficSignCountry.GERMANY: {
         LaneletType.URBAN: "highway.residential",
         LaneletType.COUNTRY: "highway.primary",
@@ -122,70 +123,35 @@ _lanelet_type_CR2SUMO = {
         LaneletType.SIDEWALK: "highway.path",
         LaneletType.CROSSWALK: "highway.path"
     },
-    SupportedTrafficSignCountry.CHINA: {},
-    SupportedTrafficSignCountry.SPAIN: {},
-    SupportedTrafficSignCountry.RUSSIA: {},
-    SupportedTrafficSignCountry.ARGENTINA: {},
-    SupportedTrafficSignCountry.BELGIUM: {},
-    SupportedTrafficSignCountry.FRANCE: {},
-    SupportedTrafficSignCountry.GREECE: {},
-    SupportedTrafficSignCountry.CROATIA: {},
-    SupportedTrafficSignCountry.ITALY: {},
-    SupportedTrafficSignCountry.PUERTO_RICO: {},
-    SupportedTrafficSignCountry.ZAMUNDA: {}
+    # SupportedTrafficSignCountry.CHINA: {},
+    # SupportedTrafficSignCountry.SPAIN: {},
+    # SupportedTrafficSignCountry.RUSSIA: {},
+    # SupportedTrafficSignCountry.ARGENTINA: {},
+    # SupportedTrafficSignCountry.BELGIUM: {},
+    # SupportedTrafficSignCountry.FRANCE: {},
+    # SupportedTrafficSignCountry.GREECE: {},
+    # SupportedTrafficSignCountry.CROATIA: {},
+    # SupportedTrafficSignCountry.ITALY: {},
+    # SupportedTrafficSignCountry.PUERTO_RICO: {},
+    # SupportedTrafficSignCountry.ZAMUNDA: {}
 }
 
 TEMPLATES_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "templates"))
 DEFAULT_CFG_FILE = os.path.join(TEMPLATES_DIR, "default.sumo.cfg")
 
 
-def get_sumo_edge_type(country_id: SupportedTrafficSignCountry, *lanelet_types: LaneletType) -> Tuple[str, str]:
+def get_sumo_edge_type(edge_types: EdgeTypes,
+                       country_id: SupportedTrafficSignCountry,
+                       *lanelet_types: LaneletType) -> EdgeType:
     if not lanelet_types:
         logging.warning("No Lanelet Type given for sumo_edge_type conversion, falling back to LaneletType.URBAN")
-        return get_sumo_edge_type(country_id, LaneletType.URBAN)
+        return get_sumo_edge_type(edge_types, country_id, LaneletType.COUNTRY)
     lanelet_type = max(set(lanelet_types), key=lanelet_types.count)
 
-    if country_id in _lanelet_type_CR2SUMO and lanelet_type in _lanelet_type_CR2SUMO[country_id]:
-        filename = os.path.join(TEMPLATES_DIR, f"{country_id.value}.typ.xml")
-        return _lanelet_type_CR2SUMO[country_id][lanelet_type], filename
-
-    elif lanelet_type not in _lanelet_type_CR2SUMO[SupportedTrafficSignCountry.GERMANY]:
+    if country_id in lanelet_type_CR2SUMO and lanelet_type in lanelet_type_CR2SUMO[country_id]:
+        return edge_types.types[lanelet_type_CR2SUMO[country_id][lanelet_type]]
+    elif lanelet_type not in lanelet_type_CR2SUMO[SupportedTrafficSignCountry.GERMANY]:
         raise KeyError(f"LaneletType {str(lanelet_type)} is invalid")
-
     else:
         logging.warning(f"SupportedTrafficSignCountry {country_id} is invalid, using GERMANY instead")
-        return get_sumo_edge_type(SupportedTrafficSignCountry.GERMANY, lanelet_type)
-
-
-def _get_type_attributes(type_id: str, type_path: str) -> Dict[str, str]:
-    xml = ET.parse(type_path)
-    if not xml:
-        return dict()
-    tpe = xml.getroot().find(f".//type[@id='{type_id}']")
-    return tpe.attrib
-
-
-def edge_type_allowed(type_id: str, type_path: str) -> Set[str]:
-    """
-    Set of allowed vClasses for type_id from the given type_path .typ.xml
-    :return: vClasses
-    :rtype:
-    """
-    attrib = _get_type_attributes(type_id, type_path)
-    try:
-        return set(attrib["allow"].split(" "))
-    except Exception:
-        return set(SUMO_VEHICLE_CLASSES) - set(attrib["disallow"].split(" "))
-
-
-def edge_type_disallowed(type_id: str, type_path: str) -> Set[str]:
-    """
-    Set of disallowed vClasses for type_id from the given type_path .typ.xml
-    :return: vClasses
-    :rtype:
-    """
-    attrib = _get_type_attributes(type_id, type_path)
-    try:
-        return set(attrib["disallow"].split(" "))
-    except Exception:
-        return set(SUMO_VEHICLE_CLASSES) - set(attrib["allow"].split(" "))
+        return get_sumo_edge_type(edge_types, SupportedTrafficSignCountry.GERMANY, lanelet_type)

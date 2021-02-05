@@ -15,6 +15,8 @@ SOURCE = "OpenStreetMaps (OSM)"
 TAGS = "urban"
 # Geonames username to retrieve geonamesID for created scenarios
 GEONAMES_USERNAME = "demo"
+# Mapillary Client ID which can be set to extract additional traffic signs. If set to "demo", mapillary signs will be disabled
+MAPILLARY_CLIENT_ID = "demo"
 # time step size for the benchmark in seconds
 TIMESTEPSIZE = 0.1
 
@@ -58,7 +60,7 @@ ACCEPTED_HIGHWAYS_MAINLAYER = [
     "primary",
     "secondary",
     "tertiary",
-    "unclassified",
+    #"unclassified",
     "residential",
     "motorway_link",
     "trunk_link",
@@ -66,7 +68,7 @@ ACCEPTED_HIGHWAYS_MAINLAYER = [
     "secondary_link",
     "tertiary_link",
     "living_street",
-    "service"
+    #"service"
 ]
 EXTRACT_SUBLAYER = False
 # types of highways extracted from the OSM file as sublayer
@@ -219,4 +221,16 @@ TRAFFIC_SIGN_KEYS = [
     "overtaking",
     "traffic_signals:direction",
     "maxspeed",
+]
+# include traffic signs based on their id, e.g. "Max_SPEED". Keep "ALL" to accept all found traffic sings
+ACCEPTED_TRAFFIC_SIGNS = ["ALL"]
+# exclude traffic signs based on their id, e.g. "MAX_SPEED". "ALL" has to be set in ACCEPTED_TRAFFIC_SIGNS
+EXCLUDED_TRAFFIC_SIGNS = []
+
+# categories to include if mapillary is used for sign extraction
+MAPILLARY_CATEGORIES = [
+    "warning",
+    "regulatory",
+    "information",
+    "complementary"
 ]

@@ -3,11 +3,11 @@
 
 import os
 import unittest
-from parameterized import parameterized
+import warnings
 from typing import List
-import pytest
 
 import numpy as np
+import pytest
 from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.common.file_writer import CommonRoadFileWriter
 from crmapconverter.sumo_map.config import SumoConfig
@@ -49,7 +49,8 @@ class BaseClass(unittest.TestCase):
         planning_problem.translate_rotate(-centroid, 0)
         config = SumoConfig.from_scenario_name(self.scenario_name)
         # convert to SUMO
-        wrapper = CR2SumoMapConverter(self.scenario.lanelet_network, config)
+        wrapper = CR2SumoMapConverter(self.scenario.lanelet_network, config,
+                                      country_id=self.scenario.scenario_id.country_id)
         return config, wrapper
 
     def sumo_run(self, config: SumoConfig, wrapper: CR2SumoMapConverter, tls_lanelet_ids: List[int]):
@@ -87,7 +88,19 @@ class BaseClass(unittest.TestCase):
             os.path.join(os.path.dirname(self.path),
                          self.scenario_name + ".simulated.xml"),
             overwrite_existing_file=True)
-        # check validity of written file
+        # TODO: check validity of written file
+
+    def validate_output(self, capfd):
+        captured = capfd.readouterr()
+        lines = captured.err.split("\n")
+        keywords = ["teleporting", "collision"]
+        for keyword in keywords:
+            matches = [line for line in lines if keyword in line]
+            err_str = "\n".join(matches)
+            if len(matches) > 0:
+                warnings.warn(
+                    f"Simulation Error, {keyword} found {len(matches)} times in stderr:" + "\n" + err_str
+                )
 
 
 @pytest.mark.parametrize("cr_file_name, tls", [
@@ -139,15 +152,18 @@ class BaseClass(unittest.TestCase):
     ("HRV_Pula-4_5_T-1", []),
     ("ITA_Siderno-1_2_T-1", []),
     ("ITA_Siderno-8_2_T-1", []),
-    # ("USA_US101-3_1_T-1", []),
+    ("USA_US101-3_1_T-1", []),
     ("ZAM_Tjunction-1_56_T-1", []),
     ("ZAM_Zip-1_54_T-1", []),
+    ("ZAM_MergingTrafficSign-1_1_T-1", []),
+    ("ZAM_MergingTrafficSign-1_2_T-1", [])
 ])
 @pytest.mark.parallel
-def test_parameterized_sumo_run(cr_file_name: str, tls: List[int]):
+def test_parameterized_sumo_run(capfd, cr_file_name: str, tls: List[int]):
     tester = BaseClass()
     config, wrapper = tester.read_cr_file(cr_file_name)
     tester.sumo_run(config, wrapper, tls)
+    tester.validate_output(capfd)
 
 
 if __name__ == "__main__":
