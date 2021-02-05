@@ -129,6 +129,8 @@ class ConversionLanelet(Lanelet):
             self._lanelet_type = {LaneletType.CROSSWALK}
         elif value == 'interstate':
             self._lanelet_type = {LaneletType.INTERSTATE}
+        elif value == 'intersection':
+            self._lanelet_type = {LaneletType.INTERSECTION}
         else:
             self._lanelet_type = {LaneletType.UNKNOWN}
 

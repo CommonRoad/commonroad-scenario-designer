@@ -9,7 +9,7 @@ from typing import List, Optional
 from queue import Queue
 import numpy as np
 from crmapconverter.osm2cr import config
-from commonroad.scenario.lanelet import LaneletNetwork, StopLine
+from commonroad.scenario.lanelet import LaneletNetwork, StopLine, LaneletType
 from crmapconverter.osm2cr.converter_modules.utility import geometry
 from crmapconverter.opendrive.opendriveconversion.conversion_lanelet import ConversionLanelet
 from commonroad.scenario.intersection import IntersectionIncomingElement, Intersection
@@ -666,8 +666,8 @@ class ConversionLaneletNetwork(LaneletNetwork):
             successor_straight = set()
 
             for incoming_lane in incoming_lanelet_set:
+                self.set_intersection_lanelet_type(incoming_lane)
                 successor_directions = self.get_successor_directions(self.find_lanelet_by_id(incoming_lane))
-
                 for successor, direction in successor_directions.items():
                     if direction == "right":
                         successor_right.add(successor)
@@ -690,6 +690,13 @@ class ConversionLaneletNetwork(LaneletNetwork):
         is_left_of_map = self.find_left_of(intersection.incomings)
 
         self.add_intersection(intersection)
+
+    def set_intersection_lanelet_type(self, incoming_lane):
+        """
+        Set the lanelet type of all the lanelets inside an intersection to Intersection
+        """
+        for successor in self.find_lanelet_by_id(incoming_lane).successor:
+            self.find_lanelet_by_id(successor).lanelet_type = "intersection"
 
     def find_left_of(self, incomings):
         """
