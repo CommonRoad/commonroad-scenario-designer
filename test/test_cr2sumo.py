@@ -3,11 +3,11 @@
 
 import os
 import unittest
-from parameterized import parameterized
+import warnings
 from typing import List
-import pytest
 
 import numpy as np
+import pytest
 from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.common.file_writer import CommonRoadFileWriter
 from crmapconverter.sumo_map.config import SumoConfig
@@ -88,7 +88,19 @@ class BaseClass(unittest.TestCase):
             os.path.join(os.path.dirname(self.path),
                          self.scenario_name + ".simulated.xml"),
             overwrite_existing_file=True)
-        # check validity of written file
+        # TODO: check validity of written file
+
+    def validate_output(self, capfd):
+        captured = capfd.readouterr()
+        lines = captured.err.split("\n")
+        keywords = ["teleporting", "collision"]
+        for keyword in keywords:
+            matches = [line for line in lines if keyword in line]
+            err_str = "\n".join(matches)
+            if len(matches) > 0:
+                warnings.warn(
+                    f"Simulation Error, {keyword} found {len(matches)} times in stderr:" + "\n" + err_str
+                )
 
 
 @pytest.mark.parametrize("cr_file_name, tls", [
@@ -147,10 +159,11 @@ class BaseClass(unittest.TestCase):
     ("ZAM_MergingTrafficSign-1_2_T-1", [])
 ])
 @pytest.mark.parallel
-def test_parameterized_sumo_run(cr_file_name: str, tls: List[int]):
+def test_parameterized_sumo_run(capfd, cr_file_name: str, tls: List[int]):
     tester = BaseClass()
     config, wrapper = tester.read_cr_file(cr_file_name)
     tester.sumo_run(config, wrapper, tls)
+    tester.validate_output(capfd)
 
 
 if __name__ == "__main__":
