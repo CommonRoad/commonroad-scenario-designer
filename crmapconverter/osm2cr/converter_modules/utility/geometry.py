@@ -633,7 +633,9 @@ def intersection_polylines(
             if 0 <= a1 <= 1 and 0 <= a2 <= 1:
                 print("intersection at index1: {}, index2: {}".format(index1, index2))
                 return point
-    raise ValueError("no intersection")
+    # Return false if polylines do not intersect
+    return False
+    # raise ValueError("no intersection")
 
 
 def find_point(line: List[np.ndarray], point: int, overhang: float) -> np.ndarray:
