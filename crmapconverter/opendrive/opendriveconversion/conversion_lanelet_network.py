@@ -687,7 +687,7 @@ class ConversionLaneletNetwork(LaneletNetwork):
             # TODO: Add crossings to intersections
             incoming_id_counter += 1
         intersection = Intersection(intersection_id, intersection_incoming_lanes)
-        is_left_of_map = self.find_left_of(intersection.incomings)
+        self.find_left_of(intersection.incomings)
 
         self.add_intersection(intersection)
 
@@ -750,7 +750,6 @@ class ConversionLaneletNetwork(LaneletNetwork):
                 else:
                     prev -= 1
 
-        return is_left_of_map
 
     def combine_common_incoming_lanelets(self, intersection_map):
         """
