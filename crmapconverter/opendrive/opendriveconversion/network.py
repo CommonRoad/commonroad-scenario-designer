@@ -125,7 +125,6 @@ class Network:
         # concatenate possible lanelets with their successors
         replacement_id_map = lanelet_network.concatenate_possible_lanelets()
         self._link_index.concatenate_lanes_in_intersection_map(replacement_id_map)
-        # self.traffic_signal_elements.replace_concatenated_lanes_for_traffic_signs_map(replacement_id_map)
 
         # Perform lane splits and joins
         lanelet_network.join_and_split_possible_lanes()
@@ -476,11 +475,9 @@ class LinkIndex:
             intersection_map_concatenated_lanelets = copy.copy(intersection_map)
             # Check if old lanelet is in keys
             for old_id, new_id in replacement_id_map.items():
-                # TODO: Update values along with keys
                 for incoming, successors in intersection_map.items():
                     updated_successors = [new_id if x == old_id else x for x in successors]
                     intersection_map[incoming] = updated_successors
-
                 if old_id in intersection_map.keys():
                     intersection_map_concatenated_lanelets[new_id] = intersection_map[old_id]
                     del intersection_map_concatenated_lanelets[old_id]
