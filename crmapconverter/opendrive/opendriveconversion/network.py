@@ -45,7 +45,6 @@ class Network:
         self._stop_lines = []
 
 #        self.traffic_signal_elements = None
-#        self._signal_id_mapper = dict()
 
     # def __eq__(self, other):
     # return self.__dict__ == other.__dict__
