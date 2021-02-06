@@ -1,7 +1,7 @@
 """
 This module provides various methods to handle geometric problems.
 """
-from typing import List, Tuple, Optional
+from typing import List, Tuple, Optional, Iterable
 
 import numpy as np
 import scipy.special
@@ -372,7 +372,7 @@ def get_bezier_points_of_segment(
     return p1, p2, p3, p4
 
 
-def distance(point: np.ndarray, polyline: List[np.ndarray]) -> float:
+def distance(point: np.ndarray, polyline: Iterable[np.ndarray]) -> float:
     """
     calculates the distance of a point to a polyline
 

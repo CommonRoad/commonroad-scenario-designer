@@ -81,17 +81,17 @@ class L2OSMConverter:
         self.last_nodes[lanelet.lanelet_id] = (left_nodes[-1], right_nodes[-1])
 
         if not left_way_id:
-            left_way = Way(self.id_count, *left_nodes)
+            left_way = Way(self.id_count, left_nodes)
             self.osm.add_way(left_way)
             left_way_id = left_way.id_
         if not right_way_id:
-            right_way = Way(self.id_count, *right_nodes)
+            right_way = Way(self.id_count, right_nodes)
             self.osm.add_way(right_way)
             right_way_id = right_way.id_
 
         self.left_ways[lanelet.lanelet_id] = left_way_id
         self.right_ways[lanelet.lanelet_id] = right_way_id
-        self.osm.add_way_relation(WayRelation(self.id_count, left_way_id, right_way_id))
+        self.osm.add_way_relation(WayRelation(self.id_count, left_way_id, right_way_id, tag_dict={"type": "lanelet"}))
 
     def _create_nodes(
         self, lanelet: Lanelet, left_way_id: str, right_way_id: str

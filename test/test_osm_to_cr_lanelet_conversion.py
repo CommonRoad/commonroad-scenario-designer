@@ -24,7 +24,7 @@ from crmapconverter.osm.osm2lanelet import OSM2LConverter
 from test.utils import elements_equal
 
 
-class TestOSM2CRConversionBaseClass:
+class TestOSM2CRConversionBaseClass(unittest.TestCase):
     """Test the conversion of a specific osm file by reading it, parsing it
     and then converting it to a CommonRoad file including a scenario.
 
@@ -54,13 +54,9 @@ class TestOSM2CRConversionBaseClass:
                     if file.endswith('.xml'):
                         os.remove(os.path.join(dirpath, file))
 
-        with open(
-            os.path.dirname(os.path.realpath(__file__))
-            + f"/osm_xml_test_files/{self.osm_file_name}.osm",
-            "r",
-        ) as file_in:
-            parser = OSMParser(etree.parse(file_in).getroot())
-            osm = parser.parse()
+        file_in = f"{os.path.dirname(os.path.realpath(__file__))}/osm_xml_test_files/{self.osm_file_name}.osm"
+        parser = OSMParser(etree.parse(file_in).getroot())
+        osm = parser.parse()
         osm2l = OSM2LConverter(proj_string="+proj=utm +zone=32 +ellps=WGS84")
         self.scenario = osm2l(osm)
 
@@ -68,33 +64,29 @@ class TestOSM2CRConversionBaseClass:
         """Test if converted scenario is equal to the loaded xml file.
         Disregard the different dates.
         """
-        with open(
-                os.path.dirname(os.path.realpath(__file__))
-                + f"/osm_xml_test_files/{self.xml_output_name}.xml",
-                "r",
-        ) as fh:
-            parser = etree.XMLParser(remove_blank_text=True)
-            tree_import = etree.parse(fh, parser=parser).getroot()
-            writer = CommonRoadFileWriter(
-                scenario=self.scenario,
-                planning_problem_set=PlanningProblemSet(),
-                author="",
-                affiliation="",
-                source="OpenDRIVE 2 Lanelet Converter",
-                tags={Tag.URBAN, Tag.HIGHWAY},
-            )
-            writer.write_to_file(self.out_path + "/" + self.xml_output_name + ".xml", OverwriteExistingFile.ALWAYS)
+        fh = f"{os.path.dirname(os.path.realpath(__file__))}/osm_xml_test_files/{self.xml_output_name}.xml"
+        parser = etree.XMLParser(remove_blank_text=True)
+        tree_import = etree.parse(fh, parser=parser).getroot()
+        writer = CommonRoadFileWriter(
+            scenario=self.scenario,
+            planning_problem_set=PlanningProblemSet(),
+            author="",
+            affiliation="",
+            source="OpenDRIVE 2 Lanelet Converter",
+            tags=set(),
+        )
+        writer.write_to_file(self.out_path + "/" + self.xml_output_name + ".xml", OverwriteExistingFile.ALWAYS)
 
-            # set same date so this won't change the comparison
-            tree_import.set("date", "2020-04-14")
-            writer.root_node.set("date", "2020-04-14")
+        # set same date so this won't change the comparison
+        tree_import.set("date", "2020-04-14")
+        writer.root_node.set("date", "2020-04-14")
 
-            # compare both element trees
-            trees_are_equal = elements_equal(tree_import, writer.root_node)
-            self.assertTrue(trees_are_equal)
+        # compare both element trees
+        trees_are_equal = elements_equal(tree_import, writer.root_node)
+        self.assertTrue(trees_are_equal)
 
 
-class TestUrbanLanelets(TestOSM2CRConversionBaseClass, unittest.TestCase):
+class TestUrbanLanelets(TestOSM2CRConversionBaseClass):
     """Simple test case file which includes succesors and
     predecessors and adjacencies."""
 
@@ -102,8 +94,21 @@ class TestUrbanLanelets(TestOSM2CRConversionBaseClass, unittest.TestCase):
     osm_file_name = "urban-1_lanelets_utm"
 
 
-class TestMergingLanelets(TestOSM2CRConversionBaseClass, unittest.TestCase):
+class TestMergingLanelets(TestOSM2CRConversionBaseClass):
     """Basic test file including some splits and joins."""
 
     __test__ = True
     osm_file_name = "merging_lanelets_utm"
+
+
+class TestFeatureLanelet2Lanelets(TestOSM2CRConversionBaseClass):
+    """Basic test file including some splits and joins."""
+
+    __test__ = True
+    osm_file_name = "traffic_priority_lanelets_utm"
+
+class TestSpeedLimitConversion(TestOSM2CRConversionBaseClass):
+    """Basic test file including some splits and joins."""
+
+    __test__ = True
+    osm_file_name = "traffic_speed_limit_utm"

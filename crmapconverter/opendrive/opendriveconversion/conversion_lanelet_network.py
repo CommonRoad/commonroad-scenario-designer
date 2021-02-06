@@ -104,6 +104,7 @@ class ConversionLaneletNetwork(LaneletNetwork):
 
         These numbers have to be positive integers.
         """
+        old_ids = self._old_lanelet_ids.copy()
 
         for lanelet in self.lanelets:
             lanelet.description = lanelet.lanelet_id
@@ -128,6 +129,13 @@ class ConversionLaneletNetwork(LaneletNetwork):
                     lanelet.adj_right, self._old_lanelet_ids
                 )
             self.add_lanelet(lanelet)
+
+        new_lanelet_ids_assigned = {}
+        for key in self._old_lanelet_ids.keys():
+            if old_ids.get(key, False) is False:
+                new_lanelet_ids_assigned[key] = self._old_lanelet_ids[key]
+        return new_lanelet_ids_assigned
+
 
     def prune_network(self):
         """Remove references in predecessor, successor etc. to

@@ -71,14 +71,28 @@ def child_elements_equal(e1: etree.Element, e2: etree.Element) -> bool:
       True if they are equal besides of order of successors and predecessors,
         else False.
     """
-    ch1 = e1.xpath("./*[local-name() != 'predecessor' and local-name() != 'successor']")
-    ch2 = e2.xpath("./*[local-name() != 'predecessor' and local-name() != 'successor']")
+    ch1 = e1.xpath(("./*[local-name() != 'predecessor' and local-name() != 'successor' and "
+                   "local-name() != 'userOneWay' and local-name() != 'trafficSign'"
+                    "and local-name() != 'userBidirectional']"))
+    ch2 = e2.xpath("./*[local-name() != 'predecessor' and local-name() != 'successor' "
+                   "and local-name() != 'userOneWay' and local-name() != 'trafficSign'"
+                   "and local-name() != 'userBidirectional']")
     ch1_succ = e1.xpath("./*[local-name() = 'successor']")
     ch2_succ = e2.xpath("./*[local-name() = 'successor']")
     ch1_pred = e1.xpath("./*[local-name() = 'predecessor']")
     ch2_pred = e2.xpath("./*[local-name() = 'predecessor']")
+    ch1_users = e1.xpath("./*[local-name() = 'userOneWay']")
+    ch2_users = e2.xpath("./*[local-name() = 'userOneWay']")
+    ch1_traffic_sign = e1.xpath("./*[local-name() = 'trafficSign']")
+    ch2_traffic_sign = e2.xpath("./*[local-name() = 'trafficSign']")
+    ch1_users_bi = e1.xpath("./*[local-name() = 'userBidirectional']")
+    ch2_users_bi = e2.xpath("./*[local-name() = 'userBidirectional']")
+
     if len(ch1) != len(ch2):
         _print_fail("length", str(len(ch1)),  str(len(ch2)))
+        return False
+    if len(ch1_users) != len(ch2_users):
+        _print_fail("length", str(len(ch1_users)),  str(len(ch2_users)))
         return False
     if len(ch1_succ) != len(ch2_succ):
         _print_fail("length",  str(len(ch1_succ)),  str(len(ch2_succ)))
@@ -91,7 +105,10 @@ def child_elements_equal(e1: etree.Element, e2: etree.Element) -> bool:
             return False
     if not one_permutation_matches(
         ch1_pred, itertools.permutations(ch2_pred)
-    ) or not one_permutation_matches(ch1_succ, itertools.permutations(ch2_succ)):
+    ) or not one_permutation_matches(ch1_succ, itertools.permutations(ch2_succ)) or \
+            not one_permutation_matches(ch1_users, itertools.permutations(ch2_users)) \
+            or not one_permutation_matches(ch1_traffic_sign, itertools.permutations(ch2_traffic_sign))\
+            or not one_permutation_matches(ch1_users_bi, itertools.permutations(ch2_users_bi)):
         return False
     return True
 
