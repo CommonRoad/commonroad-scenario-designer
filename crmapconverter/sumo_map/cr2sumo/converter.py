@@ -1566,11 +1566,15 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
 
         for veh_role, type_grouped_obstacles in grouped_obstacles.items():
             for veh_type, obstacle_list in type_grouped_obstacles.items():
-                sumo_veh_type = VEHICLE_TYPE_CR2SUMO[veh_type]
-                if veh_role == ObstacleRole.STATIC:
-                    sumo_veh_type_name = sumo_veh_type + "_static"
-                else:
-                    sumo_veh_type_name = sumo_veh_type
+                try:
+                    sumo_veh_type = VEHICLE_TYPE_CR2SUMO[veh_type]
+                    if veh_role == ObstacleRole.STATIC:
+                        sumo_veh_type_name = sumo_veh_type.value + "_static"
+                    else:
+                        sumo_veh_type_name = sumo_veh_type.value
+                except KeyError:
+                    logging.warning(f"{veh_type} could not be converted to SUMO")
+                    continue
                 vType_node = domTree.createElement("vType")
                 vType_node.setAttribute("id", sumo_veh_type_name)
                 vType_node.setAttribute("guiShape", sumo_veh_type)
@@ -1625,9 +1629,9 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         for veh_type, probability in veh_distribution.items():
             if probability > 0:
                 vType_node = domTree.createElement("vType")
-                vType_node.setAttribute("id", VEHICLE_TYPE_CR2SUMO[veh_type])
-                vType_node.setAttribute("guiShape", VEHICLE_TYPE_CR2SUMO[veh_type])
-                vType_node.setAttribute("vClass", VEHICLE_TYPE_CR2SUMO[veh_type])
+                vType_node.setAttribute("id", VEHICLE_TYPE_CR2SUMO[veh_type].value)
+                vType_node.setAttribute("guiShape", VEHICLE_TYPE_CR2SUMO[veh_type].value)
+                vType_node.setAttribute("vClass", VEHICLE_TYPE_CR2SUMO[veh_type].value)
                 vType_node.setAttribute("probability", str(probability))
                 for att_name, setting in veh_params.items():
                     att_value = setting[veh_type]
@@ -1878,7 +1882,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
 
                 vehicle_node.setAttribute("id", str(obstacle.obstacle_id))
 
-                sumo_veh_type = VEHICLE_TYPE_CR2SUMO[obstacle.obstacle_type]
+                sumo_veh_type = VEHICLE_TYPE_CR2SUMO[obstacle.obstacle_type].value
                 sumo_veh_length_center = self.conf.veh_params['length'][sumo_veh_type] / 2
 
                 if obstacle.obstacle_role == ObstacleRole.STATIC:

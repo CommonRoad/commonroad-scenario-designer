@@ -134,7 +134,7 @@ def polyline_length(line: np.ndarray) -> float:
     :param line: array of vertices
     :return: length of the line (L2-norm)
     """
-    return np.sum(np.linalg.norm(np.diff(line, axis=0), axis=1))
+    return float(np.sum(np.linalg.norm(np.diff(line, axis=0), axis=1)))
 
 
 def write_ego_ids_to_rou_file(rou_file: str, ego_ids: List[int]) -> None:

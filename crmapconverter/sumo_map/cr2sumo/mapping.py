@@ -4,7 +4,7 @@ from commonroad.scenario.lanelet import LaneletType
 from commonroad.scenario.traffic_sign import SupportedTrafficSignCountry
 from crmapconverter.sumo_map.sumolib_net.constants import SUMO_VEHICLE_CLASSES
 from typing import Tuple, Dict, Set
-from crmapconverter.sumo_map.sumolib_net import EdgeTypes, EdgeType
+from crmapconverter.sumo_map.sumolib_net import EdgeTypes, EdgeType, SumoVehicles
 from xml.etree import ElementTree as ET
 import logging
 import os
@@ -50,22 +50,22 @@ traffic_light_states_SUMO2CR = {
 
 # CommonRoad obstacle type to sumo type
 VEHICLE_TYPE_CR2SUMO = {
-    ObstacleType.UNKNOWN: "passenger",
-    ObstacleType.CAR: "passenger",
-    ObstacleType.TRUCK: "truck",
-    ObstacleType.BUS: "bus",
-    ObstacleType.BICYCLE: "bicycle",
-    ObstacleType.PEDESTRIAN: "pedestrian",
-    ObstacleType.PRIORITY_VEHICLE: "vip",
-    ObstacleType.PARKED_VEHICLE: "passenger",
-    ObstacleType.CONSTRUCTION_ZONE: "passenger",
-    ObstacleType.TRAIN: "rail",
-    ObstacleType.ROAD_BOUNDARY: "custom2",
-    ObstacleType.MOTORCYCLE: "motorcycle",
-    ObstacleType.TAXI: "taxi",
-    ObstacleType.BUILDING: "custom2",
-    ObstacleType.PILLAR: "custom2",
-    ObstacleType.MEDIAN_STRIP: "custom1"
+    ObstacleType.UNKNOWN: SumoVehicles.PASSENGER,
+    ObstacleType.CAR: SumoVehicles.PASSENGER,
+    ObstacleType.TRUCK: SumoVehicles.TRUCK,
+    ObstacleType.BUS: SumoVehicles.BUS,
+    ObstacleType.BICYCLE: SumoVehicles.BICYCLE,
+    ObstacleType.PEDESTRIAN: SumoVehicles.PEDESTRIAN,
+    ObstacleType.PRIORITY_VEHICLE: SumoVehicles.VIP,
+    ObstacleType.PARKED_VEHICLE: SumoVehicles.PASSENGER,
+    ObstacleType.TRAIN: SumoVehicles.RAIL,
+    ObstacleType.MOTORCYCLE: SumoVehicles.MOTORCYCLE,
+    ObstacleType.TAXI: SumoVehicles.TAXI,
+    # ObstacleType.CONSTRUCTION_ZONE: SumoVehicles.AUTHORITY,
+    # ObstacleType.ROAD_BOUNDARY: SUMO,
+    # ObstacleType.BUILDING: "custom2",
+    # ObstacleType.PILLAR: "custom2",
+    # ObstacleType.MEDIAN_STRIP: "custom1"
 }
 
 VEHICLE_NODE_TYPE_CR2SUMO = {
