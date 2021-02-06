@@ -58,7 +58,7 @@ from crmapconverter.sumo_map.util import (_find_intersecting_edges,
 from crmapconverter.sumo_map.config import SumoConfig
 from .mapping import (get_sumo_edge_type, traffic_light_states_CR2SUMO,
                       traffic_light_states_SUMO2CR, VEHICLE_TYPE_CR2SUMO, VEHICLE_NODE_TYPE_CR2SUMO, DEFAULT_CFG_FILE,
-                      TEMPLATES_DIR, lanelet_type_CR2SUMO)
+                      TEMPLATES_DIR, lanelet_type_CR2SUMO, get_edge_types_from_template)
 from .traffic_sign import TrafficSignEncoder
 
 
@@ -67,14 +67,11 @@ from .traffic_sign import TrafficSignEncoder
 class CR2SumoMapConverter(AbstractScenarioWrapper):
     """Converts CommonRoad map to sumo map .net.xml"""
 
-    def __init__(
-        self,
-        lanelet_network: LaneletNetwork,
-        conf: SumoConfig,
-        country_id: SupportedTrafficSignCountry = SupportedTrafficSignCountry.
-            GERMANY):
+    def __init__(self,
+                 lanelet_network: LaneletNetwork,
+                 conf: SumoConfig,
+                 country_id: SupportedTrafficSignCountry = SupportedTrafficSignCountry.ZAMUNDA):
         """
-
         :param lanelet_network: lanelet network to be converted
         :param conf: configuration file for additional map conversion parameters
         :param country_id: ID of the country, used to generate traffic signs and highway speed limits for
@@ -106,17 +103,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         self._traffic_sign_interpreter: TrafficSigInterpreter = TrafficSigInterpreter(
             country_id, self.lanelet_network)
         # Read Edge Types from template
-        try:
-            if self.country_id not in lanelet_type_CR2SUMO:
-                logging.warning(f"{self.country_id} is currently not supported by the converter, falling back to "
-                                f"SupportedTrafficSignCountry.GERMANY")
-                self.country_id = SupportedTrafficSignCountry.GERMANY
-
-            templates_path = os.path.join(TEMPLATES_DIR, f"{self.country_id.value}.typ.xml")
-            with open(templates_path, "r") as f:
-                self.edge_types = EdgeTypes.from_XML(f.read())
-        except Exception as e:
-            raise RuntimeError(f"Cannot find .typ.xml file for {self.country_id}") from e
+        self.edge_types = get_edge_types_from_template(self.country_id)
 
         self.lane_id2lanelet_id: Dict[str, int] = {}
         self.lanelet_id2lane_id: Dict[int, str] = {}
