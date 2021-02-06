@@ -46,7 +46,7 @@ from commonroad.scenario.traffic_sign_interpreter import TrafficSigInterpreter
 from sumocr.maps.scenario_wrapper import AbstractScenarioWrapper
 
 from crmapconverter.sumo_map.sumolib_net import (TLS, Connection, Crossing, Edge, Junction, Lane,
-                                                 Node, TLSProgram, EdgeTypes, EdgeType)
+                                                 Node, TLSProgram, EdgeTypes, EdgeType, Phase)
 from crmapconverter.sumo_map.errors import ScenarioException
 from crmapconverter.sumo_map.util import (_find_intersecting_edges,
                                           get_total_lane_length_from_netfile, max_lanelet_network_id,
@@ -69,17 +69,15 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
 
     def __init__(self,
                  lanelet_network: LaneletNetwork,
-                 conf: SumoConfig,
-                 country_id: SupportedTrafficSignCountry = SupportedTrafficSignCountry.ZAMUNDA):
+                 conf: SumoConfig):
         """
         :param lanelet_network: lanelet network to be converted
         :param conf: configuration file for additional map conversion parameters
-        :param country_id: ID of the country, used to generate traffic signs and highway speed limits for
         """
         self.lanelet_network: LaneletNetwork = lanelet_network
         self.conf: SumoConfig = conf
-        self.country_id = SupportedTrafficSignCountry(country_id) if isinstance(country_id, str) else country_id
-
+        self.country_id = SupportedTrafficSignCountry(conf.country_id) if isinstance(conf.country_id,
+                                                                                     str) else conf.country_id
         # all the nodes of the map, key is the node ID
         self.nodes: Dict[int, Node] = {}
         # all the edges of the map, key is the edge ID
@@ -101,7 +99,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
 
         # traffic signs
         self._traffic_sign_interpreter: TrafficSigInterpreter = TrafficSigInterpreter(
-            country_id, self.lanelet_network)
+            self.country_id, self.lanelet_network)
         # Read Edge Types from template
         self.edge_types = get_edge_types_from_template(self.country_id)
 
@@ -113,8 +111,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         self.lanelet_id2junction: Dict[int, Junction] = {}
         self._start_nodes = {}
         self._end_nodes = {}
-        # tl (traffic_light_id) ->  TLS (Traffic Light Signal)
-        self.traffic_light_signals: Dict[int, TLS] = {}
+        self.traffic_light_signals = TLS()
 
         # NETCONVERT files
         self._nodes_file = ""
@@ -809,112 +806,71 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         self._crossings = new_crossings
 
     def _create_traffic_lights(self):
-
         # tl (traffic_light_id) -> Node (Traffic Light)
-        nodes_tl: Dict[int, Node] = {}
+        generated: Dict[str, Node] = {}
 
         # generate traffic lights in SUMO format
         for lanelet in self.lanelet_network.lanelets:
-            lanelet_lights_ids: Set[TrafficLight] = lanelet.traffic_lights
-            if not lanelet_lights_ids: continue
-
+            if not lanelet.traffic_lights:
+                continue
             edge_id = self.lanelet_id2edge_id[lanelet.lanelet_id]
-
-            if not edge_id in self.new_edges:
-                logging.warning(
-                    "Edge: {} has been removed in SUMO-NET but contained a traffic light"
-                        .format(edge_id))
+            if edge_id not in self.new_edges:
+                logging.warning(f"Edge: {edge_id} has been removed in SUMO-NET but contained a traffic light")
                 continue
 
-            from_edge: Edge = self.new_edges[edge_id]
-            to_node: Node = from_edge.getToNode()
-            successor_edges: List[Edge] = [
-                edge for id, edge in self.new_edges.items()
-                if edge.getFromNode().getID() == to_node.getID()
-            ]
+            edge: Edge = self.new_edges[edge_id]
+            to_node: Node = edge.getToNode()
+            outgoing_lanes: List[Lane] = [lane for e in edge.getOutgoing() for lane in e.getLanes()]
 
-            for tl in [
-                tl for tl in self.lanelet_network.traffic_lights
-                if tl.traffic_light_id in lanelet_lights_ids
-            ]:
+            for traffic_light in self.lanelet_network.traffic_lights:
+                if traffic_light.traffic_light_id not in lanelet.traffic_lights:
+                    continue
                 # is the traffic light active?
-                if not tl.active:
-                    logging.info(
-                        'Traffic Light: {} is inactive, skipping conversion'.
-                            format(tl.traffic_light_id))
+                if not traffic_light.active:
+                    logging.info(f"Traffic Light: {traffic_light.traffic_light_id} is inactive, skipping conversion")
+                    continue
+                if traffic_light.traffic_light_id in generated:
                     continue
 
-                ## Only valid if the traffic light has not been created ##
-
+                tls_id = str(traffic_light.traffic_light_id)
                 # create a new node for the traffic light
-                traffic_light = Node(
+                # TODO
+                tl_node = Node(
                     self.node_id_next,
                     "traffic_light",
                     # convert TrafficLight position if explicitly given
-                    tl.position if tl.position.size > 0 else
-                    from_edge.getToNode().getCoord3D(),
+                    traffic_light.position if traffic_light.position.size > 0 else edge.getToNode().getCoord3D(),
                     incLanes=None,
-                    tl=tl.traffic_light_id)
+                    tl=tls_id)
                 self.node_id_next += 1
-                nodes_tl[tl.traffic_light_id] = traffic_light
+                generated[tls_id] = tl_node
 
-                # have we already generated the tls for this traffic light?
-                if tl.traffic_light_id in self.traffic_light_signals:
+                if tls_id in self.traffic_light_signals.getPrograms():
                     logging.warning(
-                        'TrafficLight: {} is referenced by multiple lanelets'.
-                            format(tl.traffic_light_id))
+                        f"TrafficLight: {traffic_light.traffic_light_id} is referenced by multiple lanelets")
                     continue
 
                 # create Traffic Light Signal
-                # give a testing program id:
-                tls_program = TLSProgram('cr_converted', tl.time_offset,
-                                         'static')
-                for cycle in tl.cycle:
-                    state = traffic_light_states_CR2SUMO[cycle.state]
-                    tls_program.addPhase(state, cycle.duration * self.conf.dt)
+                tls_program = TLSProgram(tls_id, traffic_light.time_offset * self.conf.dt, "0")
+                for cycle in traffic_light.cycle:
+                    state = [traffic_light_states_CR2SUMO[cycle.state]] * len(outgoing_lanes)
+                    dur = int(cycle.duration * self.conf.dt)
+                    tls_program.addPhase(Phase(dur, state))
+                self.traffic_light_signals.addProgram(tls_program)
 
-                tls = TLS(tl.traffic_light_id)
-                tls.addProgram(tls_program)
-
-                def get_lanes(edge) -> List[Lane]:
-                    """
-                    param: return: List of lanes for the given edge
-                    """
-                    return [
-                        lane for lane_id, lane in self.lanes.items()
-                        if edge.getID() == lane.getEdge().getID()
-                    ]
-
-                def connection_exists(from_lane: str, to_lane: str) -> bool:
-                    """
-                    param: return: True iff. a connection between from_lane -> to_lane exists
-                    """
-                    for c in self._new_connections:
-                        if str(c.getFromLane()) == from_lane and str(
-                            c.getToLane()) == to_lane:
-                            return True
-                    return False
-
-                # TODO: Add proper lane modelling for the entire converter
-                for to_edge in successor_edges:
-                    for from_lane in get_lanes(from_edge):
-                        for to_lane in get_lanes(to_edge):
-                            if not connection_exists(from_lane.getID(),
-                                                     to_lane.getID()):
-                                continue
-                            tls.addConnection(Connection(from_edge,
-                                                         to_edge,
-                                                         from_lane,
-                                                         to_lane,
-                                                         direction=None,
-                                                         tls=tl.traffic_light_id,
-                                                         tllink=0,
-                                                         state=None))
-
-                self.traffic_light_signals[tl.traffic_light_id] = tls
+                for from_lane in edge.getLanes():
+                    for to_lane in outgoing_lanes:
+                        connection = next((c for c in self._new_connections
+                                           if c.getFromLane() == from_lane.getIndex()
+                                           and c.getToLane() == to_lane.getIndex()), None)
+                        if connection is None:
+                            continue
+                        connection._tls = tls_id
+                        connection._tlLink = 0
+                        self.traffic_light_signals.addConnection(connection)
 
         # save nodes to global state
-        for tl, node in nodes_tl.items():
+        for node in generated.values():
             self.new_nodes[node.getID()] = node
 
     def _is_merged_edge(self, edge: Edge):
@@ -1199,16 +1155,8 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         file_path = os.path.join(os.path.dirname(output_path), f"{self.conf.scenario_name}.tll.xml")
         with open(file_path, "w+") as f:
             sumolib.writeXMLHeader(f, 'CommonRoad Map Tool')
-            tlLogics = etree.Element('tlLogics')
-
-            for tls in self.traffic_light_signals.values():
-                tls_xml = etree.fromstring(tls.toXML())
-                tlLogics.append(tls_xml.find('tlLogic'))
-                for conn in tls_xml.findall('connection'):
-                    tlLogics.append(conn)
-            f.write(
-                str(etree.tostring(tlLogics, pretty_print=True, encoding="utf-8"), encoding="utf-8"))
-
+            xml = etree.fromstring(self.traffic_light_signals.toXML())
+            f.write(str(etree.tostring(xml, pretty_print=True, encoding="utf-8"), encoding="utf-8"))
         self._traffic_file = file_path
         return file_path
 
@@ -1226,7 +1174,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         return file_path
 
     def merge_intermediate_files(self, output_path: str, nodes_path: str, edges_path: str, connections_path: str,
-                                 traffic_path: str, type_path: str, cleanup=True, update_internal_ids=True) -> bool:
+                                 traffic_path: str, type_path: str, cleanup=False, update_internal_ids=True) -> bool:
         """
         Function that merges the edges and nodes files into one using netconvert
         :param connections_path:
