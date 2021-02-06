@@ -698,7 +698,9 @@ class ConversionLaneletNetwork(LaneletNetwork):
             successor_incoming_lanelet = self.find_lanelet_by_id(successor_incoming)
             successor_incoming_lanelet.lanelet_type = "intersection"
             # Also check if the successor of a incoming successor intersects with another successor of an incoming
-            self.check_lanelet_type_for_successor_of_successor(successor_incoming_lanelet, intersection_map)
+            # TODO: Checking for successor of incoming successor is a very expensive operation due to intersection
+            #  calculation. Find workaround.
+            # self.check_lanelet_type_for_successor_of_successor(successor_incoming_lanelet, intersection_map)
 
     def check_lanelet_type_for_successor_of_successor(self, successor_incoming_lanelet, intersection_map):
         """
