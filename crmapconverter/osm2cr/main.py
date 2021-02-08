@@ -20,6 +20,7 @@ from crmapconverter.io.scenario_designer.osm_gui_modules.gui_embedding import Ma
 
 import xml.etree.ElementTree as ElTree
 from ordered_set import OrderedSet
+from commonocean_io.src.scenario.scenario import Scenario
 
 matplotlib.use("Qt5Agg")
 
@@ -60,18 +61,13 @@ def convert_seamap(filename):
     tree = ElTree.parse(filename)
     root = tree.getroot()
     nodes = root.iter('node')
-    buoys = OrderedSet()
+    buoys =  OrderedSet()
     for node in nodes:
         for tag in node.iter('tag'):
             if str.find(tag.attrib['k'], 'seamark:buoy'):
-                if node.attrib['uid'] in buoys.__getattribute__('uid'):
-                    item = buoys.
-                    if node.attrib['version'] > buoys.__getitem__():
-
-                    else
-                        buoys.add(node)
-                break
-
+                    buoys.add(node)
+            break
+    scenario = Scenario(1.0,2) #TODO:adjust timestep
 
 def download_and_convert():
     """
