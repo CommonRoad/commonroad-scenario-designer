@@ -38,14 +38,14 @@ traffic_light_states_CR2SUMO = {
 }
 # Mapping from  UMO Traffic Light to CR TrafficLightState states
 traffic_light_states_SUMO2CR = {
-    'r': TrafficLightState.RED,
-    'y': TrafficLightState.YELLOW,
-    'g': TrafficLightState.GREEN,
-    'G': TrafficLightState.GREEN,
-    's': TrafficLightState.GREEN,
-    'u': TrafficLightState.RED_YELLOW,
-    'o': TrafficLightState.INACTIVE,
-    'O': TrafficLightState.INACTIVE
+    SumoSignalState.RED: TrafficLightState.RED,
+    SumoSignalState.YELLOW: TrafficLightState.YELLOW,
+    SumoSignalState.GREEN: TrafficLightState.GREEN,
+    SumoSignalState.GREEN_PRIORITY: TrafficLightState.GREEN,
+    SumoSignalState.GREEN_TURN_RIGHT: TrafficLightState.GREEN,
+    SumoSignalState.RED_YELLOW: TrafficLightState.RED_YELLOW,
+    SumoSignalState.BLINKING: TrafficLightState.INACTIVE,
+    SumoSignalState.NO_SIGNAL: TrafficLightState.INACTIVE
 }
 
 # CommonRoad obstacle type to sumo type

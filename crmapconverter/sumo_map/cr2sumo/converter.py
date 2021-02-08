@@ -833,9 +833,20 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
             for l in lanelet.successor:
                 succ = self.lanelet_network.find_lanelet_by_id(l)
                 # find resp. connection
-                lane_id = self.lanelet_id2lane_id[succ.lanelet_id]
-                # lane: Lane = self.lanes[lane_id]
-                connection = next(c for c in self._new_connections if c.getViaLaneID() == lane_id)
+                from_lane_id = self.lanelet_id2lane_id[lanelet.lanelet_id]
+                from_lane = self.lanes[from_lane_id]
+                succ_lane_id = self.lanelet_id2lane_id[succ.lanelet_id]
+                succ_lane = self.lanes[succ_lane_id]
+                connection = next(c for c in self._new_connections
+                                  if c.getViaLaneID() == succ_lane_id
+                                  or (c.getFrom() == str(from_lane.getEdge().getID()) and
+                                      c.getTo() == str(succ_lane.getEdge().getID()) and
+                                      c.getFromLane() == from_lane.getIndex() and
+                                      c.getToLane() == succ_lane.getIndex())
+                                  )
+                # try:
+                # except StopIteration:
+                #     continue
 
                 # compute angle
                 from_dir = lanelet.center_vertices[-1] - lanelet.center_vertices[-2]
@@ -872,23 +883,10 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         # generate traffic lights in SUMO format
         index = 0
         for to_node, lights in node_2_traffic_light.items():
-            program_id = f"program_{index}"
+            program_id = f"tl_program_{index}"
             ordered_lights = list(lights)
 
-            # set to_node to be a traffic_light
-            # tl_node = Node(
-            #     self.node_id_next,
-            #     SumoNodeType.TRAFFIC_LIGHT.value,
-            #     coord=np.mean([tl.position for tl in ordered_lights if tl.position is not None], axis=0),
-            #     incLanes=None,
-            #     # tl=program_id,
-            # )
-
-            # traffic_light_id = str(tl_node.getID())
-            # self.new_nodes[tl_node.getID()] = tl_node
-            # self.node_id_next += 1
             traffic_light_id = str(to_node.getID())
-            # to_node._tl = program_id
             to_node.setType(SumoNodeType.TRAFFIC_LIGHT.value)
 
             # create Traffic Light Program
@@ -896,7 +894,8 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
             tls_program = TLSProgram(traffic_light_id, time_offset * self.conf.dt, program_id)
             for state in merge_traffic_light_cycles(ordered_lights):
                 sumo_state = [traffic_light_states_CR2SUMO[s.state] for s in state]
-                dur = int(state[0].duration * self.conf.dt)
+                dur = int(np.ceil(state[0].duration * self.conf.dt))
+                assert dur > 0
                 tls_program.addPhase(Phase(dur, sumo_state))
             self.traffic_light_signals.addProgram(tls_program)
 
@@ -994,21 +993,16 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
 
         # did the user select an incoming lanelet to the junction?
         if not lanelet_id in self.lanelet_id2junction:
-            lanelet: Lanelet = self.lanelet_network.find_lanelet_by_id(
-                lanelet_id)
+            lanelet: Lanelet = self.lanelet_network.find_lanelet_by_id(lanelet_id)
             if not lanelet:
                 logging.warning("Invalid lanelet: {}".format(lanelet_id))
                 return False
             # if the selected lanelet is not an incoming one, check the prececessors
-            pred_ids = [
-                pred for pred in lanelet.predecessor
-                if pred in self.lanelet_id2junction
-            ]
-            if len(pred_ids) == 0:
-                logging.info(
-                    "No junction found for lanelet {}".format(lanelet_id))
+            try:
+                lanelet_id = next(pred for pred in lanelet.predecessor if pred in self.lanelet_id2junction)
+            except StopIteration:
+                logging.info("No junction found for lanelet {}".format(lanelet_id))
                 return False
-            lanelet_id = pred_ids[0]
 
         # does the lanelet have predefined traffic light?
         # If so guess signals for them and copy the corresponding position
@@ -1018,18 +1012,16 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
 
         # auto generate the TLS with netconvert
         junction = self.lanelet_id2junction[lanelet_id]
-        command = "netconvert --sumo-net-file=" + self._output_file + \
-                  " --output-file=" + self._output_file + \
-                  " --tls.guess=true" + \
-                  " --tls.guess-signals=" + ('true' if guess_signals else 'false') + \
-                  " --tls.group-signals=true" + \
-                  " --tls.cycle.time=" + str(cycle_time) + \
-                  " --tls.set=" + str(junction.id)
+        command = f"netconvert" \
+                  f" --sumo-net-file={self._output_file}" \
+                  f" --output-file={self._output_file}" \
+                  f" --tls.guess=true" \
+                  f" --tls.guess-signals={'true' if guess_signals else 'false'}" \
+                  f" --tls.group-signals=true" \
+                  f" --tls.cycle.time={cycle_time}" \
+                  f" --tls.set={junction.id}"
         try:
-            out = subprocess.check_output(command.split(),
-                                          timeout=5.,
-                                          stderr=subprocess.STDOUT,
-                                          shell=True)
+            out = subprocess.check_output(command.split(), timeout=5.0, stderr=subprocess.STDOUT)
             if "error" in str(out).lower():
                 return False
         except Exception as e:
@@ -1047,14 +1039,17 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         # parse TLS from generated xml file
         def get_tls(xml, junction) -> TLSProgram:
             for tl_logic in xml.findall("tlLogic"):
-                if not int(tl_logic.get("id")) == junction.id: continue
+                if not int(tl_logic.get("id")) == junction.id:
+                    continue
 
                 tls_program = TLSProgram(tl_logic.get("programID"),
                                          int(tl_logic.get("offset")),
                                          tl_logic.get("type"))
                 for phase in tl_logic.findall("phase"):
-                    tls_program.addPhase(phase.get("state"),
-                                         int(phase.get("duration")))
+                    tls_program.addPhase(Phase(
+                        int(phase.get("duration")),
+                        [SumoSignalState(s) for s in phase.get("state")]
+                    ))
                 return tls_program
 
         tls_program = get_tls(xml, junction)
@@ -1082,28 +1077,26 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
 
             # replace current traffic light if one exists on the lanelet
             if lanelet.traffic_lights:
-                traffic_lights: List[TrafficLight] = [
-                    self.lanelet_network.find_traffic_light_by_id(id)
-                    for id in lanelet.traffic_lights
-                ]
+                traffic_lights: List[TrafficLight] = [self.lanelet_network.find_traffic_light_by_id(id)
+                                                      for id in lanelet.traffic_lights]
                 tl = traffic_lights[0]
                 # copy attributes from old TrafficLight to new one
                 position = tl.position
                 direction = tl.direction
                 active = tl.active
                 # remove old traffic light from lanelet
-                lanelet._traffic_lights -= set([tl.traffic_light_id])
+                lanelet._traffic_lights -= {tl.traffic_light_id}
 
-            traffic_light = TrafficLight(next_cr_id, [
-                TrafficLightCycleElement(
-                    traffic_light_states_SUMO2CR[state[link_index]],
-                    int(duration / self.conf.dt))
-                for state, duration in tls_program.getPhases()
-            ], position, time_offset, direction, active)
+            traffic_light = TrafficLight(next_cr_id,
+                                         [TrafficLightCycleElement(
+                                             traffic_light_states_SUMO2CR[phase.state[link_index]],
+                                             int(phase.duration / self.conf.dt))
+                                             for phase in tls_program.getPhases()],
+                                         position, time_offset, direction, active)
             next_cr_id += 1
 
             self.lanelet_network.add_traffic_light(traffic_light,
-                                                   set([lanelet_id]))
+                                                   {lanelet_id})
 
         remove_unreferenced_traffic_lights(self.lanelet_network)
         return True

@@ -162,11 +162,6 @@ class TLS:
                 tl.append(ET.fromstring(program.toXML()))
         for c in self._connections:
             conn = ET.fromstring(c.toXML())
-            # conn.attrib = {
-            #     k: v
-            #     for k, v in conn.attrib.items()
-            #     if k in ["from", "to", "fromLane", "toLane", "tl", "linkIndex"]
-            # }
             tl.append(conn)
         return ET.tostring(tl)
 

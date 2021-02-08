@@ -4,6 +4,11 @@ import numpy as np
 
 
 def merge_traffic_light_cycles(traffic_lights: List[TrafficLight]) -> List[List[TrafficLightCycleElement]]:
+    """
+
+    :param traffic_lights:
+    :return:
+    """
     time_steps = np.lcm.reduce([sum(cycle.duration for cycle in tl.cycle) for tl in traffic_lights])
     states = np.array([_cycles_to_states(traffic_light.cycle, time_steps)
                        for traffic_light in traffic_lights]).T
@@ -24,6 +29,12 @@ def merge_traffic_light_cycles(traffic_lights: List[TrafficLight]) -> List[List[
 
 
 def _cycles_to_states(cycles: List[TrafficLightCycleElement], max_time: int) -> List[TrafficLightState]:
+    """
+    Sample TrafficLightCycleElements for each timestep in max_time
+    :param cycles:
+    :param max_time:
+    :return:
+    """
     states: List[TrafficLightState] = []
     cycle_idx = 0
     length = sum(c.duration for c in cycles)

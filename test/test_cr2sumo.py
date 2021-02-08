@@ -104,10 +104,10 @@ class BaseClass(unittest.TestCase):
 
 @pytest.mark.parametrize("cr_file_name, tls", [
     ("USA_Peach-3_3_T-1", []),
-    ("garching", [270]),
-    ("garching_merged", []),
-    ("intersect_and_crossing", [56]),
-    ("merging_lanelets_utm", [107]),
+    ("DEU_garching-1_1", [270]),
+    ("DEU_garching-1_2", []),
+    ("ZAM_intersectandcrossing-1_0", [56]),
+    ("ZAM_merging-1_1", [107]),
     ("USA_urban_1", [105]),
     ("DEU_AAH-1_8007_T-1", [154]),
     ("DEU_AAH-2_19000_T-1", [118]),
