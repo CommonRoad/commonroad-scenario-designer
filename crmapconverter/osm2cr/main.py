@@ -18,6 +18,9 @@ from crmapconverter.osm2cr.converter_modules.osm_operations.downloader import (
 )
 from crmapconverter.io.scenario_designer.osm_gui_modules.gui_embedding import MainApp
 
+import xml.etree.ElementTree as ElTree
+from ordered_set import OrderedSet
+
 matplotlib.use("Qt5Agg")
 
 
@@ -32,7 +35,7 @@ def convert(filename_open, filename_store=None):
     :return: None
     """
     scenario = converter.GraphScenario(filename_open)
-    #scenario.save_as_cr(filename_store)
+    # scenario.save_as_cr(filename_store)
 
     interm_format = IntermediateFormat.extract_from_road_graph(scenario.graph)
     scenario_cr = interm_format.to_commonroad_scenario()
@@ -51,6 +54,23 @@ def convert(filename_open, filename_store=None):
     )
     # file_writer = CommonRoadFileWriter(scenario, problemset, author, affiliation, source, tags)
     file_writer.write_scenario_to_file(file_path, OverwriteExistingFile.ALWAYS)
+
+
+def convert_seamap(filename):
+    tree = ElTree.parse(filename)
+    root = tree.getroot()
+    nodes = root.iter('node')
+    buoys = OrderedSet()
+    for node in nodes:
+        for tag in node.iter('tag'):
+            if str.find(tag.attrib['k'], 'seamark:buoy'):
+                if node.attrib['uid'] in buoys.__getattribute__('uid'):
+                    item = buoys.
+                    if node.attrib['version'] > buoys.__getitem__():
+
+                    else
+                        buoys.add(node)
+                break
 
 
 def download_and_convert():
@@ -84,12 +104,15 @@ def main():
         description="download or open an OSM file and convert it to CR or use GUI"
     )
     parser.add_argument("action",
-                        choices=["g", "gui", "d","download", "o", "open"],
+                        choices=["g", "gui", "d", "download", "o", "open"],
                         help="g or gui for starting the gui, d or download to "
-                            + "download a OSM file, o or open to convert files")
+                             + "download a OSM file, o or open to convert files")
     parser.add_argument("file", nargs="?", help="file input for the converter")
+    parser.add_argument("-seamap", "-s", help='convert Seamaps')
     args = parser.parse_args()
-    if args.action == "d" or args.action == "download":
+    if args.seamap:
+        convert_seamap(args.file)
+    elif args.action == "d" or args.action == "download":
         download_and_convert()
         ex.view_xml(config.SAVE_PATH + config.BENCHMARK_ID + ".xml")
     elif args.action == "o" or args.action == "open":
