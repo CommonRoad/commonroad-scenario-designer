@@ -5,7 +5,7 @@ from enum import Enum
 from collections import defaultdict
 
 
-class SumoSignalStates(Enum):
+class SumoSignalState(Enum):
     """
     Adapted from: https://sumo.dlr.de/docs/Simulation/Traffic_Lights.html#tllogic62_attributes
     """
@@ -39,7 +39,7 @@ class SumoSignalStates(Enum):
 class Phase:
     def __init__(self,
                  duration: int,
-                 state: List[SumoSignalStates],
+                 state: List[SumoSignalState],
                  min_dur: int = None,
                  max_dur: int = None,
                  name: str = None,
@@ -73,6 +73,12 @@ class Phase:
         if self.next is not None:
             phase.set("next", str(self.next))
         return ET.tostring(phase)
+
+    def __str__(self):
+        return str(self.to_xml())
+
+    def __repr__(self):
+        return str(self)
 
 
 class SumoTLSType(Enum):
@@ -114,10 +120,16 @@ class TLSProgram:
         tl.set("id", self._id)
         tl.set("type", str(self._type.value))
         tl.set("programID", str(self._program_id))
-        tl.set("offset", str(self._offset))
+        tl.set("offset", str(int(self._offset)))
         for phase in self._phases:
             tl.append(ET.fromstring(phase.to_xml()))
         return ET.tostring(tl)
+
+    def __str__(self):
+        return str(self.toXML())
+
+    def __repr__(self):
+        return str(self)
 
 
 class TLS:
@@ -149,5 +161,17 @@ class TLS:
             for program in programs.values():
                 tl.append(ET.fromstring(program.toXML()))
         for c in self._connections:
-            tl.append(ET.fromstring(c.toXML()))
+            conn = ET.fromstring(c.toXML())
+            # conn.attrib = {
+            #     k: v
+            #     for k, v in conn.attrib.items()
+            #     if k in ["from", "to", "fromLane", "toLane", "tl", "linkIndex"]
+            # }
+            tl.append(conn)
         return ET.tostring(tl)
+
+    def __str__(self):
+        return str(self.toXML())
+
+    def __repr__(self):
+        return str(self)

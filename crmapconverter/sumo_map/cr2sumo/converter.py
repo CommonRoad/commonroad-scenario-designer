@@ -46,7 +46,8 @@ from commonroad.scenario.traffic_sign_interpreter import TrafficSigInterpreter
 from sumocr.maps.scenario_wrapper import AbstractScenarioWrapper
 
 from crmapconverter.sumo_map.sumolib_net import (TLS, Connection, Crossing, Edge, Junction, Lane,
-                                                 Node, TLSProgram, EdgeTypes, EdgeType, Phase)
+                                                 Node, TLSProgram, EdgeTypes, EdgeType, Phase, SumoNodeType,
+                                                 SumoSignalState)
 from crmapconverter.sumo_map.errors import ScenarioException
 from crmapconverter.sumo_map.util import (_find_intersecting_edges,
                                           get_total_lane_length_from_netfile, max_lanelet_network_id,
@@ -60,6 +61,7 @@ from .mapping import (get_sumo_edge_type, traffic_light_states_CR2SUMO,
                       traffic_light_states_SUMO2CR, VEHICLE_TYPE_CR2SUMO, VEHICLE_NODE_TYPE_CR2SUMO, DEFAULT_CFG_FILE,
                       TEMPLATES_DIR, lanelet_type_CR2SUMO, get_edge_types_from_template)
 from .traffic_sign import TrafficSignEncoder
+from .traffic_light import merge_traffic_light_cycles
 
 
 # This file is used as a template for the generated .sumo.cfg files
@@ -807,71 +809,104 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
 
     def _create_traffic_lights(self):
         # tl (traffic_light_id) -> Node (Traffic Light)
-        generated: Dict[str, Node] = {}
+        cr_traffic_lights: Dict[int, TrafficLight] = {traffic_light.traffic_light_id: traffic_light
+                                                      for traffic_light in self.lanelet_network.traffic_lights}
+        node_2_traffic_light: Dict[Node, Set[TrafficLight]] = defaultdict(set)
+        node_2_connections: Dict[Node, Set[Connection]] = defaultdict(set)
+        light_2_connections: Dict[TrafficLight, Set[Connection]] = defaultdict(set)
 
-        # generate traffic lights in SUMO format
         for lanelet in self.lanelet_network.lanelets:
             if not lanelet.traffic_lights:
                 continue
+            lights: Set[TrafficLight] = {cr_traffic_lights[tl] for tl in lanelet.traffic_lights if
+                                         cr_traffic_lights[tl].active}
             edge_id = self.lanelet_id2edge_id[lanelet.lanelet_id]
             if edge_id not in self.new_edges:
                 logging.warning(f"Edge: {edge_id} has been removed in SUMO-NET but contained a traffic light")
                 continue
+            edge = self.new_edges[edge_id]
+            node: Node = edge.getToNode()
+            node_2_traffic_light[node] |= lights
 
-            edge: Edge = self.new_edges[edge_id]
-            to_node: Node = edge.getToNode()
-            outgoing_lanes: List[Lane] = [lane for e in edge.getOutgoing() for lane in e.getLanes()]
+            # maps each succeeding lanelet to the angle (in radians, [-pi, pi]) it forms with the preceding one
+            successors: Dict[Connection, float] = dict()
+            for l in lanelet.successor:
+                succ = self.lanelet_network.find_lanelet_by_id(l)
+                # find resp. connection
+                lane_id = self.lanelet_id2lane_id[succ.lanelet_id]
+                # lane: Lane = self.lanes[lane_id]
+                connection = next(c for c in self._new_connections if c.getViaLaneID() == lane_id)
 
-            for traffic_light in self.lanelet_network.traffic_lights:
-                if traffic_light.traffic_light_id not in lanelet.traffic_lights:
-                    continue
-                # is the traffic light active?
-                if not traffic_light.active:
-                    logging.info(f"Traffic Light: {traffic_light.traffic_light_id} is inactive, skipping conversion")
-                    continue
-                if traffic_light.traffic_light_id in generated:
-                    continue
+                # compute angle
+                from_dir = lanelet.center_vertices[-1] - lanelet.center_vertices[-2]
+                # from_dir /= np.linalg.norm(from_dir)
+                vertices_dir = succ.center_vertices[-1] - succ.center_vertices[-2]
+                # vertices_dir /= np.linalg.norm(vertices_dir)
+                angle = np.arctan2(from_dir[0] * vertices_dir[1] - from_dir[1] * vertices_dir[0],
+                                   from_dir[0] * vertices_dir[0] + from_dir[1] * vertices_dir[1])
+                successors[connection] = angle
 
-                tls_id = str(traffic_light.traffic_light_id)
-                # create a new node for the traffic light
-                # TODO
-                tl_node = Node(
-                    self.node_id_next,
-                    "traffic_light",
-                    # convert TrafficLight position if explicitly given
-                    traffic_light.position if traffic_light.position.size > 0 else edge.getToNode().getCoord3D(),
-                    incLanes=None,
-                    tl=tls_id)
-                self.node_id_next += 1
-                generated[tls_id] = tl_node
+            # Angle ranges for TrafficLightDirections in radians, [-pi, pi]
+            # [-pi, 0) = right, (0, pi] = left
+            direction_ranges: Dict[TrafficLightDirection, Interval] = {
+                TrafficLightDirection.ALL: Interval(-np.pi, np.pi),
+                TrafficLightDirection.RIGHT: Interval(-np.pi, -np.pi / 4),
+                TrafficLightDirection.STRAIGHT_RIGHT: Interval(-np.pi / 4, -np.pi / 8),
+                TrafficLightDirection.STRAIGHT: Interval(-np.pi / 8, np.pi / 8),
+                TrafficLightDirection.LEFT_STRAIGHT: Interval(np.pi / 8, np.pi / 4),
+                TrafficLightDirection.LEFT: Interval(np.pi / 4, np.pi)
+            }
+            for light in lights:
+                try:
+                    if not light.direction or light.direction == TrafficLightDirection.ALL:
+                        connections = set(successors.keys())
+                    else:
+                        connections = {l for l, angle in successors.items()
+                                       if direction_ranges[light.direction].contains(angle)}
+                    node_2_connections[node] |= connections
+                    light_2_connections[light] |= connections
+                except KeyError:
+                    logging.exception(f"Unknown TrafficLightDirection: {light.direction}, "
+                                      f"could not add successors for lanelet {lanelet}")
 
-                if tls_id in self.traffic_light_signals.getPrograms():
-                    logging.warning(
-                        f"TrafficLight: {traffic_light.traffic_light_id} is referenced by multiple lanelets")
-                    continue
+        # generate traffic lights in SUMO format
+        index = 0
+        for to_node, lights in node_2_traffic_light.items():
+            program_id = f"program_{index}"
+            ordered_lights = list(lights)
 
-                # create Traffic Light Signal
-                tls_program = TLSProgram(tls_id, traffic_light.time_offset * self.conf.dt, "0")
-                for cycle in traffic_light.cycle:
-                    state = [traffic_light_states_CR2SUMO[cycle.state]] * len(outgoing_lanes)
-                    dur = int(cycle.duration * self.conf.dt)
-                    tls_program.addPhase(Phase(dur, state))
-                self.traffic_light_signals.addProgram(tls_program)
+            # set to_node to be a traffic_light
+            # tl_node = Node(
+            #     self.node_id_next,
+            #     SumoNodeType.TRAFFIC_LIGHT.value,
+            #     coord=np.mean([tl.position for tl in ordered_lights if tl.position is not None], axis=0),
+            #     incLanes=None,
+            #     # tl=program_id,
+            # )
 
-                for from_lane in edge.getLanes():
-                    for to_lane in outgoing_lanes:
-                        connection = next((c for c in self._new_connections
-                                           if c.getFromLane() == from_lane.getIndex()
-                                           and c.getToLane() == to_lane.getIndex()), None)
-                        if connection is None:
-                            continue
-                        connection._tls = tls_id
-                        connection._tlLink = 0
-                        self.traffic_light_signals.addConnection(connection)
+            # traffic_light_id = str(tl_node.getID())
+            # self.new_nodes[tl_node.getID()] = tl_node
+            # self.node_id_next += 1
+            traffic_light_id = str(to_node.getID())
+            # to_node._tl = program_id
+            to_node.setType(SumoNodeType.TRAFFIC_LIGHT.value)
 
-        # save nodes to global state
-        for node in generated.values():
-            self.new_nodes[node.getID()] = node
+            # create Traffic Light Program
+            time_offset = max(tl.time_offset for tl in lights)
+            tls_program = TLSProgram(traffic_light_id, time_offset * self.conf.dt, program_id)
+            for state in merge_traffic_light_cycles(ordered_lights):
+                sumo_state = [traffic_light_states_CR2SUMO[s.state] for s in state]
+                dur = int(state[0].duration * self.conf.dt)
+                tls_program.addPhase(Phase(dur, sumo_state))
+            self.traffic_light_signals.addProgram(tls_program)
+
+            for i, light in enumerate(ordered_lights):
+                for connection in light_2_connections[light]:
+                    connection._tls = traffic_light_id
+                    connection._tlLink = i
+                    self.traffic_light_signals.addConnection(connection)
+
+            index += 1
 
     def _is_merged_edge(self, edge: Edge):
         """

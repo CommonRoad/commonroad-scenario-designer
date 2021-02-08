@@ -475,3 +475,5 @@ def orthogonal_ccw_vector(start: np.ndarray, end: np.ndarray) -> np.ndarray:
     ccw_direction = np.array([-direction[1], direction[0]])
     ccw_direction /= np.linalg.norm(ccw_direction)
     return ccw_direction
+
+

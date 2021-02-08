@@ -4,7 +4,7 @@ from commonroad.scenario.lanelet import LaneletType
 from commonroad.scenario.traffic_sign import SupportedTrafficSignCountry
 from crmapconverter.sumo_map.sumolib_net.constants import SUMO_VEHICLE_CLASSES
 from typing import Tuple, Dict, Set
-from crmapconverter.sumo_map.sumolib_net import EdgeTypes, EdgeType, SumoVehicles, SumoSignalStates
+from crmapconverter.sumo_map.sumolib_net import EdgeTypes, EdgeType, SumoVehicles, SumoSignalState
 from xml.etree import ElementTree as ET
 import logging
 import os
@@ -30,11 +30,11 @@ import os
 
 # Mapping from CR TrafficLightStates to SUMO Traffic Light states
 traffic_light_states_CR2SUMO = {
-    TrafficLightState.RED: SumoSignalStates.RED,
-    TrafficLightState.YELLOW: SumoSignalStates.YELLOW,
-    TrafficLightState.RED_YELLOW: SumoSignalStates.RED_YELLOW,
-    TrafficLightState.GREEN: SumoSignalStates.GREEN,
-    TrafficLightState.INACTIVE: SumoSignalStates.NO_SIGNAL,
+    TrafficLightState.RED: SumoSignalState.RED,
+    TrafficLightState.YELLOW: SumoSignalState.YELLOW,
+    TrafficLightState.RED_YELLOW: SumoSignalState.RED_YELLOW,
+    TrafficLightState.GREEN: SumoSignalState.GREEN,
+    TrafficLightState.INACTIVE: SumoSignalState.NO_SIGNAL,
 }
 # Mapping from  UMO Traffic Light to CR TrafficLightState states
 traffic_light_states_SUMO2CR = {
