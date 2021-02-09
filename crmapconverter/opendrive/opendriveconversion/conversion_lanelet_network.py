@@ -700,7 +700,7 @@ class ConversionLaneletNetwork(LaneletNetwork):
             # Also check if the successor of a incoming successor intersects with another successor of an incoming
             # TODO: Checking for successor of incoming successor is a very expensive operation due to intersection
             #  calculation. Find workaround.
-            # self.check_lanelet_type_for_successor_of_successor(successor_incoming_lanelet, intersection_map)
+            self.check_lanelet_type_for_successor_of_successor(successor_incoming_lanelet, intersection_map)
 
     def check_lanelet_type_for_successor_of_successor(self, successor_incoming_lanelet, intersection_map):
         """
@@ -710,12 +710,24 @@ class ConversionLaneletNetwork(LaneletNetwork):
         """
         for successor_successor_incoming in successor_incoming_lanelet.successor:
             successor_successor_incoming_lanelet = self.find_lanelet_by_id(successor_successor_incoming)
-            for incoming_lane in intersection_map.keys():
-                for successor in self.find_lanelet_by_id(incoming_lane).successor:
-                    successor_lane = self.find_lanelet_by_id(successor)
-                    if geometry.intersection_polylines(successor_lane.center_vertices,
-                                                       successor_successor_incoming_lanelet.center_vertices):
-                        successor_successor_incoming_lanelet.lanelet_type = "intersection"
+            if self.check_if_lanelet_in_intersection(successor_successor_incoming_lanelet, intersection_map):
+                successor_successor_incoming_lanelet.lanelet_type = "intersection"
+
+    def check_if_lanelet_in_intersection(self, lanelet, intersection_map):
+        """
+        Check if a particular lanelet intersects any of the lanelets that are part of a particular intersection
+        using the shapely intersect method.
+        Return true if any intersection found otherwise return False.
+        """
+        for incoming_lane in intersection_map.keys():
+            for successor in self.find_lanelet_by_id(incoming_lane).successor:
+                if successor != lanelet.lanelet_id:
+                    successor_lane_polygon = self.find_lanelet_by_id(successor).convert_to_polygon()
+                    lanelet_polygon = lanelet.convert_to_polygon()
+                    x = successor_lane_polygon.shapely_object.intersects(lanelet_polygon.shapely_object)
+                    if successor_lane_polygon.shapely_object.intersects(lanelet_polygon.shapely_object):
+                        return True
+        return False
 
     def find_left_of(self, incomings):
         """
