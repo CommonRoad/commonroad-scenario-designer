@@ -716,7 +716,7 @@ class ConversionLaneletNetwork(LaneletNetwork):
     def check_if_lanelet_in_intersection(self, lanelet, intersection_map):
         """
         Check if a particular lanelet intersects any of the lanelets that are part of a particular intersection
-        using the shapely intersect method.
+        using the shapely crosses method.
         Return true if any intersection found otherwise return False.
         """
         for incoming_lane in intersection_map.keys():
@@ -724,8 +724,7 @@ class ConversionLaneletNetwork(LaneletNetwork):
                 if successor != lanelet.lanelet_id:
                     successor_lane_polygon = self.find_lanelet_by_id(successor).convert_to_polygon()
                     lanelet_polygon = lanelet.convert_to_polygon()
-                    x = successor_lane_polygon.shapely_object.intersects(lanelet_polygon.shapely_object)
-                    if successor_lane_polygon.shapely_object.intersects(lanelet_polygon.shapely_object):
+                    if successor_lane_polygon.shapely_object.crosses(lanelet_polygon.shapely_object):
                         return True
         return False
 
