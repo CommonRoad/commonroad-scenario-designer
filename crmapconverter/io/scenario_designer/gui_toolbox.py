@@ -73,23 +73,23 @@ class UpperToolbox(QWidget):
         layout1 = QGridLayout(widget1)
 
         self.button_traffic_signs = QPushButton()
-        self.button_traffic_signs.setText("Traffic sign")
+        self.button_traffic_signs.setText("traffic sign")
         layout1.addWidget(self.button_traffic_signs, 0, 0)
 
         self.button_traffic_signs_settings = QPushButton()
-        self.button_traffic_signs_settings.setText("Settings")
+        self.button_traffic_signs_settings.setText("traffic sign settings")
         layout1.addWidget(self.button_traffic_signs_settings, 0, 1)
 
         self.button_traffic_light = QPushButton()
-        self.button_traffic_light.setText("Traffic light")
+        self.button_traffic_light.setText("traffic light")
         layout1.addWidget(self.button_traffic_light, 1, 0)
 
         self.edit_button_traffic_light = QPushButton()
-        self.edit_button_traffic_light.setText("edit Traffic light")
+        self.edit_button_traffic_light.setText("edit traffic light")
         layout1.addWidget(self.edit_button_traffic_light, 1, 1)
 
         self.delete_traffic_sign = QPushButton()
-        self.delete_traffic_sign.setText("delete Traffic element")
+        self.delete_traffic_sign.setText("delete traffic element")
         layout1.addWidget(self.delete_traffic_sign,2,0)
 
         """add Roundabout button
@@ -122,7 +122,7 @@ class UpperToolbox(QWidget):
         # TODO: add list of more traffic signs
 
         layout1.addItem(self.spacerItem)
-        title1 = "Traffic Signs"
+        title1 = "Traffic Elements"
         self.sections.append((title1, widget1))
 
 
@@ -132,12 +132,12 @@ class UpperToolbox(QWidget):
         layoutlanelets = QGridLayout(widgetlanelets)
 
         self.button_forwards = QPushButton()
-        self.button_forwards.setText("forwards")
+        self.button_forwards.setText("straight")
         self.button_forwards.setIcon(QIcon(":/forwards.PNG"))
         layoutlanelets.addWidget(self.button_forwards, 1, 0)
 
         self.button_lanelet_settings = QPushButton()
-        self.button_lanelet_settings.setText("settings")
+        self.button_lanelet_settings.setText("edit straight")
         layoutlanelets.addWidget(self.button_lanelet_settings, 1, 1)
         self.button_lanelet_settings.setIcon(QIcon(":/gui_src/forwards.PNG"))
 
@@ -147,7 +147,7 @@ class UpperToolbox(QWidget):
         self.button_turn_right.setIcon(QIcon(":/gui_src/forwards.PNG"))
 
         self.button_curve_settings = QPushButton()
-        self.button_curve_settings.setText("settings")
+        self.button_curve_settings.setText("edit curve")
         layoutlanelets.addWidget(self.button_curve_settings, 2, 1)
         self.button_curve_settings.setIcon(QIcon(":/gui_src/forwards.PNG"))
 
@@ -163,25 +163,25 @@ class UpperToolbox(QWidget):
 
         #Fit to Predecessor
         self.button_fit_to_predecessor = QPushButton()
-        self.button_fit_to_predecessor.setText("Fit to Predecessor")
+        self.button_fit_to_predecessor.setText("fit to predecessor")
         layoutlanelets.addWidget(self.button_fit_to_predecessor, 4, 0)
         self.button_fit_to_predecessor.setIcon(QIcon(":/gui_src/forwards.PNG"))
 
         #adjacent
         self.button_adjacent = QPushButton()
-        self.button_adjacent.setText("Create Adjacent\nLanelet")
+        self.button_adjacent.setText("create adjacent\nlanelet")
         layoutlanelets.addWidget(self.button_adjacent, 5, 0)
         self.button_adjacent.setIcon(QIcon(":/gui_src/forwards.PNG"))
 
         # connect lanelets
         self.button_connect_lanelets = QPushButton()
-        self.button_connect_lanelets.setText("Connect two Lanelets")
+        self.button_connect_lanelets.setText("connect two lanelets")
         layoutlanelets.addWidget(self.button_connect_lanelets, 6, 0)
         self.button_connect_lanelets.setIcon(QIcon(":/gui_src/forwards.PNG"))
 
         # remove lanelet
         self.button_remove_lanelet = QPushButton()
-        self.button_remove_lanelet.setText("Remove Lanelet")
+        self.button_remove_lanelet.setText("remove lanelet")
         layoutlanelets.addWidget(self.button_remove_lanelet, 7, 0)
         self.button_remove_lanelet.setIcon(QIcon(":/gui_src/forwards.PNG"))
 
@@ -200,12 +200,12 @@ class UpperToolbox(QWidget):
         layoutintersection = QGridLayout(widgetintersection)
 
         self.button_X = QPushButton()
-        self.button_X.setText("X")
+        self.button_X.setText("X - crossing")
         self.button_X.setIcon(QIcon(":/icons/forwards.PNG"))
         layoutintersection.addWidget(self.button_X, 1, 0)
 
         self.button_T = QPushButton()
-        self.button_T.setText("T")
+        self.button_T.setText("T - crossing")
         layoutintersection.addWidget(self.button_T, 1, 1)
         self.button_T.setIcon(QIcon(":/gui_src/forwards.PNG"))
 
@@ -215,20 +215,12 @@ class UpperToolbox(QWidget):
         # layoutintersection.addWidget(button_T_2, 1, 2)
         # button_T_2.setIcon(QIcon(":/gui_src/forwards.PNG"))
 
-        button_T_3 = QPushButton()
-        button_T_3.setText("T_3")
-        layoutintersection.addWidget(button_T_3, 2, 0)
-        button_T_3.setIcon(QIcon(":/gui_src/forwards.PNG"))
+        self.button_T_3 = QPushButton()
+        self.button_T_3.setText("fit to intersection")
+        layoutintersection.addWidget(self.button_T_3, 2, 0)
+        self.button_T_3.setIcon(QIcon(":/gui_src/forwards.PNG"))
 
-        button_T_4 = QPushButton()
-        button_T_4.setText("T_4")
-        layoutintersection.addWidget(button_T_4, 2, 1)
-        button_T_4.setIcon(QIcon(":/gui_src/forwards.PNG"))
 
-        button_T_5 = QPushButton()
-        button_T_5.setText("show more")
-        layoutintersection.addWidget(button_T_5, 3, 0)
-        button_T_4.setIcon(QIcon(":/gui_src/forwards.PNG"))
 
         titleintersection = "Intersections"
         self.sections.append((titleintersection, widgetintersection))
@@ -428,6 +420,28 @@ class LaneletInformationToolbox(QWidget):
         layout.addRow("Traffic Light Ids", self.traffic_light_ids)
         layout.addWidget(self.refresh_button)
         layout.addWidget(self.edit_button)
+
+    def getLaneletType(self):
+        list = self.type.get_checked_items()
+        strlist = []
+        for i in range(0,len(list)):
+            strlist.append(self.enumlist[list[i]])
+        return strlist
+
+
+    def getOnewayRoadUser(self):
+        list2 = self.roaduser_oneway.get_checked_items()
+        strlist2 = []
+        for i in range(0, len(list2)):
+            strlist2.append(self.roaduser_oneway_list[list2[i]])
+        return strlist2
+
+    def getBidirectionalRoadUser(self):
+        list3 = self.roaduser_bidirectional.get_checked_items()
+        strlist3 = []
+        for i in range(0, len(list3)):
+            strlist3.append(self.roaduser_bidirectional_list[list3[i]])
+        return strlist3
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

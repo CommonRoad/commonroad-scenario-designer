@@ -4,7 +4,7 @@ from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import (QMainWindow, QDockWidget, QMessageBox, QAction,
                              QLabel, QFileDialog, QDesktopWidget, QVBoxLayout,
                              QSlider, QWidget, QApplication, qApp, QLineEdit, QFormLayout, QPushButton, QDialog, QRadioButton, QCheckBox, QComboBox)
-from PyQt5.QtGui import QIcon, QIntValidator
+from PyQt5.QtGui import QIcon, QIntValidator, QStandardItemModel
 from PyQt5.QtCore import Qt
 from commonroad.scenario.lanelet import LaneletType, RoadUser, LineMarking
 
@@ -83,13 +83,27 @@ class CurveSettings(QDialog):
         self.pred = QCheckBox("set predecessor automatically")
         self.pred.stateChanged.connect(self.predecessor_button)
 
-        self.lanelet_type = QComboBox()
-        enumlist = [e.value for e in LaneletType]
-        self.lanelet_type.addItems(enumlist)
+        self.type = CheckableComboBox()
+        self.enumlist = [e.value for e in LaneletType]
+        for i in range(0, len(self.enumlist) - 1):
+            # adding item
+            self.type.addItem(self.enumlist[i])
+            item = self.type.model().item(i, 0)
+            item.setCheckState(Qt.Unchecked)
 
-        self.roaduser = QComboBox()
-        roaduser_list = [r.value for r in RoadUser]
-        self.roaduser.addItems(roaduser_list)
+        self.roaduser_oneway = CheckableComboBox()
+        self.roaduser_oneway_list = [r.value for r in RoadUser]
+        for i in range(0, len(self.roaduser_oneway_list) - 1):
+            self.roaduser_oneway.addItem(self.roaduser_oneway_list[i])
+            item = self.roaduser_oneway.model().item(i, 0)
+            item.setCheckState(Qt.Unchecked)
+
+        self.roaduser_bidirectional = CheckableComboBox()
+        self.roaduser_bidirectional_list = [r.value for r in RoadUser]
+        for i in range(0, len(self.roaduser_bidirectional_list) - 1):
+            self.roaduser_bidirectional.addItem(self.roaduser_bidirectional_list[i])
+            item = self.roaduser_bidirectional.model().item(i, 0)
+            item.setCheckState(Qt.Unchecked)
 
         self.line_marking_right = QComboBox()
         line_marking_right_list = [right.value for right in LineMarking]
@@ -119,8 +133,9 @@ class CurveSettings(QDialog):
         layout.addRow("Y position", self.posY)
         #layout.addWidget(self.adjacentCurve)
         layout.addWidget(self.pred)
-        layout.addRow("Lanelet type", self.lanelet_type)
-        layout.addRow("Roaduser", self.roaduser)
+        layout.addRow("Lanelet type", self.type)
+        layout.addRow("Roaduser oneway", self.roaduser_oneway)
+        layout.addRow("Roaduser bidirectional", self.roaduser_bidirectional)
         layout.addRow("Linemarking right", self.line_marking_right)
         layout.addRow("Linemarking left", self.line_marking_left)
         layout.addWidget(self.apply_button)
@@ -164,10 +179,6 @@ class CurveSettings(QDialog):
         self.right = self.line_marking_right.currentText()
         self.left = self.line_marking_left.currentText()
 
-
-
-        #Left curves: set curve_direction_bool to false
-        #Todo:
         if self.curve_direction.currentText() == "left curve":
             self.curve_direction_bool = True
         else:
@@ -219,12 +230,25 @@ class CurveSettings(QDialog):
         return self.setPredecessor
 
     def getLaneletType(self):
-        #print(self.lanelet_type.currentText())
-        return self.lanelet_type.currentText()
+        list = self.type.get_checked_items()
+        strlist = []
+        for i in range(0, len(list)):
+            strlist.append(self.enumlist[list[i]])
+        return strlist
 
-    def getRoadUser(self):
-        #print(self.roaduser.currentText())
-        return self.roaduser.currentText()
+    def getOnewayRoadUser(self):
+        list2 = self.roaduser_oneway.get_checked_items()
+        strlist2 = []
+        for i in range(0, len(list2)):
+            strlist2.append(self.roaduser_oneway_list[list2[i]])
+        return strlist2
+
+    def getBidirectionalRoadUser(self):
+        list3 = self.roaduser_bidirectional.get_checked_items()
+        strlist3 = []
+        for i in range(0, len(list3)):
+            strlist3.append(self.roaduser_bidirectional_list[list3[i]])
+        return strlist3
 
     def getLineMarkingRight(self):
         return self.line_marking_right.currentText()
@@ -248,3 +272,85 @@ class CurveSettings(QDialog):
             return int(self.posY.text())
         else:
             return 0
+
+class CheckableComboBox(QComboBox):
+    def __init__(self):
+        super(CheckableComboBox, self).__init__()
+        self.view().pressed.connect(self.handle_item_pressed)
+        self.setModel(QStandardItemModel(self))
+
+        # when any item get pressed
+
+    def handle_item_pressed(self, index):
+
+        # getting which item is pressed
+        item = self.model().itemFromIndex(index)
+
+        # make it check if unchecked and vice-versa
+        if item.checkState() == Qt.Checked:
+            item.setCheckState(Qt.Unchecked)
+        else:
+            item.setCheckState(Qt.Checked)
+
+            # calling method
+        self.check_items()
+
+        # method called by check_items
+
+    def item_checked(self, index):
+
+        # getting item at index
+        item = self.model().item(index, 0)
+
+        # return true if checked else false
+        return item.checkState() == Qt.Checked
+
+
+
+    def get_checked_items(self):
+        # blank list
+        checkedItems = []
+
+        # traversing the items
+        for i in range(self.count()):
+
+            # if item is checked add it to the list
+            if self.item_checked(i):
+                checkedItems.append(i)
+
+        return checkedItems
+
+    def check_items(self):
+        # blank list
+        checkedItems = []
+
+        # traversing the items
+        for i in range(self.count()):
+
+            # if item is checked add it to the list
+            if self.item_checked(i):
+                checkedItems.append(i)
+
+                # call this method
+        self.update_labels(checkedItems)
+
+        # method to update the label
+
+    def update_labels(self, item_list):
+
+        n = ''
+        count = 0
+
+        # traversing the list
+        for i in item_list:
+
+            # if count value is 0 don't add comma
+            if count == 0:
+                n += ' % s' % i
+                # else value is greater then 0
+            # add comma
+            else:
+                n += ', % s' % i
+
+                # increment count
+            count += 1

@@ -13,7 +13,7 @@ class TrafficSignsSettings(QDialog):
     def __init__(self):
         super().__init__()
 
-        self.setWindowTitle("Traffic signs settings")
+        self.setWindowTitle("Traffic sign settings")
         self.setGeometry(100, 100, 300, 100)
         self.selected_country = None
 
@@ -56,7 +56,7 @@ class TrafficSignsSelection(QDialog):
         self.setGeometry(100, 100, 500, 300)
 
         self.sign_list = QComboBox()
-        enumlist = [e.value for e in TrafficSignIDGermany]
+        enumlist = [e.name for e in TrafficSignIDGermany]
         self.sign_list.addItems(enumlist)
 
         #self.sign_list.addItem(QIcon(":/101.png"), "TEST")
@@ -101,10 +101,10 @@ class TrafficSignsSelection(QDialog):
 
     def getSignNumber(self):
         name = self.sign_list.currentText()
-        member = TrafficSignIDGermany.name
-        number = member.value
-        print(number)
-        return
+        for e in TrafficSignIDGermany:
+            if e.name == name:
+                print(e.value)
+                return e.value
 
     def getSign(self):
         return self.sign_list.currentText()

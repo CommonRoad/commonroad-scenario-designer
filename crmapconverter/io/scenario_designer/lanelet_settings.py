@@ -213,8 +213,6 @@ class LaneletSettings(QDialog):
         strlist = []
         for i in range(0,len(list)):
             strlist.append(self.enumlist[list[i]])
-
-        print(strlist)
         return strlist
 
 

@@ -151,6 +151,8 @@ class TCrossing(QDialog):
 class FitIntersection(QDialog):
     def __init__(self):
         super().__init__()
+        self.setWindowTitle("fit intersection")
+
         self.predecessor = QLineEdit()
         self.predecessor.setValidator(QIntValidator())
         self.predecessor.setMaxLength(4)
@@ -176,6 +178,28 @@ class FitIntersection(QDialog):
         layout.addRow("Intersection ID", self.intersectionID)
 
         layout.addWidget(self.apply_button)
-        layout.addWidget(self.set_default)
-
         self.setLayout(layout)
+
+    def apply_button_click(self):
+        if self.predecessor.text():
+            self.predecessor_id = int(self.predecessor.text())
+        else:
+            self.predecessor_id = None
+        if self.intersectionID.text():
+            self.intersectionID_id = int(self.intersectionID.text())
+        else:
+            self.intersectionID_id = None
+        if self.successor.text():
+            self.successor_id = int(self.successor.text())
+        else:
+            self.successor_id = None
+        self.close()
+
+    def get_Predecessor_Id(self):
+        return self.predecessor_id
+
+    def get_Successor_Id(self):
+        return self.successor_id
+
+    def get_Intersection_Id(self):
+        return self.intersectionID_id

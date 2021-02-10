@@ -75,7 +75,7 @@ class mapcreator:
         network.add_lanelet(lanelet=lanelet)
         return lanelet
 
-    def edit_straight(self, id, width, length, num_vertices, network, scenario, pred, lanelettype=set(), roaduser_oneway=set(),
+    def edit_straight(self, id, width, length, num_vertices, network, scenario, pred, lanelettype=set(), roaduser_oneway=set(), roaduser_bidirectional=set(),
                         linemarkingleft="no_marking", linemarkingright="no_marking", backwards=False):
         eps = 0.1e-15
         length_div = length / (num_vertices-1)
@@ -96,6 +96,8 @@ class mapcreator:
         lanelet._right_vertices = right_vertices
         lanelet._center_vertices = center_vertices
         lanelet._user_one_way = roaduser_oneway
+        lanelet._user_bidirectional = roaduser_bidirectional
+        lanelet._lanelet_type = lanelettype
         """lanelet = Lanelet(left_vertices=left_vertices, right_vertices=right_vertices, lanelet_id=idl,
                           center_vertices=center_vertices, lanelet_type=lanelettype,
                           user_one_way={RoadUser(roaduser)}, line_marking_right_vertices=LineMarking(linemarkingright),
@@ -103,14 +105,11 @@ class mapcreator:
         if backwards:
             lanelet.translate_rotate(-lanelet.center_vertices[0], np.pi)
 
-        if pred:
-            if self.latestid != None:
-                mapcreator.fit_to_predecessor(self, network.find_lanelet_by_id(self.latestid),lanelet)
         self.latestid = id
         #network.add_lanelet(lanelet=lanelet)
         return lanelet
 
-    def edit_curve(self, id, width, radius, angle, num_vertices, network, scenario, pred, lanelettype="urban", roaduser_oneway="vehicle",
+    def edit_curve(self, id, width, radius, angle, num_vertices, network, scenario, pred, lanelettype=set(), roaduser_oneway="vehicle",
                         linemarkingleft="no_marking", linemarkingright="no_marking"):
         angle_div = angle / (num_vertices - 1)
         radius_left = radius - (width / 2)
@@ -145,7 +144,7 @@ class mapcreator:
 
         return lanelet
 
-    def create_curve(self, width, radius, angle, num_vertices, network, scenario, pred, lanelettype="urban", roaduser="vehicle",
+    def create_curve(self, width, radius, angle, num_vertices, network, scenario, pred, lanelettype=set(), roaduseroneway=set(), roaduserbidirectional=set(),
                         linemarkingleft="no_marking", linemarkingright="no_marking"):
         angle_div = angle / (num_vertices - 1)
         radius_left = radius - (width / 2)
@@ -171,8 +170,9 @@ class mapcreator:
 
         idl = scenario.generate_object_id()
         lanelet = Lanelet(left_vertices=left_vertices, right_vertices=right_vertices, lanelet_id=idl,
-                          center_vertices=center_vertices, lanelet_type={LaneletType(lanelettype), LaneletType("busLane")},
-                          user_one_way={RoadUser(roaduser)}, line_marking_right_vertices=LineMarking(linemarkingright),
+                          center_vertices=center_vertices, lanelet_type=lanelettype,
+                          user_one_way=roaduseroneway, user_bidirectional=roaduserbidirectional,
+                          line_marking_right_vertices=LineMarking(linemarkingright),
                           line_marking_left_vertices=LineMarking(linemarkingleft))
         lanelet.translate_rotate(np.array([0,0]),angle_start)
         lanelet.translate_rotate(-lanelet.center_vertices[0],0)
@@ -262,11 +262,33 @@ class mapcreator:
     def fit_intersection_to_predecessor(self, predecessor, successor, intersection, network, scenario):
         if predecessor and successor and intersection:
             lanelet_ids = []
-            lanelet_ids = lanelet_ids + list(intersection.crossings)
-            for id in intersection.incomings:
-                lanelet = LaneletNetwork.find_lanelet_by_id(network, lanelet_id=id.incoming_id)
+            x = []
+            for i in intersection.incomings:
+                if i._successors_left != None:
+                    left = list(i._successors_left)
+                else:
+                    left = []
+
+                if i._successors_right != None:
+                    right = list(i._successors_right)
+                else:
+                    right = []
+
+                if i._successors_straight != None:
+                    straight = list(i._successors_straight)
+                else:
+                    straight = []
+
+                if i._incoming_lanelets != None:
+                    inc = list(i._incoming_lanelets)
+                else:
+                    inc = []
+                x = x + left + right + straight + inc
+                print(x)
+            for id in x:
+                lanelet = LaneletNetwork.find_lanelet_by_id(network, lanelet_id=id)
                 if lanelet:
-                    lanelet_ids.append(id.incoming_id)
+                    lanelet_ids.append(id)
                     if lanelet.adj_left:
                         lanelet_ids.append(lanelet.adj_left)
                     if lanelet.adj_right:
@@ -614,11 +636,23 @@ class mapcreator:
         self.set_predecessor_successor_relation(lanelet_17, lanelet_15)
         self.set_predecessor_successor_relation(lanelet_16, lanelet_18)
 
-        incomings = {lanelet_1.lanelet_id, lanelet_8.lanelet_id, lanelet_10.lanelet_id, lanelet_16.lanelet_id}
+        incomings = [lanelet_1.lanelet_id, lanelet_8.lanelet_id, lanelet_10.lanelet_id, lanelet_16.lanelet_id]
+        successors_right = [lanelet_6.lanelet_id, lanelet_12.lanelet_id, lanelet_18.lanelet_id, lanelet_20.lanelet_id]
+        successors_straight = [lanelet_3.lanelet_id, lanelet_4.lanelet_id, lanelet_13.lanelet_id, lanelet_14.lanelet_id]
+        successors_left = [lanelet_5.lanelet_id, lanelet_11.lanelet_id, lanelet_17.lanelet_id, lanelet_19.lanelet_id]
         map_incoming = []
+        n = 0
         for i in incomings:
-            map_incoming.append(IntersectionIncomingElement(i, incomings, incomings, incomings, incomings))
-
+            inc = incomings[n]
+            inc = {inc}
+            right = successors_right[n]
+            right = {right}
+            left = successors_left[n]
+            left = {left}
+            straight = successors_straight[n]
+            straight = {straight}
+            map_incoming.append(IntersectionIncomingElement(n, incoming_lanelets=inc, successors_right=right, successors_straight=straight, successors_left=left))
+            n = n+1
         intersection_id = scenario.generate_object_id()
 
 
@@ -656,19 +690,21 @@ class mapcreator:
         self.set_predecessor_successor_relation(lanelet_1, lanelet_12)
         self.set_predecessor_successor_relation(lanelet_11, lanelet_2)
 
-        incomings = {lanelet_1.lanelet_id, lanelet_6.lanelet_id, lanelet_10.lanelet_id}
+        incomings = [lanelet_1.lanelet_id, lanelet_6.lanelet_id, lanelet_10.lanelet_id]
         map_incoming = []
-        for i in incomings:
-            map_incoming.append(IntersectionIncomingElement(i, incomings,
-                                                            successors_right={lanelet_1.lanelet_id,
-                                                                              lanelet_6.lanelet_id},
-                                                            successors_straight={lanelet_6.lanelet_id,
-                                                                                 lanelet_10.lanelet_id},
-                                                            successors_left={lanelet_1.lanelet_id,
-                                                                             lanelet_10.lanelet_id}))
+        successors_right = [lanelet_12.lanelet_id, lanelet_4.lanelet_id]
+        successors_straight = [lanelet_7.lanelet_id, lanelet_8.lanelet_id]
+        successors_left = [lanelet_3.lanelet_id, lanelet_11.lanelet_id]
+        map_incoming = []
 
+        map_incoming.append(IntersectionIncomingElement(0, incoming_lanelets={lanelet_1.lanelet_id}, successors_right={lanelet_12.lanelet_id},
+                                                            successors_straight={lanelet_7.lanelet_id}, successors_left={lanelet_3.lanelet_id}))
+        map_incoming.append(IntersectionIncomingElement(1, incoming_lanelets={lanelet_6.lanelet_id}, successors_right={lanelet_4.lanelet_id},
+                                                        successors_straight={lanelet_8.lanelet_id}, successors_left={lanelet_11.lanelet_id}))
+        map_incoming.append(IntersectionIncomingElement(2, incoming_lanelets={lanelet_10.lanelet_id}))
         intersection_id = scenario.generate_object_id()
 
         intersection = Intersection(intersection_id=intersection_id, incomings=map_incoming)
+        scenario.add_objects([intersection])
 
         return intersection
