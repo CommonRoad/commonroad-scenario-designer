@@ -44,6 +44,8 @@ class Network:
         self._traffic_signs = []
         self._stop_lines = []
         self._country_ID = None
+    # def __eq__(self, other):
+    # return self.__dict__ == other.__dict__
 
     def assign_country_ID(self, value: str):
         """
@@ -52,11 +54,12 @@ class Network:
         value = value.upper()
         if value in iso3166.countries_by_name:
             self._country_ID = iso3166.countries_by_name[value].alpha3
+        elif value in iso3166.countries_by_alpha2:
+            self._country_ID = iso3166.countries_by_alpha2[value].alpha3
+        elif value in iso3166.countries_by_alpha3:
+            self._country_ID = value
         else:
             self._country_ID = "ZAM"
-            return
-    # def __eq__(self, other):
-    # return self.__dict__ == other.__dict__
 
     def load_opendrive(self, opendrive: OpenDrive):
         """Load all elements of an OpenDRIVE network to a parametric lane representation
