@@ -44,7 +44,7 @@ class CountryID(enum.Enum):
     GREECE = 'GRE'
     CROATIA = 'HRV'
     PUERTO_RICO = 'PRI'
-    OPEN_DRIVE = 'ZAM'
+    ZAMUNDA = 'ZAM'
 
 class Network:
     """Represents a network of parametric lanes, with a LinkIndex
@@ -63,6 +63,36 @@ class Network:
         self._stop_lines = []
         self._country_ID = None
 
+    def assign_country_ID(self, value: str):
+        """
+        Assign country ID according to the ISO 3166-1 3 letter standard
+        """
+        if value == 'Germany' or value == 'DEU' or value == 'DE':
+            self._country_ID = {CountryID.GERMANY}
+        elif value == 'USA' or value == 'United States of America' or value == 'US':
+            self._country_ID = {CountryID.UNITED_STATES_OF_AMERICA}
+        elif value == 'China' or value == 'CH' or value == 'CHN':
+            self._country_ID = {CountryID.CHINA}
+        elif value == 'Russia' or value == 'RU' or value == 'RUS':
+            self._country_ID = {CountryID.RUSSIA}
+        elif value == 'Spain' or value == 'ES' or value == 'ESP':
+            self._country_ID = {CountryID.SPAIN}
+        elif value == 'Argentina' or value == 'AR' or value == 'ARG':
+            self._country_ID = {CountryID.ARGENTINA}
+        elif value == 'Belgium' or value == 'BE' or value == 'BEL':
+            self._country_ID = {CountryID.BELGIUM}
+        elif value == 'Belgium' or value == 'BE' or value == 'BEL':
+            self._country_ID = {CountryID.BELGIUM}
+        elif value == 'France' or value == 'FR' or value == 'FRA':
+            self._country_ID = {CountryID.FRANCE}
+        elif value == 'Greece' or value == 'GR' or value == 'GRE':
+            self._country_ID = {CountryID.GREECE}
+        elif value == 'Croatia' or value == 'HR' or value == 'HRV':
+            self._country_ID = {CountryID.CROATIA}
+        elif value == 'Puerto Rico' or value == 'PR' or value == 'PRI':
+            self._country_ID = {CountryID.PUERTO_RICO}
+        elif value == 'OpenDrive' or value == 'OpenDRIVE' or value == 'ZAM':
+            self._country_ID = {CountryID.ZAMUNDA}
 
     # def __eq__(self, other):
     # return self.__dict__ == other.__dict__
@@ -83,8 +113,8 @@ class Network:
         except TypeError:
             self._geo_ref = None
 
-        # Get country ID form signal data in openDrive
-        self._country_ID = OpenDriveConverter.get_country_ID(opendrive.roads)
+        # Get country ID form signal data in openDrive and set it as attribute of the network object
+        self.assign_country_ID(self.get_country_ID_from_OpenDrive(opendrive.roads))
 
         # Convert all parts of a road to parametric lanes (planes)
         for road in opendrive.roads:
@@ -214,6 +244,14 @@ class Network:
 
         return scenario
 
+    def get_country_ID_from_OpenDrive(self, roads):
+        """
+        Get country id of a sepecific lanelet network
+        """
+        for road in roads:
+            for signal in road.signals:
+                return signal.country
+        return "OpenDrive"
 
 class LinkIndex:
     """Overall index of all links in the file, save everything as successors, predecessors can be
