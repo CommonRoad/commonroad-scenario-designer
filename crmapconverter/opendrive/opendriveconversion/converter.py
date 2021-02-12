@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """Module for logic behind converting OpenDrive to ParametricLanes."""
-
+import enum
 from typing import Tuple, List
 from crmapconverter.opendrive.opendriveconversion.plane_elements.plane import ParametricLane, ParametricLaneBorderGroup
 from crmapconverter.opendrive.opendriveconversion.plane_elements.plane_group import ParametricLaneGroup
@@ -250,11 +250,3 @@ class OpenDriveConverter:
 
         return inner_neighbour_id, outer_neighbour_id, inner_neighbour_same_dir
 
-    def get_country_ID(roads):
-        """
-        Returns the first Country code of the road it finds in the openDrive traffic signal element
-        see ISO 3166-1, alpha-2 codes for country code standards.
-        """
-        for road in roads:
-            for signal in road.signals:
-                return signal.country

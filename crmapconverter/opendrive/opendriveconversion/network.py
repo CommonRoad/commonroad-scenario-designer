@@ -4,6 +4,7 @@
 """Module to contain Network which can load an opendrive object and then export
 to lanelets. Iternally, the road network is represented by ParametricLanes."""
 import copy
+import enum
 import warnings
 
 import numpy as np
@@ -28,6 +29,23 @@ __email__ = "commonroad-i06@in.tum.de"
 __status__ = "Released"
 
 
+class CountryID(enum.Enum):
+    """
+    Enum describing different country code as per ISO 3166-1, alpha-2 codes.
+    """
+    GERMANY = 'DEU'
+    UNITED_STATES_OF_AMERICA = 'USA'
+    CHINA = 'CNN'
+    RUSSIA = 'RUS'
+    SPAIN = 'ESP'
+    ARGENTINA = 'ARG'
+    BELGIUM = 'BEL'
+    FRANCE = 'FRA'
+    GREECE = 'GRE'
+    CROATIA = 'HRV'
+    PUERTO_RICO = 'PRI'
+    OPEN_DRIVE = 'ZAM'
+
 class Network:
     """Represents a network of parametric lanes, with a LinkIndex
     which stores the neighbor relations between the parametric lanes.
@@ -45,7 +63,6 @@ class Network:
         self._stop_lines = []
         self._country_ID = None
 
-#        self.traffic_signal_elements = None
 
     # def __eq__(self, other):
     # return self.__dict__ == other.__dict__
