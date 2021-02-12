@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """module to capture traffic signal information from parsed opendrive file"""
-
+import iso3166
 import numpy as np
 import warnings
 import enum
@@ -51,7 +51,10 @@ def get_traffic_signals(road: Road):
                 additional_values = []
             else:
                 additional_values = [signal.value]
-            if signal.country == 'DEU':
+
+            signal_country = get_signal_country(signal.country)
+
+            if signal_country == 'DEU':
                 if signal.type == "1000003" or signal.type == "1000004":
                     continue  # stop line
                     # Stop lines have a signal type of 294 and are handled differently in the commonroad format
@@ -65,13 +68,13 @@ def get_traffic_signals(road: Road):
                     continue
 
                 element_id = extract_traffic_element_id(signal.type, str(signal.subtype), TrafficSignIDGermany)
-            elif signal.country == 'USA':
+            elif signal_country == 'USA':
                 element_id = extract_traffic_element_id(signal.type, str(signal.subtype), TrafficSignIDUsa)
-            elif signal.country == 'CHN':
+            elif signal_country == 'CHN':
                 element_id = extract_traffic_element_id(signal.type, str(signal.subtype), TrafficSignIDChina)
-            elif signal.country == 'ESP':
+            elif signal_country == 'ESP':
                 element_id = extract_traffic_element_id(signal.type, str(signal.subtype), TrafficSignIDSpain)
-            elif signal.country == 'RUS':
+            elif signal_country == 'RUS':
                 element_id = extract_traffic_element_id(signal.type, str(signal.subtype), TrafficSignIDRussia)
             else:
                 if signal.type == "1000003" or signal.type == "1000004":
@@ -120,6 +123,20 @@ def get_traffic_signals(road: Road):
 
     return traffic_lights, traffic_signs, stop_lines
 
+
+def get_signal_country(signal_country: str):
+    """
+    Ise iso3166 standard to find 3 letter country id
+    """
+    signal_country = signal_country.upper()
+    if signal_country in iso3166.countries_by_name:
+        return iso3166.countries_by_name[signal_country].alpha3
+    elif signal_country in iso3166.countries_by_alpha2:
+        return iso3166.countries_by_alpha2[signal_country].alpha3
+    elif signal_country in iso3166.countries_by_alpha3:
+        return signal_country
+    else:
+        return "ZAM"
 
 def calculate_stop_line_position(lane_sections, signal, position, tangent):
     """
