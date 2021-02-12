@@ -5,8 +5,7 @@
 to lanelets. Iternally, the road network is represented by ParametricLanes."""
 import copy
 import enum
-import warnings
-
+import iso3166
 import numpy as np
 import inspect
 from commonroad.scenario.scenario import Scenario, GeoTransformation, Location, ScenarioID
@@ -29,23 +28,6 @@ __email__ = "commonroad-i06@in.tum.de"
 __status__ = "Released"
 
 
-class CountryID(enum.Enum):
-    """
-    Enum describing different country code as per ISO 3166-1, alpha-2 codes.
-    """
-    GERMANY = 'DEU'
-    UNITED_STATES_OF_AMERICA = 'USA'
-    CHINA = 'CNN'
-    RUSSIA = 'RUS'
-    SPAIN = 'ESP'
-    ARGENTINA = 'ARG'
-    BELGIUM = 'BEL'
-    FRANCE = 'FRA'
-    GREECE = 'GRE'
-    CROATIA = 'HRV'
-    PUERTO_RICO = 'PRI'
-    ZAMUNDA = 'ZAM'
-
 class Network:
     """Represents a network of parametric lanes, with a LinkIndex
     which stores the neighbor relations between the parametric lanes.
@@ -67,33 +49,12 @@ class Network:
         """
         Assign country ID according to the ISO 3166-1 3 letter standard
         """
-        if value == 'Germany' or value == 'DEU' or value == 'DE':
-            self._country_ID = {CountryID.GERMANY}
-        elif value == 'USA' or value == 'United States of America' or value == 'US':
-            self._country_ID = {CountryID.UNITED_STATES_OF_AMERICA}
-        elif value == 'China' or value == 'CH' or value == 'CHN':
-            self._country_ID = {CountryID.CHINA}
-        elif value == 'Russia' or value == 'RU' or value == 'RUS':
-            self._country_ID = {CountryID.RUSSIA}
-        elif value == 'Spain' or value == 'ES' or value == 'ESP':
-            self._country_ID = {CountryID.SPAIN}
-        elif value == 'Argentina' or value == 'AR' or value == 'ARG':
-            self._country_ID = {CountryID.ARGENTINA}
-        elif value == 'Belgium' or value == 'BE' or value == 'BEL':
-            self._country_ID = {CountryID.BELGIUM}
-        elif value == 'Belgium' or value == 'BE' or value == 'BEL':
-            self._country_ID = {CountryID.BELGIUM}
-        elif value == 'France' or value == 'FR' or value == 'FRA':
-            self._country_ID = {CountryID.FRANCE}
-        elif value == 'Greece' or value == 'GR' or value == 'GRE':
-            self._country_ID = {CountryID.GREECE}
-        elif value == 'Croatia' or value == 'HR' or value == 'HRV':
-            self._country_ID = {CountryID.CROATIA}
-        elif value == 'Puerto Rico' or value == 'PR' or value == 'PRI':
-            self._country_ID = {CountryID.PUERTO_RICO}
-        elif value == 'OpenDrive' or value == 'OpenDRIVE' or value == 'ZAM':
-            self._country_ID = {CountryID.ZAMUNDA}
-
+        value = value.upper()
+        if value in iso3166.countries_by_name:
+            self._country_ID = iso3166.countries_by_name[value].alpha3
+        else:
+            self._country_ID = "ZAM"
+            return
     # def __eq__(self, other):
     # return self.__dict__ == other.__dict__
 
