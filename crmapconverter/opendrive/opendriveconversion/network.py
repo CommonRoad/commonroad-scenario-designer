@@ -43,6 +43,7 @@ class Network:
         self._traffic_lights = []
         self._traffic_signs = []
         self._stop_lines = []
+        self._country_ID = None
 
 #        self.traffic_signal_elements = None
 
@@ -64,6 +65,9 @@ class Network:
             self._geo_ref = opendrive.header.geo_reference
         except TypeError:
             self._geo_ref = None
+
+        # Get country ID form signal data in openDrive
+        self._country_ID = OpenDriveConverter.get_country_ID(opendrive.roads)
 
         # Convert all parts of a road to parametric lanes (planes)
         for road in opendrive.roads:
