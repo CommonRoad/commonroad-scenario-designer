@@ -5,6 +5,8 @@ from ordered_set import OrderedSet
 from commonocean_io.src.scenario.scenario import Scenario
 import commonocean_io.src.scenario.obstacle as Obstacle
 from commonroad.geometry.shape import Circle
+import utm
+import commonocean_io.src.scenario.traffic_sign as tS
 
 def convert_seamap(filename):
     """
@@ -25,7 +27,11 @@ def convert_seamap(filename):
 
     scenario = Scenario(1.0,2) #TODO:adjust timestep,id
     id = 0
-    for buoy in buoys: #TODO: adjust position
-        c = Circle(1)
-        #scenario.add_objects(Obstacle.StaticObstacle(id, Obstacle.ObstacleType.BUOY,c, Obstacle.State(position=c,orientation=0)))
+    for buoy in buoys:
+        lat = float(buoy.get('lat'))
+        lon = float(buoy.get('lon'))
+        coordinates = utm.from_latlon(lat,lon)
+        type = tS.TrafficSignElementID('101')
+        element = tS.TrafficSignElement(type,[])
+        sign = tS.TrafficSign(id,element,coordinates)
         id += 1
