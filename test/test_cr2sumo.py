@@ -156,8 +156,8 @@ class BaseClass(unittest.TestCase):
     ("ZAM_Zip-1_54_T-1", []),
     ("ZAM_MergingTrafficSign-1_1_T-1", []),
     ("ZAM_MergingTrafficSign-1_2_T-1", []),
-    ("traffic_light_test", []),
-    ("traffic_light_test_2", [])
+    ("ZAM_TrafficLightTest-1_1-T-1", []),
+    ("ZAM_TrafficLightTest-1_2-T-1", [])
 ])
 @pytest.mark.parallel
 def test_parameterized_sumo_run(capfd, cr_file_name: str, tls: List[int]):

@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <commonRoad timeStepSize="0.1" commonRoadVersion="2020a" author="" affiliation="" source="OpenDRIVE 2 Lanelet Converter"
-            benchmarkID="ZAM_MergingTrafficSign-1_1_T-1" date="2020-07-26">
+            benchmarkID="ZAM_MergingTrafficSign-1_2_T-1" date="2020-07-26">
     <location>
         <geoNameId>-999</geoNameId>
         <gpsLatitude>999.0</gpsLatitude>
