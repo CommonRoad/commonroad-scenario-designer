@@ -15,6 +15,27 @@
 # @version $Id$
 
 from xml.etree import cElementTree as ET
+import numpy as np
+from typing import Optional
+
+
+def _to_shape_string(shape: np.ndarray) -> str:
+    """
+    Convert a collection of points from format shape to string
+    :param shape:
+    :return: the same shape but in string format
+    """
+    return " ".join([",".join([str(p) for p in v]) for v in shape])
+
+
+def _from_shape_string(shape: str) -> np.ndarray:
+    """
+    Convert a shape string to a ndarray
+    :param shape:
+    :return:
+    """
+    return np.asarray([[float(c) for c in coords.split(",")] for coords in shape.split(" ")],
+                      dtype=float)
 
 
 class Connection:
@@ -26,17 +47,18 @@ class Connection:
     LINKDIR_PARTLEFT = "L"
     LINKDIR_PARTRIGHT = "R"
     """edge connection for a sumo network"""
+
     def __init__(self,
                  fromEdge,
                  toEdge,
                  fromLane,
                  toLane,
-                 direction = None,
-                 tls = None,
-                 tllink = None,
-                 state = None,
+                 direction=None,
+                 tls=None,
+                 tllink=None,
+                 state=None,
                  viaLaneID=None,
-                 shape=None,
+                 shape: Optional[np.ndarray] = None,
                  keepClear=None,
                  contPos=None):
         self._from = fromEdge
@@ -91,7 +113,7 @@ class Connection:
     def getShape(self):
         return self._shape
 
-    def toXML(self):
+    def toXML(self) -> bytes:
         """
         Converts this connection to it's xml representation
         """
@@ -100,21 +122,21 @@ class Connection:
         c.set("to", str(self._to))
         c.set("fromLane", str(self._fromLane))
         c.set("toLane", str(self._toLane))
-        if self._via:
+        if self._via is not None:
             c.set("via", str(self._via))
-        if self._direction:
+        if self._direction is not None:
             c.set("dir", str(self._direction))
-        if self._tls:
+        if self._tls is not None:
             c.set("tl", str(self._tls))
-        if self._tlLink:
+        if self._tlLink is not None:
             c.set("linkIndex", str(self._tlLink))
-        if self._state:
+        if self._state is not None:
             c.set("state", str(self._state))
-        if self._shape:
-            c.set("shape", str(self._shape))
-        if self._keepClear:
-            c.set("keepClear", str(self._keepClear))
-        if self._contPos:
+        if self._shape is not None:
+            c.set("shape", _to_shape_string(self._shape))
+        if self._keepClear is not None:
+            c.set("keepClear", "true" if self._keepClear else "false")
+        if self._contPos is not None:
             c.set("contPos", str(self._contPos))
 
         return ET.tostring(c)
