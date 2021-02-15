@@ -1,5 +1,6 @@
 from typing import Set, List, Dict, Tuple
 from commonroad.scenario.traffic_sign import TrafficLight, TrafficLightCycleElement, TrafficLightState
+import math
 import numpy as np
 from .mapping import traffic_light_states_CR2SUMO
 from crmapconverter.sumo_map.sumolib_net import TLSProgram, Connection, SumoNodeType, SumoSignalState, Node, Phase, TLS
@@ -67,7 +68,7 @@ class TrafficLightEncoder:
 
         # encode states
         for state, sumo_state in zip(light_states, sumo_states):
-            dur = round(state[0].duration * self.conf.dt)
+            dur = state[0].duration * self.conf.dt
             assert dur > 0 and type(dur) == int
             tls_program.addPhase(Phase(dur, sumo_state))
 

@@ -38,7 +38,7 @@ class SumoSignalState(Enum):
 
 class Phase:
     def __init__(self,
-                 duration: int,
+                 duration: float,
                  state: List[SumoSignalState],
                  min_dur: int = None,
                  max_dur: int = None,
