@@ -69,7 +69,7 @@ class TrafficLightEncoder:
         # encode states
         for state, sumo_state in zip(light_states, sumo_states):
             dur = state[0].duration * self.conf.dt
-            assert dur > 0 and type(dur) == int
+            assert dur > 0
             tls_program.addPhase(Phase(dur, sumo_state))
 
         for i, connection in enumerate(connections):
