@@ -125,6 +125,9 @@ class TLSProgram:
             tl.append(ET.fromstring(phase.to_xml()))
         return ET.tostring(tl)
 
+    # def update_state(self, old_idx: int, new_idx: int, new_state: SumoSignalState):
+    #
+
     def __str__(self):
         return str(self.toXML())
 

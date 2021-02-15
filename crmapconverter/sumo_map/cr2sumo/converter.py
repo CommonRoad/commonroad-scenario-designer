@@ -40,7 +40,7 @@ from commonroad.scenario.lanelet import LaneletNetwork, Lanelet
 from commonroad.scenario.obstacle import ObstacleRole, ObstacleType
 from commonroad.scenario.scenario import Scenario
 from commonroad.scenario.traffic_sign import SupportedTrafficSignCountry, TrafficLight, \
-    TrafficLightCycleElement, TrafficLightDirection, TrafficSign
+    TrafficLightCycleElement, TrafficLightDirection, TrafficSign, TrafficLightState
 from commonroad.scenario.traffic_sign_interpreter import TrafficSigInterpreter
 
 from sumocr.maps.scenario_wrapper import AbstractScenarioWrapper
@@ -54,14 +54,14 @@ from crmapconverter.sumo_map.util import (_find_intersecting_edges,
                                           merge_lanelets, min_cluster,
                                           remove_unreferenced_traffic_lights,
                                           write_ego_ids_to_rou_file, intersect_lanelets_line, orthogonal_ccw_vector,
-                                          update_edge_lengths)
+                                          update_edge_lengths, lines_intersect)
 
 from crmapconverter.sumo_map.config import SumoConfig
 from .mapping import (get_sumo_edge_type, traffic_light_states_CR2SUMO,
                       traffic_light_states_SUMO2CR, VEHICLE_TYPE_CR2SUMO, VEHICLE_NODE_TYPE_CR2SUMO, DEFAULT_CFG_FILE,
                       TEMPLATES_DIR, lanelet_type_CR2SUMO, get_edge_types_from_template)
 from .traffic_sign import TrafficSignEncoder
-from .traffic_light import merge_traffic_light_cycles
+from .traffic_light import TrafficLightEncoder
 
 
 # This file is used as a template for the generated .sumo.cfg files
@@ -738,8 +738,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                     fromLane=int(from_lane.split("_")[-1]),
                     toLane=int(path[-1].split("_")[-1]),
                     viaLaneID=via,
-                    shape=self._getShapeString(shape)
-                    if shape is not None else None,
+                    shape=shape,
                     keepClear=True,
                     contPos=self.conf.wait_pos_internal_junctions)
                 self._new_connections.append(connection)
@@ -844,10 +843,6 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                                       c.getFromLane() == from_lane.getIndex() and
                                       c.getToLane() == succ_lane.getIndex())
                                   )
-                # try:
-                # except StopIteration:
-                #     continue
-
                 # compute angle
                 from_dir = lanelet.center_vertices[-1] - lanelet.center_vertices[-2]
                 # from_dir /= np.linalg.norm(from_dir)
@@ -881,31 +876,12 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                                       f"could not add successors for lanelet {lanelet}")
 
         # generate traffic lights in SUMO format
-        index = 0
+        encoder = TrafficLightEncoder(self.conf)
         for to_node, lights in node_2_traffic_light.items():
-            program_id = f"tl_program_{index}"
-            ordered_lights = list(lights)
-
-            traffic_light_id = str(to_node.getID())
-            to_node.setType(SumoNodeType.TRAFFIC_LIGHT.value)
-
-            # create Traffic Light Program
-            time_offset = max(tl.time_offset for tl in lights)
-            tls_program = TLSProgram(traffic_light_id, time_offset * self.conf.dt, program_id)
-            for state in merge_traffic_light_cycles(ordered_lights):
-                sumo_state = [traffic_light_states_CR2SUMO[s.state] for s in state]
-                dur = int(np.ceil(state[0].duration * self.conf.dt))
-                assert dur > 0
-                tls_program.addPhase(Phase(dur, sumo_state))
-            self.traffic_light_signals.addProgram(tls_program)
-
-            for i, light in enumerate(ordered_lights):
-                for connection in light_2_connections[light]:
-                    connection._tls = traffic_light_id
-                    connection._tlLink = i
-                    self.traffic_light_signals.addConnection(connection)
-
-            index += 1
+            program, connections = encoder.encode(to_node, list(lights), light_2_connections)
+            self.traffic_light_signals.addProgram(program)
+            for connection in connections:
+                self.traffic_light_signals.addConnection(connection)
 
     def _is_merged_edge(self, edge: Edge):
         """
@@ -963,20 +939,6 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         average_x = np.sum(list_x) / len(list_x)
         average_y = np.sum(list_y) / len(list_y)
         return average_x, average_y
-
-    def _getShapeString(self, shape):
-        """
-        Convert a collection of points from format shape  to string
-        :param shape: a collection of point defining and edge
-        :return: the same shape but in string format
-        """
-        shapeString = ""
-        for point in shape:
-            pointx = point[0]
-            pointy = point[1]
-            pointString = str(pointx) + "," + str(pointy)
-            shapeString += pointString + " "
-        return shapeString
 
     def auto_generate_traffic_light_system(self,
                                            lanelet_id: int,
