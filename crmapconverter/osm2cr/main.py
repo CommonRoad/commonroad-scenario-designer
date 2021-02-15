@@ -18,9 +18,7 @@ from crmapconverter.osm2cr.converter_modules.osm_operations.downloader import (
 )
 from crmapconverter.io.scenario_designer.osm_gui_modules.gui_embedding import MainApp
 
-import xml.etree.ElementTree as ElTree
-from ordered_set import OrderedSet
-from commonocean_io.src.scenario.scenario import Scenario
+from crmapconverter.osm2cr.ocean import convert_seamap
 
 matplotlib.use("Qt5Agg")
 
@@ -56,18 +54,6 @@ def convert(filename_open, filename_store=None):
     # file_writer = CommonRoadFileWriter(scenario, problemset, author, affiliation, source, tags)
     file_writer.write_scenario_to_file(file_path, OverwriteExistingFile.ALWAYS)
 
-
-def convert_seamap(filename):
-    tree = ElTree.parse(filename)
-    root = tree.getroot()
-    nodes = root.iter('node')
-    buoys =  OrderedSet()
-    for node in nodes:
-        for tag in node.iter('tag'):
-            if str.find(tag.attrib['k'], 'seamark:buoy'):
-                    buoys.add(node)
-            break
-    scenario = Scenario(1.0,2) #TODO:adjust timestep
 
 def download_and_convert():
     """
