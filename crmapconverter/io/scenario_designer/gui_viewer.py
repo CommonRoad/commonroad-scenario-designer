@@ -29,7 +29,9 @@ from commonroad.scenario.lanelet import Lanelet, is_natural_number
 from commonroad.visualization.draw_dispatch_cr import draw_object
 from commonroad.geometry.shape import Circle
 
-from crmapconverter.sumo_map.config import SumoConfig
+from crmapconverter.io.scenario_designer.sumo_gui_modules.gui_sumo_simulation import SUMO_AVAILABLE
+if SUMO_AVAILABLE:
+    from crmapconverter.sumo_map.config import SumoConfig
 from crmapconverter.io.scenario_designer.util import Observable
 
 __author__ = "Benjamin Orthen, Stefan Urban, Max Winklhofer, Guyue Huang, Max Fruehauf"
@@ -321,6 +323,7 @@ class LaneletList(ScenarioElementList):
             description = ", ".join([t.value for t in lanelet.lanelet_type])
             lanelet_data.append((lanelet.lanelet_id, description))
         super()._update(sorted(lanelet_data))
+        #self.lanelet_data = sorted(lanelet_data)
 
 
 class Viewer:
@@ -329,6 +332,7 @@ class Viewer:
         self.current_scenario = None
         self.dynamic = DynamicCanvas(parent, width=5, height=10, dpi=100)
         self.dynamic.mpl_connect('button_press_event', self.select_lanelets)
+        self.selected_lanelet_use = None
 
     def open_scenario(self, scenario):
         """ """
@@ -586,6 +590,7 @@ class Viewer:
         Selecet lanelets by clicking on the canvas. Selects only one of the 
         lanelets that contains the click position.
         """
+        self.selected_lanelet_use = None
         mouse_pos = np.array(
             [mouse_clicked_event.xdata, mouse_clicked_event.ydata])
         click_shape = Circle(radius=0.01, center=mouse_pos)
@@ -599,6 +604,9 @@ class Viewer:
             self.update_plot(sel_lanelet=selected_lanelets[0])
         else:
             self.update_plot(sel_lanelet=None)
+        self.selected_lanelet_use = selected_lanelets
+
+        return selected_lanelets
 
 
 class AnimatedViewer(Viewer):
@@ -616,7 +624,7 @@ class AnimatedViewer(Viewer):
         # if playing or not
         self.playing = False
 
-    def open_scenario(self, scenario, config: Observable):
+    def open_scenario(self, scenario, config: Observable = None):
         """[summary]
 
         :param scenario: [description]
@@ -627,14 +635,14 @@ class AnimatedViewer(Viewer):
         self.current_scenario = scenario
 
         # if we have not subscribed already, subscribe now
-        if not self._config:
-            def set_config(config):
-                self._config = config
-                self._calc_max_timestep()
+        if config is not None:
+            if  not self._config:
+                def set_config(config):
+                    self._config = config
+                    self._calc_max_timestep()
+                config.subscribe(set_config)
+            self._config = config.value
 
-            config.subscribe(set_config)
-
-        self._config = config.value
         self._calc_max_timestep()
         if self.animation:
             self.timestep.value = 0

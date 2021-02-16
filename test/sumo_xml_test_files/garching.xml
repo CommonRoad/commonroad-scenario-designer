@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<commonRoad timeStepSize="0.1" commonRoadVersion="2020a" author="Automated converter by Maximilian Rieger" affiliation="Technical University of Munich, Germany" source="OpenStreetMaps (OSM)" benchmarkID="DEU_test" date="2020-09-26">
+<commonRoad timeStepSize="0.1" commonRoadVersion="2020a" author="Automated converter by Maximilian Rieger" affiliation="Technical University of Munich, Germany" source="OpenStreetMaps (OSM)" benchmarkID="DEU_garching-1_1" date="2020-09-26">
   <location>
     <geoNameId>-999</geoNameId>
     <gpsLatitude>123.45</gpsLatitude>

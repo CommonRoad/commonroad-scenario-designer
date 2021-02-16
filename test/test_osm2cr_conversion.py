@@ -39,11 +39,13 @@ class TestOSM2CRScenarioBaseClass(unittest.TestCase):
             self.xml_output_name = self.osm_file_name
 
         self.cwd_path = os.path.dirname(os.path.abspath(__file__))
-        self.out_path = self.cwd_path + "/.pytest_cache"
+        self.out_path = self.cwd_path + "/.pytest_cache/"
 
         path = os.path.dirname(os.path.realpath(
             __file__)) + f"/osm_xml_test_files/{self.osm_file_name}.osm"
 
+        assert self.out_path is not None
+        assert self.osm_file_name is not None
         self.converted_path = os.path.join(
             self.out_path, self.osm_file_name + "_converted_scenario.xml")
 
@@ -134,7 +136,7 @@ class TestOSM2CRScenarioBaseClass(unittest.TestCase):
             scenario=self.commonRoad_scenario,
             planning_problem_set=self.commonRoad_planning_problem)
         fw.write_to_file(
-            filename=self.converted_path+"_written",
+            filename=self.out_path+self.osm_file_name+"_written.xml",
             overwrite_existing_file=OverwriteExistingFile.ALWAYS,
             check_validity=True)
 
@@ -157,7 +159,7 @@ class TestHaimhausen(TestOSM2CRScenarioBaseClass):
 # class TestMunich(TestOSM2CRScenarioBaseClass):
 #     """Testing if a larger intersection with many lanes, traffic lights and signs
 #     can be converted on default settings"""
-
+#
 #     __test__ = True
 #     osm_file_name = "munich"
 

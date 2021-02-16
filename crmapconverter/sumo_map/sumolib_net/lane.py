@@ -17,52 +17,7 @@
 from xml.etree import cElementTree as ET
 import sumolib.geomhelper
 
-# taken from sumo/src/utils/common/SUMOVehicleClass.cpp
-SUMO_VEHICLE_CLASSES = (
-    # "public_emergency",  # deprecated
-    # "public_authority",  # deprecated
-    # "public_army",       # deprecated
-    # "public_transport",  # deprecated
-    # "transport",         # deprecated
-    # "lightrail",         # deprecated
-    # "cityrail",          # deprecated
-    # "rail_slow",         # deprecated
-    # "rail_fast",         # deprecated
-    "private",
-    "emergency",
-    "authority",
-    "army",
-    "vip",
-    "passenger",
-    "hov",
-    "taxi",
-    "bus",
-    "coach",
-    "delivery",
-    "truck",
-    "trailer",
-    "tram",
-    "rail_urban",
-    "rail",
-    "rail_electric",
-    "motorcycle",
-    "moped",
-    "bicycle",
-    "pedestrian",
-    "evehicle",
-    "ship",
-    "custom1",
-    "custom2")
-
-
-def get_allowed(allow, disallow):
-    """ Normalize the given string attributes as a list of all allowed vClasses."""
-    if not allow and not disallow:
-        return SUMO_VEHICLE_CLASSES
-    elif not disallow:
-        return allow
-    else:
-        return tuple([c for c in SUMO_VEHICLE_CLASSES if c not in disallow])
+from .constants import SUMO_VEHICLE_CLASSES
 
 
 def addJunctionPos(shape, fromPos, toPos):
@@ -78,6 +33,7 @@ def addJunctionPos(shape, fromPos, toPos):
 
 class Lane:
     """ Lanes from a sumo network """
+
     def __init__(self,
                  edge,
                  speed: float,
@@ -97,9 +53,25 @@ class Lane:
         self._outgoing = []
         self._adjacent_opposite = None  # added by Lisa
         self._params = {}
-        self._allowed = allow
+        self._allowed = []
         self._disallowed = []
+        if allow and disallow:
+            self._allowed = allow
+            self._disallowed = disallow
+        elif allow:
+            self._disallowed = list(set(SUMO_VEHICLE_CLASSES) - set(allow))
+        elif disallow:
+            self._allowed = list(set(SUMO_VEHICLE_CLASSES) - set(disallow))
+
         edge.addLane(self)
+
+    @property
+    def speed(self) -> float:
+        return self._speed
+
+    @speed.setter
+    def speed(self, speed: float):
+        self._speed = speed
 
     def getSpeed(self):
         return self._speed
@@ -122,12 +94,12 @@ class Lane:
         shape must be a list containing x,y,z coords as numbers
         to represent the shape of the lane
         """
-        #for pp in shape:
+        # for pp in shape:
         #    if len(pp) != 3:
         #        raise ValueError('shape point must consist of x,y,z')
 
-        #self._shape3D = shape
-        #self._shape = [(x, y) for x, y, z in shape]
+        # self._shape3D = shape
+        # self._shape = [(x, y) for x, y, z in shape]
         self._shape = shape
 
     def getShape(self, includeJunctions=False):
@@ -232,11 +204,14 @@ class Lane:
         """
         lane = ET.Element("lane")
         lane.set("index", str(self.getIndex()))
-        lane.set("speed", str(self._speed))
-        lane.set("length", str(self._length))
-        lane.set("shape", _to_shape_string(self._shape))
-        lane.set("shape", _to_shape_string(self._shape))
-        lane.set("width", str(self._width))
+        if self.speed:
+            lane.set("speed", str(self._speed))
+        if self._length:
+            lane.set("length", str(self._length))
+        if len(self._shape) > 0:
+            lane.set("shape", _to_shape_string(self._shape))
+        if self._width:
+            lane.set("width", str(self._width))
         if self._allowed:
             lane.set("allow", " ".join(self._allowed))
         if self._disallowed:

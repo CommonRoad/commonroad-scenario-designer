@@ -1,13 +1,13 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<commonRoad timeStepSize="0.1" commonRoadVersion="2020a" author="" affiliation="" source="OpenDRIVE 2 Lanelet Converter" benchmarkID="ZAM_OpenDrive-123" date="2020-07-21">
+<commonRoad timeStepSize="0.1" commonRoadVersion="2020a" author="" affiliation="" source="OpenDRIVE 2 Lanelet Converter" benchmarkID="ZAM_OpenDrive-123" date="2020-12-19">
   <location>
     <geoNameId>-999</geoNameId>
     <gpsLatitude>999</gpsLatitude>
     <gpsLongitude>999</gpsLongitude>
   </location>
   <scenarioTags>
-    <urban/>
     <highway/>
+    <urban/>
   </scenarioTags>
   <lanelet id="100">
     <leftBound>
@@ -147,6 +147,7 @@
         <x>-7.0710678</x>
         <y>-7.0710684</y>
       </point>
+      <lineMarking>no_marking</lineMarking>
     </leftBound>
     <rightBound>
       <point>
@@ -4681,6 +4682,7 @@
         <x>-7.0710684</x>
         <y>7.0710678</y>
       </point>
+      <lineMarking>no_marking</lineMarking>
     </leftBound>
     <rightBound>
       <point>
@@ -9220,6 +9222,7 @@
         <x>7.0710684</x>
         <y>-7.0710678</y>
       </point>
+      <lineMarking>no_marking</lineMarking>
     </leftBound>
     <rightBound>
       <point>
@@ -13754,6 +13757,7 @@
         <x>7.0710678</x>
         <y>7.0710684</y>
       </point>
+      <lineMarking>no_marking</lineMarking>
     </leftBound>
     <rightBound>
       <point>
@@ -18295,6 +18299,7 @@
         <x>7.0710678</x>
         <y>7.0710684</y>
       </point>
+      <lineMarking>no_marking</lineMarking>
     </leftBound>
     <rightBound>
       <point>
@@ -22829,6 +22834,7 @@
         <x>7.0710684</x>
         <y>-7.0710678</y>
       </point>
+      <lineMarking>no_marking</lineMarking>
     </leftBound>
     <rightBound>
       <point>
@@ -31620,6 +31626,7 @@
         <x>-7.0710678</x>
         <y>-7.0710684</y>
       </point>
+      <lineMarking>no_marking</lineMarking>
     </leftBound>
     <rightBound>
       <point>
@@ -36161,6 +36168,7 @@
         <x>-7.0710684</x>
         <y>7.0710678</y>
       </point>
+      <lineMarking>no_marking</lineMarking>
     </leftBound>
     <rightBound>
       <point>
@@ -36471,6 +36479,7 @@
         <x>-7.0710678</x>
         <y>-7.0710684</y>
       </point>
+      <lineMarking>no_marking</lineMarking>
     </leftBound>
     <rightBound>
       <point>
@@ -36808,6 +36817,7 @@
         <x>-7.0710684</x>
         <y>7.0710678</y>
       </point>
+      <lineMarking>no_marking</lineMarking>
     </leftBound>
     <rightBound>
       <point>
@@ -37148,6 +37158,7 @@
         <x>7.0710684</x>
         <y>-7.0710678</y>
       </point>
+      <lineMarking>no_marking</lineMarking>
     </leftBound>
     <rightBound>
       <point>
@@ -37488,6 +37499,7 @@
         <x>7.0710678</x>
         <y>7.0710684</y>
       </point>
+      <lineMarking>no_marking</lineMarking>
     </leftBound>
     <rightBound>
       <point>
@@ -37793,6 +37805,7 @@
         <x>7.0710678</x>
         <y>7.0710678</y>
       </point>
+      <lineMarking>no_marking</lineMarking>
     </leftBound>
     <rightBound>
       <point>
@@ -38066,6 +38079,7 @@
         <x>-7.0710678</x>
         <y>7.0710678</y>
       </point>
+      <lineMarking>no_marking</lineMarking>
     </leftBound>
     <rightBound>
       <point>
@@ -38340,6 +38354,7 @@
         <x>-7.0710678</x>
         <y>-7.0710678</y>
       </point>
+      <lineMarking>no_marking</lineMarking>
     </leftBound>
     <rightBound>
       <point>
@@ -38613,6 +38628,7 @@
         <x>7.0710678</x>
         <y>-7.0710678</y>
       </point>
+      <lineMarking>no_marking</lineMarking>
     </leftBound>
     <rightBound>
       <point>
@@ -38759,8 +38775,8 @@
     </trafficSignElement>
     <position>
       <point>
-        <x>-5.8689923</x>
-        <y>-13.788588</y>
+        <x>-5.8689870</x>
+        <y>-13.788583</y>
       </point>
     </position>
     <virtual>false</virtual>
@@ -38771,8 +38787,8 @@
     </trafficSignElement>
     <position>
       <point>
-        <x>13.788588</x>
-        <y>-5.8689923</y>
+        <x>13.788583</x>
+        <y>-5.8689870</y>
       </point>
     </position>
     <virtual>false</virtual>
@@ -38783,8 +38799,8 @@
     </trafficSignElement>
     <position>
       <point>
-        <x>5.8689923</x>
-        <y>13.788588</y>
+        <x>5.8689870</x>
+        <y>13.788583</y>
       </point>
     </position>
     <virtual>false</virtual>
@@ -38795,8 +38811,8 @@
     </trafficSignElement>
     <position>
       <point>
-        <x>-13.788588</x>
-        <y>5.8689923</y>
+        <x>-13.788583</x>
+        <y>5.8689870</y>
       </point>
     </position>
     <virtual>false</virtual>
@@ -38822,8 +38838,8 @@
     </cycle>
     <position>
       <point>
-        <x>-3.1819862</x>
-        <y>-11.101583</y>
+        <x>-3.1819809</x>
+        <y>-11.101577</y>
       </point>
     </position>
     <active>true</active>
@@ -38849,8 +38865,8 @@
     </cycle>
     <position>
       <point>
-        <x>-11.101571</x>
-        <y>-3.1819754</y>
+        <x>-11.101576</x>
+        <y>-3.1819807</y>
       </point>
     </position>
     <active>true</active>
@@ -38876,8 +38892,8 @@
     </cycle>
     <position>
       <point>
-        <x>11.101583</x>
-        <y>-3.1819862</y>
+        <x>11.101577</x>
+        <y>-3.1819809</y>
       </point>
     </position>
     <active>true</active>
@@ -38903,8 +38919,8 @@
     </cycle>
     <position>
       <point>
-        <x>3.1819754</x>
-        <y>-11.101571</y>
+        <x>3.1819807</x>
+        <y>-11.101576</y>
       </point>
     </position>
     <active>true</active>
@@ -38930,8 +38946,8 @@
     </cycle>
     <position>
       <point>
-        <x>3.1819862</x>
-        <y>11.101583</y>
+        <x>3.1819809</x>
+        <y>11.101577</y>
       </point>
     </position>
     <active>true</active>
@@ -38957,8 +38973,8 @@
     </cycle>
     <position>
       <point>
-        <x>11.101571</x>
-        <y>3.1819754</y>
+        <x>11.101576</x>
+        <y>3.1819807</y>
       </point>
     </position>
     <active>true</active>
@@ -38984,8 +39000,8 @@
     </cycle>
     <position>
       <point>
-        <x>-11.101583</x>
-        <y>3.1819862</y>
+        <x>-11.101577</x>
+        <y>3.1819809</y>
       </point>
     </position>
     <active>true</active>
@@ -39011,8 +39027,8 @@
     </cycle>
     <position>
       <point>
-        <x>-3.1819754</x>
-        <y>11.101571</y>
+        <x>-3.1819807</x>
+        <y>11.101576</y>
       </point>
     </position>
     <active>true</active>

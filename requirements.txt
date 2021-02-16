@@ -1,8 +1,6 @@
 numpy>=1.16.4
 lxml>=4.3.4
-# commonroad-io>=2020.2
--e git+ssh://git@gitlab.lrz.de/cps/commonroad-io.git@develop#egg=commonroad
-# -e git+https://gitlab.lrz.de/cps/commonroad-io.git@develop#egg=commonroad
+commonroad-io>=2020.3
 pyproj>=2.2.0
 scipy>=1.3.0
 Pillow>=7.1.1
@@ -16,8 +14,7 @@ matplotlib>=3.1.0
 shapely
 
 # for sumo_map converter
--e git+ssh://git@gitlab.lrz.de/cps/sumo-interface.git@3-convert-pedestrains#egg=sumocr
-# -e git+https://gitlab.lrz.de/cps/sumo-interface.git@3-convert-pedestrains#egg=sumocr
+-e git+ssh://git@gitlab.lrz.de/cps/sumo-interface.git@develop#egg=sumocr
 
 # determinism in osm2cr converter
 ordered-set>=4.0.2

@@ -53,7 +53,7 @@ class Connection:
         self._contPos = contPos
 
     def __str__(self):
-        return self.toXML()
+        return str(self.toXML())
 
     def getFrom(self):
         return self._from
@@ -113,9 +113,8 @@ class Connection:
         if self._shape:
             c.set("shape", str(self._shape))
         if self._keepClear:
-            c.set("keepClear", str(self._keepClear)) 
+            c.set("keepClear", str(self._keepClear))
         if self._contPos:
             c.set("contPos", str(self._contPos))
 
         return ET.tostring(c)
-

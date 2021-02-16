@@ -6,16 +6,16 @@ from queue import Queue
 from typing import List, Set, Tuple, Optional, Dict
 from ordered_set import OrderedSet
 import numpy as np
-from commonroad.scenario.traffic_sign import TrafficSignElement, TrafficSign, TrafficLight, TrafficSignIDGermany
+from commonroad.scenario.traffic_sign import TrafficSignElement, TrafficSign, TrafficLight, TrafficSignIDGermany, TrafficSignIDZamunda
 from commonroad.geometry.shape import Polygon
 
 from crmapconverter.osm2cr import config
-from crmapconverter.osm2cr.converter_modules.utility import geometry, idgenerator
+from crmapconverter.osm2cr.converter_modules.utility import geometry, idgenerator, traffic_sign_parser
 from crmapconverter.osm2cr.converter_modules.utility.custom_types import (
     Road_info,
     Assumption_info,
 )
-
+import math
 
 def graph_search(center_node: "GraphNode") -> Tuple[Set["GraphNode"], Set["GraphEdge"]]:
     """
@@ -302,8 +302,7 @@ class GraphNode:
                 )
 
     def add_traffic_sign(self, sign: "GraphTrafficSign"):
-        self.traffic_signs.append(sign)
-        # add to lanes
+        # this method is never called
         for edge in self.edges:
             for lane in edge.lanes:
                 # add to forward lanes
@@ -470,6 +469,16 @@ class GraphEdge:
         else:
             raise ValueError("the given node is not an endpoint of this edge")
         return np.arctan2(y, x) + np.pi
+
+    def get_compass_degrees(self):
+        """
+        calculates the compass degrees of an edge as in https://en.wikipedia.org/wiki/Points_of_the_compass#/media/File:Compass_Card_B+W.svg
+        :return: compass orientation in degrees
+        """
+        edge_compass_degrees = math.degrees(self.get_orientation(self.node1)) - 45
+        if edge_compass_degrees < 0.0:
+            edge_compass_degrees+= 360.0
+        return edge_compass_degrees
 
     def angle_to(self, edge: "GraphEdge", node: GraphNode) -> float:
         """
@@ -714,11 +723,41 @@ class GraphEdge:
         return np.array([p.get_array() for p in self.waypoints])
 
     def add_traffic_sign(self, sign: "GraphTrafficSign"):
+
         self.traffic_signs.append(sign)
-        # add to lanes
+
+        forward = True
+        sign_direction = sign.direction
+        if sign_direction is not None:
+            edge_orientation = self.get_compass_degrees()
+            # Debugging
+            # print(sign.sign)
+            # print("edge orientation: {}".format(edge_orientation))
+            # print("sign direction {} ".format(sign.direction))
+            if abs(sign_direction-edge_orientation) < 180:
+                forward = False
+
+        # add traffic signs to lanes
+
+        # approach 1, works only if sign direction is provided
+        # if sign_direction is not None:
+        #     favorable_lane = self.lanes[0]
+        #     for lane in self.lanes:
+        #         print("lane degrees: "+ str(lane.get_compass_degrees()))
+        #         if abs(sign_direction - lane.get_compass_degrees()) < abs(sign_direction - favorable_lane.get_compass_degrees()) :
+        #             favorable_lane = lane
+
+        #     if abs(sign_direction - favorable_lane.get_compass_degrees()) < 70: # threshold in degrees
+        #         favorable_lane.add_traffic_sign(sign)
+        #         return
+
+        # use approach 2 if no sign direction could be provided
+        # Warning! Sometimes edge forward direction != lane forward direction, this leads to wrongfully assigned traffic signs
         for lane in self.lanes:
-            # add to forward lanes
-            if lane.forward:
+            if lane.forward and forward:
+                    lane.add_traffic_sign(sign)
+            # add to backward lanes
+            elif (not lane.forward) and (not forward):
                 lane.add_traffic_sign(sign)
 
     def add_traffic_light(self, light: "GraphTrafficLight", forward):
@@ -730,70 +769,41 @@ class GraphEdge:
 
 class GraphTrafficSign:
     def __init__(self, sign: Dict,
-                 node: GraphNode = None, edges: List = []):
+                 node: GraphNode = None, edges: List = [], direction: float = None):
         self.sign = sign
         self.node = node
         self.edges = edges
+        self.direction = direction
         self.id = idgenerator.get_id()
+        #print(self.sign)
 
     def to_traffic_sign_cr(self):
+        #print(self.sign)
         elements = []
         position = None
-        values = []
-
-        # map OSM sign to country sign
-        # TODO Currently only Germany supported. Add more locations.
-        traffic_sign_map = {
-            'maxspeed': TrafficSignIDGermany.MAX_SPEED,
-            'overtaking': TrafficSignIDGermany.NO_OVERTAKING_START,
-            'city_limit': TrafficSignIDGermany.TOWN_SIGN,
-            'give_way': TrafficSignIDGermany.YIELD,
-            'stop': TrafficSignIDGermany.STOP,
-            '260': TrafficSignIDGermany.BAN_CAR_TRUCK_BUS_MOTORCYCLE,
-            'unknown': TrafficSignIDGermany.UNKNOWN
-        }
 
         # get position
         if self.node is not None:
-            position_point = self.node.get_cooridnates()
+            position = self.node.get_cooridnates()
 
-        # extract traffic sign values
-        # maxspeed
+        # parse sign values
+        tsp = traffic_sign_parser.TrafficSignParser(self.sign)
+        # osm maxspeed
         if 'maxspeed' in self.sign:
-            sign_id = traffic_sign_map['maxspeed']
-            value = self.sign['maxspeed']
-            elements.append(TrafficSignElement(sign_id, [value]))
-
-        # if traffic sign
+            osm_maxspeed = tsp.parse_maxspeed()
+            if osm_maxspeed is not None:
+                elements.append(osm_maxspeed)
+        # mapillary sign
+        elif 'mapillary' in self.sign:
+            mapillary_sign = tsp.parse_mapillary()
+            if mapillary_sign is not None:
+                elements.append(mapillary_sign)
+        # osm traffic sign
         elif 'traffic_sign' in self.sign:
-            key = self.sign['traffic_sign']
+            osm_signs = tsp.parse_traffic_sign()
+            if osm_signs is not None:
+                elements.extend(osm_signs)
 
-            # speed limit
-            if 'DE:274' in str(key):
-                sign_id = traffic_sign_map['maxspeed']
-                max_speed = float(key[key.find("[") + 1:key.find("]")])
-                # convert km/h to m/s
-                max_speed /= 3.6
-                elements.append(TrafficSignElement(sign_id, [max_speed]))
-
-            # regular traffic sign
-            else:
-                found_sign = False
-                for traffic_sign in traffic_sign_map:
-                    if traffic_sign in str(key):
-                        sign_id = traffic_sign_map[traffic_sign]
-                        value = ' '  # TODO add specific values for some traffic signs
-                        elements.append(TrafficSignElement(sign_id, [value]))
-                        found_sign = True
-                        break
-
-                # unknown traffic sign
-                if not found_sign:
-                    sign_id = traffic_sign_map['unknown']
-                    value = 'unknown sign'
-                    elements.append(TrafficSignElement(sign_id, [value]))
-
-        # determine if virtual
         virtual = False
         if 'virtual' in self.sign:
             if not self.sign['virtual']:
@@ -801,9 +811,7 @@ class GraphTrafficSign:
             else:
                 virtual = self.sign['virtual']
 
-        # TODO Maybe improve this
         first_occurrence = set()
-
         return TrafficSign(
             traffic_sign_id=self.id,
             traffic_sign_elements=elements,
@@ -1068,6 +1076,21 @@ class Lane:
 
         polygon = Polygon(np.concatenate((self.right_bound, np.flip(self.left_bound, 0))))
         return polygon
+
+    def get_compass_degrees(self):
+        """
+        calculates the compass degrees of a lane as in https://en.wikipedia.org/wiki/Points_of_the_compass#/media/File:Compass_Card_B+W.svg
+        :return: compass orientation in degrees
+        """
+        def get_orientation():
+            # since self.waypoints is not always available, self.from_node and self.to_node are used instead.
+            x = self.from_node.x - self.to_node.x
+            y = self.from_node.y - self.to_node.y
+            return np.arctan2(y, x) + np.pi
+        lane_compass_degrees = math.degrees(get_orientation()) - 45
+        if lane_compass_degrees < 0.0:
+            lane_compass_degrees+= 360.0
+        return lane_compass_degrees
 
     def add_traffic_sign(self, sign: GraphTrafficSign):
         if self.traffic_signs is None:
@@ -1757,6 +1780,51 @@ class Graph:
         for lane in invalid_lanes:
             self.delete_lane(lane)
         #self.set_adjacents()
+
+    def find_closest_edge_by_lat_lng(self, lat_lng, direction=None) -> GraphNode:
+        """
+        finds the closest GraphEdge in Graph to a given lat_lng tuple/list and a optional direction
+
+        :param1 lat_lng: np.array storing latitude and longitude
+        :param2 direction: optional filter to only return edge with corresponding direction
+        :return: GraphEdge which is closest to the given lat_lng coordinates
+        """
+        given_point = np.asarray(lat_lng)
+        edges = list(self.edges)
+
+        # edge coordinates need to be converted to lat lng before comparsion
+        points = list()
+        points_to_edge = dict()
+        for edge in edges:
+            edge_orientation = edge.get_compass_degrees()
+            if direction is not None and abs(edge_orientation-direction) < 60: # degrees threshold
+                for waypoint in edge.get_waypoints():
+                    cartesian_waypoint = geometry.cartesian_to_lon_lat(waypoint, self.center_point)
+                    points.append(cartesian_waypoint)
+                    points_to_edge[tuple(cartesian_waypoint)] = edge
+            elif direction is None:
+                for waypoint in edge.get_waypoints():
+                    cartesian_waypoint = geometry.cartesian_to_lon_lat(waypoint, self.center_point)
+                    points.append(cartesian_waypoint)
+                    points_to_edge[tuple(cartesian_waypoint)] = edge
+                    # second_closest_index = np.argpartition(dist_2, 1)[1]
+        try:
+            points = np.asarray(points)
+            # https://codereview.stackexchange.com/a/28210
+            dist_2 = np.sum((points - given_point)**2, axis=1)
+            closest_edge_index = np.argmin(dist_2)
+            found_point = points[closest_edge_index]
+
+            # recalculate if direction input moves signs more than 20m away from its original found position
+            if direction is not None and geometry.distance(found_point, [given_point]) > 0.0002:
+                return self.find_closest_edge_by_lat_lng(lat_lng)
+
+            return points_to_edge[tuple(found_point)]
+        # catch value errors if not enough points were given
+        except ValueError:
+            print("No edge found. Using fallback calculation.")
+            return self.find_closest_edge_by_lat_lng(lat_lng)
+
 
 class SublayeredGraph(Graph):
 
