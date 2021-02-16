@@ -4,7 +4,7 @@
 """Module to contain Network which can load an opendrive object and then export
 to lanelets. Iternally, the road network is represented by ParametricLanes."""
 import copy
-import enum
+from pyproj import Proj, Transformer
 import iso3166
 import numpy as np
 import inspect
@@ -68,6 +68,8 @@ class Network:
           opendrive:
 
         """
+        # TODO: Extract location information from Geotransofrmation
+        # proj_string_transformed = Transformer.from_pipeline(opendrive.header.geo_reference)
 
         self._link_index = LinkIndex()
         self._link_index.create_from_opendrive(opendrive)

@@ -1024,18 +1024,14 @@ class ConversionLaneletNetwork(LaneletNetwork):
         # Assign traffic signs to lanelets
         for traffic_sign in traffic_signs:
             min_distance = float("inf")
-            for intersection in self.intersections:
-                for incoming in intersection.incomings:
-                    for lanelet in incoming.incoming_lanelets:
-                        lane = self.find_lanelet_by_id(lanelet)
-                        # Lanelet cannot have more traffic lights than number of successors
-                        # Find closest lanelet to traffic signal
-                        pos_1 = traffic_sign.position
-                        pos_2 = lane.center_vertices[-1]
-                        dist = np.linalg.norm(pos_1 - pos_2)
-                        if dist < min_distance:
-                            min_distance = dist
-                            id_for_adding = lanelet
+            for lanelet in self.lanelets:
+                # Find closest lanelet to traffic signal
+                pos_1 = traffic_sign.position
+                pos_2 = lanelet.center_vertices[-1]
+                dist = np.linalg.norm(pos_1 - pos_2)
+                if dist < min_distance:
+                    min_distance = dist
+                    id_for_adding = lanelet.lanelet_id
 
             self.add_traffic_sign(traffic_sign, {id_for_adding})
 

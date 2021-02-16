@@ -1,13 +1,13 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<commonRoad timeStepSize="0.1" commonRoadVersion="2020a" author="" affiliation="" source="OpenDRIVE 2 Lanelet Converter" benchmarkID="ZAM_OpenDrive-123" date="2021-02-02">
+<commonRoad timeStepSize="0.1" commonRoadVersion="2020a" author="" affiliation="" source="OpenDRIVE 2 Lanelet Converter" benchmarkID="ZAM_OpenDrive-123" date="2021-02-16">
   <location>
     <geoNameId>-999</geoNameId>
     <gpsLatitude>999</gpsLatitude>
     <gpsLongitude>999</gpsLongitude>
   </location>
   <scenarioTags>
-    <highway/>
     <urban/>
+    <highway/>
   </scenarioTags>
   <lanelet id="100">
     <leftBound>
@@ -449,7 +449,7 @@
     </rightBound>
     <predecessor ref="101"/>
     <successor ref="102"/>
-    <laneletType>driveWay</laneletType>
+    <laneletType>intersection</laneletType>
   </lanelet>
   <lanelet id="102">
     <leftBound>
@@ -13834,7 +13834,7 @@
     </rightBound>
     <predecessor ref="108"/>
     <successor ref="102"/>
-    <laneletType>driveWay</laneletType>
+    <laneletType>intersection</laneletType>
   </lanelet>
   <lanelet id="109">
     <leftBound>
@@ -14340,7 +14340,7 @@
     </rightBound>
     <predecessor ref="110"/>
     <successor ref="111"/>
-    <laneletType>driveWay</laneletType>
+    <laneletType>intersection</laneletType>
   </lanelet>
   <lanelet id="112">
     <leftBound>
@@ -14854,7 +14854,7 @@
     </rightBound>
     <predecessor ref="105"/>
     <successor ref="113"/>
-    <laneletType>driveWay</laneletType>
+    <laneletType>intersection</laneletType>
   </lanelet>
   <lanelet id="114">
     <leftBound>
@@ -15352,7 +15352,7 @@
     </rightBound>
     <predecessor ref="115"/>
     <successor ref="111"/>
-    <laneletType>driveWay</laneletType>
+    <laneletType>intersection</laneletType>
   </lanelet>
   <lanelet id="116">
     <leftBound>
@@ -15898,7 +15898,7 @@
     </rightBound>
     <predecessor ref="107"/>
     <successor ref="111"/>
-    <laneletType>driveWay</laneletType>
+    <laneletType>intersection</laneletType>
   </lanelet>
   <lanelet id="117">
     <leftBound>
@@ -16316,7 +16316,7 @@
     </rightBound>
     <predecessor ref="107"/>
     <successor ref="113"/>
-    <laneletType>driveWay</laneletType>
+    <laneletType>intersection</laneletType>
   </lanelet>
   <lanelet id="118">
     <leftBound>
@@ -16806,7 +16806,7 @@
     </rightBound>
     <predecessor ref="119"/>
     <successor ref="120"/>
-    <laneletType>driveWay</laneletType>
+    <laneletType>intersection</laneletType>
   </lanelet>
   <lanelet id="121">
     <leftBound>
@@ -17441,7 +17441,7 @@
     </rightBound>
     <predecessor ref="106"/>
     <successor ref="120"/>
-    <laneletType>driveWay</laneletType>
+    <laneletType>intersection</laneletType>
   </lanelet>
   <lanelet id="122">
     <leftBound>
@@ -18164,7 +18164,7 @@
     </rightBound>
     <predecessor ref="107"/>
     <successor ref="120"/>
-    <laneletType>driveWay</laneletType>
+    <laneletType>intersection</laneletType>
   </lanelet>
   <lanelet id="120">
     <leftBound>
@@ -33973,7 +33973,7 @@
     </rightBound>
     <predecessor ref="115"/>
     <successor ref="113"/>
-    <laneletType>driveWay</laneletType>
+    <laneletType>intersection</laneletType>
   </lanelet>
   <lanelet id="104">
     <leftBound>
@@ -34695,7 +34695,7 @@
     </rightBound>
     <predecessor ref="115"/>
     <successor ref="102"/>
-    <laneletType>driveWay</laneletType>
+    <laneletType>intersection</laneletType>
   </lanelet>
   <lanelet id="113">
     <leftBound>
