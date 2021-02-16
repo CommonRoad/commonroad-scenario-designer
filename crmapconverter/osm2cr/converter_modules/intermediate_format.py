@@ -652,7 +652,6 @@ class IntermediateFormat:
     def intersection_enhancement(self):
         for intersection in self.intersections:
             has_traffic_lights = False
-
             incoming_lanes = []
 
             for incoming in intersection.incomings:
@@ -660,23 +659,33 @@ class IntermediateFormat:
                     lane = self.find_edge_by_id(incoming_lane)
                     if lane.traffic_lights:
                         has_traffic_lights = True
-                        print(lane.traffic_lights)
                     incoming_lanes.append(lane)
-            # if traffic lights were found, add traffic lights to other incoming
+
+             # remove existing traffic lights
             if has_traffic_lights:
                 for lane in incoming_lanes:
-                    # remove existing traffic lights
                     if lane.traffic_lights:
                         for light_id in lane.traffic_lights:
                             light = self.find_traffic_light_by_id(light_id)
                             if light is not None:
                                 self.traffic_lights.remove(light)
-
                     lane.traffic_lights = set()
-                    # add new lights if no lights found yet
+
+
+                # add new traffic light per incoming
+                for incoming in intersection.incomings:
+                    # TODO adjacent incoming lanelets  are not listed in one incomign set, rather converted as individual incomings
+                    
+                    # postition
+                    position_point = self.find_edge_by_id(next(iter(incoming.incoming_lanelets))).right_bound[-1]
                     position_point = lane.right_bound[-1]
-                    #position = np.array([position_point.x, position_point.y])
+                    # create new traffic light
                     new_traffic_light = TrafficLight(idgenerator.get_id(), cycle=[], position=position_point)
                     self.traffic_lights.append(new_traffic_light)
+
+                    # add reference to each incoming lane
+                    for lane_id in incoming.incoming_lanelets:
+                        lane = self.find_edge_by_id(lane_id)
+                        lane.traffic_lights.add(new_traffic_light.traffic_light_id)
 
         self.remove_invalid_references()
