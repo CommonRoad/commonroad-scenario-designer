@@ -231,7 +231,7 @@ def add_is_left_of(incoming_data, incoming_data_id):
 def get_lanelet_intersections(crossing_interm: "IntermediateFormat",
                               crossed_interm: "IntermediateFormat") -> Crossings:
     """
-    Calculcate all polygon intersections of the lanelets of the two networks.
+    Calculate all polygon intersections of the lanelets of the two networks.
     For each lanelet of b return the crossing lanelets of a as list.
 
     :param crossing_interm: crossing network
@@ -287,6 +287,8 @@ class IntermediateFormat:
         if self.obstacles is None:
             self.obstacles = []
 
+        self.intersection_enhancement()
+
     def find_edge_by_id(self, edge_id):
         """
         Find the edge in the format by id
@@ -300,7 +302,7 @@ class IntermediateFormat:
 
     def find_traffic_sign_by_id(self, sign_id):
         """
-        Find the traffic sign by the sign id
+        Find traffic sign by the sign id
 
         :param sign_id: sign id of the Traffic Sign element
         :return: CommonRoad TrafficSign
@@ -308,6 +310,17 @@ class IntermediateFormat:
         for sign in self.traffic_signs:
             if sign.traffic_sign_id == sign_id:
                 return sign
+
+    def find_traffic_light_by_id(self, light_id):
+        """
+        Find traffic light by the sign id
+
+        :param sign_id: sign id of the Traffic Light element
+        :return: CommonRoad TrafficLight
+        """
+        for light in self.traffic_lights:
+            if light.traffic_light_id == light_id:
+                return light
 
     @staticmethod
     def get_directions(incoming_lane):
@@ -396,7 +409,7 @@ class IntermediateFormat:
                 # keep track of added lanes to consider unique intersections
                 incoming = [p for p in lane.predecessors if p.id not in added_lanes]
 
-                # Initialize incomming element with properties to be filled in
+                # Initialize incoming element with properties to be filled in
                 incoming_element = {'incomingLanelet': set([incoming_lane.id for incoming_lane in incoming]),
                                     'right': [],
                                     'left': [],
@@ -439,6 +452,33 @@ class IntermediateFormat:
                             {'incoming': [incoming_element]}
 
                     added_lanes = added_lanes.union(incoming_element['incomingLanelet'])
+
+        #         # fix traffic lights if they are found in intersection
+        #             if incoming_lane.traffic_lights is not None:
+        #                 pass
+        #                 # TODO implent traffic lights for all other incomings if one traffic light is detected
+        #                 #print(incoming_lane)
+        #                 #new_traffic_light = graph.GraphTrafficLight(traffic_light[node_id], nodes[int(node_id)])
+        #                 #graph.traffic_lights.append(new_traffic_light)
+
+        # for intersection_node_id in intersections:
+        #     incoming_lanes = []
+        #     has_traffic_signs = False
+        #     # find incoming lanes of intersection and check if one has traffic lights
+        #     for incoming_data in intersections[intersection_node_id]['incoming']:
+        #         lanelet_id = next(iter(incoming_data['incomingLanelet']))
+        #         lane = graph.find_lane_by_id(lanelet_id)
+        #         if lane.traffic_lights is not None:
+        #             has_traffic_signs = True
+        #         incoming_lanes.append(lane)
+        #     # if traffic lights were found, add traffic lights to other incoming
+        #     if has_traffic_signs:
+        #         for lane in incoming_lanes:
+        #             new_traffic_light = TrafficLight(idgenerator.get_id(), cycle=[], position=lane.waypoints[-1])
+        #             traffic_lights.append(new_traffic_light)
+
+
+
 
         # Convert to CommonRoad Intersections
         intersections_cr = []
@@ -517,6 +557,9 @@ class IntermediateFormat:
         traffic_lights = [light.to_traffic_light_cr() for light in graph.traffic_lights]
 
         intersections = IntermediateFormat.get_intersections(graph)
+
+
+
         return IntermediateFormat(nodes,
                                   edges,
                                   traffic_signs,
@@ -605,3 +648,35 @@ class IntermediateFormat:
         for edge in self.edges:
             if edge.id in all_crossing_ids:
                 edge.edge_type = config.CROSSING_LANELETTYPE
+
+    def intersection_enhancement(self):
+        for intersection in self.intersections:
+            has_traffic_lights = False
+
+            incoming_lanes = []
+
+            for incoming in intersection.incomings:
+                for incoming_lane in incoming.incoming_lanelets:
+                    lane = self.find_edge_by_id(incoming_lane)
+                    if lane.traffic_lights:
+                        has_traffic_lights = True
+                        print(lane.traffic_lights)
+                    incoming_lanes.append(lane)
+            # if traffic lights were found, add traffic lights to other incoming
+            if has_traffic_lights:
+                for lane in incoming_lanes:
+                    # remove existing traffic lights
+                    if lane.traffic_lights:
+                        for light_id in lane.traffic_lights:
+                            light = self.find_traffic_light_by_id(light_id)
+                            if light is not None:
+                                self.traffic_lights.remove(light)
+
+                    lane.traffic_lights = set()
+                    # add new lights if no lights found yet
+                    position_point = lane.right_bound[-1]
+                    #position = np.array([position_point.x, position_point.y])
+                    new_traffic_light = TrafficLight(idgenerator.get_id(), cycle=[], position=position_point)
+                    self.traffic_lights.append(new_traffic_light)
+
+        self.remove_invalid_references()
