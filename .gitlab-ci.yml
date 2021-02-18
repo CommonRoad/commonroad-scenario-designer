@@ -65,7 +65,7 @@ python39:
 docs:
     stage: test
     script:
-        - source activate commonroad-py38
+        - source activate commonroad-py39
         - pip install -r test_requirements.txt -r docs_requirements.txt
         - tox -e docs
 
