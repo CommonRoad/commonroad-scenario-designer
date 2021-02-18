@@ -2,7 +2,7 @@ stages:
     - test
     - build
 
-image: $CI_REGISTRY/cps/commonroad-map-tool/ci:v0.4.1
+image: $CI_REGISTRY/cps/commonroad-map-tool/ci:v0.5
 
 before_script:
     # This is required for the GitLab runner to have permissions to all the repos the user stating the job has.
@@ -12,22 +12,6 @@ before_script:
     - git clone --branch develop git@gitlab.lrz.de:cps/commonroad-io.git "$HOME"/commonroad-io
     - pip uninstall -y commonroad-io
     - source .env
-
-python36:
-    stage: test
-    script:
-        - source activate commonroad-py36
-        - pip install $HOME/sumo-interface tox-current-env -r test_requirements.txt
-        - pip install -e "$HOME"/commonroad-io
-        # install all requirements but ignore the git versions as we have already installed them previously
-        - grep -v "git" requirements.txt | pip install -r /dev/stdin
-        # use the current conda environment in tox, as we have manually installed all required dependencies there
-        # run tests
-        - tox --current-env -e py36
-    artifacts:
-        reports:
-            junit: unittest*.xml
-            cobertura: coverage.xml
 
 python37:
     stage: test
@@ -58,6 +42,22 @@ python38:
         - tox --current-env -e py38
     artifacts:
         when: always
+        reports:
+            junit: unittest*.xml
+            cobertura: coverage.xml
+
+python39:
+    stage: test
+    script:
+        - source activate commonroad-py39
+        - pip install $HOME/sumo-interface tox-current-env -r test_requirements.txt
+        - pip install -e "$HOME"/commonroad-io
+        # install all requirements but ignore the git versions as we have already installed them previously
+        - grep -v "git" requirements.txt | pip install -r /dev/stdin
+        # use the current conda environment in tox, as we have manually installed all required dependencies there
+        # run tests
+        - tox --current-env -e py39
+    artifacts:
         reports:
             junit: unittest*.xml
             cobertura: coverage.xml
