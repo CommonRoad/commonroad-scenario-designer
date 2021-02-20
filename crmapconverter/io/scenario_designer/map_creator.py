@@ -75,6 +75,26 @@ class mapcreator:
         network.add_lanelet(lanelet=lanelet)
         return lanelet
 
+"""    def edit_lanelet(self, id, width, length, radius, angle, num_vertices, network, scenario, pred, lanelettype=set(), roaduser_oneway=set(), roaduser_bidirectional=set(),
+                        linemarkingleft="no_marking", linemarkingright="no_marking", backwards=False):
+        lanelet = network.find_lanelet_by_id(id)
+        diff_left_vert_right_vert = lanelet.right_vertices - lanelet.left_vertices
+        factor = width / np.linalg.norm(diff_left_vert_right_vert[0])
+        lanelet.left_vertices = lanelet.center_vertices + 0.5 * factor * diff_left_vert_right_vert
+        lanelet.right_vertices = lanelet.center_vertices - 0.5 * factor * diff_left_vert_right_vert
+
+        #If Curve
+
+
+
+
+        #If Straight
+        lanelet.center_vertices[0] + diff_left_vert_right_vert / np.linalg.norm(diff_left_vert_right_vert[0]) * radius
+"""
+
+
+
+
     def edit_straight(self, id, width, length, num_vertices, network, scenario, pred, lanelettype=set(), roaduser_oneway=set(), roaduser_bidirectional=set(),
                         linemarkingleft="no_marking", linemarkingright="no_marking", backwards=False):
         eps = 0.1e-15
@@ -185,22 +205,6 @@ class mapcreator:
         network.add_lanelet(lanelet=lanelet)
         return lanelet
 
-    def rotate_lanelet(self, angle, lanelet):
-        trans_matrix = np.array([[np.cos(angle), -np.sin(angle)], [np.sin(angle), np.cos(angle)]])
-        transform_left = []
-        transform_center = []
-        transform_right = []
-        num_vertices = len(lanelet.left_vertices)
-
-        for i in range(num_vertices):
-            transform_left.append(np.dot(trans_matrix, lanelet.left_vertices[i]))
-            transform_center.append(np.dot(trans_matrix, lanelet.center_vertices[i]))
-            transform_right.append(np.dot(trans_matrix, lanelet.right_vertices[i]))
-
-        lanelet._left_vertices = np.array(transform_left)
-        lanelet._center_vertices = np.array(transform_center)
-        lanelet._right_vertices = np.array(transform_right)
-
     def calc_angle_between(self, predecessor, lanelet):
         line_predecessor = predecessor.left_vertices[-1] - predecessor.right_vertices[-1]
         line_lanelet = lanelet.left_vertices[0] - lanelet.right_vertices[0]
@@ -221,6 +225,7 @@ class mapcreator:
         b = (lanelet.center_vertices[0,1] * line_predecessor[0] + line_predecessor[1] * lanelet.center_vertices[-1,0] - lanelet.center_vertices[0,0]*line_predecessor[1] - lanelet.center_vertices[-1,1] * line_predecessor[0]) / (line_lanelet[1]*line_predecessor[0] - line_predecessor[1]*line_lanelet[0])
         x = lanelet.center_vertices[-1] + b * line_lanelet
         rad = np.linalg.norm(x-lanelet.center_vertices[0])
+        rad = round(rad,0)
         return rad
 
 
@@ -284,7 +289,7 @@ class mapcreator:
                 else:
                     inc = []
                 x = x + left + right + straight + inc
-                print(x)
+
             for id in x:
                 lanelet = LaneletNetwork.find_lanelet_by_id(network, lanelet_id=id)
                 if lanelet:
@@ -295,6 +300,14 @@ class mapcreator:
                         lanelet_ids.append(lanelet.adj_right)
             lanelet_ids = set(lanelet_ids)
             lanelet_ids = list(lanelet_ids)
+
+            if predecessor.lanelet_id in lanelet_ids:
+                print("Error: Intersection cannot be fit to lanelet belonging to same intersection")
+                return
+
+            if successor.lanelet_id not in lanelet_ids:
+                print("Error: Successor lanelet must belong to intersection")
+                return
 
             factor = (np.linalg.norm(successor.left_vertices[0, :] - successor.right_vertices[0, :])
                       / np.linalg.norm((predecessor.left_vertices[-1, :] - predecessor.right_vertices[-1, :])))
