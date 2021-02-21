@@ -10,6 +10,8 @@ from commonroad.scenario.lanelet import LaneletType, RoadUser, LineMarking
 class LaneletSettings(QDialog):
     def __init__(self):
         super().__init__()
+        self.x = 0
+        self.y = 0
         self.lanelet_length = 50
         self.lanelet_width = 20
         self.setadjacent = False
@@ -18,8 +20,11 @@ class LaneletSettings(QDialog):
         self.setGeometry(100, 100, 500, 300)
         self.direction_bool = False
         self.numverts = 10
-        self.right = "solid"
-        self.left = "solid"
+        self.right = "no_marking"
+        self.left = "no_marking"
+        self.lanelettypelist = []
+        self.onewayroaduserlist = []
+        self.bidirectionalroaduserlist = []
 
         self.direction = QComboBox()
         self.direction.addItems(["forwards", "backwards"])
@@ -52,7 +57,7 @@ class LaneletSettings(QDialog):
 
         self.Predecessor = QRadioButton()
         self.Predecessor.setText("set predecessor automatically")
-        self.Predecessor.toggled.connect(self.predecessor_button)
+        #self.Predecessor.toggled.connect(self.predecessor_button)
 
         self.posX = QLineEdit()
         self.posX.setValidator(QIntValidator())
@@ -69,7 +74,10 @@ class LaneletSettings(QDialog):
         self.posY.insert("0")
 
         self.pred = QCheckBox("set predecessor automatically")
-        self.pred.stateChanged.connect(self.predecessor_button)
+        if self.setPredecessor:
+            self.pred.setChecked(True)
+        else:
+            self.pred.setChecked(False)
 
         self.roaduser_oneway = CheckableComboBox()
         self.roaduser_oneway_list = [r.value for r in RoadUser]
@@ -138,12 +146,6 @@ class LaneletSettings(QDialog):
 
         self.setLayout(layout)
 
-    def predecessor_button(self):
-        if self.pred.isChecked():
-            self.setPredecessor = True
-        else:
-            self.setPredecessor = False
-
     def adjacent_button(self):
         if self.adjacentLanelet.isChecked() == True:
             self.setadjacent = True
@@ -172,7 +174,29 @@ class LaneletSettings(QDialog):
         self.right = self.line_marking_right.currentText()
         self.left = self.line_marking_left.currentText()
 
-        print(self.left)
+        list = self.type.get_checked_items()
+        strlist = []
+        for i in range(0, len(list)):
+            strlist.append(self.enumlist[list[i]])
+        self.lanelettypelist = strlist
+
+        list2 = self.roaduser_oneway.get_checked_items()
+        strlist2 = []
+        for i in range(0, len(list2)):
+            strlist2.append(self.roaduser_oneway_list[list2[i]])
+        self.onewayroaduserlist = strlist2
+
+        list3 = self.roaduser_bidirectional.get_checked_items()
+        strlist3 = []
+        for i in range(0, len(list3)):
+            strlist3.append(self.roaduser_bidirectional_list[list3[i]])
+        self.bidirectionalroaduserlist = strlist3
+
+        if self.posX.text():
+            self.x = int(self.posX.text())
+
+        if self.posY.text():
+            self.y = int(self.posY.text())
 
         self.close()
 
@@ -209,26 +233,16 @@ class LaneletSettings(QDialog):
         return self.setPredecessor
 
     def getLaneletType(self):
-        list = self.type.get_checked_items()
-        strlist = []
-        for i in range(0,len(list)):
-            strlist.append(self.enumlist[list[i]])
-        return strlist
+        return self.lanelettypelist
 
 
     def getOnewayRoadUser(self):
-        list2 = self.roaduser_oneway.get_checked_items()
-        strlist2 = []
-        for i in range(0, len(list2)):
-            strlist2.append(self.roaduser_oneway_list[list2[i]])
-        return strlist2
+        return self.onewayroaduserlist
+
 
     def getBidirectionalRoadUser(self):
-        list3 = self.roaduser_bidirectional.get_checked_items()
-        strlist3 = []
-        for i in range(0, len(list3)):
-            strlist3.append(self.roaduser_bidirectional_list[list3[i]])
-        return strlist3
+        return self.bidirectionalroaduserlist
+
 
     def getLineMarkingRight(self):
         return self.right
@@ -243,16 +257,10 @@ class LaneletSettings(QDialog):
         return self.numverts
 
     def getPosX(self):
-        if self.posX.text():
-            return int(self.posX.text())
-        else:
-            return 0
+        return self.x
 
     def getPosY(self):
-        if self.posY.text():
-            return int(self.posY.text())
-        else:
-            return 0
+        return self.y
 
     # creating checkable combo box class
 class CheckableComboBox(QComboBox):

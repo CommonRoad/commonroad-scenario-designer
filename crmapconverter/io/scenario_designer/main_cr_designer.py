@@ -329,6 +329,8 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.ADJ = AdjecentSettings()
         self.ADJ.exec()
         id = self.ADJ.getLaneletId()
+        if id == None:
+            return
         forwards = self.ADJ.isForwards()
         left = self.ADJ.isAdjacentSideLeft()
         lanelet = self.crviewer.current_scenario.lanelet_network.find_lanelet_by_id(id)
@@ -389,6 +391,8 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.REMOVE = RemoveSettings()
         self.REMOVE.exec()
         id = self.REMOVE.getLaneletId()
+        if id == None:
+            return
         lanelet = self.crviewer.current_scenario.lanelet_network.find_lanelet_by_id(id)
         if lanelet == None:
             self.textBrowser.append("select valid lanelet ID")

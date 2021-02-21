@@ -14,6 +14,7 @@ class AdjecentSettings(QDialog):
         self.setGeometry(100, 100, 500, 300)
         self.forwards_bool = True
         self.adjleft = False
+        self.id = None
 
         self.direction = QComboBox()
         self.direction.addItems(["forwards", "backwards"])
@@ -54,6 +55,8 @@ class AdjecentSettings(QDialog):
             self.adjleft = True
         else:
             self.adjleft = False
+        if self.lanelet_id.text():
+            self.id = int(self.lanelet_id.text())
 
         self.close()
 
@@ -64,10 +67,8 @@ class AdjecentSettings(QDialog):
         return self.forwards_bool
 
     def getLaneletId(self):
-        if self.lanelet_id.text():
-            return int(self.lanelet_id.text())
-        else:
-            return 0
+        return self.id
+
 
 
 class ConnectSettings(QDialog):
@@ -75,6 +76,8 @@ class ConnectSettings(QDialog):
         super().__init__()
         self.setWindowTitle("Connect Lanelets")
         self.setGeometry(100, 100, 500, 300)
+        self.pred = -1
+        self.succ = -1
 
         self.label = QLabel("Connect two laneletes with an connection lanelet")
 
@@ -102,25 +105,25 @@ class ConnectSettings(QDialog):
         self.setLayout(layout)
 
     def apply_button_click(self):
+        if self.predecessor.text():
+            self.pred = int(self.predecessor.text())
+        if self.successor.text():
+            self.succ = int(self.successor.text())
         self.close()
 
     def getPredecessor(self):
-        if self.predecessor.text():
-            return int(self.predecessor.text())
-        else:
-            return -1
+        return self.pred
 
     def getSuccessor(self):
-        if self.successor.text():
-            return int(self.successor.text())
-        else:
-            return -1
+        return self.succ
 
 class FitSettings(QDialog):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Fit lanelets")
         self.setGeometry(100, 100, 500, 300)
+        self.pred = -1
+        self.succ = -1
 
         self.label = QLabel("Fit two laneletes")
 
@@ -146,20 +149,19 @@ class FitSettings(QDialog):
         self.setLayout(layout)
 
     def apply_button_click(self):
+        if self.predecessor.text():
+            self.pred = int(self.predecessor.text())
+        if self.successor.text():
+            self.succ = int(self.successor.text())
+
         self.close()
 
 
     def getPredecessor(self):
-        if self.predecessor.text():
-            return int(self.predecessor.text())
-        else:
-            return -1
+        return self.pred
 
     def getSuccessor(self):
-        if self.successor.text():
-            return int(self.successor.text())
-        else:
-            return -1
+        return self.succ
 
 
 class RemoveSettings(QDialog):
@@ -167,6 +169,7 @@ class RemoveSettings(QDialog):
         super().__init__()
         self.setWindowTitle("Remove lanelet")
         self.setGeometry(100, 100, 500, 300)
+        self.id = None
 
         self.label = QLabel("Remove selected lanelet")
 
@@ -186,10 +189,9 @@ class RemoveSettings(QDialog):
         self.setLayout(layout)
 
     def apply_button_click(self):
+        if self.lanelet.text():
+            self.id = int(self.lanelet.text())
         self.close()
 
     def getLaneletId(self):
-        if self.lanelet.text():
-            return int(self.lanelet.text())
-        else:
-            return 0
+        return self.id
