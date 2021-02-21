@@ -39,7 +39,7 @@ class AdjecentSettings(QDialog):
         layout.addRow("Lanelet direction", self.direction)
         layout.addRow("Adjacet position", self.position)
         layout.addRow("Lanelet ID", self.lanelet_id)
-        layout.addRow("constant widht", self.width)
+        layout.addRow("Constant widht", self.width)
         layout.addWidget(self.apply_button)
         self.setLayout(layout)
 
@@ -73,10 +73,10 @@ class AdjecentSettings(QDialog):
 class ConnectSettings(QDialog):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Connect lanelets")
+        self.setWindowTitle("Connect Lanelets")
         self.setGeometry(100, 100, 500, 300)
 
-        self.label = QLabel("connect two laneletes with an connection lanelet")
+        self.label = QLabel("Connect two laneletes with an connection lanelet")
 
 
         self.predecessor = QLineEdit()
@@ -95,8 +95,8 @@ class ConnectSettings(QDialog):
 
         layout = QFormLayout()
         layout.addWidget(self.label)
-        layout.addRow("start lanelet ID", self.predecessor)
-        layout.addRow("goal lanelet ID", self.successor)
+        layout.addRow("Start Lanelet ID", self.predecessor)
+        layout.addRow("Goal Lanelet ID", self.successor)
 
         layout.addWidget(self.apply_button)
         self.setLayout(layout)
@@ -140,8 +140,8 @@ class FitSettings(QDialog):
 
         layout = QFormLayout()
         layout.addWidget(self.label)
-        layout.addRow("predecessor lanelet ID", self.predecessor)
-        layout.addRow("successor lanelet ID", self.successor)
+        layout.addRow("Predecessor Lanelet ID", self.predecessor)
+        layout.addRow("Successor Lanelet ID", self.successor)
         layout.addWidget(self.apply_button)
         self.setLayout(layout)
 
@@ -168,7 +168,7 @@ class RemoveSettings(QDialog):
         self.setWindowTitle("Remove lanelet")
         self.setGeometry(100, 100, 500, 300)
 
-        self.label = QLabel("remove selected lanelet")
+        self.label = QLabel("Remove selected lanelet")
 
         self.lanelet = QLineEdit()
         self.lanelet.setValidator(QIntValidator())
@@ -181,7 +181,7 @@ class RemoveSettings(QDialog):
 
         layout = QFormLayout()
         layout.addWidget(self.label)
-        layout.addRow("remove lanelet ID", self.lanelet)
+        layout.addRow("Remove Lanelet ID", self.lanelet)
         layout.addWidget(self.apply_button)
         self.setLayout(layout)
 

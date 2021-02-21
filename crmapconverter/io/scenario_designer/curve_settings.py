@@ -199,8 +199,8 @@ class CurveSettings(QDialog):
         self.vertices.insert("10")
         self.setadjacent = False
         self.adjacentCurve.setChecked(False)
-        self.pred.setChecked(True)
-        self.setPredecessor = True
+        self.pred.setChecked(False)
+        self.setPredecessor = False
         self.posX.insert("0")
         self.posY.insert("0")
         self.line_marking_left.setCurrentText("solid")

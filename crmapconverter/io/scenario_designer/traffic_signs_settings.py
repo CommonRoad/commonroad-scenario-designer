@@ -13,7 +13,7 @@ class TrafficSignsSettings(QDialog):
     def __init__(self):
         super().__init__()
 
-        self.setWindowTitle("Traffic sign settings")
+        self.setWindowTitle("Traffic Sign Settings")
         self.setGeometry(100, 100, 300, 100)
         self.selected_country = None
 
@@ -28,7 +28,7 @@ class TrafficSignsSettings(QDialog):
 
 
         layout = QFormLayout()
-        layout.addRow("select country", self.country)
+        layout.addRow("Select country", self.country)
         layout.addWidget(self.apply_button)
 
         self.setLayout(layout)
@@ -52,7 +52,7 @@ class TrafficSignsSelection(QDialog):
         super().__init__()
 
 
-        self.setWindowTitle("Traffic signs")
+        self.setWindowTitle("Traffic Signs")
         self.setGeometry(100, 100, 500, 300)
 
         self.sign_list = QComboBox()
@@ -87,9 +87,9 @@ class TrafficSignsSelection(QDialog):
 
 
         layout = QFormLayout()
-        layout.addRow("select sign", self.sign_list)
-        layout.addRow("select laneletID", self.lanelet_id)
-        layout.addRow("speed limit", self.additionalvalue)
+        layout.addRow("Select sign", self.sign_list)
+        layout.addRow("Select laneletID", self.lanelet_id)
+        layout.addRow("Speed limit", self.additionalvalue)
         layout.addRow("X position", self.posX)
         layout.addRow("Y position", self.posY)
         layout.addWidget(self.apply_button)
@@ -213,16 +213,16 @@ class TrafficLightSelection(QDialog):
         self.yellow.insert(str(self.timeYellow))
 
         layout = QFormLayout()
-        layout.addRow("corresponding lanelet ID", self.lanelet_id)
-        layout.addRow("select direction", self.direction)
-        layout.addRow("time offset", self.time_offset)
+        layout.addRow("Corresponding lanelet ID", self.lanelet_id)
+        layout.addRow("Select direction", self.direction)
+        layout.addRow("Time offset", self.time_offset)
         layout.addRow("active", self.active)
         layout.addRow("X position", self.posX)
         layout.addRow("Y position", self.posY)
-        layout.addRow("time red", self.red)
-        layout.addRow("time red-yellow", self.red_yellow)
-        layout.addRow("time green", self.green)
-        layout.addRow("time yellow", self.yellow)
+        layout.addRow("Time red", self.red)
+        layout.addRow("Time red-yellow", self.red_yellow)
+        layout.addRow("Time green", self.green)
+        layout.addRow("Time yellow", self.yellow)
 
 
 
@@ -295,6 +295,8 @@ class TrafficLightSelection(QDialog):
 class DeleteTrafficElement(QDialog):
     def __init__(self):
         super().__init__()
+        self.setWindowTitle("Delete Regulatory Element")
+
 
         self.id = 0
 
@@ -314,7 +316,7 @@ class DeleteTrafficElement(QDialog):
 
         layout = QFormLayout()
         layout.addRow("Lanelet ID", self.lanelet_id)
-        layout.addRow("Traffic Element ID", self.element_id)
+        layout.addRow("Regulatory element ID", self.element_id)
         layout.addWidget(self.apply_button)
 
         self.setLayout(layout)
@@ -338,7 +340,7 @@ class EditTrafficLight(QDialog):
         super().__init__()
 
 
-        self.setWindowTitle("edit Traffic light")
+        self.setWindowTitle("Edit Traffic light")
         self.setGeometry(100, 100, 500, 300)
         self.isactive = True
         self.timeRed = 60
@@ -417,16 +419,16 @@ class EditTrafficLight(QDialog):
         self.yellow.insert(str(self.timeYellow))
 
         layout = QFormLayout()
-        layout.addRow("traffic light id", self.lanelet_id)
-        layout.addRow("select direction", self.direction)
-        layout.addRow("time offset", self.time_offset)
+        layout.addRow("Traffic light id", self.lanelet_id)
+        layout.addRow("Select direction", self.direction)
+        layout.addRow("Time offset", self.time_offset)
         layout.addRow("active", self.active)
         layout.addRow("X position", self.posX)
         layout.addRow("Y position", self.posY)
-        layout.addRow("time red", self.red)
-        layout.addRow("time red-yellow", self.red_yellow)
-        layout.addRow("time green", self.green)
-        layout.addRow("time yellow", self.yellow)
+        layout.addRow("Time red", self.red)
+        layout.addRow("Time red-yellow", self.red_yellow)
+        layout.addRow("Time green", self.green)
+        layout.addRow("Time yellow", self.yellow)
 
 
 

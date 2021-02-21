@@ -14,7 +14,7 @@ class LaneletSettings(QDialog):
         self.lanelet_width = 20
         self.setadjacent = False
         self.setPredecessor = False
-        self.setWindowTitle("Lanelet settings")
+        self.setWindowTitle("Lanelet Settings")
         self.setGeometry(100, 100, 500, 300)
         self.direction_bool = False
         self.numverts = 10
@@ -183,8 +183,8 @@ class LaneletSettings(QDialog):
         self.width.insert("20")
         self.setadjacent = False
         self.adjacentLanelet.setChecked(False)
-        self.pred.setChecked(True)
-        self.setPredecessor = True
+        self.pred.setChecked(False)
+        self.setPredecessor = False
         self.posX.clear()
         self.posY.clear()
         self.posX.insert("0")

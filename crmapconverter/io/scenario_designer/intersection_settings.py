@@ -40,7 +40,7 @@ class XCrossing(QDialog):
 
         layout.addRow("Lanelet width", self.width)
         #layout.addWidget(self.adjacentLanelet)
-        layout.addRow("Diameter Crossing", self.diameter_crossing)
+        layout.addRow("Diameter crossing", self.diameter_crossing)
 
         layout.addWidget(self.apply_button)
         layout.addWidget(self.set_default)
@@ -110,7 +110,7 @@ class TCrossing(QDialog):
 
         layout.addRow("Lanelet width", self.width)
         #layout.addWidget(self.adjacentLanelet)
-        layout.addRow("Diameter Crossing", self.diameter_crossing)
+        layout.addRow("Diameter crossing", self.diameter_crossing)
 
         layout.addWidget(self.apply_button)
         layout.addWidget(self.set_default)
@@ -151,7 +151,7 @@ class TCrossing(QDialog):
 class FitIntersection(QDialog):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("fit intersection")
+        self.setWindowTitle("Fit Intersection")
 
         self.predecessor = QLineEdit()
         self.predecessor.setValidator(QIntValidator())
