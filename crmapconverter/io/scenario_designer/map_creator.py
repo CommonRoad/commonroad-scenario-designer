@@ -44,6 +44,9 @@ class mapcreator:
         b = set(b)
         predecessor._successor = list(b)
 
+    def edit_straight(self):
+        print("tet")
+
     def create_straight(self, width, length, num_vertices, network, scenario, pred, lanelettype=set(), roaduseroneway=set(),
                         roaduserbidirectional=set(), linemarkingleft="no_marking", linemarkingright="no_marking", backwards=False):
         eps = 0.1e-15
@@ -75,28 +78,8 @@ class mapcreator:
         network.add_lanelet(lanelet=lanelet)
         return lanelet
 
-"""    def edit_lanelet(self, id, width, length, radius, angle, num_vertices, network, scenario, pred, lanelettype=set(), roaduser_oneway=set(), roaduser_bidirectional=set(),
-                        linemarkingleft="no_marking", linemarkingright="no_marking", backwards=False):
-        lanelet = network.find_lanelet_by_id(id)
-        diff_left_vert_right_vert = lanelet.right_vertices - lanelet.left_vertices
-        factor = width / np.linalg.norm(diff_left_vert_right_vert[0])
-        lanelet.left_vertices = lanelet.center_vertices + 0.5 * factor * diff_left_vert_right_vert
-        lanelet.right_vertices = lanelet.center_vertices - 0.5 * factor * diff_left_vert_right_vert
 
-        #If Curve
-
-
-
-
-        #If Straight
-        lanelet.center_vertices[0] + diff_left_vert_right_vert / np.linalg.norm(diff_left_vert_right_vert[0]) * radius
-"""
-
-
-
-
-    def edit_straight(self, id, width, length, num_vertices, network, scenario, pred, lanelettype=set(), roaduser_oneway=set(), roaduser_bidirectional=set(),
-                        linemarkingleft="no_marking", linemarkingright="no_marking", backwards=False):
+    def edit_straight(self, id, width, length, num_vertices, network, scenario, pred, lanelettype=set(), roaduser_oneway=set(), roaduser_bidirectional=set(), linemarkingleft="no_marking", linemarkingright="no_marking", backwards=False):
         eps = 0.1e-15
         length_div = length / (num_vertices-1)
         left_vertices = []
@@ -118,16 +101,17 @@ class mapcreator:
         lanelet._user_one_way = roaduser_oneway
         lanelet._user_bidirectional = roaduser_bidirectional
         lanelet._lanelet_type = lanelettype
-        """lanelet = Lanelet(left_vertices=left_vertices, right_vertices=right_vertices, lanelet_id=idl,
+        lanelet = Lanelet(left_vertices=left_vertices, right_vertices=right_vertices, lanelet_id=idl,
                           center_vertices=center_vertices, lanelet_type=lanelettype,
                           user_one_way={RoadUser(roaduser)}, line_marking_right_vertices=LineMarking(linemarkingright),
-                          line_marking_left_vertices=LineMarking(linemarkingleft))"""
+                          line_marking_left_vertices=LineMarking(linemarkingleft))
         if backwards:
             lanelet.translate_rotate(-lanelet.center_vertices[0], np.pi)
 
         self.latestid = id
         #network.add_lanelet(lanelet=lanelet)
         return lanelet
+
 
     def edit_curve(self, id, width, radius, angle, num_vertices, network, scenario, pred, lanelettype=set(), roaduser_oneway="vehicle",
                         linemarkingleft="no_marking", linemarkingright="no_marking"):

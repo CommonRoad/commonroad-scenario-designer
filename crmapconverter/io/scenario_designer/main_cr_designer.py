@@ -1148,6 +1148,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         scenario.lanelet_network = net
         self.crviewer.current_scenario = scenario
         self.open_scenario(scenario)
+        self.restore_parameters()
 
     def open_commonroad_file(self):
         """ """
@@ -1195,6 +1196,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.intersection_list = IntersectionList(self.update_view, self)
         self.update_view()
         self.update_to_new_scenario()
+        self.restore_parameters()
 
     def update_to_new_scenario(self):
         """  """
@@ -1378,6 +1380,43 @@ class MWindow(QMainWindow, Ui_mainWindow):
             # triggered by click on canvas
             self.lanelet_list.reset_selection()
             self.intersection_list.reset_selection()
+
+    def restore_parameters(self):
+
+        self.pred = False
+        self.rot_angle_straight = 0
+        self.rot_angle_curve = 0
+
+        self.lenfor = 50
+        self.widfor = 20
+        self.vertfor = 20
+        self.adjfor = None
+        self.lanelettype = set()
+        self.roaduser ="vehicle"
+        self.linemarkingleft = "no_marking"
+        self.linemarkingright = "no_marking"
+        self.lanelet_pos_x = 0
+        self.lanelet_pos_y = 0
+        self.backwards = False
+        self.roaduser_oneway = set()
+        self.roaduser_bidirectional = set()
+
+        self.radcurve = 50
+        self.widcurve = 20
+        self.numcurve = 30
+        self.anglcurve = np.pi/2
+        self.adjcurve = None
+        self.curvetype = "urban"
+        self.roaduser_curve = "vehicle"
+        self.linemarkingright_curve = "no_marking"
+        self.linemarkingleft_curve = "no_marking"
+        self.curve_pos_x = 0
+        self.curve_pos_y = 0
+        self.curve_direction = False
+
+        self.LL = LaneletSettings()
+        self.EL = EditTrafficLight()
+        self.FI = FitIntersection()
 
 
 def main():
