@@ -534,6 +534,9 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
 
     def click_x_crossing(self):
+        if self.crviewer.current_scenario == None:
+            self.textBrowser.append("_Warning:_ Create a new file")
+            return
         XC = XCrossing()
         XC.exec()
         width = 20
@@ -547,6 +550,9 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
 
     def click_t_crossing(self):
+        if self.crviewer.current_scenario == None:
+            self.textBrowser.append("_Warning:_ Create a new file")
+            return
         TC = TCrossing()
         TC.exec()
         width = 20
