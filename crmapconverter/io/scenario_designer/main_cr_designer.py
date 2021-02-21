@@ -402,6 +402,10 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.update_view(focus_on_network=True)
 
     def traffic_signs(self):
+
+        if self.crviewer.current_scenario == None:
+            self.textBrowser.append("_Warning:_ Create a scenario")
+            return
         self.showTS = TrafficSignsSelection()
         self.showTS.exec()
         sig = self.showTS.getSignNumber()
@@ -410,15 +414,18 @@ class MWindow(QMainWindow, Ui_mainWindow):
         y = self.showTS.getPosY()
 
 
-        if self.showTS.getLaneletID():
-            lanelet_id = int(self.showTS.getLaneletID())
-        else:
+        lanelet_id = self.showTS.getLaneletID()
+        if lanelet_id == None:
+            self.textBrowser.append("_Warning:_ Select a valid Lanelet ID")
             return
 
         self.traffic1 = TrafficSign(self.traffic_signs_id, [TrafficSignElement(TrafficSignIDGermany(sig), [vals])], {lanelet_id},
                                     np.array([x, y]))
         self.crviewer.current_scenario.lanelet_network.add_traffic_sign(self.traffic1, {lanelet_id})
-        if lanelet_id:
+        if self.crviewer.current_scenario.lanelet_network.find_lanelet_by_id(lanelet_id) == None:
+            self.textBrowser.append("_Warning:_ Select a valid Lanelet ID")
+            return
+        else:
             lanelet = self.crviewer.current_scenario.lanelet_network.find_lanelet_by_id(lanelet_id)
             lanelet.add_traffic_sign_to_lanelet(self.traffic_signs_id)
         self.update_view(focus_on_network=True)

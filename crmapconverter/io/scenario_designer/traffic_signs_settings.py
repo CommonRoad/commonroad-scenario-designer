@@ -54,6 +54,11 @@ class TrafficSignsSelection(QDialog):
 
         self.setWindowTitle("Traffic Signs")
         self.setGeometry(100, 100, 500, 300)
+        self.id = None
+        self.namets = None
+        self.addvalue = 0
+        self.x = 0
+        self.y = 0
 
         self.sign_list = QComboBox()
         enumlist = [e.name for e in TrafficSignIDGermany]
@@ -97,37 +102,41 @@ class TrafficSignsSelection(QDialog):
         self.setLayout(layout)
 
     def apply_button_click(self):
-        self.close()
+        if self.lanelet_id.text():
+            self.id = int(self.lanelet_id.text())
 
-    def getSignNumber(self):
         name = self.sign_list.currentText()
         for e in TrafficSignIDGermany:
             if e.name == name:
                 print(e.value)
-                return e.value
+                self.namets = e.value
+
+        if self.additionalvalue.text():
+            self.addvalue = self.additionalvalue.text()
+        if self.posX.text():
+            self.x = int(self.posX.text())
+        if self.posY.text():
+            self.y = int(self.posY.text())
+
+        self.close()
+
+    def getSignNumber(self):
+        return self.namets
 
     def getSign(self):
         return self.sign_list.currentText()
 
     def getLaneletID(self):
-        if self.lanelet_id.text():
-            return int(self.lanelet_id.text())
+        return self.id
 
     def getAdditionalValues(self):
-        if self.additionalvalue.text():
-            return self.additionalvalue.text()
+        return self.addvalue
 
     def getPosX(self):
-        if self.posX.text():
-            return int(self.posX.text())
-        else:
-            return 0
+        return self.x
 
     def getPosY(self):
-        if self.posY.text():
-            return int(self.posY.text())
-        else:
-            return 0
+        return self.y
 
 class TrafficLightSelection(QDialog):
     def __init__(self):
