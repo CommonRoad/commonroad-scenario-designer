@@ -437,10 +437,13 @@ class MWindow(QMainWindow, Ui_mainWindow):
             return
         self.showTL = TrafficLightSelection()
         self.showTL.exec()
-        if self.showTL.getLaneletID():
-            lanelet_id = int(self.showTL.getLaneletID())
-        else:
-            return
+        lanelet_id = self.showTL.getLaneletID()
+        if lanelet_id == None:
+            if self.crviewer.selected_lanelet_use != None:
+                lanelet_id = self.crviewer.selected_lanelet_use[0]._lanelet_id
+            else:
+                self.textBrowser.append("_Warning:_ Select a valid lanelet ID")
+                return
         direction = self.showTL.getDirection()
         isactive = self.showTL.get_isactive()
         x = self.showTL.getPosX()
@@ -505,7 +508,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
         laneletid = self.DL.getLaneletId()
         if laneletid == None:
-            if self.crviewer.selected_lanelet_use in dir():
+            if self.crviewer.selected_lanelet_use != None:
                 laneletid = self.crviewer.selected_lanelet_use[0]._lanelet_id
             else:
                 self.textBrowser.append("_Warning:_ Select a valid lanelet ID")
@@ -737,7 +740,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
                 QtWidgets.QMessageBox.Ok)
             messbox.close()
         else:
-            if self.crviewer.selected_lanelet_use[0] != None:
+            if self.crviewer.selected_lanelet_use != None:
                 self.selected_lanelet = self.crviewer.selected_lanelet_use[0]
                 id = str(self.selected_lanelet._lanelet_id)
                 self.selected_id = int(id)
@@ -778,7 +781,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
                     self.lowertoolBox.radius.clear()
                     self.lowertoolBox.radius.insert(str(int(rad)))
             else:
-                self.textBrowser.append("select lanelet")
+                self.textBrowser.append("_Warning: Select a lanelet")
                 return
 
 

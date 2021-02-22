@@ -268,6 +268,8 @@ class TrafficLightSelection(QDialog):
             self.timeRedYellow = int(self.red_yellow.text())
         if self.green.text():
             self.timeGreen = int(self.green.text())
+        if self.lanelet_id.text():
+            self.id = int(self.lanelet_id.text())
         self.close()
 
     def getDirection(self):
@@ -277,10 +279,7 @@ class TrafficLightSelection(QDialog):
         return self.offset
 
     def getLaneletID(self):
-        if self.lanelet_id.text():
-            return int(self.lanelet_id.text())
-        else:
-            return None
+        return self.id
 
     def getPosX(self):
         return self.X
