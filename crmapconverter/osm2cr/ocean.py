@@ -2,10 +2,10 @@
 
 import xml.etree.ElementTree as ElTree
 from ordered_set import OrderedSet
-from commonocean_io.src.scenario.scenario import Scenario
-import commonocean_io.src.scenario.obstacle as Obstacle
+from src.scenario.scenario import Scenario
+import src.scenario.obstacle as Obstacle
 import utm
-import commonocean_io.src.scenario.traffic_sign as tS
+import src.scenario.traffic_sign as tS
 
 def convert_seamap(filename):
     """
@@ -22,18 +22,27 @@ def convert_seamap(filename):
         for tag in node.iter('tag'):
             if str.find(tag.attrib['k'], 'seamark:buoy'):
                     buoys.add(node)
-            break
+                    break
+
+    ways = root.iter('way')
+    fairways = OrderedSet()
+
+    for way in ways: #find fairways in OSM
+        for tag in way.iter('tag'):
+            if tag.attrib['k'] == 'seamark:type' and tag.attrib['v'] == 'fairway':
+                fairways.add(way)
+                break
 
     scenario = Scenario(1.0,2) #TODO:adjust timestep,id
     id = 0
-    for buoy in buoys:
+    for buoy in buoys: #add buoyes to scenario
         lat = float(buoy.get('lat'))
         lon = float(buoy.get('lon'))
         coordinates = utm.from_latlon(lat,lon)
         type = tS.TrafficSignElementID(getType(buoy))
         element = tS.TrafficSignElement(type,[])
         sign = tS.TrafficSign(id,element,coordinates)
-       # scenario.add_objects(sign)
+        scenario.add_objects(sign,[])
         id += 1
 
 
