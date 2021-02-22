@@ -433,6 +433,9 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.traffic_signs_id = self.traffic_signs_id + 1
 
     def traffic_light(self):
+        if self.crviewer.current_scenario == None:
+            self.textBrowser.append("_Warning:_ Create a scenario")
+            return
         self.showTL = TrafficLightSelection()
         self.showTL.exec()
         if self.showTL.getLaneletID():
@@ -482,20 +485,32 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.update_view(focus_on_network=True)
 
     def create_traffic_signs_settings(self):
+        if self.crviewer.current_scenario == None:
+            self.textBrowser.append("_Warning:_ Create a scenario")
+            return
         self.TS = TrafficSignsSettings()
         self.TS.exec()
         self.country = self.TS.getCountry()
         self.traffic_signs_settings = 0
 
     def delete_traffic_element(self):
+        if self.crviewer.current_scenario == None:
+            self.textBrowser.append("_Warning:_ Create a scenario")
+            return
         self.DL = DeleteTrafficElement()
         self.DL.exec()
         element_id = self.DL.getTrafficElement()
-        if self.DL.getLaneletId() != None:
-            laneletid = self.DL.getLaneletId()
-        else:
-            laneletid = self.crviewer.selected_lanelet_use[0]._lanelet_id
+        if element_id == None:
+            self.textBrowser.append("_Warning:_ Select a valid regulatory element ID")
+            return
 
+        laneletid = self.DL.getLaneletId()
+        if laneletid == None:
+            if self.crviewer.selected_lanelet_use in dir():
+                laneletid = self.crviewer.selected_lanelet_use[0]._lanelet_id
+            else:
+                self.textBrowser.append("_Warning:_ Select a valid lanelet ID")
+                return
         lanelet = self.crviewer.current_scenario.lanelet_network.find_lanelet_by_id(laneletid)
         trafficelementset = lanelet._traffic_signs
         trafficlightset = lanelet._traffic_lights

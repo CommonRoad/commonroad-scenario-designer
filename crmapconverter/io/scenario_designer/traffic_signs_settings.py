@@ -307,7 +307,8 @@ class DeleteTrafficElement(QDialog):
         self.setWindowTitle("Delete Regulatory Element")
 
 
-        self.id = 0
+        self.id = None
+        self.lanelet = None
 
         self.element_id = QLineEdit()
         self.element_id.setValidator(QIntValidator())
@@ -333,16 +334,16 @@ class DeleteTrafficElement(QDialog):
     def apply_button_click(self):
         if self.element_id.text():
             self.id = int(self.element_id.text())
+        if self.lanelet_id.text():
+            self.lanelet = int(self.lanelet_id.text())
+
         self.close()
 
     def getTrafficElement(self):
         return self.id
 
     def getLaneletId(self):
-        if self.lanelet_id.text():
-            return int(self.lanelet_id.text())
-        else:
-            return None
+        return self.lanelet
 
 class EditTrafficLight(QDialog):
     def __init__(self):
