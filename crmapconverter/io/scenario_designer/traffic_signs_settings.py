@@ -361,6 +361,7 @@ class EditTrafficLight(QDialog):
         self.X = 0
         self.Y = 0
         self.id = None
+        self.laneletid = None
 
         self.direction = QComboBox()
         enumlist = [e.name for e in TrafficLightDirection]
@@ -475,6 +476,8 @@ class EditTrafficLight(QDialog):
             self.timeRedYellow = int(self.red_yellow.text())
         if self.green.text():
             self.timeGreen = int(self.green.text())
+        if self.lanelet_id.text():
+            self.laneletid = int(self.lanelet_id.text())
         self.close()
 
     def getDirection(self):
@@ -484,10 +487,7 @@ class EditTrafficLight(QDialog):
         return self.offset
 
     def getLaneletID(self):
-        if self.lanelet_id.text():
-            return int(self.lanelet_id.text())
-        else:
-            return None
+        return self.laneletid
 
     def getPosX(self):
         return self.X

@@ -109,7 +109,6 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.curve_direction = False
 
         self.LL = LaneletSettings()
-        self.EL = EditTrafficLight()
         self.FI = FitIntersection()
 
 
@@ -526,11 +525,17 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.update_view(focus_on_network=True)
 
     def edittrafficlight(self):
-        self.EL.exec()
-        if self.EL.getLaneletID() != None:
-            tlid = int(self.EL.getLaneletID())
-        else:
+        if self.crviewer.current_scenario == None:
+            self.textBrowser.append("_Warning:_ Create a scenario")
             return
+        self.EL = EditTrafficLight()
+        self.EL.exec()
+
+        tlid = self.EL.getLaneletID()
+        if self.EL.getLaneletID() != None:
+            self.textBrowser.append("_Warning:_ Select a valid traffic light ID")
+            return
+
         direction = self.EL.getDirection()
         isactive = self.EL.get_isactive()
         x = self.EL.getPosX()
@@ -546,6 +551,9 @@ class MWindow(QMainWindow, Ui_mainWindow):
                  (TrafficLightState.GREEN, green),
                  (TrafficLightState.YELLOW, yellow)]
         cycle_element_list = [TrafficLightCycleElement(state[0], state[1]) for state in cycle]
+        if self.crviewer.current_scenario.lanelet_network.find_traffic_light_by_id(tlid) == None:
+            self.textBrowser.append("_Warning:_ Select a valid traffic light ID")
+            return
         TL = self.crviewer.current_scenario.lanelet_network.find_traffic_light_by_id(tlid)
         TL._time_offset = time_offset
         TL._position = position
@@ -1447,7 +1455,6 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.curve_direction = False
 
         self.LL = LaneletSettings()
-        self.EL = EditTrafficLight()
         self.FI = FitIntersection()
 
 
