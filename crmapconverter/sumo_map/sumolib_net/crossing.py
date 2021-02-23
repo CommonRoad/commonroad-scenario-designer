@@ -21,7 +21,7 @@ class Crossing:
                  edges: Iterable[Edge],
                  priority: bool = None,
                  width: float = None,
-                 shape = None,
+                 shape=None,
                  linkIndex: int = None,
                  linkIndex2: int = None,
                  discard: bool = None):
@@ -35,9 +35,9 @@ class Crossing:
         self.discard = discard
 
     def __str__(self) -> str:
-        return self.toXML()
+        return str(self.toXML())
 
-    def toXML(self) -> str:
+    def toXML(self) -> bytes:
         c = ET.Element("crossing")
         c.set("node", str(self.node.getID()))
         c.set("edges", " ".join(str(edge.getID()) for edge in self.edges))
@@ -46,9 +46,8 @@ class Crossing:
         if self.width:
             c.set("width", str(self.width))
         if self.shape is not None:
-            c.set(
-                "shape",
-                " ".join([",".join(str(coord) for coord in v) for v in self.shape]))
+            c.set("shape",
+                  " ".join([",".join(str(coord) for coord in v) for v in self.shape]))
         if self.linkIndex:
             c.set("linkIndex", str(self.linkIndex))
         if self.linkIndex2:

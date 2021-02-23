@@ -65,6 +65,14 @@ class Lane:
 
         edge.addLane(self)
 
+    @property
+    def speed(self) -> float:
+        return self._speed
+
+    @speed.setter
+    def speed(self, speed: float):
+        self._speed = speed
+
     def getSpeed(self):
         return self._speed
 
@@ -167,7 +175,7 @@ class Lane:
         return self._edge._lanes.index(self)
 
     def getID(self):
-        return "%s_%s" % (self._edge._id, self.getIndex())
+        return f"{self._edge._id}_{self.getIndex()}"
 
     def getEdge(self):
         return self._edge
@@ -196,11 +204,14 @@ class Lane:
         """
         lane = ET.Element("lane")
         lane.set("index", str(self.getIndex()))
-        lane.set("speed", str(self._speed))
-        lane.set("length", str(self._length))
-        lane.set("shape", _to_shape_string(self._shape))
-        lane.set("shape", _to_shape_string(self._shape))
-        lane.set("width", str(self._width))
+        if self.speed:
+            lane.set("speed", str(self._speed))
+        if self._length:
+            lane.set("length", str(self._length))
+        if len(self._shape) > 0:
+            lane.set("shape", _to_shape_string(self._shape))
+        if self._width:
+            lane.set("width", str(self._width))
         if self._allowed:
             lane.set("allow", " ".join(self._allowed))
         if self._disallowed:

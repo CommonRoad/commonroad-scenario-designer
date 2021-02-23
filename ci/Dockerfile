@@ -72,22 +72,16 @@ RUN sudo apt-get install -y software-properties-common \
 
 
 # activate conda environment
-RUN conda create --name commonroad-py36 python=3.6
 RUN conda create --name commonroad-py37 python=3.7
 RUN conda create --name commonroad-py38 python=3.8
+RUN conda create --name commonroad-py39 python=3.9
 # setup conda env
-RUN echo "source activate commonroad-py38" > ~/.bashrc
-ENV PATH /opt/conda/envs/commonroad-py38/bin:$PATH
+RUN echo "source activate commonroad-py39" > ~/.bashrc
+ENV PATH /opt/conda/envs/commonroad-py39/bin:$PATH
 
 ADD requirements.txt test_requirements.txt $HOME/
 
 # Install cartopy
-RUN source activate commonroad-py36 \
-	&& echo "Successfully installed Python version:" \
-	&& python --version \
- 	&& conda install -c conda-forge cartopy \
- 	&& grep -v "git" requirements.txt | pip install -r /dev/stdin \
- 	&& grep -v "git" test_requirements.txt | pip install -r /dev/stdin
 RUN source activate commonroad-py37 \
 	&& echo "Successfully installed Python version:" \
 	&& python --version \
@@ -95,6 +89,12 @@ RUN source activate commonroad-py37 \
  	&& grep -v "git" requirements.txt | pip install -r /dev/stdin \
  	&& grep -v "git" test_requirements.txt | pip install -r /dev/stdin
 RUN source activate commonroad-py38 \
+	&& echo "Successfully installed Python version:" \
+	&& python --version \
+ 	&& conda install -c conda-forge cartopy \
+ 	&& grep -v "git" requirements.txt | pip install -r /dev/stdin \
+ 	&& grep -v "git" test_requirements.txt | pip install -r /dev/stdin
+RUN source activate commonroad-py39 \
 	&& echo "Successfully installed Python version:" \
 	&& python --version \
  	&& conda install -c conda-forge cartopy \

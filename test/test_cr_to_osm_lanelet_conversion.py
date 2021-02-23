@@ -24,7 +24,7 @@ from test.utils import elements_equal
 # TODO: write osm_convert method analog to opendrive_convert
 
 
-class TestCR2OSMConversionBaseClass:
+class TestCR2OSMConversionBaseClass(unittest.TestCase):
     """Test the conversion of a specific osm file by reading it, parsing it
     and then converting it to a CommonRoad file including a scenario.
 
@@ -40,31 +40,25 @@ class TestCR2OSMConversionBaseClass:
         """Load the osm file and convert it to a scenario."""
         try:
             commonroad_reader = CommonRoadFileReader(
-                os.path.dirname(os.path.realpath(__file__))
-                + f"/osm_xml_test_files/{self.xml_file_name}.xml"
+                f"{os.path.dirname(os.path.realpath(__file__))}/osm_xml_test_files/{self.xml_file_name}.xml"
             )
             scenario, _ = commonroad_reader.open()
+            l2osm = L2OSMConverter(self.proj_string)
+            self.osm = l2osm(scenario)
 
         except etree.XMLSyntaxError as xml_error:
             print(f"SyntaxERror: {xml_error}")
             print(
                 "There was an error during the loading of the selected CommonRoad file.\n"
             )
-        l2osm = L2OSMConverter(self.proj_string)
-        self.osm = l2osm(scenario)
 
     def test_cr_scenario(self):
         """Test if converted scenario is equal to the loaded xml file.
         Disregard the different dates.
         """
-        with open(
-            os.path.dirname(os.path.realpath(__file__))
-            + f"/osm_xml_test_files/{self.xml_file_name}_from_cr.osm",
-            "r",
-        ) as fh:
-
-            parser = etree.XMLParser(remove_blank_text=True)
-            tree_import = etree.parse(fh, parser=parser).getroot()
+        fh = f"{os.path.dirname(os.path.realpath(__file__))}/osm_xml_test_files/{self.xml_file_name}_from_cr.osm"
+        parser = etree.XMLParser(remove_blank_text=True)
+        tree_import = etree.parse(fh, parser=parser).getroot()
 
         # set same date so this won't change the comparison
         tree_import.set("generator", "42")
@@ -75,7 +69,7 @@ class TestCR2OSMConversionBaseClass:
         self.assertTrue(trees_are_equal)
 
 
-class TestUrbanLanelets(TestCR2OSMConversionBaseClass, unittest.TestCase):
+class TestUrbanLanelets(TestCR2OSMConversionBaseClass):
     """Simple test case file which includes succesors and
     predecessors and adjacencies."""
 
@@ -83,7 +77,7 @@ class TestUrbanLanelets(TestCR2OSMConversionBaseClass, unittest.TestCase):
     xml_file_name = "urban-1_lanelets_utm"
 
 
-class TestMergingLanelets(TestCR2OSMConversionBaseClass, unittest.TestCase):
+class TestMergingLanelets(TestCR2OSMConversionBaseClass):
     """Basic test file including some splits and joins."""
 
     __test__ = True
