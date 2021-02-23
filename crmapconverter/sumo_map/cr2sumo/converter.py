@@ -46,8 +46,8 @@ from commonroad.scenario.traffic_sign_interpreter import TrafficSigInterpreter
 from sumocr.maps.scenario_wrapper import AbstractScenarioWrapper
 
 from crmapconverter.sumo_map.sumolib_net import (TLS, Connection, Crossing, Edge, Junction, Lane,
-                                                 Node, TLSProgram, EdgeTypes, EdgeType, Phase, SumoNodeType,
-                                                 SumoSignalState)
+                                                 Node, TLSProgram, EdgeTypes, EdgeType, Phase, NodeType,
+                                                 SignalState)
 from crmapconverter.sumo_map.errors import ScenarioException
 from crmapconverter.sumo_map.util import (_find_intersecting_edges,
                                           get_total_lane_length_from_netfile, max_lanelet_network_id,
@@ -733,14 +733,14 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                     shape = None
                     via = None
                 connection = Connection(
-                    fromEdge=from_lane.split("_")[0],
-                    toEdge=path[-1].split("_")[0],
-                    fromLane=int(from_lane.split("_")[-1]),
-                    toLane=int(path[-1].split("_")[-1]),
-                    viaLaneID=via,
+                    from_edge=from_lane.split("_")[0],
+                    to_edge=path[-1].split("_")[0],
+                    from_lane=int(from_lane.split("_")[-1]),
+                    to_lane=int(path[-1].split("_")[-1]),
+                    via_lane_id=via,
                     shape=shape,
-                    keepClear=True,
-                    contPos=self.conf.wait_pos_internal_junctions)
+                    keep_clear=True,
+                    cont_pos=self.conf.wait_pos_internal_junctions)
                 self._new_connections.append(connection)
 
     def _create_crossings(self):
@@ -879,9 +879,9 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         encoder = TrafficLightEncoder(self.conf)
         for to_node, lights in node_2_traffic_light.items():
             program, connections = encoder.encode(to_node, list(lights), light_2_connections)
-            self.traffic_light_signals.addProgram(program)
+            self.traffic_light_signals.add_program(program)
             for connection in connections:
-                self.traffic_light_signals.addConnection(connection)
+                self.traffic_light_signals.add_connection(connection)
 
     def _is_merged_edge(self, edge: Edge):
         """
@@ -1008,7 +1008,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                                          int(tl_logic.get("offset")),
                                          tl_logic.get("type"))
                 for phase in tl_logic.findall("phase"):
-                    tls_program.addPhase(Phase(
+                    tls_program.add_phase(Phase(
                         int(phase.get("duration")),
                         [SumoSignalState(s) for s in phase.get("state")]
                     ))
@@ -1107,7 +1107,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
             sumolib.writeXMLHeader(output_file, 'CommonRoad Map Tool')
             edges = etree.Element('edges')
             for edge in self.new_edges.values():
-                edges.append(etree.fromstring(edge.toXML()))
+                edges.append(etree.fromstring(edge.to_xml()))
 
             # pretty print & write the generated xml
             output_file.write(str(etree.tostring(edges, pretty_print=True, encoding="utf-8"), encoding="utf-8"))
@@ -1126,7 +1126,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
             sumolib.writeXMLHeader(output_file, 'CommonRoad Map Tool')
             connections = etree.Element('connections')
             for connection in self._new_connections:
-                connections.append(etree.fromstring(connection.toXML()))
+                connections.append(etree.fromstring(connection.to_xml()))
             for crossings in self._crossings.values():
                 for crossing in crossings:
                     connections.append(etree.fromstring(crossing.toXML()))
@@ -1145,7 +1145,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         file_path = os.path.join(os.path.dirname(output_path), f"{self.conf.scenario_name}.tll.xml")
         with open(file_path, "w+") as f:
             sumolib.writeXMLHeader(f, 'CommonRoad Map Tool')
-            xml = etree.fromstring(self.traffic_light_signals.toXML())
+            xml = etree.fromstring(self.traffic_light_signals.to_xml())
             f.write(str(etree.tostring(xml, pretty_print=True, encoding="utf-8"), encoding="utf-8"))
         self._traffic_file = file_path
         return file_path
@@ -1158,7 +1158,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         file_path = os.path.join(os.path.dirname(output_path), f"{self.conf.scenario_name}.typ.xml")
         with open(file_path, "w+") as f:
             sumolib.writeXMLHeader(f, 'CommonRoad Map Tool')
-            types = etree.fromstring(self.edge_types.to_XML())
+            types = etree.fromstring(self.edge_types.to_xml())
             f.write(str(etree.tostring(types, pretty_print=True, encoding="utf-8"), encoding="utf-8"))
         self._type_file = file_path
         return file_path
@@ -1353,7 +1353,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                                 j_type=junction_xml.get('type'),
                                 x=float(junction_xml.get('x')),
                                 y=float(junction_xml.get('y')),
-                                incLanes=inc_lanes,
+                                inc_lanes=inc_lanes,
                                 shape=shape)
             for lanelet_id in [
                 self.lane_id2lanelet_id[l.getID()] for l in inc_lanes

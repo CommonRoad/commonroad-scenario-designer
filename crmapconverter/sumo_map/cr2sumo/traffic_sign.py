@@ -1,7 +1,7 @@
 from commonroad.scenario.traffic_sign import TrafficSign, TrafficSignElement, TrafficSignIDGermany, TrafficSignIDUsa, \
     TrafficSignIDZamunda, TrafficSignIDSpain, TrafficSignIDChina, TrafficSignIDRussia
 from commonroad.scenario.lanelet import Lanelet
-from crmapconverter.sumo_map.sumolib_net import Edge, EdgeType, EdgeTypes, SumoNodeType, SumoVehicles
+from crmapconverter.sumo_map.sumolib_net import Edge, EdgeType, EdgeTypes, NodeType, VehicleType
 from crmapconverter.sumo_map.util import compute_max_curvature_from_polyline
 import logging
 import numpy as np
@@ -161,7 +161,7 @@ class TrafficSignEncoder:
         """
         assert len(element.additional_values) == 0, \
             f"STOP can only have none additional attribute, has: {element.additional_values}"
-        edge.getToNode().setType(SumoNodeType.ALLWAY_STOP.value)
+        edge.getToNode().setType(NodeType.ALLWAY_STOP.value)
 
     def _set_yield(self, element: TrafficSignElement, edge: Edge):
         """
@@ -172,7 +172,7 @@ class TrafficSignEncoder:
         """
         assert len(element.additional_values) == 0, \
             f"GIVEWAY can only have none additional attribute, has: {element.additional_values}"
-        edge.getToNode().setType(SumoNodeType.PRIORITY_STOP.value)
+        edge.getToNode().setType(NodeType.PRIORITY_STOP.value)
         for outgoing in edge.getOutgoing():
             old_type = self.edge_types.types[outgoing.getType()]
             new_type = self.edge_types.create_from_update_priority(old_type.id, max(old_type.priority - 1, 0))
@@ -187,7 +187,7 @@ class TrafficSignEncoder:
         """
         assert len(element.additional_values) == 0, \
             f"RIGHT_BEFORE_LEFT can only have none additional attribute, has: {element.additional_values}"
-        edge.getToNode().setType(SumoNodeType.RIGHT_BEFORE_LEFT.value)
+        edge.getToNode().setType(NodeType.RIGHT_BEFORE_LEFT.value)
 
     def _set_ban_car_truck_bus_motorcycle(self, element: TrafficSignElement, edge: Edge):
         """
@@ -200,10 +200,10 @@ class TrafficSignEncoder:
             f"BAN_CAR_TRUCK_BUS_MOTORCYCLE can only have none additional attribute, has: {element.additional_values}"
         old_type = self.edge_types.types[edge.getType()]
         disallow = set(old_type.disallow) | {
-            SumoVehicles.PASSENGER.value, SumoVehicles.HOV.value, SumoVehicles.TAXI.value,
-            SumoVehicles.BUS.value, SumoVehicles.COACH.value, SumoVehicles.DELIVERY.value,
-            SumoVehicles.TRUCK.value, SumoVehicles.TRAILER.value, SumoVehicles.MOTORCYCLE.value,
-            SumoVehicles.EVEHICLE.value
+            VehicleType.PASSENGER.value, VehicleType.HOV.value, VehicleType.TAXI.value,
+            VehicleType.BUS.value, VehicleType.COACH.value, VehicleType.DELIVERY.value,
+            VehicleType.TRUCK.value, VehicleType.TRAILER.value, VehicleType.MOTORCYCLE.value,
+            VehicleType.EVEHICLE.value
         }
         new_type = self.edge_types.create_from_update_disallow(old_type.id, list(disallow))
         for successor in self._bfs_until(edge, element):

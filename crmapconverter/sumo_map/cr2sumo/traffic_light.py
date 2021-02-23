@@ -3,7 +3,7 @@ from commonroad.scenario.traffic_sign import TrafficLight, TrafficLightCycleElem
 import math
 import numpy as np
 from .mapping import traffic_light_states_CR2SUMO
-from crmapconverter.sumo_map.sumolib_net import TLSProgram, Connection, SumoNodeType, SumoSignalState, Node, Phase, TLS
+from crmapconverter.sumo_map.sumolib_net import TLSProgram, Connection, NodeType, SignalState, Node, Phase, TLS
 from crmapconverter.sumo_map.util import lines_intersect, compute_max_curvature_from_polyline
 from collections import defaultdict
 
@@ -20,7 +20,7 @@ class TrafficLightEncoder:
         self.index += 1
         program_id = f"tl_program_{self.index}"
         traffic_light_id = str(node.getID())
-        node.setType(SumoNodeType.TRAFFIC_LIGHT.value)
+        node.setType(NodeType.TRAFFIC_LIGHT.value)
 
         time_offset = max(tl.time_offset for tl in traffic_lights)
         tls_program = TLSProgram(traffic_light_id, time_offset * self.conf.dt, program_id)
@@ -36,7 +36,7 @@ class TrafficLightEncoder:
         connections: List[Connection] = [conn for tl in traffic_lights for conn in light_2_connections[tl]]
 
         # convert states to SUMO
-        sumo_states: List[List[SumoSignalState]] = []
+        sumo_states: List[List[SignalState]] = []
         for state in light_states:
             by_color: Dict[TrafficLightState, Set[int]] = defaultdict(set)
             for i, s in enumerate(state):
@@ -61,8 +61,8 @@ class TrafficLightEncoder:
                         > compute_max_curvature_from_polyline(connections[foe[1]].getShape()):
                         foe[0], foe[1] = foe[1], foe[0]
                     # give foe[0] priority
-                    sumo_state[foe[0]] = SumoSignalState.GREEN_PRIORITY
-                    sumo_state[foe[1]] = SumoSignalState.GREEN
+                    sumo_state[foe[0]] = SignalState.GREEN_PRIORITY
+                    sumo_state[foe[1]] = SignalState.GREEN
 
             sumo_states.append(sumo_state)
 
@@ -70,11 +70,11 @@ class TrafficLightEncoder:
         for state, sumo_state in zip(light_states, sumo_states):
             dur = state[0].duration * self.conf.dt
             assert dur > 0
-            tls_program.addPhase(Phase(dur, sumo_state))
+            tls_program.add_phase(Phase(dur, sumo_state))
 
         for i, connection in enumerate(connections):
             connection._tls = traffic_light_id
-            connection._tlLink = i
+            connection._tl_link = i
 
         return tls_program, connections
 
