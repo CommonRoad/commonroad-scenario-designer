@@ -6,6 +6,8 @@ from commonroad.common.util import Interval
 from commonroad.scenario.obstacle import ObstacleType
 from commonroad.scenario.traffic_sign import TrafficLightState
 from commonroad.scenario.lanelet import LaneletType
+from commonroad.scenario.scenario import Scenario
+from commonroad.scenario.traffic_sign import SupportedTrafficSignCountry
 
 from typing import List
 
@@ -26,6 +28,15 @@ class SumoConfig(DefaultConfig):
         return obj
 
     @classmethod
+    def from_scenario(cls, scenario: Scenario):
+        """Initialize the config with a scenario name"""
+        obj = cls()
+        obj.scenario_name = str(scenario.scenario_id)
+        obj.dt = scenario.dt
+        obj.country_id = scenario.scenario_id.country_id
+        return obj
+
+    @classmethod
     def from_dict(cls, param_dict: dict):
         """Initialize config from dictionary"""
         obj = cls()
@@ -37,7 +48,8 @@ class SumoConfig(DefaultConfig):
     # logging level for logging module
     logging_level = 'INFO'  # select DEBUG, INFO, WARNING, ERROR, CRITICAL
 
-    scenario_name: str = ''
+    # conversion
+    country_id: SupportedTrafficSignCountry = SupportedTrafficSignCountry.ZAMUNDA
 
     # simulation
     dt = 0.1  # length of simulation step of the interface

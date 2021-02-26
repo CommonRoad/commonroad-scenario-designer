@@ -5,10 +5,7 @@
     <gpsLatitude>999</gpsLatitude>
     <gpsLongitude>999</gpsLongitude>
   </location>
-  <scenarioTags>
-    <highway/>
-    <urban/>
-  </scenarioTags>
+  <scenarioTags/>
   <lanelet id="100">
     <leftBound>
       <point>
@@ -129,6 +126,7 @@
     <successor ref="101"/>
     <adjacentLeft ref="102" drivingDir="same"/>
     <laneletType>unknown</laneletType>
+    <userBidirectional>priorityVehicle</userBidirectional>
   </lanelet>
   <lanelet id="102">
     <leftBound>
@@ -251,6 +249,7 @@
     <successor ref="104"/>
     <adjacentRight ref="100" drivingDir="same"/>
     <laneletType>unknown</laneletType>
+    <userBidirectional>priorityVehicle</userBidirectional>
   </lanelet>
   <lanelet id="101">
     <leftBound>
@@ -349,6 +348,7 @@
     <successor ref="105"/>
     <adjacentLeft ref="103" drivingDir="same"/>
     <laneletType>unknown</laneletType>
+    <userBidirectional>priorityVehicle</userBidirectional>
   </lanelet>
   <lanelet id="103">
     <leftBound>
@@ -448,6 +448,7 @@
     <adjacentLeft ref="104" drivingDir="same"/>
     <adjacentRight ref="101" drivingDir="same"/>
     <laneletType>unknown</laneletType>
+    <userBidirectional>priorityVehicle</userBidirectional>
   </lanelet>
   <lanelet id="104">
     <leftBound>
@@ -555,6 +556,7 @@
     <successor ref="108"/>
     <adjacentRight ref="103" drivingDir="same"/>
     <laneletType>unknown</laneletType>
+    <userBidirectional>priorityVehicle</userBidirectional>
   </lanelet>
   <lanelet id="105">
     <leftBound>
@@ -613,6 +615,7 @@
     <successor ref="109"/>
     <adjacentLeft ref="106" drivingDir="same"/>
     <laneletType>unknown</laneletType>
+    <userBidirectional>priorityVehicle</userBidirectional>
   </lanelet>
   <lanelet id="106">
     <leftBound>
@@ -672,6 +675,7 @@
     <adjacentLeft ref="107" drivingDir="same"/>
     <adjacentRight ref="105" drivingDir="same"/>
     <laneletType>unknown</laneletType>
+    <userBidirectional>priorityVehicle</userBidirectional>
   </lanelet>
   <lanelet id="107">
     <leftBound>
@@ -731,6 +735,7 @@
     <adjacentLeft ref="108" drivingDir="same"/>
     <adjacentRight ref="106" drivingDir="same"/>
     <laneletType>unknown</laneletType>
+    <userBidirectional>priorityVehicle</userBidirectional>
   </lanelet>
   <lanelet id="108">
     <leftBound>
@@ -789,6 +794,7 @@
     <successor ref="112"/>
     <adjacentRight ref="107" drivingDir="same"/>
     <laneletType>unknown</laneletType>
+    <userBidirectional>priorityVehicle</userBidirectional>
   </lanelet>
   <lanelet id="109">
     <leftBound>
@@ -982,6 +988,7 @@
     <predecessor ref="105"/>
     <adjacentLeft ref="110" drivingDir="same"/>
     <laneletType>unknown</laneletType>
+    <userBidirectional>priorityVehicle</userBidirectional>
   </lanelet>
   <lanelet id="110">
     <leftBound>
@@ -1176,6 +1183,7 @@
     <adjacentLeft ref="111" drivingDir="same"/>
     <adjacentRight ref="109" drivingDir="same"/>
     <laneletType>unknown</laneletType>
+    <userBidirectional>priorityVehicle</userBidirectional>
   </lanelet>
   <lanelet id="111">
     <leftBound>
@@ -1370,6 +1378,7 @@
     <adjacentLeft ref="112" drivingDir="same"/>
     <adjacentRight ref="110" drivingDir="same"/>
     <laneletType>unknown</laneletType>
+    <userBidirectional>priorityVehicle</userBidirectional>
   </lanelet>
   <lanelet id="112">
     <leftBound>
@@ -1563,5 +1572,6 @@
     <predecessor ref="108"/>
     <adjacentRight ref="111" drivingDir="same"/>
     <laneletType>unknown</laneletType>
+    <userBidirectional>priorityVehicle</userBidirectional>
   </lanelet>
 </commonRoad>

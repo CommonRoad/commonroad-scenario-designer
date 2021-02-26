@@ -419,8 +419,16 @@ class IntermediateFormat:
                             for key in directions:
                                 incoming_element[directions[key]].append(key)
                         else:
-                            incoming_element[direction].extend(
-                                    [s.id for s in incoming_lane.successors])
+                            # TODO implement unknown direction keys
+                            try:
+                                incoming_element[direction].extend(
+                                        [s.id for s in incoming_lane.successors])
+                            except KeyError:
+                                print('unknown intersection direction key: '+ direction)
+                                # calculate the direction for each successor
+                                directions = IntermediateFormat.get_directions(incoming_lane)
+                                for key in directions:
+                                    incoming_element[directions[key]].append(key)
 
                     if node.id in intersections:
                         # add new incoming element to existing intersection

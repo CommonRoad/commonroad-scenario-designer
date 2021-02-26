@@ -14,7 +14,7 @@ from crmapconverter.osm2cr.converter_modules.graph_operations import lane_linker
     road_graph, intersection_merger
 from crmapconverter.io.scenario_designer.osm_gui_modules import gui
 from crmapconverter.osm2cr.converter_modules.osm_operations import osm_parser
-from crmapconverter.osm2cr.converter_modules.utility import plots
+from crmapconverter.osm2cr.converter_modules.utility import plots, mapillary
 
 
 def step_collection_1(file: str) -> road_graph.Graph:
@@ -51,6 +51,7 @@ def step_collection_2(graph: road_graph.Graph) -> road_graph.Graph:
         if config.DELETE_SHORT_EDGES:
             graph.sublayer_graph.delete_edges(edges_to_delete)
     print("applying traffic signs to edges and nodes")
+    mapillary.add_mapillary_signs_to_graph(graph)
     graph.apply_traffic_signs()
     print("applying traffic lights to edges")
     graph.apply_traffic_lights()
