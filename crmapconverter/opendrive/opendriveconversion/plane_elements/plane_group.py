@@ -366,7 +366,7 @@ class ParametricLaneGroup:
             [(l + r) / 2 for (l, r) in zip(left_vertices, right_vertices)]
         )
         lanelet = ConversionLanelet(
-            self, left_vertices, center_vertices, right_vertices, self.id_
+            copy.deepcopy(self), left_vertices, center_vertices, right_vertices, self.id_
         )
 
         # Adjacent lanes
