@@ -57,19 +57,22 @@ Visualizing the results of the conversion from OpenDrive to CommonRoad:
 opendrive2lanelet-visualize input-file.xml
 ```
 
-Converting a file from OSM lanelets to CommonRoad lanelets with the command line (for description of input parameters see documentation):
+Converting a file from the Lanelet/Lanelet2 format to CommonRoad lanelets with the command line (for description of input parameters see documentation):
 
 ```bash
-osm-convert inputfile.xml --reverse -o outputfile.osm --adjencies --proj "+proj=etmerc +lat_0=38 +lon_0=125 +ellps=bessel"
+osm-convert inputfile.osm --reverse -o outputfile.xml --adjencies --proj "+proj=etmerc +lat_0=38 +lon_0=125 +ellps=bessel"
 ```
 
 For the conversion of CommonRoad lanelets to OSM lanelets change the input and output file accordingly.
 
-For the conversion of a file from a OSM map to CommonRoad lanelets you can
-open the general GUI and start from there the the OSM map to CommonRoad converter GUI.
+For the conversion of a [OpenStreetMap](https://www.openstreetmap.de/karte.html) to CommonRoad you can
+open the GUI and start from there the conversion.
 Missing information such as the course of individual lanes is estimated during the process.
-These estimations are imperfect (the OSM maps as well) and often it is advisable to edit the scenarios by hand.
-This tool also provides a simple GUI, to edit scenarios by hand.
+These estimations are imperfect (the OSM maps as well) and often it is advisable to edit the scenarios by hand via the GUI.
+Converting a file from the [OpenStreetMap](https://www.openstreetmap.de/karte.html) format to CommonRoad with the command line:
+```bash
+osm2cr inputfile.osm outputfile.xml"
+```
 
 ## Documentation
 
