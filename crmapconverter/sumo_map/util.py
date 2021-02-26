@@ -134,7 +134,7 @@ def polyline_length(line: np.ndarray) -> float:
     :param line: array of vertices
     :return: length of the line (L2-norm)
     """
-    return np.sum(np.linalg.norm(np.diff(line, axis=0), axis=1))
+    return float(np.sum(np.linalg.norm(np.diff(line, axis=0), axis=1)))
 
 
 def write_ego_ids_to_rou_file(rou_file: str, ego_ids: List[int]) -> None:
@@ -186,15 +186,13 @@ def compute_max_curvature_from_polyline(polyline: np.ndarray) -> float:
     curvature = (x_d * y_dd - x_dd * y_d) / ((x_d ** 2 + y_d ** 2) ** (3. / 2.))
 
     # compute maximum curvature
-    abs_curvature = [abs(ele) for ele in curvature]  # absolute value
-    max_curvature = max(abs_curvature)
+    part_curvature = np.abs(curvature)
+    part_curvature.partition(-2)
+    max_curvature = part_curvature[-1]
+    second_max_curvature = part_curvature[-2]
 
-    # compute pseudo maximum -- mean of the two largest curvatures --> relax the constraint
-    abs_curvature.remove(max_curvature)
-    second_max_curvature = max(abs_curvature)
-    max_curvature = (max_curvature + second_max_curvature) / 2
-
-    return max_curvature
+    # # compute pseudo maximum -- mean of the two largest curvatures --> relax the constraint
+    return (max_curvature + second_max_curvature) / 2
 
 
 def _erode_lanelets(lanelet_network: LaneletNetwork,
@@ -475,3 +473,13 @@ def orthogonal_ccw_vector(start: np.ndarray, end: np.ndarray) -> np.ndarray:
     ccw_direction = np.array([-direction[1], direction[0]])
     ccw_direction /= np.linalg.norm(ccw_direction)
     return ccw_direction
+
+
+def lines_intersect(polyline_1: np.ndarray, polyline_2: np.ndarray) -> bool:
+    """
+    Checks if two polylines intersect each other
+    :param polyline_1:
+    :param polyline_2:
+    :return:
+    """
+    return LineString(polyline_1).intersects(LineString(polyline_2))

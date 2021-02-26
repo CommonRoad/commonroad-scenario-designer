@@ -15,15 +15,68 @@ from typing import List, Tuple
 
 import numpy as np
 from pyproj import Proj
-from commonroad.scenario.scenario import Scenario, ScenarioID
+
+from commonroad.scenario.lanelet import StopLine, LineMarking, RoadUser, LaneletType, Lanelet
+from commonroad.scenario.traffic_sign import TrafficSignIDGermany, TrafficSignElement
+from shapely.geometry import LineString
+
+from commonroad.scenario.scenario import Scenario, ScenarioID, TrafficSign
 
 from crmapconverter.opendrive.opendriveconversion.conversion_lanelet import ConversionLanelet
-from crmapconverter.opendrive.opendriveconversion.conversion_lanelet_network import ConversionLaneletNetwork
-from crmapconverter.osm.osm import OSM, WayRelation, DEFAULT_PROJ_STRING, Node
+from crmapconverter.opendrive.opendriveconversion.conversion_lanelet_network import ConversionLaneletNetwork, convert_to_new_lanelet_id
+from crmapconverter.osm.osm import OSM, WayRelation, DEFAULT_PROJ_STRING, Node, RightOfWayRelation
+from crmapconverter.osm2cr.converter_modules.utility.geometry import (
+    point_to_line_distance,
+    distance as point_to_polyline_distance
+)
 
 NODE_DISTANCE_TOLERANCE = 0.01  # this is in meters
+PRIORITY_SIGNS = [ TrafficSignIDGermany.PRIORITY, TrafficSignIDGermany.RIGHT_OF_WAY] # removed TrafficSignIDGermany.RIGHT_BEFORE_LEFT
 
 ADJACENT_WAY_DISTANCE_TOLERANCE = 0.05
+
+
+def _add_closest_traffic_sign_to_lanelet(lanelets: List[Lanelet], traffic_signs: List[TrafficSign]):
+    """
+    Assumes that it is given traffic signs and lanelets that should get matched (all to each)
+    Each lanelet gets assigned exactly the single traffic sign closest to it
+    Does nothing if the list of traffic signs is empty
+    :return: the traffic signs that were assigned to any lanelet
+    """
+    used_signs = set()
+    for l in lanelets:
+        closest_traffic_sign = None
+        _min_distance = None
+        for t in traffic_signs:
+            distance = point_to_polyline_distance(t.position, l.center_vertices)
+            if _min_distance is None or distance < _min_distance:
+                _min_distance = distance
+                closest_traffic_sign = t
+        if closest_traffic_sign is not None:
+            l.add_traffic_sign_to_lanelet(closest_traffic_sign.traffic_sign_id)
+            used_signs.add(closest_traffic_sign)
+    return used_signs
+
+
+def _add_stop_line_to_lanelet(lanelets: List[Lanelet], stop_lines: List[StopLine]):
+    """
+    Assigns each lanelet the first stop line that it is found to intersect with
+    Several lanelets may end up getting assigned the same stop line
+    :param lanelets:
+    :param stop_lines:
+    :return:
+    """
+    yield_signs = set()
+    for l in lanelets:
+        for s in stop_lines:
+            if l.convert_to_polygon().shapely_object.intersects(LineString([s.start, s.end])):
+                l.stop_line = s
+                # add the stop line traffic sign to the lanelet if set
+                if s.traffic_sign_ref is not None:
+                    l.traffic_signs.update(s.traffic_sign_ref)
+                    yield_signs.update(s.traffic_sign_ref)
+                break
+    return yield_signs
 
 
 class OSM2LConverter:
@@ -69,30 +122,184 @@ class OSM2LConverter:
         self.first_left_pts, self.last_left_pts = defaultdict(list), defaultdict(list)
         self.first_right_pts, self.last_right_pts = defaultdict(list), defaultdict(list)
 
-
         # TODO create default scenario ID or implement workaround in commonroad-io
         scenario_id = ScenarioID(country_id="ZAM", map_name="OpenDrive", map_id=123)
 
         scenario = Scenario(dt=0.1, scenario_id=scenario_id)
         self.lanelet_network = ConversionLaneletNetwork()
 
-        for way_rel in osm.way_relations:
+        speed_limits = {}
+        speed_limit_lanelets = {}
+        for speed_limit_key in osm.speed_limit_signs.keys():
+            light_id = scenario.generate_object_id()
+            speed_limits[speed_limit_key] = light_id
+            speed_limit_lanelets[speed_limit_key] = []
+            # scenario.add_objects(speed_limit)
+
+        for way_rel in osm.way_relations.values():
+            # add traffic sign id to traffic signs for speed limit
+            # create dictionary for mapping of osm id to cr id and keep id constant
+            # later add speed limit as traffic sign
             lanelet = self._way_rel_to_lanelet(
-                way_rel, detect_adjacencies, left_driving_system
+                way_rel, detect_adjacencies, left_driving_system, speed_limits, speed_limit_lanelets
             )
             if lanelet is not None:
                 self.lanelet_network.add_lanelet(lanelet)
 
-        self.lanelet_network.convert_all_lanelet_ids()
+        new_ids = self.lanelet_network.convert_all_lanelet_ids()
+
+        for right_of_way_rel in osm.right_of_way_relations.values():
+            # TODO convert Lanelet2 to CR and add to network
+            try:
+                yield_signs, priority_signs, yield_lanelets, priority_lanelets, stop_lines = (
+                    self._right_of_way_to_traffic_sign(right_of_way_rel, new_ids)
+                )
+                # match traffic signs on the matching lanelets
+                # the overwrite makes sure we only add traffic signs in the network that are assigned to any lanelet
+                yield_signs_lanelets = _add_closest_traffic_sign_to_lanelet([self.lanelet_network.find_lanelet_by_id(i) for i in yield_lanelets], yield_signs)
+                priority_signs = _add_closest_traffic_sign_to_lanelet([self.lanelet_network.find_lanelet_by_id(i) for i in priority_lanelets], priority_signs)
+                # match stop lines on the yield lanelets
+                yield_signs_stop_lines_id = _add_stop_line_to_lanelet([self.lanelet_network.find_lanelet_by_id(i) for i in yield_lanelets], stop_lines)
+                # add any used traffic sign
+                for s in (priority_signs | yield_signs_lanelets | {
+                            y for y in yield_signs
+                            if y.traffic_sign_id in yield_signs_stop_lines_id
+                }):
+                    self.lanelet_network.add_traffic_sign(s, set())
+            except NotImplementedError as e:
+                print(str(e))
+
+        # TODO convert traffic signs as well
+        for speed_limit_key in osm.speed_limit_signs.keys():
+            speed, traffic_sign_id = osm.speed_limit_signs[speed_limit_key]
+            light_id = speed_limits[speed_limit_key]
+            first_occurrence = set([self.lanelet_network._old_lanelet_ids[l_id] for l_id in speed_limit_lanelets[speed_limit_key]])
+            # TODO find better way to position speed limit
+            position = self.lanelet_network.find_lanelet_by_id(self.lanelet_network._old_lanelet_ids[speed_limit_lanelets[speed_limit_key][0]]).left_vertices[0]
+            speed_limit = TrafficSign(light_id, [TrafficSignElement(traffic_sign_id,[speed])],first_occurrence, position, True)
+            self.lanelet_network.add_traffic_sign(speed_limit, first_occurrence)
+            # scenario.add_objects(speed_limit, first_occurrence)
+
         scenario.add_objects(self.lanelet_network)
 
         return scenario
+
+    def _right_of_way_to_traffic_sign(self, right_of_way_rel: RightOfWayRelation, new_lanelet_ids: dict):
+        """
+        one right_of_way regulatory element maps pretty well into commonroad scenarios
+        it contains
+         - a set of traffic signs active at the intersection (generally stop, yield, priority, ...)
+         - a set of last lanelets before the beginning of the intersection that have
+          - to yield
+          - the right of way
+         - a set of stop lines where vehicles crossing the yield line have to stop at
+
+        This will be converted as follows:
+         - the set of traffic signs is converted to a number of traffic signs
+           - yield lanelet get assigned the yield traffic sign closest to them
+                in different code -> return yield traffic signs
+           - priority lanelets get assigned the priority traffic sign closest to them
+                in different code -> return priority traffic signs
+         - the stop lines are converted to stop lines
+           - they are assigned to the closest yield traffic sign if any
+           - they are assigned to the lanelets that overlap with the stop line
+                in different code -> return stop lines
+
+        The IDs of returned objects are converted according to the passed set of existing lanelet id conversions
+        """
+        priority_signs, yield_signs = [], []
+
+        traffic_sign_ways = [self.osm.find_way_by_id(r) for r in right_of_way_rel.refers]
+        # traffic signs will always be "ways"
+        # https://github.com/fzi-forschungszentrum-informatik/Lanelet2/blob/master/lanelet2_core/doc/LinestringTagging.md
+        for traffic_sign_way in traffic_sign_ways:
+            traffic_sign_type = traffic_sign_way.tag_dict.get("subtype")
+            virtual = traffic_sign_way.tag_dict.get("virtual", "no") == "yes"
+            traffic_sign_node = self.osm.find_node_by_id(traffic_sign_way.nodes[0])
+
+            # distinguish yield and stop sign
+            # also handles right of way and priority road
+            # todo internationalize
+            if traffic_sign_type == "de206":
+                tsid = TrafficSignIDGermany.STOP
+            elif traffic_sign_type == "de205":
+                tsid = TrafficSignIDGermany.YIELD
+            elif traffic_sign_type == "de301" or traffic_sign_type == 'right_of_way':
+                tsid = TrafficSignIDGermany.RIGHT_OF_WAY
+            elif traffic_sign_type == "de306":
+                tsid = TrafficSignIDGermany.PRIORITY
+            elif traffic_sign_type == "de102":
+                tsid = TrafficSignIDGermany.RIGHT_BEFORE_LEFT
+            else:
+                raise NotImplementedError(f"Lanelet type {traffic_sign_way.tag_dict['subtype']} not implemented")
+            traffic_sign_element = TrafficSignElement(tsid, [])
+
+            # extract position
+            x, y = self.proj(float(traffic_sign_node.lon), float(traffic_sign_node.lat))
+
+            ref_t_id = convert_to_new_lanelet_id(traffic_sign_way.id_, new_lanelet_ids)
+            traffic_sign = TrafficSign(ref_t_id,
+                                       traffic_sign_elements=[traffic_sign_element],
+                                       first_occurrence=set(),
+                                       position=np.array([x, y]),
+                                       virtual=virtual)
+            if tsid in PRIORITY_SIGNS:
+                priority_signs.append(traffic_sign)
+            else:
+                yield_signs.append(traffic_sign)
+
+        priority_lanelets = []
+        for i in right_of_way_rel.right_of_ways:
+            # never create new lanelet ids here,
+            # if they don't exist yet, they are never created
+            if i in new_lanelet_ids.keys():
+                priority_lanelets.append(new_lanelet_ids[i])
+            else:
+                print(f"Warning: some priority sign references non-existing lanelet {i}")
+        yield_lanelets = []
+        for i in right_of_way_rel.yield_ways:
+            # never create new lanelet ids here,
+            # if they don't exist yet, they are never created
+            if i in new_lanelet_ids.keys():
+                yield_lanelets.append(new_lanelet_ids[i])
+            else:
+                print(f"Warning: some yield sign references non-existing lanelet {i}")
+
+        stop_lines = []
+        for stop_line in right_of_way_rel.ref_line:
+            # extract geometrical features
+            stop_line_way = self.osm.find_way_by_id(stop_line)
+            stop_line_way_vertices = self._convert_way_to_vertices(stop_line_way)
+            start = stop_line_way_vertices[0]
+            end = stop_line_way_vertices[-1]
+
+            # retrieve closest yield traffic sign if any
+            ref_t_id = None
+            _ref_t_min_dist = None
+            for ref_t in yield_signs:
+                d = point_to_line_distance(ref_t.position, start, end)
+                if _ref_t_min_dist is None or d < _ref_t_min_dist:
+                    ref_t_id = {ref_t.traffic_sign_id}
+                    _ref_t_min_dist = d
+
+            # initialize stop line
+            stop_line = StopLine(
+                start=start,
+                end=end,
+                traffic_sign_ref=ref_t_id,
+                # TODO distinguish linemarking types
+                line_marking=LineMarking.BROAD_DASHED
+            )
+            stop_lines.append(stop_line)
+        return yield_signs, priority_signs, yield_lanelets, priority_lanelets, stop_lines
 
     def _way_rel_to_lanelet(
         self,
         way_rel: WayRelation,
         detect_adjacencies: bool,
         left_driving_system: bool = False,
+        speed_limit_dict: dict = {},
+        speed_limit_lanelts: dict = {},
     ) -> ConversionLanelet:
         """Convert a WayRelation to a Lanelet, add additional adjacency information.
 
@@ -105,6 +312,8 @@ class OSM2LConverter:
           detect_adjacencies: Compare vertices which might be adjacent. Set
             to false if you consider it too computationally intensive.
           left_driving_system: Set to true if map describes a left_driving_system.
+          speed_limit_dict: Dictionary with reglatory_element_id to TrafficSign mapping
+          speed_limit_lanelts: mapping from speed_limit_ids to lanelets that use speed Limit
 
         Returns:
           A lanelet with a right and left vertice.
@@ -160,12 +369,72 @@ class OSM2LConverter:
         center_vertices = np.array(
             [(l + r) / 2 for (l, r) in zip(left_vertices, right_vertices)]
         )
+
+        # niels change
+        # extract special meaning like one way, road type
+        lanelet_type = None
+        users_one_way = set()
+        users_bidirectional = set()
+        one_way_val = way_rel.tag_dict.get("one_way")
+        bidirectional, one_way = one_way_val == "no", one_way_val == "yes"
+        if way_rel.tag_dict.get("bicycle") == "yes":
+            if one_way:
+                users_one_way.add(RoadUser.BICYCLE)
+            else:
+                users_bidirectional.add(RoadUser.BICYCLE)
+        subtype = way_rel.tag_dict.get("subtype")
+        if subtype == "bicycle_lane" or subtype == "shared_walkway" or subtype == "road":
+            users_one_way.add(RoadUser.BICYCLE)
+            if subtype != "road":
+                lanelet_type = 'biking'
+        if subtype == "walkway" or subtype == "shared_walkway":
+            users_bidirectional.add(RoadUser.PEDESTRIAN)
+            lanelet_type = "sidewalk"
+        if subtype == "crosswalk":
+            users_bidirectional.add(RoadUser.PEDESTRIAN)
+            lanelet_type= "crosswalk"
+        if subtype == "bus_lane":
+            users_one_way.add(RoadUser.BUS)
+            lanelet_type = "bus"
+        if subtype == "road" or subtype == "highway":
+            if bidirectional:
+                users_bidirectional.add(RoadUser.CAR)
+                users_bidirectional.add(RoadUser.MOTORCYCLE)
+            else:
+                users_one_way.add(RoadUser.CAR)
+                users_one_way.add(RoadUser.MOTORCYCLE)
+            location_val = way_rel.tag_dict.get("location")
+            if subtype == "highway":
+                lanelet_type = "highway"
+            elif location_val == "nonurban":
+                lanelet_type = 'country'
+            else:
+                # todo default because of inD origin
+                lanelet_type = 'urban'
+
+        users_bidirectional.add(RoadUser.PRIORITY_VEHICLE)
+
+        traffic_signs = []
+        for key in way_rel.regulatory_elements:
+            if not speed_limit_dict.get(key) is None:
+                traffic_signs.append(speed_limit_dict[key])
+                speed_limit_lanelts[key].append(way_rel.id_)
+
+        if len(traffic_signs) == 0:
+            traffic_signs = None
+        else:
+            traffic_signs = set(traffic_signs)
+
         lanelet = ConversionLanelet(
             left_vertices=left_vertices,
             center_vertices=center_vertices,
             right_vertices=right_vertices,
             lanelet_id=way_rel.id_,
             parametric_lane_group=None,
+            user_one_way=users_one_way,
+            user_bidirectional=users_bidirectional,
+            lanelet_type=lanelet_type,
+            traffic_signs=traffic_signs
         )
 
         self._check_right_and_left_neighbors(way_rel, lanelet)

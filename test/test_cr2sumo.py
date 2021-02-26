@@ -3,11 +3,11 @@
 
 import os
 import unittest
-from parameterized import parameterized
+import warnings
 from typing import List
-import pytest
 
 import numpy as np
+import pytest
 from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.common.file_writer import CommonRoadFileWriter
 from crmapconverter.sumo_map.config import SumoConfig
@@ -47,10 +47,9 @@ class BaseClass(unittest.TestCase):
             axis=0)
         self.scenario.translate_rotate(-centroid, 0)
         planning_problem.translate_rotate(-centroid, 0)
-        config = SumoConfig.from_scenario_name(self.scenario_name)
+        config = SumoConfig.from_scenario(self.scenario)
         # convert to SUMO
-        wrapper = CR2SumoMapConverter(self.scenario.lanelet_network, config,
-                                      country_id=self.scenario.scenario_id.country_id)
+        wrapper = CR2SumoMapConverter(self.scenario.lanelet_network, config)
         return config, wrapper
 
     def sumo_run(self, config: SumoConfig, wrapper: CR2SumoMapConverter, tls_lanelet_ids: List[int]):
@@ -88,28 +87,40 @@ class BaseClass(unittest.TestCase):
             os.path.join(os.path.dirname(self.path),
                          self.scenario_name + ".simulated.xml"),
             overwrite_existing_file=True)
-        # check validity of written file
+        # TODO: check validity of written file
+
+    def validate_output(self, capfd):
+        captured = capfd.readouterr()
+        lines = captured.err.split("\n")
+        keywords = ["teleporting", "collision"]
+        for keyword in keywords:
+            matches = [line for line in lines if keyword in line]
+            err_str = "\n".join(matches)
+            if len(matches) > 0:
+                warnings.warn(
+                    f"Simulation Error, {keyword} found {len(matches)} times in stderr:" + "\n" + err_str
+                )
 
 
 @pytest.mark.parametrize("cr_file_name, tls", [
     ("USA_Peach-3_3_T-1", []),
-    ("garching", [270]),
-    ("garching_merged", []),
-    ("intersect_and_crossing", [56]),
-    ("merging_lanelets_utm", [107]),
+    ("DEU_garching-1_1", [270]),
+    ("DEU_garching-1_2", []),
+    ("ZAM_intersectandcrossing-1_0", [56]),
+    ("ZAM_merging-1_1", [107]),
     ("USA_urban_1", [105]),
     ("DEU_AAH-1_8007_T-1", [154]),
     ("DEU_AAH-2_19000_T-1", [118]),
     ("DEU_Guetersloh-20_4_T-1", []),
-    ("DEU_Muc-13_1_T-1", []),
-    ("USA_Lanker-2_13_T-1", []),
-    ("ARG_Carcarana-10_5_T-1", []),
-    ("ARG_Carcarana-10_2_T-1", []),
+    ("DEU_Muc-13_1_T-1", [257,253]),
+    ("USA_Lanker-2_13_T-1", [3670]),
+    ("ARG_Carcarana-10_5_T-1", [6758, 6712, 6917, 8325]),
+    ("ARG_Carcarana-10_2_T-1", [6917, 6988, 8325]),
     ("BEL_Putte-10_1_T-1", []),
-    ("BEL_Putte-1_3_T-1", []),
+    ("BEL_Putte-1_3_T-1", [6077]),
     ("BEL_Zaventem-4_1_T-1", []),
-    ("DEU_BadEssen-1_6_T-1", []),
-    ("DEU_Guetersloh-11_2_T-1", []),
+    ("DEU_BadEssen-1_6_T-1", [23452]),
+    ("DEU_Guetersloh-11_2_T-1", [80457]),
     ("DEU_Guetersloh-5_2_T-1", []),
     ("DEU_Hennigsdorf-1_2_T-1", []),
     ("DEU_Hennigsdorf-16_3_T-1", []),
@@ -140,15 +151,20 @@ class BaseClass(unittest.TestCase):
     ("HRV_Pula-4_5_T-1", []),
     ("ITA_Siderno-1_2_T-1", []),
     ("ITA_Siderno-8_2_T-1", []),
-    # ("USA_US101-3_1_T-1", []),
+    ("USA_US101-3_1_T-1", []),
     ("ZAM_Tjunction-1_56_T-1", []),
     ("ZAM_Zip-1_54_T-1", []),
+    ("ZAM_MergingTrafficSign-1_1_T-1", []),
+    ("ZAM_MergingTrafficSign-1_2_T-1", []),
+    ("ZAM_TrafficLightTest-1_1-T-1", []),
+    ("ZAM_TrafficLightTest-1_2-T-1", [])
 ])
 @pytest.mark.parallel
-def test_parameterized_sumo_run(cr_file_name: str, tls: List[int]):
+def test_parameterized_sumo_run(capfd, cr_file_name: str, tls: List[int]):
     tester = BaseClass()
     config, wrapper = tester.read_cr_file(cr_file_name)
     tester.sumo_run(config, wrapper, tls)
+    tester.validate_output(capfd)
 
 
 if __name__ == "__main__":
