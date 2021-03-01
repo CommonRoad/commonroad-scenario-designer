@@ -12,8 +12,7 @@ import warnings
 from commonroad.scenario.lanelet import Lanelet, LaneletNetwork, LaneletType
 from commonroad.scenario.obstacle import Obstacle
 from commonroad.scenario.scenario import Scenario
-from commonroad.scenario.traffic_sign import TrafficSign
-from commonroad.scenario.traffic_sign import TrafficLight
+from commonroad.scenario.traffic_sign import TrafficSign, TrafficLight
 from commonroad.scenario.intersection import Intersection, IntersectionIncomingElement
 from commonroad.planning.planning_problem import PlanningProblem, PlanningProblemSet
 from commonroad.scenario.trajectory import State
@@ -24,6 +23,7 @@ from commonroad.geometry.shape import Rectangle, Circle
 from crmapconverter.osm2cr.converter_modules.graph_operations.road_graph import Graph
 from crmapconverter.osm2cr import config
 from crmapconverter.osm2cr.converter_modules.utility import geometry, idgenerator
+from crmapconverter.osm2cr.converter_modules.utility.traffic_light_generator import TrafficLightGenerator
 
 # mapping from crossed lanelet ids to the crossing ones
 Crossings = Dict[int, Set[int]]
@@ -686,17 +686,21 @@ class IntermediateFormat:
 
 
                 # add new traffic light per incoming
+                traffic_light_generator = TrafficLightGenerator(len(intersection.incomings))
+
+                
                 for incoming in intersection.incomings:
-                    
-                    # postition of traffic light
+
+                    # postition of traffic lights
                     for lane_id in incoming.incoming_lanelets:
                         edge = self.find_edge_by_id(lane_id)
                         if not edge.adjacent_right:
                             position_point = edge.right_bound[-1]
                             break
-    
+
                     # create new traffic light
-                    new_traffic_light = TrafficLight(idgenerator.get_id(), cycle=[], position=position_point)
+                    #new_traffic_light = TrafficLight(idgenerator.get_id(), cycle=get_default_cycle(), position=position_point)
+                    new_traffic_light = traffic_light_generator.generate_traffic_light(position=position_point, new_id=idgenerator.get_id())
                     self.traffic_lights.append(new_traffic_light)
 
                     # add reference to each incoming lane
