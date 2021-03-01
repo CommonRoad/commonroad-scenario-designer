@@ -26,24 +26,35 @@ def convert_seamap(filename):
 
     ways = root.iter('way')
     fairways = OrderedSet()
+    coastlines = OrderedSet()
 
-    for way in ways: #find fairways in OSM
+    for way in ways: #find fairways and coastlines in OSM
         for tag in way.iter('tag'):
             if tag.attrib['k'] == 'seamark:type' and tag.attrib['v'] == 'fairway':
                 fairways.add(way)
                 break
+            if tag.attrib['k'] == 'natural' and tag.attrib['v'] == 'coastline':
+                coastlines.add(way)
+                break
 
     scenario = Scenario(1.0,2) #TODO:adjust timestep,id
-    id = 0
     for buoy in buoys: #add buoyes to scenario
         lat = float(buoy.get('lat'))
         lon = float(buoy.get('lon'))
         coordinates = utm.from_latlon(lat,lon)
         type = tS.TrafficSignElementID(getType(buoy))
         element = tS.TrafficSignElement(type,[])
-        sign = tS.TrafficSign(id,element,coordinates)
+        sign = tS.TrafficSign(Scenario.generate_object_id(scenario),element,coordinates)
         scenario.add_objects(sign,[])
-        id += 1
+
+
+    for water in coastlines: #add coastlines to scenario
+        boundarylist = []
+        for nd in water.iter('nd'):
+            xpath = "./node[@id='{index}']".format(index=nd.attrib['ref'])
+            node = root.find(xpath)
+            coordinates = utm.from_latlon(float(node.get('lat')),float(node.get('lon')))
+
 
 
 
