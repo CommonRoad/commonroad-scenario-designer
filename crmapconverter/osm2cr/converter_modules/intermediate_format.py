@@ -688,16 +688,13 @@ class IntermediateFormat:
                 # add new traffic light per incoming
                 for incoming in intersection.incomings:
                     
-                    # TODO adjacent incoming lanelets  are not listed in one incomign set, rather converted as individual incomings
-                    # Might be on purpose?
-                    # for incoming_lane in incoming.incoming_lanelets:
-                    #     if incoming_lane.adjacent_left and incoming_lane.adjacent_left_direction_equal:
-                    #         position_point = self.find_edge_by_id(incoming_lane.adjacent_left).right_bound[-1]
-                    #         position_point = lane.right_bound[-1]
-                    
-                    # postition
-                    position_point = self.find_edge_by_id(next(iter(incoming.incoming_lanelets))).right_bound[-1]
-                    position_point = lane.right_bound[-1]
+                    # postition of traffic light
+                    for lane_id in incoming.incoming_lanelets:
+                        edge = self.find_edge_by_id(lane_id)
+                        if not edge.adjacent_right:
+                            position_point = edge.right_bound[-1]
+                            break
+    
                     # create new traffic light
                     new_traffic_light = TrafficLight(idgenerator.get_id(), cycle=[], position=position_point)
                     self.traffic_lights.append(new_traffic_light)
