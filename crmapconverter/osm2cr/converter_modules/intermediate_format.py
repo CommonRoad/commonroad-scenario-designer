@@ -409,6 +409,21 @@ class IntermediateFormat:
                 # keep track of added lanes to consider unique intersections
                 incoming = [p for p in lane.predecessors if p.id not in added_lanes]
 
+                # skip if no incoming was found
+                if not incoming:
+                    continue
+
+                #add adjacent lanes 
+                lanes_to_add = []
+                for incoming_lane in incoming:
+                    left = incoming_lane.adjacent_left
+                    right = incoming_lane.adjacent_right
+                    if left and incoming_lane.adjacent_left_direction_equal and left.id not in added_lanes:
+                        lanes_to_add.append(left)
+                    if right and incoming_lane.adjacent_right_direction_equal and right.id not in added_lanes:
+                        lanes_to_add.append(right)
+                incoming.extend(lanes_to_add)
+                
                 # Initialize incoming element with properties to be filled in
                 incoming_element = {'incomingLanelet': set([incoming_lane.id for incoming_lane in incoming]),
                                     'right': [],
@@ -443,15 +458,15 @@ class IntermediateFormat:
                                 for key in directions:
                                     incoming_element[directions[key]].append(key)
 
-                    if node.id in intersections:
-                        # add new incoming element to existing intersection
-                        intersections[node.id]['incoming'].append(incoming_element)
-                    else:
-                        # add new intersection
-                        intersections[node.id] = \
-                            {'incoming': [incoming_element]}
+                if node.id in intersections:
+                    # add new incoming element to existing intersection
+                    intersections[node.id]['incoming'].append(incoming_element)
+                else:
+                    # add new intersection
+                    intersections[node.id] = \
+                        {'incoming': [incoming_element]}
 
-                    added_lanes = added_lanes.union(incoming_element['incomingLanelet'])
+                added_lanes = added_lanes.union(incoming_element['incomingLanelet'])
 
         #         # fix traffic lights if they are found in intersection
         #             if incoming_lane.traffic_lights is not None:
@@ -476,8 +491,6 @@ class IntermediateFormat:
         #         for lane in incoming_lanes:
         #             new_traffic_light = TrafficLight(idgenerator.get_id(), cycle=[], position=lane.waypoints[-1])
         #             traffic_lights.append(new_traffic_light)
-
-
 
 
         # Convert to CommonRoad Intersections
@@ -674,7 +687,13 @@ class IntermediateFormat:
 
                 # add new traffic light per incoming
                 for incoming in intersection.incomings:
+                    
                     # TODO adjacent incoming lanelets  are not listed in one incomign set, rather converted as individual incomings
+                    # Might be on purpose?
+                    # for incoming_lane in incoming.incoming_lanelets:
+                    #     if incoming_lane.adjacent_left and incoming_lane.adjacent_left_direction_equal:
+                    #         position_point = self.find_edge_by_id(incoming_lane.adjacent_left).right_bound[-1]
+                    #         position_point = lane.right_bound[-1]
                     
                     # postition
                     position_point = self.find_edge_by_id(next(iter(incoming.incoming_lanelets))).right_bound[-1]
