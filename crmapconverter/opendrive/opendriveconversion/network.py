@@ -6,6 +6,7 @@ to lanelets. Iternally, the road network is represented by ParametricLanes."""
 import numpy as np
 
 from commonroad.scenario.scenario import Scenario, GeoTransformation, Location, ScenarioID
+from commonroad.scenario.lanelet import LaneletNetwork, Lanelet
 
 from crmapconverter.opendrive.opendriveparser.elements.opendrive import OpenDrive
 
@@ -23,6 +24,24 @@ __version__ = "1.2.0"
 __maintainer__ = "Sebastian Maierhofer"
 __email__ = "commonroad-i06@in.tum.de"
 __status__ = "Released"
+
+
+def convert_to_base_lanelet_network(lanelet_network: ConversionLaneletNetwork) -> LaneletNetwork:
+    network = LaneletNetwork()
+    for inter in lanelet_network.intersections:
+        network.add_intersection(inter)
+    for sign in lanelet_network.traffic_signs:
+        network.add_traffic_sign(sign, set())
+    for light in lanelet_network.traffic_lights:
+        network.add_traffic_light(light, set())
+    for la in lanelet_network.lanelets:
+        network.add_lanelet(Lanelet(la.left_vertices, la.center_vertices, la.right_vertices, la.lanelet_id,
+                                    la.predecessor, la.successor, la.adj_left, la.adj_left_same_direction,
+                                    la.adj_right, la.adj_right_same_direction,
+                                    la.line_marking_left_vertices, la.line_marking_right_vertices, la.stop_line,
+                                    la.lanelet_type, la.user_one_way, la.user_bidirectional, la.traffic_signs,
+                                    la.traffic_lights))
+    return network
 
 
 class Network:
@@ -85,7 +104,7 @@ class Network:
 
     def export_lanelet_network(
         self, filter_types: list = None
-    ) -> "ConversionLaneletNetwork":
+    ) -> LaneletNetwork:
         """Export network as lanelet network.
 
         Args:
@@ -121,7 +140,8 @@ class Network:
 
         lanelet_network.convert_all_lanelet_ids()
 
-        return lanelet_network
+        return convert_to_base_lanelet_network(lanelet_network)
+
 
     def export_commonroad_scenario(
         self, dt: float = 0.1, benchmark_id=None, filter_types=None
