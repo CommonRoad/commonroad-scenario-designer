@@ -1,13 +1,13 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<commonRoad timeStepSize="0.1" commonRoadVersion="2020a" author="" affiliation="" source="OpenDRIVE 2 Lanelet Converter" benchmarkID="ZAM_OpenDrive-123" date="2020-12-19">
+<commonRoad timeStepSize="0.1" commonRoadVersion="2020a" author="" affiliation="" source="OpenDRIVE 2 Lanelet Converter" benchmarkID="ZAM_OpenDrive-123" date="2021-03-02">
   <location>
     <geoNameId>-999</geoNameId>
     <gpsLatitude>999</gpsLatitude>
     <gpsLongitude>999</gpsLongitude>
   </location>
   <scenarioTags>
-    <urban/>
     <highway/>
+    <urban/>
   </scenarioTags>
   <lanelet id="100">
     <leftBound>
@@ -982,7 +982,6 @@
         <x>4.8227815</x>
         <y>23.153041</y>
       </point>
-      <lineMarking>no_marking</lineMarking>
     </rightBound>
     <predecessor ref="101"/>
     <successor ref="102"/>
@@ -1962,7 +1961,6 @@
         <x>5.5671005</x>
         <y>26.726343</y>
       </point>
-      <lineMarking>no_marking</lineMarking>
     </rightBound>
     <predecessor ref="101"/>
     <successor ref="104"/>
@@ -5343,7 +5341,6 @@
         <x>52.277553</x>
         <y>-52.277168</y>
       </point>
-      <lineMarking>no_marking</lineMarking>
     </leftBound>
     <rightBound>
       <point>
@@ -9699,7 +9696,6 @@
         <x>-23.153041</x>
         <y>4.8227815</y>
       </point>
-      <lineMarking>no_marking</lineMarking>
     </rightBound>
     <predecessor ref="110"/>
     <successor ref="111"/>
@@ -10687,7 +10683,6 @@
         <x>-26.726343</x>
         <y>5.5671005</y>
       </point>
-      <lineMarking>no_marking</lineMarking>
     </rightBound>
     <predecessor ref="110"/>
     <successor ref="113"/>
@@ -14068,7 +14063,6 @@
         <x>-52.277168</x>
         <y>-52.277553</y>
       </point>
-      <lineMarking>no_marking</lineMarking>
     </leftBound>
     <rightBound>
       <point>
@@ -18424,7 +18418,6 @@
         <x>-4.8227815</x>
         <y>-23.153041</y>
       </point>
-      <lineMarking>no_marking</lineMarking>
     </rightBound>
     <predecessor ref="114"/>
     <successor ref="118"/>
@@ -19404,7 +19397,6 @@
         <x>-5.5671005</x>
         <y>-26.726343</y>
       </point>
-      <lineMarking>no_marking</lineMarking>
     </rightBound>
     <predecessor ref="114"/>
     <successor ref="119"/>
@@ -22785,7 +22777,6 @@
         <x>-52.274863</x>
         <y>52.274671</y>
       </point>
-      <lineMarking>no_marking</lineMarking>
     </leftBound>
     <rightBound>
       <point>
@@ -26358,7 +26349,6 @@
         <x>4.0784547</x>
         <y>19.579739</y>
       </point>
-      <lineMarking>no_marking</lineMarking>
     </leftBound>
     <rightBound>
       <point>
@@ -26747,7 +26737,6 @@
         <x>4.8227736</x>
         <y>23.153042</y>
       </point>
-      <lineMarking>no_marking</lineMarking>
     </leftBound>
     <rightBound>
       <point>
@@ -27010,7 +26999,6 @@
         <x>-3.8681966</x>
         <y>19.622361</y>
       </point>
-      <lineMarking>no_marking</lineMarking>
     </leftBound>
     <rightBound>
       <point>
@@ -27152,7 +27140,6 @@
         <x>-4.5741427</x>
         <y>23.203442</y>
       </point>
-      <lineMarking>no_marking</lineMarking>
     </leftBound>
     <rightBound>
       <point>
@@ -27702,7 +27689,6 @@
         <x>52.277168</x>
         <y>52.277553</y>
       </point>
-      <lineMarking>no_marking</lineMarking>
     </leftBound>
     <rightBound>
       <point>
@@ -28249,7 +28235,6 @@
         <x>-19.622361</x>
         <y>-3.8681966</y>
       </point>
-      <lineMarking>no_marking</lineMarking>
     </leftBound>
     <rightBound>
       <point>
@@ -28389,7 +28374,6 @@
         <x>-23.203442</x>
         <y>-4.5741427</y>
       </point>
-      <lineMarking>no_marking</lineMarking>
     </leftBound>
     <rightBound>
       <point>
@@ -28657,7 +28641,6 @@
         <x>-19.579739</x>
         <y>4.0784547</y>
       </point>
-      <lineMarking>no_marking</lineMarking>
     </leftBound>
     <rightBound>
       <point>
@@ -29046,7 +29029,6 @@
         <x>-23.153042</x>
         <y>4.8227736</y>
       </point>
-      <lineMarking>no_marking</lineMarking>
     </leftBound>
     <rightBound>
       <point>
@@ -29721,7 +29703,6 @@
         <x>-52.274863</x>
         <y>52.274671</y>
       </point>
-      <lineMarking>no_marking</lineMarking>
     </leftBound>
     <rightBound>
       <point>
@@ -30680,7 +30661,6 @@
         <x>-52.277168</x>
         <y>-52.277553</y>
       </point>
-      <lineMarking>no_marking</lineMarking>
     </leftBound>
     <rightBound>
       <point>
@@ -31351,7 +31331,6 @@
         <x>-4.0784547</x>
         <y>-19.579739</y>
       </point>
-      <lineMarking>no_marking</lineMarking>
     </leftBound>
     <rightBound>
       <point>
@@ -31740,7 +31719,6 @@
         <x>-4.8227736</x>
         <y>-23.153042</y>
       </point>
-      <lineMarking>no_marking</lineMarking>
     </leftBound>
     <rightBound>
       <point>
@@ -32003,7 +31981,6 @@
         <x>3.8681966</x>
         <y>-19.622361</y>
       </point>
-      <lineMarking>no_marking</lineMarking>
     </leftBound>
     <rightBound>
       <point>
@@ -32145,7 +32122,6 @@
         <x>4.5741427</x>
         <y>-23.203442</y>
       </point>
-      <lineMarking>no_marking</lineMarking>
     </leftBound>
     <rightBound>
       <point>
@@ -32695,7 +32671,6 @@
         <x>52.277553</x>
         <y>-52.277168</y>
       </point>
-      <lineMarking>no_marking</lineMarking>
     </leftBound>
     <rightBound>
       <point>
@@ -33366,7 +33341,6 @@
         <x>19.579739</x>
         <y>-4.0784547</y>
       </point>
-      <lineMarking>no_marking</lineMarking>
     </leftBound>
     <rightBound>
       <point>
@@ -33755,7 +33729,6 @@
         <x>23.153042</x>
         <y>-4.8227736</y>
       </point>
-      <lineMarking>no_marking</lineMarking>
     </leftBound>
     <rightBound>
       <point>
@@ -34018,7 +33991,6 @@
         <x>19.622361</x>
         <y>3.8681966</y>
       </point>
-      <lineMarking>no_marking</lineMarking>
     </leftBound>
     <rightBound>
       <point>
@@ -34158,7 +34130,6 @@
         <x>23.203442</x>
         <y>4.5741427</y>
       </point>
-      <lineMarking>no_marking</lineMarking>
     </leftBound>
     <rightBound>
       <point>
@@ -35209,7 +35180,6 @@
         <x>23.153041</x>
         <y>-4.8227815</y>
       </point>
-      <lineMarking>no_marking</lineMarking>
     </rightBound>
     <predecessor ref="105"/>
     <successor ref="122"/>
@@ -36189,7 +36159,6 @@
         <x>26.726343</x>
         <y>-5.5671005</y>
       </point>
-      <lineMarking>no_marking</lineMarking>
     </rightBound>
     <predecessor ref="105"/>
     <successor ref="124"/>
@@ -39570,7 +39539,6 @@
         <x>52.277168</x>
         <y>52.277553</y>
       </point>
-      <lineMarking>no_marking</lineMarking>
     </leftBound>
     <rightBound>
       <point>

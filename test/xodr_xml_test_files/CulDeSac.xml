@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<commonRoad timeStepSize="0.1" commonRoadVersion="2020a" author="" affiliation="" source="OpenDRIVE 2 Lanelet Converter" benchmarkID="ZAM_OpenDrive-123" date="2020-12-19">
+<commonRoad timeStepSize="0.1" commonRoadVersion="2020a" author="" affiliation="" source="OpenDRIVE 2 Lanelet Converter" benchmarkID="ZAM_OpenDrive-123" date="2021-03-02">
   <location>
     <geoNameId>-999</geoNameId>
     <gpsLatitude>999</gpsLatitude>
@@ -851,7 +851,6 @@
         <x>31.936295</x>
         <y>-4.3587594</y>
       </point>
-      <lineMarking>no_marking</lineMarking>
     </leftBound>
     <rightBound>
       <point>
@@ -3385,7 +3384,6 @@
         <x>-72.867575</x>
         <y>-1.9470864</y>
       </point>
-      <lineMarking>no_marking</lineMarking>
     </rightBound>
     <predecessor ref="101"/>
     <adjacentLeft ref="100" drivingDir="opposite"/>
@@ -4229,7 +4227,6 @@
         <x>31.936295</x>
         <y>-4.3587594</y>
       </point>
-      <lineMarking>no_marking</lineMarking>
     </leftBound>
     <rightBound>
       <point>
