@@ -24,7 +24,7 @@ from commonroad.scenario.scenario import Scenario, ScenarioID, TrafficSign
 
 from crmapconverter.opendrive.opendriveconversion.conversion_lanelet import ConversionLanelet
 from crmapconverter.opendrive.opendriveconversion.conversion_lanelet_network import ConversionLaneletNetwork, convert_to_new_lanelet_id
-from crmapconverter.osm.osm import OSM, WayRelation, DEFAULT_PROJ_STRING, Node, RightOfWayRelation
+from crmapconverter.lanelet_lanelet2.osm import OSM, WayRelation, DEFAULT_PROJ_STRING, Node, RightOfWayRelation
 from crmapconverter.osm2cr.converter_modules.utility.geometry import (
     point_to_line_distance,
     distance as point_to_polyline_distance
