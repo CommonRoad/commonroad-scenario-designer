@@ -613,21 +613,18 @@ class Viewer:
         return selected_lanelets
 
           #method to refresh laneletinformation by clicking on lanelet
-        if self.lowertoolBox != None:
-            x = 0
-        else:
-            self.lowertoolBox = LaneletInformationToolbox()
-
-            self.tool2 = QDockWidget("Lanelet Information")
-            self.tool2.setFloating(True)
-            self.tool2.setFeatures(QDockWidget.AllDockWidgetFeatures)
-            self.tool2.setAllowedAreas(Qt.LeftDockWidgetArea)
-            self.tool2.setWidget(self.lowertoolBox)
-            #self.addDockWidget(Qt.LeftDockWidgetArea, self.tool2)
-            self.tool2.setGeometry()
-
-
-
+        # if self.lowertoolBox != None:
+        #     x = 0
+        # else:
+        #     self.lowertoolBox = LaneletInformationToolbox()
+        #
+        #     self.tool2 = QDockWidget("Lanelet Information")
+        #     self.tool2.setFloating(True)
+        #     self.tool2.setFeatures(QDockWidget.AllDockWidgetFeatures)
+        #     self.tool2.setAllowedAreas(Qt.LeftDockWidgetArea)
+        #     self.tool2.setWidget(self.lowertoolBox)
+        #     #self.addDockWidget(Qt.LeftDockWidgetArea, self.tool2)
+        #     self.tool2.setGeometry()
 
 
 class AnimatedViewer(Viewer):
