@@ -34,13 +34,11 @@ def get_traffic_signals(road: Road):
     traffic_lights = []
     stop_lines = []
 
-    # This map will help us convert the id's in the signal_reference list
-    # to the new id that are assigned in this function
-
-    old_signal_id_to_new_id_mapper = dict()
+    # TODO: Stop lines are created and appended to the list for DEU and OpenDrive format.
+    # This has been replicated for other countries but has not been tested with a test case
+    # Stop lines have a signal type of 294 and are handled differently in the commonroad format
 
     for signal in road.signals:
-
 
         position, tangent = road.planView.calc(signal.s)
         position = np.array([position[0] + signal.t * np.cos(tangent + np.pi / 2),
@@ -58,9 +56,9 @@ def get_traffic_signals(road: Road):
                 if signal.type == "1000003" or signal.type == "1000004":
                     continue  # stop line
                     # Stop lines have a signal type of 294 and are handled differently in the commonroad format
-
                 if signal.type == '294':
-                    # Creating stop line object
+                    # Creating stop line object by first calculating the position of the two end points that define the
+                    # straight stop line
                     position_1, position_2 = calculate_stop_line_position(road.lanes.lane_sections, signal,
                                                                           position, tangent)
                     stop_line = StopLine(position_1, position_2, LineMarking.SOLID)
@@ -70,17 +68,50 @@ def get_traffic_signals(road: Road):
                 element_id = extract_traffic_element_id(signal.type, str(signal.subtype), TrafficSignIDGermany)
             elif signal_country == 'USA':
                 element_id = extract_traffic_element_id(signal.type, str(signal.subtype), TrafficSignIDUsa)
+                if signal.type == '294':
+                    # Creating stop line object by first calculating the position of the two end points that define the
+                    # straight stop line
+                    position_1, position_2 = calculate_stop_line_position(road.lanes.lane_sections, signal,
+                                                                          position, tangent)
+                    stop_line = StopLine(position_1, position_2, LineMarking.SOLID)
+                    stop_lines.append(stop_line)
+                    continue
+
             elif signal_country == 'CHN':
                 element_id = extract_traffic_element_id(signal.type, str(signal.subtype), TrafficSignIDChina)
+                if signal.type == '294':
+                    # Creating stop line object by first calculating the position of the two end points that define the
+                    # straight stop line
+                    position_1, position_2 = calculate_stop_line_position(road.lanes.lane_sections, signal,
+                                                                          position, tangent)
+                    stop_line = StopLine(position_1, position_2, LineMarking.SOLID)
+                    stop_lines.append(stop_line)
+                    continue
+
             elif signal_country == 'ESP':
                 element_id = extract_traffic_element_id(signal.type, str(signal.subtype), TrafficSignIDSpain)
+                if signal.type == '294':
+                    # Creating stop line object by first calculating the position of the two end points that define the
+                    # straight stop line
+                    position_1, position_2 = calculate_stop_line_position(road.lanes.lane_sections, signal,
+                                                                          position, tangent)
+                    stop_line = StopLine(position_1, position_2, LineMarking.SOLID)
+                    stop_lines.append(stop_line)
+                    continue
+
             elif signal_country == 'RUS':
                 element_id = extract_traffic_element_id(signal.type, str(signal.subtype), TrafficSignIDRussia)
+                if signal.type == '294':
+                    # Creating stop line object by first calculating the position of the two end points that define the
+                    # straight stop line
+                    position_1, position_2 = calculate_stop_line_position(road.lanes.lane_sections, signal,
+                                                                          position, tangent)
+                    stop_line = StopLine(position_1, position_2, LineMarking.SOLID)
+                    stop_lines.append(stop_line)
+                    continue
             else:
                 if signal.type == "1000003" or signal.type == "1000004":
                     continue
-
-                # Stop lines have a signal type of 294 and are handled differently in the commonroad format
                 if signal.type == '294':
                     # Creating stop line object
                     position_1, position_2 = calculate_stop_line_position(road.lanes.lane_sections, signal,
@@ -94,9 +125,6 @@ def get_traffic_signals(road: Road):
                 traffic_sign_element_id=element_id,
                 additional_values=additional_values
             )
-            old_signal_id_to_new_id_mapper[signal.id] = [int(
-                "".join([str(road.id), str(signal.id), str(abs(int(position[0]))),
-                         str(abs(int(position[1]))), str(abs(int(signal.s)))])), "traffic sign"]
 
             traffic_sign = TrafficSign(
                 traffic_sign_id=int("".join([str(road.id), str(signal.id), str(abs(int(position[0]))),
@@ -113,7 +141,6 @@ def get_traffic_signals(road: Road):
             # the three listed here are hard to interpret in commonroad.
             # we ignore such signals in order not cause trouble in traffic simulation
             if signal.type != ("1000002" or "1000007" or "1000013"):
-                old_signal_id_to_new_id_mapper[signal.id] = [signal.id + 2000, "traffic light"]
 
                 traffic_light = TrafficLight(traffic_light_id=signal.id + 2000, cycle=[], position=position)
 
@@ -126,7 +153,9 @@ def get_traffic_signals(road: Road):
 
 def get_signal_country(signal_country: str):
     """
-    Ise iso3166 standard to find 3 letter country id
+    ISO iso3166 standard to find 3 letter country id
+    Args:
+        signal_country: string value of the country
     """
     signal_country = signal_country.upper()
     if signal_country in iso3166.countries_by_name:
@@ -138,10 +167,16 @@ def get_signal_country(signal_country: str):
     else:
         return "ZAM"
 
+
 def calculate_stop_line_position(lane_sections, signal, position, tangent):
     """
     Function to calculate the 2 points that define the stop line which
     is a straight line from one edge of the road to the other.
+    Args:
+        lane_sections: opendrive lane_sections list containing the lane_section parsed lane_section class
+        signal: signal object in this case the stop line
+        position: initial position as calculated in the get_traffic_signals function
+        tangent: tangent value as calculated in the get_traffic_signals function
     """
     total_width = 0
     for lane_section in lane_sections:
@@ -167,6 +202,9 @@ def get_traffic_signal_references(road: Road):
     Function to extract all the traffic sign references that are stored in the road object
     in order to avoid duplication by redefiniing predefined signals/lights and stoplines.
     """
+    # TODO: This function was ultimately not used as signal references were not required to define all traffic
+    #  lights signals and stoplines. However, it needs to be verified if signal references are required elsewhere.
+    #  If not this function can safely be deleted.
     signal_references = []
     for signal_reference in road.signalReference:
         signal_references.append(signal_reference)

@@ -647,9 +647,10 @@ class ConversionLaneletNetwork(LaneletNetwork):
     def create_intersection(self, intersection_map, intersection_id):
         """
         Creates an intersection inside the lanelet network object
-        param: intersection_map - information about the successors of a lanelet in a junction
-        param: intersection_id - The unique id used to reference the intersection
-        Return: void
+        Args:
+            intersection_map - information about the successors of a lanelet in a junction
+            intersection_id - The unique id used to reference the intersection
+        Return:
         """
         # TODO: Define criterion for intersection ID. Currently only iterative numbering
         incoming_id_counter = 0
@@ -685,6 +686,7 @@ class ConversionLaneletNetwork(LaneletNetwork):
 
             intersection_incoming_lanes.append(intersection_incoming_lane)
             # TODO: Add crossings to intersections
+            # Increment id counter to generate next unique intersection id. See To Do.
             incoming_id_counter += 1
         intersection = Intersection(intersection_id, intersection_incoming_lanes)
         self.find_left_of(intersection.incomings)
@@ -692,14 +694,15 @@ class ConversionLaneletNetwork(LaneletNetwork):
 
     def set_intersection_lanelet_type(self, incoming_lane, intersection_map):
         """
-        Set the lanelet type of all the lanelets inside an intersection to Intersection
+        Set the lanelet type of all the lanelets inside an intersection to Intersection from the enum class
+        Args:
+            incoming_lane: ID of incoming lanelet
+            intersection_map: dictionary that contains all the incomings of a particular intersection
         """
         for successor_incoming in self.find_lanelet_by_id(incoming_lane).successor:
             successor_incoming_lanelet = self.find_lanelet_by_id(successor_incoming)
             successor_incoming_lanelet.lanelet_type = "intersection"
             # Also check if the successor of a incoming successor intersects with another successor of an incoming
-            # TODO: Checking for successor of incoming successor is a very expensive operation due to intersection
-            #  calculation. Find workaround.
             self.check_lanelet_type_for_successor_of_successor(successor_incoming_lanelet, intersection_map)
 
     def check_lanelet_type_for_successor_of_successor(self, successor_incoming_lanelet, intersection_map):
@@ -707,6 +710,9 @@ class ConversionLaneletNetwork(LaneletNetwork):
         Check if the successor of an incoming successor in an intersection is also a part of the lanelet.
         This is done by checking if this lanelet intersects with successors of all the incomigns in the intersection
         If the test passes, then the successor of the incoming successor is also set as intersection lanelet type
+        Args:
+            successor_incoming_lanelet: lanelet for which we require to test if it is a part of a particular intersection
+            intersection_map: dict of the particular intersection for which the test is being conducted.
         """
         for successor_successor_incoming in successor_incoming_lanelet.successor:
             successor_successor_incoming_lanelet = self.find_lanelet_by_id(successor_successor_incoming)
@@ -717,7 +723,11 @@ class ConversionLaneletNetwork(LaneletNetwork):
         """
         Check if a particular lanelet intersects any of the lanelets that are part of a particular intersection
         using the shapely crosses method.
-        Return true if any intersection found otherwise return False.
+        Args:
+            lanelet: lanelet which is being tested for being part of the intersection.
+            intersection_map: dict of the particular intersection for which the test is being conducted.
+        Returns:
+            true if any intersection found otherwise return False.
         """
         for incoming_lane in intersection_map.keys():
             for successor in self.find_lanelet_by_id(incoming_lane).successor:
@@ -730,7 +740,7 @@ class ConversionLaneletNetwork(LaneletNetwork):
 
     def find_left_of(self, incomings):
         """
-            Find and add isLeftOf property for the incomings
+            Find and add isLeftOf property for the incomings using the right before left rule.
 
             :param incoming_data: incomings without isLeftOf
             :param incoming_data_id: List of the id of the incomings
@@ -748,7 +758,6 @@ class ConversionLaneletNetwork(LaneletNetwork):
             if angle < 0:
                 angle += 360
             angles.append((index, angle))
-        # angles.sort(key=lambda tup: tup[1])
         prev = -1
 
         is_left_of_map = dict()
@@ -763,7 +772,6 @@ class ConversionLaneletNetwork(LaneletNetwork):
                 # is left of the previous incoming
                 is_left_of = angles[prev][0]
                 data_index = angles[index][0]
-                # is_left_of_map[incomings[data_index]] = incomings[is_left_of]
                 incomings[data_index].left_of = incomings[is_left_of].incoming_id
                 min_angle = angle
                 if abs(prev) >= len(incomings):
@@ -780,10 +788,11 @@ class ConversionLaneletNetwork(LaneletNetwork):
                 else:
                     prev -= 1
 
-
     def combine_common_incoming_lanelets(self, intersection_map):
         """
         Returns a list of tuples which are pairs of adj incoming lanelets and the union of their successors
+        Args:
+            intersection_map: dict containing the information regarding a particular intersection
         """
         incoming_lane_ids = intersection_map.keys()
         combined_incoming_lane_ids = []
@@ -827,7 +836,6 @@ class ConversionLaneletNetwork(LaneletNetwork):
         :param incoming_lane: incoming lane from intersection
         :return: str: left or right or through
         """
-        # TODO: Find the direction of the successors of a particular lanelet.
         straight_threshold_angel = config.INTERSECTION_STRAIGHT_THRESHOLD
         assert 0 < straight_threshold_angel < 90
 
@@ -895,6 +903,8 @@ class ConversionLaneletNetwork(LaneletNetwork):
         """
         Adds all the traffic lights in the network object to the lanelet network
         Requires a list of all the traffic lights in the entire map
+        Args:
+            traffic_lights: list of all the traffic lights in the lanelet network
         """
         for traffic_light in traffic_lights:
             min_distance = float("inf")
@@ -910,10 +920,7 @@ class ConversionLaneletNetwork(LaneletNetwork):
                             if dist < min_distance:
                                 min_distance = dist
                                 id_for_adding = lanelet
-            # TODO: Add directions to traffic lights
             target_lanelet = self.find_lanelet_by_id(id_for_adding)
-            successor_directions = self.get_successor_directions(target_lanelet)
-
             self.add_traffic_light(traffic_light, {id_for_adding})
 
         # Traffic light directions are assigned once all traffic lights are assigned to lanelets so that it can be
@@ -924,7 +931,8 @@ class ConversionLaneletNetwork(LaneletNetwork):
     def add_traffic_light_directions(self):
         """
         Assigns directions to the traffic lights based on the directions of the lanelet successors.
-        Rule in case of no traffic lights < no of successor = left traffic light becomes left-straight and right traffic light remains right.
+        Rule in case of no traffic lights < no of successor = left traffic light becomes left-straight and
+        right traffic light remains right.
         """
         for intersection in self.intersections:
             for incoming in intersection.incomings:
@@ -1019,6 +1027,8 @@ class ConversionLaneletNetwork(LaneletNetwork):
         """
         Adds all the traffic signs in the network object to the lanelet network
         Requires a list of all the traffic signs in the entire map
+        Args:
+            traffic_signs: list of all the traffic signs
         """
 
         # Assign traffic signs to lanelets
@@ -1039,6 +1049,9 @@ class ConversionLaneletNetwork(LaneletNetwork):
         """
         Adds all the stop lines in the network object to the lanelet network
         Requires a list of all the stop lines in the entire map
+        Args:
+            stop_lines: list of all the stop lines
+
         """
         # Assign stop lines to lanelets
 

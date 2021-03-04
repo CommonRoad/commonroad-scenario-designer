@@ -50,6 +50,8 @@ class Network:
     def assign_country_ID(self, value: str):
         """
         Assign country ID according to the ISO 3166-1 3 letter standard
+        Args:
+            value: Name of location as a string
         """
         value = value.upper()
         if value in iso3166.countries_by_name:
@@ -68,7 +70,7 @@ class Network:
           opendrive:
 
         """
-        # TODO: Extract location information from Geotransofrmation
+        # TODO: Extract location information from Geotranformation in opendrive
         # proj_string_transformed = Transformer.from_pipeline(opendrive.header.geo_reference)
 
         self._link_index = LinkIndex()
@@ -123,6 +125,7 @@ class Network:
         for parametric_lane in self._planes:
 
             if filter_types is not None and parametric_lane.type not in filter_types:
+                # Remove lanelets from intersections dictionary that do not fit the filtered type criterion
                 self._link_index.clean_intersections(parametric_lane.id_)
                 continue
 
@@ -320,7 +323,13 @@ class LinkIndex:
 
     def add_intersection_link(self, parametric_lane_id, successor, reverse: bool = False):
         """
-        Similar to add_link, adds successors only in an intersection
+        Similar to add_link, adds successors only in an intersection_dict.
+        This is a temporary dictionary to accumulate junction information for each open drive junction as a dictionary
+        and then store it as a list in the intersection attribute of this class
+        Args:
+            parametric_lane_id: Lane_id as per concatenated format based on opendrive IDs
+            successor: Successor of the opendrive lane
+            reverse: If the direction is opposite
         """
         if reverse:
             self.add_intersection_link(successor, parametric_lane_id)
@@ -424,8 +433,9 @@ class LinkIndex:
                             incoming_road_id, connecting_road_id, lane_link.toId < 0
                         )
             # Extracting opendrive junction links to formulate commonroad intersections
-            # intersection_map = copy.copy(self._successors)
             self._intersections.append(self._intersection_dict)
+            # dictionary reinitialized to get junction information for next junction without appending values
+            # of previous junction
             self._intersection_dict = dict()
 
     def remove(self, parametric_lane_id):
@@ -483,7 +493,9 @@ class LinkIndex:
 
     def clean_intersections(self, parametric_lane_id):
         """
-        Remove lanes that are not part of the lanelet network
+        Remove lanes that are not part of the lanelet network based on the filters.
+        Args:
+            parametric_lane_id: ID of the lane that needs to be removed.
         """
         for intersection in self._intersections:
             if parametric_lane_id in intersection.keys():
@@ -494,6 +506,9 @@ class LinkIndex:
         """
         Lanelets are concatenated if possible, hence some lanelets ids that exist in intersections
         are no longer valid and also need to be replaced with the lanelet id they are concatenated with.
+        Args:
+            replacement_id_map: dict that maps lanelets to their new ids as per the concatenation results from
+            lanelet_network.concatenate_possible_lanelets
         """
         updated_intersection_maps = []
         for intersection_map in self.intersection_maps():
@@ -513,7 +528,11 @@ class LinkIndex:
 
     def update_intersection_lane_id(self, old_id_to_new_id_map):
         """
-        Updates the  ids in the lanelet map
+        Updates the lanelet ids in the intersection map from the concatenated opendrive based format to
+        the commonroad format
+        Args:
+            old_id_to_new_id_map: dict that maps the old lanelet ids to new lanelet ids using the attribute
+             lanelet_network.old_lanelet_ids()
         """
 
         updated_intersection_maps = []
@@ -521,47 +540,9 @@ class LinkIndex:
             intersection_map_new_id = dict()
             for incoming, connecting in intersection_map.items():
                 # Replacing keys/incoming ids with new ids
-                # print("from", incoming, "to", old_id_to_new_id_map[incoming])
                 new_incoming_id = old_id_to_new_id_map[incoming]
                 connecting = [old_id_to_new_id_map.get(item) for item in connecting]
                 intersection_map_new_id[new_incoming_id] = connecting
 
             updated_intersection_maps.append(intersection_map_new_id)
         self._intersections = updated_intersection_maps
-
-class TrafficSignalElements:
-    """
-    Class containing the information regarding how traffic signs lights and references are mapped to lanelets
-    """
-    def __init__(self):
-        self.traffic_sign_to_lanelet_mapper = defaultdict(list)
-        self.traffic_light_to_lanelet_mapper = defaultdict(list)
-        self.stopline_to_lanelet_mapper = defaultdict(list)
-        self.signal_reference_to_lanelet_id_mapper = defaultdict(list)
-
-    def replace_concatenated_lanes_for_traffic_signs_map(self, replacement_ids):
-        """
-        Replaces the lanelet id in the values of the dictionaries in order to update any lanelet
-        that has been concatenated with another lanelet
-        """
-        for key, lanelets in self.signal_reference_to_lanelet_id_mapper.items():
-            self.signal_reference_to_lanelet_id_mapper[key][:] = [replacement_ids[lane] if lane in replacement_ids.keys() else lane for lane in lanelets]
-        for key, lanelets in self.stopline_to_lanelet_mapper.items():
-            self.stopline_to_lanelet_mapper[key][:] = [replacement_ids[lane] if lane in replacement_ids.keys() else lane for lane in lanelets]
-        for key, lanelets in self.traffic_sign_to_lanelet_mapper.items():
-            self.traffic_sign_to_lanelet_mapper[key][:] = [replacement_ids[lane] if lane in replacement_ids.keys() else lane for lane in lanelets]
-        for key, lanelets in self.traffic_light_to_lanelet_mapper.items():
-            self.traffic_light_to_lanelet_mapper[key][:] = [replacement_ids[lane] if lane in replacement_ids.keys() else lane for lane in lanelets]
-
-    def update_traffic_signs_map_lane_id(self, lanelet_id_map):
-        """
-        Updates the ids of  all the lanelets stored in the dictionaries to the newly assigned lanelet id
-        """
-        for key, lanelets in self.signal_reference_to_lanelet_id_mapper.items():
-            self.signal_reference_to_lanelet_id_mapper[key][:] = [lanelet_id_map[lane] if lane in lanelet_id_map.keys() else lane for lane in lanelets]
-        for key, lanelets in self.stopline_to_lanelet_mapper.items():
-            self.stopline_to_lanelet_mapper[key][:] = [lanelet_id_map[lane] if lane in lanelet_id_map.keys() else lane for lane in lanelets]
-        for key, lanelets in self.traffic_sign_to_lanelet_mapper.items():
-            self.traffic_sign_to_lanelet_mapper[key][:] = [lanelet_id_map[lane] if lane in lanelet_id_map.keys() else lane for lane in lanelets]
-        for key, lanelets in self.traffic_light_to_lanelet_mapper.items():
-            self.traffic_light_to_lanelet_mapper[key][:] = [lanelet_id_map[lane] if lane in lanelet_id_map.keys() else lane for lane in lanelets]
