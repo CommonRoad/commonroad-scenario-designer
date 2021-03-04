@@ -2,7 +2,7 @@
 This module holds the classes required for the intermediate format
 """
 
-__author__ = "Behtarin Ferdousi"
+__author__ = "Behtarin Ferdousi, Fabian Höltke"
 
 import copy
 import numpy as np
@@ -197,7 +197,7 @@ def add_is_left_of(incoming_data, incoming_data_id):
     :return: incomings with the isLeftOf assigned
     """
 
-    # Choose a reference incoming vector
+    # choose a reference incoming vector
     ref = incoming_data[0]['waypoints'][0] - incoming_data[0]['waypoints'][-1]
     angles = [(0, 0)]
 
@@ -219,7 +219,7 @@ def add_is_left_of(incoming_data, incoming_data_id):
         if angle < 0:
             angle += 360
         
-        # add is left_of relation if angle is less than intersection straight treshold
+        # add is_left_of relation if angle is less than intersection straight treshold
         if angle <= 180 - config.INTERSECTION_STRAIGHT_THRESHOLD:
             # is left of the previous incoming
             is_left_of = angles[prev][0]
@@ -227,17 +227,6 @@ def add_is_left_of(incoming_data, incoming_data_id):
             incoming_data[data_index].update({'isLeftOf': incoming_data_id[is_left_of]})
         
         prev = index
-        
-        # is_left_of = angles[prev][0]
-        # data_index = angles[index][0]
-
-        # straight1 = self.find_edge_by_id(incoming_data[data_index].straight)
-        # straight2 = self.find_edge_by_id(incoming_data[is_left_of].straight)
-        # if straight1.adjacent_left in straight2.adjacent_left:
-        #     continue
-
-        # incoming_data[data_index].update({'isLeftOf': incoming_data_id[is_left_of]})
-        # prev = index
 
     return incoming_data
 
@@ -652,28 +641,19 @@ class IntermediateFormat:
     
 
     def intersection_enhancement(self):
+        """
+        Enhance intersections with traffic lights. 
+        Method will remove intersections found in osm and add its own instead.
+        """
 
-        # keep track of all incoming lanes in scenario
-        all_incoming_lanes_in_scenario = []
-        for intersection in self.intersections:
-            has_traffic_lights = False
-            incoming_lanes = []
+        def remove_non_intersection_lights(all_incoming_lanes_in_scenario):
+            traffic_lights_on_intersections = []
+            for incoming_lane in all_incoming_lanes_in_scenario:
+                if incoming_lane.traffic_lights:
+                    traffic_lights_on_intersections.extend(incoming_lane.traffic_lights)
+            self.traffic_lights = list(filter(lambda x: x.traffic_light_id in traffic_lights_on_intersections, self.traffic_lights))
 
-            #find all incoming lanes in intersection and determine if they have traffic lights
-            for incoming in intersection.incomings:
-                for incoming_lane in incoming.incoming_lanelets:
-                    lane = self.find_edge_by_id(incoming_lane)
-                    if lane.traffic_lights:
-                        has_traffic_lights = True
-                    incoming_lanes.append(lane)
-            # extend all incoming lanes in scenario
-            all_incoming_lanes_in_scenario.extend(incoming_lanes)
-
-            # modify intersection if traffic lights where found, else skip to next intersection
-            if not has_traffic_lights:
-                continue
-
-            # remove existing traffic lights
+        def remove_existing_traffic_lights(incoming_lanes):
             for lane in incoming_lanes:
                 if lane.traffic_lights:
                     for light_id in lane.traffic_lights:
@@ -681,13 +661,12 @@ class IntermediateFormat:
                         if light is not None:
                             self.traffic_lights.remove(light)
                 lane.traffic_lights = set()
-
-            # create traffic light generator based on number of incomings
+        
+        def create_new_traffic_lights(intersection):
+            # create traffic light generator for intersection based on number of incomings
             traffic_light_generator = TrafficLightGenerator(len(intersection.incomings))
 
-            # add new traffic light per incoming
-
-            # begin with incoming that is not left of any
+            # begin with incoming that is not left of any other
             left_of_map =  {}
             for incoming in intersection.incomings:
                 left_of_map[incoming] = incoming.left_of
@@ -698,16 +677,18 @@ class IntermediateFormat:
                 if key.incoming_id not in left_of_map.values() and key.left_of is not None:
                     incoming = key
                     break
-            # if unable fot find any than begin with any incoming (4 incomings)
+            # if unable to find any than begin with any other incoming (4 incomings)
             if incoming is None:
                 incoming = intersection.incomings[0]
             processed_incomings = set()
+
+            # loop over incomings
             while incoming is not None:
 
                 if incoming in processed_incomings:
                     break
 
-                # postition of traffic lights
+                # postition of traffic light
                 for lane_id in incoming.incoming_lanelets:
                     edge = self.find_edge_by_id(lane_id)
                     if not edge.adjacent_right:
@@ -727,16 +708,37 @@ class IntermediateFormat:
                 processed_incomings.add(incoming)
                 # new incoming is incoming with left_of id of current incoming, else None
                 incoming = next((i for i in intersection.incomings if i.incoming_id == incoming.left_of), None)
-                #edge case for only 2 incomings:
+                # edge case if only 2 incomings were found:
                 if len(intersection.incomings) == 2:
                     incoming = intersection.incomings[-1]
 
-        # remove traffic lights that are not part of any intersection
-        traffic_lights_on_intersections = []
-        for incoming_lane in all_incoming_lanes_in_scenario:
-            if incoming_lane.traffic_lights:
-                traffic_lights_on_intersections.extend(incoming_lane.traffic_lights)
-        self.traffic_lights = list(filter(lambda x: x.traffic_light_id in traffic_lights_on_intersections, self.traffic_lights))
 
+        # keep track of all incoming lanes in scenario
+        all_incoming_lanes_in_scenario = []
+
+        # iterate over all intersections in scenario
+        for intersection in self.intersections:
+            has_traffic_lights = False
+            incoming_lanes = []
+
+            #find all incoming lanes in intersection and determine if they have traffic lights
+            for incoming in intersection.incomings:
+                for incoming_lane in incoming.incoming_lanelets:
+                    lane = self.find_edge_by_id(incoming_lane)
+                    if lane.traffic_lights:
+                        has_traffic_lights = True
+                    incoming_lanes.append(lane)
+            # extend all incoming lanes in scenario
+            all_incoming_lanes_in_scenario.extend(incoming_lanes)
+
+            # modify intersection if traffic lights where found, else skip to next intersection
+            if has_traffic_lights:
+                # remove existing traffic lights
+                remove_existing_traffic_lights(incoming_lanes)
+                # create traffic light generator based on number of incomings
+                create_new_traffic_lights(intersection)
+
+        # remove traffic lights that are not part of any intersection
+        remove_non_intersection_lights(all_incoming_lanes_in_scenario)
         # clean up and remove invalid references
         self.remove_invalid_references()
