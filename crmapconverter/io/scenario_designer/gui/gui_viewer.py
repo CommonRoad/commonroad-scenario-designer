@@ -36,7 +36,6 @@ from crmapconverter.io.scenario_designer.sumo_gui_modules.gui_sumo_simulation im
 if SUMO_AVAILABLE:
     from crmapconverter.sumo_map.config import SumoConfig
 from crmapconverter.io.scenario_designer.misc.util import Observable
-from crmapconverter.io.scenario_designer.gui.gui_toolbox import LaneletInformationToolbox
 
 __author__ = "Benjamin Orthen, Stefan Urban, Max Winklhofer, Guyue Huang, Max Fruehauf"
 __copyright__ = "TUM Cyber-Physical Systems Group"

@@ -13,11 +13,11 @@ from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as Navigatio
 from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
 from commonroad.scenario.scenario import Scenario
-from commonroad.scenario.lanelet import Lanelet, LaneletType, LaneletNetwork
+from commonroad.scenario.lanelet import LaneletNetwork
 from commonroad.scenario.traffic_sign import *
 
 from crmapconverter.io.scenario_designer.gui_resources.MainWindow import Ui_mainWindow
-from crmapconverter.io.scenario_designer.gui.gui_toolbox import RoadNetworkToolbox, LaneletInformationToolbox
+from crmapconverter.io.scenario_designer.gui.gui_toolbox import RoadNetworkToolbox, ObstacleToolbox
 from crmapconverter.io.scenario_designer.gui.gui_settings import GUISettings
 from crmapconverter.io.scenario_designer.gui.gui_viewer import LaneletList, IntersectionList, find_intersection_by_id, \
     AnimatedViewer
@@ -617,21 +617,29 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.tool1.setWidget(self.uppertoolBox)
         self.addDockWidget(Qt.LeftDockWidgetArea, self.tool1)
 
+        self.uppertoolBox2 = ObstacleToolbox()
+        self.tool2 = QDockWidget("Obstacle Toolbox")
+        self.tool2.setFloating(True)
+        self.tool2.setFeatures(QDockWidget.AllDockWidgetFeatures)
+        self.tool2.setAllowedAreas(Qt.RightDockWidgetArea)
+        self.tool2.setWidget(self.uppertoolBox2)
+        self.addDockWidget(Qt.RightDockWidgetArea, self.tool2)
+
         self.uppertoolBox.button_traffic_signs_settings.clicked.connect(lambda: self.create_traffic_signs_settings())
         self.uppertoolBox.button_traffic_signs.clicked.connect(lambda: self.traffic_signs())
         self.uppertoolBox.button_traffic_light.clicked.connect(lambda: self.traffic_light())
         self.uppertoolBox.delete_traffic_sign.clicked.connect(lambda: self.delete_traffic_element())
         self.uppertoolBox.edit_button_traffic_light.clicked.connect(lambda: self.edittrafficlight())
 
-        self.uppertoolBox.button_forwards.clicked.connect(lambda: self.click_straight(self.lanelet_pos_x, self.lanelet_pos_y))
-        self.uppertoolBox.button_lanelet_settings.clicked.connect(lambda: self.forwards())
-        self.uppertoolBox.button_turn_right.clicked.connect(lambda: self.click_curve(self.curve_direction, self.curve_pos_x, self.curve_pos_y))
-        self.uppertoolBox.button_curve_settings.clicked.connect(self.curve)
-
-        self.uppertoolBox.button_fit_to_predecessor.clicked.connect(lambda: self.fit_func())
-        self.uppertoolBox.button_adjacent.clicked.connect(lambda: self.adjacent())
-        self.uppertoolBox.button_connect_lanelets.clicked.connect(lambda: self.connect_lanelets())
-        self.uppertoolBox.button_remove_lanelet.clicked.connect(lambda: self.remove_lanelet())
+        # self.uppertoolBox.button_forwards.clicked.connect(lambda: self.click_straight(self.lanelet_pos_x, self.lanelet_pos_y))
+        # self.uppertoolBox.button_lanelet_settings.clicked.connect(lambda: self.forwards())
+        # self.uppertoolBox.button_turn_right.clicked.connect(lambda: self.click_curve(self.curve_direction, self.curve_pos_x, self.curve_pos_y))
+        # self.uppertoolBox.button_curve_settings.clicked.connect(self.curve)
+        #
+        # self.uppertoolBox.button_fit_to_predecessor.clicked.connect(lambda: self.fit_func())
+        # self.uppertoolBox.button_adjacent.clicked.connect(lambda: self.adjacent())
+        # self.uppertoolBox.button_connect_lanelets.clicked.connect(lambda: self.connect_lanelets())
+        # self.uppertoolBox.button_remove_lanelet.clicked.connect(lambda: self.remove_lanelet())
 
         self.uppertoolBox.button_X.clicked.connect(lambda: self.click_x_crossing())
         self.uppertoolBox.button_T.clicked.connect(lambda: self.click_t_crossing())
@@ -859,12 +867,12 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
     def create_sumobox(self):
         """Function to create the sumo toolbox(bottom toolbox)."""
-        """self.tool2 = QDockWidget("Sumo Simulation", self)
+        self.tool2 = QDockWidget("Sumo Simulation", self)
         self.tool2.setFeatures(QDockWidget.AllDockWidgetFeatures)
         self.tool2.setAllowedAreas(Qt.LeftDockWidgetArea)
         self.tool2.setWidget(self.sumobox)
         self.addDockWidget(Qt.LeftDockWidgetArea, self.tool2)
-        self.tool2.setMaximumHeight(400)"""
+        self.tool2.setMaximumHeight(400)
 
     def detect_slider_clicked(self):
         self.slider_clicked = True
