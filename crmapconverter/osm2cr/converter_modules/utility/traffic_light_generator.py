@@ -45,7 +45,9 @@ class TrafficLightGenerator:
         offset = self.current_time_offset
 
         # change time offset for cycle start based on number of incomings
-        if self.number_incomings <= 4:
+        if self.number_incomings <=2:
+            pass
+        elif self.number_incomings <= 4:
             self.current_time_offset += int(self.cycle_length / 2)
         else: # > 4
             self.current_time_offset += int(self.cycle_length / 3)

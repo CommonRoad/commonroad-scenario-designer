@@ -218,11 +218,26 @@ def add_is_left_of(incoming_data, incoming_data_id):
         angle = angles[index][1] - angles[prev][1]
         if angle < 0:
             angle += 360
-            
-        is_left_of = angles[prev][0]
-        data_index = angles[index][0]
-        incoming_data[data_index].update({'isLeftOf': incoming_data_id[is_left_of]})
+        
+        # add is left_of relation if angle is less than intersection straight treshold
+        if angle <= 180 - config.INTERSECTION_STRAIGHT_THRESHOLD:
+            # is left of the previous incoming
+            is_left_of = angles[prev][0]
+            data_index = angles[index][0]
+            incoming_data[data_index].update({'isLeftOf': incoming_data_id[is_left_of]})
+        
         prev = index
+        
+        # is_left_of = angles[prev][0]
+        # data_index = angles[index][0]
+
+        # straight1 = self.find_edge_by_id(incoming_data[data_index].straight)
+        # straight2 = self.find_edge_by_id(incoming_data[is_left_of].straight)
+        # if straight1.adjacent_left in straight2.adjacent_left:
+        #     continue
+
+        # incoming_data[data_index].update({'isLeftOf': incoming_data_id[is_left_of]})
+        # prev = index
 
     return incoming_data
 
@@ -670,9 +685,22 @@ class IntermediateFormat:
             # create traffic light generator based on number of incomings
             traffic_light_generator = TrafficLightGenerator(len(intersection.incomings))
 
-            #TODO fix is left of relation
             # add new traffic light per incoming
-            incoming = intersection.incomings[0]
+
+            # begin with incoming that is not left of any
+            left_of_map =  {}
+            for incoming in intersection.incomings:
+                left_of_map[incoming] = incoming.left_of
+
+            incoming = None
+            # try to find incoming that is not right of any other incoming (3 incomings)
+            for key in left_of_map:
+                if key.incoming_id not in left_of_map.values() and key.left_of is not None:
+                    incoming = key
+                    break
+            # if unable fot find any than begin with any incoming (4 incomings)
+            if incoming is None:
+                incoming = intersection.incomings[0]
             processed_incomings = set()
             while incoming is not None:
 
@@ -699,6 +727,9 @@ class IntermediateFormat:
                 processed_incomings.add(incoming)
                 # new incoming is incoming with left_of id of current incoming, else None
                 incoming = next((i for i in intersection.incomings if i.incoming_id == incoming.left_of), None)
+                #edge case for only 2 incomings:
+                if len(intersection.incomings) == 2:
+                    incoming = intersection.incomings[-1]
 
         # remove traffic lights that are not part of any intersection
         traffic_lights_on_intersections = []
