@@ -218,11 +218,10 @@ def add_is_left_of(incoming_data, incoming_data_id):
         angle = angles[index][1] - angles[prev][1]
         if angle < 0:
             angle += 360
-        if config.LANE_SEGMENT_ANGLE < angle <= 90 + config.LANE_SEGMENT_ANGLE:
-            # is left of the previous incoming
-            is_left_of = angles[prev][0]
-            data_index = angles[index][0]
-            incoming_data[data_index].update({'isLeftOf': incoming_data_id[is_left_of]})
+            
+        is_left_of = angles[prev][0]
+        data_index = angles[index][0]
+        incoming_data[data_index].update({'isLeftOf': incoming_data_id[is_left_of]})
         prev = index
 
     return incoming_data
@@ -638,9 +637,6 @@ class IntermediateFormat:
     
 
     def intersection_enhancement(self):
-
-        #TODO reorder incomings
-
 
         # keep track of all incoming lanes in scenario
         all_incoming_lanes_in_scenario = []
