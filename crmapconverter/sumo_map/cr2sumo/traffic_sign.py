@@ -132,7 +132,7 @@ class TrafficSignEncoder:
                 return curvatures[edge]
 
             curvature = np.max([
-                compute_max_curvature_from_polyline(np.array(lane._shape))
+                compute_max_curvature_from_polyline(np.array(lane.shape))
                 for lane in edge.getLanes()
             ]) if edge.getLanes() else float("-inf")
             curvature = np.max([curvature] + [compute_max_path_curvature(parent) for parent in parents[edge]])

@@ -393,9 +393,9 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
 
         for edge in self.edges.values():
             for e in edge.getToNode().getOutgoing():
-                edge.addOutgoing(e)
+                edge.add_outgoing(e)
             for e in edge.getFromNode().getIncoming():
-                edge.addIncoming(e)
+                edge.add_incoming(e)
 
     def _init_connections(self):
         """
@@ -840,8 +840,8 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                                   if c.getViaLaneID() == succ_lane_id
                                   or (c.getFrom() == str(from_lane.getEdge().getID()) and
                                       c.getTo() == str(succ_lane.getEdge().getID()) and
-                                      c.getFromLane() == from_lane.getIndex() and
-                                      c.getToLane() == succ_lane.getIndex())
+                                      c.getFromLane() == from_lane.index() and
+                                      c.getToLane() == succ_lane.index())
                                   )
                 # compute angle
                 from_dir = lanelet.center_vertices[-1] - lanelet.center_vertices[-2]

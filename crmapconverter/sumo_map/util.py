@@ -453,7 +453,7 @@ def intersect_lanelets_line(lanelets: Iterable[Lanelet],
 
 def edge_centroid(e: Edge) -> np.ndarray:
     """Computes the centroid of an edge based on the vertices of it's lanes"""
-    pts = np.array([v for lane in e.getLanes() for v in lane._shape])
+    pts = np.array([v for lane in e.getLanes() for v in lane.shape])
     return np.mean(pts, axis=0)
 
 

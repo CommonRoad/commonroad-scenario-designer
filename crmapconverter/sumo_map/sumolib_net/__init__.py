@@ -19,11 +19,10 @@ This file contains a content handler for parsing sumo network xml files.
 It uses other classes from this module to represent the road network.
 """
 
-from __future__ import print_function
-from __future__ import absolute_import
+# from __future__ import print_function
+# from __future__ import absolute_import
 import os
 import math
-from xml.sax import parse, handler
 from collections import defaultdict
 from typing import List, Dict, Tuple, Set, Optional, Callable, Union, TypeVar, Iterable
 from copy import deepcopy, copy
@@ -33,601 +32,573 @@ import sumolib
 import sumolib.files
 
 from xml.etree import cElementTree as ET
+from xml.sax import parse, handler
+
 from enum import Enum, unique
 
-
-class Net:
-    """The whole sumo network."""
-
-    def __init__(self):
-        self._location = {}
-        self._id2node = {}
-        self._id2edge = {}
-        self._crossings_and_walkingAreas = set()
-        self._id2tls = {}
-        self._nodes = []
-        self._edges = []
-        self._tlss = []
-        self._ranges = [[10000, -10000], [10000, -10000]]
-        self._roundabouts = []
-        self._rtree = None
-        self._allLanes = []
-        self._origIdx = None
-        self.hasWarnedAboutMissingRTree = False
-
-    @classmethod
-    def from_net_xml(cls, filename: str, **others):
-        netreader = NetReader(**others)
-        try:
-            if not os.path.isfile(filename):
-                raise Exception(f"Network file {filename} not found")
-            parse(filename, netreader)
-        except Exception as e:
-            raise Exception(
-                "Please mind that the network format has changed in 0.13.0, you may need to update your network!") from e
-        return netreader.getNet()
-
-    def setLocation(self, netOffset, convBoundary, origBoundary,
-                    projParameter):
-        self._location["netOffset"] = netOffset
-        self._location["convBoundary"] = convBoundary
-        self._location["origBoundary"] = origBoundary
-        self._location["projParameter"] = projParameter
-
-    def addNode(self, id, type=None, coord=None, incLanes=None, intLanes=None):
-        if id is None:
-            return None
-        if id not in self._id2node:
-            n = node.Node(id, type, coord, incLanes, intLanes)
-            self._nodes.append(n)
-            self._id2node[id] = n
-        self.setAdditionalNodeInfo(self._id2node[id], type, coord, incLanes,
-                                   intLanes)
-        return self._id2node[id]
-
-    def setAdditionalNodeInfo(self,
-                              node,
-                              type,
-                              coord,
-                              incLanes,
-                              intLanes=None):
-        if coord is not None and node._coord is None:
-            node._coord = coord
-            self._ranges[0][0] = min(self._ranges[0][0], coord[0])
-            self._ranges[0][1] = max(self._ranges[0][1], coord[0])
-            self._ranges[1][0] = min(self._ranges[1][0], coord[1])
-            self._ranges[1][1] = max(self._ranges[1][1], coord[1])
-        if incLanes is not None and node._incLanes is None:
-            node._incLanes = incLanes
-        if intLanes is not None and node._intLanes is None:
-            node._intLanes = intLanes
-        if type is not None and node._type is None:
-            node._type = type
-
-    def addEdge(self, id, fromID, toID, prio, function, name):
-        if id not in self._id2edge:
-            fromN = self.addNode(fromID)
-            toN = self.addNode(toID)
-            e = edge.Edge(id, fromN, toN, prio, function, name)
-            self._edges.append(e)
-            self._id2edge[id] = e
-        return self._id2edge[id]
-
-    def addLane(self, edge, speed, length, width, allow=None, disallow=None):
-        return lane.Lane(edge, speed, length, width, allow, disallow)
-
-    def addRoundabout(self, nodes, edges=None):
-        r = roundabout.Roundabout(nodes, edges)
-        self._roundabouts.append(r)
-        return r
-
-    def addConnection(self,
-                      fromEdge,
-                      toEdge,
-                      fromlane,
-                      tolane,
-                      direction,
-                      tls,
-                      tllink,
-                      state,
-                      viaLaneID=None):
-        conn = connection.Connection(fromEdge, toEdge, fromlane, tolane,
-                                     direction, tls, tllink, state, viaLaneID)
-        fromEdge.add_outgoing(conn)
-        fromlane.add_outgoing(conn)
-        toEdge.addIncoming(conn)
-
-    def getEdges(self):
-        return self._edges
-
-    def getRoundabouts(self):
-        return self._roundabouts
-
-    def hasEdge(self, id):
-        return id in self._id2edge
-
-    def getEdge(self, id):
-        return self._id2edge[id]
-
-    def getLane(self, laneID):
-        edge_id, lane_index = laneID.rsplit("_", 1)
-        return self.getEdge(edge_id).getLane(int(lane_index))
-
-    def _initRTree(self, shapeList, includeJunctions=True):
-        import rtree
-        self._rtree = rtree.index.Index()
-        self._rtree.interleaved = True
-        for ri, shape in enumerate(shapeList):
-            self._rtree.add(ri, shape.getBoundingBox(includeJunctions))
-
-    # Please be aware that the resulting list of edges is NOT sorted
-    def getNeighboringEdges(self, x, y, r=0.1, includeJunctions=True):
-        edges = []
-        try:
-            if self._rtree is None:
-                self._initRTree(self._edges, includeJunctions)
-            for i in self._rtree.intersection((x - r, y - r, x + r, y + r)):
-                e = self._edges[i]
-                d = sumolib.geomhelper.distancePointToPolygon(
-                    (x, y), e.getShape(includeJunctions))
-                if d < r:
-                    edges.append((e, d))
-        except ImportError:
-            if not self.hasWarnedAboutMissingRTree:
-                print(
-                    "Warning: Module 'rtree' not available. Using brute-force fallback"
-                )
-                self.hasWarnedAboutMissingRTree = True
-
-            for edge in self._edges:
-                d = sumolib.geomhelper.distancePointToPolygon(
-                    (x, y), edge.getShape(includeJunctions))
-                if d < r:
-                    edges.append((edge, d))
-        return edges
-
-    def getNeighboringLanes(self, x, y, r=0.1, includeJunctions=True):
-        lanes = []
-        try:
-            if self._rtree is None:
-                if not self._allLanes:
-                    for edge in self._edges:
-                        self._allLanes += edge.getLanes()
-                self._initRTree(self._allLanes, includeJunctions)
-            for i in self._rtree.intersection((x - r, y - r, x + r, y + r)):
-                l = self._allLanes[i]
-                d = sumolib.geomhelper.distancePointToPolygon(
-                    (x, y), l.getShape(includeJunctions))
-                if d < r:
-                    lanes.append((l, d))
-        except ImportError:
-            for edge in self._edges:
-                for l in edge.getLanes():
-                    d = sumolib.geomhelper.distancePointToPolygon(
-                        (x, y), l.getShape(includeJunctions))
-                    if d < r:
-                        lanes.append((l, d))
-        return lanes
-
-    def hasNode(self, id):
-        return id in self._id2node
-
-    def getNode(self, id):
-        return self._id2node[id]
-
-    def getNodes(self):
-        return self._nodes
-
-    def getTLSSecure(self, tlid):
-        if tlid in self._id2tls:
-            tls = self._id2tls[tlid]
-        else:
-            tls = TLS(tlid)
-            self._id2tls[tlid] = tls
-            self._tlss.append(tls)
-        return tls
-
-    def getTrafficLights(self):
-        return self._tlss
-
-    def addTLS(self, tlid, inLane, outLane, linkNo):
-        tls = self.getTLSSecure(tlid)
-        tls.add_connection(inLane, outLane, linkNo)
-        return tls
-
-    def addTLSProgram(self, tlid, programID, offset, type, removeOthers):
-        tls = self.getTLSSecure(tlid)
-        program = TLSProgram(programID, offset, type)
-        if removeOthers:
-            tls.clear_programs()
-        tls.add_program(program)
-        return program
-
-    def setFoes(self, junctionID, index, foes, prohibits):
-        self._id2node[junctionID].setFoes(index, foes, prohibits)
-
-    def forbids(self, possProhibitor, possProhibited):
-        return possProhibitor.getFrom().getToNode().forbids(
-            possProhibitor, possProhibited)
-
-    def getDownstreamEdges(self, edge, distance, stopOnTLS):
-        ret = []
-        seen = set()
-        toProc = []
-        toProc.append([edge, 0, []])
-        while not len(toProc) == 0:
-            ie = toProc.pop()
-            if ie[0] in seen:
-                continue
-            seen.add(ie[0])
-            if ie[1] + ie[0].getLength() >= distance:
-                ret.append([
-                    ie[0], ie[0].getLength() + ie[1] - distance, ie[2], False
-                ])
-                continue
-            if len(ie[0]._incoming) == 0:
-                ret.append([ie[0], ie[0].getLength() + ie[1], ie[2], True])
-                continue
-            mn = []
-            hadTLS = False
-            for ci in ie[0]._incoming:
-                if ci not in seen:
-                    prev = copy(ie[2])
-                    if stopOnTLS and ci._tls and ci != edge and not hadTLS:
-                        ret.append([ie[0], ie[1], prev, True])
-                        hadTLS = True
-                    else:
-                        prev.append(ie[0])
-                        mn.append([ci, ie[0].getLength() + ie[1], prev])
-            if not hadTLS:
-                toProc.extend(mn)
-        return ret
-
-    def getEdgesByOrigID(self, origID):
-        if self._origIdx is None:
-            self._origIdx = defaultdict(set)
-            for edge in self._edges:
-                for lane in edge.getLanes():
-                    for oID in lane.getParam("origId", "").split():
-                        self._origIdx[oID].add(edge)
-        return self._origIdx[origID]
-
-    def getBBoxXY(self):
-        """
-        Get the bounding box (bottom left and top right coordinates) for a net;
-        Coordinates are in X and Y (not Lat and Lon)
-
-        :return [(bottom_left_X, bottom_left_Y), (top_right_X, top_right_Y)]
-        """
-        return [(self._ranges[0][0], self._ranges[1][0]),
-                (self._ranges[0][1], self._ranges[1][1])]
-
-    # the diagonal of the bounding box of all nodes
-    def getBBoxDiameter(self):
-        return math.sqrt((self._ranges[0][0] - self._ranges[0][1]) ** 2 +
-                         (self._ranges[1][0] - self._ranges[1][1]) ** 2)
-
-    def getGeoProj(self):
-        import pyproj
-        p1 = self._location["projParameter"].split()
-        params = {}
-        for p in p1:
-            ps = p.split("=")
-            if len(ps) == 2:
-                params[ps[0]] = ps[1]
-            else:
-                params[ps[0]] = True
-        return pyproj.Proj(projparams=params)
-
-    def getLocationOffset(self):
-        """ offset to be added after converting from geo-coordinates to UTM"""
-        return list(map(float, self._location["netOffset"].split(",")))
-
-    def convertLonLat2XY(self, lon, lat, rawUTM=False):
-        x, y = self.getGeoProj()(lon, lat)
-        if rawUTM:
-            return x, y
-        else:
-            x_off, y_off = self.getLocationOffset()
-            return x + x_off, y + y_off
-
-    def convertXY2LonLat(self, x, y, rawUTM=False):
-        if not rawUTM:
-            x_off, y_off = self.getLocationOffset()
-            x -= x_off
-            y -= y_off
-        return self.getGeoProj()(x, y, inverse=True)
-
-    def move(self, dx, dy, dz=0):
-        for n in self._nodes:
-            n._coord = (n._coord[0] + dx, n._coord[1] + dy, n._coord[2] + dz)
-        for e in self._edges:
-            for l in e._lanes:
-                l._shape = [(p[0] + dx, p[1] + dy, p[2] + dz)
-                            for p in l.getShape3D()]
-            e.rebuildShape()
-
-
-class NetReader(handler.ContentHandler):
-    """Reads a network, storing the edge geometries, lane numbers and max. speeds"""
-
-    def __init__(self, **others):
-        self._net = others.get('net', Net())
-        self._currentEdge = None
-        self._currentNode = None
-        self._currentLane = None
-        self._withPhases = others.get('withPrograms', False)
-        self._latestProgram = others.get('withLatestPrograms', False)
-        if self._latestProgram:
-            self._withPhases = True
-        self._withConnections = others.get('withConnections', True)
-        self._withFoes = others.get('withFoes', True)
-        self._withInternal = others.get('withInternal', False)
-
-    def startElement(self, name, attrs):
-        if name == 'location':
-            self._net.setLocation(attrs["netOffset"], attrs["convBoundary"],
-                                  attrs["origBoundary"],
-                                  attrs["projParameter"])
-        if name == 'edge':
-            function = attrs.get('function', '')
-            if function == '' or self._withInternal:
-                prio = -1
-                if 'priority' in attrs:
-                    prio = int(attrs['priority'])
-
-                # get the  ids
-                edgeID = attrs['id']
-                fromNodeID = attrs.get('from', None)
-                toNodeID = attrs.get('to', None)
-
-                # for internal junctions use the junction's id for from and to node
-                if function == 'internal':
-                    fromNodeID = toNodeID = edgeID[1:edgeID.rfind('_')]
-
-                self._currentEdge = self._net.addEdge(edgeID, fromNodeID,
-                                                      toNodeID, prio, function,
-                                                      attrs.get('name', ''))
-
-                self._currentEdge.setRawShape(
-                    convertShape(attrs.get('shape', '')))
-            else:
-                if function in ['crossing', 'walkingarea']:
-                    self._net._crossings_and_walkingAreas.add(attrs['id'])
-                self._currentEdge = None
-        if name == 'lane' and self._currentEdge is not None:
-            width = float(attrs['width']) if 'width' in attrs else 'default'
-            self._currentLane = self._net.addLane(self._currentEdge,
-                                                  float(attrs['speed']),
-                                                  float(attrs['length']),
-                                                  width, attrs.get('allow'),
-                                                  attrs.get('disallow'))
-            self._currentLane.setShape(convertShape(attrs.get('shape', '')))
-        if name == 'junction':
-            if attrs['id'][0] != ':':
-                intLanes = None
-                if self._withInternal:
-                    intLanes = attrs["intLanes"].split(" ")
-                self._currentNode = self._net.addNode(
-                    attrs['id'], attrs['type'],
-                    tuple(
-                        map(float, [
-                            attrs['x'], attrs['y'],
-                            attrs['z'] if 'z' in attrs else '0'
-                        ])), attrs['incLanes'].split(" "), intLanes)
-                self._currentNode.setShape(convertShape(attrs.get('shape',
-                                                                  '')))
-        if name == 'succ' and self._withConnections:  # deprecated
-            if attrs['edge'][0] != ':':
-                self._currentEdge = self._net.getEdge(attrs['edge'])
-                self._currentLane = attrs['lane']
-                self._currentLane = int(
-                    self._currentLane[self._currentLane.rfind('_') + 1:])
-            else:
-                self._currentEdge = None
-        if name == 'succlane' and self._withConnections:  # deprecated
-            lid = attrs['lane']
-            if lid[0] != ':' and lid != "SUMO_NO_DESTINATION" and self._currentEdge:
-                connected = self._net.getEdge(lid[:lid.rfind('_')])
-                tolane = int(lid[lid.rfind('_') + 1:])
-                if 'tl' in attrs and attrs['tl'] != "":
-                    tl = attrs['tl']
-                    tllink = int(attrs['linkIdx'])
-                    tlid = attrs['tl']
-                    toEdge = self._net.getEdge(lid[:lid.rfind('_')])
-                    tolane2 = toEdge._lanes[tolane]
-                    tls = self._net.addTLS(
-                        tlid, self._currentEdge._lanes[self._currentLane],
-                        tolane2, tllink)
-                    self._currentEdge.setTLS(tls)
-                else:
-                    tl = ""
-                    tllink = -1
-                toEdge = self._net.getEdge(lid[:lid.rfind('_')])
-                tolane = toEdge._lanes[tolane]
-                viaLaneID = attrs['via']
-                self._net.addConnection(
-                    self._currentEdge, connected,
-                    self._currentEdge._lanes[self._currentLane], tolane,
-                    attrs['dir'], tl, tllink, attrs['state'], viaLaneID)
-        if name == 'connection' and self._withConnections and (
-            attrs['from'][0] != ":" or self._withInternal):
-            fromEdgeID = attrs['from']
-            toEdgeID = attrs['to']
-            if not (fromEdgeID in self._net._crossings_and_walkingAreas
-                    or toEdgeID in self._net._crossings_and_walkingAreas):
-                fromEdge = self._net.getEdge(fromEdgeID)
-                toEdge = self._net.getEdge(toEdgeID)
-                fromLane = fromEdge.getLane(int(attrs['fromLane']))
-                toLane = toEdge.getLane(int(attrs['toLane']))
-                if 'tl' in attrs and attrs['tl'] != "":
-                    tl = attrs['tl']
-                    tllink = int(attrs['linkIndex'])
-                    tls = self._net.addTLS(tl, fromLane, toLane, tllink)
-                    fromEdge.setTLS(tls)
-                else:
-                    tl = ""
-                    tllink = -1
-                try:
-                    viaLaneID = attrs['via']
-                except KeyError:
-                    viaLaneID = ''
-
-                self._net.addConnection(fromEdge, toEdge, fromLane, toLane,
-                                        attrs['dir'], tl, tllink,
-                                        attrs['state'], viaLaneID)
-
-        # 'row-logic' is deprecated!!!
-        if self._withFoes and name == 'ROWLogic':
-            self._currentNode = attrs['id']
-        if name == 'logicitem' and self._withFoes:  # deprecated
-            self._net.setFoes(self._currentNode, int(attrs['request']),
-                              attrs["foes"], attrs["response"])
-        if name == 'request' and self._withFoes:
-            self._currentNode.setFoes(int(attrs['index']), attrs["foes"],
-                                      attrs["response"])
-        # tl-logic is deprecated!!! NOTE: nevertheless, this is still used by
-        # cr_net_generator... (Leo)
-        if self._withPhases and name == 'tlLogic':
-            self._currentProgram = self._net.addTLSProgram(
-                attrs['id'], attrs['programID'], float(attrs['offset']),
-                attrs['type'], self._latestProgram)
-        if self._withPhases and name == 'phase':
-            self._currentProgram.add_phase(attrs['state'],
-                                           int(attrs['duration']))
-        if name == 'roundabout':
-            self._net.addRoundabout(attrs['nodes'].split(),
-                                    attrs['edges'].split())
-        if name == 'param':
-            if self._currentLane is not None:
-                self._currentLane.setParam(attrs['key'], attrs['value'])
-
-        if name == 'neigh':  # added by Lisa
-            if self._currentLane is not None:
-                self._currentLane.setAdjacentOpposite(attrs['lane'])
-
-    def endElement(self, name):
-        if name == 'lane':
-            self._currentLane = None
-        if name == 'edge':
-            self._currentEdge = None
-        # 'row-logic' is deprecated!!!
-        if name == 'ROWLogic' or name == 'row-logic':
-            self._haveROWLogic = False
-        # tl-logic is deprecated!!!
-        if self._withPhases and (name == 'tlLogic' or name == 'tl-logic'):
-            self._currentProgram = None
-
-    def getNet(self):
-        return self._net
+# class Net:
+#     """The whole sumo network."""
+#
+#     def __init__(self):
+#         self._location = {}
+#         self._id2node = {}
+#         self._id2edge = {}
+#         self._crossings_and_walkingAreas = set()
+#         self._id2tls = {}
+#         self._nodes = []
+#         self._edges = []
+#         self._tlss = []
+#         self._ranges = [[10000, -10000], [10000, -10000]]
+#         self._roundabouts = []
+#         self._rtree = None
+#         self._allLanes = []
+#         self._origIdx = None
+#         self.hasWarnedAboutMissingRTree = False
+#
+#     @classmethod
+#     def from_net_xml(cls, filename: str, **others):
+#         netreader = NetReader(**others)
+#         try:
+#             if not os.path.isfile(filename):
+#                 raise Exception(f"Network file {filename} not found")
+#             parse(filename, netreader)
+#         except Exception as e:
+#             raise Exception(
+#                 "Please mind that the network format has changed in 0.13.0, you may need to update your network!") from e
+#         return netreader.getNet()
+#
+#     def setLocation(self, netOffset, convBoundary, origBoundary,
+#                     projParameter):
+#         self._location["netOffset"] = netOffset
+#         self._location["convBoundary"] = convBoundary
+#         self._location["origBoundary"] = origBoundary
+#         self._location["projParameter"] = projParameter
+#
+#     def addNode(self, id, type=None, coord=None, incLanes=None, intLanes=None):
+#         if id is None:
+#             return None
+#         if id not in self._id2node:
+#             n = node.Node(id, type, coord, incLanes, intLanes)
+#             self._nodes.append(n)
+#             self._id2node[id] = n
+#         self.setAdditionalNodeInfo(self._id2node[id], type, coord, incLanes,
+#                                    intLanes)
+#         return self._id2node[id]
+#
+#     def setAdditionalNodeInfo(self,
+#                               node,
+#                               type,
+#                               coord,
+#                               incLanes,
+#                               intLanes=None):
+#         if coord is not None and node.coord is None:
+#             node.coord = coord
+#             self._ranges[0][0] = min(self._ranges[0][0], coord[0])
+#             self._ranges[0][1] = max(self._ranges[0][1], coord[0])
+#             self._ranges[1][0] = min(self._ranges[1][0], coord[1])
+#             self._ranges[1][1] = max(self._ranges[1][1], coord[1])
+#         if incLanes is not None and node.inc_lanes is None:
+#             node.inc_lanes = incLanes
+#         if intLanes is not None and node.int_lanes is None:
+#             node.int_lanes = intLanes
+#         if type is not None and node.type is None:
+#             node.type = type
+#
+#     def addEdge(self, id, fromID, toID, prio, function, name):
+#         if id not in self._id2edge:
+#             fromN = self.addNode(fromID)
+#             toN = self.addNode(toID)
+#             e = edge.Edge(id, fromN, toN, prio, function, name)
+#             self._edges.append(e)
+#             self._id2edge[id] = e
+#         return self._id2edge[id]
+#
+#     def addLane(self, edge, speed, length, width, allow=None, disallow=None):
+#         return lane.Lane(edge, speed, length, width, allow, disallow)
+#
+#     def addRoundabout(self, nodes, edges=None):
+#         r = roundabout.Roundabout(nodes, edges)
+#         self._roundabouts.append(r)
+#         return r
+#
+#     def addConnection(self,
+#                       fromEdge,
+#                       toEdge,
+#                       fromlane,
+#                       tolane,
+#                       direction,
+#                       tls,
+#                       tllink,
+#                       state,
+#                       viaLaneID=None):
+#         conn = connection.Connection(fromEdge, toEdge, fromlane, tolane,
+#                                      direction, tls, tllink, state, viaLaneID)
+#         fromEdge.add_outgoing(conn)
+#         fromlane.add_outgoing(conn)
+#         toEdge.add_incoming(conn)
+#
+#     def getEdges(self):
+#         return self._edges
+#
+#     def getRoundabouts(self):
+#         return self._roundabouts
+#
+#     def hasEdge(self, id):
+#         return id in self._id2edge
+#
+#     def getEdge(self, id):
+#         return self._id2edge[id]
+#
+#     def getLane(self, laneID):
+#         edge_id, lane_index = laneID.rsplit("_", 1)
+#         return self.getEdge(edge_id).getLane(int(lane_index))
+#
+#     def _initRTree(self, shapeList, includeJunctions=True):
+#         import rtree
+#         self._rtree = rtree.index.Index()
+#         self._rtree.interleaved = True
+#         for ri, shape in enumerate(shapeList):
+#             self._rtree.add(ri, shape.getBoundingBox(includeJunctions))
+#
+#     # Please be aware that the resulting list of edges is NOT sorted
+#     def getNeighboringEdges(self, x, y, r=0.1, includeJunctions=True):
+#         edges = []
+#         try:
+#             if self._rtree is None:
+#                 self._initRTree(self._edges, includeJunctions)
+#             for i in self._rtree.intersection((x - r, y - r, x + r, y + r)):
+#                 e = self._edges[i]
+#                 d = sumolib.geomhelper.distancePointToPolygon(
+#                     (x, y), e.getShape(includeJunctions))
+#                 if d < r:
+#                     edges.append((e, d))
+#         except ImportError:
+#             if not self.hasWarnedAboutMissingRTree:
+#                 print(
+#                     "Warning: Module 'rtree' not available. Using brute-force fallback"
+#                 )
+#                 self.hasWarnedAboutMissingRTree = True
+#
+#             for edge in self._edges:
+#                 d = sumolib.geomhelper.distancePointToPolygon(
+#                     (x, y), edge.getShape(includeJunctions))
+#                 if d < r:
+#                     edges.append((edge, d))
+#         return edges
+#
+#     def getNeighboringLanes(self, x, y, r=0.1, includeJunctions=True):
+#         lanes = []
+#         try:
+#             if self._rtree is None:
+#                 if not self._allLanes:
+#                     for edge in self._edges:
+#                         self._allLanes += edge.getLanes()
+#                 self._initRTree(self._allLanes, includeJunctions)
+#             for i in self._rtree.intersection((x - r, y - r, x + r, y + r)):
+#                 l = self._allLanes[i]
+#                 d = sumolib.geomhelper.distancePointToPolygon(
+#                     (x, y), l.getShape(includeJunctions))
+#                 if d < r:
+#                     lanes.append((l, d))
+#         except ImportError:
+#             for edge in self._edges:
+#                 for l in edge.getLanes():
+#                     d = sumolib.geomhelper.distancePointToPolygon(
+#                         (x, y), l.getShape(includeJunctions))
+#                     if d < r:
+#                         lanes.append((l, d))
+#         return lanes
+#
+#     def hasNode(self, id):
+#         return id in self._id2node
+#
+#     def getNode(self, id):
+#         return self._id2node[id]
+#
+#     def getNodes(self):
+#         return self._nodes
+#
+#     def getTLSSecure(self, tlid):
+#         if tlid in self._id2tls:
+#             tls = self._id2tls[tlid]
+#         else:
+#             tls = TLS(tlid)
+#             self._id2tls[tlid] = tls
+#             self._tlss.append(tls)
+#         return tls
+#
+#     def getTrafficLights(self):
+#         return self._tlss
+#
+#     def addTLS(self, tlid, inLane, outLane, linkNo):
+#         tls = self.getTLSSecure(tlid)
+#         tls.add_connection(inLane, outLane, linkNo)
+#         return tls
+#
+#     def addTLSProgram(self, tlid, programID, offset, type, removeOthers):
+#         tls = self.getTLSSecure(tlid)
+#         program = TLSProgram(programID, offset, type)
+#         if removeOthers:
+#             tls.clear_programs()
+#         tls.add_program(program)
+#         return program
+#
+#     def setFoes(self, junctionID, index, foes, prohibits):
+#         self._id2node[junctionID].setFoes(index, foes, prohibits)
+#
+#     def forbids(self, possProhibitor, possProhibited):
+#         return possProhibitor.getFrom().getToNode().forbids(
+#             possProhibitor, possProhibited)
+#
+#     def getDownstreamEdges(self, edge, distance, stopOnTLS):
+#         ret = []
+#         seen = set()
+#         toProc = []
+#         toProc.append([edge, 0, []])
+#         while not len(toProc) == 0:
+#             ie = toProc.pop()
+#             if ie[0] in seen:
+#                 continue
+#             seen.add(ie[0])
+#             if ie[1] + ie[0].getLength() >= distance:
+#                 ret.append([
+#                     ie[0], ie[0].getLength() + ie[1] - distance, ie[2], False
+#                 ])
+#                 continue
+#             if len(ie[0]._incoming) == 0:
+#                 ret.append([ie[0], ie[0].getLength() + ie[1], ie[2], True])
+#                 continue
+#             mn = []
+#             hadTLS = False
+#             for ci in ie[0]._incoming:
+#                 if ci not in seen:
+#                     prev = copy(ie[2])
+#                     if stopOnTLS and ci._tls and ci != edge and not hadTLS:
+#                         ret.append([ie[0], ie[1], prev, True])
+#                         hadTLS = True
+#                     else:
+#                         prev.append(ie[0])
+#                         mn.append([ci, ie[0].getLength() + ie[1], prev])
+#             if not hadTLS:
+#                 toProc.extend(mn)
+#         return ret
+#
+#     def getEdgesByOrigID(self, origID):
+#         if self._origIdx is None:
+#             self._origIdx = defaultdict(set)
+#             for edge in self._edges:
+#                 for lane in edge.getLanes():
+#                     for oID in lane.getParam("origId", "").split():
+#                         self._origIdx[oID].add(edge)
+#         return self._origIdx[origID]
+#
+#     def getBBoxXY(self):
+#         """
+#         Get the bounding box (bottom left and top right coordinates) for a net;
+#         Coordinates are in X and Y (not Lat and Lon)
+#
+#         :return [(bottom_left_X, bottom_left_Y), (top_right_X, top_right_Y)]
+#         """
+#         return [(self._ranges[0][0], self._ranges[1][0]),
+#                 (self._ranges[0][1], self._ranges[1][1])]
+#
+#     # the diagonal of the bounding box of all nodes
+#     def getBBoxDiameter(self):
+#         return math.sqrt((self._ranges[0][0] - self._ranges[0][1]) ** 2 +
+#                          (self._ranges[1][0] - self._ranges[1][1]) ** 2)
+#
+#     def getGeoProj(self):
+#         import pyproj
+#         p1 = self._location["projParameter"].split()
+#         params = {}
+#         for p in p1:
+#             ps = p.split("=")
+#             if len(ps) == 2:
+#                 params[ps[0]] = ps[1]
+#             else:
+#                 params[ps[0]] = True
+#         return pyproj.Proj(projparams=params)
+#
+#     def getLocationOffset(self):
+#         """ offset to be added after converting from geo-coordinates to UTM"""
+#         return list(map(float, self._location["netOffset"].split(",")))
+#
+#     def convertLonLat2XY(self, lon, lat, rawUTM=False):
+#         x, y = self.getGeoProj()(lon, lat)
+#         if rawUTM:
+#             return x, y
+#         else:
+#             x_off, y_off = self.getLocationOffset()
+#             return x + x_off, y + y_off
+#
+#     def convertXY2LonLat(self, x, y, rawUTM=False):
+#         if not rawUTM:
+#             x_off, y_off = self.getLocationOffset()
+#             x -= x_off
+#             y -= y_off
+#         return self.getGeoProj()(x, y, inverse=True)
+#
+#     def move(self, dx, dy, dz=0):
+#         for n in self._nodes:
+#             n.coord = (n.coord[0] + dx, n.coord[1] + dy, n.coord[2] + dz)
+#         for e in self._edges:
+#             for l in e._lanes:
+#                 l.shape = [(p[0] + dx, p[1] + dy, p[2] + dz)
+#                            for p in l.getShape3D()]
+#             e.rebuildShape()
 
 
-def convertShape(shapeString):
-    """ Convert xml shape string into float tuples.
+# class NetReader(handler.ContentHandler):
+#     """Reads a network, storing the edge geometries, lane numbers and max. speeds"""
+#
+#     def __init__(self, **others):
+#         self._net = others.get('net', Net())
+#         self._currentEdge = None
+#         self._currentNode = None
+#         self._currentLane = None
+#         self._withPhases = others.get('withPrograms', False)
+#         self._latestProgram = others.get('withLatestPrograms', False)
+#         if self._latestProgram:
+#             self._withPhases = True
+#         self._withConnections = others.get('withConnections', True)
+#         self._withFoes = others.get('withFoes', True)
+#         self._withInternal = others.get('withInternal', False)
+#
+#     def startElement(self, name, attrs):
+#         if name == 'location':
+#             self._net.setLocation(attrs["netOffset"], attrs["convBoundary"],
+#                                   attrs["origBoundary"],
+#                                   attrs["projParameter"])
+#         if name == 'edge':
+#             function = attrs.get('function', '')
+#             if function == '' or self._withInternal:
+#                 prio = -1
+#                 if 'priority' in attrs:
+#                     prio = int(attrs['priority'])
+#
+#                 # get the  ids
+#                 edgeID = attrs['id']
+#                 fromNodeID = attrs.get('from', None)
+#                 toNodeID = attrs.get('to', None)
+#
+#                 # for internal junctions use the junction's id for from and to node
+#                 if function == 'internal':
+#                     fromNodeID = toNodeID = edgeID[1:edgeID.rfind('_')]
+#
+#                 self._currentEdge = self._net.addEdge(edgeID, fromNodeID,
+#                                                       toNodeID, prio, function,
+#                                                       attrs.get('name', ''))
+#
+#                 self._currentEdge.setRawShape(
+#                     convertShape(attrs.get('shape', '')))
+#             else:
+#                 if function in ['crossing', 'walkingarea']:
+#                     self._net._crossings_and_walkingAreas.add(attrs['id'])
+#                 self._currentEdge = None
+#         if name == 'lane' and self._currentEdge is not None:
+#             width = float(attrs['width']) if 'width' in attrs else 'default'
+#             self._currentLane = self._net.addLane(self._currentEdge,
+#                                                   float(attrs['speed']),
+#                                                   float(attrs['length']),
+#                                                   width, attrs.get('allow'),
+#                                                   attrs.get('disallow'))
+#             self._currentLane.setShape(convertShape(attrs.get('shape', '')))
+#         if name == 'junction':
+#             if attrs['id'][0] != ':':
+#                 intLanes = None
+#                 if self._withInternal:
+#                     intLanes = attrs["intLanes"].split(" ")
+#                 self._currentNode = self._net.addNode(
+#                     attrs['id'], attrs['type'],
+#                     tuple(
+#                         map(float, [
+#                             attrs['x'], attrs['y'],
+#                             attrs['z'] if 'z' in attrs else '0'
+#                         ])), attrs['incLanes'].split(" "), intLanes)
+#                 self._currentNode.setShape(convertShape(attrs.get('shape',
+#                                                                   '')))
+#         if name == 'succ' and self._withConnections:  # deprecated
+#             if attrs['edge'][0] != ':':
+#                 self._currentEdge = self._net.getEdge(attrs['edge'])
+#                 self._currentLane = attrs['lane']
+#                 self._currentLane = int(
+#                     self._currentLane[self._currentLane.rfind('_') + 1:])
+#             else:
+#                 self._currentEdge = None
+#         if name == 'succlane' and self._withConnections:  # deprecated
+#             lid = attrs['lane']
+#             if lid[0] != ':' and lid != "SUMO_NO_DESTINATION" and self._currentEdge:
+#                 connected = self._net.getEdge(lid[:lid.rfind('_')])
+#                 tolane = int(lid[lid.rfind('_') + 1:])
+#                 if 'tl' in attrs and attrs['tl'] != "":
+#                     tl = attrs['tl']
+#                     tllink = int(attrs['linkIdx'])
+#                     tlid = attrs['tl']
+#                     toEdge = self._net.getEdge(lid[:lid.rfind('_')])
+#                     tolane2 = toEdge._lanes[tolane]
+#                     tls = self._net.addTLS(
+#                         tlid, self._currentEdge._lanes[self._currentLane],
+#                         tolane2, tllink)
+#                     self._currentEdge.setTLS(tls)
+#                 else:
+#                     tl = ""
+#                     tllink = -1
+#                 toEdge = self._net.getEdge(lid[:lid.rfind('_')])
+#                 tolane = toEdge._lanes[tolane]
+#                 viaLaneID = attrs['via']
+#                 self._net.addConnection(
+#                     self._currentEdge, connected,
+#                     self._currentEdge._lanes[self._currentLane], tolane,
+#                     attrs['dir'], tl, tllink, attrs['state'], viaLaneID)
+#         if name == 'connection' and self._withConnections and (
+#             attrs['from'][0] != ":" or self._withInternal):
+#             fromEdgeID = attrs['from']
+#             toEdgeID = attrs['to']
+#             if not (fromEdgeID in self._net._crossings_and_walkingAreas
+#                     or toEdgeID in self._net._crossings_and_walkingAreas):
+#                 fromEdge = self._net.getEdge(fromEdgeID)
+#                 toEdge = self._net.getEdge(toEdgeID)
+#                 fromLane = fromEdge.getLane(int(attrs['fromLane']))
+#                 toLane = toEdge.getLane(int(attrs['toLane']))
+#                 if 'tl' in attrs and attrs['tl'] != "":
+#                     tl = attrs['tl']
+#                     tllink = int(attrs['linkIndex'])
+#                     tls = self._net.addTLS(tl, fromLane, toLane, tllink)
+#                     fromEdge.setTLS(tls)
+#                 else:
+#                     tl = ""
+#                     tllink = -1
+#                 try:
+#                     viaLaneID = attrs['via']
+#                 except KeyError:
+#                     viaLaneID = ''
+#
+#                 self._net.addConnection(fromEdge, toEdge, fromLane, toLane,
+#                                         attrs['dir'], tl, tllink,
+#                                         attrs['state'], viaLaneID)
+#
+#         # 'row-logic' is deprecated!!!
+#         if self._withFoes and name == 'ROWLogic':
+#             self._currentNode = attrs['id']
+#         if name == 'logicitem' and self._withFoes:  # deprecated
+#             self._net.setFoes(self._currentNode, int(attrs['request']),
+#                               attrs["foes"], attrs["response"])
+#         if name == 'request' and self._withFoes:
+#             self._currentNode.setFoes(int(attrs['index']), attrs["foes"],
+#                                       attrs["response"])
+#         # tl-logic is deprecated!!! NOTE: nevertheless, this is still used by
+#         # cr_net_generator... (Leo)
+#         if self._withPhases and name == 'tlLogic':
+#             self._currentProgram = self._net.addTLSProgram(
+#                 attrs['id'], attrs['programID'], float(attrs['offset']),
+#                 attrs['type'], self._latestProgram)
+#         if self._withPhases and name == 'phase':
+#             self._currentProgram.add_phase(attrs['state'],
+#                                            int(attrs['duration']))
+#         if name == 'roundabout':
+#             self._net.addRoundabout(attrs['nodes'].split(),
+#                                     attrs['edges'].split())
+#         if name == 'param':
+#             if self._currentLane is not None:
+#                 self._currentLane.setParam(attrs['key'], attrs['value'])
+#
+#         if name == 'neigh':  # added by Lisa
+#             if self._currentLane is not None:
+#                 self._currentLane.setAdjacentOpposite(attrs['lane'])
+#
+#     def endElement(self, name):
+#         if name == 'lane':
+#             self._currentLane = None
+#         if name == 'edge':
+#             self._currentEdge = None
+#         # 'row-logic' is deprecated!!!
+#         if name == 'ROWLogic' or name == 'row-logic':
+#             self._haveROWLogic = False
+#         # tl-logic is deprecated!!!
+#         if self._withPhases and (name == 'tlLogic' or name == 'tl-logic'):
+#             self._currentProgram = None
+#
+#     def getNet(self):
+#         return self._net
 
-    This method converts the 2d or 3d shape string from SUMO's xml file
-    into a list containing 3d float-tuples. Non existant z coordinates default
-    to zero. If shapeString is empty, an empty list will be returned.
-    """
 
-    cshape = []
-    for pointString in shapeString.split():
-        p = [float(e) for e in pointString.split(",")]
-        if len(p) == 2:
-            cshape.append((p[0], p[1], 0.))
-        elif len(p) == 3:
-            cshape.append(tuple(p))
-        else:
-            raise ValueError(
-                'Invalid shape point "%s", should be either 2d or 3d' %
-                pointString)
-    return cshape
+# def convertShape(shapeString):
+#     """ Convert xml shape string into float tuples.
+#
+#     This method converts the 2d or 3d shape string from SUMO's xml file
+#     into a list containing 3d float-tuples. Non existant z coordinates default
+#     to zero. If shapeString is empty, an empty list will be returned.
+#     """
+#
+#     cshape = []
+#     for pointString in shapeString.split():
+#         p = [float(e) for e in pointString.split(",")]
+#         if len(p) == 2:
+#             cshape.append((p[0], p[1], 0.))
+#         elif len(p) == 3:
+#             cshape.append(tuple(p))
+#         else:
+#             raise ValueError(
+#                 'Invalid shape point "%s", should be either 2d or 3d' %
+#                 pointString)
+#     return cshape
 
 
 #
 # Node
 #
+
+@unique
+class RightOfWay(Enum):
+    # Taken from: https://sumo.dlr.de/docs/Networks/PlainXML.html#right-of-way
+    # This mode is useful if the priority attribute of the edges cannot be relied on to determine right-of-way all by itself.
+    # It sorts edges according to priority, speed and laneNumber. The 2 incoming edges with the highest position
+    # are determined and will receive right-of-way. All other edges will be classified as minor.
+    DEFAULT = "default"
+    # This mode is useful for customizing right-of-way by tuning edge priority attributes.
+    # The relationship between streams of different incoming-edge priority will be solely determined by edge priority.
+    # For equal-priority values, turning directions are also evaluated.
+    EDGE_PRIORITY = "edgePriority"
+
+
 class Node:
     """ Nodes from a sumo network """
 
     def __init__(self,
                  id: int,
-                 node_type: str,
-                 coord,
-                 incLanes,
-                 intLanes=None,
-                 tl=None,
-                 right_of_way="default"):
-        self._id = id
-        self._type = node_type
-        self._coord = coord
-        self._incoming = []
-        self._outgoing = []
-        self._foes = {}
-        self._prohibits = {}
-        self._incLanes = incLanes
-        self._intLanes = intLanes
-        self._shape3D = None
-        self._shape = None
-        self._tl = tl
-        self._right_of_way = right_of_way
+                 node_type: 'NodeType',
+                 coord: np.ndarray,
+                 shape: np.ndarray = None,
+                 inc_lanes: List['Lane'] = None,
+                 int_lanes: List['Lane'] = None,
+                 tl: 'TLSProgram' = None,
+                 right_of_way=RightOfWay.DEFAULT):
+        self.id = id
+        self.type = node_type
+        self.coord = coord
+        self._incoming: List[Edge] = []
+        self._outgoing: List[Edge] = []
+        self._foes: Dict[int, Edge] = {}
+        self._prohibits: Dict[int, Edge] = {}
+        self.inc_lanes: List[Lane] = inc_lanes if inc_lanes is not None else []
+        self.int_lanes: List[Lane] = int_lanes if int_lanes is not None else []
+        self.shape: Optional[np.ndarray] = shape
+        self.tl = tl
+        self.right_of_way = right_of_way
 
-    def getID(self) -> int:
-        return self._id
-
-    def setShape(self, shape):
-        """Set the shape of the node.
-
-        Shape must be a list containing x,y,z coords as numbers
-        to represent the shape of the node.
-        """
-        for pp in shape:
-            if len(pp) != 3:
-                raise ValueError('shape point must consist of x,y,z')
-        self._shape3D = shape
-        self._shape = [(x, y) for x, y, z in shape]
-
-    def getShape(self):
-        """Returns the shape of the node in 2d.
-
-        This function returns the shape of the node, as defined in the net.xml
-        file. The returned shape is a list containing numerical
-        2-tuples representing the x,y coordinates of the shape points.
-
-        If no shape is defined in the xml, an empty list will be returned.
-        """
-
-        return self._shape
-
-    def getShape3D(self):
-        """Returns the shape of the node in 3d.
-
-        This function returns the shape of the node, as defined in the net.xml
-        file. The returned shape is a list containing numerical
-        3-tuples representing the x,y,z coordinates of the shape points.
-
-        If no shape is defined in the xml, an empty list will be returned.
-        """
-
-        return self._shape3D
-
-    def addOutgoing(self, edge):
+    def add_outgoing(self, edge: 'Edge'):
         self._outgoing.append(edge)
 
-    def getOutgoing(self):
+    @property
+    def outgoing(self) -> List['Edge']:
         return self._outgoing
 
-    def addIncoming(self, edge):
+    def add_incoming(self, edge: 'Edge'):
         self._incoming.append(edge)
 
-    def getIncoming(self):
-        return self._incoming
-
-    def getInternal(self):
-        return self._intLanes
-
-    def getTl(self):
-        return self._tl
+    @property
+    def incoming(self) -> List['Edge']:
+        return self.incoming
 
     def setFoes(self, index, foes, prohibits):
         self._foes[index] = foes
@@ -638,7 +609,7 @@ class Node:
 
     def getLinkIndex(self, conn):
         ret = 0
-        for lane_id in self._incLanes:
+        for lane_id in self.inc_lanes:
             (edge_id, index) = lane_id.split("_")
             edge = [e for e in self._incoming if e.getID() == edge_id][0]
             for candidate_conn in edge.getLane(int(index)).getOutgoing():
@@ -654,18 +625,6 @@ class Node:
             return False
         ps = self._prohibits[possProhibitedIndex]
         return ps[-(possProhibitorIndex - 1)] == '1'
-
-    def getCoord(self):
-        return tuple(self._coord[:2])
-
-    def getCoord3D(self):
-        return self._coord
-
-    def getType(self):
-        return self._type
-
-    def setType(self, type: str):
-        self._type = type
 
     def getConnections(self, source=None, target=None):
         incoming = list(self.getIncoming())
@@ -685,32 +644,45 @@ class Node:
                 conns.extend(outgoing)
         return conns
 
-    def toXML(self) -> str:
+    def to_xml(self) -> str:
         """
         Converts this node to it's xml representation
-        TODO: Not all attributes are converted
         """
         node = ET.Element("node")
-        node.set("id", str(self._id))
-        node.set("type", str(self._type))
-        for key, value in zip(["x", "y", "z"][:len(self._coord)], self._coord):
-            node.set(key, str(value))
-        if self._tl:
-            node.set("tl", str(self._tl))
-        node.set("rightOfWay", str(self._right_of_way))
+        node.set("id", str(self.id))
+        node.set("type", str(self.type))
+        for k, v in zip(["x", "y", "z"][:self.coord.size[0]], self.coord):
+            node.set(k, str(v))
+        node.set("incoming", " ".join([str(i.getID()) for i in self.incoming]))
+        node.set("outgoing", " ".join([str(o.getID()) for o in self.outgoing]))
+        if self._foes is not None:
+            # TODO: convert foes
+            pass
+        if self._prohibits is not None:
+            # TODO: convert prohibits
+            pass
+        if self.inc_lanes:
+            node.set("incLanes", " ".join([str(l.getID()) for l in self.inc_lanes]))
+        if self.int_lanes:
+            node.set("intLanes", " ".join([str(l.getID()) for l in self.int_lanes]))
+        if self.shape is not None:
+            node.set("shape", to_shape_string(self.shape))
+        if self.tl is not None:
+            node.set("tl", self.tl.id)
+        node.set("rightOfWay", str(self.right_of_way.value))
         return ET.tostring(node, encoding="unicode")
 
     def __str__(self):
-        return "Node: " + str(self._id)
+        return "Node: " + str(self.id)
 
     def __hash__(self):
-        return hash((self._id, self._type))
+        return hash((self.id, self.type))
 
     def __eq__(self, other):
-        return self._id == other._id \
-               and self._type == other._type \
-               and self._tl == other._tl \
-               and self._right_of_way == other._right_of_way
+        return self.id == other.id \
+               and self.type == other.type \
+               and self.tl == other.tl \
+               and self.right_of_way == other.right_of_way
 
     def __ne__(self, other):
         return not self.__eq__(other)
@@ -719,256 +691,214 @@ class Node:
 #
 # Edge
 #
+@unique
+class SpreadType(Enum):
+    # From: https://sumo.dlr.de/docs/Networks/PlainXML.html#spreadtype
+    # (default): The edge geometry is interpreted as the left side of the edge and lanes flare out to the right.
+    # This works well if edges in opposite directions have the same (or rather reversed) geometry.
+    RIGHT = "right"
+    # The edge geometry is interpreted as the middle of the directional edge and lanes flare out symmetrically to both sides.
+    # This is appropriate for one-way edges
+    CENTER = "center"
+    # The edge geometry is interpreted as the middle of a bi-directional road.
+    # This works well when both directional edges have a different lane number.
+    ROAD_CENTER = "roadCenter"
+
+
 class Edge:
     """ Edges from a sumo network """
 
-    def __init__(self, id: int, from_node, to_node, type_id: str = "", function: str = "normal", name: str = "",
-                 priority: int = 0):
-        self._id = id
-        self._from = from_node
-        self._to = to_node
-        self._type = type_id
+    def __init__(self,
+                 id: int,
+                 from_node: 'Node',
+                 to_node: 'Node',
+                 type_id: str = "",
+                 speed: float = None,
+                 priority: int = None,
+                 length: float = None,
+                 shape: np.ndarray = None,
+                 spread_type: SpreadType = SpreadType.RIGHT,
+                 allow: List['VehicleType'] = None,
+                 disallow: List['VehicleType'] = None,
+                 width: float = None,
+                 name: str = None,
+                 end_offset: float = None,
+                 sidewalk_width: float = None):
+        self.id = id
+        self.from_node = from_node
+        self.to_node = to_node
+        assert from_node and to_node
+        from_node.add_outgoing(self)
+        to_node.add_incoming(self)
+        self.type_id = type_id
         self._priority = priority
-        if from_node:
-            from_node.add_outgoing(self)
-        if to_node:
-            to_node.addIncoming(self)
-        self._lanes = []
-        self._speed = None
-        self._length = None
-        self._incoming = {}
-        self._outgoing = {}
-        self._shape = None
-        self._shapeWithJunctions = None
-        self._shape3D = None
-        self._shapeWithJunctions3D = None
-        self._rawShape = None
-        self._rawShape3D = None
-        self._function = function
-        self._tls = None
+        self.speed = speed
+        self.priority = priority
+        self.length = length
+        self.shape = shape
+        self.spread_type = spread_type
+        self.allow = allow
+        self.disallow = disallow
+        self.width = width
+        self.name = name
+        self.end_offset = end_offset
+        self.sidewalk_width = sidewalk_width
+
+        self._lanes: List['Lane'] = []
+        self._incoming: Dict[Node, List[Edge]] = defaultdict(list)
+        self._outgoing: Dict[Node, List[Edge]] = defaultdict(list)
         self._name = name
 
-    def setFrom(self, fromN):
-        self._from = fromN
-
-    def setTo(self, toN):
-        self._to = toN
-
-    def getName(self):
-        return self._name
-
-    def isSpecial(self):
-        """ Check if the edge has a special function.
-
-        Returns False if edge's function is 'normal', else False, e.g. for
-        internal edges or connector edges """
-
-        return self._function != ""
-
-    def getFunction(self):
-        return self._function
-
-    def getPriority(self):
-        return self._priority
-
-    def getTLS(self):
-        return self._tls
-
-    def addLane(self, lane):
-        self._lanes.append(lane)
-        self._speed = lane.getSpeed()
-        self._length = lane.getLength()
-
-    def addOutgoing(self, edge: 'Edge'):
-        if edge._to not in self._outgoing:
-            self._outgoing[edge._to] = []
-        self._outgoing[edge._to].append(edge)
-
-    def addIncoming(self, edge: 'Edge'):
-        if edge._from not in self._incoming:
-            self._incoming[edge._from] = []
-        self._incoming[edge._from].append(edge)
-
-    def setRawShape(self, shape):
-        self._rawShape3D = shape
-
-    def getID(self) -> int:
-        return self._id
-
-    def getIncoming(self) -> List['Edge']:
-        return [e for edges in self._incoming.values() for e in edges]
-
-    def getOutgoing(self) -> List['Edge']:
-        return [e for edges in self._outgoing.values() for e in edges]
-
-    def getRawShape(self):
-        """Return the shape that was used in cr_net_generator for building this edge (2D)."""
-        if self._shape is None:
-            self.rebuildShape()
-        return self._rawShape
-
-    def getRawShape3D(self):
-        """Return the shape that was used in cr_net_generator for building this edge (3D)."""
-        if self._shape is None:
-            self.rebuildShape()
-        return self._rawShape3D
-
-    def getShape(self, includeJunctions=False):
-        """Return the 2D shape that is the average of all lane shapes (segment-wise)"""
-        if self._shape is None:
-            self.rebuildShape()
-        if includeJunctions:
-            return self._shapeWithJunctions
-        return self._shape
-
-    def getShape3D(self, includeJunctions=False):
-        if self._shape is None:
-            self.rebuildShape()
-        if includeJunctions:
-            return self._shapeWithJunctions3D
-        return self._shape3D
-
-    def getBoundingBox(self, includeJunctions=True):
-        s = self.getShape(includeJunctions)
-        xmin = s[0][0]
-        xmax = s[0][0]
-        ymin = s[0][1]
-        ymax = s[0][1]
-        for p in s[1:]:
-            xmin = min(xmin, p[0])
-            xmax = max(xmax, p[0])
-            ymin = min(ymin, p[1])
-            ymax = max(ymax, p[1])
-        assert (xmin != xmax or ymin != ymax or self._function == "internal")
-        return (xmin, ymin, xmax, ymax)
-
-    def getClosestLanePosDist(self, point, perpendicular=False):
-        minDist = 1e400
-        minIdx = None
-        minPos = None
-        for i, l in enumerate(self._lanes):
-            pos, dist = l.getClosestLanePosAndDist(point, perpendicular)
-            if dist < minDist:
-                minDist = dist
-                minIdx = i
-                minPos = pos
-        return minIdx, minPos, minDist
-
-    def getSpeed(self):
-        return self._speed
-
-    def getLaneNumber(self):
+    @property
+    def num_lanes(self) -> int:
         return len(self._lanes)
 
-    def getLane(self, idx):
-        return self._lanes[idx]
-
-    def getLanes(self):
+    @property
+    def lanes(self) -> List['Lane']:
         return self._lanes
 
-    def rebuildShape(self):
-        numLanes = len(self._lanes)
-        if numLanes % 2 == 1:
-            self._shape3D = self._lanes[int(numLanes / 2)].getShape3D()
-        else:
-            self._shape3D = []
-            minLen = -1
-            for l in self._lanes:
-                if minLen == -1 or minLen > len(l.getShape()):
-                    minLen = len(l._shape)
-            for i in range(minLen):
-                x = 0.
-                y = 0.
-                z = 0.
-                for l in self._lanes:
-                    x += l.getShape3D()[i][0]
-                    y += l.getShape3D()[i][1]
-                    z += l.getShape3D()[i][2]
-                self._shape3D.append((x / float(numLanes), y / float(numLanes),
-                                      z / float(numLanes)))
+    def add_lane(self, lane: 'Lane'):
+        self._lanes.append(lane)
+        self.speed = lane.speed
+        self.length = lane.length
 
-        self._shapeWithJunctions3D = lane.add_junction_pos(self._shape3D,
-                                                           self._from.getCoord3D(),
-                                                           self._to.getCoord3D())
+    def add_outgoing(self, edge: 'Edge'):
+        self._outgoing[edge.to_node].append(edge)
 
-        if self._rawShape3D == []:
-            self._rawShape3D = [self._from.getCoord3D(), self._to.getCoord3D()]
+    def add_incoming(self, edge: 'Edge'):
+        self._incoming[edge.from_node].append(edge)
 
-        # 2d - versions
-        self._shape = [(x, y) for x, y, z in self._shape3D]
-        self._shapeWithJunctions = [(x, y)
-                                    for x, y, z in self._shapeWithJunctions3D]
-        self._rawShape = [(x, y) for x, y, z in self._rawShape3D]
+    @property
+    def incoming(self) -> List['Edge']:
+        return [e for edges in self._incoming.values() for e in edges]
 
-    def getLength(self):
-        return self._lanes[0].getLength()
+    @property
+    def outgoing(self) -> List['Edge']:
+        return [e for edges in self._outgoing.values() for e in edges]
 
-    def setTLS(self, tls):
-        self._tls = tls
+    # def getClosestLanePosDist(self, point, perpendicular=False):
+    #     minDist = 1e400
+    #     minIdx = None
+    #     minPos = None
+    #     for i, l in enumerate(self._lanes):
+    #         pos, dist = l.getClosestLanePosAndDist(point, perpendicular)
+    #         if dist < minDist:
+    #             minDist = dist
+    #             minIdx = i
+    #             minPos = pos
+    #     return minIdx, minPos, minDist
 
-    def getFromNode(self):
-        return self._from
+    # def rebuildShape(self):
+    #     numLanes = len(self._lanes)
+    #     if numLanes % 2 == 1:
+    #         self._shape3D = self._lanes[int(numLanes / 2)].getShape3D()
+    #     else:
+    #         self._shape3D = []
+    #         minLen = -1
+    #         for l in self._lanes:
+    #             if minLen == -1 or minLen > len(l.getShape()):
+    #                 minLen = len(l.shape)
+    #         for i in range(minLen):
+    #             x = 0.
+    #             y = 0.
+    #             z = 0.
+    #             for l in self._lanes:
+    #                 x += l.getShape3D()[i][0]
+    #                 y += l.getShape3D()[i][1]
+    #                 z += l.getShape3D()[i][2]
+    #             self._shape3D.append((x / float(numLanes), y / float(numLanes),
+    #                                   z / float(numLanes)))
+    #
+    #     self._shapeWithJunctions3D = lane.add_junction_pos(self._shape3D,
+    #                                                        self.from_node.getCoord3D(),
+    #                                                        self.to_node.getCoord3D())
+    #
+    #     if self._rawShape3D == []:
+    #         self._rawShape3D = [self.from_node.getCoord3D(), self.to_node.getCoord3D()]
+    #
+    #     # 2d - versions
+    #     self._shape = [(x, y) for x, y, z in self._shape3D]
+    #     self._shapeWithJunctions = [(x, y)
+    #                                 for x, y, z in self._shapeWithJunctions3D]
+    #     self._rawShape = [(x, y) for x, y, z in self._rawShape3D]
 
-    def getToNode(self):
-        return self._to
+    # def setTLS(self, tls):
+    #     self._tls = tls
 
-    def is_fringe(self, connections=None):
-        """true if this edge has no incoming or no outgoing connections (except turnarounds)
-           If connections is given, only those connections are considered"""
-        if connections is None:
-            return self.is_fringe(self._incoming) or self.is_fringe(
-                self._outgoing)
-        else:
-            cons = sum([c for c in connections.values()], [])
-            return len([
-                c for c in cons if c._direction != Connection.LINKDIR_TURN
-            ]) == 0
+    # def is_fringe(self, connections=None):
+    #     """true if this edge has no incoming or no outgoing connections (except turnarounds)
+    #        If connections is given, only those connections are considered"""
+    #     if connections is None:
+    #         return self.is_fringe(self._incoming) or self.is_fringe(
+    #             self._outgoing)
+    #     else:
+    #         cons = sum([c for c in connections.values()], [])
+    #         return len([
+    #             c for c in cons if c._direction != Connection.LINKDIR_TURN
+    #         ]) == 0
+    #
+    # def allows(self, vClass):
+    #     """true if this edge has a lane which allows the given vehicle class"""
+    #     for lane in self._lanes:
+    #         if vClass in lane._allow:
+    #             return True
+    #     return False
 
-    def allows(self, vClass):
-        """true if this edge has a lane which allows the given vehicle class"""
-        for lane in self._lanes:
-            if vClass in lane._allow:
-                return True
-        return False
-
-    def getType(self):
-        return self._type
-
-    def setType(self, value: str):
-        self._type = value
-
-    def __repr__(self):
-        if self.getFunction() == '':
-            return '<edge id="%s" from="%s" to="%s"/>' % (
-                self._id, self._from.getID(), self._to.getID())
-        else:
-            return '<edge id="%s" function="%s"/>' % (self._id,
-                                                      self.getFunction())
-
-    def toXML(self) -> str:
+    def to_xml(self) -> str:
         edge = ET.Element("edge")
-        edge.set("from", str(self.getFromNode().getID()))
-        edge.set("to", str(self.getToNode().getID()))
-        edge.set("id", str(self._id))
-        if self._type:
-            edge.set("type", str(self._type))
-        if self._priority:
-            edge.set("priority", str(self._priority))
-        if self._speed:
-            edge.set("speed", str(self._speed))
-        if self._length:
-            edge.set("length", str(self._length))
-        if self._shape:
-            edge.set("shape", str(self.getShape()))
-        if self._length:
-            edge.set("length", str(self._length))
-        edge.set("numLanes", str(self.getLaneNumber()))
-        edge.set("spreadType", "center")
-        edge.set("function", str(self._function))
+        edge.set("id", str(self.id))
+        edge.set("from", str(self.from_node.id))
+        edge.set("to", str(self.to_node.id))
+        if self.type_id:
+            edge.set("type", str(self.type_id))
+        if self.num_lanes > 0:
+            edge.set("numLanes", str(self.num_lanes))
+        if self.speed is not None:
+            edge.set("speed", str(self.speed))
+        if self.priority is not None:
+            edge.set("priority", str(self.priority))
+        if self.length is not None:
+            edge.set("length", str(self.length))
+        if self.shape is not None:
+            edge.set("shape", to_shape_string(self.shape))
+        edge.set("spreadType", str(self.spread_type.value))
+        if self.allow:
+            edge.set("allow", " ".join([str(a.value) for a in self.allow]))
+        if self.disallow:
+            edge.set("disallow", " ".join([str(a.value) for a in self.allow]))
+        if self.width is not None:
+            edge.set("width", str(self.width))
+        if self.name is not None:
+            edge.set("name", self.name)
+        if self.end_offset is not None:
+            edge.set("endOffset", str(self.end_offset))
+        if self.sidewalk_width is not None:
+            edge.set("sidewalkWidth", str(self.sidewalk_width))
+
         for lane in self._lanes:
             edge.append(ET.fromstring(lane.to_xml()))
-
         return ET.tostring(edge, encoding="unicode")
+
+    def __repr__(self):
+        return str(self)
+
+    def __str__(self):
+        return self.to_xml()
+
+    def __hash__(self):
+        return hash((self.id, self.from_node.id, self.to_node.id, self.type_id, *self._lanes))
+
+    def __eq__(self, other: 'Edge'):
+        return type(self) == type(other) \
+               and self.id == other.id \
+               and self.from_node == other.from_node \
+               and self.to_node == other.to_node \
+               and self.type_id == other.type_id \
+               and len(self._lanes) == len(other._lanes) \
+               and all(x == y for x, y in zip(self._lanes, other._lanes))
+
+    def __ne__(self, other: 'Edge'):
+        return not self.__eq__(other)
 
 
 #
@@ -989,7 +919,8 @@ def add_junction_pos(shape, fromPos, toPos):
 class Lane:
     """ Lanes from a sumo network """
 
-    def __init__(self, edge: Edge,
+    def __init__(self,
+                 edge: Edge,
                  speed: float,
                  length: float,
                  width: float,
@@ -1009,7 +940,11 @@ class Lane:
         self._disallow: List['VehicleType'] = []
         self._set_allow_disallow(allow, disallow)
 
-        edge.addLane(self)
+        edge.add_lane(self)
+
+    @property
+    def id(self) -> str:
+        return f"{self._edge.id}_{self.index}"
 
     def _set_allow_disallow(self, allow: Optional[List['VehicleType']], disallow: Optional[List['VehicleType']]):
         if allow is not None and disallow is not None:
@@ -1081,11 +1016,9 @@ class Lane:
         return sumolib.geomhelper.polygonOffsetAndDistanceToPoint(
             point, self.getShape(), perpendicular)
 
-    def getIndex(self):
+    @property
+    def index(self) -> int:
         return self._edge._lanes.index(self)
-
-    def getID(self):
-        return f"{self._edge._id}_{self.getIndex()}"
 
     @property
     def outgoing(self) -> List['Connection']:
@@ -1115,7 +1048,7 @@ class Lane:
         Converts this lane to it's xml representation
         """
         lane = ET.Element("lane")
-        lane.set("index", str(self.getIndex()))
+        lane.set("index", str(self.index))
         if self.speed:
             lane.set("speed", str(self._speed))
         if self._length:
@@ -1129,6 +1062,23 @@ class Lane:
         if self._disallow:
             lane.set("disallow", " ".join(d.value for d in self._disallow))
         return ET.tostring(lane, encoding="unicode")
+
+    def __str__(self):
+        return self.to_xml()
+
+    def __repr__(self):
+        return str(self)
+
+    def __hash__(self):
+        return hash((self.edge.id, self.index))
+
+    def __eq__(self, other: 'Lane'):
+        return type(self) == type(other) \
+               and self.edge.id == other.edge.id \
+               and self.index == other.index
+
+    def __ne__(self, other: 'Lane'):
+        return not self.__eq__(other)
 
 
 #
@@ -1188,9 +1138,12 @@ class Connection:
     """edge connection for a sumo network"""
 
     def __init__(self,
-                 from_edge: Edge, to_edge: Edge, from_lane: Lane, to_lane: Lane,
+                 from_edge: Edge,
+                 to_edge: Edge,
+                 from_lane: Lane,
+                 to_lane: Lane,
                  direction: ConnectionDirection = None,
-                 tls: 'TLS' = None,
+                 tls: 'TLSProgram' = None,
                  tl_link: int = None,
                  state=None,
                  via_lane_id=None,
@@ -1303,7 +1256,7 @@ class Connection:
         if self._direction is not None:
             c.set("dir", str(self._direction))
         if self._tls is not None:
-            c.set("tl", str(self._tls))
+            c.set("tl", str(self._tls.id))
         if self._tl_link is not None:
             c.set("linkIndex", str(self._tl_link))
         if self._state is not None:
@@ -1317,7 +1270,22 @@ class Connection:
         return ET.tostring(c, encoding="unicode")
 
     def __str__(self):
-        return str(self.to_xml())
+        return self.to_xml()
+
+    def __repr__(self):
+        return str(self)
+
+    def __hash__(self):
+        return hash((self._from.id, self._to.id, self._from_lane.id, self._to_lane.id, self._direction, self._tls.id,
+                     self._tl_link, self._state))
+
+    def __eq__(self, other: 'Connection'):
+        return type(self) == type(other) and self._from == other._from and self._to == other._to \
+               and self._direction == other._direction and self._tls == other._tls and self._tl_link == other._tl_link \
+               and self._state == other._state
+
+    def __ne__(self, other: 'Connection'):
+        return not self.__eq__(other)
 
 
 #
@@ -1649,6 +1617,10 @@ class TLSProgram:
         self._offset = offset
         self._program_id = program_id
         self._phases: List[Phase] = []
+
+    @property
+    def id(self) -> str:
+        return self._id
 
     @property
     def phases(self) -> List[Phase]:
