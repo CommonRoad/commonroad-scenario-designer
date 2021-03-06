@@ -7,36 +7,6 @@ import matplotlib
 from matplotlib.animation import FuncAnimation, writers
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
-from matplotlib.path import Path
-from matplotlib.patches import PathPatch
-
-from PyQt5.QtCore import pyqtSlot, Qt, QUrl
-from PyQt5.QtWidgets import (
-    QTableWidget,
-    QFileDialog,
-    QMessageBox,
-)
-from PyQt5.QtWidgets import (
-    QSizePolicy,
-    QTableWidgetItem,
-    QAbstractItemView,
-    QDockWidget,
-)
-
-
-
-from commonroad.scenario.intersection import Intersection
-from commonroad.common.util import Interval
-from commonroad.scenario.scenario import Scenario
-from commonroad.scenario.lanelet import Lanelet, is_natural_number
-from commonroad.visualization.draw_dispatch_cr import draw_object
-from commonroad.geometry.shape import Circle
-
-from crmapconverter.io.scenario_designer.sumo_gui_modules.gui_sumo_simulation import SUMO_AVAILABLE
-if SUMO_AVAILABLE:
-    from crmapconverter.sumo_map.config import SumoConfig
-from crmapconverter.io.scenario_designer.misc.util import Observable
-
 __author__ = "Benjamin Orthen, Stefan Urban, Max Winklhofer, Guyue Huang, Max Fruehauf"
 __copyright__ = "TUM Cyber-Physical Systems Group"
 __credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles"]
@@ -45,7 +15,25 @@ __maintainer__ = "Sebastian Maierhofer"
 __email__ = "commonroad-i06@in.tum.de"
 __status__ = "Released"
 
+from matplotlib.path import Path
+from matplotlib.patches import PathPatch
 matplotlib.use("Qt5Agg")
+
+from PyQt5.QtCore import pyqtSlot
+from PyQt5.QtWidgets import QTableWidget, QFileDialog, QMessageBox
+from PyQt5.QtWidgets import QSizePolicy, QTableWidgetItem, QAbstractItemView
+
+from commonroad.scenario.intersection import Intersection
+from commonroad.common.util import Interval
+from commonroad.scenario.scenario import Scenario
+from commonroad.scenario.lanelet import Lanelet, is_natural_number
+from commonroad.visualization.draw_dispatch_cr import draw_object
+from commonroad.geometry.shape import Circle
+
+from crmapconverter.io.scenario_designer.toolboxes.gui_sumo_simulation import SUMO_AVAILABLE
+if SUMO_AVAILABLE:
+    from crmapconverter.sumo_map.config import SumoConfig
+from crmapconverter.io.scenario_designer.misc.util import Observable
 
 ZOOM_FACTOR = 1.2
 
@@ -642,7 +630,7 @@ class AnimatedViewer(Viewer):
         self.playing = False
         self.lowertoolBox = None
 
-    def open_scenario(self, scenario, config: Observable = None):
+    def open_scenario(self, scenario: Scenario, config: Observable = None):
         """[summary]
 
         :param scenario: [description]

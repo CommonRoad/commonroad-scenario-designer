@@ -1,56 +1,40 @@
-import matplotlib.pyplot as plt
-from IPython import display
+from typing import Set
 import numpy as np
 from scipy.interpolate import interp1d
 
-from commonroad.visualization.draw_dispatch_cr import draw_object
-
-from commonroad.common.file_reader import CommonRoadFileReader
-from commonroad.common.file_writer import CommonRoadFileWriter
-from commonroad.common.file_writer import OverwriteExistingFile
-from commonroad.scenario.scenario import Location, Tag
-from commonroad.scenario.lanelet import LaneletType, RoadUser, LaneletNetwork, Lanelet, LineMarking
 from commonroad.scenario.intersection import Intersection
 from commonroad.scenario.intersection import IntersectionIncomingElement
+from commonroad.scenario.lanelet import RoadUser, LaneletNetwork, Lanelet, LineMarking, LaneletType
 
 
-# from commonroad.scenario.lanelet import LineMarking
+class MapCreator:
+    """
+    Collection of functions to work with lanelets
+    """
 
+    @staticmethod
+    def create_straight(width: float, length: float, num_vertices: int, lanelet_id: int,
+                        lanelet_types: Set[LaneletType],
+                        road_user_one_way: Set[RoadUser], road_user_bidirectional: Set[RoadUser],
+                        line_marking_left: LineMarking = LineMarking.UNKNOWN,
+                        line_marking_right: LineMarking = LineMarking.UNKNOWN, backwards: bool = False):
+        """
+        Function for creating a straight lanelet given a length, width, and number of vertices.
 
-class mapcreator:
-    """ functionality to create lanelets and Obstacles for a Scenario """
-    def __init__(self):
-        self.predecessor = None
-        self.successor = None
-        self.width = None
-        self.length = None
-        self.num_vertices = None
-        self.network = None
-        self.radius = None
-        self.angle = None
-        self.lanelet = None
-        self.adjacent_lanelet = None
-        self.same_direction = None
-        self.diameter_crossing = None
-
-    #Set Predecessor Successor relation
-    def set_predecessor_successor_relation(self, predecessor, successor):
-        a = successor.predecessor
-        a.append(predecessor.lanelet_id)
-        a = set(a)
-        successor._predecessor = list(a)
-        b = predecessor.successor
-        b.append(successor.lanelet_id)
-        b = set(b)
-        predecessor._successor = list(b)
-
-    def edit_straight(self):
-        print("tet")
-
-    def create_straight(self, width, length, num_vertices, network, scenario, pred, lanelettype=set(), roaduseroneway=set(),
-                        roaduserbidirectional=set(), linemarkingleft="no_marking", linemarkingright="no_marking", backwards=False):
+        @param width: Width of the lanelet.
+        @param length: Length of the lanelet.
+        @param num_vertices: Number of vertices of the lanelet.
+        @param lanelet_id: Id for new lanelet.
+        @param lanelet_types: Lanelet types for new lanelet.
+        @param road_user_one_way: Allowed road users one way for new lanelet.
+        @param road_user_bidirectional: Allowed road users bidirectional for new lanelet.
+        @param line_marking_left: Line markings on the left for new lanelet.
+        @param line_marking_right: Line markings on the right for new lanelet.
+        @param backwards: Boolean indicating whether lanelet should be rotated by 180°.
+        @return: Newly created lanelet.
+        """
         eps = 0.1e-15
-        length_div = length / (num_vertices-1)
+        length_div = length / (num_vertices - 1)
         left_vertices = []
         center_vertices = []
         right_vertices = []
@@ -63,25 +47,151 @@ class mapcreator:
         center_vertices = np.array(center_vertices)
         right_vertices = np.array(right_vertices)
 
-        idl = scenario.generate_object_id()
-        lanelet = Lanelet(left_vertices=left_vertices, right_vertices=right_vertices, lanelet_id=idl,
-                          center_vertices=center_vertices, lanelet_type=lanelettype,
-                          user_one_way=roaduseroneway, user_bidirectional=roaduserbidirectional, line_marking_right_vertices=LineMarking(linemarkingright),
-                          line_marking_left_vertices=LineMarking(linemarkingleft))
+        lanelet = Lanelet(left_vertices=left_vertices, right_vertices=right_vertices, lanelet_id=lanelet_id,
+                          center_vertices=center_vertices, lanelet_type=lanelet_types,
+                          user_one_way=road_user_one_way, user_bidirectional=road_user_bidirectional,
+                          line_marking_right_vertices=line_marking_left,
+                          line_marking_left_vertices=line_marking_right)
         if backwards:
             lanelet.translate_rotate(-lanelet.center_vertices[0], np.pi)
 
-        if pred:
-            if self.latestid != None:
-                mapcreator.fit_to_predecessor(self, network.find_lanelet_by_id(self.latestid),lanelet)
-        self.latestid = idl
-        network.add_lanelet(lanelet=lanelet)
         return lanelet
 
+    @staticmethod
+    def create_curve(width: float, radius: float, angle: float, num_vertices: int, lanelet_id: int,
+                     lanelet_types: Set[LaneletType],
+                     road_user_one_way: Set[RoadUser], road_user_bidirectional: Set[RoadUser],
+                     line_marking_left: LineMarking = LineMarking.UNKNOWN,
+                     line_marking_right: LineMarking = LineMarking.UNKNOWN):
+        """
+        Function for creating a straight lanelet given a length, width, and number of vertices.
 
-    def edit_straight(self, id, width, length, num_vertices, network, scenario, pred, lanelettype=set(), roaduser_oneway=set(), roaduser_bidirectional=set(), linemarkingleft="no_marking", linemarkingright="no_marking", backwards=False):
+        @param width: Width of the lanelet.
+        @param radius: Radius of new curved lanelet.
+        @param angle: Angle of new curved lanelet.
+        @param num_vertices: Number of vertices of the lanelet.
+        @param lanelet_id: Id for new lanelet.
+        @param lanelet_types: Lanelet types for new lanelet.
+        @param road_user_one_way: Allowed road users one way for new lanelet.
+        @param road_user_bidirectional: Allowed road users bidirectional for new lanelet.
+        @param line_marking_left: Line markings on the left for new lanelet.
+        @param line_marking_right: Line markings on the right for new lanelet.
+        @return: Newly created lanelet.
+        """
+        angle_div = angle / (num_vertices - 1)
+        radius_left = radius - (width / 2)
+        radius_right = radius + (width / 2)
+        left_vert = []
+        center_vert = []
+        right_vert = []
+        for i in range(num_vertices):
+            left_vert.append([np.cos(i * angle_div) * radius_left, np.sin(i * angle_div) * radius_left])
+            center_vert.append([np.cos(i * angle_div) * radius, np.sin(i * angle_div) * radius])
+            right_vert.append([np.cos(i * angle_div) * radius_right, np.sin(i * angle_div) * radius_right])
+
+        left_vertices = np.array(left_vert)
+        center_vertices = np.array(center_vert)
+        right_vertices = np.array(right_vert)
+
+        angle_start = -np.pi / 2
+        if angle < 0:
+            left_vertices = np.array(right_vert)
+            center_vertices = np.array(center_vert)
+            right_vertices = np.array(left_vert)
+            angle_start = -angle_start
+
+        lanelet = Lanelet(left_vertices=left_vertices, right_vertices=right_vertices, lanelet_id=lanelet_id,
+                          center_vertices=center_vertices, lanelet_type=lanelet_types,
+                          user_one_way=road_user_one_way, user_bidirectional=road_user_bidirectional,
+                          line_marking_right_vertices=LineMarking(line_marking_right),
+                          line_marking_left_vertices=LineMarking(line_marking_left))
+        lanelet.translate_rotate(np.array([0, 0]), angle_start)
+        lanelet.translate_rotate(-lanelet.center_vertices[0], 0)
+
+        return lanelet
+
+    @staticmethod
+    def fit_to_predecessor(predecessor: Lanelet, lanelet: Lanelet):
+        """
+        Function to translate a lanelet so that it fits to a given predecessor lanelet.
+
+        @param predecessor: Lanelet to which given lanelet should be attached.
+        @param lanelet: Lanelet which should be attached to the predecessor lanelet.
+        """
+        if predecessor:
+            factor = (np.linalg.norm(lanelet.left_vertices[0, :] - lanelet.right_vertices[0, :])
+                      / np.linalg.norm((predecessor.left_vertices[-1, :] - predecessor.right_vertices[-1, :])))
+
+            lanelet._left_vertices = lanelet.left_vertices / factor
+            lanelet._right_vertices = lanelet.right_vertices / factor
+            lanelet._center_vertices = lanelet.center_vertices / factor
+
+            ang = MapCreator.calc_angle_between(predecessor, lanelet)
+            lanelet.translate_rotate(np.array([0, 0]), ang)
+            trans = predecessor.center_vertices[-1] - lanelet.center_vertices[0]
+            lanelet.translate_rotate(trans, 0)
+
+            MapCreator.set_predecessor_successor_relation(predecessor, lanelet)
+
+    @staticmethod
+    def fit_to_successor(successor: Lanelet, lanelet: Lanelet):
+        """
+        Function to translate a lanelet so that it fits to a given successor lanelet.
+
+        @param successor: Lanelet to which given lanelet should be attached.
+        @param lanelet: Lanelet which should be attached to the successor lanelet.
+        """
+        if successor:
+            factor = (np.linalg.norm(lanelet.left_vertices[-1, :] - lanelet.right_vertices[-1, :])
+                      / np.linalg.norm((successor.left_vertices[0, :] - successor.right_vertices[0, :])))
+
+            lanelet._left_vertices = lanelet.left_vertices / factor
+            lanelet._right_vertices = lanelet.right_vertices / factor
+            lanelet._center_vertices = lanelet.center_vertices / factor
+
+            ang = MapCreator.calc_angle_between(lanelet, successor)
+            lanelet.translate_rotate(np.array([0, 0]), ang)
+            trans = lanelet.center_vertices[0] - successor.center_vertices[-1]
+            lanelet.translate_rotate(trans, 0)
+
+            MapCreator.set_predecessor_successor_relation(lanelet, successor)
+
+    @staticmethod
+    def calc_angle_between(predecessor: Lanelet, lanelet: Lanelet):
+        """
+        Computes the angle between two lanelets
+        @param predecessor: Predecessor lanelet
+        @param lanelet: Potential successor lanelet.
+        @return: Calculated angle
+        """
+        line_predecessor = predecessor.left_vertices[-1] - predecessor.right_vertices[-1]
+        line_lanelet = lanelet.left_vertices[0] - lanelet.right_vertices[0]
+        norm_predecessor = np.linalg.norm(line_predecessor)
+        norm_lanelet = np.linalg.norm(line_lanelet)
+        dot_prod = np.dot(line_predecessor, line_lanelet)
+        sign = line_lanelet[1] * line_predecessor[0] - line_lanelet[0] * line_predecessor[1]
+        angle = np.arccos(dot_prod / (norm_predecessor * norm_lanelet))
+        if sign > 0:
+            angle = 2 * np.pi - angle
+
+        return angle
+
+    @staticmethod
+    def set_predecessor_successor_relation(predecessor: Lanelet, successor: Lanelet):
+        """
+        Sets the predecessor and successor lanelet relationships between two given lanelets.
+
+        @param predecessor: Predecessor lanelet.
+        @param successor:  Successor lanelet.
+        """
+        successor.add_predecessor(predecessor.lanelet_id)
+        predecessor.add_successor(successor.lanelet_id)
+
+    def edit_straight(self, id, width, length, num_vertices, network, scenario, pred, lanelettype=set(),
+                      roaduser_oneway=set(), roaduser_bidirectional=set(), linemarkingleft="no_marking",
+                      linemarkingright="no_marking", backwards=False):
         eps = 0.1e-15
-        length_div = length / (num_vertices-1)
+        length_div = length / (num_vertices - 1)
         left_vertices = []
         center_vertices = []
         right_vertices = []
@@ -109,12 +219,12 @@ class mapcreator:
             lanelet.translate_rotate(-lanelet.center_vertices[0], np.pi)
 
         self.latestid = id
-        #network.add_lanelet(lanelet=lanelet)
+        # network.add_lanelet(lanelet=lanelet)
         return lanelet
 
-
-    def edit_curve(self, id, width, radius, angle, num_vertices, network, scenario, pred, lanelettype=set(), roaduser_oneway="vehicle",
-                        linemarkingleft="no_marking", linemarkingright="no_marking"):
+    def edit_curve(self, id, width, radius, angle, num_vertices, network, scenario, pred, lanelettype=set(),
+                   roaduser_oneway="vehicle",
+                   linemarkingleft="no_marking", linemarkingright="no_marking"):
         angle_div = angle / (num_vertices - 1)
         radius_left = radius - (width / 2)
         radius_right = radius + (width / 2)
@@ -148,70 +258,16 @@ class mapcreator:
 
         return lanelet
 
-    def create_curve(self, width, radius, angle, num_vertices, network, scenario, pred, lanelettype=set(), roaduseroneway=set(), roaduserbidirectional=set(),
-                        linemarkingleft="no_marking", linemarkingright="no_marking"):
-        angle_div = angle / (num_vertices - 1)
-        radius_left = radius - (width / 2)
-        radius_right = radius + (width / 2)
-        left_vert = []
-        center_vert = []
-        right_vert = []
-        for i in range(num_vertices):
-            left_vert.append([np.cos(i * angle_div) * radius_left, np.sin(i * angle_div) * radius_left])
-            center_vert.append([np.cos(i * angle_div) * radius, np.sin(i * angle_div) * radius])
-            right_vert.append([np.cos(i * angle_div) * radius_right, np.sin(i * angle_div) * radius_right])
-
-        left_vertices = np.array(left_vert)
-        center_vertices = np.array(center_vert)
-        right_vertices = np.array(right_vert)
-
-        angle_start = -np.pi/2
-        if angle < 0:
-            left_vertices = np.array(right_vert)
-            center_vertices = np.array(center_vert)
-            right_vertices = np.array(left_vert)
-            angle_start = -angle_start
-
-        idl = scenario.generate_object_id()
-        lanelet = Lanelet(left_vertices=left_vertices, right_vertices=right_vertices, lanelet_id=idl,
-                          center_vertices=center_vertices, lanelet_type=lanelettype,
-                          user_one_way=roaduseroneway, user_bidirectional=roaduserbidirectional,
-                          line_marking_right_vertices=LineMarking(linemarkingright),
-                          line_marking_left_vertices=LineMarking(linemarkingleft))
-        lanelet.translate_rotate(np.array([0,0]),angle_start)
-        lanelet.translate_rotate(-lanelet.center_vertices[0],0)
-
-        if pred:
-            if self.latestid != None:
-                mapcreator.fit_to_predecessor(self, network.find_lanelet_by_id(self.latestid), lanelet)
-
-        self.latestid = idl
-        network.add_lanelet(lanelet=lanelet)
-        return lanelet
-
-    def calc_angle_between(self, predecessor, lanelet):
-        line_predecessor = predecessor.left_vertices[-1] - predecessor.right_vertices[-1]
-        line_lanelet = lanelet.left_vertices[0] - lanelet.right_vertices[0]
-        norm_predecessor = np.linalg.norm(line_predecessor)
-        norm_lanelet = np.linalg.norm(line_lanelet)
-        dot_prod = np.dot(line_predecessor, line_lanelet)
-        sign = line_lanelet[1] * line_predecessor[0] - line_lanelet[0] * line_predecessor[1]
-        angle = np.arccos(dot_prod / (norm_predecessor * norm_lanelet))
-        if sign > 0:
-            angle = 2 * np.pi - angle
-
-        return angle
-
-
     def calc_radius(self, lanelet):
         line_predecessor = lanelet.left_vertices[0] - lanelet.right_vertices[0]
         line_lanelet = lanelet.left_vertices[-1] - lanelet.right_vertices[-1]
-        b = (lanelet.center_vertices[0,1] * line_predecessor[0] + line_predecessor[1] * lanelet.center_vertices[-1,0] - lanelet.center_vertices[0,0]*line_predecessor[1] - lanelet.center_vertices[-1,1] * line_predecessor[0]) / (line_lanelet[1]*line_predecessor[0] - line_predecessor[1]*line_lanelet[0])
+        b = (lanelet.center_vertices[0, 1] * line_predecessor[0] + line_predecessor[1] * lanelet.center_vertices[
+            -1, 0] - lanelet.center_vertices[0, 0] * line_predecessor[1] - lanelet.center_vertices[-1, 1] *
+             line_predecessor[0]) / (line_lanelet[1] * line_predecessor[0] - line_predecessor[1] * line_lanelet[0])
         x = lanelet.center_vertices[-1] + b * line_lanelet
-        rad = np.linalg.norm(x-lanelet.center_vertices[0])
-        rad = round(rad,0)
+        rad = np.linalg.norm(x - lanelet.center_vertices[0])
+        rad = round(rad, 0)
         return rad
-
 
     def calc_angle_between2(self, lanelet):
         line_predecessor = lanelet.left_vertices[-1] - lanelet.right_vertices[-1]
@@ -225,28 +281,6 @@ class mapcreator:
             angle = 2 * np.pi - angle
 
         return angle
-
-
-    def fit_to_predecessor(self, predecessor, successor):
-        if predecessor:
-            #last_element = len(predecessor.center_vertices) - 1
-            factor = (np.linalg.norm(successor.left_vertices[0, :] - successor.right_vertices[0, :])
-                      / np.linalg.norm((predecessor.left_vertices[-1, :] - predecessor.right_vertices[-1, :])))
-
-            successor._left_vertices = successor.left_vertices / factor
-            successor._right_vertices = successor.right_vertices / factor
-            successor._center_vertices = successor.center_vertices / factor
-
-            ang = mapcreator.calc_angle_between(mapcreator, predecessor, successor)
-            successor.translate_rotate(np.array([0, 0]), ang)
-            trans = predecessor.center_vertices[-1] - successor.center_vertices[0]
-            successor.translate_rotate(trans, 0)
-
-            # Relation
-            mapcreator.set_predecessor_successor_relation(self, predecessor, successor)
-
-        return successor
-
 
     def fit_intersection_to_predecessor(self, predecessor, successor, intersection, network, scenario):
         if predecessor and successor and intersection:
@@ -330,17 +364,14 @@ class mapcreator:
                 center_vertices = adjacent_lanelet.left_vertices - (diff_left_vert_right_vert / norm_left.T) * width / 2
                 right_vertices = adjacent_lanelet.left_vertices
 
-
-
             idl = scenario.generate_object_id()
             self.latestid = idl
             lanelet = Lanelet(left_vertices=left_vertices, right_vertices=right_vertices, lanelet_id=idl,
                               center_vertices=center_vertices, lanelet_type=adjacent_lanelet._lanelet_type,
-                              user_one_way=adjacent_lanelet._user_one_way, line_marking_right_vertices=adjacent_lanelet._line_marking_right_vertices,
+                              user_one_way=adjacent_lanelet._user_one_way,
+                              line_marking_right_vertices=adjacent_lanelet._line_marking_right_vertices,
                               line_marking_left_vertices=adjacent_lanelet._line_marking_left_vertices,
                               adjacent_left=adjacent_lanelet.lanelet_id, adjacent_left_same_direction=True)
-
-
 
             # Relation
             adjacent_lanelet._adj_left = lanelet.lanelet_id
@@ -355,20 +386,20 @@ class mapcreator:
                 if lanelet_find.adj_left is not None:
                     lanelet_adj_left = LaneletNetwork.find_lanelet_by_id(network, lanelet_id=lanelet_find.adj_left)
                     if lanelet_find.adj_left_same_direction is True:
-                        mapcreator.set_predecessor_successor_relation(self, lanelet_adj_left, lanelet)
+                        MapCreator.set_predecessor_successor_relation(self, lanelet_adj_left, lanelet)
 
                     else:
-                        mapcreator.set_predecessor_successor_relation(self, lanelet, lanelet_adj_left)
+                        MapCreator.set_predecessor_successor_relation(self, lanelet, lanelet_adj_left)
 
             for i in succs:
                 lanelet_find = LaneletNetwork.find_lanelet_by_id(network, lanelet_id=i)
                 if lanelet_find.adj_left is not None:
                     lanelet_adj_left = LaneletNetwork.find_lanelet_by_id(network, lanelet_id=lanelet_find.adj_left)
                     if lanelet_find.adj_left_same_direction is True:
-                        mapcreator.set_predecessor_successor_relation(self, lanelet, lanelet_adj_left)
+                        MapCreator.set_predecessor_successor_relation(self, lanelet, lanelet_adj_left)
 
                     else:
-                        mapcreator.set_predecessor_successor_relation(self, lanelet_adj_left, lanelet)
+                        MapCreator.set_predecessor_successor_relation(self, lanelet_adj_left, lanelet)
 
             if same_direction is False:
                 lanelet._left_vertices = np.flip(right_vertices, 0)
@@ -387,8 +418,6 @@ class mapcreator:
 
     def adjacent_lanelet_right(self, adjacent_lanelet, network, scenario, same_direction=True, width=None):
 
-
-
         if adjacent_lanelet.adj_right is None:
             # Translation
 
@@ -402,18 +431,18 @@ class mapcreator:
                 diff_left_vert_right_vert = adjacent_lanelet.right_vertices - adjacent_lanelet.left_vertices
                 norm_left = np.array([np.linalg.norm(diff_left_vert_right_vert, axis=1)])
                 left_vertices = adjacent_lanelet.right_vertices
-                center_vertices = adjacent_lanelet.right_vertices + (diff_left_vert_right_vert / norm_left.T) * width / 2
+                center_vertices = adjacent_lanelet.right_vertices + (
+                        diff_left_vert_right_vert / norm_left.T) * width / 2
                 right_vertices = adjacent_lanelet.right_vertices + (diff_left_vert_right_vert / norm_left.T) * width
-
 
             idl = scenario.generate_object_id()
             self.latestid = idl
             lanelet = Lanelet(left_vertices=left_vertices, right_vertices=right_vertices, lanelet_id=idl,
                               center_vertices=center_vertices, lanelet_type=adjacent_lanelet._lanelet_type,
-                              user_one_way=adjacent_lanelet._user_one_way, line_marking_right_vertices=adjacent_lanelet._line_marking_right_vertices,
+                              user_one_way=adjacent_lanelet._user_one_way,
+                              line_marking_right_vertices=adjacent_lanelet._line_marking_right_vertices,
                               line_marking_left_vertices=adjacent_lanelet._line_marking_left_vertices,
                               adjacent_left=adjacent_lanelet.lanelet_id, adjacent_left_same_direction=True)
-
 
             # Relation
             adjacent_lanelet._adj_right = lanelet.lanelet_id
@@ -428,20 +457,20 @@ class mapcreator:
                 if lanelet_find.adj_right is not None:
                     lanelet_adj_right = LaneletNetwork.find_lanelet_by_id(network, lanelet_id=lanelet_find.adj_right)
                     if lanelet_find.adj_right_same_direction is True:
-                        mapcreator.set_predecessor_successor_relation(self, lanelet_adj_right, lanelet)
+                        MapCreator.set_predecessor_successor_relation(self, lanelet_adj_right, lanelet)
 
                     else:
-                        mapcreator.set_predecessor_successor_relation(self, lanelet, lanelet_adj_right)
+                        MapCreator.set_predecessor_successor_relation(self, lanelet, lanelet_adj_right)
 
             for i in succs:
                 lanelet_find = LaneletNetwork.find_lanelet_by_id(network, lanelet_id=i)
                 if lanelet_find.adj_right is not None:
                     lanelet_adj_right = LaneletNetwork.find_lanelet_by_id(network, lanelet_id=lanelet_find.adj_right)
                     if lanelet_find.adj_right_same_direction is True:
-                        mapcreator.set_predecessor_successor_relation(self, lanelet, lanelet_adj_right)
+                        MapCreator.set_predecessor_successor_relation(self, lanelet, lanelet_adj_right)
 
                     else:
-                        mapcreator.set_predecessor_successor_relation(self, lanelet_adj_right, lanelet)
+                        MapCreator.set_predecessor_successor_relation(self, lanelet_adj_right, lanelet)
 
             if same_direction is False:
                 lanelet._left_vertices = np.flip(right_vertices, 0)
@@ -467,10 +496,10 @@ class mapcreator:
             idl = scenario.generate_object_id()
             self.latestid = idl
             connecting_lanelet = Lanelet(left_vertices, center_vertices, right_vertices, idl,
-                                  predecessor=[predecessor.lanelet_id], successor=[successor.lanelet_id])
+                                         predecessor=[predecessor.lanelet_id], successor=[successor.lanelet_id])
             network.add_lanelet(lanelet=connecting_lanelet)
-            mapcreator.set_predecessor_successor_relation(self, predecessor, connecting_lanelet)
-            mapcreator.set_predecessor_successor_relation(self, connecting_lanelet, successor)
+            MapCreator.set_predecessor_successor_relation(self, predecessor, connecting_lanelet)
+            MapCreator.set_predecessor_successor_relation(self, connecting_lanelet, successor)
             return connecting_lanelet
 
     def connect_lanelets4(self, predecessor, successor, network, scenario):
@@ -482,8 +511,8 @@ class mapcreator:
             vec_width_succ = successor.left_vertices[0] - successor.right_vertices[0]
             width_pred = np.linalg.norm(vec_width_pred)
             width_succ = np.linalg.norm(vec_width_succ)
-            norm_vec_pred = np.array([vec_width_pred[1],-vec_width_pred[0]])
-            norm_vec_succ = np.array([vec_width_succ[1],-vec_width_succ[0]])
+            norm_vec_pred = np.array([vec_width_pred[1], -vec_width_pred[0]])
+            norm_vec_succ = np.array([vec_width_succ[1], -vec_width_succ[0]])
             print(norm_vec_pred)
             print(norm_vec_succ)
             con_vec_factor = (length_con_vec) * 0.5
@@ -492,20 +521,20 @@ class mapcreator:
                                               [predecessor.center_vertices[-1] + norm_vec_pred],
                                               [predecessor.center_vertices[-1] + 2 * norm_vec_pred + con_vec_factor *
                                                connecting_vec], [successor.center_vertices[0] - 2 * norm_vec_succ -
-                                               (con_vec_factor * connecting_vec)],
+                                                                 (con_vec_factor * connecting_vec)],
                                               [successor.center_vertices[0] - norm_vec_succ],
                                               [successor.center_vertices[0]]))
 
             center_vertices = np.concatenate(([predecessor.center_vertices[-1]],
                                               [predecessor.center_vertices[-1] + con_vec_factor * norm_vec_pred /
                                                width_pred + con_vec_factor * connecting_vec],
-                                              [successor.center_vertices[0] -  con_vec_factor * norm_vec_succ /
+                                              [successor.center_vertices[0] - con_vec_factor * norm_vec_succ /
                                                width_succ - (con_vec_factor * connecting_vec)],
                                               [successor.center_vertices[0]]))
 
             middle_point = (predecessor.center_vertices[-1] + 0.5 * con_vec_factor * norm_vec_pred /
-                                               width_pred - 0.5 * con_vec_factor * norm_vec_succ / width_succ +
-                                               con_vec_factor * connecting_vec)
+                            width_pred - 0.5 * con_vec_factor * norm_vec_succ / width_succ +
+                            con_vec_factor * connecting_vec)
             center_vertices = np.concatenate(([predecessor.center_vertices[-1]],
                                               [predecessor.center_vertices[-1] + 0.000001 * norm_vec_pred / width_pred],
                                               [middle_point],
@@ -538,9 +567,9 @@ class mapcreator:
             d = np.zeros((lenght, 2))
             a = np.c_[d, a]
             b = np.c_[b, d]
-            a = a + b       #Constructed matrix for calculation
-            c = np.dot(a, interpolated_center)    #calculate tangent at point
-            #Create normalvectors and normalize them
+            a = a + b  # Constructed matrix for calculation
+            c = np.dot(a, interpolated_center)  # calculate tangent at point
+            # Create normalvectors and normalize them
             e = np.zeros((c.shape))
             e[:, 0] = c[:, 1]
             e[:, 1] = -c[:, 0]
@@ -572,10 +601,10 @@ class mapcreator:
             idl = scenario.generate_object_id()
             self.latestid = idl
             connecting_lanelet = Lanelet(interpolated_left, interpolated_center, interpolated_right, idl,
-                                  predecessor=[predecessor.lanelet_id], successor=[successor.lanelet_id])
+                                         predecessor=[predecessor.lanelet_id], successor=[successor.lanelet_id])
             network.add_lanelet(lanelet=connecting_lanelet)
-            mapcreator.set_predecessor_successor_relation(self, predecessor, connecting_lanelet)
-            mapcreator.set_predecessor_successor_relation(self, connecting_lanelet, successor)
+            MapCreator.set_predecessor_successor_relation(self, predecessor, connecting_lanelet)
+            MapCreator.set_predecessor_successor_relation(self, connecting_lanelet, successor)
             return connecting_lanelet
 
     def remove_lanelet(self, lanelet, network, scenario):
@@ -648,10 +677,10 @@ class mapcreator:
             left = {left}
             straight = successors_straight[n]
             straight = {straight}
-            map_incoming.append(IntersectionIncomingElement(n, incoming_lanelets=inc, successors_right=right, successors_straight=straight, successors_left=left))
-            n = n+1
+            map_incoming.append(IntersectionIncomingElement(n, incoming_lanelets=inc, successors_right=right,
+                                                            successors_straight=straight, successors_left=left))
+            n = n + 1
         intersection_id = scenario.generate_object_id()
-
 
         intersection = Intersection(intersection_id=intersection_id, incomings=map_incoming)
         scenario.add_objects([intersection])
@@ -694,10 +723,14 @@ class mapcreator:
         successors_left = [lanelet_3.lanelet_id, lanelet_11.lanelet_id]
         map_incoming = []
 
-        map_incoming.append(IntersectionIncomingElement(0, incoming_lanelets={lanelet_1.lanelet_id}, successors_right={lanelet_12.lanelet_id},
-                                                            successors_straight={lanelet_7.lanelet_id}, successors_left={lanelet_3.lanelet_id}))
-        map_incoming.append(IntersectionIncomingElement(1, incoming_lanelets={lanelet_6.lanelet_id}, successors_right={lanelet_4.lanelet_id},
-                                                        successors_straight={lanelet_8.lanelet_id}, successors_left={lanelet_11.lanelet_id}))
+        map_incoming.append(IntersectionIncomingElement(0, incoming_lanelets={lanelet_1.lanelet_id},
+                                                        successors_right={lanelet_12.lanelet_id},
+                                                        successors_straight={lanelet_7.lanelet_id},
+                                                        successors_left={lanelet_3.lanelet_id}))
+        map_incoming.append(IntersectionIncomingElement(1, incoming_lanelets={lanelet_6.lanelet_id},
+                                                        successors_right={lanelet_4.lanelet_id},
+                                                        successors_straight={lanelet_8.lanelet_id},
+                                                        successors_left={lanelet_11.lanelet_id}))
         map_incoming.append(IntersectionIncomingElement(2, incoming_lanelets={lanelet_10.lanelet_id}))
         intersection_id = scenario.generate_object_id()
 

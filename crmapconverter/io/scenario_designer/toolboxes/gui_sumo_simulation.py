@@ -5,8 +5,7 @@ import logging
 
 from commonroad.scenario.scenario import Scenario
 
-from crmapconverter.io.scenario_designer.gui_resources.Sumo_simulate import Ui_sumo_simulate
-from crmapconverter.io.scenario_designer.misc.errors import error, warning
+from crmapconverter.io.scenario_designer.misc.errors import error
 from crmapconverter.io.scenario_designer.misc.util import Observable
 
 # try to import sumo functionality
@@ -19,7 +18,7 @@ except ImportError:
     logging.warning("Cannot import SUMO, simulation will not be offered in Scenario Designer")
     SUMO_AVAILABLE = False
 
-from PyQt5.QtWidgets import QWidget, QMessageBox
+from PyQt5.QtWidgets import QMessageBox, QFrame
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import QThread
 
@@ -74,8 +73,8 @@ class WaitingDialog(QtWidgets.QDialog):
                 event.ignore()
 
 
-class SUMOSimulation(QWidget, Ui_sumo_simulate):
-    def __init__(self):
+class SUMOSimulation(QFrame):
+    def __init__(self, parent=None):
         # set random uuid as name for the scenario files
         self._config = SumoConfig.from_scenario_name(str(uuid.uuid4()))
         self._config_obs = Observable(self._config)
@@ -94,9 +93,7 @@ class SUMOSimulation(QWidget, Ui_sumo_simulate):
             os.path.join(os.path.dirname(__file__), "..", "tmp"))
         pathlib.Path(self._output_folder).mkdir(parents=True, exist_ok=True)
 
-        super(SUMOSimulation, self).__init__()
-        self.setupUi(self)
-        self._connect_events()
+        super().__init__(parent)
 
     @property
     def config(self) -> Observable:
@@ -114,47 +111,7 @@ class SUMOSimulation(QWidget, Ui_sumo_simulate):
         """
         Connecting valueChanged events of the SpinBoxes to the SumoConfig
         """
-
-        # window.btn_restore_defaults.clicked.connect(self.restore_default_button)
-        # window.btn_close.clicked.connect(self.close_button)
-
-        self._update_ui_values()
-
-        def set_dt(value):
-            self._config.dt = value
-            self._config_obs.value = self._config
-
-        def set_presimulation_steps(value):
-            self._config.presimulation_steps = value
-            self._config_obs.value = self._config
-
-        def set_simulation_steps(value):
-            self._config.simulation_steps = value
-            self._config_obs.value = self._config
-
-        self.doubleSpinBox_dt.valueChanged.connect(set_dt)
-        self.spinBox_presimulation_steps.valueChanged.connect(
-            set_presimulation_steps)
-        self.spinBox_simulation_steps.valueChanged.connect(
-            set_simulation_steps)
         self.pushButton_simulate.clicked.connect(self.simulate)
-
-    def _update_ui_values(self) -> None:
-        """
-        sets the values of the settings window to the current values of the SumoConfig file
-
-        :return: None
-        """
-        # example code:
-        # window.le_benchmark_id.setText(config.BENCHMARK_ID)
-        # window.sb_compression_threshold.setValue(config.COMPRESSION_THRESHOLD)
-        # window.chk_delete_short_edges.setChecked(config.DELETE_SHORT_EDGES)
-
-        # load values from config
-        self.doubleSpinBox_dt.setValue(self._config.dt)
-        self.spinBox_presimulation_steps.setValue(
-            self._config.presimulation_steps)
-        self.spinBox_simulation_steps.setValue(self._config.simulation_steps)
 
     def simulate(self) -> bool:
         """
@@ -194,22 +151,3 @@ class SUMOSimulation(QWidget, Ui_sumo_simulate):
                 QMessageBox.Ok,
             )
 
-    # def save_to_config(self) -> None:
-    #     """
-    #     saves the values in the settings window to config.py
-
-    #     :return: None
-    #     """
-    #     # example code:
-    #     # config.BENCHMARK_ID = window.le_benchmark_id.text()
-    #     # config.AERIAL_IMAGES = swindow.chb_aerial.isChecked()
-    #     # config.DOWNLOAD_EDGE_LENGTH = window.sb_donwload_radius.value()
-    #     return
-
-    def close_button(self) -> None:
-        """
-        closes settings without saving
-
-        :return: None
-        """
-        # and close

@@ -1,5 +1,6 @@
 from typing import List
 
+
 class Observable:
     def __init__(
         self,
@@ -35,6 +36,7 @@ def find_invalid_ref_of_traffic_lights(scenario) -> List[int]:
                 invalid_refs.append(t_light_ref)
     return invalid_refs
 
+
 def find_invalid_ref_of_traffic_signs(scenario) -> List[int]:
     """ find references to traffic signs that do not exist """
     invalid_refs = []
@@ -43,6 +45,7 @@ def find_invalid_ref_of_traffic_signs(scenario) -> List[int]:
             if not scenario.lanelet_network.find_traffic_sign_by_id(t_sign_ref):
                 invalid_refs.append(t_sign_ref)
     return invalid_refs
+
 
 def find_invalid_lanelet_polygons(scenario) -> List[int]:
     """ find lanelets with invalid polygon """

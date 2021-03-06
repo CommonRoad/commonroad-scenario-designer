@@ -1,39 +1,36 @@
 """ main window of the GUI Scenario Designer """
 
-from argparse import ArgumentParser
+import logging
 import os
 import sys
-import logging
 import numpy as np
+from argparse import ArgumentParser
 
 from PyQt5.QtCore import QUrl
 from PyQt5.QtGui import QKeySequence, QDesktopServices
-from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
-
 from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
-from commonroad.scenario.scenario import Scenario
 from commonroad.scenario.lanelet import LaneletNetwork
+from commonroad.scenario.scenario import Scenario
 from commonroad.scenario.traffic_sign import *
+from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 
-from crmapconverter.io.scenario_designer.gui_resources.MainWindow import Ui_mainWindow
-from crmapconverter.io.scenario_designer.gui.gui_toolbox import RoadNetworkToolbox, ObstacleToolbox
+from crmapconverter.io.scenario_designer.converter_modules.opendrive_interface import OpenDRIVEInterface
+from crmapconverter.io.scenario_designer.converter_modules.osm_interface import OSMInterface
 from crmapconverter.io.scenario_designer.gui.gui_settings import GUISettings
 from crmapconverter.io.scenario_designer.gui.gui_viewer import LaneletList, IntersectionList, find_intersection_by_id, \
     AnimatedViewer
+from crmapconverter.io.scenario_designer.gui_resources.MainWindow import Ui_mainWindow
+from crmapconverter.io.scenario_designer.toolboxes.gui_sumo_simulation import SUMO_AVAILABLE
+from crmapconverter.io.scenario_designer.toolboxes.road_network_toolbox import RoadNetworkToolbox, ObstacleToolbox
 
-from crmapconverter.io.scenario_designer.converter_modules.osm_interface import OSMInterface
-from crmapconverter.io.scenario_designer.converter_modules.opendrive_interface import OpenDRIVEInterface
-
-from crmapconverter.io.scenario_designer.sumo_gui_modules.gui_sumo_simulation import SUMO_AVAILABLE
 if SUMO_AVAILABLE:
-    from crmapconverter.io.scenario_designer.sumo_gui_modules.sumo_settings import SUMOSettings
-    from crmapconverter.io.scenario_designer.sumo_gui_modules.gui_sumo_simulation import SUMOSimulation
+    from crmapconverter.io.scenario_designer.settings.sumo_settings import SUMOSettings
+    from crmapconverter.io.scenario_designer.toolboxes.gui_sumo_simulation import SUMOSimulation
 
-
-from crmapconverter.io.scenario_designer.misc import config
+from crmapconverter.io.scenario_designer.settings import config
 from crmapconverter.io.scenario_designer.misc import util
-from crmapconverter.io.scenario_designer.misc.map_creator import mapcreator
+from crmapconverter.io.scenario_designer.misc.map_creator import MapCreator
 
 from crmapconverter.io.scenario_designer.road_network_element_settings.lanelet_settings import LaneletSettings
 from crmapconverter.io.scenario_designer.road_network_element_settings.curve_settings import CurveSettings
@@ -46,15 +43,17 @@ from crmapconverter.io.scenario_designer.road_network_element_settings.intersect
 
 class MWindow(QMainWindow, Ui_mainWindow):
     """The Mainwindow of CR Scenario Designer."""
+
     def __init__(self, path=None):
         super().__init__()
         self.setupUi(self)
         self.setWindowIcon(QIcon(':/icons/cr.ico'))
+     #   self.setWindowTitle("CommonRoad Scenario Designer")
         self.centralwidget.setStyleSheet('background-color:rgb(150,150,150)')
         self.setWindowFlag(True)
 
         # attributes
-        self.mapcreator = mapcreator()
+        self.map_creator = MapCreator()
         self.filename = None
         self.crviewer = AnimatedViewer(self)
         self.lanelet_list = None
@@ -64,53 +63,32 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.ani_path = None
         self.slider_clicked = False
 
-        #Senario + Lanelet variables
-        self.latestid = None
-        self.traffic_signs_id = 200
-        self.traffic_light_id = 300
+        # Scenario + Lanelet variables
         self.selected_lanelet = None
+        self.last_added_lanelet_id = None
+
+        self.lanelet_id = None
+        self.lanelet_length = 10
+        self.lanelet_width = 3
+        self.num_vertices = 2
         self.selected_predecessor = None
         self.selected_successor = None
-
-        self.pred = False
-        self.rot_angle_straight = 0
-        self.rot_angle_curve = 0
-
-        self.lenfor = 50
-        self.widfor = 20
-        self.vertfor = 20
-        self.adjfor = None
-        self.lanelettype = set()
-        self.roaduser ="vehicle"
-        self.linemarkingleft = "no_marking"
-        self.linemarkingright = "no_marking"
+        self.adjacent_left = None
+        self.adjacent_right = None
+        self.lanelet_type = set()
+        self.line_marking_left = LineMarking.UNKNOWN.value
+        self.line_marking_right = LineMarking.UNKNOWN.value
         self.lanelet_pos_x = 0
         self.lanelet_pos_y = 0
-        self.backwards = False
-        self.roaduser_oneway = set()
-        self.roaduser_bidirectional = set()
-
-        self.radcurve = 50
-        self.widcurve = 20
-        self.numcurve = 30
-        self.anglcurve = np.pi/2
-        self.adjcurve = None
-        self.curvetype = "urban"
-        self.roaduser_curve = "vehicle"
-        self.linemarkingright_curve = "no_marking"
-        self.linemarkingleft_curve = "no_marking"
-        self.curve_pos_x = 0
-        self.curve_pos_y = 0
-        self.curve_direction = False
-
-        self.LL = LaneletSettings()
-        self.FI = FitIntersection()
+        self.road_user_oneway = set()
+        self.road_user_bidirectional = set()
+        self.lanelet_radius = 50
+        self.lanelet_angle = np.pi / 2
 
 
         # GUI attributes
-        self.tool1 = None
-        self.tool2 = None
-        self.toolBox = None
+        self.road_network_toolbox_widget = None
+        self.obstacle_toolbox_widget = None
         self.console = None
         self.textBrowser = None
         if SUMO_AVAILABLE:
@@ -140,9 +118,10 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.create_viewer_dock()
         self.create_toolbar()
         self.create_console()
-        self.create_toolbox()
-        #self.create_laneletinformation()
-        #self.create_laneletsettings()
+        self.create_road_network_toolbox()
+        self.create_obstacle_toolbox()
+        # self.create_laneletinformation()
+        # self.create_laneletsettings()
 
         self.status = self.statusbar
         self.status.showMessage("Welcome to CR Scenario Designer")
@@ -178,7 +157,6 @@ class MWindow(QMainWindow, Ui_mainWindow):
         if path:
             self.open_path(path)
 
-
     def show_osm_settings(self):
         osm_interface = OSMInterface(self)
         osm_interface.show_settings()
@@ -190,42 +168,171 @@ class MWindow(QMainWindow, Ui_mainWindow):
     def show_gui_settings(self):
         self.gui_settings = GUISettings(self)
 
+    def create_obstacle_toolbox(self):
+        """ Create the obstacle toolbox."""
+        self.obstacle_toolbox = ObstacleToolbox()
+        self.obstacle_toolbox_widget = QDockWidget("Obstacle Toolbox")
+        self.obstacle_toolbox_widget.setFloating(True)
+        self.obstacle_toolbox_widget.setFeatures(QDockWidget.AllDockWidgetFeatures)
+        self.obstacle_toolbox_widget.setAllowedAreas(Qt.RightDockWidgetArea)
+        self.obstacle_toolbox_widget.setWidget(self.obstacle_toolbox)
+        self.addDockWidget(Qt.RightDockWidgetArea, self.obstacle_toolbox_widget)
+
+    def create_road_network_toolbox(self):
+        """ Create the Road network toolbox."""
+        self.road_network_toolbox = RoadNetworkToolbox()
+
+        self.road_network_toolbox_widget = QDockWidget("Road Network Toolbox")
+        self.road_network_toolbox_widget.setFloating(True)
+        self.road_network_toolbox_widget.setFeatures(QDockWidget.AllDockWidgetFeatures)
+        self.road_network_toolbox_widget.setAllowedAreas(Qt.LeftDockWidgetArea)
+        self.road_network_toolbox_widget.setWidget(self.road_network_toolbox)
+        self.addDockWidget(Qt.LeftDockWidgetArea, self.road_network_toolbox_widget)
+        self.road_network_toolbox.setMinimumWidth(375)
+
+        self.initialize_lanelet_information()
+
+        #self.road_network_toolbox.button_traffic_signs_settings.clicked.connect(lambda: self.create_traffic_signs_settings())
+        #self.road_network_toolbox.button_traffic_signs.clicked.connect(lambda: self.traffic_signs())
+        #self.road_network_toolbox.button_traffic_light.clicked.connect(lambda: self.traffic_light())
+        #self.road_network_toolbox.delete_traffic_sign.clicked.connect(lambda: self.delete_traffic_element())
+        #self.road_network_toolbox.edit_button_traffic_light.clicked.connect(lambda: self.edittrafficlight())
+
+        self.road_network_toolbox.button_add_lanelet.clicked.connect(lambda: self.add_lanelet())
+        # self.uppertoolBox.button_forwards.clicked.connect(lambda: self.click_straight(self.lanelet_pos_x, self.lanelet_pos_y))
+        # self.uppertoolBox.button_lanelet_settings.clicked.connect(lambda: self.forwards())
+        # self.uppertoolBox.button_turn_right.clicked.connect(lambda: self.click_curve(self.curve_direction, self.curve_pos_x, self.curve_pos_y))
+        # self.uppertoolBox.button_curve_settings.clicked.connect(self.curve)
+        #
+        # self.uppertoolBox.button_fit_to_predecessor.clicked.connect(lambda: self.fit_func())
+        # self.uppertoolBox.button_adjacent.clicked.connect(lambda: self.adjacent())
+        # self.uppertoolBox.button_connect_lanelets.clicked.connect(lambda: self.connect_lanelets())
+        # self.uppertoolBox.button_remove_lanelet.clicked.connect(lambda: self.remove_lanelet())
+
+        self.road_network_toolbox.button_X.clicked.connect(lambda: self.click_x_crossing())
+        self.road_network_toolbox.button_T.clicked.connect(lambda: self.click_t_crossing())
+        self.road_network_toolbox.button_T_3.clicked.connect(lambda: self.fit_intersection())
+
     def show_sumo_settings(self):
         self.sumo_settings = SUMOSettings(self, config=self.sumobox.config)
 
-
-    # Toolbox functionality
-    def click_straight(self, posX, posY):
-        if self.crviewer.current_scenario == None:
-            self.textBrowser.append("create a new file")
-            return
-        lanelet = self.mapcreator.create_straight(self.widfor, self.lenfor, self.vertfor,
-                                             self.crviewer.current_scenario.lanelet_network, self.crviewer.current_scenario, self.pred, self.lanelettype,
-                                             self.roaduser_oneway, self.roaduser_bidirectional, self.linemarkingleft,
-                                             self.linemarkingright, backwards=self.backwards)
-        lanelet.translate_rotate(np.array([posX, posY]), self.rot_angle_straight)
-        self.update_view(focus_on_network=True)
-
-    def click_curve(self, turnright=True, curve_posX=0, curve_posY=0):
-        if self.crviewer.current_scenario == None:
-            self.textBrowser.append("create a new file")
-            return
-        if turnright:
-            lanelet = self.mapcreator.create_curve(self.widcurve, self.radcurve, self.anglcurve,self.numcurve,
-                                                    self.crviewer.current_scenario.lanelet_network, self.crviewer.current_scenario, self.pred, lanelettype=self.curvelanelettype,
-                                                    roaduseroneway=self.curveroaduser_oneway, roaduserbidirectional=self.curveroaduser_bidirectional, linemarkingleft=self.linemarkingleft_curve,
-                                                   linemarkingright=self.linemarkingright_curve)
-
-
-            #lanelet.translate_rotate(np.array([curve_posX, curve_posY]), -np.pi/2)
-
+    def get_x_position_start(self) -> float:
+        if self.road_network_toolbox.x_position_lanelet_start.text():
+            return float(self.road_network_toolbox.x_position_lanelet_start.text())
         else:
-            lanelet = self.mapcreator.create_curve(self.widcurve, self.radcurve, -self.anglcurve, self.numcurve,
-                                              self.crviewer.current_scenario.lanelet_network, self.crviewer.current_scenario, self.pred)
-            #lanelet.translate_rotate(np.array([curve_posX, curve_posY]), np.pi/2)
-        lanelet.translate_rotate(np.array([curve_posX, curve_posY]), self.rot_angle_curve)
+            return 0
 
+    def get_y_position_start(self) -> float:
+        if self.road_network_toolbox.y_position_lanelet_start.text():
+            return float(self.road_network_toolbox.y_position_lanelet_start.text())
+        else:
+            return 0
+
+    def collect_lanelets(self) -> List[int]:
+        lanelet_ids = []
+        if self.crviewer.current_scenario is not None:
+            for la in self.crviewer.current_scenario.lanelet_network.lanelets:
+                lanelet_ids.append(la.lanelet_id)
+        return lanelet_ids
+
+    def initialize_lanelet_information(self):
+        self.road_network_toolbox.x_position_lanelet_start.setText("0.0")
+        self.road_network_toolbox.y_position_lanelet_start.setText("0.0")
+        self.road_network_toolbox.lanelet_width.setText("3.0")
+        self.road_network_toolbox.line_marking_left.setCurrentIndex(4)
+        self.road_network_toolbox.line_marking_right.setCurrentIndex(4)
+        self.road_network_toolbox.number_vertices.setText("20")
+        self.road_network_toolbox.traffic_light_ids.setText("")
+        self.road_network_toolbox.traffic_sign_ids.setText("")
+        self.road_network_toolbox.traffic_sign_ids.setText("")
+        self.road_network_toolbox.lanelet_length.setText("10.0")
+        self.road_network_toolbox.lanelet_radius.setText("10.0")
+        self.road_network_toolbox.lanelet_angle.setText("90.0")
+        self.update_lanelet_lists()
+
+    def update_lanelet_lists(self):
+        self.road_network_toolbox.predecessors.clear()
+        self.road_network_toolbox.predecessors.addItems(["None"] + [str(item) for item in self.collect_lanelets()])
+        self.road_network_toolbox.predecessors.setCurrentIndex(0)
+        self.road_network_toolbox.successors.clear()
+        self.road_network_toolbox.successors.addItems(["None"] + [str(item) for item in self.collect_lanelets()])
+        self.road_network_toolbox.predecessors.setCurrentIndex(0)
+        self.road_network_toolbox.adjacent_right.clear()
+        self.road_network_toolbox.adjacent_right.addItems(["None"] + [str(item) for item in self.collect_lanelets()])
+        self.road_network_toolbox.predecessors.setCurrentIndex(0)
+        self.road_network_toolbox.adjacent_left.clear()
+        self.road_network_toolbox.adjacent_left.addItems(["None"] + [str(item) for item in self.collect_lanelets()])
+        self.road_network_toolbox.predecessors.setCurrentIndex(0)
+
+    def add_lanelet(self):
+        """
+        Adds a lanelet to the scenario based on the selected parameters by the user.
+        """
+        if self.crviewer.current_scenario is None:
+            self.textBrowser.append("Please create first a new scenario.")
+            return
+
+        lanelet_pos_x = self.get_x_position_start()
+        lanelet_pos_y = self.get_y_position_start()
+        lanelet_width = float(self.road_network_toolbox.lanelet_width.text())
+        line_marking_left = LineMarking(self.road_network_toolbox.line_marking_left.currentText())
+        line_marking_right = LineMarking(self.road_network_toolbox.line_marking_right.currentText())
+        num_vertices = int(self.road_network_toolbox.number_vertices.text())
+        predecessors = [int(pre) for pre in self.road_network_toolbox.predecessors.get_checked_items()]
+        successors = [int(suc) for suc in self.road_network_toolbox.successors.get_checked_items()]
+        if self.road_network_toolbox.adjacent_left.currentText() != "None":
+            adjacent_left = int(self.road_network_toolbox.adjacent_left.currentText())
+        else:
+            adjacent_left = None
+        if self.road_network_toolbox.adjacent_right.currentText() != "None":
+            adjacent_left = int(self.road_network_toolbox.adjacent_right.currentText())
+        else:
+            adjacent_right = None
+        lanelet_type = {LaneletType(ty) for ty in self.road_network_toolbox.lanelet_type.get_checked_items() if ty is not "None"}
+        user_one_way = {RoadUser(user) for user in self.road_network_toolbox.road_user_oneway.get_checked_items() if user is not "None"}
+        user_bidirectional = \
+            {RoadUser(user) for user in self.road_network_toolbox.road_user_bidirectional.get_checked_items() if user is not "None"}
+        traffic_signs = None
+        traffic_lights = None
+        stop_line_start = None
+        stop_line_end = None
+        stop_line_marking = None
+        lanelet_length = float(self.road_network_toolbox.lanelet_length.text())
+        lanelet_radius = float(self.road_network_toolbox.lanelet_radius.text())
+        lanelet_angle = np.deg2rad(float(self.road_network_toolbox.lanelet_angle.text()))
+        add_curved_selection = self.road_network_toolbox.curved_lanelet_selection.isChecked()
+        connect_to_last_selection = self.road_network_toolbox.connect_to_previous_selection.isChecked()
+        connect_to_predecessors_selection = self.road_network_toolbox.connect_to_predecessors_selection.isChecked()
+        connect_to_successors_selection = self.road_network_toolbox.connect_to_successors_selection.isChecked()
+
+        lanelet_id = self.crviewer.current_scenario.generate_object_id()
+        if add_curved_selection:
+            lanelet = MapCreator.create_curve(lanelet_width, lanelet_radius, lanelet_angle, num_vertices, lanelet_id,
+                                              lanelet_type, user_one_way, user_bidirectional, line_marking_left,
+                                              line_marking_right)
+        else:
+            lanelet = MapCreator.create_straight(lanelet_width, lanelet_length, num_vertices, lanelet_id, lanelet_type,
+                                                 user_one_way, user_bidirectional, line_marking_left,
+                                                 line_marking_right)
+        if connect_to_last_selection:
+            if self.last_added_lanelet_id is not None:
+                MapCreator.fit_to_predecessor(
+                    self.crviewer.current_scenario.lanelet_network.find_lanelet_by_id(self.last_added_lanelet_id),
+                    lanelet)
+        elif connect_to_predecessors_selection:
+            if len(predecessors) > 0:
+                MapCreator.fit_to_predecessor(
+                    self.crviewer.current_scenario.lanelet_network.find_lanelet_by_id(predecessors[0]), lanelet)
+        elif connect_to_successors_selection:
+            if len(successors) > 0:
+                MapCreator.fit_to_successor(
+                    self.crviewer.current_scenario.lanelet_network.find_lanelet_by_id(successors[0]), lanelet)
+        self.last_added_lanelet_id = lanelet_id
+        self.crviewer.current_scenario.lanelet_network.add_lanelet(lanelet=lanelet)
+
+        lanelet.translate_rotate(np.array([lanelet_pos_x, lanelet_pos_y]), 0)
         self.update_view(focus_on_network=True)
+        self.update_lanelet_lists()
 
     def fit_func(self):
         if self.crviewer.current_scenario == None:
@@ -241,7 +348,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
             self.textBrowser.append("select valid lanelet IDs")
             return
         else:
-            self.mapcreator.fit_to_predecessor( pred_lanelet, succ_lanelet)
+            self.map_creator.fit_to_predecessor(pred_lanelet, succ_lanelet)
             self.update_view(focus_on_network=True)
 
     def create_laneletsettings(self):
@@ -259,14 +366,14 @@ class MWindow(QMainWindow, Ui_mainWindow):
             lt = LaneletType(indexlist[i])
             self.lanelettype.add(LaneletType(indexlist[i]))
 
-        #Roaduser one-way:
+        # Roaduser one-way:
         indexlist2 = self.LL.getOnewayRoadUser()
         self.roaduser_oneway = set()
         for i in range(0, len(indexlist2)):
             ro = RoadUser(indexlist2[i])
             self.roaduser_oneway.add(RoadUser(indexlist2[i]))
 
-        #Roaduser bidirectional:
+        # Roaduser bidirectional:
         indexlist3 = self.LL.getBidirectionalRoadUser()
         self.roaduser_bidirectional = set()
         for i in range(0, len(indexlist3)):
@@ -279,7 +386,6 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.lanelet_pos_y = self.LL.getPosY()
         self.backwards = self.LL.getDirection()
         self.vertfor = self.LL.getNumVertices()
-
 
     def curve(self):
         self.CU = CurveSettings()
@@ -335,22 +441,26 @@ class MWindow(QMainWindow, Ui_mainWindow):
         if self.ADJ.width.text():
             width = int(self.ADJ.width.text())
             if left:
-                adjacent_lanelet = self.mapcreator.adjacent_lanelet_left(lanelet,
-                                                                         self.crviewer.current_scenario.lanelet_network,
-                                                                         self.crviewer.current_scenario,
-                                                                         same_direction=forwards, width=width)
-            else:
-                adjacent_lanelet = self.mapcreator.adjacent_lanelet_right(lanelet,
+                adjacent_lanelet = self.map_creator.adjacent_lanelet_left(lanelet,
                                                                           self.crviewer.current_scenario.lanelet_network,
                                                                           self.crviewer.current_scenario,
                                                                           same_direction=forwards, width=width)
+            else:
+                adjacent_lanelet = self.map_creator.adjacent_lanelet_right(lanelet,
+                                                                           self.crviewer.current_scenario.lanelet_network,
+                                                                           self.crviewer.current_scenario,
+                                                                           same_direction=forwards, width=width)
         else:
             if left:
-                adjacent_lanelet = self.mapcreator.adjacent_lanelet_left(lanelet, self.crviewer.current_scenario.lanelet_network,
-                                                                self.crviewer.current_scenario, same_direction=forwards)
+                adjacent_lanelet = self.map_creator.adjacent_lanelet_left(lanelet,
+                                                                          self.crviewer.current_scenario.lanelet_network,
+                                                                          self.crviewer.current_scenario,
+                                                                          same_direction=forwards)
             else:
-                adjacent_lanelet = self.mapcreator.adjacent_lanelet_right(lanelet, self.crviewer.current_scenario.lanelet_network,
-                                                                self.crviewer.current_scenario, same_direction=forwards)
+                adjacent_lanelet = self.map_creator.adjacent_lanelet_right(lanelet,
+                                                                           self.crviewer.current_scenario.lanelet_network,
+                                                                           self.crviewer.current_scenario,
+                                                                           same_direction=forwards)
         self.update_view(focus_on_network=True)
 
     def select_predecessor(self):
@@ -374,8 +484,9 @@ class MWindow(QMainWindow, Ui_mainWindow):
             self.textBrowser.append("select valid lanelet IDs")
             return
         else:
-            connecting_lanelet = self.mapcreator.connect_lanelets4(pred_lanelet, succ_lanelet,
-                                                             self.crviewer.current_scenario.lanelet_network, self.crviewer.current_scenario)
+            connecting_lanelet = self.map_creator.connect_lanelets4(pred_lanelet, succ_lanelet,
+                                                                    self.crviewer.current_scenario.lanelet_network,
+                                                                    self.crviewer.current_scenario)
         self.update_view(focus_on_network=True)
 
     def remove_lanelet(self):
@@ -392,7 +503,8 @@ class MWindow(QMainWindow, Ui_mainWindow):
             self.textBrowser.append("select valid lanelet ID")
             return
 
-        self.mapcreator.remove_lanelet(lanelet, self.crviewer.current_scenario.lanelet_network, self.crviewer.current_scenario)
+        self.map_creator.remove_lanelet(lanelet, self.crviewer.current_scenario.lanelet_network,
+                                        self.crviewer.current_scenario)
         self.update_view(focus_on_network=True)
 
     def traffic_signs(self):
@@ -407,13 +519,13 @@ class MWindow(QMainWindow, Ui_mainWindow):
         x = self.showTS.getPosX()
         y = self.showTS.getPosY()
 
-
         lanelet_id = self.showTS.getLaneletID()
         if lanelet_id == None:
             self.textBrowser.append("_Warning:_ Select a valid Lanelet ID")
             return
 
-        self.traffic1 = TrafficSign(self.traffic_signs_id, [TrafficSignElement(TrafficSignIDGermany(sig), [vals])], {lanelet_id},
+        self.traffic1 = TrafficSign(self.traffic_signs_id, [TrafficSignElement(TrafficSignIDGermany(sig), [vals])],
+                                    {lanelet_id},
                                     np.array([x, y]))
         self.crviewer.current_scenario.lanelet_network.add_traffic_sign(self.traffic1, {lanelet_id})
         if self.crviewer.current_scenario.lanelet_network.find_lanelet_by_id(lanelet_id) == None:
@@ -453,7 +565,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
                  (TrafficLightState.GREEN, green),
                  (TrafficLightState.YELLOW, yellow)]
         cycle_element_list = [TrafficLightCycleElement(state[0], state[1]) for state in cycle]
-        tl = TrafficLight(traffic_light_id=self.traffic_light_id, cycle=cycle_element_list, position=np.array([x,y]),
+        tl = TrafficLight(traffic_light_id=self.traffic_light_id, cycle=cycle_element_list, position=np.array([x, y]),
                           direction=direction, time_offset=time_offset, active=isactive)
 
         if lanelet_id:
@@ -470,14 +582,14 @@ class MWindow(QMainWindow, Ui_mainWindow):
         id = 1
         tl = TrafficLight(traffic_light_id=id, cycle=[], position=np.array([x, y]), direction=TrafficLightDirection.ALL)
         lanelet = self.crviewer.current_scenario.lanelet_network.find_lanelet_by_id(1)
-        #lanelet.add_traffic_light_to_lanelet(id)
-        self.crviewer.current_scenario.lanelet_network.add_traffic_light(tl, [1,2])
+        # lanelet.add_traffic_light_to_lanelet(id)
+        self.crviewer.current_scenario.lanelet_network.add_traffic_light(tl, [1, 2])
         id = id + 1
         x = 10
         y = 10
-        tl2 = TrafficLight(traffic_light_id=id, cycle=[], position=np.array([x, y]), direction=TrafficLightDirection.ALL)
+        tl2 = TrafficLight(traffic_light_id=id, cycle=[], position=np.array([x, y]),
+                           direction=TrafficLightDirection.ALL)
         self.crviewer.current_scenario.lanelet_network.add_traffic_light(tl2, [2])
-
 
         self.update_view(focus_on_network=True)
 
@@ -538,7 +650,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         isactive = self.EL.get_isactive()
         x = self.EL.getPosX()
         y = self.EL.getPosY()
-        position = np.array([x,y])
+        position = np.array([x, y])
         time_offset = self.EL.getTimeOffset()
         red = self.EL.getRed()
         red_yellow = self.EL.getRed_Yellow()
@@ -560,7 +672,6 @@ class MWindow(QMainWindow, Ui_mainWindow):
         TL._cycle = cycle_element_list
         self.update_view(focus_on_network=True)
 
-
     def click_x_crossing(self):
         if self.crviewer.current_scenario == None:
             self.textBrowser.append("_Warning:_ Create a new file")
@@ -571,11 +682,10 @@ class MWindow(QMainWindow, Ui_mainWindow):
         diameter = 80
         width = XC.getWidth()
         diameter = XC.getDiameter()
-        self.mapcreator.x_crossing(width, diameter, self.crviewer.current_scenario.lanelet_network,
-                                                self.crviewer.current_scenario)
+        self.map_creator.x_crossing(width, diameter, self.crviewer.current_scenario.lanelet_network,
+                                    self.crviewer.current_scenario)
         # lanelet.translate_rotate(np.array([0, 0]), self.rot_angle_curve)
         self.update_view(focus_on_network=True)
-
 
     def click_t_crossing(self):
         if self.crviewer.current_scenario == None:
@@ -587,10 +697,9 @@ class MWindow(QMainWindow, Ui_mainWindow):
         diameter = 80
         width = TC.getWidth()
         diameter = TC.getDiameter()
-        self.mapcreator.t_crossing(width, diameter, self.crviewer.current_scenario.lanelet_network,
-                                                self.crviewer.current_scenario)
+        self.map_creator.t_crossing(width, diameter, self.crviewer.current_scenario.lanelet_network,
+                                    self.crviewer.current_scenario)
         self.update_view(focus_on_network=True)
-
 
     def fit_intersection(self):
         self.FI.exec()
@@ -602,51 +711,14 @@ class MWindow(QMainWindow, Ui_mainWindow):
         lanelet_successor = self.crviewer.current_scenario.lanelet_network.find_lanelet_by_id(successor_ID)
         intersection = self.crviewer.current_scenario.lanelet_network.find_intersection_by_id(intersection_ID)
 
-
-        self.mapcreator.fit_intersection_to_predecessor(lanelet_predecessor, lanelet_successor, intersection, self.crviewer.current_scenario.lanelet_network, self.crviewer.current_scenario)
+        self.map_creator.fit_intersection_to_predecessor(lanelet_predecessor, lanelet_successor, intersection,
+                                                         self.crviewer.current_scenario.lanelet_network,
+                                                         self.crviewer.current_scenario)
         self.update_view(focus_on_network=True)
-
-    def create_toolbox(self):
-        """ Create the Upper toolbox."""
-        self.uppertoolBox = RoadNetworkToolbox()
-
-        self.tool1 = QDockWidget("Road Network Toolbox")
-        self.tool1.setFloating(True)
-        self.tool1.setFeatures(QDockWidget.AllDockWidgetFeatures)
-        self.tool1.setAllowedAreas(Qt.LeftDockWidgetArea)
-        self.tool1.setWidget(self.uppertoolBox)
-        self.addDockWidget(Qt.LeftDockWidgetArea, self.tool1)
-
-        self.uppertoolBox2 = ObstacleToolbox()
-        self.tool2 = QDockWidget("Obstacle Toolbox")
-        self.tool2.setFloating(True)
-        self.tool2.setFeatures(QDockWidget.AllDockWidgetFeatures)
-        self.tool2.setAllowedAreas(Qt.RightDockWidgetArea)
-        self.tool2.setWidget(self.uppertoolBox2)
-        self.addDockWidget(Qt.RightDockWidgetArea, self.tool2)
-
-        self.uppertoolBox.button_traffic_signs_settings.clicked.connect(lambda: self.create_traffic_signs_settings())
-        self.uppertoolBox.button_traffic_signs.clicked.connect(lambda: self.traffic_signs())
-        self.uppertoolBox.button_traffic_light.clicked.connect(lambda: self.traffic_light())
-        self.uppertoolBox.delete_traffic_sign.clicked.connect(lambda: self.delete_traffic_element())
-        self.uppertoolBox.edit_button_traffic_light.clicked.connect(lambda: self.edittrafficlight())
-
-        # self.uppertoolBox.button_forwards.clicked.connect(lambda: self.click_straight(self.lanelet_pos_x, self.lanelet_pos_y))
-        # self.uppertoolBox.button_lanelet_settings.clicked.connect(lambda: self.forwards())
-        # self.uppertoolBox.button_turn_right.clicked.connect(lambda: self.click_curve(self.curve_direction, self.curve_pos_x, self.curve_pos_y))
-        # self.uppertoolBox.button_curve_settings.clicked.connect(self.curve)
-        #
-        # self.uppertoolBox.button_fit_to_predecessor.clicked.connect(lambda: self.fit_func())
-        # self.uppertoolBox.button_adjacent.clicked.connect(lambda: self.adjacent())
-        # self.uppertoolBox.button_connect_lanelets.clicked.connect(lambda: self.connect_lanelets())
-        # self.uppertoolBox.button_remove_lanelet.clicked.connect(lambda: self.remove_lanelet())
-
-        self.uppertoolBox.button_X.clicked.connect(lambda: self.click_x_crossing())
-        self.uppertoolBox.button_T.clicked.connect(lambda: self.click_t_crossing())
-        self.uppertoolBox.button_T_3.clicked.connect(lambda: self.fit_intersection())
 
     def create_lanelet_list(self):
         """Create the lanelet_list and put it into right Dockwidget area."""
+
         def remove_selection_and_close(_):
             """ remove selection from plot when list is closed"""
             self.lanelet_list.reset_selection()
@@ -680,6 +752,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
     def create_intersection_list(self):
         """Create the lanelet_list and put it into right Dockwidget area."""
+
         def remove_selection_and_close(_):
             """ remove selection from plot when list is closed"""
             self.intersection_list.reset_selection()
@@ -716,22 +789,21 @@ class MWindow(QMainWindow, Ui_mainWindow):
         """ Create the Upper toolbox."""
         self.lowertoolBox = LaneletInformationToolbox()
 
-        self.tool2 = QDockWidget("Lanelet Information")
-        self.tool2.setFloating(True)
-        self.tool2.setFeatures(QDockWidget.AllDockWidgetFeatures)
-        self.tool2.setAllowedAreas(Qt.LeftDockWidgetArea)
-        self.tool2.setWidget(self.lowertoolBox)
-        self.addDockWidget(Qt.LeftDockWidgetArea, self.tool2)
+        self.obstacle_toolbox_widget = QDockWidget("Lanelet Information")
+        self.obstacle_toolbox_widget.setFloating(True)
+        self.obstacle_toolbox_widget.setFeatures(QDockWidget.AllDockWidgetFeatures)
+        self.obstacle_toolbox_widget.setAllowedAreas(Qt.LeftDockWidgetArea)
+        self.obstacle_toolbox_widget.setWidget(self.lowertoolBox)
+        self.addDockWidget(Qt.LeftDockWidgetArea, self.obstacle_toolbox_widget)
         self.lowertoolBox.refresh_button.clicked.connect(lambda: self.refresh_information())
-        self.tool2.setMaximumHeight(400)
+        self.obstacle_toolbox_widget.setMaximumHeight(400)
         self.lowertoolBox.edit_button.clicked.connect(lambda: self.edit_lanelet())
 
-#        if self.crviewer.selected_lanelet_use[0]:
- #           self.selected_lanelet = self.crviewer.selected_lanelet_use[0]
+    #        if self.crviewer.selected_lanelet_use[0]:
+    #           self.selected_lanelet = self.crviewer.selected_lanelet_use[0]
 
-
-        #selected_lanelet = self.crviewer.current_scenario.lanelet_network.find_lanelet_by_id(
-          #  self.lanelet_list.selected_id)
+    # selected_lanelet = self.crviewer.current_scenario.lanelet_network.find_lanelet_by_id(
+    #  self.lanelet_list.selected_id)
 
     def refresh_information(self):
         if self.crviewer.current_scenario is None:
@@ -760,10 +832,10 @@ class MWindow(QMainWindow, Ui_mainWindow):
                 self.lowertoolBox.width.clear()
                 self.lowertoolBox.width.insert((str(int(width))))
                 self.lowertoolBox.angle.clear()
-                angle = self.mapcreator.calc_angle_between2(self.selected_lanelet)
-                angle = (angle/np.pi) * 180
+                angle = self.map_creator.calc_angle_between2(self.selected_lanelet)
+                angle = (angle / np.pi) * 180
                 self.lowertoolBox.radius.clear()
-                rad = self.mapcreator.calc_radius(self.selected_lanelet)
+                rad = self.map_creator.calc_radius(self.selected_lanelet)
                 self.lowertoolBox.traffic_sign_ids.clear()
                 traffic_ids = self.selected_lanelet.traffic_signs
                 for t in traffic_ids:
@@ -786,7 +858,6 @@ class MWindow(QMainWindow, Ui_mainWindow):
                 self.textBrowser.append("_Warning: Select a lanelet")
                 return
 
-
     def edit_lanelet(self):
 
         if self.crviewer.current_scenario is None:
@@ -797,7 +868,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
                 QtWidgets.QMessageBox.Ok)
             messbox.close()
             return
-        
+
         posX = 0
         posY = 0
         if self.crviewer.current_scenario == None:
@@ -852,27 +923,30 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
         if int((self.selected_angle)) == 0:
             self.roaduser_oneway = set()
-            lanelet = self.mapcreator.edit_straight(self.selected_id, self.selected_width, self.selected_length, self.selected_vertices,
-                                             self.crviewer.current_scenario.lanelet_network, self.crviewer.current_scenario, self.pred, lanelettype,
-                                             roaduser_oneway, roaduser_bidirectional,  self.linemarkingleft, self.linemarkingright, backwards=self.backwards)
+            lanelet = self.map_creator.edit_straight(self.selected_id, self.selected_width, self.selected_length,
+                                                     self.selected_vertices,
+                                                     self.crviewer.current_scenario.lanelet_network,
+                                                     self.crviewer.current_scenario, self.pred, lanelettype,
+                                                     roaduser_oneway, roaduser_bidirectional, self.linemarkingleft,
+                                                     self.linemarkingright, backwards=self.backwards)
             lanelet.translate_rotate(np.array([posX, posY]), self.rot_angle_straight)
         else:
-            curve = self.mapcreator.edit_curve(self.selected_id, self.selected_width, self.selected_radius, np.deg2rad(self.selected_angle), self.selected_vertices,
-                                             self.crviewer.current_scenario.lanelet_network, self.crviewer.current_scenario, self.pred, self.lanelettype,
-                                             self.roaduser, self.linemarkingleft, self.linemarkingright)
+            curve = self.map_creator.edit_curve(self.selected_id, self.selected_width, self.selected_radius,
+                                                np.deg2rad(self.selected_angle), self.selected_vertices,
+                                                self.crviewer.current_scenario.lanelet_network,
+                                                self.crviewer.current_scenario, self.pred, self.lanelettype,
+                                                self.roaduser, self.linemarkingleft, self.linemarkingright)
 
         self.update_view(focus_on_network=True)
 
-
-
     def create_sumobox(self):
         """Function to create the sumo toolbox(bottom toolbox)."""
-        self.tool2 = QDockWidget("Sumo Simulation", self)
-        self.tool2.setFeatures(QDockWidget.AllDockWidgetFeatures)
-        self.tool2.setAllowedAreas(Qt.LeftDockWidgetArea)
-        self.tool2.setWidget(self.sumobox)
-        self.addDockWidget(Qt.LeftDockWidgetArea, self.tool2)
-        self.tool2.setMaximumHeight(400)
+        self.obstacle_toolbox_widget = QDockWidget("Sumo Simulation", self)
+        self.obstacle_toolbox_widget.setFeatures(QDockWidget.AllDockWidgetFeatures)
+        self.obstacle_toolbox_widget.setAllowedAreas(Qt.LeftDockWidgetArea)
+        self.obstacle_toolbox_widget.setWidget(self.sumobox)
+        self.addDockWidget(Qt.LeftDockWidgetArea, self.obstacle_toolbox_widget)
+        self.obstacle_toolbox_widget.setMaximumHeight(400)
 
     def detect_slider_clicked(self):
         self.slider_clicked = True
@@ -922,10 +996,10 @@ class MWindow(QMainWindow, Ui_mainWindow):
                 messbox.close()
         else:
             self.textBrowser.append("Exporting animation: " +
-                                    self.uppertoolBox.save_menu.currentText() +
+                                    self.road_network_toolbox.save_menu.currentText() +
                                     " ...")
             self.crviewer.save_animation(
-                self.uppertoolBox.save_menu.currentText())
+                self.road_network_toolbox.save_menu.currentText())
             self.textBrowser.append("Exporting finished")
 
     def create_console(self):
@@ -957,7 +1031,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         tb1.addAction(action_save)
         action_save.triggered.connect(self.file_save)
 
-        #TODO: undo button
+        # TODO: undo button
         """action_undo = QAction(QIcon(":/icons/save_file.png"), "undo last action", self)
         tb1.addAction(action_undo)"""
 
@@ -966,7 +1040,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         toolbox = QAction(QIcon(":/icons/tools.ico"),
                           "show Toolbox for CR Scenario", self)
         tb2.addAction(toolbox)
-        toolbox.triggered.connect(self.tool_box1_show)
+        toolbox.triggered.connect(self.road_network_toolbox_show)
         tb2.addSeparator()
         lanelet_list = QAction(QIcon(":/icons/lanelet_list.ico"),
                                "show Lanelet list", self)
@@ -1193,7 +1267,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         scenario.lanelet_network = net
         self.crviewer.current_scenario = scenario
         self.open_scenario(scenario)
-        self.restore_parameters()
+#        self.restore_parameters()
 
     def open_commonroad_file(self):
         """ """
@@ -1241,7 +1315,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.intersection_list = IntersectionList(self.update_view, self)
         self.update_view()
         self.update_to_new_scenario()
-        self.restore_parameters()
+       # self.restore_parameters()
 
     def update_to_new_scenario(self):
         """  """
@@ -1373,11 +1447,11 @@ class MWindow(QMainWindow, Ui_mainWindow):
         event.ignore()
         self.closeWindow()
 
-    def tool_box1_show(self):
-        self.tool1.show()
+    def road_network_toolbox_show(self):
+        self.road_network_toolbox_widget.show()
 
-    def tool_box2_show(self):
-        self.tool2.show()
+    def obstacle_toolbox_show(self):
+        self.obstacle_toolbox_widget.show()
 
     def update_view(self, caller=None, focus_on_network=None):
         """ update all compoments. triggered by the component caller"""
@@ -1425,42 +1499,6 @@ class MWindow(QMainWindow, Ui_mainWindow):
             # triggered by click on canvas
             self.lanelet_list.reset_selection()
             self.intersection_list.reset_selection()
-
-    def restore_parameters(self):
-
-        self.pred = False
-        self.rot_angle_straight = 0
-        self.rot_angle_curve = 0
-
-        self.lenfor = 50
-        self.widfor = 20
-        self.vertfor = 20
-        self.adjfor = None
-        self.lanelettype = set()
-        self.roaduser ="vehicle"
-        self.linemarkingleft = "no_marking"
-        self.linemarkingright = "no_marking"
-        self.lanelet_pos_x = 0
-        self.lanelet_pos_y = 0
-        self.backwards = False
-        self.roaduser_oneway = set()
-        self.roaduser_bidirectional = set()
-
-        self.radcurve = 50
-        self.widcurve = 20
-        self.numcurve = 30
-        self.anglcurve = np.pi/2
-        self.adjcurve = None
-        self.curvetype = "urban"
-        self.roaduser_curve = "vehicle"
-        self.linemarkingright_curve = "no_marking"
-        self.linemarkingleft_curve = "no_marking"
-        self.curve_pos_x = 0
-        self.curve_pos_y = 0
-        self.curve_direction = False
-
-        self.LL = LaneletSettings()
-        self.FI = FitIntersection()
 
 
 def main():
