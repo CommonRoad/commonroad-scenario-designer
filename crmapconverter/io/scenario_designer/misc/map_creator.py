@@ -1,4 +1,4 @@
-from typing import Set
+from typing import Set, List, Union
 import numpy as np
 from scipy.interpolate import interp1d
 
@@ -14,7 +14,9 @@ class MapCreator:
 
     @staticmethod
     def create_straight(width: float, length: float, num_vertices: int, lanelet_id: int,
-                        lanelet_types: Set[LaneletType],
+                        lanelet_types: Set[LaneletType], predecessor: List[int], successor: List[int],
+                        adjacent_left: Union[int, None], adjacent_right: Union[int, None],
+                        adjacent_left_same_direction: bool, adjacent_right_same_direction: bool,
                         road_user_one_way: Set[RoadUser], road_user_bidirectional: Set[RoadUser],
                         line_marking_left: LineMarking = LineMarking.UNKNOWN,
                         line_marking_right: LineMarking = LineMarking.UNKNOWN, backwards: bool = False):
@@ -26,6 +28,12 @@ class MapCreator:
         @param num_vertices: Number of vertices of the lanelet.
         @param lanelet_id: Id for new lanelet.
         @param lanelet_types: Lanelet types for new lanelet.
+        @param adjacent_left: Left adjacent lanelet.
+        @param adjacent_right Right adjacent lanelet.
+        @param adjacent_left_same_direction: Boolean indicating whether adjacent left has same direction.
+        @param adjacent_right_same_direction: Boolean indicating whether adjacent right has same direction.
+        @param predecessor: Predecessor lanelets.
+        @param successor: Successor lanelets.
         @param road_user_one_way: Allowed road users one way for new lanelet.
         @param road_user_bidirectional: Allowed road users bidirectional for new lanelet.
         @param line_marking_left: Line markings on the left for new lanelet.
@@ -47,8 +55,11 @@ class MapCreator:
         center_vertices = np.array(center_vertices)
         right_vertices = np.array(right_vertices)
 
-        lanelet = Lanelet(left_vertices=left_vertices, right_vertices=right_vertices, lanelet_id=lanelet_id,
-                          center_vertices=center_vertices, lanelet_type=lanelet_types,
+        lanelet = Lanelet(left_vertices=left_vertices, right_vertices=right_vertices, predecessor=predecessor,
+                          successor=successor, adjacent_left=adjacent_left, adjacent_right=adjacent_right,
+                          adjacent_left_same_direction=adjacent_left_same_direction,
+                          adjacent_right_same_direction=adjacent_right_same_direction,
+                          lanelet_id=lanelet_id, center_vertices=center_vertices, lanelet_type=lanelet_types,
                           user_one_way=road_user_one_way, user_bidirectional=road_user_bidirectional,
                           line_marking_right_vertices=line_marking_left,
                           line_marking_left_vertices=line_marking_right)
@@ -59,7 +70,9 @@ class MapCreator:
 
     @staticmethod
     def create_curve(width: float, radius: float, angle: float, num_vertices: int, lanelet_id: int,
-                     lanelet_types: Set[LaneletType],
+                     lanelet_types: Set[LaneletType], predecessor: List[int], successor: List[int],
+                     adjacent_left: Union[int, None], adjacent_right: Union[int, None],
+                     adjacent_left_same_direction: bool, adjacent_right_same_direction: bool,
                      road_user_one_way: Set[RoadUser], road_user_bidirectional: Set[RoadUser],
                      line_marking_left: LineMarking = LineMarking.UNKNOWN,
                      line_marking_right: LineMarking = LineMarking.UNKNOWN):
@@ -72,6 +85,12 @@ class MapCreator:
         @param num_vertices: Number of vertices of the lanelet.
         @param lanelet_id: Id for new lanelet.
         @param lanelet_types: Lanelet types for new lanelet.
+        @param adjacent_left: Left adjacent lanelet.
+        @param adjacent_right Right adjacent lanelet.
+        @param adjacent_left_same_direction: Boolean indicating whether adjacent left has same direction.
+        @param adjacent_right_same_direction: Boolean indicating whether adjacent right has same direction.
+        @param predecessor: Predecessor lanelets.
+        @param successor: Successor lanelets.
         @param road_user_one_way: Allowed road users one way for new lanelet.
         @param road_user_bidirectional: Allowed road users bidirectional for new lanelet.
         @param line_marking_left: Line markings on the left for new lanelet.
@@ -101,7 +120,10 @@ class MapCreator:
             angle_start = -angle_start
 
         lanelet = Lanelet(left_vertices=left_vertices, right_vertices=right_vertices, lanelet_id=lanelet_id,
-                          center_vertices=center_vertices, lanelet_type=lanelet_types,
+                          center_vertices=center_vertices, predecessor=predecessor, successor=successor,
+                          adjacent_left=adjacent_left, adjacent_right=adjacent_right,
+                          adjacent_left_same_direction=adjacent_left_same_direction,
+                          adjacent_right_same_direction=adjacent_right_same_direction, lanelet_type=lanelet_types,
                           user_one_way=road_user_one_way, user_bidirectional=road_user_bidirectional,
                           line_marking_right_vertices=LineMarking(line_marking_right),
                           line_marking_left_vertices=LineMarking(line_marking_left))

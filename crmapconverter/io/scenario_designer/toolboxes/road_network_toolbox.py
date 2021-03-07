@@ -7,7 +7,7 @@ from crmapconverter.io.scenario_designer.toolboxes.gui_sumo_simulation import SU
 from crmapconverter.io.scenario_designer.toolboxes.toolbox import Toolbox, CheckableComboBox, QHLine
 
 from commonroad.scenario.lanelet import LaneletType, RoadUser, LineMarking
-from commonroad.scenario.traffic_sign import SupportedTrafficSignCountry
+from commonroad.scenario.traffic_sign import *
 from commonroad.scenario.obstacle import ObstacleType
 
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
@@ -41,120 +41,9 @@ class RoadNetworkToolbox(Toolbox):
         and add them as (title, widget) tuples to self.sections
         """
         self.sections.append(self.create_lanelet_widget())  # Lanelet Section
-        self.sections.append(self.create_lanelet_operations_widget())  # Lanelet Operations section
         self.sections.append(self.create_traffic_sign_widget())  # Traffic sign section
         self.sections.append(self.create_traffic_light_widget())
         self.sections.append(self.create_intersection_widget())  # Intersection section
-
-    def create_intersection_widget(self):
-        widget_intersection = QFrame(self.tree)
-        layout_intersection = QGridLayout(widget_intersection)
-        self.button_X = QPushButton()
-        self.button_X.setText("X - crossing")
-        self.button_X.setIcon(QIcon(":/icons/forwards.PNG"))
-        layout_intersection.addWidget(self.button_X, 1, 0)
-        self.button_T = QPushButton()
-        self.button_T.setText("T - crossing")
-        layout_intersection.addWidget(self.button_T, 1, 1)
-        self.button_T.setIcon(QIcon(":/gui_src/forwards.PNG"))
-        self.button_T_3 = QPushButton()
-        self.button_T_3.setText("fit to intersection")
-        layout_intersection.addWidget(self.button_T_3, 2, 0)
-        self.button_T_3.setIcon(QIcon(":/gui_src/forwards.PNG"))
-        title_intersection = "Intersections"
-        return title_intersection, widget_intersection
-
-    def create_traffic_light_widget(self):
-        widget_traffic_light = QFrame(self.tree)
-        layout_traffic_light = QGridLayout(widget_traffic_light)
-        self.button_traffic_light = QPushButton()
-        self.button_traffic_light.setText("traffic light")
-        layout_traffic_light.addWidget(self.button_traffic_light, 1, 0)
-        self.edit_button_traffic_light = QPushButton()
-        self.edit_button_traffic_light.setText("edit traffic light")
-        layout_traffic_light.addWidget(self.edit_button_traffic_light, 1, 1)
-        title_traffic_light = "Traffic Light"
-        return title_traffic_light, widget_traffic_light
-
-    def create_traffic_sign_widget(self):
-        widget_traffic_sign = QFrame(self.tree)
-        layout_traffic_sign = QVBoxLayout(widget_traffic_sign)
-
-        self.country = QComboBox()
-        country_list = [e.value for e in SupportedTrafficSignCountry]
-        self.country.addItems(country_list)
-
-        self.x_position_traffic_sign = QLineEdit()
-        self.x_position_traffic_sign.setValidator(QDoubleValidator())
-        self.x_position_traffic_sign.setMaxLength(4)
-        self.x_position_traffic_sign.setAlignment(Qt.AlignRight)
-
-        self.y_position_traffic_sign = QLineEdit()
-        self.y_position_traffic_sign.setValidator(QDoubleValidator())
-        self.y_position_traffic_sign.setMaxLength(4)
-        self.y_position_traffic_sign.setAlignment(Qt.AlignRight)
-
-        traffic_sign_information = QFormLayout()
-
-        label_general = QLabel("General parameters")
-        label_general.setFont(QFont("Arial", 10, QFont.Bold))
-        traffic_sign_information.addRow("Country", self.country)
-        traffic_sign_information.addRow("X-Position [m]", self.x_position_traffic_sign)
-        traffic_sign_information.addRow("Y-Position [m]", self.y_position_traffic_sign)
-
-        layout_traffic_sign.addLayout(traffic_sign_information)
-
-        title_traffic_sign = "Traffic Sign"
-        return title_traffic_sign, widget_traffic_sign
-
-    def create_lanelet_operations_widget(self):
-        widget_lanelet_operations = QFrame(self.tree)
-        layout_lanelet_operations = QGridLayout(widget_lanelet_operations)
-        # First lanelet
-        self.lanelet_one_text = QLabel()
-        self.lanelet_one_text.setText("[1] Selected lanelet:")
-        layout_lanelet_operations.addWidget(self.lanelet_one_text, 0, 0)
-        self.lanelet_one = QComboBox()
-        layout_lanelet_operations.addWidget(self.lanelet_one, 0, 1)
-        # Second lanelet
-        self.lanelet_two_text = QLabel()
-        self.lanelet_two_text.setText("[2] Previously selected:")
-        layout_lanelet_operations.addWidget(self.lanelet_two_text, 1, 0)
-        self.lanelet_two = QComboBox()
-        layout_lanelet_operations.addWidget(self.lanelet_two, 1, 1)
-        # Fit to Predecessor
-        self.button_fit_to_predecessor = QPushButton()
-        self.button_fit_to_predecessor.setText("Fit [1] to [2]")
-        self.button_fit_to_predecessor.setIcon(QIcon(":/gui_src/forwards.PNG"))
-        layout_lanelet_operations.addWidget(self.button_fit_to_predecessor, 2, 0)
-        # connect lanelets
-        self.button_connect_lanelets = QPushButton()
-        self.button_connect_lanelets.setText("Connect [1] and [2]")
-        self.button_connect_lanelets.setIcon(QIcon(":/gui_src/forwards.PNG"))
-        layout_lanelet_operations.addWidget(self.button_connect_lanelets, 2, 1)
-        # adjacent
-        self.button_adjacent = QPushButton()
-        self.button_adjacent.setText("Create adjacent")
-        self.button_adjacent.setIcon(QIcon(":/gui_src/forwards.PNG"))
-        layout_lanelet_operations.addWidget(self.button_adjacent, 3, 0)
-        # remove lanelet
-        self.button_remove_lanelet = QPushButton()
-        self.button_remove_lanelet.setText("Remove")
-        self.button_remove_lanelet.setIcon(QIcon(":/gui_src/forwards.PNG"))
-        layout_lanelet_operations.addWidget(self.button_remove_lanelet, 3, 1)
-        # rotate lanelet
-        self.button_rotate_lanelet = QPushButton()
-        self.button_rotate_lanelet.setText("Rotate")
-        self.button_rotate_lanelet.setIcon(QIcon(":/gui_src/forwards.PNG"))
-        layout_lanelet_operations.addWidget(self.button_rotate_lanelet, 4, 0)
-        # translate lanelet
-        self.button_translate_lanelet = QPushButton()
-        self.button_translate_lanelet.setText("Translate")
-        self.button_translate_lanelet.setIcon(QIcon(":/gui_src/forwards.PNG"))
-        layout_lanelet_operations.addWidget(self.button_translate_lanelet, 5, 0)
-
-        title_lanelet_operations = "Lanelet Operations"
-        return title_lanelet_operations, widget_lanelet_operations
 
     def create_lanelet_widget(self):
         widget_lanelets = QFrame(self.tree)
@@ -173,7 +62,6 @@ class RoadNetworkToolbox(Toolbox):
         self.lanelet_length = QLineEdit()
         self.lanelet_length.setValidator(QDoubleValidator())
         self.lanelet_length.setMaxLength(4)
-        self.lanelet_length.setText("10.0")
         self.lanelet_length.setAlignment(Qt.AlignRight)
 
         self.lanelet_width = QLineEdit()
@@ -183,11 +71,10 @@ class RoadNetworkToolbox(Toolbox):
 
         line_markings = [e.value for e in LineMarking]
         self.line_marking_left = QComboBox()
-        for i in range(0, len(line_markings) - 1):
-            self.line_marking_left.addItem(line_markings[i])
+        self.line_marking_left.addItems(line_markings)
+
         self.line_marking_right = QComboBox()
-        for i in range(0, len(line_markings) - 1):
-            self.line_marking_right.addItem(line_markings[i])
+        self.line_marking_right.addItems(line_markings)
 
         self.number_vertices = QLineEdit()
         self.number_vertices.setValidator(QIntValidator())
@@ -226,7 +113,9 @@ class RoadNetworkToolbox(Toolbox):
             item.setCheckState(Qt.Unchecked)
 
         self.adjacent_right = QComboBox()
+        self.adjacent_right_same_direction = QCheckBox("Adjacent right same direction")
         self.adjacent_left = QComboBox()
+        self.adjacent_left_same_direction = QCheckBox("Adjacent left same direction")
 
         self.road_user_oneway = CheckableComboBox()
         road_user_oneway_list = [r.value for r in RoadUser]
@@ -248,11 +137,8 @@ class RoadNetworkToolbox(Toolbox):
             self.lanelet_type.addItem(lanelet_type_list[i])
             item = self.lanelet_type.model().item(i, 0)
 
-        self.traffic_sign_ids = QLineEdit()
-        self.traffic_sign_ids.setAlignment(Qt.AlignRight)
-
-        self.traffic_light_ids = QLineEdit()
-        self.traffic_light_ids.setAlignment(Qt.AlignRight)
+        self.lanelet_referenced_traffic_sign_ids = CheckableComboBox()
+        self.lanelet_referenced_traffic_light_ids = CheckableComboBox()
 
         self.stop_line_start = QLineEdit()
         self.stop_line_start.setValidator(QIntValidator())
@@ -262,28 +148,50 @@ class RoadNetworkToolbox(Toolbox):
         self.stop_line_end.setValidator(QIntValidator())
         self.stop_line_end.setMaxLength(4)
         self.stop_line_end.setAlignment(Qt.AlignRight)
-        self.line_marking_stop_line = CheckableComboBox()
-        for i in range(0, len(line_markings) - 1):
-            self.line_marking_stop_line.addItem(line_markings[i])
+        self.line_marking_stop_line = QComboBox()
+        self.line_marking_stop_line.addItems(line_markings)
 
+        self.connecting_radio_button_group = QButtonGroup()
         self.connect_to_previous_selection = QRadioButton("Connect to previously added")
         self.connect_to_previous_selection.setChecked(True)
+        self.connecting_radio_button_group.addButton(self.connect_to_previous_selection)
 
         self.connect_to_predecessors_selection = QRadioButton("Connect to predecessors")
         self.connect_to_predecessors_selection.setChecked(False)
+        self.connecting_radio_button_group.addButton(self.connect_to_predecessors_selection)
 
         self.connect_to_successors_selection = QRadioButton("Connect to successors")
         self.connect_to_successors_selection.setChecked(False)
+        self.connecting_radio_button_group.addButton(self.connect_to_successors_selection)
 
-        self.curved_lanelet_selection = QCheckBox()
-        self.curved_lanelet_selection.setText("Add curved lanelet")
+        self.curved_lanelet_selection = QCheckBox("Add curved lanelet")
 
-        self.select_from_all_lanelets = QComboBox()
+        self.button_add_lanelet = QPushButton("Add")
 
-        self.button_add_lanelet = QPushButton()
-        self.button_add_lanelet.setText("Add")
-        self.button_update_lanelet = QPushButton()
-        self.button_update_lanelet.setText("Update")
+        self.selected_lanelet_one = QComboBox()
+        self.selected_lanelet_two = QComboBox()
+
+        self.button_update_lanelet = QPushButton("Update [1]")
+        self.adjacent_left_right_button_group = QButtonGroup()
+        self.create_adjacent_left_selection = QRadioButton("Adjacent left")
+        self.create_adjacent_left_selection.setChecked(True)
+        self.adjacent_left_right_button_group.addButton(self.create_adjacent_left_selection)
+        self.create_adjacent_right_selection = QRadioButton("Adjacent right")
+        self.create_adjacent_left_selection.setChecked(False)
+        self.adjacent_left_right_button_group.addButton(self.create_adjacent_right_selection)
+        self.create_adjacent_same_direction_selection = QCheckBox("Adjacent same direction")
+        self.button_create_adjacent = QPushButton("Create adjacent to [1]")
+        self.button_remove_lanelet = QPushButton("Remove [1]")
+        self.button_fit_to_predecessor = QPushButton("Fit [1] to [2]")
+        self.button_connect_lanelets = QPushButton("Connect [1] and [2]")
+
+        self.button_rotate_lanelet = QPushButton("Rotate")
+        self.rotation_angle = QSpinBox()
+        self.rotation_angle.setMinimum(0)
+        self.rotation_angle.setMaximum(360)
+
+        self.button_translate_lanelet = QPushButton("Translate")
+
         lanelet_information = QFormLayout()
 
         label_general = QLabel("General parameters")
@@ -298,12 +206,14 @@ class RoadNetworkToolbox(Toolbox):
         lanelet_information.addRow("Predecessors", self.predecessors)
         lanelet_information.addRow("Successors", self.successors)
         lanelet_information.addRow("Adjacent right", self.adjacent_right)
+        lanelet_information.addRow(self.adjacent_right_same_direction)
         lanelet_information.addRow("Adjacent left", self.adjacent_left)
+        lanelet_information.addRow(self.adjacent_left_same_direction)
         lanelet_information.addRow("Type", self.lanelet_type)
         lanelet_information.addRow("Users oneway", self.road_user_oneway)
         lanelet_information.addRow("Users bidirectional", self.road_user_bidirectional)
-        lanelet_information.addRow("Traffic Sign IDs", self.traffic_sign_ids)
-        lanelet_information.addRow("Traffic Light IDs", self.traffic_light_ids)
+        lanelet_information.addRow("Traffic Sign IDs", self.lanelet_referenced_traffic_sign_ids)
+        lanelet_information.addRow("Traffic Light IDs", self.lanelet_referenced_traffic_light_ids)
         lanelet_information.addRow("Stop line start", self.stop_line_start)
         lanelet_information.addRow("Stop line end", self.stop_line_end)
         lanelet_information.addRow("Stop line marking", self.line_marking_stop_line)
@@ -328,15 +238,160 @@ class RoadNetworkToolbox(Toolbox):
         lanelet_information.addRow(self.connect_to_successors_selection)
         lanelet_information.addRow(self.button_add_lanelet)
         lanelet_information.addRow(QHLine())
-        label_update = QLabel("Update lanelet")
+        label_update = QLabel("Lanelet operations")
         label_update.setFont(QFont("Arial", 10, QFont.Bold))
         lanelet_information.addRow(label_update)
-        lanelet_information.addRow("Select lanelet", self.select_from_all_lanelets)
+        lanelet_information.addRow("[1] Selected lanelet", self.selected_lanelet_one)
+        lanelet_information.addRow("[2] Previously selected", self.selected_lanelet_two)
         lanelet_information.addRow(self.button_update_lanelet)
+        lanelet_information.addRow(self.create_adjacent_left_selection, self.create_adjacent_right_selection)
+        lanelet_information.addRow(self.create_adjacent_same_direction_selection)
+        lanelet_information.addRow(self.button_create_adjacent)
+        lanelet_information.addRow(self.button_remove_lanelet)
+        lanelet_information.addRow(self.button_fit_to_predecessor)
+        lanelet_information.addRow(self.button_connect_lanelets)
+        lanelet_information.addRow(self.button_rotate_lanelet, self.rotation_angle)
+        lanelet_information.addRow(self.button_translate_lanelet)
         layout_lanelets.addLayout(lanelet_information)
         widget_title = "Lanelet"
 
         return widget_title, widget_lanelets
+
+    def create_traffic_sign_widget(self):
+        widget_traffic_sign = QFrame(self.tree)
+        layout_traffic_sign = QVBoxLayout(widget_traffic_sign)
+
+        self.country = QComboBox()
+        country_list = [e.value for e in SupportedTrafficSignCountry]
+        self.country.addItems(country_list)
+
+        self.x_position_traffic_sign = QLineEdit()
+        self.x_position_traffic_sign.setValidator(QDoubleValidator())
+        self.x_position_traffic_sign.setMaxLength(4)
+        self.x_position_traffic_sign.setAlignment(Qt.AlignRight)
+
+        self.y_position_traffic_sign = QLineEdit()
+        self.y_position_traffic_sign.setValidator(QDoubleValidator())
+        self.y_position_traffic_sign.setMaxLength(4)
+        self.y_position_traffic_sign.setAlignment(Qt.AlignRight)
+
+        self.referenced_lanelets_traffic_sign = CheckableComboBox()
+
+        self.button_add_traffic_sign = QPushButton("Add")
+        self.button_update_traffic_sign = QPushButton("Update")
+        self.button_remove_traffic_sign = QPushButton("Remove")
+
+        traffic_sign_information = QFormLayout()
+        traffic_sign_information.addRow("Country", self.country)
+        traffic_sign_information.addRow("X-Position [m]", self.x_position_traffic_sign)
+        traffic_sign_information.addRow("Y-Position [m]", self.y_position_traffic_sign)
+        traffic_sign_information.addRow("Referenced lanelets", self.referenced_lanelets_traffic_sign)
+        traffic_sign_information.addRow(self.button_add_traffic_sign)
+        traffic_sign_information.addRow(self.button_update_traffic_sign)
+        traffic_sign_information.addRow(self.button_remove_traffic_sign)
+
+        layout_traffic_sign.addLayout(traffic_sign_information)
+
+        title_traffic_sign = "Traffic Sign"
+        return title_traffic_sign, widget_traffic_sign
+
+    def create_traffic_light_widget(self):
+        widget_traffic_light = QFrame(self.tree)
+        layout_traffic_light = QVBoxLayout(widget_traffic_light)
+
+        self.x_position_traffic_light = QLineEdit()
+        self.x_position_traffic_light.setValidator(QDoubleValidator())
+        self.x_position_traffic_light.setMaxLength(4)
+        self.x_position_traffic_light.setAlignment(Qt.AlignRight)
+
+        self.y_position_traffic_light = QLineEdit()
+        self.y_position_traffic_light.setValidator(QDoubleValidator())
+        self.y_position_traffic_light.setMaxLength(4)
+        self.y_position_traffic_light.setAlignment(Qt.AlignRight)
+
+        directions = [e.value for e in TrafficLightDirection]
+        self.traffic_light_directions = QComboBox()
+        self.traffic_light_directions.addItems(directions)
+
+        self.time_offset = QLineEdit()
+        self.time_offset.setValidator(QIntValidator())
+        self.time_offset.setMaxLength(4)
+        self.time_offset.setAlignment(Qt.AlignRight)
+
+        self.time_red = QLineEdit()
+        self.time_red.setValidator(QIntValidator())
+        self.time_red.setMaxLength(4)
+        self.time_red.setAlignment(Qt.AlignRight)
+
+        self.time_red_yellow = QLineEdit()
+        self.time_red_yellow.setValidator(QIntValidator())
+        self.time_red_yellow.setMaxLength(4)
+        self.time_red_yellow.setAlignment(Qt.AlignRight)
+
+        self.time_yellow = QLineEdit()
+        self.time_yellow.setValidator(QIntValidator())
+        self.time_yellow.setMaxLength(4)
+        self.time_yellow.setAlignment(Qt.AlignRight)
+
+        self.time_green = QLineEdit()
+        self.time_green.setValidator(QIntValidator())
+        self.time_green.setMaxLength(4)
+        self.time_green.setAlignment(Qt.AlignRight)
+
+        self.time_inactive = QLineEdit()
+        self.time_inactive.setValidator(QIntValidator())
+        self.time_inactive.setMaxLength(4)
+        self.time_inactive.setAlignment(Qt.AlignRight)
+
+        self.active = QCheckBox("active")
+
+        self.referenced_lanelets_traffic_light = CheckableComboBox()
+
+        self.button_add_traffic_light = QPushButton("Add")
+        self.button_update_traffic_light = QPushButton("Update")
+        self.button_remove_traffic_light = QPushButton("Remove")
+
+        traffic_light_information = QFormLayout()
+        traffic_light_information.addRow("X-Position [m]", self.x_position_traffic_light)
+        traffic_light_information.addRow("Y-Position [m]", self.y_position_traffic_light)
+        traffic_light_information.addRow("Direction", self.traffic_light_directions)
+        traffic_light_information.addRow("Time offset", self.time_offset)
+        traffic_light_information.addRow("Time red", self.time_red)
+        traffic_light_information.addRow("Time red-yellow", self.time_red_yellow)
+        traffic_light_information.addRow("Time green", self.time_green)
+        traffic_light_information.addRow("Time yellow", self.time_yellow)
+        traffic_light_information.addRow("Time inactive", self.time_inactive)
+        traffic_light_information.addRow("Referenced lanelets", self.referenced_lanelets_traffic_light)
+        traffic_light_information.addRow(self.active)
+        traffic_light_information.addRow(self.button_add_traffic_light)
+        traffic_light_information.addRow(self.button_update_traffic_light)
+        traffic_light_information.addRow(self.button_remove_traffic_light)
+
+        layout_traffic_light.addLayout(traffic_light_information)
+
+        title_traffic_light = "Traffic Light"
+        return title_traffic_light, widget_traffic_light
+
+    def create_intersection_widget(self):
+        widget_intersection = QFrame(self.tree)
+        layout_intersection = QVBoxLayout(widget_intersection)
+
+        self.button_three_way_intersection = QPushButton("Add Three-way intersection")
+        self.button_four_way_intersection = QPushButton("Add Four-way intersection")
+        self.button_fit_intersection = QPushButton("Fit to intersection")
+
+        self.scenario_intersections = CheckableComboBox()
+
+        intersection_information = QFormLayout()
+        intersection_information.addRow(self.button_three_way_intersection)
+        intersection_information.addRow(self.button_four_way_intersection)
+        intersection_information.addRow(self.button_fit_intersection)
+        intersection_information.addRow("Intersections:", self.button_fit_intersection)
+
+        layout_intersection.addLayout(intersection_information)
+
+        title_intersection = "Intersection"
+        return title_intersection, widget_intersection
 
 
 class ObstacleToolbox(Toolbox):
@@ -351,14 +406,11 @@ class ObstacleToolbox(Toolbox):
         widget_obstacles = QFrame(self.tree)
         layout_obstacles = QVBoxLayout(widget_obstacles)
 
-        self.obstacle_ID = QLineEdit()
-        self.obstacle_ID.setReadOnly(True)
-        self.obstacle_ID.setValidator(QIntValidator())
-        self.obstacle_ID.setAlignment(Qt.AlignRight)
+        self.obstacle_id = QComboBox()
 
         self.length = QLineEdit()
-        self.length.setValidator(QIntValidator())
-        self.length.setMaxLength(4)
+        self.length.setValidator(QDoubleValidator())
+        self.length.setMaxLength(6)
         self.length.setAlignment(Qt.AlignRight)
 
         self.width = QLineEdit()
@@ -366,24 +418,20 @@ class ObstacleToolbox(Toolbox):
         self.width.setMaxLength(4)
         self.width.setAlignment(Qt.AlignRight)
 
-        self.type = CheckableComboBox()
-        self.enumlist = [e.value for e in ObstacleType]
-        for i in range(0, len(self.enumlist) - 1):
-            # adding item
-            self.type.addItem(self.enumlist[i])
-            item = self.type.model().item(i, 0)
-            item.setCheckState(Qt.Unchecked)
+        self.obstacle_type = QComboBox()
+        obstalce_type_list = [e.value for e in ObstacleType]
+        self.obstacle_type.addItems(obstalce_type_list)
 
         obstacle_information = QFormLayout()
-        obstacle_information.addRow("Obstacle ID", self.obstacle_ID)
+        obstacle_information.addRow("Obstacle ID", self.obstacle_id)
         obstacle_information.addRow("Width [m]", self.width)
         obstacle_information.addRow("Length [m]", self.length)
-        obstacle_information.addRow("Type", self.type)
+        obstacle_information.addRow("Type", self.obstacle_type)
         layout_obstacles.addLayout(obstacle_information)
 
-        obstacle_buttons = QGridLayout()
+       # obstacle_buttons = QGridLayout()
 
-        # self.add_button = QPushButton()
+        # self.button_add_obstacle = QPushButton()
         # self.add_button.setText("Add")
         # obstacle_buttons.addWidget(self.ed, 0, 0)
         #
