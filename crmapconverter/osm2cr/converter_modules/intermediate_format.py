@@ -403,6 +403,9 @@ class IntermediateFormat:
         :param graph: RoadGraph
         :return: List of CommonRoad Intersections
         """
+        #TODO fix adjaent incomings bug
+
+
         intersections = {}
         added_lanes = set()
         for lane in graph.lanelinks:
@@ -727,6 +730,14 @@ class IntermediateFormat:
                     lane = self.find_edge_by_id(incoming_lane)
                     if lane.traffic_lights:
                         has_traffic_lights = True
+                    # also check up to 2 predecessors ahead of lane
+                    pre1 = self.find_edge_by_id(lane.predecessors[0]) if len(lane.predecessors) == 1 else None
+                    pre2 = self.find_edge_by_id(pre1.predecessors[0]) if pre1 and len(pre1.predecessors) == 1 else None
+                    if pre1 and pre1.traffic_lights:
+                        has_traffic_lights = True
+                    if pre2 and pre2.traffic_lights:
+                        has_traffic_lights = True
+                        
                     incoming_lanes.append(lane)
             # extend all incoming lanes in scenario
             all_incoming_lanes_in_scenario.extend(incoming_lanes)
@@ -735,8 +746,10 @@ class IntermediateFormat:
             if has_traffic_lights:
                 # remove existing traffic lights
                 remove_existing_traffic_lights(incoming_lanes)
-                # create traffic light generator based on number of incomings
+                # create new traffic lights
                 create_new_traffic_lights(intersection)
+                # remove inner traffic lights
+                #TODO
 
         # remove traffic lights that are not part of any intersection
         remove_non_intersection_lights(all_incoming_lanes_in_scenario)
