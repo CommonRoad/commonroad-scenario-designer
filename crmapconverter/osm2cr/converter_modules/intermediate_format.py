@@ -403,7 +403,8 @@ class IntermediateFormat:
         :param graph: RoadGraph
         :return: List of CommonRoad Intersections
         """
-        #TODO fix adjaent incomings bug
+        #TODO fix adjacent incomings bug
+
 
 
         intersections = {}
@@ -419,15 +420,24 @@ class IntermediateFormat:
                 if not incoming:
                     continue
 
-                #add adjacent lanes
+                # add adjacent lanes
                 lanes_to_add = []
                 for incoming_lane in incoming:
                     left = incoming_lane.adjacent_left
                     right = incoming_lane.adjacent_right
-                    if left and incoming_lane.adjacent_left_direction_equal and left.id not in added_lanes:
-                        lanes_to_add.append(left)
-                    if right and incoming_lane.adjacent_right_direction_equal and right.id not in added_lanes:
-                        lanes_to_add.append(right)
+                    while left:
+                        if incoming_lane.adjacent_left_direction_equal and left.id not in added_lanes:
+                            lanes_to_add.append(left)
+                            left = left.adjacent_left
+                        else:
+                            left = None
+                    while right:
+                        if incoming_lane.adjacent_right_direction_equal and right.id not in added_lanes:
+                            lanes_to_add.append(right)
+                            right = right.adjacent_right
+                        else:
+                            right = None
+                    
                 incoming.extend(lanes_to_add)
                 
                 # Initialize incoming element with properties to be filled in
