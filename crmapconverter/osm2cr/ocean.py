@@ -6,6 +6,8 @@ from src.scenario.scenario import Scenario
 import src.scenario.obstacle as Obstacle
 import utm
 import src.scenario.traffic_sign as tS
+import src.scenario.waters as w
+import numpy as np
 
 def convert_seamap(filename):
     """
@@ -38,7 +40,7 @@ def convert_seamap(filename):
                 break
 
     scenario = Scenario(1.0,2) #TODO:adjust timestep,id
-    for buoy in buoys: #add buoyes to scenario
+    for buoy in buoys: #add buoyes to scenario as TrafficSigns
         lat = float(buoy.get('lat'))
         lon = float(buoy.get('lon'))
         coordinates = utm.from_latlon(lat,lon)
@@ -47,13 +49,11 @@ def convert_seamap(filename):
         sign = tS.TrafficSign(Scenario.generate_object_id(scenario),element,coordinates)
         scenario.add_objects(sign,[])
 
+    if len(coastlines) > 0:
+        addLand(coastlines,scenario, root)
+    if len(fairways) > 0:
+        addWaters(fairways, scenario, w.WatersType('trafficseparationzone'), root)
 
-    for water in coastlines: #add coastlines to scenario
-        boundarylist = []
-        for nd in water.iter('nd'):
-            xpath = "./node[@id='{index}']".format(index=nd.attrib['ref'])
-            node = root.find(xpath)
-            coordinates = utm.from_latlon(float(node.get('lat')),float(node.get('lon')))
 
 
 
@@ -87,3 +87,35 @@ def getType(buoy) -> str:
         elif str.find(tag.attrib['k'], 'seamark:buoy_special_purpose'):
             return '103'
     return '103'
+
+def addWaters(waters, scenario: Scenario, type: w.WatersType, root):
+    for water in waters:  # add waters to scenario
+        x=[]
+        y=[]
+        for nd in water.iter('nd'):
+            #get coordinates for point
+            xpath = "./node[@id='{index}']".format(index=nd.attrib['ref'])
+            node = root.find(xpath)
+            coordinates = utm.from_latlon(float(node.get('lat')), float(node.get('lon')))
+            x.append(coordinates[0])
+            y.append(coordinates[1])
+
+        if(len(x)>4):
+            water2 = w.Waters(borders,Scenario.generate_object_id(scenario), type)
+            scenario.add_objects(water2,[]) #TODO: test functionality
+
+def addLand(lands, scenario: Scenario, root):
+    for land in lands:  # add waters to scenario
+        x=[]
+        y=[]
+        for nd in land.iter('nd'):
+            #get coordinates for point
+            xpath = "./node[@id='{index}']".format(index=nd.attrib['ref'])
+            node = root.find(xpath)
+            coordinates = utm.from_latlon(float(node.get('lat')), float(node.get('lon')))
+            x.append(coordinates[0])
+            y.append(coordinates[1])
+
+        if(len(x)>4):
+            water2 = w.Waters(np.array([[x[1], x[0]],[y[1],y[0]]]) , np.ndarray([]) ,np.array([x[2:], y[2:]]), Scenario.generate_object_id(scenario), 'land')
+            scenario.add_objects(water2,[]) #TODO: test
