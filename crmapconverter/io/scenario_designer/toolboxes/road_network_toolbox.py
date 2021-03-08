@@ -180,6 +180,7 @@ class RoadNetworkToolbox(Toolbox):
         self.create_adjacent_left_selection.setChecked(False)
         self.adjacent_left_right_button_group.addButton(self.create_adjacent_right_selection)
         self.create_adjacent_same_direction_selection = QCheckBox("Adjacent same direction")
+        self.create_adjacent_same_direction_selection.setChecked(True)
         self.button_create_adjacent = QPushButton("Create adjacent to [1]")
         self.button_remove_lanelet = QPushButton("Remove [1]")
         self.button_fit_to_predecessor = QPushButton("Fit [1] to [2]")

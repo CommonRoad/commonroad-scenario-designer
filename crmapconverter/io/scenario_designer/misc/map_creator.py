@@ -5,6 +5,7 @@ from scipy.interpolate import interp1d
 from commonroad.scenario.intersection import Intersection
 from commonroad.scenario.intersection import IntersectionIncomingElement
 from commonroad.scenario.lanelet import RoadUser, LaneletNetwork, Lanelet, LineMarking, LaneletType
+from commonroad.scenario.scenario import Scenario
 
 
 class MapCreator:
@@ -129,6 +130,84 @@ class MapCreator:
                           line_marking_left_vertices=LineMarking(line_marking_left))
         lanelet.translate_rotate(np.array([0, 0]), angle_start)
         lanelet.translate_rotate(-lanelet.center_vertices[0], 0)
+
+        return lanelet
+
+    @staticmethod
+    def create_adjacent_lanelet(create_adj_left: bool, base_lanelet: Lanelet, scenario: Scenario,
+                                same_direction: bool, width: float, lanelet_types: Set[LaneletType],
+                                predecessor: List[int], successor: List[int], road_user_one_way: Set[RoadUser],
+                                road_user_bidirectional: Set[RoadUser],
+                                line_marking_left: LineMarking = LineMarking.UNKNOWN,
+                                line_marking_right: LineMarking = LineMarking.UNKNOWN):
+        """
+        Creates adjacent left or adjacent right lanelet for given lanelet.
+
+        @param create_adj_left: Boolean indicating whether adjacent left or right should be created.
+        @param base_lanelet: Lanelet for which adjacent lanelet should be created.
+        @param scenario: CommonRoad scenario.
+        @param same_direction: Boolean indicating whether the newly created lanelet should have the same
+        direction as the given lanelet.
+        @param width: Width of the new lanelet.
+        @param lanelet_types: Lanelet types for the new lanelet.
+        @param predecessor: IDs of predecessor lanelets of the new lanelet.
+        @param successor: IDs of successor lanelets of the new lanelet.
+        @param road_user_one_way: Set of allowed road users one way.
+        @param road_user_bidirectional: Set of allowed road users bidirectional.
+        @param line_marking_left: Left line marking for the left lanelet.
+        @param line_marking_right: Left line marking for the left lanelet.
+        @return: Newly created lanelet.
+        """
+        lanelet_id = scenario.generate_object_id()
+        if base_lanelet.adj_left is None and create_adj_left:
+            diff_left_vert_right_vert = base_lanelet.right_vertices - base_lanelet.left_vertices
+            norm_left = np.array([np.linalg.norm(diff_left_vert_right_vert, axis=1)])
+            left_vertices = base_lanelet.left_vertices - (diff_left_vert_right_vert / norm_left.T) * width
+            center_vertices = base_lanelet.left_vertices - (diff_left_vert_right_vert / norm_left.T) * width / 2
+            right_vertices = base_lanelet.left_vertices
+            adjacent_right = base_lanelet.lanelet_id
+            adjacent_right_same_direction = same_direction
+            adjacent_left = None
+            adjacent_left_same_direction = None
+            base_lanelet.adj_left = lanelet_id
+            base_lanelet.adj_left_same_direction = same_direction
+        elif base_lanelet.adj_right is None and not create_adj_left:
+            diff_left_vert_right_vert = base_lanelet.right_vertices - base_lanelet.left_vertices
+            norm_left = np.array([np.linalg.norm(diff_left_vert_right_vert, axis=1)])
+            left_vertices = base_lanelet.right_vertices
+            center_vertices = base_lanelet.right_vertices + (
+                    diff_left_vert_right_vert / norm_left.T) * width / 2
+            right_vertices = base_lanelet.right_vertices + (diff_left_vert_right_vert / norm_left.T) * width
+            adjacent_right = None
+            adjacent_right_same_direction = None
+            adjacent_left = base_lanelet.lanelet_id
+            adjacent_left_same_direction = same_direction
+            base_lanelet.adj_right = lanelet_id
+            base_lanelet.adj_right_same_direction = same_direction
+        else:
+            print("Adjacent lanelet already exists.")
+            return
+
+        if same_direction is False:
+            vertices_tmp = left_vertices
+            adjacent_left_tmp = adjacent_left
+            adjacent_left_same_direction_tmp = adjacent_left_same_direction
+            left_vertices = np.flip(right_vertices, 0)
+            center_vertices = np.flip(center_vertices, 0)
+            right_vertices = np.flip(vertices_tmp, 0)
+            adjacent_left = adjacent_right
+            adjacent_right = adjacent_left_tmp
+            adjacent_left_same_direction = adjacent_right_same_direction
+            adjacent_right_same_direction = adjacent_left_same_direction_tmp
+
+        lanelet = Lanelet(left_vertices=left_vertices, right_vertices=right_vertices, lanelet_id=lanelet_id,
+                          center_vertices=center_vertices, predecessor=predecessor, successor=successor,
+                          adjacent_right=adjacent_right, adjacent_left=adjacent_left, lanelet_type=lanelet_types,
+                          adjacent_right_same_direction=adjacent_right_same_direction,
+                          adjacent_left_same_direction=adjacent_left_same_direction,
+                          user_one_way=road_user_one_way, user_bidirectional=road_user_bidirectional,
+                          line_marking_right_vertices=LineMarking(line_marking_right),
+                          line_marking_left_vertices=LineMarking(line_marking_left))
 
         return lanelet
 
@@ -371,143 +450,6 @@ class MapCreator:
             successor._predecessor = []
             self.set_predecessor_successor_relation(predecessor, successor)
 
-    def adjacent_lanelet_left(self, adjacent_lanelet, network, scenario, same_direction=True, width=None):
-        if adjacent_lanelet.adj_left is None:
-            if width is None:
-                # Translation
-                diff_left_vert_right_vert = adjacent_lanelet.right_vertices - adjacent_lanelet.left_vertices
-                left_vertices = adjacent_lanelet.left_vertices - diff_left_vert_right_vert
-                center_vertices = adjacent_lanelet.center_vertices - diff_left_vert_right_vert
-                right_vertices = adjacent_lanelet.left_vertices
-            else:
-                diff_left_vert_right_vert = adjacent_lanelet.right_vertices - adjacent_lanelet.left_vertices
-                norm_left = np.array([np.linalg.norm(diff_left_vert_right_vert, axis=1)])
-                left_vertices = adjacent_lanelet.left_vertices - (diff_left_vert_right_vert / norm_left.T) * width
-                center_vertices = adjacent_lanelet.left_vertices - (diff_left_vert_right_vert / norm_left.T) * width / 2
-                right_vertices = adjacent_lanelet.left_vertices
-
-            idl = scenario.generate_object_id()
-            self.latestid = idl
-            lanelet = Lanelet(left_vertices=left_vertices, right_vertices=right_vertices, lanelet_id=idl,
-                              center_vertices=center_vertices, lanelet_type=adjacent_lanelet._lanelet_type,
-                              user_one_way=adjacent_lanelet._user_one_way,
-                              line_marking_right_vertices=adjacent_lanelet._line_marking_right_vertices,
-                              line_marking_left_vertices=adjacent_lanelet._line_marking_left_vertices,
-                              adjacent_left=adjacent_lanelet.lanelet_id, adjacent_left_same_direction=True)
-
-            # Relation
-            adjacent_lanelet._adj_left = lanelet.lanelet_id
-            adjacent_lanelet._adj_left_same_direction = True
-
-            # Find Predecessors
-            preds = adjacent_lanelet.predecessor
-            succs = adjacent_lanelet.successor
-
-            for i in preds:
-                lanelet_find = LaneletNetwork.find_lanelet_by_id(network, lanelet_id=i)
-                if lanelet_find.adj_left is not None:
-                    lanelet_adj_left = LaneletNetwork.find_lanelet_by_id(network, lanelet_id=lanelet_find.adj_left)
-                    if lanelet_find.adj_left_same_direction is True:
-                        MapCreator.set_predecessor_successor_relation(self, lanelet_adj_left, lanelet)
-
-                    else:
-                        MapCreator.set_predecessor_successor_relation(self, lanelet, lanelet_adj_left)
-
-            for i in succs:
-                lanelet_find = LaneletNetwork.find_lanelet_by_id(network, lanelet_id=i)
-                if lanelet_find.adj_left is not None:
-                    lanelet_adj_left = LaneletNetwork.find_lanelet_by_id(network, lanelet_id=lanelet_find.adj_left)
-                    if lanelet_find.adj_left_same_direction is True:
-                        MapCreator.set_predecessor_successor_relation(self, lanelet, lanelet_adj_left)
-
-                    else:
-                        MapCreator.set_predecessor_successor_relation(self, lanelet_adj_left, lanelet)
-
-            if same_direction is False:
-                lanelet._left_vertices = np.flip(right_vertices, 0)
-                lanelet._center_vertices = np.flip(center_vertices, 0)
-                lanelet._right_vertices = np.flip(left_vertices, 0)
-                lanelet._adjacent_right_same_direction = None
-                lanelet._adj_right = None
-                lanelet._adj_left = adjacent_lanelet.lanelet_id
-                lanelet._adj_left_same_direction = False
-                adjacent_lanelet._adj_left_same_direction = False
-
-            network.add_lanelet(lanelet=lanelet)
-            return lanelet
-        else:
-            print("Adjacent lanelet already exists")
-
-    def adjacent_lanelet_right(self, adjacent_lanelet, network, scenario, same_direction=True, width=None):
-
-        if adjacent_lanelet.adj_right is None:
-            # Translation
-
-            if width is None:
-                # Translation
-                diff_left_vert_right_vert = adjacent_lanelet.right_vertices - adjacent_lanelet.left_vertices
-                left_vertices = adjacent_lanelet.right_vertices
-                center_vertices = adjacent_lanelet.center_vertices + diff_left_vert_right_vert
-                right_vertices = adjacent_lanelet.right_vertices + diff_left_vert_right_vert
-            else:
-                diff_left_vert_right_vert = adjacent_lanelet.right_vertices - adjacent_lanelet.left_vertices
-                norm_left = np.array([np.linalg.norm(diff_left_vert_right_vert, axis=1)])
-                left_vertices = adjacent_lanelet.right_vertices
-                center_vertices = adjacent_lanelet.right_vertices + (
-                        diff_left_vert_right_vert / norm_left.T) * width / 2
-                right_vertices = adjacent_lanelet.right_vertices + (diff_left_vert_right_vert / norm_left.T) * width
-
-            idl = scenario.generate_object_id()
-            self.latestid = idl
-            lanelet = Lanelet(left_vertices=left_vertices, right_vertices=right_vertices, lanelet_id=idl,
-                              center_vertices=center_vertices, lanelet_type=adjacent_lanelet._lanelet_type,
-                              user_one_way=adjacent_lanelet._user_one_way,
-                              line_marking_right_vertices=adjacent_lanelet._line_marking_right_vertices,
-                              line_marking_left_vertices=adjacent_lanelet._line_marking_left_vertices,
-                              adjacent_left=adjacent_lanelet.lanelet_id, adjacent_left_same_direction=True)
-
-            # Relation
-            adjacent_lanelet._adj_right = lanelet.lanelet_id
-            adjacent_lanelet._adj_right_same_direction = True
-
-            # Find Predecessors
-            preds = adjacent_lanelet.predecessor
-            succs = adjacent_lanelet.successor
-
-            for i in preds:
-                lanelet_find = LaneletNetwork.find_lanelet_by_id(network, lanelet_id=i)
-                if lanelet_find.adj_right is not None:
-                    lanelet_adj_right = LaneletNetwork.find_lanelet_by_id(network, lanelet_id=lanelet_find.adj_right)
-                    if lanelet_find.adj_right_same_direction is True:
-                        MapCreator.set_predecessor_successor_relation(self, lanelet_adj_right, lanelet)
-
-                    else:
-                        MapCreator.set_predecessor_successor_relation(self, lanelet, lanelet_adj_right)
-
-            for i in succs:
-                lanelet_find = LaneletNetwork.find_lanelet_by_id(network, lanelet_id=i)
-                if lanelet_find.adj_right is not None:
-                    lanelet_adj_right = LaneletNetwork.find_lanelet_by_id(network, lanelet_id=lanelet_find.adj_right)
-                    if lanelet_find.adj_right_same_direction is True:
-                        MapCreator.set_predecessor_successor_relation(self, lanelet, lanelet_adj_right)
-
-                    else:
-                        MapCreator.set_predecessor_successor_relation(self, lanelet_adj_right, lanelet)
-
-            if same_direction is False:
-                lanelet._left_vertices = np.flip(right_vertices, 0)
-                lanelet._center_vertices = np.flip(center_vertices, 0)
-                lanelet._right_vertices = np.flip(left_vertices, 0)
-                lanelet._adjacent_left_same_direction = None
-                lanelet._adj_left = None
-                lanelet._adj_right = adjacent_lanelet.lanelet_id
-                lanelet._adj_right_same_direction = False
-                adjacent_lanelet._adj_right_same_direction = False
-
-            network.add_lanelet(lanelet=lanelet)
-            return lanelet
-        else:
-            print("Adjacent lanelet already exists")
 
     def connect_lanelets(self, predecessor, successor, network, scenario):
         if predecessor and successor:
@@ -629,10 +571,15 @@ class MapCreator:
             MapCreator.set_predecessor_successor_relation(self, connecting_lanelet, successor)
             return connecting_lanelet
 
-    def remove_lanelet(self, lanelet, network, scenario):
-        del network._lanelets[lanelet.lanelet_id]
-        network.cleanup_lanelet_references()
-        scenario._lanelet_network = network
+    @staticmethod
+    def remove_lanelet(lanelet_id: int, network: LaneletNetwork):
+        """
+        Removes a lanelet from a lanelet network of a CommonRoad scenario.
+
+        @param lanelet_id: ID of lanelet which should be removed.
+        @param network: Lanelet network from which the lanelet should be removed.
+        """
+        network.remove_lanelet(lanelet_id)
 
     # x crossing
     def x_crossing(self, width, diameter_crossing, network, scenario):

@@ -50,7 +50,6 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.setWindowFlag(True)
 
         # attributes
-        self.map_creator = MapCreator()
         self.filename = None
         self.crviewer = AnimatedViewer(self)
         self.lanelet_list = None
@@ -395,61 +394,76 @@ class MWindow(QMainWindow, Ui_mainWindow):
         selected_lanelet = self.crviewer.current_scenario.lanelet_network.find_lanelet_by_id(
             int(self.road_network_toolbox.selected_lanelet_one.currentText()))
 
-    def fit_func(self):
-        if self.crviewer.current_scenario == None:
-            self.textBrowser.append("create a new file")
-            return
-        self.FIT = FitSettings()
-        self.FIT.exec()
-        pred = self.FIT.getPredecessor()
-        succ = self.FIT.getSuccessor()
-        pred_lanelet = self.crviewer.current_scenario.lanelet_network.find_lanelet_by_id(pred)
-        succ_lanelet = self.crviewer.current_scenario.lanelet_network.find_lanelet_by_id(succ)
-        if pred_lanelet == None or succ_lanelet == None:
-            self.textBrowser.append("select valid lanelet IDs")
-            return
-        else:
-            self.map_creator.fit_to_predecessor(pred_lanelet, succ_lanelet)
-            self.update_view(focus_on_network=True)
-
     def create_adjacent(self):
         """
         Create adjacent lanelet given a selected lanelet
         """
         if self.crviewer.current_scenario == None:
-            self.textBrowser.append("create a new file")
+            self.textBrowser.append("Create a new file!")
+            return
+        if self.road_network_toolbox.selected_lanelet_one.currentText() != "None":
+            selected_lanelet = self.crviewer.current_scenario.lanelet_network.find_lanelet_by_id(
+                int(self.road_network_toolbox.selected_lanelet_one.currentText()))
+        else:
+            self.textBrowser.append("No lanelet selected for [1].")
             return
         adjacent_left = self.road_network_toolbox.create_adjacent_left_selection.isChecked()
-        adjacent_right = self.road_network_toolbox.create_adjacent_right_selection.isChecked()
-        adjacent_same_direction = self.road_network_toolbox.adjacent_same_direction.isChecked()
+        adjacent_same_direction = self.road_network_toolbox.create_adjacent_same_direction_selection.isChecked()
 
-        selected_lanelet = self.crviewer.current_scenario.lanelet_network.find_lanelet_by_id(
-            int(self.road_network_toolbox.selected_lanelet_one.currentText()))
+        lanelet_width = float(self.road_network_toolbox.lanelet_width.text())
+        line_marking_left = LineMarking(self.road_network_toolbox.line_marking_left.currentText())
+        line_marking_right = LineMarking(self.road_network_toolbox.line_marking_right.currentText())
+        predecessors = [int(pre) for pre in self.road_network_toolbox.predecessors.get_checked_items()]
+        successors = [int(suc) for suc in self.road_network_toolbox.successors.get_checked_items()]
+        lanelet_type = {LaneletType(ty) for ty in self.road_network_toolbox.lanelet_type.get_checked_items()
+                        if ty is not "None"}
+        user_one_way = {RoadUser(user) for user in self.road_network_toolbox.road_user_oneway.get_checked_items()
+                        if user is not "None"}
+        user_bidirectional = \
+            {RoadUser(user) for user in self.road_network_toolbox.road_user_bidirectional.get_checked_items()
+             if user is not "None"}
+        traffic_signs = None
+        traffic_lights = None
+        stop_line_start = None
+        stop_line_end = None
+        stop_line_marking = None
 
-
-        if self.ADJ.width.text():
-            width = int(self.ADJ.width.text())
-            if left:
-                adjacent_lanelet = self.map_creator.adjacent_lanelet_left(lanelet,
-                                                                          self.crviewer.current_scenario.lanelet_network,
-                                                                          self.crviewer.current_scenario,
-                                                                          same_direction=forwards, width=width)
-            else:
-                adjacent_lanelet = self.map_creator.adjacent_lanelet_right(lanelet,
-                                                                           self.crviewer.current_scenario.lanelet_network,
-                                                                           self.crviewer.current_scenario,
-                                                                           same_direction=forwards, width=width)
+        if adjacent_left:
+            adjacent_lanelet = MapCreator.create_adjacent_lanelet(adjacent_left, selected_lanelet,
+                                                                        self.crviewer.current_scenario,
+                                                                        adjacent_same_direction,
+                                                                        lanelet_width, lanelet_type,
+                                                                        predecessors, successors, user_one_way,
+                                                                        user_bidirectional, line_marking_left,
+                                                                        line_marking_right)
         else:
-            if left:
-                adjacent_lanelet = self.map_creator.adjacent_lanelet_left(lanelet,
-                                                                          self.crviewer.current_scenario.lanelet_network,
-                                                                          self.crviewer.current_scenario,
-                                                                          same_direction=forwards)
-            else:
-                adjacent_lanelet = self.map_creator.adjacent_lanelet_right(lanelet,
-                                                                           self.crviewer.current_scenario.lanelet_network,
-                                                                           self.crviewer.current_scenario,
-                                                                           same_direction=forwards)
+            adjacent_lanelet = MapCreator.create_adjacent_lanelet(adjacent_left, selected_lanelet,
+                                                                        self.crviewer.current_scenario,
+                                                                        adjacent_same_direction,
+                                                                        lanelet_width, lanelet_type,
+                                                                        predecessors, successors, user_one_way,
+                                                                        user_bidirectional, line_marking_left,
+                                                                        line_marking_right)
+
+        self.last_added_lanelet_id = adjacent_lanelet.lanelet_id
+        self.crviewer.current_scenario.lanelet_network.add_lanelet(lanelet=adjacent_lanelet)
+        self.update_view(focus_on_network=True)
+        self.update_list_information()
+
+    def remove_lanelet(self):
+        """
+        Removes a selected lanelet from the scenario.
+        """
+        if self.crviewer.current_scenario == None:
+            self.textBrowser.append("Create a new file")
+            return
+        if self.road_network_toolbox.selected_lanelet_one.currentText() != "None":
+            selected_lanelet = int(self.road_network_toolbox.selected_lanelet_one.currentText())
+        else:
+            self.textBrowser.append("No lanelet selected for [1].")
+            return
+
+        MapCreator.remove_lanelet(selected_lanelet, self.crviewer.current_scenario.lanelet_network)
         self.update_view(focus_on_network=True)
 
     def select_predecessor(self):
@@ -478,23 +492,22 @@ class MWindow(QMainWindow, Ui_mainWindow):
                                                                     self.crviewer.current_scenario)
         self.update_view(focus_on_network=True)
 
-    def remove_lanelet(self):
+    def fit_func(self):
         if self.crviewer.current_scenario == None:
             self.textBrowser.append("create a new file")
             return
-        self.REMOVE = RemoveSettings()
-        self.REMOVE.exec()
-        id = self.REMOVE.getLaneletId()
-        if id == None:
+        self.FIT = FitSettings()
+        self.FIT.exec()
+        pred = self.FIT.getPredecessor()
+        succ = self.FIT.getSuccessor()
+        pred_lanelet = self.crviewer.current_scenario.lanelet_network.find_lanelet_by_id(pred)
+        succ_lanelet = self.crviewer.current_scenario.lanelet_network.find_lanelet_by_id(succ)
+        if pred_lanelet == None or succ_lanelet == None:
+            self.textBrowser.append("select valid lanelet IDs")
             return
-        lanelet = self.crviewer.current_scenario.lanelet_network.find_lanelet_by_id(id)
-        if lanelet == None:
-            self.textBrowser.append("select valid lanelet ID")
-            return
-
-        self.map_creator.remove_lanelet(lanelet, self.crviewer.current_scenario.lanelet_network,
-                                        self.crviewer.current_scenario)
-        self.update_view(focus_on_network=True)
+        else:
+            self.map_creator.fit_to_predecessor(pred_lanelet, succ_lanelet)
+            self.update_view(focus_on_network=True)
 
     def traffic_signs(self):
 
