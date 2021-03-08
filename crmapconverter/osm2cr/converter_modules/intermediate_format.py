@@ -403,10 +403,6 @@ class IntermediateFormat:
         :param graph: RoadGraph
         :return: List of CommonRoad Intersections
         """
-        #TODO fix adjacent incomings bug
-
-
-
         intersections = {}
         added_lanes = set()
         for lane in graph.lanelinks:
@@ -437,7 +433,7 @@ class IntermediateFormat:
                             right = right.adjacent_right
                         else:
                             right = None
-                    
+
                 incoming.extend(lanes_to_add)
                 
                 # Initialize incoming element with properties to be filled in
@@ -674,6 +670,22 @@ class IntermediateFormat:
                         if light is not None:
                             self.traffic_lights.remove(light)
                 lane.traffic_lights = set()
+
+        def remove_innner_lights(intersection, incoming_lanes):
+            remove = False
+            for lane in incoming_lanes:
+                if len(lane.predecessors) > 1 and geometry.distance(lane.center_points[0], [lane.center_points[-1]]) < 20: # TODO figure out distance
+                    remove = True
+                    indicating_lane = lane.id
+            
+            if remove:
+                for incoming in intersection.incomings:
+                    for incoming_lane in incoming.incoming_lanelets:
+                        if incoming_lane == indicating_lane:
+                            for incoming_t in incoming.incoming_lanelets:
+                                self.find_edge_by_id(incoming_t).traffic_lights = set()
+            # TODO figure out distnace and refacor
+
         
         def create_new_traffic_lights(intersection):
             # create traffic light generator for intersection based on number of incomings
@@ -759,7 +771,7 @@ class IntermediateFormat:
                 # create new traffic lights
                 create_new_traffic_lights(intersection)
                 # remove inner traffic lights
-                #TODO
+                remove_innner_lights(intersection, incoming_lanes)
 
         # remove traffic lights that are not part of any intersection
         remove_non_intersection_lights(all_incoming_lanes_in_scenario)
