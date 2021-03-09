@@ -424,12 +424,14 @@ class IntermediateFormat:
                     while left:
                         if incoming_lane.adjacent_left_direction_equal and left.id not in added_lanes:
                             lanes_to_add.append(left)
+                            added_lanes.add(left.id)
                             left = left.adjacent_left
                         else:
                             left = None
                     while right:
                         if incoming_lane.adjacent_right_direction_equal and right.id not in added_lanes:
                             lanes_to_add.append(right)
+                            added_lanes.add(right.id)
                             right = right.adjacent_right
                         else:
                             right = None
@@ -647,7 +649,6 @@ class IntermediateFormat:
         for edge in self.edges:
             if edge.id in all_crossing_ids:
                 edge.edge_type = config.CROSSING_LANELETTYPE
-    
 
     def intersection_enhancement(self):
         """
@@ -674,19 +675,16 @@ class IntermediateFormat:
         def remove_innner_lights(intersection, incoming_lanes):
             remove = False
             for lane in incoming_lanes:
-                if len(lane.predecessors) > 1 and geometry.distance(lane.center_points[0], [lane.center_points[-1]]) < 20: # TODO figure out distance
+                if len(lane.predecessors) > 1 and geometry.distance(lane.center_points[0], [lane.center_points[-1]]) < 2: # shorter than 2 meters
                     remove = True
                     indicating_lane = lane.id
-            
             if remove:
                 for incoming in intersection.incomings:
                     for incoming_lane in incoming.incoming_lanelets:
                         if incoming_lane == indicating_lane:
                             for incoming_t in incoming.incoming_lanelets:
                                 self.find_edge_by_id(incoming_t).traffic_lights = set()
-            # TODO figure out distnace and refacor
-
-        
+  
         def create_new_traffic_lights(intersection):
             # create traffic light generator for intersection based on number of incomings
             traffic_light_generator = TrafficLightGenerator(len(intersection.incomings))
@@ -770,7 +768,7 @@ class IntermediateFormat:
                 remove_existing_traffic_lights(incoming_lanes)
                 # create new traffic lights
                 create_new_traffic_lights(intersection)
-                # remove inner traffic lights
+                # remove inner traffic lights in the middle of bigger crossings
                 remove_innner_lights(intersection, incoming_lanes)
 
         # remove traffic lights that are not part of any intersection
