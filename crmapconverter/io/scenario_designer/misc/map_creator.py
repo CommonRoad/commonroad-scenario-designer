@@ -15,10 +15,10 @@ class MapCreator:
 
     @staticmethod
     def create_straight(width: float, length: float, num_vertices: int, lanelet_id: int,
-                        lanelet_types: Set[LaneletType], predecessor: List[int], successor: List[int],
-                        adjacent_left: Union[int, None], adjacent_right: Union[int, None],
-                        adjacent_left_same_direction: bool, adjacent_right_same_direction: bool,
-                        road_user_one_way: Set[RoadUser], road_user_bidirectional: Set[RoadUser],
+                        lanelet_types: Set[LaneletType], predecessor: List[int] = None, successor: List[int] = None,
+                        adjacent_left: Union[int, None] = None, adjacent_right: Union[int, None] = None,
+                        adjacent_left_same_direction: bool = None, adjacent_right_same_direction: bool = None,
+                        road_user_one_way: Set[RoadUser] = None, road_user_bidirectional: Set[RoadUser] = None,
                         line_marking_left: LineMarking = LineMarking.UNKNOWN,
                         line_marking_right: LineMarking = LineMarking.UNKNOWN, backwards: bool = False):
         """
@@ -62,8 +62,8 @@ class MapCreator:
                           adjacent_right_same_direction=adjacent_right_same_direction,
                           lanelet_id=lanelet_id, center_vertices=center_vertices, lanelet_type=lanelet_types,
                           user_one_way=road_user_one_way, user_bidirectional=road_user_bidirectional,
-                          line_marking_right_vertices=line_marking_left,
-                          line_marking_left_vertices=line_marking_right)
+                          line_marking_right_vertices=line_marking_right,
+                          line_marking_left_vertices=line_marking_left)
         if backwards:
             lanelet.translate_rotate(-lanelet.center_vertices[0], np.pi)
 
@@ -71,10 +71,10 @@ class MapCreator:
 
     @staticmethod
     def create_curve(width: float, radius: float, angle: float, num_vertices: int, lanelet_id: int,
-                     lanelet_types: Set[LaneletType], predecessor: List[int], successor: List[int],
-                     adjacent_left: Union[int, None], adjacent_right: Union[int, None],
-                     adjacent_left_same_direction: bool, adjacent_right_same_direction: bool,
-                     road_user_one_way: Set[RoadUser], road_user_bidirectional: Set[RoadUser],
+                     lanelet_types: Set[LaneletType], predecessor: List[int] = None, successor: List[int] = None,
+                     adjacent_left: Union[int, None] = None, adjacent_right: Union[int, None] = None,
+                     adjacent_left_same_direction: bool = None, adjacent_right_same_direction: bool= None,
+                     road_user_one_way: Set[RoadUser] = None, road_user_bidirectional: Set[RoadUser] = None,
                      line_marking_left: LineMarking = LineMarking.UNKNOWN,
                      line_marking_right: LineMarking = LineMarking.UNKNOWN):
         """
@@ -126,18 +126,19 @@ class MapCreator:
                           adjacent_left_same_direction=adjacent_left_same_direction,
                           adjacent_right_same_direction=adjacent_right_same_direction, lanelet_type=lanelet_types,
                           user_one_way=road_user_one_way, user_bidirectional=road_user_bidirectional,
-                          line_marking_right_vertices=LineMarking(line_marking_right),
-                          line_marking_left_vertices=LineMarking(line_marking_left))
+                          line_marking_right_vertices=line_marking_right,
+                          line_marking_left_vertices=line_marking_left)
         lanelet.translate_rotate(np.array([0, 0]), angle_start)
         lanelet.translate_rotate(-lanelet.center_vertices[0], 0)
 
         return lanelet
 
     @staticmethod
-    def create_adjacent_lanelet(create_adj_left: bool, base_lanelet: Lanelet, scenario: Scenario,
+    def create_adjacent_lanelet(create_adj_left: bool, base_lanelet: Lanelet, lanelet_id: int,
                                 same_direction: bool, width: float, lanelet_types: Set[LaneletType],
-                                predecessor: List[int], successor: List[int], road_user_one_way: Set[RoadUser],
-                                road_user_bidirectional: Set[RoadUser],
+                                predecessor: List[int] = None, successor: List[int] = None,
+                                road_user_one_way: Set[RoadUser] = None,
+                                road_user_bidirectional: Set[RoadUser] = None,
                                 line_marking_left: LineMarking = LineMarking.UNKNOWN,
                                 line_marking_right: LineMarking = LineMarking.UNKNOWN):
         """
@@ -145,7 +146,7 @@ class MapCreator:
 
         @param create_adj_left: Boolean indicating whether adjacent left or right should be created.
         @param base_lanelet: Lanelet for which adjacent lanelet should be created.
-        @param scenario: CommonRoad scenario.
+        @param lanelet_id: ID of new lanelet.
         @param same_direction: Boolean indicating whether the newly created lanelet should have the same
         direction as the given lanelet.
         @param width: Width of the new lanelet.
@@ -158,7 +159,6 @@ class MapCreator:
         @param line_marking_right: Left line marking for the left lanelet.
         @return: Newly created lanelet.
         """
-        lanelet_id = scenario.generate_object_id()
         if base_lanelet.adj_left is None and create_adj_left:
             diff_left_vert_right_vert = base_lanelet.right_vertices - base_lanelet.left_vertices
             norm_left = np.array([np.linalg.norm(diff_left_vert_right_vert, axis=1)])
@@ -206,59 +206,57 @@ class MapCreator:
                           adjacent_right_same_direction=adjacent_right_same_direction,
                           adjacent_left_same_direction=adjacent_left_same_direction,
                           user_one_way=road_user_one_way, user_bidirectional=road_user_bidirectional,
-                          line_marking_right_vertices=LineMarking(line_marking_right),
-                          line_marking_left_vertices=LineMarking(line_marking_left))
+                          line_marking_right_vertices=line_marking_right,
+                          line_marking_left_vertices=line_marking_left)
 
         return lanelet
 
     @staticmethod
-    def fit_to_predecessor(predecessor: Lanelet, lanelet: Lanelet):
+    def fit_to_predecessor(predecessor: Lanelet, successor: Lanelet):
         """
         Function to translate a lanelet so that it fits to a given predecessor lanelet.
 
         @param predecessor: Lanelet to which given lanelet should be attached.
-        @param lanelet: Lanelet which should be attached to the predecessor lanelet.
+        @param successor: Lanelet which should be attached to the predecessor lanelet.
         """
-        if predecessor:
-            factor = (np.linalg.norm(lanelet.left_vertices[0, :] - lanelet.right_vertices[0, :])
-                      / np.linalg.norm((predecessor.left_vertices[-1, :] - predecessor.right_vertices[-1, :])))
+        factor = (np.linalg.norm(successor.left_vertices[0, :] - successor.right_vertices[0, :])
+                  / np.linalg.norm((predecessor.left_vertices[-1, :] - predecessor.right_vertices[-1, :])))
 
-            lanelet._left_vertices = lanelet.left_vertices / factor
-            lanelet._right_vertices = lanelet.right_vertices / factor
-            lanelet._center_vertices = lanelet.center_vertices / factor
+        successor._left_vertices = successor.left_vertices / factor
+        successor._right_vertices = successor.right_vertices / factor
+        successor._center_vertices = successor.center_vertices / factor
 
-            ang = MapCreator.calc_angle_between(predecessor, lanelet)
-            lanelet.translate_rotate(np.array([0, 0]), ang)
-            trans = predecessor.center_vertices[-1] - lanelet.center_vertices[0]
-            lanelet.translate_rotate(trans, 0)
+        ang = MapCreator.calc_angle_between_lanelets(predecessor, successor)
+        successor.translate_rotate(np.array([0, 0]), ang)
+        trans = predecessor.center_vertices[-1] - successor.center_vertices[0]
+        successor.translate_rotate(trans, 0)
 
-            MapCreator.set_predecessor_successor_relation(predecessor, lanelet)
+        MapCreator.set_predecessor_successor_relation(predecessor, successor)
 
     @staticmethod
-    def fit_to_successor(successor: Lanelet, lanelet: Lanelet):
+    def fit_to_successor(successor: Lanelet, predecessor: Lanelet):
         """
         Function to translate a lanelet so that it fits to a given successor lanelet.
 
         @param successor: Lanelet to which given lanelet should be attached.
-        @param lanelet: Lanelet which should be attached to the successor lanelet.
+        @param predecessor: Lanelet which should be attached to the successor lanelet.
         """
-        if successor:
-            factor = (np.linalg.norm(lanelet.left_vertices[-1, :] - lanelet.right_vertices[-1, :])
-                      / np.linalg.norm((successor.left_vertices[0, :] - successor.right_vertices[0, :])))
+        factor = (np.linalg.norm(predecessor.left_vertices[-1, :] - predecessor.right_vertices[-1, :])
+                  / np.linalg.norm((successor.left_vertices[0, :] - successor.right_vertices[0, :])))
 
-            lanelet._left_vertices = lanelet.left_vertices / factor
-            lanelet._right_vertices = lanelet.right_vertices / factor
-            lanelet._center_vertices = lanelet.center_vertices / factor
+        predecessor._left_vertices = predecessor.left_vertices / factor
+        predecessor._right_vertices = predecessor.right_vertices / factor
+        predecessor._center_vertices = predecessor.center_vertices / factor
 
-            ang = MapCreator.calc_angle_between(lanelet, successor)
-            lanelet.translate_rotate(np.array([0, 0]), ang)
-            trans = lanelet.center_vertices[0] - successor.center_vertices[-1]
-            lanelet.translate_rotate(trans, 0)
+        ang = MapCreator.calc_angle_between_lanelets(predecessor, successor)
+        predecessor.translate_rotate(np.array([0, 0]), ang)
+        trans = predecessor.center_vertices[0] - successor.center_vertices[-1]
+        predecessor.translate_rotate(trans, 0)
 
-            MapCreator.set_predecessor_successor_relation(lanelet, successor)
+        MapCreator.set_predecessor_successor_relation(predecessor, successor)
 
     @staticmethod
-    def calc_angle_between(predecessor: Lanelet, lanelet: Lanelet):
+    def calc_angle_between_lanelets(predecessor: Lanelet, lanelet: Lanelet):
         """
         Computes the angle between two lanelets
         @param predecessor: Predecessor lanelet
@@ -283,81 +281,10 @@ class MapCreator:
         Sets the predecessor and successor lanelet relationships between two given lanelets.
 
         @param predecessor: Predecessor lanelet.
-        @param successor:  Successor lanelet.
+        @param successor: Successor lanelet.
         """
         successor.add_predecessor(predecessor.lanelet_id)
         predecessor.add_successor(successor.lanelet_id)
-
-    def edit_straight(self, id, width, length, num_vertices, network, scenario, pred, lanelettype=set(),
-                      roaduser_oneway=set(), roaduser_bidirectional=set(), linemarkingleft="no_marking",
-                      linemarkingright="no_marking", backwards=False):
-        eps = 0.1e-15
-        length_div = length / (num_vertices - 1)
-        left_vertices = []
-        center_vertices = []
-        right_vertices = []
-        for i in range(num_vertices):
-            left_vertices.append([length_div * i + eps, width / 2 + eps])
-            center_vertices.append([length_div * i + eps, eps])
-            right_vertices.append([length_div * i + eps, -(width / 2) + eps])
-
-        left_vertices = np.array(left_vertices)
-        center_vertices = np.array(center_vertices)
-        right_vertices = np.array(right_vertices)
-
-        lanelet = network.find_lanelet_by_id(id)
-        lanelet._left_vertices = left_vertices
-        lanelet._right_vertices = right_vertices
-        lanelet._center_vertices = center_vertices
-        lanelet._user_one_way = roaduser_oneway
-        lanelet._user_bidirectional = roaduser_bidirectional
-        lanelet._lanelet_type = lanelettype
-        lanelet = Lanelet(left_vertices=left_vertices, right_vertices=right_vertices, lanelet_id=idl,
-                          center_vertices=center_vertices, lanelet_type=lanelettype,
-                          user_one_way={RoadUser(roaduser)}, line_marking_right_vertices=LineMarking(linemarkingright),
-                          line_marking_left_vertices=LineMarking(linemarkingleft))
-        if backwards:
-            lanelet.translate_rotate(-lanelet.center_vertices[0], np.pi)
-
-        self.latestid = id
-        # network.add_lanelet(lanelet=lanelet)
-        return lanelet
-
-    def edit_curve(self, id, width, radius, angle, num_vertices, network, scenario, pred, lanelettype=set(),
-                   roaduser_oneway="vehicle",
-                   linemarkingleft="no_marking", linemarkingright="no_marking"):
-        angle_div = angle / (num_vertices - 1)
-        radius_left = radius - (width / 2)
-        radius_right = radius + (width / 2)
-        left_vert = []
-        center_vert = []
-        right_vert = []
-        for i in range(num_vertices):
-            left_vert.append([np.cos(i * angle_div) * radius_left, np.sin(i * angle_div) * radius_left])
-            center_vert.append([np.cos(i * angle_div) * radius, np.sin(i * angle_div) * radius])
-            right_vert.append([np.cos(i * angle_div) * radius_right, np.sin(i * angle_div) * radius_right])
-
-        left_vertices = np.array(left_vert)
-        center_vertices = np.array(center_vert)
-        right_vertices = np.array(right_vert)
-
-        angle_start = -np.pi / 2
-        if angle < 0:
-            left_vertices = np.array(right_vert)
-            center_vertices = np.array(center_vert)
-            right_vertices = np.array(left_vert)
-            angle_start = -angle_start
-
-        lanelet = network.find_lanelet_by_id(id)
-        lanelet._left_vertices = left_vertices
-        lanelet._right_vertices = right_vertices
-        lanelet._center_vertices = center_vertices
-        lanelet._user_one_way = roaduser_oneway
-
-        lanelet.translate_rotate(np.array([0, 0]), angle_start)
-        lanelet.translate_rotate(-lanelet.center_vertices[0], 0)
-
-        return lanelet
 
     def calc_radius(self, lanelet):
         line_predecessor = lanelet.left_vertices[0] - lanelet.right_vertices[0]
@@ -451,22 +378,31 @@ class MapCreator:
             self.set_predecessor_successor_relation(predecessor, successor)
 
 
-    def connect_lanelets(self, predecessor, successor, network, scenario):
-        if predecessor and successor:
-            left_vertices = np.concatenate(([predecessor.left_vertices[-1]], [successor.left_vertices[0]]))
-            right_vertices = np.concatenate(([predecessor.right_vertices[-1]], [successor.right_vertices[0]]))
-            center_vertices = np.concatenate(([predecessor.center_vertices[-1]], [successor.center_vertices[0]]))
+    # def connect_lanelets(self, predecessor: Lanelet, successor: Lanelet, lanelet_id: int):
+    #     """
+    #     Connects the predecessor lanelet with the successor lanelet
+    #
+    #     @param predecessor:
+    #     @param successor:
+    #     @param lanelet_id:
+    #     @return:
+    #     """
+    #     if predecessor and successor:
+    #         left_vertices = np.concatenate(([predecessor.left_vertices[-1]], [successor.left_vertices[0]]))
+    #         right_vertices = np.concatenate(([predecessor.right_vertices[-1]], [successor.right_vertices[0]]))
+    #         center_vertices = np.concatenate(([predecessor.center_vertices[-1]], [successor.center_vertices[0]]))
+    #
+    #         idl = scenario.generate_object_id()
+    #         self.latestid = idl
+    #         connecting_lanelet = Lanelet(left_vertices, center_vertices, right_vertices, idl,
+    #                                      predecessor=[predecessor.lanelet_id], successor=[successor.lanelet_id])
+    #
+    #         MapCreator.set_predecessor_successor_relation(self, predecessor, connecting_lanelet)
+    #         MapCreator.set_predecessor_successor_relation(self, connecting_lanelet, successor)
+    #         return connecting_lanelet
 
-            idl = scenario.generate_object_id()
-            self.latestid = idl
-            connecting_lanelet = Lanelet(left_vertices, center_vertices, right_vertices, idl,
-                                         predecessor=[predecessor.lanelet_id], successor=[successor.lanelet_id])
-            network.add_lanelet(lanelet=connecting_lanelet)
-            MapCreator.set_predecessor_successor_relation(self, predecessor, connecting_lanelet)
-            MapCreator.set_predecessor_successor_relation(self, connecting_lanelet, successor)
-            return connecting_lanelet
-
-    def connect_lanelets4(self, predecessor, successor, network, scenario):
+    @staticmethod
+    def connect_lanelets(predecessor: Lanelet, successor: Lanelet, lanelet_id: int):
         if predecessor and successor:
             connecting_vec = successor.center_vertices[0] - predecessor.center_vertices[-1]
             length_con_vec = np.linalg.norm(connecting_vec)
@@ -477,8 +413,7 @@ class MapCreator:
             width_succ = np.linalg.norm(vec_width_succ)
             norm_vec_pred = np.array([vec_width_pred[1], -vec_width_pred[0]])
             norm_vec_succ = np.array([vec_width_succ[1], -vec_width_succ[0]])
-            print(norm_vec_pred)
-            print(norm_vec_succ)
+
             con_vec_factor = (length_con_vec) * 0.5
 
             center_vertices = np.concatenate(([predecessor.center_vertices[-1]],
@@ -504,7 +439,6 @@ class MapCreator:
                                               [middle_point],
                                               [successor.center_vertices[0] - 0.000001 * norm_vec_succ / width_succ],
                                               [successor.center_vertices[0]]))
-            print(center_vertices)
 
             # Linear length along the line:
             distance_center = np.cumsum(np.sqrt(np.sum(np.diff(center_vertices, axis=0) ** 2, axis=1)))
@@ -562,13 +496,10 @@ class MapCreator:
             interpolated_right[0] = predecessor.right_vertices[-1]
             interpolated_right[-1] = successor.right_vertices[0]
 
-            idl = scenario.generate_object_id()
-            self.latestid = idl
-            connecting_lanelet = Lanelet(interpolated_left, interpolated_center, interpolated_right, idl,
+            connecting_lanelet = Lanelet(interpolated_left, interpolated_center, interpolated_right, lanelet_id,
                                          predecessor=[predecessor.lanelet_id], successor=[successor.lanelet_id])
-            network.add_lanelet(lanelet=connecting_lanelet)
-            MapCreator.set_predecessor_successor_relation(self, predecessor, connecting_lanelet)
-            MapCreator.set_predecessor_successor_relation(self, connecting_lanelet, successor)
+            MapCreator.set_predecessor_successor_relation(predecessor, connecting_lanelet)
+            MapCreator.set_predecessor_successor_relation(connecting_lanelet, successor)
             return connecting_lanelet
 
     @staticmethod
@@ -581,129 +512,247 @@ class MapCreator:
         """
         network.remove_lanelet(lanelet_id)
 
-    # x crossing
-    def x_crossing(self, width, diameter_crossing, network, scenario):
+    @staticmethod
+    def create_four_way_intersection(width: float, diameter_crossing: int, scenario: Scenario):
+        """
+        Creates a four way intersection with predefined line markings at the origin.
+
+        @param width: The width of the created lanelets.
+        @param diameter_crossing: The length of the main part of the intersection.
+        @param scenario: The scenario to which the intersection will be added.
+        @return: New intersection element and new lanelets.
+        """
         rad = (diameter_crossing + width) / 2
-        lanelet_1 = self.create_straight(width, diameter_crossing, 10, network, scenario, None)
-        lanelet_2 = self.adjacent_lanelet_left(lanelet_1, network, scenario, False)
+        lanelet_ids = [scenario.generate_object_id() for i in range(0, 20)]
+        new_lanelets = []
+        new_lanelets.append(MapCreator.create_straight(width, diameter_crossing, 10, lanelet_ids[0],
+                                                       {LaneletType.INTERSECTION}, road_user_one_way={RoadUser.VEHICLE},
+                                                       line_marking_left=LineMarking.DASHED,
+                                                       line_marking_right=LineMarking.SOLID))
+        new_lanelets.append(MapCreator.create_adjacent_lanelet(True, new_lanelets[0], lanelet_ids[1], False, width,
+                                                               {LaneletType.INTERSECTION},
+                                                               road_user_one_way={RoadUser.VEHICLE},
+                                                               line_marking_left=LineMarking.DASHED,
+                                                               line_marking_right=LineMarking.SOLID))
 
-        lanelet_3 = self.create_straight(width, diameter_crossing, 10, network, scenario, None)
-        self.fit_to_predecessor(lanelet_1, lanelet_3)
-        lanelet_4 = self.adjacent_lanelet_left(lanelet_3, network, scenario, False)
+        new_lanelets.append(MapCreator.create_straight(width, diameter_crossing, 10, lanelet_ids[2],
+                                                       {LaneletType.INTERSECTION}, road_user_one_way={RoadUser.VEHICLE},
+                                                       line_marking_left=LineMarking.NO_MARKING,
+                                                       line_marking_right=LineMarking.NO_MARKING))
+        MapCreator.fit_to_predecessor(new_lanelets[0], new_lanelets[2])
+        new_lanelets.append(MapCreator.create_adjacent_lanelet(True, new_lanelets[2], lanelet_ids[3], False, width,
+                                                               {LaneletType.INTERSECTION},
+                                                               road_user_one_way={RoadUser.VEHICLE},
+                                                               line_marking_left=LineMarking.NO_MARKING,
+                                                               line_marking_right=LineMarking.NO_MARKING))
 
-        lanelet_5 = self.create_curve(width, rad, np.pi * 0.5, 20, network, scenario, None)
-        self.fit_to_predecessor(lanelet_1, lanelet_5)
-        lanelet_6 = self.adjacent_lanelet_left(lanelet_5, network, scenario, False)
+        new_lanelets.append(MapCreator.create_curve(width, rad, np.pi * 0.5, 20, lanelet_ids[4],
+                                                    {LaneletType.INTERSECTION}, road_user_one_way={RoadUser.VEHICLE},
+                                                    line_marking_left=LineMarking.NO_MARKING,
+                                                    line_marking_right=LineMarking.NO_MARKING))
+        MapCreator.fit_to_predecessor(new_lanelets[0], new_lanelets[4])
+        new_lanelets.append(MapCreator.create_adjacent_lanelet(True, new_lanelets[4], lanelet_ids[5], False, width,
+                                                               {LaneletType.INTERSECTION},
+                                                               road_user_one_way={RoadUser.VEHICLE},
+                                                       line_marking_left=LineMarking.NO_MARKING,
+                                                       line_marking_right=LineMarking.SOLID))
 
-        lanelet_7 = self.create_straight(width, diameter_crossing, 10, network, scenario, None)
-        self.fit_to_predecessor(lanelet_5, lanelet_7)
-        lanelet_8 = self.adjacent_lanelet_left(lanelet_7, network, scenario, False)
+        new_lanelets.append(MapCreator.create_straight(width, diameter_crossing, 10, lanelet_ids[6],
+                                                       {LaneletType.INTERSECTION}, road_user_one_way={RoadUser.VEHICLE},
+                                                       line_marking_left=LineMarking.DASHED,
+                                                       line_marking_right=LineMarking.SOLID))
+        MapCreator.fit_to_predecessor(new_lanelets[4], new_lanelets[6])
+        new_lanelets.append(MapCreator.create_adjacent_lanelet(True, new_lanelets[6], lanelet_ids[7], False, width,
+                                                               {LaneletType.INTERSECTION},
+                                                               road_user_one_way={RoadUser.VEHICLE},
+                                                               line_marking_left=LineMarking.DASHED,
+                                                               line_marking_right=LineMarking.SOLID))
 
-        lanelet_9 = self.create_straight(width, diameter_crossing, 10, network, scenario, None)
-        self.fit_to_predecessor(lanelet_3, lanelet_9)
-        lanelet_10 = self.adjacent_lanelet_left(lanelet_9, network, scenario, False)
+        new_lanelets.append(MapCreator.create_straight(width, diameter_crossing, 10, lanelet_ids[8],
+                                                       {LaneletType.INTERSECTION}, road_user_one_way={RoadUser.VEHICLE},
+                                                       line_marking_left=LineMarking.DASHED,
+                                                       line_marking_right=LineMarking.SOLID))
+        MapCreator.fit_to_predecessor(new_lanelets[2], new_lanelets[8])
+        new_lanelets.append(MapCreator.create_adjacent_lanelet(True, new_lanelets[8], lanelet_ids[9], False, width,
+                                                               {LaneletType.INTERSECTION},
+                                                               road_user_one_way={RoadUser.VEHICLE},
+                                                       line_marking_left=LineMarking.DASHED,
+                                                       line_marking_right=LineMarking.SOLID))
 
-        lanelet_11 = self.create_curve(width, rad, np.pi * 0.5, 20, network, scenario, None)
-        self.fit_to_predecessor(lanelet_8, lanelet_11)
-        lanelet_12 = self.adjacent_lanelet_left(lanelet_11, network, scenario, False)
+        new_lanelets.append(MapCreator.create_curve(width, rad, np.pi * 0.5, 20, lanelet_ids[10],
+                                                    {LaneletType.INTERSECTION}, road_user_one_way={RoadUser.VEHICLE},
+                                                    line_marking_left=LineMarking.NO_MARKING,
+                                                    line_marking_right=LineMarking.NO_MARKING))
+        MapCreator.fit_to_predecessor(new_lanelets[7], new_lanelets[10])
+        new_lanelets.append(MapCreator.create_adjacent_lanelet(True, new_lanelets[10], lanelet_ids[11], False, width,
+                                                               {LaneletType.INTERSECTION},
+                                                               road_user_one_way={RoadUser.VEHICLE},
+                                                       line_marking_left=LineMarking.NO_MARKING,
+                                                       line_marking_right=LineMarking.SOLID))
 
-        lanelet_13 = self.create_straight(width, diameter_crossing, 10, network, scenario, None)
-        self.fit_to_predecessor(lanelet_8, lanelet_13)
-        lanelet_14 = self.adjacent_lanelet_left(lanelet_13, network, scenario, False)
+        new_lanelets.append(MapCreator.create_straight(width, diameter_crossing, 10, lanelet_ids[12],
+                                                       {LaneletType.INTERSECTION}, road_user_one_way={RoadUser.VEHICLE},
+                                                       line_marking_left=LineMarking.NO_MARKING,
+                                                       line_marking_right=LineMarking.NO_MARKING))
+        MapCreator.fit_to_predecessor(new_lanelets[7], new_lanelets[12])
+        new_lanelets.append(MapCreator.create_adjacent_lanelet(True, new_lanelets[12], lanelet_ids[13], False, width,
+                                                               {LaneletType.INTERSECTION},
+                                                               road_user_one_way={RoadUser.VEHICLE},
+                                                       line_marking_left=LineMarking.NO_MARKING,
+                                                       line_marking_right=LineMarking.NO_MARKING))
 
-        lanelet_15 = self.create_straight(width, diameter_crossing, 10, network, scenario, None)
-        self.fit_to_predecessor(lanelet_13, lanelet_15)
-        lanelet_16 = self.adjacent_lanelet_left(lanelet_15, network, scenario, False)
+        new_lanelets.append(MapCreator.create_straight(width, diameter_crossing, 10, lanelet_ids[14],
+                                                       {LaneletType.INTERSECTION}, road_user_one_way={RoadUser.VEHICLE},
+                                                       line_marking_left=LineMarking.DASHED,
+                                                       line_marking_right=LineMarking.SOLID))
+        MapCreator.fit_to_predecessor(new_lanelets[12], new_lanelets[14])
+        new_lanelets.append(MapCreator.create_adjacent_lanelet(True, new_lanelets[14], lanelet_ids[15], False, width,
+                                                               {LaneletType.INTERSECTION}, road_user_one_way={RoadUser.VEHICLE},
+                                                       line_marking_left=LineMarking.DASHED,
+                                                       line_marking_right=LineMarking.SOLID))
 
-        lanelet_17 = self.create_curve(width, rad, np.pi * 0.5, 20, network, scenario, None)
-        self.fit_to_predecessor(lanelet_10, lanelet_17)
-        lanelet_18 = self.adjacent_lanelet_left(lanelet_17, network, scenario, False)
+        new_lanelets.append(MapCreator.create_curve(width, rad, np.pi * 0.5, 20, lanelet_ids[16],
+                                                    {LaneletType.INTERSECTION}, road_user_one_way={RoadUser.VEHICLE},
+                                                    line_marking_left=LineMarking.NO_MARKING,
+                                                    line_marking_right=LineMarking.NO_MARKING))
+        MapCreator.fit_to_predecessor(new_lanelets[9], new_lanelets[16])
+        new_lanelets.append(MapCreator.create_adjacent_lanelet(True, new_lanelets[16], lanelet_ids[17], False, width,
+                                                               {LaneletType.INTERSECTION}, road_user_one_way={RoadUser.VEHICLE},
+                                                       line_marking_left=LineMarking.NO_MARKING,
+                                                       line_marking_right=LineMarking.SOLID))
 
-        lanelet_19 = self.create_curve(width, rad, np.pi * 0.5, 20, network, scenario, None)
-        self.fit_to_predecessor(lanelet_16, lanelet_19)
-        lanelet_20 = self.adjacent_lanelet_left(lanelet_19, network, scenario, False)
+        new_lanelets.append(MapCreator.create_curve(width, rad, np.pi * 0.5, 20, lanelet_ids[18],
+                                                    {LaneletType.INTERSECTION}, road_user_one_way={RoadUser.VEHICLE},
+                                                    line_marking_left=LineMarking.NO_MARKING,
+                                                    line_marking_right=LineMarking.NO_MARKING))
+        MapCreator.fit_to_predecessor(new_lanelets[15], new_lanelets[18])
+        new_lanelets.append(MapCreator.create_adjacent_lanelet(True, new_lanelets[18], lanelet_ids[19], False, width,
+                                                               {LaneletType.INTERSECTION},
+                                                               road_user_one_way={RoadUser.VEHICLE},
+                                                       line_marking_left=LineMarking.NO_MARKING,
+                                                       line_marking_right=LineMarking.SOLID))
 
         # missing dependencies
-        self.set_predecessor_successor_relation(lanelet_1, lanelet_20)
-        self.set_predecessor_successor_relation(lanelet_19, lanelet_2)
-        self.set_predecessor_successor_relation(lanelet_11, lanelet_9)
-        self.set_predecessor_successor_relation(lanelet_10, lanelet_12)
-        self.set_predecessor_successor_relation(lanelet_17, lanelet_15)
-        self.set_predecessor_successor_relation(lanelet_16, lanelet_18)
+        MapCreator.set_predecessor_successor_relation(new_lanelets[0], new_lanelets[19])
+        MapCreator.set_predecessor_successor_relation(new_lanelets[18], new_lanelets[1])
+        MapCreator.set_predecessor_successor_relation(new_lanelets[10], new_lanelets[8])
+        MapCreator.set_predecessor_successor_relation(new_lanelets[9], new_lanelets[11])
+        MapCreator.set_predecessor_successor_relation(new_lanelets[16], new_lanelets[14])
+        MapCreator.set_predecessor_successor_relation(new_lanelets[15], new_lanelets[17])
 
-        incomings = [lanelet_1.lanelet_id, lanelet_8.lanelet_id, lanelet_10.lanelet_id, lanelet_16.lanelet_id]
-        successors_right = [lanelet_6.lanelet_id, lanelet_12.lanelet_id, lanelet_18.lanelet_id, lanelet_20.lanelet_id]
-        successors_straight = [lanelet_3.lanelet_id, lanelet_4.lanelet_id, lanelet_13.lanelet_id, lanelet_14.lanelet_id]
-        successors_left = [lanelet_5.lanelet_id, lanelet_11.lanelet_id, lanelet_17.lanelet_id, lanelet_19.lanelet_id]
+        incomings = [lanelet_ids[0], lanelet_ids[7], lanelet_ids[9], lanelet_ids[15]]
+        successors_right = [lanelet_ids[5], lanelet_ids[11], lanelet_ids[17], lanelet_ids[19]]
+        successors_straight = [lanelet_ids[2], lanelet_ids[3], lanelet_ids[12], lanelet_ids[13]]
+        successors_left = [lanelet_ids[4], lanelet_ids[10], lanelet_ids[16], lanelet_ids[18]]
         map_incoming = []
-        n = 0
-        for i in incomings:
-            inc = incomings[n]
-            inc = {inc}
-            right = successors_right[n]
-            right = {right}
-            left = successors_left[n]
-            left = {left}
-            straight = successors_straight[n]
-            straight = {straight}
+
+        for n in range(len(incomings)):
+            inc = {incomings[n]}
+            right = {successors_right[n]}
+            left = {successors_left[n]}
+            straight = {successors_straight[n]}
             map_incoming.append(IntersectionIncomingElement(n, incoming_lanelets=inc, successors_right=right,
                                                             successors_straight=straight, successors_left=left))
-            n = n + 1
         intersection_id = scenario.generate_object_id()
 
         intersection = Intersection(intersection_id=intersection_id, incomings=map_incoming)
-        scenario.add_objects([intersection])
-        return intersection
 
-    # t crossing
-    def t_crossing(self, width, diameter_crossing, network, scenario):
+        return intersection, new_lanelets
+
+    @staticmethod
+    def create_three_way_crossing(width: float, diameter_crossing: int, scenario: Scenario):
+        """
+        Creates a four way intersection with predefined line markings at the origin.
+
+        @param width: The width of the created lanelets.
+        @param diameter_crossing: The length of the main part of the intersection.
+        @param scenario: The scenario to which the intersection will be added.
+        @return: New intersection element and new lanelets.
+        """
         rad = (diameter_crossing + width) / 2
-        lanelet_1 = self.create_straight(width, diameter_crossing, 10, network, scenario, None)
-        lanelet_2 = self.adjacent_lanelet_left(lanelet_1, network, scenario, False)
+        lanelet_ids = [scenario.generate_object_id() for i in range(0, 12)]
+        new_lanelets = []
+        new_lanelets.append(MapCreator.create_straight(width, diameter_crossing, 10, lanelet_ids[0],
+                                                       {LaneletType.INTERSECTION}, road_user_one_way={RoadUser.VEHICLE},
+                                                       line_marking_left=LineMarking.DASHED,
+                                                       line_marking_right=LineMarking.SOLID))
+        new_lanelets.append(MapCreator.create_adjacent_lanelet(True, new_lanelets[0], lanelet_ids[1], False, width,
+                                                               {LaneletType.INTERSECTION},
+                                                               road_user_one_way={RoadUser.VEHICLE},
+                                                               line_marking_left=LineMarking.DASHED,
+                                                               line_marking_right=LineMarking.SOLID))
 
-        lanelet_3 = self.create_curve(width, rad, np.pi * 0.5, 20, network, scenario, None)
-        self.fit_to_predecessor(lanelet_1, lanelet_3)
-        lanelet_4 = self.adjacent_lanelet_left(lanelet_3, network, scenario, False)
+        new_lanelets.append(MapCreator.create_curve(width, rad, np.pi * 0.5, 20, lanelet_ids[2],
+                                                    {LaneletType.INTERSECTION}, road_user_one_way={RoadUser.VEHICLE},
+                                                    line_marking_left=LineMarking.NO_MARKING,
+                                                    line_marking_right=LineMarking.NO_MARKING))
+        MapCreator.fit_to_predecessor(new_lanelets[0], new_lanelets[2])
+        new_lanelets.append(MapCreator.create_adjacent_lanelet(True, new_lanelets[2], lanelet_ids[3], False, width,
+                                                               {LaneletType.INTERSECTION},
+                                                               road_user_one_way={RoadUser.VEHICLE},
+                                                               line_marking_left=LineMarking.NO_MARKING,
+                                                               line_marking_right=LineMarking.SOLID))
 
-        lanelet_5 = self.create_straight(width, diameter_crossing, 10, network, scenario, None)
-        self.fit_to_predecessor(lanelet_3, lanelet_5)
-        lanelet_6 = self.adjacent_lanelet_left(lanelet_5, network, scenario, False)
+        new_lanelets.append(MapCreator.create_straight(width, diameter_crossing, 10, lanelet_ids[4],
+                                                       {LaneletType.INTERSECTION}, road_user_one_way={RoadUser.VEHICLE},
+                                                       line_marking_left=LineMarking.DASHED,
+                                                       line_marking_right=LineMarking.SOLID))
+        MapCreator.fit_to_predecessor(new_lanelets[2], new_lanelets[4])
+        new_lanelets.append(MapCreator.create_adjacent_lanelet(True, new_lanelets[4], lanelet_ids[5], False, width,
+                                                               {LaneletType.INTERSECTION},
+                                                               road_user_one_way={RoadUser.VEHICLE},
+                                                               line_marking_left=LineMarking.DASHED,
+                                                               line_marking_right=LineMarking.SOLID))
 
-        lanelet_7 = self.create_straight(width, diameter_crossing, 10, network, scenario, None)
-        self.fit_to_predecessor(lanelet_6, lanelet_7)
-        lanelet_8 = self.adjacent_lanelet_left(lanelet_7, network, scenario, False)
+        new_lanelets.append(MapCreator.create_straight(width, diameter_crossing, 10, lanelet_ids[6],
+                                                       {LaneletType.INTERSECTION}, road_user_one_way={RoadUser.VEHICLE},
+                                                       line_marking_left=LineMarking.DASHED,
+                                                       line_marking_right=LineMarking.NO_MARKING))
+        MapCreator.fit_to_predecessor(new_lanelets[5], new_lanelets[6])
+        new_lanelets.append(MapCreator.create_adjacent_lanelet(True, new_lanelets[6], lanelet_ids[7], False, width,
+                                                               {LaneletType.INTERSECTION},
+                                                               road_user_one_way={RoadUser.VEHICLE},
+                                                               line_marking_left=LineMarking.DASHED,
+                                                               line_marking_right=LineMarking.SOLID))
 
-        lanelet_9 = self.create_straight(width, diameter_crossing, 10, network, scenario, None)
-        self.fit_to_predecessor(lanelet_7, lanelet_9)
-        lanelet_10 = self.adjacent_lanelet_left(lanelet_9, network, scenario, False)
+        new_lanelets.append(MapCreator.create_straight(width, diameter_crossing, 10, lanelet_ids[8],
+                                                       {LaneletType.INTERSECTION}, road_user_one_way={RoadUser.VEHICLE},
+                                                       line_marking_left=LineMarking.DASHED,
+                                                       line_marking_right=LineMarking.SOLID))
+        MapCreator.fit_to_predecessor(new_lanelets[6], new_lanelets[8])
+        new_lanelets.append(MapCreator.create_adjacent_lanelet(True, new_lanelets[8], lanelet_ids[9], False, width,
+                                                               {LaneletType.INTERSECTION},
+                                                               road_user_one_way={RoadUser.VEHICLE},
+                                                               line_marking_left=LineMarking.DASHED,
+                                                               line_marking_right=LineMarking.SOLID))
 
-        lanelet_11 = self.create_curve(width, rad, np.pi * 0.5, 20, network, scenario, None)
-        self.fit_to_predecessor(lanelet_10, lanelet_11)
-        lanelet_12 = self.adjacent_lanelet_left(lanelet_11, network, scenario, False)
+        new_lanelets.append(MapCreator.create_curve(width, rad, np.pi * 0.5, 20, lanelet_ids[10],
+                                                    {LaneletType.INTERSECTION}, road_user_one_way={RoadUser.VEHICLE},
+                                                    line_marking_left=LineMarking.NO_MARKING,
+                                                    line_marking_right=LineMarking.NO_MARKING))
+        MapCreator.fit_to_predecessor(new_lanelets[9], new_lanelets[10])
+        new_lanelets.append(MapCreator.create_adjacent_lanelet(True, new_lanelets[10], lanelet_ids[11], False, width,
+                                                               {LaneletType.INTERSECTION},
+                                                               road_user_one_way={RoadUser.VEHICLE},
+                                                               line_marking_left=LineMarking.NO_MARKING,
+                                                               line_marking_right=LineMarking.SOLID))
 
         # missing dependencies
-        self.set_predecessor_successor_relation(lanelet_1, lanelet_12)
-        self.set_predecessor_successor_relation(lanelet_11, lanelet_2)
+        MapCreator.set_predecessor_successor_relation(new_lanelets[0], new_lanelets[11])
+        MapCreator.set_predecessor_successor_relation(new_lanelets[10], new_lanelets[1])
 
-        incomings = [lanelet_1.lanelet_id, lanelet_6.lanelet_id, lanelet_10.lanelet_id]
         map_incoming = []
-        successors_right = [lanelet_12.lanelet_id, lanelet_4.lanelet_id]
-        successors_straight = [lanelet_7.lanelet_id, lanelet_8.lanelet_id]
-        successors_left = [lanelet_3.lanelet_id, lanelet_11.lanelet_id]
-        map_incoming = []
-
-        map_incoming.append(IntersectionIncomingElement(0, incoming_lanelets={lanelet_1.lanelet_id},
-                                                        successors_right={lanelet_12.lanelet_id},
-                                                        successors_straight={lanelet_7.lanelet_id},
-                                                        successors_left={lanelet_3.lanelet_id}))
-        map_incoming.append(IntersectionIncomingElement(1, incoming_lanelets={lanelet_6.lanelet_id},
-                                                        successors_right={lanelet_4.lanelet_id},
-                                                        successors_straight={lanelet_8.lanelet_id},
-                                                        successors_left={lanelet_11.lanelet_id}))
-        map_incoming.append(IntersectionIncomingElement(2, incoming_lanelets={lanelet_10.lanelet_id}))
+        map_incoming.append(IntersectionIncomingElement(0, incoming_lanelets={lanelet_ids[0]},
+                                                        successors_right={lanelet_ids[11]},
+                                                        successors_straight={lanelet_ids[6]},
+                                                        successors_left={lanelet_ids[2]}))
+        map_incoming.append(IntersectionIncomingElement(1, incoming_lanelets={lanelet_ids[5]},
+                                                        successors_right={lanelet_ids[3]},
+                                                        successors_straight={lanelet_ids[7]},
+                                                        successors_left={lanelet_ids[10]}))
+        map_incoming.append(IntersectionIncomingElement(2, incoming_lanelets={lanelet_ids[9]}))
         intersection_id = scenario.generate_object_id()
 
         intersection = Intersection(intersection_id=intersection_id, incomings=map_incoming)
-        scenario.add_objects([intersection])
 
-        return intersection
+        return intersection, new_lanelets

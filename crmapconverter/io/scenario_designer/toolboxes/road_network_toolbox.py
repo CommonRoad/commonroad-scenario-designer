@@ -187,11 +187,26 @@ class RoadNetworkToolbox(Toolbox):
         self.button_connect_lanelets = QPushButton("Connect [1] and [2]")
 
         self.button_rotate_lanelet = QPushButton("Rotate")
+        self.button_rotate_lanelet.setFixedWidth(100)
         self.rotation_angle = QSpinBox()
-        self.rotation_angle.setMinimum(0)
-        self.rotation_angle.setMaximum(360)
+        self.rotation_angle.setMinimum(-180)
+        self.rotation_angle.setMaximum(180)
+        self.rotation_degree_label = QLabel("[deg]")
 
         self.button_translate_lanelet = QPushButton("Translate")
+        self.button_translate_lanelet.setFixedWidth(100)
+        self.translate_x_label = QLabel("x:")
+        self.x_translation = QLineEdit()
+        self.x_translation.setValidator(QDoubleValidator())
+        self.x_translation.setMaxLength(4)
+        self.x_translation.setAlignment(Qt.AlignRight)
+        self.translate_x_unit_label = QLabel("[m]")
+        self.translate_y_label = QLabel("y:")
+        self.y_translation = QLineEdit()
+        self.y_translation.setValidator(QDoubleValidator())
+        self.y_translation.setMaxLength(4)
+        self.y_translation.setAlignment(Qt.AlignRight)
+        self.translate_y_unit_label = QLabel("[m]")
 
         lanelet_information = QFormLayout()
 
@@ -251,9 +266,24 @@ class RoadNetworkToolbox(Toolbox):
         lanelet_information.addRow(self.button_remove_lanelet)
         lanelet_information.addRow(self.button_fit_to_predecessor)
         lanelet_information.addRow(self.button_connect_lanelets)
-        lanelet_information.addRow(self.button_rotate_lanelet, self.rotation_angle)
-        lanelet_information.addRow(self.button_translate_lanelet)
         layout_lanelets.addLayout(lanelet_information)
+
+        lanelet_rotate_layout = QGridLayout()
+        lanelet_rotate_layout.addWidget(self.button_rotate_lanelet, 0, 0)
+        lanelet_rotate_layout.addWidget(self.rotation_angle, 0, 1)
+        lanelet_rotate_layout.addWidget(self.rotation_degree_label, 0, 2)
+        layout_lanelets.addLayout(lanelet_rotate_layout)
+
+        lanelet_translate_layout = QGridLayout()
+        lanelet_translate_layout.addWidget(self.button_translate_lanelet, 1, 0)
+        lanelet_translate_layout.addWidget(self.translate_x_label, 1, 1)
+        lanelet_translate_layout.addWidget(self.x_translation, 1, 2)
+        lanelet_translate_layout.addWidget(self.translate_x_unit_label, 1, 3)
+        lanelet_translate_layout.addWidget(self.translate_y_label, 1, 4)
+        lanelet_translate_layout.addWidget(self.y_translation, 1, 5)
+        lanelet_translate_layout.addWidget(self.translate_y_unit_label, 1, 6)
+        layout_lanelets.addLayout(lanelet_translate_layout)
+
         widget_title = "Lanelet"
 
         return widget_title, widget_lanelets
@@ -377,17 +407,37 @@ class RoadNetworkToolbox(Toolbox):
         widget_intersection = QFrame(self.tree)
         layout_intersection = QVBoxLayout(widget_intersection)
 
+        self.intersection_diameter = QLineEdit()
+        self.intersection_diameter.setValidator(QIntValidator())
+        self.intersection_diameter.setMaxLength(2)
+        self.intersection_diameter.setAlignment(Qt.AlignRight)
+
+        self.intersection_lanelet_width = QLineEdit()
+        self.intersection_lanelet_width.setValidator(QDoubleValidator())
+        self.intersection_lanelet_width.setMaxLength(4)
+        self.intersection_lanelet_width.setAlignment(Qt.AlignRight)
+
         self.button_three_way_intersection = QPushButton("Add Three-way intersection")
         self.button_four_way_intersection = QPushButton("Add Four-way intersection")
         self.button_fit_intersection = QPushButton("Fit to intersection")
 
-        self.scenario_intersections = CheckableComboBox()
+        self.selected_intersection_label = QLabel("Selected intersection")
+        self.selected_intersection = QComboBox()
+
+        self.intersection_incomings_table = QTableWidget()
+        self.intersection_incomings_table.setColumnCount(5)
+        self.intersection_incomings_table.setHorizontalHeaderLabels(['IncomingID', 'SuccessorStraight', 'SuccessorLeft',
+                                                                     'SuccessorRight', 'IncomingLeft'])
+        self.intersection_incomings_table.resizeColumnsToContents()
 
         intersection_information = QFormLayout()
+        intersection_information.addRow("Diameter [m]", self.intersection_diameter)
+        intersection_information.addRow("Lanelet width [m]", self.intersection_lanelet_width)
         intersection_information.addRow(self.button_three_way_intersection)
         intersection_information.addRow(self.button_four_way_intersection)
         intersection_information.addRow(self.button_fit_intersection)
-        intersection_information.addRow("Intersections:", self.button_fit_intersection)
+        intersection_information.addRow(self.selected_intersection_label, self.selected_intersection)
+        intersection_information.addRow(self.intersection_incomings_table)
 
         layout_intersection.addLayout(intersection_information)
 
@@ -509,65 +559,66 @@ class MapConversionToolbox(Toolbox):
         """reimplement this to define all your sections
         and add them as (title, widget) tuples to self.sections
         """
-        #  Lanelet Section
-        widget_conversion = QFrame(self.tree)
-        layout_conversion = QVBoxLayout(widget_conversion)
+        #  OSM Section
+        widget_osm = QFrame(self.tree)
+        layout_osm = QVBoxLayout(widget_osm)
 
 
-        # self.add_button = QPushButton()
-        # self.add_button.setText("Add")
-        # obstacle_buttons.addWidget(self.ed, 0, 0)
-        #
-        # self.update_button = QPushButton()
-        # self.update_button.setText("Update")
-        # obstacle_buttons.addWidget(self.update_button, 1, 0)
-        #
-        # self.remove_button = QPushButton()
-        # self.remove_button.setText("Remove")
-        # obstacle_buttons.addWidget(self.remove_button, 2, 0)
-        #
-        # layout_obstacles.addLayout(obstacle_buttons)
+        self.osm_conversion_load_osm_file_selection = QRadioButton("Load OSM File")
+        self.osm_conversion_download_osm_file_selection = QRadioButton("Download OSM Map")
 
-        # a figure instance to plot on
-        self.figure = Figure(figsize=(3, 1))
+        self.button_select_osm_file = QPushButton("Select File")
 
-        # this is the Canvas Widget that displays the `figure`
-        # it takes the `figure` instance as a parameter to __init__
-        self.canvas = FigureCanvas(self.figure)
+        self.osm_conversion_coordinate_latitude = QLineEdit()
+        self.osm_conversion_coordinate_latitude.setValidator(QDoubleValidator())
+        self.osm_conversion_coordinate_latitude.setAlignment(Qt.AlignRight)
+        self.osm_conversion_coordinate_longitude = QLineEdit()
+        self.osm_conversion_coordinate_longitude.setValidator(QDoubleValidator())
+        self.osm_conversion_coordinate_longitude.setAlignment(Qt.AlignRight)
 
-        # this is the Navigation widget
-        # it takes the Canvas widget and a parent
-        self.toolbar = NavigationToolbar(self.canvas, self)
+        self.osm_download_map_range = QSpinBox()
+        self.osm_download_map_range.setMinimum(0)
+        self.osm_download_map_range.setMaximum(10000)
 
-        # Just some button connected to `plot` method
-        self.button = QPushButton('Plot')
-        self.button.clicked.connect(self.plot)
+        self.osm_conversion_edit_manually_selection = QCheckBox("Edit Scenario Manually")
 
-        # set the layout
-        layout = QVBoxLayout()
-        layout.addWidget(self.toolbar)
-        layout.addWidget(self.canvas)
-        layout.addWidget(self.button)
-        layout_conversion.addLayout(layout)
+        self.button_load_osm_edit_state = QPushButton("Select File")
+        self.button_start_conversion = QPushButton("Start Conversion")
+        #self.button_load_osm_edit_state = QPushButton("Select File")
 
+        osm_conversion_configuration = QFormLayout()
+        osm_conversion_configuration.addRow(self.osm_conversion_load_osm_file_selection)
+        osm_conversion_configuration.addRow(self.osm_conversion_download_osm_file_selection)
+        osm_conversion_configuration.addRow(self.button_select_osm_file)
+        osm_conversion_configuration.addRow("Latitude:", self.osm_conversion_coordinate_latitude)
+        osm_conversion_configuration.addRow("Longitude:", self.osm_conversion_coordinate_longitude)
+        osm_conversion_configuration.addRow("Range:", self.osm_download_map_range)
+        osm_conversion_configuration.addRow(self.osm_conversion_edit_manually_selection)
+        osm_conversion_configuration.addRow(self.button_load_osm_edit_state)
+        osm_conversion_configuration.addRow(self.button_start_conversion)
 
-        title_obstacle = "Map Conversion"
-        self.sections.append((title_obstacle, widget_conversion))
+        layout_osm.addLayout(osm_conversion_configuration)
 
+        title_osm = "OSM Conversion"
+        self.sections.append((title_osm, widget_osm))
 
-    def plot(self):
-        ''' plot some random stuff '''
-        # random data
-        data = [random.random() for i in range(10)]
+        #  OpenDRIVE Section
+        widget_opendrive = QFrame(self.tree)
+        layout_opendrive = QVBoxLayout(widget_opendrive)
 
-        # create an axis
-        ax = self.figure.add_subplot(111)
+        title_opendrive = "OpenDRIVE  Conversion"
+        self.sections.append((title_opendrive, widget_opendrive))
 
-        # discards the old graph
-        ax.clear()
+        #  Lanelet/Lanelet2 Section
+        widget_lanelet2 = QFrame(self.tree)
+        layout_lanelet2 = QVBoxLayout(widget_lanelet2)
 
-        # plot data
-        ax.plot(data, 'o-')
+        title_lanelet2 = "Lanelet/Lanelet2  Conversion"
+        self.sections.append((title_lanelet2, widget_lanelet2))
 
-        # refresh canvas
-        self.canvas.draw()
+        #  SUMO Section
+        widget_sumo = QFrame(self.tree)
+        layout_sumo = QVBoxLayout(widget_sumo)
+
+        title_sumo = "SUMO  Conversion"
+        self.sections.append((title_sumo, widget_sumo))
