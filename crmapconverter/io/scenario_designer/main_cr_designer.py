@@ -4,6 +4,7 @@ import logging
 import os
 import sys
 from argparse import ArgumentParser
+from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 
 from PyQt5.QtCore import QUrl
 from PyQt5.QtGui import QKeySequence, QDesktopServices
@@ -14,7 +15,6 @@ from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistin
 from commonroad.scenario.lanelet import LaneletNetwork
 from commonroad.scenario.scenario import Scenario
 from commonroad.scenario.traffic_sign import *
-from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 
 from crmapconverter.io.scenario_designer.converter_modules.opendrive_interface import OpenDRIVEInterface
 from crmapconverter.io.scenario_designer.converter_modules.osm_interface import OSMInterface
@@ -25,6 +25,7 @@ from crmapconverter.io.scenario_designer.gui_resources.MainWindow import Ui_main
 from crmapconverter.io.scenario_designer.toolboxes.gui_sumo_simulation import SUMO_AVAILABLE
 from crmapconverter.io.scenario_designer.toolboxes.road_network_toolbox import RoadNetworkToolbox, ObstacleToolbox, \
     MapConversionToolbox
+from crmapconverter.io.scenario_designer.toolboxes.toolbox import CheckableComboBox
 
 if SUMO_AVAILABLE:
     from crmapconverter.io.scenario_designer.settings.sumo_settings import SUMOSettings
@@ -33,7 +34,6 @@ if SUMO_AVAILABLE:
 from crmapconverter.io.scenario_designer.settings import config
 from crmapconverter.io.scenario_designer.misc import util
 from crmapconverter.io.scenario_designer.misc.map_creator import MapCreator
-
 from crmapconverter.io.scenario_designer.road_network_element_settings.intersection_settings import *
 
 
@@ -206,9 +206,11 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.road_network_toolbox.button_four_way_intersection.clicked.connect(lambda: self.add_four_way_intersection())
         self.road_network_toolbox.button_three_way_intersection.clicked.connect(
             lambda: self.add_three_way_intersection())
-#        self.road_network_toolbox.selected_intersection.mousePressEvent.connect(
-    #       lambda: self.update_incomings())
-      #  self.road_network_toolbox.button_.clicked.connect(lambda: self.fit_intersection())
+        #  self.road_network_toolbox.button_.clicked.connect(lambda: self.fit_intersection())
+        self.road_network_toolbox.selected_intersection.currentTextChanged.connect(
+            lambda: self.update_intersection_information())
+        self.road_network_toolbox.button_add_incoming.clicked.connect(lambda: self.add_incoming())
+        self.road_network_toolbox.button_remove_incoming.clicked.connect(lambda: self.remove_incoming())
 
     def show_sumo_settings(self):
         self.sumo_settings = SUMOSettings(self, config=self.sumobox.config)
@@ -288,7 +290,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.road_network_toolbox.lanelet_length.setText("10.0")
         self.road_network_toolbox.lanelet_radius.setText("10.0")
         self.road_network_toolbox.lanelet_angle.setText("90.0")
-        self.update_list_information()
+        self.set_default_list_information()
 
     def initialize_intersection_information(self):
         """
@@ -296,9 +298,10 @@ class MWindow(QMainWindow, Ui_mainWindow):
         """
         self.road_network_toolbox.intersection_diameter.setText("10")
         self.road_network_toolbox.intersection_lanelet_width.setText("3.0")
-        self.update_list_information()
+        self.road_network_toolbox.intersection_incoming_length.setText("20")
+        self.set_default_list_information()
 
-    def update_list_information(self):
+    def set_default_list_information(self):
         """
         Initializes Combobox GUI elements with lanelet information.
         """
@@ -338,11 +341,6 @@ class MWindow(QMainWindow, Ui_mainWindow):
             ["None"] + [str(item) for item in self.collect_lanelet_ids()])
         self.road_network_toolbox.selected_lanelet_two.setCurrentIndex(0)
 
-        self.road_network_toolbox.selected_intersection.clear()
-        self.road_network_toolbox.selected_intersection.addItems(
-            ["None"] + [str(item) for item in self.collect_intersection_ids()])
-        self.road_network_toolbox.selected_lanelet_two.setCurrentIndex(0)
-
         self.road_network_toolbox.referenced_lanelets_traffic_sign.clear()
         self.road_network_toolbox.referenced_lanelets_traffic_sign.addItems(
             ["None"] + [str(item) for item in self.collect_lanelet_ids()])
@@ -357,6 +355,16 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.road_network_toolbox.selected_traffic_sign.addItems(
             ["None"] + [str(item) for item in self.collect_traffic_sign_ids()])
         self.road_network_toolbox.selected_traffic_sign.setCurrentIndex(0)
+
+        self.road_network_toolbox.selected_intersection.clear()
+        self.road_network_toolbox.selected_intersection.addItems(
+            ["None"] + [str(item) for item in self.collect_intersection_ids()])
+        self.road_network_toolbox.selected_lanelet_two.setCurrentIndex(0)
+
+        self.road_network_toolbox.intersection_crossings.clear()
+        self.road_network_toolbox.intersection_crossings.addItems(
+            ["None"] + [str(item) for item in self.collect_lanelet_ids()])
+        self.road_network_toolbox.intersection_crossings.setCurrentIndex(0)
 
     def add_lanelet(self):
         """
@@ -435,7 +443,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
         lanelet.translate_rotate(np.array([lanelet_pos_x, lanelet_pos_y]), 0)
         self.update_view(focus_on_network=True)
-        self.update_list_information()
+        self.set_default_list_information()
 
     def update_lanelet(self):
         """
@@ -501,7 +509,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.last_added_lanelet_id = adjacent_lanelet.lanelet_id
         self.crviewer.current_scenario.lanelet_network.add_lanelet(lanelet=adjacent_lanelet)
         self.update_view(focus_on_network=True)
-        self.update_list_information()
+        self.set_default_list_information()
 
     def remove_lanelet(self):
         """
@@ -518,7 +526,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
         MapCreator.remove_lanelet(selected_lanelet, self.crviewer.current_scenario.lanelet_network)
         self.update_view(focus_on_network=True)
-        self.update_list_information()
+        self.set_default_list_information()
 
     def add_four_way_intersection(self):
         """
@@ -530,12 +538,13 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
         width = float(self.road_network_toolbox.intersection_lanelet_width.text())
         diameter = int(self.road_network_toolbox.intersection_diameter.text())
+        incoming_length = int(self.road_network_toolbox.intersection_incoming_length.text())
 
-        intersection, new_lanelets = MapCreator.create_four_way_intersection(width, diameter,
+        intersection, new_lanelets = MapCreator.create_four_way_intersection(width, diameter, incoming_length,
                                                                              self.crviewer.current_scenario)
         self.crviewer.current_scenario.add_objects(intersection)
         self.crviewer.current_scenario.add_objects(new_lanelets)
-        self.update_list_information()
+        self.set_default_list_information()
         self.update_view(focus_on_network=True)
 
     def add_three_way_intersection(self):
@@ -548,13 +557,14 @@ class MWindow(QMainWindow, Ui_mainWindow):
             return
         width = float(self.road_network_toolbox.intersection_lanelet_width.text())
         diameter = int(self.road_network_toolbox.intersection_diameter.text())
+        incoming_length = int(self.road_network_toolbox.intersection_incoming_length.text())
 
-        intersection, new_lanelets = MapCreator.create_three_way_crossing(width, diameter,
+        intersection, new_lanelets = MapCreator.create_three_way_crossing(width, diameter, incoming_length,
                                                                           self.crviewer.current_scenario)
 
         self.crviewer.current_scenario.add_objects(intersection)
         self.crviewer.current_scenario.add_objects(new_lanelets)
-        self.update_list_information()
+        self.set_default_list_information()
         self.update_view(focus_on_network=True)
 
     def update_incomings(self):
@@ -628,7 +638,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
                                first_occurence, np.array([x_position, y_position]), virtual)
 
         self.crviewer.current_scenario.add_objects(new_sign, referenced_lanelets)
-        self.update_list_information()
+        self.set_default_list_information()
         self.update_view(focus_on_network=True)
 
     def remove_traffic_sign(self):
@@ -641,7 +651,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
             return
         traffic_sign = self.crviewer.current_scenario.lanelet_network.find_traffic_sign_by_id(selected_traffic_sign_id)
         self.crviewer.current_scenario.remove_traffic_sign(traffic_sign)
-        self.update_list_information()
+        self.set_default_list_information()
         self.update_view(focus_on_network=True)
 
     def update_traffic_sign(self):
@@ -657,6 +667,9 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.add_traffic_sign(selected_traffic_sign_id)
 
     def update_traffic_sign_information(self):
+        """
+        Updates information of traffic sign widget based on traffic sign ID selected by the user.
+        """
         if self.road_network_toolbox.selected_traffic_sign.currentText() not in ["", "None"]:
             selected_country = self.road_network_toolbox.country.currentText()
             country_signs = globals()["TrafficSignID" + SupportedTrafficSignCountry(selected_country).name.capitalize()]
@@ -689,6 +702,60 @@ class MWindow(QMainWindow, Ui_mainWindow):
             self.road_network_toolbox.y_position_traffic_sign.setText("0.0")
             self.road_network_toolbox.traffic_sign_element_table.setRowCount(0)
 
+    def add_incoming(self):
+        """
+        Adds a row to the intersection incoming table.
+        Only a default entry is created the user has to specify the incoming afterward manually.
+        """
+        if self.crviewer.current_scenario == None:
+            self.textBrowser.append("_Warning:_ Create a new file")
+            return
+        num_rows = self.road_network_toolbox.intersection_incomings_table.rowCount()
+        self.road_network_toolbox.intersection_incomings_table.insertRow(num_rows)
+        lanelet_ids = [str(la_id) for la_id in self.collect_lanelet_ids()]
+        combo_box_lanelets = CheckableComboBox()
+        combo_box_lanelets.addItems(lanelet_ids)
+        self.road_network_toolbox.intersection_incomings_table.setCellWidget(num_rows, 1, combo_box_lanelets)
+        combo_box_successors_left = CheckableComboBox()
+        combo_box_successors_left.addItems(lanelet_ids)
+        self.road_network_toolbox.intersection_incomings_table.setCellWidget(num_rows, 2, combo_box_successors_left)
+        combo_box_successors_straight = CheckableComboBox()
+        combo_box_successors_straight.addItems(lanelet_ids)
+        self.road_network_toolbox.intersection_incomings_table.setCellWidget(num_rows, 3, combo_box_successors_straight)
+        combo_box_successors_right = CheckableComboBox()
+        combo_box_successors_right.addItems(lanelet_ids)
+        self.road_network_toolbox.intersection_incomings_table.setCellWidget(num_rows, 4, combo_box_successors_right)
+
+    def remove_incoming(self):
+        """
+        Removes a row from the intersection incoming table.
+        """
+        num_rows = self.road_network_toolbox.intersection_incomings_table.rowCount()
+        self.road_network_toolbox.intersection_incomings_table.removeRow(num_rows - 1)
+
+    def update_intersection_information(self):
+        """
+        Updates information of intersection widget based on intersection ID selected by the user.
+        """
+        if self.road_network_toolbox.selected_intersection.currentText() not in ["", "None"]:
+            selected_intersection_id = int(self.road_network_toolbox.selected_intersection.currentText())
+            intersection = \
+                self.crviewer.current_scenario.lanelet_network.find_intersection_by_id(selected_intersection_id)
+            for incoming in intersection.incomings:
+                self.add_incoming()
+                num_rows = self.road_network_toolbox.intersection_incomings_table.rowCount()
+                self.road_network_toolbox.intersection_incomings_table.setItem(
+                    num_rows - 1, 0, QTableWidgetItem(str(incoming.incoming_id)))
+                self.road_network_toolbox.intersection_incomings_table.cellWidget(
+                    num_rows - 1, 1).set_checked_items([str(la_id) for la_id in incoming.incoming_lanelets])
+                self.road_network_toolbox.intersection_incomings_table.cellWidget(
+                    num_rows - 1, 2).set_checked_items([str(la_id) for la_id in incoming.successors_left])
+                self.road_network_toolbox.intersection_incomings_table.cellWidget(
+                    num_rows - 1, 3).set_checked_items([str(la_id) for la_id in incoming.successors_straight])
+                self.road_network_toolbox.intersection_incomings_table.cellWidget(
+                    num_rows - 1, 4).set_checked_items([str(la_id) for la_id in incoming.successors_right])
+            self.road_network_toolbox.intersection_crossings.set_checked_items(intersection.crossings)
+
     def connect_lanelets(self):
         if self.crviewer.current_scenario == None:
             self.textBrowser.append("create a new file")
@@ -712,7 +779,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.last_added_lanelet_id = connected_lanelet.lanelet_id
         self.crviewer.current_scenario.lanelet_network.add_lanelet(lanelet=connected_lanelet)
         self.update_view(focus_on_network=True)
-        self.update_list_information()
+        self.set_default_list_information()
 
     def fit_to_predecessor(self):
         if self.crviewer.current_scenario == None:
