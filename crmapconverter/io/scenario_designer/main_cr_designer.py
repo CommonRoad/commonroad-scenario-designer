@@ -4,10 +4,10 @@ import logging
 import os
 import sys
 from argparse import ArgumentParser
-import numpy as np
 
 from PyQt5.QtCore import QUrl
 from PyQt5.QtGui import QKeySequence, QDesktopServices
+
 from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
 from commonroad.scenario.lanelet import LaneletNetwork
@@ -22,7 +22,8 @@ from crmapconverter.io.scenario_designer.gui.gui_viewer import LaneletList, Inte
     AnimatedViewer
 from crmapconverter.io.scenario_designer.gui_resources.MainWindow import Ui_mainWindow
 from crmapconverter.io.scenario_designer.toolboxes.gui_sumo_simulation import SUMO_AVAILABLE
-from crmapconverter.io.scenario_designer.toolboxes.road_network_toolbox import RoadNetworkToolbox, ObstacleToolbox, MapConversionToolbox
+from crmapconverter.io.scenario_designer.toolboxes.road_network_toolbox import RoadNetworkToolbox, ObstacleToolbox, \
+    MapConversionToolbox
 
 if SUMO_AVAILABLE:
     from crmapconverter.io.scenario_designer.settings.sumo_settings import SUMOSettings
@@ -179,11 +180,6 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.initialize_lanelet_information()
         self.initialize_intersection_information()
 
-        #self.road_network_toolbox.button_traffic_signs.clicked.connect(lambda: self.traffic_signs())
-        #self.road_network_toolbox.button_traffic_light.clicked.connect(lambda: self.traffic_light())
-        #self.road_network_toolbox.delete_traffic_sign.clicked.connect(lambda: self.delete_traffic_element())
-        #self.road_network_toolbox.edit_button_traffic_light.clicked.connect(lambda: self.edittrafficlight())
-
         self.road_network_toolbox.button_add_lanelet.clicked.connect(lambda: self.add_lanelet())
         self.road_network_toolbox.button_update_lanelet.clicked.connect(lambda: self.update_lanelet())
 
@@ -193,6 +189,16 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.road_network_toolbox.button_connect_lanelets.clicked.connect(lambda: self.connect_lanelets())
         self.road_network_toolbox.button_rotate_lanelet.clicked.connect(lambda: self.rotate_lanelet())
         self.road_network_toolbox.button_translate_lanelet.clicked.connect(lambda: self.translate_lanelet())
+
+        self.road_network_toolbox.button_add_traffic_sign_element.clicked.connect(
+            lambda: self.add_traffic_sign_element())
+        self.road_network_toolbox.button_remove_traffic_sign_element.clicked.connect(
+            lambda: self.remove_traffic_sign_element())
+        self.road_network_toolbox.button_add_traffic_sign.clicked.connect(
+            lambda: self.add_traffic_sign())
+        #self.road_network_toolbox.button_traffic_light.clicked.connect(lambda: self.traffic_light())
+        #self.road_network_toolbox.delete_traffic_sign.clicked.connect(lambda: self.delete_traffic_element())
+        #self.road_network_toolbox.edit_button_traffic_light.clicked.connect(lambda: self.edittrafficlight())
 
         self.road_network_toolbox.button_four_way_intersection.clicked.connect(lambda: self.add_four_way_intersection())
         self.road_network_toolbox.button_three_way_intersection.clicked.connect(
@@ -333,6 +339,16 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.road_network_toolbox.selected_intersection.addItems(
             ["None"] + [str(item) for item in self.collect_intersection_ids()])
         self.road_network_toolbox.selected_lanelet_two.setCurrentIndex(0)
+
+        self.road_network_toolbox.referenced_lanelets_traffic_sign.clear()
+        self.road_network_toolbox.referenced_lanelets_traffic_sign.addItems(
+            ["None"] + [str(item) for item in self.collect_lanelet_ids()])
+        self.road_network_toolbox.referenced_lanelets_traffic_sign.setCurrentIndex(0)
+
+        self.road_network_toolbox.referenced_lanelets_traffic_light.clear()
+        self.road_network_toolbox.referenced_lanelets_traffic_light.addItems(
+            ["None"] + [str(item) for item in self.collect_lanelet_ids()])
+        self.road_network_toolbox.referenced_lanelets_traffic_light.setCurrentIndex(0)
 
     def add_lanelet(self):
         """
@@ -541,6 +557,62 @@ class MWindow(QMainWindow, Ui_mainWindow):
         for inc in selected_intersection.incomings:
             self.road_network_toolbox.intersection_incomings_table.setItem(0, 0, inc.incoming_id)
 
+    def add_traffic_sign_element(self):
+        """
+        Adds traffic sign element to traffic sign.
+        Only a default entry is created the user has to specify the traffic sign ID manually afterward.
+        """
+        if self.crviewer.current_scenario == None:
+            self.textBrowser.append("_Warning:_ Create a new file")
+            return
+        selected_country = self.road_network_toolbox.country.currentText()
+        num_rows = self.road_network_toolbox.traffic_sign_element_table.rowCount()
+        self.road_network_toolbox.traffic_sign_element_table.insertRow(num_rows)
+        comboBox = QComboBox()
+        comboBox.addItems([elem.name for elem in globals()["TrafficSignID"
+                                                           + SupportedTrafficSignCountry(selected_country).name.capitalize()]])
+        self.road_network_toolbox.traffic_sign_element_table.setCellWidget(num_rows, 0, comboBox)
+
+    def remove_traffic_sign_element(self):
+        """
+        Removes last entry in traffic sign element table of a traffic sign.
+        """
+        num_rows = self.road_network_toolbox.traffic_sign_element_table.rowCount()
+        self.road_network_toolbox.traffic_sign_element_table.removeRow(num_rows - 1)
+
+    def table_comobox_connection(self):
+        row = sorted(self.road_network_toolbox.traffic_sign_element_table.selectionModel().selectedIndexes())[0].row()
+        self.road_network_toolbox.traffic_sign_element_table.item(row, 0).setText()
+
+    def add_traffic_sign(self):
+        if self.crviewer.current_scenario == None:
+            self.textBrowser.append("_Warning:_ Create a new file")
+            return
+        selected_country = self.road_network_toolbox.country.currentText()
+        country_signs = globals()["TrafficSignID" + SupportedTrafficSignCountry(selected_country).name.capitalize()]
+        traffic_sign_elements = []
+        referenced_lanelets = \
+            [int(la) for la in self.road_network_toolbox.referenced_lanelets_traffic_sign.get_checked_items()]
+        first_occurence = set()
+        virtual = False
+        for row in range(self.road_network_toolbox.traffic_sign_element_table.rowCount()):
+            sign_id = self.road_network_toolbox.traffic_sign_element_table.cellWidget(row, 0).currentText()
+            if self.road_network_toolbox.traffic_sign_element_table.item(row, 1) is None:
+                additional_value = []
+            else:
+                additional_value = [self.road_network_toolbox.traffic_sign_element_table.item(row, 1).text()]
+            traffic_sign_elements.append(TrafficSignElement(country_signs[sign_id], additional_value))
+
+        if len(traffic_sign_elements) == 0:
+            self.textBrowser.append("_Warning:_ No traffic sign element added.")
+            return
+        new_sign = TrafficSign(self.crviewer.current_scenario.generate_object_id(), traffic_sign_elements,
+                               first_occurence, np.array([0, 0]), virtual)
+
+        self.crviewer.current_scenario.add_objects(new_sign, referenced_lanelets)
+        self.update_list_information()
+        self.update_view(focus_on_network=True)
+
     def connect_lanelets(self):
         if self.crviewer.current_scenario == None:
             self.textBrowser.append("create a new file")
@@ -616,169 +688,6 @@ class MWindow(QMainWindow, Ui_mainWindow):
         selected_lanelet_one.translate_rotate(np.array([x_translation, y_translation]), 0)
         self.update_view(focus_on_network=True)
 
-    def traffic_signs(self):
-        if self.crviewer.current_scenario == None:
-            self.textBrowser.append("_Warning:_ Create a scenario")
-            return
-        self.showTS = TrafficSignsSelection()
-        self.showTS.exec()
-        sig = self.showTS.getSignNumber()
-        vals = self.showTS.getAdditionalValues()
-        x = self.showTS.getPosX()
-        y = self.showTS.getPosY()
-
-        lanelet_id = self.showTS.getLaneletID()
-        if lanelet_id == None:
-            self.textBrowser.append("_Warning:_ Select a valid Lanelet ID")
-            return
-
-        self.traffic1 = TrafficSign(self.traffic_signs_id, [TrafficSignElement(TrafficSignIDGermany(sig), [vals])],
-                                    {lanelet_id},
-                                    np.array([x, y]))
-        self.crviewer.current_scenario.lanelet_network.add_traffic_sign(self.traffic1, {lanelet_id})
-        if self.crviewer.current_scenario.lanelet_network.find_lanelet_by_id(lanelet_id) == None:
-            self.textBrowser.append("_Warning:_ Select a valid Lanelet ID")
-            return
-        else:
-            lanelet = self.crviewer.current_scenario.lanelet_network.find_lanelet_by_id(lanelet_id)
-            lanelet.add_traffic_sign_to_lanelet(self.traffic_signs_id)
-        self.update_view(focus_on_network=True)
-
-        self.traffic_signs_id = self.traffic_signs_id + 1
-
-    def traffic_light(self):
-        if self.crviewer.current_scenario == None:
-            self.textBrowser.append("_Warning:_ Create a scenario")
-            return
-        self.showTL = TrafficLightSelection()
-        self.showTL.exec()
-        lanelet_id = self.showTL.getLaneletID()
-        if lanelet_id == None:
-            if self.crviewer.selected_lanelet_use != None:
-                lanelet_id = self.crviewer.selected_lanelet_use[0]._lanelet_id
-            else:
-                self.textBrowser.append("_Warning:_ Select a valid lanelet ID")
-                return
-        direction = self.showTL.getDirection()
-        isactive = self.showTL.get_isactive()
-        x = self.showTL.getPosX()
-        y = self.showTL.getPosY()
-        time_offset = self.showTL.getTimeOffset()
-        red = self.showTL.getRed()
-        red_yellow = self.showTL.getRed_Yellow()
-        green = self.showTL.getGreen()
-        yellow = self.showTL.getYellow()
-        cycle = [(TrafficLightState.RED, red),
-                 (TrafficLightState.RED_YELLOW, red_yellow),
-                 (TrafficLightState.GREEN, green),
-                 (TrafficLightState.YELLOW, yellow)]
-        cycle_element_list = [TrafficLightCycleElement(state[0], state[1]) for state in cycle]
-        tl = TrafficLight(traffic_light_id=self.traffic_light_id, cycle=cycle_element_list, position=np.array([x, y]),
-                          direction=direction, time_offset=time_offset, active=isactive)
-
-        if lanelet_id:
-            lanelet = self.crviewer.current_scenario.lanelet_network.find_lanelet_by_id(lanelet_id)
-            self.crviewer.current_scenario.lanelet_network.add_traffic_light(tl, [lanelet_id])
-        self.traffic_light_id = self.traffic_light_id + 1
-        self.update_view(focus_on_network=True)
-
-        return
-
-    def traffic_light_exec(self):
-        x = 0
-        y = 0
-        id = 1
-        tl = TrafficLight(traffic_light_id=id, cycle=[], position=np.array([x, y]), direction=TrafficLightDirection.ALL)
-        lanelet = self.crviewer.current_scenario.lanelet_network.find_lanelet_by_id(1)
-        # lanelet.add_traffic_light_to_lanelet(id)
-        self.crviewer.current_scenario.lanelet_network.add_traffic_light(tl, [1, 2])
-        id = id + 1
-        x = 10
-        y = 10
-        tl2 = TrafficLight(traffic_light_id=id, cycle=[], position=np.array([x, y]),
-                           direction=TrafficLightDirection.ALL)
-        self.crviewer.current_scenario.lanelet_network.add_traffic_light(tl2, [2])
-
-        self.update_view(focus_on_network=True)
-
-    def create_traffic_signs_settings(self):
-        if self.crviewer.current_scenario == None:
-            self.textBrowser.append("_Warning:_ Create a scenario")
-            return
-        self.TS = TrafficSignsSettings()
-        self.TS.exec()
-        self.country = self.TS.getCountry()
-        self.traffic_signs_settings = 0
-
-    def delete_traffic_element(self):
-        if self.crviewer.current_scenario == None:
-            self.textBrowser.append("_Warning:_ Create a scenario")
-            return
-        self.DL = DeleteTrafficElement()
-        self.DL.exec()
-        element_id = self.DL.getTrafficElement()
-        if element_id == None:
-            self.textBrowser.append("_Warning:_ Select a valid regulatory element ID")
-            return
-
-        laneletid = self.DL.getLaneletId()
-        if laneletid == None:
-            if self.crviewer.selected_lanelet_use != None:
-                laneletid = self.crviewer.selected_lanelet_use[0]._lanelet_id
-            else:
-                self.textBrowser.append("_Warning:_ Select a valid lanelet ID")
-                return
-        lanelet = self.crviewer.current_scenario.lanelet_network.find_lanelet_by_id(laneletid)
-        trafficelementset = lanelet._traffic_signs
-        trafficlightset = lanelet._traffic_lights
-        if element_id in trafficelementset:
-            trafficelementset.remove(element_id)
-            del self.crviewer.current_scenario.lanelet_network._traffic_signs[element_id]
-
-        if element_id in trafficlightset:
-            trafficlightset.remove(element_id)
-            del self.crviewer.current_scenario.lanelet_network._traffic_lights[element_id]
-
-        self.crviewer.current_scenario.lanelet_network.cleanup_lanelet_references()
-        self.update_view(focus_on_network=True)
-
-    def edittrafficlight(self):
-        if self.crviewer.current_scenario == None:
-            self.textBrowser.append("_Warning:_ Create a scenario")
-            return
-        self.EL = EditTrafficLight()
-        self.EL.exec()
-
-        tlid = self.EL.getLaneletID()
-        if self.EL.getLaneletID() != None:
-            self.textBrowser.append("_Warning:_ Select a valid traffic light ID")
-            return
-
-        direction = self.EL.getDirection()
-        isactive = self.EL.get_isactive()
-        x = self.EL.getPosX()
-        y = self.EL.getPosY()
-        position = np.array([x, y])
-        time_offset = self.EL.getTimeOffset()
-        red = self.EL.getRed()
-        red_yellow = self.EL.getRed_Yellow()
-        green = self.EL.getGreen()
-        yellow = self.EL.getYellow()
-        cycle = [(TrafficLightState.RED, red),
-                 (TrafficLightState.RED_YELLOW, red_yellow),
-                 (TrafficLightState.GREEN, green),
-                 (TrafficLightState.YELLOW, yellow)]
-        cycle_element_list = [TrafficLightCycleElement(state[0], state[1]) for state in cycle]
-        if self.crviewer.current_scenario.lanelet_network.find_traffic_light_by_id(tlid) == None:
-            self.textBrowser.append("_Warning:_ Select a valid traffic light ID")
-            return
-        TL = self.crviewer.current_scenario.lanelet_network.find_traffic_light_by_id(tlid)
-        TL._time_offset = time_offset
-        TL._position = position
-        TL._direction = direction
-        TL._acvite = isactive
-        TL._cycle = cycle_element_list
-        self.update_view(focus_on_network=True)
 
     def fit_intersection(self):
         self.FI.exec()

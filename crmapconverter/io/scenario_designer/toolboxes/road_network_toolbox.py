@@ -306,17 +306,32 @@ class RoadNetworkToolbox(Toolbox):
         self.y_position_traffic_sign.setMaxLength(4)
         self.y_position_traffic_sign.setAlignment(Qt.AlignRight)
 
+        self.selected_traffic_sign = QComboBox()
+
         self.referenced_lanelets_traffic_sign = CheckableComboBox()
 
-        self.button_add_traffic_sign = QPushButton("Add")
-        self.button_update_traffic_sign = QPushButton("Update")
-        self.button_remove_traffic_sign = QPushButton("Remove")
+        self.traffic_sign_element_label = QLabel("Traffic Sign Elements:")
+        self.traffic_sign_element_table = QTableWidget()
+        self.traffic_sign_element_table.setColumnCount(2)
+        self.traffic_sign_element_table.setHorizontalHeaderLabels(['Traffic Sign ID', 'Additional Value'])
+        self.traffic_sign_element_table.resizeColumnsToContents()
+        self.traffic_sign_element_table.setColumnWidth(0, 180)
+        self.button_add_traffic_sign_element = QPushButton("Add Element")
+        self.button_remove_traffic_sign_element = QPushButton("Remove Element")
+
+        self.button_add_traffic_sign = QPushButton("Add Traffic Sign to Scenario")
+        self.button_update_traffic_sign = QPushButton("Update Selected Traffic Sign")
+        self.button_remove_traffic_sign = QPushButton("Remove Selected Traffic Sign")
 
         traffic_sign_information = QFormLayout()
         traffic_sign_information.addRow("Country", self.country)
         traffic_sign_information.addRow("X-Position [m]", self.x_position_traffic_sign)
         traffic_sign_information.addRow("Y-Position [m]", self.y_position_traffic_sign)
+        traffic_sign_information.addRow("Selected traffic sign", self.selected_traffic_sign)
         traffic_sign_information.addRow("Referenced lanelets", self.referenced_lanelets_traffic_sign)
+        traffic_sign_information.addRow(self.traffic_sign_element_label)
+        traffic_sign_information.addRow(self.traffic_sign_element_table)
+        traffic_sign_information.addRow(self.button_add_traffic_sign_element, self.button_remove_traffic_sign_element)
         traffic_sign_information.addRow(self.button_add_traffic_sign)
         traffic_sign_information.addRow(self.button_update_traffic_sign)
         traffic_sign_information.addRow(self.button_remove_traffic_sign)
@@ -376,7 +391,7 @@ class RoadNetworkToolbox(Toolbox):
 
         self.active = QCheckBox("active")
 
-        self.referenced_lanelets_traffic_light = CheckableComboBox()
+        self.referenced_lanelets_traffic_light = QComboBox()
 
         self.button_add_traffic_light = QPushButton("Add")
         self.button_update_traffic_light = QPushButton("Update")
