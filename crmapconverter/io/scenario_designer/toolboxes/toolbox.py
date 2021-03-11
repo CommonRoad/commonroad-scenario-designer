@@ -34,8 +34,6 @@ class CheckableComboBox(QComboBox):
         self.view().pressed.connect(self.handle_item_pressed)
         self.setModel(QStandardItemModel(self))
 
-        # when any item get pressed
-
     def handle_item_pressed(self, index):
 
         # getting which item is pressed
@@ -47,13 +45,9 @@ class CheckableComboBox(QComboBox):
         else:
             item.setCheckState(Qt.Checked)
 
-            # calling method
         self.check_items()
 
-        # method called by check_items
-
     def item_checked(self, index):
-
         # getting item at index
         item = self.model().item(index, 0)
 
@@ -72,6 +66,14 @@ class CheckableComboBox(QComboBox):
                 checked_items.append(i)
 
         return checked_items
+
+    def set_checked_items(self, checked_items):
+        for index in range(self.count()):
+            item = self.model().item(index, 0)
+            if item.text() in checked_items:
+                item.setCheckState(Qt.Checked)
+            else:
+                item.setCheckState(Qt.Unchecked)
 
     def check_items(self):
         # blank list

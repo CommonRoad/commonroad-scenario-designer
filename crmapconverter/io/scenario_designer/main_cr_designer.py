@@ -7,6 +7,7 @@ from argparse import ArgumentParser
 
 from PyQt5.QtCore import QUrl
 from PyQt5.QtGui import QKeySequence, QDesktopServices
+from PyQt5.QtWidgets import QTableWidgetItem
 
 from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
@@ -33,8 +34,6 @@ from crmapconverter.io.scenario_designer.settings import config
 from crmapconverter.io.scenario_designer.misc import util
 from crmapconverter.io.scenario_designer.misc.map_creator import MapCreator
 
-from crmapconverter.io.scenario_designer.road_network_element_settings.traffic_signs_settings import \
-    TrafficSignsSettings, TrafficSignsSelection, TrafficLightSelection, DeleteTrafficElement, EditTrafficLight
 from crmapconverter.io.scenario_designer.road_network_element_settings.intersection_settings import *
 
 
@@ -196,8 +195,12 @@ class MWindow(QMainWindow, Ui_mainWindow):
             lambda: self.remove_traffic_sign_element())
         self.road_network_toolbox.button_add_traffic_sign.clicked.connect(
             lambda: self.add_traffic_sign())
+        self.road_network_toolbox.button_remove_traffic_sign.clicked.connect(lambda: self.remove_traffic_sign())
+        self.road_network_toolbox.button_update_traffic_sign.clicked.connect(lambda: self.update_traffic_sign())
+        self.road_network_toolbox.selected_traffic_sign.currentTextChanged.connect(
+            lambda: self.update_traffic_sign_information())
         #self.road_network_toolbox.button_traffic_light.clicked.connect(lambda: self.traffic_light())
-        #self.road_network_toolbox.delete_traffic_sign.clicked.connect(lambda: self.delete_traffic_element())
+
         #self.road_network_toolbox.edit_button_traffic_light.clicked.connect(lambda: self.edittrafficlight())
 
         self.road_network_toolbox.button_four_way_intersection.clicked.connect(lambda: self.add_four_way_intersection())
@@ -210,7 +213,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
     def show_sumo_settings(self):
         self.sumo_settings = SUMOSettings(self, config=self.sumobox.config)
 
-    def get_x_position_start(self) -> float:
+    def get_x_position_lanelet_start(self) -> float:
         """
         Extracts lanelet x-position of first center vertex.
 
@@ -221,7 +224,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         else:
             return 0
 
-    def get_y_position_start(self) -> float:
+    def get_y_position_lanelet_start(self) -> float:
         """
         Extracts lanelet y-position of first center vertex.
 
@@ -349,6 +352,11 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.road_network_toolbox.referenced_lanelets_traffic_light.addItems(
             ["None"] + [str(item) for item in self.collect_lanelet_ids()])
         self.road_network_toolbox.referenced_lanelets_traffic_light.setCurrentIndex(0)
+
+        self.road_network_toolbox.selected_traffic_sign.clear()
+        self.road_network_toolbox.selected_traffic_sign.addItems(
+            ["None"] + [str(item) for item in self.collect_traffic_sign_ids()])
+        self.road_network_toolbox.selected_traffic_sign.setCurrentIndex(0)
 
     def add_lanelet(self):
         """
@@ -580,11 +588,11 @@ class MWindow(QMainWindow, Ui_mainWindow):
         num_rows = self.road_network_toolbox.traffic_sign_element_table.rowCount()
         self.road_network_toolbox.traffic_sign_element_table.removeRow(num_rows - 1)
 
-    def table_comobox_connection(self):
-        row = sorted(self.road_network_toolbox.traffic_sign_element_table.selectionModel().selectedIndexes())[0].row()
-        self.road_network_toolbox.traffic_sign_element_table.item(row, 0).setText()
-
-    def add_traffic_sign(self):
+    def add_traffic_sign(self, traffic_sign_id: int = None):
+        """
+        Adds a traffic sign to a CommonRoad scenario.
+        @param selected_traffic_sign_id: Id which the new traffic sign should have.
+        """
         if self.crviewer.current_scenario == None:
             self.textBrowser.append("_Warning:_ Create a new file")
             return
@@ -592,9 +600,17 @@ class MWindow(QMainWindow, Ui_mainWindow):
         country_signs = globals()["TrafficSignID" + SupportedTrafficSignCountry(selected_country).name.capitalize()]
         traffic_sign_elements = []
         referenced_lanelets = \
-            [int(la) for la in self.road_network_toolbox.referenced_lanelets_traffic_sign.get_checked_items()]
+            {int(la) for la in self.road_network_toolbox.referenced_lanelets_traffic_sign.get_checked_items()}
         first_occurence = set()
-        virtual = False
+        virtual = self.road_network_toolbox.traffic_sign_virtual_selection.isChecked()
+        if self.road_network_toolbox.x_position_traffic_sign.text():
+            x_position = float(self.road_network_toolbox.x_position_traffic_sign.text())
+        else:
+            x_position = 0
+        if self.road_network_toolbox.y_position_traffic_sign.text():
+            y_position = float(self.road_network_toolbox.y_position_traffic_sign.text())
+        else:
+            y_position = 0
         for row in range(self.road_network_toolbox.traffic_sign_element_table.rowCount()):
             sign_id = self.road_network_toolbox.traffic_sign_element_table.cellWidget(row, 0).currentText()
             if self.road_network_toolbox.traffic_sign_element_table.item(row, 1) is None:
@@ -606,12 +622,72 @@ class MWindow(QMainWindow, Ui_mainWindow):
         if len(traffic_sign_elements) == 0:
             self.textBrowser.append("_Warning:_ No traffic sign element added.")
             return
-        new_sign = TrafficSign(self.crviewer.current_scenario.generate_object_id(), traffic_sign_elements,
-                               first_occurence, np.array([0, 0]), virtual)
+        traffic_sign_id = traffic_sign_id if traffic_sign_id is not None else \
+            self.crviewer.current_scenario.generate_object_id()
+        new_sign = TrafficSign(traffic_sign_id, traffic_sign_elements,
+                               first_occurence, np.array([x_position, y_position]), virtual)
 
         self.crviewer.current_scenario.add_objects(new_sign, referenced_lanelets)
         self.update_list_information()
         self.update_view(focus_on_network=True)
+
+    def remove_traffic_sign(self):
+        """
+        Removes selected traffic sign from scenario.
+        """
+        if self.road_network_toolbox.selected_traffic_sign.currentText() not in ["", "None"]:
+            selected_traffic_sign_id = int(self.road_network_toolbox.selected_traffic_sign.currentText())
+        else:
+            return
+        traffic_sign = self.crviewer.current_scenario.lanelet_network.find_traffic_sign_by_id(selected_traffic_sign_id)
+        self.crviewer.current_scenario.remove_traffic_sign(traffic_sign)
+        self.update_list_information()
+        self.update_view(focus_on_network=True)
+
+    def update_traffic_sign(self):
+        """
+        Updates information of selected traffic sign.
+        """
+        if self.road_network_toolbox.selected_traffic_sign.currentText() not in ["", "None"]:
+            selected_traffic_sign_id = int(self.road_network_toolbox.selected_traffic_sign.currentText())
+        else:
+            return
+        traffic_sign = self.crviewer.current_scenario.lanelet_network.find_traffic_sign_by_id(selected_traffic_sign_id)
+        self.crviewer.current_scenario.remove_traffic_sign(traffic_sign)
+        self.add_traffic_sign(selected_traffic_sign_id)
+
+    def update_traffic_sign_information(self):
+        if self.road_network_toolbox.selected_traffic_sign.currentText() not in ["", "None"]:
+            selected_country = self.road_network_toolbox.country.currentText()
+            country_signs = globals()["TrafficSignID" + SupportedTrafficSignCountry(selected_country).name.capitalize()]
+            selected_traffic_sign_id = int(self.road_network_toolbox.selected_traffic_sign.currentText())
+            traffic_sign = \
+                self.crviewer.current_scenario.lanelet_network.find_traffic_sign_by_id(selected_traffic_sign_id)
+            referenced_lanelets = [str(la.lanelet_id) for la in
+                                   self.crviewer.current_scenario.lanelet_network.lanelets
+                                   if selected_traffic_sign_id in la.traffic_signs]
+            self.road_network_toolbox.referenced_lanelets_traffic_sign.set_checked_items(referenced_lanelets)
+
+            self.road_network_toolbox.traffic_sign_virtual_selection.setChecked(traffic_sign.virtual)
+            self.road_network_toolbox.x_position_traffic_sign.setText(str(traffic_sign.position[0]))
+            self.road_network_toolbox.y_position_traffic_sign.setText(str(traffic_sign.position[1]))
+            self.road_network_toolbox.traffic_sign_element_table.setRowCount(0)
+            for elem in traffic_sign.traffic_sign_elements:
+                self.add_traffic_sign_element()
+                num_rows = self.road_network_toolbox.traffic_sign_element_table.rowCount()
+                self.road_network_toolbox.traffic_sign_element_table.cellWidget(num_rows - 1, 0).setCurrentText(
+                    country_signs(elem.traffic_sign_element_id).name)
+                if len(elem.additional_values) > 0:
+                    self.road_network_toolbox.traffic_sign_element_table.setItem(
+                        num_rows - 1, 1, QTableWidgetItem(str(elem.additional_values[0])))
+                else:
+                    self.road_network_toolbox.traffic_sign_element_table.setItem(
+                        num_rows - 1, 1, QTableWidgetItem(""))
+        else:
+            self.road_network_toolbox.traffic_sign_virtual_selection.setChecked(False)
+            self.road_network_toolbox.x_position_traffic_sign.setText("0.0")
+            self.road_network_toolbox.y_position_traffic_sign.setText("0.0")
+            self.road_network_toolbox.traffic_sign_element_table.setRowCount(0)
 
     def connect_lanelets(self):
         if self.crviewer.current_scenario == None:

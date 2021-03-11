@@ -305,6 +305,7 @@ class RoadNetworkToolbox(Toolbox):
         self.y_position_traffic_sign.setValidator(QDoubleValidator())
         self.y_position_traffic_sign.setMaxLength(4)
         self.y_position_traffic_sign.setAlignment(Qt.AlignRight)
+        self.traffic_sign_virtual_selection = QCheckBox("virtual")
 
         self.selected_traffic_sign = QComboBox()
 
@@ -327,6 +328,7 @@ class RoadNetworkToolbox(Toolbox):
         traffic_sign_information.addRow("Country", self.country)
         traffic_sign_information.addRow("X-Position [m]", self.x_position_traffic_sign)
         traffic_sign_information.addRow("Y-Position [m]", self.y_position_traffic_sign)
+        traffic_sign_information.addRow(self.traffic_sign_virtual_selection)
         traffic_sign_information.addRow("Selected traffic sign", self.selected_traffic_sign)
         traffic_sign_information.addRow("Referenced lanelets", self.referenced_lanelets_traffic_sign)
         traffic_sign_information.addRow(self.traffic_sign_element_label)
