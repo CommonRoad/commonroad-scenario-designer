@@ -4,7 +4,7 @@ from scipy.interpolate import interp1d
 
 from commonroad.scenario.intersection import Intersection
 from commonroad.scenario.intersection import IntersectionIncomingElement
-from commonroad.scenario.lanelet import RoadUser, LaneletNetwork, Lanelet, LineMarking, LaneletType
+from commonroad.scenario.lanelet import RoadUser, LaneletNetwork, Lanelet, LineMarking, LaneletType, StopLine
 from commonroad.scenario.scenario import Scenario
 
 
@@ -20,7 +20,8 @@ class MapCreator:
                         adjacent_left_same_direction: bool = None, adjacent_right_same_direction: bool = None,
                         road_user_one_way: Set[RoadUser] = None, road_user_bidirectional: Set[RoadUser] = None,
                         line_marking_left: LineMarking = LineMarking.UNKNOWN,
-                        line_marking_right: LineMarking = LineMarking.UNKNOWN, backwards: bool = False):
+                        line_marking_right: LineMarking = LineMarking.UNKNOWN, stop_line: StopLine = None,
+                        traffic_signs: Set[int] = None, traffic_lights: Set[int] = None, backwards: bool = False):
         """
         Function for creating a straight lanelet given a length, width, and number of vertices.
 
@@ -39,6 +40,9 @@ class MapCreator:
         @param road_user_bidirectional: Allowed road users bidirectional for new lanelet.
         @param line_marking_left: Line markings on the left for new lanelet.
         @param line_marking_right: Line markings on the right for new lanelet.
+        @param stop_line: Stop line of new lanelet.
+        @param traffic_signs: Referenced traffic signs by new lanelet.
+        @param traffic_lights: Referenced traffic lights by new lanelet.
         @param backwards: Boolean indicating whether lanelet should be rotated by 180°.
         @return: Newly created lanelet.
         """
@@ -63,7 +67,8 @@ class MapCreator:
                           lanelet_id=lanelet_id, center_vertices=center_vertices, lanelet_type=lanelet_types,
                           user_one_way=road_user_one_way, user_bidirectional=road_user_bidirectional,
                           line_marking_right_vertices=line_marking_right,
-                          line_marking_left_vertices=line_marking_left)
+                          line_marking_left_vertices=line_marking_left, stop_line=stop_line,
+                          traffic_signs=traffic_signs, traffic_lights=traffic_lights)
         if backwards:
             lanelet.translate_rotate(-lanelet.center_vertices[0], np.pi)
 
@@ -76,7 +81,8 @@ class MapCreator:
                      adjacent_left_same_direction: bool = None, adjacent_right_same_direction: bool= None,
                      road_user_one_way: Set[RoadUser] = None, road_user_bidirectional: Set[RoadUser] = None,
                      line_marking_left: LineMarking = LineMarking.UNKNOWN,
-                     line_marking_right: LineMarking = LineMarking.UNKNOWN):
+                     line_marking_right: LineMarking = LineMarking.UNKNOWN, stop_line: StopLine = None,
+                     traffic_signs: Set[int] = None, traffic_lights: Set[int] = None):
         """
         Function for creating a straight lanelet given a length, width, and number of vertices.
 
@@ -96,6 +102,9 @@ class MapCreator:
         @param road_user_bidirectional: Allowed road users bidirectional for new lanelet.
         @param line_marking_left: Line markings on the left for new lanelet.
         @param line_marking_right: Line markings on the right for new lanelet.
+        @param stop_line: Stop line of new lanelet.
+        @param traffic_signs: Referenced traffic signs by new lanelet.
+        @param traffic_lights: Referenced traffic lights by new lanelet.
         @return: Newly created lanelet.
         """
         angle_div = angle / (num_vertices - 1)
@@ -127,7 +136,8 @@ class MapCreator:
                           adjacent_right_same_direction=adjacent_right_same_direction, lanelet_type=lanelet_types,
                           user_one_way=road_user_one_way, user_bidirectional=road_user_bidirectional,
                           line_marking_right_vertices=line_marking_right,
-                          line_marking_left_vertices=line_marking_left)
+                          line_marking_left_vertices=line_marking_left, stop_line=stop_line,
+                          traffic_signs=traffic_signs, traffic_lights=traffic_lights)
         lanelet.translate_rotate(np.array([0, 0]), angle_start)
         lanelet.translate_rotate(-lanelet.center_vertices[0], 0)
 
@@ -140,7 +150,8 @@ class MapCreator:
                                 road_user_one_way: Set[RoadUser] = None,
                                 road_user_bidirectional: Set[RoadUser] = None,
                                 line_marking_left: LineMarking = LineMarking.UNKNOWN,
-                                line_marking_right: LineMarking = LineMarking.UNKNOWN):
+                                line_marking_right: LineMarking = LineMarking.UNKNOWN, stop_line: StopLine = None,
+                                traffic_signs: Set[int] = None, traffic_lights: Set[int] = None):
         """
         Creates adjacent left or adjacent right lanelet for given lanelet.
 
@@ -157,6 +168,9 @@ class MapCreator:
         @param road_user_bidirectional: Set of allowed road users bidirectional.
         @param line_marking_left: Left line marking for the left lanelet.
         @param line_marking_right: Left line marking for the left lanelet.
+        @param stop_line: Stop line of new lanelet.
+        @param traffic_signs: Referenced traffic signs by new lanelet.
+        @param traffic_lights: Referenced traffic lights by new lanelet.
         @return: Newly created lanelet.
         """
         if base_lanelet.adj_left is None and create_adj_left:
@@ -207,7 +221,8 @@ class MapCreator:
                           adjacent_left_same_direction=adjacent_left_same_direction,
                           user_one_way=road_user_one_way, user_bidirectional=road_user_bidirectional,
                           line_marking_right_vertices=line_marking_right,
-                          line_marking_left_vertices=line_marking_left)
+                          line_marking_left_vertices=line_marking_left, stop_line=stop_line,
+                          traffic_signs=traffic_signs, traffic_lights=traffic_lights)
 
         return lanelet
 
