@@ -672,10 +672,25 @@ class IntermediateFormat:
                             self.traffic_lights.remove(light)
                 lane.traffic_lights = set()
 
+        def check_pre_incoming_lane(lane):
+            # determines if any predecessor of a lane is part of another intersection as successor
+            for intersection in self.intersections:
+                all_succesors = set()
+                for incoming in intersection.incomings:
+                    all_succesors.update(incoming.successors_left)
+                    all_succesors.update(incoming.successors_right)
+                    all_succesors.update(incoming.successors_straight)
+                for pre in lane.predecessors:
+                    if pre in all_succesors:
+                        return True
+            return False
+
         def remove_innner_lights(intersection, incoming_lanes):
+            # removes inner traffic lights in the middle of crossings
+            # if lane is short and predecessor is other incoming's successor
             remove = False
             for lane in incoming_lanes:
-                if len(lane.predecessors) > 1 and geometry.distance(lane.center_points[0], [lane.center_points[-1]]) < 2: # shorter than 2 meters
+                if geometry.distance(lane.center_points[0], [lane.center_points[-1]]) < 2 and check_pre_incoming_lane(lane): # shorter than 2 meters
                     remove = True
                     indicating_lane = lane.id
             if remove:
