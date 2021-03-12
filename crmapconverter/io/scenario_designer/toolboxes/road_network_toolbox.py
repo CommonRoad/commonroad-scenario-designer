@@ -392,9 +392,11 @@ class RoadNetworkToolbox(Toolbox):
         self.time_inactive.setMaxLength(4)
         self.time_inactive.setAlignment(Qt.AlignRight)
 
-        self.active = QCheckBox("active")
+        self.traffic_light_active = QCheckBox("active")
 
-        self.referenced_lanelets_traffic_light = QComboBox()
+        self.referenced_lanelets_traffic_light = CheckableComboBox()
+
+        self.selected_traffic_light = QComboBox()
 
         self.button_add_traffic_light = QPushButton("Add")
         self.button_update_traffic_light = QPushButton("Update")
@@ -411,7 +413,8 @@ class RoadNetworkToolbox(Toolbox):
         traffic_light_information.addRow("Time yellow", self.time_yellow)
         traffic_light_information.addRow("Time inactive", self.time_inactive)
         traffic_light_information.addRow("Referenced lanelets", self.referenced_lanelets_traffic_light)
-        traffic_light_information.addRow(self.active)
+        traffic_light_information.addRow("Selected traffic light", self.selected_traffic_light)
+        traffic_light_information.addRow(self.traffic_light_active)
         traffic_light_information.addRow(self.button_add_traffic_light)
         traffic_light_information.addRow(self.button_update_traffic_light)
         traffic_light_information.addRow(self.button_remove_traffic_light)
