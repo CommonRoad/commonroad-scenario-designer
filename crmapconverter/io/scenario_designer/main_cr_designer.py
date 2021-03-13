@@ -5,6 +5,7 @@ import os
 import sys
 from argparse import ArgumentParser
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
+import pickle
 
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
@@ -23,9 +24,17 @@ from crmapconverter.io.scenario_designer.gui.gui_viewer import LaneletList, Inte
     AnimatedViewer
 from crmapconverter.io.scenario_designer.gui_resources.MainWindow import Ui_mainWindow
 from crmapconverter.io.scenario_designer.toolboxes.gui_sumo_simulation import SUMO_AVAILABLE
-from crmapconverter.io.scenario_designer.toolboxes.road_network_toolbox import RoadNetworkToolbox, ObstacleToolbox, \
-    MapConversionToolbox
-from crmapconverter.io.scenario_designer.toolboxes.toolbox import CheckableComboBox
+from crmapconverter.io.scenario_designer.toolboxes.road_network_toolbox_ui import RoadNetworkToolbox
+from crmapconverter.io.scenario_designer.toolboxes.obstacle_toolbox_ui import ObstacleToolbox
+from crmapconverter.io.scenario_designer.toolboxes.map_converter_toolbox_ui import MapConversionToolbox
+from crmapconverter.io.scenario_designer.toolboxes.scenario_toolbox_ui import ScenarioToolbox
+from crmapconverter.io.scenario_designer.toolboxes.toolbox_ui import CheckableComboBox
+from crmapconverter.io.scenario_designer.osm_gui_modules.gui_embedding import EdgeEdit, LaneLinkEdit
+from crmapconverter.io.scenario_designer.osm_gui_modules import gui
+
+from crmapconverter.osm2cr.converter_modules import converter
+from crmapconverter.osm2cr.converter_modules.graph_operations import road_graph as rg
+from crmapconverter.osm2cr.converter_modules.osm_operations.downloader import download_around_map
 
 if SUMO_AVAILABLE:
     from crmapconverter.io.scenario_designer.settings.sumo_settings import SUMOSettings
@@ -45,7 +54,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.setWindowIcon(QIcon(':/icons/cr.ico'))
         self.setWindowTitle("CommonRoad Designer")
         self.centralwidget.setStyleSheet('background-color:rgb(150,150,150)')
-        self.setWindowFlag(True)
+        self.setWindowFlag(Qt.Window)
 
         # attributes
         self.filename = None
@@ -72,8 +81,6 @@ class MWindow(QMainWindow, Ui_mainWindow):
         else:
             self.sumo_box = None
         self.viewer_dock = None
-        self.lanelet_list_dock = None
-        self.intersection_list_dock = None
         self.sumo_settings = None
         self.gui_settings = None
         self.lanelet_settings = None
@@ -97,6 +104,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.create_road_network_toolbox()
         self.create_obstacle_toolbox()
         self.create_converter_toolbox()
+        self.create_scenario_toolbox()
 
         self.status = self.statusbar
         self.status.showMessage("Welcome to CR Scenario Designer")
@@ -154,7 +162,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.addDockWidget(Qt.RightDockWidgetArea, self.obstacle_toolbox_widget)
 
     def create_converter_toolbox(self):
-        """ Create the obstacle toolbox."""
+        """ Create the map converter toolbox."""
         self.converter_toolbox = MapConversionToolbox()
         self.converter_toolbox_widget = QDockWidget("Map Converter Toolbox")
         self.converter_toolbox_widget.setFloating(True)
@@ -162,6 +170,26 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.converter_toolbox_widget.setAllowedAreas(Qt.RightDockWidgetArea)
         self.converter_toolbox_widget.setWidget(self.converter_toolbox)
         self.addDockWidget(Qt.RightDockWidgetArea, self.converter_toolbox_widget)
+
+        # connect to all buttons of the start window
+        self.converter_toolbox.button_start_osm_conversion.clicked.connect(lambda: self.start_conversion())
+        self.converter_toolbox.button_select_osm_file.clicked.connect(lambda: self.select_file())
+        self.converter_toolbox.button_load_osm_edit_state.clicked.connect(lambda: self.load_edit_state())
+        #window.b_download.clicked.connect(self.download_map)
+        # window.coordinate_input.textChanged.connect(self.verify_coordinate_input)
+        # window.rb_load_file.clicked.connect(self.load_file_clicked)
+        # window.input_bench_id.textChanged.connect(self.bench_id_set)
+        # window.rb_download_map.clicked.connect(self.download_map_clicked)
+
+    def create_scenario_toolbox(self):
+        """ Create the obstacle toolbox."""
+        self.scenario_toolbox = ScenarioToolbox()
+        self.scenario_toolbox_widget = QDockWidget("Scenario Toolbox")
+        self.scenario_toolbox_widget.setFloating(True)
+        self.scenario_toolbox_widget.setFeatures(QDockWidget.AllDockWidgetFeatures)
+        self.scenario_toolbox_widget.setAllowedAreas(Qt.RightDockWidgetArea)
+        self.scenario_toolbox_widget.setWidget(self.scenario_toolbox)
+        self.addDockWidget(Qt.RightDockWidgetArea, self.scenario_toolbox_widget)
 
     def create_road_network_toolbox(self):
         """ Create the Road network toolbox."""
@@ -1017,7 +1045,6 @@ class MWindow(QMainWindow, Ui_mainWindow):
         selected_lanelet_one.translate_rotate(np.array([x_translation, y_translation]), 0)
         self.update_view(focus_on_network=True)
 
-
     def fit_intersection(self):
         self.FI.exec()
         predecessor_ID = self.FI.get_Predecessor_Id()
@@ -1032,6 +1059,156 @@ class MWindow(QMainWindow, Ui_mainWindow):
                                                          self.cr_viewer.current_scenario.lanelet_network,
                                                          self.cr_viewer.current_scenario)
         self.update_view(focus_on_network=True)
+
+    def load_edit_state(self) -> None:
+        """
+        Loads an OSM edit state and opens it within a separate GUI.
+        """
+        filename, _ = QFileDialog.getOpenFileName(self, "Select a edit state file", "", "edit save *.save (*.save)",
+                                                  options=QFileDialog.Options())
+        if filename == "" or filename is None:
+            print("no file picked")
+        else:
+            with open(filename, "rb") as fd:
+                gui_state = pickle.load(fd)
+            if isinstance(gui_state, gui.EdgeEditGUI):
+                EdgeEdit(self.app, None, gui_state)
+                self.app.main_window.show()
+            elif isinstance(gui_state, gui.LaneLinkGUI):
+                LaneLinkEdit(self.app, None, gui_state)
+                self.app.main_window.show()
+            else:
+                QMessageBox.critical(self, "Warning", "Invalid GUI state.", QMessageBox.Ok)
+                return
+
+    def select_file(self) -> None:
+        """
+        Allows to select an OSM file from the file system and loads it.
+        """
+
+        filename, _ = QFileDialog.getOpenFileName(self, "Select OpenStreetMap File", "",
+                                                  "OpenStreetMap file *.osm (*.osm)", options=QFileDialog.Options())
+        if filename != "":
+            self.selected_osm_file = filename
+
+    def hidden_conversion(self, graph: rg.Graph) -> None:
+        """
+        Performs a OSM conversion without user edit.
+
+        :param graph: graph to convert
+        """
+        try:
+            graph = converter.step_collection_2(graph)
+            graph = converter.step_collection_3(graph)
+        except Exception as e:
+            QMessageBox.warning(self, "Internal Error", "There was an error during the processing of the graph.\n\n{}"
+                                .format(e), QMessageBox.Ok)
+            return
+        self.app.export(graph)
+
+    def start_conversion(self) -> None:
+        """
+        Starts the OSM conversion process by picking a file and showing the edge edit GUI.
+
+        :return: None
+        """
+        try:
+            if self.embedding.rb_load_file.isChecked():
+                if self.selected_file is not None:
+                    self.read_osm_file(self.selected_file)
+                else:
+                    QMessageBox.warning(
+                        self,
+                        "Warning",
+                        "No file selected.",
+                        QMessageBox.Ok)
+                    return
+            else:
+                self.download_and_open_osm_file()
+        except ValueError as e:
+            QMessageBox.critical(
+                self,
+                "Warning",
+                "Map unreadable: " + str(e),
+                QMessageBox.Ok)
+            return
+        if self.embedding.chk_user_edit.isChecked():
+            self.app.edge_edit_embedding(self.graph)
+        else:
+            self.hidden_conversion(self.graph)
+
+    def verify_coordinate_input(self) -> bool:
+        """
+        check if user input of coordinates are in correct format and sane
+
+        :return: True if coordinates are valid
+        """
+        coords = self.embedding.coordinate_input.text()
+        try:
+            lat, lon = coords.split(", ")
+            self.lat, self.lon = float(lat), float(lon)
+            if not (-90 <= self.lat <= 90 and -180 <= self.lon <= 180):
+                raise ValueError
+            self.embedding.l_region.setText("Coordinates Valid")
+            if self.embedding.rb_download_map.isChecked():
+                self.embedding.input_picked_output.setText("Map will be downloaded")
+            return True
+        except ValueError:
+            self.embedding.l_region.setText("Coordinates Invalid")
+            if self.embedding.rb_download_map.isChecked():
+                self.embedding.input_picked_output.setText(
+                    "Cannot download, invalid Coordinates"
+                )
+            return False
+
+    def download_map(self) -> Optional[str]:
+        """
+        downloads map, but does not open it
+
+        :return: the file name
+        """
+        # TODO maybe ask for filename
+        name = config.BENCHMARK_ID + ".osm"
+        if not self.verify_coordinate_input():
+            QMessageBox.critical(
+                self,
+                "Warning",
+                "cannot download, coordinates invalid",
+                QMessageBox.Ok)
+            return None
+        else:
+            download_around_map(
+                name, self.lat, self.lon, self.embedding.range_input.value()
+            )
+            return name
+
+    def download_and_open_osm_file(self) -> None:
+        """
+        downloads the specified region and reads the osm file
+
+        :return: None
+        """
+        name = self.download_map()
+        if name is not None:
+            self.read_osm_file(config.SAVE_PATH + name)
+
+    def read_osm_file(self, file: str) -> None:
+        """
+        loads an osm file and performs first steps to create the road graph
+
+        :param file: file name
+        :return: None
+        """
+        try:
+            self.graph = converter.step_collection_1(file)
+        except Exception as e:
+            QMessageBox.warning(
+                self,
+                "Internal Error",
+                "There was an error during the loading of the selected osm file.\n\n{}"
+                .format(e),
+                QMessageBox.Ok,
+            )
 
     def create_lanelet_list(self):
         """Create the lanelet_list and put it into right Dockwidget area."""
@@ -1060,7 +1237,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
                 messbox.warning(
                     self, "Warning",
                     "Please load or convert a CR Scenario firstly",
-                    QtWidgets.QMessageBox.Ok)
+                    QMessageBox.Ok)
                 messbox.close()
             else:
                 self.lanelet_list_dock.show()

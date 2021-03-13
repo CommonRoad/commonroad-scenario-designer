@@ -3,8 +3,6 @@ This module allows to embed the GUIs defined in gui.py in a pyqt5 window.
 It also provides a main window to start the conversion process, and the possibility to view CR scenarios
 """
 
-#Updated by Rayane Zaibet
-
 from abc import ABC, abstractmethod
 import pickle
 import re
