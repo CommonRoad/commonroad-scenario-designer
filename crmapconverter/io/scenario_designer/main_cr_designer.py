@@ -95,7 +95,6 @@ class MWindow(QMainWindow, Ui_mainWindow):
         # build and connect GUI
         self.create_file_actions()
         self.create_import_actions()
-        self.create_export_actions()
         self.create_setting_actions()
         self.create_help_actions()
         self.create_viewer_dock()
@@ -121,10 +120,6 @@ class MWindow(QMainWindow, Ui_mainWindow):
         menu_import.addAction(self.importfromOpendrive)
         menu_import.addAction(self.importfromOSM)
         # menu_import.addAction(self.importfromSUMO)
-
-        menu_export = menu_bar.addMenu('Export')  # add menu 'Export'
-        menu_export.addAction(self.exportAsCommonRoad)
-        menu_export.addAction(self.exportAsOpendrive)
 
         menu_setting = menu_bar.addMenu('Setting')  # add menu 'Setting'
         menu_setting.addAction(self.gui_settings)
@@ -1210,74 +1205,6 @@ class MWindow(QMainWindow, Ui_mainWindow):
                 QMessageBox.Ok,
             )
 
-    def create_lanelet_list(self):
-        """Create the lanelet_list and put it into right Dockwidget area."""
-
-        def remove_selection_and_close(_):
-            """ remove selection from plot when list is closed"""
-            self.lanelet_list.reset_selection()
-            self.update_view()
-
-        if self.lanelet_list_dock is not None:
-            self.lanelet_list_dock.close()
-            self.lanelet_list_dock = None
-        self.lanelet_list_dock = QDockWidget("Lanelets")
-        self.lanelet_list_dock.setFloating(True)
-        self.lanelet_list_dock.setFeatures(QDockWidget.AllDockWidgetFeatures)
-        self.lanelet_list_dock.setAllowedAreas(Qt.RightDockWidgetArea)
-        self.lanelet_list_dock.setWidget(self.lanelet_list)
-        self.lanelet_list_dock.closeEvent = remove_selection_and_close
-        self.addDockWidget(Qt.RightDockWidgetArea, self.lanelet_list_dock)
-
-    def show_lanelet_list(self):
-        """Function connected with button 'Lanelets List' to show the lanelets list."""
-        if self.lanelet_list_dock is None:
-            if self.cr_viewer.current_scenario is None:
-                messbox = QMessageBox()
-                messbox.warning(
-                    self, "Warning",
-                    "Please load or convert a CR Scenario firstly",
-                    QMessageBox.Ok)
-                messbox.close()
-            else:
-                self.lanelet_list_dock.show()
-        else:
-            self.lanelet_list_dock.show()
-
-    def create_intersection_list(self):
-        """Create the lanelet_list and put it into right Dockwidget area."""
-
-        def remove_selection_and_close(_):
-            """ remove selection from plot when list is closed"""
-            self.intersection_list.reset_selection()
-            self.update_view()
-
-        if self.intersection_list_dock is not None:
-            self.intersection_list_dock.close()
-            self.intersection_list_dock = None
-        self.intersection_list_dock = QDockWidget("Intersections")
-        self.intersection_list_dock.setFloating(True)
-        self.intersection_list_dock.setFeatures(
-            QDockWidget.AllDockWidgetFeatures)
-        self.intersection_list_dock.setAllowedAreas(Qt.RightDockWidgetArea)
-        self.intersection_list_dock.setWidget(self.intersection_list)
-        self.intersection_list_dock.closeEvent = remove_selection_and_close
-        self.addDockWidget(Qt.RightDockWidgetArea, self.intersection_list_dock)
-
-    def show_intersection_list(self):
-        """Function connected with button 'Lanelets List' to show the lanelets list."""
-        if self.intersection_list_dock is None:
-            if self.cr_viewer.current_scenario is None:
-                messbox = QMessageBox()
-                messbox.warning(
-                    self, "Warning",
-                    "Please load or convert a CR Scenario or first",
-                    QMessageBox.Ok)
-                messbox.close()
-            else:
-                self.intersection_list_dock.show()
-        else:
-            self.intersection_list_dock.show()
 
     def create_laneletinformation(self):
         """ Create the Upper toolbox."""
@@ -1454,7 +1381,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
     def timestep_change(self, value):
         if self.cr_viewer.current_scenario:
             self.cr_viewer.set_timestep(value)
-            self.label1.setText('  Frame: ' + str(value))
+            self.label1.setText('  Time Stamp: ' + str(value))
             self.cr_viewer.animation.event_source.start()
 
     def play_pause_animation(self):
@@ -1528,31 +1455,27 @@ class MWindow(QMainWindow, Ui_mainWindow):
         tb1.addAction(action_save)
         action_save.triggered.connect(self.file_save)
 
-        # TODO: undo button
-        """action_undo = QAction(QIcon(":/icons/save_file.png"), "undo last action", self)
-        tb1.addAction(action_undo)"""
-
         tb1.addSeparator()
         tb2 = self.addToolBar("Road Network Toolbox")
         toolbox = QAction(QIcon(":/icons/tools.ico"),
-                          "show Toolbox for CR Scenario", self)
+                          "open Road Network Toolbox", self)
         tb2.addAction(toolbox)
         toolbox.triggered.connect(self.road_network_toolbox_show)
         tb2.addSeparator()
-        lanelet_list = QAction(QIcon(":/icons/lanelet_list.ico"),
-                               "show Lanelet list", self)
-        intersection_list = QAction(QIcon(":/icons/intersection_list.ico"),
-                                    "show Intersection list", self)
-        tb2.addAction(lanelet_list)
-        lanelet_list.triggered.connect(self.show_lanelet_list)
-        tb2.addAction(intersection_list)
-        intersection_list.triggered.connect(self.show_intersection_list)
 
-        tb3 = self.addToolBar("Animation Play")
+        tb3 = self.addToolBar("Undo/Redo")
+
+        # TODO: undo button
+        action_undo = QAction(QIcon(":/icons/save_file.png"), "undo last action", self)
+        tb3.addAction(action_undo)
+
+        tb3.addSeparator()
+
+        tb4 = self.addToolBar("Animation Play")
         self.button_play_pause = QAction(QIcon(":/icons/play.png"),
                                    "Play the animation", self)
         self.button_play_pause.triggered.connect(self.play_pause_animation)
-        tb3.addAction(self.button_play_pause)
+        tb4.addAction(self.button_play_pause)
         #self.button_pause = QAction(QIcon(":/icons/pause.png"),
         #                            "Pause the animation", self)
         #self.button_pause.triggered.connect(self.pause_animation)
@@ -1571,13 +1494,15 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.slider.sliderPressed.connect(self.detect_slider_clicked)
         self.slider.sliderReleased.connect(self.detect_slider_release)
         self.cr_viewer.timestep.subscribe(self.slider.setValue)
-        tb3.addWidget(self.slider)
+        tb4.addWidget(self.slider)
 
-        self.label1 = QLabel('  Frame: 0', self)
-        tb3.addWidget(self.label1)
+        self.label1 = QLabel('  Time Stamp: 0', self)
+        tb4.addWidget(self.label1)
 
         self.label2 = QLabel(' / 0', self)
-        tb3.addWidget(self.label2)
+        tb4.addWidget(self.label2)
+
+
 
     def update_max_step(self, value: int = -1):
         logging.info('update_max_step')
@@ -1618,23 +1543,6 @@ class MWindow(QMainWindow, Ui_mainWindow):
         opendrive_interface = OpenDRIVEInterface(self)
         opendrive_interface.start_import()
 
-    def create_export_actions(self):
-        """Function to create the export action in the menu bar."""
-        self.exportAsCommonRoad = self.create_action(
-            "As CommonRoad",
-            icon="",
-            checkable=False,
-            slot=self.file_save,
-            tip="Save as CommonRoad File (the same function as Save)",
-            shortcut=None)
-
-        self.exportAsOpendrive = self.create_action(
-            "As Opendrive",
-            icon="",
-            checkable=False,
-            slot=None,
-            tip="Save as Opendrive File",
-            shortcut=None)
 
     def create_setting_actions(self):
         """Function to create the export action in the menu bar."""
@@ -1819,8 +1727,6 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.update_max_step()
         self.viewer_dock.setWindowIcon(QIcon(":/icons/cr1.ico"))
         if self.cr_viewer.current_scenario is not None:
-            self.create_lanelet_list()
-            self.create_intersection_list()
             self.setWindowTitle(self.filename)
             self.textBrowser.append("loading " + self.filename)
         else:

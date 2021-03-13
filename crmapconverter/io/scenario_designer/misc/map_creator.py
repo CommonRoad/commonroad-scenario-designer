@@ -441,6 +441,16 @@ class MapCreator:
         MapCreator.set_predecessor_successor_relation(new_lanelets[9], new_lanelets[11])
         MapCreator.set_predecessor_successor_relation(new_lanelets[16], new_lanelets[14])
         MapCreator.set_predecessor_successor_relation(new_lanelets[15], new_lanelets[17])
+        MapCreator.set_predecessor_successor_relation(new_lanelets[17], new_lanelets[8])
+        MapCreator.set_predecessor_successor_relation(new_lanelets[13], new_lanelets[6])
+        MapCreator.set_predecessor_successor_relation(new_lanelets[15], new_lanelets[13])
+        MapCreator.set_predecessor_successor_relation(new_lanelets[11], new_lanelets[6])
+        MapCreator.set_predecessor_successor_relation(new_lanelets[3], new_lanelets[1])
+        MapCreator.set_predecessor_successor_relation(new_lanelets[5], new_lanelets[1])
+        MapCreator.set_predecessor_successor_relation(new_lanelets[5], new_lanelets[1])
+        MapCreator.set_predecessor_successor_relation(new_lanelets[19], new_lanelets[14])
+        MapCreator.set_predecessor_successor_relation(new_lanelets[9], new_lanelets[3])
+        MapCreator.set_predecessor_successor_relation(new_lanelets[7], new_lanelets[5])
 
         incomings = [lanelet_ids[0], lanelet_ids[7], lanelet_ids[9], lanelet_ids[15]]
         successors_right = [lanelet_ids[5], lanelet_ids[11], lanelet_ids[17], lanelet_ids[19]]
@@ -544,6 +554,11 @@ class MapCreator:
         # missing dependencies
         MapCreator.set_predecessor_successor_relation(new_lanelets[0], new_lanelets[11])
         MapCreator.set_predecessor_successor_relation(new_lanelets[10], new_lanelets[1])
+        MapCreator.set_predecessor_successor_relation(new_lanelets[3], new_lanelets[1])
+        MapCreator.set_predecessor_successor_relation(new_lanelets[9], new_lanelets[7])
+        MapCreator.set_predecessor_successor_relation(new_lanelets[11], new_lanelets[8])
+        MapCreator.set_predecessor_successor_relation(new_lanelets[5], new_lanelets[3])
+        MapCreator.set_predecessor_successor_relation(new_lanelets[7], new_lanelets[4])
 
         map_incoming = []
         map_incoming.append(IntersectionIncomingElement(scenario.generate_object_id(),
