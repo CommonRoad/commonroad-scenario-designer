@@ -6,6 +6,7 @@ import sys
 from argparse import ArgumentParser
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 import pickle
+import copy
 
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
@@ -17,11 +18,11 @@ from commonroad.scenario.lanelet import LaneletNetwork, LineMarking, LaneletType
 from commonroad.scenario.scenario import Scenario
 from commonroad.scenario.traffic_sign import *
 
+from crmapconverter.io.scenario_designer.gui_src import CR_Scenario_Designer  # do not remove!!!
 from crmapconverter.io.scenario_designer.converter_modules.opendrive_interface import OpenDRIVEInterface
 from crmapconverter.io.scenario_designer.converter_modules.osm_interface import OSMInterface
 from crmapconverter.io.scenario_designer.gui.gui_settings import GUISettings
-from crmapconverter.io.scenario_designer.gui.gui_viewer import LaneletList, IntersectionList, find_intersection_by_id, \
-    AnimatedViewer
+from crmapconverter.io.scenario_designer.gui.gui_viewer import LaneletList, IntersectionList, AnimatedViewer
 from crmapconverter.io.scenario_designer.gui_resources.MainWindow import Ui_mainWindow
 from crmapconverter.io.scenario_designer.toolboxes.gui_sumo_simulation import SUMO_AVAILABLE
 from crmapconverter.io.scenario_designer.toolboxes.road_network_toolbox_ui import RoadNetworkToolbox
@@ -59,14 +60,14 @@ class MWindow(QMainWindow, Ui_mainWindow):
         # attributes
         self.filename = None
         self.cr_viewer = AnimatedViewer(self)
-        self.lanelet_list = None
-        self.intersection_list = None
-        self.count = 0
-        self.timer = None
-        self.ani_path = None
+        #self.count = 0
+        #self.timer = None
+        #self.ani_path = None
         self.slider_clicked = False
 
         # Scenario + Lanelet variables
+        self.scenarios = []
+        self.current_scenario_index = 0
         self.selected_lanelet = None
         self.last_added_lanelet_id = None
 
@@ -513,6 +514,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         lanelet.translate_rotate(np.array([lanelet_pos_x, lanelet_pos_y]), 0)
         self.update_view(focus_on_network=True)
         self.set_default_list_information()
+        self.store_scenario()
 
     def update_lanelet(self):
         """
@@ -531,6 +533,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.add_lanelet(selected_lanelet_id)
         self.set_default_list_information()
         self.update_view(focus_on_network=True)
+        self.store_scenario()
 
     def create_adjacent(self):
         """
@@ -595,6 +598,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.cr_viewer.current_scenario.lanelet_network.add_lanelet(lanelet=adjacent_lanelet)
         self.update_view(focus_on_network=True)
         self.set_default_list_information()
+        self.store_scenario()
 
     def remove_lanelet(self):
         """
@@ -612,6 +616,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         MapCreator.remove_lanelet(selected_lanelet, self.cr_viewer.current_scenario.lanelet_network)
         self.update_view(focus_on_network=True)
         self.set_default_list_information()
+        self.store_scenario()
 
     def add_four_way_intersection(self):
         """
@@ -638,6 +643,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.cr_viewer.current_scenario.add_objects(new_traffic_lights)
         self.set_default_list_information()
         self.update_view(focus_on_network=True)
+        self.store_scenario()
 
     def add_three_way_intersection(self):
         """
@@ -664,6 +670,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.cr_viewer.current_scenario.add_objects(new_traffic_lights)
         self.set_default_list_information()
         self.update_view(focus_on_network=True)
+        self.store_scenario()
 
     def update_incomings(self):
         """Updates incoming table information."""
@@ -756,6 +763,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.cr_viewer.current_scenario.remove_traffic_sign(traffic_sign)
         self.set_default_list_information()
         self.update_view(focus_on_network=True)
+        self.store_scenario()
 
     def update_traffic_sign(self):
         """
@@ -773,6 +781,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.add_traffic_sign(selected_traffic_sign_id)
         self.set_default_list_information()
         self.update_view(focus_on_network=True)
+        self.store_scenario()
 
     def update_traffic_sign_information(self):
         """
@@ -862,6 +871,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.cr_viewer.current_scenario.add_objects(new_traffic_light, referenced_lanelets)
         self.set_default_list_information()
         self.update_view(focus_on_network=True)
+        self.store_scenario()
 
     def remove_traffic_light(self):
         """
@@ -879,6 +889,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.cr_viewer.current_scenario.remove_traffic_light(traffic_light)
         self.set_default_list_information()
         self.update_view(focus_on_network=True)
+        self.store_scenario()
 
     def update_traffic_light(self):
         """
@@ -897,6 +908,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.add_traffic_light(selected_traffic_light_id)
         self.set_default_list_information()
         self.update_view(focus_on_network=True)
+        self.store_scenario()
 
     def update_traffic_light_information(self):
         """
@@ -1010,6 +1022,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.cr_viewer.current_scenario.lanelet_network.add_lanelet(lanelet=connected_lanelet)
         self.update_view(focus_on_network=True)
         self.set_default_list_information()
+        self.store_scenario()
 
     def fit_to_predecessor(self):
         if self.cr_viewer.current_scenario == None:
@@ -1031,6 +1044,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
         MapCreator.fit_to_predecessor(selected_lanelet_two, selected_lanelet_one)
         self.update_view(focus_on_network=True)
+        self.store_scenario()
 
     def rotate_lanelet(self):
         if self.cr_viewer.current_scenario == None:
@@ -1045,6 +1059,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         rotation_angle = int(self.road_network_toolbox.rotation_angle.text())
         selected_lanelet_one.translate_rotate(np.array([0, 0]), np.deg2rad(rotation_angle))
         self.update_view(focus_on_network=True)
+        self.store_scenario()
 
     def translate_lanelet(self):
         if self.cr_viewer.current_scenario == None:
@@ -1060,6 +1075,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         y_translation = float(self.road_network_toolbox.y_translation.text())
         selected_lanelet_one.translate_rotate(np.array([x_translation, y_translation]), 0)
         self.update_view(focus_on_network=True)
+        self.store_scenario()
 
     def fit_intersection(self):
         self.FI.exec()
@@ -1075,6 +1091,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
                                                          self.cr_viewer.current_scenario.lanelet_network,
                                                          self.cr_viewer.current_scenario)
         self.update_view(focus_on_network=True)
+        self.store_scenario()
 
     def load_edit_state(self) -> None:
         """
@@ -1226,162 +1243,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
                 QMessageBox.Ok,
             )
 
-
-    def create_laneletinformation(self):
-        """ Create the Upper toolbox."""
-        self.lowertoolBox = LaneletInformationToolbox()
-
-        self.obstacle_toolbox_widget = QDockWidget("Lanelet Information")
-        self.obstacle_toolbox_widget.setFloating(True)
-        self.obstacle_toolbox_widget.setFeatures(QDockWidget.AllDockWidgetFeatures)
-        self.obstacle_toolbox_widget.setAllowedAreas(Qt.LeftDockWidgetArea)
-        self.obstacle_toolbox_widget.setWidget(self.lowertoolBox)
-        self.addDockWidget(Qt.LeftDockWidgetArea, self.obstacle_toolbox_widget)
-        self.lowertoolBox.refresh_button.clicked.connect(lambda: self.refresh_information())
-        self.obstacle_toolbox_widget.setMaximumHeight(400)
-        self.lowertoolBox.edit_button.clicked.connect(lambda: self.edit_lanelet())
-
-    #        if self.crviewer.selected_lanelet_use[0]:
-    #           self.selected_lanelet = self.crviewer.selected_lanelet_use[0]
-
-    # selected_lanelet = self.crviewer.current_scenario.lanelet_network.find_lanelet_by_id(
-    #  self.lanelet_list.selected_id)
-
-    def refresh_information(self):
-        if self.cr_viewer.current_scenario is None:
-            messbox = QMessageBox()
-            messbox.warning(
-                self, "Warning",
-                "Please load or convert a CR Scenario firstly",
-                QtWidgets.QMessageBox.Ok)
-            messbox.close()
-        else:
-            if self.cr_viewer.selected_lanelet_use != None:
-                self.selected_lanelet = self.cr_viewer.selected_lanelet_use[0]
-                id = str(self.selected_lanelet._lanelet_id)
-                self.selected_id = int(id)
-                num_vertices = len(self.selected_lanelet.center_vertices)
-                length = self.selected_lanelet.center_vertices[0] - self.selected_lanelet.center_vertices[-1]
-                length = np.linalg.norm(length)
-                width_array = self.selected_lanelet.left_vertices[0] - self.selected_lanelet.right_vertices[0]
-                width = np.linalg.norm(width_array)
-                self.lowertoolBox.laneletID.clear()
-                self.lowertoolBox.laneletID.insert(id)
-                self.lowertoolBox.number_vertices.clear()
-                self.lowertoolBox.number_vertices.insert(str(num_vertices))
-                self.lowertoolBox.length.clear()
-                self.lowertoolBox.length.insert(str(int(length)))
-                self.lowertoolBox.width.clear()
-                self.lowertoolBox.width.insert((str(int(width))))
-                self.lowertoolBox.angle.clear()
-                angle = self.map_creator.calc_angle_between2(self.selected_lanelet)
-                angle = (angle / np.pi) * 180
-                self.lowertoolBox.radius.clear()
-                rad = self.map_creator.calc_radius(self.selected_lanelet)
-                self.lowertoolBox.traffic_sign_ids.clear()
-                traffic_ids = self.selected_lanelet.traffic_signs
-                for t in traffic_ids:
-                    t = str(t)
-                    self.lowertoolBox.traffic_sign_ids.insert(t)
-                    self.lowertoolBox.traffic_sign_ids.insert(", ")
-                self.lowertoolBox.traffic_light_ids.clear()
-                trafficlight_ids = self.selected_lanelet.traffic_lights
-                for t in trafficlight_ids:
-                    t = str(t)
-                    self.lowertoolBox.traffic_light_ids.insert(t)
-                    self.lowertoolBox.traffic_light_ids.insert(", ")
-                if int(angle) != 0:
-                    self.lowertoolBox.angle.clear()
-                    self.lowertoolBox.angle.insert(str(int(angle)))
-                    self.lowertoolBox.length.clear()
-                    self.lowertoolBox.radius.clear()
-                    self.lowertoolBox.radius.insert(str(int(rad)))
-            else:
-                self.textBrowser.append("_Warning: Select a lanelet")
-                return
-
-    def edit_lanelet(self):
-
-        if self.cr_viewer.current_scenario is None:
-            messbox = QMessageBox()
-            messbox.warning(
-                self, "Warning",
-                "Please load or convert a CR Scenario firstly",
-                QtWidgets.QMessageBox.Ok)
-            messbox.close()
-            return
-
-        posX = 0
-        posY = 0
-        if self.cr_viewer.current_scenario == None:
-            self.textBrowser.append("create a new file")
-            return
-
-        if self.lowertoolBox.width.text():
-            self.selected_width = int(self.lowertoolBox.width.text())
-        else:
-            self.textBrowser.append("define a vaild width")
-            return
-
-        if self.lowertoolBox.length.text():
-            self.selected_length = int(self.lowertoolBox.length.text())
-        else:
-            self.selected_length = 0
-
-        if self.lowertoolBox.angle.text():
-            self.selected_angle = int(self.lowertoolBox.angle.text())
-        else:
-            self.selected_angle = 0
-
-        if self.lowertoolBox.radius.text():
-            self.selected_radius = int(self.lowertoolBox.radius.text())
-        else:
-            self.selected_radius = 0
-
-        if self.lowertoolBox.number_vertices.text():
-            self.selected_vertices = int(self.lowertoolBox.number_vertices.text())
-        else:
-            self.selected_vertices = 20
-
-        indexlist = self.lowertoolBox.getLaneletType()
-        lanelettype = set()
-        for i in range(0, len(indexlist)):
-            lt = LaneletType(indexlist[i])
-            lanelettype.add(LaneletType(indexlist[i]))
-
-        # Roaduser one-way:
-        indexlist2 = self.lowertoolBox.getOnewayRoadUser()
-        roaduser_oneway = set()
-        for i in range(0, len(indexlist2)):
-            ro = RoadUser(indexlist2[i])
-            roaduser_oneway.add(RoadUser(indexlist2[i]))
-
-        # Roaduser bidirectional:
-        indexlist3 = self.lowertoolBox.getBidirectionalRoadUser()
-        roaduser_bidirectional = set()
-        for i in range(0, len(indexlist3)):
-            ro = RoadUser(indexlist3[i])
-            roaduser_bidirectional.add(RoadUser(indexlist3[i]))
-
-        if int((self.selected_angle)) == 0:
-            self.roaduser_oneway = set()
-            lanelet = self.map_creator.edit_straight(self.selected_id, self.selected_width, self.selected_length,
-                                                     self.selected_vertices,
-                                                     self.cr_viewer.current_scenario.lanelet_network,
-                                                     self.cr_viewer.current_scenario, self.pred, lanelettype,
-                                                     roaduser_oneway, roaduser_bidirectional, self.linemarkingleft,
-                                                     self.linemarkingright, backwards=self.backwards)
-            lanelet.translate_rotate(np.array([posX, posY]), self.rot_angle_straight)
-        else:
-            curve = self.map_creator.edit_curve(self.selected_id, self.selected_width, self.selected_radius,
-                                                np.deg2rad(self.selected_angle), self.selected_vertices,
-                                                self.cr_viewer.current_scenario.lanelet_network,
-                                                self.cr_viewer.current_scenario, self.pred, self.lanelettype,
-                                                self.roaduser, self.linemarkingleft, self.linemarkingright)
-
-        self.update_view(focus_on_network=True)
-
-    def create_sumobox(self):
+    def create_sumo_box(self):
         """Function to create the sumo toolbox(bottom toolbox)."""
         self.obstacle_toolbox_widget = QDockWidget("Sumo Simulation", self)
         self.obstacle_toolbox_widget.setFeatures(QDockWidget.AllDockWidgetFeatures)
@@ -1486,9 +1348,13 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
         tb3 = self.addToolBar("Undo/Redo")
 
-        # TODO: undo button
-        action_undo = QAction(QIcon(":/icons/save_file.png"), "undo last action", self)
+        action_undo = QAction(QIcon(":/icons/button_undo.png"), "undo last action", self)
         tb3.addAction(action_undo)
+        action_undo.triggered.connect(self.undo_action)
+
+        action_redo = QAction(QIcon(":/icons/button_redo.png"), "redo last action", self)
+        tb3.addAction(action_redo)
+        action_redo.triggered.connect(self.redo_action)
 
         tb3.addSeparator()
 
@@ -1741,6 +1607,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.intersection_list = IntersectionList(self.update_view, self)
         self.update_view()
         self.update_to_new_scenario()
+        self.store_scenario()
        # self.restore_parameters()
 
     def update_to_new_scenario(self):
@@ -1750,9 +1617,6 @@ class MWindow(QMainWindow, Ui_mainWindow):
         if self.cr_viewer.current_scenario is not None:
             #self.setWindowTitle(self.filename)
             self.textBrowser.append("loading " + self.filename)
-        else:
-            self.lanelet_list_dock.close()
-            self.intersection_list_dock.close()
 
     def check_scenario(self, scenario) -> int:
         """ 
@@ -1878,7 +1742,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.obstacle_toolbox_widget.show()
 
     def update_view(self, caller=None, focus_on_network=None):
-        """ update all compoments. triggered by the component caller"""
+        """ update all components. triggered by the component caller"""
 
         # reset selection of all other selectable elements
         if caller is not None:
@@ -1893,9 +1757,9 @@ class MWindow(QMainWindow, Ui_mainWindow):
         if self.cr_viewer.current_scenario is None:
             return
         if self.intersection_list.selected_id is not None:
-            selected_intersection = find_intersection_by_id(
-                self.cr_viewer.current_scenario,
-                self.intersection_list.selected_id)
+            selected_intersection = \
+                self.cr_viewer.current_scenario.lanelet_network.find_intersection_by_id(
+                    self.intersection_list.selected_id)
         else:
             selected_intersection = None
         if self.lanelet_list.selected_id is not None:
@@ -1923,6 +1787,25 @@ class MWindow(QMainWindow, Ui_mainWindow):
             # triggered by click on canvas
             self.lanelet_list.reset_selection()
             self.intersection_list.reset_selection()
+
+    def store_scenario(self):
+        self.scenarios.append(copy.deepcopy(self.cr_viewer.current_scenario))
+
+    def undo_action(self):
+        if self.current_scenario_index > 0:
+            self.current_scenario_index -= 1
+        else:
+            return
+        self.cr_viewer.current_scenario = self.scenarios[self.current_scenario_index]
+        self.update_view(focus_on_network=True)
+
+    def redo_action(self):
+        if self.current_scenario_index < len(self.scenarios) - 1:
+            self.current_scenario_index += 1
+        else:
+            return
+        self.cr_viewer.current_scenario = self.scenarios[self.current_scenario_index]
+        self.update_view(focus_on_network=True)
 
 
 def main():

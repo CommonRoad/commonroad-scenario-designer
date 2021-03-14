@@ -3,6 +3,8 @@
     <file>tools.ico</file>
     <file>button_roundabout.png</file>
     <file>button_stop.png</file>
+    <file>button_undo.png</file>
+    <file>button_redo.png</file>
     <file>button_traffic_light.png</file>
     <file>button_yeld.png</file>
     <file>new_file.png</file>

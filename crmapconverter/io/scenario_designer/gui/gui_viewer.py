@@ -7,13 +7,6 @@ import matplotlib
 from matplotlib.animation import FuncAnimation, writers
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
-__author__ = "Benjamin Orthen, Stefan Urban, Max Winklhofer, Guyue Huang, Max Fruehauf"
-__copyright__ = "TUM Cyber-Physical Systems Group"
-__credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles"]
-__version__ = "1.2.0"
-__maintainer__ = "Sebastian Maierhofer"
-__email__ = "commonroad-i06@in.tum.de"
-__status__ = "Released"
 
 from matplotlib.path import Path
 from matplotlib.patches import PathPatch
@@ -34,6 +27,14 @@ from crmapconverter.io.scenario_designer.toolboxes.gui_sumo_simulation import SU
 if SUMO_AVAILABLE:
     from crmapconverter.sumo_map.config import SumoConfig
 from crmapconverter.io.scenario_designer.misc.util import Observable
+
+__author__ = "Benjamin Orthen, Stefan Urban, Max Winklhofer, Guyue Huang, Max Fruehauf, Sebastian Maierhofer"
+__copyright__ = "TUM Cyber-Physical Systems Group"
+__credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles, BMW Car@TUM"]
+__version__ = "1.2.0"
+__maintainer__ = "Sebastian Maierhofer"
+__email__ = "commonroad-i06@in.tum.de"
+__status__ = "Released"
 
 ZOOM_FACTOR = 1.2
 
@@ -317,6 +318,46 @@ class LaneletList(ScenarioElementList):
         #self.lanelet_data = sorted(lanelet_data)
 
 
+def draw_lanelet_polygon(lanelet, ax, color, alpha, zorder,
+                         label) -> Tuple[float, float, float, float]:
+    # TODO efficiency
+    verts = []
+    codes = [Path.MOVETO]
+
+    xlim1 = float("Inf")
+    xlim2 = -float("Inf")
+    ylim1 = float("Inf")
+    ylim2 = -float("Inf")
+
+    for x, y in np.vstack(
+        [lanelet.left_vertices, lanelet.right_vertices[::-1]]):
+        verts.append([x, y])
+        codes.append(Path.LINETO)
+
+        xlim1 = min(xlim1, x)
+        xlim2 = max(xlim2, x)
+        ylim1 = min(ylim1, y)
+        ylim2 = max(ylim2, y)
+
+    verts.append(verts[0])
+    codes[-1] = Path.CLOSEPOLY
+
+    path = Path(verts, codes)
+
+    ax.add_patch(
+        PathPatch(
+            path,
+            facecolor=color,
+            edgecolor="black",
+            lw=0.0,
+            alpha=alpha,
+            zorder=zorder,
+            label=label,
+        ))
+
+    return [xlim1, xlim2, ylim1, ylim2]
+
+
 class Viewer:
     """ functionality to draw a Scenario onto a Canvas """
     def __init__(self, parent):
@@ -373,7 +414,7 @@ class Viewer:
                 lanelet, sel_lanelet, sel_intersection)
             if color == "gray": continue
 
-            lanelet_limits = self.draw_lanelet_polygon(lanelet, ax, color,
+            lanelet_limits = draw_lanelet_polygon(lanelet, ax, color,
                                                        alpha, zorder, label)
             network_limits[0] = min(network_limits[0], lanelet_limits[0])
             network_limits[1] = max(network_limits[1], lanelet_limits[1])
@@ -509,45 +550,6 @@ class Viewer:
 
         return draw_arrow, color, alpha, zorder, label
 
-    def draw_lanelet_polygon(self, lanelet, ax, color, alpha, zorder,
-                             label) -> Tuple[float, float, float, float]:
-        # TODO efficiency
-        verts = []
-        codes = [Path.MOVETO]
-
-        xlim1 = float("Inf")
-        xlim2 = -float("Inf")
-        ylim1 = float("Inf")
-        ylim2 = -float("Inf")
-
-        for x, y in np.vstack(
-            [lanelet.left_vertices, lanelet.right_vertices[::-1]]):
-            verts.append([x, y])
-            codes.append(Path.LINETO)
-
-            xlim1 = min(xlim1, x)
-            xlim2 = max(xlim2, x)
-            ylim1 = min(ylim1, y)
-            ylim2 = max(ylim2, y)
-
-        verts.append(verts[0])
-        codes[-1] = Path.CLOSEPOLY
-
-        path = Path(verts, codes)
-
-        ax.add_patch(
-            PathPatch(
-                path,
-                facecolor=color,
-                edgecolor="black",
-                lw=0.0,
-                alpha=alpha,
-                zorder=zorder,
-                label=label,
-            ))
-
-        return [xlim1, xlim2, ylim1, ylim2]
-
     def draw_lanelet_vertices(self, lanelet, ax):
         ax.plot(
             [x for x, y in lanelet.left_vertices],
@@ -578,7 +580,7 @@ class Viewer:
 
     def select_lanelets(self, mouse_clicked_event):
         """ 
-        Selecet lanelets by clicking on the canvas. Selects only one of the 
+        Select lanelets by clicking on the canvas. Selects only one of the
         lanelets that contains the click position.
         """
         self.selected_lanelet_use = None
@@ -599,20 +601,6 @@ class Viewer:
 
         return selected_lanelets
 
-          #method to refresh laneletinformation by clicking on lanelet
-        # if self.lowertoolBox != None:
-        #     x = 0
-        # else:
-        #     self.lowertoolBox = LaneletInformationToolbox()
-        #
-        #     self.tool2 = QDockWidget("Lanelet Information")
-        #     self.tool2.setFloating(True)
-        #     self.tool2.setFeatures(QDockWidget.AllDockWidgetFeatures)
-        #     self.tool2.setAllowedAreas(Qt.LeftDockWidgetArea)
-        #     self.tool2.setWidget(self.lowertoolBox)
-        #     #self.addDockWidget(Qt.LeftDockWidgetArea, self.tool2)
-        #     self.tool2.setGeometry()
-
 
 class AnimatedViewer(Viewer):
     def __init__(self, parent):
@@ -628,7 +616,6 @@ class AnimatedViewer(Viewer):
         self.animation: FuncAnimation = None
         # if playing or not
         self.playing = False
-        self.lowertoolBox = None
 
     def open_scenario(self, scenario: Scenario, config: Observable = None):
         """[summary]
@@ -823,18 +810,3 @@ class AnimatedViewer(Viewer):
         ]
         self.max_timestep = np.max(timesteps) if timesteps else 0
         return self.max_timestep
-
-def find_intersection_by_id(scenario, intersection_id: int) -> Lanelet:
-    """
-    Finds a intersection for a given intersection_id
-
-    :param intersection_id: The id of the lanelet to find
-    :return: The lanelet object if the id exists and None otherwise
-    """
-    assert is_natural_number(
-        intersection_id
-    ), '<LaneletNetwork/find_intersection_by_id>: provided id is not valid! id = {}'.format(
-        intersection_id)
-    intersections = scenario.lanelet_network._intersections
-    return intersections[
-        intersection_id] if intersection_id in intersections else None

@@ -35,7 +35,7 @@
      <x>0</x>
      <y>0</y>
      <width>1280</width>
-     <height>23</height>
+     <height>22</height>
     </rect>
    </property>
   </widget>
@@ -108,7 +108,7 @@
   </action>
  </widget>
  <resources>
-  <include location="../CR_Scenario_Designer.qrc"/>
+  <include location="../gui_src/CR_Scenario_Designer.qrc"/>
  </resources>
  <connections/>
 </ui>

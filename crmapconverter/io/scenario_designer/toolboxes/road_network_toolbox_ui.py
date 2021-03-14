@@ -2,7 +2,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
-from crmapconverter.io.scenario_designer.gui_src import CR_Scenario_Designer  # do not remove!!!
+
 from crmapconverter.io.scenario_designer.toolboxes.toolbox_ui import Toolbox, CheckableComboBox, QHLine
 
 from commonroad.scenario.lanelet import LaneletType, RoadUser, LineMarking
