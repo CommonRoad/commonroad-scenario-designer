@@ -22,7 +22,8 @@ class MapCreator:
                         road_user_one_way: Set[RoadUser] = None, road_user_bidirectional: Set[RoadUser] = None,
                         line_marking_left: LineMarking = LineMarking.UNKNOWN,
                         line_marking_right: LineMarking = LineMarking.UNKNOWN, stop_line: StopLine = None,
-                        traffic_signs: Set[int] = None, traffic_lights: Set[int] = None, backwards: bool = False):
+                        traffic_signs: Set[int] = None, traffic_lights: Set[int] = None, stop_line_at_end: bool = False,
+                        backwards: bool = False) -> Lanelet:
         """
         Function for creating a straight lanelet given a length, width, and number of vertices.
 
@@ -45,6 +46,7 @@ class MapCreator:
         @param traffic_signs: Referenced traffic signs by new lanelet.
         @param traffic_lights: Referenced traffic lights by new lanelet.
         @param backwards: Boolean indicating whether lanelet should be rotated by 180°.
+        @param stop_line_at_end: Boolean indicating whether stop line positions should correspond with end of lanelet.
         @return: Newly created lanelet.
         """
         eps = 0.1e-15
@@ -60,6 +62,10 @@ class MapCreator:
         left_vertices = np.array(left_vertices)
         center_vertices = np.array(center_vertices)
         right_vertices = np.array(right_vertices)
+
+        if stop_line_at_end:
+            stop_line.start = left_vertices[-1]
+            stop_line.end = right_vertices[-1]
 
         lanelet = Lanelet(left_vertices=left_vertices, right_vertices=right_vertices, predecessor=predecessor,
                           successor=successor, adjacent_left=adjacent_left, adjacent_right=adjacent_right,
@@ -83,7 +89,8 @@ class MapCreator:
                      road_user_one_way: Set[RoadUser] = None, road_user_bidirectional: Set[RoadUser] = None,
                      line_marking_left: LineMarking = LineMarking.UNKNOWN,
                      line_marking_right: LineMarking = LineMarking.UNKNOWN, stop_line: StopLine = None,
-                     traffic_signs: Set[int] = None, traffic_lights: Set[int] = None):
+                     traffic_signs: Set[int] = None, traffic_lights: Set[int] = None, stop_line_at_end: bool = False) \
+            -> Lanelet:
         """
         Function for creating a straight lanelet given a length, width, and number of vertices.
 
@@ -106,6 +113,7 @@ class MapCreator:
         @param stop_line: Stop line of new lanelet.
         @param traffic_signs: Referenced traffic signs by new lanelet.
         @param traffic_lights: Referenced traffic lights by new lanelet.
+        @param stop_line_at_end: Boolean indicating whether stop line positions should correspond with end of lanelet.
         @return: Newly created lanelet.
         """
         angle_div = angle / (num_vertices - 1)
@@ -130,6 +138,10 @@ class MapCreator:
             right_vertices = np.array(left_vert)
             angle_start = -angle_start
 
+        if stop_line_at_end:
+            stop_line.start = left_vertices[-1]
+            stop_line.end = right_vertices[-1]
+
         lanelet = Lanelet(left_vertices=left_vertices, right_vertices=right_vertices, lanelet_id=lanelet_id,
                           center_vertices=center_vertices, predecessor=predecessor, successor=successor,
                           adjacent_left=adjacent_left, adjacent_right=adjacent_right,
@@ -152,7 +164,8 @@ class MapCreator:
                                 road_user_bidirectional: Set[RoadUser] = None,
                                 line_marking_left: LineMarking = LineMarking.UNKNOWN,
                                 line_marking_right: LineMarking = LineMarking.UNKNOWN, stop_line: StopLine = None,
-                                traffic_signs: Set[int] = None, traffic_lights: Set[int] = None):
+                                traffic_signs: Set[int] = None, traffic_lights: Set[int] = None,
+                                stop_line_at_end: bool = False) -> Lanelet:
         """
         Creates adjacent left or adjacent right lanelet for given lanelet.
 
@@ -172,6 +185,7 @@ class MapCreator:
         @param stop_line: Stop line of new lanelet.
         @param traffic_signs: Referenced traffic signs by new lanelet.
         @param traffic_lights: Referenced traffic lights by new lanelet.
+        @param stop_line_at_end: Boolean indicating whether stop line positions should correspond with end of lanelet.
         @return: Newly created lanelet.
         """
         if base_lanelet.adj_left is None and create_adj_left:
@@ -201,7 +215,7 @@ class MapCreator:
             base_lanelet.adj_right_same_direction = same_direction
         else:
             print("Adjacent lanelet already exists.")
-            return
+            return None
 
         if same_direction is False:
             vertices_tmp = left_vertices
@@ -214,6 +228,10 @@ class MapCreator:
             adjacent_right = adjacent_left_tmp
             adjacent_left_same_direction = adjacent_right_same_direction
             adjacent_right_same_direction = adjacent_left_same_direction_tmp
+
+        if stop_line_at_end:
+            stop_line.start = left_vertices[-1]
+            stop_line.end = right_vertices[-1]
 
         lanelet = Lanelet(left_vertices=left_vertices, right_vertices=right_vertices, lanelet_id=lanelet_id,
                           center_vertices=center_vertices, predecessor=predecessor, successor=successor,

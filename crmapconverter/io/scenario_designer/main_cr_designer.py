@@ -318,6 +318,10 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.road_network_toolbox.lanelet_length.setText("10.0")
         self.road_network_toolbox.lanelet_radius.setText("10.0")
         self.road_network_toolbox.lanelet_angle.setText("90.0")
+        self.road_network_toolbox.stop_line_start_x.setText("0.0")
+        self.road_network_toolbox.stop_line_start_y.setText("0.0")
+        self.road_network_toolbox.stop_line_end_x.setText("0.0")
+        self.road_network_toolbox.stop_line_end_y.setText("0.0")
 
     def initialize_traffic_sign_information(self):
         """
@@ -428,8 +432,8 @@ class MWindow(QMainWindow, Ui_mainWindow):
             self.textBrowser.append("Please create first a new scenario.")
             return
 
-        lanelet_pos_x = self.get_x_position_start()
-        lanelet_pos_y = self.get_y_position_start()
+        lanelet_pos_x = self.get_x_position_lanelet_start()
+        lanelet_pos_y = self.get_y_position_lanelet_start()
         lanelet_width = float(self.road_network_toolbox.lanelet_width.text())
         line_marking_left = LineMarking(self.road_network_toolbox.line_marking_left.currentText())
         line_marking_right = LineMarking(self.road_network_toolbox.line_marking_right.currentText())
@@ -463,6 +467,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         stop_line_start_y = float(self.road_network_toolbox.stop_line_start_y.text())
         stop_line_end_y = float(self.road_network_toolbox.stop_line_end_y.text())
         stop_line_marking = LineMarking(self.road_network_toolbox.line_marking_stop_line.currentText())
+        stop_line_at_end = self.road_network_toolbox.stop_line_at_end.isChecked()
         stop_line = StopLine(np.array([stop_line_start_x, stop_line_start_y]),
                              np.array([stop_line_end_x, stop_line_end_y]), stop_line_marking, set(), set())
         lanelet_length = float(self.road_network_toolbox.lanelet_length.text())
@@ -480,13 +485,15 @@ class MWindow(QMainWindow, Ui_mainWindow):
                                               lanelet_type, predecessors, successors, adjacent_left, adjacent_right,
                                               adjacent_left_same_direction, adjacent_right_same_direction,
                                               user_one_way, user_bidirectional, line_marking_left,
-                                              line_marking_right, stop_line, traffic_signs, traffic_lights)
+                                              line_marking_right, stop_line, traffic_signs, traffic_lights,
+                                              stop_line_at_end)
         else:
             lanelet = MapCreator.create_straight(lanelet_width, lanelet_length, num_vertices, lanelet_id, lanelet_type,
                                                  predecessors, successors, adjacent_left, adjacent_right,
                                                  adjacent_left_same_direction, adjacent_right_same_direction,
                                                  user_one_way, user_bidirectional, line_marking_left,
-                                                 line_marking_right)
+                                                 line_marking_right, stop_line, traffic_signs, traffic_lights,
+                                                 stop_line_at_end)
         if connect_to_last_selection:
             if self.last_added_lanelet_id is not None:
                 MapCreator.fit_to_predecessor(

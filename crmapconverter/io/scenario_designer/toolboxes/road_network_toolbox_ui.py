@@ -145,7 +145,7 @@ class RoadNetworkToolbox(Toolbox):
         self.stop_line_end_y.setAlignment(Qt.AlignRight)
         self.line_marking_stop_line = QComboBox()
         self.line_marking_stop_line.addItems(line_markings)
-        self.stop_line_at_end = QCheckBox("Stop line at end of lanelet.")
+        self.stop_line_at_end = QCheckBox("Stop line at end of lanelet")
 
         self.connecting_radio_button_group = QButtonGroup()
         self.connect_to_previous_selection = QRadioButton("Connect to previously added")
@@ -245,6 +245,7 @@ class RoadNetworkToolbox(Toolbox):
 
         lanelet_information_3 = QFormLayout()
         lanelet_information_3.addRow("Stop line marking", self.line_marking_stop_line)
+        lanelet_information_3.addRow(self.stop_line_at_end)
         lanelet_information_3.addRow(QHLine())
         lanelet_information_3.addRow(label_straight)
         lanelet_information_3.addRow("Length [m]", self.lanelet_length)
