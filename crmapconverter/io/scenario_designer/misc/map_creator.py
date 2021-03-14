@@ -6,6 +6,7 @@ from commonroad.scenario.intersection import Intersection
 from commonroad.scenario.intersection import IntersectionIncomingElement
 from commonroad.scenario.lanelet import RoadUser, LaneletNetwork, Lanelet, LineMarking, LaneletType, StopLine
 from commonroad.scenario.scenario import Scenario
+from commonroad.scenario.traffic_sign import *
 
 
 class MapCreator:
@@ -312,7 +313,15 @@ class MapCreator:
         network.remove_lanelet(lanelet_id)
 
     @staticmethod
-    def create_four_way_intersection(width: float, diameter_crossing: int, incoming_length: int, scenario: Scenario):
+    def create_four_way_intersection(width: float, diameter_crossing: int, incoming_length: int, scenario: Scenario,
+                                     add_traffic_signs: bool, add_traffic_lights: bool,
+                                     country_signs: Union[TrafficSignIDArgentina, TrafficSignIDBelgium,
+                                                          TrafficSignIDChina, TrafficSignIDCroatia,
+                                                          TrafficSignIDFrance, TrafficSignIDGermany,
+                                                          TrafficSignIDGreece, TrafficSignIDItaly,
+                                                          TrafficSignIDPuertoRico, TrafficSignIDRussia,
+                                                          TrafficSignIDSpain, TrafficSignIDUsa,  TrafficSignIDZamunda])\
+            -> Tuple[Intersection, List[TrafficSign], List[TrafficLight], List[Lanelet]]:
         """
         Creates a four way intersection with predefined line markings at the origin.
 
@@ -320,6 +329,9 @@ class MapCreator:
         @param diameter_crossing: The length of the main part of the intersection.
         @param incoming_length: Length of the incoming lanelets of the intersection.
         @param scenario: The scenario to which the intersection will be added.
+        @param add_traffic_signs: Boolean indicating whether traffic signs should be added to intersection.
+        @param add_traffic_lights: Boolean indicating whether traffic lights should be added to intersection.
+        @param country_signs: List of supported traffic signs.
         @return: New intersection element and new lanelets.
         """
         rad = (diameter_crossing + width) / 2
@@ -467,13 +479,70 @@ class MapCreator:
                                                             successors_right=right,successors_straight=straight,
                                                             successors_left=left))
         intersection_id = scenario.generate_object_id()
-
         intersection = Intersection(intersection_id=intersection_id, incomings=map_incoming)
 
-        return intersection, new_lanelets
+        new_traffic_signs = []
+        new_traffic_lights = []
+        # TODO compute first occurrences
+        if add_traffic_signs and "YIELD" in country_signs._member_names_ and "PRIORITY" in country_signs._member_names_:
+            yield_sign = TrafficSignElement(country_signs.YIELD)
+            priority_sign = TrafficSignElement(country_signs.PRIORITY)
+            sign_priority_one = TrafficSign(scenario.generate_object_id(), [priority_sign], set(),
+                                            new_lanelets[0].right_vertices[-1] + np.array([-4, -2]))
+            new_lanelets[0].add_traffic_sign_to_lanelet(sign_priority_one.traffic_sign_id)
+            new_traffic_signs.append(sign_priority_one)
+            sign_priority_two = TrafficSign(scenario.generate_object_id(), [priority_sign], set(),
+                                            new_lanelets[9].right_vertices[-1] + np.array([4, 2]))
+            new_lanelets[9].add_traffic_sign_to_lanelet(sign_priority_two.traffic_sign_id)
+            new_traffic_signs.append(sign_priority_two)
+
+            sign_yield_one = TrafficSign(scenario.generate_object_id(), [yield_sign], set(),
+                                            new_lanelets[15].right_vertices[-1] + np.array([2, -6]))
+            new_lanelets[15].add_traffic_sign_to_lanelet(sign_yield_one.traffic_sign_id)
+            new_traffic_signs.append(sign_yield_one)
+            sign_yield_two = TrafficSign(scenario.generate_object_id(), [yield_sign], set(),
+                                            new_lanelets[7].right_vertices[-1] + np.array([-2, 6]))
+            new_lanelets[7].add_traffic_sign_to_lanelet(sign_yield_two.traffic_sign_id)
+            new_traffic_signs.append(sign_yield_two)
+
+        if add_traffic_lights:
+            traffic_light_cycle_one = [TrafficLightCycleElement(TrafficLightState.GREEN, 200),
+                                       TrafficLightCycleElement(TrafficLightState.YELLOW, 50),
+                                       TrafficLightCycleElement(TrafficLightState.RED, 200),
+                                       TrafficLightCycleElement(TrafficLightState.RED_YELLOW, 50)]
+            traffic_light_cycle_two = [TrafficLightCycleElement(TrafficLightState.RED, 200),
+                                       TrafficLightCycleElement(TrafficLightState.RED_YELLOW, 50),
+                                       TrafficLightCycleElement(TrafficLightState.GREEN, 200),
+                                       TrafficLightCycleElement(TrafficLightState.YELLOW, 50)]
+            traffic_light_one = TrafficLight(scenario.generate_object_id(), traffic_light_cycle_one,
+                                             new_lanelets[0].right_vertices[-1] + np.array([-1, -2]))
+            new_traffic_lights.append(traffic_light_one)
+            new_lanelets[0].add_traffic_light_to_lanelet(traffic_light_one.traffic_light_id)
+            traffic_light_two = TrafficLight(scenario.generate_object_id(), traffic_light_cycle_one,
+                                             new_lanelets[9].right_vertices[-1] + np.array([1, 2]))
+            new_traffic_lights.append(traffic_light_two)
+            new_lanelets[9].add_traffic_light_to_lanelet(traffic_light_two.traffic_light_id)
+            traffic_light_three = TrafficLight(scenario.generate_object_id(), traffic_light_cycle_two,
+                                               new_lanelets[15].right_vertices[-1] + np.array([2, -2]))
+            new_traffic_lights.append(traffic_light_three)
+            new_lanelets[15].add_traffic_light_to_lanelet(traffic_light_two.traffic_light_id)
+            traffic_light_three = TrafficLight(scenario.generate_object_id(), traffic_light_cycle_two,
+                                               new_lanelets[7].right_vertices[-1] + np.array([-2, 2]))
+            new_traffic_lights.append(traffic_light_three)
+            new_lanelets[7].add_traffic_light_to_lanelet(traffic_light_two.traffic_light_id)
+
+        return intersection, new_traffic_signs, new_traffic_lights, new_lanelets
 
     @staticmethod
-    def create_three_way_crossing(width: float, diameter_crossing: int, incoming_length: int, scenario: Scenario):
+    def create_three_way_crossing(width: float, diameter_crossing: int, incoming_length: int, scenario: Scenario,
+                                  add_traffic_signs: bool, add_traffic_lights: bool,
+                                  country_signs: Union[TrafficSignIDArgentina, TrafficSignIDBelgium,
+                                                       TrafficSignIDChina, TrafficSignIDCroatia,
+                                                       TrafficSignIDFrance, TrafficSignIDGermany,
+                                                       TrafficSignIDGreece, TrafficSignIDItaly,
+                                                       TrafficSignIDPuertoRico, TrafficSignIDRussia,
+                                                       TrafficSignIDSpain, TrafficSignIDUsa,  TrafficSignIDZamunda]) \
+            -> Tuple[Intersection, List[TrafficSign], List[TrafficLight], List[Lanelet]]:
         """
         Creates a four way intersection with predefined line markings at the origin.
 
@@ -481,12 +550,15 @@ class MapCreator:
         @param diameter_crossing: The length of the main part of the intersection.
         @param incoming_length: Length of the incoming lanelets of the intersection.
         @param scenario: The scenario to which the intersection will be added.
+        @param add_traffic_signs: Boolean indicating whether traffic signs should be added to intersection.
+        @param add_traffic_lights: Boolean indicating whether traffic lights should be added to intersection.
+        @param country_signs: List of supported traffic signs.
         @return: New intersection element and new lanelets.
         """
         rad = (diameter_crossing + width) / 2
         lanelet_ids = [scenario.generate_object_id() for i in range(0, 12)]
         new_lanelets = []
-        new_lanelets.append(MapCreator.create_straight(width, diameter_crossing, 10, lanelet_ids[0],
+        new_lanelets.append(MapCreator.create_straight(width, incoming_length, 10, lanelet_ids[0],
                                                        {LaneletType.INTERSECTION}, road_user_one_way={RoadUser.VEHICLE},
                                                        line_marking_left=LineMarking.DASHED,
                                                        line_marking_right=LineMarking.SOLID))
@@ -507,7 +579,7 @@ class MapCreator:
                                                                line_marking_left=LineMarking.NO_MARKING,
                                                                line_marking_right=LineMarking.SOLID))
 
-        new_lanelets.append(MapCreator.create_straight(width, diameter_crossing, 10, lanelet_ids[4],
+        new_lanelets.append(MapCreator.create_straight(width, incoming_length, 10, lanelet_ids[4],
                                                        {LaneletType.INTERSECTION}, road_user_one_way={RoadUser.VEHICLE},
                                                        line_marking_left=LineMarking.DASHED,
                                                        line_marking_right=LineMarking.SOLID))
@@ -529,7 +601,7 @@ class MapCreator:
                                                                line_marking_left=LineMarking.DASHED,
                                                                line_marking_right=LineMarking.SOLID))
 
-        new_lanelets.append(MapCreator.create_straight(width, diameter_crossing, 10, lanelet_ids[8],
+        new_lanelets.append(MapCreator.create_straight(width, incoming_length, 10, lanelet_ids[8],
                                                        {LaneletType.INTERSECTION}, road_user_one_way={RoadUser.VEHICLE},
                                                        line_marking_left=LineMarking.DASHED,
                                                        line_marking_right=LineMarking.SOLID))
@@ -573,11 +645,52 @@ class MapCreator:
                                                         successors_left={lanelet_ids[10]}))
         map_incoming.append(IntersectionIncomingElement(scenario.generate_object_id(),
                                                         incoming_lanelets={lanelet_ids[9]}))
-        intersection_id = scenario.generate_object_id()
 
+        intersection_id = scenario.generate_object_id()
         intersection = Intersection(intersection_id=intersection_id, incomings=map_incoming)
 
-        return intersection, new_lanelets
+        new_traffic_signs = []
+        new_traffic_lights = []
+        # TODO compute first occurrences
+        if add_traffic_signs and "YIELD" in country_signs._member_names_ and "PRIORITY" in country_signs._member_names_:
+            yield_sign = TrafficSignElement(country_signs.YIELD)
+            priority_sign = TrafficSignElement(country_signs.PRIORITY)
+            sign_priority_one = TrafficSign(scenario.generate_object_id(), [priority_sign], set(),
+                                            new_lanelets[5].right_vertices[-1] + np.array([-2, 6]))
+            new_lanelets[5].add_traffic_sign_to_lanelet(sign_priority_one.traffic_sign_id)
+            new_traffic_signs.append(sign_priority_one)
+            sign_priority_two = TrafficSign(scenario.generate_object_id(), [priority_sign], set(),
+                                            new_lanelets[9].right_vertices[-1] + np.array([2, -6]))
+            new_lanelets[9].add_traffic_sign_to_lanelet(sign_priority_two.traffic_sign_id)
+            new_traffic_signs.append(sign_priority_two)
+
+            sign_yield_one = TrafficSign(scenario.generate_object_id(), [yield_sign], set(),
+                                         new_lanelets[0].right_vertices[-1] + np.array([-4, -2]))
+            new_lanelets[0].add_traffic_sign_to_lanelet(sign_yield_one.traffic_sign_id)
+            new_traffic_signs.append(sign_yield_one)
+        if add_traffic_lights:
+            traffic_light_cycle_one = [TrafficLightCycleElement(TrafficLightState.GREEN, 200),
+                                       TrafficLightCycleElement(TrafficLightState.YELLOW, 50),
+                                       TrafficLightCycleElement(TrafficLightState.RED, 200),
+                                       TrafficLightCycleElement(TrafficLightState.RED_YELLOW, 50)]
+            traffic_light_cycle_two = [TrafficLightCycleElement(TrafficLightState.RED, 200),
+                                       TrafficLightCycleElement(TrafficLightState.RED_YELLOW, 50),
+                                       TrafficLightCycleElement(TrafficLightState.GREEN, 200),
+                                       TrafficLightCycleElement(TrafficLightState.YELLOW, 50)]
+            traffic_light_one = TrafficLight(scenario.generate_object_id(), traffic_light_cycle_one,
+                                             new_lanelets[5].right_vertices[-1] + np.array([-2, 2]))
+            new_traffic_lights.append(traffic_light_one)
+            new_lanelets[5].add_traffic_light_to_lanelet(traffic_light_one.traffic_light_id)
+            traffic_light_two = TrafficLight(scenario.generate_object_id(), traffic_light_cycle_one,
+                                             new_lanelets[9].right_vertices[-1] + np.array([2, -2]))
+            new_traffic_lights.append(traffic_light_two)
+            new_lanelets[9].add_traffic_light_to_lanelet(traffic_light_two.traffic_light_id)
+            traffic_light_three = TrafficLight(scenario.generate_object_id(), traffic_light_cycle_two,
+                                               new_lanelets[0].right_vertices[-1] + np.array([-1, -2]))
+            new_traffic_lights.append(traffic_light_three)
+            new_lanelets[0].add_traffic_light_to_lanelet(traffic_light_two.traffic_light_id)
+
+        return intersection, new_traffic_signs, new_traffic_lights, new_lanelets
 
     def calc_radius(self, lanelet):
         line_predecessor = lanelet.left_vertices[0] - lanelet.right_vertices[0]

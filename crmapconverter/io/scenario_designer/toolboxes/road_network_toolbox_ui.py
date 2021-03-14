@@ -451,6 +451,9 @@ class RoadNetworkToolbox(Toolbox):
         self.intersection_incoming_length.setMaxLength(4)
         self.intersection_incoming_length.setAlignment(Qt.AlignRight)
 
+        self.intersection_with_traffic_signs = QCheckBox("Add traffic signs")
+        self.intersection_with_traffic_lights = QCheckBox("Add traffic lights")
+
         self.button_three_way_intersection = QPushButton("Add Three-way intersection")
         self.button_four_way_intersection = QPushButton("Add Four-way intersection")
         self.button_fit_intersection = QPushButton("Fit to intersection")
@@ -473,6 +476,7 @@ class RoadNetworkToolbox(Toolbox):
         intersection_information.addRow("Diameter [m]", self.intersection_diameter)
         intersection_information.addRow("Lanelet width [m]", self.intersection_lanelet_width)
         intersection_information.addRow("Incoming length [m]", self.intersection_incoming_length)
+        intersection_information.addRow(self.intersection_with_traffic_signs, self.intersection_with_traffic_lights)
         intersection_information.addRow(self.button_three_way_intersection)
         intersection_information.addRow(self.button_four_way_intersection)
         intersection_information.addRow(self.button_fit_intersection)

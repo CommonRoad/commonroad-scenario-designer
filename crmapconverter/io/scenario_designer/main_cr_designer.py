@@ -617,11 +617,18 @@ class MWindow(QMainWindow, Ui_mainWindow):
         width = float(self.road_network_toolbox.intersection_lanelet_width.text())
         diameter = int(self.road_network_toolbox.intersection_diameter.text())
         incoming_length = int(self.road_network_toolbox.intersection_incoming_length.text())
+        add_traffic_signs = self.road_network_toolbox.intersection_with_traffic_signs.isChecked()
+        add_traffic_lights = self.road_network_toolbox.intersection_with_traffic_lights.isChecked()
+        selected_country = self.road_network_toolbox.country.currentText()
+        country_signs = globals()["TrafficSignID" + SupportedTrafficSignCountry(selected_country).name.capitalize()]
 
-        intersection, new_lanelets = MapCreator.create_four_way_intersection(width, diameter, incoming_length,
-                                                                             self.cr_viewer.current_scenario)
+        intersection, new_traffic_signs, new_traffic_lights, new_lanelets = \
+            MapCreator.create_four_way_intersection(width, diameter, incoming_length, self.cr_viewer.current_scenario,
+                                                    add_traffic_signs, add_traffic_lights, country_signs)
         self.cr_viewer.current_scenario.add_objects(intersection)
         self.cr_viewer.current_scenario.add_objects(new_lanelets)
+        self.cr_viewer.current_scenario.add_objects(new_traffic_signs)
+        self.cr_viewer.current_scenario.add_objects(new_traffic_lights)
         self.set_default_list_information()
         self.update_view(focus_on_network=True)
 
@@ -635,12 +642,19 @@ class MWindow(QMainWindow, Ui_mainWindow):
         width = float(self.road_network_toolbox.intersection_lanelet_width.text())
         diameter = int(self.road_network_toolbox.intersection_diameter.text())
         incoming_length = int(self.road_network_toolbox.intersection_incoming_length.text())
+        add_traffic_signs = self.road_network_toolbox.intersection_with_traffic_signs.isChecked()
+        add_traffic_lights = self.road_network_toolbox.intersection_with_traffic_lights.isChecked()
+        selected_country = self.road_network_toolbox.country.currentText()
+        country_signs = globals()["TrafficSignID" + SupportedTrafficSignCountry(selected_country).name.capitalize()]
 
-        intersection, new_lanelets = MapCreator.create_three_way_crossing(width, diameter, incoming_length,
-                                                                          self.cr_viewer.current_scenario)
+        intersection, new_traffic_signs, new_traffic_lights, new_lanelets = \
+            MapCreator.create_three_way_crossing(width, diameter, incoming_length, self.cr_viewer.current_scenario,
+                                                 add_traffic_signs, add_traffic_lights, country_signs)
 
         self.cr_viewer.current_scenario.add_objects(intersection)
         self.cr_viewer.current_scenario.add_objects(new_lanelets)
+        self.cr_viewer.current_scenario.add_objects(new_traffic_signs)
+        self.cr_viewer.current_scenario.add_objects(new_traffic_lights)
         self.set_default_list_information()
         self.update_view(focus_on_network=True)
 
@@ -1727,7 +1741,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.update_max_step()
         self.viewer_dock.setWindowIcon(QIcon(":/icons/cr1.ico"))
         if self.cr_viewer.current_scenario is not None:
-            self.setWindowTitle(self.filename)
+            #self.setWindowTitle(self.filename)
             self.textBrowser.append("loading " + self.filename)
         else:
             self.lanelet_list_dock.close()
