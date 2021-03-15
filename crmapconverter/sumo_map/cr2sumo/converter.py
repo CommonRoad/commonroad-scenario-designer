@@ -1194,7 +1194,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         except ScenarioException:
             raise
         except Exception as e:
-            logging.error(e)
+            logging.exception(e)
             success = False
 
         if cleanup and success:
@@ -1211,22 +1211,19 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
             return groupby(sorted(list, key=criterion), key=criterion)
 
         original_connection_map = {str(from_edge):
-                                       {str(from_lane):
+                                       {str(from_lane.split("_")[-1]):
                                             {str(to_edge):
-                                                 {str(to_lane):
-                                                      [connection.getViaLaneID() for connection in to_lane_connections]
+                                                 {str(to_lane.split("_")[-1]):
+                                                      [connection.via for connection in to_lane_connections]
                                                   for to_lane, to_lane_connections in grouped_list(to_edge_connections,
                                                                                                    lambda
-                                                                                                       connection: connection.getToLane())}
+                                                                                                       c: c.to_lane.id)}
                                              for to_edge, to_edge_connections in grouped_list(from_lane_connections,
-                                                                                              lambda
-                                                                                                  connection: connection.getTo())}
+                                                                                              lambda c: c.to_edge.id)}
                                         for from_lane, from_lane_connections in grouped_list(from_edge_connections,
-                                                                                             lambda
-                                                                                                 connection: connection.getFromLane())}
+                                                                                             lambda c: c.from_lane.id)}
                                    for from_edge, from_edge_connections in grouped_list(self._new_connections,
-                                                                                        lambda
-                                                                                            connection: connection.getFrom())}
+                                                                                        lambda c: c.from_edge.id)}
 
         available_lane_ids = set()
 
@@ -1254,11 +1251,11 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
 
             new_internal_connection_id_split = new_internal_connection_id.split('_')
             new_internal_edge_id = f"{new_internal_connection_id_split[0]}_{new_internal_connection_id_split[1]}"
-            new_internal_lane_id = new_internal_connection_id_split[2]
+            new_internal_lane_id = int(new_internal_connection_id_split[2])
 
             try:
-                original_internal_connection_ids = original_connection_map[from_edge_id][from_lane_id][to_edge_id][
-                    to_lane_id]
+                original_internal_connection_ids = \
+                    original_connection_map[from_edge_id][from_lane_id][to_edge_id][to_lane_id]
             except KeyError as invalid_key:
                 raise ScenarioException(
                     f"Inconsistent scenario, there is no connection between "
@@ -1273,7 +1270,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
             if original_internal_connection_ids is None:
                 continue
 
-            for original_internal_connection_ID in original_internal_connection_ids.split(" "):
+            for original_internal_connection_ID in original_internal_connection_ids:
                 original_internal_connection_ID_splitted = original_internal_connection_ID.split('_')
                 original_internal_edge_ID = original_internal_connection_ID_splitted[0]
                 original_internal_lane_ID = original_internal_connection_ID_splitted[1]
@@ -1289,11 +1286,8 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                 else:
                     self.lane_id2lanelet_id[new_internal_connection_id] = original_lanelet_ID
                 # del self.lane_id2lanelet_id[original_internal_connection_ID]
-
                 self.lanelet_id2edge_id[original_lanelet_ID] = new_internal_edge_id
-
                 self.lanelet_id2edge_lane_id[original_lanelet_ID] = new_internal_lane_id
-
                 self.lanelet_id2lane_id[original_lanelet_ID] = new_internal_connection_id
 
         # available_lanelet_ids = {self.lane_id2lanelet_id[available_lane_id] for available_lane_id in available_lane_ids if available_lane_id in self.lane_id2lanelet_id}

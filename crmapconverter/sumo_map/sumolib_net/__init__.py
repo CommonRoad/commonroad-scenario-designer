@@ -1289,7 +1289,7 @@ class Connection:
         return str(self)
 
     def __hash__(self):
-        return hash((self._from.id, self._to.id, self._from_lane.id, self._to_lane.id, self._direction, self._tls.id,
+        return hash((self._from.id, self._to.id, self._from_lane.id, self._to_lane.id, self._direction, self._tls,
                      self._tl_link, self._state))
 
     def __eq__(self, other: 'Connection'):
