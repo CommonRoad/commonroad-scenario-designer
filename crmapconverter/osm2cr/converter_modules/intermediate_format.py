@@ -2,7 +2,7 @@
 This module holds the classes required for the intermediate format
 """
 
-__author__ = "Behtarin Ferdousi, Fabian Höltke"
+__author__ = "Behtarin Ferdousi"
 
 import copy
 import numpy as np
@@ -218,14 +218,14 @@ def add_is_left_of(incoming_data, incoming_data_id):
         angle = angles[index][1] - angles[prev][1]
         if angle < 0:
             angle += 360
-        
+
         # add is_left_of relation if angle is less than intersection straight treshold
         if angle <= 180 - config.INTERSECTION_STRAIGHT_THRESHOLD:
             # is left of the previous incoming
             is_left_of = angles[prev][0]
             data_index = angles[index][0]
             incoming_data[data_index].update({'isLeftOf': incoming_data_id[is_left_of]})
-        
+
         prev = index
 
     return incoming_data
@@ -290,7 +290,8 @@ class IntermediateFormat:
         if self.obstacles is None:
             self.obstacles = []
 
-        intersection_enhancement(self)
+        if config.INTERSECTION_EMHANCEMENT:
+            intersection_enhancement(self)
 
     def find_edge_by_id(self, edge_id):
         """
@@ -316,9 +317,9 @@ class IntermediateFormat:
 
     def find_traffic_light_by_id(self, light_id):
         """
-        Find traffic light by the sign id
+        Find traffic light by the light id
 
-        :param sign_id: sign id of the Traffic Light element
+        :param light_id: light id of the Traffic Light element
         :return: CommonRoad TrafficLight
         """
         for light in self.traffic_lights:
@@ -558,8 +559,6 @@ class IntermediateFormat:
         traffic_lights = [light.to_traffic_light_cr() for light in graph.traffic_lights]
 
         intersections = IntermediateFormat.get_intersections(graph)
-
-
 
         return IntermediateFormat(nodes,
                                   edges,
