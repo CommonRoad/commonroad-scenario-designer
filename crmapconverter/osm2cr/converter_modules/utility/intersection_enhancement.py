@@ -145,3 +145,4 @@ def intersection_enhancement(intermediate_format):
     remove_non_intersection_lights(all_incoming_lanes_in_scenario)
     # clean up and remove invalid references
     intermediate_format.remove_invalid_references()
+    
