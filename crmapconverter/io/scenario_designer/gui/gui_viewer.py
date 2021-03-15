@@ -360,13 +360,12 @@ def draw_lanelet_polygon(lanelet, ax, color, alpha, zorder,
 
 class Viewer:
     """ functionality to draw a Scenario onto a Canvas """
-    def __init__(self, parent):
+    def __init__(self, parent, callback_function):
         self.current_scenario = None
         self.dynamic = DynamicCanvas(parent, width=5, height=10, dpi=100)
-        self.dynamic.mpl_connect('button_press_event', self.select_lanelets)
-        self.selected_lanelet_use = None
+        self.callback_function = callback_function
 
-    def open_scenario(self, scenario):
+    def open_scenario(self, scenario: Scenario):
         """ """
         self.current_scenario = scenario
         self.update_plot(focus_on_network=True)
@@ -410,7 +409,7 @@ class Viewer:
 
         for lanelet in self.current_scenario.lanelet_network.lanelets:
 
-            draw_arrow, color, alpha, zorder, label = self.get_paint_parameters(
+            color, alpha, zorder, label = self.get_paint_parameters(
                 lanelet, sel_lanelet, sel_intersection)
             if color == "gray": continue
 
@@ -422,8 +421,6 @@ class Viewer:
             network_limits[3] = max(network_limits[3], lanelet_limits[3])
 
             self.draw_lanelet_vertices(lanelet, ax)
-            if draw_arrow:
-                self.draw_arrow_on_lanelet(lanelet, ax)
 
         handles, labels = ax.get_legend_handles_labels()
         legend = ax.legend(handles, labels)
@@ -455,7 +452,6 @@ class Viewer:
         """
 
         if selected_lanelet:
-            draw_arrow = True
 
             if lanelet.lanelet_id == selected_lanelet.lanelet_id:
                 color = "red"
@@ -508,7 +504,6 @@ class Viewer:
                 alpha = 0.3
                 zorder = 0
                 label = None
-                draw_arrow = False
 
         elif selected_intersection:
             incoming_ids = selected_intersection.map_incoming_lanelets.keys()
@@ -518,7 +513,6 @@ class Viewer:
                 inc_succ_ids |= inc.successors_left
                 inc_succ_ids |= inc.successors_straight
 
-            draw_arrow = True
 
             if lanelet.lanelet_id in incoming_ids:
                 color = "red"
@@ -540,15 +534,13 @@ class Viewer:
                 alpha = 0.3
                 zorder = 0
                 label = None
-                draw_arrow = False
         else:
             color = "gray"
             alpha = 0.3
             zorder = 0
             label = None
-            draw_arrow = False
 
-        return draw_arrow, color, alpha, zorder, label
+        return color, alpha, zorder, label
 
     def draw_lanelet_vertices(self, lanelet, ax):
         ax.plot(
@@ -564,47 +556,10 @@ class Viewer:
             lw=0.1,
         )
 
-    def draw_arrow_on_lanelet(self, lanelet, ax):
-        idx = 0
-        ml = lanelet.left_vertices[idx]
-        mr = lanelet.right_vertices[idx]
-        mc = lanelet.center_vertices[min(
-            len(lanelet.center_vertices) - 1, idx + 3)]
-        ax.plot(
-            [ml[0], mr[0], mc[0], ml[0]],
-            [ml[1], mr[1], mc[1], ml[1]],
-            color="black",
-            lw=0.3,
-            zorder=15,
-        )
-
-    def select_lanelets(self, mouse_clicked_event):
-        """ 
-        Select lanelets by clicking on the canvas. Selects only one of the
-        lanelets that contains the click position.
-        """
-        self.selected_lanelet_use = None
-        mouse_pos = np.array(
-            [mouse_clicked_event.xdata, mouse_clicked_event.ydata])
-        click_shape = Circle(radius=0.01, center=mouse_pos)
-
-        l_network = self.current_scenario.lanelet_network
-        selected_l_ids = l_network.find_lanelet_by_shape(click_shape)
-        selected_lanelets = [
-            l_network.find_lanelet_by_id(lid) for lid in selected_l_ids
-        ]
-        if selected_lanelets:
-            self.update_plot(sel_lanelet=selected_lanelets[0])
-        else:
-            self.update_plot(sel_lanelet=None)
-        self.selected_lanelet_use = selected_lanelets
-
-        return selected_lanelets
-
 
 class AnimatedViewer(Viewer):
-    def __init__(self, parent):
-        super().__init__(parent)
+    def __init__(self, parent, callback_function):
+        super().__init__(parent, callback_function)
 
         # sumo config giving dt etc
         self._config: SumoConfig = None
@@ -616,6 +571,7 @@ class AnimatedViewer(Viewer):
         self.animation: FuncAnimation = None
         # if playing or not
         self.playing = False
+        self.dynamic.mpl_connect('button_press_event', self.select_scenario_element)
 
     def open_scenario(self, scenario: Scenario, config: Observable = None):
         """[summary]
@@ -810,3 +766,28 @@ class AnimatedViewer(Viewer):
         ]
         self.max_timestep = np.max(timesteps) if timesteps else 0
         return self.max_timestep
+
+    def select_scenario_element(self, mouse_clicked_event):
+        """
+        Select lanelets by clicking on the canvas. Selects only one of the
+        lanelets that contains the click position.
+        """
+        mouse_pos = np.array(
+            [mouse_clicked_event.xdata, mouse_clicked_event.ydata])
+        click_shape = Circle(radius=0.01, center=mouse_pos)
+
+        l_network = self.current_scenario.lanelet_network
+        selected_l_ids = l_network.find_lanelet_by_shape(click_shape)
+        selected_lanelets = [l_network.find_lanelet_by_id(lid) for lid in selected_l_ids]
+        selected_obstacles = [obs for obs in self.current_scenario.obstacles
+                              if obs.occupancy_at_time(self.timestep.value).shape.contains_point(mouse_pos)]
+
+        if len(selected_lanelets) > 0 and len(selected_obstacles) == 0:
+            self.update_plot(sel_lanelet=selected_lanelets[0])
+        else:
+            self.update_plot(sel_lanelet=None)
+
+        if len(selected_obstacles) > 0:
+            self.callback_function(selected_obstacles[0])
+        elif len(selected_lanelets) > 0:
+            self.callback_function(selected_lanelets[0])

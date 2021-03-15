@@ -14,9 +14,11 @@ from PyQt5.QtCore import *
 
 from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
-from commonroad.scenario.lanelet import LaneletNetwork, LineMarking, LaneletType, RoadUser, StopLine
+from commonroad.scenario.lanelet import LaneletNetwork, LineMarking, LaneletType, RoadUser, StopLine, Lanelet
 from commonroad.scenario.scenario import Scenario
 from commonroad.scenario.traffic_sign import *
+from commonroad.geometry.shape import Rectangle
+from commonroad.scenario.obstacle import Obstacle
 
 from crmapconverter.io.scenario_designer.gui_src import CR_Scenario_Designer  # do not remove!!!
 from crmapconverter.io.scenario_designer.converter_modules.opendrive_interface import OpenDRIVEInterface
@@ -59,7 +61,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
         # attributes
         self.filename = None
-        self.cr_viewer = AnimatedViewer(self)
+        self.cr_viewer = AnimatedViewer(self, self.viewer_callback)
         self.slider_clicked = False
 
         # Scenario + Lanelet variables
@@ -133,6 +135,12 @@ class MWindow(QMainWindow, Ui_mainWindow):
         if path:
             self.open_path(path)
 
+    def viewer_callback(self, selected_object):
+        if isinstance(selected_object, Lanelet):
+            self.road_network_toolbox.selected_lanelet_one.setCurrentText(str(selected_object.lanelet_id))
+        elif isinstance(selected_object, Obstacle):
+            self.obstacle_toolbox.selected_obstacle.setCurrentText(str(selected_object.obstacle_id))
+
     def show_osm_settings(self):
         osm_interface = OSMInterface(self)
         osm_interface.show_settings()
@@ -153,6 +161,22 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.obstacle_toolbox_widget.setAllowedAreas(Qt.RightDockWidgetArea)
         self.obstacle_toolbox_widget.setWidget(self.obstacle_toolbox)
         self.addDockWidget(Qt.RightDockWidgetArea, self.obstacle_toolbox_widget)
+        self.obstacle_toolbox_widget.setMinimumWidth(375)
+
+        self.initialize_obstacle_information()
+
+        self.obstacle_toolbox.selected_obstacle.currentTextChanged.connect(
+            lambda: self.update_obstacle_information())
+
+        self.obstacle_toolbox.obstacle_state_variable.currentTextChanged.connect(
+            lambda: self.plot_obstacle_state_profile())
+
+    def initialize_toolboxes(self):
+        self.initialize_lanelet_information()
+        self.initialize_obstacle_information()
+        self.initialize_traffic_light_information()
+        self.initialize_intersection_information()
+        self.initialize_traffic_sign_information()
 
     def create_converter_toolbox(self):
         """ Create the map converter toolbox."""
@@ -200,10 +224,12 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.initialize_traffic_sign_information()
         self.initialize_traffic_light_information()
         self.initialize_intersection_information()
-        self.set_default_list_information()
+        self.set_default_road_network_list_information()
 
         self.road_network_toolbox.button_add_lanelet.clicked.connect(lambda: self.add_lanelet())
         self.road_network_toolbox.button_update_lanelet.clicked.connect(lambda: self.update_lanelet())
+        self.road_network_toolbox.selected_lanelet_one.currentTextChanged.connect(
+            lambda: self.update_lanelet_information())
 
         self.road_network_toolbox.button_remove_lanelet.clicked.connect(lambda: self.remove_lanelet())
         self.road_network_toolbox.button_fit_to_predecessor.clicked.connect(lambda: self.fit_to_predecessor())
@@ -303,6 +329,16 @@ class MWindow(QMainWindow, Ui_mainWindow):
         else:
             return []
 
+    def collect_obstacle_ids(self) -> List[int]:
+        """
+        Collects IDs of all obstacles within a CommonRoad scenario.
+        @return:
+        """
+        if self.cr_viewer.current_scenario is not None:
+            return [obs.obstacle_id for obs in self.cr_viewer.current_scenario.obstacles]
+        else:
+            return []
+
     def initialize_lanelet_information(self):
         """
         Initializes lanelet GUI elements with lanelet information.
@@ -316,10 +352,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.road_network_toolbox.lanelet_length.setText("10.0")
         self.road_network_toolbox.lanelet_radius.setText("10.0")
         self.road_network_toolbox.lanelet_angle.setText("90.0")
-        self.road_network_toolbox.stop_line_start_x.setText("0.0")
-        self.road_network_toolbox.stop_line_start_y.setText("0.0")
-        self.road_network_toolbox.stop_line_end_x.setText("0.0")
-        self.road_network_toolbox.stop_line_end_y.setText("0.0")
+        self.set_default_road_network_list_information()
 
     def initialize_traffic_sign_information(self):
         """
@@ -350,7 +383,19 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.road_network_toolbox.intersection_lanelet_width.setText("3.0")
         self.road_network_toolbox.intersection_incoming_length.setText("20")
 
-    def set_default_list_information(self):
+    def initialize_obstacle_information(self):
+        """
+        Initializes GUI elements with intersection information.
+        """
+
+        self.obstacle_toolbox.obstacle_width.setText("")
+        self.obstacle_toolbox.obstacle_length.setText("")
+        self.obstacle_toolbox.selected_obstacle.clear()
+        self.obstacle_toolbox.selected_obstacle.addItems(
+            ["None"] + [str(item) for item in self.collect_obstacle_ids()])
+        self.obstacle_toolbox.selected_obstacle.setCurrentIndex(0)
+
+    def set_default_road_network_list_information(self):
         """
         Initializes Combobox GUI elements with lanelet information.
         """
@@ -420,11 +465,12 @@ class MWindow(QMainWindow, Ui_mainWindow):
             ["None"] + [str(item) for item in self.collect_lanelet_ids()])
         self.road_network_toolbox.intersection_crossings.setCurrentIndex(0)
 
-    def add_lanelet(self, lanelet_id: int = None):
+    def add_lanelet(self, lanelet_id: int = None, update: bool = False):
         """
         Adds a lanelet to the scenario based on the selected parameters by the user.
 
         @param lanelet_id: Id which the new lanelet should have.
+        @param update: Boolean indicating whether lanelet is updated or newly created.
         """
         if self.cr_viewer.current_scenario is None:
             self.textBrowser.append("Please create first a new scenario.")
@@ -460,14 +506,25 @@ class MWindow(QMainWindow, Ui_mainWindow):
             {int(sign) for sign in self.road_network_toolbox.lanelet_referenced_traffic_sign_ids.get_checked_items()}
         traffic_lights = \
             {int(light) for light in self.road_network_toolbox.lanelet_referenced_traffic_light_ids.get_checked_items()}
-        stop_line_start_x = float(self.road_network_toolbox.stop_line_start_x.text())
-        stop_line_end_x = float(self.road_network_toolbox.stop_line_end_x.text())
-        stop_line_start_y = float(self.road_network_toolbox.stop_line_start_y.text())
-        stop_line_end_y = float(self.road_network_toolbox.stop_line_end_y.text())
-        stop_line_marking = LineMarking(self.road_network_toolbox.line_marking_stop_line.currentText())
-        stop_line_at_end = self.road_network_toolbox.stop_line_at_end.isChecked()
-        stop_line = StopLine(np.array([stop_line_start_x, stop_line_start_y]),
-                             np.array([stop_line_end_x, stop_line_end_y]), stop_line_marking, set(), set())
+        if self.road_network_toolbox.stop_line_start_x.text() != "" \
+                and self.road_network_toolbox.stop_line_end_x.text() != "" \
+                and self.road_network_toolbox.stop_line_start_y.text() != "" \
+                and self.road_network_toolbox.stop_line_end_y.text() != "":
+            stop_line_start_x = float(self.road_network_toolbox.stop_line_start_x.text())
+            stop_line_end_x = float(self.road_network_toolbox.stop_line_end_x.text())
+            stop_line_start_y = float(self.road_network_toolbox.stop_line_start_y.text())
+            stop_line_end_y = float(self.road_network_toolbox.stop_line_end_y.text())
+            stop_line_marking = LineMarking(self.road_network_toolbox.line_marking_stop_line.currentText())
+            stop_line_at_end = self.road_network_toolbox.stop_line_at_end.isChecked()
+            stop_line = StopLine(np.array([stop_line_start_x, stop_line_start_y]),
+                                 np.array([stop_line_end_x, stop_line_end_y]), stop_line_marking, set(), set())
+        elif self.road_network_toolbox.stop_line_at_end.isChecked():
+            stop_line_at_end = True
+            stop_line_marking = LineMarking(self.road_network_toolbox.line_marking_stop_line.currentText())
+            stop_line = StopLine(np.array([0, 0]), np.array([0, 0]), stop_line_marking, set(), set())
+        else:
+            stop_line_at_end = False
+            stop_line = None
         lanelet_length = float(self.road_network_toolbox.lanelet_length.text())
         lanelet_radius = float(self.road_network_toolbox.lanelet_radius.text())
         lanelet_angle = np.deg2rad(float(self.road_network_toolbox.lanelet_angle.text()))
@@ -492,25 +549,26 @@ class MWindow(QMainWindow, Ui_mainWindow):
                                                  user_one_way, user_bidirectional, line_marking_left,
                                                  line_marking_right, stop_line, traffic_signs, traffic_lights,
                                                  stop_line_at_end)
-        if connect_to_last_selection:
-            if self.last_added_lanelet_id is not None:
-                MapCreator.fit_to_predecessor(
-                    self.cr_viewer.current_scenario.lanelet_network.find_lanelet_by_id(self.last_added_lanelet_id),
-                    lanelet)
-        elif connect_to_predecessors_selection:
-            if len(predecessors) > 0:
-                MapCreator.fit_to_predecessor(
-                    self.cr_viewer.current_scenario.lanelet_network.find_lanelet_by_id(predecessors[0]), lanelet)
-        elif connect_to_successors_selection:
-            if len(successors) > 0:
-                MapCreator.fit_to_successor(
-                    self.cr_viewer.current_scenario.lanelet_network.find_lanelet_by_id(successors[0]), lanelet)
-        self.last_added_lanelet_id = lanelet_id
-        self.cr_viewer.current_scenario.lanelet_network.add_lanelet(lanelet=lanelet)
+        if not update:
+            if connect_to_last_selection:
+                if self.last_added_lanelet_id is not None:
+                    MapCreator.fit_to_predecessor(
+                        self.cr_viewer.current_scenario.lanelet_network.find_lanelet_by_id(self.last_added_lanelet_id),
+                        lanelet)
+            elif connect_to_predecessors_selection:
+                if len(predecessors) > 0:
+                    MapCreator.fit_to_predecessor(
+                        self.cr_viewer.current_scenario.lanelet_network.find_lanelet_by_id(predecessors[0]), lanelet)
+            elif connect_to_successors_selection:
+                if len(successors) > 0:
+                    MapCreator.fit_to_successor(
+                        self.cr_viewer.current_scenario.lanelet_network.find_lanelet_by_id(successors[0]), lanelet)
+            self.last_added_lanelet_id = lanelet_id
 
+        self.cr_viewer.current_scenario.lanelet_network.add_lanelet(lanelet=lanelet)
         lanelet.translate_rotate(np.array([lanelet_pos_x, lanelet_pos_y]), 0)
         self.update_view(focus_on_network=True)
-        self.set_default_list_information()
+        self.set_default_road_network_list_information()
         self.store_scenario()
 
     def update_lanelet(self):
@@ -527,10 +585,68 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
         lanelet = self.cr_viewer.current_scenario.lanelet_network.find_lanelet_by_id(selected_lanelet_id)
         self.cr_viewer.current_scenario.remove_lanelet(lanelet)
-        self.add_lanelet(selected_lanelet_id)
+        self.add_lanelet(selected_lanelet_id, True)
         self.set_default_list_information()
         self.update_view(focus_on_network=True)
         self.store_scenario()
+
+    def update_lanelet_information(self):
+        if self.road_network_toolbox.selected_lanelet_one.currentText() not in ["", "None"]:
+            selected_lanelet_id = int(self.road_network_toolbox.selected_lanelet_one.currentText())
+            lanelet = self.cr_viewer.current_scenario.lanelet_network.find_lanelet_by_id(selected_lanelet_id)
+
+            self.road_network_toolbox.x_position_lanelet_start.setText(str(lanelet.center_vertices[0][0]))
+            self.road_network_toolbox.y_position_lanelet_start.setText(str(lanelet.center_vertices[0][1]))
+            self.road_network_toolbox.lanelet_width.setText(
+                str(np.linalg.norm(lanelet.left_vertices[0] - lanelet.right_vertices[0])))
+
+            self.road_network_toolbox.line_marking_left.setCurrentText(lanelet.line_marking_left_vertices.value)
+            self.road_network_toolbox.line_marking_right.setCurrentText(lanelet.line_marking_right_vertices.value)
+            self.road_network_toolbox.number_vertices.setText(str(len(lanelet.center_vertices)))
+
+            self.road_network_toolbox.predecessors.set_checked_items([str(pre) for pre in lanelet.predecessor])
+            self.road_network_toolbox.successors.set_checked_items([str(suc) for suc in lanelet.successor])
+
+            self.road_network_toolbox.adjacent_left.setCurrentText(str(lanelet.adj_left))
+            self.road_network_toolbox.adjacent_right.setCurrentText(str(lanelet.adj_right))
+            self.road_network_toolbox.adjacent_left_same_direction.setChecked(
+                lanelet.adj_left_same_direction if lanelet.adj_left_same_direction is not None else False)
+            self.road_network_toolbox.adjacent_right_same_direction.setChecked(
+                lanelet.adj_right_same_direction if lanelet.adj_right_same_direction is not None else False)
+
+
+            self.road_network_toolbox.lanelet_type.set_checked_items(
+                [str(la_type.value) for la_type in lanelet.lanelet_type])
+
+            self.road_network_toolbox.road_user_oneway.set_checked_items(
+                [str(user.value) for user in lanelet.user_one_way])
+
+            self.road_network_toolbox.road_user_bidirectional.set_checked_items(
+                [str(user.value) for user in lanelet.user_bidirectional])
+
+            self.road_network_toolbox.lanelet_referenced_traffic_sign_ids.set_checked_items(
+                [str(sign) for sign in lanelet.traffic_signs])
+            self.road_network_toolbox.lanelet_referenced_traffic_light_ids.set_checked_items(
+                [str(light) for light in lanelet.traffic_lights])
+
+            if lanelet.stop_line is not None:
+                self.road_network_toolbox.stop_line_start_x.setText(str(lanelet.stop_line.start[0]))
+                self.road_network_toolbox.stop_line_start_y.setText(str(lanelet.stop_line.start[1]))
+                self.road_network_toolbox.stop_line_end_x.setText(str(lanelet.stop_line.end[0]))
+                self.road_network_toolbox.stop_line_end_y.setText(str(lanelet.stop_line.end[1]))
+                self.road_network_toolbox.line_marking_stop_line.setCurrentText(
+                    str(lanelet.stop_line.line_marking.value))
+            else:
+                self.road_network_toolbox.stop_line_start_x.setText("")
+                self.road_network_toolbox.stop_line_start_y.setText("")
+                self.road_network_toolbox.stop_line_end_x.setText("")
+                self.road_network_toolbox.stop_line_end_y.setText("")
+                self.road_network_toolbox.line_marking_stop_line.setCurrentText("unknown")
+
+            #width = np.linalg.norm(lanelet.left_vertices[0] - lanelet.right_vertices[0])
+            #angle = (MapCreator.calc_angle_between2(lanelet) / np.pi) * 180
+            #rad = MapCreator.calc_radius(lanelet)
+
 
     def create_adjacent(self):
         """
@@ -1090,6 +1206,55 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.update_view(focus_on_network=True)
         self.store_scenario()
 
+    def update_obstacle_information(self):
+        if self.obstacle_toolbox.selected_obstacle.currentText() not in ["", "None"]:
+            obstacle_id = int(self.obstacle_toolbox.selected_obstacle.currentText())
+            obstacle = self.cr_viewer.current_scenario.obstacle_by_id(obstacle_id)
+            if isinstance(obstacle.obstacle_shape, Rectangle):
+                self.obstacle_toolbox.obstacle_width.setText(str(obstacle.obstacle_shape.width))
+                self.obstacle_toolbox.obstacle_length.setText(str(obstacle.obstacle_shape.length))
+            else:
+                self.obstacle_toolbox.obstacle_width.setText("")
+                self.obstacle_toolbox.obstacle_length.setText("")
+            self.obstacle_toolbox.obstacle_type.setCurrentText(obstacle.obstacle_type.value)
+            state_variables = [var for var in obstacle.initial_state.attributes if var not in ["position", "time_step"]]
+            if "position" in obstacle.initial_state.attributes:
+                state_variables += ["x-position", "y-position"]
+            self.obstacle_toolbox.obstacle_state_variable.addItems(state_variables)
+            self.plot_obstacle_state_profile()
+
+    def plot_obstacle_state_profile(self):
+        if self.obstacle_toolbox.selected_obstacle.currentText() not in ["", "None"]:
+            obstacle_id = int(self.obstacle_toolbox.selected_obstacle.currentText())
+            obstacle = self.cr_viewer.current_scenario.obstacle_by_id(obstacle_id)
+            state_variable_name = self.obstacle_toolbox.obstacle_state_variable.currentText()
+            if state_variable_name == "x-position":
+                profile = [obstacle.initial_state.__getattribute__("position")[0]]
+                profile += [state.__getattribute__("position")[0]
+                            for state in obstacle.prediction.trajectory.state_list]
+            elif state_variable_name == "y-position":
+                profile = [obstacle.initial_state.__getattribute__("position")[1]]
+                profile += [state.__getattribute__("position")[1]
+                            for state in obstacle.prediction.trajectory.state_list]
+            else:
+                profile = [obstacle.initial_state.__getattribute__(state_variable_name)]
+                profile += [state.__getattribute__(state_variable_name)
+                            for state in obstacle.prediction.trajectory.state_list]
+            time = [obstacle.initial_state.time_step]
+            time += [state.time_step for state in obstacle.prediction.trajectory.state_list]
+
+            # create an axis
+            ax = self.obstacle_toolbox.figure.add_subplot(111)
+
+            # discards the old graph
+            ax.clear()
+
+            # plot data
+            ax.plot(time, profile, 'o-')
+
+            # refresh canvas
+            self.obstacle_toolbox.canvas.draw()
+
     def load_edit_state(self) -> None:
         """
         Loads an OSM edit state and opens it within a separate GUI.
@@ -1197,7 +1362,6 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
         :return: the file name
         """
-        # TODO maybe ask for filename
         name = config.BENCHMARK_ID + ".osm"
         if not self.verify_coordinate_input():
             QMessageBox.critical(
@@ -1600,8 +1764,6 @@ class MWindow(QMainWindow, Ui_mainWindow):
             self.sumo_box.scenario = self.cr_viewer.current_scenario
         else:
             self.cr_viewer.open_scenario(new_scenario)
-        self.lanelet_list = LaneletList(self.update_view, self)
-        self.intersection_list = IntersectionList(self.update_view, self)
         self.update_view()
         self.update_to_new_scenario()
         self.store_scenario()
@@ -1610,6 +1772,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
     def update_to_new_scenario(self):
         """  """
         self.update_max_step()
+        self.initialize_toolboxes()
         self.viewer_dock.setWindowIcon(QIcon(":/icons/cr1.ico"))
         if self.cr_viewer.current_scenario is not None:
             #self.setWindowTitle(self.filename)
@@ -1738,52 +1901,16 @@ class MWindow(QMainWindow, Ui_mainWindow):
     def obstacle_toolbox_show(self):
         self.obstacle_toolbox_widget.show()
 
-    def update_view(self, caller=None, focus_on_network=None):
-        """ update all components. triggered by the component caller"""
+    def update_view(self, focus_on_network=None):
+        """ update all components."""
 
         # reset selection of all other selectable elements
-        if caller is not None:
-            if caller is not self.intersection_list:
-                self.intersection_list.reset_selection()
-            if caller is not self.lanelet_list:
-                self.lanelet_list.reset_selection()
-
-        self.lanelet_list.update(self.cr_viewer.current_scenario)
-        self.intersection_list.update(self.cr_viewer.current_scenario)
-
         if self.cr_viewer.current_scenario is None:
             return
-        if self.intersection_list.selected_id is not None:
-            selected_intersection = \
-                self.cr_viewer.current_scenario.lanelet_network.find_intersection_by_id(
-                    self.intersection_list.selected_id)
-        else:
-            selected_intersection = None
-        if self.lanelet_list.selected_id is not None:
-            selected_lanelet = self.cr_viewer.current_scenario.lanelet_network.find_lanelet_by_id(
-                self.lanelet_list.selected_id)
-        else:
-            selected_lanelet = None
         if focus_on_network is None:
             focus_on_network = config.AUTOFOCUS
-        self.cr_viewer.update_plot(sel_lanelet=selected_lanelet,
-                                   sel_intersection=selected_intersection,
-                                   focus_on_network=focus_on_network)
+        self.cr_viewer.update_plot(focus_on_network=focus_on_network)
 
-    def make_trigger_exclusive(self):
-        """ 
-        Only one component can trigger the plot update
-        """
-        if self.lanelet_list.new:
-            self.lanelet_list.new = False
-            self.intersection_list.reset_selection()
-        elif self.intersection_list.new:
-            self.intersection_list.new = False
-            self.lanelet_list.reset_selection()
-        else:
-            # triggered by click on canvas
-            self.lanelet_list.reset_selection()
-            self.intersection_list.reset_selection()
 
     def store_scenario(self):
         self.scenarios.append(copy.deepcopy(self.cr_viewer.current_scenario))

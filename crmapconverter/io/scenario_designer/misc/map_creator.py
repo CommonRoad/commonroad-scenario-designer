@@ -749,7 +749,8 @@ class MapCreator:
 
         return intersection, new_traffic_signs, new_traffic_lights, new_lanelets
 
-    def calc_radius(self, lanelet):
+    @staticmethod
+    def calc_radius(lanelet):
         line_predecessor = lanelet.left_vertices[0] - lanelet.right_vertices[0]
         line_lanelet = lanelet.left_vertices[-1] - lanelet.right_vertices[-1]
         b = (lanelet.center_vertices[0, 1] * line_predecessor[0] + line_predecessor[1] * lanelet.center_vertices[
@@ -760,7 +761,8 @@ class MapCreator:
         rad = round(rad, 0)
         return rad
 
-    def calc_angle_between2(self, lanelet):
+    @staticmethod
+    def calc_angle_between2(lanelet):
         line_predecessor = lanelet.left_vertices[-1] - lanelet.right_vertices[-1]
         line_lanelet = lanelet.left_vertices[0] - lanelet.right_vertices[0]
         norm_predecessor = np.linalg.norm(line_predecessor)
@@ -773,7 +775,8 @@ class MapCreator:
 
         return angle
 
-    def fit_intersection_to_predecessor(self, predecessor, successor, intersection, network, scenario):
+    @staticmethod
+    def fit_intersection_to_predecessor(predecessor, successor, intersection, network, scenario):
         if predecessor and successor and intersection:
             lanelet_ids = []
             x = []
@@ -821,7 +824,7 @@ class MapCreator:
             factor = (np.linalg.norm(successor.left_vertices[0, :] - successor.right_vertices[0, :])
                       / np.linalg.norm((predecessor.left_vertices[-1, :] - predecessor.right_vertices[-1, :])))
 
-            ang = self.calc_angle_between(predecessor, successor)
+            ang = MapCreator.calc_angle_between(predecessor, successor)
             successor.translate_rotate(np.array([0, 0]), ang)
             successor._left_vertices = successor.left_vertices / factor
             successor._right_vertices = successor.right_vertices / factor
