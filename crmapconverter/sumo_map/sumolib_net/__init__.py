@@ -38,7 +38,7 @@ from crmapconverter.sumo_map.sumolib_net.connection import Connection
 from crmapconverter.sumo_map.sumolib_net.roundabout import Roundabout
 from crmapconverter.sumo_map.sumolib_net.junction import Junction
 from crmapconverter.sumo_map.sumolib_net.crossing import Crossing
-from crmapconverter.sumo_map.sumolib_net.tls import TLS, TLSProgram
+from crmapconverter.sumo_map.sumolib_net.tls import TLS, TLSProgram, Phase, SumoSignalState, SumoTLSType
 from crmapconverter.sumo_map.sumolib_net.edge_type import EdgeTypes, EdgeType
 from crmapconverter.sumo_map.sumolib_net.constants import SUMO_VEHICLE_CLASSES, SumoNodeType, SumoVehicles
 

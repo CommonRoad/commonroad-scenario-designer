@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<commonRoad timeStepSize="0.1" commonRoadVersion="2020a" author="" affiliation="" source="OpenDRIVE 2 Lanelet Converter" benchmarkID="ZAM_OpenDrive-123" date="2020-12-19">
+<commonRoad timeStepSize="0.1" commonRoadVersion="2020a" author="" affiliation="" source="OpenDRIVE 2 Lanelet Converter" benchmarkID="ZAM_OpenDrive-123" date="2021-03-02">
   <location>
     <geoNameId>-999</geoNameId>
     <gpsLatitude>999</gpsLatitude>
@@ -17,8 +17,8 @@
     </geoTransformation>
   </location>
   <scenarioTags>
-    <urban/>
     <highway/>
+    <urban/>
   </scenarioTags>
   <lanelet id="100">
     <leftBound>
@@ -442,7 +442,6 @@
         <x>361863.55</x>
         <y>5296858.6</y>
       </point>
-      <lineMarking>no_marking</lineMarking>
     </leftBound>
     <rightBound>
       <point>
@@ -865,7 +864,6 @@
         <x>361860.09</x>
         <y>5296857.4</y>
       </point>
-      <lineMarking>no_marking</lineMarking>
     </rightBound>
     <adjacentLeft ref="101" drivingDir="opposite"/>
     <laneletType>driveWay</laneletType>
@@ -1296,7 +1294,6 @@
         <x>361849.69</x>
         <y>5296910.8</y>
       </point>
-      <lineMarking>no_marking</lineMarking>
     </leftBound>
     <rightBound>
       <point>
@@ -1723,7 +1720,6 @@
         <x>361852.70</x>
         <y>5296911.6</y>
       </point>
-      <lineMarking>no_marking</lineMarking>
     </rightBound>
     <adjacentLeft ref="100" drivingDir="opposite"/>
     <laneletType>driveWay</laneletType>
@@ -1922,7 +1918,6 @@
         <x>361873.14</x>
         <y>5296838.3</y>
       </point>
-      <lineMarking>no_marking</lineMarking>
     </leftBound>
     <rightBound>
       <point>
@@ -2304,7 +2299,6 @@
         <x>361863.55</x>
         <y>5296858.6</y>
       </point>
-      <lineMarking>no_marking</lineMarking>
     </leftBound>
     <rightBound>
       <point>
@@ -2487,7 +2481,6 @@
         <x>361865.91</x>
         <y>5296859.4</y>
       </point>
-      <lineMarking>no_marking</lineMarking>
     </rightBound>
     <adjacentLeft ref="102" drivingDir="opposite"/>
     <laneletType>driveWay</laneletType>
@@ -2506,7 +2499,6 @@
         <x>361873.14</x>
         <y>5296838.3</y>
       </point>
-      <lineMarking>no_marking</lineMarking>
     </leftBound>
     <rightBound>
       <point>
@@ -2521,7 +2513,6 @@
         <x>361870.04</x>
         <y>5296836.4</y>
       </point>
-      <lineMarking>no_marking</lineMarking>
     </rightBound>
     <adjacentLeft ref="105" drivingDir="opposite"/>
     <laneletType>driveWay</laneletType>
@@ -2540,7 +2531,6 @@
         <x>361873.14</x>
         <y>5296838.3</y>
       </point>
-      <lineMarking>no_marking</lineMarking>
     </leftBound>
     <rightBound>
       <point>
@@ -2555,7 +2545,6 @@
         <x>361876.11</x>
         <y>5296840.1</y>
       </point>
-      <lineMarking>no_marking</lineMarking>
     </rightBound>
     <adjacentLeft ref="104" drivingDir="opposite"/>
     <laneletType>driveWay</laneletType>
@@ -3266,7 +3255,6 @@
         <x>361928.36</x>
         <y>5296766.9</y>
       </point>
-      <lineMarking>no_marking</lineMarking>
     </leftBound>
     <rightBound>
       <point>
@@ -3973,7 +3961,6 @@
         <x>361925.52</x>
         <y>5296764.6</y>
       </point>
-      <lineMarking>no_marking</lineMarking>
     </rightBound>
     <adjacentLeft ref="107" drivingDir="opposite"/>
     <laneletType>driveWay</laneletType>
@@ -4688,7 +4675,6 @@
         <x>361873.14</x>
         <y>5296838.3</y>
       </point>
-      <lineMarking>no_marking</lineMarking>
     </leftBound>
     <rightBound>
       <point>
@@ -5399,7 +5385,6 @@
         <x>361876.11</x>
         <y>5296840.1</y>
       </point>
-      <lineMarking>no_marking</lineMarking>
     </rightBound>
     <adjacentLeft ref="106" drivingDir="opposite"/>
     <laneletType>driveWay</laneletType>
@@ -5758,7 +5743,6 @@
         <x>361955.66</x>
         <y>5296731.9</y>
       </point>
-      <lineMarking>no_marking</lineMarking>
     </leftBound>
     <rightBound>
       <point>
@@ -6113,7 +6097,6 @@
         <x>361952.95</x>
         <y>5296729.8</y>
       </point>
-      <lineMarking>no_marking</lineMarking>
     </rightBound>
     <adjacentLeft ref="109" drivingDir="opposite"/>
     <laneletType>driveWay</laneletType>
@@ -6819,7 +6802,6 @@
         <x>361930.82</x>
         <y>5296768.8</y>
       </point>
-      <lineMarking>no_marking</lineMarking>
     </rightBound>
     <adjacentLeft ref="108" drivingDir="opposite"/>
     <laneletType>driveWay</laneletType>
@@ -6922,7 +6904,6 @@
         <x>361962.38</x>
         <y>5296722.3</y>
       </point>
-      <lineMarking>no_marking</lineMarking>
     </leftBound>
     <rightBound>
       <point>
@@ -7021,7 +7002,6 @@
         <x>361959.35</x>
         <y>5296720.7</y>
       </point>
-      <lineMarking>no_marking</lineMarking>
     </rightBound>
     <adjacentLeft ref="111" drivingDir="opposite"/>
     <laneletType>driveWay</laneletType>
@@ -7231,7 +7211,6 @@
         <x>361958.21</x>
         <y>5296733.9</y>
       </point>
-      <lineMarking>no_marking</lineMarking>
     </rightBound>
     <adjacentLeft ref="110" drivingDir="opposite"/>
     <laneletType>driveWay</laneletType>
@@ -7582,7 +7561,6 @@
         <x>361960.06</x>
         <y>5296679.7</y>
       </point>
-      <lineMarking>no_marking</lineMarking>
     </leftBound>
     <rightBound>
       <point>
@@ -7929,7 +7907,6 @@
         <x>361956.91</x>
         <y>5296680.7</y>
       </point>
-      <lineMarking>no_marking</lineMarking>
     </rightBound>
     <adjacentLeft ref="113" drivingDir="opposite"/>
     <laneletType>driveWay</laneletType>
@@ -8627,7 +8604,6 @@
         <x>361965.75</x>
         <y>5296724.1</y>
       </point>
-      <lineMarking>no_marking</lineMarking>
     </rightBound>
     <adjacentLeft ref="112" drivingDir="opposite"/>
     <laneletType>driveWay</laneletType>

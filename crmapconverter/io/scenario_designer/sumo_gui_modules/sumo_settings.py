@@ -6,7 +6,7 @@ from commonroad.common.util import Interval
 from commonroad.scenario.obstacle import ObstacleType
 
 from crmapconverter.io.scenario_designer.gui_resources.sumo_settings_ui import Ui_MainWindow
-from crmapconverter.io.scenario_designer.util import Observable
+from crmapconverter.io.scenario_designer.misc.util import Observable
 from crmapconverter.sumo_map.config import SumoConfig
 
 

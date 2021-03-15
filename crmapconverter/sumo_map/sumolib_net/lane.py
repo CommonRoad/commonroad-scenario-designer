@@ -175,7 +175,7 @@ class Lane:
         return self._edge._lanes.index(self)
 
     def getID(self):
-        return "%s_%s" % (self._edge._id, self.getIndex())
+        return f"{self._edge._id}_{self.getIndex()}"
 
     def getEdge(self):
         return self._edge

@@ -12,7 +12,8 @@ cartopy>=0.17.0
 # only for graphical display
 PyQt5>=5.12.2
 matplotlib>=3.1.0
-shapely
+shapely>=1.7.1
+ipython>=7.19.0
 
 # for sumo_map converter
 -e git+ssh://git@gitlab.lrz.de/cps/sumo-interface.git@develop#egg=sumocr

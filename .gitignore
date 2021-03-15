@@ -9,7 +9,7 @@ venv/
 .idea/
 src/*
 unittest_*.xml
-# *.env
+files/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
