@@ -60,14 +60,11 @@ class MWindow(QMainWindow, Ui_mainWindow):
         # attributes
         self.filename = None
         self.cr_viewer = AnimatedViewer(self)
-        #self.count = 0
-        #self.timer = None
-        #self.ani_path = None
         self.slider_clicked = False
 
         # Scenario + Lanelet variables
         self.scenarios = []
-        self.current_scenario_index = 0
+        self.current_scenario_index = -1
         self.selected_lanelet = None
         self.last_added_lanelet_id = None
 
@@ -1790,9 +1787,10 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
     def store_scenario(self):
         self.scenarios.append(copy.deepcopy(self.cr_viewer.current_scenario))
+        self.current_scenario_index += 1
 
     def undo_action(self):
-        if self.current_scenario_index > 0:
+        if self.current_scenario_index >= 0:
             self.current_scenario_index -= 1
         else:
             return
