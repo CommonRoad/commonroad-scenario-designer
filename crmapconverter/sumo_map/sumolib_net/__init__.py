@@ -36,6 +36,7 @@ from xml.sax import parse, handler
 
 from enum import Enum, unique
 
+
 # class Net:
 #     """The whole sumo network."""
 #
@@ -598,7 +599,7 @@ class Node:
 
     @property
     def incoming(self) -> List['Edge']:
-        return self.incoming
+        return self._incoming
 
     def setFoes(self, index, foes, prohibits):
         self._foes[index] = foes
@@ -611,8 +612,8 @@ class Node:
         ret = 0
         for lane_id in self.inc_lanes:
             (edge_id, index) = lane_id.split("_")
-            edge = [e for e in self._incoming if e.getID() == edge_id][0]
-            for candidate_conn in edge.getLane(int(index)).getOutgoing():
+            edge = [e for e in self._incoming if e.id == edge_id][0]
+            for candidate_conn in edge.lanes[int(index)].outgoing:
                 if candidate_conn == conn:
                     return ret
                 ret += 1
@@ -627,7 +628,7 @@ class Node:
         return ps[-(possProhibitorIndex - 1)] == '1'
 
     def getConnections(self, source=None, target=None):
-        incoming = list(self.getIncoming())
+        incoming = list(self.incoming)
         if source:
             incoming = [source]
         conns = []
@@ -650,11 +651,13 @@ class Node:
         """
         node = ET.Element("node")
         node.set("id", str(self.id))
-        node.set("type", str(self.type))
-        for k, v in zip(["x", "y", "z"][:self.coord.size[0]], self.coord):
+        node.set("type", str(self.type.value))
+        for k, v in zip(["x", "y", "z"][:self.coord.shape[0]], self.coord):
             node.set(k, str(v))
-        node.set("incoming", " ".join([str(i.getID()) for i in self.incoming]))
-        node.set("outgoing", " ".join([str(o.getID()) for o in self.outgoing]))
+        if self.incoming:
+            node.set("incoming", " ".join([str(i.id) for i in self.incoming]))
+        if self.outgoing:
+            node.set("outgoing", " ".join([str(o.id) for o in self.outgoing]))
         if self._foes is not None:
             # TODO: convert foes
             pass
@@ -662,9 +665,9 @@ class Node:
             # TODO: convert prohibits
             pass
         if self.inc_lanes:
-            node.set("incLanes", " ".join([str(l.getID()) for l in self.inc_lanes]))
+            node.set("incLanes", " ".join([str(l.id) for l in self.inc_lanes]))
         if self.int_lanes:
-            node.set("intLanes", " ".join([str(l.getID()) for l in self.int_lanes]))
+            node.set("intLanes", " ".join([str(l.id) for l in self.int_lanes]))
         if self.shape is not None:
             node.set("shape", to_shape_string(self.shape))
         if self.tl is not None:
@@ -999,7 +1002,7 @@ class Lane:
         return self._shape
 
     @shape.setter
-    def shape(self, shape: np.ndarry):
+    def shape(self, shape: np.ndarray):
         self._shape = shape
 
     @property
@@ -1018,7 +1021,7 @@ class Lane:
 
     @property
     def index(self) -> int:
-        return self._edge._lanes.index(self)
+        return self.edge.lanes.index(self)
 
     @property
     def outgoing(self) -> List['Connection']:
@@ -1075,7 +1078,17 @@ class Lane:
     def __eq__(self, other: 'Lane'):
         return type(self) == type(other) \
                and self.edge.id == other.edge.id \
-               and self.index == other.index
+               and self.speed == other.speed \
+               and self.length == other.length \
+               and self.width == other.width \
+               and self._shapeWithJunctions == other._shapeWithJunctions \
+               and self._shapeWithJunctions3D == other._shapeWithJunctions3D \
+               and len(self.outgoing) == len(other.outgoing) \
+               and all(x == y for x, y in zip(self.outgoing, other.outgoing)) \
+               and len(self.allow) == len(other.allow) \
+               and all(x == y for x, y in zip(self.allow, other.allow)) \
+               and len(self.disallow) == len(other.disallow) \
+               and all(x == y for x, y in zip(self.disallow, other.disallow))
 
     def __ne__(self, other: 'Lane'):
         return not self.__eq__(other)
@@ -1146,7 +1159,7 @@ class Connection:
                  tls: 'TLSProgram' = None,
                  tl_link: int = None,
                  state=None,
-                 via_lane_id=None,
+                 via_lane_id: List[str] = None,
                  shape: Optional[np.ndarray] = None,
                  keep_clear: bool = None,
                  cont_pos=None):
@@ -1196,11 +1209,11 @@ class Connection:
         self._to_lane = to_lane
 
     @property
-    def via(self):
+    def via(self) -> Optional[List[str]]:
         return self._via
 
     @via.setter
-    def via(self, via):
+    def via(self, via: List[str]):
         self._via = via
 
     @property
@@ -1247,12 +1260,12 @@ class Connection:
         Converts this connection to it's xml representation
         """
         c = ET.Element("connection")
-        c.set("from", str(self._from))
-        c.set("to", str(self._to))
-        c.set("fromLane", str(self._from_lane))
-        c.set("toLane", str(self._to_lane))
+        c.set("from", str(self._from.id))
+        c.set("to", str(self._to.id))
+        c.set("fromLane", str(self._from_lane.index))
+        c.set("toLane", str(self._to_lane.index))
         if self._via is not None:
-            c.set("via", str(self._via))
+            c.set("via", " ".join(self._via))
         if self._direction is not None:
             c.set("dir", str(self._direction))
         if self._tls is not None:
@@ -1316,8 +1329,8 @@ class Crossing:
 
     def to_xml(self) -> str:
         c = ET.Element("crossing")
-        c.set("node", str(self.node.getID()))
-        c.set("edges", " ".join(str(edge.getID()) for edge in self.edges))
+        c.set("node", str(self.node.id))
+        c.set("edges", " ".join(str(edge.id) for edge in self.edges))
         if self.priority is not None:
             c.set("priority", str(self.priority))
         if self.width is not None:
@@ -1442,7 +1455,7 @@ class EdgeType:
             node.set("speed", f"{self.speed:.2f}")
         if self.sidewalk_width > 0:
             node.set("sidewalkWidth", f"{self.sidewalk_width:.2f}")
-        return ET.tostring(node, encoding="unidcode")
+        return ET.tostring(node, encoding="unicode")
 
     def __str__(self):
         return self.to_xml()

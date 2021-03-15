@@ -2,7 +2,7 @@ from commonroad.scenario.obstacle import ObstacleType
 from commonroad.scenario.traffic_sign import TrafficLightState
 from commonroad.scenario.lanelet import LaneletType
 from commonroad.scenario.traffic_sign import SupportedTrafficSignCountry
-from crmapconverter.sumo_map.sumolib_net.constants import SUMO_VEHICLE_CLASSES
+from crmapconverter.sumo_map.sumolib_net import SUMO_VEHICLE_CLASSES
 from typing import Tuple, Dict, Set
 from crmapconverter.sumo_map.sumolib_net import EdgeTypes, EdgeType, VehicleType, SignalState
 from xml.etree import ElementTree as ET

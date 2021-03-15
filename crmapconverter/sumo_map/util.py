@@ -2,7 +2,7 @@ import os
 import warnings
 from copy import deepcopy
 from pathlib import Path
-from typing import Dict, List, Iterable
+from typing import Dict, List, Iterable, Tuple
 from xml.dom import minidom
 import lxml.etree as et
 
@@ -12,7 +12,7 @@ from commonroad.geometry.shape import Polygon
 from commonroad.scenario.lanelet import Lanelet
 from commonroad.scenario.lanelet import LaneletNetwork
 from commonroad.visualization.plot_helper import draw_object
-from crmapconverter.sumo_map.sumolib_net.edge import Edge
+from crmapconverter.sumo_map.sumolib_net import Edge
 from shapely.geometry import LineString
 from shapely.ops import unary_union
 from shapely.validation import explain_validity
@@ -247,7 +247,7 @@ def _erode_lanelets(lanelet_network: LaneletNetwork,
 
 def _find_intersecting_edges(
     edges_dict: Dict[int, List[int]],
-    lanelet_network: LaneletNetwork, visualize=False) -> List[List[int]]:
+    lanelet_network: LaneletNetwork, visualize=False) -> List[Tuple[int, int]]:
     """
 
     :param lanelet_network:
@@ -295,7 +295,7 @@ def _find_intersecting_edges(
                     # shapely
                     if shape_0.intersection(shape_1).area > 0.0:
                         edges_intersect = True
-                        intersecting_edges.append([edge_id, edge_id_other])
+                        intersecting_edges.append((edge_id, edge_id_other))
                         break
 
     return intersecting_edges

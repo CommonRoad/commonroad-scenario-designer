@@ -19,8 +19,8 @@ class TrafficLightEncoder:
         # create SUMO Traffic Light Node
         self.index += 1
         program_id = f"tl_program_{self.index}"
-        traffic_light_id = str(node.getID())
-        node.setType(NodeType.TRAFFIC_LIGHT.value)
+        traffic_light_id = str(node.id)
+        node.type = NodeType.TRAFFIC_LIGHT
 
         time_offset = max(tl.time_offset for tl in traffic_lights)
         tls_program = TLSProgram(traffic_light_id, time_offset * self.conf.dt, program_id)
@@ -53,12 +53,12 @@ class TrafficLightEncoder:
                                                       b.getShape()[-1] - b.getShape()[0])
                 foes = ([i, j] for i in green_connections for j in green_connections
                         if i < j
-                        and lines_intersect(connections[i].getShape(), connections[j].getShape())
+                        and lines_intersect(connections[i].shape, connections[j].shape)
                         and dot_connections(connections[i], connections[j]) < 0)
                 for foe in foes:
                     # make sure foe[0] is more straight than foe[1]
-                    if compute_max_curvature_from_polyline(connections[foe[0]].getShape()) \
-                        > compute_max_curvature_from_polyline(connections[foe[1]].getShape()):
+                    if compute_max_curvature_from_polyline(connections[foe[0]].shape) \
+                        > compute_max_curvature_from_polyline(connections[foe[1]].shape):
                         foe[0], foe[1] = foe[1], foe[0]
                     # give foe[0] priority
                     sumo_state[foe[0]] = SignalState.GREEN_PRIORITY

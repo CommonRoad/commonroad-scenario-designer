@@ -80,12 +80,12 @@ class TrafficSignEncoder:
         assert len(traffic_sign_element.additional_values) == 1, \
             f"MAX_SPEED, can only have one additional attribute, has: {traffic_sign_element.additional_values}"
         max_speed = float(traffic_sign_element.additional_values[0])  # in m/s
-        new_type = self.edge_types.create_from_update_speed(edge.getType(), max_speed)
+        new_type = self.edge_types.create_from_update_speed(edge.type_id, max_speed)
         # According to https://gitlab.lrz.de/tum-cps/commonroad-scenarios/-/blob/master/documentation/XML_commonRoad_2020a.pdf
         # MAX_SPEED is valid from the start of the specified lanelet, until another speed sign is set
         for e in self._bfs_until(edge, traffic_sign_element):
-            e.setType(new_type.id)
-            for lane in e.getLanes():
+            e.type_id = new_type.id
+            for lane in e.lanes:
                 lane.speed = max_speed
 
     def _bfs_until(self, start: Edge, element: TrafficSignElement) -> Generator[Edge, None, None]:
@@ -106,7 +106,7 @@ class TrafficSignEncoder:
             if any(elem.traffic_sign_element_id == start_id for elem in self.edge_traffic_signs[edge]
                    if edge != start):
                 continue
-            queue += edge.getOutgoing()
+            queue += edge.outgoing
             yield edge
 
     def _set_priority(self, element: TrafficSignElement, edge: Edge, max_curvature: float = 1):
@@ -119,9 +119,9 @@ class TrafficSignEncoder:
         """
         assert len(element.additional_values) == 0, \
             f"PRIORITY can only have none additional attribute, has: {element.additional_values}"
-        old_type = self.edge_types.types[edge.getType()]
+        old_type = self.edge_types.types[edge.type_id]
         new_type = self.edge_types.create_from_update_priority(old_type.id, old_type.priority + 1)
-        queue = list(edge.getOutgoing())
+        queue = list(edge.outgoing)
         parents: Dict[edge, List[edge]] = defaultdict(list)
         # memoized curvatures
         curvatures: Dict[edge, float] = dict()
@@ -133,8 +133,8 @@ class TrafficSignEncoder:
 
             curvature = np.max([
                 compute_max_curvature_from_polyline(np.array(lane.shape))
-                for lane in edge.getLanes()
-            ]) if edge.getLanes() else float("-inf")
+                for lane in edge.lanes
+            ]) if edge.lanes else float("-inf")
             curvature = np.max([curvature] + [compute_max_path_curvature(parent) for parent in parents[edge]])
             curvatures[edge] = curvature
             return curvature
@@ -161,7 +161,7 @@ class TrafficSignEncoder:
         """
         assert len(element.additional_values) == 0, \
             f"STOP can only have none additional attribute, has: {element.additional_values}"
-        edge.getToNode().setType(NodeType.ALLWAY_STOP.value)
+        edge.to_node.type = NodeType.ALLWAY_STOP
 
     def _set_yield(self, element: TrafficSignElement, edge: Edge):
         """
@@ -172,11 +172,11 @@ class TrafficSignEncoder:
         """
         assert len(element.additional_values) == 0, \
             f"GIVEWAY can only have none additional attribute, has: {element.additional_values}"
-        edge.getToNode().setType(NodeType.PRIORITY_STOP.value)
-        for outgoing in edge.getOutgoing():
-            old_type = self.edge_types.types[outgoing.getType()]
+        edge.to_node.type = NodeType.PRIORITY_STOP
+        for outgoing in edge.outgoing:
+            old_type = self.edge_types.types[outgoing.type_id]
             new_type = self.edge_types.create_from_update_priority(old_type.id, max(old_type.priority - 1, 0))
-            outgoing.setType(new_type.id)
+            outgoing.type_id = new_type.id
 
     def _set_right_before_left(self, element: TrafficSignElement, edge: Edge):
         """
@@ -187,7 +187,7 @@ class TrafficSignEncoder:
         """
         assert len(element.additional_values) == 0, \
             f"RIGHT_BEFORE_LEFT can only have none additional attribute, has: {element.additional_values}"
-        edge.getToNode().setType(NodeType.RIGHT_BEFORE_LEFT.value)
+        edge.to_node.type = NodeType.RIGHT_BEFORE_LEFT
 
     def _set_ban_car_truck_bus_motorcycle(self, element: TrafficSignElement, edge: Edge):
         """
@@ -198,8 +198,8 @@ class TrafficSignEncoder:
         """
         assert len(element.additional_values) == 0, \
             f"BAN_CAR_TRUCK_BUS_MOTORCYCLE can only have none additional attribute, has: {element.additional_values}"
-        old_type = self.edge_types.types[edge.getType()]
-        disallow = set(old_type.disallow) | {
+        old_type = self.edge_types.types[edge.type_id]
+        disallow = {v_type.value for v_type in old_type.disallow} | {
             VehicleType.PASSENGER.value, VehicleType.HOV.value, VehicleType.TAXI.value,
             VehicleType.BUS.value, VehicleType.COACH.value, VehicleType.DELIVERY.value,
             VehicleType.TRUCK.value, VehicleType.TRAILER.value, VehicleType.MOTORCYCLE.value,
@@ -207,4 +207,4 @@ class TrafficSignEncoder:
         }
         new_type = self.edge_types.create_from_update_disallow(old_type.id, list(disallow))
         for successor in self._bfs_until(edge, element):
-            successor.setType(new_type.id)
+            successor.type_id = new_type.id
