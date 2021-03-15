@@ -189,7 +189,7 @@ LEAST_CLUSTER_LENGTH = 10.0
 MERGE_DISTANCE = 3.5
 # threshold which is used to determine if a successor of an incoming lane is considered as straight
 INTERSECTION_STRAIGHT_THRESHOLD = 35.0
-# option to clean up intersections and add generic traffic lights to it
+# option to clean up intersections and add new traffic lights to it
 INTERSECTION_EMHANCEMENT = True
 
 # Toggle edit for user
