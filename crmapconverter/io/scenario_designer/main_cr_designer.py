@@ -24,7 +24,7 @@ from crmapconverter.io.scenario_designer.gui_src import CR_Scenario_Designer  # 
 from crmapconverter.io.scenario_designer.converter_modules.opendrive_interface import OpenDRIVEInterface
 from crmapconverter.io.scenario_designer.converter_modules.osm_interface import OSMInterface
 from crmapconverter.io.scenario_designer.gui.gui_settings import GUISettings
-from crmapconverter.io.scenario_designer.gui.gui_viewer import LaneletList, IntersectionList, AnimatedViewer
+from crmapconverter.io.scenario_designer.gui.gui_viewer import AnimatedViewer
 from crmapconverter.io.scenario_designer.gui_resources.MainWindow import Ui_mainWindow
 from crmapconverter.io.scenario_designer.toolboxes.gui_sumo_simulation import SUMO_AVAILABLE
 from crmapconverter.io.scenario_designer.toolboxes.road_network_toolbox_ui import RoadNetworkToolbox

@@ -1,32 +1,28 @@
-"""Viewer module to visualize and inspect the created lanelet scenario."""
-
 from typing import Union, List, Tuple
 import numpy as np
 
-import matplotlib
-from matplotlib.animation import FuncAnimation, writers
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.figure import Figure
-
-from matplotlib.path import Path
-from matplotlib.patches import PathPatch
-matplotlib.use("Qt5Agg")
-
-from PyQt5.QtCore import pyqtSlot
-from PyQt5.QtWidgets import QTableWidget, QFileDialog, QMessageBox
-from PyQt5.QtWidgets import QSizePolicy, QTableWidgetItem, QAbstractItemView
+from PyQt5.QtWidgets import QFileDialog, QMessageBox
+from PyQt5.QtWidgets import QSizePolicy
 
 from commonroad.scenario.intersection import Intersection
 from commonroad.common.util import Interval
 from commonroad.scenario.scenario import Scenario
-from commonroad.scenario.lanelet import Lanelet, is_natural_number
-from commonroad.visualization.draw_dispatch_cr import draw_object
+from commonroad.scenario.lanelet import Lanelet
+from commonroad.visualization.mp_renderer import MPRenderer
 from commonroad.geometry.shape import Circle
 
 from crmapconverter.io.scenario_designer.toolboxes.gui_sumo_simulation import SUMO_AVAILABLE
 if SUMO_AVAILABLE:
     from crmapconverter.sumo_map.config import SumoConfig
 from crmapconverter.io.scenario_designer.misc.util import Observable
+
+import matplotlib
+from matplotlib.animation import FuncAnimation, writers
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.figure import Figure
+from matplotlib.path import Path
+from matplotlib.patches import PathPatch
+matplotlib.use("Qt5Agg")
 
 __author__ = "Benjamin Orthen, Stefan Urban, Max Winklhofer, Guyue Huang, Max Fruehauf, Sebastian Maierhofer"
 __copyright__ = "TUM Cyber-Physical Systems Group"
@@ -58,6 +54,7 @@ class DynamicCanvas(FigureCanvas):
 
         self.ax = None
         self.drawer = Figure(figsize=(width, height), dpi=dpi)
+        self.rnd = MPRenderer(ax=self.ax)
 
         self.draw_params = {
             'scenario': {
@@ -99,7 +96,6 @@ class DynamicCanvas(FigureCanvas):
             limits = None
             self.ax = self.drawer.add_subplot(111)
 
-        self.ax.set_aspect("equal", "datalim")
         self.ax.set_axis_off()
         self.draw_idle()
         if keep_limits and limits:
@@ -193,11 +189,11 @@ class DynamicCanvas(FigureCanvas):
 
         draw_params_merged = _merge_dict(self.draw_params.copy(), draw_params)
 
-        draw_object(scenario,
-                    ax=self.ax,
-                    draw_params=draw_params_merged,
-                    plot_limits=plot_limits,
-                    handles=self._handles)
+        self.rnd.plot_limits = plot_limits
+        self.rnd.ax = self.ax
+        scenario.draw(renderer=self.rnd, draw_params=draw_params_merged)
+        self.rnd.render(show=False)
+
         if not plot_limits:
             self.ax.set(xlim=xlim)
             self.ax.set(ylim=ylim)
@@ -225,97 +221,12 @@ class DynamicCanvas(FigureCanvas):
             Interval(plot_limits[2], plot_limits[3])
         ]) if plot_limits else scenario.obstacles
 
-        traffic_lights = scenario.lanelet_network.traffic_lights
-        traffic_light_lanelets = [
-            lanelet for lanelet in scenario.lanelet_network.lanelets
-            if lanelet.traffic_lights
-        ]
-
         draw_params_merged = _merge_dict(self.draw_params.copy(), draw_params)
 
-        for obj in [obstacles, traffic_lights]:
-            draw_object(obstacles,
-                        ax=self.ax,
-                        draw_params=draw_params_merged,
-                        plot_limits=plot_limits,
-                        handles=self._handles)
-
-
-class ScenarioElementList(QTableWidget):
-    def __init__(self, action_on_click, parent=None):
-        """ 
-        :param action_on_click: action to call when an list item is clicked.
-            reference to self will be passed as first argument
-        """
-        super().__init__(parent)
-        self.setSelectionBehavior(QAbstractItemView.SelectRows)
-        self.clicked.connect(self.onClick)
-        self.update_action = lambda: action_on_click(self)
-
-        self.selected_id: int = None
-        self.header_labels: List = None
-
-    def _update(self, data: List[Tuple]):
-        # set dimesions
-        if data and not len(self.header_labels) == len(data[0]):
-            raise RuntimeError()
-        self.setRowCount(len(data))
-        self.setColumnCount(len(self.header_labels))
-        # set content
-        self.setHorizontalHeaderLabels(self.header_labels)
-        for y, row in enumerate(data):
-            x = 0
-            for element in row:
-                self.setItem(y, x, QTableWidgetItem(str(element)))
-                x += 1
-
-    @pyqtSlot()
-    def onClick(self):
-        """ """
-        selected_item = self.selectedItems()
-        if not selected_item:
-            self.selected_id = None
-            return
-        self.selected_id = int(selected_item[0].text())
-
-        self.update_action()
-
-    def reset_selection(self):
-        """ unselect all elements """
-        self.selected_id = None
-        self.clearSelection()
-
-
-class IntersectionList(ScenarioElementList):
-    def __init__(self, action_on_click, parent=None):
-        super().__init__(action_on_click, parent)
-        self.header_labels = ["Intersection-Id", "Description"]
-
-    def update(self, scenario):
-        if scenario is None:
-            self.close()
-        intersection_data = []
-        for intersection in scenario.lanelet_network.intersections:
-            description = None
-            intersection_data.append(
-                (intersection.intersection_id, description))
-        super()._update(sorted(intersection_data))
-
-
-class LaneletList(ScenarioElementList):
-    def __init__(self, action_on_click, parent=None):
-        super().__init__(action_on_click, parent)
-        self.header_labels = ["Lanelet-Id", "LaneletType"]
-
-    def update(self, scenario):
-        if scenario is None:
-            self.close()
-        lanelet_data = []
-        for lanelet in scenario.lanelet_network.lanelets:
-            description = ", ".join([t.value for t in lanelet.lanelet_type])
-            lanelet_data.append((lanelet.lanelet_id, description))
-        super()._update(sorted(lanelet_data))
-        #self.lanelet_data = sorted(lanelet_data)
+        self.rnd.ax = self.ax
+        for obj in obstacles:
+            obj.draw(renderer=self.rnd, draw_params=draw_params_merged)
+            self.rnd.render(show=True)
 
 
 def draw_lanelet_polygon(lanelet, ax, color, alpha, zorder,
