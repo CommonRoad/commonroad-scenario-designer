@@ -19,7 +19,7 @@ from commonroad.scenario.scenario import Tag
 from crmapconverter.opendrive.opendriveparser.elements.opendrive import OpenDrive
 from crmapconverter.opendrive.opendriveparser.parser import parse_opendrive
 from crmapconverter.opendrive.opendriveconversion.network import Network
-from crmapconverter.osm.lanelet2osm import L2OSMConverter
+from crmapconverter.lanelet_lanelet2.lanelet2osm import L2OSMConverter
 
 __author__ = "Benjamin Orthen"
 __copyright__ = "TUM Cyber-Physical Systems Group"

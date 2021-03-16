@@ -35,8 +35,8 @@ from commonroad.geometry.shape import Circle
 from crmapconverter.io.scenario_designer.sumo_gui_modules.gui_sumo_simulation import SUMO_AVAILABLE
 if SUMO_AVAILABLE:
     from crmapconverter.sumo_map.config import SumoConfig
-from crmapconverter.io.scenario_designer.util import Observable
-from crmapconverter.io.scenario_designer.gui_toolbox import LaneletInformationToolbox
+from crmapconverter.io.scenario_designer.misc.util import Observable
+from crmapconverter.io.scenario_designer.gui.gui_toolbox import LaneletInformationToolbox
 
 __author__ = "Benjamin Orthen, Stefan Urban, Max Winklhofer, Guyue Huang, Max Fruehauf"
 __copyright__ = "TUM Cyber-Physical Systems Group"
@@ -613,21 +613,18 @@ class Viewer:
         return selected_lanelets
 
           #method to refresh laneletinformation by clicking on lanelet
-        if self.lowertoolBox != None:
-            x = 0
-        else:
-            self.lowertoolBox = LaneletInformationToolbox()
-
-            self.tool2 = QDockWidget("Lanelet Information")
-            self.tool2.setFloating(True)
-            self.tool2.setFeatures(QDockWidget.AllDockWidgetFeatures)
-            self.tool2.setAllowedAreas(Qt.LeftDockWidgetArea)
-            self.tool2.setWidget(self.lowertoolBox)
-            #self.addDockWidget(Qt.LeftDockWidgetArea, self.tool2)
-            self.tool2.setGeometry()
-
-
-
+        # if self.lowertoolBox != None:
+        #     x = 0
+        # else:
+        #     self.lowertoolBox = LaneletInformationToolbox()
+        #
+        #     self.tool2 = QDockWidget("Lanelet Information")
+        #     self.tool2.setFloating(True)
+        #     self.tool2.setFeatures(QDockWidget.AllDockWidgetFeatures)
+        #     self.tool2.setAllowedAreas(Qt.LeftDockWidgetArea)
+        #     self.tool2.setWidget(self.lowertoolBox)
+        #     #self.addDockWidget(Qt.LeftDockWidgetArea, self.tool2)
+        #     self.tool2.setGeometry()
 
 
 class AnimatedViewer(Viewer):

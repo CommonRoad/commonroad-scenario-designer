@@ -11,7 +11,7 @@ __email__ = "commonroad-i06@in.tum.de"
 __status__ = "Released"
 
 from lxml import etree
-from crmapconverter.osm.osm import OSM, Node, Way, WayRelation, RightOfWayRelation
+from crmapconverter.lanelet_lanelet2.osm import OSM, Node, Way, WayRelation, RightOfWayRelation
 
 from commonroad.scenario.traffic_sign import TrafficSignIDGermany
 

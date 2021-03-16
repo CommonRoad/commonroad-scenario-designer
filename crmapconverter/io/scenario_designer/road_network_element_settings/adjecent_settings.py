@@ -175,7 +175,7 @@ class RemoveSettings(QDialog):
 
         self.lanelet = QLineEdit()
         self.lanelet.setValidator(QIntValidator())
-        self.lanelet.setMaxLength(2)
+        self.lanelet.setMaxLength(3)
         self.lanelet.setAlignment(Qt.AlignRight)
 
         self.apply_button = QPushButton()

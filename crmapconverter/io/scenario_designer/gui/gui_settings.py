@@ -2,7 +2,7 @@
 from PyQt5.QtWidgets import QMainWindow
 
 from crmapconverter.io.scenario_designer.gui_resources.gui_settings_ui import Ui_MainWindow
-from crmapconverter.io.scenario_designer import config
+from crmapconverter.io.scenario_designer.misc import config
 
 
 class GUISettings:

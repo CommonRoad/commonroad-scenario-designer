@@ -88,6 +88,8 @@ class ConversionLanelet(Lanelet):
         Returns:
            True if id_ is equal.
         """
+        if lanelet is None:
+            return False
         return self.lanelet_id == lanelet.lanelet_id
 
     """

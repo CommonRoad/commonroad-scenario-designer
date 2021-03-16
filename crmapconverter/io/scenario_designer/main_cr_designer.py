@@ -5,49 +5,44 @@ import os
 import sys
 import logging
 import numpy as np
-import time
 
-
-from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import (QMainWindow, QDockWidget, QMessageBox, QAction,
-                             QLabel, QFileDialog, QDesktopWidget, QVBoxLayout,
-                             QSlider, QWidget, QApplication, qApp, QLineEdit, QFormLayout, QPushButton, QDialog)
-from PyQt5.QtCore import Qt, QUrl
-from PyQt5.QtGui import QIcon, QKeySequence, QDesktopServices, QIntValidator
-from matplotlib.backends.backend_qt5agg import (NavigationToolbar2QT as
-                                                NavigationToolbar)
+from PyQt5.QtCore import QUrl
+from PyQt5.QtGui import QKeySequence, QDesktopServices
+from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 
 from commonroad.common.file_reader import CommonRoadFileReader
-from commonroad.common.file_writer import (CommonRoadFileWriter,
-                                           OverwriteExistingFile)
-from commonroad.scenario.scenario import Scenario, LaneletNetwork, Lanelet
+from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
+from commonroad.scenario.scenario import Scenario
+from commonroad.scenario.lanelet import Lanelet, LaneletType, LaneletNetwork
+from commonroad.scenario.traffic_sign import *
 
 from crmapconverter.io.scenario_designer.gui_resources.MainWindow import Ui_mainWindow
-from crmapconverter.io.scenario_designer.gui_toolbox import UpperToolbox, LaneletInformationToolbox
+from crmapconverter.io.scenario_designer.gui.gui_toolbox import RoadNetworkToolbox, LaneletInformationToolbox
+from crmapconverter.io.scenario_designer.gui.gui_settings import GUISettings
+from crmapconverter.io.scenario_designer.gui.gui_viewer import LaneletList, IntersectionList, find_intersection_by_id, \
+    AnimatedViewer
+
 from crmapconverter.io.scenario_designer.converter_modules.osm_interface import OSMInterface
-from crmapconverter.io.scenario_designer.converter_modules.opendrive_interface import (
-    OpenDRIVEInterface)
-from crmapconverter.io.scenario_designer.gui_settings import GUISettings
+from crmapconverter.io.scenario_designer.converter_modules.opendrive_interface import OpenDRIVEInterface
+
 from crmapconverter.io.scenario_designer.sumo_gui_modules.gui_sumo_simulation import SUMO_AVAILABLE
 if SUMO_AVAILABLE:
     from crmapconverter.io.scenario_designer.sumo_gui_modules.sumo_settings import SUMOSettings
     from crmapconverter.io.scenario_designer.sumo_gui_modules.gui_sumo_simulation import SUMOSimulation
-from crmapconverter.io.scenario_designer.gui_viewer import (
-    LaneletList, IntersectionList, find_intersection_by_id, AnimatedViewer)
-from crmapconverter.io.scenario_designer import config
-from crmapconverter.io.scenario_designer import util
-from crmapconverter.io.scenario_designer.lanelet_settings import LaneletSettings
-from crmapconverter.io.scenario_designer.curve_settings import CurveSettings
-from crmapconverter.io.scenario_designer.traffic_signs_settings import TrafficSignsSettings, TrafficSignsSelection, TrafficLightSelection, DeleteTrafficElement, EditTrafficLight
 
-from crmapconverter.io.scenario_designer.adjecent_settings import AdjecentSettings, ConnectSettings, FitSettings, RemoveSettings
-from crmapconverter.io.scenario_designer.intersection_settings import *
 
-from commonroad.scenario.lanelet import Lanelet, LaneletType, LaneletNetwork
-from commonroad.scenario.traffic_sign import *
-from commonroad.scenario.traffic_sign_interpreter import TrafficSigInterpreter
+from crmapconverter.io.scenario_designer.misc import config
+from crmapconverter.io.scenario_designer.misc import util
+from crmapconverter.io.scenario_designer.misc.map_creator import mapcreator
 
-from crmapconverter.io.scenario_designer.map_creator import mapcreator
+from crmapconverter.io.scenario_designer.road_network_element_settings.lanelet_settings import LaneletSettings
+from crmapconverter.io.scenario_designer.road_network_element_settings.curve_settings import CurveSettings
+from crmapconverter.io.scenario_designer.road_network_element_settings.traffic_signs_settings import \
+    TrafficSignsSettings, TrafficSignsSelection, TrafficLightSelection, DeleteTrafficElement, EditTrafficLight
+from crmapconverter.io.scenario_designer.road_network_element_settings.adjecent_settings import AdjecentSettings, \
+    ConnectSettings, FitSettings, RemoveSettings
+from crmapconverter.io.scenario_designer.road_network_element_settings.intersection_settings import *
+
 
 class MWindow(QMainWindow, Ui_mainWindow):
     """The Mainwindow of CR Scenario Designer."""
@@ -146,7 +141,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.create_toolbar()
         self.create_console()
         self.create_toolbox()
-        self.create_laneletinformation()
+        #self.create_laneletinformation()
         #self.create_laneletsettings()
 
         self.status = self.statusbar
@@ -613,9 +608,9 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
     def create_toolbox(self):
         """ Create the Upper toolbox."""
-        self.uppertoolBox = UpperToolbox()
+        self.uppertoolBox = RoadNetworkToolbox()
 
-        self.tool1 = QDockWidget("ToolBox")
+        self.tool1 = QDockWidget("Road Network Toolbox")
         self.tool1.setFloating(True)
         self.tool1.setFeatures(QDockWidget.AllDockWidgetFeatures)
         self.tool1.setAllowedAreas(Qt.LeftDockWidgetArea)
@@ -708,7 +703,6 @@ class MWindow(QMainWindow, Ui_mainWindow):
                 self.intersection_list_dock.show()
         else:
             self.intersection_list_dock.show()
-
 
     def create_laneletinformation(self):
         """ Create the Upper toolbox."""
@@ -960,7 +954,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         tb1.addAction(action_undo)"""
 
         tb1.addSeparator()
-        tb2 = self.addToolBar("ToolBox")
+        tb2 = self.addToolBar("Road Network Toolbox")
         toolbox = QAction(QIcon(":/icons/tools.ico"),
                           "show Toolbox for CR Scenario", self)
         tb2.addAction(toolbox)

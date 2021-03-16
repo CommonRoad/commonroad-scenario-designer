@@ -2,8 +2,8 @@ import sys
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
-from crmapconverter.io.scenario_designer.gui_src import CR_Scenario_Designer
-from commonroad.scenario.lanelet import LaneletType, RoadUser, LineMarking
+from crmapconverter.io.scenario_designer.gui_src import CR_Scenario_Designer  # do not remove!!!
+from commonroad.scenario.lanelet import LaneletType, RoadUser
 
 
 
@@ -25,13 +25,93 @@ class SectionExpandButton(QPushButton):
             self.section.setExpanded(True)
 
 
-class UpperToolbox(QWidget):
+def update_labels(item_list):
+
+    n = ''
+    count = 0
+
+    # traversing the list
+    for i in item_list:
+
+        # if count value is 0 don't add comma
+        if count == 0:
+            n += ' % s' % i
+            # else value is greater then 0
+        # add comma
+        else:
+            n += ', % s' % i
+
+            # increment count
+        count += 1
+
+
+class CheckableComboBox(QComboBox):
+    def __init__(self):
+        super(CheckableComboBox, self).__init__()
+        self.view().pressed.connect(self.handle_item_pressed)
+        self.setModel(QStandardItemModel(self))
+
+        # when any item get pressed
+
+    def handle_item_pressed(self, index):
+
+        # getting which item is pressed
+        item = self.model().itemFromIndex(index)
+
+        # make it check if unchecked and vice-versa
+        if item.checkState() == Qt.Checked:
+            item.setCheckState(Qt.Unchecked)
+        else:
+            item.setCheckState(Qt.Checked)
+
+            # calling method
+        self.check_items()
+
+        # method called by check_items
+
+    def item_checked(self, index):
+
+        # getting item at index
+        item = self.model().item(index, 0)
+
+        # return true if checked else false
+        return item.checkState() == Qt.Checked
+
+    def get_checked_items(self):
+        # blank list
+        checked_items = []
+
+        # traversing the items
+        for i in range(self.count()):
+
+            # if item is checked add it to the list
+            if self.item_checked(i):
+                checked_items.append(i)
+
+        return checked_items
+
+    def check_items(self):
+        # blank list
+        checked_items = []
+
+        # traversing the items
+        for i in range(self.count()):
+
+            # if item is checked add it to the list
+            if self.item_checked(i):
+                checked_items.append(i)
+
+                # call this method
+        update_labels(checked_items)
+
+        # method to update the label
+
+
+class Toolbox(QWidget):
     """a dialog to which collapsible sections can be added;
     reimplement define_sections() to define sections and
     add them as (title, widget) tuples to self.sections
         """
-    button_sumo_simulation = None
-    button_forwards = None
 
     def __init__(self):
         super().__init__()
@@ -59,204 +139,6 @@ class UpperToolbox(QWidget):
             section1 = self.add_widget(button1, widget)
             button1.addChild(section1)
 
-    #def clicked(self):
-        #print("clicked")
-       #click_curve(self, width=3, radius=50, angle=np.pi / 2, num_vertices=30, rot_angle=0):
-
-    def define_sections(self):
-        """reimplement this to define all your sections
-        and add them as (title, widget) tuples to self.sections
-        """
-
-        """Section Traffic Signs/ Traffic Lights"""
-        widget1 = QFrame(self.tree)
-        layout1 = QGridLayout(widget1)
-
-        self.button_traffic_signs = QPushButton()
-        self.button_traffic_signs.setText("traffic sign")
-        layout1.addWidget(self.button_traffic_signs, 0, 0)
-
-        self.button_traffic_signs_settings = QPushButton()
-        self.button_traffic_signs_settings.setText("traffic sign settings")
-        layout1.addWidget(self.button_traffic_signs_settings, 0, 1)
-
-        self.button_traffic_light = QPushButton()
-        self.button_traffic_light.setText("traffic light")
-        layout1.addWidget(self.button_traffic_light, 1, 0)
-
-        self.edit_button_traffic_light = QPushButton()
-        self.edit_button_traffic_light.setText("edit traffic light")
-        layout1.addWidget(self.edit_button_traffic_light, 1, 1)
-
-        self.delete_traffic_sign = QPushButton()
-        self.delete_traffic_sign.setText("delete traffic element")
-        layout1.addWidget(self.delete_traffic_sign,2,0)
-
-        """add Roundabout button
-        button_roundabout = QPushButton()
-        button_roundabout.setText("Roundabout")
-        button_roundabout.setIcon(QIcon(":/icons/button_roundabout.png"))
-        layout1.addWidget(button_roundabout, 0, 0)
-
-        add traffic light button
-        button_traffic_light = QPushButton()
-        button_traffic_light.setText("Traffic Light")
-        button_traffic_light.setIcon(QIcon(":/icons/button_traffic_light.png"))
-        layout1.addWidget(button_traffic_light, 0, 1)
-
-        button_stop = QPushButton()
-        button_stop.setText("Stop")
-        button_stop.setIcon(QIcon(":/icons/button_stop.png"))
-        layout1.addWidget(button_stop, 1, 0)
-
-       
-        button_yield = QPushButton()
-        button_yield.setText("Yield")
-        button_yield.setIcon(QIcon(":/icons/button_yeld.png"))
-        layout1.addWidget(button_yield, 1, 1)"""
-
-        "add show more button for lanelets list"""
-        self.button_lanlist = QPushButton("show more")
-        self.button_lanlist.setToolTip("Show more Traffic Signs")
-        #layout1.addWidget(self.button_lanlist, 2, 0)
-        # TODO: add list of more traffic signs
-
-        layout1.addItem(self.spacerItem)
-        title1 = "Traffic Elements"
-        self.sections.append((title1, widget1))
-
-
-        #--Section lanelets--
-
-        widgetlanelets = QFrame(self.tree)
-        layoutlanelets = QGridLayout(widgetlanelets)
-
-        self.button_forwards = QPushButton()
-        self.button_forwards.setText("straight")
-        self.button_forwards.setIcon(QIcon(":/forwards.PNG"))
-        layoutlanelets.addWidget(self.button_forwards, 1, 0)
-
-        self.button_lanelet_settings = QPushButton()
-        self.button_lanelet_settings.setText("edit straight")
-        layoutlanelets.addWidget(self.button_lanelet_settings, 1, 1)
-        self.button_lanelet_settings.setIcon(QIcon(":/gui_src/forwards.PNG"))
-
-        self.button_turn_right = QPushButton()
-        self.button_turn_right.setText("curve")
-        layoutlanelets.addWidget(self.button_turn_right, 2, 0)
-        self.button_turn_right.setIcon(QIcon(":/gui_src/forwards.PNG"))
-
-        self.button_curve_settings = QPushButton()
-        self.button_curve_settings.setText("edit curve")
-        layoutlanelets.addWidget(self.button_curve_settings, 2, 1)
-        self.button_curve_settings.setIcon(QIcon(":/gui_src/forwards.PNG"))
-
-        self.button_turn_left = QPushButton()
-        self.button_turn_left.setText("turn left")
-        #layoutlanelets.addWidget(self.button_turn_left, 3, 0)
-        self.button_turn_left.setIcon(QIcon(":/gui_src/forwards.PNG"))
-
-        self.button_curve_settings2 = QPushButton()
-        self.button_curve_settings2.setText("settings")
-        #layoutlanelets.addWidget(self.button_curve_settings2, 3, 1)
-        self.button_curve_settings2.setIcon(QIcon(":/gui_src/forwards.PNG"))
-
-        #Fit to Predecessor
-        self.button_fit_to_predecessor = QPushButton()
-        self.button_fit_to_predecessor.setText("fit to predecessor")
-        layoutlanelets.addWidget(self.button_fit_to_predecessor, 4, 0)
-        self.button_fit_to_predecessor.setIcon(QIcon(":/gui_src/forwards.PNG"))
-
-        #adjacent
-        self.button_adjacent = QPushButton()
-        self.button_adjacent.setText("create adjacent\nlanelet")
-        layoutlanelets.addWidget(self.button_adjacent, 5, 0)
-        self.button_adjacent.setIcon(QIcon(":/gui_src/forwards.PNG"))
-
-        # connect lanelets
-        self.button_connect_lanelets = QPushButton()
-        self.button_connect_lanelets.setText("connect two lanelets")
-        layoutlanelets.addWidget(self.button_connect_lanelets, 6, 0)
-        self.button_connect_lanelets.setIcon(QIcon(":/gui_src/forwards.PNG"))
-
-        # remove lanelet
-        self.button_remove_lanelet = QPushButton()
-        self.button_remove_lanelet.setText("remove lanelet")
-        layoutlanelets.addWidget(self.button_remove_lanelet, 7, 0)
-        self.button_remove_lanelet.setIcon(QIcon(":/gui_src/forwards.PNG"))
-
-        #button_turn_left_45 = QPushButton()
-        #button_turn_left_45.setText("show more")
-        # button_turn_right.setIcon(QIcon(":/icons/Groupe_2.png"))
-        #layoutlanelets.addWidget(button_turn_left_45, 3, 0)
-        # widgetlanelets.addItem(spacerItem)
-
-        titlelanelets = "Lanelets"
-        self.sections.append((titlelanelets, widgetlanelets))
-
-        #--Section intersections--
-
-        widgetintersection = QFrame(self.tree)
-        layoutintersection = QGridLayout(widgetintersection)
-
-        self.button_X = QPushButton()
-        self.button_X.setText("X - crossing")
-        self.button_X.setIcon(QIcon(":/icons/forwards.PNG"))
-        layoutintersection.addWidget(self.button_X, 1, 0)
-
-        self.button_T = QPushButton()
-        self.button_T.setText("T - crossing")
-        layoutintersection.addWidget(self.button_T, 1, 1)
-        self.button_T.setIcon(QIcon(":/gui_src/forwards.PNG"))
-
-        # button_T_2 = QPushButton()
-        # button_T_2.setText("T_2")
-        # button_turn_right.setIcon(QIcon(":/icons/Groupe_2.png"))
-        # layoutintersection.addWidget(button_T_2, 1, 2)
-        # button_T_2.setIcon(QIcon(":/gui_src/forwards.PNG"))
-
-        self.button_T_3 = QPushButton()
-        self.button_T_3.setText("fit to intersection")
-        layoutintersection.addWidget(self.button_T_3, 2, 0)
-        self.button_T_3.setIcon(QIcon(":/gui_src/forwards.PNG"))
-
-
-
-        titleintersection = "Intersections"
-        self.sections.append((titleintersection, widgetintersection))
-
-
-
-
-        widget2 = QFrame(self.tree)
-        layout2 = QGridLayout(widget2)
-        """ add animation button """
-        self.button_sumo_simulation = QPushButton()
-        self.button_sumo_simulation.setText("Show SUMO Setting")
-        self.button_sumo_simulation.setIcon(QIcon(":/icons/Groupe_2.png"))
-        layout2.addWidget(self.button_sumo_simulation, 0, 0)
-
-        """add Save menu"""
-        self.lb = QLabel("")
-        self.save_menu = QComboBox()
-        self.save_menu.addItem("Save as mp4")
-        self.save_menu.addItem("Save as gif")
-        self.save_menu.currentIndexChanged.connect(self.selection_change)
-        layout2.addWidget(self.save_menu)
-        layout2.addWidget(self.lb)
-
-        """add SAVE button"""
-        self.button_save = QPushButton(self)
-        self.button_save.setText("Save animation")
-        self.button_save.setIcon(QIcon(":/icons/botton_save.png"))
-        layout2.addWidget(self.button_save)
-
-        layout2.addItem(self.spacerItem)
-
-        # layout2.addItem(self.spacerItem)
-        title2 = "Tools for Animation"
-        self.sections.append((title2, widget2))
-
     def selection_change(self):
         self.lb.setText(self.save_menu.currentText())
 
@@ -277,6 +159,192 @@ class UpperToolbox(QWidget):
         section.setDisabled(True)
         self.tree.setItemWidget(section, 0, widget)
         return section
+
+
+class RoadNetworkToolbox(Toolbox):
+    """a dialog to which collapsible sections can be added;
+    reimplement define_sections() to define sections and
+    add them as (title, widget) tuples to self.sections
+        """
+    button_forwards = None
+
+    def __init__(self):
+        super().__init__()
+
+    def define_sections(self):
+        """reimplement this to define all your sections
+        and add them as (title, widget) tuples to self.sections
+        """
+        #  Lanelet Section
+        widget_lanelets = QFrame(self.tree)
+        layout_lanelets = QGridLayout(widget_lanelets)
+
+        self.button_forwards = QPushButton()
+        self.button_forwards.setText("straight")
+        self.button_forwards.setIcon(QIcon(":/forwards.PNG"))
+        layout_lanelets.addWidget(self.button_forwards, 1, 0)
+
+        self.button_lanelet_settings = QPushButton()
+        self.button_lanelet_settings.setText("edit straight")
+        layout_lanelets.addWidget(self.button_lanelet_settings, 1, 1)
+        self.button_lanelet_settings.setIcon(QIcon(":/gui_src/forwards.PNG"))
+
+        self.button_turn_right = QPushButton()
+        self.button_turn_right.setText("curve")
+        layout_lanelets.addWidget(self.button_turn_right, 2, 0)
+        self.button_turn_right.setIcon(QIcon(":/gui_src/forwards.PNG"))
+
+        self.button_curve_settings = QPushButton()
+        self.button_curve_settings.setText("edit curve")
+        layout_lanelets.addWidget(self.button_curve_settings, 2, 1)
+        self.button_curve_settings.setIcon(QIcon(":/gui_src/forwards.PNG"))
+
+        self.button_turn_left = QPushButton()
+        self.button_turn_left.setText("turn left")
+        #layoutlanelets.addWidget(self.button_turn_left, 3, 0)
+        self.button_turn_left.setIcon(QIcon(":/gui_src/forwards.PNG"))
+
+        self.button_curve_settings2 = QPushButton()
+        self.button_curve_settings2.setText("settings")
+        #layoutlanelets.addWidget(self.button_curve_settings2, 3, 1)
+        self.button_curve_settings2.setIcon(QIcon(":/gui_src/forwards.PNG"))
+
+        #Fit to Predecessor
+        self.button_fit_to_predecessor = QPushButton()
+        self.button_fit_to_predecessor.setText("fit to predecessor")
+        layout_lanelets.addWidget(self.button_fit_to_predecessor, 4, 0)
+        self.button_fit_to_predecessor.setIcon(QIcon(":/gui_src/forwards.PNG"))
+
+        #adjacent
+        self.button_adjacent = QPushButton()
+        self.button_adjacent.setText("create adjacent\nlanelet")
+        layout_lanelets.addWidget(self.button_adjacent, 5, 0)
+        self.button_adjacent.setIcon(QIcon(":/gui_src/forwards.PNG"))
+
+        # connect lanelets
+        self.button_connect_lanelets = QPushButton()
+        self.button_connect_lanelets.setText("connect two lanelets")
+        layout_lanelets.addWidget(self.button_connect_lanelets, 6, 0)
+        self.button_connect_lanelets.setIcon(QIcon(":/gui_src/forwards.PNG"))
+
+        # remove lanelet
+        self.button_remove_lanelet = QPushButton()
+        self.button_remove_lanelet.setText("remove lanelet")
+        layout_lanelets.addWidget(self.button_remove_lanelet, 7, 0)
+        self.button_remove_lanelet.setIcon(QIcon(":/gui_src/forwards.PNG"))
+
+        #button_turn_left_45 = QPushButton()
+        #button_turn_left_45.setText("show more")
+        # button_turn_right.setIcon(QIcon(":/icons/Groupe_2.png"))
+        #layoutlanelets.addWidget(button_turn_left_45, 3, 0)
+        # widgetlanelets.addItem(spacerItem)
+
+        title_lanelets = "Lanelet"
+        self.sections.append((title_lanelets, widget_lanelets))
+
+        # Traffic sign section
+        widget_traffic_sign = QFrame(self.tree)
+        layout_traffic_sign = QGridLayout(widget_traffic_sign)
+
+        self.button_traffic_signs = QPushButton()
+        self.button_traffic_signs.setText("traffic sign")
+        layout_traffic_sign.addWidget(self.button_traffic_signs, 0, 0)
+
+        self.button_traffic_signs_settings = QPushButton()
+        self.button_traffic_signs_settings.setText("traffic sign settings")
+        layout_traffic_sign.addWidget(self.button_traffic_signs_settings, 0, 1)
+
+        self.delete_traffic_sign = QPushButton()
+        self.delete_traffic_sign.setText("delete traffic element")
+        layout_traffic_sign.addWidget(self.delete_traffic_sign,2,0)
+
+        "add show more button for lanelets list"""
+        self.button_lanlist = QPushButton("show more")
+        self.button_lanlist.setToolTip("Show more Traffic Signs")
+        #layout1.addWidget(self.button_lanlist, 2, 0)
+        # TODO: add list of more traffic signs
+
+        layout_traffic_sign.addItem(self.spacerItem)
+        title_traffic_sign = "Traffic Sign"
+        self.sections.append((title_traffic_sign, widget_traffic_sign))
+
+        # Traffic light section
+        widget_traffic_light = QFrame(self.tree)
+        layout_traffic_light = QGridLayout(widget_traffic_light)
+
+        self.button_traffic_light = QPushButton()
+        self.button_traffic_light.setText("traffic light")
+        layout_traffic_light.addWidget(self.button_traffic_light, 1, 0)
+
+        self.edit_button_traffic_light = QPushButton()
+        self.edit_button_traffic_light.setText("edit traffic light")
+        layout_traffic_light.addWidget(self.edit_button_traffic_light, 1, 1)
+
+        title_traffic_light = "Traffic Light"
+        self.sections.append((title_traffic_light, widget_traffic_light))
+
+        #--Section intersections--
+
+        widget_intersection = QFrame(self.tree)
+        layout_intersection = QGridLayout(widget_intersection)
+
+        self.button_X = QPushButton()
+        self.button_X.setText("X - crossing")
+        self.button_X.setIcon(QIcon(":/icons/forwards.PNG"))
+        layout_intersection.addWidget(self.button_X, 1, 0)
+
+        self.button_T = QPushButton()
+        self.button_T.setText("T - crossing")
+        layout_intersection.addWidget(self.button_T, 1, 1)
+        self.button_T.setIcon(QIcon(":/gui_src/forwards.PNG"))
+
+        # button_T_2 = QPushButton()
+        # button_T_2.setText("T_2")
+        # button_turn_right.setIcon(QIcon(":/icons/Groupe_2.png"))
+        # layoutintersection.addWidget(button_T_2, 1, 2)
+        # button_T_2.setIcon(QIcon(":/gui_src/forwards.PNG"))
+
+        self.button_T_3 = QPushButton()
+        self.button_T_3.setText("fit to intersection")
+        layout_intersection.addWidget(self.button_T_3, 2, 0)
+        self.button_T_3.setIcon(QIcon(":/gui_src/forwards.PNG"))
+
+
+
+        title_intersection = "Intersections"
+        self.sections.append((title_intersection, widget_intersection))
+
+
+
+
+        # widget2 = QFrame(self.tree)
+        # layout2 = QGridLayout(widget2)
+        # """ add animation button """
+        # self.button_sumo_simulation = QPushButton()
+        # self.button_sumo_simulation.setText("Show SUMO Setting")
+        # self.button_sumo_simulation.setIcon(QIcon(":/icons/Groupe_2.png"))
+        # layout2.addWidget(self.button_sumo_simulation, 0, 0)
+        #
+        # """add Save menu"""
+        # self.lb = QLabel("")
+        # self.save_menu = QComboBox()
+        # self.save_menu.addItem("Save as mp4")
+        # self.save_menu.addItem("Save as gif")
+        # self.save_menu.currentIndexChanged.connect(self.selection_change)
+        # layout2.addWidget(self.save_menu)
+        # layout2.addWidget(self.lb)
+        #
+        # """add SAVE button"""
+        # self.button_save = QPushButton(self)
+        # self.button_save.setText("Save animation")
+        # self.button_save.setIcon(QIcon(":/icons/botton_save.png"))
+        # layout2.addWidget(self.button_save)
+        #
+        # layout2.addItem(self.spacerItem)
+        #
+        # # layout2.addItem(self.spacerItem)
+        # title2 = "Tools for Animation"
+        # self.sections.append((title2, widget2))
 
 
 class SumoTool(QWidget):
@@ -443,95 +511,11 @@ class LaneletInformationToolbox(QWidget):
             strlist3.append(self.roaduser_bidirectional_list[list3[i]])
         return strlist3
 
+
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    window = UpperToolbox()
+    window = RoadNetworkToolbox()
     window.show()
     sumo = SumoTool()
     sumo.show()
     sys.exit(app.exec_())
-
-
-class CheckableComboBox(QComboBox):
-    def __init__(self):
-        super(CheckableComboBox, self).__init__()
-        self.view().pressed.connect(self.handle_item_pressed)
-        self.setModel(QStandardItemModel(self))
-
-        # when any item get pressed
-
-    def handle_item_pressed(self, index):
-
-        # getting which item is pressed
-        item = self.model().itemFromIndex(index)
-
-        # make it check if unchecked and vice-versa
-        if item.checkState() == Qt.Checked:
-            item.setCheckState(Qt.Unchecked)
-        else:
-            item.setCheckState(Qt.Checked)
-
-            # calling method
-        self.check_items()
-
-        # method called by check_items
-
-    def item_checked(self, index):
-
-        # getting item at index
-        item = self.model().item(index, 0)
-
-        # return true if checked else false
-        return item.checkState() == Qt.Checked
-
-
-
-    def get_checked_items(self):
-        # blank list
-        checkedItems = []
-
-        # traversing the items
-        for i in range(self.count()):
-
-            # if item is checked add it to the list
-            if self.item_checked(i):
-                checkedItems.append(i)
-
-        return checkedItems
-
-    def check_items(self):
-        # blank list
-        checkedItems = []
-
-        # traversing the items
-        for i in range(self.count()):
-
-            # if item is checked add it to the list
-            if self.item_checked(i):
-                checkedItems.append(i)
-
-                # call this method
-        self.update_labels(checkedItems)
-
-        # method to update the label
-
-    def update_labels(self, item_list):
-
-        n = ''
-        count = 0
-
-        # traversing the list
-        for i in item_list:
-
-            # if count value is 0 don't add comma
-            if count == 0:
-                n += ' % s' % i
-                # else value is greater then 0
-            # add comma
-            else:
-                n += ', % s' % i
-
-                # increment count
-            count += 1
-
-
