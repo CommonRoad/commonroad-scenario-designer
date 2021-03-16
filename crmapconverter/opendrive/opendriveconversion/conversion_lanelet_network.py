@@ -1054,7 +1054,7 @@ class ConversionLaneletNetwork(LaneletNetwork):
 
             self.add_traffic_sign(traffic_sign, {id_for_adding})
 
-    def add_stop_lines_to_network(self, stop_lines):
+    def add_stop_lines_to_network(self, stop_lines: List[StopLine]):
         """
         Adds all the stop lines in the network object to the lanelet network
         Requires a list of all the stop lines in the entire map
