@@ -171,6 +171,9 @@ class TrafficSignParser:
             elif 'end-of-maximum-speed' in name:
                 sign_id = TrafficSignIDZamunda.MAX_SPEED_END
                 value = name.split('-')[-1]
+            elif 'advisory-maximum-speed-limit' in name:
+                # traffic sign not correct implemented in mapillary yet. Speed is missing.
+                pass
             elif 'maximum-speed-limit' in name:
                 sign_id = TrafficSignIDZamunda.MAX_SPEED
                 value = float(name.split('-')[-1]) / 3.6
