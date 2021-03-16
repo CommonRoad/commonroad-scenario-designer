@@ -185,14 +185,13 @@ class DynamicCanvas(FigureCanvas):
         ylim = self.ax.get_ylim()
 
         self.ax.clear()
-        self._handles.clear()
 
         draw_params_merged = _merge_dict(self.draw_params.copy(), draw_params)
 
         self.rnd.plot_limits = plot_limits
         self.rnd.ax = self.ax
         scenario.draw(renderer=self.rnd, draw_params=draw_params_merged)
-        self.rnd.render(show=False)
+        self.rnd.render()
 
         if not plot_limits:
             self.ax.set(xlim=xlim)
@@ -208,13 +207,6 @@ class DynamicCanvas(FigureCanvas):
         :param draw_params: CommonRoad draw_object() DrawParams
         :param plot_limits: Matplotlib plot limits
         """
-        # # remove dynamic obstacles
-        for handles_i in self._handles.values():
-            for handle in handles_i:
-                if handle:
-                    handle.remove()
-        self._handles.clear()
-
         # redraw dynamic obstacles
         obstacles = scenario.obstacles_by_position_intervals([
             Interval(plot_limits[0], plot_limits[1]),
@@ -324,8 +316,7 @@ class Viewer:
                 lanelet, sel_lanelet, sel_intersection)
             if color == "gray": continue
 
-            lanelet_limits = draw_lanelet_polygon(lanelet, ax, color,
-                                                       alpha, zorder, label)
+            lanelet_limits = draw_lanelet_polygon(lanelet, ax, color, alpha, zorder, label)
             network_limits[0] = min(network_limits[0], lanelet_limits[0])
             network_limits[1] = max(network_limits[1], lanelet_limits[1])
             network_limits[2] = min(network_limits[2], lanelet_limits[2])
@@ -474,10 +465,10 @@ class AnimatedViewer(Viewer):
 
         # sumo config giving dt etc
         self._config: SumoConfig = None
-        self.min_timestep = 0
-        self.max_timestep = 0
+        self.min_time_step = 0
+        self.max_time_step = 0
         # current time step
-        self.timestep = Observable(0)
+        self.time_step = Observable(0)
         # FuncAnimation object
         self.animation: FuncAnimation = None
         # if playing or not
@@ -496,16 +487,16 @@ class AnimatedViewer(Viewer):
 
         # if we have not subscribed already, subscribe now
         if config is not None:
-            if  not self._config:
-                def set_config(config):
-                    self._config = config
+            if not self._config:
+                def set_config(conf):
+                    self._config = conf
                     self._calc_max_timestep()
                 config.subscribe(set_config)
             self._config = config.value
 
         self._calc_max_timestep()
         if self.animation:
-            self.timestep.value = 0
+            self.time_step.value = 0
             self.animation.event_source.stop()
             self.animation = None
         self.update_plot(focus_on_network=True)
@@ -518,7 +509,7 @@ class AnimatedViewer(Viewer):
         scenario = self.current_scenario
         self.dynamic.clear_axes(keep_limits=True)
 
-        start = self.min_timestep
+        start = self.min_time_step
         end = self.max_timestep
         plot_limits: Union[list, None, str] = None
         if self._config is not None:
@@ -541,11 +532,11 @@ class AnimatedViewer(Viewer):
             start, end)
 
         def draw_frame(draw_params):
-            time_start = start + self.timestep.value
-            time_end = start + min(anim_frames, self.timestep.value)
-            self.timestep.value += 1
+            time_start = start + self.time_step.value
+            time_end = start + min(anim_frames, self.time_step.value)
+            self.time_step.value += 1
             if time_start > time_end:
-                self.timestep.value = 0
+                self.time_step.value = 0
 
             draw_params = {
                 'time_begin': time_start,
@@ -597,7 +588,7 @@ class AnimatedViewer(Viewer):
             self._init_animation()
         self.dynamic.update_plot()
         # self.animation.event_source.start()
-        self.timestep.silent_set(timestep)
+        self.time_step.silent_set(timestep)
 
     def save_animation(self, save_file: str):
         # if self.animation is None:
@@ -691,7 +682,7 @@ class AnimatedViewer(Viewer):
         selected_l_ids = l_network.find_lanelet_by_shape(click_shape)
         selected_lanelets = [l_network.find_lanelet_by_id(lid) for lid in selected_l_ids]
         selected_obstacles = [obs for obs in self.current_scenario.obstacles
-                              if obs.occupancy_at_time(self.timestep.value).shape.contains_point(mouse_pos)]
+                              if obs.occupancy_at_time(self.time_step.value).shape.contains_point(mouse_pos)]
 
         if len(selected_lanelets) > 0 and len(selected_obstacles) == 0:
             self.update_plot(sel_lanelet=selected_lanelets[0])

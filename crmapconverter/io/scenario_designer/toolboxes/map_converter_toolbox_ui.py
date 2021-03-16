@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import *
 from crmapconverter.io.scenario_designer.toolboxes.toolbox_ui import Toolbox
 
 
-class MapConversionToolbox(Toolbox):
+class MapConversionToolboxUI(Toolbox):
     def __init__(self):
         super().__init__()
 

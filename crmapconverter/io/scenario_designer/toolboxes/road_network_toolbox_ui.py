@@ -9,7 +9,7 @@ from commonroad.scenario.lanelet import LaneletType, RoadUser, LineMarking
 from commonroad.scenario.traffic_sign import *
 
 
-class RoadNetworkToolbox(Toolbox):
+class RoadNetworkToolboxUI(Toolbox):
     """a dialog to which collapsible sections can be added;
     reimplement define_sections() to define sections and
     add them as (title, widget) tuples to self.sections
@@ -181,6 +181,7 @@ class RoadNetworkToolbox(Toolbox):
         self.button_remove_lanelet = QPushButton("Remove [1]")
         self.button_fit_to_predecessor = QPushButton("Fit [1] to [2]")
         self.button_connect_lanelets = QPushButton("Connect [1] and [2]")
+        self.button_merge_lanelets = QPushButton("Merge [1] with successor")
 
         self.button_rotate_lanelet = QPushButton("Rotate")
         self.button_rotate_lanelet.setFixedWidth(100)
@@ -275,6 +276,7 @@ class RoadNetworkToolbox(Toolbox):
         lanelet_information_3.addRow(self.button_remove_lanelet)
         lanelet_information_3.addRow(self.button_fit_to_predecessor)
         lanelet_information_3.addRow(self.button_connect_lanelets)
+        lanelet_information_3.addRow(self.button_merge_lanelets)
         layout_lanelets.addLayout(lanelet_information_3)
 
         lanelet_rotate_layout = QGridLayout()

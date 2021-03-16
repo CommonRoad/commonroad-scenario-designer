@@ -24,9 +24,10 @@ except ImportError:
     SUMO_AVAILABLE = False
 
 
-class ObstacleToolbox(Toolbox):
+class ObstacleToolboxUI(Toolbox):
     def __init__(self):
         super().__init__()
+
 
     def define_sections(self):
         """reimplement this to define all your sections
