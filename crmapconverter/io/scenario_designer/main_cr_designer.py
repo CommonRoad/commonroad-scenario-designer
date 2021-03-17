@@ -127,6 +127,8 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
     def viewer_callback(self, selected_object):
         if isinstance(selected_object, Lanelet):
+            self.road_network_toolbox_widget.road_network_toolbox.selected_lanelet_two.setCurrentText(
+                self.road_network_toolbox_widget.road_network_toolbox.selected_lanelet_one.currentText())
             self.road_network_toolbox_widget.road_network_toolbox.selected_lanelet_one.setCurrentText(
                 str(selected_object.lanelet_id))
         elif isinstance(selected_object, Obstacle):

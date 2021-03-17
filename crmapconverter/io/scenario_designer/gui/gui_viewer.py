@@ -96,6 +96,7 @@ class DynamicCanvas(FigureCanvas):
             limits = None
             self.ax = self.drawer.add_subplot(111)
 
+        self.ax.set_aspect("equal", "datalim")
         self.ax.set_axis_off()
         self.draw_idle()
         if keep_limits and limits:

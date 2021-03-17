@@ -47,7 +47,7 @@ class RoadNetworkToolbox(QDockWidget):
             lambda: self.update_lanelet_information())
 
         self.road_network_toolbox.button_remove_lanelet.clicked.connect(lambda: self.remove_lanelet())
-        self.road_network_toolbox.button_fit_to_predecessor.clicked.connect(lambda: self.fit_to_predecessor())
+        self.road_network_toolbox.button_attach_to_other_lanelet.clicked.connect(lambda: self.attach_to_other_lanelet())
         self.road_network_toolbox.button_create_adjacent.clicked.connect(lambda: self.create_adjacent())
         self.road_network_toolbox.button_connect_lanelets.clicked.connect(lambda: self.connect_lanelets())
         self.road_network_toolbox.button_rotate_lanelet.clicked.connect(lambda: self.rotate_lanelet())
@@ -84,6 +84,7 @@ class RoadNetworkToolbox(QDockWidget):
         self.initialize_traffic_light_information()
         self.initialize_intersection_information()
         self.initialize_traffic_sign_information()
+        self.set_default_road_network_list_information()
 
     def get_x_position_lanelet_start(self) -> float:
         """
@@ -120,7 +121,7 @@ class RoadNetworkToolbox(QDockWidget):
     def collect_traffic_sign_ids(self) -> List[int]:
         """
         Collects IDs of all traffic signs within a CommonRoad scenario.
-        @return:
+        @return: List of traffic sign IDs.
         """
         if self.current_scenario is not None:
             return [ts.traffic_sign_id for ts in self.current_scenario.lanelet_network.traffic_signs]
@@ -130,7 +131,7 @@ class RoadNetworkToolbox(QDockWidget):
     def collect_traffic_light_ids(self) -> List[int]:
         """
         Collects IDs of all traffic lights within a CommonRoad scenario.
-        @return:
+        @return: List of traffic light IDs.
         """
         if self.current_scenario is not None:
             return [tl.traffic_light_id for tl in self.current_scenario.lanelet_network.traffic_lights]
@@ -140,12 +141,19 @@ class RoadNetworkToolbox(QDockWidget):
     def collect_intersection_ids(self) -> List[int]:
         """
         Collects IDs of all intersection within a CommonRoad scenario.
-        @return:
+        @return: List of intersection IDs.
         """
         if self.current_scenario is not None:
             return [inter.intersection_id for inter in self.current_scenario.lanelet_network.intersections]
         else:
             return []
+
+    def collect_incoming_lanelet_ids_from_intersection(self) -> List[int]:
+        """
+        Collects IDs of all incoming lanelets of a given intersection.
+        @return: List of lanelet IDs.
+        """
+        return []
 
     def initialize_lanelet_information(self):
         """
@@ -160,7 +168,6 @@ class RoadNetworkToolbox(QDockWidget):
         self.road_network_toolbox.lanelet_length.setText("10.0")
         self.road_network_toolbox.lanelet_radius.setText("10.0")
         self.road_network_toolbox.lanelet_angle.setText("90.0")
-        self.set_default_road_network_list_information()
 
     def initialize_traffic_sign_information(self):
         """
@@ -260,6 +267,16 @@ class RoadNetworkToolbox(QDockWidget):
         self.road_network_toolbox.intersection_crossings.addItems(
             ["None"] + [str(item) for item in self.collect_lanelet_ids()])
         self.road_network_toolbox.intersection_crossings.setCurrentIndex(0)
+
+        self.road_network_toolbox.intersection_lanelet_to_fit.clear()
+        self.road_network_toolbox.intersection_lanelet_to_fit.addItems(
+            ["None"] + [str(item) for item in self.collect_incoming_lanelet_ids_from_intersection()])
+        self.road_network_toolbox.intersection_lanelet_to_fit.setCurrentIndex(0)
+
+        self.road_network_toolbox.intersection_lanelet_to_fit.clear()
+        self.road_network_toolbox.intersection_lanelet_to_fit.addItems(
+            ["None"] + [str(item) for item in self.collect_incoming_lanelet_ids_from_intersection()])
+        self.road_network_toolbox.intersection_lanelet_to_fit.setCurrentIndex(0)
 
     def add_lanelet(self, lanelet_id: int = None, update: bool = False):
         """
@@ -382,7 +399,7 @@ class RoadNetworkToolbox(QDockWidget):
         lanelet = self.current_scenario.lanelet_network.find_lanelet_by_id(selected_lanelet_id)
         self.current_scenario.remove_lanelet(lanelet)
         self.add_lanelet(selected_lanelet_id, True)
-        self.set_default_list_information()
+        self.set_default_road_network_list_information()
         self.callback(self.current_scenario)
 
     def update_lanelet_information(self):
@@ -502,7 +519,7 @@ class RoadNetworkToolbox(QDockWidget):
 
         self.last_added_lanelet_id = adjacent_lanelet.lanelet_id
         self.current_scenario.lanelet_network.add_lanelet(lanelet=adjacent_lanelet)
-        self.set_default_list_information()
+        self.set_default_road_network_list_information()
         self.callback(self.current_scenario)
 
     def remove_lanelet(self):
@@ -519,7 +536,7 @@ class RoadNetworkToolbox(QDockWidget):
             return
 
         MapCreator.remove_lanelet(selected_lanelet, self.current_scenario.lanelet_network)
-        self.set_default_list_information()
+        self.set_default_road_network_list_information()
         self.callback(self.current_scenario)
 
     def add_four_way_intersection(self):
@@ -545,7 +562,7 @@ class RoadNetworkToolbox(QDockWidget):
         self.current_scenario.add_objects(new_lanelets)
         self.current_scenario.add_objects(new_traffic_signs)
         self.current_scenario.add_objects(new_traffic_lights)
-        self.set_default_list_information()
+        self.set_default_road_network_list_information()
         self.callback(self.current_scenario)
 
     def add_three_way_intersection(self):
@@ -571,7 +588,7 @@ class RoadNetworkToolbox(QDockWidget):
         self.current_scenario.add_objects(new_lanelets)
         self.current_scenario.add_objects(new_traffic_signs)
         self.current_scenario.add_objects(new_traffic_lights)
-        self.set_default_list_information()
+        self.set_default_road_network_list_information()
         self.callback(self.current_scenario)
 
     def update_incomings(self):
@@ -647,7 +664,7 @@ class RoadNetworkToolbox(QDockWidget):
                                first_occurrence, np.array([x_position, y_position]), virtual)
 
         self.current_scenario.add_objects(new_sign, referenced_lanelets)
-        self.set_default_list_information()
+        self.set_default_road_network_list_information()
         self.callback(self.current_scenario)
 
     def remove_traffic_sign(self):
@@ -663,7 +680,7 @@ class RoadNetworkToolbox(QDockWidget):
             return
         traffic_sign = self.current_scenario.lanelet_network.find_traffic_sign_by_id(selected_traffic_sign_id)
         self.current_scenario.remove_traffic_sign(traffic_sign)
-        self.set_default_list_information()
+        self.set_default_road_network_list_information()
         self.callback(self.current_scenario)
 
     def update_traffic_sign(self):
@@ -680,7 +697,7 @@ class RoadNetworkToolbox(QDockWidget):
         traffic_sign = self.current_scenario.lanelet_network.find_traffic_sign_by_id(selected_traffic_sign_id)
         self.current_scenario.remove_traffic_sign(traffic_sign)
         self.add_traffic_sign(selected_traffic_sign_id)
-        self.set_default_list_information()
+        self.set_default_road_network_list_information()
         self.callback(self.current_scenario)
 
     def update_traffic_sign_information(self):
@@ -769,7 +786,7 @@ class RoadNetworkToolbox(QDockWidget):
                                          traffic_light_active)
 
         self.current_scenario.add_objects(new_traffic_light, referenced_lanelets)
-        self.set_default_list_information()
+        self.set_default_road_network_list_information()
         self.callback(self.current_scenario)
 
     def remove_traffic_light(self):
@@ -786,7 +803,7 @@ class RoadNetworkToolbox(QDockWidget):
         traffic_light = \
             self.current_scenario.lanelet_network.find_traffic_light_by_id(selected_traffic_light_id)
         self.current_scenario.remove_traffic_light(traffic_light)
-        self.set_default_list_information()
+        self.set_default_road_network_list_information()
         self.callback(self.current_scenario)
 
     def update_traffic_light(self):
@@ -804,7 +821,7 @@ class RoadNetworkToolbox(QDockWidget):
             self.current_scenario.lanelet_network.find_traffic_light_by_id(selected_traffic_light_id)
         self.current_scenario.remove_traffic_light(traffic_light)
         self.add_traffic_light(selected_traffic_light_id)
-        self.set_default_list_information()
+        self.set_default_road_network_list_information()
         self.callback(self.current_scenario)
 
     def update_traffic_light_information(self):
@@ -896,6 +913,9 @@ class RoadNetworkToolbox(QDockWidget):
             self.road_network_toolbox.intersection_crossings.set_checked_items(intersection.crossings)
 
     def connect_lanelets(self):
+        """
+        Connects two lanelets by adding a new lanelet using cubic spline interpolation.
+        """
         if self.current_scenario is None:
             self.textBrowser.append("create a new file")
             return
@@ -917,14 +937,17 @@ class RoadNetworkToolbox(QDockWidget):
                                                         self.current_scenario.generate_object_id())
         self.last_added_lanelet_id = connected_lanelet.lanelet_id
         self.current_scenario.lanelet_network.add_lanelet(lanelet=connected_lanelet)
-        self.set_default_list_information()
+        self.set_default_road_network_list_information()
         self.callback(self.current_scenario)
 
-    def fit_to_predecessor(self):
+    def attach_to_other_lanelet(self):
+        """
+        Attaches a lanelet to another lanelet.
+        @return:
+        """
         if self.current_scenario is None:
             self.textBrowser.append("create a new file")
             return
-
         if self.road_network_toolbox.selected_lanelet_one.currentText() != "None":
             selected_lanelet_one = self.current_scenario.lanelet_network.find_lanelet_by_id(
                 int(self.road_network_toolbox.selected_lanelet_one.currentText()))
@@ -942,6 +965,9 @@ class RoadNetworkToolbox(QDockWidget):
         self.callback(self.current_scenario)
 
     def rotate_lanelet(self):
+        """
+        Rotates lanelet by a user-defined angle.
+        """
         if self.current_scenario is None:
             self.textBrowser.append("create a new file")
             return
@@ -957,6 +983,9 @@ class RoadNetworkToolbox(QDockWidget):
         self.store_scenario()
 
     def translate_lanelet(self):
+        """
+        Translates lanelet by user-defined x- and y-values.
+        """
         if self.current_scenario is None:
             self.textBrowser.append("create a new file")
             return
@@ -971,17 +1000,26 @@ class RoadNetworkToolbox(QDockWidget):
         selected_lanelet_one.translate_rotate(np.array([x_translation, y_translation]), 0)
         self.callback(self.current_scenario)
 
-    # def fit_intersection(self):
-    #     self.FI.exec()
-    #     predecessor_id = self.FI.get_predecessor_Id()
-    #     successor_id = self.FI.get_successor_Id()
-    #     intersection_id = self.FI.get_intersection_Id()
-    #
-    #     lanelet_predecessor = self.current_scenario.lanelet_network.find_lanelet_by_id(predecessor_ID)
-    #     lanelet_successor = self.current_scenario.lanelet_network.find_lanelet_by_id(successor_ID)
-    #     intersection = self.current_scenario.lanelet_network.find_intersection_by_id(intersection_ID)
-    #
-    #     self.map_creator.fit_intersection_to_predecessor(lanelet_predecessor, lanelet_successor, intersection,
-    #                                                      self.current_scenario.lanelet_network,
-    #                                                      self.current_scenario)
-    #     self.callback(self.current_scenario)
+    def merge_with_successor(self):
+        """
+        Merges a lanelet with its successor. If several successors exist, a new lanelet is created for each successor.
+        """
+        pass
+
+    def fit_intersection(self):
+        """
+        Rotates and translates a complete intersection so that it is attached to a user-defined lanelet.
+        """
+        self.FI.exec()
+        predecessor_id = self.FI.get_predecessor_Id()
+        successor_id = self.FI.get_successor_Id()
+        intersection_id = self.FI.get_intersection_Id()
+
+        lanelet_predecessor = self.current_scenario.lanelet_network.find_lanelet_by_id(predecessor_id)
+        lanelet_successor = self.current_scenario.lanelet_network.find_lanelet_by_id(successor_id)
+        intersection = self.current_scenario.lanelet_network.find_intersection_by_id(intersection_id)
+
+        self.map_creator.fit_intersection_to_predecessor(lanelet_predecessor, lanelet_successor, intersection,
+                                                         self.current_scenario.lanelet_network,
+                                                         self.current_scenario)
+        self.callback(self.current_scenario)

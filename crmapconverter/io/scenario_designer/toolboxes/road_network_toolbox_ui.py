@@ -179,7 +179,7 @@ class RoadNetworkToolboxUI(Toolbox):
         self.create_adjacent_same_direction_selection.setChecked(True)
         self.button_create_adjacent = QPushButton("Create adjacent to [1]")
         self.button_remove_lanelet = QPushButton("Remove [1]")
-        self.button_fit_to_predecessor = QPushButton("Fit [1] to [2]")
+        self.button_attach_to_other_lanelet = QPushButton("Fit [1] to [2]")
         self.button_connect_lanelets = QPushButton("Connect [1] and [2]")
         self.button_merge_lanelets = QPushButton("Merge [1] with successor")
 
@@ -207,6 +207,8 @@ class RoadNetworkToolboxUI(Toolbox):
 
 
         lanelet_information_1 = QFormLayout()
+        lanelet_information_1.addRow("[1] Selected lanelet", self.selected_lanelet_one)
+        lanelet_information_1.addRow("[2] Previously selected", self.selected_lanelet_two)
         lanelet_information_1.addRow(label_general)
         lanelet_information_1.addRow("X-Position start [m]", self.x_position_lanelet_start)
         lanelet_information_1.addRow("Y-Position start [m]", self.y_position_lanelet_start)
@@ -267,14 +269,12 @@ class RoadNetworkToolboxUI(Toolbox):
         label_update = QLabel("Lanelet operations")
         label_update.setFont(QFont("Arial", 10, QFont.Bold))
         lanelet_information_3.addRow(label_update)
-        lanelet_information_3.addRow("[1] Selected lanelet", self.selected_lanelet_one)
-        lanelet_information_3.addRow("[2] Previously selected", self.selected_lanelet_two)
         lanelet_information_3.addRow(self.button_update_lanelet)
         lanelet_information_3.addRow(self.create_adjacent_left_selection, self.create_adjacent_right_selection)
         lanelet_information_3.addRow(self.create_adjacent_same_direction_selection)
         lanelet_information_3.addRow(self.button_create_adjacent)
         lanelet_information_3.addRow(self.button_remove_lanelet)
-        lanelet_information_3.addRow(self.button_fit_to_predecessor)
+        lanelet_information_3.addRow(self.button_attach_to_other_lanelet)
         lanelet_information_3.addRow(self.button_connect_lanelets)
         lanelet_information_3.addRow(self.button_merge_lanelets)
         layout_lanelets.addLayout(lanelet_information_3)
@@ -459,7 +459,6 @@ class RoadNetworkToolboxUI(Toolbox):
 
         self.button_three_way_intersection = QPushButton("Add Three-way intersection")
         self.button_four_way_intersection = QPushButton("Add Four-way intersection")
-        self.button_fit_intersection = QPushButton("Fit to intersection")
 
         self.selected_intersection_label = QLabel("Selected intersection")
         self.selected_intersection = QComboBox()
@@ -475,6 +474,11 @@ class RoadNetworkToolboxUI(Toolbox):
         self.button_remove_incoming = QPushButton("Remove incoming")
         self.intersection_crossings = CheckableComboBox()
 
+        self.intersection_lanelet_to_fit = QComboBox()
+        self.other_lanelet_to_fit = QComboBox()
+        self.button_fit_intersection = QPushButton("Fit to intersection")
+        self.intersection_fitting_groupbox = QGroupBox("Intersection fitting")
+
         intersection_information = QFormLayout()
         intersection_information.addRow("Diameter [m]", self.intersection_diameter)
         intersection_information.addRow("Lanelet width [m]", self.intersection_lanelet_width)
@@ -482,7 +486,6 @@ class RoadNetworkToolboxUI(Toolbox):
         intersection_information.addRow(self.intersection_with_traffic_signs, self.intersection_with_traffic_lights)
         intersection_information.addRow(self.button_three_way_intersection)
         intersection_information.addRow(self.button_four_way_intersection)
-        intersection_information.addRow(self.button_fit_intersection)
         intersection_information.addRow(self.selected_intersection_label, self.selected_intersection)
         intersection_information.addRow(self.intersection_incomings_label)
         intersection_information.addRow(self.intersection_incomings_table)
@@ -490,6 +493,15 @@ class RoadNetworkToolboxUI(Toolbox):
         intersection_information.addRow("Crossing lanelets", self.intersection_crossings)
 
         layout_intersection.addLayout(intersection_information)
+
+        intersection_fitting = QFormLayout()
+        intersection_fitting_groupbox = QGroupBox("Fit Intersection to Lanelet")
+        intersection_fitting_groupbox.setLayout(intersection_fitting)
+        intersection_fitting.addRow("Incoming lanelet:", self.intersection_lanelet_to_fit)
+        intersection_fitting.addRow("Preceding lanelet:", self.other_lanelet_to_fit)
+        intersection_fitting.addRow(self.button_fit_intersection)
+
+        layout_intersection.addWidget(intersection_fitting_groupbox)
 
         title_intersection = "Intersection"
         return title_intersection, widget_intersection
