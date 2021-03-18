@@ -776,7 +776,7 @@ class MapCreator:
         return angle
 
     @staticmethod
-    def fit_intersection_to_predecessor(predecessor, successor, intersection, network, scenario):
+    def fit_intersection_to_predecessor(predecessor, successor, intersection, network):
         if predecessor and successor and intersection:
             lanelet_ids = []
             x = []
@@ -824,7 +824,7 @@ class MapCreator:
             factor = (np.linalg.norm(successor.left_vertices[0, :] - successor.right_vertices[0, :])
                       / np.linalg.norm((predecessor.left_vertices[-1, :] - predecessor.right_vertices[-1, :])))
 
-            ang = MapCreator.calc_angle_between(predecessor, successor)
+            ang = MapCreator.calc_angle_between_lanelets(predecessor, successor)
             successor.translate_rotate(np.array([0, 0]), ang)
             successor._left_vertices = successor.left_vertices / factor
             successor._right_vertices = successor.right_vertices / factor
@@ -841,7 +841,7 @@ class MapCreator:
 
             # Relation
             successor._predecessor = []
-            self.set_predecessor_successor_relation(predecessor, successor)
+            MapCreator.set_predecessor_successor_relation(predecessor, successor)
 
 
     # def connect_lanelets(self, predecessor: Lanelet, successor: Lanelet, lanelet_id: int):
