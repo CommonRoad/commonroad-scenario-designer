@@ -10,7 +10,6 @@ from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 
 from commonroad.common.file_reader import CommonRoadFileReader
-from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
 from commonroad.scenario.lanelet import LaneletNetwork, Lanelet
 from commonroad.scenario.scenario import Scenario
 from commonroad.scenario.obstacle import Obstacle
@@ -25,7 +24,7 @@ from crmapconverter.io.scenario_designer.toolboxes.gui_sumo_simulation import SU
 from crmapconverter.io.scenario_designer.toolboxes.road_network_toolbox import RoadNetworkToolbox
 from crmapconverter.io.scenario_designer.toolboxes.obstacle_toolbox import ObstacleToolbox
 from crmapconverter.io.scenario_designer.toolboxes.map_converter_toolbox import MapConversionToolbox
-from crmapconverter.io.scenario_designer.toolboxes.scenario_toolbox_ui import ScenarioToolbox
+from crmapconverter.io.scenario_designer.gui_resources.scenario_saving_dialog import ScenarioDialog
 from crmapconverter.io.scenario_designer.settings import config
 from crmapconverter.io.scenario_designer.misc import util
 
@@ -66,6 +65,8 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.sumo_settings = None
         self.gui_settings = None
 
+        self.scenario_saving_dialog = ScenarioDialog()
+
         # build and connect GUI
         self.create_file_actions()
         self.create_import_actions()
@@ -77,7 +78,6 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.create_road_network_toolbox()
         self.create_obstacle_toolbox()
         self.create_converter_toolbox()
-        self.create_scenario_toolbox()
 
         self.status = self.statusbar
         self.status.showMessage("Welcome to CR Scenario Designer")
@@ -154,16 +154,6 @@ class MWindow(QMainWindow, Ui_mainWindow):
     def initialize_toolboxes(self):
         self.road_network_toolbox_widget.initialize_toolbox()
         self.obstacle_toolbox_widget.initialize_toolbox()
-
-    def create_scenario_toolbox(self):
-        """ Create the obstacle toolbox."""
-        self.scenario_toolbox = ScenarioToolbox()
-        self.scenario_toolbox_widget = QDockWidget("Scenario Toolbox")
-        self.scenario_toolbox_widget.setFloating(True)
-        self.scenario_toolbox_widget.setFeatures(QDockWidget.AllDockWidgetFeatures)
-        self.scenario_toolbox_widget.setAllowedAreas(Qt.RightDockWidgetArea)
-        self.scenario_toolbox_widget.setWidget(self.scenario_toolbox)
-        self.addDockWidget(Qt.RightDockWidgetArea, self.scenario_toolbox_widget)
 
     def show_sumo_settings(self):
         self.sumo_settings = SUMOSettings(self, config=self.sumo_box.config)
@@ -278,10 +268,6 @@ class MWindow(QMainWindow, Ui_mainWindow):
                                    "Play the animation", self)
         self.button_play_pause.triggered.connect(self.play_pause_animation)
         tb4.addAction(self.button_play_pause)
-        #self.button_pause = QAction(QIcon(":/icons/pause.png"),
-        #                            "Pause the animation", self)
-        #self.button_pause.triggered.connect(self.pause_animation)
-        #tb3.addAction(self.button_pause)
 
         self.slider = QSlider(Qt.Horizontal)
         self.slider.setMaximumWidth(300)
@@ -303,8 +289,6 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
         self.label2 = QLabel(' / 0', self)
         tb4.addWidget(self.label2)
-
-
 
     def update_max_step(self, value: int = -1):
         logging.info('update_max_step')
@@ -344,7 +328,6 @@ class MWindow(QMainWindow, Ui_mainWindow):
     def cr_2_od(self):
         opendrive_interface = OpenDRIVEInterface(self)
         opendrive_interface.start_import()
-
 
     def create_setting_actions(self):
         """Function to create the export action in the menu bar."""
@@ -433,7 +416,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.exitAction = self.create_action("Quit",
                                              icon=QIcon(":/icons/close.png"),
                                              checkable=False,
-                                             slot=self.closeWindow,
+                                             slot=self.close_window,
                                              tip="Quit",
                                              shortcut=QKeySequence.Close)
 
@@ -523,9 +506,9 @@ class MWindow(QMainWindow, Ui_mainWindow):
         else:
             self.cr_viewer.open_scenario(new_scenario)
         self.update_view(focus_on_network=True)
-        self.update_to_new_scenario()
         self.store_scenario()
         self.update_toolbox_scenarios()
+        self.update_to_new_scenario()
 
        # self.restore_parameters()
 
@@ -607,42 +590,44 @@ class MWindow(QMainWindow, Ui_mainWindow):
             messbox.close()
             return
 
-        file_path, _ = QFileDialog.getSaveFileName(
-            self,
-            "Select file to save scenario",
-            self.filename + ".xml",
-            "CommonRoad files *.xml (*.xml)",
-            options=QFileDialog.Options(),
-        )
-        if not file_path:
-            return
+        self.scenario_saving_dialog.show(self.cr_viewer.current_scenario)
 
-        try:
-            fd = open(file_path, "w")
-            fd.close()
-            writer = CommonRoadFileWriter(
-                scenario=self.cr_viewer.current_scenario,
-                planning_problem_set=None,
-                author="",
-                affiliation="",
-                source="",
-                tags="",
-            )
-            writer.write_scenario_to_file(file_path,
-                                          OverwriteExistingFile.ALWAYS)
-        except IOError as e:
-            QMessageBox.critical(
-                self,
-                "CommonRoad file not created!",
-                "The CommonRoad file was not saved due to an error.\n\n" +
-                "{}".format(e),
-                QMessageBox.Ok,
-            )
+        # file_path, _ = QFileDialog.getSaveFileName(
+        #     self,
+        #     "Select file to save scenario",
+        #     self.filename + ".xml",
+        #     "CommonRoad files *.xml (*.xml)",
+        #     options=QFileDialog.Options(),
+        # )
+        # if not file_path:
+        #     return
+        #
+        # try:
+        #     fd = open(file_path, "w")
+        #     fd.close()
+        #     writer = CommonRoadFileWriter(
+        #         scenario=self.cr_viewer.current_scenario,
+        #         planning_problem_set=None,
+        #         author="",
+        #         affiliation="",
+        #         source="",
+        #         tags="",
+        #     )
+        #     writer.write_scenario_to_file(file_path,
+        #                                   OverwriteExistingFile.ALWAYS)
+        # except IOError as e:
+        #     QMessageBox.critical(
+        #         self,
+        #         "CommonRoad file not created!",
+        #         "The CommonRoad file was not saved due to an error.\n\n" +
+        #         "{}".format(e),
+        #         QMessageBox.Ok,
+        #     )
 
     def process_trigger(self, q):
         self.status.showMessage(q.text() + ' is triggered')
 
-    def closeWindow(self):
+    def close_window(self):
         reply = QMessageBox.warning(self, "Warning",
                                     "Do you really want to quit?",
                                     QMessageBox.Yes | QMessageBox.No,
@@ -652,7 +637,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
     def closeEvent(self, event):
         event.ignore()
-        self.closeWindow()
+        self.close_window()
 
     def road_network_toolbox_show(self):
         self.road_network_toolbox_widget.show()

@@ -79,7 +79,7 @@ class ObstacleToolbox(QDockWidget):
     def plot_obstacle_state_profile(self):
         if self.obstacle_toolbox.selected_obstacle.currentText() not in ["", "None"]:
             obstacle_id = int(self.obstacle_toolbox.selected_obstacle.currentText())
-            obstacle = self.cr_viewer.current_scenario.obstacle_by_id(obstacle_id)
+            obstacle = self.current_scenario.obstacle_by_id(obstacle_id)
             state_variable_name = self.obstacle_toolbox.obstacle_state_variable.currentText()
             if state_variable_name == "x-position":
                 profile = [obstacle.initial_state.__getattribute__("position")[0]]
@@ -111,7 +111,7 @@ class ObstacleToolbox(QDockWidget):
     def update_obstacle_information(self):
         if self.obstacle_toolbox.selected_obstacle.currentText() not in ["", "None"]:
             obstacle_id = int(self.obstacle_toolbox.selected_obstacle.currentText())
-            obstacle = self.cr_viewer.current_scenario.obstacle_by_id(obstacle_id)
+            obstacle = self.current_scenario.obstacle_by_id(obstacle_id)
             if isinstance(obstacle.obstacle_shape, Rectangle):
                 self.obstacle_toolbox.obstacle_width.setText(str(obstacle.obstacle_shape.width))
                 self.obstacle_toolbox.obstacle_length.setText(str(obstacle.obstacle_shape.length))

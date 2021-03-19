@@ -2,35 +2,29 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
-from crmapconverter.io.scenario_designer.toolboxes.toolbox_ui import Toolbox, CheckableComboBox
+from crmapconverter.io.scenario_designer.toolboxes.toolbox_ui import CheckableComboBox
 
 from commonroad.scenario.scenario import Tag, TimeOfDay, Weather, Underground
 from commonroad.scenario.traffic_sign import SupportedTrafficSignCountry
 
 
-class ScenarioToolbox(Toolbox):
+class ScenarioDialogUI(QWidget):
     def __init__(self):
         super().__init__()
-       # self.sections.append(self.define_sections())
-
-    def define_sections(self):
-        """reimplement this to define all your sections
-        and add them as (title, widget) tuples to self.sections
-        """
-        widget_scenario = QFrame(self.tree)
-        layout_scenario = QVBoxLayout(widget_scenario)
 
         self.label_benchmark_id = QLabel("")
         self.label_benchmark_id.setFont(QFont("Arial", 10, QFont.Bold))
-        self.label_benchmark_id = QLabel("Straight lanelet parameters")
+
+        self.label_directory = QLabel("")
+        self.label_directory.setFont(QFont("Arial", 10, QFont.Bold))
+        self.button_directory = QPushButton("Change Directory")
 
         self.country = QComboBox()
         country_list = [e.value for e in SupportedTrafficSignCountry]
         self.country.addItems(country_list)
 
-        self.scenario_scene_id = QSpinBox()
-        self.scenario_scene_id.setMinimum(1)
-        self.scenario_scene_id.setMaximum(999)
+        self.scenario_scene_name = QLineEdit()
+        self.scenario_scene_name.setAlignment(Qt.AlignRight)
 
         self.scenario_scene_id = QSpinBox()
         self.scenario_scene_id.setMinimum(1)
@@ -69,6 +63,8 @@ class ScenarioToolbox(Toolbox):
         self.scenario_source.setAlignment(Qt.AlignRight)
 
         self.scenario_date = QDateEdit()
+        self.scenario_date.setDateTime(QDateTime.currentDateTime())
+        self.scenario_date.setCalendarPopup(True)
 
         self.scenario_geo_anme_id = QLineEdit()
         self.scenario_geo_anme_id.setAlignment(Qt.AlignRight)
@@ -101,9 +97,14 @@ class ScenarioToolbox(Toolbox):
         self.scenario_time_minute.setMinimum(0)
         self.scenario_time_minute.setMaximum(59)
 
+        self.button_save = QPushButton("Save Scenario/Map")
+
         scenario_information = QFormLayout()
         scenario_information.addRow("Benchmark ID", self.label_benchmark_id)
+        scenario_information.addRow("Directory", self.label_directory)
+        scenario_information.addRow(self.button_directory)
         scenario_information.addRow("Country", self.country)
+        scenario_information.addRow("Scene Name", self.scenario_scene_name)
         scenario_information.addRow("Scene ID", self.scenario_scene_id)
         scenario_information.addRow("Initial Config ID", self.scenario_config_id)
         scenario_information.addRow("Prediction Type", self.prediction_type)
@@ -122,9 +123,6 @@ class ScenarioToolbox(Toolbox):
         scenario_information.addRow("Weather", self.scenario_weather)
         scenario_information.addRow("Underground", self.scenario_underground)
         scenario_information.addRow("Time", self.scenario_time_hour)
+        scenario_information.addRow(self.button_save)
 
-        layout_scenario.addLayout(scenario_information)
-
-        widget_title = "Scenario"
-
-        self.sections.append((widget_title, widget_scenario))
+        self.setLayout(scenario_information)
