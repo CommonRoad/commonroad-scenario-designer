@@ -117,7 +117,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
     def create_converter_toolbox(self):
         """ Create the map converter toolbox."""
-        self.converter_toolbox_widget = MapConversionToolbox(self.toolbox_callback)
+        self.converter_toolbox_widget = MapConversionToolbox(self.toolbox_callback, self.textBrowser)
         self.addDockWidget(Qt.RightDockWidgetArea, self.converter_toolbox_widget)
 
     def create_obstacle_toolbox(self):

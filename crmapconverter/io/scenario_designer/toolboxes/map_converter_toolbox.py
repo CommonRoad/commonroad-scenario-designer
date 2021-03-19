@@ -1,4 +1,6 @@
 import pickle
+import os
+from lxml import etree
 
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
@@ -15,13 +17,17 @@ from crmapconverter.osm2cr.converter_modules.cr_operations.export import convert
 from crmapconverter.osm2cr.converter_modules.graph_operations import road_graph as rg
 from crmapconverter.osm2cr.converter_modules.osm_operations.downloader import download_around_map
 
+from crmapconverter.opendrive.opendriveparser.parser import parse_opendrive
+from crmapconverter.opendrive.opendriveconversion.network import Network
+
 
 class MapConversionToolbox(QDockWidget):
-    def __init__(self, callback):
+    def __init__(self, callback, text_browser):
         super().__init__("Map Converter Toolbox")
 
         self.converter_toolbox = MapConversionToolboxUI()
         self.callback = callback
+        self.text_browser = text_browser
         self.selected_osm_file = None
         self.adjust_ui()
         self.connect_gui_elements()
@@ -37,6 +43,7 @@ class MapConversionToolbox(QDockWidget):
         self.converter_toolbox.button_start_osm_conversion.clicked.connect(lambda: self.start_conversion())
         self.converter_toolbox.button_select_osm_file.clicked.connect(lambda: self.select_file())
         self.converter_toolbox.button_load_osm_edit_state.clicked.connect(lambda: self.load_edit_state())
+        self.converter_toolbox.button_load_open_drive.clicked.connect(lambda: self.convert_open_drive())
         # window.b_download.clicked.connect(self.download_map)
         # window.coordinate_input.textChanged.connect(self.verify_coordinate_input)
         # window.rb_load_file.clicked.connect(self.load_file_clicked)
@@ -193,3 +200,64 @@ class MapConversionToolbox(QDockWidget):
                 .format(e),
                 QMessageBox.Ok,
             )
+
+    def convert_open_drive(self):
+        """  """
+        file_path, _ = QFileDialog.getOpenFileName(
+            self,
+            "select OpenDRIVE file to convert",
+            "",
+            "OpenDRIVE files *.xodr (*.xodr)",
+            options=QFileDialog.Options(),
+        )
+
+        if not file_path:
+            # self.NoFileselected()
+            return
+
+        # Load road network and print some statistics
+        try:
+            with open(file_path, "r") as fd:
+                openDriveXml = parse_opendrive(etree.parse(fd).getroot())
+        except (etree.XMLSyntaxError) as e:
+            errorMsg = "XML Syntax Error: {}".format(e)
+            QMessageBox.warning(
+                self,
+                "OpenDRIVE error",
+                "There was an error during the loading of the selected OpenDRIVE file.\n\n{}"
+                    .format(errorMsg),
+                QMessageBox.Ok,
+            )
+            return
+        except (TypeError, AttributeError, ValueError) as e:
+            errorMsg = "Value Error: {}".format(e)
+            QMessageBox.warning(
+                self,
+                "OpenDRIVE error",
+                "There was an error during the loading of the selected OpenDRIVE file.\n\n{}"
+                    .format(errorMsg),
+                QMessageBox.Ok,
+            )
+            return
+
+        self.loadedRoadNetwork = Network()
+        self.loadedRoadNetwork.load_opendrive(openDriveXml)
+
+        self.text_browser.append(
+            """Name: {}<br>Version: {}<br>Date: {}<br><br>OpenDRIVE
+            Version {}.{}<br><br>Number of roads: {}<br>Total length
+            of road network: {:.2f} meters""".format(
+                openDriveXml.header.name
+                if openDriveXml.header.name
+                else "<i>unset</i>",
+                openDriveXml.header.version,
+                openDriveXml.header.date,
+                openDriveXml.header.revMajor,
+                openDriveXml.header.revMinor,
+                len(openDriveXml.roads),
+                sum([road.length for road in openDriveXml.roads]),
+            )
+        )
+
+        scenario = self.loadedRoadNetwork.export_commonroad_scenario()
+        self.callback(scenario)
