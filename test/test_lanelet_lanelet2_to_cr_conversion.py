@@ -54,7 +54,7 @@ class TestOSM2CRConversionBaseClass(unittest.TestCase):
                     if file.endswith('.xml'):
                         os.remove(os.path.join(dirpath, file))
 
-        file_in = f"{os.path.dirname(os.path.realpath(__file__))}/osm_xml_test_files/{self.osm_file_name}.osm"
+        file_in = f"{os.path.dirname(os.path.realpath(__file__))}/lanelet_lanelet2_test_files/{self.osm_file_name}.osm"
         parser = OSMParser(etree.parse(file_in).getroot())
         osm = parser.parse()
         osm2l = OSM2LConverter(proj_string="+proj=utm +zone=32 +ellps=WGS84")
@@ -64,7 +64,7 @@ class TestOSM2CRConversionBaseClass(unittest.TestCase):
         """Test if converted scenario is equal to the loaded xml file.
         Disregard the different dates.
         """
-        fh = f"{os.path.dirname(os.path.realpath(__file__))}/osm_xml_test_files/{self.xml_output_name}.xml"
+        fh = f"{os.path.dirname(os.path.realpath(__file__))}/lanelet_lanelet2_test_files/{self.xml_output_name}.xml"
         parser = etree.XMLParser(remove_blank_text=True)
         tree_import = etree.parse(fh, parser=parser).getroot()
         writer = CommonRoadFileWriter(

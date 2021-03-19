@@ -20,6 +20,9 @@ from crmapconverter.osm2cr.converter_modules.osm_operations.downloader import do
 from crmapconverter.opendrive.opendriveparser.parser import parse_opendrive
 from crmapconverter.opendrive.opendriveconversion.network import Network
 
+from crmapconverter.lanelet_lanelet2.parser import OSMParser
+from crmapconverter.lanelet_lanelet2.osm2lanelet import OSM2LConverter
+
 
 class MapConversionToolbox(QDockWidget):
     def __init__(self, callback, text_browser):
@@ -44,6 +47,7 @@ class MapConversionToolbox(QDockWidget):
         self.converter_toolbox.button_select_osm_file.clicked.connect(lambda: self.select_file())
         self.converter_toolbox.button_load_osm_edit_state.clicked.connect(lambda: self.load_edit_state())
         self.converter_toolbox.button_load_open_drive.clicked.connect(lambda: self.convert_open_drive())
+        self.converter_toolbox.button_load_lanelet2.clicked.connect(lambda: self.convert_lanelet())
         # window.b_download.clicked.connect(self.download_map)
         # window.coordinate_input.textChanged.connect(self.verify_coordinate_input)
         # window.rb_load_file.clicked.connect(self.load_file_clicked)
@@ -260,4 +264,47 @@ class MapConversionToolbox(QDockWidget):
         )
 
         scenario = self.loadedRoadNetwork.export_commonroad_scenario()
+        self.callback(scenario)
+
+    def convert_lanelet(self):
+        """  """
+        file_path, _ = QFileDialog.getOpenFileName(
+            self,
+            "select Lanelet/Lanelet2 file to convert",
+            "",
+            "Lanelet files *.osm (*.osm)",
+            options=QFileDialog.Options(),
+        )
+
+        if not file_path:
+            return
+
+        # Load road network and print some statistics
+        try:
+            with open(file_path, "r") as fd:
+                parser = OSMParser(etree.parse(fd).getroot())
+                osm = parser.parse()
+        except (etree.XMLSyntaxError) as e:
+            error_message = "XML Syntax Error: {}".format(e)
+            QMessageBox.warning(
+                self,
+                "Lanelet/Lanelet2 error",
+                "There was an error during the loading of the selected Lanelet/Lanelet2 file.\n\n{}"
+                    .format(error_message),
+                QMessageBox.Ok,
+            )
+            return
+        except (TypeError, AttributeError, ValueError) as e:
+            error_message = "Value Error: {}".format(e)
+            QMessageBox.warning(
+                self,
+                "Lanelet/Lanelet2 error",
+                "There was an error during the loading of the selected Lanelet/Lanelet2 file.\n\n{}"
+                    .format(error_message),
+                QMessageBox.Ok,
+            )
+            return
+
+        osm2l = OSM2LConverter()
+        scenario = osm2l(osm)
         self.callback(scenario)

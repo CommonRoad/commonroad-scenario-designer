@@ -23,7 +23,8 @@ from shapely.geometry import LineString
 from commonroad.scenario.scenario import Scenario, ScenarioID, TrafficSign
 
 from crmapconverter.opendrive.opendriveconversion.conversion_lanelet import ConversionLanelet
-from crmapconverter.opendrive.opendriveconversion.conversion_lanelet_network import ConversionLaneletNetwork, convert_to_new_lanelet_id
+from crmapconverter.opendrive.opendriveconversion.conversion_lanelet_network import ConversionLaneletNetwork, \
+    convert_to_new_lanelet_id
 from crmapconverter.lanelet_lanelet2.osm import OSM, WayRelation, DEFAULT_PROJ_STRING, Node, RightOfWayRelation
 from crmapconverter.osm2cr.converter_modules.utility.geometry import (
     point_to_line_distance,
@@ -31,7 +32,8 @@ from crmapconverter.osm2cr.converter_modules.utility.geometry import (
 )
 
 NODE_DISTANCE_TOLERANCE = 0.01  # this is in meters
-PRIORITY_SIGNS = [ TrafficSignIDGermany.PRIORITY, TrafficSignIDGermany.RIGHT_OF_WAY] # removed TrafficSignIDGermany.RIGHT_BEFORE_LEFT
+PRIORITY_SIGNS = [TrafficSignIDGermany.PRIORITY, TrafficSignIDGermany.RIGHT_OF_WAY]
+# removed TrafficSignIDGermany.RIGHT_BEFORE_LEFT
 
 ADJACENT_WAY_DISTANCE_TOLERANCE = 0.05
 
@@ -94,10 +96,10 @@ class OSM2LConverter:
         self.lanelet_network = None
 
     def __call__(
-        self,
-        osm: OSM,
-        detect_adjacencies: bool = True,
-        left_driving_system: bool = False,
+            self,
+            osm: OSM,
+            detect_adjacencies: bool = True,
+            left_driving_system: bool = False,
     ) -> Scenario:
         """Convert OSM to Scenario.
 
@@ -156,14 +158,17 @@ class OSM2LConverter:
                 )
                 # match traffic signs on the matching lanelets
                 # the overwrite makes sure we only add traffic signs in the network that are assigned to any lanelet
-                yield_signs_lanelets = _add_closest_traffic_sign_to_lanelet([self.lanelet_network.find_lanelet_by_id(i) for i in yield_lanelets], yield_signs)
-                priority_signs = _add_closest_traffic_sign_to_lanelet([self.lanelet_network.find_lanelet_by_id(i) for i in priority_lanelets], priority_signs)
+                yield_signs_lanelets = _add_closest_traffic_sign_to_lanelet([self.lanelet_network.find_lanelet_by_id(i)
+                                                                             for i in yield_lanelets], yield_signs)
+                priority_signs = _add_closest_traffic_sign_to_lanelet([self.lanelet_network.find_lanelet_by_id(i)
+                                                                       for i in priority_lanelets], priority_signs)
                 # match stop lines on the yield lanelets
-                yield_signs_stop_lines_id = _add_stop_line_to_lanelet([self.lanelet_network.find_lanelet_by_id(i) for i in yield_lanelets], stop_lines)
+                yield_signs_stop_lines_id = _add_stop_line_to_lanelet([self.lanelet_network.find_lanelet_by_id(i)
+                                                                       for i in yield_lanelets], stop_lines)
                 # add any used traffic sign
                 for s in (priority_signs | yield_signs_lanelets | {
-                            y for y in yield_signs
-                            if y.traffic_sign_id in yield_signs_stop_lines_id
+                    y for y in yield_signs
+                    if y.traffic_sign_id in yield_signs_stop_lines_id
                 }):
                     self.lanelet_network.add_traffic_sign(s, set())
             except NotImplementedError as e:
@@ -173,10 +178,13 @@ class OSM2LConverter:
         for speed_limit_key in osm.speed_limit_signs.keys():
             speed, traffic_sign_id = osm.speed_limit_signs[speed_limit_key]
             light_id = speed_limits[speed_limit_key]
-            first_occurrence = set([self.lanelet_network._old_lanelet_ids[l_id] for l_id in speed_limit_lanelets[speed_limit_key]])
+            first_occurrence = set([self.lanelet_network._old_lanelet_ids[l_id]
+                                    for l_id in speed_limit_lanelets[speed_limit_key]])
             # TODO find better way to position speed limit
-            position = self.lanelet_network.find_lanelet_by_id(self.lanelet_network._old_lanelet_ids[speed_limit_lanelets[speed_limit_key][0]]).left_vertices[0]
-            speed_limit = TrafficSign(light_id, [TrafficSignElement(traffic_sign_id,[speed])],first_occurrence, position, True)
+            position = self.lanelet_network.find_lanelet_by_id(
+                self.lanelet_network._old_lanelet_ids[speed_limit_lanelets[speed_limit_key][0]]).left_vertices[0]
+            speed_limit = TrafficSign(light_id, [TrafficSignElement(traffic_sign_id, [speed])], first_occurrence,
+                                      position, True)
             self.lanelet_network.add_traffic_sign(speed_limit, first_occurrence)
             # scenario.add_objects(speed_limit, first_occurrence)
 
@@ -294,12 +302,12 @@ class OSM2LConverter:
         return yield_signs, priority_signs, yield_lanelets, priority_lanelets, stop_lines
 
     def _way_rel_to_lanelet(
-        self,
-        way_rel: WayRelation,
-        detect_adjacencies: bool,
-        left_driving_system: bool = False,
-        speed_limit_dict: dict = {},
-        speed_limit_lanelts: dict = {},
+            self,
+            way_rel: WayRelation,
+            detect_adjacencies: bool,
+            left_driving_system: bool = False,
+            speed_limit_dict: dict = {},
+            speed_limit_lanelts: dict = {},
     ) -> ConversionLanelet:
         """Convert a WayRelation to a Lanelet, add additional adjacency information.
 
@@ -392,7 +400,7 @@ class OSM2LConverter:
             lanelet_type = "sidewalk"
         if subtype == "crosswalk":
             users_bidirectional.add(RoadUser.PEDESTRIAN)
-            lanelet_type= "crosswalk"
+            lanelet_type = "crosswalk"
         if subtype == "bus_lane":
             users_one_way.add(RoadUser.BUS)
             lanelet_type = "bus"
@@ -481,52 +489,52 @@ class OSM2LConverter:
         if (len(left_way.nodes) < len(right_way.nodes)):
             n = len(right_way.nodes) - len(left_way.nodes)
             # Coordinates of two nodes in the middle to interpolate and add n nodes in between
-            mid = int(len(left_way.nodes)/2)
+            mid = int(len(left_way.nodes) / 2)
             start_node = self.osm.find_node_by_id(left_way.nodes[mid])
             end_node = self.osm.find_node_by_id(left_way.nodes[mid - 1])
             # Parse to nodes with numeric values
-            start_node_f = np.array([float(start_node.lat),float(start_node.lon)])
-            end_node_f = np.array([float(end_node.lat),float(end_node.lon)])
+            start_node_f = np.array([float(start_node.lat), float(start_node.lon)])
+            end_node_f = np.array([float(end_node.lat), float(end_node.lon)])
             # Add n nodes, start from last one
             for i in range(n, 0, -1):
                 # TODO: What to do with the node id? For now add some big number to start node id
                 k = 10
-                new_id = int(start_node.id_) + k*100 + i
+                new_id = int(start_node.id_) + k * 100 + i
                 while self.osm.find_node_by_id(str(new_id)) is not None:
-                    k = k+1
-                    new_id = int(start_node.id_) + k*100 + i
+                    k = k + 1
+                    new_id = int(start_node.id_) + k * 100 + i
                 # For Getting n additional nodes, we need to split the segment into n+1 smaller segments
-                new_lat = round(start_node_f[0] + (end_node_f[0] - start_node_f[0])*i/(n+1), 11)
-                new_lon = round(start_node_f[1] + (end_node_f[1] - start_node_f[1])*i/(n+1), 11)
+                new_lat = round(start_node_f[0] + (end_node_f[0] - start_node_f[0]) * i / (n + 1), 11)
+                new_lon = round(start_node_f[1] + (end_node_f[1] - start_node_f[1]) * i / (n + 1), 11)
                 new_node = Node(new_id, new_lat, new_lon)
                 self.osm.add_node(new_node)
                 left_way.nodes.insert(mid, new_node.id_)
         else:
             n = len(left_way.nodes) - len(right_way.nodes)
             # Coordinates of two nodes in the middle to interpolate and add n nodes in between
-            mid = int(len(right_way.nodes)/2)
+            mid = int(len(right_way.nodes) / 2)
             start_node = self.osm.find_node_by_id(right_way.nodes[mid])
             end_node = self.osm.find_node_by_id(right_way.nodes[mid - 1])
             # Parse to nodes with numeric values
-            start_node_f = np.array([float(start_node.lat),float(start_node.lon)])
-            end_node_f = np.array([float(end_node.lat),float(end_node.lon)])
+            start_node_f = np.array([float(start_node.lat), float(start_node.lon)])
+            end_node_f = np.array([float(end_node.lat), float(end_node.lon)])
             # Add n nodes, start from last one
             for i in range(n, 0, -1):
                 # TODO: What to do with the node id? For now add some big number to start node id
                 k = 10
-                new_id = int(start_node.id_) + k*100 + i
+                new_id = int(start_node.id_) + k * 100 + i
                 while self.osm.find_node_by_id(str(new_id)) is not None:
-                    k = k+1
-                    new_id = int(start_node.id_) + k*100 + i
+                    k = k + 1
+                    new_id = int(start_node.id_) + k * 100 + i
                 # For Getting n additional nodes, we need to split the segment into n+1 smaller segments
-                new_lat = round(start_node_f[0] + (end_node_f[0] - start_node_f[0])*i/(n+1), 11)
-                new_lon = round(start_node_f[1] + (end_node_f[1] - start_node_f[1])*i/(n+1), 11)
+                new_lat = round(start_node_f[0] + (end_node_f[0] - start_node_f[0]) * i / (n + 1), 11)
+                new_lon = round(start_node_f[1] + (end_node_f[1] - start_node_f[1]) * i / (n + 1), 11)
                 new_node = Node(new_id, new_lat, new_lon)
                 self.osm.add_node(new_node)
                 right_way.nodes.insert(mid, new_node.id_)
 
     def _check_for_split_and_join_adjacencies(
-        self, first_left_node, first_right_node, last_left_node, last_right_node
+            self, first_left_node, first_right_node, last_left_node, last_right_node
     ) -> Tuple[List, List]:
         """Check if there are adjacencies if there is a lanelet split or join.
 
@@ -599,7 +607,7 @@ class OSM2LConverter:
         return potential_adj_left, potential_adj_right
 
     def _check_for_predecessors(
-        self, first_left_node: str, first_right_node: str
+            self, first_left_node: str, first_right_node: str
     ) -> List:
 
         """Check whether the first left and right node are last nodes of another lanelet.
@@ -651,12 +659,12 @@ class OSM2LConverter:
         return []
 
     def _find_adjacencies_of_coinciding_ways(
-        self,
-        lanelet: ConversionLanelet,
-        first_left_node: str,
-        first_right_node: str,
-        last_left_node: str,
-        last_right_node: str,
+            self,
+            lanelet: ConversionLanelet,
+            first_left_node: str,
+            first_right_node: str,
+            last_left_node: str,
+            last_right_node: str,
     ):
         """Find adjacencies of a lanelet by checking if its vertices coincide with vertices of other lanelets.
 
@@ -684,7 +692,7 @@ class OSM2LConverter:
             for lanelet_id in potential_left_same_direction:
                 nb_lanelet = self.lanelet_network.find_lanelet_by_id(lanelet_id)
                 if nb_lanelet is not None and _two_vertices_coincide(
-                    lanelet.left_vertices, nb_lanelet.right_vertices
+                        lanelet.left_vertices, nb_lanelet.right_vertices
                 ):
                     self.lanelet_network.set_adjacent_left(
                         lanelet, nb_lanelet.lanelet_id, True
@@ -705,7 +713,7 @@ class OSM2LConverter:
             for lanelet_id in potential_right_same_direction:
                 nb_lanelet = self.lanelet_network.find_lanelet_by_id(lanelet_id)
                 if nb_lanelet is not None and _two_vertices_coincide(
-                    lanelet.right_vertices, nb_lanelet.left_vertices
+                        lanelet.right_vertices, nb_lanelet.left_vertices
                 ):
                     self.lanelet_network.set_adjacent_right(
                         lanelet, nb_lanelet.lanelet_id, True
@@ -727,7 +735,7 @@ class OSM2LConverter:
                 nb_lanelet = self.lanelet_network.find_lanelet_by_id(lanelet_id)
                 # compare right vertice of nb_lanelet with left vertice of lanelet
                 if nb_lanelet is not None and _two_vertices_coincide(
-                    lanelet.left_vertices, nb_lanelet.left_vertices[::-1]
+                        lanelet.left_vertices, nb_lanelet.left_vertices[::-1]
                 ):
                     self.lanelet_network.set_adjacent_left(
                         lanelet, nb_lanelet.lanelet_id, False
@@ -748,7 +756,7 @@ class OSM2LConverter:
             for lanelet_id in potential_right_other_direction:
                 nb_lanelet = self.lanelet_network.find_lanelet_by_id(lanelet_id)
                 if nb_lanelet is not None and _two_vertices_coincide(
-                    lanelet.right_vertices, nb_lanelet.right_vertices[::-1]
+                        lanelet.right_vertices, nb_lanelet.right_vertices[::-1]
                 ):
                     self.lanelet_network.set_adjacent_right(
                         lanelet, nb_lanelet.lanelet_id, True
@@ -756,7 +764,7 @@ class OSM2LConverter:
                     break
 
     def _check_right_and_left_neighbors(
-        self, way_rel: WayRelation, lanelet: ConversionLanelet
+            self, way_rel: WayRelation, lanelet: ConversionLanelet
     ):
         """check if lanelet has adjacent right and lefts.
 
@@ -825,7 +833,7 @@ class OSM2LConverter:
         return np.linalg.norm(vec1 - vec2)
 
     def _find_lanelet_ids_of_suitable_nodes(
-        self, nodes_dict: dict, node_id: str
+            self, nodes_dict: dict, node_id: str
     ) -> List:
         """Find values of a dict where the keys are node ids.
 
@@ -848,7 +856,7 @@ class OSM2LConverter:
 
 
 def _two_vertices_coincide(
-    vertices1: List[np.ndarray], vertices2: List[np.ndarray]
+        vertices1: List[np.ndarray], vertices2: List[np.ndarray]
 ) -> bool:
     """Check if two vertices coincide and describe the same trajectory.
 

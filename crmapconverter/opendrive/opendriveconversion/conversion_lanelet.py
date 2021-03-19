@@ -6,7 +6,7 @@ for conversion from the opendrive format."""
 from typing import Tuple, Optional
 
 import numpy as np
-from commonroad.scenario.lanelet import Lanelet, LaneletType
+from commonroad.scenario.lanelet import Lanelet, LaneletType, LineMarking
 
 __author__ = "Benjamin Orthen, Sebastian Maierhofer"
 __copyright__ = "TUM Cyber-Physical Systems Group"
@@ -45,8 +45,8 @@ class ConversionLanelet(Lanelet):
         adjacent_left_same_direction=None,
         adjacent_right=None,
         adjacent_right_same_direction=None,
-        line_marking_left_vertices=None,
-        line_marking_right_vertices=None,
+        line_marking_left_vertices=LineMarking.UNKNOWN,
+        line_marking_right_vertices=LineMarking.UNKNOWN,
         stop_line=None,
         lanelet_type=None,
         user_one_way=None,

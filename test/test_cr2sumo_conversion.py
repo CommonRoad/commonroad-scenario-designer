@@ -34,7 +34,7 @@ class BaseClass(unittest.TestCase):
 
         self.cwd_path = os.path.dirname(os.path.abspath(__file__))
 
-        self.path = os.path.join(self.cwd_path, "sumo_xml_test_files",
+        self.path = os.path.join(self.cwd_path, "sumo_test_files",
                                  cr_file_name + ".xml")
 
         self.scenario, planning_problem = CommonRoadFileReader(
