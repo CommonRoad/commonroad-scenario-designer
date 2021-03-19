@@ -1,4 +1,5 @@
 from typing import List
+import logging
 
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
@@ -16,21 +17,17 @@ from crmapconverter.io.scenario_designer.toolboxes.obstacle_toolbox_ui import Ob
 
 
 class ObstacleToolbox(QDockWidget):
-    def __init__(self, current_scenario: Scenario, open_scenario):
+    def __init__(self, current_scenario: Scenario, callback):
         super().__init__("Obstacle Toolbox")
 
         self.current_scenario = current_scenario
+        self.callback = callback
         self.obstacle_toolbox = ObstacleToolboxUI()
         self.adjust_ui()
         self.connect_gui_elements()
 
         if SUMO_AVAILABLE:
             self.sumo_box = SUMOSimulation()
-            # when the current scenario was simulated, load it in the gui
-            self.sumo_box.simulated_scenario.subscribe(open_scenario)
-            # when the maximum simulation steps change, update the slider
-            self.sumo_box.config.subscribe(
-                lambda config: self.update_max_step(config.simulation_steps))
         else:
             self.sumo_box = None
 
@@ -47,9 +44,11 @@ class ObstacleToolbox(QDockWidget):
 
         self.obstacle_toolbox.selected_obstacle.currentTextChanged.connect(
             lambda: self.update_obstacle_information())
-
         self.obstacle_toolbox.obstacle_state_variable.currentTextChanged.connect(
             lambda: self.plot_obstacle_state_profile())
+
+        self.obstacle_toolbox.button_start_simulation.clicked.connect(
+            lambda: self.start_sumo_simulation())
 
     def collect_obstacle_ids(self) -> List[int]:
         """
@@ -124,3 +123,8 @@ class ObstacleToolbox(QDockWidget):
                 state_variables += ["x-position", "y-position"]
             self.obstacle_toolbox.obstacle_state_variable.addItems(state_variables)
             self.plot_obstacle_state_profile()
+
+    def start_sumo_simulation(self):
+        self.sumo_box.simulate()
+        self.callback(self.current_scenario)
+

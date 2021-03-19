@@ -553,7 +553,7 @@ class RoadNetworkToolbox(QDockWidget):
         Adds a four-way intersection to the scenario.
         """
         if self.current_scenario is None:
-            self.textBrowser.append("_Warning:_ Create a new file")
+            self.text_browser.append("_Warning:_ Create a new file")
             return
 
         width = float(self.road_network_toolbox.intersection_lanelet_width.text())
@@ -579,7 +579,7 @@ class RoadNetworkToolbox(QDockWidget):
         Adds a three-way intersection to the scenario.
         """
         if self.current_scenario is None:
-            self.textBrowser.append("_Warning:_ Create a new file")
+            self.text_browser.append("_Warning:_ Create a new file")
             return
         width = float(self.road_network_toolbox.intersection_lanelet_width.text())
         diameter = int(self.road_network_toolbox.intersection_diameter.text())
@@ -615,7 +615,7 @@ class RoadNetworkToolbox(QDockWidget):
         Only a default entry is created the user has to specify the traffic sign ID manually afterward.
         """
         if self.current_scenario is None:
-            self.textBrowser.append("_Warning:_ Create a new file")
+            self.text_browser.append("_Warning:_ Create a new file")
             return
         selected_country = self.road_network_toolbox.country.currentText()
         num_rows = self.road_network_toolbox.traffic_sign_element_table.rowCount()
@@ -640,7 +640,7 @@ class RoadNetworkToolbox(QDockWidget):
         @param traffic_sign_id: Id which the new traffic sign should have.
         """
         if self.current_scenario is None:
-            self.textBrowser.append("_Warning:_ Create a new file")
+            self.text_browser.append("_Warning:_ Create a new file")
             return
         selected_country = self.road_network_toolbox.country.currentText()
         country_signs = globals()["TrafficSignID" + SupportedTrafficSignCountry(selected_country).name.capitalize()]
@@ -666,7 +666,7 @@ class RoadNetworkToolbox(QDockWidget):
             traffic_sign_elements.append(TrafficSignElement(country_signs[sign_id], additional_value))
 
         if len(traffic_sign_elements) == 0:
-            self.textBrowser.append("_Warning:_ No traffic sign element added.")
+            self.text_browser.append("_Warning:_ No traffic sign element added.")
             return
         traffic_sign_id = traffic_sign_id if traffic_sign_id is not None else \
             self.current_scenario.generate_object_id()
@@ -682,7 +682,7 @@ class RoadNetworkToolbox(QDockWidget):
         Removes selected traffic sign from scenario.
         """
         if self.current_scenario is None:
-            self.textBrowser.append("_Warning:_ Create a new file")
+            self.text_browser.append("_Warning:_ Create a new file")
             return
         if self.road_network_toolbox.selected_traffic_sign.currentText() not in ["", "None"]:
             selected_traffic_sign_id = int(self.road_network_toolbox.selected_traffic_sign.currentText())
@@ -698,7 +698,7 @@ class RoadNetworkToolbox(QDockWidget):
         Updates information of selected traffic sign.
         """
         if self.current_scenario is None:
-            self.textBrowser.append("_Warning:_ Create a new file")
+            self.text_browser.append("_Warning:_ Create a new file")
             return
         if self.road_network_toolbox.selected_traffic_sign.currentText() not in ["", "None"]:
             selected_traffic_sign_id = int(self.road_network_toolbox.selected_traffic_sign.currentText())
@@ -753,7 +753,7 @@ class RoadNetworkToolbox(QDockWidget):
         @param traffic_light_id: Id which the new traffic sign should have.
         """
         if self.current_scenario is None:
-            self.textBrowser.append("_Warning:_ Create a new file")
+            self.text_browser.append("_Warning:_ Create a new file")
             return
         referenced_lanelets = \
             {int(la) for la in self.road_network_toolbox.referenced_lanelets_traffic_light.get_checked_items()}
@@ -804,7 +804,7 @@ class RoadNetworkToolbox(QDockWidget):
         Removes a traffic light from the scenario.
         """
         if self.current_scenario is None:
-            self.textBrowser.append("_Warning:_ Create a new file")
+            self.text_browser.append("_Warning:_ Create a new file")
             return
         if self.road_network_toolbox.selected_traffic_light.currentText() not in ["", "None"]:
             selected_traffic_light_id = int(self.road_network_toolbox.selected_traffic_light.currentText())
@@ -821,7 +821,7 @@ class RoadNetworkToolbox(QDockWidget):
         Updates a traffic light from the scenario based on the user selection.
         """
         if self.current_scenario is None:
-            self.textBrowser.append("_Warning:_ Create a new file")
+            self.text_browser.append("_Warning:_ Create a new file")
             return
         if self.road_network_toolbox.selected_traffic_light.currentText() not in ["", "None"]:
             selected_traffic_light_id = int(self.road_network_toolbox.selected_traffic_light.currentText())
@@ -874,7 +874,7 @@ class RoadNetworkToolbox(QDockWidget):
         Only a default entry is created the user has to specify the incoming afterward manually.
         """
         if self.current_scenario is None:
-            self.textBrowser.append("_Warning:_ Create a new file")
+            self.text_browser.append("_Warning:_ Create a new file")
             return
         num_rows = self.road_network_toolbox.intersection_incomings_table.rowCount()
         self.road_network_toolbox.intersection_incomings_table.insertRow(num_rows)
@@ -938,7 +938,7 @@ class RoadNetworkToolbox(QDockWidget):
             selected_lanelet_two = self.current_scenario.lanelet_network.find_lanelet_by_id(
                 int(self.road_network_toolbox.selected_lanelet_two.currentText()))
         else:
-            self.textBrowser.append("No lanelet selected for [2].")
+            self.text_browser.append("No lanelet selected for [2].")
             return
 
         connected_lanelet = MapCreator.connect_lanelets(selected_lanelet_one, selected_lanelet_two,
@@ -960,7 +960,7 @@ class RoadNetworkToolbox(QDockWidget):
             selected_lanelet_two = self.current_scenario.lanelet_network.find_lanelet_by_id(
                 int(self.road_network_toolbox.selected_lanelet_two.currentText()))
         else:
-            self.textBrowser.append("No lanelet selected for [2].")
+            self.text_browser.append("No lanelet selected for [2].")
             return
 
         MapCreator.fit_to_predecessor(selected_lanelet_two, selected_lanelet_one)
