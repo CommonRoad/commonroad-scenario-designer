@@ -11,15 +11,18 @@ from crmapconverter.io.scenario_designer.osm_gui_modules.gui_embedding import Ed
 from crmapconverter.io.scenario_designer.osm_gui_modules import gui
 
 from crmapconverter.osm2cr.converter_modules import converter
+from crmapconverter.osm2cr.converter_modules.cr_operations.export import convert_to_scenario
 from crmapconverter.osm2cr.converter_modules.graph_operations import road_graph as rg
 from crmapconverter.osm2cr.converter_modules.osm_operations.downloader import download_around_map
 
 
 class MapConversionToolbox(QDockWidget):
-    def __init__(self):
+    def __init__(self, callback):
         super().__init__("Map Converter Toolbox")
 
         self.converter_toolbox = MapConversionToolboxUI()
+        self.callback = callback
+        self.selected_osm_file = None
         self.adjust_ui()
         self.connect_gui_elements()
 
@@ -84,7 +87,8 @@ class MapConversionToolbox(QDockWidget):
             QMessageBox.warning(self, "Internal Error", "There was an error during the processing of the graph.\n\n{}"
                                 .format(e), QMessageBox.Ok)
             return
-        self.app.export(graph)
+        scenario = convert_to_scenario(graph)
+        self.callback(scenario)
 
     def start_conversion(self) -> None:
         """
@@ -93,9 +97,9 @@ class MapConversionToolbox(QDockWidget):
         :return: None
         """
         try:
-            if self.embedding.rb_load_file.isChecked():
-                if self.selected_file is not None:
-                    self.read_osm_file(self.selected_file)
+            if self.converter_toolbox.osm_conversion_load_osm_file_selection.isChecked():
+                if self.selected_osm_file is not None:
+                    self.read_osm_file(self.selected_osm_file)
                 else:
                     QMessageBox.warning(
                         self,
@@ -112,7 +116,7 @@ class MapConversionToolbox(QDockWidget):
                 "Map unreadable: " + str(e),
                 QMessageBox.Ok)
             return
-        if self.embedding.chk_user_edit.isChecked():
+        if self.converter_toolbox.osm_conversion_edit_manually_selection.isChecked():
             self.app.edge_edit_embedding(self.graph)
         else:
             self.hidden_conversion(self.graph)
@@ -123,22 +127,23 @@ class MapConversionToolbox(QDockWidget):
 
         :return: True if coordinates are valid
         """
-        coords = self.embedding.coordinate_input.text()
+        lat = self.converter_toolbox.osm_conversion_coordinate_latitude.text()
+        lon = self.converter_toolbox.osm_conversion_coordinate_longitude.text()
         try:
-            lat, lon = coords.split(", ")
-            self.lat, self.lon = float(lat), float(lon)
-            if not (-90 <= self.lat <= 90 and -180 <= self.lon <= 180):
+            lat = float(lat)
+            lon = float(lon)
+            if not (-90 <= lat <= 90 and -180 <= lon <= 180):
                 raise ValueError
-            self.embedding.l_region.setText("Coordinates Valid")
-            if self.embedding.rb_download_map.isChecked():
-                self.embedding.input_picked_output.setText("Map will be downloaded")
+            #self.embedding.l_region.setText("Coordinates Valid")
+         #   if self.converter_toolbox.osm_conversion_download_osm_file_selection.isChecked():
+         #       self.embedding.input_picked_output.setText("Map will be downloaded")
             return True
         except ValueError:
-            self.embedding.l_region.setText("Coordinates Invalid")
-            if self.embedding.rb_download_map.isChecked():
-                self.embedding.input_picked_output.setText(
-                    "Cannot download, invalid Coordinates"
-                )
+            # self.embedding.l_region.setText("Coordinates Invalid")
+            # if self.embedding.rb_download_map.isChecked():
+            #     self.embedding.input_picked_output.setText(
+            #         "Cannot download, invalid Coordinates"
+            #     )
             return False
 
     def download_map(self) -> Optional[str]:
@@ -147,7 +152,7 @@ class MapConversionToolbox(QDockWidget):
 
         :return: the file name
         """
-        name = config.BENCHMARK_ID + ".osm"
+        name = "test" + ".osm"
         if not self.verify_coordinate_input():
             QMessageBox.critical(
                 self,
@@ -157,7 +162,7 @@ class MapConversionToolbox(QDockWidget):
             return None
         else:
             download_around_map(
-                name, self.lat, self.lon, self.embedding.range_input.value()
+                name, self.lat, self.lon, self.converter_toolbox.osm_download_map_range.value()
             )
             return name
 

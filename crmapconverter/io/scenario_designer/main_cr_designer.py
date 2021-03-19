@@ -117,7 +117,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
     def create_converter_toolbox(self):
         """ Create the map converter toolbox."""
-        self.converter_toolbox_widget = MapConversionToolbox()
+        self.converter_toolbox_widget = MapConversionToolbox(self.toolbox_callback)
         self.addDockWidget(Qt.RightDockWidgetArea, self.converter_toolbox_widget)
 
     def create_obstacle_toolbox(self):
@@ -167,7 +167,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.slider_clicked = False
         self.cr_viewer.pause()
 
-    def timestep_change(self, value):
+    def time_step_change(self, value):
         if self.cr_viewer.current_scenario:
             self.cr_viewer.set_timestep(value)
             self.label1.setText('  Time Stamp: ' + str(value))
@@ -278,7 +278,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.slider.setTickInterval(1)
         self.slider.setToolTip(
             "Show corresponding Scenario at selected timestep")
-        self.slider.valueChanged.connect(self.timestep_change)
+        self.slider.valueChanged.connect(self.time_step_change)
         self.slider.sliderPressed.connect(self.detect_slider_clicked)
         self.slider.sliderReleased.connect(self.detect_slider_release)
         self.cr_viewer.time_step.subscribe(self.slider.setValue)
@@ -447,7 +447,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         return action
 
     def open_cr_web(self):
-        """Function to open the webseite of CommonRoad."""
+        """Function to open the CommonRoad website."""
         QDesktopServices.openUrl(QUrl("https://commonroad.in.tum.de/"))
 
     def file_new(self):
@@ -591,38 +591,6 @@ class MWindow(QMainWindow, Ui_mainWindow):
             return
 
         self.scenario_saving_dialog.show(self.cr_viewer.current_scenario)
-
-        # file_path, _ = QFileDialog.getSaveFileName(
-        #     self,
-        #     "Select file to save scenario",
-        #     self.filename + ".xml",
-        #     "CommonRoad files *.xml (*.xml)",
-        #     options=QFileDialog.Options(),
-        # )
-        # if not file_path:
-        #     return
-        #
-        # try:
-        #     fd = open(file_path, "w")
-        #     fd.close()
-        #     writer = CommonRoadFileWriter(
-        #         scenario=self.cr_viewer.current_scenario,
-        #         planning_problem_set=None,
-        #         author="",
-        #         affiliation="",
-        #         source="",
-        #         tags="",
-        #     )
-        #     writer.write_scenario_to_file(file_path,
-        #                                   OverwriteExistingFile.ALWAYS)
-        # except IOError as e:
-        #     QMessageBox.critical(
-        #         self,
-        #         "CommonRoad file not created!",
-        #         "The CommonRoad file was not saved due to an error.\n\n" +
-        #         "{}".format(e),
-        #         QMessageBox.Ok,
-        #     )
 
     def process_trigger(self, q):
         self.status.showMessage(q.text() + ' is triggered')

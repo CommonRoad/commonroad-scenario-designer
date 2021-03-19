@@ -83,8 +83,6 @@ class OSMInterface(ConverterInterface):
     def show_settings(self):
         self.settings = settings.SettingsMenu(self, self.main_window.close)
 
-        
-
 
 class StartMenu(gui_embedding.StartMenu):
     """
@@ -112,6 +110,7 @@ class StartMenu(gui_embedding.StartMenu):
         window.input_bench_id.textChanged.connect(self.bench_id_set)
         window.rb_download_map.clicked.connect(self.download_map_clicked)
 
+
 class EdgeEdit(gui_embedding.EdgeEdit):
     """
     Embedding for edge edit GUI,
@@ -132,6 +131,7 @@ class EdgeEdit(gui_embedding.EdgeEdit):
         self.embedding.pushButton.setIcon(QIcon(":/icons/next_step.png"))
         self.embedding.pushButton_2.setIcon(QIcon(":/icons/next_step.png"))
         self.embedding.pushButton_3.setIcon(QIcon(":/icons/next_step.png"))
+
 
 class LaneLinkEdit(gui_embedding.LaneLinkEdit):
     """
