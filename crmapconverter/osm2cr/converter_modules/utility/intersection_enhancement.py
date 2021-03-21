@@ -5,6 +5,20 @@ This module is used to enhance intersections with traffic lights.
 from crmapconverter.osm2cr.converter_modules.utility import geometry, idgenerator
 from crmapconverter.osm2cr.converter_modules.utility.traffic_light_generator import TrafficLightGenerator
 
+
+def check_pre_incoming_lane(lane, intermediate_format):
+        # determines if any predecessor of a lane is part of another intersection as successor
+        for intersection in intermediate_format.intersections:
+            all_succesors = set()
+            for incoming in intersection.incomings:
+                all_succesors.update(incoming.successors_left)
+                all_succesors.update(incoming.successors_right)
+                all_succesors.update(incoming.successors_straight)
+            for pre in lane.predecessors:
+                if pre in all_succesors:
+                    return True
+        return False
+
 def intersection_enhancement(intermediate_format):
     """
     Enhance intersections with traffic lights. 
@@ -27,25 +41,12 @@ def intersection_enhancement(intermediate_format):
                         intermediate_format.traffic_lights.remove(light)
             lane.traffic_lights = set()
 
-    def check_pre_incoming_lane(lane):
-        # determines if any predecessor of a lane is part of another intersection as successor
-        for intersection in intermediate_format.intersections:
-            all_succesors = set()
-            for incoming in intersection.incomings:
-                all_succesors.update(incoming.successors_left)
-                all_succesors.update(incoming.successors_right)
-                all_succesors.update(incoming.successors_straight)
-            for pre in lane.predecessors:
-                if pre in all_succesors:
-                    return True
-        return False
-
     def remove_innner_lights(intersection, incoming_lanes):
         # removes inner traffic lights in the middle of crossings
         # if lane is short and predecessor is other incoming's successor
         remove = False
         for lane in incoming_lanes:
-            if geometry.distance(lane.center_points[0], [lane.center_points[-1]]) < 2 and check_pre_incoming_lane(lane): # shorter than 2 meters
+            if geometry.distance(lane.center_points[0], [lane.center_points[-1]]) < 2 and check_pre_incoming_lane(lane, intermediate_format): # shorter than 2 meters
                 remove = True
                 indicating_lane = lane.id
         if remove:
@@ -141,8 +142,104 @@ def intersection_enhancement(intermediate_format):
             # remove inner traffic lights in the middle of bigger crossings
             remove_innner_lights(intersection, incoming_lanes)
 
+        remove_short_predeccesors(intermediate_format, intersection)
+
     # remove traffic lights that are not part of any intersection
     remove_non_intersection_lights(all_incoming_lanes_in_scenario)
     # clean up and remove invalid references
     intermediate_format.remove_invalid_references()
+
+def merge_incoming(incoming, intermediate_format):
+    """ def __init__(self,
+                 edge_id: int,
+                 node1: Node,
+                 node2: Node,
+                 left_bound: List[np.ndarray],
+                 right_bound: List[np.ndarray],
+                 center_points: List[np.ndarray],
+                 adjacent_right: int,
+                 adjacent_right_direction_equal: bool,
+                 adjacent_left: int,
+                 adjacent_left_direction_equal: bool,
+                 successors: List[int],
+                 predecessors: List[int],
+                 traffic_signs: Set[int],
+                 traffic_lights: Set[int],
+                 edge_type: str = config.LANELETTYPE): """
+
+    for incoming_id in incoming.incoming_lanelets:
+        edge = intermediate_format.find_edge_by_id(incoming_id)
+        pre = intermediate_format.find_edge_by_id(edge.predecessors[0])
+        
+        assert len(pre.left_bound) == len(pre.right_bound) == len(pre.center_points)
+        assert len(edge.left_bound) == len(edge.right_bound) == len(edge.center_points)
+
+        shared_node = None
+        # find shared node
+        if edge.node1.id == pre.node2.id:
+            shared_node = edge.node1
+        elif edge.node2.id == pre.node1.id:
+            shared_node = edge.node2
+        else:
+            raise ValueError
+
+        assert shared_node is not None
+
+        if shared_node.id == edge.node1.id:
+            edge.node1 = pre.node1
+        elif shared_node.id == edge.node2:
+            edge.node2 = pre.node2
+        else:
+            raise ValueError
+
+ 
+        edge.right_bound = pre.right_bound + edge.right_bound
+        edge.left_bound = pre.left_bound + edge.left_bound
+        edge.center_points = pre.center_points + edge.center_points
+
+        # traffic lights and signs
+        edge.traffic_signs.union(pre.traffic_signs)
+        edge.traffic_lights.union(pre.traffic_lights)
+
+        
+        assert len(edge.left_bound) == len(edge.right_bound) == len(edge.center_points)
+
+        # update predeccessors
+        edge.predecessors = pre.predecessors
+        for pre_pre in pre.predecessors:
+            pre_pre_edge = intermediate_format.find_edge_by_id(pre_pre)
     
+            pre_pre_edge.successors.remove(pre.id)
+            pre_pre_edge.successors.append(edge.id)
+           
+        # remove pre from edge list
+        intermediate_format.edges.remove(pre)
+
+        # update adajcent opposite direction
+        if edge.adjacent_left and not edge.adjacent_left_direction_equal:
+            merge_outgoing(intermediate_format.find_edge_by_id(edge.adjacent_left), intermediate_format)
+
+
+def merge_outgoing(outgoing, intermediate_format):
+    return
+
+    
+
+def remove_short_predeccesors(intermediate_format, intersection):
+    
+    for incoming in intersection.incomings:
+        merge = True
+        for incoming_lane in incoming.incoming_lanelets:
+            edge = intermediate_format.find_edge_by_id(incoming_lane)
+            if (
+                    geometry.distance(edge.center_points[0], [edge.center_points[-1]]) < 2 and # shorter than 2 meters
+                    len(edge.predecessors) == 1 and
+                    not check_pre_incoming_lane(edge, intermediate_format)
+                    and edge.adjacent_right is None
+                ):
+                merge = True
+                break
+            merge = False
+        if merge:
+            merge_incoming(incoming, intermediate_format)
+                
