@@ -133,6 +133,9 @@ def intersection_enhancement(intermediate_format):
         # extend all incoming lanes in scenario
         all_incoming_lanes_in_scenario.extend(incoming_lanes)
 
+        # merge short incomings with predecessors
+        remove_short_predeccesors(intermediate_format, intersection)
+
         # modify intersection if traffic lights where found, else skip to next intersection
         if has_traffic_lights:
             # remove existing traffic lights
@@ -142,7 +145,7 @@ def intersection_enhancement(intermediate_format):
             # remove inner traffic lights in the middle of bigger crossings
             remove_innner_lights(intersection, incoming_lanes)
 
-        remove_short_predeccesors(intermediate_format, intersection)
+        
 
     # remove traffic lights that are not part of any intersection
     remove_non_intersection_lights(all_incoming_lanes_in_scenario)
@@ -221,7 +224,61 @@ def merge_incoming(incoming, intermediate_format):
 
 
 def merge_outgoing(outgoing, intermediate_format):
-    return
+    if not (
+            geometry.distance(outgoing.center_points[0], [outgoing.center_points[-1]]) < 2 and # shorter than 2 meters
+            len(outgoing.successors) == 1 
+        ): return
+
+    suc = intermediate_format.find_edge_by_id(outgoing.successors[0])
+    
+    assert len(suc.left_bound) == len(suc.right_bound) == len(suc.center_points)
+    assert len(outgoing.left_bound) == len(outgoing.right_bound) == len(outgoing.center_points)
+
+    shared_node = None
+    # find shared node
+    if outgoing.node1.id == suc.node2.id:
+        shared_node = outgoing.node1
+    elif outgoing.node2.id == suc.node1.id:
+        shared_node = outgoing.node2
+    else:
+        raise ValueError
+
+    assert shared_node is not None
+
+    if shared_node.id == outgoing.node1.id:
+        outgoing.node1 = suc.node1
+    elif shared_node.id == outgoing.node2.id:
+        outgoing.node2 = suc.node2
+    else:
+        raise ValueError
+
+    outgoing.right_bound = outgoing.right_bound + suc.right_bound
+    outgoing.left_bound = outgoing.left_bound + suc.left_bound
+    outgoing.center_points = outgoing.center_points + suc.center_points
+
+    # traffic lights and signs
+    outgoing.traffic_signs.union(suc.traffic_signs)
+    outgoing.traffic_lights.union(suc.traffic_lights)
+
+    
+    assert len(outgoing.left_bound) == len(outgoing.right_bound) == len(outgoing.center_points)
+
+    # update successors
+    outgoing.successors = suc.successors
+    for suc_suc in suc.successors:
+        suc_suc_edge = intermediate_format.find_edge_by_id(suc_suc)
+
+        suc_suc_edge.predecessors.remove(suc.id)
+        suc_suc_edge.predecessors.append(outgoing.id)
+        
+    # remove pre from edge list
+    intermediate_format.edges.remove(suc)
+
+    # update adjacent same direction
+    if outgoing.adjacent_right and outgoing.adjacent_left_direction_equal:
+        merge_outgoing(intermediate_format.find_edge_by_id(outgoing.adjacent_right), intermediate_format)
+
+    # TODO test if this method works also for larger intersections
 
     
 
