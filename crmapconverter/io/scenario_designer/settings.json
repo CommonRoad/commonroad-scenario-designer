@@ -1,9 +1,0 @@
-{
-  "tmp_folder": "cache",
-  "gui": {},
-  "converters": {
-    "openDRIVE": {},
-    "OSM": {},
-    "SUMO": {}
-  }
-}

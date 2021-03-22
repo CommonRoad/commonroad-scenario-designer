@@ -139,6 +139,8 @@ class ParametricLaneGroup:
 
         """
         left_vertices, right_vertices = np.array([]), np.array([])
+        line_marking_left_vertices = LineMarking.UNKNOWN
+        line_marking_right_vertices = LineMarking.UNKNOWN
 
         for parametric_lane in self.parametric_lanes:
 
@@ -161,9 +163,7 @@ class ParametricLaneGroup:
                 right_vertices = local_right_vertices
 
         for parametric_lane in self.parametric_lanes:
-            mark = LineMarking.NO_MARKING
-            line_marking_left_vertices = LineMarking.NO_MARKING
-            line_marking_right_vertices = LineMarking.NO_MARKING
+            mark = LineMarking.UNKNOWN
             line_marking = parametric_lane.line_marking
 
             if line_marking is not None:
@@ -183,7 +183,7 @@ class ParametricLaneGroup:
                             mark = LineMarking.BROAD_DASHED
 
                     else:
-                        mark = None
+                        mark = LineMarking.UNKNOWN
 
                     line_marking_left_vertices = mark
 
@@ -202,7 +202,7 @@ class ParametricLaneGroup:
                             mark = LineMarking.BROAD_DASHED
 
                     else:
-                        mark = None
+                        mark = LineMarking.UNKNOWN
 
                     line_marking_right_vertices = mark
             else:

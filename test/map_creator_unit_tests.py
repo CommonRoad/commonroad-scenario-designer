@@ -34,22 +34,22 @@ class TestLanelet(unittest.TestCase):
         scenario = Scenario(0.1, 'new scenario')
         network = LaneletNetwork()
         scenario.lanelet_network = network
-        lanelet = mapcreator.create_straight(self, 2, 8, 8, network, scenario, None)
+        lanelet = mapcreator.create_straight(self, 2, 8, 9, network, scenario, None)
 
         np.testing.assert_array_almost_equal(lanelet.left_vertices, left_vertices)
         np.testing.assert_array_almost_equal(lanelet.right_vertices, right_vertices)
         np.testing.assert_array_almost_equal(lanelet.center_vertices, center_vertices)
 
     def test_create_curve(self):
-        left_vertices = np.array([[9, 0],[8.22190912, 3.66062979],[6.02217546, 6.68830343],[2.78115295,8.55950865],
-                                  [-0.94075617, 8.95069706],[-4.5, 7.79422863],[-7.28115295, 5.29006727],
-                                  [-8.80332841, 1.87120522],[-8.80332841, -1.87120522],[-7.28115295, -5.29006727]])
-        right_vertices = np.array([[11 ,0],[10.04900003, 4.47410307],[7.36043667, 8.17459308],[3.39918694, 10.46162168],
-                                   [-1.1498131, 10.93974085],[-5.5, 9.52627944],[-8.89918694, 6.46563778],
-                                   [-10.75962361, 2.2870286 ],[-10.75962361, -2.2870286 ],[-8.89918694, -6.46563778]])
-        center_vertices = np.array([[10, 0],[9.13545458, 4.06736643],[6.69130606, 7.43144825],[3.09016994, 9.51056516],
-                                    [-1.04528463, 9.94521895],[-5, 8.66025404],[-8.09016994, 5.87785252],
-                                    [-9.78147601, 2.07911691],[-9.78147601, -2.07911691],[-8.09016994, -5.87785252]])
+        left_vertices = np.array([[0, 1],[3.66062979, 1.77809088],[6.68830343,3.97782454],[8.55950865,7.21884705],
+                                  [8.95069706, 10.9407562],[7.79422863,14.5],[5.29006727, 17.2811529],
+                                  [1.87120522, 18.8033284],[-1.87120522, 18.8033284],[-5.29006727, 17.2811529]])
+        right_vertices = np.array([[0, -1],[4.47410307, -0.0490000341],[8.17459308, 2.63956333],[10.4616217, 6.60081306],
+                                   [10.9397408, 11.1498131],[9.52627944, 15.5],[6.46563778, 18.8991869],
+                                   [2.2870286, 20.7596236],[-2.2870286, 20.7596236],[-6.46563778, 18.8991869]])
+        center_vertices = np.array([[0, 0],[4.06736643, 0.86454542],[7.43144825, 3.30869394],[9.51056516, 6.90983006],
+                                    [9.94521895, 11.04528463],[8.66025404, 15],[5.87785252, 18.09016994],
+                                    [2.07911691, 19.78147601],[-2.07911691, 19.78147601],[-5.87785252, 18.09016994]])
 
         lanelet = Lanelet(left_vertices, center_vertices, right_vertices, 1)
         scenario = Scenario(0.1, 'new scenario')
@@ -192,7 +192,7 @@ class TestLanelet(unittest.TestCase):
         network = LaneletNetwork()
         scenario.lanelet_network = network
 
-        lanelet_connect = mapcreator.connect_lanelets3(self, lanelet, lanelet2, network, scenario)
+        lanelet_connect = mapcreator.connect_lanelets4(self, lanelet, lanelet2, network, scenario)
 
         np.testing.assert_array_almost_equal(lanelet.left_vertices[-1], lanelet_connect.left_vertices[0])
         np.testing.assert_array_almost_equal(lanelet.right_vertices[-1], lanelet_connect.right_vertices[0])
@@ -206,3 +206,4 @@ if __name__ == '__main__':
 
 Test = TestLanelet()
 Test.test_set_predecessor_successor_relation()
+

@@ -12,8 +12,7 @@ import warnings
 from commonroad.scenario.lanelet import Lanelet, LaneletNetwork, LaneletType
 from commonroad.scenario.obstacle import Obstacle
 from commonroad.scenario.scenario import Scenario
-from commonroad.scenario.traffic_sign import TrafficSign
-from commonroad.scenario.traffic_sign import TrafficLight
+from commonroad.scenario.traffic_sign import TrafficSign, TrafficLight
 from commonroad.scenario.intersection import Intersection, IntersectionIncomingElement
 from commonroad.planning.planning_problem import PlanningProblem, PlanningProblemSet
 from commonroad.scenario.trajectory import State
@@ -24,6 +23,7 @@ from commonroad.geometry.shape import Rectangle, Circle
 from crmapconverter.osm2cr.converter_modules.graph_operations.road_graph import Graph
 from crmapconverter.osm2cr import config
 from crmapconverter.osm2cr.converter_modules.utility import geometry, idgenerator
+from crmapconverter.osm2cr.converter_modules.utility.intersection_enhancement import intersection_enhancement
 
 # mapping from crossed lanelet ids to the crossing ones
 Crossings = Dict[int, Set[int]]
@@ -197,7 +197,7 @@ def add_is_left_of(incoming_data, incoming_data_id):
     :return: incomings with the isLeftOf assigned
     """
 
-    # Choose a reference incoming vector
+    # choose a reference incoming vector
     ref = incoming_data[0]['waypoints'][0] - incoming_data[0]['waypoints'][-1]
     angles = [(0, 0)]
 
@@ -218,11 +218,14 @@ def add_is_left_of(incoming_data, incoming_data_id):
         angle = angles[index][1] - angles[prev][1]
         if angle < 0:
             angle += 360
-        if config.LANE_SEGMENT_ANGLE < angle <= 90 + config.LANE_SEGMENT_ANGLE:
+
+        # add is_left_of relation if angle is less than intersection straight treshold
+        if angle <= 180 - config.INTERSECTION_STRAIGHT_THRESHOLD:
             # is left of the previous incoming
             is_left_of = angles[prev][0]
             data_index = angles[index][0]
             incoming_data[data_index].update({'isLeftOf': incoming_data_id[is_left_of]})
+
         prev = index
 
     return incoming_data
@@ -231,7 +234,7 @@ def add_is_left_of(incoming_data, incoming_data_id):
 def get_lanelet_intersections(crossing_interm: "IntermediateFormat",
                               crossed_interm: "IntermediateFormat") -> Crossings:
     """
-    Calculcate all polygon intersections of the lanelets of the two networks.
+    Calculate all polygon intersections of the lanelets of the two networks.
     For each lanelet of b return the crossing lanelets of a as list.
 
     :param crossing_interm: crossing network
@@ -287,6 +290,9 @@ class IntermediateFormat:
         if self.obstacles is None:
             self.obstacles = []
 
+        if config.INTERSECTION_EMHANCEMENT:
+            intersection_enhancement(self)
+
     def find_edge_by_id(self, edge_id):
         """
         Find the edge in the format by id
@@ -300,7 +306,7 @@ class IntermediateFormat:
 
     def find_traffic_sign_by_id(self, sign_id):
         """
-        Find the traffic sign by the sign id
+        Find traffic sign by the sign id
 
         :param sign_id: sign id of the Traffic Sign element
         :return: CommonRoad TrafficSign
@@ -308,6 +314,17 @@ class IntermediateFormat:
         for sign in self.traffic_signs:
             if sign.traffic_sign_id == sign_id:
                 return sign
+
+    def find_traffic_light_by_id(self, light_id):
+        """
+        Find traffic light by the light id
+
+        :param light_id: light id of the Traffic Light element
+        :return: CommonRoad TrafficLight
+        """
+        for light in self.traffic_lights:
+            if light.traffic_light_id == light_id:
+                return light
 
     @staticmethod
     def get_directions(incoming_lane):
@@ -396,7 +413,33 @@ class IntermediateFormat:
                 # keep track of added lanes to consider unique intersections
                 incoming = [p for p in lane.predecessors if p.id not in added_lanes]
 
-                # Initialize incomming element with properties to be filled in
+                # skip if no incoming was found
+                if not incoming:
+                    continue
+
+                # add adjacent lanes
+                lanes_to_add = []
+                for incoming_lane in incoming:
+                    left = incoming_lane.adjacent_left
+                    right = incoming_lane.adjacent_right
+                    while left:
+                        if incoming_lane.adjacent_left_direction_equal and left.id not in added_lanes:
+                            lanes_to_add.append(left)
+                            added_lanes.add(left.id)
+                            left = left.adjacent_left
+                        else:
+                            left = None
+                    while right:
+                        if incoming_lane.adjacent_right_direction_equal and right.id not in added_lanes:
+                            lanes_to_add.append(right)
+                            added_lanes.add(right.id)
+                            right = right.adjacent_right
+                        else:
+                            right = None
+
+                incoming.extend(lanes_to_add)
+                
+                # Initialize incoming element with properties to be filled in
                 incoming_element = {'incomingLanelet': set([incoming_lane.id for incoming_lane in incoming]),
                                     'right': [],
                                     'left': [],
@@ -430,15 +473,15 @@ class IntermediateFormat:
                                 for key in directions:
                                     incoming_element[directions[key]].append(key)
 
-                    if node.id in intersections:
-                        # add new incoming element to existing intersection
-                        intersections[node.id]['incoming'].append(incoming_element)
-                    else:
-                        # add new intersection
-                        intersections[node.id] = \
-                            {'incoming': [incoming_element]}
+                if node.id in intersections:
+                    # add new incoming element to existing intersection
+                    intersections[node.id]['incoming'].append(incoming_element)
+                else:
+                    # add new intersection
+                    intersections[node.id] = \
+                        {'incoming': [incoming_element]}
 
-                    added_lanes = added_lanes.union(incoming_element['incomingLanelet'])
+                added_lanes = added_lanes.union(incoming_element['incomingLanelet'])
 
         # Convert to CommonRoad Intersections
         intersections_cr = []
@@ -463,7 +506,6 @@ class IntermediateFormat:
                                                                )
                 incoming_elements.append(incoming_element)
                 index += 1
-
             intersections_cr.append(Intersection(idgenerator.get_id(), incoming_elements))
         return intersections_cr
 
@@ -517,6 +559,7 @@ class IntermediateFormat:
         traffic_lights = [light.to_traffic_light_cr() for light in graph.traffic_lights]
 
         intersections = IntermediateFormat.get_intersections(graph)
+
         return IntermediateFormat(nodes,
                                   edges,
                                   traffic_signs,

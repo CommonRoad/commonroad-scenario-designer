@@ -1,13 +1,13 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<commonRoad timeStepSize="0.1" commonRoadVersion="2020a" author="" affiliation="" source="OpenDRIVE 2 Lanelet Converter" benchmarkID="ZAM_OpenDrive-123" date="2020-12-19">
+<commonRoad timeStepSize="0.1" commonRoadVersion="2020a" author="" affiliation="" source="OpenDRIVE 2 Lanelet Converter" benchmarkID="ZAM_OpenDrive-123" date="2021-03-02">
   <location>
     <geoNameId>-999</geoNameId>
     <gpsLatitude>999</gpsLatitude>
     <gpsLongitude>999</gpsLongitude>
   </location>
   <scenarioTags>
-    <highway/>
     <urban/>
+    <highway/>
   </scenarioTags>
   <lanelet id="100">
     <leftBound>
@@ -147,7 +147,6 @@
         <x>-7.0710678</x>
         <y>-7.0710684</y>
       </point>
-      <lineMarking>no_marking</lineMarking>
     </leftBound>
     <rightBound>
       <point>
@@ -4682,7 +4681,6 @@
         <x>-7.0710684</x>
         <y>7.0710678</y>
       </point>
-      <lineMarking>no_marking</lineMarking>
     </leftBound>
     <rightBound>
       <point>
@@ -9222,7 +9220,6 @@
         <x>7.0710684</x>
         <y>-7.0710678</y>
       </point>
-      <lineMarking>no_marking</lineMarking>
     </leftBound>
     <rightBound>
       <point>
@@ -13757,7 +13754,6 @@
         <x>7.0710678</x>
         <y>7.0710684</y>
       </point>
-      <lineMarking>no_marking</lineMarking>
     </leftBound>
     <rightBound>
       <point>
@@ -18299,7 +18295,6 @@
         <x>7.0710678</x>
         <y>7.0710684</y>
       </point>
-      <lineMarking>no_marking</lineMarking>
     </leftBound>
     <rightBound>
       <point>
@@ -22834,7 +22829,6 @@
         <x>7.0710684</x>
         <y>-7.0710678</y>
       </point>
-      <lineMarking>no_marking</lineMarking>
     </leftBound>
     <rightBound>
       <point>
@@ -31626,7 +31620,6 @@
         <x>-7.0710678</x>
         <y>-7.0710684</y>
       </point>
-      <lineMarking>no_marking</lineMarking>
     </leftBound>
     <rightBound>
       <point>
@@ -36168,7 +36161,6 @@
         <x>-7.0710684</x>
         <y>7.0710678</y>
       </point>
-      <lineMarking>no_marking</lineMarking>
     </leftBound>
     <rightBound>
       <point>
@@ -36479,7 +36471,6 @@
         <x>-7.0710678</x>
         <y>-7.0710684</y>
       </point>
-      <lineMarking>no_marking</lineMarking>
     </leftBound>
     <rightBound>
       <point>
@@ -36817,7 +36808,6 @@
         <x>-7.0710684</x>
         <y>7.0710678</y>
       </point>
-      <lineMarking>no_marking</lineMarking>
     </leftBound>
     <rightBound>
       <point>
@@ -37158,7 +37148,6 @@
         <x>7.0710684</x>
         <y>-7.0710678</y>
       </point>
-      <lineMarking>no_marking</lineMarking>
     </leftBound>
     <rightBound>
       <point>
@@ -37499,7 +37488,6 @@
         <x>7.0710678</x>
         <y>7.0710684</y>
       </point>
-      <lineMarking>no_marking</lineMarking>
     </leftBound>
     <rightBound>
       <point>
@@ -37805,7 +37793,6 @@
         <x>7.0710678</x>
         <y>7.0710678</y>
       </point>
-      <lineMarking>no_marking</lineMarking>
     </leftBound>
     <rightBound>
       <point>
@@ -38079,7 +38066,6 @@
         <x>-7.0710678</x>
         <y>7.0710678</y>
       </point>
-      <lineMarking>no_marking</lineMarking>
     </leftBound>
     <rightBound>
       <point>
@@ -38354,7 +38340,6 @@
         <x>-7.0710678</x>
         <y>-7.0710678</y>
       </point>
-      <lineMarking>no_marking</lineMarking>
     </leftBound>
     <rightBound>
       <point>
@@ -38628,7 +38613,6 @@
         <x>7.0710678</x>
         <y>-7.0710678</y>
       </point>
-      <lineMarking>no_marking</lineMarking>
     </leftBound>
     <rightBound>
       <point>
