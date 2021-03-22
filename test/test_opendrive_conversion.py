@@ -54,7 +54,7 @@ class TestOpenDriveBaseClass(unittest.TestCase):
 
         with open(
             os.path.dirname(os.path.realpath(__file__))
-            + f"/xodr_xml_test_files/{self.xodr_file_name}.xodr",
+            + f"/opendrive_test_files/{self.xodr_file_name}.xodr",
             "r",
         ) as fh:
             opendrive = parse_opendrive(etree.parse(fh).getroot())
@@ -67,7 +67,7 @@ class TestOpenDriveBaseClass(unittest.TestCase):
         """
         with open(
             os.path.dirname(os.path.realpath(__file__))
-            + f"/xodr_xml_test_files/{self.xml_output_name}.xml",
+            + f"/opendrive_test_files/{self.xml_output_name}.xml",
             "r",
         ) as fh:
 
