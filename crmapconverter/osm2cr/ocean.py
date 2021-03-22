@@ -8,7 +8,6 @@ import utm
 import src.scenario.traffic_sign as tS
 import src.scenario.waters as w
 import numpy as np
-#import commonroad.scenario.lanelet as c
 
 def convert_seamap(filename):
     """
@@ -33,7 +32,7 @@ def convert_seamap(filename):
 
     for way in ways: #find fairways and coastlines in OSM
         for tag in way.iter('tag'):
-            if tag.attrib['k'] == 'seamark:type' and tag.attrib['v'] == 'fairway':
+            if tag.attrib['k'] == 'seamark:type' and (tag.attrib['v'] == 'fairway' or  tag.attrib['v'] == 'separation_zone'):
                 fairways.add(way)
                 break
             if tag.attrib['k'] == 'natural' and tag.attrib['v'] == 'coastline':
@@ -41,15 +40,9 @@ def convert_seamap(filename):
                 break
 
     scenario = Scenario(1.0,2) #TODO:adjust timestep,id
-    for buoy in buoys: #add buoyes to scenario as TrafficSigns
-        lat = float(buoy.get('lat'))
-        lon = float(buoy.get('lon'))
-        coordinates = utm.from_latlon(lat,lon) #TODO: convert to one field
-        type = tS.TrafficSignElementID(getType(buoy))
-        element = tS.TrafficSignElement(type,[])
-        sign = tS.TrafficSign(Scenario.generate_object_id(scenario),element,coordinates)
-        scenario.add_objects(sign,[])
 
+    if len(buoys) > 0:
+        addBuoys(buoys,scenario)
     if len(coastlines) > 0:
         addLand(coastlines,scenario, root)
     if len(fairways) > 0:
@@ -90,34 +83,80 @@ def getType(buoy) -> str:
     return '103'
 
 def addWaters(waters, scenario: Scenario, type: w.WatersType, root):
+    """
+    adds different types of waters to scenario
+    """
     for water in waters:  # add waters to scenario
         z=[]
+        zone = []
         for nd in water.iter('nd'):
             #get coordinates for point
             xpath = "./node[@id='{index}']".format(index=nd.attrib['ref'])
             node = root.find(xpath)
+
+            #get coordiantes
             coordinates = utm.from_latlon(float(node.get('lat')), float(node.get('lon')))
             z.append([coordinates[0], coordinates[1]])
+            UTMZone = [coordinates[2], coordinates[3]]
+            if zone == []:
+                zone = [coordinates[2], coordinates[3]]
+            else:
+                assert (zone[0] == UTMZone[0] and zone[1] == UTMZone[1]), 'Coordinates are in different UTM zones, {} != {}'.format(zone, UTMZone)
 
-        if(len(x)>4):
+
+        if(len(z)>=4):
             center_v = np.array([[1, 2], [2, 3]])  # TODO: find good center_vertices
             water2 = w.Waters(np.array([z[1], z[0]]), center_v, np.array(z[2:]), Scenario.generate_object_id(scenario),
                               None, None, {type})
             scenario.add_objects(water2, [])
 
+
 def addLand(lands, scenario: Scenario, root):
+    """
+    adds coastlines to scenario
+    """
     for land in lands:  # add waters to scenario
         z=[]
+        zone = []
         for nd in land.iter('nd'):
             #get coordinates for point
             xpath = "./node[@id='{index}']".format(index=nd.attrib['ref'])
             node = root.find(xpath)
+
+            #get coordinates
             coordinates = utm.from_latlon(float(node.get('lat')), float(node.get('lon')))
             z.append([coordinates[0],coordinates[1]])
-            #TODO: bring coordinates to one field in UTM
+            UTMZone = [coordinates[2], coordinates[3]]
+            if zone == []:
+                zone = [coordinates[2], coordinates[3]]
+            else:
+                assert (zone[0] == UTMZone[0] and zone[1] == UTMZone[1]), 'Coordinates are in different UTM zones, {} != {}'.format(zone, UTMZone)
 
 
-        if(len(x)>4):
+        if(len(z)>=4):
             center_v = np.array([[1,2],[2,3]]) #TODO: find good center_vertices
             water2 = w.Waters(np.array([z[1],z[0]]),center_v,np.array(z[2:]), Scenario.generate_object_id(scenario),None,None,{w.WatersType('water')})
             scenario.add_objects(water2,[])
+
+
+def addBuoys (buoys, scenario):
+    """
+    adds buoys to scenario
+    """
+    zone = []
+    for buoy in buoys: #add buoyes to scenario as TrafficSigns
+        #get coordinates
+        lat = float(buoy.get('lat'))
+        lon = float(buoy.get('lon'))
+        coordinates = utm.from_latlon(lat,lon)
+        UTMZone = [coordinates[2], coordinates[3]]
+        if zone == []:
+            zone = [coordinates[2], coordinates[3]]
+        else:
+            assert (zone[0] == UTMZone[0] and zone[1] == UTMZone[
+                1]), 'Coordinates are in different UTM zones, {} != {}'.format(zone, UTMZone)
+
+        type = tS.TrafficSignElementID(getType(buoy))
+        element = tS.TrafficSignElement(type,[])
+        sign = tS.TrafficSign(Scenario.generate_object_id(scenario),element,[coordinates[0],coordinates[1]])
+        scenario.add_objects(sign,[])
