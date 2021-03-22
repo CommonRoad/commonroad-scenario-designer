@@ -247,6 +247,7 @@ def smoothen_lane(l: Lanelet, min_dis=0.7, number_nodes=50) -> Lanelet:
     :param3 number_nodes: Minimum number of nodes that shall be used for the b spline interpolation process
     :return: Smoothend lanelet
     """
+    assert len(l.left_vertices) == len(l.right_vertices) == len(l.center_vertices)
 
     if not number_nodes:
         number_nodes = len(l.left_vertices)

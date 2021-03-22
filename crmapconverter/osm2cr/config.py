@@ -191,6 +191,13 @@ MERGE_DISTANCE = 3.5
 INTERSECTION_STRAIGHT_THRESHOLD = 35.0
 # option to clean up intersections and add new traffic lights to it
 INTERSECTION_EMHANCEMENT = True
+# cycle that will be applied to each traffic light. Values in seconds
+TRAFFIC_LIGHT_CYCLE = {
+    "red_phase": 57, 
+    "red_yellow_phase": 3, 
+    "green_phase": 37,
+    "yellow_phase": 3 
+}
 
 # Toggle edit for user
 USER_EDIT = False

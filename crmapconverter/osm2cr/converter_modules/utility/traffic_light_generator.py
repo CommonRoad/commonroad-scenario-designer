@@ -1,3 +1,4 @@
+from crmapconverter.osm2cr import config
 from commonroad.scenario.traffic_sign import TrafficLight, TrafficLightCycleElement, TrafficLightState, TrafficLightDirection
 
 
@@ -10,30 +11,25 @@ class TrafficLightGenerator:
     def __init__(self, number_of_incomings):
         self.number_incomings = number_of_incomings
 
+        # cycle phases
+        self.cycle = config.TRAFFIC_LIGHT_CYCLE
+
         # increase red phase if more than 4 incomings
         if number_of_incomings > 4:
-            self.red_phase += 50
-    # Multiplier to manipulate cycle evenly
-    time_step_multiplier = 1
+            self.cycle['red_phase'] += 50
 
-    # Cycle phases
-    red_phase = 57 * time_step_multiplier
-    red_yellow_phase = 3 * time_step_multiplier
-    green_phase = 37 * time_step_multiplier
-    yellow_phase = 3 * time_step_multiplier
-
-    # internal variables
-    cycle_length = red_phase + red_yellow_phase + green_phase + yellow_phase
-    current_time_offset = 0
+        # internal variables
+        self.cycle_length = sum(self.cycle.values())
+        self.current_time_offset = 0
 
     def get_cycle(self):
         """
         Cycle that is applied to all traffic lights
         """
-        cycle = [(TrafficLightState.RED, self.red_phase),
-                (TrafficLightState.RED_YELLOW, self.red_yellow_phase),
-                (TrafficLightState.GREEN, self.green_phase),
-                (TrafficLightState.YELLOW, self.yellow_phase)]
+        cycle = [(TrafficLightState.RED, self.cycle['red_phase']),
+                (TrafficLightState.RED_YELLOW, self.cycle['red_yellow_phase']),
+                (TrafficLightState.GREEN, self.cycle['green_phase']),
+                (TrafficLightState.YELLOW, self.cycle['yellow_phase'])]
         cycle_element_list = [TrafficLightCycleElement(state[0], state[1]) for state in cycle]
         return cycle_element_list
 
@@ -49,7 +45,7 @@ class TrafficLightGenerator:
             pass
         elif self.number_incomings <= 4:
             self.current_time_offset += int(self.cycle_length / 2)
-        else: # > 4
+        else: # more than 4 incommings
             self.current_time_offset += int(self.cycle_length / 3)
 
         return offset

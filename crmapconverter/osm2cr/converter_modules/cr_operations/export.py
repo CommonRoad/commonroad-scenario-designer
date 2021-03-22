@@ -182,6 +182,8 @@ def export(
     author = config.AUTHOR
     affiliation = config.AFFILIATION
     source = config.SOURCE
+    if config.MAPILLARY_CLIENT_ID != "demo":
+        source += ", Mapillary"
     tags = create_tags(config.TAGS)
     # create location tag automatically. Retreive geonamesID from the Internet.
     location = Location(gps_latitude=graph.center_point[0],
