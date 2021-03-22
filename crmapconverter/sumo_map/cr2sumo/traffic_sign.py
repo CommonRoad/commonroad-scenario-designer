@@ -199,11 +199,11 @@ class TrafficSignEncoder:
         assert len(element.additional_values) == 0, \
             f"BAN_CAR_TRUCK_BUS_MOTORCYCLE can only have none additional attribute, has: {element.additional_values}"
         old_type = self.edge_types.types[edge.type_id]
-        disallow = {v_type.value for v_type in old_type.disallow} | {
-            VehicleType.PASSENGER.value, VehicleType.HOV.value, VehicleType.TAXI.value,
-            VehicleType.BUS.value, VehicleType.COACH.value, VehicleType.DELIVERY.value,
-            VehicleType.TRUCK.value, VehicleType.TRAILER.value, VehicleType.MOTORCYCLE.value,
-            VehicleType.EVEHICLE.value
+        disallow = {v_type for v_type in old_type.disallow} | {
+            VehicleType.PASSENGER, VehicleType.HOV, VehicleType.TAXI,
+            VehicleType.BUS, VehicleType.COACH, VehicleType.DELIVERY,
+            VehicleType.TRUCK, VehicleType.TRAILER, VehicleType.MOTORCYCLE,
+            VehicleType.EVEHICLE
         }
         new_type = self.edge_types.create_from_update_disallow(old_type.id, list(disallow))
         for successor in self._bfs_until(edge, element):

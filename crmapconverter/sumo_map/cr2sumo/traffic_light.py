@@ -73,8 +73,8 @@ class TrafficLightEncoder:
             tls_program.add_phase(Phase(dur, sumo_state))
 
         for i, connection in enumerate(connections):
-            connection._tls = traffic_light_id
-            connection._tl_link = i
+            connection.tls = tls_program
+            connection.tl_link = i
 
         return tls_program, connections
 

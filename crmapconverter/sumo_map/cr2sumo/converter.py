@@ -86,7 +86,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         # all the connections of the map
         # lane_id -> list(lane_id)
         self._connections: Dict[str, List[str]] = defaultdict(list)
-        self._new_connections: List[Connection] = []
+        self._new_connections: Set[Connection] = set()
         # dict of merged_node_id and Crossing
         self._crossings: Dict[int, Set[Lanelet]] = dict()
         # key is the ID of the edges and value the ID of the lanelets that compose it
@@ -724,7 +724,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                     shape=shape,
                     keep_clear=True,
                     cont_pos=self.conf.wait_pos_internal_junctions)
-                self._new_connections.append(connection)
+                self._new_connections.add(connection)
 
     def _create_crossings(self):
         new_crossings = dict()
@@ -818,12 +818,14 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                 from_lane = self.lanes[from_lane_id]
                 succ_lane_id = self.lanelet_id2lane_id[succ.lanelet_id]
                 succ_lane = self.lanes[succ_lane_id]
-                connection = next(c for c in self._new_connections
+                connection = next((c for c in self._new_connections
                                   if c.via == succ_lane_id
                                   or (c.from_edge == from_lane.edge and
                                       c.to_edge == succ_lane.edge and
                                       c.from_lane == from_lane and
-                                      c.to_lane == succ_lane))
+                                      c.to_lane == succ_lane)), None)
+                if connection is None:
+                    print("err")
                 # compute angle
                 from_dir = lanelet.center_vertices[-1] - lanelet.center_vertices[-2]
                 # from_dir /= np.linalg.norm(from_dir)

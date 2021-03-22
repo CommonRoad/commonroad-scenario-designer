@@ -1224,6 +1224,10 @@ class Connection:
     def tls(self):
         return self._tls
 
+    @tls.setter
+    def tls(self, tls: 'TLSProgram'):
+        self._tls = tls
+
     @property
     def tl_link(self) -> int:
         return self._tl_link
@@ -1233,11 +1237,11 @@ class Connection:
         self._tl_link = tl_link
 
     def get_junction_index(self):
-        return self._from.getToNode().getLinkIndex(self)
+        return self._from.to_node.getLinkIndex(self)
 
     @property
     def junction(self) -> Node:
-        return self._from.getToNode()
+        return self._from.to_node
 
     @property
     def state(self):
@@ -1250,6 +1254,10 @@ class Connection:
     @property
     def shape(self) -> np.ndarray:
         return self._shape
+
+    @shape.setter
+    def shape(self, shape: np.ndarray):
+        self._shape = shape
 
     @shape.setter
     def shape(self, shape: np.ndarray):
@@ -1290,12 +1298,14 @@ class Connection:
 
     def __hash__(self):
         return hash((self._from.id, self._to.id, self._from_lane.id, self._to_lane.id, self._direction, self._tls,
-                     self._tl_link, self._state))
+                     self._tl_link, self._state, len(self._via) if self._via else 0, self._keep_clear, self._cont_pos))
 
     def __eq__(self, other: 'Connection'):
         return type(self) == type(other) and self._from == other._from and self._to == other._to \
                and self._direction == other._direction and self._tls == other._tls and self._tl_link == other._tl_link \
-               and self._state == other._state
+               and self._state == other._state and len(self._via) == len(other._via) \
+               and all(x == y for x, y in zip(self._via, other._via)) \
+               and self._keep_clear == other._keep_clear and self._cont_pos == other._cont_pos
 
     def __ne__(self, other: 'Connection'):
         return not self.__eq__(other)
@@ -1509,12 +1519,12 @@ class EdgeTypes:
     def create_from_update_oneway(self, old_id: str, oneway: bool) -> Optional[EdgeType]:
         return self._create_from_update(old_id, "oneway", oneway)
 
-    def create_from_update_allow(self, old_id: str, allow: List[str]) -> Optional[EdgeType]:
+    def create_from_update_allow(self, old_id: str, allow: List['VehicleType']) -> Optional[EdgeType]:
         new_type = self._create_from_update(old_id, "allow", allow)
         setattr(new_type, "disallow", list(set(new_type.disallow) - set(new_type.allow)))
         return new_type
 
-    def create_from_update_disallow(self, old_id: str, disallow: List[str]) -> Optional[EdgeType]:
+    def create_from_update_disallow(self, old_id: str, disallow: List['VehicleType']) -> Optional[EdgeType]:
         new_type = self._create_from_update(old_id, "disallow", disallow)
         setattr(new_type, "allow", list(set(new_type.allow) - set(new_type.disallow)))
         return new_type
