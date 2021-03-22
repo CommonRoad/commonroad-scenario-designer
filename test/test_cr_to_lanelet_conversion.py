@@ -40,7 +40,7 @@ class TestCR2OSMConversionBaseClass(unittest.TestCase):
         """Load the osm file and convert it to a scenario."""
         try:
             commonroad_reader = CommonRoadFileReader(
-                f"{os.path.dirname(os.path.realpath(__file__))}/osm_xml_test_files/{self.xml_file_name}.xml"
+                f"{os.path.dirname(os.path.realpath(__file__))}/osm_test_files/{self.xml_file_name}.xml"
             )
             scenario, _ = commonroad_reader.open()
             l2osm = L2OSMConverter(self.proj_string)
@@ -56,7 +56,7 @@ class TestCR2OSMConversionBaseClass(unittest.TestCase):
         """Test if converted scenario is equal to the loaded xml file.
         Disregard the different dates.
         """
-        fh = f"{os.path.dirname(os.path.realpath(__file__))}/osm_xml_test_files/{self.xml_file_name}_from_cr.osm"
+        fh = f"{os.path.dirname(os.path.realpath(__file__))}/osm_test_files/{self.xml_file_name}_from_cr.osm"
         parser = etree.XMLParser(remove_blank_text=True)
         tree_import = etree.parse(fh, parser=parser).getroot()
 

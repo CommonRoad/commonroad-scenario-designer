@@ -42,7 +42,7 @@ class TestOSM2CRScenarioBaseClass(unittest.TestCase):
         self.out_path = self.cwd_path + "/.pytest_cache/"
 
         path = os.path.dirname(os.path.realpath(
-            __file__)) + f"/osm_xml_test_files/{self.osm_file_name}.osm"
+            __file__)) + f"/osm_test_files/{self.osm_file_name}.osm"
 
         assert self.out_path is not None
         assert self.osm_file_name is not None
@@ -62,7 +62,7 @@ class TestOSM2CRScenarioBaseClass(unittest.TestCase):
 
     #     ground_truth_path = os.path.dirname(
     #         os.path.realpath(__file__)
-    #     ) + f"/osm_xml_test_files/{self.osm_file_name}.xml"
+    #     ) + f"/osm_test_files/{self.osm_file_name}.xml"
 
     #     # load saved file & compare to ground truth
     #     with open(ground_truth_path, "r") as gt, open(self.converted_path,
