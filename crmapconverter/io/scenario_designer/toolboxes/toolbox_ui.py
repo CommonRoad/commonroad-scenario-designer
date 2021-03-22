@@ -63,7 +63,7 @@ class CheckableComboBox(QComboBox):
 
             # if item is checked add it to the list
             if self.item_checked(i):
-                checked_items.append(i)
+                checked_items.append(self.itemText(i))
 
         return checked_items
 

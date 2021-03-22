@@ -550,19 +550,19 @@ class MapCreator:
                                              new_lanelets[9].right_vertices[-1] + np.array([1, 2]))
             new_traffic_lights.append(traffic_light_two)
             new_lanelets[9].add_traffic_light_to_lanelet(traffic_light_two.traffic_light_id)
-            light_ids[1] = {traffic_light_one.traffic_light_id}
+            light_ids[1] = {traffic_light_two.traffic_light_id}
 
             traffic_light_three = TrafficLight(scenario.generate_object_id(), traffic_light_cycle_two,
                                                new_lanelets[15].right_vertices[-1] + np.array([2, -2]))
             new_traffic_lights.append(traffic_light_three)
-            new_lanelets[15].add_traffic_light_to_lanelet(traffic_light_two.traffic_light_id)
-            light_ids[2] = {traffic_light_one.traffic_light_id}
+            new_lanelets[15].add_traffic_light_to_lanelet(traffic_light_three.traffic_light_id)
+            light_ids[2] = {traffic_light_three.traffic_light_id}
 
-            traffic_light_three = TrafficLight(scenario.generate_object_id(), traffic_light_cycle_two,
+            traffic_light_four = TrafficLight(scenario.generate_object_id(), traffic_light_cycle_two,
                                                new_lanelets[7].right_vertices[-1] + np.array([-2, 2]))
-            new_traffic_lights.append(traffic_light_three)
-            new_lanelets[7].add_traffic_light_to_lanelet(traffic_light_two.traffic_light_id)
-            light_ids[3] = {traffic_light_one.traffic_light_id}
+            new_traffic_lights.append(traffic_light_four)
+            new_lanelets[7].add_traffic_light_to_lanelet(traffic_light_four.traffic_light_id)
+            light_ids[3] = {traffic_light_four.traffic_light_id}
 
         if add_traffic_lights or add_traffic_signs:
             for ref, la_idx in enumerate([0, 9, 15, 7]):
@@ -738,7 +738,7 @@ class MapCreator:
             traffic_light_three = TrafficLight(scenario.generate_object_id(), traffic_light_cycle_two,
                                                new_lanelets[0].right_vertices[-1] + np.array([-1, -2]))
             new_traffic_lights.append(traffic_light_three)
-            new_lanelets[0].add_traffic_light_to_lanelet(traffic_light_two.traffic_light_id)
+            new_lanelets[0].add_traffic_light_to_lanelet(traffic_light_three.traffic_light_id)
             light_ids[2] = {traffic_light_three.traffic_light_id}
 
         if add_traffic_lights or add_traffic_signs:

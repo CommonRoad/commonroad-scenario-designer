@@ -35,7 +35,7 @@ class ScenarioDialogUI(QWidget):
         self.scenario_config_id.setMaximum(999)
 
         self.prediction_type = QComboBox()
-        prediction_type_list = ["S", "T", "P"]
+        prediction_type_list = ["T", "S", "P"]
         self.prediction_type.addItems(prediction_type_list)
 
         self.scenario_prediction_id = QSpinBox()

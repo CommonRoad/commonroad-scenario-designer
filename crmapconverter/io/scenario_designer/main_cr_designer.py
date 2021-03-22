@@ -11,7 +11,7 @@ from PyQt5.QtCore import *
 
 from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.scenario.lanelet import LaneletNetwork, Lanelet
-from commonroad.scenario.scenario import Scenario
+from commonroad.scenario.scenario import Scenario, ScenarioID
 from commonroad.scenario.obstacle import Obstacle
 
 from crmapconverter.io.scenario_designer.gui_src import CR_Scenario_Designer  # do not remove!!!
@@ -452,7 +452,8 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
     def file_new(self):
         """Function to create the action in the menu bar."""
-        scenario = Scenario(0.1, 'new scenario')
+        scenario = Scenario(0.1, 'New_Scenario', affiliation="Technical University of Munich",
+                            source="CommonRoad Scenario Designer")
         net = LaneletNetwork()
         scenario.lanelet_network = net
         self.cr_viewer.current_scenario = scenario

@@ -31,6 +31,7 @@ class ScenarioDialog:
         self.save_window.scenario_author.setText(self.current_scenario.author)
         self.save_window.scenario_affiliation.setText(self.current_scenario.affiliation)
         self.save_window.scenario_source.setText(self.current_scenario.source)
+        self.save_window.scenario_time_step_size.setText(str(self.current_scenario.dt))
         self.save_window.scenario_tags.set_checked_items([t.value for t in self.current_scenario.tags]
                                                          if self.current_scenario.tags else [])
         self.save_window.scenario_config_id.setValue(self.current_scenario.scenario_id.configuration_id
