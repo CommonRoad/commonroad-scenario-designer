@@ -145,8 +145,8 @@ class TrafficSignEncoder:
             if current in visited:
                 continue
             visited.add(current)
-            current.setType(new_type.id)
-            for outgoing in current.getOutgoing():
+            current.type_id = new_type.id
+            for outgoing in current.outgoing:
                 parents[outgoing].append(current)
                 curvature = compute_max_path_curvature(outgoing)
                 if curvature < max_curvature:
