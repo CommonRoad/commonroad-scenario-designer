@@ -112,7 +112,7 @@ class BaseClass(unittest.TestCase):
     ("DEU_AAH-1_8007_T-1", [154]),
     ("DEU_AAH-2_19000_T-1", [118]),
     ("DEU_Guetersloh-20_4_T-1", []),
-    ("DEU_Muc-13_1_T-1", [257,253]),
+    ("DEU_Muc-13_1_T-1", [257, 253]),
     ("USA_Lanker-2_13_T-1", [3670]),
     ("ARG_Carcarana-10_5_T-1", [6758, 6712, 6917, 8325]),
     ("ARG_Carcarana-10_2_T-1", [6917, 6988, 8325]),
@@ -157,7 +157,10 @@ class BaseClass(unittest.TestCase):
     ("ZAM_MergingTrafficSign-1_1_T-1", []),
     ("ZAM_MergingTrafficSign-1_2_T-1", []),
     ("ZAM_TrafficLightTest-1_1-T-1", []),
-    ("ZAM_TrafficLightTest-1_2-T-1", [])
+    ("ZAM_TrafficLightTest-1_2-T-1", []),
+    ("ZAM_Test-1_1_T-1", []),
+    ("ZAM_Test-2_1_T-1", []),
+    ("ZAM_GUI_Manual-1_1_T-1", [])
 ])
 @pytest.mark.parallel
 def test_parameterized_sumo_run(capfd, cr_file_name: str, tls: List[int]):
