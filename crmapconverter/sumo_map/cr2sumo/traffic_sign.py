@@ -121,7 +121,8 @@ class TrafficSignEncoder:
             f"PRIORITY can only have none additional attribute, has: {element.additional_values}"
         old_type = self.edge_types.types[edge.getType()]
         new_type = self.edge_types.create_from_update_priority(old_type.id, old_type.priority + 1)
-        queue = list(edge.getOutgoing())
+        edge.getToNode().setType(SumoNodeType.PRIORITY_STOP.value)
+        queue = [edge]
         parents: Dict[edge, List[edge]] = defaultdict(list)
         # memoized curvatures
         curvatures: Dict[edge, float] = dict()
@@ -173,7 +174,7 @@ class TrafficSignEncoder:
         assert len(element.additional_values) == 0, \
             f"GIVEWAY can only have none additional attribute, has: {element.additional_values}"
         edge.getToNode().setType(SumoNodeType.PRIORITY_STOP.value)
-        for outgoing in edge.getOutgoing():
+        for outgoing in [edge] + edge.getOutgoing():
             old_type = self.edge_types.types[outgoing.getType()]
             new_type = self.edge_types.create_from_update_priority(old_type.id, max(old_type.priority - 1, 0))
             outgoing.setType(new_type.id)

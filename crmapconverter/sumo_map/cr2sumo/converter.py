@@ -140,10 +140,10 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         self._create_sumo_edges_and_lanes()
         self._init_connections()
         self._merge_junctions_intersecting_lanelets()
-        self._encode_traffic_signs()
         self._filter_edges()
         self._create_lane_based_connections()
         self._create_crossings()
+        self._encode_traffic_signs()
         self._create_traffic_lights()
 
     def _find_lanes(self):
@@ -493,7 +493,13 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         traffic_signs: Dict[int, TrafficSign] = {t.traffic_sign_id: t
                                                  for t in self.lanelet_network.traffic_signs}
         for lanelet in self.lanelet_network.lanelets:
-            edge = self.edges[str(self.lanelet_id2edge_id[lanelet.lanelet_id])]
+            if not lanelet.traffic_signs:
+                continue
+            edge_id = self.lanelet_id2edge_id[lanelet.lanelet_id]
+            if edge_id not in self.new_edges:
+                logging.warning(f"Merged Edge {edge_id} with traffic signs {lanelet.traffic_signs}. "
+                                f"These Traffic signs will not be converted.")
+            edge = self.new_edges[self.lanelet_id2edge_id[lanelet.lanelet_id]]
             for traffic_sign_id in lanelet.traffic_signs:
                 traffic_sign = traffic_signs[traffic_sign_id]
                 encoder.apply(traffic_sign, edge)
@@ -609,7 +615,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
             def merge_cluster(cluster: Set[Node]) -> Node:
                 cluster_ids = {n.getID() for n in cluster}
                 merged_node = Node(id=self.node_id_next,
-                                   node_type='priority',
+                                   node_type="priority",
                                    coord=self._calculate_centroid(cluster),
                                    incLanes=[])
                 self.node_id_next += 1
@@ -1392,6 +1398,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
 
         logging.info("Merging Intermediate Files")
         intermediary_files = self.write_intermediate_files(output_path)
+        self.draw_network(list(self.new_nodes.values()), list(self.new_edges.values()))
         conversion_possible = self.merge_intermediate_files(output_path, *intermediary_files)
         if not conversion_possible:
             logging.error("Error converting map, see above for details")
@@ -2150,11 +2157,10 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
             G.add_edge(edge.getFromNode().getID(), edge.getToNode().getID(), label=f"{len(edge.getLanes())}")
         G.add_nodes_from(graph_nodes)
         G.add_edges_from(graph_edges)
-        nx.draw(G, graph_nodes_pos)
+        nx.draw(G, graph_nodes_pos, with_labels=True)
         colors = itertools.cycle(set(mcolors.TABLEAU_COLORS) - {"tab:blue"})
         for cluster in self.merged_dictionary.values():
             nx.draw_networkx_nodes(G, graph_nodes_pos, nodelist=cluster, node_color=next(colors))
-
         labels = nx.get_edge_attributes(G, "label")
         nx.draw_networkx_edge_labels(G, pos=graph_nodes_pos, edge_labels=labels)
         plt.autoscale()
