@@ -818,29 +818,30 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
 
             # maps each succeeding lanelet to the angle (in radians, [-pi, pi]) it forms with the preceding one
             successors: Dict[Connection, float] = dict()
-            for l in lanelet.successor:
-                succ = self.lanelet_network.find_lanelet_by_id(l)
-                # find resp. connection
-                from_lane_id = self.lanelet_id2lane_id[lanelet.lanelet_id]
-                from_lane = self.lanes[from_lane_id]
-                succ_lane_id = self.lanelet_id2lane_id[succ.lanelet_id]
-                succ_lane = self.lanes[succ_lane_id]
-                connection = next((c for c in self._new_connections
-                                  if c.via == succ_lane_id
-                                  or (c.from_edge == from_lane.edge and
-                                      c.to_edge == succ_lane.edge and
-                                      c.from_lane == from_lane and
-                                      c.to_lane == succ_lane)), None)
-                if connection is None:
-                    print("err")
-                # compute angle
-                from_dir = lanelet.center_vertices[-1] - lanelet.center_vertices[-2]
-                # from_dir /= np.linalg.norm(from_dir)
-                vertices_dir = succ.center_vertices[-1] - succ.center_vertices[-2]
-                # vertices_dir /= np.linalg.norm(vertices_dir)
-                angle = np.arctan2(from_dir[0] * vertices_dir[1] - from_dir[1] * vertices_dir[0],
-                                   from_dir[0] * vertices_dir[0] + from_dir[1] * vertices_dir[1])
-                successors[connection] = angle
+
+            def succeeding_new_edges(edge: Edge):
+                queue = edge.outgoing.copy()
+                visited = set()
+                res = set()
+                while queue:
+                    current = queue.pop()
+                    if current in visited:
+                        continue
+                    visited.add(current)
+                    if current.id in self.new_edges:
+                        res.add(current)
+                        continue
+                    queue += current.outgoing
+                return res
+
+            for successor in succeeding_new_edges(edge):
+                for connection in (c for c in self._new_connections if c.from_edge == edge and c.to_edge == successor):
+                    # compute angle
+                    from_dir = connection.from_lane.shape[-1] - connection.from_lane.shape[-2]
+                    to_dir = connection.to_lane.shape[-1] - connection.to_lane.shape[-2]
+                    angle = np.arctan2(from_dir[0] * to_dir[1] - from_dir[1] * to_dir[0],
+                                       from_dir[0] * to_dir[0] + from_dir[1] * to_dir[1])
+                    successors[connection] = angle
 
             # Angle ranges for TrafficLightDirections in radians, [-pi, pi]
             # [-pi, 0) = right, (0, pi] = left
@@ -2121,7 +2122,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         graph_nodes = [node.id for node in nodes]
         graph_nodes_pos = {node.id: node.coord for node in nodes}
         for edge in edges:
-            G.add_edge(edge.from_node.id, edge.to_node.id, label=f"{len(edge.lanes)}")
+            G.add_edge(edge.from_node.id, edge.to_node.id, label=edge.id)
         G.add_nodes_from(graph_nodes)
         nx.draw(G, graph_nodes_pos, with_labels=True)
         colors = itertools.cycle(set(mcolors.TABLEAU_COLORS) - {"tab:blue"})

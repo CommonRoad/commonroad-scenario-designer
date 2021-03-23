@@ -49,8 +49,8 @@ class TrafficLightEncoder:
             # >= 2 green connections intersect at a time, curving ones have to yield straight ones
             if len(by_color[TrafficLightState.GREEN]) >= 2:
                 green_connections = by_color[TrafficLightState.GREEN]
-                dot_connections = lambda a, b: np.dot(a.getShape()[-1] - a.getShape()[0],
-                                                      b.getShape()[-1] - b.getShape()[0])
+                dot_connections = lambda a, b: np.dot(a.shape[-1] - a.shape[0],
+                                                      b.shape[-1] - b.shape[0])
                 foes = ([i, j] for i in green_connections for j in green_connections
                         if i < j
                         and lines_intersect(connections[i].shape, connections[j].shape)

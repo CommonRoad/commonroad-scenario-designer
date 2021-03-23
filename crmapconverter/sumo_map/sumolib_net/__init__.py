@@ -1171,7 +1171,7 @@ class Connection:
         self._tls = tls
         self._tl_link = tl_link
         self._state = state
-        self._via = via_lane_id
+        self._via: List[str] = via_lane_id if via_lane_id is not None else []
         self._shape = shape
         self._keep_clear = keep_clear
         self._cont_pos = cont_pos
