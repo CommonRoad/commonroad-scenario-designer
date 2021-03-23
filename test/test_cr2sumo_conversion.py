@@ -10,8 +10,8 @@ import numpy as np
 import pytest
 from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.common.file_writer import CommonRoadFileWriter
-from crmapconverter.sumo_map.config import SumoConfig
-from crmapconverter.sumo_map.cr2sumo import CR2SumoMapConverter
+from crdesigner.sumo_map.config import SumoConfig
+from crdesigner.sumo_map.cr2sumo import CR2SumoMapConverter
 from sumocr.interface.sumo_simulation import SumoSimulation
 
 

@@ -9,7 +9,7 @@ import unittest
 import math
 from lxml import etree
 
-import crmapconverter.osm2cr.converter_modules.converter as converter
+import crdesigner.osm2cr.converter_modules.converter as converter
 from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
 

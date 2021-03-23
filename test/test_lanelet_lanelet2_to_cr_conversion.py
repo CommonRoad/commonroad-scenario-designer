@@ -19,8 +19,8 @@ from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistin
 from commonroad.planning.planning_problem import PlanningProblemSet
 from commonroad.scenario.scenario import Tag
 
-from crmapconverter.lanelet_lanelet2.parser import OSMParser
-from crmapconverter.lanelet_lanelet2.osm2lanelet import OSM2LConverter
+from crdesigner.lanelet_lanelet2.parser import OSMParser
+from crdesigner.lanelet_lanelet2.osm2lanelet import OSM2LConverter
 from test.utils import elements_equal
 
 
