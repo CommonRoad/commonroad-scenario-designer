@@ -499,7 +499,8 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
             if edge_id not in self.new_edges:
                 logging.warning(f"Merged Edge {edge_id} with traffic signs {lanelet.traffic_signs}. "
                                 f"These Traffic signs will not be converted.")
-            edge = self.new_edges[self.lanelet_id2edge_id[lanelet.lanelet_id]]
+                continue
+            edge = self.new_edges[edge_id]
             for traffic_sign_id in lanelet.traffic_signs:
                 traffic_sign = traffic_signs[traffic_sign_id]
                 encoder.apply(traffic_sign, edge)
@@ -1398,7 +1399,6 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
 
         logging.info("Merging Intermediate Files")
         intermediary_files = self.write_intermediate_files(output_path)
-        self.draw_network(list(self.new_nodes.values()), list(self.new_edges.values()))
         conversion_possible = self.merge_intermediate_files(output_path, *intermediary_files)
         if not conversion_possible:
             logging.error("Error converting map, see above for details")
