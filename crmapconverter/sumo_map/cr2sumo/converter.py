@@ -142,10 +142,10 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         self._create_sumo_edges_and_lanes()
         self._init_connections()
         self._merge_junctions_intersecting_lanelets()
-        self._encode_traffic_signs()
         self._filter_edges()
         self._create_lane_based_connections()
         self._create_crossings()
+        self._encode_traffic_signs()
         self._create_traffic_lights()
 
     def _find_lanes(self):
@@ -482,7 +482,14 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         traffic_signs: Dict[int, TrafficSign] = {t.traffic_sign_id: t
                                                  for t in self.lanelet_network.traffic_signs}
         for lanelet in self.lanelet_network.lanelets:
-            edge = self.edges[self.lanelet_id2edge_id[lanelet.lanelet_id]]
+            if not lanelet.traffic_signs:
+                continue
+            edge_id = self.lanelet_id2edge_id[lanelet.lanelet_id]
+            if edge_id not in self.new_edges:
+                logging.warning(f"Merged Edge {edge_id} with traffic signs {lanelet.traffic_signs}. "
+                                f"These Traffic signs will not be converted.")
+                continue
+            edge = self.new_edges[edge_id]
             for traffic_sign_id in lanelet.traffic_signs:
                 traffic_sign = traffic_signs[traffic_sign_id]
                 encoder.apply(traffic_sign, edge)
@@ -2116,11 +2123,10 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         for edge in edges:
             G.add_edge(edge.from_node.id, edge.to_node.id, label=f"{len(edge.lanes)}")
         G.add_nodes_from(graph_nodes)
-        nx.draw(G, graph_nodes_pos)
+        nx.draw(G, graph_nodes_pos, with_labels=True)
         colors = itertools.cycle(set(mcolors.TABLEAU_COLORS) - {"tab:blue"})
         for cluster in self.merged_dictionary.values():
             nx.draw_networkx_nodes(G, graph_nodes_pos, nodelist=cluster, node_color=next(colors))
-
         labels = nx.get_edge_attributes(G, "label")
         nx.draw_networkx_edge_labels(G, pos=graph_nodes_pos, edge_labels=labels)
         plt.autoscale()
