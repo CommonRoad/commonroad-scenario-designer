@@ -155,7 +155,7 @@ class BaseClass(unittest.TestCase):
     # ("ZAM_Tjunction-1_56_T-1", []),
     # ("ZAM_Zip-1_54_T-1", []),
     # ("ZAM_MergingTrafficSign-1_1_T-1", []),
-    ("ZAM_MergingTrafficSign-1_2_T-1", []),
+    # ("ZAM_MergingTrafficSign-1_2_T-1", []),
     ("ZAM_TrafficLightTest-1_1-T-1", []),
     ("ZAM_TrafficLightTest-1_2-T-1", [])
 ])
