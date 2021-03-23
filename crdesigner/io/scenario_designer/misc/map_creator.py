@@ -532,14 +532,14 @@ class MapCreator:
             sign_ids[3] = {sign_yield_two.traffic_sign_id}
 
         if add_traffic_lights:
-            traffic_light_cycle_one = [TrafficLightCycleElement(TrafficLightState.GREEN, 200),
-                                       TrafficLightCycleElement(TrafficLightState.YELLOW, 50),
-                                       TrafficLightCycleElement(TrafficLightState.RED, 200),
-                                       TrafficLightCycleElement(TrafficLightState.RED_YELLOW, 50)]
-            traffic_light_cycle_two = [TrafficLightCycleElement(TrafficLightState.RED, 200),
-                                       TrafficLightCycleElement(TrafficLightState.RED_YELLOW, 50),
-                                       TrafficLightCycleElement(TrafficLightState.GREEN, 200),
-                                       TrafficLightCycleElement(TrafficLightState.YELLOW, 50)]
+            traffic_light_cycle_one = [TrafficLightCycleElement(TrafficLightState.GREEN, 100),
+                                       TrafficLightCycleElement(TrafficLightState.YELLOW, 30),
+                                       TrafficLightCycleElement(TrafficLightState.RED, 100),
+                                       TrafficLightCycleElement(TrafficLightState.RED_YELLOW, 30)]
+            traffic_light_cycle_two = [TrafficLightCycleElement(TrafficLightState.RED, 100),
+                                       TrafficLightCycleElement(TrafficLightState.RED_YELLOW, 30),
+                                       TrafficLightCycleElement(TrafficLightState.GREEN, 100),
+                                       TrafficLightCycleElement(TrafficLightState.YELLOW, 30)]
             traffic_light_one = TrafficLight(scenario.generate_object_id(), traffic_light_cycle_one,
                                              new_lanelets[0].right_vertices[-1] + np.array([-1, -2]))
             new_traffic_lights.append(traffic_light_one)
@@ -715,14 +715,14 @@ class MapCreator:
             sign_ids[1] = {sign_yield_one.traffic_sign_id}
 
         if add_traffic_lights:
-            traffic_light_cycle_one = [TrafficLightCycleElement(TrafficLightState.GREEN, 200),
-                                       TrafficLightCycleElement(TrafficLightState.YELLOW, 50),
-                                       TrafficLightCycleElement(TrafficLightState.RED, 200),
-                                       TrafficLightCycleElement(TrafficLightState.RED_YELLOW, 50)]
-            traffic_light_cycle_two = [TrafficLightCycleElement(TrafficLightState.RED, 200),
-                                       TrafficLightCycleElement(TrafficLightState.RED_YELLOW, 50),
-                                       TrafficLightCycleElement(TrafficLightState.GREEN, 200),
-                                       TrafficLightCycleElement(TrafficLightState.YELLOW, 50)]
+            traffic_light_cycle_one = [TrafficLightCycleElement(TrafficLightState.GREEN, 100),
+                                       TrafficLightCycleElement(TrafficLightState.YELLOW, 30),
+                                       TrafficLightCycleElement(TrafficLightState.RED, 100),
+                                       TrafficLightCycleElement(TrafficLightState.RED_YELLOW, 30)]
+            traffic_light_cycle_two = [TrafficLightCycleElement(TrafficLightState.RED, 100),
+                                       TrafficLightCycleElement(TrafficLightState.RED_YELLOW, 30),
+                                       TrafficLightCycleElement(TrafficLightState.GREEN, 100),
+                                       TrafficLightCycleElement(TrafficLightState.YELLOW, 30)]
             traffic_light_one = TrafficLight(scenario.generate_object_id(), traffic_light_cycle_one,
                                              new_lanelets[5].right_vertices[-1] + np.array([-2, 2]))
             new_traffic_lights.append(traffic_light_one)

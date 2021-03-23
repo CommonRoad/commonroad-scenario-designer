@@ -663,6 +663,8 @@ class AnimatedViewer(Viewer):
 
     def _calc_max_timestep(self):
         """calculate maximal time step of current scenario"""
+        if self.current_scenario is None:
+            return 0
         timesteps = [
             obstacle.prediction.occupancy_set[-1].time_step
             for obstacle in self.current_scenario.dynamic_obstacles
@@ -683,7 +685,8 @@ class AnimatedViewer(Viewer):
         selected_l_ids = l_network.find_lanelet_by_shape(click_shape)
         selected_lanelets = [l_network.find_lanelet_by_id(lid) for lid in selected_l_ids]
         selected_obstacles = [obs for obs in self.current_scenario.obstacles
-                              if obs.occupancy_at_time(self.time_step.value).shape.contains_point(mouse_pos)]
+                              if obs.occupancy_at_time(self.time_step.value) is not None and
+                              obs.occupancy_at_time(self.time_step.value).shape.contains_point(mouse_pos)]
 
         if len(selected_lanelets) > 0 and len(selected_obstacles) == 0:
             self.update_plot(sel_lanelet=selected_lanelets[0])

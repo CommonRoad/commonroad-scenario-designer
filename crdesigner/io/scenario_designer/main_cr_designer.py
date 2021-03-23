@@ -135,9 +135,11 @@ class MWindow(QMainWindow, Ui_mainWindow):
             self.obstacle_toolbox.obstacle_toolbox.selected_obstacle.setCurrentText(str(selected_object.obstacle_id))
 
     def toolbox_callback(self, scenario):
-        self.cr_viewer.open_scenario(scenario)
-        self.update_view(focus_on_network=True)
-        self.store_scenario()
+        if scenario is not None:
+            self.cr_viewer.open_scenario(scenario)
+            self.update_view(focus_on_network=True)
+            self.update_max_step()
+            self.store_scenario()
 
     def show_osm_settings(self):
         osm_interface = OSMInterface(self)
