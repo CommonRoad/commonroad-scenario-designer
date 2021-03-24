@@ -124,7 +124,7 @@ def intersection_enhancement(intermediate_format):
         all_incoming_lanes_in_scenario.extend(incoming_lanes)
 
         # merge short incomings with predecessors
-        remove_short_predeccesors(intermediate_format, intersection)
+        remove_short_predeccesors(intermediate_format, intersection, all_incoming_lanes_in_scenario)
 
         # modify intersection if traffic lights where found, else skip to next intersection
         if has_traffic_lights:
@@ -157,13 +157,22 @@ def check_pre_incoming_lane(lane, intermediate_format):
     return False
 
 
-def merge_incoming(incoming, intermediate_format):
+def merge_incoming(incoming, intermediate_format, all_incoming_lanes_in_scenario):
     """
     Merge incomings of intersection with predecessor edge
     """
     for incoming_id in incoming.incoming_lanelets:
         edge = intermediate_format.find_edge_by_id(incoming_id)
+
+        # only one predecessor edge is allowed
+        if not len(edge.predecessors) == 1:
+            return
+
         pre = intermediate_format.find_edge_by_id(edge.predecessors[0])
+
+        # predecessor is not allowed to be another incoming lane
+        if pre in all_incoming_lanes_in_scenario:
+            return
 
         assert len(pre.left_bound) == len(pre.right_bound) == len(pre.center_points)
         assert len(edge.left_bound) == len(edge.right_bound) == len(edge.center_points)
@@ -207,10 +216,10 @@ def merge_incoming(incoming, intermediate_format):
 
         # update adajcent opposite direction
         if edge.adjacent_left and not edge.adjacent_left_direction_equal:
-            merge_outgoing(intermediate_format.find_edge_by_id(edge.adjacent_left), intermediate_format)
+            merge_outgoing(intermediate_format.find_edge_by_id(edge.adjacent_left), intermediate_format, all_incoming_lanes_in_scenario)
 
 
-def merge_outgoing(outgoing, intermediate_format):
+def merge_outgoing(outgoing, intermediate_format, all_incoming_lanes_in_scenario):
     """
     Merge outgoings of intersection with sucessor edge
     """
@@ -220,6 +229,10 @@ def merge_outgoing(outgoing, intermediate_format):
         ): return
 
     suc = intermediate_format.find_edge_by_id(outgoing.successors[0])
+
+    # successor is not allowed to be an incoming
+    if suc in all_incoming_lanes_in_scenario:
+        return
 
     assert len(suc.left_bound) == len(suc.right_bound) == len(suc.center_points)
     assert len(outgoing.left_bound) == len(outgoing.right_bound) == len(outgoing.center_points)
@@ -264,10 +277,10 @@ def merge_outgoing(outgoing, intermediate_format):
 
     # update adjacent same direction
     if outgoing.adjacent_right and outgoing.adjacent_left_direction_equal:
-        merge_outgoing(intermediate_format.find_edge_by_id(outgoing.adjacent_right), intermediate_format)
+        merge_outgoing(intermediate_format.find_edge_by_id(outgoing.adjacent_right), intermediate_format, all_incoming_lanes_in_scenario)
 
 
-def remove_short_predeccesors(intermediate_format, intersection):
+def remove_short_predeccesors(intermediate_format, intersection, all_incoming_lanes_in_scenario):
     """
     Merge very short incomings with predecessors
     """
@@ -285,5 +298,5 @@ def remove_short_predeccesors(intermediate_format, intersection):
                 break
             merge = False
         if merge:
-            merge_incoming(incoming, intermediate_format)
+            merge_incoming(incoming, intermediate_format, all_incoming_lanes_in_scenario)
                 
