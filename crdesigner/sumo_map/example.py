@@ -4,7 +4,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.common.file_writer import CommonRoadFileWriter
-from commonroad.scenario.scenario import Scenario
 from commonroad.visualization.draw_dispatch_cr import draw_object
 from crdesigner.sumo_map.config import SumoConfig
 from crdesigner.sumo_map.cr2sumo import CR2SumoMapConverter

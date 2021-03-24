@@ -3,9 +3,9 @@ import subprocess
 
 from commonroad.common.file_writer import CommonRoadFileWriter
 from commonroad.scenario.scenario import Tag
-from lxml import etree
 from crdesigner.opendrive.opendriveconversion.network import Network
 from crdesigner.opendrive.opendriveparser.parser import parse_opendrive
+from lxml import etree
 
 
 def convert_net_to_cr(net_file:str, out_folder:str=None, verbose=False) -> str:

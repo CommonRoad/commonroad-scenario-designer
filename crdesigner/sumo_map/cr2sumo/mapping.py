@@ -1,13 +1,11 @@
-from commonroad.scenario.obstacle import ObstacleType
-from commonroad.scenario.traffic_sign import TrafficLightState
-from commonroad.scenario.lanelet import LaneletType
-from commonroad.scenario.traffic_sign import SupportedTrafficSignCountry
-from crdesigner.sumo_map.sumolib_net.constants import SUMO_VEHICLE_CLASSES
-from typing import Tuple, Dict, Set
-from crdesigner.sumo_map.sumolib_net import EdgeTypes, EdgeType, SumoVehicles, SumoSignalState
-from xml.etree import ElementTree as ET
 import logging
 import os
+
+from commonroad.scenario.lanelet import LaneletType
+from commonroad.scenario.obstacle import ObstacleType
+from commonroad.scenario.traffic_sign import SupportedTrafficSignCountry
+from commonroad.scenario.traffic_sign import TrafficLightState
+from crdesigner.sumo_map.sumolib_net import EdgeTypes, EdgeType, VehicleType, SignalState
 
 # # sumo type to CommonRoad obstacle type
 # TYPE_MAPPING = {
@@ -30,37 +28,37 @@ import os
 
 # Mapping from CR TrafficLightStates to SUMO Traffic Light states
 traffic_light_states_CR2SUMO = {
-    TrafficLightState.RED: SumoSignalState.RED,
-    TrafficLightState.YELLOW: SumoSignalState.YELLOW,
-    TrafficLightState.RED_YELLOW: SumoSignalState.RED_YELLOW,
-    TrafficLightState.GREEN: SumoSignalState.GREEN,
-    TrafficLightState.INACTIVE: SumoSignalState.NO_SIGNAL,
+    TrafficLightState.RED: SignalState.RED,
+    TrafficLightState.YELLOW: SignalState.YELLOW,
+    TrafficLightState.RED_YELLOW: SignalState.RED_YELLOW,
+    TrafficLightState.GREEN: SignalState.GREEN,
+    TrafficLightState.INACTIVE: SignalState.NO_SIGNAL,
 }
 # Mapping from  UMO Traffic Light to CR TrafficLightState states
 traffic_light_states_SUMO2CR = {
-    SumoSignalState.RED: TrafficLightState.RED,
-    SumoSignalState.YELLOW: TrafficLightState.YELLOW,
-    SumoSignalState.GREEN: TrafficLightState.GREEN,
-    SumoSignalState.GREEN_PRIORITY: TrafficLightState.GREEN,
-    SumoSignalState.GREEN_TURN_RIGHT: TrafficLightState.GREEN,
-    SumoSignalState.RED_YELLOW: TrafficLightState.RED_YELLOW,
-    SumoSignalState.BLINKING: TrafficLightState.INACTIVE,
-    SumoSignalState.NO_SIGNAL: TrafficLightState.INACTIVE
+    SignalState.RED: TrafficLightState.RED,
+    SignalState.YELLOW: TrafficLightState.YELLOW,
+    SignalState.GREEN: TrafficLightState.GREEN,
+    SignalState.GREEN_PRIORITY: TrafficLightState.GREEN,
+    SignalState.GREEN_TURN_RIGHT: TrafficLightState.GREEN,
+    SignalState.RED_YELLOW: TrafficLightState.RED_YELLOW,
+    SignalState.BLINKING: TrafficLightState.INACTIVE,
+    SignalState.NO_SIGNAL: TrafficLightState.INACTIVE
 }
 
 # CommonRoad obstacle type to sumo type
 VEHICLE_TYPE_CR2SUMO = {
-    ObstacleType.UNKNOWN: SumoVehicles.PASSENGER,
-    ObstacleType.CAR: SumoVehicles.PASSENGER,
-    ObstacleType.TRUCK: SumoVehicles.TRUCK,
-    ObstacleType.BUS: SumoVehicles.BUS,
-    ObstacleType.BICYCLE: SumoVehicles.BICYCLE,
-    ObstacleType.PEDESTRIAN: SumoVehicles.PEDESTRIAN,
-    ObstacleType.PRIORITY_VEHICLE: SumoVehicles.VIP,
-    ObstacleType.PARKED_VEHICLE: SumoVehicles.PASSENGER,
-    ObstacleType.TRAIN: SumoVehicles.RAIL,
-    ObstacleType.MOTORCYCLE: SumoVehicles.MOTORCYCLE,
-    ObstacleType.TAXI: SumoVehicles.TAXI,
+    ObstacleType.UNKNOWN: VehicleType.PASSENGER,
+    ObstacleType.CAR: VehicleType.PASSENGER,
+    ObstacleType.TRUCK: VehicleType.TRUCK,
+    ObstacleType.BUS: VehicleType.BUS,
+    ObstacleType.BICYCLE: VehicleType.BICYCLE,
+    ObstacleType.PEDESTRIAN: VehicleType.PEDESTRIAN,
+    ObstacleType.PRIORITY_VEHICLE: VehicleType.VIP,
+    ObstacleType.PARKED_VEHICLE: VehicleType.PASSENGER,
+    ObstacleType.TRAIN: VehicleType.RAIL,
+    ObstacleType.MOTORCYCLE: VehicleType.MOTORCYCLE,
+    ObstacleType.TAXI: VehicleType.TAXI,
     # ObstacleType.CONSTRUCTION_ZONE: SumoVehicles.AUTHORITY,
     # ObstacleType.ROAD_BOUNDARY: SUMO,
     # ObstacleType.BUILDING: "custom2",
@@ -200,6 +198,6 @@ def get_edge_types_from_template(country_id: SupportedTrafficSignCountry) -> Edg
     try:
         with open(path, "r") as f:
             xml = f.read()
-        return EdgeTypes.from_XML(xml)
+        return EdgeTypes.from_xml(xml)
     except FileExistsError as e:
         raise RuntimeError(f"Cannot find {country_id.value}.typ.xml file for {country_id}") from e
