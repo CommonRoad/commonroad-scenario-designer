@@ -1,12 +1,11 @@
-from commonroad.scenario.obstacle import ObstacleType
-from commonroad.scenario.traffic_sign import TrafficLightState
-from commonroad.scenario.lanelet import LaneletType
-from commonroad.scenario.traffic_sign import SupportedTrafficSignCountry
-from typing import Tuple, Dict, Set
-from crdesigner.sumo_map.sumolib_net import EdgeTypes, EdgeType, VehicleType, SignalState, SUMO_VEHICLE_CLASSES
-from xml.etree import ElementTree as ET
 import logging
 import os
+
+from commonroad.scenario.lanelet import LaneletType
+from commonroad.scenario.obstacle import ObstacleType
+from commonroad.scenario.traffic_sign import SupportedTrafficSignCountry
+from commonroad.scenario.traffic_sign import TrafficLightState
+from crdesigner.sumo_map.sumolib_net import EdgeTypes, EdgeType, VehicleType, SignalState
 
 # # sumo type to CommonRoad obstacle type
 # TYPE_MAPPING = {

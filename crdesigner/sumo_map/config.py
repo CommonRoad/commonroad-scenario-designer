@@ -2,15 +2,12 @@
 Default configuration for CommonRoad to SUMO map converter
 """
 
-from commonroad.common.util import Interval
-from commonroad.scenario.obstacle import ObstacleType
-from commonroad.scenario.traffic_sign import TrafficLightState
-from commonroad.scenario.lanelet import LaneletType
-from commonroad.scenario.scenario import Scenario
-from commonroad.scenario.traffic_sign import SupportedTrafficSignCountry
-
 from typing import List
 
+from commonroad.common.util import Interval
+from commonroad.scenario.obstacle import ObstacleType
+from commonroad.scenario.scenario import Scenario
+from commonroad.scenario.traffic_sign import SupportedTrafficSignCountry
 from sumocr.sumo_config.default import DefaultConfig
 
 EGO_ID_START = 'egoVehicle'

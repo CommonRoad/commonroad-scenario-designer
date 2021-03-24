@@ -1,11 +1,12 @@
-from typing import Set, List, Dict, Tuple
-from commonroad.scenario.traffic_sign import TrafficLight, TrafficLightCycleElement, TrafficLightState
-import math
-import numpy as np
-from .mapping import traffic_light_states_CR2SUMO
-from crdesigner.sumo_map.sumolib_net import TLSProgram, Connection, NodeType, SignalState, Node, Phase, TLS
-from crdesigner.sumo_map.util import lines_intersect, compute_max_curvature_from_polyline
 from collections import defaultdict
+from typing import Set, List, Dict, Tuple
+
+import numpy as np
+from commonroad.scenario.traffic_sign import TrafficLight, TrafficLightCycleElement, TrafficLightState
+from crdesigner.sumo_map.sumolib_net import TLSProgram, Connection, NodeType, SignalState, Node, Phase
+from crdesigner.sumo_map.util import lines_intersect, compute_max_curvature_from_polyline
+
+from .mapping import traffic_light_states_CR2SUMO
 
 
 class TrafficLightEncoder:

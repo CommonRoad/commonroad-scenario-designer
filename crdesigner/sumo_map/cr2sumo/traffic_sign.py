@@ -1,13 +1,13 @@
-from commonroad.scenario.traffic_sign import TrafficSign, TrafficSignElement, TrafficSignIDGermany, TrafficSignIDUsa, \
-    TrafficSignIDZamunda, TrafficSignIDSpain, TrafficSignIDChina, TrafficSignIDRussia
-from commonroad.scenario.lanelet import Lanelet
-from crdesigner.sumo_map.sumolib_net import Edge, EdgeType, EdgeTypes, NodeType, VehicleType
-from crdesigner.sumo_map.util import compute_max_curvature_from_polyline
 import logging
-import numpy as np
 from collections import defaultdict
-from typing import Optional, Dict, List, Set, Generator
 from copy import copy
+from typing import Optional, Dict, List, Set, Generator
+
+import numpy as np
+from commonroad.scenario.lanelet import Lanelet
+from commonroad.scenario.traffic_sign import TrafficSign, TrafficSignElement, TrafficSignIDGermany, TrafficSignIDZamunda
+from crdesigner.sumo_map.sumolib_net import Edge, EdgeTypes, NodeType, VehicleType
+from crdesigner.sumo_map.util import compute_max_curvature_from_polyline
 
 
 class TrafficSignEncoder:

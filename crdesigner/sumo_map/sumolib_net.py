@@ -21,20 +21,15 @@ It uses other classes from this module to represent the road network.
 
 # from __future__ import print_function
 # from __future__ import absolute_import
-import os
-import math
 from collections import defaultdict
-from typing import List, Dict, Tuple, Set, Optional, Callable, Union, TypeVar, Iterable
-from copy import deepcopy, copy
-import numpy as np
+from copy import deepcopy
+from enum import Enum, unique
+from typing import List, Dict, Tuple, Optional, Callable, TypeVar, Iterable
+from xml.etree import cElementTree as ET
 
+import numpy as np
 import sumolib
 import sumolib.files
-
-from xml.etree import cElementTree as ET
-from xml.sax import parse, handler
-
-from enum import Enum, unique
 
 
 # class Net:

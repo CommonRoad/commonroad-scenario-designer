@@ -52,13 +52,11 @@ from crdesigner.sumo_map.util import (_find_intersecting_edges,
                                       get_total_lane_length_from_netfile, max_lanelet_network_id,
                                       merge_lanelets, min_cluster,
                                       remove_unreferenced_traffic_lights,
-                                      write_ego_ids_to_rou_file, intersect_lanelets_line, orthogonal_ccw_vector,
-                                      update_edge_lengths, lines_intersect)
+                                      write_ego_ids_to_rou_file, update_edge_lengths)
 
 from crdesigner.sumo_map.config import SumoConfig
-from .mapping import (get_sumo_edge_type, traffic_light_states_CR2SUMO,
-                      traffic_light_states_SUMO2CR, VEHICLE_TYPE_CR2SUMO, VEHICLE_NODE_TYPE_CR2SUMO, DEFAULT_CFG_FILE,
-                      TEMPLATES_DIR, lanelet_type_CR2SUMO, get_edge_types_from_template)
+from .mapping import (get_sumo_edge_type, traffic_light_states_SUMO2CR, VEHICLE_TYPE_CR2SUMO, VEHICLE_NODE_TYPE_CR2SUMO, DEFAULT_CFG_FILE,
+                      get_edge_types_from_template)
 from .traffic_sign import TrafficSignEncoder
 from .traffic_light import TrafficLightEncoder
 

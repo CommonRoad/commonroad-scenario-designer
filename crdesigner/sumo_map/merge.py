@@ -1,10 +1,11 @@
+import os
+from functools import reduce
+from typing import *
+
 from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.common.file_writer import CommonRoadFileWriter
-from commonroad.scenario.lanelet import Lanelet, LaneletNetwork
+from commonroad.scenario.lanelet import Lanelet
 from commonroad.scenario.scenario import Scenario
-from functools import reduce
-import os
-from typing import *
 
 
 def merge(to_merge: List[int], scenario: Scenario) -> Tuple[Scenario, int]:

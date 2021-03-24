@@ -1,11 +1,10 @@
 import os
 import warnings
 from copy import deepcopy
-from pathlib import Path
 from typing import Dict, List, Iterable, Tuple
 from xml.dom import minidom
-import lxml.etree as et
 
+import lxml.etree as et
 import matplotlib.pyplot as plt
 import numpy as np
 from commonroad.geometry.shape import Polygon
