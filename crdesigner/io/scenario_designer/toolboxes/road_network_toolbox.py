@@ -606,8 +606,8 @@ class RoadNetworkToolbox(QDockWidget):
         country_signs = globals()["TrafficSignID" + SupportedTrafficSignCountry(selected_country).name.capitalize()]
 
         intersection, new_traffic_signs, new_traffic_lights, new_lanelets = \
-            MapCreator.create_three_way_crossing(width, diameter, incoming_length, self.current_scenario,
-                                                 add_traffic_signs, add_traffic_lights, country_signs)
+            MapCreator.create_three_way_intersection(width, diameter, incoming_length, self.current_scenario,
+                                                     add_traffic_signs, add_traffic_lights, country_signs)
 
         self.current_scenario.add_objects(intersection)
         self.current_scenario.add_objects(new_lanelets)

@@ -573,9 +573,9 @@ class MapCreator:
         return intersection, new_traffic_signs, new_traffic_lights, new_lanelets
 
     @staticmethod
-    def create_three_way_crossing(width: float, diameter_crossing: int, incoming_length: int, scenario: Scenario,
-                                  add_traffic_signs: bool, add_traffic_lights: bool,
-                                  country_signs: Union[TrafficSignIDArgentina, TrafficSignIDBelgium,
+    def create_three_way_intersection(width: float, diameter_crossing: int, incoming_length: int, scenario: Scenario,
+                                      add_traffic_signs: bool, add_traffic_lights: bool,
+                                      country_signs: Union[TrafficSignIDArgentina, TrafficSignIDBelgium,
                                                        TrafficSignIDChina, TrafficSignIDCroatia,
                                                        TrafficSignIDFrance, TrafficSignIDGermany,
                                                        TrafficSignIDGreece, TrafficSignIDItaly,
@@ -675,15 +675,15 @@ class MapCreator:
         map_incoming.append(IntersectionIncomingElement(scenario.generate_object_id(),
                                                         incoming_lanelets={lanelet_ids[0]},
                                                         successors_right={lanelet_ids[11]},
-                                                        successors_straight={lanelet_ids[6]},
                                                         successors_left={lanelet_ids[2]}))
         map_incoming.append(IntersectionIncomingElement(scenario.generate_object_id(),
-                                                        incoming_lanelets={lanelet_ids[5]},
+                                                        incoming_lanelets={lanelet_ids[4]},
                                                         successors_right={lanelet_ids[3]},
-                                                        successors_straight={lanelet_ids[7]},
-                                                        successors_left={lanelet_ids[10]}))
+                                                        successors_straight={lanelet_ids[7]}))
         map_incoming.append(IntersectionIncomingElement(scenario.generate_object_id(),
-                                                        incoming_lanelets={lanelet_ids[9]}))
+                                                        incoming_lanelets={lanelet_ids[9]},
+                                                        successors_straight={lanelet_ids[5]},
+                                                        successors_left={lanelet_ids[10]}))
 
         intersection_id = scenario.generate_object_id()
         intersection = Intersection(intersection_id=intersection_id, incomings=map_incoming)
