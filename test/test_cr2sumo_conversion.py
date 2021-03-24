@@ -10,8 +10,8 @@ import numpy as np
 import pytest
 from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.common.file_writer import CommonRoadFileWriter
-from crmapconverter.sumo_map.config import SumoConfig
-from crmapconverter.sumo_map.cr2sumo import CR2SumoMapConverter
+from crdesigner.sumo_map.config import SumoConfig
+from crdesigner.sumo_map.cr2sumo import CR2SumoMapConverter
 from sumocr.interface.sumo_simulation import SumoSimulation
 
 
@@ -34,7 +34,7 @@ class BaseClass(unittest.TestCase):
 
         self.cwd_path = os.path.dirname(os.path.abspath(__file__))
 
-        self.path = os.path.join(self.cwd_path, "sumo_xml_test_files",
+        self.path = os.path.join(self.cwd_path, "sumo_test_files",
                                  cr_file_name + ".xml")
 
         self.scenario, planning_problem = CommonRoadFileReader(
@@ -112,7 +112,7 @@ class BaseClass(unittest.TestCase):
     ("DEU_AAH-1_8007_T-1", [154]),
     ("DEU_AAH-2_19000_T-1", [118]),
     ("DEU_Guetersloh-20_4_T-1", []),
-    ("DEU_Muc-13_1_T-1", [257, 253]),
+    ("DEU_Muc-13_1_T-1", [257,253]),
     ("USA_Lanker-2_13_T-1", [3670]),
     ("ARG_Carcarana-10_5_T-1", [6758, 6712, 6917, 8325]),
     ("ARG_Carcarana-10_2_T-1", [6917, 6988, 8325]),

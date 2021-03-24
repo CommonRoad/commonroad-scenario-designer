@@ -18,7 +18,7 @@ from lxml import etree
 
 from commonroad.common.file_reader import CommonRoadFileReader
 
-from crmapconverter.lanelet_lanelet2.lanelet2osm import L2OSMConverter
+from crdesigner.lanelet_lanelet2.lanelet2osm import L2OSMConverter
 from test.utils import elements_equal
 
 # TODO: write osm_convert method analog to opendrive_convert
@@ -40,7 +40,7 @@ class TestCR2OSMConversionBaseClass(unittest.TestCase):
         """Load the osm file and convert it to a scenario."""
         try:
             commonroad_reader = CommonRoadFileReader(
-                f"{os.path.dirname(os.path.realpath(__file__))}/osm_xml_test_files/{self.xml_file_name}.xml"
+                f"{os.path.dirname(os.path.realpath(__file__))}/lanelet_lanelet2_test_files/{self.xml_file_name}.xml"
             )
             scenario, _ = commonroad_reader.open()
             l2osm = L2OSMConverter(self.proj_string)
@@ -56,7 +56,7 @@ class TestCR2OSMConversionBaseClass(unittest.TestCase):
         """Test if converted scenario is equal to the loaded xml file.
         Disregard the different dates.
         """
-        fh = f"{os.path.dirname(os.path.realpath(__file__))}/osm_xml_test_files/{self.xml_file_name}_from_cr.osm"
+        fh = f"{os.path.dirname(os.path.realpath(__file__))}/lanelet_lanelet2_test_files/{self.xml_file_name}_from_cr.osm"
         parser = etree.XMLParser(remove_blank_text=True)
         tree_import = etree.parse(fh, parser=parser).getroot()
 
