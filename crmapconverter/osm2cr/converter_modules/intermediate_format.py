@@ -423,14 +423,14 @@ class IntermediateFormat:
                     left = incoming_lane.adjacent_left
                     right = incoming_lane.adjacent_right
                     while left:
-                        if incoming_lane.adjacent_left_direction_equal and left.id not in added_lanes:
+                        if left.adjacent_right_direction_equal and left.id not in added_lanes:
                             lanes_to_add.append(left)
                             added_lanes.add(left.id)
                             left = left.adjacent_left
                         else:
                             left = None
                     while right:
-                        if incoming_lane.adjacent_right_direction_equal and right.id not in added_lanes:
+                        if right.adjacent_left_direction_equal and right.id not in added_lanes:
                             lanes_to_add.append(right)
                             added_lanes.add(right.id)
                             right = right.adjacent_right
