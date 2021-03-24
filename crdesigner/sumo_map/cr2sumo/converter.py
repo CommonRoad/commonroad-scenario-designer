@@ -313,7 +313,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                 # create new node
                 coords = self._compute_node_coords(lanelets, index=index)
                 self.nodes[self.node_id_next] = Node(self.node_id_next,
-                                                     NodeType.PRIORITY,
+                                                     NodeType.RIGHT_BEFORE_LEFT,
                                                      coords,
                                                      right_of_way=RightOfWay.EDGE_PRIORITY)
                 # @REFERENCE_1
@@ -331,7 +331,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
             # dead end
             coords = self._compute_node_coords(lanelets, index=index)
             self.nodes[self.node_id_next] = Node(self.node_id_next,
-                                                 NodeType.PRIORITY,
+                                                 NodeType.RIGHT_BEFORE_LEFT,
                                                  coords,
                                                  right_of_way=RightOfWay.EDGE_PRIORITY)
             if node_type == "from":
@@ -370,9 +370,16 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
             for lanelet in lanelets:
                 if not lanelet.stop_line:
                     continue
-                centroid = (lanelet.stop_line.start + lanelet.stop_line.end) / 2
                 center_line = LineString(lanelet.center_vertices)
+                if lanelet.stop_line.start is None or lanelet.stop_line.end is None:
+                    projections.append(center_line.length)
+                    lengths.append(center_line.length)
+                    continue
+                centroid = (lanelet.stop_line.start + lanelet.stop_line.end) / 2
                 proj = center_line.project(Point(centroid))
+                assert 0 <= proj <= center_line.length, f"Stop Line for lanelet {lanelet.lanelet_id} has to be within" \
+                                                        f"it's geometry. Remove stop line for lanelet {lanelet.lanelet_id}" \
+                                                        f"or change it's start and end position to fix this."
                 projections.append(proj)
                 lengths.append(center_line.length)
             # end offset is the mean difference to the composing lanelet's lengths
@@ -613,7 +620,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
             def merge_cluster(cluster: Set[Node]) -> Node:
                 cluster_ids = {n.id for n in cluster}
                 merged_node = Node(id=self.node_id_next,
-                                   node_type=NodeType.PRIORITY,
+                                   node_type=NodeType.RIGHT_BEFORE_LEFT,
                                    coord=np.mean([node.coord for node in cluster], axis=0))
                 self.node_id_next += 1
                 self.new_nodes[merged_node.id] = merged_node
