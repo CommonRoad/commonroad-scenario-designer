@@ -20,8 +20,7 @@ IMAGE_RESOLUTION = 256
 
 bing_maps_api_response = None
 
-if not os.path.exists(config.IMAGE_SAVE_PATH):
-    os.makedirs(config.IMAGE_SAVE_PATH)
+os.makedirs(config.IMAGE_SAVE_PATH, exist_ok=True)
 
 
 def store_tile(quadkey: str, image: JpegImageFile) -> None:
