@@ -103,6 +103,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
         menu_help = menu_bar.addMenu('Help')  # add menu 'Help'
         menu_help.addAction(self.open_web)
+        menu_help.addAction(self.open_forum)
 
         self.center()
 
@@ -368,7 +369,13 @@ class MWindow(QMainWindow, Ui_mainWindow):
                                            icon="",
                                            checkable=False,
                                            slot=self.open_cr_web,
-                                           tip="Open CommonRoad Web",
+                                           tip="Open CommonRoad Website",
+                                           shortcut=None)
+        self.open_forum = self.create_action("Open Forum",
+                                           icon="",
+                                           checkable=False,
+                                           slot=self.open_cr_forum,
+                                           tip="Open CommonRoad Forum",
                                            shortcut=None)
 
     def create_viewer_dock(self):
@@ -450,6 +457,10 @@ class MWindow(QMainWindow, Ui_mainWindow):
     def open_cr_web(self):
         """Function to open the CommonRoad website."""
         QDesktopServices.openUrl(QUrl("https://commonroad.in.tum.de/"))
+
+    def open_cr_forum(self):
+        """Function to open the CommonRoad Forum."""
+        QDesktopServices.openUrl(QUrl("https://commonroad.in.tum.de/forum/c/map-tool/11"))
 
     def file_new(self):
         """Function to create the action in the menu bar."""
