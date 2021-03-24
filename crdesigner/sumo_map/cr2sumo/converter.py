@@ -45,7 +45,7 @@ from sumocr.maps.scenario_wrapper import AbstractScenarioWrapper
 
 from crdesigner.sumo_map.sumolib_net import (TLS, Connection, Crossing, Edge, Junction, Lane,
                                              Node, TLSProgram, Phase, SignalState, NodeType, RightOfWay,
-                                             VehicleType)
+                                             VehicleType, SpreadType)
 
 from crdesigner.sumo_map.errors import ScenarioException
 from crdesigner.sumo_map.util import (_find_intersecting_edges,
@@ -375,7 +375,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                         from_node=start_node,
                         to_node=end_node,
                         type_id=edge_type.id,
-                        name=f"edge_{edge_id}")
+                        spread_type=SpreadType.CENTER)
 
             self.edges[edge_id] = edge
             if self.conf.overwrite_speed_limit:
