@@ -19,6 +19,7 @@ import lxml.etree as etree
 import matplotlib.colors as mcolors
 import networkx as nx
 import numpy as np
+from shapely.geometry import LineString, Point
 import sumolib
 from matplotlib import pyplot as plt
 
@@ -55,7 +56,8 @@ from crdesigner.sumo_map.util import (_find_intersecting_edges,
                                       write_ego_ids_to_rou_file, update_edge_lengths)
 
 from crdesigner.sumo_map.config import SumoConfig
-from .mapping import (get_sumo_edge_type, traffic_light_states_SUMO2CR, VEHICLE_TYPE_CR2SUMO, VEHICLE_NODE_TYPE_CR2SUMO, DEFAULT_CFG_FILE,
+from .mapping import (get_sumo_edge_type, traffic_light_states_SUMO2CR, VEHICLE_TYPE_CR2SUMO, VEHICLE_NODE_TYPE_CR2SUMO,
+                      DEFAULT_CFG_FILE,
                       get_edge_types_from_template)
 from .traffic_sign import TrafficSignEncoder
 from .traffic_light import TrafficLightEncoder
@@ -189,9 +191,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                 right_lanelet = self.lanelet_network.find_lanelet_by_id(
                     adj_right_id)
                 if right_lanelet.successor is not None:
-                    if len(
-                        successors.intersection(
-                            set(right_lanelet.successor))) > 0:
+                    if len(successors.intersection(set(right_lanelet.successor))) > 0:
                         zipper = True
                     successors = successors.union(set(right_lanelet.successor))
                 adj_right_start = right_lanelet.center_vertices[0]
@@ -207,8 +207,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
             while adj_left_id and left_same_direction:
                 self._explored_lanelets.append(adj_left_id)
                 # Get start and end nodes of left adjacency.
-                left_lanelet = self.lanelet_network.find_lanelet_by_id(
-                    adj_left_id)
+                left_lanelet = self.lanelet_network.find_lanelet_by_id(adj_left_id)
                 if left_lanelet.successor is not None:
                     if len(successors.intersection(set(left_lanelet.successor))) > 0:
                         zipper = True
@@ -221,13 +220,12 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                 adj_left_id = left_lanelet._adj_left
                 left_same_direction = left_lanelet.adj_left_same_direction
 
-            # order lanelets
+            # order lanelets from right to left
             current_lanelet = rightmost_lanelet
             ordered_lanelet_ids = [current_lanelet.lanelet_id]
             while len(lanelets) != len(ordered_lanelet_ids):
                 ordered_lanelet_ids.append(current_lanelet.adj_left)
-                current_lanelet = self.lanelet_network.find_lanelet_by_id(
-                    ordered_lanelet_ids[-1])
+                current_lanelet = self.lanelet_network.find_lanelet_by_id(ordered_lanelet_ids[-1])
 
             self.lanes_dict[rightmost_lanelet.lanelet_id] = ordered_lanelet_ids
             self.edge_lengths[rightmost_lanelet.lanelet_id] = min([lanelet.distance[-1] for lanelet in lanelets])
@@ -364,23 +362,38 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
             # Creation of Edge, using id as name
             start_node = self.nodes[self._start_nodes[edge_id]]
             end_node = self.nodes[self._end_nodes[edge_id]]
+            lanelets = [self.lanelet_network.find_lanelet_by_id(lanelet_id) for lanelet_id in lanelet_ids]
 
-            lanelet_types = [lanelet_type for lanelet_id in lanelet_ids for lanelet_type in
-                             self.lanelet_network.find_lanelet_by_id(lanelet_id).lanelet_type]
+            # compute edge end_offset from composing lanelets
+            projections: List[float] = []
+            lengths: List[float] = []
+            for lanelet in lanelets:
+                if not lanelet.stop_line:
+                    continue
+                centroid = (lanelet.stop_line.start + lanelet.stop_line.end) / 2
+                center_line = LineString(lanelet.center_vertices)
+                proj = center_line.project(Point(centroid))
+                projections.append(proj)
+                lengths.append(center_line.length)
+            # end offset is the mean difference to the composing lanelet's lengths
+            end_offset = np.mean(lengths) - np.mean(projections)
+
+            # get edge type
+            lanelet_types = [lanelet_type for lanelet in lanelets for lanelet_type in lanelet.lanelet_type]
             edge_type = get_sumo_edge_type(self.edge_types, self.country_id, *lanelet_types)
 
             edge = Edge(id=edge_id,
                         from_node=start_node,
                         to_node=end_node,
                         type_id=edge_type.id,
-                        spread_type=SpreadType.CENTER)
+                        spread_type=SpreadType.CENTER,
+                        end_offset=end_offset)
 
             self.edges[edge_id] = edge
             if self.conf.overwrite_speed_limit:
                 speed_limit = self.conf.overwrite_speed_limit
             else:
-                speed_limit = self._traffic_sign_interpreter.speed_limit(
-                    frozenset([lanelet.lanelet_id]))
+                speed_limit = self._traffic_sign_interpreter.speed_limit(frozenset([lanelet.lanelet_id]))
                 if speed_limit is None or np.isinf(speed_limit):
                     speed_limit = self.conf.unrestricted_speed_limit_default
 
