@@ -90,6 +90,7 @@ class RoadNetworkToolbox(QDockWidget):
         self.initialize_intersection_information()
         self.initialize_traffic_sign_information()
         self.set_default_road_network_list_information()
+        self.last_added_lanelet_id = None
 
     def get_x_position_lanelet_start(self) -> float:
         """
