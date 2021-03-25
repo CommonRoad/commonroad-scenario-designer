@@ -439,6 +439,9 @@ class RoadNetworkToolboxUI(Toolbox):
         widget_intersection = QFrame(self.tree)
         layout_intersection = QVBoxLayout(widget_intersection)
 
+        label_intersection_templates = QLabel("Intersection Templates")
+        label_intersection_templates.setFont(QFont("Arial", 10, QFont.Bold))
+
         self.intersection_diameter = QLineEdit()
         self.intersection_diameter.setValidator(QIntValidator())
         self.intersection_diameter.setMaxLength(2)
@@ -460,19 +463,26 @@ class RoadNetworkToolboxUI(Toolbox):
         self.button_three_way_intersection = QPushButton("Add Three-way intersection")
         self.button_four_way_intersection = QPushButton("Add Four-way intersection")
 
+        label_update_intersection = QLabel("Add/Update Intersection")
+        label_update_intersection.setFont(QFont("Arial", 10, QFont.Bold))
+
         self.selected_intersection_label = QLabel("Selected intersection")
         self.selected_intersection = QComboBox()
 
         self.intersection_incomings_label = QLabel("Incomings:")
         self.intersection_incomings_table = QTableWidget()
-        self.intersection_incomings_table.setColumnCount(5)
+        self.intersection_incomings_table.setColumnCount(6)
         self.intersection_incomings_table.setHorizontalHeaderLabels(['ID', 'Lanelets', 'Suc. Left', 'Suc. Straight',
-                                                                     'Suc. Right'])
+                                                                     'Suc. Right', 'Left Of'])
         self.intersection_incomings_table.resizeColumnsToContents()
         self.intersection_incomings_table.setMaximumHeight(175)
         self.button_add_incoming = QPushButton("Add incoming")
         self.button_remove_incoming = QPushButton("Remove incoming")
         self.intersection_crossings = CheckableComboBox()
+
+        self.button_add_intersection = QPushButton("Add Intersection")
+        self.button_remove_intersection = QPushButton("Remove Intersection")
+        self.button_update_intersection = QPushButton("Update Intersection")
 
         self.intersection_lanelet_to_fit = QComboBox()
         self.other_lanelet_to_fit = QComboBox()
@@ -480,17 +490,23 @@ class RoadNetworkToolboxUI(Toolbox):
         self.intersection_fitting_groupbox = QGroupBox("Intersection fitting")
 
         intersection_information = QFormLayout()
+        intersection_information.addRow(label_intersection_templates)
         intersection_information.addRow("Diameter [m]", self.intersection_diameter)
         intersection_information.addRow("Lanelet width [m]", self.intersection_lanelet_width)
         intersection_information.addRow("Incoming length [m]", self.intersection_incoming_length)
         intersection_information.addRow(self.intersection_with_traffic_signs, self.intersection_with_traffic_lights)
         intersection_information.addRow(self.button_three_way_intersection)
         intersection_information.addRow(self.button_four_way_intersection)
+        intersection_information.addRow(QHLine())
+        intersection_information.addRow(label_update_intersection)
         intersection_information.addRow(self.selected_intersection_label, self.selected_intersection)
         intersection_information.addRow(self.intersection_incomings_label)
         intersection_information.addRow(self.intersection_incomings_table)
         intersection_information.addRow(self.button_add_incoming, self.button_remove_incoming)
         intersection_information.addRow("Crossing lanelets", self.intersection_crossings)
+        intersection_information.addRow(self.button_add_intersection)
+        intersection_information.addRow(self.button_remove_intersection)
+        intersection_information.addRow(self.button_update_intersection)
 
         layout_intersection.addLayout(intersection_information)
 
