@@ -303,10 +303,6 @@ class RoadNetworkToolboxUI(Toolbox):
         widget_traffic_sign = QFrame(self.tree)
         layout_traffic_sign = QVBoxLayout(widget_traffic_sign)
 
-        self.country = QComboBox()
-        country_list = [e.value for e in SupportedTrafficSignCountry]
-        self.country.addItems(country_list)
-
         self.x_position_traffic_sign = QLineEdit()
         self.x_position_traffic_sign.setValidator(QDoubleValidator())
         self.x_position_traffic_sign.setMaxLength(4)
@@ -337,7 +333,6 @@ class RoadNetworkToolboxUI(Toolbox):
         self.button_remove_traffic_sign = QPushButton("Remove Selected Traffic Sign")
 
         traffic_sign_information = QFormLayout()
-        traffic_sign_information.addRow("Country", self.country)
         traffic_sign_information.addRow("X-Position [m]", self.x_position_traffic_sign)
         traffic_sign_information.addRow("Y-Position [m]", self.y_position_traffic_sign)
         traffic_sign_information.addRow(self.traffic_sign_virtual_selection)

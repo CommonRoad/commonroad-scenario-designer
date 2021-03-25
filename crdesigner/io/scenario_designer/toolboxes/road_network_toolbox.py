@@ -599,8 +599,8 @@ class RoadNetworkToolbox(QDockWidget):
         incoming_length = int(self.road_network_toolbox.intersection_incoming_length.text())
         add_traffic_signs = self.road_network_toolbox.intersection_with_traffic_signs.isChecked()
         add_traffic_lights = self.road_network_toolbox.intersection_with_traffic_lights.isChecked()
-        selected_country = self.road_network_toolbox.country.currentText()
-        country_signs = globals()["TrafficSignID" + SupportedTrafficSignCountry(selected_country).name.capitalize()]
+        country_signs = globals()["TrafficSignID" + SupportedTrafficSignCountry(
+            self.current_scenario.scenario_id.country_id).name.capitalize()]
 
         intersection, new_traffic_signs, new_traffic_lights, new_lanelets = \
             MapCreator.create_four_way_intersection(width, diameter, incoming_length, self.current_scenario,
@@ -624,8 +624,8 @@ class RoadNetworkToolbox(QDockWidget):
         incoming_length = int(self.road_network_toolbox.intersection_incoming_length.text())
         add_traffic_signs = self.road_network_toolbox.intersection_with_traffic_signs.isChecked()
         add_traffic_lights = self.road_network_toolbox.intersection_with_traffic_lights.isChecked()
-        selected_country = self.road_network_toolbox.country.currentText()
-        country_signs = globals()["TrafficSignID" + SupportedTrafficSignCountry(selected_country).name.capitalize()]
+        country_signs = globals()["TrafficSignID" + SupportedTrafficSignCountry(
+            self.current_scenario.scenario_id.country_id).name.capitalize()]
 
         intersection, new_traffic_signs, new_traffic_lights, new_lanelets = \
             MapCreator.create_three_way_intersection(width, diameter, incoming_length, self.current_scenario,
@@ -655,13 +655,13 @@ class RoadNetworkToolbox(QDockWidget):
         if self.current_scenario is None:
             self.text_browser.append("_Warning:_ Create a new file")
             return
-        selected_country = self.road_network_toolbox.country.currentText()
         num_rows = self.road_network_toolbox.traffic_sign_element_table.rowCount()
         self.road_network_toolbox.traffic_sign_element_table.insertRow(num_rows)
         combo_box = QComboBox()
         combo_box.addItems(
             [elem.name for elem in globals()["TrafficSignID"
-                                             + SupportedTrafficSignCountry(selected_country).name.capitalize()]])
+                                             + SupportedTrafficSignCountry(
+                self.current_scenario.scenario_id.country_id).name.capitalize()]])
         self.road_network_toolbox.traffic_sign_element_table.setCellWidget(num_rows, 0, combo_box)
 
     def remove_traffic_sign_element(self):
@@ -680,8 +680,8 @@ class RoadNetworkToolbox(QDockWidget):
         if self.current_scenario is None:
             self.text_browser.append("_Warning:_ Create a new file")
             return
-        selected_country = self.road_network_toolbox.country.currentText()
-        country_signs = globals()["TrafficSignID" + SupportedTrafficSignCountry(selected_country).name.capitalize()]
+        country_signs = globals()["TrafficSignID" + SupportedTrafficSignCountry(
+            self.current_scenario.scenario_id.country_id).name.capitalize()]
         traffic_sign_elements = []
         referenced_lanelets = \
             {int(la) for la in self.road_network_toolbox.referenced_lanelets_traffic_sign.get_checked_items()}
@@ -753,8 +753,8 @@ class RoadNetworkToolbox(QDockWidget):
         Updates information of traffic sign widget based on traffic sign ID selected by the user.
         """
         if self.road_network_toolbox.selected_traffic_sign.currentText() not in ["", "None"]:
-            selected_country = self.road_network_toolbox.country.currentText()
-            country_signs = globals()["TrafficSignID" + SupportedTrafficSignCountry(selected_country).name.capitalize()]
+            country_signs = globals()["TrafficSignID" + SupportedTrafficSignCountry(
+                self.current_scenario.scenario_id.country_id).name.capitalize()]
             selected_traffic_sign_id = int(self.road_network_toolbox.selected_traffic_sign.currentText())
             traffic_sign = \
                 self.current_scenario.lanelet_network.find_traffic_sign_by_id(selected_traffic_sign_id)
