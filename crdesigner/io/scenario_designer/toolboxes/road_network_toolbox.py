@@ -1006,7 +1006,9 @@ class RoadNetworkToolbox(QDockWidget):
         if selected_lanelet_one is None:
             return
         rotation_angle = int(self.road_network_toolbox.rotation_angle.text())
+        initial_vertex = selected_lanelet_one.center_vertices[0]
         selected_lanelet_one.translate_rotate(np.array([0, 0]), np.deg2rad(rotation_angle))
+        selected_lanelet_one.translate_rotate(initial_vertex - selected_lanelet_one.center_vertices[0], 0.0)
         self.callback(self.current_scenario)
 
     def translate_lanelet(self):
