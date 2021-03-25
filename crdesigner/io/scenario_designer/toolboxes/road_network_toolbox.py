@@ -82,7 +82,6 @@ class RoadNetworkToolbox(QDockWidget):
 
     def update_scenario(self, scenario: Scenario):
         self.current_scenario = scenario
-        self.initialize_toolbox()
 
     def initialize_toolbox(self):
         self.initialize_lanelet_information()
@@ -290,12 +289,15 @@ class RoadNetworkToolbox(QDockWidget):
             ["None"] + [str(item) for item in self.collect_lanelet_ids()])
         self.road_network_toolbox.other_lanelet_to_fit.setCurrentIndex(0)
 
-    def add_lanelet(self, lanelet_id: int = None, update: bool = False):
+    def add_lanelet(self, lanelet_id: int = None, update: bool = False, left_vertices: np.array = None,
+                    right_vertices: np.array = None):
         """
         Adds a lanelet to the scenario based on the selected parameters by the user.
 
         @param lanelet_id: Id which the new lanelet should have.
         @param update: Boolean indicating whether lanelet is updated or newly created.
+        @param left_vertices: Left boundary of lanelet which should be updated.
+        @param right_vertices: Right boundary of lanelet which should be updated.
         """
         if self.current_scenario is None:
             self.text_browser.append("Please create first a new scenario.")
@@ -358,23 +360,25 @@ class RoadNetworkToolbox(QDockWidget):
         connect_to_predecessors_selection = self.road_network_toolbox.connect_to_predecessors_selection.isChecked()
         connect_to_successors_selection = self.road_network_toolbox.connect_to_successors_selection.isChecked()
 
-        if lanelet_id is None:
-            lanelet_id = self.current_scenario.generate_object_id()
-        if add_curved_selection:
-            lanelet = MapCreator.create_curve(lanelet_width, lanelet_radius, lanelet_angle, num_vertices, lanelet_id,
-                                              lanelet_type, predecessors, successors, adjacent_left, adjacent_right,
-                                              adjacent_left_same_direction, adjacent_right_same_direction,
-                                              user_one_way, user_bidirectional, line_marking_left,
-                                              line_marking_right, stop_line, traffic_signs, traffic_lights,
-                                              stop_line_at_end)
-        else:
-            lanelet = MapCreator.create_straight(lanelet_width, lanelet_length, num_vertices, lanelet_id, lanelet_type,
-                                                 predecessors, successors, adjacent_left, adjacent_right,
-                                                 adjacent_left_same_direction, adjacent_right_same_direction,
-                                                 user_one_way, user_bidirectional, line_marking_left,
-                                                 line_marking_right, stop_line, traffic_signs, traffic_lights,
-                                                 stop_line_at_end)
         if not update:
+            if lanelet_id is None:
+                lanelet_id = self.current_scenario.generate_object_id()
+            if add_curved_selection:
+                lanelet = MapCreator.create_curve(lanelet_width, lanelet_radius, lanelet_angle, num_vertices,
+                                                  lanelet_id,
+                                                  lanelet_type, predecessors, successors, adjacent_left, adjacent_right,
+                                                  adjacent_left_same_direction, adjacent_right_same_direction,
+                                                  user_one_way, user_bidirectional, line_marking_left,
+                                                  line_marking_right, stop_line, traffic_signs, traffic_lights,
+                                                  stop_line_at_end)
+            else:
+                lanelet = MapCreator.create_straight(lanelet_width, lanelet_length, num_vertices, lanelet_id,
+                                                     lanelet_type,
+                                                     predecessors, successors, adjacent_left, adjacent_right,
+                                                     adjacent_left_same_direction, adjacent_right_same_direction,
+                                                     user_one_way, user_bidirectional, line_marking_left,
+                                                     line_marking_right, stop_line, traffic_signs, traffic_lights,
+                                                     stop_line_at_end)
             if connect_to_last_selection:
                 if self.last_added_lanelet_id is not None:
                     MapCreator.fit_to_predecessor(
@@ -388,12 +392,22 @@ class RoadNetworkToolbox(QDockWidget):
                 if len(successors) > 0:
                     MapCreator.fit_to_successor(
                         self.current_scenario.lanelet_network.find_lanelet_by_id(successors[0]), lanelet)
+            lanelet.translate_rotate(np.array([lanelet_pos_x, lanelet_pos_y]), 0)
             self.last_added_lanelet_id = lanelet_id
+        else:
+            lanelet = \
+                Lanelet(left_vertices=left_vertices, right_vertices=right_vertices, predecessor=predecessors,
+                        successor=successors, adjacent_left=adjacent_left, adjacent_right=adjacent_right,
+                        center_vertices=0.5 * (left_vertices + right_vertices),
+                        adjacent_left_same_direction=adjacent_left_same_direction,
+                        adjacent_right_same_direction=adjacent_right_same_direction,
+                        lanelet_id=lanelet_id, lanelet_type=lanelet_type, user_one_way=user_one_way,
+                        user_bidirectional=user_bidirectional, line_marking_right_vertices=line_marking_right,
+                        line_marking_left_vertices=line_marking_left, stop_line=stop_line, traffic_signs=traffic_signs,
+                        traffic_lights=traffic_lights)
 
         self.current_scenario.add_objects(lanelet)
-        lanelet.translate_rotate(np.array([lanelet_pos_x, lanelet_pos_y]), 0)
         self.set_default_road_network_list_information()
-
         self.callback(self.current_scenario)
 
     def selected_lanelet(self) -> Union[Lanelet, None]:
@@ -420,7 +434,8 @@ class RoadNetworkToolbox(QDockWidget):
         if selected_lanelet is None:
             return
         self.current_scenario.remove_lanelet(selected_lanelet)
-        self.add_lanelet(selected_lanelet.lanelet_id, True)
+        self.add_lanelet(selected_lanelet.lanelet_id, True, selected_lanelet.left_vertices,
+                         selected_lanelet.right_vertices)
         self.set_default_road_network_list_information()
         self.callback(self.current_scenario)
 
