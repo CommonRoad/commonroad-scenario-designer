@@ -47,6 +47,9 @@ class ObstacleToolbox(QDockWidget):
         self.obstacle_toolbox.obstacle_state_variable.currentTextChanged.connect(
             lambda: self.plot_obstacle_state_profile())
 
+        self.obstacle_toolbox.button_remove_obstacle.clicked.connect(
+            lambda: self.remove_obstacle())
+
         self.obstacle_toolbox.button_start_simulation.clicked.connect(
             lambda: self.start_sumo_simulation())
 
@@ -131,4 +134,14 @@ class ObstacleToolbox(QDockWidget):
     def start_sumo_simulation(self):
         self.sumo_box.simulate()
         self.callback(self.sumo_box.simulated_scenario.value)
+
+    def remove_obstacle(self):
+        """
+        Removes the selected obstacle from the scenario.
+        """
+        if self.obstacle_toolbox.selected_obstacle.currentText() not in ["", "None"]:
+            obstacle_id = int(self.obstacle_toolbox.selected_obstacle.currentText())
+            obstacle = self.current_scenario.obstacle_by_id(obstacle_id)
+            self.current_scenario.remove_obstacle(obstacle)
+            self.callback(self.current_scenario)
 
