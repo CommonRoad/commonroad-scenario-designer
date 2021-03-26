@@ -486,6 +486,8 @@ class MapCreator:
         successors_right = [lanelet_ids[5], lanelet_ids[11], lanelet_ids[17], lanelet_ids[19]]
         successors_straight = [lanelet_ids[2], lanelet_ids[3], lanelet_ids[12], lanelet_ids[13]]
         successors_left = [lanelet_ids[4], lanelet_ids[10], lanelet_ids[16], lanelet_ids[18]]
+        incoming_ids = [scenario.generate_object_id() for i in range(len(incomings))]
+        left_of = [incoming_ids[-1], incoming_ids[0], incoming_ids[1], incoming_ids[2]]
         map_incoming = []
 
         for n in range(len(incomings)):
@@ -493,9 +495,10 @@ class MapCreator:
             right = {successors_right[n]}
             left = {successors_left[n]}
             straight = {successors_straight[n]}
-            map_incoming.append(IntersectionIncomingElement(scenario.generate_object_id(), incoming_lanelets=inc,
-                                                            successors_right=right,successors_straight=straight,
-                                                            successors_left=left))
+            incoming_id = incoming_ids[n]
+            map_incoming.append(IntersectionIncomingElement(incoming_id, incoming_lanelets=inc,
+                                                            successors_right=right, successors_straight=straight,
+                                                            successors_left=left, left_of=left_of[n]))
         intersection_id = scenario.generate_object_id()
         intersection = Intersection(intersection_id=intersection_id, incomings=map_incoming)
 
@@ -671,19 +674,24 @@ class MapCreator:
         MapCreator.set_predecessor_successor_relation(new_lanelets[5], new_lanelets[3])
         MapCreator.set_predecessor_successor_relation(new_lanelets[7], new_lanelets[4])
 
+
+        incomings = [lanelet_ids[0], lanelet_ids[5], lanelet_ids[9]]
+        successors_right = [lanelet_ids[11], lanelet_ids[3], None]
+        successors_straight = [None, lanelet_ids[6], lanelet_ids[7]]
+        successors_left = [lanelet_ids[2], None, lanelet_ids[10]]
+        incoming_ids = [scenario.generate_object_id() for i in range(len(incomings))]
+        left_of = [incoming_ids[-1], incoming_ids[0], None]
         map_incoming = []
-        map_incoming.append(IntersectionIncomingElement(scenario.generate_object_id(),
-                                                        incoming_lanelets={lanelet_ids[0]},
-                                                        successors_right={lanelet_ids[11]},
-                                                        successors_left={lanelet_ids[2]}))
-        map_incoming.append(IntersectionIncomingElement(scenario.generate_object_id(),
-                                                        incoming_lanelets={lanelet_ids[4]},
-                                                        successors_right={lanelet_ids[3]},
-                                                        successors_straight={lanelet_ids[7]}))
-        map_incoming.append(IntersectionIncomingElement(scenario.generate_object_id(),
-                                                        incoming_lanelets={lanelet_ids[9]},
-                                                        successors_straight={lanelet_ids[5]},
-                                                        successors_left={lanelet_ids[10]}))
+
+        for n in range(len(incomings)):
+            inc = {incomings[n]}
+            right = {successors_right[n]}
+            left = {successors_left[n]}
+            straight = {successors_straight[n]}
+            incoming_id = incoming_ids[n]
+            map_incoming.append(IntersectionIncomingElement(incoming_id, incoming_lanelets=inc,
+                                                            successors_right=right, successors_straight=straight,
+                                                            successors_left=left, left_of=left_of[n]))
 
         intersection_id = scenario.generate_object_id()
         intersection = Intersection(intersection_id=intersection_id, incomings=map_incoming)
