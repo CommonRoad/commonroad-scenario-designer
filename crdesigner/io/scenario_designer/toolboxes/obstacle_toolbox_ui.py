@@ -67,10 +67,13 @@ class ObstacleToolboxUI(Toolbox):
         self.canvas = FigureCanvas(self.figure)
         self.toolbar = NavigationToolbar(self.canvas, self)
 
+        self.button_remove_obstacle = QPushButton("Remove Obstacle")
+
         # set the layout
         layout = QVBoxLayout()
         layout.addWidget(self.toolbar)
         layout.addWidget(self.canvas)
+        layout.addWidget(self.button_remove_obstacle)
         layout_obstacles.addLayout(layout)
 
         title_obstacle = "Obstacle"
@@ -80,8 +83,7 @@ class ObstacleToolboxUI(Toolbox):
         widget_sumo = SUMOSimulation(self.tree)
         layout_sumo = QGridLayout(widget_sumo)
 
-        self.button_start_simulation = QPushButton()
-        self.button_start_simulation.setText("Simulate")
+        self.button_start_simulation = QPushButton("Simulate")
         layout_sumo.addWidget(self.button_start_simulation, 1, 0)
 
         title_sumo = "Sumo Simulation"

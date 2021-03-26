@@ -61,8 +61,7 @@ class OSMInterface(ConverterInterface):
     def export(self, graph):
         """ converts a graph to a scenario and loads it into the CrSD """
         scenario = export.convert_to_scenario(graph)
-        filename = os.path.basename(self.start_menu.selected_file)
-        filename = os.path.splitext(filename)[0]
+        filename = os.path.basename("new_scenario")
         self.cr_designer.open_scenario(scenario, filename)
         self.main_window.close()
 

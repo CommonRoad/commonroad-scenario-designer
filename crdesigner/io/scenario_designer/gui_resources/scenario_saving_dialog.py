@@ -49,13 +49,15 @@ class ScenarioDialog:
             self.save_window.scenario_geo_anme_id.setText(str(scenario.location.geo_name_id))
             self.save_window.scenario_latitude.setText(str(scenario.location.gps_latitude))
             self.save_window.scenario_longitude.setText(str(scenario.location.gps_longitude))
-            self.save_window.scenario_time_of_day.setCurrentText(
-                self.current_scenario.location.environment.time_of_day.value)
-            self.save_window.scenario_weather.setCurrentText(self.current_scenario.location.environment.weather.value)
-            self.save_window.scenario_underground.setCurrentText(
-                self.current_scenario.location.environment.underground.value)
-            self.save_window.scenario_time_hour.setValue(self.current_scenario.location.environment.time.hours)
-            self.save_window.scenario_time_minute.setValue(self.current_scenario.location.environment.time.minutes)
+            if scenario.location.environment:
+                self.save_window.scenario_time_of_day.setCurrentText(
+                    self.current_scenario.location.environment.time_of_day.value)
+                self.save_window.scenario_weather.setCurrentText(
+                    self.current_scenario.location.environment.weather.value)
+                self.save_window.scenario_underground.setCurrentText(
+                    self.current_scenario.location.environment.underground.value)
+                self.save_window.scenario_time_hour.setValue(self.current_scenario.location.environment.time.hours)
+                self.save_window.scenario_time_minute.setValue(self.current_scenario.location.environment.time.minutes)
         else:
             self.save_window.scenario_geo_anme_id.setText("-1")
             self.save_window.scenario_latitude.setText("-999.9")
