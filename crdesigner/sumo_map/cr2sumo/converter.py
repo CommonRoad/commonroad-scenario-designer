@@ -55,7 +55,8 @@ from crdesigner.sumo_map.util import (_find_intersecting_edges,
                                       write_ego_ids_to_rou_file, update_edge_lengths)
 
 from crdesigner.sumo_map.config import SumoConfig
-from .mapping import (get_sumo_edge_type, traffic_light_states_SUMO2CR, VEHICLE_TYPE_CR2SUMO, VEHICLE_NODE_TYPE_CR2SUMO, DEFAULT_CFG_FILE,
+from .mapping import (get_sumo_edge_type, traffic_light_states_SUMO2CR, VEHICLE_TYPE_CR2SUMO, VEHICLE_NODE_TYPE_CR2SUMO,
+                      DEFAULT_CFG_FILE,
                       get_edge_types_from_template)
 from .traffic_sign import TrafficSignEncoder
 from .traffic_light import TrafficLightEncoder
@@ -925,13 +926,41 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
 
     def auto_generate_traffic_light_system(self,
                                            lanelet_id: int,
-                                           cycle_time: int = 90) -> bool:
+                                           cycle_time: int = 90,
+                                           yellow_time: int = -1,
+                                           all_red_time: int = 0,
+                                           left_green_time: int = 6,
+                                           crossing_min_time: int = 4,
+                                           crossing_clearance_time: int = 5
+                                           ) -> bool:
         """
-        Automatically generate a TLS for the given intersection
-        param: lanelet_id: id of lanelet in junction to generate Traffic Lights for
-        param: cycle_time: total duration of a traffic light cycle in seconds
+        Automatically generate a Traffic Light System (TLS) for all lanelets
+        in the same intersection as the given lanelet_id.
+        The below has been partially adapted from: https://sumo.dlr.de/docs/netconvert.html#tls_building
+        :param lanelet_id: ID of lanelet in intersection to generate traffic lights for
+        :param cycle_time: Duration of a full traffic light cycle [s]
+        :param green_time: Duration of a green phase [s]
+        :param yellow_time: Fixed time for yellow phase durations [s]
+        :param red_time: Fixed time for red phase duration at traffic lights that do not have
+        a conflicting flow [s].
+        :param all_red_time: Fixed time for intermediate red phase after every switch [s].
+        :param left_green_time: Green phase duration for left turns. Setting this value to 0
+        disables additional left-turning phases [s].
+        :param crossing_min_time: Minimum time duration for pedestrian crossings [s].
+        :param crossing_clearance_time: Clearance time for pedestrian crossings [s].
         :return: if the conversion was successful
         """
+        assert cycle_time > 0
+        assert yellow_time >= -1
+        assert all_red_time >= 0
+        assert left_green_time > 0
+        assert crossing_min_time > 0
+        assert crossing_clearance_time > 0
+        assert cycle_time >= max(yellow_time, 0) + \
+               all_red_time + left_green_time + crossing_min_time + crossing_clearance_time, \
+            f"Cycle time {cycle_time} needs to be greater than the sum of individual times" \
+            f"sum: {max(yellow_time, 0) + all_red_time + left_green_time + crossing_min_time + crossing_clearance_time}."
+
         if not self._output_file:
             logging.error("Need to call convert_to_net_file first")
             return False
@@ -940,31 +969,35 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         if not lanelet_id in self.lanelet_id2junction:
             lanelet: Lanelet = self.lanelet_network.find_lanelet_by_id(lanelet_id)
             if not lanelet:
-                logging.warning("Invalid lanelet: {}".format(lanelet_id))
+                logging.warning(f"Unknown Lanelet: {lanelet_id}")
                 return False
             # if the selected lanelet is not an incoming one, check the prececessors
             try:
                 lanelet_id = next(pred for pred in lanelet.predecessor if pred in self.lanelet_id2junction)
             except StopIteration:
-                logging.info("No junction found for lanelet {}".format(lanelet_id))
+                logging.warning(f"No junction found for lanelet {lanelet_id}")
                 return False
 
-        # does the lanelet have predefined traffic light?
+        # does the lanelet already have a traffic light?
         # If so guess signals for them and copy the corresponding position
-        guess_signals = False
-        if self.lanelet_network.find_lanelet_by_id(lanelet_id).traffic_lights:
-            guess_signals = True
+        lanelet = self.lanelet_network.find_lanelet_by_id(lanelet_id)
+        guess_signals = bool(lanelet.traffic_lights)
 
         # auto generate the TLS with netconvert
         junction = self.lanelet_id2junction[lanelet_id]
         command = f"netconvert" \
                   f" --sumo-net-file={self._output_file}" \
                   f" --output-file={self._output_file}" \
+                  f" --tls.set={junction.id}" \
                   f" --tls.guess=true" \
                   f" --tls.guess-signals={'true' if guess_signals else 'false'}" \
                   f" --tls.group-signals=true" \
                   f" --tls.cycle.time={cycle_time}" \
-                  f" --tls.set={junction.id}"
+                  f" --tls.yellow.time={yellow_time}" \
+                  f" --tls.allred.time={all_red_time}" \
+                  f" --tls.left-green.time={left_green_time}" \
+                  f" --tls.crossing-min.time={crossing_min_time}" \
+                  f" --tls.crossing-clearance.time={crossing_clearance_time}"
         try:
             out = subprocess.check_output(command.split(), timeout=5.0, stderr=subprocess.STDOUT)
             if "error" in str(out).lower():

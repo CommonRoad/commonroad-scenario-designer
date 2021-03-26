@@ -523,7 +523,7 @@ class RoadNetworkToolbox(QDockWidget):
         predecessors = [int(pre) for pre in self.road_network_toolbox.predecessors.get_checked_items()]
         successors = [int(suc) for suc in self.road_network_toolbox.successors.get_checked_items()]
         lanelet_type = {LaneletType(ty) for ty in self.road_network_toolbox.lanelet_type.get_checked_items()
-                        if ty !="None"}
+                        if ty != "None"}
         user_one_way = {RoadUser(user) for user in self.road_network_toolbox.road_user_oneway.get_checked_items()
                         if user != "None"}
         user_bidirectional = \
@@ -919,7 +919,10 @@ class RoadNetworkToolbox(QDockWidget):
         converter.convert_to_net_file(self.tmp_folder)
         oks = []
         for lanelet_id in lanelet_ids:
-            ok = converter.auto_generate_traffic_light_system(lanelet_id)
+            try:
+                ok = converter.auto_generate_traffic_light_system(lanelet_id)
+            except Exception as e:
+                ok = False
             oks.append(ok)
             self.text_browser.append(
                 ("Created" if ok else "ERROR: Could not create") + f" traffic light system for lanelet {lanelet_id}")
