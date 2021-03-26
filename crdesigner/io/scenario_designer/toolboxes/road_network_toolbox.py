@@ -240,7 +240,7 @@ class RoadNetworkToolbox(QDockWidget):
 
         self.road_network_toolbox.lanelet_referenced_traffic_light_ids.clear()
         self.road_network_toolbox.lanelet_referenced_traffic_light_ids.addItems(
-            ["None"] + [str(item) for item in self.collect_lanelet_ids()])
+            ["None"] + [str(item) for item in self.collect_traffic_light_ids()])
         self.road_network_toolbox.lanelet_referenced_traffic_light_ids.setCurrentIndex(0)
 
         self.road_network_toolbox.selected_lanelet_one.clear()
