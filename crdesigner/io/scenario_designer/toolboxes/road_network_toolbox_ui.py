@@ -407,6 +407,7 @@ class RoadNetworkToolboxUI(Toolbox):
         self.button_add_traffic_light = QPushButton("Add")
         self.button_update_traffic_light = QPushButton("Update")
         self.button_remove_traffic_light = QPushButton("Remove")
+        self.button_create_traffic_lights = QPushButton("Create Traffic Lights for Referenced Lanelets")
 
         traffic_light_information = QFormLayout()
         traffic_light_information.addRow("X-Position [m]", self.x_position_traffic_light)
@@ -424,6 +425,7 @@ class RoadNetworkToolboxUI(Toolbox):
         traffic_light_information.addRow(self.button_add_traffic_light)
         traffic_light_information.addRow(self.button_update_traffic_light)
         traffic_light_information.addRow(self.button_remove_traffic_light)
+        traffic_light_information.addRow(self.button_create_traffic_lights)
 
         layout_traffic_light.addLayout(traffic_light_information)
 

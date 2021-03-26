@@ -7,16 +7,17 @@ from commonroad.scenario.intersection import IntersectionIncomingElement, Inters
 from commonroad.scenario.scenario import Scenario
 from commonroad.scenario.traffic_sign import *
 
-
 from crdesigner.io.scenario_designer.toolboxes.toolbox_ui import CheckableComboBox
 from crdesigner.io.scenario_designer.misc.map_creator import MapCreator
 from crdesigner.io.scenario_designer.toolboxes.road_network_toolbox_ui import RoadNetworkToolboxUI
 
+from crdesigner.sumo_map.cr2sumo import CR2SumoMapConverter
+from crdesigner.sumo_map.config import SumoConfig
+
 
 class RoadNetworkToolbox(QDockWidget):
-    def __init__(self, current_scenario: Scenario, text_browser, callback):
+    def __init__(self, current_scenario: Scenario, text_browser, callback, tmp_folder: str):
         super().__init__("Road Network Toolbox")
-
         self.road_network_toolbox = RoadNetworkToolboxUI()
         self.adjust_ui()
 
@@ -24,6 +25,7 @@ class RoadNetworkToolbox(QDockWidget):
         self.text_browser = text_browser
         self.last_added_lanelet_id = None
         self.callback = callback
+        self.tmp_folder = tmp_folder
 
         self.initialize_lanelet_information()
         self.initialize_traffic_sign_information()
@@ -69,6 +71,7 @@ class RoadNetworkToolbox(QDockWidget):
         self.road_network_toolbox.button_add_traffic_light.clicked.connect(lambda: self.add_traffic_light())
         self.road_network_toolbox.button_update_traffic_light.clicked.connect(lambda: self.update_traffic_light())
         self.road_network_toolbox.button_remove_traffic_light.clicked.connect(lambda: self.remove_traffic_light())
+        self.road_network_toolbox.button_create_traffic_lights.clicked.connect(self.create_traffic_lights)
         self.road_network_toolbox.selected_traffic_light.currentTextChanged.connect(
             lambda: self.update_traffic_light_information())
 
@@ -328,21 +331,21 @@ class RoadNetworkToolbox(QDockWidget):
         adjacent_left_same_direction = self.road_network_toolbox.adjacent_left_same_direction.isChecked()
         adjacent_right_same_direction = self.road_network_toolbox.adjacent_right_same_direction.isChecked()
         lanelet_type = {LaneletType(ty) for ty in self.road_network_toolbox.lanelet_type.get_checked_items()
-                        if ty is not "None"}
+                        if ty != "None"}
         user_one_way = {RoadUser(user) for user in self.road_network_toolbox.road_user_oneway.get_checked_items()
-                        if user is not "None"}
+                        if user != "None"}
         user_bidirectional = \
             {RoadUser(user) for user in self.road_network_toolbox.road_user_bidirectional.get_checked_items()
-             if user is not "None"}
+             if user != "None"}
 
         traffic_signs = \
             {int(sign) for sign in self.road_network_toolbox.lanelet_referenced_traffic_sign_ids.get_checked_items()}
         traffic_lights = \
             {int(light) for light in self.road_network_toolbox.lanelet_referenced_traffic_light_ids.get_checked_items()}
         if self.road_network_toolbox.stop_line_start_x.text() != "" \
-                and self.road_network_toolbox.stop_line_end_x.text() != "" \
-                and self.road_network_toolbox.stop_line_start_y.text() != "" \
-                and self.road_network_toolbox.stop_line_end_y.text() != "":
+            and self.road_network_toolbox.stop_line_end_x.text() != "" \
+            and self.road_network_toolbox.stop_line_start_y.text() != "" \
+            and self.road_network_toolbox.stop_line_end_y.text() != "":
             stop_line_start_x = float(self.road_network_toolbox.stop_line_start_x.text())
             stop_line_end_x = float(self.road_network_toolbox.stop_line_end_x.text())
             stop_line_start_y = float(self.road_network_toolbox.stop_line_start_y.text())
@@ -520,20 +523,20 @@ class RoadNetworkToolbox(QDockWidget):
         predecessors = [int(pre) for pre in self.road_network_toolbox.predecessors.get_checked_items()]
         successors = [int(suc) for suc in self.road_network_toolbox.successors.get_checked_items()]
         lanelet_type = {LaneletType(ty) for ty in self.road_network_toolbox.lanelet_type.get_checked_items()
-                        if ty is not "None"}
+                        if ty !="None"}
         user_one_way = {RoadUser(user) for user in self.road_network_toolbox.road_user_oneway.get_checked_items()
-                        if user is not "None"}
+                        if user != "None"}
         user_bidirectional = \
             {RoadUser(user) for user in self.road_network_toolbox.road_user_bidirectional.get_checked_items()
-             if user is not "None"}
+             if user != "None"}
         traffic_signs = \
             {int(sign) for sign in self.road_network_toolbox.lanelet_referenced_traffic_sign_ids.get_checked_items()}
         traffic_lights = \
             {int(light) for light in self.road_network_toolbox.lanelet_referenced_traffic_light_ids.get_checked_items()}
         if self.road_network_toolbox.stop_line_start_x.text() != "" \
-                and self.road_network_toolbox.stop_line_end_x.text() != "" \
-                and self.road_network_toolbox.stop_line_start_y.text() != "" \
-                and self.road_network_toolbox.stop_line_end_y.text() != "":
+            and self.road_network_toolbox.stop_line_end_x.text() != "" \
+            and self.road_network_toolbox.stop_line_start_y.text() != "" \
+            and self.road_network_toolbox.stop_line_end_y.text() != "":
             stop_line_start_x = float(self.road_network_toolbox.stop_line_start_x.text())
             stop_line_end_x = float(self.road_network_toolbox.stop_line_end_x.text())
             stop_line_start_y = float(self.road_network_toolbox.stop_line_start_y.text())
@@ -906,6 +909,25 @@ class RoadNetworkToolbox(QDockWidget):
                                    if selected_traffic_light_id in la.traffic_lights]
             self.road_network_toolbox.referenced_lanelets_traffic_light.set_checked_items(referenced_lanelets)
 
+    def create_traffic_lights(self):
+        lanelet_ids = [int(lanelet_id) for lanelet_id in
+                       self.road_network_toolbox.referenced_lanelets_traffic_light.get_checked_items()]
+        if not lanelet_ids:
+            return
+        converter = CR2SumoMapConverter(self.current_scenario.lanelet_network,
+                                        SumoConfig.from_scenario(self.current_scenario))
+        converter.convert_to_net_file(self.tmp_folder)
+        oks = []
+        for lanelet_id in lanelet_ids:
+            ok = converter.auto_generate_traffic_light_system(lanelet_id)
+            oks.append(ok)
+            self.text_browser.append(
+                ("Created" if ok else "ERROR: Could not create") + f" traffic light system for lanelet {lanelet_id}")
+        if any(oks):
+            # update lanelet_network and boradcast change
+            self.current_scenario.lanelet_network = converter.lanelet_network
+            self.callback(self.current_scenario)
+
     def add_incoming_to_table(self, new_incoming: bool = True, incoming_ids: List[str] = None):
         """
         Adds a row to the intersection incoming table.
@@ -1151,8 +1173,8 @@ class RoadNetworkToolbox(QDockWidget):
         Rotates and translates a complete intersection so that it is attached to a user-defined lanelet.
         """
         if self.road_network_toolbox.selected_intersection.currentText() not in ["", "None"] \
-                and self.road_network_toolbox.other_lanelet_to_fit.currentText() not in ["", "None"] \
-                and self.road_network_toolbox.intersection_lanelet_to_fit.currentText() not in ["", "None"]:
+            and self.road_network_toolbox.other_lanelet_to_fit.currentText() not in ["", "None"] \
+            and self.road_network_toolbox.intersection_lanelet_to_fit.currentText() not in ["", "None"]:
             selected_intersection_id = int(self.road_network_toolbox.selected_intersection.currentText())
             intersection = self.current_scenario.lanelet_network.find_intersection_by_id(selected_intersection_id)
 

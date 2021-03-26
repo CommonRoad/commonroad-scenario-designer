@@ -13,6 +13,7 @@ try:
     from crdesigner.sumo_map.config import SumoConfig
     from crdesigner.sumo_map.cr2sumo import CR2SumoMapConverter
     from sumocr.interface.sumo_simulation import SumoSimulation
+
     SUMO_AVAILABLE = True
 except ImportError:
     logging.warning("Cannot import SUMO, simulation will not be offered in Scenario Designer")
@@ -35,8 +36,8 @@ class SimulationWorker(QThread):
     def run(self):
         print(self.config.presimulation_steps, self.config.simulation_steps,
               self.config.dt)
-      #  try:
-            # convert scenario to SUMO
+        #  try:
+        # convert scenario to SUMO
         wrapper = CR2SumoMapConverter(self.scenario.lanelet_network,
                                       self.config)
         wrapper.convert_to_net_file(self.output_folder)
@@ -74,7 +75,7 @@ class WaitingDialog(QtWidgets.QDialog):
 
 
 class SUMOSimulation(QFrame):
-    def __init__(self, parent=None):
+    def __init__(self, tmp_folder: str, parent=None):
         # set random uuid as name for the scenario files
         self._config = SumoConfig.from_scenario_name(str(uuid.uuid4()))
         self._config_obs = Observable(self._config)
@@ -88,10 +89,8 @@ class SUMOSimulation(QFrame):
         # observable giving the simulated scenario once done
         self.simulated_scenario = Observable(None)
 
-        # set path to chache folder and creat it if not already existing
-        self._output_folder = os.path.abspath(
-            os.path.join(os.path.dirname(__file__), "..", "tmp"))
-        pathlib.Path(self._output_folder).mkdir(parents=True, exist_ok=True)
+        # set output_path to tmp_folder
+        self.output_folder = tmp_folder
 
         super().__init__(parent)
 
@@ -150,4 +149,3 @@ class SUMOSimulation(QFrame):
                     self.worker.error),
                 QMessageBox.Ok,
             )
-

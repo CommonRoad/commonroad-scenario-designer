@@ -1,5 +1,6 @@
 import logging
 import os
+import pathlib
 import sys
 from argparse import ArgumentParser
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
@@ -37,6 +38,9 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
     def __init__(self, path=None):
         super().__init__()
+        self.tmp_folder = "/tmp/cr_designer/"
+        pathlib.Path(self.tmp_folder).mkdir(parents=True, exist_ok=True)
+
         self.setupUi(self)
         self.setWindowIcon(QIcon(':/icons/cr.ico'))
         self.setWindowTitle("CommonRoad Designer")
@@ -113,7 +117,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
     def create_road_network_toolbox(self):
         """ Create the Road network toolbox."""
         self.road_network_toolbox = RoadNetworkToolbox(self.cr_viewer.current_scenario, self.textBrowser,
-                                                       self.toolbox_callback)
+                                                       self.toolbox_callback, self.tmp_folder)
         self.addDockWidget(Qt.LeftDockWidgetArea, self.road_network_toolbox)
 
     def create_converter_toolbox(self):
@@ -123,7 +127,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
     def create_obstacle_toolbox(self):
         """ Create the obstacle toolbox."""
-        self.obstacle_toolbox = ObstacleToolbox(self.cr_viewer.current_scenario, self.toolbox_callback)
+        self.obstacle_toolbox = ObstacleToolbox(self.cr_viewer.current_scenario, self.toolbox_callback, self.tmp_folder)
         self.addDockWidget(Qt.RightDockWidgetArea, self.obstacle_toolbox)
 
     def viewer_callback(self, selected_object):
@@ -537,7 +541,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
             self.textBrowser.append("loading " + self.filename)
 
     def check_scenario(self, scenario) -> int:
-        """ 
+        """
         Check the scenario to validity and calculate a quality score.
         The higher the score the higher the data faults.
 

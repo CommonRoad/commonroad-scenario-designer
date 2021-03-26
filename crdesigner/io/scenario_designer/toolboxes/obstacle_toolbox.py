@@ -17,7 +17,7 @@ from crdesigner.io.scenario_designer.toolboxes.obstacle_toolbox_ui import Obstac
 
 
 class ObstacleToolbox(QDockWidget):
-    def __init__(self, current_scenario: Scenario, callback):
+    def __init__(self, current_scenario: Scenario, callback, tmp_folder: str):
         super().__init__("Obstacle Toolbox")
 
         self.current_scenario = current_scenario
@@ -25,9 +25,10 @@ class ObstacleToolbox(QDockWidget):
         self.obstacle_toolbox = ObstacleToolboxUI()
         self.adjust_ui()
         self.connect_gui_elements()
+        self.tmp_folder = tmp_folder
 
         if SUMO_AVAILABLE:
-            self.sumo_box = SUMOSimulation()
+            self.sumo_box = SUMOSimulation(tmp_folder=tmp_folder)
         else:
             self.sumo_box = None
 
@@ -144,4 +145,3 @@ class ObstacleToolbox(QDockWidget):
             obstacle = self.current_scenario.obstacle_by_id(obstacle_id)
             self.current_scenario.remove_obstacle(obstacle)
             self.callback(self.current_scenario)
-
