@@ -317,14 +317,10 @@ class RoadNetworkToolbox(QDockWidget):
         num_vertices = int(self.road_network_toolbox.number_vertices.text())
         predecessors = [int(pre) for pre in self.road_network_toolbox.predecessors.get_checked_items()]
         successors = [int(suc) for suc in self.road_network_toolbox.successors.get_checked_items()]
-        if self.road_network_toolbox.adjacent_left.currentText() != "None":
-            adjacent_left = int(self.road_network_toolbox.adjacent_left.currentText())
-        else:
-            adjacent_left = None
-        if self.road_network_toolbox.adjacent_right.currentText() != "None":
-            adjacent_right = int(self.road_network_toolbox.adjacent_right.currentText())
-        else:
-            adjacent_right = None
+        adjacent_left = int(self.road_network_toolbox.adjacent_left.currentText()) \
+            if self.road_network_toolbox.adjacent_left.currentText() != "None" else None
+        adjacent_right = int(self.road_network_toolbox.adjacent_right.currentText()) \
+            if self.road_network_toolbox.adjacent_right.currentText() != "None" else None
         adjacent_left_same_direction = self.road_network_toolbox.adjacent_left_same_direction.isChecked()
         adjacent_right_same_direction = self.road_network_toolbox.adjacent_right_same_direction.isChecked()
         lanelet_type = {LaneletType(ty) for ty in self.road_network_toolbox.lanelet_type.get_checked_items()
@@ -439,9 +435,29 @@ class RoadNetworkToolbox(QDockWidget):
         selected_lanelet = self.selected_lanelet()
         if selected_lanelet is None:
             return
+        selected_lanelet_id = selected_lanelet.lanelet_id
+        successors = [la.lanelet_id for la in self.current_scenario.lanelet_network.lanelets
+                      if selected_lanelet_id in la.successor]
+        predecessors = [la.lanelet_id for la in self.current_scenario.lanelet_network.lanelets
+                        if selected_lanelet_id in la.predecessor]
+        adjacent_left = [la.lanelet_id for la in self.current_scenario.lanelet_network.lanelets
+                         if selected_lanelet_id == la.adj_left]
+        adjacent_right = [la.lanelet_id for la in self.current_scenario.lanelet_network.lanelets
+                          if selected_lanelet_id == la.adj_right]
+
         self.current_scenario.remove_lanelet(selected_lanelet)
         self.add_lanelet(selected_lanelet.lanelet_id, True, selected_lanelet.left_vertices,
                          selected_lanelet.right_vertices)
+
+        for la_id in successors:
+            self.current_scenario.lanelet_network.find_lanelet_by_id(la_id).add_successor(selected_lanelet_id)
+        for la_id in predecessors:
+            self.current_scenario.lanelet_network.find_lanelet_by_id(la_id).add_predecessor(selected_lanelet_id)
+        for la_id in adjacent_left:
+            self.current_scenario.lanelet_network.find_lanelet_by_id(la_id).adj_left = selected_lanelet_id
+        for la_id in adjacent_right:
+            self.current_scenario.lanelet_network.find_lanelet_by_id(la_id).adj_right = selected_lanelet_id
+
         self.set_default_road_network_list_information()
         self.callback(self.current_scenario)
 
@@ -500,10 +516,6 @@ class RoadNetworkToolbox(QDockWidget):
             self.road_network_toolbox.stop_line_end_y.setText("")
             self.road_network_toolbox.line_marking_stop_line.setCurrentText("unknown")
 
-        # width = np.linalg.norm(lanelet.left_vertices[0] - lanelet.right_vertices[0])
-        # angle = (MapCreator.calc_angle_between2(lanelet) / np.pi) * 180
-        # rad = MapCreator.calc_radius(lanelet)
-
     def create_adjacent(self):
         """
         Create adjacent lanelet given a selected lanelet
@@ -530,6 +542,8 @@ class RoadNetworkToolbox(QDockWidget):
             {int(sign) for sign in self.road_network_toolbox.lanelet_referenced_traffic_sign_ids.get_checked_items()}
         traffic_lights = \
             {int(light) for light in self.road_network_toolbox.lanelet_referenced_traffic_light_ids.get_checked_items()}
+        stop_line_at_end = False
+        stop_line = None
         if self.road_network_toolbox.stop_line_start_x.text() != "" \
                 and self.road_network_toolbox.stop_line_end_x.text() != "" \
                 and self.road_network_toolbox.stop_line_start_y.text() != "" \
@@ -539,16 +553,12 @@ class RoadNetworkToolbox(QDockWidget):
             stop_line_start_y = float(self.road_network_toolbox.stop_line_start_y.text())
             stop_line_end_y = float(self.road_network_toolbox.stop_line_end_y.text())
             stop_line_marking = LineMarking(self.road_network_toolbox.line_marking_stop_line.currentText())
-            stop_line_at_end = self.road_network_toolbox.stop_line_at_end.isChecked()
             stop_line = StopLine(np.array([stop_line_start_x, stop_line_start_y]),
                                  np.array([stop_line_end_x, stop_line_end_y]), stop_line_marking, set(), set())
         elif self.road_network_toolbox.stop_line_at_end.isChecked():
             stop_line_at_end = True
             stop_line_marking = LineMarking(self.road_network_toolbox.line_marking_stop_line.currentText())
             stop_line = StopLine(np.array([0, 0]), np.array([0, 0]), stop_line_marking, set(), set())
-        else:
-            stop_line_at_end = False
-            stop_line = None
 
         if adjacent_left:
             adjacent_lanelet = MapCreator.create_adjacent_lanelet(adjacent_left, selected_lanelet,
@@ -558,7 +568,7 @@ class RoadNetworkToolbox(QDockWidget):
                                                                   predecessors, successors, user_one_way,
                                                                   user_bidirectional, line_marking_left,
                                                                   line_marking_right, stop_line, traffic_signs,
-                                                                  traffic_lights)
+                                                                  traffic_lights, stop_line_at_end)
         else:
             adjacent_lanelet = MapCreator.create_adjacent_lanelet(adjacent_left, selected_lanelet,
                                                                   self.current_scenario.generate_object_id(),
@@ -567,7 +577,7 @@ class RoadNetworkToolbox(QDockWidget):
                                                                   predecessors, successors, user_one_way,
                                                                   user_bidirectional, line_marking_left,
                                                                   line_marking_right, stop_line, traffic_signs,
-                                                                  traffic_lights)
+                                                                  traffic_lights, stop_line_at_end)
 
         self.last_added_lanelet_id = adjacent_lanelet.lanelet_id
         self.current_scenario.add_objects(adjacent_lanelet)
@@ -964,6 +974,10 @@ class RoadNetworkToolbox(QDockWidget):
         """
         Removes selected intersection from lanelet network.
         """
+        if self.current_scenario is None:
+            self.text_browser.append("_Warning:_ Create a new file")
+            return
+
         if self.road_network_toolbox.selected_intersection.currentText() not in ["", "None"]:
             selected_intersection_id = int(self.road_network_toolbox.selected_intersection.currentText())
             intersection = \
@@ -976,6 +990,10 @@ class RoadNetworkToolbox(QDockWidget):
         """
         Updates a selected intersection from the scenario.
         """
+        if self.current_scenario is None:
+            self.text_browser.append("_Warning:_ Create a new file")
+            return
+
         if self.road_network_toolbox.selected_intersection.currentText() not in ["", "None"]:
             selected_intersection_id = int(self.road_network_toolbox.selected_intersection.currentText())
             intersection = \
@@ -989,6 +1007,10 @@ class RoadNetworkToolbox(QDockWidget):
         """
         Adds an intersection to the scenario.
         """
+        if self.current_scenario is None:
+            self.text_browser.append("_Warning:_ Create a new file")
+            return
+
         if intersection_id is None:
             intersection_id = self.current_scenario.generate_object_id()
         incomings = []
