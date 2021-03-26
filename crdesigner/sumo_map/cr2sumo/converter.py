@@ -932,9 +932,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                                            left_green_time: int = 6,
                                            crossing_min_time: int = 4,
                                            crossing_clearance_time: int = 5,
-                                           time_offset: int = 0,
-                                           time_inactive: int = 0
-                                           ) -> bool:
+                                           time_offset: int = 0) -> bool:
         """
         Automatically generate a Traffic Light System (TLS) for all lanelets
         in the same intersection as the given lanelet_id.
@@ -947,6 +945,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         disables additional left-turning phases [s].
         :param crossing_min_time: Minimum time duration for pedestrian crossings [s].
         :param crossing_clearance_time: Clearance time for pedestrian crossings [s].
+        :param time_offset: Offset for start time of the generated traffic lights [s].
         :return: if the conversion was successful
         """
         assert cycle_time > 0
@@ -1048,7 +1047,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
             # sensible defaults for newly generated traffic light
             # TODO: This assuems right-hand traffic
             position = lanelet.right_vertices[-1]
-            time_offset = tls_program.offset
+            # time_offset = tls_program.offset
             direction = TrafficLightDirection.ALL
             active = True
 
@@ -1069,7 +1068,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                                              traffic_light_states_SUMO2CR[phase.state[link_index]],
                                              int(phase.duration / self.conf.dt))
                                              for phase in tls_program.phases],
-                                         position, time_offset, direction, active)
+                                         position, int(time_offset * self.conf.dt), direction, active)
             next_cr_id += 1
 
             self.lanelet_network.add_traffic_light(traffic_light,

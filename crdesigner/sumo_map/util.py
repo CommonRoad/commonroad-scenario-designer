@@ -315,19 +315,15 @@ def remove_unreferenced_traffic_lights(
 
 
 def max_lanelet_network_id(lanelet_network: LaneletNetwork) -> int:
-    max_lanelet = np.max([l.lanelet_id for l in lanelet_network.lanelets
-                          ]) if lanelet_network.lanelets else 0
-    max_intersection = np.max([
-        i.intersection_id for i in lanelet_network.intersections
-    ]) if lanelet_network.intersections else 0
-    max_traffic_light = np.max([
-        t.traffic_light_id for t in lanelet_network.traffic_lights
-    ]) if lanelet_network.traffic_lights else 0
-    max_traffic_sign = np.max([
-        t.traffic_sign_id for t in lanelet_network.traffic_signs
-    ]) if lanelet_network.traffic_signs else 0
-    return np.max(
-        [max_lanelet, max_intersection, max_traffic_light, max_traffic_sign])
+    max_lanelet = np.max([l.lanelet_id for l in lanelet_network.lanelets]) \
+        if lanelet_network.lanelets else 0
+    max_intersection = np.max([i.intersection_id for i in lanelet_network.intersections]) \
+        if lanelet_network.intersections else 0
+    max_traffic_light = np.max([t.traffic_light_id for t in lanelet_network.traffic_lights]) \
+        if lanelet_network.traffic_lights else 0
+    max_traffic_sign = np.max([t.traffic_sign_id for t in lanelet_network.traffic_signs]) \
+        if lanelet_network.traffic_signs else 0
+    return np.max([max_lanelet, max_intersection, max_traffic_light, max_traffic_sign])
 
 
 def vector_angle(v1: np.array, v2: np.array) -> float:

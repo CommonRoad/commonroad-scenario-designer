@@ -916,7 +916,7 @@ class RoadNetworkToolbox(QDockWidget):
                        self.road_network_toolbox.referenced_lanelets_traffic_light.get_checked_items()]
         if not lanelet_ids:
             return
-
+        self.road_network_toolbox.referenced_lanelets_traffic_light.clear()
         converter = CR2SumoMapConverter(self.current_scenario.lanelet_network,
                                         SumoConfig.from_scenario(self.current_scenario))
         converter.convert_to_net_file(self.tmp_folder)
@@ -927,7 +927,6 @@ class RoadNetworkToolbox(QDockWidget):
         red_yellow = int(self.road_network_toolbox.time_red_yellow.text())
         green = int(self.road_network_toolbox.time_green.text())
         yellow = int(self.road_network_toolbox.time_yellow.text())
-        inactive = int(self.road_network_toolbox.time_inactive.text())
         total = red + red_yellow + green + yellow
 
         for lanelet_id in lanelet_ids:
@@ -939,13 +938,13 @@ class RoadNetworkToolbox(QDockWidget):
                                                                   left_green_time=math.ceil(0.06 * total * dt),
                                                                   crossing_min_time=math.ceil(0.1 * total * dt),
                                                                   crossing_clearance_time=math.ceil(0.15 * total * dt),
-                                                                  time_offset=int(offset * dt),
-                                                                  time_inactive=int(inactive * dt))
+                                                                  time_offset=int(offset * dt))
             except Exception as e:
                 ok = False
             oks.append(ok)
             self.text_browser.append(
                 ("Created" if ok else "ERROR: Could not create") + f" traffic light system for lanelet {lanelet_id}")
+
         if any(oks):
             # update lanelet_network and boradcast change
             self.current_scenario.lanelet_network = converter.lanelet_network

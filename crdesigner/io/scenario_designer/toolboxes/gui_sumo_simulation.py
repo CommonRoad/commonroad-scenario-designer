@@ -90,7 +90,7 @@ class SUMOSimulation(QFrame):
         self.simulated_scenario = Observable(None)
 
         # set output_path to tmp_folder
-        self.output_folder = tmp_folder
+        self._output_folder = tmp_folder
 
         super().__init__(parent)
 
