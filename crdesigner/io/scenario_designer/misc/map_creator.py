@@ -971,7 +971,10 @@ class MapCreator:
             interpolated_right[-1] = successor.right_vertices[0]
 
             connecting_lanelet = Lanelet(interpolated_left, interpolated_center, interpolated_right, lanelet_id,
-                                         predecessor=[predecessor.lanelet_id], successor=[successor.lanelet_id])
+                                         predecessor=[predecessor.lanelet_id], successor=[successor.lanelet_id],
+                                         line_marking_left_vertices=predecessor.line_marking_left_vertices,
+                                         line_marking_right_vertices=predecessor.line_marking_right_vertices,
+                                         lanelet_type=predecessor.lanelet_type.union(successor.lanelet_type))
             MapCreator.set_predecessor_successor_relation(predecessor, connecting_lanelet)
             MapCreator.set_predecessor_successor_relation(connecting_lanelet, successor)
             return connecting_lanelet
