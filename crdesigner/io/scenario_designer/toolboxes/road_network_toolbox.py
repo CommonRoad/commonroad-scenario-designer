@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
+import math
 
 from commonroad.scenario.lanelet import LineMarking, LaneletType, RoadUser, StopLine, Lanelet
 from commonroad.scenario.intersection import IntersectionIncomingElement, Intersection
@@ -68,6 +69,7 @@ class RoadNetworkToolbox(QDockWidget):
         self.road_network_toolbox.selected_traffic_sign.currentTextChanged.connect(
             lambda: self.update_traffic_sign_information())
 
+        # Traffic Lights
         self.road_network_toolbox.button_add_traffic_light.clicked.connect(lambda: self.add_traffic_light())
         self.road_network_toolbox.button_update_traffic_light.clicked.connect(lambda: self.update_traffic_light())
         self.road_network_toolbox.button_remove_traffic_light.clicked.connect(lambda: self.remove_traffic_light())
@@ -201,10 +203,10 @@ class RoadNetworkToolbox(QDockWidget):
         self.road_network_toolbox.x_position_traffic_light.setText("0.0")
         self.road_network_toolbox.y_position_traffic_light.setText("0.0")
         self.road_network_toolbox.time_offset.setText("0")
-        self.road_network_toolbox.time_red.setText("0")
-        self.road_network_toolbox.time_red_yellow.setText("0")
-        self.road_network_toolbox.time_yellow.setText("0")
-        self.road_network_toolbox.time_green.setText("0")
+        self.road_network_toolbox.time_red.setText("50")
+        self.road_network_toolbox.time_red_yellow.setText("10")
+        self.road_network_toolbox.time_yellow.setText("20")
+        self.road_network_toolbox.time_green.setText("70")
         self.road_network_toolbox.time_inactive.setText("0")
         self.road_network_toolbox.traffic_light_active.setChecked(True)
 
@@ -914,13 +916,31 @@ class RoadNetworkToolbox(QDockWidget):
                        self.road_network_toolbox.referenced_lanelets_traffic_light.get_checked_items()]
         if not lanelet_ids:
             return
+
         converter = CR2SumoMapConverter(self.current_scenario.lanelet_network,
                                         SumoConfig.from_scenario(self.current_scenario))
         converter.convert_to_net_file(self.tmp_folder)
         oks = []
+        dt = self.current_scenario.dt
+        offset = int(self.road_network_toolbox.time_offset.text())
+        red = int(self.road_network_toolbox.time_red.text())
+        red_yellow = int(self.road_network_toolbox.time_red_yellow.text())
+        green = int(self.road_network_toolbox.time_green.text())
+        yellow = int(self.road_network_toolbox.time_yellow.text())
+        inactive = int(self.road_network_toolbox.time_inactive.text())
+        total = red + red_yellow + green + yellow
+
         for lanelet_id in lanelet_ids:
             try:
-                ok = converter.auto_generate_traffic_light_system(lanelet_id)
+                ok = converter.auto_generate_traffic_light_system(lanelet_id,
+                                                                  cycle_time=math.ceil(total * dt),
+                                                                  yellow_time=int(yellow * dt),
+                                                                  all_red_time=0,
+                                                                  left_green_time=math.ceil(0.06 * total * dt),
+                                                                  crossing_min_time=math.ceil(0.1 * total * dt),
+                                                                  crossing_clearance_time=math.ceil(0.15 * total * dt),
+                                                                  time_offset=int(offset * dt),
+                                                                  time_inactive=int(inactive * dt))
             except Exception as e:
                 ok = False
             oks.append(ok)

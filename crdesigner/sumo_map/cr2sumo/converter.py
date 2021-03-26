@@ -931,7 +931,9 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                                            all_red_time: int = 0,
                                            left_green_time: int = 6,
                                            crossing_min_time: int = 4,
-                                           crossing_clearance_time: int = 5
+                                           crossing_clearance_time: int = 5,
+                                           time_offset: int = 0,
+                                           time_inactive: int = 0
                                            ) -> bool:
         """
         Automatically generate a Traffic Light System (TLS) for all lanelets
@@ -939,10 +941,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         The below has been partially adapted from: https://sumo.dlr.de/docs/netconvert.html#tls_building
         :param lanelet_id: ID of lanelet in intersection to generate traffic lights for
         :param cycle_time: Duration of a full traffic light cycle [s]
-        :param green_time: Duration of a green phase [s]
         :param yellow_time: Fixed time for yellow phase durations [s]
-        :param red_time: Fixed time for red phase duration at traffic lights that do not have
-        a conflicting flow [s].
         :param all_red_time: Fixed time for intermediate red phase after every switch [s].
         :param left_green_time: Green phase duration for left turns. Setting this value to 0
         disables additional left-turning phases [s].
