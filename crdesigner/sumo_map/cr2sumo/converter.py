@@ -10,7 +10,7 @@ from collections import defaultdict
 from copy import deepcopy
 from functools import reduce
 from itertools import groupby
-from typing import Dict, List, Set, Tuple, Iterable
+from typing import Dict, List, Set, Tuple, Iterable, Optional
 # TODO: Move to a single XML lib
 from xml.dom import minidom
 from xml.etree import cElementTree as ET
@@ -35,7 +35,7 @@ from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.common.util import Interval
 from commonroad.prediction.prediction import TrajectoryPrediction
 from commonroad.scenario.trajectory import State
-from commonroad.scenario.lanelet import LaneletNetwork, Lanelet
+from commonroad.scenario.lanelet import LaneletNetwork, Lanelet, LineMarking
 from commonroad.scenario.obstacle import ObstacleRole, ObstacleType
 from commonroad.scenario.scenario import Scenario
 from commonroad.scenario.traffic_sign import SupportedTrafficSignCountry, TrafficLight, \
@@ -313,7 +313,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                 # create new node
                 coords = self._compute_node_coords(lanelets, index=index)
                 self.nodes[self.node_id_next] = Node(self.node_id_next,
-                                                     NodeType.RIGHT_BEFORE_LEFT,
+                                                     NodeType.PRIORITY,
                                                      coords,
                                                      right_of_way=RightOfWay.EDGE_PRIORITY)
                 # @REFERENCE_1
@@ -331,7 +331,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
             # dead end
             coords = self._compute_node_coords(lanelets, index=index)
             self.nodes[self.node_id_next] = Node(self.node_id_next,
-                                                 NodeType.RIGHT_BEFORE_LEFT,
+                                                 NodeType.PRIORITY,
                                                  coords,
                                                  right_of_way=RightOfWay.EDGE_PRIORITY)
             if node_type == "from":
@@ -340,6 +340,42 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                 self._end_nodes[edge_id] = self.node_id_next
 
             self.node_id_next += 1
+
+    def _stop_line_end_offset(self, lanelets: Iterable[Lanelet], end_node: Node) -> Optional[float]:
+        """
+        Computes the end_offset parameter, modelling the stop line for some lanelets
+        :param lanelets: Lanelets composing an edge, to compute the end_offset from
+        :param end_node: end node of the edge composed by lanelets.
+        If the stop_lines LineMarking is SOLID or BORAD_SOLID, this node's type is set
+        to ALLWAY_STOP
+        :return: Optional end_offset if the given lanelets define a least one stop_line
+        """
+        # compute edge end_offset from composing lanelets
+        projections: List[float] = []
+        lengths: List[float] = []
+        for lanelet in lanelets:
+            # if no stop sign defined, or the stop sign has no lane marking, ignore it
+            if not lanelet.stop_line or (
+                lanelet.stop_line and lanelet.stop_line.line_marking == LineMarking.NO_MARKING):
+                continue
+            if lanelet.stop_line.line_marking in {LineMarking.SOLID, LineMarking.BROAD_SOLID}:
+                end_node.type = NodeType.ALLWAY_STOP
+            center_line = LineString(lanelet.center_vertices)
+            if lanelet.stop_line.start is None or lanelet.stop_line.end is None:
+                projections.append(center_line.length)
+                lengths.append(center_line.length)
+                continue
+            centroid = (lanelet.stop_line.start + lanelet.stop_line.end) / 2
+            proj = center_line.project(Point(centroid))
+            assert 0 <= proj <= center_line.length, f"Stop Line for lanelet {lanelet.lanelet_id} has to be within" \
+                                                    f"it's geometry. Remove stop line for lanelet {lanelet.lanelet_id}" \
+                                                    f"or change it's start and end position to fix this."
+            projections.append(proj)
+            lengths.append(center_line.length)
+        if lengths and projections:
+            # end offset is the mean difference to the composing lanelet's lengths
+            return np.mean(lengths) - np.mean(projections)
+        return None
 
     def _create_sumo_edges_and_lanes(self):
         """
@@ -364,27 +400,6 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
             end_node = self.nodes[self._end_nodes[edge_id]]
             lanelets = [self.lanelet_network.find_lanelet_by_id(lanelet_id) for lanelet_id in lanelet_ids]
 
-            # compute edge end_offset from composing lanelets
-            projections: List[float] = []
-            lengths: List[float] = []
-            for lanelet in lanelets:
-                if not lanelet.stop_line:
-                    continue
-                center_line = LineString(lanelet.center_vertices)
-                if lanelet.stop_line.start is None or lanelet.stop_line.end is None:
-                    projections.append(center_line.length)
-                    lengths.append(center_line.length)
-                    continue
-                centroid = (lanelet.stop_line.start + lanelet.stop_line.end) / 2
-                proj = center_line.project(Point(centroid))
-                assert 0 <= proj <= center_line.length, f"Stop Line for lanelet {lanelet.lanelet_id} has to be within" \
-                                                        f"it's geometry. Remove stop line for lanelet {lanelet.lanelet_id}" \
-                                                        f"or change it's start and end position to fix this."
-                projections.append(proj)
-                lengths.append(center_line.length)
-            # end offset is the mean difference to the composing lanelet's lengths
-            end_offset = np.mean(lengths) - np.mean(projections)
-
             # get edge type
             lanelet_types = [lanelet_type for lanelet in lanelets for lanelet_type in lanelet.lanelet_type]
             edge_type = get_sumo_edge_type(self.edge_types, self.country_id, *lanelet_types)
@@ -394,7 +409,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                         to_node=end_node,
                         type_id=edge_type.id,
                         spread_type=SpreadType.CENTER,
-                        end_offset=end_offset)
+                        end_offset=self._stop_line_end_offset(lanelets, end_node))
 
             self.edges[edge_id] = edge
             if self.conf.overwrite_speed_limit:
@@ -620,8 +635,9 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
             def merge_cluster(cluster: Set[Node]) -> Node:
                 cluster_ids = {n.id for n in cluster}
                 merged_node = Node(id=self.node_id_next,
-                                   node_type=NodeType.RIGHT_BEFORE_LEFT,
-                                   coord=np.mean([node.coord for node in cluster], axis=0))
+                                   node_type=NodeType.PRIORITY,
+                                   coord=np.mean([node.coord for node in cluster], axis=0),
+                                   right_of_way=RightOfWay.EDGE_PRIORITY)
                 self.node_id_next += 1
                 self.new_nodes[merged_node.id] = merged_node
                 for old_node_id in cluster_ids:
