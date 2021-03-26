@@ -914,16 +914,12 @@ class RoadNetworkToolbox(QDockWidget):
         if self.current_scenario is None:
             self.text_browser.append("_Warning:_ Create a new file")
             return
-        if self.road_network_toolbox.selected_intersection.currentText() not in ["", "None"]:
-            selected_intersection_id = int(self.road_network_toolbox.selected_intersection.currentText())
-            intersection = \
-                self.current_scenario.lanelet_network.find_intersection_by_id(selected_intersection_id)
-            incoming_ids = [str(inc.incoming_id) for inc in intersection.incomings]
-        else:
-            incoming_ids = []
+
         num_rows = self.road_network_toolbox.intersection_incomings_table.rowCount()
         self.road_network_toolbox.intersection_incomings_table.insertRow(num_rows)
         lanelet_ids = [str(la_id) for la_id in self.collect_lanelet_ids()]
+        self.road_network_toolbox.intersection_incomings_table.setItem(
+            num_rows, 0, QTableWidgetItem(str(self.current_scenario.generate_object_id())) )
         combo_box_lanelets = CheckableComboBox()
         combo_box_lanelets.addItems(lanelet_ids)
         self.road_network_toolbox.intersection_incomings_table.setCellWidget(num_rows, 1, combo_box_lanelets)
@@ -936,9 +932,26 @@ class RoadNetworkToolbox(QDockWidget):
         combo_box_successors_right = CheckableComboBox()
         combo_box_successors_right.addItems(lanelet_ids)
         self.road_network_toolbox.intersection_incomings_table.setCellWidget(num_rows, 4, combo_box_successors_right)
-        combo_box_left_of = QComboBox()
-        combo_box_left_of.addItems(incoming_ids)
-        self.road_network_toolbox.intersection_incomings_table.setCellWidget(num_rows, 5, combo_box_left_of)
+        self.update_left_of_combobox()
+
+    def update_left_of_combobox(self):
+        """
+        Collects all incoming IDs int incoming table and updates left of combobox
+        """
+        incoming_ids = [self.road_network_toolbox.intersection_incomings_table.item(row, 0).text()
+                        for row in range(self.road_network_toolbox.intersection_incomings_table.rowCount())]
+        for row in range(self.road_network_toolbox.intersection_incomings_table.rowCount()):
+            combo_box_left_of = QComboBox()
+            combo_box_left_of.addItems(incoming_ids)
+            if row != self.road_network_toolbox.intersection_incomings_table.rowCount() - 1:
+                index = self.road_network_toolbox.intersection_incomings_table.cellWidget(row, 5).findText(
+                    self.road_network_toolbox.intersection_incomings_table.cellWidget(row, 5).currentText(),
+                    Qt.MatchFixedString)
+            else:
+                index = -1
+            self.road_network_toolbox.intersection_incomings_table.setCellWidget(row, 5, combo_box_left_of)
+            if index >= 0:
+                self.road_network_toolbox.intersection_incomings_table.cellWidget(row, 5).setCurrentIndex(index)
 
     def remove_intersection(self):
         """
@@ -977,6 +990,9 @@ class RoadNetworkToolbox(QDockWidget):
             incoming_lanelets = \
                 {int(item) for item in
                  self.road_network_toolbox.intersection_incomings_table.cellWidget(row, 1).get_checked_items()}
+            if len(incoming_lanelets) < 1:
+                print("An incoming must consist at least of one lanelet")
+                return
             successor_left = {int(item) for item in
                               self.road_network_toolbox.intersection_incomings_table.cellWidget(row,
                                                                                                 2).get_checked_items()}
@@ -986,6 +1002,9 @@ class RoadNetworkToolbox(QDockWidget):
             successor_right = {int(item) for item in
                                self.road_network_toolbox.intersection_incomings_table.cellWidget(row,
                                                                                                  4).get_checked_items()}
+            if len(successor_left) + len(successor_right) + len(successor_straight) < 1:
+                print("An incoming must consist at least of one successor")
+                return
             left_of = int(self.road_network_toolbox.intersection_incomings_table.cellWidget(row, 5).currentText())
             incoming = IntersectionIncomingElement(incoming_id, incoming_lanelets, successor_left,
                                                    successor_straight, successor_right, left_of)
@@ -1004,6 +1023,7 @@ class RoadNetworkToolbox(QDockWidget):
         """
         num_rows = self.road_network_toolbox.intersection_incomings_table.rowCount()
         self.road_network_toolbox.intersection_incomings_table.removeRow(num_rows - 1)
+        self.update_left_of_combobox()
 
     def update_intersection_information(self):
         """
