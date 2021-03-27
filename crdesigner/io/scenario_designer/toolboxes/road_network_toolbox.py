@@ -948,8 +948,7 @@ class RoadNetworkToolbox(QDockWidget):
             cycle_order = cycle_order[:-1]
             self.road_network_toolbox.traffic_light_cycle_order.setCurrentText(cycle_order)
 
-            index = self.road_network_toolbox.traffic_light_directions.findText(str(traffic_light.direction.value))
-            self.road_network_toolbox.traffic_light_directions.setCurrentIndex(index)
+            self.road_network_toolbox.traffic_light_directions.setCurrentText(str(traffic_light.direction.value))
 
             referenced_lanelets = [str(la.lanelet_id) for la in
                                    self.current_scenario.lanelet_network.lanelets
