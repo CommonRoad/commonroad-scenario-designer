@@ -392,6 +392,10 @@ class RoadNetworkToolbox(QDockWidget):
                     MapCreator.fit_to_predecessor(
                         self.current_scenario.lanelet_network.find_lanelet_by_id(self.last_added_lanelet_id),
                         lanelet)
+                else:
+                    self.text_browser.append("__Warning__: Previously add lanelet does not exist anymore. "
+                                             "Change lanelet adding option.")
+                    return
             elif connect_to_predecessors_selection:
                 if len(predecessors) > 0:
                     MapCreator.fit_to_predecessor(
@@ -600,6 +604,10 @@ class RoadNetworkToolbox(QDockWidget):
             return
 
         MapCreator.remove_lanelet(selected_lanelet.lanelet_id, self.current_scenario.lanelet_network)
+
+        if selected_lanelet.lanelet_id == self.last_added_lanelet_id:
+            self.last_added_lanelet_id = None
+
         self.set_default_road_network_list_information()
         self.callback(self.current_scenario)
 
