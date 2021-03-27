@@ -44,7 +44,7 @@ class RoadNetworkToolbox(QDockWidget):
     def connect_gui_elements(self):
         self.road_network_toolbox.button_add_lanelet.clicked.connect(lambda: self.add_lanelet())
         self.road_network_toolbox.button_update_lanelet.clicked.connect(lambda: self.update_lanelet())
-        self.road_network_toolbox.selected_lanelet_one.currentTextChanged.connect(
+        self.road_network_toolbox.selected_lanelet_update.currentTextChanged.connect(
             lambda: self.update_lanelet_information())
 
         self.road_network_toolbox.button_remove_lanelet.clicked.connect(lambda: self.remove_lanelet())
@@ -243,6 +243,11 @@ class RoadNetworkToolbox(QDockWidget):
             ["None"] + [str(item) for item in self.collect_traffic_light_ids()])
         self.road_network_toolbox.lanelet_referenced_traffic_light_ids.setCurrentIndex(0)
 
+        self.road_network_toolbox.selected_lanelet_update.clear()
+        self.road_network_toolbox.selected_lanelet_update.addItems(
+            ["None"] + [str(item) for item in self.collect_lanelet_ids()])
+        self.road_network_toolbox.selected_lanelet_update.setCurrentIndex(0)
+
         self.road_network_toolbox.selected_lanelet_one.clear()
         self.road_network_toolbox.selected_lanelet_one.addItems(
             ["None"] + [str(item) for item in self.collect_lanelet_ids()])
@@ -276,7 +281,7 @@ class RoadNetworkToolbox(QDockWidget):
         self.road_network_toolbox.selected_intersection.clear()
         self.road_network_toolbox.selected_intersection.addItems(
             ["None"] + [str(item) for item in self.collect_intersection_ids()])
-        self.road_network_toolbox.selected_lanelet_two.setCurrentIndex(0)
+        self.road_network_toolbox.selected_intersection.setCurrentIndex(0)
 
         self.road_network_toolbox.intersection_crossings.clear()
         self.road_network_toolbox.intersection_crossings.addItems(
@@ -1106,7 +1111,7 @@ class RoadNetworkToolbox(QDockWidget):
         connected_lanelet = MapCreator.connect_lanelets(selected_lanelet_one, selected_lanelet_two,
                                                         self.current_scenario.generate_object_id())
         self.last_added_lanelet_id = connected_lanelet.lanelet_id
-        self.current_scenario.lanelet_network.add_lanelet(lanelet=connected_lanelet)
+        self.current_scenario.add_objects(connected_lanelet)
         self.set_default_road_network_list_information()
         self.callback(self.current_scenario)
 
