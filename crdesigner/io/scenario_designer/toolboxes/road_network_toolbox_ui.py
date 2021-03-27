@@ -148,7 +148,7 @@ class RoadNetworkToolboxUI(Toolbox):
 
         self.connecting_radio_button_group = QButtonGroup()
         self.connect_to_previous_selection = QRadioButton("Connect to previously added")
-        self.connect_to_previous_selection.setChecked(True)
+        self.connect_to_previous_selection.setChecked(False)
         self.connecting_radio_button_group.addButton(self.connect_to_previous_selection)
 
         self.connect_to_predecessors_selection = QRadioButton("Connect to predecessors")
@@ -158,6 +158,10 @@ class RoadNetworkToolboxUI(Toolbox):
         self.connect_to_successors_selection = QRadioButton("Connect to successors")
         self.connect_to_successors_selection.setChecked(False)
         self.connecting_radio_button_group.addButton(self.connect_to_successors_selection)
+
+        self.place_at_defined_position = QRadioButton("Place at position")
+        self.place_at_defined_position.setChecked(True)
+        self.connecting_radio_button_group.addButton(self.place_at_defined_position)
 
         self.curved_lanelet_selection = QCheckBox("Curved Lanelet")
 
@@ -231,6 +235,7 @@ class RoadNetworkToolboxUI(Toolbox):
         layout_lanelet_adding_groupbox.addRow("Width [m]", self.lanelet_width)
         layout_lanelet_adding_groupbox.addRow("Curve radius [m]", self.lanelet_radius)
         layout_lanelet_adding_groupbox.addRow("Curve angle [deg]", self.lanelet_angle)
+        layout_lanelet_adding_groupbox.addRow(self.place_at_defined_position)
         layout_lanelet_adding_groupbox.addRow(self.connect_to_previous_selection)
         layout_lanelet_adding_groupbox.addRow(self.connect_to_predecessors_selection)
         layout_lanelet_adding_groupbox.addRow(self.connect_to_successors_selection)
@@ -255,7 +260,6 @@ class RoadNetworkToolboxUI(Toolbox):
         self.selected_lanelet_one = QComboBox()
         self.selected_lanelet_two = QComboBox()
 
-        self.button_update_lanelet = QPushButton("Update [1]")
         self.adjacent_left_right_button_group = QButtonGroup()
         self.create_adjacent_left_selection = QRadioButton("Adjacent left")
         self.create_adjacent_left_selection.setChecked(True)
@@ -292,7 +296,6 @@ class RoadNetworkToolboxUI(Toolbox):
         self.y_translation.setAlignment(Qt.AlignRight)
         self.translate_y_unit_label = QLabel("[m]")
 
-
         lanelet_operations_information = QFormLayout()
         lanelet_operations_information.addRow("[1] Selected lanelet", self.selected_lanelet_one)
         lanelet_operations_information.addRow("[2] Previously selected", self.selected_lanelet_two)
@@ -328,6 +331,9 @@ class RoadNetworkToolboxUI(Toolbox):
         widget_traffic_sign = QFrame(self.tree)
         layout_traffic_sign = QVBoxLayout(widget_traffic_sign)
 
+        label_general = QLabel("Traffic Sign Attributes")
+        label_general.setFont(QFont("Arial", 11, QFont.Bold))
+
         self.x_position_traffic_sign = QLineEdit()
         self.x_position_traffic_sign.setValidator(QDoubleValidator())
         self.x_position_traffic_sign.setMaxLength(4)
@@ -351,26 +357,33 @@ class RoadNetworkToolboxUI(Toolbox):
         self.traffic_sign_element_table.setColumnWidth(0, 180)
         self.traffic_sign_element_table.setMaximumHeight(100)
         self.button_add_traffic_sign_element = QPushButton("Add Element")
+        self.button_add_traffic_sign_element.setMinimumWidth(150)
         self.button_remove_traffic_sign_element = QPushButton("Remove Element")
 
-        self.button_add_traffic_sign = QPushButton("Add Traffic Sign to Scenario")
-        self.button_update_traffic_sign = QPushButton("Update Selected Traffic Sign")
-        self.button_remove_traffic_sign = QPushButton("Remove Selected Traffic Sign")
+        self.button_add_traffic_sign = QPushButton("Add")
+        self.button_update_traffic_sign = QPushButton("Update")
+        self.button_remove_traffic_sign = QPushButton("Remove")
 
-        traffic_sign_information = QFormLayout()
-        traffic_sign_information.addRow("X-Position [m]", self.x_position_traffic_sign)
-        traffic_sign_information.addRow("Y-Position [m]", self.y_position_traffic_sign)
-        traffic_sign_information.addRow(self.traffic_sign_virtual_selection)
-        traffic_sign_information.addRow("Selected traffic sign", self.selected_traffic_sign)
-        traffic_sign_information.addRow("Referenced lanelets", self.referenced_lanelets_traffic_sign)
-        traffic_sign_information.addRow(self.traffic_sign_element_label)
-        traffic_sign_information.addRow(self.traffic_sign_element_table)
-        traffic_sign_information.addRow(self.button_add_traffic_sign_element, self.button_remove_traffic_sign_element)
-        traffic_sign_information.addRow(self.button_add_traffic_sign)
-        traffic_sign_information.addRow(self.button_update_traffic_sign)
-        traffic_sign_information.addRow(self.button_remove_traffic_sign)
+        traffic_sign_layout = QFormLayout()
+        traffic_sign_information_layout = QFormLayout()
+        traffic_sign_information_groupbox = QGroupBox()
+        traffic_sign_information_groupbox.setLayout(traffic_sign_information_layout)
+        traffic_sign_information_layout.addRow(label_general)
+        traffic_sign_information_layout.addRow("X-Position [m]", self.x_position_traffic_sign)
+        traffic_sign_information_layout.addRow("Y-Position [m]", self.y_position_traffic_sign)
+        traffic_sign_information_layout.addRow(self.traffic_sign_virtual_selection)
+        traffic_sign_information_layout.addRow("Referenced lanelets", self.referenced_lanelets_traffic_sign)
+        traffic_sign_information_layout.addRow(self.traffic_sign_element_label)
+        traffic_sign_information_layout.addRow(self.traffic_sign_element_table)
+        traffic_sign_information_layout.addRow(self.button_add_traffic_sign_element,
+                                               self.button_remove_traffic_sign_element)
+        traffic_sign_layout.addRow(self.button_add_traffic_sign)
+        traffic_sign_layout.addRow("Selected Traffic Sign", self.selected_traffic_sign)
+        traffic_sign_layout.addRow(self.button_update_traffic_sign)
+        traffic_sign_layout.addRow(self.button_remove_traffic_sign)
 
-        layout_traffic_sign.addLayout(traffic_sign_information)
+        layout_traffic_sign.addWidget(traffic_sign_information_groupbox)
+        layout_traffic_sign.addLayout(traffic_sign_layout)
 
         title_traffic_sign = "Traffic Sign"
         return title_traffic_sign, widget_traffic_sign
@@ -378,6 +391,9 @@ class RoadNetworkToolboxUI(Toolbox):
     def create_traffic_light_widget(self):
         widget_traffic_light = QFrame(self.tree)
         layout_traffic_light = QVBoxLayout(widget_traffic_light)
+
+        label_general = QLabel("Traffic Light Attributes")
+        label_general.setFont(QFont("Arial", 11, QFont.Bold))
 
         self.x_position_traffic_light = QLineEdit()
         self.x_position_traffic_light.setValidator(QDoubleValidator())
@@ -433,24 +449,29 @@ class RoadNetworkToolboxUI(Toolbox):
         self.button_update_traffic_light = QPushButton("Update")
         self.button_remove_traffic_light = QPushButton("Remove")
 
-        traffic_light_information = QFormLayout()
-        traffic_light_information.addRow("X-Position [m]", self.x_position_traffic_light)
-        traffic_light_information.addRow("Y-Position [m]", self.y_position_traffic_light)
-        traffic_light_information.addRow("Direction", self.traffic_light_directions)
-        traffic_light_information.addRow("Time offset", self.time_offset)
-        traffic_light_information.addRow("Time red", self.time_red)
-        traffic_light_information.addRow("Time red-yellow", self.time_red_yellow)
-        traffic_light_information.addRow("Time green", self.time_green)
-        traffic_light_information.addRow("Time yellow", self.time_yellow)
-        traffic_light_information.addRow("Time inactive", self.time_inactive)
-        traffic_light_information.addRow("Referenced lanelets", self.referenced_lanelets_traffic_light)
-        traffic_light_information.addRow("Selected traffic light", self.selected_traffic_light)
-        traffic_light_information.addRow(self.traffic_light_active)
-        traffic_light_information.addRow(self.button_add_traffic_light)
-        traffic_light_information.addRow(self.button_update_traffic_light)
-        traffic_light_information.addRow(self.button_remove_traffic_light)
+        traffic_light_layout = QFormLayout()
+        traffic_light_information_layout = QFormLayout()
+        traffic_light_information_groupbox = QGroupBox()
+        traffic_light_information_groupbox.setLayout(traffic_light_information_layout)
+        traffic_light_information_layout.addRow(label_general)
+        traffic_light_information_layout.addRow("X-Position [m]", self.x_position_traffic_light)
+        traffic_light_information_layout.addRow("Y-Position [m]", self.y_position_traffic_light)
+        traffic_light_information_layout.addRow("Direction", self.traffic_light_directions)
+        traffic_light_information_layout.addRow("Time offset", self.time_offset)
+        traffic_light_information_layout.addRow("Time red", self.time_red)
+        traffic_light_information_layout.addRow("Time red-yellow", self.time_red_yellow)
+        traffic_light_information_layout.addRow("Time green", self.time_green)
+        traffic_light_information_layout.addRow("Time yellow", self.time_yellow)
+        traffic_light_information_layout.addRow("Time inactive", self.time_inactive)
+        traffic_light_information_layout.addRow("Referenced lanelets", self.referenced_lanelets_traffic_light)
+        traffic_light_information_layout.addRow(self.traffic_light_active)
+        traffic_light_layout.addRow(self.button_add_traffic_light)
+        traffic_light_layout.addRow("Selected traffic light", self.selected_traffic_light)
+        traffic_light_layout.addRow(self.button_update_traffic_light)
+        traffic_light_layout.addRow(self.button_remove_traffic_light)
 
-        layout_traffic_light.addLayout(traffic_light_information)
+        layout_traffic_light.addWidget(traffic_light_information_groupbox)
+        layout_traffic_light.addLayout(traffic_light_layout)
 
         title_traffic_light = "Traffic Light"
         return title_traffic_light, widget_traffic_light

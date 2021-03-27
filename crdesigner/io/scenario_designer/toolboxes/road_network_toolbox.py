@@ -366,6 +366,7 @@ class RoadNetworkToolbox(QDockWidget):
         connect_to_last_selection = self.road_network_toolbox.connect_to_previous_selection.isChecked()
         connect_to_predecessors_selection = self.road_network_toolbox.connect_to_predecessors_selection.isChecked()
         connect_to_successors_selection = self.road_network_toolbox.connect_to_successors_selection.isChecked()
+        place_at_position = self.road_network_toolbox.place_at_defined_position.isChecked()
 
         if not update:
             if lanelet_id is None:
@@ -399,7 +400,8 @@ class RoadNetworkToolbox(QDockWidget):
                 if len(successors) > 0:
                     MapCreator.fit_to_successor(
                         self.current_scenario.lanelet_network.find_lanelet_by_id(successors[0]), lanelet)
-            lanelet.translate_rotate(np.array([lanelet_pos_x, lanelet_pos_y]), 0)
+            elif place_at_position:
+                lanelet.translate_rotate(np.array([lanelet_pos_x, lanelet_pos_y]), 0)
             self.last_added_lanelet_id = lanelet_id
         else:
             lanelet = \
