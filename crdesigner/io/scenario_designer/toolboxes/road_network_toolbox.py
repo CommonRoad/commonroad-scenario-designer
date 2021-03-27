@@ -14,7 +14,7 @@ from crdesigner.io.scenario_designer.toolboxes.road_network_toolbox_ui import Ro
 
 
 class RoadNetworkToolbox(QDockWidget):
-    def __init__(self, current_scenario: Scenario, text_browser, callback):
+    def __init__(self, current_scenario: Scenario, text_browser, callback, selection_changed_callback):
         super().__init__("Road Network Toolbox")
 
         self.road_network_toolbox = RoadNetworkToolboxUI()
@@ -24,6 +24,7 @@ class RoadNetworkToolbox(QDockWidget):
         self.text_browser = text_browser
         self.last_added_lanelet_id = None
         self.callback = callback
+        self.selection_changed_callback = selection_changed_callback
 
         self.initialize_lanelet_information()
         self.initialize_traffic_sign_information()
@@ -46,6 +47,8 @@ class RoadNetworkToolbox(QDockWidget):
         self.road_network_toolbox.button_update_lanelet.clicked.connect(lambda: self.update_lanelet())
         self.road_network_toolbox.selected_lanelet_update.currentTextChanged.connect(
             lambda: self.update_lanelet_information())
+        self.road_network_toolbox.selected_lanelet_update.currentTextChanged.connect(
+            lambda: self.lanelet_selection_changed())
 
         self.road_network_toolbox.button_remove_lanelet.clicked.connect(lambda: self.remove_lanelet())
         self.road_network_toolbox.button_attach_to_other_lanelet.clicked.connect(lambda: self.attach_to_other_lanelet())
@@ -86,6 +89,11 @@ class RoadNetworkToolbox(QDockWidget):
 
     def update_scenario(self, scenario: Scenario):
         self.current_scenario = scenario
+
+    def lanelet_selection_changed(self):
+        selected_lanelet = self.selected_lanelet()
+        if selected_lanelet is not None:
+            self.selection_changed_callback(sel_lanelet=selected_lanelet)
 
     def initialize_toolbox(self):
         self.initialize_lanelet_information()
@@ -408,6 +416,9 @@ class RoadNetworkToolbox(QDockWidget):
                 lanelet.translate_rotate(np.array([lanelet_pos_x, lanelet_pos_y]), 0)
             self.last_added_lanelet_id = lanelet_id
         else:
+            if stop_line_at_end:
+                stop_line.start = left_vertices[-1]
+                stop_line.end = right_vertices[-1]
             lanelet = \
                 Lanelet(left_vertices=left_vertices, right_vertices=right_vertices, predecessor=predecessors,
                         successor=successors, adjacent_left=adjacent_left, adjacent_right=adjacent_right,
@@ -431,12 +442,12 @@ class RoadNetworkToolbox(QDockWidget):
         if self.current_scenario is None:
             self.text_browser.append("create a new file")
             return None
-        if self.road_network_toolbox.selected_lanelet_one.currentText() not in ["None", ""]:
-            selected_lanelet_one = self.current_scenario.lanelet_network.find_lanelet_by_id(
-                int(self.road_network_toolbox.selected_lanelet_one.currentText()))
-            return selected_lanelet_one
+        if self.road_network_toolbox.selected_lanelet_update.currentText() not in ["None", ""]:
+            selected_lanelet = self.current_scenario.lanelet_network.find_lanelet_by_id(
+                int(self.road_network_toolbox.selected_lanelet_update.currentText()))
+            return selected_lanelet
         else:
-            self.text_browser.append("No lanelet selected for [1].")
+            self.text_browser.append("No lanelet selected.")
             return None
 
     def update_lanelet(self):
@@ -451,9 +462,11 @@ class RoadNetworkToolbox(QDockWidget):
                       if selected_lanelet_id in la.successor]
         predecessors = [la.lanelet_id for la in self.current_scenario.lanelet_network.lanelets
                         if selected_lanelet_id in la.predecessor]
-        adjacent_left = [la.lanelet_id for la in self.current_scenario.lanelet_network.lanelets
+        adjacent_left = [(la.lanelet_id, la.adj_left_same_direction)
+                         for la in self.current_scenario.lanelet_network.lanelets
                          if selected_lanelet_id == la.adj_left]
-        adjacent_right = [la.lanelet_id for la in self.current_scenario.lanelet_network.lanelets
+        adjacent_right = [(la.lanelet_id, la.adj_right_same_direction)
+                          for la in self.current_scenario.lanelet_network.lanelets
                           if selected_lanelet_id == la.adj_right]
 
         self.current_scenario.remove_lanelet(selected_lanelet)
@@ -464,10 +477,12 @@ class RoadNetworkToolbox(QDockWidget):
             self.current_scenario.lanelet_network.find_lanelet_by_id(la_id).add_successor(selected_lanelet_id)
         for la_id in predecessors:
             self.current_scenario.lanelet_network.find_lanelet_by_id(la_id).add_predecessor(selected_lanelet_id)
-        for la_id in adjacent_left:
-            self.current_scenario.lanelet_network.find_lanelet_by_id(la_id).adj_left = selected_lanelet_id
-        for la_id in adjacent_right:
-            self.current_scenario.lanelet_network.find_lanelet_by_id(la_id).adj_right = selected_lanelet_id
+        for la_info in adjacent_left:
+            self.current_scenario.lanelet_network.find_lanelet_by_id(la_info[0]).adj_left = selected_lanelet_id
+            self.current_scenario.lanelet_network.find_lanelet_by_id(la_info[0]).adj_left_same_direction = la_info[1]
+        for la_info in adjacent_right:
+            self.current_scenario.lanelet_network.find_lanelet_by_id(la_info[0]).adj_right = selected_lanelet_id
+            self.current_scenario.lanelet_network.find_lanelet_by_id(la_info[0]).adj_right_same_direction = la_info[1]
 
         self.set_default_road_network_list_information()
         self.callback(self.current_scenario)
@@ -838,18 +853,20 @@ class RoadNetworkToolbox(QDockWidget):
         time_red_yellow = int(self.road_network_toolbox.time_red_yellow.text())
         time_inactive = int(self.road_network_toolbox.time_inactive.text())
         traffic_light_active = self.road_network_toolbox.traffic_light_active.isChecked()
+        traffic_light_cycle_order = self.road_network_toolbox.traffic_light_cycle_order.currentText().split("-")
 
         traffic_light_cycle = []
-        if time_red > 0:
-            traffic_light_cycle.append(TrafficLightCycleElement(TrafficLightState.RED, time_red))
-        if time_green > 0:
-            traffic_light_cycle.append(TrafficLightCycleElement(TrafficLightState.GREEN, time_green))
-        if time_red_yellow > 0:
-            traffic_light_cycle.append(TrafficLightCycleElement(TrafficLightState.RED_YELLOW, time_red_yellow))
-        if time_yellow > 0:
-            traffic_light_cycle.append(TrafficLightCycleElement(TrafficLightState.YELLOW, time_yellow))
-        if time_inactive > 0:
-            traffic_light_cycle.append(TrafficLightCycleElement(TrafficLightState.INACTIVE, time_inactive))
+        for elem in traffic_light_cycle_order:
+            if elem == "r" and time_red > 0:
+                traffic_light_cycle.append(TrafficLightCycleElement(TrafficLightState.RED, time_red))
+            elif elem == "g" and time_green > 0:
+                traffic_light_cycle.append(TrafficLightCycleElement(TrafficLightState.GREEN, time_green))
+            elif elem == "ry" and time_red_yellow > 0:
+                traffic_light_cycle.append(TrafficLightCycleElement(TrafficLightState.RED_YELLOW, time_red_yellow))
+            elif elem == "y" and time_yellow > 0:
+                traffic_light_cycle.append(TrafficLightCycleElement(TrafficLightState.YELLOW, time_yellow))
+            elif elem == "in" and time_inactive > 0:
+                traffic_light_cycle.append(TrafficLightCycleElement(TrafficLightState.INACTIVE, time_inactive))
 
         if traffic_light_id is None:
             traffic_light_id = self.current_scenario.generate_object_id()
@@ -911,17 +928,25 @@ class RoadNetworkToolbox(QDockWidget):
             self.road_network_toolbox.time_offset.setText(str(traffic_light.time_offset))
             self.road_network_toolbox.traffic_light_active.setChecked(True)
 
+            cycle_order = ""
             for elem in traffic_light.cycle:
                 if elem.state is TrafficLightState.RED:
+                    cycle_order += "r-"
                     self.road_network_toolbox.time_red.setText(str(elem.duration))
                 if elem.state is TrafficLightState.GREEN:
+                    cycle_order += "g-"
                     self.road_network_toolbox.time_green.setText(str(elem.duration))
                 if elem.state is TrafficLightState.YELLOW:
+                    cycle_order += "y-"
                     self.road_network_toolbox.time_yellow.setText(str(elem.duration))
                 if elem.state is TrafficLightState.RED_YELLOW:
+                    cycle_order += "ry-"
                     self.road_network_toolbox.time_red_yellow.setText(str(elem.duration))
                 if elem.state is TrafficLightState.INACTIVE:
+                    cycle_order += "in-"
                     self.road_network_toolbox.time_inactive.setText(str(elem.duration))
+            cycle_order = cycle_order[:-1]
+            self.road_network_toolbox.traffic_light_cycle_order.setCurrentText(cycle_order)
 
             index = self.road_network_toolbox.traffic_light_directions.findText(str(traffic_light.direction.value))
             self.road_network_toolbox.traffic_light_directions.setCurrentIndex(index)
