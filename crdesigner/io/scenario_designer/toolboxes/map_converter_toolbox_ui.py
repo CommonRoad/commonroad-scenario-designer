@@ -39,18 +39,29 @@ class MapConversionToolboxUI(Toolbox):
         self.button_load_osm_edit_state = QPushButton("Load OSM Edit State")
         self.button_start_osm_conversion = QPushButton("Start Conversion")
 
-        osm_conversion_configuration = QFormLayout()
-        osm_conversion_configuration.addRow(self.osm_conversion_load_osm_file_selection)
-        osm_conversion_configuration.addRow(self.osm_conversion_download_osm_file_selection)
-        osm_conversion_configuration.addRow(self.button_select_osm_file)
-        osm_conversion_configuration.addRow("Latitude:", self.osm_conversion_coordinate_latitude)
-        osm_conversion_configuration.addRow("Longitude:", self.osm_conversion_coordinate_longitude)
-        osm_conversion_configuration.addRow("Range:", self.osm_download_map_range)
-        osm_conversion_configuration.addRow(self.osm_conversion_edit_manually_selection)
-        osm_conversion_configuration.addRow(self.button_load_osm_edit_state)
-        osm_conversion_configuration.addRow(self.button_start_osm_conversion)
+        layout_osm_conversion_configuration = QFormLayout()
 
-        layout_osm.addLayout(osm_conversion_configuration)
+        layout_osm_file_selection_groupbox = QFormLayout()
+        osm_file_selection_groupbox = QGroupBox()
+        osm_file_selection_groupbox.setLayout(layout_osm_file_selection_groupbox)
+        layout_osm_file_selection_groupbox.addRow(self.osm_conversion_load_osm_file_selection)
+        layout_osm_file_selection_groupbox.addRow(self.osm_conversion_download_osm_file_selection)
+        layout_osm_file_selection_groupbox.addRow(self.button_select_osm_file)
+        layout_osm_conversion_configuration.addWidget(osm_file_selection_groupbox)
+
+        layout_osm_range_groupbox = QFormLayout()
+        osm_range_groupbox = QGroupBox()
+        osm_range_groupbox.setLayout(layout_osm_range_groupbox)
+        layout_osm_range_groupbox.addRow("Latitude:", self.osm_conversion_coordinate_latitude)
+        layout_osm_range_groupbox.addRow("Longitude:", self.osm_conversion_coordinate_longitude)
+        layout_osm_range_groupbox.addRow("Range:", self.osm_download_map_range)
+        layout_osm_conversion_configuration.addWidget(osm_range_groupbox)
+
+        layout_osm_conversion_configuration.addRow(self.osm_conversion_edit_manually_selection)
+        layout_osm_conversion_configuration.addRow(self.button_load_osm_edit_state)
+        layout_osm_conversion_configuration.addRow(self.button_start_osm_conversion)
+
+        layout_osm.addLayout(layout_osm_conversion_configuration)
 
         title_osm = "OSM Conversion"
         self.sections.append((title_osm, widget_osm))

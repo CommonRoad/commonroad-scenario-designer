@@ -33,27 +33,24 @@ class SimulationWorker(QThread):
         self.error = None
 
     def run(self):
-        print(self.config.presimulation_steps, self.config.simulation_steps,
-              self.config.dt)
-      #  try:
+        try:
             # convert scenario to SUMO
-        wrapper = CR2SumoMapConverter(self.scenario.lanelet_network,
-                                      self.config)
-        wrapper.convert_to_net_file(self.output_folder)
+            wrapper = CR2SumoMapConverter(self.scenario.lanelet_network,
+                                          self.config)
+            wrapper.convert_to_net_file(self.output_folder)
 
-        simulation = SumoSimulation()
-        simulation.initialize(self.config, wrapper)
+            simulation = SumoSimulation()
+            simulation.initialize(self.config, wrapper)
 
-        for _ in range(self.config.simulation_steps):
-            simulation.simulate_step()
-        simulation.stop()
+            for _ in range(self.config.simulation_steps):
+                simulation.simulate_step()
+            simulation.stop()
 
-        self.simulated_scenario = simulation.commonroad_scenarios_all_time_steps(
-        )
-        # except Exception as e:
-        #     # log error and save it for display to the user
-        #     logging.error(e)
-        #     self.error = e
+            self.simulated_scenario = simulation.commonroad_scenarios_all_time_steps()
+        except Exception as e:
+            # log error and save it for display to the user
+            logging.error(e)
+            self.error = e
 
 
 class WaitingDialog(QtWidgets.QDialog):
@@ -106,12 +103,6 @@ class SUMOSimulation(QFrame):
     @scenario.setter
     def scenario(self, scenario: Scenario):
         self._scenario = scenario
-
-    def _connect_events(self) -> None:
-        """
-        Connecting valueChanged events of the SpinBoxes to the SumoConfig
-        """
-        self.pushButton_simulate.clicked.connect(self.simulate)
 
     def simulate(self) -> bool:
         """

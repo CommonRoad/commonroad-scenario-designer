@@ -1074,8 +1074,8 @@ class RoadNetworkToolbox(QDockWidget):
             left_of = int(self.road_network_toolbox.intersection_incomings_table.cellWidget(row, 5).currentText()) \
                 if self.road_network_toolbox.intersection_incomings_table.cellWidget(row, 5).currentText() != "" \
                 else None
-            incoming = IntersectionIncomingElement(incoming_id, incoming_lanelets, successor_left,
-                                                   successor_straight, successor_right, left_of)
+            incoming = IntersectionIncomingElement(incoming_id, incoming_lanelets, successor_right,
+                                                   successor_straight, successor_left, left_of)
             incomings.append(incoming)
         crossings = {int(item) for item in self.road_network_toolbox.intersection_crossings.get_checked_items()}
 

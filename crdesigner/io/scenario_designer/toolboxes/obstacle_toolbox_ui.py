@@ -28,7 +28,6 @@ class ObstacleToolboxUI(Toolbox):
     def __init__(self):
         super().__init__()
 
-
     def define_sections(self):
         """reimplement this to define all your sections
         and add them as (title, widget) tuples to self.sections
@@ -37,7 +36,8 @@ class ObstacleToolboxUI(Toolbox):
         widget_obstacles = QFrame(self.tree)
         layout_obstacles = QVBoxLayout(widget_obstacles)
 
-        self.selected_obstacle = QComboBox()
+        label_general = QLabel("Obstacle Attributes")
+        label_general.setFont(QFont("Arial", 11, QFont.Bold))
 
         self.obstacle_length = QLineEdit()
         self.obstacle_length.setValidator(QDoubleValidator())
@@ -54,27 +54,38 @@ class ObstacleToolboxUI(Toolbox):
         self.obstacle_type.addItems(obstalce_type_list)
 
         self.obstacle_state_variable = QComboBox()
-
-        obstacle_information = QFormLayout()
-        obstacle_information.addRow("Obstacle ID", self.selected_obstacle)
-        obstacle_information.addRow("Width [m]", self.obstacle_width)
-        obstacle_information.addRow("Length [m]", self.obstacle_length)
-        obstacle_information.addRow("Type", self.obstacle_type)
-        obstacle_information.addRow("Visualized State", self.obstacle_state_variable)
-        layout_obstacles.addLayout(obstacle_information)
-
         self.figure = Figure(figsize=(3, 1))
         self.canvas = FigureCanvas(self.figure)
         self.toolbar = NavigationToolbar(self.canvas, self)
 
-        self.button_remove_obstacle = QPushButton("Remove Obstacle")
+        self.selected_obstacle = QComboBox()
+        self.button_update_obstacle = QPushButton("Update")
+        self.button_remove_obstacle = QPushButton("Remove")
 
-        # set the layout
-        layout = QVBoxLayout()
-        layout.addWidget(self.toolbar)
-        layout.addWidget(self.canvas)
-        layout.addWidget(self.button_remove_obstacle)
-        layout_obstacles.addLayout(layout)
+        layout_obstacle_information_groupbox = QFormLayout()
+        obstacle_information_groupbox = QGroupBox()
+        obstacle_information_groupbox.setLayout(layout_obstacle_information_groupbox)
+        layout_obstacle_information_groupbox.addRow(label_general)
+        layout_obstacle_information_groupbox.addRow("Width [m]", self.obstacle_width)
+        layout_obstacle_information_groupbox.addRow("Length [m]", self.obstacle_length)
+        layout_obstacle_information_groupbox.addRow("Type", self.obstacle_type)
+        layout_obstacles.addWidget(obstacle_information_groupbox)
+
+        layout_obstacle_state_vis_groupbox = QFormLayout()
+        obstacle_state_vis_groupbox = QGroupBox()
+        obstacle_state_vis_groupbox.setLayout(layout_obstacle_state_vis_groupbox)
+        layout_vis_selection = QFormLayout()
+        layout_vis_selection.addRow("Visualized State:", self.obstacle_state_variable)
+        layout_obstacle_state_vis_groupbox.addRow(layout_vis_selection)
+        layout_obstacle_state_vis_groupbox.addWidget(self.toolbar)
+        layout_obstacle_state_vis_groupbox.addWidget(self.canvas)
+        layout_obstacles.addWidget(obstacle_state_vis_groupbox)
+
+        layout_obstacle_buttons = QFormLayout()
+        layout_obstacle_buttons.addRow("Selected Obstacle ID:", self.selected_obstacle)
+        layout_obstacle_buttons.addRow(self.button_update_obstacle)
+        layout_obstacle_buttons.addRow(self.button_remove_obstacle)
+        layout_obstacles.addLayout(layout_obstacle_buttons)
 
         title_obstacle = "Obstacle"
         self.sections.append((title_obstacle, widget_obstacles))
