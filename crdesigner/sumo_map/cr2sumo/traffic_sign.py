@@ -206,6 +206,8 @@ class TrafficSignEncoder:
             VehicleType.TRUCK, VehicleType.TRAILER, VehicleType.MOTORCYCLE,
             VehicleType.EVEHICLE
         }
-        new_type = self.edge_types.create_from_update_disallow(old_type.id, list(disallow))
+        new_type = self.edge_types.create_from_update_allow(old_type.id, list(
+            set(VehicleType) - disallow
+        ))
         for successor in self._bfs_until(edge, element):
             successor.type_id = new_type.id

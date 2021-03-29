@@ -24,7 +24,7 @@ It uses other classes from this module to represent the road network.
 from collections import defaultdict
 from copy import deepcopy
 from enum import Enum, unique
-from typing import List, Dict, Tuple, Optional, Callable, TypeVar, Iterable, Union
+from typing import List, Dict, Tuple, Optional, Callable, TypeVar, Iterable, Union, Set
 from xml.etree import cElementTree as ET
 import os
 
@@ -65,7 +65,8 @@ class Net:
         # from_edge -> from_lane -> to_edge -> to_lane -> Connection
         self.connections: Dict[int, Dict[int, Dict[int, Dict[int, Connection]]]] = defaultdict(
             lambda: defaultdict(lambda: defaultdict(dict)))
-        self.tlss: List[TLSProgram] = []
+        # id -> program_id -> TLSProgram
+        self.tlss: Dict[str, TLSProgram] = {}
 
 
 _K = TypeVar("_K")
@@ -82,16 +83,24 @@ def _get_default(d: Dict[_K, _V], key: _K, default: Optional[_VV] = None, map: C
         return default
 
 
-def from_xml(file: str) -> Net:
+def sumo_net_from_xml(file: str) -> Net:
+    """
+    Given a SUMO .net.xml file this function returns the parsed
+    representation of it.
+    :param file: Path to .net.xml file
+    :return: parsed Net
+    """
     if not os.path.isfile(file):
         raise RuntimeError(f"Invalid file path: {file}")
+    if not file.endswith(".net.xml"):
+        raise RuntimeError(f"Invalid file type {file}, required *.net.xml")
+
     root = ET.parse(file).getroot()
     net = Net(version=_get_default(root.attrib, "version", None),
               junction_corner_detail=_get_default(root.attrib, "junctionCornerDetail", None, float),
               junction_link_detail=_get_default(root.attrib, "junctionLinkDetail", None, float),
               limit_turn_speed=_get_default(root.attrib, "limitTurnSpeed", None, float))
     for elem in root.iter():
-        print(elem)
         if elem.tag == "location":
             net.location = NetLocation(
                 net_offset=np.array([float(f) for f in elem.attrib["netOffset"].split(",")]),
@@ -100,19 +109,22 @@ def from_xml(file: str) -> Net:
                 proj_parameter=elem.attrib["projParameter"]
             )
         elif elem.tag == "type":
-            net.types[elem.attrib["id"]] = EdgeType(
-                id=elem.attrib["id"],
-                allow=_get_default(elem.attrib, "allow", None,
-                                   lambda allow: [VehicleType(a) for a in allow.split(" ")]),
-                disallow=_get_default(elem.attrib, "disallow", None,
-                                      lambda disallow: [VehicleType(a) for a in disallow.split(" ")]),
-                discard=_get_default(elem.attrib, "discard", False, lambda d: bool(int(x))),
-                num_lanes=_get_default(elem.attrib, "num_lanes", -1, int),
-                oneway=_get_default(elem.attrib, "oneway", False, lambda o: bool(int(o))),
-                priority=_get_default(elem.attrib, "priority", 0, int),
-                speed=_get_default(elem.attrib, "speed", 13.89, float),
-                sidewalk_width=_get_default(elem.attrib, "sidewalkWidth", -1., float)
-            )
+            try:
+                net.types[elem.attrib["id"]] = EdgeType(
+                    id=elem.attrib["id"],
+                    allow=_get_default(elem.attrib, "allow", None,
+                                       lambda allow: [VehicleType(a) for a in allow.split(" ")]),
+                    disallow=_get_default(elem.attrib, "disallow", None,
+                                          lambda disallow: [VehicleType(a) for a in disallow.split(" ")]),
+                    discard=_get_default(elem.attrib, "discard", False, lambda d: bool(int(x))),
+                    num_lanes=_get_default(elem.attrib, "num_lanes", -1, int),
+                    oneway=_get_default(elem.attrib, "oneway", False, lambda o: bool(int(o))),
+                    priority=_get_default(elem.attrib, "priority", 0, int),
+                    speed=_get_default(elem.attrib, "speed", 13.89, float),
+                    sidewalk_width=_get_default(elem.attrib, "sidewalkWidth", -1., float)
+                )
+            except ValueError:
+                print("eeor")
         elif elem.tag == "tlLogic":
             program = TLSProgram(id=elem.attrib["id"],
                                  offset=_get_default(elem.attrib, "offset", 0, int),
@@ -122,14 +134,17 @@ def from_xml(file: str) -> Net:
                 if phase.tag != "phase":
                     continue
                 program.add_phase(Phase(
-                    duration=_get_default(phase.attrib, "duration", 0, int),
+                    duration=_get_default(phase.attrib, "duration", 0., float),
                     state=_get_default(phase.attrib, "state", [], lambda state: [SignalState(s) for s in state]),
                     min_dur=_get_default(phase.attrib, "minDur", None, int),
                     max_dur=_get_default(phase.attrib, "maxDur", None, int),
                     name=_get_default(phase.attrib, "name"),
                     next=_get_default(phase.attrib, "next", None, lambda n: [int(i) for i in n.split(" ")])
                 ))
-            net.tlss.append(program)
+
+            assert program.id not in net.tlss
+            net.tlss[program.id] = program
+
         elif elem.tag == "junction":
             x = _get_default(elem.attrib, "x", None, float)
             y = _get_default(elem.attrib, "y", None, float)
@@ -137,7 +152,7 @@ def from_xml(file: str) -> Net:
             junction = Junction(
                 id=_get_default(elem.attrib, "id", None, int),
                 junction_type=_get_default(elem.attrib, "type", None, JunctionType),
-                coord=np.array([v for v in [x, y, z] if v]),
+                coord=np.array([x, y, z] if z is not None else [x, y]),
                 shape=_get_default(elem.attrib, "shape", None, from_shape_string),
                 inc_lanes=_get_default(elem.attrib, "incLanes", None,
                                        lambda inc_lanes: inc_lanes.split(" ") if inc_lanes else None),
@@ -176,15 +191,17 @@ def from_xml(file: str) -> Net:
                 if lane.tag != "lane":
                     continue
                 # lane is added to edge implicitly in the Lane() constructor
-                Lane(edge=edge,
-                     speed=_get_default(lane.attrib, "speed", None, float),
-                     length=_get_default(lane.attrib, "length", None, float),
-                     width=_get_default(lane.attrib, "width", None, float),
-                     allow=_get_default(lane.attrib, "allow", None,
-                                        lambda allow: [VehicleType(a) for a in allow.split(" ")]),
-                     disallow=_get_default(lane.attrib, "disallow", None,
-                                           lambda disallow: [VehicleType(a) for a in disallow.split(" ")]),
-                     shape=_get_default(lane.attrib, "shape", None, from_shape_string))
+                Lane(
+                    edge=edge,
+                    speed=_get_default(lane.attrib, "speed", None, float),
+                    length=_get_default(lane.attrib, "length", None, float),
+                    width=_get_default(lane.attrib, "width", None, float),
+                    allow=_get_default(lane.attrib, "allow", None,
+                                       lambda allow: [VehicleType(a) for a in allow.split(" ")]),
+                    disallow=_get_default(lane.attrib, "disallow", None,
+                                          lambda disallow: [VehicleType(a) for a in disallow.split(" ")]),
+                    shape=_get_default(lane.attrib, "shape", None, from_shape_string)
+                )
             net.edges[edge.id] = edge
         elif elem.tag == "connection":
             from_edge = _get_default(elem.attrib, "from", map=lambda f: net.edges[f])
@@ -195,8 +212,8 @@ def from_xml(file: str) -> Net:
                 from_lane=_get_default(elem.attrib, "fromLane", map=lambda idx: from_edge.lanes[int(idx)]),
                 to_lane=_get_default(elem.attrib, "toLane", map=lambda idx: to_edge.lanes[int(idx)]),
                 direction=_get_default(elem.attrib, "dir", map=ConnectionDirection),
-                tls=_get_default(elem.attrib, "tls", map=lambda tls: next(t for t in net.tlss if t.id == tls)),
-                tl_link=_get_default(elem.attrib, "tlLink", map=int),
+                tls=_get_default(elem.attrib, "tl", map=lambda tls: net.tlss[tls]),
+                tl_link=_get_default(elem.attrib, "linkIndex", map=int),
                 state=_get_default(elem.attrib, "state"),
                 via_lane_id=_get_default(elem.attrib, "via", map=lambda via: via.split(" ")),
                 shape=_get_default(elem.attrib, "shape", map=from_shape_string),
@@ -416,7 +433,7 @@ class Junction(Node):
         super().__init__(id, junction_type, coord, shape, inc_lanes, int_lanes)
         self.id = id
         self.type = junction_type
-        assert coord.shape == (2,) or coord.shape == (3,)
+        assert coord.shape == (2,) or coord.shape == (3,), f"Coord has to have two or three values, was {coord}"
         self.coord = coord
         self.shape = shape
         self.inc_lanes = inc_lanes
@@ -711,6 +728,27 @@ class Lane:
     @edge.setter
     def edge(self, edge: Edge):
         self._edge = edge
+
+        # with open(self._output_file, "r") as f:
+        #     xml = ET.parse(f)
+
+        # # parse TLS from generated xml file
+        # def get_tls(xml, junction) -> TLSProgram:
+        #     for tl_logic in xml.findall("tlLogic"):
+        #         if not int(tl_logic.get("id")) == junction.id:
+        #             continue
+        #
+        #         tls_program = TLSProgram(tl_logic.get("programID"),
+        #                                  int(tl_logic.get("offset")),
+        #                                  tl_logic.get("type"))
+        #         for phase in tl_logic.findall("phase"):
+        #             tls_program.add_phase(Phase(
+        #                 int(phase.get("duration")),
+        #                 [SignalState(s) for s in phase.get("state")]
+        #             ))
+        #         return tls_program
+        #
+        # tls_program = get_tls(xml, junction)
 
     @property
     def speed(self) -> float:
@@ -1246,12 +1284,12 @@ class EdgeTypes:
 
     def create_from_update_allow(self, old_id: str, allow: List['VehicleType']) -> Optional[EdgeType]:
         new_type = self._create_from_update(old_id, "allow", allow)
-        setattr(new_type, "disallow", list(set(new_type.disallow) - set(new_type.allow)))
+        # setattr(new_type, "disallow", list(set(new_type.disallow) - set(new_type.allow)))
         return new_type
 
     def create_from_update_disallow(self, old_id: str, disallow: List['VehicleType']) -> Optional[EdgeType]:
         new_type = self._create_from_update(old_id, "disallow", disallow)
-        setattr(new_type, "allow", list(set(new_type.allow) - set(new_type.disallow)))
+        # setattr(new_type, "allow", list(set(new_type.allow) - set(new_type.disallow)))
         return new_type
 
 
@@ -1304,7 +1342,9 @@ class Phase:
         :param min_dur: The minimum duration of the phase when using type actuated. Optional, defaults to duration.
         :param max_dur: The maximum duration of the phase when using type actuated. Optional, defaults to duration.
         :param name: An optional description for the phase. This can be used to establish the correspondence between SUMO-phase-indexing and traffic engineering phase names.
-        :param next:
+        :param next: The next phase in the cycle after the current.
+        This is useful when adding extra transition phases to a traffic light plan which are not part of every cycle.
+        Traffic lights of type 'actuated' can make use of a list of indices for selecting among alternative successor phases.
         """
         self.duration = duration
         self.state = state
@@ -1336,11 +1376,11 @@ class Phase:
 
 class TLSType(Enum):
     """
+    Adapted from: https://sumo.dlr.de/docs/Simulation/Traffic_Lights.html
     The type of the traffic light
      - fixed phase durations,
      - phase prolongation based on time gaps between vehicles (actuated),
      - or on accumulated time loss of queued vehicles (delay_based)
-    Adapted from: https://sumo.dlr.de/docs/Simulation/Traffic_Lights.html
     """
     STATIC = "static"
     ACTUATED = "actuated"
@@ -1368,6 +1408,10 @@ class TLSProgram:
 
     @property
     def id(self) -> str:
+        return self._id
+
+    @property
+    def program_id(self) -> str:
         return self._id
 
     @property

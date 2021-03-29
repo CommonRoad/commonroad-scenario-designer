@@ -11,7 +11,7 @@ from commonroad.geometry.shape import Polygon
 from commonroad.scenario.lanelet import Lanelet
 from commonroad.scenario.lanelet import LaneletNetwork
 from commonroad.visualization.plot_helper import draw_object
-from crdesigner.sumo_map.sumolib_net import Edge
+from crdesigner.sumo_map.sumolib_net import Edge, from_shape_string
 from shapely.geometry import LineString
 from shapely.ops import unary_union
 from shapely.validation import explain_validity
@@ -92,7 +92,7 @@ def add_params_in_rou_file(
     tree.write(rou_file)
 
 
-def update_edge_lengths(net_file_path: str) -> bool:
+def update_edge_lengths(net_file_path: str):
     """
     Recomputes lane lengths based on their shapes and updates lane & edge lengths accordingly
     This is a workaround to a bug in netedit, caused by updating lane shapes, but not their lengths
@@ -106,7 +106,7 @@ def update_edge_lengths(net_file_path: str) -> bool:
         lengths = []
         for lane in edge.iter("lane"):
             shape_str = lane.get("shape")
-            length = polyline_length(parse_shape_string(shape_str))
+            length = polyline_length(from_shape_string(shape_str))
             # if length ~= 0 do not update, as SUMO then discards this lane
             if not shape_str or not lane.get("length") or np.isclose(length, 0):
                 continue
@@ -117,14 +117,6 @@ def update_edge_lengths(net_file_path: str) -> bool:
 
     tree.write(net_file_path, encoding="utf-8")
 
-
-def parse_shape_string(shape_string: str) -> np.ndarray:
-    """
-    Parses a SUMO shape string to numpy array
-    :param shape_string: SUMO shape string
-    :return: parsed shape string
-    """
-    return np.array([[float(c) for c in pos.split(",")] for pos in shape_string.split(" ")])
 
 
 def polyline_length(line: np.ndarray) -> float:

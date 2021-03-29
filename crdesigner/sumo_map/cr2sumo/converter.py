@@ -45,7 +45,7 @@ from sumocr.maps.scenario_wrapper import AbstractScenarioWrapper
 
 from crdesigner.sumo_map.sumolib_net import (TLS, Connection, Crossing, Edge, Junction, Lane,
                                              Node, TLSProgram, Phase, SignalState, NodeType, RightOfWay,
-                                             VehicleType, SpreadType, from_xml)
+                                             VehicleType, SpreadType, sumo_net_from_xml, Net)
 
 from crdesigner.sumo_map.errors import ScenarioException
 from crdesigner.sumo_map.util import (_find_intersecting_edges,
@@ -57,7 +57,7 @@ from crdesigner.sumo_map.util import (_find_intersecting_edges,
 from crdesigner.sumo_map.config import SumoConfig
 from .mapping import (get_sumo_edge_type, traffic_light_states_SUMO2CR, VEHICLE_TYPE_CR2SUMO, VEHICLE_NODE_TYPE_CR2SUMO,
                       DEFAULT_CFG_FILE,
-                      get_edge_types_from_template)
+                      get_edge_types_from_template, directions_SUMO2CR)
 from .traffic_sign import TrafficSignEncoder
 from .traffic_light import TrafficLightEncoder
 
@@ -1004,78 +1004,38 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
             logging.error(e)
             return False
 
-        # add the generated tls to the lanelet_network
-        self._read_junctions_from_net_file(self._output_file)
-        # update the read junction
+        net = sumo_net_from_xml(self._output_file)
+        self._update_junctions_from_net(net)
         junction = self.lanelet_id2junction[lanelet_id]
-
-        with open(self._output_file, "r") as f:
-            xml = ET.parse(f)
-
-        # parse TLS from generated xml file
-        def get_tls(xml, junction) -> TLSProgram:
-            for tl_logic in xml.findall("tlLogic"):
-                if not int(tl_logic.get("id")) == junction.id:
-                    continue
-
-                tls_program = TLSProgram(tl_logic.get("programID"),
-                                         int(tl_logic.get("offset")),
-                                         tl_logic.get("type"))
-                for phase in tl_logic.findall("phase"):
-                    tls_program.add_phase(Phase(
-                        int(phase.get("duration")),
-                        [SignalState(s) for s in phase.get("state")]
-                    ))
-                return tls_program
-
-        tls_program = get_tls(xml, junction)
-        net = from_xml(self._output_file)
 
         # compute unused id value for the traffic lights
         next_cr_id = max_lanelet_network_id(self.lanelet_network) + 1
 
-        # add Traffic Lights to the corresponding lanelets
-        # TODO: somewhat hacky replace with proper connection reading
-        for c in xml.findall('connection'):
-            tl = c.get("tl")
-            if not (tl and int(tl) == junction.id): continue
-
-            lanelet_id = self.lane_id2lanelet_id["{}_{}".format(
-                c.get('from'), c.get("fromLane"))]
+        # add generated Traffic Lights to the corresponding lanelets
+        for connection in (conn for from_edges in net.connections.values()
+                           for from_lanes in from_edges.values()
+                           for to_edges in from_lanes.values()
+                           for conn in to_edges.values()):
+            # only add traffic lights the the connections at the current junction
+            if connection.tls is None or connection.tls.id != str(junction.id):
+                continue
+            lanelet_id = self.lane_id2lanelet_id[connection.from_lane.id]
             lanelet = self.lanelet_network.find_lanelet_by_id(lanelet_id)
-            link_index = int(c.get("linkIndex"))
-
-            # sensible defaults for newly generated traffic light
-            # TODO: This assuems right-hand traffic
-            position = lanelet.right_vertices[-1]
-            # time_offset = tls_program.offset
-            direction = TrafficLightDirection.ALL
-            active = True
-
-            # replace current traffic light if one exists on the lanelet
-            if lanelet.traffic_lights:
-                traffic_lights: List[TrafficLight] = [self.lanelet_network.find_traffic_light_by_id(id)
-                                                      for id in lanelet.traffic_lights]
-                tl = traffic_lights[0]
-                # copy attributes from old TrafficLight to new one
-                position = tl.position
-                direction = tl.direction
-                active = tl.active
-                # remove old traffic light from lanelet
-                lanelet._traffic_lights -= {tl.traffic_light_id}
-
-            traffic_light = TrafficLight(next_cr_id,
-                                         [TrafficLightCycleElement(
-                                             traffic_light_states_SUMO2CR[phase.state[link_index]],
-                                             int(phase.duration / self.conf.dt))
-                                             for phase in tls_program.phases],
-                                         position, int(time_offset * self.conf.dt), direction, active)
+            traffic_light = TrafficLight(
+                traffic_light_id=next_cr_id,
+                cycle=[
+                    TrafficLightCycleElement(
+                        state=traffic_light_states_SUMO2CR[phase.state[connection.tl_link]],
+                        duration=round(phase.duration * self.conf.dt)
+                    )
+                    for phase in connection.tls.phases
+                ],
+                direction=directions_SUMO2CR[connection.direction],
+                position=lanelet.right_vertices[-1]
+            )
             next_cr_id += 1
+            assert self.lanelet_network.add_traffic_light(traffic_light, {lanelet_id})
 
-            self.lanelet_network.add_traffic_light(traffic_light,
-                                                   {lanelet_id})
-
-        remove_unreferenced_traffic_lights(self.lanelet_network)
         return True
 
     def write_intermediate_files(self, output_path: str) -> Tuple[str, ...]:
@@ -1222,9 +1182,10 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         success = True
         try:
             _ = subprocess.check_output(command.split(), timeout=5.0)
-            self._read_junctions_from_net_file(self._output_file)
             # update lengths
             update_edge_lengths(self._output_file)
+            net = sumo_net_from_xml(self._output_file)
+            self._update_junctions_from_net(net)
 
             if update_internal_ids:
                 self._update_internal_IDs_from_net_file(self._output_file)
@@ -1342,30 +1303,16 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                 del self.lanelet_id2edge_lane_id[lanelet_id]
                 del self.lanelet_id2lane_id[lanelet_id]
 
-    def _read_junctions_from_net_file(self, filename: str):
+    def _update_junctions_from_net(self, net: Net):
         # parse junctions from .net.xml
-        with open(filename, 'r') as f:
-            root = ET.parse(f)
-
-        for junction_xml in root.findall("junction"):
-            inc_lanes: List[Lane] = [
-                self.lanes[lane_id]
-                for lane_id in junction_xml.get('incLanes').split()
-                # we don't care about internal junction added by netconvert
-                if lane_id in self.lanes
-            ]
-            shape = np.array([
-                [float(i) for i in s.split(",")]
-                for s in junction_xml.get('shape').split()
-            ])
-            junction = Junction(id=int(junction_xml.get('id')),
-                                junction_type=junction_xml.get('type'),
-                                coord=np.array([float(junction_xml.get('x')),
-                                                float(junction_xml.get('y'))]),
-                                inc_lanes=inc_lanes,
-                                shape=shape)
-            for lanelet_id in [self.lane_id2lanelet_id[l.id] for l in inc_lanes]:
-                self.lanelet_id2junction[lanelet_id] = junction
+        for junction in net.junctions.values():
+            if junction.inc_lanes is None:
+                continue
+            for lane in junction.inc_lanes:
+                # skip internal lanes
+                if lane.id not in self.lane_id2lanelet_id:
+                    continue
+                self.lanelet_id2junction[self.lane_id2lanelet_id[lane.id]] = junction
 
     @staticmethod
     def rewrite_netfile(output: str):
