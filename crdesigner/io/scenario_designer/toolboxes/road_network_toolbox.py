@@ -1059,7 +1059,8 @@ class RoadNetworkToolbox(QDockWidget):
                 {int(item) for item in
                  self.road_network_toolbox.intersection_incomings_table.cellWidget(row, 1).get_checked_items()}
             if len(incoming_lanelets) < 1:
-                print("An incoming must consist at least of one lanelet")
+                self.text_browser.append("_Warning:_ An incoming must consist at least of one lanelet.")
+                print("road_network_toolbox.py/add_intersection: An incoming must consist at least of one lanelet.")
                 return
             successor_left = {int(item) for item in self.road_network_toolbox.intersection_incomings_table.cellWidget(
                 row, 2).get_checked_items()}
@@ -1079,11 +1080,15 @@ class RoadNetworkToolbox(QDockWidget):
             incomings.append(incoming)
         crossings = {int(item) for item in self.road_network_toolbox.intersection_crossings.get_checked_items()}
 
-        intersection = Intersection(intersection_id, incomings, crossings)
-        self.current_scenario.add_objects(intersection)
+        if len(incomings) > 1:
+            intersection = Intersection(intersection_id, incomings, crossings)
+            self.current_scenario.add_objects(intersection)
 
-        self.set_default_road_network_list_information()
-        self.callback(self.current_scenario)
+            self.set_default_road_network_list_information()
+            self.callback(self.current_scenario)
+        else:
+            self.text_browser.append("_Warning:_ An intersection must consist at least of two incomings.")
+            print("road_network_toolbox.py/add_intersection: An intersection must consist at least of two incomings.")
 
     def remove_incoming(self):
         """
