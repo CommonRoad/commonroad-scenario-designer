@@ -45,7 +45,7 @@ from sumocr.maps.scenario_wrapper import AbstractScenarioWrapper
 
 from crdesigner.sumo_map.sumolib_net import (TLS, Connection, Crossing, Edge, Junction, Lane,
                                              Node, TLSProgram, Phase, SignalState, NodeType, RightOfWay,
-                                             VehicleType, SpreadType)
+                                             VehicleType, SpreadType, from_xml)
 
 from crdesigner.sumo_map.errors import ScenarioException
 from crdesigner.sumo_map.util import (_find_intersecting_edges,
@@ -1029,6 +1029,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                 return tls_program
 
         tls_program = get_tls(xml, junction)
+        net = from_xml(self._output_file)
 
         # compute unused id value for the traffic lights
         next_cr_id = max_lanelet_network_id(self.lanelet_network) + 1
@@ -1358,9 +1359,9 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                 for s in junction_xml.get('shape').split()
             ])
             junction = Junction(id=int(junction_xml.get('id')),
-                                j_type=junction_xml.get('type'),
-                                x=float(junction_xml.get('x')),
-                                y=float(junction_xml.get('y')),
+                                junction_type=junction_xml.get('type'),
+                                coord=np.array([float(junction_xml.get('x')),
+                                                float(junction_xml.get('y'))]),
                                 inc_lanes=inc_lanes,
                                 shape=shape)
             for lanelet_id in [self.lane_id2lanelet_id[l.id] for l in inc_lanes]:
