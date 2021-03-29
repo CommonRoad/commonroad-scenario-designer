@@ -43,10 +43,10 @@ class MapConversionToolbox(QDockWidget):
 
     def connect_gui_elements(self):
         self.converter_toolbox.button_start_osm_conversion.clicked.connect(lambda: self.start_conversion())
-        self.converter_toolbox.button_select_osm_file.clicked.connect(lambda: self.select_file())
+        self.converter_toolbox.button_load_osm_file.clicked.connect(lambda: self.select_file())
         self.converter_toolbox.button_load_osm_edit_state.clicked.connect(lambda: self.load_edit_state())
-        self.converter_toolbox.button_load_open_drive.clicked.connect(lambda: self.convert_open_drive())
-        self.converter_toolbox.button_load_lanelet2.clicked.connect(lambda: self.convert_lanelet())
+        self.converter_toolbox.button_convert_opendrive.clicked.connect(lambda: self.convert_open_drive())
+        self.converter_toolbox.button_convert_lanelet2_to_commonroad.clicked.connect(lambda: self.convert_lanelet())
 
     def load_edit_state(self) -> None:
         """

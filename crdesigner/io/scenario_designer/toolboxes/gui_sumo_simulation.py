@@ -100,6 +100,9 @@ class SUMOSimulation(QFrame):
     def scenario(self) -> Scenario:
         return self._scenario
 
+    def set_simulation_length(self, steps: int):
+        self._config.simulation_steps = steps
+
     @scenario.setter
     def scenario(self, scenario: Scenario):
         self._scenario = scenario

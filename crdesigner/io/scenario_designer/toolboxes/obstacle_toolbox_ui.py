@@ -69,8 +69,6 @@ class ObstacleToolboxUI(Toolbox):
         layout_obstacle_information_groupbox.addRow("Width [m]", self.obstacle_width)
         layout_obstacle_information_groupbox.addRow("Length [m]", self.obstacle_length)
         layout_obstacle_information_groupbox.addRow("Type", self.obstacle_type)
-        layout_obstacles.addWidget(obstacle_information_groupbox)
-
         layout_obstacle_state_vis_groupbox = QFormLayout()
         obstacle_state_vis_groupbox = QGroupBox()
         obstacle_state_vis_groupbox.setLayout(layout_obstacle_state_vis_groupbox)
@@ -79,7 +77,8 @@ class ObstacleToolboxUI(Toolbox):
         layout_obstacle_state_vis_groupbox.addRow(layout_vis_selection)
         layout_obstacle_state_vis_groupbox.addWidget(self.toolbar)
         layout_obstacle_state_vis_groupbox.addWidget(self.canvas)
-        layout_obstacles.addWidget(obstacle_state_vis_groupbox)
+        layout_obstacle_information_groupbox.addRow(obstacle_state_vis_groupbox)
+        layout_obstacles.addWidget(obstacle_information_groupbox)
 
         layout_obstacle_buttons = QFormLayout()
         layout_obstacle_buttons.addRow("Selected Obstacle ID:", self.selected_obstacle)
@@ -92,10 +91,15 @@ class ObstacleToolboxUI(Toolbox):
 
         # --Section SUMO Simulation--
         widget_sumo = SUMOSimulation(self.tree)
-        layout_sumo = QGridLayout(widget_sumo)
+        layout_sumo = QFormLayout(widget_sumo)
 
         self.button_start_simulation = QPushButton("Simulate")
-        layout_sumo.addWidget(self.button_start_simulation, 1, 0)
+        self.sumo_simulation_length = QSpinBox()
+        self.sumo_simulation_length.setMinimum(10)
+        self.sumo_simulation_length.setMaximum(10000)
+
+        layout_sumo.addRow("Number Time Steps:", self.sumo_simulation_length)
+        layout_sumo.addRow(self.button_start_simulation)
 
         title_sumo = "Sumo Simulation"
         self.sections.append((title_sumo, widget_sumo))

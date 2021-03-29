@@ -39,7 +39,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         super().__init__()
         self.setupUi(self)
         self.setWindowIcon(QIcon(':/icons/cr.ico'))
-        self.setWindowTitle("CommonRoad Designer")
+        self.setWindowTitle("CommonRoad Scenario Designer")
         self.centralwidget.setStyleSheet('background-color:rgb(150,150,150)')
         self.setWindowFlag(Qt.Window)
 
