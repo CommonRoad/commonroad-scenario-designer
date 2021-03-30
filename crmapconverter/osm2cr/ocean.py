@@ -8,6 +8,9 @@ import utm
 import src.scenario.traffic_sign as tS
 import src.scenario.waters as w
 import numpy as np
+from src.common.file_writer import CommonOceanFileWriter
+from  src.planning.planning_problem import PlanningProblemSet
+
 
 def convert_seamap(filename):
     """
@@ -47,6 +50,10 @@ def convert_seamap(filename):
         addLand(coastlines,scenario, root)
     if len(fairways) > 0:
         addWaters(fairways, scenario, w.WatersType('trafficseparationzone'), root)
+
+    #save scenario in file
+    filewriter = CommonOceanFileWriter(scenario, PlanningProblemSet(), "Franzi", "TUM", "OpenSeaMap", "") #TODO: adjust parameters
+    filewriter.write_to_file()
 
 
 
@@ -156,7 +163,8 @@ def addBuoys (buoys, scenario):
             assert (zone[0] == UTMZone[0] and zone[1] == UTMZone[
                 1]), 'Coordinates are in different UTM zones, {} != {}'.format(zone, UTMZone)
 
+        #save Buoys
         type = tS.TrafficSignElementID(getType(buoy))
         element = tS.TrafficSignElement(type,[])
-        sign = tS.TrafficSign(Scenario.generate_object_id(scenario),element,[coordinates[0],coordinates[1]])
+        sign = tS.TrafficSign(Scenario.generate_object_id(scenario),[element],[coordinates[0],coordinates[1]])
         scenario.add_objects(sign,[])
