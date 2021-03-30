@@ -16,7 +16,7 @@ from typing import List, Tuple
 import numpy as np
 from pyproj import Proj
 
-from commonroad.scenario.lanelet import StopLine, LineMarking, RoadUser, LaneletType, Lanelet
+from commonroad.scenario.lanelet import StopLine, LineMarking, RoadUser, Lanelet
 from commonroad.scenario.traffic_sign import TrafficSignIDGermany, TrafficSignElement
 from shapely.geometry import LineString
 
@@ -25,7 +25,7 @@ from commonroad.scenario.scenario import Scenario, ScenarioID, TrafficSign
 from crdesigner.opendrive.opendriveconversion.conversion_lanelet import ConversionLanelet
 from crdesigner.opendrive.opendriveconversion.conversion_lanelet_network import ConversionLaneletNetwork, \
     convert_to_new_lanelet_id
-from crdesigner.lanelet_lanelet2.osm import OSM, WayRelation, DEFAULT_PROJ_STRING, Node, RightOfWayRelation
+from crdesigner.lanelet_lanelet2.lanelet2 import OSMLanelet, WayRelation, DEFAULT_PROJ_STRING, Node, RightOfWayRelation
 from crdesigner.osm2cr.converter_modules.utility.geometry import (
     point_to_line_distance,
     distance as point_to_polyline_distance
@@ -81,7 +81,7 @@ def _add_stop_line_to_lanelet(lanelets: List[Lanelet], stop_lines: List[StopLine
     return yield_signs
 
 
-class OSM2LConverter:
+class Lanelet2CRConverter:
     "Class to convert OSM to the Commonroad representation of Lanelets."
 
     def __init__(self, proj_string: str = None):
@@ -97,7 +97,7 @@ class OSM2LConverter:
 
     def __call__(
             self,
-            osm: OSM,
+            osm: OSMLanelet,
             detect_adjacencies: bool = True,
             left_driving_system: bool = False,
     ) -> Scenario:

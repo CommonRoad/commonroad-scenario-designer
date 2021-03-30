@@ -8,7 +8,7 @@ __maintainer__ = "Sebastian Maierhofer"
 __email__ = "commonroad-i06@in.tum.de"
 __status__ = "Released"
 
-from typing import Optional, Union
+from typing import Optional
 
 from lxml import etree
 from typing import List
@@ -62,7 +62,8 @@ class Way:
 class WayRelation:
     """Relation for a lanelet with a left and a right way."""
 
-    def __init__(self, id_, left_way, right_way, tag_dict: Optional[dict] = None, regulatory_elements: List[str] = []): #add a spot for traffic signs especially speed limit
+    def __init__(self, id_, left_way, right_way, tag_dict: Optional[dict] = None, regulatory_elements: List[str] = []):
+        #  add a spot for traffic signs especially speed limit
         self.id_ = str(id_)
         self.left_way = str(left_way)
         self.right_way = str(right_way)
@@ -93,7 +94,8 @@ class WayRelation:
 class RightOfWayRelation:
     """Relation for a right of way relation with yield and right of way lines."""
 
-    def __init__(self, id_, refers: list, yield_ways: list, right_of_ways: list, tag_dict: Optional[dict] = None, ref_line: Optional[list] = None):
+    def __init__(self, id_, refers: list, yield_ways: list, right_of_ways: list, tag_dict: Optional[dict] = None,
+                 ref_line: Optional[list] = None):
         self.id_ = str(id_)
         self.refers = [str(i) for i in refers]
         self.yield_ways = [str(i) for i in yield_ways]
@@ -134,7 +136,7 @@ class RightOfWayRelation:
         return rel
 
 
-class OSM:
+class OSMLanelet:
     """Basic OSM representation."""
 
     def __init__(self):

@@ -3,6 +3,7 @@ import os
 import sys
 from argparse import ArgumentParser
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
+from matplotlib.pyplot import close
 import copy
 
 from PyQt5.QtWidgets import *
@@ -11,8 +12,12 @@ from PyQt5.QtCore import *
 
 from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.scenario.lanelet import LaneletNetwork, Lanelet
-from commonroad.scenario.scenario import Scenario, ScenarioID
+from commonroad.scenario.scenario import Scenario
 from commonroad.scenario.obstacle import Obstacle
+
+from crdesigner.osm2cr.converter_modules.cr_operations.export import convert_to_scenario
+from crdesigner.io.scenario_designer.osm_gui_modules.gui_embedding import EdgeEdit, LaneLinkEdit
+from crdesigner.osm2cr.converter_modules.graph_operations import road_graph as rg
 
 from crdesigner.io.scenario_designer.gui_src import CR_Scenario_Designer  # do not remove!!!
 from crdesigner.io.scenario_designer.converter_modules.opendrive_interface import OpenDRIVEInterface
@@ -118,7 +123,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
     def create_converter_toolbox(self):
         """ Create the map converter toolbox."""
-        self.converter_toolbox_widget = MapConversionToolbox(self.toolbox_callback, self.textBrowser)
+        self.converter_toolbox_widget = MapConversionToolbox(self, self.toolbox_callback, self.textBrowser)
         self.addDockWidget(Qt.RightDockWidgetArea, self.converter_toolbox_widget)
 
     def create_obstacle_toolbox(self):
@@ -139,6 +144,12 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
     def toolbox_callback(self, scenario):
         if scenario is not None:
+            if self.edge_edit_window is not None:
+                close(self.edge_edit_window.gui_plot.fig)
+            if self.lane_link_window is not None:
+                close(self.lane_link_window.gui_plot.fig)
+            self.edge_edit_window = None
+            self.lane_link_window = None
             self.cr_viewer.open_scenario(scenario)
             self.update_view(focus_on_network=True)
             self.update_max_step()
@@ -661,6 +672,33 @@ class MWindow(QMainWindow, Ui_mainWindow):
             return
         self.cr_viewer.current_scenario = self.scenarios[self.current_scenario_index]
         self.update_view(focus_on_network=True)
+
+    def manual_osm_conversion(self, graph):
+        self.edge_edit_embedding(graph)
+
+    def edge_edit_embedding(self, graph: rg.Graph):
+        """
+        sets edge edit embedding as main window
+
+        :param graph: the graph to edit
+        :return: None
+        """
+        if graph is not None:
+            self.edge_edit_window = EdgeEdit(self, graph, None)
+            self.show()
+        else:
+            print("no graph loaded")
+
+    def lane_link_embedding(self, graph: rg.Graph):
+        """
+        sets lane link embedding as main window
+
+        :param graph: the graph to edit
+        :return:
+        """
+        if graph is not None:
+            self.lane_link_window = LaneLinkEdit(self, graph, None)
+            self.show()
 
 
 def main():

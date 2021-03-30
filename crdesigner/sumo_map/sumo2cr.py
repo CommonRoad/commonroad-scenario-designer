@@ -8,12 +8,13 @@ from crdesigner.opendrive.opendriveparser.parser import parse_opendrive
 from lxml import etree
 
 
-def convert_net_to_cr(net_file:str, out_folder:str=None, verbose=False) -> str:
+def convert_net_to_cr(net_file: str, out_folder: str = None, verbose: bool = False) -> str:
     """
     Converts .net file to CommonRoad xml using Netconvert and OpenDRIVE 2 Lanelet Converter.
 
     :param net_file: path of .net.xml file
     :param out_folder: path of output folder for CommonRoad scenario.
+    :param verbose: Boolean indicating whether status should be printed to console
 
     :return: commonroad map file
     """
@@ -39,7 +40,6 @@ def convert_net_to_cr(net_file:str, out_folder:str=None, verbose=False) -> str:
     with open(opendrive_file, "r") as fi:
         open_drive = parse_opendrive(etree.parse(fi).getroot())
 
-
     road_network = Network()
     road_network.load_opendrive(open_drive)
     scenario = road_network.export_commonroad_scenario()
@@ -48,7 +48,8 @@ def convert_net_to_cr(net_file:str, out_folder:str=None, verbose=False) -> str:
 
     # write CommonRoad scenario to file
     commonroad_writer = CommonRoadFileWriter(scenario, planning_problem_set=None,
-                                             source="Converted from SUMO net using netconvert and OpenDRIVE 2 Lanelet Converter",
+                                             source="Converted from SUMO net using netconvert "
+                                                    "and OpenDRIVE 2 Lanelet Converter",
                                              tags=set(Tag.simulated), author='', affiliation='')
 
     commonroad_writer.write_scenario_to_file(cr_map_file)

@@ -463,7 +463,7 @@ class MapEdit(ABC):
         self.embedding = embedding
         self.gui_plot = gui_plot
 
-        self.embedding.setupUi(self.app.main_window)
+        self.embedding.setupUi(self.app)
         self.canvas: FigureCanvas
         self.toolbar: NavigationToolbar
         self.canvas, self.toolbar = self.embed_plot_in_window(
@@ -495,7 +495,7 @@ class MapEdit(ABC):
         """
         layout = window.plot_frame
         canvas = plot.fig.canvas
-        toolbar = NavigationToolbar(canvas, self.app.main_window)
+        toolbar = NavigationToolbar(canvas, self.app)
         layout.addWidget(toolbar)
         layout.addWidget(canvas)
         return canvas, toolbar
@@ -717,7 +717,7 @@ class LaneLinkEdit(MapEdit):
         self.embedding.b_delete.clicked.connect(self.gui_plot.delete)
         self.embedding.b_finalize.clicked.connect(self.finalize)
 
-    def finalize(self) -> None:
+    def finalize(self):
         """
         end edit process by exporting the benchmark
 
@@ -735,7 +735,7 @@ class LaneLinkEdit(MapEdit):
                 QMessageBox.Ok,
             )
             return
-        self.app.export(graph)
+        self.app.toolbox_callback(ex.convert_to_scenario(graph))
 
 
 class AttributeEditor:
