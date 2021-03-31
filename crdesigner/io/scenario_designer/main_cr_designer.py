@@ -116,8 +116,11 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
     def create_road_network_toolbox(self):
         """ Create the Road network toolbox."""
-        self.road_network_toolbox = RoadNetworkToolbox(self.cr_viewer.current_scenario, self.textBrowser,
-                                                       self.toolbox_callback, self.tmp_folder)
+        self.road_network_toolbox = RoadNetworkToolbox(current_scenario=self.cr_viewer.current_scenario,
+                                                       text_browser=self.textBrowser,
+                                                       callback=self.toolbox_callback,
+                                                       tmp_folder=self.tmp_folder,
+                                                       selection_changed_callback=self.cr_viewer.update_plot)
         self.addDockWidget(Qt.LeftDockWidgetArea, self.road_network_toolbox)
 
     def create_converter_toolbox(self):
@@ -135,6 +138,8 @@ class MWindow(QMainWindow, Ui_mainWindow):
             self.road_network_toolbox.road_network_toolbox.selected_lanelet_two.setCurrentText(
                 self.road_network_toolbox.road_network_toolbox.selected_lanelet_one.currentText())
             self.road_network_toolbox.road_network_toolbox.selected_lanelet_one.setCurrentText(
+                str(selected_object.lanelet_id))
+            self.road_network_toolbox.road_network_toolbox.selected_lanelet_update.setCurrentText(
                 str(selected_object.lanelet_id))
         elif isinstance(selected_object, Obstacle):
             self.obstacle_toolbox.obstacle_toolbox.selected_obstacle.setCurrentText(str(selected_object.obstacle_id))
@@ -508,7 +513,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.open_scenario(scenario, filename)
 
     def update_toolbox_scenarios(self):
-        scenario = self.scenarios[self.current_scenario_index]
+        scenario = self.cr_viewer.current_scenario
         self.road_network_toolbox.update_scenario(scenario)
         self.obstacle_toolbox.update_scenario(scenario)
         if SUMO_AVAILABLE:
