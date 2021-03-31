@@ -1,7 +1,6 @@
 import pickle
 from lxml import etree
-import uuid
-
+from typing import Optional
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
@@ -16,6 +15,10 @@ from crdesigner.osm2cr.converter_modules.cr_operations.export import convert_to_
 from crdesigner.osm2cr.converter_modules.graph_operations import road_graph as rg
 from crdesigner.osm2cr.converter_modules.osm_operations.downloader import download_around_map
 from crdesigner.osm2cr import config
+from crdesigner.osm2cr.converter_modules.cr_operations.export import convert_to_scenario
+from crdesigner.osm2cr.converter_modules.graph_operations import road_graph as rg
+
+from crdesigner.io.scenario_designer.osm_gui_modules.gui_embedding import EdgeEdit, LaneLinkEdit
 from crdesigner.io.scenario_designer.converter_modules.osm_interface import OSMInterface
 
 from crdesigner.opendrive.opendriveparser.parser import parse_opendrive
@@ -30,15 +33,14 @@ from crdesigner.sumo_map.cr2sumo.converter import CR2SumoMapConverter
 
 
 class MapConversionToolbox(QDockWidget):
-    def __init__(self, parent, callback, text_browser):
+    def __init__(self, callback, text_browser):
         super().__init__("Map Converter Toolbox")
-
-        self.pa = parent
         self.converter_toolbox = MapConversionToolboxUI()
         self.callback = callback
         self.text_browser = text_browser
         self.adjust_ui()
         self.connect_gui_elements()
+        self.osm_edit_window = QMainWindow(self)
 
         self.lanelet2_to_cr_converter = Lanelet2CRConverter()
 
@@ -140,11 +142,35 @@ class MapConversionToolbox(QDockWidget):
                 QMessageBox.Ok)
             return
         if self.converter_toolbox.osm_conversion_edit_manually_selection.isChecked():
-            self.pa.manual_osm_conversion(self.graph)
+            self.edge_edit_embedding(self.graph)
         else:
             self.hidden_osm_conversion(self.graph)
         self.converter_toolbox.osm_loading_status.setText("no file selected")
         self.osm_file = None
+
+    def edge_edit_embedding(self, graph: rg.Graph):
+        """
+        sets edge edit embedding as main window
+
+        :param graph: the graph to edit
+        :return: None
+        """
+        if graph is not None:
+            self.edge_edit_window = EdgeEdit(self, graph, None)
+            self.osm_edit_window.show()
+        else:
+            print("no graph loaded")
+
+    def lane_link_embedding(self, graph: rg.Graph):
+        """
+        sets lane link embedding as main window
+
+        :param graph: the graph to edit
+        :return:
+        """
+        if graph is not None:
+            self.lane_link_window = LaneLinkEdit(self, graph, None)
+            self.osm_edit_window.show()
 
     def verify_osm_coordinate_input(self) -> bool:
         """
