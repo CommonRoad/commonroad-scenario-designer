@@ -210,10 +210,10 @@ class RoadNetworkToolbox(QDockWidget):
         self.road_network_toolbox.x_position_traffic_light.setText("0.0")
         self.road_network_toolbox.y_position_traffic_light.setText("0.0")
         self.road_network_toolbox.time_offset.setText("0")
-        self.road_network_toolbox.time_red.setText("50")
-        self.road_network_toolbox.time_red_yellow.setText("10")
-        self.road_network_toolbox.time_yellow.setText("20")
-        self.road_network_toolbox.time_green.setText("70")
+        self.road_network_toolbox.time_red.setText("120")
+        self.road_network_toolbox.time_red_yellow.setText("15")
+        self.road_network_toolbox.time_yellow.setText("70")
+        self.road_network_toolbox.time_green.setText("380")
         self.road_network_toolbox.time_inactive.setText("0")
         self.road_network_toolbox.traffic_light_active.setChecked(True)
 
@@ -984,14 +984,14 @@ class RoadNetworkToolbox(QDockWidget):
         for lanelet_id in lanelet_ids:
             try:
                 ok = converter.auto_generate_traffic_light_system(lanelet_id,
-                                                                  cycle_time=math.ceil(total * dt),
+                                                                  green_time=int(green * dt),
                                                                   yellow_time=int(yellow * dt),
                                                                   all_red_time=0,
                                                                   left_green_time=math.ceil(0.06 * total * dt),
                                                                   crossing_min_time=math.ceil(0.1 * total * dt),
                                                                   crossing_clearance_time=math.ceil(0.15 * total * dt),
                                                                   time_offset=int(offset * dt))
-            except Exception as e:
+            except Exception:
                 ok = False
             oks.append(ok)
             self.text_browser.append(

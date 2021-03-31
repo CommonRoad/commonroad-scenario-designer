@@ -961,8 +961,9 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
 
     def auto_generate_traffic_light_system(self,
                                            lanelet_id: int,
-                                           cycle_time: int = 90,
-                                           yellow_time: int = -1,
+                                           green_time: int = 38,
+                                           red_time: int = 12,
+                                           yellow_time: int = 7,
                                            all_red_time: int = 0,
                                            left_green_time: int = 6,
                                            crossing_min_time: int = 4,
@@ -973,8 +974,9 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         in the same intersection as the given lanelet_id.
         The below has been partially adapted from: https://sumo.dlr.de/docs/netconvert.html#tls_building
         :param lanelet_id: ID of lanelet in intersection to generate traffic lights for
-        :param cycle_time: Duration of a full traffic light cycle [s]
+        :param green_time: Green phase duration. [s]
         :param yellow_time: Fixed time for yellow phase durations [s]
+        :param red_time: Set INT as fixed time for red phase duration at traffic lights that do not have a conflicting flow [s]
         :param all_red_time: Fixed time for intermediate red phase after every switch [s].
         :param left_green_time: Green phase duration for left turns. Setting this value to 0
         disables additional left-turning phases [s].
@@ -983,16 +985,13 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         :param time_offset: Offset for start time of the generated traffic lights [s].
         :return: if the conversion was successful
         """
-        assert cycle_time > 0
-        assert yellow_time >= -1
+        assert green_time > 0
+        assert yellow_time > 0
         assert all_red_time >= 0
         assert left_green_time > 0
         assert crossing_min_time > 0
         assert crossing_clearance_time > 0
-        assert cycle_time >= max(yellow_time, 0) + \
-               all_red_time + left_green_time + crossing_min_time + crossing_clearance_time, \
-            f"Cycle time {cycle_time} needs to be greater than the sum of individual times" \
-            f"sum: {max(yellow_time, 0) + all_red_time + left_green_time + crossing_min_time + crossing_clearance_time}."
+        assert red_time >= 0
 
         if not self._output_file:
             logging.error("Need to call convert_to_net_file first")
@@ -1025,7 +1024,8 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                   f" --tls.guess=true" \
                   f" --tls.guess-signals={'true' if guess_signals else 'false'}" \
                   f" --tls.group-signals=true" \
-                  f" --tls.cycle.time={cycle_time}" \
+                  f" --tls.green.time={green_time}" \
+                  f" --tls.red.time={red_time}" \
                   f" --tls.yellow.time={yellow_time}" \
                   f" --tls.allred.time={all_red_time}" \
                   f" --tls.left-green.time={left_green_time}" \
@@ -1061,15 +1061,17 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                 cycle=[
                     TrafficLightCycleElement(
                         state=traffic_light_states_SUMO2CR[phase.state[connection.tl_link]],
-                        duration=round(phase.duration * self.conf.dt)
+                        duration=round(phase.duration / self.conf.dt)
                     )
                     for phase in connection.tls.phases
                 ],
                 direction=directions_SUMO2CR[connection.direction],
-                position=lanelet.right_vertices[-1]
+                position=lanelet.right_vertices[-1],
+                time_offset=time_offset / self.conf.dt
             )
             next_cr_id += 1
-            assert self.lanelet_network.add_traffic_light(traffic_light, {lanelet_id})
+            assert self.lanelet_network.add_traffic_light(traffic_light, {lanelet_id}), \
+                f"Could not add traffic light to lanelet: {lanelet_id}"
 
         return True
 
