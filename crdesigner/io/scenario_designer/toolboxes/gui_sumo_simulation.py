@@ -38,8 +38,7 @@ class SimulationWorker(QThread):
               self.config.dt)
         try:
             # convert scenario to SUMO
-            wrapper = CR2SumoMapConverter(self.scenario.lanelet_network,
-                                          self.config)
+            wrapper = CR2SumoMapConverter(self.scenario.lanelet_network, self.config)
             wrapper.convert_to_net_file(self.output_folder)
 
             simulation = SumoSimulation()

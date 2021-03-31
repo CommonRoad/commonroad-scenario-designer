@@ -136,7 +136,7 @@ class RoadNetworkToolbox(QDockWidget):
         @return: List of lanelet IDs.
         """
         if self.current_scenario is not None:
-            return [la.lanelet_id for la in self.current_scenario.lanelet_network.lanelets]
+            return sorted([la.lanelet_id for la in self.current_scenario.lanelet_network.lanelets])
         else:
             return []
 
@@ -146,9 +146,8 @@ class RoadNetworkToolbox(QDockWidget):
         @return: List of traffic sign IDs.
         """
         if self.current_scenario is not None:
-            return [ts.traffic_sign_id for ts in self.current_scenario.lanelet_network.traffic_signs]
-        else:
-            return []
+            return sorted([ts.traffic_sign_id for ts in self.current_scenario.lanelet_network.traffic_signs])
+        return []
 
     def collect_traffic_light_ids(self) -> List[int]:
         """
@@ -156,9 +155,8 @@ class RoadNetworkToolbox(QDockWidget):
         @return: List of traffic light IDs.
         """
         if self.current_scenario is not None:
-            return [tl.traffic_light_id for tl in self.current_scenario.lanelet_network.traffic_lights]
-        else:
-            return []
+            return sorted([tl.traffic_light_id for tl in self.current_scenario.lanelet_network.traffic_lights])
+        return []
 
     def collect_intersection_ids(self) -> List[int]:
         """
@@ -166,9 +164,8 @@ class RoadNetworkToolbox(QDockWidget):
         @return: List of intersection IDs.
         """
         if self.current_scenario is not None:
-            return [inter.intersection_id for inter in self.current_scenario.lanelet_network.intersections]
-        else:
-            return []
+            return sorted([inter.intersection_id for inter in self.current_scenario.lanelet_network.intersections])
+        return []
 
     def collect_incoming_lanelet_ids_from_intersection(self) -> List[int]:
         """
