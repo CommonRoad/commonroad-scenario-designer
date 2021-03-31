@@ -92,8 +92,10 @@ class RoadNetworkToolbox(QDockWidget):
         self.road_network_toolbox.button_remove_intersection.clicked.connect(lambda: self.remove_intersection())
         self.road_network_toolbox.button_update_intersection.clicked.connect(lambda: self.update_intersection())
 
-    def update_scenario(self, scenario: Scenario):
+    def refresh_toolbox(self, scenario: Scenario):
         self.current_scenario = scenario
+        # refresh toolboxes based on the scenario
+        self.set_default_road_network_list_information()
 
     def lanelet_selection_changed(self):
         selected_lanelet = self.selected_lanelet()
@@ -228,19 +230,23 @@ class RoadNetworkToolbox(QDockWidget):
         Initializes Combobox GUI elements with lanelet information.
         """
         self.road_network_toolbox.predecessors.clear()
-        self.road_network_toolbox.predecessors.addItems(["None"] + [str(item) for item in self.collect_lanelet_ids()])
+        self.road_network_toolbox.predecessors.addItems(
+            ["None"] + [str(item) for item in self.collect_lanelet_ids()])
         self.road_network_toolbox.predecessors.setCurrentIndex(0)
 
         self.road_network_toolbox.successors.clear()
-        self.road_network_toolbox.successors.addItems(["None"] + [str(item) for item in self.collect_lanelet_ids()])
+        self.road_network_toolbox.successors.addItems(
+            ["None"] + [str(item) for item in self.collect_lanelet_ids()])
         self.road_network_toolbox.successors.setCurrentIndex(0)
 
         self.road_network_toolbox.adjacent_right.clear()
-        self.road_network_toolbox.adjacent_right.addItems(["None"] + [str(item) for item in self.collect_lanelet_ids()])
+        self.road_network_toolbox.adjacent_right.addItems(
+            ["None"] + [str(item) for item in self.collect_lanelet_ids()])
         self.road_network_toolbox.adjacent_right.setCurrentIndex(0)
 
         self.road_network_toolbox.adjacent_left.clear()
-        self.road_network_toolbox.adjacent_left.addItems(["None"] + [str(item) for item in self.collect_lanelet_ids()])
+        self.road_network_toolbox.adjacent_left.addItems(
+            ["None"] + [str(item) for item in self.collect_lanelet_ids()])
         self.road_network_toolbox.adjacent_left.setCurrentIndex(0)
 
         self.road_network_toolbox.lanelet_referenced_traffic_sign_ids.clear()
@@ -421,16 +427,16 @@ class RoadNetworkToolbox(QDockWidget):
             if stop_line_at_end:
                 stop_line.start = left_vertices[-1]
                 stop_line.end = right_vertices[-1]
-            lanelet = \
-                Lanelet(left_vertices=left_vertices, right_vertices=right_vertices, predecessor=predecessors,
-                        successor=successors, adjacent_left=adjacent_left, adjacent_right=adjacent_right,
-                        center_vertices=0.5 * (left_vertices + right_vertices),
-                        adjacent_left_same_direction=adjacent_left_same_direction,
-                        adjacent_right_same_direction=adjacent_right_same_direction,
-                        lanelet_id=lanelet_id, lanelet_type=lanelet_type, user_one_way=user_one_way,
-                        user_bidirectional=user_bidirectional, line_marking_right_vertices=line_marking_right,
-                        line_marking_left_vertices=line_marking_left, stop_line=stop_line, traffic_signs=traffic_signs,
-                        traffic_lights=traffic_lights)
+            lanelet = Lanelet(left_vertices=left_vertices, right_vertices=right_vertices, predecessor=predecessors,
+                              successor=successors, adjacent_left=adjacent_left, adjacent_right=adjacent_right,
+                              center_vertices=0.5 * (left_vertices + right_vertices),
+                              adjacent_left_same_direction=adjacent_left_same_direction,
+                              adjacent_right_same_direction=adjacent_right_same_direction,
+                              lanelet_id=lanelet_id, lanelet_type=lanelet_type, user_one_way=user_one_way,
+                              user_bidirectional=user_bidirectional, line_marking_right_vertices=line_marking_right,
+                              line_marking_left_vertices=line_marking_left, stop_line=stop_line,
+                              traffic_signs=traffic_signs,
+                              traffic_lights=traffic_lights)
 
         self.current_scenario.add_objects(lanelet)
         self.set_default_road_network_list_information()

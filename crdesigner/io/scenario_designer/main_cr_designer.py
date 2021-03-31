@@ -514,8 +514,8 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
     def update_toolbox_scenarios(self):
         scenario = self.cr_viewer.current_scenario
-        self.road_network_toolbox.update_scenario(scenario)
-        self.obstacle_toolbox.update_scenario(scenario)
+        self.road_network_toolbox.refresh_toolbox(scenario)
+        self.obstacle_toolbox.refresh_toolbox(scenario)
         if SUMO_AVAILABLE:
             self.obstacle_toolbox.sumo_box.scenario = scenario
 

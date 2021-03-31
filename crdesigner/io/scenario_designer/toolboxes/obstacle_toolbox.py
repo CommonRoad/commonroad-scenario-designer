@@ -64,7 +64,7 @@ class ObstacleToolbox(QDockWidget):
         else:
             return []
 
-    def update_scenario(self, scenario: Scenario):
+    def refresh_toolbox(self, scenario: Scenario):
         self.current_scenario = scenario
         self.initialize_toolbox()
 
