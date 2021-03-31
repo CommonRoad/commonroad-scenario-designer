@@ -65,6 +65,7 @@ class ScenarioDialogUI(QWidget):
         self.location_storage_selection = QCheckBox("Store Location")
 
         self.scenario_geo_anme_id = QLineEdit()
+        self.scenario_geo_anme_id.setValidator(QIntValidator())
         self.scenario_geo_anme_id.setAlignment(Qt.AlignRight)
 
         self.scenario_latitude = QLineEdit()
