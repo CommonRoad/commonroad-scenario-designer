@@ -15,7 +15,7 @@
     <type id="highway.tertiary"        speed="22.22" priority="10" oneway="false" disallow="rail rail_urban rail_electric tram ship pedestrian"/>
     <type id="highway.tertiary_link"   speed="22.22" priority="5"  oneway="false" disallow="rail rail_urban rail_electric tram ship pedestrian"/>
     <!--    Below tertiary, still interconnecting, not in a residential area    -->
-    <type id="highway.unclassified"    speed="13.89" priority="4"  oneway="false" disallow="rail rail_urban rail_electric tram ship pedestrian"/>
+    <type id="highway.unclassified"    speed="13.89" priority="4"  oneway="false" disallow="rail rail_urban rail_electric tram ship"/>
     <!--   Inner City roads & Accessing a residential area, should probably not be outside a town  -->
     <type id="highway.residential"     speed="13.89" priority="3"  oneway="false" disallow="rail rail_urban rail_electric tram ship pedestrian"/>
     <!--    Verkehrsberuhigter Bereich (walking speed). If you leave that street, you have to give way  -->

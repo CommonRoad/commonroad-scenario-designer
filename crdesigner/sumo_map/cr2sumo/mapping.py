@@ -4,27 +4,27 @@ import os
 from commonroad.scenario.lanelet import LaneletType
 from commonroad.scenario.obstacle import ObstacleType
 from commonroad.scenario.traffic_sign import SupportedTrafficSignCountry
-from commonroad.scenario.traffic_sign import TrafficLightState
-from crdesigner.sumo_map.sumolib_net import EdgeTypes, EdgeType, VehicleType, SignalState
+from commonroad.scenario.traffic_sign import TrafficLightState, TrafficLightDirection
+from crdesigner.sumo_map.sumolib_net import EdgeTypes, EdgeType, VehicleType, SignalState, ConnectionDirection
 
-# # sumo type to CommonRoad obstacle type
-# TYPE_MAPPING = {
-#     'DEFAULT_VEHTYPE': ObstacleType.CAR,
-#     'passenger': ObstacleType.CAR,
-#     'truck': ObstacleType.TRUCK,
-#     'bus': ObstacleType.BUS,
-#     'bicycle': ObstacleType.BICYCLE,
-#     'pedestrian': ObstacleType.PEDESTRIAN
-# }
-# # sumo type to CommonRoad obstacle type
-# VEHICLE_TYPE_SUMO2CR = {
-#     'DEFAULT_VEHTYPE': ObstacleType.CAR,
-#     'passenger': ObstacleType.CAR,
-#     'truck': ObstacleType.TRUCK,
-#     'bus': ObstacleType.BUS,
-#     'bicycle': ObstacleType.BICYCLE,
-#     'pedestrian': ObstacleType.PEDESTRIAN
-# }
+directions_CR2SUMO = {
+    TrafficLightDirection.RIGHT: ConnectionDirection.RIGHT,
+    TrafficLightDirection.STRAIGHT: ConnectionDirection.STRAIGHT,
+    TrafficLightDirection.LEFT: ConnectionDirection.LEFT,
+    TrafficLightDirection.LEFT_STRAIGHT: ConnectionDirection.PARTLEFT,
+    TrafficLightDirection.STRAIGHT_RIGHT: ConnectionDirection.PARTRIGHT,
+    TrafficLightDirection.LEFT_RIGHT: ConnectionDirection.PARTLEFT,
+    TrafficLightDirection.ALL: ConnectionDirection.STRAIGHT
+}
+
+directions_SUMO2CR = {
+    ConnectionDirection.RIGHT: TrafficLightDirection.RIGHT,
+    ConnectionDirection.STRAIGHT: TrafficLightDirection.STRAIGHT,
+    ConnectionDirection.LEFT: TrafficLightDirection.LEFT,
+    ConnectionDirection.PARTLEFT: TrafficLightDirection.LEFT_RIGHT,
+    ConnectionDirection.PARTRIGHT: TrafficLightDirection.LEFT_RIGHT,
+    ConnectionDirection.TURN: TrafficLightDirection.ALL
+}
 
 # Mapping from CR TrafficLightStates to SUMO Traffic Light states
 traffic_light_states_CR2SUMO = {

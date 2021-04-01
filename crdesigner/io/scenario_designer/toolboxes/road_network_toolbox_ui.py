@@ -468,6 +468,7 @@ class RoadNetworkToolboxUI(Toolbox):
         self.button_add_traffic_light = QPushButton("Add")
         self.button_update_traffic_light = QPushButton("Update")
         self.button_remove_traffic_light = QPushButton("Remove")
+        self.button_create_traffic_lights = QPushButton("Create Traffic Lights for Referenced Lanelets")
 
         self.traffic_light_cycle_order = QComboBox()
         self.traffic_light_cycle_order.addItems(["r-ry-g-y", "g-y-r-ry", "ry-g-y-r", "y-r-ry-g", "r-g", "r-g-in"])
@@ -493,9 +494,11 @@ class RoadNetworkToolboxUI(Toolbox):
         traffic_light_layout.addRow("Selected traffic light", self.selected_traffic_light)
         traffic_light_layout.addRow(self.button_update_traffic_light)
         traffic_light_layout.addRow(self.button_remove_traffic_light)
+        traffic_light_layout.addRow(self.button_create_traffic_lights)
 
         layout_traffic_light.addWidget(traffic_light_information_groupbox)
         layout_traffic_light.addLayout(traffic_light_layout)
+# >>>>>>> develop
 
         title_traffic_light = "Traffic Light"
         return title_traffic_light, widget_traffic_light
