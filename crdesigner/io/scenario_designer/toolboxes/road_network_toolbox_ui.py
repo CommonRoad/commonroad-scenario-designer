@@ -470,27 +470,6 @@ class RoadNetworkToolboxUI(Toolbox):
         self.button_remove_traffic_light = QPushButton("Remove")
         self.button_create_traffic_lights = QPushButton("Create Traffic Lights for Referenced Lanelets")
 
-# <<<<<<< HEAD
-#         traffic_light_information = QFormLayout()
-#         traffic_light_information.addRow("X-Position [m]", self.x_position_traffic_light)
-#         traffic_light_information.addRow("Y-Position [m]", self.y_position_traffic_light)
-#         traffic_light_information.addRow("Direction", self.traffic_light_directions)
-#         traffic_light_information.addRow("Time offset", self.time_offset)
-#         traffic_light_information.addRow("Time red", self.time_red)
-#         traffic_light_information.addRow("Time red-yellow", self.time_red_yellow)
-#         traffic_light_information.addRow("Time green", self.time_green)
-#         traffic_light_information.addRow("Time yellow", self.time_yellow)
-#         traffic_light_information.addRow("Time inactive", self.time_inactive)
-#         traffic_light_information.addRow("Referenced lanelets", self.referenced_lanelets_traffic_light)
-#         traffic_light_information.addRow("Selected traffic light", self.selected_traffic_light)
-#         traffic_light_information.addRow(self.traffic_light_active)
-#         traffic_light_information.addRow(self.button_add_traffic_light)
-#         traffic_light_information.addRow(self.button_update_traffic_light)
-#         traffic_light_information.addRow(self.button_remove_traffic_light)
-#         traffic_light_information.addRow(self.button_create_traffic_lights)
-#
-#         layout_traffic_light.addLayout(traffic_light_information)
-# =======
         self.traffic_light_cycle_order = QComboBox()
         self.traffic_light_cycle_order.addItems(["r-ry-g-y", "g-y-r-ry", "ry-g-y-r", "y-r-ry-g", "r-g", "r-g-in"])
 
