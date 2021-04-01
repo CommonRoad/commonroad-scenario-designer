@@ -5,6 +5,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 
 from commonroad.scenario.traffic_sign import *
+from commonroad.scenario.scenario import Scenario
 
 from crdesigner.io.scenario_designer.toolboxes.map_converter_toolbox_ui import MapConversionToolboxUI
 from crdesigner.io.scenario_designer.misc.util import select_local_file
@@ -25,13 +26,16 @@ from crdesigner.opendrive.opendriveconversion.network import Network
 from crdesigner.lanelet_lanelet2.lanelet2_parser import Lanelet2Parser
 from crdesigner.lanelet_lanelet2.lanelet2cr import Lanelet2CRConverter
 
-from crdesigner.sumo_map.config import SumoConfig
-from crdesigner.sumo_map.sumo2cr import convert_net_to_cr
-from crdesigner.sumo_map.cr2sumo.converter import CR2SumoMapConverter
+from crdesigner.io.scenario_designer.toolboxes.gui_sumo_simulation import SUMO_AVAILABLE
+if SUMO_AVAILABLE:
+    if SUMO_AVAILABLE:
+        from crdesigner.io.scenario_designer.toolboxes.gui_sumo_simulation import SUMOSimulation
+        from crdesigner.io.scenario_designer.settings.sumo_settings import SUMOSettings
+        from crdesigner.sumo_map.sumo2cr import convert_net_to_cr
 
 
 class MapConversionToolbox(QDockWidget):
-    def __init__(self, callback, text_browser):
+    def __init__(self, current_scenario, callback, text_browser, tmp_folder: str):
         super().__init__("Map Converter Toolbox")
         self.converter_toolbox = MapConversionToolboxUI()
         self.callback = callback
@@ -39,6 +43,12 @@ class MapConversionToolbox(QDockWidget):
         self.adjust_ui()
         self.connect_gui_elements()
         self.osm_edit_window = QMainWindow(self)
+        self.current_scenario = current_scenario
+
+        if SUMO_AVAILABLE:
+            self.sumo_simulation = SUMOSimulation(tmp_folder=tmp_folder)
+        else:
+            self.sumo_simulation = None
 
         self.lanelet2_to_cr_converter = Lanelet2CRConverter()
 
@@ -72,6 +82,9 @@ class MapConversionToolbox(QDockWidget):
         self.converter_toolbox.button_convert_sumo_to_cr.clicked.connect(lambda: self.convert_sumo_to_cr())
         self.converter_toolbox.button_convert_cr_to_sumo.clicked.connect(lambda: self.convert_cr_to_sumo())
         self.converter_toolbox.button_open_sumo_settings.clicked.connect(lambda: self.open_sumo_settings())
+
+    def refresh_toolbox(self, scenario: Scenario):
+        self.current_scenario = scenario
 
     def load_osm_edit_state(self) -> None:
         """
@@ -327,12 +340,20 @@ class MapConversionToolbox(QDockWidget):
             self.callback(scenario)
 
     def load_sumo(self):
-        self.path_sumo_file = select_local_file(self, "SUMO", "net")
+        self.path_sumo_file = select_local_file(self, "SUMO", "net.xml")
         if self.path_sumo_file:
             self.converter_toolbox.loaded_sumo_file.setText("file successfully loaded")
 
     def convert_cr_to_sumo(self):
-        self.sumo_converter = CR2SumoMapConverter.convert_scenario_to_net_file(self.current_scenario)
+        directory = QFileDialog.getExistingDirectory(self, "Dir", options=QFileDialog.Options())
+        if not directory:
+            return
+        self.sumo_simulation.convert(directory)
+
+    def open_sumo_settings(self):
+        SUMOSettings(self, config=self.sumo_simulation.config)
 
     def convert_sumo_to_cr(self):
-        pass
+        scenario = convert_net_to_cr(self.path_sumo_file)
+        self.callback(scenario)
+

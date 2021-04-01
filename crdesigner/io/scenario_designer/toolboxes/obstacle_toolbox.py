@@ -28,9 +28,9 @@ class ObstacleToolbox(QDockWidget):
         self.tmp_folder = tmp_folder
 
         if SUMO_AVAILABLE:
-            self.sumo_box = SUMOSimulation(tmp_folder=tmp_folder)
+            self.sumo_simulation = SUMOSimulation(tmp_folder=tmp_folder)
         else:
-            self.sumo_box = None
+            self.sumo_simulation = None
 
     def adjust_ui(self):
         """Updates GUI properties like width, etc."""
@@ -134,9 +134,9 @@ class ObstacleToolbox(QDockWidget):
 
     def start_sumo_simulation(self):
         num_time_steps = self.obstacle_toolbox.sumo_simulation_length.value()
-        self.sumo_box.set_simulation_length(num_time_steps)
-        self.sumo_box.simulate()
-        self.callback(self.sumo_box.simulated_scenario.value)
+        self.sumo_simulation.set_simulation_length(num_time_steps)
+        self.sumo_simulation.simulate()
+        self.callback(self.sumo_simulation.simulated_scenario.value)
 
     def remove_obstacle(self):
         """
