@@ -19,7 +19,7 @@ from crdesigner.lanelet_lanelet2.lanelet2 import OSMLanelet, Node, Way, WayRelat
 ways_are_equal_tolerance = 0.001
 
 
-class CR2Lanelet2Converter:
+class CR2LaneletConverter:
     """Class to convert CommonRoad lanelet to the OSM representation."""
 
     def __init__(self, proj_string):
