@@ -884,9 +884,9 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
             direction_ranges: Dict[TrafficLightDirection, Interval] = {
                 TrafficLightDirection.ALL: Interval(-np.pi, np.pi),
                 TrafficLightDirection.RIGHT: Interval(-np.pi, -np.pi / 4),
-                TrafficLightDirection.STRAIGHT_RIGHT: Interval(-np.pi / 4, -np.pi / 8),
-                TrafficLightDirection.STRAIGHT: Interval(-np.pi / 8, np.pi / 8),
-                TrafficLightDirection.LEFT_STRAIGHT: Interval(np.pi / 8, np.pi / 4),
+                TrafficLightDirection.STRAIGHT_RIGHT: Interval(-np.pi, np.pi / 4),
+                TrafficLightDirection.STRAIGHT: Interval(-np.pi / 4, np.pi / 4),
+                TrafficLightDirection.LEFT_STRAIGHT: Interval(np.pi / 4, np.pi),
                 TrafficLightDirection.LEFT: Interval(np.pi / 4, np.pi)
             }
             for light in lights:
