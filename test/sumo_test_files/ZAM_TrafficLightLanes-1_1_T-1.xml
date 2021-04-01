@@ -3387,7 +3387,7 @@
     <cycle>
       <cycleElement>
         <duration>100</duration>
-        <color>green</color>
+        <color>red</color>
       </cycleElement>
       <cycleElement>
         <duration>30</duration>
@@ -3395,7 +3395,7 @@
       </cycleElement>
       <cycleElement>
         <duration>200</duration>
-        <color>red</color>
+        <color>green</color>
       </cycleElement>
       <cycleElement>
         <duration>30</duration>
