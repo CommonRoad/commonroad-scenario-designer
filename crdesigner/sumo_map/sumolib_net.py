@@ -755,10 +755,12 @@ class Edge:
     def lanes(self) -> List['Lane']:
         return self._lanes
 
-    def add_lane(self, lane: 'Lane'):
+    def add_lane(self, lane: 'Lane') -> int:
+        index = len(self._lanes)
         self._lanes.append(lane)
         self.speed = lane.speed
         self.length = lane.length
+        return index
 
     def add_outgoing(self, edge: 'Edge'):
         self._outgoing[edge.to_node].append(edge)
@@ -938,7 +940,7 @@ class Lane:
         self._disallow: List['VehicleType'] = []
         self._set_allow_disallow(allow, disallow)
 
-        edge.add_lane(self)
+        self._index = edge.add_lane(self)
 
     @property
     def id(self) -> str:
@@ -1016,7 +1018,7 @@ class Lane:
 
     @property
     def index(self) -> int:
-        return self.edge.lanes.index(self)
+        return self._index
 
     @property
     def outgoing(self) -> List['Connection']:
