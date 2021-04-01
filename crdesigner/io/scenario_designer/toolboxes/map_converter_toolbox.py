@@ -1,6 +1,5 @@
 import pickle
 from lxml import etree
-from typing import Optional
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
@@ -11,8 +10,6 @@ from crdesigner.io.scenario_designer.toolboxes.map_converter_toolbox_ui import M
 from crdesigner.io.scenario_designer.misc.util import select_local_file
 
 from crdesigner.osm2cr.converter_modules import converter
-from crdesigner.osm2cr.converter_modules.cr_operations.export import convert_to_scenario
-from crdesigner.osm2cr.converter_modules.graph_operations import road_graph as rg
 from crdesigner.osm2cr.converter_modules.osm_operations.downloader import download_around_map
 from crdesigner.osm2cr import config
 from crdesigner.osm2cr.converter_modules.cr_operations.export import convert_to_scenario
@@ -20,6 +17,7 @@ from crdesigner.osm2cr.converter_modules.graph_operations import road_graph as r
 
 from crdesigner.io.scenario_designer.osm_gui_modules.gui_embedding import EdgeEdit, LaneLinkEdit
 from crdesigner.io.scenario_designer.converter_modules.osm_interface import OSMInterface
+from crdesigner.io.scenario_designer.osm_gui_modules.gui import EdgeEditGUI, LaneLinkGUI
 
 from crdesigner.opendrive.opendriveparser.parser import parse_opendrive
 from crdesigner.opendrive.opendriveconversion.network import Network
@@ -86,12 +84,12 @@ class MapConversionToolbox(QDockWidget):
         else:
             with open(filename, "rb") as fd:
                 gui_state = pickle.load(fd)
-            if isinstance(gui_state, gui.EdgeEditGUI):
-                EdgeEdit(self.app, None, gui_state)
-                self.app.main_window.show()
-            elif isinstance(gui_state, gui.LaneLinkGUI):
-                LaneLinkEdit(self.app, None, gui_state)
-                self.app.main_window.show()
+            if isinstance(gui_state, EdgeEditGUI):
+                EdgeEdit(self, None, gui_state)
+                self.osm_edit_window.show()
+            elif isinstance(gui_state, LaneLinkGUI):
+                LaneLinkEdit(self, None, gui_state)
+                self.osm_edit_window.show()
             else:
                 QMessageBox.critical(self, "Warning", "Invalid GUI state.", QMessageBox.Ok)
                 return

@@ -97,6 +97,7 @@ class ObstacleToolboxUI(Toolbox):
         self.sumo_simulation_length = QSpinBox()
         self.sumo_simulation_length.setMinimum(10)
         self.sumo_simulation_length.setMaximum(10000)
+        self.sumo_simulation_length.setValue(200)
 
         layout_sumo.addRow("Number Time Steps:", self.sumo_simulation_length)
         layout_sumo.addRow(self.button_start_simulation)
