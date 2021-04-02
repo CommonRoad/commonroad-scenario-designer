@@ -1,5 +1,7 @@
 import pickle
 from lxml import etree
+from typing import Optional
+
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
@@ -342,8 +344,15 @@ class MapConversionToolbox(QDockWidget):
 
     def convert_cr_to_lanelet2(self):
         directory = QFileDialog.getExistingDirectory(self, "Dir", options=QFileDialog.Options())
-        l2osm = CR2LaneletConverter(self.proj_string)
+        path = directory + "/" + str(self.current_scenario.scenario_id) + ".osm"
+        l2osm = CR2LaneletConverter()
         osm = l2osm(self.current_scenario)
+        with open(f"{path}", "wb") as file_out:
+            file_out.write(
+                etree.tostring(
+                    osm, xml_declaration=True, encoding="UTF-8", pretty_print=True
+                )
+            )
 
     def load_sumo(self):
         self.path_sumo_file = select_local_file(self, "SUMO", "net.xml")

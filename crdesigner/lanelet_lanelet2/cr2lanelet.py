@@ -22,7 +22,7 @@ ways_are_equal_tolerance = 0.001
 class CR2LaneletConverter:
     """Class to convert CommonRoad lanelet to the OSM representation."""
 
-    def __init__(self, proj_string):
+    def __init__(self, proj_string = None):
         if proj_string:
             self.proj = Proj(proj_string)
         else:
