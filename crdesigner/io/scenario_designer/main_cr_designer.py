@@ -12,7 +12,7 @@ from PyQt5.QtCore import *
 
 from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.scenario.lanelet import LaneletNetwork, Lanelet
-from commonroad.scenario.scenario import Scenario, ScenarioID
+from commonroad.scenario.scenario import Scenario
 from commonroad.scenario.obstacle import Obstacle
 
 from crdesigner.io.scenario_designer.gui_src import CR_Scenario_Designer  # do not remove!!!
@@ -43,7 +43,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
         self.setupUi(self)
         self.setWindowIcon(QIcon(':/icons/cr.ico'))
-        self.setWindowTitle("CommonRoad Designer")
+        self.setWindowTitle("CommonRoad Scenario Designer")
         self.centralwidget.setStyleSheet('background-color:rgb(150,150,150)')
         self.setWindowFlag(Qt.Window)
 
@@ -59,7 +59,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         # GUI attributes
         self.road_network_toolbox = None
         self.obstacle_toolbox = None
-        self.converter_toolbox_widget = None
+        self.converter_toolbox = None
 
         self.console = None
         self.play_activated = False
@@ -73,7 +73,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
         # build and connect GUI
         self.create_file_actions()
-        self.create_import_actions()
+#        self.create_import_actions()
         self.create_setting_actions()
         self.create_help_actions()
         self.create_viewer_dock()
@@ -94,9 +94,9 @@ class MWindow(QMainWindow, Ui_mainWindow):
         menu_file.addAction(self.separator)
         menu_file.addAction(self.exitAction)
 
-        menu_import = menu_bar.addMenu('Import')  # add menu 'Import'
-        menu_import.addAction(self.importfromOpendrive)
-        menu_import.addAction(self.importfromOSM)
+ #       menu_import = menu_bar.addMenu('Import')  # add menu 'Import'
+#        menu_import.addAction(self.importfromOpendrive)
+    #    menu_import.addAction(self.importfromOSM)
         # menu_import.addAction(self.importfromSUMO)
 
         menu_setting = menu_bar.addMenu('Setting')  # add menu 'Setting'
@@ -125,8 +125,10 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
     def create_converter_toolbox(self):
         """ Create the map converter toolbox."""
-        self.converter_toolbox_widget = MapConversionToolbox(self.toolbox_callback, self.textBrowser)
-        self.addDockWidget(Qt.RightDockWidgetArea, self.converter_toolbox_widget)
+        self.converter_toolbox = MapConversionToolbox(self.cr_viewer.current_scenario,
+                                                      self.toolbox_callback, self.textBrowser,
+                                                      self.obstacle_toolbox.sumo_simulation)
+        self.addDockWidget(Qt.RightDockWidgetArea, self.converter_toolbox)
 
     def create_obstacle_toolbox(self):
         """ Create the obstacle toolbox."""
@@ -307,38 +309,38 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.label2.setText(' / ' + str(value))
         self.slider.setMaximum(value)
 
-    def create_import_actions(self):
-        """Function to create the import action in the menu bar."""
-        self.importfromOpendrive = self.create_action(
-            "From OpenDrive",
-            icon="",
-            checkable=False,
-            slot=self.od_2_cr,
-            tip="Convert from OpenDrive to CommonRoad",
-            shortcut=None)
-        self.importfromOSM = self.create_action(
-            "From OSM",
-            icon="",
-            checkable=False,
-            slot=self.osm_2_cr,
-            tip="Convert from OSM to CommonRoad",
-            shortcut=None)
-
-    def cr_2_osm(self):
-        osm_interface = OSMInterface(self)
-        osm_interface.start_export()
-
-    def osm_2_cr(self):
-        osm_interface = OSMInterface(self)
-        osm_interface.start_import()
-
-    def od_2_cr(self):
-        opendrive_interface = OpenDRIVEInterface(self)
-        opendrive_interface.start_import()
-
-    def cr_2_od(self):
-        opendrive_interface = OpenDRIVEInterface(self)
-        opendrive_interface.start_import()
+    # def create_import_actions(self):
+    #     """Function to create the import action in the menu bar."""
+    #     self.importfromOpendrive = self.create_action(
+    #         "From OpenDrive",
+    #         icon="",
+    #         checkable=False,
+    #         slot=self.od_2_cr,
+    #         tip="Convert from OpenDrive to CommonRoad",
+    #         shortcut=None)
+    #     self.importfromOSM = self.create_action(
+    #         "From OSM",
+    #         icon="",
+    #         checkable=False,
+    #         slot=self.osm_2_cr,
+    #         tip="Convert from OSM to CommonRoad",
+    #         shortcut=None)
+    #
+    # def cr_2_osm(self):
+    #     osm_interface = OSMInterface(self)
+    #     osm_interface.start_export()
+    #
+    # def osm_2_cr(self):
+    #     osm_interface = OSMInterface(self)
+    #     osm_interface.start_import()
+    #
+    # def od_2_cr(self):
+    #     opendrive_interface = OpenDRIVEInterface(self)
+    #     opendrive_interface.start_import()
+    #
+    # def cr_2_od(self):
+    #     opendrive_interface = OpenDRIVEInterface(self)
+    #     opendrive_interface.start_import()
 
     def create_setting_actions(self):
         """Function to create the export action in the menu bar."""
@@ -516,8 +518,10 @@ class MWindow(QMainWindow, Ui_mainWindow):
         scenario = self.cr_viewer.current_scenario
         self.road_network_toolbox.refresh_toolbox(scenario)
         self.obstacle_toolbox.refresh_toolbox(scenario)
+        self.converter_toolbox.refresh_toolbox(scenario)
         if SUMO_AVAILABLE:
-            self.obstacle_toolbox.sumo_box.scenario = scenario
+            self.obstacle_toolbox.sumo_simulation.scenario = scenario
+            self.converter_toolbox.sumo_simulation.scenario = scenario
 
     def open_scenario(self, new_scenario, filename="new_scenario"):
         """  """
@@ -526,8 +530,8 @@ class MWindow(QMainWindow, Ui_mainWindow):
             return
         self.filename = filename
         if SUMO_AVAILABLE:
-            self.cr_viewer.open_scenario(new_scenario, self.obstacle_toolbox.sumo_box.config)
-            self.obstacle_toolbox.sumo_box.scenario = self.cr_viewer.current_scenario
+            self.cr_viewer.open_scenario(new_scenario, self.obstacle_toolbox.sumo_simulation.config)
+            self.obstacle_toolbox.sumo_simulation.scenario = self.cr_viewer.current_scenario
         else:
             self.cr_viewer.open_scenario(new_scenario)
         self.update_view(focus_on_network=True)
