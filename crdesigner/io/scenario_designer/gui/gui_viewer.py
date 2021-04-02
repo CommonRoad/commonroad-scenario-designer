@@ -595,7 +595,6 @@ class AnimatedViewer(Viewer):
         # if self.animation is None:
         # print("no animation loaded")
         # return
-        self.play()
         if save_file == "Save as mp4":
             if not self.current_scenario:
                 return
@@ -618,7 +617,6 @@ class AnimatedViewer(Viewer):
                     FFMpegWriter = writers['ffmpeg']
                     writer = FFMpegWriter()
                     self.animation.save(path, dpi=120, writer=writer)
-
 
             except IOError as e:
                 QMessageBox.critical(
@@ -649,8 +647,9 @@ class AnimatedViewer(Viewer):
                     messbox = QMessageBox.about(None, "Information",
                                                 "Exporting as Gif file will take few minutes, please wait until "
                                                 "process finished")
-                    self.animation.save(path, writer='imagemagick', fps=30)
-
+                    #self.animation.save(path, writer='imagemagick', fps=30)
+                    self.dynamic.rnd.create_video([self.current_scenario], path, draw_params=self.dynamic.draw_params)
+                    print("finished")
             except IOError as e:
                 QMessageBox.critical(
                     self,

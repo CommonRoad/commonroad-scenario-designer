@@ -59,7 +59,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         # GUI attributes
         self.road_network_toolbox = None
         self.obstacle_toolbox = None
-        self.converter_toolbox = None
+        self.map_converter_toolbox = None
 
         self.console = None
         self.play_activated = False
@@ -94,16 +94,10 @@ class MWindow(QMainWindow, Ui_mainWindow):
         menu_file.addAction(self.separator)
         menu_file.addAction(self.exitAction)
 
- #       menu_import = menu_bar.addMenu('Import')  # add menu 'Import'
-#        menu_import.addAction(self.importfromOpendrive)
-    #    menu_import.addAction(self.importfromOSM)
-        # menu_import.addAction(self.importfromSUMO)
-
         menu_setting = menu_bar.addMenu('Setting')  # add menu 'Setting'
         menu_setting.addAction(self.gui_settings)
         menu_setting.addAction(self.sumo_settings)
         menu_setting.addAction(self.osm_settings)
-        # menu_setting.addAction(self.opendrive_settings)
 
         menu_help = menu_bar.addMenu('Help')  # add menu 'Help'
         menu_help.addAction(self.open_web)
@@ -125,10 +119,10 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
     def create_converter_toolbox(self):
         """ Create the map converter toolbox."""
-        self.converter_toolbox = MapConversionToolbox(self.cr_viewer.current_scenario,
-                                                      self.toolbox_callback, self.textBrowser,
-                                                      self.obstacle_toolbox.sumo_simulation)
-        self.addDockWidget(Qt.RightDockWidgetArea, self.converter_toolbox)
+        self.map_converter_toolbox = MapConversionToolbox(self.cr_viewer.current_scenario,
+                                                          self.toolbox_callback, self.textBrowser,
+                                                          self.obstacle_toolbox.sumo_simulation)
+        self.addDockWidget(Qt.RightDockWidgetArea, self.map_converter_toolbox)
 
     def create_obstacle_toolbox(self):
         """ Create the obstacle toolbox."""
@@ -208,7 +202,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
             self.button_play_pause.setIcon(QIcon(":/icons/play.png"))
             self.play_activated = False
 
-    def save_animation(self):
+    def save_video(self):
         """Function connected with the save button in the Toolbar."""
         if not self.cr_viewer.current_scenario:
             messbox = QMessageBox()
@@ -221,11 +215,10 @@ class MWindow(QMainWindow, Ui_mainWindow):
             else:
                 messbox.close()
         else:
-            self.textBrowser.append("Exporting animation: " +
-                                    self.road_network_toolbox.save_menu.currentText() +
-                                    " ...")
+            self.textBrowser.append("Save video for scenario with ID " +
+                                    str(self.cr_viewer.current_scenario.scenario_id))
             self.cr_viewer.save_animation(
-                self.road_network_toolbox.save_menu.currentText())
+                "Save as gif")
             self.textBrowser.append("Exporting finished")
 
     def create_console(self):
@@ -257,11 +250,16 @@ class MWindow(QMainWindow, Ui_mainWindow):
         action_save.triggered.connect(self.file_save)
 
         tb1.addSeparator()
-        tb2 = self.addToolBar("Road Network Toolbox")
-        toolbox = QAction(QIcon(":/icons/tools.ico"),
-                          "open Road Network Toolbox", self)
-        tb2.addAction(toolbox)
-        toolbox.triggered.connect(self.road_network_toolbox_show)
+        tb2 = self.addToolBar("Toolboxes")
+        action_road_network_toolbox = QAction(QIcon(":/icons/lanelet_list.ico"), "Open Road Network Toolbox", self)
+        tb2.addAction(action_road_network_toolbox)
+        action_road_network_toolbox.triggered.connect(self.road_network_toolbox_show)
+        action_obstacle_toolbox = QAction(QIcon(":/icons/obstacle_toolbox.png"), "Open Obstacle Toolbox", self)
+        tb2.addAction(action_obstacle_toolbox)
+        action_obstacle_toolbox.triggered.connect(self.obstacle_toolbox_show)
+        action_converter_toolbox = QAction(QIcon(":/icons/tools.ico"), "Open Map Converter Toolbox", self)
+        tb2.addAction(action_converter_toolbox)
+        action_converter_toolbox.triggered.connect(self.map_converter_toolbox_show)
         tb2.addSeparator()
 
         tb3 = self.addToolBar("Undo/Redo")
@@ -303,44 +301,15 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.label2 = QLabel(' / 0', self)
         tb4.addWidget(self.label2)
 
+        action_save_video = QAction(QIcon(":/icons/save_video.png"), "Save Video", self)
+        tb4.addAction(action_save_video)
+        action_save_video.triggered.connect(self.save_video)
+
     def update_max_step(self, value: int = -1):
         logging.info('update_max_step')
         value = value if value > -1 else self.cr_viewer.max_timestep
         self.label2.setText(' / ' + str(value))
         self.slider.setMaximum(value)
-
-    # def create_import_actions(self):
-    #     """Function to create the import action in the menu bar."""
-    #     self.importfromOpendrive = self.create_action(
-    #         "From OpenDrive",
-    #         icon="",
-    #         checkable=False,
-    #         slot=self.od_2_cr,
-    #         tip="Convert from OpenDrive to CommonRoad",
-    #         shortcut=None)
-    #     self.importfromOSM = self.create_action(
-    #         "From OSM",
-    #         icon="",
-    #         checkable=False,
-    #         slot=self.osm_2_cr,
-    #         tip="Convert from OSM to CommonRoad",
-    #         shortcut=None)
-    #
-    # def cr_2_osm(self):
-    #     osm_interface = OSMInterface(self)
-    #     osm_interface.start_export()
-    #
-    # def osm_2_cr(self):
-    #     osm_interface = OSMInterface(self)
-    #     osm_interface.start_import()
-    #
-    # def od_2_cr(self):
-    #     opendrive_interface = OpenDRIVEInterface(self)
-    #     opendrive_interface.start_import()
-    #
-    # def cr_2_od(self):
-    #     opendrive_interface = OpenDRIVEInterface(self)
-    #     opendrive_interface.start_import()
 
     def create_setting_actions(self):
         """Function to create the export action in the menu bar."""
@@ -518,10 +487,10 @@ class MWindow(QMainWindow, Ui_mainWindow):
         scenario = self.cr_viewer.current_scenario
         self.road_network_toolbox.refresh_toolbox(scenario)
         self.obstacle_toolbox.refresh_toolbox(scenario)
-        self.converter_toolbox.refresh_toolbox(scenario)
+        self.map_converter_toolbox.refresh_toolbox(scenario)
         if SUMO_AVAILABLE:
             self.obstacle_toolbox.sumo_simulation.scenario = scenario
-            self.converter_toolbox.sumo_simulation.scenario = scenario
+            self.map_converter_toolbox.sumo_simulation.scenario = scenario
 
     def open_scenario(self, new_scenario, filename="new_scenario"):
         """  """
@@ -641,6 +610,9 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
     def obstacle_toolbox_show(self):
         self.obstacle_toolbox.show()
+
+    def map_converter_toolbox_show(self):
+        self.map_converter_toolbox.show()
 
     def update_view(self, focus_on_network=None):
         """ update all components."""
