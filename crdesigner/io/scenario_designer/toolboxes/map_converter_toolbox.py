@@ -25,6 +25,7 @@ from crdesigner.opendrive.opendriveconversion.network import Network
 
 from crdesigner.lanelet_lanelet2.lanelet2_parser import Lanelet2Parser
 from crdesigner.lanelet_lanelet2.lanelet2cr import Lanelet2CRConverter
+from crdesigner.lanelet_lanelet2.cr2lanelet import CR2LaneletConverter
 
 from crdesigner.io.scenario_designer.toolboxes.gui_sumo_simulation import SUMO_AVAILABLE
 if SUMO_AVAILABLE:
@@ -338,6 +339,11 @@ class MapConversionToolbox(QDockWidget):
             self.lanelet2_file = None
             self.converter_toolbox.loaded_lanelet_file.setText("no file selected")
             self.callback(scenario)
+
+    def convert_cr_to_lanelet2(self):
+        directory = QFileDialog.getExistingDirectory(self, "Dir", options=QFileDialog.Options())
+        l2osm = CR2LaneletConverter(self.proj_string)
+        osm = l2osm(self.current_scenario)
 
     def load_sumo(self):
         self.path_sumo_file = select_local_file(self, "SUMO", "net.xml")
