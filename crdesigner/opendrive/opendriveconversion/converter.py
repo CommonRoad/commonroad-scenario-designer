@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """Module for logic behind converting OpenDrive to ParametricLanes."""
-
+import enum
 from typing import Tuple, List
 from crdesigner.opendrive.opendriveconversion.plane_elements.plane import ParametricLane, ParametricLaneBorderGroup
 from crdesigner.opendrive.opendriveconversion.plane_elements.plane_group import ParametricLaneGroup
@@ -133,7 +133,6 @@ class OpenDriveConverter:
 
                 if plane_group.length > 0:
                     plane_groups.append(plane_group)
-
         return plane_groups
 
     @staticmethod
@@ -250,3 +249,4 @@ class OpenDriveConverter:
         )
 
         return inner_neighbour_id, outer_neighbour_id, inner_neighbour_same_dir
+

@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-"""Test case for xodr file ka_suedtangente."""
-
 import os
 import unittest
 import time

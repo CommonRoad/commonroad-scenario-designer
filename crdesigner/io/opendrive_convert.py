@@ -60,12 +60,14 @@ def convert_opendrive(opendrive: OpenDrive) -> Scenario:
 
 
 def main():
+
     """Helper function to convert an xodr to a lanelet file
 
     """
     args = parse_arguments()
 
     if args.output_name:
+        # If no output name is defined by the user, default to the name of the xodr file
         output_name = args.output_name
     else:
         output_name = args.xodr_file.rpartition(".")[0]
@@ -108,3 +110,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
