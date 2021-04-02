@@ -10,8 +10,8 @@ import numpy as np
 import pytest
 from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.common.file_writer import CommonRoadFileWriter
-from crmapconverter.sumo_map.config import SumoConfig
-from crmapconverter.sumo_map.cr2sumo import CR2SumoMapConverter
+from crdesigner.sumo_map.config import SumoConfig
+from crdesigner.sumo_map.cr2sumo import CR2SumoMapConverter
 from sumocr.interface.sumo_simulation import SumoSimulation
 
 
@@ -34,7 +34,7 @@ class BaseClass(unittest.TestCase):
 
         self.cwd_path = os.path.dirname(os.path.abspath(__file__))
 
-        self.path = os.path.join(self.cwd_path, "sumo_xml_test_files",
+        self.path = os.path.join(self.cwd_path, "sumo_test_files",
                                  cr_file_name + ".xml")
 
         self.scenario, planning_problem = CommonRoadFileReader(
@@ -157,7 +157,8 @@ class BaseClass(unittest.TestCase):
     ("ZAM_MergingTrafficSign-1_1_T-1", []),
     ("ZAM_MergingTrafficSign-1_2_T-1", []),
     ("ZAM_TrafficLightTest-1_1-T-1", []),
-    ("ZAM_TrafficLightTest-1_2-T-1", [])
+    ("ZAM_TrafficLightTest-1_2-T-1", []),
+    ("ZAM_TrafficLightLanes-1_1_T-1", []),
 ])
 @pytest.mark.parallel
 def test_parameterized_sumo_run(capfd, cr_file_name: str, tls: List[int]):

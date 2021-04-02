@@ -13,11 +13,13 @@ Replacing <version> with the desired semantic versioning numer (e.g. v0.4.1):
 ## Running Tests locally
 
 You can run all tests in the same environment as the CI/CD Pipeline using
-the following command:
+the following command (this assumes you have already built the corresponding docker image above):
 
 ```bash
 ./run_tests.sh
 ```
+**Caution**: This script will expose you ssh private key to the
+running docker container to fetch packages from [gitlab.ltz.de](https://gitlab.lrz.de). Use carefully.
 
 ## Running the docker image locally
 
@@ -28,6 +30,8 @@ you can run the following script:
 ./run_docker.sh
 ```
 
-This command will allow you to run GUI applications  (e.g. `sumo-gui`)
-within the container, but also expose you ssh private key to it.
-Use carefully.
+This command will allow you to run GUI applications  (i.e. `sumo-gui`)
+within the container
+
+**Caution**: Just like above, this script will expose you ssh private key to
+the running docker container to fetch packages from [gitlab.ltz.de](https://gitlab.lrz.de). Use carefully.

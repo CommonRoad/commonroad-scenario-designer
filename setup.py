@@ -9,13 +9,13 @@ with open(f"{setup_dir}/README.md", "r") as fh:
     long_description = fh.read()
 
 setup(
-    name="commonroad-map-converter",
-    version="1.1.0",
-    description="Convert maps to CommonRoad format",
+    name="commonroad-scenario-designer",
+    version="0.5",
+    description="Toolbox for Map Conversion and Scenario Creation for Autonomous Vehicles",
     long_description=long_description,
     long_description_content_type="text/markdown",
     author="Technical University of Munich",
-    author_email="commonroad-i06@in.tum.de",
+    author_email="commonroad@lists.lrz.de",
     url="https://commonroad.in.tum.de/",
     license="GNU General Public License v3.0",
     packages=find_packages(exclude=("test", )),
@@ -39,9 +39,9 @@ setup(
     python_requires=">=3.6",
     entry_points={
         "console_scripts": [
-            "opendrive2lanelet-convert=crmapconverter.io.opendrive_convert:main",
-            "osm-convert=crmapconverter.io.osm_convert:main",
-            "cr-designer=crmapconverter.io.scenario_designer.main_cr_designer:main"
+            "opendrive2lanelet-convert=crdesigner.io.opendrive_convert:main",
+            "osm-convert=crdesigner.io.osm_convert:main",
+            "cr-designer=crdesigner.io.scenario_designer.main_cr_designer:main"
         ]
     },
     classifiers=[

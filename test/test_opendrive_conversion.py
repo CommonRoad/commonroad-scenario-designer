@@ -9,8 +9,8 @@ from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistin
 from commonroad.planning.planning_problem import PlanningProblemSet
 from commonroad.scenario.scenario import Tag
 
-from crmapconverter.opendrive.opendriveparser.parser import parse_opendrive
-from crmapconverter.io.opendrive_convert import convert_opendrive
+from crdesigner.opendrive.opendriveparser.parser import parse_opendrive
+from crdesigner.io.opendrive_convert import convert_opendrive
 from test.utils import elements_equal
 
 __author__ = "Benjamin Orthen, Sebastian Maierhofer"
@@ -52,7 +52,7 @@ class TestOpenDriveBaseClass(unittest.TestCase):
 
         with open(
             os.path.dirname(os.path.realpath(__file__))
-            + f"/xodr_xml_test_files/{self.xodr_file_name}.xodr",
+            + f"/opendrive_test_files/{self.xodr_file_name}.xodr",
             "r",
         ) as fh:
             opendrive = parse_opendrive(etree.parse(fh).getroot())
@@ -65,7 +65,7 @@ class TestOpenDriveBaseClass(unittest.TestCase):
         """
         with open(
             os.path.dirname(os.path.realpath(__file__))
-            + f"/xodr_xml_test_files/{self.xml_output_name}.xml",
+            + f"/opendrive_test_files/{self.xml_output_name}.xml",
             "r",
         ) as fh:
 
