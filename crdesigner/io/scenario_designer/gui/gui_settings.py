@@ -51,6 +51,6 @@ class GUISettings:
         if self.has_valid_entries():
             self.save_to_config()
             self.settings_window.close()
-            self.cr_designer.textBrowser.append("settings saved")
+            self.cr_designer.text_browser.append("settings saved")
         else:
             print("invalid settings")

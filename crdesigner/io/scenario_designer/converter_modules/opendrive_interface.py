@@ -59,7 +59,7 @@ class OpenDRIVEInterface(ConverterInterface):
         self.loadedRoadNetwork = Network()
         self.loadedRoadNetwork.load_opendrive(openDriveXml)
 
-        self.cr_designer.textBrowser.append(
+        self.cr_designer.text_browser.append(
             """Name: {}<br>Version: {}<br>Date: {}<br><br>OpenDRIVE
             Version {}.{}<br><br>Number of roads: {}<br>Total length
             of road network: {:.2f} meters""".format(

@@ -692,7 +692,22 @@ class AnimatedViewer(Viewer):
         else:
             self.update_plot(sel_lanelet=None)
 
+        if len(selected_lanelets) + len(selected_obstacles) > 1:
+            output = "__Info__: More than one object can be selected! Lanelets: "
+            for la in selected_lanelets:
+                output += str(la.lanelet_id) + ", "
+            output = output[:len(output) - 2]
+            output += ". Obstacles: "
+            for obs in selected_obstacles:
+                output += str(obs.obstacle_id) + ", "
+            output = output[:len(output) - 2]
+            output += "."
+        else:
+            output = ""
+
         if len(selected_obstacles) > 0:
-            self.callback_function(selected_obstacles[0])
+            selection = " Obstacle with ID " + str(selected_obstacles[0].obstacle_id) + " is selected."
+            self.callback_function(selected_obstacles[0], output+ selection)
         elif len(selected_lanelets) > 0:
-            self.callback_function(selected_lanelets[0])
+            selection = " Lanelet with ID " + str(selected_lanelets[0].lanelet_id) + " is selected."
+            self.callback_function(selected_lanelets[0], output + selection)

@@ -5,6 +5,7 @@ import sys
 from argparse import ArgumentParser
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 import copy
+from typing import Union
 
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
@@ -49,7 +50,6 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
         # attributes
         self.filename = None
-        self.cr_viewer = AnimatedViewer(self, self.viewer_callback)
         self.slider_clicked = False
 
         # Scenario + Lanelet variables
@@ -63,7 +63,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
         self.console = None
         self.play_activated = False
-        self.textBrowser = None
+        self.text_browser = None
 
         self.viewer_dock = None
         self.sumo_settings = None
@@ -71,9 +71,9 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
         self.scenario_saving_dialog = ScenarioDialog()
 
-        # build and connect GUI
+        self.cr_viewer = AnimatedViewer(self, self.viewer_callback)
+
         self.create_file_actions()
-#        self.create_import_actions()
         self.create_setting_actions()
         self.create_help_actions()
         self.create_viewer_dock()
@@ -111,7 +111,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
     def create_road_network_toolbox(self):
         """ Create the Road network toolbox."""
         self.road_network_toolbox = RoadNetworkToolbox(current_scenario=self.cr_viewer.current_scenario,
-                                                       text_browser=self.textBrowser,
+                                                       text_browser=self.text_browser,
                                                        callback=self.toolbox_callback,
                                                        tmp_folder=self.tmp_folder,
                                                        selection_changed_callback=self.cr_viewer.update_plot)
@@ -120,7 +120,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
     def create_converter_toolbox(self):
         """ Create the map converter toolbox."""
         self.map_converter_toolbox = MapConversionToolbox(self.cr_viewer.current_scenario,
-                                                          self.toolbox_callback, self.textBrowser,
+                                                          self.toolbox_callback, self.text_browser,
                                                           self.obstacle_toolbox.sumo_simulation)
         self.addDockWidget(Qt.RightDockWidgetArea, self.map_converter_toolbox)
 
@@ -129,7 +129,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.obstacle_toolbox = ObstacleToolbox(self.cr_viewer.current_scenario, self.toolbox_callback, self.tmp_folder)
         self.addDockWidget(Qt.RightDockWidgetArea, self.obstacle_toolbox)
 
-    def viewer_callback(self, selected_object):
+    def viewer_callback(self, selected_object: Union[Lanelet, Obstacle], output: str):
         if isinstance(selected_object, Lanelet):
             self.road_network_toolbox.road_network_toolbox.selected_lanelet_two.setCurrentText(
                 self.road_network_toolbox.road_network_toolbox.selected_lanelet_one.currentText())
@@ -139,6 +139,8 @@ class MWindow(QMainWindow, Ui_mainWindow):
                 str(selected_object.lanelet_id))
         elif isinstance(selected_object, Obstacle):
             self.obstacle_toolbox.obstacle_toolbox.selected_obstacle.setCurrentText(str(selected_object.obstacle_id))
+        if output != "":
+            self.text_browser.append(output)
 
     def toolbox_callback(self, scenario):
         if scenario is not None:
@@ -193,12 +195,12 @@ class MWindow(QMainWindow, Ui_mainWindow):
             return
         if not self.play_activated:
             self.cr_viewer.play()
-            self.textBrowser.append("Playing the animation")
+            self.text_browser.append("Playing the animation")
             self.button_play_pause.setIcon(QIcon(":/icons/pause.png"))
             self.play_activated = True
         else:
             self.cr_viewer.pause()
-            self.textBrowser.append("Pause the animation")
+            self.text_browser.append("Pause the animation")
             self.button_play_pause.setIcon(QIcon(":/icons/play.png"))
             self.play_activated = False
 
@@ -215,21 +217,21 @@ class MWindow(QMainWindow, Ui_mainWindow):
             else:
                 messbox.close()
         else:
-            self.textBrowser.append("Save video for scenario with ID " +
-                                    str(self.cr_viewer.current_scenario.scenario_id))
+            self.text_browser.append("Save video for scenario with ID " +
+                                     str(self.cr_viewer.current_scenario.scenario_id))
             self.cr_viewer.save_animation(
                 "Save as gif")
-            self.textBrowser.append("Exporting finished")
+            self.text_browser.append("Exporting finished")
 
     def create_console(self):
         """Function to create the console."""
         self.console = QDockWidget(self)
         self.console.setTitleBarWidget(QWidget(
             self.console))  # no title of Dock
-        self.textBrowser = QTextBrowser()
-        self.textBrowser.setMaximumHeight(80)
-        self.textBrowser.setObjectName("textBrowser")
-        self.console.setWidget(self.textBrowser)
+        self.text_browser = QTextBrowser()
+        self.text_browser.setMaximumHeight(80)
+        self.text_browser.setObjectName("textBrowser")
+        self.console.setWidget(self.text_browser)
         self.console.setFloating(False)  # set if console can float
         self.console.setFeatures(QDockWidget.NoDockWidgetFeatures)
         self.addDockWidget(Qt.BottomDockWidgetArea, self.console)
@@ -495,7 +497,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
     def open_scenario(self, new_scenario, filename="new_scenario"):
         """  """
         if self.check_scenario(new_scenario) >= 2:
-            self.textBrowser.append("loading aborted")
+            self.text_browser.append("loading aborted")
             return
         self.filename = filename
         if SUMO_AVAILABLE:
@@ -516,7 +518,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.initialize_toolboxes()
         self.viewer_dock.setWindowIcon(QIcon(":/icons/cr1.ico"))
         if self.cr_viewer.current_scenario is not None:
-            self.textBrowser.append("loading " + self.filename)
+            self.text_browser.append("loading " + self.filename)
 
     def check_scenario(self, scenario) -> int:
         """
@@ -536,8 +538,8 @@ class MWindow(QMainWindow, Ui_mainWindow):
         found_ids = util.find_invalid_ref_of_traffic_lights(scenario)
         if found_ids and verbose:
             error_score = max(error_score, FATAL_ERROR)
-            self.textBrowser.append("invalid traffic light refs: " +
-                                    str(found_ids))
+            self.text_browser.append("invalid traffic light refs: " +
+                                     str(found_ids))
             QMessageBox.critical(
                 self,
                 "CommonRoad XML error",
@@ -549,8 +551,8 @@ class MWindow(QMainWindow, Ui_mainWindow):
         found_ids = util.find_invalid_ref_of_traffic_signs(scenario)
         if found_ids and verbose:
             error_score = max(error_score, FATAL_ERROR)
-            self.textBrowser.append("invalid traffic sign refs: " +
-                                    str(found_ids))
+            self.text_browser.append("invalid traffic sign refs: " +
+                                     str(found_ids))
             QMessageBox.critical(
                 self,
                 "CommonRoad XML error",
@@ -566,7 +568,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         found_ids = util.find_invalid_lanelet_polygons(scenario)
         if found_ids and verbose:
             error_score = max(error_score, WARNING)
-            self.textBrowser.append(
+            self.text_browser.append(
                 "Warning: Lanelet(s) with invalid polygon:" + str(found_ids))
             QMessageBox.warning(
                 self,
