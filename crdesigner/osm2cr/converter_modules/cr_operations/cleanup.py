@@ -1,9 +1,11 @@
 """
 This module removes converting errors before exporting the scenario to XML
 """
-from ordered_set import OrderedSet
 import numpy as np
+import networkx as nx
+from ordered_set import OrderedSet
 from scipy import interpolate
+from crdesigner.osm2cr import config
 from commonroad.scenario.scenario import Scenario, Lanelet, LaneletNetwork
 from commonroad.scenario.traffic_sign import LEFT_HAND_TRAFFIC
 
@@ -14,6 +16,9 @@ def sanitize(scenario: Scenario) -> None:
     :param1 scenario: Scenario where operations will be performed on
     :return: None
     """
+    # remove unconnected lanelets
+    if config.REMOVE_UNCONNECTED_LANELETS:
+        remove_unconnected_lanes(scenario)
     # remove non referenced traffic signs
     remove_duplicate_traffic_signs(scenario)
     remove_non_referenced_signs(scenario)
@@ -66,6 +71,7 @@ def remove_non_referenced_signs(scenario: Scenario) -> None:
                 continue
 
     scenario.lanelet_network = create_laneletnetwork(scenario.lanelet_network.lanelets, filtered_signs, scenario.lanelet_network.traffic_lights, scenario.lanelet_network.intersections)
+
 
 def merge_short_lanes(scenario: Scenario, min_distance=1) -> None:
     """
@@ -134,6 +140,7 @@ def merge_short_lanes(scenario: Scenario, min_distance=1) -> None:
         # update scenario's road network
 
         scenario.lanelet_network = create_laneletnetwork(lanelets, scenario.lanelet_network.traffic_signs, scenario.lanelet_network.traffic_lights, scenario.lanelet_network.intersections)
+
 
 def merge_lanelets(lanelet1: Lanelet, lanelet2: Lanelet) -> Lanelet:
     """
@@ -204,7 +211,6 @@ def smoothen_scenario(scenario: Scenario) -> None:
 
     # update scenario
     scenario.lanelet_network = create_laneletnetwork(lanelets, scenario.lanelet_network.traffic_signs, scenario.lanelet_network.traffic_lights, scenario.lanelet_network.intersections)
-
 
 
 def b_spline(ctr, max_nodes=10) -> np.array:
@@ -310,6 +316,7 @@ def convert_to_lht(scenario: Scenario) -> None:
         print("converting scenario to lht")
         rht_to_lht(scenario)
 
+
 def rht_to_lht(scenario: Scenario) -> None:
     """
     Converts scenario to left hand traffic.
@@ -347,6 +354,65 @@ def rht_to_lht(scenario: Scenario) -> None:
     scenario.lanelet_network = create_laneletnetwork(lht_lanes, scenario.lanelet_network.traffic_signs, scenario.lanelet_network.traffic_lights, scenario.lanelet_network.intersections)
 
 
+def remove_unconnected_lanes(scenario):
+    """
+    Remove unconnected lanes which are not part of the scenario
+
+    :param1 scenario: Scenario where operations are performed on
+    :return: None
+    """
+    graph = scenario_to_networkx_graph(scenario)
+    net = scenario.lanelet_network
+    lanelets = net.lanelets
+
+    # create connections for adjacent lanelets
+    tmp_edges = []
+    for l in lanelets:
+        if l.adj_right:
+            graph.add_edge(l.lanelet_id, l.adj_right)
+            tmp_edges.append((l.lanelet_id, l.adj_right))
+        if l.adj_left:
+            graph.add_edge(l.lanelet_id, l.adj_left)
+            tmp_edges.append((l.lanelet_id, l.adj_left))
+
+    # choose the subgraph with the most forking points as intersection
+    # more information about subgraphs:
+    # https://networkx.github.io/documentation/networkx-1.10/reference/generated/networkx.algorithms.components.weakly_connected.weakly_connected_component_subgraphs.html#networkx.algorithms.components.weakly_connected.weakly_connected_component_subgraphs
+    components = [graph.subgraph(c).copy() for c in nx.weakly_connected_components(graph)]
+
+    main_graph = components[0]
+    for comp in components:
+        if comp.number_of_nodes() > main_graph.number_of_nodes():
+            main_graph = comp
+
+    filterd_lanelets = list(filter(lambda l: l.lanelet_id in main_graph.nodes, lanelets))
+    scenario.lanelet_network = create_laneletnetwork(filterd_lanelets, net.traffic_signs, net.traffic_lights, net.intersections)
+
+
+def scenario_to_networkx_graph(scenario) -> nx.DiGraph:
+    """
+    Convert scenario to NetworkX graph
+
+    :return: networkX Graph
+    """
+    net = scenario.lanelet_network
+    lanelets = net.lanelets
+    lanelet_ids = [l.lanelet_id for l in lanelets]
+
+    graph = nx.DiGraph(scenario=scenario)
+    for l in lanelets:
+        position = (
+                np.mean([p[0] for p in l.center_vertices]),
+                np.mean([p[1] for p in l.center_vertices])
+            )
+        graph.add_node(l.lanelet_id, pos=position, lanelet=l)
+        edges = [(l.lanelet_id, s)  for s in l.successor if s in lanelet_ids]
+        if edges:
+            graph.add_edges_from(edges)
+
+    return graph
+
+        
 def create_lanelet(l, left_vertices, right_vertices, center_vertices, predecessor=None, successor=None,
     adjacent_right=None, adjacent_left=None, adjacent_right_same_direction=None, adjacent_left_same_direction=None, traffic_signs=None, traffic_lights=None) -> Lanelet:
     """
@@ -399,6 +465,7 @@ def create_lanelet(l, left_vertices, right_vertices, center_vertices, predecesso
         traffic_lights=traffic_lights
     )
     return new_lanelet
+
 
 def create_laneletnetwork(lanelets, traffic_signs, traffic_lights, intersections) -> LaneletNetwork:
     """
