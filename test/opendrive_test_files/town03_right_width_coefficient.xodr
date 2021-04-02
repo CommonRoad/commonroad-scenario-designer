@@ -35101,8 +35101,4 @@
             <laneLink from="-2" to="2"/>
         </connection>
     </junction>
-    <junction id="304" name=""/>
-    <junction id="305" name=""/>
-    <junction id="306" name=""/>
-    <junction id="307" name=""/>
 </OpenDRIVE>

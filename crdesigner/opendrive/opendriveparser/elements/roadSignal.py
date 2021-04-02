@@ -128,3 +128,61 @@ class Signal:
     @subtype.setter
     def subtype(self, value):
         self._subtype = int(value)
+
+
+class SignalReference:
+    """
+    In OpenDRIVE, a reference to another signal for reuse of signal information
+    is represented by the <signalReference> element within the <signal> element.
+
+    attributes  name        type    unit    value       Description
+                x           double     m    ]-∞;∞[      x-coordinate
+                y           double     m    ]-∞;∞[      y-coordinate
+                id          string                      Unique ID of the referenced signal within the database
+                orientation e_orientation   +; -; none  "+" = valid in positive s- direction
+                                                        "-" = valid in negative s- direction
+                                                        "none" = valid in both directions
+
+    Rules:
+    The following rules apply for the purpose of reusing signal information:
+    A lane validity element may be added for every <signalReference> element.
+    Signal reference shall be used for signals only.
+    For the signal that reuses the content of another signal, the direction for which it is valid shall be specified.
+    """
+    def __init__(self):
+        self._s = None
+        self._t = None
+        self._id = None
+        self._orientation = None
+
+    @property
+    def s(self):
+        return self._s
+
+    @s.setter
+    def s(self, value):
+        self._s = float(value)
+
+    @property
+    def t(self):
+        return self._t
+
+    @t.setter
+    def t(self, value):
+        self._t = float(value)
+
+    @property
+    def id(self):
+        return self._id
+
+    @id.setter
+    def id(self, value):
+        self._id = int(value)
+
+    @property
+    def orientation(self):
+        return self._orientation
+
+    @orientation.setter
+    def orientation(self, value):
+        self._orientation = str(value)

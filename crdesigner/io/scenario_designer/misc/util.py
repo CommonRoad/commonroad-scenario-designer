@@ -1,5 +1,5 @@
 from typing import List
-
+from PyQt5.QtWidgets import QFileDialog
 
 class Observable:
     def __init__(
@@ -55,5 +55,14 @@ def find_invalid_lanelet_polygons(scenario) -> List[int]:
         if not polygon.is_valid:
             lanelet_ids.append(lanelet.lanelet_id)
     return lanelet_ids
-        
 
+
+def select_local_file(parent, file_type: str, file_ending: str) -> str:
+    file_path, _ = QFileDialog.getOpenFileName(
+        parent,
+        "Select {} file to convert".format(file_type),
+        "",
+        "{} files *.{} (*.{})".format(file_type, file_ending, file_ending),
+        options=QFileDialog.Options(),
+    )
+    return file_path

@@ -9,7 +9,7 @@ from crdesigner.opendrive.opendriveparser.elements.roadElevationProfile import (
 from crdesigner.opendrive.opendriveparser.elements.roadLateralProfile import LateralProfile
 from crdesigner.opendrive.opendriveparser.elements.junction import Junction
 from crdesigner.opendrive.opendriveparser.elements.roadObject import Object
-from crdesigner.opendrive.opendriveparser.elements.roadSignal import Signal
+from crdesigner.opendrive.opendriveparser.elements.roadSignal import Signal, SignalReference
 
 class Road:
     """ """
@@ -29,6 +29,7 @@ class Road:
         self._lanes = Lanes()
         self._objects = []
         self._signals = []
+        self._signalReferences = []
 
     def __eq__(self, other):
         return self.__dict__ == other.__dict__
@@ -142,3 +143,14 @@ class Road:
             raise TypeError("Has to be of instance Signal")
 
         self._signals.append(signal)
+
+    @property
+    def signalReference(self):
+        return self._signalReferences
+
+    def addSignalReference(self, signal_reference):
+
+        if not isinstance(signal_reference, SignalReference):
+            raise TypeError("Has to be of instance Signal Reference")
+
+        self._signalReferences.append(signal_reference)

@@ -2,12 +2,18 @@
 
 """Module to enhance LaneletNetwork class
 so it can be used for conversion from the opendrive format."""
-
+import itertools
+import warnings
 from typing import List, Optional
 from queue import Queue
 import numpy as np
 
-from commonroad.scenario.lanelet import LaneletNetwork
+from commonroad.scenario.lanelet import LaneletNetwork, StopLine
+from commonroad.scenario.intersection import IntersectionIncomingElement, Intersection
+from commonroad.scenario.traffic_sign import TrafficLightDirection, TrafficLight, TrafficSign
+
+from crdesigner.osm2cr import config
+from crdesigner.osm2cr.converter_modules.utility import geometry
 
 from crdesigner.opendrive.opendriveconversion.conversion_lanelet import ConversionLanelet
 
@@ -59,6 +65,9 @@ class ConversionLaneletNetwork(LaneletNetwork):
         super().__init__()
         self._old_lanelet_ids = {}
 
+    def old_lanelet_ids(self):
+        return self._old_lanelet_ids
+
     def remove_lanelet(self, lanelet_id: str, remove_references: bool = False):
         """Remove a lanelets with the specific lanelet_id
         from the _lanelets dict.
@@ -98,6 +107,43 @@ class ConversionLaneletNetwork(LaneletNetwork):
 
         """
         return self._lanelets.get(lanelet_id)
+
+    def find_traffic_light_by_id(self, traffic_light_id) -> TrafficLight:
+        """Find a traffic light for a given traffic light id.
+
+        Args:
+          Traffic Light id: The id of the traffic light to find
+
+        Returns:
+          The traffic light object if the id exists and None otherwise
+
+        """
+        return self._traffic_lights.get(traffic_light_id)
+
+    def find_traffic_sign_by_id(self, traffic_sign_id) -> TrafficSign:
+        """Find a traffic sign for a given traffic sign id.
+
+        Args:
+          Traffic Sign id: The id of the traffic sign to find
+
+        Returns:
+          The traffic sign object if the id exists and None otherwise
+
+        """
+        return self._traffic_signs.get(traffic_sign_id)
+
+    def find_stop_linee_by_id(self, stop_line_id) -> StopLine:
+        """Find a stop line for a given stop line id.
+
+        Args:
+          Stop line id: The id of the stop line to find
+
+        Returns:
+          The stop line object if the id exists and None otherwise
+
+        """
+        return self._stop_linees.get(stop_line_id)
+
 
     def convert_all_lanelet_ids(self):
         """Convert lanelet ids to numbers which comply with the Commonroad specification.
@@ -263,9 +309,12 @@ class ConversionLaneletNetwork(LaneletNetwork):
                 )
                 for pair in possible_concat_lanes
             ]
+
             replacement_ids.update(
                 self._concatenate_lanelet_pairs_group(possible_concat_lanes)
             )
+
+        return replacement_ids
 
     def _concatenate_lanelet_pairs_group(self, lanelet_pairs: list) -> dict:
         """Concatenate a group of lanelet_pairs, with setting correctly the new lanelet_ids
@@ -604,6 +653,442 @@ class ConversionLaneletNetwork(LaneletNetwork):
         else:
             return successor.adj_left is None
         return True
+
+    def create_intersection(self, intersection_map, intersection_id):
+        """
+        Creates an intersection inside the lanelet network object
+        Args:
+            intersection_map - information about the successors of a lanelet in a junction
+            intersection_id - The unique id used to reference the intersection
+        Return:
+        """
+        # TODO: Define criterion for intersection ID. Currently only iterative numbering
+        incoming_id_counter = 0
+        # If different incoming lanelets have same successors, combine into set
+        incoming_lanelet_ids = self.combine_common_incoming_lanelets(intersection_map)
+        intersection_incoming_lanes = list()
+
+        for incoming_lanelet_set in incoming_lanelet_ids:
+            # Since all the lanes have the same successors,
+            # we simply use the first one to check for the successor directions
+            # if more than one incoming lanes exist
+            successor_right = set()
+            successor_left = set()
+            successor_straight = set()
+
+            for incoming_lane in incoming_lanelet_set:
+                self.set_intersection_lanelet_type(incoming_lane, intersection_map)
+                successor_directions = self.get_successor_directions(self.find_lanelet_by_id(incoming_lane))
+                for successor, direction in successor_directions.items():
+                    if direction == "right":
+                        successor_right.add(successor)
+                    elif direction == "left":
+                        successor_left.add(successor)
+                    elif direction == "straight":
+                        successor_straight.add(successor)
+                    else:
+                        print(direction)
+                        warnings.warn("Incorrect direction assigned to successor of incoming lanelet in intersection")
+
+            intersection_incoming_lane = IntersectionIncomingElement(incoming_id_counter, incoming_lanelet_set,
+                                                                     successor_right, successor_straight,
+                                                                     successor_left)
+
+            intersection_incoming_lanes.append(intersection_incoming_lane)
+            # TODO: Add crossings to intersections
+            # Increment id counter to generate next unique intersection id. See To Do.
+            incoming_id_counter += 1
+        intersection = Intersection(intersection_id, intersection_incoming_lanes)
+        self.find_left_of(intersection.incomings)
+        self.add_intersection(intersection)
+
+    def set_intersection_lanelet_type(self, incoming_lane, intersection_map):
+        """
+        Set the lanelet type of all the lanelets inside an intersection to Intersection from the enum class
+        Args:
+            incoming_lane: ID of incoming lanelet
+            intersection_map: dictionary that contains all the incomings of a particular intersection
+        """
+        for successor_incoming in self.find_lanelet_by_id(incoming_lane).successor:
+            successor_incoming_lanelet = self.find_lanelet_by_id(successor_incoming)
+            successor_incoming_lanelet.lanelet_type = "intersection"
+            # Also check if the successor of a incoming successor intersects with another successor of an incoming
+            self.check_lanelet_type_for_successor_of_successor(successor_incoming_lanelet, intersection_map)
+
+    def check_lanelet_type_for_successor_of_successor(self, successor_incoming_lanelet, intersection_map):
+        """
+        Check if the successor of an incoming successor in an intersection is also a part of the lanelet.
+        This is done by checking if this lanelet intersects with successors of all the incomigns in the intersection
+        If the test passes, then the successor of the incoming successor is also set as intersection lanelet type
+        Args:
+            successor_incoming_lanelet: lanelet for which we require to test if it is a part of a particular intersection
+            intersection_map: dict of the particular intersection for which the test is being conducted.
+        """
+        for successor_successor_incoming in successor_incoming_lanelet.successor:
+            successor_successor_incoming_lanelet = self.find_lanelet_by_id(successor_successor_incoming)
+            if self.check_if_lanelet_in_intersection(successor_successor_incoming_lanelet, intersection_map):
+                successor_successor_incoming_lanelet.lanelet_type = "intersection"
+
+    def check_if_lanelet_in_intersection(self, lanelet, intersection_map):
+        """
+        Check if a particular lanelet intersects any of the lanelets that are part of a particular intersection
+        using the shapely crosses method.
+        Args:
+            lanelet: lanelet which is being tested for being part of the intersection.
+            intersection_map: dict of the particular intersection for which the test is being conducted.
+        Returns:
+            true if any intersection found otherwise return False.
+        """
+        for incoming_lane in intersection_map.keys():
+            for successor in self.find_lanelet_by_id(incoming_lane).successor:
+                if successor != lanelet.lanelet_id:
+                    successor_lane_polygon = self.find_lanelet_by_id(successor).convert_to_polygon()
+                    lanelet_polygon = lanelet.convert_to_polygon()
+                    if successor_lane_polygon.shapely_object.crosses(lanelet_polygon.shapely_object):
+                        return True
+        return False
+
+    def find_left_of(self, incomings):
+        """
+            Find and add isLeftOf property for the incomings using the right before left rule.
+
+            :param incoming_data: incomings without isLeftOf
+            :param incoming_data_id: List of the id of the incomings
+            :return: incomings with the isLeftOf assigned
+        """
+        # Choose a reference incoming vector
+        ref = self.find_lanelet_by_id(incomings[0].incoming_lanelets[0]).center_vertices[-1] - \
+              self.find_lanelet_by_id(incomings[0].incoming_lanelets[0]).center_vertices[-5]
+        angles = [(0, 0)]
+        # calculate all incoming angle from the reference incoming vector
+        for index in range(1, len(incomings)):
+            new_v = self.find_lanelet_by_id(incomings[index].incoming_lanelets[0]).center_vertices[-1] - \
+                    self.find_lanelet_by_id(incomings[index].incoming_lanelets[0]).center_vertices[-5]
+            angle = geometry.get_angle(ref, new_v)
+            if angle < 0:
+                angle += 360
+            angles.append((index, angle))
+        prev = -1
+
+        is_left_of_map = dict()
+        # take the incomings which have less than 90 degrees in between
+        index = 0
+        min_angle = 360
+        while index < len(incomings):
+            angle = angles[index][1] - angles[prev][1]
+            if angle < 0:
+                angle += 360
+            if angle > config.LANE_SEGMENT_ANGLE and angle <= 180 - config.LANE_SEGMENT_ANGLE and angle < min_angle:
+                # is left of the previous incoming
+                is_left_of = angles[prev][0]
+                data_index = angles[index][0]
+                incomings[data_index].left_of = incomings[is_left_of].incoming_id
+                min_angle = angle
+                if abs(prev) >= len(incomings):
+                    max_angle = 360
+                    prev = -1
+                    index += 1
+                else:
+                    prev -= 1
+            else:
+                if abs(prev) >= len(incomings):
+                    min_angle = 360
+                    index += 1
+                    prev = -1
+                else:
+                    prev -= 1
+
+    def combine_common_incoming_lanelets(self, intersection_map):
+        """
+        Returns a list of tuples which are pairs of adj incoming lanelets and the union of their successors
+        Args:
+            intersection_map: dict containing the information regarding a particular intersection
+        """
+        incoming_lane_ids = intersection_map.keys()
+        combined_incoming_lane_ids = []
+        for incoming_lane_id, successors in intersection_map.items():
+            intersection_incoming_set = list()
+            incoming_lane = self.find_lanelet_by_id(incoming_lane_id)
+            intersection_incoming_set.append(incoming_lane_id)
+            adj_right = incoming_lane.adj_right
+            adj_left = incoming_lane.adj_left
+            while adj_right is not None:
+                if adj_right in incoming_lane_ids:
+                    adj_right_lane = self.find_lanelet_by_id(adj_right)
+                    if adj_right_lane.adj_right_same_direction:
+                        intersection_incoming_set.append(adj_right)
+                        adj_right = adj_right_lane.adj_right
+                    else:
+                        adj_right = None
+                else:
+                    adj_right = None
+
+            while adj_left is not None:
+                if adj_left in incoming_lane_ids:
+                    adj_left_lane = self.find_lanelet_by_id(adj_left)
+                    if adj_left_lane.adj_left_same_direction:
+                        intersection_incoming_set.append(adj_left)
+                        adj_left = adj_left_lane.adj_left
+                    else:
+                        adj_left = None
+                else:
+                    adj_left = None
+            intersection_incoming_set.sort()
+            combined_incoming_lane_ids.append(intersection_incoming_set)
+            combined_incoming_lane_ids.sort()
+        combined_incoming_lane_ids = list(k for k, _ in itertools.groupby(combined_incoming_lane_ids))
+        return combined_incoming_lane_ids
+
+    def get_successor_directions(self, incoming_lane):
+        """
+        Find all directions of a incoming lane's successors
+
+        :param incoming_lane: incoming lane from intersection
+        :return: str: left or right or through
+        """
+        straight_threshold_angel = config.INTERSECTION_STRAIGHT_THRESHOLD
+        assert 0 < straight_threshold_angel < 90
+
+        angels = {}
+        directions = {}
+
+        for successor in incoming_lane.successor:
+            # only use the last three waypoints of the incoming for angle calculation
+            succeeding_lane = self.find_lanelet_by_id(successor)
+            a_angle = geometry.curvature(incoming_lane.center_vertices[-3:])
+            b_angle = geometry.curvature(succeeding_lane.center_vertices)
+            angle = a_angle - b_angle
+            angels[succeeding_lane.lanelet_id] = angle
+
+            # determine direction of trajectory
+            # right-turn
+
+            if geometry.is_clockwise(list(succeeding_lane.center_vertices)) > 0:
+                angels[succeeding_lane.lanelet_id] = abs(angels[succeeding_lane.lanelet_id])
+            # left-turn
+            if geometry.is_clockwise(list(succeeding_lane.center_vertices)) < 0:
+                angels[succeeding_lane.lanelet_id] = -abs(angels[succeeding_lane.lanelet_id])
+
+        # sort after size
+        sorted_angels = {k: v for k, v in sorted(angels.items(), key=lambda item: item[1])}
+        sorted_keys = list(sorted_angels.keys())
+        sorted_values = list(sorted_angels.values())
+
+        # if 3 successors we assume the directions
+        if len(sorted_angels) == 3:
+            directions = {sorted_keys[0]: 'left', sorted_keys[1]: 'straight', sorted_keys[2]: 'right'}
+
+        # if 2 successors we assume that they both cannot have the same direction
+        if len(sorted_angels) == 2:
+
+            directions = dict.fromkeys(sorted_angels)
+
+            if (abs(sorted_values[0]) > straight_threshold_angel) \
+                    and (abs(sorted_values[1]) > straight_threshold_angel):
+                directions[sorted_keys[0]] = 'left'
+                directions[sorted_keys[1]] = 'right'
+            elif abs(sorted_values[0]) < abs(sorted_values[1]):
+                directions[sorted_keys[0]] = 'straight'
+                directions[sorted_keys[1]] = 'right'
+            elif abs(sorted_values[0]) > abs(sorted_values[1]):
+                directions[sorted_keys[0]] = 'left'
+                directions[sorted_keys[1]] = 'straight'
+            else:
+                directions[sorted_keys[0]] = 'straight'
+                directions[sorted_keys[1]] = 'straight'
+
+        # if we have 1 or more than 3 successors it's hard to make predictions,
+        # therefore only straight_threshold_angel is used
+        if len(sorted_angels) == 1 or len(sorted_angels) > 3:
+            directions = dict.fromkeys(sorted_angels, 'straight')
+            for key in sorted_angels:
+                if sorted_angels[key] < -straight_threshold_angel:
+                    directions[key] = 'left'
+                if sorted_angels[key] > straight_threshold_angel:
+                    directions[key] = 'right'
+
+        return directions
+
+    def add_traffic_lights_to_network(self, traffic_lights: List):
+        """
+        Adds all the traffic lights in the network object to the lanelet network
+        Requires a list of all the traffic lights in the entire map
+        Args:
+            traffic_lights: list of all the traffic lights in the lanelet network
+        """
+        for traffic_light in traffic_lights:
+            min_distance = float("inf")
+            for intersection in self.intersections:
+                for incoming in intersection.incomings:
+                    for lanelet in incoming.incoming_lanelets:
+                        lane = self.find_lanelet_by_id(lanelet)
+                        # Lanelet cannot have more traffic lights than number of successors
+                        if len(lane.successor) > len(lane.traffic_lights):
+                            pos_1 = traffic_light.position
+                            pos_2 = lane.center_vertices[-1]
+                            dist = np.linalg.norm(pos_1 - pos_2)
+                            if dist < min_distance:
+                                min_distance = dist
+                                id_for_adding = lanelet
+            target_lanelet = self.find_lanelet_by_id(id_for_adding)
+            self.add_traffic_light(traffic_light, {id_for_adding})
+
+        # Traffic light directions are assigned once all traffic lights are assigned to lanelets so that it can be
+        # determined how directions need to be divided (i.e. the decision between left to one light and straight to
+        # one light instead of left-striaght)
+        self.add_traffic_light_directions()
+
+    def add_traffic_light_directions(self):
+        """
+        Assigns directions to the traffic lights based on the directions of the lanelet successors.
+        Rule in case of no traffic lights < no of successor = left traffic light becomes left-straight and
+        right traffic light remains right.
+        """
+        for intersection in self.intersections:
+            for incoming in intersection.incomings:
+                for lanelet in incoming.incoming_lanelets:
+                    target_lanelet = self.find_lanelet_by_id(lanelet)
+                    traffic_light_ids = target_lanelet.traffic_lights
+                    no_of_traffic_lights = len(traffic_light_ids)
+                    if no_of_traffic_lights == 1:
+                        successor_directions = self.get_successor_directions(target_lanelet)
+                        if len(successor_directions) == 1:
+                            traffic_light = self.find_traffic_light_by_id(list(traffic_light_ids)[0])
+                            if list(successor_directions.values())[0] == 'left':
+                                traffic_light.direction = TrafficLightDirection.LEFT
+                            elif list(successor_directions.values())[0] == 'right':
+                                traffic_light.direction = TrafficLightDirection.RIGHT
+                            elif list(successor_directions.values())[0] == 'straight':
+                                traffic_light.direction = TrafficLightDirection.STRAIGHT
+                        elif len(successor_directions) == 2:
+                            if (list(successor_directions.values())[0] == 'left' and list(successor_directions.values())[1] == 'right') \
+                                    or (list(successor_directions.values())[0] == 'right' and list(successor_directions.values())[1] == 'left'):
+                                traffic_light.direction = TrafficLightDirection.LEFT_RIGHT
+                            if (list(successor_directions.values())[0] == 'left' and list(successor_directions.values())[1] == 'straight') \
+                                    or (list(successor_directions.values())[0] == 'straight' and list(successor_directions.values())[1] == 'left'):
+                                traffic_light.direction = TrafficLightDirection.LEFT_STRAIGHT
+                            if (list(successor_directions.values())[0] == 'right' and list(successor_directions.values())[1] == 'straight') \
+                                    or (list(successor_directions.values())[0] == 'straight' and list(successor_directions.values())[1] == 'right'):
+                                traffic_light.direction = TrafficLightDirection.STRAIGHT_RIGHT
+
+                    if no_of_traffic_lights == 2:
+                        successor_directions = self.get_successor_directions(target_lanelet)
+                        if len(successor_directions) == 1:
+                            warnings.warn("Number of traffic lights should never be more than the number of successors "
+                                          "of a lanelet")
+                        elif len(successor_directions) == 2:
+                            # TODO: In case a lanelet has 2 successors and 2 traffic lights,
+                            #  apply directions based on position. How to cater to straight case?
+                            for index, traffic_light_id in enumerate(traffic_light_ids):
+                                traffic_light = self.find_traffic_light_by_id(traffic_light_id)
+                                traffic_light_position = traffic_light.position
+                                lanelet_left_position = target_lanelet.left_vertices[-1]
+                                lanelet_right_position = target_lanelet.right_vertices[-1]
+                                distance_from_right = np.linalg.norm(lanelet_right_position - traffic_light_position)
+                                distance_from_left = np.linalg.norm(lanelet_left_position - traffic_light_position)
+                                if distance_from_left < distance_from_right and 'left' in list(successor_directions.values()):
+                                    traffic_light.direction = TrafficLightDirection.LEFT
+                                elif distance_from_left < distance_from_right and 'right' in list(successor_directions.values()):
+                                    traffic_light.direction = TrafficLightDirection.RIGHT
+                                elif 'straight' in list(successor_directions.values()) or distance_from_left - distance_from_right < 0.001:
+                                    traffic_light.direction = TrafficLightDirection.STRAIGHT
+
+                        elif len(successor_directions) == 3:
+                            # TODO: In case a lanelet has 3 successors and 2 traffic lights, define
+                            #  which light gets which direction
+                            # Currently the left traffic light controls the left and straight successor while the right
+                            # traffic light only controls the right successor.
+                            for index, traffic_light_id in enumerate(traffic_light_ids):
+                                traffic_light = self.find_traffic_light_by_id(traffic_light_id)
+                                # Check if traffic light is to the left of the lanelet or to the right of the lanelet
+                                traffic_light_position = traffic_light.position
+                                lanelet_left_position = target_lanelet.left_vertices[-1]
+                                lanelet_right_position = target_lanelet.right_vertices[-1]
+                                distance_from_right = np.linalg.norm(lanelet_right_position - traffic_light_position)
+                                distance_from_left = np.linalg.norm(lanelet_left_position - traffic_light_position)
+                                if distance_from_left < distance_from_right:
+                                    traffic_light.direction = TrafficLightDirection.LEFT_STRAIGHT
+                                elif distance_from_left > distance_from_right:
+                                    traffic_light.direction = TrafficLightDirection.RIGHT
+                    if no_of_traffic_lights == 3:
+                        successor_directions = self.get_successor_directions(target_lanelet)
+                        if len(successor_directions) < 3:
+                            warnings.warn("Number of traffic lights should never be more than the number of successors "
+                                          "of a lanelet")
+                        elif len(successor_directions) == 3:
+                            # TODO: In case a lanelet has 3 successors and 3 traffic lights,
+                            #  apply directions based on position
+                            for index, traffic_light_id in enumerate(traffic_light_ids):
+                                traffic_light = self.find_traffic_light_by_id(traffic_light_id)
+                                # Check if traffic light is to the left of the lanelet or to the right of the lanelet
+                                traffic_light_position = traffic_light.position
+                                lanelet_left_position = target_lanelet.left_vertices[-1]
+                                lanelet_right_position = target_lanelet.right_vertices[-1]
+                                distance_from_right = np.linalg.norm(lanelet_right_position - traffic_light_position)
+                                distance_from_left = np.linalg.norm(lanelet_left_position - traffic_light_position)
+                                if distance_from_left < distance_from_right:
+                                    traffic_light.direction = TrafficLightDirection.LEFT
+                                elif distance_from_left > distance_from_right:
+                                    traffic_light.direction = TrafficLightDirection.RIGHT
+                                elif 'straight' in list(successor_directions.values()) or distance_from_left - distance_from_right < 0.001:
+                                    traffic_light.direction = TrafficLightDirection.STRAIGHT
+
+    def add_traffic_signs_to_network(self, traffic_signs):
+        """
+        Adds all the traffic signs in the network object to the lanelet network
+        Requires a list of all the traffic signs in the entire map
+        Args:
+            traffic_signs: list of all the traffic signs
+        """
+
+        # Assign traffic signs to lanelets
+        for traffic_sign in traffic_signs:
+            min_distance = float("inf")
+            for lanelet in self.lanelets:
+                # Find closest lanelet to traffic signal
+                pos_1 = traffic_sign.position
+                pos_2 = lanelet.center_vertices[-1]
+                dist = np.linalg.norm(pos_1 - pos_2)
+                if dist < min_distance:
+                    min_distance = dist
+                    id_for_adding = lanelet.lanelet_id
+
+            self.add_traffic_sign(traffic_sign, {id_for_adding})
+
+    def add_stop_lines_to_network(self, stop_lines: List[StopLine]):
+        """
+        Adds all the stop lines in the network object to the lanelet network
+        Requires a list of all the stop lines in the entire map
+        Args:
+            stop_lines: list of all the stop lines
+
+        """
+        # Assign stop lines to lanelets
+
+        for stop_line in stop_lines:
+            min_start = float("inf")
+            min_end = float("inf")
+            for intersection in self.intersections:
+                for incoming in intersection.incomings:
+                    for lanelet in incoming.incoming_lanelets:
+                        lane = self.find_lanelet_by_id(lanelet)
+                        lanelet_position_left = lane.left_vertices[-1]
+                        lanelet_position_right = lane.right_vertices[-1]
+                        stop_line_position_end = stop_line.start
+                        stop_line_position_start = stop_line.end
+                        if np.linalg.norm(lanelet_position_right - stop_line_position_start) < min_start and \
+                                np.linalg.norm(lanelet_position_left - stop_line_position_end) < min_end:
+                            lane_to_add_stop_line = lane
+                            min_start = np.linalg.norm(lanelet_position_right - stop_line_position_start)
+                            min_end = np.linalg.norm(lanelet_position_left - stop_line_position_end)
+            if lane_to_add_stop_line is None:
+                warnings.warn("No lanelet was matched with a stop line")
+                continue
+            if stop_line.traffic_light_ref is None:
+                stop_line.traffic_light_ref = lane_to_add_stop_line.traffic_lights
+            if stop_line.traffic_sign_ref is None:
+                stop_line.traffic_sign_ref = lane_to_add_stop_line.traffic_signs
+            lane_to_add_stop_line.stop_line = stop_line
 
 
 class _JoinSplitTarget:

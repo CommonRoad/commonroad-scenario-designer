@@ -35,7 +35,8 @@ from crdesigner.opendrive.opendriveparser.elements.junction import (
     LaneLink as JunctionConnectionLaneLink,
 )
 from crdesigner.opendrive.opendriveparser.elements.roadSignal import (
-    Signal as RoadSignal
+    Signal as RoadSignal,
+    SignalReference,
 )
 
 __author__ = "Benjamin Orthen, Stefan Urban"
@@ -314,7 +315,7 @@ def parse_opendrive_road_lane_section(newRoad, lane_section_id, lane_section):
 
     newLaneSection = RoadLanesSection(road=newRoad)
 
-    # Manually enumerate lane sections for referencing purposes
+    # NOTE: Manually enumerate lane sections for referencing purposes
     newLaneSection.idx = lane_section_id
 
     newLaneSection.sPos = float(lane_section.get("s"))
@@ -449,6 +450,15 @@ def parse_opendrive_road_signal(newRoad, road_signal):
     newRoad.addSignal(newSignal)
 
 
+def parse_opendrive_road_signal_reference(newRoad, road_signal_reference):
+    new_signal_reference = SignalReference()
+    new_signal_reference.id = road_signal_reference.get("id")
+    new_signal_reference.s = road_signal_reference.get("s")  # position along the reference curve
+    new_signal_reference.t = road_signal_reference.get("t")  # position away from the reference curve
+    new_signal_reference.orientation = road_signal_reference.get("orientation")
+
+    newRoad.addSignalReference(new_signal_reference)
+
 def parse_opendrive_road(opendrive, road):
     """
 
@@ -518,6 +528,10 @@ def parse_opendrive_road(opendrive, road):
         for road_signal in road.find("signals").findall("signal"):
             if road_signal is not None:
                 parse_opendrive_road_signal(newRoad, road_signal)
+        for road_signal_reference in road.find("signals").findall("signalReference"):
+            # Parsing signal reference element
+            if road_signal_reference is not None:
+                parse_opendrive_road_signal_reference(newRoad, road_signal_reference)
     else:
         pass
 
@@ -567,7 +581,7 @@ def parse_opendrive_header(opendrive, header):
       header:
 
     """
-
+    # Generates object out of the attributes of the header
     parsed_header = Header(
         header.get("revMajor"),
         header.get("revMinor"),
@@ -579,6 +593,7 @@ def parse_opendrive_header(opendrive, header):
         header.get("west"),
         header.get("vendor"),
     )
+
     # Reference
     if header.find("geoReference") is not None:
         parsed_header.geo_reference = header.find("geoReference").text

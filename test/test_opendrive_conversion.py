@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-"""Test case for xodr file ka_suedtangente."""
-
 import os
 import unittest
 import time
@@ -91,6 +89,7 @@ class TestOpenDriveBaseClass(unittest.TestCase):
             # compare both element trees
             trees_are_equal = elements_equal(tree_import, writer.root_node)
             self.assertTrue(trees_are_equal)
+
 
 class TestBasicOpenDrive(TestOpenDriveBaseClass):
     """Basic test with a junction in the middle."""

@@ -14,15 +14,15 @@ import numpy as np
 from pyproj import Proj
 from commonroad.scenario.lanelet import Lanelet
 
-from crdesigner.lanelet_lanelet2.osm import OSM, Node, Way, WayRelation, DEFAULT_PROJ_STRING
+from crdesigner.lanelet_lanelet2.lanelet2 import OSMLanelet, Node, Way, WayRelation, DEFAULT_PROJ_STRING
 
 ways_are_equal_tolerance = 0.001
 
 
-class L2OSMConverter:
+class CR2LaneletConverter:
     """Class to convert CommonRoad lanelet to the OSM representation."""
 
-    def __init__(self, proj_string):
+    def __init__(self, proj_string = None):
         if proj_string:
             self.proj = Proj(proj_string)
         else:
@@ -51,7 +51,7 @@ class L2OSMConverter:
         Args:
           scenario:
         """
-        self.osm = OSM()
+        self.osm = OSMLanelet()
         self.lanelet_network = scenario.lanelet_network
         self.first_nodes = dict()  # saves first left and right node
         self.last_nodes = dict()  # saves last left and right node

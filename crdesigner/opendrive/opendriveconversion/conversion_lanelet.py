@@ -131,6 +131,8 @@ class ConversionLanelet(Lanelet):
             self._lanelet_type = {LaneletType.CROSSWALK}
         elif value == 'interstate':
             self._lanelet_type = {LaneletType.INTERSTATE}
+        elif value == 'intersection':
+            self._lanelet_type = {LaneletType.INTERSECTION}
         else:
             self._lanelet_type = {LaneletType.UNKNOWN}
 
@@ -248,7 +250,6 @@ class ConversionLanelet(Lanelet):
           # lanelet_id: str:  (Default value = -1)
           extend_plane_group: bool:  (Default value = True)
         """
-
         # check connectedness
         if np.isclose(self.left_vertices[-1], lanelet_conc.left_vertices[0]).all():
             idx = 1
