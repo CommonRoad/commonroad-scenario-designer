@@ -236,7 +236,6 @@ class ConversionLanelet(Lanelet):
         # pylint: disable=W0201
         self._adj_right_same_direction = same
 
-
     def concatenate(
         self, lanelet_conc: "ConversionLanelet", extend_plane_group: bool = True
     ):

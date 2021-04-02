@@ -4,14 +4,16 @@
 so it can be used for conversion from the opendrive format."""
 import itertools
 import warnings
-from collections import defaultdict
 from typing import List, Optional
 from queue import Queue
 import numpy as np
 
-from commonroad.scenario.lanelet import LaneletNetwork, StopLine, LaneletType
+from commonroad.scenario.lanelet import LaneletNetwork, StopLine
 from commonroad.scenario.intersection import IntersectionIncomingElement, Intersection
 from commonroad.scenario.traffic_sign import TrafficLightDirection, TrafficLight, TrafficSign
+
+from crdesigner.osm2cr import config
+from crdesigner.osm2cr.converter_modules.utility import geometry
 
 from crdesigner.opendrive.opendriveconversion.conversion_lanelet import ConversionLanelet
 
