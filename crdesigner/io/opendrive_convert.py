@@ -19,7 +19,7 @@ from commonroad.scenario.scenario import Tag
 from crdesigner.opendrive.opendriveparser.elements.opendrive import OpenDrive
 from crdesigner.opendrive.opendriveparser.parser import parse_opendrive
 from crdesigner.opendrive.opendriveconversion.network import Network
-from crdesigner.lanelet_lanelet2.lanelet2osm import L2OSMConverter
+from crdesigner.lanelet_lanelet2.cr2lanelet import CR2LaneletConverter
 
 __author__ = "Benjamin Orthen"
 __copyright__ = "TUM Cyber-Physical Systems Group"
@@ -96,7 +96,7 @@ def main():
         )
         writer.write_to_file(output_name, OverwriteExistingFile.ALWAYS)
     else:
-        l2osm = L2OSMConverter(args.osm)
+        l2osm = CR2LaneletConverter(args.osm)
         osm = l2osm(scenario)
         with open(f"{output_name}", "wb") as file_out:
             file_out.write(

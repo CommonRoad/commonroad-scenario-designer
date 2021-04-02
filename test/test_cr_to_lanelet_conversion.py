@@ -13,12 +13,11 @@ __status__ = "Released"
 
 import os
 import unittest
-from io import StringIO
 from lxml import etree
 
 from commonroad.common.file_reader import CommonRoadFileReader
 
-from crdesigner.lanelet_lanelet2.lanelet2osm import L2OSMConverter
+from crdesigner.lanelet_lanelet2.cr2lanelet import CR2LaneletConverter
 from test.utils import elements_equal
 
 # TODO: write osm_convert method analog to opendrive_convert
@@ -43,7 +42,7 @@ class TestCR2OSMConversionBaseClass(unittest.TestCase):
                 f"{os.path.dirname(os.path.realpath(__file__))}/lanelet_lanelet2_test_files/{self.xml_file_name}.xml"
             )
             scenario, _ = commonroad_reader.open()
-            l2osm = L2OSMConverter(self.proj_string)
+            l2osm = CR2LaneletConverter(self.proj_string)
             self.osm = l2osm(scenario)
 
         except etree.XMLSyntaxError as xml_error:

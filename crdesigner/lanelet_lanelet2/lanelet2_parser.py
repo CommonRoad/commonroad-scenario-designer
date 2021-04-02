@@ -11,7 +11,7 @@ __email__ = "commonroad-i06@in.tum.de"
 __status__ = "Released"
 
 from lxml import etree
-from crdesigner.lanelet_lanelet2.osm import OSM, Node, Way, WayRelation, RightOfWayRelation
+from crdesigner.lanelet_lanelet2.lanelet2 import OSMLanelet, Node, Way, WayRelation, RightOfWayRelation
 
 from commonroad.scenario.traffic_sign import TrafficSignIDGermany
 
@@ -25,7 +25,8 @@ ALLOWED_TAGS = {
     'highway',
 }
 
-class OSMParser:
+
+class Lanelet2Parser:
     """Parser for OSM documents.
 
     Only extracts relevant information for conversion to Lanelet.
@@ -35,7 +36,7 @@ class OSMParser:
         self.xml = xml_doc
 
     def parse(self):
-        osm = OSM()
+        osm = OSMLanelet()
         for node in self.xml.xpath("//node[@lat and @lon and @id]"):
             osm.add_node(Node(node.get("id"), node.get("lat"), node.get("lon")))
 
@@ -62,7 +63,8 @@ class OSMParser:
                 )
             except IndexError:
                 print(
-                    f"Lanelet relation {way_rel.attrib.get('id')} has either no left or no right way! Please check your data! Discarding this lanelet relation."
+                    f"Lanelet relation {way_rel.attrib.get('id')} has either no left or no right way! "
+                    f"Please check your data! Discarding this lanelet relation."
                 )
 
         for reg_element_rel in self.xml.xpath("//relation/tag[@v='regulatory_element' and @k='type']/.."):
@@ -78,11 +80,13 @@ class OSMParser:
                                 if tag.get("k") in ALLOWED_TAGS}
                     ref_lines = right_of_way_rel.xpath("./member[@role='ref_line']/@ref")
                     osm.add_right_of_way_relation(
-                        RightOfWayRelation(right_of_way_rel.get("id"), traffic_signs, yield_lanelets, right_of_way_lanelets, tag_dict, ref_lines)
+                        RightOfWayRelation(right_of_way_rel.get("id"), traffic_signs, yield_lanelets,
+                                           right_of_way_lanelets, tag_dict, ref_lines)
                     )
                 except IndexError:
                     print(
-                        f"Right of way relation {right_of_way_rel.attrib.get('id')} has no traffic sign. Please check your data! Discarding."
+                        f"Right of way relation {right_of_way_rel.attrib.get('id')} has no traffic sign. "
+                        f"Please check your data! Discarding."
                     )
 
             for speed_limit in reg_element_rel.xpath("./tag[@v='speed_limit' and @k='subtype']/.."):

@@ -28,6 +28,8 @@ class RoadNetworkToolbox(QDockWidget):
         self.callback = callback
         self.tmp_folder = tmp_folder
         self.selection_changed_callback = selection_changed_callback
+        self.initialized = False
+        self.update = False
 
         self.initialize_lanelet_information()
         self.initialize_traffic_sign_information()
@@ -46,11 +48,10 @@ class RoadNetworkToolbox(QDockWidget):
         self.road_network_toolbox.setMinimumWidth(375)
 
     def connect_gui_elements(self):
+        self.initialized = False
         self.road_network_toolbox.button_add_lanelet.clicked.connect(lambda: self.add_lanelet())
         self.road_network_toolbox.button_update_lanelet.clicked.connect(lambda: self.update_lanelet())
-        self.road_network_toolbox.selected_lanelet_update.currentTextChanged.connect(
-            lambda: self.update_lanelet_information())
-        self.road_network_toolbox.selected_lanelet_update.currentTextChanged.connect(
+        self.road_network_toolbox.selected_lanelet_update.currentIndexChanged.connect(
             lambda: self.lanelet_selection_changed())
 
         self.road_network_toolbox.button_remove_lanelet.clicked.connect(lambda: self.remove_lanelet())
@@ -101,6 +102,7 @@ class RoadNetworkToolbox(QDockWidget):
         selected_lanelet = self.selected_lanelet()
         if selected_lanelet is not None:
             self.selection_changed_callback(sel_lanelet=selected_lanelet)
+            self.update_lanelet_information(selected_lanelet)
 
     def initialize_toolbox(self):
         self.initialize_lanelet_information()
@@ -109,6 +111,7 @@ class RoadNetworkToolbox(QDockWidget):
         self.initialize_traffic_sign_information()
         self.set_default_road_network_list_information()
         self.last_added_lanelet_id = None
+        self.initialized = True
 
     def get_x_position_lanelet_start(self) -> float:
         """
@@ -229,6 +232,7 @@ class RoadNetworkToolbox(QDockWidget):
         """
         Initializes Combobox GUI elements with lanelet information.
         """
+        self.update = True
         self.road_network_toolbox.predecessors.clear()
         self.road_network_toolbox.predecessors.addItems(
             ["None"] + [str(item) for item in self.collect_lanelet_ids()])
@@ -315,6 +319,8 @@ class RoadNetworkToolbox(QDockWidget):
         self.road_network_toolbox.other_lanelet_to_fit.setCurrentIndex(0)
 
         self.road_network_toolbox.intersection_incomings_table.setRowCount(0)
+
+        self.update = False
 
     def add_lanelet(self, lanelet_id: int = None, update: bool = False, left_vertices: np.array = None,
                     right_vertices: np.array = None):
@@ -447,6 +453,8 @@ class RoadNetworkToolbox(QDockWidget):
         Extracts the selected lanelet one
         @return: Selected lanelet object.
         """
+        if not self.initialized:
+            return
         if self.current_scenario is None:
             self.text_browser.append("create a new file")
             return None
@@ -454,7 +462,7 @@ class RoadNetworkToolbox(QDockWidget):
             selected_lanelet = self.current_scenario.lanelet_network.find_lanelet_by_id(
                 int(self.road_network_toolbox.selected_lanelet_update.currentText()))
             return selected_lanelet
-        else:
+        elif self.road_network_toolbox.selected_lanelet_update.currentText() in ["None", ""] and not self.update:
             self.text_browser.append("No lanelet selected.")
             return None
 
@@ -495,14 +503,12 @@ class RoadNetworkToolbox(QDockWidget):
         self.set_default_road_network_list_information()
         self.callback(self.current_scenario)
 
-    def update_lanelet_information(self):
+    def update_lanelet_information(self, lanelet: Lanelet = None):
         """
         Updates properties of a selected lanelet.
-        """
-        lanelet = self.selected_lanelet()
-        if lanelet is None:
-            return
 
+        @param lanelet: Currently selected lanelet.
+        """
         self.road_network_toolbox.x_position_lanelet_start.setText(str(lanelet.center_vertices[0][0]))
         self.road_network_toolbox.y_position_lanelet_start.setText(str(lanelet.center_vertices[0][1]))
         self.road_network_toolbox.lanelet_width.setText(

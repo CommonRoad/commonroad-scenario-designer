@@ -17,10 +17,9 @@ from lxml import etree
 
 from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
 from commonroad.planning.planning_problem import PlanningProblemSet
-from commonroad.scenario.scenario import Tag
 
-from crdesigner.lanelet_lanelet2.parser import OSMParser
-from crdesigner.lanelet_lanelet2.osm2lanelet import OSM2LConverter
+from crdesigner.lanelet_lanelet2.lanelet2_parser import Lanelet2Parser
+from crdesigner.lanelet_lanelet2.lanelet2cr import Lanelet2CRConverter
 from test.utils import elements_equal
 
 
@@ -55,9 +54,9 @@ class TestOSM2CRConversionBaseClass(unittest.TestCase):
                         os.remove(os.path.join(dirpath, file))
 
         file_in = f"{os.path.dirname(os.path.realpath(__file__))}/lanelet_lanelet2_test_files/{self.osm_file_name}.osm"
-        parser = OSMParser(etree.parse(file_in).getroot())
+        parser = Lanelet2Parser(etree.parse(file_in).getroot())
         osm = parser.parse()
-        osm2l = OSM2LConverter(proj_string="+proj=utm +zone=32 +ellps=WGS84")
+        osm2l = Lanelet2CRConverter(proj_string="+proj=utm +zone=32 +ellps=WGS84")
         self.scenario = osm2l(osm)
 
     def test_osm_scenario(self):

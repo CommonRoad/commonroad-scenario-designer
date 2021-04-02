@@ -92,6 +92,7 @@ class TestOpenDriveBaseClass(unittest.TestCase):
             trees_are_equal = elements_equal(tree_import, writer.root_node)
             self.assertTrue(trees_are_equal)
 
+
 class TestBasicOpenDrive(TestOpenDriveBaseClass):
     """Basic test with a junction in the middle."""
 

@@ -463,7 +463,7 @@ class MapEdit(ABC):
         self.embedding = embedding
         self.gui_plot = gui_plot
 
-        self.embedding.setupUi(self.app.main_window)
+        self.embedding.setupUi(self.app)
         self.canvas: FigureCanvas
         self.toolbar: NavigationToolbar
         self.canvas, self.toolbar = self.embed_plot_in_window(
@@ -495,7 +495,7 @@ class MapEdit(ABC):
         """
         layout = window.plot_frame
         canvas = plot.fig.canvas
-        toolbar = NavigationToolbar(canvas, self.app.main_window)
+        toolbar = NavigationToolbar(canvas, self.app)
         layout.addWidget(toolbar)
         layout.addWidget(canvas)
         return canvas, toolbar
@@ -544,6 +544,7 @@ class EdgeEdit(MapEdit):
         :param graph: the graph to edit
         :param ee_gui: the gui to embed, a new will be created if None
         """
+        self.parent = app
         if ee_gui is None:
             assert graph is not None, "if no ee_gui provided, graph is needed"
             gui_plot = gui.EdgeEditGUI(
@@ -556,7 +557,7 @@ class EdgeEdit(MapEdit):
             gui_plot.reloader = self.reload_gui
             embedding = eeGUI_frame()
             graph = gui_plot.graph
-        super().__init__(app, graph, gui_plot, embedding)
+        super().__init__(app.osm_edit_window, graph, gui_plot, embedding)
         self.embedding: eeGUI_frame
         self.attribute_editor = AttributeEditor(
             self.embedding.widget, self.embedding, self.gui_plot
@@ -639,7 +640,7 @@ class EdgeEdit(MapEdit):
                 QMessageBox.Ok,
             )
             return
-        self.app.lane_link_embedding(graph)
+        self.parent.lane_link_embedding(graph)
 
     def update_movement(self, value: bool) -> None:
         """
@@ -677,6 +678,7 @@ class LaneLinkEdit(MapEdit):
         :param graph: the graph to edit
         :param ll_gui: the embedded gui object
         """
+        self.parent = app
         if ll_gui is None:
             assert graph is not None, "if no ee_gui provided, graph is needed"
             gui_plot = gui.LaneLinkGUI(graph, self.reload_gui)
@@ -687,7 +689,7 @@ class LaneLinkEdit(MapEdit):
             gui_plot.reloader = self.reload_gui
             embedding = llGUI_frame()
             graph = gui_plot.graph
-        super().__init__(app, graph, gui_plot, embedding)
+        super().__init__(app.osm_edit_window, graph, gui_plot, embedding)
         self.gui_plot: gui.LaneLinkGUI = self.gui_plot
 
     def bind_events(self) -> None:
@@ -717,7 +719,7 @@ class LaneLinkEdit(MapEdit):
         self.embedding.b_delete.clicked.connect(self.gui_plot.delete)
         self.embedding.b_finalize.clicked.connect(self.finalize)
 
-    def finalize(self) -> None:
+    def finalize(self):
         """
         end edit process by exporting the benchmark
 
@@ -735,8 +737,8 @@ class LaneLinkEdit(MapEdit):
                 QMessageBox.Ok,
             )
             return
-        self.app.export(graph)
-
+        self.parent.callback(ex.convert_to_scenario(graph))
+        self.parent.osm_edit_window.close()
 
 class AttributeEditor:
     """

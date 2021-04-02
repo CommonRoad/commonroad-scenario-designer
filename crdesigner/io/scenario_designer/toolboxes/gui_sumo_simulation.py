@@ -34,8 +34,6 @@ class SimulationWorker(QThread):
         self.error = None
 
     def run(self):
-        print(self.config.presimulation_steps, self.config.simulation_steps,
-              self.config.dt)
         try:
             # convert scenario to SUMO
             wrapper = CR2SumoMapConverter(self.scenario.lanelet_network, self.config)
@@ -49,6 +47,27 @@ class SimulationWorker(QThread):
             simulation.stop()
 
             self.simulated_scenario = simulation.commonroad_scenarios_all_time_steps()
+        except Exception as e:
+            # log error and save it for display to the user
+            logging.error(e)
+            self.error = e
+
+
+class ConversionWorker(QThread):
+    def __init__(self, scenario, config, output_folder):
+        super(ConversionWorker, self).__init__()
+        self.scenario: Scenario = scenario
+        self.config: SumoConfig = config
+        self.output_folder: str = output_folder
+        self.simulated_scenario: Scenario = None
+        self.error = None
+
+    def run(self):
+        try:
+            # convert scenario to SUMO
+            wrapper = CR2SumoMapConverter(self.scenario.lanelet_network, self.config)
+            wrapper.convert_to_net_file(self.output_folder)
+
         except Exception as e:
             # log error and save it for display to the user
             logging.error(e)
@@ -100,9 +119,36 @@ class SUMOSimulation(QFrame):
     def scenario(self) -> Scenario:
         return self._scenario
 
+    def set_simulation_length(self, steps: int):
+        self._config.simulation_steps = steps
+
     @scenario.setter
     def scenario(self, scenario: Scenario):
         self._scenario = scenario
+
+    def convert(self, output_folder) -> bool:
+        """
+        simulates the current scenario and returns the simulated version
+        """
+        if not self._scenario:
+            error(
+                self,
+                "No Scenario loaded, load a valid commonroad scenario to simulate"
+            )
+            return False
+
+        self.waiting_msg = WaitingDialog()
+        self.worker: ConversionWorker = ConversionWorker(
+            self._scenario, self._config, output_folder)
+        self.worker.finished.connect(self.simulation_done)
+        self.worker.start()
+
+        # show Info box, telling user to wait for the simulation to finish
+        # self.waiting_msg.information(self, "SUMO Simulation", "Simulating...",
+        #                              QMessageBox.Ok)
+        self.waiting_msg.exec_()
+
+        return True
 
     def simulate(self) -> bool:
         """
