@@ -66,6 +66,7 @@ class MapConversionToolbox(QDockWidget):
         self.setFeatures(QDockWidget.AllDockWidgetFeatures)
         self.setAllowedAreas(Qt.RightDockWidgetArea)
         self.setWidget(self.converter_toolbox)
+        self.converter_toolbox.setMinimumWidth(450)
 
     def connect_gui_elements(self):
         self.converter_toolbox.button_download_osm_file.clicked.connect(lambda: self.download_osm_map())

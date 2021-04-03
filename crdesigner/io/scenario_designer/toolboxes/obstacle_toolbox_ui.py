@@ -54,7 +54,7 @@ class ObstacleToolboxUI(Toolbox):
         self.obstacle_type.addItems(obstalce_type_list)
 
         self.obstacle_state_variable = QComboBox()
-        self.figure = Figure(figsize=(3, 1))
+        self.figure = Figure(figsize=(5, 4))
         self.canvas = FigureCanvas(self.figure)
         self.toolbar = NavigationToolbar(self.canvas, self)
 

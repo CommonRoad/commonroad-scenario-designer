@@ -1,5 +1,5 @@
 from typing import List
-import logging
+import matplotlib as mpl
 
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
@@ -38,7 +38,7 @@ class ObstacleToolbox(QDockWidget):
         self.setFeatures(QDockWidget.AllDockWidgetFeatures)
         self.setAllowedAreas(Qt.RightDockWidgetArea)
         self.setWidget(self.obstacle_toolbox)
-        self.obstacle_toolbox.setMinimumWidth(375)
+        self.obstacle_toolbox.setMinimumWidth(450)
 
     def connect_gui_elements(self):
         self.initialize_obstacle_information()
@@ -110,10 +110,34 @@ class ObstacleToolbox(QDockWidget):
             ax.clear()
 
             # plot data
-            ax.plot(time, profile, 'o-')
-
+            ax.plot(time, profile, '.-', markersize=4)
+            ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.1f}'))
+            ax.set_xlabel("time [s]")
+            ax.set_ylabel(self.resolve_y_label(state_variable_name))
+            self.obstacle_toolbox.figure.tight_layout()
             # refresh canvas
             self.obstacle_toolbox.canvas.draw()
+
+    @staticmethod
+    def resolve_y_label(state_variable_name: str) -> str:
+        """
+        Creates y-label of state variable.
+
+        @param state_variable_name: State variable from commonroad-io.
+        @return: State variable with unit for visualization.
+        """
+        if state_variable_name == "x-position":
+            return "x-position [m]"
+        elif state_variable_name == "y-position":
+            return "y-position [m]"
+        elif state_variable_name == "orientation":
+            return "orientation [rad]"
+        elif state_variable_name == "velocity":
+            return "velocity [m/s]"
+        elif state_variable_name == "acceleration":
+            return "acceleration [m/s^2]"
+        else:
+            return ""
 
     def update_obstacle_information(self):
         if self.obstacle_toolbox.selected_obstacle.currentText() not in ["", "None"]:
