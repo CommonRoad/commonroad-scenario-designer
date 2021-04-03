@@ -1,23 +1,26 @@
-# CommonRoad Map Converter
+# CommonRoad Scenario Designer
 
-This software provides multiple converters from different map formats to the CommonRoad map format.
-This branch is under development for CommonRoad 2020a.
-Commit 4abf24d380b2ddac2c2c71b210764c4ae5759406 is the last stable version for CommonRoad 2018b.
+This toolbox provides map converters for OpenStreetMap (OSM), Lanelet/Lanelet2, OpenDRIVE, and SUMO to the CommonRoad (CR) format and for some formats vice versa.  
+Additionally, a graphical user interface (GUI) is included, which allows one to efficiently create and manipulate CommonRoad
+maps and scenarios.
 
-|         Tool         |                 Path                  |                            Functionality                            |
-| :------------------: | :-----------------------------------: | :-----------------------------------------------------------------: |
-|  opendrive2lanelet   |      `crmapconverter/opendrive`       |          Conversion from OpenDRIVE files to Lanelet maps.           |
-|     osm-convert      |         `crmapconverter/osm`          | Conversion from CommonRoad lanelets to OSM lanelets and vice versa. |
-|        osm2cr        |        `crmapconverter/osm2cr`        |    Conversion from general OSM maps to CommonRoad Lanelet maps.     |
-| CR Scenario Designer | `crmapconverter/io/scenario_designer` |   Multi-functional GUI for map conversion and traffic simulation.   |
+|                 Tool                      |                 Path                 |                            Functionality                           |
+| :---------------------------------------: | :----------------------------------: | :----------------------------------------------------------------: |
+|         OpenDRIVE &rightarrow; CR         |      `crdesigner/opendrive`          |          Conversion from OpenDRIVE to CommonRoad.                  |
+|     Lanelet/Lanelet2 &rightarrow; CR      |         `crdesigner/lanelet_lanelet2`| Conversion from Lanelet/Lanelet2 to CommonRoad.                    |
+|        CR &rightarrow; Lanelet            |        `crdesigner/lanelet_lanelet2` |    Conversion from CommonRoad to the original lanelet format.      |
+|            OSM &rightarrow; CR            |        `crdesigner/osm2cr`           |    Conversion from OSM to CommonRoad.                              |
+|     SUMO &rightarrow; CR                  |         `crdesigner/sumo_map`        | Conversion from SUMO to CommonRoad.                                |
+|        CR &rightarrow; SUMO               |        `crdesigner/sumo_map`         |    Conversion CommonRoad to SUMO.                                  |
+|        CR Scenario Designer GUI           | `crdesigner/io/scenario_designer`    |   Multi-functional GUI for map conversion and scenario generation. |
 
 ## Installation
 
-Installation instructions are given in the documentation in the section "Installation" (*./docs/source/000_installation.rst*).
+TODO
 
 ## Usage
 
-### GUI (CommonRoad Scenario Designer / CRSD)
+### GUI
 
 ![GUI_Screenshot](./docs/source/images/gui/GUI_screenshot.png)
 
@@ -92,12 +95,10 @@ The documentation can be accessed by opening `docs/_build/html/index.html`.
 
 ## Bug and feature reporting
 
-In case you detect a bug or you want to suggest a new feature create an issue in the backlog of the project.
+In case you detect a bug or you want to suggest a new feature, please create an issue in the repository (if you are TUM member) or report them in our forum (https://commonroad.in.tum.de/forum/c/map-tool/11). 
 
 ## Authors
 
-Sebastian Maierhofer (current maintainer)  
-Benjamin Orthen  
-Stefan Urban  
-Maximilian Rieger  
-Maximilian Fruehauf @rasaford
+Responsible: Sebastian Maierhofer (maintainer), Moritz Klischat  
+Contribution (in alphabetic order of last name): Maximilian Fruehauf, Marcus Gabler, Fabian Hoeltke, Aaron Kaefer, 
+Benjamin Orthen, Maximilian Rieger, Stefan Urban
