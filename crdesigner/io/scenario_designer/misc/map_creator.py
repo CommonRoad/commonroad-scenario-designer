@@ -685,9 +685,9 @@ class MapCreator:
 
         for n in range(len(incomings)):
             inc = {incomings[n]}
-            right = {successors_right[n]}
-            left = {successors_left[n]}
-            straight = {successors_straight[n]}
+            right = {successors_right[n]} if successors_right[n] is not None else set()
+            left = {successors_left[n]} if successors_left[n] is not None else set()
+            straight = {successors_straight[n]} if successors_straight[n] is not None else set()
             incoming_id = incoming_ids[n]
             map_incoming.append(IntersectionIncomingElement(incoming_id, incoming_lanelets=inc,
                                                             successors_right=right, successors_straight=straight,

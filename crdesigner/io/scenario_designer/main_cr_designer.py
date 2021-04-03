@@ -518,7 +518,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.initialize_toolboxes()
         self.viewer_dock.setWindowIcon(QIcon(":/icons/cr1.ico"))
         if self.cr_viewer.current_scenario is not None:
-            self.text_browser.append("loading " + self.filename)
+            self.text_browser.append("Loading " + self.filename)
 
     def check_scenario(self, scenario) -> int:
         """
