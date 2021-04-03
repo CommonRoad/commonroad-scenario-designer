@@ -39,19 +39,9 @@ setup(
     python_requires=">=3.6",
     entry_points={
         "console_scripts": [
-            "opendrive2lanelet-convert=crdesigner.io.opendrive_convert:main",
-            "osm-convert=crdesigner.io.osm_convert:main",
-            "cr-designer=crdesigner.io.scenario_designer.main_cr_designer:main"
+            "opendrive2cr-convert=crdesigner.io.opendrive_convert:main",
+            "osm2cr-convert=crdesigner.io.osm_convert:main",
+            "crdesigner=crdesigner.io.scenario_designer.main_cr_designer:main"
         ]
     },
-    classifiers=[
-        "Development Status :: 5 - Production/Stable",
-        "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
-        "Programming Language :: Python :: 3.6",
-        "Programming Language :: Python :: 3.7",
-        "Operating System :: MacOS",
-        "Operating System :: Microsoft :: Windows",
-        "Operating System :: POSIX",
-        "Operating System :: Unix",
-    ],
 )

@@ -1,46 +1,69 @@
 # CommonRoad Scenario Designer
 
-This toolbox provides map converters for OpenStreetMap (OSM), Lanelet/Lanelet2, OpenDRIVE, and SUMO to the CommonRoad (CR) format and for some formats vice versa.  
-Additionally, a graphical user interface (GUI) is included, which allows one to efficiently create and manipulate CommonRoad
-maps and scenarios.
+This toolbox provides map converters for OpenStreetMap (OSM), Lanelet/Lanelet2, OpenDRIVE, and SUMO to the CommonRoad 
+(CR) format and for some formats vice versa.  
+Additionally, a graphical user interface (GUI) is included, which allows one to efficiently create and manipulate 
+CommonRoad maps and scenarios.
 
-|                 Tool                      |                 Path                 |                            Functionality                           |
-| :---------------------------------------: | :----------------------------------: | :----------------------------------------------------------------: |
-|         OpenDRIVE &rightarrow; CR         |      `crdesigner/opendrive`          |          Conversion from OpenDRIVE to CommonRoad.                  |
-|     Lanelet/Lanelet2 &rightarrow; CR      |         `crdesigner/lanelet_lanelet2`| Conversion from Lanelet/Lanelet2 to CommonRoad.                    |
-|        CR &rightarrow; Lanelet            |        `crdesigner/lanelet_lanelet2` |    Conversion from CommonRoad to the original lanelet format.      |
-|            OSM &rightarrow; CR            |        `crdesigner/osm2cr`           |    Conversion from OSM to CommonRoad.                              |
-|     SUMO &rightarrow; CR                  |         `crdesigner/sumo_map`        | Conversion from SUMO to CommonRoad.                                |
-|        CR &rightarrow; SUMO               |        `crdesigner/sumo_map`         |    Conversion CommonRoad to SUMO.                                  |
-|        CR Scenario Designer GUI           | `crdesigner/io/scenario_designer`    |   Multi-functional GUI for map conversion and scenario generation. |
+|  Tool                           |Path                             |Functionality                                                    |
+| :-----------------------------: |:------------------------------: |:--------------------------------------------------------------: |
+|OpenDRIVE &rightarrow; CR        |`crdesigner/opendrive`           |Conversion from OpenDRIVE to CommonRoad.                         |
+|Lanelet/Lanelet2 &rightarrow; CR |`crdesigner/lanelet_lanelet2`    |Conversion from Lanelet/Lanelet2 to CommonRoad.                  |
+|CR &rightarrow; Lanelet          |`crdesigner/lanelet_lanelet2`    |Conversion from CommonRoad to the original lanelet format.       |
+|OSM &rightarrow; CR              |`crdesigner/osm2cr`              |Conversion from OSM to CommonRoad.                               |
+|SUMO &rightarrow; CR             |`crdesigner/sumo_map`            |Conversion from SUMO to CommonRoad.                              |
+|CR &rightarrow; SUMO             |`crdesigner/sumo_map`            |Conversion from CommonRoad to SUMO.                              |
+|CR Scenario Designer GUI         |`crdesigner/io/scenario_designer`|Multi-functional GUI for map conversion and scenario generation. |
 
-## Installation
+## Prerequisites and Installation
+For the execution of the _CommonRoad Scenario Designer_ you need at least Python 3.7 and the following modules:
+- commonroad_io >= 2021.1
+- matplotlib >= 3.1.0
+- numpy >= 1.16.4
+- ordered-set > =4.0.2
+- lxml >= 4.3.4
+- pyproj >= 2.2.0
+- scipy >= 1.3.0
+- Pillow >= 7.1.1
+- mercantile >= 1.1.3
+- utm >= 0.5.0
+- cartopy >= 0.17.0
+- PyQt5 >= 5.12.2
 
-TODO
+If you want to use the SUMO conversion or to generate traffic using SUMO, please install 
+[SUMO](https://sumo.dlr.de/docs/index.html) 
+and our [SUMO-Interface](https://gitlab.lrz.de/tum-cps/commonroad-sumo-interface).
+
+The usage of the Anaconda Python distribution is recommended.  
+To install the _CommonRoad Scenario Designer_, please execute one of the following two commands:
+```bash
+python setup.py install
+pip install -e .
+```
 
 ## Usage
+We provide different types of usage for the _CommonRoad Scenario Designer_. Subsequently, we present for each component 
+the different usage methods.
 
 ### GUI
 
 ![GUI_Screenshot](./docs/source/images/gui/GUI_screenshot.png)
 
-First you need to activate your python environment with the installed dependencies and load the environment variables.
+The GUI can either activated via a Python API, command line, or executing a Python script.
+First you need to activate your python environment with the installed dependencies.
 Then you can start _CommonRoad Scenario Designer_:
 
 ```bash
 $ conda activate commonroad
-$ source .env
 # Run CR Scenario designer
-$ python crmapconverter/io/scenario_designer/main_cr_designer.py
+$ python crdesigner/io/scenario_designer/main_cr_designer.py
 ```
 
-### Command Line
+Within the GUI, you can also execute the different converters.
 
-To run the converters, load the corresponding environment variabels (defined in `.env` file):
-
-```bash
-$ source .env
-```
+### Map Converters
+You can execute the different converters either via command line, calling them within your Python program via an API, 
+or the GUI.
 
 Converting a file from OpenDRIVE to CommonRoad with the command line:
 
