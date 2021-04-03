@@ -1,4 +1,4 @@
-.. 
+..
   Normally, there are no heading levels assigned to certain characters as the structure is
   determined from the succession of headings. However, this convention is used in Python’s
   Style Guide for documenting which you may follow:
@@ -12,7 +12,7 @@
 
 Vehicle Simulation using Simulation of Urban Mobility (SUMO)
 ############################################################
-Simulation of Urban Mobility (SUMO) [6] is a microscopic 
+Simulation of Urban Mobility (SUMO) [6] is a microscopic
 traffic simulator which is able to simulate traffic
 participants, given a road network in it’s own graph like format
 of nodes and edges. Nodes represent ends of edges or other
@@ -25,7 +25,7 @@ and interactions between them. Optionally trips for pedestrians
 and vehicles from one edge in the network to another can
 be automatically generated. SUMO also provides a set of
 tools for programmatically interacting with a network, namely
-NETEDIT. 
+NETEDIT.
 
 
 Quick Start Guide
@@ -33,24 +33,24 @@ Quick Start Guide
 To simulate traffic on a CommonRoad Scenario, you firstly need to install SUMOs dependencies.
 For a detailed explanation on this process see :ref:`installation`.
 
-Then refer to the provided example file `example file <https://gitlab.lrz.de/cps/commonroad-map-tool/-/blob/develop/crmapconverter/sumo_map/example.py>`_ to convert a commonroad .xml
+Then refer to the provided example file `example file <https://gitlab.lrz.de/cps/commonroad-map-tool/-/blob/develop/crdesigner/sumo_map/example.py>`_ to convert a commonroad .xml
 file to SUMO, simulate on traffic on it and save the result to disk:
 
 .. code:: bash
 
   # add the current module to the python path
   export $PYTHONPATH="$PYTHONPATH:$(pwd)"
-  python crmapconverter/sumo_map/example.py
+  python crdesigner/sumo_map/example.py
 
 
 Implementation
 **************
-SUMO is a microscopic traffic simulator which is able to simulate traffic participants, 
+SUMO is a microscopic traffic simulator which is able to simulate traffic participants,
 given a road network in it's own graph like format of nodes and edges.
 Nodes represent ends of edges or other fixed position objects (eg. traffic signs) and are connected by edges.
 Each edge in turn can consist of multiple lanes.
 Realistic traffic constrains such as traffic lights and partially traffic signs can also be modelled.
-Additionally it provides the capability to simulate multiple types of traffic participants and interactions between them. 
+Additionally it provides the capability to simulate multiple types of traffic participants and interactions between them.
 Optionally trips for pedestrians and vehicles from one edge in the network to another can be automatically generated.
 SUMO also provides a set of tools for programmatically interacting with a network, namely NETEDIT.
 
@@ -68,17 +68,17 @@ and the results converted back to CommonRoad.
 
 .. _lanelet_type_conversion:
 .. figure:: images/sumo/converted_sumo_crossing.png
-   :alt: Converted CommonRoad lanelet intersections and crossings (left) to SUMO networks (right) 
+   :alt: Converted CommonRoad lanelet intersections and crossings (left) to SUMO networks (right)
    :name: fig:sumo_lanelet_types:cr_intersection
 
-   Converted CommonRoad lanelet intersections and crossings (left) to SUMO networks (right) 
+   Converted CommonRoad lanelet intersections and crossings (left) to SUMO networks (right)
 
 Lanelet type conversion
 =======================
 
 In CommonRoad every lanelet has one or more LaneletTypes describing the
 type of a Lanelet and giving an indication of
-usage. However in SUMO each lane can be assigned to one more ``vClass`` attributes, 
+usage. However in SUMO each lane can be assigned to one more ``vClass`` attributes,
 which define
 what type of vehicle is allowed to use the respective lane. To convert
 from one representation to the other we therefore propose a mapping
@@ -159,7 +159,7 @@ collision free cycles at intersections. This generation is done by:
    involves reversing the conversion process for CommonRoad traffic
    lights to SUMO described in the previous paragraph.
 
-Visually this process is shown in :numref:`traffic_light_conversion`. 
+Visually this process is shown in :numref:`traffic_light_conversion`.
 Where show the user selecting
 a lanelet (red) in *CR Scenario Designer*. Other colors in this figure
 are representing adjacency information. Next shows the generated traffic
