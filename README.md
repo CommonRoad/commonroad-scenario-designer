@@ -47,7 +47,7 @@ the different usage methods.
 
 ### GUI
 
-![GUI_Screenshot](./docs/source/images/gui/GUI_screenshot.png)
+![GUI_Screenshot](./docs/source/images/gui/gui_screenshot.png)
 
 The GUI can either activated via a Python API, command line, or executing a Python script.
 

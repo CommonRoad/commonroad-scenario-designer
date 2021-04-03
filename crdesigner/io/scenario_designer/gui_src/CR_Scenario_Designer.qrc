@@ -15,9 +15,8 @@
     <file>close.png</file>
     <file>play.png</file>
     <file>pause.png</file>
-    <file>import.png</file>
-    <file>lanelet_list.ico</file>
     <file>save_video.png</file>
     <file>obstacle_toolbox.png</file>
+    <file>road_network_toolbox.png</file>
   </qresource>
 </RCC>

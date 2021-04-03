@@ -253,7 +253,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
         tb1.addSeparator()
         tb2 = self.addToolBar("Toolboxes")
-        action_road_network_toolbox = QAction(QIcon(":/icons/lanelet_list.ico"), "Open Road Network Toolbox", self)
+        action_road_network_toolbox = QAction(QIcon(":/icons/road_network_toolbox.png"), "Open Road Network Toolbox", self)
         tb2.addAction(action_road_network_toolbox)
         action_road_network_toolbox.triggered.connect(self.road_network_toolbox_show)
         action_obstacle_toolbox = QAction(QIcon(":/icons/obstacle_toolbox.png"), "Open Obstacle Toolbox", self)
