@@ -20,7 +20,7 @@ For the execution of the _CommonRoad Scenario Designer_ you need at least Python
 - commonroad_io >= 2021.1
 - matplotlib >= 3.1.0
 - numpy >= 1.16.4
-- ordered-set > =4.0.2
+- ordered-set >= 4.0.2
 - lxml >= 4.3.4
 - pyproj >= 2.2.0
 - scipy >= 1.3.0
@@ -50,8 +50,11 @@ the different usage methods.
 ![GUI_Screenshot](./docs/source/images/gui/GUI_screenshot.png)
 
 The GUI can either activated via a Python API, command line, or executing a Python script.
-First you need to activate your python environment with the installed dependencies.
-Then you can start _CommonRoad Scenario Designer_:
+
+####Python Script
+First you need to activate your python environment with the installed dependencies (we assume the environment 
+is called _commonroad_.  
+Afterward, you can start _CommonRoad Scenario Designer_ and the GUI will open:
 
 ```bash
 $ conda activate commonroad
@@ -61,10 +64,18 @@ $ python crdesigner/io/scenario_designer/main_cr_designer.py
 
 Within the GUI, you can also execute the different converters.
 
+#### API
+
+#### Command Line
+
+
 ### Map Converters
 You can execute the different converters either via command line, calling them within your Python program via an API, 
 or the GUI.
 
+#### API
+
+#### Command Line
 Converting a file from OpenDRIVE to CommonRoad with the command line:
 
 ```bash
@@ -83,7 +94,8 @@ Visualizing the results of the conversion from OpenDrive to CommonRoad:
 opendrive2lanelet-visualize input-file.xml
 ```
 
-Converting a file from the Lanelet/Lanelet2 format to CommonRoad lanelets with the command line (for description of input parameters see documentation):
+Converting a file from the Lanelet/Lanelet2 format to CommonRoad lanelets with the command line (for description of 
+input parameters see documentation):
 
 ```bash
 osm-convert inputfile.osm --reverse -o outputfile.xml --adjencies --proj "+proj=etmerc +lat_0=38 +lon_0=125 +ellps=bessel"
@@ -94,11 +106,17 @@ For the conversion of CommonRoad lanelets to OSM lanelets change the input and o
 For the conversion of a [OpenStreetMap](https://www.openstreetmap.de/karte.html) to CommonRoad you can
 open the GUI and start from there the conversion.
 Missing information such as the course of individual lanes is estimated during the process.
-These estimations are imperfect (the OSM maps as well) and often it is advisable to edit the scenarios by hand via the GUI.
-Converting a file from the [OpenStreetMap](https://www.openstreetmap.de/karte.html) format to CommonRoad with the command line:
+These estimations are imperfect (the OSM maps as well) and often it is advisable to edit the 
+scenarios by hand via the GUI.
+Converting a file from the [OpenStreetMap](https://www.openstreetmap.de/karte.html) format to CommonRoad 
+with the command line:
 ```bash
 osm2cr inputfile.osm outputfile.xml"
 ```
+
+#### GUI
+The GUI provides a toolbox with which contains functionality to load maps given in formats other the CommonRoad format 
+and to convert CommonRoad maps to other formats or the other formats to the CommonRoad format.
 
 ## Documentation
 
@@ -118,7 +136,8 @@ The documentation can be accessed by opening `docs/_build/html/index.html`.
 
 ## Bug and feature reporting
 
-In case you detect a bug or you want to suggest a new feature, please create an issue in the repository (if you are TUM member) or report them in our forum (https://commonroad.in.tum.de/forum/c/map-tool/11). 
+In case you detect a bug or you want to suggest a new feature, please create an issue in the repository 
+(if you are TUM member) or report them in our forum (https://commonroad.in.tum.de/forum/c/map-tool/11). 
 
 ## Authors
 
