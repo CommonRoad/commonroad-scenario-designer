@@ -70,7 +70,6 @@ class RoadNetworkToolboxUI(Toolbox):
         self.lanelet_radius.setAlignment(Qt.AlignRight)
 
         self.lanelet_angle = QLineEdit()
-        self.lanelet_angle.setValidator(QIntValidator())
         self.lanelet_angle.setMaxLength(6)
         self.lanelet_angle.setAlignment(Qt.AlignRight)
 

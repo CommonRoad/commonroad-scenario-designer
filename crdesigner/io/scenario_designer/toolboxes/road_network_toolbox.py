@@ -110,7 +110,6 @@ class RoadNetworkToolbox(QDockWidget):
         self.initialize_intersection_information()
         self.initialize_traffic_sign_information()
         self.set_default_road_network_list_information()
-        self.last_added_lanelet_id = None
         self.initialized = True
 
     def get_x_position_lanelet_start(self) -> float:
@@ -445,7 +444,7 @@ class RoadNetworkToolbox(QDockWidget):
                               traffic_lights=traffic_lights)
 
         self.current_scenario.add_objects(lanelet)
-        self.set_default_road_network_list_information()
+        self.initialize_toolbox()
         self.callback(self.current_scenario)
 
     def selected_lanelet(self) -> Union[Lanelet, None]:
