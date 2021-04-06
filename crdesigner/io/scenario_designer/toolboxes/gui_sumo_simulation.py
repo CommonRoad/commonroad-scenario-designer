@@ -79,6 +79,7 @@ class WaitingDialog(QtWidgets.QDialog):
         super(WaitingDialog, self).__init__()
         self.layout = QtWidgets.QVBoxLayout(self)
         self.textBrowser = QtWidgets.QTextBrowser()
+        self.setWindowTitle("Sumo Simulation")
         self.textBrowser.setText("Simulating, please wait ...")
         self.layout.addWidget(self.textBrowser)
 

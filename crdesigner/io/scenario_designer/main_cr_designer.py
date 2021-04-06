@@ -165,7 +165,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.obstacle_toolbox.initialize_toolbox()
 
     def show_sumo_settings(self):
-        self.sumo_settings = SUMOSettings(self, config=self.obstacle_toolbox.sumo_box.config)
+        self.sumo_settings = SUMOSettings(self, config=self.obstacle_toolbox.sumo_simulation.config)
 
     def detect_slider_clicked(self):
         self.slider_clicked = True
