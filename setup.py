@@ -18,7 +18,7 @@ setup(
     author_email="commonroad@lists.lrz.de",
     url="https://commonroad.in.tum.de/",
     license="GNU General Public License v3.0",
-    packages=find_packages(exclude=("test", )),
+    packages=find_packages(exclude=("test", "ci", "files", "docs", "tutorials")),
     include_package_data=True,
     install_requires=[
         "numpy>=1.16.4",
@@ -39,9 +39,11 @@ setup(
     python_requires=">=3.6",
     entry_points={
         "console_scripts": [
-            "opendrive2cr-convert=crdesigner.io.opendrive_convert:main",
-            "osm2cr-convert=crdesigner.io.osm_convert:main",
+            "opendrive-convert=crdesigner.io.opendrive_convert:main",
+            "osm-convert=crdesigner.io.osm_convert:main",
             "crdesigner=crdesigner.io.scenario_designer.main_cr_designer:main"
+            "lanelet2-convert="
+            "sumo-convert="
         ]
     },
 )

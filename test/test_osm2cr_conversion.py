@@ -9,11 +9,9 @@ import unittest
 import math
 from lxml import etree
 
-import crdesigner.osm2cr.converter_modules.converter as converter
+import crdesigner.conversion.osm2cr.converter_modules.converter as converter
 from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
-
-from test.utils import elements_equal
 
 
 class TestOSM2CRScenarioBaseClass(unittest.TestCase):

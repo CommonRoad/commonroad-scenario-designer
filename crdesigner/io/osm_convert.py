@@ -13,9 +13,9 @@ from commonroad.planning.planning_problem import PlanningProblemSet
 from commonroad.scenario.scenario import Tag
 from commonroad.common.file_reader import CommonRoadFileReader
 
-from crdesigner.lanelet_lanelet2.osm2lanelet import OSM2LConverter
-from crdesigner.lanelet_lanelet2.parser import OSMParser
-from crdesigner.lanelet_lanelet2.lanelet2osm import L2OSMConverter
+from crdesigner.conversion.lanelet_lanelet2 import OSM2LConverter
+from crdesigner.conversion.lanelet_lanelet2 import OSMParser
+from crdesigner.conversion.lanelet_lanelet2 import L2OSMConverter
 
 __author__ = "Benjamin Orthen"
 __copyright__ = "TUM Cyber-Physical Systems Group"

@@ -18,8 +18,8 @@ from lxml import etree
 from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
 from commonroad.planning.planning_problem import PlanningProblemSet
 
-from crdesigner.lanelet_lanelet2.lanelet2_parser import Lanelet2Parser
-from crdesigner.lanelet_lanelet2.lanelet2cr import Lanelet2CRConverter
+from crdesigner.conversion.lanelet_lanelet2.lanelet2_parser import Lanelet2Parser
+from crdesigner.conversion.lanelet_lanelet2.lanelet2cr import Lanelet2CRConverter
 from test.utils import elements_equal
 
 
