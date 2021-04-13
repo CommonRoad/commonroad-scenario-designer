@@ -18,8 +18,8 @@ from commonroad.scenario.scenario import Tag
 
 from crdesigner.conversion.opendrive.opendriveparser.elements.opendrive import OpenDrive
 from crdesigner.conversion.opendrive.opendriveparser.parser import parse_opendrive
-from crdesigner.conversion.opendrive import Network
-from crdesigner.conversion.lanelet_lanelet2 import CR2LaneletConverter
+from crdesigner.conversion.opendrive.opendriveconversion.network import Network
+from crdesigner.conversion.lanelet_lanelet2.cr2lanelet import CR2LaneletConverter
 
 __author__ = "Benjamin Orthen"
 __copyright__ = "TUM Cyber-Physical Systems Group"

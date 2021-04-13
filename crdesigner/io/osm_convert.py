@@ -13,9 +13,9 @@ from commonroad.planning.planning_problem import PlanningProblemSet
 from commonroad.scenario.scenario import Tag
 from commonroad.common.file_reader import CommonRoadFileReader
 
-from crdesigner.conversion.lanelet_lanelet2 import OSM2LConverter
-from crdesigner.conversion.lanelet_lanelet2 import OSMParser
-from crdesigner.conversion.lanelet_lanelet2 import L2OSMConverter
+from crdesigner.conversion.lanelet_lanelet2.lanelet2cr import Lanelet2CRConverter
+from crdesigner.conversion.lanelet_lanelet2.lanelet2_parser import Lanelet2Parser
+from crdesigner.conversion.lanelet_lanelet2.cr2lanelet import CR2LaneletConverter
 
 __author__ = "Benjamin Orthen"
 __copyright__ = "TUM Cyber-Physical Systems Group"
@@ -97,10 +97,10 @@ def osm_to_commonroad(args, output_name: str):
       args: Object containing parsed arguments.
       output_name: Name of file where result should be written to.
     """
-    parser = OSMParser(etree.parse(args.input_file).getroot())
+    parser = Lanelet2Parser(etree.parse(args.input_file).getroot())
     osm = parser.parse()
 
-    osm2l = OSM2LConverter(proj_string=args.proj)
+    osm2l = Lanelet2CRConverter(proj_string=args.proj)
     scenario = osm2l(
         osm, detect_adjacencies=args.adjacencies, left_driving_system=args.left_driving
     )
@@ -134,7 +134,7 @@ def commonroad_to_osm(args, output_name: str):
         print(
             "There was an error during the loading of the selected CommonRoad file.\n"
         )
-    l2osm = L2OSMConverter(args.proj)
+    l2osm = CR2LaneletConverter(args.proj)
     osm = l2osm(scenario)
     with open(f"{output_name}", "wb") as file_out:
         file_out.write(
