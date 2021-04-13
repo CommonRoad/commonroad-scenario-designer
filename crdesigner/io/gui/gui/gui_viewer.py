@@ -680,6 +680,8 @@ class AnimatedViewer(Viewer):
             [mouse_clicked_event.xdata, mouse_clicked_event.ydata])
         click_shape = Circle(radius=0.01, center=mouse_pos)
 
+        if self.current_scenario is None:
+            return
         l_network = self.current_scenario.lanelet_network
         selected_l_ids = l_network.find_lanelet_by_shape(click_shape)
         selected_lanelets = [l_network.find_lanelet_by_id(lid) for lid in selected_l_ids]
@@ -694,13 +696,15 @@ class AnimatedViewer(Viewer):
 
         if len(selected_lanelets) + len(selected_obstacles) > 1:
             output = "__Info__: More than one object can be selected! Lanelets: "
-            for la in selected_lanelets:
-                output += str(la.lanelet_id) + ", "
-            output = output[:len(output) - 2]
-            output += ". Obstacles: "
-            for obs in selected_obstacles:
-                output += str(obs.obstacle_id) + ", "
-            output = output[:len(output) - 2]
+            if len(selected_lanelets) > 0:
+                for la in selected_lanelets:
+                    output += str(la.lanelet_id) + ", "
+            output = output[:len(output) - 1]
+            if len(selected_obstacles) > 0:
+                output += ". Obstacles: "
+                for obs in selected_obstacles:
+                    output += str(obs.obstacle_id) + ", "
+            output = output[:len(output) - 1]
             output += "."
         else:
             output = ""
