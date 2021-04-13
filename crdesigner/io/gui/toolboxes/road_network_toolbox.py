@@ -1256,12 +1256,18 @@ class RoadNetworkToolbox(QDockWidget):
         selected_lanelet_one = self.selected_lanelet()
         if selected_lanelet_one is None:
             return
+        successors = []
+        predecessors = selected_lanelet_one.predecessor
         for suc in selected_lanelet_one.successor:
             new_lanelet = Lanelet.merge_lanelets(selected_lanelet_one,
                                                  self.current_scenario.lanelet_network.find_lanelet_by_id(suc))
             self.current_scenario.remove_lanelet(self.current_scenario.lanelet_network.find_lanelet_by_id(suc))
             self.current_scenario.add_objects(new_lanelet)
+            successors.append(new_lanelet.lanelet_id)
         self.current_scenario.remove_lanelet(selected_lanelet_one)
+        for pred in predecessors:
+            for suc in successors:
+                self.current_scenario.lanelet_network.find_lanelet_by_id(pred).add_successor(suc)
         self.callback(self.current_scenario)
 
     def fit_intersection(self):

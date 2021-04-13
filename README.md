@@ -55,7 +55,8 @@ the different usage methods.
 Within the GUI, you can also execute the different converters.
 The GUI can either be activated via a Python API, command line, or executing a Python script.
 
-####Python Script
+#### Python Script
+
 First you need to activate your python environment with the installed dependencies (we assume the environment 
 is called _commonroad_).  
 Afterward, you can start the _CommonRoad Scenario Designer_ and the GUI will open:
