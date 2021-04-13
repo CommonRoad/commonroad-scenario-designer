@@ -34,6 +34,7 @@ If you want to use the SUMO conversion or to generate traffic using SUMO, please
 [SUMO](https://sumo.dlr.de/docs/index.html) 
 and our [SUMO-Interface](https://gitlab.lrz.de/tum-cps/commonroad-sumo-interface).
 
+
 The usage of the Anaconda Python distribution is recommended.  
 To install the _CommonRoad Scenario Designer_, please execute one of the following two commands:
 ```bash
@@ -54,7 +55,7 @@ The GUI can either activated via a Python API, command line, or executing a Pyth
 ####Python Script
 First you need to activate your python environment with the installed dependencies (we assume the environment 
 is called _commonroad_.  
-Afterward, you can start _CommonRoad Scenario Designer_ and the GUI will open:
+Afterward, you can start _CommonRoad Scenario Designer_ and the GUI opens:
 
 ```bash
 $ conda activate commonroad
@@ -142,5 +143,5 @@ In case you detect a bug or you want to suggest a new feature, please create an 
 ## Authors
 
 Responsible: Sebastian Maierhofer (maintainer), Moritz Klischat  
-Contribution (in alphabetic order of last name): Maximilian Fruehauf, Marcus Gabler, Fabian Hoeltke, Aaron Kaefer, 
+Contribution (in alphabetic order by last name): Maximilian Fruehauf, Marcus Gabler, Fabian Hoeltke, Aaron Kaefer, 
 Benjamin Orthen, Maximilian Rieger, Stefan Urban
