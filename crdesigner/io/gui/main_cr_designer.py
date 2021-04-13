@@ -638,6 +638,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
             return
         self.cr_viewer.current_scenario = self.scenarios[self.current_scenario_index]
         self.update_view(focus_on_network=True)
+        self.update_toolbox_scenarios()
 
     def redo_action(self):
         if self.current_scenario_index < len(self.scenarios) - 1:
@@ -646,6 +647,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
             return
         self.cr_viewer.current_scenario = self.scenarios[self.current_scenario_index]
         self.update_view(focus_on_network=True)
+        self.update_toolbox_scenarios()
 
 
 def main():
