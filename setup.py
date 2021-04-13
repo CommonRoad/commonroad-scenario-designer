@@ -42,8 +42,8 @@ setup(
             "opendrive-convert=crdesigner.io.opendrive_convert:main",
             "osm-convert=crdesigner.io.osm_convert:main",
             "crdesigner=crdesigner.io.scenario_designer.main_cr_designer:main"
-            "lanelet2-convert="
-            "sumo-convert="
+    #       "lanelet2-convert="
+     #       "sumo-convert="
         ]
     },
 )

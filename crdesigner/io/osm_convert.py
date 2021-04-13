@@ -142,5 +142,7 @@ def commonroad_to_osm(args, output_name: str):
                 osm, xml_declaration=True, encoding="UTF-8", pretty_print=True
             )
         )
+
+
 if __name__ == '__main__':
     main()
