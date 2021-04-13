@@ -442,6 +442,8 @@ class RoadNetworkToolbox(QDockWidget):
                               line_marking_left_vertices=line_marking_left, stop_line=stop_line,
                               traffic_signs=traffic_signs,
                               traffic_lights=traffic_lights)
+            lanelet.translate_rotate(np.array([-lanelet.center_vertices[0][0], -lanelet.center_vertices[0][1]]), 0)
+            lanelet.translate_rotate(np.array([lanelet_pos_x, lanelet_pos_y]), 0)
 
         self.current_scenario.add_objects(lanelet)
         self.initialize_toolbox()
