@@ -1,7 +1,7 @@
 #!/bin/bash
 
 version=$1
-gitlab_img=gitlab.lrz.de:5005/cps/commonroad-map-tool/ci:$version
+gitlab_img=gitlab.lrz.de:5005/cps/commonroad-scenario-designer/ci:$version
 
 DOCKER_BUILDKIT=1 docker build -t "commonroad:$version" -f Dockerfile --no-cache .. \
 && docker tag "commonroad:$version" "latest" \
