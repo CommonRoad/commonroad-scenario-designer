@@ -2,7 +2,7 @@ stages:
     - test
     - build
 
-image: $CI_REGISTRY/cps/commonroad-map-tool/ci:v0.5
+image: $CI_REGISTRY/cps/commonroad-scenario-designer/ci:v0.5
 
 before_script:
     # This is required for the GitLab runner to have permissions to all the repos the user stating the job has.
