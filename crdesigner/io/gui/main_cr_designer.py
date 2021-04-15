@@ -650,18 +650,11 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.update_toolbox_scenarios()
 
 
-def main():
-    parser = ArgumentParser()
-    parser.add_argument("--input_file",
-                        "-i",
-                        default=None,
-                        help="load this file after startup")
-    args = parser.parse_args()
-
+def start_gui(input_file: str = None):
     # application
     app = QApplication(sys.argv)
-    if args.input_file:
-        w = MWindow(args.input_file)
+    if input_file:
+        w = MWindow(input_file)
     else:
         w = MWindow()
     w.showMaximized()
@@ -669,4 +662,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    start_gui()

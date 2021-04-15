@@ -11,10 +11,10 @@ from numpy.polynomial import polynomial as P
 __author__ = "Benjamin Orthen"
 __copyright__ = "TUM Cyber-Physical Systems Group"
 __credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles"]
-__version__ = "1.2.0"
+__version__ = "0.5"
 __maintainer__ = "Sebastian Maierhofer"
 __email__ = "commonroad@lists.lrz.de"
-__status__ = "Released"
+__status__ = "Development"
 
 
 class ParametricLaneBorderGroup:

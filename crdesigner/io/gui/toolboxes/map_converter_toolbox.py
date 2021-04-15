@@ -30,10 +30,9 @@ from crdesigner.conversion.lanelet_lanelet2.cr2lanelet import CR2LaneletConverte
 
 from crdesigner.io.gui.toolboxes.gui_sumo_simulation import SUMO_AVAILABLE
 if SUMO_AVAILABLE:
-    if SUMO_AVAILABLE:
-        from crdesigner.io.gui.toolboxes.gui_sumo_simulation import SUMOSimulation
-        from crdesigner.io.gui.settings.sumo_settings import SUMOSettings
-        from crdesigner.conversion.sumo_map.sumo2cr import convert_net_to_cr
+    from crdesigner.io.gui.toolboxes.gui_sumo_simulation import SUMOSimulation
+    from crdesigner.io.gui.settings.sumo_settings import SUMOSettings
+    from crdesigner.conversion.sumo_map.sumo2cr import convert_net_to_cr
 
 
 class MapConversionToolbox(QDockWidget):

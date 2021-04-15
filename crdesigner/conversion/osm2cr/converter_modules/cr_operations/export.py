@@ -139,6 +139,7 @@ def convert_coordinates_to_utm(scenario: Scenario, origin: np.ndarray) -> None:
                 bound[index] = np.array([easting, northing])
     return
 
+
 def create_scenario_intermediate(graph) -> Tuple[Scenario, IntermediateFormat]:
     """ Convert Scenario from RoadGraph via IntermediateFormat """
     interm = IntermediateFormat.extract_from_road_graph(graph)
