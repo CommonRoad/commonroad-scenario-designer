@@ -2,7 +2,7 @@ import unittest
 import subprocess
 from pathlib import Path
 import time
-
+import os
 
 def test_gui():
     process = subprocess.Popen(['crdesigner'])
@@ -14,26 +14,28 @@ def test_gui():
 class MyTestCase(unittest.TestCase):
     def test_opendrive(self):
         subprocess.Popen(['crdesigner', 'opendrive',
-                          '-i', './opendrive_test_files/poly3_and_border_record.xodr',
-                          '-o', './opendrive_command_line.xml'])
+                          '-i', os.path.dirname(os.path.realpath(__file__))
+                          + '/opendrive_test_files/poly3_and_border_record.xodr',
+                          '-o', os.path.dirname(os.path.realpath(__file__)) + '/opendrive_command_line.xml'])
         time.sleep(5)
-        exists = Path('./opendrive_command_line.xml')
+        exists = Path(os.path.dirname(os.path.realpath(__file__)) + '/opendrive_command_line.xml')
         self.assertTrue(exists.is_file())
 
     def test_osm(self):
         subprocess.Popen(['crdesigner', 'osm',
-                          '-i', './osm_test_files/munich.osm',
-                          '-o', './osm_command_line.xml'])
+                          '-i', os.path.dirname(os.path.realpath(__file__)) + '/osm_test_files/munich.osm',
+                          '-o', os.path.dirname(os.path.realpath(__file__)) + '/osm_command_line.xml'])
         time.sleep(15)
-        exists = Path('./osm_command_line.xml')
+        exists = Path(os.path.dirname(os.path.realpath(__file__)) + '/osm_command_line.xml')
         self.assertTrue(exists.is_file())
 
     def test_lanelet2_to_cr(self):
         subprocess.Popen(['crdesigner', 'lanelet',
-                          '-i', './lanelet_lanelet2_test_files/traffic_priority_lanelets_utm.osm',
-                          '-o', './lanelet_lanelet2_command_line.xml'])
+                          '-i', os.path.dirname(os.path.realpath(__file__))
+                          + '/lanelet_lanelet2_test_files/traffic_priority_lanelets_utm.osm',
+                          '-o', os.path.dirname(os.path.realpath(__file__)) + '/lanelet_lanelet2_command_line.xml'])
         time.sleep(5)
-        exists = Path('./lanelet_lanelet2_command_line.xml')
+        exists = Path(os.path.dirname(os.path.realpath(__file__)) + '/lanelet_lanelet2_command_line.xml')
         self.assertTrue(exists.is_file())
 
     def test_cr_to_lanelet(self):
@@ -42,7 +44,7 @@ class MyTestCase(unittest.TestCase):
                           '-o', './cr_lanelet_command_line.osm',
                           '--source_commonroad'])
         time.sleep(5)
-        exists = Path('./cr_lanelet_command_line.osm')
+        exists = Path(os.path.dirname(os.path.realpath(__file__)) + '/cr_lanelet_command_line.osm')
         self.assertTrue(exists.is_file())
 
 
