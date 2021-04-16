@@ -62,13 +62,13 @@ Afterward, you can start the _CommonRoad Scenario Designer_ and the GUI will ope
 ```bash
 $ conda activate commonroad
 # Run CR Scenario designer
-$ python crdesigner/io/scenario_designer/main_cr_designer.py
+$ python crdesigner/io/gui/commonroad_scenario_designer_gui.py
 ```
 
 #### API
 
 #### Command Line
-The GUI can be started from command line via the following two options.
+The GUI can be started from command line via the following two options:
 ```bash
 $ crdesigner
 $ crdesigner gui
@@ -85,32 +85,24 @@ For many conversions we provide further APIs, e.g., for downloading a map from O
 #### Command Line
 
 Converting a file from OpenDRIVE to CommonRoad with the command line:
-
 ```bash
-crdesigner [mode] -i [input_file] -o [output_file] ~~~~
+crdesigner [mode] -i [input_file] -o [output_file] -c -f -t [tags] --proj [proj-string] --adjacencies --left-driving --author --affiliation
 ```
-
-Converting a file from the Lanelet/Lanelet2 format to CommonRoad lanelets with the command line:
+For a description of the command line arguments please execute 
 ```bash
-lanelet2cr-convert inputfile.osm --reverse -o outputfile.xml --adjencies --proj "+proj=etmerc +lat_0=38 +lon_0=125 +ellps=bessel"
-```
-
-For the conversion of CommonRoad maps to the original lanelet format change the input and output file accordingly:
-```bash
-lanelet2cr-convert inputfile.xml -o outputfile.osm
-```
-
-Missing information such as the course of individual lanes is estimated during the process.
-These estimations are imperfect (the OSM maps as well) and often it is advisable to edit the 
-scenarios by hand via the GUI.
-Converting a file from the OSM format to CommonRoad  with the command line:
-```bash
-osm2cr-convert inputfile.osm outputfile.xml"
+crdesigner -h
 ```
 
 #### GUI
 The GUI provides a toolbox with which contains functionality to load maps given in formats other the CommonRoad format 
 and to convert CommonRoad maps to other formats or the other formats to the CommonRoad format.
+
+#### Important information
+
+When converting OSM maps, missing information such as the course of individual lanes is estimated during the process.
+These estimations are imperfect (the OSM maps as well) and often it is advisable to edit the 
+scenarios by hand via the GUI.
+
 
 ## Documentation
 

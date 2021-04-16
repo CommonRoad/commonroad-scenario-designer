@@ -29,22 +29,26 @@ def get_args() -> argparse.Namespace:
                                                  "Autonomous Vehicles")
     parser.add_argument('mode', type=str, const='all', nargs='?', choices=["gui", "osm", "sumo", "lanelet",
                                                                            "opendrive"],
-                        help='Specification of Operation Mode', default="gui")
+                        help='specification of operation mode', default="gui")
     parser.add_argument('-i', '--input_file', type=str, help='Path to input file', default=None)
-    parser.add_argument('-o', '--output_file', type=str, help='Directory to store generated CommonRoad files or file name')
-    parser.add_argument('--source_commonroad', default=False, action='store_true',
-                        help='Indicator whether a conversion from CommonRoad to the other format should be performed, '
+    parser.add_argument('-o', '--output_file', type=str, help='Path for output file')
+    parser.add_argument('-c', '--source_commonroad', default=False, action='store_true',
+                        help='indicator whether a conversion from CommonRoad to the other format should be performed, '
                              'default=False')
     parser.add_argument("-f", "--force-overwrite", action="store_true", help="overwrite existing file if it has same "
                                                                              "name as converted file")
-    parser.add_argument("-t", "--tags", nargs="+", type=Tag, help="tags of the created scenarios", default=set())
+    parser.add_argument("-t", "--tags", nargs="+", help="tags for the created scenario", default=set())
     parser.add_argument("--proj", help="proj-string to specify conversion for lanelet/lanelet2 format")
     parser.add_argument("--adjacencies", action="store_true", help="detect left and right adjacencies of "
-                                                                   "lanelets if they do not share a common way")
+                                                                   "lanelets if they do not share a common way "
+                                                                   "(this is only used for lanelet/lanelet2 "
+                                                                   "conversion)")
     parser.add_argument("--left-driving", action="store_true", help="set to true if map describes a left driving "
-                                                                    "system (e.g. in Great Britain)")
-    parser.add_argument("--author", help="Comma-separated list of scenario/map author names", default="")
-    parser.add_argument("--affiliation", help="Your affiliation, e.g., university, research institute, company",
+                                                                    "system, e.g., in Great Britain "
+                                                                    "(this is only used for lanelet/lanelet2 "
+                                                                    "conversion)")
+    parser.add_argument("--author", help="comma-separated list of scenario/map author names", default="")
+    parser.add_argument("--affiliation", help="your affiliation, e.g., university, research institute, company",
                         default="")
 
     return parser.parse_args()
@@ -107,13 +111,14 @@ def main():
                 scenario = lanelet_to_commonroad(input_file, args.proj, args.left_driving, args.adjacencies)
             else:
                 return
+            tags = set([Tag(t) for t in args.tags])
             writer = CommonRoadFileWriter(
                 scenario=scenario,
                 planning_problem_set=PlanningProblemSet(),
                 author=args.author,
                 affiliation=args.affiliation,
                 source="CommonRoad Scenario Designer",
-                tags=args.tags,
+                tags=tags,
             )
             if args.force_overwrite:
                 writer.write_to_file(output_file, OverwriteExistingFile.ALWAYS)
