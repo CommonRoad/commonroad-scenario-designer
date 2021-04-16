@@ -27,7 +27,7 @@ class MyTestCase(unittest.TestCase):
         subprocess.Popen(['crdesigner', 'osm',
                           '-i', os.path.dirname(os.path.realpath(__file__)) + '/osm_test_files/munich.osm',
                           '-o', os.path.dirname(os.path.realpath(__file__)) + '/osm_command_line.xml'])
-        time.sleep(15)
+        time.sleep(30)
         exists = Path(os.path.dirname(os.path.realpath(__file__)) + '/osm_command_line.xml')
         self.assertTrue(exists.is_file())
 
