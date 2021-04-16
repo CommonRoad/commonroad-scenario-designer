@@ -106,5 +106,8 @@ ENV PATH $HOME/.local/bin:$PATH
 # install usefull tools
 RUN sudo apt-get install -y vim nano
 
+# install Tkinter
+RUN sudo apt-get install -y tk-dev
+
 ADD ci/test.sh $HOME/
 

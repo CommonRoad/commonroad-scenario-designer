@@ -7,15 +7,13 @@ This toolbox provides map converters for [OpenStreetMap](https://www.openstreetm
 Additionally, a graphical user interface (GUI) is included, which allows one to efficiently create and manipulate 
 CommonRoad maps and scenarios.
 
-|  Tool                           |Path                                       |Functionality                                                    |
-| :-----------------------------: |:----------------------------------------: |:--------------------------------------------------------------: |
-|OpenDRIVE &rightarrow; CR        |`crdesigner/converter/opendrive`           |Conversion from OpenDRIVE to CommonRoad.                         |
-|Lanelet/Lanelet2 &rightarrow; CR |`crdesigner/converter/lanelet_lanelet2`    |Conversion from Lanelet/Lanelet2 to CommonRoad.                  |
-|CR &rightarrow; Lanelet          |`crdesigner/converter/lanelet_lanelet2`    |Conversion from CommonRoad to the original lanelet format.       |
-|OSM &rightarrow; CR              |`crdesigner/converter/osm2cr`              |Conversion from OSM to CommonRoad.                               |
-|SUMO &rightarrow; CR             |`crdesigner/converter/sumo_map`            |Conversion from SUMO to CommonRoad.                              |
-|CR &rightarrow; SUMO             |`crdesigner/converter/sumo_map`            |Conversion from CommonRoad to SUMO.                              |
-|CR Scenario Designer GUI         |`crdesigner/io/gui                        `|Multi-functional GUI for map conversion and scenario generation. |
+|  Tool                               |Path                                       |Functionality                                                                        |
+| :---------------------------------: |:----------------------------------------: |:----------------------------------------------------------------------------------: |
+|OpenDRIVE &rightarrow; CR            |`crdesigner/converter/opendrive`           |Conversion from OpenDRIVE to CommonRoad.                                             |
+|Lanelet/Lanelet2 &leftrightarrow; CR |`crdesigner/converter/lanelet_lanelet2`    |Conversion from Lanelet/Lanelet2 to CommonRoad <br /> and from CommonRoad to lanelet |
+|OSM &rightarrow; CR                  |`crdesigner/converter/osm2cr`              |Conversion from OSM to CommonRoad.                                                   |
+|SUMO &leftrightarrow; CR             |`crdesigner/converter/sumo_map`            |Conversion from SUMO to CommonRoad and vice versa.                                   |
+|CR Scenario Designer GUI             |`crdesigner/io/gui                        `|Multi-functional GUI for map conversion and scenario generation.                     |
 
 ## Prerequisites and Installation
 For the execution of the _CommonRoad Scenario Designer_ you need at least Python 3.7 and the following modules:
@@ -70,8 +68,10 @@ $ python crdesigner/io/scenario_designer/main_cr_designer.py
 #### API
 
 #### Command Line
+The GUI can be started from command line via the following two options.
 ```bash
-crdesigner
+$ crdesigner
+$ crdesigner gui
 ```
 
 ### Map Converters
@@ -79,13 +79,15 @@ You can execute the different converters either via command line, calling them w
 or the GUI.
 
 #### API
+The main APIs to execute the pure conversions are located under `crdesigner/io/api`. 
+For many conversions we provide further APIs, e.g., for downloading a map from OSM.
 
 #### Command Line
-For a detailed description of input parameters see documentation.
+
 Converting a file from OpenDRIVE to CommonRoad with the command line:
 
 ```bash
-opendrive2cr-convert input_file.xodr -o output_file.xml
+crdesigner [mode] -i [input_file] -o [output_file] ~~~~
 ```
 
 Converting a file from the Lanelet/Lanelet2 format to CommonRoad lanelets with the command line:

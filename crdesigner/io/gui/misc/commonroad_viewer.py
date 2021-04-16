@@ -16,13 +16,12 @@ if SUMO_AVAILABLE:
     from crdesigner.conversion.sumo_map.config import SumoConfig
 from crdesigner.io.gui.misc.util import Observable
 
-import matplotlib
 from matplotlib.animation import FuncAnimation, writers
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from matplotlib.path import Path
 from matplotlib.patches import PathPatch
-matplotlib.use("TkAgg")
+
 
 __author__ = "Benjamin Orthen, Stefan Urban, Max Winklhofer, Guyue Huang, Max Fruehauf, Sebastian Maierhofer"
 __copyright__ = "TUM Cyber-Physical Systems Group"
