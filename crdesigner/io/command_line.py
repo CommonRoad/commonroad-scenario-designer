@@ -6,7 +6,7 @@ from commonroad.planning.planning_problem import PlanningProblemSet
 from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
 from commonroad.scenario.scenario import Tag
 
-from crdesigner.io.gui.main_cr_designer import start_gui
+from crdesigner.io.gui.commonroad_scenario_designer_gui import start_gui
 from crdesigner.io.api import commonroad_to_lanelet, lanelet_to_commonroad, opendrive_to_commonroad, \
     osm_to_commonroad, commonroad_to_sumo, sumo_to_commonroad
 
