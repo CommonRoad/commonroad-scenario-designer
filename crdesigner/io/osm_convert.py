@@ -20,10 +20,10 @@ from crdesigner.conversion.lanelet_lanelet2.cr2lanelet import CR2LaneletConverte
 __author__ = "Benjamin Orthen"
 __copyright__ = "TUM Cyber-Physical Systems Group"
 __credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles"]
-__version__ = "1.2.0"
+__version__ = "0.5"
 __maintainer__ = "Sebastian Maierhofer"
 __email__ = "commonroad@lists.lrz.de"
-__status__ = "Released"
+__status__ = "Development"
 
 
 def parse_arguments():
@@ -142,6 +142,20 @@ def commonroad_to_osm(args, output_name: str):
                 osm, xml_declaration=True, encoding="UTF-8", pretty_print=True
             )
         )
+
+
+def convert_opendrive(opendrive: OpenDrive) -> Scenario:
+    """Convert an existing OpenDrive object to a CommonRoad Scenario.
+
+    Args:
+      opendrive: Parsed in OpenDrive map.
+    Returns:
+      A commonroad scenario with the map represented by lanelets.
+    """
+    road_network = Network()
+    road_network.load_opendrive(opendrive)
+
+    return road_network.export_commonroad_scenario()
 
 
 if __name__ == '__main__':

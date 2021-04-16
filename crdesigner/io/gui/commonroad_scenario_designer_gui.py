@@ -2,7 +2,6 @@ import logging
 import os
 import pathlib
 import sys
-from argparse import ArgumentParser
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 import copy
 from typing import Union
@@ -19,8 +18,8 @@ from commonroad.scenario.obstacle import Obstacle
 from crdesigner.io.gui.gui_src import CR_Scenario_Designer  # do not remove!!!
 from crdesigner.io.gui.converter_modules.opendrive_interface import OpenDRIVEInterface
 from crdesigner.io.gui.converter_modules.osm_interface import OSMInterface
-from crdesigner.io.gui.gui.gui_settings import GUISettings
-from crdesigner.io.gui.gui.gui_viewer import AnimatedViewer
+from crdesigner.io.gui.misc.gui_settings import GUISettings
+from crdesigner.io.gui.misc.commonroad_viewer import AnimatedViewer
 from crdesigner.io.gui.gui_resources.MainWindow import Ui_mainWindow
 from crdesigner.io.gui.toolboxes.gui_sumo_simulation import SUMO_AVAILABLE
 from crdesigner.io.gui.toolboxes.road_network_toolbox import RoadNetworkToolbox
@@ -650,18 +649,11 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.update_toolbox_scenarios()
 
 
-def main():
-    parser = ArgumentParser()
-    parser.add_argument("--input_file",
-                        "-i",
-                        default=None,
-                        help="load this file after startup")
-    args = parser.parse_args()
-
+def start_gui(input_file: str = None):
     # application
     app = QApplication(sys.argv)
-    if args.input_file:
-        w = MWindow(args.input_file)
+    if input_file:
+        w = MWindow(input_file)
     else:
         w = MWindow()
     w.showMaximized()
@@ -669,4 +661,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    start_gui()

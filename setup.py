@@ -37,13 +37,5 @@ setup(
     ],
     extras_require={"GUI": ["matplotlib>=3.1.0"]},
     python_requires=">=3.6",
-    entry_points={
-        "console_scripts": [
-            "opendrive-convert=crdesigner.io.opendrive_convert:main",
-            "osm-convert=crdesigner.io.osm_convert:main",
-            "crdesigner=crdesigner.io.scenario_designer.main_cr_designer:main"
-    #       "lanelet2-convert="
-     #       "sumo-convert="
-        ]
-    },
+    entry_points={"console_scripts": ["crdesigner=crdesigner.io.command_line:main"]},
 )
