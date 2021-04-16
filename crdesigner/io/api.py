@@ -1,4 +1,6 @@
 from lxml import etree
+import uuid
+import os
 
 from commonroad.scenario.scenario import Scenario
 from commonroad.common.file_reader import CommonRoadFileReader
@@ -12,7 +14,8 @@ from crdesigner.conversion.lanelet_lanelet2.cr2lanelet import CR2LaneletConverte
 
 from crdesigner.io.gui.toolboxes.gui_sumo_simulation import SUMO_AVAILABLE
 if SUMO_AVAILABLE:
-    from crdesigner.io.gui.toolboxes.gui_sumo_simulation import SUMOSimulation
+    from crdesigner.conversion.sumo_map.config import SumoConfig
+    from crdesigner.conversion.sumo_map.cr2sumo import CR2SumoMapConverter
     from crdesigner.conversion.sumo_map.sumo2cr import convert_net_to_cr
 
 from crdesigner.conversion.osm2cr.converter_modules.converter import GraphScenario
@@ -102,16 +105,30 @@ def sumo_to_commonroad(input_file: str) -> Scenario:
     return convert_net_to_cr(input_file)
 
 
-def commonroad_to_sumo(input_file: str):
+def commonroad_to_sumo(input_file: str, output_file: str):
     """
     Converts CommonRoad file to SUMO net file and stores it
 
     @param input_file: Path to CommonRoad file
+    @param output_file: Path where files should be stored
     @return: CommonRoad scenario
     """
+    try:
+        commonroad_reader = CommonRoadFileReader(input_file)
+        scenario, _ = commonroad_reader.open()
+    except etree.XMLSyntaxError as xml_error:
+        print(f"SyntaxError: {xml_error}")
+        print(
+            "There was an error during the loading of the selected CommonRoad file.\n"
+        )
+        return
+
     if SUMO_AVAILABLE:
-        sumo_simulation = SUMOSimulation("./")
-        sumo_simulation.convert(input_file)
+        config = SumoConfig.from_scenario_name(str(uuid.uuid4()))
+        path, file_name = os.path.split(output_file)
+        config.scenario_name = file_name.partition(".")[0]
+        converter = CR2SumoMapConverter(scenario.lanelet_network, config)
+        converter.convert_to_net_file(path)
 
 
 def osm_to_commonroad(input_file: str) -> Scenario:

@@ -31,7 +31,7 @@ def get_args() -> argparse.Namespace:
                                                                            "opendrive"],
                         help='Specification of Operation Mode', default="gui")
     parser.add_argument('-i', '--input_file', type=str, help='Path to input file', default=None)
-    parser.add_argument('-o', '--output_file', type=str, help='Directory to store generated CommonRoad files')
+    parser.add_argument('-o', '--output_file', type=str, help='Directory to store generated CommonRoad files or file name')
     parser.add_argument('--source_commonroad', default=False, action='store_true',
                         help='Indicator whether a conversion from CommonRoad to the other format should be performed, '
                              'default=False')
@@ -95,7 +95,7 @@ def main():
             if args.mode == "lanelet":
                 commonroad_to_lanelet(input_file, output_file, args.proj)
             if args.mode == "sumo":
-                commonroad_to_sumo(input_file)
+                commonroad_to_sumo(input_file, output_file)
         else:
             if args.mode == "osm":
                 scenario = osm_to_commonroad(input_file)

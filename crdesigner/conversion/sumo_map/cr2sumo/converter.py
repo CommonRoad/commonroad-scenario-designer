@@ -1095,7 +1095,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         """
         file_path = os.path.join(os.path.dirname(output_path), f"{self.conf.scenario_name}.nod.xml")
         with open(file_path, 'w+') as output_file:
-            sumolib.writeXMLHeader(output_file, 'CommonRoad Map Tool')
+            sumolib.writeXMLHeader(output_file, 'CommonRoad Scenario Designer')
             nodes = etree.Element("nodes")
 
             for node in self.new_nodes.values():
@@ -1115,7 +1115,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         """
         file_path = os.path.join(os.path.dirname(output_path), f"{self.conf.scenario_name}.edg.xml")
         with open(file_path, 'w+') as output_file:
-            sumolib.writeXMLHeader(output_file, 'CommonRoad Map Tool')
+            sumolib.writeXMLHeader(output_file, 'CommonRoad Scenario Designer')
             edges = etree.Element('edges')
             for edge in self.new_edges.values():
                 edges.append(etree.fromstring(edge.to_xml()))
@@ -1134,7 +1134,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         """
         file_path = os.path.join(os.path.dirname(output_path), f"{self.conf.scenario_name}.con.xml")
         with open(file_path, 'w+') as output_file:
-            sumolib.writeXMLHeader(output_file, 'CommonRoad Map Tool')
+            sumolib.writeXMLHeader(output_file, 'CommonRoad Scenario Designer')
             connections = etree.Element('connections')
             for connection in self._new_connections:
                 connections.append(etree.fromstring(connection.to_xml()))
@@ -1155,7 +1155,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         """
         file_path = os.path.join(os.path.dirname(output_path), f"{self.conf.scenario_name}.tll.xml")
         with open(file_path, "w+") as f:
-            sumolib.writeXMLHeader(f, 'CommonRoad Map Tool')
+            sumolib.writeXMLHeader(f, 'CommonRoad Scenario Designer')
             xml = etree.fromstring(self.traffic_light_signals.to_xml())
             f.write(str(etree.tostring(xml, pretty_print=True, encoding="utf-8"), encoding="utf-8"))
         self._traffic_file = file_path
@@ -1168,7 +1168,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         """
         file_path = os.path.join(os.path.dirname(output_path), f"{self.conf.scenario_name}.typ.xml")
         with open(file_path, "w+") as f:
-            sumolib.writeXMLHeader(f, 'CommonRoad Map Tool')
+            sumolib.writeXMLHeader(f, 'CommonRoad Scenario Designer')
             types = etree.fromstring(self.edge_types.to_xml())
             f.write(str(etree.tostring(types, pretty_print=True, encoding="utf-8"), encoding="utf-8"))
         self._type_file = file_path
@@ -1372,10 +1372,11 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         """
         Convert the Commonroad scenario to a net.xml file, specified by the absolute  path output_file.
         NOTE: This method regenerates the traffic!
-        :param path of the returned net.xml file
+        :param output_folder of the returned net.xml file
         :return returns whether conversion was successful
         """
-
+        print(output_folder)
+        print(self.conf.scenario_name)
         output_path = os.path.join(output_folder, self.conf.scenario_name + '.net.xml')
         logging.info("Converting to SUMO Map")
         self._convert_map()

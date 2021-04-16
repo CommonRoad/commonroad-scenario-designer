@@ -23,6 +23,7 @@ python37:
         - grep -v "git" requirements.txt | pip install -r /dev/stdin
         # use the current conda environment in tox, as we have manually installed all required dependencies there
         # run tests
+        - pip install -e .
         - tox --current-env -e py37
     artifacts:
         reports:
@@ -39,6 +40,7 @@ python38:
         - grep -v "git" requirements.txt | pip install -r /dev/stdin
         # use the current conda environment in tox, as we have manually installed all required dependencies there
         # run tests
+        - pip install -e .
         - tox --current-env -e py38
     artifacts:
         when: always
@@ -56,6 +58,7 @@ python39:
         - grep -v "git" requirements.txt | pip install -r /dev/stdin
         # use the current conda environment in tox, as we have manually installed all required dependencies there
         # run tests
+        - pip install -e .
         - tox --current-env -e py39
     artifacts:
         reports:
