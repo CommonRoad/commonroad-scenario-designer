@@ -31,7 +31,8 @@ __email__ = "commonroad@lists.lrz.de"
 __status__ = "Development"
 
 
-def lanelet_to_commonroad(input_file: str, proj: str, left_driving: bool, adjacencies: bool) -> Scenario:
+def lanelet_to_commonroad(input_file: str, proj: str, left_driving: bool = False,
+                          adjacencies: bool = False) -> Scenario:
     """
     Converts lanelet/lanelet2 file to CommonRoad
 
@@ -42,10 +43,10 @@ def lanelet_to_commonroad(input_file: str, proj: str, left_driving: bool, adjace
     @return: CommonRoad scenario
     """
     parser = Lanelet2Parser(etree.parse(input_file).getroot())
-    osm = parser.parse()
+    lanelet2_content = parser.parse()
 
-    osm2l = Lanelet2CRConverter(proj_string=proj)
-    scenario = osm2l(osm, detect_adjacencies=adjacencies, left_driving_system=left_driving)
+    lanelet2_converter = Lanelet2CRConverter(proj_string=proj)
+    scenario = lanelet2_converter(lanelet2_content, detect_adjacencies=adjacencies, left_driving_system=left_driving)
 
     return scenario
 
