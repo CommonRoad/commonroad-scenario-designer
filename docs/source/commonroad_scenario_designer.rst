@@ -13,11 +13,7 @@
 CommonRoad Scenario Designer GUI
 #############################################
 
-.. _fig.component_diagram:
-.. figure:: images/gui/Components_Diagram_CR_Designer-1.png
-  :alt: Component diagram of CR Scenario Designer
 
-  Component diagram of CR Scenario Designer
 
 CommonRoad Scenario Designer (CRSD) is a GUI, which
 integrates all currently developed converters with CR scenario
