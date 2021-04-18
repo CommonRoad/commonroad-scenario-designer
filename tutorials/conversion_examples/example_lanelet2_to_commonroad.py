@@ -16,7 +16,7 @@ left_driving = False  # replace with favoured value
 adjacencies = False  # replace with favoured value
 
 # ----------------------------------------------- Option 1: General API ------------------------------------------------
-# load OpenDRIVE file, parse it, and convert it to a CommonRoad scenario
+# load lanelet/lanelet2 file, parse it, and convert it to a CommonRoad scenario
 scenario = lanelet_to_commonroad(input_path, proj, left_driving, adjacencies)
 
 # store converted file as CommonRoad scenario
@@ -28,9 +28,8 @@ writer = CommonRoadFileWriter(
     source="CommonRoad Scenario Designer",
     tags={Tag.URBAN},
 )
-writer.write_to_file(os.path.dirname(os.path.realpath(__file__)) + "/" + "ZAM_OpenDRIVETest-1_1-T1.xml",
+writer.write_to_file(os.path.dirname(os.path.realpath(__file__)) + "/" + "ZAM_Lanelet-1_1-T1.xml",
                      OverwriteExistingFile.ALWAYS)
-
 
 # ---------------------------------------- Option 2: Lanelet conversion APIs -------------------------------------------
 # read and parse lanelet/lanelet2 file
