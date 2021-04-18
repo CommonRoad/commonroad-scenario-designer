@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 # CommonRoad python tools are imported
 from commonroad.visualization.draw_dispatch_cr import draw_object
 from commonroad.common.file_reader import CommonRoadFileReader
-from crdesigner.conversion.osm2cr.converter_modules import find_bounds
+from crdesigner.conversion.osm2cr.converter_modules.cr_operations.export import find_bounds
 
 def view_xml(filename= str, ax=None):
     """
@@ -48,6 +48,6 @@ def view_xml(filename= str, ax=None):
 if __name__ == "__main__":
 
     # TODO Add file location here
-    filename = " "
+    filename = "/Users/Fabian/Developer/Hiwi/commonroad-map-tool/crdesigner/conversion/osm2cr/files/sonnentauTest.xml"
 
     view_xml(filename)
