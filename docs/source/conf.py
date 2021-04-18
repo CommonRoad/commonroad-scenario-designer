@@ -21,14 +21,14 @@ sys.path.insert(0, os.path.abspath("../.."))
 
 # -- Project information -----------------------------------------------------
 
-project = "commonroad-map-tool"
-copyright = "2020, Technische Universität München"
-author = "Maximilian Frühauf, Benjamin Orthen, Stefan Urban"
+project = "commonroad-scenario-designer"
+copyright = "2021, Technical University of Munich"
+author = "Sebastian Maierhofer"
 
 # The short X.Y version
-version = "1.0"
+version = "0.5"
 # The full version, including alpha/beta/rc tags
-release = "1.1.0"
+release = "0.5.0"
 
 
 # -- General configuration ---------------------------------------------------
@@ -114,7 +114,7 @@ html_static_path = ["_static"]
 # -- Options for HTMLHelp output ---------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = "opendrive2laneletdoc"
+htmlhelp_basename = "crdesigner"
 
 
 # -- Options for LaTeX output ------------------------------------------------
@@ -140,9 +140,9 @@ latex_elements = {
 latex_documents = [
     (
         master_doc,
-        "opendrive2lanelet.tex",
-        "opendrive2lanelet Documentation",
-        "Benjamin Orthen, Stefan Urban",
+        "crdesigner.tex",
+        "CommonRoad Scenario Designer Documentation",
+        "Sebastian Maierhofer",
         "manual",
     )
 ]
@@ -153,7 +153,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, "opendrive2lanelet", "opendrive2lanelet Documentation", [author], 1)
+    (master_doc, "crdesigner", "CommonRoad Scenario Designer Documentation", [author], 1)
 ]
 
 
@@ -165,11 +165,11 @@ man_pages = [
 texinfo_documents = [
     (
         master_doc,
-        "opendrive2lanelet",
-        "opendrive2lanelet Documentation",
+        "crdesigner",
+        "CommonRoad Scenario Designer Documentation",
         author,
-        "opendrive2lanelet",
-        "One line description of project.",
+        "crdesigner",
+        "Toolbox for Map Conversion and Scenario Creation for Autonomous Vehicles.",
         "Miscellaneous",
     )
 ]
@@ -205,6 +205,6 @@ intersphinx_mapping = {"https://docs.python.org/": None}
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 # todo_include_todos = True
 
-apidoc_module_dir = "../../opendrive2lanelet"
+apidoc_module_dir = "../../crdesigner"
 # apidoc_excluded_paths = ["test", "setup.py"]
 apidoc_separate_modules = True

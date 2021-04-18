@@ -1,7 +1,8 @@
-CommonRoad Map-Converter documentation
+CommonRoad Scenario Designer
 ======================================
 
-This documentation summarizes the different map converters in this repository.
+The CommonRoad Scenario Designer provides algorithms and interfaces for creating and manipulating CommonRoad maps
+and scenarios as well as converting maps between several map formats.
 It consists of the individual converter documentations from the original repositories listed in the table below.
 
 .. toctree::
@@ -12,4 +13,4 @@ It consists of the individual converter documentations from the original reposit
     020_osm
     030_cr_designer
     040_sumo
-    050_development
+    050_lanelet2
