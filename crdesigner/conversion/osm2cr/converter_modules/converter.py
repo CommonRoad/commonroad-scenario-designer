@@ -78,6 +78,7 @@ def step_collection_3(graph: road_graph.Graph) -> road_graph.Graph:
     print("adjust common bound points")
     graph.correct_start_end_points()
     print("done converting")
+                
     return graph
 
 

@@ -4,7 +4,7 @@ This module holds all parameters necessary for the conversion
 
 # Benchmark settings
 # name of the benchmark
-BENCHMARK_ID = "ZAM_Test-1_1_T-1"
+BENCHMARK_ID = "pappel"
 # author of the benchmark
 AUTHOR = "Automated converter by Maximilian Rieger"
 # affiliation of the benchmark
@@ -16,7 +16,7 @@ TAGS = "urban"
 # Geonames username to retrieve geonamesID for created scenarios
 GEONAMES_USERNAME = "demo"
 # Mapillary Client ID which can be set to extract additional traffic signs. If set to "demo", mapillary signs will be disabled
-MAPILLARY_CLIENT_ID = "demo"
+MAPILLARY_CLIENT_ID = "dVY5ZFZiclhmM256endnTTk3TDRIYjphYmNmNDg0YTEwNmFmZGM2"
 # time step size for the benchmark in seconds
 TIMESTEPSIZE = 0.1
 

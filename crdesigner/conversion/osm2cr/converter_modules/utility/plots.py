@@ -46,6 +46,17 @@ def draw_graph(graph: rg.Graph, ax: axis, links: bool = True):
     lanes = []
     for edge in graph.edges:
         lanes += edge.lanes
+        # draw an arrow from start to end of edge
+        ax.scatter(edge.node1.x, edge.node1.y, color="blue")
+        ax.arrow( 
+            x=edge.node1.x, 
+            y=edge.node1.y, 
+            dx=edge.node2.x - edge.node1.x, 
+            dy=edge.node2.y - edge.node1.y, 
+            color="red", 
+            width=1,
+            head_width= 6)
+        
     if links:
         lanes += list(graph.lanelinks)
     for lane in lanes:
@@ -53,6 +64,16 @@ def draw_graph(graph: rg.Graph, ax: axis, links: bool = True):
             print("drawing lanelet {} of {}".format(counter, len(lanes)))
         draw_laneborders(lane, ax)
         counter += 1
+        
+        # draw lanelet arrrow
+        ax.arrow( 
+            x=lane.right_bound[0][0], 
+            y=lane.right_bound[0][1], 
+            dx=lane.right_bound[-1][0] - lane.right_bound[0][0], 
+            dy=lane.right_bound[-1][1] - lane.right_bound[0][1], 
+            color="green", 
+            width=1,
+            head_width= 2)
     return
 
 
