@@ -31,9 +31,10 @@ NETEDIT.
 Quick Start Guide
 *****************
 To simulate traffic on a CommonRoad Scenario, you firstly need to install SUMOs dependencies.
-For a detailed explanation on this process see :ref:`installation`.
 
-Then refer to the provided example file `example file <https://gitlab.lrz.de/cps/commonroad-map-tool/-/blob/develop/crdesigner/sumo_map/example.py>`_ to convert a commonroad .xml
+Then refer to the provided example file
+`example file <https://gitlab.lrz.de/cps/commonroad-map-tool/-/blob/develop/crdesigner/sumo_map/example.py>`_
+to convert a commonroad .xml
 file to SUMO, simulate on traffic on it and save the result to disk:
 
 .. code:: bash

@@ -8,9 +8,21 @@ It consists of the individual converter documentations from the original reposit
 .. toctree::
     :maxdepth: 2
 
-    000_installation
     010_open_drive
     020_osm
-    030_cr_designer
+    030_commonroad_scenario_designer
     040_sumo
     050_lanelet2
+
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
+
+Contact information
+===================
+
+:Website: `http://commonroad.in.tum.de <https://commonroad.in.tum.de/>`_
+:Email: `commonroad@lists.lrz.de <commonroad@lists.lrz.de>`_

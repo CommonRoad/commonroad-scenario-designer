@@ -10,7 +10,7 @@
   ^ for subsubsections
   " for paragraphs
 
-GUI CommonRoad Scenario Designer (CRSD)
+CommonRoad Scenario Designer GUI
 #############################################
 
 .. _fig.component_diagram:
