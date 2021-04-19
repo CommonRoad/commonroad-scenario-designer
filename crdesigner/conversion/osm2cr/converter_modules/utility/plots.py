@@ -28,7 +28,7 @@ def draw_laneborders(lane: rg.Lane, ax: axis):
             y_points.append(y_current)
         x_points.append(lane.left_bound[0][0])
         y_points.append(lane.left_bound[0][1])
-        ax.plot(x_points, y_points, color='black', linewidth=1.0)
+        ax.plot(x_points, y_points, color="black", linewidth=1.0)
         # plotter.scatter(x_points, y_points, color='grey', s=4)
     return
 
