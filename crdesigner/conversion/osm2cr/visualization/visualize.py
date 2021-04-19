@@ -49,6 +49,6 @@ def view_xml(filename= str, ax=None):
 if __name__ == "__main__":
 
     # TODO Add file location here
-    filename = "/Users/Fabian/Developer/Hiwi/commonroad-map-tool/crdesigner/conversion/osm2cr/files/pappel.xml"
+    filename = ""
 
     view_xml(filename)

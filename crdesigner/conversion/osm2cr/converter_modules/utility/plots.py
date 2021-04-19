@@ -8,7 +8,7 @@ import numpy as np
 from crdesigner.conversion.osm2cr.converter_modules.graph_operations import road_graph as rg
 
 
-def draw_laneborders(lane: rg.Lane, ax: axis, color='black'):
+def draw_laneborders(lane: rg.Lane, ax: axis):
     """
     draws a single lane in a plot
 
@@ -28,9 +28,54 @@ def draw_laneborders(lane: rg.Lane, ax: axis, color='black'):
             y_points.append(y_current)
         x_points.append(lane.left_bound[0][0])
         y_points.append(lane.left_bound[0][1])
-        ax.plot(x_points, y_points, color=color, linewidth=1.0)
+        ax.plot(x_points, y_points, color='black', linewidth=1.0)
         # plotter.scatter(x_points, y_points, color='grey', s=4)
     return
+
+def draw_edge_orientation(edge: rg.GraphEdge, ax: axis):
+    """
+    draws a single edge direction in a plot
+
+    :param ax: the ax object to draw on
+    :param edge: edge object
+
+    :return: None
+    """
+
+    # draw an arrow from start to end of edge
+    ax.scatter(edge.node1.x, edge.node1.y, color="blue")
+    ax.arrow( 
+        x=edge.node1.x, 
+        y=edge.node1.y, 
+        dx=edge.node2.x - edge.node1.x, 
+        dy=edge.node2.y - edge.node1.y, 
+        color="red", 
+        width=1,
+        head_width= 6)
+    # print compass degrees
+    ax.text(
+        x=(edge.node1.x + edge.node2.x)/2, 
+        y=(edge.node1.y +edge.node2.y)/2, 
+        s='{}'.format(int(edge.get_compass_degrees()))
+        )
+
+def draw_lanelet_direction(lane: rg.Lane, ax: axis):
+    """
+    draws a single lane direction in a plot. Green if lane forward
+
+    :param ax: the ax object to draw on
+    :param lane: lane object
+
+    :return: None
+    """
+    ax.arrow( 
+        x=lane.right_bound[0][0], 
+        y=lane.right_bound[0][1], 
+        dx=lane.right_bound[-1][0] - lane.right_bound[0][0], 
+        dy=lane.right_bound[-1][1] - lane.right_bound[0][1], 
+        color="green" if lane.forward else "pink", 
+        width=1,
+        head_width= 2)
 
 
 def draw_graph(graph: rg.Graph, ax: axis, links: bool = True):
@@ -42,44 +87,27 @@ def draw_graph(graph: rg.Graph, ax: axis, links: bool = True):
     :type graph: Graph
     :return: None
     """
+
+    # USE THIS FOR DEBUGGING
+    debug = False
+
     counter = 0
     lanes = []
     for edge in graph.edges:
         lanes += edge.lanes
-        # draw an arrow from start to end of edge
-        ax.scatter(edge.node1.x, edge.node1.y, color="blue")
-        ax.arrow( 
-            x=edge.node1.x, 
-            y=edge.node1.y, 
-            dx=edge.node2.x - edge.node1.x, 
-            dy=edge.node2.y - edge.node1.y, 
-            color="red", 
-            width=1,
-            head_width= 6)
-        # print compass degrees
-        ax.text(
-            x=(edge.node1.x + edge.node2.x)/2, 
-            y=(edge.node1.y +edge.node2.y)/2, 
-            s='{}'.format(int(edge.get_compass_degrees()))
-            )
-        
+        if debug:
+            draw_edge_orientation(edge, ax)
+   
     if links:
         lanes += list(graph.lanelinks)
     for lane in lanes:
         if counter % 100 == 0:
             print("drawing lanelet {} of {}".format(counter, len(lanes)))
         draw_laneborders(lane, ax)
+        if debug:
+            draw_lanelet_direction(lane, ax)
         counter += 1
-        
-        # draw lanelet arrrow
-        ax.arrow( 
-            x=lane.right_bound[0][0], 
-            y=lane.right_bound[0][1], 
-            dx=lane.right_bound[-1][0] - lane.right_bound[0][0], 
-            dy=lane.right_bound[-1][1] - lane.right_bound[0][1], 
-            color="green" if lane.forward else "pink", 
-            width=1,
-            head_width= 2)
+
     return
 
 

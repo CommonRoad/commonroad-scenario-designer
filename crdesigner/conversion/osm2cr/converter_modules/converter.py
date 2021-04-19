@@ -77,8 +77,7 @@ def step_collection_3(graph: road_graph.Graph) -> road_graph.Graph:
             graph.sublayer_graph.delete_invalid_lanes()
     print("adjust common bound points")
     graph.correct_start_end_points()
-    print("done converting")
-                
+    print("done converting")        
     return graph
 
 
