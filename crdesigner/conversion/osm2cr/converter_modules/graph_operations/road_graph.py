@@ -357,7 +357,9 @@ class GraphEdge:
         self.node2: GraphNode = node2
         self.waypoints: List[geometry.Point] = waypoints
         self.nr_of_lanes: int = nr_of_lanes
+        # number of forward lanes
         self.forward_lanes: int = forward_lanes
+        # number of backward lanes
         self.backward_lanes: int = backward_lanes
         self.oneway: bool = oneway
         self.speedlimit: float = speedlimit

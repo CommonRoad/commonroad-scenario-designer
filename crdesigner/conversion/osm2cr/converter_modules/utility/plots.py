@@ -8,7 +8,7 @@ import numpy as np
 from crdesigner.conversion.osm2cr.converter_modules.graph_operations import road_graph as rg
 
 
-def draw_laneborders(lane: rg.Lane, ax: axis):
+def draw_laneborders(lane: rg.Lane, ax: axis, color='black'):
     """
     draws a single lane in a plot
 
@@ -28,7 +28,7 @@ def draw_laneborders(lane: rg.Lane, ax: axis):
             y_points.append(y_current)
         x_points.append(lane.left_bound[0][0])
         y_points.append(lane.left_bound[0][1])
-        ax.plot(x_points, y_points, color="black", linewidth=1.0)
+        ax.plot(x_points, y_points, color=color, linewidth=1.0)
         # plotter.scatter(x_points, y_points, color='grey', s=4)
     return
 
@@ -56,6 +56,12 @@ def draw_graph(graph: rg.Graph, ax: axis, links: bool = True):
             color="red", 
             width=1,
             head_width= 6)
+        # print compass degrees
+        ax.text(
+            x=(edge.node1.x + edge.node2.x)/2, 
+            y=(edge.node1.y +edge.node2.y)/2, 
+            s='{}'.format(int(edge.get_compass_degrees()))
+            )
         
     if links:
         lanes += list(graph.lanelinks)
@@ -71,7 +77,7 @@ def draw_graph(graph: rg.Graph, ax: axis, links: bool = True):
             y=lane.right_bound[0][1], 
             dx=lane.right_bound[-1][0] - lane.right_bound[0][0], 
             dy=lane.right_bound[-1][1] - lane.right_bound[0][1], 
-            color="green", 
+            color="green" if lane.forward else "pink", 
             width=1,
             head_width= 2)
     return
