@@ -1,19 +1,4 @@
-# Eclipse SUMO, Simulation of Urban MObility; see https://eclipse.org/sumo
-# Copyright (C) 2008-2017 German Aerospace Center (DLR) and others.
-# This program and the accompanying materials
-# are made available under the terms of the Eclipse Public License v2.0
-# which accompanies this distribution, and is available at
-# http://www.eclipse.org/legal/epl-v20.html
 
-# @file    __init__.py
-# @author  Daniel Krajzewicz
-# @author  Laura Bieker
-# @author  Karol Stosiek
-# @author  Michael Behrisch
-# @author  Jakob Erdmann
-# @author  Robert Hilbrich
-# @date    2008-03-27
-# @version $Id$
 """
 This file contains a content handler for parsing sumo network xml files.
 It uses other classes from this module to represent the road network.
@@ -244,7 +229,8 @@ def sumo_net_from_xml(file: str) -> Net:
 class NodeType(Enum):
     """
     Node types:
-    If you leave out the type of the node, it is automatically guessed by netconvert but may not be the one you intended.
+    If you leave out the type of the node, it is automatically guessed by netconvert but may not be the one you
+    intended.
     The following types are possible, any other string is counted as an error and will yield in a program stop:
     taken from https://sumo.dlr.de/docs/Networks/PlainXML.html#connections_after_joining_nodes
     """

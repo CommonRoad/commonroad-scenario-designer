@@ -1,5 +1,5 @@
 import matplotlib.pyplot as plt
-from crdesigner.conversion.osm2cr.converter_modules import find_bounds
+from crdesigner.conversion.osm2cr.converter_modules.cr_operations.export import find_bounds
 from commonroad.visualization.draw_dispatch_cr import draw_object
 from commonroad.common.file_reader import CommonRoadFileReader
 

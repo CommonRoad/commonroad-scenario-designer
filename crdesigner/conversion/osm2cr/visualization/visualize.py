@@ -45,6 +45,7 @@ def view_xml(filename= str, ax=None):
         draw_object(scenario, plot_limits=limits, ax=ax, draw_params=draw_params)
         ax.set_aspect("equal")
 
+
 if __name__ == "__main__":
 
     # TODO Add file location here

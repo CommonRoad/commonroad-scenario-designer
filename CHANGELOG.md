@@ -1,11 +1,6 @@
 # Changelog commonroad-map-and-scenario-designer
 
-## [1.0.0] - 2021-XX-XX
+## [0.0.5] - 2021-04-01
 ### Added
-- ABC
-
-### Fixed
-- ABC
-
-### Removed
-- ABC
+- Graphical User Interface for creating and manipulating CommonRoad maps and scenarios
+- converts between different map formats: OpenStreetMap, SUMO, Lanelet/Lanelet2, OpenDRIVE, CommonRoad
