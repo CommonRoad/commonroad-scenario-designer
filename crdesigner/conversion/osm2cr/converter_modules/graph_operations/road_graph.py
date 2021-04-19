@@ -301,6 +301,14 @@ class GraphNode:
                     "malformed graph, node has edges assigned to it, which start elsewhere"
                 )
 
+    def add_traffic_sign(self, sign: "GraphTrafficSign"):
+        
+        for edge in self.edges:
+            for lane in edge.lanes:
+                # add to forward lanes
+                # TODO determine in which direction
+                if lane.forward:
+                    lane.add_traffic_sign(sign)
 
 class GraphEdge:
     """
