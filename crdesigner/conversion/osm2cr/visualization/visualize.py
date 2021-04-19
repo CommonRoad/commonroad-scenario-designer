@@ -9,7 +9,6 @@ from commonroad.visualization.draw_dispatch_cr import draw_object
 from commonroad.common.file_reader import CommonRoadFileReader
 from crdesigner.conversion.osm2cr.converter_modules.cr_operations.export import find_bounds
 
-
 def view_xml(filename= str, ax=None):
     """
     shows the plot of a CR scenario on a axes object
@@ -50,6 +49,6 @@ def view_xml(filename= str, ax=None):
 if __name__ == "__main__":
 
     # TODO Add file location here
-    filename = " "
+    filename = ""
 
     view_xml(filename)

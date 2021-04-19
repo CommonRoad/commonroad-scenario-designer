@@ -302,14 +302,13 @@ class GraphNode:
                 )
 
     def add_traffic_sign(self, sign: "GraphTrafficSign"):
-        # this method is never called
+        
         for edge in self.edges:
             for lane in edge.lanes:
                 # add to forward lanes
                 # TODO determine in which direction
                 if lane.forward:
                     lane.add_traffic_sign(sign)
-
 
 class GraphEdge:
     """
@@ -357,7 +356,9 @@ class GraphEdge:
         self.node2: GraphNode = node2
         self.waypoints: List[geometry.Point] = waypoints
         self.nr_of_lanes: int = nr_of_lanes
+        # number of forward lanes
         self.forward_lanes: int = forward_lanes
+        # number of backward lanes
         self.backward_lanes: int = backward_lanes
         self.oneway: bool = oneway
         self.speedlimit: float = speedlimit
@@ -475,10 +476,23 @@ class GraphEdge:
         calculates the compass degrees of an edge as in https://en.wikipedia.org/wiki/Points_of_the_compass#/media/File:Compass_Card_B+W.svg
         :return: compass orientation in degrees
         """
-        edge_compass_degrees = math.degrees(self.get_orientation(self.node1)) - 45
-        if edge_compass_degrees < 0.0:
-            edge_compass_degrees+= 360.0
-        return edge_compass_degrees
+     
+        # compute radians
+        delta_x = self.node2.x - self.node1.x
+        delta_y = self.node2.y - self.node1.y
+        radians = np.arctan2(delta_y, delta_x)  
+    
+        # https://stackoverflow.com/a/7805311
+        if radians < 0.0:
+            radians = abs(radians)
+        else:
+            radians = 2 * np.pi - radians
+        degrees = math.degrees(radians)
+        degrees += 90.0
+        if degrees > 360.0:
+            degrees -= 360.0
+        # return correctly computed degrees
+        return degrees
 
     def angle_to(self, edge: "GraphEdge", node: GraphNode) -> float:
         """
@@ -724,36 +738,29 @@ class GraphEdge:
 
     def add_traffic_sign(self, sign: "GraphTrafficSign"):
 
-        self.traffic_signs.append(sign)
+        """
+        adds traffic signs to all lanes of the edge
+        
+        :param sign: the sign to add
 
+        :return: None
+        """
+
+        # TODO handle direction for traffic signs where no direction is given (e.g parsed maxspeed from OSM). 
+        # Currently, every sign of these is added to the forward lane only
+
+        self.traffic_signs.append(sign)
         forward = True
         sign_direction = sign.direction
+        # add traffic sign to direction wise lane if direction is given.
+        # This is the case for all mapillary signs
         if sign_direction is not None:
+            # get compass degrees of edge
             edge_orientation = self.get_compass_degrees()
-            # Debugging
-            # print(sign.sign)
-            # print("edge orientation: {}".format(edge_orientation))
-            # print("sign direction {} ".format(sign.direction))
             if abs(sign_direction-edge_orientation) < 180:
                 forward = False
-
-        # add traffic signs to lanes
-
-        # approach 1, works only if sign direction is provided
-        # if sign_direction is not None:
-        #     favorable_lane = self.lanes[0]
-        #     for lane in self.lanes:
-        #         print("lane degrees: "+ str(lane.get_compass_degrees()))
-        #         if abs(sign_direction - lane.get_compass_degrees()) < abs(sign_direction - favorable_lane.get_compass_degrees()) :
-        #             favorable_lane = lane
-
-        #     if abs(sign_direction - favorable_lane.get_compass_degrees()) < 70: # threshold in degrees
-        #         favorable_lane.add_traffic_sign(sign)
-        #         return
-
-        # use approach 2 if no sign direction could be provided
-        # Warning! Sometimes edge forward direction != lane forward direction, this leads to wrongfully assigned traffic signs
         for lane in self.lanes:
+            # add sign to forward lanes
             if lane.forward and forward:
                     lane.add_traffic_sign(sign)
             # add to backward lanes
@@ -761,6 +768,14 @@ class GraphEdge:
                 lane.add_traffic_sign(sign)
 
     def add_traffic_light(self, light: "GraphTrafficLight", forward):
+        """
+        adds traffic light to all lanes of the edge
+        
+        :param light: the light to add
+
+        :return: None
+        """
+
         self.traffic_lights.append(light)
         for lane in self.lanes:
             if lane.forward == forward:
@@ -775,10 +790,9 @@ class GraphTrafficSign:
         self.edges = edges
         self.direction = direction
         self.id = idgenerator.get_id()
-        #print(self.sign)
-
+       
     def to_traffic_sign_cr(self):
-        #print(self.sign)
+    
         elements = []
         position = None
 
