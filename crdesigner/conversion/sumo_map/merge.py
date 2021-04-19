@@ -59,28 +59,3 @@ def merge(to_merge: List[int], scenario: Scenario) -> Tuple[Scenario, int]:
     return scenario, merged_lanelet.lanelet_id
 
 
-base_path = os.path.abspath(os.path.join(__file__, "../..", "..", "..", "test", "sumo_xml_test_files"))
-scenario_name = "garching"
-scenario_path = os.path.join(base_path, scenario_name + ".xml")
-scenario, planning_problem = CommonRoadFileReader(scenario_path).open()
-
-scenario, lanelet_id = merge([266, 225], scenario)
-scenario, lanelet_id = merge([lanelet_id, 228], scenario)
-scenario, lanelet_id = merge([253, 226], scenario)
-scenario, lanelet_id = merge([lanelet_id, 229], scenario)
-scenario, lanelet_id = merge([222, 258], scenario)
-scenario, lanelet_id = merge([223, 269], scenario)
-scenario, lanelet_id = merge([207, 254], scenario)
-scenario, lanelet_id = merge([208, 264], scenario)
-scenario, lanelet_id = merge([210, 263], scenario)
-scenario, lanelet_id = merge([211, 273], scenario)
-
-new_scenario_path = os.path.join(base_path, f"{scenario_name}_merged.xml")
-CommonRoadFileWriter(scenario,
-                     planning_problem,
-                     author=scenario.author,
-                     affiliation=scenario.affiliation,
-                     source=scenario.source,
-                     tags=scenario.tags,
-                     location=scenario.location) \
-    .write_scenario_to_file(new_scenario_path, overwrite_existing_file=True)
