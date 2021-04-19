@@ -14,7 +14,7 @@ OpenDRIVE to CommonRoad Conversion
 ##################################
 
 This conversion allows you to convert a road network description from the
-`OpenDRIVE format <http://www.opendrive.org/project.html>`_ to
+`OpenDRIVE format <https://www.asam.net/standards/detail/opendrive/>`_ to
 the `CommonRoad format <https://gitlab.lrz.de/tum-cps/commonroad-sc
 enarios/blob/master/documentation/XML_commonRoad_2020a.pdf>`_ (Version 2020a).
 Its theoretical background is detailed in the following paper
@@ -27,7 +27,7 @@ Since the release of the paper, various updates have been implemented in the cod
 Quick Start Guide
 *****************
 
-OpenDRIVE to CommonRoad
+Command Line Interface
 ========================
 
 Want to quickly convert an XODR file detailing a OpenDRIVE scenario
@@ -44,10 +44,10 @@ produces a file called *new_converted_file_name.xml*
    e.g. ``crdesigner opendrive -i test.xodr`` produces a file called *test.xml*.
 
 Or use the GUI with the command
-``crdesigner gui``.
+``crdesigner`` or ``crdesigner gui``.
 
 
-Converting an OpenDRIVE file to CommonRoad
+Python APIs
 ==========================================
 
 .. code:: python
@@ -111,16 +111,10 @@ Converting an OpenDRIVE file to CommonRoad
                          OverwriteExistingFile.ALWAYS)
 
 
-Implementation
-**************
+Implementation Details
+**********************
 
-.. warning:
-  **This work is still in progress.**
-
-This part contains explanations of the rationales behind the implementation
-of the opendrive2lanelet package.
-
-In detail, the parsing of an OpenDrive file to a Python object,
+Subsequently, the parsing of an OpenDrive file to a Python object,
 the converting to a network of ``ParametricLane`` object and then the
 conversion from parametric lanes to lanelets is explained.
 

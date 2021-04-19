@@ -13,11 +13,93 @@
 Open Street Maps (OSM) to CommonRoad Conversion
 ###############################################
 
-System Design
-=============
+This conversion allows you to convert road networks from the
+`OpenStreetMap (OSM) format <https://www.openstreetmap.org>`_ format to the CommonRoad format (2020a).
+
+Quick Start Guide
+*****************
+
+Command Line Interface
+========================
+
+Want to quickly convert an OSM file detailing an OSM map to a XML file with a CommonRoad scenario?
+
+Use the command
+``crdesigner osm -i input-file.xodr -o output-file.xml``.
+
+For example ``crdesigner osm -i test.osm -o new_converted_file_name.xml``
+produces a file called *new_converted_file_name.xml*
+
+.. note::
+   If no output file name is specified, the converted file will be called input-file.xml,
+   e.g. ``crdesigner opendrive -i test.osm`` produces a file called *test.xml*.
+
+Or use the GUI with the command
+``crdesigner`` or ``crdesigner gui``.
+
+The GUI provides also functionality to edit already the OSM graph structure before converting to CommonRoad.
+
+Python APIs
+==========================================
+
+.. code:: python
+
+    import os
+
+    from crdesigner.io.api import osm_to_commonroad
+
+    from commonroad.scenario.scenario import Tag
+    from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
+    from commonroad.planning.planning_problem import PlanningProblemSet
+
+    import crdesigner.conversion.osm2cr.converter_modules.converter as converter
+    import crdesigner.conversion.osm2cr.converter_modules.cr_operations.export as ex
+    from crdesigner.conversion.osm2cr import config
+    from crdesigner.conversion.osm2cr.converter_modules.osm_operations.downloader import download_around_map
+
+    # download a map
+    download_around_map(config.BENCHMARK_ID + '_downloaded.osm', 48.140289, 11.566272)
+
+    # --------------------------------------- Option 1: General API ------------------------------------------
+    # load OpenDRIVE file, parse it, and convert it to a CommonRoad scenario
+    scenario = osm_to_commonroad(config.SAVE_PATH + config.BENCHMARK_ID + ".osm")
+
+    # store converted file as CommonRoad scenario
+    writer = CommonRoadFileWriter(
+        scenario=scenario,
+        planning_problem_set=PlanningProblemSet(),
+        author="Sebastian Maierhofer",
+        affiliation="Technical University of Munich",
+        source="CommonRoad Scenario Designer",
+        tags={Tag.URBAN},
+    )
+    writer.write_to_file(os.path.dirname(os.path.realpath(__file__)) + "/" + "ZAM_OSM-1_1-T1.xml",
+                         OverwriteExistingFile.ALWAYS)
+
+
+    # ----------------------------------- Option 2: OSM conversion APIs --------------------------------------
+
+    # open the map and convert it to a scenario
+    scenario = converter.GraphScenario(config.SAVE_PATH + config.BENCHMARK_ID + ".osm")
+
+    # draw and show the scenario
+    scenario.plot()
+
+    # save the scenario as commonroad file
+    scenario.save_as_cr(config.SAVE_PATH + config.BENCHMARK_ID + ".xml")
+    # save the scenario as a binary
+    scenario.save_to_file(config.SAVE_PATH + config.BENCHMARK_ID + ".pickle")
+
+    # view the generated
+    ex.view_xml(config.SAVE_PATH + config.BENCHMARK_ID + ".xml")
+
+
+
+Implementation Details
+**********************
 
 Format differences
-------------------
+==================
 
 OpenStreetMap (OSM) files and CommonRoad (CR) scenarios are formats that can both represent road networks with
 additional elements. While they both use XML to be stored on disk the internal structure has many differences.
@@ -33,7 +115,7 @@ With CR version 2020.2 new elements are inserted into the scenario format:
 Traffic Signs and Traffic Lights.
 
 Conversion Overview
--------------------
+===================
 
 Extremely simplified the conversion process works as follows:
 
@@ -59,7 +141,7 @@ with the GUI tool **LaneLinkEdit**.
 
 
 When does the automated conversion work?
-========================================
+****************************************
 
 This tool was originally created to automatically convert OSM files to CommonRoad scenarios.
 Unfortunately, the tool is not capable to convert all kinds scenarios.
@@ -75,7 +157,7 @@ Please be always aware, that the automated tool generates only realistic scenari
 
 
 Scenarios That Will Work Well
------------------------------
+=============================
 There are many scenarios for which the automated conversion will perform well.
 For example motorways and highways, which do not have complicated intersections will be converted quite reliably.
 Roads with few lanes, low curvature and far apart intersections, such as parking lots,
@@ -120,12 +202,12 @@ A large motorway intersection.
 A motorway access.
 
 Problematic Scenarios
----------------------
+=====================
 The conversion process can fail because of various reasons.
 Problematic occurrences we experienced repeatedly are listed in the following.
 
 Faulty OSM Data
-~~~~~~~~~~~~~~~
+---------------
 Relying on solely OSM data for the generation of a scenario causes the tool to be extremely prone to incomplete and
 faulty OSM data.
 This seems obvious, but it is easy to overlook small flaws that will cause the result to be surprisingly erroneous.
@@ -152,7 +234,7 @@ If the info about lane counts is just missing and not wrong, you can also edit t
 
 
 Large Intersections
-~~~~~~~~~~~~~~~~~~~
+-------------------
 Linking lanes across intersections in a reasonable manner becomes exponentially more difficult for intersections of
 many streets.
 We therefore did only build detailed heuristics for intersections with up to four streets (segments of roads that lead
@@ -169,7 +251,7 @@ Example:
 The linking of lanes across intersections can be guided by hand in the GUI of this tool.
 
 Narrow Winding Streets
-~~~~~~~~~~~~~~~~~~~~~~
+----------------------
 The tool creates the course of lanes by offsetting the central course of roads.
 This offsetting procedure will not work well for wide roads with tight curves.
 
@@ -194,7 +276,7 @@ If you nonetheless need to depict such streets in CR, you can try to model the c
 
 
 Streets Running Close Together
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------------
 
 Streets are cropped at intersections to leave space for the turning lanes on the intersection.
 By default, they are cropped until they have at least a certain distance to all other streets.
@@ -213,7 +295,7 @@ Then the tool will crop roads until a certain distance to the center of the inte
 
 
 Very Complicated Scenarios
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+--------------------------
 
 There are several factors, which can make a scenario complicated.
 We see most problems when there are many large intersections (containing many lanes/streets) close together.
@@ -240,31 +322,19 @@ This will prevent the tool from deleting road segments it considers as too short
 In some cases it might still be necessary, to create at least parts of the scenario by hand.
 
 Left Hand Traffic
-~~~~~~~~~~~~~~~~~
+-----------------
 
 The tool assumes right hand traffic for all scenarios.
 
 
-The Converter Module
-====================
-
-converter.converter module
---------------------------
-
-.. automodule:: crdesigner.conversion.osm2cr.converter_modules.converter
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-
 Configuration
-=============
+*************
 
 There are several parameters which can be edited in **config.py**.
 These Parameters can also be set in the GUI via **edit settings**.
 
 Benchmark settings
-------------------
+==================
 * **BENCHMARK_ID**: name of the benchmark::
 
   BENCHMARK_ID = "test_bench"
@@ -474,8 +544,7 @@ these can be used to improve the conversion process for individual scenarios
 
   LEAST_CLUSTER_LENGTH = 10.0
 
-* **MERGE_DISTANCE**: maximal distance between two intersections to which they are merged, if zero, no intersections
-are merged::
+* **MERGE_DISTANCE**: maximal distance between two intersections to which they are merged, if zero, no intersections are merged::
 
   MERGE_DISTANCE = 0.0
 
@@ -486,12 +555,5 @@ User edit activation
 
   USER_EDIT = False
 
-The Full Converter Package
-==========================
-This page includes the documentation of all modules of the converter package.
-Please note, that the documentation of the **converter module** can be found on the page **The Converter Module**
-and is excluded in this page.
 
-osm_operations modules
-----------------------
-These modules contain all operations performed on OSM maps and their data.
+

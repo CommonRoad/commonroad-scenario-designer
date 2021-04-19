@@ -1,11 +1,11 @@
 CommonRoad Scenario Designer
 ======================================
 
-The CommonRoad Scenario Designer provides algorithms and interfaces for creating and manipulating CommonRoad maps
-and scenarios as well as converting maps between several map formats.
+The CommonRoad Scenario Designer provides a toolbox for creating and manipulating CommonRoad maps
+and scenarios as well as converting maps between different map formats.
 The CommonRoad Scenario Designer can convert from the Lanelet/Lanelet2, OpenDRIVE, OpenStreetMap (OSM), and SUMO
 formats to the CommonRoad format.
-Additionally, we provide conversions from the CommonRoad map format to the SUMO and Lanelet map format.
+Additionally, we provide conversions from the CommonRoad map format to the SUMO and Lanelet format.
 We provide a graphical user interface (GUI), command line interface, and different APIs.
 
 
@@ -14,8 +14,8 @@ We provide a graphical user interface (GUI), command line interface, and differe
 
     open_drive
     osm
-    sumo
     lanelet2
+    sumo
     commonroad_scenario_designer
 
 Indices and tables

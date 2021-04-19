@@ -41,7 +41,7 @@ file to SUMO, simulate on traffic on it and save the result to disk:
 
   # add the current module to the python path
   export $PYTHONPATH="$PYTHONPATH:$(pwd)"
-  python crdesigner/sumo_map/example.py
+  python crdesigner/covnersion/sumo_map/example.py
 
 
 Implementation
