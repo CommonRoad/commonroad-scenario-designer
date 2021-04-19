@@ -474,7 +474,7 @@ class GraphEdge:
         delta_y = self.node2.y - self.node1.y
         radians = np.arctan2(delta_y, delta_x)  
     
-        # black math magic from https://stackoverflow.com/a/7805311
+        # https://stackoverflow.com/a/7805311
         if radians < 0.0:
             radians = abs(radians)
         else:
@@ -767,7 +767,7 @@ class GraphEdge:
 
         :return: None
         """
-        
+
         self.traffic_lights.append(light)
         for lane in self.lanes:
             if lane.forward == forward:
