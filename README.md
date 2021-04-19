@@ -48,7 +48,7 @@ the different usage methods.
 
 ### GUI
 
-![GUI_Screenshot](./docs/source/images/gui/gui_screenshot.png)
+![GUI_Screenshot](./docs/source/images/gui_screenshot.png)
 
 Within the GUI, you can also execute the different converters.
 The GUI can either be activated via a Python API, command line, or executing a Python script.
