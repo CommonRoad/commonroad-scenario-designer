@@ -37,7 +37,8 @@ produces a file called *new_converted_file_name.xml*
 Or use the GUI with the command
 ``crdesigner`` or ``crdesigner gui``.
 
-The GUI provides also functionality to edit already the OSM graph structure before converting to CommonRoad.
+Note that you have to activate the Python environment in which the CommonRoad Scenario Designer is installed first to
+use the command line.
 
 Python APIs
 ==========================================
@@ -93,7 +94,7 @@ Python APIs
     # view the generated
     ex.view_xml(config.SAVE_PATH + config.BENCHMARK_ID + ".xml")
 
-
+The GUI provides also functionality to edit already the OSM graph structure before converting to CommonRoad.
 
 Implementation Details
 **********************

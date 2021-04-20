@@ -16,7 +16,7 @@ if SUMO_AVAILABLE:
     from crdesigner.conversion.sumo_map.config import SumoConfig
 from crdesigner.io.gui.misc.util import Observable
 
-from matplotlib.animation import FuncAnimation, writers
+from matplotlib.animation import FuncAnimation
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from matplotlib.path import Path
@@ -64,13 +64,9 @@ class DynamicCanvas(FigureCanvas):
                     }
                 },
                 'lanelet_network': {
-                    # 'traffic_light': {
-                    #     'scale_factor': 0.2
-                    # },
                     'traffic_sign': {
                         'draw_traffic_signs': True,
                         'show_traffic_signs': 'all',
-                        # 'scale_factor': 0.2
                     },
                 }
             }
@@ -187,7 +183,6 @@ class DynamicCanvas(FigureCanvas):
         self.ax.clear()
 
         draw_params_merged = _merge_dict(self.draw_params.copy(), draw_params)
-
         self.rnd.plot_limits = plot_limits
         self.rnd.ax = self.ax
         scenario.draw(renderer=self.rnd, draw_params=draw_params_merged)
@@ -261,29 +256,221 @@ def draw_lanelet_polygon(lanelet, ax, color, alpha, zorder,
     return [xlim1, xlim2, ylim1, ylim2]
 
 
-class Viewer:
-    """ functionality to draw a Scenario onto a Canvas """
+class AnimatedViewer:
     def __init__(self, parent, callback_function):
+
         self.current_scenario = None
         self.dynamic = DynamicCanvas(parent, width=5, height=10, dpi=100)
         self.callback_function = callback_function
 
-    def open_scenario(self, scenario: Scenario):
-        """ """
+        # sumo config giving dt etc
+        self._config: SumoConfig = None
+        self.min_time_step = 0
+        self.max_time_step = 0
+        # current time step
+        self.time_step = Observable(0)
+        # FuncAnimation object
+        self.animation: FuncAnimation = None
+        # if playing or not
+        self.playing = False
+        self.dynamic.mpl_connect('button_press_event', self.select_scenario_element)
+
+    def open_scenario(self, scenario: Scenario, config: Observable = None):
+        """[summary]
+
+        :param scenario: [description]
+        :type scenario: [type]
+        :param config: [description], defaults to None
+        :type config: SumoConfig, optional
+        """
         self.current_scenario = scenario
+
+        # if we have not subscribed already, subscribe now
+        if config is not None:
+            if not self._config:
+                def set_config(conf):
+                    self._config = conf
+                    self._calc_max_timestep()
+                config.subscribe(set_config)
+            self._config = config.value
+
+        self._calc_max_timestep()
+        if self.animation:
+            self.time_step.value = 0
+            self.animation.event_source.stop()
+            self.animation = None
         self.update_plot(focus_on_network=True)
+
+    def _init_animation(self):
+        if not self.current_scenario:
+            return
+
+        print('init animation')
+        scenario = self.current_scenario
+        self.dynamic.clear_axes(keep_limits=True)
+
+        start = self.min_time_step
+        end = self.max_timestep
+        plot_limits: Union[list, None, str] = None
+        if self._config is not None:
+            dt = self._config.dt
+        else:
+            dt = 0
+        # ps = 25
+        # dpi = 120
+        # ln, = self.dynamic.ax.plot([], [], animated=True)
+        anim_frames = end - start
+
+        if start == end:
+            warning_dialog = QMessageBox()
+            warning_dialog.warning(None, "Warning",
+                                   "This Scenario only has one time step!",
+                                   QMessageBox.Ok, QMessageBox.Ok)
+            warning_dialog.close()
+
+        assert start <= end, '<video/create_scenario_video> time_begin=%i needs to smaller than time_end=%i.' % (
+            start, end)
+
+        def draw_frame(draw_params):
+            time_start = start + self.time_step.value
+            time_end = start + min(anim_frames, self.time_step.value)
+            self.time_step.value += 1
+            if time_start > time_end:
+                self.time_step.value = 0
+
+            draw_params = {
+                'time_begin': time_start,
+                'time_end': time_end,
+                'antialiased': True,
+            }
+
+            self.dynamic.draw_scenario(scenario, draw_params=draw_params)
+
+        # Interval determines the duration of each frame in ms
+        interval = 1000 * dt
+        self.dynamic.clear_axes(keep_limits=True)
+        self.animation = FuncAnimation(self.dynamic.figure,
+                                       draw_frame,
+                                       blit=False,
+                                       interval=interval,
+                                       repeat=True)
+
+    def play(self):
+        """ plays the animation if existing """
+        if not self.animation:
+            self._init_animation()
+
+        self.dynamic.update_plot()
+        self.animation.event_source.start()
+
+    def pause(self):
+        """ pauses the animation if playing """
+        if not self.animation:
+            self._init_animation()
+            return
+
+        self.animation.event_source.stop()
+
+    def set_timestep(self, timestep: int):
+        """ sets the animation to the current timestep """
+        print("set timestep: ", timestep)
+        if not self.animation:
+            self._init_animation()
+        self.dynamic.update_plot()
+        # self.animation.event_source.start()
+        self.time_step.silent_set(timestep)
+
+    def save_animation(self):
+        path, _ = QFileDialog.getSaveFileName(
+            caption="QFileDialog.getSaveFileName()",
+            directory=self.current_scenario.scenario_id.__str__() + ".mp4",
+            filter="MP4 (*.mp4);;GIF (*.gif);; AVI (*avi)",
+            options=QFileDialog.Options(),
+        )
+        if not path:
+            return
+
+        try:
+            rnd = MPRenderer()
+            with open(path, "w"):
+                QMessageBox.about(None, "Information",
+                                  "Exporting the video will take few minutes, please wait until process is finished!")
+                rnd.create_video([self.current_scenario], path, draw_params=self.dynamic.draw_params)
+                print("finished")
+        except IOError as e:
+            QMessageBox.critical(
+                self,
+                "CommonRoad file not created!",
+                "The CommonRoad scenario was not saved as video due to an error.\n\n{}".format(e),
+                QMessageBox.Ok,
+            )
+            return
+
+    def _calc_max_timestep(self):
+        """calculate maximal time step of current scenario"""
+        if self.current_scenario is None:
+            return 0
+        timesteps = [
+            obstacle.prediction.occupancy_set[-1].time_step
+            for obstacle in self.current_scenario.dynamic_obstacles
+        ]
+        self.max_timestep = np.max(timesteps) if timesteps else 0
+        return self.max_timestep
+
+    def select_scenario_element(self, mouse_clicked_event):
+        """
+        Select lanelets by clicking on the canvas. Selects only one of the
+        lanelets that contains the click position.
+        """
+        mouse_pos = np.array(
+            [mouse_clicked_event.xdata, mouse_clicked_event.ydata])
+        click_shape = Circle(radius=0.01, center=mouse_pos)
+
+        if self.current_scenario is None:
+            return
+        l_network = self.current_scenario.lanelet_network
+        selected_l_ids = l_network.find_lanelet_by_shape(click_shape)
+        selected_lanelets = [l_network.find_lanelet_by_id(lid) for lid in selected_l_ids]
+        selected_obstacles = [obs for obs in self.current_scenario.obstacles
+                              if obs.occupancy_at_time(self.time_step.value) is not None and
+                              obs.occupancy_at_time(self.time_step.value).shape.contains_point(mouse_pos)]
+
+        if len(selected_lanelets) > 0 and len(selected_obstacles) == 0:
+            self.update_plot(sel_lanelet=selected_lanelets[0], time_step=self.time_step.value)
+        else:
+            self.update_plot(sel_lanelet=None, time_step=self.time_step.value)
+
+        if len(selected_lanelets) + len(selected_obstacles) > 1:
+            output = "__Info__: More than one object can be selected! Lanelets: "
+            if len(selected_lanelets) > 0:
+                for la in selected_lanelets:
+                    output += str(la.lanelet_id) + ", "
+            output = output[:len(output) - 1]
+            if len(selected_obstacles) > 0:
+                output += ". Obstacles: "
+                for obs in selected_obstacles:
+                    output += str(obs.obstacle_id) + ", "
+            output = output[:len(output) - 1]
+            output += "."
+        else:
+            output = ""
+
+        if len(selected_obstacles) > 0:
+            selection = " Obstacle with ID " + str(selected_obstacles[0].obstacle_id) + " is selected."
+            self.callback_function(selected_obstacles[0], output+ selection)
+        elif len(selected_lanelets) > 0:
+            selection = " Lanelet with ID " + str(selected_lanelets[0].lanelet_id) + " is selected."
+            self.callback_function(selected_lanelets[0], output + selection)
 
     def update_plot(self,
                     sel_lanelet: Lanelet = None,
                     sel_intersection: Intersection = None,
-                    focus_on_network: bool = False):
-        """ Update the plot accordinly to the selection of scenario elements
-        :param scenario: Scenario to draw
-        :type scenario: Scenario
+                    time_step_changed: bool = False,
+                    focus_on_network: bool = False,
+                    time_step: int = 0):
+        """ Update the plot accordingly to the selection of scenario elements
         :param sel_lanelet: selected lanelet, defaults to None
-        :type sel_lanelet: Lanelet, optional
         :param sel_intersection: selected intersection, defaults to None
-        :type sel_intersection: Intersection, optional
         """
 
         x_lim = self.dynamic.get_axes().get_xlim()
@@ -297,24 +484,23 @@ class Viewer:
             float("Inf"), -float("Inf")
         ]
 
-        draw_params = {
-            'scenario': {
-                'dynamic_obstacle': {
-                    'trajectory': {
-                        'show_label': True,
-                        'draw_trajectory': False
-                    }
-                }
+        if time_step_changed:
+            draw_params = {
+                'time_begin': time_step,
             }
-        }
-        self.dynamic.draw_scenario(self.current_scenario,
-                                   draw_params=draw_params)
+        else:
+            draw_params = {
+                'time_begin': self.time_step.value - 1,
+            }
+
+        self.dynamic.draw_scenario(self.current_scenario, draw_params=draw_params)
 
         for lanelet in self.current_scenario.lanelet_network.lanelets:
 
             color, alpha, zorder, label = self.get_paint_parameters(
                 lanelet, sel_lanelet, sel_intersection)
-            if color == "gray": continue
+            if color == "gray":
+                continue
 
             lanelet_limits = draw_lanelet_polygon(lanelet, ax, color, alpha, zorder, label)
             network_limits[0] = min(network_limits[0], lanelet_limits[0])
@@ -330,7 +516,7 @@ class Viewer:
 
         if focus_on_network:
             # can we focus on a selection?
-            if all([abs(l) < float("Inf") for l in network_limits]):
+            if all([abs(lim) < float("Inf") for lim in network_limits]):
                 # enlarge limits
                 border_x = (network_limits[1] - network_limits[0]) * 0.1 + 1
                 border_y = (network_limits[3] - network_limits[2]) * 0.1 + 1
@@ -457,260 +643,3 @@ class Viewer:
             color="black",
             lw=0.1,
         )
-
-
-class AnimatedViewer(Viewer):
-    def __init__(self, parent, callback_function):
-        super().__init__(parent, callback_function)
-
-        # sumo config giving dt etc
-        self._config: SumoConfig = None
-        self.min_time_step = 0
-        self.max_time_step = 0
-        # current time step
-        self.time_step = Observable(0)
-        # FuncAnimation object
-        self.animation: FuncAnimation = None
-        # if playing or not
-        self.playing = False
-        self.dynamic.mpl_connect('button_press_event', self.select_scenario_element)
-
-    def open_scenario(self, scenario: Scenario, config: Observable = None):
-        """[summary]
-
-        :param scenario: [description]
-        :type scenario: [type]
-        :param config: [description], defaults to None
-        :type config: SumoConfig, optional
-        """
-        self.current_scenario = scenario
-
-        # if we have not subscribed already, subscribe now
-        if config is not None:
-            if not self._config:
-                def set_config(conf):
-                    self._config = conf
-                    self._calc_max_timestep()
-                config.subscribe(set_config)
-            self._config = config.value
-
-        self._calc_max_timestep()
-        if self.animation:
-            self.time_step.value = 0
-            self.animation.event_source.stop()
-            self.animation = None
-        self.update_plot(focus_on_network=True)
-
-    def _init_animation(self):
-        if not self.current_scenario:
-            return
-
-        print('init animation')
-        scenario = self.current_scenario
-        self.dynamic.clear_axes(keep_limits=True)
-
-        start = self.min_time_step
-        end = self.max_timestep
-        plot_limits: Union[list, None, str] = None
-        if self._config is not None:
-            dt = self._config.dt
-        else:
-            dt = 0
-        # ps = 25
-        # dpi = 120
-        # ln, = self.dynamic.ax.plot([], [], animated=True)
-        anim_frames = end - start
-
-        if start == end:
-            warning_dialog = QMessageBox()
-            warning_dialog.warning(None, "Warning",
-                                   "This Scenario only has one time step!",
-                                   QMessageBox.Ok, QMessageBox.Ok)
-            warning_dialog.close()
-
-        assert start <= end, '<video/create_scenario_video> time_begin=%i needs to smaller than time_end=%i.' % (
-            start, end)
-
-        def draw_frame(draw_params):
-            time_start = start + self.time_step.value
-            time_end = start + min(anim_frames, self.time_step.value)
-            self.time_step.value += 1
-            if time_start > time_end:
-                self.time_step.value = 0
-
-            draw_params = {
-                'time_begin': time_start,
-                'time_end': time_end,
-                'antialiased': True,
-                'dynamic_obstacle': {
-                    'show_label': True
-                }
-            }
-
-            # plot dynamic obstracles
-            # if self.timestep.value == 1:
-            self.dynamic.draw_scenario(scenario, draw_params=draw_params)
-            # else:
-            #     self.dynamic.update_obstacles(
-            #         scenario,
-            #         draw_params=draw_params,
-            #         plot_limits=None if plot_limits == 'auto' else plot_limits)
-
-        # Interval determines the duration of each frame in ms
-        interval = 1000 * dt
-        self.dynamic.clear_axes(keep_limits=True)
-        self.animation = FuncAnimation(self.dynamic.figure,
-                                       draw_frame,
-                                       blit=False,
-                                       interval=interval,
-                                       repeat=True)
-
-    def play(self):
-        """ plays the animation if existing """
-        if not self.animation:
-            self._init_animation()
-
-        self.dynamic.update_plot()
-        self.animation.event_source.start()
-
-    def pause(self):
-        """ pauses the animation if playing """
-        if not self.animation:
-            self._init_animation()
-            return
-
-        self.animation.event_source.stop()
-
-    def set_timestep(self, timestep: int):
-        """ sets the animation to the current timestep """
-        print("set timestep: ", timestep)
-        if not self.animation:
-            self._init_animation()
-        self.dynamic.update_plot()
-        # self.animation.event_source.start()
-        self.time_step.silent_set(timestep)
-
-    def save_animation(self, save_file: str):
-        # if self.animation is None:
-        # print("no animation loaded")
-        # return
-        if save_file == "Save as mp4":
-            if not self.current_scenario:
-                return
-            path, _ = QFileDialog.getSaveFileName(
-                None,
-                "QFileDialog.getSaveFileName()",
-                ".mp4",
-                "CommonRoad scenario video *.mp4 (*.mp4)",
-                options=QFileDialog.Options(),
-            )
-
-            if not path:
-                return
-
-            try:
-                with open(path, "w"):
-                    messbox = QMessageBox.about(None, "Information",
-                                                "Exporting as Mp4 file will take a while, please wait until process "
-                                                "finished ")
-                    FFMpegWriter = writers['ffmpeg']
-                    writer = FFMpegWriter()
-                    self.animation.save(path, dpi=120, writer=writer)
-
-            except IOError as e:
-                QMessageBox.critical(
-                    None,
-                    "CommonRoad file not created!",
-                    "The CommonRoad file was not saved due to an error.\n\n{}".
-                        format(e),
-                    QMessageBox.Ok,
-                )
-                return
-
-        elif save_file == "Save as gif":
-            if not self.current_scenario:
-                return
-            path, _ = QFileDialog.getSaveFileName(
-                None,
-                "QFileDialog.getSaveFileName()",
-                ".gif",
-                "CommonRoad scenario video *.gif (*.gif)",
-                options=QFileDialog.Options(),
-            )
-
-            if not path:
-                return
-
-            try:
-                with open(path, "w"):
-                    messbox = QMessageBox.about(None, "Information",
-                                                "Exporting as Gif file will take few minutes, please wait until "
-                                                "process finished")
-                    #self.animation.save(path, writer='imagemagick', fps=30)
-                    self.dynamic.rnd.create_video([self.current_scenario], path, draw_params=self.dynamic.draw_params)
-                    print("finished")
-            except IOError as e:
-                QMessageBox.critical(
-                    self,
-                    "CommonRoad file not created!",
-                    "The CommonRoad file was not saved due to an error.\n\n{}".
-                        format(e),
-                    QMessageBox.Ok,
-                )
-                return
-
-    def _calc_max_timestep(self):
-        """calculate maximal time step of current scenario"""
-        if self.current_scenario is None:
-            return 0
-        timesteps = [
-            obstacle.prediction.occupancy_set[-1].time_step
-            for obstacle in self.current_scenario.dynamic_obstacles
-        ]
-        self.max_timestep = np.max(timesteps) if timesteps else 0
-        return self.max_timestep
-
-    def select_scenario_element(self, mouse_clicked_event):
-        """
-        Select lanelets by clicking on the canvas. Selects only one of the
-        lanelets that contains the click position.
-        """
-        mouse_pos = np.array(
-            [mouse_clicked_event.xdata, mouse_clicked_event.ydata])
-        click_shape = Circle(radius=0.01, center=mouse_pos)
-
-        if self.current_scenario is None:
-            return
-        l_network = self.current_scenario.lanelet_network
-        selected_l_ids = l_network.find_lanelet_by_shape(click_shape)
-        selected_lanelets = [l_network.find_lanelet_by_id(lid) for lid in selected_l_ids]
-        selected_obstacles = [obs for obs in self.current_scenario.obstacles
-                              if obs.occupancy_at_time(self.time_step.value) is not None and
-                              obs.occupancy_at_time(self.time_step.value).shape.contains_point(mouse_pos)]
-
-        if len(selected_lanelets) > 0 and len(selected_obstacles) == 0:
-            self.update_plot(sel_lanelet=selected_lanelets[0])
-        else:
-            self.update_plot(sel_lanelet=None)
-
-        if len(selected_lanelets) + len(selected_obstacles) > 1:
-            output = "__Info__: More than one object can be selected! Lanelets: "
-            if len(selected_lanelets) > 0:
-                for la in selected_lanelets:
-                    output += str(la.lanelet_id) + ", "
-            output = output[:len(output) - 1]
-            if len(selected_obstacles) > 0:
-                output += ". Obstacles: "
-                for obs in selected_obstacles:
-                    output += str(obs.obstacle_id) + ", "
-            output = output[:len(output) - 1]
-            output += "."
-        else:
-            output = ""
-
-        if len(selected_obstacles) > 0:
-            selection = " Obstacle with ID " + str(selected_obstacles[0].obstacle_id) + " is selected."
-            self.callback_function(selected_obstacles[0], output+ selection)
-        elif len(selected_lanelets) > 0:
-            selection = " Lanelet with ID " + str(selected_lanelets[0].lanelet_id) + " is selected."
-            self.callback_function(selected_lanelets[0], output + selection)

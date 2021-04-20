@@ -40,7 +40,8 @@ produces a file called *new_converted_file_name.xml*
 
 Or use the GUI with the command
 ``crdesigner`` or ``crdesigner gui``.
-
+Note that you have to activate the Python environment in which the CommonRoad Scenario Designer is installed first to
+use the command line.
 
 Python APIs
 ==========================================
