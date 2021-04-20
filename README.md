@@ -65,14 +65,13 @@ $ conda activate commonroad
 $ python crdesigner/io/gui/commonroad_scenario_designer_gui.py
 ```
 
-#### API
-
 #### Command Line
 The GUI can be started from command line via the following two options:
 ```bash
 $ crdesigner
 $ crdesigner gui
 ```
+Note that you have to activate first the Python environment in which the CommonRoad Scenario Designer is installed.
 
 ### Map Converters
 You can execute the different converters either via command line, calling them within your Python program via an API, 
@@ -83,7 +82,7 @@ The main APIs to execute the pure conversions are located under `crdesigner/io/a
 For many conversions we provide further APIs, e.g., for downloading a map from OSM.
 
 #### Command Line
-
+Note that you have to activate first the Python environment in which the CommonRoad Scenario Designer was installed.  
 Converting a file from OpenDRIVE to CommonRoad with the command line:
 ```bash
 crdesigner [mode] -i [input_file] -o [output_file] -c -f -t [tags] --proj [proj-string] --adjacencies --left-driving --author --affiliation

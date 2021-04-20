@@ -187,7 +187,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
             messbox = QMessageBox()
             reply = messbox.warning(
                 self, "Warning",
-                "Please load an animation before attempting to play",
+                "Please load or create a CommonRoad scenario before attempting to play",
                 QMessageBox.Ok | QMessageBox.No, QMessageBox.Ok)
             if (reply == QMessageBox.Ok):
                 self.open_commonroad_file()
@@ -208,7 +208,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         if not self.cr_viewer.current_scenario:
             messbox = QMessageBox()
             reply = messbox.warning(self, "Warning",
-                                    "Please load an animation before saving",
+                                    "Please load or create a CommonRoad scenario before saving a video",
                                     QMessageBox.Ok | QMessageBox.No,
                                     QMessageBox.Ok)
             if (reply == QMessageBox.Ok):
@@ -218,9 +218,8 @@ class MWindow(QMainWindow, Ui_mainWindow):
         else:
             self.text_browser.append("Save video for scenario with ID " +
                                      str(self.cr_viewer.current_scenario.scenario_id))
-            self.cr_viewer.save_animation(
-                "Save as gif")
-            self.text_browser.append("Exporting finished")
+            self.cr_viewer.save_animation()
+            self.text_browser.append("Saving the video finished.")
 
     def create_console(self):
         """Function to create the console."""
