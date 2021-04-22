@@ -480,7 +480,7 @@ def get_graph_traffic_signs(nodes: Dict[int, rg.GraphNode], roads: Dict[int, rg.
     return graph_traffic_signs
 
 
-def get_graph_traffic_lights(nodes: Dict[int, rg.GraphNode], traffic_lights: List[Dict]) -> List[rg.TrafficLight]:
+def get_graph_traffic_lights(nodes: Dict[int, rg.GraphNode], traffic_lights: List[Dict]) -> List[rg.GraphTrafficLight]:
     """
     Create the extracted traffic lights.
     """
