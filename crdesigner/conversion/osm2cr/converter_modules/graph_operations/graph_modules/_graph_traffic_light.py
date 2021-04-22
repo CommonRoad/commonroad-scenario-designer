@@ -1,17 +1,12 @@
-from queue import Queue
-from typing import List, Set, Tuple, Optional, Dict
-from ordered_set import OrderedSet
-import numpy as np
-from commonroad.scenario.traffic_sign import TrafficSign, TrafficLight
-from commonroad.geometry.shape import Polygon
+"""
+GraphTrafficLight class
+"""
 
-from crdesigner.conversion.osm2cr import config
-from crdesigner.conversion.osm2cr.converter_modules.utility import geometry, traffic_sign_parser, idgenerator
-from crdesigner.conversion.osm2cr.converter_modules.utility.custom_types import (
-    Road_info,
-    Assumption_info,
-)
-import math
+from typing import Dict
+import numpy as np
+
+from commonroad.scenario.traffic_sign import TrafficLight
+from crdesigner.conversion.osm2cr.converter_modules.utility import idgenerator
 
 from ._graph_node import GraphNode
 
