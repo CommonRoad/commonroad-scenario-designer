@@ -1,5 +1,5 @@
 """
-Graph class. Most important one for road graph
+Graph class. It also provides several methods to perform operations on elements of the graph.
 """
 import math
 from queue import Queue
