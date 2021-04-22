@@ -38,3 +38,4 @@ class GraphTrafficLight:
             position = np.array([position_point.x, position_point.y])
         traffic_light = TrafficLight(self.id, cycle=[], position=position)
         return traffic_light
+        

@@ -486,8 +486,3 @@ class GraphEdge:
         for lane in self.lanes:
             if lane.forward == forward:
                 lane.add_traffic_light(light)
-
-
-
-
-

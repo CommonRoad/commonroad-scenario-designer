@@ -6,8 +6,6 @@ Since the file got too long, it was splitted in the respective classses
 
 from ._graph_node import GraphNode
 from ._graph_edge import GraphEdge
-from ._graph_node import GraphNode
-from ._graph_node import GraphNode
 from ._graph_traffic_light import GraphTrafficLight
 from ._graph_traffic_sign import GraphTrafficSign
 from ._graph_lane import Lane

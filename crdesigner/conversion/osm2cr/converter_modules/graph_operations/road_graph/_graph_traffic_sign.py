@@ -59,3 +59,4 @@ class GraphTrafficSign:
             first_occurrence=first_occurrence,
             position=position,
             virtual=virtual)
+            

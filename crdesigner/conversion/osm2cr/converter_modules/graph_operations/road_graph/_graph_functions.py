@@ -167,3 +167,4 @@ def set_points(predecessor: "Lane", successor: "Lane") -> List[np.ndarray]:
         waypoints = geometry.evaluate_bezier(np.array([p1, p2, p3, p4]), n)
         waypoints.append(p4)
     return waypoints
+    

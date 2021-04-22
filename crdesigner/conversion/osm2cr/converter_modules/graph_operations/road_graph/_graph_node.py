@@ -138,3 +138,4 @@ class GraphNode:
                 # TODO determine in which direction
                 if lane.forward:
                     lane.add_traffic_sign(sign)
+                    
