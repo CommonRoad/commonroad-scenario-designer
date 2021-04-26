@@ -1,6 +1,7 @@
 """
 functions used for graph
 """
+
 from queue import Queue
 from typing import List, Set, Tuple
 import numpy as np

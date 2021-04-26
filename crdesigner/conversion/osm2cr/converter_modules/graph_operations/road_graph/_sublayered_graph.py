@@ -1,5 +1,5 @@
 """
-Sublyered Graph
+Sublayered Graph class
 """
 
 from typing import List, Set, Tuple, Optional
@@ -80,4 +80,3 @@ class SublayeredGraph(Graph):
         super().delete_invalid_lanes()
         if self.apply_on_sublayer:
             self.sublayer_graph.delete_invalid_lanes()
-            

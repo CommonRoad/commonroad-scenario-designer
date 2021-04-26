@@ -1,6 +1,7 @@
 """
-GraphEdge
+GraphEdge class
 """
+
 import math
 from typing import List, Set, Tuple, Optional
 from ordered_set import OrderedSet

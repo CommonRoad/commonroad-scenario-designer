@@ -1,6 +1,7 @@
 """
 Graph class. It also provides several methods to perform operations on elements of the graph.
 """
+
 import math
 from queue import Queue
 from typing import List, Set, Tuple, Optional, Dict

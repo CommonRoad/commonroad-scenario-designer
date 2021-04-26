@@ -1,6 +1,7 @@
 """
 Lane class of road graph
 """
+
 import math
 from typing import List, Set, Optional
 import numpy as np
