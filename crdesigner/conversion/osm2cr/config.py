@@ -4,7 +4,7 @@ This module holds all parameters necessary for the conversion
 
 # Benchmark settings
 # name of the benchmark
-BENCHMARK_ID = "tram"
+BENCHMARK_ID = "ZAM_Test-1_1_T-1"
 # author of the benchmark
 AUTHOR = "Automated converter by Maximilian Rieger"
 # affiliation of the benchmark
