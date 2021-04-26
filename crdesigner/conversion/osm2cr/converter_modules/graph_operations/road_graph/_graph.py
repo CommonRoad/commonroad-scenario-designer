@@ -10,9 +10,9 @@ import numpy as np
 from commonroad.scenario.traffic_sign import TrafficSign, TrafficLight
 from commonroad.geometry.shape import Polygon
 from crdesigner.conversion.osm2cr import config
+from crdesigner.conversion.osm2cr.converter_modules.graph_operations import traffic_sign_parser
 from crdesigner.conversion.osm2cr.converter_modules.utility import (
     geometry,
-    traffic_sign_parser,
     idgenerator
 )
 from crdesigner.conversion.osm2cr.converter_modules.utility.custom_types import (
