@@ -10,8 +10,7 @@ import utm
 
 from crdesigner.conversion.osm2cr import config
 from crdesigner.conversion.osm2cr.converter_modules.graph_operations import road_graph as rg
-from crdesigner.conversion.osm2cr.converter_modules.intermediate_operations.intermediate_format import IntermediateFormat, \
-    get_lanelet_intersections
+from crdesigner.conversion.osm2cr.converter_modules.intermediate_operations.intermediate_format import IntermediateFormat
 from crdesigner.conversion.osm2cr.converter_modules.utility import geometry
 from crdesigner.conversion.osm2cr.converter_modules.utility.idgenerator import get_id
 from crdesigner.conversion.osm2cr.converter_modules.utility.geonamesID import get_geonamesID
@@ -146,7 +145,7 @@ def create_scenario_intermediate(graph) -> Tuple[Scenario, IntermediateFormat]:
     if isinstance(graph, rg.SublayeredGraph):
         interm_sublayer = IntermediateFormat.extract_from_road_graph(
             graph.sublayer_graph)
-        crossings = get_lanelet_intersections(interm_sublayer, interm)
+        crossings = IntermediateFormat.get_lanelet_intersections(interm_sublayer, interm)
         interm_sublayer.intersections = list()
         interm_sublayer.traffic_lights = list()
         interm_sublayer.traffic_lights = list()
