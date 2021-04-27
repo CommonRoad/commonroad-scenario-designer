@@ -10,11 +10,17 @@ import matplotlib.pyplot as plt
 
 from crdesigner.conversion.osm2cr import config
 from crdesigner.conversion.osm2cr.converter_modules.cr_operations import export
-from crdesigner.conversion.osm2cr.converter_modules.graph_operations import intersection_merger, offsetter, \
-    segment_clusters, road_graph, lane_linker
 from crdesigner.io.gui.osm_gui_modules import gui
 from crdesigner.conversion.osm2cr.converter_modules.osm_operations import osm_parser
-from crdesigner.conversion.osm2cr.converter_modules.utility import mapillary, plots
+from crdesigner.conversion.osm2cr.converter_modules.utility import plots
+from crdesigner.conversion.osm2cr.converter_modules.graph_operations import (
+    road_graph,
+    intersection_merger,
+    offsetter,
+    segment_clusters,
+    lane_linker,
+    mapillary
+)
 
 
 def step_collection_1(file: str) -> road_graph.Graph:
