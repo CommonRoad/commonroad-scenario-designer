@@ -190,7 +190,7 @@ MERGE_DISTANCE = 3.5
 # threshold which is used to determine if a successor of an incoming lane is considered as straight
 INTERSECTION_STRAIGHT_THRESHOLD = 35.0
 # option to clean up intersections and add new traffic lights to it, that are not part of the original OSM file
-INTERSECTION_EMHANCEMENT = True
+INTERSECTION_ENHANCEMENT = True
 # option to remove unconnected lanelets from the main lanelet scenario
 REMOVE_UNCONNECTED_LANELETS = True
 

@@ -626,9 +626,9 @@ these can be used to improve the conversion process for individual scenarios
   
   INTERSECTION_STRAIGHT_THRESHOLD = 35.0
 
-* **INTERSECTION_EMHANCEMENT**: option to clean up intersections and add new traffic lights to it::
+* **INTERSECTION_ENHANCEMENT**: option to clean up intersections and add new traffic lights to it::
   
-  INTERSECTION_EMHANCEMENT = True
+  INTERSECTION_ENHANCEMENT = True
 
 * **REMOVE_UNCONNECTED_LANELETS**: option to remove unconnected lanelets from the main lanelet scenario::
   

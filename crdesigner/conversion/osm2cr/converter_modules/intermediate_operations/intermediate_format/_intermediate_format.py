@@ -70,7 +70,7 @@ class IntermediateFormat:
         if self.obstacles is None:
             self.obstacles = []
 
-        if config.INTERSECTION_EMHANCEMENT:
+        if config.INTERSECTION_ENHANCEMENT:
             intersection_enhancement(self)
 
     def find_edge_by_id(self, edge_id):
