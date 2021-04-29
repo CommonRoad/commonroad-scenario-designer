@@ -218,7 +218,6 @@ TRAFFIC_LIGHT_CYCLE = {
     "yellow_phase": 3 
 }
 
-
 # traffic signs
 # values to search for in OSM
 TRAFFIC_SIGN_VALUES = [
@@ -241,12 +240,10 @@ MAPILLARY_CATEGORIES = [
     "information",
     "complementary"
 ]
-
 # include traffic signs based on their id, e.g. "Max_SPEED". Keep "ALL" to accept all found traffic sings
 ACCEPTED_TRAFFIC_SIGNS = ["ALL"]
 # exclude traffic signs based on their id, e.g. "MAX_SPEED". "ALL" has to be set in ACCEPTED_TRAFFIC_SIGNS
 EXCLUDED_TRAFFIC_SIGNS = []
-
 
 # User edit activation
 # Toggle edit for user
