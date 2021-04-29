@@ -365,9 +365,9 @@ These Parameters can also be set in the GUI via **edit settings**.
 
 Benchmark settings
 ==================
-* **BENCHMARK_ID**: name of the benchmark::
+* **BENCHMARK_ID**: name of the benchmark See commonRoad documentation for naming convention::
 
-  BENCHMARK_ID = "test_bench"
+  BENCHMARK_ID = "ZAM_Test-1_1_T-1"
 
 * **AUTHOR**: author of the benchmark::
 
@@ -383,7 +383,15 @@ Benchmark settings
 
 * **TAGS**: additional tags for the benchmark::
 
-  TAGS = "..."
+  TAGS = "urban"
+
+* **GEONAMES_USERNAME**: Geonames username to retrieve geonamesID for created scenarios::
+
+  GEONAMES_USERNAME = "demo"
+
+* **MAPILLARY_CLIENT_ID**: Mapillary Client ID which can be set to extract additional traffic signs. If set to "demo", mapillary signs will be disabled::
+  
+  MAPILLARY_CLIENT_ID = "demo"
 
 * **TIMESTEPSIZE**: time step size for the benchmark in seconds::
 
@@ -393,7 +401,7 @@ Aerial Image Settings
 ---------------------
 * **AERIAL_IMAGES** Use aerial images for edit::
 
-  AERIAL_IMAGES = True
+  AERIAL_IMAGES = False
 
 * **IMAGE_SAVE_PATH**: Path to save downloaded aerial images::
 
@@ -440,75 +448,103 @@ Scenario Settings
 
   USE_RESTRICTIONS = True
 
-* **ACCEPTED_HIGHWAYS**: types of roads extracted from the OSM file
-  suitable types: 'motorway', 'trunk', 'primary', 'secondary', 'tertiary', 'unclassified', 'residential',
+* **ACCEPTED_HIGHWAYS_MAINLAYER**: types of roads extracted from the OSM file.
+  
+  Suitable types: 'motorway', 'trunk', 'primary', 'secondary', 'tertiary', 'unclassified', 'residential',
   'motorway_link', 'trunk_link', 'primary_link', 'secondary_link', 'tertiary_link', 'living_street', 'service'::
+  
+  ACCEPTED_HIGHWAYS_MAINLAYER = 
+  [
+  'motorway',
+  'trunk',
+  'primary',
+  'secondary',
+  'tertiary',
+  'unclassified',
+  'residential',
+  'motorway_link',
+  'trunk_link',
+  'primary_link',
+  'secondary_link',
+  'tertiary_link',
+  'living_street',
+  'service'
+  ]
 
-  ACCEPTED_HIGHWAYS = ['motorway',
-                     'trunk',
-                     'primary',
-                     'secondary',
-                     'tertiary',
-                     'unclassified',
-                     'residential',
-                     'motorway_link',
-                     'trunk_link',
-                     'primary_link',
-                     'secondary_link',
-                     'tertiary_link',
-                     'living_street',
-                     'service']
+* **EXTRACT_SUBLAYER**: use sublayers for different kind of ways, e.g. sidewalks or cycle paths::
+  
+  EXTRACT_SUBLAYER = False
+
+* **ACCEPTED_HIGHWAYS_SUBLAYER**: types of highways extracted from the OSM file as sublayer. Elements mustn't be in ACCEPTED_HIGHWAYS_MAINLAYER::
+  
+  ACCEPTED_HIGHWAYS_SUBLAYER = 
+  [
+  "path",
+  "footway",
+  "cycleway"
+  ]
+
+* **SUBLAYER_LANELETTYPE**: Lanelet type of the sublayer lanelets::
+  
+  SUBLAYER_LANELETTYPE = 'sidewalk'
+
+* **CROSSING_LANELETTYPE**: Lanelet type of the sublayer lanelets that cross the main layer. 
+  Overwrites SUBLAYER_LANELETTYPE for lanelets applied on::
+  
+  CROSSING_LANELETTYPE = 'crosswalk'
+
+* **REJECTED_TAGS** osm ways with these tags are not taken into account::
+  
+  REJECTED_TAGS = 
+  {
+  "area": "yes"
+  }
+
 
 * **LANECOUNTS**: number of lanes for each type of road should be >=1::
 
-  LANECOUNTS = {'motorway': 6,
-              'trunk': 4,
-              'primary': 2,
-              'secondary': 2,
-              'tertiary': 2,
-              'unclassified': 2,
-              'residential': 2,
-              'motorway_link': 2,
-              'trunk_link': 2,
-              'primary_link': 2,
-              'secondary_link': 2,
-              'tertiary_link': 2,
-              'living_street': 2,
-              'service': 2}
+  LANECOUNTS = 
+  {
+  'motorway': 6,
+  'trunk': 4,
+  'primary': 2,
+  'secondary': 2,
+  'tertiary': 2,
+  'unclassified': 2,
+  'residential': 2,
+  'motorway_link': 2,
+  'trunk_link': 2,
+  'primary_link': 2,
+  'secondary_link': 2,
+  'tertiary_link': 2,
+  'living_street': 2,
+  'service': 2
+  }
 
 * **LANEWIDTHS**: width of lanes for each type of road in meters::
 
-  LANEWIDTHS = {'motorway': 2.5,
-              'trunk': 2.5,
-              'primary': 2.5,
-              'secondary': 2.5,
-              'tertiary': 2.5,
-              'unclassified': 2.5,
-              'residential': 2.5,
-              'motorway_link': 2.5,
-              'trunk_link': 2.5,
-              'primary_link': 2.5,
-              'secondary_link': 2.5,
-              'tertiary_link': 2.5,
-              'living_street': 2.5,
-              'service': 2.5}
+  LANEWIDTHS = 
+  
 
 * **SPEED_LIMITS**: default speed limit for each type of road in km/h::
 
-  SPEED_LIMITS = {'motorway': 120,
-                'trunk': 100,
-                'primary': 100,
-                'secondary': 100,
-                'tertiary': 100,
-                'unclassified': 80,
-                'residential': 50,
-                'motorway_link': 80,
-                'trunk_link': 80,
-                'primary_link': 80,
-                'secondary_link': 80,
-                'tertiary_link': 80,
-                'living_street': 7,
-                'service': 10}
+  SPEED_LIMITS = 
+  {
+  'motorway': 120,
+  'trunk': 100,
+  'primary': 100,
+  'secondary': 100,
+  'tertiary': 100,
+  'unclassified': 80,
+  'residential': 50,
+  'motorway_link': 80,
+  'trunk_link': 80,
+  'primary_link': 80,
+  'secondary_link': 80,
+  'tertiary_link': 80,
+  'living_street': 7,
+  'service': 10
+  }
 
 Export Settings
 ---------------
@@ -522,11 +558,15 @@ Export Settings
 
 * **EXPORT_IN_UTM**: export the scenario in UTM coordinates::
 
-  EXPORT_IN_UTM = True
+  EXPORT_IN_UTM = False
 
 * **FILTER**: toggle filtering of negligible waypoints::
 
   FILTER = True
+
+* **DELETE_INVALID_LANES**: delete invalid lanes before export::
+  
+  DELETE_INVALID_LANES = True
 
 Internal settings
 -----------------
@@ -542,7 +582,7 @@ these can be used to improve the conversion process for individual scenarios
 
 * **INTERPOLATION_DISTANCE_INTERNAL**: distance between waypoints used internally in meters::
 
-  INTERPOLATION_DISTANCE_INTERNAL = 0.25
+  INTERPOLATION_DISTANCE_INTERNAL = 0.5
 
 * **BEZIER_PARAMETER**: bezier parameter for interpolation (should be within [0, 0.5])::
 
@@ -550,7 +590,11 @@ these can be used to improve the conversion process for individual scenarios
 
 * **INTERSECTION_DISTANCE**: distance between roads at intersection used for cropping in meters::
 
-  INTERSECTION_DISTANCE = 5.0
+  INTERSECTION_DISTANCE = 4.0
+
+* **INTERSECTION_DISTANCE_SUBLAYER**: associated with pedestrian pathways by default::
+  
+  INTERSECTION_DISTANCE_SUBLAYER = 1.0
 
 * **INTERSECTION_CROPPING_WITH_RESPECT_TO_ROADS**: defines if the distance to other roads is used for cropping
   if false the distance to the center of the intersection is used::
@@ -576,7 +620,88 @@ these can be used to improve the conversion process for individual scenarios
 
 * **MERGE_DISTANCE**: maximal distance between two intersections to which they are merged, if zero, no intersections are merged::
 
-  MERGE_DISTANCE = 0.0
+  MERGE_DISTANCE = 3.5
+
+* **INTERSECTION_STRAIGHT_THRESHOLD**: threshold which is used to determine if a successor of an incoming lane is considered as straight::
+  
+  INTERSECTION_STRAIGHT_THRESHOLD = 35.0
+
+* **INTERSECTION_EMHANCEMENT**: option to clean up intersections and add new traffic lights to it::
+  
+  INTERSECTION_EMHANCEMENT = True
+
+* **REMOVE_UNCONNECTED_LANELETS**: option to remove unconnected lanelets from the main lanelet scenario::
+  
+  REMOVE_UNCONNECTED_LANELETS = True
+  
+* **RECOGNIZED_TURNLANES**: set of processed turn lanes. This should only be changed for further development::
+  
+  RECOGNIZED_TURNLANES = 
+  [
+  "left",
+  "through",
+  "right",
+  "merge_to_left",
+  "merge_to_right",
+  "through;right",
+  "left;through",
+  "left;through;right",
+  "left;right",
+  "none",
+  ]
+
+Traffic Lights
+--------------
+* **TRAFFIC_LIGHT_CYCLE**: cycle that will be applied to each traffic light. Values in seconds::
+  
+  TRAFFIC_LIGHT_CYCLE = 
+  {
+  "red_phase": 57, 
+  "red_yellow_phase": 3, 
+  "green_phase": 37,
+  "yellow_phase": 3 
+  }
+
+Traffic Signs
+-------------
+
+* **TRAFFIC_SIGN_VALUES**: values to search for in OSM::
+
+  TRAFFIC_SIGN_VALUES = 
+  [
+  "traffic_signals",
+  "stop",
+  "give_way",
+  "city_limit",
+  ]
+
+* **TRAFFIC_SIGN_KEYS**: keys to search for in OSM::
+  
+  TRAFFIC_SIGN_KEYS = 
+  [
+  "traffic_sign",
+  "overtaking",
+  "traffic_signals:direction",
+  "maxspeed",
+  ]
+
+* **MAPILLARY_CATEGORIES**: categories to include if mapillary is used for sign extraction::
+  
+  MAPILLARY_CATEGORIES = 
+  [
+  "warning",
+  "regulatory",
+  "information",
+  "complementary"
+  ]
+
+* **ACCEPTED_TRAFFIC_SIGNS**: include traffic signs based on their id, e.g. "Max_SPEED". Keep "ALL" to accept all found traffic sings::
+
+  ACCEPTED_TRAFFIC_SIGNS = ["ALL"]
+
+* **EXCLUDED_TRAFFIC_SIGNS**: exclude traffic signs based on their id, e.g. "MAX_SPEED". "ALL" has to be set in ACCEPTED_TRAFFIC_SIGNS::
+  
+  EXCLUDED_TRAFFIC_SIGNS = []
 
 User edit activation
 --------------------
