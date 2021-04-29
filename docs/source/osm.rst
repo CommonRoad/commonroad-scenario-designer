@@ -25,7 +25,7 @@ Command Line Interface
 Want to quickly convert an OSM file detailing an OSM map to a XML file with a CommonRoad scenario?
 
 Use the command
-``crdesigner osm -i input-file.xodr -o output-file.xml``.
+``crdesigner osm -i input-file.osm -o output-file.xml``.
 
 For example ``crdesigner osm -i test.osm -o new_converted_file_name.xml``
 produces a file called *new_converted_file_name.xml*
@@ -62,7 +62,7 @@ Python APIs
     download_around_map(config.BENCHMARK_ID + '_downloaded.osm', 48.140289, 11.566272)
 
     # --------------------------------------- Option 1: General API ------------------------------------------
-    # load OpenDRIVE file, parse it, and convert it to a CommonRoad scenario
+    # load OSM file, parse it, and convert it to a CommonRoad scenario
     scenario = osm_to_commonroad(config.SAVE_PATH + config.BENCHMARK_ID + ".osm")
 
     # store converted file as CommonRoad scenario
@@ -93,6 +93,9 @@ Python APIs
 
     # view the generated
     ex.view_xml(config.SAVE_PATH + config.BENCHMARK_ID + ".xml")
+
+In order to use the API calls, the save_path and Benchmark_ID has to be set in the config file. 
+The config file can be found at ``/crdesigner/conversion/osm2cr``.
 
 The GUI provides also functionality to edit already the OSM graph structure before converting to CommonRoad.
 
@@ -194,13 +197,13 @@ A simple roundabout.
  images/motorway.png
  :width: 500
 
-A large motorway intersection.
+A large motorway intersection. Please note that tunnels are not supported yet.
 
 .. image::
  images/motorway_2.png
  :width: 500
 
-A motorway access.
+A motorway access. Please note that tunnels are not supported yet.
 
 Problematic Scenarios
 =====================
@@ -327,6 +330,32 @@ Left Hand Traffic
 
 The tool assumes right hand traffic for all scenarios.
 
+
+External Data Sources
+*********************
+
+Geonames Scenario Infos
+=======================
+
+`Geonames <https://www.geonames.org/>`_ is a free database that contains information (such as population density) about over eleven million places worldwide. 
+When providing a Geonames username in the **config.py**, a Geonames ID will be stored in a scenario. 
+This ID can be later on used to retrieve further location information about the scenario.
+
+
+Mapillary Traffic Signs
+=======================
+
+Additionally to traffic signs, which can be found in the given .osm file, the converter is also able to use **Mapillary** as an external source of signs.
+Mapillary is an open source mapping tool, that provides more detailed insights in road networks based on real camera footage.
+In order to request data from Mapillary, an API key is needed, which can be obtained from `Mapillary.com <https://www.mapillary.com/>`_.
+The key has to be saved in the **config.py** file.
+
+Since Mapillary is only providing the coordinates of each detected traffic sign, signs are added to the lanelet with the closest distance.
+This strategy can sometimes lead to traffic signs that are not correctly placed in the final scenario. 
+A manual review is therefore recommended.
+
+It is also possible change the behavior how traffic signs are added to the scenario using **config.py** file.
+For example, Mapillary can be used as single source for traffic signs or several filters can be applied on signs. 
 
 Configuration
 *************
