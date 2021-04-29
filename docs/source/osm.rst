@@ -95,7 +95,7 @@ Python APIs
     ex.view_xml(config.SAVE_PATH + config.BENCHMARK_ID + ".xml")
 
 In order to use the API calls, the save_path and Benchmark_ID has to be set in the config file. 
-The config file can be found at ``/crdesigner/conversion/osm2cr``.
+The config file can be found at */crdesigner/conversion/osm2cr* and is described in detail at the end of this document.
 
 The GUI provides also functionality to edit already the OSM graph structure before converting to CommonRoad.
 
@@ -345,8 +345,8 @@ This ID can be later on used to retrieve further location information about the 
 Mapillary Traffic Signs
 =======================
 
-Additionally to traffic signs, which can be found in the given .osm file, the converter is also able to use **Mapillary** as an external source of signs.
-Mapillary is an open source mapping tool, that provides more detailed insights in road networks based on real camera footage.
+Additionally to traffic signs from the given .osm file, the converter is also able to use **Mapillary** as an external source of signs.
+Mapillary is an open source community mapping tool, that provides more detailed insights in road networks based on real camera footage.
 In order to request data from Mapillary, an API key is needed, which can be obtained from `Mapillary.com <https://www.mapillary.com/>`_.
 The key has to be saved in the **config.py** file.
 
@@ -500,7 +500,6 @@ Scenario Settings
   "area": "yes"
   }
 
-
 * **LANECOUNTS**: number of lanes for each type of road should be >=1::
 
   LANECOUNTS = 
@@ -524,8 +523,26 @@ Scenario Settings
 * **LANEWIDTHS**: width of lanes for each type of road in meters::
 
   LANEWIDTHS = 
+  {
+  "motorway": 3.5,
+  "trunk": 3.5,
+  "primary": 3.5,
+  "secondary": 3.5,
+  "tertiary": 3.5,
+  "unclassified": 3.5,
+  "residential": 3.5,
+  "motorway_link": 3.5,
+  "trunk_link": 3.5,
+  "primary_link": 3.5,
+  "secondary_link": 3.5,
+  "tertiary_link": 3.5,
+  "living_street": 3.5,
+  "service": 3.5,
+  "path": 2.0,
+  "footway": 2.0,
+  "cycleway": 2.0
+  }
   
-
 * **SPEED_LIMITS**: default speed limit for each type of road in km/h::
 
   SPEED_LIMITS = 
