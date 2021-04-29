@@ -12,8 +12,10 @@ from crdesigner.io.gui.toolboxes.toolbox_ui import CheckableComboBox
 from crdesigner.io.gui.misc.map_creator import MapCreator
 from crdesigner.io.gui.toolboxes.road_network_toolbox_ui import RoadNetworkToolboxUI
 
-from crdesigner.conversion.sumo_map.cr2sumo import CR2SumoMapConverter
-from crdesigner.conversion.sumo_map.config import SumoConfig
+from crdesigner.io.gui.toolboxes.gui_sumo_simulation import SUMO_AVAILABLE
+if SUMO_AVAILABLE:
+    from crdesigner.conversion.sumo_map.cr2sumo.converter import CR2SumoMapConverter
+    from crdesigner.conversion.sumo_map.config import SumoConfig
 
 
 class RoadNetworkToolbox(QDockWidget):
@@ -971,6 +973,9 @@ class RoadNetworkToolbox(QDockWidget):
             self.road_network_toolbox.referenced_lanelets_traffic_light.set_checked_items(referenced_lanelets)
 
     def create_traffic_lights(self):
+        if not SUMO_AVAILABLE:
+            self.text_browser.append("SUMO is not activated!")
+            return
         lanelet_ids = [int(lanelet_id) for lanelet_id in
                        self.road_network_toolbox.referenced_lanelets_traffic_light.get_checked_items()]
         if not lanelet_ids:

@@ -11,7 +11,7 @@ import pytest
 from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.common.file_writer import CommonRoadFileWriter
 from crdesigner.conversion.sumo_map.config import SumoConfig
-from crdesigner.conversion.sumo_map.cr2sumo import CR2SumoMapConverter
+from crdesigner.conversion.sumo_map.cr2sumo.converter import CR2SumoMapConverter
 from sumocr.interface.sumo_simulation import SumoSimulation
 
 

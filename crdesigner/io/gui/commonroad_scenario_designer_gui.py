@@ -21,7 +21,6 @@ from crdesigner.io.gui.converter_modules.osm_interface import OSMInterface
 from crdesigner.io.gui.misc.gui_settings import GUISettings
 from crdesigner.io.gui.misc.commonroad_viewer import AnimatedViewer
 from crdesigner.io.gui.gui_resources.MainWindow import Ui_mainWindow
-from crdesigner.io.gui.toolboxes.gui_sumo_simulation import SUMO_AVAILABLE
 from crdesigner.io.gui.toolboxes.road_network_toolbox import RoadNetworkToolbox
 from crdesigner.io.gui.toolboxes.obstacle_toolbox import ObstacleToolbox
 from crdesigner.io.gui.toolboxes.map_converter_toolbox import MapConversionToolbox
@@ -29,6 +28,7 @@ from crdesigner.io.gui.gui_resources.scenario_saving_dialog import ScenarioDialo
 from crdesigner.io.gui.settings import config
 from crdesigner.io.gui.misc import util
 
+from crdesigner.io.gui.toolboxes.gui_sumo_simulation import SUMO_AVAILABLE
 if SUMO_AVAILABLE:
     from crdesigner.io.gui.settings.sumo_settings import SUMOSettings
 
