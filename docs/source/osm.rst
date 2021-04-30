@@ -118,30 +118,30 @@ OSM also contains other elements like traffic signs. All this information is sto
 With CR version 2020.2 new elements are inserted into the scenario format:
 Traffic Signs and Traffic Lights.
 
-Conversion Overview
-===================
+.. Conversion Overview
+.. ===================
 
-Extremely simplified the conversion process works as follows:
+.. Extremely simplified the conversion process works as follows:
 
-.. image::
- images/OSM_control_flow.png
- :width: 500
+.. .. image::
+..  images/OSM_control_flow.png
+..  :width: 500
 
-The program takes a OSM file as input and parses it into the internel representation (graph).
-The refine the coordinate the user can adjust the graph with the GUI tool **EdgeEdit**.
+.. The program takes a OSM file as input and parses it into the internel representation (graph).
+.. The refine the coordinate the user can adjust the graph with the GUI tool **EdgeEdit**.
 
-.. image::
- images/example_edgeedit.png
- :width: 500
+.. .. image::
+..  images/example_edgeedit.png
+..  :width: 500
 
-Afterwards the each edge that is representing a road with multiple lanes is split into these lane so that there is
-exactely one edge per lane. As intersection are only single points in OSM the lanes are cut of with a specific
-radius around the intersection and linked together again. This linking can be adjusted
-with the GUI tool **LaneLinkEdit**.
+.. Afterwards the each edge that is representing a road with multiple lanes is split into these lane so that there is
+.. exactely one edge per lane. As intersection are only single points in OSM the lanes are cut of with a specific
+.. radius around the intersection and linked together again. This linking can be adjusted
+.. with the GUI tool **LaneLinkEdit**.
 
-.. image::
- images/example_lanelinkedit.png
- :width: 500
+.. .. image::
+..  images/example_lanelinkedit.png
+..  :width: 500
 
 
 When does the automated conversion work?
@@ -365,7 +365,7 @@ These Parameters can also be set in the GUI via **edit settings**.
 
 Benchmark settings
 ==================
-* **BENCHMARK_ID**: name of the benchmark See commonRoad documentation for naming convention::
+* **BENCHMARK_ID**: name of the benchmark. See CommonRoad documentation for naming convention::
 
   BENCHMARK_ID = "ZAM_Test-1_1_T-1"
 
