@@ -365,73 +365,91 @@ These Parameters can also be set in the GUI via **edit settings**.
 
 Benchmark settings
 ==================
-* **BENCHMARK_ID**: Name of the benchmark. See CommonRoad documentation for naming convention
-    BENCHMARK_ID = "ZAM_Test-1_1_T-1"
+* | **BENCHMARK_ID**
+  | Name of the benchmark. See CommonRoad documentation for naming convention
+  |  BENCHMARK_ID = "ZAM_Test-1_1_T-1"
 
-* **AUTHOR**: Author of the benchmark
-    AUTHOR = "Automated converter by Maximilian Rieger"
+* | **AUTHOR**
+  | Author of the benchmark
+  |  AUTHOR = "Automated converter by Maximilian Rieger"
 
-* **AFFILIATION**: Affiliation of the benchmark
-    AFFILIATION = "Technical University of Munich, Germany"
+* | **AFFILIATION**
+  | Affiliation of the benchmark
+  |  AFFILIATION = "Technical University of Munich, Germany"
 
-* **SOURCE**: Source of the benchmark
-    SOURCE = "OpenStreetMaps (OSM)"
+* | **SOURCE**
+  | Source of the benchmark
+  |  SOURCE = "OpenStreetMaps (OSM)"
 
-* **TAGS**: Additional tags for the benchmark
-    TAGS = "urban"
+* | **TAGS**
+  | Additional tags for the benchmark
+  |  TAGS = "urban"
 
-* **GEONAMES_USERNAME**: Geonames username to retrieve geonamesID for created scenarios
-    GEONAMES_USERNAME = "demo"
+* | **GEONAMES_USERNAME**
+  | Geonames username to retrieve geonamesID for created scenarios
+  |  GEONAMES_USERNAME = "demo"
 
-* **MAPILLARY_CLIENT_ID**: Mapillary Client ID which can be set to extract additional traffic signs. If set to "demo", Mapillary signs will be disabled
-    MAPILLARY_CLIENT_ID = "demo"
+* | **MAPILLARY_CLIENT_ID**
+  | Mapillary Client ID which can be set to extract additional traffic signs. If set to "demo", Mapillary signs will be disabled
+  |  MAPILLARY_CLIENT_ID = "demo"
 
-* **TIMESTEPSIZE**: Time step size for the benchmark in seconds
-    TIMESTEPSIZE = 0.1
+* | **TIMESTEPSIZE**
+  | Time step size for the benchmark in seconds
+  |  TIMESTEPSIZE = 0.1
 
 Aerial Image Settings
 =====================
-* **AERIAL_IMAGES**: Use aerial images for edit
-    AERIAL_IMAGES = False
+* | **AERIAL_IMAGES**
+  | Use aerial images for edit
+  |  AERIAL_IMAGES = False
 
-* **IMAGE_SAVE_PATH**: Path to save downloaded aerial images
-    IMAGE_SAVE_PATH = "files/imagery/"
+* | **IMAGE_SAVE_PATH**
+  | Path to save downloaded aerial images
+  |  IMAGE_SAVE_PATH = "files/imagery/"
 
-* **ZOOM_LEVEL**: The zoom level of Bing Maps tiles
-    ZOOM_LEVEL = 19
+* | **ZOOM_LEVEL**
+  | The zoom level of Bing Maps tiles
+  |  ZOOM_LEVEL = 19
 
-* **BING_MAPS_KEY**: The key to access bing maps
-    BING_MAPS_KEY = "key"
+* | **BING_MAPS_KEY**
+  | The key to access bing maps
+  |  BING_MAPS_KEY = "key"
 
 Map download Settings
 =====================
-* **SAVE_PATH** Path to save downloaded files
-    SAVE_PATH = "files/"
+* | **SAVE_PATH** 
+  | Path to save downloaded files
+  |  SAVE_PATH = "files/"
 
-* **DOWNLOAD_EDGE_LENGTH**: Half width of area downloaded in meters
-    DOWNLOAD_EDGE_LENGTH = 200
+* | **DOWNLOAD_EDGE_LENGTH**
+  | Half width of area downloaded in meters
+  |  DOWNLOAD_EDGE_LENGTH = 200
 
-* **DOWNLOAD_COORDINATES**: Coordinates in latitude and longitude specifying the center of the downloaded area
-    DOWNLOAD_COORDINATES = (48.262447, 11.657881)
+* | **DOWNLOAD_COORDINATES**
+  | Coordinates in latitude and longitude specifying the center of the downloaded area
+  |  DOWNLOAD_COORDINATES = (48.262447, 11.657881)
 
 Scenario Settings
 =================
-* **LOAD_TUNNELS**: Include tunnels in result
-    LOAD_TUNNELS = False
+* | **LOAD_TUNNELS**
+  | Include tunnels in result
+  |  LOAD_TUNNELS = False
 
-* **MAKE_CONTIGUOUS**: elete unconnected edges
-    MAKE_CONTIGUOUS = False
+* | **MAKE_CONTIGUOUS**
+  | Delete unconnected edges
+  |  MAKE_CONTIGUOUS = False
 
-* **SPLIT_AT_CORNER**: Split edges at corners (~90° between two waypoint segments). This can help to model the course of roads on parking lots better
-    SPLIT_AT_CORNER = True
+* | **SPLIT_AT_CORNER**
+  | Split edges at corners (~90° between two waypoint segments). This can help to model the course of roads on parking lots better
+  |  SPLIT_AT_CORNER = True
 
-* **USE_RESTRICTIONS**: Use OSM restrictions for linking process
-    USE_RESTRICTIONS = True
+* | **USE_RESTRICTIONS**
+  | Use OSM restrictions for linking process
+  |  USE_RESTRICTIONS = True
 
-* **ACCEPTED_HIGHWAYS_MAINLAYER**: Types of roads extracted from the OSM file
-    Suitable types are: 'motorway', 'trunk', 'primary', 'secondary', 'tertiary', 'unclassified', 'residential', 'motorway_link', 'trunk_link', 'primary_link', 'secondary_link', 'tertiary_link', 'living_street', 'service'
-  
-    ACCEPTED_HIGHWAYS_MAINLAYER = 
+* | **ACCEPTED_HIGHWAYS_MAINLAYER**
+  | Types of roads extracted from the OSM file. Suitable types are: 'motorway', 'trunk', 'primary', 'secondary', 'tertiary', 'unclassified', 'residential', 'motorway_link', 'trunk_link', 'primary_link', 'secondary_link', 'tertiary_link', 'living_street', 'service'
+  |  ACCEPTED_HIGHWAYS_MAINLAYER = 
     ['motorway',
     'trunk',
     'primary',
@@ -447,27 +465,33 @@ Scenario Settings
     'living_street',
     'service']
 
-* **EXTRACT_SUBLAYER**: Use sublayers for different kind of ways, e.g. sidewalks or cycle paths
-    EXTRACT_SUBLAYER = False
+* | **EXTRACT_SUBLAYER**
+  | Use sublayers for different kind of ways, e.g. sidewalks or cycle paths
+  |  EXTRACT_SUBLAYER = False
 
-* **ACCEPTED_HIGHWAYS_SUBLAYER**: Types of highways extracted from the OSM file as sublayer. Elements mustn't be in ACCEPTED_HIGHWAYS_MAINLAYER
-    ACCEPTED_HIGHWAYS_SUBLAYER = 
+* | **ACCEPTED_HIGHWAYS_SUBLAYER**
+  | Types of highways extracted from the OSM file as sublayer. Elements must not be in *ACCEPTED_HIGHWAYS_MAINLAYER*
+  |  ACCEPTED_HIGHWAYS_SUBLAYER = 
     ["path",
     "footway",
     "cycleway"]
 
-* **SUBLAYER_LANELETTYPE**: Lanelet type of the sublayer lanelets
-    SUBLAYER_LANELETTYPE = 'sidewalk'
+* | **SUBLAYER_LANELETTYPE**
+  | Lanelet type of the sublayer lanelets
+  |  SUBLAYER_LANELETTYPE = 'sidewalk'
 
-* **CROSSING_LANELETTYPE**: Lanelet type of the sublayer lanelets that cross the main layer. Overwrites SUBLAYER_LANELETTYPE for lanelets applied on
-    CROSSING_LANELETTYPE = 'crosswalk'
+* | **CROSSING_LANELETTYPE**
+  | Lanelet type of the sublayer lanelets that cross the main layer. Overwrites SUBLAYER_LANELETTYPE for lanelets applied on
+  |  CROSSING_LANELETTYPE = 'crosswalk'
 
-* **REJECTED_TAGS** OSM ways with these tags are not taken into account 
-    REJECTED_TAGS = 
+* | **REJECTED_TAGS** 
+  | OSM ways with these tags are not taken into account 
+  |  REJECTED_TAGS = 
     {"area": "yes"}
 
-* **LANECOUNTS**: number of lanes for each type of road should be >=1
-    LANECOUNTS = 
+* | **LANECOUNTS**
+  | number of lanes for each type of road should be >=1
+  |  LANECOUNTS = 
     {'motorway': 6,
     'trunk': 4,
     'primary': 2,
@@ -483,8 +507,9 @@ Scenario Settings
     'living_street': 2,
     'service': 2}
 
-* **LANEWIDTHS**: Width of lanes for each type of road in meters
-    LANEWIDTHS = 
+* | **LANEWIDTHS**
+  | Width of lanes for each type of road in meters
+  |  LANEWIDTHS = 
     {"motorway": 3.5,
     "trunk": 3.5,
     "primary": 3.5,
@@ -503,8 +528,9 @@ Scenario Settings
     "footway": 2.0,
     "cycleway": 2.0}
   
-* **SPEED_LIMITS**: Default speed limit for each type of road in km/h
-    SPEED_LIMITS = 
+* | **SPEED_LIMITS**
+  | Default speed limit for each type of road in km/h
+  |  SPEED_LIMITS = 
     {'motorway': 120,
     'trunk': 100,
     'primary': 100,
@@ -522,72 +548,93 @@ Scenario Settings
 
 Export Settings
 ===============
-* **INTERPOLATION_DISTANCE**: Desired distance between interpolated waypoints in meters
-    INTERPOLATION_DISTANCE = 0.5
+* | **INTERPOLATION_DISTANCE**
+  | Desired distance between interpolated waypoints in meters
+  |  INTERPOLATION_DISTANCE = 0.5
 
-* **COMPRESSION_THRESHOLD**: Allowed inaccuracy of exported lines to reduce number of way points in meters
-    COMPRESSION_THRESHOLD = 0.05
+* | **COMPRESSION_THRESHOLD**
+  | Allowed inaccuracy of exported lines to reduce number of way points in meters
+  |  COMPRESSION_THRESHOLD = 0.05
 
-* **EXPORT_IN_UTM**: Export the scenario in UTM coordinates
-    EXPORT_IN_UTM = False
+* | **EXPORT_IN_UTM**
+  | Export the scenario in UTM coordinates
+  |  EXPORT_IN_UTM = False
 
-* **FILTER**: Toggle filtering of negligible waypoints
-    FILTER = True
+* | **FILTER**
+  | Toggle filtering of negligible waypoints
+  |  FILTER = True
 
-* **DELETE_INVALID_LANES**: Delete invalid lanes before export
-    DELETE_INVALID_LANES = True
+* | **DELETE_INVALID_LANES**
+  | Delete invalid lanes before export
+  |  DELETE_INVALID_LANES = True
 
 Internal settings
 =================
 These settings can be used to improve the conversion process for individual scenarios
 
-* **EARTH_RADIUS**: Radius of the earth used for calculation in meters
-    EARTH_RADIUS = 6371000
+* | **EARTH_RADIUS**
+  | Radius of the earth used for calculation in meters
+  |  EARTH_RADIUS = 6371000
 
-* **DELETE_SHORT_EDGES**: Delete short edges after cropping
-    DELETE_SHORT_EDGES = False
+* | **DELETE_SHORT_EDGES**
+  | Delete short edges after cropping
+  |  DELETE_SHORT_EDGES = False
 
-* **INTERPOLATION_DISTANCE_INTERNAL**: Distance between waypoints used internally in meters
-    INTERPOLATION_DISTANCE_INTERNAL = 0.5
+* | **INTERPOLATION_DISTANCE_INTERNAL**
+  | Distance between waypoints used internally in meters
+  |  INTERPOLATION_DISTANCE_INTERNAL = 0.5
 
-* **BEZIER_PARAMETER**: Bezier parameter for interpolation (should be within [0, 0.5])
-    BEZIER_PARAMETER = 0.35
+* | **BEZIER_PARAMETER**
+  | Bezier parameter for interpolation (should be within [0, 0.5])
+  |  BEZIER_PARAMETER = 0.35
 
-* **INTERSECTION_DISTANCE**: Distance between roads at intersection used for cropping in meters
-    INTERSECTION_DISTANCE = 4.0
+* | **INTERSECTION_DISTANCE**
+  | Distance between roads at intersection used for cropping in meters
+  |  INTERSECTION_DISTANCE = 4.0
 
-* **INTERSECTION_DISTANCE_SUBLAYER**: Associated with pedestrian pathways by default
-    INTERSECTION_DISTANCE_SUBLAYER = 1.0
+* | **INTERSECTION_DISTANCE_SUBLAYER**
+  | Associated with pedestrian pathways by default
+  |  INTERSECTION_DISTANCE_SUBLAYER = 1.0
 
-* **INTERSECTION_CROPPING_WITH_RESPECT_TO_ROADS**: Defines if the distance to other roads is used for cropping. If *false* the distance to the center of the intersection is used
-    INTERSECTION_CROPPING_WITH_RESPECT_TO_ROADS = True
+* | **INTERSECTION_CROPPING_WITH_RESPECT_TO_ROADS**
+  | Defines if the distance to other roads is used for cropping. If *false* the distance to the center of the intersection is used
+  |  INTERSECTION_CROPPING_WITH_RESPECT_TO_ROADS = True
 
-* **SOFT_ANGLE_THRESHOLD**: Threshold above which angles are considered as soft in degrees
-    SOFT_ANGLE_THRESHOLD = 55.0
+* | **SOFT_ANGLE_THRESHOLD**
+  | Threshold above which angles are considered as soft in degrees
+  |  SOFT_ANGLE_THRESHOLD = 55.0
 
-* **LANE_SEGMENT_ANGLE**: Least angle for lane segment to be added to the graph in degrees. If you edit the graph by hand, a value of 0 is recommended
-    LANE_SEGMENT_ANGLE = 5.0
+* | **LANE_SEGMENT_ANGLE**
+  | Least angle for lane segment to be added to the graph in degrees. If you edit the graph by hand, a value of 0 is recommended
+  |  LANE_SEGMENT_ANGLE = 5.0
 
-* **CLUSTER_LENGTH**: Least distance between graph nodes to try clustering in meters
-    CLUSTER_LENGTH = 10.0
+* | **CLUSTER_LENGTH**
+  | Least distance between graph nodes to try clustering in meters
+  |  CLUSTER_LENGTH = 10.0
 
-* **LEAST_CLUSTER_LENGTH**: Least length of cluster to be added in meters
-    LEAST_CLUSTER_LENGTH = 10.0
+* | **LEAST_CLUSTER_LENGTH**
+  | Least length of cluster to be added in meters
+  |  LEAST_CLUSTER_LENGTH = 10.0
 
-* **MERGE_DISTANCE**: Maximal distance between two intersections to which they are merged, if zero, no intersections are merged
-    MERGE_DISTANCE = 3.5
+* | **MERGE_DISTANCE**
+  | Maximal distance between two intersections to which they are merged, if zero, no intersections are merged
+  |  MERGE_DISTANCE = 3.5
 
-* **INTERSECTION_STRAIGHT_THRESHOLD**: Threshold which is used to determine if a successor of an incoming lane is considered as straight
-    INTERSECTION_STRAIGHT_THRESHOLD = 35.0
+* | **INTERSECTION_STRAIGHT_THRESHOLD**
+  | Threshold which is used to determine if a successor of an incoming lane is considered as straight
+  |  INTERSECTION_STRAIGHT_THRESHOLD = 35.0
 
-* **INTERSECTION_ENHANCEMENT**: Option to clean up intersections and add new traffic lights to it
-    INTERSECTION_ENHANCEMENT = True
+* | **INTERSECTION_ENHANCEMENT**
+  | Option to clean up intersections and add new traffic lights to it
+  |  INTERSECTION_ENHANCEMENT = True
 
-* **REMOVE_UNCONNECTED_LANELETS**: Option to remove unconnected lanelets from the main lanelet scenario
-    REMOVE_UNCONNECTED_LANELETS = True
+* | **REMOVE_UNCONNECTED_LANELETS**
+  | Option to remove unconnected lanelets from the main lanelet scenario
+  |  REMOVE_UNCONNECTED_LANELETS = True
   
-* **RECOGNIZED_TURNLANES**: Set of processed turn lanes. This should only be changed for further development
-    RECOGNIZED_TURNLANES = 
+* | **RECOGNIZED_TURNLANES**
+  | Set of processed turn lanes. This should only be changed for further development
+  |  RECOGNIZED_TURNLANES = 
     ["left",
     "through",
     "right",
@@ -597,47 +644,55 @@ These settings can be used to improve the conversion process for individual scen
     "left;through",
     "left;through;right",
     "left;right",
-    "none"]
+    "none"]  
 
 Traffic Lights
 ==============
-* **TRAFFIC_LIGHT_CYCLE**: Cycle that will be applied to each traffic light. Values in seconds
-    TRAFFIC_LIGHT_CYCLE = 
+* | **TRAFFIC_LIGHT_CYCLE**
+  | Cycle that will be applied to each traffic light. Values in seconds 
+  |  TRAFFIC_LIGHT_CYCLE = 
     {"red_phase": 57, 
     "red_yellow_phase": 3, 
     "green_phase": 37,
-    "yellow_phase": 3}
+    "yellow_phase": 3}   
 
 Traffic Signs
 =============
-* **TRAFFIC_SIGN_VALUES**: Values to search for in OSM
-    TRAFFIC_SIGN_VALUES = 
+* | **TRAFFIC_SIGN_VALUES**
+  | Values to search for in OSM
+  |  TRAFFIC_SIGN_VALUES = 
     ["traffic_signals",
     "stop",
     "give_way",
-    "city_limit"]
+    "city_limit"]  
 
-* **TRAFFIC_SIGN_KEYS**: Keys to search for in OSM
-    TRAFFIC_SIGN_KEYS = 
+* | **TRAFFIC_SIGN_KEYS**
+  | Keys to search for in OSM 
+  |  TRAFFIC_SIGN_KEYS = 
     ["traffic_sign",
     "overtaking",
     "traffic_signals:direction",
-    "maxspeed"]
+    "maxspeed"]  
 
-* **MAPILLARY_CATEGORIES**: Categories to include if mapillary is used for sign extraction
-    MAPILLARY_CATEGORIES =
+* | **MAPILLARY_CATEGORIES**
+  | Categories to include if mapillary is used for sign extraction  
+  |  MAPILLARY_CATEGORIES =
     ["warning",
     "regulatory",
     "information",
-    "complementary"]
+    "complementary"] 
 
-* **ACCEPTED_TRAFFIC_SIGNS**: Include traffic signs based on their id, e.g. "Max_SPEED". Keep "ALL" to accept all found traffic sings
-    ACCEPTED_TRAFFIC_SIGNS = ["ALL"]
+* | **ACCEPTED_TRAFFIC_SIGNS**
+  | Include traffic signs based on their id, e.g. "Max_SPEED". Keep "ALL" to accept all found traffic sings
+  |  ACCEPTED_TRAFFIC_SIGNS = ["ALL"]
 
-* **EXCLUDED_TRAFFIC_SIGNS**: Exclude traffic signs based on their id, e.g. "MAX_SPEED". "ALL" has to be set in ACCEPTED_TRAFFIC_SIGNS
-    EXCLUDED_TRAFFIC_SIGNS = []
+
+* | **EXCLUDED_TRAFFIC_SIGNS**
+  | Exclude traffic signs based on their id, e.g. "MAX_SPEED". "ALL" has to be set in ACCEPTED_TRAFFIC_SIGNS
+  |  EXCLUDED_TRAFFIC_SIGNS = []
 
 User edit activation
 ====================
-* **USER_EDIT**: Toggle edit for user
-    USER_EDIT = False
+* | **USER_EDIT**
+  | Toggle edit for user
+  |  USER_EDIT = False
