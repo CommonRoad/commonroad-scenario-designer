@@ -13,7 +13,7 @@ from crdesigner.io.api import commonroad_to_sumo
 from crdesigner.io.gui.toolboxes.gui_sumo_simulation import SUMO_AVAILABLE
 if SUMO_AVAILABLE:
     from crdesigner.conversion.sumo_map.config import SumoConfig
-    from crdesigner.conversion.sumo_map.cr2sumo import CR2SumoMapConverter
+    from crdesigner.conversion.sumo_map.cr2sumo.converter import CR2SumoMapConverter
     from sumocr.interface.sumo_simulation import SumoSimulation
     from sumocr.visualization.video import create_video
 

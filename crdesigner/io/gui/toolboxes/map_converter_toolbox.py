@@ -116,6 +116,7 @@ class MapConversionToolbox(QDockWidget):
         filename = select_local_file(self, "OSM", "osm")
         if filename != "":
             self.osm_file = filename
+            self.converter_toolbox.osm_loading_status.setText("map successfully loaded")
 
     def hidden_osm_conversion(self, graph: rg.Graph) -> None:
         """
