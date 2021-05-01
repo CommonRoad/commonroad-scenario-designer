@@ -55,6 +55,24 @@ Additionally it provides the capability to simulate multiple types of traffic pa
 Optionally trips for pedestrians and vehicles from one edge in the network to another can be automatically generated.
 SUMO also provides a set of tools for programmatically interacting with a network, namely NETEDIT.
 
+The main module of the converter is in ``crdesiger/sumo_map/cr2sumo/converter.py``. Here, a
+CommonRoad Scenario is converted to it's representation as a SUMO Net. This SUMO Net is then
+used as the specification for simulating vehicles with SUMO.
+
+In detail, conversion follows roughly the following steps, which are successively called in
+``_convert_map()``:
+
+1. Find lanes from lanelets
+2. Initialize SUMO Nodes
+3. Create Lanes and Edges from Lanelets
+4. Initialize Connections between Lanes
+5. Merge overlapping lanelets into a single junction
+6. Remove merged edges
+7. Create Lane based connections
+8. Create pedestrian crossings
+9. Encode Traffic Signs from CR file
+10. Encode Traffic Lights from CR file
+
 Dynamic Obstacle Simulation with SUMO
 =====================================
 
