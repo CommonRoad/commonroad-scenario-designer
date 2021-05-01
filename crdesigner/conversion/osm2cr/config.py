@@ -2,7 +2,7 @@
 This module holds all parameters necessary for the conversion
 """
 
-# Benchmark settings
+# Benchmark Settings
 # name of the benchmark
 BENCHMARK_ID = "ZAM_Test-1_1_T-1"
 # author of the benchmark
@@ -160,7 +160,7 @@ FILTER = True
 # delete invalid lanes before export
 DELETE_INVALID_LANES = True
 
-# Internal settings (these can be used to improve the conversion process for individual scenarios)
+# Internal Settings (these can be used to improve the conversion process for individual scenarios)
 # radius of the earth used for calculation in meters
 EARTH_RADIUS = 6371000
 # delete short edges after cropping
@@ -193,7 +193,6 @@ INTERSECTION_STRAIGHT_THRESHOLD = 35.0
 INTERSECTION_ENHANCEMENT = True
 # option to remove unconnected lanelets from the main lanelet scenario
 REMOVE_UNCONNECTED_LANELETS = True
-
 # set of processed turn lanes
 # this should only be changed for further development
 RECOGNIZED_TURNLANES = [
@@ -209,7 +208,7 @@ RECOGNIZED_TURNLANES = [
     "none",
 ]
 
-# Traffic lights
+# Traffic Lights
 # cycle that will be applied to each traffic light. Values in seconds
 TRAFFIC_LIGHT_CYCLE = {
     "red_phase": 57, 
@@ -218,7 +217,7 @@ TRAFFIC_LIGHT_CYCLE = {
     "yellow_phase": 3 
 }
 
-# traffic signs
+# Traffic Signs
 # values to search for in OSM
 TRAFFIC_SIGN_VALUES = [
     "traffic_signals",
