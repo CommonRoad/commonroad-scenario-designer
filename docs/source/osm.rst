@@ -363,7 +363,7 @@ Configuration
 There are several parameters which can be edited in **config.py**.
 These Parameters can also be set in the GUI via **edit settings**.
 
-Benchmark settings
+Benchmark Settings
 ==================
 * | **BENCHMARK_ID**
   | Name of the benchmark. See CommonRoad documentation for naming convention
@@ -415,7 +415,7 @@ Aerial Image Settings
   | The key to access bing maps
   |  BING_MAPS_KEY = "key"
 
-Map download Settings
+Map Download Settings
 =====================
 * | **SAVE_PATH** 
   | Path to save downloaded files
@@ -568,7 +568,7 @@ Export Settings
   | Delete invalid lanes before export
   |  DELETE_INVALID_LANES = True
 
-Internal settings
+Internal Settings
 =================
 These settings can be used to improve the conversion process for individual scenarios
 
@@ -691,7 +691,7 @@ Traffic Signs
   | Exclude traffic signs based on their id, e.g. "MAX_SPEED". "ALL" has to be set in ACCEPTED_TRAFFIC_SIGNS
   |  EXCLUDED_TRAFFIC_SIGNS = []
 
-User edit activation
+User Edit Activation
 ====================
 * | **USER_EDIT**
   | Toggle edit for user
