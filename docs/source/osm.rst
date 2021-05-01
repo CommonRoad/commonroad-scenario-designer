@@ -25,7 +25,7 @@ Command Line Interface
 Want to quickly convert an OSM file detailing an OSM map to a XML file with a CommonRoad scenario?
 
 Use the command
-``crdesigner osm -i input-file.xodr -o output-file.xml``.
+``crdesigner osm -i input-file.osm -o output-file.xml``.
 
 For example ``crdesigner osm -i test.osm -o new_converted_file_name.xml``
 produces a file called *new_converted_file_name.xml*
@@ -62,7 +62,7 @@ Python APIs
     download_around_map(config.BENCHMARK_ID + '_downloaded.osm', 48.140289, 11.566272)
 
     # --------------------------------------- Option 1: General API ------------------------------------------
-    # load OpenDRIVE file, parse it, and convert it to a CommonRoad scenario
+    # load OSM file, parse it, and convert it to a CommonRoad scenario
     scenario = osm_to_commonroad(config.SAVE_PATH + config.BENCHMARK_ID + ".osm")
 
     # store converted file as CommonRoad scenario
@@ -94,6 +94,9 @@ Python APIs
     # view the generated
     ex.view_xml(config.SAVE_PATH + config.BENCHMARK_ID + ".xml")
 
+In order to use the API calls, the save_path and Benchmark_ID has to be set in the config file. 
+The config file can be found at */crdesigner/conversion/osm2cr* and is described in detail at the end of this document.
+
 The GUI provides also functionality to edit already the OSM graph structure before converting to CommonRoad.
 
 Implementation Details
@@ -115,30 +118,30 @@ OSM also contains other elements like traffic signs. All this information is sto
 With CR version 2020.2 new elements are inserted into the scenario format:
 Traffic Signs and Traffic Lights.
 
-Conversion Overview
-===================
+.. Conversion Overview
+.. ===================
 
-Extremely simplified the conversion process works as follows:
+.. Extremely simplified the conversion process works as follows:
 
-.. image::
- images/OSM_control_flow.png
- :width: 500
+.. .. image::
+..  images/OSM_control_flow.png
+..  :width: 500
 
-The program takes a OSM file as input and parses it into the internel representation (graph).
-The refine the coordinate the user can adjust the graph with the GUI tool **EdgeEdit**.
+.. The program takes a OSM file as input and parses it into the internel representation (graph).
+.. The refine the coordinate the user can adjust the graph with the GUI tool **EdgeEdit**.
 
-.. image::
- images/example_edgeedit.png
- :width: 500
+.. .. image::
+..  images/example_edgeedit.png
+..  :width: 500
 
-Afterwards the each edge that is representing a road with multiple lanes is split into these lane so that there is
-exactely one edge per lane. As intersection are only single points in OSM the lanes are cut of with a specific
-radius around the intersection and linked together again. This linking can be adjusted
-with the GUI tool **LaneLinkEdit**.
+.. Afterwards the each edge that is representing a road with multiple lanes is split into these lane so that there is
+.. exactely one edge per lane. As intersection are only single points in OSM the lanes are cut of with a specific
+.. radius around the intersection and linked together again. This linking can be adjusted
+.. with the GUI tool **LaneLinkEdit**.
 
-.. image::
- images/example_lanelinkedit.png
- :width: 500
+.. .. image::
+..  images/example_lanelinkedit.png
+..  :width: 500
 
 
 When does the automated conversion work?
@@ -194,13 +197,13 @@ A simple roundabout.
  images/motorway.png
  :width: 500
 
-A large motorway intersection.
+A large motorway intersection. Please note that tunnels are not supported yet.
 
 .. image::
  images/motorway_2.png
  :width: 500
 
-A motorway access.
+A motorway access. Please note that tunnels are not supported yet.
 
 Problematic Scenarios
 =====================
@@ -328,233 +331,368 @@ Left Hand Traffic
 The tool assumes right hand traffic for all scenarios.
 
 
+External Data Sources
+*********************
+
+Geonames Scenario Infos
+=======================
+
+`Geonames <https://www.geonames.org/>`_ is a free database that contains information (such as population density) about over eleven million places worldwide. 
+When providing a Geonames username in the **config.py**, a Geonames ID will be stored in the scenario. 
+This ID can be later on used to retrieve further location information about the scenario.
+
+
+Mapillary Traffic Signs
+=======================
+
+Additionally to traffic signs from the given .osm file, the converter is also able to use **Mapillary** as an external source of signs.
+Mapillary is an open source community mapping tool, that provides more detailed insights in road networks based on real camera footage.
+In order to request data from Mapillary, an API key is needed, which can be obtained from `Mapillary.com <https://www.mapillary.com/>`_.
+The key has to be saved in the **config.py** file.
+
+Since Mapillary is only providing the coordinates of each detected traffic sign, signs are added to the lanelet with the closest distance.
+This strategy can sometimes lead to traffic signs that are not correctly placed in the final scenario. 
+A manual review is therefore recommended.
+
+It is also possible change the behavior how traffic signs are added to the scenario using **config.py** file.
+For example, Mapillary can be used as single source for traffic signs or several filters can be applied on signs. 
+
 Configuration
 *************
 
 There are several parameters which can be edited in **config.py**.
 These Parameters can also be set in the GUI via **edit settings**.
 
-Benchmark settings
+Benchmark Settings
 ==================
-* **BENCHMARK_ID**: name of the benchmark::
+* | **BENCHMARK_ID**
+  | Name of the benchmark. See CommonRoad documentation for naming convention
+  |  BENCHMARK_ID = "ZAM_Test-1_1_T-1"
 
-  BENCHMARK_ID = "test_bench"
+* | **AUTHOR**
+  | Author of the benchmark
+  |  AUTHOR = "Automated converter by Maximilian Rieger"
 
-* **AUTHOR**: author of the benchmark::
+* | **AFFILIATION**
+  | Affiliation of the benchmark
+  |  AFFILIATION = "Technical University of Munich, Germany"
 
-  AUTHOR = "Automated converter by Maximilian Rieger"
+* | **SOURCE**
+  | Source of the benchmark
+  |  SOURCE = "OpenStreetMaps (OSM)"
 
-* **AFFILIATION**: affiliation of the benchmark::
+* | **TAGS**
+  | Additional tags for the benchmark
+  |  TAGS = "urban"
 
-  AFFILIATION = "Technical University of Munich, Germany"
+* | **GEONAMES_USERNAME**
+  | Geonames username to retrieve geonamesID for created scenarios
+  |  GEONAMES_USERNAME = "demo"
 
-* **SOURCE**: source of the benchmark::
+* | **MAPILLARY_CLIENT_ID**
+  | Mapillary Client ID which can be set to extract additional traffic signs. If set to "demo", Mapillary signs will be disabled
+  |  MAPILLARY_CLIENT_ID = "demo"
 
-  SOURCE = "OpenStreetMaps (OSM)"
-
-* **TAGS**: additional tags for the benchmark::
-
-  TAGS = "..."
-
-* **TIMESTEPSIZE**: time step size for the benchmark in seconds::
-
-  TIMESTEPSIZE = 0.1
+* | **TIMESTEPSIZE**
+  | Time step size for the benchmark in seconds
+  |  TIMESTEPSIZE = 0.1
 
 Aerial Image Settings
----------------------
-* **AERIAL_IMAGES** Use aerial images for edit::
+=====================
+* | **AERIAL_IMAGES**
+  | Use aerial images for edit
+  |  AERIAL_IMAGES = False
 
-  AERIAL_IMAGES = True
+* | **IMAGE_SAVE_PATH**
+  | Path to save downloaded aerial images
+  |  IMAGE_SAVE_PATH = "files/imagery/"
 
-* **IMAGE_SAVE_PATH**: Path to save downloaded aerial images::
+* | **ZOOM_LEVEL**
+  | The zoom level of Bing Maps tiles
+  |  ZOOM_LEVEL = 19
 
-  IMAGE_SAVE_PATH = "files/imagery/"
+* | **BING_MAPS_KEY**
+  | The key to access bing maps
+  |  BING_MAPS_KEY = "key"
 
-* **ZOOM_LEVEL**: The zoom level of Bing Maps tiles::
+Map Download Settings
+=====================
+* | **SAVE_PATH** 
+  | Path to save downloaded files
+  |  SAVE_PATH = "files/"
 
-  ZOOM_LEVEL = 19
+* | **DOWNLOAD_EDGE_LENGTH**
+  | Half width of area downloaded in meters
+  |  DOWNLOAD_EDGE_LENGTH = 200
 
-* **BING_MAPS_KEY**: The key to access bing maps::
-
-  BING_MAPS_KEY = "key"
-
-Map download Settings
----------------------
-* **SAVE_PATH** path to save downloaded files::
-
-  SAVE_PATH = "files/"
-
-* **DOWNLOAD_EDGE_LENGTH**: half width of area downloaded in meters::
-
-  DOWNLOAD_EDGE_LENGTH = 200
-
-* **DOWNLOAD_COORDINATES**: coordinates in latitude and longitude specifying the center of the downloaded area::
-
-  DOWNLOAD_COORDINATES = (48.262447, 11.657881)
+* | **DOWNLOAD_COORDINATES**
+  | Coordinates in latitude and longitude specifying the center of the downloaded area
+  |  DOWNLOAD_COORDINATES = (48.262447, 11.657881)
 
 Scenario Settings
------------------
-* **LOAD_TUNNELS**: include tunnels in result::
+=================
+* | **LOAD_TUNNELS**
+  | Include tunnels in result
+  |  LOAD_TUNNELS = False
 
-  LOAD_TUNNELS = False
+* | **MAKE_CONTIGUOUS**
+  | Delete unconnected edges
+  |  MAKE_CONTIGUOUS = False
 
-* **MAKE_CONTIGUOUS**: delete unconnected edges::
+* | **SPLIT_AT_CORNER**
+  | Split edges at corners (~90° between two waypoint segments). This can help to model the course of roads on parking lots better
+  |  SPLIT_AT_CORNER = True
 
-  MAKE_CONTIGUOUS = False
+* | **USE_RESTRICTIONS**
+  | Use OSM restrictions for linking process
+  |  USE_RESTRICTIONS = True
 
-* **SPLIT_AT_CORNER**: split edges at corners (~90° between two waypoint segments)
-  this can help to model the course of roads on parking lots better::
+* | **ACCEPTED_HIGHWAYS_MAINLAYER**
+  | Types of roads extracted from the OSM file. Suitable types are: 'motorway', 'trunk', 'primary', 'secondary', 'tertiary', 'unclassified', 'residential', 'motorway_link', 'trunk_link', 'primary_link', 'secondary_link', 'tertiary_link', 'living_street', 'service'
+  |  ACCEPTED_HIGHWAYS_MAINLAYER = 
+    ['motorway',
+    'trunk',
+    'primary',
+    'secondary',
+    'tertiary',
+    'unclassified',
+    'residential',
+    'motorway_link',
+    'trunk_link',
+    'primary_link',
+    'secondary_link',
+    'tertiary_link',
+    'living_street',
+    'service']
 
-  SPLIT_AT_CORNER = True
+* | **EXTRACT_SUBLAYER**
+  | Use sublayers for different kind of ways, e.g. sidewalks or cycle paths
+  |  EXTRACT_SUBLAYER = False
 
-* **USE_RESTRICTIONS**: use OSM restrictions for linking process::
+* | **ACCEPTED_HIGHWAYS_SUBLAYER**
+  | Types of highways extracted from the OSM file as sublayer. Elements must not be in *ACCEPTED_HIGHWAYS_MAINLAYER*
+  |  ACCEPTED_HIGHWAYS_SUBLAYER = 
+    ["path",
+    "footway",
+    "cycleway"]
 
-  USE_RESTRICTIONS = True
+* | **SUBLAYER_LANELETTYPE**
+  | Lanelet type of the sublayer lanelets
+  |  SUBLAYER_LANELETTYPE = 'sidewalk'
 
-* **ACCEPTED_HIGHWAYS**: types of roads extracted from the OSM file
-  suitable types: 'motorway', 'trunk', 'primary', 'secondary', 'tertiary', 'unclassified', 'residential',
-  'motorway_link', 'trunk_link', 'primary_link', 'secondary_link', 'tertiary_link', 'living_street', 'service'::
+* | **CROSSING_LANELETTYPE**
+  | Lanelet type of the sublayer lanelets that cross the main layer. Overwrites SUBLAYER_LANELETTYPE for lanelets applied on
+  |  CROSSING_LANELETTYPE = 'crosswalk'
 
-  ACCEPTED_HIGHWAYS = ['motorway',
-                     'trunk',
-                     'primary',
-                     'secondary',
-                     'tertiary',
-                     'unclassified',
-                     'residential',
-                     'motorway_link',
-                     'trunk_link',
-                     'primary_link',
-                     'secondary_link',
-                     'tertiary_link',
-                     'living_street',
-                     'service']
+* | **REJECTED_TAGS** 
+  | OSM ways with these tags are not taken into account 
+  |  REJECTED_TAGS = 
+    {"area": "yes"}
 
-* **LANECOUNTS**: number of lanes for each type of road should be >=1::
+* | **LANECOUNTS**
+  | number of lanes for each type of road should be >=1
+  |  LANECOUNTS = 
+    {'motorway': 6,
+    'trunk': 4,
+    'primary': 2,
+    'secondary': 2,
+    'tertiary': 2,
+    'unclassified': 2,
+    'residential': 2,
+    'motorway_link': 2,
+    'trunk_link': 2,
+    'primary_link': 2,
+    'secondary_link': 2,
+    'tertiary_link': 2,
+    'living_street': 2,
+    'service': 2}
 
-  LANECOUNTS = {'motorway': 6,
-              'trunk': 4,
-              'primary': 2,
-              'secondary': 2,
-              'tertiary': 2,
-              'unclassified': 2,
-              'residential': 2,
-              'motorway_link': 2,
-              'trunk_link': 2,
-              'primary_link': 2,
-              'secondary_link': 2,
-              'tertiary_link': 2,
-              'living_street': 2,
-              'service': 2}
-
-* **LANEWIDTHS**: width of lanes for each type of road in meters::
-
-  LANEWIDTHS = {'motorway': 2.5,
-              'trunk': 2.5,
-              'primary': 2.5,
-              'secondary': 2.5,
-              'tertiary': 2.5,
-              'unclassified': 2.5,
-              'residential': 2.5,
-              'motorway_link': 2.5,
-              'trunk_link': 2.5,
-              'primary_link': 2.5,
-              'secondary_link': 2.5,
-              'tertiary_link': 2.5,
-              'living_street': 2.5,
-              'service': 2.5}
-
-* **SPEED_LIMITS**: default speed limit for each type of road in km/h::
-
-  SPEED_LIMITS = {'motorway': 120,
-                'trunk': 100,
-                'primary': 100,
-                'secondary': 100,
-                'tertiary': 100,
-                'unclassified': 80,
-                'residential': 50,
-                'motorway_link': 80,
-                'trunk_link': 80,
-                'primary_link': 80,
-                'secondary_link': 80,
-                'tertiary_link': 80,
-                'living_street': 7,
-                'service': 10}
+* | **LANEWIDTHS**
+  | Width of lanes for each type of road in meters
+  |  LANEWIDTHS = 
+    {"motorway": 3.5,
+    "trunk": 3.5,
+    "primary": 3.5,
+    "secondary": 3.5,
+    "tertiary": 3.5,
+    "unclassified": 3.5,
+    "residential": 3.5,
+    "motorway_link": 3.5,
+    "trunk_link": 3.5,
+    "primary_link": 3.5,
+    "secondary_link": 3.5,
+    "tertiary_link": 3.5,
+    "living_street": 3.5,
+    "service": 3.5,
+    "path": 2.0,
+    "footway": 2.0,
+    "cycleway": 2.0}
+  
+* | **SPEED_LIMITS**
+  | Default speed limit for each type of road in km/h
+  |  SPEED_LIMITS = 
+    {'motorway': 120,
+    'trunk': 100,
+    'primary': 100,
+    'secondary': 100,
+    'tertiary': 100,
+    'unclassified': 80,
+    'residential': 50,
+    'motorway_link': 80,
+    'trunk_link': 80,
+    'primary_link': 80,
+    'secondary_link': 80,
+    'tertiary_link': 80,
+    'living_street': 7,
+    'service': 10}
 
 Export Settings
----------------
-* **INTERPOLATION_DISTANCE**: desired distance between interpolated waypoints in meters::
+===============
+* | **INTERPOLATION_DISTANCE**
+  | Desired distance between interpolated waypoints in meters
+  |  INTERPOLATION_DISTANCE = 0.5
 
-  INTERPOLATION_DISTANCE = 0.5
+* | **COMPRESSION_THRESHOLD**
+  | Allowed inaccuracy of exported lines to reduce number of way points in meters
+  |  COMPRESSION_THRESHOLD = 0.05
 
-* **COMPRESSION_THRESHOLD**: allowed inaccuracy of exported lines to reduce number of way points in meters::
+* | **EXPORT_IN_UTM**
+  | Export the scenario in UTM coordinates
+  |  EXPORT_IN_UTM = False
 
-  COMPRESSION_THRESHOLD = 0.05
+* | **FILTER**
+  | Toggle filtering of negligible waypoints
+  |  FILTER = True
 
-* **EXPORT_IN_UTM**: export the scenario in UTM coordinates::
+* | **DELETE_INVALID_LANES**
+  | Delete invalid lanes before export
+  |  DELETE_INVALID_LANES = True
 
-  EXPORT_IN_UTM = True
+Internal Settings
+=================
+These settings can be used to improve the conversion process for individual scenarios
 
-* **FILTER**: toggle filtering of negligible waypoints::
+* | **EARTH_RADIUS**
+  | Radius of the earth used for calculation in meters
+  |  EARTH_RADIUS = 6371000
 
-  FILTER = True
+* | **DELETE_SHORT_EDGES**
+  | Delete short edges after cropping
+  |  DELETE_SHORT_EDGES = False
 
-Internal settings
------------------
-these can be used to improve the conversion process for individual scenarios
+* | **INTERPOLATION_DISTANCE_INTERNAL**
+  | Distance between waypoints used internally in meters
+  |  INTERPOLATION_DISTANCE_INTERNAL = 0.5
 
-* **EARTH_RADIUS**: radius of the earth used for calculation in meters::
+* | **BEZIER_PARAMETER**
+  | Bezier parameter for interpolation (should be within [0, 0.5])
+  |  BEZIER_PARAMETER = 0.35
 
-  EARTH_RADIUS = 6371000
+* | **INTERSECTION_DISTANCE**
+  | Distance between roads at intersection used for cropping in meters
+  |  INTERSECTION_DISTANCE = 4.0
 
-* **DELETE_SHORT_EDGES**: delete short edges after cropping::
+* | **INTERSECTION_DISTANCE_SUBLAYER**
+  | Associated with pedestrian pathways by default
+  |  INTERSECTION_DISTANCE_SUBLAYER = 1.0
 
-  DELETE_SHORT_EDGES = False
+* | **INTERSECTION_CROPPING_WITH_RESPECT_TO_ROADS**
+  | Defines if the distance to other roads is used for cropping. If *false* the distance to the center of the intersection is used
+  |  INTERSECTION_CROPPING_WITH_RESPECT_TO_ROADS = True
 
-* **INTERPOLATION_DISTANCE_INTERNAL**: distance between waypoints used internally in meters::
+* | **SOFT_ANGLE_THRESHOLD**
+  | Threshold above which angles are considered as soft in degrees
+  |  SOFT_ANGLE_THRESHOLD = 55.0
 
-  INTERPOLATION_DISTANCE_INTERNAL = 0.25
+* | **LANE_SEGMENT_ANGLE**
+  | Least angle for lane segment to be added to the graph in degrees. If you edit the graph by hand, a value of 0 is recommended
+  |  LANE_SEGMENT_ANGLE = 5.0
 
-* **BEZIER_PARAMETER**: bezier parameter for interpolation (should be within [0, 0.5])::
+* | **CLUSTER_LENGTH**
+  | Least distance between graph nodes to try clustering in meters
+  |  CLUSTER_LENGTH = 10.0
 
-  BEZIER_PARAMETER = 0.35
+* | **LEAST_CLUSTER_LENGTH**
+  | Least length of cluster to be added in meters
+  |  LEAST_CLUSTER_LENGTH = 10.0
 
-* **INTERSECTION_DISTANCE**: distance between roads at intersection used for cropping in meters::
+* | **MERGE_DISTANCE**
+  | Maximal distance between two intersections to which they are merged, if zero, no intersections are merged
+  |  MERGE_DISTANCE = 3.5
 
-  INTERSECTION_DISTANCE = 5.0
+* | **INTERSECTION_STRAIGHT_THRESHOLD**
+  | Threshold which is used to determine if a successor of an incoming lane is considered as straight
+  |  INTERSECTION_STRAIGHT_THRESHOLD = 35.0
 
-* **INTERSECTION_CROPPING_WITH_RESPECT_TO_ROADS**: defines if the distance to other roads is used for cropping
-  if false the distance to the center of the intersection is used::
+* | **INTERSECTION_ENHANCEMENT**
+  | Option to clean up intersections and add new traffic lights to it
+  |  INTERSECTION_ENHANCEMENT = True
 
-  INTERSECTION_CROPPING_WITH_RESPECT_TO_ROADS = True
+* | **REMOVE_UNCONNECTED_LANELETS**
+  | Option to remove unconnected lanelets from the main lanelet scenario
+  |  REMOVE_UNCONNECTED_LANELETS = True
+  
+* | **RECOGNIZED_TURNLANES**
+  | Set of processed turn lanes. This should only be changed for further development
+  |  RECOGNIZED_TURNLANES = 
+    ["left",
+    "through",
+    "right",
+    "merge_to_left",
+    "merge_to_right",
+    "through;right",
+    "left;through",
+    "left;through;right",
+    "left;right",
+    "none"]  
 
-* **SOFT_ANGLE_THRESHOLD**: threshold above which angles are considered as soft in degrees::
+Traffic Lights
+==============
+* | **TRAFFIC_LIGHT_CYCLE**
+  | Cycle that will be applied to each traffic light. Values in seconds 
+  |  TRAFFIC_LIGHT_CYCLE = 
+    {"red_phase": 57, 
+    "red_yellow_phase": 3, 
+    "green_phase": 37,
+    "yellow_phase": 3}   
 
-  SOFT_ANGLE_THRESHOLD = 55.0
+Traffic Signs
+=============
+* | **TRAFFIC_SIGN_VALUES**
+  | Values to search for in OSM
+  |  TRAFFIC_SIGN_VALUES = 
+    ["traffic_signals",
+    "stop",
+    "give_way",
+    "city_limit"]  
 
-* **LANE_SEGMENT_ANGLE**: least angle for lane segment to be added to the graph in degrees.
-  if you edit the graph by hand, a value of 0 is recommended::
+* | **TRAFFIC_SIGN_KEYS**
+  | Keys to search for in OSM 
+  |  TRAFFIC_SIGN_KEYS = 
+    ["traffic_sign",
+    "overtaking",
+    "traffic_signals:direction",
+    "maxspeed"]  
 
-  LANE_SEGMENT_ANGLE = 5.0
+* | **MAPILLARY_CATEGORIES**
+  | Categories to include if mapillary is used for sign extraction  
+  |  MAPILLARY_CATEGORIES =
+    ["warning",
+    "regulatory",
+    "information",
+    "complementary"] 
 
-* **CLUSTER_LENGTH**: least distance between graph nodes to try clustering in meters::
-
-  CLUSTER_LENGTH = 10.0
-
-* **LEAST_CLUSTER_LENGTH**: least length of cluster to be added in meters::
-
-  LEAST_CLUSTER_LENGTH = 10.0
-
-* **MERGE_DISTANCE**: maximal distance between two intersections to which they are merged, if zero, no intersections are merged::
-
-  MERGE_DISTANCE = 0.0
-
-User edit activation
---------------------
-
-* **USER_EDIT**: Toggle edit for user::
-
-  USER_EDIT = False
+* | **ACCEPTED_TRAFFIC_SIGNS**
+  | Include traffic signs based on their id, e.g. "Max_SPEED". Keep "ALL" to accept all found traffic sings
+  |  ACCEPTED_TRAFFIC_SIGNS = ["ALL"]
 
 
+* | **EXCLUDED_TRAFFIC_SIGNS**
+  | Exclude traffic signs based on their id, e.g. "MAX_SPEED". "ALL" has to be set in ACCEPTED_TRAFFIC_SIGNS
+  |  EXCLUDED_TRAFFIC_SIGNS = []
 
+User Edit Activation
+====================
+* | **USER_EDIT**
+  | Toggle edit for user
+  |  USER_EDIT = False
