@@ -11,9 +11,7 @@ import numpy as np
 
 from crdesigner.conversion.osm2cr import config
 from crdesigner.conversion.osm2cr.converter_modules.graph_operations import road_graph as rg
-from crdesigner.conversion.osm2cr.converter_modules.graph_operations.restrictions import (
-    Restriction,
-)
+from crdesigner.conversion.osm2cr.converter_modules.graph_operations.restrictions import Restriction
 from crdesigner.conversion.osm2cr.converter_modules.osm_operations import info_deduction as i_d
 from crdesigner.conversion.osm2cr.converter_modules.utility import idgenerator
 from crdesigner.conversion.osm2cr.converter_modules.utility.custom_types import Road_info
@@ -210,9 +208,12 @@ def parse_restrictions(restrictions: Set[ElTree.Element]) -> RestrictionDict:
             None,
             None,
         )
-        if not "restriction" in restriction_element.attrib:
+        if "restriction" in restriction_element.attrib:
+            restriction = restriction_element.attrib["restriction"]
+        elif "connectivity" in restriction_element.attrib:
+            restriction = "connectivity=" + str(restriction_element.attrib["connectivity"])
+        else:
             continue
-        restriction = restriction_element.attrib["restriction"]
         for member in restriction_element.findall("member"):
             if member.attrib["role"] == "from":
                 from_edge_id = member.attrib["ref"]
@@ -250,6 +251,11 @@ def get_restrictions(root) -> RestrictionDict:
             if tag.attrib["k"] == "restriction":
                 relation.set("restriction", tag.attrib["v"])
                 #TODO Handle vehicle specific restrictions, e.g. restriction:hgv
+            # also parse connectivity
+            if tag.attrib["k"] == "type" and tag.attrib["v"] == "connectivity":
+                restrictions.add(relation)
+            if tag.attrib["k"] == "connectivity":
+                relation.set("connectivity", tag.attrib["v"])
     restrictions = parse_restrictions(restrictions)
     return restrictions
 
@@ -359,7 +365,7 @@ def parse_turnlane(turnlane: str) -> str:
     if "right" in turnlane:
         included.append("right")
     result = ";".join(included)
-    if result is "":
+    if result == "":
         return "none"
     return result
 
@@ -525,7 +531,7 @@ def get_graph_nodes(roads: Set[ElTree.Element], points: Dict[int, Point], traffi
 
     for traffic_sign in traffic_signs:
         point_id = next(iter(traffic_sign))
-        if point_id.startswith('road'): # ? TODO use int
+        if point_id.startswith('road'):
             continue
         if int(point_id) not in nodes:
             current_point = points[int(point_id)]
@@ -737,7 +743,7 @@ def map_restrictions(edges: Dict[int, Set[rg.GraphEdge]], restrictions: Dict[int
                 print(
                     "several edges have the same id, we cannot apply restrictions to it"
                 )
-                # TODO implement restrictions for mutliple edges with same id
+                # TODO implement restrictions for multiple edges with same id
                 pass
         else:
             print(
