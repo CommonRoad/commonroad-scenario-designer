@@ -29,6 +29,7 @@ def parse_restriction(restriction: str) -> Optional[Set[str]]:
             # u-turns are not implemented yet
             # TODO impelement u turns
             pass
+        # return connectivity without modifications
         elif restriction.startswith("connectivity"):
             return {str(restriction)}
         else:
