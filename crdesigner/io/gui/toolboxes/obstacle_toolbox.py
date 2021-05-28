@@ -26,6 +26,7 @@ class ObstacleToolbox(QDockWidget):
         self.adjust_ui()
         self.connect_gui_elements()
         self.tmp_folder = tmp_folder
+        self.update_ongoing = False
 
         if SUMO_AVAILABLE:
             self.sumo_simulation = SUMOSimulation(tmp_folder=tmp_folder)
@@ -84,7 +85,7 @@ class ObstacleToolbox(QDockWidget):
         self.obstacle_toolbox.selected_obstacle.setCurrentIndex(0)
 
     def plot_obstacle_state_profile(self):
-        if self.obstacle_toolbox.selected_obstacle.currentText() not in ["", "None"]:
+        if self.obstacle_toolbox.selected_obstacle.currentText() not in ["", "None"] and not self.update_ongoing:
             obstacle_id = int(self.obstacle_toolbox.selected_obstacle.currentText())
             obstacle = self.current_scenario.obstacle_by_id(obstacle_id)
             state_variable_name = self.obstacle_toolbox.obstacle_state_variable.currentText()
@@ -141,6 +142,7 @@ class ObstacleToolbox(QDockWidget):
 
     def update_obstacle_information(self):
         if self.obstacle_toolbox.selected_obstacle.currentText() not in ["", "None"]:
+            self.update_ongoing = True
             obstacle_id = int(self.obstacle_toolbox.selected_obstacle.currentText())
             obstacle = self.current_scenario.obstacle_by_id(obstacle_id)
             if isinstance(obstacle.obstacle_shape, Rectangle):
@@ -150,11 +152,15 @@ class ObstacleToolbox(QDockWidget):
                 self.obstacle_toolbox.obstacle_width.setText("")
                 self.obstacle_toolbox.obstacle_length.setText("")
             self.obstacle_toolbox.obstacle_type.setCurrentText(obstacle.obstacle_type.value)
+            self.obstacle_toolbox.obstacle_state_variable.clear()
             state_variables = [var for var in obstacle.initial_state.attributes if var not in ["position", "time_step"]]
+
             if "position" in obstacle.initial_state.attributes:
                 state_variables += ["x-position", "y-position"]
             self.obstacle_toolbox.obstacle_state_variable.addItems(state_variables)
+            self.update_ongoing = False
             self.plot_obstacle_state_profile()
+
 
     def start_sumo_simulation(self):
         num_time_steps = self.obstacle_toolbox.sumo_simulation_length.value()
