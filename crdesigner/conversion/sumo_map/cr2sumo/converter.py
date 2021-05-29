@@ -24,8 +24,8 @@ import sumolib
 from matplotlib import pyplot as plt
 
 try:
-    import pycrccosy
-    from commonroad_ccosy.geometry.util import resample_polyline, compute_curvature_from_polyline, \
+    import commonroad_dc.pycrccosy
+    from commonroad_dc.geometry.util import resample_polyline, compute_curvature_from_polyline, \
         chaikins_corner_cutting
 except ImportError:
     warnings.warn(

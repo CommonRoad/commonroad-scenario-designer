@@ -94,4 +94,5 @@ CommonRoadFileWriter(simulated_scenario,
     overwrite_existing_file=OverwriteExistingFile.ALWAYS)
 
 print("creating video (this may take some time)")
-create_video(simulation, 1, config.simulation_steps, output_folder)
+create_video(simulation.commonroad_scenarios_all_time_steps(),
+            output_folder, trajectory_pred=simulation.ego_vehicles)
