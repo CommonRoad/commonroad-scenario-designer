@@ -202,6 +202,7 @@ class SumoConfig(DefaultConfig):
     'sigma': [0-1] driver imperfection (0 denotes perfect driving. sumo_default: 0.5
     'speedDev': [0-1] deviation of the speedFactor. sumo_default 0.1
     'speedFactor': [0-1] The vehicles expected multiplicator for lane speed limits. sumo_default 1.0
+    'lcMaxSpeedLatStanding': max. lateral speed when vehicle is standing (avoids lateral sliding in standstill)
     """
     driving_params = {
         'lcStrategic': Interval(10, 100),
@@ -211,5 +212,6 @@ class SumoConfig(DefaultConfig):
         'speedDev': Interval(0.1, 0.2),
         'speedFactor': Interval(0.9, 1.1),
         'lcImpatience': Interval(0, 0.5),
-        'impatience': Interval(0, 0.5)
+        'impatience': Interval(0, 0.5),
+        'lcMaxSpeedLatStanding': 0
     }
