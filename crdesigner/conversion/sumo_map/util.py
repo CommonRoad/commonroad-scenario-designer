@@ -10,7 +10,7 @@ import numpy as np
 from commonroad.geometry.shape import Polygon
 from commonroad.scenario.lanelet import Lanelet
 from commonroad.scenario.lanelet import LaneletNetwork
-from commonroad.visualization.plot_helper import draw_object
+from commonroad.visualization.mp_renderer import MPRenderer
 from crdesigner.conversion.sumo_map.sumolib_net import Edge, from_shape_string
 from shapely.geometry import LineString
 from shapely.ops import unary_union
@@ -249,7 +249,8 @@ def _find_intersecting_edges(
     # visualize eroded lanelets
     if visualize:
         plt.figure(figsize=(25, 25))
-        draw_object(eroded_lanelet_network.lanelets)
+        rnd = MPRenderer()
+        rnd.draw_list(eroded_lanelet_network)
         plt.axis('equal')
         plt.autoscale()
         plt.show()

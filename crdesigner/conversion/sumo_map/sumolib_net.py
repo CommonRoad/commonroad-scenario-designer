@@ -913,7 +913,8 @@ class Connection:
                  via_lane_id: List[str] = None,
                  shape: Optional[np.ndarray] = None,
                  keep_clear: bool = None,
-                 cont_pos=None):
+                 cont_pos=None,
+                 prohibits: List["Connection"] = []):
         self._from = from_edge
         self._to = to_edge
         self._from_lane = from_lane
@@ -926,6 +927,7 @@ class Connection:
         self._shape = shape
         self._keep_clear = keep_clear
         self._cont_pos = cont_pos
+        self._prohibits = prohibits
 
     @property
     def from_edge(self) -> Edge:
@@ -1013,6 +1015,18 @@ class Connection:
     @shape.setter
     def shape(self, shape: np.ndarray):
         self._shape = shape
+    
+    @property
+    def prohibits(self) -> List["Connection"]:
+        return self._prohibits
+
+    @prohibits.setter
+    def prohibits(self, prohibits):
+        self._prohibits = prohibits if self._prohibits is not None else []
+
+    @property
+    def connection_string(self) -> str:
+        return f"{self.from_lane.id}->{self.to_lane.id}"
 
     def to_xml(self) -> str:
         """
@@ -1040,6 +1054,16 @@ class Connection:
         if self._cont_pos is not None:
             c.set("contPos", str(self._cont_pos))
         return ET.tostring(c, encoding="unicode")
+
+    def get_prohibition_xmls(self) -> List[str]:
+        xmls = []
+        for p in self.prohibits:
+            x = ET.Element("prohibition")
+            x.set("prohibitor", self.connection_string)
+            x.set("prohibited", p.connection_string)
+            xmls.append(ET.tostring(x, encoding="unicode"))
+
+        return xmls
 
     def __str__(self):
         return self.to_xml()
