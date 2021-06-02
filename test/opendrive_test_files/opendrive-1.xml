@@ -1,13 +1,13 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<commonRoad timeStepSize="0.1" commonRoadVersion="2020a" author="" affiliation="" source="OpenDRIVE 2 Lanelet Converter" benchmarkID="ZAM_OpenDrive-123" date="2021-03-16">
+<commonRoad timeStepSize="0.1" commonRoadVersion="2020a" author="" affiliation="" source="OpenDRIVE 2 Lanelet Converter" benchmarkID="ZAM_OpenDrive-123" date="2021-06-02">
   <location>
     <geoNameId>-999</geoNameId>
     <gpsLatitude>999</gpsLatitude>
     <gpsLongitude>999</gpsLongitude>
   </location>
   <scenarioTags>
-    <urban/>
     <highway/>
+    <urban/>
   </scenarioTags>
   <lanelet id="100">
     <leftBound>
@@ -38826,6 +38826,7 @@
         <y>-11.101577</y>
       </point>
     </position>
+    <direction>right</direction>
     <active>true</active>
   </trafficLight>
   <trafficLight id="2042">
@@ -38853,6 +38854,7 @@
         <y>-3.1819807</y>
       </point>
     </position>
+    <direction>leftStraight</direction>
     <active>true</active>
   </trafficLight>
   <trafficLight id="2010">
@@ -38880,6 +38882,7 @@
         <y>-3.1819809</y>
       </point>
     </position>
+    <direction>right</direction>
     <active>true</active>
   </trafficLight>
   <trafficLight id="2012">
@@ -38907,6 +38910,7 @@
         <y>-11.101576</y>
       </point>
     </position>
+    <direction>leftStraight</direction>
     <active>true</active>
   </trafficLight>
   <trafficLight id="2030">
@@ -38934,6 +38938,7 @@
         <y>11.101577</y>
       </point>
     </position>
+    <direction>right</direction>
     <active>true</active>
   </trafficLight>
   <trafficLight id="2032">
@@ -38961,6 +38966,7 @@
         <y>3.1819807</y>
       </point>
     </position>
+    <direction>leftStraight</direction>
     <active>true</active>
   </trafficLight>
   <trafficLight id="2020">
@@ -38988,6 +38994,7 @@
         <y>3.1819809</y>
       </point>
     </position>
+    <direction>right</direction>
     <active>true</active>
   </trafficLight>
   <trafficLight id="2022">
@@ -39015,6 +39022,7 @@
         <y>11.101576</y>
       </point>
     </position>
+    <direction>leftStraight</direction>
     <active>true</active>
   </trafficLight>
   <intersection id="0">

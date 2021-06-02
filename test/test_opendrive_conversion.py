@@ -146,7 +146,7 @@ class TestZeroWidthCoefficients(TestOpenDriveBaseClass):
 
 
 class TestPoly3AndBorderRecord(TestOpenDriveBaseClass):
-    """Test if the program convert Poly3 Geometry and wheter it can handle
+    """Test if the program convert Poly3 Geometry and whether it can handle
     border records instead of width records."""
 
     __test__ = True
