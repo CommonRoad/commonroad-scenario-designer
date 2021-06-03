@@ -14,16 +14,16 @@ from commonroad.scenario.traffic_sign import TrafficSign, TrafficLight, TrafficS
 from commonroad.scenario.lanelet import StopLine, LineMarking
 
 
-def extract_traffic_element_id(signal_type: str, singal_subtype: str, traffic_sign_enum: enum) \
+def extract_traffic_element_id(signal_type: str, signal_subtype: str, traffic_sign_enum: enum) \
         -> Union[TrafficSignIDZamunda, TrafficSignIDGermany, TrafficSignIDUsa, TrafficSignIDChina,
                  TrafficSignIDSpain, TrafficSignIDRussia]:
     if signal_type in set(item.value for item in traffic_sign_enum):
         element_id = traffic_sign_enum(signal_type)
-    elif signal_type + "-" + singal_subtype in set(item.value for item in traffic_sign_enum):
-        element_id = traffic_sign_enum(signal_type + "-" + str(singal_subtype))
+    elif signal_type + "-" + signal_subtype in set(item.value for item in traffic_sign_enum):
+        element_id = traffic_sign_enum(signal_type + "-" + str(signal_subtype))
     else:
         warnings.warn("OpenDRIVE/traffic_signals.py: Unknown {}"
-                      " of ID {} of subtype {}!".format(traffic_sign_enum.__name__, signal_type, singal_subtype))
+                      " of ID {} of subtype {}!".format(traffic_sign_enum.__name__, signal_type, signal_subtype))
         element_id = traffic_sign_enum.UNKNOWN
 
     return element_id
@@ -72,7 +72,7 @@ def get_traffic_signals(road: Road):
                 element_id = extract_traffic_element_id(signal.type, str(signal.subtype), TrafficSignIDGermany)
             elif signal_country == 'USA':
                 element_id = extract_traffic_element_id(signal.type, str(signal.subtype), TrafficSignIDUsa)
-                if signal.type == '294':
+                if signal.type == '294':  # TODO has another ID
                     # Creating stop line object by first calculating the position of the two end points that define the
                     # straight stop line
                     position_1, position_2 = calculate_stop_line_position(road.lanes.lane_sections, signal,
@@ -83,7 +83,7 @@ def get_traffic_signals(road: Road):
 
             elif signal_country == 'CHN':
                 element_id = extract_traffic_element_id(signal.type, str(signal.subtype), TrafficSignIDChina)
-                if signal.type == '294':
+                if signal.type == '294':  # TODO has another ID
                     # Creating stop line object by first calculating the position of the two end points that define the
                     # straight stop line
                     position_1, position_2 = calculate_stop_line_position(road.lanes.lane_sections, signal,
@@ -94,7 +94,7 @@ def get_traffic_signals(road: Road):
 
             elif signal_country == 'ESP':
                 element_id = extract_traffic_element_id(signal.type, str(signal.subtype), TrafficSignIDSpain)
-                if signal.type == '294':
+                if signal.type == '294':  # TODO has another ID
                     # Creating stop line object by first calculating the position of the two end points that define the
                     # straight stop line
                     position_1, position_2 = calculate_stop_line_position(road.lanes.lane_sections, signal,
@@ -105,7 +105,7 @@ def get_traffic_signals(road: Road):
 
             elif signal_country == 'RUS':
                 element_id = extract_traffic_element_id(signal.type, str(signal.subtype), TrafficSignIDRussia)
-                if signal.type == '294':
+                if signal.type == '294':  # TODO has another ID
                     # Creating stop line object by first calculating the position of the two end points that define the
                     # straight stop line
                     position_1, position_2 = calculate_stop_line_position(road.lanes.lane_sections, signal,
@@ -125,11 +125,13 @@ def get_traffic_signals(road: Road):
                     continue
 
                 element_id = extract_traffic_element_id(signal.type, str(signal.subtype), TrafficSignIDZamunda)
+
+            if element_id.value == "":
+                continue
             traffic_sign_element = TrafficSignElement(
                 traffic_sign_element_id=element_id,
                 additional_values=additional_values
             )
-
             traffic_sign = TrafficSign(
                 traffic_sign_id=int("".join([str(road.id), str(signal.id), str(abs(int(position[0]))),
                                              str(abs(int(position[1]))), str(abs(int(signal.s)))])),
