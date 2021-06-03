@@ -168,7 +168,7 @@ class Network:
         # self.traffic_signal_elements.update_traffic_signs_map_lane_id(lanelet_network.old_lanelet_ids())
 
         # generating intersections
-        intersection_id_counter = 0
+        intersection_id_counter = max([la.lanelet_id for la in lanelet_network.lanelets]) + 1
         for intersection_map in self._link_index.intersection_maps():
             # Remove lanelets that are not part of the network (as they are of a different type)
             lanelet_network.create_intersection(intersection_map, intersection_id_counter)
@@ -180,7 +180,6 @@ class Network:
         lanelet_network.add_stop_lines_to_network(self._stop_lines)
 
         return convert_to_base_lanelet_network(lanelet_network)
-
 
     def export_commonroad_scenario(
             self, dt: float = 0.1, benchmark_id=None, filter_types=None

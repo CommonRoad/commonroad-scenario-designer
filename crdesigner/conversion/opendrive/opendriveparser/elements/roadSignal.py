@@ -127,7 +127,7 @@ class Signal:
 
     @subtype.setter
     def subtype(self, value):
-        self._subtype = int(value)
+        self._subtype = value
 
 
 class SignalReference:
