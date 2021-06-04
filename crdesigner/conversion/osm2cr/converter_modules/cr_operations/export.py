@@ -10,7 +10,8 @@ import utm
 
 from crdesigner.conversion.osm2cr import config
 from crdesigner.conversion.osm2cr.converter_modules.graph_operations import road_graph as rg
-from crdesigner.conversion.osm2cr.converter_modules.intermediate_operations.intermediate_format import IntermediateFormat
+from crdesigner.conversion.osm2cr.converter_modules.intermediate_operations.intermediate_format import \
+    IntermediateFormat
 from crdesigner.conversion.osm2cr.converter_modules.utility import geometry
 from crdesigner.conversion.osm2cr.converter_modules.utility.idgenerator import get_id
 from crdesigner.conversion.osm2cr.converter_modules.utility.geonamesID import get_geonamesID
@@ -167,7 +168,7 @@ def export(
     :param graph: the graph
     :return: None
     """
-    #scenario = create_scenario(graph)
+    # scenario = create_scenario(graph)
     scenario, intermediate_format = create_scenario_intermediate(graph)
 
     # removing converting errors before writing to xml
@@ -194,15 +195,15 @@ def export(
     file_writer = CommonRoadFileWriter(
         scenario, problemset, author, affiliation, source, tags, location, decimal_precision=16)
 
-    #write scenario to file with planning problem
+    # write scenario to file with planning problem
     file_writer.write_to_file(file_path, OverwriteExistingFile.ALWAYS)
 
     # write scenario to file without planning problem
-    #file_writer.write_scenario_to_file(file, OverwriteExistingFile.ALWAYS)
+    # file_writer.write_scenario_to_file(file, OverwriteExistingFile.ALWAYS)
 
 
 def convert_to_scenario(graph: rg.Graph) -> Scenario:
-    #scenario = create_scenario(graph)
+    # scenario = create_scenario(graph)
     scenario, intermediate_format = create_scenario_intermediate(graph)
     # removing converting errors before writing to xml
     sanitize(scenario)
@@ -274,15 +275,15 @@ def view_xml(filename: str, ax=None) -> None:
         return
     limits = find_bounds(scenario)
 
-    draw_params = { 'lanelet_network': {'draw_intersections': True, 'draw_traffic_signs_in_lanelet': True,
-                                        'draw_traffic_signs': True, 'draw_traffic_lights': True,
-                                        'intersection': {'draw_intersections': True},
-                                        'traffic_sign':{'draw_traffic_signs': True,
-                                                        'show_label':False,
-                                                        'show_traffic_signs':'all',
+    draw_params = {'lanelet_network': {'draw_intersections': True, 'draw_traffic_signs_in_lanelet': True,
+                                       'draw_traffic_signs': True, 'draw_traffic_lights': True,
+                                       'intersection': {'draw_intersections': True},
+                                       'traffic_sign': {'draw_traffic_signs': True,
+                                                        'show_label': False,
+                                                        'show_traffic_signs': 'all',
 
                                                         'scale_factor': 0.15}},
-                    'lanelet': {'show_label': False}}
+                   'lanelet': {'show_label': False}}
     if ax is None:
         draw_object(scenario, plot_limits=limits, draw_params=draw_params)
         plt.gca().set_aspect("equal")

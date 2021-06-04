@@ -2,7 +2,6 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
-from crdesigner.io.gui.toolboxes.gui_sumo_simulation import SUMOSimulation
 from crdesigner.io.gui.toolboxes.toolbox_ui import Toolbox
 
 from commonroad.scenario.obstacle import ObstacleType
@@ -18,6 +17,7 @@ try:
     from crdesigner.conversion.sumo_map.config import SumoConfig
     from crdesigner.conversion.sumo_map.cr2sumo.converter import CR2SumoMapConverter
     from sumocr.interface.sumo_simulation import SumoSimulation
+    from crdesigner.io.gui.toolboxes.gui_sumo_simulation import SUMOSimulation
     SUMO_AVAILABLE = True
 except ImportError:
     logging.warning("Cannot import SUMO, simulation will not be offered in Scenario Designer")
@@ -89,21 +89,22 @@ class ObstacleToolboxUI(Toolbox):
         title_obstacle = "Obstacle"
         self.sections.append((title_obstacle, widget_obstacles))
 
-        # --Section SUMO Simulation--
-        widget_sumo = SUMOSimulation(self.tree)
-        layout_sumo = QFormLayout(widget_sumo)
+        # --Section SUMO Simulation-
+        if SUMO_AVAILABLE:
+            widget_sumo = SUMOSimulation(self.tree)
+            layout_sumo = QFormLayout(widget_sumo)
 
-        self.button_start_simulation = QPushButton("Simulate")
-        self.sumo_simulation_length = QSpinBox()
-        self.sumo_simulation_length.setMinimum(10)
-        self.sumo_simulation_length.setMaximum(10000)
-        self.sumo_simulation_length.setValue(200)
+            self.button_start_simulation = QPushButton("Simulate")
+            self.sumo_simulation_length = QSpinBox()
+            self.sumo_simulation_length.setMinimum(10)
+            self.sumo_simulation_length.setMaximum(10000)
+            self.sumo_simulation_length.setValue(200)
 
-        layout_sumo.addRow("Number Time Steps:", self.sumo_simulation_length)
-        layout_sumo.addRow(self.button_start_simulation)
+            layout_sumo.addRow("Number Time Steps:", self.sumo_simulation_length)
+            layout_sumo.addRow(self.button_start_simulation)
 
-        title_sumo = "Sumo Simulation"
-        self.sections.append((title_sumo, widget_sumo))
+            title_sumo = "Sumo Simulation"
+            self.sections.append((title_sumo, widget_sumo))
 
 
 

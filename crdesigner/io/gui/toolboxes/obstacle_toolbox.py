@@ -9,7 +9,6 @@ from commonroad.geometry.shape import Rectangle
 from commonroad.scenario.scenario import Scenario
 
 from crdesigner.io.gui.toolboxes.gui_sumo_simulation import SUMO_AVAILABLE
-
 if SUMO_AVAILABLE:
     from crdesigner.io.gui.toolboxes.gui_sumo_simulation import SUMOSimulation
 
@@ -52,8 +51,9 @@ class ObstacleToolbox(QDockWidget):
         self.obstacle_toolbox.button_remove_obstacle.clicked.connect(
             lambda: self.remove_obstacle())
 
-        self.obstacle_toolbox.button_start_simulation.clicked.connect(
-            lambda: self.start_sumo_simulation())
+        if SUMO_AVAILABLE:
+            self.obstacle_toolbox.button_start_simulation.clicked.connect(
+                lambda: self.start_sumo_simulation())
 
     def collect_obstacle_ids(self) -> List[int]:
         """
