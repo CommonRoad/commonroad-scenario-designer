@@ -1,13 +1,13 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<commonRoad timeStepSize="0.1" commonRoadVersion="2020a" author="" affiliation="" source="OpenDRIVE 2 Lanelet Converter" benchmarkID="ZAM_OpenDrive-123" date="2021-03-16">
+<commonRoad timeStepSize="0.1" commonRoadVersion="2020a" author="" affiliation="" source="OpenDRIVE 2 Lanelet Converter" benchmarkID="ZAM_OpenDrive-123" date="2021-06-04">
   <location>
     <geoNameId>-999</geoNameId>
     <gpsLatitude>999</gpsLatitude>
     <gpsLongitude>999</gpsLongitude>
   </location>
   <scenarioTags>
-    <urban/>
     <highway/>
+    <urban/>
   </scenarioTags>
   <lanelet id="100">
     <leftBound>
@@ -43113,7 +43113,7 @@
     </position>
     <virtual>false</virtual>
   </trafficSign>
-  <intersection id="0">
+  <intersection id="132">
     <incoming id="0">
       <incomingLanelet ref="107"/>
       <successorsStraight ref="124"/>
@@ -43139,7 +43139,7 @@
       <isLeftOf ref="1"/>
     </incoming>
   </intersection>
-  <intersection id="1">
+  <intersection id="133">
     <incoming id="0">
       <incomingLanelet ref="111"/>
       <incomingLanelet ref="113"/>
@@ -43165,7 +43165,7 @@
       <successorsStraight ref="119"/>
     </incoming>
   </intersection>
-  <intersection id="2">
+  <intersection id="134">
     <incoming id="0">
       <incomingLanelet ref="102"/>
       <incomingLanelet ref="104"/>
@@ -43191,7 +43191,7 @@
       <successorsStraight ref="113"/>
     </incoming>
   </intersection>
-  <intersection id="3">
+  <intersection id="135">
     <incoming id="0">
       <incomingLanelet ref="100"/>
       <incomingLanelet ref="103"/>
