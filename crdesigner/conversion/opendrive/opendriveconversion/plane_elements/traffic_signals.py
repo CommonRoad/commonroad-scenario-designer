@@ -50,9 +50,9 @@ def get_traffic_signals(road: Road):
                 additional_values = []
             else:
                 if signal.unit == 'km/h':
-                    additional_values = [float(signal.value)/3.6]
+                    additional_values = [str(float(signal.value)/3.6)]
                 else:
-                    additional_values = [signal.value]
+                    additional_values = [str(signal.value)]
 
             signal_country = get_signal_country(signal.country)
 
