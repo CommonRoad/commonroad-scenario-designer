@@ -4,9 +4,15 @@
 """Module to contain Network which can load an opendrive object and then export
 to lanelets. Iternally, the road network is represented by ParametricLanes."""
 import copy
+from multiprocessing import Pool
+from typing import List, Dict
+
 import iso3166
 from commonroad.scenario.scenario import Scenario, GeoTransformation, Location, ScenarioID
 from commonroad.scenario.lanelet import LaneletNetwork, Lanelet
+from crdesigner.conversion.opendrive.opendriveconversion.plane_elements.border import Border
+from crdesigner.conversion.opendrive.opendriveconversion.plane_elements.plane import ParametricLane
+from crdesigner.conversion.opendrive.opendriveconversion.plane_elements.plane_group import ParametricLaneGroup
 
 from crdesigner.conversion.opendrive.opendriveparser.elements.opendrive import OpenDrive
 
@@ -59,6 +65,9 @@ class Network:
         self._traffic_signs = []
         self._stop_lines = []
         self._country_ID = None
+        self.error_tolerance = 0.2
+        self.min_delta_s = 0.4
+
     # def __eq__(self, other):
     # return self.__dict__ == other.__dict__
 
@@ -143,7 +152,7 @@ class Network:
                 self._link_index.clean_intersections(parametric_lane.id_)
                 continue
 
-            lanelet = parametric_lane.to_lanelet()
+            lanelet = parametric_lane.to_lanelet(self.error_tolerance, self.min_delta_s)
             lanelet.predecessor = self._link_index.get_predecessors(parametric_lane.id_)
             lanelet.successor = self._link_index.get_successors(parametric_lane.id_)
             lanelet_network.add_lanelet(lanelet)
@@ -235,6 +244,7 @@ class Network:
             for signal in road.signals:
                 return signal.country
         return "OpenDrive"
+
 
 class LinkIndex:
     """Overall index of all links in the file, save everything as successors, predecessors can be

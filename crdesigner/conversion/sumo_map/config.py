@@ -95,7 +95,10 @@ class SumoConfig(DefaultConfig):
     lane_change_tol = 0.00
 
     ##
-    ## TRAFFIC GENERATION
+    ### MAP-RELATED PARAMETERS
+    min_lc_distance = 5.0
+    ##
+    ## TRAFFIC GENERATION - RELATED PARAMETERS
     ##
     # probability that vehicles will start at the fringe of the network (edges without
     # predecessor), and end at the fringe of the network (edges without successor).

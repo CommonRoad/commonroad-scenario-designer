@@ -93,6 +93,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         self._crossings: Dict[int, Set[Lanelet]] = dict()
         # key is the ID of the edges and value the ID of the lanelets that compose it
         self.lanes_dict: Dict[int, List[int]] = {}
+        # key is lane_id, value is Lane
         self.lanes: Dict[str, Lane] = {}
         # edge_id -> length (float)
         self.edge_lengths = {}
@@ -588,30 +589,30 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
 
         # collect lanelet ids that ´prohibit´ other lanelets in terms of SUMO's definition
         # (i.e. that have higher priority to pass an intersection)
-        for intersection in self.lanelet_network.intersections:
-            inc_id2incoming_element = {inc.incoming_id: inc for inc in intersection.incomings}
-            for inc in intersection.incomings:
-                if inc.left_of is not None:
-                    if inc.left_of in inc_id2incoming_element:
-                        for left_of_id in inc_id2incoming_element[inc.left_of].incoming_lanelets:
-                            self.prohibits[self.lanelet_id2lane_id[left_of_id]].extend(
-                                [self.lanelet_id2lane_id[l]for l in inc.incoming_lanelets])
-                        else:
-                            warnings.warn(f"ID {inc.left_of} of left_of not among incomings"
-                                          f"{list(inc_id2incoming_element.keys())} of intersection"
-                                          f"{intersection.intersection_id}"
-                                          f"-> bug in lanelet_network of CommonRoad xml file!")
-
-                for succ_left in inc.successors_left:
-                    succ_left_lane_id = self.lanelet_id2lane_id[succ_left]
-                    for intersecting_edge in intersecting_edges[succ_left]:
-                        intersecting_lane_id = self.lanelet_id2lane_id[intersecting_edge]
-                        if succ_left_lane_id.split("_")[0] != intersecting_lane_id.split("_")[0]:
-                            continue
-                            # self.prohibits[intersecting_lane_id].append(succ_left_lane_id)
-                            # self.prohibits[succ_left_lane_id].append(intersecting_lane_id)
-                        else:
-                            print(f"NEQ!")
+        # for intersection in self.lanelet_network.intersections:
+        #     inc_id2incoming_element = {inc.incoming_id: inc for inc in intersection.incomings}
+        #     for inc in intersection.incomings:
+        #         if inc.left_of is not None:
+        #             if inc.left_of in inc_id2incoming_element:
+        #                 for left_of_id in inc_id2incoming_element[inc.left_of].incoming_lanelets:
+        #                     self.prohibits[self.lanelet_id2lane_id[left_of_id]].extend(
+        #                         [self.lanelet_id2lane_id[l]for l in inc.incoming_lanelets])
+        #                 else:
+        #                     warnings.warn(f"ID {inc.left_of} of left_of not among incomings"
+        #                                   f"{list(inc_id2incoming_element.keys())} of intersection"
+        #                                   f"{intersection.intersection_id}"
+        #                                   f"-> bug in lanelet_network of CommonRoad xml file!")
+        #
+        #         for succ_left in inc.successors_left:
+        #             succ_left_lane_id = self.lanelet_id2lane_id[succ_left]
+        #             for intersecting_edge in intersecting_edges[succ_left]:
+        #                 intersecting_lane_id = self.lanelet_id2lane_id[intersecting_edge]
+        #                 if succ_left_lane_id.split("_")[0] != intersecting_lane_id.split("_")[0]:
+        #                     continue
+        #                     # self.prohibits[intersecting_lane_id].append(succ_left_lane_id)
+        #                     # self.prohibits[succ_left_lane_id].append(intersecting_lane_id)
+        #                 else:
+        #                     print(f"NEQ!")
 
 
         # Expand merged clusters by all lanelets intersecting each other.
@@ -797,7 +798,10 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                     via_lane_id=via,
                     shape=shape,
                     keep_clear=True,
-                    cont_pos=self.conf.wait_pos_internal_junctions)
+                    cont_pos=self.conf.wait_pos_internal_junctions,
+                    change_left_allowed=set.intersection(*[self.lanes[l].change_left_allowed for l in path]),
+                    change_right_allowed=set.intersection(*[self.lanes[l].change_right_allowed for l in path]))
+
                 self._new_connections.add(connection)
 
     def _set_prohibited_connections(self):
