@@ -40,7 +40,7 @@ def get_traffic_signals(road: Road):
 
     for signal in road.signals:
 
-        position, tangent = road.planView.calc(signal.s)
+        position, tangent, _, _ = road.planView.calc(signal.s, compute_curvature=False)
         position = np.array([position[0] + signal.t * np.cos(tangent + np.pi / 2),
                              position[1] + signal.t * np.sin(tangent + np.pi / 2)])
         if signal.dynamic == 'no':

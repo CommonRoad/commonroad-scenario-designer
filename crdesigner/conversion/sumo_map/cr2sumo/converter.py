@@ -24,8 +24,8 @@ import sumolib
 from matplotlib import pyplot as plt
 
 try:
-    import pycrccosy
-    from commonroad_ccosy.geometry.util import resample_polyline, compute_curvature_from_polyline, \
+    import commonroad_dc.pycrccosy
+    from commonroad_dc.geometry.util import resample_polyline, compute_curvature_from_polyline, \
         chaikins_corner_cutting
 except ImportError:
     warnings.warn(
@@ -51,8 +51,7 @@ from crdesigner.conversion.sumo_map.sumolib_net import (TLS, Connection, Crossin
 from crdesigner.conversion.sumo_map.errors import ScenarioException
 from crdesigner.conversion.sumo_map.util import (_find_intersecting_edges,
                                                  get_total_lane_length_from_netfile, max_lanelet_network_id,
-                                                 merge_lanelets, min_cluster,
-                                                 write_ego_ids_to_rou_file, update_edge_lengths)
+                                                 merge_lanelets, min_cluster, update_edge_lengths)
 
 from crdesigner.conversion.sumo_map.config import SumoConfig
 from .mapping import (get_sumo_edge_type, traffic_light_states_SUMO2CR, VEHICLE_TYPE_CR2SUMO, VEHICLE_NODE_TYPE_CR2SUMO,
@@ -88,10 +87,13 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         # lane_id -> list(lane_id)
         self._connections: Dict[str, List[str]] = defaultdict(list)
         self._new_connections: Set[Connection] = set()
+        # collect which lanelet ids are prohibited by a lanelet
+        self.prohibits = defaultdict(list)
         # dict of merged_node_id and Crossing
         self._crossings: Dict[int, Set[Lanelet]] = dict()
         # key is the ID of the edges and value the ID of the lanelets that compose it
         self.lanes_dict: Dict[int, List[int]] = {}
+        # key is lane_id, value is Lane
         self.lanes: Dict[str, Lane] = {}
         # edge_id -> length (float)
         self.edge_lengths = {}
@@ -145,6 +147,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         self._merge_junctions_intersecting_lanelets()
         self._filter_edges()
         self._create_lane_based_connections()
+        # self._set_prohibited_connections()
         self._create_crossings()
         self._encode_traffic_signs()
         self._create_traffic_lights()
@@ -427,7 +430,12 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                             speed=speed_limit,
                             length=self.edge_lengths[edge_id],
                             width=lanelet_width,
-                            shape=shape)
+                            shape=shape,
+                            change_left_allowed=[] if lanelet.adj_left is None
+                                                      or lanelet.distance[-1] < self.conf.min_lc_distance else None,
+                            change_right_allowed=[] if lanelet.adj_right is None
+                                                       or lanelet.distance[-1] < self.conf.min_lc_distance else None)
+
                 self.lanes[lane.id] = lane
                 self.lane_id2lanelet_id[lane.id] = lanelet_id
                 self.lanelet_id2lane_id[lanelet_id] = lane.id
@@ -536,7 +544,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         """
         # new dictionary for the merged nodes
         self.new_nodes: Dict[int, Node] = self.nodes.copy()
-        # new dictionary for the edges after the simplifications
+        # new dictionary for the edges after deleting internal edges of junctions
         self.new_edges: Dict[int, Edge] = {}
         # key is the merged node, value is a list of the nodes that form the merged node
         self.merged_dictionary: Dict[int, Set[Node]] = {}
@@ -578,13 +586,42 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
             except StopIteration:
                 break
 
-        # Expand merged clusters by all lanelets intersecting each other.
-        # merging based on Lanelets intersecting
+        # compute dict with all intersecting lanelets of each lanelet
         intersecting_edges: Dict[int, Set[int]] = defaultdict(set)
         for pair in _find_intersecting_edges(self.lanes_dict, self.lanelet_network):
             intersecting_edges[pair[0]].add(pair[1])
             intersecting_edges[pair[1]].add(pair[0])
 
+        # collect lanelet ids that ´prohibit´ other lanelets in terms of SUMO's definition
+        # (i.e. that have higher priority to pass an intersection)
+        # for intersection in self.lanelet_network.intersections:
+        #     inc_id2incoming_element = {inc.incoming_id: inc for inc in intersection.incomings}
+        #     for inc in intersection.incomings:
+        #         if inc.left_of is not None:
+        #             if inc.left_of in inc_id2incoming_element:
+        #                 for left_of_id in inc_id2incoming_element[inc.left_of].incoming_lanelets:
+        #                     self.prohibits[self.lanelet_id2lane_id[left_of_id]].extend(
+        #                         [self.lanelet_id2lane_id[l]for l in inc.incoming_lanelets])
+        #                 else:
+        #                     warnings.warn(f"ID {inc.left_of} of left_of not among incomings"
+        #                                   f"{list(inc_id2incoming_element.keys())} of intersection"
+        #                                   f"{intersection.intersection_id}"
+        #                                   f"-> bug in lanelet_network of CommonRoad xml file!")
+        #
+        #         for succ_left in inc.successors_left:
+        #             succ_left_lane_id = self.lanelet_id2lane_id[succ_left]
+        #             for intersecting_edge in intersecting_edges[succ_left]:
+        #                 intersecting_lane_id = self.lanelet_id2lane_id[intersecting_edge]
+        #                 if succ_left_lane_id.split("_")[0] != intersecting_lane_id.split("_")[0]:
+        #                     continue
+        #                     # self.prohibits[intersecting_lane_id].append(succ_left_lane_id)
+        #                     # self.prohibits[succ_left_lane_id].append(intersecting_lane_id)
+        #                 else:
+        #                     print(f"NEQ!")
+
+
+        # Expand merged clusters by all lanelets intersecting each other.
+        # merging based on Lanelets intersecting
         explored_nodes = set()
         for current_node in self.nodes.values():
             clusters_flat = {n for cluster in clusters.values() for n in cluster}
@@ -735,7 +772,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
             queue = [[via]
                      for via in connections]  # list with edge ids to toLane
             paths = []
-            # explore paths
+            # explore paths until successor not inside junction anymore
             while queue:
                 current_path = queue.pop()
                 succ_lane = current_path[-1]
@@ -757,6 +794,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                 else:
                     shape = None
                     via = None
+
                 connection = Connection(
                     from_edge=self.new_edges[int(from_lane.split("_")[0])],
                     to_edge=self.new_edges[int(path[-1].split("_")[0])],
@@ -765,8 +803,22 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                     via_lane_id=via,
                     shape=shape,
                     keep_clear=True,
-                    cont_pos=self.conf.wait_pos_internal_junctions)
+                    cont_pos=self.conf.wait_pos_internal_junctions,
+                    change_left_allowed=set.intersection(*[self.lanes[l].change_left_allowed for l in path]),
+                    change_right_allowed=set.intersection(*[self.lanes[l].change_right_allowed for l in path]))
+
                 self._new_connections.add(connection)
+
+    def _set_prohibited_connections(self):
+        """Add connections that are prohibited by a connection."""
+        edges2connection = {c.from_lane.id: c for c in self._new_connections}
+        edges2connection.update({via: c for c in self._new_connections for via in c.via})
+        for connection in self._new_connections:
+            prohibited_lanes = [edges2connection[p] for p in self.prohibits[connection.from_lane.id]]
+            prohibited_lanes.extend([edges2connection[p] for via_lane in connection.via
+                                     for p in self.prohibits[via_lane] if p in edges2connection])
+            connection.prohibits = prohibited_lanes
+        return True
 
     def _create_crossings(self):
         new_crossings = dict()
@@ -921,34 +973,6 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         return any(
             start_node_id in merged_nodes and end_node_id in merged_nodes
             for merged_nodes in self.merged_dictionary.values())
-
-    def _check_addition(self, to_edges):
-        """
-        Check if the connection is really to add
-        :param to_edges: destination edges to check
-        :return: True if the connection must be added, False otherwise
-        """
-        mustAdd = True
-        for connection in to_edges:
-            if connection not in self.new_edges.keys():
-                mustAdd = False
-        return mustAdd
-
-    def _redefine_connection(self, from_edge, to_edges):
-        """
-        Substitute the ID of edges that were transformed into lanes with their corresponding edge ID
-        :param from_edge: source Edge ID
-        :param to_edges: destinations edges IDs
-        :return: fromEdgeNew, toEdgesNew
-        """
-        toEdgesNew = []
-        for master_edge, lanes in self.lanes_dict.items():
-            if from_edge in lanes:
-                fromEdgeNew = master_edge
-            for edge in to_edges:
-                if edge in lanes:
-                    toEdgesNew.append(master_edge)
-        return fromEdgeNew, toEdgesNew
 
     def _calculate_centroid(self, nodes: Iterable[Node]) -> np.ndarray:
         """
@@ -1138,12 +1162,13 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
             connections = etree.Element('connections')
             for connection in self._new_connections:
                 connections.append(etree.fromstring(connection.to_xml()))
+                [connections.append(etree.fromstring(p)) for p in connection.get_prohibition_xmls()]
             for crossings in self._crossings.values():
                 for crossing in crossings:
                     connections.append(etree.fromstring(crossing.to_xml()))
 
             # pretty print & write the generated xml
-            output_file.write(str(etree.tostring(connections, pretty_print=True, encoding="utf-8"), encoding="utf-8"))
+            output_file.write(str(etree.tostring(connections, pretty_print=True, encoding="utf-8"), encoding="utf-8").replace("&gt;",">"))
 
         self._connections_file = file_path
         return file_path
@@ -1375,10 +1400,10 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         :param output_folder of the returned net.xml file
         :return returns whether conversion was successful
         """
-        print(output_folder)
-        print(self.conf.scenario_name)
         output_path = os.path.join(output_folder, self.conf.scenario_name + '.net.xml')
         logging.info("Converting to SUMO Map")
+        logging.info(output_folder)
+        logging.info(self.conf.scenario_name)
         self._convert_map()
 
         logging.info("Merging Intermediate Files")
@@ -1393,7 +1418,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
 
     def convert_scenario_to_net_file(self, scenario: Scenario, output_folder: str) -> bool:
         """
-        Convert the Commonroad scenario to SUMO format.
+        Convert a Commonroad scenario with given trajectories of dynamic obstacles to SUMO format.
         The routes will be initialized according to the trajectories defined in the CR scenario
         :param scenario: the scenario to be converted
         :param output_folder: path to the output folder
@@ -1540,6 +1565,19 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         :param output_folder: the generated add file will be saved here
         :return: additional file
         """
+        def add_driving_params(vType_node, driving_params):
+            for att_name, value_interval in driving_params.items():
+                if isinstance(value_interval, Interval):
+                    att_value = np.random.uniform(value_interval.start,
+                                                  value_interval.end, 1)[0]
+                elif isinstance(value_interval, (int, float)):
+                    att_value = value_interval
+                else:
+                    raise ValueError(f"Unknown vehicle parameter value/interval '{value_interval}'.")
+
+                vType_node.setAttribute(att_name,
+                                        str("{0:.2f}".format(att_value)))
+
         add_file = os.path.join(output_folder, scenario_name + '.add.xml')
 
         # create file
@@ -1571,15 +1609,9 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                     else:
                         att_value = str(att_value)
                     vType_node.setAttribute(att_name, att_value)
-                for att_name, value_interval in driving_params.items():
-                    att_value = np.random.uniform(value_interval.start,
-                                                  value_interval.end, 1)[0]
-                    vType_node.setAttribute(att_name,
-                                            str("{0:.2f}".format(att_value)))
+
+                add_driving_params(vType_node, driving_params)
                 vType_dist_node.appendChild(vType_node)
-            #     print("The probability of the vehicle type %s is %s." % (veh_type, probability))
-            # else:
-            #     print("The probability of the vehicle type %s is 0." % veh_type)
 
         with open(add_file, "w") as f:
             domTree.documentElement.writexml(f, addindent="\t", newl="\n")
@@ -1656,7 +1688,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                 return list(lanelet_id_list[sorted_indices])
 
         def create_coordinate_system_from_polyline(
-            polyline) -> pycrccosy.CurvilinearCoordinateSystem:
+            polyline) -> commonroad_dc.pycrccosy.CurvilinearCoordinateSystem:
 
             def compute_polyline_length(polyline: np.ndarray) -> float:
                 """
@@ -1717,7 +1749,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                 if infinite_loop_counter > 20:
                     break
 
-            return pycrccosy.CurvilinearCoordinateSystem(polyline)
+            return commonroad_dc.pycrccosy.CurvilinearCoordinateSystem(polyline)
 
         def get_long_dist(ccosy, position):
             try:
@@ -1989,13 +2021,14 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         # filenames
         route_files: Dict[str, str] = {
             'vehicle': os.path.join(out_folder, scenario_name + ".vehicles.rou.xml"),
-            "pedestrian": os.path.join(out_folder, scenario_name + ".pedestrians.rou.xml")
         }
         trip_files: Dict[str, str] = {
             'vehicle': os.path.join(out_folder, scenario_name + '.vehicles.trips.xml'),
-            'pedestrian': os.path.join(out_folder, scenario_name + '.pedestrian.trips.xml')
         }
-        add_file = os.path.join(out_folder, scenario_name + '.add.xml')
+
+        if self.conf.veh_distribution[ObstacleType.PEDESTRIAN] > 0:
+            route_files["pedestrian"] = os.path.join(out_folder, scenario_name + ".pedestrians.rou.xml")
+            trip_files["pedestrian"] = os.path.join(out_folder, scenario_name + '.pedestrian.trips.xml')
 
         def run(cmd) -> bool:
             try:
@@ -2021,74 +2054,22 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
             '--trip-attributes=departLane=\"best\" departSpeed=\"max\" departPos=\"base\"'
         ])
         # create pedestrian routes
-        run([
-            'python',
-            os.path.join(os.environ['SUMO_HOME'], 'tools',
-                         'randomTrips.py'), '-n', net_file, '-o',
-            trip_files['pedestrian'], '-r', route_files["pedestrian"], '-b',
-            str(self.conf.departure_interval_vehicles.start), '-e',
-            str(self.conf.departure_interval_vehicles.end), "-p",
-            str(1 - self.conf.veh_distribution[ObstacleType.PEDESTRIAN]),
-            '--allow-fringe', '--fringe-factor',
-            str(self.conf.fringe_factor), "--persontrips", "--seed",
-            str(self.conf.random_seed),
-            '--trip-attributes= modes=\"public car\" departPos=\"base\"'
-        ])
-
-        if self.conf.n_ego_vehicles != 0:
-            # get ego ids and add EGO_ID_START prefix
-            ego_ids = self._find_ego_ids_by_departure_time(
-                route_files["vehicle"])
-            write_ego_ids_to_rou_file(route_files["vehicle"], ego_ids)
+        if "pedestrian" in route_files:
+            run([
+                'python',
+                os.path.join(os.environ['SUMO_HOME'], 'tools',
+                             'randomTrips.py'), '-n', net_file, '-o',
+                trip_files['pedestrian'], '-r', route_files["pedestrian"], '-b',
+                str(self.conf.departure_interval_vehicles.start), '-e',
+                str(self.conf.departure_interval_vehicles.end), "-p",
+                str(1 - self.conf.veh_distribution[ObstacleType.PEDESTRIAN]),
+                '--allow-fringe', '--fringe-factor',
+                str(self.conf.fringe_factor), "--persontrips", "--seed",
+                str(self.conf.random_seed),
+                '--trip-attributes= modes=\"public car\" departPos=\"base\"'
+            ])
 
         return route_files
-
-    def _find_ego_ids_by_departure_time(self, rou_file: str) -> list:
-        """
-        Returns ids of vehicles from route file which match desired departure time as close as possible.
-
-        :param rou_file: path of route file
-        :param n_ego_vehicles:  number of ego vehicles
-        :param departure_time_ego: desired departure time ego vehicle
-        :param ego_ids: if desired ids of ego_vehicle known, specify here
-
-        """
-        vehicles = sumolib.output.parse_fast(rou_file, 'vehicle', ['id', 'depart'])
-        dep_times = []
-        veh_ids = []
-        for veh in vehicles:
-            veh_ids.append(veh[0])
-            dep_times.append(int(float(veh[1])))
-
-        if n_ego_vehicles > len(veh_ids):
-            warnings.warn('only {} vehicles in route file instead of {}'.format(len(veh_ids), n_ego_vehicles),
-                          stacklevel=1)
-            n_ego_vehicles = len(veh_ids)
-
-        # check if specified ids exist
-        for i in self.conf.ego_ids:
-            if i not in veh_ids:
-                warnings.warn('<generate_rou_file> id {} not in route file!'.format_map(i))
-                del i
-
-        # assign vehicles as ego by finding closest departure time
-        dep_times = np.array(dep_times)
-        veh_ids = np.array(veh_ids)
-        greater_start_time = np.where(
-            dep_times >= self.conf.departure_time_ego)[0]
-        for index in greater_start_time:
-            if len(self.conf.ego_ids) == n_ego_vehicles:
-                break
-            else:
-                self.conf.ego_ids.append(veh_ids[index])
-
-        if len(self.conf.ego_ids) < n_ego_vehicles:
-            n_ids_missing = n_ego_vehicles - len(self.conf.ego_ids)
-            self.conf.ego_ids.extend(
-                (veh_ids[greater_start_time[0] -
-                         n_ids_missing:greater_start_time[0]]).tolist())
-
-        return self.conf.ego_ids
 
     def _generate_cfg_file(self, scenario_name: str, net_file: str,
                            route_files: Dict[str, str], add_file: str,
@@ -2098,8 +2079,8 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
 
         :param scenario_name: name of the scenario used for the cfg file generation.
         :param net_file: path of the generated sumo .net.xml file
-        :param rou_file: path of the generated sumo .rou.xml file
-        :param rou_file: path of the generated sumo .add.xml file
+        :param route_files: path of the generated sumo .rou.xml file
+        :param add_file: path of the generated sumo .add.xml file
         :param output_folder: the generated cfg file will be saved here
 
         :return: the path of the generated cfg file.

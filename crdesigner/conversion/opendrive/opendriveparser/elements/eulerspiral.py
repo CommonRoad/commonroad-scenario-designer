@@ -19,6 +19,15 @@ class EulerSpiral:
     def __init__(self, gamma):
         self._gamma = gamma
 
+    def curvature(self, s, kappa0=0):
+        """
+        Returns curvature at position s
+        :param s:
+        :param kappa0:
+        :return:
+        """
+        return self._gamma * s + kappa0
+
     @staticmethod
     def createFromLengthAndCurvature(length, curvStart, curvEnd):
         """Create an EulerSpiral from a given length with curveStart
@@ -73,7 +82,7 @@ class EulerSpiral:
         # Tangent at each point
         theta = self._gamma * s ** 2 / 2 + kappa0 * s + theta0
 
-        return (Cs.real, Cs.imag, theta)
+        return Cs.real, Cs.imag, theta, self.curvature(kappa0)
 
     def _calc_fresnel_integral(self, s, kappa0, theta0, C0):
         Sa, Ca = special.fresnel(
