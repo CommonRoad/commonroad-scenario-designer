@@ -1,16 +1,10 @@
 # -*- coding: utf-8 -*-
 """Test case file for SUMO to CR conversion and simulation"""
-import contextlib
-import io
+
 import os
-import shutil
 import unittest
 import warnings
 from typing import List
-
-from commonroad.scenario.obstacle import ObstacleType
-from commonroad.visualization.mp_renderer import MPRenderer
-from parameterized import parameterized
 
 import numpy as np
 import pytest
@@ -122,7 +116,7 @@ class BaseClass(unittest.TestCase):
             source=self.scenario.source,
             tags=self.scenario.tags,
             location=self.scenario.location).write_scenario_to_file(
-            os.path.join(self.out_path_test,
+            os.path.join(os.path.dirname(self.path),
                          self.scenario_name + ".simulated.xml"),
             overwrite_existing_file=True)
 
