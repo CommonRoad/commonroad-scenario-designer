@@ -289,7 +289,11 @@ class PlanView:
             _precalculation.append([s, coord[0], coord[1], tang])
             if s >= self.length:
                 break
-            s = calc_next_s(s, curv, self._error_tolerance_s, self._min_delta_s, remaining_length)
+
+            if s == remaining_length:
+                s += self._min_delta_s
+            else:
+                s = calc_next_s(s, curv, self._error_tolerance_s, self._min_delta_s, remaining_length)
             s = min(self.length, s)
             i += 1
 

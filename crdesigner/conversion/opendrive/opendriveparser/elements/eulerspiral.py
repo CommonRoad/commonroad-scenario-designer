@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from typing import Tuple
 
 import numpy as np
 from scipy import special
@@ -19,14 +20,15 @@ class EulerSpiral:
     def __init__(self, gamma):
         self._gamma = gamma
 
-    def curvature(self, s, kappa0=0):
+    def curvature(self, s, kappa0=0) -> Tuple[float, float]:
         """
         Returns curvature at position s
         :param s:
         :param kappa0:
         :return:
         """
-        return self._gamma * s + kappa0
+        return self._gamma * s + kappa0, \
+               self._gamma
 
     @staticmethod
     def createFromLengthAndCurvature(length, curvStart, curvEnd):

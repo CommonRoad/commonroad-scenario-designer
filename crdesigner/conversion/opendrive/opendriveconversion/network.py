@@ -65,8 +65,8 @@ class Network:
         self._traffic_signs = []
         self._stop_lines = []
         self._country_ID = None
-        self.error_tolerance = 0.2
-        self.min_delta_s = 0.4
+        self.error_tolerance = 0.15
+        self.min_delta_s = 0.5
 
     # def __eq__(self, other):
     # return self.__dict__ == other.__dict__
