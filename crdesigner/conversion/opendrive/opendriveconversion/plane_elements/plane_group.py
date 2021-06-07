@@ -225,7 +225,7 @@ class ParametricLaneGroup:
 
         return lanelet
 
-    def calc_border(self, border: str, s_pos: float, width_offset: float = 0.0):
+    def calc_border(self, border: str, s_pos: float, width_offset: float = 0.0, compute_curvature=True):
         """Calc vertices point of inner or outer Border.
 
         Args:
@@ -256,7 +256,7 @@ class ParametricLaneGroup:
                 )
 
         return self.parametric_lanes[plane_idx].calc_border(
-            border, s_pos - self._geo_lengths[plane_idx], width_offset
+            border, s_pos - self._geo_lengths[plane_idx], width_offset, compute_curvature=compute_curvature
         )
 
     def to_lanelet_with_mirroring(

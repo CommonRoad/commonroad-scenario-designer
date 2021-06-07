@@ -51,7 +51,8 @@ class ParametricLaneBorderGroup:
         self.outer_border_offset = outer_border_offset
 
     def calc_border_position(
-        self, border: str, s_pos: float, width_offset: float, is_last_pos: bool = False, reverse=False
+        self, border: str, s_pos: float, width_offset: float, is_last_pos: bool = False, reverse=False,
+            compute_curvature=True
     ) -> Tuple[Tuple[float, float], float]:
         """Calc vertices point of inner or outer Border.
 
@@ -77,7 +78,8 @@ class ParametricLaneBorderGroup:
         )
 
         return select_border.calc(
-            select_offset + s_pos, width_offset=width_offset, is_last_pos=is_last_pos, reverse=reverse
+            select_offset + s_pos, width_offset=width_offset, is_last_pos=is_last_pos, reverse=reverse,
+            compute_curvature=compute_curvature
         )
 
     def get_width_coefficients(self) -> list:
@@ -123,7 +125,7 @@ class ParametricLane:
         self.side = side
 
     def calc_border(
-        self, border: str, s_pos: float, width_offset: float = 0.0
+        self, border: str, s_pos: float, width_offset: float = 0.0, compute_curvature=True
     ) -> Tuple[Tuple[float, float], float, float, float]:
         """Calc vertices point of inner or outer Border.
 
@@ -147,7 +149,7 @@ class ParametricLane:
 
         is_last_pos = np.isclose(self.length, border_pos)
         r1, r2, r3, l =  self.border_group.calc_border_position(
-            border, border_pos, width_offset, is_last_pos, self.reverse
+            border, border_pos, width_offset, is_last_pos, self.reverse, compute_curvature=compute_curvature
         )
         return r1, r2, r3, l
 
@@ -300,22 +302,26 @@ class ParametricLane:
         while s <= self.length:
             s_cache = s + 0.0
             inner_pos, _, curvature, max_geometry_length = self.calc_border("inner", s)
-            outer_pos, _, curvature, max_geometry_length = self.calc_border("outer", s)
+            outer_pos = self.calc_border("outer", s, compute_curvature=False)[0]
             left_vertices.append(inner_pos)
             right_vertices.append(outer_pos)
+
             if s >= self.length:
                 break
 
-            s = calc_next_s(s, curvature, error_tolerance=error_tolerance, min_delta_s=min_delta_s,
-                            s_max=max_geometry_length)
+            if s == max_geometry_length:
+                s += min_delta_s
+            else:
+                s = calc_next_s(s, curvature, error_tolerance=error_tolerance, min_delta_s=min_delta_s,
+                                s_max=max_geometry_length)
 
+            # ensure total road length is not exceeded
             s = min(self.length, s)
-            # avoid lanelets with < 3 vertices
+            # ensure lanelet has >= 3 vertices
             if check_3 and s >= self.length:
                 s = (s_cache + self.length) * 0.5
 
             check_3 = False
-
         # assert len(left_vertices) >= 3, f"Not enough vertices, len: {len(left_vertices)}"
         return np.array(left_vertices),\
                np.array(right_vertices)
