@@ -3,12 +3,13 @@
 """Module describe parametric lane groups, which are groups combining consecutive
 associated parametric lanes."""
 
-from typing import Tuple, Optional
+from typing import Tuple, Optional, List
 import math
 import numpy as np
 import copy
 
 from crdesigner.conversion.opendrive.opendriveconversion.conversion_lanelet import ConversionLanelet
+from crdesigner.conversion.opendrive.opendriveconversion.plane_elements.plane import ParametricLane
 from commonroad.scenario.lanelet import LineMarking
 
 __author__ = "Benjamin Orthen, Stefan Urban, Sebastian Maierhofer"
@@ -35,7 +36,7 @@ class ParametricLaneGroup:
     ):
 
         self._geo_lengths = [np.array([0.0])]
-        self.parametric_lanes = []
+        self.parametric_lanes: List[ParametricLane] = []
         self.id_ = id_
         self.inner_neighbour = inner_neighbour
         self.inner_neighbour_same_direction = inner_neighbour_same_direction
@@ -128,15 +129,14 @@ class ParametricLaneGroup:
             [plane.has_zero_width_everywhere() for plane in self.parametric_lanes]
         )
 
-    def to_lanelet(self, precision: float = 0.5) -> ConversionLanelet:
+    def to_lanelet(self, error_tolerance, min_delta_s) -> ConversionLanelet:
         """Convert a ParametricLaneGroup to a Lanelet.
 
         Args:
           precision: Number which indicates at which space interval (in curve parameter ds)
             the coordinates of the boundaries should be calculated.
-          mirror_border: Which lane to mirror, if performing merging or splitting of lanes.
-          distance: Distance at start and end of lanelet, which mirroring lane should
-            have from the other lane it mirrors.
+          error_tolerance: max. error between reference geometry and polyline of vertices
+          min_delta_s: min step length between two sampling positions on the reference geometry
 
         Returns:
           Created Lanelet.
@@ -149,7 +149,7 @@ class ParametricLaneGroup:
         for parametric_lane in self.parametric_lanes:
 
             local_left_vertices, local_right_vertices = parametric_lane.calc_vertices(
-                precision=precision
+                error_tolerance=error_tolerance, min_delta_s=min_delta_s
             )
 
             if local_left_vertices is None:
@@ -225,7 +225,7 @@ class ParametricLaneGroup:
 
         return lanelet
 
-    def calc_border(self, border: str, s_pos: float, width_offset: float = 0.0):
+    def calc_border(self, border: str, s_pos: float, width_offset: float = 0.0, compute_curvature=True):
         """Calc vertices point of inner or outer Border.
 
         Args:
@@ -256,7 +256,7 @@ class ParametricLaneGroup:
                 )
 
         return self.parametric_lanes[plane_idx].calc_border(
-            border, s_pos - self._geo_lengths[plane_idx], width_offset
+            border, s_pos - self._geo_lengths[plane_idx], width_offset, compute_curvature=compute_curvature
         )
 
     def to_lanelet_with_mirroring(

@@ -6,6 +6,8 @@ and lanelets."""
 from typing import Tuple
 
 import numpy as np
+from crdesigner.conversion.opendrive.opendriveconversion.plane_elements.border import Border
+from crdesigner.conversion.opendrive.opendriveparser.elements.geometry import calc_next_s
 from numpy.polynomial import polynomial as P
 
 __author__ = "Benjamin Orthen"
@@ -43,13 +45,14 @@ class ParametricLaneBorderGroup:
         outer_border=None,
         outer_border_offset=None,
     ):
-        self.inner_border = inner_border
+        self.inner_border: Border = inner_border
         self.inner_border_offset = inner_border_offset
-        self.outer_border = outer_border
+        self.outer_border: Border = outer_border
         self.outer_border_offset = outer_border_offset
 
     def calc_border_position(
-        self, border: str, s_pos: float, width_offset: float, is_last_pos: bool = False
+        self, border: str, s_pos: float, width_offset: float, is_last_pos: bool = False, reverse=False,
+            compute_curvature=True
     ) -> Tuple[Tuple[float, float], float]:
         """Calc vertices point of inner or outer Border.
 
@@ -75,7 +78,8 @@ class ParametricLaneBorderGroup:
         )
 
         return select_border.calc(
-            select_offset + s_pos, width_offset=width_offset, is_last_pos=is_last_pos
+            select_offset + s_pos, width_offset=width_offset, is_last_pos=is_last_pos, reverse=reverse,
+            compute_curvature=compute_curvature
         )
 
     def get_width_coefficients(self) -> list:
@@ -121,8 +125,8 @@ class ParametricLane:
         self.side = side
 
     def calc_border(
-        self, border: str, s_pos: float, width_offset: float = 0.0
-    ) -> Tuple[Tuple[float, float], float]:
+        self, border: str, s_pos: float, width_offset: float = 0.0, compute_curvature=True
+    ) -> Tuple[Tuple[float, float], float, float, float]:
         """Calc vertices point of inner or outer Border.
 
         Args:
@@ -144,10 +148,11 @@ class ParametricLane:
             border_pos = s_pos
 
         is_last_pos = np.isclose(self.length, border_pos)
-
-        return self.border_group.calc_border_position(
-            border, border_pos, width_offset, is_last_pos
+        r1, r2, r3, l =  self.border_group.calc_border_position(
+            border, border_pos, width_offset, is_last_pos, self.reverse, compute_curvature=compute_curvature
         )
+        return r1, r2, r3, l
+
 
     def calc_width(self, s_pos: float) -> float:
         """Calc width of border at position s_pos.
@@ -276,35 +281,50 @@ class ParametricLane:
     #         last_width_difference,
     #     )
 
-    def calc_vertices(self, precision: float = 0.5) -> Tuple[np.ndarray, np.ndarray]:
+    def calc_vertices(self, error_tolerance, min_delta_s) -> Tuple[np.ndarray, np.ndarray]:
         """Convert a ParametricLane to Lanelet.
 
         Args:
           plane_group: PlaneGroup which should be referenced by created Lanelet.
-          precision: Number which indicates at which space interval (in curve parameter ds)
-            the coordinates of the boundaries should be calculated.
+          error_tolerance: max. error between reference geometry and polyline of vertices
+          min_delta_s: min step length between two sampling positions on the reference geometry
 
         Returns:
            Created Lanelet, with left, center and right vertices and a lanelet_id.
 
         """
 
-        num_steps = int(max(3, np.ceil(self.length / float(precision))))
-
-        poses = np.linspace(0, self.length, num_steps)
-
         left_vertices = []
         right_vertices = []
-
-        # width difference between original_width and width with merge algo applied
-
         # calculate left and right vertices of lanelet
-        for pos in poses:
-            inner_pos = self.calc_border("inner", pos)[0]
-            outer_pos = self.calc_border("outer", pos)[0]
+        s = 0
+        check_3 = True
+        while s <= self.length:
+            s_cache = s + 0.0
+            inner_pos, _, curvature, max_geometry_length = self.calc_border("inner", s)
+            outer_pos = self.calc_border("outer", s, compute_curvature=False)[0]
             left_vertices.append(inner_pos)
             right_vertices.append(outer_pos)
-        return (np.array(left_vertices), np.array(right_vertices))
+
+            if s >= self.length:
+                break
+
+            if s == max_geometry_length:
+                s += min_delta_s
+            else:
+                s = calc_next_s(s, curvature, error_tolerance=error_tolerance, min_delta_s=min_delta_s,
+                                s_max=max_geometry_length)
+
+            # ensure total road length is not exceeded
+            s = min(self.length, s)
+            # ensure lanelet has >= 3 vertices
+            if check_3 and s >= self.length:
+                s = (s_cache + self.length) * 0.5
+
+            check_3 = False
+        # assert len(left_vertices) >= 3, f"Not enough vertices, len: {len(left_vertices)}"
+        return np.array(left_vertices),\
+               np.array(right_vertices)
 
     def zero_width_change_positions(self) -> float:
         """Position where the inner and outer Border have zero minimal distance change.

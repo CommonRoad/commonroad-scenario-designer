@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-
+import math
+import warnings
 from functools import lru_cache
 import numpy as np
 
@@ -40,8 +41,7 @@ class Border:
         Returns:
           Index for self.width_coefficient_offsets or self.width_coefficients.
         """
-        return next(
-            (
+        return next((
                 self.width_coefficient_offsets.index(n)
                 for n in self.width_coefficient_offsets[::-1]
                 if (
@@ -49,7 +49,7 @@ class Border:
                     or (n < s_pos and is_last_pos)
                 )
             ),
-            len(self.width_coefficient_offsets),
+            len(self.width_coefficient_offsets)-1,
         )
 
     def get_next_width_coeffs(self, s_pos: float, is_last_pos: bool = False) -> list:
@@ -68,7 +68,7 @@ class Border:
     # NOTE: might by more efficient to calculate each border once
     # instead of recalculating them over and over.
     @lru_cache(maxsize=200000)
-    def calc(self, s_pos: float, width_offset: float = 0.0, is_last_pos: bool = False):
+    def calc(self, s_pos: float, width_offset: float = 0.0, is_last_pos: bool = False, reverse=False, compute_curvature=True):
         """Calculate the Cartesian coordinates and the tangential direction of
         the border by calculating position of reference border at s_pos
         and then adding the width in orthogonal direction to the reference position.
@@ -88,11 +88,12 @@ class Border:
             s_pos = 0
 
         try:
-            ref_coord, tang_angle = self.reference.calc(
-                self.ref_offset + s_pos, is_last_pos=is_last_pos
+            ref_coord, tang_angle, curv, max_geometry_length = self.reference.calc(
+                self.ref_offset + s_pos, is_last_pos=is_last_pos, reverse=reverse, compute_curvature=compute_curvature
             )
-        except TypeError:
-            ref_coord, tang_angle = self.reference.calc(self.ref_offset + s_pos)
+        except TypeError as e:
+            ref_coord, tang_angle, curv, max_geometry_length = self.reference.calc(self.ref_offset + s_pos, reverse=reverse,
+                                                                                   compute_curvature=compute_curvature)
 
         if not self.width_coefficients or not self.width_coefficient_offsets:
             raise Exception("No entries for width definitions.")
@@ -100,7 +101,7 @@ class Border:
         # Find correct coefficients
         # find which width segment is at s_pos
         width_idx = self._get_width_index(s_pos, is_last_pos)
-
+        # width_idx = min(width_idx, len(self.width_coefficient_offsets)-1)
         # Calculate width at s_pos
         distance = (
             np.polynomial.polynomial.polyval(
@@ -113,7 +114,7 @@ class Border:
         # New point is in orthogonal direction
         ortho = tang_angle + np.pi / 2
         coord = ref_coord + np.array(
-            [distance * np.cos(ortho), distance * np.sin(ortho)]
+            [distance * math.cos(ortho), distance * math.sin(ortho)]
         )
 
-        return coord, tang_angle
+        return coord, tang_angle, curv, max_geometry_length

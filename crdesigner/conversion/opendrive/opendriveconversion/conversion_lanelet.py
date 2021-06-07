@@ -405,7 +405,7 @@ class ConversionLanelet(Lanelet):
         self.center_vertices = lanelet.center_vertices
         self.right_vertices = lanelet.right_vertices
 
-    def calc_border(self, border: str, s_pos: float, width_offset: float = 0.0):
+    def calc_border(self, border: str, s_pos: float, width_offset: float = 0.0, compute_curvature=True):
         """Calc border position according to parametric_lane_group.
 
         Note: This does not consider borders which have been moved
@@ -422,4 +422,4 @@ class ConversionLanelet(Lanelet):
           Cartesian coordinates of point on inner border
             and tangential direction, too.
         """
-        return self.parametric_lane_group.calc_border(border, s_pos, width_offset)
+        return self.parametric_lane_group.calc_border(border, s_pos, width_offset, compute_curvature=compute_curvature)
