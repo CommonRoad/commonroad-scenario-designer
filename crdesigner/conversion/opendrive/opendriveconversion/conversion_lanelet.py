@@ -112,11 +112,17 @@ class ConversionLanelet(Lanelet):
         elif value == 'driving':
             self._lanelet_type = {LaneletType.DRIVE_WAY}
         elif value == 'mainCarriageWay':
-            self._lanelet_type = {LaneletType.MAIN_CARRIAGE_WAY}
+            self._lanelet_type = {LaneletType.MAIN_CARRIAGE_WAY, LaneletType.INTERSTATE}
         elif value == 'entry':
-            self._lanelet_type = {LaneletType.ACCESS_RAMP}
+            self._lanelet_type = {LaneletType.ACCESS_RAMP, LaneletType.INTERSTATE}
         elif value == 'exit':
-            self._lanelet_type = {LaneletType.EXIT_RAMP}
+            self._lanelet_type = {LaneletType.EXIT_RAMP, LaneletType.INTERSTATE}
+        elif value == 'onRamp':
+            self._lanelet_type = {LaneletType.ACCESS_RAMP, LaneletType.INTERSTATE}
+        elif value == 'offRamp':
+            self._lanelet_type = {LaneletType.EXIT_RAMP, LaneletType.INTERSTATE}
+        elif value == 'connectingRamp':
+            self._lanelet_type = {LaneletType.ACCESS_RAMP, LaneletType.INTERSTATE}
         elif value == 'shoulder':
             self._lanelet_type = {LaneletType.SHOULDER}
         elif value == 'bus':
