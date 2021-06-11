@@ -10,11 +10,8 @@ from typing import List, Dict
 import iso3166
 from commonroad.scenario.scenario import Scenario, GeoTransformation, Location, ScenarioID
 from commonroad.scenario.lanelet import LaneletNetwork, Lanelet
-from crdesigner.conversion.opendrive.opendriveconversion.plane_elements.border import Border
-from crdesigner.conversion.opendrive.opendriveconversion.plane_elements.plane import ParametricLane
-from crdesigner.conversion.opendrive.opendriveconversion.plane_elements.plane_group import ParametricLaneGroup
 
-from crdesigner.conversion.opendrive.opendriveparser.elements.opendrive import OpenDrive
+from crdesigner.conversion.opendrive.opendriveparser.elements.opendrive import OpenDrive, Header
 
 from crdesigner.conversion.opendrive.opendriveconversion.utils import encode_road_section_lane_width_id
 from crdesigner.conversion.opendrive.opendriveconversion.conversion_lanelet_network import ConversionLaneletNetwork
@@ -58,6 +55,7 @@ class Network:
     """
 
     def __init__(self):
+        self._header = None
         self._planes = []
         self._link_index = None
         self._geo_ref = None
@@ -100,6 +98,7 @@ class Network:
         self._link_index = LinkIndex()
         self._link_index.create_from_opendrive(opendrive)
 
+        self._header = opendrive.header
         try:
             self._geo_ref = opendrive.header.geo_reference
         except TypeError:
@@ -191,13 +190,13 @@ class Network:
         return convert_to_base_lanelet_network(lanelet_network)
 
     def export_commonroad_scenario(
-            self, dt: float = 0.1, benchmark_id=None, filter_types=None
+            self, dt: float = 0.1, filter_types=None, scenario_id: ScenarioID = None
     ):
         """Export a full CommonRoad scenario
 
         Args:
           dt:  (Default value = 0.1)
-          benchmark_id:  (Default value = None)
+          scenario_id:  (Default value = None)
           filter_types:  (Default value = None)
 
         Returns:
@@ -218,8 +217,11 @@ class Network:
         else:
             location = None
 
-        # TODO create default scenario ID or implement workaround in commonroad-io
-        scenario_id = ScenarioID(country_id="ZAM", map_name="OpenDrive", map_id=123)
+        # TODO load scenario ID as user input
+        if scenario_id is None and self._header.name is None:
+            scenario_id = ScenarioID(country_id=self._country_ID, map_name="OpenDRIVE", map_id=123)
+        elif scenario_id is None and self._header.name is not None:
+            scenario_id = ScenarioID(country_id=self._country_ID, map_name=self._header.name, map_id=123)
 
         scenario = Scenario(
             dt=dt, scenario_id=scenario_id,

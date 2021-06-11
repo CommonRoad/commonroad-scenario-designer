@@ -355,7 +355,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         for lanelet in lanelets:
             # if no stop sign defined, or the stop sign has no lane marking, ignore it
             if not lanelet.stop_line or (
-                lanelet.stop_line and lanelet.stop_line.line_marking == LineMarking.NO_MARKING):
+                    lanelet.stop_line and lanelet.stop_line.line_marking == LineMarking.NO_MARKING):
                 continue
             if lanelet.stop_line.line_marking in {LineMarking.SOLID, LineMarking.BROAD_SOLID}:
                 end_node.type = NodeType.ALLWAY_STOP
@@ -472,8 +472,8 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         if max_curvature > 0.001:  # not straight lanelet
             radius = 1 / max_curvature
             max_vehicle_length_sq = 4 * (
-                (radius + lanelet_width / 2) ** 2 -
-                (radius + self._max_vehicle_width / 2) ** 2)
+                    (radius + lanelet_width / 2) ** 2 -
+                    (radius + self._max_vehicle_width / 2) ** 2)
 
             for veh_class, veh_length in self.conf.veh_params['length'].items(
             ):
@@ -1405,8 +1405,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
 
         logging.info("Merging Intermediate Files")
         intermediary_files = self.write_intermediate_files(output_path)
-        conversion_possible = self.merge_intermediate_files(output_path, *intermediary_files,
-                                                            update_internal_ids=True)
+        conversion_possible = self.merge_intermediate_files(output_path, *intermediary_files, update_internal_ids=True)
         if not conversion_possible:
             logging.error("Error converting map, see above for details")
             return False
@@ -1588,9 +1587,9 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         return add_file
 
     def _convert_to_rou_file(
-        self,
-        scenario: Scenario,
-        out_folder: str,
+            self,
+            scenario: Scenario,
+            out_folder: str,
     ) -> Dict[str, str]:
         """
         Creates route files from CommonRoad scenario.
@@ -1635,7 +1634,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
 
         def sorted_lanelet_ids(lanelet_ids: List[int], orientation: float, position: np.ndarray,
                                scenario: Scenario) \
-            -> List[int]:
+                -> List[int]:
             """
             return the lanelets sorted by relative orientation to the position and orientation given
             """
@@ -1656,7 +1655,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                 return list(lanelet_id_list[sorted_indices])
 
         def create_coordinate_system_from_polyline(
-            polyline) -> pycrccosy.CurvilinearCoordinateSystem:
+                polyline) -> pycrccosy.CurvilinearCoordinateSystem:
 
             def compute_polyline_length(polyline: np.ndarray) -> float:
                 """
@@ -1894,7 +1893,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
 
                     # Add successors until not ending in internal edge
                     while lanelet_ids[-1] in self.lanelet_id2edge_id and \
-                        str(self.lanelet_id2edge_id[lanelet_ids[-1]]).startswith(':'):
+                            str(self.lanelet_id2edge_id[lanelet_ids[-1]]).startswith(':'):
                         last_lanelet = scenario.lanelet_network.find_lanelet_by_id(lanelet_ids[-1])
                         lanelet_ids.append(last_lanelet.successor[0])
                         # _, all_successor_lanelet_ids = Lanelet.all_lanelets_by_merging_successors_from_lanelet(
@@ -1950,10 +1949,10 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         return route_files
 
     def _generate_rou_file(
-        self,
-        net_file: str,
-        scenario_name: str,
-        out_folder: str = None,
+            self,
+            net_file: str,
+            scenario_name: str,
+            out_folder: str = None,
     ) -> Dict[str, str]:
         """
         Creates route & trips files using randomTrips generator.
