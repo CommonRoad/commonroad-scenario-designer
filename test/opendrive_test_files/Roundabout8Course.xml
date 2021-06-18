@@ -1,12 +1,11 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<commonRoad timeStepSize="0.1" commonRoadVersion="2020a" author="" affiliation="" source="OpenDRIVE 2 Lanelet Converter" benchmarkID="ZAM_OpenDrive-123" date="2021-06-10">
+<commonRoad timeStepSize="0.1" commonRoadVersion="2020a" author="Sebastian Maierhofer" affiliation="Technical University of Munich" source="CommonRoad Scenario Designer" benchmarkID="ZAM_OpenDrive-123" date="2021-06-18">
   <location>
     <geoNameId>-999</geoNameId>
     <gpsLatitude>999</gpsLatitude>
     <gpsLongitude>999</gpsLongitude>
   </location>
   <scenarioTags>
-    <highway/>
     <urban/>
   </scenarioTags>
   <lanelet id="100">
@@ -1488,6 +1487,1247 @@
   <lanelet id="109">
     <leftBound>
       <point>
+        <x>204.1</x>
+        <y>-1.0797</y>
+      </point>
+      <point>
+        <x>204.1</x>
+        <y>0.0</y>
+      </point>
+      <point>
+        <x>204.1</x>
+        <y>0.5</y>
+      </point>
+      <point>
+        <x>204.1</x>
+        <y>1.0797</y>
+      </point>
+      <point>
+        <x>204.0999</x>
+        <y>1.5802</y>
+      </point>
+      <point>
+        <x>203.8262</x>
+        <y>12.6122</y>
+      </point>
+      <point>
+        <x>203.7877</x>
+        <y>13.1364</y>
+      </point>
+      <point>
+        <x>202.3737</x>
+        <y>23.3325</y>
+      </point>
+      <point>
+        <x>199.7247</x>
+        <y>33.2794</y>
+      </point>
+      <point>
+        <x>195.8803</x>
+        <y>42.8283</y>
+      </point>
+      <point>
+        <x>190.8981</x>
+        <y>51.8359</y>
+      </point>
+      <point>
+        <x>184.8528</x>
+        <y>60.1674</y>
+      </point>
+      <point>
+        <x>177.8350</x>
+        <y>67.6980</y>
+      </point>
+      <point>
+        <x>169.9497</x>
+        <y>74.3148</y>
+      </point>
+      <point>
+        <x>161.3151</x>
+        <y>79.9186</y>
+      </point>
+      <point>
+        <x>152.0606</x>
+        <y>84.4257</y>
+      </point>
+      <point>
+        <x>142.3247</x>
+        <y>87.7683</y>
+      </point>
+      <point>
+        <x>132.2535</x>
+        <y>89.8966</y>
+      </point>
+      <point>
+        <x>121.9976</x>
+        <y>90.7784</y>
+      </point>
+      <point>
+        <x>111.7109</x>
+        <y>90.4008</y>
+      </point>
+      <point>
+        <x>101.5474</x>
+        <y>88.7692</y>
+      </point>
+      <point>
+        <x>91.6593</x>
+        <y>85.9082</y>
+      </point>
+      <point>
+        <x>82.1948</x>
+        <y>81.8606</y>
+      </point>
+      <point>
+        <x>73.2957</x>
+        <y>76.6871</y>
+      </point>
+      <point>
+        <x>65.0952</x>
+        <y>70.4652</y>
+      </point>
+      <point>
+        <x>64.7912</x>
+        <y>70.2024</y>
+      </point>
+      <point>
+        <x>64.3958</x>
+        <y>69.8569</y>
+      </point>
+      <point>
+        <x>56.4429</x>
+        <y>62.2412</y>
+      </point>
+      <point>
+        <x>56.0895</x>
+        <y>61.8878</y>
+      </point>
+      <point>
+        <x>49.3781</x>
+        <y>55.1767</y>
+      </point>
+      <point>
+        <x>37.2008</x>
+        <y>45.4337</y>
+      </point>
+      <point>
+        <x>24.9470</x>
+        <y>35.7673</y>
+      </point>
+      <point>
+        <x>22.8256</x>
+        <y>33.6460</y>
+      </point>
+      <point>
+        <x>20.7042</x>
+        <y>31.5248</y>
+      </point>
+      <point>
+        <x>20.7039</x>
+        <y>31.5244</y>
+      </point>
+      <point>
+        <x>18.2604</x>
+        <y>29.0808</y>
+      </point>
+      <point>
+        <x>17.0264</x>
+        <y>27.8945</y>
+      </point>
+      <point>
+        <x>15.1173</x>
+        <y>26.6487</y>
+      </point>
+      <point>
+        <x>12.9425</x>
+        <y>25.9656</y>
+      </point>
+      <point>
+        <x>10.6639</x>
+        <y>25.8961</y>
+      </point>
+      <point>
+        <x>9.9738</x>
+        <y>25.9992</y>
+      </point>
+      <point>
+        <x>8.3113</x>
+        <y>26.4071</y>
+      </point>
+      <point>
+        <x>7.9893</x>
+        <y>26.4929</y>
+      </point>
+      <point>
+        <x>5.9088</x>
+        <y>27.0112</y>
+      </point>
+      <point>
+        <x>5.6384</x>
+        <y>27.0689</y>
+      </point>
+      <point>
+        <x>-1.0942</x>
+        <y>27.6283</y>
+      </point>
+      <point>
+        <x>-5.3477</x>
+        <y>27.1279</y>
+      </point>
+      <point>
+        <x>-5.5830</x>
+        <y>27.0803</y>
+      </point>
+      <point>
+        <x>-7.5089</x>
+        <y>26.6213</y>
+      </point>
+      <point>
+        <x>-10.2259</x>
+        <y>25.9286</y>
+      </point>
+      <point>
+        <x>-11.6313</x>
+        <y>25.5957</y>
+      </point>
+      <point>
+        <x>-14.7279</x>
+        <y>25.4325</y>
+      </point>
+      <point>
+        <x>-17.7470</x>
+        <y>26.1400</y>
+      </point>
+      <point>
+        <x>-20.4487</x>
+        <y>27.6620</y>
+      </point>
+      <point>
+        <x>-21.0873</x>
+        <y>28.1914</y>
+      </point>
+      <point>
+        <x>-22.1258</x>
+        <y>29.1950</y>
+      </point>
+      <point>
+        <x>-22.5796</x>
+        <y>29.6489</y>
+      </point>
+      <point>
+        <x>-22.5766</x>
+        <y>29.6468</y>
+      </point>
+      <point>
+        <x>-24.6979</x>
+        <y>31.7681</y>
+      </point>
+      <point>
+        <x>-26.8192</x>
+        <y>33.8895</y>
+      </point>
+      <point>
+        <x>-38.1133</x>
+        <y>44.5157</y>
+      </point>
+      <point>
+        <x>-49.3756</x>
+        <y>55.1737</y>
+      </point>
+      <point>
+        <x>-87.7106</x>
+        <y>84.3855</y>
+      </point>
+      <point>
+        <x>-97.4423</x>
+        <y>87.7403</y>
+      </point>
+      <point>
+        <x>-107.5109</x>
+        <y>89.8811</y>
+      </point>
+      <point>
+        <x>-117.7656</x>
+        <y>90.7758</y>
+      </point>
+      <point>
+        <x>-128.0528</x>
+        <y>90.4110</y>
+      </point>
+      <point>
+        <x>-138.2184</x>
+        <y>88.7921</y>
+      </point>
+      <point>
+        <x>-148.1100</x>
+        <y>85.9434</y>
+      </point>
+      <point>
+        <x>-157.5795</x>
+        <y>81.9077</y>
+      </point>
+      <point>
+        <x>-166.4851</x>
+        <y>76.7452</y>
+      </point>
+      <point>
+        <x>-174.6933</x>
+        <y>70.5335</y>
+      </point>
+      <point>
+        <x>-182.0811</x>
+        <y>63.3655</y>
+      </point>
+      <point>
+        <x>-188.5378</x>
+        <y>55.3487</y>
+      </point>
+      <point>
+        <x>-193.9668</x>
+        <y>46.6031</y>
+      </point>
+      <point>
+        <x>-198.2867</x>
+        <y>37.2597</y>
+      </point>
+      <point>
+        <x>-201.4328</x>
+        <y>27.4586</y>
+      </point>
+      <point>
+        <x>-203.3579</x>
+        <y>17.3466</y>
+      </point>
+      <point>
+        <x>-204.0596</x>
+        <y>7.1391</y>
+      </point>
+      <point>
+        <x>-204.1000</x>
+        <y>-1.0797</y>
+      </point>
+      <point>
+        <x>-203.8262</x>
+        <y>-12.6122</y>
+      </point>
+      <point>
+        <x>-203.7877</x>
+        <y>-13.1364</y>
+      </point>
+      <point>
+        <x>-202.3737</x>
+        <y>-23.3325</y>
+      </point>
+      <point>
+        <x>-199.7247</x>
+        <y>-33.2794</y>
+      </point>
+      <point>
+        <x>-195.8803</x>
+        <y>-42.8283</y>
+      </point>
+      <point>
+        <x>-190.8981</x>
+        <y>-51.8359</y>
+      </point>
+      <point>
+        <x>-184.8528</x>
+        <y>-60.1674</y>
+      </point>
+      <point>
+        <x>-177.8350</x>
+        <y>-67.6980</y>
+      </point>
+      <point>
+        <x>-169.9497</x>
+        <y>-74.3148</y>
+      </point>
+      <point>
+        <x>-161.3151</x>
+        <y>-79.9186</y>
+      </point>
+      <point>
+        <x>-152.0606</x>
+        <y>-84.4257</y>
+      </point>
+      <point>
+        <x>-142.3247</x>
+        <y>-87.7683</y>
+      </point>
+      <point>
+        <x>-132.2535</x>
+        <y>-89.8966</y>
+      </point>
+      <point>
+        <x>-121.9976</x>
+        <y>-90.7784</y>
+      </point>
+      <point>
+        <x>-111.7109</x>
+        <y>-90.4008</y>
+      </point>
+      <point>
+        <x>-101.5474</x>
+        <y>-88.7692</y>
+      </point>
+      <point>
+        <x>-91.6593</x>
+        <y>-85.9082</y>
+      </point>
+      <point>
+        <x>-82.1948</x>
+        <y>-81.8606</y>
+      </point>
+      <point>
+        <x>-73.2957</x>
+        <y>-76.6871</y>
+      </point>
+      <point>
+        <x>-65.0952</x>
+        <y>-70.4652</y>
+      </point>
+      <point>
+        <x>-64.7912</x>
+        <y>-70.2024</y>
+      </point>
+      <point>
+        <x>-64.3958</x>
+        <y>-69.8569</y>
+      </point>
+      <point>
+        <x>-56.4429</x>
+        <y>-62.2412</y>
+      </point>
+      <point>
+        <x>-56.0895</x>
+        <y>-61.8878</y>
+      </point>
+      <point>
+        <x>-49.3781</x>
+        <y>-55.1767</y>
+      </point>
+      <point>
+        <x>-37.2008</x>
+        <y>-45.4337</y>
+      </point>
+      <point>
+        <x>-24.9470</x>
+        <y>-35.7673</y>
+      </point>
+      <point>
+        <x>-22.8256</x>
+        <y>-33.6460</y>
+      </point>
+      <point>
+        <x>-20.7042</x>
+        <y>-31.5248</y>
+      </point>
+      <point>
+        <x>-20.7039</x>
+        <y>-31.5244</y>
+      </point>
+      <point>
+        <x>-18.2604</x>
+        <y>-29.0808</y>
+      </point>
+      <point>
+        <x>-17.0264</x>
+        <y>-27.8945</y>
+      </point>
+      <point>
+        <x>-15.1173</x>
+        <y>-26.6487</y>
+      </point>
+      <point>
+        <x>-12.9425</x>
+        <y>-25.9656</y>
+      </point>
+      <point>
+        <x>-10.6639</x>
+        <y>-25.8961</y>
+      </point>
+      <point>
+        <x>-9.9738</x>
+        <y>-25.9992</y>
+      </point>
+      <point>
+        <x>-8.3113</x>
+        <y>-26.4071</y>
+      </point>
+      <point>
+        <x>-7.9893</x>
+        <y>-26.4929</y>
+      </point>
+      <point>
+        <x>-5.9088</x>
+        <y>-27.0112</y>
+      </point>
+      <point>
+        <x>-5.6384</x>
+        <y>-27.0689</y>
+      </point>
+      <point>
+        <x>1.0942</x>
+        <y>-27.6283</y>
+      </point>
+      <point>
+        <x>5.3477</x>
+        <y>-27.1279</y>
+      </point>
+      <point>
+        <x>5.5830</x>
+        <y>-27.0803</y>
+      </point>
+      <point>
+        <x>7.5089</x>
+        <y>-26.6213</y>
+      </point>
+      <point>
+        <x>10.2259</x>
+        <y>-25.9286</y>
+      </point>
+      <point>
+        <x>11.6313</x>
+        <y>-25.5957</y>
+      </point>
+      <point>
+        <x>14.7279</x>
+        <y>-25.4325</y>
+      </point>
+      <point>
+        <x>17.7470</x>
+        <y>-26.1400</y>
+      </point>
+      <point>
+        <x>20.4487</x>
+        <y>-27.6620</y>
+      </point>
+      <point>
+        <x>21.0873</x>
+        <y>-28.1914</y>
+      </point>
+      <point>
+        <x>22.1258</x>
+        <y>-29.1950</y>
+      </point>
+      <point>
+        <x>22.5796</x>
+        <y>-29.6489</y>
+      </point>
+      <point>
+        <x>24.7009</x>
+        <y>-31.7703</y>
+      </point>
+      <point>
+        <x>26.8222</x>
+        <y>-33.8916</y>
+      </point>
+      <point>
+        <x>38.1161</x>
+        <y>-44.5180</y>
+      </point>
+      <point>
+        <x>49.3783</x>
+        <y>-55.1762</y>
+      </point>
+      <point>
+        <x>87.7106</x>
+        <y>-84.3855</y>
+      </point>
+      <point>
+        <x>97.4423</x>
+        <y>-87.7403</y>
+      </point>
+      <point>
+        <x>107.5109</x>
+        <y>-89.8811</y>
+      </point>
+      <point>
+        <x>117.7656</x>
+        <y>-90.7758</y>
+      </point>
+      <point>
+        <x>128.0528</x>
+        <y>-90.4110</y>
+      </point>
+      <point>
+        <x>138.2184</x>
+        <y>-88.7921</y>
+      </point>
+      <point>
+        <x>148.1100</x>
+        <y>-85.9434</y>
+      </point>
+      <point>
+        <x>157.5795</x>
+        <y>-81.9077</y>
+      </point>
+      <point>
+        <x>166.4851</x>
+        <y>-76.7452</y>
+      </point>
+      <point>
+        <x>174.6933</x>
+        <y>-70.5335</y>
+      </point>
+      <point>
+        <x>182.0811</x>
+        <y>-63.3655</y>
+      </point>
+      <point>
+        <x>188.5378</x>
+        <y>-55.3487</y>
+      </point>
+      <point>
+        <x>193.9668</x>
+        <y>-46.6031</y>
+      </point>
+      <point>
+        <x>198.2867</x>
+        <y>-37.2597</y>
+      </point>
+      <point>
+        <x>201.4328</x>
+        <y>-27.4586</y>
+      </point>
+      <point>
+        <x>203.3579</x>
+        <y>-17.3466</y>
+      </point>
+      <point>
+        <x>204.0596</x>
+        <y>-7.1391</y>
+      </point>
+      <point>
+        <x>204.1000</x>
+        <y>-1.0797</y>
+      </point>
+    </leftBound>
+    <rightBound>
+      <point>
+        <x>205.6</x>
+        <y>-1.0797</y>
+      </point>
+      <point>
+        <x>205.6</x>
+        <y>0.0</y>
+      </point>
+      <point>
+        <x>205.6</x>
+        <y>0.5</y>
+      </point>
+      <point>
+        <x>205.6</x>
+        <y>1.0797</y>
+      </point>
+      <point>
+        <x>205.5999</x>
+        <y>1.5805</y>
+      </point>
+      <point>
+        <x>205.3225</x>
+        <y>12.7175</y>
+      </point>
+      <point>
+        <x>205.2833</x>
+        <y>13.2511</y>
+      </point>
+      <point>
+        <x>203.8441</x>
+        <y>23.6290</y>
+      </point>
+      <point>
+        <x>201.1478</x>
+        <y>33.7534</y>
+      </point>
+      <point>
+        <x>197.2348</x>
+        <y>43.4726</y>
+      </point>
+      <point>
+        <x>192.1638</x>
+        <y>52.6409</y>
+      </point>
+      <point>
+        <x>186.0107</x>
+        <y>61.1210</y>
+      </point>
+      <point>
+        <x>178.8677</x>
+        <y>68.7859</y>
+      </point>
+      <point>
+        <x>170.8417</x>
+        <y>75.5207</y>
+      </point>
+      <point>
+        <x>162.0531</x>
+        <y>81.2245</y>
+      </point>
+      <point>
+        <x>152.6336</x>
+        <y>85.8119</y>
+      </point>
+      <point>
+        <x>142.7241</x>
+        <y>89.2142</y>
+      </point>
+      <point>
+        <x>132.4732</x>
+        <y>91.3804</y>
+      </point>
+      <point>
+        <x>122.0345</x>
+        <y>92.2780</y>
+      </point>
+      <point>
+        <x>111.5642</x>
+        <y>91.8936</y>
+      </point>
+      <point>
+        <x>101.2194</x>
+        <y>90.2329</y>
+      </point>
+      <point>
+        <x>91.1550</x>
+        <y>87.3209</y>
+      </point>
+      <point>
+        <x>81.5217</x>
+        <y>83.2011</y>
+      </point>
+      <point>
+        <x>72.4638</x>
+        <y>77.9353</y>
+      </point>
+      <point>
+        <x>64.1172</x>
+        <y>71.6024</y>
+      </point>
+      <point>
+        <x>63.8077</x>
+        <y>71.3349</y>
+      </point>
+      <point>
+        <x>63.4054</x>
+        <y>70.9834</y>
+      </point>
+      <point>
+        <x>55.3823</x>
+        <y>63.3019</y>
+      </point>
+      <point>
+        <x>55.0288</x>
+        <y>62.9484</y>
+      </point>
+      <point>
+        <x>48.3174</x>
+        <y>56.2374</y>
+      </point>
+      <point>
+        <x>36.1402</x>
+        <y>46.4944</y>
+      </point>
+      <point>
+        <x>23.8864</x>
+        <y>36.8280</y>
+      </point>
+      <point>
+        <x>21.7650</x>
+        <y>34.7067</y>
+      </point>
+      <point>
+        <x>19.6436</x>
+        <y>32.5855</y>
+      </point>
+      <point>
+        <x>19.6432</x>
+        <y>32.5851</y>
+      </point>
+      <point>
+        <x>17.1997</x>
+        <y>30.1414</y>
+      </point>
+      <point>
+        <x>16.0428</x>
+        <y>29.0270</y>
+      </point>
+      <point>
+        <x>14.4767</x>
+        <y>28.0050</y>
+      </point>
+      <point>
+        <x>12.6925</x>
+        <y>27.4446</y>
+      </point>
+      <point>
+        <x>10.8233</x>
+        <y>27.3876</y>
+      </point>
+      <point>
+        <x>10.2572</x>
+        <y>27.4722</y>
+      </point>
+      <point>
+        <x>8.6975</x>
+        <y>27.8565</y>
+      </point>
+      <point>
+        <x>8.3754</x>
+        <y>27.9423</y>
+      </point>
+      <point>
+        <x>6.2294</x>
+        <y>28.4765</y>
+      </point>
+      <point>
+        <x>5.9443</x>
+        <y>28.5374</y>
+      </point>
+      <point>
+        <x>-1.1536</x>
+        <y>29.1271</y>
+      </point>
+      <point>
+        <x>-5.6378</x>
+        <y>28.5995</y>
+      </point>
+      <point>
+        <x>-5.8878</x>
+        <y>28.5490</y>
+      </point>
+      <point>
+        <x>-7.8794</x>
+        <y>28.0748</y>
+      </point>
+      <point>
+        <x>-10.5964</x>
+        <y>27.3821</y>
+      </point>
+      <point>
+        <x>-11.9205</x>
+        <y>27.0676</y>
+      </point>
+      <point>
+        <x>-14.5949</x>
+        <y>26.9266</y>
+      </point>
+      <point>
+        <x>-17.2023</x>
+        <y>27.5376</y>
+      </point>
+      <point>
+        <x>-19.5356</x>
+        <y>28.8521</y>
+      </point>
+      <point>
+        <x>-20.0871</x>
+        <y>29.3092</y>
+      </point>
+      <point>
+        <x>-21.0651</x>
+        <y>30.2556</y>
+      </point>
+      <point>
+        <x>-21.5189</x>
+        <y>30.7095</y>
+      </point>
+      <point>
+        <x>-21.5160</x>
+        <y>30.7074</y>
+      </point>
+      <point>
+        <x>-23.6373</x>
+        <y>32.8288</y>
+      </point>
+      <point>
+        <x>-25.7585</x>
+        <y>34.9501</y>
+      </point>
+      <point>
+        <x>-37.0527</x>
+        <y>45.5763</y>
+      </point>
+      <point>
+        <x>-48.3150</x>
+        <y>56.2344</y>
+      </point>
+      <point>
+        <x>-87.1359</x>
+        <y>85.7711</y>
+      </point>
+      <point>
+        <x>-97.0411</x>
+        <y>89.1857</y>
+      </point>
+      <point>
+        <x>-107.2893</x>
+        <y>91.3647</y>
+      </point>
+      <point>
+        <x>-117.7269</x>
+        <y>92.2753</y>
+      </point>
+      <point>
+        <x>-128.1976</x>
+        <y>91.9040</y>
+      </point>
+      <point>
+        <x>-138.5445</x>
+        <y>90.2562</y>
+      </point>
+      <point>
+        <x>-148.6125</x>
+        <y>87.3567</y>
+      </point>
+      <point>
+        <x>-158.2510</x>
+        <y>83.2490</y>
+      </point>
+      <point>
+        <x>-167.3154</x>
+        <y>77.9945</y>
+      </point>
+      <point>
+        <x>-175.6700</x>
+        <y>71.6720</y>
+      </point>
+      <point>
+        <x>-183.1895</x>
+        <y>64.3761</y>
+      </point>
+      <point>
+        <x>-189.7615</x>
+        <y>56.2163</y>
+      </point>
+      <point>
+        <x>-195.2873</x>
+        <y>47.3147</y>
+      </point>
+      <point>
+        <x>-199.6842</x>
+        <y>37.8047</y>
+      </point>
+      <point>
+        <x>-202.8864</x>
+        <y>27.8288</y>
+      </point>
+      <point>
+        <x>-204.8458</x>
+        <y>17.5364</y>
+      </point>
+      <point>
+        <x>-205.5593</x>
+        <y>7.1688</y>
+      </point>
+      <point>
+        <x>-205.6000</x>
+        <y>-1.0797</y>
+      </point>
+      <point>
+        <x>-205.3225</x>
+        <y>-12.7175</y>
+      </point>
+      <point>
+        <x>-205.2833</x>
+        <y>-13.2511</y>
+      </point>
+      <point>
+        <x>-203.8441</x>
+        <y>-23.6290</y>
+      </point>
+      <point>
+        <x>-201.1478</x>
+        <y>-33.7534</y>
+      </point>
+      <point>
+        <x>-197.2348</x>
+        <y>-43.4726</y>
+      </point>
+      <point>
+        <x>-192.1638</x>
+        <y>-52.6409</y>
+      </point>
+      <point>
+        <x>-186.0107</x>
+        <y>-61.1210</y>
+      </point>
+      <point>
+        <x>-178.8677</x>
+        <y>-68.7859</y>
+      </point>
+      <point>
+        <x>-170.8417</x>
+        <y>-75.5207</y>
+      </point>
+      <point>
+        <x>-162.0531</x>
+        <y>-81.2245</y>
+      </point>
+      <point>
+        <x>-152.6336</x>
+        <y>-85.8119</y>
+      </point>
+      <point>
+        <x>-142.7241</x>
+        <y>-89.2142</y>
+      </point>
+      <point>
+        <x>-132.4732</x>
+        <y>-91.3804</y>
+      </point>
+      <point>
+        <x>-122.0345</x>
+        <y>-92.2780</y>
+      </point>
+      <point>
+        <x>-111.5642</x>
+        <y>-91.8936</y>
+      </point>
+      <point>
+        <x>-101.2194</x>
+        <y>-90.2329</y>
+      </point>
+      <point>
+        <x>-91.1550</x>
+        <y>-87.3209</y>
+      </point>
+      <point>
+        <x>-81.5217</x>
+        <y>-83.2011</y>
+      </point>
+      <point>
+        <x>-72.4638</x>
+        <y>-77.9353</y>
+      </point>
+      <point>
+        <x>-64.1172</x>
+        <y>-71.6024</y>
+      </point>
+      <point>
+        <x>-63.8077</x>
+        <y>-71.3349</y>
+      </point>
+      <point>
+        <x>-63.4054</x>
+        <y>-70.9834</y>
+      </point>
+      <point>
+        <x>-55.3823</x>
+        <y>-63.3019</y>
+      </point>
+      <point>
+        <x>-55.0288</x>
+        <y>-62.9484</y>
+      </point>
+      <point>
+        <x>-48.3174</x>
+        <y>-56.2374</y>
+      </point>
+      <point>
+        <x>-36.1402</x>
+        <y>-46.4944</y>
+      </point>
+      <point>
+        <x>-23.8864</x>
+        <y>-36.8280</y>
+      </point>
+      <point>
+        <x>-21.7650</x>
+        <y>-34.7067</y>
+      </point>
+      <point>
+        <x>-19.6436</x>
+        <y>-32.5855</y>
+      </point>
+      <point>
+        <x>-19.6432</x>
+        <y>-32.5851</y>
+      </point>
+      <point>
+        <x>-17.1997</x>
+        <y>-30.1414</y>
+      </point>
+      <point>
+        <x>-16.0428</x>
+        <y>-29.0270</y>
+      </point>
+      <point>
+        <x>-14.4767</x>
+        <y>-28.0050</y>
+      </point>
+      <point>
+        <x>-12.6925</x>
+        <y>-27.4446</y>
+      </point>
+      <point>
+        <x>-10.8233</x>
+        <y>-27.3876</y>
+      </point>
+      <point>
+        <x>-10.2572</x>
+        <y>-27.4722</y>
+      </point>
+      <point>
+        <x>-8.6975</x>
+        <y>-27.8565</y>
+      </point>
+      <point>
+        <x>-8.3754</x>
+        <y>-27.9423</y>
+      </point>
+      <point>
+        <x>-6.2294</x>
+        <y>-28.4765</y>
+      </point>
+      <point>
+        <x>-5.9443</x>
+        <y>-28.5374</y>
+      </point>
+      <point>
+        <x>1.1536</x>
+        <y>-29.1271</y>
+      </point>
+      <point>
+        <x>5.6378</x>
+        <y>-28.5995</y>
+      </point>
+      <point>
+        <x>5.8878</x>
+        <y>-28.5490</y>
+      </point>
+      <point>
+        <x>7.8794</x>
+        <y>-28.0748</y>
+      </point>
+      <point>
+        <x>10.5964</x>
+        <y>-27.3821</y>
+      </point>
+      <point>
+        <x>11.9205</x>
+        <y>-27.0676</y>
+      </point>
+      <point>
+        <x>14.5949</x>
+        <y>-26.9266</y>
+      </point>
+      <point>
+        <x>17.2023</x>
+        <y>-27.5376</y>
+      </point>
+      <point>
+        <x>19.5356</x>
+        <y>-28.8521</y>
+      </point>
+      <point>
+        <x>20.0871</x>
+        <y>-29.3092</y>
+      </point>
+      <point>
+        <x>21.0651</x>
+        <y>-30.2556</y>
+      </point>
+      <point>
+        <x>21.5189</x>
+        <y>-30.7095</y>
+      </point>
+      <point>
+        <x>23.6402</x>
+        <y>-32.8309</y>
+      </point>
+      <point>
+        <x>25.7615</x>
+        <y>-34.9523</y>
+      </point>
+      <point>
+        <x>37.0554</x>
+        <y>-45.5786</y>
+      </point>
+      <point>
+        <x>48.3176</x>
+        <y>-56.2368</y>
+      </point>
+      <point>
+        <x>87.1359</x>
+        <y>-85.7711</y>
+      </point>
+      <point>
+        <x>97.0411</x>
+        <y>-89.1857</y>
+      </point>
+      <point>
+        <x>107.2893</x>
+        <y>-91.3647</y>
+      </point>
+      <point>
+        <x>117.7269</x>
+        <y>-92.2753</y>
+      </point>
+      <point>
+        <x>128.1976</x>
+        <y>-91.9040</y>
+      </point>
+      <point>
+        <x>138.5445</x>
+        <y>-90.2562</y>
+      </point>
+      <point>
+        <x>148.6125</x>
+        <y>-87.3567</y>
+      </point>
+      <point>
+        <x>158.2510</x>
+        <y>-83.2490</y>
+      </point>
+      <point>
+        <x>167.3154</x>
+        <y>-77.9945</y>
+      </point>
+      <point>
+        <x>175.6700</x>
+        <y>-71.6720</y>
+      </point>
+      <point>
+        <x>183.1895</x>
+        <y>-64.3761</y>
+      </point>
+      <point>
+        <x>189.7615</x>
+        <y>-56.2163</y>
+      </point>
+      <point>
+        <x>195.2873</x>
+        <y>-47.3147</y>
+      </point>
+      <point>
+        <x>199.6842</x>
+        <y>-37.8047</y>
+      </point>
+      <point>
+        <x>202.8864</x>
+        <y>-27.8288</y>
+      </point>
+      <point>
+        <x>204.8458</x>
+        <y>-17.5364</y>
+      </point>
+      <point>
+        <x>205.5593</x>
+        <y>-7.1688</y>
+      </point>
+      <point>
+        <x>205.6000</x>
+        <y>-1.0797</y>
+      </point>
+    </rightBound>
+    <predecessor ref="109"/>
+    <successor ref="109"/>
+    <laneletType>sidewalk</laneletType>
+  </lanelet>
+  <lanelet id="110">
+    <leftBound>
+      <point>
         <x>-52.2748</x>
         <y>52.2746</y>
       </point>
@@ -2459,12 +3699,12 @@
         <y>4.8227</y>
       </point>
     </rightBound>
-    <predecessor ref="110"/>
-    <successor ref="111"/>
-    <adjacentRight ref="112" drivingDir="same"/>
+    <predecessor ref="111"/>
+    <successor ref="112"/>
+    <adjacentRight ref="113" drivingDir="same"/>
     <laneletType>driveWay</laneletType>
   </lanelet>
-  <lanelet id="112">
+  <lanelet id="113">
     <leftBound>
       <point>
         <x>-52.2748</x>
@@ -2614,14 +3854,14 @@
         <y>5.5671</y>
       </point>
     </rightBound>
-    <predecessor ref="110"/>
-    <successor ref="113"/>
-    <adjacentLeft ref="109" drivingDir="same"/>
+    <predecessor ref="111"/>
+    <successor ref="114"/>
+    <adjacentLeft ref="110" drivingDir="same"/>
     <laneletType>driveWay</laneletType>
     <trafficSignRef ref="1024328149"/>
     <trafficSignRef ref="1024428149"/>
   </lanelet>
-  <lanelet id="114">
+  <lanelet id="115">
     <leftBound>
       <point>
         <x>-52.2748</x>
@@ -2979,13 +4219,640 @@
       </point>
       <lineMarking>solid</lineMarking>
     </rightBound>
-    <predecessor ref="115"/>
-    <successor ref="116"/>
+    <predecessor ref="116"/>
     <successor ref="117"/>
-    <adjacentLeft ref="110" drivingDir="opposite"/>
+    <successor ref="118"/>
+    <adjacentLeft ref="111" drivingDir="opposite"/>
     <laneletType>driveWay</laneletType>
   </lanelet>
-  <lanelet id="117">
+  <lanelet id="119">
+    <leftBound>
+      <point>
+        <x>-29.6489</x>
+        <y>-22.5796</y>
+      </point>
+      <point>
+        <x>-31.7703</x>
+        <y>-24.7009</y>
+      </point>
+      <point>
+        <x>-33.8916</x>
+        <y>-26.8222</y>
+      </point>
+      <point>
+        <x>-44.5180</x>
+        <y>-38.1161</y>
+      </point>
+      <point>
+        <x>-55.1762</x>
+        <y>-49.3783</y>
+      </point>
+      <point>
+        <x>-90.8525</x>
+        <y>-76.8113</y>
+      </point>
+      <point>
+        <x>-99.6353</x>
+        <y>-79.8390</y>
+      </point>
+      <point>
+        <x>-108.7222</x>
+        <y>-81.7711</y>
+      </point>
+      <point>
+        <x>-117.9770</x>
+        <y>-82.5785</y>
+      </point>
+      <point>
+        <x>-127.2612</x>
+        <y>-82.2493</y>
+      </point>
+      <point>
+        <x>-136.4356</x>
+        <y>-80.7882</y>
+      </point>
+      <point>
+        <x>-145.3628</x>
+        <y>-78.2173</y>
+      </point>
+      <point>
+        <x>-153.9090</x>
+        <y>-74.5750</y>
+      </point>
+      <point>
+        <x>-161.9462</x>
+        <y>-69.9160</y>
+      </point>
+      <point>
+        <x>-169.3541</x>
+        <y>-64.3099</y>
+      </point>
+      <point>
+        <x>-176.0216</x>
+        <y>-57.8408</y>
+      </point>
+      <point>
+        <x>-181.8488</x>
+        <y>-50.6057</y>
+      </point>
+      <point>
+        <x>-186.7484</x>
+        <y>-42.7128</y>
+      </point>
+      <point>
+        <x>-190.6471</x>
+        <y>-34.2804</y>
+      </point>
+      <point>
+        <x>-193.4864</x>
+        <y>-25.4350</y>
+      </point>
+      <point>
+        <x>-195.2238</x>
+        <y>-16.3089</y>
+      </point>
+      <point>
+        <x>-195.8612</x>
+        <y>-6.9763</y>
+      </point>
+      <point>
+        <x>-195.8999</x>
+        <y>-1.0797</y>
+      </point>
+      <point>
+        <x>-195.9</x>
+        <y>-0.0000</y>
+      </point>
+      <point>
+        <x>-195.9000</x>
+        <y>0.4999</y>
+      </point>
+      <point>
+        <x>-195.9</x>
+        <y>1.0797</y>
+      </point>
+      <point>
+        <x>-195.8999</x>
+        <y>1.5791</y>
+      </point>
+      <point>
+        <x>-195.6465</x>
+        <y>12.0361</y>
+      </point>
+      <point>
+        <x>-195.6117</x>
+        <y>12.5092</y>
+      </point>
+      <point>
+        <x>-194.3356</x>
+        <y>21.7111</y>
+      </point>
+      <point>
+        <x>-191.9448</x>
+        <y>30.6882</y>
+      </point>
+      <point>
+        <x>-188.4753</x>
+        <y>39.3060</y>
+      </point>
+      <point>
+        <x>-183.9789</x>
+        <y>47.4354</y>
+      </point>
+      <point>
+        <x>-178.5230</x>
+        <y>54.9546</y>
+      </point>
+      <point>
+        <x>-172.1894</x>
+        <y>61.7509</y>
+      </point>
+      <point>
+        <x>-165.0730</x>
+        <y>67.7225</y>
+      </point>
+      <point>
+        <x>-157.2803</x>
+        <y>72.7800</y>
+      </point>
+      <point>
+        <x>-148.9281</x>
+        <y>76.8476</y>
+      </point>
+      <point>
+        <x>-140.1416</x>
+        <y>79.8643</y>
+      </point>
+      <point>
+        <x>-131.0523</x>
+        <y>81.7850</y>
+      </point>
+      <point>
+        <x>-121.7964</x>
+        <y>82.5809</y>
+      </point>
+      <point>
+        <x>-112.5127</x>
+        <y>82.2401</y>
+      </point>
+      <point>
+        <x>-103.3401</x>
+        <y>80.7676</y>
+      </point>
+      <point>
+        <x>-94.4162</x>
+        <y>78.1855</y>
+      </point>
+      <point>
+        <x>-85.8745</x>
+        <y>74.5326</y>
+      </point>
+      <point>
+        <x>-77.8430</x>
+        <y>69.8635</y>
+      </point>
+      <point>
+        <x>-70.4422</x>
+        <y>64.2482</y>
+      </point>
+      <point>
+        <x>-70.1678</x>
+        <y>64.0111</y>
+      </point>
+      <point>
+        <x>-62.2413</x>
+        <y>56.4430</y>
+      </point>
+      <point>
+        <x>-55.1740</x>
+        <y>49.3755</y>
+      </point>
+      <point>
+        <x>-45.4308</x>
+        <y>37.1984</y>
+      </point>
+      <point>
+        <x>-35.7642</x>
+        <y>24.9447</y>
+      </point>
+      <point>
+        <x>-33.6430</x>
+        <y>22.8234</y>
+      </point>
+      <point>
+        <x>-31.5217</x>
+        <y>20.7020</y>
+      </point>
+      <point>
+        <x>-31.5244</x>
+        <y>20.7039</y>
+      </point>
+      <point>
+        <x>-29.0808</x>
+        <y>18.2604</y>
+      </point>
+      <point>
+        <x>-27.8945</x>
+        <y>17.0264</y>
+      </point>
+      <point>
+        <x>-26.6487</x>
+        <y>15.1173</y>
+      </point>
+      <point>
+        <x>-25.9656</x>
+        <y>12.9425</y>
+      </point>
+      <point>
+        <x>-25.8961</x>
+        <y>10.6639</y>
+      </point>
+      <point>
+        <x>-25.9992</x>
+        <y>9.9738</y>
+      </point>
+      <point>
+        <x>-26.4071</x>
+        <y>8.3113</y>
+      </point>
+      <point>
+        <x>-26.4929</x>
+        <y>7.9893</y>
+      </point>
+      <point>
+        <x>-27.0112</x>
+        <y>5.9088</y>
+      </point>
+      <point>
+        <x>-27.0689</x>
+        <y>5.6384</y>
+      </point>
+      <point>
+        <x>-27.6283</x>
+        <y>-1.0942</y>
+      </point>
+      <point>
+        <x>-27.1279</x>
+        <y>-5.3477</y>
+      </point>
+      <point>
+        <x>-27.0803</x>
+        <y>-5.5830</y>
+      </point>
+      <point>
+        <x>-26.6213</x>
+        <y>-7.5089</y>
+      </point>
+      <point>
+        <x>-25.9286</x>
+        <y>-10.2259</y>
+      </point>
+      <point>
+        <x>-25.5957</x>
+        <y>-11.6313</y>
+      </point>
+      <point>
+        <x>-25.4325</x>
+        <y>-14.7279</y>
+      </point>
+      <point>
+        <x>-26.1400</x>
+        <y>-17.7470</y>
+      </point>
+      <point>
+        <x>-27.6620</x>
+        <y>-20.4487</y>
+      </point>
+      <point>
+        <x>-28.1914</x>
+        <y>-21.0873</y>
+      </point>
+      <point>
+        <x>-29.1950</x>
+        <y>-22.1258</y>
+      </point>
+      <point>
+        <x>-29.6489</x>
+        <y>-22.5796</y>
+      </point>
+    </leftBound>
+    <rightBound>
+      <point>
+        <x>-30.7095</x>
+        <y>-21.5189</y>
+      </point>
+      <point>
+        <x>-32.8309</x>
+        <y>-23.6402</y>
+      </point>
+      <point>
+        <x>-34.9523</x>
+        <y>-25.7615</y>
+      </point>
+      <point>
+        <x>-45.5786</x>
+        <y>-37.0554</y>
+      </point>
+      <point>
+        <x>-56.2368</x>
+        <y>-48.3176</y>
+      </point>
+      <point>
+        <x>-91.4272</x>
+        <y>-75.4258</y>
+      </point>
+      <point>
+        <x>-100.0364</x>
+        <y>-78.3937</y>
+      </point>
+      <point>
+        <x>-108.9437</x>
+        <y>-80.2875</y>
+      </point>
+      <point>
+        <x>-118.0157</x>
+        <y>-81.0790</y>
+      </point>
+      <point>
+        <x>-127.1164</x>
+        <y>-80.7563</y>
+      </point>
+      <point>
+        <x>-136.1095</x>
+        <y>-79.3241</y>
+      </point>
+      <point>
+        <x>-144.8602</x>
+        <y>-76.8040</y>
+      </point>
+      <point>
+        <x>-153.2376</x>
+        <y>-73.2337</y>
+      </point>
+      <point>
+        <x>-161.1160</x>
+        <y>-68.6667</y>
+      </point>
+      <point>
+        <x>-168.3774</x>
+        <y>-63.1715</y>
+      </point>
+      <point>
+        <x>-174.9131</x>
+        <y>-56.8302</y>
+      </point>
+      <point>
+        <x>-180.6252</x>
+        <y>-49.7380</y>
+      </point>
+      <point>
+        <x>-185.4280</x>
+        <y>-42.0011</y>
+      </point>
+      <point>
+        <x>-189.2496</x>
+        <y>-33.7354</y>
+      </point>
+      <point>
+        <x>-192.0328</x>
+        <y>-25.0648</y>
+      </point>
+      <point>
+        <x>-193.7359</x>
+        <y>-16.1190</y>
+      </point>
+      <point>
+        <x>-194.3615</x>
+        <y>-6.9465</y>
+      </point>
+      <point>
+        <x>-194.3999</x>
+        <y>-1.0797</y>
+      </point>
+      <point>
+        <x>-194.4</x>
+        <y>-0.0000</y>
+      </point>
+      <point>
+        <x>-194.4000</x>
+        <y>0.4999</y>
+      </point>
+      <point>
+        <x>-194.4</x>
+        <y>1.0797</y>
+      </point>
+      <point>
+        <x>-194.3999</x>
+        <y>1.5789</y>
+      </point>
+      <point>
+        <x>-194.1502</x>
+        <y>11.9307</y>
+      </point>
+      <point>
+        <x>-194.1161</x>
+        <y>12.3944</y>
+      </point>
+      <point>
+        <x>-192.8652</x>
+        <y>21.4145</y>
+      </point>
+      <point>
+        <x>-190.5217</x>
+        <y>30.2142</y>
+      </point>
+      <point>
+        <x>-187.1207</x>
+        <y>38.6617</y>
+      </point>
+      <point>
+        <x>-182.7132</x>
+        <y>46.6304</y>
+      </point>
+      <point>
+        <x>-177.3652</x>
+        <y>54.0010</y>
+      </point>
+      <point>
+        <x>-171.1567</x>
+        <y>60.6630</y>
+      </point>
+      <point>
+        <x>-164.1809</x>
+        <y>66.5166</y>
+      </point>
+      <point>
+        <x>-156.5422</x>
+        <y>71.4741</y>
+      </point>
+      <point>
+        <x>-148.3551</x>
+        <y>75.4613</y>
+      </point>
+      <point>
+        <x>-139.7422</x>
+        <y>78.4184</y>
+      </point>
+      <point>
+        <x>-130.8326</x>
+        <y>80.3012</y>
+      </point>
+      <point>
+        <x>-121.7596</x>
+        <y>81.0814</y>
+      </point>
+      <point>
+        <x>-112.6594</x>
+        <y>80.7472</y>
+      </point>
+      <point>
+        <x>-103.6681</x>
+        <y>79.3039</y>
+      </point>
+      <point>
+        <x>-94.9205</x>
+        <y>76.7729</y>
+      </point>
+      <point>
+        <x>-86.5476</x>
+        <y>73.1921</y>
+      </point>
+      <point>
+        <x>-78.6749</x>
+        <y>68.6153</y>
+      </point>
+      <point>
+        <x>-71.4203</x>
+        <y>63.1110</y>
+      </point>
+      <point>
+        <x>-71.1513</x>
+        <y>62.8785</y>
+      </point>
+      <point>
+        <x>-63.3019</x>
+        <y>55.3823</y>
+      </point>
+      <point>
+        <x>-56.2347</x>
+        <y>48.3149</y>
+      </point>
+      <point>
+        <x>-46.4915</x>
+        <y>36.1377</y>
+      </point>
+      <point>
+        <x>-36.8249</x>
+        <y>23.8841</y>
+      </point>
+      <point>
+        <x>-34.7036</x>
+        <y>21.7627</y>
+      </point>
+      <point>
+        <x>-32.5823</x>
+        <y>19.6414</y>
+      </point>
+      <point>
+        <x>-32.5851</x>
+        <y>19.6432</y>
+      </point>
+      <point>
+        <x>-30.1414</x>
+        <y>17.1997</y>
+      </point>
+      <point>
+        <x>-29.0270</x>
+        <y>16.0428</y>
+      </point>
+      <point>
+        <x>-28.0050</x>
+        <y>14.4767</y>
+      </point>
+      <point>
+        <x>-27.4446</x>
+        <y>12.6925</y>
+      </point>
+      <point>
+        <x>-27.3876</x>
+        <y>10.8233</y>
+      </point>
+      <point>
+        <x>-27.4722</x>
+        <y>10.2572</y>
+      </point>
+      <point>
+        <x>-27.8565</x>
+        <y>8.6975</y>
+      </point>
+      <point>
+        <x>-27.9423</x>
+        <y>8.3754</y>
+      </point>
+      <point>
+        <x>-28.4765</x>
+        <y>6.2294</y>
+      </point>
+      <point>
+        <x>-28.5374</x>
+        <y>5.9443</y>
+      </point>
+      <point>
+        <x>-29.1271</x>
+        <y>-1.1536</y>
+      </point>
+      <point>
+        <x>-28.5995</x>
+        <y>-5.6378</y>
+      </point>
+      <point>
+        <x>-28.5490</x>
+        <y>-5.8878</y>
+      </point>
+      <point>
+        <x>-28.0748</x>
+        <y>-7.8794</y>
+      </point>
+      <point>
+        <x>-27.3821</x>
+        <y>-10.5964</y>
+      </point>
+      <point>
+        <x>-27.0676</x>
+        <y>-11.9205</y>
+      </point>
+      <point>
+        <x>-26.9266</x>
+        <y>-14.5949</y>
+      </point>
+      <point>
+        <x>-27.5376</x>
+        <y>-17.2023</y>
+      </point>
+      <point>
+        <x>-28.8521</x>
+        <y>-19.5356</y>
+      </point>
+      <point>
+        <x>-29.3092</x>
+        <y>-20.0871</y>
+      </point>
+      <point>
+        <x>-30.2556</x>
+        <y>-21.0651</y>
+      </point>
+      <point>
+        <x>-30.7095</x>
+        <y>-21.5189</y>
+      </point>
+    </rightBound>
+    <predecessor ref="119"/>
+    <successor ref="119"/>
+    <laneletType>sidewalk</laneletType>
+    <trafficSignRef ref="1075221207"/>
+    <trafficSignRef ref="1075121207"/>
+  </lanelet>
+  <lanelet id="118">
     <leftBound>
       <point>
         <x>-52.2771</x>
@@ -3959,12 +5826,12 @@
         <y>-23.1530</y>
       </point>
     </rightBound>
-    <predecessor ref="114"/>
-    <successor ref="118"/>
-    <adjacentRight ref="116" drivingDir="same"/>
+    <predecessor ref="115"/>
+    <successor ref="120"/>
+    <adjacentRight ref="117" drivingDir="same"/>
     <laneletType>driveWay</laneletType>
   </lanelet>
-  <lanelet id="116">
+  <lanelet id="117">
     <leftBound>
       <point>
         <x>-52.2771</x>
@@ -4106,14 +5973,14 @@
         <y>-26.7263</y>
       </point>
     </rightBound>
-    <predecessor ref="114"/>
-    <successor ref="119"/>
-    <adjacentLeft ref="117" drivingDir="same"/>
+    <predecessor ref="115"/>
+    <successor ref="121"/>
+    <adjacentLeft ref="118" drivingDir="same"/>
     <laneletType>driveWay</laneletType>
     <trafficSignRef ref="1075414289"/>
     <trafficSignRef ref="1075314289"/>
   </lanelet>
-  <lanelet id="110">
+  <lanelet id="111">
     <leftBound>
       <point>
         <x>-52.2771</x>
@@ -4487,13 +6354,13 @@
       </point>
       <lineMarking>solid</lineMarking>
     </rightBound>
-    <predecessor ref="120"/>
-    <successor ref="112"/>
-    <successor ref="109"/>
-    <adjacentLeft ref="114" drivingDir="opposite"/>
+    <predecessor ref="122"/>
+    <successor ref="113"/>
+    <successor ref="110"/>
+    <adjacentLeft ref="115" drivingDir="opposite"/>
     <laneletType>driveWay</laneletType>
   </lanelet>
-  <lanelet id="121">
+  <lanelet id="123">
     <leftBound>
       <point>
         <x>19.6223</x>
@@ -4546,12 +6413,12 @@
         <y>23.1530</y>
       </point>
     </rightBound>
-    <predecessor ref="122"/>
+    <predecessor ref="124"/>
     <successor ref="102"/>
-    <adjacentRight ref="123" drivingDir="same"/>
+    <adjacentRight ref="125" drivingDir="same"/>
     <laneletType>driveWay</laneletType>
   </lanelet>
-  <lanelet id="123">
+  <lanelet id="125">
     <leftBound>
       <point>
         <x>23.2034</x>
@@ -4604,9 +6471,9 @@
         <y>26.5794</y>
       </point>
     </rightBound>
-    <predecessor ref="124"/>
+    <predecessor ref="126"/>
     <successor ref="104"/>
-    <adjacentLeft ref="121" drivingDir="same"/>
+    <adjacentLeft ref="123" drivingDir="same"/>
     <laneletType>driveWay</laneletType>
   </lanelet>
   <lanelet id="102">
@@ -4638,9 +6505,9 @@
         <y>23.2034</y>
       </point>
     </rightBound>
-    <predecessor ref="121"/>
+    <predecessor ref="123"/>
     <predecessor ref="100"/>
-    <successor ref="125"/>
+    <successor ref="127"/>
     <adjacentRight ref="104" drivingDir="same"/>
     <laneletType>driveWay</laneletType>
   </lanelet>
@@ -4674,10 +6541,10 @@
       </point>
       <lineMarking>solid</lineMarking>
     </rightBound>
-    <predecessor ref="123"/>
+    <predecessor ref="125"/>
     <predecessor ref="103"/>
-    <successor ref="126"/>
-    <successor ref="115"/>
+    <successor ref="128"/>
+    <successor ref="116"/>
     <adjacentLeft ref="102" drivingDir="same"/>
     <laneletType>driveWay</laneletType>
     <trafficSignRef ref="1024120217"/>
@@ -4825,11 +6692,11 @@
       </point>
       <lineMarking>solid</lineMarking>
     </rightBound>
-    <predecessor ref="124"/>
+    <predecessor ref="126"/>
     <successor ref="105"/>
     <laneletType>driveWay</laneletType>
   </lanelet>
-  <lanelet id="111">
+  <lanelet id="112">
     <leftBound>
       <point>
         <x>-19.5797</x>
@@ -4858,13 +6725,13 @@
         <y>-4.5741</y>
       </point>
     </rightBound>
-    <predecessor ref="109"/>
-    <predecessor ref="125"/>
-    <successor ref="127"/>
-    <adjacentRight ref="113" drivingDir="same"/>
+    <predecessor ref="110"/>
+    <predecessor ref="127"/>
+    <successor ref="129"/>
+    <adjacentRight ref="114" drivingDir="same"/>
     <laneletType>driveWay</laneletType>
   </lanelet>
-  <lanelet id="113">
+  <lanelet id="114">
     <leftBound>
       <point>
         <x>-23.1530</x>
@@ -4894,16 +6761,14 @@
       </point>
       <lineMarking>solid</lineMarking>
     </rightBound>
-    <predecessor ref="112"/>
-    <predecessor ref="126"/>
-    <successor ref="128"/>
-    <successor ref="120"/>
-    <adjacentLeft ref="111" drivingDir="same"/>
+    <predecessor ref="113"/>
+    <predecessor ref="128"/>
+    <successor ref="130"/>
+    <successor ref="122"/>
+    <adjacentLeft ref="112" drivingDir="same"/>
     <laneletType>driveWay</laneletType>
-    <trafficSignRef ref="1075221207"/>
-    <trafficSignRef ref="1075121207"/>
   </lanelet>
-  <lanelet id="125">
+  <lanelet id="127">
     <leftBound>
       <point>
         <x>-3.8681</x>
@@ -4957,11 +6822,11 @@
       </point>
     </rightBound>
     <predecessor ref="102"/>
-    <successor ref="111"/>
-    <adjacentRight ref="126" drivingDir="same"/>
+    <successor ref="112"/>
+    <adjacentRight ref="128" drivingDir="same"/>
     <laneletType>driveWay</laneletType>
   </lanelet>
-  <lanelet id="126">
+  <lanelet id="128">
     <leftBound>
       <point>
         <x>-4.5741</x>
@@ -5015,11 +6880,11 @@
       </point>
     </rightBound>
     <predecessor ref="104"/>
-    <successor ref="113"/>
-    <adjacentLeft ref="125" drivingDir="same"/>
+    <successor ref="114"/>
+    <adjacentLeft ref="127" drivingDir="same"/>
     <laneletType>driveWay</laneletType>
   </lanelet>
-  <lanelet id="115">
+  <lanelet id="116">
     <leftBound>
       <point>
         <x>-4.5741</x>
@@ -5170,10 +7035,10 @@
       <lineMarking>solid</lineMarking>
     </rightBound>
     <predecessor ref="104"/>
-    <successor ref="114"/>
+    <successor ref="115"/>
     <laneletType>driveWay</laneletType>
   </lanelet>
-  <lanelet id="120">
+  <lanelet id="122">
     <leftBound>
       <point>
         <x>-23.2034</x>
@@ -5315,11 +7180,11 @@
       </point>
       <lineMarking>solid</lineMarking>
     </rightBound>
-    <predecessor ref="113"/>
-    <successor ref="110"/>
+    <predecessor ref="114"/>
+    <successor ref="111"/>
     <laneletType>driveWay</laneletType>
   </lanelet>
-  <lanelet id="127">
+  <lanelet id="129">
     <leftBound>
       <point>
         <x>-19.6223</x>
@@ -5372,12 +7237,12 @@
         <y>-23.1530</y>
       </point>
     </rightBound>
-    <predecessor ref="111"/>
-    <successor ref="118"/>
-    <adjacentRight ref="128" drivingDir="same"/>
+    <predecessor ref="112"/>
+    <successor ref="120"/>
+    <adjacentRight ref="130" drivingDir="same"/>
     <laneletType>driveWay</laneletType>
   </lanelet>
-  <lanelet id="128">
+  <lanelet id="130">
     <leftBound>
       <point>
         <x>-23.2034</x>
@@ -5430,12 +7295,12 @@
         <y>-26.5794</y>
       </point>
     </rightBound>
-    <predecessor ref="113"/>
-    <successor ref="119"/>
-    <adjacentLeft ref="127" drivingDir="same"/>
+    <predecessor ref="114"/>
+    <successor ref="121"/>
+    <adjacentLeft ref="129" drivingDir="same"/>
     <laneletType>driveWay</laneletType>
   </lanelet>
-  <lanelet id="118">
+  <lanelet id="120">
     <leftBound>
       <point>
         <x>-4.0784</x>
@@ -5464,13 +7329,13 @@
         <y>-23.2034</y>
       </point>
     </rightBound>
-    <predecessor ref="127"/>
-    <predecessor ref="117"/>
-    <successor ref="129"/>
-    <adjacentRight ref="119" drivingDir="same"/>
+    <predecessor ref="129"/>
+    <predecessor ref="118"/>
+    <successor ref="131"/>
+    <adjacentRight ref="121" drivingDir="same"/>
     <laneletType>driveWay</laneletType>
   </lanelet>
-  <lanelet id="119">
+  <lanelet id="121">
     <leftBound>
       <point>
         <x>-4.8227</x>
@@ -5500,16 +7365,16 @@
       </point>
       <lineMarking>solid</lineMarking>
     </rightBound>
-    <predecessor ref="128"/>
-    <predecessor ref="116"/>
-    <successor ref="130"/>
-    <successor ref="131"/>
-    <adjacentLeft ref="118" drivingDir="same"/>
+    <predecessor ref="130"/>
+    <predecessor ref="117"/>
+    <successor ref="132"/>
+    <successor ref="133"/>
+    <adjacentLeft ref="120" drivingDir="same"/>
     <laneletType>driveWay</laneletType>
     <trafficSignRef ref="1106120217"/>
     <trafficSignRef ref="1106220217"/>
   </lanelet>
-  <lanelet id="131">
+  <lanelet id="133">
     <leftBound>
       <point>
         <x>4.5741</x>
@@ -5651,11 +7516,11 @@
       </point>
       <lineMarking>solid</lineMarking>
     </rightBound>
-    <predecessor ref="119"/>
+    <predecessor ref="121"/>
     <successor ref="101"/>
     <laneletType>driveWay</laneletType>
   </lanelet>
-  <lanelet id="129">
+  <lanelet id="131">
     <leftBound>
       <point>
         <x>3.8681</x>
@@ -5708,12 +7573,12 @@
         <y>-4.8227</y>
       </point>
     </rightBound>
-    <predecessor ref="118"/>
-    <successor ref="122"/>
-    <adjacentRight ref="130" drivingDir="same"/>
+    <predecessor ref="120"/>
+    <successor ref="124"/>
+    <adjacentRight ref="132" drivingDir="same"/>
     <laneletType>driveWay</laneletType>
   </lanelet>
-  <lanelet id="130">
+  <lanelet id="132">
     <leftBound>
       <point>
         <x>4.5741</x>
@@ -5766,12 +7631,12 @@
         <y>-5.5365</y>
       </point>
     </rightBound>
-    <predecessor ref="119"/>
-    <successor ref="124"/>
-    <adjacentLeft ref="129" drivingDir="same"/>
+    <predecessor ref="121"/>
+    <successor ref="126"/>
+    <adjacentLeft ref="131" drivingDir="same"/>
     <laneletType>driveWay</laneletType>
   </lanelet>
-  <lanelet id="122">
+  <lanelet id="124">
     <leftBound>
       <point>
         <x>19.5797</x>
@@ -5801,12 +7666,12 @@
       </point>
     </rightBound>
     <predecessor ref="108"/>
-    <predecessor ref="129"/>
-    <successor ref="121"/>
-    <adjacentRight ref="124" drivingDir="same"/>
+    <predecessor ref="131"/>
+    <successor ref="123"/>
+    <adjacentRight ref="126" drivingDir="same"/>
     <laneletType>driveWay</laneletType>
   </lanelet>
-  <lanelet id="124">
+  <lanelet id="126">
     <leftBound>
       <point>
         <x>23.1530</x>
@@ -5837,10 +7702,10 @@
       <lineMarking>solid</lineMarking>
     </rightBound>
     <predecessor ref="107"/>
-    <predecessor ref="130"/>
-    <successor ref="123"/>
+    <predecessor ref="132"/>
+    <successor ref="125"/>
     <successor ref="106"/>
-    <adjacentLeft ref="122" drivingDir="same"/>
+    <adjacentLeft ref="124" drivingDir="same"/>
     <laneletType>driveWay</laneletType>
     <trafficSignRef ref="100221207"/>
     <trafficSignRef ref="100121207"/>
@@ -6820,7 +8685,7 @@
       </point>
     </rightBound>
     <predecessor ref="105"/>
-    <successor ref="122"/>
+    <successor ref="124"/>
     <adjacentRight ref="107" drivingDir="same"/>
     <laneletType>driveWay</laneletType>
   </lanelet>
@@ -6967,11 +8832,604 @@
       </point>
     </rightBound>
     <predecessor ref="105"/>
-    <successor ref="124"/>
+    <successor ref="126"/>
     <adjacentLeft ref="108" drivingDir="same"/>
     <laneletType>driveWay</laneletType>
     <trafficSignRef ref="1106328149"/>
     <trafficSignRef ref="1106428149"/>
+  </lanelet>
+  <lanelet id="134">
+    <leftBound>
+      <point>
+        <x>55.1767</x>
+        <y>-49.3781</y>
+      </point>
+      <point>
+        <x>45.4337</x>
+        <y>-37.2008</y>
+      </point>
+      <point>
+        <x>35.7673</x>
+        <y>-24.9470</y>
+      </point>
+      <point>
+        <x>33.6460</x>
+        <y>-22.8256</y>
+      </point>
+      <point>
+        <x>31.5248</x>
+        <y>-20.7042</y>
+      </point>
+      <point>
+        <x>31.5244</x>
+        <y>-20.7039</y>
+      </point>
+      <point>
+        <x>29.0808</x>
+        <y>-18.2604</y>
+      </point>
+      <point>
+        <x>27.8945</x>
+        <y>-17.0264</y>
+      </point>
+      <point>
+        <x>26.6487</x>
+        <y>-15.1173</y>
+      </point>
+      <point>
+        <x>25.9656</x>
+        <y>-12.9425</y>
+      </point>
+      <point>
+        <x>25.8961</x>
+        <y>-10.6639</y>
+      </point>
+      <point>
+        <x>25.9992</x>
+        <y>-9.9738</y>
+      </point>
+      <point>
+        <x>26.4071</x>
+        <y>-8.3113</y>
+      </point>
+      <point>
+        <x>26.4929</x>
+        <y>-7.9893</y>
+      </point>
+      <point>
+        <x>27.0112</x>
+        <y>-5.9088</y>
+      </point>
+      <point>
+        <x>27.0689</x>
+        <y>-5.6384</y>
+      </point>
+      <point>
+        <x>27.6283</x>
+        <y>1.0942</y>
+      </point>
+      <point>
+        <x>27.1279</x>
+        <y>5.3477</y>
+      </point>
+      <point>
+        <x>27.0803</x>
+        <y>5.5830</y>
+      </point>
+      <point>
+        <x>26.6213</x>
+        <y>7.5089</y>
+      </point>
+      <point>
+        <x>25.9286</x>
+        <y>10.2259</y>
+      </point>
+      <point>
+        <x>25.5957</x>
+        <y>11.6313</y>
+      </point>
+      <point>
+        <x>25.4325</x>
+        <y>14.7279</y>
+      </point>
+      <point>
+        <x>26.1400</x>
+        <y>17.7470</y>
+      </point>
+      <point>
+        <x>27.6620</x>
+        <y>20.4487</y>
+      </point>
+      <point>
+        <x>28.1914</x>
+        <y>21.0873</y>
+      </point>
+      <point>
+        <x>29.1950</x>
+        <y>22.1258</y>
+      </point>
+      <point>
+        <x>29.6489</x>
+        <y>22.5796</y>
+      </point>
+      <point>
+        <x>31.7703</x>
+        <y>24.7009</y>
+      </point>
+      <point>
+        <x>33.8916</x>
+        <y>26.8222</y>
+      </point>
+      <point>
+        <x>44.5180</x>
+        <y>38.1161</y>
+      </point>
+      <point>
+        <x>55.1762</x>
+        <y>49.3783</y>
+      </point>
+      <point>
+        <x>90.8525</x>
+        <y>76.8113</y>
+      </point>
+      <point>
+        <x>99.6353</x>
+        <y>79.8390</y>
+      </point>
+      <point>
+        <x>108.7222</x>
+        <y>81.7711</y>
+      </point>
+      <point>
+        <x>117.9770</x>
+        <y>82.5785</y>
+      </point>
+      <point>
+        <x>127.2612</x>
+        <y>82.2493</y>
+      </point>
+      <point>
+        <x>136.4356</x>
+        <y>80.7882</y>
+      </point>
+      <point>
+        <x>145.3628</x>
+        <y>78.2173</y>
+      </point>
+      <point>
+        <x>153.9090</x>
+        <y>74.5750</y>
+      </point>
+      <point>
+        <x>161.9462</x>
+        <y>69.9160</y>
+      </point>
+      <point>
+        <x>169.3541</x>
+        <y>64.3099</y>
+      </point>
+      <point>
+        <x>176.0216</x>
+        <y>57.8408</y>
+      </point>
+      <point>
+        <x>181.8488</x>
+        <y>50.6057</y>
+      </point>
+      <point>
+        <x>186.7484</x>
+        <y>42.7128</y>
+      </point>
+      <point>
+        <x>190.6471</x>
+        <y>34.2804</y>
+      </point>
+      <point>
+        <x>193.4864</x>
+        <y>25.4350</y>
+      </point>
+      <point>
+        <x>195.2238</x>
+        <y>16.3089</y>
+      </point>
+      <point>
+        <x>195.8612</x>
+        <y>6.9763</y>
+      </point>
+      <point>
+        <x>195.9</x>
+        <y>-1.0797</y>
+      </point>
+      <point>
+        <x>195.6465</x>
+        <y>-12.0361</y>
+      </point>
+      <point>
+        <x>195.6117</x>
+        <y>-12.5092</y>
+      </point>
+      <point>
+        <x>194.3356</x>
+        <y>-21.7111</y>
+      </point>
+      <point>
+        <x>191.9448</x>
+        <y>-30.6882</y>
+      </point>
+      <point>
+        <x>188.4753</x>
+        <y>-39.3060</y>
+      </point>
+      <point>
+        <x>183.9789</x>
+        <y>-47.4354</y>
+      </point>
+      <point>
+        <x>178.5230</x>
+        <y>-54.9546</y>
+      </point>
+      <point>
+        <x>172.1894</x>
+        <y>-61.7509</y>
+      </point>
+      <point>
+        <x>165.0730</x>
+        <y>-67.7225</y>
+      </point>
+      <point>
+        <x>157.2803</x>
+        <y>-72.7800</y>
+      </point>
+      <point>
+        <x>148.9281</x>
+        <y>-76.8476</y>
+      </point>
+      <point>
+        <x>140.1416</x>
+        <y>-79.8643</y>
+      </point>
+      <point>
+        <x>131.0523</x>
+        <y>-81.7850</y>
+      </point>
+      <point>
+        <x>121.7964</x>
+        <y>-82.5809</y>
+      </point>
+      <point>
+        <x>112.5127</x>
+        <y>-82.2401</y>
+      </point>
+      <point>
+        <x>103.3401</x>
+        <y>-80.7676</y>
+      </point>
+      <point>
+        <x>94.4162</x>
+        <y>-78.1855</y>
+      </point>
+      <point>
+        <x>85.8745</x>
+        <y>-74.5326</y>
+      </point>
+      <point>
+        <x>77.8430</x>
+        <y>-69.8635</y>
+      </point>
+      <point>
+        <x>70.4422</x>
+        <y>-64.2482</y>
+      </point>
+      <point>
+        <x>70.1678</x>
+        <y>-64.0111</y>
+      </point>
+      <point>
+        <x>62.2413</x>
+        <y>-56.4430</y>
+      </point>
+      <point>
+        <x>55.1767</x>
+        <y>-49.3781</y>
+      </point>
+    </leftBound>
+    <rightBound>
+      <point>
+        <x>56.2374</x>
+        <y>-48.3174</y>
+      </point>
+      <point>
+        <x>46.4944</x>
+        <y>-36.1402</y>
+      </point>
+      <point>
+        <x>36.8280</x>
+        <y>-23.8864</y>
+      </point>
+      <point>
+        <x>34.7067</x>
+        <y>-21.7650</y>
+      </point>
+      <point>
+        <x>32.5855</x>
+        <y>-19.6436</y>
+      </point>
+      <point>
+        <x>32.5851</x>
+        <y>-19.6432</y>
+      </point>
+      <point>
+        <x>30.1414</x>
+        <y>-17.1997</y>
+      </point>
+      <point>
+        <x>29.0270</x>
+        <y>-16.0428</y>
+      </point>
+      <point>
+        <x>28.0050</x>
+        <y>-14.4767</y>
+      </point>
+      <point>
+        <x>27.4446</x>
+        <y>-12.6925</y>
+      </point>
+      <point>
+        <x>27.3876</x>
+        <y>-10.8233</y>
+      </point>
+      <point>
+        <x>27.4722</x>
+        <y>-10.2572</y>
+      </point>
+      <point>
+        <x>27.8565</x>
+        <y>-8.6975</y>
+      </point>
+      <point>
+        <x>27.9423</x>
+        <y>-8.3754</y>
+      </point>
+      <point>
+        <x>28.4765</x>
+        <y>-6.2294</y>
+      </point>
+      <point>
+        <x>28.5374</x>
+        <y>-5.9443</y>
+      </point>
+      <point>
+        <x>29.1271</x>
+        <y>1.1536</y>
+      </point>
+      <point>
+        <x>28.5995</x>
+        <y>5.6378</y>
+      </point>
+      <point>
+        <x>28.5490</x>
+        <y>5.8878</y>
+      </point>
+      <point>
+        <x>28.0748</x>
+        <y>7.8794</y>
+      </point>
+      <point>
+        <x>27.3821</x>
+        <y>10.5964</y>
+      </point>
+      <point>
+        <x>27.0676</x>
+        <y>11.9205</y>
+      </point>
+      <point>
+        <x>26.9266</x>
+        <y>14.5949</y>
+      </point>
+      <point>
+        <x>27.5376</x>
+        <y>17.2023</y>
+      </point>
+      <point>
+        <x>28.8521</x>
+        <y>19.5356</y>
+      </point>
+      <point>
+        <x>29.3092</x>
+        <y>20.0871</y>
+      </point>
+      <point>
+        <x>30.2556</x>
+        <y>21.0651</y>
+      </point>
+      <point>
+        <x>30.7095</x>
+        <y>21.5189</y>
+      </point>
+      <point>
+        <x>32.8309</x>
+        <y>23.6402</y>
+      </point>
+      <point>
+        <x>34.9523</x>
+        <y>25.7615</y>
+      </point>
+      <point>
+        <x>45.5786</x>
+        <y>37.0554</y>
+      </point>
+      <point>
+        <x>56.2368</x>
+        <y>48.3176</y>
+      </point>
+      <point>
+        <x>91.4272</x>
+        <y>75.4258</y>
+      </point>
+      <point>
+        <x>100.0364</x>
+        <y>78.3937</y>
+      </point>
+      <point>
+        <x>108.9437</x>
+        <y>80.2875</y>
+      </point>
+      <point>
+        <x>118.0157</x>
+        <y>81.0790</y>
+      </point>
+      <point>
+        <x>127.1164</x>
+        <y>80.7563</y>
+      </point>
+      <point>
+        <x>136.1095</x>
+        <y>79.3241</y>
+      </point>
+      <point>
+        <x>144.8602</x>
+        <y>76.8040</y>
+      </point>
+      <point>
+        <x>153.2376</x>
+        <y>73.2337</y>
+      </point>
+      <point>
+        <x>161.1160</x>
+        <y>68.6667</y>
+      </point>
+      <point>
+        <x>168.3774</x>
+        <y>63.1715</y>
+      </point>
+      <point>
+        <x>174.9131</x>
+        <y>56.8302</y>
+      </point>
+      <point>
+        <x>180.6252</x>
+        <y>49.7380</y>
+      </point>
+      <point>
+        <x>185.4280</x>
+        <y>42.0011</y>
+      </point>
+      <point>
+        <x>189.2496</x>
+        <y>33.7354</y>
+      </point>
+      <point>
+        <x>192.0328</x>
+        <y>25.0648</y>
+      </point>
+      <point>
+        <x>193.7359</x>
+        <y>16.1190</y>
+      </point>
+      <point>
+        <x>194.3615</x>
+        <y>6.9465</y>
+      </point>
+      <point>
+        <x>194.4</x>
+        <y>-1.0797</y>
+      </point>
+      <point>
+        <x>194.1502</x>
+        <y>-11.9307</y>
+      </point>
+      <point>
+        <x>194.1161</x>
+        <y>-12.3944</y>
+      </point>
+      <point>
+        <x>192.8652</x>
+        <y>-21.4145</y>
+      </point>
+      <point>
+        <x>190.5217</x>
+        <y>-30.2142</y>
+      </point>
+      <point>
+        <x>187.1207</x>
+        <y>-38.6617</y>
+      </point>
+      <point>
+        <x>182.7132</x>
+        <y>-46.6304</y>
+      </point>
+      <point>
+        <x>177.3652</x>
+        <y>-54.0010</y>
+      </point>
+      <point>
+        <x>171.1567</x>
+        <y>-60.6630</y>
+      </point>
+      <point>
+        <x>164.1809</x>
+        <y>-66.5166</y>
+      </point>
+      <point>
+        <x>156.5422</x>
+        <y>-71.4741</y>
+      </point>
+      <point>
+        <x>148.3551</x>
+        <y>-75.4613</y>
+      </point>
+      <point>
+        <x>139.7422</x>
+        <y>-78.4184</y>
+      </point>
+      <point>
+        <x>130.8326</x>
+        <y>-80.3012</y>
+      </point>
+      <point>
+        <x>121.7596</x>
+        <y>-81.0814</y>
+      </point>
+      <point>
+        <x>112.6594</x>
+        <y>-80.7472</y>
+      </point>
+      <point>
+        <x>103.6681</x>
+        <y>-79.3039</y>
+      </point>
+      <point>
+        <x>94.9205</x>
+        <y>-76.7729</y>
+      </point>
+      <point>
+        <x>86.5476</x>
+        <y>-73.1921</y>
+      </point>
+      <point>
+        <x>78.6749</x>
+        <y>-68.6153</y>
+      </point>
+      <point>
+        <x>71.4203</x>
+        <y>-63.1110</y>
+      </point>
+      <point>
+        <x>71.1513</x>
+        <y>-62.8785</y>
+      </point>
+      <point>
+        <x>63.3020</x>
+        <y>-55.3824</y>
+      </point>
+      <point>
+        <x>56.2374</x>
+        <y>-48.3174</y>
+      </point>
+    </rightBound>
+    <predecessor ref="134"/>
+    <successor ref="134"/>
+    <laneletType>sidewalk</laneletType>
   </lanelet>
   <lanelet id="101">
     <leftBound>
@@ -7363,7 +9821,7 @@
       </point>
       <lineMarking>solid</lineMarking>
     </rightBound>
-    <predecessor ref="131"/>
+    <predecessor ref="133"/>
     <successor ref="103"/>
     <successor ref="100"/>
     <adjacentLeft ref="105" drivingDir="opposite"/>
@@ -7561,85 +10019,116 @@
     </position>
     <virtual>false</virtual>
   </trafficSign>
-  <intersection id="132">
+  <intersection id="135">
     <incoming id="0">
       <incomingLanelet ref="107"/>
-      <successorsStraight ref="124"/>
+      <successorsStraight ref="126"/>
+      <isLeftOf ref="2"/>
     </incoming>
     <incoming id="1">
       <incomingLanelet ref="107"/>
       <incomingLanelet ref="108"/>
-      <successorsStraight ref="122"/>
       <successorsStraight ref="124"/>
-    </incoming>
-    <incoming id="2">
-      <incomingLanelet ref="118"/>
-      <incomingLanelet ref="119"/>
-      <successorsRight ref="131"/>
-      <successorsLeft ref="129"/>
-      <successorsLeft ref="130"/>
-      <isLeftOf ref="1"/>
-    </incoming>
-    <incoming id="3">
-      <incomingLanelet ref="119"/>
-      <successorsRight ref="131"/>
-      <successorsLeft ref="130"/>
-      <isLeftOf ref="1"/>
-    </incoming>
-  </intersection>
-  <intersection id="133">
-    <incoming id="0">
-      <incomingLanelet ref="111"/>
-      <incomingLanelet ref="113"/>
-      <successorsRight ref="120"/>
-      <successorsLeft ref="128"/>
-      <successorsLeft ref="127"/>
-      <isLeftOf ref="3"/>
-    </incoming>
-    <incoming id="1">
-      <incomingLanelet ref="113"/>
-      <successorsRight ref="120"/>
-      <successorsLeft ref="128"/>
-      <isLeftOf ref="3"/>
-    </incoming>
-    <incoming id="2">
-      <incomingLanelet ref="116"/>
-      <successorsStraight ref="119"/>
-    </incoming>
-    <incoming id="3">
-      <incomingLanelet ref="116"/>
-      <incomingLanelet ref="117"/>
-      <successorsStraight ref="118"/>
-      <successorsStraight ref="119"/>
-    </incoming>
-  </intersection>
-  <intersection id="134">
-    <incoming id="0">
-      <incomingLanelet ref="102"/>
-      <incomingLanelet ref="104"/>
-      <successorsRight ref="115"/>
-      <successorsLeft ref="125"/>
-      <successorsLeft ref="126"/>
-      <isLeftOf ref="3"/>
-    </incoming>
-    <incoming id="1">
-      <incomingLanelet ref="104"/>
-      <successorsRight ref="115"/>
-      <successorsLeft ref="126"/>
-      <isLeftOf ref="3"/>
+      <successorsStraight ref="126"/>
+      <isLeftOf ref="2"/>
     </incoming>
     <incoming id="2">
       <incomingLanelet ref="109"/>
-      <incomingLanelet ref="112"/>
-      <successorsStraight ref="113"/>
-      <successorsStraight ref="111"/>
+      <successorsStraight ref="109"/>
+      <isLeftOf ref="5"/>
     </incoming>
     <incoming id="3">
-      <incomingLanelet ref="112"/>
-      <successorsStraight ref="113"/>
+      <incomingLanelet ref="120"/>
+      <incomingLanelet ref="121"/>
+      <successorsRight ref="133"/>
+      <successorsLeft ref="131"/>
+      <successorsLeft ref="132"/>
+      <isLeftOf ref="1"/>
+    </incoming>
+    <incoming id="4">
+      <incomingLanelet ref="121"/>
+      <successorsRight ref="133"/>
+      <successorsLeft ref="132"/>
+      <isLeftOf ref="1"/>
+    </incoming>
+    <incoming id="5">
+      <incomingLanelet ref="134"/>
+      <successorsStraight ref="134"/>
     </incoming>
   </intersection>
-  <intersection id="135">
+  <intersection id="136">
+    <incoming id="0">
+      <incomingLanelet ref="109"/>
+      <successorsStraight ref="109"/>
+      <isLeftOf ref="5"/>
+    </incoming>
+    <incoming id="1">
+      <incomingLanelet ref="112"/>
+      <incomingLanelet ref="114"/>
+      <successorsRight ref="122"/>
+      <successorsLeft ref="129"/>
+      <successorsLeft ref="130"/>
+      <isLeftOf ref="4"/>
+    </incoming>
+    <incoming id="2">
+      <incomingLanelet ref="114"/>
+      <successorsRight ref="122"/>
+      <successorsLeft ref="130"/>
+      <isLeftOf ref="4"/>
+    </incoming>
+    <incoming id="3">
+      <incomingLanelet ref="117"/>
+      <successorsStraight ref="121"/>
+    </incoming>
+    <incoming id="4">
+      <incomingLanelet ref="117"/>
+      <incomingLanelet ref="118"/>
+      <successorsStraight ref="120"/>
+      <successorsStraight ref="121"/>
+    </incoming>
+    <incoming id="5">
+      <incomingLanelet ref="119"/>
+      <successorsStraight ref="119"/>
+      <isLeftOf ref="2"/>
+    </incoming>
+  </intersection>
+  <intersection id="137">
+    <incoming id="0">
+      <incomingLanelet ref="102"/>
+      <incomingLanelet ref="104"/>
+      <successorsRight ref="116"/>
+      <successorsLeft ref="128"/>
+      <successorsLeft ref="127"/>
+      <isLeftOf ref="5"/>
+    </incoming>
+    <incoming id="1">
+      <incomingLanelet ref="104"/>
+      <successorsRight ref="116"/>
+      <successorsLeft ref="128"/>
+      <isLeftOf ref="5"/>
+    </incoming>
+    <incoming id="2">
+      <incomingLanelet ref="109"/>
+      <successorsStraight ref="109"/>
+      <isLeftOf ref="1"/>
+    </incoming>
+    <incoming id="3">
+      <incomingLanelet ref="110"/>
+      <incomingLanelet ref="113"/>
+      <successorsStraight ref="112"/>
+      <successorsStraight ref="114"/>
+    </incoming>
+    <incoming id="4">
+      <incomingLanelet ref="113"/>
+      <successorsStraight ref="114"/>
+    </incoming>
+    <incoming id="5">
+      <incomingLanelet ref="119"/>
+      <successorsStraight ref="119"/>
+      <isLeftOf ref="4"/>
+    </incoming>
+  </intersection>
+  <intersection id="138">
     <incoming id="0">
       <incomingLanelet ref="100"/>
       <incomingLanelet ref="103"/>
@@ -7651,17 +10140,27 @@
       <successorsStraight ref="104"/>
     </incoming>
     <incoming id="2">
-      <incomingLanelet ref="122"/>
-      <incomingLanelet ref="124"/>
-      <successorsRight ref="106"/>
-      <successorsLeft ref="121"/>
-      <successorsLeft ref="123"/>
-      <isLeftOf ref="1"/>
+      <incomingLanelet ref="109"/>
+      <successorsStraight ref="109"/>
+      <isLeftOf ref="5"/>
     </incoming>
     <incoming id="3">
       <incomingLanelet ref="124"/>
+      <incomingLanelet ref="126"/>
       <successorsRight ref="106"/>
       <successorsLeft ref="123"/>
+      <successorsLeft ref="125"/>
+      <isLeftOf ref="5"/>
+    </incoming>
+    <incoming id="4">
+      <incomingLanelet ref="126"/>
+      <successorsRight ref="106"/>
+      <successorsLeft ref="125"/>
+      <isLeftOf ref="5"/>
+    </incoming>
+    <incoming id="5">
+      <incomingLanelet ref="134"/>
+      <successorsStraight ref="134"/>
       <isLeftOf ref="1"/>
     </incoming>
   </intersection>
