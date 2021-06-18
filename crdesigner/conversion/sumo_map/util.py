@@ -195,6 +195,10 @@ def _erode_lanelets(lanelet_network: LaneletNetwork,
     :return:
     """
     assert radius > 0
+    if isinstance(lanelet_network, LaneletNetwork):
+        lanelets = lanelet_network.lanelets
+    else:
+        lanelets = lanelet_network
 
     # erode length
     def shorten(vertices: np.ndarray, length: float) -> np.ndarray:
@@ -209,7 +213,7 @@ def _erode_lanelets(lanelet_network: LaneletNetwork,
         return LineString(vertices).length
 
     lanelets_ero = []
-    for lanelet in lanelet_network.lanelets:
+    for lanelet in lanelets:
         lanelet = deepcopy(lanelet)
 
         # erode width

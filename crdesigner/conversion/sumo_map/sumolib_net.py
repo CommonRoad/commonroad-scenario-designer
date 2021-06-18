@@ -66,6 +66,8 @@ def _get_default(d: Dict[_K, _V], key: _K, default: Optional[_VV] = None, map: C
         return map(d[key])
     except KeyError:
         return default
+    except ValueError:
+        return None
 
 
 def sumo_net_from_xml(file: str) -> Net:
@@ -134,8 +136,12 @@ def sumo_net_from_xml(file: str) -> Net:
             x = _get_default(elem.attrib, "x", None, float)
             y = _get_default(elem.attrib, "y", None, float)
             z = _get_default(elem.attrib, "z", None, float)
+            id_ = _get_default(elem.attrib, "id", None, int)
+            if id_ is None:
+                id_ = _get_default(elem.attrib, "id", None, str)
+                assert id_ is not None
             junction = Junction(
-                id=_get_default(elem.attrib, "id", None, int),
+                id=id_,
                 junction_type=_get_default(elem.attrib, "type", None, JunctionType),
                 coord=np.array([x, y, z] if z is not None else [x, y]),
                 shape=_get_default(elem.attrib, "shape", None, from_shape_string),
@@ -306,6 +312,8 @@ class Node:
         self.shape: Optional[np.ndarray] = shape
         self.tl = tl
         self.right_of_way = right_of_way
+        self.zipper = True
+        self.keep_clear = False
 
     def add_outgoing(self, edge: 'Edge'):
         self._outgoing.append(edge)
@@ -340,6 +348,8 @@ class Node:
         if self._prohibits is not None:
             # TODO: convert prohibits
             pass
+        if self.keep_clear is False:
+            node.set("keepClear", "false")
         if self.inc_lanes:
             node.set("incLanes", " ".join([str(l.id) for l in self.inc_lanes]))
         if self.int_lanes:
@@ -1488,17 +1498,16 @@ class TLS:
 #
 
 class Roundabout:
-    def __init__(self, nodes: List[Node], edges: List[Edge] = None):
-        self._nodes = nodes
+    def __init__(self, edges: List[Edge] = None):
         self._edges = edges if edges is not None else []
 
-    @property
-    def nodes(self) -> List[Node]:
-        return self._nodes
-
-    @nodes.setter
-    def nodes(self, nodes: List[Node]):
-        self._nodes = nodes
+    # @property
+    # def nodes(self) -> List[Node]:
+    #     return self._nodes
+    #
+    # @nodes.setter
+    # def nodes(self, nodes: List[Node]):
+    #     self._nodes = nodes
 
     @property
     def edges(self) -> List[Edge]:
@@ -1507,6 +1516,11 @@ class Roundabout:
     @edges.setter
     def edges(self, edges: List[Edge]):
         self._edges = edges
+
+    def to_xml(self)  -> str:
+        roundabout = ET.Element("roundabout")
+        roundabout.set("edges", " ".join([str(e.id) for e in self.edges]))
+        return ET.tostring(roundabout, encoding="unicode")
 
 
 #
