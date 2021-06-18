@@ -76,7 +76,7 @@ class TestOpenDriveBaseClass(unittest.TestCase):
                 planning_problem_set=PlanningProblemSet(),
                 author="",
                 affiliation="",
-                source="OpenDRIVE 2 Lanelet Converter",
+                source="CommonRoad Scenario Designer",
                 tags={Tag.URBAN, Tag.HIGHWAY},
             )
             writer.write_to_file(self.out_path + "/" + self.xml_output_name + ".xml", OverwriteExistingFile.ALWAYS)
