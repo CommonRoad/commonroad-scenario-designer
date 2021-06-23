@@ -712,7 +712,7 @@ class ConversionLaneletNetwork(LaneletNetwork):
         """
         for successor_incoming in self.find_lanelet_by_id(incoming_lane).successor:
             successor_incoming_lanelet = self.find_lanelet_by_id(successor_incoming)
-            successor_incoming_lanelet.lanelet_type = "intersection"
+            #successor_incoming_lanelet.lanelet_type = "intersection"   TODO assign only to main intersection lanelets not to incomings or other lanelets, e.g., check KA-Suedtangente scenario
             # Also check if the successor of a incoming successor intersects with another successor of an incoming
             self.check_lanelet_type_for_successor_of_successor(successor_incoming_lanelet, intersection_map)
 
