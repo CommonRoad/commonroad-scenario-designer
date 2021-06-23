@@ -765,7 +765,7 @@ class ConversionLaneletNetwork(LaneletNetwork):
                 if successor != lanelet.lanelet_id:
                     successor_lane_polygon = self.find_lanelet_by_id(successor).convert_to_polygon()
                     lanelet_polygon = lanelet.convert_to_polygon()
-                    if successor_lane_polygon.shapely_object.crosses(lanelet_polygon.shapely_object):
+                    if successor_lane_polygon.shapely_object.intersects(lanelet_polygon.shapely_object):
                         return True
         return False
 
