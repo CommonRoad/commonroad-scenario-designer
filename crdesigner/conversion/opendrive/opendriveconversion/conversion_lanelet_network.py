@@ -655,7 +655,7 @@ class ConversionLaneletNetwork(LaneletNetwork):
             return successor.adj_left is None
         return True
 
-    def create_intersection(self, intersection_map, intersection_id):
+        def create_intersection(self, intersection_map, intersection_id):
         """
         Creates an intersection inside the lanelet network object
         Args:
@@ -678,18 +678,28 @@ class ConversionLaneletNetwork(LaneletNetwork):
             successor_straight = set()
 
             for incoming_lane in incoming_lanelet_set:
+                successors = list()
                 self.set_intersection_lanelet_type(incoming_lane, intersection_map)
                 successor_directions = self.get_successor_directions(self.find_lanelet_by_id(incoming_lane))
+                print(incoming_lane)
                 for successor, direction in successor_directions.items():
                     if direction == "right":
                         successor_right.add(successor)
+                        successors.append(successor)
                     elif direction == "left":
                         successor_left.add(successor)
+                        successors.append(successor)
                     elif direction == "straight":
                         successor_straight.add(successor)
+                        successors.append(successor)
                     else:
                         print(direction)
                         warnings.warn("Incorrect direction assigned to successor of incoming lanelet in intersection")
+                        
+                print(successors)
+                for suc in successors:
+                    print(self.check_if_lanelet_in_intersection(self.find_lanelet_by_id(suc), intersection_map))
+                print('''''')
 
             intersection_incoming_lane = IntersectionIncomingElement(incoming_id_counter, incoming_lanelet_set,
                                                                      successor_right, successor_straight,
@@ -701,6 +711,16 @@ class ConversionLaneletNetwork(LaneletNetwork):
             incoming_id_counter += 1
         intersection = Intersection(intersection_id, intersection_incoming_lanes)
         self.find_left_of(intersection.incomings)
+
+        '''
+        for incomings in intersection.incomings:
+            for incoming_lane in incoming_lanelet_set:
+                #print(incomings.incoming_id)
+                for incomingsid in incomings.incoming_lanelets:
+                    print(incomingsid)
+                print(self.check_if_lanelet_in_intersection(self.find_lanelet_by_id(incomingsid), intersection_map))
+                print('''''')
+        '''
         self.add_intersection(intersection)
 
     def set_intersection_lanelet_type(self, incoming_lane, intersection_map):
