@@ -326,7 +326,7 @@ class Node:
         self.tl = tl
         self.right_of_way = right_of_way
         self.zipper = True
-        self.keep_clear = False
+        self.keep_clear = True
 
     def add_outgoing(self, edge: 'Edge'):
         self._outgoing.append(edge)

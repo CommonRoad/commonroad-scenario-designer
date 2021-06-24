@@ -428,7 +428,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
             """
             helper_matrix = lanelet.right_vertices - lanelet.left_vertices
             distance_array = helper_matrix[:, 0] ** 2 + helper_matrix[:, 1] ** 2
-            average_width = np.sqrt(np.min(distance_array))
+            average_width = np.sqrt(np.max(distance_array))
             return average_width
 
         for edge_id, lanelet_ids in self.lanes_dict.items():
@@ -603,12 +603,55 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                     continue
                 cluster_instruction = self.get_cluster_instruction(intersection, lanelet_network, intersecting_edges)
                 print(cluster_instruction)
+                intersect_any = False
                 if cluster_instruction != ClusterInstruction.NO_CLUSTERING:
+                    for incoming in intersection.incomings:
+                        intersecting_lanelets = {
+                            lanelet_id
+                            for inc_tmp in intersection.incomings
+                            for lanelet_id in
+                            inc_tmp.successors_right | inc_tmp.successors_left | inc_tmp.successors_straight
+                            if incoming.incoming_id != inc_tmp.incoming_id
+                        }
+                        intersecting_lanelets -= incoming.incoming_lanelets
+                        intersection_edges_others: List[Edge] = list(self.edges[self.lanelet_id2edge_id[step]]
+                                                              for step in intersecting_lanelets)
+                        out_lanelets_self = {
+                            lanelet_id
+                            for lanelet_id in
+                            incoming.successors_right | incoming.successors_left | incoming.successors_straight
+                        }
+                        out_edges_self: List[Edge] = list(self.edges[self.lanelet_id2edge_id[step]]
+                                                              for step in out_lanelets_self)
+                        intersection_edges_others = list(set(intersection_edges_others) - set(out_edges_self))
+                        # check whether any lanelets of the intersection actually intersect, else remove the whole cluster
+                        intersect = False
+                        for e1 in out_edges_self:
+                            for e2 in intersection_edges_others:
+                                if e2.id in intersecting_edges[e1.id]:
+                                    intersect = intersect_any = True
+                                    # delete_intersections.append(intersection.intersection_id)
+                                    break
+                            if intersect:
+                                break
+                        if intersect is False:
+                            for inc2 in intersection.incomings:
+                                if inc2.left_of == incoming.incoming_id:
+                                    inc2.left_of = incoming.left_of
+                            del intersection._incomings[intersection._incomings.index(incoming)]
+
+                    if intersect_any is False:
+                        continue
+
+                    if len(intersection.incomings) <= 1:
+                        delete_intersections.append(intersection.intersection_id)
+
+                    # get all edges of intersection
                     intersecting_lanelets = {
                         lanelet_id
-                        for incoming in intersection.incomings
+                        for inc_tmp in intersection.incomings
                         for lanelet_id in
-                        incoming.successors_right | incoming.successors_left | incoming.successors_straight
+                        inc_tmp.successors_right | inc_tmp.successors_left | inc_tmp.successors_straight
                     }
                     incoming_lanelets = {
                         lanelet_id
@@ -618,21 +661,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                     }
                     intersecting_lanelets -= incoming_lanelets
                     intersection_edges: List[Edge] = list(self.edges[self.lanelet_id2edge_id[step]]
-                                                          for step in intersecting_lanelets)
-
-                    # check whether any lanelets of the intersection actually intersect, else remove the whole cluster
-                    intersect = False
-                    for i1, e1 in enumerate(intersection_edges[:-1]):
-                        for e2 in intersection_edges[i1 + 1:]:
-                            if e2.id in intersecting_edges[e1.id]:
-                                intersect = True
-                                # delete_intersections.append(intersection.intersection_id)
-                                break
-                        if intersect:
-                            break
-
-                    if intersect is False:
-                        continue
+                                                                 for step in intersecting_lanelets)
 
                     clusters[next_cluster_id] = {node for e in intersection_edges for node in [e.from_node, e.to_node]}
                     if cluster_instruction == ClusterInstruction.ZIPPER:
@@ -645,9 +674,14 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                         self.lanelet_network.find_lanelet_by_id(lanelet_id) for lanelet_id in intersection.crossings
                     }
                     next_cluster_id += 1
+                else:
+                    delete_intersections.append(intersection.intersection_id)
 
             for inter_id in delete_intersections:
                 del lanelet_network._intersections[inter_id]
+            self.lanelet_network.cleanup_traffic_lights()
+            self.delete_traffic_light_if_no_intersection()
+
             return clusters, clusters_crossing, cluster_types, next_cluster_id
 
         clusters, clusters_crossing, cluster_types, next_cluster_id = cluster_lanelets_from_intersection(
@@ -1038,13 +1072,23 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
             #
             intersection = incoming_lanelet_2_intersection[lanelet.lanelet_id] \
                 if lanelet.lanelet_id in incoming_lanelet_2_intersection else None
-
+            # if intersection is None:
+            #     print("NO INCOMING:", lanelet.lanelet_id)
+            #     raise ValueError
             def calc_direction_2_connections(edge: Edge):
                 connections_init = {}
-                incoming_elem = intersection.map_incoming_lanelets[lanelet.lanelet_id]
-                connections_init[TrafficLightDirection.STRAIGHT] = incoming_elem.successors_straight
-                connections_init[TrafficLightDirection.LEFT] = incoming_elem.successors_left
-                connections_init[TrafficLightDirection.RIGHT] = incoming_elem.successors_right
+                if intersection is not None:
+                    incoming_elem = intersection.map_incoming_lanelets[lanelet.lanelet_id]
+                    connections_init[TrafficLightDirection.STRAIGHT] = incoming_elem.successors_straight
+                    connections_init[TrafficLightDirection.LEFT] = incoming_elem.successors_left
+                    connections_init[TrafficLightDirection.RIGHT] = incoming_elem.successors_right
+                elif len(lanelet.successor) == 1:
+                    connections_init[TrafficLightDirection.STRAIGHT] = set(lanelet.successor)
+                    connections_init[TrafficLightDirection.LEFT] = set(lanelet.successor)
+                    connections_init[TrafficLightDirection.RIGHT] = set(lanelet.successor)
+                else:
+                    raise ValueError
+
                 connections = defaultdict(set)
                 for direction, init_queue in connections_init.items():
                     queue = [self.edges[self.lanelet_id2edge_id[l]] for l in init_queue]
@@ -1060,7 +1104,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                                                           if c.from_edge == edge and c.to_edge == current)
                             continue
                         queue += current.outgoing
-                return connections
+                return dict(connections)
 
             # successor_edges = succeeding_new_edges(edge)
             direction_2_connections = calc_direction_2_connections(edge)
@@ -1117,13 +1161,17 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                 #     self.logger.exception(f"Unknown TrafficLightDirection: {light.direction}, "
                 #                       f"could not add successors for lanelet {lanelet}")
 
+        light_2_connections = dict(light_2_connections)
         # generate traffic lights in SUMO format
         encoder = TrafficLightEncoder(self.conf)
         for to_node, lights in node_2_traffic_light.items():
-            program, connections = encoder.encode(to_node, list(lights), light_2_connections)
-            self.traffic_light_signals.add_program(program)
-            for connection in connections:
-                self.traffic_light_signals.add_connection(connection)
+            try:
+                program, connections = encoder.encode(to_node, list(lights), light_2_connections)
+                self.traffic_light_signals.add_program(program)
+                for connection in connections:
+                    self.traffic_light_signals.add_connection(connection)
+            except:
+                continue
 
     def _is_merged_edge(self, edge: Edge, merged_dictionary):
         """
@@ -1202,6 +1250,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         lanelet = self.lanelet_network.find_lanelet_by_id(lanelet_id)
         guess_signals = bool(lanelet.traffic_lights)
 
+
         # auto generate the TLS with netconvert
         junction = self.lanelet_id2junction[lanelet_id]
         command = f"netconvert" \
@@ -1209,7 +1258,8 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                   f" --output-file={self._output_file}" \
                   f" --tls.set={junction.id}" \
                   f" --tls.guess=true" \
-                  f" --geometry.remove.min-length=2.0" \
+                f" --geometry.remove.keep-edges.explicit"\
+                  f" --geometry.remove.min-length=0.0" \
                   f" --tls.guess-signals={'true' if guess_signals else 'false'}" \
                   f" --tls.group-signals=true" \
                   f" --tls.green.time={green_time}" \
@@ -2198,18 +2248,35 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         if successor_criterion is True and adj_other is True:
             return zipper_return
 
-        incoming_lanelets = set(intersection.map_incoming_lanelets.keys())
-        # check whether all incoming lanelets are laterally adjacent
-        adjacency_criterion = True
-        zipper_criterion = False
-        for inc_l in incoming_lanelets:
-            adjacent_lanelets = get_all_adj(inc_l)
-            if not adjacent_lanelets & incoming_lanelets:
+
+        lanelet_2_inc = intersection.map_incoming_lanelets
+        inc_lanelets = set(lanelet_2_inc.keys())
+        inc_2_incoming_lanelets = defaultdict(list)
+        for lanelet, incoming in lanelet_2_inc.items():
+            inc_2_incoming_lanelets[incoming].append(lanelet)
+
+        # check whether in all incoming at least one lanelet is adjacent to another incoming
+        adjacency_criterion = True  # is falsified if at least one incoming doesn't fulfil criterion
+        # check whether two incomings are merging
+        zipper_criterion = False  # only needs to occur once
+        for inc, inc_lanelets in inc_2_incoming_lanelets.items():
+            is_adj_with_other_incoming = False
+            for l_id in inc_lanelets:
+                is_adj_with_other_incoming = False
+                other_inc_lanelets = set(itertools.chain.from_iterable(
+                    [incoming_lanelets for inc_other, incoming_lanelets in inc_2_incoming_lanelets.items() if
+                     inc != inc_other]))
+                if set(get_all_adj(l_id)) & other_inc_lanelets:
+                    is_adj_with_other_incoming = True
+                if set(lanelet_network.find_lanelet_by_id(l_id).successor) & get_all_successors(other_inc_lanelets):
+                    zipper_criterion = True
+
+            if is_adj_with_other_incoming is False:
                 adjacency_criterion = False
-            elif set(lanelet_network.find_lanelet_by_id(inc_l).successor) & get_all_successors(adjacent_lanelets):
-                zipper_criterion = True
-            if adjacency_criterion is False and zipper_criterion is False:
-                break
+
+        # zipper with > 2 edges undefined
+        if len(intersection.incomings) == 2:
+            zipper_criterion = False
 
         if adjacency_criterion is True:
             if zipper_criterion is True:
@@ -2221,9 +2288,13 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         non_intersecting_criterion = True
         succ_edges = {self.lanelet_id2edge_id[s] for s in all_successors}
         for edge_id in succ_edges:
-            if edge_id in intersection_edges and set(intersection_edges[edge_id]) & succ_edges:
-                non_intersecting_criterion = False
-                break
+            if edge_id in intersection_edges:
+                intersecting_edges_tmp = set(intersection_edges[edge_id]) & succ_edges
+                for edge_tmp in intersecting_edges_tmp:
+                    # intersections are not counted, if they occur between forking edges
+                    if self.edges[edge_id].from_node.id != self.edges[edge_tmp].from_node.id:
+                        non_intersecting_criterion = False
+                        break
 
         if non_intersecting_criterion is True:
             return ClusterInstruction.NO_CLUSTERING
@@ -2265,6 +2336,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
             self.logger.info(
                 'SUMO traffic generation: neither total_lane_length nor veh_per_second is defined. '
                 'For each second there are two vehicles generated.')
+
         # step_per_departure = ((conf.departure_interval_vehicles.end - conf.departure_interval_vehicles.start) / n_vehicles_max)
 
         # filenames
@@ -2360,6 +2432,18 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
             f.write(reparsed.toprettyxml(indent="\t", newl="\n"))
 
         return sumo_cfg_file
+
+    def delete_traffic_light_if_no_intersection(self):
+        """
+        Delete traffic lights, if lanelet is not an incoming of an intersection.
+        :return:
+        """
+        incoming_mapping = self.lanelet_network.map_inc_lanelets_to_intersections
+        for l_id, lanelet in self.lanelet_network._lanelets.items():
+            if len(lanelet.traffic_lights) > 0 and len(lanelet.successor) > 1 and lanelet not in incoming_mapping:
+                lanelet._traffic_lights = set()
+
+        self.lanelet_network.cleanup_traffic_lights()
 
     def draw_network(self, nodes: Dict[int, Node], edges: Dict[int, Edge], figsize=(20, 20)):
         return

@@ -107,8 +107,8 @@ class SumoConfig(DefaultConfig):
     departure_interval_vehicles = Interval(0, 30)
     # max. number of vehicles in route file
     n_vehicles_max: int = 30
-    # max. number of vehicles per km
-    max_veh_per_km: int = 20
+    # max. number of vehicles per km / sec
+    max_veh_per_km: int = 25
     # random seed for deterministic sumo traffic generation
     random_seed: int = 1234
 
