@@ -668,7 +668,7 @@ class ConversionLaneletNetwork(LaneletNetwork):
         # If different incoming lanelets have same successors, combine into set
         incoming_lanelet_ids = self.combine_common_incoming_lanelets(intersection_map)
         intersection_incoming_lanes = list()
-
+        
         for incoming_lanelet_set in incoming_lanelet_ids:
             # Since all the lanes have the same successors,
             # we simply use the first one to check for the successor directions
@@ -676,32 +676,39 @@ class ConversionLaneletNetwork(LaneletNetwork):
             successor_right = set()
             successor_left = set()
             successor_straight = set()
+            successors = list()
 
             for incoming_lane in incoming_lanelet_set:
                 self.set_intersection_lanelet_type(incoming_lane, intersection_map)
                 successor_directions = self.get_successor_directions(self.find_lanelet_by_id(incoming_lane))
+                
                 for successor, direction in successor_directions.items():
                     if direction == "right":
                         successor_right.add(successor)
+                        successors.append(successor)
                     elif direction == "left":
                         successor_left.add(successor)
+                        successors.append(successor)
                     elif direction == "straight":
                         successor_straight.add(successor)
+                        successors.append(successor)
                     else:
                         print(direction)
                         warnings.warn("Incorrect direction assigned to successor of incoming lanelet in intersection")
-
+            
             intersection_incoming_lane = IntersectionIncomingElement(incoming_id_counter, incoming_lanelet_set,
                                                                      successor_right, successor_straight,
                                                                      successor_left)
-
             intersection_incoming_lanes.append(intersection_incoming_lane)
+            
             # TODO: Add crossings to intersections
             # Increment id counter to generate next unique intersection id. See To Do.
             incoming_id_counter += 1
-        intersection = Intersection(intersection_id, intersection_incoming_lanes)
-        self.find_left_of(intersection.incomings)
-        self.add_intersection(intersection)
+
+        if self.check_if_successor_is_intersecting(intersection_map, successors):
+            intersection = Intersection(intersection_id, intersection_incoming_lanes)
+            self.find_left_of(intersection.incomings)
+            self.add_intersection(intersection)
 
     def set_intersection_lanelet_type(self, incoming_lane, intersection_map):
         """
@@ -745,8 +752,30 @@ class ConversionLaneletNetwork(LaneletNetwork):
                 if successor != lanelet.lanelet_id:
                     successor_lane_polygon = self.find_lanelet_by_id(successor).convert_to_polygon()
                     lanelet_polygon = lanelet.convert_to_polygon()
-                    if successor_lane_polygon.shapely_object.crosses(lanelet_polygon.shapely_object):
+                    if successor_lane_polygon.shapely_object.intersects(lanelet_polygon.shapely_object):
                         return True
+        return False
+
+    def check_if_successor_is_intersecting(self, intersection_map, successors_list):
+        """
+        Check if successors of an incoming intersect with successors of other incoming of the intersection
+        using the shapely crosses method.
+        Args:
+            intersection_map: dict of the particular intersection for which the test is being conducted.
+            successors_list: list of all the successors of an intersection
+        Returns:
+            true if successors of an incoming intersect with successors of other incoming of the intersection otherwise return False.
+        """
+        for incoming_lane in intersection_map.keys():
+            for incoming_successor in self.find_lanelet_by_id(incoming_lane).successor:
+                for successor in successors_list:
+                    if successor not in self.find_lanelet_by_id(incoming_lane).successor:
+                        successor_lane_polygon = self.find_lanelet_by_id(successor).convert_to_polygon()
+                        incoming_successor_lane_polygon = self.find_lanelet_by_id(
+                            incoming_successor).convert_to_polygon()
+                        if successor_lane_polygon.shapely_object.intersects(
+                                incoming_successor_lane_polygon.shapely_object):
+                            return True
         return False
 
     def find_left_of(self, incomings):
