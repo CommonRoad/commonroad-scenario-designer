@@ -38,7 +38,7 @@ from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.common.util import Interval
 from commonroad.prediction.prediction import TrajectoryPrediction
 from commonroad.scenario.trajectory import State
-from commonroad.scenario.lanelet import LaneletNetwork, Lanelet, LineMarking
+from commonroad.scenario.lanelet import LaneletNetwork, Lanelet, LineMarking, LaneletType
 from commonroad.scenario.obstacle import ObstacleRole, ObstacleType
 from commonroad.scenario.scenario import Scenario
 from commonroad.scenario.traffic_sign import SupportedTrafficSignCountry, TrafficLight, \
@@ -128,6 +128,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         self._edges_file = ""
         self._connections_file = ""
         self._traffic_file = ""
+        self._additional_file = ""
         # path to SUMO typ.xml file
         self._type_file = ""
         self._output_file = ""
@@ -675,7 +676,8 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                     }
                     next_cluster_id += 1
                 else:
-                    delete_intersections.append(intersection.intersection_id)
+                    print("sdf")
+                    # delete_intersections.append(intersection.intersection_id)
 
             for inter_id in delete_intersections:
                 del lanelet_network._intersections[inter_id]
@@ -916,16 +918,36 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                     shape = None
                     via = None
 
-                connection = Connection(
-                    from_edge=self.new_edges[int(from_lane.split("_")[0])],
-                    to_edge=self.new_edges[int(path[-1].split("_")[0])],
-                    from_lane=self.lanes[from_lane],
-                    to_lane=self.lanes[path[-1]],
-                    via_lane_id=via,
-                    shape=shape,
-                    keep_clear=True,
-                    cont_pos=self.conf.wait_pos_internal_junctions)
-                self._new_connections.add(connection)
+                keep_clear = True
+                no_connection = False
+                not_keep_clear_types = {LaneletType.ACCESS_RAMP, LaneletType.INTERSTATE, LaneletType.EXIT_RAMP}
+                no_connection_types = {LaneletType.ACCESS_RAMP}
+                for lane_id in [from_lane] + path:
+                    if len(not_keep_clear_types & \
+                        self.lanelet_network.find_lanelet_by_id(self.lane_id2lanelet_id[lane_id]).lanelet_type) > 0:
+                        keep_clear = False
+
+                if len(no_connection_types & \
+                    self.lanelet_network.find_lanelet_by_id(self.lane_id2lanelet_id[from_lane]).lanelet_type) > 0:
+                    no_connection = True
+
+                if no_connection is False:
+                    connection = Connection(
+                        from_edge=self.new_edges[int(from_lane.split("_")[0])],
+                        to_edge=self.new_edges[int(path[-1].split("_")[0])],
+                        from_lane=self.lanes[from_lane],
+                        to_lane=self.lanes[path[-1]],
+                        via_lane_id=via,
+                        shape=shape,
+                        keep_clear=keep_clear,
+                        cont_pos=self.conf.wait_pos_internal_junctions)
+
+                    # lanes changes to access ramps are forbidden
+                    # lanelet = self.lanelet_network.find_lanelet_by_id(self.lane_id2lanelet_id[from_lane])
+                    # if lanelet.adj_right is not None and LaneletType.ACCESS_RAMP \
+                    #         in self.lanelet_network.find_lanelet_by_id(lanelet.adj_right).lanelet_type:
+                    #     connection.change_right_allowed = {}
+                    self._new_connections.add(connection)
 
     def _create_roundabouts(self, driving_direction: str = "right"):
         if driving_direction == "left":
@@ -1258,7 +1280,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                   f" --output-file={self._output_file}" \
                   f" --tls.set={junction.id}" \
                   f" --tls.guess=true" \
-                f" --geometry.remove.keep-edges.explicit"\
+                  f" --geometry.remove.keep-edges.explicit"\
                   f" --geometry.remove.min-length=0.0" \
                   f" --tls.guess-signals={'true' if guess_signals else 'false'}" \
                   f" --tls.group-signals=true" \
@@ -1452,6 +1474,16 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                   f" --junctions.internal-link-detail=20" \
                   f" --geometry.avoid-overlap=true" \
                   f" --geometry.remove.keep-edges.explicit=true" \
+                  f" --geometry.remove.min-length=0.0" \
+                  f" --tls.guess-signals=true" \
+                  f" --tls.group-signals=true" \
+                  f" --tls.green.time={50}" \
+                  f" --tls.red.time={50}" \
+                  f" --tls.yellow.time={10}" \
+                  f" --tls.allred.time={50}" \
+                  f" --tls.left-green.time={50}" \
+                  f" --tls.crossing-min.time={50}" \
+                  f" --tls.crossing-clearance.time={50}" \
                   f" --offset.disable-normalization=true" \
                   f" --node-files={nodes_path}" \
                   f" --edge-files={edges_path}" \
@@ -1468,8 +1500,8 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
             net = sumo_net_from_xml(self._output_file)
             self._update_junctions_from_net(net)
 
-            if update_internal_ids:
-                self._update_internal_IDs_from_net_file(self._output_file)
+            # if update_internal_ids:
+            #     self._update_internal_IDs_from_net_file(self._output_file)
 
         except FileNotFoundError as e:
             if 'netconvert' in e.filename:
@@ -1669,9 +1701,9 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         scenario_name = self.conf.scenario_name
         net_file = os.path.join(output_folder, scenario_name + '.net.xml')
 
-        add_file = self._convert_to_add_file(scenario, output_folder)
+        self._additional_file = self._convert_to_add_file(scenario, output_folder)
         rou_files = self._convert_to_rou_file(scenario, output_folder)
-        self.sumo_cfg_file = self._generate_cfg_file(scenario_name, net_file, rou_files, add_file,
+        self.sumo_cfg_file = self._generate_cfg_file(scenario_name, net_file, rou_files, self._additional_file,
                                                      output_folder)
         return True
 
@@ -1696,11 +1728,11 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         scenario_name = self.conf.scenario_name
         out_folder = os.path.dirname(net_file)
 
-        add_file = self._generate_add_file(scenario_name, out_folder)
+        self._additional_file = self._generate_add_file(scenario_name, out_folder)
         rou_files = self._generate_rou_file(net_file, scenario_name,
                                             out_folder)
         self.sumo_cfg_file = self._generate_cfg_file(scenario_name, net_file,
-                                                     rou_files, add_file,
+                                                     rou_files, self._additional_file,
                                                      out_folder)
         return True
 
@@ -2372,6 +2404,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
             str(period), '--allow-fringe', '--fringe-factor',
             str(self.conf.fringe_factor), "--seed",
             str(self.conf.random_seed),
+            "--additional-file", str(self._additional_file),
             '--trip-attributes=departLane=\"best\" departSpeed=\"max\" departPos=\"base\"'
         ])
         # create pedestrian routes
@@ -2415,7 +2448,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         updated_fields = {
             '*/net-file': os.path.basename(net_file),
             '*/route-files': ",".join([os.path.basename(f) for f in route_files.values()]),
-            '*/additional-files': os.path.basename(add_file),
+            # '*/additional-files': os.path.basename(add_file),
         }
         for k, v in updated_fields.items():
             tree.findall(k)[0].attrib['value'] = v
@@ -2446,10 +2479,10 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         self.lanelet_network.cleanup_traffic_lights()
 
     def draw_network(self, nodes: Dict[int, Node], edges: Dict[int, Edge], figsize=(20, 20)):
-        return
+        # return
         plt.figure(figsize=figsize)
         draw_params = {"lanelet": {"show_label": True},
-                       "intersection": {"draw_intersections": True, "show_label": False}}
+                       "intersection": {"draw_intersections": True, "show_label": True}}
         rnd = MPRenderer(draw_params=draw_params)
         self.lanelet_network.draw(rnd)
         rnd.render(show=False)

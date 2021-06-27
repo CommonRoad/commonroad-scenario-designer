@@ -68,6 +68,7 @@ class TrafficLightEncoder:
             sumo_states.append(sumo_state)
 
         # encode states
+        pattern = "rg"
         for state, sumo_state in zip(light_states, sumo_states):
             dur = state[0].duration * self.conf.dt
             assert dur > 0
