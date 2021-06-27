@@ -1121,9 +1121,10 @@ class ConversionLaneletNetwork(LaneletNetwork):
             if stop_line.traffic_light_ref is None:
                 stop_line.traffic_light_ref = lane_to_add_stop_line.traffic_lights
             else:
-                stop_line._traffic_light_ref = self._old_lanelet_ids[stop_line._traffic_light_ref]
+                stop_line._traffic_light_ref = {self._old_lanelet_ids[id_tmp] for id_tmp in stop_line.traffic_light_ref}
+
             if stop_line.traffic_sign_ref is None:
-                stop_line.traffic_sign_ref = {self._old_lanelet_ids[id_tmp] for id_tmp in stop_line.traffic_light_ref}
+                stop_line.traffic_sign_ref = lane_to_add_stop_line.traffic_signs
             else:
                 stop_line._traffic_sign_ref = {self._old_lanelet_ids[id_tmp] for id_tmp in stop_line.traffic_sign_ref}
 

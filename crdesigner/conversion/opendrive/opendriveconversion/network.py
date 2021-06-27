@@ -180,6 +180,7 @@ class Network:
         intersection_id_counter = max([la.lanelet_id for la in lanelet_network.lanelets]) + 1
         for intersection_map in self._link_index.intersection_maps():
             # Remove lanelets that are not part of the network (as they are of a different type)
+            lanelet_network._old_lanelet_ids[intersection_id_counter] = intersection_id_counter
             lanelet_network.create_intersection(intersection_map, intersection_id_counter)
             intersection_id_counter += 1
 
