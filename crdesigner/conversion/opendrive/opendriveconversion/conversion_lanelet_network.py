@@ -1100,8 +1100,6 @@ class ConversionLaneletNetwork(LaneletNetwork):
         # Assign stop lines to lanelets
 
         for stop_line in stop_lines:
-            stop_line._traffic_sign_ref = self._old_lanelet_ids[stop_line._traffic_sign_ref]
-            stop_line._traffic_light_ref = self._old_lanelet_ids[stop_line._traffic_light_ref]
             min_start = float("inf")
             min_end = float("inf")
             for intersection in self.intersections:
@@ -1122,8 +1120,13 @@ class ConversionLaneletNetwork(LaneletNetwork):
                 continue
             if stop_line.traffic_light_ref is None:
                 stop_line.traffic_light_ref = lane_to_add_stop_line.traffic_lights
+            else:
+                stop_line._traffic_light_ref = self._old_lanelet_ids[stop_line._traffic_light_ref]
             if stop_line.traffic_sign_ref is None:
                 stop_line.traffic_sign_ref = lane_to_add_stop_line.traffic_signs
+            else:
+                stop_line._traffic_sign_ref = self._old_lanelet_ids[stop_line._traffic_sign_ref]
+
             lane_to_add_stop_line.stop_line = stop_line
 
 
