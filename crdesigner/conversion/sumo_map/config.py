@@ -47,7 +47,7 @@ class SumoConfig(DefaultConfig):
 
     # conversion
     country_id: SupportedTrafficSignCountry = SupportedTrafficSignCountry.ZAMUNDA
-    highway_mode = False  # less aggressive clustering, use zipper junctions for onRamps
+    highway_mode = True  # less aggressive clustering, use zipper junctions for onRamps
 
     # simulation
     dt = 0.1  # length of simulation step of the interface
@@ -111,6 +111,7 @@ class SumoConfig(DefaultConfig):
     max_veh_per_km: int = 25
     # random seed for deterministic sumo traffic generation
     random_seed: int = 1234
+    random_seed_trip_generation: int = 1234
 
     # other vehicles size bound (values are sampled from normal distribution within bounds)
     vehicle_length_interval = 0.4

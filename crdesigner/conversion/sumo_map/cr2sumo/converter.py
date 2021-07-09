@@ -918,14 +918,22 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                     shape = None
                     via = None
 
-                keep_clear = True
+                if self.conf.highway_mode is True:
+                    keep_clear = False
+                else:
+                    keep_clear = True
+
                 no_connection = False
                 not_keep_clear_types = {LaneletType.ACCESS_RAMP, LaneletType.INTERSTATE, LaneletType.EXIT_RAMP}
+                keep_clear_types = {LaneletType.INTERSECTION}
                 no_connection_types = {LaneletType.ACCESS_RAMP}
                 for lane_id in [from_lane] + path:
                     if len(not_keep_clear_types & \
                         self.lanelet_network.find_lanelet_by_id(self.lane_id2lanelet_id[lane_id]).lanelet_type) > 0:
                         keep_clear = False
+                    if len(keep_clear_types & \
+                        self.lanelet_network.find_lanelet_by_id(self.lane_id2lanelet_id[lane_id]).lanelet_type) > 0:
+                        keep_clear = True
 
                 if len(no_connection_types & \
                     self.lanelet_network.find_lanelet_by_id(self.lane_id2lanelet_id[from_lane]).lanelet_type) > 0:
@@ -1491,7 +1499,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                   f" --tllogic-files={traffic_path}" \
                   f" --type-files={type_path}" \
                   f" --output-file={output_path}" \
-                  f" --seed={SumoConfig.random_seed}"
+                  f" --seed={self.conf.random_seed_trip_generation}"
         success = True
         try:
             _ = subprocess.check_output(command.split(), timeout=5.0)
@@ -1703,11 +1711,11 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
 
         self._additional_file = self._convert_to_add_file(scenario, output_folder)
         rou_files = self._convert_to_rou_file(scenario, output_folder)
-        self.sumo_cfg_file = self._generate_cfg_file(scenario_name, net_file, rou_files, self._additional_file,
-                                                     output_folder)
+        self.sumo_cfg_file = self.generate_cfg_file(scenario_name, net_file, rou_files,
+                                                    output_folder)
         return True
 
-    def _generate_routes(self, net_file: str) -> bool:
+    def _generate_routes(self, net_file: str, scenario_name: str=None, return_files= True) -> bool:
         """
         Automatically generates traffic routes from the given .net.xml file
 
@@ -1725,16 +1733,19 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                     .format(self.conf.n_ego_vehicles, self.conf.n_vehicles_max))
             return False
 
-        scenario_name = self.conf.scenario_name
+        if scenario_name is None:
+            scenario_name = self.conf.scenario_name
         out_folder = os.path.dirname(net_file)
 
         self._additional_file = self._generate_add_file(scenario_name, out_folder)
         rou_files = self._generate_rou_file(net_file, scenario_name,
                                             out_folder)
-        self.sumo_cfg_file = self._generate_cfg_file(scenario_name, net_file,
-                                                     rou_files, self._additional_file,
-                                                     out_folder)
-        return True
+
+        self.sumo_cfg_file = self.generate_cfg_file(scenario_name, net_file, rou_files, out_folder)
+        if return_files is False:
+            return True
+        else:
+            return rou_files, self._additional_file, self.sumo_cfg_file
 
     def _convert_to_add_file(self, scenario: Scenario, output_folder: str) -> str:
         """
@@ -2394,16 +2405,17 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                 #         e.cmd, e.returncode, e.output)) from e
 
         # create vehicle route file
-        run([
+        success_trip = run([
             'python',
             os.path.join(os.environ['SUMO_HOME'], 'tools',
                          'randomTrips.py'), '-n', net_file, '-o',
             trip_files['vehicle'], '-r', route_files["vehicle"], '-b',
             str(self.conf.departure_interval_vehicles.start), '-e',
             str(self.conf.departure_interval_vehicles.end), '-p',
-            str(period), '--allow-fringe', '--fringe-factor',
+            str(period), '--fringe-factor',
             str(self.conf.fringe_factor), "--seed",
-            str(self.conf.random_seed),
+            str(self.conf.random_seed_trip_generation),
+            "--validate",
             "--additional-file", str(self._additional_file),
             '--trip-attributes=departLane=\"best\" departSpeed=\"max\" departPos=\"base\"'
         ])
@@ -2419,22 +2431,22 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                 str(1 - self.conf.veh_distribution[ObstacleType.PEDESTRIAN]),
                 '--allow-fringe', '--fringe-factor',
                 str(self.conf.fringe_factor), "--persontrips", "--seed",
-                str(self.conf.random_seed),
+                str(self.conf.random_seed_trip_generation),
                 '--trip-attributes= modes=\"public car\" departPos=\"base\"'
             ])
 
         return route_files
 
-    def _generate_cfg_file(self, scenario_name: str, net_file: str,
-                           route_files: Dict[str, str], add_file: str,
-                           output_folder: str) -> str:
+    @staticmethod
+    def generate_cfg_file(scenario_name: str, net_file: str,
+                          route_files: Dict[str, str],
+                          output_folder: str) -> str:
         """
         Generates the configuration file according to the scenario name to the specified output folder.
 
         :param scenario_name: name of the scenario used for the cfg file generation.
         :param net_file: path of the generated sumo .net.xml file
         :param route_files: path of the generated sumo .rou.xml file
-        :param add_file: path of the generated sumo .add.xml file
         :param output_folder: the generated cfg file will be saved here
 
         :return: the path of the generated cfg file.
@@ -2448,7 +2460,6 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         updated_fields = {
             '*/net-file': os.path.basename(net_file),
             '*/route-files': ",".join([os.path.basename(f) for f in route_files.values()]),
-            # '*/additional-files': os.path.basename(add_file),
         }
         for k, v in updated_fields.items():
             tree.findall(k)[0].attrib['value'] = v
@@ -2479,7 +2490,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         self.lanelet_network.cleanup_traffic_lights()
 
     def draw_network(self, nodes: Dict[int, Node], edges: Dict[int, Edge], figsize=(20, 20)):
-        # return
+        return
         plt.figure(figsize=figsize)
         draw_params = {"lanelet": {"show_label": True},
                        "intersection": {"draw_intersections": True, "show_label": True}}

@@ -1116,7 +1116,7 @@ class Connection:
         if self._shape is not None:
             c.set("shape", to_shape_string(self._shape))
         if self._keep_clear is not None:
-            c.set("keepClear", "true" if self._keep_clear else "false")
+            c.set("keepClear", "true" if self._keep_clear is True else "false")
         if self._cont_pos is not None:
             c.set("contPos", str(self._cont_pos))
 
