@@ -125,11 +125,16 @@ class Network:
                 )
 
                 self._planes.extend(parametric_lane_groups)
-
+            
+            stop_lines_final = []
             traffic_lights, traffic_signs, stop_lines = get_traffic_signals(road)
             self._traffic_lights.extend(traffic_lights)
+            for stop_line in stop_lines:
+                for traffic_light in traffic_lights:
+                    if (numpy.linalg.norm(stop_line.start - traffic_light.position) < 10): #10 could be adjusted later as a threshold
+                        stop_lines_final.append(stop_line)
             self._traffic_signs.extend(traffic_signs)
-            self._stop_lines.extend(stop_lines)
+            self._stop_lines.extend(stop_lines_final)
 
     def export_lanelet_network(
         self, filter_types: list = None
