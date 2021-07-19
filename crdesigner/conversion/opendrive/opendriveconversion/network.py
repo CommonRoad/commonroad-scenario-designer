@@ -6,7 +6,7 @@ to lanelets. Iternally, the road network is represented by ParametricLanes."""
 import copy
 from multiprocessing import Pool
 from typing import List, Dict
-
+import numpy.linalg
 import iso3166
 from commonroad.scenario.scenario import Scenario, GeoTransformation, Location, ScenarioID
 from commonroad.scenario.lanelet import LaneletNetwork, Lanelet
@@ -127,7 +127,7 @@ class Network:
                 self._planes.extend(parametric_lane_groups)
             
             stop_lines_final = []
-            traffic_lights, traffic_signs, stop_lines = get_traffic_signals(road)
+            traffic_lights, traffic_signs, stop_lines = get_traffic_signals(road, Scenario(dt=0.1, scenario_id=None,location=None))
             self._traffic_lights.extend(traffic_lights)
             for stop_line in stop_lines:
                 for traffic_light in traffic_lights:
