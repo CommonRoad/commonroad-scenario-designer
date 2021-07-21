@@ -68,6 +68,18 @@ class DynamicCanvas(FigureCanvas):
                         'draw_traffic_signs': True,
                         'show_traffic_signs': 'all',
                     },
+                    'intersection': {
+                        'draw_intersections': True,
+                        'draw_incoming_lanelets': True,
+                        'incoming_lanelets_color': '#3ecbcf',
+                        'draw_crossings': True,
+                        'crossings_color': '#b62a55',
+                        'draw_successors': True,
+                        'successors_left_color': '#ff00ff',
+                        'successors_straight_color': 'blue',
+                        'successors_right_color': '#ccff00',
+                        'show_label': True,
+                    },
                 }
             }
         }

@@ -668,6 +668,7 @@ class ConversionLaneletNetwork(LaneletNetwork):
         # If different incoming lanelets have same successors, combine into set
         incoming_lanelet_ids = self.combine_common_incoming_lanelets(intersection_map)
         intersection_incoming_lanes = list()
+        successors = list()
         
         for incoming_lanelet_set in incoming_lanelet_ids:
             # Since all the lanes have the same successors,
@@ -676,7 +677,6 @@ class ConversionLaneletNetwork(LaneletNetwork):
             successor_right = set()
             successor_left = set()
             successor_straight = set()
-            successors = list()
 
             for incoming_lane in incoming_lanelet_set:
                 self.set_intersection_lanelet_type(incoming_lane, intersection_map)
@@ -993,6 +993,7 @@ class ConversionLaneletNetwork(LaneletNetwork):
                             elif list(successor_directions.values())[0] == 'straight':
                                 traffic_light.direction = TrafficLightDirection.STRAIGHT
                         elif len(successor_directions) == 2:
+                            traffic_light = self.find_traffic_light_by_id(list(traffic_light_ids)[0])
                             if (list(successor_directions.values())[0] == 'left' and list(successor_directions.values())[1] == 'right') \
                                     or (list(successor_directions.values())[0] == 'right' and list(successor_directions.values())[1] == 'left'):
                                 traffic_light.direction = TrafficLightDirection.LEFT_RIGHT
