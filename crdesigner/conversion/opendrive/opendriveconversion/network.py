@@ -67,23 +67,9 @@ class Network:
         self._country_ID = None
         self.error_tolerance = 0.15
         self.min_delta_s = 0.5
-        self._id_counter = None
 
     # def __eq__(self, other):
     # return self.__dict__ == other.__dict__
-
-    def generate_object_id(self) -> int:
-        """ Generates a unique ID which is not assigned to any object in the scenario.
-
-            :return: unique object ID
-        """
-        if self._id_counter is None:
-            self._id_counter = 0
-        if len(self._id_set) > 0:
-            max_id_used = max(self._id_set)
-            self._id_counter = max(self._id_counter, max_id_used)
-        self._id_counter += 1
-        return self._id_counter
 
     def assign_country_ID(self, value: str):
         """
@@ -140,7 +126,7 @@ class Network:
 
                 self._planes.extend(parametric_lane_groups)
 
-            traffic_lights, traffic_signs, stop_lines = get_traffic_signals(self, road)
+            traffic_lights, traffic_signs, stop_lines = get_traffic_signals(road)
             self._traffic_lights.extend(traffic_lights)
             self._traffic_signs.extend(traffic_signs)
             self._stop_lines.extend(stop_lines)
@@ -186,7 +172,7 @@ class Network:
         # Perform lane splits and joins
         lanelet_network.join_and_split_possible_lanes()
 
-        lanelet_network.convert_all_lanelet_ids(self)
+        lanelet_network.convert_all_lanelet_ids()
         self._link_index.update_intersection_lane_id(lanelet_network.old_lanelet_ids())
         # self.traffic_signal_elements.update_traffic_signs_map_lane_id(lanelet_network.old_lanelet_ids())
 
