@@ -8,6 +8,8 @@ __maintainer__ = "Sebastian Maierhofer"
 __email__ = "commonroad@lists.lrz.de"
 __status__ = "Development"
 
+class ObjectID():
+    id = 0
 
 def encode_road_section_lane_width_id(roadId, sectionId, laneId, widthId):
     """
