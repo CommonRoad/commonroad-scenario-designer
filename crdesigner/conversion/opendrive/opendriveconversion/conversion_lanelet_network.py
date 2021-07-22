@@ -17,6 +17,7 @@ from crdesigner.conversion.osm2cr import config
 from crdesigner.conversion.osm2cr.converter_modules.utility import geometry
 
 from crdesigner.conversion.opendrive.opendriveconversion.conversion_lanelet import ConversionLanelet
+from crdesigner.conversion.opendrive.opendriveconversion.utils import ObjectID
 
 __author__ = "Benjamin Orthen, Sebastian Maierhofer"
 __copyright__ = "TUM Cyber-Physical Systems Group"
@@ -50,7 +51,8 @@ def convert_to_new_lanelet_id(old_lanelet_id: str, ids_assigned: dict) -> int:
         new_lanelet_id = ids_assigned[old_lanelet_id]
     else:
         try:
-            new_lanelet_id = max(ids_assigned.values()) + 1
+            new_lanelet_id = ObjectID.id
+            ObjectID.id += 1
         except ValueError:
             new_lanelet_id = starting_lanelet_id
         ids_assigned[old_lanelet_id] = new_lanelet_id
