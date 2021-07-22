@@ -12,7 +12,6 @@ from crdesigner.conversion.opendrive.opendriveparser.elements.road import Road
 from commonroad.scenario.traffic_sign import TrafficSign, TrafficLight, TrafficSignElement, TrafficSignIDZamunda, \
     TrafficSignIDGermany, TrafficSignIDUsa, TrafficSignIDChina, TrafficSignIDSpain, TrafficSignIDRussia
 from commonroad.scenario.lanelet import StopLine, LineMarking
-from crdesigner.conversion.opendrive.opendriveconversion.network import Network
 from crdesigner.conversion.opendrive.opendriveconversion.utils import ObjectID
 
 
