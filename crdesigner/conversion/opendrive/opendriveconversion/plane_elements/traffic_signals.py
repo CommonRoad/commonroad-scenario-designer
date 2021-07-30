@@ -134,13 +134,12 @@ def get_traffic_signals(road: Road):
                 additional_values=additional_values
             )
             traffic_sign = TrafficSign(
-                traffic_sign_id=ObjectID.id,,
+                traffic_sign_id=ObjectID(),,
                 traffic_sign_elements=list([traffic_sign_element]),
                 first_occurrence=None,
                 position=position,
                 virtual=False
             )
-            ObjectID.id += 1
 
             traffic_signs.append(traffic_sign)
 
