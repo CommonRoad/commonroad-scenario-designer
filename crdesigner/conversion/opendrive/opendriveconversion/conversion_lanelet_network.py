@@ -52,7 +52,6 @@ def convert_to_new_lanelet_id(old_lanelet_id: str, ids_assigned: dict) -> int:
     else:
         try:
             new_lanelet_id = ObjectID()
-            ObjectID.id += 1
         except ValueError:
             new_lanelet_id = starting_lanelet_id
         ids_assigned[old_lanelet_id] = new_lanelet_id
