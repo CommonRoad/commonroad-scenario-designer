@@ -51,7 +51,7 @@ def convert_to_new_lanelet_id(old_lanelet_id: str, ids_assigned: dict) -> int:
         new_lanelet_id = ids_assigned[old_lanelet_id]
     else:
         try:
-            new_lanelet_id = ObjectID.id
+            new_lanelet_id = ObjectID()
             ObjectID.id += 1
         except ValueError:
             new_lanelet_id = starting_lanelet_id
@@ -665,8 +665,6 @@ class ConversionLaneletNetwork(LaneletNetwork):
             intersection_id - The unique id used to reference the intersection
         Return:
         """
-        # TODO: Define criterion for intersection ID. Currently only iterative numbering
-        incoming_id_counter = 0
         # If different incoming lanelets have same successors, combine into set
         incoming_lanelet_ids = self.combine_common_incoming_lanelets(intersection_map)
         intersection_incoming_lanes = list()
@@ -693,14 +691,12 @@ class ConversionLaneletNetwork(LaneletNetwork):
                         print(direction)
                         warnings.warn("Incorrect direction assigned to successor of incoming lanelet in intersection")
 
-            intersection_incoming_lane = IntersectionIncomingElement(incoming_id_counter, incoming_lanelet_set,
+            intersection_incoming_lane = IntersectionIncomingElement(ObjectID(), incoming_lanelet_set,
                                                                      successor_right, successor_straight,
                                                                      successor_left)
 
             intersection_incoming_lanes.append(intersection_incoming_lane)
             # TODO: Add crossings to intersections
-            # Increment id counter to generate next unique intersection id. See To Do.
-            incoming_id_counter += 1
         intersection = Intersection(intersection_id, intersection_incoming_lanes)
         self.find_left_of(intersection.incomings)
         self.add_intersection(intersection)
@@ -964,6 +960,7 @@ class ConversionLaneletNetwork(LaneletNetwork):
                             elif list(successor_directions.values())[0] == 'straight':
                                 traffic_light.direction = TrafficLightDirection.STRAIGHT
                         elif len(successor_directions) == 2:
+                            traffic_light = self.find_traffic_light_by_id(list(traffic_light_ids)[0])
                             if (list(successor_directions.values())[0] == 'left' and list(successor_directions.values())[1] == 'right') \
                                     or (list(successor_directions.values())[0] == 'right' and list(successor_directions.values())[1] == 'left'):
                                 traffic_light.direction = TrafficLightDirection.LEFT_RIGHT
