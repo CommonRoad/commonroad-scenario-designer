@@ -8,8 +8,11 @@ __maintainer__ = "Sebastian Maierhofer"
 __email__ = "commonroad@lists.lrz.de"
 __status__ = "Development"
 
-class ObjectID():
-    id = 0
+def ObjectID():
+    if not hasattr(ObjectID, "counter"):
+        ObjectID.counter = 0  # it doesn't exist yet, so initialize it
+    ObjectID.counter += 1
+    return ObjectID.counter
 
 def encode_road_section_lane_width_id(roadId, sectionId, laneId, widthId):
     """
