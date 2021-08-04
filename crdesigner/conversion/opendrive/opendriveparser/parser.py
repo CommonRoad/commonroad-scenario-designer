@@ -523,7 +523,6 @@ def parse_opendrive_road(opendrive, road):
     # TODO implementation
 
     # Signals
-    # TODO implementation
     if road.find("signals") is not None:
         for road_signal in road.find("signals").findall("signal"):
             if road_signal is not None:
