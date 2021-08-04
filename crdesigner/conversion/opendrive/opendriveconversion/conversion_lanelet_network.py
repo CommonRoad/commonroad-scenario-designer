@@ -700,7 +700,6 @@ class ConversionLaneletNetwork(LaneletNetwork):
                                                                      successor_right, successor_straight,
                                                                      successor_left)
             intersection_incoming_lanes.append(intersection_incoming_lane)
-            
             # TODO: Add crossings to intersections
             # Increment id counter to generate next unique intersection id. See To Do.
             incoming_id_counter += 1

@@ -12,7 +12,7 @@ from crdesigner.conversion.opendrive.opendriveparser.elements.road import Road
 from commonroad.scenario.traffic_sign import TrafficSign, TrafficLight, TrafficSignElement, TrafficSignIDZamunda, \
     TrafficSignIDGermany, TrafficSignIDUsa, TrafficSignIDChina, TrafficSignIDSpain, TrafficSignIDRussia
 from commonroad.scenario.lanelet import StopLine, LineMarking
-from commonroad.scenario.scenario import Scenario
+
 
 def extract_traffic_element_id(signal_type: str, signal_subtype: str, traffic_sign_enum: enum) \
         -> Union[TrafficSignIDZamunda, TrafficSignIDGermany, TrafficSignIDUsa, TrafficSignIDChina,
@@ -29,7 +29,7 @@ def extract_traffic_element_id(signal_type: str, signal_subtype: str, traffic_si
     return element_id
 
 
-def get_traffic_signals(road: Road, scenario: Scenario):
+def get_traffic_signals(road: Road):
     traffic_signs = []
     traffic_lights = []
     stop_lines = []
@@ -133,7 +133,8 @@ def get_traffic_signals(road: Road, scenario: Scenario):
                 additional_values=additional_values
             )
             traffic_sign = TrafficSign(
-                traffic_sign_id=scenario.generate_object_id(),
+                traffic_sign_id=int("".join([str(road.id), str(signal.id), str(abs(int(position[0]))),
+                                             str(abs(int(position[1]))), str(abs(int(signal.s)))])),
                 traffic_sign_elements=list([traffic_sign_element]),
                 first_occurrence=None,
                 position=position,
