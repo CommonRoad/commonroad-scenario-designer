@@ -8,11 +8,6 @@ __maintainer__ = "Sebastian Maierhofer"
 __email__ = "commonroad@lists.lrz.de"
 __status__ = "Development"
 
-def generate_unique_id():
-    if not hasattr(generate_unique_id, "counter"):
-        generate_unique_id.counter = 0  # it doesn't exist yet, so initialize it
-    generate_unique_id.counter += 1
-    return generate_unique_id.counter
 
 def encode_road_section_lane_width_id(roadId, sectionId, laneId, widthId):
     """

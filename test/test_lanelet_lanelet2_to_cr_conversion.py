@@ -86,7 +86,7 @@ class TestOSM2CRConversionBaseClass(unittest.TestCase):
 
 
 class TestUrbanLanelets(TestOSM2CRConversionBaseClass):
-    """Simple test case file which includes succesors and
+    """Simple test case file which includes successors and
     predecessors and adjacencies."""
 
     __test__ = True
@@ -105,6 +105,7 @@ class TestFeatureLanelet2Lanelets(TestOSM2CRConversionBaseClass):
 
     __test__ = True
     osm_file_name = "traffic_priority_lanelets_utm"
+
 
 class TestSpeedLimitConversion(TestOSM2CRConversionBaseClass):
     """Basic test file including some splits and joins."""

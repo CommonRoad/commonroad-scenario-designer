@@ -17,7 +17,7 @@ from crdesigner.conversion.osm2cr import config
 from crdesigner.conversion.osm2cr.converter_modules.utility import geometry
 
 from crdesigner.conversion.opendrive.opendriveconversion.conversion_lanelet import ConversionLanelet
-from crdesigner.conversion.opendrive.opendriveconversion.utils import generate_unique_id
+from crdesigner.conversion.common.utils import generate_unique_id
 
 __author__ = "Benjamin Orthen, Sebastian Maierhofer"
 __copyright__ = "TUM Cyber-Physical Systems Group"
