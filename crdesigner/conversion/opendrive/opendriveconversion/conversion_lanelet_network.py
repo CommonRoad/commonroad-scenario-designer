@@ -17,7 +17,7 @@ from crdesigner.conversion.osm2cr import config
 from crdesigner.conversion.osm2cr.converter_modules.utility import geometry
 
 from crdesigner.conversion.opendrive.opendriveconversion.conversion_lanelet import ConversionLanelet
-from crdesigner.conversion.opendrive.opendriveconversion.utils import ObjectID
+from crdesigner.conversion.opendrive.opendriveconversion.utils import generate_unique_id
 
 __author__ = "Benjamin Orthen, Sebastian Maierhofer"
 __copyright__ = "TUM Cyber-Physical Systems Group"
@@ -51,7 +51,7 @@ def convert_to_new_lanelet_id(old_lanelet_id: str, ids_assigned: dict) -> int:
         new_lanelet_id = ids_assigned[old_lanelet_id]
     else:
         try:
-            new_lanelet_id = ObjectID()
+            new_lanelet_id = generate_unique_id()
         except ValueError:
             new_lanelet_id = starting_lanelet_id
         ids_assigned[old_lanelet_id] = new_lanelet_id
@@ -690,7 +690,7 @@ class ConversionLaneletNetwork(LaneletNetwork):
                         print(direction)
                         warnings.warn("Incorrect direction assigned to successor of incoming lanelet in intersection")
 
-            intersection_incoming_lane = IntersectionIncomingElement(ObjectID(), incoming_lanelet_set,
+            intersection_incoming_lane = IntersectionIncomingElement(generate_unique_id(), incoming_lanelet_set,
                                                                      successor_right, successor_straight,
                                                                      successor_left)
 
