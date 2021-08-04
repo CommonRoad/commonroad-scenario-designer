@@ -18,6 +18,7 @@ from lxml import etree
 from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
 from commonroad.planning.planning_problem import PlanningProblemSet
 
+from crdesigner.conversion.common.utils import generate_unique_id
 from crdesigner.conversion.lanelet_lanelet2.lanelet2_parser import Lanelet2Parser
 from crdesigner.conversion.lanelet_lanelet2.lanelet2cr import Lanelet2CRConverter
 from test.utils import elements_equal
@@ -83,7 +84,7 @@ class TestOSM2CRConversionBaseClass(unittest.TestCase):
         # compare both element trees
         trees_are_equal = elements_equal(tree_import, writer.root_node)
         self.assertTrue(trees_are_equal)
-
+        generate_unique_id(0)
 
 class TestUrbanLanelets(TestOSM2CRConversionBaseClass):
     """Simple test case file which includes successors and
