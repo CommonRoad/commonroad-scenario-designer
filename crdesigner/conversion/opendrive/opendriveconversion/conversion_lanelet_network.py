@@ -670,7 +670,7 @@ class ConversionLaneletNetwork(LaneletNetwork):
         intersection_incoming_lanes = list()
         successors = list()
         
-        for incoming_lanelet_set in incoming_lanelet_ids:
+        for incoming_lanelet_list in incoming_lanelet_ids:
             # Since all the lanes have the same successors,
             # we simply use the first one to check for the successor directions
             # if more than one incoming lanes exist
@@ -678,7 +678,7 @@ class ConversionLaneletNetwork(LaneletNetwork):
             successor_left = set()
             successor_straight = set()
 
-            for incoming_lane in incoming_lanelet_set:
+            for incoming_lane in incoming_lanelet_list:
                 self.set_intersection_lanelet_type(incoming_lane, intersection_map)
                 successor_directions = self.get_successor_directions(self.find_lanelet_by_id(incoming_lane))
                 
@@ -696,7 +696,7 @@ class ConversionLaneletNetwork(LaneletNetwork):
                         print(direction)
                         warnings.warn("Incorrect direction assigned to successor of incoming lanelet in intersection")
             
-            intersection_incoming_lane = IntersectionIncomingElement(incoming_id_counter, incoming_lanelet_set,
+            intersection_incoming_lane = IntersectionIncomingElement(incoming_id_counter, set(incoming_lanelet_list),
                                                                      successor_right, successor_straight,
                                                                      successor_left)
             intersection_incoming_lanes.append(intersection_incoming_lane)
@@ -786,13 +786,13 @@ class ConversionLaneletNetwork(LaneletNetwork):
             :return: incomings with the isLeftOf assigned
         """
         # Choose a reference incoming vector
-        ref = self.find_lanelet_by_id(incomings[0].incoming_lanelets[0]).center_vertices[-1] - \
-              self.find_lanelet_by_id(incomings[0].incoming_lanelets[0]).center_vertices[-3]
+        ref = self.find_lanelet_by_id(list(incomings[0].incoming_lanelets)[0]).center_vertices[-1] - \
+              self.find_lanelet_by_id(list(incomings[0].incoming_lanelets)[0]).center_vertices[-3]
         angles = [(0, 0)]
         # calculate all incoming angle from the reference incoming vector
         for index in range(1, len(incomings)):
-            new_v = self.find_lanelet_by_id(incomings[index].incoming_lanelets[0]).center_vertices[-1] - \
-                    self.find_lanelet_by_id(incomings[index].incoming_lanelets[0]).center_vertices[-3]
+            new_v = self.find_lanelet_by_id(list(incomings[index].incoming_lanelets)[0]).center_vertices[-1] - \
+                    self.find_lanelet_by_id(list(incomings[index].incoming_lanelets)[0]).center_vertices[-3]
             angle = geometry.get_angle(ref, new_v)
             if angle < 0:
                 angle += 360
