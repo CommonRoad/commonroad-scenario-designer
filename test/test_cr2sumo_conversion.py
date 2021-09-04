@@ -1,17 +1,20 @@
 # -*- coding: utf-8 -*-
 """Test case file for SUMO to CR conversion and simulation"""
-
+import contextlib
+import io
 import os
+import shutil
 import unittest
 import warnings
 from typing import List
 
 import numpy as np
-import pytest
 from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.common.file_writer import CommonRoadFileWriter
+from commonroad.scenario.obstacle import ObstacleType
 from crdesigner.conversion.sumo_map.config import SumoConfig
 from crdesigner.conversion.sumo_map.cr2sumo.converter import CR2SumoMapConverter
+from parameterized import parameterized
 from sumocr.interface.sumo_simulation import SumoSimulation
 
 

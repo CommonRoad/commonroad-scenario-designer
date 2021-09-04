@@ -32,7 +32,7 @@ try:
         chaikins_corner_cutting
 except ImportError:
     warnings.warn(
-        f"Unable to import pycrccosy, converting static scenario into interactive is not supported!")
+        f"Unable to import commonroad_dc.pycrccosy, converting static scenario into interactive is not supported!")
 
 from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.common.util import Interval
@@ -926,7 +926,6 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                 no_connection = False
                 not_keep_clear_types = {LaneletType.ACCESS_RAMP, LaneletType.INTERSTATE, LaneletType.EXIT_RAMP}
                 keep_clear_types = {LaneletType.INTERSECTION}
-                no_connection_types = {LaneletType.ACCESS_RAMP}
                 for lane_id in [from_lane] + path:
                     if len(not_keep_clear_types & \
                         self.lanelet_network.find_lanelet_by_id(self.lane_id2lanelet_id[lane_id]).lanelet_type) > 0:
@@ -935,27 +934,29 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                         self.lanelet_network.find_lanelet_by_id(self.lane_id2lanelet_id[lane_id]).lanelet_type) > 0:
                         keep_clear = True
 
-                if len(no_connection_types & \
-                    self.lanelet_network.find_lanelet_by_id(self.lane_id2lanelet_id[from_lane]).lanelet_type) > 0:
+                # don't connect on-ramps to successor -> enforces lane change instead of driving straight
+                lanelet_from = self.lanelet_network.find_lanelet_by_id(self.lane_id2lanelet_id[from_lane])
+                if LaneletType.ACCESS_RAMP in lanelet_from.lanelet_type and lanelet_from.adj_left is not None:
                     no_connection = True
 
-                if no_connection is False:
-                    connection = Connection(
-                        from_edge=self.new_edges[int(from_lane.split("_")[0])],
-                        to_edge=self.new_edges[int(path[-1].split("_")[0])],
-                        from_lane=self.lanes[from_lane],
-                        to_lane=self.lanes[path[-1]],
-                        via_lane_id=via,
-                        shape=shape,
-                        keep_clear=keep_clear,
-                        cont_pos=self.conf.wait_pos_internal_junctions)
+                # if no_connection is False:
+                connection = Connection(
+                    from_edge=self.new_edges[int(from_lane.split("_")[0])],
+                    to_edge=self.new_edges[int(path[-1].split("_")[0])],
+                    from_lane=self.lanes[from_lane],
+                    to_lane=self.lanes[path[-1]],
+                    via_lane_id=via,
+                    shape=shape,
+                    keep_clear=keep_clear,
+                    cont_pos=self.conf.wait_pos_internal_junctions,
+                    forbidden=no_connection)
 
-                    # lanes changes to access ramps are forbidden
-                    # lanelet = self.lanelet_network.find_lanelet_by_id(self.lane_id2lanelet_id[from_lane])
-                    # if lanelet.adj_right is not None and LaneletType.ACCESS_RAMP \
-                    #         in self.lanelet_network.find_lanelet_by_id(lanelet.adj_right).lanelet_type:
-                    #     connection.change_right_allowed = {}
-                    self._new_connections.add(connection)
+                # lanes changes to access ramps are forbidden
+                # lanelet = self.lanelet_network.find_lanelet_by_id(self.lane_id2lanelet_id[from_lane])
+                # if lanelet.adj_right is not None and LaneletType.ACCESS_RAMP \
+                #         in self.lanelet_network.find_lanelet_by_id(lanelet.adj_right).lanelet_type:
+                #     connection.change_right_allowed = {}
+                self._new_connections.add(connection)
 
     def _create_roundabouts(self, driving_direction: str = "right"):
         if driving_direction == "left":
@@ -1709,8 +1710,8 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         scenario_name = self.conf.scenario_name
         net_file = os.path.join(output_folder, scenario_name + '.net.xml')
 
-        self._additional_file = self._convert_to_add_file(scenario, output_folder)
         rou_files = self._convert_to_rou_file(scenario, output_folder)
+
         self.sumo_cfg_file = self.generate_cfg_file(scenario_name, net_file, rou_files,
                                                     output_folder)
         return True
@@ -1747,22 +1748,22 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         else:
             return rou_files, self._additional_file, self.sumo_cfg_file
 
-    def _convert_to_add_file(self, scenario: Scenario, output_folder: str) -> str:
+    def _convert_to_add_file(self, scenario: Scenario, xml_root, domTree) -> str:
         """
         During converting the Commonroad trajectories to SUMO routes add file is required for SUMO.
         :param scenario: the scenario to be converted
         :param output_folder: path to the output folder
         :return: the path of the created add file
         """
-        add_file = os.path.join(output_folder, self.conf.scenario_name + '.add.xml')
+        # add_file = os.path.join(output_folder, self.conf.scenario_name + '.add.xml')
 
         # create file
-        domTree = minidom.Document()
-        additional_node = domTree.createElement("additional")
-        domTree.appendChild(additional_node)
-        vType_dist_node = domTree.createElement("vTypeDistribution")
-        vType_dist_node.setAttribute("id", "DEFAULT_VEHTYPE")
-        additional_node.appendChild(vType_dist_node)
+        # domTree = minidom.Document()
+        # additional_node = domTree.createElement("additional")
+        # domTree.appendChild(additional_node)
+        # vType_dist_node = domTree.createElement("vTypeDistribution")
+        # vType_dist_node.setAttribute("id", "DEFAULT_VEHTYPE")
+        # additional_node.appendChild(vType_dist_node)
 
         # config parameters for easy access
         vehicle_params = self.conf.veh_params
@@ -1786,39 +1787,40 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                 try:
                     sumo_veh_type = VEHICLE_TYPE_CR2SUMO[veh_type]
                     if veh_role == ObstacleRole.STATIC:
-                        sumo_veh_type_name = sumo_veh_type.value + "_static"
+                        sumo_veh_type_name = veh_type.value + "_static"
                     else:
-                        sumo_veh_type_name = sumo_veh_type.value
+                        sumo_veh_type_name = veh_type.value + "_dynamic"
                 except KeyError:
                     self.logger.warning(f"{veh_type} could not be converted to SUMO")
                     continue
                 vType_node = domTree.createElement("vType")
+                xml_root.appendChild(vType_node)
                 vType_node.setAttribute("id", sumo_veh_type_name)
-                vType_node.setAttribute("guiShape", sumo_veh_type)
-                vType_node.setAttribute("vClass", sumo_veh_type)
+                vType_node.setAttribute("guiShape", sumo_veh_type.value)
+                vType_node.setAttribute("vClass", sumo_veh_type.value)
                 vType_node.setAttribute("probability", str(len(obstacle_list) / num_all_obstacles))
 
                 for att_name, setting in vehicle_params.items():
-                    att_value = setting[sumo_veh_type]
+                    att_value = setting[veh_type]
                     if type(att_value) is Interval:
-                        raise ValueError(
-                            f"Converting a CommonRoad scenario does not support using Interval "
-                            f"as value for parameter {att_name}.{veh_type}")
+                        att_value = str(0.5 * (att_value.start + att_value.end))
                     else:
                         att_value = str(att_value)
                     vType_node.setAttribute(att_name, att_value)
                 for att_name, att_value in driving_params.items():
+                    if type(att_value) is Interval:
+                        att_value = 0.5 * (att_value.start + att_value.end)
                     vType_node.setAttribute(att_name, str("{0:.2f}".format(att_value)))
                 if veh_role == ObstacleRole.STATIC:
                     vType_node.setAttribute("maxSpeed", str(f"{sys.float_info.min}"))
 
-                vType_dist_node.appendChild(vType_node)
+                # vType_dist_node.appendChild(vType_node)
 
-        with open(add_file, "w") as f:
-            domTree.documentElement.writexml(f, addindent="\t", newl="\n")
-
-        self.logger.info("Additional file written to {}".format(add_file))
-        return add_file
+        # with open(add_file, "w") as f:
+        #     domTree.documentElement.writexml(f, addindent="\t", newl="\n")
+        #
+        # self.logger.info("Additional file written to {}".format(add_file))
+        # return add_file
 
     def _generate_add_file(self, scenario_name: str,
                            output_folder: str) -> str:
@@ -2086,7 +2088,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
 
         # filenames
         route_files: Dict[str, str] = {
-            'vehicle': os.path.join(out_folder, self.conf.scenario_name + ".vehicles.rou.xml"),
+            "vehicle": os.path.join(out_folder, self.conf.scenario_name + ".vehicles.rou.xml"),
             "pedestrian": os.path.join(out_folder, self.conf.scenario_name + ".pedestrians.rou.xml")
         }
 
@@ -2099,6 +2101,8 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
             domTree = minidom.Document()
             routes_node = domTree.createElement("routes")
             domTree.appendChild(routes_node)
+            if route_type == "vehicle":
+                self._convert_to_add_file(scenario, routes_node, domTree)
             vType_dist_node = domTree.createElement("vTypeDistribution")
             vType_dist_node.setAttribute("id", "DEFAULT_VEHTYPE")
 
@@ -2107,13 +2111,13 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
 
                 vehicle_node.setAttribute("id", str(obstacle.obstacle_id))
 
-                sumo_veh_type = VEHICLE_TYPE_CR2SUMO[obstacle.obstacle_type].value
-                sumo_veh_length_center = self.conf.veh_params['length'][sumo_veh_type] / 2
+                sumo_veh_type = VEHICLE_TYPE_CR2SUMO[obstacle.obstacle_type]
+                sumo_veh_length_center = self.conf.veh_params['length'][obstacle.obstacle_type] / 2
 
                 if obstacle.obstacle_role == ObstacleRole.STATIC:
                     vehicle_node.setAttribute("depart", str(scenario.dt))
                     vehicle_node.setAttribute("departSpeed", str(0))
-                    vehicle_node.setAttribute("type", f"{sumo_veh_type}_static")
+                    vehicle_node.setAttribute("type", f"{obstacle.obstacle_type.value}_static")
 
                     starting_lanelet_id = find_lanelet_id(obstacle.initial_state)
                     if starting_lanelet_id not in self.lanelet_id2edge_lane_id:
@@ -2143,7 +2147,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                                               str(
                                                   obstacle.prediction.initial_time_step * scenario.dt))
                     vehicle_node.setAttribute("departSpeed", str(obstacle.initial_state.velocity))
-                    vehicle_node.setAttribute("type", sumo_veh_type)
+                    vehicle_node.setAttribute("type", f"{obstacle.obstacle_type.value}_dynamic")
 
                     lanelet_ids = []
                     last_lanelet_id = None
@@ -2409,15 +2413,15 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
             'python',
             os.path.join(os.environ['SUMO_HOME'], 'tools',
                          'randomTrips.py'), '-n', net_file, '-o',
-            trip_files['vehicle'], '-r', route_files["vehicle"], '-b',
-            str(self.conf.departure_interval_vehicles.start), '-e',
-            str(self.conf.departure_interval_vehicles.end), '-p',
-            str(period), '--fringe-factor',
-            str(self.conf.fringe_factor), "--seed",
-            str(self.conf.random_seed_trip_generation),
+            trip_files['vehicle'], '-r', route_files["vehicle"],
+            '-b', str(self.conf.departure_interval_vehicles.start),
+            '-e', str(self.conf.departure_interval_vehicles.end),
+            '-p', str(period),
+            '--fringe-factor', str(self.conf.fringe_factor),
+            "--seed", str(self.conf.random_seed_trip_generation),
             "--validate",
             "--additional-file", str(self._additional_file),
-            '--trip-attributes=departLane=\"best\" departSpeed=\"max\" departPos=\"base\"'
+            '--trip-attributes=departLane=\"best\" departSpeed=\"max\" departPos=\"random_free\"'
         ])
         # create pedestrian routes
         if "pedestrian" in route_files:

@@ -133,7 +133,8 @@ def get_traffic_signals(road: Road, scenario: Scenario):
                 additional_values=additional_values
             )
             traffic_sign = TrafficSign(
-                traffic_sign_id=scenario.generate_object_id(),
+                traffic_sign_id=int("".join([str(road.id), str(signal.id), str(abs(int(position[0]))),
+                                             str(abs(int(position[1]))), str(abs(int(signal.s)))])),
                 traffic_sign_elements=list([traffic_sign_element]),
                 first_occurrence=None,
                 position=position,

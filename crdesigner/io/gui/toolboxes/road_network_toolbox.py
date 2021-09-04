@@ -974,7 +974,7 @@ class RoadNetworkToolbox(QDockWidget):
 
     def create_traffic_lights(self):
         if not SUMO_AVAILABLE:
-            self.text_browser.append("SUMO is not activated!")
+            self.text_browser.append("SUMO is not installed correctly!")
             return
         lanelet_ids = [int(lanelet_id) for lanelet_id in
                        self.road_network_toolbox.referenced_lanelets_traffic_light.get_checked_items()]

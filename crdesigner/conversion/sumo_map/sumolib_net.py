@@ -939,7 +939,8 @@ class Connection:
                  cont_pos=None,
                  prohibits: List["Connection"] = [],
                  change_left_allowed: Set['VehicleType'] = None,
-                 change_right_allowed: Set['VehicleType'] = None):
+                 change_right_allowed: Set['VehicleType'] = None,
+                 forbidden=False):
         self._from = from_edge
         self._to = to_edge
         self._from_lane = from_lane
@@ -957,6 +958,7 @@ class Connection:
         self._change_right_allowed = None
         self.change_left_allowed = change_left_allowed
         self.change_right_allowed = change_right_allowed
+        self._forbidden = forbidden
 
     @property
     def from_edge(self) -> Edge:
@@ -1113,6 +1115,8 @@ class Connection:
             c.set("linkIndex", str(self._tl_link))
         if self._state is not None:
             c.set("state", str(self._state))
+        if self._forbidden is True:
+            c.set("disallow", "all")
         if self._shape is not None:
             c.set("shape", to_shape_string(self._shape))
         if self._keep_clear is not None:

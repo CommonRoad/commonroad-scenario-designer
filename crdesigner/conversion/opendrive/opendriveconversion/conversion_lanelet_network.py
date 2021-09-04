@@ -984,8 +984,8 @@ class ConversionLaneletNetwork(LaneletNetwork):
                     no_of_traffic_lights = len(traffic_light_ids)
                     if no_of_traffic_lights == 1:
                         successor_directions = self.get_successor_directions(target_lanelet)
+                        traffic_light = self.find_traffic_light_by_id(list(traffic_light_ids)[0])
                         if len(successor_directions) == 1:
-                            traffic_light = self.find_traffic_light_by_id(list(traffic_light_ids)[0])
                             if list(successor_directions.values())[0] == 'left':
                                 traffic_light.direction = TrafficLightDirection.LEFT
                             elif list(successor_directions.values())[0] == 'right':
