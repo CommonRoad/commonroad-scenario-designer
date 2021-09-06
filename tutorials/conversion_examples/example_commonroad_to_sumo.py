@@ -1,12 +1,11 @@
 import os
-import matplotlib.pyplot as plt
 import numpy as np
 from lxml import etree
 import uuid
 
 from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
-from commonroad.visualization.draw_dispatch_cr import draw_object
+from commonroad.visualization.mp_renderer import MPRenderer
 
 from crdesigner.io.api import commonroad_to_sumo
 
@@ -62,11 +61,9 @@ traffic_light_system_generated = wrapper.auto_generate_traffic_light_system(tls_
 print(f"Generated Traffic Light System at {tls_lanelet_id}, {traffic_light_system_generated}")
 
 # draw scenario after traffic light generation
-plt.figure(figsize=(25, 25))
-draw_object(wrapper.lanelet_network)
-plt.axis('equal')
-plt.autoscale()
-plt.show()
+rnd = MPRenderer()
+wrapper.lanelet_network.draw(rnd)
+rnd.render(show=True)
 
 # write generated traffic lights back to commonroad file
 scenario.lanelet_network = wrapper.lanelet_network
