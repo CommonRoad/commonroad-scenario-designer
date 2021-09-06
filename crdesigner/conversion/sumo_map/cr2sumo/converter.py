@@ -22,13 +22,13 @@ import networkx as nx
 import numpy as np
 from commonroad.scenario.intersection import Intersection
 from commonroad.visualization.mp_renderer import MPRenderer
-from commonroad_dc.costs.route_matcher import LaneletRouteMatcher
 from shapely.geometry import LineString, Point
 import sumolib
 from matplotlib import pyplot as plt
 
 try:
     import commonroad_dc.pycrccosy
+    from commonroad_dc.costs.route_matcher import LaneletRouteMatcher
     from commonroad_dc.geometry.util import resample_polyline, compute_curvature_from_polyline, \
         chaikins_corner_cutting
 except ImportError:
