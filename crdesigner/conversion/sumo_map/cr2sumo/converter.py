@@ -9,7 +9,7 @@ import time
 import warnings
 from collections import defaultdict
 from copy import deepcopy
-from functools import reduce
+from functools import reduce, lru_cache
 from itertools import groupby
 from typing import Dict, List, Set, Tuple, Iterable, Optional
 # TODO: Move to a single XML lib
@@ -22,6 +22,7 @@ import networkx as nx
 import numpy as np
 from commonroad.scenario.intersection import Intersection
 from commonroad.visualization.mp_renderer import MPRenderer
+from commonroad_dc.costs.route_matcher import LaneletRouteMatcher
 from shapely.geometry import LineString, Point
 import sumolib
 from matplotlib import pyplot as plt
@@ -35,9 +36,10 @@ except ImportError:
         f"Unable to import commonroad_dc.pycrccosy, converting static scenario into interactive is not supported!")
 
 from commonroad.common.file_reader import CommonRoadFileReader
+from commonroad.common.solution import VehicleType as VehicleTypeParam
 from commonroad.common.util import Interval
 from commonroad.prediction.prediction import TrajectoryPrediction
-from commonroad.scenario.trajectory import State
+from commonroad.scenario.trajectory import State, Trajectory
 from commonroad.scenario.lanelet import LaneletNetwork, Lanelet, LineMarking, LaneletType
 from commonroad.scenario.obstacle import ObstacleRole, ObstacleType
 from commonroad.scenario.scenario import Scenario
@@ -96,9 +98,10 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         self._crossings: Dict[int, Set[Lanelet]] = dict()
         # key is the ID of the edges and value the ID of the lanelets that compose it
         self.lanes_dict: Dict[int, List[int]] = {}
+        # lane ID -> Lane
         self.lanes: Dict[str, Lane] = {}
         # edge_id -> length (float)
-        self.edge_lengths = {}
+        self.edge_lengths: Dict[str, float] = {}
         # list of the already explored lanelets
         self._explored_lanelets = []
         self._max_vehicle_width = max(self.conf.veh_params['width'].values())
@@ -1710,7 +1713,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         scenario_name = self.conf.scenario_name
         net_file = os.path.join(output_folder, scenario_name + '.net.xml')
 
-        rou_files = self._convert_to_rou_file(scenario, output_folder)
+        rou_files = self._create_rou_file_from_trajectories(scenario, output_folder)
 
         self.sumo_cfg_file = self.generate_cfg_file(scenario_name, net_file, rou_files,
                                                     output_folder)
@@ -1885,7 +1888,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         self.logger.info("Additional file written to {}".format(add_file))
         return add_file
 
-    def _convert_to_rou_file(
+    def _create_rou_file_from_trajectories(
             self,
             scenario: Scenario,
             out_folder: str,
@@ -1898,19 +1901,11 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         :return: path of route file
         """
 
-        ccosy_cache = {}
+        route_matcher = LaneletRouteMatcher(scenario, VehicleTypeParam.FORD_ESCORT)
+        @lru_cache(512)
+        def get_ccosy(lane_id: str):
+            return create_coordinate_system_from_polyline(self.lanes[lane_id].shape)
 
-        def get_ccosy(lanelet: Lanelet):
-            if lanelet.lanelet_id not in ccosy_cache:
-                ccosy_cache[lanelet.lanelet_id] = create_coordinate_system_from_polyline(
-                    lanelet.center_vertices)
-            return ccosy_cache[lanelet.lanelet_id]
-
-        # TODO: The following methods are coming from the route-planner repository.
-        #  These functions are currently required only for this method, however, this functionality
-        #  is useful over the whole CommonRoad framework, therefore it should be placed
-        #  in the pycrccosy or commonroad-io repository
-        #  The future of these methods needs to be discussed
         def relative_orientation(from_angle1_in_rad, to_angle2_in_rad):
             phi = (to_angle2_in_rad - from_angle1_in_rad) % (2 * np.pi)
             if phi > np.pi:
@@ -2066,16 +2061,8 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         def get_position_in_lane(lanelet_id, position):
             # If the lanelet is merged in one SUMO lane, the lanelets must be merged too
             lane_id = self.lanelet_id2lane_id[lanelet_id]
-            merged_lanelet_ids = self.lane_id2lanelet_id[lane_id]
-            if isinstance(merged_lanelet_ids, list):
-                starting_lanelet = scenario.lanelet_network.find_lanelet_by_id(merged_lanelet_ids[0])
-                for succ_lanelet_id in merged_lanelet_ids[1:]:
-                    succ_lanelet = scenario.lanelet_network.find_lanelet_by_id(succ_lanelet_id)
-                    starting_lanelet = Lanelet.merge_lanelets(starting_lanelet, succ_lanelet)
-            else:
-                starting_lanelet = scenario.lanelet_network.find_lanelet_by_id(lanelet_id)
             # In SUMO the starting point of the vehicle is used as position, not the center
-            depart_pos, _ = get_long_dist(get_ccosy(starting_lanelet), position)
+            depart_pos, _ = get_long_dist(get_ccosy(lane_id), position)
             depart_pos += sumo_veh_length_center
 
             return depart_pos
@@ -2110,8 +2097,6 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                 vehicle_node = domTree.createElement("vehicle")
 
                 vehicle_node.setAttribute("id", str(obstacle.obstacle_id))
-
-                sumo_veh_type = VEHICLE_TYPE_CR2SUMO[obstacle.obstacle_type]
                 sumo_veh_length_center = self.conf.veh_params['length'][obstacle.obstacle_type] / 2
 
                 if obstacle.obstacle_role == ObstacleRole.STATIC:
@@ -2122,7 +2107,8 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                     starting_lanelet_id = find_lanelet_id(obstacle.initial_state)
                     if starting_lanelet_id not in self.lanelet_id2edge_lane_id:
                         self.logger.warning(f"The used starting lanelet {starting_lanelet_id} of the static obstacle "
-                                            f"{obstacle.obstacle_id} was not converted into the SUMO map, the obstacle will be skipped!")
+                                            f"{obstacle.obstacle_id} was not converted into the SUMO map,"
+                                            f"the obstacle will be skipped!")
                         continue
                     depart_lane = self.lanelet_id2edge_lane_id[starting_lanelet_id]
                     vehicle_node.setAttribute("departLane", str(depart_lane))
@@ -2143,9 +2129,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                             f"Obstacle {obstacle.obstacle_id} in scenario {scenario.scenario_id} "
                             f"has no trajectory")
 
-                    vehicle_node.setAttribute("depart",
-                                              str(
-                                                  obstacle.prediction.initial_time_step * scenario.dt))
+                    vehicle_node.setAttribute("depart", str(obstacle.prediction.initial_time_step * scenario.dt))
                     vehicle_node.setAttribute("departSpeed", str(obstacle.initial_state.velocity))
                     vehicle_node.setAttribute("type", f"{obstacle.obstacle_type.value}_dynamic")
 
@@ -2158,33 +2142,12 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                             f"the current obstacle was {type(obstacle.prediction)}")
 
                     skip_obstacle = False
-                    for state in obstacle.prediction.trajectory.state_list:
-
-                        lanelet_id = find_lanelet_id(state)
-                        if lanelet_id is None:
-                            self.logger.warning(
-                                "Skipping obstacle %s, because left the lanelet network in the scenario %s",
-                                obstacle.obstacle_id, scenario.scenario_id)
-                            skip_obstacle = True
-                            break
-
-                        if lanelet_id != last_lanelet_id:
-                            if last_lanelet_id is not None:
-                                prev_lanelet = scenario.lanelet_network.find_lanelet_by_id(last_lanelet_id)
-                                if len(prev_lanelet.successor) == 0:
-                                    break
-                                if lanelet_id not in prev_lanelet.successor:
-                                    if len(prev_lanelet.successor) == 1:
-                                        self.logger.warning(
-                                            f"The lanelet ID {lanelet_id} of the state at timestep {state.time_step} of obstacle {obstacle.obstacle_id} "
-                                            f"was not found within the successors {prev_lanelet.successor} of the previous state, using {prev_lanelet.successor[0]}")
-                                        lanelet_id = prev_lanelet.successor[0]
-                                    else:
-                                        continue
-                            lanelet_ids.append(lanelet_id)
-                            last_lanelet_id = lanelet_id
-
-                    if skip_obstacle:
+                    try:
+                        lanelet_ids, _ = route_matcher.find_lanelets_by_trajectory(obstacle.prediction.trajectory,
+                                                                                   exclude_oncoming_lanes=True,
+                                                                                   required_properties=[])
+                    except ValueError:
+                        self.logger.warning(f"Could not match route for obstacle {obstacle.obstacle_id}!")
                         continue
 
                     # Add one successor to force the obstacle to leave the lanelet
@@ -2197,12 +2160,6 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                             str(self.lanelet_id2edge_id[lanelet_ids[-1]]).startswith(':'):
                         last_lanelet = scenario.lanelet_network.find_lanelet_by_id(lanelet_ids[-1])
                         lanelet_ids.append(last_lanelet.successor[0])
-                        # _, all_successor_lanelet_ids = Lanelet.all_lanelets_by_merging_successors_from_lanelet(
-                        #     last_lanelet,
-                        #     scenario.lanelet_network)
-                        #
-                        # successor_lanelet_ids = all_successor_lanelet_ids[0]
-                        # lanelet_ids.extend(successor_lanelet_ids[1:])
 
                     # Remove all the not converted lanelets
                     lanelet_ids_tmp = [lanelet_id for lanelet_id in lanelet_ids if
@@ -2210,7 +2167,8 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
 
                     if len(lanelet_ids_tmp) == 0:
                         self.logger.warning(
-                            f"None of the used lanelets of the vehicle {obstacle.obstacle_id} has been converted, original lanelet IDs was: {lanelet_ids}, the vehicle will be skipped")
+                            f"None of the used lanelets of the vehicle {obstacle.obstacle_id} has been converted,"
+                            f"original lanelet IDs was: {lanelet_ids}, the vehicle will be skipped")
                         continue
                     lanelet_ids = lanelet_ids_tmp
 
