@@ -2171,6 +2171,8 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                         idx = 0
                     filtered_edges = [edges[idx]]
                     filtered_edges.extend([edge_id for edge_id in edges[idx + 1:] if not edge_id.startswith(':')])
+                    # remove duplicates
+                    filtered_edges = [x[0] for x in groupby(filtered_edges)]
 
                     vehicle_route_node.setAttribute("edges", " ".join(filtered_edges))
                     vehicle_node.appendChild(vehicle_route_node)
