@@ -37,27 +37,27 @@ class BaseClass(unittest.TestCase):
     def out_path_test(self):
         return os.path.join(self.out_path, str(self.id()).split(".")[3])
 
-    def _delete_tmp_folder(self):
-        # return
-        try:
-            shutil.rmtree(self.out_path_test)
-        except FileNotFoundError:
-            pass
-
-    def _delete_tmp_files(self):
-        for (dirpath, dirnames, filenames) in os.walk(self.out_path_test):
-            for file in filenames:
-                if file.endswith(self._outfile_extensions):
-                    os.remove(os.path.join(dirpath, file))
+    # def _delete_tmp_folder(self):
+    #     # return
+    #     try:
+    #         shutil.rmtree(self.out_path_test)
+    #     except FileNotFoundError:
+    #         pass
+    #
+    # def _delete_tmp_files(self):
+    #     for (dirpath, dirnames, filenames) in os.walk(self.out_path_test):
+    #         for file in filenames:
+    #             if file.endswith(self._outfile_extensions):
+    #                 os.remove(os.path.join(dirpath, file))
 
     def setUp(self) -> None:
         if not os.path.isdir(self.out_path_test):
             os.makedirs(self.out_path_test)
-        else:
-            self._delete_tmp_files()
+        # else:
+        #     self._delete_tmp_files()
 
-    def tearDown(self) -> None:
-        self._delete_tmp_folder()
+    # def tearDown(self) -> None:
+    #     self._delete_tmp_folder()
 
     def read_cr_file(self, cr_file_name: str, folder="sumo_test_files"):
         """Load the osm file and convert it to a scenario."""
@@ -87,9 +87,9 @@ class BaseClass(unittest.TestCase):
 
     def sumo_run(self, config: SumoConfig, converter: CR2SumoMapConverter, tls_lanelet_ids: List[int]) -> io.BytesIO:
         # was the conversion successful?
-        conversion_successfull = converter.convert_to_net_file(
+        conversion_successful = converter.create_sumo_files(
             self.out_path_test)
-        self.assertTrue(conversion_successfull)
+        self.assertTrue(conversion_successful)
 
         # can we generate traffic light systems?
         if tls_lanelet_ids:
@@ -246,6 +246,24 @@ class BaseClass(unittest.TestCase):
     #     self.validate_output(out)
     #     self.tearDown()
 
+    # @parameterized.expand([
+    #     ["USA_Peach-3_3_T-1", []],
+    # ])
+    # def convert_scenario_to_net_file(self, cr_file_name: str, tls: List[int]):
+    #     # load CR scenario and translate to origo
+    #     scenario, planning_problem_set = CommonRoadFileReader(scenario_file).open()
+    #     conf.country_id = scenario.scenario_id.country_id
+    #     scenario.scenario_id.obstacle_behavior = "I"
+    #     conf.scenario_name = str(scenario.scenario_id)
+    #     conf.presimulation_steps = 0
+    #     output_folder = os.path.join(output_folder_path, conf.scenario_name)
+    #     os.makedirs(output_folder, exist_ok=True)
+    #
+    #     # convert scenario to SUMO files
+    #     converter_config = SumoConfig()
+    #     converter_config.scenario_name = str(scenario.scenario_id)
+    #     converter_config.country_id = scenario.scenario_id.country_id
+    #     converter = CR2SumoMapConverter(scenario, converter_config)
 
 if __name__ == "__main__":
     unittest.main()

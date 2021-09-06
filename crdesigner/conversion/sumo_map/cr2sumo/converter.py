@@ -538,17 +538,6 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         speeds_list = set(speeds_list)
         return speeds_list
 
-    # def _calculate_number_junctions(self):
-    #     """
-    #     Calculate the number of junctions, nodes that don't represent a junction are not counted
-    #     :return: number of junctions
-    #     """
-    #     number_of_junctions = 0
-    #     for nodes in merged_dictionary.values():
-    #         if len(nodes) != 1:
-    #             number_of_junctions += 1
-    #     return number_of_junctions
-
     def _encode_traffic_signs(self):
         """
         Encodes all traffic signs and writes the according changes to relevant nodes / edges
@@ -678,12 +667,6 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                         self.lanelet_network.find_lanelet_by_id(lanelet_id) for lanelet_id in intersection.crossings
                     }
                     next_cluster_id += 1
-                else:
-                    print("sdf")
-                    # delete_intersections.append(intersection.intersection_id)
-
-            for inter_id in delete_intersections:
-                del lanelet_network._intersections[inter_id]
 
             return clusters, clusters_crossing, cluster_types, next_cluster_id
 
@@ -1435,18 +1418,19 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         self._type_file = file_path
         return file_path
 
-    def merge_intermediate_files(self, output_path: str, nodes_path: str, edges_path: str, connections_path: str,
-                                 traffic_path: str, type_path: str, cleanup=False, update_internal_ids=True) -> bool:
+    def merge_intermediate_files(self, output_path: str, cleanup: bool,
+                                 nodes_path: str, edges_path: str, connections_path: str,
+                                 traffic_path: str, type_path: str) -> bool:
         """
         Function that merges the edges and nodes files into one using netconvert
+        :param output_path
+        :param cleanup: deletes temporary input files after creating net file (only deactivate for debugging)
         :param connections_path:
         :param nodes_path:
         :param edges_path:
         :param traffic_path:
         :param type_path:
         :param output_path: the relative path of the output
-        :param cleanup: deletes temporary input files after creating net file (only deactivate for debugging)
-        :param update_internal_ids: Updates the internal Edge IDs from the newly generated net file
         :return: bool: returns False if conversion fails
         """
 
@@ -1557,7 +1541,9 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                 continue
 
             # if new_internal_connection_ID.contains(' '):
-            #     raise ScenarioException("There is no lanelet between intersections/junctions, which causes that these intersections must be merged in SUMO, therefore multiple internal edges would be in this merged intersection, which is not supported!")
+            #     raise ScenarioException("There is no lanelet between intersections/junctions,
+            #     which causes that these intersections must be merged in SUMO,
+            #     therefore multiple internal edges would be in this merged intersection, which is not supported!")
 
             new_internal_connection_id_split = new_internal_connection_id.split('_')
             new_internal_edge_id = f"{new_internal_connection_id_split[0]}_{new_internal_connection_id_split[1]}"
@@ -1600,7 +1586,8 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                 self.lanelet_id2edge_lane_id[original_lanelet_ID] = new_internal_lane_id
                 self.lanelet_id2lane_id[original_lanelet_ID] = new_internal_connection_id
 
-        # available_lanelet_ids = {self.lane_id2lanelet_id[available_lane_id] for available_lane_id in available_lane_ids if available_lane_id in self.lane_id2lanelet_id}
+        # available_lanelet_ids = {self.lane_id2lanelet_id[available_lane_id] for available_lane_id in
+        # available_lane_ids if available_lane_id in self.lane_id2lanelet_id}
 
         for lanelet in self.lanelet_network.lanelets:
             lanelet_id = lanelet.lanelet_id
@@ -1621,29 +1608,14 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                     continue
                 self.lanelet_id2junction[self.lane_id2lanelet_id[lane.id]] = junction
 
-    # @staticmethod
-    # def rewrite_netfile(output: str):
-    #     """
-    #     Change the type of the junction node to zipper.
-    #     :param output: the netfile to be modified.
-    #     :return: None
-    #     """
-    #     tree = ET.parse(output)
-    #     root = tree.getroot()
-    #     junctions = root.findall("junction")
-    #     for junction in junctions:
-    #         for key, value in junction.attrib.items():
-    #             if key == 'type' and (value == 'priority'
-    #                                   or value == 'unregulated'):
-    #                 junction.set(key, 'zipper')
-    #
-    #     tree.write(output, encoding='utf-8', xml_declaration=True)
-
-    def convert_to_net_file(self, output_folder: str) -> bool:
+    def create_sumo_files(self, output_folder: str, traffic_from_trajectories=False, cleanup_tmp_files=True) -> bool:
         """
-        Convert the Commonroad scenario to a net.xml file, specified by the absolute  path output_file.
-        NOTE: This method regenerates the traffic!
-        :param output_folder of the returned net.xml file
+        Convert the CommonRoad scenario to a net.xml file, specified by the absolute  path output_file and create
+        all SUMO files required for the traffic simulation.
+        :param output_folder of the returned SUMO files
+        :param traffic_from_trajectories: if True, create route files based on trajectories from CommonRoad scenario;
+            if False, create traffic randomly using SUMO's randomTrips script
+        :param cleanup_tmp_files: clean up temporary files created during the .net conversion, useful for debugging
         :return returns whether conversion was successful
         """
         output_path = os.path.join(output_folder, self.conf.scenario_name + '.net.xml')
@@ -1654,38 +1626,18 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
 
         self.logger.info("Merging Intermediate Files")
         intermediary_files = self.write_intermediate_files(output_path)
-        conversion_possible = self.merge_intermediate_files(output_path, *intermediary_files)
+        conversion_possible = self.merge_intermediate_files(output_path, cleanup_tmp_files, *intermediary_files)
         if not conversion_possible:
             self.logger.error("Error converting map, see above for details")
             return False
 
         self.logger.info("Generating Traffic Routes")
-        return self._generate_routes(output_path)
+        if traffic_from_trajectories is True:
+            return self._create_routes_from_trajectories(self.initial_scenario, output_folder)
+        else:
+            return self._create_random_routes(output_path)
 
-    def convert_scenario_to_net_file(self, scenario: Scenario, output_folder: str) -> bool:
-        """
-        Convert a Commonroad scenario with given trajectories of dynamic obstacles to SUMO format.
-        The routes will be initialized according to the trajectories defined in the CR scenario
-        :param scenario: the scenario to be converted
-        :param output_folder: path to the output folder
-        :return returns whether conversion was successful
-        """
-        output_path = os.path.join(output_folder, self.conf.scenario_name + '.net.xml')
-        self.logger.info("Converting to SUMO Map")
-        self._convert_map()
-
-        self.logger.info("Merging Intermediate Files")
-        intermediary_files = self.write_intermediate_files(output_path)
-        conversion_possible = self.merge_intermediate_files(output_path, *intermediary_files,
-                                                            update_internal_ids=True)
-        if not conversion_possible:
-            self.logger.error("Error converting map, see above for details")
-            return False
-
-        self.logger.info("Converting Traffic Routes")
-        return self._convert_routes(scenario, output_folder)
-
-    def _convert_routes(self, scenario: Scenario, output_folder: str) -> bool:
+    def _create_routes_from_trajectories(self, scenario: Scenario, output_folder: str) -> bool:
         """
         Convert the Commonroad trajectories to SUMO routes. Next to the route files add file will be created as well
         :param scenario: the scenario to be converted
@@ -1701,7 +1653,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                                                     output_folder)
         return True
 
-    def _generate_routes(self, net_file: str, scenario_name: str=None, return_files= True) -> bool:
+    def _create_random_routes(self, net_file: str, scenario_name: str=None, return_files= True) -> bool:
         """
         Automatically generates traffic routes from the given .net.xml file
 
