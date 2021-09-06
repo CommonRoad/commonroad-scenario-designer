@@ -9,6 +9,7 @@ from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistin
 from commonroad.planning.planning_problem import PlanningProblemSet
 from commonroad.scenario.scenario import Tag
 
+from crdesigner.conversion.common.utils import generate_unique_id
 from crdesigner.conversion.opendrive.opendriveparser.parser import parse_opendrive
 from crdesigner.io.opendrive_convert import convert_opendrive
 from test.utils import elements_equal
@@ -89,6 +90,7 @@ class TestOpenDriveBaseClass(unittest.TestCase):
             # compare both element trees
             trees_are_equal = elements_equal(tree_import, writer.root_node)
             self.assertTrue(trees_are_equal)
+        generate_unique_id(0)
 
 
 class TestBasicOpenDrive(TestOpenDriveBaseClass):

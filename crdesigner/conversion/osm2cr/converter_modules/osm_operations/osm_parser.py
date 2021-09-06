@@ -359,7 +359,7 @@ def parse_turnlane(turnlane: str) -> str:
     if "right" in turnlane:
         included.append("right")
     result = ";".join(included)
-    if result is "":
+    if result == "":
         return "none"
     return result
 
