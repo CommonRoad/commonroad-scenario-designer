@@ -684,8 +684,6 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
 
             for inter_id in delete_intersections:
                 del lanelet_network._intersections[inter_id]
-            self.lanelet_network.cleanup_traffic_lights()
-            self.delete_traffic_light_if_no_intersection()
 
             return clusters, clusters_crossing, cluster_types, next_cluster_id
 
@@ -693,22 +691,6 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
             self.lanelet_network, intersecting_edges)
 
         # merge overlapping clusters
-        # delete_clusters = []
-        # for a_id, a in clusters.items():
-        #     for b_id, b in clusters.items():
-        #         if b_id in delete_clusters:
-        #             continue
-        #         if a_id < b_id:
-        #             if a & b:
-        #                 clusters[a_id] |= clusters[b_id]
-        #                 cluster_types[a_id] |= cluster_types[b_id]
-        #                 delete_clusters.append(b_id)
-        #                 del cluster_types[b_id]
-        #                 clusters_crossing[a_id] |= clusters_crossing[b_id]
-        #                 del clusters_crossing[b_id]
-        #
-        # for b_id in delete_clusters:
-        #     del clusters[b_id]
         while True:
             try:
                 a_id, b_id = next((a_id, b_id)
@@ -738,7 +720,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         #                               f"{intersection.intersection_id}"
         #                               f"-> bug in lanelet_network of CommonRoad xml file!")
 
-        if False:#not self.conf.highway_mode:
+        if not self.conf.highway_mode:
             # Expand merged clusters by all lanelets intersecting each other.
             # merging based on Lanelets intersecting
             explored_nodes = set()
