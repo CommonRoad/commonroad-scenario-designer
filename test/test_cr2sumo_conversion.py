@@ -9,6 +9,7 @@ import warnings
 from typing import List
 
 import numpy as np
+import pytest
 from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.common.file_writer import CommonRoadFileWriter
 from commonroad.scenario.obstacle import ObstacleType
@@ -159,9 +160,9 @@ class BaseClass(unittest.TestCase):
                     f"Simulation Error, {keyword} found {len(matches)} times in stderr:" + "\n" + err_str
                 )
 
-    @parameterized.expand([
-        ["USA_Peach-3_3_T-1", []],
-        ["DEU_garching-1_1", [270]],
+    # @parameterized.expand([
+    #     ["USA_Peach-3_3_T-1", []],
+    #     ["DEU_garching-1_1", [270]],
         # ["DEU_garching-1_2", []],
         # ["ZAM_intersectandcrossing-1_0", [56]],
         # ["ZAM_merging-1_1", [107]],
@@ -216,8 +217,10 @@ class BaseClass(unittest.TestCase):
         # ["ZAM_TrafficLightTest-1_1-T-1", []],
         # ["ZAM_TrafficLightTest-1_2-T-1", []],
         # ["ZAM_TrafficLightLanes-1_1_T-1", []],
-    ])
-    def test_parameterized_sumo_run(self, cr_file_name: str, tls: List[int]):
+    # ])
+    def test_sumo_conversion(self):
+        cr_file_name = "DEU_garching-1_1"
+        tls = [270]
         config, converter = self.read_cr_file(cr_file_name)
         out = self.sumo_run(config, converter, tls)
         self.validate_output(out)
