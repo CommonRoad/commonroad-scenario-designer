@@ -72,13 +72,13 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
     """Converts CommonRoad map to sumo map .net.xml"""
 
     def __init__(self,
-                 lanelet_network: LaneletNetwork,
+                 scenario: Scenario,
                  conf: SumoConfig):
         """
         :param lanelet_network: lanelet network to be converted
         :param conf: configuration file for additional map conversion parameters
         """
-        self.lanelet_network: LaneletNetwork = lanelet_network
+        self.initial_scenario: Scenario = scenario
         self.conf: SumoConfig = conf
         self.country_id = SupportedTrafficSignCountry(conf.country_id) if isinstance(conf.country_id,
                                                                                      str) else conf.country_id

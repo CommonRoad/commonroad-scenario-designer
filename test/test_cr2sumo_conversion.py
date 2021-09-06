@@ -82,26 +82,26 @@ class BaseClass(unittest.TestCase):
         config = SumoConfig.from_scenario(self.scenario)
         config.veh_distribution[ObstacleType.PEDESTRIAN] = 0.0
         # convert to SUMO
-        wrapper = CR2SumoMapConverter(self.scenario.lanelet_network, config)
+        wrapper = CR2SumoMapConverter(self.scenario, config)
         return config, wrapper
 
-    def sumo_run(self, config: SumoConfig, wrapper: CR2SumoMapConverter, tls_lanelet_ids: List[int]) -> io.BytesIO:
+    def sumo_run(self, config: SumoConfig, converter: CR2SumoMapConverter, tls_lanelet_ids: List[int]) -> io.BytesIO:
         # was the conversion successful?
-        conversion_successfull = wrapper.convert_to_net_file(
+        conversion_successfull = converter.convert_to_net_file(
             self.out_path_test)
         self.assertTrue(conversion_successfull)
 
         # can we generate traffic light systems?
         if tls_lanelet_ids:
             self.assertTrue(
-                all(wrapper.auto_generate_traffic_light_system(lanelet_id)
+                all(converter.auto_generate_traffic_light_system(lanelet_id)
                     for lanelet_id in tls_lanelet_ids)
             )
 
         simulation = SumoSimulation()
         f = io.StringIO()
         with contextlib.redirect_stderr(f):
-            simulation.initialize(config, wrapper)
+            simulation.initialize(config, converter)
 
             for _ in range(config.simulation_steps):
                 simulation.simulate_step()
@@ -159,69 +159,68 @@ class BaseClass(unittest.TestCase):
                     f"Simulation Error, {keyword} found {len(matches)} times in stderr:" + "\n" + err_str
                 )
 
-    # @parameterized.expand([
-    #     ["USA_Peach-3_3_T-1", []],
-    #     ["DEU_garching-1_1", [270]],
-    #     ["DEU_garching-1_2", []],
-    #     ["ZAM_intersectandcrossing-1_0", [56]],
-    #     ["ZAM_merging-1_1", [107]],
-    #     ["USA_urban_1", [105]],
-    #     ["DEU_AAH-1_8007_T-1", [154]],
-    #     ["DEU_AAH-2_19000_T-1", [118]],
-    #     ["DEU_Guetersloh-20_4_T-1", []],
-    #     ["DEU_Muc-13_1_T-1", [257,253]],
-    #     ["USA_Lanker-2_13_T-1", [3670]],
-    #     ["ARG_Carcarana-10_5_T-1", [6758, 6712, 6917, 8325]],
-    #     ["ARG_Carcarana-10_2_T-1", [6917, 6988, 8325]],
-    #     ["BEL_Putte-10_1_T-1", []],
-    #     ["BEL_Putte-1_3_T-1", [6077]],
-    #     ["BEL_Zaventem-4_1_T-1", []],
-    #     ["DEU_BadEssen-1_6_T-1", [23452]],
-    #     # ["DEU_Guetersloh-11_2_T-1", [80457]],
-    #     # ["DEU_Guetersloh-5_2_T-1", []],
-    #     # ["DEU_Hennigsdorf-1_2_T-1", []],
-    #     # ["DEU_Hennigsdorf-16_3_T-1", []],
-    #     # ["DEU_Hennigsdorf-18_2_T-1", []],
-    #     # ["DEU_Hennigsdorf-9_3_T-1", []],
-    #     # ["DEU_Meckenheim-2_4_T-1", []],
-    #     # ["DEU_Moabit-6_1_T-1", []],
-    #     # ["DEU_Moelln-12_1_T-1", []],
-    #     # ["DEU_Moelln-2_1_T-1", []],
-    #     # ["DEU_Moelln-9_1_T-1", []],
-    #     # ["DEU_Muehlhausen-12_4_T-1", []],
-    #     # ["DEU_Muehlhausen-13_6_T-1", []],
-    #     # ["DEU_Rheinbach-2_5_T-1", []],
-    #     # ["DEU_Speyer-4_3_T-1", []],
-    #     # ["ESP_Almansa-1_1_T-1", []],
-    #     # ["ESP_Berga-4_1_T-1", []],
-    #     # ["ESP_Cambre-3_3_T-1", []],
-    #     # ["ESP_Ceuta-1_2_T-1", []],
-    #     # ["ESP_Ceuta-1_3_T-1", []],
-    #     # ["ESP_Inca-3_2_T-1", []],
-    #     # ["ESP_Inca-7_1_T-1", []],
-    #     # ["ESP_SantBoideLlobregat-11_3_T-1", []],
-    #     # ["ESP_Toledo-8_3_T-1", []],
-    #     # ["FRA_Miramas-4_6_T-1", []],
-    #     # ["GRC_Perama-2_2_T-1", []],
-    #     # ["HRV_Pula-12_2_T-1", []],
-    #     # ["HRV_Pula-4_1_T-1", []],
-    #     # ["HRV_Pula-4_5_T-1", []],
-    #     # ["ITA_Siderno-1_2_T-1", []],
-    #     # ["ITA_Siderno-8_2_T-1", []],
-    #     # ["USA_US101-3_1_T-1", []],
-    #     # ["ZAM_Tjunction-1_56_T-1", []],
-    #     # ["ZAM_Zip-1_54_T-1", []],
-    #     # ["ZAM_MergingTrafficSign-1_1_T-1", []],
-    #     # ["ZAM_MergingTrafficSign-1_2_T-1", []],
-    #     ["ZAM_TrafficLightTest-1_1-T-1", []],
-    #     ["ZAM_TrafficLightTest-1_2-T-1", []],
-    #     ["ZAM_TrafficLightLanes-1_1_T-1", []],
-    # ])
-    # @pytest.mark.parallel
-    # def test_parameterized_sumo_run(self, cr_file_name: str, tls: List[int]):
-    #     config, wrapper = self.read_cr_file(cr_file_name)
-    #     out = self.sumo_run(config, wrapper, tls)
-    #     self.validate_output(out)
+    @parameterized.expand([
+        ["USA_Peach-3_3_T-1", []],
+        ["DEU_garching-1_1", [270]],
+        # ["DEU_garching-1_2", []],
+        # ["ZAM_intersectandcrossing-1_0", [56]],
+        # ["ZAM_merging-1_1", [107]],
+        # ["USA_urban_1", [105]],
+        # ["DEU_AAH-1_8007_T-1", [154]],
+        # ["DEU_AAH-2_19000_T-1", [118]],
+        # ["DEU_Guetersloh-20_4_T-1", []],
+        # ["DEU_Muc-13_1_T-1", [257,253]],
+        # ["USA_Lanker-2_13_T-1", [3670]],
+        # ["ARG_Carcarana-10_5_T-1", [6758, 6712, 6917, 8325]],
+        # ["ARG_Carcarana-10_2_T-1", [6917, 6988, 8325]],
+        # ["BEL_Putte-10_1_T-1", []],
+        # ["BEL_Putte-1_3_T-1", [6077]],
+        # ["BEL_Zaventem-4_1_T-1", []],
+        # ["DEU_BadEssen-1_6_T-1", [23452]],
+        # ["DEU_Guetersloh-11_2_T-1", [80457]],
+        # ["DEU_Guetersloh-5_2_T-1", []],
+        # ["DEU_Hennigsdorf-1_2_T-1", []],
+        # ["DEU_Hennigsdorf-16_3_T-1", []],
+        # ["DEU_Hennigsdorf-18_2_T-1", []],
+        # ["DEU_Hennigsdorf-9_3_T-1", []],
+        # ["DEU_Meckenheim-2_4_T-1", []],
+        # ["DEU_Moabit-6_1_T-1", []],
+        # ["DEU_Moelln-12_1_T-1", []],
+        # ["DEU_Moelln-2_1_T-1", []],
+        # ["DEU_Moelln-9_1_T-1", []],
+        # ["DEU_Muehlhausen-12_4_T-1", []],
+        # ["DEU_Muehlhausen-13_6_T-1", []],
+        # ["DEU_Rheinbach-2_5_T-1", []],
+        # ["DEU_Speyer-4_3_T-1", []],
+        # ["ESP_Almansa-1_1_T-1", []],
+        # ["ESP_Berga-4_1_T-1", []],
+        # ["ESP_Cambre-3_3_T-1", []],
+        # ["ESP_Ceuta-1_2_T-1", []],
+        # ["ESP_Ceuta-1_3_T-1", []],
+        # ["ESP_Inca-3_2_T-1", []],
+        # ["ESP_Inca-7_1_T-1", []],
+        # ["ESP_SantBoideLlobregat-11_3_T-1", []],
+        # ["ESP_Toledo-8_3_T-1", []],
+        # ["FRA_Miramas-4_6_T-1", []],
+        # ["GRC_Perama-2_2_T-1", []],
+        # ["HRV_Pula-12_2_T-1", []],
+        # ["HRV_Pula-4_1_T-1", []],
+        # ["HRV_Pula-4_5_T-1", []],
+        # ["ITA_Siderno-1_2_T-1", []],
+        # ["ITA_Siderno-8_2_T-1", []],
+        # ["USA_US101-3_1_T-1", []],
+        # ["ZAM_Tjunction-1_56_T-1", []],
+        # ["ZAM_Zip-1_54_T-1", []],
+        # ["ZAM_MergingTrafficSign-1_1_T-1", []],
+        # ["ZAM_MergingTrafficSign-1_2_T-1", []],
+        # ["ZAM_TrafficLightTest-1_1-T-1", []],
+        # ["ZAM_TrafficLightTest-1_2-T-1", []],
+        # ["ZAM_TrafficLightLanes-1_1_T-1", []],
+    ])
+    def test_parameterized_sumo_run(self, cr_file_name: str, tls: List[int]):
+        config, converter = self.read_cr_file(cr_file_name)
+        out = self.sumo_run(config, converter, tls)
+        self.validate_output(out)
 
     # @parameterized.expand([
     #     # ["ESP_Ceuta-1_2_T-1", []],
@@ -234,18 +233,18 @@ class BaseClass(unittest.TestCase):
     #     # print(err.getvalue())
     #     self.validate_output(out)
 
-    @parameterized.expand([
-        # ["ESP_Ceuta-1_2_T-1", []],
-        # ["USA_Peach-3_3_T-1", []],
-        ["KA-Suedtangente-atlatec", []],
-    ])
-    def test_opendrive_source(self, cr_file_name: str, tls: List[int]):
-        """Test with maps that have been converted from openDRIVE"""
-        config, wrapper = self.read_cr_file(cr_file_name, folder="opendrive_test_files")
-        out = self.sumo_run(config, wrapper, tls)
-        # print(err.getvalue())
-        self.validate_output(out)
-        self.tearDown()
+    # @parameterized.expand([
+    #     # ["ESP_Ceuta-1_2_T-1", []],
+    #     # ["USA_Peach-3_3_T-1", []],
+    #     ["KA-Suedtangente-atlatec", []],
+    # ])
+    # def test_opendrive_source(self, cr_file_name: str, tls: List[int]):
+    #     """Test with maps that have been converted from openDRIVE"""
+    #     config, wrapper = self.read_cr_file(cr_file_name, folder="opendrive_test_files")
+    #     out = self.sumo_run(config, wrapper, tls)
+    #     # print(err.getvalue())
+    #     self.validate_output(out)
+    #     self.tearDown()
 
 
 if __name__ == "__main__":

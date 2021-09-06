@@ -981,7 +981,7 @@ class RoadNetworkToolbox(QDockWidget):
         if not lanelet_ids:
             return
         self.road_network_toolbox.referenced_lanelets_traffic_light.clear()
-        converter = CR2SumoMapConverter(self.current_scenario.lanelet_network,
+        converter = CR2SumoMapConverter(self.current_scenario,
                                         SumoConfig.from_scenario(self.current_scenario))
         converter.convert_to_net_file(self.tmp_folder)
         oks = []
