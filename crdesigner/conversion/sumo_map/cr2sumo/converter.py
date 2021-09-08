@@ -2064,7 +2064,9 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                             f"has no trajectory")
 
                     vehicle_node.setAttribute("depart", str(obstacle.prediction.initial_time_step * scenario.dt))
-                    vehicle_node.setAttribute("departSpeed", str(obstacle.initial_state.velocity))
+                    vehicle_node.setAttribute("departSpeed",
+                                              str(min(obstacle.initial_state.velocity,
+                                                      self.conf.veh_params["maxSpeed"][obstacle.obstacle_type])))
                     vehicle_node.setAttribute("type", f"{obstacle.obstacle_type.value}_dynamic")
 
                     lanelet_ids = []
