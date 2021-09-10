@@ -174,11 +174,6 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         self.new_nodes, self.merged_dictionary, replaced_nodes = self._merge_junctions_intersecting_lanelets()
         self.logger.info(f"Merged: {self.merged_dictionary}")
         self.new_edges = self._filter_edges(self.merged_dictionary, replaced_nodes)
-        self.draw_network(self.new_nodes, self.new_edges)
-        # else:
-        #     self.new_nodes = self.nodes
-        #     self.new_edges = self.edges
-
         self._create_lane_based_connections()
         # self._set_prohibited_connections()
         self.roundabouts = self._create_roundabouts()
@@ -1047,7 +1042,6 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         self._crossings = new_crossings
 
     def _create_traffic_lights(self):
-        # tl (traffic_light_id) -> Node (Traffic Light)
         cr_traffic_lights: Dict[int, TrafficLight] = self.lanelet_network._traffic_lights
         node_2_traffic_light: Dict[Node, Set[TrafficLight]] = defaultdict(set)
         node_2_connections: Dict[Node, Set[Connection]] = defaultdict(set)
@@ -1071,9 +1065,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
             #
             intersection = incoming_lanelet_2_intersection[lanelet.lanelet_id] \
                 if lanelet.lanelet_id in incoming_lanelet_2_intersection else None
-            # if intersection is None:
-            #     print("NO INCOMING:", lanelet.lanelet_id)
-            #     raise ValueError
+
             def calc_direction_2_connections(edge: Edge):
                 connections_init = {}
                 if intersection is not None:
@@ -1107,25 +1099,6 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
 
             # successor_edges = succeeding_new_edges(edge)
             direction_2_connections = calc_direction_2_connections(edge)
-            # for successor in calc_direction_2_connections(edge):
-            #     for connection in (c for c in self._new_connections if c.from_edge == edge and c.to_edge == successor):
-            #         # compute angle
-            #         # from_dir = connection.from_lane.shape[-1] - connection.from_lane.shape[-2]
-            #         # to_dir = connection.to_lane.shape[-1] - connection.to_lane.shape[-2]
-            #         # angle = np.arctan2(from_dir[0] * to_dir[1] - from_dir[1] * to_dir[0],
-            #         #                    from_dir[0] * to_dir[0] + from_dir[1] * to_dir[1])
-            #         connections_all.add(connection)
-            #
-            # # Angle ranges for TrafficLightDirections in radians, [-pi, pi]
-            # # [-pi, 0) = right, (0, pi] = left
-            # direction_ranges: Dict[TrafficLightDirection, Interval] = {
-            #     TrafficLightDirection.ALL: Interval(-np.pi, np.pi),
-            #     TrafficLightDirection.RIGHT: Interval(-np.pi, -np.pi / 4),
-            #     TrafficLightDirection.STRAIGHT_RIGHT: Interval(-np.pi, np.pi / 4),
-            #     TrafficLightDirection.STRAIGHT: Interval(-np.pi / 4, np.pi / 4),
-            #     TrafficLightDirection.LEFT_STRAIGHT: Interval(np.pi / 4, np.pi),
-            #     TrafficLightDirection.LEFT: Interval(np.pi / 4, np.pi)
-            # }
 
             for light in lights:
                 # try:
@@ -1568,8 +1541,6 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
 
             for original_internal_connection_ID in original_internal_connection_ids:
                 original_internal_connection_ID_splitted = original_internal_connection_ID.split('_')
-                original_internal_edge_ID = original_internal_connection_ID_splitted[0]
-                original_internal_lane_ID = original_internal_connection_ID_splitted[1]
 
                 original_lanelet_ID = self.lane_id2lanelet_id[original_internal_connection_ID]
 
@@ -1581,7 +1552,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                     self.lane_id2lanelet_id[new_internal_connection_id].append(original_lanelet_ID)
                 else:
                     self.lane_id2lanelet_id[new_internal_connection_id] = original_lanelet_ID
-                # del self.lane_id2lanelet_id[original_internal_connection_ID]
+
                 self.lanelet_id2edge_id[original_lanelet_ID] = new_internal_edge_id
                 self.lanelet_id2edge_lane_id[original_lanelet_ID] = new_internal_lane_id
                 self.lanelet_id2lane_id[original_lanelet_ID] = new_internal_connection_id
@@ -1692,15 +1663,6 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         :param output_folder: path to the output folder
         :return: the path of the created add file
         """
-        # add_file = os.path.join(output_folder, self.conf.scenario_name + '.add.xml')
-
-        # create file
-        # domTree = minidom.Document()
-        # additional_node = domTree.createElement("additional")
-        # domTree.appendChild(additional_node)
-        # vType_dist_node = domTree.createElement("vTypeDistribution")
-        # vType_dist_node.setAttribute("id", "DEFAULT_VEHTYPE")
-        # additional_node.appendChild(vType_dist_node)
 
         # config parameters for easy access
         vehicle_params = self.conf.veh_params
@@ -1750,14 +1712,6 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                     vType_node.setAttribute(att_name, str("{0:.2f}".format(att_value)))
                 if veh_role == ObstacleRole.STATIC:
                     vType_node.setAttribute("maxSpeed", str(f"{sys.float_info.min}"))
-
-                # vType_dist_node.appendChild(vType_node)
-
-        # with open(add_file, "w") as f:
-        #     domTree.documentElement.writexml(f, addindent="\t", newl="\n")
-        #
-        # self.logger.info("Additional file written to {}".format(add_file))
-        # return add_file
 
     def _generate_add_file(self, scenario_name: str,
                            output_folder: str) -> str:
@@ -2390,7 +2344,6 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         self.lanelet_network.cleanup_traffic_lights()
 
     def draw_network(self, nodes: Dict[int, Node], edges: Dict[int, Edge], figsize=(20, 20)):
-        return
         plt.figure(figsize=figsize)
         draw_params = {"lanelet": {"show_label": True},
                        "intersection": {"draw_intersections": True, "show_label": True}}

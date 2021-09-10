@@ -68,7 +68,6 @@ class TrafficLightEncoder:
             sumo_states.append(sumo_state)
 
         # encode states
-        pattern = "rg"
         for state, sumo_state in zip(light_states, sumo_states):
             dur = state[0].duration * self.conf.dt
             assert dur > 0
@@ -87,7 +86,6 @@ def _sync_traffic_light_cycles(traffic_lights: List[TrafficLight]) -> List[List[
     :param traffic_lights:
     :return: list of synchronized states
     """
-    ids = [tl.traffic_light_id for tl in traffic_lights]
     time_steps = np.lcm.reduce([sum(cycle.duration for cycle in tl.cycle) for tl in traffic_lights])
     states = np.array([_cycles_to_states(traffic_light.cycle, time_steps)
                        for traffic_light in traffic_lights]).T
