@@ -7,7 +7,6 @@ from typing import List, Tuple
 import matplotlib.pyplot as plt
 import numpy as np
 import utm
-from commonroad.visualization.mp_renderer import MPRenderer
 
 from crdesigner.conversion.osm2cr import config
 from crdesigner.conversion.osm2cr.converter_modules.graph_operations import road_graph as rg
@@ -19,6 +18,7 @@ from crdesigner.conversion.osm2cr.converter_modules.utility.geonamesID import ge
 from crdesigner.conversion.osm2cr.converter_modules.cr_operations.cleanup import sanitize
 
 # CommonRoad python tools are imported
+from commonroad.visualization.mp_renderer import MPRenderer
 from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
 from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.scenario.scenario import Scenario, Lanelet, Tag, Location
@@ -284,8 +284,6 @@ def view_xml(filename: str, ax=None) -> None:
 
                                                         'scale_factor': 0.15}},
                    'lanelet': {'show_label': False}}
-
-    rnd = MPRenderer(plot_limits=limits, ax=ax)
-    scenario.draw(rnd, draw_params=draw_params)
+    rnd = MPRenderer(plot_limits=limits, ax=ax, draw_params=draw_params)
+    scenario.draw(rnd)
     rnd.render()
-    return
