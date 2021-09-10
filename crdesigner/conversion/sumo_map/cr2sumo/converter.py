@@ -1228,7 +1228,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         assert red_time >= 0
 
         if not self._output_file:
-            self.logger.error("Need to call convert_to_net_file first")
+            self.logger.error("Need to call create_sumo_files first")
             return False
 
         # did the user select an incoming lanelet to the junction?

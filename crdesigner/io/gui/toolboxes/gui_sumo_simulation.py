@@ -35,7 +35,7 @@ class SimulationWorker(QThread):
         try:
             # convert scenario to SUMO
             wrapper = CR2SumoMapConverter(self.scenario, self.config)
-            wrapper.convert_to_net_file(self.output_folder)
+            wrapper.create_sumo_files(self.output_folder)
 
             simulation = SumoSimulation()
             simulation.initialize(self.config, wrapper)
@@ -64,7 +64,7 @@ class ConversionWorker(QThread):
         try:
             # convert scenario to SUMO
             wrapper = CR2SumoMapConverter(self.scenario, self.config)
-            wrapper.convert_to_net_file(self.output_folder)
+            wrapper.create_sumo_files(self.output_folder)
 
         except Exception as e:
             # log error and save it for display to the user

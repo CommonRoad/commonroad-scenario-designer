@@ -129,7 +129,7 @@ def commonroad_to_sumo(input_file: str, output_file: str):
         path, file_name = os.path.split(output_file)
         config.scenario_name = file_name.partition(".")[0]
         converter = CR2SumoMapConverter(scenario, config)
-        converter.convert_to_net_file(path)
+        converter.create_sumo_files(path)
 
 
 def osm_to_commonroad(input_file: str) -> Scenario:

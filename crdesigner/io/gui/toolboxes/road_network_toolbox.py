@@ -983,7 +983,7 @@ class RoadNetworkToolbox(QDockWidget):
         self.road_network_toolbox.referenced_lanelets_traffic_light.clear()
         converter = CR2SumoMapConverter(self.current_scenario,
                                         SumoConfig.from_scenario(self.current_scenario))
-        converter.convert_to_net_file(self.tmp_folder)
+        converter.create_sumo_files(self.tmp_folder)
         oks = []
         dt = self.current_scenario.dt
         offset = int(self.road_network_toolbox.time_offset.text())

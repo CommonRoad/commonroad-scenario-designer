@@ -39,7 +39,7 @@ if SUMO_AVAILABLE:
     config = SumoConfig.from_scenario_name(str(uuid.uuid4()))
     config.scenario_name = scenario_name
     converter = CR2SumoMapConverter(scenario, config)
-    converter.convert_to_net_file(output_folder)
+    converter.create_sumo_files(output_folder)
 
 # -------------------- Option 3: SUMO conversion APIs with Traffic Simulation and Video Creation -----------------------
 
@@ -54,7 +54,7 @@ config = SumoConfig.from_scenario_name(scenario_name)
 
 # convert CR to sumo net
 wrapper = CR2SumoMapConverter(scenario, config)
-wrapper.convert_to_net_file(output_folder)
+wrapper.create_sumo_files(output_folder)
 tls_lanelet_id = 43513
 traffic_light_system_generated = wrapper.auto_generate_traffic_light_system(tls_lanelet_id)
 
