@@ -47,6 +47,7 @@ class SumoConfig(DefaultConfig):
 
     # conversion
     country_id: SupportedTrafficSignCountry = SupportedTrafficSignCountry.ZAMUNDA
+    highway_mode = True  # less aggressive clustering, use zipper junctions for onRamps
 
     # simulation
     dt = 0.1  # length of simulation step of the interface
@@ -55,7 +56,7 @@ class SumoConfig(DefaultConfig):
     simulation_steps = 300  # number of simulated (and synchronized) time steps
     with_sumo_gui = False
     # lateral resolution > 0 enables SUMO'S sublane model, see https://sumo.dlr.de/docs/Simulation/SublaneModel.html
-    lateral_resolution = 0
+    lateral_resolution = 1.0
     # re-compute orientation when fetching vehicles from SUMO.
     # Avoids lateral "sliding" at lane changes at computational costs
     compute_orientation = True
@@ -99,17 +100,18 @@ class SumoConfig(DefaultConfig):
     ##
     # probability that vehicles will start at the fringe of the network (edges without
     # predecessor), and end at the fringe of the network (edges without successor).
-    fringe_factor: int = 1000000000
+    fringe_factor: int = 100000000000
     # number of vehicle departures per second
     veh_per_second = 50
     # Interval of departure times for vehicles
     departure_interval_vehicles = Interval(0, 30)
     # max. number of vehicles in route file
     n_vehicles_max: int = 30
-    # max. number of vehicles per km
-    max_veh_per_km: int = 70
+    # max. number of vehicles per km / sec
+    max_veh_per_km: int = 25
     # random seed for deterministic sumo traffic generation
     random_seed: int = 1234
+    random_seed_trip_generation: int = 1234
 
     # other vehicles size bound (values are sampled from normal distribution within bounds)
     vehicle_length_interval = 0.4
@@ -154,7 +156,7 @@ class SumoConfig(DefaultConfig):
         },
         'accel': {
             # default 2.9 m/s²
-            ObstacleType.CAR: Interval(2, 2.9),
+            ObstacleType.CAR: Interval(1.8, 2.9),
             # default 1.3
             ObstacleType.TRUCK: Interval(1, 1.5),
             # default 1.2
@@ -202,6 +204,7 @@ class SumoConfig(DefaultConfig):
     'sigma': [0-1] driver imperfection (0 denotes perfect driving. sumo_default: 0.5
     'speedDev': [0-1] deviation of the speedFactor. sumo_default 0.1
     'speedFactor': [0-1] The vehicles expected multiplicator for lane speed limits. sumo_default 1.0
+    'lcMaxSpeedLatStanding': max. lateral speed when vehicle is standing (avoids lateral sliding in standstill)
     """
     driving_params = {
         'lcStrategic': Interval(10, 100),
@@ -211,5 +214,8 @@ class SumoConfig(DefaultConfig):
         'speedDev': Interval(0.1, 0.2),
         'speedFactor': Interval(0.9, 1.1),
         'lcImpatience': Interval(0, 0.5),
-        'impatience': Interval(0, 0.5)
+        'impatience': Interval(0, 0.5),
+        'lcMaxSpeedLatStanding': 0,
+        'lcSigma': Interval(0.1,0.2),
+        'lcKeepRight': Interval(0.8, 0.9)
     }

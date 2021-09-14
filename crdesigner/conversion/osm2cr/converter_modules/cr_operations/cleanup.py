@@ -313,7 +313,7 @@ def convert_to_lht(scenario: Scenario) -> None:
     :param1 scenario: The scenario to be checked
     :return: None
     """
-    if scenario.benchmark_id[:3] in LEFT_HAND_TRAFFIC:
+    if scenario.scenario_id.country_id in LEFT_HAND_TRAFFIC:
         print("converting scenario to lht")
         rht_to_lht(scenario)
 

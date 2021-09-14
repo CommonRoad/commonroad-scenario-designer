@@ -128,7 +128,7 @@ class TrafficSignEncoder:
         curvatures: Dict[edge, float] = dict()
         visited = set()
 
-        def compute_max_path_curvature(edge: Edge):
+        def compute_max_path_curvature(edge: Edge, checked_parents=()):
             if edge in curvatures:
                 return curvatures[edge]
 
@@ -136,7 +136,8 @@ class TrafficSignEncoder:
                 compute_max_curvature_from_polyline(np.array(lane.shape))
                 for lane in edge.lanes
             ]) if edge.lanes else float("-inf")
-            curvature = np.max([curvature] + [compute_max_path_curvature(parent) for parent in parents[edge]])
+            curvature = np.max([curvature] + [compute_max_path_curvature(parent, checked_parents + tuple(parents[edge]))
+                                              for parent in parents[edge] if parent not in checked_parents])
             curvatures[edge] = curvature
             return curvature
 

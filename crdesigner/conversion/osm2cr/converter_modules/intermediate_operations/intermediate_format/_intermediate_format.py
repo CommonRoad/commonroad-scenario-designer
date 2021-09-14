@@ -6,11 +6,13 @@ __author__ = "Behtarin Ferdousi"
 
 import copy
 from typing import List, Set, Dict
+
+import commonroad
 import numpy as np
 
 from commonroad.scenario.lanelet import LaneletNetwork
 from commonroad.scenario.obstacle import Obstacle
-from commonroad.scenario.scenario import Scenario
+from commonroad.scenario.scenario import Scenario, ScenarioID
 from commonroad.scenario.traffic_sign import TrafficSign, TrafficLight
 from commonroad.scenario.intersection import Intersection, IntersectionIncomingElement
 from commonroad.planning.planning_problem import PlanningProblem, PlanningProblemSet
@@ -338,7 +340,8 @@ class IntermediateFormat:
 
         :return: CommonRoad Scenario
         """
-        scenario = Scenario(config.TIMESTEPSIZE, config.BENCHMARK_ID)
+        scenario = Scenario(config.TIMESTEPSIZE,
+                            ScenarioID.from_benchmark_id(config.BENCHMARK_ID, commonroad.SCENARIO_VERSION))
         net = LaneletNetwork()
 
         # Add edges

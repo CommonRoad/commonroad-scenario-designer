@@ -34,8 +34,8 @@ class SimulationWorker(QThread):
     def run(self):
         try:
             # convert scenario to SUMO
-            wrapper = CR2SumoMapConverter(self.scenario.lanelet_network, self.config)
-            wrapper.convert_to_net_file(self.output_folder)
+            wrapper = CR2SumoMapConverter(self.scenario, self.config)
+            wrapper.create_sumo_files(self.output_folder)
 
             simulation = SumoSimulation()
             simulation.initialize(self.config, wrapper)
@@ -63,8 +63,8 @@ class ConversionWorker(QThread):
     def run(self):
         try:
             # convert scenario to SUMO
-            wrapper = CR2SumoMapConverter(self.scenario.lanelet_network, self.config)
-            wrapper.convert_to_net_file(self.output_folder)
+            wrapper = CR2SumoMapConverter(self.scenario, self.config)
+            wrapper.create_sumo_files(self.output_folder)
 
         except Exception as e:
             # log error and save it for display to the user
