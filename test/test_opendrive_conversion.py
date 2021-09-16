@@ -7,7 +7,7 @@ from lxml import etree
 
 from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
 from commonroad.planning.planning_problem import PlanningProblemSet
-from commonroad.scenario.scenario import Tag
+from commonroad.scenario.scenario import Tag, Scenario
 
 from crdesigner.conversion.common.utils import generate_unique_id
 from crdesigner.conversion.opendrive.opendriveparser.parser import parse_opendrive
@@ -23,8 +23,8 @@ __email__ = "commonroad@lists.lrz.de"
 __status__ = "Development"
 
 
-def setUp(xodr_file_name):
-    """Load the xodr file and create the scenario.
+def load_and_convert_opendrive(xodr_file_name:str) -> Scenario:
+    """
 
     """
     cwd_path = os.path.dirname(os.path.abspath(__file__))
@@ -46,12 +46,12 @@ def setUp(xodr_file_name):
     return convert_opendrive(opendrive)
 
 
-def opendrive_scenario(xodr_file_name):
+def compare_maps(file_name: str) -> bool:
     """Test if the scenario is equal to the loaded xml file.
     Disregard the different dates.
 
     """
-    xml_output_name = xodr_file_name
+    xml_output_name = file_name
 
     with open(
             os.path.dirname(os.path.realpath(__file__))
@@ -61,7 +61,7 @@ def opendrive_scenario(xodr_file_name):
         parser = etree.XMLParser(remove_blank_text=True)
         tree_import = etree.parse(fh, parser=parser).getroot()
         writer = CommonRoadFileWriter(
-            scenario=setUp(xodr_file_name),
+            scenario=load_and_convert_opendrive(file_name),
             planning_problem_set=PlanningProblemSet(),
             author="",
             affiliation="",
@@ -88,29 +88,26 @@ class TestOpenDrive(unittest.TestCase):
 
     def test_basic_opendrive(self):
         """Basic test with a junction in the middle."""
-
-        self.assertTrue(opendrive_scenario("opendrive-1"))
+        self.assertTrue(compare_maps("opendrive-1"))
 
     def test_sued_tangente(self):
         """Includes roads with multiple lane sections and
         lane sections with multiple width sections.
         This should be split into multiple tests in the future."""
 
-        self.assertTrue(opendrive_scenario("KA-Suedtangente-atlatec"))
+        self.assertTrue(compare_maps("KA-Suedtangente-atlatec"))
 
     def test_culdesac(self):
         """Two adjacent lanes with same successor should not be mistaken
         as merging lanes!"""
 
-        self.assertTrue(opendrive_scenario("CulDeSac"))
+        self.assertTrue(compare_maps("CulDeSac"))
 
     def test_complex_crossing(self):
-
-        self.assertTrue(opendrive_scenario("CrossingComplex8Course"))
+        self.assertTrue(compare_maps("CrossingComplex8Course"))
 
     def test_roundabout(self):
-
-        self.assertTrue(opendrive_scenario("Roundabout8Course"))
+        self.assertTrue(compare_maps("Roundabout8Course"))
 
     def test_right_width_coefficients(self):
         """Test if algorithm selects the right width index if it is ambiguous.
@@ -118,30 +115,20 @@ class TestOpenDrive(unittest.TestCase):
         For multiple width coefficients, at the border between the interval of two
         both could apply and it was previously not rightly determined which to select.
         """
-
-        self.assertTrue(opendrive_scenario("town03_right_width_coefficient"))
+        self.assertTrue(compare_maps("town03_right_width_coefficient"))
 
     def test_zero_width_coefficients(self):
         """Test if this converter discards lanes which have zero width everywhere.
         In this case, it is the lane -1 of road 1."""
-
-        self.assertTrue(opendrive_scenario("zero_width_lanes_map"))
-        #xml_output_name = "CulDeSac"
+        self.assertTrue(compare_maps("zero_width_lanes_map"))
 
     def test_poly3_and_border_record(self):
         """Test if the program convert Poly3 Geometry and whether it can handle
         border records instead of width records."""
-
-        self.assertTrue(opendrive_scenario("poly3_and_border_record"))
+        self.assertTrue(compare_maps("poly3_and_border_record"))
 
     def test_four_way_signal(self):
-
-        self.assertTrue(opendrive_scenario("FourWaySignal"))
-
-class TestFourWaySignal(TestOpenDriveBaseClass):
-
-    __test__ = True
-    xodr_file_name = "FourWaySignal"
+        self.assertTrue(compare_maps("FourWaySignal"))
 
 
 if __name__ == "__main__":

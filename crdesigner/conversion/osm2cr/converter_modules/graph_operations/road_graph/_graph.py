@@ -664,7 +664,7 @@ class Graph:
         """
         invalid_lanes = []
         for lane in self.get_all_lanes():
-            if not lane.convert_to_polygon().shapely_object.is_valid:
+            if not lane.polygon.shapely_object.is_valid:
                 invalid_lanes.append(lane)
         return invalid_lanes
 

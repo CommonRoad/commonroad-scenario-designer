@@ -337,7 +337,7 @@ def _find_intersecting_edges(
         edge_shape = []
         for lanelet_id in (lanelet_ids[0], lanelet_ids[-1]):
             if lanelet_id not in polygons_dict:
-                polygon = eroded_lanelet_network.find_lanelet_by_id(lanelet_id).convert_to_polygon()
+                polygon = eroded_lanelet_network.find_lanelet_by_id(lanelet_id).polygon
 
                 polygons_dict[lanelet_id] = polygon.shapely_object
 
@@ -491,7 +491,7 @@ def intersect_lanelets_line(lanelets: Iterable[Lanelet],
     """
     # intersect line with convex hull of lanelets
     convex_hull = unary_union([
-        lanelet.convert_to_polygon().shapely_object for lanelet in lanelets
+        lanelet.polygon.shapely_object for lanelet in lanelets
     ]).convex_hull
     shapely_line = LineString(line)
     intersect = convex_hull.intersection(shapely_line)
