@@ -51,7 +51,7 @@ def find_invalid_lanelet_polygons(scenario) -> List[int]:
     """ find lanelets with invalid polygon """
     lanelet_ids = []
     for lanelet in scenario.lanelet_network.lanelets:
-        polygon = lanelet.convert_to_polygon().shapely_object
+        polygon = lanelet.polygon.shapely_object
         if not polygon.is_valid:
             lanelet_ids.append(lanelet.lanelet_id)
     return lanelet_ids

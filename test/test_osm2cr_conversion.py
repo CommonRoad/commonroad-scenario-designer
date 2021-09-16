@@ -117,7 +117,7 @@ class TestOSM2CRScenarioBaseClass(unittest.TestCase):
         # test if lng was set
         self.assertNotEqual(location.find('gpsLongitude').text, '999')
 
-    def test_osm2cr_conversion_lanewith(self):
+    def test_osm2cr_conversion_lane_width(self):
         """Test if every lanelet is wider than the given minimum distance of 2.5 meters"""
 
         min_distance = 2.5
@@ -127,7 +127,7 @@ class TestOSM2CRScenarioBaseClass(unittest.TestCase):
                 distance = math.sqrt((r_v[0]-l_v[0])**2 + (r_v[1]-l_v[1])**2)
                 self.assertGreaterEqual(distance, min_distance)
 
-    def test_osm2cr_scenerio_write_validates(self):
+    def test_osm2cr_scenario_write_validates(self):
         """Test if created CommonRoad scenario validates"""
 
         fw = CommonRoadFileWriter(

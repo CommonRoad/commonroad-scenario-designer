@@ -700,7 +700,6 @@ class Graph:
                     adj_lane.adjacent_right = None
                     adj_lane.adjacent_right_direction_equal = None
 
-
     def delete_invalid_lanes(self) -> None:
         """
         finds and deletes invalid lanes in the RoadGraph

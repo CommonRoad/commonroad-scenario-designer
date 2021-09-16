@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<commonRoad timeStepSize="0.1" commonRoadVersion="2020a" author="Sebastian Maierhofer" affiliation="Technical University of Munich" source="CommonRoad Scenario Designer" benchmarkID="ZAM_OpenDrive-123" date="2021-08-04">
+<commonRoad timeStepSize="0.1" commonRoadVersion="2020a" author="" affiliation="" source="CommonRoad Scenario Designer" benchmarkID="ZAM_OpenDrive-1" date="2021-09-16">
   <location>
     <geoNameId>-999</geoNameId>
     <gpsLatitude>999</gpsLatitude>
@@ -7,6 +7,7 @@
   </location>
   <scenarioTags>
     <urban/>
+    <highway/>
   </scenarioTags>
   <lanelet id="5">
     <leftBound>
@@ -503,7 +504,7 @@
     <successor ref="9"/>
     <successor ref="10"/>
     <adjacentLeft ref="11" drivingDir="opposite"/>
-    <laneletType>driveWay</laneletType>
+    <laneletType>intersection</laneletType>
     <trafficLightRef ref="2020"/>
     <trafficLightRef ref="2022"/>
   </lanelet>
@@ -1988,7 +1989,7 @@
     <successor ref="16"/>
     <successor ref="7"/>
     <adjacentLeft ref="17" drivingDir="opposite"/>
-    <laneletType>driveWay</laneletType>
+    <laneletType>intersection</laneletType>
     <trafficSignRef ref="3"/>
     <trafficLightRef ref="2032"/>
     <trafficLightRef ref="2030"/>
@@ -3106,7 +3107,7 @@
     <successor ref="19"/>
     <successor ref="21"/>
     <adjacentLeft ref="14" drivingDir="opposite"/>
-    <laneletType>driveWay</laneletType>
+    <laneletType>intersection</laneletType>
     <trafficLightRef ref="2010"/>
     <trafficLightRef ref="2012"/>
   </lanelet>
@@ -3587,7 +3588,7 @@
     <successor ref="13"/>
     <successor ref="20"/>
     <adjacentLeft ref="6" drivingDir="opposite"/>
-    <laneletType>driveWay</laneletType>
+    <laneletType>intersection</laneletType>
     <trafficLightRef ref="2040"/>
     <trafficLightRef ref="2042"/>
   </lanelet>

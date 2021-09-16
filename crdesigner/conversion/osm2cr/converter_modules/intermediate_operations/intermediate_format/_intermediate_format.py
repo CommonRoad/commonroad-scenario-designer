@@ -408,7 +408,7 @@ class IntermediateFormat:
         crossings = dict()
         for crossed_lanelet in crossed_lane_network.lanelets:
             crossing_lanelet_ids = crossing_lane_network.find_lanelet_by_shape(
-                crossed_lanelet.convert_to_polygon())
+                crossed_lanelet.polygon)
             crossings[crossed_lanelet.lanelet_id] = set(crossing_lanelet_ids)
         return crossings
 

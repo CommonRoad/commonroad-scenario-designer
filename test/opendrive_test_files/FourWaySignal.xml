@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<commonRoad timeStepSize="0.1" commonRoadVersion="2020a" author="Sebastian Maierhofer" affiliation="Technical University of Munich" source="CommonRoad Scenario Designer" benchmarkID="ZAM_OpenDrive-123" date="2021-08-25">
+<commonRoad timeStepSize="0.1" commonRoadVersion="2020a" author="" affiliation="" source="CommonRoad Scenario Designer" benchmarkID="ZAM_OpenDrive-1" date="2021-09-16">
   <location>
     <geoNameId>-999</geoNameId>
     <gpsLatitude>999</gpsLatitude>
@@ -7,6 +7,7 @@
   </location>
   <scenarioTags>
     <urban/>
+    <highway/>
   </scenarioTags>
   <lanelet id="3">
     <leftBound>
@@ -278,7 +279,7 @@
     <predecessor ref="10"/>
     <predecessor ref="11"/>
     <adjacentLeft ref="3" drivingDir="opposite"/>
-    <laneletType>driveWay</laneletType>
+    <laneletType>intersection</laneletType>
   </lanelet>
   <lanelet id="12">
     <leftBound>
@@ -314,7 +315,7 @@
     <predecessor ref="14"/>
     <successor ref="15"/>
     <adjacentLeft ref="16" drivingDir="opposite"/>
-    <laneletType>driveWay</laneletType>
+    <laneletType>intersection</laneletType>
   </lanelet>
   <lanelet id="16">
     <leftBound>
@@ -2620,7 +2621,7 @@
     <successor ref="36"/>
     <adjacentLeft ref="32" drivingDir="opposite"/>
     <adjacentRight ref="39" drivingDir="same"/>
-    <laneletType>driveWay</laneletType>
+    <laneletType>intersection</laneletType>
   </lanelet>
   <lanelet id="39">
     <leftBound>
@@ -2691,7 +2692,7 @@
     <successor ref="45"/>
     <adjacentLeft ref="46" drivingDir="opposite"/>
     <adjacentRight ref="47" drivingDir="same"/>
-    <laneletType>driveWay</laneletType>
+    <laneletType>intersection</laneletType>
   </lanelet>
   <lanelet id="47">
     <leftBound>
@@ -2726,7 +2727,7 @@
     <predecessor ref="41"/>
     <successor ref="48"/>
     <adjacentLeft ref="44" drivingDir="same"/>
-    <laneletType>driveWay</laneletType>
+    <laneletType>intersection</laneletType>
   </lanelet>
   <lanelet id="46">
     <leftBound>

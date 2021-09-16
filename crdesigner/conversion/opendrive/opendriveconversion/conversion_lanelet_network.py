@@ -745,8 +745,8 @@ class ConversionLaneletNetwork(LaneletNetwork):
         for incoming_lane in intersection_map.keys():
             for successor in self.find_lanelet_by_id(incoming_lane).successor:
                 if successor != lanelet.lanelet_id:
-                    successor_lane_polygon = self.find_lanelet_by_id(successor).convert_to_polygon()
-                    lanelet_polygon = lanelet.convert_to_polygon()
+                    successor_lane_polygon = self.find_lanelet_by_id(successor).polygon
+                    lanelet_polygon = lanelet.polygon
                     if successor_lane_polygon.shapely_object.intersects(lanelet_polygon.shapely_object):
                         return True
         return False
@@ -765,9 +765,9 @@ class ConversionLaneletNetwork(LaneletNetwork):
             for incoming_successor in self.find_lanelet_by_id(incoming_lane).successor:
                 for successor in successors_list:
                     if successor not in self.find_lanelet_by_id(incoming_lane).successor:
-                        successor_lane_polygon = self.find_lanelet_by_id(successor).convert_to_polygon()
+                        successor_lane_polygon = self.find_lanelet_by_id(successor).polygon
                         incoming_successor_lane_polygon = self.find_lanelet_by_id(
-                            incoming_successor).convert_to_polygon()
+                            incoming_successor).polygon
                         if successor_lane_polygon.shapely_object.intersects(
                                 incoming_successor_lane_polygon.shapely_object):
                             return True
