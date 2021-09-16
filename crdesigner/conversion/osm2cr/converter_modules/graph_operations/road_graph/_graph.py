@@ -664,7 +664,7 @@ class Graph:
         """
         invalid_lanes = []
         for lane in self.get_all_lanes():
-            if not lane.polygon.shapely_object.is_valid:
+            if not lane.convert_to_polygon().shapely_object.is_valid:
                 invalid_lanes.append(lane)
         return invalid_lanes
 
@@ -699,7 +699,6 @@ class Graph:
                 if adj_lane.adjacent_right == lane:
                     adj_lane.adjacent_right = None
                     adj_lane.adjacent_right_direction_equal = None
-
 
     def delete_invalid_lanes(self) -> None:
         """

@@ -13,6 +13,7 @@ from ._graph_node import GraphNode
 from ._graph_traffic_light import GraphTrafficLight
 from ._graph_traffic_sign import GraphTrafficSign
 
+
 class Lane:
     """
     Class that represents a lane in the graph structure
