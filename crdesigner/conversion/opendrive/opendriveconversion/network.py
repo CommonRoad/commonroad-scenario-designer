@@ -565,9 +565,13 @@ class LinkIndex:
             intersection_map_new_id = dict()
             for incoming, connecting in intersection_map.items():
                 # Replacing keys/incoming ids with new ids
-                new_incoming_id = old_id_to_new_id_map[incoming]
-                connecting = [old_id_to_new_id_map.get(item) for item in connecting]
-                intersection_map_new_id[new_incoming_id] = connecting
+                #print('incoming: ', incoming)
+                #print('connecting:', connecting)
+                #print('new ids: ', old_id_to_new_id_map[incoming])
+                if incoming in old_id_to_new_id_map.keys():
+                    new_incoming_id = old_id_to_new_id_map[incoming]
+                    connecting = [old_id_to_new_id_map.get(item) for item in connecting]
+                    intersection_map_new_id[new_incoming_id] = connecting
 
             updated_intersection_maps.append(intersection_map_new_id)
         self._intersections = updated_intersection_maps

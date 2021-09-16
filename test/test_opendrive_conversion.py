@@ -155,5 +155,11 @@ class TestPoly3AndBorderRecord(TestOpenDriveBaseClass):
     xodr_file_name = "poly3_and_border_record"
 
 
+class TestFourWaySignal(TestOpenDriveBaseClass):
+
+    __test__ = True
+    xodr_file_name = "FourWaySignal"
+
+
 if __name__ == "__main__":
     unittest.main()
