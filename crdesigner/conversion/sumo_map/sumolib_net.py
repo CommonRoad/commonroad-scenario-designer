@@ -18,6 +18,19 @@ import sumolib
 import sumolib.files
 
 
+def set_allowed_changes(xml_node: ET.Element, obj: Union["Connection", "Lane"]):
+    """Adds allowed lange change directions to etree xml node"""
+    return
+    if obj.change_left_allowed and len(obj.change_left_allowed) != len(VehicleType):
+        xml_node.set("changeLeft", " ".join(l.value for l in obj.change_left_allowed))
+    elif len(obj.change_left_allowed) == 0:
+        xml_node.set("changeLeft", VehicleType.CUSTOM1.value)
+    if obj.change_right_allowed and len(obj.change_right_allowed) != len(VehicleType):
+        xml_node.set("changeRight", " ".join(l.value for l in obj.change_right_allowed))
+    elif len(obj.change_right_allowed) == 0:
+        xml_node.set("changeRight", VehicleType.CUSTOM1.value)
+
+
 class NetLocation:
     def __init__(self, net_offset: np.ndarray,
                  conv_boundary: np.ndarray,
@@ -66,6 +79,8 @@ def _get_default(d: Dict[_K, _V], key: _K, default: Optional[_VV] = None, map: C
         return map(d[key])
     except KeyError:
         return default
+    except ValueError:
+        return None
 
 
 def sumo_net_from_xml(file: str) -> Net:
@@ -134,8 +149,12 @@ def sumo_net_from_xml(file: str) -> Net:
             x = _get_default(elem.attrib, "x", None, float)
             y = _get_default(elem.attrib, "y", None, float)
             z = _get_default(elem.attrib, "z", None, float)
+            id_ = _get_default(elem.attrib, "id", None, int)
+            if id_ is None:
+                id_ = _get_default(elem.attrib, "id", None, str)
+                assert id_ is not None
             junction = Junction(
-                id=_get_default(elem.attrib, "id", None, int),
+                id=id_,
                 junction_type=_get_default(elem.attrib, "type", None, JunctionType),
                 coord=np.array([x, y, z] if z is not None else [x, y]),
                 shape=_get_default(elem.attrib, "shape", None, from_shape_string),
@@ -306,6 +325,8 @@ class Node:
         self.shape: Optional[np.ndarray] = shape
         self.tl = tl
         self.right_of_way = right_of_way
+        self.zipper = True
+        self.keep_clear = True
 
     def add_outgoing(self, edge: 'Edge'):
         self._outgoing.append(edge)
@@ -340,6 +361,8 @@ class Node:
         if self._prohibits is not None:
             # TODO: convert prohibits
             pass
+        if self.keep_clear is False:
+            node.set("keepClear", "false")
         if self.inc_lanes:
             node.set("incLanes", " ".join([str(l.id) for l in self.inc_lanes]))
         if self.int_lanes:
@@ -913,7 +936,11 @@ class Connection:
                  via_lane_id: List[str] = None,
                  shape: Optional[np.ndarray] = None,
                  keep_clear: bool = None,
-                 cont_pos=None):
+                 cont_pos=None,
+                 prohibits: List["Connection"] = [],
+                 change_left_allowed: Set['VehicleType'] = None,
+                 change_right_allowed: Set['VehicleType'] = None,
+                 forbidden=False):
         self._from = from_edge
         self._to = to_edge
         self._from_lane = from_lane
@@ -926,6 +953,12 @@ class Connection:
         self._shape = shape
         self._keep_clear = keep_clear
         self._cont_pos = cont_pos
+        self._prohibits = prohibits
+        self._change_left_allowed = None
+        self._change_right_allowed = None
+        self.change_left_allowed = change_left_allowed
+        self.change_right_allowed = change_right_allowed
+        self._forbidden = forbidden
 
     @property
     def from_edge(self) -> Edge:
@@ -1014,6 +1047,55 @@ class Connection:
     def shape(self, shape: np.ndarray):
         self._shape = shape
 
+    @property
+    def prohibits(self) -> List["Connection"]:
+        return self._prohibits
+
+    @prohibits.setter
+    def prohibits(self, prohibits):
+        self._prohibits = prohibits if self._prohibits is not None else []
+
+    @property
+    def connection_string(self) -> str:
+        return f"{self.from_lane.id}->{self.to_lane.id}"
+
+    @property
+    def change_left_forbidden(self) -> Set['VehicleType']:
+        return set(VehicleType) - self._change_left_allowed
+
+    @change_left_forbidden.setter
+    def change_left_forbidden(self, change_left_forbidden):
+        self._change_left_allowed = set(VehicleType) - set(change_left_forbidden) \
+            if change_left_forbidden is not None else set(VehicleType)
+
+    @property
+    def change_right_forbidden(self) -> Set['VehicleType']:
+        return set(VehicleType) - self._change_right_allowed \
+            if self._change_right_allowed is not None else set(VehicleType)
+
+    @change_right_forbidden.setter
+    def change_right_forbidden(self, change_right_forbidden):
+        self._change_right_allowed = set(VehicleType) - set(change_right_forbidden) \
+            if change_right_forbidden is not None else set(VehicleType)
+
+    @property
+    def change_left_allowed(self) -> Set['VehicleType']:
+        return self._change_left_allowed
+
+    @change_left_allowed.setter
+    def change_left_allowed(self, change_left_allowed):
+        self._change_left_allowed = set(change_left_allowed) \
+            if change_left_allowed is not None else set(VehicleType)
+
+    @property
+    def change_right_allowed(self) -> Set['VehicleType']:
+        return self._change_right_allowed
+
+    @change_right_allowed.setter
+    def change_right_allowed(self, change_right_allowed):
+        self._change_right_allowed = set(change_right_allowed) \
+            if change_right_allowed is not None else set(VehicleType)
+
     def to_xml(self) -> str:
         """
         Converts this connection to it's xml representation
@@ -1033,13 +1115,27 @@ class Connection:
             c.set("linkIndex", str(self._tl_link))
         if self._state is not None:
             c.set("state", str(self._state))
+        if self._forbidden is True:
+            c.set("disallow", "all")
         if self._shape is not None:
             c.set("shape", to_shape_string(self._shape))
         if self._keep_clear is not None:
-            c.set("keepClear", "true" if self._keep_clear else "false")
+            c.set("keepClear", "true" if self._keep_clear is True else "false")
         if self._cont_pos is not None:
             c.set("contPos", str(self._cont_pos))
+
+        set_allowed_changes(c, self)
         return ET.tostring(c, encoding="unicode")
+
+    def get_prohibition_xmls(self) -> List[str]:
+        xmls = []
+        for p in self.prohibits:
+            x = ET.Element("prohibition")
+            x.set("prohibitor", self.connection_string)
+            x.set("prohibited", p.connection_string)
+            xmls.append(ET.tostring(x, encoding="unicode"))
+
+        return xmls
 
     def __str__(self):
         return self.to_xml()
@@ -1488,17 +1584,16 @@ class TLS:
 #
 
 class Roundabout:
-    def __init__(self, nodes: List[Node], edges: List[Edge] = None):
-        self._nodes = nodes
+    def __init__(self, edges: List[Edge] = None):
         self._edges = edges if edges is not None else []
 
-    @property
-    def nodes(self) -> List[Node]:
-        return self._nodes
-
-    @nodes.setter
-    def nodes(self, nodes: List[Node]):
-        self._nodes = nodes
+    # @property
+    # def nodes(self) -> List[Node]:
+    #     return self._nodes
+    #
+    # @nodes.setter
+    # def nodes(self, nodes: List[Node]):
+    #     self._nodes = nodes
 
     @property
     def edges(self) -> List[Edge]:
@@ -1507,6 +1602,11 @@ class Roundabout:
     @edges.setter
     def edges(self, edges: List[Edge]):
         self._edges = edges
+
+    def to_xml(self)  -> str:
+        roundabout = ET.Element("roundabout")
+        roundabout.set("edges", " ".join([str(e.id) for e in self.edges]))
+        return ET.tostring(roundabout, encoding="unicode")
 
 
 #

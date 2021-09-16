@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<commonRoad timeStepSize="0.1" commonRoadVersion="2020a" author="" affiliation="" source="CommonRoad Scenario Designer" benchmarkID="ZAM_OpenDrive-123" date="2021-06-18">
+<commonRoad timeStepSize="0.1" commonRoadVersion="2020a" author="" affiliation="" source="CommonRoad Scenario Designer" benchmarkID="ZAM_OpenDrive-1" date="2021-09-10">
   <location>
     <geoNameId>-999</geoNameId>
     <gpsLatitude>999</gpsLatitude>
@@ -17,10 +17,10 @@
     </geoTransformation>
   </location>
   <scenarioTags>
-    <highway/>
     <urban/>
+    <highway/>
   </scenarioTags>
-  <lanelet id="100">
+  <lanelet id="1">
     <leftBound>
       <point>
         <x>361849.69</x>
@@ -865,11 +865,11 @@
         <y>5296857.3644</y>
       </point>
     </rightBound>
-    <adjacentLeft ref="101" drivingDir="opposite"/>
-    <adjacentRight ref="102" drivingDir="same"/>
+    <adjacentLeft ref="2" drivingDir="opposite"/>
+    <adjacentRight ref="3" drivingDir="same"/>
     <laneletType>driveWay</laneletType>
   </lanelet>
-  <lanelet id="102">
+  <lanelet id="3">
     <leftBound>
       <point>
         <x>361848.7255</x>
@@ -1746,10 +1746,10 @@
         <y>5296857.0368</y>
       </point>
     </rightBound>
-    <adjacentLeft ref="100" drivingDir="same"/>
+    <adjacentLeft ref="1" drivingDir="same"/>
     <laneletType>sidewalk</laneletType>
   </lanelet>
-  <lanelet id="101">
+  <lanelet id="2">
     <leftBound>
       <point>
         <x>361863.5503</x>
@@ -1922,10 +1922,10 @@
         <y>5296911.5842</y>
       </point>
     </rightBound>
-    <adjacentLeft ref="100" drivingDir="opposite"/>
+    <adjacentLeft ref="1" drivingDir="opposite"/>
     <laneletType>driveWay</laneletType>
   </lanelet>
-  <lanelet id="103">
+  <lanelet id="4">
     <leftBound>
       <point>
         <x>361863.5503</x>
@@ -1995,10 +1995,10 @@
       </point>
       <lineMarking>dashed</lineMarking>
     </rightBound>
-    <adjacentLeft ref="104" drivingDir="opposite"/>
+    <adjacentLeft ref="5" drivingDir="opposite"/>
     <laneletType>driveWay</laneletType>
   </lanelet>
-  <lanelet id="104">
+  <lanelet id="5">
     <leftBound>
       <point>
         <x>361873.1364</x>
@@ -2059,10 +2059,10 @@
         <y>5296859.3806</y>
       </point>
     </rightBound>
-    <adjacentLeft ref="103" drivingDir="opposite"/>
+    <adjacentLeft ref="4" drivingDir="opposite"/>
     <laneletType>driveWay</laneletType>
   </lanelet>
-  <lanelet id="105">
+  <lanelet id="6">
     <leftBound>
       <point>
         <x>361873.1364</x>
@@ -2083,11 +2083,11 @@
         <y>5296836.3648</y>
       </point>
     </rightBound>
-    <adjacentLeft ref="106" drivingDir="opposite"/>
-    <adjacentRight ref="107" drivingDir="same"/>
+    <adjacentLeft ref="7" drivingDir="opposite"/>
+    <adjacentRight ref="8" drivingDir="same"/>
     <laneletType>driveWay</laneletType>
   </lanelet>
-  <lanelet id="107">
+  <lanelet id="8">
     <leftBound>
       <point>
         <x>361872.2857</x>
@@ -2108,10 +2108,10 @@
         <y>5296835.8392</y>
       </point>
     </rightBound>
-    <adjacentLeft ref="105" drivingDir="same"/>
+    <adjacentLeft ref="6" drivingDir="same"/>
     <laneletType>sidewalk</laneletType>
   </lanelet>
-  <lanelet id="106">
+  <lanelet id="7">
     <leftBound>
       <point>
         <x>361873.1364</x>
@@ -2140,10 +2140,10 @@
         <y>5296840.1143</y>
       </point>
     </rightBound>
-    <adjacentLeft ref="105" drivingDir="opposite"/>
+    <adjacentLeft ref="6" drivingDir="opposite"/>
     <laneletType>driveWay</laneletType>
   </lanelet>
-  <lanelet id="108">
+  <lanelet id="9">
     <leftBound>
       <point>
         <x>361873.1364</x>
@@ -3556,11 +3556,11 @@
         <y>5296764.6065</y>
       </point>
     </rightBound>
-    <adjacentLeft ref="109" drivingDir="opposite"/>
-    <adjacentRight ref="110" drivingDir="same"/>
+    <adjacentLeft ref="10" drivingDir="opposite"/>
+    <adjacentRight ref="11" drivingDir="same"/>
     <laneletType>driveWay</laneletType>
   </lanelet>
-  <lanelet id="110">
+  <lanelet id="11">
     <leftBound>
       <point>
         <x>361872.2857</x>
@@ -5013,10 +5013,10 @@
         <y>5296763.9849</y>
       </point>
     </rightBound>
-    <adjacentLeft ref="108" drivingDir="same"/>
+    <adjacentLeft ref="9" drivingDir="same"/>
     <laneletType>sidewalk</laneletType>
   </lanelet>
-  <lanelet id="109">
+  <lanelet id="10">
     <leftBound>
       <point>
         <x>361928.3605</x>
@@ -6437,11 +6437,11 @@
         <y>5296840.1143</y>
       </point>
     </rightBound>
-    <adjacentLeft ref="108" drivingDir="opposite"/>
-    <adjacentRight ref="111" drivingDir="same"/>
+    <adjacentLeft ref="9" drivingDir="opposite"/>
+    <adjacentRight ref="12" drivingDir="same"/>
     <laneletType>driveWay</laneletType>
   </lanelet>
-  <lanelet id="111">
+  <lanelet id="12">
     <leftBound>
       <point>
         <x>361929.1438</x>
@@ -7894,10 +7894,10 @@
         <y>5296840.6399</y>
       </point>
     </rightBound>
-    <adjacentLeft ref="109" drivingDir="same"/>
+    <adjacentLeft ref="10" drivingDir="same"/>
     <laneletType>sidewalk</laneletType>
   </lanelet>
-  <lanelet id="112">
+  <lanelet id="13">
     <leftBound>
       <point>
         <x>361928.3605</x>
@@ -8606,11 +8606,11 @@
         <y>5296729.7758</y>
       </point>
     </rightBound>
-    <adjacentLeft ref="113" drivingDir="opposite"/>
-    <adjacentRight ref="114" drivingDir="same"/>
+    <adjacentLeft ref="14" drivingDir="opposite"/>
+    <adjacentRight ref="15" drivingDir="same"/>
     <laneletType>driveWay</laneletType>
   </lanelet>
-  <lanelet id="114">
+  <lanelet id="15">
     <leftBound>
       <point>
         <x>361927.5771</x>
@@ -9327,10 +9327,10 @@
         <y>5296729.1543</y>
       </point>
     </rightBound>
-    <adjacentLeft ref="112" drivingDir="same"/>
+    <adjacentLeft ref="13" drivingDir="same"/>
     <laneletType>sidewalk</laneletType>
   </lanelet>
-  <lanelet id="113">
+  <lanelet id="14">
     <leftBound>
       <point>
         <x>361955.6625</x>
@@ -10032,11 +10032,11 @@
         <y>5296768.8113</y>
       </point>
     </rightBound>
-    <adjacentLeft ref="112" drivingDir="opposite"/>
-    <adjacentRight ref="115" drivingDir="same"/>
+    <adjacentLeft ref="13" drivingDir="opposite"/>
+    <adjacentRight ref="16" drivingDir="same"/>
     <laneletType>driveWay</laneletType>
   </lanelet>
-  <lanelet id="115">
+  <lanelet id="16">
     <leftBound>
       <point>
         <x>361956.4459</x>
@@ -10754,10 +10754,10 @@
         <y>5296769.4329</y>
       </point>
     </rightBound>
-    <adjacentLeft ref="113" drivingDir="same"/>
+    <adjacentLeft ref="14" drivingDir="same"/>
     <laneletType>sidewalk</laneletType>
   </lanelet>
-  <lanelet id="116">
+  <lanelet id="17">
     <leftBound>
       <point>
         <x>361955.6625</x>
@@ -10954,11 +10954,11 @@
         <y>5296720.6863</y>
       </point>
     </rightBound>
-    <adjacentLeft ref="117" drivingDir="opposite"/>
-    <adjacentRight ref="118" drivingDir="same"/>
+    <adjacentLeft ref="18" drivingDir="opposite"/>
+    <adjacentRight ref="19" drivingDir="same"/>
     <laneletType>driveWay</laneletType>
   </lanelet>
-  <lanelet id="118">
+  <lanelet id="19">
     <leftBound>
       <point>
         <x>361954.8791</x>
@@ -11155,10 +11155,10 @@
         <y>5296720.2100</y>
       </point>
     </rightBound>
-    <adjacentLeft ref="116" drivingDir="same"/>
+    <adjacentLeft ref="17" drivingDir="same"/>
     <laneletType>sidewalk</laneletType>
   </lanelet>
-  <lanelet id="117">
+  <lanelet id="18">
     <leftBound>
       <point>
         <x>361962.3745</x>
@@ -11356,11 +11356,11 @@
         <y>5296733.9441</y>
       </point>
     </rightBound>
-    <adjacentLeft ref="116" drivingDir="opposite"/>
-    <adjacentRight ref="119" drivingDir="same"/>
+    <adjacentLeft ref="17" drivingDir="opposite"/>
+    <adjacentRight ref="20" drivingDir="same"/>
     <laneletType>driveWay</laneletType>
   </lanelet>
-  <lanelet id="119">
+  <lanelet id="20">
     <leftBound>
       <point>
         <x>361963.2538</x>
@@ -11557,10 +11557,10 @@
         <y>5296734.5655</y>
       </point>
     </rightBound>
-    <adjacentLeft ref="117" drivingDir="same"/>
+    <adjacentLeft ref="18" drivingDir="same"/>
     <laneletType>sidewalk</laneletType>
   </lanelet>
-  <lanelet id="120">
+  <lanelet id="21">
     <leftBound>
       <point>
         <x>361962.3745</x>
@@ -11701,10 +11701,10 @@
         <y>5296680.6509</y>
       </point>
     </rightBound>
-    <adjacentLeft ref="121" drivingDir="opposite"/>
+    <adjacentLeft ref="22" drivingDir="opposite"/>
     <laneletType>driveWay</laneletType>
   </lanelet>
-  <lanelet id="121">
+  <lanelet id="22">
     <leftBound>
       <point>
         <x>361960.0599</x>
@@ -11830,7 +11830,7 @@
         <y>5296724.1502</y>
       </point>
     </rightBound>
-    <adjacentLeft ref="120" drivingDir="opposite"/>
+    <adjacentLeft ref="21" drivingDir="opposite"/>
     <laneletType>driveWay</laneletType>
   </lanelet>
 </commonRoad>

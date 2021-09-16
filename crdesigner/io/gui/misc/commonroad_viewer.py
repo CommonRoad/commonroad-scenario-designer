@@ -211,7 +211,7 @@ class DynamicCanvas(FigureCanvas):
         """
         Redraw only the dynamic obstacles. This gives a large performance boost, when playing an animation
         :param scenario: The scneario containing the dynamic obstacles 
-        :param draw_params: CommonRoad draw_object() DrawParams
+        :param draw_params: CommonRoad DrawParams for visualization
         :param plot_limits: Matplotlib plot limits
         """
         # redraw dynamic obstacles

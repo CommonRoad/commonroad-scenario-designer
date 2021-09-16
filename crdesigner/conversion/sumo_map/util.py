@@ -10,7 +10,7 @@ import numpy as np
 from commonroad.geometry.shape import Polygon
 from commonroad.scenario.lanelet import Lanelet
 from commonroad.scenario.lanelet import LaneletNetwork
-from commonroad.visualization.plot_helper import draw_object
+from commonroad.visualization.mp_renderer import MPRenderer
 from crdesigner.conversion.sumo_map.sumolib_net import Edge, from_shape_string
 from shapely.geometry import LineString
 from shapely.ops import unary_union
@@ -118,7 +118,6 @@ def update_edge_lengths(net_file_path: str):
     tree.write(net_file_path, encoding="utf-8")
 
 
-
 def polyline_length(line: np.ndarray) -> float:
     """
     Computes the length of a line of n-dim vertices
@@ -186,6 +185,114 @@ def compute_max_curvature_from_polyline(polyline: np.ndarray) -> float:
     return (max_curvature + second_max_curvature) / 2
 
 
+def resample_lanelet(lanelet: Lanelet, step= 3.0):
+    polyline = lanelet.center_vertices
+    """Resamples the input polyline with the specified step size.
+
+    The distances between each pair of consecutive vertices are examined. If it is larger than the step size,
+    a new sample is added in between.
+
+    :param polyline: polyline with 2D points
+    :param step: minimum distance between each consecutive pairs of vertices
+    :return: resampled polyline
+    """
+    if len(polyline) < 2:
+        return np.array(polyline)
+
+    polyline_new_c = [polyline[0]]
+    polyline_new_r = [lanelet.right_vertices[0]]
+    polyline_new_l = [lanelet.left_vertices[0]]
+
+    current_idx = 0
+    current_position = step
+    current_distance = np.linalg.norm(polyline[0] - polyline[1])
+
+    # iterate through all pairs of vertices of the polyline
+    while current_idx < len(polyline) - 1:
+        if current_position <= current_distance:
+            # add new sample and increase current position
+            ratio = current_position / current_distance
+            polyline_new_c.append((1 - ratio) * polyline[current_idx] +
+                                ratio * polyline[current_idx + 1])
+            polyline_new_r.append((1 - ratio) * lanelet.right_vertices[current_idx] +
+                                ratio * lanelet.right_vertices[current_idx + 1])
+            polyline_new_l.append((1 - ratio) * lanelet.left_vertices[current_idx] +
+                                ratio * lanelet.left_vertices[current_idx + 1])
+            current_position += step
+
+        else:
+            # move on to the next pair of vertices
+            current_idx += 1
+            # if we are out of vertices, then break
+            if current_idx >= len(polyline) - 1:
+                break
+            # deduct the distance of previous vertices from the position
+            current_position = current_position - current_distance
+            # compute new distances of vertices
+            current_distance = np.linalg.norm(polyline[current_idx + 1] - polyline[current_idx])
+
+    # add the last vertex
+    polyline_new_c.append(polyline[-1])
+    polyline_new_r.append(lanelet.right_vertices[-1])
+    polyline_new_l.append(lanelet.left_vertices[-1])
+
+    lanelet._center_vertices = np.array(polyline_new_c).reshape([-1,2])
+    lanelet._right_vertices = np.array(polyline_new_r).reshape([-1,2])
+    lanelet._left_vertices = np.array(polyline_new_l).reshape([-1,2])
+    lanelet._distance = lanelet._compute_polyline_cumsum_dist([lanelet.center_vertices])
+
+
+def erode_lanelet(lanelet: Lanelet, radius: float):
+    # erode length
+    def shorten(lanelet: Lanelet, radius: float):
+        resample_lanelet(lanelet)
+
+        def reshape_vertices(vertices: tuple):
+            vertices = list(vertices)
+            for i in range(3):
+                vertices[i] = vertices[i].reshape([1, 2])
+            return vertices
+
+        cut_vertices_start = reshape_vertices(lanelet.interpolate_position(radius))
+        cut_vertices_end = reshape_vertices(lanelet.interpolate_position(lanelet.distance[-1] - radius))
+
+        # erode at start
+        lanelet._center_vertices = np.insert(lanelet._center_vertices[cut_vertices_start[3] + 1:, :], 0,
+                                             cut_vertices_start[0], axis=0)
+        lanelet._right_vertices = np.insert(lanelet._right_vertices[cut_vertices_start[3] + 1:, :], 0,
+                                            cut_vertices_start[1], axis=0)
+        lanelet._left_vertices = np.insert(lanelet._left_vertices[cut_vertices_start[3] + 1:, :], 0,
+                                           cut_vertices_start[2], axis=0)
+        # erode at end
+        lanelet._center_vertices = np.append(lanelet._center_vertices[:cut_vertices_end[3] + 1, :],
+                                             cut_vertices_end[0], axis=0)
+        lanelet._right_vertices = np.append(lanelet._right_vertices[:cut_vertices_end[3] + 1, :],
+                                            cut_vertices_end[1], axis=0)
+        lanelet._left_vertices = np.append(lanelet._left_vertices[:cut_vertices_end[3] + 1, :],
+                                           cut_vertices_end[2], axis=0)
+        lanelet._distance = lanelet._compute_polyline_cumsum_dist([lanelet.center_vertices])
+
+    # erode width
+    # make sure lanelets are not self intersecting after erosion
+    if np.min(np.linalg.norm(lanelet.left_vertices - lanelet.right_vertices, axis=1)) > radius:
+        left = lanelet.center_vertices - lanelet.left_vertices
+        lanelet._left_vertices += left / np.linalg.norm(left, axis=1)[np.newaxis].T * radius
+        right = lanelet.center_vertices - lanelet.right_vertices
+        lanelet._right_vertices += right / np.linalg.norm(right, axis=1)[np.newaxis].T * radius
+
+    lanelet._distance = lanelet._compute_polyline_cumsum_dist([lanelet.center_vertices])
+
+    # erode length -> prevents successors from intersecting with each other
+    if lanelet.distance[-1] > 2.1 * radius:
+        shorten(lanelet, radius)
+
+    # recompute polyon if present
+    if lanelet._polygon:
+        lanelet._polygon = Polygon(
+            np.concatenate((lanelet.right_vertices, np.flip(lanelet.left_vertices, axis=0))))
+    return lanelet
+
+
 def _erode_lanelets(lanelet_network: LaneletNetwork,
                     radius: float = 0.4) -> LaneletNetwork:
     """
@@ -195,44 +302,16 @@ def _erode_lanelets(lanelet_network: LaneletNetwork,
     :return:
     """
     assert radius > 0
-
-    # erode length
-    def shorten(vertices: np.ndarray, length: float) -> np.ndarray:
-        line = LineString(vertices)
-        n = vertices.shape[0]
-        offsets = list(np.arange(radius, line.length, (line.length - length) / n))
-        if max(offsets) < line.length - length:
-            offsets.append(line.length - length)
-        return np.array([np.array(line.interpolate(offset).xy).T[0] for offset in offsets])
-
-    def length(vertices: np.ndarray) -> float:
-        return LineString(vertices).length
+    if isinstance(lanelet_network, LaneletNetwork):
+        lanelets = lanelet_network.lanelets
+    else:
+        lanelets = lanelet_network
 
     lanelets_ero = []
-    for lanelet in lanelet_network.lanelets:
+    for lanelet in lanelets:
         lanelet = deepcopy(lanelet)
+        lanelets_ero.append(erode_lanelet(lanelet, radius))
 
-        # erode width
-        # make sure lanelets are not self intersecting after erosion
-        if np.min(np.linalg.norm(lanelet.left_vertices - lanelet.right_vertices, axis=1)) > radius:
-            left = lanelet.center_vertices - lanelet.left_vertices
-            lanelet._left_vertices += left / np.linalg.norm(left, axis=1)[np.newaxis].T * radius
-            right = lanelet.center_vertices - lanelet.right_vertices
-            lanelet._right_vertices += right / np.linalg.norm(right, axis=1)[np.newaxis].T * radius
-
-        # erode length
-        # make sure lanelets are not self intersecting after erosion
-        if min(length(lanelet.center_vertices), length(lanelet.left_vertices), length(lanelet.right_vertices)) > radius:
-            lanelet._center_vertices = shorten(lanelet._center_vertices, radius)
-            lanelet._left_vertices = shorten(lanelet._left_vertices, radius)
-            lanelet._right_vertices = shorten(lanelet._right_vertices, radius)
-
-        # recompute polyon if present
-        if lanelet._polygon:
-            lanelet._polygon = Polygon(
-                np.concatenate((lanelet.right_vertices, np.flip(lanelet.left_vertices, axis=0))))
-
-        lanelets_ero.append(lanelet)
     return LaneletNetwork.create_from_lanelet_list(lanelets_ero)
 
 
@@ -248,11 +327,9 @@ def _find_intersecting_edges(
 
     # visualize eroded lanelets
     if visualize:
-        plt.figure(figsize=(25, 25))
-        draw_object(eroded_lanelet_network.lanelets)
-        plt.axis('equal')
-        plt.autoscale()
-        plt.show()
+        rnd = MPRenderer()
+        eroded_lanelet_network.draw(rnd)
+        rnd.render(show=True)
 
     polygons_dict = {}
     edge_shapes_dict = {}

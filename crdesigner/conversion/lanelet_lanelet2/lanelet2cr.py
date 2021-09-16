@@ -22,6 +22,7 @@ from shapely.geometry import LineString
 
 from commonroad.scenario.scenario import Scenario, ScenarioID, TrafficSign
 
+from crdesigner.conversion.common.utils import generate_unique_id
 from crdesigner.conversion.opendrive.opendriveconversion.conversion_lanelet import ConversionLanelet
 from crdesigner.conversion.opendrive.opendriveconversion.conversion_lanelet_network import ConversionLaneletNetwork, \
     convert_to_new_lanelet_id
@@ -134,7 +135,7 @@ class Lanelet2CRConverter:
         speed_limits = {}
         speed_limit_lanelets = {}
         for speed_limit_key in osm.speed_limit_signs.keys():
-            light_id = scenario.generate_object_id()
+            light_id = generate_unique_id()
             speed_limits[speed_limit_key] = light_id
             speed_limit_lanelets[speed_limit_key] = []
             # scenario.add_objects(speed_limit)

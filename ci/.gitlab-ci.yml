@@ -10,7 +10,7 @@ before_script:
     # # Install commonroad-io & sumo-interface manually as installing though pip does not respect the JOB_TOKEN
     - git clone --branch develop git@gitlab.lrz.de:cps/sumo-interface.git $HOME/sumo-interface
     - git clone --branch develop git@gitlab.lrz.de:cps/commonroad-io.git "$HOME"/commonroad-io
-    - cd $HOME/sumo-interface && git checkout 147e1141
+    - cd $HOME/sumo-interface
     - cd -
     - pip uninstall -y commonroad-io
     - source .env

@@ -10,12 +10,8 @@ import numpy.linalg
 import iso3166
 from commonroad.scenario.scenario import Scenario, GeoTransformation, Location, ScenarioID
 from commonroad.scenario.lanelet import LaneletNetwork, Lanelet
-from crdesigner.conversion.opendrive.opendriveconversion.plane_elements.border import Border
-from crdesigner.conversion.opendrive.opendriveconversion.plane_elements.plane import ParametricLane
-from crdesigner.conversion.opendrive.opendriveconversion.plane_elements.plane_group import ParametricLaneGroup
 
 from crdesigner.conversion.opendrive.opendriveparser.elements.opendrive import OpenDrive
-
 from crdesigner.conversion.opendrive.opendriveconversion.utils import encode_road_section_lane_width_id
 from crdesigner.conversion.opendrive.opendriveconversion.conversion_lanelet_network import ConversionLaneletNetwork
 from crdesigner.conversion.opendrive.opendriveconversion.converter import OpenDriveConverter
@@ -184,6 +180,7 @@ class Network:
         intersection_id_counter = max([la.lanelet_id for la in lanelet_network.lanelets]) + 1
         for intersection_map in self._link_index.intersection_maps():
             # Remove lanelets that are not part of the network (as they are of a different type)
+            lanelet_network._old_lanelet_ids[intersection_id_counter] = intersection_id_counter
             lanelet_network.create_intersection(intersection_map, intersection_id_counter)
             intersection_id_counter += 1
 
@@ -195,13 +192,14 @@ class Network:
         return convert_to_base_lanelet_network(lanelet_network)
 
     def export_commonroad_scenario(
-            self, dt: float = 0.1, benchmark_id=None, filter_types=None
+            self, dt: float = 0.1, map_name="OpenDrive", map_id=1, filter_types=None
     ):
         """Export a full CommonRoad scenario
 
         Args:
           dt:  (Default value = 0.1)
-          benchmark_id:  (Default value = None)
+          map_name:  name of the map in the scenario ID (Default value = "OpenDrive")
+          map_id: running index of the map in the scenario ID (Default value = 1)
           filter_types:  (Default value = None)
 
         Returns:
@@ -222,8 +220,7 @@ class Network:
         else:
             location = None
 
-        # TODO create default scenario ID or implement workaround in commonroad-io
-        scenario_id = ScenarioID(country_id="ZAM", map_name="OpenDrive", map_id=123)
+        scenario_id = ScenarioID(country_id=self._country_ID, map_name=map_name, map_id=map_id)
 
         scenario = Scenario(
             dt=dt, scenario_id=scenario_id,
@@ -247,7 +244,7 @@ class Network:
         for road in roads:
             for signal in road.signals:
                 return signal.country
-        return "OpenDrive"
+        return "ZAM"
 
 
 class LinkIndex:

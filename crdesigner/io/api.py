@@ -128,8 +128,8 @@ def commonroad_to_sumo(input_file: str, output_file: str):
         config = SumoConfig.from_scenario_name(str(uuid.uuid4()))
         path, file_name = os.path.split(output_file)
         config.scenario_name = file_name.partition(".")[0]
-        converter = CR2SumoMapConverter(scenario.lanelet_network, config)
-        converter.convert_to_net_file(path)
+        converter = CR2SumoMapConverter(scenario, config)
+        converter.create_sumo_files(path)
 
 
 def osm_to_commonroad(input_file: str) -> Scenario:

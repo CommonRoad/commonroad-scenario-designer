@@ -17,6 +17,7 @@ from crdesigner.conversion.osm2cr import config
 from crdesigner.conversion.osm2cr.converter_modules.utility import geometry
 
 from crdesigner.conversion.opendrive.opendriveconversion.conversion_lanelet import ConversionLanelet
+from crdesigner.conversion.common.utils import generate_unique_id
 
 __author__ = "Benjamin Orthen, Sebastian Maierhofer"
 __copyright__ = "TUM Cyber-Physical Systems Group"
@@ -50,7 +51,7 @@ def convert_to_new_lanelet_id(old_lanelet_id: str, ids_assigned: dict) -> int:
         new_lanelet_id = ids_assigned[old_lanelet_id]
     else:
         try:
-            new_lanelet_id = max(ids_assigned.values()) + 1
+            new_lanelet_id = generate_unique_id()
         except ValueError:
             new_lanelet_id = starting_lanelet_id
         ids_assigned[old_lanelet_id] = new_lanelet_id
@@ -145,7 +146,6 @@ class ConversionLaneletNetwork(LaneletNetwork):
         """
         return self._stop_linees.get(stop_line_id)
 
-
     def convert_all_lanelet_ids(self):
         """Convert lanelet ids to numbers which comply with the Commonroad specification.
 
@@ -182,7 +182,6 @@ class ConversionLaneletNetwork(LaneletNetwork):
             if old_ids.get(key, False) is False:
                 new_lanelet_ids_assigned[key] = self._old_lanelet_ids[key]
         return new_lanelet_ids_assigned
-
 
     def prune_network(self):
         """Remove references in predecessor, successor etc. to
@@ -362,12 +361,12 @@ class ConversionLaneletNetwork(LaneletNetwork):
 
             lanelet_split, lanelet_join = False, False
             if not lanelet.predecessor and np.allclose(
-                lanelet.left_vertices[0], lanelet.right_vertices[0]
+                    lanelet.left_vertices[0], lanelet.right_vertices[0]
             ):
                 lanelet_split = True
 
             if not lanelet.successor and np.allclose(
-                lanelet.left_vertices[-1], lanelet.right_vertices[-1]
+                    lanelet.left_vertices[-1], lanelet.right_vertices[-1]
             ):
                 lanelet_join = True
 
@@ -382,7 +381,7 @@ class ConversionLaneletNetwork(LaneletNetwork):
             js_target.add_adjacent_predecessor_or_successor()
 
     def predecessor_is_neighbor_of_neighbors_predecessor(
-        self, lanelet: "ConversionLanelet"
+            self, lanelet: "ConversionLanelet"
     ) -> bool:
         """Checks if neighbors of predecessor are the successor of the adjacent neighbors
         of the lanelet.
@@ -401,7 +400,7 @@ class ConversionLaneletNetwork(LaneletNetwork):
         return self.successor_is_neighbor_of_neighbors_successor(predecessor)
 
     def add_successors_to_lanelet(
-        self, lanelet: ConversionLanelet, successor_ids: List[str]
+            self, lanelet: ConversionLanelet, successor_ids: List[str]
     ):
         """Add a successor to a lanelet, but add the lanelet also to the predecessor
         of the succesor.
@@ -416,7 +415,7 @@ class ConversionLaneletNetwork(LaneletNetwork):
             successor.predecessor.append(lanelet.lanelet_id)
 
     def add_predecessors_to_lanelet(
-        self, lanelet: ConversionLanelet, predecessor_ids: List[str]
+            self, lanelet: ConversionLanelet, predecessor_ids: List[str]
     ):
         """Add a successor to a lanelet, but add the lanelet also to the predecessor
         of the succesor.
@@ -431,7 +430,7 @@ class ConversionLaneletNetwork(LaneletNetwork):
             predecessor.successor.append(lanelet.lanelet_id)
 
     def set_adjacent_left(
-        self, lanelet: ConversionLanelet, adj_left_id: str, same_direction: bool = True
+            self, lanelet: ConversionLanelet, adj_left_id: str, same_direction: bool = True
     ):
         """Set the adj_left of a lanelet to a new value.
 
@@ -459,7 +458,7 @@ class ConversionLaneletNetwork(LaneletNetwork):
         return True
 
     def set_adjacent_right(
-        self, lanelet: ConversionLanelet, adj_right_id: str, same_direction: bool = True
+            self, lanelet: ConversionLanelet, adj_right_id: str, same_direction: bool = True
     ):
         """Set the adj_right of a lanelet to a new value.
 
@@ -487,7 +486,7 @@ class ConversionLaneletNetwork(LaneletNetwork):
         return True
 
     def check_concatenation_potential(
-        self, lanelet: ConversionLanelet, adjacent_direction: str
+            self, lanelet: ConversionLanelet, adjacent_direction: str
     ) -> list:
         """Check if lanelet could be concatenated with its successor.
 
@@ -540,7 +539,7 @@ class ConversionLaneletNetwork(LaneletNetwork):
         return mergeable_lanelets
 
     def successor_is_neighbor_of_neighbors_successor(
-        self, lanelet: ConversionLanelet
+            self, lanelet: ConversionLanelet
     ) -> bool:
         """Checks if neighbors of successor are the successor of the adjacent neighbors
         of the lanelet.
@@ -560,7 +559,7 @@ class ConversionLaneletNetwork(LaneletNetwork):
         )
 
     def has_unique_pred_succ_relation(
-        self, direction: int, lanelet: ConversionLanelet
+            self, direction: int, lanelet: ConversionLanelet
     ) -> bool:
         """Checks if lanelet has only one successor/predecessor and the
         successor/predecessor has only one predecessor/successor, s.t.
@@ -663,14 +662,12 @@ class ConversionLaneletNetwork(LaneletNetwork):
             intersection_id - The unique id used to reference the intersection
         Return:
         """
-        # TODO: Define criterion for intersection ID. Currently only iterative numbering
-        incoming_id_counter = 0
         # If different incoming lanelets have same successors, combine into set
         incoming_lanelet_ids = self.combine_common_incoming_lanelets(intersection_map)
         intersection_incoming_lanes = list()
         successors = list()
         
-        for incoming_lanelet_list in incoming_lanelet_ids:
+        for incoming_lanelet_set in incoming_lanelet_ids:
             # Since all the lanes have the same successors,
             # we simply use the first one to check for the successor directions
             # if more than one incoming lanes exist
@@ -678,10 +675,9 @@ class ConversionLaneletNetwork(LaneletNetwork):
             successor_left = set()
             successor_straight = set()
 
-            for incoming_lane in incoming_lanelet_list:
+            for incoming_lane in incoming_lanelet_set:
                 self.set_intersection_lanelet_type(incoming_lane, intersection_map)
                 successor_directions = self.get_successor_directions(self.find_lanelet_by_id(incoming_lane))
-                
                 for successor, direction in successor_directions.items():
                     if direction == "right":
                         successor_right.add(successor)
@@ -695,14 +691,14 @@ class ConversionLaneletNetwork(LaneletNetwork):
                     else:
                         print(direction)
                         warnings.warn("Incorrect direction assigned to successor of incoming lanelet in intersection")
-            
-            intersection_incoming_lane = IntersectionIncomingElement(incoming_id_counter, set(incoming_lanelet_list),
+
+            intersection_incoming_lane = IntersectionIncomingElement(generate_unique_id(), incoming_lanelet_set,
                                                                      successor_right, successor_straight,
                                                                      successor_left)
+
             intersection_incoming_lanes.append(intersection_incoming_lane)
             # TODO: Add crossings to intersections
             # Increment id counter to generate next unique intersection id. See To Do.
-            incoming_id_counter += 1
 
         if self.check_if_successor_is_intersecting(intersection_map, successors):
             intersection = Intersection(intersection_id, intersection_incoming_lanes)

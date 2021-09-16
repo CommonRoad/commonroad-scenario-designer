@@ -974,16 +974,16 @@ class RoadNetworkToolbox(QDockWidget):
 
     def create_traffic_lights(self):
         if not SUMO_AVAILABLE:
-            self.text_browser.append("SUMO is not activated!")
+            self.text_browser.append("SUMO is not installed correctly!")
             return
         lanelet_ids = [int(lanelet_id) for lanelet_id in
                        self.road_network_toolbox.referenced_lanelets_traffic_light.get_checked_items()]
         if not lanelet_ids:
             return
         self.road_network_toolbox.referenced_lanelets_traffic_light.clear()
-        converter = CR2SumoMapConverter(self.current_scenario.lanelet_network,
+        converter = CR2SumoMapConverter(self.current_scenario,
                                         SumoConfig.from_scenario(self.current_scenario))
-        converter.convert_to_net_file(self.tmp_folder)
+        converter.create_sumo_files(self.tmp_folder)
         oks = []
         dt = self.current_scenario.dt
         offset = int(self.road_network_toolbox.time_offset.text())

@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<commonRoad timeStepSize="0.1" commonRoadVersion="2020a" author="" affiliation="" source="CommonRoad Scenario Designer" benchmarkID="ZAM_OpenDrive-123" date="2021-06-18">
+<commonRoad timeStepSize="0.1" commonRoadVersion="2020a" author="" affiliation="" source="CommonRoad Scenario Designer" benchmarkID="ZAM_OpenDrive-1" date="2021-09-10">
   <location>
     <geoNameId>-999</geoNameId>
     <gpsLatitude>999</gpsLatitude>
@@ -9,7 +9,7 @@
     <urban/>
     <highway/>
   </scenarioTags>
-  <lanelet id="100">
+  <lanelet id="17">
     <leftBound>
       <point>
         <x>52.2771</x>
@@ -983,12 +983,12 @@
         <y>23.1530</y>
       </point>
     </rightBound>
-    <predecessor ref="101"/>
-    <successor ref="102"/>
-    <adjacentRight ref="103" drivingDir="same"/>
+    <predecessor ref="18"/>
+    <successor ref="19"/>
+    <adjacentRight ref="20" drivingDir="same"/>
     <laneletType>driveWay</laneletType>
   </lanelet>
-  <lanelet id="103">
+  <lanelet id="20">
     <leftBound>
       <point>
         <x>52.2771</x>
@@ -1130,14 +1130,14 @@
         <y>26.7263</y>
       </point>
     </rightBound>
-    <predecessor ref="101"/>
-    <successor ref="104"/>
-    <adjacentLeft ref="100" drivingDir="same"/>
+    <predecessor ref="18"/>
+    <successor ref="21"/>
+    <adjacentLeft ref="17" drivingDir="same"/>
     <laneletType>driveWay</laneletType>
-    <trafficSignRef ref="100414289"/>
-    <trafficSignRef ref="100314289"/>
+    <trafficSignRef ref="1"/>
+    <trafficSignRef ref="2"/>
   </lanelet>
-  <lanelet id="105">
+  <lanelet id="22">
     <leftBound>
       <point>
         <x>52.2771</x>
@@ -1479,13 +1479,13 @@
       </point>
       <lineMarking>solid</lineMarking>
     </rightBound>
-    <predecessor ref="106"/>
-    <successor ref="107"/>
-    <successor ref="108"/>
-    <adjacentLeft ref="101" drivingDir="opposite"/>
+    <predecessor ref="23"/>
+    <successor ref="24"/>
+    <successor ref="25"/>
+    <adjacentLeft ref="18" drivingDir="opposite"/>
     <laneletType>driveWay</laneletType>
   </lanelet>
-  <lanelet id="109">
+  <lanelet id="26">
     <leftBound>
       <point>
         <x>204.1</x>
@@ -2722,11 +2722,11 @@
         <y>-1.0797</y>
       </point>
     </rightBound>
-    <predecessor ref="109"/>
-    <successor ref="109"/>
+    <predecessor ref="26"/>
+    <successor ref="26"/>
     <laneletType>sidewalk</laneletType>
   </lanelet>
-  <lanelet id="110">
+  <lanelet id="27">
     <leftBound>
       <point>
         <x>-52.2748</x>
@@ -3700,12 +3700,12 @@
         <y>4.8227</y>
       </point>
     </rightBound>
-    <predecessor ref="111"/>
-    <successor ref="112"/>
-    <adjacentRight ref="113" drivingDir="same"/>
+    <predecessor ref="28"/>
+    <successor ref="29"/>
+    <adjacentRight ref="30" drivingDir="same"/>
     <laneletType>driveWay</laneletType>
   </lanelet>
-  <lanelet id="113">
+  <lanelet id="30">
     <leftBound>
       <point>
         <x>-52.2748</x>
@@ -3855,14 +3855,14 @@
         <y>5.5671</y>
       </point>
     </rightBound>
-    <predecessor ref="111"/>
-    <successor ref="114"/>
-    <adjacentLeft ref="110" drivingDir="same"/>
+    <predecessor ref="28"/>
+    <successor ref="31"/>
+    <adjacentLeft ref="27" drivingDir="same"/>
     <laneletType>driveWay</laneletType>
-    <trafficSignRef ref="1024328149"/>
-    <trafficSignRef ref="1024428149"/>
+    <trafficSignRef ref="5"/>
+    <trafficSignRef ref="6"/>
   </lanelet>
-  <lanelet id="115">
+  <lanelet id="32">
     <leftBound>
       <point>
         <x>-52.2748</x>
@@ -4220,13 +4220,13 @@
       </point>
       <lineMarking>solid</lineMarking>
     </rightBound>
-    <predecessor ref="116"/>
-    <successor ref="117"/>
-    <successor ref="118"/>
-    <adjacentLeft ref="111" drivingDir="opposite"/>
+    <predecessor ref="33"/>
+    <successor ref="34"/>
+    <successor ref="35"/>
+    <adjacentLeft ref="28" drivingDir="opposite"/>
     <laneletType>driveWay</laneletType>
   </lanelet>
-  <lanelet id="119">
+  <lanelet id="36">
     <leftBound>
       <point>
         <x>-29.6489</x>
@@ -4847,13 +4847,13 @@
         <y>-21.5189</y>
       </point>
     </rightBound>
-    <predecessor ref="119"/>
-    <successor ref="119"/>
+    <predecessor ref="36"/>
+    <successor ref="36"/>
     <laneletType>sidewalk</laneletType>
-    <trafficSignRef ref="1075221207"/>
-    <trafficSignRef ref="1075121207"/>
+    <trafficSignRef ref="11"/>
+    <trafficSignRef ref="12"/>
   </lanelet>
-  <lanelet id="118">
+  <lanelet id="35">
     <leftBound>
       <point>
         <x>-52.2771</x>
@@ -5827,12 +5827,12 @@
         <y>-23.1530</y>
       </point>
     </rightBound>
-    <predecessor ref="115"/>
-    <successor ref="120"/>
-    <adjacentRight ref="117" drivingDir="same"/>
+    <predecessor ref="32"/>
+    <successor ref="37"/>
+    <adjacentRight ref="34" drivingDir="same"/>
     <laneletType>driveWay</laneletType>
   </lanelet>
-  <lanelet id="117">
+  <lanelet id="34">
     <leftBound>
       <point>
         <x>-52.2771</x>
@@ -5974,14 +5974,14 @@
         <y>-26.7263</y>
       </point>
     </rightBound>
-    <predecessor ref="115"/>
-    <successor ref="121"/>
-    <adjacentLeft ref="118" drivingDir="same"/>
+    <predecessor ref="32"/>
+    <successor ref="38"/>
+    <adjacentLeft ref="35" drivingDir="same"/>
     <laneletType>driveWay</laneletType>
-    <trafficSignRef ref="1075414289"/>
-    <trafficSignRef ref="1075314289"/>
+    <trafficSignRef ref="9"/>
+    <trafficSignRef ref="10"/>
   </lanelet>
-  <lanelet id="111">
+  <lanelet id="28">
     <leftBound>
       <point>
         <x>-52.2771</x>
@@ -6355,13 +6355,13 @@
       </point>
       <lineMarking>solid</lineMarking>
     </rightBound>
-    <predecessor ref="122"/>
-    <successor ref="113"/>
-    <successor ref="110"/>
-    <adjacentLeft ref="115" drivingDir="opposite"/>
+    <predecessor ref="39"/>
+    <successor ref="30"/>
+    <successor ref="27"/>
+    <adjacentLeft ref="32" drivingDir="opposite"/>
     <laneletType>driveWay</laneletType>
   </lanelet>
-  <lanelet id="123">
+  <lanelet id="40">
     <leftBound>
       <point>
         <x>19.6223</x>
@@ -6414,12 +6414,12 @@
         <y>23.1530</y>
       </point>
     </rightBound>
-    <predecessor ref="124"/>
-    <successor ref="102"/>
-    <adjacentRight ref="125" drivingDir="same"/>
+    <predecessor ref="41"/>
+    <successor ref="19"/>
+    <adjacentRight ref="42" drivingDir="same"/>
     <laneletType>driveWay</laneletType>
   </lanelet>
-  <lanelet id="125">
+  <lanelet id="42">
     <leftBound>
       <point>
         <x>23.2034</x>
@@ -6472,12 +6472,12 @@
         <y>26.5794</y>
       </point>
     </rightBound>
-    <predecessor ref="126"/>
-    <successor ref="104"/>
-    <adjacentLeft ref="123" drivingDir="same"/>
+    <predecessor ref="43"/>
+    <successor ref="21"/>
+    <adjacentLeft ref="40" drivingDir="same"/>
     <laneletType>driveWay</laneletType>
   </lanelet>
-  <lanelet id="102">
+  <lanelet id="19">
     <leftBound>
       <point>
         <x>4.0784</x>
@@ -6506,13 +6506,13 @@
         <y>23.2034</y>
       </point>
     </rightBound>
-    <predecessor ref="123"/>
-    <predecessor ref="100"/>
-    <successor ref="127"/>
-    <adjacentRight ref="104" drivingDir="same"/>
+    <predecessor ref="40"/>
+    <predecessor ref="17"/>
+    <successor ref="44"/>
+    <adjacentRight ref="21" drivingDir="same"/>
     <laneletType>driveWay</laneletType>
   </lanelet>
-  <lanelet id="104">
+  <lanelet id="21">
     <leftBound>
       <point>
         <x>4.8227</x>
@@ -6542,16 +6542,16 @@
       </point>
       <lineMarking>solid</lineMarking>
     </rightBound>
-    <predecessor ref="125"/>
-    <predecessor ref="103"/>
-    <successor ref="128"/>
-    <successor ref="116"/>
-    <adjacentLeft ref="102" drivingDir="same"/>
+    <predecessor ref="42"/>
+    <predecessor ref="20"/>
+    <successor ref="45"/>
+    <successor ref="33"/>
+    <adjacentLeft ref="19" drivingDir="same"/>
     <laneletType>driveWay</laneletType>
-    <trafficSignRef ref="1024120217"/>
-    <trafficSignRef ref="1024220217"/>
+    <trafficSignRef ref="8"/>
+    <trafficSignRef ref="7"/>
   </lanelet>
-  <lanelet id="106">
+  <lanelet id="23">
     <leftBound>
       <point>
         <x>23.2034</x>
@@ -6693,11 +6693,11 @@
       </point>
       <lineMarking>solid</lineMarking>
     </rightBound>
-    <predecessor ref="126"/>
-    <successor ref="105"/>
+    <predecessor ref="43"/>
+    <successor ref="22"/>
     <laneletType>driveWay</laneletType>
   </lanelet>
-  <lanelet id="112">
+  <lanelet id="29">
     <leftBound>
       <point>
         <x>-19.5797</x>
@@ -6726,13 +6726,13 @@
         <y>-4.5741</y>
       </point>
     </rightBound>
-    <predecessor ref="110"/>
-    <predecessor ref="127"/>
-    <successor ref="129"/>
-    <adjacentRight ref="114" drivingDir="same"/>
+    <predecessor ref="27"/>
+    <predecessor ref="44"/>
+    <successor ref="46"/>
+    <adjacentRight ref="31" drivingDir="same"/>
     <laneletType>driveWay</laneletType>
   </lanelet>
-  <lanelet id="114">
+  <lanelet id="31">
     <leftBound>
       <point>
         <x>-23.1530</x>
@@ -6762,14 +6762,14 @@
       </point>
       <lineMarking>solid</lineMarking>
     </rightBound>
-    <predecessor ref="113"/>
-    <predecessor ref="128"/>
-    <successor ref="130"/>
-    <successor ref="122"/>
-    <adjacentLeft ref="112" drivingDir="same"/>
+    <predecessor ref="30"/>
+    <predecessor ref="45"/>
+    <successor ref="47"/>
+    <successor ref="39"/>
+    <adjacentLeft ref="29" drivingDir="same"/>
     <laneletType>driveWay</laneletType>
   </lanelet>
-  <lanelet id="127">
+  <lanelet id="44">
     <leftBound>
       <point>
         <x>-3.8681</x>
@@ -6822,12 +6822,12 @@
         <y>4.8227</y>
       </point>
     </rightBound>
-    <predecessor ref="102"/>
-    <successor ref="112"/>
-    <adjacentRight ref="128" drivingDir="same"/>
+    <predecessor ref="19"/>
+    <successor ref="29"/>
+    <adjacentRight ref="45" drivingDir="same"/>
     <laneletType>driveWay</laneletType>
   </lanelet>
-  <lanelet id="128">
+  <lanelet id="45">
     <leftBound>
       <point>
         <x>-4.5741</x>
@@ -6880,12 +6880,12 @@
         <y>5.5365</y>
       </point>
     </rightBound>
-    <predecessor ref="104"/>
-    <successor ref="114"/>
-    <adjacentLeft ref="127" drivingDir="same"/>
+    <predecessor ref="21"/>
+    <successor ref="31"/>
+    <adjacentLeft ref="44" drivingDir="same"/>
     <laneletType>driveWay</laneletType>
   </lanelet>
-  <lanelet id="116">
+  <lanelet id="33">
     <leftBound>
       <point>
         <x>-4.5741</x>
@@ -7035,11 +7035,11 @@
       </point>
       <lineMarking>solid</lineMarking>
     </rightBound>
-    <predecessor ref="104"/>
-    <successor ref="115"/>
+    <predecessor ref="21"/>
+    <successor ref="32"/>
     <laneletType>driveWay</laneletType>
   </lanelet>
-  <lanelet id="122">
+  <lanelet id="39">
     <leftBound>
       <point>
         <x>-23.2034</x>
@@ -7181,11 +7181,11 @@
       </point>
       <lineMarking>solid</lineMarking>
     </rightBound>
-    <predecessor ref="114"/>
-    <successor ref="111"/>
+    <predecessor ref="31"/>
+    <successor ref="28"/>
     <laneletType>driveWay</laneletType>
   </lanelet>
-  <lanelet id="129">
+  <lanelet id="46">
     <leftBound>
       <point>
         <x>-19.6223</x>
@@ -7238,12 +7238,12 @@
         <y>-23.1530</y>
       </point>
     </rightBound>
-    <predecessor ref="112"/>
-    <successor ref="120"/>
-    <adjacentRight ref="130" drivingDir="same"/>
+    <predecessor ref="29"/>
+    <successor ref="37"/>
+    <adjacentRight ref="47" drivingDir="same"/>
     <laneletType>driveWay</laneletType>
   </lanelet>
-  <lanelet id="130">
+  <lanelet id="47">
     <leftBound>
       <point>
         <x>-23.2034</x>
@@ -7296,12 +7296,12 @@
         <y>-26.5794</y>
       </point>
     </rightBound>
-    <predecessor ref="114"/>
-    <successor ref="121"/>
-    <adjacentLeft ref="129" drivingDir="same"/>
+    <predecessor ref="31"/>
+    <successor ref="38"/>
+    <adjacentLeft ref="46" drivingDir="same"/>
     <laneletType>driveWay</laneletType>
   </lanelet>
-  <lanelet id="120">
+  <lanelet id="37">
     <leftBound>
       <point>
         <x>-4.0784</x>
@@ -7330,13 +7330,13 @@
         <y>-23.2034</y>
       </point>
     </rightBound>
-    <predecessor ref="129"/>
-    <predecessor ref="118"/>
-    <successor ref="131"/>
-    <adjacentRight ref="121" drivingDir="same"/>
+    <predecessor ref="46"/>
+    <predecessor ref="35"/>
+    <successor ref="48"/>
+    <adjacentRight ref="38" drivingDir="same"/>
     <laneletType>driveWay</laneletType>
   </lanelet>
-  <lanelet id="121">
+  <lanelet id="38">
     <leftBound>
       <point>
         <x>-4.8227</x>
@@ -7366,16 +7366,16 @@
       </point>
       <lineMarking>solid</lineMarking>
     </rightBound>
-    <predecessor ref="130"/>
-    <predecessor ref="117"/>
-    <successor ref="132"/>
-    <successor ref="133"/>
-    <adjacentLeft ref="120" drivingDir="same"/>
+    <predecessor ref="47"/>
+    <predecessor ref="34"/>
+    <successor ref="49"/>
+    <successor ref="50"/>
+    <adjacentLeft ref="37" drivingDir="same"/>
     <laneletType>driveWay</laneletType>
-    <trafficSignRef ref="1106120217"/>
-    <trafficSignRef ref="1106220217"/>
+    <trafficSignRef ref="16"/>
+    <trafficSignRef ref="15"/>
   </lanelet>
-  <lanelet id="133">
+  <lanelet id="50">
     <leftBound>
       <point>
         <x>4.5741</x>
@@ -7517,11 +7517,11 @@
       </point>
       <lineMarking>solid</lineMarking>
     </rightBound>
-    <predecessor ref="121"/>
-    <successor ref="101"/>
+    <predecessor ref="38"/>
+    <successor ref="18"/>
     <laneletType>driveWay</laneletType>
   </lanelet>
-  <lanelet id="131">
+  <lanelet id="48">
     <leftBound>
       <point>
         <x>3.8681</x>
@@ -7574,12 +7574,12 @@
         <y>-4.8227</y>
       </point>
     </rightBound>
-    <predecessor ref="120"/>
-    <successor ref="124"/>
-    <adjacentRight ref="132" drivingDir="same"/>
+    <predecessor ref="37"/>
+    <successor ref="41"/>
+    <adjacentRight ref="49" drivingDir="same"/>
     <laneletType>driveWay</laneletType>
   </lanelet>
-  <lanelet id="132">
+  <lanelet id="49">
     <leftBound>
       <point>
         <x>4.5741</x>
@@ -7632,12 +7632,12 @@
         <y>-5.5365</y>
       </point>
     </rightBound>
-    <predecessor ref="121"/>
-    <successor ref="126"/>
-    <adjacentLeft ref="131" drivingDir="same"/>
+    <predecessor ref="38"/>
+    <successor ref="43"/>
+    <adjacentLeft ref="48" drivingDir="same"/>
     <laneletType>driveWay</laneletType>
   </lanelet>
-  <lanelet id="124">
+  <lanelet id="41">
     <leftBound>
       <point>
         <x>19.5797</x>
@@ -7666,13 +7666,13 @@
         <y>4.5741</y>
       </point>
     </rightBound>
-    <predecessor ref="108"/>
-    <predecessor ref="131"/>
-    <successor ref="123"/>
-    <adjacentRight ref="126" drivingDir="same"/>
+    <predecessor ref="25"/>
+    <predecessor ref="48"/>
+    <successor ref="40"/>
+    <adjacentRight ref="43" drivingDir="same"/>
     <laneletType>driveWay</laneletType>
   </lanelet>
-  <lanelet id="126">
+  <lanelet id="43">
     <leftBound>
       <point>
         <x>23.1530</x>
@@ -7702,16 +7702,16 @@
       </point>
       <lineMarking>solid</lineMarking>
     </rightBound>
-    <predecessor ref="107"/>
-    <predecessor ref="132"/>
-    <successor ref="125"/>
-    <successor ref="106"/>
-    <adjacentLeft ref="124" drivingDir="same"/>
+    <predecessor ref="24"/>
+    <predecessor ref="49"/>
+    <successor ref="42"/>
+    <successor ref="23"/>
+    <adjacentLeft ref="41" drivingDir="same"/>
     <laneletType>driveWay</laneletType>
-    <trafficSignRef ref="100221207"/>
-    <trafficSignRef ref="100121207"/>
+    <trafficSignRef ref="3"/>
+    <trafficSignRef ref="4"/>
   </lanelet>
-  <lanelet id="108">
+  <lanelet id="25">
     <leftBound>
       <point>
         <x>52.2775</x>
@@ -8685,12 +8685,12 @@
         <y>-4.8227</y>
       </point>
     </rightBound>
-    <predecessor ref="105"/>
-    <successor ref="124"/>
-    <adjacentRight ref="107" drivingDir="same"/>
+    <predecessor ref="22"/>
+    <successor ref="41"/>
+    <adjacentRight ref="24" drivingDir="same"/>
     <laneletType>driveWay</laneletType>
   </lanelet>
-  <lanelet id="107">
+  <lanelet id="24">
     <leftBound>
       <point>
         <x>52.2775</x>
@@ -8832,14 +8832,14 @@
         <y>-5.5671</y>
       </point>
     </rightBound>
-    <predecessor ref="105"/>
-    <successor ref="126"/>
-    <adjacentLeft ref="108" drivingDir="same"/>
+    <predecessor ref="22"/>
+    <successor ref="43"/>
+    <adjacentLeft ref="25" drivingDir="same"/>
     <laneletType>driveWay</laneletType>
-    <trafficSignRef ref="1106328149"/>
-    <trafficSignRef ref="1106428149"/>
+    <trafficSignRef ref="13"/>
+    <trafficSignRef ref="14"/>
   </lanelet>
-  <lanelet id="134">
+  <lanelet id="51">
     <leftBound>
       <point>
         <x>55.1767</x>
@@ -9428,11 +9428,11 @@
         <y>-48.3174</y>
       </point>
     </rightBound>
-    <predecessor ref="134"/>
-    <successor ref="134"/>
+    <predecessor ref="51"/>
+    <successor ref="51"/>
     <laneletType>sidewalk</laneletType>
   </lanelet>
-  <lanelet id="101">
+  <lanelet id="18">
     <leftBound>
       <point>
         <x>52.2775</x>
@@ -9822,13 +9822,13 @@
       </point>
       <lineMarking>solid</lineMarking>
     </rightBound>
-    <predecessor ref="133"/>
-    <successor ref="103"/>
-    <successor ref="100"/>
-    <adjacentLeft ref="105" drivingDir="opposite"/>
+    <predecessor ref="50"/>
+    <successor ref="20"/>
+    <successor ref="17"/>
+    <adjacentLeft ref="22" drivingDir="opposite"/>
     <laneletType>driveWay</laneletType>
   </lanelet>
-  <trafficSign id="100414289">
+  <trafficSign id="1">
     <trafficSignElement>
       <trafficSignID>205</trafficSignID>
     </trafficSignElement>
@@ -9840,7 +9840,7 @@
     </position>
     <virtual>false</virtual>
   </trafficSign>
-  <trafficSign id="100314289">
+  <trafficSign id="2">
     <trafficSignElement>
       <trafficSignID>215</trafficSignID>
     </trafficSignElement>
@@ -9852,7 +9852,7 @@
     </position>
     <virtual>false</virtual>
   </trafficSign>
-  <trafficSign id="100121207">
+  <trafficSign id="3">
     <trafficSignElement>
       <trafficSignID>205</trafficSignID>
     </trafficSignElement>
@@ -9864,7 +9864,7 @@
     </position>
     <virtual>false</virtual>
   </trafficSign>
-  <trafficSign id="100221207">
+  <trafficSign id="4">
     <trafficSignElement>
       <trafficSignID>215</trafficSignID>
     </trafficSignElement>
@@ -9876,7 +9876,7 @@
     </position>
     <virtual>false</virtual>
   </trafficSign>
-  <trafficSign id="1024428149">
+  <trafficSign id="5">
     <trafficSignElement>
       <trafficSignID>205</trafficSignID>
     </trafficSignElement>
@@ -9888,7 +9888,7 @@
     </position>
     <virtual>false</virtual>
   </trafficSign>
-  <trafficSign id="1024328149">
+  <trafficSign id="6">
     <trafficSignElement>
       <trafficSignID>215</trafficSignID>
     </trafficSignElement>
@@ -9900,7 +9900,7 @@
     </position>
     <virtual>false</virtual>
   </trafficSign>
-  <trafficSign id="1024120217">
+  <trafficSign id="7">
     <trafficSignElement>
       <trafficSignID>205</trafficSignID>
     </trafficSignElement>
@@ -9912,7 +9912,7 @@
     </position>
     <virtual>false</virtual>
   </trafficSign>
-  <trafficSign id="1024220217">
+  <trafficSign id="8">
     <trafficSignElement>
       <trafficSignID>215</trafficSignID>
     </trafficSignElement>
@@ -9924,7 +9924,7 @@
     </position>
     <virtual>false</virtual>
   </trafficSign>
-  <trafficSign id="1075414289">
+  <trafficSign id="9">
     <trafficSignElement>
       <trafficSignID>205</trafficSignID>
     </trafficSignElement>
@@ -9936,7 +9936,7 @@
     </position>
     <virtual>false</virtual>
   </trafficSign>
-  <trafficSign id="1075314289">
+  <trafficSign id="10">
     <trafficSignElement>
       <trafficSignID>215</trafficSignID>
     </trafficSignElement>
@@ -9948,7 +9948,7 @@
     </position>
     <virtual>false</virtual>
   </trafficSign>
-  <trafficSign id="1075121207">
+  <trafficSign id="11">
     <trafficSignElement>
       <trafficSignID>205</trafficSignID>
     </trafficSignElement>
@@ -9960,7 +9960,7 @@
     </position>
     <virtual>false</virtual>
   </trafficSign>
-  <trafficSign id="1075221207">
+  <trafficSign id="12">
     <trafficSignElement>
       <trafficSignID>215</trafficSignID>
     </trafficSignElement>
@@ -9972,7 +9972,7 @@
     </position>
     <virtual>false</virtual>
   </trafficSign>
-  <trafficSign id="1106428149">
+  <trafficSign id="13">
     <trafficSignElement>
       <trafficSignID>205</trafficSignID>
     </trafficSignElement>
@@ -9984,7 +9984,7 @@
     </position>
     <virtual>false</virtual>
   </trafficSign>
-  <trafficSign id="1106328149">
+  <trafficSign id="14">
     <trafficSignElement>
       <trafficSignID>215</trafficSignID>
     </trafficSignElement>
@@ -9996,7 +9996,7 @@
     </position>
     <virtual>false</virtual>
   </trafficSign>
-  <trafficSign id="1106120217">
+  <trafficSign id="15">
     <trafficSignElement>
       <trafficSignID>205</trafficSignID>
     </trafficSignElement>
@@ -10008,7 +10008,7 @@
     </position>
     <virtual>false</virtual>
   </trafficSign>
-  <trafficSign id="1106220217">
+  <trafficSign id="16">
     <trafficSignElement>
       <trafficSignID>215</trafficSignID>
     </trafficSignElement>
@@ -10020,149 +10020,150 @@
     </position>
     <virtual>false</virtual>
   </trafficSign>
-  <intersection id="135">
-    <incoming id="0">
-      <incomingLanelet ref="107"/>
-      <successorsStraight ref="126"/>
-      <isLeftOf ref="2"/>
+  <intersection id="52">
+    <incoming id="52">
+      <incomingLanelet ref="24"/>
+      <successorsStraight ref="43"/>
+      <isLeftOf ref="54"/>
     </incoming>
-    <incoming id="1">
-      <incomingLanelet ref="107"/>
-      <incomingLanelet ref="108"/>
-      <successorsStraight ref="124"/>
-      <successorsStraight ref="126"/>
-      <isLeftOf ref="2"/>
+    <incoming id="53">
+      <incomingLanelet ref="24"/>
+      <incomingLanelet ref="25"/>
+      <successorsStraight ref="41"/>
+      <successorsStraight ref="43"/>
+      <isLeftOf ref="54"/>
     </incoming>
-    <incoming id="2">
-      <incomingLanelet ref="109"/>
-      <successorsStraight ref="109"/>
-      <isLeftOf ref="5"/>
+    <incoming id="54">
+      <incomingLanelet ref="26"/>
+      <successorsStraight ref="26"/>
+      <isLeftOf ref="57"/>
     </incoming>
-    <incoming id="3">
-      <incomingLanelet ref="120"/>
-      <incomingLanelet ref="121"/>
-      <successorsRight ref="133"/>
-      <successorsLeft ref="131"/>
-      <successorsLeft ref="132"/>
-      <isLeftOf ref="1"/>
+    <incoming id="55">
+      <incomingLanelet ref="37"/>
+      <incomingLanelet ref="38"/>
+      <successorsRight ref="50"/>
+      <successorsLeft ref="48"/>
+      <successorsLeft ref="49"/>
+      <isLeftOf ref="53"/>
     </incoming>
-    <incoming id="4">
-      <incomingLanelet ref="121"/>
-      <successorsRight ref="133"/>
-      <successorsLeft ref="132"/>
-      <isLeftOf ref="1"/>
+    <incoming id="56">
+      <incomingLanelet ref="38"/>
+      <successorsRight ref="50"/>
+      <successorsLeft ref="49"/>
+      <isLeftOf ref="53"/>
     </incoming>
-    <incoming id="5">
-      <incomingLanelet ref="134"/>
-      <successorsStraight ref="134"/>
-    </incoming>
-  </intersection>
-  <intersection id="136">
-    <incoming id="0">
-      <incomingLanelet ref="109"/>
-      <successorsStraight ref="109"/>
-      <isLeftOf ref="5"/>
-    </incoming>
-    <incoming id="1">
-      <incomingLanelet ref="112"/>
-      <incomingLanelet ref="114"/>
-      <successorsRight ref="122"/>
-      <successorsLeft ref="129"/>
-      <successorsLeft ref="130"/>
-      <isLeftOf ref="4"/>
-    </incoming>
-    <incoming id="2">
-      <incomingLanelet ref="114"/>
-      <successorsRight ref="122"/>
-      <successorsLeft ref="130"/>
-      <isLeftOf ref="4"/>
-    </incoming>
-    <incoming id="3">
-      <incomingLanelet ref="117"/>
-      <successorsStraight ref="121"/>
-    </incoming>
-    <incoming id="4">
-      <incomingLanelet ref="117"/>
-      <incomingLanelet ref="118"/>
-      <successorsStraight ref="120"/>
-      <successorsStraight ref="121"/>
-    </incoming>
-    <incoming id="5">
-      <incomingLanelet ref="119"/>
-      <successorsStraight ref="119"/>
-      <isLeftOf ref="2"/>
+    <incoming id="57">
+      <incomingLanelet ref="51"/>
+      <successorsStraight ref="51"/>
     </incoming>
   </intersection>
-  <intersection id="137">
-    <incoming id="0">
-      <incomingLanelet ref="102"/>
-      <incomingLanelet ref="104"/>
-      <successorsRight ref="116"/>
-      <successorsLeft ref="128"/>
-      <successorsLeft ref="127"/>
-      <isLeftOf ref="5"/>
+  <intersection id="53">
+    <incoming id="58">
+      <incomingLanelet ref="26"/>
+      <successorsStraight ref="26"/>
+      <isLeftOf ref="63"/>
     </incoming>
-    <incoming id="1">
-      <incomingLanelet ref="104"/>
-      <successorsRight ref="116"/>
-      <successorsLeft ref="128"/>
-      <isLeftOf ref="5"/>
+    <incoming id="59">
+      <incomingLanelet ref="29"/>
+      <incomingLanelet ref="31"/>
+      <successorsRight ref="39"/>
+      <successorsLeft ref="46"/>
+      <successorsLeft ref="47"/>
+      <isLeftOf ref="62"/>
     </incoming>
-    <incoming id="2">
-      <incomingLanelet ref="109"/>
-      <successorsStraight ref="109"/>
-      <isLeftOf ref="1"/>
+    <incoming id="60">
+      <incomingLanelet ref="31"/>
+      <successorsRight ref="39"/>
+      <successorsLeft ref="47"/>
+      <isLeftOf ref="62"/>
     </incoming>
-    <incoming id="3">
-      <incomingLanelet ref="110"/>
-      <incomingLanelet ref="113"/>
-      <successorsStraight ref="112"/>
-      <successorsStraight ref="114"/>
+    <incoming id="61">
+      <incomingLanelet ref="34"/>
+      <successorsStraight ref="38"/>
+      <isLeftOf ref="58"/>
     </incoming>
-    <incoming id="4">
-      <incomingLanelet ref="113"/>
-      <successorsStraight ref="114"/>
+    <incoming id="62">
+      <incomingLanelet ref="34"/>
+      <incomingLanelet ref="35"/>
+      <successorsStraight ref="37"/>
+      <successorsStraight ref="38"/>
     </incoming>
-    <incoming id="5">
-      <incomingLanelet ref="119"/>
-      <successorsStraight ref="119"/>
-      <isLeftOf ref="4"/>
+    <incoming id="63">
+      <incomingLanelet ref="36"/>
+      <successorsStraight ref="36"/>
+      <isLeftOf ref="60"/>
     </incoming>
   </intersection>
-  <intersection id="138">
-    <incoming id="0">
-      <incomingLanelet ref="100"/>
-      <incomingLanelet ref="103"/>
-      <successorsStraight ref="104"/>
-      <successorsStraight ref="102"/>
+  <intersection id="54">
+    <incoming id="64">
+      <incomingLanelet ref="19"/>
+      <incomingLanelet ref="21"/>
+      <successorsRight ref="33"/>
+      <successorsLeft ref="44"/>
+      <successorsLeft ref="45"/>
+      <isLeftOf ref="69"/>
     </incoming>
-    <incoming id="1">
-      <incomingLanelet ref="103"/>
-      <successorsStraight ref="104"/>
+    <incoming id="65">
+      <incomingLanelet ref="21"/>
+      <successorsRight ref="33"/>
+      <successorsLeft ref="45"/>
+      <isLeftOf ref="69"/>
     </incoming>
-    <incoming id="2">
-      <incomingLanelet ref="109"/>
-      <successorsStraight ref="109"/>
-      <isLeftOf ref="5"/>
+    <incoming id="66">
+      <incomingLanelet ref="26"/>
+      <successorsStraight ref="26"/>
+      <isLeftOf ref="65"/>
     </incoming>
-    <incoming id="3">
-      <incomingLanelet ref="124"/>
-      <incomingLanelet ref="126"/>
-      <successorsRight ref="106"/>
-      <successorsLeft ref="123"/>
-      <successorsLeft ref="125"/>
-      <isLeftOf ref="5"/>
+    <incoming id="67">
+      <incomingLanelet ref="27"/>
+      <incomingLanelet ref="30"/>
+      <successorsStraight ref="29"/>
+      <successorsStraight ref="31"/>
     </incoming>
-    <incoming id="4">
-      <incomingLanelet ref="126"/>
-      <successorsRight ref="106"/>
-      <successorsLeft ref="125"/>
-      <isLeftOf ref="5"/>
+    <incoming id="68">
+      <incomingLanelet ref="30"/>
+      <successorsStraight ref="31"/>
     </incoming>
-    <incoming id="5">
-      <incomingLanelet ref="134"/>
-      <successorsStraight ref="134"/>
-      <isLeftOf ref="1"/>
+    <incoming id="69">
+      <incomingLanelet ref="36"/>
+      <successorsStraight ref="36"/>
+      <isLeftOf ref="68"/>
+    </incoming>
+  </intersection>
+  <intersection id="55">
+    <incoming id="70">
+      <incomingLanelet ref="17"/>
+      <incomingLanelet ref="20"/>
+      <successorsStraight ref="19"/>
+      <successorsStraight ref="21"/>
+    </incoming>
+    <incoming id="71">
+      <incomingLanelet ref="20"/>
+      <successorsStraight ref="21"/>
+    </incoming>
+    <incoming id="72">
+      <incomingLanelet ref="26"/>
+      <successorsStraight ref="26"/>
+      <isLeftOf ref="75"/>
+    </incoming>
+    <incoming id="73">
+      <incomingLanelet ref="41"/>
+      <incomingLanelet ref="43"/>
+      <successorsRight ref="23"/>
+      <successorsLeft ref="40"/>
+      <successorsLeft ref="42"/>
+      <isLeftOf ref="75"/>
+    </incoming>
+    <incoming id="74">
+      <incomingLanelet ref="43"/>
+      <successorsRight ref="23"/>
+      <successorsLeft ref="42"/>
+      <isLeftOf ref="75"/>
+    </incoming>
+    <incoming id="75">
+      <incomingLanelet ref="51"/>
+      <successorsStraight ref="51"/>
+      <isLeftOf ref="71"/>
     </incoming>
   </intersection>
 </commonRoad>
