@@ -1,14 +1,15 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<commonRoad timeStepSize="0.1" commonRoadVersion="2020a" author="Sebastian Maierhofer" affiliation="Technical University of Munich" source="CommonRoad Scenario Designer" benchmarkID="ZAM_OpenDrive-123" date="2021-08-04">
+<commonRoad timeStepSize="0.1" commonRoadVersion="2020a" author="" affiliation="" source="CommonRoad Scenario Designer" benchmarkID="ZAM_OpenDrive-1" date="2021-09-10">
   <location>
     <geoNameId>-999</geoNameId>
     <gpsLatitude>999</gpsLatitude>
     <gpsLongitude>999</gpsLongitude>
   </location>
   <scenarioTags>
+    <highway/>
     <urban/>
   </scenarioTags>
-  <lanelet id="1">
+  <lanelet id="677">
     <leftBound>
       <point>
         <x>-72.8415</x>
@@ -38,11 +39,11 @@
       </point>
       <lineMarking>solid</lineMarking>
     </rightBound>
-    <successor ref="2"/>
-    <adjacentLeft ref="3" drivingDir="opposite"/>
+    <successor ref="678"/>
+    <adjacentLeft ref="679" drivingDir="opposite"/>
     <laneletType>driveWay</laneletType>
   </lanelet>
-  <lanelet id="3">
+  <lanelet id="679">
     <leftBound>
       <point>
         <x>31.9362</x>
@@ -72,11 +73,11 @@
         <y>-1.9470</y>
       </point>
     </rightBound>
-    <predecessor ref="2"/>
-    <adjacentLeft ref="1" drivingDir="opposite"/>
+    <predecessor ref="678"/>
+    <adjacentLeft ref="677" drivingDir="opposite"/>
     <laneletType>driveWay</laneletType>
   </lanelet>
-  <lanelet id="2">
+  <lanelet id="678">
     <leftBound>
       <point>
         <x>31.9362</x>
@@ -314,8 +315,8 @@
       </point>
       <lineMarking>solid</lineMarking>
     </rightBound>
-    <predecessor ref="1"/>
-    <successor ref="3"/>
+    <predecessor ref="677"/>
+    <successor ref="679"/>
     <laneletType>driveWay</laneletType>
   </lanelet>
 </commonRoad>

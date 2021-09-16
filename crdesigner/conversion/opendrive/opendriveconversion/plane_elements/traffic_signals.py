@@ -8,12 +8,11 @@ import enum
 from typing import Union
 
 from crdesigner.conversion.opendrive.opendriveparser.elements.road import Road
+from crdesigner.conversion.common.utils import generate_unique_id
 
 from commonroad.scenario.traffic_sign import TrafficSign, TrafficLight, TrafficSignElement, TrafficSignIDZamunda, \
     TrafficSignIDGermany, TrafficSignIDUsa, TrafficSignIDChina, TrafficSignIDSpain, TrafficSignIDRussia
 from commonroad.scenario.lanelet import StopLine, LineMarking
-from crdesigner.conversion.common.utils import generate_unique_id
-
 
 def extract_traffic_element_id(signal_type: str, signal_subtype: str, traffic_sign_enum: enum) \
         -> Union[TrafficSignIDZamunda, TrafficSignIDGermany, TrafficSignIDUsa, TrafficSignIDChina,

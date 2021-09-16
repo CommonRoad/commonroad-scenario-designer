@@ -138,5 +138,11 @@ class TestOpenDrive(unittest.TestCase):
 
         self.assertTrue(opendrive_scenario("FourWaySignal"))
 
+class TestFourWaySignal(TestOpenDriveBaseClass):
+
+    __test__ = True
+    xodr_file_name = "FourWaySignal"
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -33,7 +33,7 @@ Quick Start Guide
 To simulate traffic on a CommonRoad Scenario, you firstly need to install SUMOs dependencies.
 
 Then refer to the provided example file
-`example file <https://gitlab.lrz.de/cps/commonroad-map-tool/-/blob/develop/crdesigner/sumo_map/example.py>`_
+`example file <https://gitlab.lrz.de/tum-cps/commonroad-scenario-designer/-/blob/develop/tutorials/conversion_examples/example_commonroad_to_sumo.py>`_
 to convert a commonroad .xml
 file to SUMO, simulate on traffic on it and save the result to disk:
 
@@ -41,7 +41,7 @@ file to SUMO, simulate on traffic on it and save the result to disk:
 
   # add the current module to the python path
   export $PYTHONPATH="$PYTHONPATH:$(pwd)"
-  python crdesigner/covnersion/sumo_map/example.py
+  python tutorials/conversion_examples/example_commonroad_to_sumo.py
 
 
 Implementation
@@ -55,8 +55,8 @@ Additionally it provides the capability to simulate multiple types of traffic pa
 Optionally trips for pedestrians and vehicles from one edge in the network to another can be automatically generated.
 SUMO also provides a set of tools for programmatically interacting with a network, namely NETEDIT.
 
-The main module of the converter is in ``crdesiger/sumo_map/cr2sumo/converter.py``. Here, a
-CommonRoad Scenario is converted to it's representation as a SUMO Net. This SUMO Net is then
+The main module of the converter is in ``crdesigner/conversion/sumo_map/cr2sumo/converter.py``. Here, a
+CommonRoad Scenario is converted to its representation as a SUMO Net. This SUMO Net is then
 used as the specification for simulating vehicles with SUMO.
 
 In detail, conversion follows roughly the following steps, which are successively called in

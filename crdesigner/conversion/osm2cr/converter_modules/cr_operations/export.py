@@ -18,7 +18,7 @@ from crdesigner.conversion.osm2cr.converter_modules.utility.geonamesID import ge
 from crdesigner.conversion.osm2cr.converter_modules.cr_operations.cleanup import sanitize
 
 # CommonRoad python tools are imported
-from commonroad.visualization.draw_dispatch_cr import draw_object
+from commonroad.visualization.mp_renderer import MPRenderer
 from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
 from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.scenario.scenario import Scenario, Lanelet, Tag, Location
@@ -284,11 +284,6 @@ def view_xml(filename: str, ax=None) -> None:
 
                                                         'scale_factor': 0.15}},
                    'lanelet': {'show_label': False}}
-    if ax is None:
-        draw_object(scenario, plot_limits=limits, draw_params=draw_params)
-        plt.gca().set_aspect("equal")
-        plt.show()
-        return
-    else:
-        draw_object(scenario, plot_limits=limits, ax=ax, draw_params=draw_params)
-        ax.set_aspect("equal")
+    rnd = MPRenderer(plot_limits=limits, ax=ax, draw_params=draw_params)
+    scenario.draw(rnd)
+    rnd.render()
