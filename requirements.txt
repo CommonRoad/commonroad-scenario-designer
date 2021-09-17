@@ -13,7 +13,7 @@ shapely>=1.7.0
 ipython>=7.19.0
 
 # for sumo_map converter
--e git+ssh://git@gitlab.lrz.de/cps/sumo-interface.git@develop#egg=sumocr
+#-e git+ssh://git@gitlab.lrz.de/cps/sumo-interface.git@develop#egg=sumocr
 
 # determinism in osm2cr converter
 ordered-set>=4.0.2

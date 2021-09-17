@@ -18,7 +18,7 @@ image: $CI_REGISTRY/cps/commonroad-scenario-designer/ci:v0.5
 .install-and-run: &install-and-run
   - git config --global url."https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.lrz.de/".insteadOf "git@gitlab.lrz.de:"
   - git clone --branch develop git@gitlab.lrz.de:cps/sumo-interface.git $HOME/sumo-interface
-  - pip install $HOME/sumo-interface
+  - pip install -e $HOME/sumo-interface
   - pip install -r ./requirements.txt
   - pip install -r ./ci/test_requirements.txt
   - pip install -e .
