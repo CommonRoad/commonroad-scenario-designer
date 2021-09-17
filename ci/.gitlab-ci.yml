@@ -80,7 +80,7 @@ docs:
     script:
         - source activate commonroad-py39
         - pip install -r ./ci/test_requirements.txt -r ./docs/docs_requirements.txt
-        - tox -e docs
+        - cd docs && make html
 
 build_package:
     stage: build
