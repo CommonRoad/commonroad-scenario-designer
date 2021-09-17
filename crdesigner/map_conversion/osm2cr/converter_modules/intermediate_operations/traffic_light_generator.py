@@ -1,5 +1,6 @@
 from crdesigner.map_conversion.osm2cr import config
-from commonroad.scenario.traffic_sign import TrafficLight, TrafficLightCycleElement, TrafficLightState, TrafficLightDirection
+from commonroad.scenario.traffic_sign import TrafficLight, TrafficLightCycleElement, TrafficLightState, \
+    TrafficLightDirection
 
 
 class TrafficLightGenerator:

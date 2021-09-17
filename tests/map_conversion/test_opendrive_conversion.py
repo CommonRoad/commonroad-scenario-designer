@@ -10,7 +10,7 @@ from commonroad.scenario.scenario import Tag, Scenario
 from crdesigner.map_conversion.common.utils import generate_unique_id
 from crdesigner.map_conversion.opendrive.opendriveparser.parser import parse_opendrive
 from crdesigner.io.opendrive_convert import convert_opendrive
-from tests.conversion.utils import elements_equal
+from tests.map_conversion.utils import elements_equal
 
 __author__ = "Benjamin Orthen, Sebastian Maierhofer"
 __copyright__ = "TUM Cyber-Physical Systems Group"

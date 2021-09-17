@@ -6,7 +6,8 @@ from commonroad.scenario.lanelet import LaneletType
 from commonroad.scenario.obstacle import ObstacleType
 from commonroad.scenario.traffic_sign import SupportedTrafficSignCountry
 from commonroad.scenario.traffic_sign import TrafficLightState, TrafficLightDirection
-from crdesigner.map_conversion.sumo_map.sumolib_net import EdgeTypes, EdgeType, VehicleType, SignalState, ConnectionDirection
+from crdesigner.map_conversion.sumo_map.sumolib_net import EdgeTypes, EdgeType, VehicleType, SignalState, \
+    ConnectionDirection
 
 
 class ClusterInstruction(IntEnum):

@@ -18,7 +18,7 @@ from lxml import etree
 from commonroad.common.file_reader import CommonRoadFileReader
 
 from crdesigner.map_conversion.lanelet_lanelet2.cr2lanelet import CR2LaneletConverter
-from tests.conversion.utils import elements_equal
+from tests.map_conversion.utils import elements_equal
 
 
 class TestCommonRoadToLaneletConversion(unittest.TestCase):

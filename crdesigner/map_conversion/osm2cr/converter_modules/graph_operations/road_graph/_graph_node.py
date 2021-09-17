@@ -6,6 +6,7 @@ from typing import Set
 import numpy as np
 from crdesigner.map_conversion.osm2cr.converter_modules.utility import geometry
 
+
 class GraphNode:
     """
     Class that represents a node in the graph

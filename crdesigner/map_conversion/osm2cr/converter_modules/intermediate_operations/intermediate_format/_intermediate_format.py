@@ -24,7 +24,8 @@ from commonroad.geometry.shape import Rectangle, Circle
 from crdesigner.map_conversion.osm2cr.converter_modules.graph_operations.road_graph import Graph
 from crdesigner.map_conversion.osm2cr import config
 from crdesigner.map_conversion.osm2cr.converter_modules.utility import geometry, idgenerator
-from crdesigner.map_conversion.osm2cr.converter_modules.intermediate_operations.intersection_enhancement import intersection_enhancement
+from crdesigner.map_conversion.osm2cr.converter_modules.intermediate_operations.intersection_enhancement import \
+    intersection_enhancement
 
 
 from ._intermediate_node import Node
@@ -32,6 +33,7 @@ from ._intermediate_edge import Edge
 
 # mapping from crossed lanelet ids to the crossing ones
 Crossings = Dict[int, Set[int]]
+
 
 class IntermediateFormat:
     """

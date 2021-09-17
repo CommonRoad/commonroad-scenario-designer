@@ -24,8 +24,8 @@ from commonroad.scenario.scenario import Scenario, ScenarioID, TrafficSign
 
 from crdesigner.map_conversion.common.utils import generate_unique_id
 from crdesigner.map_conversion.opendrive.opendriveconversion.conversion_lanelet import ConversionLanelet
-from crdesigner.map_conversion.opendrive.opendriveconversion.conversion_lanelet_network import ConversionLaneletNetwork, \
-    convert_to_new_lanelet_id
+from crdesigner.map_conversion.opendrive.opendriveconversion.conversion_lanelet_network import \
+    ConversionLaneletNetwork, convert_to_new_lanelet_id
 from crdesigner.map_conversion.lanelet_lanelet2.lanelet2 import OSMLanelet, WayRelation, DEFAULT_PROJ_STRING, Node, \
     RightOfWayRelation
 from crdesigner.map_conversion.osm2cr.converter_modules.utility.geometry import (
@@ -337,7 +337,8 @@ class Lanelet2CRConverter:
         # If for some reason, relation couldn't be fixed, notify user
         if len(left_way.nodes) != len(right_way.nodes):
             print(
-                f"Error: Relation {way_rel.id_} has left and right ways which are not equally long! Please check your data! Discarding this lanelet relation."
+                f"Error: Relation {way_rel.id_} has left and right ways which are not equally long! "
+                f"Please check your data! Discarding this lanelet relation."
             )
             return None
 
@@ -484,7 +485,8 @@ class Lanelet2CRConverter:
 
     def _fix_relation_unequal_ways(self, left_way, right_way):
         # Try to fix by adding some nodes by interpolation in the way with the least nodes...
-        # TODO: Maybe we should try to add the extra nodes close to the zone where the other way has extra nodes? Or distribute evenly...
+        # TODO: Maybe we should try to add the extra nodes close to the zone
+        #  where the other way has extra nodes? Or distribute evenly...
         # For now, add between two central nodes
         if (len(left_way.nodes) == len(right_way.nodes)):
             return
