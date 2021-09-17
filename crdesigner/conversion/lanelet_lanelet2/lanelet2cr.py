@@ -71,20 +71,20 @@ def _add_stop_line_to_lanelet(lanelets: List[Lanelet], stop_lines: List[StopLine
     :return:
     """
     yield_signs = set()
-    for l in lanelets:
+    for la in lanelets:
         for s in stop_lines:
-            if l.convert_to_polygon().shapely_object.intersects(LineString([s.start, s.end])):
-                l.stop_line = s
+            if la.convert_to_polygon().shapely_object.intersects(LineString([s.start, s.end])):
+                la.stop_line = s
                 # add the stop line traffic sign to the lanelet if set
                 if s.traffic_sign_ref is not None:
-                    l.traffic_signs.update(s.traffic_sign_ref)
+                    la.traffic_signs.update(s.traffic_sign_ref)
                     yield_signs.update(s.traffic_sign_ref)
                 break
     return yield_signs
 
 
 class Lanelet2CRConverter:
-    "Class to convert OSM to the Commonroad representation of Lanelets."
+    """Class to convert OSM to the Commonroad representation of Lanelets."""
 
     def __init__(self, proj_string: str = None):
         if proj_string:
