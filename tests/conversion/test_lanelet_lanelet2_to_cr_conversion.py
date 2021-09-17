@@ -20,7 +20,7 @@ from commonroad.scenario.scenario import Tag, Scenario
 from crdesigner.conversion.common.utils import generate_unique_id
 from crdesigner.conversion.lanelet_lanelet2.lanelet2_parser import Lanelet2Parser
 from crdesigner.conversion.lanelet_lanelet2.lanelet2cr import Lanelet2CRConverter
-from test.conversion.utils import elements_equal
+from tests.conversion.utils import elements_equal
 
 
 def load_and_convert_opendrive(xodr_file_name: str) -> Scenario:
