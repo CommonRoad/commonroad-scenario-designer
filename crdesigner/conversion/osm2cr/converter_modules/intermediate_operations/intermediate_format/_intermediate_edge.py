@@ -76,7 +76,7 @@ class Edge:
 
         :return: boolean if given lanelet is valid
         """
-        polygon = lanelet.polygon.shapely_object
+        polygon = lanelet.convert_to_polygon().shapely_object
         if not polygon.is_valid:
             warnings.warn("Lanelet " + str(lanelet.lanelet_id) + " invalid")
             return False
