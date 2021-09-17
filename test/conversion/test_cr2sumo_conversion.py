@@ -20,7 +20,6 @@ from parameterized import parameterized
 from sumocr.interface.sumo_simulation import SumoSimulation
 
 
-
 class BaseClass(unittest.TestCase):
     """Test the conversion from an CommonRoad map to a SUMO .net.xml file
     """
