@@ -79,7 +79,7 @@ docs:
     stage: test
     script:
         - source activate commonroad-py39
-        - pip install -r test_requirements.txt -r docs_requirements.txt
+        - pip install -r ./ci/test_requirements.txt -r ./docs/docs_requirements.txt
         - tox -e docs
 
 build_package:
