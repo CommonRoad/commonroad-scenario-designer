@@ -47,13 +47,13 @@ class TestOpenDrive(unittest.TestCase):
         """
         xml_output_name = file_name
 
-        with open(os.path.dirname(os.path.realpath(__file__)) + f"/opendrive_test_files/{xml_output_name}.xml",
-                "r", ) as fh:
+        with open(os.path.dirname(os.path.realpath(__file__))
+                  + f"/opendrive_test_files/{xml_output_name}.xml", "r", ) as fh:
             parser = etree.XMLParser(remove_blank_text=True)
             tree_import = etree.parse(fh, parser=parser).getroot()
             writer = CommonRoadFileWriter(scenario=self.load_and_convert_opendrive(file_name),
-                    planning_problem_set=PlanningProblemSet(), author="", affiliation="",
-                    source="CommonRoad Scenario Designer", tags={Tag.URBAN, Tag.HIGHWAY}, )
+                                          planning_problem_set=PlanningProblemSet(), author="", affiliation="",
+                                          source="CommonRoad Scenario Designer", tags={Tag.URBAN, Tag.HIGHWAY}, )
             writer.write_to_file(
                     os.path.dirname(os.path.abspath(__file__)) + "/.pytest_cache" + "/" + xml_output_name + ".xml",
                     OverwriteExistingFile.ALWAYS)
