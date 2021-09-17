@@ -89,13 +89,11 @@ class TestOpenDrive(unittest.TestCase):
         """Includes roads with multiple lane sections and
         lane sections with multiple width sections.
         This should be split into multiple tests in the future."""
-
         self.assertTrue(compare_maps("KA-Suedtangente-atlatec"))
 
     def test_culdesac(self):
         """Two adjacent lanes with same successor should not be mistaken
         as merging lanes!"""
-
         self.assertTrue(compare_maps("CulDeSac"))
 
     def test_complex_crossing(self):

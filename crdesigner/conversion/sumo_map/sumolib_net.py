@@ -810,7 +810,7 @@ class Lane:
         return xmin, ymin, xmax, ymax
 
     def getClosestLanePosAndDist(self, point, perpendicular=False):
-        return sumolib.geomhelper.convert_to_polygon()OffsetAndDistanceToPoint(
+        return sumolib.geomhelper.polygon.OffsetAndDistanceToPoint(
             point, self.getShape(), perpendicular)
 
     @property
