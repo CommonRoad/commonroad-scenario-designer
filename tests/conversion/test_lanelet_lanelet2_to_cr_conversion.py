@@ -17,9 +17,9 @@ from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistin
 from commonroad.planning.planning_problem import PlanningProblemSet
 from commonroad.scenario.scenario import Tag, Scenario
 
-from crdesigner.conversion.common.utils import generate_unique_id
-from crdesigner.conversion.lanelet_lanelet2.lanelet2_parser import Lanelet2Parser
-from crdesigner.conversion.lanelet_lanelet2.lanelet2cr import Lanelet2CRConverter
+from crdesigner.map_conversion.common.utils import generate_unique_id
+from crdesigner.map_conversion.lanelet_lanelet2.lanelet2_parser import Lanelet2Parser
+from crdesigner.map_conversion.lanelet_lanelet2.lanelet2cr import Lanelet2CRConverter
 from tests.conversion.utils import elements_equal
 
 

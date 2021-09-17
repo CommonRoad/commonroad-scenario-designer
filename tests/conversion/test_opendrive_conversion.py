@@ -7,8 +7,8 @@ from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistin
 from commonroad.planning.planning_problem import PlanningProblemSet
 from commonroad.scenario.scenario import Tag, Scenario
 
-from crdesigner.conversion.common.utils import generate_unique_id
-from crdesigner.conversion.opendrive.opendriveparser.parser import parse_opendrive
+from crdesigner.map_conversion.common.utils import generate_unique_id
+from crdesigner.map_conversion.opendrive.opendriveparser.parser import parse_opendrive
 from crdesigner.io.opendrive_convert import convert_opendrive
 from tests.conversion.utils import elements_equal
 

@@ -1,6 +1,6 @@
 from lxml import etree
 from commonroad.common.file_reader import CommonRoadFileReader
-from crdesigner.conversion.lanelet_lanelet2.cr2lanelet import CR2LaneletConverter
+from crdesigner.map_conversion.lanelet_lanelet2.cr2lanelet import CR2LaneletConverter
 from crdesigner.io.api import commonroad_to_lanelet
 
 

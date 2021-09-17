@@ -10,8 +10,8 @@ from PyQt5.QtWidgets import QMainWindow
 from PyQt5.QtGui import QIcon
 from matplotlib.pyplot import close
 
-from crdesigner.conversion.osm2cr.converter_modules.cr_operations import export
-from crdesigner.conversion.osm2cr.converter_modules.graph_operations import road_graph as rg
+from crdesigner.map_conversion.osm2cr.converter_modules.cr_operations import export
+from crdesigner.map_conversion.osm2cr.converter_modules.graph_operations import road_graph as rg
 from crdesigner.io.gui.osm_gui_modules import gui_embedding, settings, gui
 from crdesigner.io.gui.osm_gui_modules.GUI_resources.start_window import Ui_MainWindow as startWindow
 from crdesigner.io.gui.converter_modules.converter_interface import ConverterInterface

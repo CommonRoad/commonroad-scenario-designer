@@ -5,8 +5,8 @@ from commonroad.scenario.scenario import Tag
 from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
 from commonroad.planning.planning_problem import PlanningProblemSet
 
-from crdesigner.conversion.lanelet_lanelet2.lanelet2cr import Lanelet2CRConverter
-from crdesigner.conversion.lanelet_lanelet2.lanelet2_parser import Lanelet2Parser
+from crdesigner.map_conversion.lanelet_lanelet2.lanelet2cr import Lanelet2CRConverter
+from crdesigner.map_conversion.lanelet_lanelet2.lanelet2_parser import Lanelet2Parser
 
 from crdesigner.io.api import lanelet_to_commonroad
 

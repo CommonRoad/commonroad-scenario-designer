@@ -10,7 +10,7 @@ import math
 from lxml import etree
 from typing import Tuple
 
-import crdesigner.conversion.osm2cr.converter_modules.converter as converter
+import crdesigner.map_conversion.osm2cr.converter_modules.converter as converter
 from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
 from commonroad.scenario.scenario import Scenario

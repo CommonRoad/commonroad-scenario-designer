@@ -5,21 +5,21 @@ import os
 from commonroad.scenario.scenario import Scenario
 from commonroad.common.file_reader import CommonRoadFileReader
 
-from crdesigner.conversion.opendrive.opendriveparser.parser import parse_opendrive
-from crdesigner.conversion.opendrive.opendriveconversion.network import Network
+from crdesigner.map_conversion.opendrive.opendriveparser.parser import parse_opendrive
+from crdesigner.map_conversion.opendrive.opendriveconversion.network import Network
 
-from crdesigner.conversion.lanelet_lanelet2.lanelet2cr import Lanelet2CRConverter
-from crdesigner.conversion.lanelet_lanelet2.lanelet2_parser import Lanelet2Parser
-from crdesigner.conversion.lanelet_lanelet2.cr2lanelet import CR2LaneletConverter
+from crdesigner.map_conversion.lanelet_lanelet2.lanelet2cr import Lanelet2CRConverter
+from crdesigner.map_conversion.lanelet_lanelet2.lanelet2_parser import Lanelet2Parser
+from crdesigner.map_conversion.lanelet_lanelet2.cr2lanelet import CR2LaneletConverter
 
 from crdesigner.io.gui.toolboxes.gui_sumo_simulation import SUMO_AVAILABLE
 if SUMO_AVAILABLE:
-    from crdesigner.conversion.sumo_map.config import SumoConfig
-    from crdesigner.conversion.sumo_map.cr2sumo.converter import CR2SumoMapConverter
-    from crdesigner.conversion.sumo_map.sumo2cr import convert_net_to_cr
+    from crdesigner.map_conversion.sumo_map.config import SumoConfig
+    from crdesigner.map_conversion.sumo_map.cr2sumo.converter import CR2SumoMapConverter
+    from crdesigner.map_conversion.sumo_map.sumo2cr import convert_net_to_cr
 
-from crdesigner.conversion.osm2cr.converter_modules.converter import GraphScenario
-from crdesigner.conversion.osm2cr.converter_modules.cr_operations.export import convert_to_scenario
+from crdesigner.map_conversion.osm2cr.converter_modules.converter import GraphScenario
+from crdesigner.map_conversion.osm2cr.converter_modules.cr_operations.export import convert_to_scenario
 
 
 __author__ = "Sebastian Maierhofer"

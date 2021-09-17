@@ -20,12 +20,12 @@ from matplotlib.collections import Collection
 from matplotlib.lines import Line2D
 from matplotlib.backends.backend_agg import FigureCanvasAgg
 
-from crdesigner.conversion.osm2cr import config
-import crdesigner.conversion.osm2cr.converter_modules.graph_operations.road_graph as rg
+from crdesigner.map_conversion.osm2cr import config
+import crdesigner.map_conversion.osm2cr.converter_modules.graph_operations.road_graph as rg
 from crdesigner.io.gui.osm_gui_modules import aerial_data, actions, plots_interactive as iplot
 from crdesigner.io.gui.osm_gui_modules.settings import EditLaneWidth
-from crdesigner.conversion.osm2cr.converter_modules.utility import geometry
-from crdesigner.conversion.osm2cr.converter_modules.utility.idgenerator import get_id
+from crdesigner.map_conversion.osm2cr.converter_modules.utility import geometry
+from crdesigner.map_conversion.osm2cr.converter_modules.utility.idgenerator import get_id
 
 
 def check_dir(directory: str) -> None:

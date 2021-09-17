@@ -14,7 +14,7 @@ import mercantile
 from PIL import Image
 from PIL.JpegImagePlugin import JpegImageFile
 
-from crdesigner.conversion.osm2cr import config
+from crdesigner.map_conversion.osm2cr import config
 
 IMAGE_RESOLUTION = 256
 

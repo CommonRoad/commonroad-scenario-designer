@@ -9,7 +9,7 @@ from typing import Dict, Union, List, Optional, Tuple
 
 from PyQt5.QtWidgets import QDialog, QFileDialog, QMessageBox
 
-from crdesigner.conversion.osm2cr import config
+from crdesigner.map_conversion.osm2cr import config
 from crdesigner.io.gui.osm_gui_modules import config_default
 from crdesigner.io.gui.osm_gui_modules.GUI_resources.lane_counts import Ui_Dialog as Lane_counts
 from crdesigner.io.gui.osm_gui_modules.GUI_resources.lane_width import Ui_Dialog as Lane_width

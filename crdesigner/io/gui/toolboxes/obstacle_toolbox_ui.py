@@ -14,8 +14,8 @@ import logging
 
 # try to import sumo functionality
 try:
-    from crdesigner.conversion.sumo_map.config import SumoConfig
-    from crdesigner.conversion.sumo_map.cr2sumo.converter import CR2SumoMapConverter
+    from crdesigner.map_conversion.sumo_map.config import SumoConfig
+    from crdesigner.map_conversion.sumo_map.cr2sumo.converter import CR2SumoMapConverter
     from sumocr.interface.sumo_simulation import SumoSimulation
     from crdesigner.io.gui.toolboxes.gui_sumo_simulation import SUMOSimulation
     SUMO_AVAILABLE = True

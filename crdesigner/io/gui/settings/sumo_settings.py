@@ -7,7 +7,7 @@ from commonroad.scenario.obstacle import ObstacleType
 
 from crdesigner.io.gui.gui_resources.sumo_settings_ui import Ui_MainWindow
 from crdesigner.io.gui.misc.util import Observable
-from crdesigner.conversion.sumo_map.config import SumoConfig
+from crdesigner.map_conversion.sumo_map.config import SumoConfig
 
 
 class SUMOSettings:

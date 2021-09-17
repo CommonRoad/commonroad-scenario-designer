@@ -8,7 +8,7 @@ from commonroad.planning.planning_problem import PlanningProblemSet
 
 from crdesigner.io.gui.toolboxes.gui_sumo_simulation import SUMO_AVAILABLE
 if SUMO_AVAILABLE:
-    from crdesigner.conversion.sumo_map.sumo2cr import convert_net_to_cr
+    from crdesigner.map_conversion.sumo_map.sumo2cr import convert_net_to_cr
 
 input_file = ""  # replace empty string
 

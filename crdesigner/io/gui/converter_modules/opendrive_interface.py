@@ -4,8 +4,8 @@ from lxml import etree
 
 from PyQt5.QtWidgets import QFileDialog, QMessageBox
 
-from crdesigner.conversion.opendrive.opendriveparser.parser import parse_opendrive
-from crdesigner.conversion.opendrive.opendriveconversion.network import Network
+from crdesigner.map_conversion.opendrive.opendriveparser.parser import parse_opendrive
+from crdesigner.map_conversion.opendrive.opendriveconversion.network import Network
 from crdesigner.io.gui.converter_modules.converter_interface import ConverterInterface
 
 
