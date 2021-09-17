@@ -34,7 +34,7 @@ class BaseClass(unittest.TestCase):
 
     @property
     def out_path_test(self):
-        return os.path.join(self.out_path, str(self.id()).split(".")[3])
+        return os.path.join(self.out_path, str(self.id()).split(".")[4])
 
     def setUp(self) -> None:
         if not os.path.isdir(self.out_path_test):
