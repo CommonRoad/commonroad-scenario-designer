@@ -90,13 +90,13 @@ class TestOSMToCRScenario(unittest.TestCase):
                 self.assertGreaterEqual(distance, min_distance)
 
     def osm2cr_scenario_write_validates(self, cr_scenario: Scenario, cr_planning_problem: PlanningProblemSet,
-                                             osm_file_name: str):
+                                        osm_file_name: str):
         """Test if created CommonRoad scenario validates"""
         fw = CommonRoadFileWriter(
             scenario=cr_scenario,
             planning_problem_set=cr_planning_problem)
         fw.write_to_file(
-            filename=self.out_path + osm_file_name+ "_written.xml",
+            filename=self.out_path + osm_file_name + "_written.xml",
             overwrite_existing_file=OverwriteExistingFile.ALWAYS,
             check_validity=True)
 
