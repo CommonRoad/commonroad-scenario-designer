@@ -17,7 +17,7 @@ image: $CI_REGISTRY/cps/commonroad-scenario-designer/ci:v0.5
 
 .install-and-run: &install-and-run
     - pip install -e .
-    - pip install -r ./ci/tests_requirements.txt
+    - pip install -r ./ci/test_requirements.txt
     - coverage run commonroad/tests/run_tests.py
     - coverage report -m || true
 
