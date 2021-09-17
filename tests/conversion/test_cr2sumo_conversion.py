@@ -228,5 +228,6 @@ class BaseClass(unittest.TestCase):
     #     converter_config.country_id = scenario.scenario_id.country_id
     #     converter = CR2SumoMapConverter(scenario, converter_config)
 
+
 if __name__ == "__main__":
     unittest.main()
