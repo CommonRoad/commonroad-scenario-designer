@@ -1,7 +1,0 @@
-pytest>=5.3.2
-pytest-cov
-pytest-xdist
-tox
-tox-current-env
-coverage
-parameterized>=0.7.4
