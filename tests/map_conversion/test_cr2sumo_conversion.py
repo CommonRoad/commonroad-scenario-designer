@@ -223,4 +223,3 @@ class TestCommonRoadToSUMOConversion(unittest.TestCase):
     #     converter_config.scenario_name = str(scenario.scenario_id)
     #     converter_config.country_id = scenario.scenario_id.country_id
     #     converter = CR2SumoMapConverter(scenario, converter_config)
-

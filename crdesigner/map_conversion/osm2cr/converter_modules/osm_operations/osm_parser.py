@@ -251,8 +251,7 @@ def get_restrictions(root) -> RestrictionDict:
     return restrictions
 
 
-def get_ways(accepted_highways: List[str], rejected_tags: Dict[str, str],
-              root) -> OrderedSet[ElTree.Element]:
+def get_ways(accepted_highways: List[str], rejected_tags: Dict[str, str], root) -> OrderedSet[ElTree.Element]:
     """
     finds ways of desired types in osm file.
 

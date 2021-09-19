@@ -645,7 +645,6 @@ class Graph:
                 if not light.forward and edge.node1.id == light.node.id:
                     edge.add_traffic_light(light, light.forward)
 
-
     def find_invalid_lanes(self) -> List[Lane]:
         """
         checks every lane for validity, using the shapely_object.is_valid method
@@ -657,7 +656,6 @@ class Graph:
             if not lane.convert_to_polygon().shapely_object.is_valid:
                 invalid_lanes.append(lane)
         return invalid_lanes
-
 
     def delete_lane(self, lane) -> None:
         """

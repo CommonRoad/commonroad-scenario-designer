@@ -43,9 +43,9 @@ def remove_duplicate_traffic_signs(scenario: Scenario) -> None:
     net = scenario.lanelet_network
     filtered_signs = OrderedSet()
     
-    for l in net.lanelets:
+    for la in net.lanelets:
         sign_elements = set()
-        for lanelet_sign in l.traffic_signs:
+        for lanelet_sign in la.traffic_signs:
             already_added = False
             for element in net.find_traffic_sign_by_id(lanelet_sign).traffic_sign_elements:
                 if element not in sign_elements:
@@ -58,6 +58,7 @@ def remove_duplicate_traffic_signs(scenario: Scenario) -> None:
     scenario.lanelet_network = create_laneletnetwork(scenario.lanelet_network.lanelets, filtered_signs,
                                                      scenario.lanelet_network.traffic_lights,
                                                      scenario.lanelet_network.intersections)
+
 
 def remove_non_referenced_signs(scenario: Scenario) -> None:
     """
@@ -90,13 +91,12 @@ def merge_short_lanes(scenario: Scenario, min_distance=1) -> None:
     logging.info("merging short lanes")
 
     lanelets = scenario.lanelet_network.lanelets
-    net = scenario.lanelet_network
 
     # collect all faulty lanelets
     too_small = []
-    for l in lanelets:
-        if l.distance[-1] < min_distance:
-            too_small.append(l.lanelet_id)
+    for la in lanelets:
+        if la.distance[-1] < min_distance:
+            too_small.append(la.lanelet_id)
 
     # iterate over all too small lanelets
     while len(too_small) > 0:
@@ -104,35 +104,35 @@ def merge_short_lanes(scenario: Scenario, min_distance=1) -> None:
         net = scenario.lanelet_network
 
         l_id = too_small.pop()
-        l = net.find_lanelet_by_id(l_id)
+        la = net.find_lanelet_by_id(l_id)
 
-        if l not in lanelets:
+        if la not in lanelets:
             continue
 
-        if len(l.successor) == 0 and len(l.predecessor) == 1:
-            pre = net.find_lanelet_by_id(l.predecessor[0])
+        if len(la.successor) == 0 and len(la.predecessor) == 1:
+            pre = net.find_lanelet_by_id(la.predecessor[0])
             new_pre = create_lanelet(pre, pre.left_vertices, pre.right_vertices, pre.center_vertices, successor=[])
-            lanelets.remove(l)
+            lanelets.remove(la)
             lanelets.append(new_pre)
             continue
 
-        if len(l.successor) == 1 and len(l.predecessor) == 0:
-            suc = net.find_lanelet_by_id(l.successor[0])
+        if len(la.successor) == 1 and len(la.predecessor) == 0:
+            suc = net.find_lanelet_by_id(la.successor[0])
             new_suc = create_lanelet(suc, suc.left_vertices, suc.right_vertices, suc.center_vertices, predecessor=[])
-            lanelets.remove(l)
+            lanelets.remove(la)
             lanelets.append(new_suc)
             continue
 
-        successors = l.successor
-        predecessors = l.predecessor
+        successors = la.successor
+        predecessors = la.predecessor
 
         for suc in successors:
             suc_l = net.find_lanelet_by_id(suc)
-            merged_lanelet = merge_lanelets(l, suc_l)
+            merged_lanelet = merge_lanelets(la, suc_l)
             lanelets.remove(suc_l)
             lanelets.append(merged_lanelet)
 
-        lanelets.remove(l)
+        lanelets.remove(la)
 
         # merge lanelets does not modify the predecessors's successor
         for pre in predecessors:
@@ -233,8 +233,8 @@ def b_spline(ctr, max_nodes=10) -> np.array:
     :return: Interpolated point list
     """
 
-    x=ctr[:,0]
-    y=ctr[:,1]
+    x = ctr[:,0]
+    y = ctr[:,1]
 
     # return straight line if we have less or equal 3 waypoints
     if len(x) <= 3:
@@ -244,9 +244,9 @@ def b_spline(ctr, max_nodes=10) -> np.array:
 
     try:
         # b_spline
-        tck,u = interpolate.splprep([x,y],k=3,s=0)
-        u = np.linspace(0,1,num=max_nodes,endpoint=True)
-        out = interpolate.splev(u,tck)
+        tck, u = interpolate.splprep([x,y],k=3,s=0)
+        u = np.linspace(0, 1, num=max_nodes)
+        out = interpolate.splev(u, tck)
     except:
         logging.error("error occurred in b spline interpolation")
         return ctr
@@ -254,29 +254,29 @@ def b_spline(ctr, max_nodes=10) -> np.array:
     return np.column_stack((out[0], out[1]))
 
 
-def smoothen_lane(l: Lanelet, min_dis=0.7, number_nodes=50) -> Lanelet:
+def smoothen_lane(lanelet: Lanelet, min_dis=0.7, number_nodes=50) -> Lanelet:
     """
     Smoothens the vertices of a single lanelet
 
     :param1 lanelet: The lanelet which is manipulated
     :param2 min_dis: Minimum distance waypoints are supposed to have between each other
     :param3 number_nodes: Minimum number of nodes that shall be used for the b spline interpolation process
-    :return: Smoothend lanelet
+    :return: Smoothed lanelet
     """
-    assert len(l.left_vertices) == len(l.right_vertices) == len(l.center_vertices)
+    assert len(lanelet.left_vertices) == len(lanelet.right_vertices) == len(lanelet.center_vertices)
 
     if not number_nodes:
-        number_nodes = len(l.left_vertices)
+        number_nodes = len(lanelet.left_vertices)
 
-    rv = l.right_vertices
-    lv = l.left_vertices
-    cv = l.center_vertices
+    rv = lanelet.right_vertices
+    lv = lanelet.left_vertices
+    cv = lanelet.center_vertices
     filtered_lv = [lv[0]]
     filtered_rv = [rv[0]]
     filtered_cv = [cv[0]]
 
     # compute euclidean distance between last accepted way point and new waypoint
-    for i in range(0, len(l.left_vertices)):
+    for i in range(0, len(lanelet.left_vertices)):
         if not np.linalg.norm(filtered_rv[-1] - rv[i]) < min_dis:
             filtered_rv.append(rv[i])
         if not np.linalg.norm(filtered_lv[-1] - lv[i]) < min_dis:
@@ -285,11 +285,11 @@ def smoothen_lane(l: Lanelet, min_dis=0.7, number_nodes=50) -> Lanelet:
             filtered_cv.append(cv[i])
 
     # add end waypoints in case they were filtered out in earlier step
-    if not (rv[-1]==filtered_rv[-1]).all():
+    if not (rv[-1] == filtered_rv[-1]).all():
         filtered_rv.append(rv[-1])
-    if not (lv[-1]==filtered_lv[-1]).all():
+    if not (lv[-1] == filtered_lv[-1]).all():
         filtered_lv.append(lv[-1])
-    if not (cv[-1]==filtered_cv[-1]).all():
+    if not (cv[-1] == filtered_cv[-1]).all():
         filtered_cv.append(cv[-1])
 
     # convert to np.array
@@ -301,7 +301,7 @@ def smoothen_lane(l: Lanelet, min_dis=0.7, number_nodes=50) -> Lanelet:
     mv = min(len(filtered_lv), len(filtered_cv), len(filtered_rv))
     # fallback, if errors have occurred
     if mv <= 1:
-        return l
+        return lanelet
 
     # create new waypoints using b_splines if old waypoints changed
     length = len(lv)
@@ -312,7 +312,7 @@ def smoothen_lane(l: Lanelet, min_dis=0.7, number_nodes=50) -> Lanelet:
         filtered_cv = b_spline(filtered_cv, max_nodes=num_nodes)
 
     assert len(filtered_lv) == len(filtered_rv), "error during b spline interpolation"
-    return create_lanelet(l, filtered_lv, filtered_rv, filtered_cv)
+    return create_lanelet(lanelet, filtered_lv, filtered_rv, filtered_cv)
 
 
 def convert_to_lht(scenario: Scenario) -> None:
@@ -339,29 +339,31 @@ def rht_to_lht(scenario: Scenario) -> None:
     lanelets = net.lanelets
 
     lht_lanes = []
-    for l in lanelets:
+    for la in lanelets:
         adj_r_same = False
         adj_l_same = False
-        if l.adj_right and l.adj_right_same_direction:
+        if la.adj_right and la.adj_right_same_direction:
             adj_r_same = True
-        if l.adj_left and l.adj_left_same_direction:
+        if la.adj_left and la.adj_left_same_direction:
             adj_l_same = True
 
         lht_l = create_lanelet(
-            l=l,
-            left_vertices=l.right_vertices,
-            right_vertices=l.left_vertices,
-            center_vertices=l.center_vertices,
-            predecessor=l.successor,
-            successor=l.predecessor,
-            adjacent_right=l.adj_left,
-            adjacent_left=l.adj_right,
+            lanelet=la,
+            left_vertices=la.right_vertices,
+            right_vertices=la.left_vertices,
+            center_vertices=la.center_vertices,
+            predecessor=la.successor,
+            successor=la.predecessor,
+            adjacent_right=la.adj_left,
+            adjacent_left=la.adj_right,
             adjacent_right_same_direction=adj_l_same,
             adjacent_left_same_direction=adj_r_same)
 
         lht_lanes.append(lht_l)
 
-    scenario.lanelet_network = create_laneletnetwork(lht_lanes, scenario.lanelet_network.traffic_signs, scenario.lanelet_network.traffic_lights, scenario.lanelet_network.intersections)
+    scenario.lanelet_network = create_laneletnetwork(lht_lanes, scenario.lanelet_network.traffic_signs,
+                                                     scenario.lanelet_network.traffic_lights,
+                                                     scenario.lanelet_network.intersections)
 
 
 def remove_unconnected_lanes(scenario):
@@ -377,17 +379,19 @@ def remove_unconnected_lanes(scenario):
 
     # create connections for adjacent lanelets
     tmp_edges = []
-    for l in lanelets:
-        if l.adj_right:
-            graph.add_edge(l.lanelet_id, l.adj_right)
-            tmp_edges.append((l.lanelet_id, l.adj_right))
-        if l.adj_left:
-            graph.add_edge(l.lanelet_id, l.adj_left)
-            tmp_edges.append((l.lanelet_id, l.adj_left))
+    for la in lanelets:
+        if la.adj_right:
+            graph.add_edge(la.lanelet_id, la.adj_right)
+            tmp_edges.append((la.lanelet_id, la.adj_right))
+        if la.adj_left:
+            graph.add_edge(la.lanelet_id, la.adj_left)
+            tmp_edges.append((la.lanelet_id, la.adj_left))
 
     # choose the subgraph with the most forking points as intersection
     # more information about subgraphs:
-    # https://networkx.github.io/documentation/networkx-1.10/reference/generated/networkx.algorithms.components.weakly_connected.weakly_connected_component_subgraphs.html#networkx.algorithms.components.weakly_connected.weakly_connected_component_subgraphs
+    # https://networkx.github.io/documentation/networkx-1.10/reference/generated/networkx.algorithms.components.
+    # weakly_connected.weakly_connected_component_subgraphs.html#networkx.algorithms.components.weakly_connected.
+    # weakly_connected_component_subgraphs
     components = [graph.subgraph(c).copy() for c in nx.weakly_connected_components(graph)]
 
     main_graph = components[0]
@@ -395,8 +399,9 @@ def remove_unconnected_lanes(scenario):
         if comp.number_of_nodes() > main_graph.number_of_nodes():
             main_graph = comp
 
-    filterd_lanelets = list(filter(lambda l: l.lanelet_id in main_graph.nodes, lanelets))
-    scenario.lanelet_network = create_laneletnetwork(filterd_lanelets, net.traffic_signs, net.traffic_lights, net.intersections)
+    filtered_lanelets = list(filter(lambda lanelet: lanelet.lanelet_id in main_graph.nodes, lanelets))
+    scenario.lanelet_network = create_laneletnetwork(filtered_lanelets, net.traffic_signs, net.traffic_lights,
+                                                     net.intersections)
 
 
 def scenario_to_networkx_graph(scenario) -> nx.DiGraph:
@@ -407,28 +412,29 @@ def scenario_to_networkx_graph(scenario) -> nx.DiGraph:
     """
     net = scenario.lanelet_network
     lanelets = net.lanelets
-    lanelet_ids = [l.lanelet_id for l in lanelets]
+    lanelet_ids = [la.lanelet_id for la in lanelets]
 
     graph = nx.DiGraph(scenario=scenario)
-    for l in lanelets:
+    for la in lanelets:
         position = (
-                np.mean([p[0] for p in l.center_vertices]),
-                np.mean([p[1] for p in l.center_vertices])
+                np.mean([p[0] for p in la.center_vertices]),
+                np.mean([p[1] for p in la.center_vertices])
             )
-        graph.add_node(l.lanelet_id, pos=position, lanelet=l)
-        edges = [(l.lanelet_id, s)  for s in l.successor if s in lanelet_ids]
+        graph.add_node(la.lanelet_id, pos=position, lanelet=la)
+        edges = [(la.lanelet_id, s) for s in la.successor if s in lanelet_ids]
         if edges:
             graph.add_edges_from(edges)
 
     return graph
 
         
-def create_lanelet(l, left_vertices, right_vertices, center_vertices, predecessor=None, successor=None,
-    adjacent_right=None, adjacent_left=None, adjacent_right_same_direction=None, adjacent_left_same_direction=None, traffic_signs=None, traffic_lights=None) -> Lanelet:
+def create_lanelet(lanelet, left_vertices, right_vertices, center_vertices, predecessor=None, successor=None,
+                   adjacent_right=None, adjacent_left=None, adjacent_right_same_direction=None,
+                   adjacent_left_same_direction=None, traffic_signs=None, traffic_lights=None) -> Lanelet:
     """
     Create a new lanelet given an old one. Vertices, successors and predecessors can be modified
 
-    :param1 l: The old lanelet
+    :param1 lanelet: The old lanelet
     :param2 left_vertices: New left vertices
     :param3 right_vertices: New right vertices
     :param4 center_vertices: New center vertices
@@ -437,40 +443,40 @@ def create_lanelet(l, left_vertices, right_vertices, center_vertices, predecesso
     :return: New Lanelet
     """
     if predecessor is None:
-        predecessor = l.predecessor
+        predecessor = lanelet.predecessor
     if successor is None:
-        successor = l.successor
+        successor = lanelet.successor
     if adjacent_left is None:
-        adjacent_left = l.adj_left
+        adjacent_left = lanelet.adj_left
     if adjacent_right is None:
-        adjacent_right = l.adj_right
+        adjacent_right = lanelet.adj_right
     if adjacent_left_same_direction is None:
-        adjacent_left_same_direction = l.adj_left_same_direction
+        adjacent_left_same_direction = lanelet.adj_left_same_direction
     if adjacent_right_same_direction is None:
-        adjacent_right_same_direction = l.adj_right_same_direction
+        adjacent_right_same_direction = lanelet.adj_right_same_direction
     if traffic_signs is None:
-        traffic_signs = l.traffic_signs
+        traffic_signs = lanelet.traffic_signs
     if traffic_lights is None:
-        traffic_lights = l.traffic_lights
+        traffic_lights = lanelet.traffic_lights
 
     # create new lanelet in CommomRoad2020 format
     new_lanelet = Lanelet(
         left_vertices=left_vertices,
         center_vertices=center_vertices,
         right_vertices=right_vertices,
-        lanelet_id=l.lanelet_id,
+        lanelet_id=lanelet.lanelet_id,
         predecessor=predecessor,
         successor=successor,
         adjacent_left=adjacent_left,
         adjacent_left_same_direction=adjacent_left_same_direction,
         adjacent_right=adjacent_right,
         adjacent_right_same_direction=adjacent_right_same_direction,
-        line_marking_left_vertices=l.line_marking_left_vertices,
-        line_marking_right_vertices=l.line_marking_right_vertices,
-        stop_line=l.stop_line,
-        lanelet_type=l.lanelet_type,
-        user_one_way=l.user_one_way,
-        user_bidirectional=l.user_bidirectional,
+        line_marking_left_vertices=lanelet.line_marking_left_vertices,
+        line_marking_right_vertices=lanelet.line_marking_right_vertices,
+        stop_line=lanelet.stop_line,
+        lanelet_type=lanelet.lanelet_type,
+        user_one_way=lanelet.user_one_way,
+        user_bidirectional=lanelet.user_bidirectional,
         traffic_signs=traffic_signs,
         traffic_lights=traffic_lights
     )

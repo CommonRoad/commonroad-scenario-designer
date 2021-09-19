@@ -41,12 +41,14 @@ def get_geonamesID(lat: float, lng: float):
         logging.error("Fallback GeonamesID used.")
         return -999
     except URLError:
-        logging.error("No Internet connection could be established for retrieving a GeonamesID. Using fallback GeonamesID instead.")
+        logging.error("No Internet connection could be established for retrieving a GeonamesID. "
+                      "Using fallback GeonamesID instead.")
         return -999
     # catch account errors
     except KeyError:
         try:
-            logging.error("Couldn't retrieve a valid GeonamesID. Using fallback GeonamesID instead. Message from Geonames server: " + response['status']['message'])
+            logging.error("Couldn't retrieve a valid GeonamesID. Using fallback GeonamesID instead. "
+                          "Message from Geonames server: " + response['status']['message'])
         except KeyError:
             logging.error("Couldn't retrieve a valid GeonamesID. Using fallback GeonamesID instead.")
         return -999
