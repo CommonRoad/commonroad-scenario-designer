@@ -27,7 +27,7 @@ class TestOpenDriveToCommonRoadConversion(unittest.TestCase):
     @staticmethod
     def load_and_convert_opendrive(xodr_file_name: str) -> Scenario:
         cwd_path = os.path.dirname(os.path.abspath(__file__))
-        out_path = cwd_path + "/.pytest_cache"
+        out_path = cwd_path + "/opendrive/.pytest_cache"
         if not os.path.isdir(out_path):
             os.makedirs(out_path)
         else:

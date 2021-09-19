@@ -12,7 +12,7 @@ tolerance = 0.1
 
 
 def _print_fail(topic: str, arg_1: str, arg_2: str):
-    logging.error("{} fail!\n\n{}\n\n{}\n".format(topic, arg_1, arg_2))
+    logging.error("{} fail: arg1: {}, arg2: {}\n".format(topic, arg_1, arg_2))
 
 
 def elements_equal(e1: etree.Element, e2: etree.Element) -> bool:
@@ -37,13 +37,11 @@ def elements_equal(e1: etree.Element, e2: etree.Element) -> bool:
                 _print_fail("text", e1.text, e2.text)
                 return False
         except ValueError:
-            _print_fail("text", e1.text, e2.text)
             return False
     for name, value in e1.attrib.items():
         if e2.attrib.get(name) != value:
             try:  # Only accuracy error
                 if abs(float(e2.attrib.get(name)) - float(value)) > tolerance:
-                    logging.error(f"Attributes do not match: {name}={value}, {name}={e2.attrib.get(name)}")
                     return False
             except ValueError:
                 return False
