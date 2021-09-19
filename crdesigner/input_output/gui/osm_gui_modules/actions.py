@@ -14,7 +14,7 @@ from matplotlib.lines import Line2D
 from crdesigner.map_conversion.osm2cr import config
 from crdesigner.map_conversion.osm2cr.converter_modules.graph_operations import road_graph as rg
 from crdesigner.map_conversion.osm2cr.converter_modules.graph_operations.road_graph import Lane
-from crdesigner.io.gui.osm_gui_modules import plots_interactive as iplot
+from crdesigner.input_output.gui.osm_gui_modules import plots_interactive as iplot
 from crdesigner.map_conversion.osm2cr.converter_modules.utility import geometry
 from crdesigner.map_conversion.osm2cr.converter_modules.utility.idgenerator import get_id
 

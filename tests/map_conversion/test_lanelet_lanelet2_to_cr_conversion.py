@@ -23,8 +23,9 @@ from crdesigner.map_conversion.lanelet_lanelet2.lanelet2cr import Lanelet2CRConv
 from tests.map_conversion.utils import elements_equal
 
 
-class TestLanelet2ToCommonRoad(unittest.TestCase):
-    def load_and_convert_opendrive(self, xodr_file_name: str) -> Scenario:
+class TestLanelet2ToCommonRoadConversion(unittest.TestCase):
+    @staticmethod
+    def load_and_convert_opendrive(xodr_file_name: str) -> Scenario:
         cwd_path = os.path.dirname(os.path.abspath(__file__))
         out_path = cwd_path + "/.pytest_cache"
         if not os.path.isdir(out_path):

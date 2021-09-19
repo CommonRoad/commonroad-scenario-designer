@@ -15,22 +15,22 @@ from commonroad.scenario.lanelet import LaneletNetwork, Lanelet
 from commonroad.scenario.scenario import Scenario
 from commonroad.scenario.obstacle import Obstacle
 
-from crdesigner.io.gui.gui_src import CR_Scenario_Designer  # do not remove!!!
-from crdesigner.io.gui.converter_modules.opendrive_interface import OpenDRIVEInterface
-from crdesigner.io.gui.converter_modules.osm_interface import OSMInterface
-from crdesigner.io.gui.misc.gui_settings import GUISettings
-from crdesigner.io.gui.misc.commonroad_viewer import AnimatedViewer
-from crdesigner.io.gui.gui_resources.MainWindow import Ui_mainWindow
-from crdesigner.io.gui.toolboxes.road_network_toolbox import RoadNetworkToolbox
-from crdesigner.io.gui.toolboxes.obstacle_toolbox import ObstacleToolbox
-from crdesigner.io.gui.toolboxes.map_converter_toolbox import MapConversionToolbox
-from crdesigner.io.gui.gui_resources.scenario_saving_dialog import ScenarioDialog
-from crdesigner.io.gui.settings import config
-from crdesigner.io.gui.misc import util
+from crdesigner.input_output.gui.gui_src import CR_Scenario_Designer  # do not remove!!!
+from crdesigner.input_output.gui.converter_modules.opendrive_interface import OpenDRIVEInterface
+from crdesigner.input_output.gui.converter_modules.osm_interface import OSMInterface
+from crdesigner.input_output.gui.misc.gui_settings import GUISettings
+from crdesigner.input_output.gui.misc.commonroad_viewer import AnimatedViewer
+from crdesigner.input_output.gui.gui_resources.MainWindow import Ui_mainWindow
+from crdesigner.input_output.gui.toolboxes.road_network_toolbox import RoadNetworkToolbox
+from crdesigner.input_output.gui.toolboxes.obstacle_toolbox import ObstacleToolbox
+from crdesigner.input_output.gui.toolboxes.map_converter_toolbox import MapConversionToolbox
+from crdesigner.input_output.gui.gui_resources.scenario_saving_dialog import ScenarioDialog
+from crdesigner.input_output.gui.settings import config
+from crdesigner.input_output.gui.misc import util
 
-from crdesigner.io.gui.toolboxes.gui_sumo_simulation import SUMO_AVAILABLE
+from crdesigner.input_output.gui.toolboxes.gui_sumo_simulation import SUMO_AVAILABLE
 if SUMO_AVAILABLE:
-    from crdesigner.io.gui.settings.sumo_settings import SUMOSettings
+    from crdesigner.input_output.gui.settings.sumo_settings import SUMOSettings
 
 
 class MWindow(QMainWindow, Ui_mainWindow):

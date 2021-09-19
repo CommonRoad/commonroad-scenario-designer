@@ -17,7 +17,7 @@ from commonroad.scenario.scenario import Scenario
 from commonroad.planning.planning_problem import PlanningProblemSet
 
 
-class TestOSMToCRScenario(unittest.TestCase):
+class TestOSMToCommonRoadConversion(unittest.TestCase):
     """
     Test the conversion from an osm file to the respective commonroad scenario
     """

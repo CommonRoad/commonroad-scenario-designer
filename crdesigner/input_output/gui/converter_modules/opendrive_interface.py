@@ -6,7 +6,7 @@ from PyQt5.QtWidgets import QFileDialog, QMessageBox
 
 from crdesigner.map_conversion.opendrive.opendriveparser.parser import parse_opendrive
 from crdesigner.map_conversion.opendrive.opendriveconversion.network import Network
-from crdesigner.io.gui.converter_modules.converter_interface import ConverterInterface
+from crdesigner.input_output.gui.converter_modules.converter_interface import ConverterInterface
 
 
 class OpenDRIVEInterface(ConverterInterface):

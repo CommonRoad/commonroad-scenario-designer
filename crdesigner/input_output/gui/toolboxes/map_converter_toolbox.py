@@ -8,8 +8,8 @@ from PyQt5.QtCore import *
 from commonroad.scenario.traffic_sign import *
 from commonroad.scenario.scenario import Scenario
 
-from crdesigner.io.gui.toolboxes.map_converter_toolbox_ui import MapConversionToolboxUI
-from crdesigner.io.gui.misc.util import select_local_file
+from crdesigner.input_output.gui.toolboxes.map_converter_toolbox_ui import MapConversionToolboxUI
+from crdesigner.input_output.gui.misc.util import select_local_file
 
 from crdesigner.map_conversion.osm2cr.converter_modules import converter
 from crdesigner.map_conversion.osm2cr.converter_modules.osm_operations.downloader import download_around_map
@@ -17,9 +17,9 @@ from crdesigner.map_conversion.osm2cr import config
 from crdesigner.map_conversion.osm2cr.converter_modules.cr_operations.export import convert_to_scenario
 from crdesigner.map_conversion.osm2cr.converter_modules.graph_operations import road_graph as rg
 
-from crdesigner.io.gui.osm_gui_modules.gui_embedding import EdgeEdit, LaneLinkEdit
-from crdesigner.io.gui.converter_modules.osm_interface import OSMInterface
-from crdesigner.io.gui.osm_gui_modules.gui import EdgeEditGUI, LaneLinkGUI
+from crdesigner.input_output.gui.osm_gui_modules.gui_embedding import EdgeEdit, LaneLinkEdit
+from crdesigner.input_output.gui.converter_modules.osm_interface import OSMInterface
+from crdesigner.input_output.gui.osm_gui_modules.gui import EdgeEditGUI, LaneLinkGUI
 
 from crdesigner.map_conversion.opendrive.opendriveparser.parser import parse_opendrive
 from crdesigner.map_conversion.opendrive.opendriveconversion.network import Network
@@ -28,10 +28,10 @@ from crdesigner.map_conversion.lanelet_lanelet2.lanelet2_parser import Lanelet2P
 from crdesigner.map_conversion.lanelet_lanelet2.lanelet2cr import Lanelet2CRConverter
 from crdesigner.map_conversion.lanelet_lanelet2.cr2lanelet import CR2LaneletConverter
 
-from crdesigner.io.gui.toolboxes.gui_sumo_simulation import SUMO_AVAILABLE
+from crdesigner.input_output.gui.toolboxes.gui_sumo_simulation import SUMO_AVAILABLE
 if SUMO_AVAILABLE:
-    from crdesigner.io.gui.toolboxes.gui_sumo_simulation import SUMOSimulation
-    from crdesigner.io.gui.settings.sumo_settings import SUMOSettings
+    from crdesigner.input_output.gui.toolboxes.gui_sumo_simulation import SUMOSimulation
+    from crdesigner.input_output.gui.settings.sumo_settings import SUMOSettings
     from crdesigner.map_conversion.sumo_map.sumo2cr import convert_net_to_cr
 
 

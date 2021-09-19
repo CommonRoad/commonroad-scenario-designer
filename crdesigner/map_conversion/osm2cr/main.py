@@ -15,7 +15,7 @@ from crdesigner.map_conversion.osm2cr import config
 from crdesigner.map_conversion.osm2cr.converter_modules.intermediate_operations.intermediate_format import \
     IntermediateFormat
 from crdesigner.map_conversion.osm2cr.converter_modules.osm_operations.downloader import download_around_map
-from crdesigner.io.gui.osm_gui_modules.gui_embedding import MainApp
+from crdesigner.input_output.gui.osm_gui_modules.gui_embedding import MainApp
 
 matplotlib.use("Qt5Agg")
 

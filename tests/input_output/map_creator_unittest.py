@@ -4,7 +4,7 @@ import numpy as np
 from commonroad.scenario.lanelet import Lanelet, LineMarking, LaneletNetwork, StopLine
 from commonroad.scenario.scenario import Scenario
 
-from crdesigner.io.gui.misc.map_creator import MapCreator
+from crdesigner.input_output.gui.misc.map_creator import MapCreator
 
 
 class TestLanelet(unittest.TestCase):

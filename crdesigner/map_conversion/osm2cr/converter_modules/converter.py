@@ -3,14 +3,13 @@ This module provides the main functionality to perform a conversion.
 You can use this module instead of using **main.py**.
 """
 import pickle
-#from sumo.tests.complex.simpla.openGap.runner import step
 import sys
-
+import logging
 import matplotlib.pyplot as plt
 
 from crdesigner.map_conversion.osm2cr import config
 from crdesigner.map_conversion.osm2cr.converter_modules.cr_operations import export
-from crdesigner.io.gui.osm_gui_modules import gui
+from crdesigner.input_output.gui.osm_gui_modules import gui
 from crdesigner.map_conversion.osm2cr.converter_modules.osm_operations import osm_parser
 from crdesigner.map_conversion.osm2cr.converter_modules.utility import plots
 from crdesigner.map_conversion.osm2cr.converter_modules.graph_operations import (
@@ -26,9 +25,9 @@ from crdesigner.map_conversion.osm2cr.converter_modules.graph_operations import 
 def step_collection_1(file: str) -> road_graph.Graph:
     graph = osm_parser.create_graph(file)
     if config.MAKE_CONTIGUOUS:
-        print("making graph contiguously")
+        logging.info("making graph contiguously")
         graph.make_contiguous()
-    print("merging close intersections")
+    logging.info("merging close intersections")
     intersection_merger.merge_close_intersections(graph)
     if isinstance(graph, road_graph.SublayeredGraph):
         intersection_merger.merge_close_intersections(graph.sublayer_graph)
@@ -37,53 +36,53 @@ def step_collection_1(file: str) -> road_graph.Graph:
 
 
 def step_collection_2(graph: road_graph.Graph) -> road_graph.Graph:
-    print("linking lanes")
+    logging.info("linking lanes")
     lane_linker.link_graph(graph)
     if isinstance(graph, road_graph.SublayeredGraph):
         lane_linker.link_graph(graph.sublayer_graph)
-    print("interpolating waypoints")
+    logging.info("interpolating waypoints")
     graph.interpolate()
-    print("offsetting roads")
+    logging.info("offsetting roads")
     offsetter.offset_graph(graph)
     if isinstance(graph, road_graph.SublayeredGraph):
         offsetter.offset_graph(graph.sublayer_graph)
-    print("cropping roads at intersections")
+    logging.info("cropping roads at intersections")
     edges_to_delete = graph.crop_waypoints_at_intersections(config.INTERSECTION_DISTANCE)
     if config.DELETE_SHORT_EDGES:
-        print("deleting short edges")
+        logging.info("deleting short edges")
         graph.delete_edges(edges_to_delete)
     if isinstance(graph, road_graph.SublayeredGraph):
         edges_to_delete = graph.sublayer_graph.crop_waypoints_at_intersections(config.INTERSECTION_DISTANCE_SUBLAYER)
         if config.DELETE_SHORT_EDGES:
             graph.sublayer_graph.delete_edges(edges_to_delete)
-    print("applying traffic signs to edges and nodes")
+    logging.info("applying traffic signs to edges and nodes")
     mapillary.add_mapillary_signs_to_graph(graph)
     graph.apply_traffic_signs()
-    print("applying traffic lights to edges")
+    logging.info("applying traffic lights to edges")
     graph.apply_traffic_lights()
-    print("creating waypoints of lanes")
+    logging.info("creating waypoints of lanes")
     graph.create_lane_waypoints()
     return graph
 
 
 def step_collection_3(graph: road_graph.Graph) -> road_graph.Graph:
-    print("creating segments at intersections")
+    logging.info("creating segments at intersections")
     graph.create_lane_link_segments()
-    print("clustering segments")
+    logging.info("clustering segments")
     segment_clusters.cluster_segments(graph)
     if isinstance(graph, road_graph.SublayeredGraph):
         segment_clusters.cluster_segments(graph.sublayer_graph)
-    print("changing to desired interpolation distance and creating borders of lanes")
+    logging.info("changing to desired interpolation distance and creating borders of lanes")
     graph.create_lane_bounds(config.INTERPOLATION_DISTANCE_INTERNAL / config.INTERPOLATION_DISTANCE)
     if config.DELETE_INVALID_LANES:
-        print("deleting invalid lanes")
+        logging.info("deleting invalid lanes")
         graph.delete_invalid_lanes()
     if isinstance(graph, road_graph.SublayeredGraph):
         if config.DELETE_INVALID_LANES:
             graph.sublayer_graph.delete_invalid_lanes()
-    print("adjust common bound points")
+    logging.info("adjust common bound points")
     graph.correct_start_end_points()
-    print("done converting")
+    logging.info("done converting")
     return graph
 
 
@@ -101,17 +100,17 @@ class GraphScenario:
         :param file: OSM file to be loaded
         :type file: str
         """
-        print("reading File and creating graph")
+        logging.info("reading File and creating graph")
 
         graph = step_collection_1(file)
         # HERE WE CAN EDIT THE NODES AND EDGES OF THE GRAPH
         if config.USER_EDIT:
-            print("editing the graph")
+            logging.info("editing the graph")
             graph = gui.edit_graph_edges(graph)
         graph = step_collection_2(graph)
         # HERE WE CAN EDIT LINKS IN THE GRAPH
         if config.USER_EDIT:
-            print("editing the graph")
+            logging.info("editing the graph")
             graph = gui.edit_graph_links(graph)
         graph = step_collection_3(graph)
         self.graph: road_graph.Graph = graph
@@ -122,7 +121,7 @@ class GraphScenario:
 
         :return: None
         """
-        print("plotting graph")
+        logging.info("plotting graph")
         _, ax = plt.subplots()
         ax.set_aspect("equal")
         plots.draw_graph(self.graph, ax)

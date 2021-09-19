@@ -9,7 +9,7 @@ from commonroad.scenario.scenario import Tag, Scenario
 
 from crdesigner.map_conversion.common.utils import generate_unique_id
 from crdesigner.map_conversion.opendrive.opendriveparser.parser import parse_opendrive
-from crdesigner.io.opendrive_convert import convert_opendrive
+from crdesigner.input_output.opendrive_convert import convert_opendrive
 from tests.map_conversion.utils import elements_equal
 
 __author__ = "Benjamin Orthen, Sebastian Maierhofer"
@@ -21,10 +21,11 @@ __email__ = "commonroad@lists.lrz.de"
 __status__ = "Released"
 
 
-class TestOpenDrive(unittest.TestCase):
+class TestOpenDriveToCommonRoadConversion(unittest.TestCase):
     """Basic test with a junction in the middle."""
 
-    def load_and_convert_opendrive(self, xodr_file_name: str) -> Scenario:
+    @staticmethod
+    def load_and_convert_opendrive(xodr_file_name: str) -> Scenario:
         cwd_path = os.path.dirname(os.path.abspath(__file__))
         out_path = cwd_path + "/.pytest_cache"
         if not os.path.isdir(out_path):

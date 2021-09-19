@@ -3,7 +3,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
 
-from crdesigner.io.gui.toolboxes.toolbox_ui import Toolbox, CheckableComboBox, QHLine
+from crdesigner.input_output.gui.toolboxes.toolbox_ui import Toolbox, CheckableComboBox, QHLine
 
 from commonroad.scenario.lanelet import LaneletType, RoadUser, LineMarking
 from commonroad.scenario.traffic_sign import *

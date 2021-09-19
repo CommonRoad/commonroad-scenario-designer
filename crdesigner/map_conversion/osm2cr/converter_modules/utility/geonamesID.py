@@ -4,6 +4,7 @@ An Internet connection is needed and a valid geonames username has to be provide
 """
 
 import json
+import logging
 from urllib.request import urlopen
 from urllib.error import URLError
 from crdesigner.map_conversion.osm2cr import config
@@ -37,19 +38,19 @@ def get_geonamesID(lat: float, lng: float):
 
     # catch connection error
     except ValueError:
-        print("Fallback GeonamesID used.")
+        logging.error("Fallback GeonamesID used.")
         return -999
     except URLError:
-        print("No Internet connection could be established for retrieving a GeonamesID. Using fallback GeonamesID instead.")
+        logging.error("No Internet connection could be established for retrieving a GeonamesID. Using fallback GeonamesID instead.")
         return -999
     # catch account errors
     except KeyError:
         try:
-            print("Couldn't retrieve a valid GeonamesID. Using fallback GeonamesID instead. Message from Geonames server: " + response['status']['message'])
+            logging.error("Couldn't retrieve a valid GeonamesID. Using fallback GeonamesID instead. Message from Geonames server: " + response['status']['message'])
         except KeyError:
-            print("Couldn't retrieve a valid GeonamesID. Using fallback GeonamesID instead.")
+            logging.error("Couldn't retrieve a valid GeonamesID. Using fallback GeonamesID instead.")
         return -999
     # catch errors we don't know about yet
     except Exception:
-        print("Couldn't retrieve a GeonamesID. Using fallback GeonamesID instead.")
+        logging.error("Couldn't retrieve a GeonamesID. Using fallback GeonamesID instead.")
         return -999

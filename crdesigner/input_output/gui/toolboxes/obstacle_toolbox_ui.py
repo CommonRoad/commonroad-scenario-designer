@@ -2,7 +2,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
-from crdesigner.io.gui.toolboxes.toolbox_ui import Toolbox
+from crdesigner.input_output.gui.toolboxes.toolbox_ui import Toolbox
 
 from commonroad.scenario.obstacle import ObstacleType
 
@@ -17,7 +17,7 @@ try:
     from crdesigner.map_conversion.sumo_map.config import SumoConfig
     from crdesigner.map_conversion.sumo_map.cr2sumo.converter import CR2SumoMapConverter
     from sumocr.interface.sumo_simulation import SumoSimulation
-    from crdesigner.io.gui.toolboxes.gui_sumo_simulation import SUMOSimulation
+    from crdesigner.input_output.gui.toolboxes.gui_sumo_simulation import SUMOSimulation
     SUMO_AVAILABLE = True
 except ImportError:
     logging.warning("Cannot import SUMO, simulation will not be offered in Scenario Designer")

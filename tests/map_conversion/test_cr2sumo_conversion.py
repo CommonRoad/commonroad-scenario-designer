@@ -12,7 +12,7 @@ from typing import List
 import numpy as np
 import pytest
 from commonroad.common.file_reader import CommonRoadFileReader
-from commonroad.common.file_writer import CommonRoadFileWriter
+from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
 from commonroad.scenario.obstacle import ObstacleType
 from crdesigner.map_conversion.sumo_map.config import SumoConfig
 from crdesigner.map_conversion.sumo_map.cr2sumo.converter import CR2SumoMapConverter
@@ -20,30 +20,25 @@ from parameterized import parameterized
 from sumocr.interface.sumo_simulation import SumoSimulation
 
 
-class BaseClass(unittest.TestCase):
-    """Test the conversion from an CommonRoad map to a SUMO .net.xml file
+class TestCommonRoadToSUMOConversion(unittest.TestCase):
+    """Test the conversion from a CommonRoad map to a SUMO .net.xml file
     """
     proj_string = ""
     scenario_name = None
     cwd_path = None
     scenario = None
-    out_path = os.path.join(os.path.dirname(__file__), ".pytest_cache/sumo_map")
+    out_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".pytest_cache/sumo_map")
     _outfile_extensions = ('.xml', 'sumo.cfg', '.mp4')
     avg_velocities = []
     colliding_ids = 0
 
     @property
     def out_path_test(self):
-        return os.path.join(self.out_path, str(self.id()).split(".")[4])
+        return os.path.join(self.out_path, str(self.id()).split(".")[2])
 
     def setUp(self) -> None:
         if not os.path.isdir(self.out_path_test):
             os.makedirs(self.out_path_test)
-        # else:
-        #     self._delete_tmp_files()
-
-    # def tearDown(self) -> None:
-    #     self._delete_tmp_folder()
 
     def read_cr_file(self, cr_file_name: str, folder="sumo_test_files"):
         """Load the osm file and convert it to a scenario."""
@@ -71,7 +66,7 @@ class BaseClass(unittest.TestCase):
         wrapper = CR2SumoMapConverter(self.scenario, config)
         return config, wrapper
 
-    def sumo_run(self, config: SumoConfig, converter: CR2SumoMapConverter, tls_lanelet_ids: List[int]) -> io.BytesIO:
+    def sumo_run(self, config: SumoConfig, converter: CR2SumoMapConverter, tls_lanelet_ids: List[int]) -> str:
         # was the conversion successful?
         conversion_successful = converter.create_sumo_files(
             self.out_path_test)
@@ -107,10 +102,11 @@ class BaseClass(unittest.TestCase):
             location=self.scenario.location).write_scenario_to_file(
             os.path.join(os.path.dirname(self.path),
                          self.scenario_name + ".simulated.xml"),
-            overwrite_existing_file=True)
+            overwrite_existing_file=OverwriteExistingFile.ALWAYS)
         return f.getvalue()
 
-    def validate_output(self, captured):
+    @staticmethod
+    def validate_output(captured):
         lines = captured.split("\n")
         keywords = ["teleporting", "collision"]
         for keyword in keywords:
@@ -228,6 +224,3 @@ class BaseClass(unittest.TestCase):
     #     converter_config.country_id = scenario.scenario_id.country_id
     #     converter = CR2SumoMapConverter(scenario, converter_config)
 
-
-if __name__ == "__main__":
-    unittest.main()

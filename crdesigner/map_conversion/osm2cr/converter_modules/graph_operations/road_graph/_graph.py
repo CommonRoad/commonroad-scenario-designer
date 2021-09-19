@@ -2,24 +2,13 @@
 Graph class. It also provides several methods to perform operations on elements of the graph.
 """
 
-import math
-from queue import Queue
-from typing import List, Set, Tuple, Optional, Dict
+import logging
+from typing import List, Set, Tuple, Optional
 from ordered_set import OrderedSet
 import numpy as np
 
-from commonroad.scenario.traffic_sign import TrafficSign, TrafficLight
-from commonroad.geometry.shape import Polygon
 from crdesigner.map_conversion.osm2cr import config
-from crdesigner.map_conversion.osm2cr.converter_modules.graph_operations import traffic_sign_parser
-from crdesigner.map_conversion.osm2cr.converter_modules.utility import (
-    geometry,
-    idgenerator
-)
-from crdesigner.map_conversion.osm2cr.converter_modules.utility.custom_types import (
-    Road_info,
-    Assumption_info,
-)
+from crdesigner.map_conversion.osm2cr.converter_modules.utility import geometry
 
 from ._graph_node import GraphNode
 from ._graph_edge import GraphEdge
@@ -33,6 +22,7 @@ from ._graph_functions import (
     get_lane_waypoints,
     set_points
 )
+
 
 class Graph:
     def __init__(
@@ -460,7 +450,7 @@ class Graph:
 
         # filter negligible points
         if config.FILTER:
-            print("filtering points")
+            logging.info("filtering points")
             for edge in self.edges:
                 lines = [
                     lane.waypoints if lane.forward else lane.waypoints[::-1]
@@ -752,6 +742,6 @@ class Graph:
             return points_to_edge[tuple(found_point)]
         # catch value errors if not enough points were given
         except ValueError:
-            print("No edge found. Using fallback calculation.")
+            logging.error("No edge found. Using fallback calculation.")
             return self.find_closest_edge_by_lat_lng(lat_lng)
             

@@ -3,8 +3,8 @@ import logging
 
 from commonroad.scenario.scenario import Scenario
 
-from crdesigner.io.gui.misc.errors import error
-from crdesigner.io.gui.misc.util import Observable
+from crdesigner.input_output.gui.misc.errors import error
+from crdesigner.input_output.gui.misc.util import Observable
 
 # try to import sumo functionality
 try:

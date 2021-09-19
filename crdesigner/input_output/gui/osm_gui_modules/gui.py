@@ -22,8 +22,8 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg
 
 from crdesigner.map_conversion.osm2cr import config
 import crdesigner.map_conversion.osm2cr.converter_modules.graph_operations.road_graph as rg
-from crdesigner.io.gui.osm_gui_modules import aerial_data, actions, plots_interactive as iplot
-from crdesigner.io.gui.osm_gui_modules.settings import EditLaneWidth
+from crdesigner.input_output.gui.osm_gui_modules import aerial_data, actions, plots_interactive as iplot
+from crdesigner.input_output.gui.osm_gui_modules.settings import EditLaneWidth
 from crdesigner.map_conversion.osm2cr.converter_modules.utility import geometry
 from crdesigner.map_conversion.osm2cr.converter_modules.utility.idgenerator import get_id
 

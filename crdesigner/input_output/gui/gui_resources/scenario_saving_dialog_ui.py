@@ -2,7 +2,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
-from crdesigner.io.gui.toolboxes.toolbox_ui import CheckableComboBox
+from crdesigner.input_output.gui.toolboxes.toolbox_ui import CheckableComboBox
 
 from commonroad.scenario.scenario import Tag, TimeOfDay, Weather, Underground
 from commonroad.scenario.traffic_sign import SupportedTrafficSignCountry

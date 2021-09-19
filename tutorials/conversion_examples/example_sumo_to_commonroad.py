@@ -1,12 +1,12 @@
 import os
 
-from crdesigner.io.api import sumo_to_commonroad
+from crdesigner.input_output.api import sumo_to_commonroad
 
 from commonroad.scenario.scenario import Tag
 from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
 from commonroad.planning.planning_problem import PlanningProblemSet
 
-from crdesigner.io.gui.toolboxes.gui_sumo_simulation import SUMO_AVAILABLE
+from crdesigner.input_output.gui.toolboxes.gui_sumo_simulation import SUMO_AVAILABLE
 if SUMO_AVAILABLE:
     from crdesigner.map_conversion.sumo_map.sumo2cr import convert_net_to_cr
 

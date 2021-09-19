@@ -6,7 +6,7 @@ import xml.etree.ElementTree as ElTree
 from typing import List, Dict, Tuple, Set, Optional
 from ordered_set import OrderedSet
 from collections import OrderedDict
-
+import logging
 import numpy as np
 
 from crdesigner.map_conversion.osm2cr import config
@@ -70,9 +70,6 @@ def get_points(nodes: Dict[int, ElTree.Element], custom_bounds=None) \
     assert bounds[3] >= bounds[1]
     lon_center = (bounds[1] + bounds[3]) / 2
     lat_center = (bounds[0] + bounds[2]) / 2
-    # print(bounds)
-    # lon_center = (min(lons) + max(lons)) / 2
-    # lat_center = (min(lats) + max(lats)) / 2
     lons = np.array(lons)
     lats = np.array(lats)
     lons_d = lons - lon_center
@@ -84,7 +81,7 @@ def get_points(nodes: Dict[int, ElTree.Element], custom_bounds=None) \
     y = lat_constant * lats_d
     for index, point_id in enumerate(ids):
         points[int(point_id)] = Point(int(point_id), x[index], y[index])
-    print("{} required nodes found".format(len(points)))
+    logging.info("{} required nodes found".format(len(points)))
     center_point = lat_center, lon_center
     return points, center_point, bounds
 
@@ -255,7 +252,7 @@ def get_restrictions(root) -> RestrictionDict:
 
 
 def get_ways(accepted_highways: List[str], rejected_tags: Dict[str, str],
-              root) -> Set[ElTree.Element]:
+              root) -> OrderedSet[ElTree.Element]:
     """
     finds ways of desired types in osm file.
 
@@ -301,7 +298,7 @@ def get_ways(accepted_highways: List[str], rejected_tags: Dict[str, str],
             if not has_maxspeed:
                 way.set('maxspeed', roadtype)
             roads.add(way)
-    print("{} roads found".format(len(roads)))
+    logging.info("{} roads found".format(len(roads)))
     return roads
 
 
@@ -385,12 +382,12 @@ def extract_speedlimit(value) -> Tuple[float, bool]:
             try:
                 speedlimit = int(float(value[:-3]) / 1.60934)
             except ValueError:
-                print("unreadable speedlimit: '{}'".format(value))
+                logging.error("unreadable speedlimit: '{}'".format(value))
         elif value in config.SPEED_LIMITS:
             speedlimit = config.SPEED_LIMITS[value]
             virtual = True
         else:
-            print("unreadable speedlimit: '{}'".format(value))
+            logging.warning("unreadable speedlimit: '{}'".format(value))
 
     # convert from km/h to m/s
     if speedlimit is not None:
@@ -418,7 +415,7 @@ def extract_tag_info(road: ElTree.Element) -> Tuple[Road_info, int]:
             try:
                 nr_of_lanes = int(tag.attrib["v"])
             except ValueError:
-                print("unreadable nr_of_lanes: {}".format(tag.attrib["v"]))
+                logging.error("unreadable nr_of_lanes: {}".format(tag.attrib["v"]))
         if tag.attrib["k"] == "lanes:forward":
             forward_lanes = int(tag.attrib["v"])
         if tag.attrib["k"] == "lanes:backward":
@@ -658,7 +655,7 @@ def get_graph_edges_from_road(roads: Set[ElTree.Element],
                         )
                     edge_nodes.append((nodes[waypoint_id], index))
                 except ValueError:
-                    print("edge could not be splitted at corner")
+                    logging.error("edge could not be splitted at corner")
 
         new_edges = []
         for index, node in enumerate(edge_nodes[:-1]):
@@ -688,7 +685,7 @@ def get_graph_edges_from_road(roads: Set[ElTree.Element],
 
                 new_edge.generate_lanes()
             else:
-                print("a small edge occurred in the map, it is omitted")
+                logging.warning("a small edge occurred in the map, it is omitted")
 
         # add successors to edges
         for index, edge in enumerate(new_edges[:-1]):
@@ -734,13 +731,13 @@ def map_restrictions(edges: Dict[int, Set[rg.GraphEdge]], restrictions: Dict[int
                     elif restriction_node is from_edge.node2:
                         from_edge.forward_restrictions |= restriction.restriction
             else:
-                print(
+                logging.warning(
                     "several edges have the same id, we cannot apply restrictions to it"
                 )
                 # TODO implement restrictions for mutliple edges with same id
                 pass
         else:
-            print(
+            logging.warning(
                 "unknown id '{}' for restriction element. skipping restriction".format(
                     from_id
                 )
@@ -791,7 +788,7 @@ def roads_to_graph(roads: Set[ElTree.Element],
     if additional_nodes is not None:
         for node in additional_nodes:
             nodes[node.id] = node
-            print("added crossing point", node)
+            logging.info("added crossing point", node)
     edges = get_graph_edges_from_road(roads, nodes, road_points, bounds, origin)
     graph_traffic_signs = get_graph_traffic_signs(nodes, edges, traffic_signs)
     graph_traffic_lights = get_graph_traffic_lights(nodes, traffic_lights)
@@ -880,7 +877,7 @@ def create_graph(file_path: str) -> rg.Graph:
                 "main layer types and sublayer types have equal elements")
 
         #  get combined graph
-        print("extract combined layer")
+        logging.info("extract combined layer")
         all_accepted_ways = config.ACCEPTED_HIGHWAYS_MAINLAYER.copy()
         all_accepted_ways.extend(config.ACCEPTED_HIGHWAYS_SUBLAYER)
         combined_g, _ = _create_graph(file_path, all_accepted_ways)
@@ -888,7 +885,7 @@ def create_graph(file_path: str) -> rg.Graph:
         # get crossing nodes
         main_g, main_crossing_points = _create_graph(file_path,
                                                      config.ACCEPTED_HIGHWAYS_MAINLAYER, combined_g.bounds)
-        print("extract sub layer")
+        logging.info("extract sub layer")
         sub_g, sub_crossing_points = _create_graph(file_path,
                                                    config.ACCEPTED_HIGHWAYS_SUBLAYER, combined_g.bounds)
         new_crossing_nodes, already_contained = get_crossing_points(
@@ -906,8 +903,8 @@ def create_graph(file_path: str) -> rg.Graph:
             if node.id in already_contained:
                 node.is_crossing = True
 
-        print("extract main layer")
-        main_g =  rg.SublayeredGraph(
+        logging.info("extract main layer")
+        main_g = rg.SublayeredGraph(
             extended_main_graph.nodes,
             extended_main_graph.edges,
             extended_main_graph.center_point,
@@ -918,7 +915,7 @@ def create_graph(file_path: str) -> rg.Graph:
         )
 
     else:
-        print("extract main layer")
+        logging.info("extract main layer")
         main_g, _ = _create_graph(file_path, config.ACCEPTED_HIGHWAYS_MAINLAYER)
 
     return main_g

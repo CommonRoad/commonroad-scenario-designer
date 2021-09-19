@@ -1,8 +1,8 @@
 """ window with settings for the Scenario Designer """
 from PyQt5.QtWidgets import QMainWindow
 
-from crdesigner.io.gui.gui_resources.gui_settings_ui import Ui_MainWindow
-from crdesigner.io.gui.settings import config
+from crdesigner.input_output.gui.gui_resources.gui_settings_ui import Ui_MainWindow
+from crdesigner.input_output.gui.settings import config
 
 
 class GUISettings:

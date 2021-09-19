@@ -4,6 +4,7 @@ This module removes converting errors before exporting the scenario to XML
 import numpy as np
 import networkx as nx
 from ordered_set import OrderedSet
+import logging
 from scipy import interpolate
 from crdesigner.map_conversion.osm2cr import config
 from commonroad.scenario.scenario import Scenario, Lanelet, LaneletNetwork
@@ -54,7 +55,9 @@ def remove_duplicate_traffic_signs(scenario: Scenario) -> None:
             if not already_added:
                 filtered_signs.add(net.find_traffic_sign_by_id(lanelet_sign))
 
-    scenario.lanelet_network = create_laneletnetwork(scenario.lanelet_network.lanelets, filtered_signs, scenario.lanelet_network.traffic_lights, scenario.lanelet_network.intersections)
+    scenario.lanelet_network = create_laneletnetwork(scenario.lanelet_network.lanelets, filtered_signs,
+                                                     scenario.lanelet_network.traffic_lights,
+                                                     scenario.lanelet_network.intersections)
 
 def remove_non_referenced_signs(scenario: Scenario) -> None:
     """
@@ -71,7 +74,9 @@ def remove_non_referenced_signs(scenario: Scenario) -> None:
                 filtered_signs.add(sign)
                 continue
 
-    scenario.lanelet_network = create_laneletnetwork(scenario.lanelet_network.lanelets, filtered_signs, scenario.lanelet_network.traffic_lights, scenario.lanelet_network.intersections)
+    scenario.lanelet_network = create_laneletnetwork(scenario.lanelet_network.lanelets, filtered_signs,
+                                                     scenario.lanelet_network.traffic_lights,
+                                                     scenario.lanelet_network.intersections)
 
 
 def merge_short_lanes(scenario: Scenario, min_distance=1) -> None:
@@ -82,7 +87,7 @@ def merge_short_lanes(scenario: Scenario, min_distance=1) -> None:
     :param2 min_distance: Minimum distance a single lanelet has to have to not be merged
     :return: None
     """
-    print("merging short lanes")
+    logging.info("merging short lanes")
 
     lanelets = scenario.lanelet_network.lanelets
     net = scenario.lanelet_network
@@ -134,18 +139,23 @@ def merge_short_lanes(scenario: Scenario, min_distance=1) -> None:
             pre_lanelet = net.find_lanelet_by_id(pre)
             sucs_of_pre = list(filter(lambda s: s != l_id, pre_lanelet.successor))
             sucs_of_pre.extend(successors)
-            new_pre = create_lanelet(pre_lanelet, pre_lanelet.left_vertices, pre_lanelet.right_vertices, pre_lanelet.center_vertices, predecessor=pre_lanelet.predecessor, successor=sucs_of_pre)
+            new_pre = create_lanelet(pre_lanelet, pre_lanelet.left_vertices, pre_lanelet.right_vertices,
+                                     pre_lanelet.center_vertices, predecessor=pre_lanelet.predecessor,
+                                     successor=sucs_of_pre)
             lanelets.remove(pre_lanelet)
             lanelets.append(new_pre)
 
         # update scenario's road network
 
-        scenario.lanelet_network = create_laneletnetwork(lanelets, scenario.lanelet_network.traffic_signs, scenario.lanelet_network.traffic_lights, scenario.lanelet_network.intersections)
+        scenario.lanelet_network = create_laneletnetwork(lanelets, scenario.lanelet_network.traffic_signs,
+                                                         scenario.lanelet_network.traffic_lights,
+                                                         scenario.lanelet_network.intersections)
 
 
 def merge_lanelets(lanelet1: Lanelet, lanelet2: Lanelet) -> Lanelet:
     """
-    Merges two lanelets which are in predecessor-successor relation. Modified version from commonroad-io which does not remove adj lanelets (and speedlimits)
+    Merges two lanelets which are in predecessor-successor relation. Modified version from commonroad-io which does
+    not remove adj lanelets (and speedlimits)
 
     :param lanelet1: The first lanelet
     :param lanelet2: The second lanelet
@@ -155,8 +165,8 @@ def merge_lanelets(lanelet1: Lanelet, lanelet2: Lanelet) -> Lanelet:
     assert isinstance(lanelet2, Lanelet), '<Lanelet/merge_lanelets>: lanelet1 is not a valid lanelet object!'
     # check connection via successor / predecessor
     assert lanelet1.lanelet_id in lanelet2.successor or lanelet2.lanelet_id in lanelet1.successor,\
-        '<Lanelet/merge_lanelets>: cannot merge two not connected lanelets! successors of l1 = {}, successors of l2 = {}'.format(
-        lanelet1.successor, lanelet2.successor)
+        '<Lanelet/merge_lanelets>: cannot merge two not connected lanelets! successors of l1 = {}, ' \
+        'successors of l2 = {}'.format(lanelet1.successor, lanelet2.successor)
 
     # check pred and successor
     if lanelet1.lanelet_id in lanelet2.successor:
@@ -183,16 +193,13 @@ def merge_lanelets(lanelet1: Lanelet, lanelet2: Lanelet) -> Lanelet:
     # Merge also traffic signs
     traffic_signs = set()
     traffic_lights = set()
-    #print(lanelet1.traffic_signs)
-    #print(lanelet2.traffic_signs)
     traffic_signs.update(lanelet1.traffic_signs)
     traffic_signs.update(lanelet2.traffic_signs)
     traffic_lights.update(lanelet1.traffic_lights)
     traffic_lights.update(lanelet2.traffic_lights)
 
-    #print("merged:" + str(traffic_signs))
-
-    return create_lanelet(suc, left_vertices, right_vertices, center_vertices, predecessor=predecessor, successor=successor, traffic_signs=traffic_signs, traffic_lights=traffic_lights)
+    return create_lanelet(suc, left_vertices, right_vertices, center_vertices, predecessor=predecessor,
+                          successor=successor, traffic_signs=traffic_signs, traffic_lights=traffic_lights)
 
 
 def smoothen_scenario(scenario: Scenario) -> None:
@@ -202,7 +209,7 @@ def smoothen_scenario(scenario: Scenario) -> None:
     :param1 scenario: Scenario whose lanelets shall be smoothended
     :return: None
     """
-    print("smoothening all lanelets of the scenario")
+    logging.info("smoothening all lanelets of the scenario")
 
     net = scenario.lanelet_network
     lanelets = net.lanelets
@@ -211,7 +218,9 @@ def smoothen_scenario(scenario: Scenario) -> None:
     lanelets = list(map(smoothen_lane, lanelets))
 
     # update scenario
-    scenario.lanelet_network = create_laneletnetwork(lanelets, scenario.lanelet_network.traffic_signs, scenario.lanelet_network.traffic_lights, scenario.lanelet_network.intersections)
+    scenario.lanelet_network = create_laneletnetwork(lanelets, scenario.lanelet_network.traffic_signs,
+                                                     scenario.lanelet_network.traffic_lights,
+                                                     scenario.lanelet_network.intersections)
 
 
 def b_spline(ctr, max_nodes=10) -> np.array:
@@ -239,7 +248,7 @@ def b_spline(ctr, max_nodes=10) -> np.array:
         u = np.linspace(0,1,num=max_nodes,endpoint=True)
         out = interpolate.splev(u,tck)
     except:
-        print("error occurred in b spline interpolation")
+        logging.error("error occurred in b spline interpolation")
         return ctr
 
     return np.column_stack((out[0], out[1]))
@@ -314,7 +323,7 @@ def convert_to_lht(scenario: Scenario) -> None:
     :return: None
     """
     if scenario.scenario_id.country_id in LEFT_HAND_TRAFFIC:
-        print("converting scenario to lht")
+        logging.info("converting scenario to lht")
         rht_to_lht(scenario)
 
 

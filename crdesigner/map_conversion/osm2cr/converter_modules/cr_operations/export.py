@@ -4,7 +4,7 @@ It allows to export a scenario to CR or plot a CR scenario.
 """
 from typing import List, Tuple
 
-import matplotlib.pyplot as plt
+import logging
 import numpy as np
 import utm
 
@@ -175,7 +175,7 @@ def export(
     sanitize(scenario)
 
     # writing everything to XML
-    print("writing scenario to XML file")
+    logging.info("writing scenario to XML file")
 
     if config.EXPORT_IN_UTM:
         convert_coordinates_to_utm(scenario, graph.center_point)

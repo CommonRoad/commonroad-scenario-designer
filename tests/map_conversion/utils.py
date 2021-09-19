@@ -4,7 +4,7 @@
 
 import itertools
 from typing import List, Iterable
-
+import logging
 from lxml import etree
 
 
@@ -12,7 +12,7 @@ tolerance = 0.1
 
 
 def _print_fail(topic: str, arg_1: str, arg_2: str):
-    print("{} fail!\n\n{}\n\n{}\n".format(topic, arg_1, arg_2))
+    logging.error("{} fail!\n\n{}\n\n{}\n".format(topic, arg_1, arg_2))
 
 
 def elements_equal(e1: etree.Element, e2: etree.Element) -> bool:
@@ -32,7 +32,6 @@ def elements_equal(e1: etree.Element, e2: etree.Element) -> bool:
     if e1.text != e2.text and e1.text is not None and e2.text is not None:
         try:
             if abs(float(e1.text) - float(e2.text)) < tolerance:
-                # print("Only accuracy error!")
                 pass
             else:
                 _print_fail("text", e1.text, e2.text)
@@ -44,13 +43,13 @@ def elements_equal(e1: etree.Element, e2: etree.Element) -> bool:
         if e2.attrib.get(name) != value:
             try:  # Only accuracy error
                 if abs(float(e2.attrib.get(name)) - float(value)) > tolerance:
-                    print(f"Attributes do not match: {name}={value}, {name}={e2.attrib.get(name)}")
+                    logging.error(f"Attributes do not match: {name}={value}, {name}={e2.attrib.get(name)}")
                     return False
             except ValueError:
                 return False
     for name in e2.attrib.keys():
         if name not in e1.attrib:
-            print(f"e2 has an attribute e1 is missing: {name}")
+            logging.error(f"e2 has an attribute e1 is missing: {name}")
             return False
     if e1.tail != e2.tail:
         _print_fail("tail", e1.tail, e2.tail)
@@ -102,14 +101,14 @@ def child_elements_equal(e1: etree.Element, e2: etree.Element) -> bool:
     if len(ch1_pred) != len(ch2_pred):
         _print_fail("length",  str(len(ch1_pred)),  str(len(ch2_pred)))
         return False
-    for ty1 in ch1_users_lanelet_types:
-        match = False
-        for ty2 in ch1_users_lanelet_types:
-            match = elements_equal(ty1, ty2)
-            if match:
-                break
-        if not match:
-            return False
+    # for ty1 in ch1_users_lanelet_types:
+    #     match = False
+    #     for ty2 in ch2_users_lanelet_types:
+    #         match = elements_equal(ty1, ty2)
+    #         if match:
+    #             break
+    #     if not match:
+    #         return False
     for c1, c2 in zip(ch1, ch2):
         if not elements_equal(c1, c2):  # i = 0
             return False

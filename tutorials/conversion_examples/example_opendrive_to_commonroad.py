@@ -8,7 +8,7 @@ from commonroad.planning.planning_problem import PlanningProblemSet
 from crdesigner.map_conversion.opendrive.opendriveparser.parser import parse_opendrive
 from crdesigner.map_conversion.opendrive.opendriveconversion.network import Network
 
-from crdesigner.io.api import opendrive_to_commonroad
+from crdesigner.input_output.api import opendrive_to_commonroad
 
 
 input_path = "../../tests/opendrive_test_files/el-vendrell-02.06.20.xodr"
