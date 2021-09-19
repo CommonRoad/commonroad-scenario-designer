@@ -244,7 +244,7 @@ def b_spline(ctr, max_nodes=10) -> np.array:
 
     try:
         # b_spline
-        tck, u = interpolate.splprep([x,y], k=3, s=0)
+        tck, u = interpolate.splprep([x, y], k=3, s=0)
         u = np.linspace(0, 1, num=max_nodes)
         out = interpolate.splev(u, tck)
     except (RuntimeError, TypeError, ValueError):
