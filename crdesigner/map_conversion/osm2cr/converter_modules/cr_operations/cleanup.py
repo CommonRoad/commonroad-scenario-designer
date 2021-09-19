@@ -42,7 +42,7 @@ def remove_duplicate_traffic_signs(scenario: Scenario) -> None:
     """
     net = scenario.lanelet_network
     filtered_signs = OrderedSet()
-    
+
     for la in net.lanelets:
         sign_elements = set()
         for lanelet_sign in la.traffic_signs:
@@ -233,8 +233,8 @@ def b_spline(ctr, max_nodes=10) -> np.array:
     :return: Interpolated point list
     """
 
-    x = ctr[:,0]
-    y = ctr[:,1]
+    x = ctr[:, 0]
+    y = ctr[:, 1]
 
     # return straight line if we have less or equal 3 waypoints
     if len(x) <= 3:
@@ -244,10 +244,10 @@ def b_spline(ctr, max_nodes=10) -> np.array:
 
     try:
         # b_spline
-        tck, u = interpolate.splprep([x,y],k=3,s=0)
+        tck, u = interpolate.splprep([x,y], k=3, s=0)
         u = np.linspace(0, 1, num=max_nodes)
         out = interpolate.splev(u, tck)
-    except:
+    except (RuntimeError, TypeError, ValueError):
         logging.error("error occurred in b spline interpolation")
         return ctr
 
@@ -427,7 +427,7 @@ def scenario_to_networkx_graph(scenario) -> nx.DiGraph:
 
     return graph
 
-        
+
 def create_lanelet(lanelet, left_vertices, right_vertices, center_vertices, predecessor=None, successor=None,
                    adjacent_right=None, adjacent_left=None, adjacent_right_same_direction=None,
                    adjacent_left_same_direction=None, traffic_signs=None, traffic_lights=None) -> Lanelet:
