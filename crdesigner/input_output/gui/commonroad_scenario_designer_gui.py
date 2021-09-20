@@ -449,6 +449,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         net = LaneletNetwork()
         scenario.lanelet_network = net
         self.cr_viewer.current_scenario = scenario
+        self.cr_viewer.current_pps = None
         self.open_scenario(scenario)
 #        self.restore_parameters()
 
@@ -469,7 +470,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         """ """
         try:
             commonroad_reader = CommonRoadFileReader(path)
-            scenario, _ = commonroad_reader.open()
+            scenario, pps = commonroad_reader.open()
         except Exception as e:
             QMessageBox.warning(
                 self,
@@ -481,7 +482,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
             return
 
         filename = os.path.splitext(os.path.basename(path))[0]
-        self.open_scenario(scenario, filename)
+        self.open_scenario(scenario, filename, pps)
 
     def update_toolbox_scenarios(self):
         scenario = self.cr_viewer.current_scenario
@@ -492,17 +493,18 @@ class MWindow(QMainWindow, Ui_mainWindow):
             self.obstacle_toolbox.sumo_simulation.scenario = scenario
             self.map_converter_toolbox.sumo_simulation.scenario = scenario
 
-    def open_scenario(self, new_scenario, filename="new_scenario"):
+    def open_scenario(self, new_scenario, filename="new_scenario", pps=None):
         """  """
         if self.check_scenario(new_scenario) >= 2:
             self.text_browser.append("loading aborted")
             return
         self.filename = filename
         if SUMO_AVAILABLE:
-            self.cr_viewer.open_scenario(new_scenario, self.obstacle_toolbox.sumo_simulation.config)
+            self.cr_viewer.open_scenario(new_scenario, self.obstacle_toolbox.sumo_simulation.config,
+                                         planning_problem_set=pps)
             self.obstacle_toolbox.sumo_simulation.scenario = self.cr_viewer.current_scenario
         else:
-            self.cr_viewer.open_scenario(new_scenario)
+            self.cr_viewer.open_scenario(new_scenario, planning_problem_set=pps)
         self.update_view(focus_on_network=True)
         self.store_scenario()
         self.update_toolbox_scenarios()
@@ -588,7 +590,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
             messbox.close()
             return
 
-        self.scenario_saving_dialog.show(self.cr_viewer.current_scenario)
+        self.scenario_saving_dialog.show(self.cr_viewer.current_scenario, self.cr_viewer.current_pps)
 
     def process_trigger(self, q):
         self.status.showMessage(q.text() + ' is triggered')

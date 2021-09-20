@@ -1,8 +1,8 @@
 from PyQt5.QtWidgets import *
 
-from typing import Union
+from typing import Union, Optional
 
-
+from commonroad.planning.planning_problem import PlanningProblemSet
 from crdesigner.input_output.gui.gui_resources.scenario_saving_dialog_ui import ScenarioDialogUI
 
 from commonroad.scenario.scenario import Scenario, SCENARIO_VERSION, Environment, Tag, TimeOfDay, Weather, \
@@ -14,7 +14,8 @@ class ScenarioDialog:
     def __init__(self):
         self.save_window = ScenarioDialogUI()
         self.connect_gui_elements()
-        self.current_scenario: Union[None, Scenario] = None
+        self.current_scenario: Optional[Scenario] = None
+        self.current_pps: Optional[PlanningProblemSet] = None
         self.directory = ""
         self.initialized = False
 
@@ -30,9 +31,10 @@ class ScenarioDialog:
         self.save_window.button_directory.clicked.connect(lambda: self.select_directory())
         self.save_window.button_save.clicked.connect(lambda: self.save_scenario())
 
-    def show(self, scenario: Scenario):
+    def show(self, scenario: Scenario, pps: PlanningProblemSet):
         self.initialized = False
         self.current_scenario = scenario
+        self.current_pps = pps
         self.save_window.label_benchmark_id.setText(scenario.scenario_id.__str__())
 
         self.save_window.scenario_author.setText(self.current_scenario.author)
@@ -92,14 +94,17 @@ class ScenarioDialog:
         try:
             writer = CommonRoadFileWriter(
                 scenario=self.current_scenario,
-                planning_problem_set=None,
+                planning_problem_set=self.current_pps,
                 author=self.current_scenario.author,
                 affiliation=self.current_scenario.affiliation,
                 source=self.current_scenario.source,
                 tags=set(self.current_scenario.tags),
             )
             filename = self.directory + "/" + self.current_scenario.scenario_id.__str__() + ".xml"
-            writer.write_scenario_to_file(filename, OverwriteExistingFile.ALWAYS)
+            if self.current_pps is None:
+                writer.write_scenario_to_file(filename, OverwriteExistingFile.ALWAYS)
+            else:
+                writer.write_to_file(filename, OverwriteExistingFile.ALWAYS)
             self.save_window.close()
         except IOError as e:
             QMessageBox.critical(
