@@ -10,7 +10,7 @@ with open(f"{setup_dir}/README.md", "r") as fh:
 
 setup(
     name="commonroad-scenario-designer",
-    version="0.5",
+    version="0.2",
     description="Toolbox for Map Conversion and Scenario Creation for Autonomous Vehicles",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -30,7 +30,6 @@ setup(
         "mercantile >= 1.1.3",
         "utm >= 0.5.0",
         "cartopy >= 0.17.0",
-        # only for graphical display
         "PyQt5>=5.12.2",
         "matplotlib>=3.1.0",
         "ordered-set>=4.0.2"
