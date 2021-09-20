@@ -3,7 +3,7 @@
 ## [0.2] - 2021-09-22
 
 ### Added
-- Planning Problem Visualization in GUI
+- Planning problem visualization in GUI
 
 ### Changed
 - Extension of readme and documentation

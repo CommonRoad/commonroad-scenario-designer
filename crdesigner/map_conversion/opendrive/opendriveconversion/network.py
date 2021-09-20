@@ -24,7 +24,7 @@ __credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles"]
 __version__ = "0.2"
 __maintainer__ = "Sebastian Maierhofer"
 __email__ = "commonroad@lists.lrz.de"
-__status__ = "Development"
+__status__ = "Released"
 
 
 def convert_to_base_lanelet_network(lanelet_network: ConversionLaneletNetwork) -> LaneletNetwork:

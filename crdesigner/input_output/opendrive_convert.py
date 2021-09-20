@@ -1,9 +1,12 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
-
 """This file is a simple script to convert a xodr file
 to a lanelet .xml file."""
+__author__ = "Benjamin Orthen, Sebastian Maierhofer"
+__copyright__ = "TUM Cyber-Physical Systems Group"
+__credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles, BMW Car@TUM"]
+__version__ = "0.2"
+__maintainer__ = "Sebastian Maierhofer"
+__email__ = "commonroad@lists.lrz.de"
+__status__ = "Released"
 
 import os
 import sys
@@ -20,14 +23,6 @@ from crdesigner.map_conversion.opendrive.opendriveparser.elements.opendrive impo
 from crdesigner.map_conversion.opendrive.opendriveparser.parser import parse_opendrive
 from crdesigner.map_conversion.opendrive.opendriveconversion.network import Network
 from crdesigner.map_conversion.lanelet_lanelet2.cr2lanelet import CR2LaneletConverter
-
-__author__ = "Benjamin Orthen"
-__copyright__ = "TUM Cyber-Physical Systems Group"
-__credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles"]
-__version__ = "0.2"
-__maintainer__ = "Sebastian Maierhofer"
-__email__ = "commonroad@lists.lrz.de"
-__status__ = "Development"
 
 
 def parse_arguments():

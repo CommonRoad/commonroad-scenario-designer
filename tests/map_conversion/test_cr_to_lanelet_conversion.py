@@ -1,14 +1,10 @@
-# -*- coding: utf-8 -*-
-
-"""Test the conversion from an Commonroad file to an OSM file."""
-
-__author__ = "Benjamin Orthen"
+__author__ = "Benjamin Orthen, Sebastian Maierhofer"
 __copyright__ = "TUM Cyber-Physical Systems Group"
-__credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles"]
+__credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles, BMW Car@TUM"]
 __version__ = "0.2"
 __maintainer__ = "Sebastian Maierhofer"
 __email__ = "commonroad@lists.lrz.de"
-__status__ = "Development"
+__status__ = "Released"
 
 
 import os

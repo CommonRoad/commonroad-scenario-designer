@@ -1,3 +1,11 @@
+__author__ = "Sebastian Maierhofer"
+__copyright__ = "TUM Cyber-Physical Systems Group"
+__credits__ = ["BMW Car@TUM"]
+__version__ = "0.2"
+__maintainer__ = "Sebastian Maierhofer"
+__email__ = "commonroad@lists.lrz.de"
+__status__ = "Released"
+
 from lxml import etree
 import uuid
 import os
@@ -20,15 +28,6 @@ if SUMO_AVAILABLE:
 
 from crdesigner.map_conversion.osm2cr.converter_modules.converter import GraphScenario
 from crdesigner.map_conversion.osm2cr.converter_modules.cr_operations.export import convert_to_scenario
-
-
-__author__ = "Sebastian Maierhofer"
-__copyright__ = "TUM Cyber-Physical Systems Group"
-__credits__ = ["BMW Car@TUM"]
-__version__ = "0.5.0"
-__maintainer__ = "Sebastian Maierhofer"
-__email__ = "commonroad@lists.lrz.de"
-__status__ = "Development"
 
 
 def lanelet_to_commonroad(input_file: str, proj: str, left_driving: bool = False,

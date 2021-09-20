@@ -1,8 +1,10 @@
-# -*- coding: utf-8 -*-
-"""Test the conversion from an osm file to a CommonRoad Scenario file."""
-
-__author__ = "Max Frühauf, Fabian Höltke"
+__author__ = "Max Fruehauf, Fabian Hoeltke, Sebastian Maierhofer"
 __copyright__ = "TUM Cyber-Physical Systems Group"
+__credits__ = ["BMW Car@TUM"]
+__version__ = "0.2"
+__maintainer__ = "Sebastian Maierhofer"
+__email__ = "commonroad@lists.lrz.de"
+__status__ = "Released"
 
 import os
 import unittest
@@ -18,9 +20,7 @@ from commonroad.planning.planning_problem import PlanningProblemSet
 
 
 class TestOSMToCommonRoadConversion(unittest.TestCase):
-    """
-    Test the conversion from an osm file to the respective commonroad scenario
-    """
+    """Test the conversion from an osm file to a CommonRoad Scenario file."""
     def setUp(self) -> None:
         cwd_path = os.path.dirname(os.path.abspath(__file__))
         self.out_path = cwd_path + "/.pytest_cache/"

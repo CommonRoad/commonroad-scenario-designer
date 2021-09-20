@@ -1,3 +1,11 @@
+__author__ = "Sebastian Maierhofer"
+__copyright__ = "TUM Cyber-Physical Systems Group"
+__credits__ = ["BMW Car@TUM"]
+__version__ = "0.2"
+__maintainer__ = "Sebastian Maierhofer"
+__email__ = "commonroad@lists.lrz.de"
+__status__ = "Released"
+
 import os
 import argparse
 import sys
@@ -9,14 +17,6 @@ from commonroad.scenario.scenario import Tag
 from crdesigner.input_output.gui.commonroad_scenario_designer_gui import start_gui
 from crdesigner.input_output.api import commonroad_to_lanelet, lanelet_to_commonroad, opendrive_to_commonroad, \
     osm_to_commonroad, commonroad_to_sumo, sumo_to_commonroad
-
-__author__ = "Sebastian Maierhofer"
-__copyright__ = "TUM Cyber-Physical Systems Group"
-__credits__ = ["BMW Car@TUM"]
-__version__ = "0.5.0"
-__maintainer__ = "Sebastian Maierhofer"
-__email__ = "commonroad@lists.lrz.de"
-__status__ = "Development"
 
 
 def get_args() -> argparse.Namespace:

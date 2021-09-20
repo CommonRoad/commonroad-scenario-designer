@@ -1,7 +1,11 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 """Script to call from commandline to convert OSM to a CommonRoad file."""
+__author__ = "Benjamin Orthen, Sebastian Maierhofer"
+__copyright__ = "TUM Cyber-Physical Systems Group"
+__credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles, BMW Car@TUM"]
+__version__ = "0.2"
+__maintainer__ = "Sebastian Maierhofer"
+__email__ = "commonroad@lists.lrz.de"
+__status__ = "Released"
 
 import os
 import sys
@@ -17,17 +21,9 @@ from crdesigner.map_conversion.lanelet_lanelet2.lanelet2cr import Lanelet2CRConv
 from crdesigner.map_conversion.lanelet_lanelet2.lanelet2_parser import Lanelet2Parser
 from crdesigner.map_conversion.lanelet_lanelet2.cr2lanelet import CR2LaneletConverter
 
-__author__ = "Benjamin Orthen"
-__copyright__ = "TUM Cyber-Physical Systems Group"
-__credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles"]
-__version__ = "0.2"
-__maintainer__ = "Sebastian Maierhofer"
-__email__ = "commonroad@lists.lrz.de"
-__status__ = "Development"
-
 
 def parse_arguments():
-    """Parse command line arguemts.
+    """Parse command line arguments.
 
     Returns:
       args object
@@ -130,10 +126,11 @@ def commonroad_to_osm(args, output_name: str):
         scenario, _ = commonroad_reader.open()
 
     except etree.XMLSyntaxError as xml_error:
-        print(f"SyntaxERror: {xml_error}")
+        print(f"SyntaxError: {xml_error}")
         print(
             "There was an error during the loading of the selected CommonRoad file.\n"
         )
+        return
     l2osm = CR2LaneletConverter(args.proj)
     osm = l2osm(scenario)
     with open(f"{output_name}", "wb") as file_out:
@@ -142,20 +139,6 @@ def commonroad_to_osm(args, output_name: str):
                 osm, xml_declaration=True, encoding="UTF-8", pretty_print=True
             )
         )
-
-
-def convert_opendrive(opendrive: OpenDrive) -> Scenario:
-    """Convert an existing OpenDrive object to a CommonRoad Scenario.
-
-    Args:
-      opendrive: Parsed in OpenDrive map.
-    Returns:
-      A commonroad scenario with the map represented by lanelets.
-    """
-    road_network = Network()
-    road_network.load_opendrive(opendrive)
-
-    return road_network.export_commonroad_scenario()
 
 
 if __name__ == '__main__':
