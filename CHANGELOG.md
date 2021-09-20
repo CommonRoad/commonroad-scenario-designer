@@ -1,6 +1,9 @@
 # Changelog
 
-## [0.2] - 2021-09-XX
+## [0.2] - 2021-09-22
+
+### Added
+- Planning Problem Visualization in GUI
 
 ### Changed
 - Extension of readme and documentation

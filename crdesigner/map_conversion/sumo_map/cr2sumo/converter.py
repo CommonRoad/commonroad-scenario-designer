@@ -1581,7 +1581,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
 
     def create_sumo_files(self, output_folder: str, traffic_from_trajectories=False, cleanup_tmp_files=True) -> bool:
         """
-        Convert the CommonRoad scenario to a net.xml file, specified by the absolute  path output_file and create
+        Convert the CommonRoad scenario to a net.xml file, specified by the absolute path output_file and create
         all SUMO files required for the traffic simulation.
         :param output_folder of the returned SUMO files
         :param traffic_from_trajectories: if True, create route files based on trajectories from CommonRoad scenario;

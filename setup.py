@@ -36,5 +36,5 @@ setup(
     ],
     extras_require={"GUI": ["matplotlib>=3.1.0"]},
     python_requires=">=3.6",
-    entry_points={"console_scripts": ["crdesigner=crdesigner.io.command_line:main"]},
+    entry_points={"console_scripts": ["crdesigner=crdesigner.input_output.command_line:main"]},
 )
