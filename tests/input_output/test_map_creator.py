@@ -61,8 +61,7 @@ class TestLanelet(unittest.TestCase):
     def test_calc_angle_between(self):
         left_vertices = np.array([[0, 1], [1, 1], [2, 1], [3, 1.5], [4, 2], [5, 2], [6, 2], [7, 1], [8, 1]])
         right_vertices = np.array([[0, 0], [1, 0], [2, 0], [3, .5], [4, 1], [5, 1], [6, 1], [7, 0], [8, 0]])
-        center_vertices = np.array([[0, .5], [1, .5], [2, .5], [3, 1], [4, 1.5], [5, 1.5], [6, 1.5], [7, .5],
-        [8, .5]])
+        center_vertices = np.array([[0, .5], [1, .5], [2, .5], [3, 1], [4, 1.5], [5, 1.5], [6, 1.5], [7, .5], [8, .5]])
         stop_line = StopLine(start=np.array([0, 0]), end=np.array([0, 1]), line_marking=LineMarking.SOLID)
 
         lanelet = Lanelet(left_vertices, center_vertices, right_vertices, 1, stop_line=stop_line)
@@ -186,14 +185,13 @@ class TestLanelet(unittest.TestCase):
     def test_connect_lanelets(self):
         left_vertices = np.array([[0, 1], [1, 1], [2, 1], [3, 1.5], [4, 2], [5, 2], [6, 2], [7, 1], [8, 1]])
         right_vertices = np.array([[0, 0], [1, 0], [2, 0], [3, .5], [4, 1], [5, 1], [6, 1], [7, 0], [8, 0]])
-        center_vertices = np.array([[0, .5], [1, .5], [2, .5], [3, 1], [4, 1.5], [5, 1.5], [6, 1.5], [7, .5],
-        [8, .5]])
+        center_vertices = np.array([[0, .5], [1, .5], [2, .5], [3, 1], [4, 1.5], [5, 1.5], [6, 1.5], [7, .5], [8, .5]])
         stop_line = StopLine(start=np.array([0, 0]), end=np.array([0, 1]), line_marking=LineMarking.SOLID)
 
         lanelet = Lanelet(left_vertices, center_vertices, right_vertices, 1, stop_line=stop_line)
         lanelet2 = Lanelet(left_vertices, center_vertices, right_vertices, 2, stop_line=stop_line)
         test_angle_translated = np.pi*0.7
-        lanelet2.translate_rotate(np.array([40,80]), test_angle_translated)
+        lanelet2.translate_rotate(np.array([40, 80]), test_angle_translated)
 
         scenario = Scenario(0.1, 'new scenario')
         network = LaneletNetwork()
