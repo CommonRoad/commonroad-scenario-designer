@@ -3,6 +3,7 @@ import numpy as np
 
 from PyQt5.QtWidgets import QFileDialog, QMessageBox
 from PyQt5.QtWidgets import QSizePolicy
+from commonroad.planning.planning_problem import PlanningProblemSet
 
 from commonroad.scenario.intersection import Intersection
 from commonroad.common.util import Interval
@@ -178,11 +179,14 @@ class DynamicCanvas(FigureCanvas):
 
     def draw_scenario(self,
                       scenario: Scenario,
+                      pps: PlanningProblemSet = None,
                       draw_params=None,
                       plot_limits=None):
         """[summary]
 
         :param scenario: [description]
+        :param pps: PlanningProblemSet of the scenario,defaults to None
+        :type pps: PlanningProblemSet
         :type scenario: Scenario
         :param draw_params: [description], defaults to None
         :type draw_params: [type], optional
@@ -198,6 +202,8 @@ class DynamicCanvas(FigureCanvas):
         self.rnd.plot_limits = plot_limits
         self.rnd.ax = self.ax
         scenario.draw(renderer=self.rnd, draw_params=draw_params_merged)
+        if pps is not None:
+            pps.draw(renderer=self.rnd, draw_params=draw_params_merged)
         self.rnd.render()
 
         if not plot_limits:
@@ -272,6 +278,7 @@ class AnimatedViewer:
     def __init__(self, parent, callback_function):
 
         self.current_scenario = None
+        self.current_pps = None
         self.dynamic = DynamicCanvas(parent, width=5, height=10, dpi=100)
         self.callback_function = callback_function
 
@@ -287,15 +294,19 @@ class AnimatedViewer:
         self.playing = False
         self.dynamic.mpl_connect('button_press_event', self.select_scenario_element)
 
-    def open_scenario(self, scenario: Scenario, config: Observable = None):
+    def open_scenario(self, scenario: Scenario, config: Observable = None,
+                      planning_problem_set: PlanningProblemSet = None):
         """[summary]
 
         :param scenario: [description]
         :type scenario: [type]
         :param config: [description], defaults to None
         :type config: SumoConfig, optional
+        :param planning_problem_set: des,
+        :type planning_problem_set: PlanningProblemSet
         """
         self.current_scenario = scenario
+        self.current_pps = planning_problem_set
 
         # if we have not subscribed already, subscribe now
         if config is not None:
@@ -319,6 +330,7 @@ class AnimatedViewer:
 
         print('init animation')
         scenario = self.current_scenario
+        pps = self.current_pps
         self.dynamic.clear_axes(keep_limits=True)
 
         start = self.min_time_step
@@ -356,7 +368,7 @@ class AnimatedViewer:
                 'antialiased': True,
             }
 
-            self.dynamic.draw_scenario(scenario, draw_params=draw_params)
+            self.dynamic.draw_scenario(scenario, pps=pps, draw_params=draw_params)
 
         # Interval determines the duration of each frame in ms
         interval = 1000 * dt
@@ -505,7 +517,7 @@ class AnimatedViewer:
                 'time_begin': self.time_step.value - 1,
             }
 
-        self.dynamic.draw_scenario(self.current_scenario, draw_params=draw_params)
+        self.dynamic.draw_scenario(self.current_scenario, self.current_pps, draw_params=draw_params)
 
         for lanelet in self.current_scenario.lanelet_network.lanelets:
 
