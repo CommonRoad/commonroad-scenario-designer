@@ -1,8 +1,8 @@
 *.xodr
-!test/**/*.xodr
+!tests/**/**/*.xodr
 #*.xml
-!test/**/*.xml
-test/.pytest_cache
+!test/**/**/*.xml
+tests/.pytest_cache
 .pytest_cache
 venv/
 .vscode/

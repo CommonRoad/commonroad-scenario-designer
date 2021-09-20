@@ -54,16 +54,7 @@ SHELL ["/bin/bash", "-c"]
 # ENV SUMO_HOME=$HOME/sumo
 ENV SUMO_HOME=/usr/share/sumo
 ENV PATH=$PATH:$SUMO_HOME/bin
-# RUN sudo apt-get install -y ffmpeg \
-# 	&& git clone --depth 1 --recurse-submodules --shallow-submodules https://github.com/eclipse/sumo \
-# 	&& cd sumo \
-# #	&& git checkout smooth-lane-change \
-# 	&& sudo apt-get install -y cmake python g++ libxerces-c-dev libfox-1.6-dev libgdal-dev libproj-dev libgl2ps-dev swig \
-# 	&& export SUMO_HOME="$(pwd)" \
-# 	&& echo "export SUMO_HOME=$(pwd)" >> ~/.bashrc \
-# 	&& cd build \
-# 	&& cmake .. \
-# 	&& make -j$(nproc)
+
 RUN sudo apt-get install -y software-properties-common \
 	&& sudo add-apt-repository -y ppa:sumo/stable \
 	&& sudo apt-get update \
@@ -78,8 +69,6 @@ RUN conda create --name commonroad-py39 python=3.9
 # setup conda env
 RUN echo "source activate commonroad-py39" > ~/.bashrc
 ENV PATH /opt/conda/envs/commonroad-py39/bin:$PATH
-
-ADD requirements.txt test_requirements.txt $HOME/
 
 # Install cartopy
 RUN source activate commonroad-py37 \
@@ -109,5 +98,4 @@ RUN sudo apt-get install -y vim nano
 # install Tkinter
 RUN sudo apt-get install -y tk-dev
 
-ADD ci/test.sh $HOME/
 

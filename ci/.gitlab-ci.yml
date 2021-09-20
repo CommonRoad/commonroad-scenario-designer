@@ -1,78 +1,57 @@
 stages:
+    - style_check
     - test
     - build
 
 image: $CI_REGISTRY/cps/commonroad-scenario-designer/ci:v0.5
 
-before_script:
-    # This is required for the GitLab runner to have permissions to all the repos the user stating the job has.
-    - git config --global url."https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.lrz.de/".insteadOf "git@gitlab.lrz.de:"
-    # # Install commonroad-io & sumo-interface manually as installing though pip does not respect the JOB_TOKEN
-    - git clone --branch develop git@gitlab.lrz.de:cps/sumo-interface.git $HOME/sumo-interface
-    - git clone --branch develop git@gitlab.lrz.de:cps/commonroad-io.git "$HOME"/commonroad-io
-    - cd $HOME/sumo-interface
-    - cd -
-    - pip uninstall -y commonroad-io
-    - source .env
+.install-and-run: &install-and-run
+  - git config --global url."https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.lrz.de/".insteadOf "git@gitlab.lrz.de:"
+  - git clone --branch develop git@gitlab.lrz.de:cps/sumo-interface.git $HOME/sumo-interface
+  - pip install -e $HOME/sumo-interface
+  - pip install -e .
+  - coverage run -m pytest tests
+  - coverage xml
+
+style_checks:
+  stage: style_check
+  script:
+    - pip install pycodestyle
+    - git  diff ${CI_COMMIT_BEFORE_SHA}...${CI_COMMIT_SHA} -- '*.py' | pycodestyle --max-line-length=120 --diff
 
 python37:
     stage: test
     script:
         - source activate commonroad-py37
-        - pip install $HOME/sumo-interface tox-current-env -r test_requirements.txt
-        - pip install -e "$HOME"/commonroad-io
-        # install all requirements but ignore the git versions as we have already installed them previously
-        - grep -v "git" requirements.txt | pip install -r /dev/stdin
-        # use the current conda environment in tox, as we have manually installed all required dependencies there
-        # run tests
-        - pip install -e .
-        - tox --current-env -e py37
+        - *install-and-run
     artifacts:
-        reports:
-            junit: unittest*.xml
-            cobertura: coverage.xml
+      reports:
+        cobertura: coverage.xml
 
 python38:
     stage: test
     script:
         - source activate commonroad-py38
-        - pip install $HOME/sumo-interface tox-current-env -r test_requirements.txt
-        - pip install -e "$HOME"/commonroad-io
-        # install all requirements but ignore the git versions as we have already installed them previously
-        - grep -v "git" requirements.txt | pip install -r /dev/stdin
-        # use the current conda environment in tox, as we have manually installed all required dependencies there
-        # run tests
-        - pip install -e .
-        - tox --current-env -e py38
+        - *install-and-run
     artifacts:
-        when: always
-        reports:
-            junit: unittest*.xml
-            cobertura: coverage.xml
+      reports:
+        cobertura: coverage.xml
 
 python39:
     stage: test
     script:
         - source activate commonroad-py39
-        - pip install $HOME/sumo-interface tox-current-env -r test_requirements.txt
-        - pip install -e "$HOME"/commonroad-io
-        # install all requirements but ignore the git versions as we have already installed them previously
-        - grep -v "git" requirements.txt | pip install -r /dev/stdin
-        # use the current conda environment in tox, as we have manually installed all required dependencies there
-        # run tests
-        - pip install -e .
-        - tox --current-env -e py39
+        - *install-and-run
     artifacts:
-        reports:
-            junit: unittest*.xml
-            cobertura: coverage.xml
+      reports:
+        cobertura: coverage.xml
 
 docs:
     stage: test
     script:
         - source activate commonroad-py39
-        - pip install -r test_requirements.txt -r docs_requirements.txt
-        - tox -e docs
+        - pip install -r ./requirements.txt
+        - cd docs && make html
 
 build_package:
     stage: build
