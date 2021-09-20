@@ -742,4 +742,3 @@ class Graph:
         except ValueError:
             logging.error("No edge found. Using fallback calculation.")
             return self.find_closest_edge_by_lat_lng(lat_lng)
-            

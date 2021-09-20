@@ -126,8 +126,8 @@ class Network:
             self._traffic_lights.extend(traffic_lights)
             for stop_line in stop_lines:
                 for traffic_light in traffic_lights:
-                    if (numpy.linalg.norm(stop_line.start - traffic_light.position) < 10): #10 could be adjusted later as a threshold
-                        stop_lines_final.append(stop_line)
+                    if numpy.linalg.norm(stop_line.start - traffic_light.position) < 10:
+                        stop_lines_final.append(stop_line)  # hard-coded 10 could be adjusted later as a threshold
             self._traffic_signs.extend(traffic_signs)
             self._stop_lines.extend(stop_lines_final)
 
@@ -565,9 +565,6 @@ class LinkIndex:
             intersection_map_new_id = dict()
             for incoming, connecting in intersection_map.items():
                 # Replacing keys/incoming ids with new ids
-                #print('incoming: ', incoming)
-                #print('connecting:', connecting)
-                #print('new ids: ', old_id_to_new_id_map[incoming])
                 if incoming in old_id_to_new_id_map.keys():
                     new_incoming_id = old_id_to_new_id_map[incoming]
                     connecting = [old_id_to_new_id_map.get(item) for item in connecting]

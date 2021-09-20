@@ -6,6 +6,7 @@ __author__ = "Behtarin Ferdousi"
 
 from crdesigner.map_conversion.osm2cr.converter_modules.utility import geometry
 
+
 class Node:
     """
     Class to represent the nodes in the intermediate format

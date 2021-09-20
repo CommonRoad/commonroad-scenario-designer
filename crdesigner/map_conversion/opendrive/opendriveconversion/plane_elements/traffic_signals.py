@@ -14,6 +14,7 @@ from commonroad.scenario.traffic_sign import TrafficSign, TrafficLight, TrafficS
     TrafficSignIDGermany, TrafficSignIDUsa, TrafficSignIDChina, TrafficSignIDSpain, TrafficSignIDRussia
 from commonroad.scenario.lanelet import StopLine, LineMarking
 
+
 def extract_traffic_element_id(signal_type: str, signal_subtype: str, traffic_sign_enum: enum) \
         -> Union[TrafficSignIDZamunda, TrafficSignIDGermany, TrafficSignIDUsa, TrafficSignIDChina,
                  TrafficSignIDSpain, TrafficSignIDRussia]:

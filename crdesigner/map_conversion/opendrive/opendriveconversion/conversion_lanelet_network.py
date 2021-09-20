@@ -666,7 +666,7 @@ class ConversionLaneletNetwork(LaneletNetwork):
         incoming_lanelet_ids = self.combine_common_incoming_lanelets(intersection_map)
         intersection_incoming_lanes = list()
         successors = list()
-        
+
         for incoming_lanelet_set in incoming_lanelet_ids:
             # Since all the lanes have the same successors,
             # we simply use the first one to check for the successor directions
@@ -714,7 +714,9 @@ class ConversionLaneletNetwork(LaneletNetwork):
         """
         for successor_incoming in self.find_lanelet_by_id(incoming_lane).successor:
             successor_incoming_lanelet = self.find_lanelet_by_id(successor_incoming)
-            #successor_incoming_lanelet.lanelet_type = "intersection"   TODO assign only to main intersection lanelets not to incomings or other lanelets, e.g., check KA-Suedtangente scenario
+            # successor_incoming_lanelet.lanelet_type = "intersection"
+            # TODO assign only to main intersection lanelets not to incomings or other lanelets,
+            #  e.g., check KA-Suedtangente scenario
             # Also check if the successor of a incoming successor intersects with another successor of an incoming
             self.check_lanelet_type_for_successor_of_successor(successor_incoming_lanelet, intersection_map)
 
@@ -724,8 +726,8 @@ class ConversionLaneletNetwork(LaneletNetwork):
         This is done by checking if this lanelet intersects with successors of all the incomigns in the intersection
         If the test passes, then the successor of the incoming successor is also set as intersection lanelet type
         Args:
-            successor_incoming_lanelet: lanelet for which we require to test if it is a part of a particular intersection
-            intersection_map: dict of the particular intersection for which the test is being conducted.
+            successor_incoming_lanelet: lanelet for which we require to test if it is a part of a particular
+            intersection intersection_map: dict of the particular intersection for which the test is being conducted.
         """
         for successor_successor_incoming in successor_incoming_lanelet.successor:
             successor_successor_incoming_lanelet = self.find_lanelet_by_id(successor_successor_incoming)
@@ -759,7 +761,8 @@ class ConversionLaneletNetwork(LaneletNetwork):
             intersection_map: dict of the particular intersection for which the test is being conducted.
             successors_list: list of all the successors of an intersection
         Returns:
-            true if successors of an incoming intersect with successors of other incoming of the intersection otherwise return False.
+            true if successors of an incoming intersect with successors of other incoming
+            of the intersection otherwise return False.
         """
         for incoming_lane in intersection_map.keys():
             for incoming_successor in self.find_lanelet_by_id(incoming_lane).successor:
@@ -782,8 +785,9 @@ class ConversionLaneletNetwork(LaneletNetwork):
             :return: incomings with the isLeftOf assigned
         """
         # Choose a reference incoming vector
-        ref = self.find_lanelet_by_id(list(incomings[0].incoming_lanelets)[0]).center_vertices[-1] - \
-              self.find_lanelet_by_id(list(incomings[0].incoming_lanelets)[0]).center_vertices[-3]
+        ref = \
+            self.find_lanelet_by_id(list(incomings[0].incoming_lanelets)[0]).center_vertices[-1] - \
+            self.find_lanelet_by_id(list(incomings[0].incoming_lanelets)[0]).center_vertices[-3]
         angles = [(0, 0)]
         # calculate all incoming angle from the reference incoming vector
         for index in range(1, len(incomings)):
@@ -987,14 +991,20 @@ class ConversionLaneletNetwork(LaneletNetwork):
                                 traffic_light.direction = TrafficLightDirection.STRAIGHT
                         elif len(successor_directions) == 2:
                             traffic_light = self.find_traffic_light_by_id(list(traffic_light_ids)[0])
-                            if (list(successor_directions.values())[0] == 'left' and list(successor_directions.values())[1] == 'right') \
-                                    or (list(successor_directions.values())[0] == 'right' and list(successor_directions.values())[1] == 'left'):
+                            if (list(successor_directions.values())[0] == 'left'
+                                and list(successor_directions.values())[1] == 'right') \
+                                    or (list(successor_directions.values())[0] == 'right'
+                                        and list(successor_directions.values())[1] == 'left'):
                                 traffic_light.direction = TrafficLightDirection.LEFT_RIGHT
-                            if (list(successor_directions.values())[0] == 'left' and list(successor_directions.values())[1] == 'straight') \
-                                    or (list(successor_directions.values())[0] == 'straight' and list(successor_directions.values())[1] == 'left'):
+                            if (list(successor_directions.values())[0] == 'left'
+                                and list(successor_directions.values())[1] == 'straight') \
+                                    or (list(successor_directions.values())[0] == 'straight'
+                                        and list(successor_directions.values())[1] == 'left'):
                                 traffic_light.direction = TrafficLightDirection.LEFT_STRAIGHT
-                            if (list(successor_directions.values())[0] == 'right' and list(successor_directions.values())[1] == 'straight') \
-                                    or (list(successor_directions.values())[0] == 'straight' and list(successor_directions.values())[1] == 'right'):
+                            if (list(successor_directions.values())[0] == 'right'
+                                and list(successor_directions.values())[1] == 'straight') \
+                                    or (list(successor_directions.values())[0] == 'straight'
+                                        and list(successor_directions.values())[1] == 'right'):
                                 traffic_light.direction = TrafficLightDirection.STRAIGHT_RIGHT
 
                     if no_of_traffic_lights == 2:
@@ -1012,11 +1022,14 @@ class ConversionLaneletNetwork(LaneletNetwork):
                                 lanelet_right_position = target_lanelet.right_vertices[-1]
                                 distance_from_right = np.linalg.norm(lanelet_right_position - traffic_light_position)
                                 distance_from_left = np.linalg.norm(lanelet_left_position - traffic_light_position)
-                                if distance_from_left < distance_from_right and 'left' in list(successor_directions.values()):
+                                if distance_from_left < distance_from_right \
+                                        and 'left' in list(successor_directions.values()):
                                     traffic_light.direction = TrafficLightDirection.LEFT
-                                elif distance_from_left < distance_from_right and 'right' in list(successor_directions.values()):
+                                elif distance_from_left < distance_from_right \
+                                        and 'right' in list(successor_directions.values()):
                                     traffic_light.direction = TrafficLightDirection.RIGHT
-                                elif 'straight' in list(successor_directions.values()) or distance_from_left - distance_from_right < 0.001:
+                                elif 'straight' in list(successor_directions.values()) \
+                                        or distance_from_left - distance_from_right < 0.001:
                                     traffic_light.direction = TrafficLightDirection.STRAIGHT
 
                         elif len(successor_directions) == 3:
@@ -1056,7 +1069,8 @@ class ConversionLaneletNetwork(LaneletNetwork):
                                     traffic_light.direction = TrafficLightDirection.LEFT
                                 elif distance_from_left > distance_from_right:
                                     traffic_light.direction = TrafficLightDirection.RIGHT
-                                elif 'straight' in list(successor_directions.values()) or distance_from_left - distance_from_right < 0.001:
+                                elif 'straight' in list(successor_directions.values()) \
+                                        or distance_from_left - distance_from_right < 0.001:
                                     traffic_light.direction = TrafficLightDirection.STRAIGHT
 
     def add_traffic_signs_to_network(self, traffic_signs):
