@@ -14,7 +14,8 @@
 #
 import os
 import sys
-sys.path.insert(0, os.path.abspath(".."))
+sys.path.append(os.path.join(os.path.dirname(__file__), '../..'))
+sys.path.append(os.path.join(os.path.dirname(__file__), '../../..'))
 
 
 # -- Project information -----------------------------------------------------
@@ -24,9 +25,9 @@ copyright = "2021, Technical University of Munich"
 author = "Sebastian Maierhofer"
 
 # The short X.Y version
-version = "0.5"
+version = "0.2"
 # The full version, including alpha/beta/rc tags
-release = "0.5.0"
+release = "0.2"
 
 
 # -- General configuration ---------------------------------------------------

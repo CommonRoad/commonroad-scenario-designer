@@ -47,16 +47,13 @@ __status__ = "Released"
 
 
 def parse_opendrive(root_node) -> OpenDrive:
-    """Tries to parse XML tree, returns OpenDRIVE object
-
-    Args:
-      root_node:
-
-    Returns:
-      The object representing an OpenDrive specification.
-
     """
+    Tries to parse XML tree, returns OpenDRIVE object
+    sche1!
 
+    :param root_node:
+    :return: The object representing an OpenDrive specification.
+    """
     # Only accept lxml element
     if not etree.iselement(root_node):
         raise TypeError("Argument root_node is not a xml element")
