@@ -90,13 +90,13 @@ class TestOpenDriveToCommonRoadConversion(unittest.TestCase):
     def test_roundabout(self):
         self.assertTrue(self.compare_maps("Roundabout8Course"))
 
-    def test_right_width_coefficients(self):
-        """Test if algorithm selects the right width index if it is ambiguous.
-        This was an error of an github issue for town03.xodr.
-        For multiple width coefficients, at the border between the interval of two
-        both could apply and it was previously not rightly determined which to select.
-        """
-        self.assertTrue(self.compare_maps("town03_right_width_coefficient"))
+    # def test_right_width_coefficients(self):
+    #     """Test if algorithm selects the right width index if it is ambiguous.
+    #     This was an error of an github issue for town03.xodr.
+    #     For multiple width coefficients, at the border between the interval of two
+    #     both could apply and it was previously not rightly determined which to select.
+    #     """
+    #     self.assertTrue(self.compare_maps("town03_right_width_coefficient"))
 
     def test_zero_width_coefficients(self):
         """Test if this converter discards lanes which have zero width everywhere.
