@@ -10,7 +10,7 @@ import unittest
 import numpy as np
 
 from commonroad.scenario.lanelet import Lanelet, LineMarking, LaneletNetwork, StopLine
-from commonroad.scenario.scenario import Scenario
+from commonroad.scenario.scenario import Scenario, ScenarioID
 
 from crdesigner.input_output.gui.misc.map_creator import MapCreator
 
@@ -35,7 +35,7 @@ class TestLanelet(unittest.TestCase):
         right_vertices = np.array([[0, -1], [1, -1], [2, -1], [3, -1], [4, -1], [5, -1], [6, -1], [7, -1], [8, -1]])
         center_vertices = np.array([[0, 0], [1, 0], [2, 0], [3, 0], [4, 0], [5, 0], [6, 0], [7, 0], [8, 0]])
 
-        scenario = Scenario(0.1, 'new scenario')
+        scenario = Scenario(0.1, ScenarioID())
         network = LaneletNetwork()
         scenario.lanelet_network = network
         lanelet = MapCreator.create_straight(2, 8, 9, scenario.generate_object_id(), set())
@@ -57,7 +57,7 @@ class TestLanelet(unittest.TestCase):
              [9.94521895, 11.04528463], [8.66025404, 15], [5.87785252, 18.09016994],
              [2.07911691, 19.78147601], [-2.07911691, 19.78147601], [-5.87785252, 18.09016994]])
 
-        scenario = Scenario(0.1, 'new scenario')
+        scenario = Scenario(0.1, ScenarioID())
         network = LaneletNetwork()
         scenario.lanelet_network = network
         lanelet = MapCreator.create_curve(2, 10, np.pi*1.2, 10, scenario.generate_object_id(), set())
@@ -128,7 +128,7 @@ class TestLanelet(unittest.TestCase):
                                         [-7.82518081, -1.66329353], [-6.47213595, -4.70228201]])
 
         lanelet = Lanelet(left_vertices, center_vertices, right_vertices, 1)
-        scenario = Scenario(0.1, 'new scenario')
+        scenario = Scenario(0.1, ScenarioID())
         network = LaneletNetwork()
         scenario.lanelet_network = network
 
@@ -172,7 +172,7 @@ class TestLanelet(unittest.TestCase):
                                         [-11.73777121, -2.49494029], [-9.70820393, -7.05342303]])
 
         lanelet = Lanelet(left_vertices, center_vertices, right_vertices, 1)
-        scenario = Scenario(0.1, 'new scenario')
+        scenario = Scenario(0.1, ScenarioID())
         network = LaneletNetwork()
         scenario.lanelet_network = network
 
@@ -198,7 +198,7 @@ class TestLanelet(unittest.TestCase):
         test_angle_translated = np.pi*0.7
         lanelet2.translate_rotate(np.array([40, 80]), test_angle_translated)
 
-        scenario = Scenario(0.1, 'new scenario')
+        scenario = Scenario(0.1, ScenarioID())
         network = LaneletNetwork()
         scenario.lanelet_network = network
 
