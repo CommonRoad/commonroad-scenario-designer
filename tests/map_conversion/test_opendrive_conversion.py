@@ -16,8 +16,7 @@ from commonroad.planning.planning_problem import PlanningProblemSet
 from commonroad.scenario.scenario import Tag, Scenario
 
 from crdesigner.map_conversion.common.utils import generate_unique_id
-from crdesigner.map_conversion.opendrive.opendriveparser.parser import parse_opendrive
-from crdesigner.input_output.opendrive_convert import convert_opendrive
+from crdesigner.input_output.api import opendrive_to_commonroad
 from tests.map_conversion.utils import elements_equal
 
 
@@ -36,10 +35,8 @@ class TestOpenDriveToCommonRoadConversion(unittest.TestCase):
                     if file.endswith('.xml'):
                         os.remove(os.path.join(dir_path, file))
 
-        with open(os.path.dirname(os.path.realpath(__file__)) +
-                  f"/opendrive_test_files/{xodr_file_name}.xodr", "r", ) as fh:
-            opendrive = parse_opendrive(etree.parse(fh).getroot())
-        return convert_opendrive(opendrive)
+        return opendrive_to_commonroad(os.path.dirname(os.path.realpath(__file__)) +
+                                       "/opendrive_test_files/{}.xodr".format(xodr_file_name))
 
     def compare_maps(self, file_name: str) -> bool:
         """
