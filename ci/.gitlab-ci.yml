@@ -3,10 +3,11 @@ stages:
     - test
     - build
 
-image: $CI_REGISTRY/cps/commonroad-scenario-designer/ci:v0.6.1
+image: $CI_REGISTRY/cps/commonroad-scenario-designer/ci:v0.6.2
 
 .install-and-run: &install-and-run
   - pip install -e .
+  - pip install -r ./ci/test_requirements.txt
   - coverage run --source ./crdesigner -m pytest tests/
   - coverage report -m || true
 
@@ -39,8 +40,8 @@ docs:
     stage: test
     script:
         - source activate commonroad-py39
-        - pip install -r ./docs/requirements_doc.txt
-        - cd docs && make html
+        - pip install -r ./doc/requirements_doc.txt
+        - cd doc && make html
 
 build_package:
     stage: build

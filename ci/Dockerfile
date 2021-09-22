@@ -37,7 +37,7 @@ WORKDIR $HOME
 
 RUN sudo apt-get update \
 	&& sudo apt-get -y upgrade \
-	&& sudo apt-get -y install git gcc g++ cmake make libgeos++-dev proj-bin
+	&& sudo apt-get -y install git gcc g++ cmake make libgeos++-dev proj-data proj-bin
 
 SHELL ["/bin/bash", "-c"]
 
