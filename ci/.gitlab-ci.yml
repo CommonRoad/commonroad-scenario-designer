@@ -3,7 +3,7 @@ stages:
     - test
     - build
 
-image: $CI_REGISTRY/cps/commonroad-scenario-designer/ci:v0.6.4
+image: $CI_REGISTRY/cps/commonroad-scenario-designer/ci:v0.6.5
 
 .install-and-run: &install-and-run
   - pip install -e .

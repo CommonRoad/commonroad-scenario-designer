@@ -48,7 +48,8 @@ ENV PATH=$PATH:$SUMO_HOME/bin
 
 RUN sudo apt-get install -y software-properties-common \
     && sudo apt-get update \
-    && sudo apt-get install -y ffmpeg sumo sumo-tools sumo-doc
+    && sudo apt-get install -y ffmpeg sumo sumo-tools sumo-doc \
+	&& echo "export SUMO_HOME=/usr/share/sumo" >> ~/.bashrc
 
 # activate conda environment
 RUN conda create --name commonroad-py37 python=3.7 && \

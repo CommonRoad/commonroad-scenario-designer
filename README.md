@@ -16,7 +16,8 @@ CommonRoad maps and scenarios.
 |CR Scenario Designer GUI             |`crdesigner/input_output/gui                  `|Multi-functional GUI for map conversion and scenario generation.                     |
 
 ## Prerequisites and Installation
-For the execution of the _CommonRoad Scenario Designer_ you need at least Python 3.7 and the following modules:
+The usage of the Anaconda Python distribution is recommended. We have tested the toolbox with Python 3.7, 3.8, and 3.9.
+You need the following modules:
 - commonroad_io >= 2021.3
 - matplotlib >= 3.1.0
 - numpy >= 1.16.4
@@ -37,12 +38,24 @@ For the execution of the _CommonRoad Scenario Designer_ you need at least Python
 - future>=0.17.1
 - networkx>=2.5
 
+Cartopy can be easily installed via
+```bash
+conda install -c conda-forge cartopy
+```
+from you Anaconda environment. For the other packages, we recommend to use the provided `requirements.txt`:
+```bash
+pip install -r requirements.txt
+```
+
 If you want to use the SUMO conversion or to generate traffic using SUMO, please install 
-[SUMO](https://sumo.dlr.de/docs/index.html).
-We provide an installation script for that.
+[SUMO](https://sumo.dlr.de/docs/index.html):
+```bash
+sudo apt-get install sumo sumo-tools sumo-doc
+echo "export SUMO_HOME=/usr/share/sumo" >> ~/.bashrc
+echo 'export PYTHONPATH="$SUMO_HOME/tools:$PYTHONPATH"' >> ~/.bashrc
+```
+If you use zsh, replace `.bashrc` with `.zshrc`.
 
-
-The usage of the Anaconda Python distribution is recommended. We have tested the toolbox with Python 3.7, 3.8, and 3.9.
 To install the _CommonRoad Scenario Designer_, please execute one of the following two commands:
 ```bash
 pip install -e .
