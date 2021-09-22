@@ -73,7 +73,7 @@ def _add_stop_line_to_lanelet(lanelets: List[Lanelet], stop_lines: List[StopLine
     yield_signs = set()
     for la in lanelets:
         for s in stop_lines:
-            if la.convert_to_polygon().shapely_object.intersects(LineString([s.start, s.end])):
+            if la.polygon.shapely_object.intersects(LineString([s.start, s.end])):
                 la.stop_line = s
                 # add the stop line traffic sign to the lanelet if set
                 if s.traffic_sign_ref is not None:
