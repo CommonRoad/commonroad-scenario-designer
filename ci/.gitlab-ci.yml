@@ -13,6 +13,7 @@ image: $CI_REGISTRY/cps/commonroad-scenario-designer/ci:v0.6
 style_checks:
   stage: style_check
   script:
+    - source activate commonroad-py39
     - pip install pycodestyle
     - git  diff ${CI_COMMIT_BEFORE_SHA}...${CI_COMMIT_SHA} -- '*.py' | pycodestyle --max-line-length=120 --diff
 
