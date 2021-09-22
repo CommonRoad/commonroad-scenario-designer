@@ -9,11 +9,11 @@ CommonRoad maps and scenarios.
 
 |  Tool                               |Path                                       |Functionality                                                                        |
 | :---------------------------------: |:----------------------------------------: |:----------------------------------------------------------------------------------: |
-|OpenDRIVE &rightarrow; CR            |`crdesigner/map_converter/opendrive`           |Conversion from OpenDRIVE to CommonRoad.                                             |
-|Lanelet/Lanelet2 &leftrightarrow; CR |`crdesigner/map_converter/lanelet_lanelet2`    |Conversion from Lanelet/Lanelet2 to CommonRoad <br /> and from CommonRoad to lanelet |
-|OSM &rightarrow; CR                  |`crdesigner/map_converter/osm2cr`              |Conversion from OSM to CommonRoad.                                                   |
-|SUMO &leftrightarrow; CR             |`crdesigner/map_converter/sumo_map`            |Conversion from SUMO to CommonRoad and vice versa.                                   |
-|CR Scenario Designer GUI             |`crdesigner/input_output/gui                  `|Multi-functional GUI for map conversion and scenario generation.                     |
+|OpenDRIVE => CR            |`crdesigner/map_converter/opendrive`           |Conversion from OpenDRIVE to CommonRoad.                                             |
+|Lanelet/Lanelet2 <=> CR |`crdesigner/map_converter/lanelet_lanelet2`    |Conversion from Lanelet/Lanelet2 to CommonRoad <br /> and from CommonRoad to lanelet |
+|OSM => CR                  |`crdesigner/map_converter/osm2cr`              |Conversion from OSM to CommonRoad.                                                   |
+|SUMO <=> CR             |`crdesigner/map_converter/sumo_map`            |Conversion from SUMO to CommonRoad and vice versa.                                   |
+|CR Scenario Designer GUI             |`crdesigner/input_output/gui                  `|Multi-functional GUI for map conversion and scenario creation/editing.                     |
 
 ## Prerequisites and Installation
 The usage of the Anaconda Python distribution is recommended. We have tested the toolbox with Python 3.7, 3.8, and 3.9.
@@ -126,6 +126,8 @@ When converting OSM maps, missing information such as the course of individual l
 These estimations are imperfect (the OSM maps as well) and often it is advisable to edit the 
 scenarios by hand via the GUI.
 
+#### Tutorials
+We also provide tutorials demonstrating how the different map converter APIs can be used.
 
 ## Documentation
 
@@ -142,9 +144,10 @@ cd doc && make html
 ```
 
 The documentation can be accessed by opening `doc/_build/html/index.html`.
+The full documentation of the API and introducing examples can also be found [here](https://commonroad-scenario-designer.readthedocs.io/en/latest/).
 
 ## Bug and feature reporting
-
+This release (v0.2) is still a BETA version.  
 In case you detect a bug or you want to suggest a new feature, please report it in our [forum](https://commonroad.in.tum.de/forum/c/scenario-designer/18) forum. 
 
 ## Authors

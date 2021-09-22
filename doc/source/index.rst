@@ -14,18 +14,10 @@ and scenarios, a command line interface, and different Python APIs.
     In case you encounter errors or want to provide us feedback, please post them in our
     `forum <https://commonroad.in.tum.de/forum/c/scenario-designer/18>`_.
 
-The software is written in Python 3.7/3.8/3.9 and tested on Linux. he usage of the Anaconda_ Python distribution
+The software is written in Python 3.7/3.8/3.9 and tested on Linux. The usage of the Anaconda_ Python distribution
 is strongly recommended.
 
 .. _Anaconda: http://www.anaconda.com/download/#download
-
-Documentation
-=============
-
-The full documentation of the API and introducing examples can be found under
-`commonroad.in.tum.de <https://commonroad-scenario-designer.readthedocs.io/en/latest/>`__.
-
-For getting started, we recommend our `tutorials <https://commonroad.in.tum.de/commonroad-io>`__.
 
 Requirements
 ============
@@ -51,31 +43,60 @@ The required dependencies for running the CommonRoad Scenario Designer are:
 * iso3166>=1.0.1
 * future>=0.17.1
 * networkx>=2.5
-* pytest>=5.3.2
-* coverage
-* parameterized>=0.7.4
 
+Cartopy can be easily installed with::
+
+   conda install -c conda-forge cartopy
+
+from your Anaconda environment. For the other packages, we recommend to use the provided `requirements.txt`::
+
+    pip install -r requirements.txt
+
+
+If you want to use the SUMO conversion or to generate traffic using SUMO, please install
+[SUMO](https://sumo.dlr.de/docs/index.html): ::
+
+    sudo apt-get install sumo sumo-tools sumo-doc
+    echo "export SUMO_HOME=/usr/share/sumo" >> ~/.bashrc
+    echo 'export PYTHONPATH="$SUMO_HOME/tools:$PYTHONPATH"' >> ~/.bashrc
+
+If you use zsh, replace `.bashrc` with `.zshrc`.
 
 Installation
 ============
 
-For installing the CommonRoad Scenario Designer, clone from our gitlab repository::
+To install the *CommonRoad Scenario Designer*, please execute one of the following two commands: ::
 
-	git clone https://gitlab.lrz.de/tum-cps/commonroad-scenario-designer.git
+    pip install -e .
+or::
 
-From the root directory of the corresponding repository run::
+    python setup.py install
 
-	pip install -e .
-
-Alternatively, run::
-
-	python setup.py install
-
+We will soon publish the toolbox on PyPI.
 
 Getting Started
 ===============
 
-A tutorial on the main functionalities of the project is :ref:`available here<getting_started>`.
+A tutorial on the Python APIs can be found in the form of jupyter notebooks in the tutorials folder.
+
+Subsequently, we briefly explain how to use the command line interface.
+Note that you have to activate first the Python environment in which the CommonRoad Scenario Designer was installed.
+Converting a file from OpenDRIVE to CommonRoad with the command line::
+
+    crdesigner [mode] -i [input_file] -o [output_file] -c -f -t [tags] --proj [proj-string] --adjacencies --left-driving --author --affiliation
+
+For a description of the command line arguments please execute::
+
+    crdesigner -h
+
+The GUI can be started from command line via the following two options::
+
+    crdesigner
+
+or::
+
+    crdesigner gui
+
 
 .. toctree::
     :maxdepth: 2
