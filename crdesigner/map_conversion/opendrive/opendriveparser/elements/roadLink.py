@@ -1,7 +1,3 @@
-# -*- coding: utf-8 -*-
-
-"""Provide road link classes for the OpenDRIVE implementation."""
-
 __author__ = "Benjamin Orthen, Stefan Urban"
 __copyright__ = "TUM Cyber-Physical Systems Group"
 __credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles"]
@@ -12,7 +8,7 @@ __status__ = "Released"
 
 
 class Link:
-    """"""
+    """Road link classes for OpenDRIVE."""
 
     def __init__(self, link_id=None, predecessor=None, successor=None, neighbors=None):
         self.id_ = link_id

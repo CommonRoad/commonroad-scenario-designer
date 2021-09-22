@@ -1,3 +1,9 @@
+import unittest
+import subprocess
+from pathlib import Path
+import time
+import os
+
 __author__ = "Sebastian Maierhofer"
 __copyright__ = "TUM Cyber-Physical Systems Group"
 __credits__ = ["BMW Car@TUM"]
@@ -5,12 +11,6 @@ __version__ = "0.2"
 __maintainer__ = "Sebastian Maierhofer"
 __email__ = "commonroad@lists.lrz.de"
 __status__ = "Released"
-
-import unittest
-import subprocess
-from pathlib import Path
-import time
-import os
 
 
 # def test_gui():

@@ -1,4 +1,11 @@
-# -*- coding: utf-8 -*-
+__author__ = "Benjamin Orthen, Stefan Urban"
+__copyright__ = "TUM Cyber-Physical Systems Group"
+__credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles"]
+__version__ = "0.2"
+__maintainer__ = "Sebastian Maierhofer"
+__email__ = "commonroad@lists.lrz.de"
+__status__ = "Released"
+
 
 class Signal:
 
@@ -12,7 +19,7 @@ class Signal:
         self._type = None
         self._subtype = None
         self._country = None
-        self._signalvalue = None
+        self._signal_value = None
         self._unit = None
         self._text = None
 
@@ -86,12 +93,12 @@ class Signal:
         self._country = str(value)
 
     @property
-    def signalvalue(self):
-        return self._signalvalue
+    def signal_value(self):
+        return self._signal_value
 
-    @signalvalue.setter
+    @signal_value.setter
     def value(self, value):
-        self._signalvalue = float(value)
+        self._signal_value = float(value)
 
     @property
     def unit(self):
@@ -109,9 +116,9 @@ class Signal:
     def text(self, value):
         self._text = str(value)
 
-    @signalvalue.setter
-    def signalvalue(self, value):
-        self._signalvalue = value
+    @signal_value.setter
+    def signal_value(self, value):
+        self._signal_value = value
 
     @property
     def type(self):

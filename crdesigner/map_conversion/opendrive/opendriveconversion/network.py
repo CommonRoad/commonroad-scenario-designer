@@ -1,11 +1,6 @@
-# -*- coding: utf-8 -*-
-
-
 """Module to contain Network which can load an opendrive object and then export
-to lanelets. Iternally, the road network is represented by ParametricLanes."""
+to lanelets. Internally, the road network is represented by ParametricLanes."""
 import copy
-from multiprocessing import Pool
-from typing import List, Dict
 import numpy.linalg
 import iso3166
 from commonroad.scenario.scenario import Scenario, GeoTransformation, Location, ScenarioID

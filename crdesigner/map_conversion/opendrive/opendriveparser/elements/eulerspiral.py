@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
 from typing import Tuple
-
 import numpy as np
 from scipy import special
 

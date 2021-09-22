@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from crdesigner.map_conversion.opendrive.opendriveparser.elements.roadPlanView import PlanView
 from crdesigner.map_conversion.opendrive.opendriveparser.elements.roadLink import Link
 from crdesigner.map_conversion.opendrive.opendriveparser.elements.roadLanes import Lanes
@@ -10,6 +8,14 @@ from crdesigner.map_conversion.opendrive.opendriveparser.elements.roadLateralPro
 from crdesigner.map_conversion.opendrive.opendriveparser.elements.junction import Junction
 from crdesigner.map_conversion.opendrive.opendriveparser.elements.roadObject import Object
 from crdesigner.map_conversion.opendrive.opendriveparser.elements.roadSignal import Signal, SignalReference
+
+__author__ = "Benjamin Orthen, Stefan Urban, Sebastian Maierhofer"
+__copyright__ = "TUM Cyber-Physical Systems Group"
+__credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles, BMW Car@TUM"]
+__version__ = "0.2"
+__maintainer__ = "Sebastian Maierhofer"
+__email__ = "commonroad@lists.lrz.de"
+__status__ = "Released"
 
 
 class Road:

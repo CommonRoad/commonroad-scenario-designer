@@ -1,11 +1,3 @@
-__author__ = "Aaron Kaefer, Marcus Gabler, Sebastian Maierhofer"
-__copyright__ = "TUM Cyber-Physical Systems Group"
-__credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles, BMW Car@TUM"]
-__version__ = "0.2"
-__maintainer__ = "Sebastian Maierhofer"
-__email__ = "commonroad@lists.lrz.de"
-__status__ = "Released"
-
 import unittest
 import numpy as np
 
@@ -13,6 +5,14 @@ from commonroad.scenario.lanelet import Lanelet, LineMarking, LaneletNetwork, St
 from commonroad.scenario.scenario import Scenario, ScenarioID
 
 from crdesigner.input_output.gui.misc.map_creator import MapCreator
+
+__author__ = "Aaron Kaefer, Marcus Gabler, Sebastian Maierhofer"
+__copyright__ = "TUM Cyber-Physical Systems Group"
+__credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles, BMW Car@TUM"]
+__version__ = "0.2"
+__maintainer__ = "Sebastian Maierhofer"
+__email__ = "commonroad@lists.lrz.de"
+__status__ = "Released"
 
 
 class TestLanelet(unittest.TestCase):

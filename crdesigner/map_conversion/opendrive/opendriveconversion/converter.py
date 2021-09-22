@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Module for logic behind converting OpenDrive to ParametricLanes."""
 from typing import Tuple, List
 from crdesigner.map_conversion.opendrive.opendriveconversion.plane_elements.plane import ParametricLane, \

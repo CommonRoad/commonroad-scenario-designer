@@ -8,7 +8,7 @@
 # __email__ = "commonroad@lists.lrz.de"
 # __status__ = "Released"
 sudo apt-get install sumo sumo-tools sumo-doc
-sudo apt-get install libgeos++-dev
+conda install
 echo "export SUMO_HOME=/usr/share/sumo" >> ~/.bashrc
 grep -qxF "export SUMO_HOME=/usr/share/sumo" ~/.zshrc || echo "export SUMO_HOME=/usr/share/sumo" >> ~/.zshrc
 echo 'export PYTHONPATH="$SUMO_HOME/tools:$PYTHONPATH"' >> ~/.bashrc

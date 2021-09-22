@@ -16,7 +16,7 @@ RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86
     /opt/conda/bin/conda clean -tipsy && \
     ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh && \
     echo ". /opt/conda/etc/profile.d/conda.sh" >> ~/.bashrc && \
-	conda update -n base -c defaults conda
+    conda update -n base -c defaults conda
 
 CMD [ "/bin/bash" ]
 
@@ -26,8 +26,8 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 # Run all commands as cruser
 RUN apt-get update && apt-get install -y sudo
 RUN useradd --create-home --shell /bin/bash cruser \
-	&& usermod -aG sudo cruser \
-	&& echo "cruser ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+    && usermod -aG sudo cruser \
+    && echo "cruser ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 USER cruser
 ENV HOME="/home/cruser"
 ARG PROFILE="$HOME/.profile"
@@ -37,7 +37,7 @@ WORKDIR $HOME
 
 RUN sudo apt-get update \
 	&& sudo apt-get -y upgrade \
-	&& sudo apt-get -y install git gcc g++ cmake make python3-dev libproj-dev proj-data proj-bin libgeos-dev
+	&& sudo apt-get -y install git gcc g++ cmake make
 
 SHELL ["/bin/bash", "-c"]
 
@@ -47,10 +47,33 @@ ENV SUMO_HOME=/usr/share/sumo
 ENV PATH=$PATH:$SUMO_HOME/bin
 
 RUN sudo apt-get install -y software-properties-common \
-	&& sudo apt-get update \
-	&& sudo apt-get install -y ffmpeg sumo sumo-tools sumo-doc
+    && sudo apt-get update \
+    && sudo apt-get install -y ffmpeg sumo sumo-tools sumo-doc
 
 # activate conda environment
 RUN conda create --name commonroad-py37 python=3.7 && \
     conda create --name commonroad-py38 python=3.8 && \
     conda create --name commonroad-py39 python=3.9
+
+# Install cartopy
+RUN source activate commonroad-py37 \
+    && echo "Successfully installed Python version:" \
+    && python --version \
+    && conda install -c conda-forge cartopy \
+    && grep -v "git" requirements.txt | pip install -r /dev/stdin \
+    && grep -v "git" test_requirements.txt | pip install -r /dev/stdin && \
+    source activate commonroad-py38 \
+    && echo "Successfully installed Python version:" \
+    && python --version \
+    && conda install -c conda-forge cartopy \
+    && grep -v "git" requirements.txt | pip install -r /dev/stdin \
+    && grep -v "git" test_requirements.txt | pip install -r /dev/stdin && \
+    source activate commonroad-py39 \
+    && echo "Successfully installed Python version:" \
+    && python --version \
+    && conda install -c conda-forge cartopy \
+    && grep -v "git" requirements.txt | pip install -r /dev/stdin \
+    && grep -v "git" test_requirements.txt | pip install -r /dev/stdin
+
+# update path to include packages installed by conda
+ENV PATH $HOME/.local/bin:$PATH

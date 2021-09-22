@@ -1,8 +1,5 @@
-# -*- coding: utf-8 -*-
-
 """Module describe parametric lane groups, which are groups combining consecutive
 associated parametric lanes."""
-
 from typing import Tuple, Optional, List
 import math
 import numpy as np

@@ -9,15 +9,15 @@ CommonRoad maps and scenarios.
 
 |  Tool                               |Path                                       |Functionality                                                                        |
 | :---------------------------------: |:----------------------------------------: |:----------------------------------------------------------------------------------: |
-|OpenDRIVE &rightarrow; CR            |`crdesigner/converter/opendrive`           |Conversion from OpenDRIVE to CommonRoad.                                             |
-|Lanelet/Lanelet2 &leftrightarrow; CR |`crdesigner/converter/lanelet_lanelet2`    |Conversion from Lanelet/Lanelet2 to CommonRoad <br /> and from CommonRoad to lanelet |
-|OSM &rightarrow; CR                  |`crdesigner/converter/osm2cr`              |Conversion from OSM to CommonRoad.                                                   |
-|SUMO &leftrightarrow; CR             |`crdesigner/converter/sumo_map`            |Conversion from SUMO to CommonRoad and vice versa.                                   |
-|CR Scenario Designer GUI             |`crdesigner/io/gui                        `|Multi-functional GUI for map conversion and scenario generation.                     |
+|OpenDRIVE &rightarrow; CR            |`crdesigner/map_converter/opendrive`           |Conversion from OpenDRIVE to CommonRoad.                                             |
+|Lanelet/Lanelet2 &leftrightarrow; CR |`crdesigner/map_converter/lanelet_lanelet2`    |Conversion from Lanelet/Lanelet2 to CommonRoad <br /> and from CommonRoad to lanelet |
+|OSM &rightarrow; CR                  |`crdesigner/map_converter/osm2cr`              |Conversion from OSM to CommonRoad.                                                   |
+|SUMO &leftrightarrow; CR             |`crdesigner/map_converter/sumo_map`            |Conversion from SUMO to CommonRoad and vice versa.                                   |
+|CR Scenario Designer GUI             |`crdesigner/input_output/gui                  `|Multi-functional GUI for map conversion and scenario generation.                     |
 
 ## Prerequisites and Installation
 For the execution of the _CommonRoad Scenario Designer_ you need at least Python 3.7 and the following modules:
-- commonroad_io >= 2021.1
+- commonroad_io >= 2021.3
 - matplotlib >= 3.1.0
 - numpy >= 1.16.4
 - ordered-set >= 4.0.2
@@ -29,18 +29,29 @@ For the execution of the _CommonRoad Scenario Designer_ you need at least Python
 - utm >= 0.5.0
 - cartopy >= 0.17.0
 - PyQt5 >= 5.12.2
+- shapely>=1.7.0
+- sumocr>=2021.5
+- ordered-set>=4.0.2
+- enum34>=1.1.10
+- iso3166>=1.0.1
+- future>=0.17.1
+- networkx>=2.5
 
 If you want to use the SUMO conversion or to generate traffic using SUMO, please install 
-[SUMO](https://sumo.dlr.de/docs/index.html) 
-and our [SUMO-Interface](https://gitlab.lrz.de/tum-cps/commonroad-sumo-interface).
+[SUMO](https://sumo.dlr.de/docs/index.html).
+We provide an installation script for that.
 
 
-The usage of the Anaconda Python distribution is recommended.  
+The usage of the Anaconda Python distribution is recommended. We have tested the toolbox with Python 3.7, 3.8, and 3.9.
 To install the _CommonRoad Scenario Designer_, please execute one of the following two commands:
 ```bash
-python setup.py install
 pip install -e .
 ```
+or
+```bash
+python setup.py install
+```
+We will soon publish the toolbox on PyPI.
 
 ## Usage
 We provide different types of usage for the _CommonRoad Scenario Designer_. Subsequently, we present for each component 
@@ -62,7 +73,7 @@ Afterward, you can start the _CommonRoad Scenario Designer_ and the GUI will ope
 ```bash
 $ conda activate commonroad
 # Run CR Scenario designer
-$ python crdesigner/io/gui/commonroad_scenario_designer_gui.py
+$ python crdesigner/input_output/gui/commonroad_scenario_designer_gui.py
 ```
 
 #### Command Line
@@ -78,7 +89,7 @@ You can execute the different converters either via command line, calling them w
 or the GUI.
 
 #### API
-The main APIs to execute the pure conversions are located under `crdesigner/io/api`. 
+The main APIs to execute the pure conversions are located under `crdesigner/input_output/api`. 
 For many conversions we provide further APIs, e.g., for downloading a map from OSM.
 
 #### Command Line
@@ -108,21 +119,20 @@ scenarios by hand via the GUI.
 To generate the documentation from source, first install the necessary dependencies with pip:
 
 ```bash
-pip install -r docs_requirements.txt
+pip install -r doc/doc_requirements.txt
 ```
 
 Afterward run:
 
 ```bash
-cd docs && make html
+cd doc && make html
 ```
 
-The documentation can be accessed by opening `docs/_build/html/index.html`.
+The documentation can be accessed by opening `doc/_build/html/index.html`.
 
 ## Bug and feature reporting
 
-In case you detect a bug or you want to suggest a new feature, please create an issue in the repository 
-(if you are TUM member) or report them in our forum (https://commonroad.in.tum.de/forum/c/map-tool/11). 
+In case you detect a bug or you want to suggest a new feature, please report it in our [forum](https://commonroad.in.tum.de/forum/c/scenario-designer/18) forum. 
 
 ## Authors
 

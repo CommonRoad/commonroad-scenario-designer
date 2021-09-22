@@ -1,10 +1,6 @@
-# -*- coding: utf-8 -*-
-
 """Module for parametric lanes, which is an intermediate step between OpenDRIVE lanes
 and lanelets."""
-
 from typing import Tuple
-
 import numpy as np
 from crdesigner.map_conversion.opendrive.opendriveconversion.plane_elements.border import Border
 from crdesigner.map_conversion.opendrive.opendriveparser.elements.geometry import calc_next_s

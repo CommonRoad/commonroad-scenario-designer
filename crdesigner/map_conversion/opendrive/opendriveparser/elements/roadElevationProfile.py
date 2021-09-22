@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from crdesigner.map_conversion.opendrive.opendriveparser.elements.road_record import RoadRecord
 
 __author__ = "Benjamin Orthen, Stefan Urban"

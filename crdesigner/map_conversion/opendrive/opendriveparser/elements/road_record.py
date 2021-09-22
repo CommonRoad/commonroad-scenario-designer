@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+from abc import ABC
 
 __author__ = "Benjamin Orthen, Stefan Urban"
 __copyright__ = "TUM Cyber-Physical Systems Group"
@@ -7,8 +7,6 @@ __version__ = "0.2"
 __maintainer__ = "Sebastian Maierhofer"
 __email__ = "commonroad@lists.lrz.de"
 __status__ = "Released"
-
-from abc import ABC
 
 
 class RoadRecord(ABC):

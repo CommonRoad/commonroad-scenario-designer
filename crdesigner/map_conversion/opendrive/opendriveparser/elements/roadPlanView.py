@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import math
 from typing import Tuple, List, Union
 

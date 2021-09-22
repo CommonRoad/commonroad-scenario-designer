@@ -1,3 +1,8 @@
+import itertools
+from typing import List, Iterable
+import logging
+from lxml import etree
+
 __author__ = "Benjamin Orthen, Sebastian Maierhofer"
 __copyright__ = "TUM Cyber-Physical Systems Group"
 __credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles, BMW Car@TUM"]
@@ -5,12 +10,6 @@ __version__ = "0.2"
 __maintainer__ = "Sebastian Maierhofer"
 __email__ = "commonroad@lists.lrz.de"
 __status__ = "Released"
-
-import itertools
-from typing import List, Iterable
-import logging
-from lxml import etree
-
 
 tolerance = 0.1
 

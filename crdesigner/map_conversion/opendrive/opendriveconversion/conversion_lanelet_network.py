@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Module to enhance LaneletNetwork class
 so it can be used for conversion from the opendrive format."""
 import itertools

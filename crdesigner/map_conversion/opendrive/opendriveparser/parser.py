@@ -2,56 +2,36 @@ import numpy as np
 from lxml import etree
 from crdesigner.map_conversion.opendrive.opendriveparser.elements.opendrive import OpenDrive, Header
 from crdesigner.map_conversion.opendrive.opendriveparser.elements.road import Road
-from crdesigner.map_conversion.opendrive.opendriveparser.elements.roadLink import (
-    Predecessor as RoadLinkPredecessor,
-    Successor as RoadLinkSuccessor,
-    Neighbor as RoadLinkNeighbor,
-)
-from crdesigner.map_conversion.opendrive.opendriveparser.elements.roadtype import (
-    RoadType,
-    Speed as RoadTypeSpeed,
-)
-from crdesigner.map_conversion.opendrive.opendriveparser.elements.roadElevationProfile import (
-    ElevationRecord as RoadElevationProfile,
-)
-from crdesigner.map_conversion.opendrive.opendriveparser.elements.roadLateralProfile import (
-    Superelevation as RoadLateralProfileSuperelevation,
-    Crossfall as RoadLateralProfileCrossfall,
-    Shape as RoadLateralProfileShape,
-)
-from crdesigner.map_conversion.opendrive.opendriveparser.elements.roadLanes import (
-    LaneOffset as RoadLanesLaneOffset,
-    Lane as RoadLaneSectionLane,
-    LaneSection as RoadLanesSection,
-    LaneWidth as RoadLaneSectionLaneWidth,
-    LaneBorder as RoadLaneSectionLaneBorder,
-    RoadMark as RoadLaneRoadMark
-)
-from crdesigner.map_conversion.opendrive.opendriveparser.elements.junction import (
-    Junction,
-    Connection as JunctionConnection,
-    LaneLink as JunctionConnectionLaneLink,
-)
-from crdesigner.map_conversion.opendrive.opendriveparser.elements.roadSignal import (
-    Signal as RoadSignal,
-    SignalReference,
-)
+from crdesigner.map_conversion.opendrive.opendriveparser.elements.roadLink import Predecessor as RoadLinkPredecessor, \
+    Successor as RoadLinkSuccessor, Neighbor as RoadLinkNeighbor
+from crdesigner.map_conversion.opendrive.opendriveparser.elements.roadtype import RoadType, Speed as RoadTypeSpeed
+from crdesigner.map_conversion.opendrive.opendriveparser.elements.roadElevationProfile \
+    import ElevationRecord as RoadElevationProfile
+from crdesigner.map_conversion.opendrive.opendriveparser.elements.roadLateralProfile \
+    import Superelevation as RoadLateralProfileSuperelevation, Crossfall as RoadLateralProfileCrossfall, \
+    Shape as RoadLateralProfileShape
+from crdesigner.map_conversion.opendrive.opendriveparser.elements.roadLanes import LaneOffset as RoadLanesLaneOffset, \
+    Lane as RoadLaneSectionLane, LaneSection as RoadLanesSection, LaneWidth as RoadLaneSectionLaneWidth, \
+    LaneBorder as RoadLaneSectionLaneBorder, RoadMark as RoadLaneRoadMark
+from crdesigner.map_conversion.opendrive.opendriveparser.elements.junction import Junction, \
+    Connection as JunctionConnection, LaneLink as JunctionConnectionLaneLink
+from crdesigner.map_conversion.opendrive.opendriveparser.elements.roadSignal import Signal as RoadSignal, \
+    SignalReference
 
-__author__ = "Benjamin Orthen, Stefan Urban"
+__author__ = "Benjamin Orthen, Stefan Urban, Sebastian Maierhofer"
 __copyright__ = "TUM Cyber-Physical Systems Group"
-__credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles"]
+__credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles, BMW Car@TUM"]
 __version__ = "0.2"
 __maintainer__ = "Sebastian Maierhofer"
 __email__ = "commonroad@lists.lrz.de"
 __status__ = "Released"
 
 
-def parse_opendrive(root_node) -> OpenDrive:
+def parse_opendrive(root_node: etree.ElementTree) -> OpenDrive:
     """
     Tries to parse XML tree, returns OpenDRIVE object
-    sche1!
 
-    :param root_node:
+    :param root_node: loaded OpenDRIVE data
     :return: The object representing an OpenDrive specification.
     """
     # Only accept lxml element
@@ -76,13 +56,12 @@ def parse_opendrive(root_node) -> OpenDrive:
     return opendrive
 
 
-def parse_opendrive_road_link(new_road, opendrive_road_link):
+def parse_opendrive_road_link(new_road: Road, opendrive_road_link: etree.ElementTree):
     """
+    Parses OpenDRIVE Road Link element
 
-    Args:
-      new_road:
-      opendrive_road_link:
-
+    :param new_road: Road element where link should be added.
+    :param opendrive_road_link: Loaded OpenDRIVE link.
     """
     predecessor = opendrive_road_link.find("predecessor")
 
@@ -110,14 +89,12 @@ def parse_opendrive_road_link(new_road, opendrive_road_link):
         new_road.link.neighbors.append(new_neighbor)
 
 
-def parse_opendrive_road_type(road, opendrive_xml_road_type: etree.ElementTree):
-    """Parse opendrive road type and append to road object.
+def parse_opendrive_road_type(road: Road, opendrive_xml_road_type: etree.ElementTree):
+    """
+    Parse opendrive road type and appends it to road object.
 
-    Args:
-      road: Road to append the parsed road_type to types.
-      opendrive_xml_road_type: XML element which contains the information.
-      opendrive_xml_road_type: etree.ElementTree:
-
+    :param road: Road to append the parsed road_type to types.
+    :param opendrive_xml_road_type: XML element which contains the information.
     """
     speed = None
     if opendrive_xml_road_type.find("speed") is not None:
@@ -134,15 +111,13 @@ def parse_opendrive_road_type(road, opendrive_xml_road_type: etree.ElementTree):
     road.types.append(road_type)
 
 
-def parse_opendrive_road_geometry(new_road, road_geometry):
+def parse_opendrive_road_geometry(new_road: Road, road_geometry: etree.ElementTree):
     """
+    Parse OpenDRIVE road geometry and appends it to road object.
 
-    Args:
-      new_road:
-      road_geometry:
-
+    :param new_road: Road to append the parsed road geometry.
+    :param road_geometry: XML element which contains the information.
     """
-
     start_coord = [float(road_geometry.get("x")), float(road_geometry.get("y"))]
 
     if road_geometry.find("line") is not None:
@@ -210,15 +185,13 @@ def parse_opendrive_road_geometry(new_road, road_geometry):
         raise Exception("invalid xml")
 
 
-def parse_opendrive_road_elevation_profile(new_road, road_elevation_profile):
+def parse_opendrive_road_elevation_profile(new_road: Road, road_elevation_profile: etree.ElementTree):
     """
+    Parse OpenDRIVE road elevation profile and appends it to road object.
 
-    Args:
-      new_road:
-      road_elevation_profile:
-
+    :param new_road: Road to append the parsed road elevation profile.
+    :param road_elevation_profile: XML element which contains the information.
     """
-
     for elevation in road_elevation_profile.findall("elevation"):
         new_elevation = (
             RoadElevationProfile(
@@ -233,15 +206,13 @@ def parse_opendrive_road_elevation_profile(new_road, road_elevation_profile):
         new_road.elevationProfile.elevations.append(new_elevation)
 
 
-def parse_opendrive_road_lateral_profile(new_road, road_lateral_profile):
+def parse_opendrive_road_lateral_profile(new_road: Road, road_lateral_profile: etree.ElementTree):
     """
+    Parse OpenDRIVE road lateral profile and appends it to road object.
 
-    Args:
-      new_road:
-      road_lateral_profile:
-
+    :param new_road: Road to append the parsed road lateral profile.
+    :param road_lateral_profile: XML element which contains the information.
     """
-
     for super_elevation in road_lateral_profile.findall("superelevation"):
         new_super_elevation = RoadLateralProfileSuperelevation(
             float(super_elevation.get("a")),
@@ -278,15 +249,13 @@ def parse_opendrive_road_lateral_profile(new_road, road_lateral_profile):
         new_road.lateralProfile.shapes.append(new_shape)
 
 
-def parse_opendrive_road_lane_offset(new_road, lane_offset):
+def parse_opendrive_road_lane_offset(new_road: Road, lane_offset: etree.ElementTree):
     """
+    Parse OpenDRIVE road lane offset and appends it to road object.
 
-    Args:
-      new_road:
-      lane_offset:
-
+    :param new_road: Road to append the parsed road lane offset.
+    :param lane_offset: XML element which contains the information.
     """
-
     new_lane_offset = RoadLanesLaneOffset(
         float(lane_offset.get("a")),
         float(lane_offset.get("b")),
@@ -298,14 +267,13 @@ def parse_opendrive_road_lane_offset(new_road, lane_offset):
     new_road.lanes.laneOffsets.append(new_lane_offset)
 
 
-def parse_opendrive_road_lane_section(new_road, lane_section_id, lane_section):
+def parse_opendrive_road_lane_section(new_road: Road, lane_section_id: int, lane_section: etree.ElementTree):
     """
+    Parse OpenDRIVE road lane section and appends it to road object.
 
-    Args:
-      new_road:
-      lane_section_id:
-      lane_section:
-
+    :param new_road: Road to append the parsed road lane section.
+    :param lane_section_id: ID which should be assigned to lane section.
+    :param lane_section: XML element which contains the information.
     """
 
     new_lane_section = RoadLanesSection(road=new_road)
@@ -420,32 +388,37 @@ def parse_opendrive_road_lane_section(new_road, lane_section_id, lane_section):
     new_road.lanes.lane_sections.append(new_lane_section)
 
 
-def parse_opendrive_road_signal(new_road, road_signal):
+def parse_opendrive_road_signal(new_road: Road, road_signal: etree.ElementTree):
     """
+    Parse OpenDRIVE road signal and appends it to road object.
 
-    :param new_road: class Road
-    :param road_signal: class Signal
-    :return: Attributes of signal element in xodr
-
+    :param new_road: Road to append the parsed road lane section.
+    :param road_signal: XML element which contains the information.
     """
-    newSignal = RoadSignal()
-    newSignal.id = road_signal.get("id")
-    newSignal.s = road_signal.get("s")  # position along the reference curve
-    newSignal.t = road_signal.get("t")  # position away from the reference curve
-    newSignal.name = road_signal.get("name")
-    newSignal.country = road_signal.get("country")
-    newSignal.type = road_signal.get("type")
-    newSignal.subtype = road_signal.get("subtype")
-    newSignal.orientation = road_signal.get("orientation")
-    newSignal.dynamic = road_signal.get("dynamic")
-    newSignal.signalvalue = road_signal.get("value")
-    newSignal.unit = road_signal.get("unit")
-    newSignal.text = road_signal.get("text")
+    new_signal = RoadSignal()
+    new_signal.id = road_signal.get("id")
+    new_signal.s = road_signal.get("s")  # position along the reference curve
+    new_signal.t = road_signal.get("t")  # position away from the reference curve
+    new_signal.name = road_signal.get("name")
+    new_signal.country = road_signal.get("country")
+    new_signal.type = road_signal.get("type")
+    new_signal.subtype = road_signal.get("subtype")
+    new_signal.orientation = road_signal.get("orientation")
+    new_signal.dynamic = road_signal.get("dynamic")
+    new_signal.signal_value = road_signal.get("value")
+    new_signal.unit = road_signal.get("unit")
+    new_signal.text = road_signal.get("text")
 
-    new_road.addSignal(newSignal)
+    new_road.addSignal(new_signal)
 
 
-def parse_opendrive_road_signal_reference(new_road, road_signal_reference):
+def parse_opendrive_road_signal_reference(new_road: Road, road_signal_reference: etree.ElementTree):
+    """
+    Parse OpenDRIVE road signal reference and appends it to road object.
+
+    :param new_road: Road to append the parsed road signal reference.
+    :param road_signal_reference: XML element which contains the information.
+    """
     new_signal_reference = SignalReference()
     new_signal_reference.id = road_signal_reference.get("id")
     new_signal_reference.s = road_signal_reference.get("s")  # position along the reference curve
@@ -455,13 +428,12 @@ def parse_opendrive_road_signal_reference(new_road, road_signal_reference):
     new_road.addSignalReference(new_signal_reference)
 
 
-def parse_opendrive_road(opendrive, road):
+def parse_opendrive_road(opendrive: OpenDrive, road: etree.ElementTree):
     """
+    Parse OpenDRIVE road and appends it to OpenDRIVE object.
 
-    Args:
-      opendrive:
-      road:
-
+    :param opendrive: OpenDRIVE object to append the parsed road.
+    :param road: XML element which contains the information.
     """
 
     new_road = Road()
@@ -469,10 +441,10 @@ def parse_opendrive_road(opendrive, road):
     new_road.id = int(road.get("id"))
     new_road.name = road.get("name")
 
-    junctionId = int(road.get("junction")) if road.get("junction") != "-1" else None
+    junction_id = int(road.get("junction")) if road.get("junction") != "-1" else None
 
-    if junctionId:
-        new_road.junction = opendrive.getJunction(junctionId)
+    if junction_id:
+        new_road.junction = opendrive.getJunction(junction_id)
 
     # TODO verify road length
     new_road.length = float(road.get("length"))
@@ -535,13 +507,13 @@ def parse_opendrive_road(opendrive, road):
     opendrive.roads.append(new_road)
 
 
-def calculate_lane_section_lengths(new_road):
+def calculate_lane_section_lengths(new_road: Road):
+    """
+    Calculates lane section length for OpenDRIVE road.
+
+    :param new_road: OpenDRIVE road for which lane section length should be calculated.
     """
 
-    Args:
-      new_road:
-
-    """
     # OpenDRIVE does not provide lane section lengths by itself, calculate them by ourselves
     for lane_section in new_road.lanes.lane_sections:
 
@@ -568,14 +540,14 @@ def calculate_lane_section_lengths(new_road):
                 width.length = widths_lengths[widthIdx]
 
 
-def parse_opendrive_header(opendrive, header):
+def parse_opendrive_header(opendrive: OpenDrive, header: etree.ElementTree):
+    """
+    Parse OpenDRIVE header and appends it to OpenDRIVE object.
+
+    :param opendrive: OpenDRIVE object to append the parsed header.
+    :param header: XML element which contains the information.
     """
 
-    Args:
-      opendrive:
-      header:
-
-    """
     # Generates object out of the attributes of the header
     parsed_header = Header(
         header.get("revMajor"),
@@ -596,14 +568,14 @@ def parse_opendrive_header(opendrive, header):
     opendrive.header = parsed_header
 
 
-def parse_opendrive_junction(opendrive, junction):
+def parse_opendrive_junction(opendrive: OpenDrive, junction: etree.ElementTree):
+    """
+    Parse OpenDRIVE junction and appends it to OpenDRIVE object.
+
+    :param opendrive: OpenDRIVE object to append the parsed junction.
+    :param junction: XML element which contains the information.
     """
 
-    Args:
-      opendrive:
-      junction:
-
-    """
     new_junction = Junction()
 
     new_junction.id = int(junction.get("id"))
