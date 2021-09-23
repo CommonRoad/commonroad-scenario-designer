@@ -48,4 +48,6 @@ build_package:
     only:
         - master
         - develop
-    script: python setup.py sdist bdist_wheel
+    script:
+        - source activate commonroad-py39
+        - python setup.py sdist bdist_wheel
