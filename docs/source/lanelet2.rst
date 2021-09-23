@@ -14,17 +14,17 @@ Converting Lanelet/Lanelet2 to CommonRoad and vice versa
 ########################################################
 
 Lanelet/Lanelet2 to CommonRoad
-------------------------------
+******************************
 This conversion allows you to convert a road network description from the
 `Lanelet/Lanelet2 format <https://github.com/fzi-forschungszentrum-informatik/Lanelet2>`_ to
 the `CommonRoad format <https://gitlab.lrz.de/tum-cps/commonroad-sc
 enarios/blob/master/documentation/XML_commonRoad_2020a.pdf>`_ (Version 2020a).
 
 Quick Start Guide
-*****************
+=================
 
 Command Line Interface
-========================
+----------------------
 
 Want to quickly convert an Lanelet/Lanelet2 file to a CommonRoad map?
 
@@ -44,7 +44,7 @@ Note that you have to activate the Python environment in which the CommonRoad Sc
 use the command line.
 
 Python APIs
-==========================================
+-----------
 
 .. code:: python
 
@@ -55,10 +55,10 @@ Python APIs
     from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
     from commonroad.planning.planning_problem import PlanningProblemSet
 
-    from crdesigner.conversion.lanelet_lanelet2.lanelet2cr import Lanelet2CRConverter
-    from crdesigner.conversion.lanelet_lanelet2.lanelet2_parser import Lanelet2Parser
+    from crdesigner.map_conversion.lanelet_lanelet2.lanelet2cr import Lanelet2CRConverter
+    from crdesigner.map_conversion.lanelet_lanelet2.lanelet2_parser import Lanelet2Parser
 
-    from crdesigner.io.api import lanelet_to_commonroad
+    from crdesigner.input_output.api import lanelet_to_commonroad
 
     input_path = ""  # replace empty string
     proj = ""  # replace empty string
@@ -103,7 +103,7 @@ Python APIs
                          OverwriteExistingFile.ALWAYS)
 
 Implementation Details
-**********************
+======================
 
 As OSM lanelet boundaries are saved as geographic coordinates (lat, lon) and CommonRoad saves the
 boundaries as cartesian (map projection) coordinates, a projection is needed for the conversion.
@@ -122,17 +122,17 @@ A few comments on the conversion:
 - Lanelets can be adjacent without sharing a common way, because two ways can describe the same trajectory, but with a different number of nodes. This converter can still compare two vertices which resulted from converting two possible adjacent ways to the CommonRoad lanelet format and determine if the corresponding lanelets are adjacent. However, this is computationally quite intensive and is thus disabled by default (enable it with "--adjacencies" in the command line tool or setting "detect_adjacencies=True" when calling the converter.)
 
 CommonRoad to Lanelet
--------------------------
+*********************
 This conversion allows you to convert a road network description from
 the `CommonRoad format <https://gitlab.lrz.de/tum-cps/commonroad-sc
 enarios/blob/master/documentation/XML_commonRoad_2020a.pdf>`_ (Version 2020a) format to the
 `Lanelet/Lanelet2 format <https://github.com/fzi-forschungszentrum-informatik/Lanelet2>`_ format.
 
 Quick Start Guide
-*****************
+=================
 
 Command Line Interface
-========================
+----------------------
 
 Want to quickly convert an CommonRoad map to a OSM lanelet map?
 
@@ -151,14 +151,14 @@ Or use the GUI with the command
 
 
 Python APIs
-==========================================
+-----------
 
 .. code:: python
 
     from lxml import etree
     from commonroad.common.file_reader import CommonRoadFileReader
-    from crdesigner.conversion.lanelet_lanelet2.cr2lanelet import CR2LaneletConverter
-    from crdesigner.io.api import commonroad_to_lanelet
+    from crdesigner.map_conversion.lanelet_lanelet2.cr2lanelet import CR2LaneletConverter
+    from crdesigner.input_output.api import commonroad_to_lanelet
 
 
     input_path = ""  # replace empty string
@@ -192,7 +192,7 @@ Python APIs
 
 
 Implementation Details
-**********************
+======================
 
 Converting back from cartesian to geographic coordinates requires, like mentioned in the above description of the
 reverse conversion, a projection.

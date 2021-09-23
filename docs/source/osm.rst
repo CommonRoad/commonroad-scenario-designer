@@ -47,16 +47,16 @@ Python APIs
 
     import os
 
-    from crdesigner.io.api import osm_to_commonroad
+    from crdesigner.input_output.api import osm_to_commonroad
 
     from commonroad.scenario.scenario import Tag
     from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
     from commonroad.planning.planning_problem import PlanningProblemSet
 
-    import crdesigner.conversion.osm2cr.converter_modules.converter as converter
-    import crdesigner.conversion.osm2cr.converter_modules.cr_operations.export as ex
-    from crdesigner.conversion.osm2cr import config
-    from crdesigner.conversion.osm2cr.converter_modules.osm_operations.downloader import download_around_map
+    import crdesigner.map_conversion.osm2cr.converter_modules.converter as converter
+    import crdesigner.map_conversion.osm2cr.converter_modules.cr_operations.export as ex
+    from crdesigner.map_conversion.osm2cr import config
+    from crdesigner.map_conversion.osm2cr.converter_modules.osm_operations.downloader import download_around_map
 
     # download a map
     download_around_map(config.BENCHMARK_ID + '_downloaded.osm', 48.140289, 11.566272)
@@ -142,6 +142,58 @@ Traffic Signs and Traffic Lights.
 .. .. image::
 ..  images/example_lanelinkedit.png
 ..  :width: 500
+
+
+Important Files and Directories
+===================
+
+- `/osm_operations`: All files regarding information extraction from the given .osm file.
+- `/graph_operations`: Files that are needed to create a road_graph object.
+- `/intermediate_operations`: Files used for creating the intermediate format.
+- `/cr_operations`: Files for exporting and creating the the final a commonroad scenario.
+- `config.py`: The config file contains all settings related to the conversion process. A detailed description can be found in the crdesigner documentation
+- `converter.py`: This file orchestrates the whole conversion. It calls the different stages described earlier during the conversion process.
+- `/utility`: This directory contains various tools and files that are used throughout all stages, such as the ID generator for all elements in the final commonroad scenario.
+- `/visulization`: Files that can be used for visualization of the final commonroad scenario can be found here.
+
+Conversion Process
+===================
+
+The converting process consists currently out of three stages:
+
+- **osm to road_graph:** In the first stage all information from the .osm file is extracted and a road graph is created. This procedure is described in detail by the original thesis written by Maximilian. Later on, the creation of traffic signs and traffic lights were also added to this stage, since they could be parsed from the .osm file. All files which are used during this converting stage can be found in `/osm_operations` and `/graph_operations`.
+- **road_graph to intermediate_format:** The intermediate format was added to perform operations on the road graph easier. In this stage intersections with lane specific data are created (trough lane, turn right, turn left, ...). Also, intersections are enhanced and traffic lights are added, which were missing in the initial .osm file.  All related files can be found in `/intermediate_operations`.
+- **intermediate_format to cr_scenario:**
+  In the last stage the intermediate format is exported to a commonroad scenario. During this process checks for converting errors are performed. Also, the benchmark ID and other scenario tags are added. All files for this stage can be found in `/cr_operations`.
+
+Traffic Sign Conversion
+-----------------------
+Currently there are three different methods to retrieve information about traffic signs:
+
+- **max_speed tag from highways:** Usually every highway in the .osm file has a designated speed limit tag assigned to it. This tag is then used to create max speed signs. See [osm wiki](https://wiki.openstreetmap.org/wiki/DE:Key:maxspeed) for more information.
+- **traffic_sign tag from .osm file:** In some cases designated traffic signs tags are found onto edges highways in the .osm file. These can be then used to parse traffic signs later on. However, these tags are country specific and not very well maintained. Therefore not much effort was done here for a world wide coverage. See `osm wiki <https://wiki.openstreetmap.org/wiki/Key:traffic_sign>`_ for more information.
+- **mapillary:** Mapillary is an open source data base that can be used to retrieve more detailed information about road networks. Osm2cr uses mapillary as its main source for traffic signs. To enable mapillary, an API key has to be provided in the `config.py`. Mapillary is very convenient, since it has world wide coverage and a unified database for traffic signs. See [mapillary's documentation about traffic signs](https://www.mapillary.com/developer/api-documentation/#traffic-signs) for more information.
+
+The file `traffic_sign_parser.py` in `/graph_operations` is used to process all information about traffic signs. It provides a mapping for all traffic signs found in the .osm file and mapillary to the traffic sign format used for commonRoad and returns the final *TrafficSignElement*.
+
+Traffic signs are only assigned to the beginning or the ending of lanelet. It can therefore happen to have multiple signs or illogical sign combinations for a single lanelet.
+
+Traffic Light Conversion
+------------------------
+Usually, an .osm  file does only uses a single `traffic_signal tag <https://wiki.openstreetmap.org/wiki/Key:traffic_signals>`_ to determine if an intersection makes use of traffic lights or not. Therefore, missing information about light cycles and traffic light positions on incoming lanes has to be added during the conversion process. The following steps summarize this process:
+
+1. A traffic_signal tag is found in .osm file and added to an edge on the road graph during the *osm to road_graph* stage.
+2. In the *intermediate_format to cr_scenario* stage, all edges, which are part of intersections, are checked for the traffic signal tag. Only when a single traffic light is found, new traffic lights will be added to all other incoming lanelets of that intersection.
+3. A generic traffic light cycle for lights is generated based on the number of incoming lanelets. The duration for this cycle can be set in the `config.py`.
+4. The intersection is saved together with traffic light references in the intermediate format.
+
+Intersection Creation
+---------------------
+No reliable information about lane directions of intersections is currently saved in .osm files. Therefore, these directions and other relations of lanes in intersections have to be calculated during the *intermediate_format to cr_scenario* stage.
+
+-  Right- left- and through lanes are based on their degrees they enter and exit an intersection with.
+-  Successor relations are based on the earlier assigned tags *left-*, *right-* and *through-lane*
+-  Relations and directions for too complicated intersections are not reliably calculated yet and have room for improvements.
 
 
 When does the automated conversion work?

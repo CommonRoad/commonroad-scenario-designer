@@ -53,8 +53,7 @@ from your Anaconda environment. For the other packages, we recommend to use the 
     pip install -r requirements.txt
 
 
-If you want to use the SUMO conversion or to generate traffic using SUMO, please install
-[SUMO](https://sumo.dlr.de/docs/index.html): ::
+If you want to use the SUMO conversion or to generate traffic using SUMO, please install `SUMO <https://sumo.dlr.de/docs/index.html>`_::
 
     sudo apt-get install sumo sumo-tools sumo-doc
     echo "export SUMO_HOME=/usr/share/sumo" >> ~/.bashrc
@@ -78,6 +77,7 @@ Getting Started
 ===============
 
 A tutorial on the Python APIs can be found in the form of jupyter notebooks in the tutorials folder.
+We also provide exemplary Python scripts for each conversion within the same folder.
 
 Subsequently, we briefly explain how to use the command line interface.
 Note that you have to activate first the Python environment in which the CommonRoad Scenario Designer was installed.
@@ -99,7 +99,7 @@ or::
 
 
 
-We provide more detailed information and examples under the following links:
+We provide more detailed information and examples under the following links, e.g., information about implementation details, API usage, or limitations:
 
 .. toctree::
     :maxdepth: 2

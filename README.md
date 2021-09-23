@@ -72,7 +72,7 @@ the different usage methods.
 
 ### GUI
 
-![GUI_Screenshot](./doc/source/images/gui_screenshot.png)
+![GUI_Screenshot](docs/source/images/gui_screenshot.png)
 
 Within the GUI, you can also execute the different converters.
 The GUI can either be activated via a Python API, command line, or executing a Python script.
@@ -127,20 +127,20 @@ These estimations are imperfect (the OSM maps as well) and often it is advisable
 scenarios by hand via the GUI.
 
 #### Tutorials
-We also provide tutorials demonstrating how the different map converter APIs can be used.
+We also provide tutorials demonstrating how the different map converter APIs can be used. 
+The tutorials include a jupyter notebook and exemplary Python scripts for each conversion.
 
 ## Documentation
-
 To generate the documentation from source, first install the necessary dependencies with pip:
 
 ```bash
-pip install -r doc/doc_requirements.txt
+pip install -r docs/doc_requirements.txt
 ```
 
 Afterward run:
 
 ```bash
-cd doc && make html
+cd docs && make html
 ```
 
 The documentation can be accessed by opening `doc/_build/html/index.html`.

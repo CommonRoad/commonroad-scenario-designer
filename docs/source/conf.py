@@ -14,13 +14,15 @@
 #
 import os
 import sys
-sys.path.append(os.path.join(os.path.dirname(__file__), '../..'))
+sys.path.append(os.path.join(os.path.dirname(__file__), '../../crdesigner'))
+sys.path.append(os.path.join(os.path.dirname(__file__), '../../crdesigner/map_conversion'))
+sys.path.append(os.path.join(os.path.dirname(__file__), '../../crdesigner/input_output'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../..'))
 
 
 # -- Project information -----------------------------------------------------
 
-project = "commonroad-scenario-designer"
+project = "CommonRoad Scenario Designer"
 copyright = "2021, Technical University of Munich"
 author = "Sebastian Maierhofer"
 

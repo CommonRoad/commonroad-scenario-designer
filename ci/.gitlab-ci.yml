@@ -40,8 +40,8 @@ docs:
     stage: test
     script:
         - source activate commonroad-py39
-        - pip install -r ./doc/doc_requirements.txt
-        - cd doc && make html
+        - pip install -r ./docs/doc_requirements.txt
+        - cd docs && make html
 
 build_package:
     stage: build

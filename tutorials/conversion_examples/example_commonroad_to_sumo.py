@@ -92,4 +92,4 @@ CommonRoadFileWriter(simulated_scenario,
 
 print("creating video (this may take some time)")
 create_video(simulation.commonroad_scenarios_all_time_steps(),
-            output_folder, trajectory_pred=simulation.ego_vehicles)
+             output_folder, trajectory_pred=simulation.ego_vehicles)
