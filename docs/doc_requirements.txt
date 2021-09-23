@@ -16,10 +16,6 @@ enum34>=1.1.10
 iso3166>=1.0.1
 future>=0.17.1
 networkx>=2.5
-sphinx-autodoc-typehints>=1.6.0
-sphinx_rtd_theme>=0.4.3
-sphinx>=2.1.0
-sphinxcontrib-apidoc>=0.3.0
 
 # doc related
 sphinx-autodoc-typehints>=1.6.0
