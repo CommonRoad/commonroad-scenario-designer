@@ -25,20 +25,22 @@ Command Line Interface
 Want to quickly convert an OSM file detailing an OSM map to a XML file with a CommonRoad scenario?
 
 Use the command
-``crdesigner osm -i input-file.osm -o output-file.xml``.
+``crdesigner map-convert-osm -i input-file.osm -o output-file.xml``.
 
-For example ``crdesigner osm -i test.osm -o new_converted_file_name.xml``
+.. note::
+   You have to activate the Python environment in which the CommonRoad Scenario Designer is
+   installed before using the command line.
+
+For example, ``crdesigner map-convert-osm -i test.osm -o new_converted_file_name.xml``
 produces a file called *new_converted_file_name.xml*
 
 .. note::
    If no output file name is specified, the converted file will be called input-file.xml,
-   e.g. ``crdesigner opendrive -i test.osm`` produces a file called *test.xml*.
+   e.g., ``crdesigner map-convert-osm -i test.osm`` produces a file called *test.xml*.
 
-Or use the GUI with the command
-``crdesigner`` or ``crdesigner gui``.
+You can also use the GUI to convert an OpenDRIVE file.
+The GUI can be started from command line with ``crdesigner`` or ``crdesigner gui``.
 
-Note that you have to activate the Python environment in which the CommonRoad Scenario Designer is installed first to
-use the command line.
 
 Python APIs
 ==========================================
@@ -95,7 +97,7 @@ Python APIs
     ex.view_xml(config.SAVE_PATH + config.BENCHMARK_ID + ".xml")
 
 In order to use the API calls, the save_path and Benchmark_ID has to be set in the config file. 
-The config file can be found at */crdesigner/conversion/osm2cr* and is described in detail at the end of this document.
+The config file can be found at */crdesigner/map_conversion/osm2cr* and is described in detail at the end of this document.
 
 The GUI provides also functionality to edit already the OSM graph structure before converting to CommonRoad.
 
@@ -109,40 +111,13 @@ OpenStreetMap (OSM) files and CommonRoad (CR) scenarios are formats that can bot
 additional elements. While they both use XML to be stored on disk the internal structure has many differences.
 We will only look at the ones important for the conversion.
 
-Firstly the road network in OSM is basically a graph with nodes and edges. One edge represents a road.
-Compared to CR here we have lanelets and information about intersections.
+Firstly, the road network in OSM is basically a graph with nodes and edges. One edge represents a road.
+In CR, we have lanelets and information about intersections.
 The coordinates (GPS) in OSM are rough and the amount of points per road section is much smaller.
-To accomplish the conversion we have to use heuristics and interpolation for guessing the reality behind the data.
+To accomplish the conversion, we have to use heuristics and interpolation for guessing the reality behind the data.
 
 OSM also contains other elements like traffic signs. All this information is stored in so called tags or relations.
-With CR version 2020.2 new elements are inserted into the scenario format:
-Traffic Signs and Traffic Lights.
-
-.. Conversion Overview
-.. ===================
-
-.. Extremely simplified the conversion process works as follows:
-
-.. .. image::
-..  images/OSM_control_flow.png
-..  :width: 500
-
-.. The program takes a OSM file as input and parses it into the internel representation (graph).
-.. The refine the coordinate the user can adjust the graph with the GUI tool **EdgeEdit**.
-
-.. .. image::
-..  images/example_edgeedit.png
-..  :width: 500
-
-.. Afterwards the each edge that is representing a road with multiple lanes is split into these lane so that there is
-.. exactely one edge per lane. As intersection are only single points in OSM the lanes are cut of with a specific
-.. radius around the intersection and linked together again. This linking can be adjusted
-.. with the GUI tool **LaneLinkEdit**.
-
-.. .. image::
-..  images/example_lanelinkedit.png
-..  :width: 500
-
+With CR version 2020.2 new elements are added to the scenario format: traffic Signs and traffic lights.
 
 Important Files and Directories
 ===================
@@ -151,20 +126,42 @@ Important Files and Directories
 - `/graph_operations`: Files that are needed to create a road_graph object.
 - `/intermediate_operations`: Files used for creating the intermediate format.
 - `/cr_operations`: Files for exporting and creating the the final a commonroad scenario.
-- `config.py`: The config file contains all settings related to the conversion process. A detailed description can be found in the crdesigner documentation
+- `config.py`: The config file contains all settings related to the conversion process.
 - `converter.py`: This file orchestrates the whole conversion. It calls the different stages described earlier during the conversion process.
 - `/utility`: This directory contains various tools and files that are used throughout all stages, such as the ID generator for all elements in the final commonroad scenario.
 - `/visulization`: Files that can be used for visualization of the final commonroad scenario can be found here.
 
 Conversion Process
 ===================
-
-The converting process consists currently out of three stages:
+The conversion process consists currently out of three stages:
 
 - **osm to road_graph:** In the first stage all information from the .osm file is extracted and a road graph is created. This procedure is described in detail by the original thesis written by Maximilian. Later on, the creation of traffic signs and traffic lights were also added to this stage, since they could be parsed from the .osm file. All files which are used during this converting stage can be found in `/osm_operations` and `/graph_operations`.
 - **road_graph to intermediate_format:** The intermediate format was added to perform operations on the road graph easier. In this stage intersections with lane specific data are created (trough lane, turn right, turn left, ...). Also, intersections are enhanced and traffic lights are added, which were missing in the initial .osm file.  All related files can be found in `/intermediate_operations`.
 - **intermediate_format to cr_scenario:**
   In the last stage the intermediate format is exported to a commonroad scenario. During this process checks for converting errors are performed. Also, the benchmark ID and other scenario tags are added. All files for this stage can be found in `/cr_operations`.
+
+Lanelet Conversion
+-------------------
+Extremely simplified the main conversion process to lanelets works as follows:
+
+.. image::
+  images/OSM_control_flow.png
+  :width: 500
+
+The program takes an OSM file as input and parses it into the internal representation (graph).
+
+.. image::
+  images/example_edgeedit.png
+  :width: 500
+
+Afterwards, each edge that is representing a road with multiple lanes is split into these lane so that there is
+exactly one edge per lane. As intersection are only represented by single nodes in OSM, the lanes are cut of within
+a specific radius around the intersection and linked together again.
+
+.. image::
+  images/example_lanelinkedit.png
+  :width: 500
+
 
 Traffic Sign Conversion
 -----------------------

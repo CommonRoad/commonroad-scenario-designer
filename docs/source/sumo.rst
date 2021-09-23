@@ -15,18 +15,7 @@ Vehicle Simulation using Simulation of Urban Mobility (SUMO)
 Simulation of Urban Mobility `(SUMO) <https://sumo.dlr.de/docs/index.html>`_ is a microscopic
 traffic simulator which is able to simulate traffic
 participants, given a road network in it’s own graph like format
-of nodes and edges. Nodes represent ends of edges or other
-fixed position objects (eg., traffic signs) and are connected
-by edges. Each edge in turn can consist of multiple lanes.
-Realistic traffic constrains such as traffic lights and partially
-traffic signs can also be modelled. Additionally it provides
-the capability to simulate multiple types of traffic participants
-and interactions between them. Optionally trips for pedestrians
-and vehicles from one edge in the network to another can
-be automatically generated. SUMO also provides a set of
-tools for programmatically interacting with a network, namely
-NETEDIT.
-
+of nodes and edges.
 
 Quick Start Guide
 *****************
@@ -38,20 +27,21 @@ Command Line Interface
 Want to quickly convert an OSM file detailing an OSM map to a XML file with a CommonRoad scenario?
 
 Use the command
-``crdesigner osm -i input-file.osm -o output-file.xml``.
+``crdesigner map-convert-sumo -i input-file.net.xml -o output-file.xml``.
 
-For example ``crdesigner osm -i test.osm -o new_converted_file_name.xml``
+.. note::
+   You have to activate the Python environment in which the CommonRoad Scenario Designer is
+   installed before using the command line.
+
+For example, ``crdesigner map-convert-sumo -i test.net.xml -o new_converted_file_name.xml``
 produces a file called *new_converted_file_name.xml*
 
 .. note::
    If no output file name is specified, the converted file will be called input-file.xml,
-   e.g. ``crdesigner opendrive -i test.osm`` produces a file called *test.xml*.
+   e.g., ``crdesigner map-convert-sumo -i test.net.xml`` produces a file called *test.xml*.
 
-Or use the GUI with the command
-``crdesigner`` or ``crdesigner gui``.
-
-Note that you have to activate the Python environment in which the CommonRoad Scenario Designer is installed first to
-use the command line.
+You can also use the GUI to convert an OpenDRIVE file.
+The GUI can be started from command line with ``crdesigner`` or ``crdesigner gui``.
 
 Python APIs
 ============
@@ -164,16 +154,14 @@ The GUI provides also functionality to edit already the OSM graph structure befo
 
 Implementation Details
 **************
-SUMO is a microscopic traffic simulator which is able to simulate traffic participants,
-given a road network in it's own graph like format of nodes and edges.
-Nodes represent ends of edges or other fixed position objects (eg. traffic signs) and are connected by edges.
+In SUMO, nodes represent ends of edges or other fixed position objects (eg. traffic signs) and are connected by edges.
 Each edge in turn can consist of multiple lanes.
 Realistic traffic constrains such as traffic lights and partially traffic signs can also be modelled.
 Additionally it provides the capability to simulate multiple types of traffic participants and interactions between them.
 Optionally trips for pedestrians and vehicles from one edge in the network to another can be automatically generated.
 SUMO also provides a set of tools for programmatically interacting with a network, namely NETEDIT.
 
-The main module of the converter is in ``crdesigner/conversion/sumo_map/cr2sumo/converter.py``. Here, a
+The main module of the converter is in ``crdesigner/map_conversion/sumo_map/cr2sumo/converter.py``. Here, a
 CommonRoad Scenario is converted to its representation as a SUMO Net. This SUMO Net is then
 used as the specification for simulating vehicles with SUMO.
 

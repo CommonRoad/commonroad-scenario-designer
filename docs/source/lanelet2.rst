@@ -31,17 +31,19 @@ Want to quickly convert an Lanelet/Lanelet2 file to a CommonRoad map?
 Use the command
 ``crdesigner osm -i input-file.osm -o output-file.xml``.
 
-For example ``crdesigner osm -i test.osm -o new_converted_file_name.xml``
+.. note::
+   You have to activate the Python environment in which the CommonRoad Scenario Designer is
+   installed before using the command line.
+
+For example, ``crdesigner osm -i test.osm -o new_converted_file_name.xml``
 produces a file called *new_converted_file_name.xml*
 
 .. note::
    If no output file name is specified, the converted file will be called input-file.xml,
-   e.g. ``crdesigner opendrive -i test.osm`` produces a file called *test.xml*.
+   e.g., ``crdesigner opendrive -i test.osm`` produces a file called *test.xml*.
 
-Or use the GUI with the command
-``crdesigner`` or ``crdesigner gui``.
-Note that you have to activate the Python environment in which the CommonRoad Scenario Designer is installed first to
-use the command line.
+You can also use the GUI to convert an OpenDRIVE file.
+The GUI can be started from command line with ``crdesigner`` or ``crdesigner gui``.
 
 Python APIs
 -----------
@@ -116,8 +118,8 @@ a Universal Transversal Mercator projection.
 
 A few comments on the conversion:
 
-- A lanelet and its successor share two nodes (last ones of the lanelet, first ones of the successor). Therefore, to detect this relation and save it in the CommonRoad file, exist dicts which save the node-lanelet relation, e.g. "Node is first left node of which lanelet" (first_left_nodes[node_id] = lanelet_id).
-- Same goes for a lanelet and its predecessor.
+- A lanelet and its successor share two nodes (last ones of the lanelet, first ones of the successor). Therefore, to detect this relation and save it in the CommonRoad file, dictionaries are used which save the node-lanelet relation, e.g., "Node is first left node of which lanelet" (first_left_nodes[node_id] = lanelet_id).
+- Same for lanelet predecessor relationship.
 - If lanelets in OSM share a common way, they are adjacent to each other. As a way can have only one direction, and if it is shared by lanelets having opposite driving directions, the vertices of one boundary of one of the two lanelet have to be reversed after conversion. This boundary is by default the left boundary considering the right-driving system in most of the world. You can set it to right by using the argument "left_driving_system=True" when calling the Converter.
 - Lanelets can be adjacent without sharing a common way, because two ways can describe the same trajectory, but with a different number of nodes. This converter can still compare two vertices which resulted from converting two possible adjacent ways to the CommonRoad lanelet format and determine if the corresponding lanelets are adjacent. However, this is computationally quite intensive and is thus disabled by default (enable it with "--adjacencies" in the command line tool or setting "detect_adjacencies=True" when calling the converter.)
 
@@ -139,15 +141,19 @@ Want to quickly convert an CommonRoad map to a OSM lanelet map?
 Use the command
 ``crdesigner osm -i input-file.xodr -o output-file.xml -c``.
 
-For example ``crdesigner osm -i test.xml -o new_converted_file_name.osm -c``
+.. note::
+   You have to activate the Python environment in which the CommonRoad Scenario Designer is
+   installed before using the command line.
+
+For example, ``crdesigner osm -i test.xml -o new_converted_file_name.osm -c``
 produces a file called *new_converted_file_name.osm*
 
 .. note::
    If no output file name is specified, the converted file will be called input-file.xml,
-   e.g. ``crdesigner osm -i test.osm -c`` produces a file called *test.osm*.
+   e.g., ``crdesigner osm -i test.osm -c`` produces a file called *test.osm*.
 
-Or use the GUI with the command
-``crdesigner`` or ``crdesigner gui``.
+You can also use the GUI to convert an OpenDRIVE file.
+The GUI can be started from command line with ``crdesigner`` or ``crdesigner gui``.
 
 
 Python APIs
@@ -200,5 +206,5 @@ reverse conversion, a projection.
 This code of this conversion take some points into account:
 
 - If a lanelet has a successor, the converted nodes at the end of the lanelet have to be the same as the nodes of the converted successor.
-- Same goes for a lanelet and its predecessor.
+- Same lanelet predecessor relationships.
 - If a lanelet is adjacent to another lanelet, and the vertices of the shared border coincide, they can share a way in the converted OSM document.

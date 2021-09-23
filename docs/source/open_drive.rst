@@ -34,19 +34,22 @@ Want to quickly convert an XODR file detailing a OpenDRIVE scenario
 to a XML file with a CommonRoad scenario?
 
 Use the command
-``crdesigner opendrive -i input-file.xodr -o output-file.xml``.
+``crdesigner map-convert-opendrive -i input-file.xodr -o output-file.xml``.
 
-For example ``crdesigner opendrive -i test.xodr -o new_converted_file_name.xml``
+.. note::
+   You have to activate the Python environment in which the CommonRoad Scenario Designer is
+   installed before using the command line.
+
+For example, ``crdesigner map-convert-opendrive -i test.xodr -o new_converted_file_name.xml``
 produces a file called *new_converted_file_name.xml*
 
 .. note::
    If no output file name is specified, the converted file will be called input-file.xml,
-   e.g. ``crdesigner opendrive -i test.xodr`` produces a file called *test.xml*.
+   e.g., ``crdesigner map-convert-opendrive -i test.xodr`` produces a file called *test.xml*.
 
-Or use the GUI with the command
-``crdesigner`` or ``crdesigner gui``.
-Note that you have to activate the Python environment in which the CommonRoad Scenario Designer is installed first to
-use the command line.
+You can also use the GUI to convert an OpenDRIVE file.
+The GUI can be started from command line with ``crdesigner`` or ``crdesigner gui``.
+
 
 Python APIs
 ==========================================
@@ -120,14 +123,15 @@ the converting to a network of ``ParametricLane`` object and the
 conversion from parametric lanes to lanelets is explained.
 
 The three main types of formats are:
-- `OpenDRIVE format`: In OpenDRIVE, roads are specified based on a reference path. Individual lanes are created by specifying a lateral distance from a reference path.  Lanes with a negative lane number (ID) have the same direction as the reference path and positive IDs indicate that the direction is opposite
+
+- `OpenDRIVE format`: In OpenDRIVE, roads are specified based on a reference path. Individual lanes are created by specifying a lateral distance from a reference path. Lanes with a negative lane number (ID) have the same direction as the reference path and positive IDs indicate that the direction is opposite.
 - `Lanelet format`: Lanelets are atomic, interconnected, and drivable road segments. A lanelet is defined by its left and right bound, where each bound is represented by an array of points.Two lanelets are called longitudinally adjacent, if the left and right start points of one lanelet are identical with the corresponding final points of the next lanelet in driving direction. The longitudinal, left, right, and empty adjacencies form a road network that can be modeled as a directed graph.
--`Parametric lanes`: In OpenDRIVE, lanes are merged by gradually reducing their width to zero or split by gradually increasing the width from zero. In a lanelet network, the end points have to coincide with starting points of another lanelet so that splitting and merging is realized. To conveniently perform the conversion of merging and splitting, the concept of parametric lanes is used. These eliminate the dependency of each lane on its inner neighbor by specifying the borders with respect to the reference path. The following parameters are required for parametric lanes: offset - distance from the beginning of the reference path of the considered section, path length of the parametric lane, inner and outer borders specified as distances to the reference path varying along the reference path.
+- `Parametric lanes`: In OpenDRIVE, lanes are merged by gradually reducing their width to zero or split by gradually increasing the width from zero. In a lanelet network, the end points have to coincide with starting points of another lanelet so that splitting and merging is realized. To conveniently perform the conversion of merging and splitting, the concept of parametric lanes is used. These eliminate the dependency of each lane on its inner neighbor by specifying the borders with respect to the reference path. The following parameters are required for parametric lanes: 1 ) offset specifying distance from the beginning of the reference path of the considered section, 2) path length of the parametric lane, 3) inner and outer borders specified as distances to the reference path varying along the reference path.
 
 Code Structure
 ==============
-Subsequently, we provide a simplified overview about the code structure. Note that the presented code
-structure is not complete::
+Subsequently, we provide a simplified overview about the code structure (the presented code
+structure is not complete)::
 
     /map_conversion/opendrive
     │
@@ -153,8 +157,6 @@ structure is not complete::
 - `conversion_lanelet_network.py`: Module to enhance LaneletNetwork class so it can be used for conversion from the OpenDRIVE format and further enable it to modify its lanelets.
 
 
-
-
 .. _fig.layout-opendrive:
 .. figure:: images/opendrive_flow_chart.png
    :alt: Layout of the CommonRoad Scenario Designer.
@@ -167,8 +169,8 @@ structure is not complete::
 Parsing OpenDRIVE
 ==================
 
-Parsing the OpenDRIVE xodr file is pretty straightforward. We mirror the OpenDRIVE document
-with a Python class in this package. The XML is parsed and from the results a OpenDRIVE object is created.
+Parsing the OpenDRIVE xodr file is straightforward. We mirror the OpenDRIVE document
+with a Python class in this package. The XML is parsed and from the results an OpenDRIVE object is created.
 
 
 Converting to Network of ParametricLanes
@@ -179,13 +181,11 @@ ParametricLanes have a ParametricLaneBorderGroup which has references to the lef
 ParametricLane and to the offset of each borders, which indicate at which point of the border the ParametricLane
 starts, as a Border can be used by multiple ParametricLanes.
 
-Calculating cartesian coordinates at a position on a border works as follows:
+Calculating Cartesian coordinates at a position on a border works as follows:
 
 - The border has a reference border which calculates its coordinates.
-- The border has one or more tuples of width coefficients. With the width coefficients which apply at the position
-(determined by a width coefficients offset), it calculates the width of its reference border.
-- The width is added to the coordinates of the reference border in orthogonal direction, which results in coordinates
-of the border at a specific position.
+- The border has one or more tuples of width coefficients. With the width coefficients which apply at the position (determined by a width coefficients offset), it calculates the width of its reference border.
+- The width is added to the coordinates of the reference border in orthogonal direction, which results in coordinates of the border at a specific position.
 
 The position on a border is always specified in a curve parameter ds which follows the path of the border.
 Each reference border is a border again, until the last reference border, which in turn is a reference path,
@@ -209,15 +209,12 @@ width of the lanelet it joins into at the end.
 
 The difficulty in determining the parameters used to calculate the new border was amplified by following problems:
 
-- Determining the position from where to calculate the new border. In general, this position is where the width of the
-joining/splitting lanelet has a zero derivative.
+- Determining the position from where to calculate the new border. In general, this position is where the width of the joining/splitting lanelet has a zero derivative.
 - The joining/splitting of a border could extend over multiple, successive lanelets.
-- The joining/splitting lanelet has to be adjacent all the time to the lanelet it joins into or splits from,
-respectively.
+- The joining/splitting lanelet has to be adjacent all the time to the lanelet it joins into or splits from, respectively.
 
 Smaller issues
 --------------
 
 - If lanelets have zero width everywhere, they are discarded.
-- If a lanelet has an adjacent neighbor, and the successor of this neighbor and the lanelets successor are adjacent
-too, the lanelets and their successors can be each merged into one lanelet in most circumstances.
+- If a lanelet has an adjacent neighbor, and the successor of this neighbor and the lanelets successor are adjacent too, the lanelets and their successors can be each merged into one lanelet in most circumstances.
