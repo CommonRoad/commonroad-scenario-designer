@@ -41,6 +41,7 @@ release = "0.2"
 # ones.
 extensions = [
     'sphinx.ext.autodoc',
+    'sphinx.ext.napoleon',
     'matplotlib.sphinxext.plot_directive',
     'IPython.sphinxext.ipython_directive',
     'IPython.sphinxext.ipython_console_highlighting',
@@ -48,8 +49,12 @@ extensions = [
     'sphinx.ext.inheritance_diagram',
     'sphinx.ext.doctest',
     'sphinx.ext.coverage',
+    'sphinx.ext.intersphinx',
+    'sphinx.ext.todo',
     'sphinx.ext.mathjax',
-    'sphinx.ext.viewcode'
+    'sphinx.ext.ifconfig',
+    'sphinx.ext.viewcode',
+    'sphinxcontrib.apidoc',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -115,3 +120,6 @@ html_logo = 'images/commonroad_white150.png'
 
 # Output file base name for HTML help builder.
 htmlhelp_basename = "crdesigner-doc"
+
+apidoc_module_dir = "../../crdesigner"
+apidoc_separate_modules = True
