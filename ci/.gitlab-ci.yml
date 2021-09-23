@@ -41,7 +41,7 @@ docs:
     script:
         - source activate commonroad-py39
         - pip install -r ./docs/doc_requirements.txt
-        - cd docs && make html
+        - cd docs && ./docs_build_script.sh
 
 build_package:
     stage: build
