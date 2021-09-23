@@ -2,8 +2,8 @@ import os
 import subprocess
 
 from commonroad.scenario.scenario import Scenario
-from crdesigner.map_conversion.opendrive.opendriveconversion.network import Network
-from crdesigner.map_conversion.opendrive.opendriveparser.parser import parse_opendrive
+from crdesigner.map_conversion.opendrive.opendrive_conversion.network import Network
+from crdesigner.map_conversion.opendrive.opendrive_parser.parser import parse_opendrive
 from lxml import etree
 
 

@@ -1,1 +1,1 @@
-include crdesigner/conversion/sumo_map/templates/*
+include crdesigner/map_conversion/sumo_map/templates/*

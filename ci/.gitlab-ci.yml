@@ -3,19 +3,18 @@ stages:
     - test
     - build
 
-image: $CI_REGISTRY/cps/commonroad-scenario-designer/ci:v0.5
+image: $CI_REGISTRY/cps/commonroad-scenario-designer/ci:v0.6.6
 
 .install-and-run: &install-and-run
-  - git config --global url."https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.lrz.de/".insteadOf "git@gitlab.lrz.de:"
-  - git clone --branch develop git@gitlab.lrz.de:cps/sumo-interface.git $HOME/sumo-interface
-  - pip install -e $HOME/sumo-interface
   - pip install -e .
-  - coverage run -m pytest tests/
+  - pip install -r ./tests/test_requirements.txt
+  - coverage run --source ./crdesigner -m pytest tests/
   - coverage report -m || true
 
 style_checks:
   stage: style_check
   script:
+    - source activate commonroad-py39
     - pip install pycodestyle
     - git  diff ${CI_COMMIT_BEFORE_SHA}...${CI_COMMIT_SHA} -- '*.py' | pycodestyle --max-line-length=120 --diff
 
@@ -41,8 +40,8 @@ docs:
     stage: test
     script:
         - source activate commonroad-py39
-        - pip install -r ./requirements.txt
-        - cd docs && make html
+        - pip install -r ./docs/doc_requirements.txt
+        - cd docs && bash ./docs_build_script.sh
 
 build_package:
     stage: build

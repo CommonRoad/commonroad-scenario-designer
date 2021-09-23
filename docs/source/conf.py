@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-#
 # Configuration file for the Sphinx documentation builder.
 #
 # This file does only contain a selection of the most common options. For a
@@ -14,19 +12,22 @@
 #
 import os
 import sys
-sys.path.insert(0, os.path.abspath(".."))
+sys.path.append(os.path.join(os.path.dirname(__file__), '../../crdesigner'))
+sys.path.append(os.path.join(os.path.dirname(__file__), '../../crdesigner/map_conversion'))
+sys.path.append(os.path.join(os.path.dirname(__file__), '../../crdesigner/input_output'))
+sys.path.append(os.path.join(os.path.dirname(__file__), '../../..'))
 
 
 # -- Project information -----------------------------------------------------
 
-project = "commonroad-scenario-designer"
+project = "CommonRoad Scenario Designer"
 copyright = "2021, Technical University of Munich"
 author = "Sebastian Maierhofer"
 
 # The short X.Y version
-version = "0.5"
+version = "0.2"
 # The full version, including alpha/beta/rc tags
-release = "0.5.0"
+release = "0.2"
 
 
 # -- General configuration ---------------------------------------------------
@@ -108,117 +109,9 @@ html_theme_options = {
     'includehidden': True,
     'titles_only': False
 }
-
-# Add any paths that contain custom static files (such as style sheets) here,
-# relative to this directory. They are copied after the builtin static files,
-# so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ["_static"]
-
-# Custom sidebar templates, must be a dictionary that maps document names
-# to template names.
-#
-# The default sidebars (for documents that don't match any pattern) are
-# defined by theme itself.  Builtin themes are using these templates by
-# default: ``['localtoc.html', 'relations.html', 'sourcelink.html',
-# 'searchbox.html']``.
-#
-# html_sidebars = {}
-
+html_logo = 'images/commonroad_white150.png'
 
 # -- Options for HTMLHelp output ---------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = "crdesigner"
-
-
-# -- Options for LaTeX output ------------------------------------------------
-
-latex_elements = {
-    # The paper size ('letterpaper' or 'a4paper').
-    #
-    # 'papersize': 'letterpaper',
-    # The font size ('10pt', '11pt' or '12pt').
-    #
-    # 'pointsize': '10pt',
-    # Additional stuff for the LaTeX preamble.
-    #
-    # 'preamble': '',
-    # Latex figure (float) alignment
-    #
-    # 'figure_align': 'htbp',
-}
-
-# Grouping the document tree into LaTeX files. List of tuples
-# (source start file, target name, title,
-#  author, documentclass [howto, manual, or own class]).
-latex_documents = [
-    (
-        master_doc,
-        "crdesigner.tex",
-        "CommonRoad Scenario Designer Documentation",
-        "Sebastian Maierhofer",
-        "manual",
-    )
-]
-
-
-# -- Options for manual page output ------------------------------------------
-
-# One entry per manual page. List of tuples
-# (source start file, name, description, authors, manual section).
-man_pages = [
-    (master_doc, "crdesigner", "CommonRoad Scenario Designer Documentation", [author], 1)
-]
-
-
-# -- Options for Texinfo output ----------------------------------------------
-
-# Grouping the document tree into Texinfo files. List of tuples
-# (source start file, target name, title, author,
-#  dir menu entry, description, category)
-texinfo_documents = [
-    (
-        master_doc,
-        "crdesigner",
-        "CommonRoad Scenario Designer Documentation",
-        author,
-        "crdesigner",
-        "Toolbox for Map Conversion and Scenario Creation for Autonomous Vehicles.",
-        "Miscellaneous",
-    )
-]
-
-
-# -- Options for Epub output -------------------------------------------------
-
-# Bibliographic Dublin Core info.
-epub_title = project
-
-# The unique identifier of the text. This can be a ISBN number
-# or the project homepage.
-#
-# epub_identifier = ''
-
-# A unique identification for the text.
-#
-# epub_uid = ''
-
-# A list of files that should not be packed into the epub file.
-epub_exclude_files = ["search.html"]
-
-
-# -- Extension configuration -------------------------------------------------
-
-# -- Options for intersphinx extension ---------------------------------------
-
-# Example configuration for intersphinx: refer to the Python standard library.
-intersphinx_mapping = {"https://docs.python.org/": None}
-
-# -- Options for todo extension ----------------------------------------------
-
-# If true, `todo` and `todoList` produce output, else they produce nothing.
-# todo_include_todos = True
-
-apidoc_module_dir = "../../crdesigner"
-# apidoc_excluded_paths = ["test", "setup.py"]
-apidoc_separate_modules = True
+htmlhelp_basename = "crdesigner-doc"

@@ -1,13 +1,3 @@
-"""Test the conversion from an osm file to a CommonRoad xml file."""
-
-__author__ = "Benjamin Orthen, Sebastian Maierhofer"
-__copyright__ = "TUM Cyber-Physical Systems Group"
-__credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles"]
-__version__ = "0.5"
-__maintainer__ = "Sebastian Maierhofer"
-__email__ = "commonroad@lists.lrz.de"
-__status__ = "Development"
-
 import time
 import os
 import unittest
@@ -22,8 +12,18 @@ from crdesigner.map_conversion.lanelet_lanelet2.lanelet2_parser import Lanelet2P
 from crdesigner.map_conversion.lanelet_lanelet2.lanelet2cr import Lanelet2CRConverter
 from tests.map_conversion.utils import elements_equal
 
+__author__ = "Benjamin Orthen, Sebastian Maierhofer"
+__copyright__ = "TUM Cyber-Physical Systems Group"
+__credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles"]
+__version__ = "0.2"
+__maintainer__ = "Sebastian Maierhofer"
+__email__ = "commonroad@lists.lrz.de"
+__status__ = "Released"
+
 
 class TestLanelet2ToCommonRoadConversion(unittest.TestCase):
+    """Tests the conversion from an osm file to a CommonRoad xml file."""
+
     @staticmethod
     def load_and_convert_opendrive(xodr_file_name: str) -> Scenario:
         cwd_path = os.path.dirname(os.path.abspath(__file__))

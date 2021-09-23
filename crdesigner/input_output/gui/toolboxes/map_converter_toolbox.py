@@ -21,8 +21,8 @@ from crdesigner.input_output.gui.osm_gui_modules.gui_embedding import EdgeEdit, 
 from crdesigner.input_output.gui.converter_modules.osm_interface import OSMInterface
 from crdesigner.input_output.gui.osm_gui_modules.gui import EdgeEditGUI, LaneLinkGUI
 
-from crdesigner.map_conversion.opendrive.opendriveparser.parser import parse_opendrive
-from crdesigner.map_conversion.opendrive.opendriveconversion.network import Network
+from crdesigner.map_conversion.opendrive.opendrive_parser.parser import parse_opendrive
+from crdesigner.map_conversion.opendrive.opendrive_conversion.network import Network
 
 from crdesigner.map_conversion.lanelet_lanelet2.lanelet2_parser import Lanelet2Parser
 from crdesigner.map_conversion.lanelet_lanelet2.lanelet2cr import Lanelet2CRConverter

@@ -8,14 +8,13 @@ from commonroad.planning.planning_problem import PlanningProblemSet
 from commonroad.scenario.scenario import Tag, Scenario
 
 from crdesigner.map_conversion.common.utils import generate_unique_id
-from crdesigner.map_conversion.opendrive.opendriveparser.parser import parse_opendrive
-from crdesigner.input_output.opendrive_convert import convert_opendrive
+from crdesigner.input_output.api import opendrive_to_commonroad
 from tests.map_conversion.utils import elements_equal
 
 __author__ = "Benjamin Orthen, Sebastian Maierhofer"
 __copyright__ = "TUM Cyber-Physical Systems Group"
 __credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles, BMW Car@TUM"]
-__version__ = "0.6"
+__version__ = "0.2"
 __maintainer__ = "Sebastian Maierhofer"
 __email__ = "commonroad@lists.lrz.de"
 __status__ = "Released"
@@ -36,10 +35,8 @@ class TestOpenDriveToCommonRoadConversion(unittest.TestCase):
                     if file.endswith('.xml'):
                         os.remove(os.path.join(dir_path, file))
 
-        with open(os.path.dirname(os.path.realpath(__file__)) +
-                  f"/opendrive_test_files/{xodr_file_name}.xodr", "r", ) as fh:
-            opendrive = parse_opendrive(etree.parse(fh).getroot())
-        return convert_opendrive(opendrive)
+        return opendrive_to_commonroad(os.path.dirname(os.path.realpath(__file__)) +
+                                       "/opendrive_test_files/{}.xodr".format(xodr_file_name))
 
     def compare_maps(self, file_name: str) -> bool:
         """

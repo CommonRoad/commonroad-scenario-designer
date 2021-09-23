@@ -5,8 +5,8 @@ from commonroad.scenario.scenario import Tag
 from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
 from commonroad.planning.planning_problem import PlanningProblemSet
 
-from crdesigner.map_conversion.opendrive.opendriveparser.parser import parse_opendrive
-from crdesigner.map_conversion.opendrive.opendriveconversion.network import Network
+from crdesigner.map_conversion.opendrive.opendrive_parser.parser import parse_opendrive
+from crdesigner.map_conversion.opendrive.opendrive_conversion.network import Network
 
 from crdesigner.input_output.api import opendrive_to_commonroad
 

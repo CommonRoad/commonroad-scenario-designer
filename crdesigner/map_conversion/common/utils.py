@@ -1,10 +1,10 @@
 __author__ = "Sebastian Maierhofer"
 __copyright__ = "TUM Cyber-Physical Systems Group"
 __credits__ = ["BMW Car@TUM"]
-__version__ = "0.5"
+__version__ = "0.2"
 __maintainer__ = "Sebastian Maierhofer"
 __email__ = "commonroad@lists.lrz.de"
-__status__ = "Development"
+__status__ = "Released"
 
 
 def generate_unique_id(set_id: int = None):

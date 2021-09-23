@@ -5,10 +5,10 @@
 __author__ = "Benjamin Orthen, Sebastian Maierhofer"
 __copyright__ = "TUM Cyber-Physical Systems Group"
 __credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles"]
-__version__ = "0.5"
+__version__ = "0.2"
 __maintainer__ = "Sebastian Maierhofer"
 __email__ = "commonroad@lists.lrz.de"
-__status__ = "Development"
+__status__ = "Released"
 
 from collections import defaultdict
 from typing import List, Tuple
@@ -23,8 +23,8 @@ from shapely.geometry import LineString
 from commonroad.scenario.scenario import Scenario, ScenarioID, TrafficSign
 
 from crdesigner.map_conversion.common.utils import generate_unique_id
-from crdesigner.map_conversion.opendrive.opendriveconversion.conversion_lanelet import ConversionLanelet
-from crdesigner.map_conversion.opendrive.opendriveconversion.conversion_lanelet_network import \
+from crdesigner.map_conversion.opendrive.opendrive_conversion.conversion_lanelet import ConversionLanelet
+from crdesigner.map_conversion.opendrive.opendrive_conversion.conversion_lanelet_network import \
     ConversionLaneletNetwork, convert_to_new_lanelet_id
 from crdesigner.map_conversion.lanelet_lanelet2.lanelet2 import OSMLanelet, WayRelation, DEFAULT_PROJ_STRING, Node, \
     RightOfWayRelation
@@ -73,7 +73,7 @@ def _add_stop_line_to_lanelet(lanelets: List[Lanelet], stop_lines: List[StopLine
     yield_signs = set()
     for la in lanelets:
         for s in stop_lines:
-            if la.convert_to_polygon().shapely_object.intersects(LineString([s.start, s.end])):
+            if la.polygon.shapely_object.intersects(LineString([s.start, s.end])):
                 la.stop_line = s
                 # add the stop line traffic sign to the lanelet if set
                 if s.traffic_sign_ref is not None:

@@ -85,7 +85,7 @@ class MapCreator:
     def create_curve(width: float, radius: float, angle: float, num_vertices: int, lanelet_id: int,
                      lanelet_types: Set[LaneletType], predecessor: List[int] = None, successor: List[int] = None,
                      adjacent_left: Union[int, None] = None, adjacent_right: Union[int, None] = None,
-                     adjacent_left_same_direction: bool = None, adjacent_right_same_direction: bool= None,
+                     adjacent_left_same_direction: bool = None, adjacent_right_same_direction: bool = None,
                      road_user_one_way: Set[RoadUser] = None, road_user_bidirectional: Set[RoadUser] = None,
                      line_marking_left: LineMarking = LineMarking.UNKNOWN,
                      line_marking_right: LineMarking = LineMarking.UNKNOWN, stop_line: StopLine = None,
@@ -523,13 +523,13 @@ class MapCreator:
             sign_ids[1] = {sign_priority_two.traffic_sign_id}
 
             sign_yield_one = TrafficSign(scenario.generate_object_id(), [yield_sign], set(),
-                                            new_lanelets[15].right_vertices[-1] + np.array([2, -6]))
+                                         new_lanelets[15].right_vertices[-1] + np.array([2, -6]))
             new_lanelets[15].add_traffic_sign_to_lanelet(sign_yield_one.traffic_sign_id)
             new_traffic_signs.append(sign_yield_one)
             sign_ids[2] = {sign_yield_one.traffic_sign_id}
 
             sign_yield_two = TrafficSign(scenario.generate_object_id(), [yield_sign], set(),
-                                            new_lanelets[7].right_vertices[-1] + np.array([-2, 6]))
+                                         new_lanelets[7].right_vertices[-1] + np.array([-2, 6]))
             new_lanelets[7].add_traffic_sign_to_lanelet(sign_yield_two.traffic_sign_id)
             new_traffic_signs.append(sign_yield_two)
             sign_ids[3] = {sign_yield_two.traffic_sign_id}
@@ -562,7 +562,7 @@ class MapCreator:
             light_ids[2] = {traffic_light_three.traffic_light_id}
 
             traffic_light_four = TrafficLight(scenario.generate_object_id(), traffic_light_cycle_two,
-                                               new_lanelets[7].right_vertices[-1] + np.array([-2, 2]))
+                                              new_lanelets[7].right_vertices[-1] + np.array([-2, 2]))
             new_traffic_lights.append(traffic_light_four)
             new_lanelets[7].add_traffic_light_to_lanelet(traffic_light_four.traffic_light_id)
             light_ids[3] = {traffic_light_four.traffic_light_id}
@@ -579,11 +579,12 @@ class MapCreator:
     def create_three_way_intersection(width: float, diameter_crossing: int, incoming_length: int, scenario: Scenario,
                                       add_traffic_signs: bool, add_traffic_lights: bool,
                                       country_signs: Union[TrafficSignIDArgentina, TrafficSignIDBelgium,
-                                                       TrafficSignIDChina, TrafficSignIDCroatia,
-                                                       TrafficSignIDFrance, TrafficSignIDGermany,
-                                                       TrafficSignIDGreece, TrafficSignIDItaly,
-                                                       TrafficSignIDPuertoRico, TrafficSignIDRussia,
-                                                       TrafficSignIDSpain, TrafficSignIDUsa,  TrafficSignIDZamunda]) \
+                                                           TrafficSignIDChina, TrafficSignIDCroatia,
+                                                           TrafficSignIDFrance, TrafficSignIDGermany,
+                                                           TrafficSignIDGreece, TrafficSignIDItaly,
+                                                           TrafficSignIDPuertoRico, TrafficSignIDRussia,
+                                                           TrafficSignIDSpain, TrafficSignIDUsa,
+                                                           TrafficSignIDZamunda]) \
             -> Tuple[Intersection, List[TrafficSign], List[TrafficLight], List[Lanelet]]:
         """
         Creates a four way intersection with predefined line markings at the origin.
@@ -597,9 +598,9 @@ class MapCreator:
         @param country_signs: List of supported traffic signs.
         @return: New intersection element and new lanelets.
         """
+        new_lanelets = []
         rad = (diameter_crossing + width) / 2
         lanelet_ids = [scenario.generate_object_id() for i in range(0, 12)]
-        new_lanelets = []
         new_lanelets.append(MapCreator.create_straight(width, incoming_length, 10, lanelet_ids[0],
                                                        {LaneletType.INTERSECTION}, road_user_one_way={RoadUser.VEHICLE},
                                                        line_marking_left=LineMarking.DASHED,
@@ -673,7 +674,6 @@ class MapCreator:
         MapCreator.set_predecessor_successor_relation(new_lanelets[11], new_lanelets[8])
         MapCreator.set_predecessor_successor_relation(new_lanelets[5], new_lanelets[3])
         MapCreator.set_predecessor_successor_relation(new_lanelets[7], new_lanelets[4])
-
 
         incomings = [lanelet_ids[0], lanelet_ids[5], lanelet_ids[9]]
         successors_right = [lanelet_ids[11], lanelet_ids[3], None]
@@ -810,10 +810,10 @@ class MapCreator:
                     inc = []
                 x = x + left + right + straight + inc
 
-            for id in x:
-                lanelet = LaneletNetwork.find_lanelet_by_id(network, lanelet_id=id)
+            for idx in x:
+                lanelet = LaneletNetwork.find_lanelet_by_id(network, lanelet_id=idx)
                 if lanelet:
-                    lanelet_ids.append(id)
+                    lanelet_ids.append(idx)
                     if lanelet.adj_left:
                         lanelet_ids.append(lanelet.adj_left)
                     if lanelet.adj_right:
@@ -838,8 +838,8 @@ class MapCreator:
             successor._right_vertices = successor.right_vertices / factor
             successor._center_vertices = successor.center_vertices / factor
             trans = predecessor.center_vertices[-1] - successor.center_vertices[0]
-            for id in lanelet_ids:
-                lanelet = LaneletNetwork.find_lanelet_by_id(network, lanelet_id=id)
+            for idx in lanelet_ids:
+                lanelet = LaneletNetwork.find_lanelet_by_id(network, lanelet_id=idx)
                 if lanelet != successor:
                     lanelet._left_vertices = lanelet.left_vertices / factor
                     lanelet._right_vertices = lanelet.right_vertices / factor
@@ -850,30 +850,6 @@ class MapCreator:
             # Relation
             successor._predecessor = []
             MapCreator.set_predecessor_successor_relation(predecessor, successor)
-
-
-    # def connect_lanelets(self, predecessor: Lanelet, successor: Lanelet, lanelet_id: int):
-    #     """
-    #     Connects the predecessor lanelet with the successor lanelet
-    #
-    #     @param predecessor:
-    #     @param successor:
-    #     @param lanelet_id:
-    #     @return:
-    #     """
-    #     if predecessor and successor:
-    #         left_vertices = np.concatenate(([predecessor.left_vertices[-1]], [successor.left_vertices[0]]))
-    #         right_vertices = np.concatenate(([predecessor.right_vertices[-1]], [successor.right_vertices[0]]))
-    #         center_vertices = np.concatenate(([predecessor.center_vertices[-1]], [successor.center_vertices[0]]))
-    #
-    #         idl = scenario.generate_object_id()
-    #         self.latestid = idl
-    #         connecting_lanelet = Lanelet(left_vertices, center_vertices, right_vertices, idl,
-    #                                      predecessor=[predecessor.lanelet_id], successor=[successor.lanelet_id])
-    #
-    #         MapCreator.set_predecessor_successor_relation(self, predecessor, connecting_lanelet)
-    #         MapCreator.set_predecessor_successor_relation(self, connecting_lanelet, successor)
-    #         return connecting_lanelet
 
     @staticmethod
     def connect_lanelets(predecessor: Lanelet, successor: Lanelet, lanelet_id: int):
@@ -888,7 +864,7 @@ class MapCreator:
             norm_vec_pred = np.array([vec_width_pred[1], -vec_width_pred[0]])
             norm_vec_succ = np.array([vec_width_succ[1], -vec_width_succ[0]])
 
-            con_vec_factor = (length_con_vec) * 0.5
+            con_vec_factor = length_con_vec * 0.5
 
             center_vertices = np.concatenate(([predecessor.center_vertices[-1]],
                                               [predecessor.center_vertices[-1] + norm_vec_pred],

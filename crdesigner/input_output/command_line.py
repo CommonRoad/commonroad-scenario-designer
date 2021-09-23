@@ -1,3 +1,11 @@
+__author__ = "Sebastian Maierhofer"
+__copyright__ = "TUM Cyber-Physical Systems Group"
+__credits__ = ["BMW Car@TUM"]
+__version__ = "0.2"
+__maintainer__ = "Sebastian Maierhofer"
+__email__ = "commonroad@lists.lrz.de"
+__status__ = "Released"
+
 import os
 import argparse
 import sys
@@ -10,14 +18,6 @@ from crdesigner.input_output.gui.commonroad_scenario_designer_gui import start_g
 from crdesigner.input_output.api import commonroad_to_lanelet, lanelet_to_commonroad, opendrive_to_commonroad, \
     osm_to_commonroad, commonroad_to_sumo, sumo_to_commonroad
 
-__author__ = "Sebastian Maierhofer"
-__copyright__ = "TUM Cyber-Physical Systems Group"
-__credits__ = ["BMW Car@TUM"]
-__version__ = "0.5.0"
-__maintainer__ = "Sebastian Maierhofer"
-__email__ = "commonroad@lists.lrz.de"
-__status__ = "Development"
-
 
 def get_args() -> argparse.Namespace:
     """
@@ -27,8 +27,10 @@ def get_args() -> argparse.Namespace:
     """
     parser = argparse.ArgumentParser(description="Toolbox for Map Conversion and Scenario Creation for "
                                                  "Autonomous Vehicles")
-    parser.add_argument('mode', type=str, const='all', nargs='?', choices=["gui", "osm", "sumo", "lanelet",
-                                                                           "opendrive"],
+    parser.add_argument('mode', type=str, const='all', nargs='?', choices=["gui", "map-convert-osm",
+                                                                           "map-convert-sumo",
+                                                                           "map-convert-lanelet",
+                                                                           "map-convert-opendrive"],
                         help='specification of operation mode', default="gui")
     parser.add_argument('-i', '--input_file', type=str, help='Path to input file', default=None)
     parser.add_argument('-o', '--output_file', type=str, help='Path for output file')
@@ -68,19 +70,19 @@ def main():
 
         file_ending = "xml"
         if args.source_commonroad:
-            if args.mode == "osm":
+            if args.mode == "map-convert-osm":
                 print(
                     "Not converting: The CommonRoad to OpenStreetMap conversion is currently not supported.",
                     file=sys.stderr,
                 )
-            elif args.mode == "opendrive":
+            elif args.mode == "map-convert-opendrive":
                 print(
                     "Not converting: The CommonRoad to OpenDRIVE conversion is currently not supported.",
                     file=sys.stderr,
                 )
-            elif args.mode == "sumo":
+            elif args.mode == "map-convert-sumo":
                 file_ending = "net"
-            elif args.mode == "lanelet":
+            elif args.mode == "map-convert-lanelet":
                 file_ending = "osm"
 
         if args.output_file:
@@ -96,18 +98,18 @@ def main():
             sys.exit(-1)
 
         if args.source_commonroad:
-            if args.mode == "lanelet":
+            if args.mode == "map-convert-lanelet":
                 commonroad_to_lanelet(input_file, output_file, args.proj)
-            if args.mode == "sumo":
+            if args.mode == "map-convert-sumo":
                 commonroad_to_sumo(input_file, output_file)
         else:
-            if args.mode == "osm":
+            if args.mode == "map-convert-osm":
                 scenario = osm_to_commonroad(input_file)
-            elif args.mode == "opendrive":
+            elif args.mode == "map-convert-opendrive":
                 scenario = opendrive_to_commonroad(input_file)
-            elif args.mode == "sumo":
+            elif args.mode == "map-convert-sumo":
                 scenario = sumo_to_commonroad(input_file)
-            elif args.mode == "lanelet":
+            elif args.mode == "map-convert-lanelet":
                 scenario = lanelet_to_commonroad(input_file, args.proj, args.left_driving, args.adjacencies)
             else:
                 return
