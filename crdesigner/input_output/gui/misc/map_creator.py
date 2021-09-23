@@ -789,22 +789,22 @@ class MapCreator:
             lanelet_ids = []
             x = []
             for i in intersection.incomings:
-                if i._successors_left != None:
+                if i._successors_left is not None:
                     left = list(i._successors_left)
                 else:
                     left = []
 
-                if i._successors_right != None:
+                if i._successors_right is not None:
                     right = list(i._successors_right)
                 else:
                     right = []
 
-                if i._successors_straight != None:
+                if i._successors_straight is not None:
                     straight = list(i._successors_straight)
                 else:
                     straight = []
 
-                if i._incoming_lanelets != None:
+                if i._incoming_lanelets is not None:
                     inc = list(i._incoming_lanelets)
                 else:
                     inc = []

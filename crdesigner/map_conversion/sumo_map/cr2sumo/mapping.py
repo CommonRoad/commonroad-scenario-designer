@@ -18,6 +18,7 @@ class ClusterInstruction(IntEnum):
     CLUSTERING = 1
     ZIPPER = 2
 
+
 directions_CR2SUMO = {
     TrafficLightDirection.RIGHT: ConnectionDirection.RIGHT,
     TrafficLightDirection.STRAIGHT: ConnectionDirection.STRAIGHT,

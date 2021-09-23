@@ -59,7 +59,7 @@ class TrafficLightEncoder:
                 for foe in foes:
                     # make sure foe[0] is more straight than foe[1]
                     if compute_max_curvature_from_polyline(connections[foe[0]].shape) \
-                        > compute_max_curvature_from_polyline(connections[foe[1]].shape):
+                            > compute_max_curvature_from_polyline(connections[foe[1]].shape):
                         foe[0], foe[1] = foe[1], foe[0]
                     # give foe[0] priority
                     sumo_state[foe[0]] = SignalState.GREEN_PRIORITY

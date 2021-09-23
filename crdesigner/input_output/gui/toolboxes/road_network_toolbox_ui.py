@@ -141,7 +141,7 @@ class RoadNetworkToolboxUI(Toolbox):
         self.stop_line_end_y.setAlignment(Qt.AlignRight)
         self.line_marking_stop_line = QComboBox()
         line_markings_stop_line = [e.value for e in LineMarking if e.value not in [LineMarking.UNKNOWN.value,
-                                                                         LineMarking.NO_MARKING.value]]
+                                                                                   LineMarking.NO_MARKING.value]]
         self.line_marking_stop_line.addItems(line_markings_stop_line)
         self.stop_line_at_end = QCheckBox("Stop line at end of lanelet")
 

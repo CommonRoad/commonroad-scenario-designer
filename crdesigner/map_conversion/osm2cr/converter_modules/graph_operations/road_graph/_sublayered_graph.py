@@ -10,6 +10,7 @@ from ._graph_edge import GraphEdge
 from ._graph_traffic_light import GraphTrafficLight
 from ._graph_traffic_sign import GraphTrafficSign
 
+
 class SublayeredGraph(Graph):
 
     def __init__(

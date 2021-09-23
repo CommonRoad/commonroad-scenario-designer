@@ -17,6 +17,7 @@ from crdesigner.map_conversion.osm2cr.converter_modules.utility.custom_types imp
 from ._graph_node import GraphNode
 from ._graph_lane import Lane
 
+
 class GraphEdge:
     """
     Class that represents an edge in the graph structure
@@ -87,12 +88,10 @@ class GraphEdge:
         self.traffic_lights = []
 
     def __str__(self):
-        return "Graph_edge {}: {}->{}".format(
-            self.id,self.node1.id,self.node2.id)
+        return "Graph_edge {}: {}->{}".format(self.id, self.node1.id, self.node2.id)
 
     def __repr__(self):
-        return "Graph_edge {}: {}->{}".format(
-            self.id,self.node1.id,self.node2.id)
+        return "Graph_edge {}: {}->{}".format(self.id, self.node1.id, self.node2.id)
 
     def flip(self) -> None:
         """
@@ -180,10 +179,11 @@ class GraphEdge:
 
     def get_compass_degrees(self):
         """
-        calculates the compass degrees of an edge as in https://en.wikipedia.org/wiki/Points_of_the_compass#/media/File:Compass_Card_B+W.svg
+        calculates the compass degrees of an edge as in
+        https://en.wikipedia.org/wiki/Points_of_the_compass#/media/File:Compass_Card_B+W.svg
         :return: compass orientation in degrees
         """
-     
+
         # compute radians
         delta_x = self.node2.x - self.node1.x
         delta_y = self.node2.y - self.node1.y
@@ -447,7 +447,7 @@ class GraphEdge:
 
         """
         adds traffic signs to all lanes of the edge
-        
+
         :param sign: the sign to add
 
         :return: None
@@ -469,7 +469,7 @@ class GraphEdge:
         for lane in self.lanes:
             # add sign to forward lanes
             if lane.forward and forward:
-                    lane.add_traffic_sign(sign)
+                lane.add_traffic_sign(sign)
             # add to backward lanes
             elif (not lane.forward) and (not forward):
                 lane.add_traffic_sign(sign)
@@ -477,7 +477,7 @@ class GraphEdge:
     def add_traffic_light(self, light: "GraphTrafficLight", forward):
         """
         adds traffic light to all lanes of the edge
-        
+
         :param light: the light to add
 
         :return: None

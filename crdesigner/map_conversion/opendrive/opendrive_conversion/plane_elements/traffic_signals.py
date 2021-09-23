@@ -198,8 +198,9 @@ def calculate_stop_line_position(lane_sections, signal, position, tangent):
                 for width in lane.widths:
                     # Calculating total width of stop line
                     coefficients = width.polynomial_coefficients
-                    lane_width = coefficients[0] + coefficients[1] * signal.s + coefficients[2] * signal.s ** 2 + \
-                                 coefficients[3] * signal.s ** 2
+                    lane_width = \
+                        coefficients[0] + coefficients[1] * signal.s + coefficients[2] * signal.s ** 2 \
+                        + coefficients[3] * signal.s ** 2
 
                     total_width += lane_width
     position_1 = position

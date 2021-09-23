@@ -46,22 +46,17 @@ class TrafficLightGenerator:
             pass
         elif self.number_incomings <= 4:
             self.current_time_offset += int(self.cycle_length / 2)
-        else: # more than 4 incommings
+        else:  # more than 4 incommings
             self.current_time_offset += int(self.cycle_length / 3)
 
         return offset
-          
+
     def generate_traffic_light(self, position, new_id):
         """
         Method to create the new traffic light
         """
-        
-        new_traffic_light = TrafficLight(
-                                traffic_light_id=new_id,
-                                cycle=self.get_cycle(),
-                                position=position,
-                                time_offset=self.get_time_offset(),
-                                direction=TrafficLightDirection.ALL,
-                                active=True
-                                )
+
+        new_traffic_light = TrafficLight(traffic_light_id=new_id, cycle=self.get_cycle(), position=position,
+                                         time_offset=self.get_time_offset(), direction=TrafficLightDirection.ALL,
+                                         active=True)
         return new_traffic_light

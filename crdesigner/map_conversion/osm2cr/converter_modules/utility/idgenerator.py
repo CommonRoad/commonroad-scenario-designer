@@ -45,6 +45,7 @@ def get_id():
     """
     return generator.get()
 
+
 def reset():
     """
     resets id generator

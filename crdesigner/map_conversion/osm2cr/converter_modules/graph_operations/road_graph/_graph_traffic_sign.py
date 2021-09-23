@@ -10,6 +10,7 @@ from crdesigner.map_conversion.osm2cr.converter_modules.utility import idgenerat
 
 from ._graph_node import GraphNode
 
+
 class GraphTrafficSign:
     def __init__(self, sign: Dict,
                  node: GraphNode = None, edges: List = [], direction: float = None):
@@ -18,9 +19,9 @@ class GraphTrafficSign:
         self.edges = edges
         self.direction = direction
         self.id = idgenerator.get_id()
-       
+
     def to_traffic_sign_cr(self):
-    
+
         elements = []
         position = None
 
@@ -60,4 +61,3 @@ class GraphTrafficSign:
             first_occurrence=first_occurrence,
             position=position,
             virtual=virtual)
-            

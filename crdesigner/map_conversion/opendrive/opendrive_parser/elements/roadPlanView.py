@@ -145,6 +145,7 @@ class PlanView:
 
         self._geo_lengths = np.append(self._geo_lengths, length + self._geo_lengths[-1])
         # print("Adding geo length",self._geo_lengths)
+
     @property
     def length(self) -> float:
         """Get length of whole plan view"""
@@ -194,17 +195,9 @@ class PlanView:
         if s_pos - self._precalculation[idx, 0] < 0 or idx + 1 == len(self._precalculation):
             idx -= 1
 
-        result_pos_x = np.interp(
-            s_pos,
-            self._precalculation[idx : idx + 2, 0],
-            self._precalculation[idx : idx + 2, 1],
-        )
+        result_pos_x = np.interp(s_pos, self._precalculation[idx: idx + 2, 0], self._precalculation[idx: idx + 2, 1],)
 
-        result_pos_y = np.interp(
-            s_pos,
-            self._precalculation[idx : idx + 2, 0],
-            self._precalculation[idx : idx + 2, 2],
-        )
+        result_pos_y = np.interp(s_pos, self._precalculation[idx: idx + 2, 0], self._precalculation[idx: idx + 2, 2],)
         result_tang = self.interpolate_angle(idx, s_pos)
         result_pos = np.array((result_pos_x, result_pos_y))
         # end = time.time()
@@ -230,7 +223,8 @@ class PlanView:
         shortest_angle = ((angle_next - angle_prev) + np.pi) % (2 * np.pi) - np.pi
         return angle_prev + shortest_angle * (s_pos - pos_prev) / (pos_next - pos_prev)
 
-    def calc_geometry(self, s_pos: float, compute_curvature=True, reverse=False) -> Tuple[np.ndarray, float, Union[None, float], float]:
+    def calc_geometry(self, s_pos: float, compute_curvature=True, reverse=False) \
+            -> Tuple[np.ndarray, float, Union[None, float], float]:
         """Calc position and tangent at s_pos by delegating calculation to geometry.
 
         Args:
@@ -301,4 +295,3 @@ class PlanView:
         # plt.plot(self._precalculation[:,1], self._precalculation[:,2])
         # plt.axis("equal")
         # plt.show(block=True)
-

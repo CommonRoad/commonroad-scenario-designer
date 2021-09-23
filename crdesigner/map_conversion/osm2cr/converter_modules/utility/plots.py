@@ -32,6 +32,7 @@ def draw_laneborders(lane: rg.Lane, ax: axis):
         # plotter.scatter(x_points, y_points, color='grey', s=4)
     return
 
+
 def draw_edge_orientation(edge: rg.GraphEdge, ax: axis):
     """
     draws a single edge direction in a plot
@@ -44,20 +45,15 @@ def draw_edge_orientation(edge: rg.GraphEdge, ax: axis):
 
     # draw an arrow from start to end of edge
     ax.scatter(edge.node1.x, edge.node1.y, color="blue")
-    ax.arrow( 
-        x=edge.node1.x, 
-        y=edge.node1.y, 
-        dx=edge.node2.x - edge.node1.x, 
-        dy=edge.node2.y - edge.node1.y, 
-        color="red", 
-        width=1,
-        head_width= 6)
+    ax.arrow(x=edge.node1.x,  y=edge.node1.y,  dx=edge.node2.x - edge.node1.x,  dy=edge.node2.y - edge.node1.y,
+             color="red",  width=1, head_width=6)
     # print compass degrees
     ax.text(
         x=(edge.node1.x + edge.node2.x)/2, 
-        y=(edge.node1.y +edge.node2.y)/2, 
+        y=(edge.node1.y + edge.node2.y)/2,
         s='{}'.format(int(edge.get_compass_degrees()))
         )
+
 
 def draw_lanelet_direction(lane: rg.Lane, ax: axis):
     """
@@ -75,10 +71,10 @@ def draw_lanelet_direction(lane: rg.Lane, ax: axis):
         dy=lane.right_bound[-1][1] - lane.right_bound[0][1], 
         color="green" if lane.forward else "pink", 
         width=1,
-        head_width= 2)
+        head_width=2)
 
 
-def draw_graph(graph: rg.Graph, ax: axis, links: bool = True):
+def draw_graph(graph: rg.Graph, ax: axis, links: bool=True):
     """
     draws lanelets of a graph in a plot
 
@@ -195,7 +191,7 @@ def draw_lane(lane: rg.Lane, ax: axis):
     return
 
 
-def draw_lanes(graph: rg.Graph, ax: axis, links: bool = True):
+def draw_lanes(graph: rg.Graph, ax: axis, links: bool=True):
     """
     draws all lanes of a graph
 

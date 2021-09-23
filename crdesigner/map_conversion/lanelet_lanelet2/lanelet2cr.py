@@ -48,16 +48,16 @@ def _add_closest_traffic_sign_to_lanelet(lanelets: List[Lanelet], traffic_signs:
     :return: the traffic signs that were assigned to any lanelet
     """
     used_signs = set()
-    for l in lanelets:
+    for la in lanelets:
         closest_traffic_sign = None
         _min_distance = None
         for t in traffic_signs:
-            distance = point_to_polyline_distance(t.position, l.center_vertices)
+            distance = point_to_polyline_distance(t.position, la.center_vertices)
             if _min_distance is None or distance < _min_distance:
                 _min_distance = distance
                 closest_traffic_sign = t
         if closest_traffic_sign is not None:
-            l.add_traffic_sign_to_lanelet(closest_traffic_sign.traffic_sign_id)
+            la.add_traffic_sign_to_lanelet(closest_traffic_sign.traffic_sign_id)
             used_signs.add(closest_traffic_sign)
     return used_signs
 

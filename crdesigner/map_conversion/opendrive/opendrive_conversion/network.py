@@ -115,7 +115,7 @@ class Network:
                     lane_section, reference_border
                 )
 
-                self._planes.extend(parametric_lane_groups)          
+                self._planes.extend(parametric_lane_groups)
             stop_lines_final = []
             traffic_lights, traffic_signs, stop_lines = get_traffic_signals(road)
             self._traffic_lights.extend(traffic_lights)

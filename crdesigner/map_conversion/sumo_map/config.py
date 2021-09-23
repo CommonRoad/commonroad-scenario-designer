@@ -216,6 +216,6 @@ class SumoConfig(DefaultConfig):
         'lcImpatience': Interval(0, 0.5),
         'impatience': Interval(0, 0.5),
         'lcMaxSpeedLatStanding': 0,
-        'lcSigma': Interval(0.1,0.2),
+        'lcSigma': Interval(0.1, 0.2),
         'lcKeepRight': Interval(0.8, 0.9)
     }

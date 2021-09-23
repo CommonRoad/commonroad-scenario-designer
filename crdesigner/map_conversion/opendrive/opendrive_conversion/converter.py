@@ -240,4 +240,3 @@ class OpenDriveConverter:
         )
 
         return inner_neighbour_id, outer_neighbour_id, inner_neighbour_same_dir
-

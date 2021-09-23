@@ -144,11 +144,9 @@ class ParametricLane:
             border_pos = s_pos
 
         is_last_pos = np.isclose(self.length, border_pos)
-        r1, r2, r3, l =  self.border_group.calc_border_position(
-            border, border_pos, width_offset, is_last_pos, self.reverse, compute_curvature=compute_curvature
-        )
-        return r1, r2, r3, l
-
+        r1, r2, r3, la = self.border_group.calc_border_position(
+            border, border_pos, width_offset, is_last_pos, self.reverse, compute_curvature=compute_curvature)
+        return r1, r2, r3, la
 
     def calc_width(self, s_pos: float) -> float:
         """Calc width of border at position s_pos.
@@ -319,8 +317,7 @@ class ParametricLane:
 
             check_3 = False
         # assert len(left_vertices) >= 3, f"Not enough vertices, len: {len(left_vertices)}"
-        return np.array(left_vertices),\
-               np.array(right_vertices)
+        return np.array(left_vertices), np.array(right_vertices)
 
     def zero_width_change_positions(self) -> float:
         """Position where the inner and outer Border have zero minimal distance change.

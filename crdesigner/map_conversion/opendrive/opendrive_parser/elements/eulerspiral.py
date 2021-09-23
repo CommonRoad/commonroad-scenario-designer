@@ -25,8 +25,7 @@ class EulerSpiral:
         :param kappa0:
         :return:
         """
-        return self._gamma * s + kappa0, \
-               self._gamma
+        return self._gamma * s + kappa0, self._gamma
 
     @staticmethod
     def createFromLengthAndCurvature(length, curvStart, curvEnd):
