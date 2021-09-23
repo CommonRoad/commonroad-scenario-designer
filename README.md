@@ -13,7 +13,7 @@ CommonRoad maps and scenarios.
 |Lanelet/Lanelet2 <=> CR |`crdesigner/map_converter/lanelet_lanelet2`    |Conversion from Lanelet/Lanelet2 to CommonRoad <br /> and from CommonRoad to lanelet |
 |OSM => CR                  |`crdesigner/map_converter/osm2cr`              |Conversion from OSM to CommonRoad.                                                   |
 |SUMO <=> CR             |`crdesigner/map_converter/sumo_map`            |Conversion from SUMO to CommonRoad and vice versa.                                   |
-|CR Scenario Designer GUI             |`crdesigner/input_output/gui                  `|Multi-functional GUI for map conversion and scenario creation/editing.                     |
+|CR Scenario Designer GUI             |`crdesigner/input_output/gui`|Multi-functional GUI for map conversion and scenario creation/editing.                     |
 
 ## Prerequisites and Installation
 The usage of the Anaconda Python distribution is recommended. We have tested the toolbox with Python 3.7, 3.8, and 3.9.
