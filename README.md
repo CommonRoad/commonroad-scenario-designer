@@ -140,10 +140,11 @@ pip install -r docs/doc_requirements.txt
 Afterward run:
 
 ```bash
-cd docs && make html
+cd docs && ./docs_build_script.sh
 ```
 
 The documentation can be accessed by opening `doc/_build/html/index.html`.
+The titles of module pages have to be set manually!
 The full documentation of the API and introducing examples can also be found [here](https://commonroad-scenario-designer.readthedocs.io/en/latest/).
 
 ## Bug and feature reporting
