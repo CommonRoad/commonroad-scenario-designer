@@ -1,4 +1,4 @@
-from crdesigner.map_conversion.opendrive.opendriveparser.elements.road_record import RoadRecord
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.road_record import RoadRecord
 
 __author__ = "Benjamin Orthen, Stefan Urban"
 __copyright__ = "TUM Cyber-Physical Systems Group"

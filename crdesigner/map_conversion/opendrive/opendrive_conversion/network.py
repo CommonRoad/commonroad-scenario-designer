@@ -6,12 +6,12 @@ import iso3166
 from commonroad.scenario.scenario import Scenario, GeoTransformation, Location, ScenarioID
 from commonroad.scenario.lanelet import LaneletNetwork, Lanelet
 
-from crdesigner.map_conversion.opendrive.opendriveparser.elements.opendrive import OpenDrive
-from crdesigner.map_conversion.opendrive.opendriveconversion.utils import encode_road_section_lane_width_id
-from crdesigner.map_conversion.opendrive.opendriveconversion.conversion_lanelet_network import ConversionLaneletNetwork
-from crdesigner.map_conversion.opendrive.opendriveconversion.converter import OpenDriveConverter
-from crdesigner.map_conversion.opendrive.opendriveconversion.plane_elements.traffic_signals import get_traffic_signals
-from crdesigner.map_conversion.opendrive.opendriveconversion.plane_elements.geo_reference import get_geo_reference
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.opendrive import OpenDrive
+from crdesigner.map_conversion.opendrive.opendrive_conversion.utils import encode_road_section_lane_width_id
+from crdesigner.map_conversion.opendrive.opendrive_conversion.conversion_lanelet_network import ConversionLaneletNetwork
+from crdesigner.map_conversion.opendrive.opendrive_conversion.converter import OpenDriveConverter
+from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.traffic_signals import get_traffic_signals
+from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.geo_reference import get_geo_reference
 
 __author__ = "Benjamin Orthen, Stefan Urban, Sebastian Maierhofer"
 __copyright__ = "TUM Cyber-Physical Systems Group"

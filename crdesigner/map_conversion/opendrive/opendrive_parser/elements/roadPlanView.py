@@ -4,7 +4,7 @@ from typing import Tuple, List, Union
 import matplotlib.pyplot as plt
 import numpy as np
 
-from crdesigner.map_conversion.opendrive.opendriveparser.elements.geometry import (
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.geometry import (
     Geometry,
     Line,
     Spiral,

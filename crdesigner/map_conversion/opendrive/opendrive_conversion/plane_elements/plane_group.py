@@ -5,8 +5,8 @@ import math
 import numpy as np
 import copy
 
-from crdesigner.map_conversion.opendrive.opendriveconversion.conversion_lanelet import ConversionLanelet
-from crdesigner.map_conversion.opendrive.opendriveconversion.plane_elements.plane import ParametricLane
+from crdesigner.map_conversion.opendrive.opendrive_conversion.conversion_lanelet import ConversionLanelet
+from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.plane import ParametricLane
 from commonroad.scenario.lanelet import LineMarking
 
 __author__ = "Benjamin Orthen, Stefan Urban, Sebastian Maierhofer"

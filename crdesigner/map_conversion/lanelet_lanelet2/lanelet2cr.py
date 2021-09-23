@@ -23,8 +23,8 @@ from shapely.geometry import LineString
 from commonroad.scenario.scenario import Scenario, ScenarioID, TrafficSign
 
 from crdesigner.map_conversion.common.utils import generate_unique_id
-from crdesigner.map_conversion.opendrive.opendriveconversion.conversion_lanelet import ConversionLanelet
-from crdesigner.map_conversion.opendrive.opendriveconversion.conversion_lanelet_network import \
+from crdesigner.map_conversion.opendrive.opendrive_conversion.conversion_lanelet import ConversionLanelet
+from crdesigner.map_conversion.opendrive.opendrive_conversion.conversion_lanelet_network import \
     ConversionLaneletNetwork, convert_to_new_lanelet_id
 from crdesigner.map_conversion.lanelet_lanelet2.lanelet2 import OSMLanelet, WayRelation, DEFAULT_PROJ_STRING, Node, \
     RightOfWayRelation

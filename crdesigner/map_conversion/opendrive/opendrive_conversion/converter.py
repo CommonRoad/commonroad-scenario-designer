@@ -1,10 +1,10 @@
 """Module for logic behind converting OpenDrive to ParametricLanes."""
 from typing import Tuple, List
-from crdesigner.map_conversion.opendrive.opendriveconversion.plane_elements.plane import ParametricLane, \
+from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.plane import ParametricLane, \
     ParametricLaneBorderGroup
-from crdesigner.map_conversion.opendrive.opendriveconversion.plane_elements.plane_group import ParametricLaneGroup
-from crdesigner.map_conversion.opendrive.opendriveconversion.plane_elements.border import Border
-from crdesigner.map_conversion.opendrive.opendriveconversion.utils import encode_road_section_lane_width_id
+from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.plane_group import ParametricLaneGroup
+from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.border import Border
+from crdesigner.map_conversion.opendrive.opendrive_conversion.utils import encode_road_section_lane_width_id
 
 
 __author__ = "Benjamin Orthen"

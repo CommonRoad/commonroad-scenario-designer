@@ -1,21 +1,21 @@
 import numpy as np
 from lxml import etree
-from crdesigner.map_conversion.opendrive.opendriveparser.elements.opendrive import OpenDrive, Header
-from crdesigner.map_conversion.opendrive.opendriveparser.elements.road import Road
-from crdesigner.map_conversion.opendrive.opendriveparser.elements.roadLink import Predecessor as RoadLinkPredecessor, \
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.opendrive import OpenDrive, Header
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.road import Road
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadLink import Predecessor as RoadLinkPredecessor, \
     Successor as RoadLinkSuccessor, Neighbor as RoadLinkNeighbor
-from crdesigner.map_conversion.opendrive.opendriveparser.elements.roadtype import RoadType, Speed as RoadTypeSpeed
-from crdesigner.map_conversion.opendrive.opendriveparser.elements.roadElevationProfile \
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadtype import RoadType, Speed as RoadTypeSpeed
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadElevationProfile \
     import ElevationRecord as RoadElevationProfile
-from crdesigner.map_conversion.opendrive.opendriveparser.elements.roadLateralProfile \
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadLateralProfile \
     import Superelevation as RoadLateralProfileSuperelevation, Crossfall as RoadLateralProfileCrossfall, \
     Shape as RoadLateralProfileShape
-from crdesigner.map_conversion.opendrive.opendriveparser.elements.roadLanes import LaneOffset as RoadLanesLaneOffset, \
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadLanes import LaneOffset as RoadLanesLaneOffset, \
     Lane as RoadLaneSectionLane, LaneSection as RoadLanesSection, LaneWidth as RoadLaneSectionLaneWidth, \
     LaneBorder as RoadLaneSectionLaneBorder, RoadMark as RoadLaneRoadMark
-from crdesigner.map_conversion.opendrive.opendriveparser.elements.junction import Junction, \
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.junction import Junction, \
     Connection as JunctionConnection, LaneLink as JunctionConnectionLaneLink
-from crdesigner.map_conversion.opendrive.opendriveparser.elements.roadSignal import Signal as RoadSignal, \
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadSignal import Signal as RoadSignal, \
     SignalReference
 
 __author__ = "Benjamin Orthen, Stefan Urban, Sebastian Maierhofer"

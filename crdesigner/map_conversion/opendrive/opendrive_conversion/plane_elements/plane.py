@@ -2,8 +2,8 @@
 and lanelets."""
 from typing import Tuple
 import numpy as np
-from crdesigner.map_conversion.opendrive.opendriveconversion.plane_elements.border import Border
-from crdesigner.map_conversion.opendrive.opendriveparser.elements.geometry import calc_next_s
+from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.border import Border
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.geometry import calc_next_s
 from numpy.polynomial import polynomial as P
 
 __author__ = "Benjamin Orthen"

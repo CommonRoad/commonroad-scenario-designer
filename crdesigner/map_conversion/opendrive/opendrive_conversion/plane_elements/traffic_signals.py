@@ -5,7 +5,7 @@ import warnings
 import enum
 from typing import Union
 
-from crdesigner.map_conversion.opendrive.opendriveparser.elements.road import Road
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.road import Road
 from crdesigner.map_conversion.common.utils import generate_unique_id
 
 from commonroad.scenario.traffic_sign import TrafficSign, TrafficLight, TrafficSignElement, TrafficSignIDZamunda, \

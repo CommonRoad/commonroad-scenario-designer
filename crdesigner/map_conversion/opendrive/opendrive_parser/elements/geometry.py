@@ -5,7 +5,7 @@ from typing import Tuple
 
 import numpy as np
 import scipy.optimize
-from crdesigner.map_conversion.opendrive.opendriveparser.elements.eulerspiral import EulerSpiral
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.eulerspiral import EulerSpiral
 
 __author__ = "Benjamin Orthen, Stefan Urban"
 __copyright__ = "TUM Cyber-Physical Systems Group"

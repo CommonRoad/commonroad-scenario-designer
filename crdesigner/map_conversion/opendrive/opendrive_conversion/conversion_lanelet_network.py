@@ -14,7 +14,7 @@ from commonroad.scenario.traffic_sign import TrafficLightDirection, TrafficLight
 from crdesigner.map_conversion.osm2cr import config
 from crdesigner.map_conversion.osm2cr.converter_modules.utility import geometry
 
-from crdesigner.map_conversion.opendrive.opendriveconversion.conversion_lanelet import ConversionLanelet
+from crdesigner.map_conversion.opendrive.opendrive_conversion.conversion_lanelet import ConversionLanelet
 from crdesigner.map_conversion.common.utils import generate_unique_id
 
 __author__ = "Benjamin Orthen, Sebastian Maierhofer"

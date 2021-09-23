@@ -1,13 +1,13 @@
-from crdesigner.map_conversion.opendrive.opendriveparser.elements.roadPlanView import PlanView
-from crdesigner.map_conversion.opendrive.opendriveparser.elements.roadLink import Link
-from crdesigner.map_conversion.opendrive.opendriveparser.elements.roadLanes import Lanes
-from crdesigner.map_conversion.opendrive.opendriveparser.elements.roadElevationProfile import (
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadPlanView import PlanView
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadLink import Link
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadLanes import Lanes
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadElevationProfile import (
     ElevationProfile,
 )
-from crdesigner.map_conversion.opendrive.opendriveparser.elements.roadLateralProfile import LateralProfile
-from crdesigner.map_conversion.opendrive.opendriveparser.elements.junction import Junction
-from crdesigner.map_conversion.opendrive.opendriveparser.elements.roadObject import Object
-from crdesigner.map_conversion.opendrive.opendriveparser.elements.roadSignal import Signal, SignalReference
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadLateralProfile import LateralProfile
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.junction import Junction
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadObject import Object
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadSignal import Signal, SignalReference
 
 __author__ = "Benjamin Orthen, Stefan Urban, Sebastian Maierhofer"
 __copyright__ = "TUM Cyber-Physical Systems Group"
