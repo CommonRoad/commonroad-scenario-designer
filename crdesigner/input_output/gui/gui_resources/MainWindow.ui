@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>mainWindow</class>
+ <widget class="QMainWindow" name="mainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1280</width>
+    <height>720</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>CR Scenario Designer</string>
+  </property>
+  <property name="windowIcon">
+   <iconset>
+    <normaloff>:/Icon/icon.png</normaloff>:/Icon/icon.png</iconset>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QTextBrowser" name="textBrowser">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>550</y>
+      <width>1271</width>
+      <height>101</height>
+     </rect>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1280</width>
+     <height>22</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <widget class="QToolBar" name="toolBar">
+   <property name="windowTitle">
+    <string>toolBar</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+  </widget>
+  <action name="actionNew">
+   <property name="text">
+    <string>New</string>
+   </property>
+  </action>
+  <action name="actionSave">
+   <property name="text">
+    <string>Save</string>
+   </property>
+  </action>
+  <action name="actionQuit">
+   <property name="text">
+    <string>Quit</string>
+   </property>
+  </action>
+  <action name="actionFrom_OpenDrive">
+   <property name="text">
+    <string>From OpenDrive</string>
+   </property>
+  </action>
+  <action name="actionFrom_OSM">
+   <property name="text">
+    <string>From OSM</string>
+   </property>
+  </action>
+  <action name="actionOpen">
+   <property name="text">
+    <string>Open</string>
+   </property>
+  </action>
+  <action name="actionAs_CommonRoad">
+   <property name="text">
+    <string>As CommonRoad</string>
+   </property>
+  </action>
+  <action name="actionAs_OpenDrive">
+   <property name="text">
+    <string>As OpenDrive</string>
+   </property>
+  </action>
+  <action name="actionAs_OSM">
+   <property name="text">
+    <string>As OSM</string>
+   </property>
+  </action>
+  <action name="actionAs_SUMO">
+   <property name="text">
+    <string>As SUMO</string>
+   </property>
+  </action>
+  <action name="actionToolbox_for_CR">
+   <property name="text">
+    <string>Toolbox for CR</string>
+   </property>
+  </action>
+ </widget>
+ <resources>
+  <include location="../gui_src/CR_Scenario_Designer.qrc"/>
+ </resources>
+ <connections/>
+</ui>

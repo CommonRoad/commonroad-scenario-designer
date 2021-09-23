@@ -1,8 +1,0 @@
-# ignore intermediate test files
-*.add.xml
-*.rou.xml
-*.rou.alt.xml
-*.net.xml
-*.sumo.cfg
-*.trips.xml
-output_lanechange.txt

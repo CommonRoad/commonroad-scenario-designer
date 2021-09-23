@@ -1,0 +1,15 @@
+# ignore intermediate test files
+*.add.xml
+*.rou.xml
+*.rou.alt.xml
+*.net.xml
+*.sumo.cfg
+*.trips.xml
+*.mp4
+*.simulated.xml
+*.nod.xml
+*.edg.xml
+*.tll.xml
+*.con.xml
+*.typ.xml
+output_lanechange.txt

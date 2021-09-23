@@ -1,100 +1,158 @@
-# CommonRoad Map Converter
+# CommonRoad Scenario Designer
 
-This software provides multiple converters from different map formats to the CommonRoad map format.
-This branch is under development for CommonRoad 2020a.
-Commit 4abf24d380b2ddac2c2c71b210764c4ae5759406 is the last stable version for CommonRoad 2018b.
+This toolbox provides map converters for [OpenStreetMap](https://www.openstreetmap.de/karte.html) (OSM), 
+[Lanelet](https://www.mrt.kit.edu/software/libLanelet/libLanelet.html) / [Lanelet2](https://github.com/fzi-forschungszentrum-informatik/Lanelet2), 
+[OpenDRIVE](https://www.asam.net/standards/detail/opendrive/), and [SUMO](https://sumo.dlr.de/docs/index.html) to the [CommonRoad](https://commonroad.in.tum.de/) 
+(CR) format and for some formats vice versa.  
+Additionally, a graphical user interface (GUI) is included, which allows one to efficiently create and manipulate 
+CommonRoad maps and scenarios.
 
-|         Tool         |                 Path                  |                            Functionality                            |
-| :------------------: | :-----------------------------------: | :-----------------------------------------------------------------: |
-|  opendrive2lanelet   |      `crmapconverter/opendrive`       |          Conversion from OpenDRIVE files to Lanelet maps.           |
-|     osm-convert      |         `crmapconverter/osm`          | Conversion from CommonRoad lanelets to OSM lanelets and vice versa. |
-|        osm2cr        |        `crmapconverter/osm2cr`        |    Conversion from general OSM maps to CommonRoad Lanelet maps.     |
-| CR Scenario Designer | `crmapconverter/io/scenario_designer` |   Multi-functional GUI for map conversion and traffic simulation.   |
+|  Tool                               |Path                                       |Functionality                                                                        |
+| :---------------------------------: |:----------------------------------------: |:----------------------------------------------------------------------------------: |
+|OpenDRIVE => CR            |`crdesigner/map_converter/opendrive`           |Conversion from OpenDRIVE to CommonRoad.                                             |
+|Lanelet/Lanelet2 <=> CR |`crdesigner/map_converter/lanelet_lanelet2`    |Conversion from Lanelet/Lanelet2 to CommonRoad <br /> and from CommonRoad to lanelet |
+|OSM => CR                  |`crdesigner/map_converter/osm2cr`              |Conversion from OSM to CommonRoad.                                                   |
+|SUMO <=> CR             |`crdesigner/map_converter/sumo_map`            |Conversion from SUMO to CommonRoad and vice versa.                                   |
+|CR Scenario Designer GUI             |`crdesigner/input_output/gui`|Multi-functional GUI for map conversion and scenario creation/editing.                     |
 
-## Installation
+## Prerequisites and Installation
+The usage of the Anaconda Python distribution is recommended. We have tested the toolbox with Python 3.7, 3.8, and 3.9.
+You need the following modules:
+- commonroad_io >= 2021.3
+- matplotlib >= 3.1.0
+- numpy >= 1.16.4
+- ordered-set >= 4.0.2
+- lxml >= 4.3.4
+- pyproj >= 2.2.0
+- scipy >= 1.3.0
+- Pillow >= 7.1.1
+- mercantile >= 1.1.3
+- utm >= 0.5.0
+- cartopy >= 0.17.0
+- PyQt5 >= 5.12.2
+- shapely>=1.7.0
+- sumocr>=2021.5
+- ordered-set>=4.0.2
+- enum34>=1.1.10
+- iso3166>=1.0.1
+- future>=0.17.1
+- networkx>=2.5
 
-Installation instructions are given in the documentation in the section "Installation"
+Cartopy can be easily installed via
+```bash
+conda install -c conda-forge cartopy
+```
+from you Anaconda environment. For the other packages, we recommend to use the provided `requirements.txt`:
+```bash
+pip install -r requirements.txt
+```
+
+If you want to use the SUMO conversion or to generate traffic using SUMO, please install 
+[SUMO](https://sumo.dlr.de/docs/index.html):
+```bash
+sudo apt-get install sumo sumo-tools sumo-doc
+echo "export SUMO_HOME=/usr/share/sumo" >> ~/.bashrc
+echo 'export PYTHONPATH="$SUMO_HOME/tools:$PYTHONPATH"' >> ~/.bashrc
+```
+If you use zsh, replace `.bashrc` with `.zshrc`.
+
+To install the _CommonRoad Scenario Designer_, please execute one of the following two commands:
+```bash
+pip install -e .
+```
+or
+```bash
+python setup.py install
+```
+We will soon publish the toolbox on PyPI.
 
 ## Usage
+We provide different types of usage for the _CommonRoad Scenario Designer_. Subsequently, we present for each component 
+the different usage methods.
 
-### GUI (CommonRoad Scenario Designer / CRSD)
+### GUI
 
-![GUI_Screenshot](./docs/source/images/gui/GUI_screenshot.png)
+![GUI_Screenshot](docs/source/images/gui_screenshot.png)
 
-First you need to activate your python environment with the installed dependencies and load the environment variables.
-Then you can start _CommonRoad Scenario Designer_:
+Within the GUI, you can also execute the different converters.
+The GUI can either be activated via a Python API, command line, or executing a Python script.
+
+#### Python Script
+
+First you need to activate your python environment with the installed dependencies (we assume the environment 
+is called _commonroad_).  
+Afterward, you can start the _CommonRoad Scenario Designer_ and the GUI will open:
 
 ```bash
 $ conda activate commonroad
-$ source .env
 # Run CR Scenario designer
-$ python crmapconverter/io/scenario_designer/main_cr_designer.py
+$ python crdesigner/input_output/gui/commonroad_scenario_designer_gui.py
 ```
 
-### Command Line
-
-To run the converters, load the corresponding environment variabels (defined in `.env` file):
-
+#### Command Line
+The GUI can be started from command line via the following two options:
 ```bash
-$ source .env
+$ crdesigner
+$ crdesigner gui
 ```
+Note that you have to activate first the Python environment in which the CommonRoad Scenario Designer is installed.
 
+### Map Converters
+You can execute the different converters either via command line, calling them within your Python program via an API, 
+or the GUI.
+
+#### API
+The main APIs to execute the pure conversions are located under `crdesigner/input_output/api`. 
+For many conversions we provide further APIs, e.g., for downloading a map from OSM.
+
+#### Command Line
+Note that you have to activate first the Python environment in which the CommonRoad Scenario Designer was installed.  
 Converting a file from OpenDRIVE to CommonRoad with the command line:
-
 ```bash
-opendrive2lanelet-convert input_file.xodr -o output_file.xml
+crdesigner [mode] -i [input_file] -o [output_file] -c -f -t [tags] --proj [proj-string] --adjacencies --left-driving --author --affiliation
+```
+For a description of the command line arguments please execute 
+```bash
+crdesigner -h
 ```
 
-Opening OpenDRIVE to CommonRoad converter GUI:
+#### GUI
+The GUI provides a toolbox with which contains functionality to load maps given in formats other the CommonRoad format 
+and to convert CommonRoad maps to other formats or the other formats to the CommonRoad format.
 
-```bash
-opendrive2lanelet-gui
-```
+#### Important information
 
-Visualizing the results of the conversion from OpenDrive to CommonRoad:
+When converting OSM maps, missing information such as the course of individual lanes is estimated during the process.
+These estimations are imperfect (the OSM maps as well) and often it is advisable to edit the 
+scenarios by hand via the GUI.
 
-```bash
-opendrive2lanelet-visualize input-file.xml
-```
-
-Converting a file from OSM lanelets to CommonRoad lanelets with the command line (for description of input parameters see documentation):
-
-```bash
-osm-convert inputfile.xml --reverse -o outputfile.osm --adjencies --proj "+proj=etmerc +lat_0=38 +lon_0=125 +ellps=bessel"
-```
-
-For the conversion of CommonRoad lanelets to OSM lanelets change the input and output file accordingly.
-
-For the conversion of a file from a OSM map to CommonRoad lanelets you can
-open the general GUI and start from there the the OSM map to CommonRoad converter GUI.
-Missing information such as the course of individual lanes is estimated during the process.
-These estimations are imperfect (the OSM maps as well) and often it is advisable to edit the scenarios by hand.
-This tool also provides a simple GUI, to edit scenarios by hand.
+#### Tutorials
+We also provide tutorials demonstrating how the different map converter APIs can be used. 
+The tutorials include a jupyter notebook and exemplary Python scripts for each conversion.
 
 ## Documentation
-
 To generate the documentation from source, first install the necessary dependencies with pip:
 
 ```bash
-pip install -r docs_requirements.txt
+pip install -r docs/doc_requirements.txt
 ```
 
 Afterward run:
 
 ```bash
-cd docs && make html
+cd docs && ./docs_build_script.sh
 ```
 
-The documentation can be accessed by opening `docs/_build/html/index.html`.
+The documentation can be accessed by opening `doc/_build/html/index.html`.
+The titles of module pages have to be set manually!
+The full documentation of the API and introducing examples can also be found [here](https://commonroad-scenario-designer.readthedocs.io/en/latest/).
 
 ## Bug and feature reporting
-
-In case you detect a bug or you want to suggest a new feature create an issue in the backlog of the project.
+This release (v0.2) is still a BETA version.  
+In case you detect a bug or you want to suggest a new feature, please report it in our [forum](https://commonroad.in.tum.de/forum/c/scenario-designer/18) forum. 
 
 ## Authors
 
-Sebastian Maierhofer (current maintainer)  
-Benjamin Orthen  
-Stefan Urban  
-Maximilian Rieger  
-Maximilian Fruehauf @rasaford
+Responsible: Sebastian Maierhofer (maintainer), Moritz Klischat  
+Contribution (in alphabetic order by last name): Maximilian Fruehauf, Marcus Gabler, Fabian Hoeltke, Aaron Kaefer, 
+Benjamin Orthen, Maximilian Rieger, Stefan Urban
