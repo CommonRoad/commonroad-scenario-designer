@@ -104,11 +104,11 @@ We provide more detailed information and examples under the following links, e.g
 .. toctree::
     :maxdepth: 2
 
-    open_drive
-    osm
-    lanelet2
-    sumo
-    commonroad_scenario_designer
+    details/open_drive
+    details/osm
+    details/lanelet2
+    details/sumo
+    details/commonroad_scenario_designer
 
 Indices and tables
 ==================
