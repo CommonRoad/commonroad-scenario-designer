@@ -8,3 +8,4 @@ sphinx-apidoc -o source/api/map_conversion/lanelet ../crdesigner/map_conversion/
 sphinx-apidoc -o source/api/input_output/ ../crdesigner/input_output/ -d 1 -f
 make html
 
+# Titles of module pages have to be set manually!
