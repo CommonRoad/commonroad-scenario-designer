@@ -4,6 +4,7 @@
 # You can set these variables from the command line.
 SPHINXOPTS    =
 SPHINXBUILD   = python -msphinx
+SPHINXPROJ    = CommonRoad-Scenario-Designer
 SOURCEDIR     = source
 BUILDDIR      = build
 

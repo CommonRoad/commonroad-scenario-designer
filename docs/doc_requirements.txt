@@ -18,7 +18,15 @@ future>=0.17.1
 networkx>=2.5
 
 # doc related
-sphinx-autodoc-typehints>=1.6.0
-sphinx_rtd_theme>=0.4.3
-sphinx>=2.1.0
-sphinxcontrib-apidoc>=0.3.0
+ipython>7.16.0
+sphinx>=2.2.1
+sphinx-autodoc-typehints>=1.11.0
+sphinx-rtd-theme
+sphinxcontrib-apidoc
+sphinxcontrib-applehelp
+sphinxcontrib-devhelp
+sphinxcontrib-htmlhelp
+sphinxcontrib-jsmath
+sphinxcontrib-napoleon
+sphinxcontrib-qthelp
+sphinxcontrib-serializinghtml
