@@ -1,9 +1,6 @@
-import os
 from functools import reduce
 from typing import *
 
-from commonroad.common.file_reader import CommonRoadFileReader
-from commonroad.common.file_writer import CommonRoadFileWriter
 from commonroad.scenario.lanelet import Lanelet
 from commonroad.scenario.scenario import Scenario
 
@@ -18,8 +15,8 @@ def merge(to_merge: List[int], scenario: Scenario) -> Tuple[Scenario, int]:
     merged_lanelet._traffic_signs = {t for lanelet in lanelets for t in lanelet.traffic_signs}
     merged_lanelet._traffic_lights = {t for lanelet in lanelets for t in lanelet.traffic_lights}
 
-    lanelet_network._lanelets = {l.lanelet_id: l for l in lanelet_network.lanelets + [merged_lanelet]
-                                 if l.lanelet_id not in to_merge}
+    lanelet_network._lanelets = {la.lanelet_id: la for la in lanelet_network.lanelets + [merged_lanelet]
+                                 if la.lanelet_id not in to_merge}
     to_merge = set(to_merge)
     update = lambda ids: list(set(ids) - to_merge | {merged_lanelet.lanelet_id})
 
@@ -57,5 +54,3 @@ def merge(to_merge: List[int], scenario: Scenario) -> Tuple[Scenario, int]:
     scenario.lanelet_network = lanelet_network
     scenario.scenario_id = "DEU_test"
     return scenario, merged_lanelet.lanelet_id
-
-

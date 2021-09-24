@@ -235,9 +235,9 @@ def resample_lanelet(lanelet: Lanelet, step=3.0):
     polyline_new_r.append(lanelet.right_vertices[-1])
     polyline_new_l.append(lanelet.left_vertices[-1])
 
-    lanelet._center_vertices = np.array(polyline_new_c).reshape([-1,2])
-    lanelet._right_vertices = np.array(polyline_new_r).reshape([-1,2])
-    lanelet._left_vertices = np.array(polyline_new_l).reshape([-1,2])
+    lanelet._center_vertices = np.array(polyline_new_c).reshape([-1, 2])
+    lanelet._right_vertices = np.array(polyline_new_r).reshape([-1, 2])
+    lanelet._left_vertices = np.array(polyline_new_l).reshape([-1, 2])
     lanelet._distance = lanelet._compute_polyline_cumsum_dist([lanelet.center_vertices])
 
 
