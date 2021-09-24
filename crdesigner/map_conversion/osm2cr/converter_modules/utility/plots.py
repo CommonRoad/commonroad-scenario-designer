@@ -49,7 +49,7 @@ def draw_edge_orientation(edge: rg.GraphEdge, ax: axis):
              color="red",  width=1, head_width=6)
     # print compass degrees
     ax.text(
-        x=(edge.node1.x + edge.node2.x)/2, 
+        x=(edge.node1.x + edge.node2.x)/2,
         y=(edge.node1.y + edge.node2.y)/2,
         s='{}'.format(int(edge.get_compass_degrees()))
         )
@@ -64,17 +64,17 @@ def draw_lanelet_direction(lane: rg.Lane, ax: axis):
 
     :return: None
     """
-    ax.arrow( 
-        x=lane.right_bound[0][0], 
-        y=lane.right_bound[0][1], 
-        dx=lane.right_bound[-1][0] - lane.right_bound[0][0], 
-        dy=lane.right_bound[-1][1] - lane.right_bound[0][1], 
-        color="green" if lane.forward else "pink", 
+    ax.arrow(
+        x=lane.right_bound[0][0],
+        y=lane.right_bound[0][1],
+        dx=lane.right_bound[-1][0] - lane.right_bound[0][0],
+        dy=lane.right_bound[-1][1] - lane.right_bound[0][1],
+        color="green" if lane.forward else "pink",
         width=1,
         head_width=2)
 
 
-def draw_graph(graph: rg.Graph, ax: axis, links: bool=True):
+def draw_graph(graph: rg.Graph, ax: axis, links: bool = True):
     """
     draws lanelets of a graph in a plot
 
@@ -191,7 +191,7 @@ def draw_lane(lane: rg.Lane, ax: axis):
     return
 
 
-def draw_lanes(graph: rg.Graph, ax: axis, links: bool=True):
+def draw_lanes(graph: rg.Graph, ax: axis, links: bool = True):
     """
     draws all lanes of a graph
 

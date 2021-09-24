@@ -35,7 +35,7 @@ class GUISettings:
         config.AUTOFOCUS = self.window.chk_autofocus.isChecked()
 
     def has_valid_entries(self) -> bool:
-        """ 
+        """
         Check if the user input is valid. Otherwise warn the user.
 
         :return: bool wether the input is valid

@@ -96,7 +96,7 @@ class Lanelet2Parser:
                 # each lanelet with a relation to this speed limit needs a reference
 
                 # TODO find out if required to remove kmh or mph
-                speed = speed_limit.xpath("./tag[@k='sign_type']/@v")[0] #[:-3]
+                speed = speed_limit.xpath("./tag[@k='sign_type']/@v")[0]  # [:-3]
                 speed_limit_id = speed_limit.attrib['id']
                 traffic_sign_id = TrafficSignIDGermany.MAX_SPEED
                 osm.add_speed_limit_sign(speed_limit_id, speed, traffic_sign_id)
