@@ -6,6 +6,9 @@ from commonroad.scenario.scenario import Scenario
 
 
 def merge(to_merge: List[int], scenario: Scenario) -> Tuple[Scenario, int]:
+    def update(ids: Union[List[int], Set[int]]) -> List[int]:
+        return list(set(ids) - to_merge | {merged_lanelet.lanelet_id})
+
     lanelet_network = scenario.lanelet_network
     lanelets = [lanelet_network.find_lanelet_by_id(lanelet_id) for lanelet_id in to_merge]
 
@@ -18,7 +21,6 @@ def merge(to_merge: List[int], scenario: Scenario) -> Tuple[Scenario, int]:
     lanelet_network._lanelets = {la.lanelet_id: la for la in lanelet_network.lanelets + [merged_lanelet]
                                  if la.lanelet_id not in to_merge}
     to_merge = set(to_merge)
-    update = lambda ids: list(set(ids) - to_merge | {merged_lanelet.lanelet_id})
 
     # update other lanelets
     for lanelet in lanelet_network.lanelets:
