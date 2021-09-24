@@ -491,8 +491,8 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         """
         for la in self.lanelet_network.lanelets:
             if la.successor:
-                self._connections[self.lanelet_id2lane_id[la.lanelet_id]] += [self.lanelet_id2lane_id[succ]
-                                                                             for succ in la.successor]
+                self._connections[self.lanelet_id2lane_id[la.lanelet_id]] += \
+                    [self.lanelet_id2lane_id[succ] for succ in la.successor]
 
     def _filter_disallowed_vehicle_classes(self, max_curvature: float,
                                            lanelet_width, lanelet_id) -> List[str]:
@@ -575,8 +575,8 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
 
         # INTERSECTION BASED CLUSTERING
         # create clusters of nodes belonging to intersection elements fomr lanelet network
-        def cluster_lanelets_from_intersection(lanelet_network, intersecting_edges) -> Tuple[
-            Dict[int, Set[Node]], Dict[int, Set[Lanelet]], Dict[int, Set[NodeType]]]:
+        def cluster_lanelets_from_intersection(lanelet_network, intersecting_edges) \
+                -> Tuple[Dict[int, Set[Node]], Dict[int, Set[Lanelet]], Dict[int, Set[NodeType]]]:
             clusters: Dict[int, Set[Node]] = defaultdict(set)
             cluster_types: Dict[int, Set[NodeType]] = defaultdict(set)
             next_cluster_id = 0
@@ -1479,18 +1479,16 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         def grouped_list(list, criterion):
             return groupby(sorted(list, key=criterion), key=criterion)
 
-        original_connection_map = \
-            {str(from_edge):
-                 {str(from_lane.split("_")[-1]):
-                      {str(to_edge):
-                           {str(to_lane.split("_")[-1]):
-                                [connection.via for connection in to_lane_connections]
-                            for to_lane, to_lane_connections in grouped_list(to_edge_connections,
-                                                                             lambda c: c.to_lane.id)}
-                       for to_edge, to_edge_connections in grouped_list(from_lane_connections,
-                                                                        lambda c: c.to_edge.id)}
-                  for from_lane, from_lane_connections in grouped_list(from_edge_connections, lambda c: c.from_lane.id)}
-             for from_edge, from_edge_connections in grouped_list(self._new_connections, lambda c: c.from_edge.id)}
+        original_connection_map = {
+            str(from_edge): {
+                str(from_lane.split("_")[-1]): {
+                    str(to_edge): {
+                        str(to_lane.split("_")[-1]):
+                            [connection.via for connection in to_lane_connections]
+                        for to_lane, to_lane_connections in grouped_list(to_edge_connections, lambda c: c.to_lane.id)}
+                    for to_edge, to_edge_connections in grouped_list(from_lane_connections, lambda c: c.to_edge.id)}
+                for from_lane, from_lane_connections in grouped_list(from_edge_connections, lambda c: c.from_lane.id)}
+            for from_edge, from_edge_connections in grouped_list(self._new_connections, lambda c: c.from_edge.id)}
 
         available_lane_ids = set()
 
@@ -1625,7 +1623,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                                                     output_folder)
         return True
 
-    def _create_random_routes(self, net_file: str, scenario_name: str = None, return_files = True) -> bool:
+    def _create_random_routes(self, net_file: str, scenario_name: str = None, return_files=True) -> bool:
         """
         Automatically generates traffic routes from the given .net.xml file
 
@@ -2376,9 +2374,8 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
             s = f"""\
             intersection {inter.intersection_id}:
             inc:{[inc.incoming_lanelets for inc in inter.incomings]}
-            out:{list(itertools.chain.from_iterable([inc.successors_straight | inc.successors_left 
-                                                     | inc.successors_right
-                                                     for inc in inter.incomings]))}
+            out:{list(itertools.chain.from_iterable(
+                    [inc.successors_straight | inc.successors_left | inc.successors_right for inc in inter.incomings]))}
             """
             pos = \
                 self.lanelet_network.find_lanelet_by_id(
