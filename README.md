@@ -156,3 +156,22 @@ In case you detect a bug or you want to suggest a new feature, please report it 
 Responsible: Sebastian Maierhofer (maintainer), Moritz Klischat  
 Contribution (in alphabetic order by last name): Maximilian Fruehauf, Marcus Gabler, Fabian Hoeltke, Aaron Kaefer, 
 Benjamin Orthen, Maximilian Rieger, Stefan Urban
+
+## Citation
+**If you use our code for research, please consider citing our paper:**
+```
+@inproceedings{ ,
+	author = {Sebastian Maierhofer, Moritz Klischat, and Matthias Althoff},
+	title = {CommonRoad Scenario Designer: An Open-Source Toolbox for Map Conversion and Scenario Creation for Autonomous Vehicles},
+	booktitle = {Proc. of the IEEE Int. Conf. on Intelligent Transportation Systems },
+	year = {2021},
+	abstract = {Maps are essential for testing autonomous driving functions. Several map and scenario formats are 
+                    available. However, they are usually not compatible with each other, limiting their usability.  
+                    In this paper, we address this problem using our open-source toolbox that provides map converters  
+                    from different formats to the well-known CommonRoad format. Our toolbox provides converters for 
+                    OpenStreetMap, Lanelet/Lanelet2, OpenDRIVE, and SUMO. Additionally, a graphical user interface is 
+                    included, which allows one to efficiently create and manipulate CommonRoad maps and scenarios. 
+                    We demonstrate the functionality of the toolbox by creating CommonRoad maps and scenarios based on 
+                    other map formats and manually-created map data.},
+}
+```
