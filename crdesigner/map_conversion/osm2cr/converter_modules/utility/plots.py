@@ -64,7 +64,7 @@ def draw_lanelet_direction(lane: rg.Lane, ax: axis):
 
     :return: None
     """
-    ax.arrow( 
+    ax.arrow(
         x=lane.right_bound[0][0],
         y=lane.right_bound[0][1],
         dx=lane.right_bound[-1][0] - lane.right_bound[0][0],
