@@ -59,10 +59,8 @@ class TestCommonRoadToSUMOConversion(unittest.TestCase):
             self.path).open()
 
         # translate scenario to center
-        centroid = np.mean(np.concatenate([
-            l.center_vertices for l in self.scenario.lanelet_network.lanelets
-        ]),
-            axis=0)
+        centroid = np.mean(np.concatenate([la.center_vertices for la in self.scenario.lanelet_network.lanelets]),
+                           axis=0)
         self.scenario.translate_rotate(-centroid, 0)
         planning_problem.translate_rotate(-centroid, 0)
         config = SumoConfig.from_scenario(self.scenario)

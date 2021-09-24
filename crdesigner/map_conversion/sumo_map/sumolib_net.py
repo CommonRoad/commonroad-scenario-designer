@@ -4,8 +4,6 @@ This file contains a content handler for parsing sumo network xml files.
 It uses other classes from this module to represent the road network.
 """
 
-# from __future__ import print_function
-# from __future__ import absolute_import
 from collections import defaultdict
 from copy import deepcopy
 from enum import Enum, unique
@@ -22,11 +20,11 @@ def set_allowed_changes(xml_node: ET.Element, obj: Union["Connection", "Lane"]):
     """Adds allowed lange change directions to etree xml node"""
     return
     if obj.change_left_allowed and len(obj.change_left_allowed) != len(VehicleType):
-        xml_node.set("changeLeft", " ".join(l.value for l in obj.change_left_allowed))
+        xml_node.set("changeLeft", " ".join(la.value for la in obj.change_left_allowed))
     elif len(obj.change_left_allowed) == 0:
         xml_node.set("changeLeft", VehicleType.CUSTOM1.value)
     if obj.change_right_allowed and len(obj.change_right_allowed) != len(VehicleType):
-        xml_node.set("changeRight", " ".join(l.value for l in obj.change_right_allowed))
+        xml_node.set("changeRight", " ".join(la.value for la in obj.change_right_allowed))
     elif len(obj.change_right_allowed) == 0:
         xml_node.set("changeRight", VehicleType.CUSTOM1.value)
 
@@ -291,7 +289,8 @@ class NodeType(Enum):
 @unique
 class RightOfWay(Enum):
     # Taken from: https://sumo.dlr.de/docs/Networks/PlainXML.html#right-of-way
-    # This mode is useful if the priority attribute of the edges cannot be relied on to determine right-of-way all by itself.
+    # This mode is useful if the priority attribute of the edges cannot be relied
+    # on to determine right-of-way all by itself.
     # It sorts edges according to priority, speed and laneNumber. The 2 incoming edges with the highest position
     # are determined and will receive right-of-way. All other edges will be classified as minor.
     DEFAULT = "default"
@@ -364,9 +363,9 @@ class Node:
         if self.keep_clear is False:
             node.set("keepClear", "false")
         if self.inc_lanes:
-            node.set("incLanes", " ".join([str(l.id) for l in self.inc_lanes]))
+            node.set("incLanes", " ".join([str(la.id) for la in self.inc_lanes]))
         if self.int_lanes:
-            node.set("intLanes", " ".join([str(l.id) for l in self.int_lanes]))
+            node.set("intLanes", " ".join([str(la.id) for la in self.int_lanes]))
         if self.shape is not None:
             node.set("shape", to_shape_string(self.shape))
         if self.tl is not None:
@@ -470,7 +469,8 @@ class SpreadType(Enum):
     # (default): The edge geometry is interpreted as the left side of the edge and lanes flare out to the right.
     # This works well if edges in opposite directions have the same (or rather reversed) geometry.
     RIGHT = "right"
-    # The edge geometry is interpreted as the middle of the directional edge and lanes flare out symmetrically to both sides.
+    # The edge geometry is interpreted as the middle of the directional edge and lanes
+    # flare out symmetrically to both sides.
     # This is appropriate for one-way edges
     CENTER = "center"
     # The edge geometry is interpreted as the middle of a bi-directional road.
@@ -1231,13 +1231,18 @@ class EdgeType:
         """
         Constructs a SUMO Edge Type
         Documentation from: https://sumo.dlr.de/docs/SUMO_edge_type_file.html
-        :param id: The name of the road type. This is the only mandatory attribute. For OpenStreetMap data, the name could, for example, be highway.trunk or highway.residential. For ArcView data, the name of the road type is a number.
+        :param id: The name of the road type. This is the only mandatory attribute.
+        For OpenStreetMap data, the name could, for example, be highway.trunk or highway.residential.
+        For ArcView data, the name of the road type is a number.
         :param allow: List of allowed vehicle classes
         :param disallow: List of not allowed vehicle classes
         :param discard: If "yes", edges of that type are not imported. This parameter is optional and defaults to false.
         :param num_lanes: The number of lanes on an edge. This is the default number of lanes per direction.
-        :param oneway: If "yes", only the edge for one direction is created during the import. (This attribute makes no sense for SUMO XML descriptions but, for example, for OpenStreetMap files.)
-        :param priority: A number, which determines the priority between different road types. netconvert derives the right-of-way rules at junctions from the priority. The number starts with one; higher numbers represent more important roads.
+        :param oneway: If "yes", only the edge for one direction is created during the import.
+        (This attribute makes no sense for SUMO XML descriptions but, for example, for OpenStreetMap files.)
+        :param priority: A number, which determines the priority between different road types.
+        netconvert derives the right-of-way rules at junctions from the priority.
+        The number starts with one; higher numbers represent more important roads.
         :param speed: The default (implicit) speed limit in m/s.
         :param sidewalk_width: The default width for added sidewalks (defaults to -1 which disables extra sidewalks).
         """
@@ -1425,10 +1430,12 @@ class Phase:
         :param state: The traffic light states for this phase, see below
         :param min_dur: The minimum duration of the phase when using type actuated. Optional, defaults to duration.
         :param max_dur: The maximum duration of the phase when using type actuated. Optional, defaults to duration.
-        :param name: An optional description for the phase. This can be used to establish the correspondence between SUMO-phase-indexing and traffic engineering phase names.
+        :param name: An optional description for the phase. This can be used to establish the
+        correspondence between SUMO-phase-indexing and traffic engineering phase names.
         :param next: The next phase in the cycle after the current.
         This is useful when adding extra transition phases to a traffic light plan which are not part of every cycle.
-        Traffic lights of type 'actuated' can make use of a list of indices for selecting among alternative successor phases.
+        Traffic lights of type 'actuated' can make use of a list of indices for
+        selecting among alternative successor phases.
         """
         self.duration = duration
         self.state = state
@@ -1479,7 +1486,8 @@ class TLSProgram:
         Typically the id for a traffic light is identical with the junction id.
         The name may be obtained by right-clicking the red/green bars in front of a controlled intersection.
         :param offset: The initial time offset of the program
-        :param program_id: The id of the traffic light program; This must be a new program name for the traffic light id.
+        :param program_id: The id of the traffic light program;
+        This must be a new program name for the traffic light id.
         Please note that "off" is reserved, see below.
         :param tls_type: The type of the traffic light (fixed phase durations, phase prolongation based on time
         gaps between vehicles (actuated), or on accumulated time loss of queued vehicles (delay_based) )

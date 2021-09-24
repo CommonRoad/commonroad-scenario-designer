@@ -81,7 +81,7 @@ class TrafficSignEncoder:
             f"MAX_SPEED, can only have one additional attribute, has: {traffic_sign_element.additional_values}"
         max_speed = float(traffic_sign_element.additional_values[0])  # in m/s
         new_type = self.edge_types.create_from_update_speed(edge.type_id, max_speed)
-        # According to https://gitlab.lrz.de/tum-cps/commonroad-scenarios/-/blob/master/documentation/XML_commonRoad_2020a.pdf
+        # According to CommonRoad 2020a spec
         # MAX_SPEED is valid from the start of the specified lanelet, until another speed sign is set
         for e in self._bfs_until(edge, traffic_sign_element):
             e.type_id = new_type.id

@@ -161,7 +161,6 @@ class ObstacleToolbox(QDockWidget):
             self.update_ongoing = False
             self.plot_obstacle_state_profile()
 
-
     def start_sumo_simulation(self):
         num_time_steps = self.obstacle_toolbox.sumo_simulation_length.value()
         self.sumo_simulation.set_simulation_length(num_time_steps)

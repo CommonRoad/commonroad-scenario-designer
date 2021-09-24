@@ -27,13 +27,13 @@ class Signal:
         ###not supported in CommonRoad Signs/Lights###
         #self._zOffset = None
         #self._countryRevision = None
-        
+
         self._height = None
         self._width = None
         self._hOffset = None
         self._pitch = None
         self._roll = None
-        
+
         """
 
     @property

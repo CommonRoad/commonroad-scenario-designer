@@ -12,7 +12,7 @@ class Node:
     Class to represent the nodes in the intermediate format
     """
 
-    def __init__(self, node_id:int, point: geometry.Point):
+    def __init__(self, node_id: int, point: geometry.Point):
         """
         Initialize a node element
 

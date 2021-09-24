@@ -19,7 +19,6 @@ def get_geonamesID(lat: float, lng: float):
     :return: GeonamesID for scenario
     """
 
-
     # try to request information for the given scenario center
     try:
         if config.GEONAMES_USERNAME == 'demo':

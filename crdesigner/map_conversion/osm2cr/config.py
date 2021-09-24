@@ -15,7 +15,8 @@ SOURCE = "OpenStreetMaps (OSM)"
 TAGS = "urban"
 # Geonames username to retrieve geonamesID for created scenarios
 GEONAMES_USERNAME = "demo"
-# Mapillary Client ID which can be set to extract additional traffic signs. If set to "demo", mapillary signs will be disabled
+# Mapillary Client ID which can be set to extract additional traffic signs. If set to "demo",
+# mapillary signs will be disabled
 MAPILLARY_CLIENT_ID = "demo"
 # time step size for the benchmark in seconds
 TIMESTEPSIZE = 0.1
@@ -60,7 +61,7 @@ ACCEPTED_HIGHWAYS_MAINLAYER = [
     "primary",
     "secondary",
     "tertiary",
-    #"unclassified",
+    # "unclassified",
     "residential",
     "motorway_link",
     "trunk_link",
@@ -68,7 +69,7 @@ ACCEPTED_HIGHWAYS_MAINLAYER = [
     "secondary_link",
     "tertiary_link",
     "living_street",
-    #"service"
+    # "service"
 ]
 EXTRACT_SUBLAYER = False
 # types of highways extracted from the OSM file as sublayer
@@ -211,10 +212,10 @@ RECOGNIZED_TURNLANES = [
 # Traffic Lights
 # cycle that will be applied to each traffic light. Values in seconds
 TRAFFIC_LIGHT_CYCLE = {
-    "red_phase": 57, 
-    "red_yellow_phase": 3, 
+    "red_phase": 57,
+    "red_yellow_phase": 3,
     "green_phase": 37,
-    "yellow_phase": 3 
+    "yellow_phase": 3
 }
 
 # Traffic Signs

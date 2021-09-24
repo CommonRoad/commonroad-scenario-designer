@@ -217,7 +217,7 @@ class Poly3(Geometry):
         if compute_curvature:
             curvature = (np.polynomial.polynomial.polyval(s_pos, self.d2_coeffs),
                          self._d)
-        
+
         return self.start_position + np.array([srot, trot]), self.heading + tangent, curvature
 
 
@@ -265,8 +265,8 @@ class ParamPoly3(Geometry):
     def max_abs_curvature(self, pos):
         """
         Maximal curvature at position s
-        :param pos: 
-        :return: 
+        :param pos:
+        :return:
         """
         if abs(np.polynomial.polynomial.polyval(pos, self.d2_coeffs_u)) > \
            abs(np.polynomial.polynomial.polyval(pos, self.d2_coeffs_v)):
@@ -314,8 +314,8 @@ class ParamPoly3(Geometry):
 def calc_next_s(s_current, curvature: float, error_tolerance: float, min_delta_s, s_max) -> float:
     """
     Adaptive computation of next longitudinal sampling position considering approximated error using the curvature:
-    ```math
-        error_tolerance(curvature) \leq \frac{curvature^2}{8}*max_{[a,b]}(|f''(s)|)
+    ```
+    math  error_tolerance(curvature) <= \frac{curvature^2}{8}*max_{[a,b]}(|f''(s)|)
     ```
 
     :param curvature: curvature at current position

@@ -371,4 +371,3 @@ class MapConversionToolbox(QDockWidget):
     def convert_sumo_to_cr(self):
         scenario = convert_net_to_cr(self.path_sumo_file)
         self.callback(scenario)
-

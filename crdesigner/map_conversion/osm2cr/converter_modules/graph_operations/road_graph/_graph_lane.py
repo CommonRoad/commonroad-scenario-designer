@@ -244,7 +244,8 @@ class Lane:
 
     def get_compass_degrees(self):
         """
-        calculates the compass degrees of a lane as in https://en.wikipedia.org/wiki/Points_of_the_compass#/media/File:Compass_Card_B+W.svg
+        calculates the compass degrees of a lane as in
+        https://en.wikipedia.org/wiki/Points_of_the_compass#/media/File:Compass_Card_B+W.svg
         :return: compass orientation in degrees
         """
         def get_orientation():
@@ -254,7 +255,7 @@ class Lane:
             return np.arctan2(y, x) + np.pi
         lane_compass_degrees = math.degrees(get_orientation()) - 45
         if lane_compass_degrees < 0.0:
-            lane_compass_degrees+= 360.0
+            lane_compass_degrees += 360.0
         return lane_compass_degrees
 
     def add_traffic_sign(self, sign: GraphTrafficSign):
@@ -266,4 +267,3 @@ class Lane:
         if self.traffic_lights is None:
             self.traffic_lights = []
         self.traffic_lights.append(light)
-        

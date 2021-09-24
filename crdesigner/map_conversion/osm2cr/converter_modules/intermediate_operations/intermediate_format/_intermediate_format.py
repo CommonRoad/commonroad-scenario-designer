@@ -265,7 +265,7 @@ class IntermediateFormat:
                             right = None
 
                 incoming.extend(lanes_to_add)
-                
+
                 # Initialize incoming element with properties to be filled in
                 incoming_element = {'incomingLanelet': set([incoming_lane.id for incoming_lane in incoming]),
                                     'right': [],
@@ -294,7 +294,7 @@ class IntermediateFormat:
                                 incoming_element[direction].extend(
                                         [s.id for s in incoming_lane.successors])
                             except KeyError:
-                                print('unknown intersection direction key: '+ direction)
+                                print('unknown intersection direction key: ' + direction)
                                 # calculate the direction for each successor
                                 directions = IntermediateFormat.get_directions(incoming_lane)
                                 for key in directions:
@@ -396,7 +396,7 @@ class IntermediateFormat:
 
     @staticmethod
     def get_lanelet_intersections(crossing_interm: "IntermediateFormat",
-                              crossed_interm: "IntermediateFormat") -> Crossings:
+                                  crossed_interm: "IntermediateFormat") -> Crossings:
         """
         Calculate all polygon intersections of the lanelets of the two networks.
         For each lanelet of b return the crossing lanelets of a as list.
@@ -496,4 +496,3 @@ class IntermediateFormat:
         for edge in self.edges:
             if edge.id in all_crossing_ids:
                 edge.edge_type = config.CROSSING_LANELETTYPE
-                

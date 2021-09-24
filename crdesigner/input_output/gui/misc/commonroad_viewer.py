@@ -216,7 +216,8 @@ class DynamicCanvas(FigureCanvas):
                          plot_limits=None):
         """
         Redraw only the dynamic obstacles. This gives a large performance boost, when playing an animation
-        :param scenario: The scneario containing the dynamic obstacles 
+
+        :param scenario: The scenario containing the dynamic obstacles
         :param draw_params: CommonRoad DrawParams for visualization
         :param plot_limits: Matplotlib plot limits
         """
@@ -245,8 +246,7 @@ def draw_lanelet_polygon(lanelet, ax, color, alpha, zorder,
     ylim1 = float("Inf")
     ylim2 = -float("Inf")
 
-    for x, y in np.vstack(
-        [lanelet.left_vertices, lanelet.right_vertices[::-1]]):
+    for x, y in np.vstack([lanelet.left_vertices, lanelet.right_vertices[::-1]]):
         verts.append([x, y])
         codes.append(Path.LINETO)
 
@@ -481,7 +481,7 @@ class AnimatedViewer:
 
         if len(selected_obstacles) > 0:
             selection = " Obstacle with ID " + str(selected_obstacles[0].obstacle_id) + " is selected."
-            self.callback_function(selected_obstacles[0], output+ selection)
+            self.callback_function(selected_obstacles[0], output + selection)
         elif len(selected_lanelets) > 0:
             selection = " Lanelet with ID " + str(selected_lanelets[0].lanelet_id) + " is selected."
             self.callback_function(selected_lanelets[0], output + selection)
@@ -624,7 +624,6 @@ class AnimatedViewer:
                 inc_succ_ids |= inc.successors_right
                 inc_succ_ids |= inc.successors_left
                 inc_succ_ids |= inc.successors_straight
-
 
             if lanelet.lanelet_id in incoming_ids:
                 color = "red"

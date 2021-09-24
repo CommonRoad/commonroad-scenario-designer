@@ -697,7 +697,7 @@ class Graph:
         invalid_lanes = self.find_invalid_lanes()
         for lane in invalid_lanes:
             self.delete_lane(lane)
-        #self.set_adjacents()
+        # self.set_adjacents()
 
     def find_closest_edge_by_lat_lng(self, lat_lng, direction=None) -> GraphNode:
         """
@@ -715,7 +715,7 @@ class Graph:
         points_to_edge = dict()
         for edge in edges:
             edge_orientation = edge.get_compass_degrees()
-            if direction is not None and abs(edge_orientation-direction) < 60: # degrees threshold
+            if direction is not None and abs(edge_orientation-direction) < 60:  # degrees threshold
                 for waypoint in edge.get_waypoints():
                     cartesian_waypoint = geometry.cartesian_to_lon_lat(waypoint, self.center_point)
                     points.append(cartesian_waypoint)

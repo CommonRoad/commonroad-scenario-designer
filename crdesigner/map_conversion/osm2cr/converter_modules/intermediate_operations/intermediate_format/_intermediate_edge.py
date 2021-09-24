@@ -14,6 +14,7 @@ from crdesigner.map_conversion.osm2cr import config
 
 from ._intermediate_node import Node
 
+
 class Edge:
     """
     Class to represent the edges in the intermediate format

@@ -366,7 +366,7 @@ class RoadNetworkToolbox(QDockWidget):
         if self.road_network_toolbox.stop_line_start_x.text() != "" \
             and self.road_network_toolbox.stop_line_end_x.text() != "" \
             and self.road_network_toolbox.stop_line_start_y.text() != "" \
-            and self.road_network_toolbox.stop_line_end_y.text() != "":
+                and self.road_network_toolbox.stop_line_end_y.text() != "":
             stop_line_start_x = float(self.road_network_toolbox.stop_line_start_x.text())
             stop_line_end_x = float(self.road_network_toolbox.stop_line_end_x.text())
             stop_line_start_y = float(self.road_network_toolbox.stop_line_start_y.text())
@@ -590,7 +590,7 @@ class RoadNetworkToolbox(QDockWidget):
         if self.road_network_toolbox.stop_line_start_x.text() != "" \
             and self.road_network_toolbox.stop_line_end_x.text() != "" \
             and self.road_network_toolbox.stop_line_start_y.text() != "" \
-            and self.road_network_toolbox.stop_line_end_y.text() != "":
+                and self.road_network_toolbox.stop_line_end_y.text() != "":
             stop_line_start_x = float(self.road_network_toolbox.stop_line_start_x.text())
             stop_line_end_x = float(self.road_network_toolbox.stop_line_end_x.text())
             stop_line_start_y = float(self.road_network_toolbox.stop_line_start_y.text())
@@ -715,10 +715,9 @@ class RoadNetworkToolbox(QDockWidget):
         num_rows = self.road_network_toolbox.traffic_sign_element_table.rowCount()
         self.road_network_toolbox.traffic_sign_element_table.insertRow(num_rows)
         combo_box = QComboBox()
-        combo_box.addItems(
-            [elem.name for elem in globals()["TrafficSignID"
-                                             + SupportedTrafficSignCountry(
-                self.current_scenario.scenario_id.country_id).name.capitalize()]])
+        combo_box.addItems([elem.name for elem in globals()[
+            "TrafficSignID" + SupportedTrafficSignCountry(self.current_scenario.scenario_id.country_id)
+                           .name.capitalize()]])
         self.road_network_toolbox.traffic_sign_element_table.setCellWidget(num_rows, 0, combo_box)
 
     def remove_traffic_sign_element(self):
@@ -1283,7 +1282,7 @@ class RoadNetworkToolbox(QDockWidget):
         """
         if self.road_network_toolbox.selected_intersection.currentText() not in ["", "None"] \
             and self.road_network_toolbox.other_lanelet_to_fit.currentText() not in ["", "None"] \
-            and self.road_network_toolbox.intersection_lanelet_to_fit.currentText() not in ["", "None"]:
+                and self.road_network_toolbox.intersection_lanelet_to_fit.currentText() not in ["", "None"]:
             selected_intersection_id = int(self.road_network_toolbox.selected_intersection.currentText())
             intersection = self.current_scenario.lanelet_network.find_intersection_by_id(selected_intersection_id)
 

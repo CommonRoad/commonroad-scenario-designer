@@ -251,7 +251,8 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
         tb1.addSeparator()
         tb2 = self.addToolBar("Toolboxes")
-        action_road_network_toolbox = QAction(QIcon(":/icons/road_network_toolbox.png"), "Open Road Network Toolbox", self)
+        action_road_network_toolbox = QAction(QIcon(":/icons/road_network_toolbox.png"), "Open Road Network Toolbox",
+                                              self)
         tb2.addAction(action_road_network_toolbox)
         action_road_network_toolbox.triggered.connect(self.road_network_toolbox_show)
         action_obstacle_toolbox = QAction(QIcon(":/icons/obstacle_toolbox.png"), "Open Obstacle Toolbox", self)
@@ -275,8 +276,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         tb3.addSeparator()
 
         tb4 = self.addToolBar("Animation Play")
-        self.button_play_pause = QAction(QIcon(":/icons/play.png"),
-                                   "Play the animation", self)
+        self.button_play_pause = QAction(QIcon(":/icons/play.png"), "Play the animation", self)
         self.button_play_pause.triggered.connect(self.play_pause_animation)
         tb4.addAction(self.button_play_pause)
 
@@ -287,8 +287,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.slider.setMaximum(99)
         # self.slider.setTickPosition(QSlider.TicksBelow)
         self.slider.setTickInterval(1)
-        self.slider.setToolTip(
-            "Show corresponding Scenario at selected timestep")
+        self.slider.setToolTip("Show corresponding Scenario at selected timestep")
         self.slider.valueChanged.connect(self.time_step_change)
         self.slider.sliderPressed.connect(self.detect_slider_clicked)
         self.slider.sliderReleased.connect(self.detect_slider_release)
@@ -352,11 +351,11 @@ class MWindow(QMainWindow, Ui_mainWindow):
                                            tip="Open CommonRoad Website",
                                            shortcut=None)
         self.open_forum = self.create_action("Open Forum",
-                                           icon="",
-                                           checkable=False,
-                                           slot=self.open_cr_forum,
-                                           tip="Open CommonRoad Forum",
-                                           shortcut=None)
+                                             icon="",
+                                             checkable=False,
+                                             slot=self.open_cr_forum,
+                                             tip="Open CommonRoad Forum",
+                                             shortcut=None)
 
     def create_viewer_dock(self):
         self.viewer_dock = QWidget(self)
@@ -510,8 +509,6 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.update_toolbox_scenarios()
         self.update_to_new_scenario()
 
-       # self.restore_parameters()
-
     def update_to_new_scenario(self):
         """  """
         self.update_max_step()
@@ -528,8 +525,8 @@ class MWindow(QMainWindow, Ui_mainWindow):
         :return: score
         """
 
-        WARNING = 1
-        FATAL_ERROR = 2
+        warning = 1
+        fatal_error = 2
         verbose = True
 
         error_score = 0
@@ -537,7 +534,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         # handle fatal errors
         found_ids = util.find_invalid_ref_of_traffic_lights(scenario)
         if found_ids and verbose:
-            error_score = max(error_score, FATAL_ERROR)
+            error_score = max(error_score, fatal_error)
             self.text_browser.append("invalid traffic light refs: " +
                                      str(found_ids))
             QMessageBox.critical(
@@ -550,7 +547,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
         found_ids = util.find_invalid_ref_of_traffic_signs(scenario)
         if found_ids and verbose:
-            error_score = max(error_score, FATAL_ERROR)
+            error_score = max(error_score, fatal_error)
             self.text_browser.append("invalid traffic sign refs: " +
                                      str(found_ids))
             QMessageBox.critical(
@@ -561,13 +558,13 @@ class MWindow(QMainWindow, Ui_mainWindow):
                 QMessageBox.Ok,
             )
 
-        if error_score >= FATAL_ERROR:
+        if error_score >= fatal_error:
             return error_score
 
         # handle warnings
         found_ids = util.find_invalid_lanelet_polygons(scenario)
         if found_ids and verbose:
-            error_score = max(error_score, WARNING)
+            error_score = max(error_score, warning)
             self.text_browser.append(
                 "Warning: Lanelet(s) with invalid polygon:" + str(found_ids))
             QMessageBox.warning(

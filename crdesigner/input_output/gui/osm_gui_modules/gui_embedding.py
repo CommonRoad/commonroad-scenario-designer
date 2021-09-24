@@ -743,6 +743,7 @@ class LaneLinkEdit(MapEdit):
         self.parent.callback(ex.convert_to_scenario(graph))
         self.parent.osm_edit_window.close()
 
+
 class AttributeEditor:
     """
     An editor to edit the attributes of a single edge
