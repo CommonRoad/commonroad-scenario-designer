@@ -65,9 +65,9 @@ def draw_lanelet_direction(lane: rg.Lane, ax: axis):
     :return: None
     """
     ax.arrow( 
-        x=lane.right_bound[0][0], 
-        y=lane.right_bound[0][1], 
-        dx=lane.right_bound[-1][0] - lane.right_bound[0][0], 
+        x=lane.right_bound[0][0],
+        y=lane.right_bound[0][1],
+        dx=lane.right_bound[-1][0] - lane.right_bound[0][0],
         dy=lane.right_bound[-1][1] - lane.right_bound[0][1],
         color="green" if lane.forward else "pink",
         width=1,
