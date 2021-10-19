@@ -443,8 +443,8 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
     def file_new(self):
         """Function to create the action in the menu bar."""
-        scenario = Scenario(0.1, 'New_Scenario', affiliation="Technical University of Munich",
-                            source="CommonRoad Scenario Designer")
+
+        scenario = Scenario(0.1, affiliation="Technical University of Munich", source="CommonRoad Scenario Designer")
         net = LaneletNetwork()
         scenario.lanelet_network = net
         self.cr_viewer.current_scenario = scenario
