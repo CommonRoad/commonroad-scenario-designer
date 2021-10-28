@@ -1,2 +1,1 @@
-include crmapconverter/sumo_map/cr2sumo/default.sumo.cfg
-include crmapconverter/sumo_map/templates/*
+include crdesigner/map_conversion/sumo_map/templates/*
