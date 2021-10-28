@@ -28,9 +28,9 @@ class TrafficLightGenerator:
         Cycle that is applied to all traffic lights
         """
         cycle = [(TrafficLightState.RED, self.cycle['red_phase']),
-                (TrafficLightState.RED_YELLOW, self.cycle['red_yellow_phase']),
-                (TrafficLightState.GREEN, self.cycle['green_phase']),
-                (TrafficLightState.YELLOW, self.cycle['yellow_phase'])]
+                 (TrafficLightState.RED_YELLOW, self.cycle['red_yellow_phase']),
+                 (TrafficLightState.GREEN, self.cycle['green_phase']),
+                 (TrafficLightState.YELLOW, self.cycle['yellow_phase'])]
         cycle_element_list = [TrafficLightCycleElement(state[0], state[1]) for state in cycle]
         return cycle_element_list
 
@@ -42,7 +42,7 @@ class TrafficLightGenerator:
         offset = self.current_time_offset
 
         # change time offset for cycle start based on number of incomings
-        if self.number_incomings <=2:
+        if self.number_incomings <= 2:
             pass
         elif self.number_incomings <= 4:
             self.current_time_offset += int(self.cycle_length / 2)

@@ -207,7 +207,8 @@ def parse_restrictions(restrictions: Set[ElTree.Element]) -> RestrictionDict:
         )
         if "restriction" in restriction_element.attrib:
             restriction = restriction_element.attrib["restriction"]
-        # connectivity can be used as restriction. In order to distinguish from known restrictions, a connectivity prefix is added
+        # connectivity can be used as restriction.
+        # In order to distinguish from known restrictions, a connectivity prefix is added
         elif "connectivity" in restriction_element.attrib:
             restriction = "connectivity=" + str(restriction_element.attrib["connectivity"])
         else:
@@ -248,7 +249,7 @@ def get_restrictions(root) -> RestrictionDict:
                 restrictions.add(relation)
             if tag.attrib["k"] == "restriction":
                 relation.set("restriction", tag.attrib["v"])
-                #TODO Handle vehicle specific restrictions, e.g. restriction:hgv
+            # TODO Handle vehicle specific restrictions, e.g. restriction:hgv
             # also add connectivity relations, since it can be used as a restriction for lane linking
             if tag.attrib["k"] == "type" and tag.attrib["v"] == "connectivity":
                 restrictions.add(relation)
