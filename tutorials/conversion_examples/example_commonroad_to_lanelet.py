@@ -1,7 +1,7 @@
 from lxml import etree
 from commonroad.common.file_reader import CommonRoadFileReader
-from crdesigner.conversion.lanelet_lanelet2.cr2lanelet import CR2LaneletConverter
-from crdesigner.io.api import commonroad_to_lanelet
+from crdesigner.map_conversion.lanelet_lanelet2.cr2lanelet import CR2LaneletConverter
+from crdesigner.input_output.api import commonroad_to_lanelet
 
 
 input_path = ""  # replace empty string
