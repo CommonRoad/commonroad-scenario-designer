@@ -187,8 +187,8 @@ class GraphEdge:
         # compute radians
         delta_x = self.node2.x - self.node1.x
         delta_y = self.node2.y - self.node1.y
-        radians = np.arctan2(delta_y, delta_x)  
-    
+        radians = np.arctan2(delta_y, delta_x)
+
         # https://stackoverflow.com/a/7805311
         if radians < 0.0:
             radians = abs(radians)
@@ -453,7 +453,7 @@ class GraphEdge:
         :return: None
         """
 
-        # TODO handle direction for traffic signs where no direction is given (e.g parsed maxspeed from OSM). 
+        # TODO handle direction for traffic signs where no direction is given (e.g parsed maxspeed from OSM).
         # Currently, every sign of these is added to the forward lane only
 
         self.traffic_signs.append(sign)
