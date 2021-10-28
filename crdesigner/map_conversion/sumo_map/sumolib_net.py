@@ -1611,7 +1611,7 @@ class Roundabout:
     def edges(self, edges: List[Edge]):
         self._edges = edges
 
-    def to_xml(self)  -> str:
+    def to_xml(self) -> str:
         roundabout = ET.Element("roundabout")
         roundabout.set("edges", " ".join([str(e.id) for e in self.edges]))
         return ET.tostring(roundabout, encoding="unicode")
