@@ -5,6 +5,8 @@ from conversion.converter import Converter
 
 # to run the tests: pytest -v --cov=conversion.converter --cov-report html
 # This also generates a coverage report, see rootdir/htmlcov -> index.html
+
+
 class TestConverterConvert(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super(TestConverterConvert, self).__init__(*args, **kwargs)
@@ -32,7 +34,7 @@ class TestConverterConvert(unittest.TestCase):
         scenario, successors, ids = self.data.initialize()
         self.converter = Converter(self.file_path_in, scenario, successors, ids)
 
-    # cuts out the date timestamp of both maps 
+    # cuts out the date timestamp of both maps
     # (as they wont be equal) and compares them
     def checkWithGroundTruth(self, reference_file):
         with open(self.file_path_out, "r") as converted_file:
