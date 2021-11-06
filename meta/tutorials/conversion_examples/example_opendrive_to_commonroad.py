@@ -5,10 +5,10 @@ from commonroad.scenario.scenario import Tag
 from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
 from commonroad.planning.planning_problem import PlanningProblemSet
 
-from crdesigner.map_conversion.opendrive.opendrive_parser.parser import parse_opendrive
-from crdesigner.map_conversion.opendrive.opendrive_conversion.network import Network
+from api.map_conversion.opendrive import parse_opendrive
+from api.map_conversion.opendrive import Network
 
-from crdesigner.input_output.api import opendrive_to_commonroad
+from api.api import opendrive_to_commonroad
 
 
 input_path = "../../tests/opendrive_test_files/el-vendrell-02.06.20.xodr"

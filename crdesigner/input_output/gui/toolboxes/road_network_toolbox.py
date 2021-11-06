@@ -14,8 +14,8 @@ from crdesigner.input_output.gui.toolboxes.road_network_toolbox_ui import RoadNe
 
 from crdesigner.input_output.gui.toolboxes.gui_sumo_simulation import SUMO_AVAILABLE
 if SUMO_AVAILABLE:
-    from crdesigner.map_conversion.sumo_map.cr2sumo.converter import CR2SumoMapConverter
-    from crdesigner.map_conversion.sumo_map.config import SumoConfig
+    from api.map_conversion.sumo_map.cr2sumo.converter import CR2SumoMapConverter
+    from api.map_conversion.sumo_map.config import SumoConfig
 
 
 class RoadNetworkToolbox(QDockWidget):

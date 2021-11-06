@@ -17,8 +17,8 @@ from matplotlib.lines import Line2D
 from matplotlib.patches import FancyArrow, Polygon, Patch, PathPatch
 from matplotlib.path import Path
 
-from crdesigner.map_conversion.osm2cr.converter_modules.graph_operations import road_graph as rg
-from crdesigner.map_conversion.osm2cr.converter_modules.utility import geometry
+from api.map_conversion.osm2cr.converter_modules.graph_operations import road_graph as rg
+from api.map_conversion.osm2cr.converter_modules.utility import geometry
 
 PICKER_SIZE = 2
 LINE_WIDTH = 2.5

@@ -11,8 +11,8 @@ import pytest
 from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
 from commonroad.scenario.obstacle import ObstacleType
-from crdesigner.map_conversion.sumo_map.config import SumoConfig
-from crdesigner.map_conversion.sumo_map.cr2sumo.converter import CR2SumoMapConverter
+from api.map_conversion.sumo_map.config import SumoConfig
+from api.map_conversion.sumo_map.cr2sumo.converter import CR2SumoMapConverter
 from parameterized import parameterized
 from sumocr.interface.sumo_simulation import SumoSimulation
 

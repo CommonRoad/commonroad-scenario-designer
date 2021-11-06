@@ -5,10 +5,10 @@ from commonroad.scenario.scenario import Tag
 from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
 from commonroad.planning.planning_problem import PlanningProblemSet
 
-from crdesigner.map_conversion.lanelet_lanelet2.lanelet2cr import Lanelet2CRConverter
-from crdesigner.map_conversion.lanelet_lanelet2.lanelet2_parser import Lanelet2Parser
+from api.map_conversion.lanelet_lanelet2 import Lanelet2CRConverter
+from api.map_conversion.lanelet_lanelet2 import Lanelet2Parser
 
-from crdesigner.input_output.api import lanelet_to_commonroad
+from api.api import lanelet_to_commonroad
 
 input_path = ""  # replace empty string
 proj = ""  # replace empty string

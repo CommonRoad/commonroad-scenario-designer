@@ -14,7 +14,7 @@ from commonroad.geometry.shape import Circle
 
 from crdesigner.input_output.gui.toolboxes.gui_sumo_simulation import SUMO_AVAILABLE
 if SUMO_AVAILABLE:
-    from crdesigner.map_conversion.sumo_map.config import SumoConfig
+    from api.map_conversion.sumo_map.config import SumoConfig
 from crdesigner.input_output.gui.misc.util import Observable
 
 from matplotlib.animation import FuncAnimation

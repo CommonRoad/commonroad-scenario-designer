@@ -7,8 +7,8 @@ from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistin
 from commonroad.planning.planning_problem import PlanningProblemSet
 from commonroad.scenario.scenario import Tag, Scenario
 
-from crdesigner.map_conversion.common.utils import generate_unique_id
-from crdesigner.input_output.api import opendrive_to_commonroad
+from api.map_conversion import generate_unique_id
+from api.api import opendrive_to_commonroad
 from tests.map_conversion.utils import elements_equal
 
 __author__ = "Benjamin Orthen, Sebastian Maierhofer"

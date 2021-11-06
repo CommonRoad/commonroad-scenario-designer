@@ -9,11 +9,9 @@ import re
 import sys
 from typing import Optional, Union, Tuple
 
-
-from crdesigner.map_conversion.osm2cr import config
-from crdesigner.map_conversion.osm2cr.converter_modules import converter
-from crdesigner.map_conversion.osm2cr.converter_modules.cr_operations import export as ex
-from crdesigner.map_conversion.osm2cr.converter_modules.graph_operations import road_graph as rg
+from api.map_conversion.osm2cr.converter_modules import converter
+from api.map_conversion.osm2cr.converter_modules.cr_operations import export as ex
+from api.map_conversion.osm2cr.converter_modules.graph_operations import road_graph as rg
 from crdesigner.input_output.gui.osm_gui_modules import gui, settings
 from crdesigner.input_output.gui.osm_gui_modules.GUI_resources.edge_edit_embedding import Ui_EdgeEdit \
     as eeGUI_frame
@@ -22,7 +20,7 @@ from crdesigner.input_output.gui.osm_gui_modules.GUI_resources.lane_link_edit_em
 from crdesigner.input_output.gui.osm_gui_modules.GUI_resources.scenario_view \
     import Ui_MainWindow as scenarioView
 from crdesigner.input_output.gui.osm_gui_modules.GUI_resources.start_window import Ui_MainWindow as startWindow
-from crdesigner.map_conversion.osm2cr.converter_modules.osm_operations.downloader import download_around_map
+from api.map_conversion.osm2cr.converter_modules.osm_operations.downloader import download_around_map, config
 
 from PyQt5 import QtCore
 from PyQt5.QtWidgets import (
