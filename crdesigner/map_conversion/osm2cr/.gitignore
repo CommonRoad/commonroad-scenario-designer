@@ -1,0 +1,3 @@
+files/**/*.osm
+files/**/*.xml
+files/**/*.pickle

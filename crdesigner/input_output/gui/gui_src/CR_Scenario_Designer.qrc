@@ -1,0 +1,22 @@
+<RCC>
+  <qresource prefix="icons">
+    <file>tools.ico</file>
+    <file>button_undo.png</file>
+    <file>button_redo.png</file>
+    <file>new_file.png</file>
+    <file>open_file.png</file>
+    <file>cr2.ico</file>
+    <file>cr1.png</file>
+    <file>icon.ico</file>
+    <file>cr1.ico</file>
+    <file>cr.ico</file>
+    <file>save.ico</file>
+    <file>save_file.png</file>
+    <file>close.png</file>
+    <file>play.png</file>
+    <file>pause.png</file>
+    <file>save_video.png</file>
+    <file>obstacle_toolbox.png</file>
+    <file>road_network_toolbox.png</file>
+  </qresource>
+</RCC>
