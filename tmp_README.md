@@ -10,6 +10,11 @@ Contains all files for the GUI - is structure by the appearing of the GUI:
 gui.py -> the main entrance to the application.
    /files
    Contains the files used / edited / downloaded during usage of the GUI.
+   /mwindow
+   Is the main window, contains the model and the view for the controller.
+   mwindow.py contains the "what" of the main window
+   mwindow_view.py contains the "how" of the layout generation
+   mwindow_controller.py contains the "how" of the actions
 
 /meta
 [all information for setup, explanation etc...]

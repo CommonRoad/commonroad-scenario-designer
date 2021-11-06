@@ -73,6 +73,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.cr_viewer = AnimatedViewer(self, self.viewer_callback)
 
         self.create_file_actions()
+        # came until here...
         self.create_setting_actions()
         self.create_help_actions()
         self.create_viewer_dock()
@@ -373,6 +374,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.move((screen.width() - size.width()) / 2,
                   (screen.height() - size.height()) / 2)
 
+    # TODO already moved to mwindow_controller
     def create_file_actions(self):
         """Function to create the file action in the menu bar."""
         self.fileNewAction = self.create_action(
@@ -407,6 +409,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
                                              tip="Quit",
                                              shortcut=QKeySequence.Close)
 
+    # TODO already moved to mwindow_controller
     def create_action(self,
                       text,
                       icon=None,
@@ -441,6 +444,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         """Function to open the CommonRoad Forum."""
         QDesktopServices.openUrl(QUrl("https://commonroad.in.tum.de/forum/c/map-tool/11"))
 
+    # TODO already moved to mwindow_controller
     def file_new(self):
         """Function to create the action in the menu bar."""
 
