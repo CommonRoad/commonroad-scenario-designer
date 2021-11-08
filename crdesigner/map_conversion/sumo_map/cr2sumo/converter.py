@@ -75,7 +75,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                  scenario: Scenario,
                  conf: SumoConfig):
         """
-        :param lanelet_network: lanelet network to be converted
+        :param scenario: CommonRoad Scenario to be converted
         :param conf: configuration file for additional map conversion parameters
         """
         self.initial_scenario: Scenario = scenario
