@@ -9,7 +9,7 @@ Contains all files for the GUI - is structure by the appearing of the GUI:
 [insert image here from packages and parts of the GUI]
 gui.py -> the main entrance to the application.
    /files
-   Contains the files used / edited / downloaded during usage of the GUI.
+   Contains the files used or edited or downloaded during usage of the GUI.
    /mwindow
    Is the main window, contains the model and the view for the controller.
    mwindow.py contains the "what" of the main window
@@ -24,3 +24,7 @@ gui.py -> the main entrance to the application.
 
 /cli
 The command line interface, uses the api.
+
+### Contribution Guideline ###
+
+The whole package is structured by the appearance in the GUI. Any functionality of an appereance is in the service_layer/ of the regarding level.

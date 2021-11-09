@@ -1,19 +1,18 @@
-import logging
-import os
-import pathlib
-import sys
-from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
-import copy
-from typing import Union
-from PyQt5.QtWidgets import *
-from PyQt5.QtGui import *
-from PyQt5.QtCore import *
-
 from crdesigner.input_output.gui.gui_resources.MainWindow import Ui_mainWindow
 from crdesigner.input_output.gui.gui_resources.scenario_saving_dialog import ScenarioDialog
 from crdesigner.input_output.gui.misc.commonroad_viewer import AnimatedViewer
-from gui.CONSTANTS import *
-from mwindow_controller import *
+from meta.CONSTANTS import *
+from gui.mwindow.service_layer.general_services import setup_tmp
+from gui.mwindow.service_layer.general_services import setup_mwindow
+from gui.mwindow.service_layer.file_actions import create_file_actions
+from gui.mwindow.service_layer.setting_actions import create_setting_actions
+from gui.mwindow.service_layer.help_actions import create_help_actions
+from gui.mwindow.service_layer.general_services import create_viewer_dock
+from gui.mwindow.service_layer.general_services import viewer_callback
+
+from crdesigner.input_output.gui.gui_src import CR_Scenario_Designer  # do not remove!!!
+
+from PyQt5.QtWidgets import *
 
 
 class MWindow(QMainWindow, Ui_mainWindow):
@@ -41,10 +40,12 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
         # init any objects here
         self.scenario_saving_dialog = ScenarioDialog()
-        self.cr_viewer = AnimatedViewer(self, self.viewer_callback)
+        self.cr_viewer = AnimatedViewer(self, viewer_callback)
 
-        # call the setup methods in the controller
+        # call the setup methods in the service layer
         setup_tmp(tmp_folder_path=self.tmp_folder)
         setup_mwindow(self)
-        create_file_actions()
-
+        self.fileNewAction, self.fileOpenAction, self.separator, self.fileSaveAction, self.exitAction = create_file_actions(mwindow=self)
+        self.osm_settings, self.opendrive_settings, self.gui_settings, self.sumo_settings = create_setting_actions()
+        self.open_web, self.open_forum = create_help_actions()
+        self.viewer_dock = create_viewer_dock(mwindow=self)

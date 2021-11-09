@@ -73,10 +73,10 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.cr_viewer = AnimatedViewer(self, self.viewer_callback)
 
         self.create_file_actions()
-        # came until here...
         self.create_setting_actions()
         self.create_help_actions()
         self.create_viewer_dock()
+        # came until here...
         self.create_toolbar()
         self.create_console()
         self.create_road_network_toolbox()
@@ -129,6 +129,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.obstacle_toolbox = ObstacleToolbox(self.cr_viewer.current_scenario, self.toolbox_callback, self.tmp_folder)
         self.addDockWidget(Qt.RightDockWidgetArea, self.obstacle_toolbox)
 
+    # Already moved to general_services.py
     def viewer_callback(self, selected_object: Union[Lanelet, Obstacle], output: str):
         if isinstance(selected_object, Lanelet):
             self.road_network_toolbox.road_network_toolbox.selected_lanelet_two.setCurrentText(
@@ -149,14 +150,17 @@ class MWindow(QMainWindow, Ui_mainWindow):
             self.update_max_step()
             self.store_scenario()
 
+    # Already moved to setting_actions.py
     def show_osm_settings(self):
         osm_interface = OSMInterface(self)
         osm_interface.show_settings()
 
+    # Already moved at setting_actions.py
     def show_opendrive_settings(self):
         opendrive_interface = OpenDRIVEInterface(self)
         opendrive_interface.show_settings()
 
+    # Already moved at setting_actions.py
     def show_gui_settings(self):
         self.gui_settings = GUISettings(self)
 
@@ -164,6 +168,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.road_network_toolbox.initialize_toolbox()
         self.obstacle_toolbox.initialize_toolbox()
 
+    # Already moved to setting_actions.py
     def show_sumo_settings(self):
         self.sumo_settings = SUMOSettings(self, config=self.obstacle_toolbox.sumo_simulation.config)
 
@@ -343,6 +348,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
                 tip="Show settings for the SUMO interface",
                 shortcut=None)
 
+    # Already moved to hrlp_actions
     def create_help_actions(self):
         """Function to create the help action in the menu bar."""
         self.open_web = self.create_action("Open CR Web",
@@ -357,7 +363,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
                                              slot=self.open_cr_forum,
                                              tip="Open CommonRoad Forum",
                                              shortcut=None)
-
+    # Already moved to general_services.py
     def create_viewer_dock(self):
         self.viewer_dock = QWidget(self)
         toolbar = NavigationToolbar(self.cr_viewer.dynamic, self.viewer_dock)
@@ -436,10 +442,12 @@ class MWindow(QMainWindow, Ui_mainWindow):
             action.setShortcut(shortcut)  # shortcut
         return action
 
+    # Already moved to help_actions.py
     def open_cr_web(self):
         """Function to open the CommonRoad website."""
         QDesktopServices.openUrl(QUrl("https://commonroad.in.tum.de/"))
 
+    # Already moved to help_actions.py
     def open_cr_forum(self):
         """Function to open the CommonRoad Forum."""
         QDesktopServices.openUrl(QUrl("https://commonroad.in.tum.de/forum/c/map-tool/11"))
@@ -456,6 +464,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.open_scenario(scenario)
 #        self.restore_parameters()
 
+    # TODO already moved to mwindow.py
     def open_commonroad_file(self):
         """ """
         path, _ = QFileDialog.getOpenFileName(
@@ -469,6 +478,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
             return
         self.open_path(path)
 
+    # TODO already moved to mwindow_controller.py
     def open_path(self, path):
         """ """
         try:
@@ -496,6 +506,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
             self.obstacle_toolbox.sumo_simulation.scenario = scenario
             self.map_converter_toolbox.sumo_simulation.scenario = scenario
 
+    # TODO already moved to mwindow_controller.py
     def open_scenario(self, new_scenario, filename="new_scenario", pps=None):
         """  """
         if self.check_scenario(new_scenario) >= 2:
@@ -581,6 +592,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
         return error_score
 
+    # TODO already moved to file_actions.py
     def file_save(self):
         """Function to save a CR .xml file."""
 
@@ -596,6 +608,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
     def process_trigger(self, q):
         self.status.showMessage(q.text() + ' is triggered')
 
+    # TODO already moved to file_action.py
     def close_window(self):
         reply = QMessageBox.warning(self, "Warning",
                                     "Do you really want to quit?",
