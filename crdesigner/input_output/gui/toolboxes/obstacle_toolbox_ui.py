@@ -120,3 +120,4 @@ class ObstacleToolboxUI(Toolbox):
 
             title_sumo = "Sumo Simulation"
             self.sections.append((title_sumo, widget_sumo))
+
