@@ -70,16 +70,14 @@ class ObstacleToolbox(QDockWidget):
     def refresh_toolbox(self, scenario: Scenario):
         self.current_scenario = scenario
         self.initialize_toolbox()
+
     def add_static_obstacle(self, obstacle_id: int = None):
         obstacle_id = obstacle_id
-
-
         self.obstacle_toolbox.obstacle_x_Position = 0
         self.obstacle_toolbox.obstacle_y_Position = 0
         self.obstacle_toolbox.obstacle_width = 2
         self.obstacle_toolbox.obstacle_length = 2
         self.obstacle_toolbox.obstacle_type = self.obstacle_toolbox.obstacle_type
-
 
     def initialize_toolbox(self):
         self.initialize_obstacle_information()
