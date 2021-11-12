@@ -49,9 +49,19 @@ class ObstacleToolboxUI(Toolbox):
         self.obstacle_width.setMaxLength(4)
         self.obstacle_width.setAlignment(Qt.AlignRight)
 
+        self.obstacle_x_Position = QLineEdit()
+        self.obstacle_x_Position.setValidator(QIntValidator())
+        self.obstacle_x_Position.setMaxLength(4)
+        self.obstacle_x_Position.setAlignment(Qt.AlignRight)
+
         self.obstacle_type = QComboBox()
         obstalce_type_list = [e.value for e in ObstacleType]
         self.obstacle_type.addItems(obstalce_type_list)
+
+        self.obstacle_y_Position = QLineEdit()
+        self.obstacle_y_Position.setValidator(QIntValidator())
+        self.obstacle_y_Position.setMaxLength(4)
+        self.obstacle_y_Position.setAlignment(Qt.AlignRight)
 
         self.obstacle_state_variable = QComboBox()
         self.figure = Figure(figsize=(5, 4))
@@ -61,6 +71,7 @@ class ObstacleToolboxUI(Toolbox):
         self.selected_obstacle = QComboBox()
         self.button_update_obstacle = QPushButton("Update")
         self.button_remove_obstacle = QPushButton("Remove")
+        self.button_add_static_obstacle = QPushButton("Add")
 
         layout_obstacle_information_groupbox = QFormLayout()
         obstacle_information_groupbox = QGroupBox()
@@ -69,6 +80,9 @@ class ObstacleToolboxUI(Toolbox):
         layout_obstacle_information_groupbox.addRow("Width [m]", self.obstacle_width)
         layout_obstacle_information_groupbox.addRow("Length [m]", self.obstacle_length)
         layout_obstacle_information_groupbox.addRow("Type", self.obstacle_type)
+        layout_obstacle_information_groupbox.addRow("X-Position", self.obstacle_x_Position)
+        layout_obstacle_information_groupbox.addRow("Y-Position", self.obstacle_y_Position)
+
         layout_obstacle_state_vis_groupbox = QFormLayout()
         obstacle_state_vis_groupbox = QGroupBox()
         obstacle_state_vis_groupbox.setLayout(layout_obstacle_state_vis_groupbox)
@@ -84,6 +98,7 @@ class ObstacleToolboxUI(Toolbox):
         layout_obstacle_buttons.addRow("Selected Obstacle ID:", self.selected_obstacle)
         layout_obstacle_buttons.addRow(self.button_update_obstacle)
         layout_obstacle_buttons.addRow(self.button_remove_obstacle)
+        layout_obstacle_buttons.addRow(self.button_add_static_obstacle)
         layout_obstacles.addLayout(layout_obstacle_buttons)
 
         title_obstacle = "Obstacle"
@@ -105,3 +120,4 @@ class ObstacleToolboxUI(Toolbox):
 
             title_sumo = "Sumo Simulation"
             self.sections.append((title_sumo, widget_sumo))
+

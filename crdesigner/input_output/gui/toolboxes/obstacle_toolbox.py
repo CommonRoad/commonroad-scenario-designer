@@ -50,6 +50,8 @@ class ObstacleToolbox(QDockWidget):
 
         self.obstacle_toolbox.button_remove_obstacle.clicked.connect(
             lambda: self.remove_obstacle())
+        self.obstacle_toolbox.button_add_static_obstacle.clicked.connect(
+            lambda: self.add_static_obstacle())
 
         if SUMO_AVAILABLE:
             self.obstacle_toolbox.button_start_simulation.clicked.connect(
@@ -68,6 +70,16 @@ class ObstacleToolbox(QDockWidget):
     def refresh_toolbox(self, scenario: Scenario):
         self.current_scenario = scenario
         self.initialize_toolbox()
+    def add_static_obstacle(self, obstacle_id: int = None):
+        obstacle_id = obstacle_id
+
+
+        self.obstacle_toolbox.obstacle_x_Position = 0
+        self.obstacle_toolbox.obstacle_y_Position = 0
+        self.obstacle_toolbox.obstacle_width = 2
+        self.obstacle_toolbox.obstacle_length = 2
+        self.obstacle_toolbox.obstacle_type = self.obstacle_toolbox.obstacle_type
+
 
     def initialize_toolbox(self):
         self.initialize_obstacle_information()
@@ -79,6 +91,8 @@ class ObstacleToolbox(QDockWidget):
 
         self.obstacle_toolbox.obstacle_width.setText("")
         self.obstacle_toolbox.obstacle_length.setText("")
+        self.obstacle_toolbox.obstacle_x_Position.setText("")
+        self.obstacle_toolbox.obstacle_y_Position.setText("")
         self.obstacle_toolbox.selected_obstacle.clear()
         self.obstacle_toolbox.selected_obstacle.addItems(
             ["None"] + [str(item) for item in self.collect_obstacle_ids()])
