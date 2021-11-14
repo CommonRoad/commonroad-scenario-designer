@@ -1,5 +1,6 @@
 from typing import List
 import matplotlib as mpl
+import numpy as np
 
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
@@ -7,6 +8,8 @@ from PyQt5.QtCore import *
 
 from commonroad.geometry.shape import Rectangle
 from commonroad.scenario.scenario import Scenario
+from commonroad.scenario.obstacle import Obstacle, StaticObstacle, ObstacleType
+from commonroad.scenario.trajectory import State
 
 from crdesigner.input_output.gui.toolboxes.gui_sumo_simulation import SUMO_AVAILABLE
 if SUMO_AVAILABLE:
@@ -51,7 +54,7 @@ class ObstacleToolbox(QDockWidget):
         self.obstacle_toolbox.button_remove_obstacle.clicked.connect(
             lambda: self.remove_obstacle())
         self.obstacle_toolbox.button_add_static_obstacle.clicked.connect(
-            lambda: self.add_static_obstacle())
+           lambda: self.add_static_obstacle()) #hardcoded just for testing
 
         if SUMO_AVAILABLE:
             self.obstacle_toolbox.button_start_simulation.clicked.connect(
@@ -71,13 +74,40 @@ class ObstacleToolbox(QDockWidget):
         self.current_scenario = scenario
         self.initialize_toolbox()
 
-    def add_static_obstacle(self, obstacle_id: int = None):
-        obstacle_id = obstacle_id
-        self.obstacle_toolbox.obstacle_x_Position = 0
+    #def add_static_obstacle(self, obstacle_id: int = None):
+    #most of this code is copied from the branch from the previous student
+    #I think some of it can be a good starting point to add more functionality
+    def add_static_obstacle(self):
+        
+        obstacle_id_temp = self.current_scenario.generate_object_id()
+
+        static_obstacle = StaticObstacle(
+            obstacle_id = obstacle_id_temp,
+            obstacle_type = ObstacleType(self.obstacle_toolbox.
+            obstacle_type.currentText()),
+            #should be able to create more shapes, this is just for testing
+            obstacle_shape = Rectangle(
+                length = float(self.obstacle_toolbox.obstacle_length.text()),
+                width = float(self.obstacle_toolbox.obstacle_width.text()) 
+            ),
+            initial_state = State(**{'position': np.array([
+                float(self.obstacle_toolbox.obstacle_x_Position.text()),
+                float(self.obstacle_toolbox.obstacle_y_Position.text())
+            ]),
+            #'orientation': math.radians(float(self.obstacle_toolbox.obstacle_orientation.text())),
+            #obstacle_orientation doesnt exist yet
+            'orientation': 3.14, #hardcoded for testing
+            'time_step': 1
+            })
+        )
+
+        self.current_scenario.add_objects(static_obstacle)
+        self.callback(self.current_scenario)
+        """self.obstacle_toolbox.obstacle_x_Position = 0
         self.obstacle_toolbox.obstacle_y_Position = 0
         self.obstacle_toolbox.obstacle_width = 2
         self.obstacle_toolbox.obstacle_length = 2
-        self.obstacle_toolbox.obstacle_type = self.obstacle_toolbox.obstacle_type
+        self.obstacle_toolbox.obstacle_type = self.obstacle_toolbox.obstacle_type"""
 
     def initialize_toolbox(self):
         self.initialize_obstacle_information()
@@ -87,7 +117,7 @@ class ObstacleToolbox(QDockWidget):
         Initializes GUI elements with intersection information.
         """
 
-        self.obstacle_toolbox.obstacle_width.setText("")
+        self.obstacle_toolbox.obstacle_width.setText("") #error
         self.obstacle_toolbox.obstacle_length.setText("")
         self.obstacle_toolbox.obstacle_x_Position.setText("")
         self.obstacle_toolbox.obstacle_y_Position.setText("")
