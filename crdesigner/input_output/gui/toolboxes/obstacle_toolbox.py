@@ -8,8 +8,9 @@ from PyQt5.QtCore import *
 
 from commonroad.geometry.shape import Rectangle
 from commonroad.scenario.scenario import Scenario
-from commonroad.scenario.obstacle import Obstacle, StaticObstacle, ObstacleType
+from commonroad.scenario.obstacle import Obstacle, StaticObstacle, ObstacleType, DynamicObstacle
 from commonroad.scenario.trajectory import State
+from commonroad.prediction.prediction import Prediction
 
 from crdesigner.input_output.gui.toolboxes.gui_sumo_simulation import SUMO_AVAILABLE
 if SUMO_AVAILABLE:
@@ -48,13 +49,16 @@ class ObstacleToolbox(QDockWidget):
 
         self.obstacle_toolbox.selected_obstacle.currentTextChanged.connect(
             lambda: self.update_obstacle_information())
+        self.obstacle_toolbox.button_update_obstacle.clicked.connect(
+            lambda: self.update_obstacle())
+            
         self.obstacle_toolbox.obstacle_state_variable.currentTextChanged.connect(
             lambda: self.plot_obstacle_state_profile())
 
         self.obstacle_toolbox.button_remove_obstacle.clicked.connect(
             lambda: self.remove_obstacle())
         self.obstacle_toolbox.button_add_static_obstacle.clicked.connect(
-           lambda: self.add_static_obstacle()) #hardcoded just for testing
+           lambda: self.add_static_obstacle())
 
         if SUMO_AVAILABLE:
             self.obstacle_toolbox.button_start_simulation.clicked.connect(
@@ -77,19 +81,16 @@ class ObstacleToolbox(QDockWidget):
     #def add_static_obstacle(self, obstacle_id: int = None):
     #most of this code is copied from the branch from the previous student
     #I think some of it can be a good starting point to add more functionality
-    def add_static_obstacle(self):
-        
-        obstacle_id_temp = self.current_scenario.generate_object_id()
-
+    def static_obstacle_details(self, obstacle_id):
         static_obstacle = StaticObstacle(
-            obstacle_id = obstacle_id_temp,
-            obstacle_type = ObstacleType(self.obstacle_toolbox.
-            obstacle_type.currentText()),
+            obstacle_id = obstacle_id,
+            obstacle_type = ObstacleType(self.obstacle_toolbox.obstacle_type.currentText()),
             #should be able to create more shapes, this is just for testing
-            obstacle_shape = Rectangle(
-                length = float(self.obstacle_toolbox.obstacle_length.text()),
-                width = float(self.obstacle_toolbox.obstacle_width.text()) 
-            ),
+                obstacle_shape = Rectangle(
+                    length = float(self.obstacle_toolbox.obstacle_length.text()),
+                    width = float(self.obstacle_toolbox.obstacle_width.text()) 
+                ),
+
             initial_state = State(**{'position': np.array([
                 float(self.obstacle_toolbox.obstacle_x_Position.text()),
                 float(self.obstacle_toolbox.obstacle_y_Position.text())
@@ -103,11 +104,35 @@ class ObstacleToolbox(QDockWidget):
 
         self.current_scenario.add_objects(static_obstacle)
         self.callback(self.current_scenario)
+        
+    def add_static_obstacle(self):
+
+        try:
+            obstacle_id = self.current_scenario.generate_object_id()
+            self.static_obstacle_details(obstacle_id)
+
+            
+        except:
+            print("Error when creating static obstacle")
+
         """self.obstacle_toolbox.obstacle_x_Position = 0
         self.obstacle_toolbox.obstacle_y_Position = 0
         self.obstacle_toolbox.obstacle_width = 2
         self.obstacle_toolbox.obstacle_length = 2
         self.obstacle_toolbox.obstacle_type = self.obstacle_toolbox.obstacle_type"""
+    
+    def update_obstacle(self):
+        try:
+            obstacle_id = int(self.obstacle_toolbox.selected_obstacle.currentText())
+            selected_obstacle = self.current_scenario.obstacle_by_id(obstacle_id)
+
+            self.current_scenario.remove_obstacle(selected_obstacle)
+
+            self.static_obstacle_details(obstacle_id)
+        except:
+            print("Could not update object")
+        
+    
 
     def initialize_toolbox(self):
         self.initialize_obstacle_information()
@@ -133,18 +158,22 @@ class ObstacleToolbox(QDockWidget):
             state_variable_name = self.obstacle_toolbox.obstacle_state_variable.currentText()
             if state_variable_name == "x-position":
                 profile = [obstacle.initial_state.__getattribute__("position")[0]]
-                profile += [state.__getattribute__("position")[0]
-                            for state in obstacle.prediction.trajectory.state_list]
+                if isinstance(obstacle, DynamicObstacle):
+                    profile += [state.__getattribute__("position")[0]
+                                for state in obstacle.prediction.trajectory.state_list]
             elif state_variable_name == "y-position":
                 profile = [obstacle.initial_state.__getattribute__("position")[1]]
-                profile += [state.__getattribute__("position")[1]
-                            for state in obstacle.prediction.trajectory.state_list]
+                if isinstance(obstacle, DynamicObstacle):
+                    profile += [state.__getattribute__("position")[1]
+                                for state in obstacle.prediction.trajectory.state_list]
             else:
                 profile = [obstacle.initial_state.__getattribute__(state_variable_name)]
-                profile += [state.__getattribute__(state_variable_name)
-                            for state in obstacle.prediction.trajectory.state_list]
+                if isinstance(obstacle, DynamicObstacle):
+                    profile += [state.__getattribute__(state_variable_name)
+                                for state in obstacle.prediction.trajectory.state_list]
             time = [obstacle.initial_state.time_step]
-            time += [state.time_step for state in obstacle.prediction.trajectory.state_list]
+            if isinstance(obstacle, DynamicObstacle):
+                time += [state.time_step for state in obstacle.prediction.trajectory.state_list]
 
             # create an axis
             ax = self.obstacle_toolbox.figure.add_subplot(111)
@@ -190,6 +219,9 @@ class ObstacleToolbox(QDockWidget):
             if isinstance(obstacle.obstacle_shape, Rectangle):
                 self.obstacle_toolbox.obstacle_width.setText(str(obstacle.obstacle_shape.width))
                 self.obstacle_toolbox.obstacle_length.setText(str(obstacle.obstacle_shape.length))
+
+                self.obstacle_toolbox.obstacle_x_Position.setText(str(obstacle.initial_state.__getattribute__("position")[0]))
+                self.obstacle_toolbox.obstacle_y_Position.setText(str(obstacle.initial_state.__getattribute__("position")[1]))
             else:
                 self.obstacle_toolbox.obstacle_width.setText("")
                 self.obstacle_toolbox.obstacle_length.setText("")
