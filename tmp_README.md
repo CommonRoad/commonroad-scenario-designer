@@ -5,7 +5,7 @@ Here all information is written, which is then transfered to the README.md.
 # Package structure #
 
 /gui
-Contains all files for the GUI - is structure by the appearing of the GUI:
+Contains all files for the GUI - is structure by the appearing of the GUI. Every part of the gui has a wrapper class which is in a package.
 [insert image here from packages and parts of the GUI]
 gui.py -> the main entrance to the application.
    /files
@@ -33,3 +33,5 @@ The whole package is structured by the appearance in the GUI. Any functionality 
 
 #### Comments ####
 Docstring python convention.
+
+###  ###

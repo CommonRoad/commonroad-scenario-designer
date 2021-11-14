@@ -47,9 +47,16 @@ def create_action(mwindow, text, icon=None, checkable=False, slot=None, tip=None
         if slot is not None:
             action.triggered.connect(slot)
     if tip is not None:
-        action.setToolTip(tip)  # toolbar tip
+        action.setToolTip(tip)  # toolbar_wrapper tip
         action.setStatusTip(tip)  # statusbar tip
     if shortcut is not None:
         action.setShortcut(shortcut)  # shortcut
     return action
 
+
+def center(mwindow):
+    """Function that makes sure the main window is in the center of screen."""
+    screen = QDesktopWidget().screenGeometry()
+    size = mwindow.geometry()
+    mwindow.move((screen.width() - size.width()) / 2,
+              (screen.height() - size.height()) / 2)

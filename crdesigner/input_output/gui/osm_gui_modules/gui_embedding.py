@@ -492,7 +492,7 @@ class MapEdit(ABC):
 
         :param plot: the embedded gui
         :param window: the embedding window
-        :return: Tuple of canvas and toolbar
+        :return: Tuple of canvas and toolbar_wrapper
         """
         layout = window.plot_frame
         canvas = plot.fig.canvas

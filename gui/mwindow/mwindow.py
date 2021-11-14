@@ -1,33 +1,36 @@
+from commonroad.scenario.lanelet import Lanelet
+from commonroad.scenario.obstacle import Obstacle
 from crdesigner.input_output.gui.gui_resources.MainWindow import Ui_mainWindow
 from crdesigner.input_output.gui.gui_resources.scenario_saving_dialog import ScenarioDialog
 from crdesigner.input_output.gui.misc.commonroad_viewer import AnimatedViewer
-from meta.CONSTANTS import *
+from crdesigner.input_output.gui.settings import config
+from gui.mwindow.toolbar_wrapper.toolbar_wrapper import ToolBarWrapper
+from gui.mwindow.console_wrapper.console_wrapper import ConsoleWrapper
 from gui.mwindow.service_layer.general_services import setup_tmp
 from gui.mwindow.service_layer.general_services import setup_mwindow
+from gui.mwindow.service_layer.general_services import center
 from gui.mwindow.service_layer.file_actions import create_file_actions
 from gui.mwindow.service_layer.setting_actions import create_setting_actions
 from gui.mwindow.service_layer.help_actions import create_help_actions
-from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
-from typing import Union
-from crdesigner.input_output.gui.settings import config
-from commonroad.scenario.lanelet import Lanelet
-from commonroad.scenario.obstacle import Obstacle
-from gui.mwindow.toolbar.toolbar import create_toolbar
-from gui.mwindow.console.console import create_console
 from gui.mwindow.toolboxes.road_network_toolbox.create_road_network_toolbox import create_road_network_toolbox
 from gui.mwindow.toolboxes.converter_toolbox.create_converter_toolbox import create_converter_toolbox
 from gui.mwindow.toolboxes.obstacle_toolbox.create_obstacle_toolbox import create_obstacle_toolbox
 from gui.mwindow.service_layer.file_actions import file_new
 from gui.mwindow.service_layer.file_actions import open_commonroad_file
 from gui.mwindow.service_layer.file_actions import file_save
+from gui.mwindow.menu_bar_wrapper.menu_bar_wrapper import MenuBarWrapper
+from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
+from meta.CONSTANTS import *
+
+from typing import Union
 import logging
 import copy
+from PyQt5.QtWidgets import *
 from crdesigner.input_output.gui.toolboxes.gui_sumo_simulation import SUMO_AVAILABLE
 if SUMO_AVAILABLE:
     from crdesigner.input_output.gui.settings.sumo_settings import SUMOSettings
-from crdesigner.input_output.gui.gui_src import CR_Scenario_Designer  # do not remove!!!  #TODO ask why
 
-from PyQt5.QtWidgets import *
+from crdesigner.input_output.gui.gui_src import CR_Scenario_Designer  # do not remove!!!  #TODO ask why
 
 
 class MWindow(QMainWindow, Ui_mainWindow):
@@ -46,7 +49,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.road_network_toolbox = None
         self.obstacle_toolbox = None
         self.map_converter_toolbox = None
-        self.console = None
+        self.console_wrapper = None  # this can be removed
         self.play_activated = False
         self.text_browser = None
         self.viewer_dock = None
@@ -64,12 +67,13 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.osm_settings, self.opendrive_settings, self.gui_settings, self.sumo_settings = create_setting_actions(mwindow=self)
         self.open_web, self.open_forum = create_help_actions(mwindow=self)
         self.create_viewer_dock()
-        self.button_play_pause, self.label1, self.label2 = create_toolbar(mwindow=self,
-                                                                          file_new=file_new,
-                                                                          open_commonroad_file=open_commonroad_file,
-                                                                          file_save=file_save)
 
-        self.console, self.text_browser = create_console(mwindow=self)
+
+        # init the wrapper classes
+        self.console_wrapper = ConsoleWrapper(mwindow=self)  # this was replaced: self.console_wrapper, self.text_browser = create_console(mwindow=self)
+        self.toolbar_wrapper = ToolBarWrapper(mwindow=self, file_new=file_new,
+                                              open_commonroad_file=open_commonroad_file, file_save=file_save)
+
         self.road_network_toolbox = create_road_network_toolbox(mwindow=self)
         self.obstacle_toolbox = create_obstacle_toolbox(mwindow=self)
         self.converter_toolbox = create_converter_toolbox(mwindow=self)
@@ -77,26 +81,15 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.status = self.statusbar
         self.status.showMessage("Welcome to CR Scenario Designer")
 
-        #
-        menu_bar = self.menuBar()  # instant of menu
-        menu_file = menu_bar.addMenu('File')  # add menu 'file'
-        menu_file.addAction(self.fileNewAction)
-        menu_file.addAction(self.fileOpenAction)
-        menu_file.addAction(self.fileSaveAction)
-        menu_file.addAction(self.separator)
-        menu_file.addAction(self.exitAction)
+        # instanciate the menu bar
+        self.menu_bar_wrapper = MenuBarWrapper(mwindow=self,
+                                fileNewAction=self.fileNewAction, fileOpenAction=self.fileOpenAction,
+                                separator=self.separator, exitAction=self.exitAction, gui_settings=self.gui_settings,
+                                sumo_settings=self.sumo_settings, osm_settings=self.osm_settings,
+                                open_web=self.open_web, open_forum=self.open_forum, fileSaveAction=self.fileSaveAction
+                                )
 
-        menu_setting = menu_bar.addMenu('Setting')  # add menu 'Setting'
-        menu_setting.addAction(self.gui_settings)
-        menu_setting.addAction(self.sumo_settings)
-        menu_setting.addAction(self.osm_settings)
-
-        menu_help = menu_bar.addMenu('Help')  # add menu 'Help'
-        menu_help.addAction(self.open_web)
-        menu_help.addAction(self.open_forum)
-
-        self.center()
-
+        center(mwindow=self)
         if path:
             self.open_path(path)
 
@@ -116,7 +109,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         elif isinstance(selected_object, Obstacle):
             self.obstacle_toolbox.obstacle_toolbox.selected_obstacle.setCurrentText(str(selected_object.obstacle_id))
         if output != "":
-            self.text_browser.append(output)
+            self.console_wrapper.text_browser.append(output)
 
     def create_viewer_dock(self):
         """Create the viewer dock."""
@@ -155,13 +148,6 @@ class MWindow(QMainWindow, Ui_mainWindow):
         value = value if value > -1 else self.cr_viewer.max_timestep
         self.label2.setText(' / ' + str(value))
         self.slider.setMaximum(value)
-
-    def center(self):
-        """Function that makes sure the main window is in the center of screen."""
-        screen = QDesktopWidget().screenGeometry()
-        size = self.geometry()
-        self.move((screen.width() - size.width()) / 2,
-                  (screen.height() - size.height()) / 2)
 
     def store_scenario(self):
         self.scenarios.append(copy.deepcopy(self.cr_viewer.current_scenario))
