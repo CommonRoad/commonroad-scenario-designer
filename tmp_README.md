@@ -28,3 +28,8 @@ The command line interface, uses the api.
 ### Contribution Guideline ###
 
 The whole package is structured by the appearance in the GUI. Any functionality of an appereance is in the service_layer/ of the regarding level.
+
+### Coding conventions ###
+
+#### Comments ####
+Docstring python convention.

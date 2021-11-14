@@ -146,6 +146,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         if output != "":
             self.text_browser.append(output)
 
+    # already moved to mwindow.py
     def toolbox_callback(self, scenario):
         if scenario is not None:
             self.cr_viewer.open_scenario(scenario)
@@ -383,6 +384,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.viewer_dock.setLayout(layout)
         self.setCentralWidget(self.viewer_dock)
 
+    # already moved to mwindow.py
     def center(self):
         """Function that makes sure the main window is in the center of screen."""
         screen = QDesktopWidget().screenGeometry()
@@ -507,6 +509,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         filename = os.path.splitext(os.path.basename(path))[0]
         self.open_scenario(scenario, filename, pps)
 
+    # moved to mwindow.py
     def update_toolbox_scenarios(self):
         scenario = self.cr_viewer.current_scenario
         self.road_network_toolbox.refresh_toolbox(scenario)
@@ -654,6 +657,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
             focus_on_network = config.AUTOFOCUS
         self.cr_viewer.update_plot(focus_on_network=focus_on_network)
 
+    # moved to mwindow.py
     def store_scenario(self):
         self.scenarios.append(copy.deepcopy(self.cr_viewer.current_scenario))
         self.current_scenario_index += 1

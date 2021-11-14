@@ -47,7 +47,7 @@ def create_toolbar(mwindow, file_new, open_commonroad_file, file_save):
 
     tb4 = mwindow.addToolBar("Animation Play")
     mwindow.button_play_pause = QAction(QIcon(":/icons/play.png"), "Play the animation", mwindow)
-    mwindow.button_play_pause.button_play_pause.triggered.connect(play_pause_animation)
+    mwindow.button_play_pause.triggered.connect(play_pause_animation)
     tb4.addAction(mwindow.button_play_pause)
 
     mwindow.slider = QSlider(Qt.Horizontal)

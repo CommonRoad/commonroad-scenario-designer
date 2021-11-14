@@ -11,17 +11,17 @@ from crdesigner.input_output.gui.converter_modules.opendrive_interface import Op
 """
 
 
-def create_setting_actions() -> (any, any, any, any):
+def create_setting_actions(mwindow) -> (any, any, any, any):
     """Function to create the export action in the menu bar."""
-    osm_settings = create_action("OSM Settings", icon="", checkable=False, slot=_show_osm_settings,
+    osm_settings = create_action(mwindow=mwindow, text="OSM Settings", icon="", checkable=False, slot=_show_osm_settings,
             tip="Show settings for osm converter", shortcut=None)
-    opendrive_settings = create_action("OpenDRIVE Settings", icon="", checkable=False,
+    opendrive_settings = create_action(mwindow=mwindow, text="OpenDRIVE Settings", icon="", checkable=False,
             slot=_show_opendrive_settings, tip="Show settings for OpenDRIVE converter", shortcut=None)
-    gui_settings = create_action("GUI Settings", icon="", checkable=False, slot=_show_gui_settings,
+    gui_settings = create_action(mwindow=mwindow, text="GUI Settings", icon="", checkable=False, slot=_show_gui_settings,
             tip="Show settings for the CR Scenario Designer", shortcut=None)
     sumo_settings = None
     if SUMO_AVAILABLE:
-        sumo_settings = create_action("SUMO Settings", icon="", checkable=False, slot=_show_sumo_settings,
+        sumo_settings = create_action(mwindow=mwindow, text="SUMO Settings", icon="", checkable=False, slot=_show_sumo_settings,
                 tip="Show settings for the SUMO interface", shortcut=None)
     return osm_settings, opendrive_settings, gui_settings, sumo_settings
 

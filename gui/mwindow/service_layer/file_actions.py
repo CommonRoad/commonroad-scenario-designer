@@ -17,17 +17,17 @@ def create_file_actions(mwindow):
     """
         Function to create the file actions in the menu bar.
     """
-    fileNewAction = create_action("New", icon=QIcon(":/icons/new_file.png"), checkable=False,
-            slot=_file_new, tip="New Commonroad File", shortcut=QKeySequence.New)
-    fileOpenAction = create_action("Open", icon=QIcon(":/icons/open_file.png"), checkable=False,
-            slot=_open_commonroad_file, tip="Open Commonroad File", shortcut=QKeySequence.Open)
+    fileNewAction = create_action(mwindow=mwindow, text="New", icon=QIcon(":/icons/new_file.png"), checkable=False,
+            slot=file_new, tip="New Commonroad File", shortcut=QKeySequence.New)
+    fileOpenAction = create_action(mwindow=mwindow, text="Open", icon=QIcon(":/icons/open_file.png"), checkable=False,
+            slot=open_commonroad_file, tip="Open Commonroad File", shortcut=QKeySequence.Open)
     separator = QAction(mwindow)
     separator.setSeparator(True)
 
-    fileSaveAction = create_action("Save", icon=QIcon(":/icons/save_file.png"), checkable=False,
-            slot=_file_save, tip="Save Commonroad File", shortcut=QKeySequence.Save)
+    fileSaveAction = create_action(mwindow=mwindow, text="Save", icon=QIcon(":/icons/save_file.png"), checkable=False,
+            slot=file_save, tip="Save Commonroad File", shortcut=QKeySequence.Save)
     separator.setSeparator(True)
-    exitAction = create_action("Quit", icon=QIcon(":/icons/close.png"), checkable=False,
+    exitAction = create_action(mwindow=mwindow, text="Quit", icon=QIcon(":/icons/close.png"), checkable=False,
                                          slot=_close_window, tip="Quit", shortcut=QKeySequence.Close)
     return fileNewAction, fileOpenAction, separator, fileSaveAction, exitAction
 
@@ -35,7 +35,7 @@ def create_file_actions(mwindow):
 # here are the internal used functions
 
 
-def _file_new(mwindow):
+def file_new(mwindow):
     """
         Function passed to the fileNewAction to create the action in the menu bar.
     """
@@ -47,7 +47,7 @@ def _file_new(mwindow):
     mwindow.open_scenario(scenario)
 
 
-def _open_commonroad_file(mwindow):
+def open_commonroad_file(mwindow):
     """ """
     path, _ = QFileDialog.getOpenFileName(
         mwindow,
@@ -98,7 +98,7 @@ def _open_scenario(self, new_scenario, filename="new_scenario", pps=None):
     self.update_to_new_scenario()
 
 
-def _file_save(mwindow):
+def file_save(mwindow):
     """Function to save a CR .xml file."""
     if mwindow.cr_viewer.current_scenario is None:
         messbox = QMessageBox()

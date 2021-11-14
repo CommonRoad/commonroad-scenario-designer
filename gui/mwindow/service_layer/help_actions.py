@@ -3,11 +3,11 @@ from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 
 
-def create_help_actions() -> (any, any):
+def create_help_actions(mwindow) -> (any, any):
     """Function to create the help action in the menu bar."""
-    open_web = create_action("Open CR Web", icon="", checkable=False, slot=_open_cr_web,
+    open_web = create_action(mwindow=mwindow, text="Open CR Web", icon="", checkable=False, slot=_open_cr_web,
                                        tip="Open CommonRoad Website", shortcut=None)
-    open_forum = create_action("Open Forum", icon="", checkable=False, slot=_open_cr_forum,
+    open_forum = create_action(mwindow=mwindow, text="Open Forum", icon="", checkable=False, slot=_open_cr_forum,
                                          tip="Open CommonRoad Forum", shortcut=None)
     return open_web, open_forum
 

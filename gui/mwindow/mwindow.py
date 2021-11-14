@@ -17,6 +17,14 @@ from gui.mwindow.console.console import create_console
 from gui.mwindow.toolboxes.road_network_toolbox.create_road_network_toolbox import create_road_network_toolbox
 from gui.mwindow.toolboxes.converter_toolbox.create_converter_toolbox import create_converter_toolbox
 from gui.mwindow.toolboxes.obstacle_toolbox.create_obstacle_toolbox import create_obstacle_toolbox
+from gui.mwindow.service_layer.file_actions import file_new
+from gui.mwindow.service_layer.file_actions import open_commonroad_file
+from gui.mwindow.service_layer.file_actions import file_save
+import logging
+import copy
+from crdesigner.input_output.gui.toolboxes.gui_sumo_simulation import SUMO_AVAILABLE
+if SUMO_AVAILABLE:
+    from crdesigner.input_output.gui.settings.sumo_settings import SUMOSettings
 from crdesigner.input_output.gui.gui_src import CR_Scenario_Designer  # do not remove!!!  #TODO ask why
 
 from PyQt5.QtWidgets import *
@@ -53,10 +61,13 @@ class MWindow(QMainWindow, Ui_mainWindow):
         setup_tmp(tmp_folder_path=self.tmp_folder)
         setup_mwindow(self)
         self.fileNewAction, self.fileOpenAction, self.separator, self.fileSaveAction, self.exitAction = create_file_actions(mwindow=self)
-        self.osm_settings, self.opendrive_settings, self.gui_settings, self.sumo_settings = create_setting_actions()
-        self.open_web, self.open_forum = create_help_actions()
+        self.osm_settings, self.opendrive_settings, self.gui_settings, self.sumo_settings = create_setting_actions(mwindow=self)
+        self.open_web, self.open_forum = create_help_actions(mwindow=self)
         self.create_viewer_dock()
-        create_toolbar()
+        self.button_play_pause, self.label1, self.label2 = create_toolbar(mwindow=self,
+                                                                          file_new=file_new,
+                                                                          open_commonroad_file=open_commonroad_file,
+                                                                          file_save=file_save)
 
         self.console, self.text_browser = create_console(mwindow=self)
         self.road_network_toolbox = create_road_network_toolbox(mwindow=self)
@@ -125,3 +136,43 @@ class MWindow(QMainWindow, Ui_mainWindow):
         if focus_on_network is None:
             focus_on_network = config.AUTOFOCUS
         self.cr_viewer.update_plot(focus_on_network=focus_on_network)
+
+    def toolbox_callback(self, scenario):
+        """
+        TODO find out why this is here.
+        """
+        if scenario is not None:
+            self.cr_viewer.open_scenario(scenario)
+            self.update_view(focus_on_network=True)
+            self.update_max_step()
+            self.store_scenario()
+
+    def update_max_step(self, value: int = -1):
+        """
+        Update the max steps.
+        """
+        logging.info('update_max_step')
+        value = value if value > -1 else self.cr_viewer.max_timestep
+        self.label2.setText(' / ' + str(value))
+        self.slider.setMaximum(value)
+
+    def center(self):
+        """Function that makes sure the main window is in the center of screen."""
+        screen = QDesktopWidget().screenGeometry()
+        size = self.geometry()
+        self.move((screen.width() - size.width()) / 2,
+                  (screen.height() - size.height()) / 2)
+
+    def store_scenario(self):
+        self.scenarios.append(copy.deepcopy(self.cr_viewer.current_scenario))
+        self.current_scenario_index += 1
+        self.update_toolbox_scenarios()
+
+    def update_toolbox_scenarios(self):
+        scenario = self.cr_viewer.current_scenario
+        self.road_network_toolbox.refresh_toolbox(scenario)
+        self.obstacle_toolbox.refresh_toolbox(scenario)
+        self.map_converter_toolbox.refresh_toolbox(scenario)
+        if SUMO_AVAILABLE:
+            self.obstacle_toolbox.sumo_simulation.scenario = scenario
+            self.map_converter_toolbox.sumo_simulation.scenario = scenario

@@ -14,6 +14,9 @@ def start_gui_old():
 
 
 def start_gui_new(input_file: str = None):
+    """
+    Redirect to the
+    """
     # application
     app = QApplication(sys.argv)
     if input_file:
