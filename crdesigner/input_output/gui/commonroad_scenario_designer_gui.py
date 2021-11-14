@@ -76,13 +76,14 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.create_setting_actions()
         self.create_help_actions()
         self.create_viewer_dock()
-        # came until here...
         self.create_toolbar()
         self.create_console()
+
         self.create_road_network_toolbox()
         self.create_obstacle_toolbox()
         self.create_converter_toolbox()
 
+        # came until here...
         self.status = self.statusbar
         self.status.showMessage("Welcome to CR Scenario Designer")
 
@@ -108,8 +109,9 @@ class MWindow(QMainWindow, Ui_mainWindow):
         if path:
             self.open_path(path)
 
+    # moved to create_road_network_toolbox.py
     def create_road_network_toolbox(self):
-        """ Create the Road network toolbox."""
+        """ Create the Road network toolbar."""
         self.road_network_toolbox = RoadNetworkToolbox(current_scenario=self.cr_viewer.current_scenario,
                                                        text_browser=self.text_browser,
                                                        callback=self.toolbox_callback,
@@ -118,14 +120,15 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.addDockWidget(Qt.LeftDockWidgetArea, self.road_network_toolbox)
 
     def create_converter_toolbox(self):
-        """ Create the map converter toolbox."""
+        """ Create the map converter toolbar."""
         self.map_converter_toolbox = MapConversionToolbox(self.cr_viewer.current_scenario,
                                                           self.toolbox_callback, self.text_browser,
                                                           self.obstacle_toolbox.sumo_simulation)
         self.addDockWidget(Qt.RightDockWidgetArea, self.map_converter_toolbox)
 
+    # already moved to create_obstacle_toolbox.py
     def create_obstacle_toolbox(self):
-        """ Create the obstacle toolbox."""
+        """ Create the obstacle toolbar."""
         self.obstacle_toolbox = ObstacleToolbox(self.cr_viewer.current_scenario, self.toolbox_callback, self.tmp_folder)
         self.addDockWidget(Qt.RightDockWidgetArea, self.obstacle_toolbox)
 
@@ -172,23 +175,27 @@ class MWindow(QMainWindow, Ui_mainWindow):
     def show_sumo_settings(self):
         self.sumo_settings = SUMOSettings(self, config=self.obstacle_toolbox.sumo_simulation.config)
 
+    # already moved to toolbar.py
     def detect_slider_clicked(self):
         self.slider_clicked = True
         self.cr_viewer.pause()
         self.cr_viewer.dynamic.update_plot()
 
+    # already moved to toolbar.py
     def detect_slider_release(self):
         self.slider_clicked = False
         self.cr_viewer.pause()
 
+    # already moved to toolbar.py
     def time_step_change(self, value):
         if self.cr_viewer.current_scenario:
             self.cr_viewer.set_timestep(value)
             self.label1.setText('  Time Stamp: ' + str(value))
             self.cr_viewer.animation.event_source.start()
 
+    # already moved to toolbar.py
     def play_pause_animation(self):
-        """Function connected with the play button in the sumo-toolbox."""
+        """Function connected with the play button in the sumo-toolbar."""
         if not self.cr_viewer.current_scenario:
             messbox = QMessageBox()
             reply = messbox.warning(
@@ -209,6 +216,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
             self.button_play_pause.setIcon(QIcon(":/icons/play.png"))
             self.play_activated = False
 
+    # already moved to toolbar.py
     def save_video(self):
         """Function connected with the save button in the Toolbar."""
         if not self.cr_viewer.current_scenario:
@@ -227,6 +235,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
             self.cr_viewer.save_animation()
             self.text_browser.append("Saving the video finished.")
 
+    # already moved to console.py
     def create_console(self):
         """Function to create the console."""
         self.console = QDockWidget(self)
@@ -240,6 +249,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.console.setFeatures(QDockWidget.NoDockWidgetFeatures)
         self.addDockWidget(Qt.BottomDockWidgetArea, self.console)
 
+    # already moved to toolbar.py
     def create_toolbar(self):
         """Function to create toolbar of the main Window."""
         tb1 = self.addToolBar("File")
@@ -621,15 +631,19 @@ class MWindow(QMainWindow, Ui_mainWindow):
         event.ignore()
         self.close_window()
 
+    # already moved to toolbar.py
     def road_network_toolbox_show(self):
         self.road_network_toolbox.show()
 
+    # already moved to toolbar.py
     def obstacle_toolbox_show(self):
         self.obstacle_toolbox.show()
 
+    # already moved to toolbar.py
     def map_converter_toolbox_show(self):
         self.map_converter_toolbox.show()
 
+    # already moved to mwindow.py
     def update_view(self, focus_on_network=None):
         """ update all components."""
 
@@ -645,6 +659,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.current_scenario_index += 1
         self.update_toolbox_scenarios()
 
+    # already moved to toolbar.py
     def undo_action(self):
         if self.current_scenario_index >= 0:
             self.current_scenario_index -= 1
@@ -654,6 +669,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.update_view(focus_on_network=True)
         self.update_toolbox_scenarios()
 
+    # already moved to toolbar.py
     def redo_action(self):
         if self.current_scenario_index < len(self.scenarios) - 1:
             self.current_scenario_index += 1
