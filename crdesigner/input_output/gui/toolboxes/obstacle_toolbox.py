@@ -1,6 +1,7 @@
 from typing import List
 import matplotlib as mpl
 import numpy as np
+import math
 
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
@@ -95,9 +96,7 @@ class ObstacleToolbox(QDockWidget):
                 float(self.obstacle_toolbox.obstacle_x_Position.text()),
                 float(self.obstacle_toolbox.obstacle_y_Position.text())
             ]),
-            #'orientation': math.radians(float(self.obstacle_toolbox.obstacle_orientation.text())),
-            #obstacle_orientation doesnt exist yet
-            'orientation': 3.14, #hardcoded for testing
+            'orientation': math.radians(float(self.obstacle_toolbox.obstacle_orientation.text())),
             'time_step': 1
             })
         )
@@ -146,6 +145,7 @@ class ObstacleToolbox(QDockWidget):
         self.obstacle_toolbox.obstacle_length.setText("")
         self.obstacle_toolbox.obstacle_x_Position.setText("")
         self.obstacle_toolbox.obstacle_y_Position.setText("")
+        self.obstacle_toolbox.obstacle_orientation.setText("")
         self.obstacle_toolbox.selected_obstacle.clear()
         self.obstacle_toolbox.selected_obstacle.addItems(
             ["None"] + [str(item) for item in self.collect_obstacle_ids()])
@@ -222,6 +222,7 @@ class ObstacleToolbox(QDockWidget):
 
                 self.obstacle_toolbox.obstacle_x_Position.setText(str(obstacle.initial_state.__getattribute__("position")[0]))
                 self.obstacle_toolbox.obstacle_y_Position.setText(str(obstacle.initial_state.__getattribute__("position")[1]))
+                self.obstacle_toolbox.obstacle_orientation.setText(str(math.degrees(obstacle.initial_state.__getattribute__("orientation"))))
             else:
                 self.obstacle_toolbox.obstacle_width.setText("")
                 self.obstacle_toolbox.obstacle_length.setText("")

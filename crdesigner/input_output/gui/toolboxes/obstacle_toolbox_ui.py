@@ -54,6 +54,11 @@ class ObstacleToolboxUI(Toolbox):
         self.obstacle_x_Position.setMaxLength(4)
         self.obstacle_x_Position.setAlignment(Qt.AlignRight)
 
+        self.obstacle_orientation = QLineEdit()
+        self.obstacle_orientation.setValidator(QIntValidator())
+        self.obstacle_orientation.setMaxLength(4)
+        self.obstacle_orientation.setAlignment(Qt.AlignRight)
+
         self.obstacle_type = QComboBox()
         obstalce_type_list = [e.value for e in ObstacleType]
         self.obstacle_type.addItems(obstalce_type_list)
@@ -79,6 +84,7 @@ class ObstacleToolboxUI(Toolbox):
         layout_obstacle_information_groupbox.addRow(label_general)
         layout_obstacle_information_groupbox.addRow("Width [m]", self.obstacle_width)
         layout_obstacle_information_groupbox.addRow("Length [m]", self.obstacle_length)
+        layout_obstacle_information_groupbox.addRow("Orientation [deg]", self.obstacle_orientation)
         layout_obstacle_information_groupbox.addRow("Type", self.obstacle_type)
         layout_obstacle_information_groupbox.addRow("X-Position", self.obstacle_x_Position)
         layout_obstacle_information_groupbox.addRow("Y-Position", self.obstacle_y_Position)
