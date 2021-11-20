@@ -70,7 +70,7 @@ class DynamicCanvas(FigureCanvas):
                         'show_traffic_signs': 'all',
                     },
                     'intersection': {
-                        'draw_intersections': True,
+                        'draw_intersections': False,
                         'draw_incoming_lanelets': True,
                         'incoming_lanelets_color': '#3ecbcf',
                         'draw_crossings': True,
