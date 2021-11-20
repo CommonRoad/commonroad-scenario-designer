@@ -104,11 +104,11 @@ class ObstacleToolbox(QDockWidget):
             time = [obstacle.initial_state.time_step]
             time += [state.time_step for state in obstacle.prediction.trajectory.state_list]
 
+            # clear previous profile
+            self.obstacle_toolbox.figure.clear()
+
             # create an axis
             ax = self.obstacle_toolbox.figure.add_subplot(111)
-
-            # discards the old graph
-            ax.clear()
 
             # plot data
             ax.plot(time, profile, '.-', markersize=4)
