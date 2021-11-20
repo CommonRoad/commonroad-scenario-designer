@@ -1,5 +1,3 @@
-from typing import Set, List, Union
-import numpy as np
 from scipy.interpolate import interp1d
 
 from commonroad.scenario.intersection import Intersection
@@ -483,8 +481,8 @@ class MapCreator:
         MapCreator.set_predecessor_successor_relation(new_lanelets[7], new_lanelets[5])
 
         incomings = [lanelet_ids[0], lanelet_ids[7], lanelet_ids[9], lanelet_ids[15]]
-        successors_right = [lanelet_ids[5], lanelet_ids[11], lanelet_ids[17], lanelet_ids[19]]
-        successors_straight = [lanelet_ids[2], lanelet_ids[3], lanelet_ids[12], lanelet_ids[13]]
+        successors_right = [lanelet_ids[19], lanelet_ids[5], lanelet_ids[11], lanelet_ids[17]]
+        successors_straight = [lanelet_ids[2], lanelet_ids[12], lanelet_ids[3], lanelet_ids[13]]
         successors_left = [lanelet_ids[4], lanelet_ids[10], lanelet_ids[16], lanelet_ids[18]]
         incoming_ids = [scenario.generate_object_id() for i in range(len(incomings))]
         left_of = [incoming_ids[-1], incoming_ids[0], incoming_ids[1], incoming_ids[2]]
