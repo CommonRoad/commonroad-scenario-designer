@@ -1,6 +1,9 @@
 import unittest
 import numpy as np
 
+from commonroad.scenario.intersection import Intersection
+from commonroad.scenario.traffic_sign import *
+from commonroad.scenario.intersection import IntersectionIncomingElement
 from commonroad.scenario.lanelet import Lanelet, LineMarking, LaneletNetwork, StopLine
 from commonroad.scenario.scenario import Scenario, ScenarioID
 
@@ -210,3 +213,86 @@ class TestLanelet(unittest.TestCase):
         np.testing.assert_array_almost_equal(lanelet_connect.left_vertices[-1], lanelet2.left_vertices[0])
         np.testing.assert_array_almost_equal(lanelet_connect.right_vertices[-1], lanelet2.right_vertices[0])
         np.testing.assert_array_almost_equal(lanelet_connect.center_vertices[-1], lanelet2.center_vertices[0])
+
+    def test_four_way_intersection(self):
+        incoming_1 = IntersectionIncomingElement(21, {1}, {20}, {3}, {5}, 24)
+        incoming_2 = IntersectionIncomingElement(22, {8}, {6}, {13}, {11}, 21)
+        incoming_3 = IntersectionIncomingElement(23, {10}, {12}, {4}, {17}, 22)
+        incoming_4 = IntersectionIncomingElement(24, {16}, {18}, {14}, {19}, 23)
+        sc = Scenario(dt=0.1)
+
+        intersection, traffic_signs, traffic_lights, lanelets = \
+            MapCreator.create_four_way_intersection(3, 20, 30, sc, True, True, TrafficSignIDZamunda)
+
+        # check intersection
+        self.assertEqual(intersection.intersection_id, 25)
+        self.assertEqual(len(intersection.incomings), 4)
+        self.assertEqual(len(intersection.crossings), 0)
+        self.assertEqual(intersection.incomings[0].incoming_id, incoming_1.incoming_id)
+        self.assertEqual(intersection.incomings[1].incoming_id, incoming_2.incoming_id)
+        self.assertEqual(intersection.incomings[2].incoming_id, incoming_3.incoming_id)
+        self.assertEqual(intersection.incomings[3].incoming_id, incoming_4.incoming_id)
+
+        self.assertEqual(intersection.incomings[0].incoming_lanelets, incoming_1.incoming_lanelets)
+        self.assertEqual(intersection.incomings[1].incoming_lanelets, incoming_2.incoming_lanelets)
+        self.assertEqual(intersection.incomings[2].incoming_lanelets, incoming_3.incoming_lanelets)
+        self.assertEqual(intersection.incomings[3].incoming_lanelets, incoming_4.incoming_lanelets)
+
+        self.assertEqual(intersection.incomings[0].successors_left, incoming_1.successors_left)
+        self.assertEqual(intersection.incomings[1].successors_left, incoming_2.successors_left)
+        self.assertEqual(intersection.incomings[2].successors_left, incoming_3.successors_left)
+        self.assertEqual(intersection.incomings[3].successors_left, incoming_4.successors_left)
+
+        self.assertEqual(intersection.incomings[0].successors_right, incoming_1.successors_right)
+        self.assertEqual(intersection.incomings[1].successors_right, incoming_2.successors_right)
+        self.assertEqual(intersection.incomings[2].successors_right, incoming_3.successors_right)
+        self.assertEqual(intersection.incomings[3].successors_right, incoming_4.successors_right)
+
+        self.assertEqual(intersection.incomings[0].successors_straight, incoming_1.successors_straight)
+        self.assertEqual(intersection.incomings[1].successors_straight, incoming_2.successors_straight)
+        self.assertEqual(intersection.incomings[2].successors_straight, incoming_3.successors_straight)
+        self.assertEqual(intersection.incomings[3].successors_straight, incoming_4.successors_straight)
+
+        # check width
+        self.assertAlmostEqual(np.linalg.norm(lanelets[0].left_vertices[0] - lanelets[0].right_vertices[0]), 3)
+        self.assertAlmostEqual(np.linalg.norm(lanelets[0].left_vertices[4] - lanelets[0].right_vertices[4]), 3)
+        self.assertAlmostEqual(np.linalg.norm(lanelets[4].left_vertices[-1] - lanelets[4].right_vertices[-1]), 3)
+        self.assertAlmostEqual(np.linalg.norm(lanelets[15].left_vertices[5] - lanelets[15].right_vertices[5]), 3)
+        self.assertAlmostEqual(np.linalg.norm(lanelets[18].left_vertices[9] - lanelets[18].right_vertices[9]), 3)
+
+        # check diameter
+        self.assertAlmostEqual(np.linalg.norm(lanelets[0].center_vertices[-1] - lanelets[8].center_vertices[0]), 20)
+        self.assertAlmostEqual(np.linalg.norm(lanelets[15].center_vertices[-1] - lanelets[6].center_vertices[0]), 20)
+
+        # check incoming length
+        self.assertAlmostEqual(lanelets[0].distance[-1], 30)
+        self.assertAlmostEqual(lanelets[15].distance[-1], 30)
+
+        # check traffic signs
+        self.assertEqual(len(traffic_signs), 4)
+        self.assertEqual(traffic_signs[0].traffic_sign_id, 26)
+        self.assertEqual(traffic_signs[2].traffic_sign_id, 28)
+        self.assertEqual(len(traffic_signs[0].traffic_sign_elements), 1)
+        self.assertEqual(len(traffic_signs[2].traffic_sign_elements), 1)
+        self.assertEqual(traffic_signs[0].traffic_sign_elements[0].traffic_sign_element_id,
+                         TrafficSignIDZamunda.PRIORITY)
+        self.assertEqual(traffic_signs[2].traffic_sign_elements[0].traffic_sign_element_id, TrafficSignIDZamunda.YIELD)
+
+        # check traffic lights
+        self.assertEqual(len(traffic_lights), 4)
+        self.assertEqual(traffic_lights[0].traffic_light_id, 30)
+        self.assertEqual(traffic_lights[2].traffic_light_id, 32)
+        self.assertEqual(traffic_lights[0].active, True)
+        self.assertEqual(traffic_lights[2].active, True)
+        self.assertEqual(len(traffic_lights[0].cycle), 4)
+        self.assertEqual(len(traffic_lights[2].cycle), 4)
+        self.assertEqual(traffic_lights[0].cycle[0].state, TrafficLightState.GREEN)
+        self.assertEqual(traffic_lights[2].cycle[0].state, TrafficLightState.RED)
+        self.assertEqual(traffic_lights[0].cycle[1].state, TrafficLightState.YELLOW)
+        self.assertEqual(traffic_lights[2].cycle[1].state, TrafficLightState.RED_YELLOW)
+        self.assertEqual(traffic_lights[0].cycle[0].duration, 100)
+        self.assertEqual(traffic_lights[0].cycle[2].duration, 100)
+        self.assertEqual(traffic_lights[2].cycle[0].duration, 100)
+        self.assertEqual(traffic_lights[2].cycle[2].duration, 100)
+        self.assertEqual(traffic_lights[0].direction, TrafficLightDirection.ALL)
+        self.assertEqual(traffic_lights[2].direction, TrafficLightDirection.ALL)
