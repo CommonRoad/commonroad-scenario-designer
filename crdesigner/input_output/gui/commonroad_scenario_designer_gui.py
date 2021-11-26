@@ -36,6 +36,7 @@ if SUMO_AVAILABLE:
 class MWindow(QMainWindow, Ui_mainWindow):
     """The Main window of the CR Scenario Designer."""
 
+    # moved to mwindow.py
     def __init__(self, path=None):
         super().__init__()
         self.tmp_folder = "/tmp/cr_designer/"
@@ -83,7 +84,6 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.create_obstacle_toolbox()
         self.create_converter_toolbox()
 
-        # came until here...
         self.status = self.statusbar
         self.status.showMessage("Welcome to CR Scenario Designer")
 
@@ -119,6 +119,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
                                                        selection_changed_callback=self.cr_viewer.update_plot)
         self.addDockWidget(Qt.LeftDockWidgetArea, self.road_network_toolbox)
 
+    # already moved to create_converter_toolbox.py
     def create_converter_toolbox(self):
         """ Create the map converter toolbar_wrapper."""
         self.map_converter_toolbox = MapConversionToolbox(self.cr_viewer.current_scenario,
@@ -168,6 +169,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
     def show_gui_settings(self):
         self.gui_settings = GUISettings(self)
 
+    # already moved to mwindow.py
     def initialize_toolboxes(self):
         self.road_network_toolbox.initialize_toolbox()
         self.obstacle_toolbox.initialize_toolbox()
@@ -321,12 +323,14 @@ class MWindow(QMainWindow, Ui_mainWindow):
         tb4.addAction(action_save_video)
         action_save_video.triggered.connect(self.save_video)
 
+    # already moved to file_actions.py
     def update_max_step(self, value: int = -1):
         logging.info('update_max_step')
         value = value if value > -1 else self.cr_viewer.max_timestep
         self.label2.setText(' / ' + str(value))
         self.slider.setMaximum(value)
 
+    # already moved to mwindow.py
     def create_setting_actions(self):
         """Function to create the export action in the menu bar."""
         self.osm_settings = self.create_action(
@@ -392,7 +396,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.move((screen.width() - size.width()) / 2,
                   (screen.height() - size.height()) / 2)
 
-    # TODO already moved to mwindow_controller
+    # already moved to mwindow_controller
     def create_file_actions(self):
         """Function to create the file action in the menu bar."""
         self.fileNewAction = self.create_action(
@@ -427,7 +431,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
                                              tip="Quit",
                                              shortcut=QKeySequence.Close)
 
-    # TODO already moved to mwindow_controller
+    # already moved to mwindow_controller
     def create_action(self,
                       text,
                       icon=None,
@@ -464,7 +468,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         """Function to open the CommonRoad Forum."""
         QDesktopServices.openUrl(QUrl("https://commonroad.in.tum.de/forum/c/map-tool/11"))
 
-    # TODO already moved to mwindow_controller
+    # already moved to mwindow_controller
     def file_new(self):
         """Function to create the action in the menu bar."""
 
@@ -476,7 +480,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.open_scenario(scenario)
 #        self.restore_parameters()
 
-    # TODO already moved to mwindow.py
+    # already moved to mwindow.py
     def open_commonroad_file(self):
         """ """
         path, _ = QFileDialog.getOpenFileName(
@@ -490,7 +494,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
             return
         self.open_path(path)
 
-    # TODO already moved to mwindow_controller.py
+    # already moved to mwindow_controller.py
     def open_path(self, path):
         """ """
         try:
@@ -519,7 +523,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
             self.obstacle_toolbox.sumo_simulation.scenario = scenario
             self.map_converter_toolbox.sumo_simulation.scenario = scenario
 
-    # TODO already moved to mwindow_controller.py
+    # already moved to mwindow_controller.py
     def open_scenario(self, new_scenario, filename="new_scenario", pps=None):
         """  """
         if self.check_scenario(new_scenario) >= 2:
@@ -537,6 +541,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.update_toolbox_scenarios()
         self.update_to_new_scenario()
 
+    # already moved to file_actions.py
     def update_to_new_scenario(self):
         """  """
         self.update_max_step()
@@ -545,6 +550,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         if self.cr_viewer.current_scenario is not None:
             self.text_browser.append("Loading " + self.filename)
 
+    # already moved to mwindow.py
     def check_scenario(self, scenario) -> int:
         """
         Check the scenario to validity and calculate a quality score.
@@ -605,7 +611,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
         return error_score
 
-    # TODO already moved to file_actions.py
+    # already moved to file_actions.py
     def file_save(self):
         """Function to save a CR .xml file."""
 
@@ -618,10 +624,11 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
         self.scenario_saving_dialog.show(self.cr_viewer.current_scenario, self.cr_viewer.current_pps)
 
+    # already moved to mwindow.py
     def process_trigger(self, q):
         self.status.showMessage(q.text() + ' is triggered')
 
-    # TODO already moved to file_action.py
+    # already moved to file_action.py
     def close_window(self):
         reply = QMessageBox.warning(self, "Warning",
                                     "Do you really want to quit?",
@@ -630,6 +637,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         if reply == QMessageBox.Yes:
             qApp.quit()
 
+    # already moved to mwindow.py
     def closeEvent(self, event):
         event.ignore()
         self.close_window()

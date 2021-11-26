@@ -3,7 +3,7 @@ import sys
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
-from gui.mwindow.mwindow import MWindow
+from ui.gui.mwindow.mwindow import MWindow
 
 
 def start_gui_old():

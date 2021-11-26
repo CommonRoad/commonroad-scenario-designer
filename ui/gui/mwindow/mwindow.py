@@ -4,21 +4,21 @@ from crdesigner.input_output.gui.gui_resources.MainWindow import Ui_mainWindow
 from crdesigner.input_output.gui.gui_resources.scenario_saving_dialog import ScenarioDialog
 from crdesigner.input_output.gui.misc.commonroad_viewer import AnimatedViewer
 from crdesigner.input_output.gui.settings import config
-from gui.mwindow.toolbar_wrapper.toolbar_wrapper import ToolBarWrapper
-from gui.mwindow.console_wrapper.console_wrapper import ConsoleWrapper
-from gui.mwindow.service_layer.general_services import setup_tmp
-from gui.mwindow.service_layer.general_services import setup_mwindow
-from gui.mwindow.service_layer.general_services import center
-from gui.mwindow.service_layer.file_actions import create_file_actions
-from gui.mwindow.service_layer.setting_actions import create_setting_actions
-from gui.mwindow.service_layer.help_actions import create_help_actions
-from gui.mwindow.toolboxes.road_network_toolbox.create_road_network_toolbox import create_road_network_toolbox
-from gui.mwindow.toolboxes.converter_toolbox.create_converter_toolbox import create_converter_toolbox
-from gui.mwindow.toolboxes.obstacle_toolbox.create_obstacle_toolbox import create_obstacle_toolbox
-from gui.mwindow.service_layer.file_actions import file_new
-from gui.mwindow.service_layer.file_actions import open_commonroad_file
-from gui.mwindow.service_layer.file_actions import file_save
-from gui.mwindow.menu_bar_wrapper.menu_bar_wrapper import MenuBarWrapper
+from ui.gui.mwindow.top_bar.toolbar_wrapper import ToolBarWrapper
+from ui.gui.mwindow.console_wrapper.console_wrapper import ConsoleWrapper
+from ui.gui.mwindow.service_layer.general_services import setup_tmp
+from ui.gui.mwindow.service_layer.general_services import setup_mwindow
+from ui.gui.mwindow.service_layer.general_services import center
+from ui.gui.mwindow.service_layer.file_actions import create_file_actions
+from ui.gui.mwindow.service_layer.setting_actions import create_setting_actions
+from ui.gui.mwindow.service_layer.help_actions import create_help_actions
+from ui.gui.mwindow.toolboxes.road_network_toolbox.create_road_network_toolbox import create_road_network_toolbox
+from ui.gui.mwindow.toolboxes.converter_toolbox.create_converter_toolbox import create_converter_toolbox
+from ui.gui.mwindow.toolboxes.obstacle_toolbox.create_obstacle_toolbox import create_obstacle_toolbox
+from ui.gui.mwindow.service_layer.file_actions import file_new
+from ui.gui.mwindow.service_layer.file_actions import open_commonroad_file
+from ui.gui.mwindow.service_layer.file_actions import file_save
+from ui.gui.mwindow.top_bar.menu_bar_wrapper import MenuBarWrapper
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from meta.CONSTANTS import *
 
@@ -28,9 +28,7 @@ import copy
 from PyQt5.QtWidgets import *
 from crdesigner.input_output.gui.toolboxes.gui_sumo_simulation import SUMO_AVAILABLE
 if SUMO_AVAILABLE:
-    from crdesigner.input_output.gui.settings.sumo_settings import SUMOSettings
-
-from crdesigner.input_output.gui.gui_src import CR_Scenario_Designer  # do not remove!!!  #TODO ask why
+    pass
 
 
 class MWindow(QMainWindow, Ui_mainWindow):
@@ -162,3 +160,77 @@ class MWindow(QMainWindow, Ui_mainWindow):
         if SUMO_AVAILABLE:
             self.obstacle_toolbox.sumo_simulation.scenario = scenario
             self.map_converter_toolbox.sumo_simulation.scenario = scenario
+
+    def closeEvent(self, event):
+        """
+        See how to move this bad boy into the service layer.
+        """
+        event.ignore()
+        self.close_window()
+
+    def process_trigger(self, q):
+        self.status.showMessage(q.text() + ' is triggered')
+
+    def initialize_toolboxes(self):
+        self.road_network_toolbox.initialize_toolbox()
+        self.obstacle_toolbox.initialize_toolbox()
+
+    def check_scenario(self, scenario) -> int:
+        """
+        Check the scenario to validity and calculate a quality score.
+        The higher the score the higher the data faults.
+
+        :return: score
+        """
+
+        warning = 1
+        fatal_error = 2
+        verbose = True
+
+        error_score = 0
+
+        # handle fatal errors
+        found_ids = util.find_invalid_ref_of_traffic_lights(scenario)
+        if found_ids and verbose:
+            error_score = max(error_score, fatal_error)
+            self.text_browser.append("invalid traffic light refs: " +
+                                     str(found_ids))
+            QMessageBox.critical(
+                self,
+                "CommonRoad XML error",
+                "Scenario contains invalid traffic light refenence(s): " +
+                str(found_ids),
+                QMessageBox.Ok,
+            )
+
+        found_ids = util.find_invalid_ref_of_traffic_signs(scenario)
+        if found_ids and verbose:
+            error_score = max(error_score, fatal_error)
+            self.text_browser.append("invalid traffic sign refs: " +
+                                     str(found_ids))
+            QMessageBox.critical(
+                self,
+                "CommonRoad XML error",
+                "Scenario contains invalid traffic sign refenence(s): " +
+                str(found_ids),
+                QMessageBox.Ok,
+            )
+
+        if error_score >= fatal_error:
+            return error_score
+
+        # handle warnings
+        found_ids = util.find_invalid_lanelet_polygons(scenario)
+        if found_ids and verbose:
+            error_score = max(error_score, warning)
+            self.text_browser.append(
+                "Warning: Lanelet(s) with invalid polygon:" + str(found_ids))
+            QMessageBox.warning(
+                self,
+                "CommonRoad XML error",
+                "Scenario contains lanelet(s) with invalid polygon: " +
+                str(found_ids),
+                QMessageBox.Ok,
+            )
+
+        return error_score

@@ -25,6 +25,9 @@ gui.py -> the main entrance to the application.
 /cli
 The command line interface, uses the api.
 
+### Documentation ###
+Bring as much information as possible to the code directly. Pictures etc.. are moved to the /meta/docs
+
 ### Contribution Guideline ###
 
 The whole package is structured by the appearance in the GUI. Any functionality of an appereance is in the service_layer/ of the regarding level.
