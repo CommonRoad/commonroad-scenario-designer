@@ -108,4 +108,3 @@ class Ui_sumo_simulate(object):
         self.label_3.setToolTip(_translate("sumo_simulate", "number of simulated (and synchronized) time steps"))
         self.label_3.setText(_translate("sumo_simulate", "Simulation_steps"))
         self.pushButton_simulate.setText(_translate("sumo_simulate", "Simulate"))
-

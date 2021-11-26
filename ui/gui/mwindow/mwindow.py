@@ -6,18 +6,18 @@ from crdesigner.input_output.gui.misc.commonroad_viewer import AnimatedViewer
 from crdesigner.input_output.gui.settings import config
 from ui.gui.mwindow.top_bar.toolbar_wrapper import ToolBarWrapper
 from ui.gui.mwindow.console_wrapper.console_wrapper import ConsoleWrapper
-from ui.gui.mwindow.service_layer.general_services import setup_tmp
-from ui.gui.mwindow.service_layer.general_services import setup_mwindow
-from ui.gui.mwindow.service_layer.general_services import center
-from ui.gui.mwindow.service_layer.file_actions import create_file_actions
-from ui.gui.mwindow.service_layer.setting_actions import create_setting_actions
-from ui.gui.mwindow.service_layer.help_actions import create_help_actions
+from ui.gui.mwindow.mwindow_service_layer.general_services import setup_tmp
+from ui.gui.mwindow.mwindow_service_layer.general_services import setup_mwindow
+from ui.gui.mwindow.mwindow_service_layer.general_services import center
+from ui.gui.mwindow.mwindow_service_layer.file_actions import create_file_actions
+from ui.gui.mwindow.mwindow_service_layer.setting_actions import create_setting_actions
+from ui.gui.mwindow.mwindow_service_layer.help_actions import create_help_actions
 from ui.gui.mwindow.toolboxes.road_network_toolbox.create_road_network_toolbox import create_road_network_toolbox
 from ui.gui.mwindow.toolboxes.converter_toolbox.create_converter_toolbox import create_converter_toolbox
 from ui.gui.mwindow.toolboxes.obstacle_toolbox.create_obstacle_toolbox import create_obstacle_toolbox
-from ui.gui.mwindow.service_layer.file_actions import file_new
-from ui.gui.mwindow.service_layer.file_actions import open_commonroad_file
-from ui.gui.mwindow.service_layer.file_actions import file_save
+from ui.gui.mwindow.mwindow_service_layer.file_actions import file_new
+from ui.gui.mwindow.mwindow_service_layer.file_actions import open_commonroad_file
+from ui.gui.mwindow.mwindow_service_layer.file_actions import file_save
 from ui.gui.mwindow.top_bar.menu_bar_wrapper import MenuBarWrapper
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from meta.CONSTANTS import *

@@ -9,7 +9,7 @@ if SUMO_AVAILABLE:
 
 """
     This file is a general collection of smaller functions which are used in the mwindow 
-    or by two or more components from the service_layer.
+    or by two or more components from the mwindow_service_layer.
 """
 
 
