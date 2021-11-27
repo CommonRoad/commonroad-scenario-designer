@@ -355,19 +355,31 @@ class MapConversionToolbox(QDockWidget):
             )
 
     def load_sumo(self):
-        self.path_sumo_file = select_local_file(self, "SUMO", "net.xml")
-        if self.path_sumo_file:
-            self.converter_toolbox.loaded_sumo_file.setText("file successfully loaded")
+        if SUMO_AVAILABLE:
+            self.path_sumo_file = select_local_file(self, "SUMO", "net.xml")
+            if self.path_sumo_file:
+                self.converter_toolbox.loaded_sumo_file.setText("file successfully loaded")
+        else:
+            warnings.warn("Cannot import SUMO, simulation will not be offered in Scenario Designer!")
 
     def convert_cr_to_sumo(self):
-        directory = QFileDialog.getExistingDirectory(self, "Dir", options=QFileDialog.Options())
-        if not directory:
-            return
-        self.sumo_simulation.convert(directory)
+        if SUMO_AVAILABLE:
+            directory = QFileDialog.getExistingDirectory(self, "Dir", options=QFileDialog.Options())
+            if not directory:
+                return
+            self.sumo_simulation.convert(directory)
+        else:
+            warnings.warn("Cannot import SUMO, simulation will not be offered in Scenario Designer!")
 
     def open_sumo_settings(self):
-        SUMOSettings(self, config=self.sumo_simulation.config)
+        if SUMO_AVAILABLE:
+            SUMOSettings(self, config=self.sumo_simulation.config)
+        else:
+            warnings.warn("Cannot import SUMO, simulation will not be offered in Scenario Designer!")
 
     def convert_sumo_to_cr(self):
-        scenario = convert_net_to_cr(self.path_sumo_file)
-        self.callback(scenario)
+        if SUMO_AVAILABLE:
+            scenario = convert_net_to_cr(self.path_sumo_file)
+            self.callback(scenario)
+        else:
+            warnings.warn("Cannot import SUMO, simulation will not be offered in Scenario Designer!")
