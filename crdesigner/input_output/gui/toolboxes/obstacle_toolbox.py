@@ -240,12 +240,27 @@ class ObstacleToolbox(QDockWidget):
             obstacle_id = int(self.obstacle_toolbox.selected_obstacle.currentText())
             obstacle = self.current_scenario.obstacle_by_id(obstacle_id)
             if isinstance(obstacle.obstacle_shape, Rectangle):
+
+                if self.obstacle_toolbox.obstacle_shape.currentText() != "Rectangle":
+                    self.obstacle_toolbox.obstacle_shape.setCurrentIndex(0)
+            
+
                 self.obstacle_toolbox.obstacle_width.setText(str(obstacle.obstacle_shape.width))
                 self.obstacle_toolbox.obstacle_length.setText(str(obstacle.obstacle_shape.length))
 
                 self.obstacle_toolbox.obstacle_x_Position.setText(str(obstacle.initial_state.__getattribute__("position")[0]))
                 self.obstacle_toolbox.obstacle_y_Position.setText(str(obstacle.initial_state.__getattribute__("position")[1]))
                 self.obstacle_toolbox.obstacle_orientation.setText(str(math.degrees(obstacle.initial_state.__getattribute__("orientation"))))
+
+            elif isinstance(obstacle.obstacle_shape, Circle):
+
+                if self.obstacle_toolbox.obstacle_shape.currentText() != "Circle":
+                    self.obstacle_toolbox.obstacle_shape.setCurrentIndex(1)
+
+                self.obstacle_toolbox.obstacle_radius.setText(str(obstacle.obstacle_shape.radius))
+                self.obstacle_toolbox.obstacle_x_Position.setText(str(obstacle.initial_state.__getattribute__("position")[0]))
+                self.obstacle_toolbox.obstacle_y_Position.setText(str(obstacle.initial_state.__getattribute__("position")[1]))
+
             else:
                 self.obstacle_toolbox.obstacle_width.setText("")
                 self.obstacle_toolbox.obstacle_length.setText("")
