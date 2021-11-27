@@ -7,7 +7,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 
-from commonroad.geometry.shape import Rectangle
+from commonroad.geometry.shape import Rectangle, Circle
 from commonroad.scenario.scenario import Scenario
 from commonroad.scenario.obstacle import Obstacle, StaticObstacle, ObstacleType, DynamicObstacle
 from commonroad.scenario.trajectory import State
@@ -60,6 +60,9 @@ class ObstacleToolbox(QDockWidget):
             lambda: self.remove_obstacle())
         self.obstacle_toolbox.button_add_static_obstacle.clicked.connect(
            lambda: self.add_static_obstacle())
+        
+        self.obstacle_toolbox.obstacle_shape.currentTextChanged.connect(
+            lambda: self.obstacle_toolbox.toggle_sections())
 
         if SUMO_AVAILABLE:
             self.obstacle_toolbox.button_start_simulation.clicked.connect(
@@ -83,42 +86,58 @@ class ObstacleToolbox(QDockWidget):
     #most of this code is copied from the branch from the previous student
     #I think some of it can be a good starting point to add more functionality
     def static_obstacle_details(self, obstacle_id):
-        static_obstacle = StaticObstacle(
-            obstacle_id = obstacle_id,
-            obstacle_type = ObstacleType(self.obstacle_toolbox.obstacle_type.currentText()),
-            #should be able to create more shapes, this is just for testing
+    #Function that creates static obstacles
+        if self.obstacle_toolbox.obstacle_shape.currentText() == "Rectangle":
+            static_obstacle = StaticObstacle(
+                obstacle_id = obstacle_id,
+
+                obstacle_type = ObstacleType(self.obstacle_toolbox.obstacle_type.currentText()),
+                #should be able to create more shapes, this is just for testing
                 obstacle_shape = Rectangle(
                     length = float(self.obstacle_toolbox.obstacle_length.text()),
                     width = float(self.obstacle_toolbox.obstacle_width.text()) 
                 ),
 
-            initial_state = State(**{'position': np.array([
-                float(self.obstacle_toolbox.obstacle_x_Position.text()),
-                float(self.obstacle_toolbox.obstacle_y_Position.text())
-            ]),
-            'orientation': math.radians(float(self.obstacle_toolbox.obstacle_orientation.text())),
-            'time_step': 1
-            })
-        )
+                initial_state = State(**{'position': np.array([
+                    float(self.obstacle_toolbox.obstacle_x_Position.text()),
+                    float(self.obstacle_toolbox.obstacle_y_Position.text())
+                ]),
+                'orientation': math.radians(float(self.obstacle_toolbox.obstacle_orientation.text())),
+                'time_step': 1
+                })
+            )
+
+        elif self.obstacle_toolbox.obstacle_shape.currentText() == "Circle":
+            static_obstacle = StaticObstacle(
+                obstacle_id = obstacle_id,
+
+                obstacle_type = ObstacleType(self.obstacle_toolbox.obstacle_type.currentText()),
+                #should be able to create more shapes, this is just for testing
+                obstacle_shape = Circle(
+                    radius = float(self.obstacle_toolbox.obstacle_radius.text())
+                ),
+
+                initial_state = State(**{'position': np.array([
+                    float(self.obstacle_toolbox.obstacle_x_Position.text()),
+                    float(self.obstacle_toolbox.obstacle_y_Position.text())
+                ]),
+                'orientation': 0, #math.radians(float(self.obstacle_toolbox.obstacle_orientation.text())),
+                'time_step': 1
+                })
+            )
 
         self.current_scenario.add_objects(static_obstacle)
         self.callback(self.current_scenario)
         
     def add_static_obstacle(self):
 
-        try:
-            obstacle_id = self.current_scenario.generate_object_id()
-            self.static_obstacle_details(obstacle_id)
+        #try:
+        obstacle_id = self.current_scenario.generate_object_id()
+        self.static_obstacle_details(obstacle_id)
 
             
-        except:
-            print("Error when creating static obstacle")
-
-        """self.obstacle_toolbox.obstacle_x_Position = 0
-        self.obstacle_toolbox.obstacle_y_Position = 0
-        self.obstacle_toolbox.obstacle_width = 2
-        self.obstacle_toolbox.obstacle_length = 2
-        self.obstacle_toolbox.obstacle_type = self.obstacle_toolbox.obstacle_type"""
+        #except:
+            #print("Error when creating static obstacle")
     
     def update_obstacle(self):
         try:
@@ -140,12 +159,16 @@ class ObstacleToolbox(QDockWidget):
         """
         Initializes GUI elements with intersection information.
         """
+        if self.obstacle_toolbox.obstacle_shape.currentText() == "Circle":
+            self.obstacle_toolbox.obstacle_radius.setText("")
 
-        self.obstacle_toolbox.obstacle_width.setText("") #error
-        self.obstacle_toolbox.obstacle_length.setText("")
+        elif self.obstacle_toolbox.obstacle_shape.currentText() == "Rectangle":
+            self.obstacle_toolbox.obstacle_width.setText("")
+            self.obstacle_toolbox.obstacle_length.setText("")
+            self.obstacle_toolbox.obstacle_orientation.setText("")
+
         self.obstacle_toolbox.obstacle_x_Position.setText("")
         self.obstacle_toolbox.obstacle_y_Position.setText("")
-        self.obstacle_toolbox.obstacle_orientation.setText("")
         self.obstacle_toolbox.selected_obstacle.clear()
         self.obstacle_toolbox.selected_obstacle.addItems(
             ["None"] + [str(item) for item in self.collect_obstacle_ids()])

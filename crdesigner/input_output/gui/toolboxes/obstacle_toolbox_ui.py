@@ -39,6 +39,12 @@ class ObstacleToolboxUI(Toolbox):
         label_general = QLabel("Obstacle Attributes")
         label_general.setFont(QFont("Arial", 11, QFont.Bold))
 
+        self.obstacle_shape = QComboBox()
+        self.obstacle_shape.addItem("Rectangle")
+        self.obstacle_shape.addItem("Circle")
+        self.obstacle_shape.addItem("Polygon")
+        self.obstacle_shape.addItem("Custom Shape")
+
         self.obstacle_length = QLineEdit()
         self.obstacle_length.setValidator(QDoubleValidator())
         self.obstacle_length.setMaxLength(6)
@@ -53,6 +59,11 @@ class ObstacleToolboxUI(Toolbox):
         self.obstacle_x_Position.setValidator(QIntValidator())
         self.obstacle_x_Position.setMaxLength(4)
         self.obstacle_x_Position.setAlignment(Qt.AlignRight)
+
+        """self.obstacle_radius = QLineEdit()
+        self.obstacle_radius.setValidator(QIntValidator())
+        self.obstacle_radius.setMaxLength(4)
+        self.obstacle_radius.setAlignment(Qt.AlignRight)"""
 
         self.obstacle_orientation = QLineEdit()
         self.obstacle_orientation.setValidator(QIntValidator())
@@ -78,27 +89,28 @@ class ObstacleToolboxUI(Toolbox):
         self.button_remove_obstacle = QPushButton("Remove")
         self.button_add_static_obstacle = QPushButton("Add")
 
-        layout_obstacle_information_groupbox = QFormLayout()
-        obstacle_information_groupbox = QGroupBox()
-        obstacle_information_groupbox.setLayout(layout_obstacle_information_groupbox)
-        layout_obstacle_information_groupbox.addRow(label_general)
-        layout_obstacle_information_groupbox.addRow("Width [m]", self.obstacle_width)
-        layout_obstacle_information_groupbox.addRow("Length [m]", self.obstacle_length)
-        layout_obstacle_information_groupbox.addRow("Orientation [deg]", self.obstacle_orientation)
-        layout_obstacle_information_groupbox.addRow("Type", self.obstacle_type)
-        layout_obstacle_information_groupbox.addRow("X-Position", self.obstacle_x_Position)
-        layout_obstacle_information_groupbox.addRow("Y-Position", self.obstacle_y_Position)
+        self.layout_obstacle_information_groupbox = QFormLayout()
+        self.obstacle_information_groupbox = QGroupBox()
+        self.obstacle_information_groupbox.setLayout(self.layout_obstacle_information_groupbox)
+        self.layout_obstacle_information_groupbox.insertRow(0, label_general)
+        self.layout_obstacle_information_groupbox.insertRow(1, "Shape", self.obstacle_shape)
+        self.layout_obstacle_information_groupbox.insertRow(2, "Width [m]", self.obstacle_width)
+        self.layout_obstacle_information_groupbox.insertRow(3, "Length [m]", self.obstacle_length)
+        self.layout_obstacle_information_groupbox.insertRow(4, "Orientation [deg]", self.obstacle_orientation)
+        self.layout_obstacle_information_groupbox.insertRow(5, "Type", self.obstacle_type)
+        self.layout_obstacle_information_groupbox.insertRow(6, "X-Position", self.obstacle_x_Position)
+        self.layout_obstacle_information_groupbox.insertRow(7, "Y-Position", self.obstacle_y_Position)
 
         layout_obstacle_state_vis_groupbox = QFormLayout()
         obstacle_state_vis_groupbox = QGroupBox()
         obstacle_state_vis_groupbox.setLayout(layout_obstacle_state_vis_groupbox)
         layout_vis_selection = QFormLayout()
-        layout_vis_selection.addRow("Visualized State:", self.obstacle_state_variable)
+        layout_vis_selection.insertRow(8, "Visualized State:", self.obstacle_state_variable)
         layout_obstacle_state_vis_groupbox.addRow(layout_vis_selection)
         layout_obstacle_state_vis_groupbox.addWidget(self.toolbar)
         layout_obstacle_state_vis_groupbox.addWidget(self.canvas)
-        layout_obstacle_information_groupbox.addRow(obstacle_state_vis_groupbox)
-        layout_obstacles.addWidget(obstacle_information_groupbox)
+        self.layout_obstacle_information_groupbox.addRow(obstacle_state_vis_groupbox)
+        layout_obstacles.addWidget(self.obstacle_information_groupbox)
 
         layout_obstacle_buttons = QFormLayout()
         layout_obstacle_buttons.addRow("Selected Obstacle ID:", self.selected_obstacle)
@@ -109,6 +121,43 @@ class ObstacleToolboxUI(Toolbox):
 
         title_obstacle = "Obstacle"
         self.sections.append((title_obstacle, widget_obstacles))
+
+    def toggle_sections(self):
+        #changes toolbox based on what shapes that are selected
+        if self.obstacle_shape.currentText() == "Circle":
+
+            self.layout_obstacle_information_groupbox.removeRow(self.obstacle_width)
+            self.layout_obstacle_information_groupbox.removeRow(self.obstacle_length)
+            self.layout_obstacle_information_groupbox.removeRow(self.obstacle_orientation)
+
+            self.obstacle_radius = QLineEdit()
+            self.obstacle_radius.setValidator(QIntValidator())
+            self.obstacle_radius.setMaxLength(4)
+            self.obstacle_radius.setAlignment(Qt.AlignRight)
+
+            self.layout_obstacle_information_groupbox.insertRow(2, "Radius [m]", self.obstacle_radius)
+
+        elif self.obstacle_shape.currentText() == "Rectangle":
+            self.layout_obstacle_information_groupbox.removeRow(self.obstacle_radius)
+
+            self.obstacle_length = QLineEdit()
+            self.obstacle_length.setValidator(QDoubleValidator())
+            self.obstacle_length.setMaxLength(6)
+            self.obstacle_length.setAlignment(Qt.AlignRight)
+
+            self.obstacle_width = QLineEdit()
+            self.obstacle_width.setValidator(QIntValidator())
+            self.obstacle_width.setMaxLength(4)
+            self.obstacle_width.setAlignment(Qt.AlignRight)
+
+            self.obstacle_orientation = QLineEdit()
+            self.obstacle_orientation.setValidator(QIntValidator())
+            self.obstacle_orientation.setMaxLength(4)
+            self.obstacle_orientation.setAlignment(Qt.AlignRight)
+
+            self.layout_obstacle_information_groupbox.insertRow(2,"Width [m]", self.obstacle_width)
+            self.layout_obstacle_information_groupbox.insertRow(3,"Length [m]", self.obstacle_length)
+            self.layout_obstacle_information_groupbox.insertRow(4,"Orientation [deg]", self.obstacle_orientation)
 
         # --Section SUMO Simulation-
         if SUMO_AVAILABLE:
