@@ -144,22 +144,21 @@ class ParametricLaneGroup:
         line_marking_right_vertices = LineMarking.UNKNOWN
 
         for parametric_lane in self.parametric_lanes:
-
             local_left_vertices, local_right_vertices = parametric_lane.calc_vertices(
                 error_tolerance=error_tolerance, min_delta_s=min_delta_s
             )
 
-            if local_left_vertices is None:
+            if local_left_vertices is None or len(local_left_vertices) == 0: # parmetric lane not usable, e.g., to small
                 continue
 
-            try:
+            if len(left_vertices) > 0: # check for first iteration
                 if np.isclose(left_vertices[-1], local_left_vertices[0]).all():
                     idx = 1
                 else:
                     idx = 0
                 left_vertices = np.vstack((left_vertices, local_left_vertices[idx:]))
                 right_vertices = np.vstack((right_vertices, local_right_vertices[idx:]))
-            except IndexError:
+            else:
                 left_vertices = local_left_vertices
                 right_vertices = local_right_vertices
 
@@ -212,10 +211,14 @@ class ParametricLaneGroup:
         center_vertices = np.array(
             [(l + r) / 2 for (l, r) in zip(left_vertices, right_vertices)]
         )
-
-        lanelet = ConversionLanelet(copy.deepcopy(self), left_vertices, center_vertices, right_vertices, self.id_,
-                                    lanelet_type=self.type, line_marking_left_vertices=line_marking_left_vertices,
-                                    line_marking_right_vertices=line_marking_right_vertices)
+        if len(left_vertices) == len(right_vertices) == len(center_vertices) and len(left_vertices) > 0 and len(right_vertices) > 0 and len(center_vertices) > 0:
+            lanelet = ConversionLanelet(copy.deepcopy(self), left_vertices, center_vertices, right_vertices, self.id_,
+                                        lanelet_type=self.type, line_marking_left_vertices=line_marking_left_vertices,
+                                        line_marking_right_vertices=line_marking_right_vertices)
+        else:
+            print(left_vertices)
+            print(right_vertices)
+            print(center_vertices)
 
         # Adjacent lanes
         self._set_adjacent_lanes(lanelet)
