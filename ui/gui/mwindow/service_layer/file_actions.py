@@ -7,7 +7,7 @@ import logging
 from commonroad.scenario.scenario import Scenario
 from commonroad.scenario.lanelet import LaneletNetwork
 from commonroad.common.file_reader import CommonRoadFileReader
-from ui.gui.mwindow.mwindow_service_layer.general_services import create_action
+from ui.gui.mwindow.service_layer.general_services import create_action
 from crdesigner.input_output.gui.toolboxes.gui_sumo_simulation import SUMO_AVAILABLE
 if SUMO_AVAILABLE:
     pass
@@ -98,7 +98,7 @@ def _open_scenario(self, new_scenario, filename="new_scenario", pps=None):
 
 
 def update_to_new_scenario(self):
-    """  """
+    """"""
     update_max_step(self)
     self.initialize_toolboxes()
     self.viewer_dock.setWindowIcon(QIcon(":/icons/cr1.ico"))

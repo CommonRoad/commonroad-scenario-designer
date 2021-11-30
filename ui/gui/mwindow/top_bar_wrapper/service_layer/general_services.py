@@ -9,26 +9,8 @@ if SUMO_AVAILABLE:
 
 """
     This file is a general collection of smaller functions which are used in the mwindow 
-    or by two or more components from the mwindow_service_layer.
+    or by two or more components from the service_layer.
 """
-
-
-def setup_tmp(tmp_folder_path: str):
-    """
-        Setup the tmp folder of the MWindow at the given Path.
-    """
-    pathlib.Path(tmp_folder_path).mkdir(parents=True, exist_ok=True)
-
-
-def setup_mwindow(mwindow):
-    """
-        Calling the methods for setting up the main window.
-    """
-    mwindow.setupUi(mwindow)
-    mwindow.setWindowIcon(QIcon(':/icons/cr.ico'))
-    mwindow.setWindowTitle("CommonRoad Scenario Designer")
-    mwindow.centralwidget.setStyleSheet('background-color:rgb(150,150,150)')
-    mwindow.setWindowFlag(Qt.Window)
 
 
 def create_action(mwindow, text, icon=None, checkable=False, slot=None, tip=None, shortcut=None):
@@ -52,11 +34,3 @@ def create_action(mwindow, text, icon=None, checkable=False, slot=None, tip=None
     if shortcut is not None:
         action.setShortcut(shortcut)  # shortcut
     return action
-
-
-def center(mwindow):
-    """Function that makes sure the main window is in the center of screen."""
-    screen = QDesktopWidget().screenGeometry()
-    size = mwindow.geometry()
-    mwindow.move((screen.width() - size.width()) / 2,
-              (screen.height() - size.height()) / 2)
