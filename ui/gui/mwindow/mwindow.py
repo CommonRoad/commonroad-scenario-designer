@@ -4,24 +4,24 @@ from crdesigner.input_output.gui.gui_resources.MainWindow import Ui_mainWindow
 from crdesigner.input_output.gui.gui_resources.scenario_saving_dialog import ScenarioDialog
 from crdesigner.input_output.gui.misc.commonroad_viewer import AnimatedViewer
 from crdesigner.input_output.gui.settings import config
-from ui.gui.mwindow.top_bar_wrapper.toolbar_wrapper import ToolBarWrapper
 from ui.gui.mwindow.console_wrapper.console_wrapper import ConsoleWrapper
 from ui.gui.mwindow.service_layer.general_services import setup_tmp
 from ui.gui.mwindow.service_layer.general_services import setup_mwindow
 from ui.gui.mwindow.service_layer.general_services import center
-from ui.gui.mwindow.service_layer.file_actions import create_file_actions
-from ui.gui.mwindow.service_layer.setting_actions import create_setting_actions
-from ui.gui.mwindow.service_layer.help_actions import create_help_actions
+# these were moved to the topbar
+#from ui.gui.mwindow.mwindow_service_layer.file_actions import create_file_actions
+#from ui.gui.mwindow.mwindow_service_layer.setting_actions import create_setting_actions
+#from ui.gui.mwindow.mwindow_service_layer.help_actions import create_help_actions
 from ui.gui.mwindow.toolboxes.road_network_toolbox.create_road_network_toolbox import create_road_network_toolbox
 from ui.gui.mwindow.toolboxes.converter_toolbox.create_converter_toolbox import create_converter_toolbox
 from ui.gui.mwindow.toolboxes.obstacle_toolbox.create_obstacle_toolbox import create_obstacle_toolbox
-from ui.gui.mwindow.service_layer.file_actions import file_new
-from ui.gui.mwindow.service_layer.file_actions import open_commonroad_file
-from ui.gui.mwindow.service_layer.file_actions import file_save
-from ui.gui.mwindow.top_bar_wrapper.top_bar_wrapper import TopBarWrapper
-from ui.gui.mwindow.top_bar_wrapper.menu_bar_wrapper import MenuBarWrapper
+# these were moved to the top_bar
+#from ui.gui.mwindow.mwindow_service_layer.file_actions import file_new
+#from ui.gui.mwindow.mwindow_service_layer.file_actions import open_commonroad_file
+#from ui.gui.mwindow.mwindow_service_layer.file_actions import file_save
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from meta.CONSTANTS import *
+# replaces menubar and topbar
 
 from typing import Union
 import logging
@@ -56,25 +56,20 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.gui_settings = None
 
         # init any objects here
-        # TODO make seperate packages for these two - for the sake of siplicity this will be done later (mid / end of this week)
         self.scenario_saving_dialog = ScenarioDialog()
         self.cr_viewer = AnimatedViewer(self, self.viewer_callback)
 
         # call the setup methods in the service layer
-        setup_tmp(tmp_folder_path=self.tmp_folder) # cleaned
-        setup_mwindow(self) # cleaned
-
-        # currently moving this to the top_bar_wrapper
+        setup_tmp(tmp_folder_path=self.tmp_folder)
+        setup_mwindow(self)
         self.fileNewAction, self.fileOpenAction, self.separator, self.fileSaveAction, self.exitAction = create_file_actions(mwindow=self)
         self.osm_settings, self.opendrive_settings, self.gui_settings, self.sumo_settings = create_setting_actions(mwindow=self)
         self.open_web, self.open_forum = create_help_actions(mwindow=self)
-
         self.create_viewer_dock()
 
 
         # init the wrapper classes
         self.console_wrapper = ConsoleWrapper(mwindow=self)  # this was replaced: self.console_wrapper, self.text_browser = create_console(mwindow=self)
-
         self.toolbar_wrapper = ToolBarWrapper(mwindow=self, file_new=file_new,
                                               open_commonroad_file=open_commonroad_file, file_save=file_save)
 
@@ -85,10 +80,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.status = self.statusbar
         self.status.showMessage("Welcome to CR Scenario Designer")
 
-        # instanciate the TopBarWrapper (from there the menu bar and the toolbar are instanciated
-        self.top_bar_wrapper = TopBarWrapper(menubar=self.menubar)
-
-        # currently moving this to the top_bar_wrapper
+        # instanciate the menu bar
         self.menu_bar_wrapper = MenuBarWrapper(mwindow=self,
                                 fileNewAction=self.fileNewAction, fileOpenAction=self.fileOpenAction,
                                 separator=self.separator, exitAction=self.exitAction, gui_settings=self.gui_settings,
