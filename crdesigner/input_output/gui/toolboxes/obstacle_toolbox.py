@@ -7,7 +7,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 
-from commonroad.geometry.shape import Rectangle, Circle
+from commonroad.geometry.shape import Rectangle, Circle, Polygon
 from commonroad.scenario.scenario import Scenario
 from commonroad.scenario.obstacle import Obstacle, StaticObstacle, ObstacleType, DynamicObstacle
 from commonroad.scenario.trajectory import State
@@ -125,9 +125,37 @@ class ObstacleToolbox(QDockWidget):
                 'time_step': 1
                 })
             )
+        
+        elif self.obstacle_toolbox.obstacle_shape.currentText() == "Polygon":
+            static_obstacle = StaticObstacle(
+                obstacle_id = obstacle_id,
+
+                obstacle_type = ObstacleType(self.obstacle_toolbox.obstacle_type.currentText()),
+                obstacle_shape = Polygon(
+                    vertices = np.array([
+                        np.array(self.string_to_float(self.obstacle_toolbox.obstacle_v0.text())),
+                        np.array(self.string_to_float(self.obstacle_toolbox.obstacle_v1.text())),
+                        np.array(self.string_to_float(self.obstacle_toolbox.obstacle_v2.text())),
+                    ])
+                ),
+
+                initial_state = State(**{'position': np.array([
+                    #float(self.obstacle_toolbox.obstacle_x_Position.text()),
+                    #float(self.obstacle_toolbox.obstacle_y_Position.text())
+                    0,
+                    0
+                ]),
+                'orientation': 0, #math.radians(float(self.obstacle_toolbox.obstacle_orientation.text())),
+                'time_step': 1
+                })
+            )
 
         self.current_scenario.add_objects(static_obstacle)
         self.callback(self.current_scenario)
+     
+    def string_to_float(self, xy_str):
+        xy_float = [float(value) for value in xy_str.split(",")]
+        return xy_float
         
     def add_static_obstacle(self):
 

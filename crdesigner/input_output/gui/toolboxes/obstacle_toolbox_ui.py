@@ -43,7 +43,6 @@ class ObstacleToolboxUI(Toolbox):
         self.obstacle_shape.addItem("Rectangle")
         self.obstacle_shape.addItem("Circle")
         self.obstacle_shape.addItem("Polygon")
-        self.obstacle_shape.addItem("Custom Shape")
 
         self.obstacle_length = QLineEdit()
         self.obstacle_length.setValidator(QDoubleValidator())
@@ -96,7 +95,7 @@ class ObstacleToolboxUI(Toolbox):
         self.layout_obstacle_information_groupbox.insertRow(1, "Shape", self.obstacle_shape)
         self.layout_obstacle_information_groupbox.insertRow(2, "Width [m]", self.obstacle_width)
         self.layout_obstacle_information_groupbox.insertRow(3, "Length [m]", self.obstacle_length)
-        self.layout_obstacle_information_groupbox.insertRow(4, "Orientation [deg]", self.obstacle_orientation)
+        self.layout_obstacle_information_groupbox.insertRow(4, "Orientation [deg]",self.obstacle_orientation)
         self.layout_obstacle_information_groupbox.insertRow(5, "Type", self.obstacle_type)
         self.layout_obstacle_information_groupbox.insertRow(6, "X-Position", self.obstacle_x_Position)
         self.layout_obstacle_information_groupbox.insertRow(7, "Y-Position", self.obstacle_y_Position)
@@ -125,10 +124,12 @@ class ObstacleToolboxUI(Toolbox):
     def toggle_sections(self):
         #changes toolbox based on what shapes that are selected
         if self.obstacle_shape.currentText() == "Circle":
-
-            self.layout_obstacle_information_groupbox.removeRow(self.obstacle_width)
-            self.layout_obstacle_information_groupbox.removeRow(self.obstacle_length)
-            self.layout_obstacle_information_groupbox.removeRow(self.obstacle_orientation)
+            try:
+                self.layout_obstacle_information_groupbox.removeRow(self.obstacle_width)
+                self.layout_obstacle_information_groupbox.removeRow(self.obstacle_length)
+                self.layout_obstacle_information_groupbox.removeRow(self.obstacle_orientation_field)
+            except:
+                pass
 
             self.obstacle_radius = QLineEdit()
             self.obstacle_radius.setValidator(QIntValidator())
@@ -138,7 +139,10 @@ class ObstacleToolboxUI(Toolbox):
             self.layout_obstacle_information_groupbox.insertRow(2, "Radius [m]", self.obstacle_radius)
 
         elif self.obstacle_shape.currentText() == "Rectangle":
-            self.layout_obstacle_information_groupbox.removeRow(self.obstacle_radius)
+            try:
+                self.layout_obstacle_information_groupbox.removeRow(self.obstacle_radius)
+            except:
+                pass
 
             self.obstacle_length = QLineEdit()
             self.obstacle_length.setValidator(QDoubleValidator())
@@ -158,6 +162,38 @@ class ObstacleToolboxUI(Toolbox):
             self.layout_obstacle_information_groupbox.insertRow(2,"Width [m]", self.obstacle_width)
             self.layout_obstacle_information_groupbox.insertRow(3,"Length [m]", self.obstacle_length)
             self.layout_obstacle_information_groupbox.insertRow(4,"Orientation [deg]", self.obstacle_orientation)
+
+        elif self.obstacle_shape.currentText() == "Polygon":
+            
+            try:
+                self.layout_obstacle_information_groupbox.removeRow(self.obstacle_radius)
+            except:
+                pass
+            try:
+                self.layout_obstacle_information_groupbox.removeRow(self.obstacle_orientation)
+                self.layout_obstacle_information_groupbox.removeRow(self.obstacle_width)
+                self.layout_obstacle_information_groupbox.removeRow(self.obstacle_length)
+            except:
+                pass
+        #temporary code, for testing polygon creation, supposed to be able to have arbitrary amount of vertices
+            self.obstacle_v0 = QLineEdit()
+            self.obstacle_v0.setValidator(QDoubleValidator())
+            self.obstacle_v0.setMaxLength(6)
+            self.obstacle_v0.setAlignment(Qt.AlignRight) 
+
+            self.obstacle_v1 = QLineEdit()
+            self.obstacle_v1.setValidator(QDoubleValidator())
+            self.obstacle_v1.setMaxLength(6)
+            self.obstacle_v1.setAlignment(Qt.AlignRight) 
+
+            self.obstacle_v2 = QLineEdit()
+            self.obstacle_v2.setValidator(QDoubleValidator())
+            self.obstacle_v2.setMaxLength(6)
+            self.obstacle_v2.setAlignment(Qt.AlignRight)
+
+            self.layout_obstacle_information_groupbox.insertRow(2,"Vertice 0", self.obstacle_v0)
+            self.layout_obstacle_information_groupbox.insertRow(3,"Vertice 1", self.obstacle_v1)
+            self.layout_obstacle_information_groupbox.insertRow(4,"Vertice 2", self.obstacle_v2)
 
         # --Section SUMO Simulation-
         if SUMO_AVAILABLE:
