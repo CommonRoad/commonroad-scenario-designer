@@ -1,4 +1,4 @@
-from crdesigner.input_output.gui.toolboxes.obstacle_toolbox import ObstacleToolbox
+from ui.gui.mwindow.toolboxes.obstacle_toolbox.obstacle_toolbox import ObstacleToolbox
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 

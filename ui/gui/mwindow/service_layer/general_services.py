@@ -3,9 +3,9 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 
-from crdesigner.input_output.gui.toolboxes.gui_sumo_simulation import SUMO_AVAILABLE
+from ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMO_AVAILABLE
 if SUMO_AVAILABLE:
-    from crdesigner.input_output.gui.settings.sumo_settings import SUMOSettings
+    from ui.gui.mwindow.service_layer.sumo_settings import SUMOSettings
 
 """
     This file is a general collection of smaller functions which are used in the mwindow 

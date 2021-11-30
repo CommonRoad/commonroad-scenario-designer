@@ -1,6 +1,6 @@
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
-from crdesigner.input_output.gui.toolboxes.map_converter_toolbox import MapConversionToolbox
+from ui.gui.mwindow.toolboxes.converter_toolbox.map_converter_toolbox import MapConversionToolbox
 
 
 def create_converter_toolbox(mwindow):

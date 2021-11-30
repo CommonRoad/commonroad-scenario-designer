@@ -8,7 +8,7 @@ from commonroad.scenario.scenario import Scenario
 from commonroad.scenario.lanelet import LaneletNetwork
 from commonroad.common.file_reader import CommonRoadFileReader
 from ui.gui.mwindow.top_bar_wrapper.service_layer.general_services import create_action
-from crdesigner.input_output.gui.toolboxes.gui_sumo_simulation import SUMO_AVAILABLE
+from ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMO_AVAILABLE
 if SUMO_AVAILABLE:
     pass
 

@@ -3,7 +3,7 @@ from PyQt5.QtWidgets import *
 from typing import Union, Optional
 
 from commonroad.planning.planning_problem import PlanningProblemSet
-from crdesigner.input_output.gui.gui_resources.scenario_saving_dialog_ui import ScenarioDialogUI
+from ui.gui.mwindow.service_layer.gui_resources.scenario_saving_dialog_ui import ScenarioDialogUI
 
 from commonroad.scenario.scenario import Scenario, SCENARIO_VERSION, Environment, Tag, TimeOfDay, Weather, \
     Underground, Time, Location

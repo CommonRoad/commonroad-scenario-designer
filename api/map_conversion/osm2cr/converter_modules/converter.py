@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 
 from api.map_conversion.osm2cr import config
 from api.map_conversion.osm2cr.converter_modules.cr_operations import export
-from crdesigner.input_output.gui.osm_gui_modules import gui
+from ui.gui.mwindow.service_layer.osm_gui_modules import gui
 from api.map_conversion.osm2cr.converter_modules.osm_operations import osm_parser
 from api.map_conversion.osm2cr.converter_modules.utility import plots
 from api.map_conversion.osm2cr.converter_modules.graph_operations import intersection_merger, road_graph, lane_linker, \

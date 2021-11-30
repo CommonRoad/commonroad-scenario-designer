@@ -1,10 +1,10 @@
-from crdesigner.input_output.gui.toolboxes.gui_sumo_simulation import SUMO_AVAILABLE
+from ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMO_AVAILABLE
 if SUMO_AVAILABLE:
-    from crdesigner.input_output.gui.settings.sumo_settings import SUMOSettings
+    from ui.gui.mwindow.service_layer.sumo_settings import SUMOSettings
 from ui.gui.mwindow.top_bar_wrapper.service_layer.general_services import create_action
-from crdesigner.input_output.gui.converter_modules.osm_interface import OSMInterface
-from crdesigner.input_output.gui.misc.gui_settings import GUISettings
-from crdesigner.input_output.gui.converter_modules.opendrive_interface import OpenDRIVEInterface
+from ui.gui.mwindow.service_layer.converter_modules.osm_interface import OSMInterface
+from ui.gui.mwindow.service_layer.gui_settings import GUISettings
+from ui.gui.mwindow.service_layer.converter_modules.opendrive_interface import OpenDRIVEInterface
 
 """
     File for providing functions for the settings.

@@ -1,9 +1,9 @@
 from commonroad.scenario.lanelet import Lanelet
 from commonroad.scenario.obstacle import Obstacle
-from crdesigner.input_output.gui.gui_resources.MainWindow import Ui_mainWindow
-from crdesigner.input_output.gui.gui_resources.scenario_saving_dialog import ScenarioDialog
-from crdesigner.input_output.gui.misc.commonroad_viewer import AnimatedViewer
-from crdesigner.input_output.gui.settings import config
+from ui.gui.mwindow.service_layer.gui_resources.MainWindow import Ui_mainWindow
+from ui.gui.mwindow.service_layer.gui_resources.scenario_saving_dialog import ScenarioDialog
+from ui.gui.mwindow.animated_viewer_wrapper.commonroad_viewer import AnimatedViewer
+from ui.gui.mwindow.service_layer import config
 from ui.gui.mwindow.console_wrapper.console_wrapper import ConsoleWrapper
 from ui.gui.mwindow.service_layer.general_services import setup_tmp
 from ui.gui.mwindow.service_layer.general_services import setup_mwindow
@@ -12,6 +12,7 @@ from ui.gui.mwindow.service_layer.general_services import center
 #from ui.gui.mwindow.mwindow_service_layer.file_actions import create_file_actions
 #from ui.gui.mwindow.mwindow_service_layer.setting_actions import create_setting_actions
 #from ui.gui.mwindow.mwindow_service_layer.help_actions import create_help_actions
+from ui.gui.mwindow.top_bar_wrapper.top_bar_wrapper import TopBarWrapper
 from ui.gui.mwindow.toolboxes.road_network_toolbox.create_road_network_toolbox import create_road_network_toolbox
 from ui.gui.mwindow.toolboxes.converter_toolbox.create_converter_toolbox import create_converter_toolbox
 from ui.gui.mwindow.toolboxes.obstacle_toolbox.create_obstacle_toolbox import create_obstacle_toolbox
@@ -27,7 +28,7 @@ from typing import Union
 import logging
 import copy
 from PyQt5.QtWidgets import *
-from crdesigner.input_output.gui.toolboxes.gui_sumo_simulation import SUMO_AVAILABLE
+from ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMO_AVAILABLE
 if SUMO_AVAILABLE:
     pass
 
@@ -56,41 +57,44 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.gui_settings = None
 
         # init any objects here
+        # TODO make an own package for these two later
         self.scenario_saving_dialog = ScenarioDialog()
         self.cr_viewer = AnimatedViewer(self, self.viewer_callback)
 
         # call the setup methods in the service layer
         setup_tmp(tmp_folder_path=self.tmp_folder)
         setup_mwindow(self)
-        self.fileNewAction, self.fileOpenAction, self.separator, self.fileSaveAction, self.exitAction = create_file_actions(mwindow=self)
-        self.osm_settings, self.opendrive_settings, self.gui_settings, self.sumo_settings = create_setting_actions(mwindow=self)
-        self.open_web, self.open_forum = create_help_actions(mwindow=self)
         self.create_viewer_dock()
-
-
-        # init the wrapper classes
-        self.console_wrapper = ConsoleWrapper(mwindow=self)  # this was replaced: self.console_wrapper, self.text_browser = create_console(mwindow=self)
-        self.toolbar_wrapper = ToolBarWrapper(mwindow=self, file_new=file_new,
-                                              open_commonroad_file=open_commonroad_file, file_save=file_save)
+        self.console_wrapper = ConsoleWrapper(mwindow=self)
 
         self.road_network_toolbox = create_road_network_toolbox(mwindow=self)
         self.obstacle_toolbox = create_obstacle_toolbox(mwindow=self)
         self.converter_toolbox = create_converter_toolbox(mwindow=self)
-
+        self.top_bar_wrapper = TopBarWrapper(mwindow=self)
         self.status = self.statusbar
         self.status.showMessage("Welcome to CR Scenario Designer")
-
-        # instanciate the menu bar
-        self.menu_bar_wrapper = MenuBarWrapper(mwindow=self,
-                                fileNewAction=self.fileNewAction, fileOpenAction=self.fileOpenAction,
-                                separator=self.separator, exitAction=self.exitAction, gui_settings=self.gui_settings,
-                                sumo_settings=self.sumo_settings, osm_settings=self.osm_settings,
-                                open_web=self.open_web, open_forum=self.open_forum, fileSaveAction=self.fileSaveAction
-                                )
 
         center(mwindow=self)
         if path:
             self.open_path(path)
+
+        #self.fileNewAction, self.fileOpenAction, self.separator, self.fileSaveAction, self.exitAction = create_file_actions(mwindow=self)
+        #self.osm_settings, self.opendrive_settings, self.gui_settings, self.sumo_settings = create_setting_actions(mwindow=self)
+        #self.open_web, self.open_forum = create_help_actions(mwindow=self)
+
+
+        # init the wrapper classes
+        # this was replaced: self.console_wrapper, self.text_browser = create_console(mwindow=self)
+        #self.toolbar_wrapper = ToolBarWrapper(mwindow=self, file_new=file_new,open_commonroad_file=open_commonroad_file, file_save=file_save)
+
+        # instanciate the menu bar
+        #self.menu_bar_wrapper = MenuBarWrapper(mwindow=self,
+        #                        fileNewAction=self.fileNewAction, fileOpenAction=self.fileOpenAction,
+        #                        separator=self.separator, exitAction=self.exitAction, gui_settings=self.gui_settings,
+        #                        sumo_settings=self.sumo_settings, osm_settings=self.osm_settings,
+        #                        open_web=self.open_web, open_forum=self.open_forum, fileSaveAction=self.fileSaveAction
+        #                        )
+
 
     # below here the functionality of the mwindow
 

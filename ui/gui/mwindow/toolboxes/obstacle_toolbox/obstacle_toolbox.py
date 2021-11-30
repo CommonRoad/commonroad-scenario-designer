@@ -8,11 +8,11 @@ from PyQt5.QtCore import *
 from commonroad.geometry.shape import Rectangle
 from commonroad.scenario.scenario import Scenario
 
-from crdesigner.input_output.gui.toolboxes.gui_sumo_simulation import SUMO_AVAILABLE
+from ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMO_AVAILABLE
 if SUMO_AVAILABLE:
-    from crdesigner.input_output.gui.toolboxes.gui_sumo_simulation import SUMOSimulation
+    from ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMOSimulation
 
-from crdesigner.input_output.gui.toolboxes.obstacle_toolbox_ui import ObstacleToolboxUI
+from ui.gui.mwindow.toolboxes.obstacle_toolbox.obstacle_toolbox_ui import ObstacleToolboxUI
 
 
 class ObstacleToolbox(QDockWidget):

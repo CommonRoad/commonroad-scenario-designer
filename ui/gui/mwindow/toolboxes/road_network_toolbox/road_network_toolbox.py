@@ -8,11 +8,11 @@ from commonroad.scenario.intersection import IntersectionIncomingElement, Inters
 from commonroad.scenario.scenario import Scenario
 from commonroad.scenario.traffic_sign import *
 
-from crdesigner.input_output.gui.toolboxes.toolbox_ui import CheckableComboBox
-from crdesigner.input_output.gui.misc.map_creator import MapCreator
-from crdesigner.input_output.gui.toolboxes.road_network_toolbox_ui import RoadNetworkToolboxUI
+from ui.gui.mwindow.toolboxes.toolbox_ui import CheckableComboBox
+from ui.gui.mwindow.service_layer.map_creator import MapCreator
+from ui.gui.mwindow.toolboxes.road_network_toolbox.road_network_toolbox_ui import RoadNetworkToolboxUI
 
-from crdesigner.input_output.gui.toolboxes.gui_sumo_simulation import SUMO_AVAILABLE
+from ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMO_AVAILABLE
 if SUMO_AVAILABLE:
     from api.map_conversion.sumo_map.cr2sumo.converter import CR2SumoMapConverter
     from api.map_conversion.sumo_map.config import SumoConfig

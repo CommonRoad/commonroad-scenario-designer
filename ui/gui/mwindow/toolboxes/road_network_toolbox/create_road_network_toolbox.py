@@ -1,4 +1,4 @@
-from crdesigner.input_output.gui.toolboxes.road_network_toolbox import RoadNetworkToolbox
+from ui.gui.mwindow.toolboxes.road_network_toolbox.road_network_toolbox import RoadNetworkToolbox
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 

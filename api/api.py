@@ -20,7 +20,7 @@ from api.map_conversion.lanelet_lanelet2.lanelet2cr import Lanelet2CRConverter
 from api.map_conversion.lanelet_lanelet2.lanelet2_parser import Lanelet2Parser
 from api.map_conversion.lanelet_lanelet2.cr2lanelet import CR2LaneletConverter
 
-from crdesigner.input_output.gui.toolboxes.gui_sumo_simulation import SUMO_AVAILABLE
+from ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMO_AVAILABLE
 if SUMO_AVAILABLE:
     from api.map_conversion.sumo_map.config import SumoConfig
     from api.map_conversion.sumo_map.cr2sumo.converter import CR2SumoMapConverter
