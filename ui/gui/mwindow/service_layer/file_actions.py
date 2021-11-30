@@ -31,7 +31,7 @@ def create_file_actions(mwindow):
             slot=file_save, tip="Save Commonroad File", shortcut=QKeySequence.Save)
     separator.setSeparator(True)
     exitAction = create_action(mwindow=mwindow, text="Quit", icon=QIcon(":/icons/close.png"), checkable=False,
-                                         slot=_close_window, tip="Quit", shortcut=QKeySequence.Close)
+                                         slot=close_window, tip="Quit", shortcut=QKeySequence.Close)
     return fileNewAction, fileOpenAction, separator, fileSaveAction, exitAction
 
 
@@ -120,13 +120,15 @@ def file_save(mwindow):
 
     mwindow.scenario_saving_dialog.show(mwindow.cr_viewer.current_scenario, mwindow.cr_viewer.current_pps)
 
+
 def update_max_step(self, value: int = -1):
     logging.info('update_max_step')
     value = value if value > -1 else self.cr_viewer.max_timestep
     self.label2.setText(' / ' + str(value))
     self.slider.setMaximum(value)
 
-def _close_window(mwindow):
+
+def close_window(mwindow):
     """
         For closing the window.
     """

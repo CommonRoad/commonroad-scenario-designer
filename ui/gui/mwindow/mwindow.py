@@ -8,6 +8,7 @@ from ui.gui.mwindow.console_wrapper.console_wrapper import ConsoleWrapper
 from ui.gui.mwindow.service_layer.general_services import setup_tmp
 from ui.gui.mwindow.service_layer.general_services import setup_mwindow
 from ui.gui.mwindow.service_layer.general_services import center
+from ui.gui.mwindow.service_layer.file_actions import close_window
 # these were moved to the topbar
 #from ui.gui.mwindow.mwindow_service_layer.file_actions import create_file_actions
 #from ui.gui.mwindow.mwindow_service_layer.setting_actions import create_setting_actions
@@ -172,7 +173,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         See how to move this bad boy into the service layer.
         """
         event.ignore()
-        self.close_window()
+        close_window(mwindow=self)
 
     def process_trigger(self, q):
         self.status.showMessage(q.text() + ' is triggered')
