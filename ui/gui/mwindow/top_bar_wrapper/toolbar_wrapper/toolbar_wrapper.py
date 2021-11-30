@@ -2,6 +2,9 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 
+from ui.gui.mwindow.service_layer.gui_src import CR_Scenario_Designer # do not remove! This is for the correct paths
+                                                                      # of the icons
+
 
 class ToolBarWrapper:
     """
@@ -13,7 +16,7 @@ class ToolBarWrapper:
         self.tb1 = mwindow.addToolBar("File")
         self.action_new = QAction(QIcon(":/icons/new_file.png"), "new CR File", mwindow)
         self.tb1.addAction(self.action_new)
-        self.action_new.triggered.connect(file_new)
+        self.action_new.triggered.connect(lambda: file_new(mwindow))
         self.action_open = QAction(QIcon(":/icons/open_file.png"), "open CR File", mwindow)
         self.tb1.addAction(self.action_open)
         self.action_open.triggered.connect(open_commonroad_file)

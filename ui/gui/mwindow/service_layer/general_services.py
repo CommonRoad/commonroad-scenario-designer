@@ -31,6 +31,9 @@ def setup_mwindow(mwindow):
     mwindow.setWindowFlag(Qt.Window)
 
 
+# TODO remove here the actions
+
+
 def create_action(mwindow, text, icon=None, checkable=False, slot=None, tip=None, shortcut=None):
     """
         Generic function used to create actions for the settings or the menu bar.

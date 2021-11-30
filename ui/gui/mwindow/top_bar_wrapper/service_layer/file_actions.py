@@ -44,7 +44,7 @@ def file_new(mwindow):
     scenario.lanelet_network = net
     mwindow.cr_viewer.current_scenario = scenario
     mwindow.cr_viewer.current_pps = None
-    mwindow.open_scenario(scenario)
+    _open_scenario(mwindow=mwindow, new_scenario=scenario)
 
 
 def open_commonroad_file(mwindow):
@@ -80,30 +80,30 @@ def _open_path(mwindow, path):
     _open_scenario(scenario, filename, pps)
 
 
-def _open_scenario(self, new_scenario, filename="new_scenario", pps=None):
-    if self.check_scenario(new_scenario) >= 2:
-        self.text_browser.append("loading aborted")
+def _open_scenario(mwindow, new_scenario, filename="new_scenario", pps=None):
+    if mwindow.check_scenario(new_scenario) >= 2:
+        mwindow.text_browser.append("loading aborted")
         return
-    self.filename = filename
+    mwindow.filename = filename
     if SUMO_AVAILABLE:
-        self.cr_viewer.open_scenario(new_scenario, self.obstacle_toolbox.sumo_simulation.config,
+        mwindow.cr_viewer.open_scenario(new_scenario, mwindow.obstacle_toolbox.sumo_simulation.config,
                                      planning_problem_set=pps)
-        self.obstacle_toolbox.sumo_simulation.scenario = self.cr_viewer.current_scenario
+        mwindow.obstacle_toolbox.sumo_simulation.scenario = mwindow.cr_viewer.current_scenario
     else:
-        self.cr_viewer.open_scenario(new_scenario, planning_problem_set=pps)
-    self.update_view(focus_on_network=True)
-    self.store_scenario()
-    self.update_toolbox_scenarios()
-    update_to_new_scenario(self)
+        mwindow.cr_viewer.open_scenario(new_scenario, planning_problem_set=pps)
+    mwindow.update_view(focus_on_network=True)
+    mwindow.store_scenario()
+    mwindow.update_toolbox_scenarios()
+    update_to_new_scenario(mwindow)
 
 
-def update_to_new_scenario(self):
+def update_to_new_scenario(mwindow):
     """"""
-    update_max_step(self)
-    self.initialize_toolboxes()
-    self.viewer_dock.setWindowIcon(QIcon(":/icons/cr1.ico"))
-    if self.cr_viewer.current_scenario is not None:
-        self.text_browser.append("Loading " + self.filename)
+    update_max_step(mwindow)
+    mwindow.initialize_toolboxes()
+    mwindow.viewer_dock.setWindowIcon(QIcon(":/icons/cr1.ico"))
+    if mwindow.cr_viewer.current_scenario is not None:
+        mwindow.console_wrapper.text_browser.append("Loading " + mwindow.filename)
 
 
 def file_save(mwindow):
@@ -117,11 +117,13 @@ def file_save(mwindow):
 
     mwindow.scenario_saving_dialog.show(mwindow.cr_viewer.current_scenario, mwindow.cr_viewer.current_pps)
 
-def update_max_step(self, value: int = -1):
+
+def update_max_step(mwindow, value: int = -1):
     logging.info('update_max_step')
-    value = value if value > -1 else self.cr_viewer.max_timestep
-    self.label2.setText(' / ' + str(value))
-    self.slider.setMaximum(value)
+    value = value if value > -1 else mwindow.cr_viewer.max_timestep
+    mwindow.top_bar_wrapper.toolbar_wrapper.label2.setText(' / ' + str(value))
+    mwindow.top_bar_wrapper.toolbar_wrapper.slider.setMaximum(value)
+
 
 def _close_window(mwindow):
     """

@@ -13,6 +13,9 @@ if SUMO_AVAILABLE:
     pass
 
 
+# TODO remove here the actions
+
+
 def create_file_actions(mwindow):
     """
         Function to create the file actions in the menu bar.

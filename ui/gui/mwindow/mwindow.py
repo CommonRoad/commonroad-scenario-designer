@@ -22,6 +22,7 @@ from ui.gui.mwindow.toolboxes.obstacle_toolbox.create_obstacle_toolbox import cr
 #from ui.gui.mwindow.mwindow_service_layer.file_actions import file_save
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from meta.CONSTANTS import *
+from ui.gui.mwindow.service_layer.util import *
 # replaces menubar and topbar
 
 from typing import Union
@@ -51,7 +52,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.map_converter_toolbox = None
         self.console_wrapper = None  # this can be removed
         self.play_activated = False
-        self.text_browser = None
+        self.text_browser = None  # handle to the text browser in the console
         self.viewer_dock = None
         self.sumo_settings = None
         self.gui_settings = None
@@ -195,7 +196,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         error_score = 0
 
         # handle fatal errors
-        found_ids = util.find_invalid_ref_of_traffic_lights(scenario)
+        found_ids = find_invalid_ref_of_traffic_lights(scenario)
         if found_ids and verbose:
             error_score = max(error_score, fatal_error)
             self.text_browser.append("invalid traffic light refs: " +
@@ -208,7 +209,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
                 QMessageBox.Ok,
             )
 
-        found_ids = util.find_invalid_ref_of_traffic_signs(scenario)
+        found_ids = find_invalid_ref_of_traffic_signs(scenario)
         if found_ids and verbose:
             error_score = max(error_score, fatal_error)
             self.text_browser.append("invalid traffic sign refs: " +
@@ -225,7 +226,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
             return error_score
 
         # handle warnings
-        found_ids = util.find_invalid_lanelet_polygons(scenario)
+        found_ids = find_invalid_lanelet_polygons(scenario)
         if found_ids and verbose:
             error_score = max(error_score, warning)
             self.text_browser.append(
