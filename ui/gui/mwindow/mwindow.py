@@ -53,7 +53,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.map_converter_toolbox = None
         self.console_wrapper = None  # this can be removed
         self.play_activated = False
-        self.text_browser = None  # handle to the text browser in the console
+        #self.text_browser = None  # handle to the text browser in the console ->  TODO remove this (this is left here for visibility as a reminder)
         self.viewer_dock = None
         self.sumo_settings = None
         self.gui_settings = None
@@ -151,8 +151,8 @@ class MWindow(QMainWindow, Ui_mainWindow):
         """
         logging.info('update_max_step')
         value = value if value > -1 else self.cr_viewer.max_timestep
-        self.label2.setText(' / ' + str(value))
-        self.slider.setMaximum(value)
+        self.top_bar_wrapper.toolbar_wrapper.label2.setText(' / ' + str(value))
+        self.top_bar_wrapper.toolbar_wrapper.slider.setMaximum(value)
 
     def store_scenario(self):
         self.scenarios.append(copy.deepcopy(self.cr_viewer.current_scenario))

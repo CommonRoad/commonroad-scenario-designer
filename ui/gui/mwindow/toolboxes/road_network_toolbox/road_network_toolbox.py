@@ -79,7 +79,7 @@ class RoadNetworkToolbox(QDockWidget):
         self.road_network_toolbox.button_add_traffic_light.clicked.connect(lambda: self.add_traffic_light())
         self.road_network_toolbox.button_update_traffic_light.clicked.connect(lambda: self.update_traffic_light())
         self.road_network_toolbox.button_remove_traffic_light.clicked.connect(lambda: self.remove_traffic_light())
-        self.road_network_toolbox.button_create_traffic_lights.clicked.connect(self.create_traffic_lights)
+        self.road_network_toolbox.button_create_traffic_lights.clicked.connect(lambda: self.create_traffic_lights())
         self.road_network_toolbox.selected_traffic_light.currentTextChanged.connect(
             lambda: self.update_traffic_light_information())
 

@@ -143,12 +143,12 @@ def play_pause_animation(mwindow, open_commonroad_file):
     if not mwindow.play_activated:
         mwindow.cr_viewer.play()
         mwindow.console_wrapper.text_browser.append("Playing the animation")
-        mwindow.toolbar_wrapper.button_play_pause.setIcon(QIcon(":/icons/pause.png"))
+        mwindow.top_bar_wrapper.toolbar_wrapper.button_play_pause.setIcon(QIcon(":/icons/pause.png"))
         mwindow.play_activated = True
     else:
         mwindow.cr_viewer.pause()
-        mwindow.console.text_browser.append("Pause the animation")
-        mwindow.toolbar_wrapper.button_play_pause.setIcon(QIcon(":/icons/play.png"))
+        mwindow.console_wrapper.text_browser.append("Pause the animation")
+        mwindow.top_bar_wrapper.toolbar_wrapper.button_play_pause.setIcon(QIcon(":/icons/play.png"))
         mwindow.play_activated = False
 
 
