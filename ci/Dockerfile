@@ -56,7 +56,7 @@ RUN sudo apt-get install -y software-properties-common \
 # activate conda environment
 RUN conda create --name cr37 python=3.7 && \
     conda create --name cr38 python=3.8 && \
-    conda create --name cr39 python=3.9 # && \
+    conda create --name cr39 python=3.9 # &&
    # conda create --name cr310 python=3.10
 
 # Install cartopy
