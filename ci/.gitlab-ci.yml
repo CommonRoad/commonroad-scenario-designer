@@ -14,7 +14,7 @@ image: $CI_REGISTRY/cps/commonroad-scenario-designer/ci:v0.6.7
 style_checks:
   stage: style_check
   script:
-    - source activate cr310
+    - source activate cr39
     - pip install pycodestyle
     - git  diff ${CI_COMMIT_BEFORE_SHA}...${CI_COMMIT_SHA} -- '*.py' | pycodestyle --max-line-length=120 --diff
   except:
@@ -23,7 +23,7 @@ style_checks:
 style_check_merge_result:
   stage: style_check
   script:
-    - source activate cr310
+    - source activate cr39
     - pip install pycodestyle
     - git  diff ${CI_MERGE_REQUEST_TARGET_BRANCH_SHA}...${CI_MERGE_REQUEST_SOURCE_BRANCH_SHA} -- '*.py' | pycodestyle --max-line-length=120 --diff
   only:
@@ -48,16 +48,16 @@ python39:
         - source activate cr39
         - *install-and-run
           
-python310:
+python39:
     stage: test
     script:
-        - source activate cr310
+        - source activate cr39
         - *install-and-run
 
 docs:
     stage: test
     script:
-        - source activate cr310
+        - source activate cr39
         - pip install -r ./docs/doc_requirements.txt
         - cd docs && bash ./docs_build_script.sh
 
@@ -67,5 +67,5 @@ build_package:
         - master
         - develop
     script:
-        - source activate cr310
+        - source activate cr39
         - python setup.py sdist bdist_wheel
