@@ -47,12 +47,6 @@ python39:
     script:
         - source activate cr39
         - *install-and-run
-          
-python39:
-    stage: test
-    script:
-        - source activate cr39
-        - *install-and-run
 
 docs:
     stage: test
