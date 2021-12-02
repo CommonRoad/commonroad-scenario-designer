@@ -147,9 +147,18 @@ The documentation can be accessed by opening `doc/_build/html/index.html`.
 The titles of module pages have to be set manually!
 The full documentation of the API and introducing examples can also be found [here](https://commonroad-scenario-designer.readthedocs.io/en/latest/).
 
+## Changelog
+Compared to version 0.1, the following features have been added or changed:
+
+- Planning problem visualization in GUI
+- Extension of readme and documentation
+
+A detailed overview about the changes in each version is provided in the [Changelog](https://gitlab.lrz.de/tum-cps/commonroad-scenario-designer/-/blob/main/CHANGELOG.md).
+
 ## Bug and feature reporting
 This release (v0.2) is still a BETA version.  
-In case you detect a bug or you want to suggest a new feature, please report it in our [forum](https://commonroad.in.tum.de/forum/c/scenario-designer/18) forum. 
+In case you detect a bug or you want to suggest a new feature, please report it in our [forum](https://commonroad.in.tum.de/forum/c/scenario-designer/18).   
+If you want to contribute to the toolbox, you can also post it in the [forum](https://commonroad.in.tum.de/forum/c/scenario-designer/18) or contact [Sebastian Maierhofer](sebastian.maierhofer@tum.de).
 
 ## Authors
 

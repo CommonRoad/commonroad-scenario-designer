@@ -27,7 +27,7 @@ from matplotlib.patches import PathPatch
 __author__ = "Benjamin Orthen, Stefan Urban, Max Winklhofer, Guyue Huang, Max Fruehauf, Sebastian Maierhofer"
 __copyright__ = "TUM Cyber-Physical Systems Group"
 __credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles, BMW Car@TUM"]
-__version__ = "0.2"
+__version__ = "0.3"
 __maintainer__ = "Sebastian Maierhofer"
 __email__ = "commonroad@lists.lrz.de"
 __status__ = "Released"
@@ -70,7 +70,7 @@ class DynamicCanvas(FigureCanvas):
                         'show_traffic_signs': 'all',
                     },
                     'intersection': {
-                        'draw_intersections': True,
+                        'draw_intersections': False,
                         'draw_incoming_lanelets': True,
                         'incoming_lanelets_color': '#3ecbcf',
                         'draw_crossings': True,
@@ -80,6 +80,36 @@ class DynamicCanvas(FigureCanvas):
                         'successors_straight_color': 'blue',
                         'successors_right_color': '#ccff00',
                         'show_label': True,
+                    },
+                }
+            }
+        }
+
+        self.draw_params_dynamic_only = {
+            'scenario': {
+                'dynamic_obstacle': {
+                    'trajectory': {
+                        'show_label': True,
+                        'draw_trajectory': False
+                    }
+                },
+                'lanelet_network': {
+                    'intersection': {'draw_intersections': False},
+                    'lanelet': {
+                        'draw_border_vertices': False,
+                        'draw_start_and_direction': False,
+                        'draw_stop_line': False,
+                        'draw_center_bound': False,
+                        'draw_right_bound': False,
+                        'draw_left_bound': False
+                    },
+                    # 'traffic_light': {
+                    #     'scale_factor': 0.2
+                    # },
+                    'traffic_sign': {
+                        'draw_traffic_signs': True,
+                        'show_traffic_signs': 'all',
+                        # 'scale_factor': 0.2
                     },
                 }
             }
@@ -95,8 +125,11 @@ class DynamicCanvas(FigureCanvas):
 
         self.clear_axes()
 
-    def clear_axes(self, keep_limits=False):
+    def clear_axes(self, keep_limits=False, clear_artists=False):
         """ """
+        if clear_artists:
+            self.rnd.clear()
+
         if self.ax:
             limits = self.get_limits()
             self.ax.clear()
@@ -181,7 +214,8 @@ class DynamicCanvas(FigureCanvas):
                       scenario: Scenario,
                       pps: PlanningProblemSet = None,
                       draw_params=None,
-                      plot_limits=None):
+                      plot_limits=None,
+                      draw_dynamic_only=False):
         """[summary]
 
         :param scenario: [description]
@@ -192,19 +226,33 @@ class DynamicCanvas(FigureCanvas):
         :type draw_params: [type], optional
         :param plot_limits: [description], defaults to None
         :type plot_limits: [type], optional
+        :param draw_dynamic_only: reuses static artists
         """
         xlim = self.ax.get_xlim()
         ylim = self.ax.get_ylim()
 
-        self.ax.clear()
+        if draw_dynamic_only is True:
+            self.rnd.remove_dynamic()
+            # self.rnd.ax.clear()
+            # self.ax.clear()
+        else:
+            self.ax.clear()
 
         draw_params_merged = _merge_dict(self.draw_params.copy(), draw_params)
         self.rnd.plot_limits = plot_limits
         self.rnd.ax = self.ax
-        scenario.draw(renderer=self.rnd, draw_params=draw_params_merged)
-        if pps is not None:
-            pps.draw(renderer=self.rnd, draw_params=draw_params_merged)
-        self.rnd.render()
+        if draw_dynamic_only is True:
+            draw_params_merged = _merge_dict(self.draw_params_dynamic_only.copy(), draw_params)
+            print(draw_params_merged)
+            scenario.draw(renderer=self.rnd, draw_params=draw_params_merged)
+
+            self.rnd.render(keep_static_artists=True)
+
+        else:
+            scenario.draw(renderer=self.rnd, draw_params=draw_params_merged)
+            if pps is not None:
+                pps.draw(renderer=self.rnd, draw_params=draw_params_merged)
+            self.rnd.render(keep_static_artists=True)
 
         if not plot_limits:
             self.ax.set(xlim=xlim)
@@ -322,7 +370,7 @@ class AnimatedViewer:
             self.time_step.value = 0
             self.animation.event_source.stop()
             self.animation = None
-        self.update_plot(focus_on_network=True)
+        self.update_plot(focus_on_network=True, clear_artists=True)
 
     def _init_animation(self):
         if not self.current_scenario:
@@ -491,16 +539,18 @@ class AnimatedViewer:
                     sel_intersection: Intersection = None,
                     time_step_changed: bool = False,
                     focus_on_network: bool = False,
-                    time_step: int = 0):
-        """ Update the plot accordingly to the selection of scenario elements
+                    time_step: int = 0,
+                    clear_artists=False):
+        """ Update the plot accordinly to the selection of scenario elements
         :param sel_lanelet: selected lanelet, defaults to None
         :param sel_intersection: selected intersection, defaults to None
+        :param clear_artists: deletes artists from renderer (only required when opening new scenarios)
         """
 
         x_lim = self.dynamic.get_axes().get_xlim()
         y_lim = self.dynamic.get_axes().get_ylim()
 
-        self.dynamic.clear_axes()
+        self.dynamic.clear_axes(clear_artists=clear_artists)
         ax = self.dynamic.get_axes()
 
         network_limits = [

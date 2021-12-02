@@ -3,7 +3,7 @@ stages:
     - test
     - build
 
-image: $CI_REGISTRY/cps/commonroad-scenario-designer/ci:v0.6.6
+image: $CI_REGISTRY/cps/commonroad-scenario-designer/ci:v0.6.8
 
 .install-and-run: &install-and-run
   - pip install -e .
@@ -14,32 +14,44 @@ image: $CI_REGISTRY/cps/commonroad-scenario-designer/ci:v0.6.6
 style_checks:
   stage: style_check
   script:
-    - source activate commonroad-py39
+    - source activate cr39
     - pip install pycodestyle
     - git  diff ${CI_COMMIT_BEFORE_SHA}...${CI_COMMIT_SHA} -- '*.py' | pycodestyle --max-line-length=120 --diff
+  except:
+  - merge_requests
+
+style_check_merge_result:
+  stage: style_check
+  script:
+    - source activate cr39
+    - pip install pycodestyle
+    - git  diff ${CI_MERGE_REQUEST_TARGET_BRANCH_SHA}...${CI_MERGE_REQUEST_SOURCE_BRANCH_SHA} -- '*.py' | pycodestyle --max-line-length=120 --diff
+  only:
+  - merge_requests
+
 
 python37:
     stage: test
     script:
-        - source activate commonroad-py37
+        - source activate cr37
         - *install-and-run
 
 python38:
     stage: test
     script:
-        - source activate commonroad-py38
+        - source activate cr38
         - *install-and-run
 
 python39:
     stage: test
     script:
-        - source activate commonroad-py39
+        - source activate cr39
         - *install-and-run
 
 docs:
     stage: test
     script:
-        - source activate commonroad-py39
+        - source activate cr39
         - pip install -r ./docs/doc_requirements.txt
         - cd docs && bash ./docs_build_script.sh
 
@@ -49,5 +61,5 @@ build_package:
         - master
         - develop
     script:
-        - source activate commonroad-py39
+        - source activate cr39
         - python setup.py sdist bdist_wheel
