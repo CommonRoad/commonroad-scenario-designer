@@ -18,5 +18,6 @@
     <file>save_video.png</file>
     <file>obstacle_toolbox.png</file>
     <file>road_network_toolbox.png</file>
+    <file>iconmonstr-trash-can-1.svg</file>
   </qresource>
 </RCC>

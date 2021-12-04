@@ -59,11 +59,6 @@ class ObstacleToolboxUI(Toolbox):
         self.obstacle_x_Position.setMaxLength(4)
         self.obstacle_x_Position.setAlignment(Qt.AlignRight)
 
-        """self.obstacle_radius = QLineEdit()
-        self.obstacle_radius.setValidator(QIntValidator())
-        self.obstacle_radius.setMaxLength(4)
-        self.obstacle_radius.setAlignment(Qt.AlignRight)"""
-
         self.obstacle_orientation = QLineEdit()
         self.obstacle_orientation.setValidator(QIntValidator())
         self.obstacle_orientation.setMaxLength(4)
@@ -100,6 +95,8 @@ class ObstacleToolboxUI(Toolbox):
         self.layout_obstacle_information_groupbox.insertRow(6, "X-Position", self.obstacle_x_Position)
         self.layout_obstacle_information_groupbox.insertRow(7, "Y-Position", self.obstacle_y_Position)
 
+        self.add_vertice_btn = QPushButton("Add Vertice")
+
         layout_obstacle_state_vis_groupbox = QFormLayout()
         obstacle_state_vis_groupbox = QGroupBox()
         obstacle_state_vis_groupbox.setLayout(layout_obstacle_state_vis_groupbox)
@@ -120,6 +117,23 @@ class ObstacleToolboxUI(Toolbox):
 
         title_obstacle = "Obstacle"
         self.sections.append((title_obstacle, widget_obstacles))
+
+        # --Section SUMO Simulation-
+        if SUMO_AVAILABLE:
+            widget_sumo = SUMOSimulation(self.tree)
+            layout_sumo = QFormLayout(widget_sumo)
+
+            self.button_start_simulation = QPushButton("Simulate")
+            self.sumo_simulation_length = QSpinBox()
+            self.sumo_simulation_length.setMinimum(10)
+            self.sumo_simulation_length.setMaximum(10000)
+            self.sumo_simulation_length.setValue(200)
+
+            layout_sumo.addRow("Number Time Steps:", self.sumo_simulation_length)
+            layout_sumo.addRow(self.button_start_simulation)
+
+            title_sumo = "Sumo Simulation"
+            self.sections.append((title_sumo, widget_sumo))
 
     def toggle_sections(self):
         #changes toolbox based on what shapes that are selected
@@ -143,7 +157,7 @@ class ObstacleToolboxUI(Toolbox):
                 self.layout_obstacle_information_groupbox.removeRow(self.obstacle_radius)
             except:
                 pass
-
+            
             self.obstacle_length = QLineEdit()
             self.obstacle_length.setValidator(QDoubleValidator())
             self.obstacle_length.setMaxLength(6)
@@ -175,39 +189,67 @@ class ObstacleToolboxUI(Toolbox):
                 self.layout_obstacle_information_groupbox.removeRow(self.obstacle_length)
             except:
                 pass
-        #temporary code, for testing polygon creation, supposed to be able to have arbitrary amount of vertices
-            self.obstacle_v0 = QLineEdit()
-            self.obstacle_v0.setValidator(QDoubleValidator())
-            self.obstacle_v0.setMaxLength(6)
-            self.obstacle_v0.setAlignment(Qt.AlignRight) 
 
-            self.obstacle_v1 = QLineEdit()
-            self.obstacle_v1.setValidator(QDoubleValidator())
-            self.obstacle_v1.setMaxLength(6)
-            self.obstacle_v1.setAlignment(Qt.AlignRight) 
+            self.vertices = []
+            self.polygon_row = []
+            self.remove_vertice_btn = []
+            self.polygon_label = []
+            self.amount_vertices = 0
+            #always gonna be 3, fix that later
+            #if len(self.vertices) == 0:
+                #self.amount_vertices = 3
 
-            self.obstacle_v2 = QLineEdit()
-            self.obstacle_v2.setValidator(QDoubleValidator())
-            self.obstacle_v2.setMaxLength(6)
-            self.obstacle_v2.setAlignment(Qt.AlignRight)
+            for i in range(3): #should be 3 by default, otherwise set to what is specified in "amount of vertices field"
+                self.add_vertice()
+            
+            self.layout_obstacle_information_groupbox.insertRow(len(self.vertices) + 2, self.add_vertice_btn)
 
-            self.layout_obstacle_information_groupbox.insertRow(2,"Vertice 0", self.obstacle_v0)
-            self.layout_obstacle_information_groupbox.insertRow(3,"Vertice 1", self.obstacle_v1)
-            self.layout_obstacle_information_groupbox.insertRow(4,"Vertice 2", self.obstacle_v2)
+    #add vertices for the polygon shape, i is the place in the array
+    def add_vertice(self):
+        i = len(self.vertices)
+        self.polygon_row.append(QHBoxLayout())
 
-        # --Section SUMO Simulation-
-        if SUMO_AVAILABLE:
-            widget_sumo = SUMOSimulation(self.tree)
-            layout_sumo = QFormLayout(widget_sumo)
+        self.polygon_label.append(QLabel("Vertice " + str(i)))
+        
+        self.vertices.append(QLineEdit())
+        self.vertices[i].setValidator(QDoubleValidator())
+        self.vertices[i].setMaxLength(6)
+        self.vertices[i].setAlignment(Qt.AlignRight)
 
-            self.button_start_simulation = QPushButton("Simulate")
-            self.sumo_simulation_length = QSpinBox()
-            self.sumo_simulation_length.setMinimum(10)
-            self.sumo_simulation_length.setMaximum(10000)
-            self.sumo_simulation_length.setValue(200)
+        self.polygon_row[i].addWidget(self.polygon_label[i])
+        self.polygon_row[i].addWidget(self.vertices[i])
 
-            layout_sumo.addRow("Number Time Steps:", self.sumo_simulation_length)
-            layout_sumo.addRow(self.button_start_simulation)
+        self.remove_vertice_btn.append(QPushButton())
+        self.remove_vertice_btn[i].setIcon(QIcon(":icons/iconmonstr-trash-can-1.svg"))
+        self.remove_vertice_btn[i].clicked.connect(
+            lambda: self.remove_vertice())
+        self.polygon_row[i].addWidget(self.remove_vertice_btn[i])
 
-            title_sumo = "Sumo Simulation"
-            self.sections.append((title_sumo, widget_sumo))
+        self.layout_obstacle_information_groupbox.insertRow(i+2, self.polygon_row[i])
+        self.amount_vertices = self.amount_vertices + 1
+
+    def remove_vertice(self):
+        #check so there is at least 3 vertices
+        if len(self.vertices) <= 3:
+            #TODO add some kind of warning message that you have to have at least 3 vertices
+            return
+        sending_button = self.sender()
+        i = self.remove_vertice_btn.index(sending_button)
+
+        self.layout_obstacle_information_groupbox.removeRow(self.polygon_row[i])
+        self.vertices.pop(i)
+        self.remove_vertice_btn.pop(i)
+        self.polygon_label.pop(i)
+        self.polygon_row.pop(i)
+        self.amount_vertices = self.amount_vertices - 1
+
+        for j in range(self.amount_vertices):
+            self.polygon_label[j].setText("Vertice " + str(j)) 
+
+            
+            
+
+        
+
+
+        

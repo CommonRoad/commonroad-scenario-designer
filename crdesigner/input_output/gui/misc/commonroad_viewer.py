@@ -524,6 +524,7 @@ class AnimatedViewer:
                     output += str(obs.obstacle_id) + ", "
             output = output[:len(output) - 1]
             output += "."
+
         else:
             output = ""
 

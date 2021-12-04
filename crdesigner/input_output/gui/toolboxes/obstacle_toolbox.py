@@ -58,11 +58,16 @@ class ObstacleToolbox(QDockWidget):
 
         self.obstacle_toolbox.button_remove_obstacle.clicked.connect(
             lambda: self.remove_obstacle())
+
         self.obstacle_toolbox.button_add_static_obstacle.clicked.connect(
            lambda: self.add_static_obstacle())
         
         self.obstacle_toolbox.obstacle_shape.currentTextChanged.connect(
             lambda: self.obstacle_toolbox.toggle_sections())
+        
+        self.obstacle_toolbox.add_vertice_btn.clicked.connect(
+            lambda: self.obstacle_toolbox.add_vertice())
+        
 
         if SUMO_AVAILABLE:
             self.obstacle_toolbox.button_start_simulation.clicked.connect(
@@ -132,11 +137,14 @@ class ObstacleToolbox(QDockWidget):
 
                 obstacle_type = ObstacleType(self.obstacle_toolbox.obstacle_type.currentText()),
                 obstacle_shape = Polygon(
-                    vertices = np.array([
-                        np.array(self.string_to_float(self.obstacle_toolbox.obstacle_v0.text())),
-                        np.array(self.string_to_float(self.obstacle_toolbox.obstacle_v1.text())),
-                        np.array(self.string_to_float(self.obstacle_toolbox.obstacle_v2.text())),
-                    ])
+                    #vertices = np.array([
+                        #np.array(self.string_to_float(self.obstacle_toolbox.obstacle_v0.text())),
+                        #np.array(self.string_to_float(self.obstacle_toolbox.obstacle_v1.text())),
+                        #np.array(self.string_to_float(self.obstacle_toolbox.obstacle_v2.text())),
+                        
+
+                    #])
+                    vertices = self.polygon_array()
                 ),
 
                 initial_state = State(**{'position': np.array([
@@ -152,7 +160,16 @@ class ObstacleToolbox(QDockWidget):
 
         self.current_scenario.add_objects(static_obstacle)
         self.callback(self.current_scenario)
-     
+    
+    #returns an np array of the vertices
+    def polygon_array(self):
+        vertices = []
+        for i in range(self.obstacle_toolbox.amount_vertices):
+            vertices.append(self.string_to_float(self.obstacle_toolbox.vertices[i].text()))
+        vertices = np.asarray(vertices)
+        return vertices
+
+    #converts string to floats
     def string_to_float(self, xy_str):
         xy_float = [float(value) for value in xy_str.split(",")]
         return xy_float
