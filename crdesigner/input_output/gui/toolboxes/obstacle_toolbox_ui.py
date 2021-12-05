@@ -32,6 +32,11 @@ class ObstacleToolboxUI(Toolbox):
         """reimplement this to define all your sections
         and add them as (title, widget) tuples to self.sections
         """
+        #TODO somehow create a validator that checks so can only input 2 doubles
+
+        self.float_validator = QDoubleValidator()
+        self.float_validator.setLocale(QLocale("en_US"))
+
         #  Lanelet Section
         widget_obstacles = QFrame(self.tree)
         layout_obstacles = QVBoxLayout(widget_obstacles)
@@ -45,17 +50,17 @@ class ObstacleToolboxUI(Toolbox):
         self.obstacle_shape.addItem("Polygon")
 
         self.obstacle_length = QLineEdit()
-        self.obstacle_length.setValidator(QDoubleValidator())
+        self.obstacle_length.setValidator(self.float_validator)
         self.obstacle_length.setMaxLength(6)
         self.obstacle_length.setAlignment(Qt.AlignRight)
 
         self.obstacle_width = QLineEdit()
-        self.obstacle_width.setValidator(QIntValidator())
+        self.obstacle_width.setValidator(self.float_validator)
         self.obstacle_width.setMaxLength(4)
         self.obstacle_width.setAlignment(Qt.AlignRight)
 
         self.obstacle_x_Position = QLineEdit()
-        self.obstacle_x_Position.setValidator(QIntValidator())
+        self.obstacle_x_Position.setValidator(QDoubleValidator())
         self.obstacle_x_Position.setMaxLength(4)
         self.obstacle_x_Position.setAlignment(Qt.AlignRight)
 
@@ -69,7 +74,7 @@ class ObstacleToolboxUI(Toolbox):
         self.obstacle_type.addItems(obstalce_type_list)
 
         self.obstacle_y_Position = QLineEdit()
-        self.obstacle_y_Position.setValidator(QIntValidator())
+        self.obstacle_y_Position.setValidator(QDoubleValidator())
         self.obstacle_y_Position.setMaxLength(4)
         self.obstacle_y_Position.setAlignment(Qt.AlignRight)
 
@@ -146,7 +151,7 @@ class ObstacleToolboxUI(Toolbox):
                 pass
 
             self.obstacle_radius = QLineEdit()
-            self.obstacle_radius.setValidator(QIntValidator())
+            self.obstacle_radius.setValidator(QDoubleValidator())
             self.obstacle_radius.setMaxLength(4)
             self.obstacle_radius.setAlignment(Qt.AlignRight)
 
@@ -164,7 +169,7 @@ class ObstacleToolboxUI(Toolbox):
             self.obstacle_length.setAlignment(Qt.AlignRight)
 
             self.obstacle_width = QLineEdit()
-            self.obstacle_width.setValidator(QIntValidator())
+            self.obstacle_width.setValidator(QDoubleValidator())
             self.obstacle_width.setMaxLength(4)
             self.obstacle_width.setAlignment(Qt.AlignRight)
 
@@ -212,8 +217,8 @@ class ObstacleToolboxUI(Toolbox):
         self.polygon_label.append(QLabel("Vertice " + str(i)))
         
         self.vertices.append(QLineEdit())
-        self.vertices[i].setValidator(QDoubleValidator())
-        self.vertices[i].setMaxLength(6)
+        #self.vertices[i].setValidator(self.float_validator)
+        self.vertices[i].setMaxLength(10)
         self.vertices[i].setAlignment(Qt.AlignRight)
 
         self.polygon_row[i].addWidget(self.polygon_label[i])
@@ -228,14 +233,16 @@ class ObstacleToolboxUI(Toolbox):
         self.layout_obstacle_information_groupbox.insertRow(i+2, self.polygon_row[i])
         self.amount_vertices = self.amount_vertices + 1
 
-    def remove_vertice(self):
+    def remove_vertice(self, i = None):
         #check so there is at least 3 vertices
         if len(self.vertices) <= 3:
             #TODO add some kind of warning message that you have to have at least 3 vertices
             return
-        sending_button = self.sender()
-        i = self.remove_vertice_btn.index(sending_button)
+        if i == None:
+            sending_button = self.sender()
+            i = self.remove_vertice_btn.index(sending_button)
 
+        print(i)
         self.layout_obstacle_information_groupbox.removeRow(self.polygon_row[i])
         self.vertices.pop(i)
         self.remove_vertice_btn.pop(i)

@@ -87,9 +87,6 @@ class ObstacleToolbox(QDockWidget):
         self.current_scenario = scenario
         self.initialize_toolbox()
 
-    #def add_static_obstacle(self, obstacle_id: int = None):
-    #most of this code is copied from the branch from the previous student
-    #I think some of it can be a good starting point to add more functionality
     def static_obstacle_details(self, obstacle_id):
     #Function that creates static obstacles
         if self.obstacle_toolbox.obstacle_shape.currentText() == "Rectangle":
@@ -162,10 +159,13 @@ class ObstacleToolbox(QDockWidget):
         self.callback(self.current_scenario)
     
     #returns an np array of the vertices
+    #TODO remove empty vertice?
     def polygon_array(self):
         vertices = []
         for i in range(self.obstacle_toolbox.amount_vertices):
-            vertices.append(self.string_to_float(self.obstacle_toolbox.vertices[i].text()))
+            if self.obstacle_toolbox.vertices[i].text() != "":
+                vertices.append(self.string_to_float(self.obstacle_toolbox.vertices[i].text()))
+            
         vertices = np.asarray(vertices)
         return vertices
 
@@ -211,6 +211,11 @@ class ObstacleToolbox(QDockWidget):
             self.obstacle_toolbox.obstacle_width.setText("")
             self.obstacle_toolbox.obstacle_length.setText("")
             self.obstacle_toolbox.obstacle_orientation.setText("")
+        
+        elif self.obstacle_toolbox.obstacle_shape.currentText() == "Polygon":
+            #TODO change so there is 3 vertices always by default
+            for i in range(self.obstacle_toolbox.amount_vertices):
+                self.obstacle_toolbox.vertices[i].setText("")
 
         self.obstacle_toolbox.obstacle_x_Position.setText("")
         self.obstacle_toolbox.obstacle_y_Position.setText("")
@@ -306,6 +311,25 @@ class ObstacleToolbox(QDockWidget):
                 self.obstacle_toolbox.obstacle_x_Position.setText(str(obstacle.initial_state.__getattribute__("position")[0]))
                 self.obstacle_toolbox.obstacle_y_Position.setText(str(obstacle.initial_state.__getattribute__("position")[1]))
 
+            elif isinstance(obstacle.obstacle_shape, Polygon):
+                if self.obstacle_toolbox.obstacle_shape.currentText() != "Polygon":
+                    self.obstacle_toolbox.obstacle_shape.setCurrentIndex(2)
+                
+                temp = obstacle.obstacle_shape.vertices
+                vertices = temp.tolist()
+                
+                for i in range(len(vertices) - 1):
+                    if i >= self.obstacle_toolbox.amount_vertices:
+                        self.obstacle_toolbox.add_vertice()
+
+                    vertice_string = str(vertices[i])
+                    vertice_string = vertice_string.replace("[", "")
+                    vertice_string = vertice_string.replace("]", "")
+                    self.obstacle_toolbox.vertices[i].setText(vertice_string)
+                    print(vertice_string)
+
+
+                
             else:
                 self.obstacle_toolbox.obstacle_width.setText("")
                 self.obstacle_toolbox.obstacle_length.setText("")
