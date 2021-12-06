@@ -12,7 +12,7 @@ from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
 from commonroad.scenario.obstacle import ObstacleType
 from crdesigner.api import SumoConfig
-from crdesigner.api.map_conversion.sumo_map.cr2sumo.converter import CR2SumoMapConverter
+from crdesigner.map_conversion.sumo_map.cr2sumo.converter import CR2SumoMapConverter
 from parameterized import parameterized
 from sumocr.interface.sumo_simulation import SumoSimulation
 

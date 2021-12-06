@@ -238,9 +238,9 @@ class MWindow(QMainWindow, Ui_mainWindow):
             self.cr_viewer.save_animation()
             self.text_browser.append("Saving the video finished.")
 
-    # already moved to console_wrapper.py
+    # already moved to crdesigner_console_wrapper.py
     def create_console(self):
-        """Function to create the console_wrapper."""
+        """Function to create the crdesigner_console_wrapper."""
         self.console = QDockWidget(self)
         self.console.setTitleBarWidget(QWidget(
             self.console))  # no title of Dock
@@ -248,7 +248,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.text_browser.setMaximumHeight(80)
         self.text_browser.setObjectName("textBrowser")
         self.console.setWidget(self.text_browser)
-        self.console.setFloating(False)  # set if console_wrapper can float
+        self.console.setFloating(False)  # set if crdesigner_console_wrapper can float
         self.console.setFeatures(QDockWidget.NoDockWidgetFeatures)
         self.addDockWidget(Qt.BottomDockWidgetArea, self.console)
 

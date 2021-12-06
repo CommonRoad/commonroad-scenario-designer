@@ -11,12 +11,12 @@ import numpy as np
 from matplotlib.axes import Axes
 from matplotlib.lines import Line2D
 
-from crdesigner.api.map_conversion.osm2cr import config
-from crdesigner.api.map_conversion.osm2cr.converter_modules.graph_operations import road_graph as rg
-from crdesigner.api.map_conversion.osm2cr.converter_modules.graph_operations.road_graph import Lane
+from crdesigner.map_conversion.osm2cr import config
+from crdesigner.map_conversion.osm2cr.converter_modules.graph_operations import road_graph as rg
+from crdesigner.map_conversion.osm2cr.converter_modules.graph_operations.road_graph import Lane
 from crdesigner.ui.gui.mwindow.service_layer.osm_gui_modules import plots_interactive as iplot
-from crdesigner.api.map_conversion.osm2cr.converter_modules.utility import geometry
-from crdesigner.api.map_conversion.osm2cr.converter_modules.utility.idgenerator import get_id
+from crdesigner.map_conversion.osm2cr.converter_modules.utility.idgenerator import get_id
+from crdesigner.map_conversion.osm2cr.converter_modules.utility import geometry
 
 
 class Action(ABC):

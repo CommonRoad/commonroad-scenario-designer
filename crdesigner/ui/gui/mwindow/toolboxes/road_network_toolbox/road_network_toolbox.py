@@ -14,7 +14,7 @@ from crdesigner.ui.gui.mwindow.toolboxes.road_network_toolbox.road_network_toolb
 
 from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMO_AVAILABLE
 if SUMO_AVAILABLE:
-    from crdesigner.api.map_conversion.sumo_map.cr2sumo.converter import CR2SumoMapConverter
+    from crdesigner.map_conversion.sumo_map.cr2sumo.converter import CR2SumoMapConverter
     from crdesigner.api import SumoConfig
 
 

@@ -9,7 +9,7 @@ from typing import Dict, Union, List, Optional, Tuple
 
 from PyQt5.QtWidgets import QDialog, QFileDialog, QMessageBox
 
-from crdesigner.api.map_conversion.osm2cr import config
+from crdesigner.map_conversion.osm2cr import config
 from crdesigner.ui.gui.mwindow.service_layer.osm_gui_modules import config_default
 from crdesigner.ui.gui.mwindow.service_layer.osm_gui_modules.GUI_resources.lane_counts import Ui_Dialog as Lane_counts
 from crdesigner.ui.gui.mwindow.service_layer.osm_gui_modules.GUI_resources.lane_width import Ui_Dialog as Lane_width
@@ -54,7 +54,7 @@ class EditStreetTypes:
         all_accepted_highways.extend(config.ACCEPTED_HIGHWAYS_SUBLAYER)
         for highway_type in all_accepted_highways:
             getattr(self.dialog.ui, 'chk_' + highway_type).setChecked(
-                highway_type in config.ACCEPTED_HIGHWAYS_MAINLAYER
+                    highway_type in config.ACCEPTED_HIGHWAYS_MAINLAYER
             )
 
     def save(self) -> None:
@@ -255,7 +255,7 @@ class EditSublayerWayTypes:
         all_accepted_highways.extend(config.ACCEPTED_HIGHWAYS_SUBLAYER)
         for highway_type in all_accepted_highways:
             getattr(self.dialog.ui, 'chk_' + highway_type).setChecked(
-                highway_type in config.ACCEPTED_HIGHWAYS_SUBLAYER
+                    highway_type in config.ACCEPTED_HIGHWAYS_SUBLAYER
             )
 
     def save(self) -> None:

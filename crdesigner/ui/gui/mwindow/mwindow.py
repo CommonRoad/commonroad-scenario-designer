@@ -4,7 +4,7 @@ from crdesigner.ui.gui.mwindow.service_layer.gui_resources.MainWindow import Ui_
 from crdesigner.ui.gui.mwindow.service_layer.gui_resources.scenario_saving_dialog import ScenarioDialog
 from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.commonroad_viewer import AnimatedViewer
 from crdesigner.ui.gui.mwindow.service_layer import config
-from crdesigner.ui.gui.mwindow.console_wrapper.console_wrapper import ConsoleWrapper
+from crdesigner.ui.gui.mwindow.crdesigner_console_wrapper.crdesigner_console_wrapper import CRDesignerConsoleWrapper
 from crdesigner.ui.gui.mwindow.service_layer.general_services import setup_tmp
 from crdesigner.ui.gui.mwindow.service_layer.general_services import setup_mwindow
 from crdesigner.ui.gui.mwindow.service_layer.general_services import center
@@ -67,7 +67,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         setup_tmp(tmp_folder_path=self.tmp_folder)
         setup_mwindow(self)
         self.create_viewer_dock()
-        self.console_wrapper = ConsoleWrapper(mwindow=self)
+        self.console_wrapper = CRDesignerConsoleWrapper(mwindow=self)
 
         self.road_network_toolbox = create_road_network_toolbox(mwindow=self)
         self.obstacle_toolbox = create_obstacle_toolbox(mwindow=self)
@@ -86,7 +86,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
 
         # init the wrapper classes
-        # this was replaced: self.console_wrapper, self.text_browser = create_console(mwindow=self)
+        # this was replaced: self.crdesigner_console_wrapper, self.text_browser = create_console(mwindow=self)
         #self.toolbar_wrapper = ToolBarWrapper(mwindow=self, file_new=file_new,open_commonroad_file=open_commonroad_file, file_save=file_save)
 
         # instanciate the menu bar
