@@ -15,22 +15,22 @@ from commonroad.scenario.lanelet import LaneletNetwork, Lanelet
 from commonroad.scenario.scenario import Scenario
 from commonroad.scenario.obstacle import Obstacle
 
-from ui.gui.mwindow.service_layer.gui_src import CR_Scenario_Designer  # do not remove!!!
-from ui.gui.mwindow.service_layer.converter_modules.opendrive_interface import OpenDRIVEInterface
-from ui.gui.mwindow.service_layer.converter_modules.osm_interface import OSMInterface
+from crdesigner.ui.gui.mwindow.service_layer.gui_src import CR_Scenario_Designer
+from crdesigner.ui.gui.mwindow.service_layer.converter_modules.opendrive_interface import OpenDRIVEInterface
+from crdesigner.ui.gui.mwindow.service_layer.converter_modules.osm_interface import OSMInterface
 from crdesigner.input_output.gui.misc.gui_settings import GUISettings
 from crdesigner.input_output.gui.misc.commonroad_viewer import AnimatedViewer
-from ui.gui.mwindow.service_layer.gui_resources.MainWindow import Ui_mainWindow
-from ui.gui.mwindow.toolboxes.road_network_toolbox.road_network_toolbox import RoadNetworkToolbox
-from ui.gui.mwindow.toolboxes.obstacle_toolbox.obstacle_toolbox import ObstacleToolbox
-from ui.gui.mwindow.toolboxes.converter_toolbox.map_converter_toolbox import MapConversionToolbox
-from ui.gui.mwindow.service_layer.gui_resources.scenario_saving_dialog import ScenarioDialog
-from ui.gui.mwindow.service_layer import config
+from crdesigner.ui.gui.mwindow.service_layer.gui_resources.MainWindow import Ui_mainWindow
+from crdesigner.ui.gui.mwindow.toolboxes.road_network_toolbox.road_network_toolbox import RoadNetworkToolbox
+from crdesigner.ui.gui.mwindow.toolboxes.obstacle_toolbox.obstacle_toolbox import ObstacleToolbox
+from crdesigner.ui.gui.mwindow.toolboxes.converter_toolbox.map_converter_toolbox import MapConversionToolbox
+from crdesigner.ui.gui.mwindow.service_layer.gui_resources.scenario_saving_dialog import ScenarioDialog
+from crdesigner.ui.gui.mwindow.service_layer import config
 from crdesigner.input_output.gui.misc import util
 
-from ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMO_AVAILABLE
+from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMO_AVAILABLE
 if SUMO_AVAILABLE:
-    from ui.gui.mwindow.service_layer.sumo_settings import SUMOSettings
+    from crdesigner.ui import SUMOSettings
 
 
 class MWindow(QMainWindow, Ui_mainWindow):
