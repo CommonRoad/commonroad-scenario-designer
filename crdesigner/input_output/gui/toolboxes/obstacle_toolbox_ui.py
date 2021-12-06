@@ -33,7 +33,7 @@ class ObstacleToolboxUI(Toolbox):
         and add them as (title, widget) tuples to self.sections
         """
         #TODO somehow create a validator that checks so can only input 2 doubles
-
+        #this validator always has the format with a dot as decimal separator
         self.float_validator = QDoubleValidator()
         self.float_validator.setLocale(QLocale("en_US"))
 
@@ -49,34 +49,9 @@ class ObstacleToolboxUI(Toolbox):
         self.obstacle_shape.addItem("Circle")
         self.obstacle_shape.addItem("Polygon")
 
-        self.obstacle_length = QLineEdit()
-        self.obstacle_length.setValidator(self.float_validator)
-        self.obstacle_length.setMaxLength(6)
-        self.obstacle_length.setAlignment(Qt.AlignRight)
-
-        self.obstacle_width = QLineEdit()
-        self.obstacle_width.setValidator(self.float_validator)
-        self.obstacle_width.setMaxLength(4)
-        self.obstacle_width.setAlignment(Qt.AlignRight)
-
-        self.obstacle_x_Position = QLineEdit()
-        self.obstacle_x_Position.setValidator(QDoubleValidator())
-        self.obstacle_x_Position.setMaxLength(4)
-        self.obstacle_x_Position.setAlignment(Qt.AlignRight)
-
-        self.obstacle_orientation = QLineEdit()
-        self.obstacle_orientation.setValidator(QIntValidator())
-        self.obstacle_orientation.setMaxLength(4)
-        self.obstacle_orientation.setAlignment(Qt.AlignRight)
-
         self.obstacle_type = QComboBox()
         obstalce_type_list = [e.value for e in ObstacleType]
         self.obstacle_type.addItems(obstalce_type_list)
-
-        self.obstacle_y_Position = QLineEdit()
-        self.obstacle_y_Position.setValidator(QDoubleValidator())
-        self.obstacle_y_Position.setMaxLength(4)
-        self.obstacle_y_Position.setAlignment(Qt.AlignRight)
 
         self.obstacle_state_variable = QComboBox()
         self.figure = Figure(figsize=(5, 4))
@@ -89,18 +64,13 @@ class ObstacleToolboxUI(Toolbox):
         self.button_add_static_obstacle = QPushButton("Add")
 
         self.layout_obstacle_information_groupbox = QFormLayout()
+        self.init_rectangle_fields()
         self.obstacle_information_groupbox = QGroupBox()
         self.obstacle_information_groupbox.setLayout(self.layout_obstacle_information_groupbox)
         self.layout_obstacle_information_groupbox.insertRow(0, label_general)
         self.layout_obstacle_information_groupbox.insertRow(1, "Shape", self.obstacle_shape)
-        self.layout_obstacle_information_groupbox.insertRow(2, "Width [m]", self.obstacle_width)
-        self.layout_obstacle_information_groupbox.insertRow(3, "Length [m]", self.obstacle_length)
-        self.layout_obstacle_information_groupbox.insertRow(4, "Orientation [deg]",self.obstacle_orientation)
         self.layout_obstacle_information_groupbox.insertRow(5, "Type", self.obstacle_type)
-        self.layout_obstacle_information_groupbox.insertRow(6, "X-Position", self.obstacle_x_Position)
-        self.layout_obstacle_information_groupbox.insertRow(7, "Y-Position", self.obstacle_y_Position)
-
-        self.add_vertice_btn = QPushButton("Add Vertice")
+        self.init_position()
 
         layout_obstacle_state_vis_groupbox = QFormLayout()
         obstacle_state_vis_groupbox = QGroupBox()
@@ -139,37 +109,16 @@ class ObstacleToolboxUI(Toolbox):
 
             title_sumo = "Sumo Simulation"
             self.sections.append((title_sumo, widget_sumo))
-
-    def toggle_sections(self):
-        #changes toolbox based on what shapes that are selected
-        if self.obstacle_shape.currentText() == "Circle":
-            try:
-                self.layout_obstacle_information_groupbox.removeRow(self.obstacle_width)
-                self.layout_obstacle_information_groupbox.removeRow(self.obstacle_length)
-                self.layout_obstacle_information_groupbox.removeRow(self.obstacle_orientation_field)
-            except:
-                pass
-
-            self.obstacle_radius = QLineEdit()
-            self.obstacle_radius.setValidator(QDoubleValidator())
-            self.obstacle_radius.setMaxLength(4)
-            self.obstacle_radius.setAlignment(Qt.AlignRight)
-
-            self.layout_obstacle_information_groupbox.insertRow(2, "Radius [m]", self.obstacle_radius)
-
-        elif self.obstacle_shape.currentText() == "Rectangle":
-            try:
-                self.layout_obstacle_information_groupbox.removeRow(self.obstacle_radius)
-            except:
-                pass
-            
+    
+    def init_rectangle_fields(self):
+    #function that creates the fields for the rectangle shape
             self.obstacle_length = QLineEdit()
-            self.obstacle_length.setValidator(QDoubleValidator())
+            self.obstacle_length.setValidator(self.float_validator)
             self.obstacle_length.setMaxLength(6)
             self.obstacle_length.setAlignment(Qt.AlignRight)
 
             self.obstacle_width = QLineEdit()
-            self.obstacle_width.setValidator(QDoubleValidator())
+            self.obstacle_width.setValidator(self.float_validator)
             self.obstacle_width.setMaxLength(4)
             self.obstacle_width.setAlignment(Qt.AlignRight)
 
@@ -178,35 +127,109 @@ class ObstacleToolboxUI(Toolbox):
             self.obstacle_orientation.setMaxLength(4)
             self.obstacle_orientation.setAlignment(Qt.AlignRight)
 
-            self.layout_obstacle_information_groupbox.insertRow(2,"Width [m]", self.obstacle_width)
-            self.layout_obstacle_information_groupbox.insertRow(3,"Length [m]", self.obstacle_length)
-            self.layout_obstacle_information_groupbox.insertRow(4,"Orientation [deg]", self.obstacle_orientation)
+            self.layout_obstacle_information_groupbox.insertRow(2, "Width [m]", self.obstacle_width)
+            self.layout_obstacle_information_groupbox.insertRow(3, "Length [m]", self.obstacle_length)
+            self.layout_obstacle_information_groupbox.insertRow(4, "Orientation [deg]",self.obstacle_orientation)
+    
+    def remove_rectangle_fields(self):
+    #function that removes the fields unique to the rectangle shape
+        try:
+            self.layout_obstacle_information_groupbox.removeRow(self.obstacle_width)
+            self.layout_obstacle_information_groupbox.removeRow(self.obstacle_length)
+            self.layout_obstacle_information_groupbox.removeRow(self.obstacle_orientation)
+        except:
+            pass
+    
+    def init_circle_fields(self):
+    #function that creates the fields for the circle shape
+        self.obstacle_radius = QLineEdit()
+        self.obstacle_radius.setValidator(self.float_validator)
+        self.obstacle_radius.setMaxLength(4)
+        self.obstacle_radius.setAlignment(Qt.AlignRight)
+
+        self.layout_obstacle_information_groupbox.insertRow(2, "Radius [m]", self.obstacle_radius)
+
+    def remove_circle_fields(self):
+    #function that removes the fields for the circle shape
+        try:
+            self.layout_obstacle_information_groupbox.removeRow(self.obstacle_radius)
+        except:
+            pass
+    def remove_polygon_fields(self):
+    #function that removes the fields for the polygon shape
+        try:
+            for i in range(self.amount_vertices):
+                self.layout_obstacle_information_groupbox.removeRow(self.polygon_row[i])
+                
+            self.layout_obstacle_information_groupbox.removeRow(self.add_vertice_btn)
+        except:
+            pass
+    
+    def init_position(self):
+    #function that adds the position fields
+        self.obstacle_x_Position = QLineEdit()
+        self.obstacle_x_Position.setValidator(self.float_validator)
+        self.obstacle_x_Position.setMaxLength(4)
+        self.obstacle_x_Position.setAlignment(Qt.AlignRight)
+
+        self.obstacle_y_Position = QLineEdit()
+        self.obstacle_y_Position.setValidator(self.float_validator)
+        self.obstacle_y_Position.setMaxLength(4)
+        self.obstacle_y_Position.setAlignment(Qt.AlignRight)
+
+        if self.obstacle_shape.currentText() == "Rectangle":
+            self.layout_obstacle_information_groupbox.insertRow(6, "X-Position", self.obstacle_x_Position)
+            self.layout_obstacle_information_groupbox.insertRow(7, "Y-Position", self.obstacle_y_Position)
+        elif self.obstacle_shape.currentText() == "Circle":
+            self.layout_obstacle_information_groupbox.insertRow(4, "X-Position", self.obstacle_x_Position)
+            self.layout_obstacle_information_groupbox.insertRow(5, "Y-Position", self.obstacle_y_Position)
+    
+    def remove_position(self):
+    #function that adds the position fields
+        try:
+            self.layout_obstacle_information_groupbox.removeRow(self.obstacle_x_Position)
+            self.layout_obstacle_information_groupbox.removeRow(self.obstacle_y_Position)
+        except:
+            pass
+
+    def toggle_sections(self):
+    #changes toolbox based on what shapes that are selected
+        if self.obstacle_shape.currentText() == "Circle":
+            
+            self.remove_rectangle_fields()
+            self.remove_polygon_fields()
+            self.remove_position()
+            
+            self.init_circle_fields()
+            self.init_position()
+
+        elif self.obstacle_shape.currentText() == "Rectangle":
+            
+            self.remove_circle_fields()
+            self.remove_polygon_fields()
+            self.remove_position()
+
+            self.init_rectangle_fields()
+            self.init_position()
 
         elif self.obstacle_shape.currentText() == "Polygon":
             
-            try:
-                self.layout_obstacle_information_groupbox.removeRow(self.obstacle_radius)
-            except:
-                pass
-            try:
-                self.layout_obstacle_information_groupbox.removeRow(self.obstacle_orientation)
-                self.layout_obstacle_information_groupbox.removeRow(self.obstacle_width)
-                self.layout_obstacle_information_groupbox.removeRow(self.obstacle_length)
-            except:
-                pass
+            self.remove_circle_fields()
+            self.remove_rectangle_fields()
+            self.remove_position()
 
             self.vertices = []
             self.polygon_row = []
             self.remove_vertice_btn = []
             self.polygon_label = []
             self.amount_vertices = 0
-            #always gonna be 3, fix that later
-            #if len(self.vertices) == 0:
-                #self.amount_vertices = 3
 
-            for i in range(3): #should be 3 by default, otherwise set to what is specified in "amount of vertices field"
+            for i in range(3): 
                 self.add_vertice()
             
+            self.add_vertice_btn = QPushButton("Add Vertice")
+            self.add_vertice_btn.clicked.connect(
+                lambda: self.add_vertice())
             self.layout_obstacle_information_groupbox.insertRow(len(self.vertices) + 2, self.add_vertice_btn)
 
     #add vertices for the polygon shape, i is the place in the array
@@ -242,7 +265,6 @@ class ObstacleToolboxUI(Toolbox):
             sending_button = self.sender()
             i = self.remove_vertice_btn.index(sending_button)
 
-        print(i)
         self.layout_obstacle_information_groupbox.removeRow(self.polygon_row[i])
         self.vertices.pop(i)
         self.remove_vertice_btn.pop(i)

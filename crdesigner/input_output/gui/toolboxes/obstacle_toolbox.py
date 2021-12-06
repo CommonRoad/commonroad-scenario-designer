@@ -65,8 +65,8 @@ class ObstacleToolbox(QDockWidget):
         self.obstacle_toolbox.obstacle_shape.currentTextChanged.connect(
             lambda: self.obstacle_toolbox.toggle_sections())
         
-        self.obstacle_toolbox.add_vertice_btn.clicked.connect(
-            lambda: self.obstacle_toolbox.add_vertice())
+        #self.obstacle_toolbox.add_vertice_btn.clicked.connect(
+            #lambda: self.obstacle_toolbox.add_vertice())
         
 
         if SUMO_AVAILABLE:
@@ -94,7 +94,6 @@ class ObstacleToolbox(QDockWidget):
                 obstacle_id = obstacle_id,
 
                 obstacle_type = ObstacleType(self.obstacle_toolbox.obstacle_type.currentText()),
-                #should be able to create more shapes, this is just for testing
                 obstacle_shape = Rectangle(
                     length = float(self.obstacle_toolbox.obstacle_length.text()),
                     width = float(self.obstacle_toolbox.obstacle_width.text()) 
@@ -114,7 +113,6 @@ class ObstacleToolbox(QDockWidget):
                 obstacle_id = obstacle_id,
 
                 obstacle_type = ObstacleType(self.obstacle_toolbox.obstacle_type.currentText()),
-                #should be able to create more shapes, this is just for testing
                 obstacle_shape = Circle(
                     radius = float(self.obstacle_toolbox.obstacle_radius.text())
                 ),
@@ -134,23 +132,15 @@ class ObstacleToolbox(QDockWidget):
 
                 obstacle_type = ObstacleType(self.obstacle_toolbox.obstacle_type.currentText()),
                 obstacle_shape = Polygon(
-                    #vertices = np.array([
-                        #np.array(self.string_to_float(self.obstacle_toolbox.obstacle_v0.text())),
-                        #np.array(self.string_to_float(self.obstacle_toolbox.obstacle_v1.text())),
-                        #np.array(self.string_to_float(self.obstacle_toolbox.obstacle_v2.text())),
-                        
-
-                    #])
+                    
                     vertices = self.polygon_array()
                 ),
 
                 initial_state = State(**{'position': np.array([
-                    #float(self.obstacle_toolbox.obstacle_x_Position.text()),
-                    #float(self.obstacle_toolbox.obstacle_y_Position.text())
                     0,
                     0
                 ]),
-                'orientation': 0, #math.radians(float(self.obstacle_toolbox.obstacle_orientation.text())),
+                'orientation': 0, 
                 'time_step': 1
                 })
             )
@@ -158,9 +148,10 @@ class ObstacleToolbox(QDockWidget):
         self.current_scenario.add_objects(static_obstacle)
         self.callback(self.current_scenario)
     
-    #returns an np array of the vertices
+    
     #TODO remove empty vertice?
     def polygon_array(self):
+    #returns an np array of the vertices
         vertices = []
         for i in range(self.obstacle_toolbox.amount_vertices):
             if self.obstacle_toolbox.vertices[i].text() != "":
@@ -169,13 +160,13 @@ class ObstacleToolbox(QDockWidget):
         vertices = np.asarray(vertices)
         return vertices
 
-    #converts string to floats
     def string_to_float(self, xy_str):
+        #converts string to array of floats
         xy_float = [float(value) for value in xy_str.split(",")]
         return xy_float
         
     def add_static_obstacle(self):
-
+    #creates the static obstacle
         #try:
         obstacle_id = self.current_scenario.generate_object_id()
         self.static_obstacle_details(obstacle_id)
@@ -185,6 +176,7 @@ class ObstacleToolbox(QDockWidget):
             #print("Error when creating static obstacle")
     
     def update_obstacle(self):
+    #updates obstacle by deleting it and then adding it again with same id
         try:
             obstacle_id = int(self.obstacle_toolbox.selected_obstacle.currentText())
             selected_obstacle = self.current_scenario.obstacle_by_id(obstacle_id)
@@ -217,8 +209,6 @@ class ObstacleToolbox(QDockWidget):
             for i in range(self.obstacle_toolbox.amount_vertices):
                 self.obstacle_toolbox.vertices[i].setText("")
 
-        self.obstacle_toolbox.obstacle_x_Position.setText("")
-        self.obstacle_toolbox.obstacle_y_Position.setText("")
         self.obstacle_toolbox.selected_obstacle.clear()
         self.obstacle_toolbox.selected_obstacle.addItems(
             ["None"] + [str(item) for item in self.collect_obstacle_ids()])
@@ -326,9 +316,6 @@ class ObstacleToolbox(QDockWidget):
                     vertice_string = vertice_string.replace("[", "")
                     vertice_string = vertice_string.replace("]", "")
                     self.obstacle_toolbox.vertices[i].setText(vertice_string)
-                    print(vertice_string)
-
-
                 
             else:
                 self.obstacle_toolbox.obstacle_width.setText("")
