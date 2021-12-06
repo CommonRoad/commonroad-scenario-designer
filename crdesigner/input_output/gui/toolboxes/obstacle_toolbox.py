@@ -312,6 +312,12 @@ class ObstacleToolbox(QDockWidget):
                 temp = obstacle.obstacle_shape.vertices
                 vertices = temp.tolist()
                 
+                #remove extra vertice(s) in toolboc
+                if len(vertices) - 1 < self.obstacle_toolbox.amount_vertices:
+                    j = self.obstacle_toolbox.amount_vertices - (len(vertices) - 1)
+                    for i in range(j):
+                        self.obstacle_toolbox.remove_vertice(i)
+
                 for i in range(len(vertices) - 1):
                     #adds another vertice if there are too few in the toolbox
                     if i >= self.obstacle_toolbox.amount_vertices:
@@ -319,8 +325,6 @@ class ObstacleToolbox(QDockWidget):
 
                     vertice_string_x = str(vertices[i][0])
                     vertice_string_y = str(vertices[i][1])
-                    #vertice_string = vertice_string.replace("[", "")
-                    #vertice_string = vertice_string.replace("]", "")
                     self.obstacle_toolbox.vertices_x[i].setText(vertice_string_x)
                     self.obstacle_toolbox.vertices_y[i].setText(vertice_string_y)
                 

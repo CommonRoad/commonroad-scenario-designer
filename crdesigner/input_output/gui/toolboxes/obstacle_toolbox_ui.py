@@ -263,12 +263,12 @@ class ObstacleToolboxUI(Toolbox):
         self.layout_obstacle_information_groupbox.insertRow(i+2, self.polygon_row[i])
         self.amount_vertices = self.amount_vertices + 1
 
-    def remove_vertice(self, i = None):
+    def remove_vertice(self, i = -1):
         #check so there is at least 3 vertices
         if len(self.vertices_x) <= 3:
             #TODO add some kind of warning message that you have to have at least 3 vertices
             return
-        if i == None:
+        if i == -1:
             sending_button = self.sender()
             i = self.remove_vertice_btn.index(sending_button)
 
