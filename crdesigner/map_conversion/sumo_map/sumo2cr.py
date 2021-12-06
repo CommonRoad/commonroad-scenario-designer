@@ -12,7 +12,7 @@ def convert_net_to_cr(net_file: str, verbose: bool = False) -> Scenario:
     Converts .net file to CommonRoad xml using netconvert and OpenDRIVE 2 Lanelet Converter.
 
     :param net_file: path of .net.xml file
-    :param verbose: Boolean indicating whether status should be printed to crdesigner_console_wrapper
+    :param verbose: Boolean indicating whether status should be printed to console
 
     :return: commonroad map file
     """

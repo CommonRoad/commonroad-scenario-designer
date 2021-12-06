@@ -1,6 +1,6 @@
 import os
 
-from crdesigner.api import osm_to_commonroad
+from crdesigner.input_output.api import osm_to_commonroad
 
 from commonroad.scenario.scenario import Tag
 from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
@@ -8,8 +8,8 @@ from commonroad.planning.planning_problem import PlanningProblemSet
 
 import crdesigner.map_conversion.osm2cr.converter_modules.converter as converter
 import crdesigner.map_conversion.osm2cr.converter_modules.cr_operations.export as ex
-from crdesigner.map_conversion.osm2cr.converter_modules.osm_operations.downloader import download_around_map
 from crdesigner.map_conversion.osm2cr import config
+from crdesigner.map_conversion.osm2cr.converter_modules.osm_operations.downloader import download_around_map
 
 # download a map
 download_around_map(config.BENCHMARK_ID + '_downloaded.osm', 48.140289, 11.566272)

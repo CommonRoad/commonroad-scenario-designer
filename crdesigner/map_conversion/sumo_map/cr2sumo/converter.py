@@ -5,6 +5,7 @@ import logging
 import os
 import subprocess
 import sys
+import time
 import warnings
 from collections import defaultdict
 from copy import deepcopy
@@ -38,7 +39,7 @@ from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.common.solution import VehicleType as VehicleTypeParam
 from commonroad.common.util import Interval
 from commonroad.prediction.prediction import TrajectoryPrediction
-from commonroad.scenario.trajectory import State
+from commonroad.scenario.trajectory import State, Trajectory
 from commonroad.scenario.lanelet import LaneletNetwork, Lanelet, LineMarking, LaneletType
 from commonroad.scenario.obstacle import ObstacleRole, ObstacleType
 from commonroad.scenario.scenario import Scenario

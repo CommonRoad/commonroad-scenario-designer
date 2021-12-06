@@ -12,7 +12,7 @@ from crdesigner.input_output.gui.misc.map_creator import MapCreator
 __author__ = "Aaron Kaefer, Marcus Gabler, Sebastian Maierhofer"
 __copyright__ = "TUM Cyber-Physical Systems Group"
 __credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles, BMW Car@TUM"]
-__version__ = "0.2"
+__version__ = "0.3"
 __maintainer__ = "Sebastian Maierhofer"
 __email__ = "commonroad@lists.lrz.de"
 __status__ = "Released"
@@ -221,9 +221,8 @@ class TestLanelet(unittest.TestCase):
         incoming_4 = IntersectionIncomingElement(24, {16}, {18}, {14}, {19}, 23)
         sc = Scenario(dt=0.1)
 
-        intersection, traffic_signs, traffic_lights, lanelets = MapCreator.create_four_way_intersection(3, 20, 30, sc,
-                                                                                                        True, True,
-                                                                                                        TrafficSignIDZamunda)
+        intersection, traffic_signs, traffic_lights, lanelets = \
+            MapCreator.create_four_way_intersection(3, 20, 30, sc, True, True, TrafficSignIDZamunda)
 
         # check intersection
         self.assertEqual(intersection.intersection_id, 25)

@@ -1,5 +1,7 @@
+import math
 from typing import Tuple, List, Union
 
+import matplotlib.pyplot as plt
 import numpy as np
 
 from crdesigner.map_conversion.opendrive.opendrive_parser.elements.geometry import (
@@ -8,14 +10,14 @@ from crdesigner.map_conversion.opendrive.opendrive_parser.elements.geometry impo
     Spiral,
     ParamPoly3,
     Arc,
-    Poly3, calc_next_s,
+    Poly3, CurvatureRes, calc_next_s,
 )
 
 
 __author__ = "Benjamin Orthen, Stefan Urban"
 __copyright__ = "TUM Cyber-Physical Systems Group"
 __credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles"]
-__version__ = "0.2"
+__version__ = "0.3"
 __maintainer__ = "Sebastian Maierhofer"
 __email__ = "commonroad@lists.lrz.de"
 __status__ = "Released"

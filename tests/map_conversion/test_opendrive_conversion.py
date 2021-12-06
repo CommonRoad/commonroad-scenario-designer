@@ -7,14 +7,14 @@ from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistin
 from commonroad.planning.planning_problem import PlanningProblemSet
 from commonroad.scenario.scenario import Tag, Scenario
 
-from crdesigner.api import generate_unique_id
-from crdesigner.api import opendrive_to_commonroad
+from crdesigner.map_conversion.common.utils import generate_unique_id
+from crdesigner.input_output.api import opendrive_to_commonroad
 from tests.map_conversion.utils import elements_equal
 
 __author__ = "Benjamin Orthen, Sebastian Maierhofer"
 __copyright__ = "TUM Cyber-Physical Systems Group"
 __credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles, BMW Car@TUM"]
-__version__ = "0.2"
+__version__ = "0.3"
 __maintainer__ = "Sebastian Maierhofer"
 __email__ = "commonroad@lists.lrz.de"
 __status__ = "Released"

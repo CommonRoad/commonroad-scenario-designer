@@ -5,7 +5,7 @@ GraphTrafficSign class
 from typing import List, Dict
 
 from commonroad.scenario.traffic_sign import TrafficSign
-from .. import traffic_sign_parser
+from crdesigner.map_conversion.osm2cr.converter_modules.graph_operations import traffic_sign_parser
 from crdesigner.map_conversion.osm2cr.converter_modules.utility import idgenerator
 
 from ._graph_node import GraphNode

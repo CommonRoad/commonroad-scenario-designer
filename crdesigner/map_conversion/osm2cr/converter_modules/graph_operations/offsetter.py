@@ -1,8 +1,7 @@
 """
 This module provides a method to offset roads at certain occasions to smooth the course of consecutive lanes.
 """
-from crdesigner.map_conversion.osm2cr.converter_modules.graph_operations import road_graph as rg
-from crdesigner.map_conversion.osm2cr.converter_modules.graph_operations import lane_linker
+from crdesigner.map_conversion.osm2cr.converter_modules.graph_operations import road_graph as rg, lane_linker
 from crdesigner.map_conversion.osm2cr.converter_modules.utility import geometry
 from crdesigner.map_conversion.osm2cr import config
 

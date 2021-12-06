@@ -8,11 +8,11 @@ from PyQt5.QtCore import *
 from commonroad.geometry.shape import Rectangle
 from commonroad.scenario.scenario import Scenario
 
-from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMO_AVAILABLE
+from crdesigner.input_output.gui.toolboxes.gui_sumo_simulation import SUMO_AVAILABLE
 if SUMO_AVAILABLE:
-    from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMOSimulation
+    from crdesigner.input_output.gui.toolboxes.gui_sumo_simulation import SUMOSimulation
 
-from crdesigner.ui.gui.mwindow.toolboxes.obstacle_toolbox.obstacle_toolbox_ui import ObstacleToolboxUI
+from crdesigner.input_output.gui.toolboxes.obstacle_toolbox_ui import ObstacleToolboxUI
 
 
 class ObstacleToolbox(QDockWidget):
@@ -104,11 +104,11 @@ class ObstacleToolbox(QDockWidget):
             time = [obstacle.initial_state.time_step]
             time += [state.time_step for state in obstacle.prediction.trajectory.state_list]
 
+            # clear previous profile
+            self.obstacle_toolbox.figure.clear()
+
             # create an axis
             ax = self.obstacle_toolbox.figure.add_subplot(111)
-
-            # discards the old graph
-            ax.clear()
 
             # plot data
             ax.plot(time, profile, '.-', markersize=4)
@@ -176,3 +176,4 @@ class ObstacleToolbox(QDockWidget):
             obstacle = self.current_scenario.obstacle_by_id(obstacle_id)
             self.current_scenario.remove_obstacle(obstacle)
             self.callback(self.current_scenario)
+

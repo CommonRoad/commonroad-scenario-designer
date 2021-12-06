@@ -8,8 +8,8 @@ from PyQt5.QtCore import *
 from commonroad.scenario.traffic_sign import *
 from commonroad.scenario.scenario import Scenario
 
-from crdesigner.ui.gui.mwindow.toolboxes.converter_toolbox.map_converter_toolbox_ui import MapConversionToolboxUI
-from crdesigner.ui.gui.mwindow.service_layer.util import select_local_file
+from crdesigner.input_output.gui.toolboxes.map_converter_toolbox_ui import MapConversionToolboxUI
+from crdesigner.input_output.gui.misc.util import select_local_file
 
 from crdesigner.map_conversion.osm2cr.converter_modules import converter
 from crdesigner.map_conversion.osm2cr.converter_modules.osm_operations.downloader import download_around_map
@@ -17,9 +17,9 @@ from crdesigner.map_conversion.osm2cr import config
 from crdesigner.map_conversion.osm2cr.converter_modules.cr_operations.export import convert_to_scenario
 from crdesigner.map_conversion.osm2cr.converter_modules.graph_operations import road_graph as rg
 
-from crdesigner.ui.gui.mwindow.service_layer.osm_gui_modules.gui_embedding import EdgeEdit, LaneLinkEdit
-from crdesigner.ui.gui.mwindow.service_layer.converter_modules.osm_interface import OSMInterface
-from crdesigner.ui.gui.mwindow.service_layer.osm_gui_modules.gui import EdgeEditGUI, LaneLinkGUI
+from crdesigner.input_output.gui.osm_gui_modules.gui_embedding import EdgeEdit, LaneLinkEdit
+from crdesigner.input_output.gui.converter_modules.osm_interface import OSMInterface
+from crdesigner.input_output.gui.osm_gui_modules.gui import EdgeEditGUI, LaneLinkGUI
 
 from crdesigner.map_conversion.opendrive.opendrive_parser.parser import parse_opendrive
 from crdesigner.map_conversion.opendrive.opendrive_conversion.network import Network
@@ -28,11 +28,11 @@ from crdesigner.map_conversion.lanelet_lanelet2.lanelet2_parser import Lanelet2P
 from crdesigner.map_conversion.lanelet_lanelet2.lanelet2cr import Lanelet2CRConverter
 from crdesigner.map_conversion.lanelet_lanelet2.cr2lanelet import CR2LaneletConverter
 
-from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMO_AVAILABLE
+from crdesigner.input_output.gui.toolboxes.gui_sumo_simulation import SUMO_AVAILABLE
 if SUMO_AVAILABLE:
-    from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMOSimulation
-    from crdesigner.ui import SUMOSettings
-    from crdesigner.api import convert_net_to_cr
+    from crdesigner.input_output.gui.toolboxes.gui_sumo_simulation import SUMOSimulation
+    from crdesigner.input_output.gui.settings.sumo_settings import SUMOSettings
+    from crdesigner.map_conversion.sumo_map.sumo2cr import convert_net_to_cr
 
 
 class MapConversionToolbox(QDockWidget):
@@ -355,19 +355,31 @@ class MapConversionToolbox(QDockWidget):
             )
 
     def load_sumo(self):
-        self.path_sumo_file = select_local_file(self, "SUMO", "net.xml")
-        if self.path_sumo_file:
-            self.converter_toolbox.loaded_sumo_file.setText("file successfully loaded")
+        if SUMO_AVAILABLE:
+            self.path_sumo_file = select_local_file(self, "SUMO", "net.xml")
+            if self.path_sumo_file:
+                self.converter_toolbox.loaded_sumo_file.setText("file successfully loaded")
+        else:
+            warnings.warn("Cannot import SUMO, simulation will not be offered in Scenario Designer!")
 
     def convert_cr_to_sumo(self):
-        directory = QFileDialog.getExistingDirectory(self, "Dir", options=QFileDialog.Options())
-        if not directory:
-            return
-        self.sumo_simulation.convert(directory)
+        if SUMO_AVAILABLE:
+            directory = QFileDialog.getExistingDirectory(self, "Dir", options=QFileDialog.Options())
+            if not directory:
+                return
+            self.sumo_simulation.convert(directory)
+        else:
+            warnings.warn("Cannot import SUMO, simulation will not be offered in Scenario Designer!")
 
     def open_sumo_settings(self):
-        SUMOSettings(self, config=self.sumo_simulation.config)
+        if SUMO_AVAILABLE:
+            SUMOSettings(self, config=self.sumo_simulation.config)
+        else:
+            warnings.warn("Cannot import SUMO, simulation will not be offered in Scenario Designer!")
 
     def convert_sumo_to_cr(self):
-        scenario = convert_net_to_cr(self.path_sumo_file)
-        self.callback(scenario)
+        if SUMO_AVAILABLE:
+            scenario = convert_net_to_cr(self.path_sumo_file)
+            self.callback(scenario)
+        else:
+            warnings.warn("Cannot import SUMO, simulation will not be offered in Scenario Designer!")

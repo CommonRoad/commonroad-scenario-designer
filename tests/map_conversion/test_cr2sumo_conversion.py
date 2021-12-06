@@ -11,7 +11,7 @@ import pytest
 from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
 from commonroad.scenario.obstacle import ObstacleType
-from crdesigner.api import SumoConfig
+from crdesigner.map_conversion.sumo_map.config import SumoConfig
 from crdesigner.map_conversion.sumo_map.cr2sumo.converter import CR2SumoMapConverter
 from parameterized import parameterized
 from sumocr.interface.sumo_simulation import SumoSimulation
@@ -19,7 +19,7 @@ from sumocr.interface.sumo_simulation import SumoSimulation
 __author__ = "Max Fruehauf, Sebastian Maierhofer"
 __copyright__ = "TUM Cyber-Physical Systems Group"
 __credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles, BMW Car@TUM"]
-__version__ = "0.2"
+__version__ = "0.3"
 __maintainer__ = "Sebastian Maierhofer"
 __email__ = "commonroad@lists.lrz.de"
 __status__ = "Released"

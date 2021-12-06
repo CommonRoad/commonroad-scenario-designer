@@ -1,6 +1,6 @@
 import logging
 import os
-from enum import IntEnum
+from enum import Enum, IntEnum
 
 from commonroad.scenario.lanelet import LaneletType
 from commonroad.scenario.obstacle import ObstacleType

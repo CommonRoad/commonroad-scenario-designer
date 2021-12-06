@@ -12,10 +12,10 @@ from commonroad.scenario.lanelet import Lanelet
 from commonroad.visualization.mp_renderer import MPRenderer
 from commonroad.geometry.shape import Circle
 
-from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMO_AVAILABLE
+from crdesigner.input_output.gui.toolboxes.gui_sumo_simulation import SUMO_AVAILABLE
 if SUMO_AVAILABLE:
-    from crdesigner.api import SumoConfig
-from crdesigner.ui.gui.mwindow.service_layer.util import Observable
+    from crdesigner.map_conversion.sumo_map.config import SumoConfig
+from crdesigner.input_output.gui.misc.util import Observable
 
 from matplotlib.animation import FuncAnimation
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
@@ -27,7 +27,7 @@ from matplotlib.patches import PathPatch
 __author__ = "Benjamin Orthen, Stefan Urban, Max Winklhofer, Guyue Huang, Max Fruehauf, Sebastian Maierhofer"
 __copyright__ = "TUM Cyber-Physical Systems Group"
 __credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles, BMW Car@TUM"]
-__version__ = "0.2"
+__version__ = "0.3"
 __maintainer__ = "Sebastian Maierhofer"
 __email__ = "commonroad@lists.lrz.de"
 __status__ = "Released"
@@ -70,7 +70,7 @@ class DynamicCanvas(FigureCanvas):
                         'show_traffic_signs': 'all',
                     },
                     'intersection': {
-                        'draw_intersections': True,
+                        'draw_intersections': False,
                         'draw_incoming_lanelets': True,
                         'incoming_lanelets_color': '#3ecbcf',
                         'draw_crossings': True,
