@@ -218,7 +218,8 @@ class ObstacleToolboxUI(Toolbox):
             self.remove_rectangle_fields()
             self.remove_position()
 
-            self.vertices = []
+            self.vertices_x = []
+            self.vertices_y = []
             self.polygon_row = []
             self.remove_vertice_btn = []
             self.polygon_label = []
@@ -230,22 +231,28 @@ class ObstacleToolboxUI(Toolbox):
             self.add_vertice_btn = QPushButton("Add Vertice")
             self.add_vertice_btn.clicked.connect(
                 lambda: self.add_vertice())
-            self.layout_obstacle_information_groupbox.insertRow(len(self.vertices) + 2, self.add_vertice_btn)
+            self.layout_obstacle_information_groupbox.insertRow(len(self.vertices_x) + 2, self.add_vertice_btn)
 
     #add vertices for the polygon shape, i is the place in the array
     def add_vertice(self):
-        i = len(self.vertices)
+        i = len(self.vertices_x)
         self.polygon_row.append(QHBoxLayout())
 
         self.polygon_label.append(QLabel("Vertice " + str(i)))
         
-        self.vertices.append(QLineEdit())
-        #self.vertices[i].setValidator(self.float_validator)
-        self.vertices[i].setMaxLength(10)
-        self.vertices[i].setAlignment(Qt.AlignRight)
+        self.vertices_x.append(QLineEdit())
+        self.vertices_x[i].setValidator(self.float_validator)
+        self.vertices_x[i].setMaxLength(6)
+        self.vertices_x[i].setAlignment(Qt.AlignRight)
+
+        self.vertices_y.append(QLineEdit())
+        self.vertices_y[i].setValidator(self.float_validator)
+        self.vertices_y[i].setMaxLength(6)
+        self.vertices_y[i].setAlignment(Qt.AlignRight)
 
         self.polygon_row[i].addWidget(self.polygon_label[i])
-        self.polygon_row[i].addWidget(self.vertices[i])
+        self.polygon_row[i].addWidget(self.vertices_x[i])
+        self.polygon_row[i].addWidget(self.vertices_y[i])
 
         self.remove_vertice_btn.append(QPushButton())
         self.remove_vertice_btn[i].setIcon(QIcon(":icons/iconmonstr-trash-can-1.svg"))
@@ -258,7 +265,7 @@ class ObstacleToolboxUI(Toolbox):
 
     def remove_vertice(self, i = None):
         #check so there is at least 3 vertices
-        if len(self.vertices) <= 3:
+        if len(self.vertices_x) <= 3:
             #TODO add some kind of warning message that you have to have at least 3 vertices
             return
         if i == None:
@@ -266,7 +273,8 @@ class ObstacleToolboxUI(Toolbox):
             i = self.remove_vertice_btn.index(sending_button)
 
         self.layout_obstacle_information_groupbox.removeRow(self.polygon_row[i])
-        self.vertices.pop(i)
+        self.vertices_x.pop(i)
+        self.vertices_y.pop(i)
         self.remove_vertice_btn.pop(i)
         self.polygon_label.pop(i)
         self.polygon_row.pop(i)

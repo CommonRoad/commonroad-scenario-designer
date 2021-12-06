@@ -154,8 +154,10 @@ class ObstacleToolbox(QDockWidget):
     #returns an np array of the vertices
         vertices = []
         for i in range(self.obstacle_toolbox.amount_vertices):
-            if self.obstacle_toolbox.vertices[i].text() != "":
-                vertices.append(self.string_to_float(self.obstacle_toolbox.vertices[i].text()))
+            if self.obstacle_toolbox.vertices_x[i].text() != "" and self.obstacle_toolbox.vertices_y[i].text() != "":
+                #vertices.append(self.string_to_float(self.obstacle_toolbox.vertices[i].text()))
+                temp = [float(self.obstacle_toolbox.vertices_x[i].text()), float(self.obstacle_toolbox.vertices_y[i].text())]
+                vertices.append(temp)
             
         vertices = np.asarray(vertices)
         return vertices
@@ -207,7 +209,8 @@ class ObstacleToolbox(QDockWidget):
         elif self.obstacle_toolbox.obstacle_shape.currentText() == "Polygon":
             #TODO change so there is 3 vertices always by default
             for i in range(self.obstacle_toolbox.amount_vertices):
-                self.obstacle_toolbox.vertices[i].setText("")
+                self.obstacle_toolbox.vertices_x[i].setText("")
+                self.obstacle_toolbox.vertices_y[i].setText("")
 
         self.obstacle_toolbox.selected_obstacle.clear()
         self.obstacle_toolbox.selected_obstacle.addItems(
@@ -305,17 +308,21 @@ class ObstacleToolbox(QDockWidget):
                 if self.obstacle_toolbox.obstacle_shape.currentText() != "Polygon":
                     self.obstacle_toolbox.obstacle_shape.setCurrentIndex(2)
                 
+                #because numpy array has weird formatting I want to get rid of
                 temp = obstacle.obstacle_shape.vertices
                 vertices = temp.tolist()
                 
                 for i in range(len(vertices) - 1):
+                    #adds another vertice if there are too few in the toolbox
                     if i >= self.obstacle_toolbox.amount_vertices:
                         self.obstacle_toolbox.add_vertice()
 
-                    vertice_string = str(vertices[i])
-                    vertice_string = vertice_string.replace("[", "")
-                    vertice_string = vertice_string.replace("]", "")
-                    self.obstacle_toolbox.vertices[i].setText(vertice_string)
+                    vertice_string_x = str(vertices[i][0])
+                    vertice_string_y = str(vertices[i][1])
+                    #vertice_string = vertice_string.replace("[", "")
+                    #vertice_string = vertice_string.replace("]", "")
+                    self.obstacle_toolbox.vertices_x[i].setText(vertice_string_x)
+                    self.obstacle_toolbox.vertices_y[i].setText(vertice_string_y)
                 
             else:
                 self.obstacle_toolbox.obstacle_width.setText("")
