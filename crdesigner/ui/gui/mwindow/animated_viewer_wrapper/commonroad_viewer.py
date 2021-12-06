@@ -12,10 +12,10 @@ from commonroad.scenario.lanelet import Lanelet
 from commonroad.visualization.mp_renderer import MPRenderer
 from commonroad.geometry.shape import Circle
 
-from crdesigner.input_output.gui.toolboxes.gui_sumo_simulation import SUMO_AVAILABLE
+from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMO_AVAILABLE
 if SUMO_AVAILABLE:
     from crdesigner.map_conversion.sumo_map.config import SumoConfig
-from crdesigner.input_output.gui.misc.util import Observable
+from crdesigner.ui.gui.mwindow.service_layer.util import Observable
 
 from matplotlib.animation import FuncAnimation
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas

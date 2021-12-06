@@ -8,8 +8,8 @@ from PyQt5.QtCore import *
 from commonroad.scenario.traffic_sign import *
 from commonroad.scenario.scenario import Scenario
 
-from crdesigner.input_output.gui.toolboxes.map_converter_toolbox_ui import MapConversionToolboxUI
-from crdesigner.input_output.gui.misc.util import select_local_file
+from crdesigner.ui.gui.mwindow.toolboxes.converter_toolbox.map_converter_toolbox_ui import MapConversionToolboxUI
+from crdesigner.ui.gui.mwindow.service_layer.util import select_local_file
 
 from crdesigner.map_conversion.osm2cr.converter_modules import converter
 from crdesigner.map_conversion.osm2cr.converter_modules.osm_operations.downloader import download_around_map
@@ -17,9 +17,9 @@ from crdesigner.map_conversion.osm2cr import config
 from crdesigner.map_conversion.osm2cr.converter_modules.cr_operations.export import convert_to_scenario
 from crdesigner.map_conversion.osm2cr.converter_modules.graph_operations import road_graph as rg
 
-from crdesigner.input_output.gui.osm_gui_modules.gui_embedding import EdgeEdit, LaneLinkEdit
-from crdesigner.input_output.gui.converter_modules.osm_interface import OSMInterface
-from crdesigner.input_output.gui.osm_gui_modules.gui import EdgeEditGUI, LaneLinkGUI
+from crdesigner.ui.gui.mwindow.service_layer.osm_gui_modules.gui_embedding import EdgeEdit, LaneLinkEdit
+from crdesigner.ui.gui.mwindow.service_layer.converter_modules.osm_interface import OSMInterface
+from crdesigner.ui.gui.mwindow.service_layer.osm_gui_modules.gui import EdgeEditGUI, LaneLinkGUI
 
 from crdesigner.map_conversion.opendrive.opendrive_parser.parser import parse_opendrive
 from crdesigner.map_conversion.opendrive.opendrive_conversion.network import Network
@@ -28,7 +28,7 @@ from crdesigner.map_conversion.lanelet_lanelet2.lanelet2_parser import Lanelet2P
 from crdesigner.map_conversion.lanelet_lanelet2.lanelet2cr import Lanelet2CRConverter
 from crdesigner.map_conversion.lanelet_lanelet2.cr2lanelet import CR2LaneletConverter
 
-from crdesigner.input_output.gui.toolboxes.gui_sumo_simulation import SUMO_AVAILABLE
+from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMO_AVAILABLE
 if SUMO_AVAILABLE:
     from crdesigner.input_output.gui.toolboxes.gui_sumo_simulation import SUMOSimulation
     from crdesigner.input_output.gui.settings.sumo_settings import SUMOSettings
