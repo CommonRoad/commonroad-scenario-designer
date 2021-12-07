@@ -7,17 +7,18 @@ from crdesigner.ui.gui.mwindow.service_layer.general_services import setup_tmp
 from crdesigner.ui.gui.mwindow.service_layer.general_services import setup_mwindow
 from crdesigner.ui.gui.mwindow.service_layer.general_services import center
 from crdesigner.ui.gui.mwindow.service_layer.general_services import close_window
-from crdesigner.ui.gui.mwindow.top_bar_wrapper.top_bar_wrapper import TopBarWrapper
-from crdesigner.ui.gui.mwindow.toolboxes.road_network_toolbox.create_road_network_toolbox \
-    import create_road_network_toolbox
-from crdesigner.ui.gui.mwindow.toolboxes.converter_toolbox.create_converter_toolbox import create_converter_toolbox
-from crdesigner.ui.gui.mwindow.toolboxes.obstacle_toolbox.create_obstacle_toolbox import create_obstacle_toolbox
-from crdesigner.ui.gui.CONSTANTS import *
+from crdesigner.ui.gui.mwindow.service_layer.config import MWINDOW_TMP_FOLDER_PATH
 from crdesigner.ui.gui.mwindow.service_layer.util import *
 from crdesigner.ui.gui.mwindow.service_layer.general_services import update_max_step_service_layer
 from crdesigner.ui.gui.mwindow.service_layer.general_services import store_scenario_service_layer
 from crdesigner.ui.gui.mwindow.service_layer.general_services import update_toolbox_scenarios_service_layer
 from crdesigner.ui.gui.mwindow.service_layer.general_services import check_scenario_service_layer
+from crdesigner.ui.gui.mwindow.top_bar_wrapper.top_bar_wrapper import TopBarWrapper
+from crdesigner.ui.gui.mwindow.toolboxes.road_network_toolbox.create_road_network_toolbox \
+    import create_road_network_toolbox
+from crdesigner.ui.gui.mwindow.toolboxes.converter_toolbox.create_converter_toolbox import create_converter_toolbox
+from crdesigner.ui.gui.mwindow.toolboxes.obstacle_toolbox.create_obstacle_toolbox import create_obstacle_toolbox
+
 
 import logging
 import copy
