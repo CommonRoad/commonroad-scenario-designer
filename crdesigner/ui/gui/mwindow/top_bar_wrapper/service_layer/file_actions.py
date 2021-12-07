@@ -64,7 +64,7 @@ def _open_path(mwindow, path):
         scenario, pps = commonroad_reader.open()
     except Exception as e:
         QMessageBox.warning(mwindow, "CommonRoad XML error",
-                            "There was an error during the loading of the selected CommonRoad file.\n\n" + \
+                            "There was an error during the loading of the selected CommonRoad file.\n\n" +
                             "Syntax Error: {}".format(e), QMessageBox.Ok, )
         return
 
