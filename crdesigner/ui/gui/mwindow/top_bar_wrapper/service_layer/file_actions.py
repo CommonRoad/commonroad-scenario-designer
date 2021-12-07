@@ -77,8 +77,7 @@ def _open_path(mwindow, path):
         return
 
     filename = os.path.splitext(os.path.basename(path))[0]
-    _open_scenario(scenario, filename, pps)
-
+    _open_scenario(mwindow, scenario, filename, pps)
 
 def _open_scenario(mwindow, new_scenario, filename="new_scenario", pps=None):
     if mwindow.check_scenario(new_scenario) >= 2:

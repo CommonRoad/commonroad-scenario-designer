@@ -7,7 +7,7 @@ from commonroad.scenario.intersection import IntersectionIncomingElement
 from commonroad.scenario.lanelet import Lanelet, LineMarking, LaneletNetwork, StopLine
 from commonroad.scenario.scenario import Scenario, ScenarioID
 
-from crdesigner.input_output.gui.misc.map_creator import MapCreator
+from crdesigner.ui.gui.mwindow.service_layer.map_creator import MapCreator
 
 __author__ = "Aaron Kaefer, Marcus Gabler, Sebastian Maierhofer"
 __copyright__ = "TUM Cyber-Physical Systems Group"
