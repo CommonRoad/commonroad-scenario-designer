@@ -9,6 +9,7 @@ from commonroad.scenario.lanelet import LaneletNetwork
 from commonroad.common.file_reader import CommonRoadFileReader
 from crdesigner.ui.gui.mwindow.top_bar_wrapper.service_layer.general_services import create_action
 from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMO_AVAILABLE
+
 if SUMO_AVAILABLE:
     pass
 
@@ -18,17 +19,17 @@ def create_file_actions(mwindow):
         Function to create the file actions in the menu bar.
     """
     fileNewAction = create_action(mwindow=mwindow, text="New", icon=QIcon(":/icons/new_file.png"), checkable=False,
-            slot=file_new, tip="New Commonroad File", shortcut=QKeySequence.New)
+                                  slot=file_new, tip="New Commonroad File", shortcut=QKeySequence.New)
     fileOpenAction = create_action(mwindow=mwindow, text="Open", icon=QIcon(":/icons/open_file.png"), checkable=False,
-            slot=open_commonroad_file, tip="Open Commonroad File", shortcut=QKeySequence.Open)
+                                   slot=open_commonroad_file, tip="Open Commonroad File", shortcut=QKeySequence.Open)
     separator = QAction(mwindow)
     separator.setSeparator(True)
 
     fileSaveAction = create_action(mwindow=mwindow, text="Save", icon=QIcon(":/icons/save_file.png"), checkable=False,
-            slot=file_save, tip="Save Commonroad File", shortcut=QKeySequence.Save)
+                                   slot=file_save, tip="Save Commonroad File", shortcut=QKeySequence.Save)
     separator.setSeparator(True)
     exitAction = create_action(mwindow=mwindow, text="Quit", icon=QIcon(":/icons/close.png"), checkable=False,
-                                         slot=_close_window, tip="Quit", shortcut=QKeySequence.Close)
+                               slot=_close_window, tip="Quit", shortcut=QKeySequence.Close)
     return fileNewAction, fileOpenAction, separator, fileSaveAction, exitAction
 
 
@@ -49,16 +50,11 @@ def file_new(mwindow):
 
 def open_commonroad_file(mwindow):
     """ """
-    path, _ = QFileDialog.getOpenFileName(
-        mwindow,
-        "Open a CommonRoad scenario",
-        "",
-        "CommonRoad scenario files *.xml (*.xml)",
-        options=QFileDialog.Options(),
-    )
+    path, _ = QFileDialog.getOpenFileName(mwindow, "Open a CommonRoad scenario", "",
+            "CommonRoad scenario files *.xml (*.xml)", options=QFileDialog.Options(), )
     if not path:
         return
-    _open_path(mwindow=mwindow,path=path)
+    _open_path(mwindow=mwindow, path=path)
 
 
 def _open_path(mwindow, path):
@@ -67,17 +63,15 @@ def _open_path(mwindow, path):
         commonroad_reader = CommonRoadFileReader(path)
         scenario, pps = commonroad_reader.open()
     except Exception as e:
-        QMessageBox.warning(
-            mwindow,
-            "CommonRoad XML error",
-            "There was an error during the loading of the selected CommonRoad file.\n\n"
-            + "Syntax Error: {}".format(e),
-            QMessageBox.Ok,
-        )
+        QMessageBox.warning(mwindow, "CommonRoad XML error",
+                "There was an error during the loading of the selected CommonRoad file.\n\n" + "Syntax Error: {"
+                                                                                               "}".format(
+                    e), QMessageBox.Ok, )
         return
 
     filename = os.path.splitext(os.path.basename(path))[0]
     _open_scenario(mwindow, scenario, filename, pps)
+
 
 def _open_scenario(mwindow, new_scenario, filename="new_scenario", pps=None):
     if mwindow.check_scenario(new_scenario) >= 2:
@@ -86,7 +80,7 @@ def _open_scenario(mwindow, new_scenario, filename="new_scenario", pps=None):
     mwindow.filename = filename
     if SUMO_AVAILABLE:
         mwindow.cr_viewer.open_scenario(new_scenario, mwindow.obstacle_toolbox.sumo_simulation.config,
-                                     planning_problem_set=pps)
+                                        planning_problem_set=pps)
         mwindow.obstacle_toolbox.sumo_simulation.scenario = mwindow.cr_viewer.current_scenario
     else:
         mwindow.cr_viewer.open_scenario(new_scenario, planning_problem_set=pps)
@@ -109,8 +103,7 @@ def file_save(mwindow):
     """Function to save a CR .xml file."""
     if mwindow.cr_viewer.current_scenario is None:
         messbox = QMessageBox()
-        messbox.warning(mwindow, "Warning", "There is no file to save!",
-                        QMessageBox.Ok, QMessageBox.Ok)
+        messbox.warning(mwindow, "Warning", "There is no file to save!", QMessageBox.Ok, QMessageBox.Ok)
         messbox.close()
         return
 
@@ -128,9 +121,7 @@ def _close_window(mwindow):
     """
         For closing the window.
     """
-    reply = QMessageBox.warning(mwindow, "Warning",
-                                "Do you really want to quit?",
-                                QMessageBox.Yes | QMessageBox.No,
+    reply = QMessageBox.warning(mwindow, "Warning", "Do you really want to quit?", QMessageBox.Yes | QMessageBox.No,
                                 QMessageBox.Yes)
     if reply == QMessageBox.Yes:
         qApp.quit()
