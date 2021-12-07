@@ -51,7 +51,7 @@ def file_new(mwindow):
 def open_commonroad_file(mwindow):
     """ """
     path, _ = QFileDialog.getOpenFileName(mwindow, "Open a CommonRoad scenario", "",
-            "CommonRoad scenario files *.xml (*.xml)", options=QFileDialog.Options(), )
+                                          "CommonRoad scenario files *.xml (*.xml)", options=QFileDialog.Options(), )
     if not path:
         return
     _open_path(mwindow=mwindow, path=path)
@@ -64,9 +64,8 @@ def _open_path(mwindow, path):
         scenario, pps = commonroad_reader.open()
     except Exception as e:
         QMessageBox.warning(mwindow, "CommonRoad XML error",
-                "There was an error during the loading of the selected CommonRoad file.\n\n" + "Syntax Error: {"
-                                                                                               "}".format(
-                    e), QMessageBox.Ok, )
+                            "There was an error during the loading of the selected CommonRoad file.\n\n" + \
+                            "Syntax Error: {}".format(e), QMessageBox.Ok, )
         return
 
     filename = os.path.splitext(os.path.basename(path))[0]
