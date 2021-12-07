@@ -125,7 +125,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
     def create_obstacle_toolbox(self):
         """ Create the obstacle toolbox."""
-        self.obstacle_toolbox = ObstacleToolbox(self.cr_viewer.current_scenario, self.toolbox_callback, self.tmp_folder)
+        self.obstacle_toolbox = ObstacleToolbox(self.cr_viewer.current_scenario, self.toolbox_callback, self.tmp_folder, self.text_browser)
         self.addDockWidget(Qt.RightDockWidgetArea, self.obstacle_toolbox)
 
     def viewer_callback(self, selected_object: Union[Lanelet, Obstacle], output: str):

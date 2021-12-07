@@ -25,14 +25,15 @@ except ImportError:
 
 
 class ObstacleToolboxUI(Toolbox):
-    def __init__(self):
+    def __init__(self, text_browser):
         super().__init__()
+
+        self.text_browser = text_browser
 
     def define_sections(self):
         """reimplement this to define all your sections
         and add them as (title, widget) tuples to self.sections
         """
-        #TODO somehow create a validator that checks so can only input 2 doubles
         #this validator always has the format with a dot as decimal separator
         self.float_validator = QDoubleValidator()
         self.float_validator.setLocale(QLocale("en_US"))
@@ -266,7 +267,7 @@ class ObstacleToolboxUI(Toolbox):
     def remove_vertice(self, i = -1):
         #check so there is at least 3 vertices
         if len(self.vertices_x) <= 3:
-            #TODO add some kind of warning message that you have to have at least 3 vertices
+            self.text_browser.append("At least 3 vertices are needed to create a polygon")
             return
         if i == -1:
             sending_button = self.sender()
