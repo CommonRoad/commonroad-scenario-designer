@@ -8,7 +8,8 @@ from crdesigner.ui.gui.mwindow.service_layer.general_services import setup_mwind
 from crdesigner.ui.gui.mwindow.service_layer.general_services import center
 from crdesigner.ui.gui.mwindow.service_layer.file_actions import close_window
 from crdesigner.ui.gui.mwindow.top_bar_wrapper.top_bar_wrapper import TopBarWrapper
-from crdesigner.ui.gui.mwindow.toolboxes.road_network_toolbox.create_road_network_toolbox import create_road_network_toolbox
+from crdesigner.ui.gui.mwindow.toolboxes.road_network_toolbox.create_road_network_toolbox \
+    import create_road_network_toolbox
 from crdesigner.ui.gui.mwindow.toolboxes.converter_toolbox.create_converter_toolbox import create_converter_toolbox
 from crdesigner.ui.gui.mwindow.toolboxes.obstacle_toolbox.create_obstacle_toolbox import create_obstacle_toolbox
 from crdesigner.ui.gui.CONSTANTS import *

@@ -16,8 +16,7 @@ class AnimatedViewerWrapper:
         self.road_network_toolbox = road_network_toolbox
         self.obstacle_toolbox = obstacle_toolbox
         self.crdesigner_console_wrapper = crdesigner_console_wrapper
-        self.viewer_dock = None  # this is called so weird because to not cause any confusion -
-                                         # it is assigned to the mainwindow anyway
+        self.viewer_dock = None
         self.mwindow = mwindow  # handle back to the main window
 
     def create_viewer_dock(self):

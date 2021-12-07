@@ -78,8 +78,9 @@ def _open_scenario(mwindow, new_scenario, filename="new_scenario", pps=None):
         return
     mwindow.filename = filename
     if SUMO_AVAILABLE:
-        mwindow.animated_viewer_wrapper.cr_viewer.open_scenario(new_scenario, mwindow.obstacle_toolbox.sumo_simulation.config,
-                                        planning_problem_set=pps)
+        mwindow.animated_viewer_wrapper.cr_viewer.open_scenario(new_scenario,
+                                                                mwindow.obstacle_toolbox.sumo_simulation.config,
+                                                                planning_problem_set=pps)
         mwindow.obstacle_toolbox.sumo_simulation.scenario = mwindow.animated_viewer_wrapper.cr_viewer.current_scenario
     else:
         mwindow.animated_viewer_wrapper.cr_viewer.open_scenario(new_scenario, planning_problem_set=pps)
