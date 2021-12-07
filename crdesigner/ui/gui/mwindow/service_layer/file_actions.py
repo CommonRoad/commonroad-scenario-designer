@@ -87,7 +87,7 @@ def _open_scenario(self, new_scenario, filename="new_scenario", pps=None):
         self.obstacle_toolbox.sumo_simulation.scenario = self.cr_viewer.current_scenario
     else:
         self.cr_viewer.open_scenario(new_scenario, planning_problem_set=pps)
-    self.update_view(focus_on_network=True)
+    self.animated_viewer_wrapper.update_view(focus_on_network=True)
     self.store_scenario()
     self.update_toolbox_scenarios()
     update_to_new_scenario(self)

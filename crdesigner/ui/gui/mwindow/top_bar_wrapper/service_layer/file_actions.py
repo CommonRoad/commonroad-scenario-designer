@@ -43,8 +43,8 @@ def file_new(mwindow):
     scenario = Scenario(0.1, affiliation="Technical University of Munich", source="CommonRoad Scenario Designer")
     net = LaneletNetwork()
     scenario.lanelet_network = net
-    mwindow.cr_viewer.current_scenario = scenario
-    mwindow.cr_viewer.current_pps = None
+    mwindow.animated_viewer_wrapper.cr_viewer.current_scenario = scenario
+    mwindow.animated_viewer_wrapper.cr_viewer.current_pps = None
     _open_scenario(mwindow=mwindow, new_scenario=scenario)
 
 
@@ -78,12 +78,12 @@ def _open_scenario(mwindow, new_scenario, filename="new_scenario", pps=None):
         return
     mwindow.filename = filename
     if SUMO_AVAILABLE:
-        mwindow.cr_viewer.open_scenario(new_scenario, mwindow.obstacle_toolbox.sumo_simulation.config,
+        mwindow.animated_viewer_wrapper.cr_viewer.open_scenario(new_scenario, mwindow.obstacle_toolbox.sumo_simulation.config,
                                         planning_problem_set=pps)
-        mwindow.obstacle_toolbox.sumo_simulation.scenario = mwindow.cr_viewer.current_scenario
+        mwindow.obstacle_toolbox.sumo_simulation.scenario = mwindow.animated_viewer_wrapper.cr_viewer.current_scenario
     else:
-        mwindow.cr_viewer.open_scenario(new_scenario, planning_problem_set=pps)
-    mwindow.update_view(focus_on_network=True)
+        mwindow.animated_viewer_wrapper.cr_viewer.open_scenario(new_scenario, planning_problem_set=pps)
+    mwindow.animated_viewer_wrapper.update_view(focus_on_network=True)
     mwindow.store_scenario()
     mwindow.update_toolbox_scenarios()
     update_to_new_scenario(mwindow)
@@ -93,25 +93,26 @@ def update_to_new_scenario(mwindow):
     """"""
     update_max_step(mwindow)
     mwindow.initialize_toolboxes()
-    mwindow.viewer_dock.setWindowIcon(QIcon(":/icons/cr1.ico"))
-    if mwindow.cr_viewer.current_scenario is not None:
-        mwindow.console_wrapper.text_browser.append("Loading " + mwindow.filename)
+    mwindow.animated_viewer_wrapper.viewer_dock.setWindowIcon(QIcon(":/icons/cr1.ico"))
+    if mwindow.animated_viewer_wrapper.cr_viewer.current_scenario is not None:
+        mwindow.crdesigner_console_wrapper.text_browser.append("Loading " + mwindow.filename)
 
 
 def file_save(mwindow):
     """Function to save a CR .xml file."""
-    if mwindow.cr_viewer.current_scenario is None:
+    if mwindow.animated_viewer_wrapper.cr_viewer.current_scenario is None:
         messbox = QMessageBox()
         messbox.warning(mwindow, "Warning", "There is no file to save!", QMessageBox.Ok, QMessageBox.Ok)
         messbox.close()
         return
 
-    mwindow.scenario_saving_dialog.show(mwindow.cr_viewer.current_scenario, mwindow.cr_viewer.current_pps)
+    mwindow.scenario_saving_dialog.show(mwindow.animated_viewer_wrapper.cr_viewer.current_scenario,
+                                        mwindow.animated_viewer_wrapper.cr_viewer.current_pps)
 
 
 def update_max_step(mwindow, value: int = -1):
     logging.info('update_max_step')
-    value = value if value > -1 else mwindow.cr_viewer.max_timestep
+    value = value if value > -1 else mwindow.animated_viewer_wrapper.cr_viewer.max_timestep
     mwindow.top_bar_wrapper.toolbar_wrapper.label2.setText(' / ' + str(value))
     mwindow.top_bar_wrapper.toolbar_wrapper.slider.setMaximum(value)
 

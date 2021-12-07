@@ -67,7 +67,7 @@ class ToolBarWrapper:
         self.slider.valueChanged.connect(lambda value, ov=mwindow: _time_step_change(value=value, mwindow=ov))
         self.slider.sliderPressed.connect(lambda: _detect_slider_clicked(mwindow))
         self.slider.sliderReleased.connect(lambda: _detect_slider_release(mwindow))
-        mwindow.cr_viewer.time_step.subscribe(self.slider.setValue)
+        mwindow.animated_viewer_wrapper.cr_viewer.time_step.subscribe(self.slider.setValue)
         self.tb4.addWidget(self.slider)
 
         self.label1 = QLabel('  Time Stamp: 0', mwindow)
@@ -114,7 +114,7 @@ def _undo_action(mwindow):
     else:
         return
     mwindow.cr_viewer.current_scenario = mwindow.scenarios[mwindow.current_scenario_index]
-    mwindow.update_view(focus_on_network=True)
+    mwindow.animated_viewer_wrapper.update_view(focus_on_network=True)
     mwindow.update_toolbox_scenarios()
 
 
@@ -127,7 +127,7 @@ def _redo_action(mwindow):
     else:
         return
     mwindow.cr_viewer.current_scenario = mwindow.scenarios[mwindow.current_scenario_index]
-    mwindow.update_view(focus_on_network=True)
+    mwindow.animated_viewer_wrapper.update_view(focus_on_network=True)
     mwindow.update_toolbox_scenarios()
 
 
@@ -144,12 +144,12 @@ def play_pause_animation(mwindow, open_commonroad_file):
         return
     if not mwindow.play_activated:
         mwindow.cr_viewer.play()
-        mwindow.console_wrapper.text_browser.append("Playing the animation")
+        mwindow.crdesigner_console_wrapper.text_browser.append("Playing the animation")
         mwindow.top_bar_wrapper.toolbar_wrapper.button_play_pause.setIcon(QIcon(":/icons/pause.png"))
         mwindow.play_activated = True
     else:
         mwindow.cr_viewer.pause()
-        mwindow.console_wrapper.text_browser.append("Pause the animation")
+        mwindow.crdesigner_console_wrapper.text_browser.append("Pause the animation")
         mwindow.top_bar_wrapper.toolbar_wrapper.button_play_pause.setIcon(QIcon(":/icons/play.png"))
         mwindow.play_activated = False
 
