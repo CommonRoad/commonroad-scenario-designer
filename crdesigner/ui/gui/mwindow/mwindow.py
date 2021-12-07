@@ -6,7 +6,7 @@ from crdesigner.ui.gui.mwindow.crdesigner_console_wrapper.crdesigner_console_wra
 from crdesigner.ui.gui.mwindow.service_layer.general_services import setup_tmp
 from crdesigner.ui.gui.mwindow.service_layer.general_services import setup_mwindow
 from crdesigner.ui.gui.mwindow.service_layer.general_services import center
-from crdesigner.ui.gui.mwindow.service_layer.file_actions import close_window
+from crdesigner.ui.gui.mwindow.service_layer.general_services import close_window
 from crdesigner.ui.gui.mwindow.top_bar_wrapper.top_bar_wrapper import TopBarWrapper
 from crdesigner.ui.gui.mwindow.toolboxes.road_network_toolbox.create_road_network_toolbox \
     import create_road_network_toolbox

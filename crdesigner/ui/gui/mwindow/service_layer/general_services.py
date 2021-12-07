@@ -2,6 +2,7 @@ import pathlib
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
+import logging
 
 from crdesigner.ui.gui.mwindow.service_layer.util import *
 import copy
@@ -31,32 +32,6 @@ def setup_mwindow(mwindow):
     mwindow.setWindowTitle("CommonRoad Scenario Designer")
     mwindow.centralwidget.setStyleSheet('background-color:rgb(150,150,150)')
     mwindow.setWindowFlag(Qt.Window)
-
-
-# TODO remove here the actions
-
-
-def create_action(mwindow, text, icon=None, checkable=False, slot=None, tip=None, shortcut=None):
-    """
-        Generic function used to create actions for the settings or the menu bar.
-    """
-    action = QAction(text, mwindow)
-    if icon is not None:
-        action.setIcon(QIcon(icon))
-    if checkable:
-        # toggle, True means on/off state, False means simply executed
-        action.setCheckable(True)
-        if slot is not None:
-            action.toggled.connect(slot)
-    else:
-        if slot is not None:
-            action.triggered.connect(slot)
-    if tip is not None:
-        action.setToolTip(tip)  # toolbar_wrapper tip
-        action.setStatusTip(tip)  # statusbar tip
-    if shortcut is not None:
-        action.setShortcut(shortcut)  # shortcut
-    return action
 
 
 def center(mwindow):
@@ -148,3 +123,13 @@ def check_scenario_service_layer(mwindow, scenario) -> int:
         )
 
     return error_score
+
+
+def close_window(mwindow):
+    """
+        For closing the window.
+    """
+    reply = QMessageBox.warning(mwindow, "Warning", "Do you really want to quit?", QMessageBox.Yes | QMessageBox.No,
+                                QMessageBox.Yes)
+    if reply == QMessageBox.Yes:
+        qApp.quit()
