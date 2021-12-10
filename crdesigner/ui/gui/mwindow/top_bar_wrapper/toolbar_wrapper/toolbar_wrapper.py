@@ -133,7 +133,7 @@ def _redo_action(mwindow):
 
 def play_pause_animation(mwindow, open_commonroad_file):
     """Function connected with the play button in the sumo-toolbar_wrapper."""
-    if not mwindow.cr_viewer.current_scenario:
+    if not mwindow.animated_viewer_wrapper.cr_viewer.current_scenario:
         messbox = QMessageBox()
         reply = messbox.warning(
             mwindow, "Warning",
@@ -143,22 +143,22 @@ def play_pause_animation(mwindow, open_commonroad_file):
             open_commonroad_file()
         return
     if not mwindow.play_activated:
-        mwindow.cr_viewer.play()
+        mwindow.animated_viewer_wrapper.cr_viewer.play()
         mwindow.crdesigner_console_wrapper.text_browser.append("Playing the animation")
         mwindow.top_bar_wrapper.toolbar_wrapper.button_play_pause.setIcon(QIcon(":/icons/pause.png"))
         mwindow.play_activated = True
     else:
-        mwindow.cr_viewer.pause()
+        mwindow.animated_viewer_wrapper.cr_viewer.pause()
         mwindow.crdesigner_console_wrapper.text_browser.append("Pause the animation")
         mwindow.top_bar_wrapper.toolbar_wrapper.button_play_pause.setIcon(QIcon(":/icons/play.png"))
         mwindow.play_activated = False
 
 
 def _time_step_change(mwindow, value):
-    if mwindow.cr_viewer.current_scenario:
-        mwindow.cr_viewer.set_timestep(value)
+    if mwindow.animated_viewer_wrapper.cr_viewer.current_scenario:
+        mwindow.animated_viewer_wrapper.cr_viewer.set_timestep(value)
         mwindow.label1.setText('  Time Stamp: ' + str(value))
-        mwindow.cr_viewer.animation.event_source.start()
+        mwindow.animated_viewer_wrapper.cr_viewer.animation.event_source.start()
 
 
 def _detect_slider_clicked(mwindow):
