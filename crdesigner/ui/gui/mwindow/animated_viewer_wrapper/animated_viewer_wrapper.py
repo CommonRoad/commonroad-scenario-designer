@@ -10,12 +10,9 @@ from PyQt5.QtWidgets import *
 
 class AnimatedViewerWrapper:
 
-    def __init__(self, road_network_toolbox, obstacle_toolbox, crdesigner_console_wrapper, mwindow):
+    def __init__(self, mwindow):
         self.cr_viewer = AnimatedViewer(mwindow, self.viewer_callback)
         # handle to the toolboxes and the console for the viewer callback
-        self.road_network_toolbox = road_network_toolbox
-        self.obstacle_toolbox = obstacle_toolbox
-        self.crdesigner_console_wrapper = crdesigner_console_wrapper
         self.viewer_dock = None
         self.mwindow = mwindow  # handle back to the main window
 
@@ -35,16 +32,16 @@ class AnimatedViewerWrapper:
     def viewer_callback(self, selected_object: Union[Lanelet, Obstacle], output: str):
         """Callback when the user clicks a lanelet inside the scenario visualization."""
         if isinstance(selected_object, Lanelet):
-            self.road_network_toolbox.road_network_toolbox.selected_lanelet_two.setCurrentText(
-                    self.road_network_toolbox.road_network_toolbox.selected_lanelet_one.currentText())
-            self.road_network_toolbox.road_network_toolbox.selected_lanelet_one.setCurrentText(
+            self.mwindow.road_network_toolbox.road_network_toolbox.selected_lanelet_two.setCurrentText(
+                    self.mwindow.road_network_toolbox.road_network_toolbox.selected_lanelet_one.currentText())
+            self.mwindow.road_network_toolbox.road_network_toolbox.selected_lanelet_one.setCurrentText(
                     str(selected_object.lanelet_id))
-            self.road_network_toolbox.road_network_toolbox.selected_lanelet_update.setCurrentText(
+            self.mwindow.road_network_toolbox.road_network_toolbox.selected_lanelet_update.setCurrentText(
                     str(selected_object.lanelet_id))
         elif isinstance(selected_object, Obstacle):
-            self.obstacle_toolbox.obstacle_toolbox.selected_obstacle.setCurrentText(str(selected_object.obstacle_id))
+            self.mwindow.obstacle_toolbox.selected_obstacle.setCurrentText(str(selected_object.obstacle_id))
         if output != "":
-            self.crdesigner_console_wrapper.text_browser.append(output)
+            self.mwindow.crdesigner_console_wrapper.text_browser.append(output)
 
     def update_view(self, focus_on_network=None):
         """ Update all components. """

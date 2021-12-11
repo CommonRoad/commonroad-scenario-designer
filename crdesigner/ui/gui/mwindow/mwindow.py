@@ -52,10 +52,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
         # init any objects here
         self.scenario_saving_dialog = ScenarioDialog()
-        self.animated_viewer_wrapper = AnimatedViewerWrapper(road_network_toolbox=self.road_network_toolbox,
-                                                             obstacle_toolbox=self.obstacle_toolbox,
-                                                             crdesigner_console_wrapper=self.crdesigner_console_wrapper,
-                                                             mwindow=self)
+        self.animated_viewer_wrapper = AnimatedViewerWrapper(mwindow=self)
         # call the setup methods in the service layer
         setup_tmp(tmp_folder_path=self.tmp_folder)
         setup_mwindow(self)
