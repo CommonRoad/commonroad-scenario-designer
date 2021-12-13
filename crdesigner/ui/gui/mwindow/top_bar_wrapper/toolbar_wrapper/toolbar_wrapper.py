@@ -53,7 +53,7 @@ class ToolBarWrapper:
 
         self.tb4 = mwindow.addToolBar("Animation Play")
         self.button_play_pause = QAction(QIcon(":/icons/play.png"), "Play the animation", mwindow)
-        self.button_play_pause.triggered.connect(lambda: play_pause_animation(mwindow=mwindow, open_commonroad_file=(lambda: open_commonroad_file(mwindow))))
+        self.button_play_pause.triggered.connect(lambda: play_pause_animation(mwindow=mwindow, open_commonroad_file=(lambda mw: open_commonroad_file(mw))))
         self.tb4.addAction(self.button_play_pause)
 
         self.slider = QSlider(Qt.Horizontal)
@@ -78,7 +78,7 @@ class ToolBarWrapper:
 
         self.action_save_video = QAction(QIcon(":/icons/save_video.png"), "Save Video", mwindow)
         self.tb4.addAction(self.action_save_video)
-        self.action_save_video.triggered.connect(_save_video)
+        self.action_save_video.triggered.connect(lambda: _save_video(mwindow,open_commonroad_file))
 
 
 # functions which are passed as arguments to elements of the gui
@@ -140,7 +140,7 @@ def play_pause_animation(mwindow, open_commonroad_file):
             "Please load or create a CommonRoad scenario before attempting to play",
             QMessageBox.Ok | QMessageBox.No, QMessageBox.Ok)
         if (reply == QMessageBox.Ok):
-            open_commonroad_file()
+            open_commonroad_file(mwindow)
         return
     if not mwindow.play_activated:
         mwindow.animated_viewer_wrapper.cr_viewer.play()
@@ -157,35 +157,35 @@ def play_pause_animation(mwindow, open_commonroad_file):
 def _time_step_change(mwindow, value):
     if mwindow.animated_viewer_wrapper.cr_viewer.current_scenario:
         mwindow.animated_viewer_wrapper.cr_viewer.set_timestep(value)
-        mwindow.label1.setText('  Time Stamp: ' + str(value))
+        mwindow.top_bar_wrapper.toolbar_wrapper.label1.setText('  Time Stamp: ' + str(value))
         mwindow.animated_viewer_wrapper.cr_viewer.animation.event_source.start()
 
 
 def _detect_slider_clicked(mwindow):
     mwindow.slider_clicked = True
-    mwindow.cr_viewer.pause()
-    mwindow.cr_viewer.dynamic.update_plot()
+    mwindow.animated_viewer_wrapper.cr_viewer.pause()
+    mwindow.animated_viewer_wrapper.cr_viewer.dynamic.update_plot()
 
 
 def _detect_slider_release(mwindow):
     mwindow.slider_clicked = False
-    mwindow.cr_viewer.pause()
+    mwindow.animated_viewer_wrapper.cr_viewer.pause()
 
 
 def _save_video(mwindow, open_commonroad_file):
     """Function connected with the save button in the Toolbar."""
-    if not mwindow.cr_viewer.current_scenario:
+    if not mwindow.animated_viewer_wrapper.cr_viewer.current_scenario:
         messbox = QMessageBox()
         reply = messbox.warning(mwindow, "Warning",
                                 "Please load or create a CommonRoad scenario before saving a video",
                                 QMessageBox.Ok | QMessageBox.No,
                                 QMessageBox.Ok)
         if (reply == QMessageBox.Ok):
-            open_commonroad_file()
+            open_commonroad_file(mwindow)
         else:
             messbox.close()
     else:
-        mwindow.text_browser.append("Save video for scenario with ID " +
-                                 str(mwindow.cr_viewer.current_scenario.scenario_id))
-        mwindow.cr_viewer.save_animation()
-        mwindow.text_browser.append("Saving the video finished.")
+        mwindow.crdesigner_console_wrapper.text_browser.append("Save video for scenario with ID " +
+                                 str(mwindow.animated_viewer_wrapper.cr_viewer.current_scenario.scenario_id))
+        mwindow.animated_viewer_wrapper.cr_viewer.save_animation()
+        mwindow.crdesigner_console_wrapper.text_browser.append("Saving the video finished.")
