@@ -28,7 +28,8 @@ class ToolBarWrapper:
 
         self.tb1.addSeparator()
         self.tb2 = mwindow.addToolBar("Toolboxes")
-        self.action_road_network_toolbox = QAction(QIcon(":/icons/road_network_toolbox.png"), "Open Road Network Toolbox", mwindow)
+        self.action_road_network_toolbox = QAction(QIcon(":/icons/road_network_toolbox.png"),
+                                                   "Open Road Network Toolbox", mwindow)
         self.tb2.addAction(self.action_road_network_toolbox)
         self.action_road_network_toolbox.triggered.connect(lambda: _road_network_toolbox_show(mwindow))
         self.action_obstacle_toolbox = QAction(QIcon(":/icons/obstacle_toolbox.png"), "Open Obstacle Toolbox", mwindow)
@@ -53,7 +54,8 @@ class ToolBarWrapper:
 
         self.tb4 = mwindow.addToolBar("Animation Play")
         self.button_play_pause = QAction(QIcon(":/icons/play.png"), "Play the animation", mwindow)
-        self.button_play_pause.triggered.connect(lambda: play_pause_animation(mwindow=mwindow, open_commonroad_file=(lambda mw: open_commonroad_file(mw))))
+        self.button_play_pause.triggered.connect(
+            lambda: play_pause_animation(mwindow=mwindow, open_commonroad_file=(lambda mw: open_commonroad_file(mw))))
         self.tb4.addAction(self.button_play_pause)
 
         self.slider = QSlider(Qt.Horizontal)
@@ -78,7 +80,7 @@ class ToolBarWrapper:
 
         self.action_save_video = QAction(QIcon(":/icons/save_video.png"), "Save Video", mwindow)
         self.tb4.addAction(self.action_save_video)
-        self.action_save_video.triggered.connect(lambda: _save_video(mwindow,open_commonroad_file))
+        self.action_save_video.triggered.connect(lambda: _save_video(mwindow, open_commonroad_file))
 
 
 # functions which are passed as arguments to elements of the gui
@@ -135,10 +137,9 @@ def play_pause_animation(mwindow, open_commonroad_file):
     """Function connected with the play button in the sumo-toolbar_wrapper."""
     if not mwindow.animated_viewer_wrapper.cr_viewer.current_scenario:
         messbox = QMessageBox()
-        reply = messbox.warning(
-            mwindow, "Warning",
-            "Please load or create a CommonRoad scenario before attempting to play",
-            QMessageBox.Ok | QMessageBox.No, QMessageBox.Ok)
+        reply = messbox.warning(mwindow, "Warning",
+                "Please load or create a CommonRoad scenario before attempting to play",
+                QMessageBox.Ok | QMessageBox.No, QMessageBox.Ok)
         if (reply == QMessageBox.Ok):
             open_commonroad_file(mwindow)
         return
@@ -176,16 +177,14 @@ def _save_video(mwindow, open_commonroad_file):
     """Function connected with the save button in the Toolbar."""
     if not mwindow.animated_viewer_wrapper.cr_viewer.current_scenario:
         messbox = QMessageBox()
-        reply = messbox.warning(mwindow, "Warning",
-                                "Please load or create a CommonRoad scenario before saving a video",
-                                QMessageBox.Ok | QMessageBox.No,
-                                QMessageBox.Ok)
+        reply = messbox.warning(mwindow, "Warning", "Please load or create a CommonRoad scenario before saving a video",
+                                QMessageBox.Ok | QMessageBox.No, QMessageBox.Ok)
         if (reply == QMessageBox.Ok):
             open_commonroad_file(mwindow)
         else:
             messbox.close()
     else:
-        mwindow.crdesigner_console_wrapper.text_browser.append("Save video for scenario with ID " +
-                                 str(mwindow.animated_viewer_wrapper.cr_viewer.current_scenario.scenario_id))
+        mwindow.crdesigner_console_wrapper.text_browser.append("Save video for scenario with ID " + str(
+            mwindow.animated_viewer_wrapper.cr_viewer.current_scenario.scenario_id))
         mwindow.animated_viewer_wrapper.cr_viewer.save_animation()
         mwindow.crdesigner_console_wrapper.text_browser.append("Saving the video finished.")
