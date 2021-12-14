@@ -10,7 +10,7 @@ from commonroad.scenario.scenario import Scenario
 
 from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMO_AVAILABLE
 if SUMO_AVAILABLE:
-    from crdesigner.input_output.gui.toolboxes.gui_sumo_simulation import SUMOSimulation
+    from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMOSimulation
 
 from crdesigner.ui.gui.mwindow.toolboxes.obstacle_toolbox.obstacle_toolbox_ui import ObstacleToolboxUI
 
@@ -21,7 +21,7 @@ class ObstacleToolbox(QDockWidget):
 
         self.current_scenario = current_scenario
         self.callback = callback
-        self.obstacle_toolbox = ObstacleToolboxUI()
+        self.obstacle_toolbox_ui = ObstacleToolboxUI()
         self.adjust_ui()
         self.connect_gui_elements()
         self.tmp_folder = tmp_folder
@@ -37,22 +37,22 @@ class ObstacleToolbox(QDockWidget):
         self.setFloating(True)
         self.setFeatures(QDockWidget.AllDockWidgetFeatures)
         self.setAllowedAreas(Qt.RightDockWidgetArea)
-        self.setWidget(self.obstacle_toolbox)
-        self.obstacle_toolbox.setMinimumWidth(450)
+        self.setWidget(self.obstacle_toolbox_ui)
+        self.obstacle_toolbox_ui.setMinimumWidth(450)
 
     def connect_gui_elements(self):
         self.initialize_obstacle_information()
 
-        self.obstacle_toolbox.selected_obstacle.currentTextChanged.connect(
+        self.obstacle_toolbox_ui.selected_obstacle.currentTextChanged.connect(
             lambda: self.update_obstacle_information())
-        self.obstacle_toolbox.obstacle_state_variable.currentTextChanged.connect(
+        self.obstacle_toolbox_ui.obstacle_state_variable.currentTextChanged.connect(
             lambda: self.plot_obstacle_state_profile())
 
-        self.obstacle_toolbox.button_remove_obstacle.clicked.connect(
+        self.obstacle_toolbox_ui.button_remove_obstacle.clicked.connect(
             lambda: self.remove_obstacle())
 
         if SUMO_AVAILABLE:
-            self.obstacle_toolbox.button_start_simulation.clicked.connect(
+            self.obstacle_toolbox_ui.button_start_simulation.clicked.connect(
                 lambda: self.start_sumo_simulation())
 
     def collect_obstacle_ids(self) -> List[int]:
@@ -77,18 +77,18 @@ class ObstacleToolbox(QDockWidget):
         Initializes GUI elements with intersection information.
         """
 
-        self.obstacle_toolbox.obstacle_width.setText("")
-        self.obstacle_toolbox.obstacle_length.setText("")
-        self.obstacle_toolbox.selected_obstacle.clear()
-        self.obstacle_toolbox.selected_obstacle.addItems(
+        self.obstacle_toolbox_ui.obstacle_width.setText("")
+        self.obstacle_toolbox_ui.obstacle_length.setText("")
+        self.obstacle_toolbox_ui.selected_obstacle.clear()
+        self.obstacle_toolbox_ui.selected_obstacle.addItems(
             ["None"] + [str(item) for item in self.collect_obstacle_ids()])
-        self.obstacle_toolbox.selected_obstacle.setCurrentIndex(0)
+        self.obstacle_toolbox_ui.selected_obstacle.setCurrentIndex(0)
 
     def plot_obstacle_state_profile(self):
-        if self.obstacle_toolbox.selected_obstacle.currentText() not in ["", "None"] and not self.update_ongoing:
-            obstacle_id = int(self.obstacle_toolbox.selected_obstacle.currentText())
+        if self.obstacle_toolbox_ui.selected_obstacle.currentText() not in ["", "None"] and not self.update_ongoing:
+            obstacle_id = int(self.obstacle_toolbox_ui.selected_obstacle.currentText())
             obstacle = self.current_scenario.obstacle_by_id(obstacle_id)
-            state_variable_name = self.obstacle_toolbox.obstacle_state_variable.currentText()
+            state_variable_name = self.obstacle_toolbox_ui.obstacle_state_variable.currentText()
             if state_variable_name == "x-position":
                 profile = [obstacle.initial_state.__getattribute__("position")[0]]
                 profile += [state.__getattribute__("position")[0]
@@ -105,19 +105,19 @@ class ObstacleToolbox(QDockWidget):
             time += [state.time_step for state in obstacle.prediction.trajectory.state_list]
 
             # clear previous profile
-            self.obstacle_toolbox.figure.clear()
+            self.obstacle_toolbox_ui.figure.clear()
 
             # create an axis
-            ax = self.obstacle_toolbox.figure.add_subplot(111)
+            ax = self.obstacle_toolbox_ui.figure.add_subplot(111)
 
             # plot data
             ax.plot(time, profile, '.-', markersize=4)
             ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.1f}'))
             ax.set_xlabel("time [s]")
             ax.set_ylabel(self.resolve_y_label(state_variable_name))
-            self.obstacle_toolbox.figure.tight_layout()
+            self.obstacle_toolbox_ui.figure.tight_layout()
             # refresh canvas
-            self.obstacle_toolbox.canvas.draw()
+            self.obstacle_toolbox_ui.canvas.draw()
 
     @staticmethod
     def resolve_y_label(state_variable_name: str) -> str:
@@ -141,28 +141,28 @@ class ObstacleToolbox(QDockWidget):
             return ""
 
     def update_obstacle_information(self):
-        if self.obstacle_toolbox.selected_obstacle.currentText() not in ["", "None"]:
+        if self.obstacle_toolbox_ui.selected_obstacle.currentText() not in ["", "None"]:
             self.update_ongoing = True
-            obstacle_id = int(self.obstacle_toolbox.selected_obstacle.currentText())
+            obstacle_id = int(self.obstacle_toolbox_ui.selected_obstacle.currentText())
             obstacle = self.current_scenario.obstacle_by_id(obstacle_id)
             if isinstance(obstacle.obstacle_shape, Rectangle):
-                self.obstacle_toolbox.obstacle_width.setText(str(obstacle.obstacle_shape.width))
-                self.obstacle_toolbox.obstacle_length.setText(str(obstacle.obstacle_shape.length))
+                self.obstacle_toolbox_ui.obstacle_width.setText(str(obstacle.obstacle_shape.width))
+                self.obstacle_toolbox_ui.obstacle_length.setText(str(obstacle.obstacle_shape.length))
             else:
-                self.obstacle_toolbox.obstacle_width.setText("")
-                self.obstacle_toolbox.obstacle_length.setText("")
-            self.obstacle_toolbox.obstacle_type.setCurrentText(obstacle.obstacle_type.value)
-            self.obstacle_toolbox.obstacle_state_variable.clear()
+                self.obstacle_toolbox_ui.obstacle_width.setText("")
+                self.obstacle_toolbox_ui.obstacle_length.setText("")
+            self.obstacle_toolbox_ui.obstacle_type.setCurrentText(obstacle.obstacle_type.value)
+            self.obstacle_toolbox_ui.obstacle_state_variable.clear()
             state_variables = [var for var in obstacle.initial_state.attributes if var not in ["position", "time_step"]]
 
             if "position" in obstacle.initial_state.attributes:
                 state_variables += ["x-position", "y-position"]
-            self.obstacle_toolbox.obstacle_state_variable.addItems(state_variables)
+            self.obstacle_toolbox_ui.obstacle_state_variable.addItems(state_variables)
             self.update_ongoing = False
             self.plot_obstacle_state_profile()
 
     def start_sumo_simulation(self):
-        num_time_steps = self.obstacle_toolbox.sumo_simulation_length.value()
+        num_time_steps = self.obstacle_toolbox_ui.sumo_simulation_length.value()
         self.sumo_simulation.set_simulation_length(num_time_steps)
         self.sumo_simulation.simulate()
         self.callback(self.sumo_simulation.simulated_scenario.value)
@@ -171,8 +171,8 @@ class ObstacleToolbox(QDockWidget):
         """
         Removes the selected obstacle from the scenario.
         """
-        if self.obstacle_toolbox.selected_obstacle.currentText() not in ["", "None"]:
-            obstacle_id = int(self.obstacle_toolbox.selected_obstacle.currentText())
+        if self.obstacle_toolbox_ui.selected_obstacle.currentText() not in ["", "None"]:
+            obstacle_id = int(self.obstacle_toolbox_ui.selected_obstacle.currentText())
             obstacle = self.current_scenario.obstacle_by_id(obstacle_id)
             self.current_scenario.remove_obstacle(obstacle)
             self.callback(self.current_scenario)
