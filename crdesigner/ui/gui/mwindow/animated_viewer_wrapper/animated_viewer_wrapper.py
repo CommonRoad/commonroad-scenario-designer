@@ -39,7 +39,8 @@ class AnimatedViewerWrapper:
             self.mwindow.road_network_toolbox.road_network_toolbox_ui.selected_lanelet_update.setCurrentText(
                     str(selected_object.lanelet_id))
         elif isinstance(selected_object, Obstacle):
-            self.mwindow.obstacle_toolbox.obstacle_toolbox_ui.selected_obstacle.setCurrentText(str(selected_object.obstacle_id))
+            self.mwindow.obstacle_toolbox.obstacle_toolbox_ui.selected_obstacle.setCurrentText(
+                    str(selected_object.obstacle_id))
         if output != "":
             self.mwindow.crdesigner_console_wrapper.text_browser.append(output)
 
