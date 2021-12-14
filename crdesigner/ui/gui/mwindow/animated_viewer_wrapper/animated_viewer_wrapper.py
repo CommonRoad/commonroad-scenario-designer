@@ -32,11 +32,11 @@ class AnimatedViewerWrapper:
     def viewer_callback(self, selected_object: Union[Lanelet, Obstacle], output: str):
         """Callback when the user clicks a lanelet inside the scenario visualization."""
         if isinstance(selected_object, Lanelet):
-            self.mwindow.road_network_toolbox.road_network_toolbox.selected_lanelet_two.setCurrentText(
-                    self.mwindow.road_network_toolbox.road_network_toolbox.selected_lanelet_one.currentText())
-            self.mwindow.road_network_toolbox.road_network_toolbox.selected_lanelet_one.setCurrentText(
+            self.mwindow.road_network_toolbox.road_network_toolbox_ui.selected_lanelet_two.setCurrentText(
+                    self.mwindow.road_network_toolbox.road_network_toolbox_ui.selected_lanelet_one.currentText())
+            self.mwindow.road_network_toolbox.road_network_toolbox_ui.selected_lanelet_one.setCurrentText(
                     str(selected_object.lanelet_id))
-            self.mwindow.road_network_toolbox.road_network_toolbox.selected_lanelet_update.setCurrentText(
+            self.mwindow.road_network_toolbox.road_network_toolbox_ui.selected_lanelet_update.setCurrentText(
                     str(selected_object.lanelet_id))
         elif isinstance(selected_object, Obstacle):
             self.mwindow.obstacle_toolbox.obstacle_toolbox.selected_obstacle.setCurrentText(str(selected_object.obstacle_id))
