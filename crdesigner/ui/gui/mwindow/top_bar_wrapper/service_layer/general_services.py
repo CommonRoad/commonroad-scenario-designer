@@ -1,16 +1,15 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 
-
 """
-    This file is a general collection of smaller functions which are used in the mwindow 
-    or by two or more components from the service_layer.
+This file is a general collection of smaller functions which are used in the mwindow 
+or by two or more components from the service_layer.
 """
 
 
 def create_action(mwindow, text, icon=None, checkable=False, slot=None, tip=None, shortcut=None):
     """
-        Generic function used to create actions for the settings or the menu bar.
+    Generic function used to create actions for the settings or the menu bar.
     """
     action = QAction(text, mwindow)
     if icon is not None:
