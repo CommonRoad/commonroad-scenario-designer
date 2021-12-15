@@ -1,14 +1,12 @@
 from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.animated_viewer_wrapper import AnimatedViewerWrapper
 from crdesigner.ui.gui.mwindow.service_layer.gui_resources.MainWindow import Ui_mainWindow
 from crdesigner.ui.gui.mwindow.service_layer.gui_resources.scenario_saving_dialog import ScenarioDialog
-from crdesigner.ui.gui.mwindow.service_layer import config
 from crdesigner.ui.gui.mwindow.crdesigner_console_wrapper.crdesigner_console_wrapper import CRDesignerConsoleWrapper
 from crdesigner.ui.gui.mwindow.service_layer.general_services import setup_tmp
 from crdesigner.ui.gui.mwindow.service_layer.general_services import setup_mwindow
 from crdesigner.ui.gui.mwindow.service_layer.general_services import center
 from crdesigner.ui.gui.mwindow.service_layer.general_services import close_window
 from crdesigner.ui.gui.mwindow.service_layer.config import MWINDOW_TMP_FOLDER_PATH
-from crdesigner.ui.gui.mwindow.service_layer.util import *
 from crdesigner.ui.gui.mwindow.service_layer.general_services import update_max_step_service_layer
 from crdesigner.ui.gui.mwindow.service_layer.general_services import store_scenario_service_layer
 from crdesigner.ui.gui.mwindow.service_layer.general_services import update_toolbox_scenarios_service_layer
@@ -21,7 +19,6 @@ from crdesigner.ui.gui.mwindow.toolboxes.obstacle_toolbox.create_obstacle_toolbo
 
 
 import logging
-import copy
 from PyQt5.QtWidgets import *
 from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMO_AVAILABLE
 if SUMO_AVAILABLE:

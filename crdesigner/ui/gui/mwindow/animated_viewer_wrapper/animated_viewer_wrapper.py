@@ -3,6 +3,7 @@ from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.commonroad_viewer import 
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 
 from typing import Union
+from ..service_layer import config
 from commonroad.scenario.lanelet import Lanelet
 from commonroad.scenario.obstacle import Obstacle
 from PyQt5.QtWidgets import *
