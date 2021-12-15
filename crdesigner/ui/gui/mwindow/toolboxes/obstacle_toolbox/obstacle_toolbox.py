@@ -176,4 +176,3 @@ class ObstacleToolbox(QDockWidget):
             obstacle = self.current_scenario.obstacle_by_id(obstacle_id)
             self.current_scenario.remove_obstacle(obstacle)
             self.callback(self.current_scenario)
-

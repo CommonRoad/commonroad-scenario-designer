@@ -25,4 +25,4 @@ class TopBarWrapper:
                                                open_web=self.open_web, open_forum=self.open_forum,
                                                fileSaveAction=self.fileSaveAction)
         self.toolbar_wrapper = ToolBarWrapper(mwindow=self.mwindow, file_new=file_new,
-                                              open_commonroad_file=open_commonroad_file,file_save=file_save)
+                                              open_commonroad_file=open_commonroad_file, file_save=file_save)

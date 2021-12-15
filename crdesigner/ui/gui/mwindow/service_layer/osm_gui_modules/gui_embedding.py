@@ -21,7 +21,8 @@ from crdesigner.ui.gui.mwindow.service_layer.osm_gui_modules.GUI_resources.lane_
     import Ui_LaneLinkEdit as llGUI_frame
 from crdesigner.ui.gui.mwindow.service_layer.osm_gui_modules.GUI_resources.scenario_view \
     import Ui_MainWindow as scenarioView
-from crdesigner.ui.gui.mwindow.service_layer.osm_gui_modules.GUI_resources.start_window import Ui_MainWindow as startWindow
+from crdesigner.ui.gui.mwindow.service_layer.osm_gui_modules.GUI_resources.start_window import Ui_MainWindow \
+    as startWindow
 from crdesigner.map_conversion.osm2cr.converter_modules.osm_operations.downloader import download_around_map
 
 from PyQt5 import QtCore

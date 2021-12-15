@@ -138,9 +138,9 @@ def play_pause_animation(mwindow, open_commonroad_file):
     if not mwindow.animated_viewer_wrapper.cr_viewer.current_scenario:
         messbox = QMessageBox()
         reply = messbox.warning(mwindow, "Warning",
-                "Please load or create a CommonRoad scenario before attempting to play",
-                QMessageBox.Ok | QMessageBox.No, QMessageBox.Ok)
-        if (reply == QMessageBox.Ok):
+                                "Please load or create a CommonRoad scenario before attempting to play",
+                                QMessageBox.Ok | QMessageBox.No, QMessageBox.Ok)
+        if reply == QMessageBox.Ok:
             open_commonroad_file(mwindow)
         return
     if not mwindow.play_activated:

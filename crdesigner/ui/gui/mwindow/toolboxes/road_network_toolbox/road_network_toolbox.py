@@ -57,7 +57,8 @@ class RoadNetworkToolbox(QDockWidget):
             lambda: self.lanelet_selection_changed())
 
         self.road_network_toolbox_ui.button_remove_lanelet.clicked.connect(lambda: self.remove_lanelet())
-        self.road_network_toolbox_ui.button_attach_to_other_lanelet.clicked.connect(lambda: self.attach_to_other_lanelet())
+        self.road_network_toolbox_ui.button_attach_to_other_lanelet.clicked.connect(
+                lambda: self.attach_to_other_lanelet())
         self.road_network_toolbox_ui.button_create_adjacent.clicked.connect(lambda: self.create_adjacent())
         self.road_network_toolbox_ui.button_connect_lanelets.clicked.connect(lambda: self.connect_lanelets())
         self.road_network_toolbox_ui.button_rotate_lanelet.clicked.connect(lambda: self.rotate_lanelet())
@@ -83,7 +84,8 @@ class RoadNetworkToolbox(QDockWidget):
         self.road_network_toolbox_ui.selected_traffic_light.currentTextChanged.connect(
             lambda: self.update_traffic_light_information())
 
-        self.road_network_toolbox_ui.button_four_way_intersection.clicked.connect(lambda: self.add_four_way_intersection())
+        self.road_network_toolbox_ui.button_four_way_intersection.clicked.connect(
+                lambda: self.add_four_way_intersection())
         self.road_network_toolbox_ui.button_three_way_intersection.clicked.connect(
             lambda: self.add_three_way_intersection())
         self.road_network_toolbox_ui.selected_intersection.currentTextChanged.connect(
@@ -362,7 +364,8 @@ class RoadNetworkToolbox(QDockWidget):
         traffic_signs = \
             {int(sign) for sign in self.road_network_toolbox_ui.lanelet_referenced_traffic_sign_ids.get_checked_items()}
         traffic_lights = \
-            {int(light) for light in self.road_network_toolbox_ui.lanelet_referenced_traffic_light_ids.get_checked_items()}
+            {int(light) for light in
+             self.road_network_toolbox_ui.lanelet_referenced_traffic_light_ids.get_checked_items()}
         if self.road_network_toolbox_ui.stop_line_start_x.text() != "" \
             and self.road_network_toolbox_ui.stop_line_end_x.text() != "" \
             and self.road_network_toolbox_ui.stop_line_start_y.text() != "" \
@@ -584,7 +587,8 @@ class RoadNetworkToolbox(QDockWidget):
         traffic_signs = \
             {int(sign) for sign in self.road_network_toolbox_ui.lanelet_referenced_traffic_sign_ids.get_checked_items()}
         traffic_lights = \
-            {int(light) for light in self.road_network_toolbox_ui.lanelet_referenced_traffic_light_ids.get_checked_items()}
+            {int(light) for light in
+             self.road_network_toolbox_ui.lanelet_referenced_traffic_light_ids.get_checked_items()}
         stop_line_at_end = False
         stop_line = None
         if self.road_network_toolbox_ui.stop_line_start_x.text() != "" \
@@ -1039,7 +1043,8 @@ class RoadNetworkToolbox(QDockWidget):
         self.road_network_toolbox_ui.intersection_incomings_table.setCellWidget(num_rows, 2, combo_box_successors_left)
         combo_box_successors_straight = CheckableComboBox()
         combo_box_successors_straight.addItems(lanelet_ids)
-        self.road_network_toolbox_ui.intersection_incomings_table.setCellWidget(num_rows, 3, combo_box_successors_straight)
+        self.road_network_toolbox_ui.intersection_incomings_table.setCellWidget(num_rows, 3,
+                                                                                combo_box_successors_straight)
         combo_box_successors_right = CheckableComboBox()
         combo_box_successors_right.addItems(lanelet_ids)
         self.road_network_toolbox_ui.intersection_incomings_table.setCellWidget(num_rows, 4, combo_box_successors_right)
@@ -1120,13 +1125,15 @@ class RoadNetworkToolbox(QDockWidget):
                 self.text_browser.append("_Warning:_ An incoming must consist at least of one lanelet.")
                 print("road_network_toolbox.py/add_intersection: An incoming must consist at least of one lanelet.")
                 return
-            successor_left = {int(item) for item in self.road_network_toolbox_ui.intersection_incomings_table.cellWidget(
+            successor_left = {int(item) for item in
+                              self.road_network_toolbox_ui.intersection_incomings_table.cellWidget(
                 row, 2).get_checked_items()}
             successor_straight = {int(item) for item in
                                   self.road_network_toolbox_ui.intersection_incomings_table.cellWidget(
                                       row, 3).get_checked_items()}
-            successor_right = {int(item) for item in self.road_network_toolbox_ui.intersection_incomings_table.cellWidget(
-                row, 4).get_checked_items()}
+            successor_right = {int(item) for item in
+                               self.road_network_toolbox_ui.intersection_incomings_table.cellWidget(
+                                       row, 4).get_checked_items()}
             if len(successor_left) + len(successor_right) + len(successor_straight) < 1:
                 print("An incoming must consist at least of one successor")
                 return

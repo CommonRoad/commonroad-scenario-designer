@@ -14,7 +14,8 @@ from crdesigner.map_conversion.osm2cr.converter_modules.cr_operations import exp
 from crdesigner.map_conversion.osm2cr.converter_modules.graph_operations import road_graph as rg
 from crdesigner.ui.gui.mwindow.service_layer.osm_gui_modules import gui_embedding, gui
 from crdesigner.ui.gui.mwindow.service_layer.osm_gui_modules import settings
-from crdesigner.ui.gui.mwindow.service_layer.osm_gui_modules.GUI_resources.start_window import Ui_MainWindow as startWindow
+from crdesigner.ui.gui.mwindow.service_layer.osm_gui_modules.GUI_resources.start_window import \
+    Ui_MainWindow as startWindow
 from crdesigner.ui.gui.mwindow.service_layer.converter_modules.converter_interface import ConverterInterface
 
 

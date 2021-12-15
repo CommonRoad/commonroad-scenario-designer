@@ -7,12 +7,10 @@ import logging
 from crdesigner.ui.gui.mwindow.service_layer.util import *
 import copy
 from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMO_AVAILABLE
-if SUMO_AVAILABLE:
-    from crdesigner.ui import SUMOSettings
 
 """
-    This file is a general collection of smaller functions which are used in the mwindow 
-    or by two or more components from the service_layer.
+This file is a general collection of smaller functions which are used in the mwindow
+or by two or more components from the service_layer.
 """
 
 

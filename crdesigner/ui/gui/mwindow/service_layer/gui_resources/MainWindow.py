@@ -38,4 +38,3 @@ class Ui_mainWindow(object):
     def retranslateUi(self, mainWindow):
         _translate = QtCore.QCoreApplication.translate
         mainWindow.setWindowTitle(_translate("mainWindow", "CR Scenario Designer"))
-        #self.toolBar.setWindowTitle(_translate("mainWindow", "toolBar"))

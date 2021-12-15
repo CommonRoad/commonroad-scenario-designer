@@ -16,7 +16,8 @@ def create_setting_actions(mwindow) -> (any, any, any, any):
     osm_settings = create_action(mwindow=mwindow, text="OSM Settings", icon="", checkable=False,
                                  slot=_show_osm_settings, tip="Show settings for osm converter", shortcut=None)
     opendrive_settings = create_action(mwindow=mwindow, text="OpenDRIVE Settings", icon="", checkable=False,
-            slot=_show_opendrive_settings, tip="Show settings for OpenDRIVE converter", shortcut=None)
+                                       slot=_show_opendrive_settings, tip="Show settings for OpenDRIVE converter",
+                                       shortcut=None)
     gui_settings = create_action(mwindow=mwindow, text="GUI Settings", icon="", checkable=False,
                                  slot=_show_gui_settings, tip="Show settings for the CR Scenario Designer",
                                  shortcut=None)
