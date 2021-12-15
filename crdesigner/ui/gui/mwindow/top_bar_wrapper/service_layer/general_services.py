@@ -1,11 +1,6 @@
-import pathlib
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
-from PyQt5.QtCore import *
 
-from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMO_AVAILABLE
-if SUMO_AVAILABLE:
-    from crdesigner.ui import SUMOSettings
 
 """
     This file is a general collection of smaller functions which are used in the mwindow 
