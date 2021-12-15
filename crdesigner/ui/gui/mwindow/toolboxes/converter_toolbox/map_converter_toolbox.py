@@ -30,8 +30,8 @@ from crdesigner.map_conversion.lanelet_lanelet2.cr2lanelet import CR2LaneletConv
 
 from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMO_AVAILABLE
 if SUMO_AVAILABLE:
-    from crdesigner.input_output.gui.toolboxes.gui_sumo_simulation import SUMOSimulation
-    from crdesigner.input_output.gui.settings.sumo_settings import SUMOSettings
+    from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMOSimulation
+    from crdesigner.ui.gui.mwindow.toolboxes.service_layer.sumo_settings import SUMOSettings
     from crdesigner.map_conversion.sumo_map.sumo2cr import convert_net_to_cr
 
 
