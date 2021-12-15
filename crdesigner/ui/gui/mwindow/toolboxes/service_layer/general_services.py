@@ -1,5 +1,4 @@
 """Generic file to move complexity"""
-from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMO_AVAILABLE
 
 
 def toolbox_callback(mwindow, scenario):
