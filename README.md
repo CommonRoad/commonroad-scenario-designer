@@ -156,7 +156,7 @@ Compared to version 0.1, the following features have been added or changed:
 A detailed overview about the changes in each version is provided in the [Changelog](https://gitlab.lrz.de/tum-cps/commonroad-scenario-designer/-/blob/main/CHANGELOG.md).
 
 ## Bug and feature reporting
-This release (v0.2) is still a BETA version.  
+This release (v0.3) is still a BETA version.  
 In case you detect a bug or you want to suggest a new feature, please report it in our [forum](https://commonroad.in.tum.de/forum/c/scenario-designer/18).   
 If you want to contribute to the toolbox, you can also post it in the [forum](https://commonroad.in.tum.de/forum/c/scenario-designer/18) or contact [Sebastian Maierhofer](sebastian.maierhofer@tum.de).
 
@@ -165,6 +165,15 @@ If you want to contribute to the toolbox, you can also post it in the [forum](ht
 Responsible: Sebastian Maierhofer (maintainer), Moritz Klischat  
 Contribution (in alphabetic order by last name): Maximilian Fruehauf, Marcus Gabler, Fabian Hoeltke, Aaron Kaefer, 
 Benjamin Orthen, Maximilian Rieger, Stefan Urban
+
+## Contribution Guidelines
+Where to place code:
+- The package uses 2 architectural styles:
+  - Descriptive Architecture:
+    - Every (bigger) part in the GUI has an own package. E.g. the mwindow represents the whole window, top_bar_wrapper has the menu_bar and the tool_bar etc.. If you want to add something then first have a look at the corresponding GUI part and then add it in the respective package.
+  - Service Layer:
+    - To seperate the "how" from the "what" a package called "service_layer" was introduced to all packages (if necessary). General helper / services are in the general_services.py file (a collection of functions). Others are named and used respectively. 
+How to comment:
 
 ## Citation
 **If you use our code for research, please consider citing our paper:**
