@@ -24,10 +24,10 @@ from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation impor
 if SUMO_AVAILABLE:
     from crdesigner.map_conversion.sumo_map.config import SumoConfig
     from crdesigner.map_conversion.sumo_map.cr2sumo.converter import CR2SumoMapConverter
-    from crdesigner.map_conversion.sumo_map import convert_net_to_cr
+    from crdesigner.map_conversion.sumo_map.sumo2cr import convert_net_to_cr
 
-#from crdesigner.api.map_conversion.osm2cr.converter_modules.converter import GraphScenario
 from crdesigner.map_conversion.osm2cr.converter_modules.cr_operations.export import convert_to_scenario
+from crdesigner.map_conversion.osm2cr.converter_modules.converter import GraphScenario
 
 
 def lanelet_to_commonroad(input_file: str, proj: str, left_driving: bool = False,

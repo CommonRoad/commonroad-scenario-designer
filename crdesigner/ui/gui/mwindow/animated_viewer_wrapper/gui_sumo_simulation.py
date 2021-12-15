@@ -8,7 +8,7 @@ from crdesigner.ui.gui.mwindow.service_layer.util import Observable
 
 # try to import sumo functionality
 try:
-    from crdesigner.api import SumoConfig
+    from crdesigner.map_conversion.sumo_map.config import SumoConfig
     from crdesigner.map_conversion.sumo_map.cr2sumo.converter import CR2SumoMapConverter
     from sumocr.interface.sumo_simulation import SumoSimulation
 
