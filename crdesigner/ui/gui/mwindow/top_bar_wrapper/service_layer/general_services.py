@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 
 """
-This file is a general collection of smaller functions which are used in the mwindow 
+This file is a general collection of smaller functions which are used in the mwindow
 or by two or more components from the service_layer.
 """
 
