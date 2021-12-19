@@ -10,7 +10,7 @@ from PyQt5.QtCore import *
 from commonroad.geometry.shape import Rectangle, Circle, Polygon
 from commonroad.scenario.scenario import Scenario
 from commonroad.scenario.obstacle import Obstacle, StaticObstacle, ObstacleType, DynamicObstacle
-from commonroad.scenario.trajectory import State
+from commonroad.scenario.trajectory import State, Trajectory
 from commonroad.prediction.prediction import Prediction
 
 from crdesigner.input_output.gui.toolboxes.gui_sumo_simulation import SUMO_AVAILABLE
@@ -18,6 +18,10 @@ if SUMO_AVAILABLE:
     from crdesigner.input_output.gui.toolboxes.gui_sumo_simulation import SUMOSimulation
 
 from crdesigner.input_output.gui.toolboxes.obstacle_toolbox_ui import ObstacleToolboxUI
+
+#test, maybe remove later
+from typing import Union
+from commonroad.prediction.prediction import Prediction, Occupancy, SetBasedPrediction, TrajectoryPrediction
 
 
 class ObstacleToolbox(QDockWidget):
@@ -61,7 +65,7 @@ class ObstacleToolbox(QDockWidget):
             lambda: self.remove_obstacle())
 
         self.obstacle_toolbox.button_add_static_obstacle.clicked.connect(
-           lambda: self.add_static_obstacle())
+           lambda: self.add_obstacle())
         
         self.obstacle_toolbox.obstacle_shape.currentTextChanged.connect(
             lambda: self.obstacle_toolbox.toggle_sections())
@@ -122,7 +126,7 @@ class ObstacleToolbox(QDockWidget):
                     float(self.obstacle_toolbox.obstacle_x_Position.text()),
                     float(self.obstacle_toolbox.obstacle_y_Position.text())
                 ]),
-                'orientation': 0, #math.radians(float(self.obstacle_toolbox.obstacle_orientation.text())),
+                'orientation': 0, 
                 'time_step': 1
                 })
             )
@@ -145,11 +149,81 @@ class ObstacleToolbox(QDockWidget):
                 'time_step': 1
                 })
             )
-
-        self.current_scenario.add_objects(static_obstacle)
+        self.current_scenario.add_objects(static_obstacle)       
         self.callback(self.current_scenario)
-    
-    #TODO check if fewer than 3 vertices and if they are the same
+
+    def dynamic_obstacle_details(self, obstacle_id):
+    #Function that creates dynamic obstacles
+    #test code maybe change later
+        if self.obstacle_toolbox.obstacle_shape.currentText() == "Rectangle":
+            dynamic_obstacle = DynamicObstacle(
+                obstacle_id = obstacle_id,
+
+                obstacle_type = ObstacleType(self.obstacle_toolbox.obstacle_type.currentText()),
+                obstacle_shape = Rectangle(
+                    length = float(self.obstacle_toolbox.obstacle_length.text()),
+                    width = float(self.obstacle_toolbox.obstacle_width.text()) 
+                ),
+
+                initial_state = State(**{'position': np.array([
+                    float(self.obstacle_toolbox.obstacle_x_Position.text()),
+                    float(self.obstacle_toolbox.obstacle_y_Position.text())
+                ]),
+                'orientation': math.radians(float(self.obstacle_toolbox.obstacle_orientation.text())),
+                'time_step': 1
+                }),
+                #test code, remove later
+                prediction = TrajectoryPrediction(
+                    shape = Rectangle(float(self.obstacle_toolbox.obstacle_length.text()), width = float(self.obstacle_toolbox.obstacle_width.text())),
+                    trajectory = Trajectory(
+                        initial_time_step = 2,
+                        state_list = [State(**{'position': np.array([1,1]),'orientation': 3,'time_step': 2, 'velocity': 7}),
+                         State(**{'position': np.array([2,2]),'orientation': 3,'time_step': 4, 'velocity': 7}),
+                         State(**{'position': np.array([5,5]),'orientation': 3,'time_step': 5, 'velocity': 7}),])
+                    #occupancy_set= [Occupancy(time_step=2, shape=Rectangle(length=3,width=3)), Occupancy(time_step=3, shape=Rectangle(length=3,width=3))]
+                )
+            )
+
+        elif self.obstacle_toolbox.obstacle_shape.currentText() == "Circle":
+            dynamic_obstacle = DynamicObstacle(
+                obstacle_id = obstacle_id,
+
+                obstacle_type = ObstacleType(self.obstacle_toolbox.obstacle_type.currentText()),
+                obstacle_shape = Circle(
+                    radius = float(self.obstacle_toolbox.obstacle_radius.text())
+                ),
+
+                initial_state = State(**{'position': np.array([
+                    float(self.obstacle_toolbox.obstacle_x_Position.text()),
+                    float(self.obstacle_toolbox.obstacle_y_Position.text())
+                ]),
+                'orientation': 0, 
+                'time_step': 1
+                })
+            )
+        
+        elif self.obstacle_toolbox.obstacle_shape.currentText() == "Polygon":
+            dynamic_obstacle = DynamicObstacle(
+                obstacle_id = obstacle_id,
+
+                obstacle_type = ObstacleType(self.obstacle_toolbox.obstacle_type.currentText()),
+                obstacle_shape = Polygon(
+                    
+                    vertices = self.polygon_array()
+                ),
+
+                initial_state = State(**{'position': np.array([
+                    0,
+                    0
+                ]),
+                'orientation': 0, 
+                'time_step': 1
+                })
+            )
+        self.current_scenario.add_objects(dynamic_obstacle)       
+        self.callback(self.current_scenario)
+
+
     def polygon_array(self):
     #returns an np array of the vertices
         vertices = []
@@ -167,13 +241,24 @@ class ObstacleToolbox(QDockWidget):
 
 
         
-    def add_static_obstacle(self):
+    """def add_static_obstacle(self):
     #creates the static obstacle
         obstacle_id = self.current_scenario.generate_object_id()
         try:
             self.static_obstacle_details(obstacle_id)
         except:
-            self.text_browser.append("Error when adding static obstacle")
+            self.text_browser.append("Error when adding static obstacle")"""
+
+    def add_obstacle(self):
+    #creates the static obstacle
+        obstacle_id = self.current_scenario.generate_object_id()
+        #try:
+        if self.obstacle_toolbox.obstacle_dyn_stat.currentText() == "Dynamic":
+            self.dynamic_obstacle_details(obstacle_id)
+        elif self.obstacle_toolbox.obstacle_dyn_stat.currentText() == "Static":
+            self.static_obstacle_details(obstacle_id)
+        #except:
+        #    self.text_browser.append("Error when adding dynamic obstacle")
     
     def update_obstacle(self):
     #updates obstacle by deleting it and then adding it again with same id

@@ -45,6 +45,10 @@ class ObstacleToolboxUI(Toolbox):
         label_general = QLabel("Obstacle Attributes")
         label_general.setFont(QFont("Arial", 11, QFont.Bold))
 
+        self.obstacle_dyn_stat = QComboBox()
+        self.obstacle_dyn_stat.addItem("Static")
+        self.obstacle_dyn_stat.addItem("Dynamic")
+
         self.obstacle_shape = QComboBox()
         self.obstacle_shape.addItem("Rectangle")
         self.obstacle_shape.addItem("Circle")
@@ -69,8 +73,9 @@ class ObstacleToolboxUI(Toolbox):
         self.obstacle_information_groupbox = QGroupBox()
         self.obstacle_information_groupbox.setLayout(self.layout_obstacle_information_groupbox)
         self.layout_obstacle_information_groupbox.insertRow(0, label_general)
-        self.layout_obstacle_information_groupbox.insertRow(1, "Shape", self.obstacle_shape)
-        self.layout_obstacle_information_groupbox.insertRow(5, "Type", self.obstacle_type)
+        self.layout_obstacle_information_groupbox.insertRow(1, "Static/Dynamic", self.obstacle_dyn_stat)
+        self.layout_obstacle_information_groupbox.insertRow(2, "Shape", self.obstacle_shape)
+        self.layout_obstacle_information_groupbox.insertRow(6, "Type", self.obstacle_type)
         self.init_position()
 
         layout_obstacle_state_vis_groupbox = QFormLayout()
@@ -128,9 +133,9 @@ class ObstacleToolboxUI(Toolbox):
             self.obstacle_orientation.setMaxLength(4)
             self.obstacle_orientation.setAlignment(Qt.AlignRight)
 
-            self.layout_obstacle_information_groupbox.insertRow(2, "Width [m]", self.obstacle_width)
-            self.layout_obstacle_information_groupbox.insertRow(3, "Length [m]", self.obstacle_length)
-            self.layout_obstacle_information_groupbox.insertRow(4, "Orientation [deg]",self.obstacle_orientation)
+            self.layout_obstacle_information_groupbox.insertRow(3, "Width [m]", self.obstacle_width)
+            self.layout_obstacle_information_groupbox.insertRow(4, "Length [m]", self.obstacle_length)
+            self.layout_obstacle_information_groupbox.insertRow(5, "Orientation [deg]",self.obstacle_orientation)
     
     def remove_rectangle_fields(self):
     #function that removes the fields unique to the rectangle shape
@@ -179,11 +184,11 @@ class ObstacleToolboxUI(Toolbox):
         self.obstacle_y_Position.setAlignment(Qt.AlignRight)
 
         if self.obstacle_shape.currentText() == "Rectangle":
-            self.layout_obstacle_information_groupbox.insertRow(6, "X-Position", self.obstacle_x_Position)
-            self.layout_obstacle_information_groupbox.insertRow(7, "Y-Position", self.obstacle_y_Position)
+            self.layout_obstacle_information_groupbox.insertRow(7, "X-Position", self.obstacle_x_Position)
+            self.layout_obstacle_information_groupbox.insertRow(8, "Y-Position", self.obstacle_y_Position)
         elif self.obstacle_shape.currentText() == "Circle":
-            self.layout_obstacle_information_groupbox.insertRow(4, "X-Position", self.obstacle_x_Position)
-            self.layout_obstacle_information_groupbox.insertRow(5, "Y-Position", self.obstacle_y_Position)
+            self.layout_obstacle_information_groupbox.insertRow(5, "X-Position", self.obstacle_x_Position)
+            self.layout_obstacle_information_groupbox.insertRow(6, "Y-Position", self.obstacle_y_Position)
     
     def remove_position(self):
     #function that adds the position fields
@@ -232,7 +237,7 @@ class ObstacleToolboxUI(Toolbox):
             self.add_vertice_btn = QPushButton("Add Vertice")
             self.add_vertice_btn.clicked.connect(
                 lambda: self.add_vertice())
-            self.layout_obstacle_information_groupbox.insertRow(len(self.vertices_x) + 2, self.add_vertice_btn)
+            self.layout_obstacle_information_groupbox.insertRow(len(self.vertices_x) + 3, self.add_vertice_btn)
 
     #add vertices for the polygon shape, i is the place in the array
     def add_vertice(self):
@@ -261,7 +266,7 @@ class ObstacleToolboxUI(Toolbox):
             lambda: self.remove_vertice())
         self.polygon_row[i].addWidget(self.remove_vertice_btn[i])
 
-        self.layout_obstacle_information_groupbox.insertRow(i+2, self.polygon_row[i])
+        self.layout_obstacle_information_groupbox.insertRow(i+3, self.polygon_row[i])
         self.amount_vertices = self.amount_vertices + 1
 
     def remove_vertice(self, i = -1):
