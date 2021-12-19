@@ -12,7 +12,7 @@ from commonroad.scenario.lanelet import LineMarking
 __author__ = "Benjamin Orthen, Stefan Urban, Sebastian Maierhofer"
 __copyright__ = "TUM Cyber-Physical Systems Group"
 __credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles"]
-__version__ = "0.2"
+__version__ = "0.3"
 __maintainer__ = "Sebastian Maierhofer"
 __email__ = "commonroad@lists.lrz.de"
 __status__ = "Released"
@@ -144,22 +144,22 @@ class ParametricLaneGroup:
         line_marking_right_vertices = LineMarking.UNKNOWN
 
         for parametric_lane in self.parametric_lanes:
-
             local_left_vertices, local_right_vertices = parametric_lane.calc_vertices(
                 error_tolerance=error_tolerance, min_delta_s=min_delta_s
             )
-
-            if local_left_vertices is None:
+            # check whether parametric lane cannot be used,
+            # e.g., if to small it is possible that no vertices are generated
+            if local_left_vertices is None or len(local_left_vertices) == 0:
                 continue
 
-            try:
+            if len(left_vertices) > 0:  # check for first iteration
                 if np.isclose(left_vertices[-1], local_left_vertices[0]).all():
                     idx = 1
                 else:
                     idx = 0
                 left_vertices = np.vstack((left_vertices, local_left_vertices[idx:]))
                 right_vertices = np.vstack((right_vertices, local_right_vertices[idx:]))
-            except IndexError:
+            else:
                 left_vertices = local_left_vertices
                 right_vertices = local_right_vertices
 

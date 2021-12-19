@@ -11,7 +11,7 @@ from crdesigner.map_conversion.opendrive.opendrive_conversion.network import Net
 from crdesigner.input_output.api import opendrive_to_commonroad
 
 
-input_path = "../../tests/opendrive_test_files/el-vendrell-02.06.20.xodr"
+input_path = ""  # replace empty string
 
 # ----------------------------------------------- Option 1: General API ------------------------------------------------
 # load OpenDRIVE file, parse it, and convert it to a CommonRoad scenario
