@@ -19,6 +19,7 @@ if SUMO_AVAILABLE:
 
 from crdesigner.ui.gui.mwindow.toolboxes.obstacle_toolbox.obstacle_toolbox_ui import ObstacleToolboxUI
 
+
 class ObstacleToolbox(QDockWidget):
     def __init__(self, current_scenario: Scenario, callback, tmp_folder, text_browser):
         super().__init__("Obstacle Toolbox")
@@ -159,7 +160,7 @@ class ObstacleToolbox(QDockWidget):
 
         vertices = np.asarray(vertices)
         return vertices
-        
+
     def add_static_obstacle(self):
         """creates the static obstacle"""
         try:
@@ -179,7 +180,7 @@ class ObstacleToolbox(QDockWidget):
             self.static_obstacle_details(obstacle_id)
         except:
             print("Could not update object")
-        
+            
     def initialize_toolbox(self):
         self.initialize_obstacle_information()
 
