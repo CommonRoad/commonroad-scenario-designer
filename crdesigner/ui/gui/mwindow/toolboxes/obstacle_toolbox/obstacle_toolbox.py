@@ -174,11 +174,10 @@ class ObstacleToolbox(QDockWidget):
         try:
             obstacle_id = int(self.obstacle_toolbox_ui.selected_obstacle.currentText())
             selected_obstacle = self.current_scenario.obstacle_by_id(obstacle_id)
-
             self.current_scenario.remove_obstacle(selected_obstacle)
             self.static_obstacle_details(obstacle_id)
         except:
-            self.text_browser.append("Could not update object")
+            self.text_browser.append("Error: when updating obstacle")
 
     def initialize_toolbox(self):
         self.initialize_obstacle_information()
