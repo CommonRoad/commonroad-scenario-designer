@@ -233,7 +233,6 @@ class ObstacleToolboxUI(Toolbox):
             self.add_vertice_btn.clicked.connect(
                 lambda: self.add_vertice())
             self.layout_obstacle_information_groupbox.insertRow(len(self.vertices_x) + 2, self.add_vertice_btn)
-
     
     def add_vertice(self):
         """add vertices for the polygon shape, i is the place in the array"""
@@ -265,7 +264,7 @@ class ObstacleToolboxUI(Toolbox):
         self.layout_obstacle_information_groupbox.insertRow(i+2, self.polygon_row[i])
         self.amount_vertices = self.amount_vertices + 1
 
-    def remove_vertice(self, i = -1):
+    def remove_vertice(self, i=-1):
         """removes one vertice field"""
         if len(self.vertices_x) <= 3:
             self.text_browser.append("At least 3 vertices are needed to create a polygon")
