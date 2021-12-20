@@ -21,12 +21,12 @@ from crdesigner.ui.gui.mwindow.toolboxes.obstacle_toolbox.obstacle_toolbox_ui im
 
 
 class ObstacleToolbox(QDockWidget):
-    def __init__(self, current_scenario: Scenario, callback, tmp_folder, text_browser: str):
+    def __init__(self, current_scenario: Scenario, callback, tmp_folder, text_browser):
         super().__init__("Obstacle Toolbox")
 
         self.current_scenario = current_scenario
         self.callback = callback
-        self.obstacle_toolbox = ObstacleToolboxUI(text_browser)
+        self.obstacle_toolbox_ui = ObstacleToolboxUI(text_browser)
         self.adjust_ui()
         self.connect_gui_elements()
         self.tmp_folder = tmp_folder
@@ -47,28 +47,25 @@ class ObstacleToolbox(QDockWidget):
         self.obstacle_toolbox_ui.setMinimumWidth(450)
 
     def connect_gui_elements(self):
+        """adds functionality to gui elements like buttons, menus etc"""
         self.initialize_obstacle_information()
 
         self.obstacle_toolbox_ui.selected_obstacle.currentTextChanged.connect(
             lambda: self.update_obstacle_information())
-        self.obstacle_toolbox.button_update_obstacle.clicked.connect(
+        self.obstacle_toolbox_ui.button_update_obstacle.clicked.connect(
             lambda: self.update_obstacle())
             
-        self.obstacle_toolbox.obstacle_state_variable.currentTextChanged.connect(
+        self.obstacle_toolbox_ui.obstacle_state_variable.currentTextChanged.connect(
             lambda: self.plot_obstacle_state_profile())
 
         self.obstacle_toolbox_ui.button_remove_obstacle.clicked.connect(
             lambda: self.remove_obstacle())
 
-        self.obstacle_toolbox.button_add_static_obstacle.clicked.connect(
+        self.obstacle_toolbox_ui.button_add_static_obstacle.clicked.connect(
            lambda: self.add_static_obstacle())
         
-        self.obstacle_toolbox.obstacle_shape.currentTextChanged.connect(
-            lambda: self.obstacle_toolbox.toggle_sections())
-        
-        #self.obstacle_toolbox.add_vertice_btn.clicked.connect(
-            #lambda: self.obstacle_toolbox.add_vertice())
-        
+        self.obstacle_toolbox_ui.obstacle_shape.currentTextChanged.connect(
+            lambda: self.obstacle_toolbox_ui.toggle_sections())
 
         if SUMO_AVAILABLE:
             self.obstacle_toolbox_ui.button_start_simulation.clicked.connect(
@@ -89,49 +86,49 @@ class ObstacleToolbox(QDockWidget):
         self.initialize_toolbox()
 
     def static_obstacle_details(self, obstacle_id):
-    #Function that creates static obstacles
-        if self.obstacle_toolbox.obstacle_shape.currentText() == "Rectangle":
+        """Creates static obstacles"""
+        if self.obstacle_toolbox_ui.obstacle_shape.currentText() == "Rectangle":
             static_obstacle = StaticObstacle(
                 obstacle_id = obstacle_id,
 
-                obstacle_type = ObstacleType(self.obstacle_toolbox.obstacle_type.currentText()),
+                obstacle_type = ObstacleType(self.obstacle_toolbox_ui.obstacle_type.currentText()),
                 obstacle_shape = Rectangle(
-                    length = float(self.obstacle_toolbox.obstacle_length.text()),
-                    width = float(self.obstacle_toolbox.obstacle_width.text()) 
+                    length = float(self.obstacle_toolbox_ui.obstacle_length.text()),
+                    width = float(self.obstacle_toolbox_ui.obstacle_width.text()) 
                 ),
 
                 initial_state = State(**{'position': np.array([
-                    float(self.obstacle_toolbox.obstacle_x_Position.text()),
-                    float(self.obstacle_toolbox.obstacle_y_Position.text())
+                    float(self.obstacle_toolbox_ui.obstacle_x_Position.text()),
+                    float(self.obstacle_toolbox_ui.obstacle_y_Position.text())
                 ]),
-                'orientation': math.radians(float(self.obstacle_toolbox.obstacle_orientation.text())),
+                'orientation': math.radians(float(self.obstacle_toolbox_ui.obstacle_orientation.text())),
                 'time_step': 1
                 })
             )
 
-        elif self.obstacle_toolbox.obstacle_shape.currentText() == "Circle":
+        elif self.obstacle_toolbox_ui.obstacle_shape.currentText() == "Circle":
             static_obstacle = StaticObstacle(
                 obstacle_id = obstacle_id,
 
-                obstacle_type = ObstacleType(self.obstacle_toolbox.obstacle_type.currentText()),
+                obstacle_type = ObstacleType(self.obstacle_toolbox_ui.obstacle_type.currentText()),
                 obstacle_shape = Circle(
-                    radius = float(self.obstacle_toolbox.obstacle_radius.text())
+                    radius = float(self.obstacle_toolbox_ui.obstacle_radius.text())
                 ),
 
                 initial_state = State(**{'position': np.array([
-                    float(self.obstacle_toolbox.obstacle_x_Position.text()),
-                    float(self.obstacle_toolbox.obstacle_y_Position.text())
+                    float(self.obstacle_toolbox_ui.obstacle_x_Position.text()),
+                    float(self.obstacle_toolbox_ui.obstacle_y_Position.text())
                 ]),
-                'orientation': 0, #math.radians(float(self.obstacle_toolbox.obstacle_orientation.text())),
+                'orientation': 0,
                 'time_step': 1
                 })
             )
         
-        elif self.obstacle_toolbox.obstacle_shape.currentText() == "Polygon":
+        elif self.obstacle_toolbox_ui.obstacle_shape.currentText() == "Polygon":
             static_obstacle = StaticObstacle(
                 obstacle_id = obstacle_id,
 
-                obstacle_type = ObstacleType(self.obstacle_toolbox.obstacle_type.currentText()),
+                obstacle_type = ObstacleType(self.obstacle_toolbox_ui.obstacle_type.currentText()),
                 obstacle_shape = Polygon(
                     
                     vertices = self.polygon_array()
@@ -149,13 +146,12 @@ class ObstacleToolbox(QDockWidget):
         self.current_scenario.add_objects(static_obstacle)
         self.callback(self.current_scenario)
     
-    #TODO check if fewer than 3 vertices and if they are the same
     def polygon_array(self):
-    #returns an np array of the vertices
+        """returns a list of the vertices from the gui menu"""
         vertices = []
-        for i in range(self.obstacle_toolbox.amount_vertices):
-            if self.obstacle_toolbox.vertices_x[i].text() != "" and self.obstacle_toolbox.vertices_y[i].text() != "":
-                temp = [float(self.obstacle_toolbox.vertices_x[i].text()), float(self.obstacle_toolbox.vertices_y[i].text())]
+        for i in range(self.obstacle_toolbox_ui.amount_vertices):
+            if self.obstacle_toolbox_ui.vertices_x[i].text() != "" and self.obstacle_toolbox_ui.vertices_y[i].text() != "":
+                temp = [float(self.obstacle_toolbox_ui.vertices_x[i].text()), float(self.obstacle_toolbox_ui.vertices_y[i].text())]
                 vertices.append(temp)
         
         if len(vertices) < 3:
@@ -168,17 +164,17 @@ class ObstacleToolbox(QDockWidget):
 
         
     def add_static_obstacle(self):
-    #creates the static obstacle
-        obstacle_id = self.current_scenario.generate_object_id()
+        """creates the static obstacle"""
         try:
+            obstacle_id = self.current_scenario.generate_object_id()
             self.static_obstacle_details(obstacle_id)
         except:
             self.text_browser.append("Error when adding static obstacle")
     
     def update_obstacle(self):
-    #updates obstacle by deleting it and then adding it again with same id
+        """updates obstacle by deleting it and then adding it again with same id"""
         try:
-            obstacle_id = int(self.obstacle_toolbox.selected_obstacle.currentText())
+            obstacle_id = int(self.obstacle_toolbox_ui.selected_obstacle.currentText())
             selected_obstacle = self.current_scenario.obstacle_by_id(obstacle_id)
 
             self.current_scenario.remove_obstacle(selected_obstacle)
@@ -198,8 +194,8 @@ class ObstacleToolbox(QDockWidget):
         """
         self.clear_obstacle_fields()
 
-        self.obstacle_toolbox.selected_obstacle.clear()
-        self.obstacle_toolbox.selected_obstacle.addItems(
+        self.obstacle_toolbox_ui.selected_obstacle.clear()
+        self.obstacle_toolbox_ui.selected_obstacle.addItems(
             ["None"] + [str(item) for item in self.collect_obstacle_ids()])
         self.obstacle_toolbox_ui.selected_obstacle.setCurrentIndex(0)
 
@@ -264,58 +260,60 @@ class ObstacleToolbox(QDockWidget):
             return ""
 
     def update_obstacle_information(self):
+        """retrieves obstacle details to the gui when an obstacle is pressed or the id
+        is selected in the obstacle toolbox"""
         if self.obstacle_toolbox_ui.selected_obstacle.currentText() not in ["", "None"]:
             self.update_ongoing = True
             obstacle_id = int(self.obstacle_toolbox_ui.selected_obstacle.currentText())
             obstacle = self.current_scenario.obstacle_by_id(obstacle_id)
             if isinstance(obstacle.obstacle_shape, Rectangle):
 
-                if self.obstacle_toolbox.obstacle_shape.currentText() != "Rectangle":
-                    self.obstacle_toolbox.obstacle_shape.setCurrentIndex(0)
+                if self.obstacle_toolbox_ui.obstacle_shape.currentText() != "Rectangle":
+                    self.obstacle_toolbox_ui.obstacle_shape.setCurrentIndex(0)
             
 
-                self.obstacle_toolbox.obstacle_width.setText(str(obstacle.obstacle_shape.width))
-                self.obstacle_toolbox.obstacle_length.setText(str(obstacle.obstacle_shape.length))
+                self.obstacle_toolbox_ui.obstacle_width.setText(str(obstacle.obstacle_shape.width))
+                self.obstacle_toolbox_ui.obstacle_length.setText(str(obstacle.obstacle_shape.length))
 
-                self.obstacle_toolbox.obstacle_x_Position.setText(str(obstacle.initial_state.__getattribute__("position")[0]))
-                self.obstacle_toolbox.obstacle_y_Position.setText(str(obstacle.initial_state.__getattribute__("position")[1]))
-                self.obstacle_toolbox.obstacle_orientation.setText(str(math.degrees(obstacle.initial_state.__getattribute__("orientation"))))
+                self.obstacle_toolbox_ui.obstacle_x_Position.setText(str(obstacle.initial_state.__getattribute__("position")[0]))
+                self.obstacle_toolbox_ui.obstacle_y_Position.setText(str(obstacle.initial_state.__getattribute__("position")[1]))
+                self.obstacle_toolbox_ui.obstacle_orientation.setText(str(math.degrees(obstacle.initial_state.__getattribute__("orientation"))))
 
             elif isinstance(obstacle.obstacle_shape, Circle):
 
-                if self.obstacle_toolbox.obstacle_shape.currentText() != "Circle":
-                    self.obstacle_toolbox.obstacle_shape.setCurrentIndex(1)
+                if self.obstacle_toolbox_ui.obstacle_shape.currentText() != "Circle":
+                    self.obstacle_toolbox_ui.obstacle_shape.setCurrentIndex(1)
 
-                self.obstacle_toolbox.obstacle_radius.setText(str(obstacle.obstacle_shape.radius))
-                self.obstacle_toolbox.obstacle_x_Position.setText(str(obstacle.initial_state.__getattribute__("position")[0]))
-                self.obstacle_toolbox.obstacle_y_Position.setText(str(obstacle.initial_state.__getattribute__("position")[1]))
+                self.obstacle_toolbox_ui.obstacle_radius.setText(str(obstacle.obstacle_shape.radius))
+                self.obstacle_toolbox_ui.obstacle_x_Position.setText(str(obstacle.initial_state.__getattribute__("position")[0]))
+                self.obstacle_toolbox_ui.obstacle_y_Position.setText(str(obstacle.initial_state.__getattribute__("position")[1]))
 
             elif isinstance(obstacle.obstacle_shape, Polygon):
-                if self.obstacle_toolbox.obstacle_shape.currentText() != "Polygon":
-                    self.obstacle_toolbox.obstacle_shape.setCurrentIndex(2)
+                if self.obstacle_toolbox_ui.obstacle_shape.currentText() != "Polygon":
+                    self.obstacle_toolbox_ui.obstacle_shape.setCurrentIndex(2)
                 
                 #because numpy array has weird formatting I want to get rid of
                 temp = obstacle.obstacle_shape.vertices
                 vertices = temp.tolist()
                 
                 #remove extra vertice(s) in toolbox
-                if len(vertices) - 1 < self.obstacle_toolbox.amount_vertices:
-                    j = self.obstacle_toolbox.amount_vertices - (len(vertices) - 1)
+                if len(vertices) - 1 < self.obstacle_toolbox_ui.amount_vertices:
+                    j = self.obstacle_toolbox_ui.amount_vertices - (len(vertices) - 1)
                     for i in range(j):
-                        self.obstacle_toolbox.remove_vertice(i)
+                        self.obstacle_toolbox_ui.remove_vertice(i)
 
                 for i in range(len(vertices) - 1):
                     #adds another vertice if there are too few in the toolbox
-                    if i >= self.obstacle_toolbox.amount_vertices:
-                        self.obstacle_toolbox.add_vertice()
+                    if i >= self.obstacle_toolbox_ui.amount_vertices:
+                        self.obstacle_toolbox_ui.add_vertice()
 
                     vertice_string_x = str(vertices[i][0])
                     vertice_string_y = str(vertices[i][1])
-                    self.obstacle_toolbox.vertices_x[i].setText(vertice_string_x)
-                    self.obstacle_toolbox.vertices_y[i].setText(vertice_string_y)
+                    self.obstacle_toolbox_ui.vertices_x[i].setText(vertice_string_x)
+                    self.obstacle_toolbox_ui.vertices_y[i].setText(vertice_string_y)
                 
-            self.obstacle_toolbox.obstacle_type.setCurrentText(obstacle.obstacle_type.value)
-            self.obstacle_toolbox.obstacle_state_variable.clear()
+            self.obstacle_toolbox_ui.obstacle_type.setCurrentText(obstacle.obstacle_type.value)
+            self.obstacle_toolbox_ui.obstacle_state_variable.clear()
             state_variables = [var for var in obstacle.initial_state.attributes if var not in ["position", "time_step"]]
 
             if "position" in obstacle.initial_state.attributes:
@@ -329,24 +327,24 @@ class ObstacleToolbox(QDockWidget):
             self.clear_obstacle_fields()
 
     def clear_obstacle_fields(self):
-    #clears the obstacle QLineEdits
-        if self.obstacle_toolbox.obstacle_shape.currentText() == "Circle":
-            self.obstacle_toolbox.obstacle_radius.setText("")
-            self.obstacle_toolbox.obstacle_x_Position.setText("")
-            self.obstacle_toolbox.obstacle_y_Position.setText("")
+        """clears the obstacle QLineEdits"""
+        if self.obstacle_toolbox_ui.obstacle_shape.currentText() == "Circle":
+            self.obstacle_toolbox_ui.obstacle_radius.setText("")
+            self.obstacle_toolbox_ui.obstacle_x_Position.setText("")
+            self.obstacle_toolbox_ui.obstacle_y_Position.setText("")
 
-        elif self.obstacle_toolbox.obstacle_shape.currentText() == "Rectangle":
-            self.obstacle_toolbox.obstacle_width.setText("")
-            self.obstacle_toolbox.obstacle_length.setText("")
-            self.obstacle_toolbox.obstacle_orientation.setText("")
-            self.obstacle_toolbox.obstacle_x_Position.setText("")
-            self.obstacle_toolbox.obstacle_y_Position.setText("")
+        elif self.obstacle_toolbox_ui.obstacle_shape.currentText() == "Rectangle":
+            self.obstacle_toolbox_ui.obstacle_width.setText("")
+            self.obstacle_toolbox_ui.obstacle_length.setText("")
+            self.obstacle_toolbox_ui.obstacle_orientation.setText("")
+            self.obstacle_toolbox_ui.obstacle_x_Position.setText("")
+            self.obstacle_toolbox_ui.obstacle_y_Position.setText("")
         
         
-        elif self.obstacle_toolbox.obstacle_shape.currentText() == "Polygon":
-            for i in range(self.obstacle_toolbox.amount_vertices):
-                self.obstacle_toolbox.vertices_x[i].setText("")
-                self.obstacle_toolbox.vertices_y[i].setText("")
+        elif self.obstacle_toolbox_ui.obstacle_shape.currentText() == "Polygon":
+            for i in range(self.obstacle_toolbox_ui.amount_vertices):
+                self.obstacle_toolbox_ui.vertices_x[i].setText("")
+                self.obstacle_toolbox_ui.vertices_y[i].setText("")
 
     def start_sumo_simulation(self):
         num_time_steps = self.obstacle_toolbox_ui.sumo_simulation_length.value()

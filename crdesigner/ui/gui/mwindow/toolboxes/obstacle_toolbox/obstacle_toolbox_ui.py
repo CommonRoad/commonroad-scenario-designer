@@ -112,28 +112,28 @@ class ObstacleToolboxUI(Toolbox):
             self.sections.append((title_sumo, widget_sumo))
     
     def init_rectangle_fields(self):
-    #function that creates the fields for the rectangle shape
-            self.obstacle_length = QLineEdit()
-            self.obstacle_length.setValidator(self.float_validator)
-            self.obstacle_length.setMaxLength(6)
-            self.obstacle_length.setAlignment(Qt.AlignRight)
+        """creates the fields for the rectangle shape"""
+        self.obstacle_length = QLineEdit()
+        self.obstacle_length.setValidator(self.float_validator)
+        self.obstacle_length.setMaxLength(6)
+        self.obstacle_length.setAlignment(Qt.AlignRight)
 
-            self.obstacle_width = QLineEdit()
-            self.obstacle_width.setValidator(self.float_validator)
-            self.obstacle_width.setMaxLength(4)
-            self.obstacle_width.setAlignment(Qt.AlignRight)
+        self.obstacle_width = QLineEdit()
+        self.obstacle_width.setValidator(self.float_validator)
+        self.obstacle_width.setMaxLength(4)
+        self.obstacle_width.setAlignment(Qt.AlignRight)
 
-            self.obstacle_orientation = QLineEdit()
-            self.obstacle_orientation.setValidator(QIntValidator())
-            self.obstacle_orientation.setMaxLength(4)
-            self.obstacle_orientation.setAlignment(Qt.AlignRight)
+        self.obstacle_orientation = QLineEdit()
+        self.obstacle_orientation.setValidator(QIntValidator())
+        self.obstacle_orientation.setMaxLength(4)
+        self.obstacle_orientation.setAlignment(Qt.AlignRight)
 
-            self.layout_obstacle_information_groupbox.insertRow(2, "Width [m]", self.obstacle_width)
-            self.layout_obstacle_information_groupbox.insertRow(3, "Length [m]", self.obstacle_length)
-            self.layout_obstacle_information_groupbox.insertRow(4, "Orientation [deg]",self.obstacle_orientation)
+        self.layout_obstacle_information_groupbox.insertRow(2, "Width [m]", self.obstacle_width)
+        self.layout_obstacle_information_groupbox.insertRow(3, "Length [m]", self.obstacle_length)
+        self.layout_obstacle_information_groupbox.insertRow(4, "Orientation [deg]",self.obstacle_orientation)
     
     def remove_rectangle_fields(self):
-    #function that removes the fields unique to the rectangle shape
+        """removes the fields unique to the rectangle shape"""
         try:
             self.layout_obstacle_information_groupbox.removeRow(self.obstacle_width)
             self.layout_obstacle_information_groupbox.removeRow(self.obstacle_length)
@@ -142,7 +142,7 @@ class ObstacleToolboxUI(Toolbox):
             pass
     
     def init_circle_fields(self):
-    #function that creates the fields for the circle shape
+        """creates the fields for the circle shape"""
         self.obstacle_radius = QLineEdit()
         self.obstacle_radius.setValidator(self.float_validator)
         self.obstacle_radius.setMaxLength(4)
@@ -151,13 +151,13 @@ class ObstacleToolboxUI(Toolbox):
         self.layout_obstacle_information_groupbox.insertRow(2, "Radius [m]", self.obstacle_radius)
 
     def remove_circle_fields(self):
-    #function that removes the fields for the circle shape
+        """removes the fields for the circle shape"""
         try:
             self.layout_obstacle_information_groupbox.removeRow(self.obstacle_radius)
         except:
             pass
     def remove_polygon_fields(self):
-    #function that removes the fields for the polygon shape
+        """removes the fields for the polygon shape"""
         try:
             for i in range(self.amount_vertices):
                 self.layout_obstacle_information_groupbox.removeRow(self.polygon_row[i])
@@ -167,7 +167,7 @@ class ObstacleToolboxUI(Toolbox):
             pass
     
     def init_position(self):
-    #function that adds the position fields
+        """adds the position fields"""
         self.obstacle_x_Position = QLineEdit()
         self.obstacle_x_Position.setValidator(self.float_validator)
         self.obstacle_x_Position.setMaxLength(4)
@@ -186,7 +186,7 @@ class ObstacleToolboxUI(Toolbox):
             self.layout_obstacle_information_groupbox.insertRow(5, "Y-Position", self.obstacle_y_Position)
     
     def remove_position(self):
-    #function that adds the position fields
+        """removes the position fields"""
         try:
             self.layout_obstacle_information_groupbox.removeRow(self.obstacle_x_Position)
             self.layout_obstacle_information_groupbox.removeRow(self.obstacle_y_Position)
@@ -194,7 +194,7 @@ class ObstacleToolboxUI(Toolbox):
             pass
 
     def toggle_sections(self):
-    #changes toolbox based on what shapes that are selected
+        """changes toolbox based on what shapes that are selected"""
         if self.obstacle_shape.currentText() == "Circle":
             
             self.remove_rectangle_fields()
@@ -234,8 +234,9 @@ class ObstacleToolboxUI(Toolbox):
                 lambda: self.add_vertice())
             self.layout_obstacle_information_groupbox.insertRow(len(self.vertices_x) + 2, self.add_vertice_btn)
 
-    #add vertices for the polygon shape, i is the place in the array
+    
     def add_vertice(self):
+        """add vertices for the polygon shape, i is the place in the array"""
         i = len(self.vertices_x)
         self.polygon_row.append(QHBoxLayout())
 
@@ -265,7 +266,7 @@ class ObstacleToolboxUI(Toolbox):
         self.amount_vertices = self.amount_vertices + 1
 
     def remove_vertice(self, i = -1):
-        #check so there is at least 3 vertices
+        """removes one vertice field"""
         if len(self.vertices_x) <= 3:
             self.text_browser.append("At least 3 vertices are needed to create a polygon")
             return

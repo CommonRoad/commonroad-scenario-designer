@@ -46,7 +46,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.viewer_dock = None
         self.sumo_settings = None
         self.gui_settings = None
-
+    
         # init any objects here
         self.scenario_saving_dialog = ScenarioDialog()
         self.animated_viewer_wrapper = AnimatedViewerWrapper(mwindow=self)
