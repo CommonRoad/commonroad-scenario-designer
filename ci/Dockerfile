@@ -54,29 +54,36 @@ RUN sudo apt-get install -y software-properties-common \
 
 
 # activate conda environment
-RUN conda create --name commonroad-py37 python=3.7 && \
-    conda create --name commonroad-py38 python=3.8 && \
-    conda create --name commonroad-py39 python=3.9
+RUN conda create --name cr37 python=3.7 && \
+    conda create --name cr38 python=3.8 && \
+    conda create --name cr39 python=3.9 # &&
+   # conda create --name cr310 python=3.10
 
 # Install cartopy
-RUN source activate commonroad-py37 \
+RUN source activate cr37 \
     && echo "Successfully installed Python version:" \
     && python --version \
     && conda install -c conda-forge cartopy \
     && grep -v "git" requirements.txt | pip install -r /dev/stdin \
     && grep -v "git" test_requirements.txt | pip install -r /dev/stdin && \
-    source activate commonroad-py38 \
+    source activate cr38 \
     && echo "Successfully installed Python version:" \
     && python --version \
     && conda install -c conda-forge cartopy \
     && grep -v "git" requirements.txt | pip install -r /dev/stdin \
     && grep -v "git" test_requirements.txt | pip install -r /dev/stdin && \
-    source activate commonroad-py39 \
+    source activate cr39 \
     && echo "Successfully installed Python version:" \
     && python --version \
     && conda install -c conda-forge cartopy \
     && grep -v "git" requirements.txt | pip install -r /dev/stdin \
     && grep -v "git" test_requirements.txt | pip install -r /dev/stdin
+#    source activate cr310 \
+#    && echo "Successfully installed Python version:" \
+#    && python --version \
+#    && conda install -c conda-forge cartopy \
+#    && grep -v "git" requirements.txt | pip install -r /dev/stdin \
+#    && grep -v "git" test_requirements.txt | pip install -r /dev/stdin
 
 # update path to include packages installed by conda
 ENV PATH $HOME/.local/bin:$PATH
