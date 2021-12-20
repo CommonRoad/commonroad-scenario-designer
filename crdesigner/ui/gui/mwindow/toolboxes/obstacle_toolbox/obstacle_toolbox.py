@@ -179,8 +179,8 @@ class ObstacleToolbox(QDockWidget):
 
             self.static_obstacle_details(obstacle_id)
         except:
-            print("Could not update object")
-            
+            self.text_browser.append("Could not update object")
+
     def initialize_toolbox(self):
         self.initialize_obstacle_information()
 
