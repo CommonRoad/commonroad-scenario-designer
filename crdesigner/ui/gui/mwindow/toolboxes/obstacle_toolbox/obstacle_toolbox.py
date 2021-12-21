@@ -150,8 +150,8 @@ class ObstacleToolbox(QDockWidget):
         self.callback(self.current_scenario)
 
     def dynamic_obstacle_details(self, obstacle_id):
-    #Function that creates dynamic obstacles
-    #test code maybe change later
+        """creates dynamic obstacles"""
+        #test code maybe change later
         if self.obstacle_toolbox_ui.obstacle_shape.currentText() == "Rectangle":
             dynamic_obstacle = DynamicObstacle(
                 obstacle_id = obstacle_id,
@@ -167,17 +167,19 @@ class ObstacleToolbox(QDockWidget):
                     float(self.obstacle_toolbox_ui.obstacle_y_Position.text())
                 ]),
                 'orientation': math.radians(float(self.obstacle_toolbox_ui.obstacle_orientation.text())),
-                'time_step': 1
+                'time_step': 0
                 }),
                 #test code, remove later
                 prediction = TrajectoryPrediction(
                     shape = Rectangle(float(self.obstacle_toolbox_ui.obstacle_length.text()), width = float(self.obstacle_toolbox_ui.obstacle_width.text())),
                     trajectory = Trajectory(
-                        initial_time_step = 2,
-                        state_list = [State(**{'position': np.array([1,1]),'orientation': 3,'time_step': 2, 'velocity': 7}),
-                         State(**{'position': np.array([2,2]),'orientation': 3,'time_step': 4, 'velocity': 7}),
-                         State(**{'position': np.array([5,5]),'orientation': 3,'time_step': 5, 'velocity': 7}),])
+                        initial_time_step = 1,
+                        state_list = self.initial_trajectory()
+                        #state_list = [State(**{'position': np.array([1,1]),'orientation': 3,'time_step': 0, 'velocity': 7}),
+                         #State(**{'position': np.array([2,2]),'orientation': 3,'time_step': 4, 'velocity': 7}),
+                         #State(**{'position': np.array([5,5]),'orientation': 3,'time_step': 5, 'velocity': 7}),])
                     #occupancy_set= [Occupancy(time_step=2, shape=Rectangle(length=3,width=3)), Occupancy(time_step=3, shape=Rectangle(length=3,width=3))]
+                    )
                 )
             )
 
@@ -219,6 +221,53 @@ class ObstacleToolbox(QDockWidget):
             )
         self.current_scenario.add_objects(dynamic_obstacle)       
         self.callback(self.current_scenario)
+
+    def initial_trajectory(self):
+        #hardcoded values for testing, right now only straight line
+        initial_position_x = float(self.obstacle_toolbox_ui.obstacle_x_Position.text()) 
+        initial_position_y = float(self.obstacle_toolbox_ui.obstacle_y_Position.text())
+
+        goal_position_x = 50 #arbitrary values for testing
+        goal_position_y = 0
+        goal_orientation = 5
+
+        length_x = abs(goal_position_x-initial_position_x)
+        length_y = abs(goal_position_y-initial_position_y)
+        length = math.sqrt(length_x**2 + length_y**2)
+
+        velocity = 14.0
+        state_list = []
+        finished = False
+        i = 1
+
+        while(finished == False):
+        #while (i < 50):
+            #sqrt(2) temporary for testing
+            #maybe change so just checks once
+            if goal_position_x > initial_position_x:
+                next_pos_x = initial_position_x + self.current_scenario.dt * (length_x / length) * i * velocity
+            elif goal_position_x < initial_position_x:
+                next_pos_x = initial_position_x - self.current_scenario.dt * (length_x / length) * i * velocity
+            
+            if goal_position_y > initial_position_y:
+                next_pos_y = initial_position_y + self.current_scenario.dt * (length_y / length) * i * velocity
+            elif goal_position_y < initial_position_y:
+                next_pos_y = initial_position_y - self.current_scenario.dt * (length_y / length) * i * velocity
+
+            remaining_length = math.dist((next_pos_x, next_pos_y), (goal_position_x, goal_position_y))
+            #print("next_pos_x " + str(next_pos_y)) 
+
+            if remaining_length < self.current_scenario.dt * velocity: # = 1.4 for vel = 14.0
+                next_pos_x = goal_position_x
+                next_pos_y = goal_position_y
+                finished = True
+                #print("hello")            
+
+            new_position = np.array([next_pos_x, next_pos_y])
+            new_state = State(**{'position': new_position, 'velocity': velocity, 'orientation': 0.02, 'time_step': i})
+            state_list.append(new_state)
+            i = i + 1
+        return state_list
     
     def polygon_array(self):
         """returns a list of the vertices from the gui menu"""
