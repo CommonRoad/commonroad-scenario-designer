@@ -313,7 +313,7 @@ def get_ways(accepted_highways: List[str], rejected_tags: Dict[str, str], root) 
 
 def parse_file(filename: str, accepted_highways: List[str], rejected_tags: Dict[str, str],
                custom_bounds: Bounds = None) -> Tuple[OrderedSet[Element], Dict[int, Point],
-                                                      Dict[int, set[Restriction]], Tuple[float, float],
+                                                      Dict[int, Set[Restriction]], Tuple[float, float],
                                                       Tuple[float, float, float, float],
                                                       list[Dict[Any, Any]], list[Dict[Any, Any]], Dict[int, Point]]:
     """
