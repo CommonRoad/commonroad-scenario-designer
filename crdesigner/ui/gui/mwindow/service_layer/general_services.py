@@ -80,8 +80,7 @@ def check_scenario_service_layer(mwindow, scenario) -> int:
     found_ids = find_invalid_ref_of_traffic_lights(scenario)
     if found_ids and verbose:
         error_score = max(error_score, fatal_error)
-        mwindow.crdesigner_console_wrapper.text_browser.append("invalid traffic light refs: " +
-                                    str(found_ids))
+        mwindow.crdesigner_console_wrapper.text_browser.append("invalid traffic light refs: " + str(found_ids))
         QMessageBox.critical(
             mwindow,
             "CommonRoad XML error",
@@ -93,8 +92,7 @@ def check_scenario_service_layer(mwindow, scenario) -> int:
     found_ids = find_invalid_ref_of_traffic_signs(scenario)
     if found_ids and verbose:
         error_score = max(error_score, fatal_error)
-        mwindow.crdesigner_console_wrapper.text_browser.append("invalid traffic sign refs: " +
-                                    str(found_ids))
+        mwindow.crdesigner_console_wrapper.text_browser.append("invalid traffic sign refs: " + str(found_ids))
         QMessageBox.critical(
             mwindow,
             "CommonRoad XML error",
