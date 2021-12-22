@@ -315,7 +315,7 @@ def parse_file(filename: str, accepted_highways: List[str], rejected_tags: Dict[
                custom_bounds: Bounds = None) -> Tuple[OrderedSet[Element], Dict[int, Point],
                                                       Dict[int, Set[Restriction]], Tuple[float, float],
                                                       Tuple[float, float, float, float],
-                                                      list[Dict[Any, Any]], list[Dict[Any, Any]], Dict[int, Point]]:
+                                                      List[Dict[Any, Any]], List[Dict[Any, Any]], Dict[int, Point]]:
     """
     extracts all ways with streets and all the nodes in these streets of a given osm file
 
