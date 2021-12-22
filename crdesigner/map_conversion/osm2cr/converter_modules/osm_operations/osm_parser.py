@@ -312,10 +312,10 @@ def get_ways(accepted_highways: List[str], rejected_tags: Dict[str, str], root) 
 
 
 def parse_file(filename: str, accepted_highways: List[str], rejected_tags: Dict[str, str],
-               custom_bounds: Bounds = None) -> tuple[OrderedSet[Element], dict[int, Point],
-                                                      dict[int, set[Restriction]], tuple[float, float],
-                                                      tuple[float, float, float, float],
-                                                      list[dict[Any, Any]], list[dict[Any, Any]], dict[int, Point]]:
+               custom_bounds: Bounds = None) -> Tuple[OrderedSet[Element], Dict[int, Point],
+                                                      Dict[int, set[Restriction]], Tuple[float, float],
+                                                      Tuple[float, float, float, float],
+                                                      list[Dict[Any, Any]], list[Dict[Any, Any]], Dict[int, Point]]:
     """
     extracts all ways with streets and all the nodes in these streets of a given osm file
 
