@@ -118,3 +118,9 @@ class TestOSMToCommonRoadConversion(unittest.TestCase):
         and large osm filesize can be converted on default settings
         """
         self.execute_tests("haimhausen")
+
+    def test_map_without_crossing_nodes(self):
+        """
+        Test whether map without crossing nodes can be converted (there was once a bug)
+        """
+        self.execute_tests("map_without_crossing_nodes")
