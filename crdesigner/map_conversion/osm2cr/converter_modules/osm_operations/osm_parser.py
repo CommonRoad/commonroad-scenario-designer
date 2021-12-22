@@ -3,7 +3,9 @@ This module provides all methods to parse an OSM file and convert it to a graph.
 It also provides a method to project OSM nodes to cartesian coordinates.
 """
 import xml.etree.ElementTree as ElTree
-from typing import List, Dict, Tuple, Set, Optional
+from typing import List, Dict, Tuple, Set, Optional, Any
+from xml.etree.ElementTree import Element
+
 from ordered_set import OrderedSet
 from collections import OrderedDict
 import logging
@@ -310,8 +312,9 @@ def get_ways(accepted_highways: List[str], rejected_tags: Dict[str, str], root) 
 
 
 def parse_file(filename: str, accepted_highways: List[str], rejected_tags: Dict[str, str],
-               custom_bounds: Bounds=None) -> Tuple[Set[ElTree.Element], Dict[int, Point], type(None),
-                                                    Tuple[float, float], Bounds, List, List, Dict[int, Point]]:
+               custom_bounds: Bounds=None) -> tuple[
+    OrderedSet[Element], dict[int, Point], dict[int, set[Restriction]], tuple[float, float], tuple[
+        float, float, float, float], list[dict[Any, Any]], list[dict[Any, Any]], dict[int, Point]]:
     """
     extracts all ways with streets and all the nodes in these streets of a given osm file
 
@@ -330,7 +333,8 @@ def parse_file(filename: str, accepted_highways: List[str], rejected_tags: Dict[
     # custom_bounds = read_custom_bounds(root)
     # print("bounds", bounds, "custom_bounds", custom_bounds)
     road_points, center_point, bounds = get_points(road_nodes, custom_bounds)
-    crossing_points, _, _ = get_points(crossing_nodes, bounds)
+    crossing_points, _, _ = \
+        get_points(crossing_nodes, bounds) if len(crossing_nodes) > 0 else (OrderedDict(), None, None)
     traffic_rules = get_traffic_rules(road_nodes, ways,
                                       config.TRAFFIC_SIGN_KEYS, config.TRAFFIC_SIGN_VALUES)
     traffic_signs, traffic_lights = get_traffic_signs_and_lights(traffic_rules)

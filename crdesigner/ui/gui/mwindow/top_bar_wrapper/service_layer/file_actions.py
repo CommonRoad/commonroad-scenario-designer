@@ -74,7 +74,7 @@ def _open_path(mwindow, path):
 
 def _open_scenario(mwindow, new_scenario, filename="new_scenario", pps=None):
     if mwindow.check_scenario(new_scenario) >= 2:
-        mwindow.text_browser.append("loading aborted")
+        mwindow.crdesigner_console_wrapper.text_browser.append("loading aborted")
         return
     mwindow.filename = filename
     if SUMO_AVAILABLE:
