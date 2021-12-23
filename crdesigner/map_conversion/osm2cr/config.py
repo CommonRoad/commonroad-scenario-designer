@@ -200,6 +200,8 @@ RECOGNIZED_TURNLANES = [
     "left",
     "through",
     "right",
+    "slight_right",
+    "slight_left",
     "merge_to_left",
     "merge_to_right",
     "through;right",

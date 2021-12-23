@@ -272,7 +272,7 @@ class IntermediateFormat:
                                     'left': [],
                                     'through': [],
                                     'none': [],
-                                    'isLeftOf': [],
+                                    'isLeftOf': None,
                                     'waypoints': []}
 
                 for incoming_lane in incoming:

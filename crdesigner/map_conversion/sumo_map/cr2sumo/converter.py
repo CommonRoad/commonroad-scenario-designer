@@ -75,7 +75,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                  scenario: Scenario,
                  conf: SumoConfig):
         """
-        :param lanelet_network: lanelet network to be converted
+        :param scenario: CommonRoad Scenario to be converted
         :param conf: configuration file for additional map conversion parameters
         """
         self.initial_scenario: Scenario = scenario
@@ -1631,7 +1631,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
         :return bool: If the conversion was successful
         """
         if len(self.conf.ego_ids) > self.conf.n_ego_vehicles:
-            self.logger.error("total number of given ego_vehicles must be <= n_ego_vehicles, but {}not<={}" \
+            self.logger.error("total number of given ego_vehicles must be <= n_ego_vehicles, but {}not<={}"
                               .format(len(self.conf.ego_ids), self.conf.n_ego_vehicles))
             return False
 
@@ -2109,7 +2109,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
 
         def get_all_successors(lanelets: Set[int]) -> Set[int]:
             return set(
-                itertools.chain.from_iterable(set(lanelet_network.find_lanelet_by_id(l).successor) for l in lanelets))
+                itertools.chain.from_iterable(set(lanelet_network.find_lanelet_by_id(la).successor) for la in lanelets))
 
         if self.conf.highway_mode:
             zipper_return = ClusterInstruction.ZIPPER
@@ -2142,7 +2142,6 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
 
         if successor_criterion is True and adj_other is True:
             return zipper_return
-
 
         lanelet_2_inc = intersection.map_incoming_lanelets
         inc_lanelets = set(lanelet_2_inc.keys())

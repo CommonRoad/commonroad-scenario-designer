@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.4] - 2021-12-X
+
+### Changed
+- New GUI software architecture
+
+### Fixed
+- Various small bug fixes
+
+## [0.3] - 2021-12-02
+
+### Changed
+- Solved deprecated warnings related to commonroad-io version 2021.3
+
+### Fixed
+- Various small bug fixes
+
 ## [0.2] - 2021-09-22
 
 ### Added

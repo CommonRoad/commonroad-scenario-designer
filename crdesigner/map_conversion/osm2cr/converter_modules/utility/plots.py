@@ -93,7 +93,7 @@ def draw_graph(graph: rg.Graph, ax: axis, links: bool = True):
         lanes += edge.lanes
         if debug:
             draw_edge_orientation(edge, ax)
-   
+
     if links:
         lanes += list(graph.lanelinks)
     for lane in lanes:
