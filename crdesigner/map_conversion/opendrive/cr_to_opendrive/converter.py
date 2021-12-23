@@ -1,9 +1,9 @@
-from conversion.elements.obstacle import Obstacle
-from conversion.elements.sign import Sign
-from conversion.elements.light import Light
-import conversion.utils.file_writer as fwr
-from conversion.elements.road import Road
-from conversion.elements.junction import Junction
+from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.obstacle import Obstacle
+from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.sign import Sign
+from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.light import Light
+import crdesigner.map_conversion.opendrive.cr_to_opendrive.utils.file_writer as fwr
+from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.road import Road
+from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.junction import Junction
 from commonroad.scenario.intersection import IntersectionIncomingElement
 import copy
 import time

@@ -1,5 +1,5 @@
 from lxml import etree
-from conversion.elements.road import Road
+from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.road import Road
 
 
 class Junction:

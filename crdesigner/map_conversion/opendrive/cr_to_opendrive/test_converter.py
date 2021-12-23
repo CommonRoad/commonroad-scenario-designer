@@ -1,9 +1,9 @@
 import unittest
 import re
-from conversion.dataloader import DataLoader
-from conversion.converter import Converter
+from crdesigner.map_conversion.opendrive.cr_to_opendrive.dataloader import DataLoader
+from crdesigner.map_conversion.opendrive.cr_to_opendrive.converter import Converter
 
-# to run the tests: pytest -v --cov=conversion.converter --cov-report html
+# to run the tests: pytest -v --cov=crdesigner.map_conversion.opendrive.cr_to_opendrive.converter --cov-report html
 # This also generates a coverage report, see rootdir/htmlcov -> index.html
 
 

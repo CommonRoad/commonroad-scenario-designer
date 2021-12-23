@@ -1,6 +1,6 @@
 from lxml import etree
 from datetime import datetime
-import conversion.elements.road as Road
+import crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.road as Road
 
 
 class Writer(object):

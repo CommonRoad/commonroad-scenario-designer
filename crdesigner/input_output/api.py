@@ -9,6 +9,7 @@ __status__ = "Released"
 from lxml import etree
 import uuid
 import os
+from pathlib import Path
 
 from commonroad.scenario.scenario import Scenario
 from commonroad.common.file_reader import CommonRoadFileReader
@@ -19,6 +20,9 @@ from crdesigner.map_conversion.opendrive.opendrive_conversion.network import Net
 from crdesigner.map_conversion.lanelet_lanelet2.lanelet2cr import Lanelet2CRConverter
 from crdesigner.map_conversion.lanelet_lanelet2.lanelet2_parser import Lanelet2Parser
 from crdesigner.map_conversion.lanelet_lanelet2.cr2lanelet import CR2LaneletConverter
+
+from crdesigner.map_conversion.opendrive.cr_to_opendrive.dataloader import DataLoader
+from crdesigner.map_conversion.opendrive.cr_to_opendrive.converter import Converter
 
 from crdesigner.input_output.gui.toolboxes.gui_sumo_simulation import SUMO_AVAILABLE
 if SUMO_AVAILABLE:
@@ -140,3 +144,28 @@ def osm_to_commonroad(input_file: str) -> Scenario:
     """
     osm_graph = GraphScenario(input_file).graph
     return convert_to_scenario(osm_graph)
+
+
+def commonroad_to_opendrive(scenario_name: str):
+    """
+    Converts CommonRoad file to OpenDRIVE file
+
+    @param scenario_name: name of scenario 
+    """
+    # get path of root directory
+    ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    file_path_in = os.path.join(ROOT_DIR, f"map_conversion/opendrive/cr_to_opendrive/maps/commonroad/{scenario_name}.xml")  # absolute path for input
+    file_path_out = os.path.join(ROOT_DIR,f"map_conversion/opendrive/cr_to_opendrive/maps/{scenario_name}.xodr")  # absolute path for output
+
+    # load the xml file and preprocess it
+    data = DataLoader(file_path_in)
+
+    scenario, successors, ids = data.initialize()
+    converter = Converter(file_path_in, scenario, successors, ids)
+    converter.convert(file_path_out)
+
+
+
+
+
+    

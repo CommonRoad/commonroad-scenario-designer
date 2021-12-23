@@ -1,6 +1,6 @@
 import numpy as np
-from conversion.elements.road import Road
-import conversion.utils.commonroad_ccosy_geometry_util as util
+from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.road import Road
+import crdesigner.map_conversion.opendrive.cr_to_opendrive.utils.commonroad_ccosy_geometry_util as util
 
 # Traffic signal class
 class Signal:

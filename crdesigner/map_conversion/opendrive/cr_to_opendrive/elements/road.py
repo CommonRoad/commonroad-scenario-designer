@@ -2,7 +2,7 @@ from lxml import etree
 import numpy as np
 import warnings
 
-import conversion.utils.commonroad_ccosy_geometry_util as util
+import crdesigner.map_conversion.opendrive.cr_to_opendrive.utils.commonroad_ccosy_geometry_util as util
 
 
 # Road class

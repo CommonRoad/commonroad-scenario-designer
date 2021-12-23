@@ -1,9 +1,9 @@
 from lxml import etree
 import numpy as np
-from conversion.elements.road import Road
+from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.road import Road
 from commonroad.geometry.shape import Shape, Rectangle, Circle, Polygon
 from commonroad.scenario.trajectory import State
-import conversion.utils.commonroad_ccosy_geometry_util as util
+import crdesigner.map_conversion.opendrive.cr_to_opendrive.utils.commonroad_ccosy_geometry_util as util
 
 # Obstacle class
 class Obstacle:

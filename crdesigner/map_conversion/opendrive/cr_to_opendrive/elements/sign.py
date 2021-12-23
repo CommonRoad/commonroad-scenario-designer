@@ -1,4 +1,4 @@
-from conversion.elements.signal import Signal
+from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.signal import Signal
 
 # Traffic sign class inherits from Signal class
 class Sign(Signal):
