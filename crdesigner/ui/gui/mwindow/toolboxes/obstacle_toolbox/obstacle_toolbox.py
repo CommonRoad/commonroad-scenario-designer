@@ -36,11 +36,25 @@ class ObstacleToolbox(QDockWidget):
         self.tmp_folder = tmp_folder
         self.text_browser = text_browser
         self.update_ongoing = False
+        self.init_canvas()
+
+        #for profile visualisation
+        self.sel_point = None
+        self.xyo = []
 
         if SUMO_AVAILABLE:
             self.sumo_simulation = SUMOSimulation(tmp_folder=tmp_folder)
         else:
             self.sumo_simulation = None
+
+    def init_canvas(self):
+        self.obstacle_toolbox_ui.canvas.mpl_connect('draw_event', self.on_draw)
+        self.obstacle_toolbox_ui.canvas.mpl_connect('button_press_event', self.on_button_press)
+        self.obstacle_toolbox_ui.canvas.mpl_connect('button_release_event', self.on_button_release)
+        self.obstacle_toolbox_ui.canvas.mpl_connect('motion_notify_event', self.on_mouse_move)
+
+        self.epsilon = 0.5 #tolerance of how far off from vertice you can click
+        self.ind = None
 
     def adjust_ui(self):
         """Updates GUI properties like width, etc."""
@@ -224,6 +238,7 @@ class ObstacleToolbox(QDockWidget):
 
     def initial_trajectory(self):
         #hardcoded values for testing, right now only straight line
+
         initial_position_x = float(self.obstacle_toolbox_ui.obstacle_x_Position.text()) 
         initial_position_y = float(self.obstacle_toolbox_ui.obstacle_y_Position.text())
 
@@ -239,11 +254,19 @@ class ObstacleToolbox(QDockWidget):
         state_list = []
         finished = False
         i = 1
+        #if updating positions in profile visualisation
+        if self.xyo:
+            for j in self.xyo:
+                new_position = np.array([j[0], j[1]])
+                new_state = State(**{'position': new_position, 'velocity': velocity, 'orientation': j[2], 'time_step': i})
+                state_list.append(new_state)
+                i += 1
+            return state_list
 
         while(finished == False):
         #while (i < 50):
             #sqrt(2) temporary for testing
-            #maybe change so just checks once
+            #maybe change so just checks once TODO fix so works when goal_position = initial_position
             if goal_position_x > initial_position_x:
                 next_pos_x = initial_position_x + self.current_scenario.dt * (length_x / length) * i * velocity
             elif goal_position_x < initial_position_x:
@@ -317,7 +340,133 @@ class ObstacleToolbox(QDockWidget):
         self.obstacle_toolbox_ui.selected_obstacle.addItems(
             ["None"] + [str(item) for item in self.collect_obstacle_ids()])
         self.obstacle_toolbox_ui.selected_obstacle.setCurrentIndex(0)
+    
+    def on_draw(self, event):
+        test = 1
+    
+    def on_button_press(self, event):
+        """"when left mouse button is pressed"""
+        if event.inaxes is None:
+            return
+        if event.button != 1:
+            return
+        self.sel_point = self.selected_point(event)
+    
+    def on_button_release(self, event):
+        """Updates obstacle when left mouse button is released"""
+        if event.button != 1:
+            return
+        #TODO make this a separate function
+        obstacle_id = int(self.obstacle_toolbox_ui.selected_obstacle.currentText())
+        selected_obstacle = self.current_scenario.obstacle_by_id(obstacle_id)
+        state_variable_name = self.obstacle_toolbox_ui.obstacle_state_variable.currentText()
+        i = 0
 
+        for state in selected_obstacle.prediction.trajectory.state_list:
+            if state_variable_name == "x-position":
+                y = state.__getattribute__("position")[1]
+                o = state.__getattribute__("orientation")
+                self.xyo.append([self.pos[i][1], y, o])
+            elif state_variable_name == "y-position":
+                x = state.__getattribute__("position")[0]
+                o = state.__getattribute__("orientation")
+                self.xyo.append([x, self.pos[i][1], o])
+            elif state_variable_name == "orientation":
+                x = state.__getattribute__("position")[0]
+                y = state.__getattribute__("position")[1]
+                self.xyo.append([x, y, self.pos[i][1]])
+            i += 1
+        #TODO change so update_obstacle handles this
+        self.current_scenario.remove_obstacle(selected_obstacle)
+        self.dynamic_obstacle_details(obstacle_id)
+        
+        self.sel_point = None
+        self.xyo = []
+    
+    def on_mouse_move(self, event):
+        """update position of selected point by moving mouse
+            and holding down left mouse button"""
+        if self.sel_point is None:
+            return
+        if event.inaxes is None:
+            return
+        if event.button != 1:
+            return
+        obstacle_id = int(self.obstacle_toolbox_ui.selected_obstacle.currentText())
+        obstacle = self.current_scenario.obstacle_by_id(obstacle_id)
+        state_variable_name = self.obstacle_toolbox_ui.obstacle_state_variable.currentText()
+
+        self.pos = []
+        time = []
+        profile = []
+        #TODO fix so this is a separate function
+        for state in obstacle.prediction.trajectory.state_list:
+            t = state.__getattribute__("time_step")
+            if state_variable_name == "x-position":
+                x = state.__getattribute__("position")[0]
+                self.pos.append([t,x])
+            elif state_variable_name == "y-position":
+                y = state.__getattribute__("position")[1]
+                self.pos.append([t,y])
+            elif state_variable_name == "orientation":
+                o = state.__getattribute__("orientation")
+                self.pos.append([t,o])
+        #print(self.sel_point)
+        #print(pos[self.sel_point[0]-1])
+        self.sel_point[1] = event.ydata
+        #print(pos[self.sel_point[0]-1][1])
+        self.pos[self.sel_point[0]-1][1] = self.sel_point[1] #NOTE i time_step = i + 1
+        #state_list = obstacle.prediction.trajectory.state_list
+        #TODO make separate function?   
+        self.obstacle_toolbox_ui.figure.clear()
+
+        # create an axis
+        ax = self.obstacle_toolbox_ui.figure.add_subplot(111)
+        for i in self.pos:
+            time.append(i[0])
+            profile.append(i[1])
+        # plot data
+        ax.plot(time, profile, '.-', markersize=4)
+        ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.1f}'))
+        ax.set_xlabel("time [s]")
+        ax.set_ylabel(self.resolve_y_label(state_variable_name))
+        self.obstacle_toolbox_ui.figure.tight_layout()
+        # refresh canvas
+        self.obstacle_toolbox_ui.canvas.draw()
+
+    def selected_point(self, event):
+        """get the time step of the where the point is located"""
+        obstacle_id = int(self.obstacle_toolbox_ui.selected_obstacle.currentText())
+        obstacle = self.current_scenario.obstacle_by_id(obstacle_id)
+        state_variable_name = self.obstacle_toolbox_ui.obstacle_state_variable.currentText()
+        pos = []
+        sel_point = None
+
+        for state in obstacle.prediction.trajectory.state_list:
+            t = state.__getattribute__("time_step")
+            if state_variable_name == "x-position":
+                x = state.__getattribute__("position")[0]
+                pos.append([t,x])
+            elif state_variable_name == "y-position":
+                y = state.__getattribute__("position")[1]
+                pos.append([t,y])
+            elif state_variable_name == "orientation":
+                o = state.__getattribute__("orientation")
+                pos.append([t,o])
+        
+        #calculate nearest point from mouse click
+        for i in range(0, t):
+            #distance between cursor and points
+            distance = math.dist(pos[i], [event.xdata, event.ydata])
+            if i == 0:
+                smallest_distance = distance
+            if distance < 1 and distance < smallest_distance: #add max distance?
+                smallest_distance = distance
+                sel_point = pos[i] #NOTE i time_step = i + 1
+        return sel_point
+
+        # display coords
+        
     def plot_obstacle_state_profile(self):
         if self.obstacle_toolbox_ui.selected_obstacle.currentText() not in ["", "None"] and not self.update_ongoing:
             obstacle_id = int(self.obstacle_toolbox_ui.selected_obstacle.currentText())
