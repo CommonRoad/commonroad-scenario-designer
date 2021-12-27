@@ -138,7 +138,7 @@ class ObstacleToolbox(QDockWidget):
         try:
             obstacle_id = self.current_scenario.generate_object_id()
             self.static_obstacle_details(obstacle_id)
-        except:
+        except Exception as e:
             self.text_browser.append("Error when adding static obstacle")
 
     def update_obstacle(self):
