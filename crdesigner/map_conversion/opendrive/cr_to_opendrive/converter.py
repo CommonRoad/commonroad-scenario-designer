@@ -39,11 +39,13 @@ class Converter:
         # Obstacles, signs, lights
         self.constructObstacles()
         self.populateTrafficElements(Road.crIdToOD)
-        self.constructTrafficElements()
+        # self.constructTrafficElements()
 
         self.finalize()
         self.convTime = time.time() - start
         self.printTime()
+
+        # return self.writer.root
 
     def printTime(self):
         conv = "Converter\n"

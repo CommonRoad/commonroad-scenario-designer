@@ -149,7 +149,6 @@ def osm_to_commonroad(input_file: str) -> Scenario:
 def commonroad_to_opendrive(scenario_name: str):
     """
     Converts CommonRoad file to OpenDRIVE file
-
     @param scenario_name: name of scenario 
     """
     # get path of root directory
@@ -162,7 +161,24 @@ def commonroad_to_opendrive(scenario_name: str):
 
     scenario, successors, ids = data.initialize()
     converter = Converter(file_path_in, scenario, successors, ids)
-    converter.convert(file_path_out)
+    converter.convert(file_path_out) 
+
+# if __name__ == "__main__":
+    # for these files api is working fine( when I comment the line self.constructTrafficElements() from Class-Converter: function convert)
+#     commonroad_to_opendrive("opendrive-1")
+#     commonroad_to_opendrive("CulDeSac")
+#     commonroad_to_opendrive("town03_right_width_coefficient")
+#     commonroad_to_opendrive("zero_width_lanes_map")
+
+
+    # for these files, got error while converting from xml to xodr
+    # commonroad_to_opendrive("KA-Suedtangente-atlatec")
+    # commonroad_to_opendrive("CrossingComplex8Course")
+    # commonroad_to_opendrive("Roundabout8Course")
+    # commonroad_to_opendrive("poly3_and_border_record")
+    # commonroad_to_opendrive("FourWaySignal")
+
+    
 
 
 
