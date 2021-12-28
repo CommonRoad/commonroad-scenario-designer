@@ -9,7 +9,6 @@ __status__ = "Released"
 from lxml import etree
 import uuid
 import os
-from pathlib import Path
 
 from commonroad.scenario.scenario import Scenario
 from commonroad.common.file_reader import CommonRoadFileReader
@@ -146,24 +145,29 @@ def osm_to_commonroad(input_file: str) -> Scenario:
     return convert_to_scenario(osm_graph)
 
 
-def commonroad_to_opendrive(scenario_name: str):
+# def commonroad_to_opendrive(scenario_name: str):
+def commonroad_to_opendrive(input_file: str, output_file: str):
     """
-    Converts CommonRoad file to OpenDRIVE file
-    @param scenario_name: name of scenario 
+    Converts CommonRoad file to OpenDRIVE file and stores it
+    @param input_file: Path to CommonRoad file 
+    @param output_file: Path where OpenDRIVE file to be stored
     """
-    # get path of root directory
-    ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    file_path_in = os.path.join(ROOT_DIR, f"map_conversion/opendrive/cr_to_opendrive/maps/commonroad/{scenario_name}.xml")  # absolute path for input
-    file_path_out = os.path.join(ROOT_DIR,f"map_conversion/opendrive/cr_to_opendrive/maps/{scenario_name}.xodr")  # absolute path for output
 
     # load the xml file and preprocess it
-    data = DataLoader(file_path_in)
+    data = DataLoader(input_file)
 
     scenario, successors, ids = data.initialize()
-    converter = Converter(file_path_in, scenario, successors, ids)
-    converter.convert(file_path_out) 
+    converter = Converter(input_file, scenario, successors, ids)
+    converter.convert(output_file) 
 
-# if __name__ == "__main__":
+
+
+
+if __name__ == "__main__":
+    ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    input_file = os.path.join(ROOT_DIR,f"map_conversion/opendrive/cr_to_opendrive/maps/commonroad/opendrive-1.xml")
+    output_file = os.path.join(ROOT_DIR,f"map_conversion/opendrive/cr_to_opendrive/maps/opendrive-1.xodr")
+    commonroad_to_opendrive(input_file, output_file)
     # for these files api is working fine( when I comment the line self.constructTrafficElements() from Class-Converter: function convert)
 #     commonroad_to_opendrive("opendrive-1")
 #     commonroad_to_opendrive("CulDeSac")

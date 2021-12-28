@@ -1,113 +1,91 @@
 import os
 import unittest
-import time
-from lxml import etree
+import re
+from crdesigner.map_conversion.opendrive.cr_to_opendrive.dataloader import DataLoader
+from crdesigner.map_conversion.opendrive.cr_to_opendrive.converter import Converter
+
+# to run the tests: pytest -v --cov=crdesigner.map_conversion.opendrive.cr_to_opendrive.converter --cov-report html
+# This also generates a coverage report, see rootdir/htmlcov -> index.html
 
 
-from crdesigner.map_conversion.common.utils import generate_unique_id
-from crdesigner.input_output.api import commonroad_to_opendrive
+class TestConverterConvert(unittest.TestCase):
+    def __init__(self, *args, **kwargs):
+        super(TestConverterConvert, self).__init__(*args, **kwargs)
+        self.map_names = [
+            "zero_width_lanes_map",
+            "ARG_Carcarana-1_1_T-1",
+            "DEU_Guetersloh-11_2_T-1",
+            "USA_Lanker-1_17_T-1",
+            "DEU_Test-1_1_T-1",
+            "DEU_Muehlhausen-2_2_T-1",
+            "lanelet_no_succ_or_pred",
+        ]
 
-from tests.map_conversion.utils import elements_equal
+    def prepareConversion(self, map_name):
+        self.map_name = map_name
+        # relative path for input
+        self.file_path_in = f"commonroad_to_opendrive_test_files/{self.map_name}.xml"  
+        
+        # relative path for output
+        self.file_path_out = f"commonroad_to_opendrive_test_files/converted_xodr_files/{self.map_name}.xodr"
 
-__author__ = "Benjamin Orthen, Sebastian Maierhofer"
-__copyright__ = "TUM Cyber-Physical Systems Group"
-__credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles, BMW Car@TUM"]
-__version__ = "0.2"
-__maintainer__ = "Sebastian Maierhofer"
-__email__ = "commonroad@lists.lrz.de"
-__status__ = "Released"
+        # load the xml file and preprocess it
+        self.data = DataLoader(self.file_path_in)
+        print(self.data)
 
+        scenario, successors, ids = self.data.initialize()
+        self.converter = Converter(self.file_path_in, scenario, successors, ids)
 
-class TestCommonRoadToOpenDriveConversion(unittest.TestCase):
-    """Basic test with a junction in the middle."""
+    # cuts out the date timestamp of both maps
+    # (as they wont be equal) and compares them
+    def checkWithGroundTruth(self, reference_file):
+        with open(self.file_path_out, "r") as converted_file:
+            converted_file_content = re.sub(r"date=\"[^ ]*", "", converted_file.read())
 
-    @staticmethod
-    def load_and_convert_commonroad(xml_file_name: str):
-        cwd_path = os.path.dirname(os.path.abspath(__file__))
-        out_path = cwd_path + "/.pytest_cache/commonroad"
-        # print(out_path)
+        with open(reference_file, "r") as reference_file:
+            reference_file_content = re.sub(r"date=\"[^ ]*", "", reference_file.read())
+        assert converted_file_content == reference_file_content
 
-        if not os.path.isdir(out_path):
-            os.makedirs(out_path)
-        else:
-            for (dir_path, _, filenames) in os.walk(out_path):
-                # print(filenames, dir_path)
-                for file in filenames:
-                    if file.endswith('.xodr'):
-                        os.remove(os.path.join(dir_path, file))
+    def test_convert_USA_Lanker(self):
+        self.prepareConversion("USA_Lanker-1_17_T-1")
+        self.converter.convert(self.file_path_out)
+        self.checkWithGroundTruth(f"commonroad_to_opendrive_test_files/reference_xodr_files/{self.map_name}.xodr")
 
-        commonroad_to_opendrive(xml_file_name)
+    def test_convert_DEU_Guetersloh(self):
+        self.prepareConversion("DEU_Guetersloh-11_2_T-1")
+        self.converter.convert(self.file_path_out)
+        self.checkWithGroundTruth(f"commonroad_to_opendrive_test_files/reference_xodr_files/{self.map_name}.xodr")
 
-    def compare_maps(self, file_name: str) -> bool:
-        """
-        Test if the converted opendrive file is equal to the loaded opendrive file.
-        Disregard the different dates.
-        """
-        xodr_output_name = file_name
+    def test_convert_ARG_Carcarana(self):
+        self.prepareConversion("ARG_Carcarana-1_1_T-1")
+        self.converter.convert(self.file_path_out)
+        self.checkWithGroundTruth(f"commonroad_to_opendrive_test_files/reference_xodr_files/{self.map_name}.xodr")
 
-        with open(os.path.dirname(os.path.realpath(__file__))
-                  + f"/opendrive_test_files/{xodr_output_name}.xodr", "r", ) as fh1:
-            parser = etree.XMLParser(remove_blank_text=True)
-            tree_import1 = etree.parse(fh1, parser=parser).getroot()
+    def test_convert_zero_width_lanes_map(self):
+        self.prepareConversion("zero_width_lanes_map")
+        self.converter.convert(self.file_path_out)
+        self.checkWithGroundTruth(f"commonroad_to_opendrive_test_files/reference_xodr_files/{self.map_name}.xodr")
 
-        self.load_and_convert_commonroad(file_name)
+    def test_convert_DEU_Test(self):
+        self.prepareConversion("DEU_Test-1_1_T-1")
+        self.converter.convert(self.file_path_out)
+        self.checkWithGroundTruth(f"commonroad_to_opendrive_test_files/reference_xodr_files/{self.map_name}.xodr")
 
-        # get converted xodr opendrive file
-        with open(f"/home/kiran/myprojects/hiwi/scenario/commonroad-scenario-designer/crdesigner/map_conversion/opendrive/cr_to_opendrive/maps/OpenDRIVE/{xodr_output_name}.xodr") as fh2:
-            parser = etree.XMLParser(remove_blank_text=True)
-            tree_import2 = etree.parse(fh2, parser=parser).getroot()
-            
-            # set same date so this won't change the comparison
-            date = time.strftime("%Y-%m-%d", time.localtime())
-            tree_import1.set("date", date)
-            tree_import2.set("date", date)
+    def test_convert_DEU_Muehlhausen(self):
+        self.prepareConversion("DEU_Muehlhausen-2_2_T-1")
+        self.converter.convert(self.file_path_out)
+        self.checkWithGroundTruth(f"commonroad_to_opendrive_test_files/reference_xodr_files/{self.map_name}.xodr")
 
-            generate_unique_id(0)  # reset ID counter for next test case
+    def test_convert_lanelet_no_succ_or_pred(self):
+        self.prepareConversion("lanelet_no_succ_or_pred")
+        self.converter.convert(self.file_path_out)
+        self.checkWithGroundTruth(f"commonroad_to_opendrive_test_files/reference_xodr_files/{self.map_name}.xodr")
 
-            # # compare both element trees
-            return elements_equal(tree_import1, tree_import2)
+    def test_function_checkAllVisited(self):
+        self.prepareConversion("DEU_Test-1_1_T-1")
+        self.converter.id_dict.popitem()
+        self.assertRaises(KeyError, lambda: self.converter.checkAllVisited())
 
-    def test_basic_opendrive(self):
-        """Basic test with a junction in the middle."""
-        self.assertTrue(self.compare_maps("opendrive-1"))
-
-    # def test_sued_tangente(self):
-    #     """Includes roads with multiple lane sections and
-    #     lane sections with multiple width sections.
-    #     This should be split into multiple tests in the future."""
-    #     self.assertTrue(self.compare_maps("KA-Suedtangente-atlatec"))
-
-    def test_culdesac(self):
-        """Two adjacent lanes with same successor should not be mistaken
-        as merging lanes!"""
-        self.assertTrue(self.compare_maps("CulDeSac"))
-
-    # def test_complex_crossing(self):
-    #     self.assertTrue(self.compare_maps("CrossingComplex8Course"))
-
-    # def test_roundabout(self):
-    #     self.assertTrue(self.compare_maps("Roundabout8Course"))
-
-    def test_right_width_coefficients(self):
-        """Test if algorithm selects the right width index if it is ambiguous.
-        This was an error of an github issue for town03.xodr.
-        For multiple width coefficients, at the border between the interval of two
-        both could apply and it was previously not rightly determined which to select.
-        """
-        self.assertTrue(self.compare_maps("town03_right_width_coefficient"))
-
-    def test_zero_width_coefficients(self):
-        """Test if this converter discards lanes which have zero width everywhere.
-        In this case, it is the lane -1 of road 1."""
-        self.assertTrue(self.compare_maps("zero_width_lanes_map"))
-
-    # def test_poly3_and_border_record(self):
-    #     """Test if the program convert Poly3 Geometry and whether it can handle
-    #     border records instead of width records."""
-    #     self.assertTrue(self.compare_maps("poly3_and_border_record"))
-
-    # def test_four_way_signal(self):
-    #     self.assertTrue(self.compare_maps("FourWaySignal"))
 
 
 if __name__ == "__main__":

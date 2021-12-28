@@ -54,15 +54,9 @@ Python APIs
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.dataloader import DataLoader
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.converter import Converter
 
-# get path of root directory
-ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-file_path_in = os.path.join(ROOT_DIR, f"map_conversion/opendrive/cr_to_opendrive/maps/commonroad/{scenario_name}.xml")  # absolute path for input
-file_path_out = os.path.join(ROOT_DIR,f"map_conversion/opendrive/cr_to_opendrive/maps/{scenario_name}.xodr")  # absolute path for output
-
 # load the xml file and preprocess it
-data = DataLoader(file_path_in)
+data = DataLoader(input_file)
 
 scenario, successors, ids = data.initialize()
-converter = Converter(file_path_in, scenario, successors, ids)
-converter.convert(file_path_out)
-
+converter = Converter(input_file, scenario, successors, ids)
+converter.convert(output_file) 
