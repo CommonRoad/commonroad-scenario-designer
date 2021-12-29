@@ -376,21 +376,32 @@ class ObstacleToolbox(QDockWidget):
         selected_obstacle = self.get_current_obstacle()
         state_variable_name = self.obstacle_toolbox_ui.obstacle_state_variable.currentText()
         i = 0
-        self.xyo.clear()
-        for state in selected_obstacle.prediction.trajectory.state_list:
-            if state_variable_name == "x-position":
-                y = state.__getattribute__("position")[1]
-                o = state.__getattribute__("orientation")
-                self.xyo.append([self.pos[i][1], y, o])
-            elif state_variable_name == "y-position":
-                x = state.__getattribute__("position")[0]
-                o = state.__getattribute__("orientation")
-                self.xyo.append([x, self.pos[i][1], o])
-            elif state_variable_name == "orientation":
-                x = state.__getattribute__("position")[0]
-                y = state.__getattribute__("position")[1]
-                self.xyo.append([x, y, self.pos[i][1]])
-            i += 1
+        #self.xyo.clear()
+        #so all not updated changes are saved
+        if self.xyo:
+            for j in self.xyo:
+                if state_variable_name == "x-position":
+                    j[0] = self.pos[i][1]
+                elif state_variable_name == "y-position":
+                    j[1] = self.pos[i][1]
+                elif state_variable_name == "orientation":
+                    j[2] = self.pos[i][1]
+                i += 1
+        else:
+            for state in selected_obstacle.prediction.trajectory.state_list:
+                if state_variable_name == "x-position":
+                    y = state.__getattribute__("position")[1]
+                    o = state.__getattribute__("orientation")
+                    self.xyo.append([self.pos[i][1], y, o])
+                elif state_variable_name == "y-position":
+                    x = state.__getattribute__("position")[0]
+                    o = state.__getattribute__("orientation")
+                    self.xyo.append([x, self.pos[i][1], o])
+                elif state_variable_name == "orientation":
+                    x = state.__getattribute__("position")[0]
+                    y = state.__getattribute__("position")[1]
+                    self.xyo.append([x, y, self.pos[i][1]])
+                i += 1
         
         #self.update_obstacle()
         
@@ -490,24 +501,31 @@ class ObstacleToolbox(QDockWidget):
         
     def plot_obstacle_state_profile(self):
         if self.obstacle_toolbox_ui.selected_obstacle.currentText() not in ["", "None"] and not self.update_ongoing:
-            #obstacle_id = int(self.obstacle_toolbox_ui.selected_obstacle.currentText())
-            #obstacle = self.current_scenario.obstacle_by_id(obstacle_id)
             obstacle = self.get_current_obstacle()
             state_variable_name = self.obstacle_toolbox_ui.obstacle_state_variable.currentText()
             if state_variable_name == "x-position":
                 profile = [obstacle.initial_state.__getattribute__("position")[0]]
                 if isinstance(obstacle, DynamicObstacle):
-                    profile += [state.__getattribute__("position")[0]
+                    if self.xyo:
+                        profile += [j[0] for j in self.xyo]
+                    else:
+                        profile += [state.__getattribute__("position")[0]
                                 for state in obstacle.prediction.trajectory.state_list]
             elif state_variable_name == "y-position":
                 profile = [obstacle.initial_state.__getattribute__("position")[1]]
                 if isinstance(obstacle, DynamicObstacle):
-                    profile += [state.__getattribute__("position")[1]
+                    if self.xyo:
+                        profile += [j[1] for j in self.xyo]
+                    else:
+                        profile += [state.__getattribute__("position")[1]
                                 for state in obstacle.prediction.trajectory.state_list]
             else:
                 profile = [obstacle.initial_state.__getattribute__(state_variable_name)]
                 if isinstance(obstacle, DynamicObstacle):
-                    profile += [state.__getattribute__(state_variable_name)
+                    if self.xyo:
+                        profile += [j[2] for j in self.xyo]
+                    else:
+                        profile += [state.__getattribute__(state_variable_name)
                                 for state in obstacle.prediction.trajectory.state_list]
             time = [obstacle.initial_state.time_step]
             if isinstance(obstacle, DynamicObstacle):
@@ -540,6 +558,7 @@ class ObstacleToolbox(QDockWidget):
         """retrieves obstacle details to the gui when an obstacle is pressed or the id
         is selected in the obstacle toolbox"""
         if self.obstacle_toolbox_ui.selected_obstacle.currentText() not in ["", "None"]:
+
             self.update_ongoing = True
             #obstacle_id = int(self.obstacle_toolbox_ui.selected_obstacle.currentText())
             #obstacle = self.current_scenario.obstacle_by_id(obstacle_id)
@@ -598,6 +617,8 @@ class ObstacleToolbox(QDockWidget):
                 state_variables += ["x-position", "y-position"]
             self.obstacle_toolbox_ui.obstacle_state_variable.addItems(state_variables)
             self.update_ongoing = False
+            #clear xyo if switch to another obstacle
+            self.xyo.clear()
             self.plot_obstacle_state_profile()
 
         #if set to "None": clear QLineEdits 
