@@ -41,6 +41,7 @@ class ObstacleToolbox(QDockWidget):
         #for profile visualisation
         self.sel_point = None
         self.xyo = []
+        self.pos = []
 
         if SUMO_AVAILABLE:
             self.sumo_simulation = SUMOSimulation(tmp_folder=tmp_folder)
@@ -306,6 +307,15 @@ class ObstacleToolbox(QDockWidget):
 
         vertices = np.asarray(vertices)
         return vertices
+    
+    def get_current_obstacle(self):
+        """returns current selected obstacle"""
+        obstacle_id = self.get_current_obstacle_id()
+        selected_obstacle = self.current_scenario.obstacle_by_id(obstacle_id)
+        return selected_obstacle
+    
+    def get_current_obstacle_id(self):
+        return int(self.obstacle_toolbox_ui.selected_obstacle.currentText())
 
     def add_obstacle(self):
         """creates a static or dynamic obstacle"""
@@ -319,11 +329,15 @@ class ObstacleToolbox(QDockWidget):
     def update_obstacle(self):
         """updates obstacle by deleting it and then adding it again with same id"""
         try:
-            obstacle_id = int(self.obstacle_toolbox_ui.selected_obstacle.currentText())
-            selected_obstacle = self.current_scenario.obstacle_by_id(obstacle_id)
+            selected_obstacle = self.get_current_obstacle()
+            obstacle_id = self.get_current_obstacle_id()
 
             self.current_scenario.remove_obstacle(selected_obstacle)
-            self.static_obstacle_details(obstacle_id)
+            if self.obstacle_toolbox_ui.obstacle_dyn_stat.currentText() == "Static":
+                self.static_obstacle_details(obstacle_id)
+            elif self.obstacle_toolbox_ui.obstacle_dyn_stat.currentText() == "Dynamic":
+                self.dynamic_obstacle_details(obstacle_id)
+                self.xyo.clear()
         except Exception as e:
             self.text_browser.append("Error when updating obstacle")
 
@@ -357,11 +371,12 @@ class ObstacleToolbox(QDockWidget):
         if event.button != 1:
             return
         #TODO make this a separate function
-        obstacle_id = int(self.obstacle_toolbox_ui.selected_obstacle.currentText())
-        selected_obstacle = self.current_scenario.obstacle_by_id(obstacle_id)
+        #obstacle_id = int(self.obstacle_toolbox_ui.selected_obstacle.currentText())
+        #selected_obstacle = self.current_scenario.obstacle_by_id(obstacle_id)
+        selected_obstacle = self.get_current_obstacle()
         state_variable_name = self.obstacle_toolbox_ui.obstacle_state_variable.currentText()
         i = 0
-
+        self.xyo.clear()
         for state in selected_obstacle.prediction.trajectory.state_list:
             if state_variable_name == "x-position":
                 y = state.__getattribute__("position")[1]
@@ -376,12 +391,11 @@ class ObstacleToolbox(QDockWidget):
                 y = state.__getattribute__("position")[1]
                 self.xyo.append([x, y, self.pos[i][1]])
             i += 1
-        #TODO change so update_obstacle handles this
-        self.current_scenario.remove_obstacle(selected_obstacle)
-        self.dynamic_obstacle_details(obstacle_id)
+        
+        #self.update_obstacle()
         
         self.sel_point = None
-        self.xyo = []
+        #self.xyo = []
     
     def on_mouse_move(self, event):
         """update position of selected point by moving mouse
@@ -392,25 +406,40 @@ class ObstacleToolbox(QDockWidget):
             return
         if event.button != 1:
             return
-        obstacle_id = int(self.obstacle_toolbox_ui.selected_obstacle.currentText())
-        obstacle = self.current_scenario.obstacle_by_id(obstacle_id)
+        selected_obstacle = self.get_current_obstacle()
         state_variable_name = self.obstacle_toolbox_ui.obstacle_state_variable.currentText()
 
-        self.pos = []
+        self.pos.clear()
         time = []
         profile = []
         #TODO fix so this is a separate function
-        for state in obstacle.prediction.trajectory.state_list:
-            t = state.__getattribute__("time_step")
-            if state_variable_name == "x-position":
-                x = state.__getattribute__("position")[0]
-                self.pos.append([t,x])
-            elif state_variable_name == "y-position":
-                y = state.__getattribute__("position")[1]
-                self.pos.append([t,y])
-            elif state_variable_name == "orientation":
-                o = state.__getattribute__("orientation")
-                self.pos.append([t,o])
+        #if xyo exists that means that an update is ongoing and previous changes should be saved
+        #(changes reset when __getattribute__ is called)
+        t = 1 #time_step
+        if self.xyo:
+            for i in self.xyo: 
+                if state_variable_name == "x-position":
+                    x = i[0]
+                    self.pos.append([t,x])
+                elif state_variable_name == "y-position":
+                    y = i[1]
+                    self.pos.append([t,y])
+                elif state_variable_name == "orientation":
+                    o = i[2]
+                    self.pos.append([t,o])
+                t += 1
+        else:
+            for state in selected_obstacle.prediction.trajectory.state_list:
+                t = state.__getattribute__("time_step")
+                if state_variable_name == "x-position":
+                    x = state.__getattribute__("position")[0]
+                    self.pos.append([t,x])
+                elif state_variable_name == "y-position":
+                    y = state.__getattribute__("position")[1]
+                    self.pos.append([t,y])
+                elif state_variable_name == "orientation":
+                    o = state.__getattribute__("orientation")
+                    self.pos.append([t,o])
         #print(self.sel_point)
         #print(pos[self.sel_point[0]-1])
         self.sel_point[1] = event.ydata
@@ -418,31 +447,23 @@ class ObstacleToolbox(QDockWidget):
         self.pos[self.sel_point[0]-1][1] = self.sel_point[1] #NOTE i time_step = i + 1
         #state_list = obstacle.prediction.trajectory.state_list
         #TODO make separate function?   
-        self.obstacle_toolbox_ui.figure.clear()
-
-        # create an axis
-        ax = self.obstacle_toolbox_ui.figure.add_subplot(111)
+        #self.obstacle_toolbox_ui.figure.clear()
         for i in self.pos:
             time.append(i[0])
             profile.append(i[1])
-        # plot data
-        ax.plot(time, profile, '.-', markersize=4)
-        ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.1f}'))
-        ax.set_xlabel("time [s]")
-        ax.set_ylabel(self.resolve_y_label(state_variable_name))
-        self.obstacle_toolbox_ui.figure.tight_layout()
-        # refresh canvas
-        self.obstacle_toolbox_ui.canvas.draw()
+
+        self.draw_plot(time, profile)
 
     def selected_point(self, event):
         """get the time step of the where the point is located"""
-        obstacle_id = int(self.obstacle_toolbox_ui.selected_obstacle.currentText())
-        obstacle = self.current_scenario.obstacle_by_id(obstacle_id)
+        #obstacle_id = int(self.obstacle_toolbox_ui.selected_obstacle.currentText())
+        #obstacle = self.current_scenario.obstacle_by_id(obstacle_id)
+        selected_obstacle = self.get_current_obstacle()
         state_variable_name = self.obstacle_toolbox_ui.obstacle_state_variable.currentText()
         pos = []
         sel_point = None
 
-        for state in obstacle.prediction.trajectory.state_list:
+        for state in selected_obstacle.prediction.trajectory.state_list:
             t = state.__getattribute__("time_step")
             if state_variable_name == "x-position":
                 x = state.__getattribute__("position")[0]
@@ -469,8 +490,9 @@ class ObstacleToolbox(QDockWidget):
         
     def plot_obstacle_state_profile(self):
         if self.obstacle_toolbox_ui.selected_obstacle.currentText() not in ["", "None"] and not self.update_ongoing:
-            obstacle_id = int(self.obstacle_toolbox_ui.selected_obstacle.currentText())
-            obstacle = self.current_scenario.obstacle_by_id(obstacle_id)
+            #obstacle_id = int(self.obstacle_toolbox_ui.selected_obstacle.currentText())
+            #obstacle = self.current_scenario.obstacle_by_id(obstacle_id)
+            obstacle = self.get_current_obstacle()
             state_variable_name = self.obstacle_toolbox_ui.obstacle_state_variable.currentText()
             if state_variable_name == "x-position":
                 profile = [obstacle.initial_state.__getattribute__("position")[0]]
@@ -491,20 +513,7 @@ class ObstacleToolbox(QDockWidget):
             if isinstance(obstacle, DynamicObstacle):
                 time += [state.time_step for state in obstacle.prediction.trajectory.state_list]
 
-            # clear previous profile
-            self.obstacle_toolbox_ui.figure.clear()
-
-            # create an axis
-            ax = self.obstacle_toolbox_ui.figure.add_subplot(111)
-
-            # plot data
-            ax.plot(time, profile, '.-', markersize=4)
-            ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.1f}'))
-            ax.set_xlabel("time [s]")
-            ax.set_ylabel(self.resolve_y_label(state_variable_name))
-            self.obstacle_toolbox_ui.figure.tight_layout()
-            # refresh canvas
-            self.obstacle_toolbox_ui.canvas.draw()
+            self.draw_plot(time, profile)
 
     @staticmethod
     def resolve_y_label(state_variable_name: str) -> str:
@@ -532,8 +541,9 @@ class ObstacleToolbox(QDockWidget):
         is selected in the obstacle toolbox"""
         if self.obstacle_toolbox_ui.selected_obstacle.currentText() not in ["", "None"]:
             self.update_ongoing = True
-            obstacle_id = int(self.obstacle_toolbox_ui.selected_obstacle.currentText())
-            obstacle = self.current_scenario.obstacle_by_id(obstacle_id)
+            #obstacle_id = int(self.obstacle_toolbox_ui.selected_obstacle.currentText())
+            #obstacle = self.current_scenario.obstacle_by_id(obstacle_id)
+            obstacle = self.get_current_obstacle()
             if isinstance(obstacle.obstacle_shape, Rectangle):
 
                 if self.obstacle_toolbox_ui.obstacle_shape.currentText() != "Rectangle":
@@ -625,7 +635,25 @@ class ObstacleToolbox(QDockWidget):
         Removes the selected obstacle from the scenario.
         """
         if self.obstacle_toolbox_ui.selected_obstacle.currentText() not in ["", "None"]:
-            obstacle_id = int(self.obstacle_toolbox_ui.selected_obstacle.currentText())
-            obstacle = self.current_scenario.obstacle_by_id(obstacle_id)
-            self.current_scenario.remove_obstacle(obstacle)
+            #obstacle_id = int(self.obstacle_toolbox_ui.selected_obstacle.currentText())
+            #obstacle = self.current_scenario.obstacle_by_id(obstacle_id)
+            selected_obstacle = self.get_current_obstacle()
+            self.current_scenario.remove_obstacle(selected_obstacle)
             self.callback(self.current_scenario)
+
+    def draw_plot(self, time, profile):
+        """draws the state plot in the obstacle toolbox"""
+        state_variable_name = self.obstacle_toolbox_ui.obstacle_state_variable.currentText()
+        # clear previous profile
+        self.obstacle_toolbox_ui.figure.clear()
+        # create an axis
+        ax = self.obstacle_toolbox_ui.figure.add_subplot(111)
+        
+        # plot data
+        ax.plot(time, profile, '.-', markersize=4)
+        ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.1f}'))
+        ax.set_xlabel("time [s]")
+        ax.set_ylabel(self.resolve_y_label(state_variable_name))
+        self.obstacle_toolbox_ui.figure.tight_layout()
+        # refresh canvas
+        self.obstacle_toolbox_ui.canvas.draw()
