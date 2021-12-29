@@ -51,12 +51,21 @@ Python APIs
 
 .. code:: python
 
-from crdesigner.map_conversion.opendrive.cr_to_opendrive.dataloader import DataLoader
-from crdesigner.map_conversion.opendrive.cr_to_opendrive.converter import Converter
+	from crdesigner.input_output.api import commonroad_to_opendrive
+	from crdesigner.map_conversion.opendrive.cr_to_opendrive.dataloader import DataLoader
+	from crdesigner.map_conversion.opendrive.cr_to_opendrive.converter import Converter
 
-# load the xml file and preprocess it
-data = DataLoader(input_file)
+	input_file = "" #path to CommonRoad file
+	output_file = "" #path where OpenDRIVE file to be stored
 
-scenario, successors, ids = data.initialize()
-converter = Converter(input_file, scenario, successors, ids)
-converter.convert(output_file) 
+	# -------------------------------------- Option 1: General API --------------------------------------------
+	# load xml file, preprocess it, and convert it to a respective OpenDRIVE file
+	commonroad_to_opendrive(input_file, output_file)
+
+    # ------------------------------- Option 2: CommonRoad conversion APIs ------------------------------------
+	# load the xml file and preprocess it
+	data = DataLoader(input_file)
+
+	scenario, successors, ids = data.initialize()
+	converter = Converter(input_file, scenario, successors, ids)
+	converter.convert(output_file) 

@@ -164,24 +164,12 @@ def commonroad_to_opendrive(input_file: str, output_file: str):
 
 
 if __name__ == "__main__":
+    file_name = "USA_Lanker-1_17_T-1"
     ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    input_file = os.path.join(ROOT_DIR,f"map_conversion/opendrive/cr_to_opendrive/maps/commonroad/opendrive-1.xml")
-    output_file = os.path.join(ROOT_DIR,f"map_conversion/opendrive/cr_to_opendrive/maps/opendrive-1.xodr")
+    input_file = os.path.join(ROOT_DIR,f"map_conversion/opendrive/cr_to_opendrive/maps/commonroad/{file_name}.xml")
+    output_file = os.path.join(ROOT_DIR,f"map_conversion/opendrive/cr_to_opendrive/maps/{file_name}.xodr")
     commonroad_to_opendrive(input_file, output_file)
-    # for these files api is working fine( when I comment the line self.constructTrafficElements() from Class-Converter: function convert)
-#     commonroad_to_opendrive("opendrive-1")
-#     commonroad_to_opendrive("CulDeSac")
-#     commonroad_to_opendrive("town03_right_width_coefficient")
-#     commonroad_to_opendrive("zero_width_lanes_map")
-
-
-    # for these files, got error while converting from xml to xodr
-    # commonroad_to_opendrive("KA-Suedtangente-atlatec")
-    # commonroad_to_opendrive("CrossingComplex8Course")
-    # commonroad_to_opendrive("Roundabout8Course")
-    # commonroad_to_opendrive("poly3_and_border_record")
-    # commonroad_to_opendrive("FourWaySignal")
-
+ 
     
 
 
