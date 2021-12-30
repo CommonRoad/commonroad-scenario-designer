@@ -646,10 +646,11 @@ def merge_left(incoming: List[rg.Lane], outgoing: List[rg.Lane]) -> bool:
     if (
         len(incoming) > len(outgoing)
         and len(incoming) >= 1
-        and incoming[-1].turnlane == "merge_to_left"
+        and ("left" in incoming[-1].turnlane
+             or any([p.turnlane in ("merge_to_left", "slight_left") for p in incoming[-1].predecessors]))
     ):
         merge_at_left = False
-    elif len(incoming) < len(outgoing) and outgoing[-1].turnlane == "right":
+    elif len(incoming) < len(outgoing) and "right" in outgoing[-1].turnlane:
         merge_at_left = False
     return merge_at_left
 
