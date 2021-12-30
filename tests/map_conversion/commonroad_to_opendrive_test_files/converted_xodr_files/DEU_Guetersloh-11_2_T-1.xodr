@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <OpenDRIVE>
-    <header revMajor="1" revMinor="6" version="1.0" name="DEU_Guetersloh-11_2_T-1" date="2021-12-29T01:15:54.586843" north="0.0000000000000000e+00" south="0.0000000000000000e+00" east="0.0000000000000000e+00" west="0.0000000000000000e+00">
+    <header revMajor="1" revMinor="6" version="1.0" name="DEU_Guetersloh-11_2_T-1" date="2021-12-31T00:25:08.886055" north="0.0000000000000000e+00" south="0.0000000000000000e+00" east="0.0000000000000000e+00" west="0.0000000000000000e+00">
         <geoReference>
             <TODO/>
         </geoReference>
@@ -214,7 +214,9 @@
             </laneSection>
         </lanes>
         <objects/>
-        <signals/>
+        <signals>
+            <signal s="7.4654211546708140e+01" t="1.2008070820678114e+00" id="77804" name="Sign_77804" dynamic="no" orientation="-" zOffset="3.3885" country="GERMANY" type="274" subtype="-1" coutryRevision="2021" value="8.333333333333334" unit="km/h" width="0.77" height="0.77" hOffset="0.0"/>
+        </signals>
     </road>
     <road name="" length="3.8675426984488659e+01" id="23" junction="85917">
         <link>
@@ -762,7 +764,9 @@
             </laneSection>
         </lanes>
         <objects/>
-        <signals/>
+        <signals>
+            <signal s="6.9994916186749677e+01" t="3.4990010678322250e+00" id="77832" name="Sign_77832" dynamic="no" orientation="+" zOffset="3.3885" country="GERMANY" type="274" subtype="-1" coutryRevision="2021" value="8.333333333333334" unit="km/h" width="0.77" height="0.77" hOffset="0.0"/>
+        </signals>
     </road>
     <road name="" length="3.2394639673023626e+01" id="26" junction="85917">
         <link>
@@ -1030,7 +1034,9 @@
             </laneSection>
         </lanes>
         <objects/>
-        <signals/>
+        <signals>
+            <signal s="3.7494911813906739e-03" t="-3.5001155463092859e+00" id="77804" name="Sign_77804" dynamic="no" orientation="-" zOffset="3.3885" country="GERMANY" type="274" subtype="-1" coutryRevision="2021" value="8.333333333333334" unit="km/h" width="0.77" height="0.77" hOffset="0.0"/>
+        </signals>
     </road>
     <road name="" length="3.8819309216013153e+01" id="28" junction="85930">
         <link>
@@ -1576,7 +1582,9 @@
             </laneSection>
         </lanes>
         <objects/>
-        <signals/>
+        <signals>
+            <signal s="3.3476317719404216e+02" t="-4.1656757073955220e+00" id="77851" name="Sign_77851" dynamic="no" orientation="+" zOffset="3.3885" country="GERMANY" type="274" subtype="-1" coutryRevision="2021" value="8.333333333333334" unit="km/h" width="0.77" height="0.77" hOffset="0.0"/>
+        </signals>
     </road>
     <road name="" length="3.2820925834056681e+01" id="31" junction="85930">
         <link>
@@ -2077,7 +2085,9 @@
             </laneSection>
         </lanes>
         <objects/>
-        <signals/>
+        <signals>
+            <signal s="5.0535519469577350e-02" t="3.4988626717508966e+00" id="77835" name="Sign_77835" dynamic="no" orientation="+" zOffset="3.3885" country="GERMANY" type="274" subtype="-1" coutryRevision="2021" value="8.333333333333334" unit="km/h" width="0.77" height="0.77" hOffset="0.0"/>
+        </signals>
     </road>
     <road name="" length="3.1504734915669175e+01" id="34" junction="86276">
         <link>
@@ -2454,7 +2464,9 @@
             </laneSection>
         </lanes>
         <objects/>
-        <signals/>
+        <signals>
+            <signal s="9.7668730788532059e+01" t="-2.9072894697027607e+00" id="77810" name="Sign_77810" dynamic="no" orientation="-" zOffset="3.3885" country="GERMANY" type="274" subtype="-1" coutryRevision="2021" value="8.333333333333334" unit="km/h" width="0.77" height="0.77" hOffset="0.0"/>
+        </signals>
     </road>
     <road name="" length="1.7438563979177147e+01" id="36" junction="-1">
         <link>
@@ -2544,7 +2556,9 @@
             </laneSection>
         </lanes>
         <objects/>
-        <signals/>
+        <signals>
+            <signal s="1.2579690666528492e+02" t="2.5617578500107882e+01" id="77804" name="Sign_77804" dynamic="no" orientation="-" zOffset="3.3885" country="GERMANY" type="274" subtype="-1" coutryRevision="2021" value="8.333333333333334" unit="km/h" width="0.77" height="0.77" hOffset="0.0"/>
+        </signals>
     </road>
     <road name="" length="3.1383734688592334e+01" id="37" junction="86269">
         <link>
@@ -2932,7 +2946,9 @@
             </laneSection>
         </lanes>
         <objects/>
-        <signals/>
+        <signals>
+            <signal s="6.9369850816097838e+01" t="-1.1625655773827621e+01" id="77891" name="Sign_77891" dynamic="no" orientation="+" zOffset="3.3885" country="GERMANY" type="274" subtype="-1" coutryRevision="2021" value="8.333333333333334" unit="km/h" width="0.77" height="0.77" hOffset="0.0"/>
+        </signals>
     </road>
     <road name="" length="3.1556359686384610e+01" id="39" junction="86269">
         <link>
@@ -3185,7 +3201,9 @@
             </laneSection>
         </lanes>
         <objects/>
-        <signals/>
+        <signals>
+            <signal s="1.6293513919992267e+02" t="3.2609356281929102e+01" id="77804" name="Sign_77804" dynamic="no" orientation="-" zOffset="3.3885" country="GERMANY" type="274" subtype="-1" coutryRevision="2021" value="8.333333333333334" unit="km/h" width="0.77" height="0.77" hOffset="0.0"/>
+        </signals>
     </road>
     <road name="" length="3.2843254714876878e+01" id="41" junction="86244">
         <link>
@@ -3734,7 +3752,9 @@
             </laneSection>
         </lanes>
         <objects/>
-        <signals/>
+        <signals>
+            <signal s="1.2363078609776480e+02" t="4.6802425411542536e+00" id="77885" name="Sign_77885" dynamic="no" orientation="-" zOffset="3.3885" country="GERMANY" type="274" subtype="-1" coutryRevision="2021" value="13.88888888888889" unit="km/h" width="0.77" height="0.77" hOffset="0.0"/>
+        </signals>
     </road>
     <road name="" length="3.1260608625039364e+01" id="44" junction="86244">
         <link>
@@ -4050,7 +4070,9 @@
             </laneSection>
         </lanes>
         <objects/>
-        <signals/>
+        <signals>
+            <signal s="3.8608560302057640e+01" t="-7.5806930842794262e-01" id="77885" name="Sign_77885" dynamic="no" orientation="-" zOffset="3.3885" country="GERMANY" type="274" subtype="-1" coutryRevision="2021" value="13.88888888888889" unit="km/h" width="0.77" height="0.77" hOffset="0.0"/>
+        </signals>
     </road>
     <road name="" length="3.2294473249885264e+01" id="46" junction="86170">
         <link>
@@ -4762,7 +4784,9 @@
             </laneSection>
         </lanes>
         <objects/>
-        <signals/>
+        <signals>
+            <signal s="5.4962569439805115e+01" t="-9.7206414454709655e+00" id="77894" name="Sign_77894" dynamic="no" orientation="+" zOffset="3.3885" country="GERMANY" type="274" subtype="-1" coutryRevision="2021" value="8.333333333333334" unit="km/h" width="0.77" height="0.77" hOffset="0.0"/>
+        </signals>
     </road>
     <road name="" length="4.2230343747941809e+01" id="50" junction="-1">
         <link>
@@ -4931,7 +4955,9 @@
             </laneSection>
         </lanes>
         <objects/>
-        <signals/>
+        <signals>
+            <signal s="4.2468209510760857e+01" t="2.8046873549682205e+00" id="77885" name="Sign_77885" dynamic="no" orientation="+" zOffset="3.3885" country="GERMANY" type="274" subtype="-1" coutryRevision="2021" value="13.88888888888889" unit="km/h" width="0.77" height="0.77" hOffset="0.0"/>
+        </signals>
     </road>
     <junction name="" id="86269" type="default">
         <connection id="1" incomingRoad="40" connectingRoad="42" contactPoint="start">

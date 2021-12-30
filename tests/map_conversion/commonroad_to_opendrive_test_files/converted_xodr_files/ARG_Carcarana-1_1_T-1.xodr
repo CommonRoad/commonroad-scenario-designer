@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <OpenDRIVE>
-    <header revMajor="1" revMinor="6" version="1.0" name="ARG_Carcarana-1_1_T-1" date="2021-12-29T01:22:15.336457" north="0.0000000000000000e+00" south="0.0000000000000000e+00" east="0.0000000000000000e+00" west="0.0000000000000000e+00">
+    <header revMajor="1" revMinor="6" version="1.0" name="ARG_Carcarana-1_1_T-1" date="2021-12-31T00:25:08.473759" north="0.0000000000000000e+00" south="0.0000000000000000e+00" east="0.0000000000000000e+00" west="0.0000000000000000e+00">
         <geoReference>
             <TODO/>
         </geoReference>
@@ -144,7 +144,9 @@
             </laneSection>
         </lanes>
         <objects/>
-        <signals/>
+        <signals>
+            <signal s="1.0523278869526771e+02" t="3.1409696314955795e+00" id="4107" name="Sign_4107" dynamic="no" orientation="-" zOffset="3.3885" country="ARGENTINA" type="274" subtype="-1" coutryRevision="2021" value="11.11111111111111" unit="km/h" width="0.77" height="0.77" hOffset="0.0"/>
+        </signals>
     </road>
     <road name="" length="3.1256091301845863e+01" id="22" junction="7306">
         <link>
@@ -737,7 +739,9 @@
             </laneSection>
         </lanes>
         <objects/>
-        <signals/>
+        <signals>
+            <signal s="3.5415665014311372e+02" t="3.5220255239180887e+00" id="4133" name="Sign_4133" dynamic="no" orientation="+" zOffset="3.3885" country="ARGENTINA" type="274" subtype="-1" coutryRevision="2021" value="11.11111111111111" unit="km/h" width="0.77" height="0.77" hOffset="0.0"/>
+        </signals>
     </road>
     <road name="" length="3.8796939660505672e+01" id="25" junction="7320">
         <link>
@@ -1144,7 +1148,9 @@
             </laneSection>
         </lanes>
         <objects/>
-        <signals/>
+        <signals>
+            <signal s="2.2277549878468520e+02" t="3.5222464151400956e+00" id="4133" name="Sign_4133" dynamic="no" orientation="+" zOffset="3.3885" country="ARGENTINA" type="274" subtype="-1" coutryRevision="2021" value="11.11111111111111" unit="km/h" width="0.77" height="0.77" hOffset="0.0"/>
+        </signals>
     </road>
     <road name="" length="3.8835366194994236e+01" id="27" junction="7306">
         <link>
@@ -1738,7 +1744,9 @@
             </laneSection>
         </lanes>
         <objects/>
-        <signals/>
+        <signals>
+            <signal s="3.2078447808579405e+01" t="3.4991193256445783e+00" id="4107" name="Sign_4107" dynamic="no" orientation="-" zOffset="3.3885" country="ARGENTINA" type="274" subtype="-1" coutryRevision="2021" value="11.11111111111111" unit="km/h" width="0.77" height="0.77" hOffset="0.0"/>
+        </signals>
     </road>
     <road name="" length="3.8832471319277779e+01" id="31" junction="7781">
         <link>
@@ -2040,7 +2048,9 @@
             </laneSection>
         </lanes>
         <objects/>
-        <signals/>
+        <signals>
+            <signal s="3.8799984793050633e+01" t="-3.4326375943599015e+00" id="4107" name="Sign_4107" dynamic="no" orientation="+" zOffset="3.3885" country="ARGENTINA" type="274" subtype="-1" coutryRevision="2021" value="11.11111111111111" unit="km/h" width="0.77" height="0.77" hOffset="0.0"/>
+        </signals>
     </road>
     <road name="" length="3.1545436981994204e+01" id="33" junction="7781">
         <link>
@@ -2432,7 +2442,9 @@
             </laneSection>
         </lanes>
         <objects/>
-        <signals/>
+        <signals>
+            <signal s="1.6888860938736752e+02" t="5.0088998304103107e+00" id="4107" name="Sign_4107" dynamic="no" orientation="-" zOffset="3.3885" country="ARGENTINA" type="274" subtype="-1" coutryRevision="2021" value="11.11111111111111" unit="km/h" width="0.77" height="0.77" hOffset="0.0"/>
+        </signals>
     </road>
     <road name="" length="3.8820975602742536e+01" id="36" junction="7407">
         <link>
@@ -2841,7 +2853,9 @@
             </laneSection>
         </lanes>
         <objects/>
-        <signals/>
+        <signals>
+            <signal s="7.0000970766792037e+01" t="3.5005221726977691e+00" id="4196" name="Sign_4196" dynamic="no" orientation="-" zOffset="3.3885" country="ARGENTINA" type="274" subtype="-1" coutryRevision="2021" value="11.11111111111111" unit="km/h" width="0.77" height="0.77" hOffset="0.0"/>
+        </signals>
     </road>
     <road name="" length="3.1096471725437059e+01" id="38" junction="7407">
         <link>
@@ -3836,7 +3850,9 @@
             </laneSection>
         </lanes>
         <objects/>
-        <signals/>
+        <signals>
+            <signal s="2.1880476312539312e+02" t="3.4951925759146576e+00" id="4178" name="Sign_4178" dynamic="no" orientation="+" zOffset="3.3885" country="ARGENTINA" type="274" subtype="-1" coutryRevision="2021" value="11.11111111111111" unit="km/h" width="0.77" height="0.77" hOffset="0.0"/>
+        </signals>
     </road>
     <road name="" length="3.1554334923587163e+01" id="44" junction="7329">
         <link>
@@ -4308,7 +4324,9 @@
             </laneSection>
         </lanes>
         <objects/>
-        <signals/>
+        <signals>
+            <signal s="2.4274397517659312e+02" t="3.5083005219565351e+00" id="4169" name="Sign_4169" dynamic="no" orientation="-" zOffset="3.3885" country="ARGENTINA" type="274" subtype="-1" coutryRevision="2021" value="11.11111111111111" unit="km/h" width="0.77" height="0.77" hOffset="0.0"/>
+        </signals>
     </road>
     <road name="" length="3.1590362068115862e+01" id="46" junction="7292">
         <link>
@@ -4992,7 +5010,9 @@
             </laneSection>
         </lanes>
         <objects/>
-        <signals/>
+        <signals>
+            <signal s="3.5153570465203632e+02" t="3.5012560479960229e+00" id="4169" name="Sign_4169" dynamic="no" orientation="-" zOffset="3.3885" country="ARGENTINA" type="274" subtype="-1" coutryRevision="2021" value="11.11111111111111" unit="km/h" width="0.77" height="0.77" hOffset="0.0"/>
+        </signals>
     </road>
     <road name="" length="3.8792032907834660e+01" id="50" junction="7329">
         <link>
@@ -5719,7 +5739,9 @@
             </laneSection>
         </lanes>
         <objects/>
-        <signals/>
+        <signals>
+            <signal s="9.2650967073470426e+01" t="3.4989524447609153e+00" id="4178" name="Sign_4178" dynamic="no" orientation="+" zOffset="3.3885" country="ARGENTINA" type="274" subtype="-1" coutryRevision="2021" value="11.11111111111111" unit="km/h" width="0.77" height="0.77" hOffset="0.0"/>
+        </signals>
     </road>
     <road name="" length="3.1586366256572699e+01" id="54" junction="7329">
         <link>
@@ -5999,7 +6021,9 @@
             </laneSection>
         </lanes>
         <objects/>
-        <signals/>
+        <signals>
+            <signal s="1.0968809083057376e+02" t="-3.4831923029349845e+00" id="4129" name="Sign_4129" dynamic="no" orientation="+" zOffset="3.3885" country="ARGENTINA" type="274" subtype="-1" coutryRevision="2021" value="11.11111111111111" unit="km/h" width="0.77" height="0.77" hOffset="0.0"/>
+        </signals>
     </road>
     <road name="" length="3.1151815237683540e+01" id="56" junction="7843">
         <link>
@@ -6711,7 +6735,9 @@
             </laneSection>
         </lanes>
         <objects/>
-        <signals/>
+        <signals>
+            <signal s="1.8261550734013511e+02" t="-3.5144362892474490e+00" id="4129" name="Sign_4129" dynamic="no" orientation="+" zOffset="3.3885" country="ARGENTINA" type="274" subtype="-1" coutryRevision="2021" value="11.11111111111111" unit="km/h" width="0.77" height="0.77" hOffset="0.0"/>
+        </signals>
     </road>
     <road name="" length="3.1591086012980409e+01" id="61" junction="7843">
         <link>
@@ -7263,7 +7289,9 @@
             </laneSection>
         </lanes>
         <objects/>
-        <signals/>
+        <signals>
+            <signal s="3.8838922746391148e+01" t="-3.5012703317038207e+00" id="4129" name="Sign_4129" dynamic="no" orientation="+" zOffset="3.3885" country="ARGENTINA" type="274" subtype="-1" coutryRevision="2021" value="11.11111111111111" unit="km/h" width="0.77" height="0.77" hOffset="0.0"/>
+        </signals>
     </road>
     <road name="" length="3.8821097728672711e+01" id="65" junction="7287">
         <link>
@@ -7567,7 +7595,9 @@
             </laneSection>
         </lanes>
         <objects/>
-        <signals/>
+        <signals>
+            <signal s="3.5092597384839586e+01" t="3.4986062037006325e+00" id="4129" name="Sign_4129" dynamic="no" orientation="-" zOffset="3.3885" country="ARGENTINA" type="274" subtype="-1" coutryRevision="2021" value="11.11111111111111" unit="km/h" width="0.77" height="0.77" hOffset="0.0"/>
+        </signals>
     </road>
     <road name="" length="3.1326430112997187e+01" id="67" junction="7287">
         <link>
@@ -8021,7 +8051,9 @@
             </laneSection>
         </lanes>
         <objects/>
-        <signals/>
+        <signals>
+            <signal s="3.5421443959457667e+02" t="3.5344656266895669e+00" id="4144" name="Sign_4144" dynamic="no" orientation="+" zOffset="3.3885" country="ARGENTINA" type="274" subtype="-1" coutryRevision="2021" value="11.11111111111111" unit="km/h" width="0.77" height="0.77" hOffset="0.0"/>
+        </signals>
     </road>
     <road name="" length="3.8801223405189475e+01" id="69" junction="7581">
         <link>
@@ -8428,7 +8460,9 @@
             </laneSection>
         </lanes>
         <objects/>
-        <signals/>
+        <signals>
+            <signal s="2.4643466045310188e+02" t="-3.5169547722155343e+00" id="4129" name="Sign_4129" dynamic="no" orientation="+" zOffset="3.3885" country="ARGENTINA" type="274" subtype="-1" coutryRevision="2021" value="11.11111111111111" unit="km/h" width="0.77" height="0.77" hOffset="0.0"/>
+        </signals>
     </road>
     <road name="" length="3.1577455831150036e+01" id="71" junction="7581">
         <link>
@@ -8882,7 +8916,9 @@
             </laneSection>
         </lanes>
         <objects/>
-        <signals/>
+        <signals>
+            <signal s="4.2614278152570756e+02" t="-3.4935929457353723e+00" id="4203" name="Sign_4203" dynamic="no" orientation="-" zOffset="3.3885" country="ARGENTINA" type="274" subtype="-1" coutryRevision="2021" value="11.11111111111111" unit="km/h" width="0.77" height="0.77" hOffset="0.0"/>
+        </signals>
     </road>
     <road name="" length="3.8800023136862343e+01" id="73" junction="7581">
         <link>
@@ -9288,7 +9324,9 @@
             </laneSection>
         </lanes>
         <objects/>
-        <signals/>
+        <signals>
+            <signal s="3.1734303676298981e+02" t="-3.5235429703501211e+00" id="4203" name="Sign_4203" dynamic="no" orientation="-" zOffset="3.3885" country="ARGENTINA" type="274" subtype="-1" coutryRevision="2021" value="11.11111111111111" unit="km/h" width="0.77" height="0.77" hOffset="0.0"/>
+        </signals>
     </road>
     <road name="" length="3.1428278627238431e+01" id="75" junction="7292">
         <link>
@@ -9973,7 +10011,9 @@
             </laneSection>
         </lanes>
         <objects/>
-        <signals/>
+        <signals>
+            <signal s="2.2286877380138682e+02" t="3.5170095284287939e+00" id="4144" name="Sign_4144" dynamic="no" orientation="+" zOffset="3.3885" country="ARGENTINA" type="274" subtype="-1" coutryRevision="2021" value="11.11111111111111" unit="km/h" width="0.77" height="0.77" hOffset="0.0"/>
+        </signals>
     </road>
     <road name="" length="3.8775148107275520e+01" id="79" junction="7306">
         <link>
@@ -11267,7 +11307,9 @@
             </laneSection>
         </lanes>
         <objects/>
-        <signals/>
+        <signals>
+            <signal s="4.7996769750856600e+02" t="3.4999294367621445e+00" id="4133" name="Sign_4133" dynamic="no" orientation="+" zOffset="3.3885" country="ARGENTINA" type="274" subtype="-1" coutryRevision="2021" value="11.11111111111111" unit="km/h" width="0.77" height="0.77" hOffset="0.0"/>
+        </signals>
     </road>
     <road name="" length="6.9974941238299238e+01" id="87" junction="-1">
         <link>
@@ -11513,7 +11555,9 @@
             </laneSection>
         </lanes>
         <objects/>
-        <signals/>
+        <signals>
+            <signal s="5.8875883372732790e+02" t="3.5148722411109645e+00" id="4133" name="Sign_4133" dynamic="no" orientation="+" zOffset="3.3885" country="ARGENTINA" type="274" subtype="-1" coutryRevision="2021" value="11.11111111111111" unit="km/h" width="0.77" height="0.77" hOffset="0.0"/>
+        </signals>
     </road>
     <road name="" length="3.0797090727703775e+01" id="88" junction="7820">
         <link>
@@ -11964,7 +12008,9 @@
             </laneSection>
         </lanes>
         <objects/>
-        <signals/>
+        <signals>
+            <signal s="4.2662291842213153e+02" t="-3.5084102992774859e+00" id="4115" name="Sign_4115" dynamic="no" orientation="-" zOffset="3.3885" country="ARGENTINA" type="274" subtype="-1" coutryRevision="2021" value="11.11111111111111" unit="km/h" width="0.77" height="0.77" hOffset="0.0"/>
+        </signals>
     </road>
     <road name="" length="3.8796872619674801e+01" id="90" junction="7843">
         <link>
@@ -12808,7 +12854,9 @@
             </laneSection>
         </lanes>
         <objects/>
-        <signals/>
+        <signals>
+            <signal s="3.1782690717694101e+02" t="-3.4801543550174756e+00" id="4115" name="Sign_4115" dynamic="no" orientation="-" zOffset="3.3885" country="ARGENTINA" type="274" subtype="-1" coutryRevision="2021" value="11.11111111111111" unit="km/h" width="0.77" height="0.77" hOffset="0.0"/>
+        </signals>
     </road>
     <road name="" length="3.1539008419838030e+01" id="95" junction="7292">
         <link>
@@ -13194,7 +13242,9 @@
             </laneSection>
         </lanes>
         <objects/>
-        <signals/>
+        <signals>
+            <signal s="1.0580777114734406e+02" t="3.4982608988388435e+00" id="4169" name="Sign_4169" dynamic="no" orientation="-" zOffset="3.3885" country="ARGENTINA" type="274" subtype="-1" coutryRevision="2021" value="11.11111111111111" unit="km/h" width="0.77" height="0.77" hOffset="0.0"/>
+        </signals>
     </road>
     <junction name="" id="7306" type="default">
         <connection id="1" incomingRoad="86" connectingRoad="81" contactPoint="start">

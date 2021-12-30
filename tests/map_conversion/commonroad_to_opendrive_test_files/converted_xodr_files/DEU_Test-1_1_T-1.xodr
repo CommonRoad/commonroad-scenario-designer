@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <OpenDRIVE>
-    <header revMajor="1" revMinor="6" version="1.0" name="DEU_Test-1_1_T-1" date="2021-12-29T01:25:02.402722" north="0.0000000000000000e+00" south="0.0000000000000000e+00" east="0.0000000000000000e+00" west="0.0000000000000000e+00">
+    <header revMajor="1" revMinor="6" version="1.0" name="DEU_Test-1_1_T-1" date="2021-12-31T00:25:09.312233" north="0.0000000000000000e+00" south="0.0000000000000000e+00" east="0.0000000000000000e+00" west="0.0000000000000000e+00">
         <geoReference>
             <TODO/>
         </geoReference>
@@ -533,6 +533,8 @@
             </laneSection>
         </lanes>
         <objects/>
-        <signals/>
+        <signals>
+            <signal s="0.0000000000000000e+00" t="1.0500000000000000e+01" id="5" name="Sign_5" dynamic="no" orientation="+" zOffset="3.3885" country="GERMANY" type="274" subtype="-1" coutryRevision="2021" value="16.666666666666668" unit="km/h" width="0.77" height="0.77" hOffset="0.0"/>
+        </signals>
     </road>
 </OpenDRIVE>

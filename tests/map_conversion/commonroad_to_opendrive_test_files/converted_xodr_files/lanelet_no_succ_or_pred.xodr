@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <OpenDRIVE>
-    <header revMajor="1" revMinor="6" version="1.0" name="lanelet_no_succ_or_pred" date="2021-12-29T01:35:46.543855" north="0.0000000000000000e+00" south="0.0000000000000000e+00" east="0.0000000000000000e+00" west="0.0000000000000000e+00">
+    <header revMajor="1" revMinor="6" version="1.0" name="lanelet_no_succ_or_pred" date="2021-12-31T00:25:09.658861" north="0.0000000000000000e+00" south="0.0000000000000000e+00" east="0.0000000000000000e+00" west="0.0000000000000000e+00">
         <geoReference>
             <TODO/>
         </geoReference>

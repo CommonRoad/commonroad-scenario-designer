@@ -39,13 +39,12 @@ class Converter:
         # Obstacles, signs, lights
         self.constructObstacles()
         self.populateTrafficElements(Road.crIdToOD)
-        # self.constructTrafficElements()
+        self.constructTrafficElements()
 
         self.finalize()
         self.convTime = time.time() - start
         self.printTime()
 
-        # return self.writer.root
 
     def printTime(self):
         conv = "Converter\n"
@@ -304,7 +303,7 @@ class Converter:
                         incomings.append(lanelet.lanelet_id)
 
                     incoming = IntersectionIncomingElement(
-                        -1, incomings, set(), successors_straight, set(), None
+                        1, incomings, set(), successors_straight, set(), None
                     )
 
                     Junction.counting += 1

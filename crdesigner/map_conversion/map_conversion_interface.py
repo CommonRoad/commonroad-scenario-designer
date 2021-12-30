@@ -164,7 +164,7 @@ def commonroad_to_opendrive(input_file: str, output_file: str):
 
 
 if __name__ == "__main__":
-    file_name = "USA_Lanker-1_17_T-1"
+    file_name = "zero_width_lanes_map"
     ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     input_file = os.path.join(ROOT_DIR,f"map_conversion/opendrive/cr_to_opendrive/maps/commonroad/{file_name}.xml")
     output_file = os.path.join(ROOT_DIR,f"map_conversion/opendrive/cr_to_opendrive/maps/{file_name}.xodr")
