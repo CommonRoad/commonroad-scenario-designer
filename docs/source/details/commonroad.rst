@@ -69,3 +69,57 @@ Python APIs
 	scenario, successors, ids = data.initialize()
 	converter = Converter(input_file, scenario, successors, ids)
 	converter.convert(output_file) 
+
+
+Implementation Details
+**********************
+
+Initially the CommonRoad xml file is read to create corresponding scenario object along with intersection successor and dictionary of converted roads.
+Then the scenario object is converted into corresponding OpenDRIVE xodr file.
+
+Code Structure
+==============
+Here is a simplified overview about the code structure (the presented code
+structure is not complete)::
+
+    /map_conversion/opendrive
+    │
+    └── /cr_to_opendrive
+        ├── /elements
+        ├── /maps
+        ├── /reference_maps
+        ├── /utils
+        ├── converter.py
+        ├── dataloader.py
+        └── test_converter.py
+
+- `/elements`: This directory contains various tools and files that are used for initiation of various opendrive objects and used in various stages during the conversion of scenario object(lanelets) to opendrive file.
+- `/maps`: This directory contains two directory: commonroad and Opendrive. The commonroad directory contain sample of commonroad files and the opendrive directory contains sample of opendrive files. 
+- `/reference_maps`: This directory contains sample of opendrive files which will be used as reference for testing converted opendrive files.
+- `/utils`: This directory contains two files in which one is used to preprocess the polyline for road element and another is used to write the opendrive file using opendrive tree element.
+- `converter.py`: Module to convert scenario object to opendrive file in  which lanelets are used to construct road, junctions, junction linkage, obstacles, traffic element. 
+- `dataloader.py`: Module to convert to xml file to scenario object which includes preparation of intersection successor and preparation of a dictionary with lanelet ids that keep track of converted lanelet. 
+- `test_converter.py`: Module for the implementation of test_case for commonroad to opendrive conversion. 
+
+.. _fig.layout-commonroad-to-opendrive:
+.. figure:: images/commonroad_to_opendrive_flowchart.png
+   :alt: Layout of the CommonRoad Scenario Designer.
+   :name: fig:workflow
+   :align: center
+
+   CommonRoad to OpenDRIVE conversion flow chart.
+
+## Need detail explanation
+Create Scenario Object  
+======================
+
+## Need detail explanation
+Convert Scenario Object to OpenDRIVE File 
+========================================
+- Add roads
+- Check correctness of the road construction algorithm
+- Create linkMap where all linkage information is stored
+- Add junction and  link road to junction
+- Add obstacle, traffic elements 
+- Convert to Opendrive file
+

@@ -141,7 +141,7 @@ structure is not complete)::
     │
     └── /opendrive_conversion
         ├── /plane_elements
-        ├── converter.
+        ├── converter.py
         ├── network.py
         ├── conversion_lanelet.py
         └── conversion_lanelet_network.py
