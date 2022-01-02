@@ -197,6 +197,41 @@ class ObstacleToolboxUI(Toolbox):
             self.layout_obstacle_information_groupbox.removeRow(self.obstacle_y_Position)
         except:
             pass
+    
+    def toggle_dynamic_static(self):
+        """adds/removes fields unique for the dynamic obstacle"""
+        if self.obstacle_dyn_stat.currentText() == "Dynamic":
+            self.obstacle_x_Goal_Position = QLineEdit()
+            self.obstacle_x_Goal_Position.setValidator(self.float_validator)
+            self.obstacle_x_Goal_Position.setMaxLength(4)
+            self.obstacle_x_Goal_Position.setAlignment(Qt.AlignRight)
+
+            self.obstacle_y_Goal_Position = QLineEdit()
+            self.obstacle_y_Goal_Position.setValidator(self.float_validator)
+            self.obstacle_y_Goal_Position.setMaxLength(4)
+            self.obstacle_y_Goal_Position.setAlignment(Qt.AlignRight)
+
+            self.obstacle_Goal_Orientation = QLineEdit()
+            self.obstacle_Goal_Orientation.setValidator(self.float_validator)
+            self.obstacle_Goal_Orientation.setMaxLength(4)
+            self.obstacle_Goal_Orientation.setAlignment(Qt.AlignRight)
+
+            if self.obstacle_shape.currentText() == "Rectangle":
+                self.layout_obstacle_information_groupbox.insertRow(9, "X-Goal-Position", self.obstacle_x_Goal_Position)
+                self.layout_obstacle_information_groupbox.insertRow(10, "Y-Goal-Position", self.obstacle_y_Goal_Position)
+                self.layout_obstacle_information_groupbox.insertRow(11, "Goal-Orientation", self.obstacle_Goal_Orientation)
+            elif self.obstacle_shape.currentText() == "Circle":
+                self.layout_obstacle_information_groupbox.insertRow(7, "X-Position", self.obstacle_x_Position)
+                self.layout_obstacle_information_groupbox.insertRow(8, "Y-Position", self.obstacle_y_Position)
+            elif self.obstacle_shape.currentText() == "Polygon":
+                self.layout_obstacle_information_groupbox.insertRow(8, "X-Goal-Position", self.obstacle_x_Goal_Position)
+                self.layout_obstacle_information_groupbox.insertRow(9, "Y-Goal-Position", self.obstacle_y_Goal_Position)
+                self.layout_obstacle_information_groupbox.insertRow(10, "Goal-Orientation", self.obstacle_Goal_Orientation)
+
+        elif self.obstacle_dyn_stat.currentText() == "Static":
+            self.layout_obstacle_information_groupbox.removeRow(self.obstacle_x_Goal_Position)
+            self.layout_obstacle_information_groupbox.removeRow(self.obstacle_y_Goal_Position)
+            self.layout_obstacle_information_groupbox.removeRow(self.obstacle_Goal_Orientation)
 
     def toggle_sections(self):
         """changes toolbox based on what shapes that are selected"""

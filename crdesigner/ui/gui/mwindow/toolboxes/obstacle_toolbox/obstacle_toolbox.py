@@ -11,7 +11,6 @@ from commonroad.geometry.shape import Rectangle, Circle, Polygon
 from commonroad.scenario.scenario import Scenario
 from commonroad.scenario.obstacle import Obstacle, StaticObstacle, ObstacleType, DynamicObstacle
 from commonroad.scenario.trajectory import State, Trajectory
-from commonroad.prediction.prediction import Prediction
 
 from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMO_AVAILABLE
 if SUMO_AVAILABLE:
@@ -22,6 +21,10 @@ from crdesigner.ui.gui.mwindow.toolboxes.obstacle_toolbox.obstacle_toolbox_ui im
 #test, maybe remove later
 from typing import Union
 from commonroad.prediction.prediction import Prediction, Occupancy, SetBasedPrediction, TrajectoryPrediction
+from commonroad_route_planner.route_planner import RoutePlanner
+from commonroad.planning.planning_problem import PlanningProblem
+from commonroad.planning.goal import GoalRegion
+from commonroad.common.util import Interval, AngleInterval
 
 
 class ObstacleToolbox(QDockWidget):
@@ -37,6 +40,7 @@ class ObstacleToolbox(QDockWidget):
         self.text_browser = text_browser
         self.update_ongoing = False
         self.init_canvas()
+        self.amount_obstacles = 0
 
         #for profile visualisation
         self.sel_point = None
@@ -85,6 +89,9 @@ class ObstacleToolbox(QDockWidget):
         
         self.obstacle_toolbox_ui.obstacle_shape.currentTextChanged.connect(
             lambda: self.obstacle_toolbox_ui.toggle_sections())
+        
+        self.obstacle_toolbox_ui.obstacle_dyn_stat.currentTextChanged.connect(
+            lambda: self.obstacle_toolbox_ui.toggle_dynamic_static())
 
         if SUMO_AVAILABLE:
             self.obstacle_toolbox_ui.button_start_simulation.clicked.connect(
@@ -254,7 +261,7 @@ class ObstacleToolbox(QDockWidget):
         velocity = 14.0
         state_list = []
         finished = False
-        i = 1
+        #i = 1
         #if updating positions in profile visualisation
         if self.xyo:
             for j in self.xyo:
@@ -264,7 +271,48 @@ class ObstacleToolbox(QDockWidget):
                 i += 1
             return state_list
 
-        while(finished == False):
+        initial_state = State(**{'position': np.array([
+                    float(self.obstacle_toolbox_ui.obstacle_x_Position.text()),
+                    float(self.obstacle_toolbox_ui.obstacle_y_Position.text())
+                ]),
+                'orientation': math.radians(float(self.obstacle_toolbox_ui.obstacle_orientation.text())),
+                'time_step': 1,
+                'yaw_rate': 0,
+                'velocity': 22,
+                'slip_angle': 0,
+                })
+        goal_state = [State(**{'position': Rectangle(float(self.obstacle_toolbox_ui.obstacle_length.text()), 
+            width = float(self.obstacle_toolbox_ui.obstacle_width.text()), center=np.array([30, 0]),
+            orientation=3),#np.array([ #maybe more goal states???
+                    #np.array([float(self.obstacle_toolbox_ui.obstacle_x_Goal_Position.text()),
+                    #float(self.obstacle_toolbox_ui.obstacle_y_Goal_Position.text())
+                    
+                    
+                #]),
+                'orientation': AngleInterval(-3,3),#math.radians(float(self.obstacle_toolbox_ui.obstacle_Goal_Orientation.text())),
+                'time_step': Interval(25, 30), #hardcoded for testing
+                #'velocity': Interval(20, 25)
+                })]
+        goal_region = GoalRegion(goal_state)
+        planning_problem = PlanningProblem(self.amount_obstacles+1, initial_state, goal_region)
+        route_planner = RoutePlanner(self.current_scenario, planning_problem, backend=RoutePlanner.Backend.NETWORKX_REVERSED)
+
+        candidate_holder = route_planner.plan_routes()
+        #retrieve all routes
+        list_routes, num_route_candidates = candidate_holder.retrieve_all_routes()
+        print(f"Number of route candidates: {num_route_candidates}")
+        #retrieve first route
+        route = candidate_holder.retrieve_first_route()
+        #route = list_routes[1]
+        print(route.reference_path)
+        #print(route.path_orientation)
+        j=0
+        for i in route.reference_path:
+            new_position = np.array([i[0], i[1]])
+            new_state = State(**{'position': new_position, 'orientation': route.path_orientation[j], 'time_step': j+1})
+            state_list.append(new_state)
+            j += 1
+        """while(finished == False):
         #while (i < 50):
             #sqrt(2) temporary for testing
             #maybe change so just checks once TODO fix so works when goal_position = initial_position
@@ -290,7 +338,7 @@ class ObstacleToolbox(QDockWidget):
             new_position = np.array([next_pos_x, next_pos_y])
             new_state = State(**{'position': new_position, 'velocity': velocity, 'orientation': 0.02, 'time_step': i})
             state_list.append(new_state)
-            i = i + 1
+            i = i + 1"""
         return state_list
     
     def polygon_array(self):
@@ -320,6 +368,7 @@ class ObstacleToolbox(QDockWidget):
     def add_obstacle(self):
         """creates a static or dynamic obstacle"""
         obstacle_id = self.current_scenario.generate_object_id()
+        self.amount_obstacles = self.current_scenario.generate_object_id()
         #add try and except later
         if self.obstacle_toolbox_ui.obstacle_dyn_stat.currentText() == "Dynamic":
             self.dynamic_obstacle_details(obstacle_id)
@@ -661,6 +710,7 @@ class ObstacleToolbox(QDockWidget):
             selected_obstacle = self.get_current_obstacle()
             self.current_scenario.remove_obstacle(selected_obstacle)
             self.callback(self.current_scenario)
+            self.amount_obstacles -=1
 
     def draw_plot(self, time, profile):
         """draws the state plot in the obstacle toolbox"""
