@@ -109,17 +109,48 @@ structure is not complete)::
 
    CommonRoad to OpenDRIVE conversion flow chart.
 
-## Need detail explanation
 Create Scenario Object  
 ======================
+The CommonRoad xml file is passed to Dataloader class 
+in which the file is read and converted to corresponding scenario object 
+using CommonRoadFileReader class of CommonRoad package. 
+Preparation of intersection successors and creation of dictionary with lanelet ids 
+that keep track of converted lanelet also implemented on Dataloader class.
 
-## Need detail explanation
 Convert Scenario Object to OpenDRIVE File 
-========================================
-- Add roads
-- Check correctness of the road construction algorithm
-- Create linkMap where all linkage information is stored
-- Add junction and  link road to junction
-- Add obstacle, traffic elements 
-- Convert to Opendrive file
+=========================================
+In order to convert scenario object to opendrive file, various elements have to be created 
+and linked together which are explained below in detail:
+
+
+Add roads
+---------
+Basically, roads are constructed using lanelets of scenario object.
+For the given lanelet, it is expanded left and right to construct the corresponding road.
+Then we continue to expand with its successor and predecessors.
+The road network is explored in a breadth-first fashion
+
+
+Check correctness of the road construction algorithm
+----------------------------------------------------
+We need to check whether all lanelets have been added to the road network or not. 
+If it is not added, error is raised as this particular lanelet is not added to road network and suggests to check algorithm.
+This helps to guarantee correctness of the road construction algorithm.
+
+
+Create linkMap where all linkage information is stored
+------------------------------------------------------
+
+
+Add junction and  link road to junction
+---------------------------------------
+
+
+Add obstacle, traffic elements 
+------------------------------
+
+
+Convert to Opendrive file
+-------------------------
+
 
