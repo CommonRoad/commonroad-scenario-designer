@@ -295,7 +295,8 @@ class ObstacleToolbox(QDockWidget):
                 })]
         goal_region = GoalRegion(goal_state)
         planning_problem = PlanningProblem(self.amount_obstacles+1, initial_state, goal_region)
-        route_planner = RoutePlanner(self.current_scenario, planning_problem, backend=RoutePlanner.Backend.NETWORKX_REVERSED)
+        route_planner = RoutePlanner(self.current_scenario, planning_problem, backend=RoutePlanner.Backend.NETWORKX_REVERSED,
+            allow_diagonal=True, reach_goal_state=True)
 
         candidate_holder = route_planner.plan_routes()
         #retrieve all routes
@@ -304,7 +305,7 @@ class ObstacleToolbox(QDockWidget):
         #retrieve first route
         route = candidate_holder.retrieve_first_route()
         #route = list_routes[1]
-        print(route.reference_path)
+        #print(route.reference_path)
         #print(route.path_orientation)
         j=0
         for i in route.reference_path:
@@ -413,11 +414,25 @@ class ObstacleToolbox(QDockWidget):
             return
         if event.button != 1:
             return
+        if self.obstacle_toolbox_ui.selected_obstacle.currentText() == "None":
+            return
+        if self.obstacle_toolbox_ui.figure.canvas.cursor().shape() != 0: #if using zoom or move tool (0 is standard cursor)
+            return
+        if self.obstacle_toolbox_ui.obstacle_dyn_stat.currentText() == 'Static':
+            return
         self.sel_point = self.selected_point(event)
     
     def on_button_release(self, event):
         """Updates obstacle when left mouse button is released"""
         if event.button != 1:
+            return
+        if self.obstacle_toolbox_ui.selected_obstacle.currentText() == "None":
+            return
+        if self.obstacle_toolbox_ui.figure.canvas.cursor().shape() != 0: #if using zoom or move tool (0 is standard cursor)
+            return
+        if self.obstacle_toolbox_ui.obstacle_dyn_stat.currentText() == 'Static':
+            return
+        if self.sel_point is None:
             return
         #TODO make this a separate function
         #obstacle_id = int(self.obstacle_toolbox_ui.selected_obstacle.currentText())
@@ -466,6 +481,12 @@ class ObstacleToolbox(QDockWidget):
             return
         if event.button != 1:
             return
+        if self.obstacle_toolbox_ui.selected_obstacle.currentText() == "None":
+            return
+        if self.obstacle_toolbox_ui.figure.canvas.cursor().shape() != 0: #if using zoom or move tool (0 is standard cursor)
+            return
+        if self.obstacle_toolbox_ui.obstacle_dyn_stat.currentText() == 'Static':
+            return
         selected_obstacle = self.get_current_obstacle()
         state_variable_name = self.obstacle_toolbox_ui.obstacle_state_variable.currentText()
 
@@ -512,7 +533,15 @@ class ObstacleToolbox(QDockWidget):
             time.append(i[0])
             profile.append(i[1])
 
-        self.draw_plot(time, profile)
+        self.draw_plot(time, profile, self.xmin, self.xmax, self.ymin, self.ymax)
+
+    def on_xlim_change(self, event):
+        self.xmin, self.xmax = event.get_xlim()
+        #print(xmin, xmax)
+    
+    def on_ylim_change(self, event):
+        self.ymin, self.ymax = event.get_ylim()
+        #print(ymin, ymax)
 
     def selected_point(self, event):
         """get the time step of the where the point is located"""
@@ -580,6 +609,10 @@ class ObstacleToolbox(QDockWidget):
             if isinstance(obstacle, DynamicObstacle):
                 time += [state.time_step for state in obstacle.prediction.trajectory.state_list]
 
+            self.xmin = None
+            self.xmax = None 
+            self.ymin = None 
+            self.ymax = None
             self.draw_plot(time, profile)
 
     @staticmethod
@@ -673,6 +706,9 @@ class ObstacleToolbox(QDockWidget):
         #if set to "None": clear QLineEdits 
         else:
             self.clear_obstacle_fields()
+            self.obstacle_toolbox_ui.obstacle_state_variable.clear()
+            self.obstacle_toolbox_ui.figure.clear()
+            self.obstacle_toolbox_ui.canvas.draw()
 
     def clear_obstacle_fields(self):
         """clears the obstacle QLineEdits"""
@@ -709,10 +745,11 @@ class ObstacleToolbox(QDockWidget):
             #obstacle = self.current_scenario.obstacle_by_id(obstacle_id)
             selected_obstacle = self.get_current_obstacle()
             self.current_scenario.remove_obstacle(selected_obstacle)
+            #self.obstacle_toolbox_ui.obstacle_state_variable.clear()
             self.callback(self.current_scenario)
             self.amount_obstacles -=1
 
-    def draw_plot(self, time, profile):
+    def draw_plot(self, time, profile, xmin = None, xmax = None, ymin = None, ymax =None):
         """draws the state plot in the obstacle toolbox"""
         state_variable_name = self.obstacle_toolbox_ui.obstacle_state_variable.currentText()
         # clear previous profile
@@ -726,5 +763,12 @@ class ObstacleToolbox(QDockWidget):
         ax.set_xlabel("time [s]")
         ax.set_ylabel(self.resolve_y_label(state_variable_name))
         self.obstacle_toolbox_ui.figure.tight_layout()
+        #if zoomed in the new plot should be drawn with previous x and y limits
+        # (so it doesnt zoom out on mouse event if zoomed in)
+        if (self.xmin != None and self.xmax != None and self.ymin != None and self.ymax != None):
+            ax.set_xlim([self.xmin, self.xmax])
+            ax.set_ylim([self.ymin, self.ymax])
         # refresh canvas
         self.obstacle_toolbox_ui.canvas.draw()
+        ax.callbacks.connect('xlim_changed', self.on_xlim_change)
+        ax.callbacks.connect('ylim_changed', self.on_ylim_change)
