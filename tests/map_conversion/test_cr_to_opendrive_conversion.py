@@ -54,37 +54,37 @@ class TestConverterConvert(unittest.TestCase):
     def test_convert_USA_Lanker(self):
         self.prepareConversion("USA_Lanker-1_17_T-1")
         self.converter.convert(self.file_path_out)
-        self.checkWithGroundTruth(os.path.join(self.path_to_directory,self.path_reference_xodr_file))
+        self.checkWithGroundTruth(os.path.join(self.path_to_directory, self.path_reference_xodr_file))
 
     def test_convert_DEU_Guetersloh(self):
         self.prepareConversion("DEU_Guetersloh-11_2_T-1")
         self.converter.convert(self.file_path_out)
-        self.checkWithGroundTruth(os.path.join(self.path_to_directory,self.path_reference_xodr_file))
+        self.checkWithGroundTruth(os.path.join(self.path_to_directory, self.path_reference_xodr_file))
 
     def test_convert_ARG_Carcarana(self):
         self.prepareConversion("ARG_Carcarana-1_1_T-1")
         self.converter.convert(self.file_path_out)
-        self.checkWithGroundTruth(os.path.join(self.path_to_directory,self.path_reference_xodr_file))
+        self.checkWithGroundTruth(os.path.join(self.path_to_directory, self.path_reference_xodr_file))
 
     def test_convert_zero_width_lanes_map(self):
         self.prepareConversion("zero_width_lanes_map")
         self.converter.convert(self.file_path_out)
-        self.checkWithGroundTruth(os.path.join(self.path_to_directory,self.path_reference_xodr_file))
+        self.checkWithGroundTruth(os.path.join(self.path_to_directory, self.path_reference_xodr_file))
 
     def test_convert_DEU_Test(self):
         self.prepareConversion("DEU_Test-1_1_T-1")
         self.converter.convert(self.file_path_out)
-        self.checkWithGroundTruth(os.path.join(self.path_to_directory,self.path_reference_xodr_file))
+        self.checkWithGroundTruth(os.path.join(self.path_to_directory, self.path_reference_xodr_file))
 
     def test_convert_DEU_Muehlhausen(self):
         self.prepareConversion("DEU_Muehlhausen-2_2_T-1")
         self.converter.convert(self.file_path_out)
-        self.checkWithGroundTruth(os.path.join(self.path_to_directory,self.path_reference_xodr_file))
+        self.checkWithGroundTruth(os.path.join(self.path_to_directory, self.path_reference_xodr_file))
 
     def test_convert_lanelet_no_succ_or_pred(self):
         self.prepareConversion("lanelet_no_succ_or_pred")
         self.converter.convert(self.file_path_out)
-        self.checkWithGroundTruth(os.path.join(self.path_to_directory,self.path_reference_xodr_file))
+        self.checkWithGroundTruth(os.path.join(self.path_to_directory, self.path_reference_xodr_file))
 
     def test_function_checkAllVisited(self):
         self.prepareConversion("DEU_Test-1_1_T-1")
