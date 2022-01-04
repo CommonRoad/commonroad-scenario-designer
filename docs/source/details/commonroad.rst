@@ -140,17 +140,46 @@ This helps to guarantee correctness of the road construction algorithm.
 
 Create linkMap where all linkage information is stored
 ------------------------------------------------------
+A linkmap consist of ids of road and it links. For each road and its links , 
+a data structure is created to store its corresponding successor and predessor. 
+Each links consist of ids of lanelet and corresponding lane successor and lane predessor. 
+For each lanelet, a data structure is created to store its corresponding lane successor 
+and lane predessor. Finally all these information are stored as merged linkage. 
+Also the stored information are linked with road id and stored as road linkage.
+When the road has exactly one successor/predecessor, road to road linkage is implemented.
 
 
 Add junction and  link road to junction
 ---------------------------------------
+The intersection of lane net consists of intersection incoming elements. 
+For every intersection incoming elment, all successors are obtained.  
+Road id of successors with the CommonRoad id are transformed to successors 
+with their OpenDrive id.
+All incoming lanes should be on the same road in opendrive.
+For every successor road, connection element are created and 
+are linked with the lanelink accordingly to opendrive.
 
 
 Add obstacle, traffic elements 
 ------------------------------
+Static obstacles are added on map. Obstacles can be in shape of circle, rectangle and polygon. 
+Traffic signs and lights are added to the map.
 
 
 Convert to Opendrive file
 -------------------------
+After proceeding all these stages of preprocessing and conversion, finally OpenDRIVE file is created. 
+Data structures created for addition and conversion of roads are cleared 
+and counting of junctions, obstacles is set to zero.
 
 
+Issues: CommonRoad elements which are currently not converted
+-------------------------------------------------------------
+1.Traffic signs:
+-They are not converted to opendrive format. only init(), str() and getCountry() methods are defined.
+
+2.Traffic lights:
+-They are not converted to opendrive format. Only init() and str() methods are defined.
+
+3.Stop lines:
+-They are not converted to opendrive format.
