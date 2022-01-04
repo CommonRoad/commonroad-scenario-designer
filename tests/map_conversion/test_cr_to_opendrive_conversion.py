@@ -23,11 +23,15 @@ class TestConverterConvert(unittest.TestCase):
 
     def prepareConversion(self, map_name):
         self.map_name = map_name
-        # relative path for input
-        self.file_path_in = f"commonroad_to_opendrive_test_files/{self.map_name}.xml"  
+        # absolute path for map_conversion directory
+        path_to_directory = os.path.dirname(os.path.abspath(__file__))
         
-        # relative path for output
-        self.file_path_out = f"commonroad_to_opendrive_test_files/converted_xodr_files/{self.map_name}.xodr"
+        # absolute path for input
+        self.file_path_in = os.path.join(path_to_directory,f"commonroad_to_opendrive_test_files/{self.map_name}.xml")  
+        
+        # absolute path for output
+        self.file_path_out = os.path.join(path_to_directory,f"commonroad_to_opendrive_test_files/converted_xodr_files/{self.map_name}.xodr")
+
 
         # load the xml file and preprocess it
         self.data = DataLoader(self.file_path_in)
