@@ -64,7 +64,6 @@ class Converter:
         # and afterwards will open the converted maps with
         # the opendrive2lanelet-gui tool
         """
-        
         self.writer.save()
         Road.crIdToOD.clear()
         Road.linkMap.clear()
