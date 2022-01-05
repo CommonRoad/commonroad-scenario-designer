@@ -7,8 +7,10 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 
+from commonroad.geometry.polyline_util import *
 from commonroad.geometry.shape import Rectangle, Circle, Polygon
 from commonroad.scenario.scenario import Scenario
+from commonroad.scenario.lanelet import Lanelet, LaneletNetwork
 from commonroad.scenario.obstacle import Obstacle, StaticObstacle, ObstacleType, DynamicObstacle
 from commonroad.scenario.trajectory import State, Trajectory
 
@@ -189,18 +191,15 @@ class ObstacleToolbox(QDockWidget):
                     float(self.obstacle_toolbox_ui.obstacle_y_Position.text())
                 ]),
                 'orientation': math.radians(float(self.obstacle_toolbox_ui.obstacle_orientation.text())),
+                'velocity': 0,
+                'acceleration': 0,
                 'time_step': 0
                 }),
-                #test code, remove later
                 prediction = TrajectoryPrediction(
                     shape = Rectangle(float(self.obstacle_toolbox_ui.obstacle_length.text()), width = float(self.obstacle_toolbox_ui.obstacle_width.text())),
                     trajectory = Trajectory(
                         initial_time_step = 1,
                         state_list = self.initial_trajectory()
-                        #state_list = [State(**{'position': np.array([1,1]),'orientation': 3,'time_step': 0, 'velocity': 7}),
-                         #State(**{'position': np.array([2,2]),'orientation': 3,'time_step': 4, 'velocity': 7}),
-                         #State(**{'position': np.array([5,5]),'orientation': 3,'time_step': 5, 'velocity': 7}),])
-                    #occupancy_set= [Occupancy(time_step=2, shape=Rectangle(length=3,width=3)), Occupancy(time_step=3, shape=Rectangle(length=3,width=3))]
                     )
                 )
             )
@@ -219,8 +218,17 @@ class ObstacleToolbox(QDockWidget):
                     float(self.obstacle_toolbox_ui.obstacle_y_Position.text())
                 ]),
                 'orientation': 0, 
-                'time_step': 1
-                })
+                'time_step': 1,
+                'velocity': 0,
+                'acceleration': 0
+                }),
+                prediction = TrajectoryPrediction(
+                    shape = Circle(float(self.obstacle_toolbox_ui.obstacle_radius.text())),
+                    trajectory = Trajectory(
+                        initial_time_step = 1,
+                        state_list = self.initial_trajectory()
+                    )
+                )
             )
         
         elif self.obstacle_toolbox_ui.obstacle_shape.currentText() == "Polygon":
@@ -239,19 +247,31 @@ class ObstacleToolbox(QDockWidget):
                 ]),
                 'orientation': 0, 
                 'time_step': 1
-                })
+                }),
+                prediction = TrajectoryPrediction(
+                    shape = Polygon(vertices = self.polygon_array()),
+                    trajectory = Trajectory(
+                        initial_time_step = 1,
+                        state_list = self.initial_trajectory()
+                    )
+                )
+
             )
         self.current_scenario.add_objects(dynamic_obstacle)       
         self.callback(self.current_scenario)
 
     def initial_trajectory(self):
         #hardcoded values for testing, right now only straight line
+        if self.obstacle_toolbox_ui.obstacle_shape.currentText() != "Polygon":
+            initial_position_x = float(self.obstacle_toolbox_ui.obstacle_x_Position.text()) 
+            initial_position_y = float(self.obstacle_toolbox_ui.obstacle_y_Position.text())
+        else:
+            #TODO change later from 0
+            initial_position_x = 0
+            initial_position_y = 0
 
-        initial_position_x = float(self.obstacle_toolbox_ui.obstacle_x_Position.text()) 
-        initial_position_y = float(self.obstacle_toolbox_ui.obstacle_y_Position.text())
-
-        goal_position_x = 50 #arbitrary values for testing
-        goal_position_y = 0
+        goal_position_x = float(self.obstacle_toolbox_ui.obstacle_x_Goal_Position.text())
+        goal_position_y = float(self.obstacle_toolbox_ui.obstacle_y_Goal_Position.text())
         goal_orientation = 5
 
         length_x = abs(goal_position_x-initial_position_x)
@@ -259,40 +279,60 @@ class ObstacleToolbox(QDockWidget):
         length = math.sqrt(length_x**2 + length_y**2)
 
         velocity = 14.0
+        acceleration = 0
         state_list = []
         finished = False
-        #i = 1
+
+        i = 1
         #if updating positions in profile visualisation
         if self.xyo:
             for j in self.xyo:
                 new_position = np.array([j[0], j[1]])
-                new_state = State(**{'position': new_position, 'velocity': velocity, 'orientation': j[2], 'time_step': i})
+                new_state = State(**{'position': new_position, 'velocity': velocity, 
+                'acceleration': acceleration, 'orientation': j[2], 'time_step': i})
                 state_list.append(new_state)
                 i += 1
+                print(new_position)
             return state_list
 
+        if self.obstacle_toolbox_ui.obstacle_shape.currentText() == "Rectangle":
+            orientation = math.radians(float(self.obstacle_toolbox_ui.obstacle_orientation.text()))
+        else:
+            orientation = 0
+
         initial_state = State(**{'position': np.array([
-                    float(self.obstacle_toolbox_ui.obstacle_x_Position.text()),
-                    float(self.obstacle_toolbox_ui.obstacle_y_Position.text())
+                    initial_position_x,
+                    initial_position_y
                 ]),
-                'orientation': math.radians(float(self.obstacle_toolbox_ui.obstacle_orientation.text())),
+                'orientation': orientation,
                 'time_step': 1,
                 'yaw_rate': 0,
-                'velocity': 22,
+                'velocity': velocity,
                 'slip_angle': 0,
+                'acceleration': acceleration
                 })
-        goal_state = [State(**{'position': Rectangle(float(self.obstacle_toolbox_ui.obstacle_length.text()), 
-            width = float(self.obstacle_toolbox_ui.obstacle_width.text()), center=np.array([30, 0]),
-            orientation=3),#np.array([ #maybe more goal states???
-                    #np.array([float(self.obstacle_toolbox_ui.obstacle_x_Goal_Position.text()),
-                    #float(self.obstacle_toolbox_ui.obstacle_y_Goal_Position.text())
-                    
-                    
-                #]),
+        if self.obstacle_toolbox_ui.obstacle_shape.currentText() == "Rectangle":
+            goal_state = [State(**{'position': Rectangle(float(self.obstacle_toolbox_ui.obstacle_length.text()), 
+                width = float(self.obstacle_toolbox_ui.obstacle_width.text()), center=np.array([goal_position_x, goal_position_y]), orientation=goal_orientation),
+                    'orientation': AngleInterval(-3,3),#math.radians(float(self.obstacle_toolbox_ui.obstacle_Goal_Orientation.text())),
+                    'time_step': Interval(25, 30), #hardcoded for testing
+                    })]
+        elif self.obstacle_toolbox_ui.obstacle_shape.currentText() == "Circle":
+            goal_state = [State(**{'position': Circle(float(self.obstacle_toolbox_ui.obstacle_radius.text()), 
+                center=np.array([goal_position_x, goal_position_y])),
                 'orientation': AngleInterval(-3,3),#math.radians(float(self.obstacle_toolbox_ui.obstacle_Goal_Orientation.text())),
                 'time_step': Interval(25, 30), #hardcoded for testing
-                #'velocity': Interval(20, 25)
                 })]
+        elif self.obstacle_toolbox_ui.obstacle_shape.currentText() == "Polygon":
+            goal_state = [State(**{'position': self.polygon_array(), #self.current_scenario.find_lanelet_by_id(3), 
+                'orientation': AngleInterval(-3,3),#math.radians(float(self.obstacle_toolbox_ui.obstacle_Goal_Orientation.text())),
+                'time_step': Interval(25, 30), #hardcoded for testing
+                })]
+            
+        """if self.obstacle_toolbox_ui.obstacle_shape.currentText() == "Polygon":
+            lanelets_of_goal_position = Dict[0, [3]]
+            goal_region = GoalRegion(goal_state, lanelets_of_goal_position)
+        else:"""
         goal_region = GoalRegion(goal_state)
         planning_problem = PlanningProblem(self.amount_obstacles+1, initial_state, goal_region)
         route_planner = RoutePlanner(self.current_scenario, planning_problem, backend=RoutePlanner.Backend.NETWORKX_REVERSED,
@@ -307,10 +347,14 @@ class ObstacleToolbox(QDockWidget):
         #route = list_routes[1]
         #print(route.reference_path)
         #print(route.path_orientation)
+        #resample polyline so we get the right velocity
+        trajectory = resample_polyline_with_distance(route.reference_path, velocity * self.current_scenario.dt)
         j=0
-        for i in route.reference_path:
+        #TODO fix orientation
+        for i in trajectory:
             new_position = np.array([i[0], i[1]])
-            new_state = State(**{'position': new_position, 'orientation': route.path_orientation[j], 'time_step': j+1})
+            new_state = State(**{'position': new_position, 'orientation': route.path_orientation[j], 
+            'velocity': velocity, 'acceleration': acceleration, 'time_step': j+1})
             state_list.append(new_state)
             j += 1
         """while(finished == False):
@@ -378,18 +422,18 @@ class ObstacleToolbox(QDockWidget):
     
     def update_obstacle(self):
         """updates obstacle by deleting it and then adding it again with same id"""
-        try:
-            selected_obstacle = self.get_current_obstacle()
-            obstacle_id = self.get_current_obstacle_id()
+        #try:
+        selected_obstacle = self.get_current_obstacle()
+        obstacle_id = self.get_current_obstacle_id()
 
-            self.current_scenario.remove_obstacle(selected_obstacle)
-            if self.obstacle_toolbox_ui.obstacle_dyn_stat.currentText() == "Static":
-                self.static_obstacle_details(obstacle_id)
-            elif self.obstacle_toolbox_ui.obstacle_dyn_stat.currentText() == "Dynamic":
-                self.dynamic_obstacle_details(obstacle_id)
-                self.xyo.clear()
-        except Exception as e:
-            self.text_browser.append("Error when updating obstacle")
+        self.current_scenario.remove_obstacle(selected_obstacle)
+        if self.obstacle_toolbox_ui.obstacle_dyn_stat.currentText() == "Static":
+            self.static_obstacle_details(obstacle_id)
+        elif self.obstacle_toolbox_ui.obstacle_dyn_stat.currentText() == "Dynamic":
+            self.dynamic_obstacle_details(obstacle_id)
+            self.xyo.clear()
+        #except Exception as e:
+        #self.text_browser.append("Error when updating obstacle")
 
     def initialize_toolbox(self):
         self.initialize_obstacle_information()
@@ -597,6 +641,23 @@ class ObstacleToolbox(QDockWidget):
                     else:
                         profile += [state.__getattribute__("position")[1]
                                 for state in obstacle.prediction.trajectory.state_list]
+
+            elif (state_variable_name == "velocity" and isinstance(obstacle, DynamicObstacle)):
+                    #if self.xyo:
+                     #   profile += [j[1] for j in self.xyo]
+                    #else:
+                    profile = [obstacle.initial_state.__getattribute__("velocity")]
+                    profile += [state.__getattribute__("velocity")
+                            for state in obstacle.prediction.trajectory.state_list]
+
+            elif (state_variable_name == "acceleration" and isinstance(obstacle, DynamicObstacle)):
+                    #if self.xyo:
+                     #   profile += [j[1] for j in self.xyo]
+                    #else:
+                    profile = [obstacle.initial_state.__getattribute__("acceleration")]
+                    profile += [state.__getattribute__("acceleration")
+                            for state in obstacle.prediction.trajectory.state_list]
+
             else:
                 profile = [obstacle.initial_state.__getattribute__(state_variable_name)]
                 if isinstance(obstacle, DynamicObstacle):
@@ -697,6 +758,8 @@ class ObstacleToolbox(QDockWidget):
 
             if "position" in obstacle.initial_state.attributes:
                 state_variables += ["x-position", "y-position"]
+            #if (isinstance(obstacle, DynamicObstacle)):
+                #state_variables += ["velocity", "acceleration"]
             self.obstacle_toolbox_ui.obstacle_state_variable.addItems(state_variables)
             self.update_ongoing = False
             #clear xyo if switch to another obstacle
@@ -763,6 +826,9 @@ class ObstacleToolbox(QDockWidget):
         ax.set_xlabel("time [s]")
         ax.set_ylabel(self.resolve_y_label(state_variable_name))
         self.obstacle_toolbox_ui.figure.tight_layout()
+        
+        #to get reasonable limits, if the difference is very small: it will be difficult to make changes
+        ax.set_ylim([min(profile)-0.5, max(profile)+0.5])
         #if zoomed in the new plot should be drawn with previous x and y limits
         # (so it doesnt zoom out on mouse event if zoomed in)
         if (self.xmin != None and self.xmax != None and self.ymin != None and self.ymax != None):
