@@ -162,7 +162,7 @@ class ObstacleToolboxUI(Toolbox):
         try:
             for i in range(self.amount_vertices):
                 self.layout_obstacle_information_groupbox.removeRow(self.polygon_row[i])
-                
+
             self.layout_obstacle_information_groupbox.removeRow(self.add_vertice_btn)
         except Exception:
             pass
@@ -283,4 +283,4 @@ class ObstacleToolboxUI(Toolbox):
         self.amount_vertices = self.amount_vertices - 1
 
         for j in range(self.amount_vertices):
-            self.polygon_label[j].setText("Vertice " + str(j)) 
+            self.polygon_label[j].setText("Vertice " + str(j))
