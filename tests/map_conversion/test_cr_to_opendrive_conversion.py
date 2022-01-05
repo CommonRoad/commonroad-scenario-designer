@@ -35,14 +35,10 @@ class TestConverterConvert(unittest.TestCase):
 
         self.map_name = map_name
         self.path_reference_xodr_file = f"commonroad_to_opendrive_test_files/reference_xodr_files/{self.map_name}.xodr"
-        
         # absolute path for input
         self.file_path_in = os.path.join(self.cwd_path, f"commonroad_to_opendrive_test_files/{self.map_name}.xml")  
-        
         # absolute path for output
-        self.file_path_out = os.path.join(self.cwd_path,f".pytest_cache/converted_xodr_files/{self.map_name}.xodr")
-
-
+        self.file_path_out = os.path.join(self.cwd_path, f".pytest_cache/converted_xodr_files/{self.map_name}.xodr")
         # load the xml file and preprocess it
         self.data = DataLoader(self.file_path_in)
         print(self.data)
@@ -110,7 +106,6 @@ class TestConverterConvert(unittest.TestCase):
         self.converter.convert(self.file_path_out)
         self.checkWithGroundTruth(os.path.join(self.cwd_path, self.path_reference_xodr_file))
     
-    
     def test_convert_ZAM_Over(self):
         self.prepareConversion("ZAM_Over-1_1")
         self.converter.convert(self.file_path_out)
@@ -121,6 +116,5 @@ class TestConverterConvert(unittest.TestCase):
         self.converter.convert(self.file_path_out)
         self.checkWithGroundTruth(os.path.join(self.cwd_path, self.path_reference_xodr_file))
     
-
 if __name__ == "__main__":
     unittest.main()
