@@ -28,15 +28,20 @@ class Converter:
         # choose lanelet as starting point
         lanelet = copy.deepcopy(laneList[0])
 
+        # this function constructs all roads 
+        # using a breadth first search approach
         self.constructRoads([lanelet.lanelet_id])
+
+        # double check that no lanelet was missed
         self.checkAllVisited()
 
+        # These functions are responsible for road as well as junction linkage
         self.processLinkMap(Road.linkMap, Road.lane2lanelink)
         self.createLinkages(Road.linkMap, Road.lane2lanelink)
         self.constructJunctions()
         self.addJunctionLinkage(Road.linkMap)
 
-        # Obstacles, signs, lights
+        # Obstacles, traffic signs and traffic lights conversion
         self.constructObstacles()
         self.populateTrafficElements(Road.crIdToOD)
         self.constructTrafficElements()
@@ -52,6 +57,14 @@ class Converter:
         print(conv + time)
 
     def finalize(self):
+        """
+        # This function cleans up the converter object
+        # which makes it possible to convert multiple files queued up
+        # Take a look at run.sh, this script will execute main.py
+        # and afterwards will open the converted maps with
+        # the opendrive2lanelet-gui tool
+        """
+        
         self.writer.save()
         Road.crIdToOD.clear()
         Road.linkMap.clear()

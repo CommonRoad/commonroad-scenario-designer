@@ -169,6 +169,7 @@ Traffic signs and lights are added to the map.
 Convert to Opendrive file
 -------------------------
 After proceeding all these stages of preprocessing and conversion, finally OpenDRIVE file is created. 
+This function cleans up the converter object which makes it possible to convert multiple files queued up.
 Data structures created for addition and conversion of roads are cleared 
 and counting of junctions, obstacles is set to zero.
 
