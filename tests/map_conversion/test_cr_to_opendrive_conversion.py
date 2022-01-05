@@ -100,7 +100,27 @@ class TestConverterConvert(unittest.TestCase):
         self.converter.id_dict.popitem()
         self.assertRaises(KeyError, lambda: self.converter.checkAllVisited())
 
-
+    def test_convert_BEL_Wervik(self):
+        self.prepareConversion("BEL_Wervik-2_1_T-1")
+        self.converter.convert(self.file_path_out)
+        self.checkWithGroundTruth(os.path.join(self.cwd_path, self.path_reference_xodr_file))
+    
+    def test_convert_CulDeSac(self):
+        self.prepareConversion("CulDeSac")
+        self.converter.convert(self.file_path_out)
+        self.checkWithGroundTruth(os.path.join(self.cwd_path, self.path_reference_xodr_file))
+    
+    
+    def test_convert_ZAM_Over(self):
+        self.prepareConversion("ZAM_Over-1_1")
+        self.converter.convert(self.file_path_out)
+        self.checkWithGroundTruth(os.path.join(self.cwd_path, self.path_reference_xodr_file))
+        
+    def test_convert_town03_right_width_coefficient(self):
+        self.prepareConversion("town03_right_width_coefficient")
+        self.converter.convert(self.file_path_out)
+        self.checkWithGroundTruth(os.path.join(self.cwd_path, self.path_reference_xodr_file))
+    
 
 if __name__ == "__main__":
     unittest.main()
