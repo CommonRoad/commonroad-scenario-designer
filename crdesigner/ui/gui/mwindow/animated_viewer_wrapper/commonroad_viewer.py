@@ -404,9 +404,9 @@ class AnimatedViewer:
             start, end)
 
         def draw_frame(draw_params):
+            self.time_step.value += 1
             time_start = start + self.time_step.value
             time_end = start + min(anim_frames, self.time_step.value)
-            self.time_step.value += 1
             if time_start > time_end:
                 self.time_step.value = 0
 
@@ -415,7 +415,6 @@ class AnimatedViewer:
                 'time_end': time_end,
                 'antialiased': True,
             }
-
             self.dynamic.draw_scenario(scenario, pps=pps, draw_params=draw_params)
 
         # Interval determines the duration of each frame in ms
