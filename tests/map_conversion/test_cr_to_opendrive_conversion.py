@@ -22,16 +22,25 @@ class TestConverterConvert(unittest.TestCase):
         ]
 
     def prepareConversion(self, map_name):
+        self.cwd_path = os.path.dirname(os.path.abspath(__file__))
+        out_path = self.cwd_path + "/.pytest_cache/converted_xodr_files"
+
+        if not os.path.isdir(out_path):
+            os.makedirs(out_path)
+        else:
+            for (dir_path, _, filenames) in os.walk(out_path):
+                for file in filenames:
+                    if file.endswith('.xodr'):
+                        os.remove(os.path.join(dir_path, file))
+
         self.map_name = map_name
         self.path_reference_xodr_file = f"commonroad_to_opendrive_test_files/reference_xodr_files/{self.map_name}.xodr"
-        # absolute path for map_conversion directory
-        self.path_to_directory = os.path.dirname(os.path.abspath(__file__))
-
+        
         # absolute path for input
-        self.file_path_in = os.path.join(self.path_to_directory,f"commonroad_to_opendrive_test_files/{self.map_name}.xml")  
+        self.file_path_in = os.path.join(self.cwd_path, f"commonroad_to_opendrive_test_files/{self.map_name}.xml")  
         
         # absolute path for output
-        self.file_path_out = os.path.join(self.path_to_directory,f"commonroad_to_opendrive_test_files/converted_xodr_files/{self.map_name}.xodr")
+        self.file_path_out = os.path.join(self.cwd_path,f".pytest_cache/converted_xodr_files/{self.map_name}.xodr")
 
 
         # load the xml file and preprocess it
@@ -54,37 +63,37 @@ class TestConverterConvert(unittest.TestCase):
     def test_convert_USA_Lanker(self):
         self.prepareConversion("USA_Lanker-1_17_T-1")
         self.converter.convert(self.file_path_out)
-        self.checkWithGroundTruth(os.path.join(self.path_to_directory, self.path_reference_xodr_file))
+        self.checkWithGroundTruth(os.path.join(self.cwd_path, self.path_reference_xodr_file))
 
     def test_convert_DEU_Guetersloh(self):
         self.prepareConversion("DEU_Guetersloh-11_2_T-1")
         self.converter.convert(self.file_path_out)
-        self.checkWithGroundTruth(os.path.join(self.path_to_directory, self.path_reference_xodr_file))
+        self.checkWithGroundTruth(os.path.join(self.cwd_path, self.path_reference_xodr_file))
 
     def test_convert_ARG_Carcarana(self):
         self.prepareConversion("ARG_Carcarana-1_1_T-1")
         self.converter.convert(self.file_path_out)
-        self.checkWithGroundTruth(os.path.join(self.path_to_directory, self.path_reference_xodr_file))
+        self.checkWithGroundTruth(os.path.join(self.cwd_path, self.path_reference_xodr_file))
 
     def test_convert_zero_width_lanes_map(self):
         self.prepareConversion("zero_width_lanes_map")
         self.converter.convert(self.file_path_out)
-        self.checkWithGroundTruth(os.path.join(self.path_to_directory, self.path_reference_xodr_file))
+        self.checkWithGroundTruth(os.path.join(self.cwd_path, self.path_reference_xodr_file))
 
     def test_convert_DEU_Test(self):
         self.prepareConversion("DEU_Test-1_1_T-1")
         self.converter.convert(self.file_path_out)
-        self.checkWithGroundTruth(os.path.join(self.path_to_directory, self.path_reference_xodr_file))
+        self.checkWithGroundTruth(os.path.join(self.cwd_path, self.path_reference_xodr_file))
 
     def test_convert_DEU_Muehlhausen(self):
         self.prepareConversion("DEU_Muehlhausen-2_2_T-1")
         self.converter.convert(self.file_path_out)
-        self.checkWithGroundTruth(os.path.join(self.path_to_directory, self.path_reference_xodr_file))
+        self.checkWithGroundTruth(os.path.join(self.cwd_path, self.path_reference_xodr_file))
 
     def test_convert_lanelet_no_succ_or_pred(self):
         self.prepareConversion("lanelet_no_succ_or_pred")
         self.converter.convert(self.file_path_out)
-        self.checkWithGroundTruth(os.path.join(self.path_to_directory, self.path_reference_xodr_file))
+        self.checkWithGroundTruth(os.path.join(self.cwd_path, self.path_reference_xodr_file))
 
     def test_function_checkAllVisited(self):
         self.prepareConversion("DEU_Test-1_1_T-1")
