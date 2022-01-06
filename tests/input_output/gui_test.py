@@ -129,4 +129,3 @@ def test_menu_bar(qtbot):
     assert file_new_success
     assert menubar_wrapper_gui_setting_successfull
     assert menubar_wrapper_gui_setting_sumo_successfull
-
