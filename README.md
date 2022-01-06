@@ -18,7 +18,7 @@ CommonRoad maps and scenarios.
 ## Prerequisites and Installation
 The usage of the Anaconda Python distribution is recommended. We have tested the toolbox with Python 3.7, 3.8, and 3.9.
 You need the following modules:
-- commonroad_io >= 2021.3
+- commonroad_io >= 2021.4
 - matplotlib >= 3.1.0
 - numpy >= 1.16.4
 - ordered-set >= 4.0.2
