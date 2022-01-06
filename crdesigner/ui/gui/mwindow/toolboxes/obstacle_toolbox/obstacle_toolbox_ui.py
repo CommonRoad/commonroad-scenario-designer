@@ -153,7 +153,7 @@ class ObstacleToolboxUI(Toolbox):
         self.obstacle_radius.setMaxLength(4)
         self.obstacle_radius.setAlignment(Qt.AlignRight)
 
-        self.layout_obstacle_information_groupbox.insertRow(2, "Radius [m]", self.obstacle_radius)
+        self.layout_obstacle_information_groupbox.insertRow(3, "Radius [m]", self.obstacle_radius)
 
     def remove_circle_fields(self):
         """removes the fields for the circle shape"""
@@ -198,6 +198,16 @@ class ObstacleToolboxUI(Toolbox):
         except:
             pass
     
+    def remove_dynamic_fields(self):
+        """removes fields unique to dynamic obstacle"""
+        self.layout_obstacle_information_groupbox.removeRow(self.obstacle_x_Goal_Position)
+        self.layout_obstacle_information_groupbox.removeRow(self.obstacle_y_Goal_Position)
+        self.layout_obstacle_information_groupbox.removeRow(self.obstacle_velocity)
+        try:
+            self.layout_obstacle_information_groupbox.removeRow(self.obstacle_Goal_Orientation)
+        except:
+            pass
+    
     def toggle_dynamic_static(self):
         """adds/removes fields unique for the dynamic obstacle"""
         if self.obstacle_dyn_stat.currentText() == "Dynamic":
@@ -211,27 +221,33 @@ class ObstacleToolboxUI(Toolbox):
             self.obstacle_y_Goal_Position.setMaxLength(4)
             self.obstacle_y_Goal_Position.setAlignment(Qt.AlignRight)
 
-            self.obstacle_Goal_Orientation = QLineEdit()
-            self.obstacle_Goal_Orientation.setValidator(self.float_validator)
-            self.obstacle_Goal_Orientation.setMaxLength(4)
-            self.obstacle_Goal_Orientation.setAlignment(Qt.AlignRight)
+            self.obstacle_velocity = QLineEdit()
+            self.obstacle_velocity.setValidator(self.float_validator)
+            self.obstacle_velocity.setMaxLength(4)
+            self.obstacle_velocity.setAlignment(Qt.AlignRight)
 
             if self.obstacle_shape.currentText() == "Rectangle":
+                self.obstacle_Goal_Orientation = QLineEdit()
+                self.obstacle_Goal_Orientation.setValidator(self.float_validator)
+                self.obstacle_Goal_Orientation.setMaxLength(4)
+                self.obstacle_Goal_Orientation.setAlignment(Qt.AlignRight)
+
                 self.layout_obstacle_information_groupbox.insertRow(9, "X-Goal-Position", self.obstacle_x_Goal_Position)
                 self.layout_obstacle_information_groupbox.insertRow(10, "Y-Goal-Position", self.obstacle_y_Goal_Position)
                 self.layout_obstacle_information_groupbox.insertRow(11, "Goal-Orientation", self.obstacle_Goal_Orientation)
+                self.layout_obstacle_information_groupbox.insertRow(12, "Velocity [m/s]", self.obstacle_velocity)
             elif self.obstacle_shape.currentText() == "Circle":
-                self.layout_obstacle_information_groupbox.insertRow(7, "X-Position", self.obstacle_x_Position)
-                self.layout_obstacle_information_groupbox.insertRow(8, "Y-Position", self.obstacle_y_Position)
+                self.layout_obstacle_information_groupbox.insertRow(7, "X-Goal-Position", self.obstacle_x_Goal_Position)
+                self.layout_obstacle_information_groupbox.insertRow(8, "Y-Goal-Position", self.obstacle_y_Goal_Position)
+                self.layout_obstacle_information_groupbox.insertRow(9, "Velocity [m/s]", self.obstacle_velocity)
             elif self.obstacle_shape.currentText() == "Polygon":
                 self.layout_obstacle_information_groupbox.insertRow(8, "X-Goal-Position", self.obstacle_x_Goal_Position)
                 self.layout_obstacle_information_groupbox.insertRow(9, "Y-Goal-Position", self.obstacle_y_Goal_Position)
-                self.layout_obstacle_information_groupbox.insertRow(10, "Goal-Orientation", self.obstacle_Goal_Orientation)
+                self.layout_obstacle_information_groupbox.insertRow(10, "Velocity [m/s]", self.obstacle_velocity)
+                #self.layout_obstacle_information_groupbox.insertRow(10, "Goal-Orientation", self.obstacle_Goal_Orientation)
 
         elif self.obstacle_dyn_stat.currentText() == "Static":
-            self.layout_obstacle_information_groupbox.removeRow(self.obstacle_x_Goal_Position)
-            self.layout_obstacle_information_groupbox.removeRow(self.obstacle_y_Goal_Position)
-            self.layout_obstacle_information_groupbox.removeRow(self.obstacle_Goal_Orientation)
+            self.remove_dynamic_fields()
 
     def toggle_sections(self):
         """changes toolbox based on what shapes that are selected"""
@@ -273,6 +289,10 @@ class ObstacleToolboxUI(Toolbox):
             self.add_vertice_btn.clicked.connect(
                 lambda: self.add_vertice())
             self.layout_obstacle_information_groupbox.insertRow(len(self.vertices_x) + 3, self.add_vertice_btn)
+
+        if self.obstacle_dyn_stat.currentText() == "Dynamic":
+            self.remove_dynamic_fields()
+            self.toggle_dynamic_static()
 
     #add vertices for the polygon shape, i is the place in the array
     def add_vertice(self):

@@ -793,6 +793,11 @@ class ObstacleToolbox(QDockWidget):
                 self.obstacle_toolbox_ui.vertices_x[i].setText("")
                 self.obstacle_toolbox_ui.vertices_y[i].setText("")
 
+        if self.obstacle_toolbox_ui.obstacle_dyn_stat.currentText() == "Dynamic":
+            self.obstacle_toolbox_ui.obstacle_x_Goal_Position.setText("")
+            self.obstacle.toolbox_ui.obstacle_y_Goal_Position.setText("")
+            self.obstacle_toolbox_ui.obstacle_Goal_Orientation.setText("")
+
     def start_sumo_simulation(self):
         num_time_steps = self.obstacle_toolbox_ui.sumo_simulation_length.value()
         self.sumo_simulation.set_simulation_length(num_time_steps)
@@ -827,7 +832,7 @@ class ObstacleToolbox(QDockWidget):
         ax.set_ylabel(self.resolve_y_label(state_variable_name))
         self.obstacle_toolbox_ui.figure.tight_layout()
         
-        #to get reasonable limits, if the difference is very small: it will be difficult to make changes
+        #to get reasonable limits. If the difference is very small: it will be difficult to make changes
         ax.set_ylim([min(profile)-0.5, max(profile)+0.5])
         #if zoomed in the new plot should be drawn with previous x and y limits
         # (so it doesnt zoom out on mouse event if zoomed in)
