@@ -146,10 +146,10 @@ The titles of module pages have to be set manually!
 The full documentation of the API and introducing examples can also be found [here](https://commonroad-scenario-designer.readthedocs.io/en/latest/).
 
 ## Changelog
-Compared to version 0.1, the following features have been added or changed:
+Compared to version 0.3, the following features have been added or changed:
 
-- Planning problem visualization in GUI
-- Extension of readme and documentation
+- Adding/Updating of static obstacles with circle, polygon, and rectangle shape in GUI
+- New GUI software architecture
 
 A detailed overview about the changes in each version is provided in the [Changelog](https://gitlab.lrz.de/tum-cps/commonroad-scenario-designer/-/blob/main/CHANGELOG.md).
 
