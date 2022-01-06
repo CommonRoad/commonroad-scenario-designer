@@ -25,7 +25,6 @@ You need the following modules:
 - lxml >= 4.3.4
 - pyproj >= 2.2.0
 - scipy >= 1.3.0
-- Pillow >= 7.1.1
 - mercantile >= 1.1.3
 - utm >= 0.5.0
 - cartopy >= 0.17.0
@@ -35,7 +34,6 @@ You need the following modules:
 - ordered-set>=4.0.2
 - enum34>=1.1.10
 - iso3166>=1.0.1
-- future>=0.17.1
 - networkx>=2.5
 
 Cartopy can be easily installed via
