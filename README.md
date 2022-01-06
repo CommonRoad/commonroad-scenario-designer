@@ -154,7 +154,7 @@ Compared to version 0.1, the following features have been added or changed:
 A detailed overview about the changes in each version is provided in the [Changelog](https://gitlab.lrz.de/tum-cps/commonroad-scenario-designer/-/blob/main/CHANGELOG.md).
 
 ## Bug and feature reporting
-This release (v0.3) is still a BETA version.  
+This release (v0.4) is still a BETA version.  
 In case you detect a bug or you want to suggest a new feature, please report it in our [forum](https://commonroad.in.tum.de/forum/c/scenario-designer/18).   
 If you want to contribute to the toolbox, you can also post it in the [forum](https://commonroad.in.tum.de/forum/c/scenario-designer/18) or contact [Sebastian Maierhofer](sebastian.maierhofer@tum.de).
 
@@ -162,7 +162,7 @@ If you want to contribute to the toolbox, you can also post it in the [forum](ht
 
 Responsible: Sebastian Maierhofer (maintainer), Moritz Klischat  
 Contribution (in alphabetic order by last name): Maximilian Fruehauf, Marcus Gabler, Fabian Hoeltke, Aaron Kaefer, 
-Benjamin Orthen, Maximilian Rieger, Stefan Urban
+Gustaf Lindgren, Benjamin Orthen, Benedikt Reinhard, Maximilian Rieger, Stefan Urban
 
 ## Citation
 **If you use our code for research, please consider citing our paper:**
