@@ -54,6 +54,9 @@ docs:
         - source activate cr39
         - pip install -r ./docs/doc_requirements.txt
         - cd docs && bash ./docs_build_script.sh
+    artifacts:
+      paths :
+        - ./docs/build/
 
 build_package:
     stage: build

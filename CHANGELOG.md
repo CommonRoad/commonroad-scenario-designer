@@ -1,6 +1,17 @@
 # Changelog
 
-## [0.3] - 2021-12-X
+## [0.4] - 2022-01-06
+
+### Added
+- Adding/Updating of static obstacles with circle, polygon, and rectangle shape in GUI
+
+### Changed
+- New GUI software architecture
+
+### Fixed
+- Various small bug fixes
+
+## [0.3] - 2021-12-02
 
 ### Changed
 - Solved deprecated warnings related to commonroad-io version 2021.3

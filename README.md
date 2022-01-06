@@ -18,14 +18,13 @@ CommonRoad maps and scenarios.
 ## Prerequisites and Installation
 The usage of the Anaconda Python distribution is recommended. We have tested the toolbox with Python 3.7, 3.8, and 3.9.
 You need the following modules:
-- commonroad_io >= 2021.3
+- commonroad_io >= 2021.4
 - matplotlib >= 3.1.0
 - numpy >= 1.16.4
 - ordered-set >= 4.0.2
 - lxml >= 4.3.4
 - pyproj >= 2.2.0
 - scipy >= 1.3.0
-- Pillow >= 7.1.1
 - mercantile >= 1.1.3
 - utm >= 0.5.0
 - cartopy >= 0.17.0
@@ -35,7 +34,6 @@ You need the following modules:
 - ordered-set>=4.0.2
 - enum34>=1.1.10
 - iso3166>=1.0.1
-- future>=0.17.1
 - networkx>=2.5
 
 Cartopy can be easily installed via
@@ -148,15 +146,15 @@ The titles of module pages have to be set manually!
 The full documentation of the API and introducing examples can also be found [here](https://commonroad-scenario-designer.readthedocs.io/en/latest/).
 
 ## Changelog
-Compared to version 0.1, the following features have been added or changed:
+Compared to version 0.3, the following features have been added or changed:
 
-- Planning problem visualization in GUI
-- Extension of readme and documentation
+- Adding/Updating of static obstacles with circle, polygon, and rectangle shape in GUI
+- New GUI software architecture
 
 A detailed overview about the changes in each version is provided in the [Changelog](https://gitlab.lrz.de/tum-cps/commonroad-scenario-designer/-/blob/main/CHANGELOG.md).
 
 ## Bug and feature reporting
-This release (v0.2) is still a BETA version.  
+This release (v0.4) is still a BETA version.  
 In case you detect a bug or you want to suggest a new feature, please report it in our [forum](https://commonroad.in.tum.de/forum/c/scenario-designer/18).   
 If you want to contribute to the toolbox, you can also post it in the [forum](https://commonroad.in.tum.de/forum/c/scenario-designer/18) or contact [Sebastian Maierhofer](sebastian.maierhofer@tum.de).
 
@@ -164,7 +162,7 @@ If you want to contribute to the toolbox, you can also post it in the [forum](ht
 
 Responsible: Sebastian Maierhofer (maintainer), Moritz Klischat  
 Contribution (in alphabetic order by last name): Maximilian Fruehauf, Marcus Gabler, Fabian Hoeltke, Aaron Kaefer, 
-Benjamin Orthen, Maximilian Rieger, Stefan Urban
+Gustaf Lindgren, Benjamin Orthen, Benedikt Reinhard, Maximilian Rieger, Stefan Urban
 
 ## Citation
 **If you use our code for research, please consider citing our paper:**

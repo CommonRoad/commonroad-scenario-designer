@@ -1,6 +1,6 @@
 import os
 
-from crdesigner.input_output.api import osm_to_commonroad
+from crdesigner.map_conversion.map_conversion_interface import osm_to_commonroad
 
 from commonroad.scenario.scenario import Tag
 from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
