@@ -272,13 +272,13 @@ class ObstacleToolbox(QDockWidget):
 
         goal_position_x = float(self.obstacle_toolbox_ui.obstacle_x_Goal_Position.text())
         goal_position_y = float(self.obstacle_toolbox_ui.obstacle_y_Goal_Position.text())
-        goal_orientation = 5
+        goal_orientation = float(self.obstacle_toolbox_ui.obstacle_Goal_Orientation.text())
 
         length_x = abs(goal_position_x-initial_position_x)
         length_y = abs(goal_position_y-initial_position_y)
         length = math.sqrt(length_x**2 + length_y**2)
 
-        velocity = 14.0
+        velocity = float(self.obstacle_toolbox_ui.obstacle_velocity.text())
         acceleration = 0
         state_list = []
         finished = False
@@ -323,7 +323,7 @@ class ObstacleToolbox(QDockWidget):
                 'orientation': AngleInterval(-3,3),#math.radians(float(self.obstacle_toolbox_ui.obstacle_Goal_Orientation.text())),
                 'time_step': Interval(25, 30), #hardcoded for testing
                 })]
-        elif self.obstacle_toolbox_ui.obstacle_shape.currentText() == "Polygon":
+        elif self.obstacle_toolbox_ui.obstacle_shape.currentText() == "Polygon": #NOTE the polygon doesnt really work, there is no center property, how specify goal state?
             goal_state = [State(**{'position': self.polygon_array(), #self.current_scenario.find_lanelet_by_id(3), 
                 'orientation': AngleInterval(-3,3),#math.radians(float(self.obstacle_toolbox_ui.obstacle_Goal_Orientation.text())),
                 'time_step': Interval(25, 30), #hardcoded for testing
@@ -344,19 +344,39 @@ class ObstacleToolbox(QDockWidget):
         print(f"Number of route candidates: {num_route_candidates}")
         #retrieve first route
         route = candidate_holder.retrieve_first_route()
-        #route = list_routes[1]
-        #print(route.reference_path)
-        #print(route.path_orientation)
         #resample polyline so we get the right velocity
         trajectory = resample_polyline_with_distance(route.reference_path, velocity * self.current_scenario.dt)
-        j=0
-        #TODO fix orientation
+        j = 0
+        #route always start at the beginning of the lanelet
+        #if start before start position, remove these coordinates from the trajectory
         for i in trajectory:
-            new_position = np.array([i[0], i[1]])
+            remaining_length = math.dist((i[0], i[1]), (initial_position_x, initial_position_y))
+            if remaining_length < self.current_scenario.dt * velocity:
+                i[0] = initial_position_x
+                i[1] = initial_position_y
+                break
+            j += 1
+        
+        for i in range (0, j):
+            trajectory = np.delete(trajectory, 0, 0)
+
+
+        #TODO fix orientation
+        j = 0
+        for i in trajectory:
+            #so we dont pass our desired goal position
+            remaining_length = math.dist((i[0], i[1]), (goal_position_x, goal_position_y))
+            if remaining_length < self.current_scenario.dt * velocity:
+                new_position = np.array([goal_position_x, goal_position_y])
+                finished = True
+            else:
+                new_position = np.array([i[0], i[1]])
             new_state = State(**{'position': new_position, 'orientation': route.path_orientation[j], 
             'velocity': velocity, 'acceleration': acceleration, 'time_step': j+1})
             state_list.append(new_state)
             j += 1
+            if finished:
+                break
         """while(finished == False):
         #while (i < 50):
             #sqrt(2) temporary for testing
@@ -476,15 +496,12 @@ class ObstacleToolbox(QDockWidget):
             return
         if self.obstacle_toolbox_ui.obstacle_dyn_stat.currentText() == 'Static':
             return
-        if self.sel_point is None:
+        if self.sel_point is None: #if no point is selected (pressed too far away from point)
             return
-        #TODO make this a separate function
-        #obstacle_id = int(self.obstacle_toolbox_ui.selected_obstacle.currentText())
-        #selected_obstacle = self.current_scenario.obstacle_by_id(obstacle_id)
+
         selected_obstacle = self.get_current_obstacle()
         state_variable_name = self.obstacle_toolbox_ui.obstacle_state_variable.currentText()
         i = 0
-        #self.xyo.clear()
         #so all not updated changes are saved
         if self.xyo:
             for j in self.xyo:
@@ -589,8 +606,7 @@ class ObstacleToolbox(QDockWidget):
 
     def selected_point(self, event):
         """get the time step of the where the point is located"""
-        #obstacle_id = int(self.obstacle_toolbox_ui.selected_obstacle.currentText())
-        #obstacle = self.current_scenario.obstacle_by_id(obstacle_id)
+
         selected_obstacle = self.get_current_obstacle()
         state_variable_name = self.obstacle_toolbox_ui.obstacle_state_variable.currentText()
         pos = []
@@ -731,8 +747,8 @@ class ObstacleToolbox(QDockWidget):
             elif isinstance(obstacle.obstacle_shape, Polygon):
                 if self.obstacle_toolbox_ui.obstacle_shape.currentText() != "Polygon":
                     self.obstacle_toolbox_ui.obstacle_shape.setCurrentIndex(2)
-                
-                #because numpy array has weird formatting I want to get rid of
+
+                    #because numpy array has weird formatting I want to get rid of
                 temp = obstacle.obstacle_shape.vertices
                 vertices = temp.tolist()
                 
@@ -751,6 +767,21 @@ class ObstacleToolbox(QDockWidget):
                     vertice_string_y = str(vertices[i][1])
                     self.obstacle_toolbox_ui.vertices_x[i].setText(vertice_string_x)
                     self.obstacle_toolbox_ui.vertices_y[i].setText(vertice_string_y)
+            
+            if isinstance(obstacle, DynamicObstacle):
+
+                end_state = len(obstacle.prediction.trajectory.state_list) - 1
+                print(end_state)
+                if isinstance(obstacle.obstacle_shape, Rectangle):
+                    self.obstacle_toolbox_ui.obstacle_Goal_Orientation.setText(str(
+                        obstacle.state_at_time(end_state).__getattribute__("orientation")))
+
+                self.obstacle_toolbox_ui.obstacle_x_Goal_Position.setText(str(
+                    obstacle.state_at_time(end_state).__getattribute__("position")[0]))
+                self.obstacle_toolbox_ui.obstacle_y_Goal_Position.setText(str(
+                    obstacle.state_at_time(end_state).__getattribute__("position")[1]))
+                self.obstacle_toolbox_ui.obstacle_velocity.setText(str( #NOTE this doesnt make any sense if velocity not constant
+                    obstacle.state_at_time(end_state).__getattribute__("velocity")))
                 
             self.obstacle_toolbox_ui.obstacle_type.setCurrentText(obstacle.obstacle_type.value)
             self.obstacle_toolbox_ui.obstacle_state_variable.clear()
@@ -795,8 +826,9 @@ class ObstacleToolbox(QDockWidget):
 
         if self.obstacle_toolbox_ui.obstacle_dyn_stat.currentText() == "Dynamic":
             self.obstacle_toolbox_ui.obstacle_x_Goal_Position.setText("")
-            self.obstacle.toolbox_ui.obstacle_y_Goal_Position.setText("")
+            self.obstacle_toolbox_ui.obstacle_y_Goal_Position.setText("")
             self.obstacle_toolbox_ui.obstacle_Goal_Orientation.setText("")
+            self.obstacle_toolbox_ui.obstacle_velocity.setText("")
 
     def start_sumo_simulation(self):
         num_time_steps = self.obstacle_toolbox_ui.sumo_simulation_length.value()
