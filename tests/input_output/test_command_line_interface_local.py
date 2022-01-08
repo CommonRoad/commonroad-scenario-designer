@@ -13,13 +13,6 @@ __email__ = "commonroad@lists.lrz.de"
 __status__ = "Released"
 
 
-# def test_gui():
-#     process = subprocess.Popen(['crdesigner'])
-#     process.terminate()
-#     process = subprocess.Popen(['crdesigner', 'gui'])
-#     process.terminate()
-
-
 class TestCommandLineInterface(unittest.TestCase):
     def setUp(self) -> None:
         self.output_path = os.path.dirname(os.path.realpath(__file__)) + "/.pytest_cache"
@@ -73,3 +66,11 @@ class TestCommandLineInterface(unittest.TestCase):
         time.sleep(10)
         exists = Path(self.output_path + "/cr_sumo_command_line" + "/cr_sumo_command_line.net.xml")
         self.assertTrue(exists.is_file())
+
+    def test_gui(self):
+        process = subprocess.Popen(['crdesigner'])
+        time.sleep(5)
+        process.terminate()
+        process = subprocess.Popen(['crdesigner', 'gui'])
+        time.sleep(5)
+        process.terminate()
