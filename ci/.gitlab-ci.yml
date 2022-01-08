@@ -32,6 +32,8 @@ style_check_merge_result:
 
 python37:
     stage: test
+    variables:
+      QT_QPA_PLATFORM: "offscreen"
     script:
         - source activate cr37
         - *install-and-run
