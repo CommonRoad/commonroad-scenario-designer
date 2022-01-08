@@ -40,12 +40,16 @@ python37:
 
 python38:
     stage: test
+    variables:
+      QT_QPA_PLATFORM : "offscreen"
     script:
         - source activate cr38
         - *install-and-run
 
 python39:
     stage: test
+    variables:
+      QT_QPA_PLATFORM : "offscreen"
     script:
         - source activate cr39
         - *install-and-run
@@ -56,6 +60,9 @@ docs:
         - source activate cr39
         - pip install -r ./docs/doc_requirements.txt
         - cd docs && bash ./docs_build_script.sh
+    artifacts:
+      paths :
+        - ./docs/build/
 
 build_package:
     stage: build
