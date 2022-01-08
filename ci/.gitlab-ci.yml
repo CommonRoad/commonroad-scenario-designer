@@ -32,18 +32,24 @@ style_check_merge_result:
 
 python37:
     stage: test
+    variables :
+      QT_QPA_PLATFORM : "offscreen"
     script:
         - source activate cr37
         - *install-and-run
 
 python38:
     stage: test
+    variables :
+      QT_QPA_PLATFORM : "offscreen"
     script:
         - source activate cr38
         - *install-and-run
 
 python39:
     stage: test
+    variables :
+      QT_QPA_PLATFORM : "offscreen"
     script:
         - source activate cr39
         - *install-and-run
