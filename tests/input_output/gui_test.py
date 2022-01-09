@@ -20,7 +20,7 @@ def test_pyqt_framework(qtbot):
     app = QApplication(sys.argv)
     window = MWindow()
     qtbot.addWidget(window)
-    window.showMaximized()
+    # window.showMaximized()
     # perform the test
     # action_new
     toolbar_wrapper_action_new_successfull = False
