@@ -15,13 +15,13 @@ class MenuBarWrapper:
         self.menu_file = self.menu_bar.addMenu('File')  # add menu 'file'
         # create new file
         self.action_new = create_action(mwindow=mwindow, text="New", icon=QIcon(":/icons/new_file.png"),
-                                        checkable=False, slot=lambda: file_new(mwindow), tip="New Commonroad File",
+                                        checkable=False, slot=lambda: file_new(mwindow), tip="New CommonRoad File",
                                         shortcut=QKeySequence.New)
         self.menu_file.addAction(self.action_new)
         # open a file
         self.action_open = create_action(mwindow=mwindow, text="Open", icon=QIcon(":/icons/open_file.png"),
                                          checkable=False, slot=lambda: open_commonroad_file(mwindow),
-                                         tip="Open Commonroad File", shortcut=QKeySequence.Open)
+                                         tip="Open CommonRoad File", shortcut=QKeySequence.Open)
         self.menu_file.addAction(self.action_open)
         # seperator
         self.separator = QAction(mwindow)
@@ -29,7 +29,7 @@ class MenuBarWrapper:
         # safe a file
         self.action_save = create_action(mwindow=mwindow, text="Save", icon=QIcon(":/icons/save_file.png"),
                                          checkable=False, slot=lambda: file_save(mwindow),
-                                         tip="Save Commonroad File", shortcut=QKeySequence.Save)
+                                         tip="Save CommonRoad File", shortcut=QKeySequence.Save)
         self.menu_file.addAction(self.action_save)
         self.separator.setSeparator(True)
         # exit action
