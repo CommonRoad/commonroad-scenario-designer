@@ -13,9 +13,9 @@ def test_toolbar_wrapper(qtbot):
     Test the correct link between functionality and GUI - this does NOT test the functionality!
     """
     print("Started test_top_bar - "
-           " WARNING: this tests the link between the functionality and the GUI, NOT the functionality per se."
-           " NOTE: use QT_QPA_PLATFORM = 'offscreen' as variable when using it in the pipeline - "
-           " by this the window is supressed.")
+          " WARNING: this tests the link between the functionality and the GUI, NOT the functionality per se."
+          " NOTE: use QT_QPA_PLATFORM = 'offscreen' as variable when using it in the pipeline - "
+          " by this the window is supressed.")
     # init the app and the qtbot
     app = QApplication(sys.argv)
     window = MWindow()
