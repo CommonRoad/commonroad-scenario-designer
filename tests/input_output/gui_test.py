@@ -21,6 +21,7 @@ def test_pyqt_framework(qtbot):
     window = MWindow()
     qtbot.addWidget(window)
     # window.showMaximized()
+
     # perform the test
     # action_new
     toolbar_wrapper_action_new_successfull = False
@@ -29,11 +30,8 @@ def test_pyqt_framework(qtbot):
         toolbar_wrapper_action_new_successfull = True
     except Exception as e:
         print("toolbar_wrapper_action_new failed with exception: " + str(e))
-
     # action_open is left out due to compatibility with os
-
     # action_safe is left out due to compatibility with os
-
     # now the toolboxes
     road_network_toolbox_success = False
     try:
@@ -41,7 +39,6 @@ def test_pyqt_framework(qtbot):
         road_network_toolbox_success = True
     except Exception as e:
         print("road_network_toolbox failed with exception: " + str(e))
-
     obstacle_toolbox_success = False
     try:
         window.top_bar_wrapper.toolbar_wrapper.action_obstacle_toolbox.trigger()
@@ -54,7 +51,6 @@ def test_pyqt_framework(qtbot):
         map_converter_toolbox_success = True
     except Exception as e:
         print("action_converter_toolbox failed with exception: " + str(e))
-
     # the redo and undo actions
     redo_action_success = False
     try:
@@ -62,19 +58,15 @@ def test_pyqt_framework(qtbot):
         redo_action_success = True
     except Exception as e:
         print("redo_action failed with exception: " + str(e))
-
     undo_action_success = False
     try:
         window.top_bar_wrapper.toolbar_wrapper.action_undo.trigger()
         undo_action_success = True
     except Exception as e:
         print("undo_action failed with exception: " + str(e))
-
     # the play button is skipped due we dont test paying vids.
 
-    # finish all of and assert the results
-
-    # here all from  TODO test_menu_bar
+    # here all from the menu_bar
 
     # test the file_new
     file_new_success = False
@@ -83,9 +75,7 @@ def test_pyqt_framework(qtbot):
         file_new_success = True
     except Exception as e:
         print("file_new failed with exception: " + str(e))
-
     # skip file open and file safe due to IO
-
     # test the 'setting' tab
     menubar_wrapper_gui_setting_successfull = False
     try:
@@ -93,7 +83,6 @@ def test_pyqt_framework(qtbot):
         menubar_wrapper_gui_setting_successfull = True
     except Exception as e:
         print("menubar_wrapper_gui_setting failed with exception: " + str(e))
-
     # test the sumo setting tab
     menubar_wrapper_gui_setting_sumo_successfull = False
     if SUMO_AVAILABLE:
@@ -107,6 +96,7 @@ def test_pyqt_framework(qtbot):
 
     # skip the web calls due to we dont want to produce IO
     # assert and finish
+    app.closeAllWindows()
     app.quit()
     assert file_new_success
     assert menubar_wrapper_gui_setting_successfull
