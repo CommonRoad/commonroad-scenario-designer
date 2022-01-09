@@ -1,7 +1,7 @@
 """ window with settings for the Scenario Designer """
 from PyQt5.QtWidgets import QMainWindow
 
-from crdesigner.ui.gui.mwindow.service_layer.gui_resources.MainWindow import Ui_mainWindow
+from crdesigner.ui.gui.mwindow.service_layer.gui_resources.gui_settings_ui import Ui_MainWindow
 from crdesigner.ui.gui.mwindow.service_layer import config
 
 
@@ -50,6 +50,6 @@ class GUISettings:
         if self.has_valid_entries():
             self.save_to_config()
             self.settings_window.close()
-            self.cr_designer.text_browser.append("settings saved")
+            self.cr_designer.crdesigner_console_wrapper.text_browser.append("settings saved")
         else:
             print("invalid settings")
