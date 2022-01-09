@@ -7,6 +7,13 @@ import sys
 from PyQt5.QtWidgets import *
 from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMO_AVAILABLE
 
+# HOW TO ADD TESTS ?
+# 1. all tests need to be in the test_pyqt_framework method. Otherwise the constructin / descruction causes segfaults.
+# 2. Always add the area which is tested (e.g. -- TOOLBAR)
+# 3. write the testing between # ----- PERFORM TESTS ------ # and # -- FINISH
+# 4. write the asserts after -- FINISH
+# 5. app and window are used as the handles to the app
+
 
 def test_pyqt_framework(qtbot):
     """
@@ -22,7 +29,9 @@ def test_pyqt_framework(qtbot):
     qtbot.addWidget(window)
     # window.showMaximized()
 
-    # perform the test
+    # ----- PERFORM TESTS ------ #
+    # -- TOOLBAR
+
     # action_new
     toolbar_wrapper_action_new_successfull = False
     try:
@@ -66,7 +75,7 @@ def test_pyqt_framework(qtbot):
         print("undo_action failed with exception: " + str(e))
     # the play button is skipped due we dont test paying vids.
 
-    # here all from the menu_bar
+    # -- MENUBAR
 
     # test the file_new
     file_new_success = False
@@ -95,7 +104,8 @@ def test_pyqt_framework(qtbot):
         menubar_wrapper_gui_setting_sumo_successfull = True
 
     # skip the web calls due to we dont want to produce IO
-    # assert and finish
+
+    # -- FINISH
     app.closeAllWindows()
     app.quit()
     assert file_new_success
@@ -107,53 +117,3 @@ def test_pyqt_framework(qtbot):
     assert map_converter_toolbox_success
     assert redo_action_success
     assert undo_action_success
-
-
-# def test_menu_bar(qtbot):
-#     """
-#         Test the correct link between functionality and GUI - this does NOT test the functionality!
-#         """
-#     print("Started test_menu_bar - "
-#           " WARNING: this tests the link between the functionality and the GUI, NOT the functionality per se."
-#           " NOTE: use QT_QPA_PLATFORM = 'offscreen' as variable when using it in the pipeline - "
-#           " by this the window is supressed.")
-#     # init the app and the qtbot
-#     app = QApplication(sys.argv)
-#     window = MWindow()
-#     qtbot.addWidget(window)
-#     window.showMaximized()
-#     # test the file_new
-#     file_new_success = False
-#     try:
-#         window.top_bar_wrapper.menu_bar_wrapper.action_new.trigger()
-#         file_new_success = True
-#     except Exception as e:
-#         print("file_new failed with exception: " + str(e))
-#
-#     # skip file open and file safe due to IO
-#
-#     # test the 'setting' tab
-#     menubar_wrapper_gui_setting_successfull = False
-#     try:
-#         window.top_bar_wrapper.menu_bar_wrapper.gui_settings_action.trigger()
-#         menubar_wrapper_gui_setting_successfull = True
-#     except Exception as e:
-#         print("menubar_wrapper_gui_setting failed with exception: " + str(e))
-#
-#     # test the sumo setting tab
-#     menubar_wrapper_gui_setting_sumo_successfull = False
-#     if SUMO_AVAILABLE:
-#         try:
-#             window.top_bar_wrapper.menu_bar_wrapper.sumo_settings_action.trigger()
-#             menubar_wrapper_gui_setting_sumo_successfull = True
-#         except Exception as e:
-#             print("menubar_wrapper_gui_setting_sumo failed with exception: " + str(e))
-#     else:
-#         menubar_wrapper_gui_setting_sumo_successfull = True
-#
-#     # skip the web calls due to we dont want to produce IO
-#     # assert and finish
-#     app.quit()
-#     assert file_new_success
-#     assert menubar_wrapper_gui_setting_successfull
-#     assert menubar_wrapper_gui_setting_sumo_successfull
