@@ -1,14 +1,10 @@
-import unittest
-import pytest
-import time
-
 from crdesigner.ui.gui.mwindow.mwindow import MWindow
 import sys
 from PyQt5.QtWidgets import *
 from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMO_AVAILABLE
 
 # HOW TO ADD TESTS ?
-# 1. all tests need to be in the test_pyqt_framework method. Otherwise the constructin / descruction causes segfaults.
+# 1. all tests need to be in the test_pyqt_framework method. Otherwise, the construction / destruction causes segfaults.
 # 2. Always add the area which is tested (e.g. -- TOOLBAR)
 # 3. write the testing between # ----- PERFORM TESTS ------ # and # -- FINISH
 # 4. write the asserts after -- FINISH
@@ -19,24 +15,61 @@ def test_pyqt_framework(qtbot):
     """
     Test the correct link between functionality and GUI - this does NOT test the functionality!
     """
-    print("Started test_top_bar - "
-          " WARNING: this tests the link between the functionality and the GUI, NOT the functionality per se."
-          " NOTE: use QT_QPA_PLATFORM = 'offscreen' as variable when using it in the pipeline - "
-          " by this the window is supressed.")
     # init the app and the qtbot
     app = QApplication(sys.argv)
     window = MWindow()
     qtbot.addWidget(window)
-    # window.showMaximized()
 
     # ----- PERFORM TESTS ------ #
     # -- TOOLBAR
+    execute_toolbar_test(window)
+    # -- MENUBAR
+    execute_menubar_test(window)
 
+    # -- FINISH
+    app.closeAllWindows()
+    app.quit()
+
+
+def execute_menubar_test(window):
+    # test the file_new
+    file_new_success = False
+    try:
+        window.top_bar_wrapper.menu_bar_wrapper.action_new.trigger()
+        file_new_success = True
+    except Exception as e:
+        print("file_new failed with exception: " + str(e))
+    # skip file open and file safe due to IO
+    # test the 'setting' tab
+    menubar_wrapper_gui_setting_successful = False
+    try:
+        window.top_bar_wrapper.menu_bar_wrapper.gui_settings_action.trigger()
+        menubar_wrapper_gui_setting_successful = True
+    except Exception as e:
+        print("menubar_wrapper_gui_setting failed with exception: " + str(e))
+    # test the sumo setting tab
+    menubar_wrapper_gui_setting_sumo_successful = False
+    if SUMO_AVAILABLE:
+        try:
+            window.top_bar_wrapper.menu_bar_wrapper.sumo_settings_action.trigger()
+            menubar_wrapper_gui_setting_sumo_successful = True
+        except Exception as e:
+            print("menubar_wrapper_gui_setting_sumo failed with exception: " + str(e))
+    else:
+        menubar_wrapper_gui_setting_sumo_successful = True
+    # skip the web calls due to we do not want to produce IO
+
+    assert file_new_success
+    assert menubar_wrapper_gui_setting_successful
+    assert menubar_wrapper_gui_setting_sumo_successful
+
+
+def execute_toolbar_test(window):
     # action_new
-    toolbar_wrapper_action_new_successfull = False
+    toolbar_wrapper_action_new_successful = False
     try:
         window.top_bar_wrapper.toolbar_wrapper.action_new.trigger()
-        toolbar_wrapper_action_new_successfull = True
+        toolbar_wrapper_action_new_successful = True
     except Exception as e:
         print("toolbar_wrapper_action_new failed with exception: " + str(e))
     # action_open is left out due to compatibility with os
@@ -73,47 +106,11 @@ def test_pyqt_framework(qtbot):
         undo_action_success = True
     except Exception as e:
         print("undo_action failed with exception: " + str(e))
-    # the play button is skipped due we dont test paying vids.
+    # the play button is skipped since we do not test playing videos
 
-    # -- MENUBAR
-
-    # test the file_new
-    file_new_success = False
-    try:
-        window.top_bar_wrapper.menu_bar_wrapper.action_new.trigger()
-        file_new_success = True
-    except Exception as e:
-        print("file_new failed with exception: " + str(e))
-    # skip file open and file safe due to IO
-    # test the 'setting' tab
-    menubar_wrapper_gui_setting_successfull = False
-    try:
-        window.top_bar_wrapper.menu_bar_wrapper.gui_settings_action.trigger()
-        menubar_wrapper_gui_setting_successfull = True
-    except Exception as e:
-        print("menubar_wrapper_gui_setting failed with exception: " + str(e))
-    # test the sumo setting tab
-    menubar_wrapper_gui_setting_sumo_successfull = False
-    if SUMO_AVAILABLE:
-        try:
-            window.top_bar_wrapper.menu_bar_wrapper.sumo_settings_action.trigger()
-            menubar_wrapper_gui_setting_sumo_successfull = True
-        except Exception as e:
-            print("menubar_wrapper_gui_setting_sumo failed with exception: " + str(e))
-    else:
-        menubar_wrapper_gui_setting_sumo_successfull = True
-
-    # skip the web calls due to we dont want to produce IO
-
-    # -- FINISH
-    app.closeAllWindows()
-    app.quit()
-    assert file_new_success
-    assert menubar_wrapper_gui_setting_successfull
-    assert menubar_wrapper_gui_setting_sumo_successfull
-    assert toolbar_wrapper_action_new_successfull
+    assert map_converter_toolbox_success
     assert road_network_toolbox_success
     assert obstacle_toolbox_success
-    assert map_converter_toolbox_success
     assert redo_action_success
     assert undo_action_success
+    assert toolbar_wrapper_action_new_successful
