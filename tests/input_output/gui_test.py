@@ -126,6 +126,7 @@ def test_menu_bar(qtbot):
 
     # skip the web calls due to we dont want to produce IO
     # assert and finish
+    app.quit()
     assert file_new_success
     assert menubar_wrapper_gui_setting_successfull
     assert menubar_wrapper_gui_setting_sumo_successfull
