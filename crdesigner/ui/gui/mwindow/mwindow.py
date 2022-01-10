@@ -46,7 +46,6 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.viewer_dock = None
         self.sumo_settings = None
         self.gui_settings = None
-
         # init any objects here
         self.scenario_saving_dialog = ScenarioDialog()
         self.animated_viewer_wrapper = AnimatedViewerWrapper(mwindow=self)
@@ -54,7 +53,6 @@ class MWindow(QMainWindow, Ui_mainWindow):
         setup_tmp(tmp_folder_path=self.tmp_folder)
         setup_mwindow(self)
         self.crdesigner_console_wrapper = CRDesignerConsoleWrapper(mwindow=self)
-
         self.road_network_toolbox = create_road_network_toolbox(mwindow=self)
         self.obstacle_toolbox = create_obstacle_toolbox(mwindow=self)
         self.converter_toolbox = create_converter_toolbox(mwindow=self)
