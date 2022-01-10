@@ -1,7 +1,11 @@
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.signal import Signal
 
-# Traffic sign class inherits from Signal class
+
 class Sign(Signal):
+    """
+    This traffic sign class inherits from Signal class 
+    which is used to convert commonroad sign  to opendrive sign.
+    """
     def __init__(self, roadKey, uniqueId, data, laneList) -> None:
         super().__init__(roadKey, uniqueId, data, laneList)
         self.name = "Sign_" + str(self.id)

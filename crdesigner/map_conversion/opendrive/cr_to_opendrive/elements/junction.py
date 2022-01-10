@@ -1,13 +1,18 @@
 from lxml import etree
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.road import Road
+from commonroad.scenario.lanelet import LaneletNetwork
 
 
 class Junction:
-
+    """
+    This class adds junction child element to OpenDRIVE root element and 
+    also converts the commonroad junctions to opendrive junctions.
+    The intersection of lane net consists of intersection incoming elements. 
+    For every intersection incoming elment, all successors are obtained.
+    """
     counting = 0
 
-    def __init__(self, incoming, id_to_road, lane_to_lane, root, lane_network, id):
-
+    def __init__(self, incoming: list, id_to_road: dict, lane_to_lane: dict, root: etree, lane_network: LaneletNetwork, id: int):
         self.incoming = incoming
         self.id = id
         self.root = root

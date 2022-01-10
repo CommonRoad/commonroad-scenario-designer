@@ -3,10 +3,13 @@ import numpy as np
 import warnings
 
 import crdesigner.map_conversion.opendrive.cr_to_opendrive.utils.commonroad_ccosy_geometry_util as util
+from commonroad.scenario.lanelet import Lanelet
 
-
-# Road class
 class Road:
+    """
+    This class adds road child element to OpenDRIVE root element
+    and converts commonroad lanelets to opendrive roads.
+    """
     counting = 20
     roads = {}
     crIdToOD = {}
@@ -21,8 +24,7 @@ class Road:
     DEVIAT = 0.001
     STEP = 50
 
-    def __init__(self, laneList, numberOfLanes, root, current, junctionId):
-
+    def __init__(self, laneList: list, numberOfLanes: int, root: etree, current: Lanelet, junctionId: int):
         # Supress RankWarning in polyfit
         warnings.simplefilter("ignore", np.RankWarning)
 
@@ -91,7 +93,13 @@ class Road:
         # add lane indices to links
         self.links["laneIndices"] = self.innerLinks
 
-    def addJunctionLinkage(self, id, relation):
+    def addJunctionLinkage(self, id: int, relation: str):
+        """
+        This function adds relation(successor/predecessor) child element to link parent element.
+
+        :param id: element id
+        :param relation: successor/predessor
+        """
         self.elementType = etree.SubElement(self.link, relation)
         self.elementType.set("elementId", str(id))
         self.elementType.set("elementType", "junction")
@@ -103,8 +111,21 @@ class Road:
             raise ValueError("Relation must be either successor or predecessor")
 
     def addSimpleLinkage(
-        self, key, links, lenSucc, lenPred, curLinksLanelets, lane2lane
+        self, key: int, links: dict, lenSucc: int, lenPred: int, curLinksLanelets: dict, lane2lane: dict
     ):
+        """
+        This function add successor/predecessor child element to link parent element and
+        each successor/predecessor are linked with its correponding landLink id.
+        This happens when a road has exactly one successor/predecessor.
+
+        :param key: curKey
+        :param links: A dictionary with successor/predecessor as key and list of road linkage id as value  
+        :param lenSucc: Number of successors
+        :param lenPred: Number of predecessors
+        :param curLinksLanelets: A dictionary of road ids and road links with all linkage information 
+        such as mergeLinkage, roadLinkage, laneIndices  
+        :param lane2lane: A dictionary with successor/predecessor as key and dictionaries of corresponding ids as value
+        """
         if lenSucc == 1:
             successor = self.elementType = etree.SubElement(self.link, "successor")
             successor.set("elementType", "road")
@@ -129,10 +150,22 @@ class Road:
                     pred = etree.SubElement(self.laneLink[laneId], "predecessor")
                     pred.set("id", str(predId))
 
-    def setChildOfRoad(self, name):
+    def setChildOfRoad(self, name: str) -> etree:
+        """
+        This function creates child element(name) and add it to road parent element.
+
+        :param name: An elment name to be added to road parent element.
+        :return: An etree road element with added child element.
+        """
         return etree.SubElement(self.road, name)
 
-    def setPlanView(self):
+    def setPlanView(self) -> float:
+        """
+        This function compute geometric elements required for planview. 
+        Geometric elements such as line, spiral, curve, arclength are computed.
+
+        :return: Last item of arclength list
+        """
         self.center = util.remove_duplicates_from_polyline(self.center)
         self.center = util.resample_polyline(self.center, 1)
         curv = util.compute_curvature_from_polyline(self.center)
@@ -206,11 +239,21 @@ class Road:
                         this_length,
                         curv[i - 1],
                     )
-
         return arclength[-1]
 
     # xodr for lines
-    def printLine(self, s, x, y, hdg, length):
+    def printLine(self, s: np.float64, x: np.float64, y: np.float64, hdg: np.float64, length: np.float64):
+        """
+        This function print line on OpenDrive file.
+        Geometry child element is created with corresponding attributes and added to planview parent element.
+        Line child element is added to geometry parent element.
+
+        :param s: s-coordinate of start position
+        :param x: Start position (x inertial)
+        :param y: Start position (y inertial)
+        :param hdg: Start orientation (inertial heading)
+        :param lenght: Length of the element’s reference line
+        """
         geometry = etree.SubElement(self.planView, "geometry")
         geometry.set("s", str.format("{0:.16e}", s))
         geometry.set("x", str.format("{0:.16e}", x))
@@ -221,8 +264,20 @@ class Road:
         line = etree.SubElement(geometry, "line")
 
     # xodr for spirals
-    def printSpiral(self, s, x, y, hdg, length, curvStart, curvEnd):
+    def printSpiral(self, s: np.float64, x: np.float64, y: np.float64, hdg: np.float64, length: np.float64, curvStart: np.float64, curvEnd: np.float64):
+        """
+        This function print spiral on OpenDrive file.
+        Geometry child element is created with corresponding attributes and added to planview parent element.
+        Spiral child element is added to geometry parent element.
 
+        :param s: s-coordinate of start position
+        :param x: Start position (x inertial)
+        :param y: Start position (y inertial)
+        :param hdg: Start orientation (inertial heading)
+        :param lenght: Length of the element’s reference line
+        :param curvStart: Curvature at the start of the element
+        :param curvEnd: Curvature at the end of the element
+        """
         geometry = etree.SubElement(self.planView, "geometry")
         geometry.set("s", str.format("{0:.16e}", s))
         geometry.set("x", str.format("{0:.16e}", x))
@@ -235,8 +290,19 @@ class Road:
         spiral.set("curvEnd", str.format("{0:.16e}", curvEnd))
 
     # xodr for arcs
-    def printArc(self, s, x, y, hdg, length, curvature):
+    def printArc(self, s: np.float64, x: np.float64, y: np.float64, hdg: np.float64, length: np.float64, curvature: np.float64):
+        """
+        This function print arc on OpenDrive file.
+        Geometry child element is created with corresponding attributes and added to planview parent element.
+        Arc child element is added to geometry parent element.
 
+        :param s: s-coordinate of start position
+        :param x: Start position (x inertial)
+        :param y: Start position (y inertial)
+        :param hdg: Start orientation (inertial heading)
+        :param lenght: Length of the element’s reference line
+        :param curvature: Constant curvature throughout the element
+        """
         geometry = etree.SubElement(self.planView, "geometry")
         geometry.set("s", str.format("{0:.16e}", s))
         geometry.set("x", str.format("{0:.16e}", x))
@@ -248,6 +314,12 @@ class Road:
         arc.set("curvature", str.format("{0:.16e}", curvature))
 
     def printSignal(self, sig):
+        """
+        This function print traffic sign on OpenDrive file.
+        Signal child element is created with corresponding attributes and added to road parent element.
+        
+        :param sig: Traffic sign
+        """
         signal = etree.SubElement(self.signals, "signal")
         signal.set("s", str.format("{0:.16e}", sig.s))
         signal.set("t", str.format("{0:.16e}", sig.t))
@@ -267,15 +339,26 @@ class Road:
         signal.set("hOffset", sig.hOffset)
 
     def printSignalRef(self, sigRef):
+        """
+        This function print signal reference on OpenDrive file.
+        Signal reference child element is created with corresponding attributes and added to road parent element.
+        
+        :param sigReg: Traffic sign reference
+        """
         signalRef = etree.SubElement(self.signals, "signalReference")
         signalRef.set("s", str.format("{0:.16e}", sigRef.s))
         signalRef.set("t", str.format("{0:.16e}", sigRef.t))
         signalRef.set("id", sigRef.id)
         signalRef.set("orientation", sigRef.orientation)
 
-    # every road node in xodr conatains also a lanes node with 1 or
-    # more laneSections: left, center (width 0), right
+
     def laneSections(self):
+        """
+        This function add laneSection child element to road parent element and 
+        left, center (width 0), right elements are added to laneSection.
+        Every road node in xodr contains also a lanes node with 1 or
+        More laneSections: left, center (width 0), right
+        """
         section = etree.SubElement(self.lanes, "laneSection")
         # i guess this s should not be hardcoded
         section.set("s", str.format("{0:.16e}", 0))
@@ -327,8 +410,19 @@ class Road:
     #     <width sOffset="0.0000000000000000e+00" a="3.4996264749930002e+00" b="0.0000000000000000e+00" c="0.0000000000000000e+00" d="0.0000000000000000e+00"/>
     #     <roadMark sOffset="0.0000000000000000e+00" type="solid" weight="standard" color="standard" width="1.3000000000000000e-01"/>
     # </lane>
-    def laneHelp(self, id, type, level, pos, widthList, distList):
 
+    def laneHelp(self, id: int, type: str, level: int, pos: etree, widthList: list, distList: list):
+        """
+        This function add lane child element to parent element which may be right, left or center.
+        Link, width, roadMark elements are also added to lane element. 
+
+        :param: LaneId
+        :param: Type
+        :param: Level
+        :param: Etree element that can be right, left or center
+        :param: Width of a street
+        :param: Path length of the polyline
+        """
         lanePos = etree.SubElement(pos, "lane")
         lanePos.set("id", str.format("{}", id))
         lanePos.set("type", type)

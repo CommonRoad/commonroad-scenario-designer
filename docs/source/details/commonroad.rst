@@ -86,20 +86,16 @@ structure is not complete)::
     │
     └── /cr_to_opendrive
         ├── /elements
-        ├── /maps
         ├── /reference_maps
         ├── /utils
         ├── converter.py
-        ├── dataloader.py
-        └── test_converter.py
+        └── dataloader.py
 
 - `/elements`: This directory contains various tools and files that are used for initiation of various opendrive objects and used in various stages during the conversion of scenario object(lanelets) to opendrive file.
-- `/maps`: This directory contains two directory: commonroad and Opendrive. The commonroad directory contain sample of commonroad files and the opendrive directory contains sample of opendrive files. 
 - `/reference_maps`: This directory contains sample of opendrive files which will be used as reference for testing converted opendrive files.
 - `/utils`: This directory contains two files in which one is used to preprocess the polyline for road element and another is used to write the opendrive file using opendrive tree element.
 - `converter.py`: Module to convert scenario object to opendrive file in  which lanelets are used to construct road, junctions, junction linkage, obstacles, traffic element. 
 - `dataloader.py`: Module to convert to xml file to scenario object which includes preparation of intersection successor and preparation of a dictionary with lanelet ids that keep track of converted lanelet. 
-- `test_converter.py`: Module for the implementation of test_case for commonroad to opendrive conversion. 
 
 .. _fig.layout-commonroad-to-opendrive:
 .. figure:: images/commonroad_to_opendrive_flowchart.png

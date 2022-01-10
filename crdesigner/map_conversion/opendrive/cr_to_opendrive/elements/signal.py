@@ -2,8 +2,10 @@ import numpy as np
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.road import Road
 import crdesigner.map_conversion.opendrive.cr_to_opendrive.utils.commonroad_ccosy_geometry_util as util
 
-# Traffic signal class
 class Signal:
+    """
+    This class converts commonroad traffic signal to opendrive traffic signal
+    """
     def __init__(self, roadKey, uniqueId, data, laneList) -> None:
         self.road = Road.roads[roadKey]
         self.id = str(uniqueId)
@@ -37,6 +39,12 @@ class Signal:
         """
 
     def computeCoordinates(self):
+        """
+        This function compute reference line coordinates s,t.
+
+        :return: Coordinate along reference line as s
+                 and lateral position, positive to the left within the inertial x/y plane as t.
+        """
         coords = self.road.center[0] - self.ODobject.position
 
         hdg = util.compute_orientation_from_polyline(self.road.center)[0]
@@ -50,6 +58,11 @@ class Signal:
         return s, t
 
     def getOrientation(self):
+        """
+        This function compute orientation of lanelet.
+
+        :return: Either positive sign or negative sign as string.
+        """
         lanelet = self.laneList.find_lanelet_by_id(self.laneletId)
         meanLeft = np.mean(lanelet.left_vertices)
         meanRight = np.mean(lanelet.right_vertices)

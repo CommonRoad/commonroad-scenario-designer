@@ -1,3 +1,5 @@
+from posixpath import lexists
+from typing import Dict, List
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.obstacle import Obstacle
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.sign import Sign
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.light import Light
@@ -5,13 +7,19 @@ import crdesigner.map_conversion.opendrive.cr_to_opendrive.utils.file_writer as 
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.road import Road
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.junction import Junction
 from commonroad.scenario.intersection import IntersectionIncomingElement
+from commonroad.scenario import scenario
 import copy
 import time
 
 
 class Converter:
-    def __init__(self, file_path, scenario, successors, ids):
+    """
+    This class converts the commonroad scenario object to opendrive file.
+    The commonraod elements such as roads, junctions, traffic lights, traffic signal
+    are converted to corresponding opendrive elements and opendrive file is created.
 
+    """
+    def __init__(self, file_path: str, scenario: scenario, successors: List[int], ids: Dict[int, bool]):
         self.path = file_path
         self.scenario = scenario
         self.inter_successors = successors
@@ -19,7 +27,13 @@ class Converter:
         self.lane_net = self.scenario.lanelet_network
         self.trafficElements = {}
 
-    def convert(self, file_path_out):
+    def convert(self, file_path_out: str):
+        """
+        This function creates a opendrive file and save in specific location 
+        after the conversion of scenario object to opendrive file.
+
+        :param file_path_out: Path where opendrive file to be stored  
+        """
         start = time.time()
         # initialize writer object
         self.writer = fwr.Writer(file_path_out)
@@ -52,17 +66,17 @@ class Converter:
 
 
     def printTime(self):
+        """
+        This function print the time required for the file conversion in the order of second.  
+        """
         conv = "Converter\n"
         time = f"Conversion took: \t{self.convTime:.2} seconds\n"
         print(conv + time)
 
     def finalize(self):
         """
-        # This function cleans up the converter object
-        # which makes it possible to convert multiple files queued up
-        # Take a look at run.sh, this script will execute main.py
-        # and afterwards will open the converted maps with
-        # the opendrive2lanelet-gui tool
+        This function cleans up the converter object 
+        which makes it possible to convert multiple files queued up.
         """
         self.writer.save()
         Road.crIdToOD.clear()
@@ -75,7 +89,9 @@ class Converter:
         Obstacle.counting = 0
 
     def populateTrafficElements(self, linkMap: dict):
-
+        """
+        This function is responsible for populating traffic elements.
+        """
         for lanelet in self.lane_net.lanelets:
             nonEmpty = False
             data = {"signs": {}, "lights": {}}
@@ -100,6 +116,9 @@ class Converter:
                 self.trafficElements[linkMap[lanelet.lanelet_id]] = data
 
     def constructTrafficElements(self):
+        """
+        This function converts scenario traffic elements to opendrive traffic elements.
+        """
         for roadKey, elements in self.trafficElements.items():
             for specifier in elements:
                 if specifier == "signs":
@@ -115,9 +134,9 @@ class Converter:
         We start from a given lanelet, we expand it left and right to construct its corresponding road, 
         then we continue with its succesors/predecessors.
         The road network is explored in a breadth-first fashion.
+
         :param frontier: used as a queue that contains to-be-explored nodes
         """
-
         if not frontier:
             return
 
@@ -164,9 +183,11 @@ class Converter:
         self.constructRoads(frontier)
         return
 
-    # check that all lanelets have been added to the road network
-    # this is done to guarantee correctness of the road construction algorithm
     def checkAllVisited(self):
+        """
+        This function check that all lanelets have been added to the road network.
+        This is done to guarantee correctness of the road construction algorithm
+        """
         for lanelet in self.lane_net.lanelets:
             if not self.id_dict[lanelet.lanelet_id]:
                 raise KeyError(
@@ -176,6 +197,9 @@ class Converter:
                 )
 
     def constructJunctions(self):
+        """
+        This function converts scenario junctions to opendrive junctions.
+        """
         for intersection in self.lane_net.intersections:
             Junction(
                 intersection.incomings,
@@ -187,6 +211,9 @@ class Converter:
             )
 
     def constructObstacles(self):
+        """
+        This function converts scenario obstacles to opendrive obstacles.
+        """
         obstacles = self.scenario.static_obstacles
         lanelets = self.lane_net.map_obstacles_to_lanelets(obstacles)
 
@@ -202,12 +229,13 @@ class Converter:
             )
 
     def processLinkMap(self, linkMap: dict, lane2lane: dict):
-
         """
-        Creates the data structure where all linkage information is stored, the linkMap
+        This function creates the data structure where all linkage information is stored, the linkMap
         For more information on the linkMap, read our documentation.
-        """
 
+        :param linkMap: dictionary of road ids and road links(dictionary of lanelet id and corresponding successors and predessors)
+        :param lane2lane: dictionary of road ids and corresponding successors and predessors
+        """
         for road_id, road_val in linkMap.items():
             roadSuccPred = {"succ": [], "pred": []}
             roadSuccPredFinal = {"succ": [], "pred": []}
@@ -258,10 +286,12 @@ class Converter:
 
     def createLinkages(self, linkMap: dict, lane2lane):
         """
-        Implements road-to-road linkage. 
+        This function implements road-to-road linkage. 
         This happens when a road has exactly one successor/predecessor.
-        """
 
+        :param linkMap: A dictionary of road ids and road links(dictionary of lanelet id and corresponding successors and predessors)
+        :param lane2lane: A dictionary of road ids and corresponding successors and predessors
+        """
         for key, value in linkMap.items():
             curLinks: dict = linkMap[key]["roadLinkage"]
             curLinksLanelets: dict = linkMap[key]
@@ -283,13 +313,14 @@ class Converter:
 
     def addJunctionLinkage(self, linkMap: dict):
         """
-        Links roads to junctions. 
+        This function links roads to junctions. 
         This happens when a road has multiple successors/predecessors.
         If these multiple successors/predecessors are already part of a junction, 
         we make the junction to a successor/predecessor.
         Otherwise, in the case of mupltiple successors, we define a new junction.
-        """
 
+        :param lane2lane: dictionary of road ids and corresponding successors and predessors
+        """
         for road_id, road_val in linkMap.items():
             if len(set(road_val["roadLinkage"]["succ"])) > 1:
                 road = Road.roads[road_id]
@@ -341,15 +372,28 @@ class Converter:
                     ].intersection_id
                     road.addJunctionLinkage(junctionId, "predecessor")
 
-    # mark ID's of lanes in the frontier as visited
-    def addIds(self, roadLanes, frontier: list):
+    def addIds(self, roadLanes: list, frontier: list):
+        """
+        This function mark ID's of lanes in the frontier as visited
+
+        :param roadLanes: list of lanelets
+        :param frontier: used as a queue that contains to-be-explored nodes
+        """
         for lane in roadLanes:
             self.id_dict[lane.lanelet_id] = True
             if lane.lanelet_id in frontier:
                 frontier.remove(lane.lanelet_id)
 
-    # extend road left and right, returns all lanes from right to left
     def extendRoad(self, current, roadLanes, left, append):
+        """
+        This function extend road left and right, returns all lanes from right to left.
+
+        :param current: lanelet
+        :param roadLanes: list of lanelet
+        :param left: boolean 
+        :param append: boolean  
+        :return: list of lanelet
+        """
         # extend to the right
         if not left and current.adj_right:
             lane = self.lane_net.find_lanelet_by_id(current.adj_right)

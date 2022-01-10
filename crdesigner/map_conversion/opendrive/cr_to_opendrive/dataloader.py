@@ -1,5 +1,7 @@
 # import functions to read xml file and visualize commonroad objects
 from commonroad.common.file_reader import CommonRoadFileReader
+from commonroad.scenario import scenario
+
 
 # time, size for benchmarking
 import time
@@ -12,7 +14,7 @@ class DataLoader:
     Here we also prepare some additional data strutures, which we then pass to the converter
     along with the scenario object
     """
-    def __init__(self, path, center=False):
+    def __init__(self, path: str, center: bool = False):
         start = time.time()
         self.path = path
         self.center = center
@@ -46,19 +48,33 @@ class DataLoader:
 
         self.initTime = time.time() - start
 
-    # get the needed data for conversion
-    def initialize(self):
+    def initialize(self) -> (scenario, list, dict):
+        """
+        Get the needed data for conversion
+
+        :return: scenario object, intersection successors, dictionary of converted roads
+        """
         return self.scenario, self.inter_successors, self.id_dict
 
-    # calculate the average for ndarrays x and y
-    def getAvg(self, x, y):
+    def getAvg(self, x: np.ndarray, y: np.ndarray) -> np.ndarray:
+        """
+        This method calculate the average for ndarrays x and y
+
+        :param x: average of x_right and x_left 
+        :param y: average of y_right and y_left 
+        :return: average for ndarrays x and y
+        """
         self.x_avg = -((np.min(x) + np.max(x)) / 2.0)
         self.y_avg = -((np.min(y) + np.max(y)) / 2.0)
         self.middle = np.array([self.x_avg, self.y_avg])
         return self.middle
 
-    # calculate the roads "center" to move everything into the origin
-    def getCenter(self):
+    def getCenter(self) -> np.ndarray:
+        """
+        This method calculate the roads "center" to move everything into the origin
+
+        :return: the roads "center" as (average of x_right and x_left, average of y_right and y_left)  
+        """
         coords_left = self.lane_net.lanelets[0].left_vertices
         coords_right = self.lane_net.lanelets[0].right_vertices
         for lane in self.lane_net.lanelets:
@@ -70,7 +86,13 @@ class DataLoader:
 
         return self.getAvg((x_right + x_left)/2, (y_right+y_left)/2)
 
-    def find_successors(self, indices):
+    def find_successors(self, indices: dict.keys) -> list:
+        """
+        This method creates list of successors of all incoming lanelets
+
+        :param indices: list of incoming lanelets (id's) to each intersection defined
+        :return: list of successors of all incoming lanelets (id's)
+        """
         successors = []
         for incoming_id in indices:
             # find all succesors which are part of the intersection
@@ -78,7 +100,12 @@ class DataLoader:
             successors.extend(lane.successor)
         return successors
 
-    def prepareIntersectionSuccessors(self):
+    def prepareIntersectionSuccessors(self) -> list:
+        """
+        This method creates the list of successor of all incoming lanelets(id's) of intersection defined
+
+        :return: list of all successors that are part of the intersection
+        """
         # list of all incoming lanelets (id's) to each intersection defined
         inter_incoming_lanelets = self.lane_net.map_inc_lanelets_to_intersections.keys()
         # list of their successors
@@ -86,10 +113,12 @@ class DataLoader:
         return inter_successors
 
 
-    def prepareIdDict(self):
+    def prepareIdDict(self) -> dict:
         """
         Creates a dictionary with lanelet ids as keys and boolean values.
         This helps keep track which lanelets already got converted
+
+        :return: dictionary with lanelet ids as keys and boolena values
         """
         laneList = self.lane_net.lanelets
         id_dict = {}
@@ -98,8 +127,12 @@ class DataLoader:
             id_dict[laneList[i].lanelet_id] = False
         return id_dict
 
-    # Overview
-    def __str__(self):
+    def __str__(self) -> str:
+        """
+        Provide overview of Dataloader class 
+
+        :return: Information related to path, size of loaded file, the center coordinate of roads, time required for object initialization
+        """
         header = "Dataloader\n"
         loadedFile = f"Loaded file:\t\t {self.path}\n"
         loadedFileSize = f"loaded file size:\t {os.path.getsize(self.path)} bytes\n"
