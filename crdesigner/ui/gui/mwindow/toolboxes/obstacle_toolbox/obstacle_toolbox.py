@@ -55,7 +55,6 @@ class ObstacleToolbox(QDockWidget):
             self.sumo_simulation = None
 
     def init_canvas(self):
-        self.obstacle_toolbox_ui.canvas.mpl_connect('draw_event', self.on_draw)
         self.obstacle_toolbox_ui.canvas.mpl_connect('button_press_event', self.on_button_press)
         self.obstacle_toolbox_ui.canvas.mpl_connect('button_release_event', self.on_button_release)
         self.obstacle_toolbox_ui.canvas.mpl_connect('motion_notify_event', self.on_mouse_move)
@@ -272,7 +271,7 @@ class ObstacleToolbox(QDockWidget):
 
         goal_position_x = float(self.obstacle_toolbox_ui.obstacle_x_Goal_Position.text())
         goal_position_y = float(self.obstacle_toolbox_ui.obstacle_y_Goal_Position.text())
-        goal_orientation = float(self.obstacle_toolbox_ui.obstacle_Goal_Orientation.text())
+        goal_orientation = 0 #float(self.obstacle_toolbox_ui.obstacle_Goal_Orientation.text()) #will be set by routeplanner
 
         length_x = abs(goal_position_x-initial_position_x)
         length_y = abs(goal_position_y-initial_position_y)
@@ -283,15 +282,15 @@ class ObstacleToolbox(QDockWidget):
         state_list = []
         finished = False
 
-        i = 1
+        #i = 1
         #if updating positions in profile visualisation
         if self.xyova:
-            for j in self.xyova:
-                new_position = np.array([j[0], j[1]])
-                new_state = State(**{'position': new_position, 'velocity': j[3],
-                'acceleration': j[4], 'orientation': j[2], 'time_step': i})
+            for j in range(1, len(self.xyova)):
+                new_position = np.array([self.xyova[j][0], self.xyova[j][1]])
+                new_state = State(**{'position': new_position, 'velocity': self.xyova[j][3],
+                'acceleration': self.xyova[j][4], 'orientation': self.xyova[j][2], 'time_step': j})
                 state_list.append(new_state)
-                i += 1
+                #i += 1
             return state_list
 
         if self.obstacle_toolbox_ui.obstacle_shape.currentText() == "Rectangle":
@@ -344,19 +343,36 @@ class ObstacleToolbox(QDockWidget):
         #retrieve first route
         route = candidate_holder.retrieve_first_route()
         #resample polyline so we get the right velocity
-        trajectory = resample_polyline_with_distance(route.reference_path, velocity * self.current_scenario.dt)
+        if self.obstacle_toolbox_ui.obstacle_v_lower.text() == "" and self.obstacle_toolbox_ui.obstacle_v_lower.text() == "":
+            trajectory = resample_polyline_with_distance(route.reference_path, velocity * self.current_scenario.dt)
+        else:
+            trajectory = self.trajectory_old
+            lower = int(self.obstacle_toolbox_ui.obstacle_v_lower.text())
+            upper = int(self.obstacle_toolbox_ui.obstacle_v_upper.text())
+            temp = []
+            for i in range(lower, upper+1):
+                temp.append(trajectory[i])
+            temp_np = np.asarray(temp)
+            interval_trajectory = resample_polyline_with_distance(temp_np, velocity * self.current_scenario.dt)
+            print(interval_trajectory)
+            j = lower
+            for i in range(0, upper-lower+1):
+                if i >= len(interval_trajectory):
+                    trajectory = np.delete(trajectory, j, 0)
+                else:
+                    trajectory[j] = interval_trajectory[i]
+                j += 1
+
         j = 0
         #route always start at the beginning of the lanelet
         #if start before start position, remove these coordinates from the trajectory
         for i in trajectory:
             remaining_length = math.dist((i[0], i[1]), (initial_position_x, initial_position_y))
             if remaining_length < self.current_scenario.dt * velocity:
-                i[0] = initial_position_x
-                i[1] = initial_position_y
                 break
             j += 1
         
-        for i in range (0, j):
+        for i in range (0, j+1):
             trajectory = np.delete(trajectory, 0, 0)
 
 
@@ -366,6 +382,7 @@ class ObstacleToolbox(QDockWidget):
             #so we dont pass our desired goal position
             remaining_length = math.dist((i[0], i[1]), (goal_position_x, goal_position_y))
             if remaining_length < self.current_scenario.dt * velocity:
+                i = [goal_position_x, goal_position_y]
                 new_position = np.array([goal_position_x, goal_position_y])
                 velocity = self.calc_velocity([trajectory[j-1][0], trajectory[j-1][1]], [goal_position_x, goal_position_y])
                 finished = True
@@ -376,34 +393,9 @@ class ObstacleToolbox(QDockWidget):
             state_list.append(new_state)
             j += 1
             if finished:
+                self.trajectory_old = trajectory #for changing speed on an interval
                 break
-        """while(finished == False):
-        #while (i < 50):
-            #sqrt(2) temporary for testing
-            #maybe change so just checks once TODO fix so works when goal_position = initial_position
-            if goal_position_x > initial_position_x:
-                next_pos_x = initial_position_x + self.current_scenario.dt * (length_x / length) * i * velocity
-            elif goal_position_x < initial_position_x:
-                next_pos_x = initial_position_x - self.current_scenario.dt * (length_x / length) * i * velocity
-            
-            if goal_position_y > initial_position_y:
-                next_pos_y = initial_position_y + self.current_scenario.dt * (length_y / length) * i * velocity
-            elif goal_position_y < initial_position_y:
-                next_pos_y = initial_position_y - self.current_scenario.dt * (length_y / length) * i * velocity
 
-            remaining_length = math.dist((next_pos_x, next_pos_y), (goal_position_x, goal_position_y))
-            #print("next_pos_x " + str(next_pos_y)) 
-
-            if remaining_length < self.current_scenario.dt * velocity: # = 1.4 for vel = 14.0
-                next_pos_x = goal_position_x
-                next_pos_y = goal_position_y
-                finished = True
-                #print("hello")            
-
-            new_position = np.array([next_pos_x, next_pos_y])
-            new_state = State(**{'position': new_position, 'velocity': velocity, 'orientation': 0.02, 'time_step': i})
-            state_list.append(new_state)
-            i = i + 1"""
         return state_list
     
     def polygon_array(self):
@@ -481,9 +473,6 @@ class ObstacleToolbox(QDockWidget):
             ["None"] + [str(item) for item in self.collect_obstacle_ids()])
         self.obstacle_toolbox_ui.selected_obstacle.setCurrentIndex(0)
     
-    def on_draw(self, event):
-        test = 1
-    
     def on_button_press(self, event):
         """"when left mouse button is pressed"""
         if event.inaxes is None:
@@ -495,6 +484,10 @@ class ObstacleToolbox(QDockWidget):
         if self.obstacle_toolbox_ui.figure.canvas.cursor().shape() != 0: #if using zoom or move tool (0 is standard cursor)
             return
         if self.obstacle_toolbox_ui.obstacle_dyn_stat.currentText() == 'Static':
+            return
+        if self.obstacle_toolbox_ui.obstacle_state_variable.currentText() == "velocity":
+            return
+        if self.obstacle_toolbox_ui.obstacle_state_variable.currentText() == "acceleration":
             return
         self.sel_point = self.selected_point(event)
     
@@ -510,16 +503,25 @@ class ObstacleToolbox(QDockWidget):
             return
         if self.sel_point is None: #if no point is selected (pressed too far away from point)
             return
+        """if self.obstacle_toolbox_ui.obstacle_state_variable.currentText() == "velocity":
+            return
+        if self.obstacle_toolbox_ui.obstacle_state_variable.currentText() == "acceleration":
+            return"""
 
         selected_obstacle = self.get_current_obstacle()
         state_variable_name = self.obstacle_toolbox_ui.obstacle_state_variable.currentText()
         i = 0
         k = 1
-        #so all not updated changes are saved
+        #so all not updated changes are saved (when switching profile)
         if self.xyova:
             for j in self.xyova:
                 if state_variable_name == "x-position":
                     j[0] = self.pos[i][1]
+                    #change value of obstacle_goal_x_position
+                    if j[0] == self.xyova[-1][0]:
+                        self.obstacle_toolbox_ui.obstacle_x_Goal_Position.setText(str(j[0]))
+                    elif j[0] == self.xyova[0][0]:
+                        self.obstacle_toolbox_ui.obstacle_x_Position.setText(str(j[0]))
                     #change velocity based on changes in x-position
                     self.xyova[k][3] = self.calc_velocity([self.pos[k-1][1], self.xyova[k-1][1]], 
                         [self.pos[k][1], self.xyova[k][1]])
@@ -527,12 +529,20 @@ class ObstacleToolbox(QDockWidget):
                     self.xyova[k][4] = self.calc_acceleration(self.xyova[k-1][3], self.xyova[k][3])
                 elif state_variable_name == "y-position":
                     j[1] = self.pos[i][1]
+                    #change value of obstacle_goal_y_position
+                    if j[1] == self.xyova[-1][1]:
+                        self.obstacle_toolbox_ui.obstacle_y_Goal_Position.setText(str(j[1]))
+                    elif j[1] == self.xyova[0][1]:
+                        self.obstacle_toolbox_ui.obstacle_y_Position.setText(str(j[1]))
+
                     self.xyova[k][3] = self.calc_velocity([self.xyova[k-1][0], self.pos[k-1][1]], 
                         [self.xyova[k][0], self.pos[k][1]])
                     self.xyova[k][4] = self.calc_acceleration(self.xyova[k-1][3], self.xyova[k][3])
 
                 elif state_variable_name == "orientation":
                     j[2] = self.pos[i][1]
+                    if j[2] == self.xyova[0][2]:
+                        self.obstacle_toolbox_ui.obstacle_x_orientation.setText(str(j[2]))
                 elif state_variable_name == "velocity":
                     j[3] = self.pos[i][1]
                 elif state_variable_name == "acceleration":
@@ -541,28 +551,60 @@ class ObstacleToolbox(QDockWidget):
                 if k < len(self.xyova) - 1:
                     k += 1
         else:
+
+            if state_variable_name == "x-position":
+                y = selected_obstacle.initial_state.__getattribute__("position")[1]
+                o = selected_obstacle.initial_state.__getattribute__("orientation")
+
+                a = selected_obstacle.initial_state.__getattribute__("acceleration")
+                v = self.calc_velocity([self.pos[k-1][1], y], [self.pos[k][1], y])
+                self.xyova.append([self.pos[i][1], y, o, v, a])
+                self.obstacle_toolbox_ui.obstacle_x_Position.setText(str(self.pos[i][1]))
+
+            elif state_variable_name == "y-position":
+                x = selected_obstacle.initial_state.__getattribute__("position")[0]
+                o = selected_obstacle.initial_state.__getattribute__("orientation")
+
+                a = selected_obstacle.initial_state.__getattribute__("acceleration")
+                v = self.calc_velocity([x, self.pos[k-1][1]], [x, self.pos[k][1]])
+                self.xyova.append([x, self.pos[i][1], o, v, a])
+                self.obstacle_toolbox_ui.obstacle_y_Position.setText(str(self.pos[i][1]))
+
+            elif state_variable_name == "orientation":
+                x = selected_obstacle.initial_state.__getattribute__("position")[0]
+                y = selected_obstacle.initial_state.__getattribute__("position")[1]
+                v = selected_obstacle.initial_state.__getattribute__("velocity")
+                a = selected_obstacle.initial_state.__getattribute__("acceleration")
+                self.xyova.append([x, y, self.pos[i][1], v, a])
+                self.obstacle_toolbox_ui.obstacle_orientation.setText(str(self.pos[i][1]))
+            i += 1
+            k += 1
+
             for state in selected_obstacle.prediction.trajectory.state_list:
                 if state_variable_name == "x-position":
                     y = state.__getattribute__("position")[1]
                     o = state.__getattribute__("orientation")
-                    if i == 0:
-                        a = state.__getattribute__("acceleration")
-                        v = self.calc_velocity([self.pos[k-1][1], y], [self.pos[k][1], y])
-                    else:
-                        v_previous = v
-                        v = self.calc_velocity([self.pos[k-1][1], y], [self.pos[k][1], y])
-                        a = self.calc_acceleration(v_previous, v)
+                    
+                    v_previous = v
+                    v = self.calc_velocity([self.pos[k-1][1], y], [self.pos[k][1], y])
+                    a = self.calc_acceleration(v_previous, v)
+                     #change value of obstacle_goal_x_position
+                    if (len(selected_obstacle.prediction.trajectory.state_list) + 1 == i and
+                        pos[i][1]) == state.__getattribute__("position")[0]:
+                        self.obstacle_toolbox_ui.obstacle_x_Goal_Position.setText(str(j[0]))
+
                     self.xyova.append([self.pos[i][1], y, o, v, a])
                 elif state_variable_name == "y-position":
                     x = state.__getattribute__("position")[0]
                     o = state.__getattribute__("orientation")
-                    if i == 0:
-                        a = state.get.__getattribute__("acceleration")
-                        v = self.calc_velocity([x, self.pos[k-1][1]], [x, self.pos[k][1]])
-                    else:
-                        v_previous = v
-                        v = self.calc_velocity([x, self.pos[k-1][1]], [x, self.pos[k][1]])
-                        a = self.calc_acceleration(v_previous, v)
+
+                    v_previous = v
+                    v = self.calc_velocity([x, self.pos[k-1][1]], [x, self.pos[k][1]])
+                    a = self.calc_acceleration(v_previous, v)
+                     #change value of obstacle_goal_y_position
+                    if (len(selected_obstacle.prediction.trajectory.state_list) == i + 1 and
+                        pos[i][1]) == state.__getattribute__("position")[1]:
+                        self.obstacle_toolbox_ui.obstacle_y_Goal_Position.setText(str(j[1]))
                     a = state.__getattribute__("acceleration")
                     self.xyova.append([x, self.pos[i][1], o, v, a])
 
@@ -573,7 +615,7 @@ class ObstacleToolbox(QDockWidget):
                     a = state.__getattribute__("acceleration")
                     self.xyova.append([x, y, self.pos[i][1], v, a])
                 i += 1
-                if k < len(selected_obstacle.prediction.trajectory.state_list) - 1:
+                if k < len(selected_obstacle.prediction.trajectory.state_list): # - 1 before
                     k += 1
         
         #self.update_obstacle()
@@ -605,7 +647,8 @@ class ObstacleToolbox(QDockWidget):
         #TODO fix so this is a separate function
         #if xyo exists that means that an update is ongoing and previous changes should be saved
         #(changes reset when __getattribute__ is called)
-        t = 1 #time_step
+        #t = 1 #time_step
+        t = 0
         if self.xyova:
             for i in self.xyova: 
                 if state_variable_name == "x-position":
@@ -619,6 +662,17 @@ class ObstacleToolbox(QDockWidget):
                     self.pos.append([t,o])
                 t += 1
         else:
+
+            if state_variable_name == "x-position":
+                x = selected_obstacle.initial_state.__getattribute__("position")[0]
+                self.pos.append([t,x])
+            elif state_variable_name == "y-position":
+                y = selected_obstacle.initial_state.__getattribute__("position")[1]
+                self.pos.append([t,y])
+            elif state_variable_name == "orientation":
+                o = selected_obstacle.initial_state.__getattribute__("orientation")
+                self.pos.append([t,o])
+
             for state in selected_obstacle.prediction.trajectory.state_list:
                 t = state.__getattribute__("time_step")
                 if state_variable_name == "x-position":
@@ -634,7 +688,8 @@ class ObstacleToolbox(QDockWidget):
         #print(pos[self.sel_point[0]-1])
         self.sel_point[1] = event.ydata
         #print(pos[self.sel_point[0]-1][1])
-        self.pos[self.sel_point[0]-1][1] = self.sel_point[1] #NOTE i time_step = i + 1
+        self.pos[self.sel_point[0]][1] = self.sel_point[1]
+        #self.pos[self.sel_point[0]-1][1] = self.sel_point[1] #NOTE i time_step = i + 1
         #state_list = obstacle.prediction.trajectory.state_list
         #TODO make separate function?   
         #self.obstacle_toolbox_ui.figure.clear()
@@ -660,6 +715,17 @@ class ObstacleToolbox(QDockWidget):
         pos = []
         sel_point = None
 
+        t = 0
+        if state_variable_name == "x-position":
+            x = selected_obstacle.initial_state.__getattribute__("position")[0]
+            pos.append([t,x])
+        elif state_variable_name == "y-position":
+            y = selected_obstacle.initial_state.__getattribute__("position")[1]
+            pos.append([t,y])
+        elif state_variable_name == "orientation":
+            o = selected_obstacle.initial_state.__getattribute__("orientation")
+            pos.append([t,o])
+
         for state in selected_obstacle.prediction.trajectory.state_list:
             t = state.__getattribute__("time_step")
             if state_variable_name == "x-position":
@@ -673,14 +739,15 @@ class ObstacleToolbox(QDockWidget):
                 pos.append([t,o])
         
         #calculate nearest point from mouse click
-        for i in range(0, t):
+        for i in range(0, t+1):
             #distance between cursor and points
             distance = math.dist(pos[i], [event.xdata, event.ydata])
             if i == 0:
                 smallest_distance = distance
-            if distance < 1 and distance < smallest_distance: #add max distance?
+            if distance < 1 and distance <= smallest_distance: #add max distance?
                 smallest_distance = distance
                 sel_point = pos[i] #NOTE i time_step = i + 1
+                print(sel_point)
         return sel_point
 
         # display coords
@@ -822,9 +889,9 @@ class ObstacleToolbox(QDockWidget):
                     self.obstacle_toolbox_ui.obstacle_dyn_Stat.setCurrentIndex(1)
 
                 end_state = len(obstacle.prediction.trajectory.state_list) - 1
-                if isinstance(obstacle.obstacle_shape, Rectangle):
-                    self.obstacle_toolbox_ui.obstacle_Goal_Orientation.setText(str(
-                        obstacle.state_at_time(end_state).__getattribute__("orientation")))
+                #if isinstance(obstacle.obstacle_shape, Rectangle):
+                    #self.obstacle_toolbox_ui.obstacle_Goal_Orientation.setText(str(
+                       # obstacle.state_at_time(end_state).__getattribute__("orientation")))
 
                 self.obstacle_toolbox_ui.obstacle_x_Goal_Position.setText(str(
                     obstacle.state_at_time(end_state).__getattribute__("position")[0]))
@@ -879,7 +946,7 @@ class ObstacleToolbox(QDockWidget):
         if self.obstacle_toolbox_ui.obstacle_dyn_stat.currentText() == "Dynamic":
             self.obstacle_toolbox_ui.obstacle_x_Goal_Position.setText("")
             self.obstacle_toolbox_ui.obstacle_y_Goal_Position.setText("")
-            self.obstacle_toolbox_ui.obstacle_Goal_Orientation.setText("")
+            #self.obstacle_toolbox_ui.obstacle_Goal_Orientation.setText("")
             self.obstacle_toolbox_ui.obstacle_velocity.setText("")
 
     def start_sumo_simulation(self):

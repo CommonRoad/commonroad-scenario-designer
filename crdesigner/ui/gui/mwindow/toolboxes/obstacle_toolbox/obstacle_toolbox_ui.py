@@ -202,11 +202,11 @@ class ObstacleToolboxUI(Toolbox):
         """removes fields unique to dynamic obstacle"""
         self.layout_obstacle_information_groupbox.removeRow(self.obstacle_x_Goal_Position)
         self.layout_obstacle_information_groupbox.removeRow(self.obstacle_y_Goal_Position)
-        self.layout_obstacle_information_groupbox.removeRow(self.obstacle_velocity)
-        try:
+        self.layout_obstacle_information_groupbox.removeRow(self.velocity_container)
+        """try:
             self.layout_obstacle_information_groupbox.removeRow(self.obstacle_Goal_Orientation)
         except:
-            pass
+            pass"""
     
     def toggle_dynamic_static(self):
         """adds/removes fields unique for the dynamic obstacle"""
@@ -226,24 +226,45 @@ class ObstacleToolboxUI(Toolbox):
             self.obstacle_velocity.setMaxLength(4)
             self.obstacle_velocity.setAlignment(Qt.AlignRight)
 
+            self.obstacle_v_lower = QLineEdit()
+            self.obstacle_v_lower.setValidator(QIntValidator())
+            self.obstacle_v_lower.setMaxLength(4)
+            self.obstacle_v_lower.setAlignment(Qt.AlignRight)
+            self.obstacle_v_label = QLabel("Time interval")
+
+            self.obstacle_v_upper = QLineEdit()
+            self.obstacle_v_upper.setValidator(QIntValidator())
+            self.obstacle_v_upper.setMaxLength(4)
+            self.obstacle_v_upper.setAlignment(Qt.AlignRight)
+            
+
+            self.velocity_container = QHBoxLayout()
+            self.velocity_container.addWidget(self.obstacle_velocity)
+            self.velocity_container.addWidget(self.obstacle_v_label)
+            self.velocity_container.addWidget(self.obstacle_v_lower)
+            self.velocity_container.addWidget(self.obstacle_v_upper)
+
             if self.obstacle_shape.currentText() == "Rectangle":
-                self.obstacle_Goal_Orientation = QLineEdit()
+                """self.obstacle_Goal_Orientation = QLineEdit()
                 self.obstacle_Goal_Orientation.setValidator(self.float_validator)
                 self.obstacle_Goal_Orientation.setMaxLength(4)
-                self.obstacle_Goal_Orientation.setAlignment(Qt.AlignRight)
+                self.obstacle_Goal_Orientation.setAlignment(Qt.AlignRight)"""
 
                 self.layout_obstacle_information_groupbox.insertRow(9, "X-Goal-Position", self.obstacle_x_Goal_Position)
                 self.layout_obstacle_information_groupbox.insertRow(10, "Y-Goal-Position", self.obstacle_y_Goal_Position)
-                self.layout_obstacle_information_groupbox.insertRow(11, "Goal-Orientation", self.obstacle_Goal_Orientation)
-                self.layout_obstacle_information_groupbox.insertRow(12, "Velocity [m/s]", self.obstacle_velocity)
+                #self.layout_obstacle_information_groupbox.insertRow(11, "Goal-Orientation", self.obstacle_Goal_Orientation)
+                self.layout_obstacle_information_groupbox.insertRow(11, "Velocity [m/s]", self.velocity_container)
+
             elif self.obstacle_shape.currentText() == "Circle":
                 self.layout_obstacle_information_groupbox.insertRow(7, "X-Goal-Position", self.obstacle_x_Goal_Position)
                 self.layout_obstacle_information_groupbox.insertRow(8, "Y-Goal-Position", self.obstacle_y_Goal_Position)
-                self.layout_obstacle_information_groupbox.insertRow(9, "Velocity [m/s]", self.obstacle_velocity)
+                self.layout_obstacle_information_groupbox.insertRow(9, "Velocity [m/s]", self.velocity_container)
+
             elif self.obstacle_shape.currentText() == "Polygon":
+
                 self.layout_obstacle_information_groupbox.insertRow(8, "X-Goal-Position", self.obstacle_x_Goal_Position)
                 self.layout_obstacle_information_groupbox.insertRow(9, "Y-Goal-Position", self.obstacle_y_Goal_Position)
-                self.layout_obstacle_information_groupbox.insertRow(10, "Velocity [m/s]", self.obstacle_velocity)
+                self.layout_obstacle_information_groupbox.insertRow(10, "Velocity [m/s]", self.velocity_container)
                 #self.layout_obstacle_information_groupbox.insertRow(10, "Goal-Orientation", self.obstacle_Goal_Orientation)
 
         elif self.obstacle_dyn_stat.currentText() == "Static":
