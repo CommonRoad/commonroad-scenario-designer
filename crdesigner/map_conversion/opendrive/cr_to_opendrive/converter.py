@@ -128,8 +128,8 @@ class Converter:
                         Light(roadKey, uniqueId, ODobject, self.lane_net)
 
     def constructRoads(self, frontier: list):
-        """ 
-        This method is responsible for road construction. 
+        """
+        This method is responsible for road construction.
         We start from a given lanelet, we expand it left and right to construct its corresponding road,
         then we continue with its succesors/predecessors.
         The road network is explored in a breadth-first fashion.

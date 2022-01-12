@@ -145,7 +145,6 @@ def osm_to_commonroad(input_file: str) -> Scenario:
     return convert_to_scenario(osm_graph)
 
 
-# def commonroad_to_opendrive(scenario_name: str):
 def commonroad_to_opendrive(input_file: str, output_file: str):
     """
     Converts CommonRoad file to OpenDRIVE file and stores it
@@ -158,22 +157,4 @@ def commonroad_to_opendrive(input_file: str, output_file: str):
 
     scenario, successors, ids = data.initialize()
     converter = Converter(input_file, scenario, successors, ids)
-    converter.convert(output_file) 
-
-
-
-
-if __name__ == "__main__":
-    file_name = "zero_width_lanes_map"
-    ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    input_file = os.path.join(ROOT_DIR,f"map_conversion/opendrive/cr_to_opendrive/maps/commonroad/{file_name}.xml")
-    output_file = os.path.join(ROOT_DIR,f"map_conversion/opendrive/cr_to_opendrive/maps/{file_name}.xodr")
-    commonroad_to_opendrive(input_file, output_file)
- 
-    
-
-
-
-
-
-    
+    converter.convert(output_file)

@@ -266,7 +266,7 @@ class Road:
 
     # xodr for spirals
     def printSpiral(self, s: np.float64, x: np.float64, y: np.float64, hdg: np.float64,
-                        length: np.float64, curvStart: np.float64, curvEnd: np.float64):
+                    length: np.float64, curvStart: np.float64, curvEnd: np.float64):
         """
         This function print spiral on OpenDrive file.
         Geometry child element is created with corresponding attributes and added to planview parent element.
@@ -292,8 +292,8 @@ class Road:
         spiral.set("curvEnd", str.format("{0:.16e}", curvEnd))
 
     # xodr for arcs
-    def printArc(self, s: np.float64, x: np.float64, y: np.float64, hdg: np.float64,
-                length: np.float64, curvature: np.float64):
+    def printArc(self,s: np.float64, x: np.float64, y: np.float64, hdg: np.float64,
+                 length: np.float64, curvature: np.float64):
         """
         This function print arc on OpenDrive file.
         Geometry child element is created with corresponding attributes and added to planview parent element.
