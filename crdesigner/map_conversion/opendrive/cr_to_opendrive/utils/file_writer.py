@@ -115,7 +115,7 @@ class Writer(object):
 
     def printLine(self, s, x, y, hdg, length):
         """
-        This function add geometry child element with various attribute to planView parent element and 
+        This function add geometry child element with various attribute to planView parent element and
         then add line child element to geometry parent element
         """
         geometry = etree.SubElement(self.planView, "geometry")
@@ -129,7 +129,7 @@ class Writer(object):
 
     def printSpiral(self, s, x, y, hdg, length, curvStart, curvEnd):
         """
-        This function add geometry child element with various attribute to planView parent element and 
+        This function add geometry child element with various attribute to planView parent element and
         then add spiral child element to geometry parent element
         """
         geometry = etree.SubElement(self.planView, "geometry")
@@ -145,7 +145,7 @@ class Writer(object):
 
     def printArc(self, s, x, y, hdg, length, curvature):
         """
-        This function add geometry child element with various attribute to planView parent element and 
+        This function add geometry child element with various attribute to planView parent element and
         then add arc child element to geometry parent element
         """
         geometry = etree.SubElement(self.planView, "geometry")

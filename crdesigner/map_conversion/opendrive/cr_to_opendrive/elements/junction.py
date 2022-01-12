@@ -5,14 +5,15 @@ from commonroad.scenario.lanelet import LaneletNetwork
 
 class Junction:
     """
-    This class adds junction child element to OpenDRIVE root element and 
+    This class adds junction child element to OpenDRIVE root element and
     also converts the commonroad junctions to opendrive junctions.
-    The intersection of lane net consists of intersection incoming elements. 
+    The intersection of lane net consists of intersection incoming elements.
     For every intersection incoming elment, all successors are obtained.
     """
     counting = 0
 
-    def __init__(self, incoming: list, id_to_road: dict, lane_to_lane: dict, root: etree, lane_network: LaneletNetwork, id: int):
+    def __init__(self, incoming: list, id_to_road: dict, lane_to_lane: dict,
+                    root: etree, lane_network: LaneletNetwork, id: int):
         self.incoming = incoming
         self.id = id
         self.root = root

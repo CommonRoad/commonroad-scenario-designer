@@ -5,6 +5,7 @@ import warnings
 import crdesigner.map_conversion.opendrive.cr_to_opendrive.utils.commonroad_ccosy_geometry_util as util
 from commonroad.scenario.lanelet import Lanelet
 
+
 class Road:
     """
     This class adds road child element to OpenDRIVE root element
@@ -119,11 +120,11 @@ class Road:
         This happens when a road has exactly one successor/predecessor.
 
         :param key: curKey
-        :param links: A dictionary with successor/predecessor as key and list of road linkage id as value  
+        :param links: A dictionary with successor/predecessor as key and list of road linkage id as value
         :param lenSucc: Number of successors
         :param lenPred: Number of predecessors
-        :param curLinksLanelets: A dictionary of road ids and road links with all linkage information 
-        such as mergeLinkage, roadLinkage, laneIndices  
+        :param curLinksLanelets: A dictionary of road ids and road links with all linkage information
+        such as mergeLinkage, roadLinkage, laneIndices
         :param lane2lane: A dictionary with successor/predecessor as key and dictionaries of corresponding ids as value
         """
         if lenSucc == 1:
@@ -161,7 +162,7 @@ class Road:
 
     def setPlanView(self) -> float:
         """
-        This function compute geometric elements required for planview. 
+        This function compute geometric elements required for planview.
         Geometric elements such as line, spiral, curve, arclength are computed.
 
         :return: Last item of arclength list
@@ -264,7 +265,8 @@ class Road:
         line = etree.SubElement(geometry, "line")
 
     # xodr for spirals
-    def printSpiral(self, s: np.float64, x: np.float64, y: np.float64, hdg: np.float64, length: np.float64, curvStart: np.float64, curvEnd: np.float64):
+    def printSpiral(self, s: np.float64, x: np.float64, y: np.float64, hdg: np.float64,
+                        length: np.float64, curvStart: np.float64, curvEnd: np.float64):
         """
         This function print spiral on OpenDrive file.
         Geometry child element is created with corresponding attributes and added to planview parent element.
@@ -290,7 +292,8 @@ class Road:
         spiral.set("curvEnd", str.format("{0:.16e}", curvEnd))
 
     # xodr for arcs
-    def printArc(self, s: np.float64, x: np.float64, y: np.float64, hdg: np.float64, length: np.float64, curvature: np.float64):
+    def printArc(self, s: np.float64, x: np.float64, y: np.float64, hdg: np.float64,
+                length: np.float64, curvature: np.float64):
         """
         This function print arc on OpenDrive file.
         Geometry child element is created with corresponding attributes and added to planview parent element.
@@ -317,7 +320,7 @@ class Road:
         """
         This function print traffic sign on OpenDrive file.
         Signal child element is created with corresponding attributes and added to road parent element.
-        
+
         :param sig: Traffic sign
         """
         signal = etree.SubElement(self.signals, "signal")
@@ -342,7 +345,7 @@ class Road:
         """
         This function print signal reference on OpenDrive file.
         Signal reference child element is created with corresponding attributes and added to road parent element.
-        
+
         :param sigReg: Traffic sign reference
         """
         signalRef = etree.SubElement(self.signals, "signalReference")
@@ -351,10 +354,9 @@ class Road:
         signalRef.set("id", sigRef.id)
         signalRef.set("orientation", sigRef.orientation)
 
-
     def laneSections(self):
         """
-        This function add laneSection child element to road parent element and 
+        This function add laneSection child element to road parent element and
         left, center (width 0), right elements are added to laneSection.
         Every road node in xodr contains also a lanes node with 1 or
         More laneSections: left, center (width 0), right
@@ -407,14 +409,16 @@ class Road:
     # produces something like:
     # <lane id="1" type="driving" level="false">
     #     <link/>
-    #     <width sOffset="0.0000000000000000e+00" a="3.4996264749930002e+00" b="0.0000000000000000e+00" c="0.0000000000000000e+00" d="0.0000000000000000e+00"/>
-    #     <roadMark sOffset="0.0000000000000000e+00" type="solid" weight="standard" color="standard" width="1.3000000000000000e-01"/>
+    #     <width sOffset="0.0000000000000000e+00" a="3.4996264749930002e+00"
+    #       b="0.0000000000000000e+00" c="0.0000000000000000e+00" d="0.0000000000000000e+00"/>
+    #     <roadMark sOffset="0.0000000000000000e+00" type="solid" weight="standard"
+    #       color="standard" width="1.3000000000000000e-01"/>
     # </lane>
 
     def laneHelp(self, id: int, type: str, level: int, pos: etree, widthList: list, distList: list):
         """
         This function add lane child element to parent element which may be right, left or center.
-        Link, width, roadMark elements are also added to lane element. 
+        Link, width, roadMark elements are also added to lane element.
 
         :param: LaneId
         :param: Type

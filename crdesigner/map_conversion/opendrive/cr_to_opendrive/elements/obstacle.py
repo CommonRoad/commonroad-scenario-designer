@@ -6,9 +6,10 @@ from commonroad.scenario.trajectory import State
 import crdesigner.map_conversion.opendrive.cr_to_opendrive.utils.commonroad_ccosy_geometry_util as util
 from commonroad.scenario import lanelet
 
+
 class Obstacle:
     """
-    This class adds object child element to road parent element 
+    This class adds object child element to road parent element
     and converts commonroad obstacles to opendrive obstacles
     """
     counting = 0
@@ -85,7 +86,7 @@ class Obstacle:
 
     def setPolygon(self, shape: Polygon):
         """
-        This fucntion add outline child element to object parent element 
+        This fucntion add outline child element to object parent element
         and sets id, outer, closed as attributes of outline.
         """
         self.outline = etree.SubElement(self.object, "outline")

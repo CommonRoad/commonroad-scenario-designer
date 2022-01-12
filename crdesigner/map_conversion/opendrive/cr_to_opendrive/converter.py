@@ -29,10 +29,10 @@ class Converter:
 
     def convert(self, file_path_out: str):
         """
-        This function creates a opendrive file and save in specific location 
+        This function creates a opendrive file and save in specific location
         after the conversion of scenario object to opendrive file.
 
-        :param file_path_out: Path where opendrive file to be stored  
+        :param file_path_out: Path where opendrive file to be stored
         """
         start = time.time()
         # initialize writer object
@@ -64,10 +64,9 @@ class Converter:
         self.convTime = time.time() - start
         self.printTime()
 
-
     def printTime(self):
         """
-        This function print the time required for the file conversion in the order of second.  
+        This function print the time required for the file conversion in the order of second.
         """
         conv = "Converter\n"
         time = f"Conversion took: \t{self.convTime:.2} seconds\n"
@@ -75,7 +74,7 @@ class Converter:
 
     def finalize(self):
         """
-        This function cleans up the converter object 
+        This function cleans up the converter object
         which makes it possible to convert multiple files queued up.
         """
         self.writer.save()
@@ -131,7 +130,7 @@ class Converter:
     def constructRoads(self, frontier: list):
         """ 
         This method is responsible for road construction. 
-        We start from a given lanelet, we expand it left and right to construct its corresponding road, 
+        We start from a given lanelet, we expand it left and right to construct its corresponding road,
         then we continue with its succesors/predecessors.
         The road network is explored in a breadth-first fashion.
 
@@ -233,7 +232,8 @@ class Converter:
         This function creates the data structure where all linkage information is stored, the linkMap
         For more information on the linkMap, read our documentation.
 
-        :param linkMap: dictionary of road ids and road links(dictionary of lanelet id and corresponding successors and predessors)
+        :param linkMap: dictionary of road ids and road links(dictionary of lanelet id
+        and corresponding successors and predessors)
         :param lane2lane: dictionary of road ids and corresponding successors and predessors
         """
         for road_id, road_val in linkMap.items():
@@ -286,10 +286,11 @@ class Converter:
 
     def createLinkages(self, linkMap: dict, lane2lane):
         """
-        This function implements road-to-road linkage. 
+        This function implements road-to-road linkage.
         This happens when a road has exactly one successor/predecessor.
 
-        :param linkMap: A dictionary of road ids and road links(dictionary of lanelet id and corresponding successors and predessors)
+        :param linkMap: A dictionary of road ids and road links(dictionary of lanelet id
+        and corresponding successors and predessors)
         :param lane2lane: A dictionary of road ids and corresponding successors and predessors
         """
         for key, value in linkMap.items():
@@ -313,9 +314,9 @@ class Converter:
 
     def addJunctionLinkage(self, linkMap: dict):
         """
-        This function links roads to junctions. 
+        This function links roads to junctions.
         This happens when a road has multiple successors/predecessors.
-        If these multiple successors/predecessors are already part of a junction, 
+        If these multiple successors/predecessors are already part of a junction,
         we make the junction to a successor/predecessor.
         Otherwise, in the case of mupltiple successors, we define a new junction.
 
@@ -390,8 +391,8 @@ class Converter:
 
         :param current: lanelet
         :param roadLanes: list of lanelet
-        :param left: boolean 
-        :param append: boolean  
+        :param left: boolean
+        :param append: boolean
         :return: list of lanelet
         """
         # extend to the right

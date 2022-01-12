@@ -60,8 +60,8 @@ class DataLoader:
         """
         This method calculate the average for ndarrays x and y
 
-        :param x: average of x_right and x_left 
-        :param y: average of y_right and y_left 
+        :param x: average of x_right and x_left
+        :param y: average of y_right and y_left
         :return: average for ndarrays x and y
         """
         self.x_avg = -((np.min(x) + np.max(x)) / 2.0)
@@ -73,7 +73,7 @@ class DataLoader:
         """
         This method calculate the roads "center" to move everything into the origin
 
-        :return: the roads "center" as (average of x_right and x_left, average of y_right and y_left)  
+        :return: the roads "center" as (average of x_right and x_left, average of y_right and y_left)
         """
         coords_left = self.lane_net.lanelets[0].left_vertices
         coords_right = self.lane_net.lanelets[0].right_vertices
@@ -112,7 +112,6 @@ class DataLoader:
         inter_successors = self.find_successors(inter_incoming_lanelets)
         return inter_successors
 
-
     def prepareIdDict(self) -> dict:
         """
         Creates a dictionary with lanelet ids as keys and boolean values.
@@ -129,9 +128,10 @@ class DataLoader:
 
     def __str__(self) -> str:
         """
-        Provide overview of Dataloader class 
+        Provide overview of Dataloader class
 
-        :return: Information related to path, size of loaded file, the center coordinate of roads, time required for object initialization
+        :return: Information related to path, size of loaded file,
+        the center coordinate of roads, time required for object initialization.
         """
         header = "Dataloader\n"
         loadedFile = f"Loaded file:\t\t {self.path}\n"
