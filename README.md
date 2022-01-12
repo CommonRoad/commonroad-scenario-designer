@@ -48,6 +48,8 @@ pip install -r requirements.txt
 If you want to use the SUMO conversion or to generate traffic using SUMO, please install 
 [SUMO](https://sumo.dlr.de/docs/index.html):
 ```bash
+sudo add-apt-repository ppa:sumo/stable
+sudo apt-get update
 sudo apt-get install sumo sumo-tools sumo-doc
 echo "export SUMO_HOME=/usr/share/sumo" >> ~/.bashrc
 echo 'export PYTHONPATH="$SUMO_HOME/tools:$PYTHONPATH"' >> ~/.bashrc
