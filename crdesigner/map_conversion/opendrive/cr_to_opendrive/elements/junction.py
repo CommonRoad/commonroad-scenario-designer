@@ -13,7 +13,7 @@ class Junction:
     counting = 0
 
     def __init__(self, incoming: list, id_to_road: dict, lane_to_lane: dict,
-                    root: etree, lane_network: LaneletNetwork, id: int):
+                 root: etree, lane_network: LaneletNetwork, id: int):
         self.incoming = incoming
         self.id = id
         self.root = root

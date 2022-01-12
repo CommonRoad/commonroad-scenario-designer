@@ -292,7 +292,7 @@ class Road:
         spiral.set("curvEnd", str.format("{0:.16e}", curvEnd))
 
     # xodr for arcs
-    def printArc(self,s: np.float64, x: np.float64, y: np.float64, hdg: np.float64,
+    def printArc(self, s: np.float64, x: np.float64, y: np.float64, hdg: np.float64,
                  length: np.float64, curvature: np.float64):
         """
         This function print arc on OpenDrive file.
