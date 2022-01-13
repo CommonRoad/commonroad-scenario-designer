@@ -314,7 +314,7 @@ class ObstacleToolbox(QDockWidget):
         elif self.obstacle_toolbox_ui.obstacle_shape.currentText() == "Polygon":
             goal_state = [State(**{'position': self.polygon_array(),
                                 'orientation': AngleInterval(-3, 3),
-                                 'time_step': Interval(25, 30)})]
+                                  'time_step': Interval(25, 30)})]
             self.text_browser.append("Warning: Polygons as dynamic obstacles are not currently supported")
 
         goal_region = GoalRegion(goal_state)
@@ -649,7 +649,7 @@ class ObstacleToolbox(QDockWidget):
                 a = self.calc_acceleration(v_previous, v)
                 # change value of obstacle_goal_x_position
                 if (len(selected_obstacle.prediction.trajectory.state_list) + 1 == i and
-                self.pos[i][1]) == state.__getattribute__("position")[0]:
+                 self.pos[i][1]) == state.__getattribute__("position")[0]:
                     self.obstacle_toolbox_ui.obstacle_x_Goal_Position.setText(str(j[0]))
 
                 self.xyova.append([self.pos[i][1], y, o, v, a])
@@ -901,7 +901,7 @@ class ObstacleToolbox(QDockWidget):
                     obstacle.state_at_time(end_state).__getattribute__("velocity")))
             elif self.obstacle_toolbox_ui.obstacle_dyn_stat.currentText() != "Static":
                 self.obstacle_toolbox_ui.obstacle_dyn_stat.setCurrentIndex(0)
-                
+
             self.obstacle_toolbox_ui.obstacle_type.setCurrentText(obstacle.obstacle_type.value)
             self.obstacle_toolbox_ui.obstacle_state_variable.clear()
             state_variables = [var for var in obstacle.initial_state.attributes if var not in ["position", "time_step"]]
