@@ -307,14 +307,14 @@ class ObstacleToolbox(QDockWidget):
         elif self.obstacle_toolbox_ui.obstacle_shape.currentText() == "Circle":
             goal_state = [State(**{'position': Circle(float(self.obstacle_toolbox_ui.obstacle_radius.text()),
                                                       center=np.array([goal_position_x, goal_position_y])),
-                                 'orientation': AngleInterval(-3, 3),
-                                 'time_step': Interval(25, 30)})]
+                                   'orientation': AngleInterval(-3, 3),
+                                   'time_step': Interval(25, 30)})]
 
         # NOTE the polygon doesnt really work, there is no center property, how specify goal state?
         elif self.obstacle_toolbox_ui.obstacle_shape.currentText() == "Polygon":
             goal_state = [State(**{'position': self.polygon_array(),
                                 'orientation': AngleInterval(-3, 3),
-                                'time_step': Interval(25, 30)})]
+                                 'time_step': Interval(25, 30)})]
             self.text_browser.append("Warning: Polygons as dynamic obstacles are not currently supported")
 
         goal_region = GoalRegion(goal_state)
@@ -340,7 +340,7 @@ class ObstacleToolbox(QDockWidget):
             if remaining_length < self.current_scenario.dt * velocity:
                 break
             j += 1
-        
+
         for i in range(0, j+1):
             trajectory = np.delete(trajectory, 0, 0)
 
@@ -360,11 +360,11 @@ class ObstacleToolbox(QDockWidget):
             state_list.append(new_state)
             j += 1
             if finished:
-            # self.trajectory_old = trajectory #for changing speed on an interval
+                # self.trajectory_old = trajectory #for changing speed on an interval
                 break
 
         return state_list
-    
+
     def polygon_array(self):
         """returns a list of the vertices from the gui menu"""
         vertices = []
@@ -540,7 +540,7 @@ class ObstacleToolbox(QDockWidget):
                         self.obstacle_toolbox_ui.obstacle_x_Position.setText(str(j[0]))
                     # change velocity based on changes in x-position
                     self.xyova[k][3] = self.calc_velocity([self.pos[k-1][1], self.xyova[k-1][1]],
-                                                            [self.pos[k][1], self.xyova[k][1]])
+                                                          [self.pos[k][1], self.xyova[k][1]])
                     # change acceleration based on changes in velocity
                     self.xyova[k][4] = self.calc_acceleration(self.xyova[k-1][3], self.xyova[k][3])
                 elif state_variable_name == "y-position":
@@ -649,8 +649,8 @@ class ObstacleToolbox(QDockWidget):
                 a = self.calc_acceleration(v_previous, v)
                 # change value of obstacle_goal_x_position
                 if (len(selected_obstacle.prediction.trajectory.state_list) + 1 == i and
-                    self.pos[i][1]) == state.__getattribute__("position")[0]:
-                        self.obstacle_toolbox_ui.obstacle_x_Goal_Position.setText(str(j[0]))
+                self.pos[i][1]) == state.__getattribute__("position")[0]:
+                    self.obstacle_toolbox_ui.obstacle_x_Goal_Position.setText(str(j[0]))
 
                 self.xyova.append([self.pos[i][1], y, o, v, a])
             elif state_variable_name == "y-position":
