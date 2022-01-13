@@ -306,16 +306,15 @@ class ObstacleToolbox(QDockWidget):
                     })]
         elif self.obstacle_toolbox_ui.obstacle_shape.currentText() == "Circle":
             goal_state = [State(**{'position': Circle(float(self.obstacle_toolbox_ui.obstacle_radius.text()),
-                                                        center=np.array([goal_position_x, goal_position_y])),
-                                'orientation': AngleInterval(-3,3), 
-                                'time_step': Interval(25, 30),
-                              })]
+                                                      center=np.array([goal_position_x, goal_position_y])),
+                                 'orientation': AngleInterval(-3, 3),
+                                 'time_step': Interval(25, 30)})]
+
         # NOTE the polygon doesnt really work, there is no center property, how specify goal state?
         elif self.obstacle_toolbox_ui.obstacle_shape.currentText() == "Polygon":
             goal_state = [State(**{'position': self.polygon_array(),
-                                'orientation': AngleInterval(-3,3),
-                                'time_step': Interval(25, 30),
-                              })]
+                                'orientation': AngleInterval(-3, 3),
+                                'time_step': Interval(25, 30)})]
             self.text_browser.append("Warning: Polygons as dynamic obstacles are not currently supported")
 
         goal_region = GoalRegion(goal_state)
@@ -342,7 +341,7 @@ class ObstacleToolbox(QDockWidget):
                 break
             j += 1
         
-        for i in range (0, j+1):
+        for i in range(0, j+1):
             trajectory = np.delete(trajectory, 0, 0)
 
         j = 0
@@ -361,8 +360,8 @@ class ObstacleToolbox(QDockWidget):
             state_list.append(new_state)
             j += 1
             if finished:
-             # self.trajectory_old = trajectory #for changing speed on an interval
-              break
+            # self.trajectory_old = trajectory #for changing speed on an interval
+                break
 
         return state_list
     
@@ -493,7 +492,7 @@ class ObstacleToolbox(QDockWidget):
         if self.obstacle_toolbox_ui.selected_obstacle.currentText() == "None":
             return
         # if using zoom or move tool (0 is standard cursor)
-        if self.obstacle_toolbox_ui.figure.canvas.cursor().shape() != 0: 
+        if self.obstacle_toolbox_ui.figure.canvas.cursor().shape() != 0:
             return
         if self.obstacle_toolbox_ui.obstacle_dyn_stat.currentText() == 'Static':
             return
@@ -503,7 +502,7 @@ class ObstacleToolbox(QDockWidget):
             return
         self.sel_point = self.selected_point(event)
         # if no point is selected (pressed too far away from point)
-        if self.sel_point is None: 
+        if self.sel_point is None:
             return
         if event.button == 3:
             self.delete_point()
@@ -540,8 +539,8 @@ class ObstacleToolbox(QDockWidget):
                     elif j[0] == self.xyova[0][0]:
                         self.obstacle_toolbox_ui.obstacle_x_Position.setText(str(j[0]))
                     # change velocity based on changes in x-position
-                    self.xyova[k][3] = self.calc_velocity([self.pos[k-1][1], self.xyova[k-1][1]], 
-                        [self.pos[k][1], self.xyova[k][1]])
+                    self.xyova[k][3] = self.calc_velocity([self.pos[k-1][1], self.xyova[k-1][1]],
+                                                            [self.pos[k][1], self.xyova[k][1]])
                     # change acceleration based on changes in velocity
                     self.xyova[k][4] = self.calc_acceleration(self.xyova[k-1][3], self.xyova[k][3])
                 elif state_variable_name == "y-position":
@@ -648,10 +647,10 @@ class ObstacleToolbox(QDockWidget):
                 v_previous = v
                 v = self.calc_velocity([self.pos[k-1][1], y], [self.pos[k][1], y])
                 a = self.calc_acceleration(v_previous, v)
-                    # change value of obstacle_goal_x_position
+                # change value of obstacle_goal_x_position
                 if (len(selected_obstacle.prediction.trajectory.state_list) + 1 == i and
                     self.pos[i][1]) == state.__getattribute__("position")[0]:
-                    self.obstacle_toolbox_ui.obstacle_x_Goal_Position.setText(str(j[0]))
+                        self.obstacle_toolbox_ui.obstacle_x_Goal_Position.setText(str(j[0]))
 
                 self.xyova.append([self.pos[i][1], y, o, v, a])
             elif state_variable_name == "y-position":
@@ -734,7 +733,7 @@ class ObstacleToolbox(QDockWidget):
         sel_point = None
 
         self.calculate_pos()
-        
+
         # calculate nearest point from mouse click
         for i in range(0, len(self.pos)):
             # distance between cursor and points
@@ -870,7 +869,7 @@ class ObstacleToolbox(QDockWidget):
                     # because numpy array has weird formatting I want to get rid of
                 temp = obstacle.obstacle_shape.vertices
                 vertices = temp.tolist()
-                
+
                 # remove extra vertice(s) in toolbox
                 if len(vertices) - 1 < self.obstacle_toolbox_ui.amount_vertices:
                     j = self.obstacle_toolbox_ui.amount_vertices - (len(vertices) - 1)
@@ -900,7 +899,7 @@ class ObstacleToolbox(QDockWidget):
                     obstacle.state_at_time(end_state).__getattribute__("position")[1]))
                 self.obstacle_toolbox_ui.obstacle_velocity.setText(str(
                     obstacle.state_at_time(end_state).__getattribute__("velocity")))
-            elif self.obstacle_toolbox_ui.obstacle_dyn_stat.currentText() != "Static": 
+            elif self.obstacle_toolbox_ui.obstacle_dyn_stat.currentText() != "Static":
                 self.obstacle_toolbox_ui.obstacle_dyn_stat.setCurrentIndex(0)
                 
             self.obstacle_toolbox_ui.obstacle_type.setCurrentText(obstacle.obstacle_type.value)
@@ -909,14 +908,14 @@ class ObstacleToolbox(QDockWidget):
 
             if "position" in obstacle.initial_state.attributes:
                 state_variables += ["x-position", "y-position"]
-            
+
             self.obstacle_toolbox_ui.obstacle_state_variable.addItems(state_variables)
             self.update_ongoing = False
             # clear xyo if switch to another obstacle
             self.xyova.clear()
             self.plot_obstacle_state_profile()
 
-        # if set to "None": clear QLineEdits 
+        # if set to "None": clear QLineEdits
         else:
             self.clear_obstacle_fields()
             self.obstacle_toolbox_ui.obstacle_state_variable.clear()
@@ -981,12 +980,12 @@ class ObstacleToolbox(QDockWidget):
         ax.set_xlabel("time [s]")
         ax.set_ylabel(self.resolve_y_label(state_variable_name))
         self.obstacle_toolbox_ui.figure.tight_layout()
-        
+
         # to get reasonable limits. If the difference is very small: it will be difficult to make changes
         ax.set_ylim([min(profile)-0.5, max(profile)+0.5])
-        #i f zoomed in the new plot should be drawn with previous x and y limits
+        # if zoomed in the new plot should be drawn with previous x and y limits
         # (so it doesnt zoom out on mouse event if zoomed in)
-        if (self.xmin != None and self.xmax != None and self.ymin != None and self.ymax != None):
+        if (self.xmin and self.xmax and self.ymin and self.ymax):
             ax.set_xlim([self.xmin, self.xmax])
             ax.set_ylim([self.ymin, self.ymax])
         # refresh canvas
