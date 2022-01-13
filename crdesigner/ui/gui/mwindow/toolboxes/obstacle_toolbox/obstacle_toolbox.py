@@ -649,7 +649,7 @@ class ObstacleToolbox(QDockWidget):
                 a = self.calc_acceleration(v_previous, v)
                 # change value of obstacle_goal_x_position
                 if (len(selected_obstacle.prediction.trajectory.state_list) + 1 == i and
-                  self.pos[i][1]) == state.__getattribute__("position")[0]:
+                   self.pos[i][1]) == state.__getattribute__("position")[0]:
                     self.obstacle_toolbox_ui.obstacle_x_Goal_Position.setText(str(j[0]))
 
                 self.xyova.append([self.pos[i][1], y, o, v, a])
