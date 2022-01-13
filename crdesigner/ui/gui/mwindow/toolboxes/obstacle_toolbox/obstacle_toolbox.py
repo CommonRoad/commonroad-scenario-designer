@@ -216,8 +216,8 @@ class ObstacleToolbox(QDockWidget):
                     'velocity': float(self.obstacle_toolbox_ui.obstacle_velocity.text()),
                     'acceleration': 0
                 }),
-                prediction = TrajectoryPrediction(
-                    shape = Circle(float(self.obstacle_toolbox_ui.obstacle_radius.text())),
+                prediction=TrajectoryPrediction(
+                    shape=Circle(float(self.obstacle_toolbox_ui.obstacle_radius.text())),
                     trajectory = Trajectory(
                         initial_time_step = 1,
                         state_list = self.initial_trajectory()
@@ -242,11 +242,11 @@ class ObstacleToolbox(QDockWidget):
                     'orientation': 0,
                     'time_step': 0
                 }),
-                prediction = TrajectoryPrediction(
-                    shape = Polygon(vertices=self.polygon_array()),
-                    trajectory = Trajectory(
-                        initial_time_step = 1,
-                        state_list = self.initial_trajectory()
+                prediction=TrajectoryPrediction(
+                    shape=Polygon(vertices=self.polygon_array()),
+                    trajectory=Trajectory(
+                        initial_time_step=1,
+                        state_list=self.initial_trajectory()
                     )
                 )
 
@@ -308,18 +308,20 @@ class ObstacleToolbox(QDockWidget):
             goal_state = [State(**{'position': Circle(float(self.obstacle_toolbox_ui.obstacle_radius.text()), 
                 center=np.array([goal_position_x, goal_position_y])),
                 'orientation': AngleInterval(-3,3),
-                'time_step': Interval(25, 30), 
+                'time_step': Interval(25, 30),
                 })]
-        elif self.obstacle_toolbox_ui.obstacle_shape.currentText() == "Polygon": #NOTE the polygon doesnt really work, there is no center property, how specify goal state?
+        #NOTE the polygon doesnt really work, there is no center property, how specify goal state?
+        elif self.obstacle_toolbox_ui.obstacle_shape.currentText() == "Polygon": 
             goal_state = [State(**{'position': self.polygon_array(),
                 'orientation': AngleInterval(-3,3),
                 'time_step': Interval(25, 30), 
-                })]
+            })]
             self.text_browser.append("Warning: Polygons as dynamic obstacles are not currently supported")
-            
+
         goal_region = GoalRegion(goal_state)
         planning_problem = PlanningProblem(self.amount_obstacles+1, initial_state, goal_region)
-        route_planner = RoutePlanner(self.current_scenario, planning_problem, backend=RoutePlanner.Backend.NETWORKX_REVERSED,
+        route_planner = RoutePlanner(self.current_scenario, planning_problem,
+            backend=RoutePlanner.Backend.NETWORKX_REVERSED,
             allow_diagonal=True, reach_goal_state=True)
 
         candidate_holder = route_planner.plan_routes()
@@ -332,8 +334,8 @@ class ObstacleToolbox(QDockWidget):
         trajectory = resample_polyline_with_distance(route.reference_path, velocity * self.current_scenario.dt)
 
         j = 0
-        #route always start at the beginning of the lanelet
-        #if start before start position, remove these coordinates from the trajectory
+        # route always start at the beginning of the lanelet
+        # if start before start position, remove these coordinates from the trajectory
         for i in trajectory:
             remaining_length = math.dist((i[0], i[1]), (initial_position_x, initial_position_y))
             if remaining_length < self.current_scenario.dt * velocity:
