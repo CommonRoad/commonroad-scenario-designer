@@ -211,10 +211,10 @@ class ObstacleToolbox(QDockWidget):
                     float(self.obstacle_toolbox_ui.obstacle_x_Position.text()),
                     float(self.obstacle_toolbox_ui.obstacle_y_Position.text())
                 ]),
-                'orientation': 0, 
-                'time_step': 0,
-                'velocity': float(self.obstacle_toolbox_ui.obstacle_velocity.text()),
-                'acceleration': 0
+                    'orientation': 0,
+                    'time_step': 0,
+                    'velocity': float(self.obstacle_toolbox_ui.obstacle_velocity.text()),
+                    'acceleration': 0
                 }),
                 prediction = TrajectoryPrediction(
                     shape = Circle(float(self.obstacle_toolbox_ui.obstacle_radius.text())),
@@ -239,11 +239,11 @@ class ObstacleToolbox(QDockWidget):
                     0,
                     0
                 ]),
-                'orientation': 0, 
-                'time_step': 0
+                    'orientation': 0,
+                    'time_step': 0
                 }),
                 prediction = TrajectoryPrediction(
-                    shape = Polygon(vertices = self.polygon_array()),
+                    shape = Polygon(vertices=self.polygon_array()),
                     trajectory = Trajectory(
                         initial_time_step = 1,
                         state_list = self.initial_trajectory()
@@ -311,15 +311,12 @@ class ObstacleToolbox(QDockWidget):
                 'time_step': Interval(25, 30), 
                 })]
         elif self.obstacle_toolbox_ui.obstacle_shape.currentText() == "Polygon": #NOTE the polygon doesnt really work, there is no center property, how specify goal state?
-            goal_state = [State(**{'position': self.polygon_array(), #self.current_scenario.find_lanelet_by_id(3), 
+            goal_state = [State(**{'position': self.polygon_array(),
                 'orientation': AngleInterval(-3,3),
                 'time_step': Interval(25, 30), 
                 })]
+            self.text_browser.append("Warning: Polygons as dynamic obstacles are not currently supported")
             
-        """if self.obstacle_toolbox_ui.obstacle_shape.currentText() == "Polygon":
-            lanelets_of_goal_position = Dict[0, [3]]
-            goal_region = GoalRegion(goal_state, lanelets_of_goal_position)
-        else:"""
         goal_region = GoalRegion(goal_state)
         planning_problem = PlanningProblem(self.amount_obstacles+1, initial_state, goal_region)
         route_planner = RoutePlanner(self.current_scenario, planning_problem, backend=RoutePlanner.Backend.NETWORKX_REVERSED,
@@ -332,25 +329,7 @@ class ObstacleToolbox(QDockWidget):
         #retrieve first route
         route = candidate_holder.retrieve_first_route()
         #resample polyline so we get the right velocity
-        #if self.obstacle_toolbox_ui.obstacle_v_lower.text() == "" and self.obstacle_toolbox_ui.obstacle_v_lower.text() == "":
         trajectory = resample_polyline_with_distance(route.reference_path, velocity * self.current_scenario.dt)
-        #else:
-        """trajectory = self.trajectory_old
-        lower = int(self.obstacle_toolbox_ui.obstacle_v_lower.text())
-        upper = int(self.obstacle_toolbox_ui.obstacle_v_upper.text())
-        temp = []
-        for i in range(lower, upper+1):
-            temp.append(trajectory[i])
-        temp_np = np.asarray(temp)
-        interval_trajectory = resample_polyline_with_distance(temp_np, velocity * self.current_scenario.dt)
-        print(interval_trajectory)
-        j = lower
-        for i in range(0, upper-lower+1):
-            if i >= len(interval_trajectory):
-                trajectory = np.delete(trajectory, j, 0)
-            else:
-                trajectory[j] = interval_trajectory[i]
-            j += 1"""
 
         j = 0
         #route always start at the beginning of the lanelet
