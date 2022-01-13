@@ -306,26 +306,26 @@ class ObstacleToolbox(QDockWidget):
                     })]
         elif self.obstacle_toolbox_ui.obstacle_shape.currentText() == "Circle":
             goal_state = [State(**{'position': Circle(float(self.obstacle_toolbox_ui.obstacle_radius.text()),
-                                                        center=np.array([goal_position_x, goal_position_y])),
-                'orientation': AngleInterval(-3,3),
-                'time_step': Interval(25, 30),
-                })]
+                                                    center=np.array([goal_position_x, goal_position_y])),
+                                'orientation': AngleInterval(-3,3),
+                                'time_step': Interval(25, 30),
+                        })]
         #NOTE the polygon doesnt really work, there is no center property, how specify goal state?
         elif self.obstacle_toolbox_ui.obstacle_shape.currentText() == "Polygon": 
             goal_state = [State(**{'position': self.polygon_array(),
-                            'orientation': AngleInterval(-3,3),
-                            'time_step': Interval(25, 30), 
+                                'orientation': AngleInterval(-3,3),
+                                'time_step': Interval(25, 30), 
                         })]
             self.text_browser.append("Warning: Polygons as dynamic obstacles are not currently supported")
 
         goal_region = GoalRegion(goal_state)
         planning_problem = PlanningProblem(self.amount_obstacles+1, initial_state, goal_region)
         route_planner = RoutePlanner(self.current_scenario, planning_problem,
-                                    backend=RoutePlanner.Backend.NETWORKX_REVERSED,
-                                    allow_diagonal=True, reach_goal_state=True)
+                                        backend=RoutePlanner.Backend.NETWORKX_REVERSED,
+                                        allow_diagonal=True, reach_goal_state=True)
 
         candidate_holder = route_planner.plan_routes()
-        #retrieve all routes
+        # retrieve all routes
         list_routes, num_route_candidates = candidate_holder.retrieve_all_routes()
         print(f"Number of route candidates: {num_route_candidates}")
         #retrieve first route
