@@ -35,6 +35,7 @@ __status__ = "Released"
 ZOOM_FACTOR = 1.2
 
 
+
 def _merge_dict(source, destination):
     """deeply merges two dicts
     """
