@@ -195,7 +195,7 @@ class ObstacleToolboxUI(Toolbox):
             self.layout_obstacle_information_groupbox.removeRow(self.obstacle_y_Position)
         except Exception:
             pass
-    
+        
     def remove_dynamic_fields(self):
         """removes fields unique to dynamic obstacle"""
         self.layout_obstacle_information_groupbox.removeRow(self.obstacle_x_Goal_Position)

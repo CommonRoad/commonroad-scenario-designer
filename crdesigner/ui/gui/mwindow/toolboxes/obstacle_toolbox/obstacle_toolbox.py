@@ -27,13 +27,14 @@ from commonroad.planning.planning_problem import PlanningProblem
 from commonroad.planning.goal import GoalRegion
 from commonroad.common.util import Interval, AngleInterval
 
-#try importing RoutePlanner
+# try importing RoutePlanner
 try:
     from commonroad_route_planner.route_planner import RoutePlanner
     ROUTE_PLANNER = True
 except ImportError:
     logging.warning("Cannot import RoutePlanner")
     ROUTE_PLANNER = False
+
 
 class ObstacleToolbox(QDockWidget):
     def __init__(self, current_scenario: Scenario, callback, tmp_folder, text_browser):
@@ -50,7 +51,7 @@ class ObstacleToolbox(QDockWidget):
         self.init_canvas()
         self.amount_obstacles = 0
 
-        #for profile visualisation
+        # for profile visualisation
         self.sel_point = None
         self.xyova = []
         self.pos = []
@@ -141,7 +142,7 @@ class ObstacleToolbox(QDockWidget):
                                                  'orientation': 0, 'time_step': 1}))
         elif self.obstacle_toolbox_ui.obstacle_shape.currentText() == "Polygon":
             static_obstacle = StaticObstacle(
-                obstacle_id = obstacle_id,
+                obstacle_id=obstacle_id,
 
                 obstacle_type = ObstacleType(self.obstacle_toolbox_ui.obstacle_type.currentText()),
                 obstacle_shape = Polygon(
@@ -314,8 +315,8 @@ class ObstacleToolbox(QDockWidget):
         planning_problem = PlanningProblem(self.amount_obstacles+1, initial_state, goal_region)
         if ROUTE_PLANNER:
             route_planner = RoutePlanner(self.current_scenario, planning_problem,
-                                        backend=RoutePlanner.Backend.NETWORKX_REVERSED,
-                                        allow_diagonal=True, reach_goal_state=True)
+                                         backend=RoutePlanner.Backend.NETWORKX_REVERSED,
+                                         allow_diagonal=True, reach_goal_state=True)
         else:
             text_browser.append("RoutePlanner is needed for adding dynamic obstacles")
             return
@@ -452,7 +453,7 @@ class ObstacleToolbox(QDockWidget):
         self.obstacle_toolbox_ui.selected_obstacle.addItems(
                 ["None"] + [str(item) for item in self.collect_obstacle_ids()])
         self.obstacle_toolbox_ui.selected_obstacle.setCurrentIndex(0)
-    
+        
     def delete_point(self):
         """ deletes right clicked point """
         time = []
