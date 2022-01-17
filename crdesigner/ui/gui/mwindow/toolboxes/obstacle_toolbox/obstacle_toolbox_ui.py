@@ -13,15 +13,12 @@ from matplotlib.figure import Figure
 import logging
 
 # try to import sumo functionality
-try:
-    from crdesigner.api import SumoConfig
+from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMO_AVAILABLE
+if SUMO_AVAILABLE:
+    from crdesigner.map_conversion.sumo_map.config import SumoConfig
     from crdesigner.map_conversion.sumo_map.cr2sumo.converter import CR2SumoMapConverter
     from sumocr.interface.sumo_simulation import SumoSimulation
     from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMOSimulation
-    SUMO_AVAILABLE = True
-except ImportError:
-    logging.warning("Cannot import SUMO, simulation will not be offered in Scenario Designer")
-    SUMO_AVAILABLE = False
 
 
 class ObstacleToolboxUI(Toolbox):
@@ -34,7 +31,7 @@ class ObstacleToolboxUI(Toolbox):
         """reimplement this to define all your sections
         and add them as (title, widget) tuples to self.sections
         """
-        #this validator always has the format with a dot as decimal separator
+        # this validator always has the format with a dot as decimal separator
         self.float_validator = QDoubleValidator()
         self.float_validator.setLocale(QLocale("en_US"))
 
@@ -115,7 +112,7 @@ class ObstacleToolboxUI(Toolbox):
 
             title_sumo = "Sumo Simulation"
             self.sections.append((title_sumo, widget_sumo))
-    
+
     def init_rectangle_fields(self):
         """function that creates the fields for the rectangle shape"""
         self.obstacle_length = QLineEdit()
@@ -143,9 +140,9 @@ class ObstacleToolboxUI(Toolbox):
             self.layout_obstacle_information_groupbox.removeRow(self.obstacle_width)
             self.layout_obstacle_information_groupbox.removeRow(self.obstacle_length)
             self.layout_obstacle_information_groupbox.removeRow(self.obstacle_orientation)
-        except:
+        except Exception:
             pass
-    
+
     def init_circle_fields(self):
         """creates the fields for the circle shape"""
         self.obstacle_radius = QLineEdit()
@@ -159,18 +156,19 @@ class ObstacleToolboxUI(Toolbox):
         """removes the fields for the circle shape"""
         try:
             self.layout_obstacle_information_groupbox.removeRow(self.obstacle_radius)
-        except:
+        except Exception:
             pass
+
     def remove_polygon_fields(self):
         """removes the fields for the polygon shape"""
         try:
             for i in range(self.amount_vertices):
                 self.layout_obstacle_information_groupbox.removeRow(self.polygon_row[i])
-                
+
             self.layout_obstacle_information_groupbox.removeRow(self.add_vertice_btn)
-        except:
+        except Exception:
             pass
-    
+
     def init_position(self):
         """adds the position fields"""
         self.obstacle_x_Position = QLineEdit()
@@ -195,7 +193,7 @@ class ObstacleToolboxUI(Toolbox):
         try:
             self.layout_obstacle_information_groupbox.removeRow(self.obstacle_x_Position)
             self.layout_obstacle_information_groupbox.removeRow(self.obstacle_y_Position)
-        except:
+        except Exception:
             pass
     
     def remove_dynamic_fields(self):
@@ -249,16 +247,16 @@ class ObstacleToolboxUI(Toolbox):
     def toggle_sections(self):
         """changes toolbox based on what shapes that are selected"""
         if self.obstacle_shape.currentText() == "Circle":
-            
+
             self.remove_rectangle_fields()
             self.remove_polygon_fields()
             self.remove_position()
-            
+
             self.init_circle_fields()
             self.init_position()
 
         elif self.obstacle_shape.currentText() == "Rectangle":
-            
+
             self.remove_circle_fields()
             self.remove_polygon_fields()
             self.remove_position()
@@ -267,7 +265,7 @@ class ObstacleToolboxUI(Toolbox):
             self.init_position()
 
         elif self.obstacle_shape.currentText() == "Polygon":
-            
+
             self.remove_circle_fields()
             self.remove_rectangle_fields()
             self.remove_position()
@@ -279,9 +277,9 @@ class ObstacleToolboxUI(Toolbox):
             self.polygon_label = []
             self.amount_vertices = 0
 
-            for i in range(3): 
+            for i in range(3):
                 self.add_vertice()
-            
+
             self.add_vertice_btn = QPushButton("Add Vertice")
             self.add_vertice_btn.clicked.connect(
                 lambda: self.add_vertice())
@@ -298,7 +296,7 @@ class ObstacleToolboxUI(Toolbox):
         self.polygon_row.append(QHBoxLayout())
 
         self.polygon_label.append(QLabel("Vertice " + str(i)))
-        
+
         self.vertices_x.append(QLineEdit())
         self.vertices_x[i].setValidator(self.float_validator)
         self.vertices_x[i].setMaxLength(6)
@@ -340,12 +338,4 @@ class ObstacleToolboxUI(Toolbox):
         self.amount_vertices = self.amount_vertices - 1
 
         for j in range(self.amount_vertices):
-            self.polygon_label[j].setText("Vertice " + str(j)) 
-
-            
-            
-
-        
-
-
-        
+            self.polygon_label[j].setText("Vertice " + str(j))

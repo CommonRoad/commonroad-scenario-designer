@@ -7,7 +7,7 @@ with open(f"{setup_dir}/README.md", "r") as fh:
 
 setup(
     name="commonroad-scenario-designer",
-    version="0.3",
+    version="0.4",
     description="Toolbox for Map Conversion and Scenario Creation for Autonomous Vehicles",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -23,10 +23,8 @@ setup(
         "commonroad-io>=2020.3",
         "pyproj>=2.2.0",
         "scipy>=1.3.0",
-        "Pillow >= 7.1.1",
         "mercantile >= 1.1.3",
         "utm >= 0.5.0",
-        "cartopy >= 0.17.0",
         "PyQt5>=5.12.2",
         "matplotlib>=3.1.0",
         "ordered-set>=4.0.2",
@@ -34,9 +32,10 @@ setup(
         "sumocr>=2021.5",
         "enum34>=1.1.10",
         "iso3166>=1.0.1",
-        "networkx>=2.5"
+        "networkx>=2.5",
+        "cartopy >= 0.17.0",
     ],
     extras_require={"GUI": ["matplotlib>=3.1.0"]},
     python_requires=">=3.7",
-    entry_points={"console_scripts": ["crdesigner=crdesigner.input_output.command_line:main"]},
+    entry_points={"console_scripts": ["crdesigner=crdesigner.ui.cli.command_line:main"]},
 )

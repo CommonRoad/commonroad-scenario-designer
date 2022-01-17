@@ -14,28 +14,6 @@ if SUMO_AVAILABLE:
     pass
 
 
-def create_file_actions(mwindow):
-    """
-        Function to create the file actions in the menu bar.
-    """
-    fileNewAction = create_action(mwindow=mwindow, text="New", icon=QIcon(":/icons/new_file.png"), checkable=False,
-                                  slot=file_new, tip="New Commonroad File", shortcut=QKeySequence.New)
-    fileOpenAction = create_action(mwindow=mwindow, text="Open", icon=QIcon(":/icons/open_file.png"), checkable=False,
-                                   slot=open_commonroad_file, tip="Open Commonroad File", shortcut=QKeySequence.Open)
-    separator = QAction(mwindow)
-    separator.setSeparator(True)
-
-    fileSaveAction = create_action(mwindow=mwindow, text="Save", icon=QIcon(":/icons/save_file.png"), checkable=False,
-                                   slot=file_save, tip="Save Commonroad File", shortcut=QKeySequence.Save)
-    separator.setSeparator(True)
-    exitAction = create_action(mwindow=mwindow, text="Quit", icon=QIcon(":/icons/close.png"), checkable=False,
-                               slot=_close_window, tip="Quit", shortcut=QKeySequence.Close)
-    return fileNewAction, fileOpenAction, separator, fileSaveAction, exitAction
-
-
-# here are the internal used functions
-
-
 def file_new(mwindow):
     """
         Function passed to the fileNewAction to create the action in the menu bar.
@@ -74,7 +52,7 @@ def _open_path(mwindow, path):
 
 def _open_scenario(mwindow, new_scenario, filename="new_scenario", pps=None):
     if mwindow.check_scenario(new_scenario) >= 2:
-        mwindow.text_browser.append("loading aborted")
+        mwindow.crdesigner_console_wrapper.text_browser.append("loading aborted")
         return
     mwindow.filename = filename
     if SUMO_AVAILABLE:
@@ -118,7 +96,7 @@ def update_max_step(mwindow, value: int = -1):
     mwindow.top_bar_wrapper.toolbar_wrapper.slider.setMaximum(value)
 
 
-def _close_window(mwindow):
+def close_window(mwindow):
     """
         For closing the window.
     """

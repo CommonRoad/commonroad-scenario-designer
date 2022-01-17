@@ -100,7 +100,7 @@ class SumoConfig(DefaultConfig):
     ##
     # probability that vehicles will start at the fringe of the network (edges without
     # predecessor), and end at the fringe of the network (edges without successor).
-    fringe_factor: int = 100000000000
+    fringe_factor: int = 2147483646
     # number of vehicle departures per second
     veh_per_second = 50
     # Interval of departure times for vehicles
