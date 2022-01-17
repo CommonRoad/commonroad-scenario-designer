@@ -146,11 +146,10 @@ class ObstacleToolbox(QDockWidget):
 
                 obstacle_type=ObstacleType(self.obstacle_toolbox_ui.obstacle_type.currentText()),
                 obstacle_shape=Polygon(
-                    
                     vertices=self.polygon_array()
                 ),
 
-                initial_state = State(**{'position': np.array([
+                initial_state=State(**{'position': np.array([
                     0,
                     0
                 ]),
@@ -453,7 +452,7 @@ class ObstacleToolbox(QDockWidget):
         self.obstacle_toolbox_ui.selected_obstacle.addItems(
                 ["None"] + [str(item) for item in self.collect_obstacle_ids()])
         self.obstacle_toolbox_ui.selected_obstacle.setCurrentIndex(0)
-        
+
     def delete_point(self):
         """ deletes right clicked point """
         time = []
