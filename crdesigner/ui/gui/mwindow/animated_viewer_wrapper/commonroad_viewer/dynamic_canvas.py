@@ -216,7 +216,6 @@ class DynamicCanvas(FigureCanvas):
             # self.ax.clear()
         else:
             self.ax.clear()
-
         draw_params_merged = _merge_dict(self.draw_params.copy(), draw_params)
         self.rnd.plot_limits = plot_limits
         self.rnd.ax = self.ax
@@ -224,14 +223,12 @@ class DynamicCanvas(FigureCanvas):
             draw_params_merged = _merge_dict(self.draw_params_dynamic_only.copy(), draw_params)
             print(draw_params_merged)
             scenario.draw(renderer=self.rnd, draw_params=draw_params_merged)
-
             self.rnd.render(keep_static_artists=True)
-
         else:
             scenario.draw(renderer=self.rnd, draw_params=draw_params_merged)
             if pps is not None:
                 pps.draw(renderer=self.rnd, draw_params=draw_params_merged)
-            self.rnd.render(keep_static_artists=True)
+            self.rnd.render(keep_static_artists=False)
 
         if not plot_limits:
             self.ax.set(xlim=xlim)
