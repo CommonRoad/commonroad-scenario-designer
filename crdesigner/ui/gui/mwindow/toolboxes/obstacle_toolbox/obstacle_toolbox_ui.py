@@ -195,17 +195,13 @@ class ObstacleToolboxUI(Toolbox):
             self.layout_obstacle_information_groupbox.removeRow(self.obstacle_y_Position)
         except Exception:
             pass
-        
+
     def remove_dynamic_fields(self):
         """removes fields unique to dynamic obstacle"""
         self.layout_obstacle_information_groupbox.removeRow(self.obstacle_x_Goal_Position)
         self.layout_obstacle_information_groupbox.removeRow(self.obstacle_y_Goal_Position)
         self.layout_obstacle_information_groupbox.removeRow(self.obstacle_velocity)
-        """try:
-            self.layout_obstacle_information_groupbox.removeRow(self.obstacle_Goal_Orientation)
-        except:
-            pass"""
-    
+         
     def toggle_dynamic_static(self):
         """adds/removes fields unique for the dynamic obstacle"""
         if self.obstacle_dyn_stat.currentText() == "Dynamic":

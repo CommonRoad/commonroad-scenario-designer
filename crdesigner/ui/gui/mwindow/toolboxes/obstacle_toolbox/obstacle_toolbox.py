@@ -144,10 +144,10 @@ class ObstacleToolbox(QDockWidget):
             static_obstacle = StaticObstacle(
                 obstacle_id=obstacle_id,
 
-                obstacle_type = ObstacleType(self.obstacle_toolbox_ui.obstacle_type.currentText()),
-                obstacle_shape = Polygon(
+                obstacle_type=ObstacleType(self.obstacle_toolbox_ui.obstacle_type.currentText()),
+                obstacle_shape=Polygon(
                     
-                    vertices = self.polygon_array()
+                    vertices=self.polygon_array()
                 ),
 
                 initial_state = State(**{'position': np.array([
