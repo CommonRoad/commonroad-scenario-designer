@@ -28,8 +28,7 @@ class ObstacleToolboxUI(Toolbox):
         self.text_browser = text_browser
 
     def define_sections(self):
-        """reimplement this to define all your sections
-        and add them as (title, widget) tuples to self.sections
+        """defines the sections in the obstacle toolbox
         """
         # this validator always has the format with a dot as decimal separator
         self.float_validator = QDoubleValidator()
@@ -201,7 +200,7 @@ class ObstacleToolboxUI(Toolbox):
         self.layout_obstacle_information_groupbox.removeRow(self.obstacle_x_Goal_Position)
         self.layout_obstacle_information_groupbox.removeRow(self.obstacle_y_Goal_Position)
         self.layout_obstacle_information_groupbox.removeRow(self.obstacle_velocity)
-        
+
     def toggle_dynamic_static(self):
         """adds/removes fields unique for the dynamic obstacle"""
         if self.obstacle_dyn_stat.currentText() == "Dynamic":
