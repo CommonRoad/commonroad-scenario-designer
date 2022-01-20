@@ -1,8 +1,14 @@
 import os
 import unittest
 import re
+import time
+from lxml import etree
+
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.dataloader import DataLoader
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.converter import Converter
+from crdesigner.map_conversion.opendrive.opendrive_parser.parser import parse_opendrive
+
+from tests.map_conversion.utils import elements_equal
 
 # to run the tests: pytest -v --cov=crdesigner.map_conversion.opendrive.cr_to_opendrive.converter --cov-report html
 # This also generates a coverage report, see rootdir/htmlcov -> index.html
@@ -21,7 +27,7 @@ class TestConverterConvert(unittest.TestCase):
             "lanelet_no_succ_or_pred",
         ]
 
-    def prepareConversion(self, map_name):
+    def prepareConversion(self, map_name: str):
         self.cwd_path = os.path.dirname(os.path.abspath(__file__))
         out_path = self.cwd_path + "/.pytest_cache/converted_xodr_files"
 
@@ -48,13 +54,19 @@ class TestConverterConvert(unittest.TestCase):
 
     # cuts out the date timestamp of both maps
     # (as they wont be equal) and compares them
-    def checkWithGroundTruth(self, reference_file):
-        with open(self.file_path_out, "r") as converted_file:
-            converted_file_content = re.sub(r"date=\"[^ ]*", "", converted_file.read())
+    def checkWithGroundTruth(self, reference_file: str):
+        with open("{}".format(self.file_path_out), "r") as converted_file:
+            converted_tree = etree.parse(converted_file).getroot()
+            date = time.strftime("%Y-%m-%d", time.localtime())
+            converted_tree.set("date", date)
+        
+        with open("{}".format(reference_file), "r") as reference_file:
+            reference_tree = etree.parse(reference_file).getroot()
+            date = time.strftime("%Y-%m-%d", time.localtime())
+            reference_tree.set("date", date)
 
-        with open(reference_file, "r") as reference_file:
-            reference_file_content = re.sub(r"date=\"[^ ]*", "", reference_file.read())
-        assert converted_file_content == reference_file_content
+        # compare both element trees
+        return elements_equal(converted_tree, reference_tree)
 
     def test_convert_USA_Lanker(self):
         self.prepareConversion("USA_Lanker-1_17_T-1")
