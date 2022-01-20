@@ -128,5 +128,6 @@ class TestConverterConvert(unittest.TestCase):
         self.converter.convert(self.file_path_out)
         self.checkWithGroundTruth(os.path.join(self.cwd_path, self.path_reference_xodr_file))
 
+
 if __name__ == "__main__":
     unittest.main()
