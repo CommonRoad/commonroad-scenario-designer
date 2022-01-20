@@ -59,7 +59,7 @@ class TestConverterConvert(unittest.TestCase):
             converted_tree = etree.parse(converted_file).getroot()
             date = time.strftime("%Y-%m-%d", time.localtime())
             converted_tree.set("date", date)
-        
+
         with open("{}".format(reference_file), "r") as reference_file:
             reference_tree = etree.parse(reference_file).getroot()
             date = time.strftime("%Y-%m-%d", time.localtime())
@@ -112,21 +112,21 @@ class TestConverterConvert(unittest.TestCase):
         self.prepareConversion("BEL_Wervik-2_1_T-1")
         self.converter.convert(self.file_path_out)
         self.checkWithGroundTruth(os.path.join(self.cwd_path, self.path_reference_xodr_file))
-    
+
     def test_convert_CulDeSac(self):
         self.prepareConversion("CulDeSac")
         self.converter.convert(self.file_path_out)
         self.checkWithGroundTruth(os.path.join(self.cwd_path, self.path_reference_xodr_file))
-    
+
     def test_convert_ZAM_Over(self):
         self.prepareConversion("ZAM_Over-1_1")
         self.converter.convert(self.file_path_out)
         self.checkWithGroundTruth(os.path.join(self.cwd_path, self.path_reference_xodr_file))
-        
+
     def test_convert_town03_right_width_coefficient(self):
         self.prepareConversion("town03_right_width_coefficient")
         self.converter.convert(self.file_path_out)
         self.checkWithGroundTruth(os.path.join(self.cwd_path, self.path_reference_xodr_file))
-    
+
 if __name__ == "__main__":
     unittest.main()
