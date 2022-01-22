@@ -1,6 +1,9 @@
 # Changelog
 
-## [0.4] - 2021-12-X
+## [0.4] - 2022-01-06
+
+### Added
+- Adding/Updating of static obstacles with circle, polygon, and rectangle shape in GUI
 
 ### Changed
 - New GUI software architecture

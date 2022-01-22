@@ -5,7 +5,7 @@ from crdesigner.ui.gui.mwindow.mwindow import MWindow
 
 def start_gui_new(input_file: str = None):
     """
-    Redirect to the
+    Redirect to the main window start.
     """
     # application
     app = QApplication(sys.argv)

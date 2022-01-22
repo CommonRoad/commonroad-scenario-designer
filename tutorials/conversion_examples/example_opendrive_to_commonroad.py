@@ -8,7 +8,7 @@ from commonroad.planning.planning_problem import PlanningProblemSet
 from crdesigner.map_conversion.opendrive.opendrive_parser.parser import parse_opendrive
 from crdesigner.map_conversion.opendrive.opendrive_conversion.network import Network
 
-from crdesigner.input_output.api import opendrive_to_commonroad
+from crdesigner.map_conversion.map_conversion_interface import opendrive_to_commonroad
 
 
 input_path = ""  # replace empty string

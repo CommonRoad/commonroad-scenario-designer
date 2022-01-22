@@ -10,7 +10,7 @@ The toolbox includes a graphical user interface (GUI) for creating, editing, and
 and scenarios, a command line interface, and different Python APIs.
 
 .. note::
-    This release (v0.2) is still a BETA version.
+    This release (v0.4) is still a BETA version.
     In case you encounter errors or want to provide us feedback, please post them in our
     `forum <https://commonroad.in.tum.de/forum/c/scenario-designer/18>`_.
 
@@ -26,7 +26,7 @@ The required dependencies for running the CommonRoad Scenario Designer are:
 
 * numpy>=1.16.4
 * lxml>=4.3.4
-* commonroad-io>=2021.3
+* commonroad-io>=2021.4
 * pyproj>=2.2.0
 * scipy>=1.3.0
 * Pillow>=7.1.1
@@ -36,12 +36,10 @@ The required dependencies for running the CommonRoad Scenario Designer are:
 * PyQt5>=5.12.2
 * matplotlib>=3.1.0
 * shapely>=1.7.0
-* ipython>=7.19.0
 * sumocr>=2021.5
 * ordered-set>=4.0.2
 * enum34>=1.1.10
 * iso3166>=1.0.1
-* future>=0.17.1
 * networkx>=2.5
 
 Cartopy can be easily installed with::
