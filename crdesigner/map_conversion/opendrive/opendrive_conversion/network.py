@@ -1,4 +1,4 @@
-"""Module to contain Network which can load an opendrive object and then export
+"""Module to contain Network which can load an OpenDRIVE object and then export
 to lanelets. Internally, the road network is represented by ParametricLanes."""
 import copy
 import numpy.linalg
@@ -347,8 +347,8 @@ class LinkIndex:
         This is a temporary dictionary to accumulate junction information for each open drive junction as a dictionary
         and then store it as a list in the intersection attribute of this class
         Args:
-            parametric_lane_id: Lane_id as per concatenated format based on opendrive IDs
-            successor: Successor of the opendrive lane
+            parametric_lane_id: Lane_id as per concatenated format based on OpenDRIVE IDs
+            successor: Successor of the OpenDRIVE lane
             reverse: If the direction is opposite
         """
         if reverse:
@@ -452,7 +452,7 @@ class LinkIndex:
                         self.add_intersection_link(
                             incoming_road_id, connecting_road_id, lane_link.toId < 0
                         )
-            # Extracting opendrive junction links to formulate CommonRoad intersections
+            # Extracting OpenDRIVE junction links to formulate CommonRoad intersections
             self._intersections.append(self._intersection_dict)
             # dictionary reinitialized to get junction information for next junction without appending values
             # of previous junction
@@ -548,7 +548,7 @@ class LinkIndex:
 
     def update_intersection_lane_id(self, old_id_to_new_id_map):
         """
-        Updates the lanelet ids in the intersection map from the concatenated opendrive based format to
+        Updates the lanelet ids in the intersection map from the concatenated OpenDRIVE based format to
         the CommonRoad format
         Args:
             old_id_to_new_id_map: dict that maps the old lanelet ids to new lanelet ids using the attribute

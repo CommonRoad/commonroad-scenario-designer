@@ -6,7 +6,7 @@ from commonroad.scenario.lanelet import LaneletNetwork
 class Junction:
     """
     This class adds junction child element to OpenDRIVE root element and
-    also converts the CommonRoad junctions to opendrive junctions.
+    also converts the CommonRoad junctions to OpenDRIVE junctions.
     The intersection of lane net consists of intersection incoming elements.
     For every intersection incoming element, all successors are obtained.
     """

@@ -21,7 +21,7 @@ def show_osm_settings(mwindow):
 
 def show_opendrive_settings(mwindow):
     """
-        Show the opendrive settings.
+        Show the OpenDRIVE settings.
     """
     opendrive_interface = OpenDRIVEInterface(mwindow)
     opendrive_interface.show_settings()

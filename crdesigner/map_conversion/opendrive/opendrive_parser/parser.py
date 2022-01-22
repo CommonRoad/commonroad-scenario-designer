@@ -91,7 +91,7 @@ def parse_opendrive_road_link(new_road: Road, opendrive_road_link: etree.Element
 
 def parse_opendrive_road_type(road: Road, opendrive_xml_road_type: etree.ElementTree):
     """
-    Parse opendrive road type and appends it to road object.
+    Parse OpenDRIVE road type and appends it to road object.
 
     :param road: Road to append the parsed road_type to types.
     :param opendrive_xml_road_type: XML element which contains the information.

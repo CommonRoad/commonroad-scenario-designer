@@ -1,4 +1,4 @@
-"""module to capture traffic signal information from parsed opendrive file"""
+"""module to capture traffic signal information from parsed OpenDRIVE file"""
 import iso3166
 import numpy as np
 import warnings
@@ -185,7 +185,7 @@ def calculate_stop_line_position(lane_sections, signal, position, tangent):
     Function to calculate the 2 points that define the stop line which
     is a straight line from one edge of the road to the other.
     Args:
-        lane_sections: opendrive lane_sections list containing the lane_section parsed lane_section class
+        lane_sections: OpenDRIVE lane_sections list containing the lane_section parsed lane_section class
         signal: signal object in this case the stop line
         position: initial position as calculated in the get_traffic_signals function
         tangent: tangent value as calculated in the get_traffic_signals function

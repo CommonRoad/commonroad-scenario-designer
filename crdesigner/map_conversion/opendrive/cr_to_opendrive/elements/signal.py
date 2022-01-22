@@ -5,7 +5,7 @@ import crdesigner.map_conversion.opendrive.cr_to_opendrive.utils.commonroad_ccos
 
 class Signal:
     """
-    This class converts CommonRoad traffic signal to opendrive traffic signal
+    This class converts CommonRoad traffic signal to OpenDRIVE traffic signal
     """
     def __init__(self, roadKey, uniqueId, data, laneList) -> None:
         self.road = Road.roads[roadKey]

@@ -16,7 +16,7 @@ class Converter:
     """
     This class converts the CommonRoad scenario object to CommonRoad file.
     The commonraod elements such as roads, junctions, traffic lights, traffic signal
-    are converted to corresponding OpenDRIVE elements and opendrive file is created.
+    are converted to corresponding OpenDRIVE elements and OpenDRIVE file is created.
 
     """
     def __init__(self, file_path: str, scenario: scenario, successors: List[int], ids: Dict[int, bool]):
@@ -29,10 +29,10 @@ class Converter:
 
     def convert(self, file_path_out: str):
         """
-        This function creates a opendrive file and save in specific location
-        after the conversion of scenario object to opendrive file.
+        This function creates a OpenDRIVE file and save in specific location
+        after the conversion of scenario object to OpenDRIVE file.
 
-        :param file_path_out: Path where opendrive file to be stored
+        :param file_path_out: Path where OpenDRIVE file to be stored
         """
         start = time.time()
         # initialize writer object
@@ -116,7 +116,7 @@ class Converter:
 
     def constructTrafficElements(self):
         """
-        This function converts scenario traffic elements to opendrive traffic elements.
+        This function converts scenario traffic elements to OpenDRIVE traffic elements.
         """
         for roadKey, elements in self.trafficElements.items():
             for specifier in elements:
@@ -197,7 +197,7 @@ class Converter:
 
     def constructJunctions(self):
         """
-        This function converts scenario junctions to opendrive junctions.
+        This function converts scenario junctions to OpenDRIVE junctions.
         """
         for intersection in self.lane_net.intersections:
             Junction(
@@ -211,7 +211,7 @@ class Converter:
 
     def constructObstacles(self):
         """
-        This function converts scenario obstacles to opendrive obstacles.
+        This function converts scenario obstacles to OpenDRIVE obstacles.
         """
         obstacles = self.scenario.static_obstacles
         lanelets = self.lane_net.map_obstacles_to_lanelets(obstacles)

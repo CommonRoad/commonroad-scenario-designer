@@ -5,7 +5,7 @@ import crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.road as Road
 
 class Writer(object):
     """
-    This class creates a opendrive file. The xml etree element is written as opendrive file.
+    This class creates a OpenDRIVE file. The xml etree element is written as OpenDRIVE file.
     """
     def __init__(self, file_path_out: str):
         self.file_path_out = file_path_out
@@ -16,7 +16,7 @@ class Writer(object):
 
     def save(self):
         """
-        This function writes the opendrive file.
+        This function writes the OpenDRIVE file.
         """
         etree.indent(self.root, space="    ")
         self.tree.write(
