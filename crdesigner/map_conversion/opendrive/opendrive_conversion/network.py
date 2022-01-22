@@ -452,7 +452,7 @@ class LinkIndex:
                         self.add_intersection_link(
                             incoming_road_id, connecting_road_id, lane_link.toId < 0
                         )
-            # Extracting opendrive junction links to formulate commonroad intersections
+            # Extracting opendrive junction links to formulate CommonRoad intersections
             self._intersections.append(self._intersection_dict)
             # dictionary reinitialized to get junction information for next junction without appending values
             # of previous junction
@@ -549,7 +549,7 @@ class LinkIndex:
     def update_intersection_lane_id(self, old_id_to_new_id_map):
         """
         Updates the lanelet ids in the intersection map from the concatenated opendrive based format to
-        the commonroad format
+        the CommonRoad format
         Args:
             old_id_to_new_id_map: dict that maps the old lanelet ids to new lanelet ids using the attribute
              lanelet_network.old_lanelet_ids()

@@ -39,7 +39,7 @@ scenario = converter.GraphScenario(config.SAVE_PATH + config.BENCHMARK_ID + ".os
 # draw and show the scenario
 scenario.plot()
 
-# save the scenario as commonroad file
+# save the scenario as CommonRoad file
 scenario.save_as_cr(config.SAVE_PATH + config.BENCHMARK_ID + ".xml")
 # save the scenario as a binary
 scenario.save_to_file(config.SAVE_PATH + config.BENCHMARK_ID + ".pickle")

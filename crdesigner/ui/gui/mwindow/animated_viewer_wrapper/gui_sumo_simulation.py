@@ -132,7 +132,7 @@ class SUMOSimulation(QFrame):
         if not self._scenario:
             error(
                 self,
-                "No Scenario loaded, load a valid commonroad scenario to simulate"
+                "No Scenario loaded, load a valid CommonRoad scenario to simulate"
             )
             return False
 
@@ -156,7 +156,7 @@ class SUMOSimulation(QFrame):
         if not self._scenario:
             error(
                 self,
-                "No Scenario loaded, load a valid commonroad scenario to simulate"
+                "No Scenario loaded, load a valid CommonRoad scenario to simulate"
             )
             return False
 

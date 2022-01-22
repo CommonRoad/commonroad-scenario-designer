@@ -191,7 +191,7 @@ def export(
                         gps_longitude=graph.center_point[1],
                         geo_name_id=get_geonamesID(graph.center_point[0], graph.center_point[1]),
                         geo_transformation=None)
-    # in the current commonroad version the following line works
+    # in the current CommonRoad version the following line works
     file_writer = CommonRoadFileWriter(
         scenario, problemset, author, affiliation, source, tags, location, decimal_precision=16)
 

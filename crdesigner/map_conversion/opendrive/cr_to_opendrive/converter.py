@@ -14,9 +14,9 @@ import time
 
 class Converter:
     """
-    This class converts the commonroad scenario object to opendrive file.
+    This class converts the CommonRoad scenario object to CommonRoad file.
     The commonraod elements such as roads, junctions, traffic lights, traffic signal
-    are converted to corresponding opendrive elements and opendrive file is created.
+    are converted to corresponding OpenDRIVE elements and opendrive file is created.
 
     """
     def __init__(self, file_path: str, scenario: scenario, successors: List[int], ids: Dict[int, bool]):

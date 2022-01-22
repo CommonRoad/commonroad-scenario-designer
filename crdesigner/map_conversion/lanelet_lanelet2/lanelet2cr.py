@@ -196,7 +196,7 @@ class Lanelet2CRConverter:
 
     def _right_of_way_to_traffic_sign(self, right_of_way_rel: RightOfWayRelation, new_lanelet_ids: dict):
         """
-        one right_of_way regulatory element maps pretty well into commonroad scenarios
+        one right_of_way regulatory element maps pretty well into CommonRoad scenarios
         it contains
          - a set of traffic signs active at the intersection (generally stop, yield, priority, ...)
          - a set of last lanelets before the beginning of the intersection that have

@@ -9,7 +9,7 @@ from commonroad.scenario.lanelet import Lanelet
 class Road:
     """
     This class adds road child element to OpenDRIVE root element
-    and converts commonroad lanelets to opendrive roads.
+    and converts CommonRoad lanelets to opendrive roads.
     """
     counting = 20
     roads = {}

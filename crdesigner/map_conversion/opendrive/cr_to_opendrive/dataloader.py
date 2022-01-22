@@ -1,4 +1,4 @@
-# import functions to read xml file and visualize commonroad objects
+# import functions to read xml file and visualize CommonRoad objects
 from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.scenario import scenario
 

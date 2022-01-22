@@ -10,7 +10,7 @@ from commonroad.scenario import lanelet
 class Obstacle:
     """
     This class adds object child element to road parent element
-    and converts commonroad obstacles to opendrive obstacles
+    and converts CommonRoad obstacles to opendrive obstacles
     """
     counting = 0
 
