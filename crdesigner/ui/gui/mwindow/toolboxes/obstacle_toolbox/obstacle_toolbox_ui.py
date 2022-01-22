@@ -13,15 +13,12 @@ from matplotlib.figure import Figure
 import logging
 
 # try to import sumo functionality
-try:
-    from crdesigner.api import SumoConfig
+from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMO_AVAILABLE
+if SUMO_AVAILABLE:
+    from crdesigner.map_conversion.sumo_map.config import SumoConfig
     from crdesigner.map_conversion.sumo_map.cr2sumo.converter import CR2SumoMapConverter
     from sumocr.interface.sumo_simulation import SumoSimulation
     from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMOSimulation
-    SUMO_AVAILABLE = True
-except ImportError:
-    logging.warning("Cannot import SUMO, simulation will not be offered in Scenario Designer")
-    SUMO_AVAILABLE = False
 
 
 class ObstacleToolboxUI(Toolbox):
