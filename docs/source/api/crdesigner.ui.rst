@@ -1,5 +1,5 @@
-opendrive package
-=================
+crdesigner.ui package
+=====================
 
 Subpackages
 -----------
@@ -7,13 +7,13 @@ Subpackages
 .. toctree::
    :maxdepth: 4
 
-   opendrive.opendrive_conversion
-   opendrive.opendrive_parser
+   crdesigner.ui.cli
+   crdesigner.ui.gui
 
 Module contents
 ---------------
 
-.. automodule:: opendrive
+.. automodule:: crdesigner.ui
    :members:
    :undoc-members:
    :show-inheritance:

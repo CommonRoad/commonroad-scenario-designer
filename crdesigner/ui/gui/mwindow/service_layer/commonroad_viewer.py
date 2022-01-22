@@ -14,8 +14,8 @@ from commonroad.geometry.shape import Circle
 
 from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMO_AVAILABLE
 if SUMO_AVAILABLE:
-    from crdesigner.api import SumoConfig
-from crdesigner.input_output.gui.misc.util import Observable
+    from crdesigner.map_conversion.sumo_map.config import SumoConfig
+from crdesigner.ui.gui.mwindow.service_layer.util import Observable
 
 from matplotlib.animation import FuncAnimation
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas

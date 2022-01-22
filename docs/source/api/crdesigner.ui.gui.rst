@@ -1,5 +1,5 @@
-crdesigner package
-==================
+crdesigner.ui.gui package
+=========================
 
 Subpackages
 -----------
@@ -7,8 +7,7 @@ Subpackages
 .. toctree::
    :maxdepth: 4
 
-   crdesigner.map_conversion
-   crdesigner.ui
+   crdesigner.ui.gui.mwindow
 
 Submodules
 ----------
@@ -16,12 +15,12 @@ Submodules
 .. toctree::
    :maxdepth: 4
 
-   crdesigner.start_gui
+   crdesigner.ui.gui.gui
 
 Module contents
 ---------------
 
-.. automodule:: crdesigner
+.. automodule:: crdesigner.ui.gui
    :members:
    :undoc-members:
    :show-inheritance:

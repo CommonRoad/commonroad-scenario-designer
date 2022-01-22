@@ -1,4 +1,4 @@
-OSM2CR Conversion
+osm2cr.converter\_modules package
 =================================
 
 Subpackages
@@ -9,6 +9,7 @@ Subpackages
 
    osm2cr.converter_modules.cr_operations
    osm2cr.converter_modules.graph_operations
+   osm2cr.converter_modules.intermediate_operations
    osm2cr.converter_modules.osm_operations
    osm2cr.converter_modules.utility
 
