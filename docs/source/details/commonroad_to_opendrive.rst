@@ -26,7 +26,7 @@ Command Line Interface
 ========================
 
 Want to quickly convert a XML file with a CommonRoad scenario
-to an XODR file detailing a OpenDRIVE scenario?
+to an XODR file describing an OpenDRIVE scenario?
 
 Use the command
 ``crdesigner map-convert-commonroad -i input-file.xml -o output-file.xodr``.
@@ -51,12 +51,12 @@ Python APIs
 
 .. code:: python
 
-	from crdesigner.input_output.api import commonroad_to_opendrive
+	from crdesigner.map_conversion.map_conversion_interface import commonroad_to_opendrive
 	from crdesigner.map_conversion.opendrive.cr_to_opendrive.dataloader import DataLoader
 	from crdesigner.map_conversion.opendrive.cr_to_opendrive.converter import Converter
 
 	input_file = "" #path to CommonRoad file
-	output_file = "" #path where OpenDRIVE file to be stored
+	output_file = "" #path where OpenDRIVE file should be stored
 
 	# -------------------------------------- Option 1: General API --------------------------------------------
 	# load xml file, preprocess it, and convert it to a respective OpenDRIVE file
@@ -74,8 +74,8 @@ Python APIs
 Implementation Details
 **********************
 
-Initially the CommonRoad xml file is read to create corresponding scenario object along with intersection successor and dictionary of converted roads.
-Then the scenario object is converted into corresponding OpenDRIVE xodr file.
+Initially, the CommonRoad XML file is read to create the corresponding lanelet network along with necessary intersections and dictionary of converted roads.
+Afterward, the scenario object is converted into corresponding OpenDRIVE xodr file.
 
 Code Structure
 ==============
@@ -91,11 +91,10 @@ structure is not complete)::
         ├── converter.py
         └── dataloader.py
 
-- `/elements`: This directory contains various tools and files that are used for initiation of various opendrive objects and used in various stages during the conversion of scenario object(lanelets) to opendrive file.
-- `/reference_maps`: This directory contains sample of opendrive files which will be used as reference for testing converted opendrive files.
-- `/utils`: This directory contains two files in which one is used to preprocess the polyline for road element and another is used to write the opendrive file using opendrive tree element.
-- `converter.py`: Module to convert scenario object to opendrive file in  which lanelets are used to construct road, junctions, junction linkage, obstacles, traffic element. 
-- `dataloader.py`: Module to convert to xml file to scenario object which includes preparation of intersection successor and preparation of a dictionary with lanelet ids that keep track of converted lanelet. 
+- `/elements`: This directory contains various classes for OpenDRIVE objects and is used in various stages during the conversion.
+- `/utils`: This directory contains two files in which one is used to preprocess the polyline for road elements and another is used to write the OpenDRIVE file using the OpenDRIVE tree element.
+- `converter.py`: Main conversion file.
+- `dataloader.py`: File to parse CommonRoad file which includes preparation of intersections and preparation of a dictionary with lanelet ids that keep track of converted lanelets.
 
 .. _fig.layout-commonroad-to-opendrive:
 .. figure:: images/commonroad_to_opendrive_flowchart.png
@@ -107,76 +106,59 @@ structure is not complete)::
 
 Create Scenario Object  
 ======================
-The CommonRoad xml file is passed to Dataloader class 
-in which the file is read and converted to corresponding scenario object 
-using CommonRoadFileReader class of CommonRoad package. 
-Preparation of intersection successors and creation of dictionary with lanelet ids 
-that keep track of converted lanelet also implemented on Dataloader class.
+The CommonRoad xml file is passed to the Dataloader class
+in which the file is read and converted to the corresponding scenario object
+using the CommonRoadFileReader.
+Additionally, the dataloader prepares intersections and creates a dictionary with lanelet IDs
+that keep track of already converted lanelet.
 
 Convert Scenario Object to OpenDRIVE File 
 =========================================
-In order to convert scenario object to opendrive file, various elements have to be created 
+In order to convert scenario object to OpenDRIVE file, various elements have to be created
 and linked together which are explained below in detail:
 
 
-Add roads
+Roads
 ---------
-Basically, roads are constructed using lanelets of scenario object.
-For the given lanelet, it is expanded left and right to construct the corresponding road.
-Then we continue to expand with its successor and predecessors.
-The road network is explored in a breadth-first fashion
+For a given lanelet, it is expanded left and right to construct the corresponding road.
+Then, we continue to expand with its successor and predecessors.
+The road network is explored in a breadth-first fashion.
 
 
-Check correctness of the road construction algorithm
+Checking correctness of road construction
 ----------------------------------------------------
 We need to check whether all lanelets have been added to the road network or not. 
-If it is not added, error is raised as this particular lanelet is not added to road network and suggests to check algorithm.
-This helps to guarantee correctness of the road construction algorithm.
+If it is not added, an error is raised as this particular lanelet is not added to the road network and the user is informed to check algorithm or provided road network.
 
 
 Create linkMap where all linkage information is stored
 ------------------------------------------------------
-A linkmap consist of ids of road and it links. For each road and its links , 
+A linkmap consist of ids of a road and it links. For each road and its links,
 a data structure is created to store its corresponding successor and predessor. 
-Each links consist of ids of lanelet and corresponding lane successor and lane predessor. 
+Each link consist of ids of a lanelet and corresponding lane successor and lane predessor.
 For each lanelet, a data structure is created to store its corresponding lane successor 
-and lane predessor. Finally all these information are stored as merged linkage. 
-Also the stored information are linked with road id and stored as road linkage.
-When the road has exactly one successor/predecessor, road to road linkage is implemented.
+and lane predessor. Finally, all information are stored as merged linkage.
+Also, the stored information are linked with the road ID and stored as road linkage.
 
 
-Add junction and  link road to junction
+Add junction and link road to junction
 ---------------------------------------
 The intersection of lane net consists of intersection incoming elements. 
 For every intersection incoming elment, all successors are obtained.  
 Road id of successors with the CommonRoad id are transformed to successors 
 with their OpenDrive id.
-All incoming lanes should be on the same road in opendrive.
+All incoming lanes should be on the same road in OpenDRIVE.
 For every successor road, connection element are created and 
-are linked with the lanelink accordingly to opendrive.
+are linked with the lanelink accordingly to OpenDRIVE.
 
 
-Add obstacle, traffic elements 
+Add static obstacles and regulatroy elements
 ------------------------------
-Static obstacles are added on map. Obstacles can be in shape of circle, rectangle and polygon. 
+Static obstacles are added to the map. Obstacles can be in the shape of circles, rectangles, or polygons.
 Traffic signs and lights are added to the map.
 
 
 Convert to Opendrive file
 -------------------------
-After proceeding all these stages of preprocessing and conversion, finally OpenDRIVE file is created. 
-This function cleans up the converter object which makes it possible to convert multiple files queued up.
-Data structures created for addition and conversion of roads are cleared 
-and counting of junctions, obstacles is set to zero.
-
-
-Issues: CommonRoad elements which are currently not converted
--------------------------------------------------------------
-1.Traffic signs:
--They are not converted to opendrive format. only init(), str() and getCountry() methods are defined.
-
-2.Traffic lights:
--They are not converted to opendrive format. Only init() and str() methods are defined.
-
-3.Stop lines:
--They are not converted to opendrive format.
+After performing all these stages of preprocessing and conversion, the OpenDRIVE file is created.
+Additionally, the converter is cleaned up which makes it possible to convert multiple files queued up.
