@@ -15,17 +15,19 @@ import time
 class Converter:
     """
     This class converts the CommonRoad scenario object to CommonRoad file.
-    The commonraod elements such as roads, junctions, traffic lights, traffic signal
+    The CommonRoad elements such as roads, junctions, traffic lights, traffic signal
     are converted to corresponding OpenDRIVE elements and OpenDRIVE file is created.
 
     """
-    def __init__(self, file_path: str, scenario: scenario, successors: List[int], ids: Dict[int, bool]):
+    def __init__(self, file_path: str, sc: scenario, successors: List[int], ids: Dict[int, bool]):
         self.path = file_path
-        self.scenario = scenario
+        self.scenario = sc
         self.inter_successors = successors
         self.id_dict = ids
         self.lane_net = self.scenario.lanelet_network
         self.trafficElements = {}
+        self.writer = None
+        self.convTime = 0
 
     def convert(self, file_path_out: str):
         """
@@ -38,9 +40,9 @@ class Converter:
         # initialize writer object
         self.writer = fwr.Writer(file_path_out)
 
-        laneList = self.lane_net.lanelets
+        lane_list = self.lane_net.lanelets
         # choose lanelet as starting point
-        lanelet = copy.deepcopy(laneList[0])
+        lanelet = copy.deepcopy(lane_list[0])
 
         # this function constructs all roads 
         # using a breadth first search approach
