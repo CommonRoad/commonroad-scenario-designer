@@ -7,8 +7,16 @@ Subpackages
 .. toctree::
    :maxdepth: 4
 
-   crdesigner.input_output
    crdesigner.map_conversion
+   crdesigner.ui
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   crdesigner.start_gui
 
 Module contents
 ---------------
