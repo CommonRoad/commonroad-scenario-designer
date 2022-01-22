@@ -97,7 +97,7 @@ class Network:
             self._geo_ref = None
 
         # Get country ID form signal data in openDrive and set it as attribute of the network object
-        self.assign_country_id(self.get_country_id_from_opendrive())
+        self.assign_country_id(Network.get_country_id_from_opendrive(opendrive.roads))
 
         # Convert all parts of a road to parametric lanes (planes)
         for road in opendrive.roads:
