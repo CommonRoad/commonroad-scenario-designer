@@ -125,7 +125,8 @@ class Road:
         :param len_pred: Number of predecessors
         :param curl_links_lanelets: A dictionary of road ids and road links with all linkage information
         such as mergeLinkage, roadLinkage, laneIndices
-        :param lane_2_lane: A dictionary with successor/predecessor as key and dictionaries of corresponding ids as value
+        :param lane_2_lane: A dictionary with successor/predecessor
+        as key and dictionaries of corresponding ids as value
         """
         if len_succ == 1:
             successor = self.element_type = etree.SubElement(self.link, "successor")
@@ -266,7 +267,7 @@ class Road:
 
     # xodr for spirals
     def print_spiral(self, s: np.float64, x: np.float64, y: np.float64, hdg: np.float64,
-                    length: np.float64, curv_start: np.float64, curv_end: np.float64):
+                     length: np.float64, curv_start: np.float64, curv_end: np.float64):
         """
         This function print spiral on OpenDrive file.
         Geometry child element is created with corresponding attributes and added to planview parent element.
@@ -293,7 +294,7 @@ class Road:
 
     # xodr for arcs
     def print_arc(self, s: np.float64, x: np.float64, y: np.float64, hdg: np.float64,
-                 length: np.float64, curvature: np.float64):
+                  length: np.float64, curvature: np.float64):
         """
         This function print arc on OpenDrive file.
         Geometry child element is created with corresponding attributes and added to planview parent element.
@@ -389,8 +390,6 @@ class Road:
             )
 
             dist_list = util.compute_pathlength_from_polyline(cur.center_vertices)
-
-
             lane_id = i - self.center_number
 
             # lanelets to the right should get a negative id
@@ -447,7 +446,6 @@ class Road:
             x = [dist_list[0], dist_list[-1]]
 
             b, a = np.polyfit(x, width_list, 1)
-
 
         if id != 0:
             # this should maybe not be hardcoded

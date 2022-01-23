@@ -39,7 +39,6 @@ class DataLoader:
             for element in self.scenario.lanelet_network.traffic_signs:
                 element.translate_rotate(self.get_center(), 0.0)
 
-
         # intersection successors are needed for the conversion
         self.inter_successors = self.prepare_intersection_successors()
 
@@ -138,7 +137,7 @@ class DataLoader:
         loaded_file_size = f"loaded file size:\t {os.path.getsize(self.path)} bytes\n"
         centered = f"Center coordinates:\t {self.x_avg, self.y_avg}\n"
         time = f"Initialization took:\t {self.init_time:.2} seconds\n"
-        if self.center: 
+        if self.center:
             return header + loaded_file + loaded_file_size + centered + time
         else:
             return header + loaded_file + loaded_file_size + time

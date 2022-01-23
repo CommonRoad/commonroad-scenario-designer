@@ -44,7 +44,7 @@ class Converter:
         # choose lanelet as starting point
         lanelet = copy.deepcopy(lane_list[0])
 
-        # this function constructs all roads 
+        # this function constructs all roads
         # using a breadth first search approach
         self.construct_roads([lanelet.lanelet_id])
 
@@ -421,7 +421,8 @@ class Converter:
 
             # We encountered a direction change when going left (from our point of view).
             # When switching to the next lanelet's perspective, left becomes right
-            # We also need to append the new lanelets to the end of the list, since they appear to the left from our perspective
+            # We also need to append the new lanelets to the end of the list, since
+            # they appear to the left from our perspective
             else:
                 return self.extend_road(lane, road_lanes, left=False, append=append)
 
