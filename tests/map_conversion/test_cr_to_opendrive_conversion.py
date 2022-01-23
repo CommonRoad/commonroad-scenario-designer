@@ -27,7 +27,7 @@ class TestConverterConvert(unittest.TestCase):
             "lanelet_no_succ_or_pred",
         ]
 
-    def prepareConversion(self, map_name: str):
+    def prepare_conversion(self, map_name: str):
         self.cwd_path = os.path.dirname(os.path.abspath(__file__))
         out_path = self.cwd_path + "/.pytest_cache/converted_xodr_files"
 
@@ -54,7 +54,7 @@ class TestConverterConvert(unittest.TestCase):
 
     # cuts out the date timestamp of both maps
     # (as they wont be equal) and compares them
-    def checkWithGroundTruth(self, reference_file: str):
+    def check_with_ground_truth(self, reference_file: str):
         with open("{}".format(self.file_path_out), "r") as converted_file:
             converted_tree = etree.parse(converted_file).getroot()
             date = time.strftime("%Y-%m-%d", time.localtime())
@@ -69,64 +69,64 @@ class TestConverterConvert(unittest.TestCase):
         return elements_equal(converted_tree, reference_tree)
 
     def test_convert_USA_Lanker(self):
-        self.prepareConversion("USA_Lanker-1_17_T-1")
+        self.prepare_conversion("USA_Lanker-1_17_T-1")
         self.converter.convert(self.file_path_out)
-        self.checkWithGroundTruth(os.path.join(self.cwd_path, self.path_reference_xodr_file))
+        self.check_with_ground_truth(os.path.join(self.cwd_path, self.path_reference_xodr_file))
 
     def test_convert_DEU_Guetersloh(self):
-        self.prepareConversion("DEU_Guetersloh-11_2_T-1")
+        self.prepare_conversion("DEU_Guetersloh-11_2_T-1")
         self.converter.convert(self.file_path_out)
-        self.checkWithGroundTruth(os.path.join(self.cwd_path, self.path_reference_xodr_file))
+        self.check_with_ground_truth(os.path.join(self.cwd_path, self.path_reference_xodr_file))
 
     def test_convert_ARG_Carcarana(self):
-        self.prepareConversion("ARG_Carcarana-1_1_T-1")
+        self.prepare_conversion("ARG_Carcarana-1_1_T-1")
         self.converter.convert(self.file_path_out)
-        self.checkWithGroundTruth(os.path.join(self.cwd_path, self.path_reference_xodr_file))
+        self.check_with_ground_truth(os.path.join(self.cwd_path, self.path_reference_xodr_file))
 
     def test_convert_zero_width_lanes_map(self):
-        self.prepareConversion("zero_width_lanes_map")
+        self.prepare_conversion("zero_width_lanes_map")
         self.converter.convert(self.file_path_out)
-        self.checkWithGroundTruth(os.path.join(self.cwd_path, self.path_reference_xodr_file))
+        self.check_with_ground_truth(os.path.join(self.cwd_path, self.path_reference_xodr_file))
 
     def test_convert_DEU_Test(self):
-        self.prepareConversion("DEU_Test-1_1_T-1")
+        self.prepare_conversion("DEU_Test-1_1_T-1")
         self.converter.convert(self.file_path_out)
-        self.checkWithGroundTruth(os.path.join(self.cwd_path, self.path_reference_xodr_file))
+        self.check_with_ground_truth(os.path.join(self.cwd_path, self.path_reference_xodr_file))
 
     def test_convert_DEU_Muehlhausen(self):
-        self.prepareConversion("DEU_Muehlhausen-2_2_T-1")
+        self.prepare_conversion("DEU_Muehlhausen-2_2_T-1")
         self.converter.convert(self.file_path_out)
-        self.checkWithGroundTruth(os.path.join(self.cwd_path, self.path_reference_xodr_file))
+        self.check_with_ground_truth(os.path.join(self.cwd_path, self.path_reference_xodr_file))
 
     def test_convert_lanelet_no_succ_or_pred(self):
-        self.prepareConversion("lanelet_no_succ_or_pred")
+        self.prepare_conversion("lanelet_no_succ_or_pred")
         self.converter.convert(self.file_path_out)
-        self.checkWithGroundTruth(os.path.join(self.cwd_path, self.path_reference_xodr_file))
+        self.check_with_ground_truth(os.path.join(self.cwd_path, self.path_reference_xodr_file))
 
     def test_function_checkAllVisited(self):
-        self.prepareConversion("DEU_Test-1_1_T-1")
+        self.prepare_conversion("DEU_Test-1_1_T-1")
         self.converter.id_dict.popitem()
-        self.assertRaises(KeyError, lambda: self.converter.checkAllVisited())
+        self.assertRaises(KeyError, lambda: self.converter.check_all_visited())
 
     def test_convert_BEL_Wervik(self):
-        self.prepareConversion("BEL_Wervik-2_1_T-1")
+        self.prepare_conversion("BEL_Wervik-2_1_T-1")
         self.converter.convert(self.file_path_out)
-        self.checkWithGroundTruth(os.path.join(self.cwd_path, self.path_reference_xodr_file))
+        self.check_with_ground_truth(os.path.join(self.cwd_path, self.path_reference_xodr_file))
 
     def test_convert_CulDeSac(self):
-        self.prepareConversion("CulDeSac")
+        self.prepare_conversion("CulDeSac")
         self.converter.convert(self.file_path_out)
-        self.checkWithGroundTruth(os.path.join(self.cwd_path, self.path_reference_xodr_file))
+        self.check_with_ground_truth(os.path.join(self.cwd_path, self.path_reference_xodr_file))
 
     def test_convert_ZAM_Over(self):
-        self.prepareConversion("ZAM_Over-1_1")
+        self.prepare_conversion("ZAM_Over-1_1")
         self.converter.convert(self.file_path_out)
-        self.checkWithGroundTruth(os.path.join(self.cwd_path, self.path_reference_xodr_file))
+        self.check_with_ground_truth(os.path.join(self.cwd_path, self.path_reference_xodr_file))
 
     def test_convert_town03_right_width_coefficient(self):
-        self.prepareConversion("town03_right_width_coefficient")
+        self.prepare_conversion("town03_right_width_coefficient")
         self.converter.convert(self.file_path_out)
-        self.checkWithGroundTruth(os.path.join(self.cwd_path, self.path_reference_xodr_file))
+        self.check_with_ground_truth(os.path.join(self.cwd_path, self.path_reference_xodr_file))
 
 
 if __name__ == "__main__":

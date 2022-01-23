@@ -11,7 +11,7 @@ class Writer(object):
         self.file_path_out = file_path_out
         self.root = etree.Element("OpenDRIVE")
         etree.indent(self.root, space="    ")
-        self.writeHeader()
+        self.write_header()
         self.tree = etree.ElementTree(self.root)
 
     def save(self):
@@ -28,7 +28,7 @@ class Writer(object):
         )
 
     # TODO: does this need to be <header></header> or is <header/> fine?
-    def writeHeader(self):
+    def write_header(self):
         """
         This function creates header child element with various attributes and add it to Opendrive root element.
         """
@@ -45,12 +45,12 @@ class Writer(object):
         self.header.set("south", str.format("{0:.16e}", val))
         self.header.set("east", str.format("{0:.16e}", val))
         self.header.set("west", str.format("{0:.16e}", val))
-        self.geoReference = etree.SubElement(self.header, "geoReference")
+        self.geo_reference = etree.SubElement(self.header, "geoReference")
         # TODO: do we need to convert the gps latitude and longitude
         # into something like that:   <![CDATA[epsg:25833]]>    ?
-        self.geoId = etree.SubElement(self.geoReference, "TODO")
+        self.geo_id = etree.SubElement(self.geo_reference, "TODO")
 
-    def setChildOfRoad(self, name: str) -> etree:
+    def se_child_of_road(self, name: str) -> etree:
         """
         This function add subelement to road parent element
 
@@ -59,43 +59,43 @@ class Writer(object):
         """
         return etree.SubElement(self.road, name)
 
-    def createRoadChilds(self):
+    def create_road_childs(self):
         """
         This function creates child elements for road parent element.
         """
         # subelement link - TODO
-        self.link = self.setChildOfRoad("link")
+        self.link = self.se_child_of_road("link")
 
         # subelement type - TODO
-        self.type = self.setChildOfRoad("type")
+        self.type = self.se_child_of_road("type")
 
         # subelement planview - TODO
-        self.planView = self.setChildOfRoad("planView")
+        self.plane_view = self.se_child_of_road("planView")
 
         # subelement elevationProfile - TODO
-        self.elevationProfile = self.setChildOfRoad("elevationProfile")
+        self.elevation_profile = self.se_child_of_road("elevationProfile")
 
         # subelement lateralProfile - TODO
-        self.lateralProfile = self.setChildOfRoad("lateralProfile")
+        self.lateral_profile = self.se_child_of_road("lateralProfile")
 
         # subelement lanes - TODO
-        self.lanes = self.setChildOfRoad("lanes")
+        self.lanes = self.se_child_of_road("lanes")
 
         # subelement objects - TODO
-        self.objects = self.setChildOfRoad("objects")
+        self.objects = self.se_child_of_road("objects")
 
         # subelement signals - TODO
-        self.signals = self.setChildOfRoad("signals")
+        self.signals = self.se_child_of_road("signals")
 
     # this will later take a road element
-    def writeRoad(self):
+    def write_road(self):
         """
         This function add road child element with various attributes to Opendrive root element.
         """
         # subelement road
         # set self.road for every road so that we dont overwrite existing roads
         self.road = etree.SubElement(self.root, "road")
-        self.createRoadChilds()
+        self.create_road_childs()
 
         # Write type - TODO
         self.type.set("s", str.format("{0:.16e}", 0))
@@ -113,12 +113,12 @@ class Writer(object):
         # road junction - TODO this needs to be stored in the road object
         self.road.set("junction", str.format("{}", -1))  # road.junction))
 
-    def printLine(self, s, x, y, hdg, length):
+    def print_line(self, s, x, y, hdg, length):
         """
         This function add geometry child element with various attribute to planView parent element and
         then add line child element to geometry parent element
         """
-        geometry = etree.SubElement(self.planView, "geometry")
+        geometry = etree.SubElement(self.plane_view, "geometry")
         geometry.set("s", str.format("{0:.16e}", s))
         geometry.set("x", str.format("{0:.16e}", x))
         geometry.set("y", str.format("{0:.16e}", y))
@@ -127,12 +127,12 @@ class Writer(object):
 
         line = etree.SubElement(geometry, "line")
 
-    def printSpiral(self, s, x, y, hdg, length, curvStart, curvEnd):
+    def print_spiral(self, s, x, y, hdg, length, curv_start, curv_end):
         """
         This function add geometry child element with various attribute to planView parent element and
         then add spiral child element to geometry parent element
         """
-        geometry = etree.SubElement(self.planView, "geometry")
+        geometry = etree.SubElement(self.plane_view, "geometry")
         geometry.set("s", str.format("{0:.16e}", s))
         geometry.set("x", str.format("{0:.16e}", x))
         geometry.set("y", str.format("{0:.16e}", y))
@@ -140,15 +140,15 @@ class Writer(object):
         geometry.set("length", str.format("{0:.16e}", length))
 
         spiral = etree.SubElement(geometry, "spiral")
-        spiral.set("curvStart", str.format("{0:.16e}", curvStart))
-        spiral.set("curvEnd", str.format("{0:.16e}", curvEnd))
+        spiral.set("curvStart", str.format("{0:.16e}", curv_start))
+        spiral.set("curvEnd", str.format("{0:.16e}", curv_end))
 
-    def printArc(self, s, x, y, hdg, length, curvature):
+    def print_arc(self, s, x, y, hdg, length, curvature):
         """
         This function add geometry child element with various attribute to planView parent element and
         then add arc child element to geometry parent element
         """
-        geometry = etree.SubElement(self.planView, "geometry")
+        geometry = etree.SubElement(self.plane_view, "geometry")
         geometry.set("s", str.format("{0:.16e}", s))
         geometry.set("x", str.format("{0:.16e}", x))
         geometry.set("y", str.format("{0:.16e}", y))

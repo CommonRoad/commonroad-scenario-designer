@@ -19,8 +19,8 @@ class Obstacle:
         if not lanelets:
             print("no lanelets")
             return
-        roadId = Road.crIdToOD[lanelets[0]]
-        self.road = Road.roads[roadId]
+        road_id = Road.cr_id_to_od[lanelets[0]]
+        self.road = Road.roads[road_id]
         self.state = state
 
         Obstacle.counting += 1
@@ -32,18 +32,18 @@ class Obstacle:
         self.object.set("type", self.type)
         self.object.set("orientation", "none")
 
-        self.setCoordinates()
+        self.set_coordinates()
 
         self.object.set("height", "1.0")  # should this be hardcoded?
 
         if isinstance(shape, Rectangle):
-            self.setRectangle(shape)
+            self.set_rectangle(shape)
         elif isinstance(shape, Circle):
-            self.setCircle(shape)
+            self.set_circle(shape)
         else:
-            self.setPolygon(shape)
+            self.set_polygon(shape)
 
-    def setCoordinates(self):
+    def set_coordinates(self):
         """
         This function sets the object's coordinates according to the road reference line.
         """
@@ -71,20 +71,20 @@ class Obstacle:
         self.object.set("zOffset", "0.0")
         self.object.set("hdg", str(orientation))
 
-    def setCircle(self, shape: Circle):
+    def set_circle(self, shape: Circle):
         """
         This function sets the radius of Circle
         """
         self.object.set("radius", str(shape.radius))
 
-    def setRectangle(self, shape: Rectangle):
+    def set_rectangle(self, shape: Rectangle):
         """
         This function sets the length and width of Rectangle
         """
         self.object.set("length", str(shape.length))
         self.object.set("width", str(shape.width))
 
-    def setPolygon(self, shape: Polygon):
+    def set_polygon(self, shape: Polygon):
         """
         This fucntion add outline child element to object parent element
         and sets id, outer, closed as attributes of outline.

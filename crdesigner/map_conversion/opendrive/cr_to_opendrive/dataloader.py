@@ -35,18 +35,18 @@ class DataLoader:
         # requires the same coordinate space as the input
         if self.center:
             # move lanelets into the origin
-            self.scenario.translate_rotate(self.getCenter(), 0.0)
+            self.scenario.translate_rotate(self.get_center(), 0.0)
             for element in self.scenario.lanelet_network.traffic_signs:
-                element.translate_rotate(self.getCenter(), 0.0)
+                element.translate_rotate(self.get_center(), 0.0)
 
 
         # intersection successors are needed for the conversion
-        self.inter_successors = self.prepareIntersectionSuccessors()
+        self.inter_successors = self.prepare_intersection_successors()
 
         # dictionary to keep track of converted roads
-        self.id_dict = self.prepareIdDict()
+        self.id_dict = self.prepare_id_dict()
 
-        self.initTime = time.time() - start
+        self.init_time = time.time() - start
 
     def initialize(self) -> (scenario, list, dict):
         """
@@ -56,7 +56,7 @@ class DataLoader:
         """
         return self.scenario, self.inter_successors, self.id_dict
 
-    def getAvg(self, x: np.ndarray, y: np.ndarray) -> np.ndarray:
+    def get_avg(self, x: np.ndarray, y: np.ndarray) -> np.ndarray:
         """
         This method calculate the average for ndarrays x and y
 
@@ -69,7 +69,7 @@ class DataLoader:
         self.middle = np.array([self.x_avg, self.y_avg])
         return self.middle
 
-    def getCenter(self) -> np.ndarray:
+    def get_center(self) -> np.ndarray:
         """
         This method calculate the roads "center" to move everything into the origin
 
@@ -84,7 +84,7 @@ class DataLoader:
         x_left, y_left = np.hsplit(coords_left, 2)
         x_right, y_right = np.hsplit(coords_right, 2)
 
-        return self.getAvg((x_right + x_left)/2, (y_right+y_left)/2)
+        return self.get_avg((x_right + x_left)/2, (y_right+y_left)/2)
 
     def find_successors(self, indices: dict.keys) -> list:
         """
@@ -100,7 +100,7 @@ class DataLoader:
             successors.extend(lane.successor)
         return successors
 
-    def prepareIntersectionSuccessors(self) -> list:
+    def prepare_intersection_successors(self) -> list:
         """
         This method creates the list of successor of all incoming lanelets(id's) of intersection defined
 
@@ -112,7 +112,7 @@ class DataLoader:
         inter_successors = self.find_successors(inter_incoming_lanelets)
         return inter_successors
 
-    def prepareIdDict(self) -> dict:
+    def prepare_id_dict(self) -> dict:
         """
         Creates a dictionary with lanelet ids as keys and boolean values.
         This helps keep track which lanelets already got converted
@@ -134,11 +134,11 @@ class DataLoader:
         the center coordinate of roads, time required for object initialization.
         """
         header = "Dataloader\n"
-        loadedFile = f"Loaded file:\t\t {self.path}\n"
-        loadedFileSize = f"loaded file size:\t {os.path.getsize(self.path)} bytes\n"
+        loaded_file = f"Loaded file:\t\t {self.path}\n"
+        loaded_file_size = f"loaded file size:\t {os.path.getsize(self.path)} bytes\n"
         centered = f"Center coordinates:\t {self.x_avg, self.y_avg}\n"
-        time = f"Initialization took:\t {self.initTime:.2} seconds\n"
+        time = f"Initialization took:\t {self.init_time:.2} seconds\n"
         if self.center: 
-            return header + loadedFile + loadedFileSize + centered + time
+            return header + loaded_file + loaded_file_size + centered + time
         else:
-            return header + loadedFile + loadedFileSize + time
+            return header + loaded_file + loaded_file_size + time

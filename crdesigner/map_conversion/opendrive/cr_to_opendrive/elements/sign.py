@@ -12,11 +12,11 @@ class Sign(Signal):
         self.dynamic = "no"
         self.country = self.getCountry()
         self.type = str(
-            self.ODobject.traffic_sign_elements[0].traffic_sign_element_id.value
+            self.od_object.traffic_sign_elements[0].traffic_sign_element_id.value
         )
-        self.value = str(self.ODobject.traffic_sign_elements[0].additional_values[0])
+        self.value = str(self.od_object.traffic_sign_elements[0].additional_values[0])
 
-        self.road.printSignal(self)
+        self.road.print_signal(self)
 
     def __str__(self) -> str:
         return f"""
@@ -39,5 +39,5 @@ class Sign(Signal):
         """
 
     def getCountry(self):
-        base = str(self.ODobject.traffic_sign_elements[0].traffic_sign_element_id)
+        base = str(self.od_object.traffic_sign_elements[0].traffic_sign_element_id)
         return base.split("TrafficSignID")[1].split(".")[0].upper()

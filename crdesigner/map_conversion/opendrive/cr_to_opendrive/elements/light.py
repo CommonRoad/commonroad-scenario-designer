@@ -9,12 +9,12 @@ class Light(Signal):
     def __init__(self, roadKey, uniqueId, data, laneList) -> None:
         super().__init__(roadKey, uniqueId, data, laneList)
         self.name = "Light_" + str(self.id)
-        self.dynamic = "yes" if self.ODobject.active else "no"
+        self.dynamic = "yes" if self.od_object.active else "no"
         self.country = "OpenDRIVE"
         self.type = "1000001"
         self.value = "-1"
 
-        self.road.printSignal(self)
+        self.road.print_signal(self)
 
     def __str__(self) -> str:
         return f"""
