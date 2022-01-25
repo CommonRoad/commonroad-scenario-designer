@@ -7,7 +7,7 @@ from commonroad.planning.planning_problem import PlanningProblemSet
 
 from commonroad.scenario.intersection import Intersection
 from commonroad.common.util import Interval
-from commonroad.scenario.scenario import Scenario
+from commonroad.scenario.scenario import Scenario, Obstacle, StaticObstacle, DynamicObstacle
 from commonroad.scenario.lanelet import Lanelet
 from commonroad.visualization.mp_renderer import MPRenderer
 from commonroad.geometry.shape import Circle
@@ -47,14 +47,16 @@ def _merge_dict(source, destination):
             destination[key] = value
     return destination
 
-
 class DynamicCanvas(FigureCanvas):
     """ this canvas provides zoom with the mouse wheel """
+    # static because the color should be saved
+    obstacle_color = None
     def __init__(self, parent=None, width=5, height=5, dpi=100):
 
         self.ax = None
         self.drawer = Figure(figsize=(width, height), dpi=dpi)
         self.rnd = MPRenderer(ax=self.ax)
+        self.obstacle_color = None
 
         self.draw_params = {
             'scenario': {
@@ -82,7 +84,8 @@ class DynamicCanvas(FigureCanvas):
                         'show_label': True,
                     },
                 }
-            }
+            },
+           
         }
 
         self.draw_params_dynamic_only = {
@@ -113,6 +116,7 @@ class DynamicCanvas(FigureCanvas):
                     },
                 }
             }
+            
         }
 
         self._handles = {}
@@ -238,7 +242,14 @@ class DynamicCanvas(FigureCanvas):
         else:
             self.ax.clear()
 
+        #if "set_static_obstacle_color.obstacle_color" in globals():
+            #obstacle_draw_params = self.set_obstacle_draw_param(set_static_obstacle_color.obstacle_color)
+        #else:
+        obstacle_draw_params = self.set_obstacle_draw_param()
+
         draw_params_merged = _merge_dict(self.draw_params.copy(), draw_params)
+        draw_params_merged = _merge_dict(draw_params_merged, obstacle_draw_params)
+
         self.rnd.plot_limits = plot_limits
         self.rnd.ax = self.ax
         if draw_dynamic_only is True:
@@ -281,7 +292,36 @@ class DynamicCanvas(FigureCanvas):
         for obj in obstacles:
             obj.draw(renderer=self.rnd, draw_params=draw_params_merged)
             self.rnd.render(show=True)
+    
+    #@staticmethod
+    def set_static_obstacle_color(self,color=None):
+        """sets static_obstacle color, if color=None default color"""
+        #print("hello")
+        if not color:
+            DynamicCanvas.obstacle_color = "#d95558" #default color static_obstacle
+        else:
+            DynamicCanvas.obstacle_color = color
+    #@staticmethod
+    def set_dynamic_obstacle_color(self, color=None):
+        """sets static_obstacle color, if color=None default color"""
+        if not color:
+            DynamicCanvas.obstacle_color = "#00478f" #default color dynamic_obstacle
+        else:
+            DynamicCanvas.obstacle_color = color
 
+    def set_obstacle_draw_param(self):
+        """changes color if it isn't default color"""
+        draw_params = {
+            "static_obstacle": {"occupancy": {"shape": {
+            "polygon": {"facecolor": DynamicCanvas.obstacle_color},
+            "rectangle": {"facecolor": DynamicCanvas.obstacle_color},
+            "circle": {"facecolor": DynamicCanvas.obstacle_color}}}}}
+        #print(self.obstacle_color)
+        return draw_params
+        #self.rnd.ax = self.ax
+        #draw_params_merged = _merge_dict(self.draw_params.copy(), draw_params)
+        #self.dynamic.scenario.draw(renderer=self.rnd, draw_params=draw_params_merged)
+        #self.rnd.render(show=True)
 
 def draw_lanelet_polygon(lanelet, ax, color, alpha, zorder,
                          label) -> Tuple[float, float, float, float]:
@@ -320,7 +360,6 @@ def draw_lanelet_polygon(lanelet, ax, color, alpha, zorder,
         ))
 
     return [xlim1, xlim2, ylim1, ylim2]
-
 
 class AnimatedViewer:
     def __init__(self, parent, callback_function):

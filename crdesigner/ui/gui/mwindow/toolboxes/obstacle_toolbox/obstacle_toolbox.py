@@ -15,6 +15,8 @@ from commonroad.scenario.obstacle import Obstacle, StaticObstacle, ObstacleType,
 from commonroad.scenario.trajectory import State, Trajectory
 
 from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMO_AVAILABLE
+from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.commonroad_viewer import DynamicCanvas
+#from crdesigner.ui.gui.mwindow.mwindow import MWindowWrapper
 
 if SUMO_AVAILABLE:
     from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMOSimulation
@@ -26,7 +28,6 @@ from commonroad.prediction.prediction import Prediction, Occupancy, SetBasedPred
 from commonroad.planning.planning_problem import PlanningProblem
 from commonroad.planning.goal import GoalRegion
 from commonroad.common.util import Interval, AngleInterval
-from commonroad.visualization.mp_renderer import MPRenderer
 
 # try importing RoutePlanner
 try:
@@ -51,7 +52,8 @@ class ObstacleToolbox(QDockWidget):
         self.update_ongoing = False
         self.init_canvas()
         self.amount_obstacles = 0
-        self.rnd = MPRenderer()
+        self.canvas = DynamicCanvas()
+        #self.viewer = AnimatedViewer(parent, self.callback)
 
         # for profile visualisation
         self.sel_point = None
@@ -156,26 +158,13 @@ class ObstacleToolbox(QDockWidget):
                 'time_step': 1
                 })
             )
-        """self.current_scenario.draw(self.rnd, draw_params={'time_begin': 1, 
-                                    'time_end': 10,
-                                    'focus_obstacle_id': obstacle_id,
-                                    'dynamic_obstacle': {
-                                        'draw_icon': True,
-                                        'show_label': True}})"""
-        static_obstacle.draw(self.rnd, draw_params = {#'time_begin': 1, 
-                                    #'time_end': 10,
-                                    #'focus_obstacle_id': obstacle_id,
-                                    'static_obstacle': {#'draw_icon': False, 
-                                                        #'show_label': False,
-                                    'vehicle_shape': {'occupancy': {'shape': {'rectangle': {'facecolor': '#33cc33',
-                                                                                        'edgecolor': '#000000'}}}}}},
-                                #call_stack =                                                             
-                            )
-        #self.rnd.render()                                                                         
-        self.current_scenario.add_objects(static_obstacle)       
+        #set_static_obstacle_color("g")
+        self.canvas.set_static_obstacle_color("g")
+        self.current_scenario.add_objects(static_obstacle)         
         self.callback(self.current_scenario)
+        #self.canvas.draw_scenario(self.current_scenario)
+        #self.canvas.draw_obstacle(static_obstacle)
         
-
     def dynamic_obstacle_details(self, obstacle_id):
         """creates dynamic obstacles"""
         #test code maybe change later
