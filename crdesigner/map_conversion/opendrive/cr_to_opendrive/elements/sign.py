@@ -1,4 +1,9 @@
+from typing import List, Dict
+
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.signal import Signal
+
+from commonroad.scenario.lanelet import LaneletNetwork
+from commonroad.scenario.traffic_sign import TrafficSign
 
 
 class Sign(Signal):
@@ -6,11 +11,11 @@ class Sign(Signal):
     This traffic sign class inherits from Signal class
     which is used to convert CommonRoad sign  to Open sign.
     """
-    def __init__(self, roadKey, uniqueId, data, laneList) -> None:
-        super().__init__(roadKey, uniqueId, data, laneList)
+    def __init__(self, road_key: int, unique_id: int, data: List[TrafficSign], lane_list: LaneletNetwork) -> None:
+        super().__init__(road_key, unique_id, data, lane_list)
         self.name = "Sign_" + str(self.id)
         self.dynamic = "no"
-        self.country = self.getCountry()
+        self.country = self.get_country()
         self.type = str(
             self.od_object.traffic_sign_elements[0].traffic_sign_element_id.value
         )
@@ -30,7 +35,7 @@ class Sign(Signal):
         country={self.country}
         type={self.type}
         subtype={self.subtype}
-        coutryRevision={self.coutryRevision}
+        country_revision={self.country_revision}
         value={self.value}
         unit={self.unit}
         width={self.width}
@@ -38,6 +43,6 @@ class Sign(Signal):
         hOffset={self.hOffset}
         """
 
-    def getCountry(self):
+    def get_country(self):
         base = str(self.od_object.traffic_sign_elements[0].traffic_sign_element_id)
         return base.split("TrafficSignID")[1].split(".")[0].upper()

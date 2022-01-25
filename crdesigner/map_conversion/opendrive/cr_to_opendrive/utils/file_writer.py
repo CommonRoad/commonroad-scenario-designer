@@ -1,5 +1,6 @@
 from lxml import etree
 from datetime import datetime
+import numpy as np
 import crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.road as Road
 
 
@@ -50,7 +51,7 @@ class Writer(object):
         # into something like that:   <![CDATA[epsg:25833]]>    ?
         self.geo_id = etree.SubElement(self.geo_reference, "TODO")
 
-    def se_child_of_road(self, name: str) -> etree:
+    def set_child_of_road(self, name: str) -> etree:
         """
         This function add subelement to road parent element
 
@@ -64,28 +65,28 @@ class Writer(object):
         This function creates child elements for road parent element.
         """
         # subelement link - TODO
-        self.link = self.se_child_of_road("link")
+        self.link = self.set_child_of_road("link")
 
         # subelement type - TODO
-        self.type = self.se_child_of_road("type")
+        self.type = self.set_child_of_road("type")
 
         # subelement planview - TODO
-        self.plane_view = self.se_child_of_road("planView")
+        self.plane_view = self.set_child_of_road("planView")
 
         # subelement elevationProfile - TODO
-        self.elevation_profile = self.se_child_of_road("elevationProfile")
+        self.elevation_profile = self.set_child_of_road("elevationProfile")
 
         # subelement lateralProfile - TODO
-        self.lateral_profile = self.se_child_of_road("lateralProfile")
+        self.lateral_profile = self.set_child_of_road("lateralProfile")
 
         # subelement lanes - TODO
-        self.lanes = self.se_child_of_road("lanes")
+        self.lanes = self.set_child_of_road("lanes")
 
         # subelement objects - TODO
-        self.objects = self.se_child_of_road("objects")
+        self.objects = self.set_child_of_road("objects")
 
         # subelement signals - TODO
-        self.signals = self.se_child_of_road("signals")
+        self.signals = self.set_child_of_road("signals")
 
     # this will later take a road element
     def write_road(self):
@@ -113,7 +114,7 @@ class Writer(object):
         # road junction - TODO this needs to be stored in the road object
         self.road.set("junction", str.format("{}", -1))  # road.junction))
 
-    def print_line(self, s, x, y, hdg, length):
+    def print_line(self, s: np.float64, x: np.float64, y: np.float64, hdg: np.float64, length: np.float64):
         """
         This function add geometry child element with various attribute to planView parent element and
         then add line child element to geometry parent element
@@ -127,7 +128,8 @@ class Writer(object):
 
         line = etree.SubElement(geometry, "line")
 
-    def print_spiral(self, s, x, y, hdg, length, curv_start, curv_end):
+    def print_spiral(self, s: np.float64, x: np.float64, y: np.float64, hdg: np.float64,
+                     length: np.float64, curv_start: np.float64, curv_end: np.float64):
         """
         This function add geometry child element with various attribute to planView parent element and
         then add spiral child element to geometry parent element
@@ -143,7 +145,8 @@ class Writer(object):
         spiral.set("curvStart", str.format("{0:.16e}", curv_start))
         spiral.set("curvEnd", str.format("{0:.16e}", curv_end))
 
-    def print_arc(self, s, x, y, hdg, length, curvature):
+    def print_arc(self, s: np.float64, x: np.float64, y: np.float64, hdg: np.float64,
+                  length: np.float64, curvature: np.float64):
         """
         This function add geometry child element with various attribute to planView parent element and
         then add arc child element to geometry parent element

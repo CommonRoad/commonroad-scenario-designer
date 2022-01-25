@@ -1,5 +1,9 @@
 from lxml import etree
+from typing import List, Dict
+
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.road import Road
+
+from commonroad.scenario.intersection import IntersectionIncomingElement
 from commonroad.scenario.lanelet import LaneletNetwork
 
 
@@ -12,8 +16,8 @@ class Junction:
     """
     counting = 0
 
-    def __init__(self, incoming: list, id_to_road: dict, lane_to_lane: dict,
-                 root: etree, lane_network: LaneletNetwork, id: int):
+    def __init__(self, incoming: List[IntersectionIncomingElement], id_to_road: Dict[int, int],
+                 lane_to_lane: Dict[int, int], root: etree._Element, lane_network: LaneletNetwork, id: int):
         self.incoming = incoming
         self.id = id
         self.root = root

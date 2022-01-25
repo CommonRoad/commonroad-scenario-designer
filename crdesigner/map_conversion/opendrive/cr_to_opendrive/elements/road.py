@@ -1,8 +1,11 @@
 from lxml import etree
 import numpy as np
 import warnings
+from typing import List, Dict
 
 import crdesigner.map_conversion.opendrive.cr_to_opendrive.utils.commonroad_ccosy_geometry_util as util
+from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.sign import Sign
+
 from commonroad.scenario.lanelet import Lanelet
 
 
@@ -25,7 +28,7 @@ class Road:
     DEVIAT = 0.001
     STEP = 50
 
-    def __init__(self, lane_list: list, number_of_lanes: int, root: etree, current: Lanelet, junction_id: int):
+    def __init__(self, lane_list: List[Lanelet], number_of_lanes: int, root: etree._Element, current: Lanelet, junction_id: int):
         # Supress RankWarning in polyfit
         warnings.simplefilter("ignore", np.RankWarning)
 
@@ -111,8 +114,8 @@ class Road:
         else:
             raise ValueError("Relation must be either successor or predecessor")
 
-    def add_simple_linkage(
-        self, key: int, links: dict, len_succ: int, len_pred: int, curl_links_lanelets: dict, lane_2_lane: dict
+    def add_simple_linkage(self, key: int, links: Dict[str,List[int]], len_succ: int, len_pred: int,
+                           curl_links_lanelets: Dict[int or str, Dict[str, List[int]]], lane_2_lane: Dict[str,Dict[int, List[int]]]
     ):
         """
         This function add successor/predecessor child element to link parent element and
@@ -191,6 +194,7 @@ class Road:
         else:
             # start with spiral if the curvature is slightly higher
             this_length = arclength[1] - arclength[0]
+
             self.print_spiral(
                 arclength[0],
                 self.center[0][0],
@@ -317,7 +321,7 @@ class Road:
         arc = etree.SubElement(geometry, "arc")
         arc.set("curvature", str.format("{0:.16e}", curvature))
 
-    def print_signal(self, sig):
+    def print_signal(self, sig: Sign):
         """
         This function print traffic sign on OpenDrive file.
         Signal child element is created with corresponding attributes and added to road parent element.
@@ -342,7 +346,7 @@ class Road:
         signal.set("height", sig.height)
         signal.set("hOffset", sig.hOffset)
 
-    def print_signal_ref(self, sig_ref):
+    def print_signal_ref(self, sig_ref: Sign):
         """
         This function print signal reference on OpenDrive file.
         Signal reference child element is created with corresponding attributes and added to road parent element.
@@ -414,7 +418,7 @@ class Road:
     #       color="standard" width="1.3000000000000000e-01"/>
     # </lane>
 
-    def lane_help(self, id: int, type: str, level: int, pos: etree, width_list: list, dist_list: list):
+    def lane_help(self, id: int, type: str, level: int, pos: etree._Element, width_list: List[Lanelet], dist_list: np.ndarray):
         """
         This function add lane child element to parent element which may be right, left or center.
         Link, width, roadMark elements are also added to lane element.

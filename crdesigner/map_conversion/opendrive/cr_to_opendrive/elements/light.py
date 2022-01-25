@@ -1,4 +1,9 @@
+from typing import List, Dict
+
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.signal import Signal
+
+from commonroad.scenario.lanelet import LaneletNetwork
+from commonroad.scenario.traffic_sign import TrafficLight
 
 
 class Light(Signal):
@@ -6,8 +11,8 @@ class Light(Signal):
     This traffic light class inherits from Signal class
     which is used to convert the CommonRoad lights into the OpenDRIVE lights
     """
-    def __init__(self, roadKey, uniqueId, data, laneList) -> None:
-        super().__init__(roadKey, uniqueId, data, laneList)
+    def __init__(self, road_key: int, unique_id: int, data: List[TrafficLight], lane_list: LaneletNetwork) -> None:
+        super().__init__(road_key, unique_id, data, lane_list)
         self.name = "Light_" + str(self.id)
         self.dynamic = "yes" if self.od_object.active else "no"
         self.country = "OpenDRIVE"
@@ -28,7 +33,7 @@ class Light(Signal):
         country={self.country}
         type={self.type}
         subtype={self.subtype}
-        coutryRevision={self.coutryRevision}
+        countryRevision={self.country_revision}
         value={self.value}
         unit={self.unit}
         width={self.width}

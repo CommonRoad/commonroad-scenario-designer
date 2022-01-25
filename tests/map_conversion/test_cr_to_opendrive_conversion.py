@@ -17,15 +17,6 @@ from tests.map_conversion.utils import elements_equal
 class TestConverterConvert(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super(TestConverterConvert, self).__init__(*args, **kwargs)
-        self.map_names = [
-            "zero_width_lanes_map",
-            "ARG_Carcarana-1_1_T-1",
-            "DEU_Guetersloh-11_2_T-1",
-            "USA_Lanker-1_17_T-1",
-            "DEU_Test-1_1_T-1",
-            "DEU_Muehlhausen-2_2_T-1",
-            "lanelet_no_succ_or_pred",
-        ]
 
     def prepare_conversion(self, map_name: str):
         self.cwd_path = os.path.dirname(os.path.abspath(__file__))

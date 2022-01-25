@@ -1,12 +1,13 @@
-# import functions to read xml file and visualize CommonRoad objects
-from commonroad.common.file_reader import CommonRoadFileReader
-from commonroad.scenario import scenario
-
-
 # time, size for benchmarking
 import time
 import os
 import numpy as np
+from typing import Dict, List
+
+# import functions to read xml file and visualize CommonRoad objects
+from commonroad.common.file_reader import CommonRoadFileReader
+from commonroad.scenario.scenario import Scenario
+
 
 class DataLoader:
     """
@@ -47,7 +48,7 @@ class DataLoader:
 
         self.init_time = time.time() - start
 
-    def initialize(self) -> (scenario, list, dict):
+    def initialize(self) -> (Scenario, List[int], Dict[int, bool]):
         """
         Get the needed data for conversion
 
@@ -85,7 +86,7 @@ class DataLoader:
 
         return self.get_avg((x_right + x_left)/2, (y_right+y_left)/2)
 
-    def find_successors(self, indices: dict.keys) -> list:
+    def find_successors(self, indices: dict.keys) -> List[int]:
         """
         This method creates list of successors of all incoming lanelets
 
@@ -99,7 +100,7 @@ class DataLoader:
             successors.extend(lane.successor)
         return successors
 
-    def prepare_intersection_successors(self) -> list:
+    def prepare_intersection_successors(self) -> List[int]:
         """
         This method creates the list of successor of all incoming lanelets(id's) of intersection defined
 
@@ -111,18 +112,19 @@ class DataLoader:
         inter_successors = self.find_successors(inter_incoming_lanelets)
         return inter_successors
 
-    def prepare_id_dict(self) -> dict:
+    def prepare_id_dict(self) -> Dict[int, bool]:
         """
         Creates a dictionary with lanelet ids as keys and boolean values.
         This helps keep track which lanelets already got converted
 
         :return: dictionary with lanelet ids as keys and boolena values
         """
-        laneList = self.lane_net.lanelets
+        
+        lane_list = self.lane_net.lanelets
         id_dict = {}
         # this is done to keep track which lanelets already got converted
-        for i in range(0, len(laneList)):
-            id_dict[laneList[i].lanelet_id] = False
+        for i in range(0, len(lane_list)):
+            id_dict[lane_list[i].lanelet_id] = False
         return id_dict
 
     def __str__(self) -> str:

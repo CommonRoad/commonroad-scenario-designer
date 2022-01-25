@@ -1,15 +1,19 @@
+import copy
+import time
+
 from posixpath import lexists
 from typing import Dict, List
+
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.obstacle import Obstacle
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.sign import Sign
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.light import Light
 import crdesigner.map_conversion.opendrive.cr_to_opendrive.utils.file_writer as fwr
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.road import Road
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.junction import Junction
+
 from commonroad.scenario.intersection import IntersectionIncomingElement
-from commonroad.scenario import scenario
-import copy
-import time
+from commonroad.scenario.scenario import Scenario
+from commonroad.scenario.lanelet import Lanelet
 
 
 class Converter:
@@ -19,7 +23,7 @@ class Converter:
     are converted to corresponding OpenDRIVE elements and OpenDRIVE file is created.
 
     """
-    def __init__(self, file_path: str, sc: scenario, successors: List[int], ids: Dict[int, bool]):
+    def __init__(self, file_path: str, sc: Scenario, successors: List[int], ids: Dict[int, bool]):
         self.path = file_path
         self.scenario = sc
         self.inter_successors = successors
@@ -89,7 +93,7 @@ class Converter:
         Junction.counting = 0
         Obstacle.counting = 0
 
-    def populate_traffic_elements(self, link_map: dict):
+    def populate_traffic_elements(self, link_map: Dict[int, int]):
         """
         This function is responsible for populating traffic elements.
         """
@@ -129,7 +133,7 @@ class Converter:
                     for unique_id, od_object in elements[specifier].items():
                         Light(road_key, unique_id, od_object, self.lane_net)
 
-    def construct_roads(self, frontier: list):
+    def construct_roads(self, frontier: List[int]):
         """
         This method is responsible for road construction.
         We start from a given lanelet, we expand it left and right to construct its corresponding road,
@@ -229,7 +233,8 @@ class Converter:
                 obstacle.initial_state,
             )
 
-    def process_link_map(self, link_map: dict, lane_2_lane: dict):
+    def process_link_map(self, link_map: Dict[int, Dict[int, Dict[str, List[int]]]],
+                         lane_2_lane: Dict[int, Dict[str, Dict]]):
         """
         This function creates the data structure where all linkage information is stored, the link_map
         For more information on the link_map, read our documentation.
@@ -286,7 +291,8 @@ class Converter:
                     road_succ_pred_final[key].append(Road.cr_id_to_od[value])
             link_map[road_id]["roadLinkage"] = road_succ_pred_final
 
-    def create_linkages(self, link_map: dict, lane_2_lane):
+    def create_linkages(self, link_map: Dict[int, Dict[int, Dict[str, List[int]]]],
+                        lane_2_lane: Dict[int, Dict[str, Dict[int, List[int]]]]):
         """
         This function implements road-to-road linkage.
         This happens when a road has exactly one successor/predecessor.
@@ -314,7 +320,7 @@ class Converter:
                     cur_key, cur_links, len_succ, len_pred, cur_links_lanelets, lane_2_lane[key]
                 )
 
-    def add_junction_linkage(self, link_map: dict):
+    def add_junction_linkage(self, link_map: Dict[int, Dict[int, Dict[str, List[int]]]]):
         """
         This function links roads to junctions.
         This happens when a road has multiple successors/predecessors.
@@ -375,7 +381,7 @@ class Converter:
                     ].intersection_id
                     road.add_junction_linkage(junction_id, "predecessor")
 
-    def add_ids(self, road_lanes: list, frontier: list):
+    def add_ids(self, road_lanes: List[Lanelet], frontier: List[int]):
         """
         This function mark ID's of lanes in the frontier as visited
 
@@ -387,7 +393,7 @@ class Converter:
             if lane.lanelet_id in frontier:
                 frontier.remove(lane.lanelet_id)
 
-    def extend_road(self, current, road_lanes, left, append):
+    def extend_road(self, current: Lanelet, road_lanes: List[Lanelet], left: bool, append: bool) -> List[Lanelet]:
         """
         This function extend road left and right, returns all lanes from right to left.
 
