@@ -148,7 +148,7 @@ def osm_to_commonroad(input_file: str) -> Scenario:
 def commonroad_to_opendrive(input_file: str, output_file: str):
     """
     Converts CommonRoad file to OpenDRIVE file and stores it
-    @param input_file: Path to CommonRoad file 
+    @param input_file: Path to CommonRoad file
     @param output_file: Path where OpenDRIVE file to be stored
     """
 
