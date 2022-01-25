@@ -65,7 +65,7 @@ rnd = MPRenderer()
 wrapper.lanelet_network.draw(rnd)
 rnd.render(show=True)
 
-# write generated traffic lights back to commonroad file
+# write generated traffic lights back to CommonRoad file
 scenario.lanelet_network = wrapper.lanelet_network
 
 # run Simulation

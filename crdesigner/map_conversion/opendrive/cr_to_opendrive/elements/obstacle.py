@@ -1,23 +1,27 @@
 from lxml import etree
 import numpy as np
-from conversion.elements.road import Road
+from typing import List
+from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.road import Road
 from commonroad.geometry.shape import Shape, Rectangle, Circle, Polygon
 from commonroad.scenario.trajectory import State
-import conversion.utils.commonroad_ccosy_geometry_util as util
+import crdesigner.map_conversion.opendrive.cr_to_opendrive.utils.commonroad_ccosy_geometry_util as util
+from commonroad.scenario.lanelet import Lanelet
 
-# Obstacle class
+
 class Obstacle:
-
+    """
+    This class adds object child element to road parent element
+    and converts CommonRoad obstacles to OpenDRIVE obstacles
+    """
     counting = 0
 
-    def __init__(self, type, lanelets, shape: Shape, state: State) -> None:
+    def __init__(self, type: str, lanelets: List[Lanelet], shape: Shape, state: State) -> None:
 
         if not lanelets:
             print("no lanelets")
             return
-
-        roadId = Road.crIdToOD[lanelets[0]]
-        self.road = Road.roads[roadId]
+        road_id = Road.cr_id_to_od[lanelets[0]]
+        self.road = Road.roads[road_id]
         self.state = state
 
         Obstacle.counting += 1
@@ -29,20 +33,20 @@ class Obstacle:
         self.object.set("type", self.type)
         self.object.set("orientation", "none")
 
-        self.setCoordinates()
+        self.set_coordinates()
 
         self.object.set("height", "1.0")  # should this be hardcoded?
 
         if isinstance(shape, Rectangle):
-            self.setRectangle(shape)
+            self.set_rectangle(shape)
         elif isinstance(shape, Circle):
-            self.setCircle(shape)
+            self.set_circle(shape)
         else:
-            self.setPolygon(shape)
+            self.set_polygon(shape)
 
-    def setCoordinates(self):
+    def set_coordinates(self):
         """
-        Sets the object's coordinates according to the road reference line
+        This function sets the object's coordinates according to the road reference line.
         """
         refline = self.road.center
         center = self.state.position
@@ -68,14 +72,24 @@ class Obstacle:
         self.object.set("zOffset", "0.0")
         self.object.set("hdg", str(orientation))
 
-    def setCircle(self, shape: Circle):
+    def set_circle(self, shape: Circle):
+        """
+        This function sets the radius of Circle
+        """
         self.object.set("radius", str(shape.radius))
 
-    def setRectangle(self, shape: Rectangle):
+    def set_rectangle(self, shape: Rectangle):
+        """
+        This function sets the length and width of Rectangle
+        """
         self.object.set("length", str(shape.length))
         self.object.set("width", str(shape.width))
 
-    def setPolygon(self, shape: Polygon):
+    def set_polygon(self, shape: Polygon):
+        """
+        This fucntion add outline child element to object parent element
+        and sets id, outer, closed as attributes of outline.
+        """
         self.outline = etree.SubElement(self.object, "outline")
         self.outline.set("id", "0")
         self.outline.set("outer", "true")

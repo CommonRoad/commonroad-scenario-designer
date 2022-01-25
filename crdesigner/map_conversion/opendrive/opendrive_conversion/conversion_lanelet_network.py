@@ -1,5 +1,5 @@
 """Module to enhance LaneletNetwork class
-so it can be used for conversion from the opendrive format."""
+so it can be used for conversion from the OpenDRIVE format."""
 import itertools
 import math
 import warnings

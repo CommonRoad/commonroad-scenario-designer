@@ -1,4 +1,4 @@
-"""module to capture traffic signal information from parsed opendrive file"""
+"""module to capture traffic signal information from parsed OpenDRIVE file"""
 import iso3166
 import numpy as np
 import warnings
@@ -43,7 +43,7 @@ def get_traffic_signals(road: Road):
 
     # TODO: Stop lines are created and appended to the list for DEU and OpenDrive format.
     # This has been replicated for other countries but has not been tested with a test case
-    # Stop lines have a signal type of 294 and are handled differently in the commonroad format
+    # Stop lines have a signal type of 294 and are handled differently in the CommonRoad format
 
     for signal in road.signals:
 
@@ -66,7 +66,7 @@ def get_traffic_signals(road: Road):
             if signal_country == 'DEU':
                 if signal.type == "1000003" or signal.type == "1000004":
                     continue  # stop line
-                    # Stop lines have a signal type of 294 and are handled differently in the commonroad format
+                    # Stop lines have a signal type of 294 and are handled differently in the CommonRoad format
                 if signal.type == '294':
                     # Creating stop line object by first calculating the position of the two end points that define the
                     # straight stop line
@@ -185,7 +185,7 @@ def calculate_stop_line_position(lane_sections, signal, position, tangent):
     Function to calculate the 2 points that define the stop line which
     is a straight line from one edge of the road to the other.
     Args:
-        lane_sections: opendrive lane_sections list containing the lane_section parsed lane_section class
+        lane_sections: OpenDRIVE lane_sections list containing the lane_section parsed lane_section class
         signal: signal object in this case the stop line
         position: initial position as calculated in the get_traffic_signals function
         tangent: tangent value as calculated in the get_traffic_signals function

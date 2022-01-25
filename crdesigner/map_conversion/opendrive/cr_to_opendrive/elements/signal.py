@@ -1,25 +1,32 @@
 import numpy as np
-from conversion.elements.road import Road
-import conversion.utils.commonroad_ccosy_geometry_util as util
+from typing import List, Dict
 
-# Traffic signal class
+import crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.road as road
+import crdesigner.map_conversion.opendrive.cr_to_opendrive.utils.commonroad_ccosy_geometry_util as util
+
+from commonroad.scenario.lanelet import LaneletNetwork
+
+
 class Signal:
-    def __init__(self, roadKey, uniqueId, data, laneList) -> None:
-        self.road = Road.roads[roadKey]
-        self.id = str(uniqueId)
-        self.laneList = laneList
-        self.ODobject = data[0]
-        self.laneletId = data[1]
+    """
+    This class converts CommonRoad traffic signal to OpenDRIVE traffic signal
+    """
+    def __init__(self, road_key: int, unique_id: int, data: List, lane_list: LaneletNetwork) -> None:
+        self.road = road.Road.roads[road_key]
+        self.id = str(unique_id)
+        self.lane_list = lane_list
+        self.od_object = data[0]
+        self.lanelet_id = data[1]
         self.zOffset = "3.3885"
         self.subtype = "-1"
-        self.coutryRevision = "2021"
+        self.country_revision = "2021"
         self.unit = "km/h"
         self.width = "0.77"
         self.height = "0.77"
         self.hOffset = "0.0"
 
-        self.s, self.t = self.computeCoordinates()
-        self.orientation = self.getOrientation()
+        self.s, self.t = self.compute_coordinate()
+        self.orientation = self.get_orientation()
 
     def __str__(self) -> str:
         return f"""
@@ -29,15 +36,21 @@ class Signal:
         orientation={self.orientation}
         zOffset={self.zOffset}
         subtype={self.subtype}
-        coutryRevision={self.coutryRevision}
+        country_revision={self.country_revision}
         unit={self.unit}
         width={self.width}
         height={self.height}
         hOffset={self.hOffset}
         """
 
-    def computeCoordinates(self):
-        coords = self.road.center[0] - self.ODobject.position
+    def compute_coordinate(self) -> np.ndarray:
+        """
+        This function compute reference line coordinates s,t.
+
+        :return: Coordinate along reference line as s
+                 and lateral position, positive to the left within the inertial x/y plane as t.
+        """
+        coords = self.road.center[0] - self.od_object.position
 
         hdg = util.compute_orientation_from_polyline(self.road.center)[0]
 
@@ -49,13 +62,18 @@ class Signal:
             t = -t
         return s, t
 
-    def getOrientation(self):
-        lanelet = self.laneList.find_lanelet_by_id(self.laneletId)
-        meanLeft = np.mean(lanelet.left_vertices)
-        meanRight = np.mean(lanelet.right_vertices)
-        leftDist = np.linalg.norm(meanLeft - self.ODobject.position)
-        rightDist = np.linalg.norm(meanRight - self.ODobject.position)
-        if leftDist - rightDist < 0:
+    def get_orientation(self) -> str:
+        """
+        This function compute orientation of lanelet.
+
+        :return: Either positive sign or negative sign as string.
+        """
+        lanelet = self.lane_list.find_lanelet_by_id(self.lanelet_id)
+        mean_left = np.mean(lanelet.left_vertices)
+        mean_right = np.mean(lanelet.right_vertices)
+        left_dist = np.linalg.norm(mean_left - self.od_object.position)
+        right_dist = np.linalg.norm(mean_right - self.od_object.position)
+        if left_dist - right_dist < 0:
             return "-"
         else:
             return "+"

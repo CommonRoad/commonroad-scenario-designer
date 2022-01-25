@@ -102,8 +102,9 @@ We provide more detailed information and examples under the following links, e.g
 .. toctree::
     :maxdepth: 2
 
-    details/open_drive
-    details/osm
+    details/opendrive_to_commonroad
+    details/commonroad_to_opendrive
+    details/osm_to_commonroad
     details/lanelet2
     details/sumo
     details/commonroad_scenario_designer

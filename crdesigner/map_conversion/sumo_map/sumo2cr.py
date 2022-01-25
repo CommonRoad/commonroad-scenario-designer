@@ -14,7 +14,7 @@ def convert_net_to_cr(net_file: str, verbose: bool = False) -> Scenario:
     :param net_file: path of .net.xml file
     :param verbose: Boolean indicating whether status should be printed to console
 
-    :return: commonroad map file
+    :return: CommonRoad map file
     """
     assert isinstance(net_file, str)
 
@@ -31,7 +31,7 @@ def convert_net_to_cr(net_file: str, verbose: bool = False) -> Scenario:
     if verbose:
         print('converted to OpenDrive (.xodr)')
 
-    # convert to commonroad using opendrive2lanelet
+    # convert to CommonRoad using opendrive2lanelet
     # import, parse and convert OpenDRIVE file
     with open(opendrive_file, "r") as fi:
         open_drive = parse_opendrive(etree.parse(fi).getroot())

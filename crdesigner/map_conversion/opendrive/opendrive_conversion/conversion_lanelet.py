@@ -1,5 +1,5 @@
 """Module to enhance Lanelet class so it can be used
-for conversion from the opendrive format."""
+for conversion from the OpenDRIVE format."""
 
 from typing import Tuple, Optional
 

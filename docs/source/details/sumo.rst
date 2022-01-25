@@ -57,7 +57,7 @@ Python APIs
     from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
     from commonroad.visualization.mp_renderer import MPRenderer
 
-    from crdesigner.input_output.api import commonroad_to_sumo
+    from crdesigner.map_conversion.map_conversion_interface import commonroad_to_sumo
 
     from crdesigner.input_output.gui.toolboxes.gui_sumo_simulation import SUMO_AVAILABLE
     if SUMO_AVAILABLE:

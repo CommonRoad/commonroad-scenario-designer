@@ -9,6 +9,7 @@ from commonroad.scenario.scenario import Tag, Scenario
 
 from crdesigner.map_conversion.common.utils import generate_unique_id
 from crdesigner.map_conversion.map_conversion_interface import opendrive_to_commonroad
+
 from tests.map_conversion.utils import elements_equal
 
 __author__ = "Benjamin Orthen, Sebastian Maierhofer"
