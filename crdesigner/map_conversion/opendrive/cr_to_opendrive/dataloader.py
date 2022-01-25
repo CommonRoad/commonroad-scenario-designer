@@ -119,7 +119,6 @@ class DataLoader:
 
         :return: dictionary with lanelet ids as keys and boolena values
         """
-        
         lane_list = self.lane_net.lanelets
         id_dict = {}
         # this is done to keep track which lanelets already got converted

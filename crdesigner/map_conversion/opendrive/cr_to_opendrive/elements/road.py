@@ -28,7 +28,8 @@ class Road:
     DEVIAT = 0.001
     STEP = 50
 
-    def __init__(self, lane_list: List[Lanelet], number_of_lanes: int, root: etree._Element, current: Lanelet, junction_id: int):
+    def __init__(self, lane_list: List[Lanelet], number_of_lanes: int, root: etree._Element,
+                 current: Lanelet, junction_id: int):
         # Supress RankWarning in polyfit
         warnings.simplefilter("ignore", np.RankWarning)
 
@@ -114,9 +115,9 @@ class Road:
         else:
             raise ValueError("Relation must be either successor or predecessor")
 
-    def add_simple_linkage(self, key: int, links: Dict[str,List[int]], len_succ: int, len_pred: int,
-                           curl_links_lanelets: Dict[int or str, Dict[str, List[int]]], lane_2_lane: Dict[str,Dict[int, List[int]]]
-    ):
+    def add_simple_linkage(self, key: int, links: Dict[str, List[int]], len_succ: int, len_pred: int,
+                           curl_links_lanelets: Dict[int or str, Dict[str, List[int]]],
+                           lane_2_lane: Dict[str, Dict[int, List[int]]]):
         """
         This function add successor/predecessor child element to link parent element and
         each successor/predecessor are linked with its correponding landLink id.
@@ -418,7 +419,8 @@ class Road:
     #       color="standard" width="1.3000000000000000e-01"/>
     # </lane>
 
-    def lane_help(self, id: int, type: str, level: int, pos: etree._Element, width_list: List[Lanelet], dist_list: np.ndarray):
+    def lane_help(self, id: int, type: str, level: int, pos: etree._Element,
+                  width_list: List[Lanelet], dist_list: np.ndarray):
         """
         This function add lane child element to parent element which may be right, left or center.
         Link, width, roadMark elements are also added to lane element.
