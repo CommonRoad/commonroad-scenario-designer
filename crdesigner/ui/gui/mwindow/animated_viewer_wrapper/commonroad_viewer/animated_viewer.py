@@ -35,7 +35,7 @@ class AnimatedViewer:
 
         self.current_scenario = None
         self.current_pps = None
-        self.dynamic = DynamicCanvas(parent, width=5, height=10, dpi=100)
+        self.dynamic = DynamicCanvas(parent, width=5, height=10, dpi=100, animated_viewer=self)
         self.callback_function = callback_function
 
         # sumo config giving dt etc

@@ -7,6 +7,10 @@ from commonroad.common.util import Interval
 from commonroad.scenario.scenario import Scenario
 from commonroad.visualization.mp_renderer import MPRenderer
 from .helper import _merge_dict
+from .service_layer import update_draw_params_dynamic_only_based_on_zoom
+from .service_layer import update_draw_params_based_on_zoom
+from .service_layer import update_draw_params_based_on_scenario
+from .service_layer import update_draw_params_dynamic_based_on_scenario
 
 from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMO_AVAILABLE
 if SUMO_AVAILABLE:
@@ -29,72 +33,16 @@ ZOOM_FACTOR = 1.2
 
 class DynamicCanvas(FigureCanvas):
     """ this canvas provides zoom with the mouse wheel """
-    def __init__(self, parent=None, width=5, height=5, dpi=100):
-
+    def __init__(self, parent=None, width=5, height=5, dpi=100, animated_viewer=None):
+        self.animated_viewer = animated_viewer
         self.ax = None
         self.drawer = Figure(figsize=(width, height), dpi=dpi)
         self.rnd = MPRenderer(ax=self.ax)
 
-        self.draw_params = {
-            'scenario': {
-                'dynamic_obstacle': {
-                    'trajectory': {
-                        'show_label': True,
-                        'draw_trajectory': False
-                    }
-                },
-                'lanelet_network': {
-                    'traffic_sign': {
-                        'draw_traffic_signs': True,
-                        'show_traffic_signs': 'all',
-                    },
-                    'intersection': {
-                        'draw_intersections': False,
-                        'draw_incoming_lanelets': True,
-                        'incoming_lanelets_color': '#3ecbcf',
-                        'draw_crossings': True,
-                        'crossings_color': '#b62a55',
-                        'draw_successors': True,
-                        'successors_left_color': '#ff00ff',
-                        'successors_straight_color': 'blue',
-                        'successors_right_color': '#ccff00',
-                        'show_label': True,
-                    },
-                }
-            }
-        }
-
-        self.draw_params_dynamic_only = {
-            'scenario': {
-                'dynamic_obstacle': {
-                    'trajectory': {
-                        'show_label': True,
-                        'draw_trajectory': False
-                    }
-                },
-                'lanelet_network': {
-                    'intersection': {'draw_intersections': False},
-                    'lanelet': {
-                        'draw_border_vertices': False,
-                        'draw_start_and_direction': False,
-                        'draw_stop_line': False,
-                        'draw_center_bound': False,
-                        'draw_right_bound': False,
-                        'draw_left_bound': False
-                    },
-                    # 'traffic_light': {
-                    #     'scale_factor': 0.2
-                    # },
-                    'traffic_sign': {
-                        'draw_traffic_signs': True,
-                        'show_traffic_signs': 'all',
-                        # 'scale_factor': 0.2
-                    },
-                }
-            }
-        }
-
         self._handles = {}
+        self.initial_parameter_config_done = False  # This is used to only once set the parameter based on the scenario
+        self.draw_params = None  # needed later - here for reference
+        self.draw_params_dynamic_only = None  # needed later - here for reference
 
         super().__init__(self.drawer)
         self.setParent(parent)
@@ -183,7 +131,10 @@ class DynamicCanvas(FigureCanvas):
         else:
             new_center_x = center[0]
             new_center_y = center[1]
-
+        # update the parameters for drawing based on the zoom -> this is for performance,
+        # not all details need to be rendered when you are zoomed out
+        self.draw_params = update_draw_params_based_on_zoom(x=new_x_dim, y=new_y_dim)
+        self.draw_params_dynamic_only = update_draw_params_dynamic_only_based_on_zoom(x=new_x_dim, y=new_y_dim)
         self.update_plot([
             new_center_x - new_x_dim, new_center_x + new_x_dim,
             new_center_y - new_y_dim, new_center_y + new_y_dim
@@ -209,6 +160,14 @@ class DynamicCanvas(FigureCanvas):
         """
         xlim = self.ax.get_xlim()
         ylim = self.ax.get_ylim()
+        # update the parameters based on the number of lanelets and traffic signs - but only once
+        if not self.initial_parameter_config_done:
+            self.draw_params = update_draw_params_based_on_scenario(lanelet_count=len(scenario.lanelet_network.lanelets),
+                                                            traffic_sign_count=len(scenario.lanelet_network.traffic_signs))
+            self.draw_params_dynamic_only = update_draw_params_dynamic_based_on_scenario(
+                    lanelet_count=len(scenario.lanelet_network.lanelets),
+                    traffic_sign_count=len(scenario.lanelet_network.traffic_signs))
+            self.initial_parameter_config_done = True
 
         if draw_dynamic_only is True:
             self.rnd.remove_dynamic()
