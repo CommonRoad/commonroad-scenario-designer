@@ -11,6 +11,7 @@ from .service_layer import update_draw_params_dynamic_only_based_on_zoom
 from .service_layer import update_draw_params_based_on_zoom
 from .service_layer import update_draw_params_based_on_scenario
 from .service_layer import update_draw_params_dynamic_based_on_scenario
+from .service_layer import resize_scenario_based_on_position, resize_scenario_based_on_zoom
 
 from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMO_AVAILABLE
 if SUMO_AVAILABLE:
@@ -135,6 +136,12 @@ class DynamicCanvas(FigureCanvas):
         # not all details need to be rendered when you are zoomed out
         self.draw_params = update_draw_params_based_on_zoom(x=new_x_dim, y=new_y_dim)
         self.draw_params_dynamic_only = update_draw_params_dynamic_only_based_on_zoom(x=new_x_dim, y=new_y_dim)
+        self.animated_viewer.current_scenario = resize_scenario_based_on_zoom(
+            scenario=self.animated_viewer.original_scenario,
+            center_x=new_center_x,
+            center_y=new_center_y,
+            dim_x=x_dim,
+            dim_y=y_dim)
         self.update_plot([
             new_center_x - new_x_dim, new_center_x + new_x_dim,
             new_center_y - new_y_dim, new_center_y + new_y_dim
@@ -168,7 +175,6 @@ class DynamicCanvas(FigureCanvas):
                     lanelet_count=len(scenario.lanelet_network.lanelets),
                     traffic_sign_count=len(scenario.lanelet_network.traffic_signs))
             self.initial_parameter_config_done = True
-
         if draw_dynamic_only is True:
             self.rnd.remove_dynamic()
             # self.rnd.ax.clear()
@@ -178,6 +184,8 @@ class DynamicCanvas(FigureCanvas):
         draw_params_merged = _merge_dict(self.draw_params.copy(), draw_params)
         self.rnd.plot_limits = plot_limits
         self.rnd.ax = self.ax
+        # manipulate the scenario based on the original scenario and where we currently are
+        scenario = resize_scenario_based_on_position(scenario=scenario)
         if draw_dynamic_only is True:
             draw_params_merged = _merge_dict(self.draw_params_dynamic_only.copy(), draw_params)
             print(draw_params_merged)

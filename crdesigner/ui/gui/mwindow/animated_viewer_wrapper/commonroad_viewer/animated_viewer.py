@@ -34,6 +34,7 @@ class AnimatedViewer:
     def __init__(self, parent, callback_function):
 
         self.current_scenario = None
+        self.original_scenario = None
         self.current_pps = None
         self.dynamic = DynamicCanvas(parent, width=5, height=10, dpi=100, animated_viewer=self)
         self.callback_function = callback_function
@@ -62,6 +63,8 @@ class AnimatedViewer:
         :type planning_problem_set: PlanningProblemSet
         """
         self.current_scenario = scenario
+        # safe here the original scenario -> this is needed for zooming in / out and for moving around
+        self.original_scenario = scenario
         self.current_pps = planning_problem_set
 
         # if we have not subscribed already, subscribe now
