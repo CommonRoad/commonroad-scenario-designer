@@ -64,6 +64,27 @@ class ObstacleToolboxUI(Toolbox):
         self.button_remove_obstacle = QPushButton("Remove")
         self.button_add_static_obstacle = QPushButton("Add")
 
+        self.vis_settings_container = QVBoxLayout()
+        self.vis_settings_label = QLabel("Visualization settings")
+        self.vis_settings_label.setFont(QFont("Arial", 11, QFont.Bold))
+        self.vis_settings_container.addWidget(self.vis_settings_label)
+
+        self.color_container = QHBoxLayout()
+        self.vis_settings_container.addLayout(self.color_container)
+        self.color_label = QLabel("Obstacle color:")
+        self.color_container.addWidget(self.color_label)
+        self.default_color = QCheckBox("Default color")
+        self.default_color.setChecked(True)
+        self.color_btn = QPushButton("Choose color")
+        self.selected_color = QWidget()
+        self.selected_color.setStyleSheet("border: 1px solid black")
+        self.selected_color.setFixedWidth(25)
+        self.selected_color.setFixedHeight(25)
+
+        self.color_container.addWidget(self.default_color)
+        self.color_container.addWidget(self.color_btn)
+        self.color_container.addWidget(self.selected_color)
+
         self.layout_obstacle_information_groupbox = QFormLayout()
         self.init_rectangle_fields()
         self.obstacle_information_groupbox = QGroupBox()
@@ -91,7 +112,8 @@ class ObstacleToolboxUI(Toolbox):
         layout_obstacle_buttons.addRow(self.button_remove_obstacle)
         layout_obstacle_buttons.addRow(self.button_add_static_obstacle)
         layout_obstacles.addLayout(layout_obstacle_buttons)
-
+        layout_obstacles.addLayout(self.vis_settings_container) #maybe move later
+        
         title_obstacle = "Obstacle"
         self.sections.append((title_obstacle, widget_obstacles))
 
@@ -334,3 +356,12 @@ class ObstacleToolboxUI(Toolbox):
 
         for j in range(self.amount_vertices):
             self.polygon_label[j].setText("Vertice " + str(j))
+
+    def color_picker(self):
+        """opens color dialogue"""
+        self.obstacle_color = QColorDialog.getColor()
+
+        self.default_color.setChecked(False)
+        self.selected_color.setStyleSheet(
+            "QWidget { border:1px solid black; background-color: %s}"
+             % self.obstacle_color.name())

@@ -99,6 +99,9 @@ class ObstacleToolbox(QDockWidget):
         self.obstacle_toolbox_ui.obstacle_dyn_stat.currentTextChanged.connect(
             lambda: self.obstacle_toolbox_ui.toggle_dynamic_static())
 
+        self.obstacle_toolbox_ui.color_btn.clicked.connect(
+            lambda: self.obstacle_toolbox_ui.color_picker())
+
         if SUMO_AVAILABLE:
             self.obstacle_toolbox_ui.button_start_simulation.clicked.connect(lambda: self.start_sumo_simulation())
 
@@ -159,7 +162,12 @@ class ObstacleToolbox(QDockWidget):
                 })
             )
         #set_static_obstacle_color("g")
-        self.canvas.set_static_obstacle_color("g")
+        if self.obstacle_toolbox_ui.default_color.isChecked():
+            self.canvas.set_static_obstacle_color(static_obstacle.obstacle_id)
+        else:
+            self.canvas.set_static_obstacle_color(static_obstacle.obstacle_id, 
+                                                    self.obstacle_toolbox_ui.obstacle_color.name())
+
         self.current_scenario.add_objects(static_obstacle)         
         self.callback(self.current_scenario)
         #self.canvas.draw_scenario(self.current_scenario)
@@ -249,6 +257,11 @@ class ObstacleToolbox(QDockWidget):
                 )
 
             )
+        if self.obstacle_toolbox_ui.default_color.isChecked():
+            self.canvas.set_dynamic_obstacle_color(dynamic_obstacle.obstacle_id)
+        else:
+            self.canvas.set_dynamic_obstacle_color(dynamic_obstacle.obstacle_id,
+                                                    self.obstacle_toolbox_ui.obstacle_color.name())
         self.current_scenario.add_objects(dynamic_obstacle)       
         self.callback(self.current_scenario)
 

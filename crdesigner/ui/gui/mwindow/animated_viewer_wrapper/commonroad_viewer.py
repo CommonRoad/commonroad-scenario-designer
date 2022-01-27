@@ -51,6 +51,7 @@ class DynamicCanvas(FigureCanvas):
     """ this canvas provides zoom with the mouse wheel """
     # static because the color should be saved
     obstacle_color = None
+    obstacle_color_array = []
     def __init__(self, parent=None, width=5, height=5, dpi=100):
 
         self.ax = None
@@ -232,6 +233,7 @@ class DynamicCanvas(FigureCanvas):
         :type plot_limits: [type], optional
         :param draw_dynamic_only: reuses static artists
         """
+        print("hello")
         xlim = self.ax.get_xlim()
         ylim = self.ax.get_ylim()
 
@@ -245,29 +247,46 @@ class DynamicCanvas(FigureCanvas):
         #if "set_static_obstacle_color.obstacle_color" in globals():
             #obstacle_draw_params = self.set_obstacle_draw_param(set_static_obstacle_color.obstacle_color)
         #else:
-        obstacle_draw_params = self.set_obstacle_draw_param()
+        #obstacle_draw_params = self.set_obstacle_draw_param()
 
         draw_params_merged = _merge_dict(self.draw_params.copy(), draw_params)
-        draw_params_merged = _merge_dict(draw_params_merged, obstacle_draw_params)
+        #draw_params_merged = _merge_dict(draw_params_merged, obstacle_draw_params)
 
         self.rnd.plot_limits = plot_limits
         self.rnd.ax = self.ax
         if draw_dynamic_only is True:
             draw_params_merged = _merge_dict(self.draw_params_dynamic_only.copy(), draw_params)
-            print(draw_params_merged)
+            #draw_params_merged = _merge_dict(draw_params_merged, obstacle_draw_params)
             scenario.draw(renderer=self.rnd, draw_params=draw_params_merged)
 
             self.rnd.render(keep_static_artists=True)
 
         else:
             scenario.draw(renderer=self.rnd, draw_params=draw_params_merged)
+            self.draw_obstacles(scenario)
             if pps is not None:
                 pps.draw(renderer=self.rnd, draw_params=draw_params_merged)
+            
             self.rnd.render(keep_static_artists=True)
 
+        
         if not plot_limits:
             self.ax.set(xlim=xlim)
             self.ax.set(ylim=ylim)
+
+    def draw_obstacles(self, scenario: Scenario):
+        for obj in scenario.obstacles:
+            #temp = self.obstacle_color_array.index([obj.obstacle_id])
+            # this is for getting the index of where the object_id is located
+            """temp = [(i, self.obstacle_color_array.index(obj.obstacle_id))
+                    for i, self.obstacle_color_array in enumerate(self.obstacle_color_array)
+                    if obj.obstacle_id in self.obstacle_color_array]"""
+            result = next(c for c in self.obstacle_color_array if c[0] == obj.obstacle_id)#[element for element in self.obstacle_color_array if element[0] == obj.obstacle_id]
+            obstacle_draw_params = result[1]
+            draw_params_merged = _merge_dict(self.draw_params, obstacle_draw_params)
+
+            obj.draw(renderer=self.rnd, draw_params=draw_params_merged)
+            #self.rnd.render(show=False)
 
     def update_obstacles(self,
                          scenario: Scenario,
@@ -280,6 +299,7 @@ class DynamicCanvas(FigureCanvas):
         :param draw_params: CommonRoad DrawParams for visualization
         :param plot_limits: Matplotlib plot limits
         """
+        print("test")
         # redraw dynamic obstacles
         obstacles = scenario.obstacles_by_position_intervals([
             Interval(plot_limits[0], plot_limits[1]),
@@ -294,28 +314,45 @@ class DynamicCanvas(FigureCanvas):
             self.rnd.render(show=True)
     
     #@staticmethod
-    def set_static_obstacle_color(self,color=None):
+    def set_static_obstacle_color(self,obstacle_id, color=None):
         """sets static_obstacle color, if color=None default color"""
         #print("hello")
         if not color:
-            DynamicCanvas.obstacle_color = "#d95558" #default color static_obstacle
-        else:
-            DynamicCanvas.obstacle_color = color
+            color = "#d95558"
+            #DynamicCanvas.obstacle_color_array.append([obstacle_id, "#d95558"]) #default color static_obstacle
+        #else:
+        draw_params = {"static_obstacle": {"occupancy": {"shape": {
+            "polygon": {"facecolor": color},
+            "rectangle": {"facecolor": color},
+            "circle": {"facecolor": color}}}}}
+        DynamicCanvas.obstacle_color_array.append([obstacle_id, draw_params])
     #@staticmethod
-    def set_dynamic_obstacle_color(self, color=None):
+    def set_dynamic_obstacle_color(self, obstacle_id, color=None):
         """sets static_obstacle color, if color=None default color"""
         if not color:
-            DynamicCanvas.obstacle_color = "#00478f" #default color dynamic_obstacle
-        else:
-            DynamicCanvas.obstacle_color = color
+            color = "#00478f"
+        draw_params = {"dynamic_obstacle": {
+            "vehicle_shape": {"occupancy": {"shape": {
+            "polygon": {"facecolor": color},
+            "rectangle": {"facecolor": color},
+            "circle": {"facecolor": color}}}}}}
+            #DynamicCanvas.obstacle_color_array.append([obstacle_id, "#00478f"]) #default color dynamic_obstacle
+        #else:
+        DynamicCanvas.obstacle_color_array.append([obstacle_id, draw_params])
 
-    def set_obstacle_draw_param(self):
+    def set_obstacle_draw_param(self, color): #remove later?
         """changes color if it isn't default color"""
         draw_params = {
             "static_obstacle": {"occupancy": {"shape": {
             "polygon": {"facecolor": DynamicCanvas.obstacle_color},
             "rectangle": {"facecolor": DynamicCanvas.obstacle_color},
-            "circle": {"facecolor": DynamicCanvas.obstacle_color}}}}}
+            "circle": {"facecolor": DynamicCanvas.obstacle_color}}}},
+
+            "dynamic_obstacle": {
+            "vehicle_shape": {"occupancy": {"shape": {
+            "polygon": {"facecolor": DynamicCanvas.obstacle_color},
+            "rectangle": {"facecolor": DynamicCanvas.obstacle_color},
+            "circle": {"facecolor": DynamicCanvas.obstacle_color}}}}}}
         #print(self.obstacle_color)
         return draw_params
         #self.rnd.ax = self.ax
@@ -454,6 +491,7 @@ class AnimatedViewer:
                 'time_end': time_end,
                 'antialiased': True,
             }
+
             self.dynamic.draw_scenario(scenario, pps=pps, draw_params=draw_params)
 
         # Interval determines the duration of each frame in ms
@@ -604,7 +642,7 @@ class AnimatedViewer:
             draw_params = {
                 'time_begin': self.time_step.value - 1,
             }
-
+        
         self.dynamic.draw_scenario(self.current_scenario, self.current_pps, draw_params=draw_params)
 
         for lanelet in self.current_scenario.lanelet_network.lanelets:
