@@ -1,6 +1,7 @@
 from typing import List
 
 from PyQt5.QtWidgets import QSizePolicy
+import numpy as np
 from commonroad.planning.planning_problem import PlanningProblemSet
 
 from commonroad.common.util import Interval
@@ -12,6 +13,7 @@ from .service_layer import update_draw_params_based_on_zoom
 from .service_layer import update_draw_params_based_on_scenario
 from .service_layer import update_draw_params_dynamic_based_on_scenario
 from .service_layer import resize_scenario_based_on_zoom
+from commonroad.geometry.shape import Circle
 
 from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMO_AVAILABLE
 if SUMO_AVAILABLE:
@@ -45,14 +47,13 @@ class DynamicCanvas(FigureCanvas):
         self.draw_params = None  # needed later - here for reference
         self.draw_params_dynamic_only = None  # needed later - here for reference
         self.zoom_used = False
-        self.latest_x_dim = None
-        self.latest_y_dim = None
-        self.latest_center = None, None
+        self.last_changed_sth = False
 
         super().__init__(self.drawer)
         self.setParent(parent)
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
+        self.mpl_connect('button_press_event', self.select_scenario_element)
         self.mpl_connect('scroll_event', self.zoom)
 
         self.clear_axes()
@@ -117,7 +118,6 @@ class DynamicCanvas(FigureCanvas):
         # new center sensitive to mouse position of zoom event
         mouse_pos = (event.xdata, event.ydata)
         if mouse_pos[0] and mouse_pos[1]:
-            # TODO enhance zoom center
             new_center_diff_x = (center[0] - mouse_pos[0]) / 6
             new_center_diff_y = (center[1] - mouse_pos[1]) / 6
             if event.button == 'up':
@@ -141,7 +141,7 @@ class DynamicCanvas(FigureCanvas):
         # not all details need to be rendered when you are zoomed out
         self.draw_params = update_draw_params_based_on_zoom(x=new_x_dim, y=new_y_dim)
         self.draw_params_dynamic_only = update_draw_params_dynamic_only_based_on_zoom(x=new_x_dim, y=new_y_dim)
-        self.animated_viewer.current_scenario.lanelet_network = resize_scenario_based_on_zoom(
+        self.animated_viewer.current_scenario.lanelet_network, changed_sth = resize_scenario_based_on_zoom(
             original_lanelet_network=self.animated_viewer.original_lanelet_network,
             center_x=new_center_x,
             center_y=new_center_y,
@@ -150,10 +150,14 @@ class DynamicCanvas(FigureCanvas):
         self.zoom_used = True
         self.latest_x_dim = x_dim
         self.latest_y_dim = y_dim
+        self.last_center = (new_center_x, new_center_y)
         self.update_plot([
             new_center_x - new_x_dim, new_center_x + new_x_dim,
             new_center_y - new_y_dim, new_center_y + new_y_dim
         ])
+        if changed_sth or self.last_changed_sth:
+            self.animated_viewer.update_plot()
+        self.last_changed_sth = changed_sth
 
     def draw_scenario(self,
                       scenario: Scenario,
@@ -176,6 +180,7 @@ class DynamicCanvas(FigureCanvas):
         xlim = self.ax.get_xlim()
         ylim = self.ax.get_ylim()
         # update the parameters based on the number of lanelets and traffic signs - but only once during starting
+        # TODO reset this when a new file is loaded
         if not self.initial_parameter_config_done:
             self.draw_params = update_draw_params_based_on_scenario(lanelet_count=len(scenario.lanelet_network.lanelets),
                                                             traffic_sign_count=len(scenario.lanelet_network.traffic_signs))
@@ -183,17 +188,6 @@ class DynamicCanvas(FigureCanvas):
                     lanelet_count=len(scenario.lanelet_network.lanelets),
                     traffic_sign_count=len(scenario.lanelet_network.traffic_signs))
             self.initial_parameter_config_done = True
-        # now update the map based on the zoom factor - but only when the first initial drawing is done
-        if self.zoom_used:
-            x_min, x_max = self.ax.get_xlim()
-            y_min, y_max = self.ax.get_ylim()
-            center = ((x_min + x_max) / 2, (y_min + y_max) / 2)
-            # TODO find the right center - this one is wrong... -> therefor we are using the old center
-            print(center)
-            self.animated_viewer.current_scenario.lanelet_network = resize_scenario_based_on_zoom(
-                    original_lanelet_network=self.animated_viewer.original_lanelet_network, center_x=center[0], center_y=center[1],
-                    dim_x=self.latest_x_dim, dim_y=self.latest_y_dim)
-            scenario = self.animated_viewer.current_scenario
         if draw_dynamic_only is True:
             self.rnd.remove_dynamic()
             # self.rnd.ax.clear()
@@ -241,3 +235,62 @@ class DynamicCanvas(FigureCanvas):
         for obj in obstacles:
             obj.draw(renderer=self.rnd, draw_params=draw_params_merged)
             self.rnd.render(show=True)
+
+    # TODO rename this
+    def select_scenario_element(self, mouse_clicked_event):
+        """
+        Select lanelets by clicking on the canvas. Selects only one of the
+        lanelets that contains the click position.
+        """
+        mouse_pos = np.array(
+            [mouse_clicked_event.xdata, mouse_clicked_event.ydata])
+        click_shape = Circle(radius=0.01, center=mouse_pos)
+
+        if self.animated_viewer.current_scenario is None:
+            return
+        l_network = self.animated_viewer.current_scenario.lanelet_network
+        selected_l_ids = l_network.find_lanelet_by_shape(click_shape)
+        selected_lanelets = [l_network.find_lanelet_by_id(lid) for lid in selected_l_ids]
+        selected_obstacles = [obs for obs in self.animated_viewer.current_scenario.obstacles
+                              if obs.occupancy_at_time(self.animated_viewer.time_step.value) is not None and
+                              obs.occupancy_at_time(self.animated_viewer.time_step.value).shape.contains_point(mouse_pos)]
+
+        if len(selected_lanelets) > 0 and len(selected_obstacles) == 0:
+            self.animated_viewer.update_plot(sel_lanelet=selected_lanelets[0], time_step=self.animated_viewer.time_step.value)
+        else:
+            self.animated_viewer.update_plot(sel_lanelet=None, time_step=self.animated_viewer.time_step.value)
+
+        if len(selected_lanelets) + len(selected_obstacles) > 1:
+            output = "__Info__: More than one object can be selected! Lanelets: "
+            if len(selected_lanelets) > 0:
+                for la in selected_lanelets:
+                    output += str(la.lanelet_id) + ", "
+            output = output[:len(output) - 1]
+            if len(selected_obstacles) > 0:
+                output += ". Obstacles: "
+                for obs in selected_obstacles:
+                    output += str(obs.obstacle_id) + ", "
+            output = output[:len(output) - 1]
+            output += "."
+        else:
+            output = ""
+
+        if len(selected_obstacles) > 0:
+            selection = " Obstacle with ID " + str(selected_obstacles[0].obstacle_id) + " is selected."
+            self.animated_viewer.callback_function(selected_obstacles[0], output + selection)
+        elif len(selected_lanelets) > 0:
+            selection = " Lanelet with ID " + str(selected_lanelets[0].lanelet_id) + " is selected."
+            self.animated_viewer.callback_function(selected_lanelets[0], output + selection)
+
+        # now update the map based on the zoom factor - but only when the first initial drawing is done
+        if self.zoom_used:
+            x_min, x_max = self.ax.get_xlim()
+            y_min, y_max = self.ax.get_ylim()
+            center = ((x_min + x_max) / 2, (y_min + y_max) / 2)
+            x_dim = (x_max - x_min) / 2
+            y_dim = (y_max - y_min) / 2
+            self.animated_viewer.current_scenario.lanelet_network, changed_sth = resize_scenario_based_on_zoom(
+                    original_lanelet_network=self.animated_viewer.original_lanelet_network,
+                    center_x=center[0], center_y=center[1], dim_x=x_dim,
+                    dim_y=y_dim)
+            self.animated_viewer.update_plot()

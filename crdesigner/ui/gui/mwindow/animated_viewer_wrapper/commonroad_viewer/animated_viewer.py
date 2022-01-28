@@ -9,7 +9,6 @@ from commonroad.scenario.intersection import Intersection
 from commonroad.scenario.scenario import Scenario
 from commonroad.scenario.lanelet import Lanelet, LaneletNetwork
 from commonroad.visualization.mp_renderer import MPRenderer
-from commonroad.geometry.shape import Circle
 
 from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMO_AVAILABLE
 if SUMO_AVAILABLE:
@@ -50,7 +49,6 @@ class AnimatedViewer:
         self.animation: FuncAnimation = None
         # if playing or not
         self.playing = False
-        self.dynamic.mpl_connect('button_press_event', self.select_scenario_element)
 
     def open_scenario(self, scenario: Scenario, config: Observable = None,
                       planning_problem_set: PlanningProblemSet = None):
@@ -201,50 +199,6 @@ class AnimatedViewer:
         self.max_timestep = np.max(timesteps) if timesteps else 0
         return self.max_timestep
 
-    def select_scenario_element(self, mouse_clicked_event):
-        """
-        Select lanelets by clicking on the canvas. Selects only one of the
-        lanelets that contains the click position.
-        """
-        mouse_pos = np.array(
-            [mouse_clicked_event.xdata, mouse_clicked_event.ydata])
-        click_shape = Circle(radius=0.01, center=mouse_pos)
-
-        if self.current_scenario is None:
-            return
-        l_network = self.current_scenario.lanelet_network
-        selected_l_ids = l_network.find_lanelet_by_shape(click_shape)
-        selected_lanelets = [l_network.find_lanelet_by_id(lid) for lid in selected_l_ids]
-        selected_obstacles = [obs for obs in self.current_scenario.obstacles
-                              if obs.occupancy_at_time(self.time_step.value) is not None and
-                              obs.occupancy_at_time(self.time_step.value).shape.contains_point(mouse_pos)]
-
-        if len(selected_lanelets) > 0 and len(selected_obstacles) == 0:
-            self.update_plot(sel_lanelet=selected_lanelets[0], time_step=self.time_step.value)
-        else:
-            self.update_plot(sel_lanelet=None, time_step=self.time_step.value)
-
-        if len(selected_lanelets) + len(selected_obstacles) > 1:
-            output = "__Info__: More than one object can be selected! Lanelets: "
-            if len(selected_lanelets) > 0:
-                for la in selected_lanelets:
-                    output += str(la.lanelet_id) + ", "
-            output = output[:len(output) - 1]
-            if len(selected_obstacles) > 0:
-                output += ". Obstacles: "
-                for obs in selected_obstacles:
-                    output += str(obs.obstacle_id) + ", "
-            output = output[:len(output) - 1]
-            output += "."
-        else:
-            output = ""
-
-        if len(selected_obstacles) > 0:
-            selection = " Obstacle with ID " + str(selected_obstacles[0].obstacle_id) + " is selected."
-            self.callback_function(selected_obstacles[0], output + selection)
-        elif len(selected_lanelets) > 0:
-            selection = " Lanelet with ID " + str(selected_lanelets[0].lanelet_id) + " is selected."
-            self.callback_function(selected_lanelets[0], output + selection)
 
     def update_plot(self,
                     sel_lanelet: Lanelet = None,

@@ -1,4 +1,4 @@
-def detailed_drawing_params_threshold_zoom_met(x: float, y: float, x_threshold: int = 250, y_threshold: int = 250):
+def detailed_drawing_params_threshold_zoom_met(x: float, y: float, x_threshold: int = 50, y_threshold: int = 50):
     """
     If x or y are smaller than the predefined (but editable) threshold.
     Used to determine wheter or not the details like traffic_sign etc.. are drawn.
