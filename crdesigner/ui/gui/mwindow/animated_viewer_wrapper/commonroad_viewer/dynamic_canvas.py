@@ -11,7 +11,7 @@ from .service_layer import update_draw_params_dynamic_only_based_on_zoom
 from .service_layer import update_draw_params_based_on_zoom
 from .service_layer import update_draw_params_based_on_scenario
 from .service_layer import update_draw_params_dynamic_based_on_scenario
-from .service_layer import resize_scenario_based_on_position, resize_scenario_based_on_zoom
+from .service_layer import resize_scenario_based_on_zoom
 
 from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMO_AVAILABLE
 if SUMO_AVAILABLE:
@@ -44,6 +44,10 @@ class DynamicCanvas(FigureCanvas):
         self.initial_parameter_config_done = False  # This is used to only once set the parameter based on the scenario
         self.draw_params = None  # needed later - here for reference
         self.draw_params_dynamic_only = None  # needed later - here for reference
+        self.zoom_used = False
+        self.latest_x_dim = None
+        self.latest_y_dim = None
+        self.latest_center = None, None
 
         super().__init__(self.drawer)
         self.setParent(parent)
@@ -96,6 +100,7 @@ class DynamicCanvas(FigureCanvas):
         x_min, x_max = self.ax.get_xlim()
         y_min, y_max = self.ax.get_ylim()
         center = ((x_min + x_max) / 2, (y_min + y_max) / 2)
+        print("center :" + str(center))
         x_dim = (x_max - x_min) / 2
         y_dim = (y_max - y_min) / 2
 
@@ -136,12 +141,15 @@ class DynamicCanvas(FigureCanvas):
         # not all details need to be rendered when you are zoomed out
         self.draw_params = update_draw_params_based_on_zoom(x=new_x_dim, y=new_y_dim)
         self.draw_params_dynamic_only = update_draw_params_dynamic_only_based_on_zoom(x=new_x_dim, y=new_y_dim)
-        self.animated_viewer.current_scenario = resize_scenario_based_on_zoom(
-            scenario=self.animated_viewer.original_scenario,
+        self.animated_viewer.current_scenario.lanelet_network = resize_scenario_based_on_zoom(
+            original_lanelet_network=self.animated_viewer.original_lanelet_network,
             center_x=new_center_x,
             center_y=new_center_y,
             dim_x=x_dim,
             dim_y=y_dim)
+        self.zoom_used = True
+        self.latest_x_dim = x_dim
+        self.latest_y_dim = y_dim
         self.update_plot([
             new_center_x - new_x_dim, new_center_x + new_x_dim,
             new_center_y - new_y_dim, new_center_y + new_y_dim
@@ -167,7 +175,7 @@ class DynamicCanvas(FigureCanvas):
         """
         xlim = self.ax.get_xlim()
         ylim = self.ax.get_ylim()
-        # update the parameters based on the number of lanelets and traffic signs - but only once
+        # update the parameters based on the number of lanelets and traffic signs - but only once during starting
         if not self.initial_parameter_config_done:
             self.draw_params = update_draw_params_based_on_scenario(lanelet_count=len(scenario.lanelet_network.lanelets),
                                                             traffic_sign_count=len(scenario.lanelet_network.traffic_signs))
@@ -175,6 +183,17 @@ class DynamicCanvas(FigureCanvas):
                     lanelet_count=len(scenario.lanelet_network.lanelets),
                     traffic_sign_count=len(scenario.lanelet_network.traffic_signs))
             self.initial_parameter_config_done = True
+        # now update the map based on the zoom factor - but only when the first initial drawing is done
+        if self.zoom_used:
+            x_min, x_max = self.ax.get_xlim()
+            y_min, y_max = self.ax.get_ylim()
+            center = ((x_min + x_max) / 2, (y_min + y_max) / 2)
+            # TODO find the right center - this one is wrong... -> therefor we are using the old center
+            print(center)
+            self.animated_viewer.current_scenario.lanelet_network = resize_scenario_based_on_zoom(
+                    original_lanelet_network=self.animated_viewer.original_lanelet_network, center_x=center[0], center_y=center[1],
+                    dim_x=self.latest_x_dim, dim_y=self.latest_y_dim)
+            scenario = self.animated_viewer.current_scenario
         if draw_dynamic_only is True:
             self.rnd.remove_dynamic()
             # self.rnd.ax.clear()
@@ -184,8 +203,6 @@ class DynamicCanvas(FigureCanvas):
         draw_params_merged = _merge_dict(self.draw_params.copy(), draw_params)
         self.rnd.plot_limits = plot_limits
         self.rnd.ax = self.ax
-        # manipulate the scenario based on the original scenario and where we currently are
-        scenario = resize_scenario_based_on_position(scenario=scenario)
         if draw_dynamic_only is True:
             draw_params_merged = _merge_dict(self.draw_params_dynamic_only.copy(), draw_params)
             print(draw_params_merged)

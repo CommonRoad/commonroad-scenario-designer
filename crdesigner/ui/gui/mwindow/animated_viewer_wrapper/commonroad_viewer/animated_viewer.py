@@ -1,3 +1,4 @@
+import copy
 from typing import Union
 import numpy as np
 
@@ -6,7 +7,7 @@ from commonroad.planning.planning_problem import PlanningProblemSet
 
 from commonroad.scenario.intersection import Intersection
 from commonroad.scenario.scenario import Scenario
-from commonroad.scenario.lanelet import Lanelet
+from commonroad.scenario.lanelet import Lanelet, LaneletNetwork
 from commonroad.visualization.mp_renderer import MPRenderer
 from commonroad.geometry.shape import Circle
 
@@ -64,7 +65,7 @@ class AnimatedViewer:
         """
         self.current_scenario = scenario
         # safe here the original scenario -> this is needed for zooming in / out and for moving around
-        self.original_scenario = scenario
+        self.original_lanelet_network = LaneletNetwork.create_from_lanelet_network(lanelet_network=scenario.lanelet_network)
         self.current_pps = planning_problem_set
 
         # if we have not subscribed already, subscribe now
@@ -126,7 +127,7 @@ class AnimatedViewer:
                 'time_end': time_end,
                 'antialiased': True,
             }
-            self.dynamic.draw_scenario(scenario, pps=pps, draw_params=draw_params)
+            self.dynamic.draw_scenario(scenario=scenario, pps=pps, draw_params=draw_params)
 
         # Interval determines the duration of each frame in ms
         interval = 1000 * dt
@@ -194,6 +195,7 @@ class AnimatedViewer:
             return 0
         timesteps = [
             obstacle.prediction.occupancy_set[-1].time_step
+            for obstacle in self.current_scenario.dynamic_obstacles
             for obstacle in self.current_scenario.dynamic_obstacles
         ]
         self.max_timestep = np.max(timesteps) if timesteps else 0

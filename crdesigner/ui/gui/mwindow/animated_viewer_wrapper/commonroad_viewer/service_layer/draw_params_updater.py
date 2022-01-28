@@ -1,17 +1,16 @@
-"""
-Based on the x and y render specific things.
-"""
+from .general_services import detailed_drawing_params_threshold_zoom_met
+from .general_services import is_big_map
 
 
 def update_draw_params_based_on_scenario(lanelet_count: int, traffic_sign_count: int) -> {}:
-    if lanelet_count > 200 or traffic_sign_count > 200:
+    if is_big_map(lanelet_count=lanelet_count, traffic_sign_count=traffic_sign_count):
         return PARAMS_DRAW_UNDETAILED
     else:
         return PARAMS_DRAW_DETAILED
 
 
 def update_draw_params_dynamic_based_on_scenario(lanelet_count: int, traffic_sign_count: int) -> {}:
-    if lanelet_count > 200 or traffic_sign_count > 200:
+    if is_big_map(lanelet_count=lanelet_count, traffic_sign_count=traffic_sign_count):
         return PARAMS_DRAW_DYNAMIC_UNDETAILED
     else:
         return PARAMS_DRAW_DYNAMIC_DETAILED
@@ -20,7 +19,7 @@ def update_draw_params_dynamic_based_on_scenario(lanelet_count: int, traffic_sig
 def update_draw_params_based_on_zoom(x: float, y: float) -> {}:
     print("Called update_draw_params_based_on_zoom with x: " + str(x) + " and y: " + str(y))
     # Here render the details
-    if x <= 500.0 or y <= 500.0:
+    if detailed_drawing_params_threshold_zoom_met(x=x, y=y):
         return PARAMS_DRAW_DETAILED
     # else only render the lanelets -> big big performance gain
     else:
@@ -30,7 +29,7 @@ def update_draw_params_based_on_zoom(x: float, y: float) -> {}:
 def update_draw_params_dynamic_only_based_on_zoom(x: float, y: float) -> {}:
     print("Called update_draw_params_dynamic_only_based_on_zoom with x: " + str(x) + " and y: " + str(y))
     # Here render the details
-    if x <= 500.0 or y <= 500.0:
+    if detailed_drawing_params_threshold_zoom_met(x=x, y=y):
         return PARAMS_DRAW_DYNAMIC_DETAILED
     # else render only the lanelets
     else:
@@ -65,7 +64,6 @@ PARAMS_DRAW_DETAILED = {
                 }
             }
         }
-
 
 
 PARAMS_DRAW_UNDETAILED = {'scenario': {
