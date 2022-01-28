@@ -102,6 +102,9 @@ class ObstacleToolbox(QDockWidget):
         self.obstacle_toolbox_ui.color_btn.clicked.connect(
             lambda: self.obstacle_toolbox_ui.color_picker())
 
+        self.obstacle_toolbox_ui.default_color.stateChanged.connect(
+            lambda: self.obstacle_toolbox_ui.set_default_color())
+
         if SUMO_AVAILABLE:
             self.obstacle_toolbox_ui.button_start_simulation.clicked.connect(lambda: self.start_sumo_simulation())
 
@@ -429,6 +432,7 @@ class ObstacleToolbox(QDockWidget):
         obstacle_id = self.get_current_obstacle_id()
 
         if selected_obstacle:
+            self.canvas.remove_obstacle(obstacle_id)
             self.current_scenario.remove_obstacle(selected_obstacle)
 
         if self.obstacle_toolbox_ui.obstacle_dyn_stat.currentText() == "Static":
@@ -980,6 +984,8 @@ class ObstacleToolbox(QDockWidget):
         if self.obstacle_toolbox_ui.selected_obstacle.currentText() not in ["", "None"]:
             try:
                 selected_obstacle = self.get_current_obstacle()
+                obstacle_id = self.get_current_obstacle_id()
+                self.canvas.remove_obstacle(obstacle_id)
                 self.current_scenario.remove_obstacle(selected_obstacle)
                 self.callback(self.current_scenario)
                 self.amount_obstacles -=1

@@ -64,13 +64,13 @@ class ObstacleToolboxUI(Toolbox):
         self.button_remove_obstacle = QPushButton("Remove")
         self.button_add_static_obstacle = QPushButton("Add")
 
-        self.vis_settings_container = QVBoxLayout()
+        self.vis_settings_container = QFormLayout()
         self.vis_settings_label = QLabel("Visualization settings")
         self.vis_settings_label.setFont(QFont("Arial", 11, QFont.Bold))
-        self.vis_settings_container.addWidget(self.vis_settings_label)
+        self.vis_settings_container.addRow(self.vis_settings_label)
 
         self.color_container = QHBoxLayout()
-        self.vis_settings_container.addLayout(self.color_container)
+        self.vis_settings_container.addRow(self.color_container)
         self.color_label = QLabel("Obstacle color:")
         self.color_container.addWidget(self.color_label)
         self.default_color = QCheckBox("Default color")
@@ -365,3 +365,8 @@ class ObstacleToolboxUI(Toolbox):
         self.selected_color.setStyleSheet(
             "QWidget { border:1px solid black; background-color: %s}"
              % self.obstacle_color.name())
+
+    def set_default_color(self):
+        if self.default_color.isChecked():
+            self.selected_color.setStyleSheet(
+                "QWidget { border:1px solid black; background-color: white}")
