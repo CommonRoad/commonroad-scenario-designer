@@ -269,6 +269,7 @@ class DynamicCanvas(FigureCanvas):
         :param draw_params: CommonRoad DrawParams for visualization
         :param plot_limits: Matplotlib plot limits
         """
+        print("hello")
         # redraw dynamic obstacles
         obstacles = scenario.obstacles_by_position_intervals([
             Interval(plot_limits[0], plot_limits[1]),

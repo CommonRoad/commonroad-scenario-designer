@@ -3,6 +3,7 @@ from PyQt5.QtWidgets import QMainWindow
 
 from crdesigner.ui.gui.mwindow.service_layer.gui_resources.gui_settings_ui import Ui_MainWindow
 from crdesigner.ui.gui.mwindow.service_layer import config
+from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.commonroad_viewer import DynamicCanvas
 
 
 class GUISettings:
@@ -15,6 +16,7 @@ class GUISettings:
         self.connect_events()
         self.update_ui_values()
         self.settings_window.show()
+        self.canvas = DynamicCanvas()
     
     def connect_events(self):
         """ connect buttons to callables """
@@ -26,6 +28,7 @@ class GUISettings:
         sets the values of the settings window to the current values of config
         """
         self.window.chk_autofocus.setChecked(config.AUTOFOCUS)
+        self.window.chk_draw_trajectory.setChecked(config.DRAW_TRAJECTORY)
         return
 
     def save_to_config(self):
@@ -33,6 +36,7 @@ class GUISettings:
         saves the values in the settings window to config.py
         """
         config.AUTOFOCUS = self.window.chk_autofocus.isChecked()
+        config.DRAW_TRAJECTORY = self.window.chk_draw_trajectory.isChecked()
 
     def has_valid_entries(self) -> bool:
         """

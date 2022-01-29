@@ -33,6 +33,15 @@ class Ui_MainWindow(object):
         self.chk_autofocus.setText("")
         self.chk_autofocus.setObjectName("chk_autofocus")
         self.gridLayout_2.addWidget(self.chk_autofocus, 0, 2, 1, 1)
+
+        self.label_draw_trajectory = QtWidgets.QLabel(self.scrollAreaWidgetContents)
+        self.label_draw_trajectory.setObjectName("label_draw_trajectory")
+        self.gridLayout_2.addWidget(self.label_draw_trajectory, 0, 0, 2, 1)
+        
+        self.chk_draw_trajectory = QtWidgets.QCheckBox(self.scrollAreaWidgetContents)
+        self.chk_draw_trajectory.setText("")
+        self.chk_draw_trajectory.setObjectName("chk_draw_trajectory")
+        self.gridLayout_2.addWidget(self.chk_draw_trajectory, 0, 2, 2, 1)
         
         self.scrollArea.setWidget(self.scrollAreaWidgetContents)
         self.verticalLayout.addWidget(self.scrollArea)
@@ -66,6 +75,7 @@ class Ui_MainWindow(object):
         MainWindow.setWindowTitle(_translate("MainWindow", "GUI Settings"))
 
         self.label_autofocus.setText(_translate("MainWindow", "autofocus"))
+        self.label_draw_trajectory.setText(_translate("MainWindow", "draw trajectory"))
         self.label_autofocus.setToolTip(_translate("MainWindow", 
             "activate zoom reset when selecting an item from the list"))
         
