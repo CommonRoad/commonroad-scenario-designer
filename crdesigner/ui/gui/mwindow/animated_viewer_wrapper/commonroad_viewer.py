@@ -50,14 +50,13 @@ def _merge_dict(source, destination):
 class DynamicCanvas(FigureCanvas):
     """ this canvas provides zoom with the mouse wheel """
     # static because the color should be saved
-    obstacle_color = None
+    custom_draw_params = None
     obstacle_color_array = []
     def __init__(self, parent=None, width=5, height=5, dpi=100):
 
         self.ax = None
         self.drawer = Figure(figsize=(width, height), dpi=dpi)
         self.rnd = MPRenderer(ax=self.ax)
-        self.obstacle_color = None
 
         self.draw_params = {
             'scenario': {
@@ -249,7 +248,11 @@ class DynamicCanvas(FigureCanvas):
         #else:
         #obstacle_draw_params = self.set_obstacle_draw_param()
 
-        draw_params_merged = _merge_dict(self.draw_params.copy(), draw_params)
+        
+        if DynamicCanvas.custom_draw_params is not None:
+            draw_params_merged = _merge_dict(DynamicCanvas.custom_draw_params.copy(), draw_params)
+        else:
+            draw_params_merged = _merge_dict(self.draw_params.copy(), draw_params)
         #draw_params_merged = _merge_dict(draw_params_merged, obstacle_draw_params)
         #print(draw_params_merged)
         self.rnd.plot_limits = plot_limits
@@ -263,6 +266,7 @@ class DynamicCanvas(FigureCanvas):
 
         else:
             scenario.draw(renderer=self.rnd, draw_params=draw_params_merged)
+            #print(draw_params_merged)
             if pps is not None:
                 pps.draw(renderer=self.rnd, draw_params=draw_params_merged)
             else:
@@ -278,6 +282,7 @@ class DynamicCanvas(FigureCanvas):
     def draw_obstacles(self, scenario: Scenario, draw_params=None):
         """function that draws the obstacles"""
         for obj in scenario.obstacles:
+            print(draw_params)
             # this is for getting the index of where the object_id is located
             result = next(c for c in self.obstacle_color_array if c[0] == obj.obstacle_id)#[element for element in self.obstacle_color_array if element[0] == obj.obstacle_id]
             obstacle_draw_params = result[1]
@@ -336,6 +341,43 @@ class DynamicCanvas(FigureCanvas):
         i = DynamicCanvas.obstacle_color_array.index(result)
         DynamicCanvas.obstacle_color_array.pop(i)
 
+    def update_draw_params(self, trajectory):
+        """ 
+        updates draw_params based on gui settings
+        if no changes have been made, they will be the same
+        as the default above (self.draw_param)
+        """
+        DynamicCanvas.custom_draw_params = {
+            'scenario': {
+                'dynamic_obstacle': {
+                    'trajectory': {
+                        'show_label': True,
+                        'draw_trajectory': trajectory
+                    }
+                },
+                'lanelet_network': {
+                    'traffic_sign': {
+                        'draw_traffic_signs': True,
+                        'show_traffic_signs': 'all',
+                    },
+                    'intersection': {
+                        'draw_intersections': False,
+                        'draw_incoming_lanelets': True,
+                        'incoming_lanelets_color': '#3ecbcf',
+                        'draw_crossings': True,
+                        'crossings_color': '#b62a55',
+                        'draw_successors': True,
+                        'successors_left_color': '#ff00ff',
+                        'successors_straight_color': 'blue',
+                        'successors_right_color': '#ccff00',
+                        'show_label': True,
+                    },
+                }
+            },
+           
+        }
+        #self.draw_scenario(scenario)
+        
 def draw_lanelet_polygon(lanelet, ax, color, alpha, zorder,
                          label) -> Tuple[float, float, float, float]:
     # TODO efficiency

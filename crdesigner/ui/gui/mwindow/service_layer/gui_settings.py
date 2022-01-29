@@ -55,5 +55,6 @@ class GUISettings:
             self.save_to_config()
             self.settings_window.close()
             self.cr_designer.crdesigner_console_wrapper.text_browser.append("settings saved")
+            self.canvas.update_draw_params(trajectory=self.window.chk_draw_trajectory.isChecked())
         else:
             print("invalid settings")
