@@ -12,7 +12,7 @@ from .service_layer import update_draw_params_dynamic_only_based_on_zoom
 from .service_layer import update_draw_params_based_on_zoom
 from .service_layer import update_draw_params_based_on_scenario
 from .service_layer import update_draw_params_dynamic_based_on_scenario
-from .service_layer import resize_scenario_based_on_zoom
+from .service_layer import resize_lanelet_network
 from commonroad.geometry.shape import Circle
 
 from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMO_AVAILABLE
@@ -35,7 +35,9 @@ ZOOM_FACTOR = 1.2
 
 
 class DynamicCanvas(FigureCanvas):
-    """ this canvas provides zoom with the mouse wheel """
+    """
+    This canvas provides zoom with the mouse wheel.
+    """
     def __init__(self, parent=None, width=5, height=5, dpi=100, animated_viewer=None):
         self.animated_viewer = animated_viewer
         self.ax = None
@@ -46,20 +48,19 @@ class DynamicCanvas(FigureCanvas):
         self.initial_parameter_config_done = False  # This is used to only once set the parameter based on the scenario
         self.draw_params = None  # needed later - here for reference
         self.draw_params_dynamic_only = None  # needed later - here for reference
-        self.zoom_used = False
+        # used for efficiently monitoring of we switched from detailed to undetailed params
         self.last_changed_sth = False
 
         super().__init__(self.drawer)
         self.setParent(parent)
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
-        self.mpl_connect('button_press_event', self.select_scenario_element)
+        self.mpl_connect('button_press_event', self.dynamic_canvas_click_callback)
         self.mpl_connect('scroll_event', self.zoom)
 
         self.clear_axes()
 
     def clear_axes(self, keep_limits=False, clear_artists=False):
-        """ """
         if clear_artists:
             self.rnd.clear()
 
@@ -77,33 +78,24 @@ class DynamicCanvas(FigureCanvas):
             self.update_plot(limits)
 
     def get_axes(self):
-        """Gives the plots Axes
-
-        :return: matplotlib axis
-        """
         return self.ax
 
     def get_limits(self) -> List[float]:
-        """ return the current limits of the canvas """
         x_lim = self.ax.get_xlim()
         y_lim = self.ax.get_ylim()
         return [x_lim[0], x_lim[1], y_lim[0], y_lim[1]]
 
     def update_plot(self, limits: List[float] = None):
-        """ draw the canvas. optional with new limits"""
         if limits:
             self.ax.set(xlim=limits[0:2])
             self.ax.set(ylim=limits[2:4])
         self.draw_idle()
 
     def zoom(self, event):
-        """ zoom in / out function in GUI by using mouse wheel """
-        x_min, x_max = self.ax.get_xlim()
-        y_min, y_max = self.ax.get_ylim()
-        center = ((x_min + x_max) / 2, (y_min + y_max) / 2)
-        print("center :" + str(center))
-        x_dim = (x_max - x_min) / 2
-        y_dim = (y_max - y_min) / 2
+        """
+        Zoom in / out function in Dynamic Canvas by using mouse wheel.
+        """
+        center, x_dim, y_dim, _, _ = self.get_center_and_axes_values()
 
         # enlarge / shrink limits
         if event.button == 'up':
@@ -141,23 +133,19 @@ class DynamicCanvas(FigureCanvas):
         # not all details need to be rendered when you are zoomed out
         self.draw_params = update_draw_params_based_on_zoom(x=new_x_dim, y=new_y_dim)
         self.draw_params_dynamic_only = update_draw_params_dynamic_only_based_on_zoom(x=new_x_dim, y=new_y_dim)
-        self.animated_viewer.current_scenario.lanelet_network, changed_sth = resize_scenario_based_on_zoom(
+        self.animated_viewer.current_scenario.lanelet_network, resized_lanelet_network = resize_lanelet_network(
             original_lanelet_network=self.animated_viewer.original_lanelet_network,
             center_x=new_center_x,
             center_y=new_center_y,
             dim_x=x_dim,
             dim_y=y_dim)
-        self.zoom_used = True
-        self.latest_x_dim = x_dim
-        self.latest_y_dim = y_dim
-        self.last_center = (new_center_x, new_center_y)
         self.update_plot([
             new_center_x - new_x_dim, new_center_x + new_x_dim,
             new_center_y - new_y_dim, new_center_y + new_y_dim
         ])
-        if changed_sth or self.last_changed_sth:
+        if resized_lanelet_network or self.last_changed_sth:
             self.animated_viewer.update_plot()
-        self.last_changed_sth = changed_sth
+        self.last_changed_sth = resized_lanelet_network
 
     def draw_scenario(self,
                       scenario: Scenario,
@@ -166,7 +154,6 @@ class DynamicCanvas(FigureCanvas):
                       plot_limits=None,
                       draw_dynamic_only=False):
         """[summary]
-
         :param scenario: [description]
         :param pps: PlanningProblemSet of the scenario,defaults to None
         :type pps: PlanningProblemSet
@@ -180,10 +167,10 @@ class DynamicCanvas(FigureCanvas):
         xlim = self.ax.get_xlim()
         ylim = self.ax.get_ylim()
         # update the parameters based on the number of lanelets and traffic signs - but only once during starting
-        # TODO reset this when a new file is loaded
         if not self.initial_parameter_config_done:
-            self.draw_params = update_draw_params_based_on_scenario(lanelet_count=len(scenario.lanelet_network.lanelets),
-                                                            traffic_sign_count=len(scenario.lanelet_network.traffic_signs))
+            self.draw_params = update_draw_params_based_on_scenario(
+                    lanelet_count=len(scenario.lanelet_network.lanelets),
+                    traffic_sign_count=len(scenario.lanelet_network.traffic_signs))
             self.draw_params_dynamic_only = update_draw_params_dynamic_based_on_scenario(
                     lanelet_count=len(scenario.lanelet_network.lanelets),
                     traffic_sign_count=len(scenario.lanelet_network.traffic_signs))
@@ -218,7 +205,6 @@ class DynamicCanvas(FigureCanvas):
                          plot_limits=None):
         """
         Redraw only the dynamic obstacles. This gives a large performance boost, when playing an animation
-
         :param scenario: The scenario containing the dynamic obstacles
         :param draw_params: CommonRoad DrawParams for visualization
         :param plot_limits: Matplotlib plot limits
@@ -236,11 +222,13 @@ class DynamicCanvas(FigureCanvas):
             obj.draw(renderer=self.rnd, draw_params=draw_params_merged)
             self.rnd.render(show=True)
 
-    # TODO rename this
-    def select_scenario_element(self, mouse_clicked_event):
+    def dynamic_canvas_click_callback(self, mouse_clicked_event):
         """
-        Select lanelets by clicking on the canvas. Selects only one of the
-        lanelets that contains the click position.
+        General callback for clicking in the dynamic canvas, two things are checked:
+            1. When a lanelet was selected execute the logic behind it.
+                a) Select lanelets by clicking on the canvas. Selects only one of the lanelets that contains the click
+                   position.
+            2. If the lanelet network of the current network should be resized.
         """
         mouse_pos = np.array(
             [mouse_clicked_event.xdata, mouse_clicked_event.ydata])
@@ -282,15 +270,21 @@ class DynamicCanvas(FigureCanvas):
             selection = " Lanelet with ID " + str(selected_lanelets[0].lanelet_id) + " is selected."
             self.animated_viewer.callback_function(selected_lanelets[0], output + selection)
 
-        # now update the map based on the zoom factor - but only when the first initial drawing is done
-        if self.zoom_used:
-            x_min, x_max = self.ax.get_xlim()
-            y_min, y_max = self.ax.get_ylim()
-            center = ((x_min + x_max) / 2, (y_min + y_max) / 2)
-            x_dim = (x_max - x_min) / 2
-            y_dim = (y_max - y_min) / 2
-            self.animated_viewer.current_scenario.lanelet_network, changed_sth = resize_scenario_based_on_zoom(
+        # now update the map -
+        # but only after the scenario was initialized (this is necessary because this is a general callback)
+        if self.initial_parameter_config_done:
+            center, x_dim, y_dim, _, _ = self.get_center_and_axes_values()
+            self.animated_viewer.current_scenario.lanelet_network, resized_lanelet_network = resize_lanelet_network(
                     original_lanelet_network=self.animated_viewer.original_lanelet_network,
                     center_x=center[0], center_y=center[1], dim_x=x_dim,
                     dim_y=y_dim)
-            self.animated_viewer.update_plot()
+            if resized_lanelet_network:
+                self.animated_viewer.update_plot()
+
+    def get_center_and_axes_values(self) -> ((float, float), float, float, (float, float), (float, float)):
+        x_min, x_max = self.ax.get_xlim()
+        y_min, y_max = self.ax.get_ylim()
+        center = ((x_min + x_max) / 2, (y_min + y_max) / 2)
+        x_dim = (x_max - x_min) / 2
+        y_dim = (y_max - y_min) / 2
+        return center, x_dim, y_dim, (x_min, x_max), (y_min, y_max)

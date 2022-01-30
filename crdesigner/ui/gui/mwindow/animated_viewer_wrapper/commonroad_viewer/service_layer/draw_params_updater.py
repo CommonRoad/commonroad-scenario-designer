@@ -17,7 +17,6 @@ def update_draw_params_dynamic_based_on_scenario(lanelet_count: int, traffic_sig
 
 
 def update_draw_params_based_on_zoom(x: float, y: float) -> {}:
-    print("Called update_draw_params_based_on_zoom with x: " + str(x) + " and y: " + str(y))
     # Here render the details
     if detailed_drawing_params_threshold_zoom_met(x=x, y=y):
         return PARAMS_DRAW_DETAILED
@@ -27,7 +26,6 @@ def update_draw_params_based_on_zoom(x: float, y: float) -> {}:
 
 
 def update_draw_params_dynamic_only_based_on_zoom(x: float, y: float) -> {}:
-    print("Called update_draw_params_dynamic_only_based_on_zoom with x: " + str(x) + " and y: " + str(y))
     # Here render the details
     if detailed_drawing_params_threshold_zoom_met(x=x, y=y):
         return PARAMS_DRAW_DYNAMIC_DETAILED

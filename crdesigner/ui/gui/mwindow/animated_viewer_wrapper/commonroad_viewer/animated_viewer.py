@@ -38,6 +38,7 @@ class AnimatedViewer:
         self.current_pps = None
         self.dynamic = DynamicCanvas(parent, width=5, height=10, dpi=100, animated_viewer=self)
         self.callback_function = callback_function
+        self.original_lanelet_network = None
 
         # sumo config giving dt etc
         self._config: SumoConfig = None
@@ -53,7 +54,7 @@ class AnimatedViewer:
     def open_scenario(self, scenario: Scenario, config: Observable = None,
                       planning_problem_set: PlanningProblemSet = None):
         """[summary]
-
+        Open a scenario, setup any configuration.
         :param scenario: [description]
         :type scenario: [type]
         :param config: [description], defaults to None
@@ -61,6 +62,7 @@ class AnimatedViewer:
         :param planning_problem_set: des,
         :type planning_problem_set: PlanningProblemSet
         """
+        self.dynamic.initial_parameter_config_done = False  # reset so that for any map the parameters are set correctly
         self.current_scenario = scenario
         # safe here the original scenario -> this is needed for zooming in / out and for moving around
         self.original_lanelet_network = LaneletNetwork.create_from_lanelet_network(lanelet_network=scenario.lanelet_network)
@@ -198,7 +200,6 @@ class AnimatedViewer:
         ]
         self.max_timestep = np.max(timesteps) if timesteps else 0
         return self.max_timestep
-
 
     def update_plot(self,
                     sel_lanelet: Lanelet = None,

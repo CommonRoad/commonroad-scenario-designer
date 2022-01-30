@@ -31,7 +31,9 @@ class AnimatedViewerWrapper:
         self.mwindow.setCentralWidget(self.viewer_dock)
 
     def viewer_callback(self, selected_object: Union[Lanelet, Obstacle], output: str):
-        """Callback when the user clicks a lanelet inside the scenario visualization."""
+        """
+        Callback when the user clicks a lanelet inside the scenario visualization.
+        """
         if isinstance(selected_object, Lanelet):
             self.mwindow.road_network_toolbox.road_network_toolbox_ui.selected_lanelet_two.setCurrentText(
                     self.mwindow.road_network_toolbox.road_network_toolbox_ui.selected_lanelet_one.currentText())
@@ -46,7 +48,9 @@ class AnimatedViewerWrapper:
             self.mwindow.crdesigner_console_wrapper.text_browser.append(output)
 
     def update_view(self, focus_on_network=None):
-        """ Update all components. """
+        """
+        Update all components.
+        """
         # reset selection of all other selectable elements
         if self.cr_viewer.current_scenario is None:
             return
