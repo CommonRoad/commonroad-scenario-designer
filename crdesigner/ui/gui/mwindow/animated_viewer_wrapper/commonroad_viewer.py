@@ -341,7 +341,11 @@ class DynamicCanvas(FigureCanvas):
         i = DynamicCanvas.obstacle_color_array.index(result)
         DynamicCanvas.obstacle_color_array.pop(i)
 
-    def update_draw_params(self, trajectory):
+    def update_draw_params(self, trajectory, intersection, obstacle_label,
+                            obstacle_icon, obstacle_direction, obstacle_signal,
+                            occupancy, traffic_lights, traffic_signs,
+                            incoming_lanelets, successors,
+                            intersection_labels):
         """ 
         updates draw_params based on gui settings
         if no changes have been made, they will be the same
@@ -351,9 +355,15 @@ class DynamicCanvas(FigureCanvas):
             'scenario': {
                 'dynamic_obstacle': {
                     'trajectory': {
-                        'show_label': True,
-                        'draw_trajectory': trajectory
+                        'show_label': obstacle_label,
+                        'draw_trajectory': trajectory,
+                        'draw_icon': obstacle_icon,
+                        'draw_direction': obstacle_direction,
+                        'draw_signals': obstacle_signal,
                     }
+                },
+                'static_obstacle': {
+
                 },
                 'lanelet_network': {
                     'traffic_sign': {
@@ -361,18 +371,27 @@ class DynamicCanvas(FigureCanvas):
                         'show_traffic_signs': 'all',
                     },
                     'intersection': {
-                        'draw_intersections': False,
-                        'draw_incoming_lanelets': True,
+                        'draw_intersections': intersection,
+                        'draw_incoming_lanelets': incoming_lanelets,
                         'incoming_lanelets_color': '#3ecbcf',
                         'draw_crossings': True,
                         'crossings_color': '#b62a55',
-                        'draw_successors': True,
+                        'draw_successors': successors,
                         'successors_left_color': '#ff00ff',
                         'successors_straight_color': 'blue',
                         'successors_right_color': '#ccff00',
-                        'show_label': True,
+                        'show_label': intersection_labels,
                     },
-                }
+                },
+                 "occupancy": {
+                    'draw_occupancies': occupancy,
+                    },
+                "traffic_sign": {
+                    "draw_traffic_signs": traffic_signs,
+                },
+                "traffic_light": {
+                    "draw_traffic_lights": traffic_lights,
+                },
             },
            
         }
