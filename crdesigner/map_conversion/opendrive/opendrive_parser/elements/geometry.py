@@ -37,7 +37,7 @@ class Geometry(abc.ABC):
         self._heading = heading
 
     @property
-    def start_position(self) -> float:
+    def start_position(self) -> np.ndarray:
         """Returns the overall geometry start position"""
         return self._start_position
 
@@ -313,11 +313,10 @@ class ParamPoly3(Geometry):
 
 def calc_next_s(s_current, curvature: float, error_tolerance: float, min_delta_s, s_max) -> float:
     """
-    Adaptive computation of next longitudinal sampling position considering approximated error using the curvature:
+    Adaptive computation of next longitudinal sampling position considering approximated error using the curvature
     ```
     math  error_tolerance(curvature) <= \frac{curvature^2}{8}*max_{[a,b]}(|f''(s)|)
     ```
-
     :param curvature: curvature at current position
     :param error_tolerance: max. error
     :param min_delta_s: minimal step length to avoids getting stuck
