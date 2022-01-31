@@ -236,6 +236,7 @@ class DynamicCanvas(FigureCanvas):
                    position.
         This order is important - first the resizing and then the lanelet selection - otherwise the lanelets of the old
         map are selected and then not visualized.
+        :params mouse_clicked_event:
         """
         # when the mouse is clicked we remember where this was -> use this for lanelet selection
         self.latest_mouse_pos = np.array([mouse_clicked_event.xdata, mouse_clicked_event.ydata])
@@ -247,6 +248,7 @@ class DynamicCanvas(FigureCanvas):
     def dynamic_canvas_release_callback(self, mouse_clicked_event):
         """
         When the mouse button is released update the map and also select lanelets (with old mouse pos).
+        :params mouse_clicked_event:
         """
         # update the map
         self._update_map()
@@ -312,6 +314,14 @@ class DynamicCanvas(FigureCanvas):
             self.animated_viewer.callback_function(selected_lanelets[0], output + selection)
 
     def get_center_and_axes_values(self) -> ((float, float), float, float, (float, float), (float, float)):
+        """
+        Used to get the new dimensions of the current Dynamic Canvas and other meta data about it.
+        :returns : center := touple (x,y) of center,
+                   x_dim := absolut size of x axis,
+                   y_dim := absolut size of y axis,
+                   xlim := touple of x axis limits (x_min, x_max),
+                   ylim := touple of y axis limits (y_min, y_max)
+        """
         x_min, x_max = self.ax.get_xlim()
         y_min, y_max = self.ax.get_ylim()
         center = ((x_min + x_max) / 2, (y_min + y_max) / 2)
