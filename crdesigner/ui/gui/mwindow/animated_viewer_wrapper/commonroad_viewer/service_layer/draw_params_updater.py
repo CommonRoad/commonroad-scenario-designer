@@ -3,6 +3,14 @@ from .general_services import is_big_map
 
 
 def update_draw_params_based_on_scenario(lanelet_count: int, traffic_sign_count: int) -> {}:
+    """
+    Return the parameter for drawing a lanelet network in the Dynamic Canvas based on complexity of the lanelet network.
+    Currently there are 2 Options: Either the detailed parameter or the undetailed. Undetailed are used on large maps
+    when zoomed out to improve performance.
+    (lanelet_count and traffic_sign_count act as approximation for complexity)
+    :param lanelet_count: how many lanelets are in the lanelet network.
+    :param traffic_sign_count: how many traffic signs are in the network.
+    """
     if is_big_map(lanelet_count=lanelet_count, traffic_sign_count=traffic_sign_count):
         return PARAMS_DRAW_UNDETAILED
     else:
@@ -10,6 +18,12 @@ def update_draw_params_based_on_scenario(lanelet_count: int, traffic_sign_count:
 
 
 def update_draw_params_dynamic_based_on_scenario(lanelet_count: int, traffic_sign_count: int) -> {}:
+    """
+    Same as update_draw_params_based_on_scenario, but returns parameters for dynamic visualizations.
+    Also based on complexity of lanelet network.
+    :param lanelet_count: how many lanelets are in the lanelet network.
+    :param traffic_sign_count: how many traffic signs are in the network.
+    """
     if is_big_map(lanelet_count=lanelet_count, traffic_sign_count=traffic_sign_count):
         return PARAMS_DRAW_DYNAMIC_UNDETAILED
     else:
@@ -17,6 +31,12 @@ def update_draw_params_dynamic_based_on_scenario(lanelet_count: int, traffic_sig
 
 
 def update_draw_params_based_on_zoom(x: float, y: float) -> {}:
+    """
+    Return the parameter for drawing a lanelet network in the Dynamic Canvas based on zoom into the canvas.
+    When zoomed in enough display the details.
+    :param x: Absolut value of x axis in Dynamic Canvas
+    :param y: Absolut value of y axis in Dynamic Canvas
+    """
     # Here render the details
     if detailed_drawing_params_threshold_zoom_met(x=x, y=y):
         return PARAMS_DRAW_DETAILED
@@ -26,6 +46,11 @@ def update_draw_params_based_on_zoom(x: float, y: float) -> {}:
 
 
 def update_draw_params_dynamic_only_based_on_zoom(x: float, y: float) -> {}:
+    """
+    Same as update_draw_params_based_on_zoom but returns parameter for Dynamic Visualization.
+    :param x: Absolut value of x axis in Dynamic Canvas
+    :param y: Absolut value of y axis in Dynamic Canvas
+    """
     # Here render the details
     if detailed_drawing_params_threshold_zoom_met(x=x, y=y):
         return PARAMS_DRAW_DYNAMIC_DETAILED
@@ -64,7 +89,8 @@ PARAMS_DRAW_DETAILED = {
         }
 
 
-PARAMS_DRAW_UNDETAILED = {'scenario': {
+PARAMS_DRAW_UNDETAILED = {
+    'scenario': {
         'dynamic_obstacle': {
             'trajectory': {
                 'show_label': False,
@@ -134,8 +160,8 @@ PARAMS_DRAW_DYNAMIC_DETAILED = {
         }
 
 
-PARAMS_DRAW_DYNAMIC_UNDETAILED = {'scenario':
-    {
+PARAMS_DRAW_DYNAMIC_UNDETAILED = {
+    'scenario': {
         'dynamic_obstacle': {
             'trajectory': {
                 'show_label': False,
@@ -165,4 +191,4 @@ PARAMS_DRAW_DYNAMIC_UNDETAILED = {'scenario':
             }
         }
     }
-    }
+}
