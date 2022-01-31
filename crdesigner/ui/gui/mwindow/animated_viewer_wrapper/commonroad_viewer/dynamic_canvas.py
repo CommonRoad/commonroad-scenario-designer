@@ -50,11 +50,13 @@ class DynamicCanvas(FigureCanvas):
         self.draw_params_dynamic_only = None  # needed later - here for reference
         # used for efficiently monitoring of we switched from detailed to undetailed params
         self.last_changed_sth = False
+        self.latest_mouse_pos = None  # used to store the last mouse position where a lanelet was clicked
 
         super().__init__(self.drawer)
         self.setParent(parent)
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
+        # any callbacks for interaction per mouse
         self.mpl_connect('button_press_event', self.dynamic_canvas_click_callback)
         self.mpl_connect('button_release_event', self.dynamic_canvas_release_callback)
         self.mpl_connect('scroll_event', self.zoom)
@@ -147,6 +149,8 @@ class DynamicCanvas(FigureCanvas):
         if resized_lanelet_network or self.last_changed_sth:
             self.animated_viewer.update_plot()
         self.last_changed_sth = resized_lanelet_network
+        # now also show any selected
+        self._select_lanelet()
 
     def draw_scenario(self,
                       scenario: Scenario,
@@ -233,17 +237,21 @@ class DynamicCanvas(FigureCanvas):
         This order is important - first the resizing and then the lanelet selection - otherwise the lanelets of the old
         map are selected and then not visualized.
         """
+        # when the mouse is clicked we remember where this was -> use this for lanelet selection
+        self.latest_mouse_pos = np.array([mouse_clicked_event.xdata, mouse_clicked_event.ydata])
         # update the map
         self._update_map()
         # now do the lanelet selection
-        self._select_lanelet(mouse_clicked_event=mouse_clicked_event)
+        self._select_lanelet()
 
     def dynamic_canvas_release_callback(self, mouse_clicked_event):
         """
-        Resize the map if necessary if the mousebutton is released.
+        When the mouse button is released update the map and also select lanelets (with old mouse pos).
         """
         # update the map
         self._update_map()
+        # now do the lanelet selection
+        self._select_lanelet()
 
     def _update_map(self):
         """
@@ -257,12 +265,14 @@ class DynamicCanvas(FigureCanvas):
             if resized_lanelet_network:
                 self.animated_viewer.update_plot()
 
-    def _select_lanelet(self, mouse_clicked_event):
+    def _select_lanelet(self):
         """
         Select a lanelet and display the details in the GUI.
         """
-        mouse_pos = np.array([mouse_clicked_event.xdata, mouse_clicked_event.ydata])
-        click_shape = Circle(radius=0.01, center=mouse_pos)
+        # check if any mousepos was setted before
+        if self.latest_mouse_pos is None:
+            return
+        click_shape = Circle(radius=0.01, center=self.latest_mouse_pos)
 
         if self.animated_viewer.current_scenario is None:
             return
@@ -271,7 +281,7 @@ class DynamicCanvas(FigureCanvas):
         selected_lanelets = [l_network.find_lanelet_by_id(lid) for lid in selected_l_ids]
         selected_obstacles = [obs for obs in self.animated_viewer.current_scenario.obstacles if obs.occupancy_at_time(
             self.animated_viewer.time_step.value) is not None and obs.occupancy_at_time(
-            self.animated_viewer.time_step.value).shape.contains_point(mouse_pos)]
+            self.animated_viewer.time_step.value).shape.contains_point(self.latest_mouse_pos)]
 
         if len(selected_lanelets) > 0 and len(selected_obstacles) == 0:
             self.animated_viewer.update_plot(sel_lanelet=selected_lanelets[0],
