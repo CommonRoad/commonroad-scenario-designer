@@ -56,6 +56,7 @@ class DynamicCanvas(FigureCanvas):
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
         self.mpl_connect('button_press_event', self.dynamic_canvas_click_callback)
+        self.mpl_connect('button_release_event', self.dynamic_canvas_release_callback)
         self.mpl_connect('scroll_event', self.zoom)
 
         self.clear_axes()
@@ -225,13 +226,42 @@ class DynamicCanvas(FigureCanvas):
     def dynamic_canvas_click_callback(self, mouse_clicked_event):
         """
         General callback for clicking in the dynamic canvas, two things are checked:
-            1. When a lanelet was selected execute the logic behind it.
+            1. If the lanelet network of the current network should be resized.
+            2. When a lanelet was selected execute the logic behind it.
                 a) Select lanelets by clicking on the canvas. Selects only one of the lanelets that contains the click
                    position.
-            2. If the lanelet network of the current network should be resized.
+        This order is important - first the resizing and then the lanelet selection - otherwise the lanelets of the old
+        map are selected and then not visualized.
         """
-        mouse_pos = np.array(
-            [mouse_clicked_event.xdata, mouse_clicked_event.ydata])
+        # update the map
+        self._update_map()
+        # now do the lanelet selection
+        self._select_lanelet(mouse_clicked_event=mouse_clicked_event)
+
+    def dynamic_canvas_release_callback(self, mouse_clicked_event):
+        """
+        Resize the map if necessary if the mousebutton is released.
+        """
+        # update the map
+        self._update_map()
+
+    def _update_map(self):
+        """
+        Resized the map if necessary for performance improvement.
+        """
+        if self.initial_parameter_config_done:
+            center, x_dim, y_dim, _, _ = self.get_center_and_axes_values()
+            self.animated_viewer.current_scenario.lanelet_network, resized_lanelet_network = resize_lanelet_network(
+                    original_lanelet_network=self.animated_viewer.original_lanelet_network, center_x=center[0],
+                    center_y=center[1], dim_x=x_dim, dim_y=y_dim)
+            if resized_lanelet_network:
+                self.animated_viewer.update_plot()
+
+    def _select_lanelet(self, mouse_clicked_event):
+        """
+        Select a lanelet and display the details in the GUI.
+        """
+        mouse_pos = np.array([mouse_clicked_event.xdata, mouse_clicked_event.ydata])
         click_shape = Circle(radius=0.01, center=mouse_pos)
 
         if self.animated_viewer.current_scenario is None:
@@ -239,12 +269,13 @@ class DynamicCanvas(FigureCanvas):
         l_network = self.animated_viewer.current_scenario.lanelet_network
         selected_l_ids = l_network.find_lanelet_by_shape(click_shape)
         selected_lanelets = [l_network.find_lanelet_by_id(lid) for lid in selected_l_ids]
-        selected_obstacles = [obs for obs in self.animated_viewer.current_scenario.obstacles
-                              if obs.occupancy_at_time(self.animated_viewer.time_step.value) is not None and
-                              obs.occupancy_at_time(self.animated_viewer.time_step.value).shape.contains_point(mouse_pos)]
+        selected_obstacles = [obs for obs in self.animated_viewer.current_scenario.obstacles if obs.occupancy_at_time(
+            self.animated_viewer.time_step.value) is not None and obs.occupancy_at_time(
+            self.animated_viewer.time_step.value).shape.contains_point(mouse_pos)]
 
         if len(selected_lanelets) > 0 and len(selected_obstacles) == 0:
-            self.animated_viewer.update_plot(sel_lanelet=selected_lanelets[0], time_step=self.animated_viewer.time_step.value)
+            self.animated_viewer.update_plot(sel_lanelet=selected_lanelets[0],
+                                             time_step=self.animated_viewer.time_step.value)
         else:
             self.animated_viewer.update_plot(sel_lanelet=None, time_step=self.animated_viewer.time_step.value)
 
@@ -269,17 +300,6 @@ class DynamicCanvas(FigureCanvas):
         elif len(selected_lanelets) > 0:
             selection = " Lanelet with ID " + str(selected_lanelets[0].lanelet_id) + " is selected."
             self.animated_viewer.callback_function(selected_lanelets[0], output + selection)
-
-        # now update the map -
-        # but only after the scenario was initialized (this is necessary because this is a general callback)
-        if self.initial_parameter_config_done:
-            center, x_dim, y_dim, _, _ = self.get_center_and_axes_values()
-            self.animated_viewer.current_scenario.lanelet_network, resized_lanelet_network = resize_lanelet_network(
-                    original_lanelet_network=self.animated_viewer.original_lanelet_network,
-                    center_x=center[0], center_y=center[1], dim_x=x_dim,
-                    dim_y=y_dim)
-            if resized_lanelet_network:
-                self.animated_viewer.update_plot()
 
     def get_center_and_axes_values(self) -> ((float, float), float, float, (float, float), (float, float)):
         x_min, x_max = self.ax.get_xlim()
