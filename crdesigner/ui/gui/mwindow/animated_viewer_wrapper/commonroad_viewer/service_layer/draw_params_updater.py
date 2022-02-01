@@ -2,6 +2,7 @@ from .general_services import detailed_drawing_params_threshold_zoom_met
 from .general_services import is_big_map
 
 modified_draw_params = False
+PARAMS_OBSTACLE_CUSTOM = None
 
 def update_draw_params_based_on_scenario(lanelet_count: int, traffic_sign_count: int) -> {}:
     """
@@ -68,27 +69,21 @@ def update_draw_params_dynamic_only_based_on_zoom(x: float, y: float) -> {}:
     else:
         return PARAMS_DRAW_DYNAMIC_UNDETAILED
 
+def get_draw_params_no_obstacles():
+    return PARAMS_OBSTACLE_NO_OBSTACLES
+
 def set_draw_params(trajectory, intersection, obstacle_label,
                             obstacle_icon, obstacle_direction,
                             obstacle_signal, occupancy, traffic_signs,
                             traffic_lights, incoming_lanelets, successors,
                             intersection_labels):
+
     global modified_draw_params
     modified_draw_params = True
 
     global PARAMS_DRAW_CUSTOM
     PARAMS_DRAW_CUSTOM = {
         'scenario': {
-                'dynamic_obstacle': {
-                    'trajectory': {
-                        'show_label': obstacle_label,
-                        'draw_trajectory': trajectory,
-                        'draw_icon': obstacle_icon,
-                        'draw_direction': obstacle_direction,
-                        'draw_signals': obstacle_signal,
-                        'draw_icon': obstacle_icon
-                    }
-                },
                 'lanelet_network': {
                     'traffic_sign': {
                         'draw_traffic_signs': traffic_signs,
@@ -128,7 +123,6 @@ def set_draw_params(trajectory, intersection, obstacle_label,
                         'draw_icon': obstacle_icon,
                         'draw_direction': obstacle_direction,
                         'draw_signals': obstacle_signal,
-                        'draw_icon': obstacle_icon
                     }
                 },
                 'lanelet_network': {
@@ -149,8 +143,7 @@ def set_draw_params(trajectory, intersection, obstacle_label,
                 }
             }
         }
-
-
+            
 PARAMS_DRAW_DETAILED = {
             'scenario': {
                 'dynamic_obstacle': {

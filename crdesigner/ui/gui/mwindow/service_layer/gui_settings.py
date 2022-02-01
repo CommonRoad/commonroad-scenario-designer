@@ -4,6 +4,7 @@ from PyQt5.QtWidgets import QMainWindow
 from crdesigner.ui.gui.mwindow.service_layer.gui_resources.gui_settings_ui import Ui_MainWindow
 from crdesigner.ui.gui.mwindow.service_layer import config
 from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.commonroad_viewer.service_layer.draw_params_updater import set_draw_params
+from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.commonroad_viewer.dynamic_canvas import DynamicCanvas
 
 
 class GUISettings:
@@ -16,6 +17,7 @@ class GUISettings:
         self.connect_events()
         self.update_ui_values()
         self.settings_window.show()
+        self.canvas = DynamicCanvas()
     
     def connect_events(self):
         """ connect buttons to callables """
@@ -76,6 +78,7 @@ class GUISettings:
             self.save_to_config()
             self.settings_window.close()
             self.cr_designer.crdesigner_console_wrapper.text_browser.append("settings saved")
+            self.canvas.update_obstacle_trajectory_params()
 
             set_draw_params(trajectory=self.window.chk_draw_trajectory.isChecked(),
                                             intersection=self.window.chk_draw_intersection.isChecked(),
