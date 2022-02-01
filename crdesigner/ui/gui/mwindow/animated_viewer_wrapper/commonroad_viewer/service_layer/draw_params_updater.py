@@ -83,7 +83,7 @@ def set_draw_params(trajectory, intersection, obstacle_label,
 
     global PARAMS_DRAW_CUSTOM
     PARAMS_DRAW_CUSTOM = {
-        'scenario': {
+        #'scenario': {
                 'lanelet_network': {
                     'traffic_sign': {
                         'draw_traffic_signs': traffic_signs,
@@ -112,10 +112,10 @@ def set_draw_params(trajectory, intersection, obstacle_label,
                     'draw_occupancies': occupancy,
                     },
             }
-        }
+        #}
     global PARAMS_DRAW_DYNAMIC_CUSTOM
     PARAMS_DRAW_DYNAMIC_CUSTOM = {
-            'scenario': {
+            #'scenario': {
                 'dynamic_obstacle': {
                     'trajectory': {
                         'show_label': obstacle_label,
@@ -142,10 +142,10 @@ def set_draw_params(trajectory, intersection, obstacle_label,
                     },
                 }
             }
-        }
+       # }
             
 PARAMS_DRAW_DETAILED = {
-            'scenario': {
+            #'scenario': {
                 'dynamic_obstacle': {
                     'trajectory': {
                         'show_label': True,
@@ -171,11 +171,11 @@ PARAMS_DRAW_DETAILED = {
                     },
                 }
             }
-        }
+       # }
 
 
 PARAMS_DRAW_UNDETAILED = {
-    'scenario': {
+    #'scenario': {
         'dynamic_obstacle': {
             'trajectory': {
                 'show_label': False,
@@ -214,11 +214,11 @@ PARAMS_DRAW_UNDETAILED = {
             }
             }
         }
-    }
+   # }
 
 
 PARAMS_DRAW_DYNAMIC_DETAILED = {
-            'scenario': {
+           # 'scenario': {
                 'dynamic_obstacle': {
                     'trajectory': {
                         'show_label': True,
@@ -242,11 +242,11 @@ PARAMS_DRAW_DYNAMIC_DETAILED = {
                     },
                 }
             }
-        }
+       # }
 
 
 PARAMS_DRAW_DYNAMIC_UNDETAILED = {
-    'scenario': {
+    #'scenario': {
         'dynamic_obstacle': {
             'trajectory': {
                 'show_label': False,
@@ -276,4 +276,4 @@ PARAMS_DRAW_DYNAMIC_UNDETAILED = {
             }
         }
     }
-}
+#}
