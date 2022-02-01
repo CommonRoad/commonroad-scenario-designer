@@ -15,7 +15,7 @@ from commonroad.scenario.obstacle import Obstacle, StaticObstacle, ObstacleType,
 from commonroad.scenario.trajectory import State, Trajectory
 
 from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMO_AVAILABLE
-from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.commonroad_viewer import DynamicCanvas
+from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.commonroad_viewer.dynamic_canvas import DynamicCanvas
 #from crdesigner.ui.gui.mwindow.mwindow import MWindowWrapper
 
 if SUMO_AVAILABLE:

@@ -1,4 +1,4 @@
-OSM Conversion
+osm2cr package
 ==============
 
 Subpackages
