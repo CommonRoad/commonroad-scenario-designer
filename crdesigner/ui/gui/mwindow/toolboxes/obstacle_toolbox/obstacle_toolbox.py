@@ -188,7 +188,7 @@ class ObstacleToolbox(QDockWidget):
                 state_dictionary.update({'acceleration': self.temp_obstacle.initial_state.__getattribute__("acceleration")})
             if "yaw_rate" in self.temp_obstacle.initial_state.attributes:
                 state_dictionary.update({'yaw_rate': self.temp_obstacle.initial_state.__getattribute__("yaw_rate")})
-            if "slip_angle" in self.temp_obstacle_initial_state.attributes:
+            if "slip_angle" in self.temp_obstacle.initial_state.attributes:
                 state_dictionary.update({'slip_angle': self.temp_obstacle.initial_state.__getattribute__("slip_angle")})
 
         if self.obstacle_toolbox_ui.obstacle_shape.currentText() == "Rectangle":
@@ -254,24 +254,9 @@ class ObstacleToolbox(QDockWidget):
         self.callback(self.current_scenario)
 
     def initial_trajectory(self):
-        #don't know how to get position for polygon
-        if self.obstacle_toolbox_ui.obstacle_shape.currentText() != "Polygon":
-            initial_position_x = float(self.obstacle_toolbox_ui.obstacle_x_Position.text()) 
-            initial_position_y = float(self.obstacle_toolbox_ui.obstacle_y_Position.text())
-        else:
-            initial_position_x = 0
-            initial_position_y = 0
-
-        goal_position_x = float(self.obstacle_toolbox_ui.obstacle_x_Goal_Position.text())
-        goal_position_y = float(self.obstacle_toolbox_ui.obstacle_y_Goal_Position.text())
-        goal_orientation = 0 #will be set by routeplanner
-
-        velocity = float(self.obstacle_toolbox_ui.obstacle_velocity.text())
-        acceleration = 0
         state_list = []
-        finished = False
 
-        #if updating positions in profile visualisation
+        # if updating positions in profile visualisation
         if self.xyova:
             print(self.temp_obstacle.initial_state.attributes)
             for j in range(1, len(self.xyova)):
@@ -293,109 +278,24 @@ class ObstacleToolbox(QDockWidget):
             return state_list
 
         else:
-            initial_position = np.array([self.temp_obstacle.initial_state.__getattribute__("position")[0],
-                                        self.temp_obstacle.initial_state.__getattribute__("position")[1]])
-            state_dictionary = {'position': initial_position,
-                                'velocity': self.temp_obstacle.initial_state.__getattribute__("velocity"),
-                                'orientation': self.temp_obstacle.initial_state.__getattribute__("orientation"),
-                                'time_step': 0}
+            for state in self.temp_obstacle.prediction.trajectory.state_list:
+                new_position = np.array([state.__getattribute__("position")[0],
+                                            state.__getattribute__("position")[1]])
+                state_dictionary = {'position': new_position,
+                                    'velocity': state.__getattribute__("velocity"),
+                                    'orientation': state.__getattribute__("orientation"),
+                                    'time_step': state.__getattribute__("time_step")}
 
-            if "acceleration" in self.temp_obstacle.initial_state.attributes:
-                state_dictionary.update({'acceleration': self.temp_obstacle.initial_state.__getattribute__("acceleration")})
-            if "yaw_rate" in self.temp_obstacle.initial_state.attributes:
-                state_dictionary.update({'yaw_rate': self.temp_obstacle.initial_state.__getattribute__("yaw_rate")})
-            if "slip_angle" in self.temp_obstacle_initial_state.attributes:
-                state_dictionary.update({'slip_angle': self.temp_obstacle.initial_state.__getattribute__("slip_angle")})
+                if "acceleration" in state.attributes:
+                    state_dictionary.update({'acceleration': state.__getattribute__("acceleration")})
+                if "yaw_rate" in state.attributes:
+                    state_dictionary.update({'yaw_rate': state.__getattribute__("yaw_rate")})
+                if "slip_angle" in state.attributes:
+                    state_dictionary.update({'slip_angle': state.__getattribute__("slip_angle")})
 
-                
+                new_state = State(**state_dictionary)
+                state_list.append(new_state)
             return state_list
-
-        if self.obstacle_toolbox_ui.obstacle_shape.currentText() == "Rectangle":
-            orientation = math.radians(float(self.obstacle_toolbox_ui.obstacle_orientation.text()))
-        else:
-            orientation = 0
-
-        initial_state = State(**{'position': np.array([
-                    initial_position_x,
-                    initial_position_y
-                ]),
-                'orientation': orientation,
-                'time_step': 1,
-                'yaw_rate': 0,
-                'velocity': velocity,
-                'slip_angle': 0,
-                'acceleration': acceleration
-                })
-        if self.obstacle_toolbox_ui.obstacle_shape.currentText() == "Rectangle":
-            goal_state = [State(**{'position': Rectangle(float(self.obstacle_toolbox_ui.obstacle_length.text()), 
-                width = float(self.obstacle_toolbox_ui.obstacle_width.text()), center=np.array([goal_position_x, goal_position_y]), orientation=goal_orientation),
-                    'orientation': AngleInterval(-3,3),
-                    'time_step': Interval(25, 30),
-                    })]
-        elif self.obstacle_toolbox_ui.obstacle_shape.currentText() == "Circle":
-            goal_state = [State(**{'position': Circle(float(self.obstacle_toolbox_ui.obstacle_radius.text()),
-                                                      center=np.array([goal_position_x, goal_position_y])),
-                                   'orientation': AngleInterval(-3, 3),
-                                   'time_step': Interval(25, 30)})]
-
-        # NOTE the polygon doesnt really work, there is no center property, how specify goal state?
-        elif self.obstacle_toolbox_ui.obstacle_shape.currentText() == "Polygon":
-            goal_state = [State(**{'position': self.polygon_array(),
-                                'orientation': AngleInterval(-3, 3),
-                                   'time_step': Interval(25, 30)})]
-            self.text_browser.append("Warning: Polygons as dynamic obstacles are not currently supported")
-
-        goal_region = GoalRegion(goal_state)
-        planning_problem = PlanningProblem(self.amount_obstacles+1, initial_state, goal_region)
-        if ROUTE_PLANNER:
-            route_planner = RoutePlanner(self.current_scenario, planning_problem,
-                                         backend=RoutePlanner.Backend.NETWORKX_REVERSED,
-                                         allow_diagonal=True, reach_goal_state=True)
-        else:
-            text_browser.append("RoutePlanner is needed for adding dynamic obstacles")
-            return
-
-        candidate_holder = route_planner.plan_routes()
-        # retrieve all routes
-        list_routes, num_route_candidates = candidate_holder.retrieve_all_routes()
-        print(f"Number of route candidates: {num_route_candidates}")
-        # retrieve first route
-        route = candidate_holder.retrieve_first_route()
-        # resample polyline so we get the right velocity
-        trajectory = resample_polyline_with_distance(route.reference_path, velocity * self.current_scenario.dt)
-
-        j = 0
-        # route always start at the beginning of the lanelet
-        # if start before start position, remove these coordinates from the trajectory
-        for i in trajectory:
-            remaining_length = math.dist((i[0], i[1]), (initial_position_x, initial_position_y))
-            if remaining_length < self.current_scenario.dt * velocity:
-                break
-            j += 1
-
-        for i in range(0, j+1):
-            trajectory = np.delete(trajectory, 0, 0)
-
-        j = 0
-        for i in trajectory:
-            # so we dont pass our desired goal position
-            remaining_length = math.dist((i[0], i[1]), (goal_position_x, goal_position_y))
-            if remaining_length < self.current_scenario.dt * velocity:
-                i = [goal_position_x, goal_position_y]
-                new_position = np.array([goal_position_x, goal_position_y])
-                velocity = self.calc_velocity([trajectory[j-1][0], trajectory[j-1][1]], [goal_position_x, goal_position_y])
-                finished = True
-            else:
-                new_position = np.array([i[0], i[1]])
-            new_state = State(**{'position': new_position, 'orientation': route.path_orientation[j], 
-            'velocity': velocity, 'acceleration': acceleration, 'time_step': j+1})
-            state_list.append(new_state)
-            j += 1
-            if finished:
-                # self.trajectory_old = trajectory #for changing speed on an interval
-                break
-
-        return state_list
 
     def polygon_array(self):
         """returns a list of the vertices from the gui menu"""
@@ -509,16 +409,6 @@ class ObstacleToolbox(QDockWidget):
                 profile.append(i[1])
 
         self.draw_plot(time, profile, self.xmin, self.xmax, self.ymin, self.ymax)
-        if state_variable_name == "x-position":
-            self.obstacle_toolbox_ui.obstacle_x_Position.setText(str(self.pos[0][1]))
-            self.obstacle_toolbox_ui.obstacle_x_Goal_Position.setText(str(self.pos[-1][1]))
-        
-        elif state_variable_name == "y-position":
-            self.obstacle_toolbox_ui.obstacle_y_Position.setText(str(self.pos[0][1]))
-            self.obstacle_toolbox_ui.obstacle_y_Goal_Position.setText(str(self.pos[-1][1]))
-
-        elif state_variable_name == "orientation":
-            self.obstacle_toolbox_ui.obstacle_orientation.setText(str(self.pos[0][1]))
 
         self.sel_point = None
     
@@ -570,11 +460,6 @@ class ObstacleToolbox(QDockWidget):
             for j in self.xyova:
                 if state_variable_name == "x-position":
                     j[0] = self.pos[i][1]
-                    # change value of obstacle_goal_x_position
-                    if j[0] == self.xyova[-1][0]:
-                        self.obstacle_toolbox_ui.obstacle_x_Goal_Position.setText(str(j[0]))
-                    elif j[0] == self.xyova[0][0]:
-                        self.obstacle_toolbox_ui.obstacle_x_Position.setText(str(j[0]))
                     # change velocity based on changes in x-position
                     self.xyova[k][3] = self.calc_velocity([self.pos[k-1][1], self.xyova[k-1][1]],
                                                           [self.pos[k][1], self.xyova[k][1]])
@@ -583,11 +468,6 @@ class ObstacleToolbox(QDockWidget):
                         self.xyova[k][4] = self.calc_acceleration(self.xyova[k-1][3], self.xyova[k][3])
                 elif state_variable_name == "y-position":
                     j[1] = self.pos[i][1]
-                    # change value of obstacle_goal_y_position
-                    if j[1] == self.xyova[-1][1]:
-                        self.obstacle_toolbox_ui.obstacle_y_Goal_Position.setText(str(j[1]))
-                    elif j[1] == self.xyova[0][1]:
-                        self.obstacle_toolbox_ui.obstacle_y_Position.setText(str(j[1]))
 
                     self.xyova[k][3] = self.calc_velocity([self.xyova[k-1][0], self.pos[k-1][1]], 
                         [self.xyova[k][0], self.pos[k][1]])
