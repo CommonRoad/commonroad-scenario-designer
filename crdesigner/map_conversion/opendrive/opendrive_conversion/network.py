@@ -62,7 +62,7 @@ class Network:
     # def __eq__(self, other):
     # return self.__dict__ == other.__dict__
 
-    def assign_country_ID(self, value: str):
+    def assign_country_id(self, value: str):
         """
         Assign country ID according to the ISO 3166-1 3 letter standard
         Args:
@@ -97,7 +97,7 @@ class Network:
             self._geo_ref = None
 
         # Get country ID form signal data in openDrive and set it as attribute of the network object
-        self.assign_country_ID(self.get_country_ID_from_OpenDrive(opendrive.roads))
+        self.assign_country_id(Network.get_country_id_from_opendrive(opendrive.roads))
 
         # Convert all parts of a road to parametric lanes (planes)
         for road in opendrive.roads:
@@ -232,9 +232,10 @@ class Network:
 
         return scenario
 
-    def get_country_ID_from_OpenDrive(self, roads):
+    @staticmethod
+    def get_country_id_from_opendrive(roads):
         """
-        Get country id of a sepecific lanelet network
+        Get country id of a specific lanelet network
         """
         for road in roads:
             for signal in road.signals:
@@ -275,11 +276,11 @@ class LinkIndex:
 
                     # Not the last lane section? > Next lane section in same road
                     if lane_section.idx < road.lanes.getLastLaneSectionIdx():
-                        successorId = encode_road_section_lane_width_id(
+                        successor_id = encode_road_section_lane_width_id(
                             road.id, lane_section.idx + 1, lane.link.successorId, -1
                         )
 
-                        self.add_link(parametric_lane_id, successorId, lane.id >= 0)
+                        self.add_link(parametric_lane_id, successor_id, lane.id >= 0)
 
                     # Last lane section! > Next road in first lane section
                     # Try to get next road
@@ -293,26 +294,26 @@ class LinkIndex:
                         if next_road is not None:
 
                             if road.link.successor.contactPoint == "start":
-                                successorId = encode_road_section_lane_width_id(
+                                successor_id = encode_road_section_lane_width_id(
                                     next_road.id, 0, lane.link.successorId, -1
                                 )
 
                             else:  # contact point = end
-                                successorId = encode_road_section_lane_width_id(
+                                successor_id = encode_road_section_lane_width_id(
                                     next_road.id,
                                     next_road.lanes.getLastLaneSectionIdx(),
                                     lane.link.successorId,
                                     -1,
                                 )
-                            self.add_link(parametric_lane_id, successorId, lane.id >= 0)
+                            self.add_link(parametric_lane_id, successor_id, lane.id >= 0)
 
                     # Not first lane section? > Previous lane section in same road
                     if lane_section.idx > 0:
-                        predecessorId = encode_road_section_lane_width_id(
+                        predecessor_id = encode_road_section_lane_width_id(
                             road.id, lane_section.idx - 1, lane.link.predecessorId, -1
                         )
 
-                        self.add_link(predecessorId, parametric_lane_id, lane.id >= 0)
+                        self.add_link(predecessor_id, parametric_lane_id, lane.id >= 0)
 
                     # First lane section! > Previous road
                     # Try to get previous road
@@ -326,19 +327,19 @@ class LinkIndex:
                         if prevRoad is not None:
 
                             if road.link.predecessor.contactPoint == "start":
-                                predecessorId = encode_road_section_lane_width_id(
+                                predecessor_id = encode_road_section_lane_width_id(
                                     prevRoad.id, 0, lane.link.predecessorId, -1
                                 )
 
                             else:  # contact point = end
-                                predecessorId = encode_road_section_lane_width_id(
+                                predecessor_id = encode_road_section_lane_width_id(
                                     prevRoad.id,
                                     prevRoad.lanes.getLastLaneSectionIdx(),
                                     lane.link.predecessorId,
                                     -1,
                                 )
                             self.add_link(
-                                predecessorId, parametric_lane_id, lane.id >= 0
+                                predecessor_id, parametric_lane_id, lane.id >= 0
                             )
 
     def add_intersection_link(self, parametric_lane_id, successor, reverse: bool = False):
@@ -452,7 +453,7 @@ class LinkIndex:
                         self.add_intersection_link(
                             incoming_road_id, connecting_road_id, lane_link.toId < 0
                         )
-            # Extracting opendrive junction links to formulate commonroad intersections
+            # Extracting opendrive junction links to formulate CommonRoad intersections
             self._intersections.append(self._intersection_dict)
             # dictionary reinitialized to get junction information for next junction without appending values
             # of previous junction
@@ -549,7 +550,7 @@ class LinkIndex:
     def update_intersection_lane_id(self, old_id_to_new_id_map):
         """
         Updates the lanelet ids in the intersection map from the concatenated opendrive based format to
-        the commonroad format
+        the CommonRoad format
         Args:
             old_id_to_new_id_map: dict that maps the old lanelet ids to new lanelet ids using the attribute
              lanelet_network.old_lanelet_ids()

@@ -1,4 +1,4 @@
-Lanelet/Lanelet2 Conversion
+lanelet\_lanelet2 package
 =========================
 
 Submodules
