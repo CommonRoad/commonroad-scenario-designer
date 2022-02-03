@@ -342,11 +342,15 @@ class DynamicCanvas(FigureCanvas):
         """
         for obj in scenario.obstacles:
             # this is for getting the index of where the object_id is located
-            result = next(c for c in DynamicCanvas.obstacle_color_array if c[0] == obj.obstacle_id)
-            obstacle_draw_params = result[1]
+            try:
+                result = next(c for c in DynamicCanvas.obstacle_color_array if c[0] == obj.obstacle_id)
+                obstacle_draw_params = result[1]
+                draw_params_merged = _merge_dict(draw_params.copy(), obstacle_draw_params.copy())
+            except:
+                draw_params_merged = draw_params
             #print(obstacle_draw_params)
-            draw_params_merged = _merge_dict(draw_params.copy(), obstacle_draw_params.copy())
-            print(obstacle_draw_params)
+            
+            #print(obstacle_draw_params)
 
             obj.draw(renderer=self.rnd, draw_params=draw_params_merged)
 

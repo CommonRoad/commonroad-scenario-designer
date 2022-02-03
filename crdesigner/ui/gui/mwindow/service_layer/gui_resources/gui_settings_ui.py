@@ -117,11 +117,7 @@ class Ui_MainWindow(object):
         self.chk_draw_intersection_label.setText("")
         self.chk_draw_intersection_label.setObjectName("chk_dintersection_label")
         self.formLayout_2.addRow(self.label_draw_intersection_label, self.chk_draw_intersection_label)
-        # lanelet options
-        self.label_lanelet = QtWidgets.QLabel(self.scrollAreaWidgetContents)
-        self.label_lanelet.setFont(QtGui.QFont("Arial", 11, QtGui.QFont.Bold))
-        self.label_lanelet.setObjectName("label_lanelet")
-        self.formLayout_2.addRow(self.label_lanelet)
+       
         # occupancy options
         self.label_occupancy = QtWidgets.QLabel(self.scrollAreaWidgetContents)
         self.label_occupancy.setFont(QtGui.QFont("Arial", 11, QtGui.QFont.Bold))
@@ -210,7 +206,6 @@ class Ui_MainWindow(object):
 
         self.label_obstacle.setText(_translate("MainWindow", "Obstacle visualization"))
         self.label_intersection.setText(_translate("MainWindow", "Intersection visualization"))
-        self.label_lanelet.setText(_translate("MainWindow", "Lanelet visualization"))
         self.label_occupancy.setText(_translate("MainWindow", "Occupancy visualization"))
         self.label_traffic_sign.setText(_translate("MainWindow", "Traffic sign visualization"))
         self.label_traffic_light.setText(_translate("MainWindow", "Traffic light visualization"))
