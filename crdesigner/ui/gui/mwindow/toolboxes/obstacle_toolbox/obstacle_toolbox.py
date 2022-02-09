@@ -412,7 +412,7 @@ class ObstacleToolbox(QDockWidget):
 
     def delete_point(self):
         """
-        deletes right clicked point
+        deletes right-clicked point
          """
         time = []
         profile = []
@@ -422,7 +422,7 @@ class ObstacleToolbox(QDockWidget):
             if not self.xyova:
                 self.calculate_xyova()
             self.xyova.pop(self.sel_point[0])
-            # removes point at specified timestep
+            # removes point at specified timestamp
             self.pos.pop(self.sel_point[0])
 
             for i in self.pos:
@@ -674,7 +674,7 @@ class ObstacleToolbox(QDockWidget):
 
                 v_previous = v
                 v = self.calc_velocity([self.pos[k-1][1], y], [self.pos[k][1], y])
-                if a is not None: # if accelaration is a part of the state
+                if a is not None:   # if accelaration is a part of the state
                     a = self.calc_acceleration(v_previous, v)
 
                 self.xyova.append([self.pos[i][1], y, o, v, a, yaw_rate, slip_angle])
@@ -915,7 +915,7 @@ class ObstacleToolbox(QDockWidget):
                         profile = [obstacle.initial_state.__getattribute__("orientation")]
                         profile += [state.__getattribute__("orientation")
                                     for state in obstacle.prediction.trajectory.state_list]
-        
+
             if isinstance(obstacle, DynamicObstacle):
                 if self.xyova:
                     time = [i for i in range(0, len(self.xyova))]
