@@ -191,19 +191,19 @@ class ObstacleToolbox(QDockWidget):
 
         if self.obstacle_toolbox_ui.obstacle_shape.currentText() == "Rectangle":
             dynamic_obstacle = DynamicObstacle(
-                obstacle_id = obstacle_id,
+                obstacle_id=obstacle_id,
 
-                obstacle_type = ObstacleType(self.obstacle_toolbox_ui.obstacle_type.currentText()),
-                obstacle_shape = Rectangle(
-                    length = float(self.obstacle_toolbox_ui.obstacle_length.text()),
-                    width = float(self.obstacle_toolbox_ui.obstacle_width.text()),
-                    orientation = float(self.obstacle_toolbox_ui.obstacle_orientation.text())
+                obstacle_type=ObstacleType(self.obstacle_toolbox_ui.obstacle_type.currentText()),
+                obstacle_shape=Rectangle(
+                    length=float(self.obstacle_toolbox_ui.obstacle_length.text()),
+                    width=float(self.obstacle_toolbox_ui.obstacle_width.text()),
+                    orientation=float(self.obstacle_toolbox_ui.obstacle_orientation.text())
                 ),
 
                 initial_state=State(**state_dictionary),
                 prediction=TrajectoryPrediction(
                     shape=Rectangle(float(self.obstacle_toolbox_ui.obstacle_length.text()),
-                    width = float(self.obstacle_toolbox_ui.obstacle_width.text())),
+                    width=float(self.obstacle_toolbox_ui.obstacle_width.text())),
                     trajectory=Trajectory(
                         initial_time_step=1,
                         state_list=self.calc_state_list()
@@ -213,11 +213,11 @@ class ObstacleToolbox(QDockWidget):
 
         elif self.obstacle_toolbox_ui.obstacle_shape.currentText() == "Circle":
             dynamic_obstacle = DynamicObstacle(
-                obstacle_id = obstacle_id,
+                obstacle_id=obstacle_id,
 
-                obstacle_type = ObstacleType(self.obstacle_toolbox_ui.obstacle_type.currentText()),
-                obstacle_shape = Circle(
-                    radius = float(self.obstacle_toolbox_ui.obstacle_radius.text())
+                obstacle_type=ObstacleType(self.obstacle_toolbox_ui.obstacle_type.currentText()),
+                obstacle_shape=Circle(
+                    radius=float(self.obstacle_toolbox_ui.obstacle_radius.text())
                 ),
 
                 initial_state = State(**state_dictionary),
@@ -232,15 +232,15 @@ class ObstacleToolbox(QDockWidget):
         
         elif self.obstacle_toolbox_ui.obstacle_shape.currentText() == "Polygon":
             dynamic_obstacle = DynamicObstacle(
-                obstacle_id = obstacle_id,
+                obstacle_id=obstacle_id,
 
-                obstacle_type = ObstacleType(self.obstacle_toolbox_ui.obstacle_type.currentText()),
-                obstacle_shape = Polygon(
+                obstacle_type=ObstacleType(self.obstacle_toolbox_ui.obstacle_type.currentText()),
+                obstacle_shape=Polygon(
                     
-                    vertices = self.polygon_array()
+                    vertices=self.polygon_array()
                 ),
 
-                initial_state = State(**state_dictionary),
+                initial_state=State(**state_dictionary),
                 prediction=TrajectoryPrediction(
                     shape=Polygon(vertices=self.polygon_array()),
                     trajectory=Trajectory(
@@ -518,7 +518,7 @@ class ObstacleToolbox(QDockWidget):
                     k += 1
         else:
             self.calculate_xyova()
-        
+
         self.sel_point = None
 
     def on_mouse_move(self, event):

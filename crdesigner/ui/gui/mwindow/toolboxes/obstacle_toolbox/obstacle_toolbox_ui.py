@@ -209,7 +209,7 @@ class ObstacleToolboxUI(Toolbox):
         elif self.obstacle_shape.currentText() == "Circle":
             self.layout_obstacle_information_groupbox.insertRow(4, "X-Position", self.obstacle_x_Position)
             self.layout_obstacle_information_groupbox.insertRow(5, "Y-Position", self.obstacle_y_Position)
-            
+             
     def remove_position(self):
         """
         removes the position fields
