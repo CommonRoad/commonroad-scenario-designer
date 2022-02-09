@@ -108,7 +108,7 @@ class ObstacleToolbox(QDockWidget):
         self.current_scenario = scenario
         self.initialize_toolbox()
 
-    def static_obstacle_details(self, obstacle_id):
+    def static_obstacle_details(self, obstacle_id: int):
         """
         Creates static obstacles
         :param obstacle_id: id of static obstacle to be created
@@ -156,7 +156,7 @@ class ObstacleToolbox(QDockWidget):
         self.current_scenario.add_objects(static_obstacle)       
         self.callback(self.current_scenario)
 
-    def dynamic_obstacle_details(self, obstacle_id):
+    def dynamic_obstacle_details(self, obstacle_id: int):
         """
         creates dynamic obstacles
         :param obstacle_id: id of static obstacle to be created
@@ -384,7 +384,7 @@ class ObstacleToolbox(QDockWidget):
     def initialize_toolbox(self):
         self.initialize_obstacle_information()
 
-    def calc_velocity(self, point1, point2):
+    def calc_velocity(self, point1: float, point2: float):
         """
         calculates velocity based on two points
         :return: velocity between two points
@@ -393,7 +393,7 @@ class ObstacleToolbox(QDockWidget):
         velocity = distance / self.current_scenario.dt
         return velocity
     
-    def calc_acceleration(self, velocity1, velocity2):
+    def calc_acceleration(self, velocity1: float, velocity2: float):
         """calculates acceleration based on the velocity at 2 points"""
         delta_v = velocity2 - velocity1
         acceleration = delta_v / self.current_scenario.dt
@@ -1083,7 +1083,7 @@ class ObstacleToolbox(QDockWidget):
             except Exception as e:
                 self.text_browser.append("Error when removing obstacle")
 
-    def draw_plot(self, time, profile, xmin=None, xmax=None, ymin=None, ymax=None):
+    def draw_plot(self, time, profile, xmin: float=None, xmax: float=None, ymin: float=None, ymax: float=None):
         """
         draws the state plot in the obstacle toolbox
         :param time: time steps
