@@ -146,14 +146,14 @@ class ObstacleToolbox(QDockWidget):
                 ),
 
                 initial_state=State(**{'position': np.array([
-                    0,
-                    0
-                ]),
-                'orientation': 0, 
-                'time_step': 1
-                })
+                                        0,
+                                        0
+                                    ]),
+                                    'orientation': 0, 
+                                    'time_step': 1
+                                    })
             )
-        self.current_scenario.add_objects(static_obstacle)   
+        self.current_scenario.add_objects(static_obstacle)
         self.callback(self.current_scenario)
 
     def dynamic_obstacle_details(self, obstacle_id: int):
