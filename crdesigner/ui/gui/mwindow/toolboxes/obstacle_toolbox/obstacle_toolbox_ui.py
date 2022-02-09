@@ -10,14 +10,9 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
 
-import logging
-
 # try to import sumo functionality
 from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMO_AVAILABLE
 if SUMO_AVAILABLE:
-    from crdesigner.map_conversion.sumo_map.config import SumoConfig
-    from crdesigner.map_conversion.sumo_map.cr2sumo.converter import CR2SumoMapConverter
-    from sumocr.interface.sumo_simulation import SumoSimulation
     from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMOSimulation
 
 
@@ -80,8 +75,7 @@ class ObstacleToolboxUI(Toolbox):
         self.layout_shape_groupbox.insertRow(1, "Shape", self.obstacle_shape)
 
         self.layout_obstacle_information_groupbox.insertRow(3, self.shape_groupbox)
-        
-        
+
         self.init_rectangle_fields()
         self.init_position()
 

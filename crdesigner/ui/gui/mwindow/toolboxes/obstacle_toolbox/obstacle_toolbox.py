@@ -671,7 +671,7 @@ class ObstacleToolbox(QDockWidget):
                     slip_angle = state.__getattribute__("slip_angle")
                 except Exception:
                     slip_angle = None
-                
+
                 v_previous = v
                 v = self.calc_velocity([self.pos[k-1][1], y], [self.pos[k][1], y])
                 if a is not None: # if accelaration is a part of the state
@@ -914,7 +914,7 @@ class ObstacleToolbox(QDockWidget):
                     else:
                         profile = [obstacle.initial_state.__getattribute__("orientation")]
                         profile += [state.__getattribute__("orientation")
-                                for state in obstacle.prediction.trajectory.state_list]
+                                    for state in obstacle.prediction.trajectory.state_list]
         
             if isinstance(obstacle, DynamicObstacle):
                 if self.xyova:
@@ -1099,7 +1099,7 @@ class ObstacleToolbox(QDockWidget):
         self.obstacle_toolbox_ui.figure.clear()
         # create an axis
         ax = self.obstacle_toolbox_ui.figure.add_subplot(111)
-        
+
         # plot data
         ax.plot(time, profile, '.-', markersize=4)
         ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.1f}'))
