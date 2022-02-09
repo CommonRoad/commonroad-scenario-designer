@@ -307,7 +307,7 @@ class ObstacleToolboxUI(Toolbox):
         self.layout_shape_groupbox.insertRow(i+2, self.polygon_row[i])
         self.amount_vertices = self.amount_vertices + 1
 
-    def remove_vertice(self, i: int=-1):
+    def remove_vertice(self, i: int = -1):
         """
         removes one vertice field
         :param i: index of vertice to be removed
