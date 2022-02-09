@@ -51,12 +51,17 @@ class ObstacleToolbox(QDockWidget):
             self.sumo_simulation = None
 
     def init_canvas(self):
+        """
+        so profile visualization canvas can handle events
+        """
         self.obstacle_toolbox_ui.canvas.mpl_connect('button_press_event', self.on_button_press)
         self.obstacle_toolbox_ui.canvas.mpl_connect('button_release_event', self.on_button_release)
         self.obstacle_toolbox_ui.canvas.mpl_connect('motion_notify_event', self.on_mouse_move)
 
     def adjust_ui(self):
-        """Updates GUI properties like width, etc."""
+        """
+        Updates GUI properties like width, etc.
+        """
         self.setFloating(True)
         self.setFeatures(QDockWidget.AllDockWidgetFeatures)
         self.setAllowedAreas(Qt.RightDockWidgetArea)
@@ -64,7 +69,9 @@ class ObstacleToolbox(QDockWidget):
         self.obstacle_toolbox_ui.setMinimumWidth(450)
 
     def connect_gui_elements(self):
-        """adds functionality to gui elements like buttons, menus etc"""
+        """
+        adds functionality to gui elements like buttons, menus etc
+        """
         self.initialize_obstacle_information()
 
         self.obstacle_toolbox_ui.selected_obstacle.currentTextChanged.connect(
@@ -102,7 +109,10 @@ class ObstacleToolbox(QDockWidget):
         self.initialize_toolbox()
 
     def static_obstacle_details(self, obstacle_id):
-        """Creates static obstacles"""
+        """
+        Creates static obstacles
+        :param obstacle_id: id of static obstacle to be created
+        """
         if self.obstacle_toolbox_ui.obstacle_shape.currentText() == "Rectangle":
             static_obstacle = StaticObstacle(obstacle_id=obstacle_id,
                                              obstacle_type=ObstacleType(
@@ -147,7 +157,10 @@ class ObstacleToolbox(QDockWidget):
         self.callback(self.current_scenario)
 
     def dynamic_obstacle_details(self, obstacle_id):
-        """creates dynamic obstacles"""
+        """
+        creates dynamic obstacles
+        :param obstacle_id: id of static obstacle to be created
+        """
         if self.xyova:
             initial_position = np.array([self.xyova[0][0], self.xyova[0][1]])
             state_dictionary = {'position': initial_position,
@@ -192,7 +205,7 @@ class ObstacleToolbox(QDockWidget):
                     shape = Rectangle(float(self.obstacle_toolbox_ui.obstacle_length.text()), width = float(self.obstacle_toolbox_ui.obstacle_width.text())),
                     trajectory = Trajectory(
                         initial_time_step = 1,
-                        state_list = self.initial_trajectory()
+                        state_list = self.calc_state_list()
                     )
                 )
             )
@@ -211,7 +224,7 @@ class ObstacleToolbox(QDockWidget):
                     shape=Circle(float(self.obstacle_toolbox_ui.obstacle_radius.text())),
                     trajectory=Trajectory(
                         initial_time_step=1,
-                        state_list=self.initial_trajectory()
+                        state_list=self.calc_state_list()
                     )
                 )
             )
@@ -239,7 +252,13 @@ class ObstacleToolbox(QDockWidget):
         self.current_scenario.add_objects(dynamic_obstacle)       
         self.callback(self.current_scenario)
 
-    def initial_trajectory(self):
+    def calc_state_list(self):
+        """
+        Calculates the trajectory, orientation, yaw_rate, slip_angle, etc
+        for the dynamic obstacle based on changes in profile visualization.
+        If no changes just reuse the old values
+        :return: state_list which is an array of states
+        """
         state_list = []
 
         # if updating positions in profile visualisation
@@ -281,7 +300,10 @@ class ObstacleToolbox(QDockWidget):
             return state_list
 
     def polygon_array(self):
-        """returns a list of the vertices from the gui menu"""
+        """
+        Stores values from gui menu as floats (vertice coordinates)
+        :return: a list of the vertices from the gui menu
+        """
         vertices = []
         for i in range(self.obstacle_toolbox_ui.amount_vertices):
             if self.obstacle_toolbox_ui.vertices_x[i].text() != "" and \
@@ -298,16 +320,24 @@ class ObstacleToolbox(QDockWidget):
         return vertices
     
     def get_current_obstacle(self):
-        """returns current selected obstacle"""
+        """
+        :return: current selected obstacle
+        """
         obstacle_id = self.get_current_obstacle_id()
         selected_obstacle = self.current_scenario.obstacle_by_id(obstacle_id)
         return selected_obstacle
     
     def get_current_obstacle_id(self):
+        """
+        :return: obstacle_id of current selected obstacle
+        """
         return int(self.obstacle_toolbox_ui.selected_obstacle.currentText())
 
     def add_obstacle(self):
-        """creates a static or dynamic obstacle"""
+        """
+        generates an object_id (id for obstacle) and then calls function
+        to create a static or dynamic obstacle
+        """
         obstacle_id = self.current_scenario.generate_object_id()
         self.amount_obstacles = self.current_scenario.generate_object_id()
 
@@ -323,7 +353,9 @@ class ObstacleToolbox(QDockWidget):
                 self.text_browser.append("Error when adding static obstacle")
     
     def update_obstacle(self):
-        """updates obstacle by deleting it and then adding it again with same id"""
+        """
+        updates obstacle by deleting it and then adding it again with same id
+        """
         
         selected_obstacle = self.get_current_obstacle()
         obstacle_id = self.get_current_obstacle_id()
@@ -352,7 +384,10 @@ class ObstacleToolbox(QDockWidget):
         self.initialize_obstacle_information()
 
     def calc_velocity(self, point1, point2):
-        """calculates velocity based on two points"""
+        """
+        calculates velocity based on two points
+        :return: velocity between two points
+        """
         distance = math.dist(point1, point2)
         velocity = distance / self.current_scenario.dt
         return velocity
@@ -375,7 +410,9 @@ class ObstacleToolbox(QDockWidget):
         self.obstacle_toolbox_ui.selected_obstacle.setCurrentIndex(0)
 
     def delete_point(self):
-        """ deletes right clicked point """
+        """
+        deletes right clicked point
+         """
         time = []
         profile = []
         state_variable_name = self.obstacle_toolbox_ui.obstacle_state_variable.currentText()
@@ -396,7 +433,9 @@ class ObstacleToolbox(QDockWidget):
         self.sel_point = None
     
     def on_button_press(self, event):
-        """"when left or right mouse button is pressed"""
+        """"
+        when left or right mouse button is pressed
+        """
         if event.inaxes is None:
             return
         if self.obstacle_toolbox_ui.selected_obstacle.currentText() == "None":
@@ -418,7 +457,11 @@ class ObstacleToolbox(QDockWidget):
             self.delete_point()
     
     def on_button_release(self, event):
-        """Updates obstacle when left mouse button is released"""
+        """
+        Updates obstacle when left mouse button is released
+        if xyova already exists: save changed values to that array
+        otherwise create the array and store changes
+        """
         if event.button != 1:
             return
         if self.sel_point is None:
@@ -478,8 +521,10 @@ class ObstacleToolbox(QDockWidget):
         self.sel_point = None
     
     def on_mouse_move(self, event):
-        """update position of selected point by moving mouse
-            and holding down left mouse button"""
+        """
+        update position of selected point by moving mouse
+        and holding down left mouse button
+        """
         if self.sel_point is None:
             return
         if event.button != 1:
@@ -511,7 +556,11 @@ class ObstacleToolbox(QDockWidget):
         self.draw_plot(time, profile, self.xmin, self.xmax, self.ymin, self.ymax)
 
     def calculate_xyova(self):
-        """calculate xyova array which keeps track of not updated changes"""
+        """
+        calculate xyova array which keeps track of not updated changes
+        Eg, if change orientation by dragging the points, those changes
+        are stored in this array
+        """
         selected_obstacle = self.get_current_obstacle()
         state_variable_name = self.obstacle_toolbox_ui.obstacle_state_variable.currentText()
         i = 0
@@ -703,8 +752,10 @@ class ObstacleToolbox(QDockWidget):
                 k += 1
 
     def calculate_pos(self):
-        """calculates the self.pos array which is the array that
-        contains the data that is displayed in the plot"""
+        """
+        calculates the self.pos array which is the array that
+        contains the data that is displayed in the plot
+        """
         selected_obstacle = self.get_current_obstacle()
         state_variable_name = self.obstacle_toolbox_ui.obstacle_state_variable.currentText()
         self.pos.clear()
@@ -770,7 +821,10 @@ class ObstacleToolbox(QDockWidget):
         self.ymin, self.ymax = event.get_ylim()
 
     def selected_point(self, event):
-        """get the time step of the where the point is located"""
+        """
+        get the time step of the where the point is located
+        :return: sel_point, the time step of the selected point
+        """
 
         pos = []
         sel_point = None
@@ -789,6 +843,11 @@ class ObstacleToolbox(QDockWidget):
         return sel_point
         
     def plot_obstacle_state_profile(self):
+        """
+        Gets the values based on which profile is selected.
+        If non updated changes, these values come from the xyova array,
+        otherwise directly from the obstacle state_list
+        """
         if self.obstacle_toolbox_ui.selected_obstacle.currentText() not in ["", "None"] and not self.update_ongoing:
             obstacle = self.get_current_obstacle()
             state_variable_name = self.obstacle_toolbox_ui.obstacle_state_variable.currentText()
@@ -893,8 +952,10 @@ class ObstacleToolbox(QDockWidget):
             return ""
 
     def update_obstacle_information(self):
-        """retrieves obstacle details to the gui when an obstacle is pressed or the id
-        is selected in the obstacle toolbox"""
+        """
+        retrieves obstacle details to the gui when an obstacle is pressed or the id
+        is selected in the obstacle toolbox
+        """
         if self.obstacle_toolbox_ui.selected_obstacle.currentText() not in ["", "None"]:
 
             self.update_ongoing = True
@@ -982,7 +1043,9 @@ class ObstacleToolbox(QDockWidget):
             self.obstacle_toolbox_ui.canvas.draw()
 
     def clear_obstacle_fields(self):
-        """clears the obstacle QLineEdits"""
+        """
+        clears the obstacle QLineEdits
+        """
         if self.obstacle_toolbox_ui.obstacle_shape.currentText() == "Circle":
             self.obstacle_toolbox_ui.obstacle_radius.setText("")
 
@@ -1020,7 +1083,9 @@ class ObstacleToolbox(QDockWidget):
                 self.text_browser.append("Error when removing obstacle")
 
     def draw_plot(self, time, profile, xmin = None, xmax = None, ymin = None, ymax =None):
-        """draws the state plot in the obstacle toolbox"""
+        """
+        draws the state plot in the obstacle toolbox
+        """
         state_variable_name = self.obstacle_toolbox_ui.obstacle_state_variable.currentText()
         # clear previous profile
         self.obstacle_toolbox_ui.figure.clear()
