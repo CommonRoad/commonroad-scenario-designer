@@ -203,7 +203,7 @@ class ObstacleToolbox(QDockWidget):
                 initial_state=State(**state_dictionary),
                 prediction=TrajectoryPrediction(
                     shape=Rectangle(float(self.obstacle_toolbox_ui.obstacle_length.text()),
-                            width=float(self.obstacle_toolbox_ui.obstacle_width.text())),
+                                    width=float(self.obstacle_toolbox_ui.obstacle_width.text())),
                     trajectory=Trajectory(
                         initial_time_step=1,
                         state_list=self.calc_state_list()
@@ -236,7 +236,7 @@ class ObstacleToolbox(QDockWidget):
 
                 obstacle_type=ObstacleType(self.obstacle_toolbox_ui.obstacle_type.currentText()),
                 obstacle_shape=Polygon(
-                    
+
                     vertices=self.polygon_array()
                 ),
 
