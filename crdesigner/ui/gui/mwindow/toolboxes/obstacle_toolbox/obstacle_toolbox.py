@@ -149,7 +149,7 @@ class ObstacleToolbox(QDockWidget):
                                         0,
                                         0
                                     ]),
-                                    'orientation': 0, 
+                                    'orientation': 0,
                                     'time_step': 1
                                     })
             )
