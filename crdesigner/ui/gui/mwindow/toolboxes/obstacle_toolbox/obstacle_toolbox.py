@@ -203,7 +203,7 @@ class ObstacleToolbox(QDockWidget):
                 initial_state=State(**state_dictionary),
                 prediction=TrajectoryPrediction(
                     shape=Rectangle(float(self.obstacle_toolbox_ui.obstacle_length.text()),
-                    width=float(self.obstacle_toolbox_ui.obstacle_width.text())),
+                            width=float(self.obstacle_toolbox_ui.obstacle_width.text())),
                     trajectory=Trajectory(
                         initial_time_step=1,
                         state_list=self.calc_state_list()
@@ -220,7 +220,7 @@ class ObstacleToolbox(QDockWidget):
                     radius=float(self.obstacle_toolbox_ui.obstacle_radius.text())
                 ),
 
-                initial_state = State(**state_dictionary),
+                initial_state=State(**state_dictionary),
                 prediction=TrajectoryPrediction(
                     shape=Circle(float(self.obstacle_toolbox_ui.obstacle_radius.text())),
                     trajectory=Trajectory(
@@ -229,7 +229,7 @@ class ObstacleToolbox(QDockWidget):
                     )
                 )
             )
-        
+
         elif self.obstacle_toolbox_ui.obstacle_shape.currentText() == "Polygon":
             dynamic_obstacle = DynamicObstacle(
                 obstacle_id=obstacle_id,
