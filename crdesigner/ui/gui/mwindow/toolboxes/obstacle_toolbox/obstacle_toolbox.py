@@ -200,12 +200,13 @@ class ObstacleToolbox(QDockWidget):
                     orientation = float(self.obstacle_toolbox_ui.obstacle_orientation.text())
                 ),
 
-                initial_state = State(**state_dictionary),
-                prediction = TrajectoryPrediction(
-                    shape = Rectangle(float(self.obstacle_toolbox_ui.obstacle_length.text()), width = float(self.obstacle_toolbox_ui.obstacle_width.text())),
-                    trajectory = Trajectory(
-                        initial_time_step = 1,
-                        state_list = self.calc_state_list()
+                initial_state=State(**state_dictionary),
+                prediction=TrajectoryPrediction(
+                    shape=Rectangle(float(self.obstacle_toolbox_ui.obstacle_length.text()),
+                    width = float(self.obstacle_toolbox_ui.obstacle_width.text())),
+                    trajectory=Trajectory(
+                        initial_time_step=1,
+                        state_list=self.calc_state_list()
                     )
                 )
             )
@@ -318,7 +319,7 @@ class ObstacleToolbox(QDockWidget):
 
         vertices = np.asarray(vertices)
         return vertices
-    
+
     def get_current_obstacle(self):
         """
         :return: current selected obstacle
@@ -326,7 +327,7 @@ class ObstacleToolbox(QDockWidget):
         obstacle_id = self.get_current_obstacle_id()
         selected_obstacle = self.current_scenario.obstacle_by_id(obstacle_id)
         return selected_obstacle
-    
+
     def get_current_obstacle_id(self):
         """
         :return: obstacle_id of current selected obstacle
@@ -351,12 +352,12 @@ class ObstacleToolbox(QDockWidget):
                 self.static_obstacle_details(obstacle_id)
             except Exception as e:
                 self.text_browser.append("Error when adding static obstacle")
-    
+
     def update_obstacle(self):
         """
         updates obstacle by deleting it and then adding it again with same id
         """
-        
+
         selected_obstacle = self.get_current_obstacle()
         obstacle_id = self.get_current_obstacle_id()
         self.temp_obstacle = selected_obstacle
@@ -431,7 +432,7 @@ class ObstacleToolbox(QDockWidget):
         self.draw_plot(time, profile, self.xmin, self.xmax, self.ymin, self.ymax)
 
         self.sel_point = None
-    
+
     def on_button_press(self, event):
         """"
         when left or right mouse button is pressed
@@ -455,7 +456,7 @@ class ObstacleToolbox(QDockWidget):
             return
         if event.button == 3:
             self.delete_point()
-    
+
     def on_button_release(self, event):
         """
         Updates obstacle when left mouse button is released
@@ -519,7 +520,7 @@ class ObstacleToolbox(QDockWidget):
             self.calculate_xyova()
         
         self.sel_point = None
-    
+
     def on_mouse_move(self, event):
         """
         update position of selected point by moving mouse
@@ -841,7 +842,7 @@ class ObstacleToolbox(QDockWidget):
                 smallest_distance = distance
                 sel_point = self.pos[i]
         return sel_point
-        
+
     def plot_obstacle_state_profile(self):
         """
         Gets the values based on which profile is selected.
@@ -1082,9 +1083,15 @@ class ObstacleToolbox(QDockWidget):
             except Exception as e:
                 self.text_browser.append("Error when removing obstacle")
 
-    def draw_plot(self, time, profile, xmin = None, xmax = None, ymin = None, ymax =None):
+    def draw_plot(self, time, profile, xmin=None, xmax=None, ymin=None, ymax=None):
         """
         draws the state plot in the obstacle toolbox
+        :param time: time steps
+        :param profile: the profile to be drawn, eg orientation
+        :param xmin: x lower bound to be drawn
+        :param xmax: x upper bound to be drawn
+        :param ymin: y lower bound to be drawn
+        :param: ymax: y upper bound to be drawn
         """
         state_variable_name = self.obstacle_toolbox_ui.obstacle_state_variable.currentText()
         # clear previous profile

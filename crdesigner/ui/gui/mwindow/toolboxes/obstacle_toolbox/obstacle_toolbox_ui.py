@@ -144,8 +144,8 @@ class ObstacleToolboxUI(Toolbox):
 
         self.layout_shape_groupbox.insertRow(2, "Width [m]", self.obstacle_width)
         self.layout_shape_groupbox.insertRow(3, "Length [m]", self.obstacle_length)
-        self.layout_shape_groupbox.insertRow(4, "Orientation [deg]",self.obstacle_orientation)
-    
+        self.layout_shape_groupbox.insertRow(4, "Orientation [deg]", self.obstacle_orientation)
+
     def remove_rectangle_fields(self):
         """
         removes the fields unique to the rectangle shape
@@ -209,7 +209,7 @@ class ObstacleToolboxUI(Toolbox):
         elif self.obstacle_shape.currentText() == "Circle":
             self.layout_obstacle_information_groupbox.insertRow(4, "X-Position", self.obstacle_x_Position)
             self.layout_obstacle_information_groupbox.insertRow(5, "Y-Position", self.obstacle_y_Position)
-    
+            
     def remove_position(self):
         """
         removes the position fields
