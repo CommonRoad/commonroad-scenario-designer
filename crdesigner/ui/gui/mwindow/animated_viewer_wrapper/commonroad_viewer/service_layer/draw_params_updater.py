@@ -157,7 +157,7 @@ def set_draw_params(trajectory: bool, intersection: bool, obstacle_label: bool,
                 }
             }
 
-            
+     
 PARAMS_DRAW_DETAILED = {
                 'dynamic_obstacle': {
                     'trajectory': {
