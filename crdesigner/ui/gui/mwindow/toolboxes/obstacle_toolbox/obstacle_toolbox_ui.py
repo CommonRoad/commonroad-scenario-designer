@@ -353,7 +353,9 @@ class ObstacleToolboxUI(Toolbox):
             self.polygon_label[j].setText("Vertice " + str(j))
 
     def color_picker(self):
-        """opens color dialogue"""
+        """
+        opens color dialogue window
+        """
         self.obstacle_color = QColorDialog.getColor()
 
         self.default_color.setChecked(False)
@@ -363,6 +365,9 @@ class ObstacleToolboxUI(Toolbox):
         self.change_color = True
 
     def set_default_color(self):
+        """
+        sets default color for the color display square
+        """
         if self.default_color.isChecked():
             self.selected_color.setStyleSheet(
                 "QWidget { border:1px solid black; background-color: white}")

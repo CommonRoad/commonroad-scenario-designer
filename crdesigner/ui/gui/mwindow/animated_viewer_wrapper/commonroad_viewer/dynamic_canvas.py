@@ -342,9 +342,12 @@ class DynamicCanvas(FigureCanvas):
         y_dim = (y_max - y_min) / 2
         return center, x_dim, y_dim, (x_min, x_max), (y_min, y_max)
 
-    def draw_obstacles(self, scenario: Scenario, draw_params=None):
+    def draw_obstacles(self, scenario: Scenario, draw_params: str = None):
         """
-        function that draws the obstacles
+        draws the obstacles
+        :param scenario: current scenario
+        :param: draw_params: scenario draw params, Note: does not contain
+            dynamic obstacle related parameters
         """
         for obj in scenario.obstacles:
             # this is for getting the index of where the object_id is located
@@ -360,9 +363,11 @@ class DynamicCanvas(FigureCanvas):
 
             obj.draw(renderer=self.rnd, draw_params=draw_params_merged)
 
-    def set_static_obstacle_color(self,obstacle_id, color=None):
+    def set_static_obstacle_color(self,obstacle_id: int, color: str = None):
         """
-        sets static_obstacle color, if color=None default color
+        sets static_obstacle color
+        :param obstacle_id: id of obstacle that is to be added/updated
+        :param color: color of the obstacle, None if default color
         """
         if not color:
             color = "#d95558"
@@ -372,9 +377,11 @@ class DynamicCanvas(FigureCanvas):
             "circle": {"facecolor": color}}}}}
         DynamicCanvas.obstacle_color_array.append([obstacle_id, draw_params, color])
 
-    def set_dynamic_obstacle_color(self, obstacle_id, color=None):
+    def set_dynamic_obstacle_color(self, obstacle_id: int, color: str = None):
         """
-        sets static_obstacle color, if color=None default color
+        sets dynamic_obstacle color
+        :param obstacle_id: id of obstacle that is to be added/updated
+        :param color: color of the obstacle, None if default color
         """
         if not color:
             color = "#1d7eea"
@@ -384,7 +391,6 @@ class DynamicCanvas(FigureCanvas):
             "rectangle": {"facecolor": color},
             "circle": {"facecolor": color}}}},
             'show_label': config.DRAW_OBSTACLE_LABELS,
-            #'draw_trajectory': config.DRAW_TRAJECTORY,
             'draw_icon': config.DRAW_OBSTACLE_ICONS,
             'draw_direction': config.DRAW_OBSTACLE_DIRECTION,
             'draw_signals': config.DRAW_OBSTACLE_SIGNALS
@@ -408,7 +414,6 @@ class DynamicCanvas(FigureCanvas):
                                         "rectangle": {"facecolor": color},
                                         "circle": {"facecolor": color}}}},
                                         'show_label': config.DRAW_OBSTACLE_LABELS,
-                                        #'draw_trajectory': config.DRAW_TRAJECTORY,
                                         'draw_icon': config.DRAW_OBSTACLE_ICONS,
                                         'draw_direction': config.DRAW_OBSTACLE_DIRECTION,
                                         'draw_signals': config.DRAW_OBSTACLE_SIGNALS
@@ -433,7 +438,6 @@ class DynamicCanvas(FigureCanvas):
                                             "rectangle": {"facecolor": color},
                                             "circle": {"facecolor": color}}}},
                                             'show_label': config.DRAW_OBSTACLE_LABELS,
-                                            #'draw_trajectory': config.DRAW_TRAJECTORY,
                                             'draw_icon': config.DRAW_OBSTACLE_ICONS,
                                             'draw_direction': config.DRAW_OBSTACLE_DIRECTION,
                                             'draw_signals': config.DRAW_OBSTACLE_SIGNALS
@@ -448,6 +452,9 @@ class DynamicCanvas(FigureCanvas):
                         DynamicCanvas.obstacle_color_array.append([obj.obstacle_id, draw_params, color])
 
     def get_color(self, obstacle_id: int):
+        """
+        :return: color of current selected obstacle
+        """
         try:
             result = next(c for c in self.obstacle_color_array if c[0] == obstacle_id)
             i = DynamicCanvas.obstacle_color_array.index(result)
@@ -455,7 +462,7 @@ class DynamicCanvas(FigureCanvas):
         except: # if scenario loaded and obstacle id doesn't exist in the array
             return False
 
-    def remove_obstacle(self, obstacle_id):
+    def remove_obstacle(self, obstacle_id: int):
         """
         removes obstacle from obstacle_color_array
         """

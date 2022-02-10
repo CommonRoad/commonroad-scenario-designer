@@ -72,18 +72,31 @@ def update_draw_params_dynamic_only_based_on_zoom(x: float, y: float) -> {}:
 def get_draw_params_no_obstacles():
     return PARAMS_OBSTACLE_NO_OBSTACLES
 
-def set_draw_params(trajectory, intersection, obstacle_label,
-                            obstacle_icon, obstacle_direction,
-                            obstacle_signal, occupancy, traffic_signs,
-                            traffic_lights, incoming_lanelets, successors,
-                            intersection_labels):
+def set_draw_params(trajectory: bool, intersection: bool, obstacle_label: bool,
+                            obstacle_icon: bool, obstacle_direction: bool,
+                            obstacle_signal: bool, occupancy: bool, traffic_signs: bool,
+                            traffic_lights: bool, incoming_lanelets: bool, successors: bool,
+                            intersection_labels: bool):
+    """
+    sets draw params
+    :param trajectory: toggle draw_trajectory
+    :param intersection: toggle draw_intersection
+    :param obstacle_label: toggle draw_obstacle_label
+    :param obstacle_icon: toggle draw_obstacle_icon
+    :param obstacle_signal: toggle draw_signals
+    :param occupancy: toggle draw_occupancy
+    :param traffic_signs: toggle draw_traffic_signs
+    :param traffic_lights: toggle draw_traffic_lights
+    :param incoming_lanelets: toggle draw_incoming_lanelets
+    :param successors: toggle draw_successors
+    :param intersection_labels: toggle show_label 
+    """
 
     global modified_draw_params
     modified_draw_params = True
 
     global PARAMS_DRAW_CUSTOM
     PARAMS_DRAW_CUSTOM = {
-        #'scenario': {
                 'lanelet_network': {
                     'traffic_sign': {
                         'draw_traffic_signs': traffic_signs,
@@ -112,10 +125,9 @@ def set_draw_params(trajectory, intersection, obstacle_label,
                     'draw_occupancies': occupancy,
                     },
             }
-        #}
+
     global PARAMS_DRAW_DYNAMIC_CUSTOM
     PARAMS_DRAW_DYNAMIC_CUSTOM = {
-            #'scenario': {
                 'dynamic_obstacle': {
                     'trajectory': {
                         #'show_label': obstacle_label,
@@ -142,10 +154,8 @@ def set_draw_params(trajectory, intersection, obstacle_label,
                     },
                 }
             }
-       # }
             
 PARAMS_DRAW_DETAILED = {
-            #'scenario': {
                 'dynamic_obstacle': {
                     'trajectory': {
                         'show_label': True,
@@ -171,11 +181,8 @@ PARAMS_DRAW_DETAILED = {
                     },
                 }
             }
-       # }
-
 
 PARAMS_DRAW_UNDETAILED = {
-    #'scenario': {
         'dynamic_obstacle': {
             'trajectory': {
                 'show_label': False,
@@ -218,7 +225,6 @@ PARAMS_DRAW_UNDETAILED = {
 
 
 PARAMS_DRAW_DYNAMIC_DETAILED = {
-           # 'scenario': {
                 'dynamic_obstacle': {
                     'trajectory': {
                         'show_label': True,
@@ -242,11 +248,8 @@ PARAMS_DRAW_DYNAMIC_DETAILED = {
                     },
                 }
             }
-       # }
-
 
 PARAMS_DRAW_DYNAMIC_UNDETAILED = {
-    #'scenario': {
         'dynamic_obstacle': {
             'trajectory': {
                 'show_label': False,
@@ -276,4 +279,3 @@ PARAMS_DRAW_DYNAMIC_UNDETAILED = {
             }
         }
     }
-#}
