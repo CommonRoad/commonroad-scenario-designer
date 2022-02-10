@@ -356,7 +356,7 @@ class DynamicCanvas(FigureCanvas):
                 draw_params_merged = draw_params
             #print(obstacle_draw_params)
             
-            print(draw_params_merged)
+            #print(draw_params_merged)
 
             obj.draw(renderer=self.rnd, draw_params=draw_params_merged)
 
@@ -426,7 +426,7 @@ class DynamicCanvas(FigureCanvas):
                     
                 except:
                         if isinstance(obj, DynamicObstacle):
-                            color = "#00478f"
+                            color = "#1d7eea"
                             draw_params = {"dynamic_obstacle": {
                                             "vehicle_shape": {"occupancy": {"shape": {
                                             "polygon": {"facecolor": color},
@@ -447,6 +447,13 @@ class DynamicCanvas(FigureCanvas):
                                         "circle": {"facecolor": color}}}}}
                         DynamicCanvas.obstacle_color_array.append([obj.obstacle_id, draw_params, color])
 
+    def get_color(self, obstacle_id: int):
+        try:
+            result = next(c for c in self.obstacle_color_array if c[0] == obstacle_id)
+            i = DynamicCanvas.obstacle_color_array.index(result)
+            return DynamicCanvas.obstacle_color_array[i][2]
+        except: # if scenario loaded and obstacle id doesn't exist in the array
+            return False
 
     def remove_obstacle(self, obstacle_id):
         """
