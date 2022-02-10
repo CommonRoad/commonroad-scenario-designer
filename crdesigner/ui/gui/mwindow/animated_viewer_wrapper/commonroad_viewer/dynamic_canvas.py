@@ -428,8 +428,8 @@ class DynamicCanvas(FigureCanvas):
                     i = DynamicCanvas.obstacle_color_array.index(result)
                     DynamicCanvas.obstacle_color_array.pop(i)
                     DynamicCanvas.obstacle_color_array.append([obj.obstacle_id, draw_params, color])
-                    
-                except:
+
+                except Exception:
                     if isinstance(obj, DynamicObstacle):
                         color = "#1d7eea"
                         draw_params = {"dynamic_obstacle": {
@@ -445,10 +445,10 @@ class DynamicCanvas(FigureCanvas):
                     elif isinstance(obj, StaticObstacle):
                         color = "#d95558"
                         draw_params = {"static_obstacle": {
-                                    "occupancy": {"shape": {
-                                    "polygon": {"facecolor": color},
-                                    "rectangle": {"facecolor": color},
-                                    "circle": {"facecolor": color}}}}}
+                                        "occupancy": {"shape": {
+                                                "polygon": {"facecolor": color},
+                                                "rectangle": {"facecolor": color},
+                                                "circle": {"facecolor": color}}}}}
                     DynamicCanvas.obstacle_color_array.append([obj.obstacle_id, draw_params, color])
 
     def get_color(self, obstacle_id: int):
