@@ -363,7 +363,7 @@ class DynamicCanvas(FigureCanvas):
 
             obj.draw(renderer=self.rnd, draw_params=draw_params_merged)
 
-    def set_static_obstacle_color(self,obstacle_id: int, color: str = None):
+    def set_static_obstacle_color(self, obstacle_id: int, color: str = None):
         """
         sets static_obstacle color
         :param obstacle_id: id of obstacle that is to be added/updated
@@ -386,14 +386,14 @@ class DynamicCanvas(FigureCanvas):
         if not color:
             color = "#1d7eea"
         draw_params = {"dynamic_obstacle": {
-            "vehicle_shape": {"occupancy": {"shape": {
-            "polygon": {"facecolor": color},
-            "rectangle": {"facecolor": color},
-            "circle": {"facecolor": color}}}},
-            'show_label': config.DRAW_OBSTACLE_LABELS,
-            'draw_icon': config.DRAW_OBSTACLE_ICONS,
-            'draw_direction': config.DRAW_OBSTACLE_DIRECTION,
-            'draw_signals': config.DRAW_OBSTACLE_SIGNALS
+                            "vehicle_shape": {"occupancy": {"shape": {
+                                            "polygon": {"facecolor": color},
+                                            "rectangle": {"facecolor": color},
+                                            "circle": {"facecolor": color}}}},
+                            'show_label': config.DRAW_OBSTACLE_LABELS,
+                            'draw_icon': config.DRAW_OBSTACLE_ICONS,
+                            'draw_direction': config.DRAW_OBSTACLE_DIRECTION,
+                            'draw_signals': config.DRAW_OBSTACLE_SIGNALS
                     }}
         DynamicCanvas.obstacle_color_array.append([obstacle_id, draw_params, color])
     
@@ -409,14 +409,14 @@ class DynamicCanvas(FigureCanvas):
                     color = result[2]
                     if isinstance(obj, DynamicObstacle):
                         draw_params = {"dynamic_obstacle": {
-                                        "vehicle_shape": {"occupancy": {"shape": {
-                                        "polygon": {"facecolor": color},
-                                        "rectangle": {"facecolor": color},
-                                        "circle": {"facecolor": color}}}},
-                                        'show_label': config.DRAW_OBSTACLE_LABELS,
-                                        'draw_icon': config.DRAW_OBSTACLE_ICONS,
-                                        'draw_direction': config.DRAW_OBSTACLE_DIRECTION,
-                                        'draw_signals': config.DRAW_OBSTACLE_SIGNALS
+                                            "vehicle_shape": {"occupancy": {"shape": {
+                                                    "polygon": {"facecolor": color},
+                                                    "rectangle": {"facecolor": color},
+                                                    "circle": {"facecolor": color}}}},
+                                            'show_label': config.DRAW_OBSTACLE_LABELS,
+                                            'draw_icon': config.DRAW_OBSTACLE_ICONS,
+                                            'draw_direction': config.DRAW_OBSTACLE_DIRECTION,
+                                            'draw_signals': config.DRAW_OBSTACLE_SIGNALS
                                                 }}
                     elif isinstance(obj, StaticObstacle):
                         draw_params = {"static_obstacle": {
@@ -433,14 +433,14 @@ class DynamicCanvas(FigureCanvas):
                         if isinstance(obj, DynamicObstacle):
                             color = "#1d7eea"
                             draw_params = {"dynamic_obstacle": {
-                                            "vehicle_shape": {"occupancy": {"shape": {
-                                            "polygon": {"facecolor": color},
-                                            "rectangle": {"facecolor": color},
-                                            "circle": {"facecolor": color}}}},
-                                            'show_label': config.DRAW_OBSTACLE_LABELS,
-                                            'draw_icon': config.DRAW_OBSTACLE_ICONS,
-                                            'draw_direction': config.DRAW_OBSTACLE_DIRECTION,
-                                            'draw_signals': config.DRAW_OBSTACLE_SIGNALS
+                                                "vehicle_shape": {"occupancy": {"shape": {
+                                                            "polygon": {"facecolor": color},
+                                                            "rectangle": {"facecolor": color},
+                                                            "circle": {"facecolor": color}}}},
+                                                'show_label': config.DRAW_OBSTACLE_LABELS,
+                                                'draw_icon': config.DRAW_OBSTACLE_ICONS,
+                                                'draw_direction': config.DRAW_OBSTACLE_DIRECTION,
+                                                'draw_signals': config.DRAW_OBSTACLE_SIGNALS
                                                     }}
                         elif isinstance(obj, StaticObstacle):
                             color = "#d95558"
@@ -459,7 +459,7 @@ class DynamicCanvas(FigureCanvas):
             result = next(c for c in self.obstacle_color_array if c[0] == obstacle_id)
             i = DynamicCanvas.obstacle_color_array.index(result)
             return DynamicCanvas.obstacle_color_array[i][2]
-        except: # if scenario loaded and obstacle id doesn't exist in the array
+        except Exception:  # if scenario loaded and obstacle id doesn't exist in the array
             return False
 
     def remove_obstacle(self, obstacle_id: int):

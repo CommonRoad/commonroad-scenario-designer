@@ -69,14 +69,16 @@ def update_draw_params_dynamic_only_based_on_zoom(x: float, y: float) -> {}:
     else:
         return PARAMS_DRAW_DYNAMIC_UNDETAILED
 
+
 def get_draw_params_no_obstacles():
     return PARAMS_OBSTACLE_NO_OBSTACLES
 
+
 def set_draw_params(trajectory: bool, intersection: bool, obstacle_label: bool,
-                            obstacle_icon: bool, obstacle_direction: bool,
-                            obstacle_signal: bool, occupancy: bool, traffic_signs: bool,
-                            traffic_lights: bool, incoming_lanelets: bool, successors: bool,
-                            intersection_labels: bool):
+                    obstacle_icon: bool, obstacle_direction: bool,
+                    obstacle_signal: bool, occupancy: bool, traffic_signs: bool,
+                    traffic_lights: bool, incoming_lanelets: bool, successors: bool,
+                    intersection_labels: bool):
     """
     sets draw params
     :param trajectory: toggle draw_trajectory
@@ -130,7 +132,7 @@ def set_draw_params(trajectory: bool, intersection: bool, obstacle_label: bool,
     PARAMS_DRAW_DYNAMIC_CUSTOM = {
                 'dynamic_obstacle': {
                     'trajectory': {
-                        #'show_label': obstacle_label,
+                        # 'show_label': obstacle_label,
                         'draw_trajectory': trajectory,
                         'draw_icon': obstacle_icon,
                         'draw_direction': obstacle_direction,
@@ -154,6 +156,7 @@ def set_draw_params(trajectory: bool, intersection: bool, obstacle_label: bool,
                     },
                 }
             }
+
             
 PARAMS_DRAW_DETAILED = {
                 'dynamic_obstacle': {
