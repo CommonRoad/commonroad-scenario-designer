@@ -174,6 +174,11 @@ class DynamicCanvas(FigureCanvas):
         :type plot_limits: [type], optional
         :param draw_dynamic_only: reuses static artists
         """
+        # want to update immediatly if change gui settings
+        self.draw_params = update_draw_params_based_on_scenario(
+                    lanelet_count=len(scenario.lanelet_network.lanelets),
+                    traffic_sign_count=len(scenario.lanelet_network.traffic_signs))
+
         DynamicCanvas.scenario = scenario
         xlim = self.ax.get_xlim()
         ylim = self.ax.get_ylim()
@@ -206,6 +211,7 @@ class DynamicCanvas(FigureCanvas):
                 pps.draw(renderer=self.rnd, draw_params=draw_params_merged)
             self.draw_obstacles(scenario=scenario, draw_params=draw_params_merged)
             self.rnd.render(keep_static_artists=False)
+            #print(draw_params_merged)
 
         if not plot_limits:
             self.ax.set(xlim=xlim)
@@ -350,7 +356,7 @@ class DynamicCanvas(FigureCanvas):
                 draw_params_merged = draw_params
             #print(obstacle_draw_params)
             
-            #print(obstacle_draw_params)
+            print(draw_params_merged)
 
             obj.draw(renderer=self.rnd, draw_params=draw_params_merged)
 
@@ -371,14 +377,14 @@ class DynamicCanvas(FigureCanvas):
         sets static_obstacle color, if color=None default color
         """
         if not color:
-            color = "#00478f"
+            color = "#1d7eea"
         draw_params = {"dynamic_obstacle": {
             "vehicle_shape": {"occupancy": {"shape": {
             "polygon": {"facecolor": color},
             "rectangle": {"facecolor": color},
             "circle": {"facecolor": color}}}},
             'show_label': config.DRAW_OBSTACLE_LABELS,
-            'draw_trajectory': config.DRAW_TRAJECTORY,
+            #'draw_trajectory': config.DRAW_TRAJECTORY,
             'draw_icon': config.DRAW_OBSTACLE_ICONS,
             'draw_direction': config.DRAW_OBSTACLE_DIRECTION,
             'draw_signals': config.DRAW_OBSTACLE_SIGNALS
@@ -402,7 +408,7 @@ class DynamicCanvas(FigureCanvas):
                                         "rectangle": {"facecolor": color},
                                         "circle": {"facecolor": color}}}},
                                         'show_label': config.DRAW_OBSTACLE_LABELS,
-                                        'draw_trajectory': config.DRAW_TRAJECTORY,
+                                        #'draw_trajectory': config.DRAW_TRAJECTORY,
                                         'draw_icon': config.DRAW_OBSTACLE_ICONS,
                                         'draw_direction': config.DRAW_OBSTACLE_DIRECTION,
                                         'draw_signals': config.DRAW_OBSTACLE_SIGNALS
@@ -427,7 +433,7 @@ class DynamicCanvas(FigureCanvas):
                                             "rectangle": {"facecolor": color},
                                             "circle": {"facecolor": color}}}},
                                             'show_label': config.DRAW_OBSTACLE_LABELS,
-                                            'draw_trajectory': config.DRAW_TRAJECTORY,
+                                            #'draw_trajectory': config.DRAW_TRAJECTORY,
                                             'draw_icon': config.DRAW_OBSTACLE_ICONS,
                                             'draw_direction': config.DRAW_OBSTACLE_DIRECTION,
                                             'draw_signals': config.DRAW_OBSTACLE_SIGNALS

@@ -118,7 +118,7 @@ def set_draw_params(trajectory, intersection, obstacle_label,
             #'scenario': {
                 'dynamic_obstacle': {
                     'trajectory': {
-                        'show_label': obstacle_label,
+                        #'show_label': obstacle_label,
                         'draw_trajectory': trajectory,
                         'draw_icon': obstacle_icon,
                         'draw_direction': obstacle_direction,
