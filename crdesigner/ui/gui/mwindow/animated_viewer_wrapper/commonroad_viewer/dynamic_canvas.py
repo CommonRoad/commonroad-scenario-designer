@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Union
 
 from PyQt5.QtWidgets import QSizePolicy
 import numpy as np
@@ -451,8 +451,9 @@ class DynamicCanvas(FigureCanvas):
                                                 "circle": {"facecolor": color}}}}}
                     DynamicCanvas.obstacle_color_array.append([obj.obstacle_id, draw_params, color])
 
-    def get_color(self, obstacle_id: int):
+    def get_color(self, obstacle_id: int) -> Union[int, bool]:
         """
+        :param obstacle_id: id of selected obstacle
         :return: color of current selected obstacle
         """
         try:
@@ -464,6 +465,7 @@ class DynamicCanvas(FigureCanvas):
 
     def remove_obstacle(self, obstacle_id: int):
         """
+        :param: id of obstacle to be removed
         removes obstacle from obstacle_color_array
         """
         try:

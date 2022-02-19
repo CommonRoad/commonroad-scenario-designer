@@ -12,6 +12,8 @@ def update_draw_params_based_on_scenario(lanelet_count: int, traffic_sign_count:
     (lanelet_count and traffic_sign_count act as approximation for complexity)
     :param lanelet_count: how many lanelets are in the lanelet network.
     :param traffic_sign_count: how many traffic signs are in the network.
+    :return: detailed, or not detailed draw_params depending on size of scenario
+        if custom draw_params are used, they are returned
     """
     if modified_draw_params:
         return PARAMS_DRAW_CUSTOM
@@ -27,6 +29,8 @@ def update_draw_params_dynamic_based_on_scenario(lanelet_count: int, traffic_sig
     Also based on complexity of lanelet network.
     :param lanelet_count: how many lanelets are in the lanelet network.
     :param traffic_sign_count: how many traffic signs are in the network.
+    :return: detailed, or not detailed draw_params depending on size of scenario
+        if custom draw_params are used, they are returned
     """
     if modified_draw_params:
         return PARAMS_DRAW_CUSTOM
@@ -43,6 +47,8 @@ def update_draw_params_based_on_zoom(x: float, y: float) -> {}:
     When zoomed in enough display the details.
     :param x: Absolut value of x axis in Dynamic Canvas
     :param y: Absolut value of y axis in Dynamic Canvas
+    :return: detailed, or not detailed draw_params depending on size of scenario
+        if custom draw_params are used, they are returned
     """
     if modified_draw_params:
         return PARAMS_DRAW_CUSTOM
@@ -59,6 +65,8 @@ def update_draw_params_dynamic_only_based_on_zoom(x: float, y: float) -> {}:
     Same as update_draw_params_based_on_zoom but returns parameter for Dynamic Visualization.
     :param x: Absolut value of x axis in Dynamic Canvas
     :param y: Absolut value of y axis in Dynamic Canvas
+    :return: detailed, or not detailed draw_params depending on size of scenario
+        if custom draw_params are used, they are returned
     """
     if modified_draw_params:
         return PARAMS_DRAW_DYNAMIC_CUSTOM
@@ -68,11 +76,6 @@ def update_draw_params_dynamic_only_based_on_zoom(x: float, y: float) -> {}:
     # else render only the lanelets
     else:
         return PARAMS_DRAW_DYNAMIC_UNDETAILED
-
-
-def get_draw_params_no_obstacles():
-    return PARAMS_OBSTACLE_NO_OBSTACLES
-
 
 def set_draw_params(trajectory: bool, intersection: bool, obstacle_label: bool,
                     obstacle_icon: bool, obstacle_direction: bool,
@@ -92,6 +95,7 @@ def set_draw_params(trajectory: bool, intersection: bool, obstacle_label: bool,
     :param incoming_lanelets: toggle draw_incoming_lanelets
     :param successors: toggle draw_successors
     :param intersection_labels: toggle show_label 
+    :param obstacle_directon: toggle obstacle_direction
     """
 
     global modified_draw_params
