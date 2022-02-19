@@ -1084,7 +1084,7 @@ class ObstacleToolbox(QDockWidget):
             else:
                 color = self.canvas.get_color(obstacle_id)
                 self.obstacle_toolbox_ui.selected_color.setStyleSheet(
-                    "QWidget { border:1px solid black; background-color: %s}"% color)
+                    "QWidget { border:1px solid black; background-color: %s}" % color)
                 self.obstacle_color = color
                 if color == "#d95558" or color == "#1d7eea":
                     self.obstacle_toolbox_ui.default_color.setChecked(True)

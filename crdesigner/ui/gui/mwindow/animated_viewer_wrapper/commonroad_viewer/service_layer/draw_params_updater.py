@@ -1,6 +1,7 @@
 from .general_services import detailed_drawing_params_threshold_zoom_met
 from .general_services import is_big_map
 
+
 modified_draw_params = False
 PARAMS_OBSTACLE_CUSTOM = None
 
@@ -94,7 +95,7 @@ def set_draw_params(trajectory: bool, intersection: bool, obstacle_label: bool,
     :param traffic_lights: toggle draw_traffic_lights
     :param incoming_lanelets: toggle draw_incoming_lanelets
     :param successors: toggle draw_successors
-    :param intersection_labels: toggle show_label 
+    :param intersection_labels: toggle show_label
     :param obstacle_directon: toggle obstacle_direction
     """
 
