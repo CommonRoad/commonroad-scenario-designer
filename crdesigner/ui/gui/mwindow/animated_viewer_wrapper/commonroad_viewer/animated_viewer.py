@@ -1,4 +1,3 @@
-import copy
 from typing import Union
 import numpy as np
 
@@ -6,8 +5,7 @@ from PyQt5.QtWidgets import QFileDialog, QMessageBox
 from commonroad.planning.planning_problem import PlanningProblemSet
 
 from commonroad.scenario.intersection import Intersection
-from commonroad.common.util import Interval
-from commonroad.scenario.scenario import Scenario, Obstacle, StaticObstacle, DynamicObstacle
+from commonroad.scenario.scenario import Scenario
 from commonroad.scenario.lanelet import Lanelet, LaneletNetwork
 from commonroad.visualization.mp_renderer import MPRenderer
 

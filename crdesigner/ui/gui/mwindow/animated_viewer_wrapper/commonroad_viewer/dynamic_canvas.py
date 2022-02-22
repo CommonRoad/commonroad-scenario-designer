@@ -15,11 +15,9 @@ from .service_layer import update_draw_params_dynamic_based_on_scenario
 from .service_layer import resize_lanelet_network
 from crdesigner.ui.gui.mwindow.service_layer import config
 from commonroad.geometry.shape import Circle
-from commonroad.scenario.obstacle import Obstacle, StaticObstacle, ObstacleType, DynamicObstacle
+from commonroad.scenario.obstacle import StaticObstacle, DynamicObstacle
 
 from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMO_AVAILABLE
-if SUMO_AVAILABLE:
-    from crdesigner.map_conversion.sumo_map.config import SumoConfig
 
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
@@ -211,7 +209,6 @@ class DynamicCanvas(FigureCanvas):
                 pps.draw(renderer=self.rnd, draw_params=draw_params_merged)
             self.draw_obstacles(scenario=scenario, draw_params=draw_params_merged)
             self.rnd.render(keep_static_artists=False)
-            #print(draw_params_merged)
 
         if not plot_limits:
             self.ax.set(xlim=xlim)
@@ -355,11 +352,8 @@ class DynamicCanvas(FigureCanvas):
                 result = next(c for c in DynamicCanvas.obstacle_color_array if c[0] == obj.obstacle_id)
                 obstacle_draw_params = result[1]
                 draw_params_merged = _merge_dict(draw_params.copy(), obstacle_draw_params.copy())
-            except:
+            except Exception:
                 draw_params_merged = draw_params
-            #print(obstacle_draw_params)
-            
-            #print(draw_params_merged)
 
             obj.draw(renderer=self.rnd, draw_params=draw_params_merged)
 
@@ -409,21 +403,21 @@ class DynamicCanvas(FigureCanvas):
                     color = result[2]
                     if isinstance(obj, DynamicObstacle):
                         draw_params = {"dynamic_obstacle": {
-                                            "vehicle_shape": {"occupancy": {"shape": {
-                                                    "polygon": {"facecolor": color},
-                                                    "rectangle": {"facecolor": color},
-                                                    "circle": {"facecolor": color}}}},
-                                            'show_label': config.DRAW_OBSTACLE_LABELS,
-                                            'draw_icon': config.DRAW_OBSTACLE_ICONS,
-                                            'draw_direction': config.DRAW_OBSTACLE_DIRECTION,
-                                            'draw_signals': config.DRAW_OBSTACLE_SIGNALS
+                            "vehicle_shape": {"occupancy": {"shape": {
+                                "polygon": {"facecolor": color},
+                                "rectangle": {"facecolor": color},
+                                "circle": {"facecolor": color}}}},
+                            'show_label': config.DRAW_OBSTACLE_LABELS,
+                            'draw_icon': config.DRAW_OBSTACLE_ICONS,
+                            'draw_direction': config.DRAW_OBSTACLE_DIRECTION,
+                            'draw_signals': config.DRAW_OBSTACLE_SIGNALS
                                                 }}
                     elif isinstance(obj, StaticObstacle):
                         draw_params = {"static_obstacle": {
-                                    "occupancy": {"shape": {
-                                    "polygon": {"facecolor": color},
-                                    "rectangle": {"facecolor": color},
-                                    "circle": {"facecolor": color}}}}}
+                            "occupancy": {"shape": {
+                                "polygon": {"facecolor": color},
+                                "rectangle": {"facecolor": color},
+                                "circle": {"facecolor": color}}}}}
 
                     i = DynamicCanvas.obstacle_color_array.index(result)
                     DynamicCanvas.obstacle_color_array.pop(i)
@@ -433,15 +427,15 @@ class DynamicCanvas(FigureCanvas):
                     if isinstance(obj, DynamicObstacle):
                         color = "#1d7eea"
                         draw_params = {"dynamic_obstacle": {
-                                            "vehicle_shape": {"occupancy": {"shape": {
-                                                        "polygon": {"facecolor": color},
-                                                        "rectangle": {"facecolor": color},
-                                                        "circle": {"facecolor": color}}}},
-                                            'show_label': config.DRAW_OBSTACLE_LABELS,
-                                            'draw_icon': config.DRAW_OBSTACLE_ICONS,
-                                            'draw_direction': config.DRAW_OBSTACLE_DIRECTION,
-                                            'draw_signals': config.DRAW_OBSTACLE_SIGNALS
-                                                }}
+                            "vehicle_shape": {"occupancy": {"shape": {
+                                "polygon": {"facecolor": color},
+                                "rectangle": {"facecolor": color},
+                                "circle": {"facecolor": color}}}},
+                            'show_label': config.DRAW_OBSTACLE_LABELS,
+                            'draw_icon': config.DRAW_OBSTACLE_ICONS,
+                            'draw_direction': config.DRAW_OBSTACLE_DIRECTION,
+                            'draw_signals': config.DRAW_OBSTACLE_SIGNALS
+                        }}
                     elif isinstance(obj, StaticObstacle):
                         color = "#d95558"
                         draw_params = {"static_obstacle": {
@@ -465,12 +459,13 @@ class DynamicCanvas(FigureCanvas):
 
     def remove_obstacle(self, obstacle_id: int):
         """
-        :param: id of obstacle to be removed
         removes obstacle from obstacle_color_array
+
+        :param: id of obstacle to be removed
         """
         try:
             result = next(c for c in self.obstacle_color_array if c[0] == obstacle_id)
             i = DynamicCanvas.obstacle_color_array.index(result)
             DynamicCanvas.obstacle_color_array.pop(i)
-        except: # if scenario loaded and obstacle id doesn't exist in the array
+        except Exception:  # if scenario loaded and obstacle id doesn't exist in the array
             pass

@@ -81,17 +81,17 @@ class GUISettings:
             self.canvas.update_obstacle_trajectory_params()
 
             set_draw_params(trajectory=self.window.chk_draw_trajectory.isChecked(),
-                                            intersection=self.window.chk_draw_intersection.isChecked(),
-                                            obstacle_label=self.window.chk_draw_label.isChecked(),
-                                            obstacle_icon=self.window.chk_draw_obstacle_icon.isChecked(),
-                                            obstacle_direction=self.window.chk_draw_obstacle_direction.isChecked(),
-                                            obstacle_signal=self.window.chk_draw_obstacle_signal.isChecked(),
-                                            occupancy=self.window.chk_draw_occupancy.isChecked(),
-                                            traffic_signs=self.window.chk_draw_traffic_sign.isChecked(),
-                                            traffic_lights=self.window.chk_draw_traffic_light.isChecked(),
-                                            incoming_lanelets=self.window.chk_draw_incoming_lanelet.isChecked(),
-                                            successors=self.window.chk_draw_successors.isChecked(),
-                                            intersection_labels=self.window.chk_draw_intersection_label.isChecked(),
-                                            )
+                            intersection=self.window.chk_draw_intersection.isChecked(),
+                            obstacle_label=self.window.chk_draw_label.isChecked(),
+                            obstacle_icon=self.window.chk_draw_obstacle_icon.isChecked(),
+                            obstacle_direction=self.window.chk_draw_obstacle_direction.isChecked(),
+                            obstacle_signal=self.window.chk_draw_obstacle_signal.isChecked(),
+                            occupancy=self.window.chk_draw_occupancy.isChecked(),
+                            traffic_signs=self.window.chk_draw_traffic_sign.isChecked(),
+                            traffic_lights=self.window.chk_draw_traffic_light.isChecked(),
+                            incoming_lanelets=self.window.chk_draw_incoming_lanelet.isChecked(),
+                            successors=self.window.chk_draw_successors.isChecked(),
+                            intersection_labels=self.window.chk_draw_intersection_label.isChecked(),
+                            )
         else:
             print("invalid settings")

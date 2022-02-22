@@ -162,16 +162,16 @@ class ObstacleToolbox(QDockWidget):
                                     'time_step': 1
                                     })
             )
-            
+
         if self.obstacle_toolbox_ui.default_color.isChecked():
             self.canvas.set_static_obstacle_color(static_obstacle.obstacle_id)
         else:
             if self.obstacle_color is not None and not self.obstacle_toolbox_ui.change_color:
-                self.canvas.set_static_obstacle_color(static_obstacle.obstacle_id, 
-                                                    self.obstacle_color)
+                self.canvas.set_static_obstacle_color(static_obstacle.obstacle_id,
+                                                      self.obstacle_color)
             else:
-                self.canvas.set_static_obstacle_color(static_obstacle.obstacle_id, 
-                                                        self.obstacle_toolbox_ui.obstacle_color.name())
+                self.canvas.set_static_obstacle_color(static_obstacle.obstacle_id,
+                                                      self.obstacle_toolbox_ui.obstacle_color.name())
         self.obstacle_color = None
 
         self.current_scenario.add_objects(static_obstacle)
@@ -278,10 +278,10 @@ class ObstacleToolbox(QDockWidget):
         else:
             if self.obstacle_color is not None and not self.obstacle_toolbox_ui.change_color:
                 self.canvas.set_dynamic_obstacle_color(dynamic_obstacle.obstacle_id,
-                                                    self.obstacle_color)
+                                                       self.obstacle_color)
             else:
                 self.canvas.set_dynamic_obstacle_color(dynamic_obstacle.obstacle_id,
-                                                    self.obstacle_toolbox_ui.obstacle_color.name())
+                                                       self.obstacle_toolbox_ui.obstacle_color.name())
         self.obstacle_color = None
 
         self.current_scenario.add_objects(dynamic_obstacle)
@@ -1088,8 +1088,7 @@ class ObstacleToolbox(QDockWidget):
                 self.obstacle_color = color
                 if color == "#d95558" or color == "#1d7eea":
                     self.obstacle_toolbox_ui.default_color.setChecked(True)
-            self.obstacle_toolbox_ui.change_color = False  
-                
+            self.obstacle_toolbox_ui.change_color = False
 
         # if set to "None": clear QLineEdits
         else:
@@ -1136,8 +1135,8 @@ class ObstacleToolbox(QDockWidget):
                 self.canvas.remove_obstacle(obstacle_id)
                 self.current_scenario.remove_obstacle(selected_obstacle)
                 self.callback(self.current_scenario)
-                self.amount_obstacles -=1
-            except Exception as e:
+                self.amount_obstacles -= 1
+            except Exception:
                 self.text_browser.append("Error when removing obstacle")
 
     def draw_plot(self, time, profile, xmin: float = None,

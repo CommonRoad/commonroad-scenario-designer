@@ -5,6 +5,7 @@ from .general_services import is_big_map
 modified_draw_params = False
 PARAMS_OBSTACLE_CUSTOM = None
 
+
 def update_draw_params_based_on_scenario(lanelet_count: int, traffic_sign_count: int) -> {}:
     """
     Return the parameter for drawing a lanelet network in the Dynamic Canvas based on complexity of the lanelet network.
@@ -23,6 +24,7 @@ def update_draw_params_based_on_scenario(lanelet_count: int, traffic_sign_count:
         return PARAMS_DRAW_UNDETAILED
     else:
         return PARAMS_DRAW_DETAILED
+
 
 def update_draw_params_dynamic_based_on_scenario(lanelet_count: int, traffic_sign_count: int) -> {}:
     """
@@ -78,6 +80,7 @@ def update_draw_params_dynamic_only_based_on_zoom(x: float, y: float) -> {}:
     else:
         return PARAMS_DRAW_DYNAMIC_UNDETAILED
 
+
 def set_draw_params(trajectory: bool, intersection: bool, obstacle_label: bool,
                     obstacle_icon: bool, obstacle_direction: bool,
                     obstacle_signal: bool, occupancy: bool, traffic_signs: bool,
@@ -122,7 +125,7 @@ def set_draw_params(trajectory: bool, intersection: bool, obstacle_label: bool,
                         'show_label': intersection_labels,
                     },
                     "traffic_light": {
-                    "draw_traffic_lights": traffic_lights,
+                        "draw_traffic_lights": traffic_lights,
                     },
                 },
                 'trajectory': {
@@ -221,15 +224,15 @@ PARAMS_DRAW_UNDETAILED = {
                 'successors_left_color': '#ff00ff',
                 'successors_straight_color': 'blue',
                 'successors_right_color': '#ccff00',
-                'show_label': True, },
-            "traffic_light": {
-                "draw_traffic_lights": False,
-                "draw_stop_line": False,
-                "draw_start_and_direction": False
-            }
+                'show_label': True,
+            },
+                "traffic_light": {
+                    "draw_traffic_lights": False,
+                    "draw_stop_line": False,
+                    "draw_start_and_direction": False
+                }
             }
         }
-   # }
 
 
 PARAMS_DRAW_DYNAMIC_DETAILED = {
@@ -252,7 +255,6 @@ PARAMS_DRAW_DYNAMIC_DETAILED = {
                     'traffic_sign': {
                         'draw_traffic_signs': True,
                         'show_traffic_signs': 'all',
-                        # 'scale_factor': 0.2
                     },
                 }
             }

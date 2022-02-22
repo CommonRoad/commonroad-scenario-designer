@@ -118,8 +118,8 @@ class ObstacleToolboxUI(Toolbox):
         layout_obstacle_buttons.addRow(self.button_remove_obstacle)
         layout_obstacle_buttons.addRow(self.button_add_static_obstacle)
         self.layout_obstacles.addLayout(layout_obstacle_buttons)
-        self.layout_obstacles.addLayout(self.vis_settings_container) #maybe move later
-        
+        self.layout_obstacles.addLayout(self.vis_settings_container)
+
         title_obstacle = "Obstacle"
         self.sections.append((title_obstacle, widget_obstacles))
 
@@ -296,7 +296,7 @@ class ObstacleToolboxUI(Toolbox):
             self.remove_dynamic_fields()
             self.toggle_dynamic_static()
 
-    #add vertices for the polygon shape, i is the place in the array
+    # add vertices for the polygon shape, i is the place in the array
     def add_vertice(self):
         """
         add vertices for the polygon shape, i is the place in the array
@@ -360,8 +360,7 @@ class ObstacleToolboxUI(Toolbox):
 
         self.default_color.setChecked(False)
         self.selected_color.setStyleSheet(
-            "QWidget { border:1px solid black; background-color: %s}"
-             % self.obstacle_color.name())
+            "QWidget { border:1px solid black; background-color: %s}" % self.obstacle_color.name())
         self.change_color = True
 
     def set_default_color(self):
