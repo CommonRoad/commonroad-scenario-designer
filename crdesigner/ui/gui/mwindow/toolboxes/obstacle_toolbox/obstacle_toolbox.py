@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Union
 import matplotlib as mpl
 import numpy as np
 import math
@@ -15,6 +15,7 @@ from commonroad.scenario.obstacle import Obstacle, StaticObstacle, ObstacleType,
 from commonroad.scenario.trajectory import State, Trajectory
 
 from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMO_AVAILABLE
+from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.commonroad_viewer.dynamic_canvas import DynamicCanvas
 
 if SUMO_AVAILABLE:
     from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMOSimulation
@@ -38,6 +39,8 @@ class ObstacleToolbox(QDockWidget):
         self.update_ongoing = False
         self.init_canvas()
         self.amount_obstacles = 0
+        self.canvas = DynamicCanvas()
+        self.obstacle_color = None
 
         # for profile visualisation
         self.sel_point = None
@@ -90,6 +93,12 @@ class ObstacleToolbox(QDockWidget):
 
         self.obstacle_toolbox_ui.obstacle_dyn_stat.currentTextChanged.connect(
             lambda: self.obstacle_toolbox_ui.toggle_dynamic_static())
+
+        self.obstacle_toolbox_ui.color_btn.clicked.connect(
+            lambda: self.obstacle_toolbox_ui.color_picker())
+
+        self.obstacle_toolbox_ui.default_color.stateChanged.connect(
+            lambda: self.obstacle_toolbox_ui.set_default_color())
 
         if SUMO_AVAILABLE:
             self.obstacle_toolbox_ui.button_start_simulation.clicked.connect(lambda: self.start_sumo_simulation())
@@ -153,6 +162,18 @@ class ObstacleToolbox(QDockWidget):
                                     'time_step': 1
                                     })
             )
+            
+        if self.obstacle_toolbox_ui.default_color.isChecked():
+            self.canvas.set_static_obstacle_color(static_obstacle.obstacle_id)
+        else:
+            if self.obstacle_color is not None and not self.obstacle_toolbox_ui.change_color:
+                self.canvas.set_static_obstacle_color(static_obstacle.obstacle_id, 
+                                                    self.obstacle_color)
+            else:
+                self.canvas.set_static_obstacle_color(static_obstacle.obstacle_id, 
+                                                        self.obstacle_toolbox_ui.obstacle_color.name())
+        self.obstacle_color = None
+
         self.current_scenario.add_objects(static_obstacle)
         self.callback(self.current_scenario)
 
@@ -251,10 +272,22 @@ class ObstacleToolbox(QDockWidget):
                 )
 
             )
+
+        if self.obstacle_toolbox_ui.default_color.isChecked():
+            self.canvas.set_dynamic_obstacle_color(dynamic_obstacle.obstacle_id)
+        else:
+            if self.obstacle_color is not None and not self.obstacle_toolbox_ui.change_color:
+                self.canvas.set_dynamic_obstacle_color(dynamic_obstacle.obstacle_id,
+                                                    self.obstacle_color)
+            else:
+                self.canvas.set_dynamic_obstacle_color(dynamic_obstacle.obstacle_id,
+                                                    self.obstacle_toolbox_ui.obstacle_color.name())
+        self.obstacle_color = None
+
         self.current_scenario.add_objects(dynamic_obstacle)
         self.callback(self.current_scenario)
 
-    def calc_state_list(self):
+    def calc_state_list(self) -> List[State]:
         """
         Calculates the trajectory, orientation, yaw_rate, slip_angle, etc
         for the dynamic obstacle based on changes in profile visualization.
@@ -301,7 +334,7 @@ class ObstacleToolbox(QDockWidget):
                 state_list.append(new_state)
             return state_list
 
-    def polygon_array(self):
+    def polygon_array(self) -> Union[List[float], None]:
         """
         Stores values from gui menu as floats (vertice coordinates)
         :return: a list of the vertices from the gui menu
@@ -321,19 +354,25 @@ class ObstacleToolbox(QDockWidget):
         vertices = np.asarray(vertices)
         return vertices
 
-    def get_current_obstacle(self):
+    def get_current_obstacle(self) -> Union[Obstacle, None]:
         """
         :return: current selected obstacle
         """
         obstacle_id = self.get_current_obstacle_id()
-        selected_obstacle = self.current_scenario.obstacle_by_id(obstacle_id)
-        return selected_obstacle
+        if obstacle_id is not None:
+            selected_obstacle = self.current_scenario.obstacle_by_id(obstacle_id)
+            return selected_obstacle
+        else:
+            return None
 
-    def get_current_obstacle_id(self):
+    def get_current_obstacle_id(self) -> Union[int, None]:
         """
         :return: obstacle_id of current selected obstacle
         """
-        return int(self.obstacle_toolbox_ui.selected_obstacle.currentText())
+        if self.obstacle_toolbox_ui.selected_obstacle.currentText() != "None":
+            return int(self.obstacle_toolbox_ui.selected_obstacle.currentText())
+        else:
+            return None
 
     def add_obstacle(self):
         """
@@ -364,6 +403,7 @@ class ObstacleToolbox(QDockWidget):
         self.temp_obstacle = selected_obstacle
 
         if selected_obstacle:
+            self.canvas.remove_obstacle(obstacle_id)
             self.current_scenario.remove_obstacle(selected_obstacle)
 
         if self.obstacle_toolbox_ui.obstacle_dyn_stat.currentText() == "Static":
@@ -384,7 +424,7 @@ class ObstacleToolbox(QDockWidget):
     def initialize_toolbox(self):
         self.initialize_obstacle_information()
 
-    def calc_velocity(self, point1: float, point2: float):
+    def calc_velocity(self, point1: float, point2: float) -> float:
         """
         calculates velocity based on two points
         :return: velocity between two points
@@ -393,7 +433,7 @@ class ObstacleToolbox(QDockWidget):
         velocity = distance / self.current_scenario.dt
         return velocity
 
-    def calc_acceleration(self, velocity1: float, velocity2: float):
+    def calc_acceleration(self, velocity1: float, velocity2: float) -> float:
         """calculates acceleration based on the velocity at 2 points"""
         delta_v = velocity2 - velocity1
         acceleration = delta_v / self.current_scenario.dt
@@ -821,7 +861,7 @@ class ObstacleToolbox(QDockWidget):
     def on_ylim_change(self, event):
         self.ymin, self.ymax = event.get_ylim()
 
-    def selected_point(self, event):
+    def selected_point(self, event) -> List[float]:
         """
         get the time step of the where the point is located
         :return: sel_point, the time step of the selected point
@@ -961,6 +1001,8 @@ class ObstacleToolbox(QDockWidget):
 
             self.update_ongoing = True
             obstacle = self.get_current_obstacle()
+            obstacle_id = self.get_current_obstacle_id()
+
             if isinstance(obstacle.obstacle_shape, Rectangle):
 
                 if self.obstacle_toolbox_ui.obstacle_shape.currentText() != "Rectangle":
@@ -1036,6 +1078,19 @@ class ObstacleToolbox(QDockWidget):
             self.xyova.clear()
             self.plot_obstacle_state_profile()
 
+            # load obstacle color
+            if not self.canvas.get_color(obstacle_id):
+                self.obstacle_toolbox_ui.default_color.setChecked(True)
+            else:
+                color = self.canvas.get_color(obstacle_id)
+                self.obstacle_toolbox_ui.selected_color.setStyleSheet(
+                    "QWidget { border:1px solid black; background-color: %s}" % color)
+                self.obstacle_color = color
+                if color == "#d95558" or color == "#1d7eea":
+                    self.obstacle_toolbox_ui.default_color.setChecked(True)
+            self.obstacle_toolbox_ui.change_color = False  
+                
+
         # if set to "None": clear QLineEdits
         else:
             self.clear_obstacle_fields()
@@ -1076,7 +1131,9 @@ class ObstacleToolbox(QDockWidget):
         """
         if self.obstacle_toolbox_ui.selected_obstacle.currentText() not in ["", "None"]:
             try:
+                obstacle_id = self.get_current_obstacle_id()
                 selected_obstacle = self.get_current_obstacle()
+                self.canvas.remove_obstacle(obstacle_id)
                 self.current_scenario.remove_obstacle(selected_obstacle)
                 self.callback(self.current_scenario)
                 self.amount_obstacles -=1

@@ -21,6 +21,7 @@ class ObstacleToolboxUI(Toolbox):
         super().__init__()
 
         self.text_browser = text_browser
+        self.change_color = False
 
     def define_sections(self):
         """defines the sections in the obstacle toolbox
@@ -59,6 +60,27 @@ class ObstacleToolboxUI(Toolbox):
         self.button_remove_obstacle = QPushButton("Remove")
         self.button_add_static_obstacle = QPushButton("Add")
 
+        self.vis_settings_container = QFormLayout()
+        self.vis_settings_label = QLabel("Visualization settings")
+        self.vis_settings_label.setFont(QFont("Arial", 11, QFont.Bold))
+        self.vis_settings_container.addRow(self.vis_settings_label)
+
+        self.color_container = QHBoxLayout()
+        self.vis_settings_container.addRow(self.color_container)
+        self.color_label = QLabel("Obstacle color:")
+        self.color_container.addWidget(self.color_label)
+        self.default_color = QCheckBox("Default color")
+        self.default_color.setChecked(True)
+        self.color_btn = QPushButton("Choose color")
+        self.selected_color = QWidget()
+        self.selected_color.setStyleSheet("border: 1px solid black")
+        self.selected_color.setFixedWidth(25)
+        self.selected_color.setFixedHeight(25)
+
+        self.color_container.addWidget(self.default_color)
+        self.color_container.addWidget(self.color_btn)
+        self.color_container.addWidget(self.selected_color)
+
         self.layout_obstacle_information_groupbox = QFormLayout()
         self.obstacle_information_groupbox = QGroupBox()
         self.obstacle_information_groupbox.setLayout(self.layout_obstacle_information_groupbox)
@@ -96,7 +118,8 @@ class ObstacleToolboxUI(Toolbox):
         layout_obstacle_buttons.addRow(self.button_remove_obstacle)
         layout_obstacle_buttons.addRow(self.button_add_static_obstacle)
         self.layout_obstacles.addLayout(layout_obstacle_buttons)
-
+        self.layout_obstacles.addLayout(self.vis_settings_container) #maybe move later
+        
         title_obstacle = "Obstacle"
         self.sections.append((title_obstacle, widget_obstacles))
 
@@ -269,6 +292,11 @@ class ObstacleToolboxUI(Toolbox):
         if self.obstacle_dyn_stat.currentText() == "Dynamic":
             self.toggle_dynamic_static()
 
+        if self.obstacle_dyn_stat.currentText() == "Dynamic":
+            self.remove_dynamic_fields()
+            self.toggle_dynamic_static()
+
+    #add vertices for the polygon shape, i is the place in the array
     def add_vertice(self):
         """
         add vertices for the polygon shape, i is the place in the array
@@ -323,3 +351,23 @@ class ObstacleToolboxUI(Toolbox):
 
         for j in range(self.amount_vertices):
             self.polygon_label[j].setText("Vertice " + str(j))
+
+    def color_picker(self):
+        """
+        opens color dialogue window
+        """
+        self.obstacle_color = QColorDialog.getColor()
+
+        self.default_color.setChecked(False)
+        self.selected_color.setStyleSheet(
+            "QWidget { border:1px solid black; background-color: %s}"
+             % self.obstacle_color.name())
+        self.change_color = True
+
+    def set_default_color(self):
+        """
+        sets default color for the color display square
+        """
+        if self.default_color.isChecked():
+            self.selected_color.setStyleSheet(
+                "QWidget { border:1px solid black; background-color: white}")
