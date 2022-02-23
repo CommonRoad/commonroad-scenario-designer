@@ -96,6 +96,9 @@ class Converter:
     def populate_traffic_elements(self, link_map: Dict[int, int]):
         """
         This function is responsible for populating traffic elements.
+
+        :param link_map: Dictionary with keys as lanelet id of CommonRoad lanelets and
+        values as road id of OpenDrive roads
         """
         for lanelet in self.lane_net.lanelets:
             non_empty = False
