@@ -18,6 +18,17 @@ class Junction:
 
     def __init__(self, incoming: List[IntersectionIncomingElement], id_to_road: Dict[int, int],
                  lane_to_lane: Dict[int, int], root: etree._Element, lane_network: LaneletNetwork, id: int):
+        """
+        This function lets the Junction class initialize the object with attributes incoming, id_to_road, lane_to_lane,
+        root, lane_network, id and converts scenario junctions to OpenDRIVE junction.
+
+        :param incoming: list of incoming intersection
+        :param id_to_road: dictionary with lanelet id as key and OpendDRIVE road id as value
+        :param lane_to_lane: dictionary with lanelet id as key and lane id as value
+        :param root: OpenDRIVE etree element
+        :param lane_network: collection of lanelet network
+        :param id: counting of Junction 
+        """
         self.incoming = incoming
         self.id = id
         self.root = root

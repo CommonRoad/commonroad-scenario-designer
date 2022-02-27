@@ -362,7 +362,6 @@ class Converter:
                     )
 
                     Junction.counting += 1
-
                     Junction(
                         [incoming],
                         Road.cr_id_to_od,

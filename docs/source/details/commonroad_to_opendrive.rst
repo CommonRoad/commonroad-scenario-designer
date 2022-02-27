@@ -119,14 +119,14 @@ and linked together which are explained below in detail:
 
 
 Roads
----------
+-----
 For a given lanelet, it is expanded left and right to construct the corresponding road.
 Then, we continue to expand with its successor and predecessors.
 The road network is explored in a breadth-first fashion.
 
 
 Checking correctness of road construction
-----------------------------------------------------
+-----------------------------------------
 We need to check whether all lanelets have been added to the road network or not. 
 If it is not added, an error is raised as this particular lanelet is not added to the road network and the user is informed to check algorithm or provided road network.
 
@@ -142,7 +142,7 @@ Also, the stored information are linked with the road ID and stored as road link
 
 
 Add junction and link road to junction
----------------------------------------
+--------------------------------------
 The intersection of lane net consists of intersection incoming elements. 
 For every intersection incoming elment, all successors are obtained.  
 Road id of successors with the CommonRoad id are transformed to successors 
@@ -153,10 +153,25 @@ are linked with the lanelink accordingly to OpenDRIVE.
 
 
 Add static obstacles and regulatroy elements
-------------------------------
+--------------------------------------------
 Static obstacles are added to the map. Obstacles can be in the shape of circles, rectangles, or polygons.
 Traffic signs and lights are added to the map.
 
+
+Add traffic signs and traffic lights
+------------------------------------
+We create an empty dictionary as data for storing traffic signs and traffic light of CommonRoad scenario.
+Then for every lanelet, first we check whether traffic sign exists or not on it.
+If exists, every traffic sign with corresponding lanelet id is stored  as list
+on previously defined data dictionary.
+
+Also for traffic light, we first check the existence of traffic light on every lanelet. 
+If exists, every traffic light with corresponding lanelet id is stored  as list
+on data dictionary. Then we populate a dictionary traffic_elements
+with the every road_key as key and the data dictionary as its corresponding value.
+
+Each traffic sign elements and traffic light elements are converted to OpenDRIVE format in which corresponding orientation,
+reference line coordinates s, t are computed.
 
 Convert to Opendrive file
 -------------------------
