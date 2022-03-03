@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.5] - 2022-03-05
+
+### Added
+- Dynamic loading of large maps
+- Adding of static obstacles
+- Individual colors for obstacles
+
+### Fixed
+- Bug simulation button not available
+
 ## [0.4] - 2022-01-06
 
 ### Added

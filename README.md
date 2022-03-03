@@ -93,7 +93,7 @@ Afterward, you can start the _CommonRoad Scenario Designer_ and the GUI will ope
 ```bash
 $ conda activate commonroad
 # Run CR Scenario designer
-$ python crdesigner/input_output/gui/commonroad_scenario_designer_gui.py
+$ python crdesigner/start_gui.py
 ```
 
 #### Command Line
