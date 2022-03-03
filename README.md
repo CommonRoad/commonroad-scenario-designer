@@ -66,11 +66,10 @@ python setup.py install
 ```
 We will soon publish the toolbox on PyPI.
 
-## Common Errors during installation
+### Common Errors during installation
 
-### Ubunutu 21.04
-#### Could not load the Qt platform plugin “xcb” in “” even though it was found
-Error seems to be a missing package - either libxkbcommon-x11 or libxcb-xinerama0 (both can be installed by ```sudo apt install [package_name]```). See for reference [here](https://discuss.pixls.us/t/solved-could-not-load-the-qt-platform-plugin-xcb-in-even-though-it-was-found/17677/9)
+#### Ubuntu 
+- **Could not load the Qt platform plugin “xcb” in “” even though it was found:** Error seems to be a missing package - either libxkbcommon-x11 or libxcb-xinerama0 (both can be installed by ```sudo apt install [package_name]```). See for reference [here](https://discuss.pixls.us/t/solved-could-not-load-the-qt-platform-plugin-xcb-in-even-though-it-was-found/17677/9)
 
 
 ## Usage
