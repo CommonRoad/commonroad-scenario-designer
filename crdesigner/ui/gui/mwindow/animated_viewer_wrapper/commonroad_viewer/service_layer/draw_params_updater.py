@@ -194,14 +194,15 @@ PARAMS_DRAW_DETAILED = {
             }
 
 PARAMS_DRAW_UNDETAILED = {
-        'dynamic_obstacle': {
-            'trajectory': {
-                'show_label': False,
-                'draw_trajectory': False
-            }
-        },
-        'lanelet_network':
-            {'traffic_sign': {
+    'dynamic_obstacle': {
+        'trajectory': {
+            'show_label': False,
+            'draw_trajectory': False
+        }
+    },
+    'lanelet_network':
+        {
+            'traffic_sign': {
                 'draw_traffic_signs': False
             },
             'lanelet': {
@@ -226,13 +227,13 @@ PARAMS_DRAW_UNDETAILED = {
                 'successors_right_color': '#ccff00',
                 'show_label': True,
             },
-                "traffic_light": {
-                    "draw_traffic_lights": False,
-                    "draw_stop_line": False,
-                    "draw_start_and_direction": False
-                }
+            "traffic_light": {
+                "draw_traffic_lights": False,
+                "draw_stop_line": False,
+                "draw_start_and_direction": False
             }
         }
+}
 
 
 PARAMS_DRAW_DYNAMIC_DETAILED = {

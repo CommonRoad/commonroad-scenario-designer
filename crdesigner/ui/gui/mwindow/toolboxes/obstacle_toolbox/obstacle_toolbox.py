@@ -724,18 +724,18 @@ class ObstacleToolbox(QDockWidget):
                 o = state.__getattribute__("orientation")
                 try:
                     yaw_rate = state.__getattribute__("yaw_rate")
-                except:
+                except Exception:
                     yaw_rate = None
                 try:
                     slip_angle = state.__getattribute__("slip_angle")
-                except:
+                except Exception:
                     slip_angle = None
 
                 v_previous = v
                 v = self.calc_velocity([x, self.pos[k-1][1]], [x, self.pos[k][1]])
                 if a is not None:
                     a = self.calc_acceleration(v_previous, v)
-                   
+
                 self.xyova.append([x, self.pos[i][1], o, v, a, yaw_rate, slip_angle])
 
             elif state_variable_name == "orientation":
@@ -789,7 +789,7 @@ class ObstacleToolbox(QDockWidget):
 
                 self.xyova.append([x, y, o, v, a, yaw_rate, self.pos[i][1]])
             i += 1
-            if k < len(selected_obstacle.prediction.trajectory.state_list): 
+            if k < len(selected_obstacle.prediction.trajectory.state_list):
                 k += 1
 
     def calculate_pos(self):
@@ -802,62 +802,62 @@ class ObstacleToolbox(QDockWidget):
         self.pos.clear()
         t = 0
         if self.xyova:
-            for i in self.xyova: 
+            for i in self.xyova:
                 if state_variable_name == "x-position":
                     x = i[0]
-                    self.pos.append([t,x])
+                    self.pos.append([t, x])
                 elif state_variable_name == "y-position":
                     y = i[1]
-                    self.pos.append([t,y])
+                    self.pos.append([t, y])
                 elif state_variable_name == "orientation":
                     o = i[2]
-                    self.pos.append([t,o])
+                    self.pos.append([t, o])
                 elif state_variable_name == "yaw_rate":
                     yaw_rate = i[5]
-                    self.pos.append([t,yaw_rate])
+                    self.pos.append([t, yaw_rate])
                 elif state_variable_name == "slip_angle":
                     slip_angle = i[6]
-                    self.pos.append([t,slip_angle])
+                    self.pos.append([t, slip_angle])
                 t += 1
         else:
 
             if state_variable_name == "x-position":
                 x = selected_obstacle.initial_state.__getattribute__("position")[0]
-                self.pos.append([t,x])
+                self.pos.append([t, x])
             elif state_variable_name == "y-position":
                 y = selected_obstacle.initial_state.__getattribute__("position")[1]
-                self.pos.append([t,y])
+                self.pos.append([t, y])
             elif state_variable_name == "orientation":
                 o = selected_obstacle.initial_state.__getattribute__("orientation")
-                self.pos.append([t,o])
+                self.pos.append([t, o])
             elif state_variable_name == "yaw_rate":
                 yaw_rate = selected_obstacle.initial_state.__getattribute__("yaw_rate")
-                self.pos.append([t,yaw_rate])
+                self.pos.append([t, yaw_rate])
             elif state_variable_name == "slip_angle":
                 slip_angle = selected_obstacle.initial_state.__getattribute__("slip_angle")
-                self.pos.append([t,slip_angle])
+                self.pos.append([t, slip_angle])
 
             for state in selected_obstacle.prediction.trajectory.state_list:
                 t = state.__getattribute__("time_step")
                 if state_variable_name == "x-position":
                     x = state.__getattribute__("position")[0]
-                    self.pos.append([t,x])
+                    self.pos.append([t, x])
                 elif state_variable_name == "y-position":
                     y = state.__getattribute__("position")[1]
-                    self.pos.append([t,y])
+                    self.pos.append([t, y])
                 elif state_variable_name == "orientation":
                     o = state.__getattribute__("orientation")
-                    self.pos.append([t,o])
+                    self.pos.append([t, o])
                 elif state_variable_name == "yaw_rate":
                     yaw_rate = state.__getattribute__("yaw_rate")
-                    self.pos.append([t,yaw_rate])
+                    self.pos.append([t, yaw_rate])
                 elif state_variable_name == "slip_angle":
                     slip_angle = state.__getattribute__("slip_angle")
-                    self.pos.append([t,slip_angle])
+                    self.pos.append([t, slip_angle])
 
     def on_xlim_change(self, event):
         self.xmin, self.xmax = event.get_xlim()
-    
+
     def on_ylim_change(self, event):
         self.ymin, self.ymax = event.get_ylim()
 
@@ -878,7 +878,7 @@ class ObstacleToolbox(QDockWidget):
             distance = math.dist(self.pos[i], [event.xdata, event.ydata])
             if i == 0:
                 smallest_distance = distance
-            if distance < 1 and distance <= smallest_distance: 
+            if distance < 1 and distance <= smallest_distance:
                 smallest_distance = distance
                 sel_point = self.pos[i]
         return sel_point
@@ -901,7 +901,7 @@ class ObstacleToolbox(QDockWidget):
                     else:
                         profile = [obstacle.initial_state.__getattribute__("position")[0]]
                         profile += [state.__getattribute__("position")[0]
-                                for state in obstacle.prediction.trajectory.state_list]
+                                    for state in obstacle.prediction.trajectory.state_list]
             elif state_variable_name == "y-position":
                 if isinstance(obstacle, StaticObstacle):
                     profile = [obstacle.initial_state.__getattribute__("position")[1]]
@@ -911,7 +911,7 @@ class ObstacleToolbox(QDockWidget):
                     else:
                         profile = [obstacle.initial_state.__getattribute__("position")[1]]
                         profile += [state.__getattribute__("position")[1]
-                                for state in obstacle.prediction.trajectory.state_list]
+                                    for state in obstacle.prediction.trajectory.state_list]
 
             elif (state_variable_name == "velocity" and isinstance(obstacle, DynamicObstacle)):
                 if self.xyova:
@@ -919,7 +919,7 @@ class ObstacleToolbox(QDockWidget):
                 else:
                     profile = [obstacle.initial_state.__getattribute__("velocity")]
                     profile += [state.__getattribute__("velocity")
-                            for state in obstacle.prediction.trajectory.state_list]
+                                for state in obstacle.prediction.trajectory.state_list]
 
             elif (state_variable_name == "acceleration" and isinstance(obstacle, DynamicObstacle)):
                 if self.xyova:
@@ -927,15 +927,15 @@ class ObstacleToolbox(QDockWidget):
                 else:
                     profile = [obstacle.initial_state.__getattribute__("acceleration")]
                     profile += [state.__getattribute__("acceleration")
-                        for state in obstacle.prediction.trajectory.state_list]
+                                for state in obstacle.prediction.trajectory.state_list]
 
-            elif (state_variable_name == "yaw_rate" and isinstance(obstacle, DynamicObstacle)):
+            elif state_variable_name == "yaw_rate" and isinstance(obstacle, DynamicObstacle):
                 if self.xyova:
                     profile = [j[5] for j in self.xyova]
                 else:
                     profile = [obstacle.initial_state.__getattribute__("yaw_rate")]
                     profile += [state.__getattribute__("yaw_rate")
-                        for state in obstacle.prediction.trajectory.state_list]
+                                for state in obstacle.prediction.trajectory.state_list]
 
             elif (state_variable_name == "slip_angle" and isinstance(obstacle, DynamicObstacle)):
                 if self.xyova:
@@ -943,8 +943,8 @@ class ObstacleToolbox(QDockWidget):
                 else:
                     profile = [obstacle.initial_state.__getattribute__("slip_angle")]
                     profile += [state.__getattribute__("slip_angle")
-                        for state in obstacle.prediction.trajectory.state_list]
-            
+                                for state in obstacle.prediction.trajectory.state_list]
+
             elif state_variable_name == "orientation":
                 if isinstance(obstacle, StaticObstacle):
                     profile = [obstacle.initial_state.__getattribute__("orientation")]
@@ -966,8 +966,8 @@ class ObstacleToolbox(QDockWidget):
                 time = [0]
 
             self.xmin = None
-            self.xmax = None 
-            self.ymin = None 
+            self.xmax = None
+            self.ymin = None
             self.ymax = None
             self.draw_plot(time, profile)
 
@@ -1056,7 +1056,7 @@ class ObstacleToolbox(QDockWidget):
                     vertice_string_y = str(vertices[i][1])
                     self.obstacle_toolbox_ui.vertices_x[i].setText(vertice_string_x)
                     self.obstacle_toolbox_ui.vertices_y[i].setText(vertice_string_y)
-            
+
             if isinstance(obstacle, DynamicObstacle):
 
                 if self.obstacle_toolbox_ui.obstacle_dyn_stat.currentText() != "Dynamic":
@@ -1114,7 +1114,7 @@ class ObstacleToolbox(QDockWidget):
                 self.obstacle_toolbox_ui.vertices_x[i].setText("")
                 self.obstacle_toolbox_ui.vertices_y[i].setText("")
         if (self.obstacle_toolbox_ui.obstacle_dyn_stat.currentText() == "Static" and
-        self.obstacle_toolbox_ui.obstacle_shape.currentText() != "Polygon"):
+                self.obstacle_toolbox_ui.obstacle_shape.currentText() != "Polygon"):
             self.obstacle_toolbox_ui.obstacle_x_Position.setText("")
             self.obstacle_toolbox_ui.obstacle_y_Position.setText("")
 
