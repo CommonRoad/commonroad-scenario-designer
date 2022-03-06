@@ -7,6 +7,7 @@ from typing import Dict, List
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.obstacle import Obstacle
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.sign import Sign
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.light import Light
+# from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.stop_line import StopLine
 import crdesigner.map_conversion.opendrive.cr_to_opendrive.utils.file_writer as fwr
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.road import Road
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.junction import Junction
@@ -21,7 +22,6 @@ class Converter:
     This class converts the CommonRoad scenario object to CommonRoad file.
     The CommonRoad elements such as roads, junctions, traffic lights, traffic signal
     are converted to corresponding OpenDRIVE elements and OpenDRIVE file is created.
-
     """
     def __init__(self, file_path: str, sc: Scenario, successors: List[int], ids: Dict[int, bool]):
         self.path = file_path
@@ -50,8 +50,11 @@ class Converter:
 
         # this function constructs all roads
         # using a breadth first search approach
+        # print("before construction of roads")
+        # print(self.id_dict)
         self.construct_roads([lanelet.lanelet_id])
-
+        # print("after road construction")
+        # print(self.id_dict)
         # double check that no lanelet was missed
         self.check_all_visited()
 
@@ -102,8 +105,16 @@ class Converter:
         """
         for lanelet in self.lane_net.lanelets:
             non_empty = False
-            data = {"signs": {}, "lights": {}}
-
+            data = {"signs": {}, "lights": {}, "stoplines": {}}
+            # print("******** stop lines **************")
+            # print(dir(lanelet))
+            # print(lanelet)
+            # print(lanelet.traffic_signs)
+            # print(lanelet.stop_line)
+            # print(type(lanelet.traffic_signs))
+            # print(type(lanelet.stop_line))
+            # print(len(lanelet.traffic_signs))
+            # print(len(lanelet.stop_line))
             if len(lanelet.traffic_signs) > 0:
                 non_empty = True
                 for sign in lanelet.traffic_signs:
@@ -118,8 +129,20 @@ class Converter:
                     data["lights"][sign] = [
                         self.lane_net.find_traffic_light_by_id(light),
                         lanelet.lanelet_id,
-                    ]
-
+                    ] 
+            # try:       
+            #     if len(lanelet.stop_line) > 0:
+            #         non_empty = True
+            #         for stop_line in lanelet.stop_line:
+            #             data["stop_lines"][sign] = [
+            #                 self.lane_net.find_stop_linee_by_id(stop_line),
+            #                 lanelet.lanelet_id,
+            #             ]
+            #         print("*********** stopline data ************")
+            #         print(data)
+            # except Exception as e:
+            #     print(e)
+            #     pass
             if non_empty:
                 self.traffic_elements[link_map[lanelet.lanelet_id]] = data
 
@@ -135,6 +158,9 @@ class Converter:
                 if specifier == "lights":
                     for unique_id, od_object in elements[specifier].items():
                         Light(road_key, unique_id, od_object, self.lane_net)
+                # if specifier == "stop_lines":
+                #     for unique_id, od_object in elements[specifier].items():
+                #         StopLine(road_key, unique_id, od_object, self.lane_net)
 
     def construct_roads(self, frontier: List[int]):
         """
@@ -196,7 +222,12 @@ class Converter:
         This function check that all lanelets have been added to the road network.
         This is done to guarantee correctness of the road construction algorithm
         """
+        # print("checking all visited lanelets")
         for lanelet in self.lane_net.lanelets:
+            # print(lanelet.lanelet_id)
+            # print(self.id_dict[lanelet.lanelet_id])
+            # if lanelet.lanelet_id in [8,30, 31]:
+            #     continue
             if not self.id_dict[lanelet.lanelet_id]:
                 raise KeyError(
                     "Lanelet {} not visited! Check your algorithm.".format(

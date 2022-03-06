@@ -50,13 +50,23 @@ class Signal:
         :return: Coordinate along reference line as s
                  and lateral position, positive to the left within the inertial x/y plane as t.
         """
+        # print("*********** road *************")
+        # print(dir(self.road))
+        # print(self.road.center)
+
+        # print("********* od_object **************")
+        # print(dir(self.od_object))
+        # print(self.od_object.position)
         coords = self.road.center[0] - self.od_object.position
-
+        # print("******* coords *************")
+        # print(coords)
         hdg = util.compute_orientation_from_polyline(self.road.center)[0]
-
+        # print("*********** hdg **************")
+        # print(hdg)
         s = coords[0] * np.cos(hdg) + coords[1] * np.sin(hdg)
         t = coords[1] * np.cos(hdg) - coords[0] * np.sin(hdg)
-
+        # print("********** s and t ************")
+        # print(s,t)
         if s < 0:
             s = -s
             t = -t

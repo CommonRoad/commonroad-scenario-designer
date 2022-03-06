@@ -44,12 +44,19 @@ def get_traffic_signals(road: Road):
     # TODO: Stop lines are created and appended to the list for DEU and OpenDrive format.
     # This has been replicated for other countries but has not been tested with a test case
     # Stop lines have a signal type of 294 and are handled differently in the CommonRoad format
-
+    # print("This is traffic signal in opendrive")
     for signal in road.signals:
+        # print("********** signal here **********")
+        # print(signal.s)
 
         position, tangent, _, _ = road.planView.calc(signal.s, compute_curvature=False)
+        # print("****** position **********")
+        # print(position, tangent)
+        # break
         position = np.array([position[0] + signal.t * np.cos(tangent + np.pi / 2),
                              position[1] + signal.t * np.sin(tangent + np.pi / 2)])
+        # print("after s and tangent")
+        # print(position)
         if signal.dynamic == 'no':
 
             if signal.value == '-1' or signal.value == '-1.0000000000000000e+00' \

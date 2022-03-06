@@ -119,6 +119,11 @@ class TestConverterConvert(unittest.TestCase):
         self.converter.convert(self.file_path_out)
         self.check_with_ground_truth(os.path.join(self.cwd_path, self.path_reference_xodr_file))
 
+    def test_convert_crossing_complex(self):
+        self.prepare_conversion("CrossingComplex8Course")
+        self.converter.convert(self.file_path_out)
+        self.check_with_ground_truth(os.path.join(self.cwd_path, self.path_reference_xodr_file))
+
 
 if __name__ == "__main__":
     unittest.main()
