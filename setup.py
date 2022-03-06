@@ -20,7 +20,7 @@ setup(
     install_requires=[
         "numpy>=1.16.4",
         "lxml>=4.3.4",
-        "commonroad-io>=2020.4",
+        "commonroad-io>=2021.4",
         "pyproj>=2.2.0",
         "scipy>=1.3.0",
         "mercantile >= 1.1.3",
