@@ -9,6 +9,7 @@
 
 ### Fixed
 - System crash if SUMO is available
+- Undo button works again
 - Various small bug fixes
 
 ## [0.4] - 2022-01-06
