@@ -7,7 +7,7 @@ with open(f"{setup_dir}/README.md", "r") as fh:
 
 setup(
     name="commonroad-scenario-designer",
-    version="0.4",
+    version="0.5",
     description="Toolbox for Map Conversion and Scenario Creation for Autonomous Vehicles",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -20,7 +20,7 @@ setup(
     install_requires=[
         "numpy>=1.16.4",
         "lxml>=4.3.4",
-        "commonroad-io>=2020.3",
+        "commonroad-io>=2021.4",
         "pyproj>=2.2.0",
         "scipy>=1.3.0",
         "mercantile >= 1.1.3",

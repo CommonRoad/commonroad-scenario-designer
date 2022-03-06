@@ -48,6 +48,8 @@ pip install -r requirements.txt
 If you want to use the SUMO conversion or to generate traffic using SUMO, please install 
 [SUMO](https://sumo.dlr.de/docs/index.html):
 ```bash
+sudo add-apt-repository ppa:sumo/stable
+sudo apt-get update
 sudo apt-get install sumo sumo-tools sumo-doc
 echo "export SUMO_HOME=/usr/share/sumo" >> ~/.bashrc
 echo 'export PYTHONPATH="$SUMO_HOME/tools:$PYTHONPATH"' >> ~/.bashrc
@@ -63,6 +65,12 @@ or
 python setup.py install
 ```
 We will soon publish the toolbox on PyPI.
+
+### Common Errors during installation
+
+#### Ubuntu 
+- **Could not load the Qt platform plugin “xcb” in “” even though it was found:** Error seems to be a missing package - either libxkbcommon-x11 or libxcb-xinerama0 (both can be installed by ```sudo apt install [package_name]```). See for reference [here](https://discuss.pixls.us/t/solved-could-not-load-the-qt-platform-plugin-xcb-in-even-though-it-was-found/17677/9)
+
 
 ## Usage
 We provide different types of usage for the _CommonRoad Scenario Designer_. Subsequently, we present for each component 
@@ -84,7 +92,7 @@ Afterward, you can start the _CommonRoad Scenario Designer_ and the GUI will ope
 ```bash
 $ conda activate commonroad
 # Run CR Scenario designer
-$ python crdesigner/input_output/gui/commonroad_scenario_designer_gui.py
+$ python crdesigner/start_gui.py
 ```
 
 #### Command Line

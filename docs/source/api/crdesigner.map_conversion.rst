@@ -13,6 +13,14 @@ Subpackages
    crdesigner.map_conversion.osm2cr
    crdesigner.map_conversion.sumo_map
 
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   crdesigner.map_conversion.map_conversion_interface
+
 Module contents
 ---------------
 

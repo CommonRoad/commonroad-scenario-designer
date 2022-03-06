@@ -10,7 +10,7 @@ from crdesigner.map_conversion.opendrive.opendrive_parser.elements.eulerspiral i
 __author__ = "Benjamin Orthen, Stefan Urban"
 __copyright__ = "TUM Cyber-Physical Systems Group"
 __credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles"]
-__version__ = "0.4"
+__version__ = "0.5"
 __maintainer__ = "Sebastian Maierhofer"
 __email__ = "commonroad@lists.lrz.de"
 __status__ = "Released"
@@ -37,7 +37,7 @@ class Geometry(abc.ABC):
         self._heading = heading
 
     @property
-    def start_position(self) -> float:
+    def start_position(self) -> np.ndarray:
         """Returns the overall geometry start position"""
         return self._start_position
 
@@ -313,11 +313,10 @@ class ParamPoly3(Geometry):
 
 def calc_next_s(s_current, curvature: float, error_tolerance: float, min_delta_s, s_max) -> float:
     """
-    Adaptive computation of next longitudinal sampling position considering approximated error using the curvature:
+    Adaptive computation of next longitudinal sampling position considering approximated error using the curvature
     ```
     math  error_tolerance(curvature) <= \frac{curvature^2}{8}*max_{[a,b]}(|f''(s)|)
     ```
-
     :param curvature: curvature at current position
     :param error_tolerance: max. error
     :param min_delta_s: minimal step length to avoids getting stuck

@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.5] - 2022-03-06
+
+### Added
+- Dynamic loading of large maps
+- Adding of static obstacles
+- Individual colors for obstacles
+- Obstacle states can be changed by moving profiles in obstacle toolbox
+
+### Fixed
+- System crash if SUMO is available
+- Undo button works again
+- Various small bug fixes
+
 ## [0.4] - 2022-01-06
 
 ### Added
