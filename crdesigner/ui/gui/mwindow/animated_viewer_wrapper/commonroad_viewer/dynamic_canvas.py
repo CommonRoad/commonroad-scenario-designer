@@ -263,7 +263,7 @@ class DynamicCanvas(FigureCanvas):
         # update the map
         self._update_map()
         # now do the lanelet selection
-        self._select_lanelet()
+        self._select_lanelet(release=True)
 
     def _update_map(self):
         """
@@ -277,9 +277,11 @@ class DynamicCanvas(FigureCanvas):
             if resized_lanelet_network:
                 self.animated_viewer.update_plot()
 
-    def _select_lanelet(self):
+    def _select_lanelet(self, release: bool = False):
         """
         Select a lanelet and display the details in the GUI.
+
+        :param release Boolean indicating whether function is called by click release callback
         """
         # check if any mousepos was setted before
         if self.latest_mouse_pos is None:
@@ -301,27 +303,28 @@ class DynamicCanvas(FigureCanvas):
         else:
             self.animated_viewer.update_plot(sel_lanelet=None, time_step=self.animated_viewer.time_step.value)
 
-        if len(selected_lanelets) + len(selected_obstacles) > 1:
-            output = "__Info__: More than one object can be selected! Lanelets: "
-            if len(selected_lanelets) > 0:
-                for la in selected_lanelets:
-                    output += str(la.lanelet_id) + ", "
-            output = output[:len(output) - 1]
-            if len(selected_obstacles) > 0:
-                output += ". Obstacles: "
-                for obs in selected_obstacles:
-                    output += str(obs.obstacle_id) + ", "
-            output = output[:len(output) - 1]
-            output += "."
-        else:
-            output = ""
+        if not release:
+            if len(selected_lanelets) + len(selected_obstacles) > 1:
+                output = "__Info__: More than one object can be selected! Lanelets: "
+                if len(selected_lanelets) > 0:
+                    for la in selected_lanelets:
+                        output += str(la.lanelet_id) + ", "
+                output = output[:len(output) - 1]
+                if len(selected_obstacles) > 0:
+                    output += ". Obstacles: "
+                    for obs in selected_obstacles:
+                        output += str(obs.obstacle_id) + ", "
+                output = output[:len(output) - 1]
+                output += "."
+            else:
+                output = ""
 
-        if len(selected_obstacles) > 0:
-            selection = " Obstacle with ID " + str(selected_obstacles[0].obstacle_id) + " is selected."
-            self.animated_viewer.callback_function(selected_obstacles[0], output + selection)
-        elif len(selected_lanelets) > 0:
-            selection = " Lanelet with ID " + str(selected_lanelets[0].lanelet_id) + " is selected."
-            self.animated_viewer.callback_function(selected_lanelets[0], output + selection)
+            if len(selected_obstacles) > 0:
+                selection = " Obstacle with ID " + str(selected_obstacles[0].obstacle_id) + " is selected."
+                self.animated_viewer.callback_function(selected_obstacles[0], output + selection)
+            elif len(selected_lanelets) > 0:
+                selection = " Lanelet with ID " + str(selected_lanelets[0].lanelet_id) + " is selected."
+                self.animated_viewer.callback_function(selected_lanelets[0], output + selection)
 
     def get_center_and_axes_values(self) -> ((float, float), float, float, (float, float), (float, float)):
         """

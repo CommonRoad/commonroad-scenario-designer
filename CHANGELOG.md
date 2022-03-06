@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.5] - 2022-03-05
+## [0.5] - 2022-03-06
 
 ### Added
 - Dynamic loading of large maps
@@ -8,7 +8,8 @@
 - Individual colors for obstacles
 
 ### Fixed
-- Bug simulation button not available
+- System crash if SUMO is available
+- Various small bug fixes
 
 ## [0.4] - 2022-01-06
 
