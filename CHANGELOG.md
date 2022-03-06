@@ -6,6 +6,7 @@
 - Dynamic loading of large maps
 - Adding of static obstacles
 - Individual colors for obstacles
+- Obstacle states can be changed by moving profiles in obstacle toolbox
 
 ### Fixed
 - System crash if SUMO is available
