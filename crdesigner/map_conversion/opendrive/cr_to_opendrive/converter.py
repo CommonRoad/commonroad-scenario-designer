@@ -129,8 +129,8 @@ class Converter:
                     data["lights"][sign] = [
                         self.lane_net.find_traffic_light_by_id(light),
                         lanelet.lanelet_id,
-                    ] 
-            # try:       
+                    ]
+            # try:
             #     if len(lanelet.stop_line) > 0:
             #         non_empty = True
             #         for stop_line in lanelet.stop_line:
