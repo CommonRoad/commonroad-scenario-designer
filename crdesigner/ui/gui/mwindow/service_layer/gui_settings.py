@@ -3,7 +3,8 @@ from PyQt5.QtWidgets import QMainWindow
 
 from crdesigner.ui.gui.mwindow.service_layer.gui_resources.gui_settings_ui import Ui_MainWindow
 from crdesigner.ui.gui.mwindow.service_layer import config
-from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.commonroad_viewer.service_layer.draw_params_updater import set_draw_params
+from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.commonroad_viewer.service_layer.draw_params_updater import \
+    set_draw_params
 from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.commonroad_viewer.dynamic_canvas import DynamicCanvas
 
 
@@ -18,7 +19,7 @@ class GUISettings:
         self.update_ui_values()
         self.settings_window.show()
         self.canvas = DynamicCanvas()
-    
+
     def connect_events(self):
         """ connect buttons to callables """
         # self.window.btn_restore_defaults.clicked.connect(self.restore_default_button)

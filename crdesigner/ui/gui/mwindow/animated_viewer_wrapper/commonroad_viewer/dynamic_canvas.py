@@ -1,12 +1,16 @@
 from typing import List, Union
-
 from PyQt5.QtWidgets import QSizePolicy
 import numpy as np
-from commonroad.planning.planning_problem import PlanningProblemSet
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.figure import Figure
 
+from commonroad.planning.planning_problem import PlanningProblemSet
 from commonroad.common.util import Interval
 from commonroad.scenario.scenario import Scenario
 from commonroad.visualization.mp_renderer import MPRenderer
+from commonroad.geometry.shape import Circle
+from commonroad.scenario.obstacle import StaticObstacle, DynamicObstacle
+
 from .helper import _merge_dict
 from .service_layer import update_draw_params_dynamic_only_based_on_zoom
 from .service_layer import update_draw_params_based_on_zoom
@@ -14,13 +18,6 @@ from .service_layer import update_draw_params_based_on_scenario
 from .service_layer import update_draw_params_dynamic_based_on_scenario
 from .service_layer import resize_lanelet_network
 from crdesigner.ui.gui.mwindow.service_layer import config
-from commonroad.geometry.shape import Circle
-from commonroad.scenario.obstacle import StaticObstacle, DynamicObstacle
-
-from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMO_AVAILABLE
-
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.figure import Figure
 
 
 __author__ = "Benjamin Orthen, Stefan Urban, Max Winklhofer, Guyue Huang, Max Fruehauf, Sebastian Maierhofer"
@@ -401,7 +398,7 @@ class DynamicCanvas(FigureCanvas):
 
         if DynamicCanvas.scenario is not None:
             for obj in DynamicCanvas.scenario.obstacles:
-                try: # check if obstacle is in obstacle_color_array
+                try:  # check if obstacle is in obstacle_color_array
                     result = next(c for c in DynamicCanvas.obstacle_color_array if c[0] == obj.obstacle_id)
                     color = result[2]
                     if isinstance(obj, DynamicObstacle):

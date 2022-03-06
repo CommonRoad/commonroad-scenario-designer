@@ -233,7 +233,7 @@ class AnimatedViewer:
             draw_params = {
                 'time_begin': self.time_step.value - 1,
             }
-        
+
         self.dynamic.draw_scenario(self.current_scenario, self.current_pps, draw_params=draw_params)
 
         for lanelet in self.current_scenario.lanelet_network.lanelets:
