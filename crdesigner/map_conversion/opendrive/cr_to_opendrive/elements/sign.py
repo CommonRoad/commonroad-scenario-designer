@@ -19,7 +19,8 @@ class Sign(Signal):
         self.type = str(
             self.od_object.traffic_sign_elements[0].traffic_sign_element_id.value
         )
-        self.value = str(self.od_object.traffic_sign_elements[0].additional_values[0])
+        # self.value = str(self.od_object.traffic_sign_elements[0].additional_values[0])
+        self.value = "-1"
 
         self.road.print_signal(self)
 
