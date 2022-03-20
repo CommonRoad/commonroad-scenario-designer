@@ -173,6 +173,21 @@ with the every road_key as key and the data dictionary as its corresponding valu
 Each traffic sign elements and traffic light elements are converted to OpenDRIVE format in which corresponding orientation,
 reference line coordinates s, t are computed.
 
+
+Add junction and junction linkage
+---------------------------------
+In order to convert scenario intersections to OpenDRIVE junctions, each intersection in lanenets is passed to
+Junction class with parameters as list of intersection incoming, dictionary with CommonRoad lanelet id  and OpenDRIVE
+road id, dictionary with lanelet id and lane id, OpenDRIVE etree root element, collection of lanelet network, intersection id.
+
+Then we get all successors of  every intersection incoming element, look if all incoming lanes are on the same road in opendrive.
+Finally, we create connection element for every successor road and link them with laneLink, accordingly to OpenDrive.
+
+Road may have multiple successor/predecessors. If these multiple successors/predecessors are already part of a junction,
+we make the junction to a successor/predecessor. Otherwise, in the case of multiple successors, we define a new junction.
+In this way, we linked the roads with junctions.
+
+
 Convert to Opendrive file
 -------------------------
 After performing all these stages of preprocessing and conversion, the OpenDRIVE file is created.
