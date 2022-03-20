@@ -32,9 +32,9 @@ class Light(Signal):
 
     def __str__(self) -> str:
         """
-        This function returns attributes of signals for OpenDRIVE as string.
+        This function returns attributes of light signal in OpenDRIVE format as string.
 
-        :return string: attributes of signals for OpenDRIVE as string.
+        :return: attributes of light signal in OpenDRIVE format  as string.
         """
         return f"""
         s={self.s}

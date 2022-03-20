@@ -12,6 +12,15 @@ class Signal:
     This class converts CommonRoad traffic signal to OpenDRIVE traffic signal
     """
     def __init__(self, road_key: int, unique_id: int, data: List, lane_list: LaneletNetwork) -> None:
+        """
+        This function let class Signal to intialize the object with road_key, unique_id, data, lane_list and
+        converts the CommonRoad traffic signals into OpenDRIVE traffic signals.
+
+        :param road_key: road id in OpenDRIVE format
+        :param unique_id: signal id
+        :param data: list of traffic signal in scenario object
+        :param lane_list: collection of LaneletNetwork
+        """
         self.road = road.Road.roads[road_key]
         self.id = str(unique_id)
         self.lane_list = lane_list
@@ -29,6 +38,11 @@ class Signal:
         self.orientation = self.get_orientation()
 
     def __str__(self) -> str:
+        """
+        This function returns attributes of signal in OpenDRIVE format as string.
+
+        :return: attributes of signal in OpenDRIVE format as string.
+        """
         return f"""
         s={self.s}
         t={self.t}
@@ -50,12 +64,6 @@ class Signal:
         :return: Coordinate along reference line as s
                  and lateral position, positive to the left within the inertial x/y plane as t.
         """
-        # for stopline, set start position as od_object.position 
-        try:
-            self.od_object.position = self.od_object.start
-        except:
-            pass
-
         coords = self.road.center[0] - self.od_object.position
         hdg = util.compute_orientation_from_polyline(self.road.center)[0]
 
