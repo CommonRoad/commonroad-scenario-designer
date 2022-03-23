@@ -160,17 +160,23 @@ Traffic signs and lights are added to the map.
 
 Add traffic signs and traffic lights
 ------------------------------------
-We create an empty dictionary as data for storing traffic signs and traffic light of CommonRoad scenario.
+We create an empty dictionary as data for storing traffic signs, traffic lights and stoplines of CommonRoad scenario.
 Then for every lanelet, first we check whether traffic sign exists or not on it.
 If exists, every traffic sign with corresponding lanelet id is stored  as list
 on previously defined data dictionary.
 
-Also for traffic light, we first check the existence of traffic light on every lanelet. 
+Also for traffic lights, we first check the existence of traffic light on every lanelet. 
 If exists, every traffic light with corresponding lanelet id is stored  as list
-on data dictionary. Then we populate a dictionary traffic_elements
+on data dictionary. 
+
+Similarly, for stoplines, we first check the existence of stopline on every lanelet. 
+If exists, every stopline with corresponding lanelet id is stored  as list
+on data dictionary.
+
+Then we populate a dictionary traffic_elements
 with the every road_key as key and the data dictionary as its corresponding value.
 
-Each traffic sign elements and traffic light elements are converted to OpenDRIVE format in which corresponding orientation,
+Each traffic sign elements, traffic light elements and stopline elements are converted to OpenDRIVE format in which corresponding orientation,
 reference line coordinates s, t are computed.
 
 
@@ -186,6 +192,10 @@ Finally, we create connection element for every successor road and link them wit
 Road may have multiple successor/predecessors. If these multiple successors/predecessors are already part of a junction,
 we make the junction to a successor/predecessor. Otherwise, in the case of multiple successors, we define a new junction.
 In this way, we linked the roads with junctions.
+
+
+Add stopline
+------------
 
 
 Convert to Opendrive file
