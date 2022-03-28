@@ -72,3 +72,19 @@ class StopLine(Signal):
             s = -s
             t = -t
         return s, t
+
+    def get_orientation(self) -> str:
+        """
+        This function compute orientation of lanelet.
+
+        :return: Either positive sign or negative sign as string.
+        """
+        lanelet = self.lane_list.find_lanelet_by_id(self.lanelet_id)
+        mean_left = np.mean(lanelet.left_vertices)
+        mean_right = np.mean(lanelet.right_vertices)
+        left_dist = np.linalg.norm(mean_left - self.od_object.start)
+        right_dist = np.linalg.norm(mean_right - self.od_object.start)
+        if left_dist - right_dist < 0:
+            return "-"
+        else:
+            return "+"

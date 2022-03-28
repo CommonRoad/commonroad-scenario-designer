@@ -186,7 +186,7 @@ class Road:
         """
         self.center = util.remove_duplicates_from_polyline(self.center)
         self.center = resample_polyline_with_distance(self.center, 1)
-        curv = compute_polyline_curvatures(self.center)
+        curv = compute_polyline_curvatures(self.center) if len(self.center) > 2 else np.array([[0.0], [0.0]])
         arclength = compute_polyline_lengths(self.center)
         hdg = compute_polyline_orientations(self.center)
 
