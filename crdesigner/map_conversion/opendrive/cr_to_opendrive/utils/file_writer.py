@@ -60,9 +60,9 @@ class Writer(object):
 
     def set_child_of_road(self, name: str) -> etree:
         """
-        This function add subelement to road parent element
+        This function add sub-element to road parent element
 
-        :param name: name of subelement to be added
+        :param name: name of sub-element to be added
         :return: road element xml with specific sub element
         """
         return etree.SubElement(self.road, name)
@@ -71,28 +71,28 @@ class Writer(object):
         """
         This function creates child elements for road parent element.
         """
-        # subelement link - TODO
+        # sub-element link - TODO
         self.link = self.set_child_of_road("link")
 
-        # subelement type - TODO
+        # sub-element type - TODO
         self.type = self.set_child_of_road("type")
 
-        # subelement planview - TODO
+        # sub-element planeview - TODO
         self.plane_view = self.set_child_of_road("planView")
 
-        # subelement elevationProfile - TODO
+        # sub-element elevationProfile - TODO
         self.elevation_profile = self.set_child_of_road("elevationProfile")
 
-        # subelement lateralProfile - TODO
+        # sub-element lateralProfile - TODO
         self.lateral_profile = self.set_child_of_road("lateralProfile")
 
-        # subelement lanes - TODO
+        # sub-element lanes - TODO
         self.lanes = self.set_child_of_road("lanes")
 
-        # subelement objects - TODO
+        # sub-element objects - TODO
         self.objects = self.set_child_of_road("objects")
 
-        # subelement signals - TODO
+        # sub-element signals - TODO
         self.signals = self.set_child_of_road("signals")
 
     # this will later take a road element
@@ -100,8 +100,8 @@ class Writer(object):
         """
         This function add road child element with various attributes to Opendrive root element.
         """
-        # subelement road
-        # set self.road for every road so that we dont overwrite existing roads
+        # sub-element road
+        # set self.road for every road so that we do not overwrite existing roads
         self.road = etree.SubElement(self.root, "road")
         self.create_road_childs()
 

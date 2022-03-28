@@ -1,11 +1,10 @@
 from lxml import etree
 import numpy as np
-from typing import List, Dict
+from typing import Dict
 
 from commonroad.geometry.shape import Shape, Rectangle, Circle, Polygon
 from commonroad.scenario.trajectory import State
-from commonroad.scenario.lanelet import Lanelet
-from commonroad.scenario.obstacle import ObstacleType, StaticObstacle
+from commonroad.scenario.obstacle import ObstacleType
 
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.road import Road
 import crdesigner.map_conversion.opendrive.cr_to_opendrive.utils.commonroad_ccosy_geometry_util as util
@@ -20,7 +19,7 @@ class Obstacle:
 
     def __init__(self, type: ObstacleType, lanelets: Dict[int, ObstacleType], shape: Shape, state: State) -> None:
         """
-        This function let class Obstacle to intialize the object with type, lanelets, shape, state
+        This function let class Obstacle to initialize the object with type, lanelets, shape, state
         and converts the CommonRoad obstacles into OpenDRIVE obstacles.
 
         :param type: type of obstacle
@@ -102,7 +101,7 @@ class Obstacle:
 
     def set_polygon(self, shape: Polygon) -> None:
         """
-        This fucntion add outline child element to object parent element
+        This function add outline child element to object parent element
         and sets id, outer, closed as attributes of outline.
 
         :param shape: shape of obstacle

@@ -12,7 +12,7 @@ from commonroad.scenario.scenario import Scenario
 class DataLoader:
     """
     This class is used to read a CommonRoad XML file and create a scenario object.
-    Here we also prepare some additional data strutures, which we then pass to the converter
+    Here we also prepare some additional data structures, which we then pass to the converter
     along with the scenario object
     """
     def __init__(self, path: str, center: bool = False) -> None:

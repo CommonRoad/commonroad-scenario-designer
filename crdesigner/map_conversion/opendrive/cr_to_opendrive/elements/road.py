@@ -278,7 +278,6 @@ class Road:
         geometry.set("hdg", str.format("{0:.16e}", hdg))
         geometry.set("length", str.format("{0:.16e}", length))
 
-        line = etree.SubElement(geometry, "line")
 
     # xodr for spirals
     def print_spiral(self, s: np.float64, x: np.float64, y: np.float64, hdg: np.float64,

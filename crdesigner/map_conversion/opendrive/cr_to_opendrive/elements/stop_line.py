@@ -1,26 +1,24 @@
 import numpy as np
-from typing import List, Dict
 
 import crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.road as road
 import crdesigner.map_conversion.opendrive.cr_to_opendrive.utils.commonroad_ccosy_geometry_util as util
 
-from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.signal import Signal
 from commonroad.scenario.lanelet import LaneletNetwork
 
 
 class StopLine:
     """
     This StopLine class inherits from Signal class
-    which is used to convert CommonRoad stoplines to OpenDRIVE stoplines.
+    which is used to convert CommonRoad stop lines to OpenDRIVE stop lines.
     """
     def __init__(self, road_key: int, unique_id: int, data, lane_list: LaneletNetwork) -> None:
         """
-        This function let class StopLine to intialize the object with road_key, unique_id, data, lane_list and
-        converts the CommonRoad stoplines into OpenDRIVE stoplines.
+        This function let class StopLine to initialize the object with road_key, unique_id, data, lane_list and
+        converts the CommonRoad stop lines into OpenDRIVE stop lines.
 
         :param road_key: road id in OpenDRIVE format
         :param unique_id: lanelet id
-        :param data: list of stoplines in scenario object
+        :param data: list of stop lines in scenario object
         :param lane_list: collection of LaneletNetwork
         """
         self.road = road.Road.roads[road_key]
@@ -49,9 +47,9 @@ class StopLine:
 
     def __str__(self) -> str:
         """
-        This function returns attributes of stopline in OpenDRIVE format as string.
+        This function returns attributes of stop line in OpenDRIVE format as string.
 
-        :return: attributes of stopline in OpenDRIVE format as string.
+        :return: attributes of stop line in OpenDRIVE format as string.
         """
         return f"""
         s={self.s}
