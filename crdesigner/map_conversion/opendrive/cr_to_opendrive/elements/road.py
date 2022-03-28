@@ -404,7 +404,7 @@ class Road:
                 )
             )
 
-            dist_list = util.compute_pathlength_from_polyline(cur.center_vertices)
+            dist_list = compute_polyline_lengths(cur.center_vertices)
             lane_id = i - self.center_number
 
             # lanelets to the right should get a negative id
