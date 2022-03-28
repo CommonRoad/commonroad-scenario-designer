@@ -61,15 +61,15 @@ class Obstacle:
         refline = self.road.center
         center = self.state.position
         coords = refline[0] - center
-        
-        #get rotation angle of the road reference frame relative to global coordinate system
+
+        # get rotation angle of the road reference frame relative to global coordinate system
         hdg = compute_polyline_initial_orientation(self.road.center)
 
-        #apply coordinate translation with the given angle
+        # apply coordinate translation with the given angle
         s = coords[0] * np.cos(hdg) + coords[1] * np.sin(hdg)
         t = coords[1] * np.cos(hdg) - coords[0] * np.sin(hdg)
 
-        #change sign of coordinates if reference line runs in a negative global direction
+        # change sign of coordinates if reference line runs in a negative global direction
         if s < 0:
             s = -s
             t = -t

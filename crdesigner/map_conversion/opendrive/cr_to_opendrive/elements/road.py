@@ -7,7 +7,8 @@ import crdesigner.map_conversion.opendrive.cr_to_opendrive.utils.commonroad_ccos
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.sign import Sign
 
 from commonroad.scenario.lanelet import Lanelet
-from commonroad.geometry.polyline_util import compute_polyline_orientations, resample_polyline_with_distance, compute_polyline_curvatures, compute_polyline_lengths
+from commonroad.geometry.polyline_util import compute_polyline_orientations, resample_polyline_with_distance, \
+    compute_polyline_curvatures, compute_polyline_lengths
 
 
 class Road:
