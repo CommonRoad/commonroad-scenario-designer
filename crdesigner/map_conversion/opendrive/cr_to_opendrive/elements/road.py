@@ -7,6 +7,8 @@ import crdesigner.map_conversion.opendrive.cr_to_opendrive.utils.commonroad_ccos
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.sign import Sign
 
 from commonroad.scenario.lanelet import Lanelet
+from commonroad.geometry.polyline_util import compute_polyline_orientations, resample_polyline_with_distance, \
+    compute_polyline_curvatures, compute_polyline_lengths
 
 
 class Road:
@@ -29,7 +31,17 @@ class Road:
     STEP = 50
 
     def __init__(self, lane_list: List[Lanelet], number_of_lanes: int, root: etree._Element,
-                 current: Lanelet, junction_id: int):
+                 current: Lanelet, junction_id: int) -> None:
+        """
+        This function let class road to intialize the object with lane_list, number_of_lanes, root etree element,
+        current lanelet, junction_id and converts the CommonRoad roads into OpenDRIVE roads.
+
+        :param lane_list: list of lanelets
+        :param number_of_lanes: number of lanes on the road
+        :param root: OpenDRIVE etree element
+        :param current: current lanelet
+        :param junction_id: id of junction
+        """
         # Supress RankWarning in polyfit
         warnings.simplefilter("ignore", np.RankWarning)
 
@@ -98,7 +110,7 @@ class Road:
         # add lane indices to links
         self.links["laneIndices"] = self.inner_links
 
-    def add_junction_linkage(self, id: int, relation: str):
+    def add_junction_linkage(self, id: int, relation: str) -> None:
         """
         This function adds relation(successor/predecessor) child element to link parent element.
 
@@ -117,7 +129,7 @@ class Road:
 
     def add_simple_linkage(self, key: int, links: Dict[str, List[int]], len_succ: int, len_pred: int,
                            curl_links_lanelets: Dict[int or str, Dict[str, List[int]]],
-                           lane_2_lane: Dict[str, Dict[int, List[int]]]):
+                           lane_2_lane: Dict[str, Dict[int, List[int]]]) -> None:
         """
         This function add successor/predecessor child element to link parent element and
         each successor/predecessor are linked with its correponding landLink id.
@@ -173,10 +185,10 @@ class Road:
         :return: Last item of arclength list
         """
         self.center = util.remove_duplicates_from_polyline(self.center)
-        self.center = util.resample_polyline(self.center, 1)
-        curv = util.compute_curvature_from_polyline(self.center)
-        arclength = util.compute_pathlength_from_polyline(self.center)
-        hdg = util.compute_orientation_from_polyline(self.center)
+        self.center = resample_polyline_with_distance(self.center, 1)
+        curv = compute_polyline_curvatures(self.center)
+        arclength = compute_polyline_lengths(self.center)
+        hdg = compute_polyline_orientations(self.center)
 
         if len(self.center) < 1:
             return
@@ -249,7 +261,7 @@ class Road:
         return arclength[-1]
 
     # xodr for lines
-    def print_line(self, s: np.float64, x: np.float64, y: np.float64, hdg: np.float64, length: np.float64):
+    def print_line(self, s: np.float64, x: np.float64, y: np.float64, hdg: np.float64, length: np.float64) -> None:
         """
         This function print line on OpenDrive file.
         Geometry child element is created with corresponding attributes and added to planview parent element.
@@ -268,11 +280,9 @@ class Road:
         geometry.set("hdg", str.format("{0:.16e}", hdg))
         geometry.set("length", str.format("{0:.16e}", length))
 
-        line = etree.SubElement(geometry, "line")
-
     # xodr for spirals
     def print_spiral(self, s: np.float64, x: np.float64, y: np.float64, hdg: np.float64,
-                     length: np.float64, curv_start: np.float64, curv_end: np.float64):
+                     length: np.float64, curv_start: np.float64, curv_end: np.float64) -> None:
         """
         This function print spiral on OpenDrive file.
         Geometry child element is created with corresponding attributes and added to planview parent element.
@@ -299,7 +309,7 @@ class Road:
 
     # xodr for arcs
     def print_arc(self, s: np.float64, x: np.float64, y: np.float64, hdg: np.float64,
-                  length: np.float64, curvature: np.float64):
+                  length: np.float64, curvature: np.float64) -> None:
         """
         This function print arc on OpenDrive file.
         Geometry child element is created with corresponding attributes and added to planview parent element.
@@ -322,7 +332,7 @@ class Road:
         arc = etree.SubElement(geometry, "arc")
         arc.set("curvature", str.format("{0:.16e}", curvature))
 
-    def print_signal(self, sig: Sign):
+    def print_signal(self, sig: Sign) -> None:
         """
         This function print traffic sign on OpenDrive file.
         Signal child element is created with corresponding attributes and added to road parent element.
@@ -347,7 +357,7 @@ class Road:
         signal.set("height", sig.height)
         signal.set("hOffset", sig.hOffset)
 
-    def print_signal_ref(self, sig_ref: Sign):
+    def print_signal_ref(self, sig_ref: Sign) -> None:
         """
         This function print signal reference on OpenDrive file.
         Signal reference child element is created with corresponding attributes and added to road parent element.
@@ -360,7 +370,7 @@ class Road:
         signal_ref.set("id", sig_ref.id)
         signal_ref.set("orientation", sig_ref.orientation)
 
-    def lane_sections(self):
+    def lane_sections(self) -> None:
         """
         This function add laneSection child element to road parent element and
         left, center (width 0), right elements are added to laneSection.
@@ -420,7 +430,7 @@ class Road:
     # </lane>
 
     def lane_help(self, id: int, type: str, level: int, pos: etree._Element,
-                  width_list: List[Lanelet], dist_list: np.ndarray):
+                  width_list: List[Lanelet], dist_list: np.ndarray) -> None:
         """
         This function add lane child element to parent element which may be right, left or center.
         Link, width, roadMark elements are also added to lane element.

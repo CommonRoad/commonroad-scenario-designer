@@ -7,6 +7,7 @@ from typing import Dict, List
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.obstacle import Obstacle
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.sign import Sign
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.light import Light
+from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.stop_line import StopLine
 import crdesigner.map_conversion.opendrive.cr_to_opendrive.utils.file_writer as fwr
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.road import Road
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.junction import Junction
@@ -21,9 +22,17 @@ class Converter:
     This class converts the CommonRoad scenario object to CommonRoad file.
     The CommonRoad elements such as roads, junctions, traffic lights, traffic signal
     are converted to corresponding OpenDRIVE elements and OpenDRIVE file is created.
-
     """
-    def __init__(self, file_path: str, sc: Scenario, successors: List[int], ids: Dict[int, bool]):
+    def __init__(self, file_path: str, sc: Scenario, successors: List[int], ids: Dict[int, bool]) -> None:
+        """
+        This function lets Class Converter to initialize object with path to CommonRoad file, scenario,
+        list of successor and dictionary of converted roads and initialize the instant variables.
+
+        :param file_path: path to CommonRoad file
+        :param sc: CommonRoad Scenario
+        :param successors: list of successor
+        :param ids: dictionary with lanelet ids as keys and boolean values
+        """
         self.path = file_path
         self.scenario = sc
         self.inter_successors = successors
@@ -33,7 +42,7 @@ class Converter:
         self.writer = None
         self.conv_time = 0
 
-    def convert(self, file_path_out: str):
+    def convert(self, file_path_out: str) -> None:
         """
         This function creates a OpenDRIVE file and save in specific location
         after the conversion of scenario object to OpenDRIVE file.
@@ -45,13 +54,13 @@ class Converter:
         self.writer = fwr.Writer(file_path_out)
 
         lane_list = self.lane_net.lanelets
+
         # choose lanelet as starting point
         lanelet = copy.deepcopy(lane_list[0])
 
         # this function constructs all roads
         # using a breadth first search approach
         self.construct_roads([lanelet.lanelet_id])
-
         # double check that no lanelet was missed
         self.check_all_visited()
 
@@ -70,7 +79,7 @@ class Converter:
         self.conv_time = time.time() - start
         self.print_time()
 
-    def print_time(self):
+    def print_time(self) -> None:
         """
         This function print the time required for the file conversion in the order of second.
         """
@@ -78,7 +87,7 @@ class Converter:
         time = f"Conversion took: \t{self.conv_time:.2} seconds\n"
         print(conv + time)
 
-    def finalize(self):
+    def finalize(self) -> None:
         """
         This function cleans up the converter object
         which makes it possible to convert multiple files queued up.
@@ -93,17 +102,21 @@ class Converter:
         Junction.counting = 0
         Obstacle.counting = 0
 
-    def populate_traffic_elements(self, link_map: Dict[int, int]):
+    def populate_traffic_elements(self, link_map: Dict[int, int]) -> None:
         """
         This function is responsible for populating traffic elements.
+
+        :param link_map: Dictionary with keys as lanelet id of CommonRoad lanelets and
+        values as road id of OpenDrive roads
         """
         for lanelet in self.lane_net.lanelets:
             non_empty = False
-            data = {"signs": {}, "lights": {}}
+            data = {"signs": {}, "lights": {}, "stop_lines": {}}
 
             if len(lanelet.traffic_signs) > 0:
                 non_empty = True
                 for sign in lanelet.traffic_signs:
+                    # print(sign)
                     data["signs"][sign] = [
                         self.lane_net.find_traffic_sign_by_id(sign),
                         lanelet.lanelet_id,
@@ -112,15 +125,26 @@ class Converter:
             if len(lanelet.traffic_lights) > 0:
                 non_empty = True
                 for light in lanelet.traffic_lights:
-                    data["lights"][sign] = [
+                    data["lights"][light] = [
                         self.lane_net.find_traffic_light_by_id(light),
                         lanelet.lanelet_id,
                     ]
 
+            if lanelet.stop_line is not None:
+                non_empty = True
+                data["stop_lines"][lanelet.lanelet_id] = [
+                        lanelet.stop_line,
+                        lanelet.lanelet_id,
+                    ]
+
             if non_empty:
+                if len(data["stop_lines"]) == 0:
+                    if self.traffic_elements.get(link_map[lanelet.lanelet_id]):
+                        data['stop_lines'] = self.traffic_elements[link_map[lanelet.lanelet_id]]['stop_lines']
+
                 self.traffic_elements[link_map[lanelet.lanelet_id]] = data
 
-    def construct_traffic_elements(self):
+    def construct_traffic_elements(self) -> None:
         """
         This function converts scenario traffic elements to OpenDRIVE traffic elements.
         """
@@ -132,8 +156,11 @@ class Converter:
                 if specifier == "lights":
                     for unique_id, od_object in elements[specifier].items():
                         Light(road_key, unique_id, od_object, self.lane_net)
+                if specifier == "stop_lines":
+                    for unique_id, od_object in elements[specifier].items():
+                        StopLine(road_key, unique_id, od_object, self.lane_net)
 
-    def construct_roads(self, frontier: List[int]):
+    def construct_roads(self, frontier: List[int]) -> None:
         """
         This method is responsible for road construction.
         We start from a given lanelet, we expand it left and right to construct its corresponding road,
@@ -146,7 +173,6 @@ class Converter:
             return
 
         frontier = list(set(frontier))
-
         id = frontier.pop(0)
         lanelet = copy.deepcopy(self.lane_net.find_lanelet_by_id(id))
 
@@ -188,7 +214,7 @@ class Converter:
         self.construct_roads(frontier)
         return
 
-    def check_all_visited(self):
+    def check_all_visited(self) -> None:
         """
         This function check that all lanelets have been added to the road network.
         This is done to guarantee correctness of the road construction algorithm
@@ -203,7 +229,7 @@ class Converter:
 
     def construct_junctions(self):
         """
-        This function converts scenario junctions to OpenDRIVE junctions.
+        This function converts scenario intersections to OpenDRIVE junctions.
         """
         for intersection in self.lane_net.intersections:
             Junction(
@@ -215,15 +241,13 @@ class Converter:
                 intersection.intersection_id,
             )
 
-    def construct_obstacles(self):
+    def construct_obstacles(self) -> None:
         """
         This function converts scenario obstacles to OpenDRIVE obstacles.
         """
         obstacles = self.scenario.static_obstacles
         lanelets = self.lane_net.map_obstacles_to_lanelets(obstacles)
-
         for obstacle in obstacles:
-
             center = obstacle.initial_state.position
             lanelets = self.lane_net.find_lanelet_by_position([center])[0]
             Obstacle(
@@ -234,7 +258,7 @@ class Converter:
             )
 
     def process_link_map(self, link_map: Dict[int, Dict[int, Dict[str, List[int]]]],
-                         lane_2_lane: Dict[int, Dict[str, Dict]]):
+                         lane_2_lane: Dict[int, Dict[str, Dict]]) -> None:
         """
         This function creates the data structure where all linkage information is stored, the link_map
         For more information on the link_map, read our documentation.
@@ -292,7 +316,7 @@ class Converter:
             link_map[road_id]["roadLinkage"] = road_succ_pred_final
 
     def create_linkages(self, link_map: Dict[int, Dict[int, Dict[str, List[int]]]],
-                        lane_2_lane: Dict[int, Dict[str, Dict[int, List[int]]]]):
+                        lane_2_lane: Dict[int, Dict[str, Dict[int, List[int]]]]) -> None:
         """
         This function implements road-to-road linkage.
         This happens when a road has exactly one successor/predecessor.
@@ -320,15 +344,15 @@ class Converter:
                     cur_key, cur_links, len_succ, len_pred, cur_links_lanelets, lane_2_lane[key]
                 )
 
-    def add_junction_linkage(self, link_map: Dict[int, Dict[int, Dict[str, List[int]]]]):
+    def add_junction_linkage(self, link_map: Dict[int, Dict[int, Dict[str, List[int]]]]) -> None:
         """
         This function links roads to junctions.
         This happens when a road has multiple successors/predecessors.
         If these multiple successors/predecessors are already part of a junction,
         we make the junction to a successor/predecessor.
-        Otherwise, in the case of mupltiple successors, we define a new junction.
+        Otherwise, in the case of multiple successors, we define a new junction.
 
-        :param lane_2_lane: dictionary of road ids and corresponding successors and predessors
+        :param link_map: dictionary of road ids and corresponding successors and predessors
         """
         for road_id, road_val in link_map.items():
             if len(set(road_val["roadLinkage"]["succ"])) > 1:
@@ -359,7 +383,6 @@ class Converter:
                     )
 
                     Junction.counting += 1
-
                     Junction(
                         [incoming],
                         Road.cr_id_to_od,
@@ -381,7 +404,7 @@ class Converter:
                     ].intersection_id
                     road.add_junction_linkage(junction_id, "predecessor")
 
-    def add_ids(self, road_lanes: List[Lanelet], frontier: List[int]):
+    def add_ids(self, road_lanes: List[Lanelet], frontier: List[int]) -> None:
         """
         This function mark ID's of lanes in the frontier as visited
 

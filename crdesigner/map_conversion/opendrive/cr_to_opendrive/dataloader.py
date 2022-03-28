@@ -12,10 +12,17 @@ from commonroad.scenario.scenario import Scenario
 class DataLoader:
     """
     This class is used to read a CommonRoad XML file and create a scenario object.
-    Here we also prepare some additional data strutures, which we then pass to the converter
+    Here we also prepare some additional data structures, which we then pass to the converter
     along with the scenario object
     """
-    def __init__(self, path: str, center: bool = False):
+    def __init__(self, path: str, center: bool = False) -> None:
+        """
+        This function let class Dataloader to initialize the object with path to CommonRoad file
+        and center as boolean value and initialize instancce variable x_avg and y_avg
+
+        :param path: path to CommonRoad file
+        :param center: boolean value
+        """
         start = time.time()
         self.path = path
         self.center = center
@@ -117,7 +124,7 @@ class DataLoader:
         Creates a dictionary with lanelet ids as keys and boolean values.
         This helps keep track which lanelets already got converted
 
-        :return: dictionary with lanelet ids as keys and boolena values
+        :return: dictionary with lanelet ids as keys and boolean values
         """
         lane_list = self.lane_net.lanelets
         id_dict = {}

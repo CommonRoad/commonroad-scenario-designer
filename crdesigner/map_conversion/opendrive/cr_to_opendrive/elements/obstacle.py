@@ -1,11 +1,13 @@
 from lxml import etree
 import numpy as np
-from typing import List
-from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.road import Road
+from typing import Dict
+
 from commonroad.geometry.shape import Shape, Rectangle, Circle, Polygon
 from commonroad.scenario.trajectory import State
-import crdesigner.map_conversion.opendrive.cr_to_opendrive.utils.commonroad_ccosy_geometry_util as util
-from commonroad.scenario.lanelet import Lanelet
+from commonroad.scenario.obstacle import ObstacleType
+from commonroad.geometry.polyline_util import compute_polyline_initial_orientation
+
+from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.road import Road
 
 
 class Obstacle:
@@ -15,8 +17,16 @@ class Obstacle:
     """
     counting = 0
 
-    def __init__(self, type: str, lanelets: List[Lanelet], shape: Shape, state: State) -> None:
+    def __init__(self, type: ObstacleType, lanelets: Dict[int, ObstacleType], shape: Shape, state: State) -> None:
+        """
+        This function let class Obstacle to initialize the object with type, lanelets, shape, state
+        and converts the CommonRoad obstacles into OpenDRIVE obstacles.
 
+        :param type: type of obstacle
+        :param lanelets: dictionary with key as lanelet id and value as Obstacle
+        :param shape: shape of obstacle
+        :param state: state of obstacle which includes position, orientation, time_step
+        """
         if not lanelets:
             print("no lanelets")
             return
@@ -44,22 +54,22 @@ class Obstacle:
         else:
             self.set_polygon(shape)
 
-    def set_coordinates(self):
+    def set_coordinates(self) -> None:
         """
         This function sets the object's coordinates according to the road reference line.
         """
         refline = self.road.center
         center = self.state.position
         coords = refline[0] - center
-        
-        #get rotation angle of the road reference frame relative to global coordinate system
-        hdg = util.compute_orientation_from_polyline(self.road.center)[0]
 
-        #apply coordinate translation with the given angle
+        # get rotation angle of the road reference frame relative to global coordinate system
+        hdg = compute_polyline_initial_orientation(self.road.center)
+
+        # apply coordinate translation with the given angle
         s = coords[0] * np.cos(hdg) + coords[1] * np.sin(hdg)
         t = coords[1] * np.cos(hdg) - coords[0] * np.sin(hdg)
 
-        #change sign of coordinates if reference line runs in a negative global direction
+        # change sign of coordinates if reference line runs in a negative global direction
         if s < 0:
             s = -s
             t = -t
@@ -72,23 +82,29 @@ class Obstacle:
         self.object.set("zOffset", "0.0")
         self.object.set("hdg", str(orientation))
 
-    def set_circle(self, shape: Circle):
+    def set_circle(self, shape: Circle) -> None:
         """
         This function sets the radius of Circle
+
+        :param shape: shape of obstacle
         """
         self.object.set("radius", str(shape.radius))
 
-    def set_rectangle(self, shape: Rectangle):
+    def set_rectangle(self, shape: Rectangle) -> None:
         """
         This function sets the length and width of Rectangle
+
+        :param shape: shape of obstacle
         """
         self.object.set("length", str(shape.length))
         self.object.set("width", str(shape.width))
 
-    def set_polygon(self, shape: Polygon):
+    def set_polygon(self, shape: Polygon) -> None:
         """
-        This fucntion add outline child element to object parent element
+        This function add outline child element to object parent element
         and sets id, outer, closed as attributes of outline.
+
+        :param shape: shape of obstacle
         """
         self.outline = etree.SubElement(self.object, "outline")
         self.outline.set("id", "0")

@@ -1,21 +1,27 @@
 from lxml import etree
 from datetime import datetime
 import numpy as np
-import crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.road as Road
 
 
 class Writer(object):
     """
     This class creates a OpenDRIVE file. The xml etree element is written as OpenDRIVE file.
     """
-    def __init__(self, file_path_out: str):
+    def __init__(self, file_path_out: str) -> None:
+        """
+        This function let class Write to intialize the object with path for storing converted
+        OpenDRIVE file and initialize the instance variables and creates header child elements
+        with different attributes.
+
+        :param file_path_out: path of converted OpenDRIVE file to be stored
+        """
         self.file_path_out = file_path_out
         self.root = etree.Element("OpenDRIVE")
         etree.indent(self.root, space="    ")
         self.write_header()
         self.tree = etree.ElementTree(self.root)
 
-    def save(self):
+    def save(self) -> None:
         """
         This function writes the OpenDRIVE file.
         """
@@ -29,7 +35,7 @@ class Writer(object):
         )
 
     # TODO: does this need to be <header></header> or is <header/> fine?
-    def write_header(self):
+    def write_header(self) -> None:
         """
         This function creates header child element with various attributes and add it to Opendrive root element.
         """
@@ -53,48 +59,48 @@ class Writer(object):
 
     def set_child_of_road(self, name: str) -> etree:
         """
-        This function add subelement to road parent element
+        This function add sub-element to road parent element
 
-        :param name: name of subelement to be added
+        :param name: name of sub-element to be added
         :return: road element xml with specific sub element
         """
         return etree.SubElement(self.road, name)
 
-    def create_road_childs(self):
+    def create_road_childs(self) -> None:
         """
         This function creates child elements for road parent element.
         """
-        # subelement link - TODO
+        # sub-element link - TODO
         self.link = self.set_child_of_road("link")
 
-        # subelement type - TODO
+        # sub-element type - TODO
         self.type = self.set_child_of_road("type")
 
-        # subelement planview - TODO
+        # sub-element planeview - TODO
         self.plane_view = self.set_child_of_road("planView")
 
-        # subelement elevationProfile - TODO
+        # sub-element elevationProfile - TODO
         self.elevation_profile = self.set_child_of_road("elevationProfile")
 
-        # subelement lateralProfile - TODO
+        # sub-element lateralProfile - TODO
         self.lateral_profile = self.set_child_of_road("lateralProfile")
 
-        # subelement lanes - TODO
+        # sub-element lanes - TODO
         self.lanes = self.set_child_of_road("lanes")
 
-        # subelement objects - TODO
+        # sub-element objects - TODO
         self.objects = self.set_child_of_road("objects")
 
-        # subelement signals - TODO
+        # sub-element signals - TODO
         self.signals = self.set_child_of_road("signals")
 
     # this will later take a road element
-    def write_road(self):
+    def write_road(self) -> None:
         """
         This function add road child element with various attributes to Opendrive root element.
         """
-        # subelement road
-        # set self.road for every road so that we dont overwrite existing roads
+        # sub-element road
+        # set self.road for every road so that we do not overwrite existing roads
         self.road = etree.SubElement(self.root, "road")
         self.create_road_childs()
 
@@ -114,10 +120,16 @@ class Writer(object):
         # road junction - TODO this needs to be stored in the road object
         self.road.set("junction", str.format("{}", -1))  # road.junction))
 
-    def print_line(self, s: np.float64, x: np.float64, y: np.float64, hdg: np.float64, length: np.float64):
+    def print_line(self, s: np.float64, x: np.float64, y: np.float64, hdg: np.float64, length: np.float64) -> None:
         """
         This function add geometry child element with various attribute to planView parent element and
         then add line child element to geometry parent element
+
+        :param s: s-coordinate of start position
+        :param x: Start position (x inertial)
+        :param y: Start position (y inertial)
+        :param hdg: Start orientation (inertial heading)
+        :param length: Length of the element’s reference line
         """
         geometry = etree.SubElement(self.plane_view, "geometry")
         geometry.set("s", str.format("{0:.16e}", s))
@@ -133,6 +145,12 @@ class Writer(object):
         """
         This function add geometry child element with various attribute to planView parent element and
         then add spiral child element to geometry parent element
+
+        :param s: s-coordinate of start position
+        :param x: Start position (x inertial)
+        :param y: Start position (y inertial)
+        :param hdg: Start orientation (inertial heading)
+        :param length: Length of the element’s reference line
         """
         geometry = etree.SubElement(self.plane_view, "geometry")
         geometry.set("s", str.format("{0:.16e}", s))
@@ -146,10 +164,17 @@ class Writer(object):
         spiral.set("curvEnd", str.format("{0:.16e}", curv_end))
 
     def print_arc(self, s: np.float64, x: np.float64, y: np.float64, hdg: np.float64,
-                  length: np.float64, curvature: np.float64):
+                  length: np.float64, curvature: np.float64) -> None:
         """
         This function add geometry child element with various attribute to planView parent element and
         then add arc child element to geometry parent element
+
+        :param s: s-coordinate of start position
+        :param x: Start position (x inertial)
+        :param y: Start position (y inertial)
+        :param hdg: Start orientation (inertial heading)
+        :param length: Length of the element’s reference line
+        :param curvature: Constant curvature throughout the element
         """
         geometry = etree.SubElement(self.plane_view, "geometry")
         geometry.set("s", str.format("{0:.16e}", s))
