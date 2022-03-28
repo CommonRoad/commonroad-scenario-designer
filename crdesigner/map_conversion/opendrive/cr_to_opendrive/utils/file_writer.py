@@ -1,7 +1,6 @@
 from lxml import etree
 from datetime import datetime
 import numpy as np
-import crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.road as Road
 
 
 class Writer(object):
@@ -14,7 +13,7 @@ class Writer(object):
         OpenDRIVE file and initialize the instance variables and creates header child elements
         with different attributes.
 
-        :param file_path_out: path of converted OpenDRIVE file to be stored       
+        :param file_path_out: path of converted OpenDRIVE file to be stored
         """
         self.file_path_out = file_path_out
         self.root = etree.Element("OpenDRIVE")
