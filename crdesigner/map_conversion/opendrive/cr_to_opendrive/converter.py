@@ -54,7 +54,7 @@ class Converter:
         self.writer = fwr.Writer(file_path_out)
 
         lane_list = self.lane_net.lanelets
-       
+
         # choose lanelet as starting point
         lanelet = copy.deepcopy(lane_list[0])
 
@@ -112,7 +112,7 @@ class Converter:
         for lanelet in self.lane_net.lanelets:
             non_empty = False
             data = {"signs": {}, "lights": {}, "stop_lines": {}}
-            
+
             if len(lanelet.traffic_signs) > 0:
                 non_empty = True
                 for sign in lanelet.traffic_signs:
@@ -129,7 +129,7 @@ class Converter:
                         self.lane_net.find_traffic_light_by_id(light),
                         lanelet.lanelet_id,
                     ]
-                    
+
             if lanelet.stop_line is not None:
                 non_empty = True
                 data["stop_lines"][lanelet.lanelet_id] = [

@@ -23,11 +23,11 @@ class Junction:
         root, lane_network, id and converts scenario junctions to OpenDRIVE junction.
 
         :param incoming: list of incoming intersection
-        :param id_to_road: dictionary with lanelet id as key and OpendDRIVE road id as value
+        :param id_to_road: dictionary with lanelet id as key and OpenDRIVE road id as value
         :param lane_to_lane: dictionary with lanelet id as key and lane id as value
         :param root: OpenDRIVE etree element
         :param lane_network: collection of lanelet network
-        :param id: counting of Junction 
+        :param id: counting of junction
         """
         self.incoming = incoming
         self.id = id

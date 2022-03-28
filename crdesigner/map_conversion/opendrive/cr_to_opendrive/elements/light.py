@@ -1,4 +1,4 @@
-from typing import List, Dict
+from typing import List
 
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.signal import Signal
 
@@ -13,7 +13,7 @@ class Light(Signal):
     """
     def __init__(self, road_key: int, unique_id: int, data: List[TrafficLight], lane_list: LaneletNetwork) -> None:
         """
-        This function let class Light to intialize the object with road_key, unique_id, data, lane_list and
+        This function let class Light to initialize the object with road_key, unique_id, data, lane_list and
         converts the CommonRoad traffic lights into OpenDRIVE traffic lights.
 
         :param road_key: road id in OpenDRIVE format

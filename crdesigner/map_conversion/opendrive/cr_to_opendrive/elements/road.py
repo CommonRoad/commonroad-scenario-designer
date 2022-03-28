@@ -7,6 +7,7 @@ import crdesigner.map_conversion.opendrive.cr_to_opendrive.utils.commonroad_ccos
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.sign import Sign
 
 from commonroad.scenario.lanelet import Lanelet
+from commonroad.geometry.polyline_util import compute_polyline_orientations, resample_polyline_with_distance, compute_polyline_curvatures, compute_polyline_lengths
 
 
 class Road:
@@ -183,10 +184,10 @@ class Road:
         :return: Last item of arclength list
         """
         self.center = util.remove_duplicates_from_polyline(self.center)
-        self.center = util.resample_polyline(self.center, 1)
-        curv = util.compute_curvature_from_polyline(self.center)
-        arclength = util.compute_pathlength_from_polyline(self.center)
-        hdg = util.compute_orientation_from_polyline(self.center)
+        self.center = resample_polyline_with_distance(self.center, 1)
+        curv = compute_polyline_curvatures(self.center)
+        arclength = compute_polyline_lengths(self.center)
+        hdg = compute_polyline_orientations(self.center)
 
         if len(self.center) < 1:
             return

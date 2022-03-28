@@ -5,9 +5,9 @@ from typing import Dict
 from commonroad.geometry.shape import Shape, Rectangle, Circle, Polygon
 from commonroad.scenario.trajectory import State
 from commonroad.scenario.obstacle import ObstacleType
+from commonroad.geometry.polyline_util import compute_polyline_initial_orientation
 
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.road import Road
-import crdesigner.map_conversion.opendrive.cr_to_opendrive.utils.commonroad_ccosy_geometry_util as util
 
 
 class Obstacle:
@@ -63,7 +63,7 @@ class Obstacle:
         coords = refline[0] - center
         
         #get rotation angle of the road reference frame relative to global coordinate system
-        hdg = util.compute_orientation_from_polyline(self.road.center)[0]
+        hdg = compute_polyline_initial_orientation(self.road.center)
 
         #apply coordinate translation with the given angle
         s = coords[0] * np.cos(hdg) + coords[1] * np.sin(hdg)

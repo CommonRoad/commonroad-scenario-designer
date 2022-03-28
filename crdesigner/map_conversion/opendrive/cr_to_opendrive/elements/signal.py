@@ -1,19 +1,20 @@
 import numpy as np
-from typing import List, Dict
+from typing import List, Tuple
 
 import crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.road as road
-import crdesigner.map_conversion.opendrive.cr_to_opendrive.utils.commonroad_ccosy_geometry_util as util
 
 from commonroad.scenario.lanelet import LaneletNetwork
+from commonroad.geometry.polyline_util import compute_polyline_initial_orientation
 
 
 class Signal:
     """
-    This class converts CommonRoad traffic signal to OpenDRIVE traffic signal
+    This class converts CommonRoad traffic signal to OpenDRIVE traffic signal.
+    Class serves as base class for different signal types.
     """
     def __init__(self, road_key: int, unique_id: int, data: List, lane_list: LaneletNetwork) -> None:
         """
-        This function let class Signal to intialize the object with road_key, unique_id, data, lane_list and
+        This function let class Signal to initialize the object with road_key, unique_id, data, lane_list and
         converts the CommonRoad traffic signals into OpenDRIVE traffic signals.
 
         :param road_key: road id in OpenDRIVE format
@@ -57,7 +58,7 @@ class Signal:
         hOffset={self.hOffset}
         """
 
-    def compute_coordinate(self) -> np.ndarray:
+    def compute_coordinate(self) -> Tuple[float, float]:
         """
         This function compute reference line coordinates s,t.
 
@@ -65,7 +66,7 @@ class Signal:
                  and lateral position, positive to the left within the inertial x/y plane as t.
         """
         coords = self.road.center[0] - self.od_object.position
-        hdg = util.compute_orientation_from_polyline(self.road.center)[0]
+        hdg = compute_polyline_initial_orientation(self.road.center)
 
         s = coords[0] * np.cos(hdg) + coords[1] * np.sin(hdg)
         t = coords[1] * np.cos(hdg) - coords[0] * np.sin(hdg)

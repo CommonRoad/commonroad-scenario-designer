@@ -1,4 +1,4 @@
-from typing import List, Dict
+from typing import List
 
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.signal import Signal
 
@@ -13,8 +13,8 @@ class Sign(Signal):
     """
     def __init__(self, road_key: int, unique_id: int, data: List[TrafficSign], lane_list: LaneletNetwork) -> None:
         """
-        This function let class Sign to intialize the object with road_key, unique_id, data, lane_list and
-        converts the CommonRoad traffic signs into OpenDRIVE traffic signs.
+        This function let class Sign to initialize the object with road_key, unique_id, data, lane_list and
+        converts the CommonRoad traffic signs in to OpenDRIVE traffic signs.
 
         :param road_key: road id in OpenDRIVE format
         :param unique_id: signal(traffic sign) id
@@ -28,8 +28,8 @@ class Sign(Signal):
         self.type = str(
             self.od_object.traffic_sign_elements[0].traffic_sign_element_id.value
         )
-        # Since Sign Element with id TrafficSignIDZamunda.PRIORITY or TrafficSignIDZamunda.YIELD and values [],
-        # using try catch to avoid empty values 
+        # Since sign element with id TrafficSignIDZamunda.PRIORITY or TrafficSignIDZamunda.YIELD and values [],
+        # using try catch to avoid empty values
         try:
             self.value = str(self.od_object.traffic_sign_elements[0].additional_values[0])
         except:
