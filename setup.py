@@ -34,6 +34,7 @@ setup(
         "iso3166>=1.0.1",
         "networkx>=2.5",
         "cartopy >= 0.17.0",
+        "commonroad-drivability-checker >= 2021.4.1"
     ],
     extras_require={"GUI": ["matplotlib>=3.1.0"]},
     python_requires=">=3.7",
