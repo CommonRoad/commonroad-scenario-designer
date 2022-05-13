@@ -25,6 +25,133 @@ class ObstacleToolboxUI(Toolbox):
 
     def define_sections(self):
         """defines the sections in the obstacle toolbox
+                """
+        # this validator always has the format with a dot as decimal separator
+        self.float_validator = QDoubleValidator()
+        self.float_validator.setLocale(QLocale("en_US"))
+
+        widget_obstacles = QFrame(self.tree)
+        self.layout_obstacles = QVBoxLayout()
+        widget_obstacles.setLayout(self.layout_obstacles)
+
+        label_general = QLabel("Obstacle Attributes")
+        label_general.setFont(QFont("Arial", 11, QFont.Bold))
+
+        self.obstacle_dyn_stat = QComboBox()
+        self.obstacle_dyn_stat.addItem("Static")
+        self.obstacle_dyn_stat.addItem("Dynamic")
+
+        self.static_dynamic_obstacle_group = QButtonGroup()
+        self.static_obstacle_selection = QRadioButton("static")
+        self.static_obstacle_selection.setChecked(True)
+        self.static_dynamic_obstacle_group.addButton(self.static_obstacle_selection)
+        self.dynamic_obstacle_selection = QRadioButton("dynamic")
+        self.dynamic_obstacle_selection.setChecked(False)
+        self.static_dynamic_obstacle_group.addButton(self.dynamic_obstacle_selection)
+
+        self.obstacle_shape = QComboBox()
+        self.obstacle_shape.addItem("Rectangle")
+        self.obstacle_shape.addItem("Circle")
+        self.obstacle_shape.addItem("Polygon")
+
+        self.obstacle_type = QComboBox()
+        obstalce_type_list = [e.value for e in ObstacleType]
+        self.obstacle_type.addItems(obstalce_type_list)
+
+        self.obstacle_state_variable = QComboBox()
+        self.figure = Figure(figsize=(5, 4))
+        self.canvas = FigureCanvas(self.figure)
+        self.toolbar = NavigationToolbar(self.canvas, self)
+
+        self.selected_obstacle = QComboBox()
+        self.button_update_obstacle = QPushButton("Update")
+        self.button_remove_obstacle = QPushButton("Remove")
+        self.button_add_static_obstacle = QPushButton("Add")
+
+        self.vis_settings_container = QFormLayout()
+        self.vis_settings_label = QLabel("Visualization settings")
+        self.vis_settings_label.setFont(QFont("Arial", 11, QFont.Bold))
+        self.vis_settings_container.addRow(self.vis_settings_label)
+
+        self.color_container = QHBoxLayout()
+        self.vis_settings_container.addRow(self.color_container)
+        self.color_label = QLabel("Obstacle color:")
+        self.color_container.addWidget(self.color_label)
+        self.default_color = QCheckBox("Default color")
+        self.default_color.setChecked(True)
+        self.color_btn = QPushButton("Choose color")
+        self.selected_color = QWidget()
+        self.selected_color.setStyleSheet("border: 1px solid black")
+        self.selected_color.setFixedWidth(25)
+        self.selected_color.setFixedHeight(25)
+
+        self.color_container.addWidget(self.default_color)
+        self.color_container.addWidget(self.color_btn)
+        self.color_container.addWidget(self.selected_color)
+
+        self.layout_obstacle_information_groupbox = QFormLayout()
+        self.obstacle_information_groupbox = QGroupBox()
+        self.obstacle_information_groupbox.setLayout(self.layout_obstacle_information_groupbox)
+        self.layout_obstacle_information_groupbox.insertRow(0, label_general)
+        self.layout_obstacle_information_groupbox.insertRow(1, "Static/Dynamic", self.obstacle_dyn_stat)
+        self.layout_obstacle_information_groupbox.insertRow(2, "Type", self.obstacle_type)
+
+        self.shape_groupbox = QGroupBox()
+        self.layout_shape_groupbox = QFormLayout()
+        self.shape_groupbox.setLayout(self.layout_shape_groupbox)
+        self.shape_label = QLabel("Shape attributes")
+        self.shape_label.setFont(QFont("Arial", 9, QFont.Bold))
+        self.layout_shape_groupbox.insertRow(0, self.shape_label)
+        self.layout_shape_groupbox.insertRow(1, "Shape", self.obstacle_shape)
+
+        self.layout_obstacle_information_groupbox.insertRow(3, self.shape_groupbox)
+
+        self.init_rectangle_fields()
+        self.init_position()
+
+        layout_obstacle_state_vis_groupbox = QFormLayout()
+        obstacle_state_vis_groupbox = QGroupBox()
+        obstacle_state_vis_groupbox.setLayout(layout_obstacle_state_vis_groupbox)
+        layout_vis_selection = QFormLayout()
+        layout_vis_selection.addRow("Visualized State:", self.obstacle_state_variable)
+        layout_obstacle_state_vis_groupbox.addRow(layout_vis_selection)
+        layout_obstacle_state_vis_groupbox.addWidget(self.toolbar)
+        layout_obstacle_state_vis_groupbox.addWidget(self.canvas)
+        self.layout_obstacle_information_groupbox.addRow(obstacle_state_vis_groupbox)
+        self.layout_obstacles.addWidget(self.obstacle_information_groupbox)
+
+        layout_obstacle_buttons = QFormLayout()
+        layout_obstacle_buttons.addRow("Selected Obstacle ID:", self.selected_obstacle)
+        layout_obstacle_buttons.addRow(self.button_update_obstacle)
+        layout_obstacle_buttons.addRow(self.button_remove_obstacle)
+        layout_obstacle_buttons.addRow(self.button_add_static_obstacle)
+        self.layout_obstacles.addLayout(layout_obstacle_buttons)
+        self.layout_obstacles.addLayout(self.vis_settings_container)
+
+        title_obstacle = "Obstacle"
+        self.sections.append((title_obstacle, widget_obstacles))
+
+        self.layout_obstacle_information_groupbox.addRow(self.static_obstacle_selection, self.dynamic_obstacle_selection)
+
+        # --Section SUMO Simulation-
+        if SUMO_AVAILABLE:
+            widget_sumo = SUMOSimulation(self.tree)
+            layout_sumo = QFormLayout(widget_sumo)
+
+            self.button_start_simulation = QPushButton("Simulate")
+            self.sumo_simulation_length = QSpinBox()
+            self.sumo_simulation_length.setMinimum(10)
+            self.sumo_simulation_length.setMaximum(10000)
+            self.sumo_simulation_length.setValue(200)
+
+            layout_sumo.addRow("Number Time Steps:", self.sumo_simulation_length)
+            layout_sumo.addRow(self.button_start_simulation)
+
+            title_sumo = "Sumo Simulation"
+            self.sections.append((title_sumo, widget_sumo))
+
+    def define_sections2(self):
+        """defines the sections in the obstacle toolbox
         """
         # this validator always has the format with a dot as decimal separator
         self.float_validator = QDoubleValidator()
