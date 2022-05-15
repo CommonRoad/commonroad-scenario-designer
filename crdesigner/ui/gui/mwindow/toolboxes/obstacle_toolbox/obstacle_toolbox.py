@@ -100,6 +100,13 @@ class ObstacleToolbox(QDockWidget):
         self.obstacle_toolbox_ui.default_color.stateChanged.connect(
             lambda: self.obstacle_toolbox_ui.set_default_color())
 
+        self.obstacle_toolbox_ui.dynamic_obstacle_selection.clicked.connect(
+                lambda: self.obstacle_toolbox_ui.adjust_obstacle_type_dropdown(selected_type="dynamic")
+        )
+        self.obstacle_toolbox_ui.dynamic_obstacle_selection.clicked.connect(
+                lambda: self.obstacle_toolbox_ui.adjust_obstacle_type_dropdown(selected_type="static")
+        )
+
         if SUMO_AVAILABLE:
             self.obstacle_toolbox_ui.button_start_simulation.clicked.connect(lambda: self.start_sumo_simulation())
 
