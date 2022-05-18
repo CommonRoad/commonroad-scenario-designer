@@ -116,6 +116,8 @@ def _undo_action(mwindow):
     else:
         return
     mwindow.animated_viewer_wrapper.cr_viewer.current_scenario = mwindow.scenarios[mwindow.current_scenario_index]
+    mwindow.animated_viewer_wrapper.cr_viewer.original_lanelet_network = \
+        mwindow.scenarios[mwindow.current_scenario_index].lanelet_network
     mwindow.animated_viewer_wrapper.update_view(focus_on_network=True)
     mwindow.update_toolbox_scenarios()
 
@@ -129,6 +131,8 @@ def _redo_action(mwindow):
     else:
         return
     mwindow.animated_viewer_wrapper.cr_viewer.current_scenario = mwindow.scenarios[mwindow.current_scenario_index]
+    mwindow.animated_viewer_wrapper.cr_viewer.original_lanelet_network = mwindow.scenarios[
+        mwindow.current_scenario_index].lanelet_network
     mwindow.animated_viewer_wrapper.update_view(focus_on_network=True)
     mwindow.update_toolbox_scenarios()
 

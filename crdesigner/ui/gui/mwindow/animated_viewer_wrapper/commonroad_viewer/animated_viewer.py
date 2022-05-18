@@ -33,7 +33,6 @@ class AnimatedViewer:
     def __init__(self, parent, callback_function):
 
         self.current_scenario = None
-        self.original_scenario = None
         self.current_pps = None
         self.dynamic = DynamicCanvas(parent, width=5, height=10, dpi=100, animated_viewer=self)
         self.callback_function = callback_function

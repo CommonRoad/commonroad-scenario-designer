@@ -1212,12 +1212,15 @@ class RoadNetworkToolbox(QDockWidget):
             self.text_browser.append("No lanelet selected for [2].")
             return
 
-        connected_lanelet = MapCreator.connect_lanelets(selected_lanelet_one, selected_lanelet_two,
-                                                        self.current_scenario.generate_object_id())
-        self.last_added_lanelet_id = connected_lanelet.lanelet_id
-        self.current_scenario.add_objects(connected_lanelet)
-        self.set_default_road_network_list_information()
-        self.callback(self.current_scenario)
+        try:
+            connected_lanelet = MapCreator.connect_lanelets(selected_lanelet_one, selected_lanelet_two,
+                                                            self.current_scenario.generate_object_id())
+            self.last_added_lanelet_id = connected_lanelet.lanelet_id
+            self.current_scenario.add_objects(connected_lanelet)
+            self.set_default_road_network_list_information()
+            self.callback(self.current_scenario)
+        except ValueError:
+            self.text_browser.append("An error happened: Connecting the lanelets is not possible.")
 
     def attach_to_other_lanelet(self):
         """
