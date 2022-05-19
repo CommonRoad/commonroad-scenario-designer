@@ -628,10 +628,13 @@ class RoadNetworkToolbox(QDockWidget):
                                                                   line_marking_right, stop_line, traffic_signs,
                                                                   traffic_lights, stop_line_at_end)
 
-        self.last_added_lanelet_id = adjacent_lanelet.lanelet_id
-        self.current_scenario.add_objects(adjacent_lanelet)
-        self.set_default_road_network_list_information()
-        self.callback(self.current_scenario)
+        if adjacent_lanelet is not None:
+            self.last_added_lanelet_id = adjacent_lanelet.lanelet_id
+            self.current_scenario.add_objects(adjacent_lanelet)
+            self.set_default_road_network_list_information()
+            self.callback(self.current_scenario)
+        else:
+            self.text_browser.append("Adjacent lanelet already exists.")
 
     def remove_lanelet(self):
         """

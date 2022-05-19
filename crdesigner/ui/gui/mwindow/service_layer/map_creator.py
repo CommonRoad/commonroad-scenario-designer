@@ -163,7 +163,7 @@ class MapCreator:
                                 line_marking_left: LineMarking = LineMarking.UNKNOWN,
                                 line_marking_right: LineMarking = LineMarking.UNKNOWN, stop_line: StopLine = None,
                                 traffic_signs: Set[int] = None, traffic_lights: Set[int] = None,
-                                stop_line_at_end: bool = False) -> Lanelet:
+                                stop_line_at_end: bool = False) -> Union[Lanelet, None]:
         """
         Creates adjacent left or adjacent right lanelet for given lanelet.
 
