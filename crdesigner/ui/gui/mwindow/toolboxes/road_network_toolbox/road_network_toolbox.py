@@ -414,7 +414,9 @@ class RoadNetworkToolbox(QDockWidget):
                                                      line_marking_right, stop_line, traffic_signs, traffic_lights,
                                                      stop_line_at_end)
             if connect_to_last_selection:
-                if self.last_added_lanelet_id is not None:
+                if self.last_added_lanelet_id is not None and \
+                        self.current_scenario.lanelet_network.find_lanelet_by_id(self.last_added_lanelet_id) \
+                        is not None:
                     MapCreator.fit_to_predecessor(
                         self.current_scenario.lanelet_network.find_lanelet_by_id(self.last_added_lanelet_id),
                         lanelet)
@@ -1260,10 +1262,13 @@ class RoadNetworkToolbox(QDockWidget):
         selected_lanelet_one = self.selected_lanelet()
         if selected_lanelet_one is None:
             return
-        x_translation = float(self.road_network_toolbox_ui.x_translation.text())
-        y_translation = float(self.road_network_toolbox_ui.y_translation.text())
-        selected_lanelet_one.translate_rotate(np.array([x_translation, y_translation]), 0)
-        self.callback(self.current_scenario)
+        try:
+            x_translation = float(self.road_network_toolbox_ui.x_translation.text())
+            y_translation = float(self.road_network_toolbox_ui.y_translation.text())
+            selected_lanelet_one.translate_rotate(np.array([x_translation, y_translation]), 0)
+            self.callback(self.current_scenario)
+        except ValueError:
+            self.text_browser.append("ERROR: Lanelet cannot be translated due to a invalid x- or y-coordinate!")
 
     def merge_with_successor(self):
         """
