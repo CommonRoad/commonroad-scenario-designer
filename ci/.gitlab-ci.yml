@@ -3,7 +3,7 @@ stages:
     - test
     - build
 
-image: $CI_REGISTRY/cps/commonroad-scenario-designer/ci:v0.6.8
+image: $CI_REGISTRY/cps/commonroad-scenario-designer/ci:v0.6.9_20.04
 
 .install-and-run: &install-and-run
   - pip install -e .
@@ -53,6 +53,14 @@ python39:
     script:
         - source activate cr39
         - *install-and-run
+
+python310 :
+  stage : test
+  variables :
+    QT_QPA_PLATFORM : "offscreen"
+  script :
+    - source activate cr310
+    - *install-and-run
 
 docs:
     stage: test
