@@ -188,7 +188,7 @@ class OSMLanelet:
         osm = etree.Element("osm")
         osm.set("version", "0.6")
         osm.set("upload", "true")
-        osm.set("generator", "opendrive2lanelet")
+        osm.set("generator", "commonroad-scenario-designer")
 
         for node in self.nodes.values():
             osm.append(node.serialize_to_xml())

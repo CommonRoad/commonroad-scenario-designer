@@ -8,7 +8,7 @@ __maintainer__ = "Sebastian Maierhofer"
 __email__ = "commonroad@lists.lrz.de"
 __status__ = "Released"
 
-from typing import List, Tuple
+from typing import List, Tuple, Union
 
 import numpy as np
 from pyproj import Proj
@@ -170,7 +170,7 @@ class CR2LaneletConverter:
         """
         way = self.osm.find_way_by_id(way_id)
         first_idx, last_idx = (0, -1) if same_dir else (-1, 0)
-        return (way.nodes[first_idx], way.nodes[last_idx])
+        return way.nodes[first_idx], way.nodes[last_idx]
 
     def _create_nodes_from_vertices(self, vertices: List[np.ndarray]) -> List[str]:
         """Create nodes and add them to the OSM.
@@ -242,7 +242,7 @@ class CR2LaneletConverter:
 
     def _get_shared_first_nodes_from_other_lanelets(
         self, lanelet: Lanelet
-    ) -> Tuple[str, str]:
+    ) -> Tuple[Union[str, None], Union[str, None]]:
         """Get already created nodes from other lanelets which could also
            be used by this lanelet as first nodes.
 
@@ -270,7 +270,7 @@ class CR2LaneletConverter:
 
     def _get_shared_last_nodes_from_other_lanelets(
         self, lanelet: Lanelet
-    ) -> Tuple[str, str]:
+    ) -> Tuple[Union[str, None], Union[str, None]]:
         """Get already created nodes from other lanelets which could also
            be used by this lanelet as last nodes.
 
@@ -308,7 +308,7 @@ def _vertices_are_equal(
       vertices2: Second vertices to compare.
 
     Returns:
-      True if every vertice in one list is nearly equal to the
+      True if every vertex in one list is nearly equal to the
         corresponding vertices at the same position in the other list.
     """
     if len(vertices1) != len(vertices2):
