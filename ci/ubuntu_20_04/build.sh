@@ -1,6 +1,6 @@
 #!/bin/bash
 
-version=v0.6.9_20.04 #last version v0.6.9_20.04
+version=<version> #last version v0.6.9_20.04
 gitlab_img=gitlab.lrz.de:5005/cps/commonroad-scenario-designer/ci:$version
 
 DOCKER_BUILDKIT=1 docker build -t "commonroad:$version" -f Dockerfile --no-cache .. \

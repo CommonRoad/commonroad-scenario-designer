@@ -1,5 +1,5 @@
 stages:
-    - style_check
+#    - style_check
     - test
     - build
 
@@ -11,23 +11,23 @@ image: $CI_REGISTRY/cps/commonroad-scenario-designer/ci:v0.6.9_20.04
   - coverage run --source ./crdesigner -m pytest tests/
   - coverage report -m || true
 
-style_checks:
-  stage: style_check
-  script:
-    - source activate cr39
-    - pip install pycodestyle
-    - git  diff ${CI_COMMIT_BEFORE_SHA}...${CI_COMMIT_SHA} -- '*.py' | pycodestyle --max-line-length=120 --diff
-  except:
-  - merge_requests
-
-style_check_merge_result:
-  stage: style_check
-  script:
-    - source activate cr39
-    - pip install pycodestyle
-    - git  diff ${CI_MERGE_REQUEST_TARGET_BRANCH_SHA}...${CI_MERGE_REQUEST_SOURCE_BRANCH_SHA} -- '*.py' | pycodestyle --max-line-length=120 --diff
-  only:
-  - merge_requests
+#style_checks:
+#  stage: style_check
+#  script:
+#    - source activate cr39
+#    - pip install pycodestyle
+#    - git  diff ${CI_COMMIT_BEFORE_SHA}...${CI_COMMIT_SHA} -- '*.py' | pycodestyle --max-line-length=120 --diff
+#  except:
+#  - merge_requests
+#
+#style_check_merge_result:
+#  stage: style_check
+#  script:
+#    - source activate cr39
+#    - pip install pycodestyle
+#    - git  diff ${CI_MERGE_REQUEST_TARGET_BRANCH_SHA}...${CI_MERGE_REQUEST_SOURCE_BRANCH_SHA} -- '*.py' | pycodestyle --max-line-length=120 --diff
+#  only:
+#  - merge_requests
 
 
 python37:
