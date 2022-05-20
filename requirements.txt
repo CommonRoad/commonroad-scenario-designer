@@ -14,4 +14,3 @@ enum34>=1.1.10
 iso3166>=1.0.1
 networkx>=2.5
 cartopy>=0.17.0
-commonroad-drivability-checker>=2021.4.1
