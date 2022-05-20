@@ -7,7 +7,7 @@ with open(f"{setup_dir}/README.md", "r") as fh:
 
 setup(
     name="commonroad-scenario-designer",
-    version="0.5",
+    version="0.5.1",
     description="Toolbox for Map Conversion and Scenario Creation for Autonomous Vehicles",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -34,6 +34,7 @@ setup(
         "iso3166>=1.0.1",
         "networkx>=2.5",
         "cartopy >= 0.17.0",
+        "commonroad-drivability-checker >= 2021.4.1"
     ],
     extras_require={"GUI": ["matplotlib>=3.1.0"]},
     python_requires=">=3.7",

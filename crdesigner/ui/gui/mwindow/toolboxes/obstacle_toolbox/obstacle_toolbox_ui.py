@@ -292,9 +292,6 @@ class ObstacleToolboxUI(Toolbox):
         if self.obstacle_dyn_stat.currentText() == "Dynamic":
             self.toggle_dynamic_static()
 
-        if self.obstacle_dyn_stat.currentText() == "Dynamic":
-            self.remove_dynamic_fields()
-            self.toggle_dynamic_static()
 
     # add vertices for the polygon shape, i is the place in the array
     def add_vertice(self):

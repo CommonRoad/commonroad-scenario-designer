@@ -5,7 +5,6 @@ import logging
 import os
 import subprocess
 import sys
-import time
 import warnings
 from collections import defaultdict
 from copy import deepcopy
@@ -26,14 +25,10 @@ from shapely.geometry import LineString, Point
 import sumolib
 from matplotlib import pyplot as plt
 
-try:
-    import commonroad_dc.pycrccosy
-    from commonroad_dc.costs.route_matcher import LaneletRouteMatcher
-    from commonroad_dc.geometry.util import resample_polyline, compute_curvature_from_polyline, \
-        chaikins_corner_cutting
-except ImportError:
-    warnings.warn(
-        f"Unable to import commonroad_dc.pycrccosy, converting static scenario into interactive is not supported!")
+
+import commonroad_dc.pycrccosy
+from commonroad_dc.costs.route_matcher import LaneletRouteMatcher
+from commonroad_dc.geometry.util import resample_polyline, compute_curvature_from_polyline
 
 from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.common.solution import VehicleType as VehicleTypeParam

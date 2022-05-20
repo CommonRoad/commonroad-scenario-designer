@@ -163,7 +163,7 @@ class MapCreator:
                                 line_marking_left: LineMarking = LineMarking.UNKNOWN,
                                 line_marking_right: LineMarking = LineMarking.UNKNOWN, stop_line: StopLine = None,
                                 traffic_signs: Set[int] = None, traffic_lights: Set[int] = None,
-                                stop_line_at_end: bool = False) -> Lanelet:
+                                stop_line_at_end: bool = False) -> Union[Lanelet, None]:
         """
         Creates adjacent left or adjacent right lanelet for given lanelet.
 
@@ -863,21 +863,6 @@ class MapCreator:
             norm_vec_succ = np.array([vec_width_succ[1], -vec_width_succ[0]])
 
             con_vec_factor = length_con_vec * 0.5
-
-            center_vertices = np.concatenate(([predecessor.center_vertices[-1]],
-                                              [predecessor.center_vertices[-1] + norm_vec_pred],
-                                              [predecessor.center_vertices[-1] + 2 * norm_vec_pred + con_vec_factor *
-                                               connecting_vec], [successor.center_vertices[0] - 2 * norm_vec_succ -
-                                                                 (con_vec_factor * connecting_vec)],
-                                              [successor.center_vertices[0] - norm_vec_succ],
-                                              [successor.center_vertices[0]]))
-
-            center_vertices = np.concatenate(([predecessor.center_vertices[-1]],
-                                              [predecessor.center_vertices[-1] + con_vec_factor * norm_vec_pred /
-                                               width_pred + con_vec_factor * connecting_vec],
-                                              [successor.center_vertices[0] - con_vec_factor * norm_vec_succ /
-                                               width_succ - (con_vec_factor * connecting_vec)],
-                                              [successor.center_vertices[0]]))
 
             middle_point = (predecessor.center_vertices[-1] + 0.5 * con_vec_factor * norm_vec_pred /
                             width_pred - 0.5 * con_vec_factor * norm_vec_succ / width_succ +
