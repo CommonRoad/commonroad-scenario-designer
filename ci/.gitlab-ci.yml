@@ -54,13 +54,13 @@ python39:
         - source activate cr39
         - *install-and-run
 
-python310 :
-  stage : test
-  variables :
-    QT_QPA_PLATFORM : "offscreen"
-  script :
-    - source activate cr310
-    - *install-and-run
+#python310 :
+#  stage : test
+#  variables :
+#    QT_QPA_PLATFORM : "offscreen"
+#  script :
+#    - source activate cr310
+#    - *install-and-run
 
 docs:
     stage: test
