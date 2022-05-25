@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.5.2] - 2022-XX-XX
+
+### Fixed
+- Preventing GUI crash when adding obstacle without existing scenario
+- Various small bug fixes
+
 ## [0.5.1] - 2022-05-20
 
 ### Fixed

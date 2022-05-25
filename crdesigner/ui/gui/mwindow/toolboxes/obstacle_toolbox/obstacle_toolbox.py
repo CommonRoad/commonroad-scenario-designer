@@ -379,19 +379,22 @@ class ObstacleToolbox(QDockWidget):
         generates an object_id (id for obstacle) and then calls function
         to create a static or dynamic obstacle
         """
-        obstacle_id = self.current_scenario.generate_object_id()
-        self.amount_obstacles = self.current_scenario.generate_object_id()
+        if self.current_scenario is not None:
+            obstacle_id = self.current_scenario.generate_object_id()
+            self.amount_obstacles = self.current_scenario.generate_object_id()
 
-        if self.obstacle_toolbox_ui.obstacle_dyn_stat.currentText() == "Dynamic":
-            try:
-                self.dynamic_obstacle_details(obstacle_id)
-            except Exception as e:
-                self.text_browser.append("Error when adding dynamic obstacle")
-        elif self.obstacle_toolbox_ui.obstacle_dyn_stat.currentText() == "Static":
-            try:
-                self.static_obstacle_details(obstacle_id)
-            except Exception as e:
-                self.text_browser.append("Error when adding static obstacle")
+            if self.obstacle_toolbox_ui.obstacle_dyn_stat.currentText() == "Dynamic":
+                try:
+                    self.dynamic_obstacle_details(obstacle_id)
+                except Exception as e:
+                    self.text_browser.append("Error when adding dynamic obstacle")
+            elif self.obstacle_toolbox_ui.obstacle_dyn_stat.currentText() == "Static":
+                try:
+                    self.static_obstacle_details(obstacle_id)
+                except Exception as e:
+                    self.text_browser.append("Error when adding static obstacle")
+        else:
+            self.text_browser.append("Warning: Scenario does not exist yet. Please create or load a scenario first.")
 
     def update_obstacle(self):
         """
@@ -402,7 +405,10 @@ class ObstacleToolbox(QDockWidget):
         obstacle_id = self.get_current_obstacle_id()
         self.temp_obstacle = selected_obstacle
 
-        if selected_obstacle:
+        if selected_obstacle is None or obstacle_id is None:
+            self.text_browser.append("Warning: Scenario does not exist yet. Please create or load a scenario first.")
+            return
+        else:
             self.canvas.remove_obstacle(obstacle_id)
             self.current_scenario.remove_obstacle(selected_obstacle)
 
@@ -1138,6 +1144,9 @@ class ObstacleToolbox(QDockWidget):
                 self.amount_obstacles -= 1
             except Exception:
                 self.text_browser.append("Error when removing obstacle")
+        if self.current_scenario is None:
+            self.text_browser.append("Warning: Scenario does not exist yet. Please create or load a scenario first.")
+
 
     def draw_plot(self, time, profile, xmin: float = None,
                   xmax: float = None, ymin: float = None, ymax: float = None):
