@@ -107,6 +107,8 @@ class ObstacleToolbox(QDockWidget):
                 lambda: self.obstacle_toolbox_ui.adjust_obstacle_type_dropdown(selected_type="static")
         )
 
+        self.obstacle_toolbox_ui.obstacle_id_line_edit.textEdited.connect(self.check_if_id_exists)
+
         if SUMO_AVAILABLE:
             self.obstacle_toolbox_ui.button_start_simulation.clicked.connect(lambda: self.start_sumo_simulation())
 
@@ -122,7 +124,9 @@ class ObstacleToolbox(QDockWidget):
 
     def refresh_toolbox(self, scenario: Scenario):
         self.current_scenario = scenario
+        self.obstacle_toolbox_ui.display_obstacle_id(str(self.current_scenario.generate_object_id()))
         self.initialize_toolbox()
+        self.obstacle_toolbox_ui.obstacle_id_line_edit.setEnabled(True)
 
     def static_obstacle_details(self, obstacle_id: int):
         """
@@ -137,8 +141,8 @@ class ObstacleToolbox(QDockWidget):
                                                      length=float(self.obstacle_toolbox_ui.obstacle_length.text()),
                                                      width=float(self.obstacle_toolbox_ui.obstacle_width.text())),
                                              initial_state=State(**{'position': np.array(
-                                                     [float(self.obstacle_toolbox_ui.obstacle_x_Position.text()),
-                                                      float(self.obstacle_toolbox_ui.obstacle_y_Position.text())]),
+                                                     [float(self.obstacle_toolbox_ui.position_x_text_field.text()),
+                                                      float(self.obstacle_toolbox_ui.position_y_text_field.text())]),
                                                  'orientation': math.radians(float(
                                                          self.obstacle_toolbox_ui.obstacle_orientation.text())),
                                                  'time_step': 1}))
@@ -386,7 +390,14 @@ class ObstacleToolbox(QDockWidget):
         generates an object_id (id for obstacle) and then calls function
         to create a static or dynamic obstacle
         """
-        obstacle_id = self.current_scenario.generate_object_id()
+        if self.obstacle_toolbox_ui.obstacle_id_line_edit.text() != "":
+            obstacle_id = int(self.obstacle_toolbox_ui.obstacle_id_line_edit.text())
+        else:
+            obstacle_id = [int(word)
+                           for word in self.obstacle_toolbox_ui.obstacle_id_line_edit.placeholderText().split()
+                           if word.isdigit()][0]
+
+        #obstacle_id = int(self.obstacle_toolbox_ui.obstacle_id_line_edit.text())
         self.amount_obstacles = self.current_scenario.generate_object_id()
 
         if self.obstacle_toolbox_ui.obstacle_dyn_stat.currentText() == "Dynamic":
@@ -1122,8 +1133,8 @@ class ObstacleToolbox(QDockWidget):
                 self.obstacle_toolbox_ui.vertices_y[i].setText("")
         if (self.obstacle_toolbox_ui.obstacle_dyn_stat.currentText() == "Static" and
                 self.obstacle_toolbox_ui.obstacle_shape.currentText() != "Polygon"):
-            self.obstacle_toolbox_ui.obstacle_x_Position.setText("")
-            self.obstacle_toolbox_ui.obstacle_y_Position.setText("")
+            self.obstacle_toolbox_ui.position_x_text_field.setText("")
+            self.obstacle_toolbox_ui.position_y_text_field.setText("")
 
     def start_sumo_simulation(self):
         num_time_steps = self.obstacle_toolbox_ui.sumo_simulation_length.value()
@@ -1181,3 +1192,21 @@ class ObstacleToolbox(QDockWidget):
         self.obstacle_toolbox_ui.canvas.draw()
         ax.callbacks.connect('xlim_changed', self.on_xlim_change)
         ax.callbacks.connect('ylim_changed', self.on_ylim_change)
+
+    def check_if_id_exists(self, entered_id):
+        #<a href="https://www.flaticon.com/free-icons/right" title="right icons">Right icons created by kliwir art - Flaticon</a>
+        #<a href="https://www.flaticon.com/free-icons/delete" title="delete icons">Delete icons created by Pixel perfect - Flaticon</a>
+        try:
+            if entered_id == "":
+                self.obstacle_toolbox_ui.set_obstacle_id_pixmap(valid=True)
+            elif not (entered_id.isdigit() and int(entered_id) >= 0):
+                print("ID must be a positive integer.")
+                self.obstacle_toolbox_ui.set_obstacle_id_pixmap(valid=False)
+            elif int(entered_id) in [o.obstacle_id for o in self.current_scenario.obstacles]:
+                print("ID already in use. Pick another or write: Auto")
+                self.obstacle_toolbox_ui.set_obstacle_id_pixmap(valid=False)
+            else:
+                self.obstacle_toolbox_ui.set_obstacle_id_pixmap(valid=True)
+        except Exception:
+            pass
+

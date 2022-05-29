@@ -126,7 +126,7 @@ class Toolbox(QWidget):
         self.tree.setIndentation(0)
         self.setGeometry(0, 0, 250, 500)
         self.tree.setVerticalScrollMode(QAbstractItemView.ScrollPerPixel)
-
+        self.tree.verticalScrollBar().setSingleStep(10)
         self.sections = []
         self.define_sections()
         self.add_sections()

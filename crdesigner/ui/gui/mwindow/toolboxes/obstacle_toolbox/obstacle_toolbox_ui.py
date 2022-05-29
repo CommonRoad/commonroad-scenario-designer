@@ -46,26 +46,25 @@ class ObstacleToolboxUI(Toolbox):
         self.static_dynamic_obstacle_group = QButtonGroup()
         self.static_obstacle_selection = QRadioButton("static")
         self.static_obstacle_selection.setChecked(True)
-        self.static_dynamic_obstacle_group.addButton(self.static_obstacle_selection)
+        self.static_dynamic_obstacle_group.addButton(self.static_obstacle_selection, 0)
         self.dynamic_obstacle_selection = QRadioButton("dynamic")
         self.dynamic_obstacle_selection.setChecked(False)
-        self.static_dynamic_obstacle_group.addButton(self.dynamic_obstacle_selection)
-        # create text field and label for obstacle ID and name
+        self.static_dynamic_obstacle_group.addButton(self.dynamic_obstacle_selection, 1)
+
+        # create text field and label for obstacle ID. Disable the LineEdit until a scenario is loaded
         self.obstacle_id_line_edit = QLineEdit(self)
-        self.obstacle_id_line_edit.setPlaceholderText("ID: 327")
-        self.obstacle_id_line_edit.setFixedWidth(72)
         self.obstacle_id_line_edit.setEnabled(False)
-        self.obstacle_name_line_edit = QLineEdit(self)
-        self.obstacle_name_line_edit.setPlaceholderText("Enter name (optional)")
-        # create position text fields
-        self.position_x_text_field = QLineEdit(self)
-        self.position_x_text_field.setPlaceholderText("X")
-        self.position_y_text_field = QLineEdit(self)
-        self.position_y_text_field.setPlaceholderText("Y")
-        self.position_text_field_layout = QHBoxLayout(self)
-        self.position_text_field_layout.addWidget(self.position_x_text_field)
-        self.position_text_field_layout.addWidget(self.position_y_text_field)
-        self.position_label = QLabel("Position")
+        #self.obstacle_id_line_edit.setPlaceholderText("Auto")
+        self.obstacle_id_line_edit.setToolTip("You can manually enter an ID or leave empty for an automatic ID."
+                                              " You must first create a scenario.")
+        # create QLabel to visualize the pixmap for ID
+        self.obstacle_id_pixmap_label = QLabel(self)
+        self.obstacle_id_pixmap_label.setToolTip("Visualizes whether the entered ID is valid.")
+        # load the two pixmaps used to visualize whether ID is valid or invalid
+        self.obstacle_id_pixmap_valid = QPixmap("/home/til/Downloads/correct.png")
+        self.obstacle_id_pixmap_valid = self.obstacle_id_pixmap_valid.scaledToWidth(20)
+        self.obstacle_id_pixmap_invalid = QPixmap("/home/til/Downloads/remove.png")
+        self.obstacle_id_pixmap_invalid =  self.obstacle_id_pixmap_invalid.scaledToWidth(20)
 
         self.obstacle_shape = QComboBox()
         self.obstacle_shape.addItem("Rectangle")
@@ -74,13 +73,7 @@ class ObstacleToolboxUI(Toolbox):
 
         self.obstacle_type = QComboBox()
         view = self.obstacle_type.view()
-        #view.setVerticalScrollMode(QAbstractItemView.ScrollPerPixel)
-        #view.setVerticalScrollMode(QAbstractItemView.ScrollPerItem)
-        view.setAutoScrollMargin(1)
-        #self.obstacle_type.setView(view)
         self.adjust_obstacle_type_dropdown("static")
-        #obstalce_type_list = [e.value for e in ObstacleType]
-        #self.obstacle_type.addItems(obstalce_type_list)
 
         self.obstacle_state_variable = QComboBox()
         self.figure = Figure(figsize=(5, 4))
@@ -120,8 +113,11 @@ class ObstacleToolboxUI(Toolbox):
         self.layout_obstacle_information_groupbox.insertRow(1, self.static_obstacle_selection,
                                                             self.dynamic_obstacle_selection)
         self.layout_obstacle_information_groupbox.insertRow(2, "Type", self.obstacle_type)
-        self.layout_obstacle_information_groupbox.insertRow(3, self.obstacle_id_line_edit, self.obstacle_name_line_edit)
-        self.layout_obstacle_information_groupbox.insertRow(4, "Position", self.position_text_field_layout)
+        # horizontal layout for the ID LineEdit and Pixmap that visualizes whether ID is valid
+        self.horizontal_layout_obstacle_id = QHBoxLayout()
+        self.horizontal_layout_obstacle_id.addWidget(self.obstacle_id_line_edit)
+        self.horizontal_layout_obstacle_id.addWidget(self.obstacle_id_pixmap_label)
+        self.layout_obstacle_information_groupbox.insertRow(3, "ID", self.horizontal_layout_obstacle_id)
 
         self.shape_groupbox = QGroupBox()
         self.layout_shape_groupbox = QFormLayout()
@@ -131,7 +127,8 @@ class ObstacleToolboxUI(Toolbox):
         self.layout_shape_groupbox.insertRow(0, self.shape_label)
         self.layout_shape_groupbox.insertRow(1, "Shape", self.obstacle_shape)
 
-        self.layout_obstacle_information_groupbox.insertRow(5, self.shape_groupbox)
+        self.layout_obstacle_information_groupbox.insertRow(4, self.shape_groupbox)
+        #self.layout_obstacle_information_groupbox.insertRow(5, "Position", self.position_text_field_layout)
 
         self.init_rectangle_fields()
         self.init_position()
@@ -363,30 +360,26 @@ class ObstacleToolboxUI(Toolbox):
         """
         adds the position fields
         """
-        self.obstacle_x_Position = QLineEdit()
-        self.obstacle_x_Position.setValidator(self.float_validator)
-        self.obstacle_x_Position.setMaxLength(4)
-        self.obstacle_x_Position.setAlignment(Qt.AlignRight)
-
-        self.obstacle_y_Position = QLineEdit()
-        self.obstacle_y_Position.setValidator(self.float_validator)
-        self.obstacle_y_Position.setMaxLength(4)
-        self.obstacle_y_Position.setAlignment(Qt.AlignRight)
+        self.position_x_text_field = QLineEdit(self)
+        self.position_x_text_field.setPlaceholderText("X")
+        self.position_y_text_field = QLineEdit(self)
+        self.position_y_text_field.setPlaceholderText("Y")
+        self.position_text_field_layout = QHBoxLayout(self)
+        self.position_text_field_layout.addWidget(self.position_x_text_field)
+        self.position_text_field_layout.addWidget(self.position_y_text_field)
+        self.position_label = QLabel("Position")
 
         if self.obstacle_shape.currentText() == "Rectangle":
-            self.layout_obstacle_information_groupbox.insertRow(5, "X-Position", self.obstacle_x_Position)
-            self.layout_obstacle_information_groupbox.insertRow(6, "Y-Position", self.obstacle_y_Position)
+            self.layout_obstacle_information_groupbox.insertRow(5, "Position", self.position_text_field_layout)
         elif self.obstacle_shape.currentText() == "Circle":
-            self.layout_obstacle_information_groupbox.insertRow(5, "X-Position", self.obstacle_x_Position)
-            self.layout_obstacle_information_groupbox.insertRow(6, "Y-Position", self.obstacle_y_Position)
+            self.layout_obstacle_information_groupbox.insertRow(5, "Position", self.position_text_field_layout)
 
     def remove_position(self):
         """
         removes the position fields
         """
         try:
-            self.layout_obstacle_information_groupbox.removeRow(self.obstacle_x_Position)
-            self.layout_obstacle_information_groupbox.removeRow(self.obstacle_y_Position)
+            self.layout_obstacle_information_groupbox.removeRow(self.position_text_field_layout)
         except Exception:
             pass
 
@@ -460,6 +453,20 @@ class ObstacleToolboxUI(Toolbox):
                 if e.value in ["unknown", "parkedVehicle", "constructionZone", "roadBoundary", "building", "pillar",
                                "median_strip"]:
                     self.obstacle_type.addItem(e.value)
+
+    def display_obstacle_id(self, generated_id):
+        try:
+            text = "Auto: " + str(generated_id)
+            self.obstacle_id_line_edit.setPlaceholderText(text)
+        except Exception:
+            pass
+
+    def set_obstacle_id_pixmap(self, valid=True):
+        if valid:
+            self.obstacle_id_pixmap_label.setPixmap(self.obstacle_id_pixmap_valid)
+        else:
+            self.obstacle_id_pixmap_label.setPixmap(self.obstacle_id_pixmap_invalid)
+
 
     # add vertices for the polygon shape, i is the place in the array
     def add_vertice(self):
