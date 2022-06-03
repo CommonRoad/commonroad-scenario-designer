@@ -100,12 +100,14 @@ class ObstacleToolbox(QDockWidget):
         self.obstacle_toolbox_ui.default_color.stateChanged.connect(
             lambda: self.obstacle_toolbox_ui.set_default_color())
 
-        self.obstacle_toolbox_ui.dynamic_obstacle_selection.clicked.connect(
-                lambda: self.obstacle_toolbox_ui.adjust_obstacle_type_dropdown(selected_type="dynamic")
+        self.obstacle_toolbox_ui.dynamic_obstacle_selection.toggled.connect(
+                #lambda: self.obstacle_toolbox_ui.adjust_obstacle_type_dropdown(selected_type="dynamic")
+                lambda: self.obstacle_toolbox_ui.toggle_dynamic_static(selected_type="Dynamic")
         )
-        self.obstacle_toolbox_ui.dynamic_obstacle_selection.clicked.connect(
-                lambda: self.obstacle_toolbox_ui.adjust_obstacle_type_dropdown(selected_type="static")
-        )
+
+        #self.obstacle_toolbox_ui.static_obstacle_selection.toggled.connect(
+        #        lambda: self.obstacle_toolbox_ui.toggle_dynamic_static(selected_type="Static")
+        #)
 
         self.obstacle_toolbox_ui.obstacle_id_line_edit.textEdited.connect(self.check_if_id_exists)
 
@@ -193,6 +195,7 @@ class ObstacleToolbox(QDockWidget):
         creates dynamic obstacles
         :param obstacle_id: id of static obstacle to be created
         """
+        # ToDo: read data from initial state fields...
         if self.xyova:
             initial_position = np.array([self.xyova[0][0], self.xyova[0][1]])
             state_dictionary = {'position': initial_position,

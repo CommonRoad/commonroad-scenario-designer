@@ -128,125 +128,8 @@ class ObstacleToolboxUI(Toolbox):
         self.layout_shape_groupbox.insertRow(1, "Shape", self.obstacle_shape)
 
         self.layout_obstacle_information_groupbox.insertRow(4, self.shape_groupbox)
+        self.adjust_obstacle_type_dropdown("Static")
         #self.layout_obstacle_information_groupbox.insertRow(5, "Position", self.position_text_field_layout)
-
-        self.init_rectangle_fields()
-        self.init_position()
-
-        layout_obstacle_state_vis_groupbox = QFormLayout()
-        obstacle_state_vis_groupbox = QGroupBox()
-        obstacle_state_vis_groupbox.setLayout(layout_obstacle_state_vis_groupbox)
-        layout_vis_selection = QFormLayout()
-        layout_vis_selection.addRow("Visualized State:", self.obstacle_state_variable)
-        layout_obstacle_state_vis_groupbox.addRow(layout_vis_selection)
-        layout_obstacle_state_vis_groupbox.addWidget(self.toolbar)
-        layout_obstacle_state_vis_groupbox.addWidget(self.canvas)
-        self.layout_obstacle_information_groupbox.addRow(obstacle_state_vis_groupbox)
-        self.layout_obstacles.addWidget(self.obstacle_information_groupbox)
-
-        layout_obstacle_buttons = QFormLayout()
-        layout_obstacle_buttons.addRow("Selected Obstacle ID:", self.selected_obstacle)
-        layout_obstacle_buttons.addRow(self.button_update_obstacle)
-        layout_obstacle_buttons.addRow(self.button_remove_obstacle)
-        layout_obstacle_buttons.addRow(self.button_add_static_obstacle)
-        self.layout_obstacles.addLayout(layout_obstacle_buttons)
-        self.layout_obstacles.addLayout(self.vis_settings_container)
-
-        title_obstacle = "Obstacle"
-        self.sections.append((title_obstacle, widget_obstacles))
-
-        # --Section SUMO Simulation-
-        if SUMO_AVAILABLE:
-            widget_sumo = SUMOSimulation(self.tree)
-            layout_sumo = QFormLayout(widget_sumo)
-
-            self.button_start_simulation = QPushButton("Simulate")
-            self.sumo_simulation_length = QSpinBox()
-            self.sumo_simulation_length.setMinimum(10)
-            self.sumo_simulation_length.setMaximum(10000)
-            self.sumo_simulation_length.setValue(200)
-
-            layout_sumo.addRow("Number Time Steps:", self.sumo_simulation_length)
-            layout_sumo.addRow(self.button_start_simulation)
-
-            title_sumo = "Sumo Simulation"
-            self.sections.append((title_sumo, widget_sumo))
-
-    def define_sections2(self):
-        """defines the sections in the obstacle toolbox
-        """
-        # this validator always has the format with a dot as decimal separator
-        self.float_validator = QDoubleValidator()
-        self.float_validator.setLocale(QLocale("en_US"))
-
-        widget_obstacles = QFrame(self.tree)
-        self.layout_obstacles = QVBoxLayout()
-        widget_obstacles.setLayout(self.layout_obstacles)
-
-        label_general = QLabel("Obstacle Attributes")
-        label_general.setFont(QFont("Arial", 11, QFont.Bold))
-
-        self.obstacle_dyn_stat = QComboBox()
-        self.obstacle_dyn_stat.addItem("Static")
-        self.obstacle_dyn_stat.addItem("Dynamic")
-
-        self.obstacle_shape = QComboBox()
-        self.obstacle_shape.addItem("Rectangle")
-        self.obstacle_shape.addItem("Circle")
-        self.obstacle_shape.addItem("Polygon")
-
-        self.obstacle_type = QComboBox()
-        self.adjust_obstacle_type_dropdown("static")
-        #obstalce_type_list = [e.value for e in ObstacleType]
-        #self.obstacle_type.addItems(obstalce_type_list)
-
-        self.obstacle_state_variable = QComboBox()
-        self.figure = Figure(figsize=(5, 4))
-        self.canvas = FigureCanvas(self.figure)
-        self.toolbar = NavigationToolbar(self.canvas, self)
-
-        self.selected_obstacle = QComboBox()
-        self.button_update_obstacle = QPushButton("Update")
-        self.button_remove_obstacle = QPushButton("Remove")
-        self.button_add_static_obstacle = QPushButton("Add")
-
-        self.vis_settings_container = QFormLayout()
-        self.vis_settings_label = QLabel("Visualization settings")
-        self.vis_settings_label.setFont(QFont("Arial", 11, QFont.Bold))
-        self.vis_settings_container.addRow(self.vis_settings_label)
-
-        self.color_container = QHBoxLayout()
-        self.vis_settings_container.addRow(self.color_container)
-        self.color_label = QLabel("Obstacle color:")
-        self.color_container.addWidget(self.color_label)
-        self.default_color = QCheckBox("Default color")
-        self.default_color.setChecked(True)
-        self.color_btn = QPushButton("Choose color")
-        self.selected_color = QWidget()
-        self.selected_color.setStyleSheet("border: 1px solid black")
-        self.selected_color.setFixedWidth(25)
-        self.selected_color.setFixedHeight(25)
-
-        self.color_container.addWidget(self.default_color)
-        self.color_container.addWidget(self.color_btn)
-        self.color_container.addWidget(self.selected_color)
-
-        self.layout_obstacle_information_groupbox = QFormLayout()
-        self.obstacle_information_groupbox = QGroupBox()
-        self.obstacle_information_groupbox.setLayout(self.layout_obstacle_information_groupbox)
-        self.layout_obstacle_information_groupbox.insertRow(0, label_general)
-        self.layout_obstacle_information_groupbox.insertRow(1, "Static/Dynamic", self.obstacle_dyn_stat)
-        self.layout_obstacle_information_groupbox.insertRow(2, "Type", self.obstacle_type)
-
-        self.shape_groupbox = QGroupBox()
-        self.layout_shape_groupbox = QFormLayout()
-        self.shape_groupbox.setLayout(self.layout_shape_groupbox)
-        self.shape_label = QLabel("Shape attributes")
-        self.shape_label.setFont(QFont("Arial", 9, QFont.Bold))
-        self.layout_shape_groupbox.insertRow(0, self.shape_label)
-        self.layout_shape_groupbox.insertRow(1, "Shape", self.obstacle_shape)
-
-        self.layout_obstacle_information_groupbox.insertRow(3, self.shape_groupbox)
 
         self.init_rectangle_fields()
         self.init_position()
@@ -374,6 +257,36 @@ class ObstacleToolboxUI(Toolbox):
         elif self.obstacle_shape.currentText() == "Circle":
             self.layout_obstacle_information_groupbox.insertRow(5, "Position", self.position_text_field_layout)
 
+    def init_dynamic_obstacle_fields(self):
+        self.initial_state_group_box = QGroupBox()
+        self.layout_initial_state_group_box = QFormLayout()
+        self.initial_state_group_box.setLayout(self.layout_initial_state_group_box)
+        self.initial_state_label = QLabel("Initial state of the dynamic obstacle")
+        self.initial_state_position = QLineEdit(self)
+        self.initial_state_orientation = QLineEdit(self)
+        self.initial_state_time = QLineEdit(self)
+        self.initial_state_velocity = QLineEdit(self)
+        self.initial_state_yaw_rate = QLineEdit(self)
+        self.initial_state_slip_angle = QLineEdit(self)
+        self.initial_state_position.setToolTip("Enter initial position of obstacle")
+        self.initial_state_label.setFont(QFont("Arial", 9, QFont.Bold))
+        self.layout_initial_state_group_box.insertRow(0, self.initial_state_label)
+        self.layout_initial_state_group_box.insertRow(1, "Position", self.initial_state_position)
+        self.layout_initial_state_group_box.insertRow(2, "Orientation", self.initial_state_orientation)
+        self.layout_initial_state_group_box.insertRow(3, "Time", self.initial_state_time)
+        self.layout_initial_state_group_box.insertRow(4, "Velocity", self.initial_state_velocity)
+        self.layout_initial_state_group_box.insertRow(5, "Yaw Rate", self.initial_state_yaw_rate)
+        self.layout_initial_state_group_box.insertRow(6, "Slip Angle", self.initial_state_slip_angle)
+
+        self.layout_obstacle_information_groupbox.insertRow(5, self.initial_state_group_box)
+
+    def remove_dynamic_obstacle_fields(self):
+        try:
+            self.layout_obstacle_information_groupbox.removeRow(self.initial_state_group_box)
+        except Exception as e:
+            print(e)
+            pass
+
     def remove_position(self):
         """
         removes the position fields
@@ -383,14 +296,18 @@ class ObstacleToolboxUI(Toolbox):
         except Exception:
             pass
 
-    def toggle_dynamic_static(self):
+    def toggle_dynamic_static(self, selected_type):
         """
         adds/removes fields unique for the dynamic obstacle
         """
-        if self.obstacle_dyn_stat.currentText() == "Dynamic":
+        if self.dynamic_obstacle_selection.isChecked():
             self.remove_position()
-        elif self.obstacle_dyn_stat.currentText() == "Static":
+            self.init_dynamic_obstacle_fields()
+            self.adjust_obstacle_type_dropdown("Dynamic")
+        elif self.static_obstacle_selection.isChecked():
             self.init_position()
+            self.remove_dynamic_obstacle_fields()
+            self.adjust_obstacle_type_dropdown("Static")
 
     def toggle_sections(self):
         """
@@ -443,12 +360,12 @@ class ObstacleToolboxUI(Toolbox):
 
     def adjust_obstacle_type_dropdown(self, selected_type):
         self.obstacle_type.clear()
-        if selected_type == "dynamic":
+        if selected_type == "Dynamic":
             for e in ObstacleType:
                 if e.value in ["car", "bus", "truck", "bicycle", "pedestrian", "priorityVehicle", "train", "motorcycle",
-                               "taxi"]:
+                               "taxi", "unknown"]:
                     self.obstacle_type.addItem(e.value)
-        elif selected_type == "static":
+        elif selected_type == "Static":
             for e in ObstacleType:
                 if e.value in ["unknown", "parkedVehicle", "constructionZone", "roadBoundary", "building", "pillar",
                                "median_strip"]:
