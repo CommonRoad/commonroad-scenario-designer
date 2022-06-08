@@ -91,8 +91,8 @@ class ObstacleToolbox(QDockWidget):
         self.obstacle_toolbox_ui.obstacle_shape.currentTextChanged.connect(
             lambda: self.obstacle_toolbox_ui.toggle_sections())
 
-        self.obstacle_toolbox_ui.obstacle_dyn_stat.currentTextChanged.connect(
-            lambda: self.obstacle_toolbox_ui.toggle_dynamic_static())
+        #self.obstacle_toolbox_ui.obstacle_dyn_stat.currentTextChanged.connect(
+        #    lambda: self.obstacle_toolbox_ui.toggle_dynamic_static())
 
         self.obstacle_toolbox_ui.color_btn.clicked.connect(
             lambda: self.obstacle_toolbox_ui.color_picker())
@@ -102,7 +102,7 @@ class ObstacleToolbox(QDockWidget):
 
         self.obstacle_toolbox_ui.dynamic_obstacle_selection.toggled.connect(
                 #lambda: self.obstacle_toolbox_ui.adjust_obstacle_type_dropdown(selected_type="dynamic")
-                lambda: self.obstacle_toolbox_ui.toggle_dynamic_static(selected_type="Dynamic")
+                lambda: self.obstacle_toolbox_ui.toggle_dynamic_static()
         )
 
         #self.obstacle_toolbox_ui.static_obstacle_selection.toggled.connect(
@@ -196,7 +196,33 @@ class ObstacleToolbox(QDockWidget):
         :param obstacle_id: id of static obstacle to be created
         """
         # ToDo: read data from initial state fields...
-        if self.xyova:
+        print("I was clicked! :)")
+        state_dictionary = {'position': np.array([0.0, 0.0]),
+                            'orientation': 0.0,
+                            'time_step': 0,
+                            'velocity': 50.0,
+                            'yaw_rate': 0.0,
+                            'slip_angle': 0.0}
+        first_state = State()
+        first_state.position = np.array([0.0, 0.0])
+        first_state.orientation = 0.0
+        first_state.time_step = 1
+        first_state.velocity = 50.0
+        first_state.yaw_rate = 0.0
+        first_state.slip_angle = 0.0
+        state_list = [first_state]
+        dynamic_obstacle = DynamicObstacle(obstacle_id=obstacle_id,
+                                           obstacle_type=ObstacleType(self.obstacle_toolbox_ui.obstacle_type
+                                                                      .currentText()),
+                                           obstacle_shape=Rectangle(length=float(5.0), width=float(3.0),
+                                                                    orientation=float(0.0)),
+                                           initial_state=State(**state_dictionary), prediction=TrajectoryPrediction(
+                                            shape=Rectangle(float(5.0), width=float(3.0)),
+                                            trajectory=Trajectory(initial_time_step=1, state_list=state_list)))
+        self.current_scenario.add_objects(dynamic_obstacle)
+        self.callback(self.current_scenario)
+
+        """if self.xyova:
             initial_position = np.array([self.xyova[0][0], self.xyova[0][1]])
             state_dictionary = {'position': initial_position,
                                 'velocity': self.xyova[0][3],
@@ -300,6 +326,7 @@ class ObstacleToolbox(QDockWidget):
 
         self.current_scenario.add_objects(dynamic_obstacle)
         self.callback(self.current_scenario)
+    """
 
     def calc_state_list(self) -> List[State]:
         """
@@ -396,6 +423,8 @@ class ObstacleToolbox(QDockWidget):
         if self.obstacle_toolbox_ui.obstacle_id_line_edit.text() != "":
             obstacle_id = int(self.obstacle_toolbox_ui.obstacle_id_line_edit.text())
         else:
+            if self.obstacle_toolbox_ui.obstacle_id_line_edit.placeholderText() == "":
+                return
             obstacle_id = [int(word)
                            for word in self.obstacle_toolbox_ui.obstacle_id_line_edit.placeholderText().split()
                            if word.isdigit()][0]
@@ -403,12 +432,14 @@ class ObstacleToolbox(QDockWidget):
         #obstacle_id = int(self.obstacle_toolbox_ui.obstacle_id_line_edit.text())
         self.amount_obstacles = self.current_scenario.generate_object_id()
 
-        if self.obstacle_toolbox_ui.obstacle_dyn_stat.currentText() == "Dynamic":
+        #if self.obstacle_toolbox_ui.obstacle_dyn_stat.currentText() == "Dynamic":
+        if self.obstacle_toolbox_ui.dynamic_obstacle_selection.isChecked():
             try:
                 self.dynamic_obstacle_details(obstacle_id)
             except Exception as e:
                 self.text_browser.append("Error when adding dynamic obstacle")
-        elif self.obstacle_toolbox_ui.obstacle_dyn_stat.currentText() == "Static":
+        elif self.obstacle_toolbox_ui.static_obstacle_selection.isChecked():
+        #elif self.obstacle_toolbox_ui.obstacle_dyn_stat.currentText() == "Static":
             try:
                 self.static_obstacle_details(obstacle_id)
             except Exception as e:
@@ -1135,7 +1166,8 @@ class ObstacleToolbox(QDockWidget):
                 self.obstacle_toolbox_ui.vertices_x[i].setText("")
                 self.obstacle_toolbox_ui.vertices_y[i].setText("")
         if (self.obstacle_toolbox_ui.obstacle_dyn_stat.currentText() == "Static" and
-                self.obstacle_toolbox_ui.obstacle_shape.currentText() != "Polygon"):
+                self.obstacle_toolbox_ui.obstacle_shape.currentText() != "Polygon" and
+                self.obstacle_toolbox_ui.static_obstacle_selection.isChecked()):
             self.obstacle_toolbox_ui.position_x_text_field.setText("")
             self.obstacle_toolbox_ui.position_y_text_field.setText("")
 

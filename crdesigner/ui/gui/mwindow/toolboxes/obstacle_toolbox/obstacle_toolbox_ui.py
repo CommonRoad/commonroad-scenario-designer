@@ -296,7 +296,7 @@ class ObstacleToolboxUI(Toolbox):
         except Exception:
             pass
 
-    def toggle_dynamic_static(self, selected_type):
+    def toggle_dynamic_static(self):
         """
         adds/removes fields unique for the dynamic obstacle
         """
