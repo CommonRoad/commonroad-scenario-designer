@@ -268,10 +268,11 @@ class DynamicCanvas(FigureCanvas):
         """
         if self.initial_parameter_config_done:
             center, x_dim, y_dim, _, _ = self.get_center_and_axes_values()
-            self.animated_viewer.current_scenario.lanelet_network, resized_lanelet_network = resize_lanelet_network(
+            resized_lanelet_network, resize_necessary = resize_lanelet_network(
                     original_lanelet_network=self.animated_viewer.original_lanelet_network, center_x=center[0],
                     center_y=center[1], dim_x=x_dim, dim_y=y_dim)
-            if resized_lanelet_network:
+            if resize_necessary:
+                self.animated_viewer.current_scenario.replace_lanelet_network(resized_lanelet_network)
                 self.animated_viewer.update_plot()
 
     def _select_lanelet(self, release: bool = False):
