@@ -68,6 +68,7 @@ def get_points(nodes: Dict[int, ElTree.Element], custom_bounds=None) \
         bounds = max(lats), min(lons), min(lats), max(lons)
     assert bounds[0] >= bounds[2]
     assert bounds[3] >= bounds[1]
+    # TODO reuse projection in geometry.py
     lon_center = (bounds[1] + bounds[3]) / 2
     lat_center = (bounds[0] + bounds[2]) / 2
     lons = np.array(lons)
@@ -565,8 +566,8 @@ def get_area_from_bounds(bounds: Bounds, origin: np.ndarray) -> Area:
     returns a rectangular area in cartesian coordinates from given
     bounds and origin in longitude and latitude
     '''
-    max_point = lon_lat_to_cartesian(np.array([bounds[3], bounds[0]]), origin)
-    min_point = lon_lat_to_cartesian(np.array([bounds[1], bounds[2]]), origin)
+    max_point = lon_lat_to_cartesian(np.array([bounds[0], bounds[3]]), np.array(origin)[::-1])
+    min_point = lon_lat_to_cartesian(np.array([bounds[2], bounds[1]]), np.array(origin)[::-1])
     # print("maxpoint", max_point, "minpoint", min_point)
     # print("bounds", bounds)
     # print("origin", origin)

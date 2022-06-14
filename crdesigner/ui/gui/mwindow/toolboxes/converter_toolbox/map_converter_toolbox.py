@@ -57,6 +57,7 @@ class MapConversionToolbox(QDockWidget):
         self.osm_file = None
         self.path_sumo_file = None
         self.open_drive_file = None
+        self.graph = None
 
     def adjust_ui(self):
         """Updates GUI properties like width, etc."""
