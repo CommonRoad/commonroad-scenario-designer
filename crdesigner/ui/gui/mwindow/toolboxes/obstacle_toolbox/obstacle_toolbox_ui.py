@@ -258,26 +258,67 @@ class ObstacleToolboxUI(Toolbox):
             self.layout_obstacle_information_groupbox.insertRow(5, "Position", self.position_text_field_layout)
 
     def init_dynamic_obstacle_fields(self):
+        """Initializes edit fields that are specific to dynamic obstacles. Those currently encompass
+        position, orientation, time, velocity, yaw rate and slip angle.
+        """
+        # initialize new group box, layout and header label
         self.initial_state_group_box = QGroupBox()
         self.layout_initial_state_group_box = QFormLayout()
         self.initial_state_group_box.setLayout(self.layout_initial_state_group_box)
         self.initial_state_label = QLabel("Initial state of the dynamic obstacle")
-        self.initial_state_position = QLineEdit(self)
-        self.initial_state_orientation = QLineEdit(self)
-        self.initial_state_time = QLineEdit(self)
-        self.initial_state_velocity = QLineEdit(self)
-        self.initial_state_yaw_rate = QLineEdit(self)
-        self.initial_state_slip_angle = QLineEdit(self)
-        self.initial_state_position.setToolTip("Enter initial position of obstacle")
         self.initial_state_label.setFont(QFont("Arial", 9, QFont.Bold))
+
+        # position edit fields, one for each x, y
+        self.initial_state_position_layout = QHBoxLayout(self)
+        self.initial_state_position_x = QLineEdit(self)
+        self.initial_state_position_x.setObjectName("x-position of dynamic obstacle")
+        self.initial_state_position_x.setToolTip("Enter initial x-position of obstacle")
+        self.initial_state_position_x.setPlaceholderText("X")
+
+        self.initial_state_position_y = QLineEdit(self)
+        self.initial_state_position_y.setObjectName("y-position of dynamic obstacle")
+        self.initial_state_position_y.setToolTip("Enter initial y-position of obstacle")
+        self.initial_state_position_y.setPlaceholderText("Y")
+
+        self.initial_state_position_layout.addWidget(self.initial_state_position_x)
+        self.initial_state_position_layout.addWidget(self.initial_state_position_y)
+
+        # orientation edit field
+        self.initial_state_orientation = QLineEdit(self)
+        self.initial_state_orientation.setPlaceholderText("0.0")
+        self.initial_state_orientation.setObjectName("orientation of dynamic obstacle")
+
+        # time edit field
+        self.initial_state_time = QLineEdit(self)
+        self.initial_state_time.setPlaceholderText("1")
+        self.initial_state_time.setToolTip("Time step must be an integer.")
+        self.initial_state_time.setObjectName("time of dynamic obstacle")
+
+        # velocity edit field
+        self.initial_state_velocity = QLineEdit(self)
+        self.initial_state_velocity.setPlaceholderText("50.0")
+        self.initial_state_velocity.setObjectName("velocity of dynamic obstacle")
+
+        # yaw rate edit field
+        self.initial_state_yaw_rate = QLineEdit(self)
+        self.initial_state_yaw_rate.setPlaceholderText("0.0")
+        self.initial_state_yaw_rate.setObjectName("yaw rate of dynamic obstacle")
+
+        # slip angle edit field
+        self.initial_state_slip_angle = QLineEdit(self)
+        self.initial_state_slip_angle.setPlaceholderText("0.0")
+        self.initial_state_slip_angle.setObjectName("slip angle of dynamic obstacle")
+
+        # add all edit fields to the group box
         self.layout_initial_state_group_box.insertRow(0, self.initial_state_label)
-        self.layout_initial_state_group_box.insertRow(1, "Position", self.initial_state_position)
+        self.layout_initial_state_group_box.insertRow(1, "Position", self.initial_state_position_layout)
         self.layout_initial_state_group_box.insertRow(2, "Orientation", self.initial_state_orientation)
         self.layout_initial_state_group_box.insertRow(3, "Time", self.initial_state_time)
         self.layout_initial_state_group_box.insertRow(4, "Velocity", self.initial_state_velocity)
         self.layout_initial_state_group_box.insertRow(5, "Yaw Rate", self.initial_state_yaw_rate)
         self.layout_initial_state_group_box.insertRow(6, "Slip Angle", self.initial_state_slip_angle)
 
+        # add the group box to the obstacle information groupbox
         self.layout_obstacle_information_groupbox.insertRow(5, self.initial_state_group_box)
 
     def remove_dynamic_obstacle_fields(self):

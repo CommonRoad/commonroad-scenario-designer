@@ -195,22 +195,71 @@ class ObstacleToolbox(QDockWidget):
         creates dynamic obstacles
         :param obstacle_id: id of static obstacle to be created
         """
-        # ToDo: read data from initial state fields...
-        print("I was clicked! :)")
+        # Check whether user did not enter values for any fields, if yes
+        # print a warning for this specific field
+        fields_with_no_value = "No value specified for the fields: "
+        any_field_with_no_value = False
+        for edit_field in self.obstacle_toolbox_ui.initial_state_group_box.findChildren(QLineEdit):
+            if edit_field.text() == "":
+                any_field_with_no_value = True
+                fields_with_no_value = fields_with_no_value + edit_field.objectName() + ", "
+        if any_field_with_no_value:
+            fields_with_no_value = fields_with_no_value + "using placeholder text for those."
+            self.text_browser.append(fields_with_no_value)
+
+        # initialize a state dictionary for the trajectory of the dynamic obstacle
         state_dictionary = {'position': np.array([0.0, 0.0]),
                             'orientation': 0.0,
-                            'time_step': 0,
+                            'time_step': 1,
                             'velocity': 50.0,
                             'yaw_rate': 0.0,
                             'slip_angle': 0.0}
+
+        # create an initial state for the dynamic obstacle
         first_state = State()
-        first_state.position = np.array([0.0, 0.0])
-        first_state.orientation = 0.0
-        first_state.time_step = 1
-        first_state.velocity = 50.0
-        first_state.yaw_rate = 0.0
-        first_state.slip_angle = 0.0
+
+        # get all values from the UI, take placeholder text if no text specified
+        # position
+        if self.obstacle_toolbox_ui.initial_state_position_x.text() != "":
+            first_state.position = np.array([float(self.obstacle_toolbox_ui.initial_state_position_x.text()),
+                                         (self.obstacle_toolbox_ui.initial_state_position_y.text())])
+        else:
+            first_state.position = np.array([0.0, 0.0])
+
+        # orientation
+        if self.obstacle_toolbox_ui.initial_state_orientation.text() != "":
+            first_state.orientation = float(self.obstacle_toolbox_ui.initial_state_orientation.text())
+        else:
+            first_state.orientation = float(self.obstacle_toolbox_ui.initial_state_orientation.placeholderText())
+
+        # time step
+        if self.obstacle_toolbox_ui.initial_state_time.text() != "":
+            first_state.time_step = int(self.obstacle_toolbox_ui.initial_state_time.text())
+        else:
+            first_state.time_step = int(self.obstacle_toolbox_ui.initial_state_time.placeholderText())
+
+        # velocity
+        if self.obstacle_toolbox_ui.initial_state_velocity.text() != "":
+            first_state.velocity = float(self.obstacle_toolbox_ui.initial_state_velocity.text())
+        else:
+            first_state.velocity = float(self.obstacle_toolbox_ui.initial_state_velocity.placeholderText())
+
+        # yaw rate
+        if self.obstacle_toolbox_ui.initial_state_yaw_rate.text() != "":
+            first_state.yaw_rate = float(self.obstacle_toolbox_ui.initial_state_yaw_rate.text())
+        else:
+            first_state.yaw_rate = float(self.obstacle_toolbox_ui.initial_state_yaw_rate.placeholderText())
+
+        # slip angle
+        if self.obstacle_toolbox_ui.initial_state_slip_angle.text() != "":
+            first_state.slip_angle = float(self.obstacle_toolbox_ui.initial_state_slip_angle.text())
+        else:
+            first_state.slip_angle = float(self.obstacle_toolbox_ui.initial_state_slip_angle.placeholderText())
+
+        # add first state to state list
         state_list = [first_state]
+
+        # create dynamic obstacle object
         dynamic_obstacle = DynamicObstacle(obstacle_id=obstacle_id,
                                            obstacle_type=ObstacleType(self.obstacle_toolbox_ui.obstacle_type
                                                                       .currentText()),
@@ -218,7 +267,9 @@ class ObstacleToolbox(QDockWidget):
                                                                     orientation=float(0.0)),
                                            initial_state=State(**state_dictionary), prediction=TrajectoryPrediction(
                                             shape=Rectangle(float(5.0), width=float(3.0)),
-                                            trajectory=Trajectory(initial_time_step=1, state_list=state_list)))
+                                            trajectory=Trajectory(initial_time_step=1,
+                                                                  state_list=state_list)))
+        # add to current scenario, callback
         self.current_scenario.add_objects(dynamic_obstacle)
         self.callback(self.current_scenario)
 
@@ -429,17 +480,14 @@ class ObstacleToolbox(QDockWidget):
                            for word in self.obstacle_toolbox_ui.obstacle_id_line_edit.placeholderText().split()
                            if word.isdigit()][0]
 
-        #obstacle_id = int(self.obstacle_toolbox_ui.obstacle_id_line_edit.text())
-        self.amount_obstacles = self.current_scenario.generate_object_id()
-
-        #if self.obstacle_toolbox_ui.obstacle_dyn_stat.currentText() == "Dynamic":
         if self.obstacle_toolbox_ui.dynamic_obstacle_selection.isChecked():
             try:
                 self.dynamic_obstacle_details(obstacle_id)
             except Exception as e:
                 self.text_browser.append("Error when adding dynamic obstacle")
+                print(e)
+
         elif self.obstacle_toolbox_ui.static_obstacle_selection.isChecked():
-        #elif self.obstacle_toolbox_ui.obstacle_dyn_stat.currentText() == "Static":
             try:
                 self.static_obstacle_details(obstacle_id)
             except Exception as e:
@@ -1229,8 +1277,10 @@ class ObstacleToolbox(QDockWidget):
         ax.callbacks.connect('ylim_changed', self.on_ylim_change)
 
     def check_if_id_exists(self, entered_id):
-        #<a href="https://www.flaticon.com/free-icons/right" title="right icons">Right icons created by kliwir art - Flaticon</a>
-        #<a href="https://www.flaticon.com/free-icons/delete" title="delete icons">Delete icons created by Pixel perfect - Flaticon</a>
+        # icons taken from:
+        # <a href="https://www.flaticon.com/free-icons/right" title="right icons">Right icons created by kliwir art - Flaticon</a>
+        # <a href="https://www.flaticon.com/free-icons/delete" title="delete icons">Delete icons created by Pixel perfect - Flaticon</a>
+        # Above html tags must be added online somewhere or we have to take others
         try:
             if entered_id == "":
                 self.obstacle_toolbox_ui.set_obstacle_id_pixmap(valid=True)
