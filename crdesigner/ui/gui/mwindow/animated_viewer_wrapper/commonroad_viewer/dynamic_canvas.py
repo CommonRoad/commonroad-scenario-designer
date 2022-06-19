@@ -1,5 +1,6 @@
 from typing import List, Union
 from PyQt5.QtWidgets import QSizePolicy
+from PyQt5.QtCore import Qt
 import numpy as np
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
@@ -60,8 +61,15 @@ class DynamicCanvas(FigureCanvas):
         self.mpl_connect('button_press_event', self.dynamic_canvas_click_callback)
         self.mpl_connect('button_release_event', self.dynamic_canvas_release_callback)
         self.mpl_connect('scroll_event', self.zoom)
+        # callbacks for interaction via keyboard, used for creation of trajectories of dynamic obstacles
+        self.mpl_connect('key_release_event', self._on_key_release)
+        self.setFocusPolicy(Qt.ClickFocus)
+        self.setFocus()
 
         self.clear_axes()
+
+    def test(self, key):
+        print("sos")
 
     def clear_axes(self, keep_limits=False, clear_artists=False):
         if clear_artists:
@@ -273,6 +281,12 @@ class DynamicCanvas(FigureCanvas):
                     center_y=center[1], dim_x=x_dim, dim_y=y_dim)
             if resized_lanelet_network:
                 self.animated_viewer.update_plot()
+
+    def _on_key_release(self, key_released_event):
+        if key_released_event.key == 'up':
+            print("up")
+        else:
+            print("none")
 
     def _select_lanelet(self, release: bool = False):
         """

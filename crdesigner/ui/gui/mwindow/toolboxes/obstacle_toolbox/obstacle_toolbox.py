@@ -207,6 +207,21 @@ class ObstacleToolbox(QDockWidget):
             fields_with_no_value = fields_with_no_value + "using placeholder text for those."
             self.text_browser.append(fields_with_no_value)
 
+        # get shape from UI
+        if self.obstacle_toolbox_ui.obstacle_shape.currentText() == "Rectangle":
+            shape = Rectangle(
+                    length=float(self.obstacle_toolbox_ui.obstacle_length.text()),
+                    width=float(self.obstacle_toolbox_ui.obstacle_width.text()),
+                    orientation=float(self.obstacle_toolbox_ui.obstacle_orientation.text())
+            )
+        elif self.obstacle_toolbox_ui.obstacle_shape.currentText() == "Circle":
+            shape = Circle(radius=float(self.obstacle_toolbox_ui.obstacle_radius.text()))
+        elif self.obstacle_toolbox_ui.obstacle_shape.currentText() == "Polygon":
+            shape = Polygon(vertices=self.polygon_array())
+        else:
+            self.text_browser.append("Incorrect shape specified. Cannot add or update dynamic obstacle.")
+            return
+
         # initialize a state dictionary for the trajectory of the dynamic obstacle
         state_dictionary = {'position': np.array([0.0, 0.0]),
                             'orientation': 0.0,
@@ -222,7 +237,7 @@ class ObstacleToolbox(QDockWidget):
         # position
         if self.obstacle_toolbox_ui.initial_state_position_x.text() != "":
             first_state.position = np.array([float(self.obstacle_toolbox_ui.initial_state_position_x.text()),
-                                         (self.obstacle_toolbox_ui.initial_state_position_y.text())])
+                                            (float(self.obstacle_toolbox_ui.initial_state_position_y.text()))])
         else:
             first_state.position = np.array([0.0, 0.0])
 
@@ -263,10 +278,9 @@ class ObstacleToolbox(QDockWidget):
         dynamic_obstacle = DynamicObstacle(obstacle_id=obstacle_id,
                                            obstacle_type=ObstacleType(self.obstacle_toolbox_ui.obstacle_type
                                                                       .currentText()),
-                                           obstacle_shape=Rectangle(length=float(5.0), width=float(3.0),
-                                                                    orientation=float(0.0)),
+                                           obstacle_shape=shape,
                                            initial_state=State(**state_dictionary), prediction=TrajectoryPrediction(
-                                            shape=Rectangle(float(5.0), width=float(3.0)),
+                                            shape=shape,
                                             trajectory=Trajectory(initial_time_step=1,
                                                                   state_list=state_list)))
         # add to current scenario, callback
