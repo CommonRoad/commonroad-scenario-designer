@@ -1,6 +1,7 @@
 """Wrapper for the middle visualization."""
 from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.commonroad_viewer import AnimatedViewer
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
+from matplotlib.backend_bases import KeyEvent
 
 from typing import Union
 from ..service_layer import config
@@ -30,7 +31,7 @@ class AnimatedViewerWrapper:
         self.viewer_dock.setLayout(layout)
         self.mwindow.setCentralWidget(self.viewer_dock)
 
-    def viewer_callback(self, selected_object: Union[Lanelet, Obstacle], output: str):
+    def viewer_callback(self, selected_object: Union[Lanelet, Obstacle, KeyEvent], output: str):
         """
         Callback when the user clicks a lanelet inside the scenario visualization.
         """
@@ -44,8 +45,25 @@ class AnimatedViewerWrapper:
         elif isinstance(selected_object, Obstacle):
             self.mwindow.obstacle_toolbox.obstacle_toolbox_ui.selected_obstacle.setCurrentText(
                     str(selected_object.obstacle_id))
+            self.mwindow.obstacle_toolbox.active_obstacle = selected_object
+        elif isinstance(selected_object, KeyEvent):
+            if selected_object.name == "key_press_event":
+                self._button_press_callback(selected_object.key)
+            elif selected_object.name == "key_release_event":
+                self._button_release_callback(selected_object.key)
         if output != "":
             self.mwindow.crdesigner_console_wrapper.text_browser.append(output)
+
+    def _button_press_callback(self, key: str):
+        if key == "shift":
+            self.mwindow.obstacle_toolbox.start_trajectory_recording = True
+
+    def _button_release_callback(self, key: str):
+        if self.mwindow.obstacle_toolbox.start_trajectory_recording == True:
+            if key == "shift":
+                self.mwindow.obstacle_toolbox.start_trajectory_recording = False
+            else:
+                self.mwindow.obstacle_toolbox.record_trajectory(key)
 
     def update_view(self, focus_on_network=None):
         """

@@ -48,10 +48,32 @@ class ObstacleToolbox(QDockWidget):
         self.pos = []
         self.temp_obstacle = None
 
+        # for recording of trajectories of dynamic obstacles via keyboard input
+        self._start_trajectory_recording = False
+        self._active_obstacle = None
+
         if SUMO_AVAILABLE:
             self.sumo_simulation = SUMOSimulation(tmp_folder=tmp_folder)
         else:
             self.sumo_simulation = None
+
+    @property
+    def start_trajectory_recording(self):
+        return self._start_trajectory_recording
+
+    @start_trajectory_recording.setter
+    def start_trajectory_recording(self, val):
+        assert isinstance(val, bool)
+        self._start_trajectory_recording = val
+
+    @property
+    def active_obstacle(self):
+        return self._active_obstacle
+
+    @active_obstacle.setter
+    def active_obstacle(self, obstacle):
+        assert isinstance(obstacle, DynamicObstacle)
+        self._active_obstacle = obstacle
 
     def init_canvas(self):
         """
@@ -271,6 +293,9 @@ class ObstacleToolbox(QDockWidget):
         else:
             first_state.slip_angle = float(self.obstacle_toolbox_ui.initial_state_slip_angle.placeholderText())
 
+        # acceleration
+        first_state.acceleration = 0.0
+
         # add first state to state list
         state_list = [first_state]
 
@@ -392,6 +417,37 @@ class ObstacleToolbox(QDockWidget):
         self.current_scenario.add_objects(dynamic_obstacle)
         self.callback(self.current_scenario)
     """
+
+    def record_trajectory(self, key):
+        #TODO: Do some kind of timer or scheduler like https://stackoverflow.com/questions/3393612/run-certain-code-every-n-seconds
+        #Using the timer approach (first solution in link) produces RecursionError: maximu recursion depth exceeded
+        #So maybe scheduler is better.
+        #Or some other way to continuously call this function with parameter key == "shift" so we can just
+        #duplicate previous state and only modify time_step.
+        obstacle = self.active_obstacle
+
+        if self.start_trajectory_recording == False:
+            return
+
+        if obstacle is None:
+            return
+
+        state = obstacle.prediction.trajectory.state_list[-1]
+        d_acc = 1.0
+
+        if key == "shift+up":
+            print("up")
+            state.acceleration = state.acceleration + d_acc
+        elif key == "shift+down":
+            print("down")
+        elif key == "shift+left":
+            print("left")
+        elif key == "shift+right":
+            print("right")
+        else:
+            print("none")
+
+        obstacle.prediction.trajectory.state_list.append(state)
 
     def calc_state_list(self) -> List[State]:
         """

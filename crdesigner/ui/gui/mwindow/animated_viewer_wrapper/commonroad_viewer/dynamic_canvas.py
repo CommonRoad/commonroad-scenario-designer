@@ -63,6 +63,7 @@ class DynamicCanvas(FigureCanvas):
         self.mpl_connect('scroll_event', self.zoom)
         # callbacks for interaction via keyboard, used for creation of trajectories of dynamic obstacles
         self.mpl_connect('key_release_event', self._on_key_release)
+        self.mpl_connect('key_press_event', self._on_key_press)
         self.setFocusPolicy(Qt.ClickFocus)
         self.setFocus()
 
@@ -283,10 +284,10 @@ class DynamicCanvas(FigureCanvas):
                 self.animated_viewer.update_plot()
 
     def _on_key_release(self, key_released_event):
-        if key_released_event.key == 'up':
-            print("up")
-        else:
-            print("none")
+        self.animated_viewer.callback_function(key_released_event, "")
+
+    def _on_key_press(self, key_pressed_event):
+        self.animated_viewer.callback_function(key_pressed_event, "")
 
     def _select_lanelet(self, release: bool = False):
         """
