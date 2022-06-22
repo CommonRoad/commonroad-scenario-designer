@@ -69,9 +69,6 @@ class DynamicCanvas(FigureCanvas):
 
         self.clear_axes()
 
-    def test(self, key):
-        print("sos")
-
     def clear_axes(self, keep_limits=False, clear_artists=False):
         if clear_artists:
             self.rnd.clear()
