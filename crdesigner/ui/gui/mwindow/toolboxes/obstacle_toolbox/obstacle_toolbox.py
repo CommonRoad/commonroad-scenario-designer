@@ -165,17 +165,43 @@ class ObstacleToolbox(QDockWidget):
         Creates static obstacles
         :param obstacle_id: id of static obstacle to be created
         """
+        # Bug:  The position line edits are duplicated when no scenario is loaded, and you switch between static and
+        #       dynamic type. (couldnt reproduce it for now)
+        # TODO: A negative radius can be specified when creating circle-shaped obstacle. Should be restricted to
+        #       positive angles
+        # get the shape
         shape = self._get_shape_from_gui()
+        # get the position
+        if self.obstacle_toolbox_ui.obstacle_type.currentText() == "Polygon":
+            pos_x = 0.0
+            pos_y = 0.0
+        else:
+            if self.obstacle_toolbox_ui.position_x_text_field.text() == "":
+                pos_x = 0.0
+            else:
+                pos_x = float(self.obstacle_toolbox_ui.position_x_text_field.text())
+
+            if self.obstacle_toolbox_ui.position_y_text_field.text() == "":
+                pos_y = 0.0
+            else:
+                pos_y = float(self.obstacle_toolbox_ui.position_y_text_field.text())
+
+        if hasattr(shape, 'orientation'):
+            orientation = shape.orientation
+        else:
+            orientation = 0.0
+
+
         static_obstacle = StaticObstacle(obstacle_id=obstacle_id,
                                          obstacle_type=ObstacleType(
                                                  self.obstacle_toolbox_ui.obstacle_type.currentText()),
                                          obstacle_shape=shape,
                                          initial_state=State(**{'position': np.array(
-                                                 [float(self.obstacle_toolbox_ui.position_x_text_field.text()),
-                                                  float(self.obstacle_toolbox_ui.position_y_text_field.text())]
-                                         )}))
+                                                 [pos_x, pos_y]),
+                                         'orientation': math.radians(orientation),
+                                         'time_step': 1}))
 
-        if self.obstacle_toolbox_ui.obstacle_shape.currentText() == "Rectangle":
+        """if self.obstacle_toolbox_ui.obstacle_shape.currentText() == "Rectangle":
             static_obstacle = StaticObstacle(obstacle_id=obstacle_id,
                                              obstacle_type=ObstacleType(
                                                      self.obstacle_toolbox_ui.obstacle_type.currentText()),
@@ -214,7 +240,7 @@ class ObstacleToolbox(QDockWidget):
                                     'orientation': 0,
                                     'time_step': 1
                                     })
-            )
+            )"""
 
         if self.obstacle_toolbox_ui.default_color.isChecked():
             self.canvas.set_static_obstacle_color(static_obstacle.obstacle_id)
