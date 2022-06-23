@@ -8,8 +8,7 @@ class MenuBarWrapper:
     """
     Wrapper class for the menu bar.
     """
-    def __init__(self, mwindow, file_new, open_commonroad_file, file_save, close_window, show_gui_settings,
-                 show_sumo_settings, show_osm_settings, open_cr_web, open_cr_forum):
+    def __init__(self, mwindow, file_new, open_commonroad_file, file_save, close_window, show_settings, open_cr_web, open_cr_forum):
         self.menu_bar = mwindow.menuBar()  # instant of menu
 
         self.menu_file = self.menu_bar.addMenu('File')  # add menu 'file'
@@ -37,21 +36,12 @@ class MenuBarWrapper:
                                          slot=lambda: close_window(mwindow), tip="Quit", shortcut=QKeySequence.Close)
         self.menu_file.addAction(self.exit_action)
 
-        self.menu_setting = self.menu_bar.addMenu('Setting')  # add menu 'Setting'
-        self.gui_settings_action = create_action(mwindow=mwindow, text="GUI Settings", icon="", checkable=False,
-                                                 slot=lambda: show_gui_settings(mwindow),
+         # add menu 'Setting'
+        self.settings_action = create_action(mwindow=mwindow, text="Settings", icon="", checkable=False,
+                                                 slot=lambda: show_settings(mwindow),
                                                  tip="Show settings for the CR Scenario Designer", shortcut=None)
-        self.menu_setting.addAction(self.gui_settings_action)
-        self.sumo_settings_action = None
-        if SUMO_AVAILABLE:
-            self.sumo_settings_action = create_action(mwindow=mwindow, text="SUMO Settings", icon="", checkable=False,
-                                                      slot=lambda: show_sumo_settings(mwindow),
-                                                      tip="Show settings for the SUMO interface", shortcut=None)
-        self.menu_setting.addAction(self.sumo_settings_action)
-        self.osm_settings_action = create_action(mwindow=mwindow, text="OSM Settings", icon="", checkable=False,
-                                                 slot=lambda: show_osm_settings(mwindow),
-                                                 tip="Show settings for osm converter", shortcut=None)
-        self.menu_setting.addAction(self.osm_settings_action)
+        self.menu_bar.addAction(self.settings_action)
+
 
         self.menu_help = self.menu_bar.addMenu('Help')  # add menu 'Help'
         self.open_web_action = create_action(mwindow=mwindow, text="Open CR Web", icon="", checkable=False,

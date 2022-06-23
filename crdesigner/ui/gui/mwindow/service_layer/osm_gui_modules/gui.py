@@ -24,7 +24,7 @@ from crdesigner.map_conversion.osm2cr import config
 import crdesigner.map_conversion.osm2cr.converter_modules.graph_operations.road_graph as rg
 from crdesigner.ui.gui.mwindow.service_layer.osm_gui_modules import actions
 from crdesigner.ui.gui.mwindow.service_layer.osm_gui_modules import plots_interactive as iplot, aerial_data
-from crdesigner.ui.gui.mwindow.service_layer.osm_gui_modules.settings import EditLaneWidth
+from crdesigner.ui.gui.mwindow.service_layer.osm_settings import EditLaneWidth
 from crdesigner.map_conversion.osm2cr.converter_modules.utility.idgenerator import get_id
 from crdesigner.map_conversion.osm2cr.converter_modules.utility import geometry
 

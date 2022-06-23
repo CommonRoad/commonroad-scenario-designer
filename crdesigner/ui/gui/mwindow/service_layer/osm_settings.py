@@ -13,7 +13,7 @@ from crdesigner.map_conversion.osm2cr import config
 from crdesigner.ui.gui.mwindow.service_layer.osm_gui_modules import config_default
 from crdesigner.ui.gui.mwindow.service_layer.osm_gui_modules.GUI_resources.lane_counts import Ui_Dialog as Lane_counts
 from crdesigner.ui.gui.mwindow.service_layer.osm_gui_modules.GUI_resources.lane_width import Ui_Dialog as Lane_width
-from crdesigner.ui.gui.mwindow.service_layer.osm_gui_modules.GUI_resources.settings_ui import Ui_MainWindow \
+from crdesigner.ui.gui.mwindow.service_layer.gui_resources.osm_settings_ui import Ui_OSMSettings \
     as Settings_window
 from crdesigner.ui.gui.mwindow.service_layer.osm_gui_modules.GUI_resources.street_types import Ui_Dialog as Street_types
 from crdesigner.ui.gui.mwindow.service_layer.osm_gui_modules.GUI_resources.sublayer_types import Ui_Dialog \
@@ -276,7 +276,7 @@ class EditSublayerWayTypes:
         ]
 
 
-class SettingsMenu:
+class OSMSettings:
     """
     Window to edit parameters in config.py
     """
@@ -287,20 +287,16 @@ class SettingsMenu:
         :param main_app: main app
         :param close_action: a functio to call when closeEvent is triggered
         """
-        self.app = main_app
+        self.parent = main_app
         self.close = close_action
-        self.window = Settings_window()
-        self.window.setupUi(self.app.main_window)
-        self.update_ui_values()
-        self.connect_events(self.window)
+        self.window = self.parent.window.osm_settings
+
 
         self.street_type_edit_dialog = None
         self.lane_count_edit_dialog = None
         self.lane_width_edit_dialog = None
         self.speed_limits_edit_dialog = None
         self.edit_sublayer_way_types_dialog = None
-
-        main_app.main_window.show()
 
     def connect_events(self, window: Settings_window) -> None:
         """
@@ -314,9 +310,6 @@ class SettingsMenu:
         window.btn_edit_lane_widths.clicked.connect(self.edit_lane_width)
         window.btn_edit_speed_limits.clicked.connect(self.edit_speed_limits)
         window.btn_edit_sublayer_way_types.clicked.connect(self.edit_sublayer_way_types)
-
-        window.btn_restore_defaults.clicked.connect(self.restore_default_button)
-        window.btn_apply.clicked.connect(self.apply_close)
         # window.btn_save.clicked.connect(self.save_button)
 
     def update_ui_values(self) -> None:
@@ -332,32 +325,19 @@ class SettingsMenu:
         window.le_affiliation.setText(config.AFFILIATION)
         window.le_source.setText(config.SOURCE)
         window.le_tags.setText(config.TAGS)
-        window.sb_time_step_size.setValue(config.TIMESTEPSIZE)
-
-        window.chb_aerial.setChecked(config.AERIAL_IMAGES)
-        window.le_img_save_path.setText(config.IMAGE_SAVE_PATH)
-        window.sb_zoom_level.setValue(config.ZOOM_LEVEL)
-        window.le_bing_maps_key.setText(config.BING_MAPS_KEY)
-
-        window.le_save_path.setText(config.SAVE_PATH)
-        window.le_coordinates.setText(
-            str(config.DOWNLOAD_COORDINATES[0])
-            + ", "
-            + str(config.DOWNLOAD_COORDINATES[1])
-        )
-        window.sb_donwload_radius.setValue(config.DOWNLOAD_EDGE_LENGTH)
+        window.sb_timestep_size.setValue(config.TIMESTEPSIZE)
 
         window.chk_load_tunnels.setChecked(config.LOAD_TUNNELS)
         window.chk_make_contiguous.setChecked(config.MAKE_CONTIGUOUS)
         window.chk_split_corners.setChecked(config.SPLIT_AT_CORNER)
-        window.chk_use_restrictions.setChecked(config.USE_RESTRICTIONS)
+        window.chk_osm_restrictions.setChecked(config.USE_RESTRICTIONS)
 
         window.sb_interpolation_distance.setValue(config.INTERPOLATION_DISTANCE)
         window.sb_compression_threshold.setValue(config.COMPRESSION_THRESHOLD)
         window.chk_utm_coordinates.setChecked(config.EXPORT_IN_UTM)
         window.chk_filter_points.setChecked(config.FILTER)
 
-        window.sb_eart_radius.setValue(config.EARTH_RADIUS)
+        window.sb_earth_radius.setValue(config.EARTH_RADIUS)
         window.chk_delete_short_edges.setChecked(config.DELETE_SHORT_EDGES)
         window.sb_internal_interpolation_distance.setValue(
             config.INTERPOLATION_DISTANCE_INTERNAL
@@ -389,30 +369,19 @@ class SettingsMenu:
         config.AFFILIATION = window.le_affiliation.text()
         config.SOURCE = window.le_source.text()
         config.TAGS = window.le_tags.text()
-        config.TIMESTEPSIZE = window.sb_time_step_size.value()
-
-        config.AERIAL_IMAGES = window.chb_aerial.isChecked()
-        config.IMAGE_SAVE_PATH = window.le_img_save_path.text()
-        config.ZOOM_LEVEL = window.sb_zoom_level.value()
-        config.BING_MAPS_KEY = window.le_bing_maps_key.text()
-
-        config.SAVE_PATH = window.le_save_path.text()
-        config.DOWNLOAD_COORDINATES = coordinates_from_text(
-            window.le_coordinates.text()
-        )[1]
-        config.DOWNLOAD_EDGE_LENGTH = window.sb_donwload_radius.value()
+        config.TIMESTEPSIZE = window.sb_timestep_size.value()
 
         config.LOAD_TUNNELS = window.chk_load_tunnels.isChecked()
         config.MAKE_CONTIGUOUS = window.chk_make_contiguous.isChecked()
         config.SPLIT_AT_CORNER = window.chk_split_corners.isChecked()
-        config.USE_RESTRICTIONS = window.chk_use_restrictions.isChecked()
+        config.USE_RESTRICTIONS = window.chk_osm_restrictions.isChecked()
 
         config.INTERPOLATION_DISTANCE = window.sb_interpolation_distance.value()
         config.COMPRESSION_THRESHOLD = window.sb_compression_threshold.value()
         config.EXPORT_IN_UTM = window.chk_utm_coordinates.isChecked()
         config.FILTER = window.chk_filter_points.isChecked()
 
-        config.EARTH_RADIUS = window.sb_eart_radius.value()
+        config.EARTH_RADIUS = window.sb_earth_radius.value()
         config.DELETE_SHORT_EDGES = window.chk_delete_short_edges.isChecked()
         config.INTERPOLATION_DISTANCE_INTERNAL = (
             window.sb_internal_interpolation_distance.value()
@@ -494,7 +463,7 @@ class SettingsMenu:
         """
         if self.has_valid_entries():
             self.save_to_config()
-            self.close()
+            #self.close()
         else:
             print("invalid settings")
 

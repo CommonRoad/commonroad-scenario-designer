@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import QMessageBox, QMainWindow
 from commonroad.common.util import Interval
 from commonroad.scenario.obstacle import ObstacleType
 
-from crdesigner.ui.gui.mwindow.service_layer.gui_resources.sumo_settings_ui import Ui_MainWindow
+from crdesigner.ui.gui.mwindow.service_layer.gui_resources.sumo_settings_ui import Ui_SUMOSettings
 from crdesigner.ui.gui.mwindow.service_layer.util import Observable
 from crdesigner.map_conversion.sumo_map.config import SumoConfig
 
@@ -13,8 +13,7 @@ from crdesigner.map_conversion.sumo_map.config import SumoConfig
 class SUMOSettings:
     def __init__(self, parent, config: Observable = None):
         self.parent = parent
-        self.settings_window = QMainWindow()
-        self.window = Ui_MainWindow()
+        self.window = self.parent.window.sumo_settings
         self.config = config
 
         def on_config_change(config):
@@ -25,11 +24,6 @@ class SUMOSettings:
 
         self._config = SumoConfig.from_scenario_name(
             'new_scenario') if not config else config.value
-
-        self.window.setupUi(self.settings_window)
-        self.connect_events()
-        self.update_ui_values()
-        self.settings_window.show()
 
     def connect_events(self):
         """ connect buttons to callables """
@@ -58,7 +52,7 @@ class SUMOSettings:
         self.window.sb_lateral_resolution.setValue(
             self._config.lateral_resolution)
         self.window.sb_ego_start_time.setValue(self._config.ego_start_time)
-        self.window.sb_num_ego_vehicles.setValue(
+        self.window.sb_n_ego_vehicles.setValue(
             self._config.n_ego_vehicles)  # rename
         self.window.sb_overwrite_speed_limit.setValue(
             self._config.overwrite_speed_limit)
@@ -121,7 +115,7 @@ class SUMOSettings:
         self._config.random_seed = window.sb_random_seed.value()
         self._config.lateral_resolution = window.sb_lateral_resolution.value()
         self._config.ego_start_time = window.sb_ego_start_time.value()
-        self._config.n_ego_vehicles = window.sb_num_ego_vehicles.value()
+        self._config.n_ego_vehicles = window.sb_n_ego_vehicles.value()
         self._config.overwrite_speed_limit = window.sb_overwrite_speed_limit.value(
         )
         self._config.lanelet_check_time_window = (
@@ -190,7 +184,6 @@ class SUMOSettings:
         """
         if self.has_valid_entries():
             self.save_to_config()
-            self.settings_window.close()
         else:
             print("invalid settings")
 

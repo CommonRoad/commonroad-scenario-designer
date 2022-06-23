@@ -63,6 +63,9 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.status = self.statusbar
         self.status.showMessage("Welcome to CR Scenario Designer")
 
+        #color scheme
+        #self.setStyleSheet('background-color:rgb(50,50,50); color:rgb(250,250,250);font-size: 13pt')
+
         center(mwindow=self)
         if path:
             self.open_path(path)
