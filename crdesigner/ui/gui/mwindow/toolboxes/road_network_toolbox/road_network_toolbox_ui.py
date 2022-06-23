@@ -344,6 +344,7 @@ class RoadNetworkToolboxUI(Toolbox):
 
         widget_title = "Lanelet Operations"
 
+        #widget_lanelet_operations.setStyleSheet('background-color:rgb(50,50,50)')
         return widget_title, widget_lanelet_operations
 
     def create_traffic_sign_widget(self):
