@@ -1,7 +1,7 @@
 """ window with settings for the Scenario Designer """
 from PyQt5.QtWidgets import QMainWindow
 
-from crdesigner.ui.gui.mwindow.service_layer.gui_resources.gui_settings_ui import Ui_MainWindow
+from crdesigner.ui.gui.mwindow.service_layer.gui_resources.gui_settings_ui import Ui_GUISettings
 from crdesigner.ui.gui.mwindow.service_layer import config
 from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.commonroad_viewer.service_layer.draw_params_updater import \
     set_draw_params
@@ -9,21 +9,15 @@ from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.commonroad_viewer.dynamic
 
 
 class GUISettings:
-    
+
     def __init__(self, parent):
-        self.cr_designer = parent
-        self.settings_window = QMainWindow()
-        self.window = Ui_MainWindow()
-        self.window.setupUi(self.settings_window)
-        self.connect_events()
-        self.update_ui_values()
-        self.settings_window.show()
-        self.canvas = DynamicCanvas()
+        self.parent = parent
+        self.window = self.parent.window.gui_settings
 
     def connect_events(self):
         """ connect buttons to callables """
         # self.window.btn_restore_defaults.clicked.connect(self.restore_default_button)
-        self.window.botton_close.clicked.connect(self.apply_close)
+        #self.window.botton_close.clicked.connect(self.apply_close)
 
     def update_ui_values(self):
         """
@@ -77,10 +71,6 @@ class GUISettings:
         """
         if self.has_valid_entries():
             self.save_to_config()
-            self.settings_window.close()
-            self.cr_designer.crdesigner_console_wrapper.text_browser.append("settings saved")
-            self.canvas.update_obstacle_trajectory_params()
-
             set_draw_params(trajectory=self.window.chk_draw_trajectory.isChecked(),
                             intersection=self.window.chk_draw_intersection.isChecked(),
                             obstacle_label=self.window.chk_draw_label.isChecked(),

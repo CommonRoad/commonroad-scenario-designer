@@ -42,6 +42,8 @@ class DynamicCanvas(FigureCanvas):
         self.animated_viewer = animated_viewer
         self.ax = None
         self.drawer = Figure(figsize=(width, height), dpi=dpi)
+        self.drawer.set_facecolor('None')
+        self.drawer.set_edgecolor('None')
         self.rnd = MPRenderer(ax=self.ax)
 
         self._handles = {}
@@ -53,6 +55,7 @@ class DynamicCanvas(FigureCanvas):
         self.latest_mouse_pos = None  # used to store the last mouse position where a lanelet was clicked
 
         super().__init__(self.drawer)
+
         self.setParent(parent)
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
@@ -210,6 +213,7 @@ class DynamicCanvas(FigureCanvas):
         if not plot_limits:
             self.ax.set(xlim=xlim)
             self.ax.set(ylim=ylim)
+
 
     def update_obstacles(self,
                          scenario: Scenario,

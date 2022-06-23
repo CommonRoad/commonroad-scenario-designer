@@ -219,6 +219,7 @@ class AnimatedViewer:
         self.dynamic.clear_axes(clear_artists=clear_artists)
         ax = self.dynamic.get_axes()
 
+
         network_limits = [
             float("Inf"), -float("Inf"),
             float("Inf"), -float("Inf")
@@ -233,6 +234,9 @@ class AnimatedViewer:
                 'time_begin': self.time_step.value - 1,
             }
 
+        draw_params['facecolor'] = '#00ffa6'
+        draw_params['edgecolor'] = '#00ffa6'
+        draw_params['opacity'] = 0.0
         self.dynamic.draw_scenario(self.current_scenario, self.current_pps, draw_params=draw_params)
 
         for lanelet in self.current_scenario.lanelet_network.lanelets:
