@@ -64,12 +64,12 @@ class TestLanelet2ToCommonRoadConversion(unittest.TestCase):
             # set same date so this won't change the comparison
             date = time.strftime("%Y-%m-%d", time.localtime())
             tree_import.set("date", date)
-            writer.root_node.set("date", date)
+            writer._file_writer.root_node.set("date", date)
 
             generate_unique_id(0)  # reset ID counter for next test case
 
             # compare both element trees
-            return elements_equal(tree_import, writer.root_node)
+            return elements_equal(tree_import, writer._file_writer.root_node)
 
     def test_simple_map(self):
         """Simple test case file which includes successors and predecessors and adjacencies."""
