@@ -177,7 +177,7 @@ class Network:
             # Remove lanelets that are not part of the network (as they are of a different type)
             lanelet_network._old_lanelet_ids[intersection_id_counter] = intersection_id_counter
             lanelet_network.create_intersection(intersection_map, intersection_id_counter)
-            intersection_id_counter += 1
+            intersection_id_counter += 1 + len(intersection_map)
 
         # Assign traffic signals, lights and stop lines to lanelet network
         lanelet_network.add_traffic_lights_to_network(self._traffic_lights)

@@ -6229,7 +6229,7 @@
     <direction>straight</direction>
     <active>true</active>
   </trafficLight>
-  <intersection id="57">
+  <intersection id="67">
     <incoming id="57">
       <incomingLanelet ref="3"/>
       <successorsRight ref="5"/>
