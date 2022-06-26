@@ -7,9 +7,11 @@ image: $CI_REGISTRY/cps/commonroad-scenario-designer/ci:v0.6.9_20.04
 
 .install-and-run: &install-and-run
   - git config --global url."https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.lrz.de".insteadOf "ssh://git@gitlab.lrz.de"
-  - pip install -r ./requirements.txt
   - pip install -r ./tests/test_requirements.txt
   - pip install -e .
+  - git clone --branch develop git@gitlab.lrz.de:cps/commonroad-io.git "$HOME"/commonroad-io
+  - pip uninstall -y commonroad-io
+  - pip install -e "$HOME"/commonroad-io
   - coverage run --source ./crdesigner -m pytest tests/
   - coverage report -m || true
 
