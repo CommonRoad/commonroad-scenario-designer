@@ -1019,7 +1019,7 @@ class RoadNetworkToolbox(QDockWidget):
 
         if any(oks):
             # update lanelet_network and boradcast change
-            self.current_scenario.lanelet_network = converter.lanelet_network
+            self.current_scenario.replace_lanelet_network(converter.lanelet_network)
             self.callback(self.current_scenario)
 
     def add_incoming_to_table(self, new_incoming: bool = True, incoming_ids: List[str] = None):

@@ -363,7 +363,7 @@ class IntermediateFormat:
         for intersection in self.intersections:
             net.add_intersection(intersection)
 
-        scenario.lanelet_network = net
+        scenario.replace_lanelet_network(net)
         return scenario
 
     @staticmethod

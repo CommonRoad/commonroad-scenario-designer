@@ -20,7 +20,7 @@ def file_new(mwindow):
     """
     scenario = Scenario(0.1, affiliation="Technical University of Munich", source="CommonRoad Scenario Designer")
     net = LaneletNetwork()
-    scenario.lanelet_network = net
+    scenario.replace_lanelet_network(net)
     mwindow.animated_viewer_wrapper.cr_viewer.current_scenario = scenario
     mwindow.animated_viewer_wrapper.cr_viewer.current_pps = None
     _open_scenario(mwindow=mwindow, new_scenario=scenario)

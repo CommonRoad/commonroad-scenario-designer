@@ -53,6 +53,6 @@ def merge(to_merge: List[int], scenario: Scenario) -> Tuple[Scenario, int]:
                 update_incoming()
                 incoming._successors_straight = set(update(incoming.successors_straight))
 
-    scenario.lanelet_network = lanelet_network
+    scenario.replace_lanelet_network(lanelet_network)
     scenario.scenario_id = "DEU_test"
     return scenario, merged_lanelet.lanelet_id
