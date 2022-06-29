@@ -25,7 +25,7 @@ class TestLanelet2ToCommonRoadConversion(unittest.TestCase):
     """Tests the conversion from an osm file to a CommonRoad xml file."""
 
     @staticmethod
-    def load_and_convert_opendrive(xodr_file_name: str) -> Scenario:
+    def load_and_convert(osm_file_name: str) -> Scenario:
         cwd_path = os.path.dirname(os.path.abspath(__file__))
         out_path = cwd_path + "/.pytest_cache"
         if not os.path.isdir(out_path):
@@ -37,7 +37,7 @@ class TestLanelet2ToCommonRoadConversion(unittest.TestCase):
                         os.remove(os.path.join(dir_path, file))
 
         with open(os.path.dirname(os.path.realpath(__file__))
-                  + f"/lanelet_lanelet2_test_files/{xodr_file_name}.osm", "r", ) as fh:
+                  + f"/lanelet_lanelet2_test_files/{osm_file_name}.osm", "r", ) as fh:
             osm = Lanelet2Parser(etree.parse(fh).getroot()).parse()
 
         osm2l = Lanelet2CRConverter(proj_string="+proj=utm +zone=32 +ellps=WGS84")
@@ -54,7 +54,7 @@ class TestLanelet2ToCommonRoadConversion(unittest.TestCase):
                   + f"/lanelet_lanelet2_test_files/{xml_output_name}.xml", "r", ) as fh:
             parser = etree.XMLParser(remove_blank_text=True)
             tree_import = etree.parse(fh, parser=parser).getroot()
-            writer = CommonRoadFileWriter(scenario=self.load_and_convert_opendrive(file_name),
+            writer = CommonRoadFileWriter(scenario=self.load_and_convert(file_name),
                                           planning_problem_set=PlanningProblemSet(), author="", affiliation="",
                                           source="CommonRoad Scenario Designer", tags={Tag.URBAN, Tag.HIGHWAY}, )
             writer.write_to_file(

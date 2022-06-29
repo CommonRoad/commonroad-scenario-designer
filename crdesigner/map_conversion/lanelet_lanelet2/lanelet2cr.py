@@ -20,7 +20,7 @@ from commonroad.scenario.lanelet import StopLine, LineMarking, RoadUser, Lanelet
 from commonroad.scenario.traffic_sign import TrafficSignIDGermany, TrafficSignElement
 from shapely.geometry import LineString
 
-from commonroad.scenario.scenario import Scenario, ScenarioID, TrafficSign
+from commonroad.scenario.scenario import Scenario, ScenarioID, TrafficSign, Location
 
 from crdesigner.map_conversion.common.utils import generate_unique_id
 from crdesigner.map_conversion.opendrive.opendrive_conversion.conversion_lanelet import ConversionLanelet
@@ -96,6 +96,7 @@ class Lanelet2CRConverter:
         self.first_right_pts, self.last_right_pts = None, None
         self.osm = None
         self.lanelet_network = None
+        self.origin_utm = None
 
     def __call__(
             self,
@@ -126,10 +127,13 @@ class Lanelet2CRConverter:
         self.first_left_pts, self.last_left_pts = defaultdict(list), defaultdict(list)
         self.first_right_pts, self.last_right_pts = defaultdict(list), defaultdict(list)
 
+        origin = next(iter(self.osm.nodes.values()))  # use a random node as origin
+        self.origin_utm = self.proj(origin.lon, origin.lat)
+
         # TODO create default scenario ID or implement workaround in commonroad-io
         scenario_id = ScenarioID(country_id="ZAM", map_name="OpenDrive", map_id=123)
 
-        scenario = Scenario(dt=0.1, scenario_id=scenario_id)
+        scenario = Scenario(dt=0.1, scenario_id=scenario_id, location=Location(gps_latitude=origin.lat, gps_longitude=origin.lon))
         self.lanelet_network = ConversionLaneletNetwork()
 
         speed_limits = {}
@@ -246,6 +250,8 @@ class Lanelet2CRConverter:
 
             # extract position
             x, y = self.proj(float(traffic_sign_node.lon), float(traffic_sign_node.lat))
+            x -= self.origin_utm[0]
+            y -= self.origin_utm[1]
 
             ref_t_id = convert_to_new_lanelet_id(traffic_sign_way.id_, new_lanelet_ids)
             traffic_sign = TrafficSign(ref_t_id,
@@ -817,6 +823,8 @@ class Lanelet2CRConverter:
         for i, node_id in enumerate(way.nodes):
             nd = self.osm.find_node_by_id(node_id)
             x, y = self.proj(float(nd.lon), float(nd.lat))
+            x -= self.origin_utm[0]
+            y -= self.origin_utm[1]
             vertices[i] = [x, y]
 
         return vertices
