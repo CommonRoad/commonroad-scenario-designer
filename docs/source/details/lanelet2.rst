@@ -29,20 +29,25 @@ Command Line Interface
 Want to quickly convert an Lanelet/Lanelet2 file to a CommonRoad map?
 
 Use the command
-``crdesigner osm -i input-file.osm -o output-file.xml``.
+``crdesigner map-convert-lanelet -i input-file.osm -o output-file.xml``.
 
 .. note::
    You have to activate the Python environment in which the CommonRoad Scenario Designer is
    installed before using the command line.
 
-For example, ``crdesigner osm -i test.osm -o new_converted_file_name.xml``
+   If your scenario is based in another UTM zone then the default zone (UTM 32 North) you
+   should specify the projection string using ``--proj``.
+   E.g: ``crdesigner map-convert-lanelet -i test.osm -o new_converted_file_name.xml
+   --proj "+proj=utm +zone=32 +datum=WGS84 +ellps=WGS84"``.
+
+For example, ``crdesigner map-convert-lanelet -i test.osm -o new_converted_file_name.xml``
 produces a file called *new_converted_file_name.xml*
 
 .. note::
-   If no output file name is specified, the converted file will be called input-file.xml,
-   e.g., ``crdesigner opendrive -i test.osm`` produces a file called *test.xml*.
+   If no output file name is specified, the converted file will be called <input-file>.xml,
+   e.g., ``crdesigner map-convert-lanelet -i test.osm`` produces a file called *test.xml*.
 
-You can also use the GUI to convert an OpenDRIVE file.
+You can also use the GUI to convert an lanelet file.
 The GUI can be started from command line with ``crdesigner`` or ``crdesigner gui``.
 
 Python APIs
@@ -139,20 +144,25 @@ Command Line Interface
 Want to quickly convert an CommonRoad map to a OSM lanelet map?
 
 Use the command
-``crdesigner osm -i input-file.xodr -o output-file.xml -c``.
+``crdesigner map-convert-lanelet -i input-file.xml -o output-file.osm -c``.
 
 .. note::
    You have to activate the Python environment in which the CommonRoad Scenario Designer is
    installed before using the command line.
 
-For example, ``crdesigner osm -i test.xml -o new_converted_file_name.osm -c``
+   If your scenario is based in another UTM zone then the default zone (UTM 32 North) you
+   should specify the projection string using ``--proj``.
+   E.g: ``crdesigner map-convert-lanelet -i test.xml -o new_converted_file_name.osm -c
+   --proj "+proj=utm +zone=32 +datum=WGS84 +ellps=WGS84"`` .
+
+For example, ``crdesigner map-convert-lanelet -i test.xml -o new_converted_file_name.osm -c``
 produces a file called *new_converted_file_name.osm*
 
 .. note::
-   If no output file name is specified, the converted file will be called input-file.xml,
-   e.g., ``crdesigner osm -i test.osm -c`` produces a file called *test.osm*.
+   If no output file name is specified, the converted file will be called <input-file>.xml,
+   e.g., ``crdesigner map-convert-lanelet -i test.xml -c`` produces a file called *test.osm*.
 
-You can also use the GUI to convert an OpenDRIVE file.
+You can also use the GUI to convert an lanelet file.
 The GUI can be started from command line with ``crdesigner`` or ``crdesigner gui``.
 
 
