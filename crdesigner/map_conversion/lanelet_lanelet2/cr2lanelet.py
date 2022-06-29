@@ -32,6 +32,7 @@ class CR2LaneletConverter:
         self.first_nodes, self.last_nodes = None, None
         self.left_ways, self.right_ways = None, None
         self.lanelet_network = None
+        self.origin_utm = None
 
     @property
     def id_count(self) -> int:
@@ -57,6 +58,11 @@ class CR2LaneletConverter:
         self.last_nodes = dict()  # saves last left and right node
         self.left_ways = dict()
         self.right_ways = dict()
+        if abs(scenario.location.gps_longitude) <= 180 and abs(scenario.location.gps_latitude) <= 90:
+            self.origin_utm = self.proj(scenario.location.gps_longitude, scenario.location.gps_latitude)
+        else:
+            self.proj = Proj(DEFAULT_PROJ_STRING)
+            self.origin_utm = self.proj(11.66821, 48.26301)  # set origin point (TUM MI building) in default UTM 32 zone
         for lanelet in scenario.lanelet_network.lanelets:
             self._convert_lanelet(lanelet)
 
@@ -182,7 +188,7 @@ class CR2LaneletConverter:
         """
         nodes = []
         for vertice in vertices:
-            lon, lat = self.proj(vertice[0], vertice[1], inverse=True)
+            lon, lat = self.proj(self.origin_utm[0] + vertice[0], self.origin_utm[1] + vertice[1], inverse=True)
             node = Node(self.id_count, lat, lon)
             nodes.append(node.id_)
             self.osm.add_node(node)
