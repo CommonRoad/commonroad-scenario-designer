@@ -3,6 +3,7 @@ import matplotlib as mpl
 import numpy as np
 import math
 import logging
+import traceback
 
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
@@ -23,8 +24,9 @@ if SUMO_AVAILABLE:
 
 from crdesigner.ui.gui.mwindow.toolboxes.obstacle_toolbox.obstacle_toolbox_ui import ObstacleToolboxUI
 
-from commonroad.prediction.prediction import Prediction, Occupancy, SetBasedPrediction, TrajectoryPrediction
-
+from commonroad.prediction.prediction import TrajectoryPrediction
+from commonroad_dc.feasibility.vehicle_dynamics import VehicleDynamics
+from commonroad.common.solution import VehicleType
 
 class ObstacleToolbox(QDockWidget):
     def __init__(self, current_scenario: Scenario, callback, tmp_folder, text_browser):
@@ -67,7 +69,7 @@ class ObstacleToolbox(QDockWidget):
         assert isinstance(val, bool)
         if val:
             self.sched = BackgroundScheduler()
-            self.sched.add_job(self.record_trajectory, 'interval', ["shift"], seconds=0.33)
+            self.sched.add_job(self.record_trajectory, 'interval', ["shift"], seconds=1.0)
             self.sched.start()
         elif self.sched.running and not val:
             self.sched.shutdown()
@@ -169,10 +171,14 @@ class ObstacleToolbox(QDockWidget):
         #       dynamic type. (couldnt reproduce it for now)
         # TODO: A negative radius can be specified when creating circle-shaped obstacle. Should be restricted to
         #       positive angles
+        # TODO: Do we even need a position for the initial state? Currently it is a bit inconsistent (polygon shape)
+
         # get the shape
         shape = self._get_shape_from_gui()
-        # get the position
-        if self.obstacle_toolbox_ui.obstacle_type.currentText() == "Polygon":
+        # the position here is used for the initial state. For circles and rectangles, the position
+        # of the initial state is equal to the position of the shape. Polygon-shapes do not have a position, so
+        # we set the position of the initial state to [0, 0].
+        if self.obstacle_toolbox_ui.obstacle_shape.currentText() == "Polygon":
             pos_x = 0.0
             pos_y = 0.0
         else:
@@ -185,12 +191,11 @@ class ObstacleToolbox(QDockWidget):
                 pos_y = 0.0
             else:
                 pos_y = float(self.obstacle_toolbox_ui.position_y_text_field.text())
-
+        # Circles do not have an orientation, but rectangles do. So, for circles we set the orientation to 0.0.
         if hasattr(shape, 'orientation'):
             orientation = shape.orientation
         else:
             orientation = 0.0
-
 
         static_obstacle = StaticObstacle(obstacle_id=obstacle_id,
                                          obstacle_type=ObstacleType(
@@ -198,49 +203,8 @@ class ObstacleToolbox(QDockWidget):
                                          obstacle_shape=shape,
                                          initial_state=State(**{'position': np.array(
                                                  [pos_x, pos_y]),
-                                         'orientation': math.radians(orientation),
+                                         'orientation': 0.0,
                                          'time_step': 1}))
-
-        """if self.obstacle_toolbox_ui.obstacle_shape.currentText() == "Rectangle":
-            static_obstacle = StaticObstacle(obstacle_id=obstacle_id,
-                                             obstacle_type=ObstacleType(
-                                                     self.obstacle_toolbox_ui.obstacle_type.currentText()),
-                                             obstacle_shape=Rectangle(
-                                                     length=float(self.obstacle_toolbox_ui.obstacle_length.text()),
-                                                     width=float(self.obstacle_toolbox_ui.obstacle_width.text())),
-                                             initial_state=State(**{'position': np.array(
-                                                     [float(self.obstacle_toolbox_ui.position_x_text_field.text()),
-                                                      float(self.obstacle_toolbox_ui.position_y_text_field.text())]),
-                                                 'orientation': math.radians(float(
-                                                         self.obstacle_toolbox_ui.obstacle_orientation.text())),
-                                                 'time_step': 1}))
-        elif self.obstacle_toolbox_ui.obstacle_shape.currentText() == "Circle":
-            static_obstacle = StaticObstacle(obstacle_id=obstacle_id,
-                                             obstacle_type=ObstacleType(
-                                                     self.obstacle_toolbox_ui.obstacle_type.currentText()),
-                                             obstacle_shape=Circle(
-                                                     radius=float(self.obstacle_toolbox_ui.obstacle_radius.text())),
-                                             initial_state=State(**{'position': np.array(
-                                                     [float(self.obstacle_toolbox_ui.obstacle_x_Position.text()),
-                                                      float(self.obstacle_toolbox_ui.obstacle_y_Position.text())]),
-                                                 'orientation': 0, 'time_step': 1}))
-        elif self.obstacle_toolbox_ui.obstacle_shape.currentText() == "Polygon":
-            static_obstacle = StaticObstacle(
-                obstacle_id=obstacle_id,
-
-                obstacle_type=ObstacleType(self.obstacle_toolbox_ui.obstacle_type.currentText()),
-                obstacle_shape=Polygon(
-                    vertices=self.polygon_array()
-                ),
-
-                initial_state=State(**{'position': np.array([
-                                        0,
-                                        0
-                                    ]),
-                                    'orientation': 0,
-                                    'time_step': 1
-                                    })
-            )"""
 
         if self.obstacle_toolbox_ui.default_color.isChecked():
             self.canvas.set_static_obstacle_color(static_obstacle.obstacle_id)
@@ -288,59 +252,50 @@ class ObstacleToolbox(QDockWidget):
             self.text_browser.append("Incorrect shape specified. Cannot add or update dynamic obstacle.")
             return
 
-        # initialize a state dictionary for the trajectory of the dynamic obstacle
-        state_dictionary = {'position': np.array([0.0, 0.0]),
-                            'orientation': 0.0,
-                            'time_step': 1,
-                            'velocity': 50.0,
-                            'yaw_rate': 0.0,
-                            'slip_angle': 0.0}
-
-        # create an initial state for the dynamic obstacle
-        first_state = State()
+        state_dictionary = {}
 
         # get all values from the UI, take placeholder text if no text specified
         # position
         if self.obstacle_toolbox_ui.initial_state_position_x.text() != "":
-            first_state.position = np.array([float(self.obstacle_toolbox_ui.initial_state_position_x.text()),
+            state_dictionary['position'] = np.array([float(self.obstacle_toolbox_ui.initial_state_position_x.text()),
                                             (float(self.obstacle_toolbox_ui.initial_state_position_y.text()))])
         else:
-            first_state.position = np.array([0.0, 0.0])
+            state_dictionary['position'] = np.array([0.0, 0.0])
 
         # orientation
         if self.obstacle_toolbox_ui.initial_state_orientation.text() != "":
-            first_state.orientation = float(self.obstacle_toolbox_ui.initial_state_orientation.text())
+            state_dictionary['orientation'] = float(self.obstacle_toolbox_ui.initial_state_orientation.text())
         else:
-            first_state.orientation = float(self.obstacle_toolbox_ui.initial_state_orientation.placeholderText())
+            state_dictionary['orientation'] = float(self.obstacle_toolbox_ui.initial_state_orientation.placeholderText())
 
         # time step
         if self.obstacle_toolbox_ui.initial_state_time.text() != "":
-            first_state.time_step = int(self.obstacle_toolbox_ui.initial_state_time.text())
+            state_dictionary['time_step'] = int(self.obstacle_toolbox_ui.initial_state_time.text())
         else:
-            first_state.time_step = int(self.obstacle_toolbox_ui.initial_state_time.placeholderText())
+            state_dictionary['time_step'] = int(self.obstacle_toolbox_ui.initial_state_time.placeholderText())
 
         # velocity
         if self.obstacle_toolbox_ui.initial_state_velocity.text() != "":
-            first_state.velocity = float(self.obstacle_toolbox_ui.initial_state_velocity.text())
+            state_dictionary['velocity'] = float(self.obstacle_toolbox_ui.initial_state_velocity.text())
         else:
-            first_state.velocity = float(self.obstacle_toolbox_ui.initial_state_velocity.placeholderText())
-
+            state_dictionary['velocity'] = float(self.obstacle_toolbox_ui.initial_state_velocity.placeholderText())
         # yaw rate
         if self.obstacle_toolbox_ui.initial_state_yaw_rate.text() != "":
-            first_state.yaw_rate = float(self.obstacle_toolbox_ui.initial_state_yaw_rate.text())
+            state_dictionary['yaw_rate'] = float(self.obstacle_toolbox_ui.initial_state_yaw_rate.text())
         else:
-            first_state.yaw_rate = float(self.obstacle_toolbox_ui.initial_state_yaw_rate.placeholderText())
+            state_dictionary['yaw_rate'] = float(self.obstacle_toolbox_ui.initial_state_yaw_rate.placeholderText())
 
         # slip angle
         if self.obstacle_toolbox_ui.initial_state_slip_angle.text() != "":
-            first_state.slip_angle = float(self.obstacle_toolbox_ui.initial_state_slip_angle.text())
+            state_dictionary['slip_angle'] = float(self.obstacle_toolbox_ui.initial_state_slip_angle.text())
         else:
-            first_state.slip_angle = float(self.obstacle_toolbox_ui.initial_state_slip_angle.placeholderText())
+            state_dictionary['slip_angle'] = float(self.obstacle_toolbox_ui.initial_state_slip_angle.placeholderText())
 
         # acceleration
-        first_state.acceleration = 0.0
+        state_dictionary['acceleration'] = 0.0
 
         # add first state to state list
+        first_state = State(**state_dictionary)
         state_list = [first_state]
 
         # create dynamic obstacle object
@@ -362,14 +317,14 @@ class ObstacleToolbox(QDockWidget):
             shape = Rectangle(
                     length=float(self.obstacle_toolbox_ui.obstacle_length.text()),
                     width=float(self.obstacle_toolbox_ui.obstacle_width.text()),
-                    orientation=float(self.obstacle_toolbox_ui.obstacle_orientation.text())
+                    orientation=math.radians(float(self.obstacle_toolbox_ui.obstacle_orientation.text()))
             )
         elif self.obstacle_toolbox_ui.obstacle_shape.currentText() == "Circle":
             shape = Circle(radius=float(self.obstacle_toolbox_ui.obstacle_radius.text()))
         elif self.obstacle_toolbox_ui.obstacle_shape.currentText() == "Polygon":
             shape = Polygon(vertices=self.polygon_array())
         else:
-            self.text_browser.append("Incorrect shape specified. Cannot add or update dynamic obstacle.")
+            self.text_browser.append("Incorrect shape specified.")
             raise ValueError
         return shape
 
@@ -389,10 +344,18 @@ class ObstacleToolbox(QDockWidget):
 
         state = obstacle.prediction.trajectory.state_list[-1]
         d_acc = 1.0
+        vehicle = VehicleDynamics.KS(VehicleType.BMW_320i)
 
         if key == "shift+up":
             print("up")
-            state.acceleration = state.acceleration + d_acc
+            input_state = State(
+                    steering_angle_speed = 0,
+                    acceleration = d_acc,
+                    time_step = 0
+            )
+            next_state = vehicle.simulate_next_state(state, input_state, 0.1)
+            #state.acceleration = state.acceleration + d_acc
+            obstacle.prediction.trajectory.state_list.append(next_state)
         elif key == "shift+down":
             print("down")
         elif key == "shift+left":
@@ -404,7 +367,20 @@ class ObstacleToolbox(QDockWidget):
         else:
             print("none")
 
-        obstacle.prediction.trajectory.state_list.append(state)
+        self.callback(self.current_scenario)
+        #mwindow.animated_viewer_wrapper.update_view(focus_on_network=True)
+
+        # draw trajectory
+        """
+        draw_params = {'time_begin': -1, 'dynamic_obstacle': {'trajectory': {'show_label': True, 'draw_trajectory': True}},
+         'lanelet_network': {'traffic_sign': {'draw_traffic_signs': True, 'show_traffic_signs': 'all'},
+                             'intersection': {'draw_intersections': False, 'draw_incoming_lanelets': True,
+                                              'incoming_lanelets_color': '#3ecbcf', 'draw_crossings': True,
+                                              'crossings_color': '#b62a55', 'draw_successors': True,
+                                              'successors_left_color': '#ff00ff', 'successors_straight_color': 'blue',
+                                              'successors_right_color': '#ccff00', 'show_label': True}}}
+        obstacle.prediction.trajectory.draw(self, draw_params, traceback.print_stack())
+        """
 
     def calc_state_list(self) -> List[State]:
         """
@@ -1138,9 +1114,9 @@ class ObstacleToolbox(QDockWidget):
                 self.obstacle_toolbox_ui.obstacle_width.setText(str(obstacle.obstacle_shape.width))
                 self.obstacle_toolbox_ui.obstacle_length.setText(str(obstacle.obstacle_shape.length))
                 if isinstance(obstacle, StaticObstacle):
-                    self.obstacle_toolbox_ui.obstacle_x_Position.setText(
+                    self.obstacle_toolbox_ui.position_x_text_field.setText(
                         str(obstacle.initial_state.__getattribute__("position")[0]))
-                    self.obstacle_toolbox_ui.obstacle_y_Position.setText(
+                    self.obstacle_toolbox_ui.position_y_text_field.setText(
                         str(obstacle.initial_state.__getattribute__("position")[1]))
                     self.obstacle_toolbox_ui.obstacle_orientation.setText(
                         str(math.degrees(obstacle.initial_state.__getattribute__("orientation"))))
