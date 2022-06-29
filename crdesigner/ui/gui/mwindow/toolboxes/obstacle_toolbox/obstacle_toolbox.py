@@ -192,8 +192,8 @@ class ObstacleToolbox(QDockWidget):
             else:
                 pos_y = float(self.obstacle_toolbox_ui.position_y_text_field.text())
         # Circles do not have an orientation, but rectangles do. So, for circles we set the orientation to 0.0.
-        if hasattr(shape, 'orientation'):
-            orientation = shape.orientation
+        if self.obstacle_toolbox_ui.obstacle_shape.currentText() == "Rectangle":
+            orientation = math.radians(float(self.obstacle_toolbox_ui.obstacle_orientation.text()))
         else:
             orientation = 0.0
 
@@ -203,7 +203,7 @@ class ObstacleToolbox(QDockWidget):
                                          obstacle_shape=shape,
                                          initial_state=State(**{'position': np.array(
                                                  [pos_x, pos_y]),
-                                         'orientation': 0.0,
+                                         'orientation': orientation,
                                          'time_step': 1}))
 
         if self.obstacle_toolbox_ui.default_color.isChecked():
@@ -317,7 +317,6 @@ class ObstacleToolbox(QDockWidget):
             shape = Rectangle(
                     length=float(self.obstacle_toolbox_ui.obstacle_length.text()),
                     width=float(self.obstacle_toolbox_ui.obstacle_width.text()),
-                    orientation=math.radians(float(self.obstacle_toolbox_ui.obstacle_orientation.text()))
             )
         elif self.obstacle_toolbox_ui.obstacle_shape.currentText() == "Circle":
             shape = Circle(radius=float(self.obstacle_toolbox_ui.obstacle_radius.text()))
