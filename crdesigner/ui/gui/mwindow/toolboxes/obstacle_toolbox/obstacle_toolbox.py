@@ -167,12 +167,6 @@ class ObstacleToolbox(QDockWidget):
         Creates static obstacles
         :param obstacle_id: id of static obstacle to be created
         """
-        # Bug:  The position line edits are duplicated when no scenario is loaded, and you switch between static and
-        #       dynamic type. (couldnt reproduce it for now)
-        # TODO: A negative radius can be specified when creating circle-shaped obstacle. Should be restricted to
-        #       positive angles
-        # TODO: Do we even need a position for the initial state? Currently it is a bit inconsistent (polygon shape)
-
         # get the shape
         shape = self._get_shape_from_gui()
         # the position here is used for the initial state. For circles and rectangles, the position
