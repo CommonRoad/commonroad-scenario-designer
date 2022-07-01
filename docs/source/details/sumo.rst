@@ -156,7 +156,7 @@ Implementation Details
 **************
 In SUMO, nodes represent ends of edges or other fixed position objects (eg. traffic signs) and are connected by edges.
 Each edge in turn can consist of multiple lanes.
-Realistic traffic constrains such as traffic lights and partially traffic signs can also be modelled.
+Realistic traffic constraints such as traffic lights and partially traffic signs can also be modelled.
 Additionally it provides the capability to simulate multiple types of traffic participants and interactions between them.
 Optionally trips for pedestrians and vehicles from one edge in the network to another can be automatically generated.
 SUMO also provides a set of tools for programmatically interacting with a network, namely NETEDIT.
@@ -201,22 +201,22 @@ and the results converted back to CommonRoad.
 Lanelet type conversion
 =======================
 
-In CommonRoad every lanelet has one or more LaneletTypes describing the
+In CommonRoad, every lanelet has one or more LaneletTypes describing the
 type of a Lanelet and giving an indication of
-usage. However in SUMO each lane can be assigned to one more ``vClass`` attributes,
+usage. However in SUMO each lane can be assigned to one or more ``vClass`` attributes,
 which define
 what type of vehicle is allowed to use the respective lane. To convert
 from one representation to the other we therefore propose a mapping
 :math:`t: \mathbb{P}(\texttt{LaneletType}) \rightarrow \mathbb{P}(\texttt{vClass})`
 mapping the set of all CommoRoad Lanelet types to the set of all
 vClasses. Every converted SUMO lane is then assigned a set of vClasses
-according to the LaneletTypes of the correspondin CommonRoad lanelet
+according to the LaneletTypes of the corresponding CommonRoad lanelet
 under the mapping :math:`t`.
 
 When converting intersections from CommonRoad to SUMO all overlapping
 lanelets are merged into a SUMO junction object. However, in this
 process we need to avoid adding junctions for lanelets of different
-types, to not create addional junctions during the conversion which are
+types, to not create additional junctions during the conversion which are
 not present in the source CommonRoad file. Therefore, we propose to only
 merge two lanelets Lanelet types :math:`L_1, L_2` iff.
 
@@ -224,7 +224,7 @@ merge two lanelets Lanelet types :math:`L_1, L_2` iff.
 
 This results in SUMO junctions being merged correctly as given in ,
 where the overlapping Lanelets of one type (*urban*) in are merged into
-one junction in . In two crossing paths of different types are given.
+one junction in. In two crossing paths of different types are given.
 The horizontal one being of different type to the vertical roads
 (*crosswalk* and *urban*) so no SUMO junction is generated between the
 two in :numref:`lanelet_type_conversion`.
@@ -236,8 +236,8 @@ Pedestrian paths through the network are randomly generated in a similar
 fashion as the already existing vehicle trips, by using the random trips
 functionality provided by SUMO. This built in functionality generates
 trips (start, to end edge) randomly based on distributions provided for
-each allowed ``vClass`` on a lane. Therefore, removing the need to
-explicitly specify which vehicle classes should be generated.
+each allowed ``vClass`` on a lane. Therefore, the need to explicitly 
+specify which vehicles classes should be generated is removed.
 Interaction between the different types then occurs during the
 simulation based on each agent having to wait at intersections and
 following traffic rules.
@@ -257,10 +257,10 @@ Traffic lights in CommonRoad are specified by one or more lanelets
 referencing them. Their placement is per default at the end of the
 referencing lanelet.
 Optionally a position can be explicitly defined for more detailed
-placement at the side of the road. While cycles describing each phase of
-the traffic light are represented by the tuple
-:math:`(\text{color}, \text{duration})`. In SUMO, cycle information is
-represented identically to CommonRoad. However, SUMO represents time in
+placement at the side of the road. The cycle information describing 
+each phase of traffic lights are represented identically to CommonRoad 
+by the tuple :math:`(\text{color}, \text{duration})`.
+However, SUMO represents time in
 seconds :math:`(sec)` and CommonRoad in multiples of the timestep
 :math:`n \cdot \Delta t, n \in \mathbb{N}_0`, forcing conversion between
 the two systems. Traffic lights converted to SUMO are then simulated,
@@ -285,11 +285,12 @@ collision free cycles at intersections. This generation is done by:
    lights to SUMO described in the previous paragraph.
 
 Visually this process is shown in :numref:`traffic_light_conversion`.
-Where show the user selecting
-a lanelet (red) in *CR Scenario Designer*. Other colors in this figure
-are representing adjacency information. Next shows the generated traffic
-light system (a set of traffic lights, associated with each other by an
-intersection) in SUMO, with the cycle state of each traffic light in the
-respective color. Additionally the collision free generation of the
-cycles is shown by opposing lanes having the same color. displays the
-conversion result of the generated traffic lights.
+The first image shows how a user selected a lanelet, which is displayed
+in red. Other colors in this figure are representing adjaceny information.
+The second image shows the generated traffic light system (a set of traffic 
+lights associated with each other by an intersection) in SUMO. Cycle
+states of each traffic light is shown by their respective colors.
+The collision-free generation of the cycles is visualized by opposing lanes
+having the same color. The last image displays the conversion result of the 
+generated traffic lights.
+

@@ -23,6 +23,13 @@ __status__ = "Released"
 
 
 def convert_to_base_lanelet_network(lanelet_network: ConversionLaneletNetwork) -> LaneletNetwork:
+    """Converts a ConversionLaneletNetwork to a LaneletNetwork.
+
+    :param lanelet_network: ConversionLaneletNetwork that should be converted to a LaneletNetwork.
+    :type lanelet_network: :class:`ConversionLaneletNetwork`
+    :return: The converted LaneletNetwork.
+    :rtype: :class:`LaneletNetwork`
+    """
     network = LaneletNetwork()
     for inter in lanelet_network.intersections:
         network.add_intersection(inter)
@@ -43,9 +50,6 @@ def convert_to_base_lanelet_network(lanelet_network: ConversionLaneletNetwork) -
 class Network:
     """Represents a network of parametric lanes, with a LinkIndex
     which stores the neighbor relations between the parametric lanes.
-
-    Args:
-
     """
 
     def __init__(self):
@@ -63,10 +67,10 @@ class Network:
     # return self.__dict__ == other.__dict__
 
     def assign_country_id(self, value: str):
-        """
-        Assign country ID according to the ISO 3166-1 3 letter standard
-        Args:
-            value: Name of location as a string
+        """Assign country ID according to the ISO 3166-1 3 letter standard
+
+        :param value: Nae of location as a string.
+        :type value: str
         """
         value = value.upper()
         if value in iso3166.countries_by_name:
@@ -81,9 +85,8 @@ class Network:
     def load_opendrive(self, opendrive: OpenDrive):
         """Load all elements of an OpenDRIVE network to a parametric lane representation
 
-        Args:
-          opendrive:
-
+        :param opendrive: OpenDRIVE network whose elements should be loaded.
+        :type opendrive: :class:`OpenDrive`
         """
         # TODO: Extract location information from Geotranformation in opendrive
         # proj_string_transformed = Transformer.from_pipeline(opendrive.header.geo_reference)
@@ -131,11 +134,10 @@ class Network:
     ) -> LaneletNetwork:
         """Export network as lanelet network.
 
-        Args:
-          filter_types: types of ParametricLane objects to be filtered. (Default value = None)
-
-        Returns:
-          The converted LaneletNetwork object.
+        :param filter_types: Types of ParametricLane objects to be filtered. Default value is None.
+        :type filter_types: list
+        :return: The converted LaneletNetwork object.
+        :rtype: :class:`LaneletNetwork`
         """
 
         # Convert groups to lanelets
@@ -191,14 +193,14 @@ class Network:
     ):
         """Export a full CommonRoad scenario
 
-        Args:
-          dt:  (Default value = 0.1)
-          map_name:  name of the map in the scenario ID (Default value = "OpenDrive")
-          map_id: running index of the map in the scenario ID (Default value = 1)
-          filter_types:  (Default value = None)
-
-        Returns:
-
+        :param dt: Delta time step, default is 0.1
+        :type dt: float
+        :param map_name: Name of the map in the scenario ID, default value is "OpenDrive".
+        :type map_name: str
+        :param map_id: Running index of the map in the scenario ID, default value is 1.
+        :type map_id: int
+        :param filter_types: Types of ParametricLanes to be filtered. Default is None.
+        :type filter_types: list
         """
         if self._geo_ref is not None:
             longitude, latitude = get_geo_reference(self._geo_ref)
@@ -236,6 +238,10 @@ class Network:
     def get_country_id_from_opendrive(roads):
         """
         Get country id of a specific lanelet network
+        :param roads: Roads from which country id should be returned.
+        :type roads: list[:class:`Road`]
+        :return: The country id.
+        :rtype: str
         """
         for road in roads:
             for signal in road.signals:
@@ -258,11 +264,8 @@ class LinkIndex:
     def create_from_opendrive(self, opendrive):
         """Create a LinkIndex from an OpenDrive object.
 
-        Args:
-          opendrive: OpenDrive style object.
-
-        Returns:
-
+        :param opendrive: OpenDrive style object.
+        :type opendrive: :class:`OpenDrive`
         """
         self._add_junctions(opendrive)
 
@@ -347,10 +350,13 @@ class LinkIndex:
         Similar to add_link, adds successors only in an intersection_dict.
         This is a temporary dictionary to accumulate junction information for each open drive junction as a dictionary
         and then store it as a list in the intersection attribute of this class
-        Args:
-            parametric_lane_id: Lane_id as per concatenated format based on opendrive IDs
-            successor: Successor of the opendrive lane
-            reverse: If the direction is opposite
+
+        :param parametric_lane_id: Lane_id as per concatenated format based on opendrive IDs.
+        :type parametric_lane_id: str
+        :param successor: Successor of the opendrive lane.
+        :type successor: str
+        :param reverse: Whether the direction is opposite. Default is False.
+        :type reverse: False
         """
         if reverse:
             self.add_intersection_link(successor, parametric_lane_id)
@@ -363,15 +369,14 @@ class LinkIndex:
             self._intersection_dict[parametric_lane_id].append(successor)
 
     def add_link(self, parametric_lane_id, successor, reverse: bool = False):
-        """
+        """Adds links to a parametric lane.
 
-        Args:
-          parametric_lane_id:
-          successor:
-          reverse:  (Default value = False)
-
-        Returns:
-
+        :param parametric_lane_id: The ID of the lane to which to add link.
+        :type parametric_lane_id: str
+        :param successor: Successor of the lane.
+        :type successor: str
+        :param reverse: Whether direction is reversed.
+        :type reverse: bool
         """
 
         # if reverse, call function recursively with switched parameters
@@ -386,13 +391,10 @@ class LinkIndex:
             self._successors[parametric_lane_id].append(successor)
 
     def _add_junctions(self, opendrive):
-        """
+        """Adds junctions.
 
-        Args:
-          opendrive:
-
-        Returns:
-
+        :param opendrive: The opendrive object to which junctions should be added.
+        :type opendrive: :class:`OpenDrive`
         """
         # add junctions to link_index
         # if contact_point is start, and laneId from connecting_road is negative
@@ -460,11 +462,10 @@ class LinkIndex:
             self._intersection_dict = dict()
 
     def remove(self, parametric_lane_id):
-        """
+        """Removes a parametric lane from the opendrive network.
 
-        Args:
-          parametric_lane_id:
-
+        :param parametric_lane_id: ID of lane that should be removed.
+        :type parametric_lane_id: str
         """
         # Delete key
         if parametric_lane_id in self._successors:
@@ -476,15 +477,12 @@ class LinkIndex:
                 self._successors[successorsId].remove(parametric_lane_id)
 
     def get_successors(self, parametric_lane_id: str) -> list:
-        """
+        """Get successors of the specified parametric lane.
 
-        Args:
-          parametric_lane_id: Id of ParametricLane for which to search
-            successors.
-
-        Returns:
-          List of successors belonging the the ParametricLane.
-        Par
+        :param parametric_lane_id: ID of ParametricLane for which to search successors.
+        :type parametric_lane_id: str
+        :return: List of successors belonging to the ParametricLane
+        :rtype: list
         """
         if parametric_lane_id not in self._successors:
             return []
@@ -492,13 +490,12 @@ class LinkIndex:
         return self._successors[parametric_lane_id]
 
     def get_predecessors(self, parametric_lane_id: str) -> list:
-        """
+        """Get predecessors of the specified parametric lane.
 
-        Args:
-          parametric_lane_id: Id of ParametricLane for which to search predecessors.
-
-        Returns:
-          List of predecessors of a ParametricLane.
+        :param parametric_lane_id: ID of ParametricLane for which to search predecessors.
+        :type parametric_lane_id: str
+        :return: List of predecessors belonging to the ParametricLane
+        :rtype: list
         """
         predecessors = []
         for successor_plane_id, successors in self._successors.items():
@@ -515,8 +512,9 @@ class LinkIndex:
     def clean_intersections(self, parametric_lane_id):
         """
         Remove lanes that are not part of the lanelet network based on the filters.
-        Args:
-            parametric_lane_id: ID of the lane that needs to be removed.
+
+        :param parametric_lane_id: ID of the lane that needs to be removed.
+        :type parametric_lane_id: str
         """
         for intersection in self._intersections:
             if parametric_lane_id in intersection.keys():
@@ -527,9 +525,10 @@ class LinkIndex:
         """
         Lanelets are concatenated if possible, hence some lanelets ids that exist in intersections
         are no longer valid and also need to be replaced with the lanelet id they are concatenated with.
-        Args:
-            replacement_id_map: dict that maps lanelets to their new ids as per the concatenation results from
+
+        :param replacement_id_map: Dict that maps lanelets to their new IDs as per the concatenation results from
             lanelet_network.concatenate_possible_lanelets
+        :type replacement_id_map: dict
         """
         updated_intersection_maps = []
         for intersection_map in self.intersection_maps():
@@ -551,9 +550,9 @@ class LinkIndex:
         """
         Updates the lanelet ids in the intersection map from the concatenated opendrive based format to
         the CommonRoad format
-        Args:
-            old_id_to_new_id_map: dict that maps the old lanelet ids to new lanelet ids using the attribute
-             lanelet_network.old_lanelet_ids()
+
+        :param old_id_to_new_id_map: Dict that maps the old lanelet IDs to new lanelet IDs using the attribute
+            lanelet_network.old_lanelet_ids()
         """
 
         updated_intersection_maps = []

@@ -13,19 +13,14 @@ __status__ = "Released"
 
 
 class Border:
-    """A lane border defines a path along a whole lane section
-    - a lane always uses an inner and outer lane border
-    - the reference can be another lane border or a plan view
-
-    Attributes:
-
-
-    Args:
-
-    """
+    """ A lane border defines a path along a whole lane section. A lane always uses an inner and outer lane border.
+    The reference can be another lane border or a plan view."""
 
     def __init__(self, ref_offset: float = 0.0):
-
+        """
+        :param ref_offset: Offset in s-direction to the reference object after which the border begins.
+        :type ref_offset: float, default: 0.0
+        """
         self.ref_offset = float(ref_offset)
         self.width_coefficient_offsets = []
         self.width_coefficients = []
@@ -35,10 +30,12 @@ class Border:
     def _get_width_index(self, s_pos: float, is_last_pos: bool) -> int:
         """Get the index of the width which applies at position s_pos.
 
-        Args:
-          s_pos: Position on border in curve_parameter ds.
-        Returns:
-          Index for self.width_coefficient_offsets or self.width_coefficients.
+        :param s_pos: Position on border in curve_parameter ds
+        :type s_pos: float
+        :param is_last_pos: Whether s_pos is the last position
+        :type s_pos: bool
+        :return: Index of width that applies at position s_pos
+        :rtype: float
         """
         return next((
                 self.width_coefficient_offsets.index(n)
@@ -54,12 +51,12 @@ class Border:
     def get_next_width_coeffs(self, s_pos: float, is_last_pos: bool = False) -> list:
         """Get width coefficients which apply at position s_pos.
 
-        Args:
-          s_pos: Position on border in curve_parameter ds.
-
-        Returns:
-          An array with coefficients [a, b, c, d] for the polynomial w = a + b*ds + c*ds² + d*ds³
-
+        :param s_pos: Position on border in curve_parameter ds
+        :type s_pos: float
+        :param is_last_pos: Whether s_pos is the last position
+        :type is_last_pos: bool, default is False
+        :return: An array with coefficients [a, b, c, d] for the polynomial w = a + b*ds + c*ds² + d*ds³
+        :rtype: list
         """
         width_idx = self._get_width_index(s_pos, is_last_pos)
         return self.width_coefficients[width_idx]
@@ -73,13 +70,22 @@ class Border:
         the border by calculating position of reference border at s_pos
         and then adding the width in orthogonal direction to the reference position.
 
-        Args:
-          s_pos: Position s_pos (specified in curve parameter ds)
-            where to calculate the cartesian coordinates on the border.
-          width_offset: Offset to add to calculated width at position s_pos.
-
-        Returns:
-          (x,y) tuple of cartesian coordinates and the direction angle in radians.
+        :param s_pos: Position s_pos specified in curve parameter ds where to calculate the cartesian coordinates on
+                        the border
+        :type s_pos: float
+        :param width_offset: Offset to add to calculated width at position s_pos
+        :type width_offset: float
+        :param is_last_pos: Whether s_pos is the last position
+        :type is_last_pos: bool
+        :param reverse: Whether to calculate positions in a reverse order, default is False
+        :type reverse: bool
+        :param compute_curvature: Whether to computer curvature, default is True
+        :type compute_curvature: bool
+        :return:
+                - coord: (x,y) tuple of cartesian coordinates and the direction angle in radians
+                - tang: Tangential at s_pos, a float
+                - curv: Curvature at s_pos, a float, optional
+                - max_geometry_length: Maximum length of the geometry, a float
         """
         # Last reference has to be a reference geometry (PlanView)
         # Offset of all inner lanes (Border)

@@ -25,15 +25,14 @@ class OpenDriveConverter:
         This border is used as a reference for other
         borders which rely on the PlanView.
 
-        Args:
-          plan_view: PlanView object from OpenDrive which specifies the geometry
+        :param plan_view: PlanView object from OpenDrive which specifies the geometry
             of the reference path.
-          lane_offsets: Object which contains information about width offset of reference
+        :type plan_view: :class:`PlanView`
+        :param lane_offsets: Object which contains information about width offset of reference
             path the plain_view path.
-
-        Returns:
-           The reference border on which all other borders in this lane section are based upon.
-
+         :type lane_offsets: List
+         :return: The reference border on which all other borders in this lane section are based upon.
+         :rtype: :class:`Border`
         """
 
         reference_border = Border()
@@ -70,6 +69,13 @@ class OpenDriveConverter:
         lane_section, reference_border
     ) -> List[ParametricLaneGroup]:
         """Convert a whole lane section into a list of ParametricLane objects.
+
+        :param lane_section: LaneSection from which to create the list of ParametricLane Objects
+        :type lane_section: :class:`LaneSection`
+        :param reference_border: The reference border of the lane section, created from create_reference_border()
+         :type reference_border: :class:`Border`
+         :return: The converted ParametricLane objects.
+         :rtype: List
         """
 
         plane_groups = []
@@ -130,14 +136,16 @@ class OpenDriveConverter:
     def create_parametric_lane(lane_borders, width, lane, side) -> ParametricLane:
         """Create a parametric lane for a certain width section.
 
-        Args:
-          lane_borders: Array with already created lane borders.
-          width: Width section with offset and coefficient information.
-          lane: Lane in which new parametric lane is created.
-          side: Which side of the lane section where the Parametric lane is created.
-
-        Returns:
-          A ParametricLane object with specified borders and a unique id.
+        :param lane_borders: Array with already created lane borders.
+        :type lane_borders: list[:class:`Border`]
+        :param width: Width section with offset and coefficient information.
+        :type width: :class:`LaneWidth`
+        :param lane: Lane in which new parametric lane is created.
+        :type lane: :class:`Lane`
+        :param side: Which side of the lane section where the parametric lane is created.
+        :type side: str
+        :return: A ParametricLane object with specified borders and a unique id.
+        :rtype: :class:`ParametricLane`
         """
 
         border_group = ParametricLaneBorderGroup(
@@ -167,17 +175,17 @@ class OpenDriveConverter:
         InnerBorder is already saved in lane_borders, as it is
         the outer border of the inner neighbour of the lane.
 
-        Args:
-          lane_borders: Previous calculated lane borders of more inner lanes.
-          lane: Lane for which outer border shall be created.
-            This is specified in parameter ds of curve length.
-          coeff_factor: factor of -1 or 1, dependent on which side of the reference
-            path the lane is (right side is -1).
-
-        Returns:
-          The created outer lane border.
-
+        :param lane_borders: Previous calculated lane borders of more inner lanes.
+        :type lane_borders: list[:class:`Border`]
+        :param lane: Lane for which outer border shall be created.
+        :type lane: :class:`Lane`
+        :param coeff_factor: Factor of -1 or 1, depending on which side of the reference path the lane is.
+            Right side is -1.
+        :type coeff_factor: float
+        :return: The created outer lane border.
+        :rtype: :class:`Border`
         """
+
         # Create outer lane border
         # Offset from reference border is already included in first inner border
         # (lane_border[0])
@@ -201,13 +209,12 @@ class OpenDriveConverter:
 
     @staticmethod
     def determine_neighbours(lane) -> Tuple[str, str, bool]:
-        """
+        """Determines neighbors of a lane.
 
-        Args:
-          lane:
-
-        Returns:
-
+        :param lane: Lane to find neighbors to.
+        :type lane: :class:`Lane`
+        :return: IDs of the inner and outer neighbor, and whether the inner neighbor has the same direction.
+        :rtype: Tuple[str, str, bool]
         """
         if abs(lane.id) > 1:
 

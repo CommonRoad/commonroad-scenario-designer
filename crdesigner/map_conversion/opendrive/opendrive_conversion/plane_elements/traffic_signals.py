@@ -3,6 +3,7 @@ import iso3166
 import numpy as np
 import warnings
 import enum
+from crdesigner.map_conversion.opendrive.opendrive_conversion import utils
 from typing import Union
 
 from crdesigner.map_conversion.opendrive.opendrive_parser.elements.road import Road
@@ -24,6 +25,18 @@ __status__ = "Released"
 def extract_traffic_element_id(signal_type: str, signal_subtype: str, traffic_sign_enum: enum) \
         -> Union[TrafficSignIDZamunda, TrafficSignIDGermany, TrafficSignIDUsa, TrafficSignIDChina,
                  TrafficSignIDSpain, TrafficSignIDRussia]:
+    """Extract the traffic element id from the signal type and subtype string.
+
+    :param signal_type: Signal type of the traffic element
+    :type signal_type: str
+    :param signal_subtype: Subtype of the traffic element
+    :type signal_subtype: str
+    :param traffic_sign_enum: Enumeration of country-specific traffic signs
+    :type traffic_sign_enum: enum
+    :return: The extracted traffic element id.
+    :rtype: Union[TrafficSignIDZamunda, TrafficSignIDGermany, TrafficSignIDUsa, TrafficSignIDChina,
+                 TrafficSignIDSpain, TrafficSignIDRussia]
+    """
     if signal_type in set(item.value for item in traffic_sign_enum):
         element_id = traffic_sign_enum(signal_type)
     elif signal_type + "-" + signal_subtype in set(item.value for item in traffic_sign_enum):
@@ -37,6 +50,13 @@ def extract_traffic_element_id(signal_type: str, signal_subtype: str, traffic_si
 
 
 def get_traffic_signals(road: Road):
+    """Extracts traffic_lights, traffic_signs, stop_lines from a road.
+
+    :param road: The road object from which to extract signals.
+    :type road: :class:`Road`
+    :return: lists of traffic_lights, traffic_signs, stop_lines
+    :rtype: tuple[list[TrafficLight], list[TrafficSign], list[StopLine]]
+    """
     traffic_signs = []
     traffic_lights = []
     stop_lines = []
@@ -61,7 +81,7 @@ def get_traffic_signals(road: Road):
                 else:
                     additional_values = [str(signal.value)]
 
-            signal_country = get_signal_country(signal.country)
+            signal_country = utils.get_signal_country(signal.country)
 
             if signal_country == 'DEU':
                 if signal.type == "1000003" or signal.type == "1000004":
@@ -163,32 +183,20 @@ def get_traffic_signals(road: Road):
     return traffic_lights, traffic_signs, stop_lines
 
 
-def get_signal_country(signal_country: str):
-    """
-    ISO iso3166 standard to find 3 letter country id
-    Args:
-        signal_country: string value of the country
-    """
-    signal_country = signal_country.upper()
-    if signal_country in iso3166.countries_by_name:
-        return iso3166.countries_by_name[signal_country].alpha3
-    elif signal_country in iso3166.countries_by_alpha2:
-        return iso3166.countries_by_alpha2[signal_country].alpha3
-    elif signal_country in iso3166.countries_by_alpha3:
-        return signal_country
-    else:
-        return "ZAM"
-
-
 def calculate_stop_line_position(lane_sections, signal, position, tangent):
-    """
-    Function to calculate the 2 points that define the stop line which
+    """Function to calculate the 2 points that define the stop line which
     is a straight line from one edge of the road to the other.
-    Args:
-        lane_sections: opendrive lane_sections list containing the lane_section parsed lane_section class
-        signal: signal object in this case the stop line
-        position: initial position as calculated in the get_traffic_signals function
-        tangent: tangent value as calculated in the get_traffic_signals function
+
+    :param lane_sections: Opendrive lane_sections list containing the lane_section parsed lane_section class
+    :type lane_sections: list
+    :param signal: Signal object, in this case the stop line.
+    :type signal: :class:`StopLine`
+    :param position: initial position as calculated in the get_traffic_signals function
+    :type position: np.ndarray
+    :param tangent: tangent value as calculated in the get_traffic_signals function
+    :type tangent: float
+    :return: Positions of the stop line
+    :rtype: tuple[np.ndarray, np.ndarray]
     """
     total_width = 0
     for lane_section in lane_sections:
@@ -200,7 +208,7 @@ def calculate_stop_line_position(lane_sections, signal, position, tangent):
                     coefficients = width.polynomial_coefficients
                     lane_width = \
                         coefficients[0] + coefficients[1] * signal.s + coefficients[2] * signal.s ** 2 \
-                        + coefficients[3] * signal.s ** 2
+                        + coefficients[3] * signal.s ** 3
 
                     total_width += lane_width
     position_1 = position
@@ -211,9 +219,8 @@ def calculate_stop_line_position(lane_sections, signal, position, tangent):
 
 
 def get_traffic_signal_references(road: Road):
-    """
-    Function to extract all the traffic sign references that are stored in the road object
-    in order to avoid duplication by redefiniing predefined signals/lights and stoplines.
+    """Function to extract all the traffic sign references that are stored in the road object in order to avoid
+    duplication by redefiniing predefined signals/lights and stoplines.
     """
     # TODO: This function was ultimately not used as signal references were not required to define all traffic
     #  lights signals and stoplines. However, it needs to be verified if signal references are required elsewhere.
