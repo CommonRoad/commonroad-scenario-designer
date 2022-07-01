@@ -117,26 +117,25 @@ The coordinates (GPS) in OSM are rough and the amount of points per road section
 To accomplish the conversion, we have to use heuristics and interpolation for guessing the reality behind the data.
 
 OSM also contains other elements like traffic signs. All this information is stored in so called tags or relations.
-With CR version 2020.2 new elements are added to the scenario format: traffic Signs and traffic lights.
+With CR version 2020.2 new elements are added to the scenario format: traffic signs and traffic lights.
 
 Important Files and Directories
 ===================
 
-- `/osm_operations`: All files regarding information extraction from the given .osm file.
-- `/graph_operations`: Files that are needed to create a road_graph object.
-- `/intermediate_operations`: Files used for creating the intermediate format.
-- `/cr_operations`: Files for exporting and creating the the final a commonroad scenario.
+- `/converter_modules/osm_operations`: All files regarding information extraction from the given .osm file.
+- `/converter_modules/graph_operations`: Files that are needed to create a road_graph object.
+- `/converter_modules/intermediate_operations`: Files used for creating the intermediate format.
+- `/converter_modules/cr_operations`: Files for exporting and creating the the final a commonroad scenario.
 - `config.py`: The config file contains all settings related to the conversion process.
-- `converter.py`: This file orchestrates the whole conversion. It calls the different stages described earlier during the conversion process.
-- `/utility`: This directory contains various tools and files that are used throughout all stages, such as the ID generator for all elements in the final commonroad scenario.
-- `/visulization`: Files that can be used for visualization of the final commonroad scenario can be found here.
+- `/converter_modules/converter.py`: This file orchestrates the whole conversion. It calls the different stages described earlier during the conversion process.
+- `/converter_modules/utility`: This directory contains various tools and files that are used throughout all stages, such as the ID generator for all elements in the final commonroad scenario.
 
 Conversion Process
 ===================
 The conversion process consists currently out of three stages:
 
 - **osm to road_graph:** In the first stage all information from the .osm file is extracted and a road graph is created. This procedure is described in detail by the original thesis written by Maximilian. Later on, the creation of traffic signs and traffic lights were also added to this stage, since they could be parsed from the .osm file. All files which are used during this converting stage can be found in `/osm_operations` and `/graph_operations`.
-- **road_graph to intermediate_format:** The intermediate format was added to perform operations on the road graph easier. In this stage intersections with lane specific data are created (trough lane, turn right, turn left, ...). Also, intersections are enhanced and traffic lights are added, which were missing in the initial .osm file.  All related files can be found in `/intermediate_operations`.
+- **road_graph to intermediate_format:** The intermediate format was added to perform operations on the road graph easier. In this stage intersections with lane specific data are created (through lane, turn right, turn left, ...). Also, intersections are enhanced and traffic lights are added, which were missing in the initial .osm file.  All related files can be found in `/intermediate_operations`.
 - **intermediate_format to cr_scenario:**
   In the last stage the intermediate format is exported to a commonroad scenario. During this process checks for converting errors are performed. Also, the benchmark ID and other scenario tags are added. All files for this stage can be found in `/cr_operations`.
 
@@ -154,9 +153,9 @@ The program takes an OSM file as input and parses it into the internal represent
   images/example_edgeedit.png
   :width: 500
 
-Afterwards, each edge that is representing a road with multiple lanes is split into these lane so that there is
-exactly one edge per lane. As intersection are only represented by single nodes in OSM, the lanes are cut of within
-a specific radius around the intersection and linked together again.
+Afterwards, each edge that is representing a road with multiple lanes is split into these lanes so that there is
+exactly one edge per lane. As intersections are only represented by single nodes in OSM, the lanes are cut of within
+a specific radius around the intersections and linked together again.
 
 .. image::
   images/example_lanelinkedit.png
@@ -167,19 +166,19 @@ Traffic Sign Conversion
 -----------------------
 Currently there are three different methods to retrieve information about traffic signs:
 
-- **max_speed tag from highways:** Usually every highway in the .osm file has a designated speed limit tag assigned to it. This tag is then used to create max speed signs. See [osm wiki](https://wiki.openstreetmap.org/wiki/DE:Key:maxspeed) for more information.
+- **max_speed tag from highways:** Usually every highway in the .osm file has a designated speed limit tag assigned to it. This tag is then used to create max speed signs. See `osm wiki <https://wiki.openstreetmap.org/wiki/DE:Key:maxspeed>`_ for more information.
 - **traffic_sign tag from .osm file:** In some cases designated traffic signs tags are found onto edges highways in the .osm file. These can be then used to parse traffic signs later on. However, these tags are country specific and not very well maintained. Therefore not much effort was done here for a world wide coverage. See `osm wiki <https://wiki.openstreetmap.org/wiki/Key:traffic_sign>`_ for more information.
-- **mapillary:** Mapillary is an open source data base that can be used to retrieve more detailed information about road networks. Osm2cr uses mapillary as its main source for traffic signs. To enable mapillary, an API key has to be provided in the `config.py`. Mapillary is very convenient, since it has world wide coverage and a unified database for traffic signs. See [mapillary's documentation about traffic signs](https://www.mapillary.com/developer/api-documentation/#traffic-signs) for more information.
+- **mapillary:** Mapillary is an open source data base that can be used to retrieve more detailed information about road networks. Osm2cr uses mapillary as its main source for traffic signs. To enable mapillary, an API key has to be provided in the `config.py`. Mapillary is very convenient, since it has world wide coverage and a unified database for traffic signs. See `Mapillary's documentation about traffic signs <https://www.mapillary.com/developer/api-documentation/#traffic-signs>`_ for more information.
 
-The file `traffic_sign_parser.py` in `/graph_operations` is used to process all information about traffic signs. It provides a mapping for all traffic signs found in the .osm file and mapillary to the traffic sign format used for commonRoad and returns the final *TrafficSignElement*.
+The file `traffic_sign_parser.py` in `/graph_operations` is used to process all information about traffic signs. It provides a mapping for all traffic signs found in the .osm file and mapillary to the traffic sign format used for CommonRoad and returns the final *TrafficSignElement*.
 
 Traffic signs are only assigned to the beginning or the ending of lanelet. It can therefore happen to have multiple signs or illogical sign combinations for a single lanelet.
 
 Traffic Light Conversion
 ------------------------
-Usually, an .osm  file does only uses a single `traffic_signal tag <https://wiki.openstreetmap.org/wiki/Key:traffic_signals>`_ to determine if an intersection makes use of traffic lights or not. Therefore, missing information about light cycles and traffic light positions on incoming lanes has to be added during the conversion process. The following steps summarize this process:
+Usually, an .osm  file only uses a single `traffic_signal tag <https://wiki.openstreetmap.org/wiki/Key:traffic_signals>`_ to determine if an intersection makes use of traffic lights or not. Therefore, missing information about light cycles and traffic light positions on incoming lanes has to be added during the conversion process. The following steps summarize this process:
 
-1. A traffic_signal tag is found in .osm file and added to an edge on the road graph during the *osm to road_graph* stage.
+1. A traffic_signal tag is found in the .osm file and added to an edge on the road graph during the *osm to road_graph* stage.
 2. In the *intermediate_format to cr_scenario* stage, all edges, which are part of intersections, are checked for the traffic signal tag. Only when a single traffic light is found, new traffic lights will be added to all other incoming lanelets of that intersection.
 3. A generic traffic light cycle for lights is generated based on the number of incoming lanelets. The duration for this cycle can be set in the `config.py`.
 4. The intersection is saved together with traffic light references in the intermediate format.
@@ -292,7 +291,7 @@ Linking lanes across intersections in a reasonable manner becomes exponentially 
 many streets.
 We therefore did only build detailed heuristics for intersections with up to four streets (segments of roads that lead
 to the intersection) involved.
-For larger intersection, there is a fallback heuristic, which might work well if all streets have only one lane per
+For larger intersections, there is a fallback heuristic, which might work well if all streets have only one lane per
 direction but will most likely produce insufficient results otherwise.
 
 Example:
@@ -403,7 +402,7 @@ Since Mapillary is only providing the coordinates of each detected traffic sign,
 This strategy can sometimes lead to traffic signs that are not correctly placed in the final scenario. 
 A manual review is therefore recommended.
 
-It is also possible change the behavior how traffic signs are added to the scenario using **config.py** file.
+It is also possible to change the behavior how traffic signs are added to the scenario using **config.py** file.
 For example, Mapillary can be used as single source for traffic signs or several filters can be applied on signs. 
 
 Configuration

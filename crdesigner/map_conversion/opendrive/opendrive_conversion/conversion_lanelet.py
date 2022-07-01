@@ -16,16 +16,9 @@ __status__ = "Released"
 
 
 class ConversionLanelet(Lanelet):
-    """Change some properties of the Lanelet class so that it can be used
-    to conversions to Lanelet. This means especially that lanelet_ids
-    can be other types than a natural number and that these ids can be changed
-    more than once.
-    Also adjacent neighbors and pre- and successor can be changed more than onc.
-
-    Args:
-
-    Returns:
-
+    """Change some properties of the Lanelet class so that it can be used to conversions to Lanelet. This means
+    especially that lanelet_ids can be other types than a natural number and that these ids can be changed
+    more than once. Also adjacent neighbors and pre- and successor can be changed more than once.
     """
 
     # optimal_join_split_factor = 20
@@ -81,10 +74,10 @@ class ConversionLanelet(Lanelet):
     def __eq__(self, lanelet: "ConversionLanelet") -> bool:
         """Lanelets are equal if their id_ is equal.
 
-        Args:
-           lanelet: Lanelet to be compared to equality.
-        Returns:
-           True if id_ is equal.
+        :param lanelet: Lanelet to be compared to equality
+        :type lanelet: :class:`Lanelet`
+        :return: True if id_ is equal
+        :rtype: bool
         """
         if lanelet is None:
             return False
@@ -246,13 +239,11 @@ class ConversionLanelet(Lanelet):
         """Concatenate this lanelet with lanelet_conc and assign the
         new lanelet_id to the resulting lanelet.
 
-        Args:
-          lanelet_conc: Lanelet which will be included.
-          extend_plane_group: Whether to extend the parametric_lane_group of this lanelet
-            with the parametric lanes of the lanelet_conc.parametric_lane_group.
-          lanelet_conc: "ConversionLanelet":
-          # lanelet_id: str:  (Default value = -1)
-          extend_plane_group: bool:  (Default value = True)
+        :param lanelet_conc: Lanelet which will be included.
+        :type lanelet_conc: :class:`ConversionLanelet`
+        :param extend_plane_group: Whether to extend the parametric_lane_group of this lanelet with the parametric lanes
+            of the lanelet_conc.parametric_lane_group. Default is True.
+        :type extend_plane_group: bool
         """
         # check connectedness
         if np.isclose(self.left_vertices[-1], lanelet_conc.left_vertices[0]).all():
@@ -278,28 +269,26 @@ class ConversionLanelet(Lanelet):
     def calc_width_at_end(self) -> float:
         """Calc width of lanelet at its end.
 
-        Returns:
-          Width at end of lanelet.
-
+        :return: Width at end of lanelet
+        :rtype: float
         """
         return self.calc_width(self.length)
 
     def calc_width_at_start(self) -> float:
         """Calc width of lanelet at its start.
 
-        Returns:
-          Width at start of lanelet.
-
+        :return: Width at start of lanelet
+        :rtype: float
         """
         return self.calc_width(0)
 
     def calc_width(self, s_pos: float) -> float:
         """Calc width at position s_pos.
 
-        Args:
-          s_pos: Position in curve parameter ds.
-        Returns:
-          Width at postiion s_pos.
+        :param s_pos: Position in curve parameter ds
+        :type s_pos: float
+        :return: Width at position s_pos
+        :rtype: float
         """
         inner_pos = self.calc_border("inner", s_pos)[0]
         outer_pos = self.calc_border("outer", s_pos)[0]
@@ -309,16 +298,16 @@ class ConversionLanelet(Lanelet):
     def length(self) -> float:
         """Get length of lanelet by calculating length of ParametricLaneGroup.
 
-        Returns:
-          Length of lanelet.
+        :return: Length of lanelet
+        :rtype: float
         """
         return self.parametric_lane_group.length
 
     def has_zero_width_everywhere(self) -> bool:
         """Checks if width is zero at every point of its ParametricLaneGroup.
 
-        Returns:
-          True if every ParametricLane has width_coefficients equal to only zero.
+        :return: True if every ParametricLane has width_coefficients equal to only zero.
+        :rtype: bool
         """
         return self.parametric_lane_group.has_zero_width_everywhere()
 
@@ -327,38 +316,36 @@ class ConversionLanelet(Lanelet):
     ) -> Tuple[Optional[float], Optional[float]]:
         """Get the earliest point of the lanelet where the width change is zero.
 
-        Args:
-          reverse: True if checking starts from the end of the lanelet.
-          reference_width: Width for which width at zero width change position has
-            to be greater as.
-        Returns:
-          Position of lanelet (in curve parameter ds) where width change is zero.
+        :param reverse: True if checking start from the end of the lanelet
+        :type reverse: bool
+        :param reference_width: Width for which width at zero width change position has to be greater as
+        :type reference_width: float
+        :return: Position of lanelet (in curve parameter ds) where width change is zero.
+        :rtype: Tuple[Optional[float], Optional[float]]
         """
         return self.parametric_lane_group.first_zero_width_change_position(
             reverse, reference_width
         )
 
     def maximum_width(self) -> float:
-        """Get maximum width of a the lanelet.
+        """Get width by calculating maximum width of parametric lane group.
 
-        Get width by calculating maximum width of parametric lane group.
-        Returns:
-          Maximum width of lanelet.
+        :return: Maximum width of lanelet
+        :rtype: float
         """
         return self.parametric_lane_group.maximum_width()
 
     def optimal_join_split_values(
         self, is_split: bool, split_and_join: bool, reference_width: float
     ):
-        """Calculate an optimal value, where the lanelet split or join starts
-          or ends, respectively.
+        """Calculate an optimal value, where the lanelet split or join starts or ends, respectively.
 
-        Args:
-          is_split: True if lanelet splits from another lanelet, otherwise
-            False if it is a join.
-          split_and_join: True if lanelet has a split at the start and join at the end.
-          reference_width: Width for which width at zero width change position has
-            to be greater as.
+        :param is_split: True if lanelet splits from another lanelet, otherwise False if it is a join
+        :type is_split: bool
+        :param split_and_join: True if lanelet has a split at the start and join at the end.
+        :type split_and_join: bool
+        :param reference_width: Width for which width at zero width change position has to be greater as
+        :type reference_width: float
         """
 
         merge_pos, merge_width = self.first_zero_width_change_position(
@@ -390,10 +377,12 @@ class ConversionLanelet(Lanelet):
         """Move vertices of one border by mirroring other border with
         a specified distance.
 
-        Args:
-          mirror_border: Which border to mirror, either 'left' or 'right'.
-          interval: Tuple of two values, specifying start and end of mirroring.
-          distance: Specifying distance at start and at end of mirroring.
+        :param mirror_botder: Which border to mirror, either 'left' or 'right'.
+        :type mirror_border: str
+        :param mirror_interval: Tuple of two values, specifying start and end of mirroring.
+        :type mirror_interval: Tuple[float, float]
+        :param distance: Specifying distance at start and at end of mirroring
+        :type distance: np.ndarray
         """
         if mirror_border == "left":
             distance[:] = [-1 * x for x in distance]
@@ -410,20 +399,17 @@ class ConversionLanelet(Lanelet):
         self.right_vertices = lanelet.right_vertices
 
     def calc_border(self, border: str, s_pos: float, width_offset: float = 0.0, compute_curvature=True):
-        """Calc border position according to parametric_lane_group.
+        """
+        Calc border position according to parametric_lane_group. Note: This does not consider borders which have been
+        moved due to joining / splitting.
 
-        Note: This does not consider borders which have been moved
-         due to joining / splitting.
-
-        Args:
-          border: Which border to calculate (inner or outer).
-          s_pos: Position of parameter ds where to calc the
-            Cartesian coordinates
-          width_offset: Offset to add to calculated width in reference
-           to the reference border. (Default value = 0.0)
-
-        Returns:
-          Cartesian coordinates of point on inner border
-            and tangential direction, too.
+        :param border: Which border to calculate (inner or outer):
+        :type border: str
+        :param s_pos: Position of parameter ds where to calc the cartesian coordinates
+        :type s_pos: float
+        :param width_offset: Offset to add to calculated width in reference to the reference border, default is 0.0.
+        :type width_offset: float
+        :return: Cartesian coordinates of point on inner border and tangential direction.
+        :rtype: Tuple[Tuple[float, float], float, float, float]
         """
         return self.parametric_lane_group.calc_border(border, s_pos, width_offset, compute_curvature=compute_curvature)
