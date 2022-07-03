@@ -2,7 +2,6 @@ import pickle
 from lxml import etree
 
 from PyQt5.QtWidgets import *
-from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 
 from commonroad.scenario.traffic_sign import *
@@ -31,7 +30,7 @@ from crdesigner.map_conversion.lanelet_lanelet2.cr2lanelet import CR2LaneletConv
 from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMO_AVAILABLE
 if SUMO_AVAILABLE:
     from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMOSimulation
-    from crdesigner.ui.gui.mwindow.toolboxes.service_layer.sumo_settings import SUMOSettings
+    from crdesigner.ui.gui.mwindow.service_layer.sumo_settings import SUMOSettings
     from crdesigner.map_conversion.sumo_map.sumo2cr import convert_net_to_cr
 
 
@@ -57,6 +56,7 @@ class MapConversionToolbox(QDockWidget):
         self.osm_file = None
         self.path_sumo_file = None
         self.open_drive_file = None
+        self.graph = None
 
     def adjust_ui(self):
         """Updates GUI properties like width, etc."""

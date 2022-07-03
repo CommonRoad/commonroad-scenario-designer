@@ -414,7 +414,9 @@ class RoadNetworkToolbox(QDockWidget):
                                                      line_marking_right, stop_line, traffic_signs, traffic_lights,
                                                      stop_line_at_end)
             if connect_to_last_selection:
-                if self.last_added_lanelet_id is not None:
+                if self.last_added_lanelet_id is not None and \
+                        self.current_scenario.lanelet_network.find_lanelet_by_id(self.last_added_lanelet_id) \
+                        is not None:
                     MapCreator.fit_to_predecessor(
                         self.current_scenario.lanelet_network.find_lanelet_by_id(self.last_added_lanelet_id),
                         lanelet)
@@ -626,10 +628,13 @@ class RoadNetworkToolbox(QDockWidget):
                                                                   line_marking_right, stop_line, traffic_signs,
                                                                   traffic_lights, stop_line_at_end)
 
-        self.last_added_lanelet_id = adjacent_lanelet.lanelet_id
-        self.current_scenario.add_objects(adjacent_lanelet)
-        self.set_default_road_network_list_information()
-        self.callback(self.current_scenario)
+        if adjacent_lanelet is not None:
+            self.last_added_lanelet_id = adjacent_lanelet.lanelet_id
+            self.current_scenario.add_objects(adjacent_lanelet)
+            self.set_default_road_network_list_information()
+            self.callback(self.current_scenario)
+        else:
+            self.text_browser.append("Adjacent lanelet already exists.")
 
     def remove_lanelet(self):
         """
@@ -1014,7 +1019,7 @@ class RoadNetworkToolbox(QDockWidget):
 
         if any(oks):
             # update lanelet_network and boradcast change
-            self.current_scenario.lanelet_network = converter.lanelet_network
+            self.current_scenario.replace_lanelet_network(converter.lanelet_network)
             self.callback(self.current_scenario)
 
     def add_incoming_to_table(self, new_incoming: bool = True, incoming_ids: List[str] = None):
@@ -1212,12 +1217,15 @@ class RoadNetworkToolbox(QDockWidget):
             self.text_browser.append("No lanelet selected for [2].")
             return
 
-        connected_lanelet = MapCreator.connect_lanelets(selected_lanelet_one, selected_lanelet_two,
-                                                        self.current_scenario.generate_object_id())
-        self.last_added_lanelet_id = connected_lanelet.lanelet_id
-        self.current_scenario.add_objects(connected_lanelet)
-        self.set_default_road_network_list_information()
-        self.callback(self.current_scenario)
+        try:
+            connected_lanelet = MapCreator.connect_lanelets(selected_lanelet_one, selected_lanelet_two,
+                                                            self.current_scenario.generate_object_id())
+            self.last_added_lanelet_id = connected_lanelet.lanelet_id
+            self.current_scenario.add_objects(connected_lanelet)
+            self.set_default_road_network_list_information()
+            self.callback(self.current_scenario)
+        except ValueError:
+            self.text_browser.append("An error happened: Connecting the lanelets is not possible.")
 
     def attach_to_other_lanelet(self):
         """
@@ -1257,10 +1265,13 @@ class RoadNetworkToolbox(QDockWidget):
         selected_lanelet_one = self.selected_lanelet()
         if selected_lanelet_one is None:
             return
-        x_translation = float(self.road_network_toolbox_ui.x_translation.text())
-        y_translation = float(self.road_network_toolbox_ui.y_translation.text())
-        selected_lanelet_one.translate_rotate(np.array([x_translation, y_translation]), 0)
-        self.callback(self.current_scenario)
+        try:
+            x_translation = float(self.road_network_toolbox_ui.x_translation.text())
+            y_translation = float(self.road_network_toolbox_ui.y_translation.text())
+            selected_lanelet_one.translate_rotate(np.array([x_translation, y_translation]), 0)
+            self.callback(self.current_scenario)
+        except ValueError:
+            self.text_browser.append("ERROR: Lanelet cannot be translated due to a invalid x- or y-coordinate!")
 
     def merge_with_successor(self):
         """

@@ -1,9 +1,9 @@
 from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMO_AVAILABLE
 if SUMO_AVAILABLE:
-    from crdesigner.ui.gui.mwindow.toolboxes.service_layer.sumo_settings import SUMOSettings
-from crdesigner.ui.gui.mwindow.top_bar_wrapper.service_layer.general_services import create_action
+    from crdesigner.ui.gui.mwindow.service_layer.sumo_settings import SUMOSettings
 from crdesigner.ui.gui.mwindow.service_layer.converter_modules.osm_interface import OSMInterface
 from crdesigner.ui.gui.mwindow.service_layer.gui_settings import GUISettings
+from crdesigner.ui.gui.mwindow.service_layer.settings import Settings
 from crdesigner.ui.gui.mwindow.service_layer.converter_modules.opendrive_interface import OpenDRIVEInterface
 
 """
@@ -39,3 +39,10 @@ def show_sumo_settings(mwindow):
         Show the sumo settings.
     """
     mwindow.sumo_settings = SUMOSettings(mwindow, config=mwindow.obstacle_toolbox.sumo_simulation.config)
+
+def show_settings(mwindow):
+    """
+            Show the settings.
+    """
+    mwindow.gui_settings = Settings(mwindow)
+

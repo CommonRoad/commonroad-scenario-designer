@@ -154,15 +154,18 @@ The titles of module pages have to be set manually!
 The full documentation of the API and introducing examples can also be found [here](https://commonroad-scenario-designer.readthedocs.io/en/latest/).
 
 ## Changelog
-Compared to version 0.3, the following features have been added or changed:
+Compared to version 0.5, the following things have been added, fixed or changed:
 
-- Adding/Updating of static obstacles with circle, polygon, and rectangle shape in GUI
-- New GUI software architecture
+- Switching shape of dynamic obstacle
+- Adding adjacent lanelet which already exists
+- Lanelet translation with missing x- or y-coordinate
+- Missing location information when storing a scenario
+- Various small bug fixes
 
 A detailed overview about the changes in each version is provided in the [Changelog](https://gitlab.lrz.de/tum-cps/commonroad-scenario-designer/-/blob/main/CHANGELOG.md).
 
 ## Bug and feature reporting
-This release (v0.4) is still a BETA version.  
+This release (v0.5.1) is still a BETA version.  
 In case you detect a bug or you want to suggest a new feature, please report it in our [forum](https://commonroad.in.tum.de/forum/c/scenario-designer/18).   
 If you want to contribute to the toolbox, you can also post it in the [forum](https://commonroad.in.tum.de/forum/c/scenario-designer/18) or contact [Sebastian Maierhofer](sebastian.maierhofer@tum.de).
 

@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.5.2] - 2022-XX-XX
+
+### Fixed
+- Preventing GUI crash when adding obstacle without existing scenario
+- Various small bug fixes
+
+## [0.5.1] - 2022-05-20
+
+### Fixed
+- Switching shape of dynamic obstacle
+- Adding adjacent lanelet which already exists
+- Lanelet translation with missing x- or y-coordinate
+- Missing location information when storing a scenario
+- Various small bug fixes
+
 ## [0.5] - 2022-03-06
 
 ### Added

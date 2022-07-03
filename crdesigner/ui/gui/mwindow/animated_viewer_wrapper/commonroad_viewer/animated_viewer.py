@@ -23,7 +23,7 @@ from .helper import draw_lanelet_polygon
 __author__ = "Benjamin Orthen, Stefan Urban, Max Winklhofer, Guyue Huang, Max Fruehauf, Sebastian Maierhofer"
 __copyright__ = "TUM Cyber-Physical Systems Group"
 __credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles, BMW Car@TUM"]
-__version__ = "0.5"
+__version__ = "0.5.1"
 __maintainer__ = "Sebastian Maierhofer"
 __email__ = "commonroad@lists.lrz.de"
 __status__ = "Released"
@@ -33,7 +33,6 @@ class AnimatedViewer:
     def __init__(self, parent, callback_function):
 
         self.current_scenario = None
-        self.original_scenario = None
         self.current_pps = None
         self.dynamic = DynamicCanvas(parent, width=5, height=10, dpi=100, animated_viewer=self)
         self.callback_function = callback_function
@@ -220,6 +219,7 @@ class AnimatedViewer:
         self.dynamic.clear_axes(clear_artists=clear_artists)
         ax = self.dynamic.get_axes()
 
+
         network_limits = [
             float("Inf"), -float("Inf"),
             float("Inf"), -float("Inf")
@@ -234,6 +234,9 @@ class AnimatedViewer:
                 'time_begin': self.time_step.value - 1,
             }
 
+        draw_params['facecolor'] = '#00ffa6'
+        draw_params['edgecolor'] = '#00ffa6'
+        draw_params['opacity'] = 0.0
         self.dynamic.draw_scenario(self.current_scenario, self.current_pps, draw_params=draw_params)
 
         for lanelet in self.current_scenario.lanelet_network.lanelets:

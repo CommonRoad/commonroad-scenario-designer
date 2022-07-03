@@ -1,4 +1,6 @@
 """Wrapper for the middle visualization."""
+from PyQt5.QtGui import QPalette, QBrush, QColor
+
 from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.commonroad_viewer import AnimatedViewer
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.backend_bases import KeyEvent
@@ -14,9 +16,11 @@ class AnimatedViewerWrapper:
 
     def __init__(self, mwindow):
         self.cr_viewer = AnimatedViewer(mwindow, self.viewer_callback)
+
         # handle to the toolboxes and the console for the viewer callback
         self.viewer_dock = None
         self.mwindow = mwindow  # handle back to the main window
+
 
     def create_viewer_dock(self):
         """
@@ -28,8 +32,10 @@ class AnimatedViewerWrapper:
         layout = QVBoxLayout()
         layout.addWidget(toolbar)
         layout.addWidget(self.cr_viewer.dynamic)
+
         self.viewer_dock.setLayout(layout)
         self.mwindow.setCentralWidget(self.viewer_dock)
+
 
     def viewer_callback(self, selected_object: Union[Lanelet, Obstacle, KeyEvent], output: str):
         """

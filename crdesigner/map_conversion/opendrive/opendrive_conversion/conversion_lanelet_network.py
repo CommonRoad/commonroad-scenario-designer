@@ -20,7 +20,7 @@ from crdesigner.map_conversion.common.utils import generate_unique_id
 __author__ = "Benjamin Orthen, Sebastian Maierhofer"
 __copyright__ = "TUM Cyber-Physical Systems Group"
 __credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles"]
-__version__ = "0.5"
+__version__ = "0.5.1"
 __maintainer__ = "Sebastian Maierhofer"
 __email__ = "commonroad@lists.lrz.de"
 __status__ = "Released"
@@ -689,10 +689,10 @@ class ConversionLaneletNetwork(LaneletNetwork):
                     else:
                         print(direction)
                         warnings.warn("Incorrect direction assigned to successor of incoming lanelet in intersection")
-
-            intersection_incoming_lane = IntersectionIncomingElement(generate_unique_id(), incoming_lanelet_set,
+            intersection_incoming_lane = IntersectionIncomingElement(intersection_id, incoming_lanelet_set,
                                                                      successor_right, successor_straight,
                                                                      successor_left)
+            intersection_id += 1
 
             intersection_incoming_lanes.append(intersection_incoming_lane)
             # TODO: Add crossings to intersections

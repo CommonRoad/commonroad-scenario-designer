@@ -20,6 +20,11 @@ class SectionExpandButton(QPushButton):
         self.section.setExpanded(True)
         self.clicked.connect(self.on_clicked)
 
+        #color scheme
+        #self.setStyleSheet('background-color:rgb(0, 200, 110); color:rgb(20, 20, 20); font-size: 14pt')
+
+
+
     def on_clicked(self):
         """toggle expand/collapse of section by clicking"""
         if self.section.isExpanded():
@@ -126,7 +131,8 @@ class Toolbox(QWidget):
         self.tree.setIndentation(0)
         self.setGeometry(0, 0, 250, 500)
         self.tree.setVerticalScrollMode(QAbstractItemView.ScrollPerPixel)
-        self.tree.verticalScrollBar().setSingleStep(10)
+        self.tree.verticalScrollBar().setSingleStep(30)
+
         self.sections = []
         self.define_sections()
         self.add_sections()

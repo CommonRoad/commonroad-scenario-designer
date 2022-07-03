@@ -1,33 +1,39 @@
 stages:
-    - style_check
+#    - style_check
     - test
     - build
 
-image: $CI_REGISTRY/cps/commonroad-scenario-designer/ci:v0.6.8
+image: $CI_REGISTRY/cps/commonroad-scenario-designer/ci:v0.6.9_20.04
 
 .install-and-run: &install-and-run
-  - pip install -e .
+  - git config --global url."https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.lrz.de/".insteadOf "git@gitlab.lrz.de:"
   - pip install -r ./tests/test_requirements.txt
+  - pip install -e .
+  - git clone --branch preparation_cr_io_2022_2 git@gitlab.lrz.de:cps/sumo-interface.git $HOME/sumo-interface
+  - git clone --branch develop git@gitlab.lrz.de:cps/commonroad-io.git "$HOME"/commonroad-io
+  - pip uninstall -y sumocr
+  - pip install -e "$HOME"/commonroad-io
+  - pip install -e "$HOME"/sumo-interface
   - coverage run --source ./crdesigner -m pytest tests/
   - coverage report -m || true
 
-style_checks:
-  stage: style_check
-  script:
-    - source activate cr39
-    - pip install pycodestyle
-    - git  diff ${CI_COMMIT_BEFORE_SHA}...${CI_COMMIT_SHA} -- '*.py' | pycodestyle --max-line-length=120 --diff
-  except:
-  - merge_requests
-
-style_check_merge_result:
-  stage: style_check
-  script:
-    - source activate cr39
-    - pip install pycodestyle
-    - git  diff ${CI_MERGE_REQUEST_TARGET_BRANCH_SHA}...${CI_MERGE_REQUEST_SOURCE_BRANCH_SHA} -- '*.py' | pycodestyle --max-line-length=120 --diff
-  only:
-  - merge_requests
+#style_checks:
+#  stage: style_check
+#  script:
+#    - source activate cr39
+#    - pip install pycodestyle
+#    - git  diff ${CI_COMMIT_BEFORE_SHA}...${CI_COMMIT_SHA} -- '*.py' | pycodestyle --max-line-length=120 --diff
+#  except:
+#  - merge_requests
+#
+#style_check_merge_result:
+#  stage: style_check
+#  script:
+#    - source activate cr39
+#    - pip install pycodestyle
+#    - git  diff ${CI_MERGE_REQUEST_TARGET_BRANCH_SHA}...${CI_MERGE_REQUEST_SOURCE_BRANCH_SHA} -- '*.py' | pycodestyle --max-line-length=120 --diff
+#  only:
+#  - merge_requests
 
 
 python37:
@@ -53,6 +59,14 @@ python39:
     script:
         - source activate cr39
         - *install-and-run
+
+#python310 :
+#  stage : test
+#  variables :
+#    QT_QPA_PLATFORM : "offscreen"
+#  script :
+#    - source activate cr310
+#    - *install-and-run
 
 docs:
     stage: test

@@ -24,7 +24,7 @@ from crdesigner.ui.gui.mwindow.service_layer import config
 __author__ = "Benjamin Orthen, Stefan Urban, Max Winklhofer, Guyue Huang, Max Fruehauf, Sebastian Maierhofer"
 __copyright__ = "TUM Cyber-Physical Systems Group"
 __credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles, BMW Car@TUM"]
-__version__ = "0.5"
+__version__ = "0.5.1"
 __maintainer__ = "Sebastian Maierhofer"
 __email__ = "commonroad@lists.lrz.de"
 __status__ = "Released"
@@ -43,6 +43,8 @@ class DynamicCanvas(FigureCanvas):
         self.animated_viewer = animated_viewer
         self.ax = None
         self.drawer = Figure(figsize=(width, height), dpi=dpi)
+        self.drawer.set_facecolor('None')
+        self.drawer.set_edgecolor('None')
         self.rnd = MPRenderer(ax=self.ax)
 
         self._handles = {}
@@ -54,6 +56,7 @@ class DynamicCanvas(FigureCanvas):
         self.latest_mouse_pos = None  # used to store the last mouse position where a lanelet was clicked
 
         super().__init__(self.drawer)
+
         self.setParent(parent)
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
@@ -217,6 +220,7 @@ class DynamicCanvas(FigureCanvas):
             self.ax.set(xlim=xlim)
             self.ax.set(ylim=ylim)
 
+
     def update_obstacles(self,
                          scenario: Scenario,
                          draw_params=None,
@@ -274,10 +278,11 @@ class DynamicCanvas(FigureCanvas):
         """
         if self.initial_parameter_config_done:
             center, x_dim, y_dim, _, _ = self.get_center_and_axes_values()
-            self.animated_viewer.current_scenario.lanelet_network, resized_lanelet_network = resize_lanelet_network(
+            resized_lanelet_network, resize_necessary = resize_lanelet_network(
                     original_lanelet_network=self.animated_viewer.original_lanelet_network, center_x=center[0],
                     center_y=center[1], dim_x=x_dim, dim_y=y_dim)
-            if resized_lanelet_network:
+            if resize_necessary:
+                self.animated_viewer.current_scenario.replace_lanelet_network(resized_lanelet_network)
                 self.animated_viewer.update_plot()
 
     def _on_key_release(self, key_released_event):

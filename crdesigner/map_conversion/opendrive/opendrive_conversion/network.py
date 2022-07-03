@@ -16,7 +16,7 @@ from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.geo
 __author__ = "Benjamin Orthen, Stefan Urban, Sebastian Maierhofer"
 __copyright__ = "TUM Cyber-Physical Systems Group"
 __credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles"]
-__version__ = "0.5"
+__version__ = "0.5.1"
 __maintainer__ = "Sebastian Maierhofer"
 __email__ = "commonroad@lists.lrz.de"
 __status__ = "Released"
@@ -177,7 +177,7 @@ class Network:
             # Remove lanelets that are not part of the network (as they are of a different type)
             lanelet_network._old_lanelet_ids[intersection_id_counter] = intersection_id_counter
             lanelet_network.create_intersection(intersection_map, intersection_id_counter)
-            intersection_id_counter += 1
+            intersection_id_counter += 1 + len(intersection_map)
 
         # Assign traffic signals, lights and stop lines to lanelet network
         lanelet_network.add_traffic_lights_to_network(self._traffic_lights)

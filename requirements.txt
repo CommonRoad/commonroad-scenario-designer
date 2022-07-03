@@ -1,6 +1,6 @@
 numpy>=1.16.4
 lxml>=4.3.4
-commonroad-io>=2021.4
+commonroad-io>=2022.1
 pyproj>=2.2.0
 scipy>=1.3.0
 mercantile>=1.1.3
@@ -14,4 +14,3 @@ enum34>=1.1.10
 iso3166>=1.0.1
 networkx>=2.5
 cartopy>=0.17.0
-commonroad-drivability-checker>=2021.4.1

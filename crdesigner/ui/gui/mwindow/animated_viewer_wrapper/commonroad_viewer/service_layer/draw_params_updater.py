@@ -107,6 +107,7 @@ def set_draw_params(trajectory: bool, intersection: bool, obstacle_label: bool,
 
     global PARAMS_DRAW_CUSTOM
     PARAMS_DRAW_CUSTOM = {
+
                 'lanelet_network': {
                     'traffic_sign': {
                         'draw_traffic_signs': traffic_signs,

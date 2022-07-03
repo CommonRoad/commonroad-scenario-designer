@@ -66,7 +66,7 @@ wrapper.lanelet_network.draw(rnd)
 rnd.render(show=True)
 
 # write generated traffic lights back to commonroad file
-scenario.lanelet_network = wrapper.lanelet_network
+scenario.r = wrapper.lanelet_network
 
 # run Simulation
 simulation = SumoSimulation()

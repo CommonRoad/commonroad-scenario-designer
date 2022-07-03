@@ -22,6 +22,7 @@ def sanitize(scenario: Scenario) -> None:
     if config.REMOVE_UNCONNECTED_LANELETS:
         remove_unconnected_lanes(scenario)
     # remove non referenced traffic signs
+    remove_empty_traffic_signs(scenario)
     remove_duplicate_traffic_signs(scenario)
     remove_non_referenced_signs(scenario)
     # merge too short and faulty lanes
@@ -29,8 +30,20 @@ def sanitize(scenario: Scenario) -> None:
     # merge_short_lanes(scenario)
     # interpolate waypoints to smoothen lanes
     smoothen_scenario(scenario)
-    # comvert to left hand driving scenario if necessary
+    # convert to left hand driving scenario if necessary
     convert_to_lht(scenario)
+
+
+def remove_empty_traffic_signs(scenario: Scenario) -> None:
+    """
+    Removes traffic signs without TrafficSignElement.
+
+    :param scenario: scenario from which empty traffic signs are removed
+    :return: None
+    """
+    for sign in scenario.lanelet_network.traffic_signs:
+        if sign.traffic_sign_elements is None or len(sign.traffic_sign_elements) == 0:
+            scenario.remove_traffic_sign(sign)
 
 
 def remove_duplicate_traffic_signs(scenario: Scenario) -> None:
@@ -54,30 +67,32 @@ def remove_duplicate_traffic_signs(scenario: Scenario) -> None:
                     already_added = True
             if not already_added:
                 filtered_signs.add(net.find_traffic_sign_by_id(lanelet_sign))
-
-    scenario.lanelet_network = create_laneletnetwork(scenario.lanelet_network.lanelets, filtered_signs,
-                                                     scenario.lanelet_network.traffic_lights,
-                                                     scenario.lanelet_network.intersections)
+    for sign in filtered_signs:
+        scenario.remove_traffic_sign(sign)
 
 
 def remove_non_referenced_signs(scenario: Scenario) -> None:
     """
     Removes non referenced traffic signs from scenario.
 
-    :param1 scenario: Scenario used to find non referenced traffic sings
+    :param scenario: Scenario used to find non referenced traffic sings
     :return: None
     """
     net = scenario.lanelet_network
     filtered_signs = OrderedSet()
     for sign in net.traffic_signs:
+        referenced = False
         for lanelet in net.lanelets:
             if sign.traffic_sign_id in lanelet.traffic_signs:
-                filtered_signs.add(sign)
-                continue
+                referenced = True
+                break
+        if referenced:
+            continue
+        else:
+            filtered_signs.add(sign)
 
-    scenario.lanelet_network = create_laneletnetwork(scenario.lanelet_network.lanelets, filtered_signs,
-                                                     scenario.lanelet_network.traffic_lights,
-                                                     scenario.lanelet_network.intersections)
+    for sign in filtered_signs:
+        scenario.remove_traffic_sign(sign)
 
 
 def merge_short_lanes(scenario: Scenario, min_distance=1) -> None:
@@ -134,7 +149,7 @@ def merge_short_lanes(scenario: Scenario, min_distance=1) -> None:
 
         lanelets.remove(la)
 
-        # merge lanelets does not modify the predecessors's successor
+        # merge lanelets does not modify the predecessor's successor
         for pre in predecessors:
             pre_lanelet = net.find_lanelet_by_id(pre)
             sucs_of_pre = list(filter(lambda s: s != l_id, pre_lanelet.successor))
@@ -147,9 +162,9 @@ def merge_short_lanes(scenario: Scenario, min_distance=1) -> None:
 
         # update scenario's road network
 
-        scenario.lanelet_network = create_laneletnetwork(lanelets, scenario.lanelet_network.traffic_signs,
+        scenario.replace_lanelet_network(create_laneletnetwork(lanelets, scenario.lanelet_network.traffic_signs,
                                                          scenario.lanelet_network.traffic_lights,
-                                                         scenario.lanelet_network.intersections)
+                                                         scenario.lanelet_network.intersections))
 
 
 def merge_lanelets(lanelet1: Lanelet, lanelet2: Lanelet) -> Lanelet:
@@ -218,9 +233,9 @@ def smoothen_scenario(scenario: Scenario) -> None:
     lanelets = list(map(smoothen_lane, lanelets))
 
     # update scenario
-    scenario.lanelet_network = create_laneletnetwork(lanelets, scenario.lanelet_network.traffic_signs,
-                                                     scenario.lanelet_network.traffic_lights,
-                                                     scenario.lanelet_network.intersections)
+    scenario.replace_lanelet_network(create_laneletnetwork(lanelets, scenario.lanelet_network.traffic_signs,
+                                                           scenario.lanelet_network.traffic_lights,
+                                                           scenario.lanelet_network.intersections))
 
 
 def b_spline(ctr, max_nodes=10) -> np.array:
@@ -361,12 +376,12 @@ def rht_to_lht(scenario: Scenario) -> None:
 
         lht_lanes.append(lht_l)
 
-    scenario.lanelet_network = create_laneletnetwork(lht_lanes, scenario.lanelet_network.traffic_signs,
-                                                     scenario.lanelet_network.traffic_lights,
-                                                     scenario.lanelet_network.intersections)
+    scenario.replace_lanelet_network(create_laneletnetwork(lht_lanes, scenario.lanelet_network.traffic_signs,
+                                                           scenario.lanelet_network.traffic_lights,
+                                                           scenario.lanelet_network.intersections))
 
 
-def remove_unconnected_lanes(scenario):
+def remove_unconnected_lanes(scenario: Scenario):
     """
     Remove unconnected lanes which are not part of the scenario
 
@@ -399,9 +414,9 @@ def remove_unconnected_lanes(scenario):
         if comp.number_of_nodes() > main_graph.number_of_nodes():
             main_graph = comp
 
-    filtered_lanelets = list(filter(lambda lanelet: lanelet.lanelet_id in main_graph.nodes, lanelets))
-    scenario.lanelet_network = create_laneletnetwork(filtered_lanelets, net.traffic_signs, net.traffic_lights,
-                                                     net.intersections)
+    filtered_lanelets = list(filter(lambda lanelet: lanelet.lanelet_id not in main_graph.nodes, lanelets))
+    for let in filtered_lanelets:
+        scenario.remove_lanelet(let)
 
 
 def scenario_to_networkx_graph(scenario) -> nx.DiGraph:

@@ -3,12 +3,12 @@
 __author__ = "Benjamin Orthen"
 __copyright__ = "TUM Cyber-Physical Systems Group"
 __credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles"]
-__version__ = "0.5"
+__version__ = "0.5.1"
 __maintainer__ = "Sebastian Maierhofer"
 __email__ = "commonroad@lists.lrz.de"
 __status__ = "Released"
 
-from typing import List, Tuple
+from typing import List, Tuple, Union
 
 import numpy as np
 from pyproj import Proj
@@ -32,6 +32,7 @@ class CR2LaneletConverter:
         self.first_nodes, self.last_nodes = None, None
         self.left_ways, self.right_ways = None, None
         self.lanelet_network = None
+        self.origin_utm = None
 
     @property
     def id_count(self) -> int:
@@ -57,6 +58,11 @@ class CR2LaneletConverter:
         self.last_nodes = dict()  # saves last left and right node
         self.left_ways = dict()
         self.right_ways = dict()
+        if abs(scenario.location.gps_longitude) <= 180 and abs(scenario.location.gps_latitude) <= 90:
+            self.origin_utm = self.proj(scenario.location.gps_longitude, scenario.location.gps_latitude)
+        else:
+            self.proj = Proj(DEFAULT_PROJ_STRING)
+            self.origin_utm = self.proj(11.66821, 48.26301)  # set origin point (TUM MI building) in default UTM 32 zone
         for lanelet in scenario.lanelet_network.lanelets:
             self._convert_lanelet(lanelet)
 
@@ -170,7 +176,7 @@ class CR2LaneletConverter:
         """
         way = self.osm.find_way_by_id(way_id)
         first_idx, last_idx = (0, -1) if same_dir else (-1, 0)
-        return (way.nodes[first_idx], way.nodes[last_idx])
+        return way.nodes[first_idx], way.nodes[last_idx]
 
     def _create_nodes_from_vertices(self, vertices: List[np.ndarray]) -> List[str]:
         """Create nodes and add them to the OSM.
@@ -182,7 +188,7 @@ class CR2LaneletConverter:
         """
         nodes = []
         for vertice in vertices:
-            lon, lat = self.proj(vertice[0], vertice[1], inverse=True)
+            lon, lat = self.proj(self.origin_utm[0] + vertice[0], self.origin_utm[1] + vertice[1], inverse=True)
             node = Node(self.id_count, lat, lon)
             nodes.append(node.id_)
             self.osm.add_node(node)
@@ -242,7 +248,7 @@ class CR2LaneletConverter:
 
     def _get_shared_first_nodes_from_other_lanelets(
         self, lanelet: Lanelet
-    ) -> Tuple[str, str]:
+    ) -> Tuple[Union[str, None], Union[str, None]]:
         """Get already created nodes from other lanelets which could also
            be used by this lanelet as first nodes.
 
@@ -270,7 +276,7 @@ class CR2LaneletConverter:
 
     def _get_shared_last_nodes_from_other_lanelets(
         self, lanelet: Lanelet
-    ) -> Tuple[str, str]:
+    ) -> Tuple[Union[str, None], Union[str, None]]:
         """Get already created nodes from other lanelets which could also
            be used by this lanelet as last nodes.
 
@@ -308,7 +314,7 @@ def _vertices_are_equal(
       vertices2: Second vertices to compare.
 
     Returns:
-      True if every vertice in one list is nearly equal to the
+      True if every vertex in one list is nearly equal to the
         corresponding vertices at the same position in the other list.
     """
     if len(vertices1) != len(vertices2):
