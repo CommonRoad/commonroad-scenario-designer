@@ -139,12 +139,13 @@ class DynamicCanvas(FigureCanvas):
         # not all details need to be rendered when you are zoomed out
         self.draw_params = update_draw_params_based_on_zoom(x=new_x_dim, y=new_y_dim)
         self.draw_params_dynamic_only = update_draw_params_dynamic_only_based_on_zoom(x=new_x_dim, y=new_y_dim)
-        self.animated_viewer.current_scenario.lanelet_network, resized_lanelet_network = resize_lanelet_network(
+        lanelet_network, resized_lanelet_network = resize_lanelet_network(
             original_lanelet_network=self.animated_viewer.original_lanelet_network,
             center_x=new_center_x,
             center_y=new_center_y,
             dim_x=x_dim,
             dim_y=y_dim)
+        self.animated_viewer.current_scenario.replace_lanelet_network(lanelet_network)
         self.update_plot([
             new_center_x - new_x_dim, new_center_x + new_x_dim,
             new_center_y - new_y_dim, new_center_y + new_y_dim
