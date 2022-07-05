@@ -11,7 +11,13 @@ __status__ = "Released"
 
 
 def get_geo_reference(geo_reference: str):
+    """Gets the geographic location information from the geo string extracted from opendrive files.
 
+    :param geo_reference: Input string from which longitude and latitude should be extracted.
+    :type geo_reference: String
+    :return: longitude and latitude parsed from input string
+    :rtype: float
+    """
     elements = []
     elements.extend(re.split(r'\+', geo_reference))
 
