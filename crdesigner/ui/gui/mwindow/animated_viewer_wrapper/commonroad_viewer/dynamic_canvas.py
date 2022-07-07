@@ -1,3 +1,4 @@
+import copy
 from typing import List, Union
 from PyQt5.QtWidgets import QSizePolicy
 import numpy as np
@@ -145,7 +146,7 @@ class DynamicCanvas(FigureCanvas):
             center_y=new_center_y,
             dim_x=x_dim,
             dim_y=y_dim)
-        self.animated_viewer.current_scenario.replace_lanelet_network(lanelet_network)
+        self.animated_viewer.current_scenario.replace_lanelet_network(copy.deepcopy(lanelet_network))
         self.update_plot([
             new_center_x - new_x_dim, new_center_x + new_x_dim,
             new_center_y - new_y_dim, new_center_y + new_y_dim
