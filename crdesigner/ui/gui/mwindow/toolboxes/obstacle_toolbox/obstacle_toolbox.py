@@ -29,6 +29,7 @@ from commonroad.prediction.prediction import TrajectoryPrediction
 from commonroad_dc.feasibility.vehicle_dynamics import VehicleDynamics
 from commonroad.common.solution import VehicleType
 
+
 class ObstacleToolbox(QDockWidget):
     def __init__(self, current_scenario: Scenario, callback, tmp_folder, text_browser):
         super().__init__("Obstacle Toolbox")
@@ -300,8 +301,11 @@ class ObstacleToolbox(QDockWidget):
                                            obstacle_shape=shape,
                                            initial_state=State(**state_dictionary), prediction=TrajectoryPrediction(
                                             shape=shape,
-                                            trajectory=Trajectory(initial_time_step=1,
+                                            trajectory=Trajectory(initial_time_step=0,
                                                                   state_list=state_list)))
+        # set color
+        self.canvas.set_dynamic_obstacle_color(dynamic_obstacle.obstacle_id)
+
         # add to current scenario, callback
         self.current_scenario.add_objects(dynamic_obstacle)
         self.callback(self.current_scenario)
@@ -337,8 +341,8 @@ class ObstacleToolbox(QDockWidget):
             return
 
         state = obstacle.prediction.trajectory.state_list[-1]
-        d_acc = 1.0
-        d_steering = 0.1
+        d_acc = 10.0
+        d_steering = 0.001
         vehicle = VehicleDynamics.KS(VehicleType.BMW_320i)
 
         if key == "shift+up":
@@ -381,38 +385,11 @@ class ObstacleToolbox(QDockWidget):
             return
 
         try:
-            next_state = vehicle.simulate_next_state(state, input_state, 0.1)
+            next_state = vehicle.simulate_next_state(state, input_state, 0.5)
         except Exception as e:
             next_state = state
         obstacle.prediction.trajectory.state_list.append(next_state)
-
-        #self.callback(self.current_scenario)
-        #mwindow.animated_viewer_wrapper.update_view(focus_on_network=True)
-
-        # draw trajectory
-        draw_params = {'time_begin': state.time_step, 'time_end': next_state.time_step, 'dynamic_obstacle': {'trajectory': {'show_label': True, 'draw_trajectory': True, 'draw_continuous': True}},
-         'lanelet_network': {'traffic_sign': {'draw_traffic_signs': False, 'show_traffic_signs': 'all'},
-                             'intersection': {'draw_intersections': False, 'draw_incoming_lanelets': False,
-                                              'incoming_lanelets_color': '#3ecbcf', 'draw_crossings': False,
-                                              'crossings_color': '#b62a55', 'draw_successors': False,
-                                              'successors_left_color': '#ff00ff', 'successors_straight_color': 'blue',
-                                              'successors_right_color': '#ccff00', 'show_label': False}}}
-        renderer = MPRenderer(draw_params=draw_params, plot_limits=None, ax=None, figsize=None, focus_obstacle=obstacle)
-        
-        self.current_scenario.draw(renderer, draw_params)
-        """
-        draw_params = {'time_begin': state.time_step, 'time_end': next_state.time_step, 'antialiased': True,
-         'lanelet_network': {'traffic_sign': {'draw_traffic_signs': False, 'show_traffic_signs': 'all'},
-                             'intersection': {'draw_intersections': False, 'draw_incoming_lanelets': True,
-                                              'incoming_lanelets_color': '#3ecbcf', 'draw_crossings': True,
-                                              'crossings_color': '#b62a55', 'draw_successors': True,
-                                              'successors_left_color': '#ff00ff', 'successors_straight_color': 'blue',
-                                              'successors_right_color': '#ccff00', 'show_label': False},
-                             'traffic_light': {'draw_traffic_lights': True}}, 'trajectory': {'draw_trajectory': True},
-         'occupancy': {'draw_occupancies': False}}
-        renderer = MPRenderer()
-        obstacle.prediction.trajectory.draw(renderer, draw_params, ('scenario', 'dynamic_obstacle'))
-        """
+        self.callback(self.current_scenario)
 
     def calc_state_list(self) -> List[State]:
         """

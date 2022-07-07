@@ -290,7 +290,7 @@ class ObstacleToolboxUI(Toolbox):
 
         # time edit field
         self.initial_state_time = QLineEdit(self)
-        self.initial_state_time.setPlaceholderText("1")
+        self.initial_state_time.setPlaceholderText("0")
         self.initial_state_time.setToolTip("Time step must be an integer.")
         self.initial_state_time.setObjectName("time of dynamic obstacle")
 

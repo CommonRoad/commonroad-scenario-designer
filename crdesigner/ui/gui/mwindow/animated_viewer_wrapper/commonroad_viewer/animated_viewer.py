@@ -230,9 +230,14 @@ class AnimatedViewer:
                 'time_begin': time_step,
             }
         else:
-            draw_params = {
-                'time_begin': self.time_step.value - 1,
-            }
+            if self.time_step.value == 0:
+                draw_params = {
+                    'time_begin': self.time_step.value
+                }
+            else:
+                draw_params = {
+                    'time_begin': self.time_step.value - 1,
+                }
 
         draw_params['facecolor'] = '#00ffa6'
         draw_params['edgecolor'] = '#00ffa6'
