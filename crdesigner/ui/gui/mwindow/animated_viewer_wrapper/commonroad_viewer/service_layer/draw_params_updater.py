@@ -4,6 +4,14 @@ from .general_services import is_big_map
 
 modified_draw_params = False
 PARAMS_OBSTACLE_CUSTOM = None
+COLORSCHEME = {
+    'axis': 'All',
+    'background': '#f0f0f0',
+    'color': '#0a0a0a',
+    'font-size': '11pt',
+    'highlight': '#202020',
+    'highlighttext':'#202020',
+    'secondbackground': '#ffffff'}
 
 
 def update_draw_params_based_on_scenario(lanelet_count: int, traffic_sign_count: int) -> {}:
@@ -85,7 +93,7 @@ def set_draw_params(trajectory: bool, intersection: bool, obstacle_label: bool,
                     obstacle_icon: bool, obstacle_direction: bool,
                     obstacle_signal: bool, occupancy: bool, traffic_signs: bool,
                     traffic_lights: bool, incoming_lanelets: bool, successors: bool,
-                    intersection_labels: bool):
+                    intersection_labels: bool, colorscheme: dict):
     """
     sets draw params
     :param trajectory: toggle draw_trajectory
@@ -107,7 +115,7 @@ def set_draw_params(trajectory: bool, intersection: bool, obstacle_label: bool,
 
     global PARAMS_DRAW_CUSTOM
     PARAMS_DRAW_CUSTOM = {
-
+                'colorscheme': colorscheme,
                 'lanelet_network': {
                     'traffic_sign': {
                         'draw_traffic_signs': traffic_signs,
@@ -139,6 +147,7 @@ def set_draw_params(trajectory: bool, intersection: bool, obstacle_label: bool,
 
     global PARAMS_DRAW_DYNAMIC_CUSTOM
     PARAMS_DRAW_DYNAMIC_CUSTOM = {
+                'colorscheme': colorscheme,
                 'dynamic_obstacle': {
                     'trajectory': {
                         # 'show_label': obstacle_label,
@@ -168,6 +177,7 @@ def set_draw_params(trajectory: bool, intersection: bool, obstacle_label: bool,
 
 
 PARAMS_DRAW_DETAILED = {
+                'colorscheme': COLORSCHEME,
                 'dynamic_obstacle': {
                     'trajectory': {
                         'show_label': True,
@@ -195,6 +205,7 @@ PARAMS_DRAW_DETAILED = {
             }
 
 PARAMS_DRAW_UNDETAILED = {
+    'colorscheme': COLORSCHEME,
     'dynamic_obstacle': {
         'trajectory': {
             'show_label': False,
@@ -238,6 +249,7 @@ PARAMS_DRAW_UNDETAILED = {
 
 
 PARAMS_DRAW_DYNAMIC_DETAILED = {
+                'colorscheme': COLORSCHEME,
                 'dynamic_obstacle': {
                     'trajectory': {
                         'show_label': True,
@@ -262,6 +274,7 @@ PARAMS_DRAW_DYNAMIC_DETAILED = {
             }
 
 PARAMS_DRAW_DYNAMIC_UNDETAILED = {
+        'colorscheme': COLORSCHEME,
         'dynamic_obstacle': {
             'trajectory': {
                 'show_label': False,

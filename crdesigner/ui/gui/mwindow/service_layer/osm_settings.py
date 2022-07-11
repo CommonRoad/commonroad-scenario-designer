@@ -25,14 +25,16 @@ class EditStreetTypes:
     Window to select types of roads
     """
 
-    def __init__(self):
+    def __init__(self, mwindow):
         self.dialog = QDialog()
         self.original_accept = self.dialog.accept
         self.dialog.accept = self.accept
         self.dialog.ui = Street_types()
         self.dialog.ui.setupUi(self.dialog)
         self.set_checkboxes()
+        self.dialog.setStyleSheet('background-color:' + mwindow.colorscheme()['background'] + '; color:' +mwindow.colorscheme()['color'] + ';font-size: ' + mwindow.colorscheme()['font-size'])
         self.dialog.exec_()
+
 
     def accept(self) -> None:
         """
@@ -80,13 +82,16 @@ class EditLaneCounts:
     Window to edit counts of lanes for street types
     """
 
-    def __init__(self):
+    def __init__(self, mwindow):
         self.dialog = QDialog()
         self.original_accept = self.dialog.accept
         self.dialog.accept = self.accept
         self.dialog.ui = Lane_counts()
         self.dialog.ui.setupUi(self.dialog)
         self.set_spin_boxes()
+        self.dialog.setStyleSheet(
+            'background-color:' + mwindow.colorscheme()['background'] + '; color:' + mwindow.colorscheme()[
+                'color'] + ';font-size: ' + mwindow.colorscheme()['font-size'])
         self.dialog.exec_()
 
     def accept(self) -> None:
@@ -128,13 +133,16 @@ class EditLaneWidth:
     Window to edit width of lanes for street types
     """
 
-    def __init__(self):
+    def __init__(self, mwindow):
         self.dialog = QDialog()
         self.original_accept = self.dialog.accept
         self.dialog.accept = self.accept
         self.dialog.ui = Lane_width()
         self.dialog.ui.setupUi(self.dialog)
         self.set_spin_boxes()
+        self.dialog.setStyleSheet(
+            'background-color:' + mwindow.colorscheme()['background'] + '; color:' + mwindow.colorscheme()[
+                'color'] + ';font-size: ' + mwindow.colorscheme()['font-size'])
         self.dialog.exec_()
 
     def accept(self) -> None:
@@ -176,7 +184,7 @@ class EditSpeedLimits:
     Window to edit speed limits for street types
     """
 
-    def __init__(self):
+    def __init__(self, mwindow):
         self.dialog = QDialog()
         self.original_accept = self.dialog.accept
         self.dialog.accept = self.accept
@@ -185,6 +193,9 @@ class EditSpeedLimits:
         self.dialog.ui.setupUi(self.dialog)
         self.dialog.setWindowTitle("Edit Speed Limit")
         self.set_spin_boxes()
+        self.dialog.setStyleSheet(
+            'background-color:' + mwindow.colorscheme()['background'] + '; color:' + mwindow.colorscheme()[
+                'color'] + ';font-size: ' + mwindow.colorscheme()['font-size'])
         self.dialog.exec_()
 
     def accept(self) -> None:
@@ -226,13 +237,16 @@ class EditSublayerWayTypes:
     Window to edit sublayer way types
     """
 
-    def __init__(self):
+    def __init__(self, mwindow):
         self.dialog = QDialog()
         self.original_accept = self.dialog.accept
         self.dialog.accept = self.accept
         self.dialog.ui = Sublayer_street_types()
         self.dialog.ui.setupUi(self.dialog)
         self.set_checkboxes()
+        self.dialog.setStyleSheet(
+            'background-color:' + mwindow.colorscheme()['background'] + '; color:' + mwindow.colorscheme()[
+                'color'] + ';font-size: ' + mwindow.colorscheme()['font-size'])
         self.dialog.exec_()
 
     def accept(self) -> None:
@@ -414,7 +428,8 @@ class OSMSettings:
 
         :return: None
         """
-        self.street_type_edit_dialog = EditStreetTypes()
+        self.street_type_edit_dialog = EditStreetTypes(self.parent.cr_designer)
+        
 
     def edit_lane_counts(self) -> None:
         """
@@ -422,7 +437,7 @@ class OSMSettings:
 
         :return: None
         """
-        self.lane_count_edit_dialog = EditLaneCounts()
+        self.lane_count_edit_dialog = EditLaneCounts(self.parent.cr_designer)
 
     def edit_lane_width(self) -> None:
         """
@@ -430,7 +445,7 @@ class OSMSettings:
 
         :return: None
         """
-        self.lane_width_edit_dialog = EditLaneWidth()
+        self.lane_width_edit_dialog = EditLaneWidth(self.parent.cr_designer)
 
     def edit_speed_limits(self) -> None:
         """
@@ -438,7 +453,7 @@ class OSMSettings:
 
         :return: None
         """
-        self.speed_limits_edit_dialog = EditSpeedLimits()
+        self.speed_limits_edit_dialog = EditSpeedLimits(self.parent.cr_designer)
 
     def edit_sublayer_way_types(self) -> None:
         """
@@ -446,7 +461,7 @@ class OSMSettings:
 
         :return: None
         """
-        self.edit_sublayer_way_types_dialog = EditSublayerWayTypes()
+        self.edit_sublayer_way_types_dialog = EditSublayerWayTypes(self.parent.cr_designer)
 
     def restore_default_button(self) -> None:
         """

@@ -27,9 +27,7 @@ class SUMOSettings:
 
     def connect_events(self):
         """ connect buttons to callables """
-        self.window.botton_restore_defaults.clicked.connect(
-            self.restore_defaults)
-        self.window.botton_close.clicked.connect(self.apply_close)
+        pass
 
     def update_ui_values(self):
         """

@@ -56,7 +56,6 @@ class DynamicCanvas(FigureCanvas):
         self.latest_mouse_pos = None  # used to store the last mouse position where a lanelet was clicked
 
         super().__init__(self.drawer)
-
         self.setParent(parent)
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
@@ -215,6 +214,31 @@ class DynamicCanvas(FigureCanvas):
         if not plot_limits:
             self.ax.set(xlim=xlim)
             self.ax.set(ylim=ylim)
+
+        self.rnd.ax.set_facecolor(draw_params['colorscheme']['secondbackground'])
+
+        if draw_params['colorscheme']['axis'] == 'Left/ Bottom':
+            self.ax.spines['bottom'].set_color(draw_params['colorscheme']['color'])
+            self.ax.spines['left'].set_color(draw_params['colorscheme']['color'])
+            self.ax.spines['top'].set_color(draw_params['colorscheme']['secondbackground'])
+            self.ax.spines['right'].set_color(draw_params['colorscheme']['secondbackground'])
+            self.ax.tick_params(axis='x', colors=draw_params['colorscheme']['color'])
+            self.ax.tick_params(axis='y', colors=draw_params['colorscheme']['color'])
+
+        elif draw_params['colorscheme']['axis'] == 'None':
+            self.ax.spines['bottom'].set_color(draw_params['colorscheme']['secondbackground'])
+            self.ax.spines['left'].set_color(draw_params['colorscheme']['secondbackground'])
+            self.ax.spines['top'].set_color(draw_params['colorscheme']['secondbackground'])
+            self.ax.spines['right'].set_color(draw_params['colorscheme']['secondbackground'])
+            self.ax.tick_params(axis='x', colors=draw_params['colorscheme']['secondbackground'])
+            self.ax.tick_params(axis='y', colors=draw_params['colorscheme']['secondbackground'])
+        else:
+            self.ax.spines['bottom'].set_color(draw_params['colorscheme']['color'])
+            self.ax.spines['left'].set_color(draw_params['colorscheme']['color'])
+            self.ax.spines['top'].set_color(draw_params['colorscheme']['color'])
+            self.ax.spines['right'].set_color(draw_params['colorscheme']['color'])
+            self.ax.tick_params(axis='x', colors=draw_params['colorscheme']['color'])
+            self.ax.tick_params(axis='y', colors=draw_params['colorscheme']['color'])
 
 
     def update_obstacles(self,
@@ -402,7 +426,6 @@ class DynamicCanvas(FigureCanvas):
         """
         updates obstacles' draw params when gui settings are changed
         """
-
         if DynamicCanvas.scenario is not None:
             for obj in DynamicCanvas.scenario.obstacles:
                 try:  # check if obstacle is in obstacle_color_array

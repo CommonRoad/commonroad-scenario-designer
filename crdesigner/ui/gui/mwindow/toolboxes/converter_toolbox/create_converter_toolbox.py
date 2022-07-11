@@ -9,6 +9,6 @@ def create_converter_toolbox(mwindow):
     mwindow.map_converter_toolbox = MapConversionToolbox(mwindow.animated_viewer_wrapper.cr_viewer.current_scenario,
                                                          lambda scenario: toolbox_callback(mwindow, scenario),
                                                          mwindow.crdesigner_console_wrapper.text_browser,
-                                                         mwindow.obstacle_toolbox.sumo_simulation)
+                                                         mwindow.obstacle_toolbox.sumo_simulation, mwindow)
     mwindow.addDockWidget(Qt.RightDockWidgetArea, mwindow.map_converter_toolbox)
     return mwindow.map_converter_toolbox  # for visibility
