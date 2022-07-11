@@ -18,10 +18,10 @@ if SUMO_AVAILABLE:
     from crdesigner.map_conversion.map_conversion_interface import SumoConfig
 
 
-class RoadNetworkToolbox(QDockWidget):
-    def __init__(self, current_scenario: Scenario, text_browser, callback, tmp_folder: str, selection_changed_callback):
+class RoadNetworkToolbox(QDockWidget,):
+    def __init__(self, current_scenario: Scenario, text_browser, callback, tmp_folder: str, selection_changed_callback, mwindow):
         super().__init__("Road Network Toolbox")
-        self.road_network_toolbox_ui = RoadNetworkToolboxUI()
+        self.road_network_toolbox_ui = RoadNetworkToolboxUI(mwindow)
         self.adjust_ui()
 
         self.current_scenario = current_scenario

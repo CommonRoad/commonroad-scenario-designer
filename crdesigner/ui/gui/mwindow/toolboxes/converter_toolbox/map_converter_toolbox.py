@@ -35,9 +35,9 @@ if SUMO_AVAILABLE:
 
 
 class MapConversionToolbox(QDockWidget):
-    def __init__(self, current_scenario, callback, text_browser, tmp_folder: str):
+    def __init__(self, current_scenario, callback, text_browser, tmp_folder: str, mwindow):
         super().__init__("Map Converter Toolbox")
-        self.converter_toolbox = MapConversionToolboxUI()
+        self.converter_toolbox = MapConversionToolboxUI(mwindow)
         self.callback = callback
         self.text_browser = text_browser
         self.adjust_ui()

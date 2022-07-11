@@ -17,8 +17,8 @@ if SUMO_AVAILABLE:
 
 
 class ObstacleToolboxUI(Toolbox):
-    def __init__(self, text_browser):
-        super().__init__()
+    def __init__(self, text_browser, mwindow):
+        super().__init__(mwindow)
 
         self.text_browser = text_browser
         self.change_color = False

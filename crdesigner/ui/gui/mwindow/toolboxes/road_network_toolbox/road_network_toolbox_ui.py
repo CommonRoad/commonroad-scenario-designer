@@ -14,8 +14,11 @@ class RoadNetworkToolboxUI(Toolbox):
     reimplement define_sections() to define sections and
     add them as (title, widget) tuples to self.sections
         """
-    def __init__(self):
-        super().__init__()
+    def __init__(self, mwindow):
+        super().__init__(mwindow)
+
+    def update(self) -> None:
+        super(RoadNetworkToolboxUI, self).update()
 
     def define_sections(self):
         """reimplement this to define all your sections

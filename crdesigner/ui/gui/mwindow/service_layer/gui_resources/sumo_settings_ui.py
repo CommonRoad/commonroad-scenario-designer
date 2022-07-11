@@ -41,8 +41,8 @@ class Ui_SUMOSettings():
             self.content[i].setObjectName("scrollAreaWidgetContents_" + str(i))
             self.formLayout.append(QtWidgets.QFormLayout(self.content[i]))
             self.formLayout[i].setObjectName("form_" + str(i))
-            self.content[i].setMinimumSize(810 * self.factor, 820)
-            self.content[i].setMaximumSize(810 * self.factor, 820)
+            self.content[i].setMinimumSize(830 * self.factor, 820)
+            self.content[i].setMaximumSize(830 * self.factor, 820)
             self.content[i].setLayout(self.formLayout[i])
 
         column = 0
@@ -650,7 +650,7 @@ class Ui_SUMOSettings():
         _translate = QtCore.QCoreApplication.translate
         self.label_compute_orientation.setText(_translate("MainWindow", "compute_orientation"))
         self.label_unrestricted_max_speed_default.setToolTip(_translate("MainWindow", "[m/s] default max. speed for SUMO for unrestricted sped limits"))
-        self.label_unrestricted_max_speed_default.setText(_translate("MainWindow", "unrestricted_max_speed_default"))
+        self.label_unrestricted_max_speed_default.setText(_translate("MainWindow", "unrestricted_max_speed_def"))
         self.label_lateral_resolution.setText(_translate("MainWindow", "lateral_resolution"))
         self.label_delta_steps.setToolTip(_translate("MainWindow", "number of sub-steps simulated in SUMO during every dt"))
         self.label_delta_steps.setText(_translate("MainWindow", "delta_steps"))
@@ -672,7 +672,7 @@ class Ui_SUMOSettings():
         self.label_veh_per_second.setText(_translate("MainWindow", "veh_per_second"))
         self.label_vehicle_length_interval.setText(_translate("MainWindow", "vehicle_length_interval"))
         self.label_unrestricted_speed_limit_default.setToolTip(_translate("MainWindow", "[m/s] default speed limit when no speed_limit is given"))
-        self.label_unrestricted_speed_limit_default.setText(_translate("MainWindow", "unrestricted_speed_limit_default"))
+        self.label_unrestricted_speed_limit_default.setText(_translate("MainWindow", "unrestricted_speed_limit_def"))
         self.label_fringe_factor.setText(_translate("MainWindow", "fringe_factor"))
         self.label_param_traffic_generation.setText(_translate("MainWindow", "Parameters for traffic generation"))
         self.label_lanelet_check_time_window.setToolTip(_translate("MainWindow", "Time window to detect the lanelet change in seconds"))

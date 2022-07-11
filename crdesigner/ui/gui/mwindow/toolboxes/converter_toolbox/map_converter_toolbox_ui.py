@@ -6,8 +6,8 @@ from crdesigner.ui.gui.mwindow.toolboxes.toolbox_ui import Toolbox
 
 
 class MapConversionToolboxUI(Toolbox):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, mwindow):
+        super().__init__(mwindow)
 
     def define_sections(self):
         """reimplement this to define all your sections

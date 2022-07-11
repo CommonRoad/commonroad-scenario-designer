@@ -13,17 +13,16 @@ class QHLine(QFrame):
 class SectionExpandButton(QPushButton):
     """a QPushbutton that can expand or collapse its section"""
 
-    def __init__(self, item, text="", parent=None):
+    def __init__(self, item, text="", parent=None, mwindow=None):
         super().__init__(text, parent)
+        self.mwindow = mwindow
         self.section = item
-        self.setStyleSheet("background-color: rgb(198, 198, 198);")
         self.section.setExpanded(True)
         self.clicked.connect(self.on_clicked)
+        self.update_window()
 
-        #color scheme
-        #self.setStyleSheet('background-color:rgb(0, 200, 110); color:rgb(20, 20, 20); font-size: 14pt')
-
-
+    def update_window(self):
+        self.setStyleSheet('background-color:' + self.mwindow.colorscheme()['highlight'] + '; color:' + self.mwindow.colorscheme()['highlighttext'] + '; font-size:' + self.mwindow.colorscheme()['font-size'])
 
     def on_clicked(self):
         """toggle expand/collapse of section by clicking"""
@@ -121,8 +120,10 @@ class Toolbox(QWidget):
     add them as (title, widget) tuples to self.sections
         """
 
-    def __init__(self):
+    def __init__(self, mwindow):
         super().__init__()
+        self.sectionExpandButton = []
+        self.mwindow = mwindow
         self.tree = QTreeWidget()
         self.tree.setHeaderHidden(True)
         layout = QVBoxLayout()
@@ -155,7 +156,8 @@ class Toolbox(QWidget):
         """
         item = QTreeWidgetItem()
         self.tree.addTopLevelItem(item)
-        self.tree.setItemWidget(item, 0, SectionExpandButton(item, text=title))
+        self.sectionExpandButton.append(SectionExpandButton(item, text=title, mwindow=self.mwindow))
+        self.tree.setItemWidget(item, 0, self.sectionExpandButton[-1])
         return item
 
     def add_widget(self, button, widget):
@@ -166,3 +168,7 @@ class Toolbox(QWidget):
         section.setDisabled(True)
         self.tree.setItemWidget(section, 0, widget)
         return section
+
+    def update_window(self):
+        for i in self.sectionExpandButton:
+            i.update_window()

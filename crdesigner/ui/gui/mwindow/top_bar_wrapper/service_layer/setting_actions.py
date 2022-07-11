@@ -31,7 +31,7 @@ def show_gui_settings(mwindow):
     """
         Show the gui settings.
     """
-    mwindow.gui_settings = GUISettings(mwindow)
+    mwindow.settings = GUISettings(mwindow)
 
 
 def show_sumo_settings(mwindow):
@@ -44,5 +44,5 @@ def show_settings(mwindow):
     """
             Show the settings.
     """
-    mwindow.gui_settings = Settings(mwindow)
+    mwindow.settings = Settings(mwindow)
 

@@ -41,8 +41,8 @@ class Ui_OSMSettings():
             self.content[i].setObjectName("scrollAreaWidgetContents_" + str(i))
             self.formLayout.append(QtWidgets.QFormLayout(self.content[i]))
             self.formLayout[i].setObjectName("form_" + str(i))
-            self.content[i].setMinimumSize(810 * self.factor, 820)
-            self.content[i].setMaximumSize(810 * self.factor, 820)
+            self.content[i].setMinimumSize(830 * self.factor, 820)
+            self.content[i].setMaximumSize(830 * self.factor, 820)
             self.content[i].setLayout(self.formLayout[i])
 
         column = 0

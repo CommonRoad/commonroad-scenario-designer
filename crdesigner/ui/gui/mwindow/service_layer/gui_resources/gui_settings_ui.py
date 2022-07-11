@@ -10,7 +10,7 @@ from PyQt5 import QtCore, QtWidgets, QtGui
 
 
 class Ui_GUISettings():
-    
+
     def __init__(self, h, c, wm, wf, f):
         self.columns = c
         self.height = h
@@ -41,8 +41,8 @@ class Ui_GUISettings():
             self.content[i].setObjectName("scrollAreaWidgetContents_" + str(i))
             self.formLayout.append(QtWidgets.QFormLayout(self.content[i]))
             self.formLayout[i].setObjectName("form_" + str(i))
-            self.content[i].setMinimumSize(810 * self.factor, 820)
-            self.content[i].setMaximumSize(810* self.factor, 820)
+            self.content[i].setMinimumSize(830 * self.factor, 820)
+            self.content[i].setMaximumSize(830 * self.factor, 820)
             self.content[i].setLayout(self.formLayout[i])
             self.HBoxLayout.addWidget(self.content[i])
 
@@ -65,6 +65,38 @@ class Ui_GUISettings():
         self.hL_0.addWidget(QtWidgets.QLabel(self.content[column]))
         self.formLayout[column].addRow(self.hL_0)
 
+        # colorscheme
+        self.hl_darkmode = QtWidgets.QHBoxLayout()
+        self.hl_darkmode.setObjectName("hl_darkmode")
+        self.label_darkmode = QtWidgets.QLabel(self.content[column])
+        self.label_darkmode.setObjectName("label_colorscheme")
+        self.label_darkmode.setMinimumSize(self.widthf, self.height)
+        self.chk_darkmode = QtWidgets.QCheckBox(self.content[column])
+        self.chk_darkmode.setText("")
+        self.chk_darkmode.setObjectName("chk_darkmode")
+        self.chk_darkmode.setMinimumSize(self.widthm, self.height)
+        self.hl_darkmode.addWidget(self.label_darkmode)
+        self.hl_darkmode.addWidget(self.chk_darkmode)
+        self.hl_darkmode.addWidget(QtWidgets.QLabel(self.content[column]))
+        self.formLayout[column].addRow(self.hl_darkmode)
+
+        # axis_visible
+        self.hL_axis_visible = QtWidgets.QHBoxLayout()
+        self.hL_axis_visible.setObjectName("hL_axis_visible")
+        self.label_axis_visible = QtWidgets.QLabel(self.content[column])
+        self.label_axis_visible.setObjectName("label_axis_visible")
+        self.label_axis_visible.setMinimumSize(self.widthf, self.height)
+        self.cmb_axis_visible = QtWidgets.QComboBox(self.content[column])
+        self.cmb_axis_visible.addItem('All')
+        self.cmb_axis_visible.addItem('Left/ Bottom')
+        self.cmb_axis_visible.addItem('None')
+        self.cmb_axis_visible.setObjectName("cmb_axis_visible")
+        self.cmb_axis_visible.setMinimumSize(self.widthm, self.height)
+        self.hL_axis_visible.addWidget(self.label_axis_visible)
+        self.hL_axis_visible.addWidget(self.cmb_axis_visible)
+        self.hL_axis_visible.addWidget(QtWidgets.QLabel(self.content[column]))
+        self.formLayout[column].addRow(self.hL_axis_visible)
+
         # obstacle options
         self.formLayout[column].addRow(QtWidgets.QLabel(self.content[column]))
         self.label_obstacle = QtWidgets.QLabel(self.content[column])
@@ -72,7 +104,7 @@ class Ui_GUISettings():
         self.label_obstacle.setObjectName("label_obstacles")
         self.formLayout[column].addRow(self.label_obstacle)
 
-        #draw_trajectory
+        # draw_trajectory
         self.hL_1 = QtWidgets.QHBoxLayout()
         self.hL_1.setObjectName("hL_1")
         self.label_draw_trajectory = QtWidgets.QLabel(self.content[column])
@@ -298,6 +330,8 @@ class Ui_GUISettings():
 
         self.label_autofocus.setText(_translate("MainWindow", "Autofocus"))
         self.label_draw_trajectory.setText(_translate("MainWindow", "Draw trajectory"))
+        self.label_axis_visible.setText(_translate("MainWindow", "Axis visibility"))
+        self.label_darkmode.setText(_translate('MainWindow', 'Darkmode'))
         self.label_draw_intersection.setText(_translate("MainWindow", "Draw intersections"))
         self.label_draw_label.setText(_translate("MainWindow", "Draw obstacle labels"))
         self.label_draw_obstacle_icon.setText(_translate("MainWindow", "Draw obstacle icons"))
