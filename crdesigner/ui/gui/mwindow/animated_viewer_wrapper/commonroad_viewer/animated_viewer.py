@@ -193,7 +193,8 @@ class AnimatedViewer:
         if self.current_scenario is None:
             return 0
         timesteps = [
-            obstacle.prediction.occupancy_set[-1].time_step
+            #obstacle.prediction.occupancy_set[-1].time_step
+            obstacle.prediction.trajectory.state_list[-1].time_step
             for obstacle in self.current_scenario.dynamic_obstacles
             for obstacle in self.current_scenario.dynamic_obstacles
         ]
