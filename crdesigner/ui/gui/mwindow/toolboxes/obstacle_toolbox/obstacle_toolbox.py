@@ -290,6 +290,9 @@ class ObstacleToolbox(QDockWidget):
         # acceleration
         state_dictionary['acceleration'] = 0.0
 
+        # steering angle
+        state_dictionary['steering_angle'] = 0.0
+
         # add first state to state list
         first_state = State(**state_dictionary)
         state_list = [first_state]
@@ -332,6 +335,7 @@ class ObstacleToolbox(QDockWidget):
         #So maybe scheduler is better.
         #Or some other way to continuously call this function with parameter key == "shift" so we can just
         #duplicate previous state and only modify time_step.
+
         obstacle = self.active_obstacle
 
         if self.start_trajectory_recording == False:
@@ -340,7 +344,12 @@ class ObstacleToolbox(QDockWidget):
         if obstacle is None:
             return
 
-        state = obstacle.prediction.trajectory.state_list[-1]
+        # TODO: make new state and copy state list
+        new_trajectory = Trajectory(obstacle.initial_state.time_step, obstacle.prediction.trajectory.state_list)
+        state = new_trajectory.state_list[-1]
+        #state = obstacle.prediction.trajectory.state_list[-1]
+        # set them initially to zero, both global
+        # for each click update them until some limit
         d_acc = 10.0
         d_steering = 0.001
         vehicle = VehicleDynamics.KS(VehicleType.BMW_320i)
@@ -350,7 +359,8 @@ class ObstacleToolbox(QDockWidget):
             input_state = State(
                     steering_angle_speed=0,
                     acceleration=d_acc,
-                    time_step=0
+                    time_step=0,
+                    yaw_rate=0
             )
         elif key == "shift+down":
             print("down")
@@ -385,10 +395,16 @@ class ObstacleToolbox(QDockWidget):
             return
 
         try:
+            # have this in settings
             next_state = vehicle.simulate_next_state(state, input_state, 0.5)
         except Exception as e:
             next_state = state
-        obstacle.prediction.trajectory.state_list.append(next_state)
+        # needed so that I can add states to the state list. All states must have the same properties.
+        next_state.yaw_rate = 0.0
+        next_state.slip_angle = 0.0
+        next_state.acceleration = 0.0
+        new_trajectory.state_list.append(next_state)
+        obstacle.prediction.trajectory = new_trajectory
         self.callback(self.current_scenario)
 
     def calc_state_list(self) -> List[State]:
