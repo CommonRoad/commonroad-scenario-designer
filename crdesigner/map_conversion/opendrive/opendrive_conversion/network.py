@@ -228,7 +228,7 @@ class Network:
             self.export_lanelet_network(
                 filter_types=filter_types
                 if isinstance(filter_types, list)
-                else ["driving", "onRamp", "offRamp", "exit", "entry", "sidewalk"]
+                else ["driving", "onRamp", "offRamp", "exit", "entry", "sidewalk", "shoulder", "crosswalk"]
             )
         )
 

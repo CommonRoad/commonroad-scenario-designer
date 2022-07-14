@@ -29,7 +29,7 @@ class TestCommonRoadToLaneletConversion(unittest.TestCase):
         """Load the osm file and convert it to a scenario."""
         try:
             commonroad_reader = CommonRoadFileReader(
-                f"{os.path.dirname(os.path.realpath(__file__))}/lanelet_lanelet2_test_files/{xml_file_name}.xml"
+                f"{os.path.dirname(os.path.realpath(__file__))}/test_maps/lanelet_lanelet2/{xml_file_name}.xml"
             )
             scenario, _ = commonroad_reader.open()
             l2osm = CR2LaneletConverter(self.proj_string)
@@ -45,7 +45,7 @@ class TestCommonRoadToLaneletConversion(unittest.TestCase):
         """Test if converted scenario is equal to the loaded xml file.
         Disregard the different dates.
         """
-        fh = f"{os.path.dirname(os.path.realpath(__file__))}/lanelet_lanelet2_test_files/{xml_file_name}_from_cr.osm"
+        fh = f"{os.path.dirname(os.path.realpath(__file__))}/test_maps/lanelet_lanelet2/{xml_file_name}_from_cr.osm"
         parser = etree.XMLParser(remove_blank_text=True)
         tree_import = etree.parse(fh, parser=parser).getroot()
 
