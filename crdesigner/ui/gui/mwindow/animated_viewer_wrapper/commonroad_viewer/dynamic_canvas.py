@@ -102,7 +102,7 @@ class DynamicCanvas(FigureCanvas):
         Zoom in / out function in Dynamic Canvas by using mouse wheel.
         """
         if self.animated_viewer.original_lanelet_network is None:
-            return
+            return  # if no scenario was loaded or no map was created yet
 
         center, x_dim, y_dim, _, _ = self.get_center_and_axes_values()
 
