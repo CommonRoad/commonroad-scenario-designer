@@ -101,6 +101,9 @@ class DynamicCanvas(FigureCanvas):
         """
         Zoom in / out function in Dynamic Canvas by using mouse wheel.
         """
+        if self.animated_viewer.original_lanelet_network is None:
+            return
+
         center, x_dim, y_dim, _, _ = self.get_center_and_axes_values()
 
         # enlarge / shrink limits
