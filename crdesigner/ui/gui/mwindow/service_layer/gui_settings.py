@@ -38,6 +38,7 @@ class GUISettings:
         self.window.chk_draw_intersection_label.setChecked(config.DRAW_INTERSECTION_LABELS)
         self.window.cmb_axis_visible.setCurrentText(config.AXIS_VISIBLE)
         self.window.chk_darkmode.setChecked(config.DARKMODE)
+        self.window.chk_legend.setChecked(config.LEGEND)
         return
 
     def save_to_config(self):
@@ -59,6 +60,7 @@ class GUISettings:
         config.DRAW_INTERSECTION_LABELS = self.window.chk_draw_intersection_label.isChecked()
         config.AXIS_VISIBLE = str(self.window.cmb_axis_visible.currentText())
         config.DARKMODE = self.window.chk_darkmode.isChecked()
+        config.LEGEND = self.window.chk_legend.isChecked()
 
     def has_valid_entries(self) -> bool:
         """
@@ -109,7 +111,6 @@ class GUISettings:
                         successors=config.DRAW_SUCCESSORS,
                         intersection_labels=config.DRAW_INTERSECTION_LABELS,
                         colorscheme=self.parent.cr_designer.colorscheme(), )
-        #self.parent.canvas.update_obstacle_trajectory_params()
         if self.parent.cr_designer.animated_viewer_wrapper.cr_viewer.current_scenario != None:
             self.parent.cr_designer.animated_viewer_wrapper.cr_viewer.update_plot()
         self.parent.cr_designer.update_window()

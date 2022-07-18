@@ -130,9 +130,10 @@ class MWindow(QMainWindow, Ui_mainWindow):
         p.setColor(QtGui.QPalette.ColorRole.ButtonText, QtGui.QColor(self.colorscheme()['color']))
         p.setColor(QtGui.QPalette.ColorRole.Text, QtGui.QColor(self.colorscheme()['color']))
         p.setColor(QtGui.QPalette.ColorRole.WindowText, QtGui.QColor(self.colorscheme()['color']))
+        p.setColor(QtGui.QPalette.ColorRole.AlternateBase, QtGui.QColor(self.colorscheme()['background']))
         self.setPalette(p)
 
         self.road_network_toolbox.road_network_toolbox_ui.update_window()
         self.obstacle_toolbox.obstacle_toolbox_ui.update_window()
         self.converter_toolbox.converter_toolbox.update_window()
-        self.animated_viewer_wrapper.cr_viewer.update_window()
+        self.animated_viewer_wrapper.update_window()
