@@ -1,3 +1,4 @@
+from PyQt5 import QtGui
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
@@ -24,6 +25,7 @@ class SectionExpandButton(QPushButton):
     def update_window(self):
         self.setStyleSheet('background-color:' + self.mwindow.colorscheme()['highlight'] + '; color:' + self.mwindow.colorscheme()['highlighttext'] + '; font-size:' + self.mwindow.colorscheme()['font-size'])
 
+
     def on_clicked(self):
         """toggle expand/collapse of section by clicking"""
         if self.section.isExpanded():
@@ -33,10 +35,12 @@ class SectionExpandButton(QPushButton):
 
 
 class CheckableComboBox(QComboBox):
-    def __init__(self):
+    def __init__(self, mwindow = None):
         super(CheckableComboBox, self).__init__()
+        self.mwindow = mwindow
         self.view().pressed.connect(self.handle_item_pressed)
         self.setModel(QStandardItemModel(self))
+        self.update_window()
 
     def handle_item_pressed(self, index):
 
@@ -112,6 +116,18 @@ class CheckableComboBox(QComboBox):
 
                 # increment count
             count += 1
+
+    def update_window(self):
+        if self.mwindow:
+            p = QtGui.QPalette()
+            p.setColor(QtGui.QPalette.ColorRole.Window, QtGui.QColor(self.mwindow.colorscheme()['background']))
+            p.setColor(QtGui.QPalette.ColorRole.Base, QtGui.QColor(self.mwindow.colorscheme()['color']))
+            p.setColor(QtGui.QPalette.ColorRole.Button, QtGui.QColor(self.mwindow.colorscheme()['background']))
+            p.setColor(QtGui.QPalette.ColorRole.ButtonText, QtGui.QColor(self.mwindow.colorscheme()['color']))
+            p.setColor(QtGui.QPalette.ColorRole.Text, QtGui.QColor(self.mwindow.colorscheme()['color']))
+            p.setColor(QtGui.QPalette.ColorRole.WindowText, QtGui.QColor(self.mwindow.colorscheme()['color']))
+            p.setColor(QtGui.QPalette.ColorRole.AlternateBase, QtGui.QColor(self.mwindow.colorscheme()['background']))
+            self.setPalette(p)
 
 
 class Toolbox(QWidget):

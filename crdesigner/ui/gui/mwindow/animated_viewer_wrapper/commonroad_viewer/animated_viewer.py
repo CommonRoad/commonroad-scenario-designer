@@ -10,6 +10,8 @@ from commonroad.scenario.lanelet import Lanelet, LaneletNetwork
 from commonroad.visualization.mp_renderer import MPRenderer
 
 from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMO_AVAILABLE
+from ...service_layer import config
+
 if SUMO_AVAILABLE:
     from crdesigner.map_conversion.sumo_map.config import SumoConfig
 from crdesigner.ui.gui.mwindow.service_layer.util import Observable
@@ -254,8 +256,9 @@ class AnimatedViewer:
             self.draw_lanelet_vertices(lanelet, ax)
 
         handles, labels = ax.get_legend_handles_labels()
-        legend = ax.legend(handles, labels)
-        legend.set_zorder(50)
+        if sel_lanelet != None and config.LEGEND:
+            legend = ax.legend(handles, labels)
+            legend.set_zorder(50)
 
         if focus_on_network:
             # can we focus on a selection?

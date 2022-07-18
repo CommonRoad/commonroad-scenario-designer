@@ -41,31 +41,21 @@ class Ui_GUISettings():
             self.content[i].setObjectName("scrollAreaWidgetContents_" + str(i))
             self.formLayout.append(QtWidgets.QFormLayout(self.content[i]))
             self.formLayout[i].setObjectName("form_" + str(i))
-            self.content[i].setMinimumSize(830 * self.factor, 820)
-            self.content[i].setMaximumSize(830 * self.factor, 820)
+            self.content[i].setMinimumSize(860 * self.factor, 820)
+            self.content[i].setMaximumSize(860 * self.factor, 820)
             self.content[i].setLayout(self.formLayout[i])
             self.HBoxLayout.addWidget(self.content[i])
 
         column = 0
 
-        #autofocus
-        #horizontal layout for three widgets (always same structure)
-        self.hL_0 = QtWidgets.QHBoxLayout()
-        self.hL_0.setObjectName("hL_0")
-        self.label_autofocus = QtWidgets.QLabel(self.content[column])
-        self.label_autofocus.setObjectName("label_autofocus")
-        self.label_autofocus.setMinimumSize(self.widthf, self.height)
-        self.chk_autofocus = QtWidgets.QCheckBox(self.content[column])
-        self.chk_autofocus.setText("")
-        self.chk_autofocus.setObjectName("chk_autofocus")
-        self.chk_autofocus.setMinimumSize(self.widthm, self.height)
-        self.hL_0.addWidget(self.label_autofocus)
-        self.hL_0.addWidget(self.chk_autofocus)
-        #third widget to seperate columns
-        self.hL_0.addWidget(QtWidgets.QLabel(self.content[column]))
-        self.formLayout[column].addRow(self.hL_0)
+        #appearance
+        self.label_appearance = QtWidgets.QLabel(self.content[column])
+        self.label_appearance.setFont(QtGui.QFont("Arial", 11, QtGui.QFont.Bold))
+        self.label_appearance.setObjectName("label_appearances")
+        self.formLayout[column].addRow(self.label_appearance)
+        
 
-        # colorscheme
+        #colorscheme
         self.hl_darkmode = QtWidgets.QHBoxLayout()
         self.hl_darkmode.setObjectName("hl_darkmode")
         self.label_darkmode = QtWidgets.QLabel(self.content[column])
@@ -96,6 +86,21 @@ class Ui_GUISettings():
         self.hL_axis_visible.addWidget(self.cmb_axis_visible)
         self.hL_axis_visible.addWidget(QtWidgets.QLabel(self.content[column]))
         self.formLayout[column].addRow(self.hL_axis_visible)
+
+        #showing legend
+        self.hl_legend = QtWidgets.QHBoxLayout()
+        self.hl_legend.setObjectName("hl_legend")
+        self.label_legend = QtWidgets.QLabel(self.content[column])
+        self.label_legend.setObjectName("label_legend")
+        self.label_legend.setMinimumSize(self.widthf, self.height)
+        self.chk_legend = QtWidgets.QCheckBox(self.content[column])
+        self.chk_legend.setText("")
+        self.chk_legend.setObjectName("chk_legend")
+        self.chk_legend.setMinimumSize(self.widthm, self.height)
+        self.hl_legend.addWidget(self.label_legend)
+        self.hl_legend.addWidget(self.chk_legend)
+        self.hl_legend.addWidget(QtWidgets.QLabel(self.content[column]))
+        self.formLayout[column].addRow(self.hl_legend)
 
         # obstacle options
         self.formLayout[column].addRow(QtWidgets.QLabel(self.content[column]))
@@ -254,11 +259,22 @@ class Ui_GUISettings():
         self.label_other.setObjectName("label_other")
         self.formLayout[column].addRow(self.label_other)
 
-        # occupancy options
-        # self.label_occupancy = QtWidgets.QLabel(self.content[column])
-        # self.label_occupancy.setFont(QtGui.QFont("Arial", 11, QtGui.QFont.Bold))
-        # self.label_occupancy.setObjectName("label_occupancy")
-        # self.formLayout[column].addRow(self.label_occupancy)
+        # autofocus
+        # horizontal layout for three widgets (always same structure)
+        self.hL_0 = QtWidgets.QHBoxLayout()
+        self.hL_0.setObjectName("hL_0")
+        self.label_autofocus = QtWidgets.QLabel(self.content[column])
+        self.label_autofocus.setObjectName("label_autofocus")
+        self.label_autofocus.setMinimumSize(self.widthf, self.height)
+        self.chk_autofocus = QtWidgets.QCheckBox(self.content[column])
+        self.chk_autofocus.setText("")
+        self.chk_autofocus.setObjectName("chk_autofocus")
+        self.chk_autofocus.setMinimumSize(self.widthm, self.height)
+        self.hL_0.addWidget(self.label_autofocus)
+        self.hL_0.addWidget(self.chk_autofocus)
+        # third widget to seperate columns
+        self.hL_0.addWidget(QtWidgets.QLabel(self.content[column]))
+        self.formLayout[column].addRow(self.hL_0)
 
         # draw_occupancy
         self.hL_10 = QtWidgets.QHBoxLayout()
@@ -274,12 +290,6 @@ class Ui_GUISettings():
         self.hL_10.addWidget(self.chk_draw_occupancy)
         self.hL_10.addWidget(QtWidgets.QLabel(self.content[column]))
         self.formLayout[column].addRow(self.hL_10)
-        
-        # traffic sign options
-        # self.label_traffic_sign = QtWidgets.QLabel(self.content[column])
-        # self.label_traffic_sign.setFont(QtGui.QFont("Arial", 11, QtGui.QFont.Bold))
-        # self.label_traffic_sign.setObjectName("label_traffic_sign")
-        # self.formLayout[column].addRow(self.label_traffic_sign)
 
         # draw_traffic_sign
         self.hL_11 = QtWidgets.QHBoxLayout()
@@ -328,10 +338,12 @@ class Ui_GUISettings():
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
 
+        self.label_appearance.setText(_translate("MainWindow", "Appearance"))
         self.label_autofocus.setText(_translate("MainWindow", "Autofocus"))
         self.label_draw_trajectory.setText(_translate("MainWindow", "Draw trajectory"))
         self.label_axis_visible.setText(_translate("MainWindow", "Axis visibility"))
         self.label_darkmode.setText(_translate('MainWindow', 'Darkmode'))
+        self.label_legend.setText(_translate('MainWindow', 'Legend'))
         self.label_draw_intersection.setText(_translate("MainWindow", "Draw intersections"))
         self.label_draw_label.setText(_translate("MainWindow", "Draw obstacle labels"))
         self.label_draw_obstacle_icon.setText(_translate("MainWindow", "Draw obstacle icons"))

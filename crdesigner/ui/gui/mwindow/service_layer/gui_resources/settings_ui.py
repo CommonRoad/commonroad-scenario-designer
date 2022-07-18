@@ -14,15 +14,15 @@ import crdesigner.ui.gui.mwindow.service_layer.gui_resources.osm_settings_ui as 
 HEIGHT = 25
 COLUMNS = 2
 WIDTHF = 280
-WIDTHM = 360
-FACTOR = 0.65
+WIDTHM = 390
+FACTOR = 0.7
 
 class Ui_Settings(object):
     def setupUi(self, Settings, mwindow):
         self.mwindow = mwindow
         self.settings = Settings
         self.settings.setObjectName("Settings")
-        self.settings.resize(1800 * FACTOR, 1100 * FACTOR)
+        self.settings.resize(1820 * FACTOR, 1150 * FACTOR)
         self.centralwidget = QtWidgets.QWidget(Settings)
         self.centralwidget.setObjectName("centralwidget")
         self.centralLayout = QtWidgets.QVBoxLayout(self.centralwidget)

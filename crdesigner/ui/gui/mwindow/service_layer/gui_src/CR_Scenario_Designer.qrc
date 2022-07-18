@@ -15,9 +15,11 @@
     <file>close.png</file>
     <file>play.png</file>
     <file>pause.png</file>
+    <file>pause_darkmode.png</file>
     <file>save_video.png</file>
     <file>obstacle_toolbox.png</file>
     <file>road_network_toolbox.png</file>
-    <file>iconmonstr-trash-can-1.svg</file>
+    <file>iconmonstr-trash-can.svg</file>
+    <file>iconmonstr-trash-can-darkmode.png</file>
   </qresource>
 </RCC>
