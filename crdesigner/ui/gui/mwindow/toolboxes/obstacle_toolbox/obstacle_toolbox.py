@@ -57,6 +57,11 @@ class ObstacleToolbox(QDockWidget):
         self._start_trajectory_recording = False
         self._active_obstacle = None
 
+        # variables to keep track of the input steering and acceleration when creating trajectories for dyn. obst.
+        self.obstacle_acceleration = 0.0
+        self.obstacle_steering = 0.0
+        self.accel = 5.0
+
         if SUMO_AVAILABLE:
             self.sumo_simulation = SUMOSimulation(tmp_folder=tmp_folder)
         else:
@@ -86,6 +91,8 @@ class ObstacleToolbox(QDockWidget):
     def active_obstacle(self, obstacle):
         assert isinstance(obstacle, DynamicObstacle)
         self._active_obstacle = obstacle
+        self.obstacle_acceleration = 0.0
+        self.obstacle_steering = 0.0
 
     def init_canvas(self):
         """
@@ -238,7 +245,7 @@ class ObstacleToolbox(QDockWidget):
             shape = Rectangle(
                     length=float(self.obstacle_toolbox_ui.obstacle_length.text()),
                     width=float(self.obstacle_toolbox_ui.obstacle_width.text()),
-                    orientation=float(self.obstacle_toolbox_ui.obstacle_orientation.text())
+                    orientation=math.radians(float(self.obstacle_toolbox_ui.obstacle_orientation.text()))
             )
         elif self.obstacle_toolbox_ui.obstacle_shape.currentText() == "Circle":
             shape = Circle(radius=float(self.obstacle_toolbox_ui.obstacle_radius.text()))
@@ -260,9 +267,9 @@ class ObstacleToolbox(QDockWidget):
 
         # orientation
         if self.obstacle_toolbox_ui.initial_state_orientation.text() != "":
-            state_dictionary['orientation'] = float(self.obstacle_toolbox_ui.initial_state_orientation.text())
+            state_dictionary['orientation'] = math.radians(float(self.obstacle_toolbox_ui.initial_state_orientation.text()))
         else:
-            state_dictionary['orientation'] = float(self.obstacle_toolbox_ui.initial_state_orientation.placeholderText())
+            state_dictionary['orientation'] = math.radians(float(self.obstacle_toolbox_ui.initial_state_orientation.placeholderText()))
 
         # time step
         if self.obstacle_toolbox_ui.initial_state_time.text() != "":
@@ -290,8 +297,14 @@ class ObstacleToolbox(QDockWidget):
         # acceleration
         state_dictionary['acceleration'] = 0.0
 
+        # acceleration_y
+        state_dictionary['acceleration_y'] = 0.0
+
         # steering angle
         state_dictionary['steering_angle'] = 0.0
+
+        # velocity_y
+        state_dictionary['velocity_y'] = 0.0
 
         # add first state to state list
         first_state = State(**state_dictionary)
@@ -330,12 +343,7 @@ class ObstacleToolbox(QDockWidget):
         return shape
 
     def record_trajectory(self, key):
-        #Do some kind of timer or scheduler like https://stackoverflow.com/questions/3393612/run-certain-code-every-n-seconds
-        #Using the timer approach (first solution in link) produces RecursionError: maximu recursion depth exceeded
-        #So maybe scheduler is better.
-        #Or some other way to continuously call this function with parameter key == "shift" so we can just
-        #duplicate previous state and only modify time_step.
-
+        USING_PM = True
         obstacle = self.active_obstacle
 
         if self.start_trajectory_recording == False:
@@ -344,67 +352,110 @@ class ObstacleToolbox(QDockWidget):
         if obstacle is None:
             return
 
-        # TODO: make new state and copy state list
-        new_trajectory = Trajectory(obstacle.initial_state.time_step, obstacle.prediction.trajectory.state_list)
-        state = new_trajectory.state_list[-1]
-        #state = obstacle.prediction.trajectory.state_list[-1]
+        state_list = obstacle.prediction.trajectory.state_list
+        state = state_list[-1]
+
+        # check which vehicle model is selected
+        if USING_PM:
+            # convert the initial state depending on selected vehicle model
+            if state_list[0] == state_list[-1]:
+                del state.acceleration
+                del state.acceleration_y
+                del state.slip_angle
+                del state.steering_angle
+                del state.yaw_rate
+
         # set them initially to zero, both global
         # for each click update them until some limit
-        d_acc = 10.0
+        d_acc = 2.0
         d_steering = 0.001
-        vehicle = VehicleDynamics.KS(VehicleType.BMW_320i)
+        vehicle = VehicleDynamics.PM(VehicleType.FORD_ESCORT)
+
+        # convert states depending on vehicle model
+        # Delete unnecessary attributes of states if using point mass
 
         if key == "shift+up":
-            print("up")
+            # Check if we exceed maximum acceleration when adding delta acc.
+            # If we exceed, take max. possible acceleration
+            if vehicle.input_within_bounds((0, self.obstacle_acceleration + d_acc)):
+                self.obstacle_acceleration = self.obstacle_acceleration + d_acc
+            else:
+                self.obstacle_acceleration = vehicle.input_bounds.ub[1]
+
             input_state = State(
-                    steering_angle_speed=0,
-                    acceleration=d_acc,
+                    #steering_angle_speed=0,
+                    acceleration=10,
                     time_step=0,
-                    yaw_rate=0
+                    acceleration_y=0
             )
         elif key == "shift+down":
-            print("down")
+            # Check if we exceed maximum deceleration when adding delta acc.
+            # If we exceed, take max. possible deceleration
+            if vehicle.input_within_bounds((0, self.obstacle_acceleration - d_acc)):
+                self.obstacle_acceleration = self.obstacle_acceleration - d_acc
+            else:
+                self.obstacle_acceleration = vehicle.input_bounds.lb[1]
+
             input_state = State(
-                    steering_angle_speed=0,
-                    acceleration=-d_acc,
-                    time_step=0
+                    #steering_angle_speed=0,
+                    acceleration=-10.5,
+                    time_step=0,
+                    acceleration_y =0
             )
         elif key == "shift+left":
-            print("left")
+            # Check if we exceed maximum pos. steering velocity when adding delta steering vel.,
+            # If we exceed, take max. possible steering vel.
+            #if vehicle.input_within_bounds((self.obstacle_steering + d_steering, 0)):
+            #    self.obstacle_steering = self.obstacle_steering + d_steering
+            #else:
+            #    self.obstacle_steering = vehicle.input_bounds.ub[0]
+            #self.accel = self.accel + 2
+            #if self.accel > 10:
+            #    self.accel = 10
             input_state = State(
-                    steering_angle_speed=-d_steering,
-                    acceleration=0,
-                    time_step=0
+                    acceleration=-4.0,
+                    time_step=0,
+                    acceleration_y=10
             )
         elif key == "shift+right":
-            print("right")
+            # Check if we exceed maximum neg. steering velocity when adding delta steering vel.,
+            # If we exceed, take max. possible steering vel.
+            if vehicle.input_within_bounds((self.obstacle_steering - d_steering, 1)):
+                self.obstacle_steering = self.obstacle_steering - d_steering
+            else:
+                self.obstacle_steering = vehicle.input_bounds.lb[0]
+
+            self.accel = self.accel + 2
+
             input_state = State(
-                    steering_angle_speed=d_steering,
-                    acceleration=0,
-                    time_step=0
+                    #steering_angle_speed=-d_steering,
+                    acceleration=-4.0,
+                    time_step=0,
+                    acceleration_y =-10
             )
-        elif key == "shift":
-            print("duplicate state")
+        elif key == "D":
             input_state = State(
-                    steering_angle_speed=0,
                     acceleration=0,
-                    time_step=0
+                    time_step=0,
+                    acceleration_y = 0.0
             )
         else:
-            print("none")
             return
 
         try:
             # have this in settings
-            next_state = vehicle.simulate_next_state(state, input_state, 0.5)
+            next_state = vehicle.simulate_next_state(state, input_state, 0.2)
         except Exception as e:
             next_state = state
-        # needed so that I can add states to the state list. All states must have the same properties.
-        next_state.yaw_rate = 0.0
-        next_state.slip_angle = 0.0
-        next_state.acceleration = 0.0
-        new_trajectory.state_list.append(next_state)
-        obstacle.prediction.trajectory = new_trajectory
+            print(e)
+
+        # no reverse driving
+        if next_state.velocity < 0:
+            next_state.position = state.position
+        state_list.append(next_state)
+        new_trajectory = Trajectory(obstacle.initial_state.time_step, state_list)
+        new_pred = TrajectoryPrediction(new_trajectory, obstacle.obstacle_shape, None, None)
+        obstacle.prediction = new_pred
         self.callback(self.current_scenario)
 
     def calc_state_list(self) -> List[State]:
