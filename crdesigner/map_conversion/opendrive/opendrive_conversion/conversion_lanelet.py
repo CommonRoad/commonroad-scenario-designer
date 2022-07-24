@@ -377,12 +377,13 @@ class ConversionLanelet(Lanelet):
         """Move vertices of one border by mirroring other border with
         a specified distance.
 
-        :param mirror_botder: Which border to mirror, either 'left' or 'right'.
+        :param mirror_border: Which border to mirror, either 'left' or 'right'.
         :type mirror_border: str
         :param mirror_interval: Tuple of two values, specifying start and end of mirroring.
         :type mirror_interval: Tuple[float, float]
         :param distance: Specifying distance at start and at end of mirroring
         :type distance: np.ndarray
+        :param adjacent_lanelet: The adjacent lanelet.
         """
         if mirror_border == "left":
             distance[:] = [-1 * x for x in distance]
@@ -409,6 +410,7 @@ class ConversionLanelet(Lanelet):
         :type s_pos: float
         :param width_offset: Offset to add to calculated width in reference to the reference border, default is 0.0.
         :type width_offset: float
+        :param compute_curvature: Boolean indicating whether curvature should be computed
         :return: Cartesian coordinates of point on inner border and tangential direction.
         :rtype: Tuple[Tuple[float, float], float, float, float]
         """

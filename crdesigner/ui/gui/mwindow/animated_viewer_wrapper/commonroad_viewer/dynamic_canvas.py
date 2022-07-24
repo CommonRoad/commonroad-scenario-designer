@@ -270,12 +270,13 @@ class DynamicCanvas(FigureCanvas):
     def dynamic_canvas_click_callback(self, mouse_clicked_event):
         """
         General callback for clicking in the dynamic canvas, two things are checked:
-            1. If the lanelet network of the current network should be resized.
-            2. When a lanelet was selected execute the logic behind it.
-                a) Select lanelets by clicking on the canvas. Selects only one of the lanelets that contains the click
-                   position.
+        1. If the lanelet network of the current network should be resized.
+        2. When a lanelet was selected execute the logic behind it.
+        b) Select lanelets by clicking on the canvas. Selects only one of the lanelets that contains the click
+        position.
         This order is important - first the resizing and then the lanelet selection - otherwise the lanelets of the old
         map are selected and then not visualized.
+
         :params mouse_clicked_event:
         """
         # when the mouse is clicked we remember where this was -> use this for lanelet selection
@@ -359,12 +360,14 @@ class DynamicCanvas(FigureCanvas):
 
     def get_center_and_axes_values(self) -> ((float, float), float, float, (float, float), (float, float)):
         """
-        Used to get the new dimensions of the current Dynamic Canvas and other meta data about it.
-        :returns : center := touple (x,y) of center,
-                   x_dim := absolut size of x axis,
-                   y_dim := absolut size of y axis,
-                   xlim := touple of x axis limits (x_min, x_max),
-                   ylim := touple of y axis limits (y_min, y_max)
+        Used to get the new dimensions of the current Dynamic Canvas and other meta-data about it.
+
+        :returns :
+        center := tuple (x,y) of center,
+        x_dim := absolut size of x-axis,
+        y_dim := absolut size of y-axis,
+        xlim := tuple of x-axis limits (x_min, x_max),
+        ylim := tuple of y-axis limits (y_min, y_max)
         """
         x_min, x_max = self.ax.get_xlim()
         y_min, y_max = self.ax.get_ylim()

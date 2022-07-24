@@ -1,6 +1,6 @@
 from .general_services import detailed_drawing_params_threshold_zoom_met
 from .general_services import is_big_map
-
+from typing import Dict
 
 modified_draw_params = False
 PARAMS_OBSTACLE_CUSTOM = None
@@ -20,10 +20,11 @@ def update_draw_params_based_on_scenario(lanelet_count: int, traffic_sign_count:
     Currently there are 2 Options: Either the detailed parameter or the undetailed. Undetailed are used on large maps
     when zoomed out to improve performance.
     (lanelet_count and traffic_sign_count act as approximation for complexity)
+
     :param lanelet_count: how many lanelets are in the lanelet network.
     :param traffic_sign_count: how many traffic signs are in the network.
     :return: detailed, or not detailed draw_params depending on size of scenario
-        if custom draw_params are used, they are returned
+    if custom draw_params are used, they are returned
     """
     if modified_draw_params:
         return PARAMS_DRAW_CUSTOM
@@ -38,10 +39,11 @@ def update_draw_params_dynamic_based_on_scenario(lanelet_count: int, traffic_sig
     """
     Same as update_draw_params_based_on_scenario, but returns parameters for dynamic visualizations.
     Also based on complexity of lanelet network.
+
     :param lanelet_count: how many lanelets are in the lanelet network.
     :param traffic_sign_count: how many traffic signs are in the network.
     :return: detailed, or not detailed draw_params depending on size of scenario
-        if custom draw_params are used, they are returned
+    if custom draw_params are used, they are returned
     """
     if modified_draw_params:
         return PARAMS_DRAW_CUSTOM
@@ -56,10 +58,11 @@ def update_draw_params_based_on_zoom(x: float, y: float) -> {}:
     """
     Return the parameter for drawing a lanelet network in the Dynamic Canvas based on zoom into the canvas.
     When zoomed in enough display the details.
+
     :param x: Absolut value of x axis in Dynamic Canvas
     :param y: Absolut value of y axis in Dynamic Canvas
     :return: detailed, or not detailed draw_params depending on size of scenario
-        if custom draw_params are used, they are returned
+    if custom draw_params are used, they are returned
     """
     if modified_draw_params:
         return PARAMS_DRAW_CUSTOM
@@ -71,13 +74,14 @@ def update_draw_params_based_on_zoom(x: float, y: float) -> {}:
         return PARAMS_DRAW_UNDETAILED
 
 
-def update_draw_params_dynamic_only_based_on_zoom(x: float, y: float) -> {}:
+def update_draw_params_dynamic_only_based_on_zoom(x: float, y: float) -> Dict:
     """
     Same as update_draw_params_based_on_zoom but returns parameter for Dynamic Visualization.
-    :param x: Absolut value of x axis in Dynamic Canvas
-    :param y: Absolut value of y axis in Dynamic Canvas
+
+    :param x: Absolut value of x-axis in Dynamic Canvas
+    :param y: Absolut value of y-axis in Dynamic Canvas
     :return: detailed, or not detailed draw_params depending on size of scenario
-        if custom draw_params are used, they are returned
+    if custom draw_params are used, they are returned
     """
     if modified_draw_params:
         return PARAMS_DRAW_DYNAMIC_CUSTOM
