@@ -343,7 +343,8 @@ class ObstacleToolbox(QDockWidget):
         return shape
 
     def record_trajectory(self, key):
-        USING_PM = True
+        USING_PM = False
+        USING_KS = True
         obstacle = self.active_obstacle
 
         if self.start_trajectory_recording == False:
@@ -355,108 +356,111 @@ class ObstacleToolbox(QDockWidget):
         state_list = obstacle.prediction.trajectory.state_list
         state = state_list[-1]
 
-        # check which vehicle model is selected
+        # check which vehicle model is selected, convert the initial state depending on selected vehicle model
         if USING_PM:
-            # convert the initial state depending on selected vehicle model
             if state_list[0] == state_list[-1]:
                 del state.acceleration
                 del state.acceleration_y
                 del state.slip_angle
                 del state.steering_angle
                 del state.yaw_rate
+        elif USING_KS:
+            if state_list[0] == state_list[-1]:
+                del state.yaw_rate
+                del state.slip_angle
+                del state.acceleration
+                del state.acceleration_y
+                del state.velocity_y
 
         # set them initially to zero, both global
         # for each click update them until some limit
         d_acc = 2.0
         d_steering = 0.001
-        vehicle = VehicleDynamics.PM(VehicleType.FORD_ESCORT)
+        vehicle = VehicleDynamics.KS(VehicleType.FORD_ESCORT)
 
-        # convert states depending on vehicle model
-        # Delete unnecessary attributes of states if using point mass
-
-        if key == "shift+up":
-            # Check if we exceed maximum acceleration when adding delta acc.
-            # If we exceed, take max. possible acceleration
-            if vehicle.input_within_bounds((0, self.obstacle_acceleration + d_acc)):
-                self.obstacle_acceleration = self.obstacle_acceleration + d_acc
-            else:
-                self.obstacle_acceleration = vehicle.input_bounds.ub[1]
-
-            input_state = State(
-                    #steering_angle_speed=0,
-                    acceleration=10,
-                    time_step=0,
-                    acceleration_y=0
-            )
-        elif key == "shift+down":
-            # Check if we exceed maximum deceleration when adding delta acc.
-            # If we exceed, take max. possible deceleration
-            if vehicle.input_within_bounds((0, self.obstacle_acceleration - d_acc)):
-                self.obstacle_acceleration = self.obstacle_acceleration - d_acc
-            else:
-                self.obstacle_acceleration = vehicle.input_bounds.lb[1]
-
-            input_state = State(
-                    #steering_angle_speed=0,
-                    acceleration=-10.5,
-                    time_step=0,
-                    acceleration_y =0
-            )
-        elif key == "shift+left":
-            # Check if we exceed maximum pos. steering velocity when adding delta steering vel.,
-            # If we exceed, take max. possible steering vel.
-            #if vehicle.input_within_bounds((self.obstacle_steering + d_steering, 0)):
-            #    self.obstacle_steering = self.obstacle_steering + d_steering
-            #else:
-            #    self.obstacle_steering = vehicle.input_bounds.ub[0]
-            #self.accel = self.accel + 2
-            #if self.accel > 10:
-            #    self.accel = 10
-            input_state = State(
-                    acceleration=-4.0,
-                    time_step=0,
-                    acceleration_y=10
-            )
-        elif key == "shift+right":
-            # Check if we exceed maximum neg. steering velocity when adding delta steering vel.,
-            # If we exceed, take max. possible steering vel.
-            if vehicle.input_within_bounds((self.obstacle_steering - d_steering, 1)):
-                self.obstacle_steering = self.obstacle_steering - d_steering
-            else:
-                self.obstacle_steering = vehicle.input_bounds.lb[0]
-
-            self.accel = self.accel + 2
-
-            input_state = State(
-                    #steering_angle_speed=-d_steering,
-                    acceleration=-4.0,
-                    time_step=0,
-                    acceleration_y =-10
-            )
-        elif key == "D":
-            input_state = State(
-                    acceleration=0,
-                    time_step=0,
-                    acceleration_y = 0.0
-            )
-        else:
+        # if key not in accepted input list, do nothing
+        if key not in ["shift+up", "shift+down", "shift+left", "shift+right", "D"]:
             return
+
+        if USING_PM:
+            input_state = self._input_via_pm_model(key)
+        elif USING_KS:
+            input_state = self._input_via_ks_model(key)
 
         try:
             # have this in settings
-            next_state = vehicle.simulate_next_state(state, input_state, 0.2)
+            next_state = vehicle.simulate_next_state(state, input_state, 0.1)
         except Exception as e:
-            next_state = state
             print(e)
+            return
 
         # no reverse driving
-        if next_state.velocity < 0:
-            next_state.position = state.position
+        if USING_PM:
+            if next_state.velocity < 0:
+                next_state.position = state.position
+
         state_list.append(next_state)
         new_trajectory = Trajectory(obstacle.initial_state.time_step, state_list)
         new_pred = TrajectoryPrediction(new_trajectory, obstacle.obstacle_shape, None, None)
         obstacle.prediction = new_pred
         self.callback(self.current_scenario)
+
+    def _input_via_pm_model(self, key) -> State:
+        """This method is resolving user input when using a point mass model. With a PM model, there are only
+        accelerations in the up, left, down, right direction. Pressing an arrow key applies such accelerations to the
+        PM model respectively.
+
+        :param key: The key on the keyboard that was clicked.
+        :type key: str
+        :return: The input state to the forward simulation
+        :rtype: State
+        """
+
+        # Create input state with accelerations in respective directions. Pressing shift+d/D simulates an input state
+        # with no input
+        if key == "shift+up":
+            input_state = State(acceleration=10.5, time_step=0, acceleration_y=0)
+        elif key == "shift+down":
+            input_state = State(acceleration=-10.5, time_step=0, acceleration_y =0)
+        elif key == "shift+left":
+            input_state = State(acceleration=-4.0, time_step=0, acceleration_y=10)
+        elif key == "shift+right":
+            input_state = State(acceleration=-4.0, time_step=0, acceleration_y =-10)
+        elif key == "D":
+            input_state = State(acceleration=0, time_step=0, acceleration_y = 0.0)
+        else:
+            return None
+
+        return input_state
+
+    def _input_via_ks_model(self, key: str) -> State:
+        """This method is resolving user input when using a kinematic single-track model. The KS model uses acceleration
+        in the respective directions and additionally takes a steering_angle_speed that steers the model left/right.
+
+        :param key: The key on the keyboard that was clicked.
+        :type key: str
+        :return: The input state to the forward simulation
+        :rtype: State
+        """
+        d_steering = 0.0005
+        d_time = 0.1
+
+        if key == "shift+up":
+            input_state = State(steering_angle_speed=0, acceleration=10, time_step=0)
+        elif key == "shift+down":
+            input_state = State(steering_angle_speed=0, acceleration=-10, time_step=0)
+        elif key == "shift+left":
+            steering_speed = d_steering / d_time
+            input_state = State(steering_angle_speed=steering_speed, acceleration=0, time_step=0, acceleration_y=0)
+        elif key == "shift+right":
+            steering_speed = -d_steering / d_time
+            input_state = State(steering_angle_speed=steering_speed, acceleration=0, time_step=0)
+        elif key == "D":
+            input_state = State(steering_angle_speed=0, acceleration=0, time_step=0)
+        else:
+            return None
+
+        return input_state
 
     def calc_state_list(self) -> List[State]:
         """
