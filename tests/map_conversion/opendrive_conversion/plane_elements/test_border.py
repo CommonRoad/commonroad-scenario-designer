@@ -62,7 +62,7 @@ class TestBorder(unittest.TestCase):
         view = PlanView(0.2, 0.3)
         # 45 degrees
         hdg = 0.785398
-        view.addLine(0.0, hdg, 50)
+        view.add_line(0.0, hdg, 50)
         border = Border(0.0)
         border.width_coefficients = [5.0, 0.8, 1.2, 0.052]
         border.width_coefficient_offsets = [1.0, 1.0, 0.0, 0.0]
