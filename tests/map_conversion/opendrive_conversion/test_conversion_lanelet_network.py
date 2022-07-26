@@ -803,7 +803,7 @@ class TestJointSplitTarget(unittest.TestCase):
         plane_group = ParametricLaneGroup()
         plane_group._add_geo_length(100, False)
         reference_plan_view = PlanView()
-        reference_plan_view.addLine([0.0, 0.0], 0.5, 100)
+        reference_plan_view.add_line([0.0, 0.0], 0.5, 100)
         inner_border = Border()
         inner_border.reference = reference_plan_view
         inner_border.width_coefficients.append([3.75, 0, 0, 0])
@@ -859,7 +859,7 @@ class TestJointSplitTarget(unittest.TestCase):
         plane_group = ParametricLaneGroup()
         plane_group._add_geo_length(100, False)
         reference_plan_view = PlanView()
-        reference_plan_view.addLine([0.0, 0.0], 0.5, 100)
+        reference_plan_view.add_line([0.0, 0.0], 0.5, 100)
         inner_border = Border()
         inner_border.reference = reference_plan_view
         inner_border.width_coefficients.append([0, 0, 0, 0])
@@ -918,7 +918,7 @@ class TestJoinSplitPair(unittest.TestCase):
         plane_group = ParametricLaneGroup()
 
         reference_view = PlanView()
-        reference_view.addLine(0, 0.5, 120)
+        reference_view.add_line(0, 0.5, 120)
 
         inner_border = Border()
         inner_border.reference = reference_view

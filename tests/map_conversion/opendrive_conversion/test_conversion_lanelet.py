@@ -11,7 +11,7 @@ from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadPlanView 
 def init_conversion_lanelet() -> ConversionLanelet:
     # create basic planview
     view = PlanView(error_tolerance_s=0.2, min_delta_s=0.3)
-    view.addLine([0, 0], 0.759, 120)
+    view.add_line([0, 0], 0.759, 120)
     # create a basic lanelet and group
     plane_group = ParametricLaneGroup(None, None, None, True, None)
     plane_group._add_geo_length(120, False)

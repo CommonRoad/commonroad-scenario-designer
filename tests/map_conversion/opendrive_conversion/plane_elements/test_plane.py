@@ -29,7 +29,7 @@ class TestParametricLaneBorderGroup(unittest.TestCase):
 
     def test_calc_border_position(self):
         view = PlanView(error_tolerance_s=0.2, min_delta_s=0.3)
-        view.addPoly3(0.0, 0, 100, 1, 0.2, 0.02, 0.001)
+        view.add_poly3(0.0, 0, 100, 1, 0.2, 0.02, 0.001)
 
         reference_border = Border(0.0)
         reference_border.width_coefficients.append([0.0])
@@ -121,9 +121,9 @@ class TestParametricLane(unittest.TestCase):
     @staticmethod
     def init_lane() -> ParametricLane:
         view = PlanView(error_tolerance_s=0.2, min_delta_s=0.3)
-        view.addLine([26.11, 26.11], 0.7853, 46.911)
-        view.addSpiral([59.342, 59.342], 0.7853, 11.25, 0.0, -0.0125)
-        view.addArc([67.479, 67.106], 0.715, 177.246, -0.0125)
+        view.add_line([26.11, 26.11], 0.7853, 46.911)
+        view.add_spiral([59.342, 59.342], 0.7853, 11.25, 0.0, -0.0125)
+        view.add_arc([67.479, 67.106], 0.715, 177.246, -0.0125)
 
         inner_border = Border()
         inner_border.width_coefficients.append([0.0, 0.0, 0.0, 0.0])
@@ -139,9 +139,9 @@ class TestParametricLane(unittest.TestCase):
 
     def test_calc_border(self):
         view = PlanView(error_tolerance_s=0.2, min_delta_s=0.3)
-        view.addLine([26.11, 26.11], 0.7853, 46.911)
-        view.addSpiral([59.342, 59.342], 0.7853, 11.25, 0.0, -0.0125)
-        view.addArc([67.479, 67.106], 0.715, 177.246, -0.0125)
+        view.add_line([26.11, 26.11], 0.7853, 46.911)
+        view.add_spiral([59.342, 59.342], 0.7853, 11.25, 0.0, -0.0125)
+        view.add_arc([67.479, 67.106], 0.715, 177.246, -0.0125)
 
         inner_border = Border()
         inner_border.width_coefficients.append([0.0, 0.0, 0.0, 0.0])

@@ -72,14 +72,14 @@ def get_traffic_signals(road: Road):
                              position[1] + signal.t * np.sin(tangent + np.pi / 2)])
         if signal.dynamic == 'no':
 
-            if signal.value == '-1' or signal.value == '-1.0000000000000000e+00' \
-                    or signal.value == 'none' or signal.value is None:
+            if signal.signal_value == '-1' or signal.signal_value == '-1.0000000000000000e+00' \
+                    or signal.signal_value == 'none' or signal.signal_value is None:
                 additional_values = []
             else:
                 if signal.unit == 'km/h':
-                    additional_values = [str(float(signal.value)/3.6)]
+                    additional_values = [str(float(signal.signal_value)/3.6)]
                 else:
-                    additional_values = [str(signal.value)]
+                    additional_values = [str(signal.signal_value)]
 
             signal_country = utils.get_signal_country(signal.country)
 

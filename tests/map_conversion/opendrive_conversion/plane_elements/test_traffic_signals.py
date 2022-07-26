@@ -15,7 +15,7 @@ class TestTrafficSignals(unittest.TestCase):
         s1.id = 1
         s1.name = "Signal 1"
         s1.dynamic = "no"
-        s1.orientation = 0.0
+        s1.orientation = "+"
         s1.type = "294"
         s1.country = "DEU"
         s1.value = "-1"
@@ -26,9 +26,8 @@ class TestTrafficSignals(unittest.TestCase):
         s2.s = 10
         s2.t = 2
         s2.id = 2
-        s2.orientation = 0.0
+        s2.orientation = "-"
         s2.name = "Signal 2"
-        s2.dynamic = "foo"
         self.signals.append(s2)
 
         # traffic light
@@ -36,7 +35,7 @@ class TestTrafficSignals(unittest.TestCase):
         s3.s = 15
         s3.t = 2
         s3.id = 3
-        s3.orientation = 0.0
+        s3.orientation = "+"
         s3.name = "Signal 3"
         s3.dynamic = "yes"
         self.signals.append(s3)
@@ -45,7 +44,7 @@ class TestTrafficSignals(unittest.TestCase):
         s4 = Signal()
         s4.s = 20
         s4.t = 2
-        s4.orientation = 0.0
+        s4.orientation = "-"
         s4.dynamic = "no"
         s4.type = "114"
         s4.country = "ZAM"
@@ -54,7 +53,7 @@ class TestTrafficSignals(unittest.TestCase):
         self.roadStraightLine = Road()
         self.roadStraightLine.id = 1
         self.roadStraightLine._length = 50
-        self.roadStraightLine.planView.addLine([0, 0], 0.785398, 100)
+        self.roadStraightLine.planView.add_line([0, 0], 0.785398, 100)
 
         self.roadStraightLine.addSignal(s1)
         self.roadStraightLine.addSignal(s2)
@@ -64,7 +63,7 @@ class TestTrafficSignals(unittest.TestCase):
         self.roadMultipleLaneSections = Road()
         self.roadMultipleLaneSections.id = 2
         self.roadMultipleLaneSections._length = 100
-        self.roadMultipleLaneSections.planView.addLine([0, 0], 0.523599, 100)
+        self.roadMultipleLaneSections.planView.add_line([0, 0], 0.523599, 100)
         self.roadMultipleLaneSections.addSignal(s1)
         self.roadMultipleLaneSections.addSignal(s2)
         self.roadMultipleLaneSections.addSignal(s3)
@@ -116,7 +115,7 @@ class TestTrafficSignals(unittest.TestCase):
         road.id = 1
         road.junction = None
         road._length = 50
-        road.planView.addLine(0, 6.5, 100)
+        road.planView.add_line(0, 6.5, 100)
 
         signal = Signal()
         signal.country = "DEU"
