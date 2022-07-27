@@ -29,12 +29,12 @@ from commonroad.common.solution import VehicleType
 
 
 class ObstacleToolbox(QDockWidget):
-    def __init__(self, current_scenario: Scenario, callback, tmp_folder, text_browser):
+    def __init__(self, current_scenario: Scenario, callback, tmp_folder, text_browser, mwindow):
         super().__init__("Obstacle Toolbox")
 
         self.current_scenario = current_scenario
         self.callback = callback
-        self.obstacle_toolbox_ui = ObstacleToolboxUI(text_browser)
+        self.obstacle_toolbox_ui = ObstacleToolboxUI(text_browser, mwindow)
         self.adjust_ui()
         self.connect_gui_elements()
         self.tmp_folder = tmp_folder

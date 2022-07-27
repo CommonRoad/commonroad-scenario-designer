@@ -13,6 +13,8 @@ import os
 from commonroad.scenario.scenario import Scenario
 from commonroad.common.file_reader import CommonRoadFileReader
 
+from crdesigner.map_conversion.common.utils import generate_unique_id
+
 from crdesigner.map_conversion.opendrive.opendrive_parser.parser import parse_opendrive
 from crdesigner.map_conversion.opendrive.opendrive_conversion.network import Network
 
@@ -86,6 +88,8 @@ def opendrive_to_commonroad(input_file: str) -> Scenario:
     @param input_file: Path to OpenDRIVE file
     @return: CommonRoad scenario
     """
+    generate_unique_id(0)  # reset IDs
+
     with open("{}".format(input_file), "r") as file_in:
         opendrive = parse_opendrive(etree.parse(file_in).getroot())
 

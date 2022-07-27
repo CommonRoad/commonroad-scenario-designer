@@ -10,6 +10,8 @@ from commonroad.scenario.lanelet import Lanelet, LaneletNetwork
 from commonroad.visualization.mp_renderer import MPRenderer
 
 from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMO_AVAILABLE
+from ...service_layer import config
+
 if SUMO_AVAILABLE:
     from crdesigner.map_conversion.sumo_map.config import SumoConfig
 from crdesigner.ui.gui.mwindow.service_layer.util import Observable
@@ -34,9 +36,11 @@ class AnimatedViewer:
 
         self.current_scenario = None
         self.current_pps = None
+        self.parent = parent
         self.dynamic = DynamicCanvas(parent, width=5, height=10, dpi=100, animated_viewer=self)
         self.callback_function = callback_function
         self.original_lanelet_network = None
+        self.update_window()
 
         # sumo config giving dt etc
         self._config: SumoConfig = None
@@ -240,9 +244,6 @@ class AnimatedViewer:
                     'time_begin': self.time_step.value - 1,
                 }
 
-        draw_params['facecolor'] = '#00ffa6'
-        draw_params['edgecolor'] = '#00ffa6'
-        draw_params['opacity'] = 0.0
         self.dynamic.draw_scenario(self.current_scenario, self.current_pps, draw_params=draw_params)
 
         for lanelet in self.current_scenario.lanelet_network.lanelets:
@@ -261,8 +262,9 @@ class AnimatedViewer:
             self.draw_lanelet_vertices(lanelet, ax)
 
         handles, labels = ax.get_legend_handles_labels()
-        legend = ax.legend(handles, labels)
-        legend.set_zorder(50)
+        if sel_lanelet != None and config.LEGEND:
+            legend = ax.legend(handles, labels)
+            legend.set_zorder(50)
 
         if focus_on_network:
             # can we focus on a selection?
@@ -392,3 +394,6 @@ class AnimatedViewer:
             color="black",
             lw=0.1,
         )
+
+    def update_window(self):
+        self.dynamic.setStyleSheet('background-color:' + self.parent.colorscheme()['secondbackground'] + '; color:' + self.parent.colorscheme()['color'] + ';font-size: ' + self.parent.colorscheme()['font-size'])

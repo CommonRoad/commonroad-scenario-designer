@@ -12,7 +12,6 @@ Submodules
    crdesigner.ui.gui.mwindow.service_layer.osm_gui_modules.GUI_resources.lane_link_edit_embedding
    crdesigner.ui.gui.mwindow.service_layer.osm_gui_modules.GUI_resources.lane_width
    crdesigner.ui.gui.mwindow.service_layer.osm_gui_modules.GUI_resources.scenario_view
-   crdesigner.ui.gui.mwindow.service_layer.osm_gui_modules.GUI_resources.settings_ui
    crdesigner.ui.gui.mwindow.service_layer.osm_gui_modules.GUI_resources.start_window
    crdesigner.ui.gui.mwindow.service_layer.osm_gui_modules.GUI_resources.street_types
    crdesigner.ui.gui.mwindow.service_layer.osm_gui_modules.GUI_resources.sublayer_types

@@ -14,22 +14,24 @@ import crdesigner.ui.gui.mwindow.service_layer.gui_resources.osm_settings_ui as 
 HEIGHT = 25
 COLUMNS = 2
 WIDTHF = 280
-WIDTHM = 360
-FACTOR = 0.65
+WIDTHM = 390
+FACTOR = 0.7
 
 class Ui_Settings(object):
-    def setupUi(self, Settings):
-        Settings.setObjectName("Settings")
-        Settings.resize(1750 * FACTOR, 1100 * FACTOR)
+    def setupUi(self, Settings, mwindow):
+        self.mwindow = mwindow
+        self.settings = Settings
+        self.settings.setObjectName("Settings")
+        self.settings.resize(1820 * FACTOR, 1150 * FACTOR)
         self.centralwidget = QtWidgets.QWidget(Settings)
         self.centralwidget.setObjectName("centralwidget")
         self.centralLayout = QtWidgets.QVBoxLayout(self.centralwidget)
         self.centralwidget.setObjectName("centralLayout")
         self.tabWidget = QtWidgets.QTabWidget(self.centralwidget)
         self.centralLayout.addWidget(self.tabWidget)
+        self.tabBar = QtWidgets.QTabBar()
+        self.tabWidget.setTabBar(self.tabBar)
 
-        #color scheme
-        #Settings.setStyleSheet('background-color:rgb(50,50,50); color:rgb(250,250,250);font-size: 13pt')
 
         self.frame = QtWidgets.QFrame(self.centralwidget)
         self.frameLayout = QtWidgets.QHBoxLayout(self.frame)
@@ -74,6 +76,7 @@ class Ui_Settings(object):
         self.osm_settings.setupUi(self.tabWidget)
         self.tabWidget.addTab(self.osm_settings.scrollArea, "OSM")
 
+        self.update_window()
         self.retranslateUi(Settings)
         QtCore.QMetaObject.connectSlotsByName(Settings)
 
@@ -87,3 +90,21 @@ class Ui_Settings(object):
         self.sumo_settings.retranslateUi(self.tabWidget)
         self.osm_settings.retranslateUi(self.tabWidget)
 
+    def update_window(self):
+        p = QtGui.QPalette()
+        p.setColor(QtGui.QPalette.ColorRole.Window, QtGui.QColor(self.mwindow.colorscheme()['background']))
+        p.setColor(QtGui.QPalette.ColorRole.Base, QtGui.QColor(self.mwindow.colorscheme()['secondbackground']))
+        p.setColor(QtGui.QPalette.ColorRole.Button, QtGui.QColor(self.mwindow.colorscheme()['background']))
+        p.setColor(QtGui.QPalette.ColorRole.ButtonText, QtGui.QColor(self.mwindow.colorscheme()['color']))
+        p.setColor(QtGui.QPalette.ColorRole.Text, QtGui.QColor(self.mwindow.colorscheme()['color']))
+        p.setColor(QtGui.QPalette.ColorRole.WindowText, QtGui.QColor(self.mwindow.colorscheme()['color']))
+        p.setColor(QtGui.QPalette.ColorRole.Link, QtGui.QColor(self.mwindow.colorscheme()['background']))
+
+        self.settings.setPalette(p)
+
+        p.setColor(QtGui.QPalette.ColorRole.Button, QtGui.QColor(self.mwindow.colorscheme()['highlight']))
+        p.setColor(QtGui.QPalette.ColorRole.Foreground, QtGui.QColor(self.mwindow.colorscheme()['highlighttext']))
+        p.setColor(QtGui.QPalette.ColorRole.ButtonText, QtGui.QColor(self.mwindow.colorscheme()['highlighttext']))
+        self.tabBar.setPalette(p)
+        self.button_ok.setPalette(p)
+        self.button_cancel.setPalette(p)

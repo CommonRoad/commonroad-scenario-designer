@@ -13,7 +13,7 @@ class Settings:
         self.settings_window = QMainWindow()
         self.window = Ui_Settings()
 
-        self.window.setupUi(self.settings_window)
+        self.window.setupUi(self.settings_window, self.cr_designer)
         self.gui_settings = gui.GUISettings(self)
         self.sumo_settings = sumo.SUMOSettings(self, config=parent.obstacle_toolbox.sumo_simulation.config)
         self.osm_settings = osm.OSMSettings(self, None)
@@ -30,9 +30,13 @@ class Settings:
         self.window.button_ok.clicked.connect(self.apply_close)
         self.window.button_cancel.clicked.connect(self.close)
         self.osm_settings.connect_events(self.window.osm_settings)
+        self.gui_settings.connect_events()
+        self.sumo_settings.connect_events()
+
 
     def close(self):
         self.settings_window.close()
+        self.gui_settings.close()
 
     def update_ui_values(self):
         """
@@ -41,6 +45,8 @@ class Settings:
         self.gui_settings.update_ui_values()
         self.sumo_settings.update_ui_values()
         self.osm_settings.update_ui_values()
+        self.cr_designer.update_window()
+
 
     def save_to_config(self):
         """
@@ -71,7 +77,9 @@ class Settings:
             self.settings_window.close()
             self.cr_designer.crdesigner_console_wrapper.text_browser.append("settings saved")
             self.canvas.update_obstacle_trajectory_params()
-
+            if self.cr_designer.animated_viewer_wrapper.cr_viewer.current_scenario != None:
+                self.cr_designer.animated_viewer_wrapper.cr_viewer.update_plot()
+            self.cr_designer.update_window()
 
         else:
             print("invalid settings")

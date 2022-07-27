@@ -1,32 +1,29 @@
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
-
 from crdesigner.ui.gui.mwindow.toolboxes.toolbox_ui import Toolbox
-
+from crdesigner.ui.gui.mwindow.service_layer import config
 from commonroad.scenario.obstacle import ObstacleType
-
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
 
 # try to import sumo functionality
 from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMO_AVAILABLE
-
 if SUMO_AVAILABLE:
     from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMOSimulation
 
 
 class ObstacleToolboxUI(Toolbox):
-    def __init__(self, text_browser):
-        super().__init__()
-
+    def __init__(self, text_browser, mwindow):
+        super().__init__(mwindow)
+        self.remove_vertice_btn = []
         self.text_browser = text_browser
         self.change_color = False
 
     def define_sections(self):
         """defines the sections in the obstacle toolbox
-                """
+        """
         # this validator always has the format with a dot as decimal separator
         self.float_validator = QDoubleValidator()
         self.float_validator.setLocale(QLocale("en_US"))
@@ -448,8 +445,13 @@ class ObstacleToolboxUI(Toolbox):
         self.polygon_row[i].addWidget(self.vertices_y[i])
 
         self.remove_vertice_btn.append(QPushButton())
-        self.remove_vertice_btn[i].setIcon(QIcon(":icons/iconmonstr-trash-can-1.svg"))
-        self.remove_vertice_btn[i].clicked.connect(lambda: self.remove_vertice())
+        if config.DARKMODE:
+            self.remove_vertice_btn[i].setIcon(QIcon(":icons/iconmonstr-trash-can-darkmode.png"))
+        else:
+            self.remove_vertice_btn[i].setIcon(QIcon(":icons/iconmonstr-trash-can.svg"))
+
+        self.remove_vertice_btn[i].clicked.connect(
+            lambda: self.remove_vertice())
         self.polygon_row[i].addWidget(self.remove_vertice_btn[i])
 
         self.layout_shape_groupbox.insertRow(i + 2, self.polygon_row[i])
@@ -495,3 +497,13 @@ class ObstacleToolboxUI(Toolbox):
         """
         if self.default_color.isChecked():
             self.selected_color.setStyleSheet("QWidget { border:1px solid black; background-color: white}")
+
+    def update_window(self):
+        super().update_window()
+        if self.remove_vertice_btn:
+            if config.DARKMODE:
+                for btn in self.remove_vertice_btn:
+                    btn.setIcon(QIcon(":icons/iconmonstr-trash-can-darkmode.png"))
+            else:
+                for btn in self.remove_vertice_btn:
+                    btn.setIcon(QIcon(":icons/iconmonstr-trash-can.svg"))

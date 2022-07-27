@@ -5,7 +5,7 @@ from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.pla
 from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.plane_group import ParametricLaneGroup
 from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.border import Border
 from crdesigner.map_conversion.opendrive.opendrive_conversion.utils import encode_road_section_lane_width_id
-
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadPlanView import PlanView
 
 __author__ = "Benjamin Orthen"
 __copyright__ = "TUM Cyber-Physical Systems Group"
@@ -20,7 +20,7 @@ class OpenDriveConverter:
     """Class for static methods to convert lane_sections to parametric_lanes."""
 
     @staticmethod
-    def create_reference_border(plan_view, lane_offsets) -> Border:
+    def create_reference_border(plan_view: PlanView, lane_offsets: List[float]) -> Border:
         """Create the most inner border from a PlanView.
         This border is used as a reference for other
         borders which rely on the PlanView.

@@ -10,7 +10,7 @@ class TestConverter(unittest.TestCase):
     def test_create_reference_border(self):
         # create road with lanesection and lane
         road = Road()
-        road.planView.addLine([0, 0], 1.0, 100)
+        road.planView.add_line([0, 0], 1.0, 100)
 
         # test border with no laneOffsets
         # create ground truth
@@ -69,7 +69,7 @@ class TestConverter(unittest.TestCase):
 
     def test_lane_section_to_parametric_lanes(self):
         road = Road()
-        road.planView.addLine([0.0, 0.0], 0, 100)
+        road.planView.add_line([0.0, 0.0], 0, 100)
         road.id = 100
 
         section = LaneSection(road)
@@ -171,7 +171,7 @@ class TestConverter(unittest.TestCase):
 
     def test_create_outer_lane_border(self):
         road = Road()
-        road.planView.addLine([0, 0], 1.0, 100)
+        road.planView.add_line([0, 0], 1.0, 100)
         lane_section = LaneSection(road)
         lane_section.sPos = 10
 
@@ -218,7 +218,7 @@ class TestConverter(unittest.TestCase):
 
     def test_determine_neighbors(self):
         road = Road()
-        road.planView.addPoly3([0, 0], 1.0, 100, 3.27, 0, 0.2, 0.01)
+        road.planView.add_poly3([0, 0], 1.0, 100, 3.27, 0, 0.2, 0.01)
         road.id = 100
         lane_section = LaneSection(road)
         lane_section.sPos = 10

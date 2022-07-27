@@ -2,6 +2,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 
+from crdesigner.ui.gui.mwindow.service_layer import config
 from crdesigner.ui.gui.mwindow.service_layer.gui_src import CR_Scenario_Designer
 
 
@@ -150,7 +151,10 @@ def play_pause_animation(mwindow, open_commonroad_file):
     if not mwindow.play_activated:
         mwindow.animated_viewer_wrapper.cr_viewer.play()
         mwindow.crdesigner_console_wrapper.text_browser.append("Playing the animation")
-        mwindow.top_bar_wrapper.toolbar_wrapper.button_play_pause.setIcon(QIcon(":/icons/pause.png"))
+        if config.DARKMODE:
+            mwindow.top_bar_wrapper.toolbar_wrapper.button_play_pause.setIcon(QIcon(":/icons/pause_darkmode.png"))
+        else:
+            mwindow.top_bar_wrapper.toolbar_wrapper.button_play_pause.setIcon(QIcon(":/icons/pause.png"))
         mwindow.play_activated = True
     else:
         mwindow.animated_viewer_wrapper.cr_viewer.pause()

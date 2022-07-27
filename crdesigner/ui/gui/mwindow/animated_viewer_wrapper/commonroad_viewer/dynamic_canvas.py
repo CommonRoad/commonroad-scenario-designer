@@ -1,3 +1,4 @@
+import copy
 from typing import List, Union
 from PyQt5.QtWidgets import QSizePolicy
 from PyQt5.QtCore import Qt
@@ -56,7 +57,6 @@ class DynamicCanvas(FigureCanvas):
         self.latest_mouse_pos = None  # used to store the last mouse position where a lanelet was clicked
 
         super().__init__(self.drawer)
-
         self.setParent(parent)
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
@@ -107,6 +107,9 @@ class DynamicCanvas(FigureCanvas):
         """
         Zoom in / out function in Dynamic Canvas by using mouse wheel.
         """
+        if self.animated_viewer.original_lanelet_network is None:
+            return  # if no scenario was loaded or no map was created yet
+
         center, x_dim, y_dim, _, _ = self.get_center_and_axes_values()
 
         # enlarge / shrink limits
@@ -151,7 +154,7 @@ class DynamicCanvas(FigureCanvas):
             center_y=new_center_y,
             dim_x=x_dim,
             dim_y=y_dim)
-        self.animated_viewer.current_scenario.replace_lanelet_network(lanelet_network)
+        self.animated_viewer.current_scenario.replace_lanelet_network(copy.deepcopy(lanelet_network))
         self.update_plot([
             new_center_x - new_x_dim, new_center_x + new_x_dim,
             new_center_y - new_y_dim, new_center_y + new_y_dim
@@ -221,6 +224,31 @@ class DynamicCanvas(FigureCanvas):
             self.ax.set(xlim=xlim)
             self.ax.set(ylim=ylim)
 
+        self.rnd.ax.set_facecolor(draw_params['colorscheme']['secondbackground'])
+
+        if draw_params['colorscheme']['axis'] == 'Left/ Bottom':
+            self.ax.spines['bottom'].set_color(draw_params['colorscheme']['color'])
+            self.ax.spines['left'].set_color(draw_params['colorscheme']['color'])
+            self.ax.spines['top'].set_color(draw_params['colorscheme']['secondbackground'])
+            self.ax.spines['right'].set_color(draw_params['colorscheme']['secondbackground'])
+            self.ax.tick_params(axis='x', colors=draw_params['colorscheme']['color'])
+            self.ax.tick_params(axis='y', colors=draw_params['colorscheme']['color'])
+
+        elif draw_params['colorscheme']['axis'] == 'None':
+            self.ax.spines['bottom'].set_color(draw_params['colorscheme']['secondbackground'])
+            self.ax.spines['left'].set_color(draw_params['colorscheme']['secondbackground'])
+            self.ax.spines['top'].set_color(draw_params['colorscheme']['secondbackground'])
+            self.ax.spines['right'].set_color(draw_params['colorscheme']['secondbackground'])
+            self.ax.tick_params(axis='x', colors=draw_params['colorscheme']['secondbackground'])
+            self.ax.tick_params(axis='y', colors=draw_params['colorscheme']['secondbackground'])
+        else:
+            self.ax.spines['bottom'].set_color(draw_params['colorscheme']['color'])
+            self.ax.spines['left'].set_color(draw_params['colorscheme']['color'])
+            self.ax.spines['top'].set_color(draw_params['colorscheme']['color'])
+            self.ax.spines['right'].set_color(draw_params['colorscheme']['color'])
+            self.ax.tick_params(axis='x', colors=draw_params['colorscheme']['color'])
+            self.ax.tick_params(axis='y', colors=draw_params['colorscheme']['color'])
+
 
     def update_obstacles(self,
                          scenario: Scenario,
@@ -248,12 +276,13 @@ class DynamicCanvas(FigureCanvas):
     def dynamic_canvas_click_callback(self, mouse_clicked_event):
         """
         General callback for clicking in the dynamic canvas, two things are checked:
-            1. If the lanelet network of the current network should be resized.
-            2. When a lanelet was selected execute the logic behind it.
-                a) Select lanelets by clicking on the canvas. Selects only one of the lanelets that contains the click
-                   position.
+        1. If the lanelet network of the current network should be resized.
+        2. When a lanelet was selected execute the logic behind it.
+        b) Select lanelets by clicking on the canvas. Selects only one of the lanelets that contains the click
+        position.
         This order is important - first the resizing and then the lanelet selection - otherwise the lanelets of the old
         map are selected and then not visualized.
+
         :params mouse_clicked_event:
         """
         # when the mouse is clicked we remember where this was -> use this for lanelet selection
@@ -343,12 +372,14 @@ class DynamicCanvas(FigureCanvas):
 
     def get_center_and_axes_values(self) -> ((float, float), float, float, (float, float), (float, float)):
         """
-        Used to get the new dimensions of the current Dynamic Canvas and other meta data about it.
-        :returns : center := touple (x,y) of center,
-                   x_dim := absolut size of x axis,
-                   y_dim := absolut size of y axis,
-                   xlim := touple of x axis limits (x_min, x_max),
-                   ylim := touple of y axis limits (y_min, y_max)
+        Used to get the new dimensions of the current Dynamic Canvas and other meta-data about it.
+
+        :returns :
+        center := tuple (x,y) of center,
+        x_dim := absolut size of x-axis,
+        y_dim := absolut size of y-axis,
+        xlim := tuple of x-axis limits (x_min, x_max),
+        ylim := tuple of y-axis limits (y_min, y_max)
         """
         x_min, x_max = self.ax.get_xlim()
         y_min, y_max = self.ax.get_ylim()
@@ -413,7 +444,6 @@ class DynamicCanvas(FigureCanvas):
         """
         updates obstacles' draw params when gui settings are changed
         """
-
         if DynamicCanvas.scenario is not None:
             for obj in DynamicCanvas.scenario.obstacles:
                 try:  # check if obstacle is in obstacle_color_array

@@ -1,4 +1,5 @@
 """Wrapper for the middle visualization."""
+from PyQt5 import QtGui
 from PyQt5.QtGui import QPalette, QBrush, QColor
 
 from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.commonroad_viewer import AnimatedViewer
@@ -28,9 +29,10 @@ class AnimatedViewerWrapper:
         IMPORTANT: has to be called AFTER the toolboxes - otherwise the mwindow.setCentralWidget destroys the references
         """
         self.viewer_dock = QWidget(self.mwindow)
-        toolbar = NavigationToolbar(self.cr_viewer.dynamic, self.viewer_dock)
+        self.toolbar = NavigationToolbar(self.cr_viewer.dynamic, self.viewer_dock)
+        self.update_window()
         layout = QVBoxLayout()
-        layout.addWidget(toolbar)
+        layout.addWidget(self.toolbar)
         layout.addWidget(self.cr_viewer.dynamic)
 
         self.viewer_dock.setLayout(layout)
@@ -81,3 +83,9 @@ class AnimatedViewerWrapper:
         if focus_on_network is None:
             focus_on_network = config.AUTOFOCUS
         self.cr_viewer.update_plot(focus_on_network=focus_on_network)
+
+    def update_window(self):
+        self.toolbar.setStyleSheet('background-color:' + self.mwindow.colorscheme()['background'] + '; color:' + self.mwindow.colorscheme()['color'] + '; font-size:' + self.mwindow.colorscheme()['font-size'])
+        self.cr_viewer.update_window()
+
+

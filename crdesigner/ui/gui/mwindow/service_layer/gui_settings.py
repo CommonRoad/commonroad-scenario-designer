@@ -9,15 +9,15 @@ from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.commonroad_viewer.dynamic
 
 
 class GUISettings:
-
+    
     def __init__(self, parent):
+        self.darkmode = config.DARKMODE
         self.parent = parent
         self.window = self.parent.window.gui_settings
 
     def connect_events(self):
         """ connect buttons to callables """
-        # self.window.btn_restore_defaults.clicked.connect(self.restore_default_button)
-        #self.window.botton_close.clicked.connect(self.apply_close)
+        self.window.chk_darkmode.stateChanged.connect(self.update_window)
 
     def update_ui_values(self):
         """
@@ -36,6 +36,9 @@ class GUISettings:
         self.window.chk_draw_incoming_lanelet.setChecked(config.DRAW_INCOMING_LANELETS)
         self.window.chk_draw_successors.setChecked(config.DRAW_SUCCESSORS)
         self.window.chk_draw_intersection_label.setChecked(config.DRAW_INTERSECTION_LABELS)
+        self.window.cmb_axis_visible.setCurrentText(config.AXIS_VISIBLE)
+        self.window.chk_darkmode.setChecked(config.DARKMODE)
+        self.window.chk_legend.setChecked(config.LEGEND)
         return
 
     def save_to_config(self):
@@ -55,6 +58,9 @@ class GUISettings:
         config.DRAW_INCOMING_LANELETS = self.window.chk_draw_incoming_lanelet.isChecked()
         config.DRAW_SUCCESSORS = self.window.chk_draw_successors.isChecked()
         config.DRAW_INTERSECTION_LABELS = self.window.chk_draw_intersection_label.isChecked()
+        config.AXIS_VISIBLE = str(self.window.cmb_axis_visible.currentText())
+        config.DARKMODE = self.window.chk_darkmode.isChecked()
+        config.LEGEND = self.window.chk_legend.isChecked()
 
     def has_valid_entries(self) -> bool:
         """
@@ -71,6 +77,8 @@ class GUISettings:
         """
         if self.has_valid_entries():
             self.save_to_config()
+            self.darkmode= config.DARKMODE
+
             set_draw_params(trajectory=self.window.chk_draw_trajectory.isChecked(),
                             intersection=self.window.chk_draw_intersection.isChecked(),
                             obstacle_label=self.window.chk_draw_label.isChecked(),
@@ -83,6 +91,42 @@ class GUISettings:
                             incoming_lanelets=self.window.chk_draw_incoming_lanelet.isChecked(),
                             successors=self.window.chk_draw_successors.isChecked(),
                             intersection_labels=self.window.chk_draw_intersection_label.isChecked(),
+                            colorscheme=self.parent.cr_designer.colorscheme(),
                             )
         else:
             print("invalid settings")
+
+    def update_window(self):
+        config.DARKMODE = self.window.chk_darkmode.isChecked()
+        set_draw_params(trajectory=config.DRAW_TRAJECTORY,
+                        intersection=config.DRAW_INTERSECTIONS,
+                        obstacle_label=config.DRAW_OBSTACLE_LABELS,
+                        obstacle_icon=config.DRAW_OBSTACLE_ICONS,
+                        obstacle_direction=config.DRAW_OBSTACLE_DIRECTION,
+                        obstacle_signal=config.DRAW_OBSTACLE_SIGNALS,
+                        occupancy=config.DRAW_OCCUPANCY,
+                        traffic_signs=config.DRAW_TRAFFIC_SIGNS,
+                        traffic_lights=config.DRAW_TRAFFIC_LIGHTS,
+                        incoming_lanelets=config.DRAW_INCOMING_LANELETS,
+                        successors=config.DRAW_SUCCESSORS,
+                        intersection_labels=config.DRAW_INTERSECTION_LABELS,
+                        colorscheme=self.parent.cr_designer.colorscheme(), )
+        if self.parent.cr_designer.animated_viewer_wrapper.cr_viewer.current_scenario != None:
+            self.parent.cr_designer.animated_viewer_wrapper.cr_viewer.update_plot()
+        self.parent.cr_designer.update_window()
+        self.parent.window.update_window()
+
+    def close(self):
+        config.DARKMODE = self.darkmode
+        set_draw_params(trajectory=config.DRAW_TRAJECTORY, intersection=config.DRAW_INTERSECTIONS,
+                        obstacle_label=config.DRAW_OBSTACLE_LABELS, obstacle_icon=config.DRAW_OBSTACLE_ICONS,
+                        obstacle_direction=config.DRAW_OBSTACLE_DIRECTION, obstacle_signal=config.DRAW_OBSTACLE_SIGNALS,
+                        occupancy=config.DRAW_OCCUPANCY, traffic_signs=config.DRAW_TRAFFIC_SIGNS,
+                        traffic_lights=config.DRAW_TRAFFIC_LIGHTS, incoming_lanelets=config.DRAW_INCOMING_LANELETS,
+                        successors=config.DRAW_SUCCESSORS, intersection_labels=config.DRAW_INTERSECTION_LABELS,
+                        colorscheme=self.parent.cr_designer.colorscheme(), )
+        self.parent.canvas.update_obstacle_trajectory_params()
+        if self.parent.cr_designer.animated_viewer_wrapper.cr_viewer.current_scenario != None:
+            self.parent.cr_designer.animated_viewer_wrapper.cr_viewer.update_plot()
+        self.parent.cr_designer.update_window()
+        self.parent.window.update_window()

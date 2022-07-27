@@ -1,9 +1,17 @@
 from .general_services import detailed_drawing_params_threshold_zoom_met
 from .general_services import is_big_map
-
+from typing import Dict
 
 modified_draw_params = False
 PARAMS_OBSTACLE_CUSTOM = None
+COLORSCHEME = {
+    'axis': 'All',
+    'background': '#f0f0f0',
+    'color': '#0a0a0a',
+    'font-size': '11pt',
+    'highlight': '#202020',
+    'highlighttext':'#202020',
+    'secondbackground': '#ffffff'}
 
 
 def update_draw_params_based_on_scenario(lanelet_count: int, traffic_sign_count: int) -> {}:
@@ -12,10 +20,11 @@ def update_draw_params_based_on_scenario(lanelet_count: int, traffic_sign_count:
     Currently there are 2 Options: Either the detailed parameter or the undetailed. Undetailed are used on large maps
     when zoomed out to improve performance.
     (lanelet_count and traffic_sign_count act as approximation for complexity)
+
     :param lanelet_count: how many lanelets are in the lanelet network.
     :param traffic_sign_count: how many traffic signs are in the network.
     :return: detailed, or not detailed draw_params depending on size of scenario
-        if custom draw_params are used, they are returned
+    if custom draw_params are used, they are returned
     """
     if modified_draw_params:
         return PARAMS_DRAW_CUSTOM
@@ -30,10 +39,11 @@ def update_draw_params_dynamic_based_on_scenario(lanelet_count: int, traffic_sig
     """
     Same as update_draw_params_based_on_scenario, but returns parameters for dynamic visualizations.
     Also based on complexity of lanelet network.
+
     :param lanelet_count: how many lanelets are in the lanelet network.
     :param traffic_sign_count: how many traffic signs are in the network.
     :return: detailed, or not detailed draw_params depending on size of scenario
-        if custom draw_params are used, they are returned
+    if custom draw_params are used, they are returned
     """
     if modified_draw_params:
         return PARAMS_DRAW_CUSTOM
@@ -48,10 +58,11 @@ def update_draw_params_based_on_zoom(x: float, y: float) -> {}:
     """
     Return the parameter for drawing a lanelet network in the Dynamic Canvas based on zoom into the canvas.
     When zoomed in enough display the details.
+
     :param x: Absolut value of x axis in Dynamic Canvas
     :param y: Absolut value of y axis in Dynamic Canvas
     :return: detailed, or not detailed draw_params depending on size of scenario
-        if custom draw_params are used, they are returned
+    if custom draw_params are used, they are returned
     """
     if modified_draw_params:
         return PARAMS_DRAW_CUSTOM
@@ -63,13 +74,14 @@ def update_draw_params_based_on_zoom(x: float, y: float) -> {}:
         return PARAMS_DRAW_UNDETAILED
 
 
-def update_draw_params_dynamic_only_based_on_zoom(x: float, y: float) -> {}:
+def update_draw_params_dynamic_only_based_on_zoom(x: float, y: float) -> Dict:
     """
     Same as update_draw_params_based_on_zoom but returns parameter for Dynamic Visualization.
-    :param x: Absolut value of x axis in Dynamic Canvas
-    :param y: Absolut value of y axis in Dynamic Canvas
+
+    :param x: Absolut value of x-axis in Dynamic Canvas
+    :param y: Absolut value of y-axis in Dynamic Canvas
     :return: detailed, or not detailed draw_params depending on size of scenario
-        if custom draw_params are used, they are returned
+    if custom draw_params are used, they are returned
     """
     if modified_draw_params:
         return PARAMS_DRAW_DYNAMIC_CUSTOM
@@ -85,7 +97,7 @@ def set_draw_params(trajectory: bool, intersection: bool, obstacle_label: bool,
                     obstacle_icon: bool, obstacle_direction: bool,
                     obstacle_signal: bool, occupancy: bool, traffic_signs: bool,
                     traffic_lights: bool, incoming_lanelets: bool, successors: bool,
-                    intersection_labels: bool):
+                    intersection_labels: bool, colorscheme: dict):
     """
     sets draw params
     :param trajectory: toggle draw_trajectory
@@ -107,7 +119,7 @@ def set_draw_params(trajectory: bool, intersection: bool, obstacle_label: bool,
 
     global PARAMS_DRAW_CUSTOM
     PARAMS_DRAW_CUSTOM = {
-
+                'colorscheme': colorscheme,
                 'lanelet_network': {
                     'traffic_sign': {
                         'draw_traffic_signs': traffic_signs,
@@ -139,6 +151,7 @@ def set_draw_params(trajectory: bool, intersection: bool, obstacle_label: bool,
 
     global PARAMS_DRAW_DYNAMIC_CUSTOM
     PARAMS_DRAW_DYNAMIC_CUSTOM = {
+                'colorscheme': colorscheme,
                 'dynamic_obstacle': {
                     'trajectory': {
                         # 'show_label': obstacle_label,
@@ -168,6 +181,7 @@ def set_draw_params(trajectory: bool, intersection: bool, obstacle_label: bool,
 
 
 PARAMS_DRAW_DETAILED = {
+                'colorscheme': COLORSCHEME,
                 'dynamic_obstacle': {
                     'trajectory': {
                         'show_label': True,
@@ -195,6 +209,7 @@ PARAMS_DRAW_DETAILED = {
             }
 
 PARAMS_DRAW_UNDETAILED = {
+    'colorscheme': COLORSCHEME,
     'dynamic_obstacle': {
         'trajectory': {
             'show_label': False,
@@ -238,6 +253,7 @@ PARAMS_DRAW_UNDETAILED = {
 
 
 PARAMS_DRAW_DYNAMIC_DETAILED = {
+                'colorscheme': COLORSCHEME,
                 'dynamic_obstacle': {
                     'trajectory': {
                         'show_label': True,
@@ -262,6 +278,7 @@ PARAMS_DRAW_DYNAMIC_DETAILED = {
             }
 
 PARAMS_DRAW_DYNAMIC_UNDETAILED = {
+        'colorscheme': COLORSCHEME,
         'dynamic_obstacle': {
             'trajectory': {
                 'show_label': False,
