@@ -14,11 +14,9 @@ from commonroad.geometry.shape import Rectangle, Circle, Polygon, Shape
 from commonroad.scenario.scenario import Scenario
 from commonroad.scenario.obstacle import Obstacle, StaticObstacle, ObstacleType, DynamicObstacle
 from commonroad.scenario.trajectory import State, Trajectory
-from commonroad.visualization.mp_renderer import MPRenderer
 
 from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMO_AVAILABLE
 from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.commonroad_viewer.dynamic_canvas import DynamicCanvas
-from apscheduler.schedulers.background import BackgroundScheduler
 
 if SUMO_AVAILABLE:
     from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMOSimulation
@@ -57,11 +55,6 @@ class ObstacleToolbox(QDockWidget):
         self._start_trajectory_recording = False
         self._active_obstacle = None
 
-        # variables to keep track of the input steering and acceleration when creating trajectories for dyn. obst.
-        self.obstacle_acceleration = 0.0
-        self.obstacle_steering = 0.0
-        self.accel = 5.0
-
         if SUMO_AVAILABLE:
             self.sumo_simulation = SUMOSimulation(tmp_folder=tmp_folder)
         else:
@@ -74,13 +67,6 @@ class ObstacleToolbox(QDockWidget):
     @start_trajectory_recording.setter
     def start_trajectory_recording(self, val):
         assert isinstance(val, bool)
-        if val:
-            self.sched = BackgroundScheduler()
-            self.sched.add_job(self.record_trajectory, 'interval', ["shift"], seconds=1.0)
-            #self.sched.start()
-        elif self.sched.running and not val:
-            self.sched.shutdown()
-
         self._start_trajectory_recording = val
 
     @property
@@ -91,8 +77,6 @@ class ObstacleToolbox(QDockWidget):
     def active_obstacle(self, obstacle):
         assert isinstance(obstacle, DynamicObstacle)
         self._active_obstacle = obstacle
-        self.obstacle_acceleration = 0.0
-        self.obstacle_steering = 0.0
 
     def init_canvas(self):
         """
@@ -132,9 +116,6 @@ class ObstacleToolbox(QDockWidget):
         self.obstacle_toolbox_ui.obstacle_shape.currentTextChanged.connect(
             lambda: self.obstacle_toolbox_ui.toggle_sections())
 
-        #self.obstacle_toolbox_ui.obstacle_dyn_stat.currentTextChanged.connect(
-        #    lambda: self.obstacle_toolbox_ui.toggle_dynamic_static())
-
         self.obstacle_toolbox_ui.color_btn.clicked.connect(
             lambda: self.obstacle_toolbox_ui.color_picker())
 
@@ -142,13 +123,8 @@ class ObstacleToolbox(QDockWidget):
             lambda: self.obstacle_toolbox_ui.set_default_color())
 
         self.obstacle_toolbox_ui.dynamic_obstacle_selection.toggled.connect(
-                #lambda: self.obstacle_toolbox_ui.adjust_obstacle_type_dropdown(selected_type="dynamic")
                 lambda: self.obstacle_toolbox_ui.toggle_dynamic_static()
         )
-
-        #self.obstacle_toolbox_ui.static_obstacle_selection.toggled.connect(
-        #        lambda: self.obstacle_toolbox_ui.toggle_dynamic_static(selected_type="Static")
-        #)
 
         self.obstacle_toolbox_ui.obstacle_id_line_edit.textEdited.connect(self.check_if_id_exists)
 
@@ -343,11 +319,19 @@ class ObstacleToolbox(QDockWidget):
         return shape
 
     def record_trajectory(self, key):
-        USING_PM = False
-        USING_KS = True
+        """This function is responsible for the recording of trajectories for dynamic obstacles. Based on the
+        arrow key pressed on the keyboard, different input states to the forward simulation are generated. The
+        resulting state after the simulation is appended to a state list and a new trajectory prediction object
+        is created for the selected dynamic obstacle.
+
+        :param key: The key which was pressed on the keyboard.
+        :type key: str
+        """
+        USING_PM = True
+        USING_KS = False
         obstacle = self.active_obstacle
 
-        if self.start_trajectory_recording == False:
+        if not self.start_trajectory_recording:
             return
 
         if obstacle is None:
@@ -358,6 +342,7 @@ class ObstacleToolbox(QDockWidget):
 
         # check which vehicle model is selected, convert the initial state depending on selected vehicle model
         if USING_PM:
+            vehicle = VehicleDynamics.PM(VehicleType.FORD_ESCORT)
             if state_list[0] == state_list[-1]:
                 del state.acceleration
                 del state.acceleration_y
@@ -365,18 +350,15 @@ class ObstacleToolbox(QDockWidget):
                 del state.steering_angle
                 del state.yaw_rate
         elif USING_KS:
+            vehicle = VehicleDynamics.KS(VehicleType.FORD_ESCORT)
             if state_list[0] == state_list[-1]:
                 del state.yaw_rate
                 del state.slip_angle
                 del state.acceleration
                 del state.acceleration_y
                 del state.velocity_y
-
-        # set them initially to zero, both global
-        # for each click update them until some limit
-        d_acc = 2.0
-        d_steering = 0.001
-        vehicle = VehicleDynamics.KS(VehicleType.FORD_ESCORT)
+        else:
+            return
 
         # if key not in accepted input list, do nothing
         if key not in ["shift+up", "shift+down", "shift+left", "shift+right", "D"]:
@@ -386,6 +368,8 @@ class ObstacleToolbox(QDockWidget):
             input_state = self._input_via_pm_model(key)
         elif USING_KS:
             input_state = self._input_via_ks_model(key)
+        else:
+            return
 
         try:
             # have this in settings
