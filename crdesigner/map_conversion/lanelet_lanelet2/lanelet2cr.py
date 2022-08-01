@@ -32,6 +32,7 @@ from crdesigner.map_conversion.osm2cr.converter_modules.utility.geometry import 
     point_to_line_distance,
     distance as point_to_polyline_distance
 )
+from crdesigner.configurations.get_configs import get_configs
 
 NODE_DISTANCE_TOLERANCE = 0.01  # this is in meters
 PRIORITY_SIGNS = [TrafficSignIDGermany.PRIORITY, TrafficSignIDGermany.RIGHT_OF_WAY]
@@ -134,7 +135,7 @@ class Lanelet2CRConverter:
         scenario_id = ScenarioID(country_id="ZAM", map_name="OpenDrive", map_id=123)
 
         scenario = Scenario(dt=0.1, scenario_id=scenario_id, location=Location(gps_latitude=origin.lat, gps_longitude=origin.lon))
-        self.lanelet_network = ConversionLaneletNetwork()
+        self.lanelet_network = ConversionLaneletNetwork(get_configs().opendrive_config)
 
         speed_limits = {}
         speed_limit_lanelets = {}

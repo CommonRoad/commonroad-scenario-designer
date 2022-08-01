@@ -12,6 +12,7 @@ from crdesigner.map_conversion.opendrive.opendrive_conversion.conversion_lanelet
 from crdesigner.map_conversion.opendrive.opendrive_conversion.converter import OpenDriveConverter
 from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.traffic_signals import get_traffic_signals
 from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.geo_reference import get_geo_reference
+from crdesigner.configurations.configuration import OpenDrive2CRConfiguration
 
 __author__ = "Benjamin Orthen, Stefan Urban, Sebastian Maierhofer"
 __copyright__ = "TUM Cyber-Physical Systems Group"
@@ -52,7 +53,9 @@ class Network:
     which stores the neighbor relations between the parametric lanes.
     """
 
-    def __init__(self):
+    def __init__(self, config: OpenDrive2CRConfiguration):
+        """Initializes a network object."""
+        self.config = config
         self._planes = []
         self._link_index = None
         self._geo_ref = None
@@ -60,8 +63,8 @@ class Network:
         self._traffic_signs = []
         self._stop_lines = []
         self._country_ID = None
-        self.error_tolerance = 0.15
-        self.min_delta_s = 0.5
+        self.error_tolerance = self.config.plane_conversion.error_tolerance
+        self.min_delta_s = self.config.plane_conversion.min_delta_s
 
     # def __eq__(self, other):
     # return self.__dict__ == other.__dict__
@@ -141,7 +144,7 @@ class Network:
         """
 
         # Convert groups to lanelets
-        lanelet_network = ConversionLaneletNetwork()
+        lanelet_network = ConversionLaneletNetwork(self.config)
 
         for parametric_lane in self._planes:
             if filter_types is not None and parametric_lane.type not in filter_types:

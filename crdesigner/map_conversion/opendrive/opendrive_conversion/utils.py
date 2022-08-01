@@ -9,7 +9,7 @@ __email__ = "commonroad@lists.lrz.de"
 __status__ = "Released"
 
 
-def encode_road_section_lane_width_id(roadId, sectionId, laneId, widthId):
+def encode_road_section_lane_width_id(roadId, sectionId, laneId, widthId) -> str:
     """Encodes a road section lane width with an ID.
 
     :param roadId: ID of road.
@@ -26,7 +26,7 @@ def encode_road_section_lane_width_id(roadId, sectionId, laneId, widthId):
     return ".".join([str(roadId), str(sectionId), str(laneId), str(widthId)])
 
 
-def get_signal_country(signal_country: str):
+def get_signal_country(signal_country: str) -> str:
     """
     ISO3166 standard to find 3 letter country id
     :param signal_country: String value of the country.
