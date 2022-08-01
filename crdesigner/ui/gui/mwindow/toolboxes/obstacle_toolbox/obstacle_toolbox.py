@@ -61,20 +61,42 @@ class ObstacleToolbox(QDockWidget):
             self.sumo_simulation = None
 
     @property
-    def start_trajectory_recording(self):
+    def start_trajectory_recording(self) -> bool:
+        """Get whether the trajectory recording for an obstacle has started.
+
+        :return: The boolean indicating whether recording has started for an obstacle.
+        :rtype: bool
+        """
         return self._start_trajectory_recording
 
     @start_trajectory_recording.setter
-    def start_trajectory_recording(self, val):
+    def start_trajectory_recording(self, val) -> bool:
+        """Setter to indicate that recording for an dynamic obstacle has started.
+
+        :param val: True or false, depending if recording started or not.
+        :type val: bool
+        """
         assert isinstance(val, bool)
         self._start_trajectory_recording = val
 
     @property
     def active_obstacle(self):
+        """Get the current active obstacle that has been selected via left mouse click on the canvas and is ready
+        for trajectory recording.
+
+        :return: The active DynamicObstacle.
+        :rtype: DynamicObstacle
+        """
         return self._active_obstacle
 
     @active_obstacle.setter
     def active_obstacle(self, obstacle):
+        """Set the active obstacle for which a trajectory should be recorded by left clicking dynamic obstacle on
+        canvas.
+
+        :param obstacle: The obstacle that should be set active.
+        :type obstacle: DynamicObstacle
+        """
         assert isinstance(obstacle, DynamicObstacle)
         self._active_obstacle = obstacle
 
@@ -143,15 +165,19 @@ class ObstacleToolbox(QDockWidget):
 
     def refresh_toolbox(self, scenario: Scenario):
         self.current_scenario = scenario
+        # this line should be changed such that it always shows the highest ID of the ID set. Like this, +1 is added
+        # to the last ID whenever this function is called.
         self.obstacle_toolbox_ui.display_obstacle_id(str(self.current_scenario.generate_object_id()))
         self.initialize_toolbox()
         self.obstacle_toolbox_ui.obstacle_id_line_edit.setEnabled(True)
 
     def static_obstacle_details(self, obstacle_id: int):
+        """Creates static obstacles from supplied id.
+
+        :param obstacle_id: ID of static obstacle to be created
+        :type obstacle_id: int
         """
-        Creates static obstacles
-        :param obstacle_id: id of static obstacle to be created
-        """
+
         # get the shape
         shape = self._get_shape_from_gui()
         # the position here is used for the initial state. For circles and rectangles, the position
@@ -200,9 +226,10 @@ class ObstacleToolbox(QDockWidget):
         self.callback(self.current_scenario)
 
     def dynamic_obstacle_details(self, obstacle_id: int):
-        """
-        creates dynamic obstacles
-        :param obstacle_id: id of static obstacle to be created
+        """Creates dynamic obstacles from supplied ID.
+
+        :param obstacle_id: id of dynamic obstacle to be created.
+        :type obstacle_id: int
         """
         # Check whether user did not enter values for any fields, if yes
         # print a warning for this specific field
@@ -270,6 +297,8 @@ class ObstacleToolbox(QDockWidget):
         else:
             state_dictionary['slip_angle'] = float(self.obstacle_toolbox_ui.initial_state_slip_angle.placeholderText())
 
+        # These properties are needed for the forward simulation, but only need to exist and not necessarily hold
+        # values, so we set them to 0.0
         # acceleration
         state_dictionary['acceleration'] = 0.0
 
@@ -303,6 +332,11 @@ class ObstacleToolbox(QDockWidget):
         self.callback(self.current_scenario)
 
     def _get_shape_from_gui(self) -> Shape:
+        """This methods gets the shape from the toolbox UI, so the methods for adding obstacles are not too large.
+
+        :return: The shape that the user specified in the GUI.
+        :rtype: Shape
+        """
         # get shape from UI
         if self.obstacle_toolbox_ui.obstacle_shape.currentText() == "Rectangle":
             shape = Rectangle(
@@ -327,6 +361,8 @@ class ObstacleToolbox(QDockWidget):
         :param key: The key which was pressed on the keyboard.
         :type key: str
         """
+
+        # These parameters are currently hardcoded and should be moved to settings or the obstacle toolbox ui.
         USING_PM = True
         USING_KS = False
         obstacle = self.active_obstacle
@@ -341,6 +377,8 @@ class ObstacleToolbox(QDockWidget):
         state = state_list[-1]
 
         # check which vehicle model is selected, convert the initial state depending on selected vehicle model
+        # This should be refactored after the state class has been adjusted to support state conversion in
+        # commonroad-io.
         if USING_PM:
             vehicle = VehicleDynamics.PM(VehicleType.FORD_ESCORT)
             if state_list[0] == state_list[-1]:
@@ -372,17 +410,13 @@ class ObstacleToolbox(QDockWidget):
             return
 
         try:
-            # have this in settings
+            # Have time step in settings too.
             next_state = vehicle.simulate_next_state(state, input_state, 0.1)
         except Exception as e:
             print(e)
             return
 
-        # no reverse driving
-        if USING_PM:
-            if next_state.velocity < 0:
-                next_state.position = state.position
-
+        # Create new TrajectoryPrediction, because simply appending to state list is not allowed.
         state_list.append(next_state)
         new_trajectory = Trajectory(obstacle.initial_state.time_step, state_list)
         new_pred = TrajectoryPrediction(new_trajectory, obstacle.obstacle_shape, None, None)
@@ -1344,10 +1378,17 @@ class ObstacleToolbox(QDockWidget):
         ax.callbacks.connect('ylim_changed', self.on_ylim_change)
 
     def check_if_id_exists(self, entered_id):
-        # icons taken from:
+        """
+        This method validates the supplied ID and then calls corresponding function in the obstacle toolbox UI
+        to inform the user whether the ID is valid or not.
+        Icons taken from:
         # <a href="https://www.flaticon.com/free-icons/right" title="right icons">Right icons created by kliwir art - Flaticon</a>
         # <a href="https://www.flaticon.com/free-icons/delete" title="delete icons">Delete icons created by Pixel perfect - Flaticon</a>
         # Above html tags must be added online somewhere or we have to take others
+
+        :param entered_id: The ID the user entered.
+        :type entered_id: int
+        """
         try:
             if entered_id == "":
                 self.obstacle_toolbox_ui.set_obstacle_id_pixmap(valid=True)

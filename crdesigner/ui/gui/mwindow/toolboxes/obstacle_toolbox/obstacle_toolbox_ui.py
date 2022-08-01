@@ -319,6 +319,7 @@ class ObstacleToolboxUI(Toolbox):
         self.layout_obstacle_information_groupbox.insertRow(5, self.initial_state_group_box)
 
     def remove_dynamic_obstacle_fields(self):
+        """Method to remove the fields related only to dynamic obstacles."""
         try:
             self.layout_obstacle_information_groupbox.removeRow(self.initial_state_group_box)
         except Exception as e:
@@ -392,8 +393,9 @@ class ObstacleToolboxUI(Toolbox):
         if self.obstacle_dyn_stat.currentText() == "Dynamic":
             self.toggle_dynamic_static()
 
-
     def adjust_obstacle_type_dropdown(self, selected_type):
+        """This method adjusts the obstacle type depending on whether static or dynamic obstacles are selected.
+        For example, a parkedVehicle cannot be a dynamic obstacle."""
         self.obstacle_type.clear()
         if selected_type == "Dynamic":
             for e in ObstacleType:
@@ -407,6 +409,11 @@ class ObstacleToolboxUI(Toolbox):
                     self.obstacle_type.addItem(e.value)
 
     def display_obstacle_id(self, generated_id):
+        """This method displays the automatically generated ID as a placeholder text for the obstacle ID.
+
+        :param generated_id: The generated ID.
+        :type generated_id: int
+        """
         try:
             text = "Auto: " + str(generated_id)
             self.obstacle_id_line_edit.setPlaceholderText(text)
@@ -414,6 +421,11 @@ class ObstacleToolboxUI(Toolbox):
             pass
 
     def set_obstacle_id_pixmap(self, valid=True):
+        """This method sets the pixmap next to the ID linedit, such that validity of the user-entered ID is visualized.
+
+        :param valid: Whether the ID is valid or not.
+        :type valid: bool
+        """
         if valid:
             self.obstacle_id_pixmap_label.setPixmap(self.obstacle_id_pixmap_valid)
         else:

@@ -316,9 +316,11 @@ class DynamicCanvas(FigureCanvas):
                 self.animated_viewer.update_plot()
 
     def _on_key_release(self, key_released_event):
+        """Pass keyboard release callbacks from canvas to the animated viewer, then onto the obstacle toolbox."""
         self.animated_viewer.callback_function(key_released_event, "")
 
     def _on_key_press(self, key_pressed_event):
+        """Pass keyboard press callbacks from canvas to the animated viewer, then onto the obstacle toolbox."""
         self.animated_viewer.callback_function(key_pressed_event, "")
 
     def _select_lanelet(self, release: bool = False):

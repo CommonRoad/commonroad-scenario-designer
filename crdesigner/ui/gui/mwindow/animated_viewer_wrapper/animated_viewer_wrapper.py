@@ -63,10 +63,21 @@ class AnimatedViewerWrapper:
             self.mwindow.crdesigner_console_wrapper.text_browser.append(output)
 
     def _button_press_callback(self, key: str):
+        """If the user presses shift, trajectory recording can begin.
+
+        :param key: The pressed key.
+        :type key: str
+        """
         if key == "shift":
             self.mwindow.obstacle_toolbox.start_trajectory_recording = True
 
     def _button_release_callback(self, key: str):
+        """Whenever a key was pressed, and if the selected obstacle is ready for recording, call the record_trajectory
+        function to create a trajectory point. If shift was released, stop recording.
+
+        :param key: The released key.
+        :type key: str
+        """
         if self.mwindow.obstacle_toolbox.start_trajectory_recording == True:
             if key == "shift":
                 self.mwindow.obstacle_toolbox.start_trajectory_recording = False
