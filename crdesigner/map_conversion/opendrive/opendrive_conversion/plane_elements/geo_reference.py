@@ -10,7 +10,7 @@ __email__ = "commonroad@lists.lrz.de"
 __status__ = "Released"
 
 
-def get_geo_reference(geo_reference: str):
+def get_geo_reference(geo_reference: str) -> float:
     """Gets the geographic location information from the geo string extracted from opendrive files.
 
     :param geo_reference: Input string from which longitude and latitude should be extracted.

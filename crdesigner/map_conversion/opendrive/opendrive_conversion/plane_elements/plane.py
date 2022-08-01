@@ -27,7 +27,8 @@ class ParametricLaneBorderGroup:
         outer_border=None,
         outer_border_offset=None,
     ):
-        """
+        """Initializes a ParametricLaneBorderGroup object.
+
         :param inner_border: Inner Border of a ParametricLane
         :type inner_border: :class:`opendrive.opendrive_conversion.plane_elements.border.Border`
         :param outer_border: Outer Border of a ParametricLane
@@ -100,7 +101,8 @@ class ParametricLane:
         line_marking = None,
         side: str = None
     ):
-        """
+        """Initializes a ParametricLane object.
+
         :param border_group: Reference to object which manages borders.
         :type border_group: :class:`ParametricLaneBorderGroup`
         :param id_: Unique string identifier.
@@ -136,6 +138,7 @@ class ParametricLane:
         :param compute_curvature: Whether to computer curvature. Default is True.
         :type: bool
         :return: Cartesian coordinates of point on inner border and tangential direction.
+        :rtype: Tuple[Tuple[float, float], float, float, float]
         """
         if self.reverse:
             border_pos = self.length - s_pos

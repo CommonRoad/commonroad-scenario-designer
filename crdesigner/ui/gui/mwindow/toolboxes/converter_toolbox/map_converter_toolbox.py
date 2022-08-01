@@ -32,7 +32,7 @@ if SUMO_AVAILABLE:
     from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMOSimulation
     from crdesigner.ui.gui.mwindow.service_layer.sumo_settings import SUMOSettings
     from crdesigner.map_conversion.sumo_map.sumo2cr import convert_net_to_cr
-
+    from crdesigner.configurations.get_configs import get_configs
 
 class MapConversionToolbox(QDockWidget):
     def __init__(self, current_scenario, callback, text_browser, tmp_folder: str, mwindow):
@@ -253,7 +253,8 @@ class MapConversionToolbox(QDockWidget):
         if self.open_drive_file is None:
             return
 
-        open_drive_network = Network()
+        config = get_configs().opendrive_config
+        open_drive_network = Network(config)
         open_drive_network.load_opendrive(self.open_drive_file)
 
         self.text_browser.append(

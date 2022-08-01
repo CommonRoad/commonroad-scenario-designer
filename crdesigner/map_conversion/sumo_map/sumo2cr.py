@@ -4,6 +4,7 @@ import subprocess
 from commonroad.scenario.scenario import Scenario
 from crdesigner.map_conversion.opendrive.opendrive_conversion.network import Network
 from crdesigner.map_conversion.opendrive.opendrive_parser.parser import parse_opendrive
+from crdesigner.configurations.get_configs import get_configs
 from lxml import etree
 
 
@@ -36,7 +37,8 @@ def convert_net_to_cr(net_file: str, verbose: bool = False) -> Scenario:
     with open(opendrive_file, "r") as fi:
         open_drive = parse_opendrive(etree.parse(fi).getroot())
 
-    road_network = Network()
+    config = get_configs().opendrive_config
+    road_network = Network(config)
     road_network.load_opendrive(open_drive)
     scenario = road_network.export_commonroad_scenario()
     if verbose:

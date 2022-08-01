@@ -31,7 +31,17 @@ class ParametricLaneGroup:
         inner_neighbour_same_direction=True,
         outer_neighbour=None,
     ):
+        """Initializes a ParametricLaneGroup object.
 
+        :param id_: ID of the ParametricLaneGroup.
+        :type id_: str
+        :param parametric_lanes: Lanes of the group.
+        :type parametric_lanes: list
+        :param inner_neighbour: ID of the inner neighbor of this group.
+        :type inner_neighbour: str
+        :param outer_neighbour: ID of the outer neighbor of this group.
+        :type outer_neighbour: str
+        """
         self._geo_lengths = [np.array([0.0])]
         self.parametric_lanes: List[ParametricLane] = []
         self.id_ = id_
