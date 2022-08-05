@@ -1,9 +1,17 @@
 # Changelog
 
-## [0.5.2] - 2022-XX-XX
+## [0.6.0] - 2022-08-XX
+
+### Added
+- New test cases for the OpenDRIVE to CommonRoad conversion
+- New shortcut buttons for lanelet adding, merging, splitting, creating adjacent
+
+### Changed
+- User interface for adding and updating lanelets
 
 ### Fixed
 - Preventing GUI crash when adding obstacle without existing scenario
+- Conversion of straight euler spiral 
 - Various small bug fixes
 
 ## [0.5.1] - 2022-05-20
