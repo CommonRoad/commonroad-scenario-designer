@@ -199,6 +199,7 @@ class LaneLinkGUI(GUI):
         :param event: key event
         :return: None
         """
+
         # print_grey(event.key)
         if event.key == u"delete":
             self.delete()
@@ -257,6 +258,7 @@ class LaneLinkGUI(GUI):
 
         :return: None
         """
+
         name = "link_save_{}.save".format(
             datetime.datetime.now().strftime("%y-%m-%d_%H-%M-%S")
         )
@@ -572,6 +574,8 @@ class EdgeEditGUI(GUI):
         :param event: key event
         :return: None
         """
+
+
         # print_grey(event.key)
         if self.edge_create_mode:
             print_grey("cannot do that while creating new edge")
