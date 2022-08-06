@@ -30,6 +30,7 @@ if SUMO_AVAILABLE:
 
 from crdesigner.map_conversion.osm2cr.converter_modules.cr_operations.export import convert_to_scenario
 from crdesigner.map_conversion.osm2cr.converter_modules.converter import GraphScenario
+from crdesigner.configurations.get_configs import get_configs
 
 
 def lanelet_to_commonroad(input_file: str, proj: str, left_driving: bool = False,
@@ -93,7 +94,9 @@ def opendrive_to_commonroad(input_file: str) -> Scenario:
     with open("{}".format(input_file), "r") as file_in:
         opendrive = parse_opendrive(etree.parse(file_in).getroot())
 
-    road_network = Network()
+    # load configs
+    configs = get_configs()
+    road_network = Network(configs.opendrive_config)
     road_network.load_opendrive(opendrive)
 
     return road_network.export_commonroad_scenario()

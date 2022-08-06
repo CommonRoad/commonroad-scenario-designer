@@ -4,7 +4,7 @@ import numpy as np
 import warnings
 import enum
 from crdesigner.map_conversion.opendrive.opendrive_conversion import utils
-from typing import Union
+from typing import Union, Tuple, List
 
 from crdesigner.map_conversion.opendrive.opendrive_parser.elements.road import Road
 from crdesigner.map_conversion.common.utils import generate_unique_id
@@ -49,7 +49,7 @@ def extract_traffic_element_id(signal_type: str, signal_subtype: str, traffic_si
     return element_id
 
 
-def get_traffic_signals(road: Road):
+def get_traffic_signals(road: Road) -> Tuple[List[TrafficLight], List[TrafficSign], List[StopLine]]:
     """Extracts traffic_lights, traffic_signs, stop_lines from a road.
 
     :param road: The road object from which to extract signals.
@@ -183,7 +183,7 @@ def get_traffic_signals(road: Road):
     return traffic_lights, traffic_signs, stop_lines
 
 
-def calculate_stop_line_position(lane_sections, signal, position, tangent):
+def calculate_stop_line_position(lane_sections, signal, position, tangent) -> Tuple[np.ndarray, np.ndarray]:
     """Function to calculate the 2 points that define the stop line which
     is a straight line from one edge of the road to the other.
 
@@ -218,7 +218,7 @@ def calculate_stop_line_position(lane_sections, signal, position, tangent):
     return position_1, position_2
 
 
-def get_traffic_signal_references(road: Road):
+def get_traffic_signal_references(road: Road) -> list:
     """Function to extract all the traffic sign references that are stored in the road object in order to avoid
     duplication by redefiniing predefined signals/lights and stoplines.
     """

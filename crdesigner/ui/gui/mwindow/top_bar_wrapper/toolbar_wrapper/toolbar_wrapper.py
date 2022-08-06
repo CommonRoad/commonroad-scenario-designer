@@ -83,6 +83,55 @@ class ToolBarWrapper:
         self.tb4.addAction(self.action_save_video)
         self.action_save_video.triggered.connect(lambda: _save_video(mwindow, open_commonroad_file))
 
+        self.tb4.addSeparator()
+
+        self.tb5 = mwindow.addToolBar("Lanelet Operations")
+
+        self.drawing_mode = QAction(QIcon(":/icons/drawing_mode.png"), "draw lanes", mwindow)
+        self.drawing_mode.setCheckable(True)
+        self.tb5.addAction(self.drawing_mode)
+        self.drawing_mode.triggered.connect(lambda: _drawing_mode(mwindow, self.drawing_mode.isChecked()))
+
+        self.add_adjacent_left = QAction(QIcon(":/icons/add_adjacent_left.png"), "add adjacent left", mwindow)
+        self.tb5.addAction(self.add_adjacent_left)
+        self.add_adjacent_left.setDisabled(True)
+        self.add_adjacent_left.triggered.connect(lambda: _add_adj_left(mwindow))
+
+        self.add_adjacent_right = QAction(QIcon(":/icons/add_adjacent_right.png"), "add adjacent right", mwindow)
+        self.tb5.addAction(self.add_adjacent_right)
+        self.add_adjacent_right.setDisabled(True)
+        self.add_adjacent_right.triggered.connect(lambda: _add_adj_right(mwindow))
+
+        self.split_lanelet = QAction(QIcon(":/icons/split_lanelet.png"), "split lane", mwindow)
+        self.split_lanelet.setCheckable(True)
+        self.tb5.addAction(self.split_lanelet)
+        self.split_lanelet.triggered.connect(lambda: _split_lanelet(mwindow, self.split_lanelet.isChecked()))
+        self.split_lanelet.setDisabled(True)
+
+        self.merge_lanelet = QAction(QIcon(":/icons/merge_lanelet.png"), "merge lanes", mwindow)
+        self.tb5.addAction(self.merge_lanelet)
+        self.merge_lanelet.triggered.connect(lambda: _merge_lanelets(mwindow))
+        self.merge_lanelet.setDisabled(True)
+
+    def reset_toolbar(self):
+        if self.split_lanelet.isChecked():
+            self.split_lanelet.trigger()
+        if self.drawing_mode.isChecked():
+            self.drawing_mode.trigger()
+
+    def enable_toolbar(self, number_of_selected_lanelets):
+        self.split_lanelet.setDisabled(True)
+        self.add_adjacent_left.setDisabled(True)
+        self.add_adjacent_right.setDisabled(True)
+        self.merge_lanelet.setDisabled(True)
+        if number_of_selected_lanelets == 1:
+            self.split_lanelet.setDisabled(False)
+        if number_of_selected_lanelets >= 1:
+            self.add_adjacent_right.setDisabled(False)
+            self.add_adjacent_left.setDisabled(False)
+        if number_of_selected_lanelets >= 2:
+            self.merge_lanelet.setDisabled(False)
+
 
 # functions which are passed as arguments to elements of the gui
 
@@ -117,8 +166,8 @@ def _undo_action(mwindow):
     else:
         return
     mwindow.animated_viewer_wrapper.cr_viewer.current_scenario = mwindow.scenarios[mwindow.current_scenario_index]
-    mwindow.animated_viewer_wrapper.cr_viewer.original_lanelet_network = \
-        mwindow.scenarios[mwindow.current_scenario_index].lanelet_network
+    mwindow.animated_viewer_wrapper.cr_viewer.original_lanelet_network = mwindow.scenarios[
+        mwindow.current_scenario_index].lanelet_network
     mwindow.animated_viewer_wrapper.update_view(focus_on_network=True)
     mwindow.update_toolbox_scenarios()
 
@@ -193,6 +242,26 @@ def _save_video(mwindow, open_commonroad_file):
             messbox.close()
     else:
         mwindow.crdesigner_console_wrapper.text_browser.append("Save video for scenario with ID " + str(
-            mwindow.animated_viewer_wrapper.cr_viewer.current_scenario.scenario_id))
+                mwindow.animated_viewer_wrapper.cr_viewer.current_scenario.scenario_id))
         mwindow.animated_viewer_wrapper.cr_viewer.save_animation()
         mwindow.crdesigner_console_wrapper.text_browser.append("Saving the video finished.")
+
+
+def _split_lanelet(mwindow, is_checked):
+    mwindow.animated_viewer_wrapper.cr_viewer.dynamic.activate_split_lanelet(is_checked)
+
+
+def _drawing_mode(mwindow, is_checked):
+    mwindow.animated_viewer_wrapper.cr_viewer.dynamic.activate_drawing_mode(is_checked)
+
+
+def _add_adj_left(mwindow):
+    mwindow.animated_viewer_wrapper.cr_viewer.dynamic.add_adjacent(True)
+
+
+def _add_adj_right(mwindow):
+    mwindow.animated_viewer_wrapper.cr_viewer.dynamic.add_adjacent(False)
+
+
+def _merge_lanelets(mwindow):
+    mwindow.animated_viewer_wrapper.cr_viewer.dynamic.merge_lanelets()

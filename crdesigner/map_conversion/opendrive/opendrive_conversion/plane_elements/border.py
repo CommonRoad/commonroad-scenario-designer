@@ -1,6 +1,7 @@
 import math
 import warnings
 from functools import lru_cache
+from typing import Optional, Any, Tuple
 import numpy as np
 
 __author__ = "Benjamin Orthen, Stefan Urban"
@@ -17,7 +18,7 @@ class Border:
     The reference can be another lane border or a plan view."""
 
     def __init__(self, ref_offset: float = 0.0):
-        """
+        """Initializes a Border object.
         :param ref_offset: Offset in s-direction to the reference object after which the border begins.
         :type ref_offset: float, default: 0.0
         """
@@ -27,7 +28,7 @@ class Border:
 
         self.reference = None
 
-    def _get_width_index(self, s_pos: float, is_last_pos: bool) -> int:
+    def _get_width_index(self, s_pos: float, is_last_pos: bool) -> float:
         """Get the index of the width which applies at position s_pos.
 
         :param s_pos: Position on border in curve_parameter ds
@@ -65,7 +66,7 @@ class Border:
     # instead of recalculating them over and over.
     @lru_cache(maxsize=200000)
     def calc(self, s_pos: float, width_offset: float = 0.0, is_last_pos: bool = False, reverse=False,
-             compute_curvature=True):
+             compute_curvature=True) -> Tuple[Optional[Any], Any, Any, Any]:
         """Calculate the Cartesian coordinates and the tangential direction of
         the border by calculating position of reference border at s_pos
         and then adding the width in orthogonal direction to the reference position.
@@ -81,11 +82,11 @@ class Border:
         :type reverse: bool
         :param compute_curvature: Whether to computer curvature, default is True
         :type compute_curvature: bool
-        :return:
-                - coord: (x,y) tuple of cartesian coordinates and the direction angle in radians
-                - tang: Tangential at s_pos, a float
-                - curv: Curvature at s_pos, a float, optional
-                - max_geometry_length: Maximum length of the geometry, a float
+        :return: coord: (x,y) tuple of cartesian coordinates and the direction angle in radians.
+        tang: Tangential at s_pos, a float.
+        curv: Curvature at s_pos, a float, optional.
+        max_geometry_length: Maximum length of the geometry, a float.
+        :rtype: tuple[Optional[Any], Any, Any, Any]
         """
         # Last reference has to be a reference geometry (PlanView)
         # Offset of all inner lanes (Border)

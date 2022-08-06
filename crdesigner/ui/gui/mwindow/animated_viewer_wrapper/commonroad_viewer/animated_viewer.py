@@ -71,6 +71,9 @@ class AnimatedViewer:
                 lanelet_network=scenario.lanelet_network)
         self.current_pps = planning_problem_set
 
+        # initialize lanelet network
+        self.dynamic.l_network = self.current_scenario.lanelet_network
+
         # if we have not subscribed already, subscribe now
         if config is not None:
             if not self._config:
@@ -206,17 +209,19 @@ class AnimatedViewer:
         return self.max_timestep
 
     def update_plot(self,
-                    sel_lanelet: Lanelet = None,
+                    sel_lanelets: Lanelet = None,
                     sel_intersection: Intersection = None,
                     time_step_changed: bool = False,
                     focus_on_network: bool = False,
                     time_step: int = 0,
                     clear_artists=False):
-        """ Update the plot accordinly to the selection of scenario elements
-        :param sel_lanelet: selected lanelet, defaults to None
+        """ Update the plot accordingly to the selection of scenario elements
+        :param sel_lanelets: selected lanelet, defaults to None
         :param sel_intersection: selected intersection, defaults to None
         :param clear_artists: deletes artists from renderer (only required when opening new scenarios)
         """
+        if not isinstance(sel_lanelets, list) and sel_lanelets:
+            sel_lanelets = [sel_lanelets]
 
         x_lim = self.dynamic.get_axes().get_xlim()
         y_lim = self.dynamic.get_axes().get_ylim()
@@ -249,7 +254,7 @@ class AnimatedViewer:
         for lanelet in self.current_scenario.lanelet_network.lanelets:
 
             color, alpha, zorder, label = self.get_paint_parameters(
-                lanelet, sel_lanelet, sel_intersection)
+                lanelet, sel_lanelets, sel_intersection)
             if color == "gray":
                 continue
 
@@ -262,7 +267,7 @@ class AnimatedViewer:
             self.draw_lanelet_vertices(lanelet, ax)
 
         handles, labels = ax.get_legend_handles_labels()
-        if sel_lanelet != None and config.LEGEND:
+        if sel_lanelets != None and config.LEGEND:
             legend = ax.legend(handles, labels)
             legend.set_zorder(50)
 
@@ -285,66 +290,66 @@ class AnimatedViewer:
 
         self.dynamic.drawer.tight_layout()
 
-    def get_paint_parameters(self, lanelet: Lanelet, selected_lanelet: Lanelet,
+    def get_paint_parameters(self, lanelet: Lanelet, selected_lanelets: Lanelet,
                              selected_intersection: Intersection):
         """
         Return the parameters for painting a lanelet regarding the selected lanelet.
         """
+        if selected_lanelets:
+            if len(selected_lanelets) == 1:
+                selected_lanelet = selected_lanelets[0]
+                if lanelet.lanelet_id == selected_lanelet.lanelet_id:
+                    color = "red"
+                    alpha = 0.7
+                    zorder = 20
+                    label = "{} selected".format(lanelet.lanelet_id)
 
-        if selected_lanelet:
+                elif (
+                        lanelet.lanelet_id in selected_lanelet.predecessor and lanelet.lanelet_id in
+                        selected_lanelet.successor):
+                    color = "purple"
+                    alpha = 0.5
+                    zorder = 10
+                    label = "{} predecessor and successor of {}".format(lanelet.lanelet_id, selected_lanelet.lanelet_id)
 
-            if lanelet.lanelet_id == selected_lanelet.lanelet_id:
-                color = "red"
-                alpha = 0.7
-                zorder = 20
-                label = "{} selected".format(lanelet.lanelet_id)
-
-            elif (lanelet.lanelet_id in selected_lanelet.predecessor
-                  and lanelet.lanelet_id in selected_lanelet.successor):
-                color = "purple"
-                alpha = 0.5
-                zorder = 10
-                label = "{} predecessor and successor of {}".format(
-                    lanelet.lanelet_id, selected_lanelet.lanelet_id)
-
-            elif lanelet.lanelet_id in selected_lanelet.predecessor:
-                color = "blue"
-                alpha = 0.5
-                zorder = 10
-                label = "{} predecessor of {}".format(
-                    lanelet.lanelet_id, selected_lanelet.lanelet_id)
-            elif lanelet.lanelet_id in selected_lanelet.successor:
-                color = "green"
-                alpha = 0.5
-                zorder = 10
-                label = "{} successor of {}".format(
-                    lanelet.lanelet_id, selected_lanelet.lanelet_id)
-            elif lanelet.lanelet_id == selected_lanelet.adj_left:
-                color = "yellow"
-                alpha = 0.5
-                zorder = 10
-                label = "{} adj left of {} ({})".format(
-                    lanelet.lanelet_id,
-                    selected_lanelet.lanelet_id,
-                    "same" if selected_lanelet.adj_left_same_direction else
-                    "opposite",
-                )
-            elif lanelet.lanelet_id == selected_lanelet.adj_right:
-                color = "orange"
-                alpha = 0.5
-                zorder = 10
-                label = "{} adj right of {} ({})".format(
-                    lanelet.lanelet_id,
-                    selected_lanelet.lanelet_id,
-                    "same" if selected_lanelet.adj_right_same_direction else
-                    "opposite",
-                )
+                elif lanelet.lanelet_id in selected_lanelet.predecessor:
+                    color = "blue"
+                    alpha = 0.5
+                    zorder = 10
+                    label = "{} predecessor of {}".format(lanelet.lanelet_id, selected_lanelet.lanelet_id)
+                elif lanelet.lanelet_id in selected_lanelet.successor:
+                    color = "green"
+                    alpha = 0.5
+                    zorder = 10
+                    label = "{} successor of {}".format(lanelet.lanelet_id, selected_lanelet.lanelet_id)
+                elif lanelet.lanelet_id == selected_lanelet.adj_left:
+                    color = "yellow"
+                    alpha = 0.5
+                    zorder = 10
+                    label = "{} adj left of {} ({})".format(lanelet.lanelet_id, selected_lanelet.lanelet_id,
+                            "same" if selected_lanelet.adj_left_same_direction else "opposite", )
+                elif lanelet.lanelet_id == selected_lanelet.adj_right:
+                    color = "orange"
+                    alpha = 0.5
+                    zorder = 10
+                    label = "{} adj right of {} ({})".format(lanelet.lanelet_id, selected_lanelet.lanelet_id,
+                            "same" if selected_lanelet.adj_right_same_direction else "opposite", )
+                else:
+                    color = "gray"
+                    alpha = 0.3
+                    zorder = 0
+                    label = None
             else:
-                color = "gray"
-                alpha = 0.3
-                zorder = 0
-                label = None
-
+                if any(lanelet.lanelet_id == lane.lanelet_id for lane in selected_lanelets):
+                    color = "red"
+                    alpha = 0.7
+                    zorder = 20
+                    label = "{} selected".format(lanelet.lanelet_id)
+                else:
+                    color = "gray"
+                    alpha = 0.3
+                    zorder = 0
+                    label = None
         elif selected_intersection:
             incoming_ids = selected_intersection.map_incoming_lanelets.keys()
             inc_succ_ids = set()

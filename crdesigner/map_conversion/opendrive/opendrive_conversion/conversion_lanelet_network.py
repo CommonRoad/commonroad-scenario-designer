@@ -3,7 +3,7 @@ so it can be used for conversion from the opendrive format."""
 import itertools
 import math
 import warnings
-from typing import List, Optional
+from typing import List, Optional, Tuple
 from queue import Queue
 import numpy as np
 
@@ -57,11 +57,18 @@ def convert_to_new_lanelet_id(old_lanelet_id: str, ids_assigned: dict) -> int:
 class ConversionLaneletNetwork(LaneletNetwork):
     """Add functions to LaneletNetwork which further enable it to modify its Lanelets."""
 
-    def __init__(self):
+    def __init__(self, config):
+        """Initializes a ConversionLaneletNetwork"""
         super().__init__()
+        self.config = config
         self._old_lanelet_ids = {}
 
-    def old_lanelet_ids(self):
+    def old_lanelet_ids(self) -> dict:
+        """Get the old lanelet ids.
+
+        :return: Dict containing all old lanelet IDs.
+        :rtype: dict
+        """
         return self._old_lanelet_ids
 
     def remove_lanelet(self, lanelet_id: str, remove_references: bool = False):
@@ -236,12 +243,14 @@ class ConversionLaneletNetwork(LaneletNetwork):
             if lanelet.adj_left == old_id:
                 lanelet.adj_left = new_id
 
-    def concatenate_possible_lanelets(self):
+    def concatenate_possible_lanelets(self) -> dict:
         """Iterate trough lanelets in network and concatenate possible lanelets together.
 
         Check for each lanelet if it can be concatenated with its successor and if its neighbors can be concatenated
         as well. If yes, do the concatenation.
 
+        :return: A dictionary containing the replacement IDs.
+        :rtype: dict
         """
         concatenate_lanelets = []
         for lanelet in self.lanelets:
@@ -338,7 +347,8 @@ class ConversionLaneletNetwork(LaneletNetwork):
 
             if lanelet_join or lanelet_split:
                 js_targets.append(
-                    _JoinSplitTarget(self, lanelet, lanelet_split, lanelet_join)
+                    _JoinSplitTarget(self, lanelet, lanelet_split, lanelet_join,
+                                     self.config.plane_conversion.precision)
                 )
 
         for js_target in js_targets:
@@ -795,7 +805,7 @@ class ConversionLaneletNetwork(LaneletNetwork):
                 else:
                     prev -= 1
 
-    def combine_common_incoming_lanelets(self, intersection_map:dict):
+    def combine_common_incoming_lanelets(self, intersection_map:dict) -> List[Tuple]:
         """
         Returns a list of tuples which are pairs of adj incoming lanelets and the union of their successors
 
@@ -839,7 +849,7 @@ class ConversionLaneletNetwork(LaneletNetwork):
         combined_incoming_lane_ids = list(k for k, _ in itertools.groupby(combined_incoming_lane_ids))
         return combined_incoming_lane_ids
 
-    def get_successor_directions(self, incoming_lane):
+    def get_successor_directions(self, incoming_lane) -> dict:
         """
         Find all directions of a incoming lane's successors
 
@@ -1113,6 +1123,7 @@ class _JoinSplitTarget:
     join and/or split can be performed. Additionally a method to
     change the borders of the determined lanelets.
 
+    :var :class:`ConversionLanelet` main_lanelet: Lanelet where split starts or join ends.
     :var :class:`ConversionLanelet` main_lanelet : Lanelet where split starts or join end.
     :var lanelet_network :class:`ConversionLaneletNetwork`: LaneletNetwork where join/split occurs.
     :var _mode int: Number denoting if join (0), split (1), or join and split (2) occurs.
@@ -1130,6 +1141,7 @@ class _JoinSplitTarget:
         main_lanelet: ConversionLanelet,
         split: bool,
         join: bool,
+        precision: float,
     ):
         self.main_lanelet = main_lanelet
         self.lanelet_network = lanelet_network
@@ -1143,6 +1155,7 @@ class _JoinSplitTarget:
         self.linking_side = None
         self._js_pairs = []
         self._single_lanelet_operation = False
+        self.precision = precision
 
     @property
     def split(self) -> bool:
@@ -1186,9 +1199,6 @@ class _JoinSplitTarget:
         :type lanelet_id: str
         :return: Lanelet matching the lanelet_id
         :rtype: :class:`ConversionLanelet`
-
-        Returns:
-          Lanelet matching the lanelet_id.
         """
         return self.lanelet_network.find_lanelet_by_id(lanelet_id)
 
@@ -1384,7 +1394,7 @@ class _JoinSplitTarget:
                 reference_width=adjacent_lanelet.calc_width_at_start(),
             )
             self._js_pairs.append(
-                _JoinSplitPair(lanelet, adjacent_lanelet, [0, change_pos])
+                _JoinSplitPair(lanelet, adjacent_lanelet, [0, change_pos], self.precision)
             )
             self.change_width = [change_width]
             # one for join at the end of the lanelet
@@ -1394,7 +1404,7 @@ class _JoinSplitTarget:
                 reference_width=adjacent_lanelet.calc_width_at_end(),
             )
             self._js_pairs.append(
-                _JoinSplitPair(lanelet, adjacent_lanelet, [change_pos, lanelet.length])
+                _JoinSplitPair(lanelet, adjacent_lanelet, [change_pos, lanelet.length], self.precision)
             )
             self.change_width.append(change_width)
             return True
@@ -1415,13 +1425,13 @@ class _JoinSplitTarget:
         self.change_width = change_width
         if self.split:
             self._js_pairs.append(
-                _JoinSplitPair(lanelet, adjacent_lanelet, [0, change_pos])
+                _JoinSplitPair(lanelet, adjacent_lanelet, [0, change_pos], self.precision)
             )
             if np.isclose(lanelet.length, change_pos):
                 return False
         else:
             self._js_pairs.append(
-                _JoinSplitPair(lanelet, adjacent_lanelet, [change_pos, lanelet.length])
+                _JoinSplitPair(lanelet, adjacent_lanelet, [change_pos, lanelet.length], self.precision)
             )
             if np.isclose(0, change_pos):
                 return False
@@ -1505,12 +1515,13 @@ class _JoinSplitTarget:
 
 
 class _JoinSplitPair:
-    "Pair of lanelet whose border is changed and its adjacent neighbor."
+    """Pair of lanelet whose border is changed and its adjacent neighbor."""
 
-    def __init__(self, lanelet, adjacent_lanelet, change_interval):
+    def __init__(self, lanelet, adjacent_lanelet, change_interval, precision):
         self.lanelet = lanelet
         self.adjacent_lanelet = adjacent_lanelet
         self.change_interval = change_interval
+        self.precision = precision
 
     def move_border(self, width: np.ndarray, linking_side: str) -> ConversionLanelet:
         """Move border of self.lanelet.
@@ -1527,5 +1538,6 @@ class _JoinSplitPair:
             mirror_interval=self.change_interval,
             distance=width,
             adjacent_lanelet=self.adjacent_lanelet,
+            precision=self.precision,
         )
         return self.lanelet

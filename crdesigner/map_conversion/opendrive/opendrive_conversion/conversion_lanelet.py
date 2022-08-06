@@ -5,6 +5,7 @@ from typing import Tuple, Optional
 
 import numpy as np
 from commonroad.scenario.lanelet import Lanelet, LaneletType, LineMarking
+from typing import Union
 
 __author__ = "Benjamin Orthen, Sebastian Maierhofer"
 __copyright__ = "TUM Cyber-Physical Systems Group"
@@ -89,7 +90,12 @@ class ConversionLanelet(Lanelet):
     """
 
     @property
-    def lanelet_type(self):
+    def lanelet_type(self) -> LaneletType:
+        """Get the lanelet type
+
+        :return: The lanelet type.
+        :rtype: LaneletType
+        """
         return self._lanelet_type
 
     @lanelet_type.setter
@@ -135,7 +141,11 @@ class ConversionLanelet(Lanelet):
 
     @property
     def lanelet_id(self) -> int:
-        """Get or set id of this lanelet."""
+        """Get or set id of this lanelet.
+
+        :return: The ID of the lanelet.
+        :rtype: int
+        """
         return self._lanelet_id
 
     @lanelet_id.setter
@@ -145,7 +155,11 @@ class ConversionLanelet(Lanelet):
 
     @property
     def left_vertices(self) -> np.ndarray:
-        """Get or set right vertices of this lanelet."""
+        """Get or set right vertices of this lanelet.
+
+        :return: The left vertices of the lanelet.
+        :rtype: np.ndarray
+        """
         return self._left_vertices
 
     @left_vertices.setter
@@ -155,7 +169,11 @@ class ConversionLanelet(Lanelet):
 
     @property
     def right_vertices(self) -> np.ndarray:
-        """Get or set right vertices of this lanelet."""
+        """Get or set right vertices of this lanelet.
+
+        :return: The right vertices of the lanelet.
+        :rtype: np.ndarray
+        """
         return self._right_vertices
 
     @right_vertices.setter
@@ -165,7 +183,11 @@ class ConversionLanelet(Lanelet):
 
     @property
     def center_vertices(self) -> np.ndarray:
-        """Get or set center vertices of this lanelet."""
+        """Get or set center vertices of this lanelet.
+
+        :return: The center vertices of the lanelet.
+        :rtype: np.ndarray
+        """
         return self._center_vertices
 
     @center_vertices.setter
@@ -175,7 +197,11 @@ class ConversionLanelet(Lanelet):
 
     @property
     def predecessor(self) -> list:
-        """Set or get the predecessor."""
+        """Set or get the predecessor.
+
+        :return: A list with IDs of the predecessors.
+        :rtype: list
+        """
         return self._predecessor
 
     @predecessor.setter
@@ -185,6 +211,11 @@ class ConversionLanelet(Lanelet):
 
     @property
     def successor(self) -> list:
+        """Set or get the successor.
+
+        :return: A list with IDs of the successors.
+        :rtype: list
+        """
         return self._successor
 
     @successor.setter
@@ -194,7 +225,11 @@ class ConversionLanelet(Lanelet):
 
     @property
     def adj_left(self) -> int:
-        """Set or get adjacent left lanelet."""
+        """Set or get adjacent left lanelet.
+
+        :return: The ID of the left adjacent lanelet.
+        :rtype: int
+        """
         return self._adj_left
 
     @adj_left.setter
@@ -205,7 +240,11 @@ class ConversionLanelet(Lanelet):
     @property
     def adj_left_same_direction(self) -> bool:
         """Set or get if adjacent left lanelet has the same direction
-        as this lanelet."""
+        as this lanelet.
+
+        :return: Whether the left adjacent lanelet has the same direction.
+        :rtype: bool
+        """
         return self._adj_left_same_direction
 
     @adj_left_same_direction.setter
@@ -215,7 +254,11 @@ class ConversionLanelet(Lanelet):
 
     @property
     def adj_right(self) -> int:
-        """Set or get adjacent right lanelet."""
+        """Set or get adjacent right lanelet.
+
+        :return: The ID of the right adjacent lanelet.
+        :rtype: int
+        """
         return self._adj_right
 
     @adj_right.setter
@@ -225,7 +268,11 @@ class ConversionLanelet(Lanelet):
     @property
     def adj_right_same_direction(self) -> bool:
         """Set or get if adjacent right lanelet has the same direction
-        as this lanelet."""
+        as this lanelet.
+
+        :return: Whether the right adjacent lanelet has the same direction.
+        :rtype: bool
+        """
         return self._adj_right_same_direction
 
     @adj_right_same_direction.setter
@@ -337,7 +384,7 @@ class ConversionLanelet(Lanelet):
 
     def optimal_join_split_values(
         self, is_split: bool, split_and_join: bool, reference_width: float
-    ):
+    ) -> Tuple[Union[float, int], float]:
         """Calculate an optimal value, where the lanelet split or join starts or ends, respectively.
 
         :param is_split: True if lanelet splits from another lanelet, otherwise False if it is a join
@@ -346,6 +393,8 @@ class ConversionLanelet(Lanelet):
         :type split_and_join: bool
         :param reference_width: Width for which width at zero width change position has to be greater as
         :type reference_width: float
+        :return: The merge position and merge width.
+        :rtype: Tuple[Union[float, int], float]
         """
 
         merge_pos, merge_width = self.first_zero_width_change_position(
@@ -373,6 +422,7 @@ class ConversionLanelet(Lanelet):
         mirror_interval: Tuple[float, float],
         distance: np.ndarray,
         adjacent_lanelet: "ConversionLanelet",
+        precision: float
     ):
         """Move vertices of one border by mirroring other border with
         a specified distance.
@@ -383,7 +433,10 @@ class ConversionLanelet(Lanelet):
         :type mirror_interval: Tuple[float, float]
         :param distance: Specifying distance at start and at end of mirroring
         :type distance: np.ndarray
-        :param adjacent_lanelet: The adjacent lanelet.
+        :param adjacent_lanelet: The adjacent conversion lanelet.
+        :type adjacent_lanelet: ConversionLanelet
+        :param precision: Specifies precision with which to convert the plane group to lanelet w. mirroring
+        :type precision: float
         """
         if mirror_border == "left":
             distance[:] = [-1 * x for x in distance]
@@ -393,13 +446,15 @@ class ConversionLanelet(Lanelet):
             distance=distance,
             mirror_interval=mirror_interval,
             adjacent_lanelet=adjacent_lanelet,
+            precision=precision,
         )
 
         self.left_vertices = lanelet.left_vertices
         self.center_vertices = lanelet.center_vertices
         self.right_vertices = lanelet.right_vertices
 
-    def calc_border(self, border: str, s_pos: float, width_offset: float = 0.0, compute_curvature=True):
+    def calc_border(self, border: str, s_pos: float, width_offset: float = 0.0,
+                    compute_curvature=True) -> Tuple[Tuple[float, float], float, float, float]:
         """
         Calc border position according to parametric_lane_group. Note: This does not consider borders which have been
         moved due to joining / splitting.

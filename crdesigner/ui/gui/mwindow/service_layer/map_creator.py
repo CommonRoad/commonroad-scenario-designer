@@ -21,7 +21,7 @@ class MapCreator:
                         line_marking_left: LineMarking = LineMarking.UNKNOWN,
                         line_marking_right: LineMarking = LineMarking.UNKNOWN, stop_line: StopLine = None,
                         traffic_signs: Set[int] = None, traffic_lights: Set[int] = None, stop_line_at_end: bool = False,
-                        backwards: bool = False) -> Lanelet:
+                        stop_line_at_beginning: bool = False, backwards: bool = False) -> Lanelet:
         """
         Function for creating a straight lanelet given a length, width, and number of vertices.
 
@@ -45,6 +45,7 @@ class MapCreator:
         @param traffic_lights: Referenced traffic lights by new lanelet.
         @param backwards: Boolean indicating whether lanelet should be rotated by 180°.
         @param stop_line_at_end: Boolean indicating whether stop line positions should correspond with end of lanelet.
+        @param stop_line_at_beginning: Boolean indicating whether stop line positions should correspond with beginning of lanelet.
         @return: Newly created lanelet.
         """
         eps = 0.1e-15
@@ -64,14 +65,16 @@ class MapCreator:
         if stop_line_at_end:
             stop_line.start = left_vertices[-1]
             stop_line.end = right_vertices[-1]
+        elif stop_line_at_beginning:
+            stop_line.start = left_vertices[0]
+            stop_line.end = right_vertices[0]
 
         lanelet = Lanelet(left_vertices=left_vertices, right_vertices=right_vertices, predecessor=predecessor,
                           successor=successor, adjacent_left=adjacent_left, adjacent_right=adjacent_right,
                           adjacent_left_same_direction=adjacent_left_same_direction,
-                          adjacent_right_same_direction=adjacent_right_same_direction,
-                          lanelet_id=lanelet_id, center_vertices=center_vertices, lanelet_type=lanelet_types,
-                          user_one_way=road_user_one_way, user_bidirectional=road_user_bidirectional,
-                          line_marking_right_vertices=line_marking_right,
+                          adjacent_right_same_direction=adjacent_right_same_direction, lanelet_id=lanelet_id,
+                          center_vertices=center_vertices, lanelet_type=lanelet_types, user_one_way=road_user_one_way,
+                          user_bidirectional=road_user_bidirectional, line_marking_right_vertices=line_marking_right,
                           line_marking_left_vertices=line_marking_left, stop_line=stop_line,
                           traffic_signs=traffic_signs, traffic_lights=traffic_lights)
         if backwards:
@@ -87,8 +90,8 @@ class MapCreator:
                      road_user_one_way: Set[RoadUser] = None, road_user_bidirectional: Set[RoadUser] = None,
                      line_marking_left: LineMarking = LineMarking.UNKNOWN,
                      line_marking_right: LineMarking = LineMarking.UNKNOWN, stop_line: StopLine = None,
-                     traffic_signs: Set[int] = None, traffic_lights: Set[int] = None, stop_line_at_end: bool = False) \
-            -> Lanelet:
+                     traffic_signs: Set[int] = None, traffic_lights: Set[int] = None, stop_line_at_end: bool = False,
+                     stop_line_at_beginning: bool = False) -> Lanelet:
         """
         Function for creating a straight lanelet given a length, width, and number of vertices.
 
@@ -139,6 +142,9 @@ class MapCreator:
         if stop_line_at_end:
             stop_line.start = left_vertices[-1]
             stop_line.end = right_vertices[-1]
+        elif stop_line_at_beginning:
+            stop_line.start = left_vertices[0]
+            stop_line.end = right_vertices[0]
 
         lanelet = Lanelet(left_vertices=left_vertices, right_vertices=right_vertices, lanelet_id=lanelet_id,
                           center_vertices=center_vertices, predecessor=predecessor, successor=successor,
@@ -244,26 +250,64 @@ class MapCreator:
         return lanelet
 
     @staticmethod
-    def fit_to_predecessor(predecessor: Lanelet, successor: Lanelet):
+    def lanelet_is_straight(lanelet: Lanelet):
+        """
+        Checks wether lanelet is straight
+
+        @param lanelet: Lanelet of which it should be checked whether it is straight.
+        @return: bool value of result
+        """
+        x_start = round(lanelet.left_vertices[0][0] - lanelet.right_vertices[0][0], 3)
+        y_start = round(lanelet.left_vertices[0][1] - lanelet.right_vertices[0][1], 3)
+        x_end = round(lanelet.left_vertices[len(lanelet.left_vertices) - 1][0] -
+                      lanelet.right_vertices[len(lanelet.right_vertices) - 1][0], 3)
+        y_end = round(lanelet.left_vertices[len(lanelet.left_vertices) - 1][1] -
+                      lanelet.right_vertices[len(lanelet.right_vertices) - 1][1], 3)
+        return x_start == x_end and y_start == y_end
+
+    @staticmethod
+    def fit_to_predecessor(predecessor: Lanelet, successor: Lanelet, intersection: bool = False):
         """
         Function to translate a lanelet so that it fits to a given predecessor lanelet.
 
         @param predecessor: Lanelet to which given lanelet should be attached.
         @param successor: Lanelet which should be attached to the predecessor lanelet.
         """
-        factor = (np.linalg.norm(successor.left_vertices[0, :] - successor.right_vertices[0, :])
-                  / np.linalg.norm((predecessor.left_vertices[-1, :] - predecessor.right_vertices[-1, :])))
+
+
+
+        if MapCreator.lanelet_is_straight(predecessor) and not intersection:
+            successor._left_vertices = predecessor.left_vertices
+            successor._center_vertices = predecessor.center_vertices
+            successor._right_vertices = predecessor.right_vertices
+
+
+        factor = (np.linalg.norm(successor.left_vertices[0, :] - successor.right_vertices[0, :]) / np.linalg.norm(
+                    (predecessor.left_vertices[-1, :] - predecessor.right_vertices[-1, :])))
+
 
         successor._left_vertices = successor.left_vertices / factor
         successor._right_vertices = successor.right_vertices / factor
         successor._center_vertices = successor.center_vertices / factor
 
         ang = MapCreator.calc_angle_between_lanelets(predecessor, successor)
+        if not is_natural_number(ang) and not intersection:
+            ang = 0
+            if not MapCreator.lanelet_is_straight(predecessor):
+                a = predecessor.right_vertices[-1] - predecessor.center_vertices[-1]
+                b = successor.right_vertices[0] - successor.center_vertices[0]
+                inner = np.inner(a, b)
+                norms = np.linalg.norm(a) * np.linalg.norm(b)
+                cos = inner / norms
+                ang = np.arccos(np.clip(cos, -1.0, 1.0))
+
+
         successor.translate_rotate(np.array([0, 0]), ang)
         trans = predecessor.center_vertices[-1] - successor.center_vertices[0]
         successor.translate_rotate(trans, 0)
 
         MapCreator.set_predecessor_successor_relation(predecessor, successor)
+
 
     @staticmethod
     def fit_to_successor(successor: Lanelet, predecessor: Lanelet):
@@ -273,19 +317,31 @@ class MapCreator:
         @param successor: Lanelet to which given lanelet should be attached.
         @param predecessor: Lanelet which should be attached to the successor lanelet.
         """
-        factor = (np.linalg.norm(predecessor.left_vertices[-1, :] - predecessor.right_vertices[-1, :])
-                  / np.linalg.norm((successor.left_vertices[0, :] - successor.right_vertices[0, :])))
-
-        predecessor._left_vertices = predecessor.left_vertices / factor
-        predecessor._right_vertices = predecessor.right_vertices / factor
-        predecessor._center_vertices = predecessor.center_vertices / factor
+        straight = MapCreator.lanelet_is_straight(successor)
+        if straight:
+            predecessor._left_vertices = successor.left_vertices
+            predecessor._center_vertices = successor.center_vertices
+            predecessor._right_vertices = successor.right_vertices
 
         ang = MapCreator.calc_angle_between_lanelets(predecessor, successor)
+        if not is_natural_number(ang):
+            ang = 0
+            if not straight:
+                a = predecessor.right_vertices[-1] - predecessor.center_vertices[-1]
+                b = successor.right_vertices[0] - successor.center_vertices[0]
+                inner = np.inner(a, b)
+                norms = np.linalg.norm(a) * np.linalg.norm(b)
+                cos = inner / norms
+                ang = np.arccos(np.clip(cos, -1.0, 1.0))
+
         predecessor.translate_rotate(np.array([0, 0]), ang)
-        trans = predecessor.center_vertices[0] - successor.center_vertices[-1]
-        predecessor.translate_rotate(trans, 0)
+
+        if straight:
+            trans = predecessor.center_vertices[0] - successor.center_vertices[-1]
+            predecessor.translate_rotate(trans, 0)
 
         MapCreator.set_predecessor_successor_relation(predecessor, successor)
+
 
     @staticmethod
     def calc_angle_between_lanelets(predecessor: Lanelet, lanelet: Lanelet):
@@ -304,7 +360,6 @@ class MapCreator:
         angle = np.arccos(dot_prod / (norm_predecessor * norm_lanelet))
         if sign > 0:
             angle = 2 * np.pi - angle
-
         return angle
 
     @staticmethod
@@ -367,7 +422,7 @@ class MapCreator:
                                                        {LaneletType.INTERSECTION}, road_user_one_way={RoadUser.VEHICLE},
                                                        line_marking_left=LineMarking.NO_MARKING,
                                                        line_marking_right=LineMarking.NO_MARKING))
-        MapCreator.fit_to_predecessor(new_lanelets[0], new_lanelets[2])
+        MapCreator.fit_to_predecessor(new_lanelets[0], new_lanelets[2], True)
         new_lanelets.append(MapCreator.create_adjacent_lanelet(True, new_lanelets[2], lanelet_ids[3], False, width,
                                                                {LaneletType.INTERSECTION},
                                                                road_user_one_way={RoadUser.VEHICLE},
@@ -378,7 +433,7 @@ class MapCreator:
                                                     {LaneletType.INTERSECTION}, road_user_one_way={RoadUser.VEHICLE},
                                                     line_marking_left=LineMarking.NO_MARKING,
                                                     line_marking_right=LineMarking.NO_MARKING))
-        MapCreator.fit_to_predecessor(new_lanelets[0], new_lanelets[4])
+        MapCreator.fit_to_predecessor(new_lanelets[0], new_lanelets[4], True)
         new_lanelets.append(MapCreator.create_adjacent_lanelet(True, new_lanelets[4], lanelet_ids[5], False, width,
                                                                {LaneletType.INTERSECTION},
                                                                road_user_one_way={RoadUser.VEHICLE},
@@ -389,7 +444,7 @@ class MapCreator:
                                                        {LaneletType.UNKNOWN}, road_user_one_way={RoadUser.VEHICLE},
                                                        line_marking_left=LineMarking.DASHED,
                                                        line_marking_right=LineMarking.SOLID))
-        MapCreator.fit_to_predecessor(new_lanelets[4], new_lanelets[6])
+        MapCreator.fit_to_predecessor(new_lanelets[4], new_lanelets[6], True)
         new_lanelets.append(MapCreator.create_adjacent_lanelet(True, new_lanelets[6], lanelet_ids[7], False, width,
                                                                {LaneletType.UNKNOWN},
                                                                road_user_one_way={RoadUser.VEHICLE},
@@ -400,7 +455,7 @@ class MapCreator:
                                                        {LaneletType.UNKNOWN}, road_user_one_way={RoadUser.VEHICLE},
                                                        line_marking_left=LineMarking.DASHED,
                                                        line_marking_right=LineMarking.SOLID))
-        MapCreator.fit_to_predecessor(new_lanelets[2], new_lanelets[8])
+        MapCreator.fit_to_predecessor(new_lanelets[2], new_lanelets[8], True)
         new_lanelets.append(MapCreator.create_adjacent_lanelet(True, new_lanelets[8], lanelet_ids[9], False, width,
                                                                {LaneletType.UNKNOWN},
                                                                road_user_one_way={RoadUser.VEHICLE},
@@ -411,7 +466,7 @@ class MapCreator:
                                                     {LaneletType.INTERSECTION}, road_user_one_way={RoadUser.VEHICLE},
                                                     line_marking_left=LineMarking.NO_MARKING,
                                                     line_marking_right=LineMarking.NO_MARKING))
-        MapCreator.fit_to_predecessor(new_lanelets[7], new_lanelets[10])
+        MapCreator.fit_to_predecessor(new_lanelets[7], new_lanelets[10], True)
         new_lanelets.append(MapCreator.create_adjacent_lanelet(True, new_lanelets[10], lanelet_ids[11], False, width,
                                                                {LaneletType.INTERSECTION},
                                                                road_user_one_way={RoadUser.VEHICLE},
@@ -422,7 +477,7 @@ class MapCreator:
                                                        {LaneletType.INTERSECTION}, road_user_one_way={RoadUser.VEHICLE},
                                                        line_marking_left=LineMarking.NO_MARKING,
                                                        line_marking_right=LineMarking.NO_MARKING))
-        MapCreator.fit_to_predecessor(new_lanelets[7], new_lanelets[12])
+        MapCreator.fit_to_predecessor(new_lanelets[7], new_lanelets[12], True)
         new_lanelets.append(MapCreator.create_adjacent_lanelet(True, new_lanelets[12], lanelet_ids[13], False, width,
                                                                {LaneletType.INTERSECTION},
                                                                road_user_one_way={RoadUser.VEHICLE},
@@ -433,7 +488,7 @@ class MapCreator:
                                                        {LaneletType.UNKNOWN}, road_user_one_way={RoadUser.VEHICLE},
                                                        line_marking_left=LineMarking.DASHED,
                                                        line_marking_right=LineMarking.SOLID))
-        MapCreator.fit_to_predecessor(new_lanelets[12], new_lanelets[14])
+        MapCreator.fit_to_predecessor(new_lanelets[12], new_lanelets[14], True)
         new_lanelets.append(MapCreator.create_adjacent_lanelet(True, new_lanelets[14], lanelet_ids[15], False, width,
                                                                {LaneletType.UNKNOWN},
                                                                road_user_one_way={RoadUser.VEHICLE},
@@ -444,7 +499,7 @@ class MapCreator:
                                                     {LaneletType.INTERSECTION}, road_user_one_way={RoadUser.VEHICLE},
                                                     line_marking_left=LineMarking.NO_MARKING,
                                                     line_marking_right=LineMarking.NO_MARKING))
-        MapCreator.fit_to_predecessor(new_lanelets[9], new_lanelets[16])
+        MapCreator.fit_to_predecessor(new_lanelets[9], new_lanelets[16], True)
         new_lanelets.append(MapCreator.create_adjacent_lanelet(True, new_lanelets[16], lanelet_ids[17], False, width,
                                                                {LaneletType.INTERSECTION},
                                                                road_user_one_way={RoadUser.VEHICLE},
@@ -455,7 +510,7 @@ class MapCreator:
                                                     {LaneletType.INTERSECTION}, road_user_one_way={RoadUser.VEHICLE},
                                                     line_marking_left=LineMarking.NO_MARKING,
                                                     line_marking_right=LineMarking.NO_MARKING))
-        MapCreator.fit_to_predecessor(new_lanelets[15], new_lanelets[18])
+        MapCreator.fit_to_predecessor(new_lanelets[15], new_lanelets[18], True)
         new_lanelets.append(MapCreator.create_adjacent_lanelet(True, new_lanelets[18], lanelet_ids[19], False, width,
                                                                {LaneletType.INTERSECTION},
                                                                road_user_one_way={RoadUser.VEHICLE},
@@ -613,7 +668,7 @@ class MapCreator:
                                                     {LaneletType.INTERSECTION}, road_user_one_way={RoadUser.VEHICLE},
                                                     line_marking_left=LineMarking.NO_MARKING,
                                                     line_marking_right=LineMarking.NO_MARKING))
-        MapCreator.fit_to_predecessor(new_lanelets[0], new_lanelets[2])
+        MapCreator.fit_to_predecessor(new_lanelets[0], new_lanelets[2], True)
         new_lanelets.append(MapCreator.create_adjacent_lanelet(True, new_lanelets[2], lanelet_ids[3], False, width,
                                                                {LaneletType.INTERSECTION},
                                                                road_user_one_way={RoadUser.VEHICLE},
@@ -624,7 +679,7 @@ class MapCreator:
                                                        {LaneletType.UNKNOWN}, road_user_one_way={RoadUser.VEHICLE},
                                                        line_marking_left=LineMarking.DASHED,
                                                        line_marking_right=LineMarking.SOLID))
-        MapCreator.fit_to_predecessor(new_lanelets[2], new_lanelets[4])
+        MapCreator.fit_to_predecessor(new_lanelets[2], new_lanelets[4], True)
         new_lanelets.append(MapCreator.create_adjacent_lanelet(True, new_lanelets[4], lanelet_ids[5], False, width,
                                                                {LaneletType.UNKNOWN},
                                                                road_user_one_way={RoadUser.VEHICLE},
@@ -635,7 +690,7 @@ class MapCreator:
                                                        {LaneletType.INTERSECTION}, road_user_one_way={RoadUser.VEHICLE},
                                                        line_marking_left=LineMarking.DASHED,
                                                        line_marking_right=LineMarking.NO_MARKING))
-        MapCreator.fit_to_predecessor(new_lanelets[5], new_lanelets[6])
+        MapCreator.fit_to_predecessor(new_lanelets[5], new_lanelets[6], True)
         new_lanelets.append(MapCreator.create_adjacent_lanelet(True, new_lanelets[6], lanelet_ids[7], False, width,
                                                                {LaneletType.INTERSECTION},
                                                                road_user_one_way={RoadUser.VEHICLE},
@@ -646,7 +701,7 @@ class MapCreator:
                                                        {LaneletType.UNKNOWN}, road_user_one_way={RoadUser.VEHICLE},
                                                        line_marking_left=LineMarking.DASHED,
                                                        line_marking_right=LineMarking.SOLID))
-        MapCreator.fit_to_predecessor(new_lanelets[6], new_lanelets[8])
+        MapCreator.fit_to_predecessor(new_lanelets[6], new_lanelets[8], True)
         new_lanelets.append(MapCreator.create_adjacent_lanelet(True, new_lanelets[8], lanelet_ids[9], False, width,
                                                                {LaneletType.UNKNOWN},
                                                                road_user_one_way={RoadUser.VEHICLE},
@@ -657,7 +712,7 @@ class MapCreator:
                                                     {LaneletType.INTERSECTION}, road_user_one_way={RoadUser.VEHICLE},
                                                     line_marking_left=LineMarking.NO_MARKING,
                                                     line_marking_right=LineMarking.NO_MARKING))
-        MapCreator.fit_to_predecessor(new_lanelets[9], new_lanelets[10])
+        MapCreator.fit_to_predecessor(new_lanelets[9], new_lanelets[10], True)
         new_lanelets.append(MapCreator.create_adjacent_lanelet(True, new_lanelets[10], lanelet_ids[11], False, width,
                                                                {LaneletType.INTERSECTION},
                                                                road_user_one_way={RoadUser.VEHICLE},
@@ -937,3 +992,66 @@ class MapCreator:
             MapCreator.set_predecessor_successor_relation(predecessor, connecting_lanelet)
             MapCreator.set_predecessor_successor_relation(connecting_lanelet, successor)
             return connecting_lanelet
+
+    @staticmethod
+    def split_lanelet(lanelet: Lanelet, split_index: int, scenario: Scenario, network, direction: str = "",
+                      prev_first_lane_id: int = 0, prev_second_lane_id: int = 0, same_direction: bool = None):
+
+        # Generate Lanelets
+        first_lane_id = scenario.generate_object_id()
+        second_lane_id = scenario.generate_object_id()
+
+        left_vertices_first_lane = lanelet.left_vertices[:split_index + 1]
+        center_vertices_first_lane = lanelet.center_vertices[:split_index + 1]
+        right_vertices_first_lane = lanelet.right_vertices[:split_index + 1]
+        predecessor_first_lane = lanelet.predecessor
+        successor_first_lane = [second_lane_id]
+
+        left_vertices_second_lane = lanelet.left_vertices[split_index:]
+        center_vertices_second_lane = lanelet.center_vertices[split_index:]
+        right_vertices_second_lane = lanelet.right_vertices[split_index:]
+        predecessor_second_lane = [first_lane_id]
+        successor_second_lane = lanelet.successor
+
+        lanelet_first = Lanelet(left_vertices=left_vertices_first_lane, center_vertices=center_vertices_first_lane,
+                                right_vertices=right_vertices_first_lane, lanelet_id=first_lane_id,
+                                predecessor=predecessor_first_lane, successor=successor_first_lane)
+        lanelet_second = Lanelet(left_vertices=left_vertices_second_lane, center_vertices=center_vertices_second_lane,
+                                 right_vertices=right_vertices_second_lane, lanelet_id=second_lane_id,
+                                 predecessor=predecessor_second_lane, successor=successor_second_lane)
+
+        scenario.remove_lanelet(lanelet)
+        scenario.add_objects([lanelet_first, lanelet_second])
+        # Split adjacent Lanelets
+        if direction == "" or direction == "l":
+            if direction == "l":
+                lanelet_first.adj_right = prev_first_lane_id
+                lanelet_first.adj_right_same_direction = same_direction
+                lanelet_second.adj_right = prev_second_lane_id
+                lanelet_second.adj_right_same_direction = same_direction
+            if lanelet.adj_left:
+                left_adj = network.find_lanelet_by_id(lanelet.adj_left)
+                first_adj_left_id, second_adj_left_id = MapCreator\
+                    .split_lanelet(left_adj, split_index, scenario, network, "l",
+                                   first_lane_id, second_lane_id, lanelet.adj_left_same_direction)
+                lanelet_first.adj_left = first_adj_left_id
+                lanelet_first.adj_left_same_direction = lanelet.adj_left_same_direction
+                lanelet_second.adj_left = second_adj_left_id
+                lanelet_second.adj_left_same_direction = lanelet.adj_left_same_direction
+        if direction == "" or direction == "r":
+            if direction == "r":
+                lanelet_first.adj_left = prev_first_lane_id
+                lanelet_first.adj_left_same_direction = same_direction
+                lanelet_second.adj_left = prev_second_lane_id
+                lanelet_second.adj_left_same_direction = same_direction
+            if lanelet.adj_right:
+                right_adj = network.find_lanelet_by_id(lanelet.adj_right)
+                first_adj_right_id, second_adj_right_id = MapCreator\
+                    .split_lanelet(right_adj, split_index, scenario, network, "r",
+                                   first_lane_id, second_lane_id, lanelet.adj_right_same_direction)
+                lanelet_first.adj_right = first_adj_right_id
+                lanelet_first.adj_right_same_direction = lanelet.adj_right_same_direction
+                lanelet_second.adj_right = second_adj_right_id
+                lanelet_second.adj_right_same_direction  = lanelet.adj_right_same_direction
+
+        return first_lane_id, second_lane_id
