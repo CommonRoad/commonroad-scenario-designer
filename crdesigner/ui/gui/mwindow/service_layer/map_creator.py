@@ -1022,6 +1022,7 @@ class MapCreator:
 
         scenario.remove_lanelet(lanelet)
         scenario.add_objects([lanelet_first, lanelet_second])
+
         # Split adjacent Lanelets
         if direction == "" or direction == "l":
             if direction == "l":
@@ -1052,6 +1053,6 @@ class MapCreator:
                 lanelet_first.adj_right = first_adj_right_id
                 lanelet_first.adj_right_same_direction = lanelet.adj_right_same_direction
                 lanelet_second.adj_right = second_adj_right_id
-                lanelet_second.adj_right_same_direction  = lanelet.adj_right_same_direction
+                lanelet_second.adj_right_same_direction = lanelet.adj_right_same_direction
 
         return first_lane_id, second_lane_id
