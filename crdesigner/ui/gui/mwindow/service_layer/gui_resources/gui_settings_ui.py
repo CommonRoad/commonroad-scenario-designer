@@ -42,7 +42,6 @@ class Ui_GUISettings():
             self.formLayout.append(QtWidgets.QFormLayout(self.content[i]))
             self.formLayout[i].setObjectName("form_" + str(i))
             self.content[i].setMinimumSize(860 * self.factor, 820)
-            self.content[i].setMaximumSize(860 * self.factor, 820)
             self.content[i].setLayout(self.formLayout[i])
             self.HBoxLayout.addWidget(self.content[i])
 

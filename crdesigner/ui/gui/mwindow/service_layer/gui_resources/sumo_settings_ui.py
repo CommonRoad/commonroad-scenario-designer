@@ -8,6 +8,8 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
+from crdesigner.ui.gui.mwindow.service_layer.gui_resources.size_policies import create_size_policy_for_settings_elements
+
 
 class Ui_SUMOSettings():
 
@@ -42,10 +44,10 @@ class Ui_SUMOSettings():
             self.formLayout.append(QtWidgets.QFormLayout(self.content[i]))
             self.formLayout[i].setObjectName("form_" + str(i))
             self.content[i].setMinimumSize(860 * self.factor, 820)
-            self.content[i].setMaximumSize(860 * self.factor, 820)
             self.content[i].setLayout(self.formLayout[i])
 
         column = 0
+
 
         #Parameter for the Sumo Settings
 
@@ -251,7 +253,8 @@ class Ui_SUMOSettings():
         self.le_ego_ids = QtWidgets.QLineEdit(self.content[column])
         self.le_ego_ids.setText("")
         self.le_ego_ids.setObjectName("le_ego_ids")
-        self.le_ego_ids.setMaximumSize(self.widthm, self.height)
+        self.le_ego_ids.setMinimumSize(self.widthm, self.height)
+        self.le_ego_ids.setSizePolicy(create_size_policy_for_settings_elements())
         self.label_ego_ids = QtWidgets.QLabel(self.content[column])
         self.label_ego_ids.setObjectName("label_20")
         self.label_ego_ids.setMinimumSize(self.widthf, self.height)
@@ -441,7 +444,8 @@ class Ui_SUMOSettings():
         self.le_departure_interval_vehicles.setLocale(
             QtCore.QLocale(QtCore.QLocale.English, QtCore.QLocale.UnitedStates))
         self.le_departure_interval_vehicles.setObjectName("le_departure_interval_vehicles")
-        self.le_departure_interval_vehicles.setMaximumSize(self.widthm, self.height)
+        self.le_departure_interval_vehicles.setMinimumSize(self.widthm, self.height)
+        self.le_departure_interval_vehicles.setSizePolicy(create_size_policy_for_settings_elements())
         self.label_departure_interval_vehicles = QtWidgets.QLabel(self.content[column])
         self.label_departure_interval_vehicles.setObjectName("label_30")
         self.label_departure_interval_vehicles.setMinimumSize(self.widthf, self.height)

@@ -8,6 +8,8 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
+from crdesigner.ui.gui.mwindow.service_layer.gui_resources.size_policies import create_size_policy_for_settings_elements
+
 
 class Ui_OSMSettings():
 
@@ -42,7 +44,6 @@ class Ui_OSMSettings():
             self.formLayout.append(QtWidgets.QFormLayout(self.content[i]))
             self.formLayout[i].setObjectName("form_" + str(i))
             self.content[i].setMinimumSize(860 * self.factor, 820)
-            self.content[i].setMaximumSize(860 * self.factor, 820)
             self.content[i].setLayout(self.formLayout[i])
 
         column = 0
@@ -62,7 +63,9 @@ class Ui_OSMSettings():
         self.hL_0.setObjectName("hL_0")
         self.le_benchmark_id = QtWidgets.QLineEdit(self.content[column])
         self.le_benchmark_id.setObjectName("le_benchmark_id")
-        self.le_benchmark_id.setMaximumSize(self.widthm, self.height)
+        self.le_benchmark_id.setMinimumSize(self.widthm, self.height)
+        self.le_benchmark_id.setSizePolicy(create_size_policy_for_settings_elements())
+
         self.label_benchmark_id = QtWidgets.QLabel(self.content[column])
         self.label_benchmark_id.setObjectName("label_11")
         self.label_benchmark_id.setMinimumSize(self.widthf, self.height)
@@ -80,7 +83,9 @@ class Ui_OSMSettings():
         self.label_author.setMinimumSize(self.widthf, self.height)
         self.le_author = QtWidgets.QLineEdit(self.content[column])
         self.le_author.setObjectName("le_author")
-        self.le_author.setMaximumSize(self.widthm, self.height)
+        self.le_author.setMinimumSize(self.widthm, self.height)
+        self.le_author.setSizePolicy(create_size_policy_for_settings_elements())
+
         self.hL_1.addWidget(self.label_author)
         self.hL_1.addWidget(self.le_author)
         self.hL_1.addWidget(QtWidgets.QLabel(self.content[column]))
@@ -94,7 +99,9 @@ class Ui_OSMSettings():
         self.label_affiliation.setMinimumSize(self.widthf, self.height)
         self.le_affiliation = QtWidgets.QLineEdit(self.content[column])
         self.le_affiliation.setObjectName("le_affiliation")
-        self.le_affiliation.setMaximumSize(self.widthm, self.height)
+        self.le_affiliation.setMinimumSize(self.widthm, self.height)
+        self.le_affiliation.setSizePolicy(create_size_policy_for_settings_elements())
+
         self.hL_2.addWidget(self.label_affiliation)
         self.hL_2.addWidget(self.le_affiliation)
         self.hL_2.addWidget(QtWidgets.QLabel(self.content[column]))
@@ -105,7 +112,9 @@ class Ui_OSMSettings():
         self.hL_3.setObjectName("hL_3")
         self.le_source = QtWidgets.QLineEdit(self.content[column])
         self.le_source.setObjectName("le_source")
-        self.le_source.setMaximumSize(self.widthm, self.height)
+        self.le_source.setMinimumSize(self.widthm, self.height)
+        self.le_source.setSizePolicy(create_size_policy_for_settings_elements())
+
         self.label_source = QtWidgets.QLabel(self.content[column])
         self.label_source.setObjectName("label_14")
         self.label_source.setMinimumSize(self.widthf, self.height)
@@ -119,7 +128,9 @@ class Ui_OSMSettings():
         self.hL_4.setObjectName("hL_4")
         self.le_tags = QtWidgets.QLineEdit(self.content[column])
         self.le_tags.setObjectName("le_tags")
-        self.le_tags.setMaximumSize(self.widthm, self.height)
+        self.le_tags.setMinimumSize(self.widthm, self.height)
+        self.le_tags.setSizePolicy(create_size_policy_for_settings_elements())
+
         self.label_tags = QtWidgets.QLabel(self.content[column])
         self.label_tags.setObjectName("label_15")
         self.label_tags.setMinimumSize(self.widthf, self.height)
