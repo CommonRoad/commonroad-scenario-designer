@@ -5,6 +5,8 @@ from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.commonroad_viewer.dynamic
 import crdesigner.ui.gui.mwindow.service_layer.gui_settings as gui
 import crdesigner.ui.gui.mwindow.service_layer.sumo_settings as sumo
 import crdesigner.ui.gui.mwindow.service_layer.osm_settings as osm
+from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMO_AVAILABLE
+
 
 class Settings:
 
@@ -15,14 +17,13 @@ class Settings:
 
         self.window.setupUi(self.settings_window, self.cr_designer)
         self.gui_settings = gui.GUISettings(self)
-        self.sumo_settings = sumo.SUMOSettings(self, config=parent.obstacle_toolbox.sumo_simulation.config)
+        if SUMO_AVAILABLE:
+            self.sumo_settings = sumo.SUMOSettings(self, config=parent.obstacle_toolbox.sumo_simulation.config)
         self.osm_settings = osm.OSMSettings(self, None)
         self.connect_events()
         self.update_ui_values()
         self.settings_window.show()
         self.canvas = DynamicCanvas()
-
-
 
     def connect_events(self):
         """ connect buttons to callables """
@@ -31,8 +32,8 @@ class Settings:
         self.window.button_cancel.clicked.connect(self.close)
         self.osm_settings.connect_events(self.window.osm_settings)
         self.gui_settings.connect_events()
-        self.sumo_settings.connect_events()
-
+        if SUMO_AVAILABLE:
+            self.sumo_settings.connect_events()
 
     def close(self):
         self.settings_window.close()
@@ -43,10 +44,10 @@ class Settings:
         sets the values of the settings window to the current values of config
         """
         self.gui_settings.update_ui_values()
-        self.sumo_settings.update_ui_values()
+        if SUMO_AVAILABLE:
+            self.sumo_settings.update_ui_values()
         self.osm_settings.update_ui_values()
         self.cr_designer.update_window()
-
 
     def save_to_config(self):
         """
@@ -58,9 +59,9 @@ class Settings:
 
     def has_valid_entries(self) -> bool:
         """
-        Check if the user input is valid. Otherwise warn the user.
+        Check if the user input is valid. Otherwise, warn the user.
 
-        :return: bool wether the input is valid
+        :return: bool whether the input is valid
         """
         # use if settings get extended
         return True

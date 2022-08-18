@@ -1,11 +1,7 @@
-from typing import List, Union
+from typing import Union
 import matplotlib as mpl
-import numpy as np
-import math
-import logging
 
 from PyQt5.QtWidgets import *
-from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 
 from commonroad.geometry.polyline_util import *
@@ -22,7 +18,7 @@ if SUMO_AVAILABLE:
 
 from crdesigner.ui.gui.mwindow.toolboxes.obstacle_toolbox.obstacle_toolbox_ui import ObstacleToolboxUI
 
-from commonroad.prediction.prediction import Prediction, Occupancy, SetBasedPrediction, TrajectoryPrediction
+from commonroad.prediction.prediction import TrajectoryPrediction
 
 
 class ObstacleToolbox(QDockWidget):

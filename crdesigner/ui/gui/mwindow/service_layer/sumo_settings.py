@@ -1,11 +1,8 @@
-""" """
-
-from PyQt5.QtWidgets import QMessageBox, QMainWindow
+from PyQt5.QtWidgets import QMessageBox
 
 from commonroad.common.util import Interval
 from commonroad.scenario.obstacle import ObstacleType
 
-from crdesigner.ui.gui.mwindow.service_layer.gui_resources.sumo_settings_ui import Ui_SUMOSettings
 from crdesigner.ui.gui.mwindow.service_layer.util import Observable
 from crdesigner.map_conversion.sumo_map.config import SumoConfig
 
