@@ -71,7 +71,6 @@ class PlaneConversionConfig:
     """Class holding all relevant configuration parameters for the plane conversion of OpenDrive2CR."""
     def __init__(self, config: Union[ListConfig, DictConfig]):
         """Initializes a plane conversion configuration object"""
-        print("Hallo: " + str(config))
         self.error_tolerance = config.plane_conversion.error_tolerance
         self.min_delta_s = config.plane_conversion.min_delta_s
         self.precision = config.plane_conversion.precision

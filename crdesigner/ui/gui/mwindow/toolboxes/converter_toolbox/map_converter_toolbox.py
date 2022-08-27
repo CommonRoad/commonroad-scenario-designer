@@ -27,12 +27,14 @@ from crdesigner.map_conversion.lanelet_lanelet2.lanelet2_parser import Lanelet2P
 from crdesigner.map_conversion.lanelet_lanelet2.lanelet2cr import Lanelet2CRConverter
 from crdesigner.map_conversion.lanelet_lanelet2.cr2lanelet import CR2LaneletConverter
 
+from crdesigner.configurations.get_configs import get_configs
+
 from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMO_AVAILABLE
 if SUMO_AVAILABLE:
     from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMOSimulation
     from crdesigner.ui.gui.mwindow.service_layer.sumo_settings import SUMOSettings
     from crdesigner.map_conversion.sumo_map.sumo2cr import convert_net_to_cr
-    from crdesigner.configurations.get_configs import get_configs
+
 
 class MapConversionToolbox(QDockWidget):
     def __init__(self, current_scenario, callback, text_browser, tmp_folder: str, mwindow):
@@ -259,15 +261,13 @@ class MapConversionToolbox(QDockWidget):
 
         self.text_browser.append(
             """Name: {}<br>Version: {}<br>Date: {}<br><br>OpenDRIVE
-            Version {}.{}<br><br>Number of roads: {}<br>Total length
-            of road network: {:.2f} meters""".format(
+            Version {}.{}""".format(
                 self.open_drive_file.header.name if self.open_drive_file.header.name else "<i>unset</i>",
                 self.open_drive_file.header.version,
                 self.open_drive_file.header.date,
                 self.open_drive_file.header.revMajor,
                 self.open_drive_file.header.revMinor,
                 len(self.open_drive_file.roads),
-                sum([road.length for road in self.open_drive_file.roads]),
             )
         )
         self.converter_toolbox.loaded_opendrive_file.setText("no file selected")
