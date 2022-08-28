@@ -72,21 +72,21 @@ class TestTrafficSignals(unittest.TestCase):
     def test_extract_traffic_element_id(self):
         # test with signal_type and signal_subtype
         element_id = extract_traffic_element_id("103", "10", TrafficSignIDGermany)
-        self.assertEquals(element_id, TrafficSignIDGermany.WARNING_LEFT_CURVE)
+        self.assertEqual(element_id, TrafficSignIDGermany.WARNING_LEFT_CURVE)
         # test with signal_type only
         element_id = extract_traffic_element_id("101", "", TrafficSignIDGermany)
-        self.assertEquals(element_id, TrafficSignIDGermany.WARNING_DANGER_SPOT)
+        self.assertEqual(element_id, TrafficSignIDGermany.WARNING_DANGER_SPOT)
         # test a traffic sign ID that is solely identified by signal_type with an incorrect data type for
         # signal_subtype
         # noinspection PyTypeChecker
         element_id = extract_traffic_element_id("101", 5, TrafficSignIDGermany)
-        self.assertEquals(element_id, TrafficSignIDGermany.WARNING_DANGER_SPOT)
+        self.assertEqual(element_id, TrafficSignIDGermany.WARNING_DANGER_SPOT)
         # test a traffic sign ID that is described by both signal_type and signal_subtype with incorrect data types
         self.assertRaises(TypeError, extract_traffic_element_id, "103", 10, TrafficSignIDGermany)
         self.assertRaises(TypeError, extract_traffic_element_id, 103, 10, TrafficSignIDGermany)
         # test default case when ID does not exist
         element_id = extract_traffic_element_id("00000", "00000", TrafficSignIDGermany)
-        self.assertEquals(element_id, TrafficSignIDGermany.UNKNOWN)
+        self.assertEqual(element_id, TrafficSignIDGermany.UNKNOWN)
 
     def test_get_traffic_signals(self):
         # true stop line

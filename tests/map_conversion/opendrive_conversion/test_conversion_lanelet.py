@@ -59,26 +59,26 @@ class TestConversionLanelet(unittest.TestCase):
                                      np.array([[-0.5, -0.5], [1, 0]]), 1)
         lanelet1.lanelet_type = "driving"
         true_type = {LaneletType.DRIVE_WAY}
-        self.assertEquals(true_type, lanelet1.lanelet_type)
+        self.assertEqual(true_type, lanelet1.lanelet_type)
 
         lanelet1.lanelet_type = "exit"
         true_type = {LaneletType.EXIT_RAMP, LaneletType.INTERSTATE}
-        self.assertEquals(true_type, lanelet1.lanelet_type)
+        self.assertEqual(true_type, lanelet1.lanelet_type)
 
         lanelet1.lanelet_type = "foo"
         true_type = {LaneletType.UNKNOWN}
-        self.assertEquals(true_type, lanelet1.lanelet_type)
+        self.assertEqual(true_type, lanelet1.lanelet_type)
 
     def test_lanelet_id(self):
         lanelet1 = ConversionLanelet(None, np.array([[0.5, 0.5], [1, 0]]), np.array([[0.0, 0.0], [0.5, 0.5]]),
                                      np.array([[-0.5, -0.5], [1, 0]]), 1)
         true_id = 1
         lanelet1.lanelet_id = 1
-        self.assertEquals(true_id, lanelet1.lanelet_id)
+        self.assertEqual(true_id, lanelet1.lanelet_id)
 
         true_id = "114.0.4.-1"
         lanelet1.lanelet_id = true_id
-        self.assertEquals(true_id, lanelet1.lanelet_id)
+        self.assertEqual(true_id, lanelet1.lanelet_id)
 
     def test_left_vertices(self):
         lanelet1 = ConversionLanelet(None, np.array([[0.5, 0.5], [1, 0]]), np.array([[0.0, 0.0], [0.5, 0.5]]),
@@ -120,7 +120,7 @@ class TestConversionLanelet(unittest.TestCase):
         lanelet = ConversionLanelet(None, np.array([[0.5, 0.5], [1, 0]]), np.array([[0.0, 0.0], [0.5, 0.5]]),
                                     np.array([[0.0, 0.0], [0.5, 0.5]]), 1)
 
-        self.assertEquals([], lanelet.predecessor)
+        self.assertEqual([], lanelet.predecessor)
 
         lanelet.predecessor = ["6481.7.3.-1"]
         self.assertListEqual(["6481.7.3.-1"], lanelet.predecessor)
@@ -132,7 +132,7 @@ class TestConversionLanelet(unittest.TestCase):
         lanelet = ConversionLanelet(None, np.array([[0.5, 0.5], [1, 0]]), np.array([[0.0, 0.0], [0.5, 0.5]]),
                                     np.array([[0.0, 0.0], [0.5, 0.5]]), 1)
 
-        self.assertEquals([], lanelet.successor)
+        self.assertEqual([], lanelet.successor)
 
         lanelet.successor = ["210.0.-3.-1"]
         self.assertListEqual(["210.0.-3.-1"], lanelet.successor)
@@ -145,38 +145,38 @@ class TestConversionLanelet(unittest.TestCase):
                                     np.array([[0.0, 0.0], [0.5, 0.5]]), 1)
 
         lanelet.adj_left = "3212.0.-1.-1"
-        self.assertEquals("3212.0.-1.-1", lanelet.adj_left)
+        self.assertEqual("3212.0.-1.-1", lanelet.adj_left)
 
         lanelet.adj_left = 72
-        self.assertEquals(72, lanelet.adj_left)
+        self.assertEqual(72, lanelet.adj_left)
 
     def test_adj_left_same_direction(self):
         lanelet = ConversionLanelet(None, np.array([[0.5, 0.5], [1, 0]]), np.array([[0.0, 0.0], [0.5, 0.5]]),
                                     np.array([[0.0, 0.0], [0.5, 0.5]]), 1)
         lanelet.adj_left_same_direction = True
-        self.assertEquals(True, lanelet.adj_left_same_direction)
+        self.assertEqual(True, lanelet.adj_left_same_direction)
 
         lanelet.adj_left_same_direction = False
-        self.assertEquals(False, lanelet.adj_left_same_direction)
+        self.assertEqual(False, lanelet.adj_left_same_direction)
 
     def test_adj_right(self):
         lanelet = ConversionLanelet(None, np.array([[0.5, 0.5], [1, 0]]), np.array([[0.0, 0.0], [0.5, 0.5]]),
                                     np.array([[0.0, 0.0], [0.5, 0.5]]), 1)
 
         lanelet.adj_right = "3212.0.-1.-1"
-        self.assertEquals("3212.0.-1.-1", lanelet.adj_right)
+        self.assertEqual("3212.0.-1.-1", lanelet.adj_right)
 
         lanelet.adj_right = 72
-        self.assertEquals(72, lanelet.adj_right)
+        self.assertEqual(72, lanelet.adj_right)
 
     def test_adj_right_same_direction(self):
         lanelet = ConversionLanelet(None, np.array([[0.5, 0.5], [1, 0]]), np.array([[0.0, 0.0], [0.5, 0.5]]),
                                     np.array([[0.0, 0.0], [0.5, 0.5]]), 1)
         lanelet.adj_right_same_direction = True
-        self.assertEquals(True, lanelet.adj_right_same_direction)
+        self.assertEqual(True, lanelet.adj_right_same_direction)
 
         lanelet.adj_right_same_direction = False
-        self.assertEquals(False, lanelet.adj_right_same_direction)
+        self.assertEqual(False, lanelet.adj_right_same_direction)
 
     def test_concatenate(self):
         lanelet = ConversionLanelet(None, np.array([[0, 1], [1, 2]]), np.array([[0, 0], [1, 1]]),
@@ -236,7 +236,7 @@ class TestConversionLanelet(unittest.TestCase):
         true_inner_pos = np.array([-2.58073599, 2.72071714])
         true_outer_pos = np.array([-2.58073599, 2.72071714])
         true_norm = np.linalg.norm(true_inner_pos - true_outer_pos)
-        self.assertEquals(true_norm, norm)
+        self.assertEqual(true_norm, norm)
         # test at s = 37.5
         norm = lanelet.calc_width(37.5)
         true_inner_pos = np.array([25.70174203, 27.39444492])
@@ -247,7 +247,7 @@ class TestConversionLanelet(unittest.TestCase):
     def test_length(self):
         lanelet = init_conversion_lanelet()
         len = lanelet.length
-        self.assertEquals(120, len)
+        self.assertEqual(120, len)
 
     def test_has_zero_width_everywhere(self):
         lanelet = init_conversion_lanelet()
@@ -273,12 +273,12 @@ class TestConversionLanelet(unittest.TestCase):
     def test_maximum_width(self):
         lanelet = init_conversion_lanelet()
         max_width = lanelet.maximum_width()
-        self.assertEquals(3.75, max_width)
+        self.assertEqual(3.75, max_width)
         # change outer border width coefficients to a polynomial with roots
         lanelet.parametric_lane_group.parametric_lanes[0].border_group.outer_border.width_coefficients.clear()
         lanelet.parametric_lane_group.parametric_lanes[0].border_group.outer_border.width_coefficients\
             .append([3.75, 0.0, -0.015, 0.0004])
-        self.assertEquals(3.75, max_width)
+        self.assertEqual(3.75, max_width)
 
     def test_optimal_join_split_values(self):
         lanelet = init_conversion_lanelet()

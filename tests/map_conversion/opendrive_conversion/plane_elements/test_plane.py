@@ -20,12 +20,12 @@ class TestParametricLaneBorderGroup(unittest.TestCase):
 
         self.assertListEqual(inner_border.width_coefficients, group.inner_border.width_coefficients)
         self.assertListEqual(inner_border.width_coefficient_offsets, group.inner_border.width_coefficient_offsets)
-        self.assertEquals(inner_border.ref_offset, group.inner_border.ref_offset)
-        self.assertEquals(inner_border_offset, group.inner_border_offset)
+        self.assertEqual(inner_border.ref_offset, group.inner_border.ref_offset)
+        self.assertEqual(inner_border_offset, group.inner_border_offset)
         self.assertListEqual(outer_border.width_coefficients, group.outer_border.width_coefficients)
         self.assertListEqual(outer_border.width_coefficient_offsets, group.outer_border.width_coefficient_offsets)
-        self.assertEquals(outer_border.ref_offset, group.outer_border.ref_offset)
-        self.assertEquals(outer_border_offset, group.outer_border_offset)
+        self.assertEqual(outer_border.ref_offset, group.outer_border.ref_offset)
+        self.assertEqual(outer_border_offset, group.outer_border_offset)
 
     def test_calc_border_position(self):
         view = PlanView(error_tolerance_s=0.2, min_delta_s=0.3)
@@ -54,8 +54,8 @@ class TestParametricLaneBorderGroup(unittest.TestCase):
         true_inner_geo_len = 100
         np.testing.assert_almost_equal(coords.tolist(), true_inner_coords, 3)
         self.assertTupleEqual(true_inner_curv, curv)
-        self.assertEquals(true_inner_tan, tan)
-        self.assertEquals(true_inner_geo_len, max_geo_len)
+        self.assertEqual(true_inner_tan, tan)
+        self.assertEqual(true_inner_geo_len, max_geo_len)
 
         coords, tan, curv, max_geo_len = group.calc_border_position("outer", 20.0, 0.0, False, False, True)
         true_outer_coords = [22.951, 23.148]
@@ -64,8 +64,8 @@ class TestParametricLaneBorderGroup(unittest.TestCase):
         true_outer_geo_len = 100
         np.testing.assert_almost_equal(coords.tolist(), true_outer_coords, 3)
         self.assertTupleEqual(true_outer_curv, curv)
-        self.assertEquals(true_outer_tan, tan)
-        self.assertEquals(true_outer_geo_len, max_geo_len)
+        self.assertEqual(true_outer_tan, tan)
+        self.assertEqual(true_outer_geo_len, max_geo_len)
         # test that calling the function with any other string than inner/outer raises a ValueError
         self.assertRaises(ValueError, group.calc_border_position, "foo", 20.0, 0.0, False, False, True)
 
@@ -110,13 +110,13 @@ class TestParametricLane(unittest.TestCase):
         roadMark.__setattr__('SOffset', 5)
         side = "right"
         parametric_lane = ParametricLane(id, type, group, length, roadMark, side)
-        self.assertEquals(group, parametric_lane.border_group)
+        self.assertEqual(group, parametric_lane.border_group)
         self.assertEqual(id, parametric_lane.id_)
-        self.assertEquals(type, parametric_lane.type_)
+        self.assertEqual(type, parametric_lane.type_)
         self.assertEqual(length, parametric_lane.length)
-        self.assertEquals(False, parametric_lane.reverse)
+        self.assertEqual(False, parametric_lane.reverse)
         self.assertEqual(roadMark, parametric_lane.line_marking)
-        self.assertEquals(side, parametric_lane.side)
+        self.assertEqual(side, parametric_lane.side)
 
     @staticmethod
     def init_lane() -> ParametricLane:
@@ -187,8 +187,8 @@ class TestParametricLane(unittest.TestCase):
         # function should create three vertices: start, middle and end
         parametric_lane.length = 46.911
         left, right = parametric_lane.calc_vertices(error_tolerance=0.2, min_delta_s=0.3)
-        self.assertEquals(3, len(left))
-        self.assertEquals(3, len(right))
+        self.assertEqual(3, len(left))
+        self.assertEqual(3, len(right))
         # test that inner border vertices are offset (in t-direction) by 5
         np.testing.assert_almost_equal([[22.574, 29.645], [39.161, 46.229], [55.806, 62.877]], left, 3)
         # test that outer border vertices are offset (in t-direction) by -1
@@ -208,7 +208,7 @@ class TestParametricLane(unittest.TestCase):
         lane.border_group.outer_border.width_coefficient_offsets.append(0)
         roots = lane.zero_width_change_positions()
         # test with no roots
-        self.assertEquals([], roots.tolist())
+        self.assertEqual([], roots.tolist())
         # test with real root
         lane.border_group.outer_border.width_coefficients.clear()
         lane.border_group.outer_border.width_coefficient_offsets.clear()
