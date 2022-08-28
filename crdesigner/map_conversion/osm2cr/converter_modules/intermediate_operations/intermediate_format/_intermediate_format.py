@@ -423,12 +423,18 @@ class IntermediateFormat:
         pp_id = idgenerator.get_id()
         rectangle = Rectangle(4.3, 8.9, center=np.array([0.1, 0.5]), orientation=1.7)
         circ = Circle(2.0, np.array([0.0, 0.0]))
-        custom_state = CustomState()
+        custom_state_1 = CustomState(time_step=Interval(0, 1))
+        setattr(custom_state_1, "velocity", Interval(0.0, 1))
+        setattr(custom_state_1, "position", rectangle)
+        custom_state_2 = CustomState(time_step=Interval(1, 2))
+        setattr(custom_state_2, "velocity", Interval(0.0, 1))
+        setattr(custom_state_2, "position", circ)
 
-        goal_region = GoalRegion([CustomState(time_step=Interval(0, 1), velocity=Interval(0.0, 1), position=rectangle),
-                                  State(time_step=Interval(1, 2), velocity=Interval(0.0, 1), position=circ)])
-        planning_problem = PlanningProblem(pp_id, InitialState(velocity=0.1, position=np.array([[0], [0]]), orientation=0,
-                                                       yaw_rate=0, slip_angle=0, time_step=0), goal_region)
+        goal_region = GoalRegion([custom_state_1,
+                                  custom_state_2])
+        planning_problem = \
+            PlanningProblem(pp_id, InitialState(velocity=0.1, position=np.array([[0], [0]]), orientation=0,
+                                                yaw_rate=0, slip_angle=0, time_step=0), goal_region)
 
         return PlanningProblemSet(list([planning_problem]))
 
