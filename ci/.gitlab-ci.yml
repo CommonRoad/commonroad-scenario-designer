@@ -9,7 +9,7 @@ image: $CI_REGISTRY/cps/commonroad-scenario-designer/ci:v0.6.9_20.04
   - git config --global url."https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.lrz.de/".insteadOf "git@gitlab.lrz.de:"
   - pip install -r ./tests/test_requirements.txt
   - pip install -e .
-  - git clone --branch preparation_cr_io_2022_2 git@gitlab.lrz.de:cps/sumo-interface.git $HOME/sumo-interface
+  - git clone --branch develop git@gitlab.lrz.de:cps/sumo-interface.git $HOME/sumo-interface
   - git clone --branch develop git@gitlab.lrz.de:cps/commonroad-io.git "$HOME"/commonroad-io
   - pip uninstall -y sumocr
   - pip install -e "$HOME"/commonroad-io
