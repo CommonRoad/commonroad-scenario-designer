@@ -100,14 +100,16 @@ class ConversionLanelet(Lanelet):
 
     @lanelet_type.setter
     def lanelet_type(self, value: str):
+        # Note: OpenDRIVE type "driving" is not mapped to any lanelet type
+        # because this OpenDRIVE type just represents an abitrary drivable lane
         if value == 'urban':
             self._lanelet_type = {LaneletType.URBAN}
         elif value == 'country':
             self._lanelet_type = {LaneletType.COUNTRY}
         elif value == 'highway':
             self._lanelet_type = {LaneletType.HIGHWAY}
-        elif value == 'driving':
-            self._lanelet_type = {LaneletType.DRIVE_WAY}
+        elif value == 'restricted':
+            self._lanelet_type = {LaneletType.HIGHWAY_SERVICE}
         elif value == 'mainCarriageWay':
             self._lanelet_type = {LaneletType.MAIN_CARRIAGE_WAY, LaneletType.INTERSTATE}
         elif value == 'entry':

@@ -42,8 +42,8 @@ class TestOpenDriveToCommonRoadConversion(unittest.TestCase):
         np.testing.assert_almost_equal(99.97, network.find_lanelet_by_id(1).distance[3], 2)
 
         # test lanelet type
-        self.assertEqual({LaneletType.DRIVE_WAY}, network.find_lanelet_by_id(1).lanelet_type)
-        self.assertEqual({LaneletType.DRIVE_WAY}, network.find_lanelet_by_id(2).lanelet_type)
+        self.assertEqual({LaneletType.UNKNOWN}, network.find_lanelet_by_id(1).lanelet_type)
+        self.assertEqual({LaneletType.UNKNOWN}, network.find_lanelet_by_id(2).lanelet_type)
         self.assertEqual({LaneletType.SHOULDER}, network.find_lanelet_by_id(3).lanelet_type)
         self.assertEqual({LaneletType.SIDEWALK}, network.find_lanelet_by_id(5).lanelet_type)
 
@@ -67,7 +67,7 @@ class TestOpenDriveToCommonRoadConversion(unittest.TestCase):
         np.testing.assert_almost_equal(network.find_lanelet_by_id(50).distance[2], 90.7, 1)
 
         # test num of driving lanes
-        num_driving_lanes = len([l for l in network.lanelets if l.lanelet_type == {LaneletType.DRIVE_WAY}])
+        num_driving_lanes = len([l for l in network.lanelets if l.lanelet_type == {LaneletType.UNKNOWN}])
         self.assertEqual(16, num_driving_lanes)
 
         # test number of traffic lights
@@ -122,10 +122,11 @@ class TestOpenDriveToCommonRoadConversion(unittest.TestCase):
         np.testing.assert_almost_equal(network.find_traffic_sign_by_id(1).position, [467.03, 498.24], 2)
 
         # test line marking of a stop lines
-        self.assertEqual(LineMarking.SOLID, network.find_lanelet_by_id(16).stop_line.line_marking)
+        lanelet_with_stop_line = next(l for l in network.lanelets if l.stop_line is not None)
+        self.assertEqual(LineMarking.SOLID, lanelet_with_stop_line.stop_line.line_marking)
 
         # test number of driving lanes
-        self.assertEqual(20, len([l for l in network.lanelets if l.lanelet_type == {LaneletType.DRIVE_WAY}]))
+        self.assertEqual(20, len([l for l in network.lanelets if l.lanelet_type == {LaneletType.UNKNOWN}]))
 
     def test_cul_de_sac(self):
         """Test the file CulDeSac.xodr"""
@@ -178,7 +179,7 @@ class TestOpenDriveToCommonRoadConversion(unittest.TestCase):
         network = scenario.lanelet_network
 
         # test number of driving lanes
-        self.assertEqual(12, len([l for l in network.lanelets if l.lanelet_type == {LaneletType.DRIVE_WAY}]))
+        self.assertEqual(12, len([l for l in network.lanelets if l.lanelet_type == {LaneletType.UNKNOWN}]))
 
         # test number of traffic lights
         self.assertEqual(8, len(network.traffic_lights))
@@ -210,7 +211,7 @@ class TestOpenDriveToCommonRoadConversion(unittest.TestCase):
         # test number of sidewalks
         self.assertEqual(8, len([l for l in network.lanelets if l.lanelet_type == {LaneletType.SIDEWALK}]))
         # test number of driving lanes
-        self.assertEqual(14, len([l for l in network.lanelets if l.lanelet_type == {LaneletType.DRIVE_WAY}]))
+        self.assertEqual(14, len([l for l in network.lanelets if l.lanelet_type == {LaneletType.UNKNOWN}]))
 
 
 if __name__ == "__main__":
