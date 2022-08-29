@@ -58,7 +58,7 @@ class TestConversionLanelet(unittest.TestCase):
         lanelet1 = ConversionLanelet(None, np.array([[0.5, 0.5], [1, 0]]), np.array([[0.0, 0.0], [0.5, 0.5]]),
                                      np.array([[-0.5, -0.5], [1, 0]]), 1)
         lanelet1.lanelet_type = "driving"
-        true_type = {LaneletType.DRIVE_WAY}
+        true_type = {LaneletType.UNKNOWN}
         self.assertEqual(true_type, lanelet1.lanelet_type)
 
         lanelet1.lanelet_type = "exit"
