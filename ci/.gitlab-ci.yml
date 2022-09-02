@@ -77,6 +77,7 @@ docs:
     artifacts:
       paths :
         - ./docs/build/
+      expose_as: 'Documentation'
 
 build_package:
     stage: build
