@@ -1,10 +1,11 @@
 # Changelog
 
-## [0.6.0] - 2022-08-XX
+## [0.6.0] - 2022-09-XX
 
 ### Added
 - New test cases for the OpenDRIVE to CommonRoad conversion
 - New shortcut buttons for lanelet adding, merging, splitting, creating adjacent
+- Function to convert OSM to CommonRoad using SUMO
 
 ### Changed
 - User interface for adding and updating lanelets

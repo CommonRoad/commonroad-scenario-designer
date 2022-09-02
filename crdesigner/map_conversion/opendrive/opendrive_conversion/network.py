@@ -14,14 +14,6 @@ from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.tra
 from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.geo_reference import get_geo_reference
 from crdesigner.configurations.configuration import OpenDrive2CRConfiguration
 
-__author__ = "Benjamin Orthen, Stefan Urban, Sebastian Maierhofer"
-__copyright__ = "TUM Cyber-Physical Systems Group"
-__credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles"]
-__version__ = "0.5.1"
-__maintainer__ = "Sebastian Maierhofer"
-__email__ = "commonroad@lists.lrz.de"
-__status__ = "Released"
-
 
 def convert_to_base_lanelet_network(lanelet_network: ConversionLaneletNetwork) -> LaneletNetwork:
     """Converts a ConversionLaneletNetwork to a LaneletNetwork.
@@ -63,8 +55,8 @@ class Network:
         self._traffic_signs = []
         self._stop_lines = []
         self._country_ID = None
-        self.error_tolerance = self.config.plane_conversion.error_tolerance
-        self.min_delta_s = self.config.plane_conversion.min_delta_s
+        self.error_tolerance = self.config.error_tolerance
+        self.min_delta_s = self.config.min_delta_s
 
     # def __eq__(self, other):
     # return self.__dict__ == other.__dict__

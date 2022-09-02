@@ -7,14 +7,6 @@ import numpy as np
 import scipy.optimize
 from crdesigner.map_conversion.opendrive.opendrive_parser.elements.eulerspiral import EulerSpiral
 
-__author__ = "Benjamin Orthen, Stefan Urban"
-__copyright__ = "TUM Cyber-Physical Systems Group"
-__credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles"]
-__version__ = "0.5.1"
-__maintainer__ = "Sebastian Maierhofer"
-__email__ = "commonroad@lists.lrz.de"
-__status__ = "Released"
-
 
 class CurvatureRes(IntEnum):
     CONST_ZERO = 0

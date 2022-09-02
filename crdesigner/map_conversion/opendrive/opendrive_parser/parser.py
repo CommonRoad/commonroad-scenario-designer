@@ -18,14 +18,6 @@ from crdesigner.map_conversion.opendrive.opendrive_parser.elements.junction impo
 from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadSignal import Signal as RoadSignal, \
     SignalReference
 
-__author__ = "Benjamin Orthen, Stefan Urban, Sebastian Maierhofer"
-__copyright__ = "TUM Cyber-Physical Systems Group"
-__credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles, BMW Car@TUM"]
-__version__ = "0.5.1"
-__maintainer__ = "Sebastian Maierhofer"
-__email__ = "commonroad@lists.lrz.de"
-__status__ = "Released"
-
 
 def parse_opendrive(root_node: etree.ElementTree) -> OpenDrive:
     """

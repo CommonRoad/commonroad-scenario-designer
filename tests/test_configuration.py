@@ -18,9 +18,10 @@ class TestConfiguration(unittest.TestCase):
         self.assertEqual(self.config.file_header.source, "CommonRoad Scenario Designer")
         self.assertEqual(self.config.file_header.time_step_size, 0.1)
 
-        self.assertEqual(self.config.opendrive_config.plane_conversion.error_tolerance, 0.15)
-        self.assertEqual(self.config.opendrive_config.plane_conversion.min_delta_s, 0.5)
-        self.assertEqual(self.config.opendrive_config.plane_conversion.precision, 0.5)
+        self.assertEqual(self.config.opendrive.error_tolerance, 0.15)
+        self.assertEqual(self.config.opendrive.min_delta_s, 0.5)
+        self.assertEqual(self.config.opendrive.precision, 0.5)
+        self.assertEqual(self.config.opendrive.driving_default_lanelet_type, "urban")
 
 
 if __name__ == '__main__':

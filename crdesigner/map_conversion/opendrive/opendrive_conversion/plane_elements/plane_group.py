@@ -1,5 +1,3 @@
-"""Module describe parametric lane groups, which are groups combining consecutive
-associated parametric lanes."""
 from typing import Tuple, Optional, List
 import math
 import numpy as np
@@ -8,14 +6,6 @@ import copy
 from crdesigner.map_conversion.opendrive.opendrive_conversion.conversion_lanelet import ConversionLanelet
 from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.plane import ParametricLane
 from commonroad.scenario.lanelet import LineMarking
-
-__author__ = "Benjamin Orthen, Stefan Urban, Sebastian Maierhofer"
-__copyright__ = "TUM Cyber-Physical Systems Group"
-__credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles"]
-__version__ = "0.5.1"
-__maintainer__ = "Sebastian Maierhofer"
-__email__ = "commonroad@lists.lrz.de"
-__status__ = "Released"
 
 
 class ParametricLaneGroup:

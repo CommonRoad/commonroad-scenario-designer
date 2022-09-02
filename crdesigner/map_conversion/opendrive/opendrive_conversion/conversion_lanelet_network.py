@@ -1,7 +1,6 @@
 """Module to enhance LaneletNetwork class
 so it can be used for conversion from the opendrive format."""
 import itertools
-import math
 import warnings
 from typing import List, Optional, Tuple
 from queue import Queue
@@ -16,14 +15,6 @@ from crdesigner.map_conversion.osm2cr.converter_modules.utility import geometry
 
 from crdesigner.map_conversion.opendrive.opendrive_conversion.conversion_lanelet import ConversionLanelet
 from crdesigner.map_conversion.common.utils import generate_unique_id
-
-__author__ = "Benjamin Orthen, Sebastian Maierhofer"
-__copyright__ = "TUM Cyber-Physical Systems Group"
-__credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles"]
-__version__ = "0.5.1"
-__maintainer__ = "Sebastian Maierhofer"
-__email__ = "commonroad@lists.lrz.de"
-__status__ = "Released"
 
 
 def convert_to_new_lanelet_id(old_lanelet_id: str, ids_assigned: dict) -> int:
@@ -348,7 +339,7 @@ class ConversionLaneletNetwork(LaneletNetwork):
             if lanelet_join or lanelet_split:
                 js_targets.append(
                     _JoinSplitTarget(self, lanelet, lanelet_split, lanelet_join,
-                                     self.config.plane_conversion.precision)
+                                     self.config.precision)
                 )
 
         for js_target in js_targets:

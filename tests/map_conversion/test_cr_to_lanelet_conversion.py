@@ -7,14 +7,6 @@ from commonroad.common.file_reader import CommonRoadFileReader
 from crdesigner.map_conversion.lanelet_lanelet2.cr2lanelet import CR2LaneletConverter
 from tests.map_conversion.utils import elements_equal
 
-__author__ = "Benjamin Orthen, Sebastian Maierhofer"
-__copyright__ = "TUM Cyber-Physical Systems Group"
-__credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles, BMW Car@TUM"]
-__version__ = "0.5.1"
-__maintainer__ = "Sebastian Maierhofer"
-__email__ = "commonroad@lists.lrz.de"
-__status__ = "Released"
-
 
 class TestCommonRoadToLaneletConversion(unittest.TestCase):
     """Test the conversion of a specific osm file by reading it, parsing it

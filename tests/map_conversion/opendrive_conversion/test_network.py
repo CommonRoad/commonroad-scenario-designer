@@ -8,7 +8,7 @@ class TestNetwork(unittest.TestCase):
     def test_assign_country_id(self):
         # test assigning country id by name
         id = 'YEMEN'
-        n = Network(get_configs().opendrive_config)
+        n = Network(get_configs().opendrive)
 
         n.assign_country_id(id)
         self.assertEqual('YEM', n._country_ID)

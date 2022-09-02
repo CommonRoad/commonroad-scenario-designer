@@ -8,14 +8,6 @@ from commonroad.scenario.traffic_sign import TrafficSignIDZamunda
 
 from crdesigner.map_conversion.map_conversion_interface import opendrive_to_commonroad
 
-__author__ = "Benjamin Orthen, Sebastian Maierhofer"
-__copyright__ = "TUM Cyber-Physical Systems Group"
-__credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles, BMW Car@TUM"]
-__version__ = "0.5.1"
-__maintainer__ = "Sebastian Maierhofer"
-__email__ = "commonroad@lists.lrz.de"
-__status__ = "Released"
-
 
 class TestOpenDriveToCommonRoadConversion(unittest.TestCase):
     """Performs some basic tests of the conversion by comparing what the converter produced with the content
@@ -42,9 +34,9 @@ class TestOpenDriveToCommonRoadConversion(unittest.TestCase):
         np.testing.assert_almost_equal(99.97, network.find_lanelet_by_id(1).distance[3], 2)
 
         # test lanelet type
-        self.assertEqual({LaneletType.UNKNOWN}, network.find_lanelet_by_id(1).lanelet_type)
-        self.assertEqual({LaneletType.UNKNOWN}, network.find_lanelet_by_id(2).lanelet_type)
-        self.assertEqual({LaneletType.SHOULDER}, network.find_lanelet_by_id(3).lanelet_type)
+        self.assertEqual({LaneletType.URBAN}, network.find_lanelet_by_id(1).lanelet_type)
+        self.assertEqual({LaneletType.URBAN}, network.find_lanelet_by_id(2).lanelet_type)
+        self.assertEqual({LaneletType.BORDER}, network.find_lanelet_by_id(3).lanelet_type)
         self.assertEqual({LaneletType.SIDEWALK}, network.find_lanelet_by_id(5).lanelet_type)
 
         # test driving direction
@@ -60,15 +52,14 @@ class TestOpenDriveToCommonRoadConversion(unittest.TestCase):
 
         # test number of stoplines --> Currently fails, stop lines not parsed correctly.
         # Uncomment when stop lines parsed correctly. See issue #364.
-        # num_stop_lines = len([l.stop_line for l in network.lanelets if l.stop_line != None])
+        # num_stop_lines = len([l.stop_line for l in network.lanelets if l.stop_line != None]
         # self.assertEqual(4, num_stop_lines)
 
         # test length of lanelet
         np.testing.assert_almost_equal(network.find_lanelet_by_id(50).distance[2], 90.7, 1)
 
         # test num of driving lanes
-        num_driving_lanes = len([l for l in network.lanelets if l.lanelet_type == {LaneletType.UNKNOWN}])
-        self.assertEqual(16, num_driving_lanes)
+        self.assertEqual(56, len(network.lanelets))
 
         # test number of traffic lights
         self.assertEqual(12, len(network.traffic_lights))
@@ -126,7 +117,7 @@ class TestOpenDriveToCommonRoadConversion(unittest.TestCase):
         self.assertEqual(LineMarking.SOLID, lanelet_with_stop_line.stop_line.line_marking)
 
         # test number of driving lanes
-        self.assertEqual(20, len([l for l in network.lanelets if l.lanelet_type == {LaneletType.UNKNOWN}]))
+        self.assertEqual(29, len(network.lanelets))
 
     def test_cul_de_sac(self):
         """Test the file CulDeSac.xodr"""
@@ -179,7 +170,7 @@ class TestOpenDriveToCommonRoadConversion(unittest.TestCase):
         network = scenario.lanelet_network
 
         # test number of driving lanes
-        self.assertEqual(12, len([l for l in network.lanelets if l.lanelet_type == {LaneletType.UNKNOWN}]))
+        self.assertEqual(19, len(network.lanelets))
 
         # test number of traffic lights
         self.assertEqual(8, len(network.traffic_lights))
@@ -211,7 +202,7 @@ class TestOpenDriveToCommonRoadConversion(unittest.TestCase):
         # test number of sidewalks
         self.assertEqual(8, len([l for l in network.lanelets if l.lanelet_type == {LaneletType.SIDEWALK}]))
         # test number of driving lanes
-        self.assertEqual(14, len([l for l in network.lanelets if l.lanelet_type == {LaneletType.UNKNOWN}]))
+        self.assertEqual(22, len(network.lanelets))
 
 
 if __name__ == "__main__":

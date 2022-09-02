@@ -1,15 +1,3 @@
-# -*- coding: utf-8 -*-
-
-"""Logic to convert OSM to lanelets."""
-
-__author__ = "Benjamin Orthen, Sebastian Maierhofer"
-__copyright__ = "TUM Cyber-Physical Systems Group"
-__credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles"]
-__version__ = "0.5.1"
-__maintainer__ = "Sebastian Maierhofer"
-__email__ = "commonroad@lists.lrz.de"
-__status__ = "Released"
-
 from collections import defaultdict
 from typing import List, Tuple
 
@@ -135,7 +123,7 @@ class Lanelet2CRConverter:
         scenario_id = ScenarioID(country_id="ZAM", map_name="OpenDrive", map_id=123)
 
         scenario = Scenario(dt=0.1, scenario_id=scenario_id, location=Location(gps_latitude=origin.lat, gps_longitude=origin.lon))
-        self.lanelet_network = ConversionLaneletNetwork(get_configs().opendrive_config)
+        self.lanelet_network = ConversionLaneletNetwork(get_configs().opendrive)
 
         speed_limits = {}
         speed_limit_lanelets = {}

@@ -1,34 +1,34 @@
 import iso3166
-
-__author__ = "Benjamin Orthen, Stefan Urban"
-__copyright__ = "TUM Cyber-Physical Systems Group"
-__credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles"]
-__version__ = "0.5.1"
-__maintainer__ = "Sebastian Maierhofer"
-__email__ = "commonroad@lists.lrz.de"
-__status__ = "Released"
+from dataclasses import dataclass
 
 
-def encode_road_section_lane_width_id(roadId, sectionId, laneId, widthId) -> str:
+@dataclass
+class CustomDefaultLaneletType:
+    general_lanelet_type_activ: bool  # activates whether certain lanelet type should be added to all lanelets
+    general_lanelet_type: str  # lanelet type which is added to every lanelet (if activated)
+    driving_default_lanelet_type: str  # mapping of OpenDRIVE driveway lane type to a CommonRoad lanelet type
+
+
+def encode_road_section_lane_width_id(road_id, section_id, lane_id, width_id) -> str:
     """Encodes a road section lane width with an ID.
 
-    :param roadId: ID of road.
-    :type roadId: int
-    :param sectionId: ID of RoadSection.
-    :type sectionId: int
-    :param laneId: ID of Lane.
-    :type laneId: int
-    :param widthId: ID of LaneWidth.
-    :type widthId: int
+    :param road_id: ID of road.
+    :type road_id: int
+    :param section_id: ID of RoadSection.
+    :type section_id: int
+    :param lane_id: ID of Lane.
+    :type lane_id: int
+    :param width_id: ID of LaneWidth.
+    :type width_id: int
     :return: A new ID concatenated from the input IDs.
     :rtype: str
     """
-    return ".".join([str(roadId), str(sectionId), str(laneId), str(widthId)])
+    return ".".join([str(road_id), str(section_id), str(lane_id), str(width_id)])
 
 
 def get_signal_country(signal_country: str) -> str:
     """
-    ISO3166 standard to find 3 letter country id
+    ISO3166 standard to find three-letter country id
     :param signal_country: String value of the country.
     :type signal_country: str
     :return: The 3-letter country ID per ISO3166.
@@ -43,33 +43,3 @@ def get_signal_country(signal_country: str) -> str:
         return signal_country
     else:
         return "ZAM"
-
-# def decode_road_section_lane_width_id(encodedString: str):
-#     """
-
-#     Args:
-#       encodedString:
-
-#     Returns:
-
-#     """
-
-#     parts = encodedString.split(".")
-
-#     if len(parts) != 4:
-#         raise Exception()
-
-#     return (int(parts[0]), int(parts[1]), int(parts[2]), int(parts[3]))
-
-
-# def allCloseToZero(array):
-#     """Tests if all elements of array are close to zero.
-
-#     Args:
-#       array:
-
-#     Returns:
-
-#     """
-
-#     return numpy.allclose(array, numpy.zeros(numpy.shape(array)))

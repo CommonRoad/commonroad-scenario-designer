@@ -4,14 +4,6 @@ from functools import lru_cache
 from typing import Optional, Any, Tuple
 import numpy as np
 
-__author__ = "Benjamin Orthen, Stefan Urban"
-__copyright__ = "TUM Cyber-Physical Systems Group"
-__credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles"]
-__version__ = "0.5.1"
-__maintainer__ = "Sebastian Maierhofer"
-__email__ = "commonroad@lists.lrz.de"
-__status__ = "Released"
-
 
 class Border:
     """ A lane border defines a path along a whole lane section. A lane always uses an inner and outer lane border.
