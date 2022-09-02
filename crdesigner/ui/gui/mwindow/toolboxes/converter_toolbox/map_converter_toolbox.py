@@ -255,7 +255,7 @@ class MapConversionToolbox(QDockWidget):
         if self.open_drive_file is None:
             return
 
-        config = get_configs().opendrive_config
+        config = get_configs().opendrive
         open_drive_network = Network(config)
         open_drive_network.load_opendrive(self.open_drive_file)
 

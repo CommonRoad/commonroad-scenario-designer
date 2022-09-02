@@ -1,10 +1,5 @@
-__author__ = "Sebastian Maierhofer"
-__copyright__ = "TUM Cyber-Physical Systems Group"
-__credits__ = ["BMW Car@TUM"]
-__version__ = "0.5.1"
-__maintainer__ = "Sebastian Maierhofer"
-__email__ = "commonroad@lists.lrz.de"
-__status__ = "Released"
+import subprocess
+from pathlib import Path
 
 import subprocess
 from pathlib import Path
@@ -109,7 +104,7 @@ def opendrive_to_commonroad(input_file: str) -> Scenario:
 
     # load configs
     configs = get_configs()
-    road_network = Network(configs.opendrive_config)
+    road_network = Network(configs.opendrive)
     road_network.load_opendrive(opendrive)
 
     return road_network.export_commonroad_scenario()

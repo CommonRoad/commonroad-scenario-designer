@@ -4,14 +4,6 @@ from pathlib import Path
 import time
 import os
 
-__author__ = "Sebastian Maierhofer"
-__copyright__ = "TUM Cyber-Physical Systems Group"
-__credits__ = ["BMW Car@TUM"]
-__version__ = "0.5.1"
-__maintainer__ = "Sebastian Maierhofer"
-__email__ = "commonroad@lists.lrz.de"
-__status__ = "Released"
-
 
 class TestCommandLineInterface(unittest.TestCase):
     def setUp(self) -> None:

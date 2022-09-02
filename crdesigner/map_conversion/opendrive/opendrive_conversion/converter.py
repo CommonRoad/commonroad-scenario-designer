@@ -1,4 +1,3 @@
-"""Module for logic behind converting OpenDrive to ParametricLanes."""
 from typing import Tuple, List
 from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.plane import ParametricLane, \
     ParametricLaneBorderGroup
@@ -6,14 +5,6 @@ from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.pla
 from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.border import Border
 from crdesigner.map_conversion.opendrive.opendrive_conversion.utils import encode_road_section_lane_width_id
 from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadPlanView import PlanView
-
-__author__ = "Benjamin Orthen"
-__copyright__ = "TUM Cyber-Physical Systems Group"
-__credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles"]
-__version__ = "0.5.1"
-__maintainer__ = "Sebastian Maierhofer"
-__email__ = "commonroad@lists.lrz.de"
-__status__ = "Released"
 
 
 class OpenDriveConverter:
