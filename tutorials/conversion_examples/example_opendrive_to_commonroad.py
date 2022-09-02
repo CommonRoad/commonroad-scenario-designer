@@ -36,7 +36,17 @@ writer.write_to_file(os.path.dirname(os.path.realpath(__file__)) + "/" + "ZAM_Op
 # --------------------------------------- Option 2: OpenDRIVE conversion APIs ------------------------------------------
 # OpenDRIVE parser to load file
 with open("{}".format(input_path), "r") as file_in:
-    opendrive = parse_opendrive(etree.parse(file_in).getroot())
+    root = etree.parse(file_in)
+
+    for elem in root.getiterator():
+        if not (
+            isinstance(elem, etree._Comment)
+            or isinstance(elem, etree._ProcessingInstruction)
+        ):
+            elem.tag = etree.QName(elem).localname
+    etree.cleanup_namespaces(root)
+
+    opendrive = parse_opendrive(root.getroot())
 
 # create OpenDRIVE intermediate network object from configuration
 road_network = Network(config.opendrive_config)

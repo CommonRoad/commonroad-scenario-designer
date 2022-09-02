@@ -100,7 +100,17 @@ def opendrive_to_commonroad(input_file: str) -> Scenario:
     generate_unique_id(0)  # reset IDs
 
     with open("{}".format(input_file), "r") as file_in:
-        opendrive = parse_opendrive(etree.parse(file_in).getroot())
+        root = etree.parse(file_in)
+
+        for elem in root.getiterator():
+            if not (
+                isinstance(elem, etree._Comment)
+                or isinstance(elem, etree._ProcessingInstruction)
+            ):
+                elem.tag = etree.QName(elem).localname
+        etree.cleanup_namespaces(root)
+
+        opendrive = parse_opendrive(root.getroot())
 
     # load configs
     configs = get_configs()
