@@ -1,7 +1,8 @@
 import unittest
 from crdesigner.map_conversion.opendrive.opendrive_conversion.converter import OpenDriveConverter
 from crdesigner.map_conversion.opendrive.opendrive_parser.elements.road import Road
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadLanes import Lane, LaneWidth, LaneSection
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadLanes import Lane, LaneWidth, LaneSection,\
+    RoadMark
 from crdesigner.map_conversion.opendrive.opendrive_parser.elements.road_record import RoadRecord
 from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.border import Border
 
@@ -111,6 +112,15 @@ class TestConverter(unittest.TestCase):
         reference_border.width_coefficients.append([0.0])
         plane_groups = OpenDriveConverter.lane_section_to_parametric_lanes(section, reference_border)
 
+        mark1 = RoadMark()
+        mark1.SOffset = 0.0
+        mark2 = RoadMark()
+        mark2.SOffset = 3.0
+        mark3 = RoadMark()
+        mark3.SOffset = 5.4
+        section.leftLanes[0].road_mark = [mark1, mark2, mark3]
+        plane_groups_mark = OpenDriveConverter.lane_section_to_parametric_lanes(section, reference_border)
+
         # check if correct number of plane_groups is returned
         # check if correct neighbour ids are generated (this is somewhat redundant because of the other tests)
         self.assertEqual(5, len(plane_groups))
@@ -124,6 +134,8 @@ class TestConverter(unittest.TestCase):
         self.assertListEqual([], OpenDriveConverter.lane_section_to_parametric_lanes(lane_section_empty,
                                                                                      reference_border))
 
+        self.assertEquals(5.4, plane_groups_mark[2].parametric_lanes[0].line_marking.SOffset)
+
     def test_create_parametric_lane(self):
         road = Road()
         road.id = "100"
@@ -136,6 +148,7 @@ class TestConverter(unittest.TestCase):
 
         width = LaneWidth(*[1.0, 0.0, 0.0, 0.0], idx=0, start_offset=0.0)
         lane.widths.append(width)
+        mark_idx = 0
 
         side = "right"
         lane_borders = []
@@ -152,7 +165,7 @@ class TestConverter(unittest.TestCase):
         lane_border2.width_coefficients.append([-1.0, 0.0, 0.0, 0.0])
         lane_borders.append(lane_border2)
 
-        parametric_lane = OpenDriveConverter.create_parametric_lane(lane_borders, width, lane, side)
+        parametric_lane = OpenDriveConverter.create_parametric_lane(lane_borders, width, lane, side, mark_idx)
 
         # test offsets
         true_inner_border_offset = lane.widths[0].start_offset + lane_borders[-1].ref_offset
@@ -165,9 +178,9 @@ class TestConverter(unittest.TestCase):
         self.assertListEqual(lane_border2.width_coefficients,
                              parametric_lane.border_group.outer_border.width_coefficients)
         # test properties of lane and lane group
-        self.assertEqual("100.0.-1.0", parametric_lane.id_)
-        self.assertEqual(lane.type, parametric_lane.type_)
-        self.assertEqual(side, parametric_lane.side)
+        self.assertEquals("100.0.-1.0.0", parametric_lane.id_)
+        self.assertEquals(lane.type, parametric_lane.type_)
+        self.assertEquals(side, parametric_lane.side)
 
     def test_create_outer_lane_border(self):
         road = Road()

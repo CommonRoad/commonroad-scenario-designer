@@ -25,6 +25,22 @@ def encode_road_section_lane_width_id(road_id, section_id, lane_id, width_id) ->
     """
     return ".".join([str(road_id), str(section_id), str(lane_id), str(width_id)])
 
+def encode_mark_lane_width_id(roadId, sectionId, laneId, widthId, mId) -> str:
+    """Encodes a road section lane width with an ID.
+
+    :param roadId: ID of road.
+    :type roadId: int
+    :param sectionId: ID of RoadSection.
+    :type sectionId: int
+    :param laneId: ID of Lane.
+    :type laneId: int
+    :param widthId: ID of LaneWidth.
+    :type widthId: int
+    :return: A new ID concatenated from the input IDs.
+    :rtype: str
+    """
+    return ".".join([str(roadId), str(sectionId), str(laneId), str(widthId), str(mId)])
+
 
 def get_signal_country(signal_country: str) -> str:
     """

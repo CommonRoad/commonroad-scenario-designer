@@ -345,24 +345,14 @@ def parse_opendrive_road_lane_section(new_road: Road, lane_section_id: int, lane
                 new_lane.has_border_record = True
 
             # Road Marks
-            if lane.find("roadMark") is not None:
-                mark = lane.find("roadMark")
+            for mark in lane.findall("roadMark"):
                 road_mark = RoadLaneRoadMark()
 
                 road_mark.type = mark.get("type")
                 road_mark.weight = mark.get("weight")
                 road_mark.SOffset = mark.get("sOffset")
-                new_lane.road_mark = road_mark
 
-            # adjustment commented out to secure functionality when merging into develop:
-            #for mark in lane.findall("roadMark"):
-            #    road_mark = RoadLaneRoadMark()
-
-            #    road_mark.type = mark.get("type")
-            #    road_mark.weight = mark.get("weight")
-            #    road_mark.SOffset = mark.get("sOffset")
-
-            #    new_lane.road_mark.append(road_mark)
+                new_lane.road_mark.append(road_mark)
 
             # Material and Rules are not implemented in CommonRoad -> no need
 
