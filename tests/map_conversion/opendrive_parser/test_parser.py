@@ -215,18 +215,13 @@ class TestParser(unittest.TestCase):
         self.assertEqual(0, road.lanes.lane_sections[0].rightLanes[0].widths[0].start_offset)
         np.testing.assert_equal([3.75, 0, 0, 0],
                                 road.lanes.lane_sections[0].rightLanes[0].widths[0].polynomial_coefficients)
-        # test for unchanged road_marks -> only first is parsed
-        self.assertEqual(0, road.lanes.lane_sections[0].centerLanes[0].road_mark.SOffset)
-        self.assertEqual("solid", road.lanes.lane_sections[0].centerLanes[0].road_mark.type)
-        self.assertEqual("standard", road.lanes.lane_sections[0].centerLanes[0].road_mark.weight)
-        """ tests for adapted road_marks
+        # roadmarks
         self.assertEqual(0, road.lanes.lane_sections[0].centerLanes[0].road_mark[0].SOffset)
         self.assertEqual("solid", road.lanes.lane_sections[0].centerLanes[0].road_mark[0].type)
         self.assertEqual("standard", road.lanes.lane_sections[0].centerLanes[0].road_mark[0].weight)
         self.assertEqual(0.5, road.lanes.lane_sections[0].centerLanes[0].road_mark[1].SOffset)
         self.assertEqual("none", road.lanes.lane_sections[0].centerLanes[0].road_mark[1].type)
         self.assertEqual("standard", road.lanes.lane_sections[0].centerLanes[0].road_mark[1].weight)
-        """
 
     def test_parse_opendrive_road_signal(self):
         # dir_name = os.path.dirname(os.path.abspath(os.curdir))

@@ -189,9 +189,7 @@ class Lane:
         self._borders = []
         self.lane_section = lane_section
         self.has_border_record = False
-        self._road_mark = None
-        # adjustment commented out guarantee functionality when merging into develop
-        # self._road_mark = []
+        self._road_mark = []
         # TODO material -> see parser.py
         # TODO speed limit -> see parser.py
         # TODO access -> see parser.py
@@ -594,7 +592,6 @@ class RoadMark:
         :setter: sets sOffset
         :type: float
         """
-        warnings.warn("Attribute sOffset is parsed but not used for conversion!", DeprecationWarning)
         return self._SOffset
 
     @SOffset.setter
