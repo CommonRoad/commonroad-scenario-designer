@@ -86,7 +86,7 @@ class TestOpenDriveToCommonRoadConversion(unittest.TestCase):
         np.testing.assert_almost_equal(3.500, np.linalg.norm(lanelet.left_vertices[0] - lanelet.right_vertices[0]), 3)
 
         # test length of lane
-        np.testing.assert_almost_equal(network.find_lanelet_by_id(17).inner_distance[2], 21.69863, 5)
+        np.testing.assert_almost_equal(network.find_lanelet_by_id(17).inner_distance[2], 21.69863, 3)
 
     def test_crossing_complex_eight_course(self):
         """Test the file CrossingComplex8Course.xodr"""
