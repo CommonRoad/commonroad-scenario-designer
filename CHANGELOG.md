@@ -13,6 +13,7 @@
 ### Fixed
 - Preventing GUI crash when adding obstacle without existing scenario
 - Conversion of straight euler spiral 
+- Floating point error in computation of Cartesian points of lane border in OpenDRIVE2CR conversion
 - Various small bug fixes
 
 ## [0.5.1] - 2022-05-20
