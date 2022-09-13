@@ -1,13 +1,11 @@
 from collections import defaultdict
 from typing import List, Tuple
-
+from shapely.geometry import LineString
 import numpy as np
 from pyproj import Proj
 
-from commonroad.scenario.lanelet import StopLine, LineMarking, RoadUser, Lanelet
+from commonroad.scenario.lanelet import StopLine, LineMarking, RoadUser, Lanelet, LaneletNetwork
 from commonroad.scenario.traffic_sign import TrafficSignIDGermany, TrafficSignElement
-from shapely.geometry import LineString
-
 from commonroad.scenario.scenario import Scenario, ScenarioID, TrafficSign, Location
 
 from crdesigner.map_conversion.common.utils import generate_unique_id
@@ -183,6 +181,9 @@ class Lanelet2CRConverter:
             self.lanelet_network.add_traffic_sign(speed_limit, first_occurrence)
             # scenario.add_objects(speed_limit, first_occurrence)
 
+        for la in self.lanelet_network.lanelets:
+            la.__class__ = Lanelet
+        self.lanelet_network.__class__ = LaneletNetwork
         scenario.add_objects(self.lanelet_network)
 
         return scenario
