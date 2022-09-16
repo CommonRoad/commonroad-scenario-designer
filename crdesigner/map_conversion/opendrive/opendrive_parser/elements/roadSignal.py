@@ -169,7 +169,7 @@ class Signal:
 
     @signal_value.setter
     def signal_value(self, value):
-        self._signal_value = float(value)
+        self._signal_value = value
 
     @property
     def unit(self) -> Union[None, str]:
