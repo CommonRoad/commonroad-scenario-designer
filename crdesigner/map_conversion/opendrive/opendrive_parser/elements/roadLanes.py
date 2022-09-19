@@ -582,6 +582,7 @@ class RoadMark:
         self._width = None
         self._lane_change = None
         self._height = None
+        self._line_markings = []
 
     @property
     def SOffset(self) -> float:
@@ -692,3 +693,89 @@ class RoadMark:
         """
         warnings.warn("Attribute height is not used for conversion!", DeprecationWarning)
         return self._height
+
+    @property
+    def line_markings(self):
+        """
+        Line markings of the road for multiple elements.
+
+        :getter: returns the additional line markings
+        :type: list of Line Marking objects
+        """
+        return self._line_markings
+
+    def add_line_marking(self, value):
+        self._line_markings.append(value)
+
+
+class LineMarking:
+    def __init__(self):
+        self._length = None
+        self._space = None
+        self._sOffset = None
+        self._tOffset = None
+        self._width = None
+
+    @property
+    def length(self):
+        """
+        Length of the road mark.
+
+        :getter: returns the length of the road mark
+        :setter: sets length
+        :type: float
+        """
+        return self._length
+
+    @length.setter
+    def length(self, value):
+        if value is not None:
+            self._length = float(value)
+
+    @property
+    def space(self):
+        """
+        Length of the gap between the visible parts.
+
+        :getter: returns the gap between the visible parts
+        :setter: sets the value for the gap
+        :type: float
+        """
+        return self._space
+
+    @space.setter
+    def space(self, value):
+        if value is not None:
+            self._space = float(value)
+
+    @property
+    def s_offset(self):
+        """
+        Initial longitudinal offset of the line definition from the start of the road mark definition.
+
+        :getter: returns the offset from the lane border:
+        :setter: sets offset from the lane border:
+        :type: float
+        """
+        return self._sOffset
+
+    @s_offset.setter
+    def s_offset(self, value):
+        if value is not None:
+            self._sOffset = float(value)
+
+    @property
+    def t_offset(self):
+        """
+        Lateral Offset from the lane border.
+
+        :getter: returns the offset from the lane border:
+        :setter: sets offset from the lane border:
+        :type: float
+        """
+        return self._tOffset
+
+    @t_offset.setter
+    def t_offset(self, value):
+        if value is not None:
+            self._tOffset = float(value)
