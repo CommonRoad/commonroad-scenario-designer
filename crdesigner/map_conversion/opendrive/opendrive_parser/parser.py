@@ -352,15 +352,16 @@ def parse_opendrive_road_lane_section(new_road: Road, lane_section_id: int, lane
                 road_mark.weight = mark.get("weight")
                 road_mark.SOffset = mark.get("sOffset")
 
-                for line in mark.findall("line"):
-                    line_marking = LineMarking()
-                    line_marking.length = line.get("length")
-                    line_marking.space = line.get("space")
-                    line_marking.s_offset = line.get("sOffset")
-                    line_marking.t_offset = line.get("tOffset")
-                    line_marking.width = line.get("width")
+                if mark.find("type") is not None:
+                    for line in mark.find("type").findall("line"):
+                        line_marking = LineMarking()
+                        line_marking.length = line.get("length")
+                        line_marking.space = line.get("space")
+                        line_marking.s_offset = line.get("sOffset")
+                        line_marking.t_offset = line.get("tOffset")
+                        line_marking.width = line.get("width")
 
-                    road_mark.add_line_marking(line_marking)
+                        road_mark.add_line_marking(line_marking)
 
                 new_lane.road_mark.append(road_mark)
 

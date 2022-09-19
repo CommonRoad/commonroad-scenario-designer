@@ -223,6 +223,36 @@ class TestParser(unittest.TestCase):
         self.assertEqual("none", road.lanes.lane_sections[0].centerLanes[0].road_mark[1].type)
         self.assertEqual("standard", road.lanes.lane_sections[0].centerLanes[0].road_mark[1].weight)
 
+    def test_line_markings(self):
+        # dir_name = os.path.dirname(os.path.abspath(os.curdir))
+        # file_path = os.path.join(dir_name, 'test_maps/opendrive/FourWaySignal.xodr')
+        file_path = 'tests/map_conversion/test_maps/opendrive/FourWaySignal.xodr'
+        with open("{}".format(file_path), "r") as file_in:
+            root = etree.parse(file_in).getroot()
+        road_xml = []
+        for road in root.findall("road"):
+            road_xml.append(road)
+        road = Road()
+        lanes = road_xml[0].find("lanes")
+        lane_sec_xml = []
+        for lane_section_id, lane_section in enumerate(lanes.findall("laneSection")):
+            lane_sec_xml.append([lane_section_id, lane_section])
+        parse_opendrive_road_lane_section(new_road=road, lane_section_id=lane_sec_xml[0][0],
+                                          lane_section=lane_sec_xml[0][1])
+
+        self.assertEqual(6.2769513215030031e+1, road.lanes.lane_sections[0].centerLanes[0].road_mark[0].
+                         line_markings[0].length)
+        self.assertEqual(0, road.lanes.lane_sections[0].centerLanes[0].road_mark[0].
+                         line_markings[0].space)
+        self.assertEqual(1.2500000000000000e-1, road.lanes.lane_sections[0].centerLanes[0].road_mark[0].
+                         line_markings[0].width)
+        self.assertEqual(0, road.lanes.lane_sections[0].centerLanes[0].road_mark[0].
+                         line_markings[0].s_offset)
+        self.assertEqual(-6.2500000000000000e-2, road.lanes.lane_sections[0].centerLanes[0].road_mark[0].
+                         line_markings[0].t_offset)
+        self.assertEqual(6.2500000000000000e-2,
+                         road.lanes.lane_sections[0].centerLanes[0].road_mark[0].line_markings[1].t_offset)
+
     def test_parse_opendrive_road_signal(self):
         # dir_name = os.path.dirname(os.path.abspath(os.curdir))
         # file_path = os.path.join(dir_name, 'test_maps/opendrive/CrossingComplex8Course.xodr')
