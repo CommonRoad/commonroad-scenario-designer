@@ -779,3 +779,19 @@ class LineMarking:
     def t_offset(self, value):
         if value is not None:
             self._tOffset = float(value)
+
+    @property
+    def width(self):
+        """
+        Line width.
+
+        :getter: returns line width
+        :setter: sets line width
+        :type: float
+        """
+        return self._width
+
+    @width.setter
+    def width(self, value):
+        if value is not None:
+            self._width = float(value)
