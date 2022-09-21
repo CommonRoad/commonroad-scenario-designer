@@ -56,3 +56,4 @@ class OpenDrive2CRConfiguration:
         self.driving_default_lanelet_type = config.opendrive.driving_default_lanelet_type
         self.general_lanelet_type_activ = config.opendrive.general_lanelet_type_activ
         self.general_lanelet_type = config.opendrive.general_lanelet_type
+        self.lanelet_types_backwards_compatible = config.opendrive.lanelet_types_backwards_compatible

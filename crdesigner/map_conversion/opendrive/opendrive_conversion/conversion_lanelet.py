@@ -38,7 +38,8 @@ class ConversionLanelet(Lanelet):
         traffic_lights=None,
         custom_default_lanelet_types=CustomDefaultLaneletType(config.opendrive.general_lanelet_type_activ,
                                                               config.opendrive.general_lanelet_type,
-                                                              config.opendrive.driving_default_lanelet_type)
+                                                              config.opendrive.driving_default_lanelet_type,
+                                                              config.opendrive.lanelet_types_backwards_compatible)
     ):
         if lanelet_type is None:
             lanelet_type = {LaneletType.UNKNOWN}
@@ -50,6 +51,7 @@ class ConversionLanelet(Lanelet):
         self._driving_default_lanelet_type = LaneletType(custom_default_lanelet_types.driving_default_lanelet_type) \
             if LaneletType(custom_default_lanelet_types.driving_default_lanelet_type) is not None \
             else LaneletType.UNKNOWN
+        self._lanelet_types_backwards_compatible = custom_default_lanelet_types.lanelet_types_backwards_compatible
         super().__init__(
             left_vertices=left_vertices,
             center_vertices=center_vertices,
@@ -117,9 +119,15 @@ class ConversionLanelet(Lanelet):
         elif value == 'connectingRamp':
             self._lanelet_type = {LaneletType.ACCESS_RAMP}.union(self._default_lanelet_type)
         elif value == 'shoulder':
-            self._lanelet_type = {LaneletType.BORDER}
+            if self._lanelet_types_backwards_compatible:
+                self._lanelet_type = set()
+            else:
+                self._lanelet_type = {LaneletType.BORDER}
         elif value == 'border':
-            self._lanelet_type = {LaneletType.BORDER}
+            if self._lanelet_types_backwards_compatible:
+                self._lanelet_type = set()
+            else:
+                self._lanelet_type = {LaneletType.BORDER}
         elif value == 'bus':
             self._lanelet_type = {LaneletType.BUS_LANE}.union(self._default_lanelet_type)
         elif value == 'stop':

@@ -7,6 +7,8 @@ class CustomDefaultLaneletType:
     general_lanelet_type_activ: bool  # activates whether certain lanelet type should be added to all lanelets
     general_lanelet_type: str  # lanelet type which is added to every lanelet (if activated)
     driving_default_lanelet_type: str  # mapping of OpenDRIVE driveway lane type to a CommonRoad lanelet type
+    lanelet_types_backwards_compatible: bool # if active, converts OpenDRIVE lane types only to CommonRoad lanelet
+    # types compatible with commonroad-io==2022.1 (probably also even older ones)
 
 
 def encode_road_section_lane_width_id(road_id, section_id, lane_id, width_id) -> str:
