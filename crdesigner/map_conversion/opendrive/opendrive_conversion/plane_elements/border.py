@@ -88,8 +88,7 @@ class Border:
 
         try:
             ref_coord, tang_angle, curv, max_geometry_length = self.reference.calc(
-                np.round(self.ref_offset + s_pos, 3), is_last_pos=is_last_pos, reverse=reverse,
-                compute_curvature=compute_curvature
+                self.ref_offset + s_pos, is_last_pos=is_last_pos, reverse=reverse, compute_curvature=compute_curvature
             )
         except TypeError as e:
             ref_coord, tang_angle, curv, max_geometry_length = self.reference.calc(np.round(self.ref_offset + s_pos, 3),
