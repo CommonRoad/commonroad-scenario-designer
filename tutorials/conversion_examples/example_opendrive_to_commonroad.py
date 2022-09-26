@@ -18,6 +18,7 @@ config = get_configs()
 
 # ----------------------------------------------- Option 1: General API ------------------------------------------------
 # load OpenDRIVE file, parse it, and convert it to a CommonRoad scenario
+
 scenario = opendrive_to_commonroad(input_path)
 
 # store converted file as CommonRoad scenario
@@ -49,7 +50,7 @@ with open("{}".format(input_path), "r") as file_in:
     opendrive = parse_opendrive(root.getroot())
 
 # create OpenDRIVE intermediate network object from configuration
-road_network = Network(config.opendrive_config)
+road_network = Network(config.opendrive)
 
 # convert OpenDRIVE file
 road_network.load_opendrive(opendrive)

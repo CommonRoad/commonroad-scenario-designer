@@ -209,7 +209,8 @@ class ParametricLaneGroup:
 
         lanelet = ConversionLanelet(copy.deepcopy(self), left_vertices, center_vertices, right_vertices, self.id_,
                                     lanelet_type=self.type, line_marking_left_vertices=line_marking_left_vertices,
-                                    line_marking_right_vertices=line_marking_right_vertices)
+                                    line_marking_right_vertices=line_marking_right_vertices,
+                                    speed=self.parametric_lanes[0].speed)
 
         # Adjacent lanes
         self._set_adjacent_lanes(lanelet)

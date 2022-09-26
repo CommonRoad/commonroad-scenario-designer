@@ -39,7 +39,8 @@ class ConversionLanelet(Lanelet):
         custom_default_lanelet_types=CustomDefaultLaneletType(config.opendrive.general_lanelet_type_activ,
                                                               config.opendrive.general_lanelet_type,
                                                               config.opendrive.driving_default_lanelet_type,
-                                                              config.opendrive.lanelet_types_backwards_compatible)
+                                                              config.opendrive.lanelet_types_backwards_compatible),
+            speed=None,
     ):
         if lanelet_type is None:
             lanelet_type = {LaneletType.UNKNOWN}
@@ -72,6 +73,8 @@ class ConversionLanelet(Lanelet):
             traffic_signs=traffic_signs,
             traffic_lights=traffic_lights,
         )
+
+        self.speed = speed
 
     def __eq__(self, lanelet: "ConversionLanelet") -> bool:
         """Lanelets are equal if their id_ is equal.
@@ -274,6 +277,14 @@ class ConversionLanelet(Lanelet):
         :rtype: bool
         """
         return self._adj_right_same_direction
+
+    @property
+    def speed(self) -> float:
+        return self._speed
+
+    @speed.setter
+    def speed(self, s):
+        self._speed = s
 
     @adj_right_same_direction.setter
     def adj_right_same_direction(self, same: bool):

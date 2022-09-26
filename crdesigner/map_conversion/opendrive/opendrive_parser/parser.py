@@ -360,7 +360,15 @@ def parse_opendrive_road_lane_section(new_road: Road, lane_section_id: int, lane
             # TODO implementation
 
             # Speed
-            # TODO implementation
+            if lane.find("speed") is not None:
+                # speed is always converted to m/s
+                unit = lane.find("speed").get("unit")
+                if unit == "km/h":
+                    new_lane.speed = float(lane.find("speed").get("max")) / 3.6
+                elif unit == "mph":
+                    new_lane.speed = float(lane.find("speed").get("max")) / 2.237
+            else:
+                new_lane.speed = None
 
             # Access
             # TODO implementation

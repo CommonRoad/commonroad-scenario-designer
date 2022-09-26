@@ -190,6 +190,7 @@ class Lane:
         self.lane_section = lane_section
         self.has_border_record = False
         self._road_mark = []
+        self.speed = None
         # TODO material -> see parser.py
         # TODO speed limit -> see parser.py
         # TODO access -> see parser.py

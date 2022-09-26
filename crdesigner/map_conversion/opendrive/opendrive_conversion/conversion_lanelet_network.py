@@ -652,17 +652,16 @@ class ConversionLaneletNetwork(LaneletNetwork):
                     else:
                         print(direction)
                         warnings.warn("Incorrect direction assigned to successor of incoming lanelet in intersection")
-            intersection_incoming_lane = IntersectionIncomingElement(intersection_id, incoming_lanelet_set,
+            intersection_incoming_lane = IntersectionIncomingElement(generate_unique_id(), incoming_lanelet_set,
                                                                      successor_right, successor_straight,
                                                                      successor_left)
-            intersection_id += 1
 
             intersection_incoming_lanes.append(intersection_incoming_lane)
             # TODO: Add crossings to intersections
             # Increment id counter to generate next unique intersection id. See To Do.
 
         if self.check_if_successor_is_intersecting(intersection_map, successors):
-            intersection = Intersection(intersection_id, intersection_incoming_lanes)
+            intersection = Intersection(generate_unique_id(), intersection_incoming_lanes)
             self.find_left_of(intersection.incomings)
             self.add_intersection(intersection)
 
@@ -1063,7 +1062,7 @@ class ConversionLaneletNetwork(LaneletNetwork):
             for lanelet in self.lanelets:
                 # Find closest lanelet to traffic signal
                 pos_1 = traffic_sign.position
-                pos_2 = lanelet.center_vertices[-1]
+                pos_2 = lanelet.center_vertices[0]
                 dist = np.linalg.norm(pos_1 - pos_2)
                 if dist < min_distance:
                     min_distance = dist

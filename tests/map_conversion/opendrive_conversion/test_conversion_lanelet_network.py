@@ -685,8 +685,8 @@ class TestConversionLanelet(unittest.TestCase):
         add_lanelets_to_network(conversion_lanelet_network, [lanelet1, lanelet2])
 
         conversion_lanelet_network.add_traffic_signs_to_network(traffic_signs)
-        lanelet1_true_signs = {0, 2}
-        lanelet2_true_signs = {1}
+        lanelet1_true_signs = {0, 1, 2}
+        lanelet2_true_signs = set()
         self.assertSetEqual(lanelet1_true_signs, lanelet1.traffic_signs)
         self.assertSetEqual(lanelet2_true_signs, lanelet2.traffic_signs)
 
