@@ -17,6 +17,7 @@ from crdesigner.map_conversion.opendrive.opendrive_parser.elements.junction impo
     Connection as JunctionConnection, LaneLink as JunctionConnectionLaneLink
 from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadSignal import Signal as RoadSignal, \
     SignalReference
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadObject import Object as RoadObject
 
 
 def parse_opendrive(root_node: etree.ElementTree) -> OpenDrive:
@@ -421,6 +422,25 @@ def parse_opendrive_road_signal_reference(new_road: Road, road_signal_reference:
     new_road.addSignalReference(new_signal_reference)
 
 
+def parse_opendrive_road_object(new_road: Road, road_object: etree.ElementTree):
+    new_road_object = RoadObject()
+    new_road_object.id = road_object.get("id")
+    new_road_object.name = road_object.get("name")
+    new_road_object.s = road_object.get("s")
+    new_road_object.t = road_object.get("t")
+    new_road_object.zOffset = road_object.get("zOffset")
+    new_road_object.hdg = road_object.get("hdg")
+    new_road_object.roll = road_object.get("roll")
+    new_road_object.pitch = road_object.get("pitch")
+    new_road_object.orientation = road_object.get("orientation")
+    new_road_object.type = road_object.get("type")
+    new_road_object.height = road_object.get("height")
+    new_road_object.width = road_object.get("width")
+    new_road_object.validLength = road_object.get("length")
+
+    new_road.addObject(new_road_object)
+
+
 def parse_opendrive_road(opendrive: OpenDrive, road: etree.ElementTree):
     """
     Parse OpenDRIVE road and appends it to OpenDRIVE object.
@@ -483,6 +503,9 @@ def parse_opendrive_road(opendrive: OpenDrive, road: etree.ElementTree):
 
     # Objects
     # TODO implementation
+    if road.find("objects") is not None:
+        for road_object in road.find("objects").findall("object"):
+            parse_opendrive_road_object(new_road, road_object)
 
     # Signals
     if road.find("signals") is not None:

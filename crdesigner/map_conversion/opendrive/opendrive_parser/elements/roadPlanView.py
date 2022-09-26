@@ -149,7 +149,7 @@ class PlanView:
         return self._geo_lengths[-1]
 
     def calc(self, s_pos: float, compute_curvature: bool = True, reverse: bool = True) \
-            -> Tuple[np.ndarray, float, Union[None, float]]:
+            -> Tuple[np.ndarray, float, float, Union[None, float]]:
         """
         Calculate position, tangent, curvature and max. length of the geometry at s_pos.
         Either interpolate values if possible or delegate calculation to geometries.

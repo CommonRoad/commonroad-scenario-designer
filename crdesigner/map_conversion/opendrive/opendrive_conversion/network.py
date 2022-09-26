@@ -1,13 +1,11 @@
 import copy
-import numpy.linalg
+import numpy as np
 import iso3166
 from collections import deque
 from typing import Union
-import warnings
 from commonroad.scenario.scenario import Scenario, GeoTransformation, Location, ScenarioID
-from commonroad.scenario.lanelet import LaneletNetwork, Lanelet
+from commonroad.scenario.lanelet import LaneletNetwork, Lanelet, StopLine, LineMarking
 from crdesigner.map_conversion.opendrive.opendrive_conversion import utils
-
 
 from crdesigner.map_conversion.opendrive.opendrive_parser.elements.opendrive import OpenDrive
 from crdesigner.map_conversion.opendrive.opendrive_conversion.utils import encode_road_section_lane_width_id
@@ -121,15 +119,42 @@ class Network:
                 )
 
                 self._planes.extend(parametric_lane_groups)
+
+            # stop lines from traffic signals (legacy)
             stop_lines_final = []
             traffic_lights, traffic_signs, stop_lines = get_traffic_signals(road)
             self._traffic_lights.extend(traffic_lights)
             for stop_line in stop_lines:
                 for traffic_light in traffic_lights:
-                    if numpy.linalg.norm(stop_line.start - traffic_light.position) < 10:
+                    if np.linalg.norm(stop_line.start - traffic_light.position) < 10:
                         stop_lines_final.append(stop_line)  # hard-coded 10 could be adjusted later as a threshold
             self._traffic_signs.extend(traffic_signs)
             self._stop_lines.extend(stop_lines_final)
+
+            # stop lines from road objects
+            for road_object in road.objects:
+                if road_object.name == "StopLine":
+                    position, tangent, _, _ = road.planView.calc(road_object.s, compute_curvature=False)
+                    position = np.array([position[0],
+                                         position[1]])
+
+                    position_1 = position
+                    angle = road_object.hdg + tangent
+                    # check if stop line is orthogonal to reference line
+                    if np.round(tangent) == 0:
+                        angle = np.pi / 2
+                    # check orientation of stop line
+                    if road_object.orientation == "+":
+                        position_2 = np.array(
+                                [position[0] + road_object.validLength * np.cos(angle),
+                                 position[1] - road_object.validLength * np.sin(angle)])
+                    else:
+                        position_2 = np.array(
+                                [position[0] + road_object.validLength * np.cos(angle),
+                                 position[1] + road_object.validLength * np.sin(angle)])
+
+                    stop_line = StopLine(position_1, position_2, LineMarking.SOLID)
+                    self._stop_lines.append(stop_line)
 
     def export_lanelet_network(
         self, filter_types: list = None
@@ -318,7 +343,7 @@ class Network:
                     return sign
         return None
 
-    def add_virtual_traffic_sign(self, lanelet, network):
+    def add_virtual_traffic_sign(self, lanelet: ConversionLanelet, network: ConversionLaneletNetwork):
         """Adds a virtual traffic sign to a lanelet.
 
         :param lanelet: Lanelet to add virtual traffic signal to.
@@ -380,7 +405,8 @@ class Network:
             self.export_lanelet_network(
                 filter_types=filter_types
                 if isinstance(filter_types, list)
-                else ["driving", "restricted", "onRamp", "offRamp", "exit", "entry", "sidewalk", "shoulder", "crosswalk"]
+                else ["driving", "restricted", "onRamp", "offRamp", "exit", "entry", "sidewalk", "shoulder",
+                      "crosswalk"]
             )
         )
 
@@ -584,14 +610,6 @@ class LinkIndex:
                         )
 
                     else:
-                        # decide which lane section to use (first or last)
-                        if lane_link.fromId < 0:
-                            lane_section_idx = 0
-
-                        else:
-                            lane_section_idx = (
-                                incoming_road.lanes.getLastLaneSectionIdx()
-                            )
                         incoming_road_id = encode_road_section_lane_width_id(
                             incoming_road.id, 0, lane_link.fromId, -1
                         )

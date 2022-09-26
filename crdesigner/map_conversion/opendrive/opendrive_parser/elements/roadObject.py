@@ -54,6 +54,8 @@ class Object:
                       'streetLamp', 'trafficIsland', 'trailer', 'train', 'tram', 'tree', 'van', 'vegetation', 'wind']
         customs = ['permanentDelineator', 'emergencyCallBox', 'tunnel', 'arrowStraight', 'arrowRight', 'arrowMergeLeft',
                    'arrowLeft', 'arrowLeftRight', 'arrowStraightLeft', 'arrowMergeRight', 'island', 'guidepost']
+        if value == "-1":
+            value = "none"
         if value not in road_types and value not in customs:
             raise AttributeError("Value is not a valid object type!")
         self._type = str(value)
@@ -71,7 +73,8 @@ class Object:
 
     @name.setter
     def name(self, value):
-        self._name = str(value)
+        if value is not None:
+            self._name = str(value)
 
     @property
     def width(self) -> float:
@@ -86,7 +89,8 @@ class Object:
 
     @width.setter
     def width(self, value):
-        self._width = float(value)
+        if value is not None:
+            self._width = float(value)
 
     @property
     def height(self) -> float:
@@ -101,7 +105,8 @@ class Object:
 
     @height.setter
     def height(self, value):
-        self._height = float(value)
+        if value is not None:
+            self._height = float(value)
 
     @property
     def zOffset(self) -> float:
@@ -116,7 +121,8 @@ class Object:
 
     @zOffset.setter
     def zOffset(self, value):
-        self._zOffset = float(value)
+        if value is not None:
+            self._zOffset = float(value)
 
     @property
     def id(self) -> int:
@@ -131,7 +137,8 @@ class Object:
 
     @id.setter
     def id(self, value):
-        self._id = int(value)
+        if value is not None:
+            self._id = int(value)
 
     @property
     def s(self) -> float:
@@ -146,7 +153,8 @@ class Object:
 
     @s.setter
     def s(self, value):
-        self._s = float(value)
+        if value is not None:
+            self._s = float(value)
 
     @property
     def t(self) -> float:
@@ -161,7 +169,8 @@ class Object:
 
     @t.setter
     def t(self, value):
-        self._t = float(value)
+        if value is not None:
+            self._t = float(value)
 
     @property
     def validLength(self) -> float:
@@ -176,7 +185,8 @@ class Object:
 
     @validLength.setter
     def validLength(self, value):
-        self._validLength = float(value)
+        if value is not None:
+            self._validLength = float(value)
 
     @property
     def orientation(self) -> str:
@@ -210,7 +220,8 @@ class Object:
 
     @hdg.setter
     def hdg(self, value):
-        self._hdg = float(value)
+        if value is not None:
+            self._hdg = float(value)
 
     @property
     def pitch(self) -> float:
@@ -225,7 +236,8 @@ class Object:
 
     @pitch.setter
     def pitch(self, value):
-        self._pitch = float(value)
+        if value is not None:
+            self._pitch = float(value)
 
     @property
     def roll(self) -> float:
@@ -240,4 +252,5 @@ class Object:
 
     @roll.setter
     def roll(self, value):
-        self._roll = float(value)
+        if value is not None:
+            self._roll = float(value)
