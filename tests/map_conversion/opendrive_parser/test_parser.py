@@ -290,6 +290,34 @@ class TestParser(unittest.TestCase):
         self.assertEqual(junction, odr.roads[0].junction)
         # rest of road parser is tested with other tests
 
+    def test_parse_opendrive_road_object(self):
+        # dir_name = os.path.dirname(os.path.abspath(os.curdir))
+        # file_path = os.path.join(dir_name, 'test_maps/opendrive/four_way_crossing.xodr')
+        file_path = 'tests/map_conversion/test_maps/opendrive/four_way_crossing.xodr'
+        with open("{}".format(file_path), "r") as file_in:
+            root = etree.parse(file_in).getroot()
+        road_xml = []
+        for road in root.findall("road"):
+            road_xml.append(road)
+        road = Road()
+        object_xml = []
+        for reference in road_xml[1].find("objects").findall("object"):
+            object_xml.append(reference)
+        parse_opendrive_road_object(new_road=road, road_object=object_xml[1])
+
+        self.assertEqual(81, road.objects[0].id)
+        self.assertEqual("House04_BeachColors", road.objects[0].name)
+        self.assertEqual(7.3042801461003135e+0, road.objects[0].s)
+        self.assertEqual(-1.4759999871253967e+1, road.objects[0].t)
+        self.assertEqual(-3.6077709960937501e+0, road.objects[0].zOffset)
+        self.assertEqual(1.5707963267948966e+0, road.objects[0].hdg)
+        self.assertEqual(0, road.objects[0].roll)
+        self.assertEqual(0, road.objects[0].pitch)
+        self.assertEqual("none", road.objects[0].type)
+        self.assertEqual(1.2868122558593750e+1, road.objects[0].height)
+        self.assertEqual(1.6766826171875003e+1, road.objects[0].width)
+        self.assertEqual(1.1869543457031250e+1, road.objects[0].validLength)
+
 
 if __name__ == '__main__':
     unittest.main()

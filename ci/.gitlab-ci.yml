@@ -70,6 +70,7 @@ docs:
     stage: test
     script:
         - source activate cr39
+        - pip install -e .
         - pip install -r ./docs/doc_requirements.txt
         - cd docs && bash ./docs_build_script.sh
     artifacts:
