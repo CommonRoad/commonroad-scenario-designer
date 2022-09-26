@@ -33,6 +33,19 @@ class TestOpenDriveToCommonRoadConversion(unittest.TestCase):
         # test length of road
         np.testing.assert_almost_equal(99.97, network.find_lanelet_by_id(1).distance[3], 2)
 
+        # test that two virtual traffic signs are correctly created
+        np.testing.assert_equal(2, len(network.traffic_signs))
+        np.testing.assert_equal(True, network.traffic_signs[0].virtual)
+        np.testing.assert_equal(True, network.traffic_signs[1].virtual)
+        np.testing.assert_almost_equal(network.find_lanelet_by_id(1).center_vertices[0],
+                                       network.traffic_signs[0].position)
+        np.testing.assert_almost_equal(network.find_lanelet_by_id(2).center_vertices[0],
+                                       network.traffic_signs[1].position)
+        np.testing.assert_almost_equal(17.881,
+                                       float(network.traffic_signs[0].traffic_sign_elements[0].additional_values[0]), 2)
+        np.testing.assert_almost_equal(17.881,
+                                       float(network.traffic_signs[1].traffic_sign_elements[0].additional_values[0]), 2)
+
         # test lanelet type
         self.assertEqual({LaneletType.URBAN}, network.find_lanelet_by_id(1).lanelet_type)
         self.assertEqual({LaneletType.URBAN}, network.find_lanelet_by_id(2).lanelet_type)
@@ -42,6 +55,34 @@ class TestOpenDriveToCommonRoadConversion(unittest.TestCase):
         # test driving direction
         self.assertFalse(network.find_lanelet_by_id(1).adj_left_same_direction)
         self.assertFalse(network.find_lanelet_by_id(2).adj_left_same_direction)
+
+    def test_straight_with_speed_limit(self):
+        """Test the file straight_with_speed_limit.xodr"""
+        name = "straight_with_speed_limit"
+        scenario = self.load_and_convert_opendrive(name)
+
+        np.testing.assert_equal(4, len(scenario.lanelet_network.traffic_signs))
+        # 40mph
+        np.testing.assert_almost_equal(
+                17.881, float(scenario.lanelet_network.traffic_signs[0].traffic_sign_elements[0].additional_values[0]), 2
+        )
+        np.testing.assert_almost_equal(
+                17.881, float(scenario.lanelet_network.traffic_signs[2].traffic_sign_elements[0].additional_values[0]), 2
+        )
+        # 65 mph
+        np.testing.assert_almost_equal(
+                29.057,
+                float(scenario.lanelet_network.traffic_signs[1].traffic_sign_elements[0].additional_values[0]), 2
+        )
+        np.testing.assert_almost_equal(
+                29.057,
+                float(scenario.lanelet_network.traffic_signs[3].traffic_sign_elements[0].additional_values[0]), 2
+        )
+
+        np.testing.assert_almost_equal(scenario.lanelet_network.find_lanelet_by_id(3).center_vertices[0],
+                                       scenario.lanelet_network.traffic_signs[1].position)
+        np.testing.assert_almost_equal(scenario.lanelet_network.find_lanelet_by_id(7).center_vertices[0],
+                                       scenario.lanelet_network.traffic_signs[3].position)
 
     def test_four_way_crossing(self):
         """Test the file four_way_crossing.xodr"""
@@ -151,7 +192,8 @@ class TestOpenDriveToCommonRoadConversion(unittest.TestCase):
         self.assertEqual(10, len(network.traffic_lights))
 
         # test number of traffic signs
-        self.assertEqual(2, len(network.traffic_signs))
+        self.assertEqual(2, len([t for t in network.traffic_signs if not t.virtual]))
+        self.assertEqual(6, len([t for t in network.traffic_signs if t.virtual]))
 
         # test type of traffic signs
         self.assertEqual(TrafficSignIDZamunda.U_TURN, network.find_traffic_sign_by_id(1).traffic_sign_elements[0]

@@ -1,6 +1,9 @@
 import iso3166
 from dataclasses import dataclass
-
+from typing import Union
+from commonroad.scenario.traffic_sign import TrafficSignIDZamunda, TrafficSignIDGermany, TrafficSignIDUsa, \
+    TrafficSignIDChina, TrafficSignIDSpain, TrafficSignIDRussia, TrafficSignIDArgentina, TrafficSignIDBelgium, \
+    TrafficSignIDFrance, TrafficSignIDGreece, TrafficSignIDCroatia, TrafficSignIDItaly, TrafficSignIDPuertoRico
 
 @dataclass
 class CustomDefaultLaneletType:
@@ -61,3 +64,44 @@ def get_signal_country(signal_country: str) -> str:
         return signal_country
     else:
         return "ZAM"
+
+
+def get_traffic_sign_enum_from_country(country: str) -> Union[TrafficSignIDZamunda, TrafficSignIDGermany,
+                                                              TrafficSignIDUsa, TrafficSignIDChina, TrafficSignIDSpain,
+                                                              TrafficSignIDRussia, TrafficSignIDArgentina,
+                                                              TrafficSignIDBelgium, TrafficSignIDFrance,
+                                                              TrafficSignIDGreece, TrafficSignIDCroatia,
+                                                              TrafficSignIDItaly, TrafficSignIDPuertoRico]:
+    """Returns the traffic sign ID enumeration for the country supplied by the ISO3166 country string.
+
+    :param country: ISO3166 country string to get the traffic sign enumeration from.
+    :type country: str
+    :return: The enumeration of the country if it is supported, else the Zamunda enumeration.
+    :rtype: Union
+    """
+    if country == "DEU":
+        return TrafficSignIDGermany
+    elif country == "USA":
+        return TrafficSignIDUsa
+    elif country == "CHN":
+        return TrafficSignIDChina
+    elif country == "ESP":
+        return TrafficSignIDSpain
+    elif country == "RUS":
+        return TrafficSignIDRussia
+    elif country == "ARG":
+        return TrafficSignIDArgentina
+    elif country == "BEL":
+        return TrafficSignIDBelgium
+    elif country == "FRA":
+        return TrafficSignIDFrance
+    elif country == "GRC":
+        return TrafficSignIDGreece
+    elif country == "HRV":
+        return TrafficSignIDCroatia
+    elif country == "ITA":
+        return TrafficSignIDItaly
+    elif country == "PRI":
+        return TrafficSignIDPuertoRico
+    else:
+        return TrafficSignIDZamunda

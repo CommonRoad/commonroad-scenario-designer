@@ -55,7 +55,6 @@ def get_traffic_signals(road: Road) -> Tuple[List[TrafficLight], List[TrafficSig
     # TODO: Stop lines are created and appended to the list for DEU and OpenDrive format.
     # This has been replicated for other countries but has not been tested with a test case
     # Stop lines have a signal type of 294 and are handled differently in the commonroad format
-
     for signal in road.signals:
 
         position, tangent, _, _ = road.planView.calc(signal.s, compute_curvature=False)

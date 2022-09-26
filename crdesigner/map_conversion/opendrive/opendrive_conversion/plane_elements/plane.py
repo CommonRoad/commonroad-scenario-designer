@@ -91,7 +91,8 @@ class ParametricLane:
         border_group: ParametricLaneBorderGroup,
         length: float = None,
         line_marking = None,
-        side: str = None
+        side: str = None,
+        speed: float = None,
     ):
         """Initializes a ParametricLane object.
 
@@ -107,6 +108,8 @@ class ParametricLane:
         :type line_marking: :class:`RoadMark`
         :param side: the side in lane section. Used for determining the line marking side. Default is None
         :type side: str
+        :param speed: Speed limit for this individual plane
+        :type speed: float
         """
         self.border_group = border_group
         self.id_ = id_
@@ -115,6 +118,7 @@ class ParametricLane:
         self.reverse = False
         self.line_marking = line_marking
         self.side = side
+        self.speed = speed
 
     def calc_border(
         self, border: str, s_pos: float, width_offset: float = 0.0, compute_curvature=True
