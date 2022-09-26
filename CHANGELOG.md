@@ -7,6 +7,7 @@
 - New shortcut buttons for lanelet adding, merging, splitting, creating adjacent
 - Function to convert OSM to CommonRoad using SUMO
 - Convert lane speed limits in OpenDRIVE
+- Convert OpenDRIVE stop lines represented as object
 
 ### Changed
 - User interface for adding and updating lanelets
