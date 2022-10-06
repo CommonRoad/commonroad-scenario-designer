@@ -111,11 +111,26 @@ class OpenDriveConverter:
 
                 # Create new lane for each width segment
                 for width in lane.widths:
+                    """
+                    pos = [x.SOffset for x in lane.road_mark] + [width.length]
+                    pos = np.array(sorted(set(pos)))
+                    lengths = pos[1:] - pos[:-1]
+                    print(lengths)
+
+                    for mark_idx, l in enumerate(lengths):
+                        parametric_lane = OpenDriveConverter.create_parametric_lane(
+                                lane_borders, width, lane, side, mark_idx, l
+                        )
+                        parametric_lane.reverse = bool(lane.id > 0)
+                        plane_group.append(parametric_lane)
+                    """
                     # check if road mark was changed and set corresponding road mark
                     mark_idx = -1
                     for mark in lane.road_mark:
-                        if width.start_offset > mark.SOffset:
+                        print(mark.type)
+                        if width.start_offset >= mark.SOffset:
                             mark_idx += 1
+                    print("-")
                     # create new lane
                     parametric_lane = OpenDriveConverter.create_parametric_lane(
                         lane_borders, width, lane, side, mark_idx
@@ -156,6 +171,7 @@ class OpenDriveConverter:
             inner_border_offset=width.start_offset + lane_borders[-1].ref_offset,
             outer_border_offset=width.start_offset,
         )
+
         parametric_lane = ParametricLane(
             id_=encode_mark_lane_width_id(
                 lane.lane_section.parentRoad.id,

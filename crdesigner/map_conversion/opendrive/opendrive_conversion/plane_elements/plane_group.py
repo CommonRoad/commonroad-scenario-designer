@@ -170,12 +170,16 @@ class ParametricLaneGroup:
                             mark = LineMarking.SOLID
                         elif line_marking.weight == "bold":
                             mark = LineMarking.BROAD_SOLID
+                        else:
+                            mark = LineMarking.SOLID
 
                     elif line_marking.type == "broken":
                         if line_marking.weight == "standard":
                             mark = LineMarking.DASHED
                         elif line_marking.weight == "bold":
                             mark = LineMarking.BROAD_DASHED
+                        else:
+                            mark = LineMarking.DASHED
 
                     else:
                         mark = LineMarking.UNKNOWN
@@ -189,12 +193,16 @@ class ParametricLaneGroup:
                             mark = LineMarking.SOLID
                         elif line_marking.weight == "bold":
                             mark = LineMarking.BROAD_SOLID
+                        else:
+                            mark = LineMarking.SOLID
 
                     elif line_marking.type == "broken":
                         if line_marking.weight == "standard":
                             mark = LineMarking.DASHED
                         elif line_marking.weight == "bold":
                             mark = LineMarking.BROAD_DASHED
+                        else:
+                            mark = LineMarking.DASHED
 
                     else:
                         mark = LineMarking.UNKNOWN

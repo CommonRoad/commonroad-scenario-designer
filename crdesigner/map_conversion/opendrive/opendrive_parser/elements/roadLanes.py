@@ -612,7 +612,10 @@ class RoadMark:
 
     @type.setter
     def type(self, value):
-        self._type = str(value)
+        if value == "none":
+            self._type = None
+        else:
+            self._type = str(value)
 
     @property
     def weight(self) -> str:
