@@ -127,7 +127,6 @@ class OpenDriveConverter:
                     # check if road mark was changed and set corresponding road mark
                     mark_idx = -1
                     for mark in lane.road_mark:
-                        print(mark.type)
                         if width.start_offset >= mark.SOffset:
                             mark_idx += 1
                     # create new lane

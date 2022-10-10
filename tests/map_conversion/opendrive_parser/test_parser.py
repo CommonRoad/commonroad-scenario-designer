@@ -220,7 +220,7 @@ class TestParser(unittest.TestCase):
         self.assertEqual("solid", road.lanes.lane_sections[0].centerLanes[0].road_mark[0].type)
         self.assertEqual("standard", road.lanes.lane_sections[0].centerLanes[0].road_mark[0].weight)
         self.assertEqual(0.5, road.lanes.lane_sections[0].centerLanes[0].road_mark[1].SOffset)
-        self.assertEqual("none", road.lanes.lane_sections[0].centerLanes[0].road_mark[1].type)
+        self.assertEqual(None, road.lanes.lane_sections[0].centerLanes[0].road_mark[1].type)
         self.assertEqual("standard", road.lanes.lane_sections[0].centerLanes[0].road_mark[1].weight)
 
     def test_line_markings(self):

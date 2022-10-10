@@ -711,7 +711,7 @@ class RoadMark:
         self._line_markings.append(value)
 
 
-class LineMarking:
+class LineMarkings:
     def __init__(self):
         self._length = None
         self._space = None

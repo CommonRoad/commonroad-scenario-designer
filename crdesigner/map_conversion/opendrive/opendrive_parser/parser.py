@@ -12,7 +12,7 @@ from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadLateralPr
     Shape as RoadLateralProfileShape
 from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadLanes import LaneOffset as RoadLanesLaneOffset, \
     Lane as RoadLaneSectionLane, LaneSection as RoadLanesSection, LaneWidth as RoadLaneSectionLaneWidth, \
-    LaneBorder as RoadLaneSectionLaneBorder, RoadMark as RoadLaneRoadMark, LineMarking
+    LaneBorder as RoadLaneSectionLaneBorder, RoadMark as RoadLaneRoadMark, LineMarkings
 from crdesigner.map_conversion.opendrive.opendrive_parser.elements.junction import Junction, \
     Connection as JunctionConnection, LaneLink as JunctionConnectionLaneLink
 from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadSignal import Signal as RoadSignal, \
@@ -354,7 +354,7 @@ def parse_opendrive_road_lane_section(new_road: Road, lane_section_id: int, lane
 
                 if mark.find("type") is not None:
                     for line in mark.find("type").findall("line"):
-                        line_marking = LineMarking()
+                        line_marking = LineMarkings()
                         line_marking.length = line.get("length")
                         line_marking.space = line.get("space")
                         line_marking.s_offset = line.get("sOffset")
