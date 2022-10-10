@@ -130,7 +130,6 @@ class OpenDriveConverter:
                         print(mark.type)
                         if width.start_offset >= mark.SOffset:
                             mark_idx += 1
-                    print("-")
                     # create new lane
                     parametric_lane = OpenDriveConverter.create_parametric_lane(
                         lane_borders, width, lane, side, mark_idx
