@@ -1,5 +1,6 @@
 import pickle
 from lxml import etree
+from typing import Optional
 
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
