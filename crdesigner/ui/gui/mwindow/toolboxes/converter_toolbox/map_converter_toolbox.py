@@ -1,6 +1,5 @@
 import pickle
 from lxml import etree
-from typing import Optional
 
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
@@ -282,8 +281,7 @@ class MapConversionToolbox(QDockWidget):
             return
         # Load road network and print some statistics
         try:
-            with open(file_path, "r") as fd:
-                self.open_drive_file = parse_opendrive(etree.parse(fd).getroot())
+            self.open_drive_file = parse_opendrive(file_path)
             self.converter_toolbox.loaded_opendrive_file.setText("file successfully loaded")
         except (etree.XMLSyntaxError) as e:
             error_message = "XML Syntax Error: {}".format(e)

@@ -1,5 +1,8 @@
 import numpy as np
 from lxml import etree
+
+from crdesigner.map_conversion.common.utils import generate_unique_id
+
 from crdesigner.map_conversion.opendrive.opendrive_parser.elements.opendrive import OpenDrive, Header
 from crdesigner.map_conversion.opendrive.opendrive_parser.elements.road import Road
 from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadLink import Predecessor as RoadLinkPredecessor, \
@@ -20,16 +23,22 @@ from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadSignal im
 from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadObject import Object as RoadObject
 
 
-def parse_opendrive(root_node: etree.ElementTree) -> OpenDrive:
+def parse_opendrive(file_path: str) -> OpenDrive:
     """
     Tries to parse XML tree, returns OpenDRIVE object
 
-    :param root_node: loaded OpenDRIVE data
+    :param file_path: path to opendrive
     :return: Object representing an OpenDrive specification
     """
-    # Only accept lxml element
-    if not etree.iselement(root_node):
-        raise TypeError("Argument root_node is not a xml element")
+    generate_unique_id(0)  # reset IDs
+
+    with open("{}".format(file_path), "r") as file_in:
+        root_node = etree.parse(file_in)
+
+        for elem in root_node.getiterator():
+            if not (isinstance(elem, etree._Comment) or isinstance(elem, etree._ProcessingInstruction)):
+                elem.tag = etree.QName(elem).localname
+        etree.cleanup_namespaces(root_node)
 
     opendrive = OpenDrive()
 

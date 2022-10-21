@@ -1,9 +1,6 @@
 import subprocess
 from pathlib import Path
 
-import subprocess
-from pathlib import Path
-
 from lxml import etree
 import uuid
 import os
@@ -97,20 +94,7 @@ def opendrive_to_commonroad(input_file: str) -> Scenario:
     @param input_file: Path to OpenDRIVE file
     @return: CommonRoad scenario
     """
-    generate_unique_id(0)  # reset IDs
-
-    with open("{}".format(input_file), "r") as file_in:
-        root = etree.parse(file_in)
-
-        for elem in root.getiterator():
-            if not (
-                isinstance(elem, etree._Comment)
-                or isinstance(elem, etree._ProcessingInstruction)
-            ):
-                elem.tag = etree.QName(elem).localname
-        etree.cleanup_namespaces(root)
-
-        opendrive = parse_opendrive(root.getroot())
+    opendrive = parse_opendrive(input_file)
 
     # load configs
     configs = get_configs()
