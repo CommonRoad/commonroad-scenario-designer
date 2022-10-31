@@ -1,4 +1,6 @@
 import pickle
+import warnings
+
 from lxml import etree
 
 from PyQt5.QtWidgets import *
@@ -34,6 +36,8 @@ if SUMO_AVAILABLE:
     from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMOSimulation
     from crdesigner.ui.gui.mwindow.service_layer.sumo_settings import SUMOSettings
     from crdesigner.map_conversion.sumo_map.sumo2cr import convert_net_to_cr
+
+from crdesigner.ui.gui.mwindow.service_layer.osm_gui_modules.gui import CARTOPY_AVAILABLE
 
 
 class MapConversionToolbox(QDockWidget):
@@ -157,10 +161,12 @@ class MapConversionToolbox(QDockWidget):
                 "Map unreadable: " + str(e),
                 QMessageBox.Ok)
             return
-        if self.converter_toolbox.osm_conversion_edit_manually_selection.isChecked():
+        if self.converter_toolbox.osm_conversion_edit_manually_selection.isChecked() and CARTOPY_AVAILABLE:
             self.edge_edit_embedding(self.graph)
         else:
             self.hidden_osm_conversion(self.graph)
+        if not CARTOPY_AVAILABLE:
+            warnings.warn("OSM edit mode not available!")
         self.converter_toolbox.osm_loading_status.setText("no file selected")
         self.osm_file = None
 

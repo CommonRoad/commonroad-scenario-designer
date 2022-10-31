@@ -43,6 +43,9 @@ conda install -c conda-forge cartopy
 from you Anaconda environment. For the other packages, we recommend to use the provided `requirements.txt`:
 ```bash
 pip install -r requirements.txt
+
+If you do not want to use Anaconda, some features for editing OSM graphs might not be available.
+
 ```
 
 If you want to use the SUMO conversion or to generate traffic using SUMO, please install 

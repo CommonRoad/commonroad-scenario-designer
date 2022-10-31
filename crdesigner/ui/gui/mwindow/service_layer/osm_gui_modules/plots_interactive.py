@@ -7,7 +7,12 @@ All plot functions in this module can plot in cartesian coordinates as well as i
 from abc import ABC
 from typing import Tuple, List, Optional, Set, Dict, Union
 
-import cartopy.crs as crs
+CARTOPY_AVAILABLE = False
+try:
+    import cartopy.crs as crs
+    CARTOPY_AVAILABLE = True
+except Exception:
+    CARTOPY_AVAILABLE = False
 import numpy as np
 from PIL import Image
 from matplotlib.axes import Axes
@@ -717,20 +722,21 @@ def draw_lane_links(graph: rg.Graph, ax: Axes, latlon: bool, origin: np.ndarray)
     return
 
 
-def plot_aerial_image(
-    image: Image, image_extent: List[float], ax: Axes, projection: crs.Mercator
-) -> None:
-    """
-    plots an aerial image
+if CARTOPY_AVAILABLE:
+    def plot_aerial_image(
+        image: Image, image_extent: List[float], ax: Axes, projection: crs.Mercator
+    ) -> None:
+        """
+        plots an aerial image
 
-    :param image: image to plot
-    :param image_extent: coordinates of image extent
-    :param ax: axes to draw on
-    :param projection: the projection used for the plot
-    :return: None
-    """
-    ax.imshow(image, origin="upper", extent=image_extent, transform=projection)
-    return
+        :param image: image to plot
+        :param image_extent: coordinates of image extent
+        :param ax: axes to draw on
+        :param projection: the projection used for the plot
+        :return: None
+        """
+        ax.imshow(image, origin="upper", extent=image_extent, transform=projection)
+        return
 
 
 def draw_edge(

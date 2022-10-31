@@ -6,12 +6,18 @@ import copy
 import datetime
 import os
 import pickle
+import warnings
 from abc import ABC, abstractmethod
 from tkinter import Tk
 from tkinter.filedialog import askopenfilename, asksaveasfilename
 from typing import Optional, List, Tuple, Set, Dict, Callable
 
-import cartopy.crs as crs
+CARTOPY_AVAILABLE = False
+try:
+    import cartopy.crs as crs
+    CARTOPY_AVAILABLE = True
+except Exception:
+    CARTOPY_AVAILABLE = False
 import matplotlib.pyplot as plt
 import numpy as np
 from PIL import Image
