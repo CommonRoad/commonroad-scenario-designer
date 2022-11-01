@@ -8,7 +8,8 @@ from commonroad.geometry.polyline_util import *
 from commonroad.geometry.shape import Rectangle, Circle, Polygon
 from commonroad.scenario.scenario import Scenario
 from commonroad.scenario.obstacle import Obstacle, StaticObstacle, ObstacleType, DynamicObstacle
-from commonroad.scenario.trajectory import State, Trajectory
+from commonroad.scenario.trajectory import Trajectory
+from commonroad.scenario.state import InitialState, State, PMState, KSState
 
 from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMO_AVAILABLE
 from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.commonroad_viewer.dynamic_canvas import DynamicCanvas
@@ -125,7 +126,7 @@ class ObstacleToolbox(QDockWidget):
                                              obstacle_shape=Rectangle(
                                                      length=float(self.obstacle_toolbox_ui.obstacle_length.text()),
                                                      width=float(self.obstacle_toolbox_ui.obstacle_width.text())),
-                                             initial_state=State(**{'position': np.array(
+                                             initial_state=InitialState(**{'position': np.array(
                                                      [float(self.obstacle_toolbox_ui.obstacle_x_Position.text()),
                                                       float(self.obstacle_toolbox_ui.obstacle_y_Position.text())]),
                                                  'orientation': math.radians(float(
@@ -137,7 +138,7 @@ class ObstacleToolbox(QDockWidget):
                                                      self.obstacle_toolbox_ui.obstacle_type.currentText()),
                                              obstacle_shape=Circle(
                                                      radius=float(self.obstacle_toolbox_ui.obstacle_radius.text())),
-                                             initial_state=State(**{'position': np.array(
+                                             initial_state=InitialState(**{'position': np.array(
                                                      [float(self.obstacle_toolbox_ui.obstacle_x_Position.text()),
                                                       float(self.obstacle_toolbox_ui.obstacle_y_Position.text())]),
                                                  'orientation': 0, 'time_step': 1}))
@@ -150,7 +151,7 @@ class ObstacleToolbox(QDockWidget):
                     vertices=self.polygon_array()
                 ),
 
-                initial_state=State(**{'position': np.array([
+                initial_state=InitialState(**{'position': np.array([
                                         0,
                                         0
                                     ]),
@@ -218,7 +219,7 @@ class ObstacleToolbox(QDockWidget):
                     orientation=float(self.obstacle_toolbox_ui.obstacle_orientation.text())
                 ),
 
-                initial_state=State(**state_dictionary),
+                initial_state=InitialState(**state_dictionary),
                 prediction=TrajectoryPrediction(
                     shape=Rectangle(float(self.obstacle_toolbox_ui.obstacle_length.text()),
                                     width=float(self.obstacle_toolbox_ui.obstacle_width.text())),
@@ -238,7 +239,7 @@ class ObstacleToolbox(QDockWidget):
                     radius=float(self.obstacle_toolbox_ui.obstacle_radius.text())
                 ),
 
-                initial_state=State(**state_dictionary),
+                initial_state=InitialState(**state_dictionary),
                 prediction=TrajectoryPrediction(
                     shape=Circle(float(self.obstacle_toolbox_ui.obstacle_radius.text())),
                     trajectory=Trajectory(
@@ -258,7 +259,7 @@ class ObstacleToolbox(QDockWidget):
                     vertices=self.polygon_array()
                 ),
 
-                initial_state=State(**state_dictionary),
+                initial_state=InitialState(**state_dictionary),
                 prediction=TrajectoryPrediction(
                     shape=Polygon(vertices=self.polygon_array()),
                     trajectory=Trajectory(
@@ -306,7 +307,7 @@ class ObstacleToolbox(QDockWidget):
                 if self.xyova[j][6] is not None:
                     state_dictionary.update({'slip_angle': self.xyova[j][6]})
 
-                new_state = State(**state_dictionary)
+                new_state = PMState(**state_dictionary)
                 state_list.append(new_state)
             return state_list
 
@@ -326,7 +327,7 @@ class ObstacleToolbox(QDockWidget):
                 if "slip_angle" in state.attributes:
                     state_dictionary.update({'slip_angle': state.__getattribute__("slip_angle")})
 
-                new_state = State(**state_dictionary)
+                new_state = KSState(**state_dictionary)
                 state_list.append(new_state)
             return state_list
 
