@@ -13,7 +13,8 @@ from commonroad.geometry.polyline_util import *
 from commonroad.geometry.shape import Rectangle, Circle, Polygon, Shape
 from commonroad.scenario.scenario import Scenario
 from commonroad.scenario.obstacle import Obstacle, StaticObstacle, ObstacleType, DynamicObstacle
-from commonroad.scenario.trajectory import State, Trajectory
+from commonroad.scenario.trajectory import Trajectory
+from commonroad.scenario.state import InitialState, State, PMState, KSState, PMInputState, InputState
 
 from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMO_AVAILABLE
 from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.commonroad_viewer.dynamic_canvas import DynamicCanvas
@@ -206,7 +207,7 @@ class ObstacleToolbox(QDockWidget):
                                          obstacle_type=ObstacleType(
                                                  self.obstacle_toolbox_ui.obstacle_type.currentText()),
                                          obstacle_shape=shape,
-                                         initial_state=State(**{'position': np.array(
+                                         initial_state=InitialState(**{'position': np.array(
                                                  [pos_x, pos_y]),
                                          'orientation': orientation,
                                          'time_step': 1}))
@@ -297,22 +298,13 @@ class ObstacleToolbox(QDockWidget):
         else:
             state_dictionary['slip_angle'] = float(self.obstacle_toolbox_ui.initial_state_slip_angle.placeholderText())
 
-        # These properties are needed for the forward simulation, but only need to exist and not necessarily hold
-        # values, so we set them to 0.0
-        # acceleration
+
         state_dictionary['acceleration'] = 0.0
 
-        # acceleration_y
-        state_dictionary['acceleration_y'] = 0.0
 
-        # steering angle
-        state_dictionary['steering_angle'] = 0.0
-
-        # velocity_y
-        state_dictionary['velocity_y'] = 0.0
 
         # add first state to state list
-        first_state = State(**state_dictionary)
+        first_state =InitialState(**state_dictionary)
         state_list = [first_state]
 
         # create dynamic obstacle object
@@ -320,7 +312,7 @@ class ObstacleToolbox(QDockWidget):
                                            obstacle_type=ObstacleType(self.obstacle_toolbox_ui.obstacle_type
                                                                       .currentText()),
                                            obstacle_shape=shape,
-                                           initial_state=State(**state_dictionary), prediction=TrajectoryPrediction(
+                                           initial_state=InitialState(**state_dictionary), prediction=TrajectoryPrediction(
                                             shape=shape,
                                             trajectory=Trajectory(initial_time_step=0,
                                                                   state_list=state_list)))
@@ -383,9 +375,7 @@ class ObstacleToolbox(QDockWidget):
             vehicle = VehicleDynamics.PM(VehicleType.FORD_ESCORT)
             if state_list[0] == state_list[-1]:
                 del state.acceleration
-                del state.acceleration_y
                 del state.slip_angle
-                del state.steering_angle
                 del state.yaw_rate
         elif USING_KS:
             vehicle = VehicleDynamics.KS(VehicleType.FORD_ESCORT)
@@ -393,8 +383,7 @@ class ObstacleToolbox(QDockWidget):
                 del state.yaw_rate
                 del state.slip_angle
                 del state.acceleration
-                del state.acceleration_y
-                del state.velocity_y
+
         else:
             return
 
@@ -437,15 +426,15 @@ class ObstacleToolbox(QDockWidget):
         # Create input state with accelerations in respective directions. Pressing shift+d/D simulates an input state
         # with no input
         if key == "shift+up":
-            input_state = State(acceleration=10.5, time_step=0, acceleration_y=0)
+            input_state = PMInputState(acceleration=10.5, time_step=0, acceleration_y=0)
         elif key == "shift+down":
-            input_state = State(acceleration=-10.5, time_step=0, acceleration_y =0)
+            input_state = PMInputState(acceleration=-10.5, time_step=0, acceleration_y =0)
         elif key == "shift+left":
-            input_state = State(acceleration=-4.0, time_step=0, acceleration_y=10)
+            input_state = PMInputState(acceleration=-4.0, time_step=0, acceleration_y=10)
         elif key == "shift+right":
-            input_state = State(acceleration=-4.0, time_step=0, acceleration_y =-10)
+            input_state = PMInputState(acceleration=-4.0, time_step=0, acceleration_y =-10)
         elif key == "D":
-            input_state = State(acceleration=0, time_step=0, acceleration_y = 0.0)
+            input_state = PMInputState(acceleration=0, time_step=0, acceleration_y = 0.0)
         else:
             return None
 
@@ -464,17 +453,17 @@ class ObstacleToolbox(QDockWidget):
         d_time = 0.1
 
         if key == "shift+up":
-            input_state = State(steering_angle_speed=0, acceleration=10, time_step=0)
+            input_state = InputState(steering_angle_speed=0, acceleration=10, time_step=0)
         elif key == "shift+down":
-            input_state = State(steering_angle_speed=0, acceleration=-10, time_step=0)
+            input_state = InputState(steering_angle_speed=0, acceleration=-10, time_step=0)
         elif key == "shift+left":
             steering_speed = d_steering / d_time
-            input_state = State(steering_angle_speed=steering_speed, acceleration=0, time_step=0, acceleration_y=0)
+            input_state =InputState(steering_angle_speed=steering_speed, acceleration=0, time_step=0)
         elif key == "shift+right":
             steering_speed = -d_steering / d_time
-            input_state = State(steering_angle_speed=steering_speed, acceleration=0, time_step=0)
+            input_state =InputState(steering_angle_speed=steering_speed, acceleration=0, time_step=0)
         elif key == "D":
-            input_state = State(steering_angle_speed=0, acceleration=0, time_step=0)
+            input_state =InputState(steering_angle_speed=0, acceleration=0, time_step=0)
         else:
             return None
 
@@ -503,7 +492,7 @@ class ObstacleToolbox(QDockWidget):
                 if self.xyova[j][6] is not None:
                     state_dictionary.update({'slip_angle': self.xyova[j][6]})
 
-                new_state = State(**state_dictionary)
+                new_state = PMState(**state_dictionary)
                 state_list.append(new_state)
             return state_list
 
@@ -523,7 +512,7 @@ class ObstacleToolbox(QDockWidget):
                 if "slip_angle" in state.attributes:
                     state_dictionary.update({'slip_angle': state.__getattribute__("slip_angle")})
 
-                new_state = State(**state_dictionary)
+                new_state = KSState(**state_dictionary)
                 state_list.append(new_state)
             return state_list
 
