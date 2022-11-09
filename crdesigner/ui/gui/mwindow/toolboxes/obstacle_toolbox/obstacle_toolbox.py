@@ -1,15 +1,20 @@
-from typing import Union
+from typing import List, Union
 import matplotlib as mpl
+import numpy as np
+import math
+import logging
+import traceback
 
 from PyQt5.QtWidgets import *
+from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 
 from commonroad.geometry.polyline_util import *
-from commonroad.geometry.shape import Rectangle, Circle, Polygon,Shape
+from commonroad.geometry.shape import Rectangle, Circle, Polygon, Shape
 from commonroad.scenario.scenario import Scenario
 from commonroad.scenario.obstacle import Obstacle, StaticObstacle, ObstacleType, DynamicObstacle
 from commonroad.scenario.trajectory import Trajectory
-from commonroad.scenario.state import InitialState, State, PMState, KSState
+from commonroad.scenario.state import InitialState, State, PMState, KSState, PMInputState, InputState
 
 from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMO_AVAILABLE
 from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.commonroad_viewer.dynamic_canvas import DynamicCanvas
@@ -20,6 +25,8 @@ if SUMO_AVAILABLE:
 from crdesigner.ui.gui.mwindow.toolboxes.obstacle_toolbox.obstacle_toolbox_ui import ObstacleToolboxUI
 
 from commonroad.prediction.prediction import TrajectoryPrediction
+from commonroad_dc.feasibility.vehicle_dynamics import VehicleDynamics
+from commonroad.common.solution import VehicleType
 
 
 class ObstacleToolbox(QDockWidget):
@@ -45,10 +52,54 @@ class ObstacleToolbox(QDockWidget):
         self.pos = []
         self.temp_obstacle = None
 
+        # for recording of trajectories of dynamic obstacles via keyboard input
+        self._start_trajectory_recording = False
+        self._active_obstacle = None
+
         if SUMO_AVAILABLE:
             self.sumo_simulation = SUMOSimulation(tmp_folder=tmp_folder)
         else:
             self.sumo_simulation = None
+
+    @property
+    def start_trajectory_recording(self) -> bool:
+        """Get whether the trajectory recording for an obstacle has started.
+
+        :return: The boolean indicating whether recording has started for an obstacle.
+        :rtype: bool
+        """
+        return self._start_trajectory_recording
+
+    @start_trajectory_recording.setter
+    def start_trajectory_recording(self, val) -> bool:
+        """Setter to indicate that recording for an dynamic obstacle has started.
+
+        :param val: True or false, depending if recording started or not.
+        :type val: bool
+        """
+        assert isinstance(val, bool)
+        self._start_trajectory_recording = val
+
+    @property
+    def active_obstacle(self):
+        """Get the current active obstacle that has been selected via left mouse click on the canvas and is ready
+        for trajectory recording.
+
+        :return: The active DynamicObstacle.
+        :rtype: DynamicObstacle
+        """
+        return self._active_obstacle
+
+    @active_obstacle.setter
+    def active_obstacle(self, obstacle):
+        """Set the active obstacle for which a trajectory should be recorded by left clicking dynamic obstacle on
+        canvas.
+
+        :param obstacle: The obstacle that should be set active.
+        :type obstacle: DynamicObstacle
+        """
+        assert isinstance(obstacle, DynamicObstacle)
+        self._active_obstacle = obstacle
 
     def init_canvas(self):
         """
@@ -88,14 +139,17 @@ class ObstacleToolbox(QDockWidget):
         self.obstacle_toolbox_ui.obstacle_shape.currentTextChanged.connect(
             lambda: self.obstacle_toolbox_ui.toggle_sections())
 
-        self.obstacle_toolbox_ui.obstacle_dyn_stat.currentTextChanged.connect(
-            lambda: self.obstacle_toolbox_ui.toggle_dynamic_static())
-
         self.obstacle_toolbox_ui.color_btn.clicked.connect(
             lambda: self.obstacle_toolbox_ui.color_picker())
 
         self.obstacle_toolbox_ui.default_color.stateChanged.connect(
             lambda: self.obstacle_toolbox_ui.set_default_color())
+
+        self.obstacle_toolbox_ui.dynamic_obstacle_selection.toggled.connect(
+                lambda: self.obstacle_toolbox_ui.toggle_dynamic_static()
+        )
+
+        self.obstacle_toolbox_ui.obstacle_id_line_edit.textEdited.connect(self.check_if_id_exists)
 
         if SUMO_AVAILABLE:
             self.obstacle_toolbox_ui.button_start_simulation.clicked.connect(lambda: self.start_sumo_simulation())
@@ -112,26 +166,11 @@ class ObstacleToolbox(QDockWidget):
 
     def refresh_toolbox(self, scenario: Scenario):
         self.current_scenario = scenario
+        # this line should be changed such that it always shows the highest ID of the ID set. Like this, +1 is added
+        # to the last ID whenever this function is called.
+        self.obstacle_toolbox_ui.display_obstacle_id(str(self.current_scenario.generate_object_id()))
         self.initialize_toolbox()
-
-    def _get_shape_from_gui(self) -> Shape:
-        """This methods gets the shape from the toolbox UI, so the methods for adding obstacles are not too large.
-
-        :return: The shape that the user specified in the GUI.
-        :rtype: Shape
-        """
-        # get shape from UI
-        if self.obstacle_toolbox_ui.obstacle_shape.currentText() == "Rectangle":
-            shape = Rectangle(length=float(self.obstacle_toolbox_ui.obstacle_length.text()),
-                    width=float(self.obstacle_toolbox_ui.obstacle_width.text()), )
-        elif self.obstacle_toolbox_ui.obstacle_shape.currentText() == "Circle":
-            shape = Circle(radius=float(self.obstacle_toolbox_ui.obstacle_radius.text()))
-        elif self.obstacle_toolbox_ui.obstacle_shape.currentText() == "Polygon":
-            shape = Polygon(vertices=self.polygon_array())
-        else:
-            self.text_browser.append("Incorrect shape specified.")
-            raise ValueError
-        return shape
+        self.obstacle_toolbox_ui.obstacle_id_line_edit.setEnabled(True)
 
     def static_obstacle_details(self, obstacle_id: int):
         """Creates static obstacles from supplied id.
@@ -164,15 +203,21 @@ class ObstacleToolbox(QDockWidget):
         else:
             orientation = 0.0
 
-        static_obstacle = StaticObstacle(obstacle_id=obstacle_id, obstacle_type=ObstacleType(
-                self.obstacle_toolbox_ui.obstacle_type.currentText()), obstacle_shape=shape, initial_state=InitialState(
-            **{'position': np.array([pos_x, pos_y]), 'orientation': orientation, 'time_step': 1}))
+        static_obstacle = StaticObstacle(obstacle_id=obstacle_id,
+                                         obstacle_type=ObstacleType(
+                                                 self.obstacle_toolbox_ui.obstacle_type.currentText()),
+                                         obstacle_shape=shape,
+                                         initial_state=InitialState(**{'position': np.array(
+                                                 [pos_x, pos_y]),
+                                         'orientation': orientation,
+                                         'time_step': 1}))
 
         if self.obstacle_toolbox_ui.default_color.isChecked():
             self.canvas.set_static_obstacle_color(static_obstacle.obstacle_id)
         else:
             if self.obstacle_color is not None and not self.obstacle_toolbox_ui.change_color:
-                self.canvas.set_static_obstacle_color(static_obstacle.obstacle_id, self.obstacle_color)
+                self.canvas.set_static_obstacle_color(static_obstacle.obstacle_id,
+                                                      self.obstacle_color)
             else:
                 self.canvas.set_static_obstacle_color(static_obstacle.obstacle_id,
                                                       self.obstacle_toolbox_ui.obstacle_color.name())
@@ -201,9 +246,11 @@ class ObstacleToolbox(QDockWidget):
 
         # get shape from UI
         if self.obstacle_toolbox_ui.obstacle_shape.currentText() == "Rectangle":
-            shape = Rectangle(length=float(self.obstacle_toolbox_ui.obstacle_length.text()),
+            shape = Rectangle(
+                    length=float(self.obstacle_toolbox_ui.obstacle_length.text()),
                     width=float(self.obstacle_toolbox_ui.obstacle_width.text()),
-                    orientation=math.radians(float(self.obstacle_toolbox_ui.obstacle_orientation.text())))
+                    orientation=math.radians(float(self.obstacle_toolbox_ui.obstacle_orientation.text()))
+            )
         elif self.obstacle_toolbox_ui.obstacle_shape.currentText() == "Circle":
             shape = Circle(radius=float(self.obstacle_toolbox_ui.obstacle_radius.text()))
         elif self.obstacle_toolbox_ui.obstacle_shape.currentText() == "Polygon":
@@ -218,17 +265,15 @@ class ObstacleToolbox(QDockWidget):
         # position
         if self.obstacle_toolbox_ui.initial_state_position_x.text() != "":
             state_dictionary['position'] = np.array([float(self.obstacle_toolbox_ui.initial_state_position_x.text()),
-                                                     (float(self.obstacle_toolbox_ui.initial_state_position_y.text()))])
+                                            (float(self.obstacle_toolbox_ui.initial_state_position_y.text()))])
         else:
             state_dictionary['position'] = np.array([0.0, 0.0])
 
         # orientation
         if self.obstacle_toolbox_ui.initial_state_orientation.text() != "":
-            state_dictionary['orientation'] = math.radians(
-                float(self.obstacle_toolbox_ui.initial_state_orientation.text()))
+            state_dictionary['orientation'] = math.radians(float(self.obstacle_toolbox_ui.initial_state_orientation.text()))
         else:
-            state_dictionary['orientation'] = math.radians(
-                float(self.obstacle_toolbox_ui.initial_state_orientation.placeholderText()))
+            state_dictionary['orientation'] = math.radians(float(self.obstacle_toolbox_ui.initial_state_orientation.placeholderText()))
 
         # time step
         if self.obstacle_toolbox_ui.initial_state_time.text() != "":
@@ -253,24 +298,176 @@ class ObstacleToolbox(QDockWidget):
         else:
             state_dictionary['slip_angle'] = float(self.obstacle_toolbox_ui.initial_state_slip_angle.placeholderText())
 
+
         state_dictionary['acceleration'] = 0.0
 
+
+
         # add first state to state list
-        first_state = InitialState(**state_dictionary)
+        first_state =InitialState(**state_dictionary)
         state_list = [first_state]
 
         # create dynamic obstacle object
-        dynamic_obstacle = DynamicObstacle(obstacle_id=obstacle_id, obstacle_type=ObstacleType(
-            self.obstacle_toolbox_ui.obstacle_type.currentText()), obstacle_shape=shape,
-                                           initial_state=InitialState(**state_dictionary),
-                                           prediction=TrajectoryPrediction(shape=shape,
-                                                   trajectory=Trajectory(initial_time_step=0, state_list=state_list)))
+        dynamic_obstacle = DynamicObstacle(obstacle_id=obstacle_id,
+                                           obstacle_type=ObstacleType(self.obstacle_toolbox_ui.obstacle_type
+                                                                      .currentText()),
+                                           obstacle_shape=shape,
+                                           initial_state=InitialState(**state_dictionary), prediction=TrajectoryPrediction(
+                                            shape=shape,
+                                            trajectory=Trajectory(initial_time_step=0,
+                                                                  state_list=state_list)))
         # set color
         self.canvas.set_dynamic_obstacle_color(dynamic_obstacle.obstacle_id)
 
         # add to current scenario, callback
         self.current_scenario.add_objects(dynamic_obstacle)
         self.callback(self.current_scenario)
+
+    def _get_shape_from_gui(self) -> Shape:
+        """This methods gets the shape from the toolbox UI, so the methods for adding obstacles are not too large.
+
+        :return: The shape that the user specified in the GUI.
+        :rtype: Shape
+        """
+        # get shape from UI
+        if self.obstacle_toolbox_ui.obstacle_shape.currentText() == "Rectangle":
+            shape = Rectangle(
+                    length=float(self.obstacle_toolbox_ui.obstacle_length.text()),
+                    width=float(self.obstacle_toolbox_ui.obstacle_width.text()),
+            )
+        elif self.obstacle_toolbox_ui.obstacle_shape.currentText() == "Circle":
+            shape = Circle(radius=float(self.obstacle_toolbox_ui.obstacle_radius.text()))
+        elif self.obstacle_toolbox_ui.obstacle_shape.currentText() == "Polygon":
+            shape = Polygon(vertices=self.polygon_array())
+        else:
+            self.text_browser.append("Incorrect shape specified.")
+            raise ValueError
+        return shape
+
+    def record_trajectory(self, key):
+        """This function is responsible for the recording of trajectories for dynamic obstacles. Based on the
+        arrow key pressed on the keyboard, different input states to the forward simulation are generated. The
+        resulting state after the simulation is appended to a state list and a new trajectory prediction object
+        is created for the selected dynamic obstacle.
+
+        :param key: The key which was pressed on the keyboard.
+        :type key: str
+        """
+
+        # These parameters are currently hardcoded and should be moved to settings or the obstacle toolbox ui.
+        USING_PM = True
+        USING_KS = False
+        obstacle = self.active_obstacle
+
+        if not self.start_trajectory_recording:
+            return
+
+        if obstacle is None:
+            return
+
+        state_list = obstacle.prediction.trajectory.state_list
+        state = state_list[-1]
+
+        # check which vehicle model is selected, convert the initial state depending on selected vehicle model
+        # This should be refactored after the state class has been adjusted to support state conversion in
+        # commonroad-io.
+        if USING_PM:
+            vehicle = VehicleDynamics.PM(VehicleType.FORD_ESCORT)
+            if state_list[0] == state_list[-1]:
+                del state.acceleration
+                del state.slip_angle
+                del state.yaw_rate
+        elif USING_KS:
+            vehicle = VehicleDynamics.KS(VehicleType.FORD_ESCORT)
+            if state_list[0] == state_list[-1]:
+                del state.yaw_rate
+                del state.slip_angle
+                del state.acceleration
+
+        else:
+            return
+
+        # if key not in accepted input list, do nothing
+        if key not in ["shift+up", "shift+down", "shift+left", "shift+right", "D"]:
+            return
+
+        if USING_PM:
+            input_state = self._input_via_pm_model(key)
+        elif USING_KS:
+            input_state = self._input_via_ks_model(key)
+        else:
+            return
+
+        try:
+            # Have time step in settings too.
+            next_state = vehicle.simulate_next_state(state, input_state, 0.1)
+        except Exception as e:
+            print(e)
+            return
+
+        # Create new TrajectoryPrediction, because simply appending to state list is not allowed.
+        state_list.append(next_state)
+        new_trajectory = Trajectory(obstacle.initial_state.time_step, state_list)
+        new_pred = TrajectoryPrediction(new_trajectory, obstacle.obstacle_shape, None, None)
+        obstacle.prediction = new_pred
+        self.callback(self.current_scenario)
+
+    def _input_via_pm_model(self, key) -> State:
+        """This method is resolving user input when using a point mass model. With a PM model, there are only
+        accelerations in the up, left, down, right direction. Pressing an arrow key applies such accelerations to the
+        PM model respectively.
+
+        :param key: The key on the keyboard that was clicked.
+        :type key: str
+        :return: The input state to the forward simulation
+        :rtype: State
+        """
+
+        # Create input state with accelerations in respective directions. Pressing shift+d/D simulates an input state
+        # with no input
+        if key == "shift+up":
+            input_state = PMInputState(acceleration=10.5, time_step=0, acceleration_y=0)
+        elif key == "shift+down":
+            input_state = PMInputState(acceleration=-10.5, time_step=0, acceleration_y =0)
+        elif key == "shift+left":
+            input_state = PMInputState(acceleration=-4.0, time_step=0, acceleration_y=10)
+        elif key == "shift+right":
+            input_state = PMInputState(acceleration=-4.0, time_step=0, acceleration_y =-10)
+        elif key == "D":
+            input_state = PMInputState(acceleration=0, time_step=0, acceleration_y = 0.0)
+        else:
+            return None
+
+        return input_state
+
+    def _input_via_ks_model(self, key: str) -> State:
+        """This method is resolving user input when using a kinematic single-track model. The KS model uses acceleration
+        in the respective directions and additionally takes a steering_angle_speed that steers the model left/right.
+
+        :param key: The key on the keyboard that was clicked.
+        :type key: str
+        :return: The input state to the forward simulation
+        :rtype: State
+        """
+        d_steering = 0.0005
+        d_time = 0.1
+
+        if key == "shift+up":
+            input_state = InputState(steering_angle_speed=0, acceleration=10, time_step=0)
+        elif key == "shift+down":
+            input_state = InputState(steering_angle_speed=0, acceleration=-10, time_step=0)
+        elif key == "shift+left":
+            steering_speed = d_steering / d_time
+            input_state =InputState(steering_angle_speed=steering_speed, acceleration=0, time_step=0)
+        elif key == "shift+right":
+            steering_speed = -d_steering / d_time
+            input_state =InputState(steering_angle_speed=steering_speed, acceleration=0, time_step=0)
+        elif key == "D":
+            input_state =InputState(steering_angle_speed=0, acceleration=0, time_step=0)
+        else:
+            return None
+
+        return input_state
 
     def calc_state_list(self) -> List[State]:
         """
@@ -364,22 +561,27 @@ class ObstacleToolbox(QDockWidget):
         generates an object_id (id for obstacle) and then calls function
         to create a static or dynamic obstacle
         """
-        if self.current_scenario is not None:
-            obstacle_id = self.current_scenario.generate_object_id()
-            self.amount_obstacles = self.current_scenario.generate_object_id()
-
-            if self.obstacle_toolbox_ui.obstacle_dyn_stat.currentText() == "Dynamic":
-                try:
-                    self.dynamic_obstacle_details(obstacle_id)
-                except Exception as e:
-                    self.text_browser.append("Error when adding dynamic obstacle")
-            elif self.obstacle_toolbox_ui.obstacle_dyn_stat.currentText() == "Static":
-                try:
-                    self.static_obstacle_details(obstacle_id)
-                except Exception as e:
-                    self.text_browser.append("Error when adding static obstacle")
+        if self.obstacle_toolbox_ui.obstacle_id_line_edit.text() != "":
+            obstacle_id = int(self.obstacle_toolbox_ui.obstacle_id_line_edit.text())
         else:
-            self.text_browser.append("Warning: Scenario does not exist yet. Please create or load a scenario first.")
+            if self.obstacle_toolbox_ui.obstacle_id_line_edit.placeholderText() == "":
+                return
+            obstacle_id = [int(word)
+                           for word in self.obstacle_toolbox_ui.obstacle_id_line_edit.placeholderText().split()
+                           if word.isdigit()][0]
+
+        if self.obstacle_toolbox_ui.dynamic_obstacle_selection.isChecked():
+            try:
+                self.dynamic_obstacle_details(obstacle_id)
+            except Exception as e:
+                self.text_browser.append("Error when adding dynamic obstacle")
+                print(e)
+
+        elif self.obstacle_toolbox_ui.static_obstacle_selection.isChecked():
+            try:
+                self.static_obstacle_details(obstacle_id)
+            except Exception as e:
+                self.text_browser.append("Error when adding static obstacle")
 
     def update_obstacle(self):
         """
@@ -390,10 +592,7 @@ class ObstacleToolbox(QDockWidget):
         obstacle_id = self.get_current_obstacle_id()
         self.temp_obstacle = selected_obstacle
 
-        if selected_obstacle is None or obstacle_id is None:
-            self.text_browser.append("Warning: Scenario does not exist yet. Please create or load a scenario first.")
-            return
-        else:
+        if selected_obstacle:
             self.canvas.remove_obstacle(obstacle_id)
             self.current_scenario.remove_obstacle(selected_obstacle)
 
@@ -1002,9 +1201,9 @@ class ObstacleToolbox(QDockWidget):
                 self.obstacle_toolbox_ui.obstacle_width.setText(str(obstacle.obstacle_shape.width))
                 self.obstacle_toolbox_ui.obstacle_length.setText(str(obstacle.obstacle_shape.length))
                 if isinstance(obstacle, StaticObstacle):
-                    self.obstacle_toolbox_ui.obstacle_x_Position.setText(
+                    self.obstacle_toolbox_ui.position_x_text_field.setText(
                         str(obstacle.initial_state.__getattribute__("position")[0]))
-                    self.obstacle_toolbox_ui.obstacle_y_Position.setText(
+                    self.obstacle_toolbox_ui.position_y_text_field.setText(
                         str(obstacle.initial_state.__getattribute__("position")[1]))
                     self.obstacle_toolbox_ui.obstacle_orientation.setText(
                         str(math.degrees(obstacle.initial_state.__getattribute__("orientation"))))
@@ -1105,9 +1304,10 @@ class ObstacleToolbox(QDockWidget):
                 self.obstacle_toolbox_ui.vertices_x[i].setText("")
                 self.obstacle_toolbox_ui.vertices_y[i].setText("")
         if (self.obstacle_toolbox_ui.obstacle_dyn_stat.currentText() == "Static" and
-                self.obstacle_toolbox_ui.obstacle_shape.currentText() != "Polygon"):
-            self.obstacle_toolbox_ui.obstacle_x_Position.setText("")
-            self.obstacle_toolbox_ui.obstacle_y_Position.setText("")
+                self.obstacle_toolbox_ui.obstacle_shape.currentText() != "Polygon" and
+                self.obstacle_toolbox_ui.static_obstacle_selection.isChecked()):
+            self.obstacle_toolbox_ui.position_x_text_field.setText("")
+            self.obstacle_toolbox_ui.position_y_text_field.setText("")
 
     def start_sumo_simulation(self):
         num_time_steps = self.obstacle_toolbox_ui.sumo_simulation_length.value()
@@ -1129,9 +1329,6 @@ class ObstacleToolbox(QDockWidget):
                 self.amount_obstacles -= 1
             except Exception:
                 self.text_browser.append("Error when removing obstacle")
-        if self.current_scenario is None:
-            self.text_browser.append("Warning: Scenario does not exist yet. Please create or load a scenario first.")
-
 
     def draw_plot(self, time, profile, xmin: float = None,
                   xmax: float = None, ymin: float = None, ymax: float = None):
@@ -1168,3 +1365,29 @@ class ObstacleToolbox(QDockWidget):
         self.obstacle_toolbox_ui.canvas.draw()
         ax.callbacks.connect('xlim_changed', self.on_xlim_change)
         ax.callbacks.connect('ylim_changed', self.on_ylim_change)
+
+    def check_if_id_exists(self, entered_id):
+        """
+        This method validates the supplied ID and then calls corresponding function in the obstacle toolbox UI
+        to inform the user whether the ID is valid or not.
+        Icons taken from:
+        # <a href="https://www.flaticon.com/free-icons/right" title="right icons">Right icons created by kliwir art - Flaticon</a>
+        # <a href="https://www.flaticon.com/free-icons/delete" title="delete icons">Delete icons created by Pixel perfect - Flaticon</a>
+        # Above html tags must be added online somewhere or we have to take others
+
+        :param entered_id: The ID the user entered.
+        :type entered_id: int
+        """
+        try:
+            if entered_id == "":
+                self.obstacle_toolbox_ui.set_obstacle_id_pixmap(valid=True)
+            elif not (entered_id.isdigit() and int(entered_id) >= 0):
+                print("ID must be a positive integer.")
+                self.obstacle_toolbox_ui.set_obstacle_id_pixmap(valid=False)
+            elif int(entered_id) in [o.obstacle_id for o in self.current_scenario.obstacles]:
+                print("ID already in use. Pick another or write: Auto")
+                self.obstacle_toolbox_ui.set_obstacle_id_pixmap(valid=False)
+            else:
+                self.obstacle_toolbox_ui.set_obstacle_id_pixmap(valid=True)
+        except Exception:
+            pass

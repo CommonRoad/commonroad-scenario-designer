@@ -38,6 +38,7 @@ class ObstacleToolboxUI(Toolbox):
         self.obstacle_dyn_stat = QComboBox()
         self.obstacle_dyn_stat.addItem("Static")
         self.obstacle_dyn_stat.addItem("Dynamic")
+
         # create radio buttons for static/dynamic obstacles
         self.static_dynamic_obstacle_group = QButtonGroup()
         self.static_obstacle_selection = QRadioButton("static")
@@ -50,7 +51,7 @@ class ObstacleToolboxUI(Toolbox):
         # create text field and label for obstacle ID. Disable the LineEdit until a scenario is loaded
         self.obstacle_id_line_edit = QLineEdit(self)
         self.obstacle_id_line_edit.setEnabled(False)
-        # self.obstacle_id_line_edit.setPlaceholderText("Auto")
+        #self.obstacle_id_line_edit.setPlaceholderText("Auto")
         self.obstacle_id_line_edit.setToolTip("You can manually enter an ID or leave empty for an automatic ID."
                                               " You must first create a scenario.")
         # create QLabel to visualize the pixmap for ID
@@ -60,7 +61,7 @@ class ObstacleToolboxUI(Toolbox):
         self.obstacle_id_pixmap_valid = QPixmap("/home/til/Downloads/correct.png")
         self.obstacle_id_pixmap_valid = self.obstacle_id_pixmap_valid.scaledToWidth(20)
         self.obstacle_id_pixmap_invalid = QPixmap("/home/til/Downloads/remove.png")
-        self.obstacle_id_pixmap_invalid = self.obstacle_id_pixmap_invalid.scaledToWidth(20)
+        self.obstacle_id_pixmap_invalid =  self.obstacle_id_pixmap_invalid.scaledToWidth(20)
 
         self.obstacle_shape = QComboBox()
         self.obstacle_shape.addItem("Rectangle")
@@ -114,6 +115,7 @@ class ObstacleToolboxUI(Toolbox):
         self.horizontal_layout_obstacle_id.addWidget(self.obstacle_id_line_edit)
         self.horizontal_layout_obstacle_id.addWidget(self.obstacle_id_pixmap_label)
         self.layout_obstacle_information_groupbox.insertRow(3, "ID", self.horizontal_layout_obstacle_id)
+
         self.shape_groupbox = QGroupBox()
         self.layout_shape_groupbox = QFormLayout()
         self.shape_groupbox.setLayout(self.layout_shape_groupbox)
@@ -124,7 +126,7 @@ class ObstacleToolboxUI(Toolbox):
 
         self.layout_obstacle_information_groupbox.insertRow(4, self.shape_groupbox)
         self.adjust_obstacle_type_dropdown("Static")
-        # self.layout_obstacle_information_groupbox.insertRow(5, "Position", self.position_text_field_layout)
+        #self.layout_obstacle_information_groupbox.insertRow(5, "Position", self.position_text_field_layout)
 
         self.init_rectangle_fields()
         self.init_position()
@@ -252,77 +254,77 @@ class ObstacleToolboxUI(Toolbox):
         elif self.obstacle_shape.currentText() == "Circle":
             self.layout_obstacle_information_groupbox.insertRow(5, "Position", self.position_text_field_layout)
 
-            def init_dynamic_obstacle_fields(self):
-                """Initializes edit fields that are specific to dynamic obstacles. Those currently encompass
-                position, orientation, time, velocity, yaw rate and slip angle.
-                """
-                # initialize new group box, layout and header label
-                self.initial_state_group_box = QGroupBox()
-                self.layout_initial_state_group_box = QFormLayout()
-                self.initial_state_group_box.setLayout(self.layout_initial_state_group_box)
-                self.initial_state_label = QLabel("Initial state of the dynamic obstacle")
-                self.initial_state_label.setFont(QFont("Arial", 9, QFont.Bold))
+    def init_dynamic_obstacle_fields(self):
+        """Initializes edit fields that are specific to dynamic obstacles. Those currently encompass
+        position, orientation, time, velocity, yaw rate and slip angle.
+        """
+        # initialize new group box, layout and header label
+        self.initial_state_group_box = QGroupBox()
+        self.layout_initial_state_group_box = QFormLayout()
+        self.initial_state_group_box.setLayout(self.layout_initial_state_group_box)
+        self.initial_state_label = QLabel("Initial state of the dynamic obstacle")
+        self.initial_state_label.setFont(QFont("Arial", 9, QFont.Bold))
 
-                # position edit fields, one for each x, y
-                self.initial_state_position_layout = QHBoxLayout(self)
-                self.initial_state_position_x = QLineEdit(self)
-                self.initial_state_position_x.setObjectName("x-position of dynamic obstacle")
-                self.initial_state_position_x.setToolTip("Enter initial x-position of obstacle")
-                self.initial_state_position_x.setPlaceholderText("X")
+        # position edit fields, one for each x, y
+        self.initial_state_position_layout = QHBoxLayout(self)
+        self.initial_state_position_x = QLineEdit(self)
+        self.initial_state_position_x.setObjectName("x-position of dynamic obstacle")
+        self.initial_state_position_x.setToolTip("Enter initial x-position of obstacle")
+        self.initial_state_position_x.setPlaceholderText("X")
 
-                self.initial_state_position_y = QLineEdit(self)
-                self.initial_state_position_y.setObjectName("y-position of dynamic obstacle")
-                self.initial_state_position_y.setToolTip("Enter initial y-position of obstacle")
-                self.initial_state_position_y.setPlaceholderText("Y")
+        self.initial_state_position_y = QLineEdit(self)
+        self.initial_state_position_y.setObjectName("y-position of dynamic obstacle")
+        self.initial_state_position_y.setToolTip("Enter initial y-position of obstacle")
+        self.initial_state_position_y.setPlaceholderText("Y")
 
-                self.initial_state_position_layout.addWidget(self.initial_state_position_x)
-                self.initial_state_position_layout.addWidget(self.initial_state_position_y)
+        self.initial_state_position_layout.addWidget(self.initial_state_position_x)
+        self.initial_state_position_layout.addWidget(self.initial_state_position_y)
 
-                # orientation edit field
-                self.initial_state_orientation = QLineEdit(self)
-                self.initial_state_orientation.setPlaceholderText("0.0")
-                self.initial_state_orientation.setObjectName("orientation of dynamic obstacle")
+        # orientation edit field
+        self.initial_state_orientation = QLineEdit(self)
+        self.initial_state_orientation.setPlaceholderText("0.0")
+        self.initial_state_orientation.setObjectName("orientation of dynamic obstacle")
 
-                # time edit field
-                self.initial_state_time = QLineEdit(self)
-                self.initial_state_time.setPlaceholderText("0")
-                self.initial_state_time.setToolTip("Time step must be an integer.")
-                self.initial_state_time.setObjectName("time of dynamic obstacle")
+        # time edit field
+        self.initial_state_time = QLineEdit(self)
+        self.initial_state_time.setPlaceholderText("0")
+        self.initial_state_time.setToolTip("Time step must be an integer.")
+        self.initial_state_time.setObjectName("time of dynamic obstacle")
 
-                # velocity edit field
-                self.initial_state_velocity = QLineEdit(self)
-                self.initial_state_velocity.setPlaceholderText("50.0")
-                self.initial_state_velocity.setObjectName("velocity of dynamic obstacle")
+        # velocity edit field
+        self.initial_state_velocity = QLineEdit(self)
+        self.initial_state_velocity.setPlaceholderText("50.0")
+        self.initial_state_velocity.setObjectName("velocity of dynamic obstacle")
 
-                # yaw rate edit field
-                self.initial_state_yaw_rate = QLineEdit(self)
-                self.initial_state_yaw_rate.setPlaceholderText("0.0")
-                self.initial_state_yaw_rate.setObjectName("yaw rate of dynamic obstacle")
+        # yaw rate edit field
+        self.initial_state_yaw_rate = QLineEdit(self)
+        self.initial_state_yaw_rate.setPlaceholderText("0.0")
+        self.initial_state_yaw_rate.setObjectName("yaw rate of dynamic obstacle")
 
-                # slip angle edit field
-                self.initial_state_slip_angle = QLineEdit(self)
-                self.initial_state_slip_angle.setPlaceholderText("0.0")
-                self.initial_state_slip_angle.setObjectName("slip angle of dynamic obstacle")
+        # slip angle edit field
+        self.initial_state_slip_angle = QLineEdit(self)
+        self.initial_state_slip_angle.setPlaceholderText("0.0")
+        self.initial_state_slip_angle.setObjectName("slip angle of dynamic obstacle")
 
-                # add all edit fields to the group box
-                self.layout_initial_state_group_box.insertRow(0, self.initial_state_label)
-                self.layout_initial_state_group_box.insertRow(1, "Position", self.initial_state_position_layout)
-                self.layout_initial_state_group_box.insertRow(2, "Orientation", self.initial_state_orientation)
-                self.layout_initial_state_group_box.insertRow(3, "Time", self.initial_state_time)
-                self.layout_initial_state_group_box.insertRow(4, "Velocity", self.initial_state_velocity)
-                self.layout_initial_state_group_box.insertRow(5, "Yaw Rate", self.initial_state_yaw_rate)
-                self.layout_initial_state_group_box.insertRow(6, "Slip Angle", self.initial_state_slip_angle)
+        # add all edit fields to the group box
+        self.layout_initial_state_group_box.insertRow(0, self.initial_state_label)
+        self.layout_initial_state_group_box.insertRow(1, "Position", self.initial_state_position_layout)
+        self.layout_initial_state_group_box.insertRow(2, "Orientation", self.initial_state_orientation)
+        self.layout_initial_state_group_box.insertRow(3, "Time", self.initial_state_time)
+        self.layout_initial_state_group_box.insertRow(4, "Velocity", self.initial_state_velocity)
+        self.layout_initial_state_group_box.insertRow(5, "Yaw Rate", self.initial_state_yaw_rate)
+        self.layout_initial_state_group_box.insertRow(6, "Slip Angle", self.initial_state_slip_angle)
 
-                # add the group box to the obstacle information groupbox
-                self.layout_obstacle_information_groupbox.insertRow(5, self.initial_state_group_box)
+        # add the group box to the obstacle information groupbox
+        self.layout_obstacle_information_groupbox.insertRow(5, self.initial_state_group_box)
 
-            def remove_dynamic_obstacle_fields(self):
-                """Method to remove the fields related only to dynamic obstacles."""
-                try:
-                    self.layout_obstacle_information_groupbox.removeRow(self.initial_state_group_box)
-                except Exception as e:
-                    print(e)
-                    pass
+    def remove_dynamic_obstacle_fields(self):
+        """Method to remove the fields related only to dynamic obstacles."""
+        try:
+            self.layout_obstacle_information_groupbox.removeRow(self.initial_state_group_box)
+        except Exception as e:
+            print(e)
+            pass
 
     def remove_position(self):
         """
@@ -429,6 +431,7 @@ class ObstacleToolboxUI(Toolbox):
         else:
             self.obstacle_id_pixmap_label.setPixmap(self.obstacle_id_pixmap_invalid)
 
+
     # add vertices for the polygon shape, i is the place in the array
     def add_vertice(self):
         """
@@ -463,7 +466,7 @@ class ObstacleToolboxUI(Toolbox):
             lambda: self.remove_vertice())
         self.polygon_row[i].addWidget(self.remove_vertice_btn[i])
 
-        self.layout_shape_groupbox.insertRow(i+2, self.polygon_row[i])
+        self.layout_shape_groupbox.insertRow(i + 2, self.polygon_row[i])
         self.amount_vertices = self.amount_vertices + 1
 
     def remove_vertice(self, i: int = -1):
@@ -497,7 +500,7 @@ class ObstacleToolboxUI(Toolbox):
 
         self.default_color.setChecked(False)
         self.selected_color.setStyleSheet(
-            "QWidget { border:1px solid black; background-color: %s}" % self.obstacle_color.name())
+                "QWidget { border:1px solid black; background-color: %s}" % self.obstacle_color.name())
         self.change_color = True
 
     def set_default_color(self):
@@ -505,8 +508,7 @@ class ObstacleToolboxUI(Toolbox):
         sets default color for the color display square
         """
         if self.default_color.isChecked():
-            self.selected_color.setStyleSheet(
-                "QWidget { border:1px solid black; background-color: white}")
+            self.selected_color.setStyleSheet("QWidget { border:1px solid black; background-color: white}")
 
     def update_window(self):
         super().update_window()
