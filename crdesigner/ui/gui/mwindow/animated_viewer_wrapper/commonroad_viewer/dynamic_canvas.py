@@ -3,6 +3,7 @@ from typing import List, Union, Set
 
 import scipy.version
 from PyQt5.QtWidgets import QSizePolicy
+from PyQt5.QtCore import Qt
 from PyQt5 import QtCore
 import numpy as np
 from matplotlib.backend_bases import MouseButton

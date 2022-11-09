@@ -190,8 +190,8 @@ class AnimatedViewer:
         """calculate maximal time step of current scenario"""
         if self.current_scenario is None:
             return 0
-        timesteps = [
-            obstacle.prediction.occupancy_set[-1].time_step
+        timesteps = [# obstacle.prediction.occupancy_set[-1].time_step
+            obstacle.prediction.trajectory.state_list[-1].time_step
             for obstacle in self.current_scenario.dynamic_obstacles
             for obstacle in self.current_scenario.dynamic_obstacles
         ]
@@ -230,9 +230,10 @@ class AnimatedViewer:
                 'time_begin': time_step,
             }
         else:
-            draw_params = {
-                'time_begin': self.time_step.value - 1,
-            }
+            if self.time_step.value == 0:
+                draw_params = {'time_begin': self.time_step.value}
+            else:
+                draw_params = {'time_begin': self.time_step.value - 1, }
 
         self.dynamic.draw_scenario(self.current_scenario, self.current_pps, draw_params=draw_params)
 
