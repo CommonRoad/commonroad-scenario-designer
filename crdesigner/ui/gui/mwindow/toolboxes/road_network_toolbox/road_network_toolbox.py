@@ -413,6 +413,10 @@ class RoadNetworkToolbox(QDockWidget,):
         selects always the first in the list of predecessors / successors
         """
 
+        if len(self.road_network_toolbox_ui.predecessors.get_checked_items()) == 0:
+            return
+        if len(self.road_network_toolbox_ui.successors.get_checked_items()) == 0:
+            return
         if self.road_network_toolbox_ui.connect_to_predecessors_selection.isChecked():
             pred = self.road_network_toolbox_ui.predecessors.get_checked_items()[0]
             if not pred.isdigit():
