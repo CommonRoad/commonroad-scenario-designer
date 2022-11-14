@@ -1,8 +1,8 @@
-from setuptools import setup, find_packages
+from setuptools import setup, find_packages  # type: ignore
 import os
 
 setup_dir = os.path.dirname(os.path.realpath(__file__))
-with open(f"{setup_dir}/README.md", "r") as fh:
+with open(f"{setup_dir}/README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setup(
