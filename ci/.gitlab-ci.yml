@@ -10,7 +10,7 @@ image: $CI_REGISTRY/cps/commonroad-scenario-designer/ci:v0.6.9_20.04
   - pip install -r ./tests/test_requirements.txt
   - pip install -e .
   - git clone git@gitlab.lrz.de:cps/sumo-interface.git $HOME/sumo-interface
-  - ls
+  - pwd
   - cd $HOME/sumo-interface
   - git checkout fac8334df357a7599ccc51e5ae5aeee9c82d9cb5
   - cd $HOME
