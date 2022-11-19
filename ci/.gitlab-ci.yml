@@ -15,7 +15,7 @@ image: $CI_REGISTRY/cps/commonroad-scenario-designer/ci:v0.6.9_20.04
   - cd $HOME
   - pip uninstall -y sumocr
   - pip install -e "$HOME"/sumo-interface
-  - pip isntall commonroad-io==2022.2
+  - pip install commonroad-io==2022.2
   - coverage run --source ./crdesigner -m pytest tests/
   - coverage report -m || true
 
