@@ -660,6 +660,25 @@ class DynamicCanvas(FigureCanvas):
             self._select_lanelet(False, [[last_merged_index]])
         self.parent.road_network_toolbox.callback(self.scenario)
 
+    def activate_trajectory_mode(self, is_active):
+        if is_active:
+            self.mpl_disconnect(self.button_press_event_cid)
+            self.mpl_disconnect(self.button_release_event_cid)
+            self.button_press_event_cid = self.mpl_connect('button_press_event', self.draw_lanelet)
+            self.motion_notify_event_cid = self.mpl_connect('motion_notify_event', self.drawing_mode_preview_line)
+        else:
+            if self.draw_lanelet_preview:
+                self.draw_lanelet_preview.pop(0).remove()
+                self.draw_lanelet_first_point_object.pop(0).remove()
+                self.draw_lanelet_first_point = None
+                self.add_to_selected = None
+            self.mpl_disconnect(self.button_press_event_cid)
+            self.mpl_disconnect(self.motion_notify_event_cid)
+            self.button_release_event_cid = self.mpl_connect('button_release_event',
+                                                             self.dynamic_canvas_release_callback)
+            self.button_press_event_cid = self.mpl_connect('button_press_event', self.dynamic_canvas_click_callback)
+            self.reset_toolbar()
+            self.update_plot()
     def activate_drawing_mode(self, is_active):
         if is_active:
             self.mpl_disconnect(self.button_press_event_cid)
@@ -679,7 +698,63 @@ class DynamicCanvas(FigureCanvas):
             self.button_press_event_cid = self.mpl_connect('button_press_event', self.dynamic_canvas_click_callback)
             self.reset_toolbar()
             self.update_plot()
+    def draw_trajectory(self, mouse_event):
+        x = mouse_event.xdata
+        y = mouse_event.ydata
 
+        if mouse_event.button == MouseButton.RIGHT:
+            self.activate_trajectory_mode(False)
+            return
+
+        if not self.draw_lanelet_first_point:
+            if self.add_to_selected_preview:
+                append_point = self.add_to_selected_preview.center_vertices[-1]
+                x = append_point[0]
+                y = append_point[1]
+                self.add_to_selected = self.add_to_selected_preview
+            self.draw_lanelet_first_point_object = self.ax.plot(x, y, marker="x", color="blue", zorder=21)
+            self.draw_lanelet_first_point = [x, y]
+            self.update_plot()
+        else:
+            lanelet_type = {LaneletType(ty) for ty in ["None"] if ty != "None"}
+            draw_lanelet_second_point = [x, y]
+            lanelet_length = calculate_euclidean_distance(self.draw_lanelet_first_point, draw_lanelet_second_point)
+            num_vertices = max([1, round(lanelet_length * 2)])
+            try:
+                if self.add_to_selected:
+                    created_lanelet = MapCreator.create_straight(3.0, lanelet_length, num_vertices, 10000, lanelet_type)
+                else:
+                    created_lanelet = MapCreator.create_straight(3.0, lanelet_length, num_vertices,
+                                                                 self.scenario.generate_object_id(), lanelet_type)
+            except AssertionError:
+                output = "Length of Lanelet must be at least 1"
+                self.parent.crdesigner_console_wrapper.text_browser.append(output)
+                return
+
+            drawn_vector = [draw_lanelet_second_point[0] - self.draw_lanelet_first_point[0],
+                            draw_lanelet_second_point[1] - self.draw_lanelet_first_point[1]]
+            horizontal_vector = [1, 0]
+            angle = angle_between(drawn_vector, horizontal_vector)
+
+            created_lanelet.translate_rotate(np.array([0, 0]), angle)
+            if self.add_to_selected:
+                created_lanelet.translate_rotate(np.array(draw_lanelet_second_point), 0)
+                created_lanelet = MapCreator.connect_lanelets(self.add_to_selected, created_lanelet,
+                                                              self.scenario.generate_object_id())
+                created_lanelet.successor = []
+                self.add_to_selected.add_successor(created_lanelet.lanelet_id)
+            else:
+                created_lanelet.translate_rotate(np.array(self.draw_lanelet_first_point), 0)
+            self.add_to_selected = created_lanelet
+            self.scenario.add_objects([created_lanelet])
+            self.parent.road_network_toolbox.callback(self.scenario)
+            self.parent.road_network_toolbox.last_added_lanelet_id = created_lanelet.lanelet_id
+
+            self.draw_lanelet_first_point = draw_lanelet_second_point
+            self.draw_lanelet_first_point_object.pop(0).remove()
+            self.draw_lanelet_first_point_object = self.ax.plot(x, y, marker="x", color="blue", zorder=21)
+
+            self.update_plot()
     def draw_lanelet(self, mouse_event):
         x = mouse_event.xdata
         y = mouse_event.ydata

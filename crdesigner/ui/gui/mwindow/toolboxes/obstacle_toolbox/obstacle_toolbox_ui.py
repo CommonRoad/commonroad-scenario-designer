@@ -1,7 +1,7 @@
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
-from crdesigner.ui.gui.mwindow.toolboxes.toolbox_ui import Toolbox
+from crdesigner.ui.gui.mwindow.toolboxes.toolbox_ui import Toolbox, PositionButton
 from crdesigner.ui.gui.mwindow.service_layer import config
 from commonroad.scenario.obstacle import ObstacleType
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
@@ -10,6 +10,8 @@ from matplotlib.figure import Figure
 
 # try to import sumo functionality
 from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMO_AVAILABLE
+from crdesigner.ui.gui.mwindow.top_bar_wrapper.toolbar_wrapper.toolbar_wrapper import _drawing_mode, _trajectory_mode
+
 if SUMO_AVAILABLE:
     from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMOSimulation
 
@@ -244,15 +246,34 @@ class ObstacleToolboxUI(Toolbox):
         self.position_x_text_field.setPlaceholderText("X")
         self.position_y_text_field = QLineEdit(self)
         self.position_y_text_field.setPlaceholderText("Y")
+        self.button_selected_position = PositionButton(self.position_x_text_field,
+                                                                       self.position_y_text_field, self)
         self.position_text_field_layout = QHBoxLayout(self)
         self.position_text_field_layout.addWidget(self.position_x_text_field)
         self.position_text_field_layout.addWidget(self.position_y_text_field)
         self.position_label = QLabel("Position")
-
+        self.position_text_field_layout.addWidget(self.button_selected_position)
         if self.obstacle_shape.currentText() == "Rectangle":
             self.layout_obstacle_information_groupbox.insertRow(5, "Position", self.position_text_field_layout)
         elif self.obstacle_shape.currentText() == "Circle":
             self.layout_obstacle_information_groupbox.insertRow(5, "Position", self.position_text_field_layout)
+
+    def init_waypoints_for_dynamic_obstacle(self):
+        # initialize new group box, layout and header label
+        self.initial_state_group_box = QGroupBox()
+        self.layout_initial_state_group_box = QFormLayout()
+        self.initial_state_group_box.setLayout(self.layout_initial_state_group_box)
+        self.initial_state_label = QLabel("Build trajectory for dynamic obstacles")
+        self.initial_state_label.setFont(QFont("Arial", 9, QFont.Bold))
+
+        self.drawing_mode = QPushButton("Add Waypoint")
+        self.drawing_mode.setCheckable(True)
+        self.drawing_mode.clicked.connect(lambda: _trajectory_mode(self.mwindow, self.drawing_mode.isChecked()))
+        self.layout_initial_state_group_box.insertRow(0, self.initial_state_label)
+        self.layout_initial_state_group_box.insertRow(1, "Position", self.drawing_mode)
+
+        self.layout_obstacle_information_groupbox.insertRow(6, self.initial_state_group_box)
+
 
     def init_dynamic_obstacle_fields(self):
         """Initializes edit fields that are specific to dynamic obstacles. Those currently encompass
@@ -342,6 +363,7 @@ class ObstacleToolboxUI(Toolbox):
         if self.dynamic_obstacle_selection.isChecked():
             self.remove_position()
             self.init_dynamic_obstacle_fields()
+            self.init_waypoints_for_dynamic_obstacle()
             self.adjust_obstacle_type_dropdown("Dynamic")
         elif self.static_obstacle_selection.isChecked():
             self.init_position()

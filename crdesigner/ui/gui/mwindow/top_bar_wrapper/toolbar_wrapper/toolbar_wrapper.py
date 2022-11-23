@@ -254,6 +254,8 @@ def _split_lanelet(mwindow, is_checked):
 def _drawing_mode(mwindow, is_checked):
     mwindow.animated_viewer_wrapper.cr_viewer.dynamic.activate_drawing_mode(is_checked)
 
+def _trajectory_mode(mwindow, is_checked):
+    mwindow.animated_viewer_wrapper.cr_viewer.dynamic.activate_trajectory_mode(is_checked)
 
 def _add_adj_left(mwindow):
     mwindow.animated_viewer_wrapper.cr_viewer.dynamic.add_adjacent(True)
