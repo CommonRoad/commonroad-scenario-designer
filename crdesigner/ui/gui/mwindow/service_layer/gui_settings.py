@@ -1,4 +1,6 @@
 """ window with settings for the Scenario Designer """
+from PyQt5 import Qt
+from PyQt5.QtCore import pyqtSlot
 from PyQt5.QtWidgets import QMainWindow
 
 from crdesigner.ui.gui.mwindow.service_layer.gui_resources.gui_settings_ui import UIGUISettings
@@ -6,6 +8,9 @@ from crdesigner.ui.gui.mwindow.service_layer import config
 from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.commonroad_viewer.service_layer.draw_params_updater import \
     set_draw_params
 from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.commonroad_viewer.dynamic_canvas import DynamicCanvas
+import crdesigner.configurations
+import json
+import os
 
 
 class GUISettings:
@@ -14,6 +19,7 @@ class GUISettings:
         self.darkmode = config.DARKMODE
         self.parent = parent
         self.window = self.parent.window.gui_settings
+
 
     def connect_events(self):
         """ connect buttons to callables """
@@ -118,15 +124,60 @@ class GUISettings:
 
     def close(self):
         config.DARKMODE = self.darkmode
-        set_draw_params(trajectory=config.DRAW_TRAJECTORY, intersection=config.DRAW_INTERSECTIONS,
-                        obstacle_label=config.DRAW_OBSTACLE_LABELS, obstacle_icon=config.DRAW_OBSTACLE_ICONS,
-                        obstacle_direction=config.DRAW_OBSTACLE_DIRECTION, obstacle_signal=config.DRAW_OBSTACLE_SIGNALS,
-                        occupancy=config.DRAW_OCCUPANCY, traffic_signs=config.DRAW_TRAFFIC_SIGNS,
-                        traffic_lights=config.DRAW_TRAFFIC_LIGHTS, incoming_lanelets=config.DRAW_INCOMING_LANELETS,
-                        successors=config.DRAW_SUCCESSORS, intersection_labels=config.DRAW_INTERSECTION_LABELS,
+        set_draw_params(trajectory=config.DRAW_TRAJECTORY,
+                        intersection=config.DRAW_INTERSECTIONS,
+                        obstacle_label=config.DRAW_OBSTACLE_LABELS,
+                        obstacle_icon=config.DRAW_OBSTACLE_ICONS,
+                        obstacle_direction=config.DRAW_OBSTACLE_DIRECTION,
+                        obstacle_signal=config.DRAW_OBSTACLE_SIGNALS,
+                        occupancy=config.DRAW_OCCUPANCY,
+                        traffic_signs=config.DRAW_TRAFFIC_SIGNS,
+                        traffic_lights=config.DRAW_TRAFFIC_LIGHTS,
+                        incoming_lanelets=config.DRAW_INCOMING_LANELETS,
+                        successors=config.DRAW_SUCCESSORS,
+                        intersection_labels=config.DRAW_INTERSECTION_LABELS,
                         colorscheme=self.parent.cr_designer.colorscheme(), )
         self.parent.canvas.update_obstacle_trajectory_params()
         if self.parent.cr_designer.animated_viewer_wrapper.cr_viewer.current_scenario != None:
             self.parent.cr_designer.animated_viewer_wrapper.cr_viewer.update_plot()
         self.parent.cr_designer.update_window()
         self.parent.window.update_window()
+
+    def apply_set_to_default(self):
+
+        with open('crdesigner/configurations/default_settings.json') as f:
+            data = json.load(f)
+        config.AUTOFOCUS = data.get("Autofocus")
+        config.DRAW_TRAJECTORY = data.get("Draw_trajectory")
+        config.DRAW_INTERSECTIONS = data.get("Draw_intersections")
+        config.DRAW_OBSTACLE_LABELS = data.get("Draw_obstacle_labels")
+        config.DRAW_OBSTACLE_ICONS = data.get("Draw_obstacle_icons")
+        config.DRAW_OBSTACLE_DIRECTION = data.get("Draw_obstacle_direction")
+        config.DRAW_OBSTACLE_SIGNALS = data.get("Draw_obstacle_signals")
+        config.DRAW_OCCUPANCY = data.get("Draw_occupancy")
+        config.DRAW_TRAFFIC_SIGNS = data.get("Draw_traffic_signs")
+        config.DRAW_TRAFFIC_LIGHTS = data.get("Draw_traffic_lights")
+        config.DRAW_INCOMING_LANELETS = data.get("Draw_incoming_lanelets")
+        config.DRAW_SUCCESSORS = data.get("Draw_successors")
+        config.DRAW_INTERSECTION_LABELS = data.get("Draw_intersection_labels")
+        config.AXIS_VISIBLE = data.get("Axis")
+        config.DARKMODE = data.get("Darkmode")
+        config.LEGEND = data.get("Legend")
+        set_draw_params(trajectory=data.get("Draw_trajectory"), intersection=data.get("Draw_intersections"),
+                        obstacle_label=data.get("Draw_obstacle_labels"),
+                        obstacle_icon=data.get("Draw_obstacle_icons"), obstacle_direction=data.get("Draw_obstacle_direction"),
+                        obstacle_signal=data.get("Draw_obstacle_signals"),
+                        occupancy=data.get("Draw_occupancy"), traffic_signs=data.get("Draw_traffic_signs"),
+                        traffic_lights=data.get("Draw_traffic_lights"),
+                        incoming_lanelets=data.get("Draw_incoming_lanelets"), successors=data.get("Draw_successors"),
+                        intersection_labels=data.get("Draw_intersection_labels"),
+                        colorscheme=self.parent.cr_designer.colorscheme(),)
+        self.parent.canvas.update_obstacle_trajectory_params()
+        if self.parent.cr_designer.animated_viewer_wrapper.cr_viewer.current_scenario != None:
+            self.parent.cr_designer.animated_viewer_wrapper.cr_viewer.update_plot()
+        self.parent.cr_designer.update_window()
+        self.parent.window.update_window()
+
+
+
+
