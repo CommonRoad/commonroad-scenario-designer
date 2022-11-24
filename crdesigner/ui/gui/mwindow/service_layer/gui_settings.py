@@ -1,6 +1,6 @@
 """ window with settings for the Scenario Designer """
 
-import json
+import yaml
 
 from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.commonroad_viewer.service_layer.draw_params_updater import \
     set_draw_params
@@ -139,8 +139,8 @@ class GUISettings:
 
     def apply_set_to_default(self):
 
-        with open('crdesigner/configurations/default_settings.json') as f:
-            data = json.load(f)
+        with open('crdesigner/configurations/default_settings.yaml') as f:
+            data = yaml.load(f, Loader=yaml.FullLoader)
         config.AUTOFOCUS = data.get("Autofocus")
         config.DRAW_TRAJECTORY = data.get("Draw_trajectory")
         config.DRAW_INTERSECTIONS = data.get("Draw_intersections")

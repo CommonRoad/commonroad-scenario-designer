@@ -1,0 +1,16 @@
+    Darkmode: false
+    Axis: All
+    Legend: true
+    Draw_trajectory: false
+    Draw_obstacle_labels: true
+    Draw_obstacle_icons: false
+    Draw_obstacle_direction: false
+    Draw_obstacle_signals: true
+    Draw_intersections: false
+    Draw_incoming_lanelets: true
+    Draw_successors: true
+    Draw_intersection_labels: false
+    Autofocus: false
+    Draw_occupancy: false
+    Draw_traffic_signs: false
+    Draw_traffic_lights: true
