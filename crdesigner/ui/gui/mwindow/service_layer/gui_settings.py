@@ -1,16 +1,10 @@
 """ window with settings for the Scenario Designer """
-from PyQt5 import Qt
-from PyQt5.QtCore import pyqtSlot
-from PyQt5.QtWidgets import QMainWindow
 
-from crdesigner.ui.gui.mwindow.service_layer.gui_resources.gui_settings_ui import UIGUISettings
-from crdesigner.ui.gui.mwindow.service_layer import config
+import json
+
 from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.commonroad_viewer.service_layer.draw_params_updater import \
     set_draw_params
-from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.commonroad_viewer.dynamic_canvas import DynamicCanvas
-import crdesigner.configurations
-import json
-import os
+from crdesigner.ui.gui.mwindow.service_layer import config
 
 
 class GUISettings:
