@@ -111,7 +111,7 @@ You can execute the different converters either via command line, calling them w
 or the GUI.
 
 #### API
-The main APIs to execute the pure conversions are located under `crdesigner/input_output/api`.   
+The main APIs to execute the pure conversions are located under `crdesigner/map_conversion/map_conversion_interface.py`.   
 For many conversions we provide further APIs, e.g., for downloading a map from OSM.
 
 #### Command Line

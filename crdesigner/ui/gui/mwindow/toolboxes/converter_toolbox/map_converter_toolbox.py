@@ -1,5 +1,5 @@
 import pickle
-import warnings
+from typing import Optional
 
 from lxml import etree
 
