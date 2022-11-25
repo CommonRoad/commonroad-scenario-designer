@@ -100,7 +100,7 @@ class TestOpenDriveToCommonRoadConversion(unittest.TestCase):
         np.testing.assert_almost_equal(network.find_lanelet_by_id(50).distance[2], 90.7, 1)
 
         # test num of driving lanes
-        self.assertEqual(56, len(network.lanelets))
+        self.assertEqual(60, len(network.lanelets))
 
         # test number of traffic lights
         self.assertEqual(12, len(network.traffic_lights))

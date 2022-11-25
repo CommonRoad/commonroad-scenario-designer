@@ -256,7 +256,7 @@ class TestParser(unittest.TestCase):
         object_xml = []
         for reference in road_xml[1].find("objects").findall("object"):
             object_xml.append(reference)
-        parse_opendrive_road_object(new_road=road, road_object=object_xml[1])
+        parse_opendrive_road_object(new_road=road, obj=object_xml[1])
 
         self.assertEqual(81, road.objects[0].id)
         self.assertEqual("House04_BeachColors", road.objects[0].name)
