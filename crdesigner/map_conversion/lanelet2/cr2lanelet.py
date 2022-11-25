@@ -4,7 +4,7 @@ import numpy as np
 from pyproj import Proj
 from commonroad.scenario.lanelet import Lanelet
 
-from crdesigner.map_conversion.lanelet_lanelet2.lanelet2 import OSMLanelet, Node, Way, WayRelation, DEFAULT_PROJ_STRING
+from crdesigner.map_conversion.lanelet2.lanelet2 import OSMLanelet, Node, Way, WayRelation, DEFAULT_PROJ_STRING
 
 ways_are_equal_tolerance = 0.001
 
