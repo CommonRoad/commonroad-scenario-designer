@@ -20,7 +20,8 @@ from crdesigner.map_conversion.opendrive.opendrive_parser.elements.junction impo
     Connection as JunctionConnection, LaneLink as JunctionConnectionLaneLink
 from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadSignal import Signal as RoadSignal, \
     SignalReference
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadObject import Object as RoadObject
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadObject import Object as RoadObject, \
+    ObjectOutlineCorner
 
 
 def parse_opendrive(file_path: str) -> OpenDrive:
@@ -431,25 +432,6 @@ def parse_opendrive_road_signal_reference(new_road: Road, road_signal_reference:
     new_road.addSignalReference(new_signal_reference)
 
 
-def parse_opendrive_road_object(new_road: Road, road_object: etree.ElementTree):
-    new_road_object = RoadObject()
-    new_road_object.id = road_object.get("id")
-    new_road_object.name = road_object.get("name")
-    new_road_object.s = road_object.get("s")
-    new_road_object.t = road_object.get("t")
-    new_road_object.zOffset = road_object.get("zOffset")
-    new_road_object.hdg = road_object.get("hdg")
-    new_road_object.roll = road_object.get("roll")
-    new_road_object.pitch = road_object.get("pitch")
-    new_road_object.orientation = road_object.get("orientation")
-    new_road_object.type = road_object.get("type")
-    new_road_object.height = road_object.get("height")
-    new_road_object.width = road_object.get("width")
-    new_road_object.validLength = road_object.get("length")
-
-    new_road.addObject(new_road_object)
-
-
 def parse_opendrive_road(opendrive: OpenDrive, road: etree.ElementTree):
     """
     Parse OpenDRIVE road and appends it to OpenDRIVE object.
@@ -511,10 +493,10 @@ def parse_opendrive_road(opendrive: OpenDrive, road: etree.ElementTree):
         parse_opendrive_road_lane_section(new_road, lane_section_id, lane_section)
 
     # Objects
-    # TODO implementation
     if road.find("objects") is not None:
-        for road_object in road.find("objects").findall("object"):
-            parse_opendrive_road_object(new_road, road_object)
+        for obj in road.find("objects").findall("object"):
+            if obj is not None:
+                parse_opendrive_road_object(new_road, obj)
 
     # Signals
     if road.find("signals") is not None:
@@ -531,6 +513,63 @@ def parse_opendrive_road(opendrive: OpenDrive, road: etree.ElementTree):
     calculate_lane_section_lengths(new_road)
 
     opendrive.roads.append(new_road)
+
+
+def parse_opendrive_road_object(new_road: Road, obj: etree.ElementTree):
+    """Parses opendrive road object, creates roadObject from it and adds it to the road.
+
+    :param new_road: The road to add the object to.
+    :type new_road: :class:`Road`
+    :param obj: XML road element which is parsed.
+    :type obj: :class:`etree.ElementTree`
+
+    """
+    corners = []
+    if obj.find("outline") is not None:
+        for outline in obj.find("outline").findall("cornerLocal"):
+            if outline is not None:
+                corner = ObjectOutlineCorner()
+                corner.u = outline.get("u")
+                corner.v = outline.get("v")
+                corner.z = outline.get("z")
+                corners.append(corner)
+
+    road_object = RoadObject()
+    try:
+        if obj.get("type") is not None:
+            road_object.type = obj.get("type")
+        if obj.get("id") is not None:
+            road_object.id = obj.get("id")
+        if obj.get("s") is not None:
+            road_object.s = obj.get("s")
+        if obj.get("t") is not None:
+            road_object.t = obj.get("t")
+        if obj.get("name") is not None:
+            road_object.name = obj.get("name")
+        if obj.get("width") is not None:
+            road_object.width = obj.get("width")
+        if obj.get("height") is not None:
+            road_object.height = obj.get("height")
+        if obj.get("length") is not None:
+            road_object.validLength = obj.get("length")
+        if obj.get("zOffset") is not None:
+            road_object.zOffset = obj.get("zOffset")
+        if obj.get("validLength") is not None:
+            road_object.validLength = obj.get("validLength")
+        if obj.get("orientation") is not None:
+            road_object.orientation = obj.get("orientation")
+        if obj.get("hdg") is not None:
+            road_object.hdg = obj.get("hdg")
+        if obj.get("pitch") is not None:
+            road_object.pitch = obj.get("pitch")
+        if obj.get("roll") is not None:
+            road_object.roll = obj.get("roll")
+
+        road_object.outline = corners
+    except:
+        print("Error during parsing of road objects.")
+
+    new_road.addObject(road_object)
 
 
 def calculate_lane_section_lengths(new_road: Road):
