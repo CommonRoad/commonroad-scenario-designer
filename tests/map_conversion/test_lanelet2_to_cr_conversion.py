@@ -29,7 +29,7 @@ class TestLanelet2ToCommonRoadConversion(unittest.TestCase):
                         os.remove(os.path.join(dir_path, file))
 
         with open(os.path.dirname(os.path.realpath(__file__))
-                  + f"/test_maps/lanelet_lanelet2/{osm_file_name}.osm", "r", ) as fh:
+                  + f"/test_maps/lanelet2/{osm_file_name}.osm", "r", ) as fh:
             osm = Lanelet2Parser(etree.parse(fh).getroot()).parse()
 
         osm2l = Lanelet2CRConverter(proj_string="+proj=utm +zone=32 +ellps=WGS84")
@@ -43,7 +43,7 @@ class TestLanelet2ToCommonRoadConversion(unittest.TestCase):
         xml_output_name = file_name
 
         with open(os.path.dirname(os.path.realpath(__file__))
-                  + f"/test_maps/lanelet_lanelet2/{xml_output_name}.xml", "r", ) as fh:
+                  + f"/test_maps/lanelet2/{xml_output_name}.xml", "r", ) as fh:
             parser = etree.XMLParser(remove_blank_text=True)
             tree_import = etree.parse(fh, parser=parser).getroot()
             writer = CommonRoadFileWriter(scenario=self.load_and_convert(file_name),
