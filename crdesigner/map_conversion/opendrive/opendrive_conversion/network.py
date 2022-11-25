@@ -7,6 +7,7 @@ from commonroad.scenario.scenario import Scenario, GeoTransformation, Location, 
 from commonroad.scenario.lanelet import LaneletNetwork, Lanelet, StopLine, LineMarking
 from crdesigner.map_conversion.opendrive.opendrive_conversion import utils
 
+from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.crosswalks import get_crosswalks
 from crdesigner.map_conversion.opendrive.opendrive_parser.elements.opendrive import OpenDrive
 from crdesigner.map_conversion.opendrive.opendrive_conversion.utils import encode_road_section_lane_width_id
 from crdesigner.map_conversion.opendrive.opendrive_conversion.conversion_lanelet_network import \
@@ -62,6 +63,7 @@ class Network:
         self._traffic_lights = []
         self._traffic_signs = []
         self._stop_lines = []
+        self._crosswalks = []
         self._country_ID = None
         self.error_tolerance = self.config.error_tolerance
         self.min_delta_s = self.config.min_delta_s
@@ -123,6 +125,9 @@ class Network:
             # stop lines from traffic signals (legacy)
             stop_lines_final = []
             traffic_lights, traffic_signs, stop_lines = get_traffic_signals(road)
+
+            self._crosswalks.extend(get_crosswalks(road))
+
             self._traffic_lights.extend(traffic_lights)
             for stop_line in stop_lines:
                 for traffic_light in traffic_lights:
@@ -200,12 +205,17 @@ class Network:
         self._link_index.update_intersection_lane_id(lanelet_network.old_lanelet_ids())
         # self.traffic_signal_elements.update_traffic_signs_map_lane_id(lanelet_network.old_lanelet_ids())
 
+        for crosswalk in self._crosswalks:
+            lanelet_network.add_lanelet(crosswalk)
+
         # generating intersections
         for intersection_map in self._link_index.intersection_maps():
             # Remove lanelets that are not part of the network (as they are of a different type)
             intersection_id_counter = generate_unique_id()
             lanelet_network._old_lanelet_ids[intersection_id_counter] = intersection_id_counter
             lanelet_network.create_intersection(intersection_map, intersection_id_counter)
+
+        self.relate_crosswalks_to_intersection(lanelet_network)
 
         # Assign traffic signals, lights and stop lines to lanelet network
         lanelet_network.add_traffic_lights_to_network(self._traffic_lights)
@@ -241,6 +251,47 @@ class Network:
         self.reference_traffic_signs_with_equal_speed(drivable_lanelets, lanelet_network)
 
         return convert_to_base_lanelet_network(lanelet_network)
+
+    def relate_crosswalks_to_intersection(self, lanelet_network: ConversionLaneletNetwork):
+        """
+        Find for each crossing the intersection it belongs to
+        :param lanelet_network: ConversionLaneletNetwork
+        :return:
+        """
+        def generate_line(vertices) -> (float, float):
+            """
+            generate a line from start to end of vertex
+            :param vertices:
+            :return: slope m, intersect c
+            """
+            m = (vertices[0][1] - vertices[-1][1]) / (vertices[0][0] - vertices[-1][0])
+            c = vertices[0][1] - m*vertices[0][0]
+            return m, c
+
+        def find_intersect_point() :
+            """
+            find an intersection between a lane and a crosswalk. We can conclude that a crosswalk belongs to the same
+            intersection as the lanelet it is crossing.
+            :return: lanelet id
+            """
+            for incoming in intersection.incomings:
+                for lanelet in incoming.incoming_lanelets:
+                    vertices = lanelet_network.find_lanelet_by_id(lanelet).left_vertices
+                    lanelet_m, lanelet_c = generate_line(vertices)
+                    x_intersect = (lanelet_c - crosswalk_c) / (crosswalk_m - lanelet_m)
+
+                    if x_intersect * lanelet_m + lanelet_c == x_intersect * crosswalk_m + crosswalk_c:
+                        return lanelet
+            return None
+
+        for crosswalk in self._crosswalks:
+            crosswalk_m, crosswalk_c = generate_line(crosswalk.left_vertices)
+            for intersection in lanelet_network.intersections:
+                lanelet = find_intersect_point()
+                if lanelet is not None:
+                    intersection.crossings.add(crosswalk.lanelet_id)
+                    break
+
 
     def reference_traffic_signs_with_equal_speed(self, lanelets: List[int], lanelet_network: ConversionLaneletNetwork):
         """If there are multiple lanelets that all have an equal lane speed, finds the first traffic sign of any

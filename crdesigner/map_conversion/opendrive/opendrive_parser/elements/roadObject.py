@@ -34,6 +34,7 @@ class Object:
         self._hdg = None
         self._pitch = None
         self._roll = None
+        self._outline = None
         # TODO: Check potential use of missing attributes length, perpToRoad, radius, subtype
 
     @property
@@ -91,6 +92,8 @@ class Object:
     def width(self, value):
         if value is not None:
             self._width = float(value)
+        else:
+            self._width = None
 
     @property
     def height(self) -> float:
@@ -185,8 +188,7 @@ class Object:
 
     @validLength.setter
     def validLength(self, value):
-        if value is not None:
-            self._validLength = float(value)
+        self._validLength = float(value)
 
     @property
     def orientation(self) -> str:
@@ -254,3 +256,67 @@ class Object:
     def roll(self, value):
         if value is not None:
             self._roll = float(value)
+
+    @property
+    def outline(self):
+        return self._outline
+
+    @outline.setter
+    def outline(self, value):
+        self._outline = value
+
+
+
+class ObjectOutlineCorner:
+
+    def __init__(self):
+        self._height = None
+        self._id = None
+        self._u = None
+        self._v = None
+        self._z = None
+
+    @property
+    def height(self):
+        return self._height
+
+    @height.setter
+    def height(self, value):
+        if value is not None:
+            self._height = float(value)
+
+    @property
+    def id(self):
+        return self._id
+
+    @id.setter
+    def id(self, value):
+        if value is not None:
+            self._id = int(value)
+
+    @property
+    def u(self):
+        return self._u
+
+    @u.setter
+    def u(self, value):
+        if value is not None:
+            self._u = float(value)
+
+    @property
+    def v(self):
+        return self._v
+
+    @v.setter
+    def v(self, value):
+        if value is not None:
+            self._v = float(value)
+
+    @property
+    def z(self):
+        return self._z
+
+    @z.setter
+    def z(self, value):
+        if value is not None:
+            self._z = value
