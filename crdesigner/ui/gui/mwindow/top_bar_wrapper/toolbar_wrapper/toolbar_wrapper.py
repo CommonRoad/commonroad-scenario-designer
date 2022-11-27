@@ -36,6 +36,11 @@ class ToolBarWrapper:
         self.action_obstacle_toolbox = QAction(QIcon(":/icons/obstacle_toolbox.png"), "Open Obstacle Toolbox", mwindow)
         self.tb2.addAction(self.action_obstacle_toolbox)
         self.action_obstacle_toolbox.triggered.connect(lambda: _obstacle_toolbox_show(mwindow))
+
+        self.action_obstacle_profile_toolbox = QAction(QIcon(":/icons/obstacle_toolbox.png"), "Open Obstacle Profile Toolbox", mwindow)
+        self.tb2.addAction(self.action_obstacle_profile_toolbox)
+        self.action_obstacle_profile_toolbox.triggered.connect(lambda: _obstacle_profile_toolbox_show(mwindow))
+
         self.action_converter_toolbox = QAction(QIcon(":/icons/tools.ico"), "Open Map Converter Toolbox", mwindow)
         self.tb2.addAction(self.action_converter_toolbox)
         self.action_converter_toolbox.triggered.connect(lambda: _map_converter_toolbox_show(mwindow))
@@ -148,6 +153,12 @@ def _obstacle_toolbox_show(mwindow):
         Show the obstacle Toolbox.
     """
     mwindow.obstacle_toolbox.show()
+
+def _obstacle_profile_toolbox_show(mwindow):
+    """
+        Show the Obstacle Profile Toolbox.
+    """
+    mwindow.obstacle_profile_toolbox.show()
 
 
 def _map_converter_toolbox_show(mwindow):

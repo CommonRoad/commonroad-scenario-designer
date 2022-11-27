@@ -19,6 +19,7 @@ if SUMO_AVAILABLE:
 
 from crdesigner.ui.gui.mwindow.toolboxes.obstacle_toolbox.obstacle_toolbox_ui import ObstacleToolboxUI
 
+
 from commonroad.prediction.prediction import TrajectoryPrediction
 
 
