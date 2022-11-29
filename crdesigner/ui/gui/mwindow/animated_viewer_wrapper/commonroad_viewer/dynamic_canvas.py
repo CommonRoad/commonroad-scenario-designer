@@ -66,6 +66,13 @@ class DynamicCanvas(FigureCanvas):
 
         self.l_network = None
 
+        self.draw_trajectory_first_point = None  # trajectory mode
+        self.draw_trajectory_first_point_object = None
+        self.draw_trajectory_preview = None
+        self.draw_append_trajectory_preview = None
+        self.add_to_selected_trajectory_preview = None
+        self.add_to_selected_trajectory = None
+
         self.draw_lanelet_first_point = None  # drawing mode
         self.draw_lanelet_first_point_object = None
         self.draw_lanelet_preview = None
@@ -662,16 +669,22 @@ class DynamicCanvas(FigureCanvas):
 
     def activate_trajectory_mode(self, is_active):
         if is_active:
+            x = float(self.parent.obstacle_toolbox.obstacle_toolbox_ui.initial_state_position_x.text())
+            y = float(self.parent.obstacle_toolbox.obstacle_toolbox_ui.initial_state_position_y.text())
+            self.draw_trajectory_first_point_object = self.ax.plot(x, y, marker="x", color="blue", zorder=21)
+            self.draw_trajectory_first_point = [x, y]
+
             self.mpl_disconnect(self.button_press_event_cid)
             self.mpl_disconnect(self.button_release_event_cid)
-            self.button_press_event_cid = self.mpl_connect('button_press_event', self.draw_lanelet)
-            self.motion_notify_event_cid = self.mpl_connect('motion_notify_event', self.drawing_mode_preview_line)
+
+            self.button_press_event_cid = self.mpl_connect('button_press_event', self.draw_trajectory_line)
+            self.motion_notify_event_cid = self.mpl_connect('motion_notify_event', self.trajectory_mode_preview_line)
         else:
-            if self.draw_lanelet_preview:
-                self.draw_lanelet_preview.pop(0).remove()
-                self.draw_lanelet_first_point_object.pop(0).remove()
-                self.draw_lanelet_first_point = None
-                self.add_to_selected = None
+            if self.draw_trajectory_preview:
+                self.draw_trajectory_preview.pop(0).remove()
+                self.draw_trajectory_first_point_object.pop(0).remove()
+                self.draw_trajectory_first_point = None
+                self.add_to_selected_trajectory = None
             self.mpl_disconnect(self.button_press_event_cid)
             self.mpl_disconnect(self.motion_notify_event_cid)
             self.button_release_event_cid = self.mpl_connect('button_release_event',
@@ -698,7 +711,8 @@ class DynamicCanvas(FigureCanvas):
             self.button_press_event_cid = self.mpl_connect('button_press_event', self.dynamic_canvas_click_callback)
             self.reset_toolbar()
             self.update_plot()
-    def draw_trajectory(self, mouse_event):
+    def draw_trajectory_line(self, mouse_event):
+
         x = mouse_event.xdata
         y = mouse_event.ydata
 
@@ -706,55 +720,43 @@ class DynamicCanvas(FigureCanvas):
             self.activate_trajectory_mode(False)
             return
 
-        if not self.draw_lanelet_first_point:
-            if self.add_to_selected_preview:
-                append_point = self.add_to_selected_preview.center_vertices[-1]
-                x = append_point[0]
-                y = append_point[1]
-                self.add_to_selected = self.add_to_selected_preview
-            self.draw_lanelet_first_point_object = self.ax.plot(x, y, marker="x", color="blue", zorder=21)
-            self.draw_lanelet_first_point = [x, y]
+        self.draw_trajectory_first_point_object = self.ax.plot(x, y, marker="x", color="blue", zorder=21)
+        self.draw_trajectory_first_point = [x, y]
+        self.update_plot()
+
+    def trajectory_mode_preview_line(self, mouse_move_event):
+        x = mouse_move_event.xdata
+        y = mouse_move_event.ydata
+        if not x:
+            return
+        if self.draw_append_trajectory_preview:
+            self.draw_append_trajectory_preview = None
+            self.add_to_selected_trajectory_preview = None
             self.update_plot()
+        if self.draw_trajectory_preview or (self.draw_trajectory_preview and not x and not y):
+            self.draw_trajectory_preview.pop(0).remove()
+        if self.draw_trajectory_first_point:
+            self.draw_trajectory_preview = self.ax.plot([x, self.draw_trajectory_first_point[0]],
+                                                     [y, self.draw_trajectory_first_point[1]], color="blue", zorder=21)
         else:
-            lanelet_type = {LaneletType(ty) for ty in ["None"] if ty != "None"}
-            draw_lanelet_second_point = [x, y]
-            lanelet_length = calculate_euclidean_distance(self.draw_lanelet_first_point, draw_lanelet_second_point)
-            num_vertices = max([1, round(lanelet_length * 2)])
-            try:
-                if self.add_to_selected:
-                    created_lanelet = MapCreator.create_straight(3.0, lanelet_length, num_vertices, 10000, lanelet_type)
-                else:
-                    created_lanelet = MapCreator.create_straight(3.0, lanelet_length, num_vertices,
-                                                                 self.scenario.generate_object_id(), lanelet_type)
-            except AssertionError:
-                output = "Length of Lanelet must be at least 1"
-                self.parent.crdesigner_console_wrapper.text_browser.append(output)
+            self.latest_mouse_pos = np.array([x, y])
+            click_shape = Circle(radius=0.01, center=self.latest_mouse_pos)
+            selected_l_ids = self.l_network.find_lanelet_by_shape(click_shape)
+            if not selected_l_ids:
                 return
-
-            drawn_vector = [draw_lanelet_second_point[0] - self.draw_lanelet_first_point[0],
-                            draw_lanelet_second_point[1] - self.draw_lanelet_first_point[1]]
-            horizontal_vector = [1, 0]
-            angle = angle_between(drawn_vector, horizontal_vector)
-
-            created_lanelet.translate_rotate(np.array([0, 0]), angle)
-            if self.add_to_selected:
-                created_lanelet.translate_rotate(np.array(draw_lanelet_second_point), 0)
-                created_lanelet = MapCreator.connect_lanelets(self.add_to_selected, created_lanelet,
-                                                              self.scenario.generate_object_id())
-                created_lanelet.successor = []
-                self.add_to_selected.add_successor(created_lanelet.lanelet_id)
-            else:
-                created_lanelet.translate_rotate(np.array(self.draw_lanelet_first_point), 0)
-            self.add_to_selected = created_lanelet
-            self.scenario.add_objects([created_lanelet])
-            self.parent.road_network_toolbox.callback(self.scenario)
-            self.parent.road_network_toolbox.last_added_lanelet_id = created_lanelet.lanelet_id
-
-            self.draw_lanelet_first_point = draw_lanelet_second_point
-            self.draw_lanelet_first_point_object.pop(0).remove()
-            self.draw_lanelet_first_point_object = self.ax.plot(x, y, marker="x", color="blue", zorder=21)
-
-            self.update_plot()
+            selected_l_id = selected_l_ids[0]
+            selected_l = self.l_network.find_lanelet_by_id(selected_l_id)
+            if not selected_l.successor:
+                center_distance = calculate_euclidean_distance(self.latest_mouse_pos, selected_l.center_vertices[-1])
+                left_distance = calculate_euclidean_distance(self.latest_mouse_pos, selected_l.left_vertices[-1])
+                right_distance = calculate_euclidean_distance(self.latest_mouse_pos, selected_l.right_vertices[-1])
+                if center_distance <= 1 or left_distance <= 1 or right_distance <= 1:
+                    left_v = selected_l.left_vertices[-1]
+                    right_v = selected_l.right_vertices[-1]
+                    self.add_to_selected_preview = selected_l
+                    self.draw_append_lanelet_preview = self.ax.plot([left_v[0], right_v[0]], [left_v[1], right_v[1]],
+                                                             linewidth=3, color="blue", zorder=21)
+        self.update_plot()
     def draw_lanelet(self, mouse_event):
         x = mouse_event.xdata
         y = mouse_event.ydata
@@ -812,6 +814,7 @@ class DynamicCanvas(FigureCanvas):
             self.draw_lanelet_first_point_object = self.ax.plot(x, y, marker="x", color="blue", zorder=21)
 
             self.update_plot()
+
 
     def drawing_mode_preview_line(self, mouse_move_event):
         x = mouse_move_event.xdata

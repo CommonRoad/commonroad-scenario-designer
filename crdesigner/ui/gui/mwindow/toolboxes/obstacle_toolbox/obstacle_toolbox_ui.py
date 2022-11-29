@@ -269,9 +269,13 @@ class ObstacleToolboxUI(Toolbox):
         self.drawing_mode = QPushButton("Add Waypoint")
         self.drawing_mode.setCheckable(True)
         self.drawing_mode.clicked.connect(lambda: _trajectory_mode(self.mwindow, self.drawing_mode.isChecked()))
+        self.waypoint_time_step = QLineEdit(self)
+        self.waypoint_time_step.setPlaceholderText("0")
+        self.waypoint_time_step.setToolTip("Time step must be an integer.")
+        self.waypoint_time_step.setObjectName("time step")
         self.layout_initial_state_group_box.insertRow(0, self.initial_state_label)
         self.layout_initial_state_group_box.insertRow(1, "Position", self.drawing_mode)
-
+        self.layout_initial_state_group_box.insertRow(2, "Time step", self.waypoint_time_step)
         self.layout_obstacle_information_groupbox.insertRow(6, self.initial_state_group_box)
 
 
