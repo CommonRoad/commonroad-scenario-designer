@@ -25,6 +25,7 @@ from PyQt5 import QtGui
 from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMO_AVAILABLE
 if SUMO_AVAILABLE:
     pass
+import yaml
 
 
 class MWindow(QMainWindow, Ui_mainWindow):
@@ -114,9 +115,17 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
 
     def colorscheme(self) -> dict:
-        colorscheme = {'axis': config.AXIS_VISIBLE}
-        if config.DARKMODE:
-            colorscheme.update({'background': '#303030', 'color': '#f0f0f0', 'font-size': '11pt', 'highlight': '#1e9678', 'highlighttext':'#202020', 'secondbackground': '#2c2c2c', 'disabled': '#959595'})
+        with open('crdesigner/configurations/custom_settings.yaml') as f:
+            data = yaml.load(f, Loader=yaml.FullLoader)
+        if data.get('Axis') == 'None' or data.get('Axis') == 'Left/ Bottom':
+            colorscheme = {'axis': str(data.get('Axis'))}
+        else:
+            colorscheme = {'axis': config.AXIS_VISIBLE}
+        if data.get('Darkmode') is not None and data.get('Darkmode'):
+
+            colorscheme.update(
+                    {'background': '#303030', 'color': '#f0f0f0', 'font-size': '11pt', 'highlight': '#1e9678',
+                     'highlighttext': '#202020', 'secondbackground': '#2c2c2c', 'disabled': '#959595'})
         else:
             colorscheme.update({'background': '#f0f0f0', 'color': '#0a0a0a', 'font-size': '11pt', 'highlight': '#c0c0c0', 'highlighttext':'#202020', 'secondbackground': '#ffffff', 'disabled': '#959595'})
 
