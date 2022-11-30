@@ -115,11 +115,6 @@ class MWindow(QMainWindow, Ui_mainWindow):
 
 
     def colorscheme(self) -> dict:
-        #with open('crdesigner/configurations/custom_settings.yaml') as f:
-         #   data = yaml.load(f, Loader=yaml.FullLoader)
-        #if data.get('Axis') == 'None' or data.get('Axis') == 'Left/ Bottom':
-         #   colorscheme = {'axis': str(data.get('Axis'))}
-        #else:
         colorscheme = {'axis': config.AXIS_VISIBLE}
         if config.DARKMODE:
 

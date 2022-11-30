@@ -1,7 +1,7 @@
 """ window with settings for the Scenario Designer """
 
 import yaml
-
+from munch import DefaultMunch
 from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.commonroad_viewer.service_layer.draw_params_updater import \
     set_draw_params
 from crdesigner.ui.gui.mwindow.service_layer import config
@@ -91,6 +91,7 @@ class GUISettings:
                             successors=self.window.chk_draw_successors.isChecked(),
                             intersection_labels=self.window.chk_draw_intersection_label.isChecked(),
                             colorscheme=self.parent.cr_designer.colorscheme(), )
+            # to save the changed settings into custom_settings.yaml file
             self.save_config_to_custom_settings()
         else:
             print("invalid settings")
@@ -125,25 +126,13 @@ class GUISettings:
         self.parent.window.update_window()
 
     def apply_set_to_default(self):
-
+        '''
+        the variables i config.py will be changed back to the default values, not the file itself
+        '''
         with open('crdesigner/configurations/default_settings.yaml') as f:
             data = yaml.load(f, Loader=yaml.FullLoader)
-        config.AUTOFOCUS = data.get("Autofocus")
-        config.DRAW_TRAJECTORY = data.get("Draw_trajectory")
-        config.DRAW_INTERSECTIONS = data.get("Draw_intersections")
-        config.DRAW_OBSTACLE_LABELS = data.get("Draw_obstacle_labels")
-        config.DRAW_OBSTACLE_ICONS = data.get("Draw_obstacle_icons")
-        config.DRAW_OBSTACLE_DIRECTION = data.get("Draw_obstacle_direction")
-        config.DRAW_OBSTACLE_SIGNALS = data.get("Draw_obstacle_signals")
-        config.DRAW_OCCUPANCY = data.get("Draw_occupancy")
-        config.DRAW_TRAFFIC_SIGNS = data.get("Draw_traffic_signs")
-        config.DRAW_TRAFFIC_LIGHTS = data.get("Draw_traffic_lights")
-        config.DRAW_INCOMING_LANELETS = data.get("Draw_incoming_lanelets")
-        config.DRAW_SUCCESSORS = data.get("Draw_successors")
-        config.DRAW_INTERSECTION_LABELS = data.get("Draw_intersection_labels")
-        config.AXIS_VISIBLE = data.get("Axis")
-        config.DARKMODE = data.get("Darkmode")
-        config.LEGEND = data.get("Legend")
+        for key, value in data.items():
+            setattr(config, key.upper(), value)
         set_draw_params(trajectory=data.get("Draw_trajectory"), intersection=data.get("Draw_intersections"),
                         obstacle_label=data.get("Draw_obstacle_labels"), obstacle_icon=data.get("Draw_obstacle_icons"),
                         obstacle_direction=data.get("Draw_obstacle_direction"),
@@ -152,7 +141,14 @@ class GUISettings:
                         incoming_lanelets=data.get("Draw_incoming_lanelets"), successors=data.get("Draw_successors"),
                         intersection_labels=data.get("Draw_intersection_labels"),
                         colorscheme=self.parent.cr_designer.colorscheme(), )
-
+        with open('crdesigner/configurations/custom_settings.yaml') as f:
+            data_custom = yaml.load(f, Loader=yaml.FullLoader)
+        obj = DefaultMunch.fromDict(data_custom)
+        for key, value in data.items():
+            setattr(obj, key, value)
+        data_custom = vars(obj)
+        with open('crdesigner/configurations/custom_settings.yaml', 'w') as yaml_file:
+            yaml_file.write(yaml.dump(data_custom, default_flow_style=False))
         self.parent.canvas.update_obstacle_trajectory_params()
         if self.parent.cr_designer.animated_viewer_wrapper.cr_viewer.current_scenario != None:
             self.parent.cr_designer.animated_viewer_wrapper.cr_viewer.update_plot()
@@ -160,6 +156,9 @@ class GUISettings:
         self.parent.window.update_window()
 
     def save_config_to_custom_settings(self):
+        '''
+        when clicking on ok button the changed settings will be written into the custom_settings.yaml file
+        '''
         with open('crdesigner/configurations/custom_settings.yaml') as f:
             data = yaml.load(f, Loader=yaml.FullLoader)
         data['Autofocus'] = self.window.chk_autofocus.isChecked()
