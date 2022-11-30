@@ -175,7 +175,7 @@ class GUISettings:
         data['Draw_incoming_lanelets'] = self.window.chk_draw_incoming_lanelet.isChecked()
         data['Draw_successors'] = self.window.chk_draw_successors.isChecked()
         data['Draw_intersection_labels'] = self.window.chk_draw_intersection_label.isChecked()
-        data['Axis'] = str(self.window.cmb_axis_visible.currentText())
+        data['Axis_visible'] = str(self.window.cmb_axis_visible.currentText())
         data['Darkmode'] = self.window.chk_darkmode.isChecked()
         data['Legend'] = self.window.chk_legend.isChecked()
         with open('crdesigner/configurations/custom_settings.yaml', 'w') as yaml_file:
