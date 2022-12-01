@@ -1,7 +1,7 @@
 """ window with settings for the Scenario Designer """
 
 import yaml
-from munch import DefaultMunch
+
 from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.commonroad_viewer.service_layer.draw_params_updater import \
     set_draw_params
 from crdesigner.ui.gui.mwindow.service_layer import config
@@ -141,14 +141,9 @@ class GUISettings:
                         incoming_lanelets=data.get("Draw_incoming_lanelets"), successors=data.get("Draw_successors"),
                         intersection_labels=data.get("Draw_intersection_labels"),
                         colorscheme=self.parent.cr_designer.colorscheme(), )
-        with open('crdesigner/configurations/custom_settings.yaml') as f:
-            data_custom = yaml.load(f, Loader=yaml.FullLoader)
-        obj = DefaultMunch.fromDict(data_custom)
-        for key, value in data.items():
-            setattr(obj, key, value)
-        data_custom = vars(obj)
+
         with open('crdesigner/configurations/custom_settings.yaml', 'w') as yaml_file:
-            yaml_file.write(yaml.dump(data_custom, default_flow_style=False))
+            yaml_file.write(yaml.dump(data, default_flow_style=False))
         self.parent.canvas.update_obstacle_trajectory_params()
         if self.parent.cr_designer.animated_viewer_wrapper.cr_viewer.current_scenario != None:
             self.parent.cr_designer.animated_viewer_wrapper.cr_viewer.update_plot()
