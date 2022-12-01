@@ -1,0 +1,38 @@
+
+strictness: medium
+test-warnings: true
+doc-warnings: true
+member-warnings: true
+inherits:
+  - default
+ignore-paths:
+  - docs/
+autodetect: false
+max-line-length: 120
+
+pycodestyle:
+    run: true
+
+pydocstyle:
+  disable:
+    - D100 #  exception should be removed
+
+pyflakes:
+  run: true
+
+mccabe:
+  disable:
+    - MC0001  # exception should be removed
+
+pylint:
+  disable:
+    - import-error
+    - too-many-branches
+    - too-many-arguments
+    - too-many-locals
+    - too-many-statements
+    - consider-using-f-string
+    - missing-module-docstring
+
+mypy:
+  run: true

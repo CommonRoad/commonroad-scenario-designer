@@ -41,13 +41,15 @@ def execute_menubar_test(window):
         print("file_new failed with exception: " + str(e))
     # skip file open and file safe due to IO
     # test the 'setting' tab
-    menubar_wrapper_gui_setting_successful = False
+    menubar_wrapper_setting_successful = False
     try:
-        window.top_bar_wrapper.menu_bar_wrapper.gui_settings_action.trigger()
-        menubar_wrapper_gui_setting_successful = True
+        window.top_bar_wrapper.menu_bar_wrapper.settings_action.trigger()
+        menubar_wrapper_setting_successful = True
     except Exception as e:
-        print("menubar_wrapper_gui_setting failed with exception: " + str(e))
+        print("menubar_wrapper_setting failed with exception: " + str(e))
     # test the sumo setting tab
+
+    """
     menubar_wrapper_gui_setting_sumo_successful = False
     if SUMO_AVAILABLE:
         try:
@@ -57,11 +59,12 @@ def execute_menubar_test(window):
             print("menubar_wrapper_gui_setting_sumo failed with exception: " + str(e))
     else:
         menubar_wrapper_gui_setting_sumo_successful = True
+    """
     # skip the web calls due to we do not want to produce IO
 
     assert file_new_success
-    assert menubar_wrapper_gui_setting_successful
-    assert menubar_wrapper_gui_setting_sumo_successful
+    assert menubar_wrapper_setting_successful
+    #assert menubar_wrapper_gui_setting_sumo_successful
 
 
 def execute_toolbar_test(window):

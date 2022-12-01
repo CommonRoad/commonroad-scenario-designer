@@ -21,7 +21,6 @@ Submodules
    crdesigner.ui.gui.mwindow.service_layer.osm_gui_modules.gui
    crdesigner.ui.gui.mwindow.service_layer.osm_gui_modules.gui_embedding
    crdesigner.ui.gui.mwindow.service_layer.osm_gui_modules.plots_interactive
-   crdesigner.ui.gui.mwindow.service_layer.osm_gui_modules.settings
 
 Module contents
 ---------------

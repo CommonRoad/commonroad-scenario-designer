@@ -115,6 +115,31 @@ class ScenarioDialog:
                 QMessageBox.Ok,
             )
 
+    def environment_equals_default(self):
+        """
+        Checks whether location information corresponds to default location.
+        """
+        if self.save_window.scenario_time_of_day.currentText() == TimeOfDay.UNKNOWN.value \
+                and self.save_window.scenario_weather.currentText() == Weather.UNKNOWN.value \
+                and self.save_window.scenario_underground.currentText() == Underground.UNKNOWN.value \
+                and self.save_window.scenario_time_hour.text() == "0" \
+                and self.save_window.scenario_time_minute.text() == "0":
+            return True
+        else:
+            return False
+
+    def location_equals_default(self):
+        """
+        Checks whether location information corresponds to default location.
+        """
+        if self.save_window.scenario_geo_anme_id.text() == "-999" \
+                and self.save_window.scenario_latitude.text() == "999" \
+                and self.save_window.scenario_longitude.text() == "999" \
+                and self.environment_equals_default():
+            return True
+        else:
+            return False
+
     def update_scenario_meta_data(self):
         if self.initialized:
             self.current_scenario.author = self.save_window.scenario_author.text()
@@ -128,5 +153,21 @@ class ScenarioDialog:
             self.current_scenario.scenario_id.map_name = self.save_window.scenario_scene_name.text()
             self.current_scenario.scenario_id.obstacle_behavior = self.save_window.prediction_type.currentText()
             self.current_scenario.scenario_id.prediction_id = int(self.save_window.scenario_prediction_id.text())
-
+            if self.location_equals_default() and self.current_scenario.location is None:
+                self.current_scenario.location = None
+            elif self.environment_equals_default() and not self.location_equals_default():
+                self.current_scenario.location = Location(self.save_window.scenario_geo_anme_id.text(),
+                                                          self.save_window.scenario_latitude.text(),
+                                                          self.save_window.scenario_longitude.text())
+            else:
+                self.current_scenario.location = \
+                    Location(self.save_window.scenario_geo_anme_id.text(),
+                             self.save_window.scenario_latitude.text(),
+                             self.save_window.scenario_longitude.text(),
+                             environment=Environment(
+                                     Time(int(self.save_window.scenario_time_hour.text()),
+                                          int(self.save_window.scenario_time_minute.text())),
+                                     TimeOfDay(self.save_window.scenario_time_of_day.currentText()),
+                                     Weather(self.save_window.scenario_weather.currentText()),
+                                     Underground(self.save_window.scenario_underground.currentText())))
             self.save_window.label_benchmark_id.setText(str(self.current_scenario.scenario_id))

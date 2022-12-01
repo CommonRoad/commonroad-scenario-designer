@@ -10,24 +10,17 @@ from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistin
 from commonroad.scenario.scenario import Scenario
 from commonroad.planning.planning_problem import PlanningProblemSet
 
-__author__ = "Max Fruehauf, Fabian Hoeltke, Sebastian Maierhofer"
-__copyright__ = "TUM Cyber-Physical Systems Group"
-__credits__ = ["BMW Car@TUM"]
-__version__ = "0.4"
-__maintainer__ = "Sebastian Maierhofer"
-__email__ = "commonroad@lists.lrz.de"
-__status__ = "Released"
-
 
 class TestOSMToCommonRoadConversion(unittest.TestCase):
     """Test the conversion from an osm file to a CommonRoad Scenario file."""
     def setUp(self) -> None:
-        cwd_path = os.path.dirname(os.path.abspath(__file__))
-        self.out_path = cwd_path + "/.pytest_cache/"
+        self.out_path = os.path.dirname(os.path.realpath(__file__)) + "/.pytest_cache"
+        if not os.path.isdir(self.out_path):
+            os.makedirs(self.out_path)
 
     def load_and_convert(self, osm_file_name: str) -> Tuple[Scenario, PlanningProblemSet, str]:
         path = os.path.dirname(os.path.realpath(
-            __file__)) + f"/osm_test_files/{osm_file_name}.osm"
+            __file__)) + f"/test_maps/osm/{osm_file_name}.osm"
 
         converted_path = os.path.join(self.out_path, osm_file_name + "_converted_scenario.xml")
 
@@ -82,7 +75,7 @@ class TestOSMToCommonRoadConversion(unittest.TestCase):
     def osm2cr_conversion_lane_width(self, cr_scenario: Scenario):
         """Test if every lanelet is wider than the given minimum distance of 2.5 meters"""
 
-        min_distance = 2.5
+        min_distance = 1.5
 
         for lanelet in cr_scenario.lanelet_network.lanelets:
             for l_v, r_v in zip(lanelet.left_vertices, lanelet.right_vertices):
@@ -96,7 +89,7 @@ class TestOSMToCommonRoadConversion(unittest.TestCase):
             scenario=cr_scenario,
             planning_problem_set=cr_planning_problem)
         fw.write_to_file(
-            filename=self.out_path + osm_file_name + "_written.xml",
+            filename=self.out_path + "/" +  osm_file_name + "_written.xml",
             overwrite_existing_file=OverwriteExistingFile.ALWAYS,
             check_validity=True)
 

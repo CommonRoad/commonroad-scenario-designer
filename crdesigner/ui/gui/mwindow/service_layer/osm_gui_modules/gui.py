@@ -6,12 +6,18 @@ import copy
 import datetime
 import os
 import pickle
+import warnings
 from abc import ABC, abstractmethod
 from tkinter import Tk
 from tkinter.filedialog import askopenfilename, asksaveasfilename
 from typing import Optional, List, Tuple, Set, Dict, Callable
 
-import cartopy.crs as crs
+CARTOPY_AVAILABLE = False
+try:
+    import cartopy.crs as crs
+    CARTOPY_AVAILABLE = True
+except Exception:
+    CARTOPY_AVAILABLE = False
 import matplotlib.pyplot as plt
 import numpy as np
 from PIL import Image
@@ -24,7 +30,7 @@ from crdesigner.map_conversion.osm2cr import config
 import crdesigner.map_conversion.osm2cr.converter_modules.graph_operations.road_graph as rg
 from crdesigner.ui.gui.mwindow.service_layer.osm_gui_modules import actions
 from crdesigner.ui.gui.mwindow.service_layer.osm_gui_modules import plots_interactive as iplot, aerial_data
-from crdesigner.ui.gui.mwindow.service_layer.osm_gui_modules.settings import EditLaneWidth
+from crdesigner.ui.gui.mwindow.service_layer.osm_settings import EditLaneWidth
 from crdesigner.map_conversion.osm2cr.converter_modules.utility.idgenerator import get_id
 from crdesigner.map_conversion.osm2cr.converter_modules.utility import geometry
 
@@ -199,6 +205,7 @@ class LaneLinkGUI(GUI):
         :param event: key event
         :return: None
         """
+
         # print_grey(event.key)
         if event.key == u"delete":
             self.delete()
@@ -257,6 +264,7 @@ class LaneLinkGUI(GUI):
 
         :return: None
         """
+
         name = "link_save_{}.save".format(
             datetime.datetime.now().strftime("%y-%m-%d_%H-%M-%S")
         )
@@ -572,6 +580,8 @@ class EdgeEditGUI(GUI):
         :param event: key event
         :return: None
         """
+
+
         # print_grey(event.key)
         if self.edge_create_mode:
             print_grey("cannot do that while creating new edge")

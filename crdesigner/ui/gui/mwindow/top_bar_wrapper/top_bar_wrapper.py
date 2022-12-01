@@ -14,8 +14,7 @@ class TopBarWrapper:
         # now actually create the menu_bar_wrapper
         self.menu_bar_wrapper = MenuBarWrapper(mwindow=self.mwindow, file_new=file_new,
                                                open_commonroad_file=open_commonroad_file,
-                                               close_window=close_window, show_gui_settings=show_gui_settings,
-                                               show_sumo_settings=show_sumo_settings, show_osm_settings=show_osm_settings,
+                                               close_window=close_window, show_settings=show_settings,
                                                open_cr_web=open_cr_web, open_cr_forum=open_cr_forum,
                                                file_save=file_save)
         self.toolbar_wrapper = ToolBarWrapper(mwindow=self.mwindow, file_new=file_new,

@@ -1,0 +1,8 @@
+error_tolerance: 0.15
+min_delta_s: 0.5
+precision: 0.5
+general_lanelet_type_activ: true # activates whether certain lanelet type should be added to all lanelets
+general_lanelet_type: urban # lanelet type which is added to every lanelet (if activated)
+driving_default_lanelet_type: urban # mapping of OpenDRIVE driveway lane type to a CommonRoad lanelet type
+lanelet_types_backwards_compatible: false # if active, converts OpenDRIVE lane types only to CommonRoad lanelet types compatible with commonroad-io==2022.1 (probably also even older ones)
+default_signal_country: "DEU" # default country for traffic signs and signals

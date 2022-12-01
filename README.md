@@ -7,13 +7,13 @@ This toolbox provides map converters for [OpenStreetMap](https://www.openstreetm
 Additionally, a graphical user interface (GUI) is included, which allows one to efficiently create and manipulate 
 CommonRoad maps and scenarios.
 
-|  Tool                               |Path                                       |Functionality                                                                        |
-| :---------------------------------: |:----------------------------------------: |:----------------------------------------------------------------------------------: |
-|OpenDRIVE => CR            |`crdesigner/map_converter/opendrive`           |Conversion from OpenDRIVE to CommonRoad.                                             |
-|Lanelet/Lanelet2 <=> CR |`crdesigner/map_converter/lanelet_lanelet2`    |Conversion from Lanelet/Lanelet2 to CommonRoad <br /> and from CommonRoad to lanelet |
-|OSM => CR                  |`crdesigner/map_converter/osm2cr`              |Conversion from OSM to CommonRoad.                                                   |
-|SUMO <=> CR             |`crdesigner/map_converter/sumo_map`            |Conversion from SUMO to CommonRoad and vice versa.                                   |
-|CR Scenario Designer GUI             |`crdesigner/input_output/gui`|Multi-functional GUI for map conversion and scenario creation/editing.                     |
+|  Tool                               |                 Path                  |                                Functionality                                 |
+| :---------------------------------: |:-------------------------------------:|:----------------------------------------------------------------------------:|
+|OpenDRIVE => CR            | `crdesigner/map_converter/opendrive`  |                   Conversion from OpenDRIVE to CommonRoad.                   |
+|Lanelet/Lanelet2 <=> CR |  `crdesigner/map_converter/lanelet2`  | Conversion from Lanelet2 to CommonRoad <br /> and from CommonRoad to Lanelet |
+|OSM => CR                  |   `crdesigner/map_converter/osm2cr`   |                      Conversion from OSM to CommonRoad.                      |
+|SUMO <=> CR             |  `crdesigner/map_converter/sumo_map`  |              Conversion from SUMO to CommonRoad and vice versa.              |
+|CR Scenario Designer GUI             |     `crdesigner/input_output/gui`     |    Multi-functional GUI for map conversion and scenario creation/editing.    |
 
 ## Prerequisites and Installation
 The usage of the Anaconda Python distribution is recommended. We have tested the toolbox with Python 3.7, 3.8, and 3.9.
@@ -43,6 +43,9 @@ conda install -c conda-forge cartopy
 from you Anaconda environment. For the other packages, we recommend to use the provided `requirements.txt`:
 ```bash
 pip install -r requirements.txt
+
+If you do not want to use Anaconda, some features for editing OSM graphs might not be available.
+
 ```
 
 If you want to use the SUMO conversion or to generate traffic using SUMO, please install 
@@ -66,11 +69,10 @@ python setup.py install
 ```
 We will soon publish the toolbox on PyPI.
 
-## Common Errors during installation
+### Common Errors during installation
 
-### Ubunutu 21.04
-#### Could not load the Qt platform plugin “xcb” in “” even though it was found
-Error seems to be a missing package - either libxkbcommon-x11 or libxcb-xinerama0 (both can be installed by ```sudo apt install [package_name]```). See for reference [here](https://discuss.pixls.us/t/solved-could-not-load-the-qt-platform-plugin-xcb-in-even-though-it-was-found/17677/9)
+#### Ubuntu 
+- **Could not load the Qt platform plugin “xcb” in “” even though it was found:** Error seems to be a missing package - either libxkbcommon-x11 or libxcb-xinerama0 (both can be installed by ```sudo apt install [package_name]```). See for reference [here](https://discuss.pixls.us/t/solved-could-not-load-the-qt-platform-plugin-xcb-in-even-though-it-was-found/17677/9)
 
 
 ## Usage
@@ -93,7 +95,7 @@ Afterward, you can start the _CommonRoad Scenario Designer_ and the GUI will ope
 ```bash
 $ conda activate commonroad
 # Run CR Scenario designer
-$ python crdesigner/input_output/gui/commonroad_scenario_designer_gui.py
+$ python crdesigner/start_gui.py
 ```
 
 #### Command Line
@@ -109,7 +111,7 @@ You can execute the different converters either via command line, calling them w
 or the GUI.
 
 #### API
-The main APIs to execute the pure conversions are located under `crdesigner/input_output/api`. 
+The main APIs to execute the pure conversions are located under `crdesigner/map_conversion/map_conversion_interface.py`.   
 For many conversions we provide further APIs, e.g., for downloading a map from OSM.
 
 #### Command Line
@@ -124,17 +126,17 @@ crdesigner -h
 ```
 
 #### GUI
-The GUI provides a toolbox with which contains functionality to load maps given in formats other the CommonRoad format 
+The GUI provides a toolbox with which contains functionality to load maps given in formats other the CommonRoad format   
 and to convert CommonRoad maps to other formats or the other formats to the CommonRoad format.
 
 #### Important information
 
-When converting OSM maps, missing information such as the course of individual lanes is estimated during the process.
+When converting OSM maps, missing information such as the course of individual lanes is estimated during the process.  
 These estimations are imperfect (the OSM maps as well) and often it is advisable to edit the 
 scenarios by hand via the GUI.
 
 #### Tutorials
-We also provide tutorials demonstrating how the different map converter APIs can be used. 
+We also provide tutorials demonstrating how the different map converter APIs can be used.  
 The tutorials include a jupyter notebook and exemplary Python scripts for each conversion.
 
 ## Documentation
@@ -150,33 +152,42 @@ Afterward run:
 cd docs && ./docs_build_script.sh
 ```
 
-The documentation can be accessed by opening `doc/_build/html/index.html`.
-The titles of module pages have to be set manually!
+The documentation can be accessed by opening `doc/_build/html/index.html`.  
+The titles of module pages have to be set manually!  
 The full documentation of the API and introducing examples can also be found [here](https://commonroad-scenario-designer.readthedocs.io/en/latest/).
 
 ## Changelog
-Compared to version 0.3, the following features have been added or changed:
+Compared to version 0.5, the following things have been added, fixed or changed:
 
-- Adding/Updating of static obstacles with circle, polygon, and rectangle shape in GUI
-- New GUI software architecture
+- Switching shape of dynamic obstacle
+- Adding adjacent lanelet which already exists
+- Lanelet translation with missing x- or y-coordinate
+- Missing location information when storing a scenario
+- Various small bug fixes
 
 A detailed overview about the changes in each version is provided in the [Changelog](https://gitlab.lrz.de/tum-cps/commonroad-scenario-designer/-/blob/main/CHANGELOG.md).
 
 ## Bug and feature reporting
-This release (v0.4) is still a BETA version.  
+This release (v0.6.0) is still a BETA version.  
 In case you detect a bug or you want to suggest a new feature, please report it in our [forum](https://commonroad.in.tum.de/forum/c/scenario-designer/18).   
 If you want to contribute to the toolbox, you can also post it in the [forum](https://commonroad.in.tum.de/forum/c/scenario-designer/18) or contact [Sebastian Maierhofer](sebastian.maierhofer@tum.de).
 
 ## Authors
 
-Responsible: Sebastian Maierhofer (maintainer), Moritz Klischat  
-Contribution (in alphabetic order by last name): Maximilian Fruehauf, Marcus Gabler, Fabian Hoeltke, Aaron Kaefer, 
-Gustaf Lindgren, Benjamin Orthen, Benedikt Reinhard, Maximilian Rieger, Stefan Urban
+Responsible: Sebastian Maierhofer
+Contribution (in alphabetic order by last name): Daniel Asch, Tim Dang, Behtarin Ferdousi, Maximilian Fruehauf, Marcus Gabler,   
+Fabian Hoeltke, Aaron Kaefer, David Le, Gustaf Lindgren, Benjamin Orthen, Luisa Ortner, Benedikt Reinhard, Maximilian Rieger, Til Stotz, Stefan Urban
+
+## Credits
+We gratefully acknowledge partial financial support by
+- DFG (German Research Fundation) Priority Program SPP 1835 Cooperative Interacting Automobiles
+- BMW Group within the Car@TUM project
+- Central Innovation Programme of the German Federal Government under grant no. ZF4086007BZ8
 
 ## Citation
-**If you use our code for research, please consider citing our paper:**
+**If you use our code for research, please consider to cite our paper:**
 ```
-@inproceedings{ ,
+@inproceedings{Maierhofer2021,
 	author = {Sebastian Maierhofer, Moritz Klischat, and Matthias Althoff},
 	title = {CommonRoad Scenario Designer: An Open-Source Toolbox for Map Conversion and Scenario Creation for Autonomous Vehicles},
 	booktitle = {Proc. of the IEEE Int. Conf. on Intelligent Transportation Systems },
@@ -189,5 +200,22 @@ Gustaf Lindgren, Benjamin Orthen, Benedikt Reinhard, Maximilian Rieger, Stefan U
                     included, which allows one to efficiently create and manipulate CommonRoad maps and scenarios. 
                     We demonstrate the functionality of the toolbox by creating CommonRoad maps and scenarios based on 
                     other map formats and manually-created map data.},
+}
+```
+**If you use the OpenDRIVE to CommonRoad conversion for your paper, please consider to additionally cite the corresponding paper:**
+```
+@inproceedings{Althoff2018b,
+	author = {Matthias Althoff and Stefan Urban and Markus Koschi},
+	title = {Automatic Conversion of Road Networks from OpenDRIVE to Lanelets},
+	booktitle = {Proc. of the IEEE International Conference on Service Operations and Logistics, and Informatics},
+	year = {2018},
+	abstract = {Detailed road maps are an important building block for autonomous driving. They accelerate creating a 
+	            semantic environment model within the vehicle and serve as a backup solution when sensors are occluded 
+	            or otherwise impaired. Due to the required detail of maps for autonomous driving and virtual test 
+	            drives, creating such maps is quite labor-intensive. While some detailed maps for fairly large regions 
+	            already exist, they are often in different formats and thus cannot be exchanged between companies and 
+	            research institutions. To address this problem, we present the first publicly available converter from
+	            the OpenDRIVE format to lanelets—both representations are among the most popular map formats. 
+	            We demonstrate the capabilities of the converter by using publicly available maps.},
 }
 ```

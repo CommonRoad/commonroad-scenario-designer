@@ -16,14 +16,6 @@ from crdesigner.map_conversion.sumo_map.cr2sumo.converter import CR2SumoMapConve
 from parameterized import parameterized
 from sumocr.interface.sumo_simulation import SumoSimulation
 
-__author__ = "Max Fruehauf, Sebastian Maierhofer"
-__copyright__ = "TUM Cyber-Physical Systems Group"
-__credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles, BMW Car@TUM"]
-__version__ = "0.4"
-__maintainer__ = "Sebastian Maierhofer"
-__email__ = "commonroad@lists.lrz.de"
-__status__ = "Released"
-
 
 class TestCommonRoadToSUMOConversion(unittest.TestCase):
     """Tests the conversion from a CommonRoad map to a SUMO .net.xml file
@@ -45,7 +37,7 @@ class TestCommonRoadToSUMOConversion(unittest.TestCase):
         if not os.path.isdir(self.out_path_test):
             os.makedirs(self.out_path_test)
 
-    def read_cr_file(self, cr_file_name: str, folder="sumo_test_files"):
+    def read_cr_file(self, cr_file_name: str, folder="test_maps/sumo"):
         """Load the osm file and convert it to a scenario."""
         if not self.scenario_name:
             self.scenario_name = cr_file_name
@@ -202,7 +194,7 @@ class TestCommonRoadToSUMOConversion(unittest.TestCase):
     # ])
     # def test_opendrive_source(self, cr_file_name: str, tls: List[int]):
     #     """Test with maps that have been converted from openDRIVE"""
-    #     config, wrapper = self.read_cr_file(cr_file_name, folder="opendrive_test_files")
+    #     config, wrapper = self.read_cr_file(cr_file_name, folder="opendrive")
     #     out = self.sumo_run(config, wrapper, tls)
     #     # print(err.getvalue())
     #     self.validate_output(out)

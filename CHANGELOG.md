@@ -1,5 +1,47 @@
 # Changelog
 
+## [0.6.0] - 2022-12-XX
+
+### Added
+- New test cases for the OpenDRIVE to CommonRoad conversion
+- New shortcut buttons for lanelet adding, merging, splitting, creating adjacent
+- Function to convert OSM to CommonRoad using SUMO
+- Convert lane speed limits in OpenDRIVE
+- Convert OpenDRIVE stop lines represented as object
+- Reading of protobuf CommonRoad scenarios
+- Support for commonroad-io 2022.3
+
+### Changed
+- User interface for adding and updating lanelets
+
+### Fixed
+- Preventing GUI crash when adding obstacle without existing scenario
+- Conversion of straight euler spiral 
+- Floating point error in computation of Cartesian points of lane border in OpenDRIVE2CR conversion
+- Various small bug fixes
+
+## [0.5.1] - 2022-05-20
+
+### Fixed
+- Switching shape of dynamic obstacle
+- Adding adjacent lanelet which already exists
+- Lanelet translation with missing x- or y-coordinate
+- Missing location information when storing a scenario
+- Various small bug fixes
+
+## [0.5] - 2022-03-06
+
+### Added
+- Dynamic loading of large maps
+- Adding of static obstacles
+- Individual colors for obstacles
+- Obstacle states can be changed by moving profiles in obstacle toolbox
+
+### Fixed
+- System crash if SUMO is available
+- Undo button works again
+- Various small bug fixes
+
 ## [0.4] - 2022-01-06
 
 ### Added

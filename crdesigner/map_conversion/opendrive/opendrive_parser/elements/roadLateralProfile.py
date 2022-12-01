@@ -1,20 +1,15 @@
 from crdesigner.map_conversion.opendrive.opendrive_parser.elements.road_record import RoadRecord
-
-__author__ = "Benjamin Orthen, Stefan Urban"
-__copyright__ = "TUM Cyber-Physical Systems Group"
-__credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles"]
-__version__ = "0.4"
-__maintainer__ = "Sebastian Maierhofer"
-__email__ = "commonroad@lists.lrz.de"
-__status__ = "Released"
+import warnings
 
 
 class LateralProfile:
-    """The lateral profile record contains a series of superelevation
-    and crossfall records which define the
+    """
+    The lateral profile record contains a series of superelevation and crossfall records which define the
     characteristics of the road surface's banking along the reference line.
-
     (Section 5.3.6 of OpenDRIVE 1.4)
+
+    Lateral profile and its components are not yet supported in CommonRoad! Thus, they are extracted from the
+    OpenDRIVE file but not used.
     """
 
     def __init__(self):
@@ -23,8 +18,15 @@ class LateralProfile:
         self._shapes = []
 
     @property
-    def superelevations(self):
-        """The superelevations of a LateralProfile."""
+    def superelevations(self) -> list:
+        """
+        The superelevations of a LateralProfile.
+
+        :getter: returns superelevations of the road
+        :setter: sets superelevations of the road
+        :type: instance of class Superelevations()
+        """
+        self._superelevations.sort(key=lambda x: x.start_pos)
         return self._superelevations
 
     @superelevations.setter
@@ -37,8 +39,15 @@ class LateralProfile:
         self._superelevations = value
 
     @property
-    def crossfalls(self):
-        """Crossfalls of a LateralProfile. """
+    def crossfalls(self) -> list:
+        """
+        Crossfalls of a LateralProfile.
+
+        :getter: returns crossfalls of the road
+        :setter: sets crossfalls of the road
+        :type: instance of class Crossfalls()
+        """
+        self._crossfalls.sort(key=lambda x: x.start_pos)
         return self._crossfalls
 
     @crossfalls.setter
@@ -51,8 +60,17 @@ class LateralProfile:
         self._crossfalls = value
 
     @property
-    def shapes(self):
-        """ """
+    def shapes(self) -> list:
+        """
+        Defined as the road section’s surface relative to the reference plane.
+        There may be several shape definitions at one s-position that have different t-values,
+        thereby describing the curvy shape of the road.
+
+        :getter: returns shape of the road
+        :getter: sets shape of the road
+        :type: instance of class Shape()
+        """
+        self._shapes.sort(key=lambda x: (x.start_pos, x.start_pos_t))
         return self._shapes
 
     @shapes.setter
@@ -72,10 +90,12 @@ class Superelevation(RoadRecord):
 
 
 class Crossfall(RoadRecord):
-    """The crossfall of the road is defined as the road
-    surface ́s angle relative to the t-axis.
-
+    """
+    The crossfall of the road is defined as the road surface ́s angle relative to the t-axis.
     (Section 5.3.6.2 of OpenDRIVE 1.4)
+
+    Crossfall does not exist anymore in OpenDRIVE 1.7! Crossfalls are now defined with the element <shape> which is
+    implemented by the Shape class.
     """
 
     def __init__(
@@ -83,16 +103,17 @@ class Crossfall(RoadRecord):
     ):
         super().__init__(*polynomial_coefficients, start_pos=start_pos)
         self.side = side
+        warnings.warn("Crossfalls are not an own element of OpenDRIVE anymore. They are defined within shapes!",
+                      DeprecationWarning)
 
     @property
     def side(self) -> str:
-        """The side of the crossfall.
+        """
+        The side of the crossfall.
 
-        Returns:
-          The side as a string.
-
-        Note:
-          Setter only allows to set the side for 'left', 'right' or 'both'.
+        :getter: returns the side as a string
+        :setter: sets the side, only allows to set the side for 'left', 'right' or 'both'
+        :type: string
         """
         return self._side
 
@@ -107,25 +128,17 @@ class Crossfall(RoadRecord):
 
 
 class Shape(RoadRecord):
-    """The shape of the road is defined as the road section’s surface
-    relative to the reference plane.
-
+    """
+    The shape of the road is defined as the road section’s surface relative to the reference plane.
     This shape may be described as a series of 3 order polynomials for a given "s" station.
-
-    The absolute position of a shape value is calculated by::
-
+    The absolute position of a shape value is calculated by:
        t = start_pos_t + dt
-
-    h_shape is the height above the reference path at a given position and
-    is calculated by::
-
+    h_shape is the height above the reference path at a given position and is calculated by:
        h_shape = a + b*dt + c*dt² + d*dt³
-
-    dt being the distance perpendicular to the reference line between the start of the
-    entry and the actual position.
-
+    dt being the distance perpendicular to the reference line between the start of the entry and the actual position.
     (Section 5.3.6.3 of OpenDRIVE 1.4)
 
+    :ivar start_pos_t: t-coordinate of start position
     """
 
     def __init__(
@@ -134,5 +147,13 @@ class Shape(RoadRecord):
         start_pos: float = None,
         start_pos_t: float = None,
     ):
+        """
+        Constructor of class shape.
+
+        :param polynomial_coefficients: coefficients of a polynomial function. If more than one argument is given, this
+            results in a tuple with the given arguments
+        :param start_pos: s-coordinate of start position
+        :param start_pos_t: t-coordinate of start position
+        """
         super().__init__(*polynomial_coefficients, start_pos=start_pos)
         self.start_pos_t = start_pos_t

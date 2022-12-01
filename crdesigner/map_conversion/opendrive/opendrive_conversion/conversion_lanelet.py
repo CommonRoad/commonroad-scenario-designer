@@ -1,31 +1,16 @@
-"""Module to enhance Lanelet class so it can be used
-for conversion from the OpenDRIVE format."""
-
-from typing import Tuple, Optional
-
+from typing import Tuple, Optional, Union
 import numpy as np
 from commonroad.scenario.lanelet import Lanelet, LaneletType, LineMarking
+from crdesigner.map_conversion.opendrive.opendrive_conversion.utils import CustomDefaultLaneletType
+from crdesigner.configurations.get_configs import get_configs
 
-__author__ = "Benjamin Orthen, Sebastian Maierhofer"
-__copyright__ = "TUM Cyber-Physical Systems Group"
-__credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles"]
-__version__ = "0.4"
-__maintainer__ = "Sebastian Maierhofer"
-__email__ = "commonroad@lists.lrz.de"
-__status__ = "Released"
+config = get_configs()
 
 
 class ConversionLanelet(Lanelet):
-    """Change some properties of the Lanelet class so that it can be used
-    to conversions to Lanelet. This means especially that lanelet_ids
-    can be other types than a natural number and that these ids can be changed
-    more than once.
-    Also adjacent neighbors and pre- and successor can be changed more than onc.
-
-    Args:
-
-    Returns:
-
+    """Change some properties of the Lanelet class so that it can be used to conversions to Lanelet. This means
+    especially that lanelet_ids can be other types than a natural number and that these ids can be changed
+    more than once. Adjacent neighbors and pre- and successor can be changed more than once.
     """
 
     # optimal_join_split_factor = 20
@@ -51,14 +36,28 @@ class ConversionLanelet(Lanelet):
         user_bidirectional=None,
         traffic_signs=None,
         traffic_lights=None,
+        custom_default_lanelet_types=CustomDefaultLaneletType(config.opendrive.general_lanelet_type_activ,
+                                                              config.opendrive.general_lanelet_type,
+                                                              config.opendrive.driving_default_lanelet_type,
+                                                              config.opendrive.lanelet_types_backwards_compatible),
+            speed=None,
     ):
         if lanelet_type is None:
             lanelet_type = {LaneletType.UNKNOWN}
+        self.parametric_lane_group = parametric_lane_group
+        self._default_lanelet_type = \
+            {LaneletType(custom_default_lanelet_types.general_lanelet_type)
+             if LaneletType(custom_default_lanelet_types.general_lanelet_type) is not None else LaneletType.UNKNOWN} \
+                if custom_default_lanelet_types.general_lanelet_type_activ else set()
+        self._driving_default_lanelet_type = LaneletType(custom_default_lanelet_types.driving_default_lanelet_type) \
+            if LaneletType(custom_default_lanelet_types.driving_default_lanelet_type) is not None \
+            else LaneletType.UNKNOWN
+        self._lanelet_types_backwards_compatible = custom_default_lanelet_types.lanelet_types_backwards_compatible
         super().__init__(
             left_vertices=left_vertices,
             center_vertices=center_vertices,
             right_vertices=right_vertices,
-            lanelet_id=1,
+            lanelet_id=lanelet_id,
             predecessor=predecessor,
             successor=successor,
             adjacent_left=adjacent_left,
@@ -75,16 +74,15 @@ class ConversionLanelet(Lanelet):
             traffic_lights=traffic_lights,
         )
 
-        self.parametric_lane_group = parametric_lane_group
-        self.lanelet_id = lanelet_id
+        self.speed = speed
 
     def __eq__(self, lanelet: "ConversionLanelet") -> bool:
         """Lanelets are equal if their id_ is equal.
 
-        Args:
-           lanelet: Lanelet to be compared to equality.
-        Returns:
-           True if id_ is equal.
+        :param lanelet: Lanelet to be compared to equality
+        :type lanelet: :class:`Lanelet`
+        :return: True if id_ is equal
+        :rtype: bool
         """
         if lanelet is None:
             return False
@@ -96,53 +94,61 @@ class ConversionLanelet(Lanelet):
     """
 
     @property
-    def lanelet_type(self):
+    def lanelet_type(self) -> LaneletType:
+        """Get the lanelet type
+
+        :return: The lanelet type.
+        :rtype: LaneletType
+        """
         return self._lanelet_type
 
     @lanelet_type.setter
     def lanelet_type(self, value: str):
-        if value == 'urban':
-            self._lanelet_type = {LaneletType.URBAN}
-        elif value == 'country':
-            self._lanelet_type = {LaneletType.COUNTRY}
-        elif value == 'highway':
-            self._lanelet_type = {LaneletType.HIGHWAY}
-        elif value == 'driving':
-            self._lanelet_type = {LaneletType.DRIVE_WAY}
-        elif value == 'mainCarriageWay':
-            self._lanelet_type = {LaneletType.MAIN_CARRIAGE_WAY, LaneletType.INTERSTATE}
+        if value in ['urban', 'country', 'highway', 'interstate', 'parking', 'sidewalk', 'crosswalk']:
+            self._lanelet_type = \
+                {LaneletType(value) if LaneletType(value) is not None else LaneletType.UNKNOWN}
+        elif value in ['restricted', 'mainCarriageWay', 'intersection']:
+            self._lanelet_type = \
+                {LaneletType(value) if LaneletType(value) is not None
+                 else LaneletType.UNKNOWN}.union(self._default_lanelet_type)
         elif value == 'entry':
-            self._lanelet_type = {LaneletType.ACCESS_RAMP, LaneletType.INTERSTATE}
+            self._lanelet_type = {LaneletType.ACCESS_RAMP}.union(self._default_lanelet_type)
         elif value == 'exit':
-            self._lanelet_type = {LaneletType.EXIT_RAMP, LaneletType.INTERSTATE}
+            self._lanelet_type = {LaneletType.EXIT_RAMP}.union(self._default_lanelet_type)
         elif value == 'onRamp':
-            self._lanelet_type = {LaneletType.ACCESS_RAMP, LaneletType.INTERSTATE}
+            self._lanelet_type = {LaneletType.ACCESS_RAMP}.union(self._default_lanelet_type)
         elif value == 'offRamp':
-            self._lanelet_type = {LaneletType.EXIT_RAMP, LaneletType.INTERSTATE}
+            self._lanelet_type = {LaneletType.EXIT_RAMP}.union(self._default_lanelet_type)
         elif value == 'connectingRamp':
-            self._lanelet_type = {LaneletType.ACCESS_RAMP, LaneletType.INTERSTATE}
+            self._lanelet_type = {LaneletType.ACCESS_RAMP}.union(self._default_lanelet_type)
         elif value == 'shoulder':
-            self._lanelet_type = {LaneletType.SHOULDER}
+            if self._lanelet_types_backwards_compatible:
+                self._lanelet_type = set()
+            else:
+                self._lanelet_type = {LaneletType.BORDER}
+        elif value == 'border':
+            if self._lanelet_types_backwards_compatible:
+                self._lanelet_type = set()
+            else:
+                self._lanelet_type = {LaneletType.BORDER}
         elif value == 'bus':
-            self._lanelet_type = {LaneletType.BUS_LANE}
+            self._lanelet_type = {LaneletType.BUS_LANE}.union(self._default_lanelet_type)
         elif value == 'stop':
-            self._lanelet_type = {LaneletType.BUS_STOP}
+            self._lanelet_type = {LaneletType.SHOULDER}.union(self._default_lanelet_type)
         elif value == 'biking':
             self._lanelet_type = {LaneletType.BICYCLE_LANE}
-        elif value == 'sidewalk':
-            self._lanelet_type = {LaneletType.SIDEWALK}
-        elif value == 'crosswalk':
-            self._lanelet_type = {LaneletType.CROSSWALK}
-        elif value == 'interstate':
-            self._lanelet_type = {LaneletType.INTERSTATE}
-        elif value == 'intersection':
-            self._lanelet_type = {LaneletType.INTERSECTION}
+        elif value == 'driving':
+            self._lanelet_type = {LaneletType(self._driving_default_lanelet_type)}
         else:
-            self._lanelet_type = {LaneletType.UNKNOWN}
+            self._lanelet_type = {LaneletType.UNKNOWN}.union(self._default_lanelet_type)
 
     @property
     def lanelet_id(self) -> int:
-        """Get or set id of this lanelet."""
+        """Get or set id of this lanelet.
+
+        :return: The ID of the lanelet.
+        :rtype: int
+        """
         return self._lanelet_id
 
     @lanelet_id.setter
@@ -152,7 +158,11 @@ class ConversionLanelet(Lanelet):
 
     @property
     def left_vertices(self) -> np.ndarray:
-        """Get or set right vertices of this lanelet."""
+        """Get or set right vertices of this lanelet.
+
+        :return: The left vertices of the lanelet.
+        :rtype: np.ndarray
+        """
         return self._left_vertices
 
     @left_vertices.setter
@@ -162,7 +172,11 @@ class ConversionLanelet(Lanelet):
 
     @property
     def right_vertices(self) -> np.ndarray:
-        """Get or set right vertices of this lanelet."""
+        """Get or set right vertices of this lanelet.
+
+        :return: The right vertices of the lanelet.
+        :rtype: np.ndarray
+        """
         return self._right_vertices
 
     @right_vertices.setter
@@ -172,7 +186,11 @@ class ConversionLanelet(Lanelet):
 
     @property
     def center_vertices(self) -> np.ndarray:
-        """Get or set center vertices of this lanelet."""
+        """Get or set center vertices of this lanelet.
+
+        :return: The center vertices of the lanelet.
+        :rtype: np.ndarray
+        """
         return self._center_vertices
 
     @center_vertices.setter
@@ -182,7 +200,11 @@ class ConversionLanelet(Lanelet):
 
     @property
     def predecessor(self) -> list:
-        """Set or get the predecessor."""
+        """Set or get the predecessor.
+
+        :return: A list with IDs of the predecessors.
+        :rtype: list
+        """
         return self._predecessor
 
     @predecessor.setter
@@ -192,6 +214,11 @@ class ConversionLanelet(Lanelet):
 
     @property
     def successor(self) -> list:
+        """Set or get the successor.
+
+        :return: A list with IDs of the successors.
+        :rtype: list
+        """
         return self._successor
 
     @successor.setter
@@ -201,7 +228,11 @@ class ConversionLanelet(Lanelet):
 
     @property
     def adj_left(self) -> int:
-        """Set or get adjacent left lanelet."""
+        """Set or get adjacent left lanelet.
+
+        :return: The ID of the left adjacent lanelet.
+        :rtype: int
+        """
         return self._adj_left
 
     @adj_left.setter
@@ -212,7 +243,11 @@ class ConversionLanelet(Lanelet):
     @property
     def adj_left_same_direction(self) -> bool:
         """Set or get if adjacent left lanelet has the same direction
-        as this lanelet."""
+        as this lanelet.
+
+        :return: Whether the left adjacent lanelet has the same direction.
+        :rtype: bool
+        """
         return self._adj_left_same_direction
 
     @adj_left_same_direction.setter
@@ -222,7 +257,11 @@ class ConversionLanelet(Lanelet):
 
     @property
     def adj_right(self) -> int:
-        """Set or get adjacent right lanelet."""
+        """Set or get adjacent right lanelet.
+
+        :return: The ID of the right adjacent lanelet.
+        :rtype: int
+        """
         return self._adj_right
 
     @adj_right.setter
@@ -232,8 +271,20 @@ class ConversionLanelet(Lanelet):
     @property
     def adj_right_same_direction(self) -> bool:
         """Set or get if adjacent right lanelet has the same direction
-        as this lanelet."""
+        as this lanelet.
+
+        :return: Whether the right adjacent lanelet has the same direction.
+        :rtype: bool
+        """
         return self._adj_right_same_direction
+
+    @property
+    def speed(self) -> float:
+        return self._speed
+
+    @speed.setter
+    def speed(self, s):
+        self._speed = s
 
     @adj_right_same_direction.setter
     def adj_right_same_direction(self, same: bool):
@@ -246,13 +297,11 @@ class ConversionLanelet(Lanelet):
         """Concatenate this lanelet with lanelet_conc and assign the
         new lanelet_id to the resulting lanelet.
 
-        Args:
-          lanelet_conc: Lanelet which will be included.
-          extend_plane_group: Whether to extend the parametric_lane_group of this lanelet
-            with the parametric lanes of the lanelet_conc.parametric_lane_group.
-          lanelet_conc: "ConversionLanelet":
-          # lanelet_id: str:  (Default value = -1)
-          extend_plane_group: bool:  (Default value = True)
+        :param lanelet_conc: Lanelet which will be included.
+        :type lanelet_conc: :class:`ConversionLanelet`
+        :param extend_plane_group: Whether to extend the parametric_lane_group of this lanelet with the parametric lanes
+            of the lanelet_conc.parametric_lane_group. Default is True.
+        :type extend_plane_group: bool
         """
         # check connectedness
         if np.isclose(self.left_vertices[-1], lanelet_conc.left_vertices[0]).all():
@@ -278,28 +327,26 @@ class ConversionLanelet(Lanelet):
     def calc_width_at_end(self) -> float:
         """Calc width of lanelet at its end.
 
-        Returns:
-          Width at end of lanelet.
-
+        :return: Width at end of lanelet
+        :rtype: float
         """
         return self.calc_width(self.length)
 
     def calc_width_at_start(self) -> float:
         """Calc width of lanelet at its start.
 
-        Returns:
-          Width at start of lanelet.
-
+        :return: Width at start of lanelet
+        :rtype: float
         """
         return self.calc_width(0)
 
     def calc_width(self, s_pos: float) -> float:
         """Calc width at position s_pos.
 
-        Args:
-          s_pos: Position in curve parameter ds.
-        Returns:
-          Width at postiion s_pos.
+        :param s_pos: Position in curve parameter ds
+        :type s_pos: float
+        :return: Width at position s_pos
+        :rtype: float
         """
         inner_pos = self.calc_border("inner", s_pos)[0]
         outer_pos = self.calc_border("outer", s_pos)[0]
@@ -309,16 +356,16 @@ class ConversionLanelet(Lanelet):
     def length(self) -> float:
         """Get length of lanelet by calculating length of ParametricLaneGroup.
 
-        Returns:
-          Length of lanelet.
+        :return: Length of lanelet
+        :rtype: float
         """
         return self.parametric_lane_group.length
 
     def has_zero_width_everywhere(self) -> bool:
         """Checks if width is zero at every point of its ParametricLaneGroup.
 
-        Returns:
-          True if every ParametricLane has width_coefficients equal to only zero.
+        :return: True if every ParametricLane has width_coefficients equal to only zero.
+        :rtype: bool
         """
         return self.parametric_lane_group.has_zero_width_everywhere()
 
@@ -327,38 +374,38 @@ class ConversionLanelet(Lanelet):
     ) -> Tuple[Optional[float], Optional[float]]:
         """Get the earliest point of the lanelet where the width change is zero.
 
-        Args:
-          reverse: True if checking starts from the end of the lanelet.
-          reference_width: Width for which width at zero width change position has
-            to be greater as.
-        Returns:
-          Position of lanelet (in curve parameter ds) where width change is zero.
+        :param reverse: True if checking start from the end of the lanelet
+        :type reverse: bool
+        :param reference_width: Width for which width at zero width change position has to be greater as
+        :type reference_width: float
+        :return: Position of lanelet (in curve parameter ds) where width change is zero.
+        :rtype: Tuple[Optional[float], Optional[float]]
         """
         return self.parametric_lane_group.first_zero_width_change_position(
             reverse, reference_width
         )
 
     def maximum_width(self) -> float:
-        """Get maximum width of a the lanelet.
+        """Get width by calculating maximum width of parametric lane group.
 
-        Get width by calculating maximum width of parametric lane group.
-        Returns:
-          Maximum width of lanelet.
+        :return: Maximum width of lanelet
+        :rtype: float
         """
         return self.parametric_lane_group.maximum_width()
 
     def optimal_join_split_values(
         self, is_split: bool, split_and_join: bool, reference_width: float
-    ):
-        """Calculate an optimal value, where the lanelet split or join starts
-          or ends, respectively.
+    ) -> Tuple[Union[float, int], float]:
+        """Calculate an optimal value, where the lanelet split or join starts or ends, respectively.
 
-        Args:
-          is_split: True if lanelet splits from another lanelet, otherwise
-            False if it is a join.
-          split_and_join: True if lanelet has a split at the start and join at the end.
-          reference_width: Width for which width at zero width change position has
-            to be greater as.
+        :param is_split: True if lanelet splits from another lanelet, otherwise False if it is a join
+        :type is_split: bool
+        :param split_and_join: True if lanelet has a split at the start and join at the end.
+        :type split_and_join: bool
+        :param reference_width: Width for which width at zero width change position has to be greater as
+        :type reference_width: float
+        :return: The merge position and merge width.
+        :rtype: Tuple[Union[float, int], float]
         """
 
         merge_pos, merge_width = self.first_zero_width_change_position(
@@ -386,14 +433,21 @@ class ConversionLanelet(Lanelet):
         mirror_interval: Tuple[float, float],
         distance: np.ndarray,
         adjacent_lanelet: "ConversionLanelet",
+        precision: float
     ):
         """Move vertices of one border by mirroring other border with
         a specified distance.
 
-        Args:
-          mirror_border: Which border to mirror, either 'left' or 'right'.
-          interval: Tuple of two values, specifying start and end of mirroring.
-          distance: Specifying distance at start and at end of mirroring.
+        :param mirror_border: Which border to mirror, either 'left' or 'right'.
+        :type mirror_border: str
+        :param mirror_interval: Tuple of two values, specifying start and end of mirroring.
+        :type mirror_interval: Tuple[float, float]
+        :param distance: Specifying distance at start and at end of mirroring
+        :type distance: np.ndarray
+        :param adjacent_lanelet: The adjacent conversion lanelet.
+        :type adjacent_lanelet: ConversionLanelet
+        :param precision: Specifies precision with which to convert the plane group to lanelet w. mirroring
+        :type precision: float
         """
         if mirror_border == "left":
             distance[:] = [-1 * x for x in distance]
@@ -403,27 +457,27 @@ class ConversionLanelet(Lanelet):
             distance=distance,
             mirror_interval=mirror_interval,
             adjacent_lanelet=adjacent_lanelet,
+            precision=precision,
         )
 
         self.left_vertices = lanelet.left_vertices
         self.center_vertices = lanelet.center_vertices
         self.right_vertices = lanelet.right_vertices
 
-    def calc_border(self, border: str, s_pos: float, width_offset: float = 0.0, compute_curvature=True):
-        """Calc border position according to parametric_lane_group.
+    def calc_border(self, border: str, s_pos: float, width_offset: float = 0.0,
+                    compute_curvature=True) -> Tuple[Tuple[float, float], float, float, float]:
+        """
+        Calc border position according to parametric_lane_group. Note: This does not consider borders which have been
+        moved due to joining / splitting.
 
-        Note: This does not consider borders which have been moved
-         due to joining / splitting.
-
-        Args:
-          border: Which border to calculate (inner or outer).
-          s_pos: Position of parameter ds where to calc the
-            Cartesian coordinates
-          width_offset: Offset to add to calculated width in reference
-           to the reference border. (Default value = 0.0)
-
-        Returns:
-          Cartesian coordinates of point on inner border
-            and tangential direction, too.
+        :param border: Which border to calculate (inner or outer):
+        :type border: str
+        :param s_pos: Position of parameter ds where to calc the cartesian coordinates
+        :type s_pos: float
+        :param width_offset: Offset to add to calculated width in reference to the reference border, default is 0.0.
+        :type width_offset: float
+        :param compute_curvature: Boolean indicating whether curvature should be computed
+        :return: Cartesian coordinates of point on inner border and tangential direction.
+        :rtype: Tuple[Tuple[float, float], float, float, float]
         """
         return self.parametric_lane_group.calc_border(border, s_pos, width_offset, compute_curvature=compute_curvature)
