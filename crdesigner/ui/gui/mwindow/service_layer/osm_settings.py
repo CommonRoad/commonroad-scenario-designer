@@ -19,6 +19,7 @@ from crdesigner.ui.gui.mwindow.service_layer.osm_gui_modules.GUI_resources.stree
 from crdesigner.ui.gui.mwindow.service_layer.osm_gui_modules.GUI_resources.sublayer_types import Ui_Dialog \
     as Sublayer_street_types
 
+import yaml
 
 class EditStreetTypes:
     """
@@ -479,9 +480,48 @@ class OSMSettings:
         if self.has_valid_entries():
             self.save_to_config()
             #self.close()
+            self.save_config_to_custom_settings()
         else:
             print("invalid settings")
 
+    def save_config_to_custom_settings(self):
+        window = self.window
+        with open('crdesigner/configurations/custom_settings_osm2cr.yaml') as f:
+            data = yaml.load(f, Loader=yaml.FullLoader)
+        data['Benchmark_id'] = window.le_benchmark_id.text()
+        data['Author']= window.le_author.text()
+        data['Affilation'] = window.le_affiliation.text()
+        data['Source'] = window.le_source.text()
+        data['Tags'] = window.le_tags.text()
+        data['Timestepsize'] = window.sb_timestep_size.value()
+
+        data['Load_tunnels'] = window.chk_load_tunnels.isChecked()
+        data['Make_contiguous'] = window.chk_make_contiguous.isChecked()
+        data['Split_at_corner'] = window.chk_split_corners.isChecked()
+        data['Use_restrictions'] = window.chk_osm_restrictions.isChecked()
+
+        data['Interpolation_distance'] = window.sb_interpolation_distance.value()
+        data['Compression_threshold'] = window.sb_compression_threshold.value()
+        data['Export_in_utm'] = window.chk_utm_coordinates.isChecked()
+        data['Filter'] = window.chk_filter_points.isChecked()
+
+        data['Earth_radius'] = window.sb_earth_radius.value()
+        data['Delete_short_edges'] = window.chk_delete_short_edges.isChecked()
+        data['Interpolation_distance_internal'] = (window.sb_internal_interpolation_distance.value())
+        data['Bezier_parameter'] = window.sb_bezier_parameter.value()
+        data['Intersection_distance'] = window.sb_intersection_distance.value()
+        data['Intersection_cropping_with_respect_to_roads'] = (window.chk_intersection_distance_respect.isChecked())
+        data['Soft_angle_threshold'] = window.sb_soft_angle_treshold.value()
+        data['Lane_segment_angle'] = window.sb_lane_segment_angle_treshold.value()
+        data['Cluster_length'] = window.sb_cluster_length.value()
+        data['Least_cluster_length'] = window.sb_cluster_length_treshold.value()
+        data['Merge_distance'] = window.sb_merge_distance.value()
+
+        data['Extract_sublayer'] = window.chk_extract_sublayer.isChecked()
+        data['Intersection_distance_sublayer'] = window.sb_intersection_distance_sublayer.value()
+
+        with open('crdesigner/configurations/custom_settings_osm2cr.yaml', 'w') as yaml_file:
+            yaml_file.write(yaml.dump(data, default_flow_style=False))
     def save_button(self) -> None:
         """
         saves settings
