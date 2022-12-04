@@ -457,7 +457,7 @@ class ObstacleToolbox(QDockWidget):
     def delete_point(self):
         """
         deletes right-clicked point
-         """
+        """
         time = []
         profile = []
         state_variable_name = self.obstacle_toolbox_ui.obstacle_state_variable.currentText()

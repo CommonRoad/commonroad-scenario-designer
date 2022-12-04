@@ -58,6 +58,7 @@ def update_toolbox_scenarios_service_layer(mwindow):
     scenario = mwindow.animated_viewer_wrapper.cr_viewer.current_scenario
     mwindow.road_network_toolbox.refresh_toolbox(scenario)
     mwindow.obstacle_toolbox.refresh_toolbox(scenario)
+    mwindow.obstacle_profile_toolbox.refresh_toolbox(scenario)
     mwindow.map_converter_toolbox.refresh_toolbox(scenario)
     if SUMO_AVAILABLE:
         mwindow.obstacle_toolbox.sumo_simulation.scenario = scenario

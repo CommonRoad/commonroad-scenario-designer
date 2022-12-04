@@ -102,7 +102,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
     def initialize_toolboxes(self):
         self.road_network_toolbox.initialize_toolbox()
         self.obstacle_toolbox.initialize_toolbox()
-        #self.obastacle_profile_toolbox.initialize_toolbox()
+        self.obastacle_profile_toolbox.initialize_toolbox()
 
     def check_scenario(self, scenario) -> int:
         """
