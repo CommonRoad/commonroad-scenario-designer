@@ -2,13 +2,12 @@ from pathlib import Path
 import pickle
 import subprocess
 from typing import Optional
-
+import warnings
 from lxml import etree
 
-from PyQt5.QtWidgets import *
-from PyQt5.QtCore import *
+from PyQt5.QtWidgets import QDockWidget, QMainWindow, QFileDialog, QMessageBox
+from PyQt5.QtCore import Qt
 
-from commonroad.scenario.traffic_sign import *
 from commonroad.scenario.scenario import Scenario
 
 from crdesigner.ui.gui.mwindow.toolboxes.converter_toolbox.map_converter_toolbox_ui import MapConversionToolboxUI
