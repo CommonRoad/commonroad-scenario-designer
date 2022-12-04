@@ -1,4 +1,6 @@
+from pathlib import Path
 import pickle
+import subprocess
 from typing import Optional
 
 from lxml import etree
@@ -77,6 +79,7 @@ class MapConversionToolbox(QDockWidget):
         self.converter_toolbox.button_load_osm_file.clicked.connect(lambda: self.load_osm_file())
         self.converter_toolbox.button_load_osm_edit_state.clicked.connect(lambda: self.load_osm_edit_state())
         self.converter_toolbox.button_start_osm_conversion.clicked.connect(lambda: self.convert_osm_to_cr())
+        self.converter_toolbox.button_start_osm_conversion_with_sumo_parser.clicked.connect(lambda: self.convert_osm_to_cr_with_sumo())
         self.converter_toolbox.button_open_osm_settings.clicked.connect(lambda: self.open_osm_settings())
 
         self.converter_toolbox.button_load_opendrive.clicked.connect(lambda: self.load_open_drive())
@@ -169,6 +172,84 @@ class MapConversionToolbox(QDockWidget):
             warnings.warn("OSM edit mode not available!")
         self.converter_toolbox.osm_loading_status.setText("no file selected")
         self.osm_file = None
+    
+    def convert_osm_to_cr_with_sumo(self) -> None:
+        """
+        Starts the OSM conversion process using SUMO Parser by picking a file and showing the edge edit GUI.
+        """
+        try:
+            if self.osm_file is not None:  
+              self.converter_toolbox.progress.setHidden(False)  
+              self.converter_toolbox.progress.setValue(5)
+              scenario = self.osm_to_commonroad_using_sumo(self.osm_file)
+              self.converter_toolbox.progress.setValue(89)
+              self.callback(scenario)
+              self.converter_toolbox.progress.setValue(100)
+              self.converter_toolbox.progress.setHidden(True)  
+            else:
+                QMessageBox.warning(
+                    self,
+                    "Warning",
+                    "No file selected.",
+                    QMessageBox.Ok)
+                return
+        except ValueError as e:
+            QMessageBox.critical(
+                self,
+                "Warning",
+                "Map unreadable: " + str(e),
+                QMessageBox.Ok)
+            return 
+
+    def osm_to_commonroad_using_sumo(self,input_file: str) -> Scenario:
+        """
+        Converts OpenStreetMap file to CommonRoad scenario using SUMO: SUMO offers the tool netconvert
+    (https://sumo.dlr.de/docs/netconvert.html), which can be used to convert an OSM-file to OpenDrive (.xodr).
+    This OpenDrive-file is then transformed to CommonRoad using the implementation here.
+    Compared to the OSM-to-CommonRoad-conversion implemented here (see method :osm_to_commonroad), the
+    road-interpolation is different. Furthermore, motorway services ("Raststätten") are currently not parsed
+    when using :osm_to_commonroad.
+
+    @param input_file: Path to OpenStreetMap file
+    @return: CommonRoad scenario
+        """
+        input_file_pth = Path(input_file)
+        scenario_name = str(input_file_pth.name)
+        opendrive_file = str(input_file_pth.parent / f"{scenario_name}.xodr")
+        self.converter_toolbox.progress.setValue(20)
+        # convert to OpenDRIVE file using netconvert
+        subprocess.check_output(
+            [
+                "netconvert",
+                "--osm-files",
+                input_file,
+                "--opendrive-output",
+                opendrive_file,
+                "--junctions.scurve-stretch",
+                "1.0",
+            ]
+        )
+        self.converter_toolbox.progress.setValue(35)
+        return self.opendrive_to_commonroad(opendrive_file)
+
+    def opendrive_to_commonroad(self,input_file: str) -> Scenario:
+        """
+        Converts OpenDRIVE file to CommonRoad
+
+        @param input_file: Path to OpenDRIVE file
+        @return: CommonRoad scenario
+        """
+        opendrive = parse_opendrive(input_file)
+
+        # load configs
+        configs = get_configs()
+        self.converter_toolbox.progress.setValue(40)
+        road_network = Network(configs.opendrive)
+        self.converter_toolbox.progress.setValue(50)
+        road_network.load_opendrive(opendrive)
+        self.converter_toolbox.progress.setValue(65)
+
+        return road_network.export_commonroad_scenario()            
 
     def edge_edit_embedding(self, graph: rg.Graph):
         """
