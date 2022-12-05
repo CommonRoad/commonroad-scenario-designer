@@ -178,7 +178,7 @@ class MapConversionToolbox(QDockWidget):
         Starts the OSM conversion process using SUMO Parser by picking a file and showing the edge edit GUI.
         """
         offset = 5
-        proportion = 0.84
+        proportion = 0.47
         try:
             if self.osm_file is not None:  
               self.converter_toolbox.progress.setHidden(False)  

@@ -1,6 +1,6 @@
 import subprocess
 from pathlib import Path
-from typing import Callable
+from typing import Callable, Optional
 
 from lxml import etree
 import uuid
@@ -86,7 +86,7 @@ def commonroad_to_lanelet(input_file: str, output_name: str, proj: str):
         )
 
 
-def opendrive_to_commonroad(input_file: str,progressReport: Callable[[int],None]) -> Scenario:
+def opendrive_to_commonroad(input_file: str,progressReport: Optional[Callable[[int],None]] = None) -> Scenario:
     """
     Converts OpenDRIVE file to CommonRoad
 
@@ -94,12 +94,12 @@ def opendrive_to_commonroad(input_file: str,progressReport: Callable[[int],None]
     @return: CommonRoad scenario
     """
     opendrive = parse_opendrive(input_file)
-
+    progressReport(5)
     # load configs
     configs = get_configs()
-    progressReport(70)
+    progressReport(20)
     road_network = Network(configs.opendrive)
-    progressReport(89)
+    progressReport(50)
     road_network.load_opendrive(opendrive)
     progressReport(100)
     return road_network.export_commonroad_scenario()
@@ -152,7 +152,7 @@ def osm_to_commonroad(input_file: str) -> Scenario:
     return convert_to_scenario(osm_graph)
 
 
-def osm_to_commonroad_using_sumo(input_file: str, progressReport: Callable[[int],None]) -> Scenario:
+def osm_to_commonroad_using_sumo(input_file: str, progressReport: Optional[Callable[[int],None]] = None) -> Scenario:
     """
     Converts OpenStreetMap file to CommonRoad scenario using SUMO: SUMO offers the tool netconvert
     (https://sumo.dlr.de/docs/netconvert.html), which can be used to convert an OSM-file to OpenDrive (.xodr).
@@ -168,7 +168,7 @@ def osm_to_commonroad_using_sumo(input_file: str, progressReport: Callable[[int]
     input_file_pth = Path(input_file)
     scenario_name = str(input_file_pth.name)
     opendrive_file = str(input_file_pth.parent / f"{scenario_name}.xodr")
-    progressReport(35)
+    progressReport(50)
     # convert to OpenDRIVE file using netconvert
     subprocess.check_output(
         [
@@ -181,5 +181,5 @@ def osm_to_commonroad_using_sumo(input_file: str, progressReport: Callable[[int]
             "1.0",
         ]
     )
-    progressReport(52)
-    return opendrive_to_commonroad(opendrive_file, lambda progress_value: progressReport(progress_value))
+    progressReport(100)
+    return opendrive_to_commonroad(opendrive_file, lambda progress_value: progressReport(100 + 0.78*progress_value))
