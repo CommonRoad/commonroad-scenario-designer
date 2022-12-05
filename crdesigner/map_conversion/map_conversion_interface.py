@@ -189,7 +189,9 @@ def osm_to_commonroad_using_sumo(input_file: str, progressReport: Optional[Calla
     )
     if progressReport is not None:
         progressReport(100)
-    if progressReport is not None:    
-        return opendrive_to_commonroad(opendrive_file, lambda progress_value: progressReport(100 + 0.78*progress_value))
+    if progressReport is None:    
+        subProgressReport = None
     else:
-        return opendrive_to_commonroad(opendrive_file)    
+        subProgressReport = lambda progress_value: progressReport(100 + 0.78*progress_value)
+
+    return opendrive_to_commonroad(opendrive_file, subProgressReport)
