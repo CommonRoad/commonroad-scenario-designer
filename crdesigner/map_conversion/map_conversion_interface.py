@@ -1,5 +1,6 @@
 import subprocess
 from pathlib import Path
+from typing import Callable
 
 from lxml import etree
 import uuid
@@ -85,7 +86,7 @@ def commonroad_to_lanelet(input_file: str, output_name: str, proj: str):
         )
 
 
-def opendrive_to_commonroad(input_file: str) -> Scenario:
+def opendrive_to_commonroad(input_file: str,progressReport: Callable[[int],None]) -> Scenario:
     """
     Converts OpenDRIVE file to CommonRoad
 
@@ -97,8 +98,9 @@ def opendrive_to_commonroad(input_file: str) -> Scenario:
     # load configs
     configs = get_configs()
     road_network = Network(configs.opendrive)
+    progressReport(57)
     road_network.load_opendrive(opendrive)
-
+    progressReport(70)
     return road_network.export_commonroad_scenario()
 
 
@@ -149,7 +151,7 @@ def osm_to_commonroad(input_file: str) -> Scenario:
     return convert_to_scenario(osm_graph)
 
 
-def osm_to_commonroad_using_sumo(input_file: str) -> Scenario:
+def osm_to_commonroad_using_sumo(input_file: str, progressReport: Callable[[int],None]) -> Scenario:
     """
     Converts OpenStreetMap file to CommonRoad scenario using SUMO: SUMO offers the tool netconvert
     (https://sumo.dlr.de/docs/netconvert.html), which can be used to convert an OSM-file to OpenDrive (.xodr).
@@ -162,10 +164,10 @@ def osm_to_commonroad_using_sumo(input_file: str) -> Scenario:
     @return: CommonRoad scenario
     """
     input_file_pth = Path(input_file)
-
+    progressReport(5)
     scenario_name = str(input_file_pth.name)
     opendrive_file = str(input_file_pth.parent / f"{scenario_name}.xodr")
-
+    progressReport(19)
     # convert to OpenDRIVE file using netconvert
     subprocess.check_output(
         [
@@ -178,4 +180,5 @@ def osm_to_commonroad_using_sumo(input_file: str) -> Scenario:
             "1.0",
         ]
     )
-    return opendrive_to_commonroad(opendrive_file)
+    progressReport(46)
+    return opendrive_to_commonroad(opendrive_file, lambda progress_value: progressReport(progress_value))

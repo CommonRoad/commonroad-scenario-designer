@@ -9,6 +9,7 @@ from PyQt5.QtWidgets import QDockWidget, QMainWindow, QFileDialog, QMessageBox
 from PyQt5.QtCore import Qt
 
 from commonroad.scenario.scenario import Scenario
+from crdesigner.map_conversion.map_conversion_interface import osm_to_commonroad_using_sumo
 
 from crdesigner.ui.gui.mwindow.toolboxes.converter_toolbox.map_converter_toolbox_ui import MapConversionToolboxUI
 from crdesigner.ui.gui.mwindow.service_layer.util import select_local_file
@@ -179,10 +180,9 @@ class MapConversionToolbox(QDockWidget):
         try:
             if self.osm_file is not None:  
               self.converter_toolbox.progress.setHidden(False)  
-              self.converter_toolbox.progress.setValue(5)
-              scenario = self.osm_to_commonroad_using_sumo(self.osm_file)
-              self.converter_toolbox.progress.setValue(89)
-              self.callback(scenario)
+              scenario = osm_to_commonroad_using_sumo(self.osm_file, lambda progress_value: self.converter_toolbox.progress.setValue(progress_value))
+              self.converter_toolbox.progress.setValue(95)
+              self.callback(scenario)  
               self.converter_toolbox.progress.setValue(100)
               self.converter_toolbox.progress.setHidden(True)  
             else:
@@ -199,56 +199,6 @@ class MapConversionToolbox(QDockWidget):
                 "Map unreadable: " + str(e),
                 QMessageBox.Ok)
             return 
-
-    def osm_to_commonroad_using_sumo(self,input_file: str) -> Scenario:
-        """
-        Converts OpenStreetMap file to CommonRoad scenario using SUMO: SUMO offers the tool netconvert
-    (https://sumo.dlr.de/docs/netconvert.html), which can be used to convert an OSM-file to OpenDrive (.xodr).
-    This OpenDrive-file is then transformed to CommonRoad using the implementation here.
-    Compared to the OSM-to-CommonRoad-conversion implemented here (see method :osm_to_commonroad), the
-    road-interpolation is different. Furthermore, motorway services ("Raststätten") are currently not parsed
-    when using :osm_to_commonroad.
-
-    @param input_file: Path to OpenStreetMap file
-    @return: CommonRoad scenario
-        """
-        input_file_pth = Path(input_file)
-        scenario_name = str(input_file_pth.name)
-        opendrive_file = str(input_file_pth.parent / f"{scenario_name}.xodr")
-        self.converter_toolbox.progress.setValue(20)
-        # convert to OpenDRIVE file using netconvert
-        subprocess.check_output(
-            [
-                "netconvert",
-                "--osm-files",
-                input_file,
-                "--opendrive-output",
-                opendrive_file,
-                "--junctions.scurve-stretch",
-                "1.0",
-            ]
-        )
-        self.converter_toolbox.progress.setValue(35)
-        return self.opendrive_to_commonroad(opendrive_file)
-
-    def opendrive_to_commonroad(self,input_file: str) -> Scenario:
-        """
-        Converts OpenDRIVE file to CommonRoad
-
-        @param input_file: Path to OpenDRIVE file
-        @return: CommonRoad scenario
-        """
-        opendrive = parse_opendrive(input_file)
-
-        # load configs
-        configs = get_configs()
-        self.converter_toolbox.progress.setValue(40)
-        road_network = Network(configs.opendrive)
-        self.converter_toolbox.progress.setValue(50)
-        road_network.load_opendrive(opendrive)
-        self.converter_toolbox.progress.setValue(65)
-
-        return road_network.export_commonroad_scenario()            
 
     def edge_edit_embedding(self, graph: rg.Graph):
         """
