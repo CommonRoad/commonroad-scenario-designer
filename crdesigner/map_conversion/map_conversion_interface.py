@@ -97,10 +97,11 @@ def opendrive_to_commonroad(input_file: str,progressReport: Callable[[int],None]
 
     # load configs
     configs = get_configs()
-    road_network = Network(configs.opendrive)
-    progressReport(57)
-    road_network.load_opendrive(opendrive)
     progressReport(70)
+    road_network = Network(configs.opendrive)
+    progressReport(89)
+    road_network.load_opendrive(opendrive)
+    progressReport(100)
     return road_network.export_commonroad_scenario()
 
 
@@ -163,11 +164,11 @@ def osm_to_commonroad_using_sumo(input_file: str, progressReport: Callable[[int]
     @param input_file: Path to OpenStreetMap file
     @return: CommonRoad scenario
     """
-    input_file_pth = Path(input_file)
     progressReport(5)
+    input_file_pth = Path(input_file)
     scenario_name = str(input_file_pth.name)
     opendrive_file = str(input_file_pth.parent / f"{scenario_name}.xodr")
-    progressReport(19)
+    progressReport(35)
     # convert to OpenDRIVE file using netconvert
     subprocess.check_output(
         [
@@ -180,5 +181,5 @@ def osm_to_commonroad_using_sumo(input_file: str, progressReport: Callable[[int]
             "1.0",
         ]
     )
-    progressReport(46)
+    progressReport(52)
     return opendrive_to_commonroad(opendrive_file, lambda progress_value: progressReport(progress_value))

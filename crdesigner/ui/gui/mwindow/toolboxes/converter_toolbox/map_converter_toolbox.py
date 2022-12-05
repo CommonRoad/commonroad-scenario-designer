@@ -177,10 +177,12 @@ class MapConversionToolbox(QDockWidget):
         """
         Starts the OSM conversion process using SUMO Parser by picking a file and showing the edge edit GUI.
         """
+        offset = 5
+        proportion = 0.84
         try:
             if self.osm_file is not None:  
               self.converter_toolbox.progress.setHidden(False)  
-              scenario = osm_to_commonroad_using_sumo(self.osm_file, lambda progress_value: self.converter_toolbox.progress.setValue(progress_value))
+              scenario = osm_to_commonroad_using_sumo(self.osm_file, lambda progress_value: self.converter_toolbox.progress.setValue(offset + proportion*progress_value))
               self.converter_toolbox.progress.setValue(95)
               self.callback(scenario)  
               self.converter_toolbox.progress.setValue(100)
