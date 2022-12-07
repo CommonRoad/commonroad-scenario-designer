@@ -377,12 +377,7 @@ class ObstacleToolbox(QDockWidget):
                 del state.acceleration
                 del state.slip_angle
                 del state.yaw_rate
-        elif USING_KS:
-            vehicle = VehicleDynamics.KS(VehicleType.FORD_ESCORT)
-            if state_list[0] == state_list[-1]:
-                del state.yaw_rate
-                del state.slip_angle
-                del state.acceleration
+
 
         else:
             return
