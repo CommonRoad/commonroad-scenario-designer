@@ -485,6 +485,9 @@ class OSMSettings:
             print("invalid settings")
 
     def save_config_to_custom_settings(self):
+        """
+        saves changed settings to yaml file so that it opens the crdesigner with the changed settings
+        """
         window = self.window
         with open('crdesigner/configurations/custom_settings_osm2cr.yaml') as f:
             data = yaml.load(f, Loader=yaml.FullLoader)
@@ -520,6 +523,17 @@ class OSMSettings:
         data['Extract_sublayer'] = window.chk_extract_sublayer.isChecked()
         data['Intersection_distance_sublayer'] = window.sb_intersection_distance_sublayer.value()
 
+        with open('crdesigner/configurations/custom_settings_osm2cr.yaml', 'w') as yaml_file:
+            yaml_file.write(yaml.dump(data, default_flow_style=False))
+
+    def apply_set_to_default(self):
+        '''
+        the variables i config.py will be changed back to the default values, not the file itself
+        '''
+        with open('crdesigner/configurations/default_settings_osm2cr.yaml') as f:
+            data = yaml.load(f, Loader=yaml.FullLoader)
+        for key, value in data.items():
+            setattr(config, key.upper(), value)
         with open('crdesigner/configurations/custom_settings_osm2cr.yaml', 'w') as yaml_file:
             yaml_file.write(yaml.dump(data, default_flow_style=False))
     def save_button(self) -> None:
