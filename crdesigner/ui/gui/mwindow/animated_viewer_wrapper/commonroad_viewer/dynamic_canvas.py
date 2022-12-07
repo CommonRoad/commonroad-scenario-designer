@@ -1,4 +1,5 @@
 import copy
+import math
 from typing import List, Union, Set
 
 import scipy.version
@@ -6,6 +7,7 @@ from PyQt5.QtWidgets import QSizePolicy
 from PyQt5.QtCore import Qt
 from PyQt5 import QtCore
 import numpy as np
+from commonroad.scenario.state import InputState
 from matplotlib.backend_bases import MouseButton
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
@@ -677,7 +679,7 @@ class DynamicCanvas(FigureCanvas):
             self.mpl_disconnect(self.button_press_event_cid)
             self.mpl_disconnect(self.button_release_event_cid)
 
-            self.button_press_event_cid = self.mpl_connect('button_press_event', self.draw_trajectory_line)
+            self.button_press_event_cid = self.mpl_connect('button_press_event', self.draw_trajectory_line(x,y))
             self.motion_notify_event_cid = self.mpl_connect('motion_notify_event', self.trajectory_mode_preview_line)
         else:
             if self.draw_trajectory_preview:
@@ -711,19 +713,20 @@ class DynamicCanvas(FigureCanvas):
             self.button_press_event_cid = self.mpl_connect('button_press_event', self.dynamic_canvas_click_callback)
             self.reset_toolbar()
             self.update_plot()
-    def draw_trajectory_line(self, mouse_event):
-
-        x = mouse_event.xdata
-        y = mouse_event.ydata
+    def draw_trajectory_line(self, mouse_event,x :float,y : float):
+        #todo: implement draw_trajectory_line
+        x2 = mouse_event.xdata
+        y2 = mouse_event.ydata
 
         if mouse_event.button == MouseButton.RIGHT:
             self.activate_trajectory_mode(False)
             return
 
-        self.draw_trajectory_first_point_object = self.ax.plot(x, y, marker="x", color="blue", zorder=21)
-        self.draw_trajectory_first_point = [x, y]
+        self.draw_trajectory_first_point_object = self.ax.plot(x2, y2, marker="x", color="blue", zorder=21)
+        self.draw_trajectory_first_point = [x2, y2]
         self.update_plot()
 
+        self.parent.obstacle_toolbox.obstacle_toolbox_ui.record_trajectory_with_mouse(self,x,y)
     def trajectory_mode_preview_line(self, mouse_move_event):
         x = mouse_move_event.xdata
         y = mouse_move_event.ydata
@@ -753,8 +756,8 @@ class DynamicCanvas(FigureCanvas):
                 if center_distance <= 1 or left_distance <= 1 or right_distance <= 1:
                     left_v = selected_l.left_vertices[-1]
                     right_v = selected_l.right_vertices[-1]
-                    self.add_to_selected_preview = selected_l
-                    self.draw_append_lanelet_preview = self.ax.plot([left_v[0], right_v[0]], [left_v[1], right_v[1]],
+                    self.add_to_selected_trajectory_preview = selected_l
+                    self.draw_append_trajectory_preview = self.ax.plot([left_v[0], right_v[0]], [left_v[1], right_v[1]],
                                                              linewidth=3, color="blue", zorder=21)
         self.update_plot()
     def draw_lanelet(self, mouse_event):

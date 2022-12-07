@@ -55,6 +55,8 @@ class ObstacleToolbox(QDockWidget):
         # for recording of trajectories of dynamic obstacles via keyboard input
         self._start_trajectory_recording = False
         self._active_obstacle = None
+        self.x1=0.0
+        self.y1=0.0
 
         if SUMO_AVAILABLE:
             self.sumo_simulation = SUMOSimulation(tmp_folder=tmp_folder)
@@ -266,6 +268,8 @@ class ObstacleToolbox(QDockWidget):
         if self.obstacle_toolbox_ui.initial_state_position_x.text() != "":
             state_dictionary['position'] = np.array([float(self.obstacle_toolbox_ui.initial_state_position_x.text()),
                                             (float(self.obstacle_toolbox_ui.initial_state_position_y.text()))])
+            self.x1= float(self.obstacle_toolbox_ui.initial_state_position_x.text())
+            self.y1=float(self.obstacle_toolbox_ui.initial_state_position_y.text())
         else:
             state_dictionary['position'] = np.array([0.0, 0.0])
 
@@ -412,6 +416,101 @@ class ObstacleToolbox(QDockWidget):
         obstacle.prediction = new_pred
         self.callback(self.current_scenario)
 
+
+    def record_trajectory_with_mouse(self,x2:float,y2:float):
+
+
+        # These parameters are currently hardcoded and should be moved to settings or the obstacle toolbox ui.
+        USING_PM = True
+        USING_KS = False
+        obstacle = self.active_obstacle
+
+        if not self.start_trajectory_recording:
+            return
+
+        if obstacle is None:
+            return
+
+        state_list = obstacle.prediction.trajectory.state_list
+        state = state_list[-1]
+
+        # check which vehicle model is selected, convert the initial state depending on selected vehicle model
+        # This should be refactored after the state class has been adjusted to support state conversion in
+        # commonroad-io.
+        if USING_PM:
+            vehicle = VehicleDynamics.PM(VehicleType.FORD_ESCORT)
+            if state_list[0] == state_list[-1]:
+                del state.acceleration
+                del state.slip_angle
+                del state.yaw_rate
+        elif USING_KS:
+            vehicle = VehicleDynamics.KS(VehicleType.FORD_ESCORT)
+            if state_list[0] == state_list[-1]:
+                del state.yaw_rate
+                del state.slip_angle
+                del state.acceleration
+
+        else:
+            return
+
+        # if key not in accepted input list, do nothing
+
+
+        if USING_PM:
+            input_state = self._input_via_pm_model_with_mouse(x2,y2)
+
+        else:
+            return
+
+        try:
+            # Have time step in settings too.
+            next_state = vehicle.simulate_next_state(state, input_state, 0.1)
+        except Exception as e:
+            print(e)
+            return
+
+        # Create new TrajectoryPrediction, because simply appending to state list is not allowed.
+        state_list.append(next_state)
+        new_trajectory = Trajectory(obstacle.initial_state.time_step, state_list)
+        new_pred = TrajectoryPrediction(new_trajectory, obstacle.obstacle_shape, None, None)
+        obstacle.prediction = new_pred
+        self.callback(self.current_scenario)
+
+
+    def _record_trajectory_with_mouse(self,x2:float,y2:float):
+        time_step = int(self.obstacle_toolbox_ui.initial_state_time.text()) # can be repalced with self.currentscenario.dt
+        v_previous = float(self.obstacle_toolbox_ui.initial_state_velocity.text())
+        s_previous = 0
+        s_new = math.sqrt(math.pow(x2 - self.x1, 2) + math.pow(y2 - self.y1, 2))
+        a_previous = (s_new - s_previous - v_previous * time_step) / (0.5 * math.pow(time_step, 2))
+        state_dictionary = {}
+        state_dictionary['position'] = np.array([x2, y2])
+        state_dictionary['time_step'] = int(self.obstacle_toolbox_ui.initial_state_time.text())
+        state_dictionary['velocity'] = a_previous * v_previous
+        input_state = InputState(**state_dictionary)
+
+        return input_state
+
+
+    def _input_via_pm_model_with_mouse(self,x2:float,y2:float) -> State:
+        time_step = int(
+            self.obstacle_toolbox_ui.initial_state_time.text())  # can be repalced with self.currentscenario.dt
+        v_previous = float(self.obstacle_toolbox_ui.initial_state_velocity.text())
+        s_previous = 0
+        s_new = math.sqrt(math.pow(x2 - self.x1, 2) + math.pow(y2 - self.y1, 2))
+        a_previous = (s_new - s_previous - v_previous * time_step) / (0.5 * math.pow(time_step, 2))
+        state_dictionary = {}
+        state_dictionary['position'] = np.array([x2, y2])
+        state_dictionary['time_step'] = int(self.obstacle_toolbox_ui.initial_state_time.text())
+        state_dictionary['velocity'] = a_previous * v_previous
+        position = np.array([x2, y2])
+        velocity=a_previous * v_previous
+        input_state2= PMInputState(position=position,time_step=time_step,velocity=velocity)
+        input_state = PMInputState(**state_dictionary)
+
+
+
+        return input_state
     def _input_via_pm_model(self, key) -> State:
         """This method is resolving user input when using a point mass model. With a PM model, there are only
         accelerations in the up, left, down, right direction. Pressing an arrow key applies such accelerations to the
