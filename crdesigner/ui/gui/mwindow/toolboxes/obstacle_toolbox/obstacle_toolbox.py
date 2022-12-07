@@ -507,7 +507,8 @@ class ObstacleToolbox(QDockWidget):
         velocity=a_previous * v_previous
         input_state2= PMInputState(position=position,time_step=time_step,velocity=velocity)
         input_state = PMInputState(**state_dictionary)
-
+        self.x1=x2
+        self.y1=y2
 
 
         return input_state

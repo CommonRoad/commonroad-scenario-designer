@@ -679,7 +679,7 @@ class DynamicCanvas(FigureCanvas):
             self.mpl_disconnect(self.button_press_event_cid)
             self.mpl_disconnect(self.button_release_event_cid)
 
-            self.button_press_event_cid = self.mpl_connect('button_press_event', self.draw_trajectory_line(x,y))
+            self.button_press_event_cid = self.mpl_connect('button_press_event', self.draw_trajectory_line)
             self.motion_notify_event_cid = self.mpl_connect('motion_notify_event', self.trajectory_mode_preview_line)
         else:
             if self.draw_trajectory_preview:
@@ -713,8 +713,7 @@ class DynamicCanvas(FigureCanvas):
             self.button_press_event_cid = self.mpl_connect('button_press_event', self.dynamic_canvas_click_callback)
             self.reset_toolbar()
             self.update_plot()
-    def draw_trajectory_line(self, mouse_event,x :float,y : float):
-        #todo: implement draw_trajectory_line
+    def draw_trajectory_line(self, mouse_event):
         x2 = mouse_event.xdata
         y2 = mouse_event.ydata
 
@@ -726,7 +725,7 @@ class DynamicCanvas(FigureCanvas):
         self.draw_trajectory_first_point = [x2, y2]
         self.update_plot()
 
-        self.parent.obstacle_toolbox.obstacle_toolbox_ui.record_trajectory_with_mouse(self,x,y)
+        self.parent.obstacle_toolbox.obstacle_toolbox_ui.record_trajectory_with_mouse(self, x2,y2)
     def trajectory_mode_preview_line(self, mouse_move_event):
         x = mouse_move_event.xdata
         y = mouse_move_event.ydata
