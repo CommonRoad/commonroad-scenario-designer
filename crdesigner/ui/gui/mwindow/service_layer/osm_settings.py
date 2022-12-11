@@ -102,6 +102,7 @@ class EditLaneCounts:
         :return: None
         """
         self.save()
+        self.save_to_custom_config()
         self.original_accept()
 
     def set_spin_boxes(self) -> None:
@@ -127,6 +128,17 @@ class EditLaneCounts:
         config.LANECOUNTS = {
             current_type: spin_box.value() for spin_box, current_type in types.items()
         }
+
+    def save_to_custom_config(self):
+        '''
+        saves configs to yaml file to be persistent
+        '''
+        with open('crdesigner/configurations/custom_settings_osm2cr.yaml') as f:
+            data = yaml.load(f, Loader=yaml.FullLoader)
+        for key in config.LANECOUNTS:
+            data['Lanecounts'][key] = config.LANECOUNTS[key]
+        with open('crdesigner/configurations/custom_settings_osm2cr.yaml', 'w') as yaml_file:
+            yaml_file.write(yaml.dump(data, default_flow_style=False))
 
 
 class EditLaneWidth:

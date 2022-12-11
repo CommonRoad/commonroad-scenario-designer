@@ -127,7 +127,7 @@ class GUISettings:
 
     def apply_set_to_default(self):
         '''
-        the variables i config.py will be changed back to the default values, not the file itself
+        the variables in config.py will be changed back to the default values, not the file itself
         '''
         with open('crdesigner/configurations/default_settings.yaml') as f:
             data = yaml.load(f, Loader=yaml.FullLoader)
