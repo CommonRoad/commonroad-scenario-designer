@@ -478,14 +478,14 @@ class ObstacleToolbox(QDockWidget):
 
 
     def _record_trajectory_with_mouse(self,x2:float,y2:float):
-        time_step = int(self.obstacle_toolbox_ui.initial_state_time.text()) # can be repalced with self.currentscenario.dt
+        time_step = self.current_scenario.dt       # can be repalced with  int(self.obstacle_toolbox_ui.initial_state_time.text())
         v_previous = float(self.obstacle_toolbox_ui.initial_state_velocity.text())
         s_previous = 0
         s_new = math.sqrt(math.pow(x2 - self.x1, 2) + math.pow(y2 - self.y1, 2))
         a_previous = (s_new - s_previous - v_previous * time_step) / (0.5 * math.pow(time_step, 2))
         state_dictionary = {}
         state_dictionary['position'] = np.array([x2, y2])
-        state_dictionary['time_step'] = int(self.obstacle_toolbox_ui.initial_state_time.text())
+        state_dictionary['time_step'] = self.current_scenario.dt
         state_dictionary['velocity'] = a_previous * v_previous
         input_state = InputState(**state_dictionary)
 
@@ -493,15 +493,14 @@ class ObstacleToolbox(QDockWidget):
 
 
     def _input_via_pm_model_with_mouse(self,x2:float,y2:float) -> State:
-        time_step = int(
-            self.obstacle_toolbox_ui.initial_state_time.text())  # can be repalced with self.currentscenario.dt
+        time_step = self.current_scenario.dt #   can be repalced with self.currentscenario.dt
         v_previous = float(self.obstacle_toolbox_ui.initial_state_velocity.text())
         s_previous = 0
         s_new = math.sqrt(math.pow(x2 - self.x1, 2) + math.pow(y2 - self.y1, 2))
         a_previous = (s_new - s_previous - v_previous * time_step) / (0.5 * math.pow(time_step, 2))
         state_dictionary = {}
         state_dictionary['position'] = np.array([x2, y2])
-        state_dictionary['time_step'] = int(self.obstacle_toolbox_ui.initial_state_time.text())
+        state_dictionary['time_step'] = self.current_scenario.dt
         state_dictionary['velocity'] = a_previous * v_previous
         position = np.array([x2, y2])
         velocity=a_previous * v_previous
