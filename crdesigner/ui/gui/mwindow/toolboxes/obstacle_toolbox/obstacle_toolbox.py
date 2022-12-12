@@ -421,9 +421,10 @@ class ObstacleToolbox(QDockWidget):
 
 
         # These parameters are currently hardcoded and should be moved to settings or the obstacle toolbox ui.
-        USING_PM = True
-        USING_KS = False
+        USING_PM = False
+        USING_KS = True
         obstacle = self.active_obstacle
+        self.start_trajectory_recording = True
 
         if not self.start_trajectory_recording:
             return
@@ -456,21 +457,16 @@ class ObstacleToolbox(QDockWidget):
         # if key not in accepted input list, do nothing
 
 
-        if USING_PM:
+        if USING_KS:
             input_state = self._input_via_pm_model_with_mouse(x2,y2)
 
         else:
             return
 
-        try:
-            # Have time step in settings too.
-            next_state = vehicle.simulate_next_state(state, input_state, 0.1)
-        except Exception as e:
-            print(e)
-            return
+
 
         # Create new TrajectoryPrediction, because simply appending to state list is not allowed.
-        state_list.append(next_state)
+        state_list.append(input_state)
         new_trajectory = Trajectory(obstacle.initial_state.time_step, state_list)
         new_pred = TrajectoryPrediction(new_trajectory, obstacle.obstacle_shape, None, None)
         obstacle.prediction = new_pred
@@ -498,19 +494,16 @@ class ObstacleToolbox(QDockWidget):
         s_previous = 0
         s_new = math.sqrt(math.pow(x2 - self.x1, 2) + math.pow(y2 - self.y1, 2))
         a_previous = (s_new - s_previous - v_previous * time_step) / (0.5 * math.pow(time_step, 2))
-        state_dictionary = {}
-        state_dictionary['position'] = np.array([x2, y2])
-        state_dictionary['time_step'] = self.current_scenario.dt
-        state_dictionary['velocity'] = a_previous * v_previous
+        orientation=math.atan((y2-self.y1)/(x2-self.x1))
         position = np.array([x2, y2])
         velocity=a_previous * v_previous
-        input_state2= PMInputState(position=position,time_step=time_step,velocity=velocity)
-        input_state = PMInputState(**state_dictionary)
+        input_state = KSState(position=position,time_step=time_step,velocity=velocity, steering_angle=0, orientation=orientation)
         self.x1=x2
         self.y1=y2
-
-
+        v_previous=velocity
+        s_previous=s_new
         return input_state
+
     def _input_via_pm_model(self, key) -> State:
         """This method is resolving user input when using a point mass model. With a PM model, there are only
         accelerations in the up, left, down, right direction. Pressing an arrow key applies such accelerations to the
