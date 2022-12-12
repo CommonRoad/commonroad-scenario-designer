@@ -45,6 +45,7 @@ class EditStreetTypes:
         :return: None
         """
         self.save()
+        self.save_to_custom_settings()
         self.original_accept()
 
     def set_checkboxes(self) -> None:
@@ -77,6 +78,12 @@ class EditStreetTypes:
             if check_box.isChecked()
         ]
 
+    def save_to_custom_settings(self):
+        with open('crdesigner/configurations/custom_settings_osm2cr.yaml') as f:
+            data = yaml.load(f, Loader=yaml.FullLoader)
+        data['Accepted_highways_mainlayer'] = config.ACCEPTED_HIGHWAYS_MAINLAYER
+        with open('crdesigner/configurations/custom_settings_osm2cr.yaml', 'w') as yaml_file:
+            yaml_file.write(yaml.dump(data, default_flow_style=False))
 
 class EditLaneCounts:
     """
@@ -102,7 +109,7 @@ class EditLaneCounts:
         :return: None
         """
         self.save()
-        self.save_to_custom_config()
+        self.save_to_custom_settings()
         self.original_accept()
 
     def set_spin_boxes(self) -> None:
@@ -129,9 +136,9 @@ class EditLaneCounts:
             current_type: spin_box.value() for spin_box, current_type in types.items()
         }
 
-    def save_to_custom_config(self):
+    def save_to_custom_settings(self):
         '''
-        saves configs to yaml file to be persistent
+        saves lane counts changed configs to yaml file to be persistent
         '''
         with open('crdesigner/configurations/custom_settings_osm2cr.yaml') as f:
             data = yaml.load(f, Loader=yaml.FullLoader)
@@ -165,6 +172,7 @@ class EditLaneWidth:
         :return: None
         """
         self.save()
+        self.save_to_custom_settings()
         self.original_accept()
 
     def set_spin_boxes(self) -> None:
@@ -191,7 +199,22 @@ class EditLaneWidth:
             current_type: spin_box.value() for spin_box, current_type in types.items()
         }
 
+    def save_to_custom_settings(self):
+        '''
+        saves Lane widths changed configs to yaml file to be persistent
+        '''
+        with open('crdesigner/configurations/custom_settings_osm2cr.yaml') as f:
+            data = yaml.load(f, Loader=yaml.FullLoader)
+        for key in config.LANECOUNTS:
+            data['Lanewidths'][key] = config.LANEWIDTHS[key]
+        with open('crdesigner/configurations/custom_settings_osm2cr.yaml', 'w') as yaml_file:
+            yaml_file.write(yaml.dump(data, default_flow_style=False))
 
+    def apply_set_to_default(self):
+        with open('crdesigner/configurations/default_settings_osm2cr.yaml') as f:
+            data = yaml.load(f, Loader=yaml.FullLoader)
+        config.LANEWIDTHS = {data['Lanewidths']}
+        self.save_to_custom_settings()
 class EditSpeedLimits:
     """
     Window to edit speed limits for street types
@@ -218,6 +241,7 @@ class EditSpeedLimits:
         :return: None
         """
         self.save()
+        self.save_to_custom_settings()
         self.original_accept()
 
     def set_spin_boxes(self) -> None:
@@ -244,6 +268,22 @@ class EditSpeedLimits:
             current_type: spin_box.value() for spin_box, current_type in types.items()
         }
 
+    def save_to_custom_settings(self):
+        '''
+        saves speed limits changed configs to yaml file to be persistent
+        '''
+        with open('crdesigner/configurations/custom_settings_osm2cr.yaml') as f:
+            data = yaml.load(f, Loader=yaml.FullLoader)
+        for key in config.LANECOUNTS:
+            data['Speed_limits'][key] = config.SPEED_LIMITS[key]
+        with open('crdesigner/configurations/custom_settings_osm2cr.yaml', 'w') as yaml_file:
+            yaml_file.write(yaml.dump(data, default_flow_style=False))
+
+    def apply_set_to_default(self):
+        with open('crdesigner/configurations/default_settings_osm2cr.yaml') as f:
+            data = yaml.load(f, Loader=yaml.FullLoader)
+        config.SPEED_LIMITS = {data['Speed_limits']}
+        self.save_to_custom_settings()
 
 class EditSublayerWayTypes:
     """
@@ -270,6 +310,7 @@ class EditSublayerWayTypes:
         :return: None
         """
         self.save()
+        self.save_to_custom_settings()
         self.original_accept()
 
     def set_checkboxes(self) -> None:
@@ -302,7 +343,19 @@ class EditSublayerWayTypes:
             if check_box.isChecked()
         ]
 
+    def save_to_custom_settings(self):
+        with open('crdesigner/configurations/custom_settings_osm2cr.yaml') as f:
+            data = yaml.load(f, Loader=yaml.FullLoader)
+        data['Accepted_highways_sublayer'] = config.ACCEPTED_HIGHWAYS_SUBLAYER
+        with open('crdesigner/configurations/custom_settings_osm2cr.yaml', 'w') as yaml_file:
+            yaml_file.write(yaml.dump(data, default_flow_style=False))
 
+    def apply_set_to_default(self):
+        with open('crdesigner/configurations/default_settings_osm2cr.yaml') as f:
+            data = yaml.load(f, Loader=yaml.FullLoader)
+        config.ACCEPTED_HIGHWAYS_SUBLAYER = [data['Accepted_highways_sublayer']]
+        with open('crdesigner/configurations/custom_settings_osm2cr.yaml', 'w') as yaml_file:
+            yaml_file.write(yaml.dump(data, default_flow_style=False))
 class OSMSettings:
     """
     Window to edit parameters in config.py
@@ -546,6 +599,7 @@ class OSMSettings:
             data = yaml.load(f, Loader=yaml.FullLoader)
         for key, value in data.items():
             setattr(config, key.upper(), value)
+        EditSublayerWayTypes.apply_set_to_default(self.parent.cr_designer)
         with open('crdesigner/configurations/custom_settings_osm2cr.yaml', 'w') as yaml_file:
             yaml_file.write(yaml.dump(data, default_flow_style=False))
     def save_button(self) -> None:
