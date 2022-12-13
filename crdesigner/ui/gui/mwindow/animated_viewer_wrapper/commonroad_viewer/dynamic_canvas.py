@@ -723,9 +723,11 @@ class DynamicCanvas(FigureCanvas):
 
         self.draw_trajectory_first_point_object = self.ax.plot(x2, y2, marker="x", color="blue", zorder=21)
         self.draw_trajectory_first_point = [x2, y2]
-        self.update_plot()
+
 
         self.parent.obstacle_toolbox.record_trajectory_with_mouse(x2,y2)
+
+        self.update_plot()
     def trajectory_mode_preview_line(self, mouse_move_event):
         x = mouse_move_event.xdata
         y = mouse_move_event.ydata
