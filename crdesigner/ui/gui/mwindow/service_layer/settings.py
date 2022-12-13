@@ -91,6 +91,8 @@ class Settings:
 
         self.gui_settings.apply_set_to_default()
         self.osm_settings.apply_set_to_default()
+        if SUMO_AVAILABLE:
+            self.sumo_settings.restore_defaults()
         self.settings_window.close()
         self.cr_designer.crdesigner_console_wrapper.text_browser.append("default settings")
         if self.cr_designer.animated_viewer_wrapper.cr_viewer.current_scenario != None:
