@@ -33,7 +33,7 @@ setup(
         "enum34>=1.1.10",
         "iso3166>=1.0.1",
         "networkx>=2.5",
-        "sumolib==1.12.0",
+        "sumolib==1.15.0",
         "omegaconf >= 2.2.2",
     ],
     extras_require={"GUI": ["matplotlib>=3.1.0"]},
