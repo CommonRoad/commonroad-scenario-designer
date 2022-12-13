@@ -8,7 +8,7 @@ Subpackages
    :maxdepth: 4
 
    crdesigner.map_conversion.common
-   crdesigner.map_conversion.lanelet_lanelet2
+   crdesigner.map_conversion.lanelet2
    crdesigner.map_conversion.opendrive
    crdesigner.map_conversion.osm2cr
    crdesigner.map_conversion.sumo_map

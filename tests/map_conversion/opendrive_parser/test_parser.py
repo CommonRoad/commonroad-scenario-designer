@@ -256,7 +256,7 @@ class TestParser(unittest.TestCase):
         object_xml = []
         for reference in road_xml[1].find("objects").findall("object"):
             object_xml.append(reference)
-        parse_opendrive_road_object(new_road=road, road_object=object_xml[1])
+        parse_opendrive_road_object(new_road=road, obj=object_xml[1])
 
         self.assertEqual(81, road.objects[0].id)
         self.assertEqual("House04_BeachColors", road.objects[0].name)
@@ -271,6 +271,21 @@ class TestParser(unittest.TestCase):
         self.assertEqual(1.6766826171875003e+1, road.objects[0].width)
         self.assertEqual(1.1869543457031250e+1, road.objects[0].validLength)
 
+    def test_lane_access(self):
+        file_path = os.path.dirname(os.path.abspath(__file__)) + '/../test_maps/opendrive/straight_road_lane_access.xodr'
+        with open("{}".format(file_path), "r") as file_in:  # no idea why cleaning up the namespace is not required
+            root = etree.parse(file_in).getroot()          # for any other tests in this class but this test breaks
+            for elem in root.getiterator():                # without it
+                if not (isinstance(elem, etree._Comment) or isinstance(elem, etree._ProcessingInstruction)):
+                    elem.tag = etree.QName(elem).localname
+            etree.cleanup_namespaces(root)
+        laneSection = root.find("road").find("lanes").find("laneSection")
+
+        road = Road()
+        parse_opendrive_road_lane_section(new_road=road, lane_section=laneSection, lane_section_id=1)
+        self.assertEqual([["pedestrian", "allow", 0.0]], road.lanes.lane_sections[0].leftLanes[0].access)
 
 if __name__ == '__main__':
     unittest.main()
+
+#TestParser.test_lane_access(TestParser)

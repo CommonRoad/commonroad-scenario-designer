@@ -1,5 +1,5 @@
 from lxml import etree
-from crdesigner.map_conversion.lanelet_lanelet2.lanelet2 import OSMLanelet, Node, Way, WayRelation, RightOfWayRelation
+from crdesigner.map_conversion.lanelet2.lanelet2 import OSMLanelet, Node, Way, WayRelation, RightOfWayRelation
 
 from commonroad.scenario.traffic_sign import TrafficSignIDGermany
 

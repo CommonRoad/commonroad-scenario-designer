@@ -1,5 +1,6 @@
 import subprocess
 from pathlib import Path
+from typing import Callable, Optional
 
 from lxml import etree
 import uuid
@@ -8,14 +9,12 @@ import os
 from commonroad.scenario.scenario import Scenario
 from commonroad.common.file_reader import CommonRoadFileReader
 
-from crdesigner.map_conversion.common.utils import generate_unique_id
-
 from crdesigner.map_conversion.opendrive.opendrive_parser.parser import parse_opendrive
 from crdesigner.map_conversion.opendrive.opendrive_conversion.network import Network
 
-from crdesigner.map_conversion.lanelet_lanelet2.lanelet2cr import Lanelet2CRConverter
-from crdesigner.map_conversion.lanelet_lanelet2.lanelet2_parser import Lanelet2Parser
-from crdesigner.map_conversion.lanelet_lanelet2.cr2lanelet import CR2LaneletConverter
+from crdesigner.map_conversion.lanelet2.lanelet2cr import Lanelet2CRConverter
+from crdesigner.map_conversion.lanelet2.lanelet2_parser import Lanelet2Parser
+from crdesigner.map_conversion.lanelet2.cr2lanelet import CR2LaneletConverter
 
 from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import (
     SUMO_AVAILABLE,
@@ -87,7 +86,7 @@ def commonroad_to_lanelet(input_file: str, output_name: str, proj: str):
         )
 
 
-def opendrive_to_commonroad(input_file: str) -> Scenario:
+def opendrive_to_commonroad(input_file: str,progressReport: Optional[Callable[[int],None]] = None) -> Scenario:
     """
     Converts OpenDRIVE file to CommonRoad
 
@@ -95,12 +94,18 @@ def opendrive_to_commonroad(input_file: str) -> Scenario:
     @return: CommonRoad scenario
     """
     opendrive = parse_opendrive(input_file)
-
+    if progressReport is not None:
+        progressReport(5)
     # load configs
     configs = get_configs()
+    if progressReport is not None:
+        progressReport(20)
     road_network = Network(configs.opendrive)
+    if progressReport is not None:
+        progressReport(50)
     road_network.load_opendrive(opendrive)
-
+    if progressReport is not None:
+        progressReport(100)
     return road_network.export_commonroad_scenario()
 
 
@@ -151,7 +156,7 @@ def osm_to_commonroad(input_file: str) -> Scenario:
     return convert_to_scenario(osm_graph)
 
 
-def osm_to_commonroad_using_sumo(input_file: str) -> Scenario:
+def osm_to_commonroad_using_sumo(input_file: str, progressReport: Optional[Callable[[int],None]] = None) -> Scenario:
     """
     Converts OpenStreetMap file to CommonRoad scenario using SUMO: SUMO offers the tool netconvert
     (https://sumo.dlr.de/docs/netconvert.html), which can be used to convert an OSM-file to OpenDrive (.xodr).
@@ -163,11 +168,13 @@ def osm_to_commonroad_using_sumo(input_file: str) -> Scenario:
     @param input_file: Path to OpenStreetMap file
     @return: CommonRoad scenario
     """
+    if progressReport is not None:
+        progressReport(5)
     input_file_pth = Path(input_file)
-
     scenario_name = str(input_file_pth.name)
     opendrive_file = str(input_file_pth.parent / f"{scenario_name}.xodr")
-
+    if progressReport is not None:
+        progressReport(50)
     # convert to OpenDRIVE file using netconvert
     subprocess.check_output(
         [
@@ -180,4 +187,11 @@ def osm_to_commonroad_using_sumo(input_file: str) -> Scenario:
             "1.0",
         ]
     )
-    return opendrive_to_commonroad(opendrive_file)
+    if progressReport is not None:
+        progressReport(100)
+    if progressReport is None:    
+        subProgressReport = None
+    else:
+        subProgressReport = lambda progress_value: progressReport(100 + 0.78*progress_value)
+
+    return opendrive_to_commonroad(opendrive_file, subProgressReport)

@@ -1,13 +1,15 @@
+from pathlib import Path
 import pickle
+import subprocess
+from typing import Optional
 import warnings
-
 from lxml import etree
 
-from PyQt5.QtWidgets import *
-from PyQt5.QtCore import *
+from PyQt5.QtWidgets import QDockWidget, QMainWindow, QFileDialog, QMessageBox
+from PyQt5.QtCore import Qt
 
-from commonroad.scenario.traffic_sign import *
 from commonroad.scenario.scenario import Scenario
+from crdesigner.map_conversion.map_conversion_interface import osm_to_commonroad_using_sumo
 
 from crdesigner.ui.gui.mwindow.toolboxes.converter_toolbox.map_converter_toolbox_ui import MapConversionToolboxUI
 from crdesigner.ui.gui.mwindow.service_layer.util import select_local_file
@@ -25,9 +27,9 @@ from crdesigner.ui.gui.mwindow.service_layer.osm_gui_modules.gui import EdgeEdit
 from crdesigner.map_conversion.opendrive.opendrive_parser.parser import parse_opendrive
 from crdesigner.map_conversion.opendrive.opendrive_conversion.network import Network
 
-from crdesigner.map_conversion.lanelet_lanelet2.lanelet2_parser import Lanelet2Parser
-from crdesigner.map_conversion.lanelet_lanelet2.lanelet2cr import Lanelet2CRConverter
-from crdesigner.map_conversion.lanelet_lanelet2.cr2lanelet import CR2LaneletConverter
+from crdesigner.map_conversion.lanelet2.lanelet2_parser import Lanelet2Parser
+from crdesigner.map_conversion.lanelet2.lanelet2cr import Lanelet2CRConverter
+from crdesigner.map_conversion.lanelet2.cr2lanelet import CR2LaneletConverter
 
 from crdesigner.configurations.get_configs import get_configs
 
@@ -77,6 +79,7 @@ class MapConversionToolbox(QDockWidget):
         self.converter_toolbox.button_load_osm_file.clicked.connect(lambda: self.load_osm_file())
         self.converter_toolbox.button_load_osm_edit_state.clicked.connect(lambda: self.load_osm_edit_state())
         self.converter_toolbox.button_start_osm_conversion.clicked.connect(lambda: self.convert_osm_to_cr())
+        self.converter_toolbox.button_start_osm_conversion_with_sumo_parser.clicked.connect(lambda: self.convert_osm_to_cr_with_sumo())
         self.converter_toolbox.button_open_osm_settings.clicked.connect(lambda: self.open_osm_settings())
 
         self.converter_toolbox.button_load_opendrive.clicked.connect(lambda: self.load_open_drive())
@@ -169,6 +172,35 @@ class MapConversionToolbox(QDockWidget):
             warnings.warn("OSM edit mode not available!")
         self.converter_toolbox.osm_loading_status.setText("no file selected")
         self.osm_file = None
+    
+    def convert_osm_to_cr_with_sumo(self) -> None:
+        """
+        Starts the OSM conversion process using SUMO Parser by picking a file and showing the edge edit GUI.
+        """
+        offset = 5
+        proportion = 0.47
+        try:
+            if self.osm_file is not None:  
+              self.converter_toolbox.progress.setHidden(False)  
+              scenario = osm_to_commonroad_using_sumo(self.osm_file, lambda progress_value: self.converter_toolbox.progress.setValue(offset + proportion*progress_value))
+              self.converter_toolbox.progress.setValue(95)
+              self.callback(scenario)  
+              self.converter_toolbox.progress.setValue(100)
+              self.converter_toolbox.progress.setHidden(True)  
+            else:
+                QMessageBox.warning(
+                    self,
+                    "Warning",
+                    "No file selected.",
+                    QMessageBox.Ok)
+                return
+        except ValueError as e:
+            QMessageBox.critical(
+                self,
+                "Warning",
+                "Map unreadable: " + str(e),
+                QMessageBox.Ok)
+            return 
 
     def edge_edit_embedding(self, graph: rg.Graph):
         """
