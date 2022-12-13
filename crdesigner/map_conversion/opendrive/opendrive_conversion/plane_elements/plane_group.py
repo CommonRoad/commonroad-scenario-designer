@@ -1,3 +1,4 @@
+import warnings
 from typing import Tuple, Optional, List
 import math
 import numpy as np
@@ -113,6 +114,15 @@ class ParametricLaneGroup:
 
         return sum([x.length for x in self.parametric_lanes])
 
+    @property
+    def access(self):
+        """Access restrictions of the first ParametricLane in this ParametricLaneGroup.
+
+        :return: The access restrictions of the first Plane
+        :rtype: list[list]
+        """
+        return self.parametric_lanes[0].access
+
     def has_zero_width_everywhere(self) -> bool:
         """Checks if width is zero at every point of this ParametricLaneGroup.
 
@@ -206,11 +216,56 @@ class ParametricLaneGroup:
         center_vertices = np.array(
             [(l + r) / 2 for (l, r) in zip(left_vertices, right_vertices)]
         )
+        # access to user conversion
+        user_list = [set(), set()]
+        user_set = {"car", "truck", "bus", "motorcycle", "priorityVehicle", "taxi",
+                    "bicycle", "pedestrian", "train"}
+        direct_map_set = {"truck", "bus", "motorcycle", "pedestrian", "bicycle", "taxi"}
+        vehicle_set = {"car", "truck", "bus", "motorcycle", "priorityVehicle", "taxi"}
 
-        lanelet = ConversionLanelet(copy.deepcopy(self), left_vertices, center_vertices, right_vertices, self.id_,
-                                    lanelet_type=self.type, line_marking_left_vertices=line_marking_left_vertices,
-                                    line_marking_right_vertices=line_marking_right_vertices,
-                                    speed=self.parametric_lanes[0].speed)
+        def access_map(_set: list, allow: bool, _user: str):
+            """
+            Nested helper function that unclutters the code bit.
+            :param allow: decides whether the current access type should be restricted or permitted
+            :param _user: the user to be added or excluded from the user list
+            :param _set: the already accumulated set
+            """
+            _user_list = [set(), set()]
+            if allow:
+                _user_list = [set.union(_set[0], {_user}), _user_list[1]]
+            else:
+                _user_list = [_user_list[0], set.union(_set[1], {_user})]
+            return _user_list
+
+        for restriction in self.access:
+            if not np.isclose(0.0, restriction[2]):
+                warnings.warn("There exist an offset in the lane access restrictions that is currently ignored")
+            if restriction[0] in direct_map_set:
+                user = restriction[0]
+            elif restriction[0] == "passengerCar":
+                user = "car"
+            elif restriction[0] == "emergency":
+                user = "priorityVehicle"
+            elif restriction[0] == "trucks":
+                user = "truck"
+            else: # ignore other lane access types
+                continue
+            user_list = access_map(user_list, restriction[1] == "allow", user)
+        users = (user_set if user_list[0] == set() else user_list[0]).difference(user_list[1])
+        if vehicle_set.issubset(users):
+            users = set.union({"vehicle"}, set.difference(users, vehicle_set))
+        if self.type == "bidirectional":
+            lanelet = ConversionLanelet(copy.deepcopy(self), left_vertices, center_vertices, right_vertices, self.id_,
+                                        lanelet_type=self.type, line_marking_left_vertices=line_marking_left_vertices,
+                                        line_marking_right_vertices=line_marking_right_vertices,
+                                        speed=self.parametric_lanes[0].speed,
+                                        user_bidirectional=users)
+        else:
+            lanelet = ConversionLanelet(copy.deepcopy(self), left_vertices, center_vertices, right_vertices, self.id_,
+                                        lanelet_type=self.type, line_marking_left_vertices=line_marking_left_vertices,
+                                        line_marking_right_vertices=line_marking_right_vertices,
+                                        speed=self.parametric_lanes[0].speed,
+                                        user_one_way=users)
 
         # Adjacent lanes
         self._set_adjacent_lanes(lanelet)
