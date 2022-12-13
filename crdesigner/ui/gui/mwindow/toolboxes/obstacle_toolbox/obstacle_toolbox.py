@@ -58,6 +58,8 @@ class ObstacleToolbox(QDockWidget):
         self.x1=0.0
         self.y1=0.0
         self.time_step=-1
+        self.v_previous = None
+        self.s_previous = 0
 
 
         if SUMO_AVAILABLE:
@@ -290,8 +292,10 @@ class ObstacleToolbox(QDockWidget):
         # velocity
         if self.obstacle_toolbox_ui.initial_state_velocity.text() != "":
             state_dictionary['velocity'] = float(self.obstacle_toolbox_ui.initial_state_velocity.text())
+            self.v_previous = float(self.obstacle_toolbox_ui.initial_state_velocity.text())
         else:
             state_dictionary['velocity'] = float(self.obstacle_toolbox_ui.initial_state_velocity.placeholderText())
+            self.v_previous = float(self.obstacle_toolbox_ui.initial_state_velocity.placeholderText())
         # yaw rate
         if self.obstacle_toolbox_ui.initial_state_yaw_rate.text() != "":
             state_dictionary['yaw_rate'] = float(self.obstacle_toolbox_ui.initial_state_yaw_rate.text())
@@ -350,7 +354,15 @@ class ObstacleToolbox(QDockWidget):
         return shape
 
     def record_trajectory_with_mouse(self,x2:float,y2:float):
+        """This function is responsible for the recording of trajectories for dynamic obstacles. Based on the
+                waypoint clicked with mouse on the canvas,a new state is appended to a state list and a new trajectory prediction object
+                is created for the selected dynamic obstacle.
 
+                :param x2: The x point which was clickes on the canvas
+                :type key: float
+                :param y2: The x point which was clickes on the canvas
+                :type key: float
+                """
 
         obstacle = self.active_obstacle
         self.start_trajectory_recording = True
@@ -373,20 +385,30 @@ class ObstacleToolbox(QDockWidget):
         self.callback(self.current_scenario)
 
     def _input_via_ks_model_with_mouse(self,x2:float,y2:float) -> State:
-        time_step_size = self.current_scenario.dt #   can be repalced with self.currentscenario.dt
-        v_previous = float(self.obstacle_toolbox_ui.initial_state_velocity.text())
-        s_previous = 0
+        """This method is resolving user input when using a kinematic single-track model. The KS model uses acceleration
+               in the respective directions and additionally takes a steering_angle_speed that steers the model
+               left/right.
+
+               :param x2: The x point which was clickes on the canvas
+                :type key: float
+                :param y2: The x point which was clickes on the canvas
+                :type key: float
+               :return: The input state to the forward simulation
+               :rtype: State
+               """
+        time_step_size = self.current_scenario.dt
+
         s_new = math.sqrt(math.pow(x2 - self.x1, 2) + math.pow(y2 - self.y1, 2))
-        a_previous = (s_new - s_previous - v_previous * time_step_size) / (0.5 * math.pow(time_step_size, 2))
+        a_previous = (s_new - self.s_previous - self.v_previous * time_step_size) / (0.5 * math.pow(time_step_size, 2))
         orientation=math.atan((y2-self.y1)/(x2-self.x1))
         position = np.array([x2, y2])
-        velocity=a_previous * v_previous
+        velocity=a_previous * self.v_previous
         self.time_step=self.time_step+1
         input_state = KSState(position=position,time_step=self.time_step,velocity=velocity, steering_angle=0, orientation=orientation)
         self.x1=x2
         self.y1=y2
-        v_previous=velocity
-        s_previous=s_new
+        self.v_previous=velocity
+        self.s_previous=s_new
         return input_state
 
 
