@@ -1,6 +1,6 @@
 from typing import Tuple, Optional, Union
 import numpy as np
-from commonroad.scenario.lanelet import Lanelet, LaneletType, LineMarking
+from commonroad.scenario.lanelet import Lanelet, LaneletType, LineMarking, RoadUser
 from crdesigner.map_conversion.opendrive.opendrive_conversion.utils import CustomDefaultLaneletType
 from crdesigner.configurations.get_configs import get_configs
 
@@ -53,6 +53,13 @@ class ConversionLanelet(Lanelet):
             if LaneletType(custom_default_lanelet_types.driving_default_lanelet_type) is not None \
             else LaneletType.UNKNOWN
         self._lanelet_types_backwards_compatible = custom_default_lanelet_types.lanelet_types_backwards_compatible
+        _user_bidirectional = None
+        _user_one_way = None
+        if user_one_way is not None:
+            _user_one_way = set(map(lambda x: RoadUser(x), user_one_way))
+        if user_bidirectional is not None:
+            _user_bidirectional = set(map(lambda x: RoadUser(x), user_bidirectional))
+
         super().__init__(
             left_vertices=left_vertices,
             center_vertices=center_vertices,
@@ -68,8 +75,8 @@ class ConversionLanelet(Lanelet):
             line_marking_right_vertices=line_marking_right_vertices,
             stop_line=stop_line,
             lanelet_type=lanelet_type,
-            user_one_way=user_one_way,
-            user_bidirectional=user_bidirectional,
+            user_one_way=_user_one_way,
+            user_bidirectional=_user_bidirectional,
             traffic_signs=traffic_signs,
             traffic_lights=traffic_lights,
         )

@@ -3,7 +3,7 @@ import unittest
 import numpy as np
 
 from commonroad.scenario.scenario import Scenario
-from commonroad.scenario.lanelet import LaneletType, LineMarking
+from commonroad.scenario.lanelet import LaneletType, LineMarking, RoadUser
 from commonroad.scenario.traffic_sign import TrafficSignIDZamunda
 
 from crdesigner.map_conversion.map_conversion_interface import opendrive_to_commonroad
@@ -16,8 +16,8 @@ class TestOpenDriveToCommonRoadConversion(unittest.TestCase):
     def load_and_convert_opendrive(self, xodr_file_name: str) -> Scenario:
         """ Loads a .xodr file and converts it to the commonroad format.
         """
-        scenario = opendrive_to_commonroad(os.path.dirname(os.path.realpath(__file__)) +
-                                           "/../test_maps/opendrive/{}.xodr".format(xodr_file_name))
+        scenario = opendrive_to_commonroad(
+            os.path.dirname(os.path.realpath(__file__)) + "/../test_maps/opendrive/{}.xodr".format(xodr_file_name))
 
         return scenario
 
@@ -63,21 +63,15 @@ class TestOpenDriveToCommonRoadConversion(unittest.TestCase):
 
         np.testing.assert_equal(4, len(scenario.lanelet_network.traffic_signs))
         # 40mph
-        np.testing.assert_almost_equal(
-                17.881, float(scenario.lanelet_network.traffic_signs[0].traffic_sign_elements[0].additional_values[0]), 2
-        )
-        np.testing.assert_almost_equal(
-                17.881, float(scenario.lanelet_network.traffic_signs[2].traffic_sign_elements[0].additional_values[0]), 2
-        )
+        np.testing.assert_almost_equal(17.881,
+                float(scenario.lanelet_network.traffic_signs[0].traffic_sign_elements[0].additional_values[0]), 2)
+        np.testing.assert_almost_equal(17.881,
+                float(scenario.lanelet_network.traffic_signs[2].traffic_sign_elements[0].additional_values[0]), 2)
         # 65 mph
-        np.testing.assert_almost_equal(
-                29.057,
-                float(scenario.lanelet_network.traffic_signs[1].traffic_sign_elements[0].additional_values[0]), 2
-        )
-        np.testing.assert_almost_equal(
-                29.057,
-                float(scenario.lanelet_network.traffic_signs[3].traffic_sign_elements[0].additional_values[0]), 2
-        )
+        np.testing.assert_almost_equal(29.057,
+                float(scenario.lanelet_network.traffic_signs[1].traffic_sign_elements[0].additional_values[0]), 2)
+        np.testing.assert_almost_equal(29.057,
+                float(scenario.lanelet_network.traffic_signs[3].traffic_sign_elements[0].additional_values[0]), 2)
 
         np.testing.assert_almost_equal(scenario.lanelet_network.find_lanelet_by_id(3).center_vertices[0],
                                        scenario.lanelet_network.traffic_signs[1].position)
@@ -143,12 +137,12 @@ class TestOpenDriveToCommonRoadConversion(unittest.TestCase):
         self.assertEqual(4, len(network.traffic_signs))
 
         # test number of priority traffic signs
-        self.assertEqual(2, len([s for s in network.traffic_signs if s.traffic_sign_elements[0].traffic_sign_element_id
-                                  == TrafficSignIDZamunda.PRIORITY]))
+        self.assertEqual(2, len([s for s in network.traffic_signs if
+                                 s.traffic_sign_elements[0].traffic_sign_element_id == TrafficSignIDZamunda.PRIORITY]))
 
         # test number of yield traffic signs
-        self.assertEqual(2, len([s for s in network.traffic_signs if s.traffic_sign_elements[0].traffic_sign_element_id
-                                  == TrafficSignIDZamunda.YIELD]))
+        self.assertEqual(2, len([s for s in network.traffic_signs if
+                                 s.traffic_sign_elements[0].traffic_sign_element_id == TrafficSignIDZamunda.YIELD]))
 
         # test position of a traffic sign
         np.testing.assert_almost_equal(network.find_traffic_sign_by_id(1).position, [467.03, 498.24], 2)
@@ -196,10 +190,10 @@ class TestOpenDriveToCommonRoadConversion(unittest.TestCase):
         self.assertEqual(6, len([t for t in network.traffic_signs if t.virtual]))
 
         # test type of traffic signs
-        self.assertEqual(TrafficSignIDZamunda.U_TURN, network.find_traffic_sign_by_id(1).traffic_sign_elements[0]
-                          .traffic_sign_element_id)
-        self.assertEqual(TrafficSignIDZamunda.U_TURN, network.find_traffic_sign_by_id(2).traffic_sign_elements[0]
-                          .traffic_sign_element_id)
+        self.assertEqual(TrafficSignIDZamunda.U_TURN,
+                         network.find_traffic_sign_by_id(1).traffic_sign_elements[0].traffic_sign_element_id)
+        self.assertEqual(TrafficSignIDZamunda.U_TURN,
+                         network.find_traffic_sign_by_id(2).traffic_sign_elements[0].traffic_sign_element_id)
 
         # test position of a traffic light
         np.testing.assert_almost_equal(network.find_traffic_light_by_id(2093).position, [13.15, 12.32], 2)
@@ -219,14 +213,14 @@ class TestOpenDriveToCommonRoadConversion(unittest.TestCase):
 
         # test correct traffic signs
         self.assertEqual(4, len(network.traffic_signs))
-        self.assertEqual(TrafficSignIDZamunda.PRIORITY, network.find_traffic_sign_by_id(1).traffic_sign_elements[0]
-                          .traffic_sign_element_id)
-        self.assertEqual(TrafficSignIDZamunda.YIELD, network.find_traffic_sign_by_id(2).traffic_sign_elements[0]
-                          .traffic_sign_element_id)
-        self.assertEqual(TrafficSignIDZamunda.PRIORITY, network.find_traffic_sign_by_id(3).traffic_sign_elements[0]
-                          .traffic_sign_element_id)
+        self.assertEqual(TrafficSignIDZamunda.PRIORITY,
+                         network.find_traffic_sign_by_id(1).traffic_sign_elements[0].traffic_sign_element_id)
         self.assertEqual(TrafficSignIDZamunda.YIELD,
-                          network.find_traffic_sign_by_id(4).traffic_sign_elements[0].traffic_sign_element_id)
+                         network.find_traffic_sign_by_id(2).traffic_sign_elements[0].traffic_sign_element_id)
+        self.assertEqual(TrafficSignIDZamunda.PRIORITY,
+                         network.find_traffic_sign_by_id(3).traffic_sign_elements[0].traffic_sign_element_id)
+        self.assertEqual(TrafficSignIDZamunda.YIELD,
+                         network.find_traffic_sign_by_id(4).traffic_sign_elements[0].traffic_sign_element_id)
 
         # test position of traffic sign
         np.testing.assert_almost_equal(network.find_traffic_sign_by_id(3).position, [5.86, 13.78], 2)
@@ -245,6 +239,35 @@ class TestOpenDriveToCommonRoadConversion(unittest.TestCase):
         self.assertEqual(8, len([l for l in network.lanelets if l.lanelet_type == {LaneletType.SIDEWALK}]))
         # test number of driving lanes
         self.assertEqual(22, len(network.lanelets))
+
+    def test_access_to_user_allow(self):
+        name = "straight_road_lane_access"
+        scenario = self.load_and_convert_opendrive(name)
+        self.assertEqual({RoadUser.PEDESTRIAN}, scenario.lanelet_network.find_lanelet_by_id(2).user_one_way)
+
+    def test_access_to_user_deny(self):
+        name = "straight_road_lane_access_deny"
+        scenario = self.load_and_convert_opendrive(name)
+        self.assertEqual({RoadUser.VEHICLE, RoadUser.TRAIN},
+                         scenario.lanelet_network.find_lanelet_by_id(2).user_one_way)
+
+    def test_access_mapping(self):
+        name = "straight_road_lane_access_autonomous" # testing ignored types
+        scenario = self.load_and_convert_opendrive(name)
+        self.assertEqual({RoadUser.VEHICLE, RoadUser.BICYCLE, RoadUser.PEDESTRIAN, RoadUser.TRAIN},
+                         scenario.lanelet_network.find_lanelet_by_id(2).user_one_way)
+        name = "straight_road_lane_access_emergency"
+        scenario = self.load_and_convert_opendrive(name)
+        self.assertEqual({RoadUser.PRIORITY_VEHICLE}, scenario.lanelet_network.find_lanelet_by_id(2).user_one_way)
+
+        name = "straight_road_lane_access_passengerCar"
+        scenario = self.load_and_convert_opendrive(name)
+        self.assertEqual({RoadUser.CAR}, scenario.lanelet_network.find_lanelet_by_id(2).user_one_way)
+
+        name = "straight_road_lane_access_trucks"
+        scenario = self.load_and_convert_opendrive(name)
+        self.assertEqual({RoadUser.TRUCK}, scenario.lanelet_network.find_lanelet_by_id(2).user_one_way)
+
 
 
 if __name__ == "__main__":

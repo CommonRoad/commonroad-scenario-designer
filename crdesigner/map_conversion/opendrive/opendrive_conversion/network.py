@@ -180,7 +180,6 @@ class Network:
                 # Remove lanelets from intersections dictionary that do not fit the filtered type criterion
                 self._link_index.clean_intersections(parametric_lane.id_)
                 continue
-
             lanelet = parametric_lane.to_lanelet(self.error_tolerance, self.min_delta_s)
             lanelet.predecessor = self._link_index.get_predecessors(parametric_lane.id_)
             lanelet.successor = self._link_index.get_successors(parametric_lane.id_)
