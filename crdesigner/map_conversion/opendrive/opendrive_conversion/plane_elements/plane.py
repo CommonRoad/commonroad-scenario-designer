@@ -93,6 +93,7 @@ class ParametricLane:
         line_marking = None,
         side: str = None,
         speed: float = None,
+        access: list = []
     ):
         """Initializes a ParametricLane object.
 
@@ -110,6 +111,8 @@ class ParametricLane:
         :type side: str
         :param speed: Speed limit for this individual plane
         :type speed: float
+        :param access: equivalent to access restrictions from opendrive lanes
+        :type access: list
         """
         self.border_group = border_group
         self.id_ = id_
@@ -119,6 +122,7 @@ class ParametricLane:
         self.line_marking = line_marking
         self.side = side
         self.speed = speed
+        self.access = access
 
     def calc_border(
         self, border: str, s_pos: float, width_offset: float = 0.0, compute_curvature=True

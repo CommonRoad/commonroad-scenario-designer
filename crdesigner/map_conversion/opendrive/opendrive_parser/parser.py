@@ -382,8 +382,9 @@ def parse_opendrive_road_lane_section(new_road: Road, lane_section_id: int, lane
                 new_lane.speed = None
 
             # Access
-            # TODO implementation
-
+            for _access in lane.findall("access"):
+                new_lane.access += [[str(_access.get("restriction")), str(_access.get("rule")),
+                                     float(_access.get("sOffset"))]]
             # Lane Height
             # TODO implementation
 
