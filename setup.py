@@ -33,7 +33,6 @@ setup(
         "enum34>=1.1.10",
         "iso3166>=1.0.1",
         "networkx>=2.5",
-        #"cartopy >= 0.17.0",
         "omegaconf >= 2.2.2",
     ],
     extras_require={"GUI": ["matplotlib>=3.1.0"]},

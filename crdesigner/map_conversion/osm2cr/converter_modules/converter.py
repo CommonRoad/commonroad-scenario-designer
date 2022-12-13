@@ -5,6 +5,7 @@ You can use this module instead of using **main.py**.
 import pickle
 import sys
 import logging
+from typing import Callable, Optional
 import matplotlib.pyplot as plt
 
 from crdesigner.map_conversion.osm2cr import config
@@ -22,66 +23,104 @@ from crdesigner.map_conversion.osm2cr.converter_modules.graph_operations import 
 )
 
 
-def step_collection_1(file: str) -> road_graph.Graph:
+def step_collection_1(file: str, progressReport: Optional[Callable[[int],None]] = None) -> road_graph.Graph:
     graph = osm_parser.create_graph(file)
+    if progressReport is not None:
+        progressReport(10)
     if config.MAKE_CONTIGUOUS:
         logging.info("making graph contiguously")
         graph.make_contiguous()
+    if progressReport is not None:
+        progressReport(30)
     logging.info("merging close intersections")
     intersection_merger.merge_close_intersections(graph)
+    if progressReport is not None:
+        progressReport(55)
     if isinstance(graph, road_graph.SublayeredGraph):
         intersection_merger.merge_close_intersections(graph.sublayer_graph)
+    if progressReport is not None:
+        progressReport(79)    
     graph.link_edges()
+    if progressReport is not None:
+        progressReport(100)
     return graph
 
 
-def step_collection_2(graph: road_graph.Graph) -> road_graph.Graph:
+def step_collection_2(graph: road_graph.Graph, progressReport: Optional[Callable[[int],None]] = None) -> road_graph.Graph:
     logging.info("linking lanes")
     lane_linker.link_graph(graph)
+    if progressReport is not None:
+        progressReport(5)
     if isinstance(graph, road_graph.SublayeredGraph):
         lane_linker.link_graph(graph.sublayer_graph)
     logging.info("interpolating waypoints")
     graph.interpolate()
+    if progressReport is not None:
+        progressReport(35)
     logging.info("offsetting roads")
     offsetter.offset_graph(graph)
+    if progressReport is not None:
+        progressReport(52)
     if isinstance(graph, road_graph.SublayeredGraph):
         offsetter.offset_graph(graph.sublayer_graph)
     logging.info("cropping roads at intersections")
     edges_to_delete = graph.crop_waypoints_at_intersections(config.INTERSECTION_DISTANCE)
+    if progressReport is not None:
+        progressReport(59)
     if config.DELETE_SHORT_EDGES:
         logging.info("deleting short edges")
         graph.delete_edges(edges_to_delete)
+    if progressReport is not None:
+        progressReport(62)
     if isinstance(graph, road_graph.SublayeredGraph):
         edges_to_delete = graph.sublayer_graph.crop_waypoints_at_intersections(config.INTERSECTION_DISTANCE_SUBLAYER)
         if config.DELETE_SHORT_EDGES:
             graph.sublayer_graph.delete_edges(edges_to_delete)
     logging.info("applying traffic signs to edges and nodes")
     mapillary.add_mapillary_signs_to_graph(graph)
+    if progressReport is not None:
+        progressReport(79)
     graph.apply_traffic_signs()
+    if progressReport is not None:
+        progressReport(85)
     logging.info("applying traffic lights to edges")
     graph.apply_traffic_lights()
+    if progressReport is not None:
+        progressReport(92)
     logging.info("creating waypoints of lanes")
     graph.create_lane_waypoints()
+    if progressReport is not None:
+        progressReport(100)
     return graph
 
 
-def step_collection_3(graph: road_graph.Graph) -> road_graph.Graph:
+def step_collection_3(graph: road_graph.Graph, progressReport: Optional[Callable[[int],None]] = None) -> road_graph.Graph:
     logging.info("creating segments at intersections")
     graph.create_lane_link_segments()
+    if progressReport is not None:
+        progressReport(5)
     logging.info("clustering segments")
     segment_clusters.cluster_segments(graph)
+    if progressReport is not None:
+        progressReport(37)
     if isinstance(graph, road_graph.SublayeredGraph):
         segment_clusters.cluster_segments(graph.sublayer_graph)
     logging.info("changing to desired interpolation distance and creating borders of lanes")
     graph.create_lane_bounds(config.INTERPOLATION_DISTANCE_INTERNAL / config.INTERPOLATION_DISTANCE)
+    if progressReport is not None:
+        progressReport(59)
     if config.DELETE_INVALID_LANES:
         logging.info("deleting invalid lanes")
         graph.delete_invalid_lanes()
+    if progressReport is not None:
+        progressReport(62)    
     if isinstance(graph, road_graph.SublayeredGraph):
         if config.DELETE_INVALID_LANES:
             graph.sublayer_graph.delete_invalid_lanes()
     logging.info("adjust common bound points")
     graph.correct_start_end_points()
+    if progressReport is not None:
+        progressReport(100)
     logging.info("done converting")
     return graph
 

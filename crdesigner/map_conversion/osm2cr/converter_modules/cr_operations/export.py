@@ -2,7 +2,7 @@
 This module holds all interaction between this application and the ***CommonRoad python tools**.
 It allows to export a scenario to CR or plot a CR scenario.
 """
-from typing import List, Tuple
+from typing import Callable, List, Optional, Tuple
 
 import logging
 import numpy as np
@@ -201,11 +201,17 @@ def export(
     # file_writer.write_scenario_to_file(file, OverwriteExistingFile.ALWAYS)
 
 
-def convert_to_scenario(graph: rg.Graph) -> Scenario:
+def convert_to_scenario(graph: rg.Graph, progressReport: Optional[Callable[[int],None]] = None) -> Scenario:
     # scenario = create_scenario(graph)
+    if progressReport is not None:
+        progressReport(23)
     scenario, intermediate_format = create_scenario_intermediate(graph)
+    if progressReport is not None:
+        progressReport(70)
     # removing converting errors before writing to xml
     sanitize(scenario)
+    if progressReport is not None:
+        progressReport(100)
     return scenario
 
 

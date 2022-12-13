@@ -1,7 +1,7 @@
 from pathlib import Path
 import pickle
 import subprocess
-from typing import Optional
+from typing import Callable, Optional
 import warnings
 from lxml import etree
 
@@ -38,9 +38,6 @@ if SUMO_AVAILABLE:
     from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMOSimulation
     from crdesigner.ui.gui.mwindow.service_layer.sumo_settings import SUMOSettings
     from crdesigner.map_conversion.sumo_map.sumo2cr import convert_net_to_cr
-
-from crdesigner.ui.gui.mwindow.service_layer.osm_gui_modules.gui import CARTOPY_AVAILABLE
-
 
 class MapConversionToolbox(QDockWidget):
     def __init__(self, current_scenario, callback, text_browser, tmp_folder: str, mwindow):
@@ -127,20 +124,34 @@ class MapConversionToolbox(QDockWidget):
             self.osm_file = filename
             self.converter_toolbox.osm_loading_status.setText("map successfully loaded")
 
-    def hidden_osm_conversion(self, graph: rg.Graph) -> None:
+    def hidden_osm_conversion(self, graph: rg.Graph, progressReport: Optional[Callable[[int],None]] = None) -> None:
         """
         Performs a OSM conversion without user edit.
 
         :param graph: graph to convert
         """
         try:
-            graph = converter.step_collection_2(graph)
+            if progressReport is not None:
+                progressReport(10)
+            if progressReport is None:    
+                subProgressReport = None
+            else:
+                subProgressReport = lambda progress_value: progressReport(10 + 0.30*progress_value)    
+            graph = converter.step_collection_2(graph, subProgressReport)
+            if progressReport is None:    
+                subProgressReport = None
+            else:
+                subProgressReport = lambda progress_value: progressReport(40 + 0.40*progress_value)
             graph = converter.step_collection_3(graph)
         except Exception as e:
             QMessageBox.warning(self, "Internal Error", "There was an error during the processing of the graph.\n\n{}"
                                 .format(e), QMessageBox.Ok)
             return
-        scenario = convert_to_scenario(graph)
+        if progressReport is None:    
+            subProgressReport = None
+        else:
+            subProgressReport = lambda progress_value: progressReport(80 + 0.20*progress_value)    
+        scenario = convert_to_scenario(graph,subProgressReport) 
         self.callback(scenario)
 
     def convert_osm_to_cr(self) -> None:
@@ -149,7 +160,11 @@ class MapConversionToolbox(QDockWidget):
         """
         try:
             if self.osm_file is not None:
-                self.read_osm_file(self.osm_file)
+                offset = 5
+                proportion = 0.47
+                self.converter_toolbox.progress.setHidden(False)
+                self.converter_toolbox.progress.setValue(5)
+                self.read_osm_file(self.osm_file,lambda progress_value: self.converter_toolbox.progress.setValue(offset + proportion*progress_value))
             else:
                 QMessageBox.warning(
                     self,
@@ -164,14 +179,12 @@ class MapConversionToolbox(QDockWidget):
                 "Map unreadable: " + str(e),
                 QMessageBox.Ok)
             return
-        if self.converter_toolbox.osm_conversion_edit_manually_selection.isChecked() and CARTOPY_AVAILABLE:
-            self.edge_edit_embedding(self.graph)
-        else:
-            self.hidden_osm_conversion(self.graph)
-        if not CARTOPY_AVAILABLE:
-            warnings.warn("OSM edit mode not available!")
+        offset = 52
+        proportion = 0.48    
+        self.hidden_osm_conversion(self.graph, lambda progress_value: self.converter_toolbox.progress.setValue(offset + proportion*progress_value))
         self.converter_toolbox.osm_loading_status.setText("no file selected")
         self.osm_file = None
+        self.converter_toolbox.progress.setHidden(True)
     
     def convert_osm_to_cr_with_sumo(self) -> None:
         """
@@ -267,7 +280,7 @@ class MapConversionToolbox(QDockWidget):
             self.osm_file = config.SAVE_PATH + name
             self.converter_toolbox.osm_loading_status.setText("map successfully downloaded")
 
-    def read_osm_file(self, file: str) -> None:
+    def read_osm_file(self, file: str, progressReport: Optional[Callable[[int],None]] = None) -> None:
         """
         loads an osm file and performs first steps to create the road graph
 
@@ -275,7 +288,13 @@ class MapConversionToolbox(QDockWidget):
         :return: None
         """
         try:
-            self.graph = converter.step_collection_1(file)
+            if progressReport is not None:
+                progressReport(10)
+            if progressReport is None:    
+                subProgressReport = None
+            else:
+                subProgressReport = lambda progress_value: progressReport(10 + 0.42*progress_value)    
+            self.graph = converter.step_collection_1(file, subProgressReport)
         except Exception as e:
             QMessageBox.warning(
                 self,
