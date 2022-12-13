@@ -29,7 +29,7 @@ setup(
         "ordered-set>=4.0.2",
         "shapely>=1.7.0",
         "sumocr==2022.1",
-        "commonroad-io==2022.3",
+        "commonroad-io==2022.2",
         "enum34>=1.1.10",
         "iso3166>=1.0.1",
         "networkx>=2.5",
