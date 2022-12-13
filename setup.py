@@ -20,7 +20,7 @@ setup(
     install_requires=[
         "numpy>=1.21.6",
         "lxml>=4.3.4",
-        "pyproj>=3.4.0",
+        "pyproj==3.2.1",
         "scipy>=1.3.0",
         "mercantile >= 1.1.3",
         "utm >= 0.5.0",
