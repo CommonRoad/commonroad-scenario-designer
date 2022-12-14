@@ -1,6 +1,7 @@
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
+from crdesigner.ui.gui.mwindow.toolboxes.converter_toolbox.waitingspinnerwidget import QtWaitingSpinner
 
 from crdesigner.ui.gui.mwindow.toolboxes.toolbox_ui import Toolbox
 
@@ -105,6 +106,7 @@ class MapConversionToolboxUI(Toolbox):
         self.button_start_osm_conversion_with_sumo_parser = QPushButton("Convert OSM to CommonRoad using Sumo Parser")
         self.button_start_osm_conversion_with_sumo_parser.setToolTip('The conversion follows the route : \nOsm -> OpenDrive -> CR\nUseful for densed crossing')
         self.progress = QProgressBar(self)
+        self.spinner = QtWaitingSpinner(self, centerOnParent=False)
         self.progress.setGeometry(200,80,250,20)
         self.progress.setHidden(True)
         self.button_open_osm_settings = QPushButton("Open OSM Settings")
@@ -131,6 +133,7 @@ class MapConversionToolboxUI(Toolbox):
         layout_osm_conversion_groupbox.addRow(self.button_start_osm_conversion)
         layout_osm_conversion_groupbox.addRow(self.button_start_osm_conversion_with_sumo_parser)
         layout_osm_conversion_groupbox.addRow(self.progress)
+        layout_osm_conversion_groupbox.addRow(self.spinner)
         layout_osm_conversion_configuration.addWidget(osm_conversion_groupbox)
         layout_osm_conversion_configuration.addWidget(self.button_open_osm_settings)
         layout_osm.addLayout(layout_osm_conversion_configuration)
