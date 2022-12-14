@@ -35,7 +35,6 @@ class ObstacleToolbox(QDockWidget):
         self.tmp_folder = tmp_folder
         self.text_browser = text_browser
         self.update_ongoing = False
-        self.init_canvas()
         self.amount_obstacles = 0
         self.canvas = DynamicCanvas()
         self.obstacle_color = None
@@ -50,15 +49,7 @@ class ObstacleToolbox(QDockWidget):
             self.sumo_simulation = SUMOSimulation(tmp_folder=tmp_folder)
         else:
             self.sumo_simulation = None
-
-    def init_canvas(self):
-        """
-        so profile visualization canvas can handle events
-        """
-        self.obstacle_toolbox_ui.canvas.mpl_connect('button_press_event', self.on_button_press)
-        self.obstacle_toolbox_ui.canvas.mpl_connect('button_release_event', self.on_button_release)
-        self.obstacle_toolbox_ui.canvas.mpl_connect('motion_notify_event', self.on_mouse_move)
-
+    
     def adjust_ui(self):
         """
         Updates GUI properties like width, etc.
@@ -1099,7 +1090,6 @@ class ObstacleToolbox(QDockWidget):
             self.clear_obstacle_fields()
             self.obstacle_toolbox_ui.obstacle_state_variable.clear()
             self.obstacle_toolbox_ui.figure.clear()
-            self.obstacle_toolbox_ui.canvas.draw()
 
     def clear_obstacle_fields(self):
         """
@@ -1178,6 +1168,6 @@ class ObstacleToolbox(QDockWidget):
             ax.set_xlim([self.xmin, self.xmax])
             ax.set_ylim([self.ymin, self.ymax])
         # refresh canvas
-        self.obstacle_toolbox_ui.canvas.draw()
+        
         ax.callbacks.connect('xlim_changed', self.on_xlim_change)
         ax.callbacks.connect('ylim_changed', self.on_ylim_change)

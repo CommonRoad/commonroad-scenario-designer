@@ -13,7 +13,6 @@ from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation impor
 if SUMO_AVAILABLE:
     from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMOSimulation
 
-
 class ObstacleToolboxUI(Toolbox):
     def __init__(self, text_browser, mwindow):
         super().__init__(mwindow)
@@ -50,8 +49,6 @@ class ObstacleToolboxUI(Toolbox):
 
         self.obstacle_state_variable = QComboBox()
         self.figure = Figure(figsize=(5, 4))
-        self.canvas = FigureCanvas(self.figure)
-        self.toolbar = NavigationToolbar(self.canvas, self)
 
         self.selected_obstacle = QComboBox()
         self.button_update_obstacle = QPushButton("Update")
@@ -99,15 +96,6 @@ class ObstacleToolboxUI(Toolbox):
         self.init_rectangle_fields()
         self.init_position()
 
-        layout_obstacle_state_vis_groupbox = QFormLayout()
-        obstacle_state_vis_groupbox = QGroupBox()
-        obstacle_state_vis_groupbox.setLayout(layout_obstacle_state_vis_groupbox)
-        layout_vis_selection = QFormLayout()
-        layout_vis_selection.addRow("Visualized State:", self.obstacle_state_variable)
-        layout_obstacle_state_vis_groupbox.addRow(layout_vis_selection)
-        layout_obstacle_state_vis_groupbox.addWidget(self.toolbar)
-        layout_obstacle_state_vis_groupbox.addWidget(self.canvas)
-        self.layout_obstacle_information_groupbox.addRow(obstacle_state_vis_groupbox)
         self.layout_obstacles.addWidget(self.obstacle_information_groupbox)
 
         layout_obstacle_buttons = QFormLayout()
