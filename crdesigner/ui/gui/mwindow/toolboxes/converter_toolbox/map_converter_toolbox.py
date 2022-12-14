@@ -40,56 +40,22 @@ if SUMO_AVAILABLE:
     from crdesigner.map_conversion.sumo_map.sumo2cr import convert_net_to_cr
 
 class RequestRunnable(QRunnable):
-    def __init__(self, mapConversionToolbox, isOsm2Cr):
+    def __init__(self, fun, mapConversionToolbox):
         QRunnable.__init__(self)
-        self.isOsm2Cr = isOsm2Cr #Which conversion to be done (True = osm2cr, False = Osm2Cr using Sumo)
+        self.fun = fun 
         self.mapConversionToolbox = mapConversionToolbox
 
     def run(self):
-        if self.isOsm2Cr:
-            """
-        Starts the OSM conversion process by picking a file and showing the edge edit GUI.
-        """
-            try:
-                    self.mapConversionToolbox.read_osm_file(self.mapConversionToolbox.osm_file)
-            except ValueError as e:
-                QMessageBox.critical(
-                    self,
-                    "Warning",
-                    "Map unreadable: " + str(e),
-                    QMessageBox.Ok)
-                return
-            self.mapConversionToolbox.hidden_osm_conversion(self.mapConversionToolbox.graph)
-            QMetaObject.invokeMethod(self.mapConversionToolbox, "stopSpinner",
-                                    Qt.QueuedConnection,
-                                    Q_ARG(str, "done")) 
-            self.mapConversionToolbox.converter_toolbox.osm_loading_status.setText("no file selected")
-            self.mapConversionToolbox.osm_file = None
-        else:    
-            """
-        Starts the OSM conversion process using SUMO Parser by picking a file and showing the edge edit GUI.
-        """
-            try:
-                    scenario = osm_to_commonroad_using_sumo(self.mapConversionToolbox.osm_file)
-                    self.mapConversionToolbox.callback(scenario) 
-                    QMetaObject.invokeMethod(self.mapConversionToolbox, "stopSpinner",
-                                    Qt.QueuedConnection,
-                                    Q_ARG(str, "done")) 
-                    self.mapConversionToolbox.converter_toolbox.osm_loading_status.setText("no file selected")
-                    self.mapConversionToolbox.osm_file = None
-
-            except ValueError as e:
-                QMessageBox.critical(
-                    self,
-                    "Warning",
-                    "Map unreadable: " + str(e),
-                    QMessageBox.Ok)
-                return 
+        self.fun()
+        QMetaObject.invokeMethod(self.mapConversionToolbox, "stopSpinner",
+                                Qt.QueuedConnection,
+                                Q_ARG(str, "Conversion Ended")) 
 
 class MapConversionToolbox(QDockWidget):
     def __init__(self, current_scenario, callback, text_browser, tmp_folder: str, mwindow):
         super().__init__("Map Converter Toolbox")
         self.converter_toolbox = MapConversionToolboxUI(mwindow)
+        self.current_scenario = current_scenario
         self.callback = callback
         self.text_browser = text_browser
         self.adjust_ui()
@@ -122,8 +88,8 @@ class MapConversionToolbox(QDockWidget):
         self.converter_toolbox.button_download_osm_file.clicked.connect(lambda: self.download_osm_map())
         self.converter_toolbox.button_load_osm_file.clicked.connect(lambda: self.load_osm_file())
         self.converter_toolbox.button_load_osm_edit_state.clicked.connect(lambda: self.load_osm_edit_state())
-        self.converter_toolbox.button_start_osm_conversion.clicked.connect(lambda: self.convert_osm_to_cr())
-        self.converter_toolbox.button_start_osm_conversion_with_sumo_parser.clicked.connect(lambda: self.convert_osm_to_cr_with_sumo())
+        self.converter_toolbox.button_start_osm_conversion.clicked.connect(lambda: self.convert_osm_to_cr_with_spinner())
+        self.converter_toolbox.button_start_osm_conversion_with_sumo_parser.clicked.connect(lambda: self.convert_osm_to_cr_with_sumo_with_spinner())
         self.converter_toolbox.button_open_osm_settings.clicked.connect(lambda: self.open_osm_settings())
 
         self.converter_toolbox.button_load_opendrive.clicked.connect(lambda: self.load_open_drive())
@@ -198,16 +164,37 @@ class MapConversionToolbox(QDockWidget):
             subProgressReport = None
         else:
             subProgressReport = lambda progress_value: progressReport(80 + 0.20*progress_value)    
-        scenario = convert_to_scenario(graph,subProgressReport) 
-        self.callback(scenario)
+        self.current_scenario = convert_to_scenario(graph,subProgressReport) 
+        self.callback(self.current_scenario)
 
     def convert_osm_to_cr(self) -> None:
         """
         Starts the OSM conversion process by picking a file and showing the edge edit GUI.
         """
+        try:
+            if self.osm_file is not None:
+                self.read_osm_file(self.osm_file)
+            else:
+                QMessageBox.warning(
+                    self,
+                    "Warning",
+                    "No file selected.",
+                    QMessageBox.Ok)
+                return
+        except ValueError as e:
+            QMessageBox.critical(
+                self,
+                "Warning",
+                "Map unreadable: " + str(e),
+                QMessageBox.Ok)
+        self.hidden_osm_conversion(self.graph)
+        self.converter_toolbox.osm_loading_status.setText("no file selected")
+        self.osm_file = None
+
+    def convert_osm_to_cr_with_spinner(self) -> None:
         if self.osm_file is not None:
-            self.converter_toolbox.spinner.start() 
-            runnable = RequestRunnable(self,True)
+            self.startSpinner()
+            runnable = RequestRunnable(self.convert_osm_to_cr, self)
             QThreadPool.globalInstance().start(runnable)
         else:
             QMessageBox.warning(
@@ -217,11 +204,35 @@ class MapConversionToolbox(QDockWidget):
             QMessageBox.Ok)
             return
 
-    
-    def convert_osm_to_cr_with_sumo(self):
+    def convert_osm_to_cr_with_sumo(self) -> None:
+        """
+        Starts the OSM conversion process using SUMO Parser by picking a file and showing the edge edit GUI.
+        """
+        try:
+            if self.osm_file is not None:  
+              self.current_scenario = osm_to_commonroad_using_sumo(self.osm_file)
+              self.callback(self.current_scenario)  
+            else:
+                QMessageBox.warning(
+                    self,
+                    "Warning",
+                    "No file selected.",
+                    QMessageBox.Ok)
+                return
+        except ValueError as e:
+            QMessageBox.critical(
+                self,
+                "Warning",
+                "Map unreadable: " + str(e),
+                QMessageBox.Ok)
+            return 
+        self.converter_toolbox.osm_loading_status.setText("no file selected")
+        self.osm_file = None
+
+    def convert_osm_to_cr_with_sumo_with_spinner(self) -> None:
         if self.osm_file is not None:
-            self.converter_toolbox.spinner.start() 
-            runnable = RequestRunnable(self, False)
+            self.startSpinner() 
+            runnable = RequestRunnable(self.convert_osm_to_cr_with_sumo, self)
             QThreadPool.globalInstance().start(runnable)
         else:
             QMessageBox.warning(
@@ -234,8 +245,13 @@ class MapConversionToolbox(QDockWidget):
     @pyqtSlot(str)
     def stopSpinner(self, data):
         print(data)
+        self.callback(self.current_scenario)
         self.converter_toolbox.spinner.stop() 
 
+    def startSpinner(self):
+        if(self.converter_toolbox.spinner.isSpinning()):
+            self.converter_toolbox.spinner.stop() 
+        self.converter_toolbox.spinner.start()    
 
     def edge_edit_embedding(self, graph: rg.Graph):
         """
