@@ -26,7 +26,7 @@ style_check:
   stage: static_check
   image: "python:3.11"
   script :
-    - python -m pip install prospector[with_mypy]
+    - pip install prospector[with_mypy]
     - git fetch --all
     - /bin/sh -c 
         'if [ "$CI_MERGE_REQUEST_ID" != "" ]; then
