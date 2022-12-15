@@ -25,8 +25,7 @@ if SUMO_AVAILABLE:
 from crdesigner.ui.gui.mwindow.toolboxes.obstacle_toolbox.obstacle_toolbox_ui import ObstacleToolboxUI
 
 from commonroad.prediction.prediction import TrajectoryPrediction
-from commonroad_dc.feasibility.vehicle_dynamics import VehicleDynamics
-from commonroad.common.solution import VehicleType
+
 
 
 class ObstacleToolbox(QDockWidget):
