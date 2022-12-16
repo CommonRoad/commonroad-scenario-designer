@@ -187,12 +187,28 @@ class TestParametricLane(unittest.TestCase):
         # function should create three vertices: start, middle and end
         parametric_lane.length = 46.911
         left, right = parametric_lane.calc_vertices(error_tolerance=0.2, min_delta_s=0.3)
-        self.assertEqual(3, len(left))
-        self.assertEqual(3, len(right))
+
+        # test for calculating the vertices without sampling
+        self.assertEqual(94, len(left))
+        self.assertEqual(94, len(right))
+        # test for calculating the vertices with sampling
+        # self.assertEqual(3, len(left))
+        # self.assertEqual(3, len(right))
+
         # test that inner border vertices are offset (in t-direction) by 5
-        np.testing.assert_almost_equal([[22.574, 29.645], [39.161, 46.229], [55.806, 62.877]], left, 3)
+        # test for calculating the vertices without sampling
+        np.testing.assert_almost_equal([22.574, 29.645], left[0], 3)
+        np.testing.assert_almost_equal([55.806, 62.877], left[-1], 3)
+        # test for calculating the vertices with sampling
+        # np.testing.assert_almost_equal([[22.574, 29.645], [39.161, 46.229], [55.806, 62.877]], left, 3)
+
         # test that outer border vertices are offset (in t-direction) by -1
-        np.testing.assert_almost_equal([[26.817, 25.402], [43.404, 41.986], [60.049, 58.634]], right, 3)
+        # test for calculating the vertices without sampling
+        np.testing.assert_almost_equal([26.817, 25.402], right[0], 3)
+        np.testing.assert_almost_equal([60.049, 58.634], right[-1], 3)
+        # test for calculating the vertices with sampling
+        # np.testing.assert_almost_equal([[26.817, 25.402], [43.404, 41.986], [60.049, 58.634]], right, 3)
+
         # test that parametric lane with length < 0 returns empty lists
         parametric_lane.length = -1
         left, right = parametric_lane.calc_vertices(error_tolerance=0.2, min_delta_s=0.3)
