@@ -18,7 +18,9 @@ from crdesigner.map_conversion.lanelet2.cr2lanelet import CR2LaneletConverter
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.dataloader import DataLoader
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.converter import Converter
 
-from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMO_AVAILABLE
+from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import (
+    SUMO_AVAILABLE,
+)
 
 if SUMO_AVAILABLE:
     from crdesigner.map_conversion.sumo_map.config import SumoConfig
@@ -29,6 +31,7 @@ from crdesigner.map_conversion.osm2cr.converter_modules.cr_operations.export imp
     convert_to_scenario,
 )
 from crdesigner.map_conversion.osm2cr.converter_modules.converter import GraphScenario
+from crdesigner.configurations.get_configs import get_configs
 
 
 def lanelet_to_commonroad(
@@ -147,6 +150,21 @@ def osm_to_commonroad(input_file: str) -> Scenario:
     """
     osm_graph = GraphScenario(input_file).graph
     return convert_to_scenario(osm_graph)
+
+
+def commonroad_to_opendrive(input_file: str, output_file: str):
+    """
+    Converts CommonRoad file to OpenDRIVE file and stores it
+    @param input_file: Path to CommonRoad file
+    @param output_file: Path where OpenDRIVE file to be stored
+    """
+
+    # load the xml file and preprocess it
+    data = DataLoader(input_file)
+
+    scenario, successors, ids = data.initialize()
+    converter = Converter(input_file, scenario, successors, ids)
+    converter.convert(output_file)
 
 
 def osm_to_commonroad_using_sumo(input_file: str) -> Scenario:

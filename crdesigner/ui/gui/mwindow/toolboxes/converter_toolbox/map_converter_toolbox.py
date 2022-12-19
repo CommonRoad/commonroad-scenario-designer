@@ -1,13 +1,13 @@
 import pickle
 from typing import Optional
-
+import warnings
 from lxml import etree
+
+from commonroad.scenario.scenario import Scenario
 
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
-
 from commonroad.scenario.traffic_sign import *
-from commonroad.scenario.scenario import Scenario
 
 from crdesigner.ui.gui.mwindow.toolboxes.converter_toolbox.map_converter_toolbox_ui import MapConversionToolboxUI
 from crdesigner.ui.gui.mwindow.service_layer.util import select_local_file
