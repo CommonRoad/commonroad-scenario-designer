@@ -31,7 +31,10 @@ class TestOpenDriveToCommonRoadConversion(unittest.TestCase):
         self.assertEqual(8, len(network.lanelets))
 
         # test length of road
-        np.testing.assert_almost_equal(99.97, network.find_lanelet_by_id(1).distance[3], 2)
+        # test for calculating the vertices without sampling
+        np.testing.assert_almost_equal(1.507, network.find_lanelet_by_id(1).distance[3], 3)
+        # test for calculating the vertices with sampling
+        # np.testing.assert_almost_equal(99.97, network.find_lanelet_by_id(1).distance[3], 2)
 
         # test that two virtual traffic signs are correctly created
         np.testing.assert_equal(2, len(network.traffic_signs))
@@ -91,7 +94,10 @@ class TestOpenDriveToCommonRoadConversion(unittest.TestCase):
         # self.assertEqual(4, num_stop_lines)
 
         # test length of lanelet
-        np.testing.assert_almost_equal(network.find_lanelet_by_id(50).distance[2], 90.7, 1)
+        # test for calculating the vertices without sampling
+        np.testing.assert_almost_equal(network.find_lanelet_by_id(50).distance[2], 1.003, 3)
+        # test for calculating the vertices with sampling
+        # np.testing.assert_almost_equal(network.find_lanelet_by_id(50).distance[2], 90.7, 1)
 
         # test num of driving lanes
         self.assertEqual(60, len(network.lanelets))
@@ -115,13 +121,20 @@ class TestOpenDriveToCommonRoadConversion(unittest.TestCase):
         # test vertices
         lanelet = network.find_lanelet_by_id(17)
         np.testing.assert_almost_equal(15.268, np.linalg.norm(lanelet.left_vertices[0] - lanelet.right_vertices[0]), 3)
-        self.assertEqual(3, len(lanelet.left_vertices))
+
+        # test for calculating the vertices without sampling
+        self.assertEqual(44, len(lanelet.left_vertices))
+        # test for calculating the vertices with sampling
+        # self.assertEqual(3, len(lanelet.left_vertices))
 
         lanelet = network.find_lanelet_by_id(4)
         np.testing.assert_almost_equal(3.500, np.linalg.norm(lanelet.left_vertices[0] - lanelet.right_vertices[0]), 3)
 
         # test length of lane
-        np.testing.assert_almost_equal(network.find_lanelet_by_id(17).inner_distance[2], 21.69863, 3)
+        # test for calculating the vertices with sampling
+        # np.testing.assert_almost_equal(network.find_lanelet_by_id(17).inner_distance[2], 21.69863, 3)
+        # test for calculating the vertices without sampling
+        np.testing.assert_almost_equal(network.find_lanelet_by_id(17).inner_distance[2], 1.00900, 3)
 
     def test_crossing_complex_eight_course(self):
         """Test the file CrossingComplex8Course.xodr"""
@@ -165,9 +178,18 @@ class TestOpenDriveToCommonRoadConversion(unittest.TestCase):
         self.assertEqual(3, len(network.lanelets))
 
         # test vertices of lanelet 1
-        self.assertEqual(3, len(network.find_lanelet_by_id(1).left_vertices))
-        np.testing.assert_almost_equal([[-72.84, -5.19], [-20.45, -4.77], [31.93, -4.35]],
-                                       network.find_lanelet_by_id(1).left_vertices, 2)
+        # test for calculating the vertices without sampling
+        self.assertEqual(210, len(network.find_lanelet_by_id(1).left_vertices))
+        np.testing.assert_almost_equal([-72.84, -5.19],
+                                       network.find_lanelet_by_id(1).left_vertices[0], 2)
+        np.testing.assert_almost_equal([31.93, -4.35],
+                                       network.find_lanelet_by_id(1).left_vertices[-1], 2)
+
+        # test for calculating the vertices with sampling
+        # self.assertEqual(3, len(network.find_lanelet_by_id(1).left_vertices))
+        # np.testing.assert_almost_equal([[-72.84, -5.19], [-20.45, -4.77], [31.93, -4.35]],
+        #                                network.find_lanelet_by_id(1).left_vertices, 2)
+
 
         # test successor / predecessor relation
         self.assertListEqual([2], network.find_lanelet_by_id(1).successor)
