@@ -137,34 +137,20 @@ class MapConversionToolbox(QDockWidget):
             self.osm_file = filename
             self.converter_toolbox.osm_loading_status.setText("map successfully loaded")
 
-    def hidden_osm_conversion(self, graph: rg.Graph, progressReport: Optional[Callable[[int],None]] = None) -> None:
+    def hidden_osm_conversion(self, graph: rg.Graph) -> None:
         """
         Performs a OSM conversion without user edit.
 
         :param graph: graph to convert
         """
-        try:
-            if progressReport is not None:
-                progressReport(10)
-            if progressReport is None:    
-                subProgressReport = None
-            else:
-                subProgressReport = lambda progress_value: progressReport(10 + 0.30*progress_value)    
-            graph = converter.step_collection_2(graph, subProgressReport)
-            if progressReport is None:    
-                subProgressReport = None
-            else:
-                subProgressReport = lambda progress_value: progressReport(40 + 0.40*progress_value)
+        try:  
+            graph = converter.step_collection_2(graph)
             graph = converter.step_collection_3(graph)
         except Exception as e:
             QMessageBox.warning(self, "Internal Error", "There was an error during the processing of the graph.\n\n{}"
                                 .format(e), QMessageBox.Ok)
             return
-        if progressReport is None:    
-            subProgressReport = None
-        else:
-            subProgressReport = lambda progress_value: progressReport(80 + 0.20*progress_value)    
-        self.current_scenario = convert_to_scenario(graph,subProgressReport) 
+        self.current_scenario = convert_to_scenario(graph) 
         self.callback(self.current_scenario)
 
     def convert_osm_to_cr(self) -> None:
@@ -253,19 +239,6 @@ class MapConversionToolbox(QDockWidget):
             self.converter_toolbox.spinner.stop() 
         self.converter_toolbox.spinner.start()    
 
-    def edge_edit_embedding(self, graph: rg.Graph):
-        """
-        sets edge edit embedding as main window
-
-        :param graph: the graph to edit
-        :return: None
-        """
-        if graph is not None:
-            self.edge_edit_window = EdgeEdit(self, graph, None)
-            self.osm_edit_window.show()
-        else:
-            print("no graph loaded")
-
     def lane_link_embedding(self, graph: rg.Graph):
         """
         sets lane link embedding as main window
@@ -318,21 +291,15 @@ class MapConversionToolbox(QDockWidget):
             self.osm_file = config.SAVE_PATH + name
             self.converter_toolbox.osm_loading_status.setText("map successfully downloaded")
 
-    def read_osm_file(self, file: str, progressReport: Optional[Callable[[int],None]] = None) -> None:
+    def read_osm_file(self, file: str) -> None:
         """
         loads an osm file and performs first steps to create the road graph
 
         :param file: file name
         :return: None
         """
-        try:
-            if progressReport is not None:
-                progressReport(10)
-            if progressReport is None:    
-                subProgressReport = None
-            else:
-                subProgressReport = lambda progress_value: progressReport(10 + 0.42*progress_value)    
-            self.graph = converter.step_collection_1(file, subProgressReport)
+        try:  
+            self.graph = converter.step_collection_1(file)
         except Exception as e:
             QMessageBox.warning(
                 self,
