@@ -382,14 +382,31 @@ def calc_next_s(s_current: float, curvature: float, error_tolerance: float, min_
     :param s_max: maximal length of current road element
     :return: next s-value / next position of geometry
     """
-    s_next = s_current + max(min_delta_s, calc_delta_s(curvature, error_tolerance))
+    delta_s = calc_delta_s(curvature, error_tolerance)
+    # if curvature is close to 0, delta_s will become infinity, resulting in s_next to become s_max. If s_current is
+    # much smaller than s_max, this will result in a line instead of a curve.
+    # introducing a max_delta will avoid this, but will also restrict the sampling. For the scenarios curve_road.xodr
+    # and adp-carla-road.xodr max_delta = 60 works fine, but for 02-cut_in_aheadof_ego_slow_automap.xodr it needs to be
+    # decreased to 10
+
+    # changes start
+    #
+    # max_delta = 60
+    # s_next = s_current + max(min_delta_s, min(delta_s, max_delta))
+    #
+    # changes end
+
+    # current implementation start
+    #
+    s_next = s_current + max(min_delta_s, delta_s)
+    #
+    # current implementaion end
 
     # round up when almost at the end
     if 0 < s_max - s_next < 1e-2:
         s_next = s_max
 
     s_next = min(s_max, s_next)
-    # print(s_next, curvature)
     return s_next
 
 
@@ -410,8 +427,8 @@ def calc_delta_s(curvature: Union[None, float, Tuple[float, float]], error_toler
 
     if curvature is None:
         raise RuntimeError("curvature has to be != None")
-    elif curvature == CurvatureRes.CONST_ZERO:
-        return np.inf
+    elif np.isclose(curvature, 0.0, atol=1e-4):
+        ds = np.inf
     else:
         curvature = abs(curvature)
         if curv_derivative is not None and abs(curv_derivative) > 2.0:
@@ -434,4 +451,4 @@ def calc_delta_s(curvature: Union[None, float, Tuple[float, float]], error_toler
                 ds = ds_0
         else:
             ds = math.sqrt(8 * error_tolerance / curvature)
-        return ds
+    return ds
