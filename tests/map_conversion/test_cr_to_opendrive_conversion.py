@@ -10,6 +10,7 @@ from crdesigner.map_conversion.opendrive.opendrive_parser.parser import parse_op
 
 from tests.map_conversion.utils import elements_equal
 
+
 # to run the tests: pytest -v --cov=crdesigner.map_conversion.opendrive.cr_to_opendrive.converter --cov-report html
 # This also generates a coverage report, see rootdir/htmlcov -> index.html
 
@@ -121,8 +122,28 @@ class TestConverterConvert(unittest.TestCase):
 
     def test_convert_ZAM_random(self):
         self.prepare_conversion("ZAM_OpenDrive-1_1_T-1")
+        self.converter.convert(
+            self.file_path_out)  # self.check_with_ground_truth(os.path.join(self.cwd_path,
+        # self.path_reference_xodr_file))
+
+    def test_convert_ZAM_straight_lanelet(self):
+        self.prepare_conversion("ZAM_Lanelet-1_1_T-1")
         self.converter.convert(self.file_path_out)
-        # self.check_with_ground_truth(os.path.join(self.cwd_path, self.path_reference_xodr_file))
+        self.check_with_ground_truth(os.path.join(self.cwd_path, self.path_reference_xodr_file))
+
+    def test_convert_ZAM_curved_lanelet(self):
+        self.prepare_conversion("ZAM_CurvedLanelet-1_1_T-1")
+        self.converter.convert(self.file_path_out)
+        self.check_with_ground_truth(os.path.join(self.cwd_path, self.path_reference_xodr_file))
+
+    def test_convert_ZAM_lanelet_with_obstacles(self):
+            self.prepare_conversion("ZAM_LaneletWithObstacle-1_1_T-1")
+            self.converter.convert(self.file_path_out)
+            self.check_with_ground_truth(os.path.join(self.cwd_path, self.path_reference_xodr_file))
+    def test_convert_ZAM_lanelet_with_obstacles(self):
+                self.prepare_conversion("ZAM_LaneletWithObstacle-1_1_T-1")
+                self.converter.convert(self.file_path_out)
+                self.check_with_ground_truth(os.path.join(self.cwd_path, self.path_reference_xodr_file))
 
 
 if __name__ == "__main__":
