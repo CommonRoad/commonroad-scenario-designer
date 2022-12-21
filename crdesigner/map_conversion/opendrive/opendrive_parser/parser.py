@@ -1,8 +1,5 @@
 import numpy as np
 from lxml import etree
-
-from crdesigner.map_conversion.common.utils import generate_unique_id
-
 from crdesigner.map_conversion.opendrive.opendrive_parser.elements.opendrive import OpenDrive, Header
 from crdesigner.map_conversion.opendrive.opendrive_parser.elements.road import Road
 from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadLink import Predecessor as RoadLinkPredecessor, \
@@ -20,26 +17,26 @@ from crdesigner.map_conversion.opendrive.opendrive_parser.elements.junction impo
     Connection as JunctionConnection, LaneLink as JunctionConnectionLaneLink
 from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadSignal import Signal as RoadSignal, \
     SignalReference
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadObject import Object as RoadObject, \
-    ObjectOutlineCorner
+
+__author__ = "Benjamin Orthen, Stefan Urban, Sebastian Maierhofer"
+__copyright__ = "TUM Cyber-Physical Systems Group"
+__credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles, BMW Car@TUM"]
+__version__ = "0.5.1"
+__maintainer__ = "Sebastian Maierhofer"
+__email__ = "commonroad@lists.lrz.de"
+__status__ = "Released"
 
 
-def parse_opendrive(file_path: str) -> OpenDrive:
+def parse_opendrive(root_node: etree.ElementTree) -> OpenDrive:
     """
     Tries to parse XML tree, returns OpenDRIVE object
 
-    :param file_path: path to opendrive
+    :param root_node: loaded OpenDRIVE data
     :return: Object representing an OpenDrive specification
     """
-    generate_unique_id(0)  # reset IDs
-
-    with open("{}".format(file_path), "r") as file_in:
-        root_node = etree.parse(file_in)
-
-        for elem in root_node.getiterator():
-            if not (isinstance(elem, etree._Comment) or isinstance(elem, etree._ProcessingInstruction)):
-                elem.tag = etree.QName(elem).localname
-        etree.cleanup_namespaces(root_node)
+    # Only accept lxml element
+    if not etree.iselement(root_node):
+        raise TypeError("Argument root_node is not a xml element")
 
     opendrive = OpenDrive()
 
@@ -356,14 +353,24 @@ def parse_opendrive_road_lane_section(new_road: Road, lane_section_id: int, lane
                 new_lane.has_border_record = True
 
             # Road Marks
-            for mark in lane.findall("roadMark"):
+            if lane.find("roadMark") is not None:
+                mark = lane.find("roadMark")
                 road_mark = RoadLaneRoadMark()
 
                 road_mark.type = mark.get("type")
                 road_mark.weight = mark.get("weight")
                 road_mark.SOffset = mark.get("sOffset")
+                new_lane.road_mark = road_mark
 
-                new_lane.road_mark.append(road_mark)
+            # adjustment commented out to secure functionality when merging into develop:
+            #for mark in lane.findall("roadMark"):
+            #    road_mark = RoadLaneRoadMark()
+
+            #    road_mark.type = mark.get("type")
+            #    road_mark.weight = mark.get("weight")
+            #    road_mark.SOffset = mark.get("sOffset")
+
+            #    new_lane.road_mark.append(road_mark)
 
             # Material and Rules are not implemented in CommonRoad -> no need
 
@@ -371,20 +378,11 @@ def parse_opendrive_road_lane_section(new_road: Road, lane_section_id: int, lane
             # TODO implementation
 
             # Speed
-            if lane.find("speed") is not None:
-                # speed is always converted to m/s
-                unit = lane.find("speed").get("unit")
-                if unit == "km/h":
-                    new_lane.speed = float(lane.find("speed").get("max")) / 3.6
-                elif unit == "mph":
-                    new_lane.speed = float(lane.find("speed").get("max")) / 2.237
-            else:
-                new_lane.speed = None
+            # TODO implementation
 
             # Access
-            for _access in lane.findall("access"):
-                new_lane.access += [[str(_access.get("restriction")), str(_access.get("rule")),
-                                     float(_access.get("sOffset"))]]
+            # TODO implementation
+
             # Lane Height
             # TODO implementation
 
@@ -494,10 +492,7 @@ def parse_opendrive_road(opendrive: OpenDrive, road: etree.ElementTree):
         parse_opendrive_road_lane_section(new_road, lane_section_id, lane_section)
 
     # Objects
-    if road.find("objects") is not None:
-        for obj in road.find("objects").findall("object"):
-            if obj is not None:
-                parse_opendrive_road_object(new_road, obj)
+    # TODO implementation
 
     # Signals
     if road.find("signals") is not None:
@@ -514,63 +509,6 @@ def parse_opendrive_road(opendrive: OpenDrive, road: etree.ElementTree):
     calculate_lane_section_lengths(new_road)
 
     opendrive.roads.append(new_road)
-
-
-def parse_opendrive_road_object(new_road: Road, obj: etree.ElementTree):
-    """Parses opendrive road object, creates roadObject from it and adds it to the road.
-
-    :param new_road: The road to add the object to.
-    :type new_road: :class:`Road`
-    :param obj: XML road element which is parsed.
-    :type obj: :class:`etree.ElementTree`
-
-    """
-    corners = []
-    if obj.find("outline") is not None:
-        for outline in obj.find("outline").findall("cornerLocal"):
-            if outline is not None:
-                corner = ObjectOutlineCorner()
-                corner.u = outline.get("u")
-                corner.v = outline.get("v")
-                corner.z = outline.get("z")
-                corners.append(corner)
-
-    road_object = RoadObject()
-    try:
-        if obj.get("type") is not None:
-            road_object.type = obj.get("type")
-        if obj.get("id") is not None:
-            road_object.id = obj.get("id")
-        if obj.get("s") is not None:
-            road_object.s = obj.get("s")
-        if obj.get("t") is not None:
-            road_object.t = obj.get("t")
-        if obj.get("name") is not None:
-            road_object.name = obj.get("name")
-        if obj.get("width") is not None:
-            road_object.width = obj.get("width")
-        if obj.get("height") is not None:
-            road_object.height = obj.get("height")
-        if obj.get("length") is not None:
-            road_object.validLength = obj.get("length")
-        if obj.get("zOffset") is not None:
-            road_object.zOffset = obj.get("zOffset")
-        if obj.get("validLength") is not None:
-            road_object.validLength = obj.get("validLength")
-        if obj.get("orientation") is not None:
-            road_object.orientation = obj.get("orientation")
-        if obj.get("hdg") is not None:
-            road_object.hdg = obj.get("hdg")
-        if obj.get("pitch") is not None:
-            road_object.pitch = obj.get("pitch")
-        if obj.get("roll") is not None:
-            road_object.roll = obj.get("roll")
-
-        road_object.outline = corners
-    except:
-        print("Error during parsing of road objects.")
-
-    new_road.addObject(road_object)
 
 
 def calculate_lane_section_lengths(new_road: Road):

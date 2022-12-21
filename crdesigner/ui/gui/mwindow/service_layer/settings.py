@@ -73,8 +73,7 @@ class Settings:
 
         if self.has_valid_entries():
             self.gui_settings.apply_close()
-            if SUMO_AVAILABLE:
-                self.sumo_settings.apply_close()
+            self.sumo_settings.apply_close()
             self.osm_settings.apply_close()
             self.settings_window.close()
             self.cr_designer.crdesigner_console_wrapper.text_browser.append("settings saved")

@@ -57,7 +57,7 @@ class OpenDRIVEInterface(ConverterInterface):
             )
             return
 
-        self.loadedRoadNetwork = Network(get_configs().opendrive)
+        self.loadedRoadNetwork = Network(get_configs().opendrive_config)
         self.loadedRoadNetwork.load_opendrive(openDriveXml)
 
         self.cr_designer.text_browser.append(

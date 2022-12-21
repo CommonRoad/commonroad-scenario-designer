@@ -14,7 +14,6 @@ Submodules
    crdesigner.ui.gui.mwindow.service_layer.gui_resources.scenario_saving_dialog
    crdesigner.ui.gui.mwindow.service_layer.gui_resources.scenario_saving_dialog_ui
    crdesigner.ui.gui.mwindow.service_layer.gui_resources.settings_ui
-   crdesigner.ui.gui.mwindow.service_layer.gui_resources.size_policies
    crdesigner.ui.gui.mwindow.service_layer.gui_resources.sumo_settings_ui
 
 Module contents

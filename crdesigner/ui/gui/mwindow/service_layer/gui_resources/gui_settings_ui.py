@@ -9,9 +9,9 @@
 from PyQt5 import QtCore, QtWidgets, QtGui
 
 
-class UIGUISettings:
+class Ui_GUISettings():
 
-    def __init__(self, h: int, c, wm, wf: int, f):
+    def __init__(self, h, c, wm, wf, f):
         self.columns = c
         self.height = h
         self.widthm = wm * f

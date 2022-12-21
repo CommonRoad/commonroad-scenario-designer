@@ -1,3 +1,4 @@
+from lxml import etree
 import os
 
 from commonroad.scenario.scenario import Tag
@@ -17,7 +18,6 @@ config = get_configs()
 
 # ----------------------------------------------- Option 1: General API ------------------------------------------------
 # load OpenDRIVE file, parse it, and convert it to a CommonRoad scenario
-
 scenario = opendrive_to_commonroad(input_path)
 
 # store converted file as CommonRoad scenario
@@ -35,10 +35,11 @@ writer.write_to_file(os.path.dirname(os.path.realpath(__file__)) + "/" + "ZAM_Op
 
 # --------------------------------------- Option 2: OpenDRIVE conversion APIs ------------------------------------------
 # OpenDRIVE parser to load file
-opendrive = parse_opendrive(input_path)
+with open("{}".format(input_path), "r") as file_in:
+    opendrive = parse_opendrive(etree.parse(file_in).getroot())
 
 # create OpenDRIVE intermediate network object from configuration
-road_network = Network(config.opendrive)
+road_network = Network(config.opendrive_config)
 
 # convert OpenDRIVE file
 road_network.load_opendrive(opendrive)
@@ -55,5 +56,5 @@ writer = CommonRoadFileWriter(
     source=config.file_header.source,
     tags={Tag.URBAN},
 )
-writer.write_to_file(os.path.dirname(os.path.realpath(__file__)) + "/" + "ZAM_OpenDRIVETest-1_1-T2.xml",
+writer.write_to_file(os.path.dirname(os.path.realpath(__file__)) + "/" + "ZAM_OpenDRIVETest-1_1-T1.xml",
                      OverwriteExistingFile.ALWAYS)

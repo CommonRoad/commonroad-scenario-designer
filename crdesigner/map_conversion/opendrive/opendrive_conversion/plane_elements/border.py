@@ -4,6 +4,14 @@ from functools import lru_cache
 from typing import Optional, Any, Tuple
 import numpy as np
 
+__author__ = "Benjamin Orthen, Stefan Urban"
+__copyright__ = "TUM Cyber-Physical Systems Group"
+__credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles"]
+__version__ = "0.5.1"
+__maintainer__ = "Sebastian Maierhofer"
+__email__ = "commonroad@lists.lrz.de"
+__status__ = "Released"
+
 
 class Border:
     """ A lane border defines a path along a whole lane section. A lane always uses an inner and outer lane border.
@@ -91,7 +99,7 @@ class Border:
                 self.ref_offset + s_pos, is_last_pos=is_last_pos, reverse=reverse, compute_curvature=compute_curvature
             )
         except TypeError as e:
-            ref_coord, tang_angle, curv, max_geometry_length = self.reference.calc(np.round(self.ref_offset + s_pos, 3),
+            ref_coord, tang_angle, curv, max_geometry_length = self.reference.calc(self.ref_offset + s_pos,
                                                                                    reverse=reverse,
                                                                                    compute_curvature=compute_curvature)
 

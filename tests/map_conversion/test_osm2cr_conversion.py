@@ -10,6 +10,14 @@ from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistin
 from commonroad.scenario.scenario import Scenario
 from commonroad.planning.planning_problem import PlanningProblemSet
 
+__author__ = "Max Fruehauf, Fabian Hoeltke, Sebastian Maierhofer"
+__copyright__ = "TUM Cyber-Physical Systems Group"
+__credits__ = ["BMW Car@TUM"]
+__version__ = "0.5.1"
+__maintainer__ = "Sebastian Maierhofer"
+__email__ = "commonroad@lists.lrz.de"
+__status__ = "Released"
+
 
 class TestOSMToCommonRoadConversion(unittest.TestCase):
     """Test the conversion from an osm file to a CommonRoad Scenario file."""

@@ -7,6 +7,14 @@ if TYPE_CHECKING:
 from crdesigner.map_conversion.opendrive.opendrive_parser.elements.road_record import RoadRecord
 import warnings
 
+__author__ = "Benjamin Orthen, Stefan Urban"
+__copyright__ = "TUM Cyber-Physical Systems Group"
+__credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles"]
+__version__ = "0.5.1"
+__maintainer__ = "Sebastian Maierhofer"
+__email__ = "commonroad@lists.lrz.de"
+__status__ = "Released"
+
 
 class Lanes:
     """
@@ -189,11 +197,12 @@ class Lane:
         self._borders = []
         self.lane_section = lane_section
         self.has_border_record = False
-        self._road_mark = []
-        self.speed = None
-        self.access = []
+        self._road_mark = None
+        # adjustment commented out guarantee functionality when merging into develop
+        # self._road_mark = []
         # TODO material -> see parser.py
         # TODO speed limit -> see parser.py
+        # TODO access -> see parser.py
         # TODO height -> see parser.py
         # TODO rules -> see parser.py
 
@@ -593,6 +602,7 @@ class RoadMark:
         :setter: sets sOffset
         :type: float
         """
+        warnings.warn("Attribute sOffset is parsed but not used for conversion!", DeprecationWarning)
         return self._SOffset
 
     @SOffset.setter

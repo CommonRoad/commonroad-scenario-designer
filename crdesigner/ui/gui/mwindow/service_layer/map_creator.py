@@ -1,5 +1,4 @@
 from scipy.interpolate import interp1d
-from typing import Tuple
 
 from commonroad.scenario.intersection import Intersection
 from commonroad.scenario.intersection import IntersectionIncomingElement

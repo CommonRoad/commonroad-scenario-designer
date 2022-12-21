@@ -1,3 +1,11 @@
+__author__ = "Benjamin Orthen, Stefan Urban"
+__copyright__ = "TUM Cyber-Physical Systems Group"
+__credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles"]
+__version__ = "0.5.1"
+__maintainer__ = "Sebastian Maierhofer"
+__email__ = "commonroad@lists.lrz.de"
+__status__ = "Released"
+
 from typing import Union
 
 
@@ -169,10 +177,7 @@ class Signal:
 
     @signal_value.setter
     def signal_value(self, value):
-        if type(value) == str:
-            self._signal_value = float(value)
-        else:
-            self._signal_value = value
+        self._signal_value = float(value)
 
     @property
     def unit(self) -> Union[None, str]:

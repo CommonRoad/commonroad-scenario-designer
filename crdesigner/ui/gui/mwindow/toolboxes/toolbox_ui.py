@@ -96,15 +96,6 @@ class CheckableComboBox(QComboBox):
             else:
                 item.setCheckState(Qt.Unchecked)
 
-    def uncheck_items(self, uncheck_item):
-        """
-        Unchecks item from list
-        """
-        for index in range(self.count()):
-            item = self.model().item(index, 0)
-            if item.text() in uncheck_item:
-                item.setCheckState(Qt.Unchecked)
-
     def check_items(self):
         # blank list
         checked_items = []

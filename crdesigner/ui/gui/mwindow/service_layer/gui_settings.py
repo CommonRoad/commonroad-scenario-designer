@@ -1,7 +1,7 @@
 """ window with settings for the Scenario Designer """
 from PyQt5.QtWidgets import QMainWindow
 
-from crdesigner.ui.gui.mwindow.service_layer.gui_resources.gui_settings_ui import UIGUISettings
+from crdesigner.ui.gui.mwindow.service_layer.gui_resources.gui_settings_ui import Ui_GUISettings
 from crdesigner.ui.gui.mwindow.service_layer import config
 from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.commonroad_viewer.service_layer.draw_params_updater import \
     set_draw_params

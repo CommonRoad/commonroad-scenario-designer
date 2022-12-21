@@ -1,36 +1,15 @@
 import iso3166
-from dataclasses import dataclass
-from typing import Union
-from commonroad.scenario.traffic_sign import TrafficSignIDZamunda, TrafficSignIDGermany, TrafficSignIDUsa, \
-    TrafficSignIDChina, TrafficSignIDSpain, TrafficSignIDRussia, TrafficSignIDArgentina, TrafficSignIDBelgium, \
-    TrafficSignIDFrance, TrafficSignIDGreece, TrafficSignIDCroatia, TrafficSignIDItaly, TrafficSignIDPuertoRico
 
-@dataclass
-class CustomDefaultLaneletType:
-    general_lanelet_type_activ: bool  # activates whether certain lanelet type should be added to all lanelets
-    general_lanelet_type: str  # lanelet type which is added to every lanelet (if activated)
-    driving_default_lanelet_type: str  # mapping of OpenDRIVE driveway lane type to a CommonRoad lanelet type
-    lanelet_types_backwards_compatible: bool # if active, converts OpenDRIVE lane types only to CommonRoad lanelet
-    # types compatible with commonroad-io==2022.1 (probably also even older ones)
+__author__ = "Benjamin Orthen, Stefan Urban"
+__copyright__ = "TUM Cyber-Physical Systems Group"
+__credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles"]
+__version__ = "0.5.1"
+__maintainer__ = "Sebastian Maierhofer"
+__email__ = "commonroad@lists.lrz.de"
+__status__ = "Released"
 
 
-def encode_road_section_lane_width_id(road_id, section_id, lane_id, width_id) -> str:
-    """Encodes a road section lane width with an ID.
-
-    :param road_id: ID of road.
-    :type road_id: int
-    :param section_id: ID of RoadSection.
-    :type section_id: int
-    :param lane_id: ID of Lane.
-    :type lane_id: int
-    :param width_id: ID of LaneWidth.
-    :type width_id: int
-    :return: A new ID concatenated from the input IDs.
-    :rtype: str
-    """
-    return ".".join([str(road_id), str(section_id), str(lane_id), str(width_id)])
-
-def encode_mark_lane_width_id(roadId, sectionId, laneId, widthId, mId) -> str:
+def encode_road_section_lane_width_id(roadId, sectionId, laneId, widthId) -> str:
     """Encodes a road section lane width with an ID.
 
     :param roadId: ID of road.
@@ -44,12 +23,12 @@ def encode_mark_lane_width_id(roadId, sectionId, laneId, widthId, mId) -> str:
     :return: A new ID concatenated from the input IDs.
     :rtype: str
     """
-    return ".".join([str(roadId), str(sectionId), str(laneId), str(widthId), str(mId)])
+    return ".".join([str(roadId), str(sectionId), str(laneId), str(widthId)])
 
 
 def get_signal_country(signal_country: str) -> str:
     """
-    ISO3166 standard to find three-letter country id
+    ISO3166 standard to find 3 letter country id
     :param signal_country: String value of the country.
     :type signal_country: str
     :return: The 3-letter country ID per ISO3166.
@@ -65,43 +44,32 @@ def get_signal_country(signal_country: str) -> str:
     else:
         return "ZAM"
 
+# def decode_road_section_lane_width_id(encodedString: str):
+#     """
 
-def get_traffic_sign_enum_from_country(country: str) -> Union[TrafficSignIDZamunda, TrafficSignIDGermany,
-                                                              TrafficSignIDUsa, TrafficSignIDChina, TrafficSignIDSpain,
-                                                              TrafficSignIDRussia, TrafficSignIDArgentina,
-                                                              TrafficSignIDBelgium, TrafficSignIDFrance,
-                                                              TrafficSignIDGreece, TrafficSignIDCroatia,
-                                                              TrafficSignIDItaly, TrafficSignIDPuertoRico]:
-    """Returns the traffic sign ID enumeration for the country supplied by the ISO3166 country string.
+#     Args:
+#       encodedString:
 
-    :param country: ISO3166 country string to get the traffic sign enumeration from.
-    :type country: str
-    :return: The enumeration of the country if it is supported, else the Zamunda enumeration.
-    :rtype: Union
-    """
-    if country == "DEU":
-        return TrafficSignIDGermany
-    elif country == "USA":
-        return TrafficSignIDUsa
-    elif country == "CHN":
-        return TrafficSignIDChina
-    elif country == "ESP":
-        return TrafficSignIDSpain
-    elif country == "RUS":
-        return TrafficSignIDRussia
-    elif country == "ARG":
-        return TrafficSignIDArgentina
-    elif country == "BEL":
-        return TrafficSignIDBelgium
-    elif country == "FRA":
-        return TrafficSignIDFrance
-    elif country == "GRC":
-        return TrafficSignIDGreece
-    elif country == "HRV":
-        return TrafficSignIDCroatia
-    elif country == "ITA":
-        return TrafficSignIDItaly
-    elif country == "PRI":
-        return TrafficSignIDPuertoRico
-    else:
-        return TrafficSignIDZamunda
+#     Returns:
+
+#     """
+
+#     parts = encodedString.split(".")
+
+#     if len(parts) != 4:
+#         raise Exception()
+
+#     return (int(parts[0]), int(parts[1]), int(parts[2]), int(parts[3]))
+
+
+# def allCloseToZero(array):
+#     """Tests if all elements of array are close to zero.
+
+#     Args:
+#       array:
+
+#     Returns:
+
+#     """
+
+#     return numpy.allclose(array, numpy.zeros(numpy.shape(array)))

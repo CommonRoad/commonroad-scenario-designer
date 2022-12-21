@@ -10,7 +10,7 @@ class TestBorder(unittest.TestCase):
     def test_initialize_border(self):
         offset = 0.0
         border = Border(offset)
-        self.assertEqual(border.ref_offset, offset)
+        self.assertEquals(border.ref_offset, offset)
 
     def test_get_width_index(self):
         offset = 1.0
@@ -20,27 +20,27 @@ class TestBorder(unittest.TestCase):
 
         s_pos = 0.0
         idx = border._get_width_index(s_pos, False)
-        self.assertEqual(0, idx)
+        self.assertEquals(0, idx)
 
         s_pos = 1.0
         idx = border._get_width_index(s_pos, False)
-        self.assertEqual(1.0, idx)
+        self.assertEquals(1.0, idx)
 
         s_pos = 5.4
         idx = border._get_width_index(s_pos, False)
-        self.assertEqual(2, idx)
+        self.assertEquals(2, idx)
 
         s_pos = 10
         idx = border._get_width_index(s_pos, False)
-        self.assertEqual(3, idx)
+        self.assertEquals(3, idx)
 
         s_pos = -1
         idx = border._get_width_index(s_pos, False)
-        self.assertEqual(len(border.width_coefficient_offsets)-1, idx)
+        self.assertEquals(len(border.width_coefficient_offsets)-1, idx)
 
         s_pos = 5.4
         idx = border._get_width_index(s_pos, True)
-        self.assertEqual(2, idx)
+        self.assertEquals(2, idx)
 
         s_pos = "test"
         self.assertRaises(TypeError, border._get_width_index, s_pos, False)
@@ -50,13 +50,13 @@ class TestBorder(unittest.TestCase):
         border.width_coefficients = [5.0, 0.8, 1.2, 0.052]
         border.width_coefficient_offsets = [0.0, 1.0, 5.2, 7.8]
         coeff = border.get_next_width_coeffs(5.4, False)
-        self.assertEqual(1.2, coeff)
+        self.assertEquals(1.2, coeff)
 
         coeff = border.get_next_width_coeffs(0.1, False)
-        self.assertEqual(5.0, coeff)
+        self.assertEquals(5.0, coeff)
 
         coeff = border.get_next_width_coeffs(10, True)
-        self.assertEqual(0.052, coeff)
+        self.assertEquals(0.052, coeff)
 
     def test_calc(self):
         view = PlanView(0.2, 0.3)

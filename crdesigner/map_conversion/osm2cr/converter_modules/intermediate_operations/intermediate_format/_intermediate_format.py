@@ -16,7 +16,7 @@ from commonroad.scenario.scenario import Scenario, ScenarioID
 from commonroad.scenario.traffic_sign import TrafficSign, TrafficLight
 from commonroad.scenario.intersection import Intersection, IntersectionIncomingElement
 from commonroad.planning.planning_problem import PlanningProblem, PlanningProblemSet
-from commonroad.scenario.state import CustomState, InitialState
+from commonroad.scenario.trajectory import State
 from commonroad.planning.goal import GoalRegion
 from commonroad.common.util import Interval
 from commonroad.geometry.shape import Rectangle, Circle
@@ -423,9 +423,9 @@ class IntermediateFormat:
         pp_id = idgenerator.get_id()
         rectangle = Rectangle(4.3, 8.9, center=np.array([0.1, 0.5]), orientation=1.7)
         circ = Circle(2.0, np.array([0.0, 0.0]))
-        goal_region = GoalRegion([CustomState(time_step=Interval(0, 1), velocity=Interval(0.0, 1), position=rectangle),
-                                  CustomState(time_step=Interval(1, 2), velocity=Interval(0.0, 1), position=circ)])
-        planning_problem = PlanningProblem(pp_id, InitialState(velocity=0.1, position=np.array([[0], [0]]), orientation=0,
+        goal_region = GoalRegion([State(time_step=Interval(0, 1), velocity=Interval(0.0, 1), position=rectangle),
+                                  State(time_step=Interval(1, 2), velocity=Interval(0.0, 1), position=circ)])
+        planning_problem = PlanningProblem(pp_id, State(velocity=0.1, position=np.array([[0], [0]]), orientation=0,
                                                        yaw_rate=0, slip_angle=0, time_step=0), goal_region)
 
         return PlanningProblemSet(list([planning_problem]))

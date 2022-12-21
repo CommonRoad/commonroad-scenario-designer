@@ -64,7 +64,7 @@ class Ui_Settings(object):
         Settings.setStatusBar(self.statusbar)
 
         #adding different setting tabs
-        self.gui_settings = gui.UIGUISettings(HEIGHT, COLUMNS, WIDTHF, WIDTHM, FACTOR)
+        self.gui_settings = gui.Ui_GUISettings(HEIGHT, COLUMNS, WIDTHF, WIDTHM, FACTOR)
         self.gui_settings.setupUi(self.tabWidget)
         self.tabWidget.addTab(self.gui_settings.scrollArea, "GUI")
 

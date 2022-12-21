@@ -1,8 +1,7 @@
 import unittest
 from crdesigner.map_conversion.opendrive.opendrive_conversion.converter import OpenDriveConverter
 from crdesigner.map_conversion.opendrive.opendrive_parser.elements.road import Road
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadLanes import Lane, LaneWidth, LaneSection,\
-    RoadMark
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadLanes import Lane, LaneWidth, LaneSection
 from crdesigner.map_conversion.opendrive.opendrive_parser.elements.road_record import RoadRecord
 from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.border import Border
 
@@ -80,7 +79,6 @@ class TestConverter(unittest.TestCase):
         common_lane_width = LaneWidth(*[5.0, 0.0, 0.0, 0.0], idx=0, start_offset=0)
         common_lane_width.length = 100
         right_lane1 = Lane(road, section)
-        right_lane1.speed = 30
         right_lane1.id = -1
         right_lane1.widths.append(common_lane_width)
         right_lane2 = Lane(road, section)
@@ -89,12 +87,9 @@ class TestConverter(unittest.TestCase):
 
         center_lane = Lane(road, section)
         center_lane.id = 0
-        center_lane.speed = 30
-
 
         left_lane1 = Lane(road, section)
         left_lane1.id = 1
-        left_lane1.speed = 30
         left_lane1.widths.append(common_lane_width)
         left_lane2 = Lane(road, section)
         left_lane2.id = 2
@@ -116,29 +111,18 @@ class TestConverter(unittest.TestCase):
         reference_border.width_coefficients.append([0.0])
         plane_groups = OpenDriveConverter.lane_section_to_parametric_lanes(section, reference_border)
 
-        mark1 = RoadMark()
-        mark1.SOffset = 0.0
-        mark2 = RoadMark()
-        mark2.SOffset = 3.0
-        mark3 = RoadMark()
-        mark3.SOffset = 5.4
-        section.leftLanes[0].road_mark = [mark1, mark2, mark3]
-        plane_groups_mark = OpenDriveConverter.lane_section_to_parametric_lanes(section, reference_border)
-
         # check if correct number of plane_groups is returned
         # check if correct neighbour ids are generated (this is somewhat redundant because of the other tests)
-        self.assertEqual(5, len(plane_groups))
-        self.assertEqual("100.0.-1.-1", plane_groups[0].id_)
-        self.assertEqual("100.0.1.-1", plane_groups[0].inner_neighbour)
-        self.assertEqual("100.0.-2.-1", plane_groups[0].outer_neighbour)
-        self.assertEqual(100, plane_groups[0].length)
-        self.assertEqual(1, len(plane_groups[0].parametric_lanes))
+        self.assertEquals(5, len(plane_groups))
+        self.assertEquals("100.0.-1.-1", plane_groups[0].id_)
+        self.assertEquals("100.0.1.-1", plane_groups[0].inner_neighbour)
+        self.assertEquals("100.0.-2.-1", plane_groups[0].outer_neighbour)
+        self.assertEquals(100, plane_groups[0].length)
+        self.assertEquals(1, len(plane_groups[0].parametric_lanes))
         # check if lane section with no lanes returns empty list
         lane_section_empty = LaneSection(road)
         self.assertListEqual([], OpenDriveConverter.lane_section_to_parametric_lanes(lane_section_empty,
                                                                                      reference_border))
-
-        self.assertEquals(5.4, plane_groups_mark[2].parametric_lanes[0].line_marking.SOffset)
 
     def test_create_parametric_lane(self):
         road = Road()
@@ -149,11 +133,9 @@ class TestConverter(unittest.TestCase):
         lane = Lane(road, section)
         lane.id = "-1"
         lane.type = "restricted"
-        lane.speed = 40
 
         width = LaneWidth(*[1.0, 0.0, 0.0, 0.0], idx=0, start_offset=0.0)
         lane.widths.append(width)
-        mark_idx = 0
 
         side = "right"
         lane_borders = []
@@ -170,7 +152,7 @@ class TestConverter(unittest.TestCase):
         lane_border2.width_coefficients.append([-1.0, 0.0, 0.0, 0.0])
         lane_borders.append(lane_border2)
 
-        parametric_lane = OpenDriveConverter.create_parametric_lane(lane_borders, width, lane, side, mark_idx)
+        parametric_lane = OpenDriveConverter.create_parametric_lane(lane_borders, width, lane, side)
 
         # test offsets
         true_inner_border_offset = lane.widths[0].start_offset + lane_borders[-1].ref_offset
@@ -183,10 +165,9 @@ class TestConverter(unittest.TestCase):
         self.assertListEqual(lane_border2.width_coefficients,
                              parametric_lane.border_group.outer_border.width_coefficients)
         # test properties of lane and lane group
-        self.assertEquals("100.0.-1.0.0", parametric_lane.id_)
+        self.assertEquals("100.0.-1.0", parametric_lane.id_)
         self.assertEquals(lane.type, parametric_lane.type_)
         self.assertEquals(side, parametric_lane.side)
-        self.assertEquals(40, parametric_lane.speed)
 
     def test_create_outer_lane_border(self):
         road = Road()
@@ -217,7 +198,7 @@ class TestConverter(unittest.TestCase):
         true_border.ref_offset = 10
         true_border.width_coefficient_offsets = [0.0]
         true_border.width_coefficients = [[5.0, 0, 0, 0]]
-        self.assertEqual(true_border.ref_offset, border.ref_offset)
+        self.assertEquals(true_border.ref_offset, border.ref_offset)
         self.assertListEqual(true_border.width_coefficient_offsets, border.width_coefficient_offsets)
         self.assertListEqual(true_border.width_coefficients, border.width_coefficients)
 
@@ -231,7 +212,7 @@ class TestConverter(unittest.TestCase):
         true_border.width_coefficient_offsets = [0.0, 10.0]
         true_border.width_coefficients = [[-5.0, 0, 0, 0], [-3.27, 0, -0.12, -0.05]]
         true_border.ref_offset = 10
-        self.assertEqual(true_border.ref_offset, border.ref_offset)
+        self.assertEquals(true_border.ref_offset, border.ref_offset)
         self.assertListEqual(true_border.width_coefficient_offsets, border.width_coefficient_offsets)
         self.assertListEqual(true_border.width_coefficients, border.width_coefficients)
 
@@ -273,41 +254,41 @@ class TestConverter(unittest.TestCase):
         # not sure about this:
         true_inner = "100.0.1.-1"
         true_outer = "100.0.-2.-1"
-        self.assertEqual(true_inner, inner_neighbour_id)
-        self.assertEqual(true_outer, outer_neighbour_id)
-        self.assertEqual(inner_neighbour_same_dir, False)
+        self.assertEquals(true_inner, inner_neighbour_id)
+        self.assertEquals(true_outer, outer_neighbour_id)
+        self.assertEquals(inner_neighbour_same_dir, False)
 
         inner_neighbour_id, outer_neighbour_id, inner_neighbour_same_dir = \
             OpenDriveConverter.determine_neighbours(lane1)
         true_inner = "100.0.1.-1"
         true_outer = "100.0.-2.-1"
-        self.assertEqual(true_inner, inner_neighbour_id)
-        self.assertEqual(true_outer, outer_neighbour_id)
-        self.assertEqual(inner_neighbour_same_dir, False)
+        self.assertEquals(true_inner, inner_neighbour_id)
+        self.assertEquals(true_outer, outer_neighbour_id)
+        self.assertEquals(inner_neighbour_same_dir, False)
 
         inner_neighbour_id, outer_neighbour_id, inner_neighbour_same_dir = \
             OpenDriveConverter.determine_neighbours(lane2)
         true_inner = "100.0.-1.-1"
         true_outer = "100.0.-3.-1"
-        self.assertEqual(true_inner, inner_neighbour_id)
-        self.assertEqual(true_outer, outer_neighbour_id)
-        self.assertEqual(inner_neighbour_same_dir, True)
+        self.assertEquals(true_inner, inner_neighbour_id)
+        self.assertEquals(true_outer, outer_neighbour_id)
+        self.assertEquals(inner_neighbour_same_dir, True)
 
         inner_neighbour_id, outer_neighbour_id, inner_neighbour_same_dir = \
             OpenDriveConverter.determine_neighbours(lane3)
         true_inner = "100.0.-1.-1"
         true_outer = "100.0.2.-1"
-        self.assertEqual(true_inner, inner_neighbour_id)
-        self.assertEqual(true_outer, outer_neighbour_id)
-        self.assertEqual(inner_neighbour_same_dir, False)
+        self.assertEquals(true_inner, inner_neighbour_id)
+        self.assertEquals(true_outer, outer_neighbour_id)
+        self.assertEquals(inner_neighbour_same_dir, False)
 
         inner_neighbour_id, outer_neighbour_id, inner_neighbour_same_dir = \
             OpenDriveConverter.determine_neighbours(lane4)
         true_inner = "100.0.1.-1"
         true_outer = "100.0.3.-1"
-        self.assertEqual(true_inner, inner_neighbour_id)
-        self.assertEqual(true_outer, outer_neighbour_id)
-        self.assertEqual(inner_neighbour_same_dir, True)
+        self.assertEquals(true_inner, inner_neighbour_id)
+        self.assertEquals(true_outer, outer_neighbour_id)
+        self.assertEquals(inner_neighbour_same_dir, True)
 
 
 

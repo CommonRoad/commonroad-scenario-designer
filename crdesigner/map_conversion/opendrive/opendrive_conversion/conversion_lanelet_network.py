@@ -1,6 +1,7 @@
 """Module to enhance LaneletNetwork class
 so it can be used for conversion from the opendrive format."""
 import itertools
+import math
 import warnings
 from typing import List, Optional, Tuple
 from queue import Queue
@@ -15,6 +16,14 @@ from crdesigner.map_conversion.osm2cr.converter_modules.utility import geometry
 
 from crdesigner.map_conversion.opendrive.opendrive_conversion.conversion_lanelet import ConversionLanelet
 from crdesigner.map_conversion.common.utils import generate_unique_id
+
+__author__ = "Benjamin Orthen, Sebastian Maierhofer"
+__copyright__ = "TUM Cyber-Physical Systems Group"
+__credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles"]
+__version__ = "0.5.1"
+__maintainer__ = "Sebastian Maierhofer"
+__email__ = "commonroad@lists.lrz.de"
+__status__ = "Released"
 
 
 def convert_to_new_lanelet_id(old_lanelet_id: str, ids_assigned: dict) -> int:
@@ -339,7 +348,7 @@ class ConversionLaneletNetwork(LaneletNetwork):
             if lanelet_join or lanelet_split:
                 js_targets.append(
                     _JoinSplitTarget(self, lanelet, lanelet_split, lanelet_join,
-                                     self.config.precision)
+                                     self.config.plane_conversion.precision)
                 )
 
         for js_target in js_targets:
@@ -652,16 +661,17 @@ class ConversionLaneletNetwork(LaneletNetwork):
                     else:
                         print(direction)
                         warnings.warn("Incorrect direction assigned to successor of incoming lanelet in intersection")
-            intersection_incoming_lane = IntersectionIncomingElement(generate_unique_id(), incoming_lanelet_set,
+            intersection_incoming_lane = IntersectionIncomingElement(intersection_id, incoming_lanelet_set,
                                                                      successor_right, successor_straight,
                                                                      successor_left)
+            intersection_id += 1
 
             intersection_incoming_lanes.append(intersection_incoming_lane)
             # TODO: Add crossings to intersections
             # Increment id counter to generate next unique intersection id. See To Do.
 
         if self.check_if_successor_is_intersecting(intersection_map, successors):
-            intersection = Intersection(generate_unique_id(), intersection_incoming_lanes)
+            intersection = Intersection(intersection_id, intersection_incoming_lanes)
             self.find_left_of(intersection.incomings)
             self.add_intersection(intersection)
 
@@ -911,7 +921,7 @@ class ConversionLaneletNetwork(LaneletNetwork):
 
         return directions
 
-    def add_traffic_lights_to_network(self, traffic_lights: List[TrafficLight]):
+    def add_traffic_lights_to_network(self, traffic_lights: List):
         """
         Adds all the traffic lights in the network object to the lanelet network
         Requires a list of all the traffic lights in the entire map
@@ -921,7 +931,6 @@ class ConversionLaneletNetwork(LaneletNetwork):
         """
         for traffic_light in traffic_lights:
             min_distance = float("inf")
-            id_for_adding = None
             for intersection in self.intersections:
                 for incoming in intersection.incomings:
                     for lanelet in incoming.incoming_lanelets:
@@ -934,12 +943,8 @@ class ConversionLaneletNetwork(LaneletNetwork):
                             if dist < min_distance:
                                 min_distance = dist
                                 id_for_adding = lanelet
-            if id_for_adding is None:
-                warnings.warn("For traffic light with ID {} no referencing lanelet was found!".format(
-                        traffic_light.traffic_light_id))
-                self.add_traffic_light(traffic_light, set())
-            else:
-                self.add_traffic_light(traffic_light, {id_for_adding})
+            target_lanelet = self.find_lanelet_by_id(id_for_adding)
+            self.add_traffic_light(traffic_light, {id_for_adding})
 
         # Traffic light directions are assigned once all traffic lights are assigned to lanelets so that it can be
         # determined how directions need to be divided (i.e. the decision between left to one light and straight to
@@ -1052,7 +1057,7 @@ class ConversionLaneletNetwork(LaneletNetwork):
                                         or distance_from_left - distance_from_right < 0.001:
                                     traffic_light.direction = TrafficLightDirection.STRAIGHT
 
-    def add_traffic_signs_to_network(self, traffic_signs: List[TrafficSign]):
+    def add_traffic_signs_to_network(self, traffic_signs):
         """
         Adds all the traffic signs in the network object to the lanelet network
         Requires a list of all the traffic signs in the entire map
@@ -1063,22 +1068,17 @@ class ConversionLaneletNetwork(LaneletNetwork):
 
         # Assign traffic signs to lanelets
         for traffic_sign in traffic_signs:
-            id_for_adding = None
             min_distance = float("inf")
             for lanelet in self.lanelets:
                 # Find closest lanelet to traffic signal
                 pos_1 = traffic_sign.position
-                pos_2 = lanelet.center_vertices[0]
+                pos_2 = lanelet.center_vertices[-1]
                 dist = np.linalg.norm(pos_1 - pos_2)
                 if dist < min_distance:
                     min_distance = dist
                     id_for_adding = lanelet.lanelet_id
-            if id_for_adding is None:
-                warnings.warn("For traffic sign with ID {} no referencing lanelet was found!".format(
-                        traffic_sign.traffic_sign_id))
-                self.add_traffic_sign(traffic_sign, set())
-            else:
-                self.add_traffic_sign(traffic_sign, {id_for_adding})
+
+            self.add_traffic_sign(traffic_sign, {id_for_adding})
 
     def add_stop_lines_to_network(self, stop_lines: List[StopLine]):
         """
@@ -1093,7 +1093,6 @@ class ConversionLaneletNetwork(LaneletNetwork):
         for stop_line in stop_lines:
             min_start = float("inf")
             min_end = float("inf")
-            lane_to_add_stop_line = None
             for intersection in self.intersections:
                 for incoming in intersection.incomings:
                     for lanelet in incoming.incoming_lanelets:

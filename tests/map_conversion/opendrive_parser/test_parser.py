@@ -6,13 +6,26 @@ from crdesigner.map_conversion.opendrive.opendrive_parser.elements.geometry impo
 
 class TestParser(unittest.TestCase):
     def test_parse_opendrive(self):
-        file_path = os.path.dirname(os.path.abspath(__file__)) + '/../test_maps/opendrive/CulDeSac.xodr'
-        xodr_file = parse_opendrive(file_path)
+        # get dir tests/map_conversion
+        # dir_name = os.path.dirname(os.path.abspath(os.curdir))
+        # file_path = os.path.join(dir_name, 'test_maps/opendrive/CulDeSac.xodr')
+        file_path = 'tests/map_conversion/test_maps/opendrive/CulDeSac.xodr'
+        with open("{}".format(file_path), "r") as file_in:
+            root = etree.parse(file_in).getroot()
+
+        xodr_file = parse_opendrive(root)
+
         self.assertIsInstance(xodr_file, OpenDrive)
 
     def test_parse_opendrive_header(self):
-        file_path = os.path.dirname(os.path.abspath(__file__)) + '/../test_maps/opendrive/CulDeSac.xodr'
-        odr = parse_opendrive(file_path)
+        # dir_name = os.path.dirname(os.path.abspath(os.curdir))
+        # file_path = os.path.join(dir_name, 'test_maps/opendrive/CulDeSac.xodr')
+        file_path = 'tests/map_conversion/test_maps/opendrive/CulDeSac.xodr'
+        with open("{}".format(file_path), "r") as file_in:
+            root = etree.parse(file_in).getroot()
+        odr = parse_opendrive(root)
+        header = root.find("header")
+        parse_opendrive_header(opendrive=odr, header=header)
 
         self.assertIsInstance(odr.header, Header)
         self.assertEqual("1", odr.header.revMajor)
@@ -28,8 +41,14 @@ class TestParser(unittest.TestCase):
         self.assertEqual(None, odr.header.geo_reference)
 
     def test_parse_opendrive_junction(self):
-        file_path = os.path.dirname(os.path.abspath(__file__)) + '/../test_maps/opendrive/FourWaySignal.xodr'
-        odr = parse_opendrive(file_path)
+        # dir_name = os.path.dirname(os.path.abspath(os.curdir))
+        # file_path = os.path.join(dir_name, 'test_maps/opendrive/FourWaySignal.xodr')
+        file_path = 'tests/map_conversion/test_maps/opendrive/FourWaySignal.xodr'
+        with open("{}".format(file_path), "r") as file_in:
+            root = etree.parse(file_in).getroot()
+        odr = parse_opendrive(root)
+        for junction in root.findall("junction"):
+            parse_opendrive_junction(opendrive=odr, junction=junction)
 
         for i in odr.junctions:
             self.assertIsInstance(i, Junction)
@@ -43,7 +62,9 @@ class TestParser(unittest.TestCase):
         self.assertEqual(1, junction.connections[0].laneLinks[0].toId)
 
     def test_parse_opendrive_road_link(self):
-        file_path = os.path.dirname(os.path.abspath(__file__)) + '/../test_maps/opendrive/zero_width_lanes_map.xodr'
+        # dir_name = os.path.dirname(os.path.abspath(os.curdir))
+        # file_path = os.path.join(dir_name, 'test_maps/opendrive/zero_width_lanes_map.xodr')
+        file_path = 'tests/map_conversion/test_maps/opendrive/zero_width_lanes_map.xodr'
         with open("{}".format(file_path), "r") as file_in:
             root = etree.parse(file_in).getroot()
         road_xml = []
@@ -63,7 +84,9 @@ class TestParser(unittest.TestCase):
         self.assertEqual([], road.link.neighbors)
 
     def test_parse_road_type(self):
-        file_path = os.path.dirname(os.path.abspath(__file__)) + '/../test_maps/opendrive/FourWaySignal.xodr'
+        # dir_name = os.path.dirname(os.path.abspath(os.curdir))
+        # file_path = os.path.join(dir_name, 'test_maps/opendrive/FourWaySignal.xodr')
+        file_path = 'tests/map_conversion/test_maps/opendrive/FourWaySignal.xodr'
         with open("{}".format(file_path), "r") as file_in:
             root = etree.parse(file_in).getroot()
         road_xml = []
@@ -79,7 +102,9 @@ class TestParser(unittest.TestCase):
         self.assertEqual("mph", road.types[0].speed.unit)
 
     def test_parse_opendrive_road_geometry(self):
-        file_path = os.path.dirname(os.path.abspath(__file__)) + '/../test_maps/opendrive/FourWaySignal.xodr'
+        # dir_name = os.path.dirname(os.path.abspath(os.curdir))
+        # file_path = os.path.join(dir_name, 'test_maps/opendrive/FourWaySignal.xodr')
+        file_path = 'tests/map_conversion/test_maps/opendrive/FourWaySignal.xodr'
         with open("{}".format(file_path), "r") as file_in:
             root = etree.parse(file_in).getroot()
         road_xml = []
@@ -99,7 +124,9 @@ class TestParser(unittest.TestCase):
         self.assertEqual(5.9969576254056612e+1, road.planView._geometries[0].length)
 
     def test_parse_orpendrive_road_elevation_profile(self):
-        file_path = os.path.dirname(os.path.abspath(__file__)) + '/../test_maps/opendrive/FourWaySignal.xodr'
+        # dir_name = os.path.dirname(os.path.abspath(os.curdir))
+        # file_path = os.path.join(dir_name, 'test_maps/opendrive/FourWaySignal.xodr')
+        file_path = 'tests/map_conversion/test_maps/opendrive/FourWaySignal.xodr'
         with open("{}".format(file_path), "r") as file_in:
             root = etree.parse(file_in).getroot()
         road_xml = []
@@ -113,7 +140,9 @@ class TestParser(unittest.TestCase):
         np.testing.assert_equal([0, 0, 0, 0], road.elevationProfile.elevations[0].polynomial_coefficients)
 
     def test_parse_opendrive_road_lateral_profile(self):
-        file_path = os.path.dirname(os.path.abspath(__file__)) + '/../test_maps/opendrive/FourWaySignal.xodr'
+        # dir_name = os.path.dirname(os.path.abspath(os.curdir))
+        # file_path = os.path.join(dir_name, 'test_maps/opendrive/FourWaySignal.xodr')
+        file_path = 'tests/map_conversion/test_maps/opendrive/FourWaySignal.xodr'
         with open("{}".format(file_path), "r") as file_in:
             root = etree.parse(file_in).getroot()
         road_xml = []
@@ -133,7 +162,9 @@ class TestParser(unittest.TestCase):
         # crossfall not tested as there are no crossfalls in test maps
 
     def test_parse_opendrive_road_lane_offset(self):
-        file_path = os.path.dirname(os.path.abspath(__file__)) + '/../test_maps/opendrive/CrossingComplex8Course.xodr'
+        # dir_name = os.path.dirname(os.path.abspath(os.curdir))
+        # file_path = os.path.join(dir_name, 'test_maps/opendrive/CrossingComplex8Course.xodr')
+        file_path = 'tests/map_conversion/test_maps/opendrive/CrossingComplex8Course.xodr'
         with open("{}".format(file_path), "r") as file_in:
             root = etree.parse(file_in).getroot()
         road_xml = []
@@ -151,7 +182,9 @@ class TestParser(unittest.TestCase):
                                 road.lanes.laneOffsets[0].polynomial_coefficients)
 
     def test_parse_opendrive_road_lane_section(self):
-        file_path = os.path.dirname(os.path.abspath(__file__)) + '/../test_maps/opendrive/CrossingComplex8Course.xodr'
+        # dir_name = os.path.dirname(os.path.abspath(os.curdir))
+        # file_path = os.path.join(dir_name, 'test_maps/opendrive/CrossingComplex8Course.xodr')
+        file_path = 'tests/map_conversion/test_maps/opendrive/CrossingComplex8Course.xodr'
         with open("{}".format(file_path), "r") as file_in:
             root = etree.parse(file_in).getroot()
         road_xml = []
@@ -182,16 +215,23 @@ class TestParser(unittest.TestCase):
         self.assertEqual(0, road.lanes.lane_sections[0].rightLanes[0].widths[0].start_offset)
         np.testing.assert_equal([3.75, 0, 0, 0],
                                 road.lanes.lane_sections[0].rightLanes[0].widths[0].polynomial_coefficients)
-        # roadmarks
+        # test for unchanged road_marks -> only first is parsed
+        self.assertEqual(0, road.lanes.lane_sections[0].centerLanes[0].road_mark.SOffset)
+        self.assertEqual("solid", road.lanes.lane_sections[0].centerLanes[0].road_mark.type)
+        self.assertEqual("standard", road.lanes.lane_sections[0].centerLanes[0].road_mark.weight)
+        """ tests for adapted road_marks
         self.assertEqual(0, road.lanes.lane_sections[0].centerLanes[0].road_mark[0].SOffset)
         self.assertEqual("solid", road.lanes.lane_sections[0].centerLanes[0].road_mark[0].type)
         self.assertEqual("standard", road.lanes.lane_sections[0].centerLanes[0].road_mark[0].weight)
         self.assertEqual(0.5, road.lanes.lane_sections[0].centerLanes[0].road_mark[1].SOffset)
         self.assertEqual("none", road.lanes.lane_sections[0].centerLanes[0].road_mark[1].type)
         self.assertEqual("standard", road.lanes.lane_sections[0].centerLanes[0].road_mark[1].weight)
+        """
 
     def test_parse_opendrive_road_signal(self):
-        file_path = os.path.dirname(os.path.abspath(__file__)) + '/../test_maps/opendrive/CrossingComplex8Course.xodr'
+        # dir_name = os.path.dirname(os.path.abspath(os.curdir))
+        # file_path = os.path.join(dir_name, 'test_maps/opendrive/CrossingComplex8Course.xodr')
+        file_path = 'tests/map_conversion/test_maps/opendrive/CrossingComplex8Course.xodr'
         with open("{}".format(file_path), "r") as file_in:
             root = etree.parse(file_in).getroot()
         road_xml = []
@@ -217,7 +257,9 @@ class TestParser(unittest.TestCase):
         self.assertEqual(None, road.signals[0].text)
 
     def test_parse_opendrive_road_signal_reference(self):
-        file_path = os.path.dirname(os.path.abspath(__file__)) + '/../test_maps/opendrive/CrossingComplex8Course.xodr'
+        # dir_name = os.path.dirname(os.path.abspath(os.curdir))
+        # file_path = os.path.join(dir_name, 'test_maps/opendrive/CrossingComplex8Course.xodr')
+        file_path = 'tests/map_conversion/test_maps/opendrive/CrossingComplex8Course.xodr'
         with open("{}".format(file_path), "r") as file_in:
             root = etree.parse(file_in).getroot()
         road_xml = []
@@ -235,8 +277,16 @@ class TestParser(unittest.TestCase):
         self.assertEqual("+", road.signalReference[0].orientation)
 
     def test_parse_opendrive_road(self):
-        file_path = os.path.dirname(os.path.abspath(__file__)) + '/../test_maps/opendrive/CrossingComplex8Course.xodr'
-        odr = parse_opendrive(file_path)
+        # dir_name = os.path.dirname(os.path.abspath(os.curdir))
+        # file_path = os.path.join(dir_name, 'test_maps/opendrive/CrossingComplex8Course.xodr')
+        file_path = 'tests/map_conversion/test_maps/opendrive/CrossingComplex8Course.xodr'
+        with open("{}".format(file_path), "r") as file_in:
+            root = etree.parse(file_in).getroot()
+        odr = parse_opendrive(root)
+        road_xml = []
+        for road in root.findall("road"):
+            road_xml.append(road)
+        parse_opendrive_road(opendrive=odr, road=road_xml[0])
 
         self.assertEqual("", odr.roads[0].name)
         self.assertEqual(69, odr.roads[0].id)
@@ -245,47 +295,6 @@ class TestParser(unittest.TestCase):
         self.assertEqual(junction, odr.roads[0].junction)
         # rest of road parser is tested with other tests
 
-    def test_parse_opendrive_road_object(self):
-        file_path = os.path.dirname(os.path.abspath(__file__)) + '/../test_maps/opendrive/four_way_crossing.xodr'
-        with open("{}".format(file_path), "r") as file_in:
-            root = etree.parse(file_in).getroot()
-        road_xml = []
-        for road in root.findall("road"):
-            road_xml.append(road)
-        road = Road()
-        object_xml = []
-        for reference in road_xml[1].find("objects").findall("object"):
-            object_xml.append(reference)
-        parse_opendrive_road_object(new_road=road, obj=object_xml[1])
-
-        self.assertEqual(81, road.objects[0].id)
-        self.assertEqual("House04_BeachColors", road.objects[0].name)
-        self.assertEqual(7.3042801461003135e+0, road.objects[0].s)
-        self.assertEqual(-1.4759999871253967e+1, road.objects[0].t)
-        self.assertEqual(-3.6077709960937501e+0, road.objects[0].zOffset)
-        self.assertEqual(1.5707963267948966e+0, road.objects[0].hdg)
-        self.assertEqual(0, road.objects[0].roll)
-        self.assertEqual(0, road.objects[0].pitch)
-        self.assertEqual("none", road.objects[0].type)
-        self.assertEqual(1.2868122558593750e+1, road.objects[0].height)
-        self.assertEqual(1.6766826171875003e+1, road.objects[0].width)
-        self.assertEqual(1.1869543457031250e+1, road.objects[0].validLength)
-
-    def test_lane_access(self):
-        file_path = os.path.dirname(os.path.abspath(__file__)) + '/../test_maps/opendrive/straight_road_lane_access.xodr'
-        with open("{}".format(file_path), "r") as file_in:  # no idea why cleaning up the namespace is not required
-            root = etree.parse(file_in).getroot()          # for any other tests in this class but this test breaks
-            for elem in root.getiterator():                # without it
-                if not (isinstance(elem, etree._Comment) or isinstance(elem, etree._ProcessingInstruction)):
-                    elem.tag = etree.QName(elem).localname
-            etree.cleanup_namespaces(root)
-        laneSection = root.find("road").find("lanes").find("laneSection")
-
-        road = Road()
-        parse_opendrive_road_lane_section(new_road=road, lane_section=laneSection, lane_section_id=1)
-        self.assertEqual([["pedestrian", "allow", 0.0]], road.lanes.lane_sections[0].leftLanes[0].access)
 
 if __name__ == '__main__':
     unittest.main()
-
-#TestParser.test_lane_access(TestParser)

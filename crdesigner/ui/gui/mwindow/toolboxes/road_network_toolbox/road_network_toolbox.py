@@ -53,7 +53,7 @@ class RoadNetworkToolbox(QDockWidget,):
 
         self.initialized = False
         self.road_network_toolbox_ui.button_add_lanelet.clicked.connect(lambda: self.add_lanelet())
-
+        
         self.road_network_toolbox_ui.button_update_lanelet.clicked.connect(lambda: self.update_lanelet())
         self.road_network_toolbox_ui.selected_lanelet_update.currentIndexChanged.connect(
             lambda: self.lanelet_selection_changed())
@@ -413,10 +413,6 @@ class RoadNetworkToolbox(QDockWidget,):
         selects always the first in the list of predecessors / successors
         """
 
-        if len(self.road_network_toolbox_ui.predecessors.get_checked_items()) == 0:
-            return
-        if len(self.road_network_toolbox_ui.successors.get_checked_items()) == 0:
-            return
         if self.road_network_toolbox_ui.connect_to_predecessors_selection.isChecked():
             pred = self.road_network_toolbox_ui.predecessors.get_checked_items()[0]
             if not pred.isdigit():
@@ -534,7 +530,7 @@ class RoadNetworkToolbox(QDockWidget,):
         self.road_network_toolbox_ui.selected_lanelet_referenced_traffic_light_ids.addItems(
             ["None"] + [str(item) for item in self.collect_traffic_light_ids()])
         self.road_network_toolbox_ui.selected_lanelet_referenced_traffic_light_ids.setCurrentIndex(0)
-
+        
         self.road_network_toolbox_ui.selected_lanelet_update.clear()
         self.road_network_toolbox_ui.selected_lanelet_update.addItems(
             ["None"] + [str(item) for item in self.collect_lanelet_ids()])
@@ -1235,17 +1231,7 @@ class RoadNetworkToolbox(QDockWidget,):
         """
         if self.current_scenario is None:
             self.text_browser.append("_Warning:_ Create a new file")
-            return  # Check if list is empty -> Warning
-        if len(self.road_network_toolbox_ui.referenced_lanelets_traffic_sign.get_checked_items()) == 0:
-            self.text_browser.append("_Warning:_ Add Referenced Lanelets")
             return
-        # Check if only 'None' is selected - if yes -> Warning
-        if 'None' in self.road_network_toolbox_ui.referenced_lanelets_traffic_sign.get_checked_items() and len(self.road_network_toolbox_ui.referenced_lanelets_traffic_sign.get_checked_items()) == 1:
-            self.text_browser.append("_Warning:_ Add Referenced Lanelets")
-            return
-        # Check if 'None' is and other items are selected -> Uncheck 'None'
-        elif 'None' in self.road_network_toolbox_ui.referenced_lanelets_traffic_sign.get_checked_items():
-            self.road_network_toolbox_ui.referenced_lanelets_traffic_sign.uncheck_items('None')
         country_signs = globals()["TrafficSignID" + SupportedTrafficSignCountry(
             self.current_scenario.scenario_id.country_id).name.capitalize()]
         traffic_sign_elements = []
@@ -1304,16 +1290,6 @@ class RoadNetworkToolbox(QDockWidget,):
         if self.current_scenario is None:
             self.text_browser.append("_Warning:_ Create a new file")
             return
-        if len(self.road_network_toolbox_ui.referenced_lanelets_traffic_sign.get_checked_items()) == 0:
-            self.text_browser.append("_Warning:_ Add Referenced Lanelets")
-            return
-        # Check if only 'None' is selected - if yes -> Warning
-        if 'None' in self.road_network_toolbox_ui.referenced_lanelets_traffic_sign.get_checked_items() and len(self.road_network_toolbox_ui.referenced_lanelets_traffic_sign.get_checked_items()) == 1:
-            self.text_browser.append("_Warning:_ Add Referenced Lanelets")
-            return
-        # Check if 'None' is and other items are selected -> Uncheck 'None'
-        elif 'None' in self.road_network_toolbox_ui.referenced_lanelets_traffic_sign.get_checked_items():
-            self.road_network_toolbox_ui.referenced_lanelets_traffic_sign.uncheck_items('None')
         if self.road_network_toolbox_ui.selected_traffic_sign.currentText() not in ["", "None"]:
             selected_traffic_sign_id = int(self.road_network_toolbox_ui.selected_traffic_sign.currentText())
         else:
@@ -1369,16 +1345,6 @@ class RoadNetworkToolbox(QDockWidget,):
         if self.current_scenario is None:
             self.text_browser.append("_Warning:_ Create a new file")
             return
-        if len(self.road_network_toolbox_ui.referenced_lanelets_traffic_light.get_checked_items()) == 0:
-            self.text_browser.append("_Warning:_ Add Referenced Lanelets")
-            return
-        # Check if only 'None' is selected - if yes -> Warning
-        if 'None' in self.road_network_toolbox_ui.referenced_lanelets_traffic_light.get_checked_items() and len(self.road_network_toolbox_ui.referenced_lanelets_traffic_light.get_checked_items()) == 1:
-            self.text_browser.append("_Warning:_ Add Referenced Lanelets")
-            return
-        # Check if 'None' is and other items are selected -> Uncheck 'None'
-        elif 'None' in self.road_network_toolbox_ui.referenced_lanelets_traffic_light.get_checked_items():
-            self.road_network_toolbox_ui.referenced_lanelets_traffic_light.uncheck_items('None')
         referenced_lanelets = \
             {int(la) for la in self.road_network_toolbox_ui.referenced_lanelets_traffic_light.get_checked_items()}
         if self.road_network_toolbox_ui.x_position_traffic_light.text():
@@ -1449,15 +1415,6 @@ class RoadNetworkToolbox(QDockWidget,):
         if self.current_scenario is None:
             self.text_browser.append("_Warning:_ Create a new file")
             return
-        if len(self.road_network_toolbox_ui.referenced_lanelets_traffic_light.get_checked_items()) == 0:
-            self.text_browser.append("_Warning:_ Add Referenced Lanelets")
-            return
-        # Check if only 'None' is selected - if yes -> Warning
-        if 'None' in self.road_network_toolbox_ui.referenced_lanelets_traffic_light.get_checked_items() and len(self.road_network_toolbox_ui.referenced_lanelets_traffic_light.get_checked_items()) == 1:
-            self.text_browser.append("_Warning:_ Add Referenced Lanelets")
-            return # Check if 'None' is and other items are selected -> Uncheck 'None'
-        elif 'None' in self.road_network_toolbox_ui.referenced_lanelets_traffic_light.get_checked_items():
-            self.road_network_toolbox_ui.referenced_lanelets_traffic_light.uncheck_items('None')
         if self.road_network_toolbox_ui.selected_traffic_light.currentText() not in ["", "None"]:
             selected_traffic_light_id = int(self.road_network_toolbox_ui.selected_traffic_light.currentText())
         else:

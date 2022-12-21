@@ -1,11 +1,19 @@
+"""Module for logic behind converting OpenDrive to ParametricLanes."""
 from typing import Tuple, List
 from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.plane import ParametricLane, \
     ParametricLaneBorderGroup
 from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.plane_group import ParametricLaneGroup
 from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.border import Border
-from crdesigner.map_conversion.opendrive.opendrive_conversion.utils import encode_road_section_lane_width_id, encode_mark_lane_width_id
+from crdesigner.map_conversion.opendrive.opendrive_conversion.utils import encode_road_section_lane_width_id
 from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadPlanView import PlanView
-import numpy as np
+
+__author__ = "Benjamin Orthen"
+__copyright__ = "TUM Cyber-Physical Systems Group"
+__credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles"]
+__version__ = "0.5.1"
+__maintainer__ = "Sebastian Maierhofer"
+__email__ = "commonroad@lists.lrz.de"
+__status__ = "Released"
 
 
 class OpenDriveConverter:
@@ -111,14 +119,8 @@ class OpenDriveConverter:
 
                 # Create new lane for each width segment
                 for width in lane.widths:
-                    # check if road mark was changed and set corresponding road mark
-                    mark_idx = -1
-                    for mark in lane.road_mark:
-                        if width.start_offset > mark.SOffset:
-                            mark_idx += 1
-                    # create new lane
                     parametric_lane = OpenDriveConverter.create_parametric_lane(
-                        lane_borders, width, lane, side, mark_idx
+                        lane_borders, width, lane, side
                     )
                     parametric_lane.reverse = bool(lane.id > 0)
                     plane_group.append(parametric_lane)
@@ -131,7 +133,7 @@ class OpenDriveConverter:
         return plane_groups
 
     @staticmethod
-    def create_parametric_lane(lane_borders, width, lane, side, mark_idx) -> ParametricLane:
+    def create_parametric_lane(lane_borders, width, lane, side) -> ParametricLane:
         """Create a parametric lane for a certain width section.
 
         :param lane_borders: Array with already created lane borders.
@@ -142,15 +144,9 @@ class OpenDriveConverter:
         :type lane: :class:`Lane`
         :param side: Which side of the lane section where the parametric lane is created.
         :type side: str
-        :param speed: Speed limit for this individual lane
-        :type speed: float
         :return: A ParametricLane object with specified borders and a unique id.
         :rtype: :class:`ParametricLane`
         """
-        if len(lane.road_mark) > 0:
-            marking = lane.road_mark[mark_idx]
-        else:
-            marking = None
 
         border_group = ParametricLaneBorderGroup(
             inner_border=lane_borders[-2],
@@ -159,20 +155,17 @@ class OpenDriveConverter:
             outer_border_offset=width.start_offset,
         )
         parametric_lane = ParametricLane(
-            id_=encode_mark_lane_width_id(
+            id_=encode_road_section_lane_width_id(
                 lane.lane_section.parentRoad.id,
                 lane.lane_section.idx,
                 lane.id,
                 width.idx,
-                mark_idx,
             ),
             type_=lane.type,
             length=width.length,
             border_group=border_group,
-            speed=lane.speed,
-            line_marking=marking,
-            side=side,
-            access=lane.access
+            line_marking=lane.road_mark,
+            side=side
         )
         return parametric_lane
 

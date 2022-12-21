@@ -15,6 +15,15 @@ from crdesigner.map_conversion.opendrive.opendrive_parser.elements.geometry impo
 )
 
 
+__author__ = "Benjamin Orthen, Stefan Urban"
+__copyright__ = "TUM Cyber-Physical Systems Group"
+__credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles"]
+__version__ = "0.5.1"
+__maintainer__ = "Sebastian Maierhofer"
+__email__ = "commonroad@lists.lrz.de"
+__status__ = "Released"
+
+
 class PlanView:
     """
     The plan view record contains a series of geometry records
@@ -149,7 +158,7 @@ class PlanView:
         return self._geo_lengths[-1]
 
     def calc(self, s_pos: float, compute_curvature: bool = True, reverse: bool = True) \
-            -> Tuple[np.ndarray, float, float, Union[None, float]]:
+            -> Tuple[np.ndarray, float, Union[None, float]]:
         """
         Calculate position, tangent, curvature and max. length of the geometry at s_pos.
         Either interpolate values if possible or delegate calculation to geometries.
@@ -234,7 +243,7 @@ class PlanView:
             geo_idx = np.arange(self._geo_lengths.shape[0])[mask][sub_idx] - 1
         except ValueError:
             # s_pos is after last geometry because of rounding error
-            if np.isclose(s_pos, self._geo_lengths[-1], 0.001, 0.001):
+            if np.isclose(s_pos, self._geo_lengths[-1]):
                 geo_idx = self._geo_lengths.size - 2
             else:
                 raise Exception(

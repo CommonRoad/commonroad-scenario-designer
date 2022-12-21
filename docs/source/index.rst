@@ -10,7 +10,7 @@ The toolbox includes a graphical user interface (GUI) for creating, editing, and
 and scenarios, a command line interface, and different Python APIs.
 
 .. note::
-    This release (v0.6.0) is still a BETA version.
+    This release (v0.5.1) is still a BETA version.
     In case you encounter errors or want to provide us feedback, please post them in our
     `forum <https://commonroad.in.tum.de/forum/c/scenario-designer/18>`_.
 
@@ -32,6 +32,7 @@ The required dependencies for running the CommonRoad Scenario Designer are:
 * Pillow>=7.1.1
 * mercantile>=1.1.3
 * utm>=0.5.0
+* cartopy>=0.17.0
 * PyQt5>=5.12.2
 * matplotlib>=3.1.0
 * shapely>=1.7.0
@@ -41,7 +42,11 @@ The required dependencies for running the CommonRoad Scenario Designer are:
 * iso3166>=1.0.1
 * networkx>=2.5
 
-From your Anaconda environment. For all the packages, we recommend to use the provided `requirements.txt`::
+Cartopy can be easily installed with::
+
+   conda install -c conda-forge cartopy
+
+from your Anaconda environment. For the other packages, we recommend to use the provided `requirements.txt`::
 
     pip install -r requirements.txt
 

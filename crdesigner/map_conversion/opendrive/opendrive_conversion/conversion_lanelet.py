@@ -1,16 +1,25 @@
-from typing import Tuple, Optional, Union
-import numpy as np
-from commonroad.scenario.lanelet import Lanelet, LaneletType, LineMarking, RoadUser
-from crdesigner.map_conversion.opendrive.opendrive_conversion.utils import CustomDefaultLaneletType
-from crdesigner.configurations.get_configs import get_configs
+"""Module to enhance Lanelet class so it can be used
+for conversion from the opendrive format."""
 
-config = get_configs()
+from typing import Tuple, Optional
+
+import numpy as np
+from commonroad.scenario.lanelet import Lanelet, LaneletType, LineMarking
+from typing import Union
+
+__author__ = "Benjamin Orthen, Sebastian Maierhofer"
+__copyright__ = "TUM Cyber-Physical Systems Group"
+__credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles"]
+__version__ = "0.5.1"
+__maintainer__ = "Sebastian Maierhofer"
+__email__ = "commonroad@lists.lrz.de"
+__status__ = "Released"
 
 
 class ConversionLanelet(Lanelet):
     """Change some properties of the Lanelet class so that it can be used to conversions to Lanelet. This means
     especially that lanelet_ids can be other types than a natural number and that these ids can be changed
-    more than once. Adjacent neighbors and pre- and successor can be changed more than once.
+    more than once. Also adjacent neighbors and pre- and successor can be changed more than once.
     """
 
     # optimal_join_split_factor = 20
@@ -36,35 +45,14 @@ class ConversionLanelet(Lanelet):
         user_bidirectional=None,
         traffic_signs=None,
         traffic_lights=None,
-        custom_default_lanelet_types=CustomDefaultLaneletType(config.opendrive.general_lanelet_type_activ,
-                                                              config.opendrive.general_lanelet_type,
-                                                              config.opendrive.driving_default_lanelet_type,
-                                                              config.opendrive.lanelet_types_backwards_compatible),
-            speed=None,
     ):
         if lanelet_type is None:
             lanelet_type = {LaneletType.UNKNOWN}
-        self.parametric_lane_group = parametric_lane_group
-        self._default_lanelet_type = \
-            {LaneletType(custom_default_lanelet_types.general_lanelet_type)
-             if LaneletType(custom_default_lanelet_types.general_lanelet_type) is not None else LaneletType.UNKNOWN} \
-                if custom_default_lanelet_types.general_lanelet_type_activ else set()
-        self._driving_default_lanelet_type = LaneletType(custom_default_lanelet_types.driving_default_lanelet_type) \
-            if LaneletType(custom_default_lanelet_types.driving_default_lanelet_type) is not None \
-            else LaneletType.UNKNOWN
-        self._lanelet_types_backwards_compatible = custom_default_lanelet_types.lanelet_types_backwards_compatible
-        _user_bidirectional = None
-        _user_one_way = None
-        if user_one_way is not None:
-            _user_one_way = set(map(lambda x: RoadUser(x), user_one_way))
-        if user_bidirectional is not None:
-            _user_bidirectional = set(map(lambda x: RoadUser(x), user_bidirectional))
-
         super().__init__(
             left_vertices=left_vertices,
             center_vertices=center_vertices,
             right_vertices=right_vertices,
-            lanelet_id=lanelet_id,
+            lanelet_id=1,
             predecessor=predecessor,
             successor=successor,
             adjacent_left=adjacent_left,
@@ -75,13 +63,14 @@ class ConversionLanelet(Lanelet):
             line_marking_right_vertices=line_marking_right_vertices,
             stop_line=stop_line,
             lanelet_type=lanelet_type,
-            user_one_way=_user_one_way,
-            user_bidirectional=_user_bidirectional,
+            user_one_way=user_one_way,
+            user_bidirectional=user_bidirectional,
             traffic_signs=traffic_signs,
             traffic_lights=traffic_lights,
         )
 
-        self.speed = speed
+        self.parametric_lane_group = parametric_lane_group
+        self.lanelet_id = lanelet_id
 
     def __eq__(self, lanelet: "ConversionLanelet") -> bool:
         """Lanelets are equal if their id_ is equal.
@@ -111,43 +100,44 @@ class ConversionLanelet(Lanelet):
 
     @lanelet_type.setter
     def lanelet_type(self, value: str):
-        if value in ['urban', 'country', 'highway', 'interstate', 'parking', 'sidewalk', 'crosswalk']:
-            self._lanelet_type = \
-                {LaneletType(value) if LaneletType(value) is not None else LaneletType.UNKNOWN}
-        elif value in ['restricted', 'mainCarriageWay', 'intersection']:
-            self._lanelet_type = \
-                {LaneletType(value) if LaneletType(value) is not None
-                 else LaneletType.UNKNOWN}.union(self._default_lanelet_type)
+        if value == 'urban':
+            self._lanelet_type = {LaneletType.URBAN}
+        elif value == 'country':
+            self._lanelet_type = {LaneletType.COUNTRY}
+        elif value == 'highway':
+            self._lanelet_type = {LaneletType.HIGHWAY}
+        elif value == 'driving':
+            self._lanelet_type = {LaneletType.DRIVE_WAY}
+        elif value == 'mainCarriageWay':
+            self._lanelet_type = {LaneletType.MAIN_CARRIAGE_WAY, LaneletType.INTERSTATE}
         elif value == 'entry':
-            self._lanelet_type = {LaneletType.ACCESS_RAMP}.union(self._default_lanelet_type)
+            self._lanelet_type = {LaneletType.ACCESS_RAMP, LaneletType.INTERSTATE}
         elif value == 'exit':
-            self._lanelet_type = {LaneletType.EXIT_RAMP}.union(self._default_lanelet_type)
+            self._lanelet_type = {LaneletType.EXIT_RAMP, LaneletType.INTERSTATE}
         elif value == 'onRamp':
-            self._lanelet_type = {LaneletType.ACCESS_RAMP}.union(self._default_lanelet_type)
+            self._lanelet_type = {LaneletType.ACCESS_RAMP, LaneletType.INTERSTATE}
         elif value == 'offRamp':
-            self._lanelet_type = {LaneletType.EXIT_RAMP}.union(self._default_lanelet_type)
+            self._lanelet_type = {LaneletType.EXIT_RAMP, LaneletType.INTERSTATE}
         elif value == 'connectingRamp':
-            self._lanelet_type = {LaneletType.ACCESS_RAMP}.union(self._default_lanelet_type)
+            self._lanelet_type = {LaneletType.ACCESS_RAMP, LaneletType.INTERSTATE}
         elif value == 'shoulder':
-            if self._lanelet_types_backwards_compatible:
-                self._lanelet_type = set()
-            else:
-                self._lanelet_type = {LaneletType.BORDER}
-        elif value == 'border':
-            if self._lanelet_types_backwards_compatible:
-                self._lanelet_type = set()
-            else:
-                self._lanelet_type = {LaneletType.BORDER}
+            self._lanelet_type = {LaneletType.SHOULDER}
         elif value == 'bus':
-            self._lanelet_type = {LaneletType.BUS_LANE}.union(self._default_lanelet_type)
+            self._lanelet_type = {LaneletType.BUS_LANE}
         elif value == 'stop':
-            self._lanelet_type = {LaneletType.SHOULDER}.union(self._default_lanelet_type)
+            self._lanelet_type = {LaneletType.BUS_STOP}
         elif value == 'biking':
             self._lanelet_type = {LaneletType.BICYCLE_LANE}
-        elif value == 'driving':
-            self._lanelet_type = {LaneletType(self._driving_default_lanelet_type)}
+        elif value == 'sidewalk':
+            self._lanelet_type = {LaneletType.SIDEWALK}
+        elif value == 'crosswalk':
+            self._lanelet_type = {LaneletType.CROSSWALK}
+        elif value == 'interstate':
+            self._lanelet_type = {LaneletType.INTERSTATE}
+        elif value == 'intersection':
+            self._lanelet_type = {LaneletType.INTERSECTION}
         else:
-            self._lanelet_type = {LaneletType.UNKNOWN}.union(self._default_lanelet_type)
+            self._lanelet_type = {LaneletType.UNKNOWN}
 
     @property
     def lanelet_id(self) -> int:
@@ -284,14 +274,6 @@ class ConversionLanelet(Lanelet):
         :rtype: bool
         """
         return self._adj_right_same_direction
-
-    @property
-    def speed(self) -> float:
-        return self._speed
-
-    @speed.setter
-    def speed(self, s):
-        self._speed = s
 
     @adj_right_same_direction.setter
     def adj_right_same_direction(self, same: bool):

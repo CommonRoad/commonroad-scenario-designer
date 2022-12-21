@@ -33,9 +33,6 @@ try:
 except ImportError:
     warnings.warn(
         f"Unable to import commonroad_dc.pycrccosy, converting static scenario into interactive is not supported!")
-except TypeError:
-    warnings.warn(
-        f"Unable to import commonroad_dc.pycrccosy, converting static scenario into interactive is not supported!")
 
 from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.common.solution import VehicleType as VehicleTypeParam

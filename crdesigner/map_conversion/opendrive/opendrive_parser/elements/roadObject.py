@@ -1,3 +1,11 @@
+__author__ = "Benjamin Orthen, Stefan Urban"
+__copyright__ = "TUM Cyber-Physical Systems Group"
+__credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles"]
+__version__ = "0.5.1"
+__maintainer__ = "Sebastian Maierhofer"
+__email__ = "commonroad@lists.lrz.de"
+__status__ = "Released"
+
 
 class Object:
     """
@@ -34,7 +42,6 @@ class Object:
         self._hdg = None
         self._pitch = None
         self._roll = None
-        self._outline = None
         # TODO: Check potential use of missing attributes length, perpToRoad, radius, subtype
 
     @property
@@ -55,8 +62,6 @@ class Object:
                       'streetLamp', 'trafficIsland', 'trailer', 'train', 'tram', 'tree', 'van', 'vegetation', 'wind']
         customs = ['permanentDelineator', 'emergencyCallBox', 'tunnel', 'arrowStraight', 'arrowRight', 'arrowMergeLeft',
                    'arrowLeft', 'arrowLeftRight', 'arrowStraightLeft', 'arrowMergeRight', 'island', 'guidepost']
-        if value == "-1":
-            value = "none"
         if value not in road_types and value not in customs:
             raise AttributeError("Value is not a valid object type!")
         self._type = str(value)
@@ -74,8 +79,7 @@ class Object:
 
     @name.setter
     def name(self, value):
-        if value is not None:
-            self._name = str(value)
+        self._name = str(value)
 
     @property
     def width(self) -> float:
@@ -90,10 +94,7 @@ class Object:
 
     @width.setter
     def width(self, value):
-        if value is not None:
-            self._width = float(value)
-        else:
-            self._width = None
+        self._width = float(value)
 
     @property
     def height(self) -> float:
@@ -108,8 +109,7 @@ class Object:
 
     @height.setter
     def height(self, value):
-        if value is not None:
-            self._height = float(value)
+        self._height = float(value)
 
     @property
     def zOffset(self) -> float:
@@ -124,8 +124,7 @@ class Object:
 
     @zOffset.setter
     def zOffset(self, value):
-        if value is not None:
-            self._zOffset = float(value)
+        self._zOffset = float(value)
 
     @property
     def id(self) -> int:
@@ -140,8 +139,7 @@ class Object:
 
     @id.setter
     def id(self, value):
-        if value is not None:
-            self._id = int(value)
+        self._id = int(value)
 
     @property
     def s(self) -> float:
@@ -156,8 +154,7 @@ class Object:
 
     @s.setter
     def s(self, value):
-        if value is not None:
-            self._s = float(value)
+        self._s = float(value)
 
     @property
     def t(self) -> float:
@@ -172,8 +169,7 @@ class Object:
 
     @t.setter
     def t(self, value):
-        if value is not None:
-            self._t = float(value)
+        self._t = float(value)
 
     @property
     def validLength(self) -> float:
@@ -222,8 +218,7 @@ class Object:
 
     @hdg.setter
     def hdg(self, value):
-        if value is not None:
-            self._hdg = float(value)
+        self._hdg = float(value)
 
     @property
     def pitch(self) -> float:
@@ -238,8 +233,7 @@ class Object:
 
     @pitch.setter
     def pitch(self, value):
-        if value is not None:
-            self._pitch = float(value)
+        self._pitch = float(value)
 
     @property
     def roll(self) -> float:
@@ -254,69 +248,4 @@ class Object:
 
     @roll.setter
     def roll(self, value):
-        if value is not None:
-            self._roll = float(value)
-
-    @property
-    def outline(self):
-        return self._outline
-
-    @outline.setter
-    def outline(self, value):
-        self._outline = value
-
-
-
-class ObjectOutlineCorner:
-
-    def __init__(self):
-        self._height = None
-        self._id = None
-        self._u = None
-        self._v = None
-        self._z = None
-
-    @property
-    def height(self):
-        return self._height
-
-    @height.setter
-    def height(self, value):
-        if value is not None:
-            self._height = float(value)
-
-    @property
-    def id(self):
-        return self._id
-
-    @id.setter
-    def id(self, value):
-        if value is not None:
-            self._id = int(value)
-
-    @property
-    def u(self):
-        return self._u
-
-    @u.setter
-    def u(self, value):
-        if value is not None:
-            self._u = float(value)
-
-    @property
-    def v(self):
-        return self._v
-
-    @v.setter
-    def v(self, value):
-        if value is not None:
-            self._v = float(value)
-
-    @property
-    def z(self):
-        return self._z
-
-    @z.setter
-    def z(self, value):
-        if value is not None:
-            self._z = value
+        self._roll = float(value)
