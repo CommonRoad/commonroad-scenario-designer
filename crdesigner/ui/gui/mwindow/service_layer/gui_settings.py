@@ -70,6 +70,15 @@ class GUISettings:
         # use if settings get extended
         return True
 
+    def set_draw_params_gui(self):
+        set_draw_params(trajectory=config.DRAW_TRAJECTORY, intersection=config.DRAW_INTERSECTIONS,
+                        obstacle_label=config.DRAW_OBSTACLE_LABELS, obstacle_icon=config.DRAW_OBSTACLE_ICONS,
+                        obstacle_direction=config.DRAW_OBSTACLE_DIRECTION, obstacle_signal=config.DRAW_OBSTACLE_SIGNALS,
+                        occupancy=config.DRAW_OCCUPANCY, traffic_signs=config.DRAW_TRAFFIC_SIGNS,
+                        traffic_lights=config.DRAW_TRAFFIC_LIGHTS, incoming_lanelets=config.DRAW_INCOMING_LANELETS,
+                        successors=config.DRAW_SUCCESSORS, intersection_labels=config.DRAW_INTERSECTION_LABELS,
+                        colorscheme=self.parent.cr_designer.colorscheme(), )
+
     def apply_close(self) -> None:
         """
         closes settings if settings could be saved to config
@@ -98,13 +107,7 @@ class GUISettings:
 
     def update_window(self):
         config.DARKMODE = self.window.chk_darkmode.isChecked()
-        set_draw_params(trajectory=config.DRAW_TRAJECTORY, intersection=config.DRAW_INTERSECTIONS,
-                        obstacle_label=config.DRAW_OBSTACLE_LABELS, obstacle_icon=config.DRAW_OBSTACLE_ICONS,
-                        obstacle_direction=config.DRAW_OBSTACLE_DIRECTION, obstacle_signal=config.DRAW_OBSTACLE_SIGNALS,
-                        occupancy=config.DRAW_OCCUPANCY, traffic_signs=config.DRAW_TRAFFIC_SIGNS,
-                        traffic_lights=config.DRAW_TRAFFIC_LIGHTS, incoming_lanelets=config.DRAW_INCOMING_LANELETS,
-                        successors=config.DRAW_SUCCESSORS, intersection_labels=config.DRAW_INTERSECTION_LABELS,
-                        colorscheme=self.parent.cr_designer.colorscheme(), )
+        self.set_draw_params_gui()
         if self.parent.cr_designer.animated_viewer_wrapper.cr_viewer.current_scenario != None:
             self.parent.cr_designer.animated_viewer_wrapper.cr_viewer.update_plot()
         self.parent.cr_designer.update_window()
@@ -112,13 +115,7 @@ class GUISettings:
 
     def close(self):
         config.DARKMODE = self.darkmode
-        set_draw_params(trajectory=config.DRAW_TRAJECTORY, intersection=config.DRAW_INTERSECTIONS,
-                        obstacle_label=config.DRAW_OBSTACLE_LABELS, obstacle_icon=config.DRAW_OBSTACLE_ICONS,
-                        obstacle_direction=config.DRAW_OBSTACLE_DIRECTION, obstacle_signal=config.DRAW_OBSTACLE_SIGNALS,
-                        occupancy=config.DRAW_OCCUPANCY, traffic_signs=config.DRAW_TRAFFIC_SIGNS,
-                        traffic_lights=config.DRAW_TRAFFIC_LIGHTS, incoming_lanelets=config.DRAW_INCOMING_LANELETS,
-                        successors=config.DRAW_SUCCESSORS, intersection_labels=config.DRAW_INTERSECTION_LABELS,
-                        colorscheme=self.parent.cr_designer.colorscheme(), )
+        self.set_draw_params_gui()
         self.parent.canvas.update_obstacle_trajectory_params()
         if self.parent.cr_designer.animated_viewer_wrapper.cr_viewer.current_scenario != None:
             self.parent.cr_designer.animated_viewer_wrapper.cr_viewer.update_plot()
@@ -133,14 +130,7 @@ class GUISettings:
             data = yaml.load(f, Loader=yaml.FullLoader)
         for key, value in data.items():
             setattr(config, key.upper(), value)
-        set_draw_params(trajectory=data.get("Draw_trajectory"), intersection=data.get("Draw_intersections"),
-                        obstacle_label=data.get("Draw_obstacle_labels"), obstacle_icon=data.get("Draw_obstacle_icons"),
-                        obstacle_direction=data.get("Draw_obstacle_direction"),
-                        obstacle_signal=data.get("Draw_obstacle_signals"), occupancy=data.get("Draw_occupancy"),
-                        traffic_signs=data.get("Draw_traffic_signs"), traffic_lights=data.get("Draw_traffic_lights"),
-                        incoming_lanelets=data.get("Draw_incoming_lanelets"), successors=data.get("Draw_successors"),
-                        intersection_labels=data.get("Draw_intersection_labels"),
-                        colorscheme=self.parent.cr_designer.colorscheme(), )
+        self.set_draw_params_gui()
 
         with open('crdesigner/configurations/custom_settings.yaml', 'w') as yaml_file:
             yaml_file.write(yaml.dump(data, default_flow_style=False))
@@ -156,21 +146,9 @@ class GUISettings:
         '''
         with open('crdesigner/configurations/custom_settings.yaml') as f:
             data = yaml.load(f, Loader=yaml.FullLoader)
-        data['Autofocus'] = self.window.chk_autofocus.isChecked()
-        data['Draw_trajectory'] = self.window.chk_draw_trajectory.isChecked()
-        data['Draw_intersections'] = self.window.chk_draw_intersection.isChecked()
-        data['Draw_obstacle_labels'] = self.window.chk_draw_label.isChecked()
-        data['Draw_obstacle_icons'] = self.window.chk_draw_obstacle_icon.isChecked()
-        data['Draw_obstacle_direction'] = self.window.chk_draw_obstacle_direction.isChecked()
-        data['Draw_obstacle_signals'] = self.window.chk_draw_obstacle_signal.isChecked()
-        data['Draw_occupancy'] = self.window.chk_draw_occupancy.isChecked()
-        data['Draw_traffic_signs'] = self.window.chk_draw_traffic_sign.isChecked()
-        data['Draw_traffic_lights'] = self.window.chk_draw_traffic_light.isChecked()
-        data['Draw_incoming_lanelets'] = self.window.chk_draw_incoming_lanelet.isChecked()
-        data['Draw_successors'] = self.window.chk_draw_successors.isChecked()
-        data['Draw_intersection_labels'] = self.window.chk_draw_intersection_label.isChecked()
-        data['Axis_visible'] = str(self.window.cmb_axis_visible.currentText())
-        data['Darkmode'] = self.window.chk_darkmode.isChecked()
-        data['Legend'] = self.window.chk_legend.isChecked()
+        for key in dir(config):
+            yaml_key = key.lower()
+            if yaml_key in data:
+                data[yaml_key] = getattr(config, key)
         with open('crdesigner/configurations/custom_settings.yaml', 'w') as yaml_file:
             yaml_file.write(yaml.dump(data, default_flow_style=False))

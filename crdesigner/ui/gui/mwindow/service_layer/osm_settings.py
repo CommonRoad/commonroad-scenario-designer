@@ -83,14 +83,10 @@ class EditStreetTypes:
     def save_to_custom_settings(self):
         with open('crdesigner/configurations/custom_settings_osm2cr.yaml') as f:
             data = yaml.load(f, Loader=yaml.FullLoader)
-        data['Accepted_highways_mainlayer'] = config.ACCEPTED_HIGHWAYS_MAINLAYER
+        data['accepted_highways_mainlayer'] = config.ACCEPTED_HIGHWAYS_MAINLAYER
         with open('crdesigner/configurations/custom_settings_osm2cr.yaml', 'w') as yaml_file:
             yaml_file.write(yaml.dump(data, default_flow_style=False))
 
-    def apply_set_to_default(self):
-        with open('crdesigner/configurations/default_settings_osm2cr.yaml') as f:
-            data = yaml.load(f, Loader=yaml.FullLoader)
-        config.ACCEPTED_HIGHWAYS_MAINLAYER = data['Accepted_highways_mainlayer']
 
 class EditLaneCounts:
     """
@@ -151,15 +147,10 @@ class EditLaneCounts:
         with open('crdesigner/configurations/custom_settings_osm2cr.yaml') as f:
             data = yaml.load(f, Loader=yaml.FullLoader)
         for key in config.LANECOUNTS:
-            data['Lanecounts'][key] = config.LANECOUNTS[key]
+            data['lanecounts'][key] = config.LANECOUNTS[key]
         with open('crdesigner/configurations/custom_settings_osm2cr.yaml', 'w') as yaml_file:
             yaml_file.write(yaml.dump(data, default_flow_style=False))
 
-    def apply_set_to_default(self):
-        with open('crdesigner/configurations/default_settings_osm2cr.yaml') as f:
-            data = yaml.load(f, Loader=yaml.FullLoader)
-        config.LANECOUNTS = data['Lanecounts']
-        self.save_to_custom_settings()
 class EditLaneWidth:
     """
     Window to edit width of lanes for street types
@@ -219,21 +210,12 @@ class EditLaneWidth:
         with open('crdesigner/configurations/custom_settings_osm2cr.yaml') as f:
             data = yaml.load(f, Loader=yaml.FullLoader)
         for key in config.LANECOUNTS:
-            data['Lanewidths'][key] = config.LANEWIDTHS[key]
+            data['lanewidths'][key] = config.LANEWIDTHS[key]
         with open('crdesigner/configurations/custom_settings_osm2cr.yaml', 'w') as yaml_file:
             yaml_file.write(yaml.dump(data, default_flow_style=False))
 
-    def apply_set_to_default(self):
-        with open('crdesigner/configurations/default_settings_osm2cr.yaml') as f:
-            data = yaml.load(f, Loader=yaml.FullLoader)
-        config.LANEWIDTHS = data['Lanewidths']
-        self.save_to_custom_settings()
 
-    def apply_set_to_default(self):
-        with open('crdesigner/configurations/default_settings_osm2cr.yaml') as f:
-            data = yaml.load(f, Loader=yaml.FullLoader)
-        config.LANEWIDTHS = data['Lanewidths']
-        self.save_to_custom_settings()
+
 class EditSpeedLimits:
     """
     Window to edit speed limits for street types
@@ -294,15 +276,10 @@ class EditSpeedLimits:
         with open('crdesigner/configurations/custom_settings_osm2cr.yaml') as f:
             data = yaml.load(f, Loader=yaml.FullLoader)
         for key in config.LANECOUNTS:
-            data['Speed_limits'][key] = config.SPEED_LIMITS[key]
+            data['speed_limits'][key] = config.SPEED_LIMITS[key]
         with open('crdesigner/configurations/custom_settings_osm2cr.yaml', 'w') as yaml_file:
             yaml_file.write(yaml.dump(data, default_flow_style=False))
 
-    def apply_set_to_default(self):
-        with open('crdesigner/configurations/default_settings_osm2cr.yaml') as f:
-            data = yaml.load(f, Loader=yaml.FullLoader)
-        config.SPEED_LIMITS = data['Speed_limits']
-        self.save_to_custom_settings()
 
 class EditSublayerWayTypes:
     """
@@ -366,15 +343,10 @@ class EditSublayerWayTypes:
     def save_to_custom_settings(self):
         with open('crdesigner/configurations/custom_settings_osm2cr.yaml') as f:
             data = yaml.load(f, Loader=yaml.FullLoader)
-        data['Accepted_highways_sublayer'] = config.ACCEPTED_HIGHWAYS_SUBLAYER
+        data['accepted_highways_sublayer'] = config.ACCEPTED_HIGHWAYS_SUBLAYER
         with open('crdesigner/configurations/custom_settings_osm2cr.yaml', 'w') as yaml_file:
             yaml_file.write(yaml.dump(data, default_flow_style=False))
 
-    def apply_set_to_default(self):
-        with open('crdesigner/configurations/default_settings_osm2cr.yaml') as f:
-            data = yaml.load(f, Loader=yaml.FullLoader)
-        config.ACCEPTED_HIGHWAYS_SUBLAYER = data['Accepted_highways_sublayer']
-        self.save_to_custom_settings()
 class OSMSettings:
     """
     Window to edit parameters in config.py
@@ -575,37 +547,10 @@ class OSMSettings:
         window = self.window
         with open('crdesigner/configurations/custom_settings_osm2cr.yaml') as f:
             data = yaml.load(f, Loader=yaml.FullLoader)
-        data['Benchmark_id'] = window.le_benchmark_id.text()
-        data['Author']= window.le_author.text()
-        data['Affilation'] = window.le_affiliation.text()
-        data['Source'] = window.le_source.text()
-        data['Tags'] = window.le_tags.text()
-        data['Timestepsize'] = window.sb_timestep_size.value()
-
-        data['Load_tunnels'] = window.chk_load_tunnels.isChecked()
-        data['Make_contiguous'] = window.chk_make_contiguous.isChecked()
-        data['Split_at_corner'] = window.chk_split_corners.isChecked()
-        data['Use_restrictions'] = window.chk_osm_restrictions.isChecked()
-
-        data['Interpolation_distance'] = window.sb_interpolation_distance.value()
-        data['Compression_threshold'] = window.sb_compression_threshold.value()
-        data['Export_in_utm'] = window.chk_utm_coordinates.isChecked()
-        data['Filter'] = window.chk_filter_points.isChecked()
-
-        data['Earth_radius'] = window.sb_earth_radius.value()
-        data['Delete_short_edges'] = window.chk_delete_short_edges.isChecked()
-        data['Interpolation_distance_internal'] = (window.sb_internal_interpolation_distance.value())
-        data['Bezier_parameter'] = window.sb_bezier_parameter.value()
-        data['Intersection_distance'] = window.sb_intersection_distance.value()
-        data['Intersection_cropping_with_respect_to_roads'] = (window.chk_intersection_distance_respect.isChecked())
-        data['Soft_angle_threshold'] = window.sb_soft_angle_treshold.value()
-        data['Lane_segment_angle'] = window.sb_lane_segment_angle_treshold.value()
-        data['Cluster_length'] = window.sb_cluster_length.value()
-        data['Least_cluster_length'] = window.sb_cluster_length_treshold.value()
-        data['Merge_distance'] = window.sb_merge_distance.value()
-
-        data['Extract_sublayer'] = window.chk_extract_sublayer.isChecked()
-        data['Intersection_distance_sublayer'] = window.sb_intersection_distance_sublayer.value()
+        for key in dir(config):
+            yaml_key = key.lower()
+            if yaml_key in data:
+                data[yaml_key] = getattr(config, key)
 
         with open('crdesigner/configurations/custom_settings_osm2cr.yaml', 'w') as yaml_file:
             yaml_file.write(yaml.dump(data, default_flow_style=False))
