@@ -193,7 +193,6 @@ class AnimatedViewer:
         timesteps = [
             obstacle.prediction.occupancy_set[-1].time_step
             for obstacle in self.current_scenario.dynamic_obstacles
-            for obstacle in self.current_scenario.dynamic_obstacles
         ]
         self.max_timestep = np.max(timesteps) if timesteps else 0
         return self.max_timestep

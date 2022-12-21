@@ -52,6 +52,10 @@ class ObstacleProfileToolboxUI(Toolbox):
         self.obstacle_dyn_stat.addItem("Static")
         self.obstacle_dyn_stat.addItem("Dynamic")
 
+        self.animation = QCheckBox("Animate profile")
+        self.animation.setChecked(False)
+        self.layout_obstacles.addWidget(self.animation)
+
         self.layout_obstacle_information_groupbox = QFormLayout()
         self.obstacle_information_groupbox = QGroupBox()
         self.obstacle_information_groupbox.setLayout(self.layout_obstacle_information_groupbox)

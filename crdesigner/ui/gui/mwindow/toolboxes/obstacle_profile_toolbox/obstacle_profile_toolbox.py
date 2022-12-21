@@ -188,6 +188,7 @@ class ObstacleProfileToolbox(QDockWidget):
                         profile += [state.__getattribute__("orientation")
                                     for state in obstacle.prediction.trajectory.state_list]
             else:
+                #not the best solution but does the job for now to not crash CR
                 return
 
             if isinstance(obstacle, DynamicObstacle):
@@ -357,27 +358,32 @@ class ObstacleProfileToolbox(QDockWidget):
         :param ymin: y lower bound to be drawn
         :param: ymax: y upper bound to be drawn
         """
-        state_variable_name = self.obstacle_profile_toolbox_ui.obstacle_state_variable.currentText()
-        # clear previous profile
-        self.obstacle_profile_toolbox_ui.figure.clear()
-        # create an axis
-        ax = self.obstacle_profile_toolbox_ui.figure.add_subplot(111)
+        if(self.obstacle_profile_toolbox_ui.animation.isChecked()):
+            #have to fix a bug with "NoneType Attribute" in animated_viewer for testing
+            print("TODO")
+            return
+        else:
+            state_variable_name = self.obstacle_profile_toolbox_ui.obstacle_state_variable.currentText()
+            # clear previous profile
+            self.obstacle_profile_toolbox_ui.figure.clear()
+            # create an axis
+            ax = self.obstacle_profile_toolbox_ui.figure.add_subplot(111)
 
-        # plot data
-        ax.plot(time, profile, '.-', markersize=4)
-        ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.1f}'))
-        ax.set_xlabel("time [s]")
-        ax.set_ylabel(self.resolve_y_label(state_variable_name))
-        self.obstacle_profile_toolbox_ui.figure.tight_layout()
+            # plot data
+            ax.plot(time, profile, '.-', markersize=4)
+            ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.1f}'))
+            ax.set_xlabel("time [s]")
+            ax.set_ylabel(self.resolve_y_label(state_variable_name))
+            self.obstacle_profile_toolbox_ui.figure.tight_layout()
 
-        # to get reasonable limits. If the difference is very small: it will be difficult to make changes
-        ax.set_ylim([min(profile)-0.5, max(profile)+0.5])
-        # if zoomed in the new plot should be drawn with previous x and y limits
-        # (so it doesnt zoom out on mouse event if zoomed in)
-        if (self.xmin and self.xmax and self.ymin and self.ymax):
-            ax.set_xlim([self.xmin, self.xmax])
-            ax.set_ylim([self.ymin, self.ymax])
-        # refresh canvas
-        self.obstacle_profile_toolbox_ui.canvas.draw()
-        ax.callbacks.connect('xlim_changed', self.on_xlim_change)
-        ax.callbacks.connect('ylim_changed', self.on_ylim_change)
+            # to get reasonable limits. If the difference is very small: it will be difficult to make changes
+            ax.set_ylim([min(profile)-0.5, max(profile)+0.5])
+            # if zoomed in the new plot should be drawn with previous x and y limits
+            # (so it doesnt zoom out on mouse event if zoomed in)
+            if (self.xmin and self.xmax and self.ymin and self.ymax):
+                ax.set_xlim([self.xmin, self.xmax])
+                ax.set_ylim([self.ymin, self.ymax])
+            # refresh canvas
+            self.obstacle_profile_toolbox_ui.canvas.draw()
+            ax.callbacks.connect('xlim_changed', self.on_xlim_change)
+            ax.callbacks.connect('ylim_changed', self.on_ylim_change)
