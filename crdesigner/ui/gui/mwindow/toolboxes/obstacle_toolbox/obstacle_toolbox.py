@@ -51,7 +51,7 @@ class ObstacleToolbox(QDockWidget):
         self.pos = []
         self.temp_obstacle = None
 
-        # for recording of trajectories of dynamic obstacles via keyboard input
+        # for recording of trajectories of dynamic obstacles via mouse
         self._start_trajectory_recording = False
         self._active_obstacle = None
         self.x1=0.0

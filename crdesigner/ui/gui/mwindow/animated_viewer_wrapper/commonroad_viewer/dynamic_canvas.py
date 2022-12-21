@@ -671,8 +671,8 @@ class DynamicCanvas(FigureCanvas):
 
     def activate_trajectory_mode(self, is_active):
         if is_active:
-            x = float(self.parent.obstacle_toolbox.obstacle_toolbox_ui.initial_state_position_x.text())
-            y = float(self.parent.obstacle_toolbox.obstacle_toolbox_ui.initial_state_position_y.text())
+            x = self.parent.obstacle_toolbox.x1
+            y = self.parent.obstacle_toolbox.y1
             self.draw_trajectory_first_point_object = self.ax.plot(x, y, marker="x", color="blue", zorder=21)
             self.draw_trajectory_first_point = [x, y]
 
