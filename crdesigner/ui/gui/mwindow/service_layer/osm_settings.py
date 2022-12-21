@@ -20,6 +20,7 @@ from crdesigner.ui.gui.mwindow.service_layer.osm_gui_modules.GUI_resources.subla
     as Sublayer_street_types
 
 import yaml
+from crdesigner.ui.gui.mwindow.service_layer import transfer
 
 class EditStreetTypes:
     """
@@ -559,10 +560,11 @@ class OSMSettings:
         '''
         the variables i config.py will be changed back to the default values, not the file itself
         '''
+        transfer.transfer_yaml_to_config('crdesigner/configurations/default_settings_osm2cr.yaml', config)
         with open('crdesigner/configurations/default_settings_osm2cr.yaml') as f:
             data = yaml.load(f, Loader=yaml.FullLoader)
-        for key, value in data.items():
-            setattr(config, key.upper(), value)
+        #for key, value in data.items():
+            #setattr(config, key.upper(), value)
         with open('crdesigner/configurations/custom_settings_osm2cr.yaml', 'w') as yaml_file:
             yaml_file.write(yaml.dump(data, default_flow_style=False))
     def save_button(self) -> None:

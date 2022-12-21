@@ -7,6 +7,7 @@ from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.commonroad_viewer.service
 from crdesigner.ui.gui.mwindow.service_layer import config
 
 
+from crdesigner.ui.gui.mwindow.service_layer import transfer
 class GUISettings:
 
     def __init__(self, parent):
@@ -126,10 +127,11 @@ class GUISettings:
         '''
         the variables in config.py will be changed back to the default values, not the file itself
         '''
+        transfer.transfer_yaml_to_config('crdesigner/configurations/default_settings.yaml', config)
         with open('crdesigner/configurations/default_settings.yaml') as f:
             data = yaml.load(f, Loader=yaml.FullLoader)
-        for key, value in data.items():
-            setattr(config, key.upper(), value)
+        #for key, value in data.items():
+            #setattr(config, key.upper(), value)
         self.set_draw_params_gui()
 
         with open('crdesigner/configurations/custom_settings.yaml', 'w') as yaml_file:
