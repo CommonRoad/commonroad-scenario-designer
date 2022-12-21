@@ -5,7 +5,6 @@ You can use this module instead of using **main.py**.
 import pickle
 import sys
 import logging
-from typing import Callable, Optional
 import matplotlib.pyplot as plt
 
 from crdesigner.map_conversion.osm2cr import config

@@ -1,7 +1,7 @@
 from pathlib import Path
 import pickle
 import subprocess
-from typing import Callable, Optional
+from typing import Optional
 import warnings
 from lxml import etree
 
