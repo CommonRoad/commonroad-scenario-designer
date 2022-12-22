@@ -130,8 +130,6 @@ class GUISettings:
         transfer.transfer_yaml_to_config('crdesigner/configurations/default_settings.yaml', config)
         with open('crdesigner/configurations/default_settings.yaml') as f:
             data = yaml.load(f, Loader=yaml.FullLoader)
-        #for key, value in data.items():
-            #setattr(config, key.upper(), value)
         self.set_draw_params_gui()
 
         with open('crdesigner/configurations/custom_settings.yaml', 'w') as yaml_file:
