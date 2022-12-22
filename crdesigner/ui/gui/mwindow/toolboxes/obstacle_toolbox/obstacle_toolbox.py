@@ -374,17 +374,18 @@ class ObstacleToolbox(QDockWidget):
         if isinstance(state,InitialState):
             state_list=[]
 
-        input_state = self._input_via_ks_model_with_mouse(x2,y2)
+        input_state_list = self._input_via_ks_model_with_mouse(x2,y2)
         time_step=int(self.obstacle_toolbox_ui.initial_state_time.text())
         # Create new TrajectoryPrediction, because simply appending to state list is not allowed.
-        state_list.append(input_state)
+        for input_state in input_state_list:
+            state_list.append(input_state)
         new_trajectory = Trajectory(time_step, state_list)
         new_pred = TrajectoryPrediction(new_trajectory, obstacle.obstacle_shape, None, None)
         obstacle.prediction = new_pred
         self.callback(self.current_scenario)
 
 
-    def _input_via_ks_model_with_mouse(self,x2:float,y2:float) -> State:
+    def _input_via_ks_model_with_mouse(self,x2:float,y2:float) :
         """This method is resolving user input when using a kinematic single-track model. The KS model uses acceleration
                in the respective directions and additionally takes a steering_angle_speed that steers the model
                left/right.
@@ -394,22 +395,50 @@ class ObstacleToolbox(QDockWidget):
                 :param y2: The x point which was clickes on the canvas
                 :type key: float
                :return: The input state to the forward simulation
-               :rtype: State
+               :rtype: list of State
                """
-        time_step_size = self.current_scenario.dt
+        input_state_list=[]
 
-        s_new = math.sqrt(math.pow(x2 - self.x1, 2) + math.pow(y2 - self.y1, 2))
-        a_previous = (s_new - self.s_previous - self.v_previous * time_step_size) / (0.5 * math.pow(time_step_size, 2))
-        orientation=math.atan((y2-self.y1)/(x2-self.x1))
-        position = np.array([x2, y2])
-        velocity=a_previous * self.v_previous
-        self.time_step=self.time_step+1
-        input_state = KSState(position=position,time_step=self.time_step,velocity=velocity, steering_angle=0, orientation=orientation)
-        self.x1=x2
-        self.y1=y2
-        self.v_previous=velocity
-        self.s_previous=s_new
-        return input_state
+        if ( self.obstacle_toolbox_ui.waypoint_time_step.text()!= ""):
+            time_step_size = float(self.obstacle_toolbox_ui.waypoint_time_step.text())
+            number_of_states = int (time_step_size/ self.current_scenario.dt)+1
+            x_old=self.x1
+            y_old = self.y1
+            for n in (1,number_of_states):
+                x=self.x1+n*(x2-self.x1)/number_of_states
+                y = self.y1 + n * (y2 - self.y1) / number_of_states
+                position = np.array([x, y])
+                s_new = math.sqrt(math.pow(x - x_old, 2) + math.pow(y - y_old, 2))
+                a_previous = (s_new - self.s_previous - self.v_previous * time_step_size) / (
+                            0.5 * math.pow(time_step_size, 2))
+                orientation = math.atan((y - y_old) / (x - x_old))
+                velocity = a_previous * self.v_previous
+                self.time_step = self.time_step + 1
+                input_state = KSState(position=position, time_step=self.time_step, velocity=velocity, steering_angle=0,
+                                      orientation=orientation)
+                x_old = x
+                y_old = y
+                self.v_previous = velocity
+                self.s_previous = s_new
+                input_state_list.append(input_state)
+            self.x1 = x2
+            self.y1 = y2
+            return input_state_list
+        else:
+            time_step_size = self.current_scenario.dt
+            s_new = math.sqrt(math.pow(x2 - self.x1, 2) + math.pow(y2 - self.y1, 2))
+            a_previous = (s_new - self.s_previous - self.v_previous * time_step_size) / (0.5 * math.pow(time_step_size, 2))
+            orientation=math.atan((y2-self.y1)/(x2-self.x1))
+            position = np.array([x2, y2])
+            velocity=a_previous * self.v_previous
+            self.time_step=self.time_step+1
+            input_state = KSState(position=position,time_step=self.time_step,velocity=velocity, steering_angle=0, orientation=orientation)
+            self.x1=x2
+            self.y1=y2
+            self.v_previous=velocity
+            self.s_previous=s_new
+            input_state_list.append(input_state)
+            return input_state_list
 
 
     def calc_state_list(self) -> List[State]:
