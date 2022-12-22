@@ -47,11 +47,17 @@ class Ui_Settings(object):
         self.button_ok.setObjectName("button_ok")
         self.button_ok.setMaximumSize(150, 40)
 
+        # button set to default
+        self.button_settodefault = QtWidgets.QPushButton(self.frame)
+        self.button_settodefault.setObjectName("button_set_to_default")
+        self.button_settodefault.setMaximumSize(150, 40)
+
         self.space = QtWidgets.QLabel()
         self.frameLayout.addWidget(self.space)
         self.frameLayout.addWidget(self.button_cancel)
         self.frameLayout.addWidget(self.button_ok)
-        
+        self.frameLayout.addWidget(self.button_settodefault)
+
         self.centralLayout.addWidget(self.frame)
 
         Settings.setCentralWidget(self.centralwidget)
@@ -85,6 +91,8 @@ class Ui_Settings(object):
         MainWindow.setWindowTitle(_translate("MainWindow", "Settings"))
         self.button_ok.setText(_translate("MainWindow", "Ok"))
         self.button_cancel.setText(_translate("MainWindow", "Cancel"))
+        # set to default
+        self.button_settodefault.setText(_translate("MainWindow", "Set to default"))
 
         self.gui_settings.retranslateUi(self.tabWidget)
         self.sumo_settings.retranslateUi(self.tabWidget)
@@ -108,3 +116,8 @@ class Ui_Settings(object):
         self.tabBar.setPalette(p)
         self.button_ok.setPalette(p)
         self.button_cancel.setPalette(p)
+        # set_to_default_button
+        self.button_settodefault.setPalette(p)
+
+
+

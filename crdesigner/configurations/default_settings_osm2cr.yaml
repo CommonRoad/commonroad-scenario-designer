@@ -1,0 +1,137 @@
+benchmark_id: DEU_test
+author: Automated converter by Maximilian Rieger
+affiliation: Technical University of Munich, Germany
+source: OpenStreetMaps (OSM)
+tags: urban
+geoname_id: -999
+gps_latitude: 123.45
+gps_longitude: 123.45
+timestepsize: 0.1
+lanelettype: urban
+aerial_images: False
+image_save_path: files/imagery/
+zoom_level: 19
+save_path: files/
+download_edge_length: 200
+download_coordinates: (48.262447, 11.657881)
+load_tunnels: False
+make_contiguous: False
+split_at_corner: True
+use_restrictions: True
+accepted_highways_mainlayer:
+- motorway
+- trunk
+- primary
+- secondary
+- tertiary
+- unclassified
+- residential
+- motorway_link
+- trunk_link
+- primary_link
+- secondary_link
+- tertiary_link
+- living_street
+- service
+extract_sublayer: True
+accepted_highways_sublayer:
+- path
+- footway
+- cycleway
+sublayer_lanelettype: sidewalk
+crossing_lanelettype: crosswalk
+rejected_tags:
+  area: yes
+lanecounts:
+  cycleway: 1
+  footway: 1
+  living_street: 2
+  motorway: 6
+  motorway_link: 2
+  path: 1
+  primary: 2
+  primary_link: 2
+  residential: 2
+  secondary: 2
+  secondary_link: 2
+  service: 2
+  tertiary: 2
+  tertiary_link: 2
+  trunk: 4
+  trunk_link: 2
+  unclassified: 2
+lanewidths:
+  cycleway: 2.0
+  footway: 2.0
+  living_street: 3.5
+  motorway: 3.5
+  motorway_link: 3.5
+  path: 2.0
+  primary: 3.5
+  primary_link: 3.5
+  residential: 3.5
+  secondary: 3.5
+  secondary_link: 3.5
+  service: 3.5
+  tertiary: 3.5
+  tertiary_link: 3.5
+  trunk: 3.5
+  trunk_link: 3.5
+  unclassified: 3.5
+speed_limits:
+  cycleway: 20
+  footway: 8
+  living_street: 7
+  motorway: 120
+  motorway_link: 80
+  path: 8
+  primary: 100
+  primary_link: 80
+  residential: 50
+  secondary: 100
+  secondary_link: 80
+  service: 10
+  tertiary: 100
+  tertiary_link: 80
+  trunk: 100
+  trunk_link: 80
+  unclassified: 80
+interpolation_distance: 0.5
+compression_threshold: 0.05
+export_in_utm: False
+filter: True
+earth_radius: 6371000
+delete_short_edges: False
+interpolation_distance_internal: 0.25
+bezier_parameter: 0.35
+intersection_distance: 20.0
+intersection_distance_sublayer: 1.0
+intersection_cropping_with_respect_to_roads: True
+soft_angle_threshold: 55.0
+lane_segment_angle: 5.0
+cluster_Length: 10.0
+least_cluster_length: 10.0
+merge_distance: 3.5
+intersection_straight_threshold: 35.0
+user_edit: False
+recognised_turnlanes:
+- left
+- through
+- right
+- merge_to_left
+- merge_to_right
+- through;right
+- left;through
+- left;through;right
+- left;right
+- none
+traffic_sign_keys:
+- traffic_sign
+- overtaking
+- traffic_signals:direction
+- maxspeed
+traffic_sign_values:
+- traffic_signals
+- stop
+- give_way
+- city_limit
