@@ -74,6 +74,7 @@ class DynamicCanvas(FigureCanvas):
         self.draw_append_trajectory_preview = None
         self.add_to_selected_trajectory_preview = None
         self.add_to_selected_trajectory = None
+        self.waypoints_list = []
 
         self.draw_lanelet_first_point = None  # drawing mode
         self.draw_lanelet_first_point_object = None
@@ -673,6 +674,7 @@ class DynamicCanvas(FigureCanvas):
         if is_active:
             x = self.parent.obstacle_toolbox.x1
             y = self.parent.obstacle_toolbox.y1
+            self.waypoints_list.append((x,y))
             self.draw_trajectory_first_point_object = self.ax.plot(x, y, marker="x", color="blue", zorder=21)
             self.draw_trajectory_first_point = [x, y]
 
@@ -720,13 +722,14 @@ class DynamicCanvas(FigureCanvas):
         if mouse_event.button == MouseButton.RIGHT:
             self.activate_trajectory_mode(False)
             return
-
+        self.waypoints_list.append((x2, y2))
         self.draw_trajectory_first_point_object = self.ax.plot(x2, y2, marker="x", color="blue", zorder=21)
         self.draw_trajectory_first_point = [x2, y2]
 
 
         self.parent.obstacle_toolbox.record_trajectory_with_mouse(x2,y2)
-
+        for x, y in self.waypoints_list:
+            self.ax.plot(x, y, marker="x", color="blue", zorder=21)
         self.update_plot()
     def trajectory_mode_preview_line(self, mouse_move_event):
         x = mouse_move_event.xdata

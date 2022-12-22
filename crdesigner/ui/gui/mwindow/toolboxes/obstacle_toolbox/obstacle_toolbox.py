@@ -383,6 +383,7 @@ class ObstacleToolbox(QDockWidget):
         obstacle.prediction = new_pred
         self.callback(self.current_scenario)
 
+
     def _input_via_ks_model_with_mouse(self,x2:float,y2:float) -> State:
         """This method is resolving user input when using a kinematic single-track model. The KS model uses acceleration
                in the respective directions and additionally takes a steering_angle_speed that steers the model
