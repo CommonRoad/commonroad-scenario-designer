@@ -3,9 +3,7 @@ import yaml
 
 def transfer_yaml_to_config(yaml_file: str, config: any):
     """
-    this file contains a functions that will write the settings present in the yaml file into the values of the
-    config file
-    It is in a single file because it will be called in gui_settings.py, osm_settings.py and start_gui.py
+    this function will be called to update the values in the config file by the values of the yaml file.
     """
     with open(yaml_file) as f:
         data = yaml.load(f, Loader=yaml.FullLoader)
