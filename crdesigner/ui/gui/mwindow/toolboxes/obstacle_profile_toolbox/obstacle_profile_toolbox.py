@@ -115,6 +115,19 @@ class ObstacleProfileToolbox(QDockWidget):
         else:
             return None
 
+    def animate_obstacle_state_profile(self):
+        """
+        Gets the valies based on which profile is selected.
+        If non updated changes, these values come from the xyova array,
+        otherwise directly from the obstacle state_list
+        Shows the state of the obstacle until the current timestep
+        """
+
+        if self.obstacle_profile_toolbox_ui.selected_obstacle.currentText() not in ["", "None"] and not self.update_ongoing:
+            obstacle = self.get_current_obstacle()
+            state_variable_name = self.obstacle_profile_toolbox_ui.obstacle_state_variable.currentText()
+        
+
     def plot_obstacle_state_profile(self):
         """
         Gets the values based on which profile is selected.
@@ -242,7 +255,6 @@ class ObstacleProfileToolbox(QDockWidget):
 
             self.update_ongoing = True
             obstacle = self.get_current_obstacle()
-            obstacle_id = self.get_current_obstacle_id()
 
             if isinstance(obstacle.obstacle_shape, Rectangle):
 
@@ -317,6 +329,7 @@ class ObstacleProfileToolbox(QDockWidget):
             self.update_ongoing = False
             # clear xyo if switch to another obstacle
             self.xyova.clear()
+            
             self.plot_obstacle_state_profile()
 
         # if set to "None": clear QLineEdits
@@ -358,32 +371,27 @@ class ObstacleProfileToolbox(QDockWidget):
         :param ymin: y lower bound to be drawn
         :param: ymax: y upper bound to be drawn
         """
-        if(self.obstacle_profile_toolbox_ui.animation.isChecked()):
-            #have to fix a bug with "NoneType Attribute" in animated_viewer for testing
-            print("TODO")
-            return
-        else:
-            state_variable_name = self.obstacle_profile_toolbox_ui.obstacle_state_variable.currentText()
-            # clear previous profile
-            self.obstacle_profile_toolbox_ui.figure.clear()
-            # create an axis
-            ax = self.obstacle_profile_toolbox_ui.figure.add_subplot(111)
+        state_variable_name = self.obstacle_profile_toolbox_ui.obstacle_state_variable.currentText()
+        # clear previous profile
+        self.obstacle_profile_toolbox_ui.figure.clear()
+        # create an axis
+        ax = self.obstacle_profile_toolbox_ui.figure.add_subplot(111)
 
-            # plot data
-            ax.plot(time, profile, '.-', markersize=4)
-            ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.1f}'))
-            ax.set_xlabel("time [s]")
-            ax.set_ylabel(self.resolve_y_label(state_variable_name))
-            self.obstacle_profile_toolbox_ui.figure.tight_layout()
+        # plot data
+        ax.plot(time, profile, '.-', markersize=4)
+        ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.1f}'))
+        ax.set_xlabel("time [s]")
+        ax.set_ylabel(self.resolve_y_label(state_variable_name))
+        self.obstacle_profile_toolbox_ui.figure.tight_layout()
 
-            # to get reasonable limits. If the difference is very small: it will be difficult to make changes
-            ax.set_ylim([min(profile)-0.5, max(profile)+0.5])
-            # if zoomed in the new plot should be drawn with previous x and y limits
-            # (so it doesnt zoom out on mouse event if zoomed in)
-            if (self.xmin and self.xmax and self.ymin and self.ymax):
-                ax.set_xlim([self.xmin, self.xmax])
-                ax.set_ylim([self.ymin, self.ymax])
-            # refresh canvas
-            self.obstacle_profile_toolbox_ui.canvas.draw()
-            ax.callbacks.connect('xlim_changed', self.on_xlim_change)
-            ax.callbacks.connect('ylim_changed', self.on_ylim_change)
+        # to get reasonable limits. If the difference is very small: it will be difficult to make changes
+        ax.set_ylim([min(profile)-0.5, max(profile)+0.5])
+        # if zoomed in the new plot should be drawn with previous x and y limits
+        # (so it doesnt zoom out on mouse event if zoomed in)
+        if (self.xmin and self.xmax and self.ymin and self.ymax):
+            ax.set_xlim([self.xmin, self.xmax])
+            ax.set_ylim([self.ymin, self.ymax])
+        # refresh canvas
+        self.obstacle_profile_toolbox_ui.canvas.draw()
+        ax.callbacks.connect('xlim_changed', self.on_xlim_change)
+        ax.callbacks.connect('ylim_changed', self.on_ylim_change)
