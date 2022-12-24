@@ -56,7 +56,7 @@ class ObstacleToolbox(QDockWidget):
         self._active_obstacle = None
         self.x1=0.0
         self.y1=0.0
-        self.time_step=-1
+        self.time_step = -1
         self.v_previous = None
         self.s_previous = 0
 

@@ -260,9 +260,9 @@ class ObstacleToolboxUI(Toolbox):
 
     def init_waypoints_for_dynamic_obstacle(self):
         # initialize new group box, layout and header label
-        self.initial_state_group_box = QGroupBox()
+        self.waypoint_group_box = QGroupBox()
         self.layout_initial_state_group_box = QFormLayout()
-        self.initial_state_group_box.setLayout(self.layout_initial_state_group_box)
+        self.waypoint_group_box.setLayout(self.layout_initial_state_group_box)
         self.initial_state_label = QLabel("Build trajectory for dynamic obstacles")
         self.initial_state_label.setFont(QFont("Arial", 9, QFont.Bold))
 
@@ -276,7 +276,7 @@ class ObstacleToolboxUI(Toolbox):
         self.layout_initial_state_group_box.insertRow(0, self.initial_state_label)
         self.layout_initial_state_group_box.insertRow(1, "Position", self.drawing_mode)
         self.layout_initial_state_group_box.insertRow(2, "Time step", self.waypoint_time_step)
-        self.layout_obstacle_information_groupbox.insertRow(6, self.initial_state_group_box)
+        self.layout_obstacle_information_groupbox.insertRow(6, self.waypoint_group_box)
 
 
     def init_dynamic_obstacle_fields(self):
@@ -347,6 +347,7 @@ class ObstacleToolboxUI(Toolbox):
         """Method to remove the fields related only to dynamic obstacles."""
         try:
             self.layout_obstacle_information_groupbox.removeRow(self.initial_state_group_box)
+            self.layout_obstacle_information_groupbox.removeRow(self.waypoint_group_box)
         except Exception as e:
             print(e)
             pass
