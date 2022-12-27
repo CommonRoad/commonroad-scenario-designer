@@ -32,6 +32,8 @@ class ObstacleProfileToolbox(QDockWidget):
         self.amount_obstacles = 0
         self.canvas = DynamicCanvas()
         self.obstacle_color = None
+        self.current_time_step = None
+        mwindow.animated_viewer_wrapper.cr_viewer.time_step.subscribe(self.current_time_step)
 
         # for profile visualisation
         self.sel_point = None

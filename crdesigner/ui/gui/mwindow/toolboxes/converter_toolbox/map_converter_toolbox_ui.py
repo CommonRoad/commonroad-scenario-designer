@@ -1,6 +1,7 @@
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
+from crdesigner.ui.gui.mwindow.toolboxes.converter_toolbox.waitingspinnerwidget import QtWaitingSpinner
 
 from crdesigner.ui.gui.mwindow.toolboxes.toolbox_ui import Toolbox
 
@@ -101,13 +102,10 @@ class MapConversionToolboxUI(Toolbox):
         self.button_load_osm_file = QPushButton("Load Local OSM File")
         self.osm_loading_status = QLabel("no file selected")
         self.button_load_osm_edit_state = QPushButton("Load OSM Edit State")
-        self.osm_conversion_edit_manually_selection = QCheckBox("Edit Scenario Manually")
         self.button_start_osm_conversion = QPushButton("Convert OSM to CommonRoad")
         self.button_start_osm_conversion_with_sumo_parser = QPushButton("Convert OSM to CommonRoad using Sumo Parser")
         self.button_start_osm_conversion_with_sumo_parser.setToolTip('The conversion follows the route : \nOsm -> OpenDrive -> CR\nUseful for densed crossing')
-        self.progress = QProgressBar(self)
-        self.progress.setGeometry(200,80,250,20)
-        self.progress.setHidden(True)
+        self.spinner = QtWaitingSpinner(self, centerOnParent=False)
         self.button_open_osm_settings = QPushButton("Open OSM Settings")
         layout_osm_conversion_configuration = QFormLayout()
 
@@ -129,14 +127,9 @@ class MapConversionToolboxUI(Toolbox):
         osm_conversion_groupbox = QGroupBox()
         osm_conversion_groupbox.setLayout(layout_osm_conversion_groupbox)
         layout_osm_conversion_groupbox.addRow(self.button_load_osm_edit_state)
-        layout_osm_conversion_from_osm_groupbox = QFormLayout()
-        osm_conversion_from_osm_groupbox = QGroupBox()
-        osm_conversion_from_osm_groupbox.setLayout(layout_osm_conversion_from_osm_groupbox)
-        layout_osm_conversion_from_osm_groupbox.addRow(self.osm_conversion_edit_manually_selection)
-        layout_osm_conversion_from_osm_groupbox.addRow(self.button_start_osm_conversion)
-        layout_osm_conversion_groupbox.addWidget(osm_conversion_from_osm_groupbox)
+        layout_osm_conversion_groupbox.addRow(self.button_start_osm_conversion)
         layout_osm_conversion_groupbox.addRow(self.button_start_osm_conversion_with_sumo_parser)
-        layout_osm_conversion_groupbox.addRow(self.progress)
+        layout_osm_conversion_groupbox.addRow(self.spinner)
         layout_osm_conversion_configuration.addWidget(osm_conversion_groupbox)
         layout_osm_conversion_configuration.addWidget(self.button_open_osm_settings)
         layout_osm.addLayout(layout_osm_conversion_configuration)
