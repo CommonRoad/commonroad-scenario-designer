@@ -1,4 +1,24 @@
-Accepted_highways_mainlayer:
+benchmark_id: DEU_test
+author: Automated converter by Maximilian Rieger
+affiliation: Technical University of Munich, Germany
+source: OpenStreetMaps (OSM)
+tags: urban
+geoname_id: -999
+gps_latitude: 123.45
+gps_longitude: 123.45
+timestepsize: 0.1
+lanelettype: urban
+aerial_images: False
+image_save_path: files/imagery/
+zoom_level: 19
+save_path: files/
+download_edge_length: 200
+download_coordinates: (48.262447, 11.657881)
+load_tunnels: False
+make_contiguous: False
+split_at_corner: True
+use_restrictions: True
+accepted_highways_mainlayer:
 - motorway
 - trunk
 - primary
@@ -13,41 +33,16 @@ Accepted_highways_mainlayer:
 - tertiary_link
 - living_street
 - service
-Accepted_highways_sublayer:
+extract_sublayer: True
+accepted_highways_sublayer:
 - path
 - footway
 - cycleway
-Accepted_traffic_sign:
-- All
-Aerial_images: false
-Affilation: Technical University of Munich, Germany
-Author: Automated converter by Maximilian Rieger
-Benchmark_id: ZAM_Test-1_1_T-1
-Bezier_parameter: 0.35
-Bing_maps_key: null
-Cluster_length: 10.0
-Compression_threshold: 0.05
-Crossing_lanelettype: crosswalk
-Delete_invalid_lanes: true
-Delete_short_edges: true
-Download_coordinates: (48.262447, 11.657881)
-Download_edge_length: 200
-Earth_radius: 6371000
-Excluded_traffic_sign: null
-Export_in_utm: false
-Extract_sublayer: false
-Filter: true
-Geonames_username: demo
-Image_save_path: files/imagery/
-Interpolation_distance: 0.5
-Interpolation_distance_internal: 0.5
-Intersection_cropping_with_respect_to_roads: true
-Intersection_distance: 4.0
-Intersection_distance_sublayer: 1.0
-Intersection_enhancement: true
-Intersection_straight_threshold: 35.0
-Lane_segment_angle: 5.0
-Lanecounts:
+sublayer_lanelettype: sidewalk
+crossing_lanelettype: crosswalk
+rejected_tags:
+  area: yes
+lanecounts:
   cycleway: 1
   footway: 1
   living_street: 2
@@ -65,9 +60,7 @@ Lanecounts:
   trunk: 4
   trunk_link: 2
   unclassified: 2
-
-Lanelettype: urban
-Lanewidths:
+lanewidths:
   cycleway: 2.0
   footway: 2.0
   living_street: 3.5
@@ -85,36 +78,7 @@ Lanewidths:
   trunk: 3.5
   trunk_link: 3.5
   unclassified: 3.5
-Least_cluster_length: 10.0
-Load_tunnels: false
-Make_contiguous: false
-Mapillary_categories:
-- warning
-- regulatory
-- information
-- complementary
-Mapillary_client_id: demo
-Merge_distance: 3.5
-Recognized_turnlanes:
-- left
-- through
-- right
-- slight_right
-- slight_left
-- merge_to_left
-- merge_to_right
-- through;right
-- left;through
-- left;through;right
-- left;right
-- none
-Remove_unconnected_lanelets: true
-Rrejected_tags:
-- area: true
-Save_path: files/
-Soft_angle_threshold: 55.0
-Source: OpenStreetMaps (OSM)
-Speed_limits:
+speed_limits:
   cycleway: 20
   footway: 8
   living_street: 7
@@ -132,25 +96,42 @@ Speed_limits:
   trunk: 100
   trunk_link: 80
   unclassified: 80
-Split_at_corner: true
-Sublayer_lanelettype: sidewalk
-Tags: urban
-Timestepsize: 0.1
-Traffic_light_cycle:
-- red_phase: 57
-- red_yellow_phase: 3
-- green_phase: 37
-- yellow_phase: 3
-Traffic_sign_keys:
+interpolation_distance: 0.5
+compression_threshold: 0.05
+export_in_utm: False
+filter: True
+earth_radius: 6371000
+delete_short_edges: False
+interpolation_distance_internal: 0.25
+bezier_parameter: 0.35
+intersection_distance: 20.0
+intersection_distance_sublayer: 1.0
+intersection_cropping_with_respect_to_roads: True
+soft_angle_threshold: 55.0
+lane_segment_angle: 5.0
+cluster_Length: 10.0
+least_cluster_length: 10.0
+merge_distance: 3.5
+intersection_straight_threshold: 35.0
+user_edit: False
+recognised_turnlanes:
+- left
+- through
+- right
+- merge_to_left
+- merge_to_right
+- through;right
+- left;through
+- left;through;right
+- left;right
+- none
+traffic_sign_keys:
 - traffic_sign
 - overtaking
 - traffic_signals:direction
 - maxspeed
-Traffic_sign_values:
+traffic_sign_values:
 - traffic_signals
 - stop
 - give_way
 - city_limit
-Use_restrictions: true
-User_edit: false
-Zoom_level: 19
