@@ -7,6 +7,7 @@ from commonroad.scenario.lanelet import LaneletType, LineMarking, RoadUser
 from commonroad.scenario.traffic_sign import TrafficSignIDZamunda
 
 from crdesigner.map_conversion.map_conversion_interface import opendrive_to_commonroad
+from crdesigner.map_conversion.common.utils import generate_unique_id
 
 
 class TestOpenDriveToCommonRoadConversion(unittest.TestCase):
@@ -14,8 +15,8 @@ class TestOpenDriveToCommonRoadConversion(unittest.TestCase):
     of the respective .xodr files."""
 
     def load_and_convert_opendrive(self, xodr_file_name: str) -> Scenario:
-        """ Loads a .xodr file and converts it to the commonroad format.
-        """
+        """ Loads a .xodr file and converts it to the commonroad format."""
+        generate_unique_id(0)  # reset ID counter
         scenario = opendrive_to_commonroad(
             os.path.dirname(os.path.realpath(__file__)) + "/../test_maps/opendrive/{}.xodr".format(xodr_file_name))
 
