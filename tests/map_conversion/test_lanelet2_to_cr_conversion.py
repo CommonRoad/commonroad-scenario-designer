@@ -1,11 +1,11 @@
 import time
 import os
 import unittest
-from lxml import etree
+from lxml import etree # type: ignore
 
-from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
-from commonroad.planning.planning_problem import PlanningProblemSet
-from commonroad.scenario.scenario import Tag, Scenario
+from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile # type: ignore
+from commonroad.planning.planning_problem import PlanningProblemSet # type: ignore
+from commonroad.scenario.scenario import Tag, Scenario # type: ignore
 
 from crdesigner.map_conversion.common.utils import generate_unique_id
 from crdesigner.map_conversion.lanelet2.lanelet2_parser import Lanelet2Parser
@@ -18,6 +18,14 @@ class TestLanelet2ToCommonRoadConversion(unittest.TestCase):
 
     @staticmethod
     def load_and_convert(osm_file_name: str) -> Scenario:
+        """Loads and converts osm file to a scenario
+        
+        Args:
+        osm_file_name: name of the osm file
+
+        Returns:
+        Scenario that corresponds to that osm file
+        """
         cwd_path = os.path.dirname(os.path.abspath(__file__))
         out_path = cwd_path + "/.pytest_cache"
         if not os.path.isdir(out_path):
