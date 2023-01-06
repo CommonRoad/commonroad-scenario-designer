@@ -98,7 +98,13 @@ class CR2LaneletConverter:
         self.left_ways[lanelet.lanelet_id] = left_way_id
         self.right_ways[lanelet.lanelet_id] = right_way_id
         # "subtype":"road" is needed for the autoware
-        self.osm.add_way_relation(WayRelation(self.id_count, left_way_id, right_way_id, tag_dict={"type": "lanelet", "subtype":"road"}))
+        # "turn_direction" is needed for the directions (arrows) on the road
+        self.osm.add_way_relation(
+            WayRelation(
+                self.id_count, 
+                left_way_id, 
+                right_way_id, 
+                tag_dict={"type": "lanelet", "subtype":"road", "turn_direction":""}))
 
     def _create_nodes(
         self, lanelet: Lanelet, left_way_id: str, right_way_id: str
