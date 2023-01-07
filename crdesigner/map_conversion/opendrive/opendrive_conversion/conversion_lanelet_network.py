@@ -63,8 +63,8 @@ class ConversionLaneletNetwork(LaneletNetwork):
         return self._old_lanelet_ids
 
     def remove_lanelet(self, lanelet_id: str, remove_references: bool = False):
-        """Remove a lanelets with the specific lanelet_id
-        from the _lanelets dict.
+        """
+        Remove a lanelets with the specific lanelet_id from the _lanelets dict.
 
         :param lanelet_id: id of lanelet to be removed.
         :type lanelet_id: str
@@ -86,24 +86,21 @@ class ConversionLaneletNetwork(LaneletNetwork):
                 if lanelet.adj_left == lanelet_id:
                     lanelet.adj_left = None
 
-    def find_lanelet_by_id(self, lanelet_id) -> ConversionLanelet:
-        """Find a lanelet for a given lanelet_id.
+    def find_lanelet_by_id(self, lanelet_id: int) -> ConversionLanelet:
+        """
+        Find a lanelet for a given lanelet_id.
         Disable natural number check of parent class.
 
         :param lanelet_id: The id of the lanelet to find.
-        :type lanelet_id: int
         :return: The lanelet object if the id exists and None otherwise
-        :rtype: :class:`ConversionLanelet`
         """
         return self._lanelets.get(lanelet_id)
 
-    def find_traffic_light_by_id(self, traffic_light_id) -> TrafficLight:
+    def find_traffic_light_by_id(self, traffic_light_id: int) -> TrafficLight:
         """Find a traffic light for a given traffic light id.
 
         :param traffic_light_id: The ID of the traffic light to find
-        :type traffic_light_id: int
         :return: The traffic light object if the id exists and None otherwise
-        :rtype: :class:`TrafficLight`
         """
         return self._traffic_lights.get(traffic_light_id)
 
@@ -120,7 +117,8 @@ class ConversionLaneletNetwork(LaneletNetwork):
         return self._traffic_signs.get(traffic_sign_id)
 
     def convert_all_lanelet_ids(self):
-        """Convert lanelet ids to numbers which comply with the Commonroad specification.
+        """
+        Convert lanelet ids to numbers which comply with the Commonroad specification.
         These numbers have to be positive integers.
         """
         old_ids = self._old_lanelet_ids.copy()

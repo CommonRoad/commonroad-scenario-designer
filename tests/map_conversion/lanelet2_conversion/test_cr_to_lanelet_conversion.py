@@ -1,19 +1,21 @@
 import os
 import unittest
-from lxml import etree
+from lxml import etree # type: ignore 
 
-from commonroad.common.file_reader import CommonRoadFileReader
+from commonroad.common.file_reader import CommonRoadFileReader # type: ignore
 
 from crdesigner.map_conversion.lanelet2.cr2lanelet import CR2LaneletConverter
 from tests.map_conversion.utils import elements_equal
 
 
 class TestCommonRoadToLaneletConversion(unittest.TestCase):
-    """Test the conversion of a specific osm file by reading it, parsing it
-    and then converting it to a CommonRoad file including a scenario.
-
-    This converted scenario should describe the same map as the osm file.
     """
+    Test the conversion of a specific osm file.
+
+    This converted scenario should describe the same map as the osm file,
+    by reading it, parsing it and then converting it to a CommonRoad file including a scenario.
+    """
+    
     def setUp(self) -> None:
         self.proj_string = "+proj=utm +zone=32 +ellps=WGS84"
 
@@ -21,7 +23,7 @@ class TestCommonRoadToLaneletConversion(unittest.TestCase):
         """Load the osm file and convert it to a scenario."""
         try:
             commonroad_reader = CommonRoadFileReader(
-                f"{os.path.dirname(os.path.realpath(__file__))}/test_maps/lanelet2/{xml_file_name}.xml"
+                f"{os.path.dirname(os.path.realpath(__file__))}/../test_maps/lanelet2/{xml_file_name}.xml"
             )
             scenario, _ = commonroad_reader.open()
             l2osm = CR2LaneletConverter(self.proj_string)
@@ -32,12 +34,13 @@ class TestCommonRoadToLaneletConversion(unittest.TestCase):
             print(
                 "There was an error during the loading of the selected CommonRoad file.\n"
             )
+            return None
 
     def compare_maps(self, xml_file_name: str) -> bool:
-        """Test if converted scenario is equal to the loaded xml file.
+        """Test if converted scenario is equal to the loaded xml file.    
         Disregard the different dates.
         """
-        fh = f"{os.path.dirname(os.path.realpath(__file__))}/test_maps/lanelet2/{xml_file_name}_from_cr.osm"
+        fh = f"{os.path.dirname(os.path.realpath(__file__))}/../test_maps/lanelet2/{xml_file_name}_from_cr.osm"
         parser = etree.XMLParser(remove_blank_text=True)
         tree_import = etree.parse(fh, parser=parser).getroot()
 
