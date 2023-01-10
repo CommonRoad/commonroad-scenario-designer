@@ -22,7 +22,7 @@ ways_are_equal_tolerance = 0.001
 class CR2LaneletConverter:
     """Class to convert CommonRoad lanelet to the OSM representation."""
 
-    def __init__(self, proj_string=None):
+    def __init__(self, proj_string=None, use_local_coordinates=False):
         if proj_string:
             self.proj = Proj(proj_string)
         else:
@@ -33,6 +33,7 @@ class CR2LaneletConverter:
         self.left_ways, self.right_ways = None, None
         self.lanelet_network = None
         self.origin_utm = None
+        self.use_local_coordinates = use_local_coordinates
 
     @property
     def id_count(self) -> int:
@@ -220,11 +221,11 @@ class CR2LaneletConverter:
             x = self.origin_utm[0] + vertice[0]
             y = self.origin_utm[1] + vertice[1]
             lon, lat = self.proj(x, y, inverse=True)
-            # TODO: osm2cr2 converts only lat and lon and looses x,y,v data from the autoware osm
-            # x, y = self.proj(x, y, inverse=True)
-            
-            # node = Node(self.id_count, lat, lon, x, y, 0)
-            node = Node(self.id_count, lat, lon)
+            if self.use_local_coordinates:
+                node = Node(self.id_count, 0, 0, local_x=vertice[0], local_y=vertice[1])
+            else:
+                node = Node(self.id_count, lat, lon)
+
             nodes.append(node.id_)
             self.osm.add_node(node)
         return nodes

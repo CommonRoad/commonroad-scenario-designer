@@ -21,7 +21,7 @@ DEFAULT_PROJ_STRING = "+proj=utm +zone=32 +ellps=WGS84"
     #     <node id="-1" lat="18.448442660816244" lon="-66.53742746446638">
     #     <tag k="mgrs_code" v="19QGA600415"/>
     #     <tag k="local_x" v="60091.9652"/>
-    #     <tag k="local_y" v="41570.1894"/>
+    #     <tag k="local_y" v="41570.1894"/>"""  """
     #     <tag k="ele" v="0"/>
     #     </node>
 class Node:
