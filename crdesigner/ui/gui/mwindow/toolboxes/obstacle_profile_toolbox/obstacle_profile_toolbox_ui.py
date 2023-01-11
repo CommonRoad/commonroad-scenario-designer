@@ -10,8 +10,10 @@ from matplotlib.figure import Figure
 
 # try to import sumo functionality
 from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMO_AVAILABLE
+
 if SUMO_AVAILABLE:
     from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMOSimulation
+
 
 class ObstacleProfileToolboxUI(Toolbox):
     def __init__(self, text_browser, mwindow):
@@ -63,7 +65,7 @@ class ObstacleProfileToolboxUI(Toolbox):
         self.init_circle_fields()
         self.init_rectangle_fields()
         self.init_position()
-        
+
         layout_obstacle_buttons = QFormLayout()
         layout_obstacle_buttons.addRow("Selected Obstacle ID:", self.selected_obstacle)
         self.layout_obstacles.addLayout(layout_obstacle_buttons)
@@ -140,7 +142,7 @@ class ObstacleProfileToolboxUI(Toolbox):
         self.obstacle_orientation.setValidator(QIntValidator())
         self.obstacle_orientation.setMaxLength(4)
         self.obstacle_orientation.setAlignment(Qt.AlignRight)
-    
+
     def toggle_sections(self):
         """
         changes obstacle based on shape
