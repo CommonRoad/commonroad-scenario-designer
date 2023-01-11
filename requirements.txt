@@ -15,3 +15,4 @@ iso3166>=1.0.1
 networkx>=2.5
 omegaconf>=2.2.2
 sumolib==1.15.0
+pyyaml==6.0
