@@ -669,6 +669,8 @@ class DynamicCanvas(FigureCanvas):
     def activate_trajectory_mode(self, is_active):
         if is_active:
             obstacle = self.parent.obstacle_toolbox.active_obstacle
+            if obstacle is None:
+                return
             x = obstacle.initial_state.position[0]
             y = obstacle.initial_state.position[1]
             state_list = obstacle.prediction.trajectory.state_list

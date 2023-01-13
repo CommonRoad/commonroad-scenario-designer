@@ -366,10 +366,6 @@ class ObstacleToolbox(QDockWidget):
 
         obstacle = self.active_obstacle
         self.start_trajectory_recording = True
-        if not self.start_trajectory_recording:
-            return
-        if obstacle is None:
-            return
 
         state_list = obstacle.prediction.trajectory.state_list
         state = state_list[-1]
