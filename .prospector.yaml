@@ -15,14 +15,29 @@ pycodestyle:
 
 pydocstyle:
   disable:
-    - D100 #  exception should be removed
-
-pyflakes:
-  run: true
+    - D200
+    - D203
+    - D205
+    - D212
+    - D213
+    - D404
+    - D406
+    - D407
+    - D408
+    - D409
+    - D410
+    - D411
+    - D413
+    - D415
+    - D416
+    - D417
 
 mccabe:
   disable:
     - MC0001  # exception should be removed
+
+pyflakes:
+  run: true
 
 pylint:
   disable:
@@ -33,6 +48,7 @@ pylint:
     - too-many-statements
     - consider-using-f-string
     - missing-module-docstring
+    - c-extension-no-member
 
 mypy:
   run: true

@@ -442,7 +442,7 @@ class Network:
             else:
                 location = Location(geo_transformation=geo_transformation)
         else:
-            location = None
+            location = Location()
 
         scenario_id = ScenarioID(country_id=self._country_ID, map_name=map_name, map_id=map_id)
 
