@@ -1,7 +1,7 @@
 """Wrapper for the middle visualization."""
 from PyQt5 import QtGui
 from PyQt5.QtGui import QPalette, QBrush, QColor
-from matplotlib.backend_bases import KeyEvent
+
 
 from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.commonroad_viewer import AnimatedViewer
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
@@ -43,7 +43,7 @@ class AnimatedViewerWrapper:
         self.mwindow.setCentralWidget(self.viewer_dock)
 
 
-    def viewer_callback(self, selected_object: Union[Lanelet, Obstacle, KeyEvent], output: str, temporary_positions = None):
+    def viewer_callback(self, selected_object: Union[Lanelet, Obstacle], output: str, temporary_positions = None):
         """
         Callback when the user clicks a lanelet, an obstacle or a position inside the scenario visualization.
         @return: returns draw_temporary_position which indicates whether temporary position should be drawn afterwards
@@ -60,11 +60,6 @@ class AnimatedViewerWrapper:
             self.mwindow.obstacle_toolbox.obstacle_toolbox_ui.selected_obstacle.setCurrentText(
                     str(selected_object.obstacle_id))
             self.mwindow.obstacle_toolbox.active_obstacle = selected_object
-        elif isinstance(selected_object, KeyEvent):
-            if selected_object.name == "key_press_event":
-                self._button_press_callback(selected_object.key)
-            elif selected_object.name == "key_release_event":
-                self._button_release_callback(selected_object.key)
         elif isinstance(selected_object, PosB):
             for button in self.mwindow.road_network_toolbox.road_network_toolbox_ui.position_buttons:
                 if button.button_pressed:
@@ -86,27 +81,6 @@ class AnimatedViewerWrapper:
 
         return draw_temporary_position
 
-    def _button_press_callback(self, key: str):
-        """If the user presses shift, trajectory recording can begin.
-
-        :param key: The pressed key.
-        :type key: str
-        """
-        if key == "shift":
-            self.mwindow.obstacle_toolbox.start_trajectory_recording = True
-
-    def _button_release_callback(self, key: str):
-        """Whenever a key was pressed, and if the selected obstacle is ready for recording, call the record_trajectory
-        function to create a trajectory point. If shift was released, stop recording.
-
-        :param key: The released key.
-        :type key: str
-        """
-        if self.mwindow.obstacle_toolbox.start_trajectory_recording == True:
-            if key == "shift":
-                self.mwindow.obstacle_toolbox.start_trajectory_recording = False
-            else:
-                self.mwindow.obstacle_toolbox.record_trajectory(key)
     def update_view(self, focus_on_network=None):
         """
         Update all components.

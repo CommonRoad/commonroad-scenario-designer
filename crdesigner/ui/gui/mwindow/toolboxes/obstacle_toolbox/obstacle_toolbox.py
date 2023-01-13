@@ -430,7 +430,7 @@ class ObstacleToolbox(QDockWidget):
             number_of_states = int (time_step_size/ self.current_scenario.dt)+1
             x_old=self.x1
             y_old = self.y1
-            for n in (1,number_of_states):
+            for n in range(1,number_of_states):
                 x=self.x1+n*(x2-self.x1)/number_of_states
                 y = self.y1 + n * (y2 - self.y1) / number_of_states
                 position = np.array([x, y])
