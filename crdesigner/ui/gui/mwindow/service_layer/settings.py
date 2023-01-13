@@ -6,7 +6,7 @@ import crdesigner.ui.gui.mwindow.service_layer.gui_settings as gui
 import crdesigner.ui.gui.mwindow.service_layer.sumo_settings as sumo
 import crdesigner.ui.gui.mwindow.service_layer.osm_settings as osm
 from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMO_AVAILABLE
-
+import json
 
 class Settings:
 
@@ -30,6 +30,7 @@ class Settings:
         #self.window.btn_restore_defaults.clicked.connect(self.restore_default_button)
         self.window.button_ok.clicked.connect(self.apply_close)
         self.window.button_cancel.clicked.connect(self.close)
+        self.window.button_settodefault.clicked.connect(self.clicked)
         self.osm_settings.connect_events(self.window.osm_settings)
         self.gui_settings.connect_events()
         if SUMO_AVAILABLE:
@@ -85,3 +86,15 @@ class Settings:
 
         else:
             print("invalid settings")
+
+    def clicked(self):
+
+        self.gui_settings.apply_set_to_default()
+        self.osm_settings.apply_set_to_default()
+        if SUMO_AVAILABLE:
+            self.sumo_settings.restore_defaults()
+        self.settings_window.close()
+        self.cr_designer.crdesigner_console_wrapper.text_browser.append("default settings")
+        if self.cr_designer.animated_viewer_wrapper.cr_viewer.current_scenario != None:
+            self.cr_designer.animated_viewer_wrapper.cr_viewer.update_plot()
+        self.cr_designer.update_window()

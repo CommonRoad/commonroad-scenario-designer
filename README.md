@@ -27,7 +27,6 @@ You need the following modules:
 - scipy >= 1.3.0
 - mercantile >= 1.1.3
 - utm >= 0.5.0
-- cartopy >= 0.17.0
 - PyQt5 >= 5.12.2
 - shapely>=1.7.0
 - sumocr>=2021.5
@@ -36,11 +35,7 @@ You need the following modules:
 - iso3166>=1.0.1
 - networkx>=2.5
 
-Cartopy can be easily installed via
-```bash
-conda install -c conda-forge cartopy
-```
-from you Anaconda environment. For the other packages, we recommend to use the provided `requirements.txt`:
+From you Anaconda environment. For all the packages, we recommend to use the provided `requirements.txt`:
 ```bash
 pip install -r requirements.txt
 
@@ -175,7 +170,7 @@ If you want to contribute to the toolbox, you can also post it in the [forum](ht
 ## Authors
 
 Responsible: Sebastian Maierhofer
-Contribution (in alphabetic order by last name): Daniel Asch, Tim Dang, Behtarin Ferdousi, Maximilian Fruehauf, Marcus Gabler,   
+Contribution (in alphabetic order by last name): Daniel Asch, Hamza Begic, Tim Dang, Behtarin Ferdousi, Maximilian Fruehauf, Marcus Gabler,   
 Fabian Hoeltke, Aaron Kaefer, David Le, Gustaf Lindgren, Benjamin Orthen, Luisa Ortner, Benedikt Reinhard, Maximilian Rieger, Til Stotz, Stefan Urban
 
 ## Credits

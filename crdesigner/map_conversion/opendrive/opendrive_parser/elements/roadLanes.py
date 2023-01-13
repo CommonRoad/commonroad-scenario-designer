@@ -596,7 +596,15 @@ class RoadMark:
         return self._SOffset
 
     @SOffset.setter
-    def SOffset(self, value):
+    def SOffset(self, value: float):
+        """
+        Setter of the s-coordinate of the start position of the road mark
+
+        :param value: value the SOffset is set to
+        """
+        if value is None:
+            warnings.warn("Parser could not find value for road_mark.SOffset, 0 is used per default.")
+            value = 0
         self._SOffset = float(value)
 
     @property
@@ -626,7 +634,14 @@ class RoadMark:
         return self._weight
 
     @weight.setter
-    def weight(self, value):
+    def weight(self, value: str):
+        """
+        Setter of the weight of the road mark.
+        :param value: Value the weight is set to
+        """
+        if value is None:
+            warnings.warn("Parser could not find value for road_mark.weight, standard is used per default.")
+            value = "standard"
         self._weight = str(value)
 
     @property
