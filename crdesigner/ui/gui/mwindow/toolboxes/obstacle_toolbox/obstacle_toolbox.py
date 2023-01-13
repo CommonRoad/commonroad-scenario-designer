@@ -352,6 +352,7 @@ class ObstacleToolbox(QDockWidget):
             raise ValueError
         return shape
 
+
     def record_trajectory_with_mouse(self,x2:float,y2:float):
         """This function is responsible for the recording of trajectories for dynamic obstacles. Based on the
                 waypoint clicked with mouse on the canvas,a new state is appended to a state list and a new trajectory prediction object
@@ -369,13 +370,38 @@ class ObstacleToolbox(QDockWidget):
             return
         if obstacle is None:
             return
+
         state_list = obstacle.prediction.trajectory.state_list
         state = state_list[-1]
         if isinstance(state,InitialState):
             state_list=[]
-
+            self.x1 = obstacle.initial_state.position[0]
+            self.y1 = obstacle.initial_state.position[1]
+            self.time_step = -1
+            self.s_previous = 0
+            self.v_previous=obstacle.initial_state.velocity
+        elif len(state_list) > 1 :
+            final_state=obstacle.prediction.trajectory.final_state
+            before_last_state=obstacle.prediction.trajectory.state_list[-2]
+            self.x1 = final_state.position[0]
+            self.y1 = final_state.position[1]
+            self.time_step = final_state.time_step
+            self.v_previous = final_state.velocity
+            x1 = before_last_state.position[0]
+            y1 = before_last_state.position[1]
+            self.s_previous = math.sqrt(math.pow(self.x1 - x1, 2) + math.pow(self.y1 - y1, 2))
+        else:
+            final_state = obstacle.prediction.trajectory.final_state
+            before_last_state = obstacle.initial_state
+            self.x1 = final_state.position[0]
+            self.y1 = final_state.position[1]
+            self.time_step = final_state.time_step
+            self.v_previous = final_state.velocity
+            x1 = before_last_state.position[0]
+            y1 = before_last_state.position[1]
+            self.s_previous = math.sqrt(math.pow(self.x1 - x1, 2) + math.pow(self.y1 - y1, 2))
         input_state_list = self._input_via_ks_model_with_mouse(x2,y2)
-        time_step=int(self.obstacle_toolbox_ui.initial_state_time.text())
+        time_step=obstacle.initial_state.time_step
         # Create new TrajectoryPrediction, because simply appending to state list is not allowed.
         for input_state in input_state_list:
             state_list.append(input_state)
@@ -611,6 +637,7 @@ class ObstacleToolbox(QDockWidget):
         self.obstacle_toolbox_ui.selected_obstacle.addItems(
                 ["None"] + [str(item) for item in self.collect_obstacle_ids()])
         self.obstacle_toolbox_ui.selected_obstacle.setCurrentIndex(0)
+
 
     def delete_point(self):
         """

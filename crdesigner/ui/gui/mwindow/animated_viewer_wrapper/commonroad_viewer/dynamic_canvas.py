@@ -7,7 +7,7 @@ from PyQt5.QtWidgets import QSizePolicy
 from PyQt5.QtCore import Qt
 from PyQt5 import QtCore
 import numpy as np
-from commonroad.scenario.state import InputState
+from commonroad.scenario.state import InputState, InitialState
 from matplotlib.backend_bases import MouseButton
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
@@ -668,10 +668,20 @@ class DynamicCanvas(FigureCanvas):
 
     def activate_trajectory_mode(self, is_active):
         if is_active:
-            x = self.parent.obstacle_toolbox.x1
-            y = self.parent.obstacle_toolbox.y1
-            self.waypoints_list.append((x,y))
-            self.draw_trajectory_first_point = [x, y]
+            obstacle = self.parent.obstacle_toolbox.active_obstacle
+            x = obstacle.initial_state.position[0]
+            y = obstacle.initial_state.position[1]
+            state_list = obstacle.prediction.trajectory.state_list
+            state = state_list[-1]
+            if isinstance(state, InitialState):
+                self.waypoints_list.append((x,y))
+                self.draw_trajectory_first_point = [x, y]
+            else:
+                self.waypoints_list.append((x, y))
+                for s in state_list:
+                    self.waypoints_list.append((s.position[0],s.position[1]))
+                self.draw_trajectory_first_point = [obstacle.prediction.trajectory.final_state.position[0], obstacle.prediction.trajectory.final_state.position[1]]
+
 
             self.mpl_disconnect(self.button_press_event_cid)
             self.mpl_disconnect(self.button_release_event_cid)
@@ -681,7 +691,8 @@ class DynamicCanvas(FigureCanvas):
         else:
             if self.draw_trajectory_preview:
                 self.draw_trajectory_preview.pop(0).remove()
-                self.draw_trajectory_first_point = None
+            self.draw_trajectory_first_point = None
+            self.waypoints_list=[]
             self.mpl_disconnect(self.button_press_event_cid)
             self.mpl_disconnect(self.motion_notify_event_cid)
             self.button_release_event_cid = self.mpl_connect('button_release_event',
