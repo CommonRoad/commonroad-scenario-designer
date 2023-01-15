@@ -3,10 +3,7 @@ from PyQt5.QtWidgets import QFileDialog
 
 
 class Observable:
-    def __init__(
-        self,
-        value,
-    ):
+    def __init__(self, value, ):
         self._value = value
         self._observers = []
 
@@ -32,8 +29,7 @@ def find_invalid_ref_of_traffic_lights(scenario) -> List[int]:
     invalid_refs = []
     for lanelet in scenario.lanelet_network.lanelets:
         for t_light_ref in set(lanelet.traffic_lights):
-            if not scenario.lanelet_network.find_traffic_light_by_id(
-                    t_light_ref):
+            if not scenario.lanelet_network.find_traffic_light_by_id(t_light_ref):
                 invalid_refs.append(t_light_ref)
     return invalid_refs
 
@@ -59,11 +55,6 @@ def find_invalid_lanelet_polygons(scenario) -> List[int]:
 
 
 def select_local_file(parent, file_type: str, file_ending: str) -> str:
-    file_path, _ = QFileDialog.getOpenFileName(
-        parent,
-        "Select {} file to convert".format(file_type),
-        "",
-        "{} files *.{} (*.{})".format(file_type, file_ending, file_ending),
-        options=QFileDialog.Options(),
-    )
+    file_path, _ = QFileDialog.getOpenFileName(parent, "Select {} file to convert".format(file_type), "",
+            "{} files *.{} (*.{})".format(file_type, file_ending, file_ending), options=QFileDialog.Options(), )
     return file_path

@@ -25,7 +25,7 @@ class ObstacleProfileToolbox(QDockWidget):
 
         self.current_scenario = current_scenario
         self.callback = callback
-        self.obstacle_profile_toolbox_ui = ObstacleProfileToolboxUI(text_browser, mwindow)
+        self.obstacle_profile_toolbox_ui = ObstacleProvfileToolboxUI(text_browser, mwindow)
         self.adjust_ui()
         self.connect_gui_elements()
         self.tmp_folder = tmp_folder
@@ -34,7 +34,9 @@ class ObstacleProfileToolbox(QDockWidget):
         self.amount_obstacles = 0
         self.canvas = DynamicCanvas()
         self.obstacle_color = None
-        self.slider = None
+        # subscribing of observers need a function to call -> current time lambda
+        self.current_time = lambda x: x
+        mwindow.animated_viewer_wrapper.cr_viewer.time_step.subscribe(self.current_time)
 
         # for profile visualisation
         self.sel_point = None
@@ -129,67 +131,72 @@ class ObstacleProfileToolbox(QDockWidget):
             profile = None
             obstacle = self.get_current_obstacle()
             state_variable_name = self.obstacle_profile_toolbox_ui.obstacle_state_variable.currentText()
-            # only DynamicObstacles states are checked
-            if isinstance(obstacle, DynamicObstacle) and obstacle.initial_state.__getattribute__(state_variable_name):
-                if state_variable_name == "velocity":
-                    if self.xyova:
-                        profile = [j[3] for j in self.xyova]
-                    else:
-                        profile = [obstacle.initial_state.__getattribute__("velocity")]
-                        profile += [state.__getattribute__("velocity") for state in
-                                    obstacle.prediction.trajectory.state_list]
-                elif state_variable_name == "acceleration":
-                    if self.xyova:
-                        profile = [j[4] for j in self.xyova]
-                    else:
-                        profile = [obstacle.initial_state.__getattribute__("acceleration")]
-                        profile += [state.__getattribute__("acceleration") for state in
-                                    obstacle.prediction.trajectory.state_list]
-                elif state_variable_name == "yaw_rate" and isinstance(obstacle, DynamicObstacle):
-                    if self.xyova:
-                        profile = [j[5] for j in self.xyova]
-                    else:
-                        profile = [obstacle.initial_state.__getattribute__("yaw_rate")]
-                        profile += [state.__getattribute__("yaw_rate") for state in
-                                    obstacle.prediction.trajectory.state_list]
-                elif state_variable_name == "slip_angle":
-                    if self.xyova:
-                        profile = [j[6] for j in self.xyova]
-                    else:
-                        profile = [obstacle.initial_state.__getattribute__("slip_angle")]
-                        profile += [state.__getattribute__("slip_angle") for state in
-                                    obstacle.prediction.trajectory.state_list]
-            # states which Static and DynamicObstacles share
-            if state_variable_name == "x-position":
-                if isinstance(obstacle, StaticObstacle):
-                    profile = [obstacle.initial_state.__getattribute__("position")[0]]
-                elif isinstance(obstacle, DynamicObstacle):
-                    if self.xyova:
-                        profile = [j[0] for j in self.xyova]
-                    else:
+            # some simulations do not have their obstacle_states initialized like others and if trying to access them
+            # CR will crash
+            try:
+                if obstacle.initial_state.__getattribute__(state_variable_name):
+                    if isinstance(obstacle, DynamicObstacle):
+                        if state_variable_name == "velocity":
+                            if self.xyova:
+                                profile = [j[3] for j in self.xyova]
+                            else:
+                                profile = [obstacle.initial_state.__getattribute__("velocity")]
+                                profile += [state.__getattribute__("velocity") for state in
+                                            obstacle.prediction.trajectory.state_list]
+                        elif state_variable_name == "acceleration":
+                            if self.xyova:
+                                profile = [j[4] for j in self.xyova]
+                            else:
+                                profile = [obstacle.initial_state.__getattribute__("acceleration")]
+                                profile += [state.__getattribute__("acceleration") for state in
+                                            obstacle.prediction.trajectory.state_list]
+                        elif state_variable_name == "yaw_rate":
+                            if self.xyova:
+                                profile = [j[5] for j in self.xyova]
+                            else:
+                                profile = [obstacle.initial_state.__getattribute__("yaw_rate")]
+                                profile += [state.__getattribute__("yaw_rate") for state in
+                                            obstacle.prediction.trajectory.state_list]
+                        elif state_variable_name == "slip_angle":
+                            if self.xyova:
+                                profile = [j[6] for j in self.xyova]
+                            else:
+                                profile = [obstacle.initial_state.__getattribute__("slip_angle")]
+                                profile += [state.__getattribute__("slip_angle") for state in
+                                            obstacle.prediction.trajectory.state_list]
+                # states which Static and DynamicObstacles share
+                if state_variable_name == "x-position":
+                    if isinstance(obstacle, StaticObstacle):
                         profile = [obstacle.initial_state.__getattribute__("position")[0]]
-                        profile += [state.__getattribute__("position")[0] for state in
-                                    obstacle.prediction.trajectory.state_list]
-            elif state_variable_name == "y-position":
-                if isinstance(obstacle, StaticObstacle):
-                    profile = [obstacle.initial_state.__getattribute__("position")[1]]
-                elif isinstance(obstacle, DynamicObstacle):
-                    if self.xyova:
-                        profile = [j[1] for j in self.xyova]
-                    else:
+                    elif isinstance(obstacle, DynamicObstacle):
+                        if self.xyova:
+                            profile = [j[0] for j in self.xyova]
+                        else:
+                            profile = [obstacle.initial_state.__getattribute__("position")[0]]
+                            profile += [state.__getattribute__("position")[0] for state in
+                                        obstacle.prediction.trajectory.state_list]
+                elif state_variable_name == "y-position":
+                    if isinstance(obstacle, StaticObstacle):
                         profile = [obstacle.initial_state.__getattribute__("position")[1]]
-                        profile += [state.__getattribute__("position")[1] for state in
-                                    obstacle.prediction.trajectory.state_list]
-            elif state_variable_name == "orientation":
-                if isinstance(obstacle, StaticObstacle):
-                    profile = [obstacle.initial_state.__getattribute__("orientation")]
-                elif isinstance(obstacle, DynamicObstacle):
-                    if self.xyova:
-                        profile = [j[2] for j in self.xyova]
-                    else:
+                    elif isinstance(obstacle, DynamicObstacle):
+                        if self.xyova:
+                            profile = [j[1] for j in self.xyova]
+                        else:
+                            profile = [obstacle.initial_state.__getattribute__("position")[1]]
+                            profile += [state.__getattribute__("position")[1] for state in
+                                        obstacle.prediction.trajectory.state_list]
+                elif state_variable_name == "orientation":
+                    if isinstance(obstacle, StaticObstacle):
                         profile = [obstacle.initial_state.__getattribute__("orientation")]
-                        profile += [state.__getattribute__("orientation") for state in
-                                    obstacle.prediction.trajectory.state_list]
+                    elif isinstance(obstacle, DynamicObstacle):
+                        if self.xyova:
+                            profile = [j[2] for j in self.xyova]
+                        else:
+                            profile = [obstacle.initial_state.__getattribute__("orientation")]
+                            profile += [state.__getattribute__("orientation") for state in
+                                        obstacle.prediction.trajectory.state_list]
+            except:
+                print(state_variable_name + " not initialized on")
 
             if isinstance(obstacle, DynamicObstacle) and not self.obstacle_profile_toolbox_ui.animation.isChecked():
                 if self.xyova:
@@ -204,14 +211,9 @@ class ObstacleProfileToolbox(QDockWidget):
             self.xmax = None
             self.ymin = None
             self.ymax = None
-            if profile and self.obstacle_profile_toolbox_ui.animation.isChecked():
-                self.draw_plot(time, profile)
-            elif profile:
-                self.animate_plot()
 
-    def animate_plot(self, current_time, profile):
-        # TODO
-        return
+            if profile:
+                self.draw_plot(time, profile)
 
     @staticmethod
     def resolve_y_label(state_variable_name: str) -> str:
@@ -358,7 +360,7 @@ class ObstacleProfileToolbox(QDockWidget):
         """
         draws the state plot in the obstacle toolbox
         :param time: time steps
-        :param profile: the profile to be drawn, eg orientation
+        :param profile: the profile to be drawn, eg. orientation
         :param xmin: x lower bound to be drawn
         :param xmax: x upper bound to be drawn
         :param ymin: y lower bound to be drawn
@@ -369,7 +371,6 @@ class ObstacleProfileToolbox(QDockWidget):
         self.obstacle_profile_toolbox_ui.figure.clear()
         # create an axis
         ax = self.obstacle_profile_toolbox_ui.figure.add_subplot(111)
-
         # plot data
         ax.plot(time, profile, '.-', markersize=4)
         ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.1f}'))
@@ -380,7 +381,7 @@ class ObstacleProfileToolbox(QDockWidget):
         # to get reasonable limits. If the difference is very small: it will be difficult to make changes
         ax.set_ylim([min(profile) - 0.5, max(profile) + 0.5])
         # if zoomed in the new plot should be drawn with previous x and y limits
-        # (so it doesnt zoom out on mouse event if zoomed in)
+        # (so it doesn't zoom out on mouse event if zoomed in)
         if self.xmin and self.xmax and self.ymin and self.ymax:
             ax.set_xlim([self.xmin, self.xmax])
             ax.set_ylim([self.ymin, self.ymax])
@@ -388,3 +389,14 @@ class ObstacleProfileToolbox(QDockWidget):
         self.obstacle_profile_toolbox_ui.canvas.draw()
         ax.callbacks.connect('xlim_changed', self.on_xlim_change)
         ax.callbacks.connect('ylim_changed', self.on_ylim_change)
+
+    def animate_plot(self, profile):
+        """
+        draws the state plot in the obstacle toolbox
+        :param time: time steps
+        :param profile: the profile to be drawn, eg orientation
+        :param xmin: x lower bound to be drawn
+        :param xmax: x upper bound to be drawn
+        :param ymin: y lower bound to be drawn
+        :param: ymax: y upper bound to be drawn
+        """
