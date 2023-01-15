@@ -32,16 +32,16 @@ class TestCommandLineInterface(unittest.TestCase):
     def test_lanelet2_to_cr(self):
         subprocess.Popen(['crdesigner', 'map-convert-lanelet',
                           '-i', os.path.dirname(os.path.realpath(__file__))
-                          + '/../map_conversion/test_maps/lanelet_lanelet2/traffic_priority_lanelets_utm.osm',
-                          '-o', self.output_path + "/lanelet_lanelet2_command_line.xml"])
+                          + '/../map_conversion/test_maps/lanelet2/traffic_priority_lanelets_utm.osm',
+                          '-o', self.output_path + "/lanelet2_command_line.xml"])
         time.sleep(5)
-        exists = Path(self.output_path + "/lanelet_lanelet2_command_line.xml")
+        exists = Path(self.output_path + "/lanelet2_command_line.xml")
         self.assertTrue(exists.is_file())
 
     def test_cr_to_lanelet(self):
         subprocess.Popen(['crdesigner', 'map-convert-lanelet',
                           '-i', os.path.dirname(os.path.realpath(__file__))
-                          + '/../map_conversion/test_maps/lanelet_lanelet2/merging_lanelets_utm.xml',
+                          + '/../map_conversion/test_maps/lanelet2/merging_lanelets_utm.xml',
                           '-o', self.output_path + "/cr_lanelet_command_line.osm", '--source_commonroad'])
         time.sleep(5)
         exists = Path(self.output_path + "/cr_lanelet_command_line.osm")

@@ -1,9 +1,6 @@
 import subprocess
 from pathlib import Path
 
-import subprocess
-from pathlib import Path
-
 from lxml import etree
 import uuid
 import os
@@ -11,14 +8,12 @@ import os
 from commonroad.scenario.scenario import Scenario
 from commonroad.common.file_reader import CommonRoadFileReader
 
-from crdesigner.map_conversion.common.utils import generate_unique_id
-
 from crdesigner.map_conversion.opendrive.opendrive_parser.parser import parse_opendrive
 from crdesigner.map_conversion.opendrive.opendrive_conversion.network import Network
 
-from crdesigner.map_conversion.lanelet_lanelet2.lanelet2cr import Lanelet2CRConverter
-from crdesigner.map_conversion.lanelet_lanelet2.lanelet2_parser import Lanelet2Parser
-from crdesigner.map_conversion.lanelet_lanelet2.cr2lanelet import CR2LaneletConverter
+from crdesigner.map_conversion.lanelet2.lanelet2cr import Lanelet2CRConverter
+from crdesigner.map_conversion.lanelet2.lanelet2_parser import Lanelet2Parser
+from crdesigner.map_conversion.lanelet2.cr2lanelet import CR2LaneletConverter
 
 from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import (
     SUMO_AVAILABLE,
@@ -97,26 +92,11 @@ def opendrive_to_commonroad(input_file: str) -> Scenario:
     @param input_file: Path to OpenDRIVE file
     @return: CommonRoad scenario
     """
-    generate_unique_id(0)  # reset IDs
-
-    with open("{}".format(input_file), "r") as file_in:
-        root = etree.parse(file_in)
-
-        for elem in root.getiterator():
-            if not (
-                isinstance(elem, etree._Comment)
-                or isinstance(elem, etree._ProcessingInstruction)
-            ):
-                elem.tag = etree.QName(elem).localname
-        etree.cleanup_namespaces(root)
-
-        opendrive = parse_opendrive(root.getroot())
-
+    opendrive = parse_opendrive(input_file)
     # load configs
     configs = get_configs()
     road_network = Network(configs.opendrive)
     road_network.load_opendrive(opendrive)
-
     return road_network.export_commonroad_scenario()
 
 
@@ -180,10 +160,8 @@ def osm_to_commonroad_using_sumo(input_file: str) -> Scenario:
     @return: CommonRoad scenario
     """
     input_file_pth = Path(input_file)
-
     scenario_name = str(input_file_pth.name)
     opendrive_file = str(input_file_pth.parent / f"{scenario_name}.xodr")
-
     # convert to OpenDRIVE file using netconvert
     subprocess.check_output(
         [

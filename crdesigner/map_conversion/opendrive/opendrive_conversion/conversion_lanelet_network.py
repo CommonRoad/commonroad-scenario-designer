@@ -63,8 +63,8 @@ class ConversionLaneletNetwork(LaneletNetwork):
         return self._old_lanelet_ids
 
     def remove_lanelet(self, lanelet_id: str, remove_references: bool = False):
-        """Remove a lanelets with the specific lanelet_id
-        from the _lanelets dict.
+        """
+        Remove a lanelets with the specific lanelet_id from the _lanelets dict.
 
         :param lanelet_id: id of lanelet to be removed.
         :type lanelet_id: str
@@ -86,24 +86,21 @@ class ConversionLaneletNetwork(LaneletNetwork):
                 if lanelet.adj_left == lanelet_id:
                     lanelet.adj_left = None
 
-    def find_lanelet_by_id(self, lanelet_id) -> ConversionLanelet:
-        """Find a lanelet for a given lanelet_id.
+    def find_lanelet_by_id(self, lanelet_id: int) -> ConversionLanelet:
+        """
+        Find a lanelet for a given lanelet_id.
         Disable natural number check of parent class.
 
         :param lanelet_id: The id of the lanelet to find.
-        :type lanelet_id: int
         :return: The lanelet object if the id exists and None otherwise
-        :rtype: :class:`ConversionLanelet`
         """
         return self._lanelets.get(lanelet_id)
 
-    def find_traffic_light_by_id(self, traffic_light_id) -> TrafficLight:
+    def find_traffic_light_by_id(self, traffic_light_id: int) -> TrafficLight:
         """Find a traffic light for a given traffic light id.
 
         :param traffic_light_id: The ID of the traffic light to find
-        :type traffic_light_id: int
         :return: The traffic light object if the id exists and None otherwise
-        :rtype: :class:`TrafficLight`
         """
         return self._traffic_lights.get(traffic_light_id)
 
@@ -120,7 +117,8 @@ class ConversionLaneletNetwork(LaneletNetwork):
         return self._traffic_signs.get(traffic_sign_id)
 
     def convert_all_lanelet_ids(self):
-        """Convert lanelet ids to numbers which comply with the Commonroad specification.
+        """
+        Convert lanelet ids to numbers which comply with the Commonroad specification.
         These numbers have to be positive integers.
         """
         old_ids = self._old_lanelet_ids.copy()
@@ -652,17 +650,16 @@ class ConversionLaneletNetwork(LaneletNetwork):
                     else:
                         print(direction)
                         warnings.warn("Incorrect direction assigned to successor of incoming lanelet in intersection")
-            intersection_incoming_lane = IntersectionIncomingElement(intersection_id, incoming_lanelet_set,
+            intersection_incoming_lane = IntersectionIncomingElement(generate_unique_id(), incoming_lanelet_set,
                                                                      successor_right, successor_straight,
                                                                      successor_left)
-            intersection_id += 1
 
             intersection_incoming_lanes.append(intersection_incoming_lane)
             # TODO: Add crossings to intersections
             # Increment id counter to generate next unique intersection id. See To Do.
 
         if self.check_if_successor_is_intersecting(intersection_map, successors):
-            intersection = Intersection(intersection_id, intersection_incoming_lanes)
+            intersection = Intersection(generate_unique_id(), intersection_incoming_lanes)
             self.find_left_of(intersection.incomings)
             self.add_intersection(intersection)
 
@@ -912,7 +909,7 @@ class ConversionLaneletNetwork(LaneletNetwork):
 
         return directions
 
-    def add_traffic_lights_to_network(self, traffic_lights: List):
+    def add_traffic_lights_to_network(self, traffic_lights: List[TrafficLight]):
         """
         Adds all the traffic lights in the network object to the lanelet network
         Requires a list of all the traffic lights in the entire map
@@ -922,6 +919,7 @@ class ConversionLaneletNetwork(LaneletNetwork):
         """
         for traffic_light in traffic_lights:
             min_distance = float("inf")
+            id_for_adding = None
             for intersection in self.intersections:
                 for incoming in intersection.incomings:
                     for lanelet in incoming.incoming_lanelets:
@@ -934,8 +932,12 @@ class ConversionLaneletNetwork(LaneletNetwork):
                             if dist < min_distance:
                                 min_distance = dist
                                 id_for_adding = lanelet
-            target_lanelet = self.find_lanelet_by_id(id_for_adding)
-            self.add_traffic_light(traffic_light, {id_for_adding})
+            if id_for_adding is None:
+                warnings.warn("For traffic light with ID {} no referencing lanelet was found!".format(
+                        traffic_light.traffic_light_id))
+                self.add_traffic_light(traffic_light, set())
+            else:
+                self.add_traffic_light(traffic_light, {id_for_adding})
 
         # Traffic light directions are assigned once all traffic lights are assigned to lanelets so that it can be
         # determined how directions need to be divided (i.e. the decision between left to one light and straight to
@@ -1048,7 +1050,7 @@ class ConversionLaneletNetwork(LaneletNetwork):
                                         or distance_from_left - distance_from_right < 0.001:
                                     traffic_light.direction = TrafficLightDirection.STRAIGHT
 
-    def add_traffic_signs_to_network(self, traffic_signs):
+    def add_traffic_signs_to_network(self, traffic_signs: List[TrafficSign]):
         """
         Adds all the traffic signs in the network object to the lanelet network
         Requires a list of all the traffic signs in the entire map
@@ -1059,17 +1061,22 @@ class ConversionLaneletNetwork(LaneletNetwork):
 
         # Assign traffic signs to lanelets
         for traffic_sign in traffic_signs:
+            id_for_adding = None
             min_distance = float("inf")
             for lanelet in self.lanelets:
                 # Find closest lanelet to traffic signal
                 pos_1 = traffic_sign.position
-                pos_2 = lanelet.center_vertices[-1]
+                pos_2 = lanelet.center_vertices[0]
                 dist = np.linalg.norm(pos_1 - pos_2)
                 if dist < min_distance:
                     min_distance = dist
                     id_for_adding = lanelet.lanelet_id
-
-            self.add_traffic_sign(traffic_sign, {id_for_adding})
+            if id_for_adding is None:
+                warnings.warn("For traffic sign with ID {} no referencing lanelet was found!".format(
+                        traffic_sign.traffic_sign_id))
+                self.add_traffic_sign(traffic_sign, set())
+            else:
+                self.add_traffic_sign(traffic_sign, {id_for_adding})
 
     def add_stop_lines_to_network(self, stop_lines: List[StopLine]):
         """
@@ -1084,6 +1091,7 @@ class ConversionLaneletNetwork(LaneletNetwork):
         for stop_line in stop_lines:
             min_start = float("inf")
             min_end = float("inf")
+            lane_to_add_stop_line = None
             for intersection in self.intersections:
                 for incoming in intersection.incomings:
                     for lanelet in incoming.incoming_lanelets:

@@ -15,6 +15,7 @@ from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.pla
 from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadPlanView import PlanView
 from typing import List
 from crdesigner.configurations.get_configs import get_configs
+from crdesigner.map_conversion.common.utils import generate_unique_id
 
 
 def init_lanelet_from_id(identifier) -> ConversionLanelet:
@@ -31,11 +32,14 @@ def init_lanelet_empty_vertices_from_id(plane_group, id) -> ConversionLanelet:
 
 
 def add_lanelets_to_network(network: ConversionLaneletNetwork,  lanelets: List[ConversionLanelet]):
-    for l in lanelets:
-        network.add_lanelet(l)
+    for la in lanelets:
+        network.add_lanelet(la)
 
 
 class TestConversionLanelet(unittest.TestCase):
+
+    def setUp(self) -> None:
+        generate_unique_id(0) # reset ID counter
 
     def test_convert_to_new_lanelet_id(self):
         ids_assigned = {'69.0.-1.-1': 5, '89.0.4.-1': 6, '71.0.1.-1': 7, '71.0.-3.-1': 8}
@@ -685,8 +689,8 @@ class TestConversionLanelet(unittest.TestCase):
         add_lanelets_to_network(conversion_lanelet_network, [lanelet1, lanelet2])
 
         conversion_lanelet_network.add_traffic_signs_to_network(traffic_signs)
-        lanelet1_true_signs = {0, 2}
-        lanelet2_true_signs = {1}
+        lanelet1_true_signs = {0, 1, 2}
+        lanelet2_true_signs = set()
         self.assertSetEqual(lanelet1_true_signs, lanelet1.traffic_signs)
         self.assertSetEqual(lanelet2_true_signs, lanelet2.traffic_signs)
 

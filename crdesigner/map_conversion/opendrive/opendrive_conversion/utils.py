@@ -1,12 +1,17 @@
 import iso3166
 from dataclasses import dataclass
-
+from typing import Union
+from commonroad.scenario.traffic_sign import TrafficSignIDZamunda, TrafficSignIDGermany, TrafficSignIDUsa, \
+    TrafficSignIDChina, TrafficSignIDSpain, TrafficSignIDRussia, TrafficSignIDArgentina, TrafficSignIDBelgium, \
+    TrafficSignIDFrance, TrafficSignIDGreece, TrafficSignIDCroatia, TrafficSignIDItaly, TrafficSignIDPuertoRico
 
 @dataclass
 class CustomDefaultLaneletType:
     general_lanelet_type_activ: bool  # activates whether certain lanelet type should be added to all lanelets
     general_lanelet_type: str  # lanelet type which is added to every lanelet (if activated)
     driving_default_lanelet_type: str  # mapping of OpenDRIVE driveway lane type to a CommonRoad lanelet type
+    lanelet_types_backwards_compatible: bool # if active, converts OpenDRIVE lane types only to CommonRoad lanelet
+    # types compatible with commonroad-io==2022.1 (probably also even older ones)
 
 
 def encode_road_section_lane_width_id(road_id, section_id, lane_id, width_id) -> str:
@@ -59,3 +64,44 @@ def get_signal_country(signal_country: str) -> str:
         return signal_country
     else:
         return "ZAM"
+
+
+def get_traffic_sign_enum_from_country(country: str) -> Union[TrafficSignIDZamunda, TrafficSignIDGermany,
+                                                              TrafficSignIDUsa, TrafficSignIDChina, TrafficSignIDSpain,
+                                                              TrafficSignIDRussia, TrafficSignIDArgentina,
+                                                              TrafficSignIDBelgium, TrafficSignIDFrance,
+                                                              TrafficSignIDGreece, TrafficSignIDCroatia,
+                                                              TrafficSignIDItaly, TrafficSignIDPuertoRico]:
+    """Returns the traffic sign ID enumeration for the country supplied by the ISO3166 country string.
+
+    :param country: ISO3166 country string to get the traffic sign enumeration from.
+    :type country: str
+    :return: The enumeration of the country if it is supported, else the Zamunda enumeration.
+    :rtype: Union
+    """
+    if country == "DEU":
+        return TrafficSignIDGermany
+    elif country == "USA":
+        return TrafficSignIDUsa
+    elif country == "CHN":
+        return TrafficSignIDChina
+    elif country == "ESP":
+        return TrafficSignIDSpain
+    elif country == "RUS":
+        return TrafficSignIDRussia
+    elif country == "ARG":
+        return TrafficSignIDArgentina
+    elif country == "BEL":
+        return TrafficSignIDBelgium
+    elif country == "FRA":
+        return TrafficSignIDFrance
+    elif country == "GRC":
+        return TrafficSignIDGreece
+    elif country == "HRV":
+        return TrafficSignIDCroatia
+    elif country == "ITA":
+        return TrafficSignIDItaly
+    elif country == "PRI":
+        return TrafficSignIDPuertoRico
+    else:
+        return TrafficSignIDZamunda

@@ -73,7 +73,7 @@ class TestConversionLanelet(unittest.TestCase):
         lanelet2 = \
             ConversionLanelet(None, np.array([[0.5, 0.5], [1, 0]]), np.array([[0.0, 0.0], [0.5, 0.5]]),
                               np.array([[-0.5, -0.5], [1, 0]]), 1,
-                              custom_default_lanelet_types=CustomDefaultLaneletType(True, "interstate", "country"))
+                              custom_default_lanelet_types=CustomDefaultLaneletType(True, "interstate", "country", False))
         lanelet2.lanelet_type = "driving"
         true_type = {LaneletType.COUNTRY}
         self.assertEqual(true_type, lanelet2.lanelet_type)

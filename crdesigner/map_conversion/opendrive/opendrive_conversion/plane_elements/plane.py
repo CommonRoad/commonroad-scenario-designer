@@ -91,7 +91,9 @@ class ParametricLane:
         border_group: ParametricLaneBorderGroup,
         length: float = None,
         line_marking = None,
-        side: str = None
+        side: str = None,
+        speed: float = None,
+        access: list = []
     ):
         """Initializes a ParametricLane object.
 
@@ -107,6 +109,10 @@ class ParametricLane:
         :type line_marking: :class:`RoadMark`
         :param side: the side in lane section. Used for determining the line marking side. Default is None
         :type side: str
+        :param speed: Speed limit for this individual plane
+        :type speed: float
+        :param access: equivalent to access restrictions from opendrive lanes
+        :type access: list
         """
         self.border_group = border_group
         self.id_ = id_
@@ -115,6 +121,8 @@ class ParametricLane:
         self.reverse = False
         self.line_marking = line_marking
         self.side = side
+        self.speed = speed
+        self.access = access
 
     def calc_border(
         self, border: str, s_pos: float, width_offset: float = 0.0, compute_curvature=True
@@ -281,29 +289,43 @@ class ParametricLane:
         # calculate left and right vertices of lanelet
         s = 0
         check_3 = True
-        while s <= self.length:
-            s_cache = s + 0.0
+
+        # old version from opendrive2lanelet start
+        # no sampling of s and "distance" between two consecutive s is similar
+        #
+        if self.length < 0:
+            return np.array(left_vertices), np.array(right_vertices)
+        num_steps = int(max(3, np.ceil(self.length / float(0.5))))
+        poses = np.linspace(0, self.length, num_steps)
+        for s in poses:
+        #
+        # old version end
+
+        # version with sampling
+        # while s <= self.length:
+            # s_cache = s + 0.0
             inner_pos, _, curvature, max_geometry_length = self.calc_border("inner", s)
             outer_pos = self.calc_border("outer", s, compute_curvature=False)[0]
             left_vertices.append(inner_pos)
             right_vertices.append(outer_pos)
 
-            if s >= self.length:
-                break
-
-            if s == max_geometry_length:
-                s += min_delta_s
-            else:
-                s = calc_next_s(s, curvature, error_tolerance=error_tolerance, min_delta_s=min_delta_s,
-                                s_max=max_geometry_length)
-
-            # ensure total road length is not exceeded
-            s = min(self.length, s)
-            # ensure lanelet has >= 3 vertices
-            if check_3 and s >= self.length:
-                s = (s_cache + self.length) * 0.5
-
-            check_3 = False
+            # version with sampling
+            # if s >= self.length:
+            #     break
+            #
+            # if s == max_geometry_length:
+            #     s += min_delta_s
+            # else:
+            #     s = calc_next_s(s, curvature, error_tolerance=error_tolerance, min_delta_s=min_delta_s,
+            #                     s_max=max_geometry_length)
+            #
+            # # ensure total road length is not exceeded
+            # s = min(self.length, s)
+            # # ensure lanelet has >= 3 vertices
+            # if check_3 and s >= self.length:
+            #     s = (s_cache + self.length) * 0.5
+            #
+            # check_3 = False
         # assert len(left_vertices) >= 3, f"Not enough vertices, len: {len(left_vertices)}"
         return np.array(left_vertices), np.array(right_vertices)
 

@@ -1,6 +1,6 @@
 from typing import Tuple, Optional, Union
 import numpy as np
-from commonroad.scenario.lanelet import Lanelet, LaneletType, LineMarking
+from commonroad.scenario.lanelet import Lanelet, LaneletType, LineMarking, RoadUser
 from crdesigner.map_conversion.opendrive.opendrive_conversion.utils import CustomDefaultLaneletType
 from crdesigner.configurations.get_configs import get_configs
 
@@ -38,7 +38,9 @@ class ConversionLanelet(Lanelet):
         traffic_lights=None,
         custom_default_lanelet_types=CustomDefaultLaneletType(config.opendrive.general_lanelet_type_activ,
                                                               config.opendrive.general_lanelet_type,
-                                                              config.opendrive.driving_default_lanelet_type)
+                                                              config.opendrive.driving_default_lanelet_type,
+                                                              config.opendrive.lanelet_types_backwards_compatible),
+            speed=None,
     ):
         if lanelet_type is None:
             lanelet_type = {LaneletType.UNKNOWN}
@@ -50,6 +52,14 @@ class ConversionLanelet(Lanelet):
         self._driving_default_lanelet_type = LaneletType(custom_default_lanelet_types.driving_default_lanelet_type) \
             if LaneletType(custom_default_lanelet_types.driving_default_lanelet_type) is not None \
             else LaneletType.UNKNOWN
+        self._lanelet_types_backwards_compatible = custom_default_lanelet_types.lanelet_types_backwards_compatible
+        _user_bidirectional = None
+        _user_one_way = None
+        if user_one_way is not None:
+            _user_one_way = set(map(lambda x: RoadUser(x), user_one_way))
+        if user_bidirectional is not None:
+            _user_bidirectional = set(map(lambda x: RoadUser(x), user_bidirectional))
+
         super().__init__(
             left_vertices=left_vertices,
             center_vertices=center_vertices,
@@ -65,11 +75,13 @@ class ConversionLanelet(Lanelet):
             line_marking_right_vertices=line_marking_right_vertices,
             stop_line=stop_line,
             lanelet_type=lanelet_type,
-            user_one_way=user_one_way,
-            user_bidirectional=user_bidirectional,
+            user_one_way=_user_one_way,
+            user_bidirectional=_user_bidirectional,
             traffic_signs=traffic_signs,
             traffic_lights=traffic_lights,
         )
+
+        self.speed = speed
 
     def __eq__(self, lanelet: "ConversionLanelet") -> bool:
         """Lanelets are equal if their id_ is equal.
@@ -117,9 +129,15 @@ class ConversionLanelet(Lanelet):
         elif value == 'connectingRamp':
             self._lanelet_type = {LaneletType.ACCESS_RAMP}.union(self._default_lanelet_type)
         elif value == 'shoulder':
-            self._lanelet_type = {LaneletType.BORDER}
+            if self._lanelet_types_backwards_compatible:
+                self._lanelet_type = set()
+            else:
+                self._lanelet_type = {LaneletType.BORDER}
         elif value == 'border':
-            self._lanelet_type = {LaneletType.BORDER}
+            if self._lanelet_types_backwards_compatible:
+                self._lanelet_type = set()
+            else:
+                self._lanelet_type = {LaneletType.BORDER}
         elif value == 'bus':
             self._lanelet_type = {LaneletType.BUS_LANE}.union(self._default_lanelet_type)
         elif value == 'stop':
@@ -266,6 +284,14 @@ class ConversionLanelet(Lanelet):
         :rtype: bool
         """
         return self._adj_right_same_direction
+
+    @property
+    def speed(self) -> float:
+        return self._speed
+
+    @speed.setter
+    def speed(self, s):
+        self._speed = s
 
     @adj_right_same_direction.setter
     def adj_right_same_direction(self, same: bool):

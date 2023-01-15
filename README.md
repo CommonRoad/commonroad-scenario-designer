@@ -7,13 +7,13 @@ This toolbox provides map converters for [OpenStreetMap](https://www.openstreetm
 Additionally, a graphical user interface (GUI) is included, which allows one to efficiently create and manipulate 
 CommonRoad maps and scenarios.
 
-|  Tool                               |Path                                       |Functionality                                                                        |
-| :---------------------------------: |:----------------------------------------: |:----------------------------------------------------------------------------------: |
-|OpenDRIVE => CR            |`crdesigner/map_converter/opendrive`           |Conversion from OpenDRIVE to CommonRoad.                                             |
-|Lanelet/Lanelet2 <=> CR |`crdesigner/map_converter/lanelet_lanelet2`    |Conversion from Lanelet/Lanelet2 to CommonRoad <br /> and from CommonRoad to lanelet |
-|OSM => CR                  |`crdesigner/map_converter/osm2cr`              |Conversion from OSM to CommonRoad.                                                   |
-|SUMO <=> CR             |`crdesigner/map_converter/sumo_map`            |Conversion from SUMO to CommonRoad and vice versa.                                   |
-|CR Scenario Designer GUI             |`crdesigner/input_output/gui`|Multi-functional GUI for map conversion and scenario creation/editing.                     |
+|  Tool                               |                 Path                  |                                Functionality                                 |
+| :---------------------------------: |:-------------------------------------:|:----------------------------------------------------------------------------:|
+|OpenDRIVE => CR            | `crdesigner/map_converter/opendrive`  |                   Conversion from OpenDRIVE to CommonRoad.                   |
+|Lanelet/Lanelet2 <=> CR |  `crdesigner/map_converter/lanelet2`  | Conversion from Lanelet2 to CommonRoad <br /> and from CommonRoad to Lanelet |
+|OSM => CR                  |   `crdesigner/map_converter/osm2cr`   |                      Conversion from OSM to CommonRoad.                      |
+|SUMO <=> CR             |  `crdesigner/map_converter/sumo_map`  |              Conversion from SUMO to CommonRoad and vice versa.              |
+|CR Scenario Designer GUI             |     `crdesigner/input_output/gui`     |    Multi-functional GUI for map conversion and scenario creation/editing.    |
 
 ## Prerequisites and Installation
 The usage of the Anaconda Python distribution is recommended. We have tested the toolbox with Python 3.7, 3.8, and 3.9.
@@ -27,7 +27,6 @@ You need the following modules:
 - scipy >= 1.3.0
 - mercantile >= 1.1.3
 - utm >= 0.5.0
-- cartopy >= 0.17.0
 - PyQt5 >= 5.12.2
 - shapely>=1.7.0
 - sumocr>=2021.5
@@ -36,13 +35,12 @@ You need the following modules:
 - iso3166>=1.0.1
 - networkx>=2.5
 
-Cartopy can be easily installed via
-```bash
-conda install -c conda-forge cartopy
-```
-from you Anaconda environment. For the other packages, we recommend to use the provided `requirements.txt`:
+From you Anaconda environment. For all the packages, we recommend to use the provided `requirements.txt`:
 ```bash
 pip install -r requirements.txt
+
+If you do not want to use Anaconda, some features for editing OSM graphs might not be available.
+
 ```
 
 If you want to use the SUMO conversion or to generate traffic using SUMO, please install 
@@ -108,7 +106,7 @@ You can execute the different converters either via command line, calling them w
 or the GUI.
 
 #### API
-The main APIs to execute the pure conversions are located under `crdesigner/input_output/api`.   
+The main APIs to execute the pure conversions are located under `crdesigner/map_conversion/map_conversion_interface.py`.   
 For many conversions we provide further APIs, e.g., for downloading a map from OSM.
 
 #### Command Line
@@ -172,7 +170,7 @@ If you want to contribute to the toolbox, you can also post it in the [forum](ht
 ## Authors
 
 Responsible: Sebastian Maierhofer
-Contribution (in alphabetic order by last name): Daniel Asch, Tim Dang, Behtarin Ferdousi, Maximilian Fruehauf, Marcus Gabler,   
+Contribution (in alphabetic order by last name): Daniel Asch, Hamza Begic, Tim Dang, Behtarin Ferdousi, Maximilian Fruehauf, Marcus Gabler,   
 Fabian Hoeltke, Aaron Kaefer, David Le, Gustaf Lindgren, Benjamin Orthen, Luisa Ortner, Benedikt Reinhard, Maximilian Rieger, Til Stotz, Stefan Urban
 
 ## Credits

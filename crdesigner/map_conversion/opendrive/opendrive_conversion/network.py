@@ -1,18 +1,27 @@
-"""Module to contain Network which can load an opendrive object and then export
-to lanelets. Internally, the road network is represented by ParametricLanes."""
 import copy
-import numpy.linalg
+import numpy as np
 import iso3166
+from collections import deque
+from typing import Union
 from commonroad.scenario.scenario import Scenario, GeoTransformation, Location, ScenarioID
-from commonroad.scenario.lanelet import LaneletNetwork, Lanelet
+from commonroad.scenario.lanelet import LaneletNetwork, Lanelet, StopLine, LineMarking
+from crdesigner.map_conversion.opendrive.opendrive_conversion import utils
 
+from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.crosswalks import get_crosswalks
 from crdesigner.map_conversion.opendrive.opendrive_parser.elements.opendrive import OpenDrive
 from crdesigner.map_conversion.opendrive.opendrive_conversion.utils import encode_road_section_lane_width_id
-from crdesigner.map_conversion.opendrive.opendrive_conversion.conversion_lanelet_network import ConversionLaneletNetwork
+from crdesigner.map_conversion.opendrive.opendrive_conversion.conversion_lanelet_network import \
+    ConversionLaneletNetwork, ConversionLanelet
 from crdesigner.map_conversion.opendrive.opendrive_conversion.converter import OpenDriveConverter
 from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.traffic_signals import get_traffic_signals
 from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.geo_reference import get_geo_reference
 from crdesigner.configurations.configuration import OpenDrive2CRConfiguration
+from commonroad.scenario.traffic_sign import TrafficSign, TrafficSignElement, TrafficSignIDGermany, \
+    TrafficSignIDZamunda, TrafficSignIDUsa, TrafficSignIDChina, TrafficSignIDSpain, \
+    TrafficSignIDRussia
+from crdesigner.map_conversion.common.utils import generate_unique_id
+from commonroad.scenario.lanelet import LaneletType
+from typing import List
 
 
 def convert_to_base_lanelet_network(lanelet_network: ConversionLaneletNetwork) -> LaneletNetwork:
@@ -54,12 +63,10 @@ class Network:
         self._traffic_lights = []
         self._traffic_signs = []
         self._stop_lines = []
+        self._crosswalks = []
         self._country_ID = None
         self.error_tolerance = self.config.error_tolerance
         self.min_delta_s = self.config.min_delta_s
-
-    # def __eq__(self, other):
-    # return self.__dict__ == other.__dict__
 
     def assign_country_id(self, value: str):
         """Assign country ID according to the ISO 3166-1 3 letter standard
@@ -100,7 +107,7 @@ class Network:
         # Convert all parts of a road to parametric lanes (planes)
         for road in opendrive.roads:
             road.planView.precalculate()
-            # The reference border is the base line for the whole road
+            # The reference border is the baseline for the whole road
             reference_border = OpenDriveConverter.create_reference_border(
                 road.planView, road.lanes.laneOffsets
             )
@@ -114,15 +121,45 @@ class Network:
                 )
 
                 self._planes.extend(parametric_lane_groups)
+
+            # stop lines from traffic signals (legacy)
             stop_lines_final = []
             traffic_lights, traffic_signs, stop_lines = get_traffic_signals(road)
+
+            self._crosswalks.extend(get_crosswalks(road))
+
             self._traffic_lights.extend(traffic_lights)
             for stop_line in stop_lines:
                 for traffic_light in traffic_lights:
-                    if numpy.linalg.norm(stop_line.start - traffic_light.position) < 10:
+                    if np.linalg.norm(stop_line.start - traffic_light.position) < 10:
                         stop_lines_final.append(stop_line)  # hard-coded 10 could be adjusted later as a threshold
             self._traffic_signs.extend(traffic_signs)
             self._stop_lines.extend(stop_lines_final)
+
+            # stop lines from road objects
+            for road_object in road.objects:
+                if road_object.name == "StopLine":
+                    position, tangent, _, _ = road.planView.calc(road_object.s, compute_curvature=False)
+                    position = np.array([position[0],
+                                         position[1]])
+
+                    position_1 = position
+                    angle = road_object.hdg + tangent
+                    # check if stop line is orthogonal to reference line
+                    if np.round(tangent) == 0:
+                        angle = np.pi / 2
+                    # check orientation of stop line
+                    if road_object.orientation == "+":
+                        position_2 = np.array(
+                                [position[0] + road_object.validLength * np.cos(angle),
+                                 position[1] - road_object.validLength * np.sin(angle)])
+                    else:
+                        position_2 = np.array(
+                                [position[0] + road_object.validLength * np.cos(angle),
+                                 position[1] + road_object.validLength * np.sin(angle)])
+
+                    stop_line = StopLine(position_1, position_2, LineMarking.SOLID)
+                    self._stop_lines.append(stop_line)
 
     def export_lanelet_network(
         self, filter_types: list = None
@@ -143,7 +180,6 @@ class Network:
                 # Remove lanelets from intersections dictionary that do not fit the filtered type criterion
                 self._link_index.clean_intersections(parametric_lane.id_)
                 continue
-
             lanelet = parametric_lane.to_lanelet(self.error_tolerance, self.min_delta_s)
             lanelet.predecessor = self._link_index.get_predecessors(parametric_lane.id_)
             lanelet.successor = self._link_index.get_successors(parametric_lane.id_)
@@ -153,7 +189,7 @@ class Network:
             # reference to the correct lanelets later
 
         # prune because some
-        # successorIds get encoded with a non existing successorID
+        # successorIds get encoded with a non-existing successorID
         # of the lane link
         lanelet_network.prune_network()
 
@@ -168,20 +204,216 @@ class Network:
         self._link_index.update_intersection_lane_id(lanelet_network.old_lanelet_ids())
         # self.traffic_signal_elements.update_traffic_signs_map_lane_id(lanelet_network.old_lanelet_ids())
 
+        for crosswalk in self._crosswalks:
+            lanelet_network.add_lanelet(crosswalk)
+
         # generating intersections
-        intersection_id_counter = max([la.lanelet_id for la in lanelet_network.lanelets]) + 1
         for intersection_map in self._link_index.intersection_maps():
             # Remove lanelets that are not part of the network (as they are of a different type)
+            intersection_id_counter = generate_unique_id()
             lanelet_network._old_lanelet_ids[intersection_id_counter] = intersection_id_counter
             lanelet_network.create_intersection(intersection_map, intersection_id_counter)
-            intersection_id_counter += 1 + len(intersection_map)
+
+        self.relate_crosswalks_to_intersection(lanelet_network)
 
         # Assign traffic signals, lights and stop lines to lanelet network
         lanelet_network.add_traffic_lights_to_network(self._traffic_lights)
         lanelet_network.add_traffic_signs_to_network(self._traffic_signs)
         lanelet_network.add_stop_lines_to_network(self._stop_lines)
 
+        # create virtual traffic signs for individual lane speed limits
+        drivable_lanelets = [
+            lanelet.lanelet_id for lanelet in lanelet_network.lanelets if lanelet.lanelet_type not in [
+                {LaneletType.BICYCLE_LANE}, {LaneletType.SIDEWALK}, {LaneletType.BORDER}
+            ]
+        ]
+
+        # for all lanelets with no predecessor and no traffic sign, add a virtual sign to the lanelet
+        lanelet_with_no_pred = [lanelet for lanelet in drivable_lanelets if
+                                lanelet_network.find_lanelet_by_id(lanelet).predecessor == []
+                                and lanelet_network.find_lanelet_by_id(lanelet).speed is not None]
+        for lanelet in lanelet_with_no_pred:
+            already_has_sign = False
+            ids = lanelet_network.find_lanelet_by_id(lanelet).traffic_signs
+            for sign_id in ids:
+                sign = lanelet_network.find_traffic_sign_by_id(sign_id)
+                elems = [sign.traffic_sign_elements for elem in sign.traffic_sign_elements if
+                         elem.traffic_sign_element_id.name == 'MAX_SPEED']
+
+                if any(elems):
+                    already_has_sign = True
+                    break
+            if not already_has_sign:
+                self.add_virtual_traffic_sign(lanelet_network.find_lanelet_by_id(lanelet), lanelet_network)
+
+        self.find_lane_speed_changes(drivable_lanelets, lanelet_network)
+        self.reference_traffic_signs_with_equal_speed(drivable_lanelets, lanelet_network)
+
         return convert_to_base_lanelet_network(lanelet_network)
+
+    def relate_crosswalks_to_intersection(self, lanelet_network: ConversionLaneletNetwork):
+        """
+        Find for each crossing the intersection it belongs to
+        :param lanelet_network: ConversionLaneletNetwork
+        :return:
+        """
+        def generate_line(vertices) -> (float, float):
+            """
+            generate a line from start to end of vertex
+            :param vertices:
+            :return: slope m, intersect c
+            """
+            m = (vertices[0][1] - vertices[-1][1]) / (vertices[0][0] - vertices[-1][0])
+            c = vertices[0][1] - m*vertices[0][0]
+            return m, c
+
+        def find_intersect_point() :
+            """
+            find an intersection between a lane and a crosswalk. We can conclude that a crosswalk belongs to the same
+            intersection as the lanelet it is crossing.
+            :return: lanelet id
+            """
+            for incoming in intersection.incomings:
+                for lanelet in incoming.incoming_lanelets:
+                    vertices = lanelet_network.find_lanelet_by_id(lanelet).left_vertices
+                    lanelet_m, lanelet_c = generate_line(vertices)
+                    x_intersect = (lanelet_c - crosswalk_c) / (crosswalk_m - lanelet_m)
+
+                    if x_intersect * lanelet_m + lanelet_c == x_intersect * crosswalk_m + crosswalk_c:
+                        return lanelet
+            return None
+
+        for crosswalk in self._crosswalks:
+            crosswalk_m, crosswalk_c = generate_line(crosswalk.left_vertices)
+            for intersection in lanelet_network.intersections:
+                lanelet = find_intersect_point()
+                if lanelet is not None:
+                    intersection.crossings.add(crosswalk.lanelet_id)
+                    break
+
+
+    def reference_traffic_signs_with_equal_speed(self, lanelets: List[int], lanelet_network: ConversionLaneletNetwork):
+        """If there are multiple lanelets that all have an equal lane speed, finds the first traffic sign of any
+        predecessor with the same speed and references it for all lanelets.
+
+        :param lanelets: The lanelets to be considered.
+        :type lanelets: List[int]
+        :param lanelet_network: The lanelet network that the lanelets belong to.
+        :type lanelet_network: ConversionLaneletNetwork
+        """
+        visited = []
+        for lane in lanelets:
+            visited.append(lane)
+            lane = lanelet_network.find_lanelet_by_id(lane)
+            speeds = [lanelet_network.find_lanelet_by_id(pred).speed for pred in lane.predecessor
+                      if lane.speed is not None]
+            if not speeds == [] and speeds.count(speeds[0]) == len(speeds):
+                # lane speeds are all the same, find first sign with equal speed
+                predecessors = deque(lane.predecessor)
+                # if we find a sign, update all the visited lanes with a reference to it
+                update_with_reference = []
+                traffic_sign_found = False
+                while not traffic_sign_found:
+                    while predecessors:
+                        pred = predecessors.popleft()
+                        update_with_reference.append(pred)
+                        # if we visited a predecessor, we can remove it from the lanelets, so we don't visit it twice
+                        if pred in lanelets:
+                            lanelets.remove(pred)
+                        # If we haven't already visited the predecessor, then extend the list of predecessors but only
+                        # by new unique predecessors.
+                        if pred not in visited:
+                            predecessors.extend([p for p in lanelet_network.find_lanelet_by_id(pred).predecessor
+                                                 if p not in predecessors])
+
+                        # check if the predecessor has a traffic sign with equal speed as the lane
+                        sign = self.get_traffic_sign_with_equal_speed(lanelet_network.find_lanelet_by_id(pred),
+                                                                      lanelet_network, speeds[0])
+                        if sign is not None:
+                            traffic_sign_found = True
+                            # update all traversed predecessors with a reference to this signal, do not add reference
+                            # if lane already has a sign
+                            for update_lane_id in update_with_reference:
+                                update_lane = lanelet_network.find_lanelet_by_id(update_lane_id)
+                                if sign.traffic_sign_id not in update_lane.traffic_signs and \
+                                        self.get_traffic_sign_with_equal_speed(
+                                                update_lane, lanelet_network, speeds[0] is None
+                                        ):
+                                    update_lane_id.add_traffic_sign_to_lanelet(sign.traffic_sign_id)
+                            break
+                    break
+
+    def find_lane_speed_changes(self, lanelets: List[int], lanelet_network: ConversionLaneletNetwork):
+        """Iteratively finds changes in lane speed between a lanelet and its predecessors. If there is a change, a
+        virtual speed sign is added to the lanelet.
+
+        :param lanelets: The list of lanelets that is checked for changes in lane speeds.
+        :type lanelets: List[ConversionLanelet]
+        :param lanelet_network: The lanelet network that the lanelets belong to.
+        :type lanelet_network: ConversionLaneletNetwork
+        """
+        visited = []
+        for lane in lanelets:
+            lane = lanelet_network.find_lanelet_by_id(lane)
+            visited.append(lane.lanelet_id)
+            if lane.speed is None:
+                break
+            for pred in lane.predecessor:
+                if lanelet_network.find_lanelet_by_id(pred).speed != lane.speed:
+                    self.add_virtual_traffic_sign(lane, lanelet_network)
+                    break
+                # Only extend lanelets by unique predecessors, if we have not already visisted them
+                if pred not in visited:
+                    lanelets.extend(
+                            [p for p in lanelet_network.find_lanelet_by_id(pred).predecessor if p not in lanelets]
+                    )
+
+    def get_traffic_sign_with_equal_speed(
+            self, lanelet: ConversionLanelet, lanelet_network: ConversionLaneletNetwork, speed: float
+    ) -> Union[TrafficSign, None]:
+        """Checks if the supplied lanelet has a traffic sign with a speed limit equal to the value given by the
+        argument speed. If a sign was found, it is returned.
+
+        :param lanelet: The lanelet to check for a sign with equal speed.
+        :type lanelet: ConversionLanelet
+        :param lanelet_network: The lanelet network the lanelet belongs to.
+        :type lanelet_network: ConversionLanelet
+        :param speed: The speed to compare the sign's speed to.
+        :type speed: float
+        :return: The traffic sign with equal speed, if one is found. Returns None else.
+        :rtype: Union[TrafficSign, None]
+        """
+        for id in lanelet.traffic_signs:
+            sign = lanelet_network.find_traffic_sign_by_id(id)
+            for elem in sign.traffic_sign_elements:
+                if elem.traffic_sign_element_id in [TrafficSignIDZamunda.MAX_SPEED, TrafficSignIDGermany.MAX_SPEED,
+                                                    TrafficSignIDUsa.MAX_SPEED, TrafficSignIDChina.MAX_SPEED,
+                                                    TrafficSignIDSpain.MAX_SPEED, TrafficSignIDRussia.MAX_SPEED] \
+                        and float(elem.additional_values[0]) == speed:
+                    return sign
+        return None
+
+    def add_virtual_traffic_sign(self, lanelet: ConversionLanelet, network: ConversionLaneletNetwork):
+        """Adds a virtual traffic sign to a lanelet.
+
+        :param lanelet: Lanelet to add virtual traffic signal to.
+        :type lanelet: ConversionLanelet
+        :param network: The lanelet network to which the lanelet belongs to.
+        :type network: ConversionLaneletNetwork
+        """
+        traffic_sign_enum = utils.get_traffic_sign_enum_from_country(
+                utils.get_signal_country(network.config.default_country_id)
+        )
+        element_id = traffic_sign_enum.MAX_SPEED
+        additional_values = [str(float(lanelet.speed))]
+        traffic_sign_element = TrafficSignElement(traffic_sign_element_id=element_id,
+                                                  additional_values=additional_values)
+        traffic_sign = TrafficSign(traffic_sign_id=generate_unique_id(),
+                                   traffic_sign_elements=list([traffic_sign_element]),
+                                   first_occurrence={lanelet.lanelet_id}, position=lanelet.center_vertices[0],
+                                   virtual=True)
+        network.add_traffic_signs_to_network([traffic_sign])
+        lanelet.add_traffic_sign_to_lanelet(traffic_sign.traffic_sign_id)
 
     def export_commonroad_scenario(
             self, dt: float = 0.1, map_name="OpenDrive", map_id=1, filter_types=None
@@ -210,7 +442,7 @@ class Network:
             else:
                 location = Location(geo_transformation=geo_transformation)
         else:
-            location = None
+            location = Location()
 
         scenario_id = ScenarioID(country_id=self._country_ID, map_name=map_name, map_id=map_id)
 
@@ -223,7 +455,8 @@ class Network:
             self.export_lanelet_network(
                 filter_types=filter_types
                 if isinstance(filter_types, list)
-                else ["driving", "restricted", "onRamp", "offRamp", "exit", "entry", "sidewalk", "shoulder", "crosswalk"]
+                else ["driving", "restricted", "onRamp", "offRamp", "exit", "entry", "sidewalk", "shoulder",
+                      "crosswalk"]
             )
         )
 
@@ -427,14 +660,6 @@ class LinkIndex:
                         )
 
                     else:
-                        # decide which lane section to use (first or last)
-                        if lane_link.fromId < 0:
-                            lane_section_idx = 0
-
-                        else:
-                            lane_section_idx = (
-                                incoming_road.lanes.getLastLaneSectionIdx()
-                            )
                         incoming_road_id = encode_road_section_lane_width_id(
                             incoming_road.id, 0, lane_link.fromId, -1
                         )

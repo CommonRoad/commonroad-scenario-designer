@@ -6,12 +6,11 @@ import copy
 import datetime
 import os
 import pickle
+import warnings
 from abc import ABC, abstractmethod
 from tkinter import Tk
 from tkinter.filedialog import askopenfilename, asksaveasfilename
 from typing import Optional, List, Tuple, Set, Dict, Callable
-
-import cartopy.crs as crs
 import matplotlib.pyplot as plt
 import numpy as np
 from PIL import Image
@@ -53,8 +52,6 @@ class GUI(ABC):
         """
         # setup figure and axes
         self.fig, self.ax = plt.subplots()  # constrained_layout=True)
-        self.projection = crs.Mercator()
-        self.ax = plt.axes(projection=self.projection)
         plt.axis("on")
         self.origin: np.ndarray = np.array(graph.center_point)
         self.graph: rg.Graph = graph
@@ -65,12 +62,7 @@ class GUI(ABC):
 
         # plot aerial image
         lat1, lon1, lat2, lon2 = graph.bounds
-        if config.AERIAL_IMAGES:
-            image, extents = aerial_data.get_aerial_image(
-                lat1, lon1, lat2, lon2, zoom=config.ZOOM_LEVEL
-            )
-            iplot.plot_aerial_image(image, extents, self.ax, self.projection)
-
+        
         # setup bounds of plot
         self.ax.set_xlim(lon1, lon2)
         self.ax.set_ylim(lat2, lat1)
@@ -84,19 +76,6 @@ class GUI(ABC):
         # draw necessary for tight layout: see issue #1207 at cartopy github
         self.fig.canvas.draw()
         self.fig.tight_layout()
-
-    def plot_image(self, image: Image, image_extent: List[float]) -> None:
-        """
-        plots an image in the current plot
-
-        :param image: image to plot
-        :param image_extent: coordinates of the image
-        :return: None
-        """
-        self.ax.imshow(
-            image, origin="upper", extent=image_extent, transform=self.projection
-        )
-        return
 
     def save_state(self, filename: str) -> None:
         """

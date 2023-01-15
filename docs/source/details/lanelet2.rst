@@ -62,8 +62,8 @@ Python APIs
     from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
     from commonroad.planning.planning_problem import PlanningProblemSet
 
-    from crdesigner.map_conversion.lanelet_lanelet2.lanelet2cr import Lanelet2CRConverter
-    from crdesigner.map_conversion.lanelet_lanelet2.lanelet2_parser import Lanelet2Parser
+    from crdesigner.map_conversion.lanelet2.lanelet2cr import Lanelet2CRConverter
+    from crdesigner.map_conversion.lanelet2.lanelet2_parser import Lanelet2Parser
 
     from crdesigner.input_output.api import lanelet_to_commonroad
 
@@ -128,8 +128,25 @@ A few comments on the conversion:
 - If lanelets in OSM share a common way, they are adjacent to each other. As a way can have only one direction, and if it is shared by lanelets having opposite driving directions, the vertices of one boundary of one of the two lanelet have to be reversed after conversion. This boundary is by default the left boundary considering the right-driving system in most of the world. You can set it to right by using the argument "left_driving_system=True" when calling the Converter.
 - Lanelets can be adjacent without sharing a common way, because two ways can describe the same trajectory, but with a different number of nodes. This converter can still compare two vertices which resulted from converting two possible adjacent ways to the CommonRoad lanelet format and determine if the corresponding lanelets are adjacent. However, this is computationally quite intensive and is thus disabled by default (enable it with "--adjacencies" in the command line tool or setting "detect_adjacencies=True" when calling the converter.)
 
-CommonRoad to Lanelet
-*********************
+
+
+
+
+
+
+
+Flowchart of the conversion function
+====================================
+To get a better understanding of the conversion process, a flowchart of the function that transforms the WayRelation (Lanelet2/OSM format) to the Lanelet (CommonRoad format) is given below:
+
+.. image::
+  images/Lanelet2/Lanelet2_Flowcharts/Way_rel_to_lanelet_FLOWCHART.png
+  :height: 1650
+
+Both left and right ways of the WayRelation object have to be of the same size. If not, the function tries to fix the issue by resizing one of the ways, raising an error in case of a failutre. If there is no failure, the function creates left and right vertices from those respective ways. Potentially, it reverses them, depending on the driving system and the location of the start and the end points of those newly created vertices. Special meanings of the WayRelation, such as the road user, direction or the road type are extracted and stored as Lanelet's attributes. A set of traffic signs, from the WayRelation object, is created, after which the function checks for potentially already existing successor and predecessor laneletes.
+
+CommonRoad to Lanelet2
+**********************
 This conversion allows you to convert a road network description from
 the `CommonRoad format <https://gitlab.lrz.de/tum-cps/commonroad-sc
 enarios/blob/master/documentation/XML_commonRoad_2020a.pdf>`_ (Version 2020a) format to the
@@ -173,7 +190,7 @@ Python APIs
 
     from lxml import etree
     from commonroad.common.file_reader import CommonRoadFileReader
-    from crdesigner.map_conversion.lanelet_lanelet2.cr2lanelet import CR2LaneletConverter
+    from crdesigner.map_conversion.lanelet2.cr2lanelet import CR2LaneletConverter
     from crdesigner.input_output.api import commonroad_to_lanelet
 
 
@@ -218,3 +235,18 @@ This code of this conversion take some points into account:
 - If a lanelet has a successor, the converted nodes at the end of the lanelet have to be the same as the nodes of the converted successor.
 - Same lanelet predecessor relationships.
 - If a lanelet is adjacent to another lanelet, and the vertices of the shared border coincide, they can share a way in the converted OSM document.
+
+
+Flowchart of the conversion function
+====================================
+
+To get a better understanding of the conversion process, a flowchart of the function that transforms the lanelet (CommonRoad format) to the WayRelation (Lanelet2/OSM format) is given below:
+
+.. image::
+  images/Lanelet2/Lanelet2_Flowcharts/Lanelet_to_way_rel_FLOWCHART.png
+  :width: 500
+
+The function takes a lanelet as an input and creates nodes based on those lanelet's vertices. As the nodes form right and left ways, the function checks if those ways already exist. If not, the function creates those ways, maps them to the way relation, and assigns them to the osm object's dictionary. If the way already exists, there is no need to create it, as the function maps the same id as of the newly found way to the way relation in the previously mentioned dictionary.
+
+
+

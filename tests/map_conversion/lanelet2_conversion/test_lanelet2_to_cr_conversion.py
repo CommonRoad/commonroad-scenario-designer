@@ -1,15 +1,15 @@
 import time
 import os
 import unittest
-from lxml import etree
+from lxml import etree # type: ignore
 
-from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
-from commonroad.planning.planning_problem import PlanningProblemSet
-from commonroad.scenario.scenario import Tag, Scenario
+from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile # type: ignore
+from commonroad.planning.planning_problem import PlanningProblemSet # type: ignore
+from commonroad.scenario.scenario import Tag, Scenario # type: ignore
 
 from crdesigner.map_conversion.common.utils import generate_unique_id
-from crdesigner.map_conversion.lanelet_lanelet2.lanelet2_parser import Lanelet2Parser
-from crdesigner.map_conversion.lanelet_lanelet2.lanelet2cr import Lanelet2CRConverter
+from crdesigner.map_conversion.lanelet2.lanelet2_parser import Lanelet2Parser
+from crdesigner.map_conversion.lanelet2.lanelet2cr import Lanelet2CRConverter
 from tests.map_conversion.utils import elements_equal
 
 
@@ -18,6 +18,14 @@ class TestLanelet2ToCommonRoadConversion(unittest.TestCase):
 
     @staticmethod
     def load_and_convert(osm_file_name: str) -> Scenario:
+        """Loads and converts osm file to a scenario
+        
+        Args:
+        osm_file_name: name of the osm file
+
+        Returns:
+        Scenario that corresponds to that osm file
+        """
         cwd_path = os.path.dirname(os.path.abspath(__file__))
         out_path = cwd_path + "/.pytest_cache"
         if not os.path.isdir(out_path):
@@ -29,7 +37,7 @@ class TestLanelet2ToCommonRoadConversion(unittest.TestCase):
                         os.remove(os.path.join(dir_path, file))
 
         with open(os.path.dirname(os.path.realpath(__file__))
-                  + f"/test_maps/lanelet_lanelet2/{osm_file_name}.osm", "r", ) as fh:
+                  + f"/../test_maps/lanelet2/{osm_file_name}.osm", "r", ) as fh:
             osm = Lanelet2Parser(etree.parse(fh).getroot()).parse()
 
         osm2l = Lanelet2CRConverter(proj_string="+proj=utm +zone=32 +ellps=WGS84")
@@ -43,7 +51,7 @@ class TestLanelet2ToCommonRoadConversion(unittest.TestCase):
         xml_output_name = file_name
 
         with open(os.path.dirname(os.path.realpath(__file__))
-                  + f"/test_maps/lanelet_lanelet2/{xml_output_name}.xml", "r", ) as fh:
+                  + f"/../test_maps/lanelet2/{xml_output_name}.xml", "r", ) as fh:
             parser = etree.XMLParser(remove_blank_text=True)
             tree_import = etree.parse(fh, parser=parser).getroot()
             writer = CommonRoadFileWriter(scenario=self.load_and_convert(file_name),

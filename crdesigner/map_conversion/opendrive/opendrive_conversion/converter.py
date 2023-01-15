@@ -155,6 +155,8 @@ class OpenDriveConverter:
         :type lane: :class:`Lane`
         :param side: Which side of the lane section where the parametric lane is created.
         :type side: str
+        :param speed: Speed limit for this individual lane
+        :type speed: float
         :return: A ParametricLane object with specified borders and a unique id.
         :rtype: :class:`ParametricLane`
         """
@@ -181,8 +183,10 @@ class OpenDriveConverter:
             type_=lane.type,
             length=width.length,
             border_group=border_group,
+            speed=lane.speed,
             line_marking=marking,
-            side=side
+            side=side,
+            access=lane.access
         )
         return parametric_lane
 

@@ -80,6 +80,7 @@ class TestConverter(unittest.TestCase):
         common_lane_width = LaneWidth(*[5.0, 0.0, 0.0, 0.0], idx=0, start_offset=0)
         common_lane_width.length = 100
         right_lane1 = Lane(road, section)
+        right_lane1.speed = 30
         right_lane1.id = -1
         right_lane1.widths.append(common_lane_width)
         right_lane2 = Lane(road, section)
@@ -88,9 +89,12 @@ class TestConverter(unittest.TestCase):
 
         center_lane = Lane(road, section)
         center_lane.id = 0
+        center_lane.speed = 30
+
 
         left_lane1 = Lane(road, section)
         left_lane1.id = 1
+        left_lane1.speed = 30
         left_lane1.widths.append(common_lane_width)
         left_lane2 = Lane(road, section)
         left_lane2.id = 2
@@ -145,6 +149,7 @@ class TestConverter(unittest.TestCase):
         lane = Lane(road, section)
         lane.id = "-1"
         lane.type = "restricted"
+        lane.speed = 40
 
         width = LaneWidth(*[1.0, 0.0, 0.0, 0.0], idx=0, start_offset=0.0)
         lane.widths.append(width)
@@ -181,6 +186,7 @@ class TestConverter(unittest.TestCase):
         self.assertEquals("100.0.-1.0.0", parametric_lane.id_)
         self.assertEquals(lane.type, parametric_lane.type_)
         self.assertEquals(side, parametric_lane.side)
+        self.assertEquals(40, parametric_lane.speed)
 
     def test_create_outer_lane_border(self):
         road = Road()
