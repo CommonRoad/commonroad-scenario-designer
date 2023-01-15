@@ -170,11 +170,8 @@ class ParametricLaneGroup:
         for parametric_lane in self.parametric_lanes:
             mark = LineMarking.UNKNOWN
             line_marking = parametric_lane.line_marking
-
             if line_marking is not None:
-
                 if parametric_lane.side == "left":
-
                     if line_marking.type == "solid":
                         if line_marking.weight == "standard":
                             mark = LineMarking.SOLID
@@ -194,7 +191,10 @@ class ParametricLaneGroup:
                     else:
                         mark = LineMarking.UNKNOWN
 
-                    line_marking_left_vertices = mark
+                    if not self.parametric_lanes[0].reverse:
+                        line_marking_left_vertices = mark
+                    else:
+                        line_marking_right_vertices = mark
 
                 elif parametric_lane.side == "right":
 
@@ -218,6 +218,10 @@ class ParametricLaneGroup:
                         mark = LineMarking.UNKNOWN
 
                     line_marking_right_vertices = mark
+                    if not self.parametric_lanes[0].reverse:
+                        line_marking_right_vertices = mark
+                    else:
+                        line_marking_left_vertices = mark
             else:
                 pass
 
