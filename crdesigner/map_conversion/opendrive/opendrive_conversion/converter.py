@@ -88,6 +88,7 @@ class OpenDriveConverter:
 
                 lane_borders.append(OpenDriveConverter._create_outer_lane_border(lane_borders, lane, coeff_factor))
                 center_marking = lane_section.centerLanes[0].road_mark[0] if lane.id == 1 and len(
+                        lane_section.centerLanes) > 0 and len(
                         lane_section.centerLanes[0].road_mark) > 0 else None
                 plane_group = ParametricLaneGroup(
                         id_=encode_road_section_lane_width_id(lane_section.parentRoad.id, lane_section.idx, lane.id,
