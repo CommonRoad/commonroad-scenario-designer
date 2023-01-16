@@ -31,9 +31,7 @@ class LateralProfile:
 
     @superelevations.setter
     def superelevations(self, value):
-        if not isinstance(value, list) or not all(
-            isinstance(x, Superelevation) for x in value
-        ):
+        if not isinstance(value, list) or not all(isinstance(x, Superelevation) for x in value):
             raise TypeError("Value must be a list of Superelevation.")
 
         self._superelevations = value
@@ -52,9 +50,7 @@ class LateralProfile:
 
     @crossfalls.setter
     def crossfalls(self, value):
-        if not isinstance(value, list) or not all(
-            isinstance(x, Crossfall) for x in value
-        ):
+        if not isinstance(value, list) or not all(isinstance(x, Crossfall) for x in value):
             raise TypeError("Value must be a list of Crossfall.")
 
         self._crossfalls = value
@@ -98,9 +94,7 @@ class Crossfall(RoadRecord):
     implemented by the Shape class.
     """
 
-    def __init__(
-        self, *polynomial_coefficients: float, start_pos: float = None, side: str = None
-    ):
+    def __init__(self, *polynomial_coefficients: float, start_pos: float = None, side: str = None):
         super().__init__(*polynomial_coefficients, start_pos=start_pos)
         self.side = side
         warnings.warn("Crossfalls are not an own element of OpenDRIVE anymore. They are defined within shapes!",
@@ -120,9 +114,7 @@ class Crossfall(RoadRecord):
     @side.setter
     def side(self, value):
         if value not in ["left", "right", "both"]:
-            raise TypeError(
-                "Value must be string with content 'left', 'right' or 'both'."
-            )
+            raise TypeError("Value must be string with content 'left', 'right' or 'both'.")
 
         self._side = value
 
@@ -141,12 +133,7 @@ class Shape(RoadRecord):
     :ivar start_pos_t: t-coordinate of start position
     """
 
-    def __init__(
-        self,
-        *polynomial_coefficients: float,
-        start_pos: float = None,
-        start_pos_t: float = None,
-    ):
+    def __init__(self, *polynomial_coefficients: float, start_pos: float = None, start_pos_t: float = None, ):
         """
         Constructor of class shape.
 
