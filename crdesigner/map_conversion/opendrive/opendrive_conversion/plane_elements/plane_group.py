@@ -8,6 +8,8 @@ from crdesigner.map_conversion.opendrive.opendrive_conversion.conversion_lanelet
 from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.plane import ParametricLane
 from commonroad.scenario.lanelet import LineMarking
 
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadLanes import RoadMark
+
 
 class ParametricLaneGroup:
     """A group of parametric_lanes can be converted to a
@@ -21,6 +23,7 @@ class ParametricLaneGroup:
         inner_neighbour=None,
         inner_neighbour_same_direction=True,
         outer_neighbour=None,
+        center_marking=None
     ):
         """Initializes a ParametricLaneGroup object.
 
@@ -43,6 +46,7 @@ class ParametricLaneGroup:
         self.traffic_signs = []
         self.stop_lines = []
         self.signal_references = []
+        self.center_marking = center_marking
 
         if parametric_lanes is not None:
             if isinstance(parametric_lanes, list):
@@ -166,62 +170,36 @@ class ParametricLaneGroup:
             else:
                 left_vertices = local_left_vertices
                 right_vertices = local_right_vertices
+        def line_marking_map(marking : RoadMark) -> LineMarking:
+            """
+            Nested helper function that unclutters finding the correct line marking for a given OpenDRIVE
+            RoadMark.
+            :param marking: the considered RoadMark to be converted
+            :return: the converted LineMarking
+            :rtype: LineMarking
+            """
+            if marking is None:
+                return LineMarking.UNKNOWN
+            if marking.type == "solid" or marking.type == "solid solid":
+                return LineMarking.BROAD_SOLID if marking.weight == "bold" else LineMarking.SOLID
+            elif marking.type == "broken":
+                return LineMarking.BROAD_DASHED if marking.weight == "bold" else LineMarking.DASHED
+            return LineMarking.UNKNOWN
 
         for parametric_lane in self.parametric_lanes:
-            mark = LineMarking.UNKNOWN
-            line_marking = parametric_lane.line_marking
-            if line_marking is not None:
-                if parametric_lane.side == "left":
-                    if line_marking.type == "solid":
-                        if line_marking.weight == "standard":
-                            mark = LineMarking.SOLID
-                        elif line_marking.weight == "bold":
-                            mark = LineMarking.BROAD_SOLID
-                        else:
-                            mark = LineMarking.SOLID
-
-                    elif line_marking.type == "broken":
-                        if line_marking.weight == "standard":
-                            mark = LineMarking.DASHED
-                        elif line_marking.weight == "bold":
-                            mark = LineMarking.BROAD_DASHED
-                        else:
-                            mark = LineMarking.DASHED
-
-                    else:
-                        mark = LineMarking.UNKNOWN
-
-                    if not self.parametric_lanes[0].reverse:
-                        line_marking_left_vertices = mark
-                    else:
-                        line_marking_right_vertices = mark
-
-                elif parametric_lane.side == "right":
-
-                    if line_marking.type == "solid":
-                        if line_marking.weight == "standard":
-                            mark = LineMarking.SOLID
-                        elif line_marking.weight == "bold":
-                            mark = LineMarking.BROAD_SOLID
-                        else:
-                            mark = LineMarking.SOLID
-
-                    elif line_marking.type == "broken":
-                        if line_marking.weight == "standard":
-                            mark = LineMarking.DASHED
-                        elif line_marking.weight == "bold":
-                            mark = LineMarking.BROAD_DASHED
-                        else:
-                            mark = LineMarking.DASHED
-
-                    else:
-                        mark = LineMarking.UNKNOWN
-
+            mark = line_marking_map(parametric_lane.line_marking)
+            if parametric_lane.side == "left":
+                if not self.parametric_lanes[0].reverse:
+                    line_marking_left_vertices = mark
+                    line_marking_right_vertices = line_marking_map(self.center_marking)
+                else:
                     line_marking_right_vertices = mark
-                    if not self.parametric_lanes[0].reverse:
-                        line_marking_right_vertices = mark
-                    else:
-                        line_marking_left_vertices = mark
+                    line_marking_left_vertices = line_marking_map(self.center_marking)
+            elif parametric_lane.side == "right":
+                if not self.parametric_lanes[0].reverse:
+                    line_marking_right_vertices = mark
+                else:
+                    line_marking_left_vertices = mark
             else:
                 pass
 
@@ -237,7 +215,7 @@ class ParametricLaneGroup:
 
         def access_map(_set: list, allow: bool, _user: str):
             """
-            Nested helper function that unclutters the code bit.
+            Nested helper function that unclutters the code a bit.
             :param allow: decides whether the current access type should be restricted or permitted
             :param _user: the user to be added or excluded from the user list
             :param _set: the already accumulated set
@@ -281,7 +259,6 @@ class ParametricLaneGroup:
 
         # Adjacent lanes
         self._set_adjacent_lanes(lanelet)
-
         return lanelet
 
     def calc_border(self, border: str, s_pos: float, width_offset: float = 0.0, compute_curvature=True):

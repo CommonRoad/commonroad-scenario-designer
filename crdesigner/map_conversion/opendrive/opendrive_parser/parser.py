@@ -383,7 +383,6 @@ def parse_opendrive_road_lane_section(new_road: Road, lane_section_id: int, lane
             # TODO implementation
 
             newSideLanes.append(new_lane)
-
     new_road.lanes.lane_sections.append(new_lane_section)
 
 

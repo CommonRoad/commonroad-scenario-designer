@@ -3,7 +3,8 @@ from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.pla
     ParametricLaneBorderGroup
 from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.plane_group import ParametricLaneGroup
 from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.border import Border
-from crdesigner.map_conversion.opendrive.opendrive_conversion.utils import encode_road_section_lane_width_id, encode_mark_lane_width_id
+from crdesigner.map_conversion.opendrive.opendrive_conversion.utils import encode_road_section_lane_width_id, \
+    encode_mark_lane_width_id
 from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadPlanView import PlanView
 import numpy as np
 
@@ -41,15 +42,11 @@ class OpenDriveConverter:
             for lane_offset in lane_offsets:
                 if lane_offset.start_pos in reference_border.width_coefficient_offsets:
                     # offset is already there, delete previous entries
-                    idx = reference_border.width_coefficient_offsets.index(
-                        lane_offset.start_pos
-                    )
+                    idx = reference_border.width_coefficient_offsets.index(lane_offset.start_pos)
                     del reference_border.width_coefficient_offsets[idx]
                     del reference_border.width_coefficients[idx]
                 reference_border.width_coefficient_offsets.append(lane_offset.start_pos)
-                reference_border.width_coefficients.append(
-                    lane_offset.polynomial_coefficients
-                )
+                reference_border.width_coefficients.append(lane_offset.polynomial_coefficients)
         else:
             reference_border.width_coefficient_offsets.append(0.0)
             reference_border.width_coefficients.append([0.0])
@@ -57,9 +54,7 @@ class OpenDriveConverter:
         return reference_border
 
     @staticmethod
-    def lane_section_to_parametric_lanes(
-        lane_section, reference_border
-    ) -> List[ParametricLaneGroup]:
+    def lane_section_to_parametric_lanes(lane_section, reference_border) -> List[ParametricLaneGroup]:
         """Convert a whole lane section into a list of ParametricLane objects.
 
         :param lane_section: LaneSection from which to create the list of ParametricLane Objects
@@ -71,14 +66,11 @@ class OpenDriveConverter:
         """
 
         plane_groups = []
-
         for side in ["right", "left"]:
 
             # lanes loaded by opendriveparser are aleady sorted by id
             # coeff_factor decides if border is left or right of the reference line
-            lanes = (
-                lane_section.rightLanes if side == "right" else lane_section.leftLanes
-            )
+            lanes = (lane_section.rightLanes if side == "right" else lane_section.leftLanes)
             coeff_factor = -1.0 if side == "right" else 1.0
 
             # Most inner border gets added first
@@ -87,27 +79,21 @@ class OpenDriveConverter:
             # copy reference border, but set refOffset to start of lane_section
 
             for lane in lanes:
-
                 inner_neighbour_id, outer_neighbour_id, inner_neighbour_same_dir = \
-                    OpenDriveConverter.determine_neighbours(lane)
+                    OpenDriveConverter.determine_neighbours(
+                    lane)
 
                 # Create outer lane border
                 # outer_parametric_lane_border =
 
-                lane_borders.append(
-                    OpenDriveConverter._create_outer_lane_border(
-                        lane_borders, lane, coeff_factor
-                    )
-                )
-
+                lane_borders.append(OpenDriveConverter._create_outer_lane_border(lane_borders, lane, coeff_factor))
+                center_marking = lane_section.centerLanes[0].road_mark[0] if lane.id == 1 and len(
+                        lane_section.centerLanes[0].road_mark) > 0 else None
                 plane_group = ParametricLaneGroup(
-                    id_=encode_road_section_lane_width_id(
-                        lane_section.parentRoad.id, lane_section.idx, lane.id, -1
-                    ),
-                    inner_neighbour=inner_neighbour_id,
-                    inner_neighbour_same_direction=inner_neighbour_same_dir,
-                    outer_neighbour=outer_neighbour_id,
-                )
+                        id_=encode_road_section_lane_width_id(lane_section.parentRoad.id, lane_section.idx, lane.id,
+                                -1), inner_neighbour=inner_neighbour_id,
+                        inner_neighbour_same_direction=inner_neighbour_same_dir, outer_neighbour=outer_neighbour_id,
+                        center_marking=center_marking)
 
                 # Create new lane for each width segment
                 for width in lane.widths:
@@ -130,9 +116,8 @@ class OpenDriveConverter:
                         if width.start_offset >= mark.SOffset:
                             mark_idx += 1
                     # create new lane
-                    parametric_lane = OpenDriveConverter.create_parametric_lane(
-                        lane_borders, width, lane, side, mark_idx
-                    )
+                    parametric_lane = OpenDriveConverter.create_parametric_lane(lane_borders, width, lane, side,
+                            mark_idx)
                     parametric_lane.reverse = bool(lane.id > 0)
                     plane_group.append(parametric_lane)
 
@@ -165,29 +150,14 @@ class OpenDriveConverter:
         else:
             marking = None
 
-        border_group = ParametricLaneBorderGroup(
-            inner_border=lane_borders[-2],
-            outer_border=lane_borders[-1],
-            inner_border_offset=width.start_offset + lane_borders[-1].ref_offset,
-            outer_border_offset=width.start_offset,
-        )
+        border_group = ParametricLaneBorderGroup(inner_border=lane_borders[-2], outer_border=lane_borders[-1],
+                inner_border_offset=width.start_offset + lane_borders[-1].ref_offset,
+                outer_border_offset=width.start_offset, )
 
         parametric_lane = ParametricLane(
-            id_=encode_mark_lane_width_id(
-                lane.lane_section.parentRoad.id,
-                lane.lane_section.idx,
-                lane.id,
-                width.idx,
-                mark_idx,
-            ),
-            type_=lane.type,
-            length=width.length,
-            border_group=border_group,
-            speed=lane.speed,
-            line_marking=marking,
-            side=side,
-            access=lane.access
-        )
+                id_=encode_mark_lane_width_id(lane.lane_section.parentRoad.id, lane.lane_section.idx, lane.id,
+                        width.idx, mark_idx, ), type_=lane.type, length=width.length, border_group=border_group,
+                speed=lane.speed, line_marking=marking, side=side, access=lane.access)
         return parametric_lane
 
     @staticmethod
@@ -223,9 +193,7 @@ class OpenDriveConverter:
 
         for width in lane.widths:
             border.width_coefficient_offsets.append(width.start_offset)
-            border.width_coefficients.append(
-                [x * coeff_factor for x in width.polynomial_coefficients]
-            )
+            border.width_coefficients.append([x * coeff_factor for x in width.polynomial_coefficients])
         return border
 
     @staticmethod
@@ -259,12 +227,10 @@ class OpenDriveConverter:
                 outer_lane_id = -2
             inner_neighbour_same_dir = False
 
-        inner_neighbour_id = encode_road_section_lane_width_id(
-            lane.lane_section.parentRoad.id, lane.lane_section.idx, inner_lane_id, -1
-        )
+        inner_neighbour_id = encode_road_section_lane_width_id(lane.lane_section.parentRoad.id, lane.lane_section.idx,
+                inner_lane_id, -1)
 
-        outer_neighbour_id = encode_road_section_lane_width_id(
-            lane.lane_section.parentRoad.id, lane.lane_section.idx, outer_lane_id, -1
-        )
+        outer_neighbour_id = encode_road_section_lane_width_id(lane.lane_section.parentRoad.id, lane.lane_section.idx,
+                outer_lane_id, -1)
 
         return inner_neighbour_id, outer_neighbour_id, inner_neighbour_same_dir
