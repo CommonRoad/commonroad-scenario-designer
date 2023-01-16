@@ -381,7 +381,6 @@ def parse_opendrive_road_lane_section(new_road: Road, lane_section_id: int, lane
                     [str(_access.get("restriction")), str(_access.get("rule")), float(_access.get("sOffset"))]]
             # Lane Height
             # TODO implementation
-
             newSideLanes.append(new_lane)
     new_road.lanes.lane_sections.append(new_lane_section)
 
