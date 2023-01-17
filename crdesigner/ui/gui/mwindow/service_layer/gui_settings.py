@@ -5,7 +5,8 @@ import yaml
 from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.commonroad_viewer.service_layer.draw_params_updater import \
     set_draw_params
 from crdesigner.ui.gui.mwindow.service_layer import config
-
+import os
+from crdesigner.configurations.definition import ROOT_DIR
 
 from crdesigner.ui.gui.mwindow.service_layer import transfer
 class GUISettings:
@@ -127,12 +128,14 @@ class GUISettings:
         '''
         the variables in config.py will be changed back to the default values, not the file itself
         '''
-        transfer.transfer_yaml_to_config('crdesigner/configurations/default_settings.yaml', config)
-        with open('crdesigner/configurations/default_settings.yaml') as f:
+        path_to_default_settings = os.path.join(ROOT_DIR, 'default_settings.yaml')
+        transfer.transfer_yaml_to_config(path_to_default_settings, config)
+        with open(path_to_default_settings) as f:
             data = yaml.load(f, Loader=yaml.FullLoader)
         self.set_draw_params_gui()
 
-        with open('crdesigner/configurations/custom_settings.yaml', 'w') as yaml_file:
+        path_to_custom_settings = os.path.join(ROOT_DIR, 'custom_settings.yaml')
+        with open(path_to_custom_settings, 'w') as yaml_file:
             yaml_file.write(yaml.dump(data, default_flow_style=False))
         self.parent.canvas.update_obstacle_trajectory_params()
         if self.parent.cr_designer.animated_viewer_wrapper.cr_viewer.current_scenario != None:
@@ -144,11 +147,12 @@ class GUISettings:
         '''
         when clicking on ok button the changed settings will be written into the custom_settings.yaml file
         '''
-        with open('crdesigner/configurations/custom_settings.yaml') as f:
+        path_to_custom_settings = os.path.join(ROOT_DIR, 'custom_settings.yaml')
+        with open(path_to_custom_settings) as f:
             data = yaml.load(f, Loader=yaml.FullLoader)
         for key in dir(config):
             yaml_key = key.lower()
             if yaml_key in data:
                 data[yaml_key] = getattr(config, key)
-        with open('crdesigner/configurations/custom_settings.yaml', 'w') as yaml_file:
+        with open(path_to_custom_settings, 'w') as yaml_file:
             yaml_file.write(yaml.dump(data, default_flow_style=False))
