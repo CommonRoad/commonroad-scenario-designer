@@ -345,21 +345,17 @@ class ObstacleToolboxUI(Toolbox):
 
     def remove_dynamic_obstacle_fields(self):
         """Method to remove the fields related only to dynamic obstacles."""
-        try:
-            self.layout_obstacle_information_groupbox.removeRow(self.initial_state_group_box)
-            self.layout_obstacle_information_groupbox.removeRow(self.waypoint_group_box)
-        except Exception as e:
-            print(e)
-            pass
+
+        self.layout_obstacle_information_groupbox.removeRow(self.initial_state_group_box)
+        self.layout_obstacle_information_groupbox.removeRow(self.waypoint_group_box)
+
 
     def remove_position(self):
         """
         removes the position fields
         """
-        try:
-            self.layout_obstacle_information_groupbox.removeRow(self.position_text_field_layout)
-        except Exception:
-            pass
+        self.layout_obstacle_information_groupbox.removeRow(self.position_text_field_layout)
+
 
     def toggle_dynamic_static(self):
         """
@@ -420,20 +416,18 @@ class ObstacleToolboxUI(Toolbox):
         if self.obstacle_dyn_stat.currentText() == "Dynamic":
             self.toggle_dynamic_static()
 
-    def adjust_obstacle_type_dropdown(self, selected_type):
+    def adjust_obstacle_type_dropdown(self, selected_type:QComboBox):
         """This method adjusts the obstacle type depending on whether static or dynamic obstacles are selected.
         For example, a parkedVehicle cannot be a dynamic obstacle."""
         self.obstacle_type.clear()
         if selected_type == "Dynamic":
-            for e in ObstacleType:
-                if e.value in ["car", "bus", "truck", "bicycle", "pedestrian", "priorityVehicle", "train", "motorcycle",
-                               "taxi", "unknown"]:
-                    self.obstacle_type.addItem(e.value)
+            self.obstacle_type.addItems(
+                    ["car", "bus", "truck", "bicycle", "pedestrian", "priorityVehicle", "train", "motorcycle", "taxi",
+                     "unknown"])
         elif selected_type == "Static":
-            for e in ObstacleType:
-                if e.value in ["unknown", "parkedVehicle", "constructionZone", "roadBoundary", "building", "pillar",
-                               "median_strip"]:
-                    self.obstacle_type.addItem(e.value)
+            self.obstacle_type.addItems(
+                    ["unknown", "parkedVehicle", "constructionZone", "roadBoundary", "building", "pillar",
+                     "median_strip"])
 
     def display_obstacle_id(self, generated_id):
         """This method displays the automatically generated ID as a placeholder text for the obstacle ID.

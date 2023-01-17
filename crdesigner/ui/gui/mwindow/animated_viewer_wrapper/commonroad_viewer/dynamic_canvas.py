@@ -8,7 +8,7 @@ from PyQt5.QtCore import Qt
 from PyQt5 import QtCore
 import numpy as np
 from commonroad.scenario.state import InputState, InitialState
-from matplotlib.backend_bases import MouseButton
+from matplotlib.backend_bases import MouseButton,MouseEvent
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from scipy.interpolate import interp1d
@@ -666,7 +666,12 @@ class DynamicCanvas(FigureCanvas):
             self._select_lanelet(False, [[last_merged_index]])
         self.parent.road_network_toolbox.callback(self.scenario)
 
-    def activate_trajectory_mode(self, is_active):
+    def activate_trajectory_mode(self, is_active: bool):
+        """
+               activates and deactivates trajectory mode
+
+               :param: bool to see if the trajectory mode is activated
+               """
         if is_active:
             obstacle = self.parent.obstacle_toolbox.active_obstacle
             if obstacle is None:
@@ -675,14 +680,14 @@ class DynamicCanvas(FigureCanvas):
             y = obstacle.initial_state.position[1]
             state_list = obstacle.prediction.trajectory.state_list
             state = state_list[-1]
+            self.waypoints_list.append((x, y))
             if isinstance(state, InitialState):
-                self.waypoints_list.append((x,y))
                 self.draw_trajectory_first_point = [x, y]
             else:
-                self.waypoints_list.append((x, y))
                 for s in state_list:
-                    self.waypoints_list.append((s.position[0],s.position[1]))
-                self.draw_trajectory_first_point = [obstacle.prediction.trajectory.final_state.position[0], obstacle.prediction.trajectory.final_state.position[1]]
+                    self.waypoints_list.append((s.position[0], s.position[1]))
+                self.draw_trajectory_first_point = [obstacle.prediction.trajectory.final_state.position[0],
+                                                    obstacle.prediction.trajectory.final_state.position[1]]
 
 
             self.mpl_disconnect(self.button_press_event_cid)
@@ -694,7 +699,7 @@ class DynamicCanvas(FigureCanvas):
             if self.draw_trajectory_preview:
                 self.draw_trajectory_preview.pop(0).remove()
             self.draw_trajectory_first_point = None
-            self.waypoints_list=[]
+            self.waypoints_list = []
             self.mpl_disconnect(self.button_press_event_cid)
             self.mpl_disconnect(self.motion_notify_event_cid)
             self.button_release_event_cid = self.mpl_connect('button_release_event',
@@ -722,7 +727,12 @@ class DynamicCanvas(FigureCanvas):
             self.reset_toolbar()
             self.update_plot()
 
-    def draw_trajectory_line(self, mouse_event):
+    def draw_trajectory_line(self, mouse_event: MouseEvent):
+        """
+                       draws waypoints and line between waypoints on the canvas
+
+                       :param: mouse_event that was clicked on the canvas
+                       """
         x2 = mouse_event.xdata
         y2 = mouse_event.ydata
 
@@ -740,7 +750,11 @@ class DynamicCanvas(FigureCanvas):
                                                                                         self.waypoints_list[i+1][1]], color="blue", zorder=21)
         self.update_plot()
 
-    def trajectory_mode_preview_line(self, mouse_move_event):
+    def trajectory_mode_preview_line(self, mouse_move_event: MouseEvent):
+        """           draws preview line
+
+                       :param: mouse_event for the coordinates of the waypoint
+                               """
         x = mouse_move_event.xdata
         y = mouse_move_event.ydata
         if not x:

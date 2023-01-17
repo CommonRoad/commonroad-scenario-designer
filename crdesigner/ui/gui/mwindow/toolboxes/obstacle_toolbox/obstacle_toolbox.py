@@ -358,9 +358,9 @@ class ObstacleToolbox(QDockWidget):
                 waypoint clicked with mouse on the canvas,a new state is appended to a state list and a new trajectory prediction object
                 is created for the selected dynamic obstacle.
 
-                :param x2: The x point which was clickes on the canvas
+                :param x2: The x point which was clicked on the canvas
                 :type key: float
-                :param y2: The x point which was clickes on the canvas
+                :param y2: The x point which was clicked on the canvas
                 :type key: float
                 """
 
@@ -369,6 +369,7 @@ class ObstacleToolbox(QDockWidget):
 
         state_list = obstacle.prediction.trajectory.state_list
         state = state_list[-1]
+        # Update dynamic obstacle variables
         if isinstance(state,InitialState):
             state_list=[]
             self.x1 = obstacle.initial_state.position[0]
@@ -407,19 +408,18 @@ class ObstacleToolbox(QDockWidget):
         self.callback(self.current_scenario)
 
 
-    def _input_via_ks_model_with_mouse(self,x2:float,y2:float) :
-        """This method is resolving user input when using a kinematic single-track model. The KS model uses acceleration
-               in the respective directions and additionally takes a steering_angle_speed that steers the model
-               left/right.
+    def _input_via_ks_model_with_mouse(self,x2:float,y2:float)->list:
+        """This method is resolving user input when using a kinematic single-track model.It converts the user input into
+        a list of states
 
-               :param x2: The x point which was clickes on the canvas
+               :param x2: The x point which was clicked on the canvas
                 :type key: float
-                :param y2: The x point which was clickes on the canvas
+                :param y2: The x point which was clicked on the canvas
                 :type key: float
-               :return: The input state to the forward simulation
+               :return: The input state to the trajectory
                :rtype: list of State
                """
-        input_state_list=[]
+        input_state_list = []
 
         if ( self.obstacle_toolbox_ui.waypoint_time_step.text()!= ""):
             time_step_size = float(self.obstacle_toolbox_ui.waypoint_time_step.text())
