@@ -87,10 +87,8 @@ class MapConversionToolbox(QDockWidget):
     def connect_gui_elements(self):
         self.converter_toolbox.button_download_osm_file.clicked.connect(lambda: self.download_osm_map())
         self.converter_toolbox.button_load_osm_file.clicked.connect(lambda: self.load_osm_file())
-        self.converter_toolbox.button_load_osm_edit_state.clicked.connect(lambda: self.load_osm_edit_state())
         self.converter_toolbox.button_start_osm_conversion.clicked.connect(lambda: self.convert_osm_to_cr_with_spinner())
         self.converter_toolbox.button_start_osm_conversion_with_sumo_parser.clicked.connect(lambda: self.convert_osm_to_cr_with_sumo_with_spinner())
-        self.converter_toolbox.button_open_osm_settings.clicked.connect(lambda: self.open_osm_settings())
 
         self.converter_toolbox.button_load_opendrive.clicked.connect(lambda: self.load_open_drive())
         self.converter_toolbox.button_convert_opendrive.clicked.connect(lambda: self.convert_open_drive_to_cr())
