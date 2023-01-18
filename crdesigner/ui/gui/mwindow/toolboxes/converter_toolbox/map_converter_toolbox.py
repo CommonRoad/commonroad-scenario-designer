@@ -1,7 +1,7 @@
 from pathlib import Path
 import pickle
 import subprocess
-from typing import Optional
+from typing import Callable, Optional
 import warnings
 from lxml import etree
 
@@ -34,6 +34,7 @@ from crdesigner.map_conversion.lanelet2.cr2lanelet import CR2LaneletConverter
 from crdesigner.configurations.get_configs import get_configs
 
 from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMO_AVAILABLE
+from crdesigner.ui.gui.mwindow.toolboxes.converter_toolbox.waitingspinnerwidget import QtWaitingSpinner
 if SUMO_AVAILABLE:
     from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMOSimulation
     from crdesigner.ui.gui.mwindow.service_layer.sumo_settings import SUMOSettings
@@ -151,10 +152,10 @@ class MapConversionToolbox(QDockWidget):
         self.current_scenario = convert_to_scenario(graph) 
         self.callback(self.current_scenario)
 
-    def convert_osm_with_spinner(self, functionName) -> None:
+    def convert_osm_with_spinner(self, convert_function : Callable[[], None]) -> None:
         if self.osm_file is not None:
             self.startSpinner(self.converter_toolbox.OsmSpinner)
-            runnable = RequestRunnable(functionName, self)
+            runnable = RequestRunnable(convert_function, self)
             QThreadPool.globalInstance().start(runnable)
         else:
             QMessageBox.warning(
@@ -163,7 +164,7 @@ class MapConversionToolbox(QDockWidget):
             "No file selected.",
             QMessageBox.Ok)
             return
-            
+
     def convert_osm_to_cr(self) -> None:
         """
         Starts the OSM conversion process by picking a file and showing the edge edit GUI.
@@ -221,7 +222,7 @@ class MapConversionToolbox(QDockWidget):
         self.converter_toolbox.OsmSpinner.stop() 
         self.converter_toolbox.OpenDriveSpinner.stop() 
 
-    def startSpinner(self, spinner):
+    def startSpinner(self, spinner: QtWaitingSpinner):
         if(spinner.isSpinning()):
             spinner.stop() 
         spinner.start()    
