@@ -23,9 +23,15 @@ class ObstacleProfileToolbox(QDockWidget):
     def __init__(self, current_scenario: Scenario, callback, tmp_folder, text_browser, mwindow):
         super().__init__("Obstacle Profile Toolbox")
 
+        self.current_time = QSlider(Qt.Horizontal)
+        self.current_time.setValue(0)
+        self.current_time.setMinimum(0)
+        self.current_time.setMaximum(99)
+        mwindow.animated_viewer_wrapper.cr_viewer.time_step.subscribe(self.current_time.setValue)
+
         self.current_scenario = current_scenario
         self.callback = callback
-        self.obstacle_profile_toolbox_ui = ObstacleProvfileToolboxUI(text_browser, mwindow)
+        self.obstacle_profile_toolbox_ui = ObstacleProfileToolboxUI(text_browser, mwindow)
         self.adjust_ui()
         self.connect_gui_elements()
         self.tmp_folder = tmp_folder
@@ -35,8 +41,7 @@ class ObstacleProfileToolbox(QDockWidget):
         self.canvas = DynamicCanvas()
         self.obstacle_color = None
         # subscribing of observers need a function to call -> current time lambda
-        self.current_time = lambda x: x
-        mwindow.animated_viewer_wrapper.cr_viewer.time_step.subscribe(self.current_time)
+
 
         # for profile visualisation
         self.sel_point = None
@@ -71,6 +76,9 @@ class ObstacleProfileToolbox(QDockWidget):
 
         self.obstacle_profile_toolbox_ui.selected_obstacle.currentTextChanged.connect(
                 lambda: self.update_obstacle_information())
+
+        self.current_time.valueChanged.connect(
+                lambda: self.update_animation())
 
     def refresh_toolbox(self, scenario: Scenario):
         self.current_scenario = scenario
@@ -212,7 +220,9 @@ class ObstacleProfileToolbox(QDockWidget):
             self.ymin = None
             self.ymax = None
 
-            if profile:
+            if profile and self.obstacle_profile_toolbox_ui.animation.isChecked():
+                self.animate_plot(profile)
+            elif profile:
                 self.draw_plot(time, profile)
 
     @staticmethod
@@ -390,6 +400,10 @@ class ObstacleProfileToolbox(QDockWidget):
         ax.callbacks.connect('xlim_changed', self.on_xlim_change)
         ax.callbacks.connect('ylim_changed', self.on_ylim_change)
 
+    def update_animation(self):
+        if self.obstacle_profile_toolbox_ui.animation.isChecked():
+            self.plot_obstacle_state_profile()
+
     def animate_plot(self, profile):
         """
         draws the state plot in the obstacle toolbox
@@ -400,3 +414,5 @@ class ObstacleProfileToolbox(QDockWidget):
         :param ymin: y lower bound to be drawn
         :param: ymax: y upper bound to be drawn
         """
+        time = [i for i in range(0, self.current_time.value() + 1)]
+        self.draw_plot(time, profile[0:self.current_time.value() + 1])
