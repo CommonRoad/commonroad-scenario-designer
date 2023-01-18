@@ -3,11 +3,11 @@ from typing import Optional
 import warnings
 from lxml import etree
 
-from commonroad.scenario.scenario import Scenario
+from PyQt5.QtWidgets import QDockWidget, QMainWindow, QFileDialog, QMessageBox
+from PyQt5.QtCore import Qt, QRunnable, QThreadPool, QMetaObject, Q_ARG, pyqtSlot
 
-from PyQt5.QtWidgets import *
-from PyQt5.QtCore import *
-from commonroad.scenario.traffic_sign import *
+from commonroad.scenario.scenario import Scenario
+from crdesigner.map_conversion.map_conversion_interface import osm_to_commonroad_using_sumo
 
 from crdesigner.ui.gui.mwindow.toolboxes.converter_toolbox.map_converter_toolbox_ui import MapConversionToolboxUI
 from crdesigner.ui.gui.mwindow.service_layer.util import select_local_file
@@ -37,13 +37,23 @@ if SUMO_AVAILABLE:
     from crdesigner.ui.gui.mwindow.service_layer.sumo_settings import SUMOSettings
     from crdesigner.map_conversion.sumo_map.sumo2cr import convert_net_to_cr
 
-from crdesigner.ui.gui.mwindow.service_layer.osm_gui_modules.gui import CARTOPY_AVAILABLE
+class RequestRunnable(QRunnable):
+    def __init__(self, fun, mapConversionToolbox):
+        QRunnable.__init__(self)
+        self.fun = fun
+        self.mapConversionToolbox = mapConversionToolbox
 
+    def run(self):
+        self.fun()
+        QMetaObject.invokeMethod(self.mapConversionToolbox, "stopSpinner",
+                                Qt.QueuedConnection,
+                                Q_ARG(str, "Conversion Ended"))
 
 class MapConversionToolbox(QDockWidget):
     def __init__(self, current_scenario, callback, text_browser, tmp_folder: str, mwindow):
         super().__init__("Map Converter Toolbox")
         self.converter_toolbox = MapConversionToolboxUI(mwindow)
+        self.current_scenario = current_scenario
         self.callback = callback
         self.text_browser = text_browser
         self.adjust_ui()
@@ -75,9 +85,8 @@ class MapConversionToolbox(QDockWidget):
     def connect_gui_elements(self):
         self.converter_toolbox.button_download_osm_file.clicked.connect(lambda: self.download_osm_map())
         self.converter_toolbox.button_load_osm_file.clicked.connect(lambda: self.load_osm_file())
-        self.converter_toolbox.button_load_osm_edit_state.clicked.connect(lambda: self.load_osm_edit_state())
-        self.converter_toolbox.button_start_osm_conversion.clicked.connect(lambda: self.convert_osm_to_cr())
-        self.converter_toolbox.button_open_osm_settings.clicked.connect(lambda: self.open_osm_settings())
+        self.converter_toolbox.button_start_osm_conversion.clicked.connect(lambda: self.convert_osm_to_cr_with_spinner())
+        self.converter_toolbox.button_start_osm_conversion_with_sumo_parser.clicked.connect(lambda: self.convert_osm_to_cr_with_sumo_with_spinner())
 
         self.converter_toolbox.button_load_opendrive.clicked.connect(lambda: self.load_open_drive())
         self.converter_toolbox.button_convert_opendrive.clicked.connect(lambda: self.convert_open_drive_to_cr())
@@ -137,8 +146,8 @@ class MapConversionToolbox(QDockWidget):
             QMessageBox.warning(self, "Internal Error", "There was an error during the processing of the graph.\n\n{}"
                                 .format(e), QMessageBox.Ok)
             return
-        scenario = convert_to_scenario(graph)
-        self.callback(scenario)
+        self.current_scenario = convert_to_scenario(graph)
+        self.callback(self.current_scenario)
 
     def convert_osm_to_cr(self) -> None:
         """
@@ -160,28 +169,71 @@ class MapConversionToolbox(QDockWidget):
                 "Warning",
                 "Map unreadable: " + str(e),
                 QMessageBox.Ok)
-            return
-        if self.converter_toolbox.osm_conversion_edit_manually_selection.isChecked() and CARTOPY_AVAILABLE:
-            self.edge_edit_embedding(self.graph)
-        else:
-            self.hidden_osm_conversion(self.graph)
-        if not CARTOPY_AVAILABLE:
-            warnings.warn("OSM edit mode not available!")
+        self.hidden_osm_conversion(self.graph)
         self.converter_toolbox.osm_loading_status.setText("no file selected")
         self.osm_file = None
 
-    def edge_edit_embedding(self, graph: rg.Graph):
-        """
-        sets edge edit embedding as main window
-
-        :param graph: the graph to edit
-        :return: None
-        """
-        if graph is not None:
-            self.edge_edit_window = EdgeEdit(self, graph, None)
-            self.osm_edit_window.show()
+    def convert_osm_to_cr_with_spinner(self) -> None:
+        if self.osm_file is not None:
+            self.startSpinner()
+            runnable = RequestRunnable(self.convert_osm_to_cr, self)
+            QThreadPool.globalInstance().start(runnable)
         else:
-            print("no graph loaded")
+            QMessageBox.warning(
+            self,
+            "Warning",
+            "No file selected.",
+            QMessageBox.Ok)
+            return
+
+    def convert_osm_to_cr_with_sumo(self) -> None:
+        """
+        Starts the OSM conversion process using SUMO Parser by picking a file and showing the edge edit GUI.
+        """
+        try:
+            if self.osm_file is not None:
+              self.current_scenario = osm_to_commonroad_using_sumo(self.osm_file)
+              self.callback(self.current_scenario)
+            else:
+                QMessageBox.warning(
+                    self,
+                    "Warning",
+                    "No file selected.",
+                    QMessageBox.Ok)
+                return
+        except ValueError as e:
+            QMessageBox.critical(
+                self,
+                "Warning",
+                "Map unreadable: " + str(e),
+                QMessageBox.Ok)
+            return
+        self.converter_toolbox.osm_loading_status.setText("no file selected")
+        self.osm_file = None
+
+    def convert_osm_to_cr_with_sumo_with_spinner(self) -> None:
+        if self.osm_file is not None:
+            self.startSpinner()
+            runnable = RequestRunnable(self.convert_osm_to_cr_with_sumo, self)
+            QThreadPool.globalInstance().start(runnable)
+        else:
+            QMessageBox.warning(
+            self,
+            "Warning",
+            "No file selected.",
+            QMessageBox.Ok)
+            return
+
+    @pyqtSlot(str)
+    def stopSpinner(self, data):
+        print(data)
+        self.callback(self.current_scenario)
+        self.converter_toolbox.spinner.stop()
+
+    def startSpinner(self):
+        if(self.converter_toolbox.spinner.isSpinning()):
+            self.converter_toolbox.spinner.stop()
+        self.converter_toolbox.spinner.start()
 
     def lane_link_embedding(self, graph: rg.Graph):
         """

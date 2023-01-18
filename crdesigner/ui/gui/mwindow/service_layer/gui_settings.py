@@ -1,15 +1,16 @@
 """ window with settings for the Scenario Designer """
-from PyQt5.QtWidgets import QMainWindow
 
-from crdesigner.ui.gui.mwindow.service_layer.gui_resources.gui_settings_ui import UIGUISettings
-from crdesigner.ui.gui.mwindow.service_layer import config
+import yaml
+
 from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.commonroad_viewer.service_layer.draw_params_updater import \
     set_draw_params
-from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.commonroad_viewer.dynamic_canvas import DynamicCanvas
+from crdesigner.ui.gui.mwindow.service_layer import config
+import os
+from crdesigner.configurations.definition import ROOT_DIR
 
-
+from crdesigner.ui.gui.mwindow.service_layer import transfer
 class GUISettings:
-    
+
     def __init__(self, parent):
         self.darkmode = config.DARKMODE
         self.parent = parent
@@ -71,13 +72,22 @@ class GUISettings:
         # use if settings get extended
         return True
 
+    def set_draw_params_gui(self):
+        set_draw_params(trajectory=config.DRAW_TRAJECTORY, intersection=config.DRAW_INTERSECTIONS,
+                        obstacle_label=config.DRAW_OBSTACLE_LABELS, obstacle_icon=config.DRAW_OBSTACLE_ICONS,
+                        obstacle_direction=config.DRAW_OBSTACLE_DIRECTION, obstacle_signal=config.DRAW_OBSTACLE_SIGNALS,
+                        occupancy=config.DRAW_OCCUPANCY, traffic_signs=config.DRAW_TRAFFIC_SIGNS,
+                        traffic_lights=config.DRAW_TRAFFIC_LIGHTS, incoming_lanelets=config.DRAW_INCOMING_LANELETS,
+                        successors=config.DRAW_SUCCESSORS, intersection_labels=config.DRAW_INTERSECTION_LABELS,
+                        colorscheme=self.parent.cr_designer.colorscheme(), )
+
     def apply_close(self) -> None:
         """
         closes settings if settings could be saved to config
         """
         if self.has_valid_entries():
             self.save_to_config()
-            self.darkmode= config.DARKMODE
+            self.darkmode = config.DARKMODE
 
             set_draw_params(trajectory=self.window.chk_draw_trajectory.isChecked(),
                             intersection=self.window.chk_draw_intersection.isChecked(),
@@ -91,26 +101,15 @@ class GUISettings:
                             incoming_lanelets=self.window.chk_draw_incoming_lanelet.isChecked(),
                             successors=self.window.chk_draw_successors.isChecked(),
                             intersection_labels=self.window.chk_draw_intersection_label.isChecked(),
-                            colorscheme=self.parent.cr_designer.colorscheme(),
-                            )
+                            colorscheme=self.parent.cr_designer.colorscheme(), )
+            # to save the changed settings into custom_settings.yaml file
+            self.save_config_to_custom_settings()
         else:
             print("invalid settings")
 
     def update_window(self):
         config.DARKMODE = self.window.chk_darkmode.isChecked()
-        set_draw_params(trajectory=config.DRAW_TRAJECTORY,
-                        intersection=config.DRAW_INTERSECTIONS,
-                        obstacle_label=config.DRAW_OBSTACLE_LABELS,
-                        obstacle_icon=config.DRAW_OBSTACLE_ICONS,
-                        obstacle_direction=config.DRAW_OBSTACLE_DIRECTION,
-                        obstacle_signal=config.DRAW_OBSTACLE_SIGNALS,
-                        occupancy=config.DRAW_OCCUPANCY,
-                        traffic_signs=config.DRAW_TRAFFIC_SIGNS,
-                        traffic_lights=config.DRAW_TRAFFIC_LIGHTS,
-                        incoming_lanelets=config.DRAW_INCOMING_LANELETS,
-                        successors=config.DRAW_SUCCESSORS,
-                        intersection_labels=config.DRAW_INTERSECTION_LABELS,
-                        colorscheme=self.parent.cr_designer.colorscheme(), )
+        self.set_draw_params_gui()
         if self.parent.cr_designer.animated_viewer_wrapper.cr_viewer.current_scenario != None:
             self.parent.cr_designer.animated_viewer_wrapper.cr_viewer.update_plot()
         self.parent.cr_designer.update_window()
@@ -118,15 +117,42 @@ class GUISettings:
 
     def close(self):
         config.DARKMODE = self.darkmode
-        set_draw_params(trajectory=config.DRAW_TRAJECTORY, intersection=config.DRAW_INTERSECTIONS,
-                        obstacle_label=config.DRAW_OBSTACLE_LABELS, obstacle_icon=config.DRAW_OBSTACLE_ICONS,
-                        obstacle_direction=config.DRAW_OBSTACLE_DIRECTION, obstacle_signal=config.DRAW_OBSTACLE_SIGNALS,
-                        occupancy=config.DRAW_OCCUPANCY, traffic_signs=config.DRAW_TRAFFIC_SIGNS,
-                        traffic_lights=config.DRAW_TRAFFIC_LIGHTS, incoming_lanelets=config.DRAW_INCOMING_LANELETS,
-                        successors=config.DRAW_SUCCESSORS, intersection_labels=config.DRAW_INTERSECTION_LABELS,
-                        colorscheme=self.parent.cr_designer.colorscheme(), )
+        self.set_draw_params_gui()
         self.parent.canvas.update_obstacle_trajectory_params()
         if self.parent.cr_designer.animated_viewer_wrapper.cr_viewer.current_scenario != None:
             self.parent.cr_designer.animated_viewer_wrapper.cr_viewer.update_plot()
         self.parent.cr_designer.update_window()
         self.parent.window.update_window()
+
+    def apply_set_to_default(self):
+        '''
+        the variables in config.py will be changed back to the default values, not the file itself
+        '''
+        path_to_default_settings = os.path.join(ROOT_DIR, 'default_settings.yaml')
+        transfer.transfer_yaml_to_config(path_to_default_settings, config)
+        with open(path_to_default_settings) as f:
+            data = yaml.load(f, Loader=yaml.FullLoader)
+        self.set_draw_params_gui()
+
+        path_to_custom_settings = os.path.join(ROOT_DIR, 'custom_settings.yaml')
+        with open(path_to_custom_settings, 'w') as yaml_file:
+            yaml_file.write(yaml.dump(data, default_flow_style=False))
+        self.parent.canvas.update_obstacle_trajectory_params()
+        if self.parent.cr_designer.animated_viewer_wrapper.cr_viewer.current_scenario != None:
+            self.parent.cr_designer.animated_viewer_wrapper.cr_viewer.update_plot()
+        self.parent.cr_designer.update_window()
+        self.parent.window.update_window()
+
+    def save_config_to_custom_settings(self):
+        '''
+        when clicking on ok button the changed settings will be written into the custom_settings.yaml file
+        '''
+        path_to_custom_settings = os.path.join(ROOT_DIR, 'custom_settings.yaml')
+        with open(path_to_custom_settings) as f:
+            data = yaml.load(f, Loader=yaml.FullLoader)
+        for key in dir(config):
+            yaml_key = key.lower()
+            if yaml_key in data:
+                data[yaml_key] = getattr(config, key)
+        with open(path_to_custom_settings, 'w') as yaml_file:
+            yaml_file.write(yaml.dump(data, default_flow_style=False))

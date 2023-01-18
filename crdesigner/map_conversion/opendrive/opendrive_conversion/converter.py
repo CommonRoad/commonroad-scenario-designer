@@ -171,7 +171,8 @@ class OpenDriveConverter:
             border_group=border_group,
             speed=lane.speed,
             line_marking=marking,
-            side=side
+            side=side,
+            access=lane.access
         )
         return parametric_lane
 

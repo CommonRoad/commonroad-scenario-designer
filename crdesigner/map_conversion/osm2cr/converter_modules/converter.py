@@ -76,7 +76,7 @@ def step_collection_3(graph: road_graph.Graph) -> road_graph.Graph:
     graph.create_lane_bounds(config.INTERPOLATION_DISTANCE_INTERNAL / config.INTERPOLATION_DISTANCE)
     if config.DELETE_INVALID_LANES:
         logging.info("deleting invalid lanes")
-        graph.delete_invalid_lanes()
+        graph.delete_invalid_lanes()  
     if isinstance(graph, road_graph.SublayeredGraph):
         if config.DELETE_INVALID_LANES:
             graph.sublayer_graph.delete_invalid_lanes()

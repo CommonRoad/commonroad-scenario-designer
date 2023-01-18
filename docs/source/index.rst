@@ -32,7 +32,6 @@ The required dependencies for running the CommonRoad Scenario Designer are:
 * Pillow>=7.1.1
 * mercantile>=1.1.3
 * utm>=0.5.0
-* cartopy>=0.17.0
 * PyQt5>=5.12.2
 * matplotlib>=3.1.0
 * shapely>=1.7.0
@@ -42,11 +41,7 @@ The required dependencies for running the CommonRoad Scenario Designer are:
 * iso3166>=1.0.1
 * networkx>=2.5
 
-Cartopy can be easily installed with::
-
-   conda install -c conda-forge cartopy
-
-from your Anaconda environment. For the other packages, we recommend to use the provided `requirements.txt`::
+From your Anaconda environment. For all the packages, we recommend to use the provided `requirements.txt`::
 
     pip install -r requirements.txt
 

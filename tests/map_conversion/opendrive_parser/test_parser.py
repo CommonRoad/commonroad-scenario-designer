@@ -1,10 +1,13 @@
 import unittest
 import os
+
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadLanes import RoadMark
 from crdesigner.map_conversion.opendrive.opendrive_parser.parser import *
 from crdesigner.map_conversion.opendrive.opendrive_parser.elements.geometry import *
 
-
 class TestParser(unittest.TestCase):
+
+
     def test_parse_opendrive(self):
         file_path = os.path.dirname(os.path.abspath(__file__)) + '/../test_maps/opendrive/CulDeSac.xodr'
         xodr_file = parse_opendrive(file_path)
@@ -271,6 +274,72 @@ class TestParser(unittest.TestCase):
         self.assertEqual(1.6766826171875003e+1, road.objects[0].width)
         self.assertEqual(1.1869543457031250e+1, road.objects[0].validLength)
 
+    def test_lane_access(self):
+        file_path = os.path.dirname(os.path.abspath(__file__)) + \
+                    '/../test_maps/opendrive/straight_road_lane_access.xodr'
+        with open("{}".format(file_path), "r") as file_in:  # no idea why cleaning up the namespace is not required
+            root = etree.parse(file_in).getroot()          # for any other tests in this class but this test breaks
+            for elem in root.getiterator():                # without it
+                if not (isinstance(elem, etree._Comment) or isinstance(elem, etree._ProcessingInstruction)):
+                    elem.tag = etree.QName(elem).localname
+            etree.cleanup_namespaces(root)
+        laneSection = root.find("road").find("lanes").find("laneSection")
+
+        road = Road()
+        parse_opendrive_road_lane_section(new_road=road, lane_section=laneSection, lane_section_id=1)
+        self.assertEqual([["pedestrian", "allow", 0.0]], road.lanes.lane_sections[0].leftLanes[0].access)
+
+    def test_default_vals(self):
+        """
+        Test that investigates the functionality of default values of OpenDRIVE .xodr maps
+        within the OpenDRIVE parser in the conversion.
+        """
+        file_path = os.path.dirname(
+            os.path.abspath(__file__)) + '/../test_maps/opendrive/straight_road_default.xodr'
+        with open("{}".format(file_path), "r") as file_in:
+            root = etree.parse(file_in).getroot()
+            for elem in root.getiterator():
+                if not (isinstance(elem, etree._Comment) or isinstance(elem, etree._ProcessingInstruction)):
+                    elem.tag = etree.QName(elem).localname
+            etree.cleanup_namespaces(root)
+            road_xml = root.find("road")
+        road = Road()
+        parse_opendrive_road_elevation_profile(road, road_elevation_profile=road_xml.find("elevationProfile"))
+        parse_opendrive_road_lateral_profile(road, road_lateral_profile=road_xml.find("lateralProfile"))
+        parse_opendrive_road_lane_offset(road, road_xml.find("lanes").find("laneOffset"))
+        parse_opendrive_road_lane_section(road, lane_section_id=1,
+                                          lane_section=road_xml.find("lanes").find("laneSection"))
+        for x in road_xml.find("planView").findall("geometry"):
+            parse_opendrive_road_geometry(road, road_geometry=x)
+        self.assertEqual(0, road.planView._geometries[1]._curv_start)
+        self.assertEqual(0, road.planView._geometries[2]._aU)
+        self.assertEqual(1, road.planView._geometries[2]._bU)
+        self.assertEqual(0, road.planView._geometries[2]._cU)
+        self.assertEqual(0, road.planView._geometries[2]._dU)
+        self.assertEqual(0, road.planView._geometries[2]._aV)
+        self.assertEqual(0, road.planView._geometries[2]._bV)
+        self.assertEqual(0, road.planView._geometries[2]._cV)
+        self.assertEqual(0, road.planView._geometries[2]._dV)
+        latprof = road.lateralProfile
+        for x in latprof.superelevations[0].polynomial_coefficients \
+                 + latprof.shapes[0].polynomial_coefficients + latprof.crossfalls[0].polynomial_coefficients:
+            self.assertEqual(0, x)
+        self.assertEqual("both", latprof.crossfalls[0].side)
+        for x in road.elevationProfile.elevations[0].polynomial_coefficients \
+                + [road.elevationProfile.elevations[0].start_pos]:
+            self.assertEqual(0, x)
+        self.assertEqual(0, road.lateralProfile.shapes[0].start_pos)
+        offs = road.lanes.laneOffsets[0]
+        for x in offs.polynomial_coefficients + [offs.start_pos]:
+            self.assertEqual(0, x)
+        self.assertEqual(0, road.lanes.lane_sections[0].leftLanes[1].road_mark[0].SOffset)
+        self.assertEqual("standard", road.lanes.lane_sections[0].leftLanes[1].road_mark[0].weight)
+        test = RoadMark()
+        test.SOffset = None
+        self.assertEqual(0, test.SOffset)
+        test.weight = None
+        self.assertEqual("standard", test.weight)
 
 if __name__ == '__main__':
     unittest.main()
+

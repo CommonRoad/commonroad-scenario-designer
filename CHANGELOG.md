@@ -10,6 +10,7 @@
 - Convert OpenDRIVE stop lines represented as object
 - Reading of protobuf CommonRoad scenarios
 - Support for commonroad-io 2022.3
+- Unit test cases for Lanelet2 conversion
 
 ### Changed
 - User interface for adding and updating lanelets

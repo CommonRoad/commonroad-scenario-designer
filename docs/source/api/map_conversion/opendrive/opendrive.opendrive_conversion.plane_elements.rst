@@ -12,6 +12,14 @@ opendrive.opendrive\_conversion.plane\_elements.border module
    :undoc-members:
    :show-inheritance:
 
+opendrive.opendrive\_conversion.plane\_elements.crosswalks module
+-----------------------------------------------------------------
+
+.. automodule:: opendrive.opendrive_conversion.plane_elements.crosswalks
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 opendrive.opendrive\_conversion.plane\_elements.geo\_reference module
 ---------------------------------------------------------------------
 

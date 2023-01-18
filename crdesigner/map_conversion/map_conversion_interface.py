@@ -96,12 +96,10 @@ def opendrive_to_commonroad(input_file: str) -> Scenario:
     @return: CommonRoad scenario
     """
     opendrive = parse_opendrive(input_file)
-
     # load configs
     configs = get_configs()
     road_network = Network(configs.opendrive)
     road_network.load_opendrive(opendrive)
-
     return road_network.export_commonroad_scenario()
 
 
@@ -180,10 +178,8 @@ def osm_to_commonroad_using_sumo(input_file: str) -> Scenario:
     @return: CommonRoad scenario
     """
     input_file_pth = Path(input_file)
-
     scenario_name = str(input_file_pth.name)
     opendrive_file = str(input_file_pth.parent / f"{scenario_name}.xodr")
-
     # convert to OpenDRIVE file using netconvert
     subprocess.check_output(
         [
