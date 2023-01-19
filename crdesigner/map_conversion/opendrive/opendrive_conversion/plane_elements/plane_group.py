@@ -170,6 +170,7 @@ class ParametricLaneGroup:
             else:
                 left_vertices = local_left_vertices
                 right_vertices = local_right_vertices
+
         def line_marking_map(marking : RoadMark) -> LineMarking:
             """
             Nested helper function that unclutters finding the correct line marking for a given OpenDRIVE
