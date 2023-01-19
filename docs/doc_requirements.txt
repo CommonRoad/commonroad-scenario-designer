@@ -20,7 +20,7 @@ networkx>=2.5
 # doc related
 ipython>7.16.0
 sphinx>=2.2.1
-sphinx-autodoc-typehints>=1.11.0
+sphinx-autodoc-typehints>=1.11.0,<1.21.0
 sphinx-rtd-theme
 sphinxcontrib-apidoc
 sphinxcontrib-applehelp

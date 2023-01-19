@@ -27,6 +27,7 @@ Submodules
    crdesigner.ui.gui.mwindow.service_layer.osm_settings
    crdesigner.ui.gui.mwindow.service_layer.settings
    crdesigner.ui.gui.mwindow.service_layer.sumo_settings
+   crdesigner.ui.gui.mwindow.service_layer.transfer
    crdesigner.ui.gui.mwindow.service_layer.util
 
 Module contents
