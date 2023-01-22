@@ -42,7 +42,6 @@ class ObstacleProfileToolbox(QDockWidget):
         self.obstacle_color = None
         # subscribing of observers need a function to call -> current time lambda
 
-
         # for profile visualisation
         self.sel_point = None
         self.xyova = []
@@ -77,8 +76,7 @@ class ObstacleProfileToolbox(QDockWidget):
         self.obstacle_profile_toolbox_ui.selected_obstacle.currentTextChanged.connect(
                 lambda: self.update_obstacle_information())
 
-        self.current_time.valueChanged.connect(
-                lambda: self.update_animation())
+        self.current_time.valueChanged.connect(lambda: self.update_animation())
 
     def refresh_toolbox(self, scenario: Scenario):
         self.current_scenario = scenario
@@ -401,8 +399,7 @@ class ObstacleProfileToolbox(QDockWidget):
         ax.callbacks.connect('ylim_changed', self.on_ylim_change)
 
     def update_animation(self):
-        if self.obstacle_profile_toolbox_ui.animation.isChecked():
-            self.plot_obstacle_state_profile()
+        self.plot_obstacle_state_profile()
 
     def animate_plot(self, profile):
         """
@@ -415,4 +412,9 @@ class ObstacleProfileToolbox(QDockWidget):
         :param: ymax: y upper bound to be drawn
         """
         time = [i for i in range(0, self.current_time.value() + 1)]
+
+        # there are some scenarios where more time_steps exist then profile values
+        # this if case prevents a crash
+        if len(time) != len(profile[0:self.current_time.value() + 1]):
+            return
         self.draw_plot(time, profile[0:self.current_time.value() + 1])
