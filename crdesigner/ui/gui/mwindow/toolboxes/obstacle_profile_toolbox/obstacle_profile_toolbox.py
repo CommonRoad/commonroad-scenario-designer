@@ -40,7 +40,6 @@ class ObstacleProfileToolbox(QDockWidget):
         self.amount_obstacles = 0
         self.canvas = DynamicCanvas()
         self.obstacle_color = None
-        # subscribing of observers need a function to call -> current time lambda
 
         # for profile visualisation
         self.sel_point = None
@@ -413,7 +412,7 @@ class ObstacleProfileToolbox(QDockWidget):
         """
         time = [i for i in range(0, self.current_time.value() + 1)]
 
-        # there are some scenarios where more time_steps exist then profile values
+        # there are some scenarios where more time_steps exist than profile values
         # this if case prevents a crash
         if len(time) != len(profile[0:self.current_time.value() + 1]):
             return
