@@ -302,8 +302,14 @@ class ObstacleToolboxUI(Toolbox):
         self.initial_state_position_y.setToolTip("Enter initial y-position of obstacle")
         self.initial_state_position_y.setPlaceholderText("Y")
 
+
+        self.button_selected_position = PositionButton(self.initial_state_position_x, self.initial_state_position_y, self)
+        self.position_label = QLabel("Position")
         self.initial_state_position_layout.addWidget(self.initial_state_position_x)
         self.initial_state_position_layout.addWidget(self.initial_state_position_y)
+        self.initial_state_position_layout.addWidget(self.button_selected_position)
+
+
 
         # orientation edit field
         self.initial_state_orientation = QLineEdit(self)
@@ -354,6 +360,7 @@ class ObstacleToolboxUI(Toolbox):
         """
         removes the position fields
         """
+
         self.layout_obstacle_information_groupbox.removeRow(self.position_text_field_layout)
 
 
@@ -367,8 +374,8 @@ class ObstacleToolboxUI(Toolbox):
             self.init_waypoints_for_dynamic_obstacle()
             self.adjust_obstacle_type_dropdown("Dynamic")
         elif self.static_obstacle_selection.isChecked():
-            self.init_position()
             self.remove_dynamic_obstacle_fields()
+            self.init_position()
             self.adjust_obstacle_type_dropdown("Static")
 
     def toggle_sections(self):
@@ -379,26 +386,29 @@ class ObstacleToolboxUI(Toolbox):
 
             self.remove_rectangle_fields()
             self.remove_polygon_fields()
-            self.remove_position()
-
             self.init_circle_fields()
-            self.init_position()
+
+            if self.static_obstacle_selection.isChecked():
+                self.remove_position()
+                self.init_position()
 
         elif self.obstacle_shape.currentText() == "Rectangle":
 
             self.remove_circle_fields()
             self.remove_polygon_fields()
-            self.remove_position()
-
             self.init_rectangle_fields()
-            self.init_position()
+
+            if self.static_obstacle_selection.isChecked():
+                self.remove_position()
+                self.init_position()
 
         elif self.obstacle_shape.currentText() == "Polygon":
 
             self.remove_circle_fields()
             self.remove_rectangle_fields()
-            self.remove_position()
 
+            if self.static_obstacle_selection.isChecked():
+                self.remove_position()
             self.vertices_x = []
             self.vertices_y = []
             self.polygon_row = []
