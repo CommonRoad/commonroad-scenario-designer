@@ -35,11 +35,9 @@ class ColorSchema():
         self.disabled = disabled
 
 
-
 @dataclass
 class DrawParamsCustom(MPDrawParams):
      color_schema: ColorSchema = field(default_factory=ColorSchema)
-     time_begin: int = 0
 
 
 def update_draw_params_based_on_scenario(lanelet_count: int, traffic_sign_count: int) -> DrawParamsCustom():

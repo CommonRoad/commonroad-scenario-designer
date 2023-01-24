@@ -19,6 +19,8 @@ from commonroad.scenario.obstacle import StaticObstacle, DynamicObstacle
 from commonroad.scenario.lanelet import Lanelet, LaneletType
 
 from crdesigner.ui.gui.mwindow.toolboxes.toolbox_ui import PosB
+from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.commonroad_viewer.service_layer.draw_params_updater import \
+    DrawParamsCustom
 from .helper import _merge_dict, calculate_closest_vertices, calculate_euclidean_distance, angle_between
 from .service_layer import update_draw_params_dynamic_only_based_on_zoom
 from .service_layer import update_draw_params_based_on_zoom
@@ -211,7 +213,8 @@ class DynamicCanvas(FigureCanvas):
         # now also show any selected
         self._select_lanelet(True)
 
-    def draw_scenario(self, scenario: Scenario, pps: PlanningProblemSet = None, draw_params=None, plot_limits=None,
+    def draw_scenario(self, scenario: Scenario, pps: PlanningProblemSet = None,
+                      draw_params: DrawParamsCustom = DrawParamsCustom(), plot_limits=None,
                       draw_dynamic_only=False):
         """[summary]
         :param scenario: [description]
@@ -251,10 +254,12 @@ class DynamicCanvas(FigureCanvas):
         self.rnd.ax = self.ax
         if draw_dynamic_only is True:
             draw_params_merged = _merge_dict(self.draw_params_dynamic_only.copy(), draw_params)
+            draw_params_merged.dynamic_obstacle.draw_initial_state = False
             scenario.draw(renderer=self.rnd, draw_params=draw_params_merged)
             self.draw_obstacles(scenario=scenario, draw_params=draw_params_merged)
             self.rnd.render(keep_static_artists=True)
         else:
+            draw_params_merged.dynamic_obstacle.draw_initial_state = False
             scenario.draw(renderer=self.rnd, draw_params=draw_params_merged)
             if pps is not None:
                 pps.draw(renderer=self.rnd, draw_params=draw_params_merged)
@@ -289,8 +294,6 @@ class DynamicCanvas(FigureCanvas):
             self.ax.spines['right'].set_color(draw_params.color_schema.color)
             self.ax.tick_params(axis='x', colors=draw_params.color_schema.color)
             self.ax.tick_params(axis='y', colors=draw_params.color_schema.color)
-
-
 
     def update_obstacles(self, scenario: Scenario, draw_params=None, plot_limits=None):
         """
@@ -480,7 +483,7 @@ class DynamicCanvas(FigureCanvas):
         y_dim = (y_max - y_min) / 2
         return center, x_dim, y_dim, (x_min, x_max), (y_min, y_max)
 
-    def draw_obstacles(self, scenario: Scenario, draw_params: str = None):
+    def draw_obstacles(self, scenario: Scenario, draw_params: DrawParamsCustom = None):
         """
         draws the obstacles
         :param scenario: current scenario
@@ -495,7 +498,6 @@ class DynamicCanvas(FigureCanvas):
                 draw_params_merged = _merge_dict(draw_params.copy(), obstacle_draw_params.copy())
             except Exception:
                 draw_params_merged = draw_params
-
             obj.draw(renderer=self.rnd, draw_params=draw_params_merged)
 
     def set_static_obstacle_color(self, obstacle_id: int, color: str = None):

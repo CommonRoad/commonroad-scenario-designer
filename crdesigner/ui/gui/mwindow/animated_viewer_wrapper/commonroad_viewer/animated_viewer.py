@@ -121,6 +121,8 @@ class AnimatedViewer:
                 self.time_step.value = 0
 
             draw_params = DrawParamsCustom(time_begin=time_start, time_end=time_end)
+            draw_params.dynamic_obstacle.time_begin = draw_params.time_begin
+            draw_params.dynamic_obstacle.time_end = draw_params.time_end
             self.dynamic.draw_scenario(scenario=scenario, pps=pps, draw_params=draw_params)
 
         # Interval determines the duration of each frame in ms
