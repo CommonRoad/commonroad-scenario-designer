@@ -369,7 +369,8 @@ class ObstacleToolboxUI(Toolbox):
         adds/removes fields unique for the dynamic obstacle
         """
         if self.dynamic_obstacle_selection.isChecked():
-            self.remove_position()
+            if self.obstacle_shape.currentText() == "Circle" or self.obstacle_shape.currentText() == "Rectangle":
+                self.remove_position()
             self.init_dynamic_obstacle_fields()
             self.init_waypoints_for_dynamic_obstacle()
             self.adjust_obstacle_type_dropdown("Dynamic")
