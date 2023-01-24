@@ -99,34 +99,34 @@ class DynamicCanvas(FigureCanvas):
         self.mpl_connect('key_release_event', self.dynamic_canvas_ctrl_release_callback)
 
         # activates mouse tracking on canvas and initializes the coordinates
-        self.setMouseTracking(True)
-        self.mouse_coordinates = QPoint(0, 0)
+        # self.setMouseTracking(True)
+        # self.mouse_coordinates = QPoint(0, 0)
 
         self.clear_axes()
 
-    def mouseMoveEvent(self, event):
-        """
-        Sets the mouse coordinates on mouse movement
-        :param event: mouse movement
-        :return:
-        """
-        self.mouse_coordinates = QPoint(event.x()+390, event.y()+105)
-
-    def keyPressEvent(self, event):
-        """
-        On key press activate an event
-        :param event: key press event
-        :return:
-        """
-        if self.flag is True:
-            # on backspace delete selected lanelet
-            if event.key() == QtCore.Qt.Key.Key_Backspace:
-                self.parent.road_network_toolbox.remove_lanelet()
-                return
-            # on DEL key delete selected lanelet
-            elif event.key() == QtCore.Qt.Key.Key_Delete:
-                self.parent.road_network_toolbox.remove_lanelet()
-                return
+    # def mouseMoveEvent(self, event):
+    #     """
+    #     Sets the mouse coordinates on mouse movement
+    #     :param event: mouse movement
+    #     :return:
+    #     """
+    #     self.mouse_coordinates = QPoint(event.x()+390, event.y()+105)
+    #
+    # def keyPressEvent(self, event):
+    #     """
+    #     On key press activate an event
+    #     :param event: key press event
+    #     :return:
+    #     """
+    #     if self.flag is True:
+    #         # on backspace delete selected lanelet
+    #         if event.key() == QtCore.Qt.Key.Key_Backspace:
+    #             self.parent.road_network_toolbox.remove_lanelet()
+    #             return
+    #         # on DEL key delete selected lanelet
+    #         elif event.key() == QtCore.Qt.Key.Key_Delete:
+    #             self.parent.road_network_toolbox.remove_lanelet()
+    #             return
 
     def clear_axes(self, keep_limits=False, clear_artists=False):
         if clear_artists:
@@ -327,7 +327,6 @@ class DynamicCanvas(FigureCanvas):
 
         :params mouse_clicked_event:
         """
-
         # when the mouse is clicked we remember where this was -> use this for lanelet selection
         self.latest_mouse_pos = np.array([mouse_clicked_event.xdata, mouse_clicked_event.ydata])
         # update the map
@@ -341,27 +340,27 @@ class DynamicCanvas(FigureCanvas):
         if temp_point_updated:
             self.draw_temporary_point()
         # on right mouse click
-        if mouse_clicked_event.button == 3:
-            if self.flag:
-                # if lanelet selected
-                if self.parent.road_network_toolbox.selected_lanelet() != None:
-                    # create menu
-                    menu = PyQt5.QtWidgets.QMenu()
-                    edit = menu.addAction("Edit Attributes")
-                    remove = menu.addAction("Remove Lanelet")
-                    # open menu at mouse coordinates
-                    action = menu.exec(self.parent.mapToGlobal(self.mouse_coordinates))
-                    # removes selected lanelet
-                    if action == remove:
-                        self.parent.road_network_toolbox.remove_lanelet()
-                    # opens edit attributes of lanelet
-                    if action == edit:
-                        self.parent.road_network_toolbox.road_network_toolbox_ui.tree.collapseItem(
-                            self.parent.road_network_toolbox.road_network_toolbox_ui.tree.itemAt(1, 0))
-                        self.parent.road_network_toolbox.road_network_toolbox_ui.tree.expandItem(
-                            self.parent.road_network_toolbox.road_network_toolbox_ui.tree.itemAt(7, 30))
-                        if not self.parent.road_network_toolbox.road_network_toolbox_ui.attributes_button.toggle_checked:
-                            self.parent.road_network_toolbox.road_network_toolbox_ui.attributes_button.pressed()
+        # if mouse_clicked_event.button == 3:
+        #     if self.flag:
+        #         # if lanelet selected
+        #         if self.parent.road_network_toolbox.selected_lanelet() != None:
+        #             # create menu
+        #             menu = PyQt5.QtWidgets.QMenu()
+        #             edit = menu.addAction("Edit Attributes")
+        #             remove = menu.addAction("Remove Lanelet")
+        #             # open menu at mouse coordinates
+        #             action = menu.exec(self.parent.mapToGlobal(self.mouse_coordinates))
+        #             # removes selected lanelet
+        #             if action == remove:
+        #                 self.parent.road_network_toolbox.remove_lanelet()
+        #             # opens edit attributes of lanelet
+        #             if action == edit:
+        #                 self.parent.road_network_toolbox.road_network_toolbox_ui.tree.collapseItem(
+        #                     self.parent.road_network_toolbox.road_network_toolbox_ui.tree.itemAt(1, 0))
+        #                 self.parent.road_network_toolbox.road_network_toolbox_ui.tree.expandItem(
+        #                     self.parent.road_network_toolbox.road_network_toolbox_ui.tree.itemAt(7, 30))
+        #                 if not self.parent.road_network_toolbox.road_network_toolbox_ui.attributes_button.toggle_checked:
+        #                     self.parent.road_network_toolbox.road_network_toolbox_ui.attributes_button.pressed()
 
     def dynamic_canvas_release_callback(self, mouse_clicked_event):
         """
