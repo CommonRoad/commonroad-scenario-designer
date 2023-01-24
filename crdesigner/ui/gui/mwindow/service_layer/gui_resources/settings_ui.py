@@ -22,7 +22,7 @@ class Ui_Settings(object):
         self.mwindow = mwindow
         self.settings = Settings
         self.settings.setObjectName("Settings")
-        self.settings.resize(1820 * FACTOR, 1150 * FACTOR)
+        self.settings.resize(int(1820 * FACTOR), int(1150 * FACTOR))
         self.centralwidget = QtWidgets.QWidget(Settings)
         self.centralwidget.setObjectName("centralwidget")
         self.centralLayout = QtWidgets.QVBoxLayout(self.centralwidget)

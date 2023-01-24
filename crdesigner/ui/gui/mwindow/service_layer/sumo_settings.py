@@ -41,29 +41,29 @@ class SUMOSettings:
 
         # spin boxes
         self.window.sb_departure_time_ego.setValue(
-            self._config.departure_time_ego)
+            int(self._config.departure_time_ego))
 
-        self.window.sb_random_seed.setValue(self._config.random_seed)
+        self.window.sb_random_seed.setValue(int(self._config.random_seed))
         self.window.sb_lateral_resolution.setValue(
-            self._config.lateral_resolution)
+            int(self._config.lateral_resolution))
         self.window.sb_ego_start_time.setValue(self._config.ego_start_time)
         self.window.sb_n_ego_vehicles.setValue(
             self._config.n_ego_vehicles)  # rename
         self.window.sb_overwrite_speed_limit.setValue(
-            self._config.overwrite_speed_limit)
+            int(self._config.overwrite_speed_limit))
         self.window.sb_lanelet_check_time_window.setValue(
-            self._config.lanelet_check_time_window)
+            int(self._config.lanelet_check_time_window))
         self.window.sb_unrestricted_max_speed_default.setValue(
-            self._config.unrestricted_max_speed_default)
-        self.window.sb_delta_steps.setValue(self._config.delta_steps)
-        self.window.sb_n_vehicles_max.setValue(self._config.n_vehicles_max)
+            int(self._config.unrestricted_max_speed_default))
+        self.window.sb_delta_steps.setValue(int(self._config.delta_steps))
+        self.window.sb_n_vehicles_max.setValue(int(self._config.n_vehicles_max))
         self.window.sb_consistency_window.setValue(
-            self._config.consistency_window)
-        self.window.sb_max_veh_per_km.setValue(self._config.max_veh_per_km)
-        self.window.sb_veh_per_second.setValue(self._config.veh_per_second)
+            int(self._config.consistency_window))
+        self.window.sb_max_veh_per_km.setValue(int(self._config.max_veh_per_km))
+        self.window.sb_veh_per_second.setValue(int(self._config.veh_per_second))
         self.window.sb_unrestricted_speed_limit_default.setValue(
-            self._config.unrestricted_speed_limit_default)
-        self.window.sb_fringe_factor.setValue(self._config.fringe_factor)
+            int(self._config.unrestricted_speed_limit_default))
+        self.window.sb_fringe_factor.setValue(int(self._config.fringe_factor))
         self.window.sb_wait_pos_internal_junctions.setValue(
             self._config.wait_pos_internal_junctions)
         self.window.sb_ego_veh_width.setValue(self._config.ego_veh_width)
