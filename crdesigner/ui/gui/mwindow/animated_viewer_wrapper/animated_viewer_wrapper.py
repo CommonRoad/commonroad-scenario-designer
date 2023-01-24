@@ -91,7 +91,7 @@ class AnimatedViewerWrapper:
         self.cr_viewer.update_plot(focus_on_network=focus_on_network)
 
     def update_window(self):
-        self.toolbar.setStyleSheet('background-color:' + self.mwindow.colorscheme()['background'] + '; color:' + self.mwindow.colorscheme()['color'] + '; font-size:' + self.mwindow.colorscheme()['font-size'])
+        self.toolbar.setStyleSheet('background-color:' + self.mwindow.colorscheme().background + '; color:' + self.mwindow.colorscheme().color + '; font-size:' + self.mwindow.colorscheme().font_size)
         self.cr_viewer.update_window()
 
 
