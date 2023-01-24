@@ -1,6 +1,9 @@
 import copy
 from typing import List, Union, Set
 
+import PyQt5
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
 import scipy.version
 from PyQt5.QtWidgets import QSizePolicy
 from PyQt5 import QtCore
@@ -25,7 +28,7 @@ from .service_layer import update_draw_params_based_on_scenario
 from .service_layer import update_draw_params_dynamic_based_on_scenario
 from .service_layer import resize_lanelet_network
 from crdesigner.ui.gui.mwindow.service_layer import config
-
+from .service_layer.draw_params_updater import DrawParamsCustom
 
 from ...service_layer.map_creator import MapCreator
 
@@ -41,7 +44,9 @@ class DynamicCanvas(FigureCanvas):
     control_key = False
 
     def __init__(self, parent=None, width=5, height=5, dpi=100, animated_viewer=None):
-
+        self.flag = False
+        if parent is not None:
+            self.flag = True
         self.animated_viewer = animated_viewer
         self.ax = None
         self.drawer = Figure(figsize=(width, height), dpi=dpi)
@@ -84,7 +89,6 @@ class DynamicCanvas(FigureCanvas):
         # Set focus on canvas to detect key press events
         self.setFocusPolicy(QtCore.Qt.ClickFocus)
         self.setFocus()
-
         # any callbacks for interaction per mouse
         self.button_press_event_cid = self.mpl_connect('button_press_event', self.dynamic_canvas_click_callback)
         self.button_release_event_cid = self.mpl_connect('button_release_event', self.dynamic_canvas_release_callback)
@@ -94,7 +98,35 @@ class DynamicCanvas(FigureCanvas):
         self.mpl_connect('key_press_event', self.dynamic_canvas_ctrl_press_callback)
         self.mpl_connect('key_release_event', self.dynamic_canvas_ctrl_release_callback)
 
+        # activates mouse tracking on canvas and initializes the coordinates
+        self.setMouseTracking(True)
+        self.mouse_coordinates = QPoint(0, 0)
+
         self.clear_axes()
+
+    def mouseMoveEvent(self, event):
+        """
+        Sets the mouse coordinates on mouse movement
+        :param event: mouse movement
+        :return:
+        """
+        self.mouse_coordinates = QPoint(event.x()+390, event.y()+105)
+
+    def keyPressEvent(self, event):
+        """
+        On key press activate an event
+        :param event: key press event
+        :return:
+        """
+        if self.flag is True:
+            # on backspace delete selected lanelet
+            if event.key() == QtCore.Qt.Key.Key_Backspace:
+                self.parent.road_network_toolbox.remove_lanelet()
+                return
+            # on DEL key delete selected lanelet
+            elif event.key() == QtCore.Qt.Key.Key_Delete:
+                self.parent.road_network_toolbox.remove_lanelet()
+                return
 
     def clear_axes(self, keep_limits=False, clear_artists=False):
         if clear_artists:
@@ -216,7 +248,8 @@ class DynamicCanvas(FigureCanvas):
             self.rnd.remove_dynamic()  # self.rnd.ax.clear()  # self.ax.clear()
         else:
             self.ax.clear()
-        draw_params_merged = _merge_dict(self.draw_params.copy(), draw_params)
+
+        draw_params_merged = copy.deepcopy(draw_params)
         self.rnd.plot_limits = plot_limits
         self.rnd.ax = self.ax
         if draw_dynamic_only is True:
@@ -235,30 +268,30 @@ class DynamicCanvas(FigureCanvas):
             self.ax.set(xlim=xlim)
             self.ax.set(ylim=ylim)
 
-        self.rnd.ax.set_facecolor(draw_params['colorscheme']['secondbackground'])
+        self.rnd.ax.set_facecolor(draw_params.color_schema.second_background)
 
-        if draw_params['colorscheme']['axis'] == 'Left/ Bottom':
-            self.ax.spines['bottom'].set_color(draw_params['colorscheme']['color'])
-            self.ax.spines['left'].set_color(draw_params['colorscheme']['color'])
-            self.ax.spines['top'].set_color(draw_params['colorscheme']['secondbackground'])
-            self.ax.spines['right'].set_color(draw_params['colorscheme']['secondbackground'])
-            self.ax.tick_params(axis='x', colors=draw_params['colorscheme']['color'])
-            self.ax.tick_params(axis='y', colors=draw_params['colorscheme']['color'])
+        if draw_params.color_schema.axis == 'Left/ Bottom':
+            self.ax.spines['bottom'].set_color(draw_params.color_schema.color)
+            self.ax.spines['left'].set_color(draw_params.color_schema.color)
+            self.ax.spines['top'].set_color(draw_params.color_schema.second_background)
+            self.ax.spines['right'].set_color(draw_params.color_schema.second_background)
+            self.ax.tick_params(axis='x', colors=draw_params.color_schema.color)
+            self.ax.tick_params(axis='y', colors=draw_params.color_schema.color)
 
-        elif draw_params['colorscheme']['axis'] == 'None':
-            self.ax.spines['bottom'].set_color(draw_params['colorscheme']['secondbackground'])
-            self.ax.spines['left'].set_color(draw_params['colorscheme']['secondbackground'])
-            self.ax.spines['top'].set_color(draw_params['colorscheme']['secondbackground'])
-            self.ax.spines['right'].set_color(draw_params['colorscheme']['secondbackground'])
-            self.ax.tick_params(axis='x', colors=draw_params['colorscheme']['secondbackground'])
-            self.ax.tick_params(axis='y', colors=draw_params['colorscheme']['secondbackground'])
+        elif draw_params.color_schema.axis == 'None':
+            self.ax.spines['bottom'].set_color(draw_params.color_schema.second_background)
+            self.ax.spines['left'].set_color(draw_params.color_schema.second_background)
+            self.ax.spines['top'].set_color(draw_params.color_schema.second_background)
+            self.ax.spines['right'].set_color(draw_params.color_schema.second_background)
+            self.ax.tick_params(axis='x', colors=draw_params.color_schema.second_background)
+            self.ax.tick_params(axis='y', colors=draw_params.color_schema.second_background)
         else:
-            self.ax.spines['bottom'].set_color(draw_params['colorscheme']['color'])
-            self.ax.spines['left'].set_color(draw_params['colorscheme']['color'])
-            self.ax.spines['top'].set_color(draw_params['colorscheme']['color'])
-            self.ax.spines['right'].set_color(draw_params['colorscheme']['color'])
-            self.ax.tick_params(axis='x', colors=draw_params['colorscheme']['color'])
-            self.ax.tick_params(axis='y', colors=draw_params['colorscheme']['color'])
+            self.ax.spines['bottom'].set_color(draw_params.color_schema.color)
+            self.ax.spines['left'].set_color(draw_params.color_schema.color)
+            self.ax.spines['top'].set_color(draw_params.color_schema.color)
+            self.ax.spines['right'].set_color(draw_params.color_schema.color)
+            self.ax.tick_params(axis='x', colors=draw_params.color_schema.color)
+            self.ax.tick_params(axis='y', colors=draw_params.color_schema.color)
 
 
 
@@ -288,23 +321,47 @@ class DynamicCanvas(FigureCanvas):
         2. When a lanelet was selected execute the logic behind it.
         b) Select lanelets by clicking on the canvas. Selects only one of the lanelets that contains the click
         position.
+        3. Check for rightclicked. If rightclicked and lanelet selected open context menu
         This order is important - first the resizing and then the lanelet selection - otherwise the lanelets of the old
         map are selected and then not visualized.
 
         :params mouse_clicked_event:
         """
+
         # when the mouse is clicked we remember where this was -> use this for lanelet selection
         self.latest_mouse_pos = np.array([mouse_clicked_event.xdata, mouse_clicked_event.ydata])
         # update the map
         self._update_map()
         # now do the lanelet selection
         self._select_lanelet()
-
         # call callback_function with latest mouse position to check if a position button is pressed
-        temp_point_updated = self.animated_viewer.callback_function(PosB(str(self.latest_mouse_pos[0]), str(self.latest_mouse_pos[1])), "", self.draw_temporary_points)
+        temp_point_updated = self.animated_viewer.callback_function(PosB(str(self.latest_mouse_pos[0]),
+                                                                         str(self.latest_mouse_pos[1])),
+                                                                    "", self.draw_temporary_points)
         if temp_point_updated:
             self.draw_temporary_point()
-
+        # on right mouse click
+        if mouse_clicked_event.button == 3:
+            if self.flag:
+                # if lanelet selected
+                if self.parent.road_network_toolbox.selected_lanelet() != None:
+                    # create menu
+                    menu = PyQt5.QtWidgets.QMenu()
+                    edit = menu.addAction("Edit Attributes")
+                    remove = menu.addAction("Remove Lanelet")
+                    # open menu at mouse coordinates
+                    action = menu.exec(self.parent.mapToGlobal(self.mouse_coordinates))
+                    # removes selected lanelet
+                    if action == remove:
+                        self.parent.road_network_toolbox.remove_lanelet()
+                    # opens edit attributes of lanelet
+                    if action == edit:
+                        self.parent.road_network_toolbox.road_network_toolbox_ui.tree.collapseItem(
+                            self.parent.road_network_toolbox.road_network_toolbox_ui.tree.itemAt(1, 0))
+                        self.parent.road_network_toolbox.road_network_toolbox_ui.tree.expandItem(
+                            self.parent.road_network_toolbox.road_network_toolbox_ui.tree.itemAt(7, 30))
+                        if not self.parent.road_network_toolbox.road_network_toolbox_ui.attributes_button.toggle_checked:
+                            self.parent.road_network_toolbox.road_network_toolbox_ui.attributes_button.pressed()
 
     def dynamic_canvas_release_callback(self, mouse_clicked_event):
         """
@@ -464,6 +521,7 @@ class DynamicCanvas(FigureCanvas):
         :param obstacle_id: id of obstacle that is to be added/updated
         :param color: color of the obstacle, None if default color
         """
+
         if not color:
             color = "#1d7eea"
         draw_params = {"dynamic_obstacle": {"vehicle_shape": {"occupancy": {
@@ -780,4 +838,3 @@ class DynamicCanvas(FigureCanvas):
             self.ax.plot(x, y, marker="x", color="blue", zorder=21)
         self.update_plot()
         self.num_lanelets = len(self.animated_viewer.current_scenario.lanelet_network.lanelets)
-

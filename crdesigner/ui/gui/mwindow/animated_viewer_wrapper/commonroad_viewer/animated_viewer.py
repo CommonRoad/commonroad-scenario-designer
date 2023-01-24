@@ -10,6 +10,7 @@ from commonroad.scenario.lanelet import Lanelet, LaneletNetwork
 from commonroad.visualization.mp_renderer import MPRenderer
 
 from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMO_AVAILABLE
+from .service_layer.draw_params_updater import DrawParamsCustom
 from ...service_layer import config
 
 if SUMO_AVAILABLE:
@@ -226,13 +227,9 @@ class AnimatedViewer:
         ]
 
         if time_step_changed:
-            draw_params = {
-                'time_begin': time_step,
-            }
+            draw_params = DrawParamsCustom(time_begin=time_step)
         else:
-            draw_params = {
-                'time_begin': self.time_step.value - 1,
-            }
+            draw_params = DrawParamsCustom(time_begin=self.time_step.value - 1)
 
         self.dynamic.draw_scenario(self.current_scenario, self.current_pps, draw_params=draw_params)
 
@@ -386,4 +383,4 @@ class AnimatedViewer:
         )
 
     def update_window(self):
-        self.dynamic.setStyleSheet('background-color:' + self.parent.colorscheme()['secondbackground'] + '; color:' + self.parent.colorscheme()['color'] + ';font-size: ' + self.parent.colorscheme()['font-size'])
+        self.dynamic.setStyleSheet('background-color:' + self.parent.colorscheme().second_background + '; color:' + self.parent.colorscheme().color + ';font-size: ' + self.parent.colorscheme().font_size)

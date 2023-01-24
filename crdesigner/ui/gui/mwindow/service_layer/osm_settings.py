@@ -36,7 +36,7 @@ class EditStreetTypes:
         self.dialog.ui = Street_types()
         self.dialog.ui.setupUi(self.dialog)
         self.set_checkboxes()
-        self.dialog.setStyleSheet('background-color:' + mwindow.colorscheme()['background'] + '; color:' +mwindow.colorscheme()['color'] + ';font-size: ' + mwindow.colorscheme()['font-size'])
+        self.dialog.setStyleSheet('background-color:' + mwindow.colorscheme().background + '; color:' +mwindow.colorscheme().color + ';font-size: ' + mwindow.colorscheme().font_size)
         self.dialog.exec_()
 
 
@@ -106,8 +106,7 @@ class EditLaneCounts:
         self.dialog.ui.setupUi(self.dialog)
         self.set_spin_boxes()
         self.dialog.setStyleSheet(
-            'background-color:' + mwindow.colorscheme()['background'] + '; color:' + mwindow.colorscheme()[
-                'color'] + ';font-size: ' + mwindow.colorscheme()['font-size'])
+            'background-color:' + mwindow.colorscheme().background + '; color:' + mwindow.colorscheme().color + ';font-size: ' + mwindow.colorscheme().font_size)
         self.dialog.exec_()
 
     def accept(self) -> None:
@@ -171,8 +170,7 @@ class EditLaneWidth:
         self.dialog.ui.setupUi(self.dialog)
         self.set_spin_boxes()
         self.dialog.setStyleSheet(
-            'background-color:' + mwindow.colorscheme()['background'] + '; color:' + mwindow.colorscheme()[
-                'color'] + ';font-size: ' + mwindow.colorscheme()['font-size'])
+            'background-color:' + mwindow.colorscheme().background + '; color:' + mwindow.colorscheme().color + ';font-size: ' + mwindow.colorscheme().font_size)
         self.dialog.exec_()
 
     def accept(self) -> None:
@@ -240,8 +238,7 @@ class EditSpeedLimits:
         self.dialog.setWindowTitle("Edit Speed Limit")
         self.set_spin_boxes()
         self.dialog.setStyleSheet(
-            'background-color:' + mwindow.colorscheme()['background'] + '; color:' + mwindow.colorscheme()[
-                'color'] + ';font-size: ' + mwindow.colorscheme()['font-size'])
+            'background-color:' + mwindow.colorscheme().background + '; color:' + mwindow.colorscheme().color + ';font-size: ' + mwindow.colorscheme().font_size)
         self.dialog.exec_()
 
     def accept(self) -> None:
@@ -305,8 +302,7 @@ class EditSublayerWayTypes:
         self.dialog.ui.setupUi(self.dialog)
         self.set_checkboxes()
         self.dialog.setStyleSheet(
-            'background-color:' + mwindow.colorscheme()['background'] + '; color:' + mwindow.colorscheme()[
-                'color'] + ';font-size: ' + mwindow.colorscheme()['font-size'])
+            'background-color:' + mwindow.colorscheme().background + '; color:' + mwindow.colorscheme().color + ';font-size: ' + mwindow.colorscheme().font_size)
         self.dialog.exec_()
 
     def accept(self) -> None:

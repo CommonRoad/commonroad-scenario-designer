@@ -26,8 +26,8 @@ class SectionExpandButton(QPushButton):
 
     def update_window(self):
         self.setStyleSheet(
-            'background-color:' + self.mwindow.colorscheme()['highlight'] + '; color:' + self.mwindow.colorscheme()[
-                'highlighttext'] + '; font-size:' + self.mwindow.colorscheme()['font-size'])
+            'background-color:' + self.mwindow.colorscheme().highlight + '; color:' + self.mwindow.colorscheme().highlight_text
+            + '; font-size:' + self.mwindow.colorscheme().font_size)
 
     def on_clicked(self):
         """toggle expand/collapse of section by clicking"""
@@ -141,13 +141,13 @@ class CheckableComboBox(QComboBox):
     def update_window(self):
         if self.mwindow:
             p = QtGui.QPalette()
-            p.setColor(QtGui.QPalette.ColorRole.Window, QtGui.QColor(self.mwindow.colorscheme()['background']))
-            p.setColor(QtGui.QPalette.ColorRole.Base, QtGui.QColor(self.mwindow.colorscheme()['color']))
-            p.setColor(QtGui.QPalette.ColorRole.Button, QtGui.QColor(self.mwindow.colorscheme()['background']))
-            p.setColor(QtGui.QPalette.ColorRole.ButtonText, QtGui.QColor(self.mwindow.colorscheme()['color']))
-            p.setColor(QtGui.QPalette.ColorRole.Text, QtGui.QColor(self.mwindow.colorscheme()['color']))
-            p.setColor(QtGui.QPalette.ColorRole.WindowText, QtGui.QColor(self.mwindow.colorscheme()['color']))
-            p.setColor(QtGui.QPalette.ColorRole.AlternateBase, QtGui.QColor(self.mwindow.colorscheme()['background']))
+            p.setColor(QtGui.QPalette.ColorRole.Window, QtGui.QColor(self.mwindow.colorscheme().background))
+            p.setColor(QtGui.QPalette.ColorRole.Base, QtGui.QColor(self.mwindow.colorscheme().color))
+            p.setColor(QtGui.QPalette.ColorRole.Button, QtGui.QColor(self.mwindow.colorscheme().background))
+            p.setColor(QtGui.QPalette.ColorRole.ButtonText, QtGui.QColor(self.mwindow.colorscheme().color))
+            p.setColor(QtGui.QPalette.ColorRole.Text, QtGui.QColor(self.mwindow.colorscheme().color))
+            p.setColor(QtGui.QPalette.ColorRole.WindowText, QtGui.QColor(self.mwindow.colorscheme().color))
+            p.setColor(QtGui.QPalette.ColorRole.AlternateBase, QtGui.QColor(self.mwindow.colorscheme().background))
             self.setPalette(p)
 
 
@@ -238,7 +238,7 @@ class CollapsibleArrowBox(QToolButton):
         self.button = QToolButton()
         toolbox.arrowButtons.append(self.button)
         self.toolbox = toolbox
-        self.button.setStyleSheet("QToolButton {border: none; color: " + self.mwindow.colorscheme()["color"] + ";}")
+        self.button.setStyleSheet("QToolButton {border: none; color: " + self.mwindow.colorscheme().color + ";}")
         self.button.setText(title)
         self.button.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
         self.button.setArrowType(Qt.RightArrow)
@@ -315,10 +315,10 @@ class PositionButton(QPushButton):
 
     def update_window(self):
         if self.button_pressed:
-            self.setStyleSheet("color: " + self.toolbox.mwindow.colorscheme()["highlighttext"] + "; background-color: " + self.toolbox.mwindow.colorscheme()["highlight"])
+            self.setStyleSheet("color: " + self.toolbox.mwindow.colorscheme().highlighttext + "; background-color: " + self.toolbox.mwindow.colorscheme().highlight)
             self.setIcon(QIcon(":/icons/target.png"))
         else:
-            self.setStyleSheet("color: " + self.toolbox.mwindow.colorscheme()["highlight"] + "; background-color: " + self.toolbox.mwindow.colorscheme()["secondbackground"])
+            self.setStyleSheet("color: " + self.toolbox.mwindow.colorscheme().highlight + "; background-color: " + self.toolbox.mwindow.colorscheme().second_background)
             if config.DARKMODE:
                 self.setIcon(QIcon(":/icons/target-darkmode.png"))
             else:
@@ -391,17 +391,17 @@ class Toolbox(QWidget):
         for i in self.position_buttons:
             i.update_window()
         for i in self.arrowButtons:
-            i.setStyleSheet("QToolButton {border: none; color: " + self.mwindow.colorscheme()["color"] + ";}")
+            i.setStyleSheet("QToolButton {border: none; color: " + self.mwindow.colorscheme().color + ";}")
 
-        #self.setStyleSheet("QWidget {color: " + self.mwindow.colorscheme()["color"] + "; background-color: " +
-        #                   self.mwindow.colorscheme()["background"] + "}" + " QToolButton {border: none; color: " +
-        #                   self.mwindow.colorscheme()["color"] + ";}")
+        #self.setStyleSheet("QWidget {color: " + self.mwindow.colorscheme().color + "; background-color: " +
+        #                   self.mwindow.colorscheme().background + "}" + " QToolButton {border: none; color: " +
+        #                   self.mwindow.colorscheme().color + ";}")
 
         p = QtGui.QPalette()
-        p.setColor(QtGui.QPalette.ColorRole.Window, QtGui.QColor(self.mwindow.colorscheme()['secondbackground']))
-        p.setColor(QtGui.QPalette.ColorRole.Base, QtGui.QColor(self.mwindow.colorscheme()['secondbackground']))
-        p.setColor(QtGui.QPalette.ColorRole.Button, QtGui.QColor(self.mwindow.colorscheme()['background']))
-        p.setColor(QtGui.QPalette.ColorRole.ButtonText, QtGui.QColor(self.mwindow.colorscheme()['color']))
-        p.setColor(QtGui.QPalette.ColorRole.Text, QtGui.QColor(self.mwindow.colorscheme()['color']))
-        p.setColor(QtGui.QPalette.ColorRole.WindowText, QtGui.QColor(self.mwindow.colorscheme()['color']))
+        p.setColor(QtGui.QPalette.ColorRole.Window, QtGui.QColor(self.mwindow.colorscheme().second_background))
+        p.setColor(QtGui.QPalette.ColorRole.Base, QtGui.QColor(self.mwindow.colorscheme().second_background))
+        p.setColor(QtGui.QPalette.ColorRole.Button, QtGui.QColor(self.mwindow.colorscheme().background))
+        p.setColor(QtGui.QPalette.ColorRole.ButtonText, QtGui.QColor(self.mwindow.colorscheme().color))
+        p.setColor(QtGui.QPalette.ColorRole.Text, QtGui.QColor(self.mwindow.colorscheme().color))
+        p.setColor(QtGui.QPalette.ColorRole.WindowText, QtGui.QColor(self.mwindow.colorscheme().color))
         self.setPalette(p)
