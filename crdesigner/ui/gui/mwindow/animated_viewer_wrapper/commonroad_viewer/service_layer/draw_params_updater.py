@@ -12,7 +12,7 @@ PARAMS_OBSTACLE_CUSTOM = None
 
 
 @dataclass
-class ColorSchema():
+class ColorSchema:
     axis: str = 'all'
     background: str = '#f0f0f0'
     color: str = '#0a0a0a'
@@ -21,18 +21,6 @@ class ColorSchema():
     highlight_text: str = '#202020'
     second_background: str = '#ffffff'
     disabled: str = '#959595'
-
-    def __init__(self, axis: str = 'all', background: str = '#f0f0f0', color: str = '#0a0a0a', font_size: str = '11pt',
-                 highlight: str = '#c0c0c0', highlight_text: str = '#202020', second_background: str = '#ffffff',
-                 disabled: str = '#959595'):
-        self.axis = axis
-        self.background = background
-        self.color = color
-        self.font_size = font_size
-        self.highlight = highlight
-        self.highlight_text = highlight_text
-        self.second_background = second_background
-        self.disabled = disabled
 
 
 @dataclass

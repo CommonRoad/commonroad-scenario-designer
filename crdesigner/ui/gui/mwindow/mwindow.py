@@ -114,10 +114,10 @@ class MWindow(QMainWindow, Ui_mainWindow):
         """
         return check_scenario_service_layer(mwindow=self, scenario=scenario)
 
-
-    def colorscheme(self) -> dict:
+    def colorscheme(self) -> ColorSchema:
         if config.DARKMODE:
-            colorscheme = ColorSchema(axis=config.AXIS_VISIBLE, background='#303030', color='#f0f0f0', highlight='#1e9678', second_background='#2c2c2c')
+            colorscheme = ColorSchema(axis=config.AXIS_VISIBLE, background='#303030', color='#f0f0f0',
+                                      highlight='#1e9678', second_background='#2c2c2c')
         else:
             colorscheme = ColorSchema(axis=config.AXIS_VISIBLE)
 
