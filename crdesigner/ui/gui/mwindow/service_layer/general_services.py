@@ -38,7 +38,7 @@ def center(mwindow):
     """Function that makes sure the main window is in the center of screen."""
     screen = QDesktopWidget().screenGeometry()
     size = mwindow.geometry()
-    mwindow.move((screen.width() - size.width()) / 2, (screen.height() - size.height()) / 2)
+    mwindow.move(int((screen.width() - size.width()) / 2), int((screen.height() - size.height()) / 2))
 
 
 def update_max_step_service_layer(mwindow, value):
