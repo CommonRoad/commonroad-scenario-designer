@@ -123,6 +123,7 @@ class AnimatedViewer:
             draw_params = DrawParamsCustom(time_begin=time_start, time_end=time_end)
             draw_params.dynamic_obstacle.time_begin = draw_params.time_begin
             draw_params.dynamic_obstacle.time_end = draw_params.time_end
+            draw_params.dynamic_obstacle.trajectory.draw_trajectory = False
             self.dynamic.draw_scenario(scenario=scenario, pps=pps, draw_params=draw_params)
 
         # Interval determines the duration of each frame in ms
@@ -228,7 +229,7 @@ class AnimatedViewer:
             draw_params = DrawParamsCustom(time_begin=time_step)
         else:
             draw_params = DrawParamsCustom(time_begin=self.time_step.value - 1)
-
+        draw_params.dynamic_obstacle.trajectory.draw_trajectory = False
         self.dynamic.draw_scenario(self.current_scenario, self.current_pps, draw_params=draw_params)
 
         for lanelet in self.current_scenario.lanelet_network.lanelets:

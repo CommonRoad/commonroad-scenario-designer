@@ -112,7 +112,7 @@ def set_draw_params(trajectory: bool, intersection: bool, obstacle_label: bool,
                     obstacle_icon: bool, obstacle_direction: bool,
                     obstacle_signal: bool, occupancy: bool, traffic_signs: bool,
                     traffic_lights: bool, incoming_lanelets: bool, successors: bool,
-                    intersection_labels: bool, colorscheme: dict):
+                    intersection_labels: bool, colorscheme: ColorSchema):
     """
     sets draw params
     :param trajectory: toggle draw_trajectory
