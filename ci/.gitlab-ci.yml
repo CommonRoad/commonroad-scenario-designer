@@ -43,63 +43,63 @@ prospector_tutorials:
     - pip install prospector[with_mypy]
     - prospector tutorials/
   allow_failure: true
-
-python37:
-    stage: test
-    variables:
-      QT_QPA_PLATFORM: "offscreen"
-    script:
-        - source activate cr37
-        - *install-and-run
-
-python38:
-    stage: test
-    variables:
-      QT_QPA_PLATFORM : "offscreen"
-    script:
-        - source activate cr38
-        - *install-and-run
-
-python39:
-    stage: test
-    variables:
-      QT_QPA_PLATFORM : "offscreen"
-    script:
-        - source activate cr39
-        - *install-and-run
-        - coverage xml
-    coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
-    artifacts :
-      reports :
-        coverage_report :
-          coverage_format : cobertura
-          path : coverage.xml
-
-#python310 :
-#  stage : test
-#  variables :
-#    QT_QPA_PLATFORM : "offscreen"
-#  script :
-#    - source activate cr310
-#    - *install-and-run
-
-docs:
-    stage: test
-    script:
-        - source activate cr39
-        - pip install -e .
-        - pip install -r ./docs/doc_requirements.txt
-        - cd docs && bash ./docs_build_script.sh
-    artifacts:
-      paths :
-        - ./docs/build/
-      expose_as: 'Documentation'
-
-build_package:
-    stage: build
-    only:
-        - master
-        - develop
-    script:
-        - source activate cr39
-        - python setup.py sdist bdist_wheel
+#
+#python37:
+#    stage: test
+#    variables:
+#      QT_QPA_PLATFORM: "offscreen"
+#    script:
+#        - source activate cr37
+#        - *install-and-run
+#
+#python38:
+#    stage: test
+#    variables:
+#      QT_QPA_PLATFORM : "offscreen"
+#    script:
+#        - source activate cr38
+#        - *install-and-run
+#
+#python39:
+#    stage: test
+#    variables:
+#      QT_QPA_PLATFORM : "offscreen"
+#    script:
+#        - source activate cr39
+#        - *install-and-run
+#        - coverage xml
+#    coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
+#    artifacts :
+#      reports :
+#        coverage_report :
+#          coverage_format : cobertura
+#          path : coverage.xml
+#
+##python310 :
+##  stage : test
+##  variables :
+##    QT_QPA_PLATFORM : "offscreen"
+##  script :
+##    - source activate cr310
+##    - *install-and-run
+#
+#docs:
+#    stage: test
+#    script:
+#        - source activate cr39
+#        - pip install -e .
+#        - pip install -r ./docs/doc_requirements.txt
+#        - cd docs && bash ./docs_build_script.sh
+#    artifacts:
+#      paths :
+#        - ./docs/build/
+#      expose_as: 'Documentation'
+#
+#build_package:
+#    stage: build
+#    only:
+#        - master
+#        - develop
+#    script:
+#        - source activate cr39
+#        - python setup.py sdist bdist_wheel

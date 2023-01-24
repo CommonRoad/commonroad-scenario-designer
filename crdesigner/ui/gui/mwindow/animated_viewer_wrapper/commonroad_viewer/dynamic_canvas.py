@@ -25,7 +25,7 @@ from .service_layer import update_draw_params_based_on_scenario
 from .service_layer import update_draw_params_dynamic_based_on_scenario
 from .service_layer import resize_lanelet_network
 from crdesigner.ui.gui.mwindow.service_layer import config
-
+from .service_layer.draw_params_updater import DrawParamsCustom
 
 from ...service_layer.map_creator import MapCreator
 
@@ -216,7 +216,8 @@ class DynamicCanvas(FigureCanvas):
             self.rnd.remove_dynamic()  # self.rnd.ax.clear()  # self.ax.clear()
         else:
             self.ax.clear()
-        draw_params_merged = _merge_dict(self.draw_params.copy(), draw_params)
+
+        draw_params_merged = copy.deepcopy(draw_params)
         self.rnd.plot_limits = plot_limits
         self.rnd.ax = self.ax
         if draw_dynamic_only is True:
@@ -235,30 +236,30 @@ class DynamicCanvas(FigureCanvas):
             self.ax.set(xlim=xlim)
             self.ax.set(ylim=ylim)
 
-        self.rnd.ax.set_facecolor(draw_params['colorscheme']['secondbackground'])
+        self.rnd.ax.set_facecolor(draw_params.color_schema.second_background)
 
-        if draw_params['colorscheme']['axis'] == 'Left/ Bottom':
-            self.ax.spines['bottom'].set_color(draw_params['colorscheme']['color'])
-            self.ax.spines['left'].set_color(draw_params['colorscheme']['color'])
-            self.ax.spines['top'].set_color(draw_params['colorscheme']['secondbackground'])
-            self.ax.spines['right'].set_color(draw_params['colorscheme']['secondbackground'])
-            self.ax.tick_params(axis='x', colors=draw_params['colorscheme']['color'])
-            self.ax.tick_params(axis='y', colors=draw_params['colorscheme']['color'])
+        if draw_params.color_schema.axis == 'Left/ Bottom':
+            self.ax.spines['bottom'].set_color(draw_params.color_schema.color)
+            self.ax.spines['left'].set_color(draw_params.color_schema.color)
+            self.ax.spines['top'].set_color(draw_params.color_schema.second_background)
+            self.ax.spines['right'].set_color(draw_params.color_schema.second_background)
+            self.ax.tick_params(axis='x', colors=draw_params.color_schema.color)
+            self.ax.tick_params(axis='y', colors=draw_params.color_schema.color)
 
-        elif draw_params['colorscheme']['axis'] == 'None':
-            self.ax.spines['bottom'].set_color(draw_params['colorscheme']['secondbackground'])
-            self.ax.spines['left'].set_color(draw_params['colorscheme']['secondbackground'])
-            self.ax.spines['top'].set_color(draw_params['colorscheme']['secondbackground'])
-            self.ax.spines['right'].set_color(draw_params['colorscheme']['secondbackground'])
-            self.ax.tick_params(axis='x', colors=draw_params['colorscheme']['secondbackground'])
-            self.ax.tick_params(axis='y', colors=draw_params['colorscheme']['secondbackground'])
+        elif draw_params.color_schema.axis == 'None':
+            self.ax.spines['bottom'].set_color(draw_params.color_schema.second_background)
+            self.ax.spines['left'].set_color(draw_params.color_schema.second_background)
+            self.ax.spines['top'].set_color(draw_params.color_schema.second_background)
+            self.ax.spines['right'].set_color(draw_params.color_schema.second_background)
+            self.ax.tick_params(axis='x', colors=draw_params.color_schema.second_background)
+            self.ax.tick_params(axis='y', colors=draw_params.color_schema.second_background)
         else:
-            self.ax.spines['bottom'].set_color(draw_params['colorscheme']['color'])
-            self.ax.spines['left'].set_color(draw_params['colorscheme']['color'])
-            self.ax.spines['top'].set_color(draw_params['colorscheme']['color'])
-            self.ax.spines['right'].set_color(draw_params['colorscheme']['color'])
-            self.ax.tick_params(axis='x', colors=draw_params['colorscheme']['color'])
-            self.ax.tick_params(axis='y', colors=draw_params['colorscheme']['color'])
+            self.ax.spines['bottom'].set_color(draw_params.color_schema.color)
+            self.ax.spines['left'].set_color(draw_params.color_schema.color)
+            self.ax.spines['top'].set_color(draw_params.color_schema.color)
+            self.ax.spines['right'].set_color(draw_params.color_schema.color)
+            self.ax.tick_params(axis='x', colors=draw_params.color_schema.color)
+            self.ax.tick_params(axis='y', colors=draw_params.color_schema.color)
 
 
 
@@ -464,6 +465,7 @@ class DynamicCanvas(FigureCanvas):
         :param obstacle_id: id of obstacle that is to be added/updated
         :param color: color of the obstacle, None if default color
         """
+
         if not color:
             color = "#1d7eea"
         draw_params = {"dynamic_obstacle": {"vehicle_shape": {"occupancy": {
