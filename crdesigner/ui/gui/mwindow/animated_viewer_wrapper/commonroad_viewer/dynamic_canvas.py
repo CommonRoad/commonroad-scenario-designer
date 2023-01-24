@@ -1,26 +1,24 @@
 import copy
-from typing import List, Union, Set
+from typing import List, Union
+import numpy as np
 
-import PyQt5
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
-import scipy.version
 from PyQt5.QtWidgets import QSizePolicy
 from PyQt5 import QtCore
-import numpy as np
+
 from matplotlib.backend_bases import MouseButton
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
-from scipy.interpolate import interp1d
+
 from commonroad.planning.planning_problem import PlanningProblemSet
 from commonroad.common.util import Interval
 from commonroad.scenario.scenario import Scenario
 from commonroad.visualization.mp_renderer import MPRenderer
+from commonroad.visualization.draw_params import StaticObstacleParams, DynamicObstacleParams
 from commonroad.geometry.shape import Circle
 from commonroad.scenario.obstacle import StaticObstacle, DynamicObstacle
 from commonroad.scenario.lanelet import Lanelet, LaneletType
-from crdesigner.ui.gui.mwindow.toolboxes.toolbox_ui import PosB
 
+from crdesigner.ui.gui.mwindow.toolboxes.toolbox_ui import PosB
 from .helper import _merge_dict, calculate_closest_vertices, calculate_euclidean_distance, angle_between
 from .service_layer import update_draw_params_dynamic_only_based_on_zoom
 from .service_layer import update_draw_params_based_on_zoom
@@ -28,7 +26,6 @@ from .service_layer import update_draw_params_based_on_scenario
 from .service_layer import update_draw_params_dynamic_based_on_scenario
 from .service_layer import resize_lanelet_network
 from crdesigner.ui.gui.mwindow.service_layer import config
-from .service_layer.draw_params_updater import DrawParamsCustom
 
 from ...service_layer.map_creator import MapCreator
 
@@ -509,26 +506,45 @@ class DynamicCanvas(FigureCanvas):
         """
         if not color:
             color = "#d95558"
-        draw_params = {"static_obstacle": {"occupancy": {
-            "shape": {"polygon": {"facecolor": color}, "rectangle": {"facecolor": color},
-                      "circle": {"facecolor": color}}}}}
-        DynamicCanvas.obstacle_color_array.append([obstacle_id, draw_params, color])
+
+        DynamicCanvas.obstacle_color_array.append([obstacle_id, self.create_static_obstacle_draw_params(color), color])
+
+    def create_static_obstacle_draw_params(self, color: str) -> StaticObstacleParams:
+        """
+        Creates draw parameters for static obstacle.
+
+        :param color: Desired color of obstacle
+        """
+        draw_params = StaticObstacleParams()
+        draw_params.occupancy.shape.facecolor = color
+
+        return draw_params
+
+    def create_dyn_obstacle_draw_params(self, color: str) -> DynamicObstacleParams:
+        """
+        Creates draw parameters for dynamic obstacle.
+
+        :param color: Desired color of obstacle
+        """
+        draw_params = DynamicObstacleParams()
+        draw_params.occupancy.shape.facecolor = color
+        draw_params.show_label = config.DRAW_OBSTACLE_LABELS
+        draw_params.draw_icon = config.DRAW_OBSTACLE_ICONS
+        draw_params.draw_direction = config.DRAW_OBSTACLE_DIRECTION
+        draw_params.draw_signals = config.DRAW_OBSTACLE_SIGNALS
+
+        return draw_params
 
     def set_dynamic_obstacle_color(self, obstacle_id: int, color: str = None):
         """
-        sets dynamic_obstacle color
+        Sets dynamic_obstacle color.
+
         :param obstacle_id: id of obstacle that is to be added/updated
         :param color: color of the obstacle, None if default color
         """
-
         if not color:
             color = "#1d7eea"
-        draw_params = {"dynamic_obstacle": {"vehicle_shape": {"occupancy": {
-            "shape": {"polygon": {"facecolor": color}, "rectangle": {"facecolor": color},
-                      "circle": {"facecolor": color}}}}, 'show_label': config.DRAW_OBSTACLE_LABELS,
-            'draw_icon': config.DRAW_OBSTACLE_ICONS, 'draw_direction': config.DRAW_OBSTACLE_DIRECTION,
-            'draw_signals': config.DRAW_OBSTACLE_SIGNALS}}
-        DynamicCanvas.obstacle_color_array.append([obstacle_id, draw_params, color])
+        DynamicCanvas.obstacle_color_array.append([obstacle_id, self.create_dyn_obstacle_draw_params(color), color])
 
     def update_obstacle_trajectory_params(self):
         """
@@ -541,15 +557,9 @@ class DynamicCanvas(FigureCanvas):
                     result = next(c for c in DynamicCanvas.obstacle_color_array if c[0] == obj.obstacle_id)
                     color = result[2]
                     if isinstance(obj, DynamicObstacle):
-                        draw_params = {"dynamic_obstacle": {"vehicle_shape": {"occupancy": {
-                            "shape": {"polygon": {"facecolor": color}, "rectangle": {"facecolor": color},
-                                      "circle": {"facecolor": color}}}}, 'show_label': config.DRAW_OBSTACLE_LABELS,
-                            'draw_icon': config.DRAW_OBSTACLE_ICONS, 'draw_direction': config.DRAW_OBSTACLE_DIRECTION,
-                            'draw_signals': config.DRAW_OBSTACLE_SIGNALS}}
+                        draw_params = self.create_dyn_obstacle_draw_params(color)
                     elif isinstance(obj, StaticObstacle):
-                        draw_params = {"static_obstacle": {"occupancy": {
-                            "shape": {"polygon": {"facecolor": color}, "rectangle": {"facecolor": color},
-                                      "circle": {"facecolor": color}}}}}
+                        draw_params = self.create_static_obstacle_draw_params(color)
 
                     i = DynamicCanvas.obstacle_color_array.index(result)
                     DynamicCanvas.obstacle_color_array.pop(i)
@@ -558,16 +568,10 @@ class DynamicCanvas(FigureCanvas):
                 except Exception:
                     if isinstance(obj, DynamicObstacle):
                         color = "#1d7eea"
-                        draw_params = {"dynamic_obstacle": {"vehicle_shape": {"occupancy": {
-                            "shape": {"polygon": {"facecolor": color}, "rectangle": {"facecolor": color},
-                                      "circle": {"facecolor": color}}}}, 'show_label': config.DRAW_OBSTACLE_LABELS,
-                            'draw_icon': config.DRAW_OBSTACLE_ICONS, 'draw_direction': config.DRAW_OBSTACLE_DIRECTION,
-                            'draw_signals': config.DRAW_OBSTACLE_SIGNALS}}
+                        draw_params = self.create_dyn_obstacle_draw_params(color)
                     elif isinstance(obj, StaticObstacle):
                         color = "#d95558"
-                        draw_params = {"static_obstacle": {"occupancy": {
-                            "shape": {"polygon": {"facecolor": color}, "rectangle": {"facecolor": color},
-                                      "circle": {"facecolor": color}}}}}
+                        draw_params = self.create_static_obstacle_draw_params(color)
                     DynamicCanvas.obstacle_color_array.append([obj.obstacle_id, draw_params, color])
 
     def get_color(self, obstacle_id: int) -> Union[int, bool]:

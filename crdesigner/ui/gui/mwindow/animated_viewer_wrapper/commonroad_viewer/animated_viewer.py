@@ -120,11 +120,7 @@ class AnimatedViewer:
             if time_start > time_end:
                 self.time_step.value = 0
 
-            draw_params = {
-                'time_begin': time_start,
-                'time_end': time_end,
-                'antialiased': True,
-            }
+            draw_params = DrawParamsCustom(time_begin=time_start, time_end=time_end)
             self.dynamic.draw_scenario(scenario=scenario, pps=pps, draw_params=draw_params)
 
         # Interval determines the duration of each frame in ms
