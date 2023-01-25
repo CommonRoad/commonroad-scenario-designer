@@ -1,21 +1,14 @@
 stages:
     - static_check
     - test
-    - build
+    - build_deploy
 
-image: $CI_REGISTRY/cps/commonroad-scenario-designer/ci:v0.6.9_20.04
+image: $CI_REGISTRY/cps/commonroad-scenario-designer/ci:v0.7.4
 
 .install-and-run: &install-and-run
-  - git config --global url."https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.lrz.de/".insteadOf "git@gitlab.lrz.de:"
+  - pip install -r ./requirements.txt
   - pip install -r ./tests/test_requirements.txt
   - pip install -e .
-  - git clone git@gitlab.lrz.de:cps/sumo-interface.git $HOME/sumo-interface
-  - cd $HOME/sumo-interface
-  - git checkout fac8334df357a7599ccc51e5ae5aeee9c82d9cb5
-  - cd /builds/cps/commonroad-scenario-designer
-  - pip uninstall -y sumocr
-  - pip install -e "$HOME"/sumo-interface
-  - pip install commonroad-io==2022.2
   - coverage run --source ./crdesigner -m pytest tests/
   - coverage report -m || true
 
@@ -27,6 +20,7 @@ prospector_source:
     - pip install prospector[with_mypy]
     - prospector crdesigner/
   allow_failure: true
+  needs: []
 
 prospector_test:
   stage: static_check
@@ -35,6 +29,7 @@ prospector_test:
     - pip install prospector[with_mypy]
     - prospector tests/
   allow_failure: true
+  needs: []
 
 prospector_tutorials:
   stage: static_check
@@ -43,63 +38,62 @@ prospector_tutorials:
     - pip install prospector[with_mypy]
     - prospector tutorials/
   allow_failure: true
-
-python37:
-    stage: test
-    variables:
-      QT_QPA_PLATFORM: "offscreen"
-    script:
-        - source activate cr37
-        - *install-and-run
+  needs: []
 
 python38:
     stage: test
     variables:
       QT_QPA_PLATFORM : "offscreen"
     script:
-        - source activate cr38
-        - *install-and-run
+      - source activate cr38
+      - *install-and-run
+    needs: []
 
 python39:
     stage: test
     variables:
       QT_QPA_PLATFORM : "offscreen"
     script:
-        - source activate cr39
-        - *install-and-run
-        - coverage xml
-    coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
-    artifacts :
-      reports :
-        coverage_report :
-          coverage_format : cobertura
-          path : coverage.xml
+      - source activate cr39
+      - *install-and-run
+    needs: []
 
-#python310 :
-#  stage : test
-#  variables :
-#    QT_QPA_PLATFORM : "offscreen"
-#  script :
-#    - source activate cr310
-#    - *install-and-run
+python310:
+  stage : test
+  variables :
+    QT_QPA_PLATFORM : "offscreen"
+  script :
+    - source activate cr310
+    - *install-and-run
+    - coverage xml
+  coverage : '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
+  artifacts :
+    reports :
+      coverage_report :
+        coverage_format : cobertura
+        path : coverage.xml
+  needs : [ ]
 
 docs:
-    stage: test
+    stage: build_deploy
+    image: "python:3.11"
     script:
-        - source activate cr39
         - pip install -e .
+        - pip install -r ./requirements.txt
         - pip install -r ./docs/doc_requirements.txt
         - cd docs && bash ./docs_build_script.sh
     artifacts:
       paths :
         - ./docs/build/
       expose_as: 'Documentation'
+    needs: []
 
 build_package:
-    stage: build
+    stage: build_deploy
+    image: "python:3.11"
     only:
         - master
         - develop
     script:
-        - source activate cr39
         - python setup.py sdist bdist_wheel
+    needs: []

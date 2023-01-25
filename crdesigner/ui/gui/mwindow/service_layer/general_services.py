@@ -38,7 +38,7 @@ def center(mwindow):
     """Function that makes sure the main window is in the center of screen."""
     screen = QDesktopWidget().screenGeometry()
     size = mwindow.geometry()
-    mwindow.move((screen.width() - size.width()) / 2, (screen.height() - size.height()) / 2)
+    mwindow.move(int((screen.width() - size.width()) / 2), int((screen.height() - size.height()) / 2))
 
 
 def update_max_step_service_layer(mwindow, value):
@@ -131,12 +131,12 @@ def close_window(mwindow):
     messageBox = QMessageBox(QMessageBox.Warning,  "Warning", "Do you really want to quit?", buttons=QMessageBox.Yes | QMessageBox.No, parent=mwindow)
 
     p = QtGui.QPalette()
-    p.setColor(QtGui.QPalette.ColorRole.Window, QtGui.QColor(mwindow.colorscheme()['background']))
-    p.setColor(QtGui.QPalette.ColorRole.Base, QtGui.QColor(mwindow.colorscheme()['secondbackground']))
-    p.setColor(QtGui.QPalette.ColorRole.Button, QtGui.QColor(mwindow.colorscheme()['highlight']))
-    p.setColor(QtGui.QPalette.ColorRole.ButtonText, QtGui.QColor(mwindow.colorscheme()['highlighttext']))
-    p.setColor(QtGui.QPalette.ColorRole.Text, QtGui.QColor(mwindow.colorscheme()['color']))
-    p.setColor(QtGui.QPalette.ColorRole.WindowText, QtGui.QColor(mwindow.colorscheme()['color']))
+    p.setColor(QtGui.QPalette.ColorRole.Window, QtGui.QColor(mwindow.colorscheme().background))
+    p.setColor(QtGui.QPalette.ColorRole.Base, QtGui.QColor(mwindow.colorscheme().second_background))
+    p.setColor(QtGui.QPalette.ColorRole.Button, QtGui.QColor(mwindow.colorscheme().highlight))
+    p.setColor(QtGui.QPalette.ColorRole.ButtonText, QtGui.QColor(mwindow.colorscheme().highlight_text))
+    p.setColor(QtGui.QPalette.ColorRole.Text, QtGui.QColor(mwindow.colorscheme().color))
+    p.setColor(QtGui.QPalette.ColorRole.WindowText, QtGui.QColor(mwindow.colorscheme().color))
     messageBox.setPalette(p)
 
     messageBox.exec_()
