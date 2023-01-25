@@ -23,6 +23,7 @@ class ObstacleProfileToolbox(QDockWidget):
     def __init__(self, current_scenario: Scenario, callback, tmp_folder, text_browser, mwindow):
         super().__init__("Obstacle Profile Toolbox")
 
+        # slider is used to get the value
         self.current_time = QSlider(Qt.Horizontal)
         self.current_time.setValue(0)
         self.current_time.setMinimum(0)
