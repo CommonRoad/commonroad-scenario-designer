@@ -1,7 +1,6 @@
 from crdesigner.ui.gui.mwindow.mwindow import MWindow
 import sys
 from PyQt5.QtWidgets import *
-from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMO_AVAILABLE
 
 # HOW TO ADD TESTS ?
 # 1. all tests need to be in the test_pyqt_framework method. Otherwise, the construction / destruction causes segfaults.

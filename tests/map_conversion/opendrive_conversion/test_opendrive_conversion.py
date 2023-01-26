@@ -210,7 +210,7 @@ class TestOpenDriveToCommonRoadConversion(unittest.TestCase):
 
         # test number of traffic signs
         self.assertEqual(2, len([t for t in network.traffic_signs if not t.virtual]))
-        self.assertEqual(6, len([t for t in network.traffic_signs if t.virtual]))
+        self.assertEqual(7, len([t for t in network.traffic_signs if t.virtual]))
 
         # test type of traffic signs
         self.assertEqual(TrafficSignIDZamunda.U_TURN,
@@ -273,6 +273,17 @@ class TestOpenDriveToCommonRoadConversion(unittest.TestCase):
         scenario = self.load_and_convert_opendrive(name)
         self.assertEqual({RoadUser.VEHICLE, RoadUser.TRAIN},
                          scenario.lanelet_network.find_lanelet_by_id(2).user_one_way)
+
+    def test_access_to_user_allow_bi(self):
+        name = "straight_road_lane_access_bi"
+        scenario = self.load_and_convert_opendrive(name)
+        self.assertEqual({RoadUser.PEDESTRIAN}, scenario.lanelet_network.find_lanelet_by_id(2).user_bidirectional)
+
+    def test_access_to_user_deny_bi(self):
+        name = "straight_road_lane_access_deny_bi"
+        scenario = self.load_and_convert_opendrive(name)
+        self.assertEqual({RoadUser.VEHICLE, RoadUser.TRAIN, RoadUser.BICYCLE},
+                         scenario.lanelet_network.find_lanelet_by_id(2).user_bidirectional)
 
     def test_access_mapping(self):
         name = "straight_road_lane_access_autonomous" # testing ignored types
