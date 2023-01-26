@@ -295,8 +295,8 @@ class MapCreator:
         if not is_natural_number(ang) and not intersection:
             ang = 0
             if not MapCreator.lanelet_is_straight(predecessor):
-                a = predecessor.right_vertices[-1] - predecessor.center_vertices[-1]
                 b = successor.right_vertices[0] - successor.center_vertices[0]
+                a = predecessor.right_vertices[-1] - predecessor.center_vertices[-1]
                 inner = np.inner(a, b)
                 if inner == 0:
                     sign = np.cross(a, b)
