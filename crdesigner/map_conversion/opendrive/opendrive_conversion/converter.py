@@ -95,9 +95,12 @@ class OpenDriveConverter:
                                 -1), inner_neighbour=inner_neighbour_id,
                         inner_neighbour_same_direction=inner_neighbour_same_dir, outer_neighbour=outer_neighbour_id,
                         center_marking=center_marking)
-
+                print("------------")
+                print(lane.id)
+                for r in lane.road_mark:
+                    print(r.type)
                 # Create new lane for each width segment
-                for width in lane.widths:
+                for w, width in enumerate(lane.widths):
                     """
                     pos = [x.SOffset for x in lane.road_mark] + [width.length]
                     pos = np.array(sorted(set(pos)))
@@ -113,15 +116,27 @@ class OpenDriveConverter:
                     """
                     # check if road mark was changed and set corresponding road mark
                     mark_idx = -1
+                    marks = []
                     for mark in lane.road_mark:
+                        print("width_offset: " + str(width.start_offset) + "; mark_offset: " + str(mark.SOffset))
+                        print(str(w + 1) + " " + str(len(lane.widths)))
                         if width.start_offset >= mark.SOffset:
                             mark_idx += 1
+                            if np.isclose(width.start_offset, mark.SOffset):
+                                marks += [mark]
+                        elif (mark.SOffset < lane.widths[w + 1].start_offset) if w < len(lane.widths) - 1 else True:
+                            marks += [mark]
+                        else:
+                            pass
                     # create new lane
                     parametric_lane = OpenDriveConverter.create_parametric_lane(lane_borders, width, lane, side,
                             mark_idx)
                     parametric_lane.reverse = bool(lane.id > 0)
-                    plane_group.append(parametric_lane)
-
+                    mlist = [("lineMarking", m, m.SOffset) for m in marks[1:]]
+                    plist = parametric_lane.split_plane(mlist)
+                    #plane_group.append(parametric_lane)
+                    for p in plist:
+                        plane_group.append(p)
                 # if lane borders are specified by offsets instead of widths
                 # for borders in lane.borders:
 

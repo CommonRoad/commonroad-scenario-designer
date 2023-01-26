@@ -395,3 +395,52 @@ class ParametricLane:
 
         max_idx = np.argmax(pos_and_val, axis=0)[1]
         return tuple(pos_and_val[max_idx])
+
+    def split_plane(self, split_vals: list) -> list:
+        """Experimental function splitting planes according to the split values given in the form
+        list[tuple(category, value, offset)], where category is a string that describes according to which parameter
+        should be split at this point (currently either "lineMarking", "speed" or "access")
+        :param split_vals: the split values given in the form list[tuple(category, value, offset)]
+        :rtype: list[ParametricLane]
+        """
+        plane_list = [[self.id_, self.border_group, self.type_, self.line_marking, self.side, self.speed, self.access
+                       ]]
+        line_marking = self.line_marking
+        speed = self.speed
+        access = self.access
+        counter = 1
+        prev = 0
+        len_prev = [] if self.length is not None else [None] * len(split_vals)
+        for category, value, offset in sorted(split_vals, key=lambda y: y[2]):
+            inner_border_offset = self.border_group.inner_border_offset + offset
+            outer_border_offset = self.border_group.outer_border_offset + offset
+            border_group = ParametricLaneBorderGroup(inner_border=self.border_group.inner_border,
+                                                     outer_border=self.border_group.outer_border,
+                                                     inner_border_offset=inner_border_offset,
+                                                     outer_border_offset=outer_border_offset)
+            if category == "lineMarking":
+                line_marking = value
+            elif category == "speed":
+                speed = value
+            elif category == "access":
+                access = value
+            else:
+                pass
+            plane_list.append([self.id_ + "." + str(counter), border_group, self.type_, line_marking, self.side,
+                               speed, access])
+            if self.length is not None:
+                len_prev.append(offset - prev)
+                prev = offset
+            counter += 1
+        if self.length is not None:
+            len_prev.append(self.length - prev)
+        for x in range(len(plane_list)):
+            plane_list[x] = ParametricLane(id_=plane_list[x][0], border_group=plane_list[x][1],
+                                           type_=plane_list[x][2],
+                                           line_marking=plane_list[x][3],
+                                           side=plane_list[x][4],
+                                           speed=plane_list[x][5],
+                                           access=plane_list[x][6],
+                                           length=len_prev[x])
+            plane_list[x].reverse = self.reverse
+        return plane_list

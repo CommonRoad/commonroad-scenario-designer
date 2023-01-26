@@ -16,15 +16,8 @@ class ParametricLaneGroup:
     lanelet just like a single parametric_lane.
     """
 
-    def __init__(
-        self,
-        id_=None,
-        parametric_lanes=None,
-        inner_neighbour=None,
-        inner_neighbour_same_direction=True,
-        outer_neighbour=None,
-        center_marking=None
-    ):
+    def __init__(self, id_=None, parametric_lanes=None, inner_neighbour=None, inner_neighbour_same_direction=True,
+            outer_neighbour=None, center_marking=None):
         """Initializes a ParametricLaneGroup object.
 
         :param id_: ID of the ParametricLaneGroup.
@@ -91,13 +84,9 @@ class ParametricLaneGroup:
         """
         if reverse:
             self._geo_lengths = np.insert(self._geo_lengths, 1, length)
-            self._geo_lengths[2:] = [
-                x + length for i, x in enumerate(self._geo_lengths) if i > 1
-            ]
+            self._geo_lengths[2:] = [x + length for i, x in enumerate(self._geo_lengths) if i > 1]
         else:
-            self._geo_lengths = np.append(
-                self._geo_lengths, length + self._geo_lengths[-1]
-            )
+            self._geo_lengths = np.append(self._geo_lengths, length + self._geo_lengths[-1])
 
     @property
     def type(self) -> str:
@@ -133,9 +122,7 @@ class ParametricLaneGroup:
         :return: True if every ParametricLane has width_coefficients equal to only zero
         :rtype: bool
         """
-        return all(
-            [plane.has_zero_width_everywhere() for plane in self.parametric_lanes]
-        )
+        return all([plane.has_zero_width_everywhere() for plane in self.parametric_lanes])
 
     def to_lanelet(self, error_tolerance, min_delta_s) -> ConversionLanelet:
         """Convert a ParametricLaneGroup to a Lanelet.
@@ -152,9 +139,8 @@ class ParametricLaneGroup:
         line_marking_right_vertices = LineMarking.UNKNOWN
 
         for parametric_lane in self.parametric_lanes:
-            local_left_vertices, local_right_vertices = parametric_lane.calc_vertices(
-                error_tolerance=error_tolerance, min_delta_s=min_delta_s
-            )
+            local_left_vertices, local_right_vertices = parametric_lane.calc_vertices(error_tolerance=error_tolerance,
+                    min_delta_s=min_delta_s)
             # check whether parametric lane cannot be used,
             # e.g., if to small it is possible that no vertices are generated
             if local_left_vertices is None or len(local_left_vertices) == 0:
@@ -171,31 +157,15 @@ class ParametricLaneGroup:
                 left_vertices = local_left_vertices
                 right_vertices = local_right_vertices
 
-        def line_marking_map(marking : RoadMark) -> LineMarking:
-            """
-            Nested helper function that unclutters finding the correct line marking for a given OpenDRIVE
-            RoadMark.
-            :param marking: the considered RoadMark to be converted
-            :return: the converted LineMarking
-            :rtype: LineMarking
-            """
-            if marking is None:
-                return LineMarking.UNKNOWN
-            if marking.type == "solid" or marking.type == "solid solid":
-                return LineMarking.BROAD_SOLID if marking.weight == "bold" else LineMarking.SOLID
-            elif marking.type == "broken":
-                return LineMarking.BROAD_DASHED if marking.weight == "bold" else LineMarking.DASHED
-            return LineMarking.UNKNOWN
-
         for parametric_lane in self.parametric_lanes:
-            mark = line_marking_map(parametric_lane.line_marking)
+            mark = self.line_marking_map(parametric_lane.line_marking)
             if parametric_lane.side == "left":
                 if not self.parametric_lanes[0].reverse:
                     line_marking_left_vertices = mark
-                    line_marking_right_vertices = line_marking_map(self.center_marking)
+                    line_marking_right_vertices = self.line_marking_map(self.center_marking)
                 else:
                     line_marking_right_vertices = mark
-                    line_marking_left_vertices = line_marking_map(self.center_marking)
+                    line_marking_left_vertices = self.line_marking_map(self.center_marking)
             elif parametric_lane.side == "right":
                 if not self.parametric_lanes[0].reverse:
                     line_marking_right_vertices = mark
@@ -204,13 +174,10 @@ class ParametricLaneGroup:
             else:
                 pass
 
-        center_vertices = np.array(
-            [(l + r) / 2 for (l, r) in zip(left_vertices, right_vertices)]
-        )
+        center_vertices = np.array([(l + r) / 2 for (l, r) in zip(left_vertices, right_vertices)])
         # access to user conversion
         user_list = [set(), set()]
-        user_set = {"car", "truck", "bus", "motorcycle", "priorityVehicle", "taxi",
-                    "bicycle", "pedestrian", "train"}
+        user_set = {"car", "truck", "bus", "motorcycle", "priorityVehicle", "taxi", "bicycle", "pedestrian", "train"}
         direct_map_set = {"truck", "bus", "motorcycle", "pedestrian", "bicycle", "taxi"}
         vehicle_set = {"car", "truck", "bus", "motorcycle", "priorityVehicle", "taxi"}
 
@@ -239,24 +206,23 @@ class ParametricLaneGroup:
                 user = "priorityVehicle"
             elif restriction[0] == "trucks":
                 user = "truck"
-            else: # ignore other lane access types
+            else:  # ignore other lane access types
                 continue
             user_list = access_map(user_list, restriction[1] == "allow", user)
         users = (user_set if user_list[0] == set() else user_list[0]).difference(user_list[1])
         if vehicle_set.issubset(users):
             users = set.union({"vehicle"}, set.difference(users, vehicle_set))
+
         if self.type == "bidirectional":
             lanelet = ConversionLanelet(copy.deepcopy(self), left_vertices, center_vertices, right_vertices, self.id_,
                                         lanelet_type=self.type, line_marking_left_vertices=line_marking_left_vertices,
                                         line_marking_right_vertices=line_marking_right_vertices,
-                                        speed=self.parametric_lanes[0].speed,
-                                        user_bidirectional=users)
+                                        speed=self.parametric_lanes[0].speed, user_bidirectional=users)
         else:
             lanelet = ConversionLanelet(copy.deepcopy(self), left_vertices, center_vertices, right_vertices, self.id_,
                                         lanelet_type=self.type, line_marking_left_vertices=line_marking_left_vertices,
                                         line_marking_right_vertices=line_marking_right_vertices,
-                                        speed=self.parametric_lanes[0].speed,
-                                        user_one_way=users)
+                                        speed=self.parametric_lanes[0].speed, user_one_way=users)
 
         # Adjacent lanes
         self._set_adjacent_lanes(lanelet)
@@ -287,22 +253,14 @@ class ParametricLaneGroup:
                 plane_idx = self._geo_lengths.size - 2
             else:
                 raise Exception(
-                    f"Tried to calculate a position outside of the borders of the reference path at s={s_pos}"
-                    f", but path has only length of l={self._geo_lengths[-1]}"
-                )
+                        f"Tried to calculate a position outside of the borders of the reference path at s={s_pos}"
+                        f", but path has only length of l={self._geo_lengths[-1]}")
 
-        return self.parametric_lanes[plane_idx].calc_border(
-            border, s_pos - self._geo_lengths[plane_idx], width_offset, compute_curvature=compute_curvature
-        )
+        return self.parametric_lanes[plane_idx].calc_border(border, s_pos - self._geo_lengths[plane_idx], width_offset,
+                compute_curvature=compute_curvature)
 
-    def to_lanelet_with_mirroring(
-        self,
-        mirror_border: str,
-        distance: Tuple[float, float],
-        mirror_interval: Tuple[float, float],
-        adjacent_lanelet: ConversionLanelet,
-        precision: float = 0.5,
-    ):
+    def to_lanelet_with_mirroring(self, mirror_border: str, distance: Tuple[float, float],
+            mirror_interval: Tuple[float, float], adjacent_lanelet: ConversionLanelet, precision: float = 0.5, ):
         """Convert a ParametricLaneGroup to a Lanelet with mirroring one of the borders.
 
         :param mirror_border: Which lane to mirror, if performing merging or splitting of lanes.
@@ -337,9 +295,7 @@ class ParametricLaneGroup:
             original_width = np.linalg.norm(inner_pos - outer_pos)
 
             # if not mirroring lane or outside of range
-            if (
-                pos < mirror_interval[0] or pos > mirror_interval[1]
-            ) and not np.isclose(pos, mirror_interval[1]):
+            if (pos < mirror_interval[0] or pos > mirror_interval[1]) and not np.isclose(pos, mirror_interval[1]):
                 left_vertices.append(inner_pos)
                 right_vertices.append(outer_pos)
                 last_width_difference = 0
@@ -353,20 +309,14 @@ class ParametricLaneGroup:
                 local_width_offset = distance_slope * pos + global_distance[0]
 
                 if mirror_border == "left":
-                    new_outer_pos = self.calc_border("inner", pos, local_width_offset)[
-                        0
-                    ]
+                    new_outer_pos = self.calc_border("inner", pos, local_width_offset)[0]
                     modified_width = np.linalg.norm(new_outer_pos - inner_pos)
 
                     # change width s.t. it does not mirror inner border but instead
                     # outer border
-                    local_width_offset = (
-                        math.copysign(1, local_width_offset) * last_width_difference
-                    )
+                    local_width_offset = (math.copysign(1, local_width_offset) * last_width_difference)
                     if modified_width < original_width:
-                        right_vertices.append(
-                            self.calc_border("outer", pos, local_width_offset)[0]
-                        )
+                        right_vertices.append(self.calc_border("outer", pos, local_width_offset)[0])
                     elif modified_width > original_width + adjacent_width:
                         right_vertices.append(adj_outer_pos)
                     else:
@@ -375,18 +325,12 @@ class ParametricLaneGroup:
 
                     left_vertices.append(inner_pos)
                 elif mirror_border == "right":
-                    new_inner_pos = self.calc_border("outer", pos, local_width_offset)[
-                        0
-                    ]
+                    new_inner_pos = self.calc_border("outer", pos, local_width_offset)[0]
                     modified_width = np.linalg.norm(new_inner_pos - outer_pos)
 
-                    local_width_offset = (
-                        math.copysign(1, local_width_offset) * last_width_difference
-                    )
+                    local_width_offset = (math.copysign(1, local_width_offset) * last_width_difference)
                     if modified_width < original_width:
-                        left_vertices.append(
-                            self.calc_border("inner", pos, local_width_offset)[0]
-                        )
+                        left_vertices.append(self.calc_border("inner", pos, local_width_offset)[0])
                     elif modified_width > original_width + adjacent_width:
                         left_vertices.append(adj_inner_pos)
                     else:
@@ -395,18 +339,11 @@ class ParametricLaneGroup:
 
                     right_vertices.append(outer_pos)
 
-        left_vertices, right_vertices = (
-            np.array(left_vertices),
-            np.array(right_vertices),
-        )
+        left_vertices, right_vertices = (np.array(left_vertices), np.array(right_vertices),)
         # right_vertices = np.array(right_vertices)
 
-        center_vertices = np.array(
-            [(l + r) / 2 for (l, r) in zip(left_vertices, right_vertices)]
-        )
-        lanelet = ConversionLanelet(
-            copy.deepcopy(self), left_vertices, center_vertices, right_vertices, self.id_
-        )
+        center_vertices = np.array([(l + r) / 2 for (l, r) in zip(left_vertices, right_vertices)])
+        lanelet = ConversionLanelet(copy.deepcopy(self), left_vertices, center_vertices, right_vertices, self.id_)
 
         # Adjacent lanes
         self._set_adjacent_lanes(lanelet)
@@ -431,11 +368,7 @@ class ParametricLaneGroup:
             else:
                 idx = 1
 
-            poses = np.append(
-                poses,
-                np.linspace(0, parametric_lane.length, num_steps)[idx::]
-                + self._geo_lengths[i],
-            )
+            poses = np.append(poses, np.linspace(0, parametric_lane.length, num_steps)[idx::] + self._geo_lengths[i], )
 
         return poses
 
@@ -468,9 +401,8 @@ class ParametricLaneGroup:
 
         return total_maximum
 
-    def first_zero_width_change_position(
-        self, reverse: bool = False, reference_width: float = 0.0
-    ) -> Tuple[Optional[float], Optional[float]]:
+    def first_zero_width_change_position(self, reverse: bool = False, reference_width: float = 0.0) -> Tuple[
+        Optional[float], Optional[float]]:
         """Get the earliest point of the ParametricLaneGroup where the width change is zero.
 
         :param reverse: True if checking should start from end of lanelet. Default is False
@@ -505,3 +437,45 @@ class ParametricLaneGroup:
                 return (pos, val)
 
         return (None, None)
+
+    @staticmethod
+    def line_marking_map(marking: RoadMark) -> LineMarking:
+        """Helper function that unclutters finding the correct line marking for a given OpenDRIVE
+        RoadMark.
+        :param marking: the considered RoadMark to be converted
+        :return: the converted LineMarking
+        :rtype: LineMarking
+        """
+        if marking is None:
+            return LineMarking.UNKNOWN
+        if marking.type == "solid" or marking.type == "solid solid":
+            return LineMarking.BROAD_SOLID if marking.weight == "bold" else LineMarking.SOLID
+        elif marking.type == "broken":
+            return LineMarking.BROAD_DASHED if marking.weight == "bold" else LineMarking.DASHED
+        return LineMarking.UNKNOWN
+
+    def marking_subset_lanelets(self, error_tolerance, min_delta_s) -> list[ConversionLanelet]:
+        print("marking subset lanelet")
+        """Experimental plane group splitting function that splits it with regard to the different line markings when
+        converting it to a set of lanelets
+        :param error_tolerance: the error tolerance passed to the default conversion function
+        :param mind_delta_s: the minimum delta s passed to the default conversion function
+        :rtype: list[ConversionLanelet]
+        """
+        plist = [[self.parametric_lanes[0]]]
+        for p, plane in enumerate(self.parametric_lanes[1:]):
+            if self.line_marking_map(plane.line_marking) \
+                    == self.line_marking_map(self.parametric_lanes[p].line_marking):
+                plist[len(plist) - 1].append(plane)
+            else:
+                plist.append([plane])
+        for x in range(len(plist)):
+            plist[x] = ParametricLaneGroup(id_=self.id_+(("."+str(x)) if len(plist) > 1 else ""),
+                                           parametric_lanes=plist[x],
+                                           inner_neighbour=self.inner_neighbour,
+                                           inner_neighbour_same_direction=self.inner_neighbour_same_direction,
+                                           outer_neighbour=self.outer_neighbour, center_marking=self.center_marking
+                                           ).to_lanelet(error_tolerance, min_delta_s)
+        for p in plist:
+            print(p.lanelet_id)
+        return plist

@@ -180,11 +180,16 @@ class Network:
                 # Remove lanelets from intersections dictionary that do not fit the filtered type criterion
                 self._link_index.clean_intersections(parametric_lane.id_)
                 continue
-            lanelet = parametric_lane.to_lanelet(self.error_tolerance, self.min_delta_s)
-            lanelet.predecessor = self._link_index.get_predecessors(parametric_lane.id_)
-            lanelet.successor = self._link_index.get_successors(parametric_lane.id_)
-            lanelet_network.add_lanelet(lanelet)
-
+            lanelets = parametric_lane.marking_subset_lanelets(self.error_tolerance, self.min_delta_s)
+            lanelets[0].predecessor = self._link_index.get_predecessors(parametric_lane.id_)
+            for ind in range(len(lanelets)):
+                if ind > 0:
+                    lanelets[ind].predecessor = [lanelets[ind - 1].lanelet_id]
+                if ind < len(lanelets) - 1:
+                    lanelets[ind].successor = [lanelets[ind + 1].lanelet_id]
+            lanelets[len(lanelets) - 1].successor = self._link_index.get_successors(parametric_lane.id_)
+            for lanelet in lanelets:
+                lanelet_network.add_lanelet(lanelet)
             # Create a map of lanelet_description to traffic signs/lights so that they can be assigned as
             # reference to the correct lanelets later
 
