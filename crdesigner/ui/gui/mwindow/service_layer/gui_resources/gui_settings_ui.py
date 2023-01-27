@@ -13,10 +13,10 @@ class UIGUISettings:
 
     def __init__(self, h: int, c, wm, wf: int, f):
         self.columns = c
-        self.height = h
-        self.widthm = wm * f
-        self.widthf = wf * f
-        self.factor = f
+        self.height = int(h)
+        self.widthm = int(wm * f)
+        self.widthf = int(wf * f)
+        self.factor = int(f)
     
     def setupUi(self, tabWidget, ):
         self.scrollArea = QtWidgets.QScrollArea(tabWidget)

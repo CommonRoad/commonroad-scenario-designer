@@ -16,9 +16,9 @@ class Ui_OSMSettings():
     def __init__(self, h, c, wm, wf, f):
         self.columns = c
         self.height = h
-        self.widthm = wm * f
-        self.widthf = wf * f
-        self.factor = f
+        self.widthm = int(wm * f)
+        self.widthf = int(wf * f)
+        self.factor = int(f)
     
     def setupUi(self, tabWidget):
         self.scrollArea = QtWidgets.QScrollArea(tabWidget)

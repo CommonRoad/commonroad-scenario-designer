@@ -1,23 +1,29 @@
 import copy
-from typing import List, Union, Set
+from typing import List, Union
+import numpy as np
 
-import scipy.version
+import PyQt5
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
 from PyQt5.QtWidgets import QSizePolicy
 from PyQt5 import QtCore
-import numpy as np
+
 from matplotlib.backend_bases import MouseButton
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
-from scipy.interpolate import interp1d
+
 from commonroad.planning.planning_problem import PlanningProblemSet
 from commonroad.common.util import Interval
 from commonroad.scenario.scenario import Scenario
 from commonroad.visualization.mp_renderer import MPRenderer
+from commonroad.visualization.draw_params import StaticObstacleParams, DynamicObstacleParams
 from commonroad.geometry.shape import Circle
 from commonroad.scenario.obstacle import StaticObstacle, DynamicObstacle
 from commonroad.scenario.lanelet import Lanelet, LaneletType
-from crdesigner.ui.gui.mwindow.toolboxes.toolbox_ui import PosB
 
+from crdesigner.ui.gui.mwindow.toolboxes.toolbox_ui import PosB
+from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.commonroad_viewer.service_layer.draw_params_updater import \
+    DrawParamsCustom
 from .helper import _merge_dict, calculate_closest_vertices, calculate_euclidean_distance, angle_between
 from .service_layer import update_draw_params_dynamic_only_based_on_zoom
 from .service_layer import update_draw_params_based_on_zoom
@@ -25,7 +31,6 @@ from .service_layer import update_draw_params_based_on_scenario
 from .service_layer import update_draw_params_dynamic_based_on_scenario
 from .service_layer import resize_lanelet_network
 from crdesigner.ui.gui.mwindow.service_layer import config
-
 
 from ...service_layer.map_creator import MapCreator
 
@@ -41,7 +46,9 @@ class DynamicCanvas(FigureCanvas):
     control_key = False
 
     def __init__(self, parent=None, width=5, height=5, dpi=100, animated_viewer=None):
-
+        self.flag = False
+        if parent is not None:
+            self.flag = True
         self.animated_viewer = animated_viewer
         self.ax = None
         self.drawer = Figure(figsize=(width, height), dpi=dpi)
@@ -84,7 +91,6 @@ class DynamicCanvas(FigureCanvas):
         # Set focus on canvas to detect key press events
         self.setFocusPolicy(QtCore.Qt.ClickFocus)
         self.setFocus()
-
         # any callbacks for interaction per mouse
         self.button_press_event_cid = self.mpl_connect('button_press_event', self.dynamic_canvas_click_callback)
         self.button_release_event_cid = self.mpl_connect('button_release_event', self.dynamic_canvas_release_callback)
@@ -94,7 +100,26 @@ class DynamicCanvas(FigureCanvas):
         self.mpl_connect('key_press_event', self.dynamic_canvas_ctrl_press_callback)
         self.mpl_connect('key_release_event', self.dynamic_canvas_ctrl_release_callback)
 
+        # initializes mouse coordinates
+        self.mouse_coordinates = QPoint(0, 0)
+
         self.clear_axes()
+
+    def keyPressEvent(self, event):
+        """
+        On key press activate an event
+        :param event: key press event
+        :return:
+        """
+        if self.flag is True:
+            # on backspace delete selected lanelet
+            if event.key() == QtCore.Qt.Key.Key_Backspace:
+                self.parent.road_network_toolbox.remove_lanelet()
+                return
+            # on DEL key delete selected lanelet
+            elif event.key() == QtCore.Qt.Key.Key_Delete:
+                self.parent.road_network_toolbox.remove_lanelet()
+                return
 
     def clear_axes(self, keep_limits=False, clear_artists=False):
         if clear_artists:
@@ -182,7 +207,8 @@ class DynamicCanvas(FigureCanvas):
         # now also show any selected
         self._select_lanelet(True)
 
-    def draw_scenario(self, scenario: Scenario, pps: PlanningProblemSet = None, draw_params=None, plot_limits=None,
+    def draw_scenario(self, scenario: Scenario, pps: PlanningProblemSet = None,
+                      draw_params: DrawParamsCustom = DrawParamsCustom(), plot_limits=None,
                       draw_dynamic_only=False):
         """[summary]
         :param scenario: [description]
@@ -216,15 +242,18 @@ class DynamicCanvas(FigureCanvas):
             self.rnd.remove_dynamic()  # self.rnd.ax.clear()  # self.ax.clear()
         else:
             self.ax.clear()
-        draw_params_merged = _merge_dict(self.draw_params.copy(), draw_params)
+
+        draw_params_merged = copy.deepcopy(draw_params)
         self.rnd.plot_limits = plot_limits
         self.rnd.ax = self.ax
         if draw_dynamic_only is True:
             draw_params_merged = _merge_dict(self.draw_params_dynamic_only.copy(), draw_params)
+            draw_params_merged.dynamic_obstacle.draw_initial_state = False
             scenario.draw(renderer=self.rnd, draw_params=draw_params_merged)
             self.draw_obstacles(scenario=scenario, draw_params=draw_params_merged)
             self.rnd.render(keep_static_artists=True)
         else:
+            draw_params_merged.dynamic_obstacle.draw_initial_state = False
             scenario.draw(renderer=self.rnd, draw_params=draw_params_merged)
             if pps is not None:
                 pps.draw(renderer=self.rnd, draw_params=draw_params_merged)
@@ -235,32 +264,30 @@ class DynamicCanvas(FigureCanvas):
             self.ax.set(xlim=xlim)
             self.ax.set(ylim=ylim)
 
-        self.rnd.ax.set_facecolor(draw_params['colorscheme']['secondbackground'])
+        self.rnd.ax.set_facecolor(draw_params.color_schema.second_background)
 
-        if draw_params['colorscheme']['axis'] == 'Left/ Bottom':
-            self.ax.spines['bottom'].set_color(draw_params['colorscheme']['color'])
-            self.ax.spines['left'].set_color(draw_params['colorscheme']['color'])
-            self.ax.spines['top'].set_color(draw_params['colorscheme']['secondbackground'])
-            self.ax.spines['right'].set_color(draw_params['colorscheme']['secondbackground'])
-            self.ax.tick_params(axis='x', colors=draw_params['colorscheme']['color'])
-            self.ax.tick_params(axis='y', colors=draw_params['colorscheme']['color'])
+        if draw_params.color_schema.axis == 'Left/ Bottom':
+            self.ax.spines['bottom'].set_color(draw_params.color_schema.color)
+            self.ax.spines['left'].set_color(draw_params.color_schema.color)
+            self.ax.spines['top'].set_color(draw_params.color_schema.second_background)
+            self.ax.spines['right'].set_color(draw_params.color_schema.second_background)
+            self.ax.tick_params(axis='x', colors=draw_params.color_schema.color)
+            self.ax.tick_params(axis='y', colors=draw_params.color_schema.color)
 
-        elif draw_params['colorscheme']['axis'] == 'None':
-            self.ax.spines['bottom'].set_color(draw_params['colorscheme']['secondbackground'])
-            self.ax.spines['left'].set_color(draw_params['colorscheme']['secondbackground'])
-            self.ax.spines['top'].set_color(draw_params['colorscheme']['secondbackground'])
-            self.ax.spines['right'].set_color(draw_params['colorscheme']['secondbackground'])
-            self.ax.tick_params(axis='x', colors=draw_params['colorscheme']['secondbackground'])
-            self.ax.tick_params(axis='y', colors=draw_params['colorscheme']['secondbackground'])
+        elif draw_params.color_schema.axis == 'None':
+            self.ax.spines['bottom'].set_color(draw_params.color_schema.second_background)
+            self.ax.spines['left'].set_color(draw_params.color_schema.second_background)
+            self.ax.spines['top'].set_color(draw_params.color_schema.second_background)
+            self.ax.spines['right'].set_color(draw_params.color_schema.second_background)
+            self.ax.tick_params(axis='x', colors=draw_params.color_schema.second_background)
+            self.ax.tick_params(axis='y', colors=draw_params.color_schema.second_background)
         else:
-            self.ax.spines['bottom'].set_color(draw_params['colorscheme']['color'])
-            self.ax.spines['left'].set_color(draw_params['colorscheme']['color'])
-            self.ax.spines['top'].set_color(draw_params['colorscheme']['color'])
-            self.ax.spines['right'].set_color(draw_params['colorscheme']['color'])
-            self.ax.tick_params(axis='x', colors=draw_params['colorscheme']['color'])
-            self.ax.tick_params(axis='y', colors=draw_params['colorscheme']['color'])
-
-
+            self.ax.spines['bottom'].set_color(draw_params.color_schema.color)
+            self.ax.spines['left'].set_color(draw_params.color_schema.color)
+            self.ax.spines['top'].set_color(draw_params.color_schema.color)
+            self.ax.spines['right'].set_color(draw_params.color_schema.color)
+            self.ax.tick_params(axis='x', colors=draw_params.color_schema.color)
+            self.ax.tick_params(axis='y', colors=draw_params.color_schema.color)
 
     def update_obstacles(self, scenario: Scenario, draw_params=None, plot_limits=None):
         """
@@ -288,22 +315,48 @@ class DynamicCanvas(FigureCanvas):
         2. When a lanelet was selected execute the logic behind it.
         b) Select lanelets by clicking on the canvas. Selects only one of the lanelets that contains the click
         position.
+        3. Check for rightclicked. If rightclicked and lanelet selected open context menu
         This order is important - first the resizing and then the lanelet selection - otherwise the lanelets of the old
         map are selected and then not visualized.
 
         :params mouse_clicked_event:
         """
+
         # when the mouse is clicked we remember where this was -> use this for lanelet selection
         self.latest_mouse_pos = np.array([mouse_clicked_event.xdata, mouse_clicked_event.ydata])
         # update the map
         self._update_map()
         # now do the lanelet selection
         self._select_lanelet()
-
         # call callback_function with latest mouse position to check if a position button is pressed
-        temp_point_updated = self.animated_viewer.callback_function(PosB(str(self.latest_mouse_pos[0]), str(self.latest_mouse_pos[1])), "", self.draw_temporary_points)
+        temp_point_updated = self.animated_viewer.callback_function(PosB(str(self.latest_mouse_pos[0]),
+                                                                         str(self.latest_mouse_pos[1])),
+                                                                    "", self.draw_temporary_points)
         if temp_point_updated:
             self.draw_temporary_point()
+        # on right mouse click
+        if mouse_clicked_event.button == 3:
+            if self.flag:
+                self.mouse_coordinates = QPoint(QCursor.pos().x(), QCursor.pos().y())
+                 # if lanelet selected
+                if self.parent.road_network_toolbox.selected_lanelet() != None:
+                    # create menu
+                    menu = PyQt5.QtWidgets.QMenu()
+                    edit = menu.addAction("Edit Attributes")
+                    remove = menu.addAction("Remove Lanelet")
+                    # open menu at mouse coordinates
+                    action = menu.exec((self.mouse_coordinates))
+                    # removes selected lanelet
+                    if action == remove:
+                        self.parent.road_network_toolbox.remove_lanelet()
+                    # opens edit attributes of lanelet
+                    if action == edit:
+                        self.parent.road_network_toolbox.road_network_toolbox_ui.tree.collapseItem(
+                            self.parent.road_network_toolbox.road_network_toolbox_ui.tree.itemAt(1, 0))
+                        self.parent.road_network_toolbox.road_network_toolbox_ui.tree.expandItem(
+                            self.parent.road_network_toolbox.road_network_toolbox_ui.tree.itemAt(7, 30))
+                        if not self.parent.road_network_toolbox.road_network_toolbox_ui.attributes_button.toggle_checked:
+                            self.parent.road_network_toolbox.road_network_toolbox_ui.attributes_button.pressed()
 
 
     def dynamic_canvas_release_callback(self, mouse_clicked_event):
@@ -427,7 +480,7 @@ class DynamicCanvas(FigureCanvas):
         y_dim = (y_max - y_min) / 2
         return center, x_dim, y_dim, (x_min, x_max), (y_min, y_max)
 
-    def draw_obstacles(self, scenario: Scenario, draw_params: str = None):
+    def draw_obstacles(self, scenario: Scenario, draw_params: DrawParamsCustom = None):
         """
         draws the obstacles
         :param scenario: current scenario
@@ -442,7 +495,6 @@ class DynamicCanvas(FigureCanvas):
                 draw_params_merged = _merge_dict(draw_params.copy(), obstacle_draw_params.copy())
             except Exception:
                 draw_params_merged = draw_params
-
             obj.draw(renderer=self.rnd, draw_params=draw_params_merged)
 
     def set_static_obstacle_color(self, obstacle_id: int, color: str = None):
@@ -453,25 +505,45 @@ class DynamicCanvas(FigureCanvas):
         """
         if not color:
             color = "#d95558"
-        draw_params = {"static_obstacle": {"occupancy": {
-            "shape": {"polygon": {"facecolor": color}, "rectangle": {"facecolor": color},
-                      "circle": {"facecolor": color}}}}}
-        DynamicCanvas.obstacle_color_array.append([obstacle_id, draw_params, color])
+
+        DynamicCanvas.obstacle_color_array.append([obstacle_id, self.create_static_obstacle_draw_params(color), color])
+
+    def create_static_obstacle_draw_params(self, color: str) -> StaticObstacleParams:
+        """
+        Creates draw parameters for static obstacle.
+
+        :param color: Desired color of obstacle
+        """
+        draw_params = StaticObstacleParams()
+        draw_params.occupancy.shape.facecolor = color
+
+        return draw_params
+
+    def create_dyn_obstacle_draw_params(self, color: str) -> DynamicObstacleParams:
+        """
+        Creates draw parameters for dynamic obstacle.
+
+        :param color: Desired color of obstacle
+        """
+        draw_params = DynamicObstacleParams()
+        draw_params.occupancy.shape.facecolor = color
+        draw_params.show_label = config.DRAW_OBSTACLE_LABELS
+        draw_params.draw_icon = config.DRAW_OBSTACLE_ICONS
+        draw_params.draw_direction = config.DRAW_OBSTACLE_DIRECTION
+        draw_params.draw_signals = config.DRAW_OBSTACLE_SIGNALS
+
+        return draw_params
 
     def set_dynamic_obstacle_color(self, obstacle_id: int, color: str = None):
         """
-        sets dynamic_obstacle color
+        Sets dynamic_obstacle color.
+
         :param obstacle_id: id of obstacle that is to be added/updated
         :param color: color of the obstacle, None if default color
         """
         if not color:
             color = "#1d7eea"
-        draw_params = {"dynamic_obstacle": {"vehicle_shape": {"occupancy": {
-            "shape": {"polygon": {"facecolor": color}, "rectangle": {"facecolor": color},
-                      "circle": {"facecolor": color}}}}, 'show_label': config.DRAW_OBSTACLE_LABELS,
-            'draw_icon': config.DRAW_OBSTACLE_ICONS, 'draw_direction': config.DRAW_OBSTACLE_DIRECTION,
-            'draw_signals': config.DRAW_OBSTACLE_SIGNALS}}
-        DynamicCanvas.obstacle_color_array.append([obstacle_id, draw_params, color])
+        DynamicCanvas.obstacle_color_array.append([obstacle_id, self.create_dyn_obstacle_draw_params(color), color])
 
     def update_obstacle_trajectory_params(self):
         """
@@ -484,15 +556,9 @@ class DynamicCanvas(FigureCanvas):
                     result = next(c for c in DynamicCanvas.obstacle_color_array if c[0] == obj.obstacle_id)
                     color = result[2]
                     if isinstance(obj, DynamicObstacle):
-                        draw_params = {"dynamic_obstacle": {"vehicle_shape": {"occupancy": {
-                            "shape": {"polygon": {"facecolor": color}, "rectangle": {"facecolor": color},
-                                      "circle": {"facecolor": color}}}}, 'show_label': config.DRAW_OBSTACLE_LABELS,
-                            'draw_icon': config.DRAW_OBSTACLE_ICONS, 'draw_direction': config.DRAW_OBSTACLE_DIRECTION,
-                            'draw_signals': config.DRAW_OBSTACLE_SIGNALS}}
+                        draw_params = self.create_dyn_obstacle_draw_params(color)
                     elif isinstance(obj, StaticObstacle):
-                        draw_params = {"static_obstacle": {"occupancy": {
-                            "shape": {"polygon": {"facecolor": color}, "rectangle": {"facecolor": color},
-                                      "circle": {"facecolor": color}}}}}
+                        draw_params = self.create_static_obstacle_draw_params(color)
 
                     i = DynamicCanvas.obstacle_color_array.index(result)
                     DynamicCanvas.obstacle_color_array.pop(i)
@@ -501,16 +567,10 @@ class DynamicCanvas(FigureCanvas):
                 except Exception:
                     if isinstance(obj, DynamicObstacle):
                         color = "#1d7eea"
-                        draw_params = {"dynamic_obstacle": {"vehicle_shape": {"occupancy": {
-                            "shape": {"polygon": {"facecolor": color}, "rectangle": {"facecolor": color},
-                                      "circle": {"facecolor": color}}}}, 'show_label': config.DRAW_OBSTACLE_LABELS,
-                            'draw_icon': config.DRAW_OBSTACLE_ICONS, 'draw_direction': config.DRAW_OBSTACLE_DIRECTION,
-                            'draw_signals': config.DRAW_OBSTACLE_SIGNALS}}
+                        draw_params = self.create_dyn_obstacle_draw_params(color)
                     elif isinstance(obj, StaticObstacle):
                         color = "#d95558"
-                        draw_params = {"static_obstacle": {"occupancy": {
-                            "shape": {"polygon": {"facecolor": color}, "rectangle": {"facecolor": color},
-                                      "circle": {"facecolor": color}}}}}
+                        draw_params = self.create_static_obstacle_draw_params(color)
                     DynamicCanvas.obstacle_color_array.append([obj.obstacle_id, draw_params, color])
 
     def get_color(self, obstacle_id: int) -> Union[int, bool]:
@@ -780,4 +840,3 @@ class DynamicCanvas(FigureCanvas):
             self.ax.plot(x, y, marker="x", color="blue", zorder=21)
         self.update_plot()
         self.num_lanelets = len(self.animated_viewer.current_scenario.lanelet_network.lanelets)
-
