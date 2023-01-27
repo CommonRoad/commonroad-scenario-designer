@@ -70,6 +70,11 @@ class MapConversionToolboxUI(Toolbox):
         self.button_load_opendrive = QPushButton("Load OpenDRIVE File")
         self.loaded_opendrive_file = QLabel("no file selected")
         self.button_convert_opendrive = QPushButton("Convert OpenDRIVE to CommonRoad")
+        self.OpenDriveSpinner = QtWaitingSpinner(self, centerOnParent=False)
+        self.OpenDriveSpinner.setInnerRadius(7)
+        self.OpenDriveSpinner.setNumberOfLines(10)
+        self.OpenDriveSpinner.setLineLength(7)
+        self.OpenDriveSpinner.setLineWidth(2)
 
         load_opendrive_groupbox = QGroupBox()
         layout_load_opendrive_groupbox = QVBoxLayout()
@@ -77,6 +82,10 @@ class MapConversionToolboxUI(Toolbox):
         layout_load_opendrive_groupbox.addWidget(self.button_load_opendrive)
         layout_load_opendrive_groupbox.addWidget(self.loaded_opendrive_file)
         layout_load_opendrive_groupbox.addWidget(self.button_convert_opendrive)
+        h_layout = QHBoxLayout()
+        h_layout.setAlignment(Qt.AlignCenter)
+        h_layout.addWidget(self.OpenDriveSpinner)
+        layout_load_opendrive_groupbox.addLayout(h_layout)
         layout_opendrive.addWidget(load_opendrive_groupbox)
 
         title_opendrive = "OpenDRIVE  Conversion"
@@ -101,12 +110,10 @@ class MapConversionToolboxUI(Toolbox):
         self.osm_download_map_range.setValue(500)
         self.button_load_osm_file = QPushButton("Load Local OSM File")
         self.osm_loading_status = QLabel("no file selected")
-        self.button_load_osm_edit_state = QPushButton("Load OSM Edit State")
         self.button_start_osm_conversion = QPushButton("Convert OSM to CommonRoad")
         self.button_start_osm_conversion_with_sumo_parser = QPushButton("Convert OSM to CommonRoad using Sumo Parser")
         self.button_start_osm_conversion_with_sumo_parser.setToolTip('The conversion follows the route : \nOsm -> OpenDrive -> CR\nUseful for densed crossing')
-        self.spinner = QtWaitingSpinner(self, centerOnParent=False)
-        self.button_open_osm_settings = QPushButton("Open OSM Settings")
+        self.OsmSpinner = QtWaitingSpinner(self, centerOnParent=False)
         layout_osm_conversion_configuration = QFormLayout()
 
         layout_osm_selection_groupbox = QVBoxLayout()
@@ -126,12 +133,13 @@ class MapConversionToolboxUI(Toolbox):
         layout_osm_conversion_groupbox = QFormLayout()
         osm_conversion_groupbox = QGroupBox()
         osm_conversion_groupbox.setLayout(layout_osm_conversion_groupbox)
-        layout_osm_conversion_groupbox.addRow(self.button_load_osm_edit_state)
         layout_osm_conversion_groupbox.addRow(self.button_start_osm_conversion)
         layout_osm_conversion_groupbox.addRow(self.button_start_osm_conversion_with_sumo_parser)
-        layout_osm_conversion_groupbox.addRow(self.spinner)
+        h_layout = QHBoxLayout()
+        h_layout.setAlignment(Qt.AlignCenter)
+        h_layout.addWidget(self.OsmSpinner)
+        layout_osm_conversion_groupbox.addRow(h_layout)
         layout_osm_conversion_configuration.addWidget(osm_conversion_groupbox)
-        layout_osm_conversion_configuration.addWidget(self.button_open_osm_settings)
         layout_osm.addLayout(layout_osm_conversion_configuration)
 
         widget_title = "OSM Conversion"

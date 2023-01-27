@@ -1363,11 +1363,11 @@ class RoadNetworkToolboxUI(Toolbox):
         super().update_window()
         if self.place_at_position.isChecked():
             if self.curved_check_button.isChecked():
-                self.select_end_position.setStyleSheet('background-color: '+ self.mwindow.colorscheme()["secondbackground"] + '; color: ' + self.mwindow.colorscheme()["disabled"])
+                self.select_end_position.setStyleSheet('background-color: '+ self.mwindow.colorscheme().second_background + '; color: ' + self.mwindow.colorscheme().disabled)
             else:
-                self.select_end_position.setStyleSheet('background-color: '+ self.mwindow.colorscheme()["secondbackground"] + '; color: ' + self.mwindow.colorscheme()["color"])
+                self.select_end_position.setStyleSheet('background-color: '+ self.mwindow.colorscheme().second_background + '; color: ' + self.mwindow.colorscheme().color)
 
             if self.select_end_position.isChecked():
-                self.curved_check_button.button.setStyleSheet('background-color: '+ self.mwindow.colorscheme()["secondbackground"] + '; color: ' + self.mwindow.colorscheme()["disabled"])
+                self.curved_check_button.button.setStyleSheet('background-color: '+ self.mwindow.colorscheme().second_background + '; color: ' + self.mwindow.colorscheme().disabled)
             else:
-                self.curved_check_button.button.setStyleSheet('background-color: '+ self.mwindow.colorscheme()["secondbackground"] + '; color: ' + self.mwindow.colorscheme()["color"])
+                self.curved_check_button.button.setStyleSheet('background-color: '+ self.mwindow.colorscheme().second_background + '; color: ' + self.mwindow.colorscheme().color)

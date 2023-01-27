@@ -1,6 +1,5 @@
 import unittest
 import os
-from pathlib import Path
 from crdesigner.configurations.configuration_builder import ConfigurationBuilder
 
 
