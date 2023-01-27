@@ -10,6 +10,7 @@ Submodules
    crdesigner.ui.gui.mwindow.toolboxes.converter_toolbox.create_converter_toolbox
    crdesigner.ui.gui.mwindow.toolboxes.converter_toolbox.map_converter_toolbox
    crdesigner.ui.gui.mwindow.toolboxes.converter_toolbox.map_converter_toolbox_ui
+   crdesigner.ui.gui.mwindow.toolboxes.converter_toolbox.waitingspinnerwidget
 
 Module contents
 ---------------

@@ -10,6 +10,7 @@ from commonroad.scenario.lanelet import Lanelet, LaneletNetwork
 from commonroad.visualization.mp_renderer import MPRenderer
 
 from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMO_AVAILABLE
+from .service_layer.draw_params_updater import DrawParamsCustom
 from ...service_layer import config
 
 if SUMO_AVAILABLE:
@@ -119,11 +120,10 @@ class AnimatedViewer:
             if time_start > time_end:
                 self.time_step.value = 0
 
-            draw_params = {
-                'time_begin': time_start,
-                'time_end': time_end,
-                'antialiased': True,
-            }
+            draw_params = DrawParamsCustom(time_begin=time_start, time_end=time_end)
+            draw_params.dynamic_obstacle.time_begin = draw_params.time_begin
+            draw_params.dynamic_obstacle.time_end = draw_params.time_end
+            draw_params.dynamic_obstacle.trajectory.draw_trajectory = False
             self.dynamic.draw_scenario(scenario=scenario, pps=pps, draw_params=draw_params)
 
         # Interval determines the duration of each frame in ms
@@ -226,14 +226,10 @@ class AnimatedViewer:
         ]
 
         if time_step_changed:
-            draw_params = {
-                'time_begin': time_step,
-            }
+            draw_params = DrawParamsCustom(time_begin=time_step)
         else:
-            draw_params = {
-                'time_begin': self.time_step.value - 1,
-            }
-
+            draw_params = DrawParamsCustom(time_begin=self.time_step.value - 1)
+        draw_params.dynamic_obstacle.trajectory.draw_trajectory = False
         self.dynamic.draw_scenario(self.current_scenario, self.current_pps, draw_params=draw_params)
 
         for lanelet in self.current_scenario.lanelet_network.lanelets:
@@ -386,4 +382,4 @@ class AnimatedViewer:
         )
 
     def update_window(self):
-        self.dynamic.setStyleSheet('background-color:' + self.parent.colorscheme()['secondbackground'] + '; color:' + self.parent.colorscheme()['color'] + ';font-size: ' + self.parent.colorscheme()['font-size'])
+        self.dynamic.setStyleSheet('background-color:' + self.parent.colorscheme().second_background + '; color:' + self.parent.colorscheme().color + ';font-size: ' + self.parent.colorscheme().font_size)
