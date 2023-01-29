@@ -65,7 +65,6 @@
                     <lane id="1" type="driving" level="false">
                         <width sOffset="0.0000000000000000e+0" a="3.5000000000000000e+0" b="0.0000000000000000e+0" c="0.0000000000000000e+0" d="0.0000000000000000e+0"/>
                         <roadMark sOffset="0.0000000000000000e+0" type="none" material="standard" color="white" laneChange="none"/>
-                        <roadMark sOffset="3.0000000000000000e+0" type="broken" material="standard" color="white" laneChange="none"/>
                         <speed sOffset="0.0000000000000000e+0" max="4.0000000000000000e+1" unit="mph"/>
                         <userData code="vectorLane">
                             <vectorLane sOffset="0.0000000000000000e+0" laneId="{287e9246-4c45-4dec-b01d-091d7611d9ea}" travelDir="backward"/>
@@ -75,6 +74,7 @@
                 <center>
                     <lane id="0" type="none" level="false">
                         <roadMark sOffset="0.0000000000000000e+0" type="solid solid" material="standard" color="yellow" width="1.2500000000000000e-1" laneChange="none"/>
+                        <roadMark sOffset="15.0000000000000000e+0" type="broken" material="standard" color="white" laneChange="none"/>
                         <userData code="vectorLane"/>
                     </lane>
                 </center>

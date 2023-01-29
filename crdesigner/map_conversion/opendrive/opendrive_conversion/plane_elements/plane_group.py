@@ -39,7 +39,6 @@ class ParametricLaneGroup:
         self.traffic_signs = []
         self.stop_lines = []
         self.signal_references = []
-        self.center_marking = center_marking
 
         if parametric_lanes is not None:
             if isinstance(parametric_lanes, list):
@@ -159,13 +158,14 @@ class ParametricLaneGroup:
 
         for parametric_lane in self.parametric_lanes:
             mark = self.line_marking_map(parametric_lane.line_marking)
+            cmark = self.line_marking_map(parametric_lane.center_marking)
             if parametric_lane.side == "left":
                 if not self.parametric_lanes[0].reverse:
                     line_marking_left_vertices = mark
-                    line_marking_right_vertices = self.line_marking_map(self.center_marking)
+                    line_marking_right_vertices = cmark
                 else:
                     line_marking_right_vertices = mark
-                    line_marking_left_vertices = self.line_marking_map(self.center_marking)
+                    line_marking_left_vertices = cmark
             elif parametric_lane.side == "right":
                 if not self.parametric_lanes[0].reverse:
                     line_marking_right_vertices = mark
@@ -455,7 +455,6 @@ class ParametricLaneGroup:
         return LineMarking.UNKNOWN
 
     def marking_subset_lanelets(self, error_tolerance, min_delta_s) -> list[ConversionLanelet]:
-        print("marking subset lanelet")
         """Experimental plane group splitting function that splits it with regard to the different line markings when
         converting it to a set of lanelets
         :param error_tolerance: the error tolerance passed to the default conversion function
@@ -465,7 +464,9 @@ class ParametricLaneGroup:
         plist = [[self.parametric_lanes[0]]]
         for p, plane in enumerate(self.parametric_lanes[1:]):
             if self.line_marking_map(plane.line_marking) \
-                    == self.line_marking_map(self.parametric_lanes[p].line_marking):
+                    == self.line_marking_map(self.parametric_lanes[p].line_marking) and \
+                    self.line_marking_map(plane.center_marking) \
+                    == self.line_marking_map(self.parametric_lanes[p].center_marking):
                 plist[len(plist) - 1].append(plane)
             else:
                 plist.append([plane])
@@ -474,8 +475,6 @@ class ParametricLaneGroup:
                                            parametric_lanes=plist[x],
                                            inner_neighbour=self.inner_neighbour,
                                            inner_neighbour_same_direction=self.inner_neighbour_same_direction,
-                                           outer_neighbour=self.outer_neighbour, center_marking=self.center_marking
+                                           outer_neighbour=self.outer_neighbour
                                            ).to_lanelet(error_tolerance, min_delta_s)
-        for p in plist:
-            print(p.lanelet_id)
         return plist

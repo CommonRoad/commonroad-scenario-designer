@@ -78,6 +78,10 @@ class OpenDriveConverter:
 
             # copy reference border, but set refOffset to start of lane_section
 
+            center_marking = []
+            for x in lane_section.centerLanes:
+                center_marking += x.road_mark
+
             for lane in lanes:
                 inner_neighbour_id, outer_neighbour_id, inner_neighbour_same_dir = \
                     OpenDriveConverter.determine_neighbours(
@@ -87,18 +91,11 @@ class OpenDriveConverter:
                 # outer_parametric_lane_border =
 
                 lane_borders.append(OpenDriveConverter._create_outer_lane_border(lane_borders, lane, coeff_factor))
-                center_marking = lane_section.centerLanes[0].road_mark[0] if lane.id == 1 and len(
-                        lane_section.centerLanes) > 0 and len(
-                        lane_section.centerLanes[0].road_mark) > 0 else None
+
                 plane_group = ParametricLaneGroup(
                         id_=encode_road_section_lane_width_id(lane_section.parentRoad.id, lane_section.idx, lane.id,
                                 -1), inner_neighbour=inner_neighbour_id,
-                        inner_neighbour_same_direction=inner_neighbour_same_dir, outer_neighbour=outer_neighbour_id,
-                        center_marking=center_marking)
-                print("------------")
-                print(lane.id)
-                for r in lane.road_mark:
-                    print(r.type)
+                        inner_neighbour_same_direction=inner_neighbour_same_dir, outer_neighbour=outer_neighbour_id)
                 # Create new lane for each width segment
                 for w, width in enumerate(lane.widths):
                     """
@@ -118,8 +115,6 @@ class OpenDriveConverter:
                     mark_idx = -1
                     marks = []
                     for mark in lane.road_mark:
-                        print("width_offset: " + str(width.start_offset) + "; mark_offset: " + str(mark.SOffset))
-                        print(str(w + 1) + " " + str(len(lane.widths)))
                         if width.start_offset >= mark.SOffset:
                             mark_idx += 1
                             if np.isclose(width.start_offset, mark.SOffset):
@@ -130,9 +125,13 @@ class OpenDriveConverter:
                             pass
                     # create new lane
                     parametric_lane = OpenDriveConverter.create_parametric_lane(lane_borders, width, lane, side,
-                            mark_idx)
+                            mark_idx, center_marking[0] if lane.id == 1 and len(center_marking) > 0
+                        else None)
                     parametric_lane.reverse = bool(lane.id > 0)
                     mlist = [("lineMarking", m, m.SOffset) for m in marks[1:]]
+                    if lane.id == 1:
+                        mlist += [("centerMarking", m, m.SOffset) for m in center_marking[1:]]
+                        print([("centerMarking", m, m.SOffset) for m in center_marking[1:]])
                     plist = parametric_lane.split_plane(mlist)
                     #plane_group.append(parametric_lane)
                     for p in plist:
@@ -145,7 +144,7 @@ class OpenDriveConverter:
         return plane_groups
 
     @staticmethod
-    def create_parametric_lane(lane_borders, width, lane, side, mark_idx) -> ParametricLane:
+    def create_parametric_lane(lane_borders, width, lane, side, mark_idx, center_marking) -> ParametricLane:
         """Create a parametric lane for a certain width section.
 
         :param lane_borders: Array with already created lane borders.
@@ -173,7 +172,7 @@ class OpenDriveConverter:
         parametric_lane = ParametricLane(
                 id_=encode_mark_lane_width_id(lane.lane_section.parentRoad.id, lane.lane_section.idx, lane.id,
                         width.idx, mark_idx, ), type_=lane.type, length=width.length, border_group=border_group,
-                speed=lane.speed, line_marking=marking, side=side, access=lane.access)
+                speed=lane.speed, line_marking=marking, side=side, access=lane.access, center_marking=center_marking)
         return parametric_lane
 
     @staticmethod

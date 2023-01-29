@@ -192,7 +192,12 @@ class Network:
                 lanelet_network.add_lanelet(lanelet)
             # Create a map of lanelet_description to traffic signs/lights so that they can be assigned as
             # reference to the correct lanelets later
-
+        # adjacent lanelet of a lanelet next to a spliced up lane is the first segment lanelet
+        for lanelet in lanelet_network.lanelets:
+            if lanelet.adj_right not in [x.lanelet_id for x in lanelet_network.lanelets] + [None]:
+                lanelet.adj_right = lanelet.adj_right + ".0"
+            if lanelet.adj_left not in [x.lanelet_id for x in lanelet_network.lanelets] + [None]:
+                lanelet.adj_left = lanelet.adj_left + ".0"
         # prune because some
         # successorIds get encoded with a non-existing successorID
         # of the lane link
