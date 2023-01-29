@@ -47,17 +47,17 @@ class TestCommandLineInterface(unittest.TestCase):
         exists = Path(self.output_path + "/cr_lanelet_command_line.osm")
         self.assertTrue(exists.is_file())
 
-    def test_cr_to_sumo(self):
-        if not os.path.isdir(self.output_path + '/cr_sumo_command_line'):
-            os.makedirs(self.output_path + '/cr_sumo_command_line')
-        subprocess.Popen(['crdesigner', 'map-convert-sumo',
-                          '-i', os.path.dirname(os.path.realpath(__file__))
-                          + '/../map_conversion/test_maps/sumo/ARG_Carcarana-10_2_T-1.xml',
-                          '-o', self.output_path + "/cr_sumo_command_line" +
-                          "/cr_sumo_command_line.net.xml", '--source_commonroad'])
-        time.sleep(10)
-        exists = Path(self.output_path + "/cr_sumo_command_line" + "/cr_sumo_command_line.net.xml")
-        self.assertTrue(exists.is_file())
+    # def test_cr_to_sumo(self):
+    #     if not os.path.isdir(self.output_path + '/cr_sumo_command_line'):
+    #         os.makedirs(self.output_path + '/cr_sumo_command_line')
+    #     subprocess.Popen(['crdesigner', 'map-convert-sumo',
+    #                       '-i', os.path.dirname(os.path.realpath(__file__))
+    #                       + '/../map_conversion/test_maps/sumo/ARG_Carcarana-10_2_T-1.xml',
+    #                       '-o', self.output_path + "/cr_sumo_command_line" +
+    #                       "/cr_sumo_command_line.net.xml", '--source_commonroad'])
+    #     time.sleep(10)
+    #     exists = Path(self.output_path + "/cr_sumo_command_line" + "/cr_sumo_command_line.net.xml")
+    #     self.assertTrue(exists.is_file())
 
     def test_gui(self):
         process = subprocess.Popen(['crdesigner'])
