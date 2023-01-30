@@ -194,17 +194,3 @@ def osm_to_commonroad_using_sumo(input_file: str) -> Scenario:
     )
     return opendrive_to_commonroad(opendrive_file)
 
-
-def commonroad_to_opendrive(input_file: str, output_file: str):
-    """
-    Converts CommonRoad file to OpenDRIVE file and stores it
-    @param input_file: Path to CommonRoad file
-    @param output_file: Path where OpenDRIVE file to be stored
-    """
-
-    # load the xml file and preprocess it
-    data = DataLoader(input_file)
-
-    scenario, successors, ids = data.initialize()
-    converter = Converter(input_file, scenario, successors, ids)
-    converter.convert(output_file)

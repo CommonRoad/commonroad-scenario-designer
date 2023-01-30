@@ -15,10 +15,13 @@ from tests.map_conversion.opendrive_conversion.test_conversion_lanelet_network i
 
 
 class TestRoad(unittest.TestCase):
-    road_counting = 20
 
     def setUp(self):
-        TestRoad.road_counting += 1
+        Road.counting = 20
+        Road.cr_id_to_od = dict()
+        Road.lane_to_lane = dict()
+        Road.lane_2_lane_link = dict()
+        Road.link_map = dict()
 
     def test_initialize_road(self):
         # Given
@@ -38,7 +41,7 @@ class TestRoad(unittest.TestCase):
         road = Road(lane_list, number_of_lanes, root, current, junction_id)
 
         # Then
-        self.assertEqual(self.road_counting, Road.counting)
+        self.assertEqual(21, Road.counting)
         self.assertEqual({"succ": {}, "pred": {}}, Road.lane_2_lane_link[Road.counting])
         self.assertEqual(-1, road.junction_id)
         expected_links = {'79.0.-3.-1': {'pred': [], 'succ': []}, '89.0.4.-1': {'pred': [], 'succ': []},
@@ -52,7 +55,7 @@ class TestRoad(unittest.TestCase):
         expected_center = np.array([[0., 1.], [1., 1.], [2., 1.]])
         self.assertTrue((expected_center == road.center).all())
 
-        expected_cr_to_od = {'79.0.-3.-1': self.road_counting, '89.0.4.-1': self.road_counting}
+        expected_cr_to_od = {'79.0.-3.-1': 21, '89.0.4.-1': 21}
         self.assertEqual(expected_cr_to_od, road.cr_id_to_od)
         self.assertEqual(root, road.root)
 
@@ -83,7 +86,7 @@ class TestRoad(unittest.TestCase):
         self.assertEqual("signals", road.signals.tag)
 
         self.assertEqual("", road.road.attrib["name"])
-        self.assertEqual(str(self.road_counting), road.road.attrib["id"])
+        self.assertEqual(str(21), road.road.attrib["id"])
         self.assertEqual("-1", road.road.attrib["junction"])
 
         expected_lane_indices = {'79.0.-3.-1': -1, '89.0.4.-1': 1}
@@ -157,7 +160,6 @@ class TestRoad(unittest.TestCase):
 
         road = Road(lane_list, number_of_lanes, root, current, junction_id)
 
-
         key = 21
         links = {'succ': [22, 22, 22, 22, 22, 22, 22, 22, 22], 'pred': []}
         len_succ = 1
@@ -168,13 +170,11 @@ class TestRoad(unittest.TestCase):
         # When
         road.add_simple_linkage(key, links, len_succ, len_pred, curl_links_lanelets, lane_2_lane)
 
-        #Then
+        # Then
         self.assertEqual("successor", road.link[-1].tag)
         self.assertEqual("road", road.link[-1].get("elementType"))
         self.assertEqual("22", road.link[-1].get("elementId"))
         self.assertEqual("start", road.link[-1].get("contactPoint"))
-
-
 
     def test_set_child_of_road(self):
         # Given
@@ -304,7 +304,7 @@ class TestRoad(unittest.TestCase):
         self.assertEqual(str.format("{0:.16e}", hdg), road.plan_view[-1].get("hdg"))
         self.assertEqual(str.format("{0:.16e}", length), road.plan_view[-1].get("length"))
 
-        spiral_elem= list(road.plan_view[-1].iter())[-1]
+        spiral_elem = list(road.plan_view[-1].iter())[-1]
         self.assertEqual("spiral", spiral_elem.tag)
         self.assertEqual(str.format("{0:.16e}", curv_start), spiral_elem.get("curvStart"))
         self.assertEqual(str.format("{0:.16e}", curv_end), spiral_elem.get("curvEnd"))
@@ -368,10 +368,10 @@ class TestRoad(unittest.TestCase):
         data.append("79.0.-3.-1")
         signal = Sign(road_key, unique_id, data, conversion_lanelet_network)
 
-        #When
+        # When
         road.print_signal(signal)
 
-        #Then
+        # Then
         self.assertEqual("signal", road.signals[-1].tag)
 
         self.assertEqual("4.9000000000000004e+00", road.signals[-1].get("s"))
@@ -551,7 +551,7 @@ class TestRoad(unittest.TestCase):
         # requires more careful check for parent nodes?
 
         roadmark = list(center[-1].iter())[-1]
-        self.assertEqual(str.format("{0:.16e}", 0), roadmark.get("sOffset",))
+        self.assertEqual(str.format("{0:.16e}", 0), roadmark.get("sOffset", ))
         self.assertEqual("solid", roadmark.get("type"))
         self.assertEqual("standard", roadmark.get("weight"))
         self.assertEqual("standard", roadmark.get("color"))

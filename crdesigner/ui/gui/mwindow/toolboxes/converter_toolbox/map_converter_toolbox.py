@@ -1,8 +1,8 @@
 import pickle
 import subprocess
 from typing import Callable, Optional
-import warnings
 from lxml import etree
+import warnings
 
 from PyQt5.QtWidgets import QDockWidget, QMainWindow, QFileDialog, QMessageBox
 from PyQt5.QtCore import Qt, QRunnable, QThreadPool, QMetaObject, Q_ARG, pyqtSlot
@@ -187,7 +187,6 @@ class MapConversionToolbox(QDockWidget):
         self.hidden_osm_conversion(self.graph)
         self.converter_toolbox.osm_loading_status.setText("no file selected")
         self.osm_file = None
-
 
     def convert_osm_to_cr_with_sumo(self) -> None:
         """
