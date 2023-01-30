@@ -186,26 +186,6 @@ class CR2LaneletConverter:
         first_idx, last_idx = (0, -1) if same_dir else (-1, 0)
         return way.nodes[first_idx], way.nodes[last_idx]
 
-    # TODO: clarify values for x and y, do inverse of the operations below
-        # def _convert_way_to_vertices(self, way) -> np.ndarray:
-        # """Convert a Way to a list of points.
-
-        # Args:
-        #   way: Way to be converted.
-        #   osm: OSM which includes the way and the nodes.
-        # Returns:
-        #   The vertices of the new lanelet border.
-
-        # """
-        # vertices = np.empty((len(way.nodes), 2))
-        # for i, node_id in enumerate(way.nodes):
-        #     nd = self.osm.find_node_by_id(node_id)
-        #     x, y = self.proj(float(nd.lon), float(nd.lat))
-        #     x -= self.origin_utm[0]
-        #     y -= self.origin_utm[1]
-        #     vertices[i] = [x, y]
-
-        # return vertices
     def _create_nodes_from_vertices(self, vertices: List[np.ndarray]) -> List[str]:
         """Create nodes and add them to the OSM.
 
@@ -214,8 +194,6 @@ class CR2LaneletConverter:
         Returns:
           Ids of nodes which were created.
         """
-        # v = proj(nd.lon) - utm 
-        # nd.lon = unproj(v + utm)
         nodes = []
         for vertice in vertices:
             x = self.origin_utm[0] + vertice[0]
