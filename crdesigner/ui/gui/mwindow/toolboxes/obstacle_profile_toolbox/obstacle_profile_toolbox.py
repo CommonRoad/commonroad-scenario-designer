@@ -70,9 +70,6 @@ class ObstacleProfileToolbox(QDockWidget):
         self.obstacle_profile_toolbox_ui.obstacle_state_variable.currentTextChanged.connect(
                 lambda: self.plot_obstacle_state_profile())
 
-        self.obstacle_profile_toolbox_ui.obstacle_shape.currentTextChanged.connect(
-                lambda: self.obstacle_profile_toolbox_ui.toggle_sections())
-
         self.obstacle_profile_toolbox_ui.selected_obstacle.currentTextChanged.connect(
                 lambda: self.update_obstacle_information())
 
@@ -89,7 +86,6 @@ class ObstacleProfileToolbox(QDockWidget):
         """
         Initializes GUI elements with intersection information.
         """
-        self.clear_obstacle_fields()
 
         self.obstacle_profile_toolbox_ui.selected_obstacle.clear()
         self.obstacle_profile_toolbox_ui.selected_obstacle.addItems(
@@ -259,68 +255,6 @@ class ObstacleProfileToolbox(QDockWidget):
             self.update_ongoing = True
             obstacle = self.get_current_obstacle()
 
-            if isinstance(obstacle.obstacle_shape, Rectangle):
-
-                if self.obstacle_profile_toolbox_ui.obstacle_shape.currentText() != "Rectangle":
-                    self.obstacle_profile_toolbox_ui.obstacle_shape.setCurrentIndex(0)
-
-                self.obstacle_profile_toolbox_ui.obstacle_width.setText(str(obstacle.obstacle_shape.width))
-                self.obstacle_profile_toolbox_ui.obstacle_length.setText(str(obstacle.obstacle_shape.length))
-                if isinstance(obstacle, StaticObstacle):
-                    self.obstacle_profile_toolbox_ui.obstacle_x_Position.setText(
-                            str(obstacle.initial_state.__getattribute__("position")[0]))
-                    self.obstacle_profile_toolbox_ui.obstacle_y_Position.setText(
-                            str(obstacle.initial_state.__getattribute__("position")[1]))
-                    self.obstacle_profile_toolbox_ui.obstacle_orientation.setText(
-                            str(math.degrees(obstacle.initial_state.__getattribute__("orientation"))))
-                else:
-                    self.obstacle_profile_toolbox_ui.obstacle_orientation.setText(
-                            str(math.degrees(obstacle.obstacle_shape.__getattribute__("orientation"))))
-
-            elif isinstance(obstacle.obstacle_shape, Circle):
-
-                if self.obstacle_profile_toolbox_ui.obstacle_shape.currentText() != "Circle":
-                    self.obstacle_profile_toolbox_ui.obstacle_shape.setCurrentIndex(1)
-
-                self.obstacle_profile_toolbox_ui.obstacle_radius.setText(str(obstacle.obstacle_shape.radius))
-                if isinstance(obstacle, StaticObstacle):
-                    self.obstacle_profile_toolbox_ui.obstacle_x_Position.setText(
-                            str(obstacle.initial_state.__getattribute__("position")[0]))
-                    self.obstacle_profile_toolbox_ui.obstacle_y_Position.setText(
-                            str(obstacle.initial_state.__getattribute__("position")[1]))
-
-            elif isinstance(obstacle.obstacle_shape, Polygon):
-                if self.obstacle_profile_toolbox_ui.obstacle_shape.currentText() != "Polygon":
-                    self.obstacle_profile_toolbox_ui.obstacle_shape.setCurrentIndex(2)
-
-                    # because numpy array has weird formatting I want to get rid of
-                temp = obstacle.obstacle_shape.vertices
-                vertices = temp.tolist()
-
-                # remove extra vertice(s) in toolbox
-                if len(vertices) - 1 < self.obstacle_profile_toolbox_ui.amount_vertices:
-                    j = self.obstacle_profile_toolbox_ui.amount_vertices - (len(vertices) - 1)
-                    for i in range(j):
-                        self.obstacle_profile_toolbox_ui.remove_vertice(i)
-
-                for i in range(len(vertices) - 1):
-                    # adds another vertice if there are too few in the toolbox
-                    if i >= self.obstacle_profile_toolbox_ui.amount_vertices:
-                        self.obstacle_profile_toolbox_ui.add_vertice()
-
-                    vertice_string_x = str(vertices[i][0])
-                    vertice_string_y = str(vertices[i][1])
-                    self.obstacle_profile_toolbox_ui.vertices_x[i].setText(vertice_string_x)
-                    self.obstacle_profile_toolbox_ui.vertices_y[i].setText(vertice_string_y)
-
-            if isinstance(obstacle, DynamicObstacle):
-
-                if self.obstacle_profile_toolbox_ui.obstacle_dyn_stat.currentText() != "Dynamic":
-                    self.obstacle_profile_toolbox_ui.obstacle_dyn_stat.setCurrentIndex(1)
-
-            elif self.obstacle_profile_toolbox_ui.obstacle_dyn_stat.currentText() != "Static":
-                self.obstacle_profile_toolbox_ui.obstacle_dyn_stat.setCurrentIndex(0)
-
             self.obstacle_profile_toolbox_ui.obstacle_type.setCurrentText(obstacle.obstacle_type.value)
             self.obstacle_profile_toolbox_ui.obstacle_state_variable.clear()
             state_variables = [var for var in obstacle.initial_state.attributes if var not in ["position", "time_step"]]
@@ -337,32 +271,9 @@ class ObstacleProfileToolbox(QDockWidget):
 
         # if set to "None": clear QLineEdits
         else:
-            self.clear_obstacle_fields()
             self.obstacle_profile_toolbox_ui.obstacle_state_variable.clear()
             self.obstacle_profile_toolbox_ui.figure.clear()
             self.obstacle_profile_toolbox_ui.canvas.draw()
-
-    def clear_obstacle_fields(self):
-        """
-        clears the obstacle QLineEdits
-        """
-        if self.obstacle_profile_toolbox_ui.obstacle_shape.currentText() == "Circle":
-            self.obstacle_profile_toolbox_ui.obstacle_radius.setText("")
-
-        elif self.obstacle_profile_toolbox_ui.obstacle_shape.currentText() == "Rectangle":
-            self.obstacle_profile_toolbox_ui.obstacle_width.setText("")
-            self.obstacle_profile_toolbox_ui.obstacle_length.setText("")
-            self.obstacle_profile_toolbox_ui.obstacle_orientation.setText("")
-
-        elif self.obstacle_profile_toolbox_ui.obstacle_shape.currentText() == "Polygon":
-            for i in range(self.obstacle_profile_toolbox_ui.amount_vertices):
-                self.obstacle_profile_toolbox_ui.vertices_x[i].setText("")
-                self.obstacle_profile_toolbox_ui.vertices_y[i].setText("")
-        if (
-                self.obstacle_profile_toolbox_ui.obstacle_dyn_stat.currentText() == "Static" and
-                self.obstacle_profile_toolbox_ui.obstacle_shape.currentText() != "Polygon"):
-            self.obstacle_profile_toolbox_ui.obstacle_x_Position.setText("")
-            self.obstacle_profile_toolbox_ui.obstacle_y_Position.setText("")
 
     def draw_plot(self, time, profile, xmin: float = None, xmax: float = None, ymin: float = None, ymax: float = None):
         """
