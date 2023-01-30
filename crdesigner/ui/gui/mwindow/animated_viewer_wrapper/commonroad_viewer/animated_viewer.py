@@ -190,13 +190,19 @@ class AnimatedViewer:
         """calculate maximal time step of current scenario"""
         if self.current_scenario is None:
             return 0
-        timesteps = [
-            obstacle.prediction.occupancy_set[-1].time_step
-            for obstacle in self.current_scenario.dynamic_obstacles
-            #if obstacles in code do not have prediction the simulation may not work. At least it does not crash with this if cacse
-            if obstacle.prediction
-        ]
-        self.max_timestep = np.max(timesteps) if timesteps else 0
+
+        if len(self.current_scenario.dynamic_obstacles) > 0 \
+                and self.current_scenario.dynamic_obstacles[0].prediction is not None:
+            time_steps = [
+                obstacle.prediction.occupancy_set[-1].time_step
+                for obstacle in self.current_scenario.dynamic_obstacles
+                #if obstacles in code do not have prediction the simulation may not work. At least it does not crash with this if cacse
+                if obstacle.prediction
+            ]
+            self.max_timestep = np.max(time_steps) if time_steps else 0
+        else:
+            self.max_timestep = 0
+
         return self.max_timestep
 
     def update_plot(self,

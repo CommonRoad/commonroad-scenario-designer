@@ -295,12 +295,20 @@ class MapCreator:
         if not is_natural_number(ang) and not intersection:
             ang = 0
             if not MapCreator.lanelet_is_straight(predecessor):
-                a = predecessor.right_vertices[-1] - predecessor.center_vertices[-1]
                 b = successor.right_vertices[0] - successor.center_vertices[0]
+                a = predecessor.right_vertices[-1] - predecessor.center_vertices[-1]
                 inner = np.inner(a, b)
-                norms = np.linalg.norm(a) * np.linalg.norm(b)
-                cos = inner / norms
-                ang = np.arccos(np.clip(cos, -1.0, 1.0))
+                if inner == 0:
+                    sign = np.cross(a, b)
+                    if sign > 0:
+                        ang = - np.pi / 2
+                    else:
+                        ang = np.pi / 2
+                else:
+                    norms = np.linalg.norm(a) * np.linalg.norm(b)
+                    cos = inner / norms
+                    ang = np.arccos(np.clip(cos, -1.0, 1.0))
+
 
 
         successor.translate_rotate(np.array([0, 0]), ang)
