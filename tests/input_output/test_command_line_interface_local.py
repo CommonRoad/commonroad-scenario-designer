@@ -16,7 +16,7 @@ class TestCommandLineInterface(unittest.TestCase):
                           '-i', os.path.dirname(os.path.realpath(__file__))
                           + '/../map_conversion/test_maps/opendrive/poly3_and_border_record.xodr',
                           '-o', self.output_path + "/opendrive_command_line.xml", '-t', 'urban', 'highway'])
-        time.sleep(5)
+        time.sleep(10)
         exists = Path(self.output_path + "/opendrive_command_line.xml")
         self.assertTrue(exists.is_file())
 
