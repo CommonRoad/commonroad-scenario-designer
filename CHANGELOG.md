@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.6.0] - 2023-01-XX
+## [0.6.0] - 2023-01-31
 
 ### Added
 - New test cases for the OpenDRIVE to CommonRoad conversion
