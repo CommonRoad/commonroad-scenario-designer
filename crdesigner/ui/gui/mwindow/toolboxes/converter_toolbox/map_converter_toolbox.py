@@ -1,12 +1,14 @@
 import pickle
+import subprocess
+from typing import Callable, Optional
+import warnings
 from lxml import etree
 
-from PyQt5.QtWidgets import *
-from PyQt5.QtGui import *
-from PyQt5.QtCore import *
+from PyQt5.QtWidgets import QDockWidget, QMainWindow, QFileDialog, QMessageBox
+from PyQt5.QtCore import Qt, QRunnable, QThreadPool, QMetaObject, Q_ARG, pyqtSlot
 
-from commonroad.scenario.traffic_sign import *
 from commonroad.scenario.scenario import Scenario
+from crdesigner.map_conversion.map_conversion_interface import osm_to_commonroad_using_sumo
 
 from crdesigner.ui.gui.mwindow.toolboxes.converter_toolbox.map_converter_toolbox_ui import MapConversionToolboxUI
 from crdesigner.ui.gui.mwindow.service_layer.util import select_local_file
@@ -24,21 +26,36 @@ from crdesigner.ui.gui.mwindow.service_layer.osm_gui_modules.gui import EdgeEdit
 from crdesigner.map_conversion.opendrive.opendrive_parser.parser import parse_opendrive
 from crdesigner.map_conversion.opendrive.opendrive_conversion.network import Network
 
-from crdesigner.map_conversion.lanelet_lanelet2.lanelet2_parser import Lanelet2Parser
-from crdesigner.map_conversion.lanelet_lanelet2.lanelet2cr import Lanelet2CRConverter
-from crdesigner.map_conversion.lanelet_lanelet2.cr2lanelet import CR2LaneletConverter
+from crdesigner.map_conversion.lanelet2.lanelet2_parser import Lanelet2Parser
+from crdesigner.map_conversion.lanelet2.lanelet2cr import Lanelet2CRConverter
+from crdesigner.map_conversion.lanelet2.cr2lanelet import CR2LaneletConverter
+
+from crdesigner.configurations.get_configs import get_configs
 
 from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMO_AVAILABLE
+from crdesigner.ui.gui.mwindow.toolboxes.converter_toolbox.waitingspinnerwidget import QtWaitingSpinner
 if SUMO_AVAILABLE:
     from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMOSimulation
-    from crdesigner.ui.gui.mwindow.toolboxes.service_layer.sumo_settings import SUMOSettings
+    from crdesigner.ui.gui.mwindow.service_layer.sumo_settings import SUMOSettings
     from crdesigner.map_conversion.sumo_map.sumo2cr import convert_net_to_cr
 
+class RequestRunnable(QRunnable):
+    def __init__(self, fun, mapConversionToolbox):
+        QRunnable.__init__(self)
+        self.fun = fun 
+        self.mapConversionToolbox = mapConversionToolbox
+
+    def run(self):
+        self.fun()
+        QMetaObject.invokeMethod(self.mapConversionToolbox, "stopSpinner",
+                                Qt.QueuedConnection,
+                                Q_ARG(str, "Conversion Ended")) 
 
 class MapConversionToolbox(QDockWidget):
-    def __init__(self, current_scenario, callback, text_browser, tmp_folder: str):
+    def __init__(self, current_scenario, callback, text_browser, tmp_folder: str, mwindow):
         super().__init__("Map Converter Toolbox")
-        self.converter_toolbox = MapConversionToolboxUI()
+        self.converter_toolbox = MapConversionToolboxUI(mwindow)
+        self.current_scenario = current_scenario
         self.callback = callback
         self.text_browser = text_browser
         self.adjust_ui()
@@ -57,6 +74,7 @@ class MapConversionToolbox(QDockWidget):
         self.osm_file = None
         self.path_sumo_file = None
         self.open_drive_file = None
+        self.graph = None
 
     def adjust_ui(self):
         """Updates GUI properties like width, etc."""
@@ -69,12 +87,11 @@ class MapConversionToolbox(QDockWidget):
     def connect_gui_elements(self):
         self.converter_toolbox.button_download_osm_file.clicked.connect(lambda: self.download_osm_map())
         self.converter_toolbox.button_load_osm_file.clicked.connect(lambda: self.load_osm_file())
-        self.converter_toolbox.button_load_osm_edit_state.clicked.connect(lambda: self.load_osm_edit_state())
-        self.converter_toolbox.button_start_osm_conversion.clicked.connect(lambda: self.convert_osm_to_cr())
-        self.converter_toolbox.button_open_osm_settings.clicked.connect(lambda: self.open_osm_settings())
+        self.converter_toolbox.button_start_osm_conversion.clicked.connect(lambda: self.convert_osm_with_spinner(self.convert_osm_to_cr))
+        self.converter_toolbox.button_start_osm_conversion_with_sumo_parser.clicked.connect(lambda: self.convert_osm_with_spinner(self.convert_osm_to_cr_with_sumo))
 
         self.converter_toolbox.button_load_opendrive.clicked.connect(lambda: self.load_open_drive())
-        self.converter_toolbox.button_convert_opendrive.clicked.connect(lambda: self.convert_open_drive_to_cr())
+        self.converter_toolbox.button_convert_opendrive.clicked.connect(lambda: self.convert_open_drive_to_cr_with_spinner())
 
         self.converter_toolbox.button_load_lanelet2.clicked.connect(lambda: self.load_lanelet2())
         self.converter_toolbox.button_convert_lanelet2_to_cr.clicked.connect(lambda: self.convert_lanelet2_to_cr())
@@ -124,15 +141,28 @@ class MapConversionToolbox(QDockWidget):
 
         :param graph: graph to convert
         """
-        try:
+        try:  
             graph = converter.step_collection_2(graph)
             graph = converter.step_collection_3(graph)
         except Exception as e:
             QMessageBox.warning(self, "Internal Error", "There was an error during the processing of the graph.\n\n{}"
                                 .format(e), QMessageBox.Ok)
             return
-        scenario = convert_to_scenario(graph)
-        self.callback(scenario)
+        self.current_scenario = convert_to_scenario(graph) 
+        self.callback(self.current_scenario)
+
+    def convert_osm_with_spinner(self, convert_function : Callable[[], None]) -> None:
+        if self.osm_file is not None:
+            self.startSpinner(self.converter_toolbox.OsmSpinner)
+            runnable = RequestRunnable(convert_function, self)
+            QThreadPool.globalInstance().start(runnable)
+        else:
+            QMessageBox.warning(
+            self,
+            "Warning",
+            "No file selected.",
+            QMessageBox.Ok)
+            return
 
     def convert_osm_to_cr(self) -> None:
         """
@@ -154,26 +184,47 @@ class MapConversionToolbox(QDockWidget):
                 "Warning",
                 "Map unreadable: " + str(e),
                 QMessageBox.Ok)
-            return
-        if self.converter_toolbox.osm_conversion_edit_manually_selection.isChecked():
-            self.edge_edit_embedding(self.graph)
-        else:
-            self.hidden_osm_conversion(self.graph)
+        self.hidden_osm_conversion(self.graph)
         self.converter_toolbox.osm_loading_status.setText("no file selected")
         self.osm_file = None
 
-    def edge_edit_embedding(self, graph: rg.Graph):
-        """
-        sets edge edit embedding as main window
 
-        :param graph: the graph to edit
-        :return: None
+    def convert_osm_to_cr_with_sumo(self) -> None:
         """
-        if graph is not None:
-            self.edge_edit_window = EdgeEdit(self, graph, None)
-            self.osm_edit_window.show()
-        else:
-            print("no graph loaded")
+        Starts the OSM conversion process using SUMO Parser by picking a file and showing the edge edit GUI.
+        """
+        try:
+            if self.osm_file is not None:  
+              self.current_scenario = osm_to_commonroad_using_sumo(self.osm_file)
+              self.callback(self.current_scenario)  
+            else:
+                QMessageBox.warning(
+                    self,
+                    "Warning",
+                    "No file selected.",
+                    QMessageBox.Ok)
+                return
+        except ValueError as e:
+            QMessageBox.critical(
+                self,
+                "Warning",
+                "Map unreadable: " + str(e),
+                QMessageBox.Ok)
+            return 
+        self.converter_toolbox.osm_loading_status.setText("no file selected")
+        self.osm_file = None
+
+    @pyqtSlot(str)
+    def stopSpinner(self, data):
+        print(data)
+        self.callback(self.current_scenario)
+        self.converter_toolbox.OsmSpinner.stop() 
+        self.converter_toolbox.OpenDriveSpinner.stop() 
+
+    def startSpinner(self, spinner: QtWaitingSpinner):
+        if(spinner.isSpinning()):
+            spinner.stop() 
+        spinner.start()    
 
     def lane_link_embedding(self, graph: rg.Graph):
         """
@@ -234,7 +285,7 @@ class MapConversionToolbox(QDockWidget):
         :param file: file name
         :return: None
         """
-        try:
+        try:  
             self.graph = converter.step_collection_1(file)
         except Exception as e:
             QMessageBox.warning(
@@ -249,30 +300,42 @@ class MapConversionToolbox(QDockWidget):
         osm_interface = OSMInterface(self)
         osm_interface.show_settings()
 
+    def convert_open_drive_to_cr_with_spinner(self) -> None:
+        if self.open_drive_file is not None:
+            self.startSpinner(self.converter_toolbox.OpenDriveSpinner)
+            runnable = RequestRunnable(self.convert_open_drive_to_cr, self)
+            QThreadPool.globalInstance().start(runnable)
+        else:
+            QMessageBox.warning(
+            self,
+            "Warning",
+            "No file selected.",
+            QMessageBox.Ok)
+            return
+
     def convert_open_drive_to_cr(self):
         if self.open_drive_file is None:
             return
 
-        open_drive_network = Network()
+        config = get_configs().opendrive
+        open_drive_network = Network(config)
         open_drive_network.load_opendrive(self.open_drive_file)
 
         self.text_browser.append(
             """Name: {}<br>Version: {}<br>Date: {}<br><br>OpenDRIVE
-            Version {}.{}<br><br>Number of roads: {}<br>Total length
-            of road network: {:.2f} meters""".format(
+            Version {}.{}""".format(
                 self.open_drive_file.header.name if self.open_drive_file.header.name else "<i>unset</i>",
                 self.open_drive_file.header.version,
                 self.open_drive_file.header.date,
                 self.open_drive_file.header.revMajor,
                 self.open_drive_file.header.revMinor,
                 len(self.open_drive_file.roads),
-                sum([road.length for road in self.open_drive_file.roads]),
             )
         )
         self.converter_toolbox.loaded_opendrive_file.setText("no file selected")
         self.open_drive_file = None
-        scenario = open_drive_network.export_commonroad_scenario()
-        self.callback(scenario)
+        self.current_scenario = open_drive_network.export_commonroad_scenario()
+        self.callback(self.current_scenario)
 
     def load_open_drive(self):
         file_path = select_local_file(self, "OpenDRIVE", "xodr")
@@ -280,8 +343,7 @@ class MapConversionToolbox(QDockWidget):
             return
         # Load road network and print some statistics
         try:
-            with open(file_path, "r") as fd:
-                self.open_drive_file = parse_opendrive(etree.parse(fd).getroot())
+            self.open_drive_file = parse_opendrive(file_path)
             self.converter_toolbox.loaded_opendrive_file.setText("file successfully loaded")
         except (etree.XMLSyntaxError) as e:
             error_message = "XML Syntax Error: {}".format(e)

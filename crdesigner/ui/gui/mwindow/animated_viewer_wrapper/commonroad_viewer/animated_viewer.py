@@ -10,6 +10,9 @@ from commonroad.scenario.lanelet import Lanelet, LaneletNetwork
 from commonroad.visualization.mp_renderer import MPRenderer
 
 from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMO_AVAILABLE
+from .service_layer.draw_params_updater import DrawParamsCustom
+from ...service_layer import config
+
 if SUMO_AVAILABLE:
     from crdesigner.map_conversion.sumo_map.config import SumoConfig
 from crdesigner.ui.gui.mwindow.service_layer.util import Observable
@@ -20,23 +23,16 @@ from .dynamic_canvas import DynamicCanvas
 from .helper import draw_lanelet_polygon
 
 
-__author__ = "Benjamin Orthen, Stefan Urban, Max Winklhofer, Guyue Huang, Max Fruehauf, Sebastian Maierhofer"
-__copyright__ = "TUM Cyber-Physical Systems Group"
-__credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles, BMW Car@TUM"]
-__version__ = "0.5.1"
-__maintainer__ = "Sebastian Maierhofer"
-__email__ = "commonroad@lists.lrz.de"
-__status__ = "Released"
-
-
 class AnimatedViewer:
     def __init__(self, parent, callback_function):
 
         self.current_scenario = None
         self.current_pps = None
+        self.parent = parent
         self.dynamic = DynamicCanvas(parent, width=5, height=10, dpi=100, animated_viewer=self)
         self.callback_function = callback_function
         self.original_lanelet_network = None
+        self.update_window()
 
         # sumo config giving dt etc
         self._config: SumoConfig = None
@@ -66,6 +62,9 @@ class AnimatedViewer:
         self.original_lanelet_network = LaneletNetwork.create_from_lanelet_network(
                 lanelet_network=scenario.lanelet_network)
         self.current_pps = planning_problem_set
+
+        # initialize lanelet network
+        self.dynamic.l_network = self.current_scenario.lanelet_network
 
         # if we have not subscribed already, subscribe now
         if config is not None:
@@ -121,11 +120,10 @@ class AnimatedViewer:
             if time_start > time_end:
                 self.time_step.value = 0
 
-            draw_params = {
-                'time_begin': time_start,
-                'time_end': time_end,
-                'antialiased': True,
-            }
+            draw_params = DrawParamsCustom(time_begin=time_start, time_end=time_end)
+            draw_params.dynamic_obstacle.time_begin = draw_params.time_begin
+            draw_params.dynamic_obstacle.time_end = draw_params.time_end
+            draw_params.dynamic_obstacle.trajectory.draw_trajectory = False
             self.dynamic.draw_scenario(scenario=scenario, pps=pps, draw_params=draw_params)
 
         # Interval determines the duration of each frame in ms
@@ -188,30 +186,37 @@ class AnimatedViewer:
             )
             return
 
-    def _calc_max_timestep(self):
-        """calculate maximal time step of current scenario"""
+    def _calc_max_timestep(self) -> int:
+        """Calculates maximal time step of current scenario."""
         if self.current_scenario is None:
             return 0
-        timesteps = [
-            obstacle.prediction.occupancy_set[-1].time_step
-            for obstacle in self.current_scenario.dynamic_obstacles
-            for obstacle in self.current_scenario.dynamic_obstacles
-        ]
-        self.max_timestep = np.max(timesteps) if timesteps else 0
+
+        if len(self.current_scenario.dynamic_obstacles) > 0 \
+                and self.current_scenario.dynamic_obstacles[0].prediction is not None:
+            time_steps = [
+                obstacle.prediction.occupancy_set[-1].time_step
+                for obstacle in self.current_scenario.dynamic_obstacles
+            ]
+            self.max_timestep = np.max(time_steps) if time_steps else 0
+        else:
+            self.max_timestep = 0
+
         return self.max_timestep
 
     def update_plot(self,
-                    sel_lanelet: Lanelet = None,
+                    sel_lanelets: Lanelet = None,
                     sel_intersection: Intersection = None,
                     time_step_changed: bool = False,
                     focus_on_network: bool = False,
                     time_step: int = 0,
                     clear_artists=False):
-        """ Update the plot accordinly to the selection of scenario elements
-        :param sel_lanelet: selected lanelet, defaults to None
+        """ Update the plot accordingly to the selection of scenario elements
+        :param sel_lanelets: selected lanelet, defaults to None
         :param sel_intersection: selected intersection, defaults to None
         :param clear_artists: deletes artists from renderer (only required when opening new scenarios)
         """
+        if not isinstance(sel_lanelets, list) and sel_lanelets:
+            sel_lanelets = [sel_lanelets]
 
         x_lim = self.dynamic.get_axes().get_xlim()
         y_lim = self.dynamic.get_axes().get_ylim()
@@ -219,26 +224,23 @@ class AnimatedViewer:
         self.dynamic.clear_axes(clear_artists=clear_artists)
         ax = self.dynamic.get_axes()
 
+
         network_limits = [
             float("Inf"), -float("Inf"),
             float("Inf"), -float("Inf")
         ]
 
         if time_step_changed:
-            draw_params = {
-                'time_begin': time_step,
-            }
+            draw_params = DrawParamsCustom(time_begin=time_step)
         else:
-            draw_params = {
-                'time_begin': self.time_step.value - 1,
-            }
-
+            draw_params = DrawParamsCustom(time_begin=self.time_step.value - 1)
+        draw_params.dynamic_obstacle.trajectory.draw_trajectory = False
         self.dynamic.draw_scenario(self.current_scenario, self.current_pps, draw_params=draw_params)
 
         for lanelet in self.current_scenario.lanelet_network.lanelets:
 
             color, alpha, zorder, label = self.get_paint_parameters(
-                lanelet, sel_lanelet, sel_intersection)
+                lanelet, sel_lanelets, sel_intersection)
             if color == "gray":
                 continue
 
@@ -251,8 +253,9 @@ class AnimatedViewer:
             self.draw_lanelet_vertices(lanelet, ax)
 
         handles, labels = ax.get_legend_handles_labels()
-        legend = ax.legend(handles, labels)
-        legend.set_zorder(50)
+        if sel_lanelets != None and config.LEGEND:
+            legend = ax.legend(handles, labels)
+            legend.set_zorder(50)
 
         if focus_on_network:
             # can we focus on a selection?
@@ -273,66 +276,66 @@ class AnimatedViewer:
 
         self.dynamic.drawer.tight_layout()
 
-    def get_paint_parameters(self, lanelet: Lanelet, selected_lanelet: Lanelet,
+    def get_paint_parameters(self, lanelet: Lanelet, selected_lanelets: Lanelet,
                              selected_intersection: Intersection):
         """
         Return the parameters for painting a lanelet regarding the selected lanelet.
         """
+        if selected_lanelets:
+            if len(selected_lanelets) == 1:
+                selected_lanelet = selected_lanelets[0]
+                if lanelet.lanelet_id == selected_lanelet.lanelet_id:
+                    color = "red"
+                    alpha = 0.7
+                    zorder = 20
+                    label = "{} selected".format(lanelet.lanelet_id)
 
-        if selected_lanelet:
+                elif (
+                        lanelet.lanelet_id in selected_lanelet.predecessor and lanelet.lanelet_id in
+                        selected_lanelet.successor):
+                    color = "purple"
+                    alpha = 0.5
+                    zorder = 10
+                    label = "{} predecessor and successor of {}".format(lanelet.lanelet_id, selected_lanelet.lanelet_id)
 
-            if lanelet.lanelet_id == selected_lanelet.lanelet_id:
-                color = "red"
-                alpha = 0.7
-                zorder = 20
-                label = "{} selected".format(lanelet.lanelet_id)
-
-            elif (lanelet.lanelet_id in selected_lanelet.predecessor
-                  and lanelet.lanelet_id in selected_lanelet.successor):
-                color = "purple"
-                alpha = 0.5
-                zorder = 10
-                label = "{} predecessor and successor of {}".format(
-                    lanelet.lanelet_id, selected_lanelet.lanelet_id)
-
-            elif lanelet.lanelet_id in selected_lanelet.predecessor:
-                color = "blue"
-                alpha = 0.5
-                zorder = 10
-                label = "{} predecessor of {}".format(
-                    lanelet.lanelet_id, selected_lanelet.lanelet_id)
-            elif lanelet.lanelet_id in selected_lanelet.successor:
-                color = "green"
-                alpha = 0.5
-                zorder = 10
-                label = "{} successor of {}".format(
-                    lanelet.lanelet_id, selected_lanelet.lanelet_id)
-            elif lanelet.lanelet_id == selected_lanelet.adj_left:
-                color = "yellow"
-                alpha = 0.5
-                zorder = 10
-                label = "{} adj left of {} ({})".format(
-                    lanelet.lanelet_id,
-                    selected_lanelet.lanelet_id,
-                    "same" if selected_lanelet.adj_left_same_direction else
-                    "opposite",
-                )
-            elif lanelet.lanelet_id == selected_lanelet.adj_right:
-                color = "orange"
-                alpha = 0.5
-                zorder = 10
-                label = "{} adj right of {} ({})".format(
-                    lanelet.lanelet_id,
-                    selected_lanelet.lanelet_id,
-                    "same" if selected_lanelet.adj_right_same_direction else
-                    "opposite",
-                )
+                elif lanelet.lanelet_id in selected_lanelet.predecessor:
+                    color = "blue"
+                    alpha = 0.5
+                    zorder = 10
+                    label = "{} predecessor of {}".format(lanelet.lanelet_id, selected_lanelet.lanelet_id)
+                elif lanelet.lanelet_id in selected_lanelet.successor:
+                    color = "green"
+                    alpha = 0.5
+                    zorder = 10
+                    label = "{} successor of {}".format(lanelet.lanelet_id, selected_lanelet.lanelet_id)
+                elif lanelet.lanelet_id == selected_lanelet.adj_left:
+                    color = "yellow"
+                    alpha = 0.5
+                    zorder = 10
+                    label = "{} adj left of {} ({})".format(lanelet.lanelet_id, selected_lanelet.lanelet_id,
+                            "same" if selected_lanelet.adj_left_same_direction else "opposite", )
+                elif lanelet.lanelet_id == selected_lanelet.adj_right:
+                    color = "orange"
+                    alpha = 0.5
+                    zorder = 10
+                    label = "{} adj right of {} ({})".format(lanelet.lanelet_id, selected_lanelet.lanelet_id,
+                            "same" if selected_lanelet.adj_right_same_direction else "opposite", )
+                else:
+                    color = "gray"
+                    alpha = 0.3
+                    zorder = 0
+                    label = None
             else:
-                color = "gray"
-                alpha = 0.3
-                zorder = 0
-                label = None
-
+                if any(lanelet.lanelet_id == lane.lanelet_id for lane in selected_lanelets):
+                    color = "red"
+                    alpha = 0.7
+                    zorder = 20
+                    label = "{} selected".format(lanelet.lanelet_id)
+                else:
+                    color = "gray"
+                    alpha = 0.3
+                    zorder = 0
+                    label = None
         elif selected_intersection:
             incoming_ids = selected_intersection.map_incoming_lanelets.keys()
             inc_succ_ids = set()
@@ -382,3 +385,6 @@ class AnimatedViewer:
             color="black",
             lw=0.1,
         )
+
+    def update_window(self):
+        self.dynamic.setStyleSheet('background-color:' + self.parent.colorscheme().second_background + '; color:' + self.parent.colorscheme().color + ';font-size: ' + self.parent.colorscheme().font_size)

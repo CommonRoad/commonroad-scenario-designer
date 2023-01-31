@@ -9,14 +9,6 @@ from commonroad.scenario.scenario import Scenario, ScenarioID
 
 from crdesigner.ui.gui.mwindow.service_layer.map_creator import MapCreator
 
-__author__ = "Aaron Kaefer, Marcus Gabler, Sebastian Maierhofer"
-__copyright__ = "TUM Cyber-Physical Systems Group"
-__credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles, BMW Car@TUM"]
-__version__ = "0.5.1"
-__maintainer__ = "Sebastian Maierhofer"
-__email__ = "commonroad@lists.lrz.de"
-__status__ = "Released"
-
 
 class TestLanelet(unittest.TestCase):
     def test_set_predecessor_successor_relation(self):
@@ -40,7 +32,7 @@ class TestLanelet(unittest.TestCase):
 
         scenario = Scenario(0.1, ScenarioID())
         network = LaneletNetwork()
-        scenario.lanelet_network = network
+        scenario.replace_lanelet_network(network)
         lanelet = MapCreator.create_straight(2, 8, 9, scenario.generate_object_id(), set())
 
         np.testing.assert_array_almost_equal(lanelet.left_vertices, left_vertices)
@@ -62,7 +54,7 @@ class TestLanelet(unittest.TestCase):
 
         scenario = Scenario(0.1, ScenarioID())
         network = LaneletNetwork()
-        scenario.lanelet_network = network
+        scenario.replace_lanelet_network(network)
         lanelet = MapCreator.create_curve(2, 10, np.pi*1.2, 10, scenario.generate_object_id(), set())
 
         np.testing.assert_array_almost_equal(lanelet.left_vertices, left_vertices)
@@ -133,7 +125,7 @@ class TestLanelet(unittest.TestCase):
         lanelet = Lanelet(left_vertices, center_vertices, right_vertices, 1)
         scenario = Scenario(0.1, ScenarioID())
         network = LaneletNetwork()
-        scenario.lanelet_network = network
+        scenario.replace_lanelet_network(network)
 
         lanelet2 = MapCreator.create_adjacent_lanelet(True, lanelet, scenario.generate_object_id(), True, 2, set())
         lanelet._adj_left = None
@@ -177,7 +169,7 @@ class TestLanelet(unittest.TestCase):
         lanelet = Lanelet(left_vertices, center_vertices, right_vertices, 1)
         scenario = Scenario(0.1, ScenarioID())
         network = LaneletNetwork()
-        scenario.lanelet_network = network
+        scenario.replace_lanelet_network(network)
 
         lanelet2 = MapCreator.create_adjacent_lanelet(False, lanelet, scenario.generate_object_id(), True, 2, set())
         lanelet._adj_right = None
@@ -203,7 +195,7 @@ class TestLanelet(unittest.TestCase):
 
         scenario = Scenario(0.1, ScenarioID())
         network = LaneletNetwork()
-        scenario.lanelet_network = network
+        scenario.replace_lanelet_network(network)
 
         lanelet_connect = MapCreator.connect_lanelets(lanelet, lanelet2, scenario.generate_object_id())
 

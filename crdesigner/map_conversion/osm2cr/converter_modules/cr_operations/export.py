@@ -148,7 +148,7 @@ def create_scenario_intermediate(graph) -> Tuple[Scenario, IntermediateFormat]:
             graph.sublayer_graph)
         crossings = IntermediateFormat.get_lanelet_intersections(interm_sublayer, interm)
         interm_sublayer.intersections = list()
-        interm_sublayer.traffic_lights = list()
+        interm_sublayer.traffic_signs = list()
         interm_sublayer.traffic_lights = list()
         interm_sublayer.remove_invalid_references()
         print("removed intersections, traffic lights, traffic signs from sublayer")
@@ -170,7 +170,6 @@ def export(
     """
     # scenario = create_scenario(graph)
     scenario, intermediate_format = create_scenario_intermediate(graph)
-
     # removing converting errors before writing to xml
     sanitize(scenario)
 

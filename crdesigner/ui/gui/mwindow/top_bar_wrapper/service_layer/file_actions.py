@@ -1,13 +1,11 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
-from PyQt5.QtCore import *
 import os
 import logging
 
 from commonroad.scenario.scenario import Scenario
 from commonroad.scenario.lanelet import LaneletNetwork
-from commonroad.common.file_reader import CommonRoadFileReader
-from crdesigner.ui.gui.mwindow.top_bar_wrapper.service_layer.general_services import create_action
+from commonroad.common.file_reader import CommonRoadFileReader, FileFormat
 from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMO_AVAILABLE
 
 if SUMO_AVAILABLE:
@@ -20,7 +18,7 @@ def file_new(mwindow):
     """
     scenario = Scenario(0.1, affiliation="Technical University of Munich", source="CommonRoad Scenario Designer")
     net = LaneletNetwork()
-    scenario.lanelet_network = net
+    scenario.replace_lanelet_network(net)
     mwindow.animated_viewer_wrapper.cr_viewer.current_scenario = scenario
     mwindow.animated_viewer_wrapper.cr_viewer.current_pps = None
     _open_scenario(mwindow=mwindow, new_scenario=scenario)
@@ -29,7 +27,9 @@ def file_new(mwindow):
 def open_commonroad_file(mwindow):
     """ """
     path, _ = QFileDialog.getOpenFileName(mwindow, "Open a CommonRoad scenario", "",
-                                          "CommonRoad scenario files *.xml (*.xml)", options=QFileDialog.Options(), )
+                                          "CommonRoad scenario *.xml file (*.xml);; "
+                                          "CommonRoad scenario *.pb file (*.pb)",
+                                          options=QFileDialog.Options(), )
     if not path:
         return
     _open_path(mwindow=mwindow, path=path)
@@ -38,7 +38,10 @@ def open_commonroad_file(mwindow):
 def _open_path(mwindow, path):
     """ """
     try:
-        commonroad_reader = CommonRoadFileReader(path)
+        if ".pb" in path:
+            commonroad_reader = CommonRoadFileReader(path, file_format=FileFormat.PROTOBUF)
+        else:
+            commonroad_reader = CommonRoadFileReader(path, file_format=FileFormat.XML)
         scenario, pps = commonroad_reader.open()
     except Exception as e:
         QMessageBox.warning(mwindow, "CommonRoad XML error",
@@ -62,6 +65,7 @@ def _open_scenario(mwindow, new_scenario, filename="new_scenario", pps=None):
         mwindow.obstacle_toolbox.sumo_simulation.scenario = mwindow.animated_viewer_wrapper.cr_viewer.current_scenario
     else:
         mwindow.animated_viewer_wrapper.cr_viewer.open_scenario(new_scenario, planning_problem_set=pps)
+
     mwindow.animated_viewer_wrapper.update_view(focus_on_network=True)
     mwindow.store_scenario()
     mwindow.update_toolbox_scenarios()

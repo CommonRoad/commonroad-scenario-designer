@@ -7,6 +7,7 @@ Subpackages
 .. toctree::
    :maxdepth: 4
 
+   crdesigner.configurations
    crdesigner.map_conversion
    crdesigner.ui
 

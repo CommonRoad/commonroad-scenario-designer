@@ -8,7 +8,6 @@ Submodules
    :maxdepth: 4
 
    crdesigner.ui.gui.mwindow.toolboxes.service_layer.general_services
-   crdesigner.ui.gui.mwindow.toolboxes.service_layer.sumo_settings
 
 Module contents
 ---------------

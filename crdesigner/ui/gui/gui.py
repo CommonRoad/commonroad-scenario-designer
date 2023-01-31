@@ -1,4 +1,5 @@
 import sys
+
 from PyQt5.QtWidgets import *
 from crdesigner.ui.gui.mwindow.mwindow import MWindow
 

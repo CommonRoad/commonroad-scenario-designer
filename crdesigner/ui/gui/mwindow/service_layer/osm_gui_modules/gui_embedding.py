@@ -14,7 +14,6 @@ from crdesigner.map_conversion.osm2cr import config
 from crdesigner.map_conversion.osm2cr.converter_modules.cr_operations import export as ex
 from crdesigner.map_conversion.osm2cr.converter_modules.graph_operations import road_graph as rg
 from crdesigner.ui.gui.mwindow.service_layer.osm_gui_modules import gui
-from crdesigner.ui.gui.mwindow.service_layer.osm_gui_modules import settings
 from crdesigner.ui.gui.mwindow.service_layer.osm_gui_modules.GUI_resources.edge_edit_embedding import Ui_EdgeEdit \
     as eeGUI_frame
 from crdesigner.ui.gui.mwindow.service_layer.osm_gui_modules.GUI_resources.lane_link_edit_embedding \
@@ -193,8 +192,8 @@ class StartMenu(QWidget):
 
         :return: None
         """
-        self.settings_menu = settings.SettingsMenu(self.app,
-                                                   self.app.show_start_menu)
+        self.settings_menu = settings.OSMSettings(self.app,
+                                                  self.app.show_start_menu)
 
     def load_edit_state(self) -> None:
         """

@@ -1,3 +1,4 @@
+from crdesigner.ui.gui.mwindow.service_layer import config
 from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.animated_viewer_wrapper import AnimatedViewerWrapper
 from crdesigner.ui.gui.mwindow.service_layer.gui_resources.MainWindow import Ui_mainWindow
 from crdesigner.ui.gui.mwindow.service_layer.gui_resources.scenario_saving_dialog import ScenarioDialog
@@ -16,13 +17,16 @@ from crdesigner.ui.gui.mwindow.toolboxes.road_network_toolbox.create_road_networ
     import create_road_network_toolbox
 from crdesigner.ui.gui.mwindow.toolboxes.converter_toolbox.create_converter_toolbox import create_converter_toolbox
 from crdesigner.ui.gui.mwindow.toolboxes.obstacle_toolbox.create_obstacle_toolbox import create_obstacle_toolbox
+from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.commonroad_viewer.service_layer.draw_params_updater import ColorSchema
 
 
 import logging
 from PyQt5.QtWidgets import *
+from PyQt5 import QtGui
 from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMO_AVAILABLE
 if SUMO_AVAILABLE:
     pass
+import yaml
 
 
 class MWindow(QMainWindow, Ui_mainWindow):
@@ -62,6 +66,7 @@ class MWindow(QMainWindow, Ui_mainWindow):
         self.animated_viewer_wrapper.create_viewer_dock()
         self.status = self.statusbar
         self.status.showMessage("Welcome to CR Scenario Designer")
+        self.update_window()
 
         center(mwindow=self)
         if path:
@@ -108,3 +113,29 @@ class MWindow(QMainWindow, Ui_mainWindow):
         :return: score
         """
         return check_scenario_service_layer(mwindow=self, scenario=scenario)
+
+    def colorscheme(self) -> ColorSchema:
+        if config.DARKMODE:
+            colorscheme = ColorSchema(axis=config.AXIS_VISIBLE, background='#303030', color='#f0f0f0',
+                                      highlight='#1e9678', second_background='#2c2c2c')
+        else:
+            colorscheme = ColorSchema(axis=config.AXIS_VISIBLE)
+
+        return colorscheme
+
+    def update_window(self):
+        p = QtGui.QPalette()
+        p.setColor(QtGui.QPalette.ColorRole.Window, QtGui.QColor(self.colorscheme().background))
+        p.setColor(QtGui.QPalette.ColorRole.Base, QtGui.QColor(self.colorscheme().second_background))
+        p.setColor(QtGui.QPalette.ColorRole.Button, QtGui.QColor(self.colorscheme().background))
+        p.setColor(QtGui.QPalette.ColorRole.ButtonText, QtGui.QColor(self.colorscheme().color))
+        p.setColor(QtGui.QPalette.ColorRole.Text, QtGui.QColor(self.colorscheme().color))
+        p.setColor(QtGui.QPalette.ColorRole.WindowText, QtGui.QColor(self.colorscheme().color))
+        p.setColor(QtGui.QPalette.ColorRole.AlternateBase, QtGui.QColor(self.colorscheme().background))
+        self.setPalette(p)
+
+        self.road_network_toolbox.road_network_toolbox_ui.update_window()
+        self.obstacle_toolbox.obstacle_toolbox_ui.update_window()
+        self.converter_toolbox.converter_toolbox.update_window()
+        self.animated_viewer_wrapper.update_window()
+        self.menubar.setStyleSheet('background-color: '+ self.colorscheme().second_background + '; color: ' + self.colorscheme().color)

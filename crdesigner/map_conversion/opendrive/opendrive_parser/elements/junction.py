@@ -1,14 +1,14 @@
-__author__ = "Benjamin Orthen, Stefan Urban"
-__copyright__ = "TUM Cyber-Physical Systems Group"
-__credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles"]
-__version__ = "0.5.1"
-__maintainer__ = "Sebastian Maierhofer"
-__email__ = "commonroad@lists.lrz.de"
-__status__ = "Released"
+from __future__ import annotations
 
 
 class Junction:
-    """ """
+    """
+    Class which describes some attributes of the junction element in OpenDrive.
+
+    :ivar _id: ID of the junction element
+    :ivar _name: name of the junction
+    :ivar _connections: list of connection elements associated with the junction
+    """
 
     # TODO priority
     # TODO controller
@@ -19,52 +19,51 @@ class Junction:
         self._connections = []
 
     @property
-    def id(self):
-        """ """
+    def id(self) -> int:
+        """
+        Junction ID.
+
+        :getter: returns the junction ID
+        :setter: sets the junction ID
+        :type: int
+        """
         return self._id
 
     @id.setter
     def id(self, value):
-        """
-
-        Args:
-          value:
-
-        Returns:
-
-        """
         self._id = int(value)
 
     @property
-    def name(self):
-        """ """
+    def name(self) -> str:
+        """
+        Junction name.
+
+        :getter: returns the junction name
+        :setter: sets the junction name
+        :type: string
+        """
         return self._name
 
     @name.setter
-    def name(self, value):
-        """
-
-        Args:
-          value:
-
-        Returns:
-
-        """
+    def name(self, value: str):
         self._name = str(value)
 
     @property
-    def connections(self):
-        """ """
+    def connections(self) -> list[Connection]:
+        """
+        Shows the connections associated with the junction.
+
+        :getter: returns the connection objects in the form of a list [connection1, connection2, ...]
+        :type: list of object instances of class Connection
+        """
         return self._connections
 
-    def addConnection(self, connection):
+    def addConnection(self, connection: Connection):
         """
+        Adds new connections which are associated with the junction element.
 
-        Args:
-          connection:
-
-        Returns:
-
+        :param: connection which needs to be an object of class Connection
+        :return: appended list of connections
         """
         if not isinstance(connection, Connection):
             raise TypeError("Has to be of instance Connection")
@@ -73,7 +72,16 @@ class Junction:
 
 
 class Connection:
-    """ """
+    """
+    Class which describes connecting roads and correspond to the connection elements on a junction element.
+    It corresponds to the t_junction_connection element in the UML model of ASAM OpenDrive.
+
+    :ivar _id: ID of the connection element
+    :ivar _incomingRoad: ID of the incoming road
+    :ivar _connectingRoad: ID of the connecting road
+    :ivar _contactPoint: contact point of the connecting road
+    :ivar _laneLinks: list of laneLinks associated with the connection
+    """
 
     def __init__(self):
         self._id = None
@@ -83,89 +91,84 @@ class Connection:
         self._laneLinks = []
 
     @property
-    def id(self):
-        """ """
+    def id(self) -> int:
+        """
+        ID of the connection.
+
+        :getter: returns the ID of the connection
+        :setter: sets the ID of the connection
+        :type: int
+        """
         return self._id
 
     @id.setter
     def id(self, value):
-        """
-
-        Args:
-          value:
-
-        Returns:
-
-        """
         self._id = int(value)
 
     @property
-    def incomingRoad(self):
-        """ """
+    def incomingRoad(self) -> int:
+        """
+        ID of the incoming road.
+
+        :getter: returns the ID of the incoming road
+        :setter: sets the ID of the incoming road
+        :type: int
+        """
         return self._incomingRoad
 
     @incomingRoad.setter
     def incomingRoad(self, value):
-        """
-
-        Args:
-          value:
-
-        Returns:
-
-        """
         self._incomingRoad = int(value)
 
     @property
-    def connectingRoad(self):
-        """ """
+    def connectingRoad(self) -> int:
+        """
+        ID of the connecting road.
+
+        :getter: returns the ID of the connecting road
+        :setter: sets the ID of the connecting road
+        :type: int
+        """
         return self._connectingRoad
 
     @connectingRoad.setter
     def connectingRoad(self, value):
-        """
-
-        Args:
-          value:
-
-        Returns:
-
-        """
         self._connectingRoad = int(value)
 
     @property
-    def contactPoint(self):
-        """ """
+    def contactPoint(self) -> str:
+        """
+        Contact Point on the connecting road. Valid options are "start" and "end".
+
+        :getter: returns the contact point
+        :setter: sets the contact point
+        :type: string
+        """
         return self._contactPoint
 
     @contactPoint.setter
     def contactPoint(self, value):
-        """
-
-        Args:
-          value:
-
-        Returns:
-
-        """
         if value not in ["start", "end"]:
             raise AttributeError("Contact point can only be start or end.")
 
         self._contactPoint = value
 
     @property
-    def laneLinks(self):
-        """ """
+    def laneLinks(self) -> list[LaneLink]:
+        """
+        Shows the laneLinks associated with the connection element.
+
+        :getter: returns the laneLink objects in the form of a list [laneLink1, laneLink2, ...]
+        :type: list of object instances of class LaneLink
+        """
         return self._laneLinks
 
-    def addLaneLink(self, laneLink):
+    def addLaneLink(self, laneLink: LaneLink):
         """
+        Adds new laneLinks which are associated with the connection element.
 
-        Args:
-          laneLink:
-
-        Returns:
-
+        :param: laneLink which needs to be an object of class LaneLink
+        :return: appended list of laneLinks
         """
         if not isinstance(laneLink, LaneLink):
             raise TypeError("Has to be of instance LaneLink")
@@ -174,7 +177,13 @@ class Connection:
 
 
 class LaneLink:
-    """ """
+    """
+    Class which describes the lanes that are linked between an incoming road and a connecting road.
+    It corresponds to the t_junction_connection_laneLink element in the UML model in ASAM OpenDrive.
+
+    :ivar _from: ID of the incoming lane
+    :ivar _to: ID of the connection lane
+    """
 
     def __init__(self):
         self._from = None
@@ -184,35 +193,31 @@ class LaneLink:
         return str(self._from) + " > " + str(self._to)
 
     @property
-    def fromId(self):
-        """ """
+    def fromId(self) -> int:
+        """
+        ID of the incoming lane.
+
+        :getter: returns ID
+        :setter: sets ID
+        :type: int
+        """
         return self._from
 
     @fromId.setter
     def fromId(self, value):
-        """
-
-        Args:
-          value:
-
-        Returns:
-
-        """
         self._from = int(value)
 
     @property
-    def toId(self):
-        """ """
+    def toId(self) -> int:
+        """
+        ID of the connection lane.
+
+        :getter: returns ID
+        :setter: sets ID
+        :type: int
+        """
         return self._to
 
     @toId.setter
     def toId(self, value):
-        """
-
-        Args:
-          value:
-
-        Returns:
-
-        """
         self._to = int(value)

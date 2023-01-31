@@ -16,14 +16,6 @@ from crdesigner.map_conversion.sumo_map.cr2sumo.converter import CR2SumoMapConve
 from parameterized import parameterized
 from sumocr.interface.sumo_simulation import SumoSimulation
 
-__author__ = "Max Fruehauf, Sebastian Maierhofer"
-__copyright__ = "TUM Cyber-Physical Systems Group"
-__credits__ = ["Priority Program SPP 1835 Cooperative Interacting Automobiles, BMW Car@TUM"]
-__version__ = "0.5.1"
-__maintainer__ = "Sebastian Maierhofer"
-__email__ = "commonroad@lists.lrz.de"
-__status__ = "Released"
-
 
 class TestCommonRoadToSUMOConversion(unittest.TestCase):
     """Tests the conversion from a CommonRoad map to a SUMO .net.xml file
@@ -45,18 +37,16 @@ class TestCommonRoadToSUMOConversion(unittest.TestCase):
         if not os.path.isdir(self.out_path_test):
             os.makedirs(self.out_path_test)
 
-    def read_cr_file(self, cr_file_name: str, folder="sumo_test_files"):
+    def read_cr_file(self, cr_file_name: str, folder="test_maps/sumo"):
         """Load the osm file and convert it to a scenario."""
         if not self.scenario_name:
             self.scenario_name = cr_file_name
 
         self.cwd_path = os.path.dirname(os.path.abspath(__file__))
 
-        self.path = os.path.join(self.cwd_path, folder,
-                                 cr_file_name + ".xml")
+        self.path = os.path.join(self.cwd_path, folder, cr_file_name + ".xml")
 
-        self.scenario, planning_problem = CommonRoadFileReader(
-            self.path).open()
+        self.scenario, planning_problem = CommonRoadFileReader(self.path).open()
 
         # translate scenario to center
         centroid = np.mean(np.concatenate([la.center_vertices for la in self.scenario.lanelet_network.lanelets]),
@@ -71,16 +61,15 @@ class TestCommonRoadToSUMOConversion(unittest.TestCase):
 
     def sumo_run(self, config: SumoConfig, converter: CR2SumoMapConverter, tls_lanelet_ids: List[int]) -> str:
         # was the conversion successful?
-        conversion_successful = converter.create_sumo_files(
-            self.out_path_test)
+        conversion_successful = converter.create_sumo_files(self.out_path_test)
+        import glob
+        print(glob.glob(self.out_path_test + "/*"))
         self.assertTrue(conversion_successful)
 
         # can we generate traffic light systems?
         if tls_lanelet_ids:
             self.assertTrue(
-                all(converter.auto_generate_traffic_light_system(lanelet_id)
-                    for lanelet_id in tls_lanelet_ids)
-            )
+                    all(converter.auto_generate_traffic_light_system(lanelet_id) for lanelet_id in tls_lanelet_ids))
 
         simulation = SumoSimulation()
         f = io.StringIO()
@@ -95,17 +84,11 @@ class TestCommonRoadToSUMOConversion(unittest.TestCase):
         self.assertIsNotNone(simulated_scenario)
 
         # write simulated scenario to disk
-        CommonRoadFileWriter(
-            simulated_scenario,
-            None,
-            author=self.scenario.author,
-            affiliation=self.scenario.affiliation,
-            source=self.scenario.source,
-            tags=self.scenario.tags,
-            location=self.scenario.location).write_scenario_to_file(
-            os.path.join(os.path.dirname(self.path),
-                         self.scenario_name + ".simulated.xml"),
-            overwrite_existing_file=OverwriteExistingFile.ALWAYS)
+        CommonRoadFileWriter(simulated_scenario, None, author=self.scenario.author,
+                affiliation=self.scenario.affiliation, source=self.scenario.source, tags=self.scenario.tags,
+                location=self.scenario.location).write_scenario_to_file(
+                os.path.join(os.path.dirname(self.path), self.scenario_name + ".simulated.xml"),
+                overwrite_existing_file=OverwriteExistingFile.ALWAYS)
         return f.getvalue()
 
     @staticmethod
@@ -116,16 +99,14 @@ class TestCommonRoadToSUMOConversion(unittest.TestCase):
             matches = [line for line in lines if keyword in line]
             err_str = "\n".join(matches)
             if len(matches) > 0:
-                warnings.warn(
-                    f"Simulation Error, {keyword} found {len(matches)} times in stderr:" + "\n" + err_str
-                )
+                warnings.warn(f"Simulation Error, {keyword} found {len(matches)} times in stderr:" + "\n" + err_str)
 
-    @parameterized.expand([
-        ["USA_Peach-3_3_T-1", []],
-        ["DEU_garching-1_1", [270]],
+  #  @parameterized.expand([
+       # ["USA_Peach-3_3_T-1", []],
+        # ["DEU_garching-1_1", [270]],
         # ["DEU_garching-1_2", []],
         # ["ZAM_intersectandcrossing-1_0", [56]],
-        # ["ZAM_merging-1_1", [107]],
+       # ["ZAM_merging-1_1", [107]],
         # ["USA_urban_1", [105]],
         # ["DEU_AAH-1_8007_T-1", [154]],
         # ["DEU_AAH-2_19000_T-1", [118]],
@@ -177,52 +158,30 @@ class TestCommonRoadToSUMOConversion(unittest.TestCase):
         # ["ZAM_TrafficLightTest-1_1-T-1", []],
         # ["ZAM_TrafficLightTest-1_2-T-1", []],
         # ["ZAM_TrafficLightLanes-1_1_T-1", []],
-    ])
-    @pytest.mark.parallel
-    def test_parameterized_sumo_run(self, cr_file_name: str, tls: List[int]):
-        config, converter = self.read_cr_file(cr_file_name)
-        out = self.sumo_run(config, converter, tls)
-        self.validate_output(out)
+   # ])
+   #  @pytest.mark.parallel
+   #  def test_parameterized_sumo_run(self, cr_file_name: str, tls: List[int]):
+   #      config, converter = self.read_cr_file(cr_file_name)
+   #      out = self.sumo_run(config, converter, tls)
+   #      self.validate_output(out)
 
-    # @parameterized.expand([
-    #     # ["ESP_Ceuta-1_2_T-1", []],
-    #     # ["USA_Peach-3_3_T-1", []],
-    #     ["USA_Lanker-2_13_T-1", []],
-    # ])
-    # def test_ngsim_conversion(self, cr_file_name: str, tls: List[int]):
-    #     config, wrapper = self.read_cr_file(cr_file_name)
-    #     out = self.sumo_run(config, wrapper, tls)
-    #     # print(err.getvalue())
-    #     self.validate_output(out)
+    # @parameterized.expand([  #     # ["ESP_Ceuta-1_2_T-1", []],  #     # ["USA_Peach-3_3_T-1", []],
+    #     ["USA_Lanker-2_13_T-1", []],  # ])  # def test_ngsim_conversion(self, cr_file_name: str, tls: List[int]):
+    #     config, wrapper = self.read_cr_file(cr_file_name)  #     out = self.sumo_run(config, wrapper, tls)  #     #
+    #     print(err.getvalue())  #     self.validate_output(out)
 
-    # @parameterized.expand([
-    #     # ["ESP_Ceuta-1_2_T-1", []],
-    #     # ["USA_Peach-3_3_T-1", []],
-    #     ["KA-Suedtangente-atlatec", []],
-    # ])
-    # def test_opendrive_source(self, cr_file_name: str, tls: List[int]):
-    #     """Test with maps that have been converted from openDRIVE"""
-    #     config, wrapper = self.read_cr_file(cr_file_name, folder="opendrive_test_files")
-    #     out = self.sumo_run(config, wrapper, tls)
-    #     # print(err.getvalue())
-    #     self.validate_output(out)
-    #     self.tearDown()
+    # @parameterized.expand([  #     # ["ESP_Ceuta-1_2_T-1", []],  #     # ["USA_Peach-3_3_T-1", []],
+    #     ["KA-Suedtangente-atlatec", []],  # ])  # def test_opendrive_source(self, cr_file_name: str,
+    #     tls: List[int]):  #     """Test with maps that have been converted from openDRIVE"""  #     config,
+    #     wrapper = self.read_cr_file(cr_file_name, folder="opendrive")  #     out = self.sumo_run(config, wrapper,
+    #     tls)  #     # print(err.getvalue())  #     self.validate_output(out)  #     self.tearDown()
 
-    # @parameterized.expand([
-    #     ["USA_Peach-3_3_T-1", []],
-    # ])
-    # def convert_scenario_to_net_file(self, cr_file_name: str, tls: List[int]):
-    #     # load CR scenario and translate to origo
-    #     scenario, planning_problem_set = CommonRoadFileReader(scenario_file).open()
-    #     conf.country_id = scenario.scenario_id.country_id
-    #     scenario.scenario_id.obstacle_behavior = "I"
-    #     conf.scenario_name = str(scenario.scenario_id)
-    #     conf.presimulation_steps = 0
-    #     output_folder = os.path.join(output_folder_path, conf.scenario_name)
-    #     os.makedirs(output_folder, exist_ok=True)
-    #
-    #     # convert scenario to SUMO files
-    #     converter_config = SumoConfig()
-    #     converter_config.scenario_name = str(scenario.scenario_id)
-    #     converter_config.country_id = scenario.scenario_id.country_id
-    #     converter = CR2SumoMapConverter(scenario, converter_config)
+    # @parameterized.expand([  #     ["USA_Peach-3_3_T-1", []],  # ])  # def convert_scenario_to_net_file(self,
+    # cr_file_name: str, tls: List[int]):  #     # load CR scenario and translate to origo  #     scenario,
+    # planning_problem_set = CommonRoadFileReader(scenario_file).open()  #     conf.country_id =
+    # scenario.scenario_id.country_id  #     scenario.scenario_id.obstacle_behavior = "I"  #     conf.scenario_name =
+    # str(scenario.scenario_id)  #     conf.presimulation_steps = 0  #     output_folder = os.path.join(
+    # output_folder_path, conf.scenario_name)  #     os.makedirs(output_folder, exist_ok=True)  #  #     # convert
+    # scenario to SUMO files  #     converter_config = SumoConfig()  #     converter_config.scenario_name = str(
+    # scenario.scenario_id)  #     converter_config.country_id = scenario.scenario_id.country_id  #     converter =
+    # CR2SumoMapConverter(scenario, converter_config)

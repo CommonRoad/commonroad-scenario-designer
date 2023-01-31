@@ -1,11 +1,9 @@
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
-
 from crdesigner.ui.gui.mwindow.toolboxes.toolbox_ui import Toolbox
-
+from crdesigner.ui.gui.mwindow.service_layer import config
 from commonroad.scenario.obstacle import ObstacleType
-
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
@@ -17,9 +15,9 @@ if SUMO_AVAILABLE:
 
 
 class ObstacleToolboxUI(Toolbox):
-    def __init__(self, text_browser):
-        super().__init__()
-
+    def __init__(self, text_browser, mwindow):
+        super().__init__(mwindow)
+        self.remove_vertice_btn = []
         self.text_browser = text_browser
         self.change_color = False
 
@@ -318,7 +316,11 @@ class ObstacleToolboxUI(Toolbox):
         self.polygon_row[i].addWidget(self.vertices_y[i])
 
         self.remove_vertice_btn.append(QPushButton())
-        self.remove_vertice_btn[i].setIcon(QIcon(":icons/iconmonstr-trash-can-1.svg"))
+        if config.DARKMODE:
+            self.remove_vertice_btn[i].setIcon(QIcon(":icons/iconmonstr-trash-can-darkmode.png"))
+        else:
+            self.remove_vertice_btn[i].setIcon(QIcon(":icons/iconmonstr-trash-can.svg"))
+
         self.remove_vertice_btn[i].clicked.connect(
             lambda: self.remove_vertice())
         self.polygon_row[i].addWidget(self.remove_vertice_btn[i])
@@ -367,3 +369,13 @@ class ObstacleToolboxUI(Toolbox):
         if self.default_color.isChecked():
             self.selected_color.setStyleSheet(
                 "QWidget { border:1px solid black; background-color: white}")
+
+    def update_window(self):
+        super().update_window()
+        if self.remove_vertice_btn:
+            if config.DARKMODE:
+                for btn in self.remove_vertice_btn:
+                    btn.setIcon(QIcon(":icons/iconmonstr-trash-can-darkmode.png"))
+            else:
+                for btn in self.remove_vertice_btn:
+                    btn.setIcon(QIcon(":icons/iconmonstr-trash-can.svg"))
