@@ -424,8 +424,7 @@ class ObstacleToolboxUI(Toolbox):
             self.add_vertice_btn.clicked.connect(lambda: self.add_vertice())
             self.layout_shape_groupbox.insertRow(len(self.vertices_x) + 2, self.add_vertice_btn)
 
-        if self.obstacle_dyn_stat.currentText() == "Dynamic":
-            self.toggle_dynamic_static()
+
 
     def adjust_obstacle_type_dropdown(self, selected_type:QComboBox):
         """This method adjusts the obstacle type depending on whether static or dynamic obstacles are selected.
