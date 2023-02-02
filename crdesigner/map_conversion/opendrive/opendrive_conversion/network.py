@@ -182,6 +182,7 @@ class Network:
                 continue
             lanelets = parametric_lane.marking_subset_lanelets(self.error_tolerance, self.min_delta_s)
             lanelets[0].predecessor = self._link_index.get_predecessors(parametric_lane.id_)
+            # fix adjacency problems with several converted lanelets
             for ind in range(len(lanelets)):
                 if ind > 0:
                     lanelets[ind].predecessor = [lanelets[ind - 1].lanelet_id]

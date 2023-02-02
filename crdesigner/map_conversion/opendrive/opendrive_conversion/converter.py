@@ -111,7 +111,8 @@ class OpenDriveConverter:
                         parametric_lane.reverse = bool(lane.id > 0)
                         plane_group.append(parametric_lane)
                     """
-                    # check if road mark was changed and set corresponding road mark
+                    # check if road mark was changed and set corresponding road mark and collect road marks for the
+                    # current lane
                     mark_idx = -1
                     marks = []
                     for mark in lane.road_mark:
@@ -128,10 +129,11 @@ class OpenDriveConverter:
                             mark_idx, center_marking[0] if lane.id == 1 and len(center_marking) > 0
                         else None)
                     parametric_lane.reverse = bool(lane.id > 0)
+                    # split the lanes according to their road marks
                     mlist = [("lineMarking", m, m.SOffset) for m in marks[1:]]
                     if lane.id == 1:
+                        # also consider center marking
                         mlist += [("centerMarking", m, m.SOffset) for m in center_marking[1:]]
-                        print([("centerMarking", m, m.SOffset) for m in center_marking[1:]])
                     plist = parametric_lane.split_plane(mlist)
                     #plane_group.append(parametric_lane)
                     for p in plist:
@@ -156,6 +158,7 @@ class OpenDriveConverter:
         :param side: Which side of the lane section where the parametric lane is created.
         :type side: str
         :param speed: Speed limit for this individual lane
+        :param center_marking: Center marking given the lane has the id 1, None otherwise
         :type speed: float
         :return: A ParametricLane object with specified borders and a unique id.
         :rtype: :class:`ParametricLane`
