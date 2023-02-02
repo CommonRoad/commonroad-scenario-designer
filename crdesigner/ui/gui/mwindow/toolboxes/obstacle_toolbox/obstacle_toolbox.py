@@ -71,16 +71,14 @@ class ObstacleToolbox(QDockWidget):
         """Get whether the trajectory recording for an obstacle has started.
 
         :return: The boolean indicating whether recording has started for an obstacle.
-        :rtype: bool
         """
         return self._start_trajectory_recording
 
     @start_trajectory_recording.setter
-    def start_trajectory_recording(self, val) -> bool:
+    def start_trajectory_recording(self, val:bool) -> bool:
         """Setter to indicate that recording for an dynamic obstacle has started.
 
         :param val: True or false, depending if recording started or not.
-        :type val: bool
         """
         assert isinstance(val, bool)
         self._start_trajectory_recording = val

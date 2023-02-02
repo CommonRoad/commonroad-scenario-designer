@@ -792,10 +792,10 @@ class DynamicCanvas(FigureCanvas):
 
     def draw_trajectory_line(self, mouse_event: MouseEvent):
         """
-                       draws waypoints and line between waypoints on the canvas
+        draws waypoints and line between waypoints on the canvas
 
-                       :param: mouse_event that was clicked on the canvas
-                       """
+        :param: mouse_event that was clicked on the canvas
+        """
         x2 = mouse_event.xdata
         y2 = mouse_event.ydata
 
@@ -814,10 +814,10 @@ class DynamicCanvas(FigureCanvas):
         self.update_plot()
 
     def trajectory_mode_preview_line(self, mouse_move_event: MouseEvent):
-        """           draws preview line
-
-                       :param: mouse_event for the coordinates of the waypoint
-                               """
+        """
+        draws preview line
+        :param: mouse_event for the coordinates of the waypoint
+        """
         x = mouse_move_event.xdata
         y = mouse_move_event.ydata
         if not x:
