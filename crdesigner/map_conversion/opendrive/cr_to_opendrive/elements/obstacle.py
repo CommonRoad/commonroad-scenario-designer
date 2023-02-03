@@ -1,13 +1,15 @@
-from lxml import etree
+from lxml import etree # type: ignore
 import numpy as np
 from typing import Dict
 
-from commonroad.geometry.shape import Shape, Rectangle, Circle, Polygon
-from commonroad.scenario.trajectory import State
-from commonroad.scenario.obstacle import ObstacleType
-from commonroad.geometry.polyline_util import compute_polyline_initial_orientation
+from commonroad.geometry.shape import Shape, Rectangle, Circle, Polygon # type: ignore
+from commonroad.scenario.trajectory import State # type: ignore
+from commonroad.scenario.obstacle import ObstacleType # type: ignore
+from commonroad.geometry.polyline_util import compute_polyline_initial_orientation # type: ignore
 
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.road import Road
+
+from crdesigner.map_conversion.opendrive.cr_to_opendrive.utils import config
 
 
 class Obstacle:
@@ -15,14 +17,16 @@ class Obstacle:
     This class adds object child element to road parent element
     and converts CommonRoad obstacles to OpenDRIVE obstacles
     """
+
     counting = 0
 
-    def __init__(self, type: ObstacleType, lanelets: Dict[int, ObstacleType], shape: Shape, state: State) -> None:
+    def __init__(self, obstacle_type: ObstacleType, lanelets: Dict[int, ObstacleType],
+                 shape: Shape, state: State) -> None:
         """
         This function let class Obstacle to initialize the object with type, lanelets, shape, state
         and converts the CommonRoad obstacles into OpenDRIVE obstacles.
 
-        :param type: type of obstacle
+        :param obstacle_type: type of obstacle
         :param lanelets: dictionary with key as lanelet id and value as Obstacle
         :param shape: shape of obstacle
         :param state: state of obstacle which includes position, orientation, time_step
@@ -36,16 +40,16 @@ class Obstacle:
 
         Obstacle.counting += 1
         self.id = Obstacle.counting
-        self.type = type if type == "building" else "obstacle"
-        self.object = etree.SubElement(self.road.objects, "object")
+        self.type = obstacle_type if obstacle_type == config.BUILDING else config.OBSTACLE
+        self.object = etree.SubElement(self.road.objects, config.OBJECT_TAG)
 
-        self.object.set("id", str(self.id))
-        self.object.set("type", self.type)
-        self.object.set("orientation", "none")
+        self.object.set(config.ID_TAG, str(self.id))
+        self.object.set(config.TYPE_TAG, self.type)
+        self.object.set(config.SIGNAL_ORIENTATION_TAG, config.NONE)
 
         self.set_coordinates()
 
-        self.object.set("height", "1.0")  # should this be hardcoded?
+        self.object.set(config.SIGNAL_HEIGHT_TAG, config.OBSTACLE_HEIGHT_VALUE)  # should this be hardcoded?
 
         if isinstance(shape, Rectangle):
             self.set_rectangle(shape)
@@ -76,11 +80,11 @@ class Obstacle:
 
         orientation = self.state.orientation
 
-        self.object.set("s", str(s))
-        self.object.set("t", str(t))
+        self.object.set(config.GEOMETRY_S_COORDINATE_TAG, str(s))
+        self.object.set(config.SIGNAL_T_TAG, str(t))
 
-        self.object.set("zOffset", "0.0")
-        self.object.set("hdg", str(orientation))
+        self.object.set(config.SIGNAL_ZOFFSET_TAG, config.ZERO)
+        self.object.set(config.GEOMETRY_HEADING_TAG, str(orientation))
 
     def set_circle(self, shape: Circle) -> None:
         """
@@ -88,7 +92,7 @@ class Obstacle:
 
         :param shape: shape of obstacle
         """
-        self.object.set("radius", str(shape.radius))
+        self.object.set(config.RADIUS_TAG, str(shape.radius))
 
     def set_rectangle(self, shape: Rectangle) -> None:
         """
@@ -96,8 +100,8 @@ class Obstacle:
 
         :param shape: shape of obstacle
         """
-        self.object.set("length", str(shape.length))
-        self.object.set("width", str(shape.width))
+        self.object.set(config.LENGTH_TAG, str(shape.length))
+        self.object.set(config.SIGNAL_WIDTH_TAG, str(shape.width))
 
     def set_polygon(self, shape: Polygon) -> None:
         """
@@ -106,19 +110,19 @@ class Obstacle:
 
         :param shape: shape of obstacle
         """
-        self.outline = etree.SubElement(self.object, "outline")
-        self.outline.set("id", "0")
-        self.outline.set("outer", "true")
-        self.outline.set("closed", "true")
+        self.outline = etree.SubElement(self.object, config.OUTLINE_TAG)
+        self.outline.set(config.ID_TAG, "0")
+        self.outline.set(config.OUTER_TAG, config.TRUE)
+        self.outline.set(config.CLOSED_TAG, config.TRUE)
 
-        id = 0
+        corner_local_id = 0
         # first and last vertex are the same
         vertices = shape.vertices[:-1]
         for vertex in vertices:
-            cornerLocal = etree.SubElement(self.outline, "cornerLocal")
-            cornerLocal.set("id", str(id))
-            cornerLocal.set("u", str(vertex[0]))
-            cornerLocal.set("v", str(vertex[1]))
-            cornerLocal.set("z", "0")
-            cornerLocal.set("height", "1.0")
-            id += 1
+            cornerLocal = etree.SubElement(self.outline, config.CORNER_LOCAL_TAG)
+            cornerLocal.set(config.ID_TAG, str(corner_local_id))
+            cornerLocal.set(config.U_TAG, str(vertex[0]))
+            cornerLocal.set(config.V_TAG, str(vertex[1]))
+            cornerLocal.set(config.Z_TAG, config.OBSTACLE_Z_VALUE)
+            cornerLocal.set(config.SIGNAL_HEIGHT_TAG, config.OBSTACLE_HEIGHT_VALUE)
+            corner_local_id += 1

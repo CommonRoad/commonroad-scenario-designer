@@ -1,11 +1,12 @@
-from lxml import etree
+from lxml import etree # type: ignore
 from typing import List, Dict
 
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.road import Road
 
-from commonroad.scenario.intersection import IntersectionIncomingElement
-from commonroad.scenario.lanelet import LaneletNetwork
+from commonroad.scenario.intersection import IntersectionIncomingElement # type: ignore
+from commonroad.scenario.lanelet import LaneletNetwork # type: ignore
 
+from crdesigner.map_conversion.opendrive.cr_to_opendrive.utils import config
 
 class Junction:
     """
@@ -14,10 +15,12 @@ class Junction:
     The intersection of lane net consists of intersection incoming elements.
     For every intersection incoming element, all successors are obtained.
     """
+
     counting = 0
 
     def __init__(self, incoming: List[IntersectionIncomingElement], id_to_road: Dict[int, int],
-                 lane_to_lane: Dict[int, int], root: etree._Element, lane_network: LaneletNetwork, id: int) -> None:
+                 lane_to_lane: Dict[int, int], root: etree._Element,
+                 lane_network: LaneletNetwork, junction_id: int) -> None:
         """
         This function lets the Junction class initialize the object with attributes incoming, id_to_road, lane_to_lane,
         root, lane_network, id and converts scenario junctions to OpenDRIVE junction.
@@ -27,19 +30,18 @@ class Junction:
         :param lane_to_lane: dictionary with lanelet id as key and lane id as value
         :param root: OpenDRIVE etree element
         :param lane_network: collection of lanelet network
-        :param id: counting of junction
+        :param junction_id: counting of junction
         """
         self.incoming = incoming
-        self.id = id
+        self.id = junction_id
         self.root = root
 
-        junction = etree.SubElement(root, "junction")
-        junction.set("name", "")
-        junction.set("id", str.format("{}", self.id))
-        junction.set("type", "default")
+        junction = etree.SubElement(root, config.JUNCTION_TAG)
+        junction.set(config.NAME_TAG, "")
+        junction.set(config.ID_TAG, str.format(config.ID_FORMAT_PATTERN, self.id))
+        junction.set(config.TYPE_TAG, config.DEFAULT)
 
         self.junction = junction
-        self.ending_list = []
         connection_num = 1
 
         # Do this for every IntersectionIncomingElement
@@ -49,7 +51,7 @@ class Junction:
             # get all successors of the IntersectionIncomingElement
             # inc_suc are all roads as successors with their OpenDrive ID
             inc_suc = set()
-            map_road_to_lane_link = {}
+            map_road_to_lane_link: dict  = {}
 
             # all_suc has all successors with the commonroad-id
             all_suc = inter_incoming.successors_right.union(
@@ -75,17 +77,17 @@ class Junction:
 
             # create connection element for every successor road
             for connect in inc_suc:
-                connection = etree.SubElement(junction, "connection")
-                connection.set("id", str.format("{}", connection_num))
+                connection = etree.SubElement(junction, config.JUNCTION_CONNECTION_TAG)
+                connection.set(config.ID_TAG, str.format(config.ID_FORMAT_PATTERN, connection_num))
                 connection_num += 1
-                connection.set("incomingRoad", str.format("{}", road_number))
-                connection.set("connectingRoad", str.format("{}", connect))
-                connection.set("contactPoint", "start")  # todo?
+                connection.set(config.JUNCTION_INCOMING_ROAD_TAG, str.format(config.ID_FORMAT_PATTERN, road_number))
+                connection.set(config.JUNCTION_CONNECTING_ROAD_TAG, str.format(config.ID_FORMAT_PATTERN, connect))
+                connection.set(config.CONTACT_POINT_TAG, config.START_TAG)  # todo?
                 road = Road.roads[connect]
-                road.road.set("junction", str.format("{}", self.id))
+                road.road.set(config.JUNCTION_TAG, str.format(config.ID_FORMAT_PATTERN, self.id))
 
                 # link them with laneLink, accordingly to OpenDrive
                 for (inc, out) in map_road_to_lane_link[connect]:
-                    laneLink = etree.SubElement(connection, "laneLink")
-                    laneLink.set("from", str.format("{}", inc))
-                    laneLink.set("to", str.format("{}", out))
+                    laneLink = etree.SubElement(connection, config.JUNCTION_LANE_LINK_TAG)
+                    laneLink.set(config.JUNCTION_FROM_TAG, str.format(config.ID_FORMAT_PATTERN, inc))
+                    laneLink.set(config.JUNCTION_TO_TAG, str.format(config.ID_FORMAT_PATTERN, out))

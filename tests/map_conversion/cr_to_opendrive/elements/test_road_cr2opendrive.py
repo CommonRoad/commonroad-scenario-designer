@@ -13,6 +13,8 @@ from crdesigner.map_conversion.opendrive.opendrive_conversion.conversion_lanelet
 from tests.map_conversion.opendrive_conversion.test_conversion_lanelet_network import init_lanelet_from_id, \
     add_lanelets_to_network
 
+from crdesigner.map_conversion.opendrive.cr_to_opendrive.utils import config
+
 
 class TestRoad(unittest.TestCase):
 
@@ -33,16 +35,16 @@ class TestRoad(unittest.TestCase):
 
         lane_list = conversion_lanelet_network.lanelets
         number_of_lanes = 2
-        root = etree.Element("OpenDRIVE")
-        current = etree.Element("OpenDRIVE")
+        root = etree.Element(config.OPENDRIVE)
+        current = etree.Element(config.OPENDRIVE)
         junction_id = -1
 
         # When
-        road = Road(lane_list, number_of_lanes, root, current, junction_id)
+        road = Road(lane_list, number_of_lanes, root,  junction_id)
 
         # Then
         self.assertEqual(21, Road.counting)
-        self.assertEqual({"succ": {}, "pred": {}}, Road.lane_2_lane_link[Road.counting])
+        self.assertEqual({config.SUCC_TAG: {}, config.PRED_TAG: {}}, Road.lane_2_lane_link[Road.counting])
         self.assertEqual(-1, road.junction_id)
         expected_links = {'79.0.-3.-1': {'pred': [], 'succ': []}, '89.0.4.-1': {'pred': [], 'succ': []},
                           'laneIndices': {'79.0.-3.-1': -1, '89.0.4.-1': 1}}
@@ -59,38 +61,38 @@ class TestRoad(unittest.TestCase):
         self.assertEqual(expected_cr_to_od, road.cr_id_to_od)
         self.assertEqual(root, road.root)
 
-        self.assertEqual("road", road.root[0].tag)
+        self.assertEqual(config.ROAD_TAG, road.root[0].tag)
 
-        self.assertEqual("link", road.road[0].tag)
+        self.assertEqual(config.LINK_TAG, road.road[0].tag)
 
-        self.assertEqual("type", road.road[1].tag)
-        self.assertEqual(str.format("{0:.16e}", 0), road.road[1].get("s"))
-        self.assertEqual("town", road.road[1].get("type"))
-        self.assertEqual("type", road.type.tag)
-        self.assertEqual(str.format("{0:.16e}", 0), road.type.get("s"))
-        self.assertEqual("town", road.type.get("type"))
+        self.assertEqual(config.TYPE_TAG, road.road[1].tag)
+        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0), road.road[1].get(config.GEOMETRY_S_COORDINATE_TAG))
+        self.assertEqual(config.TOWN_TAG, road.road[1].get(config.TYPE_TAG))
+        self.assertEqual(config.TYPE_TAG, road.type.tag)
+        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0), road.type.get(config.GEOMETRY_S_COORDINATE_TAG))
+        self.assertEqual(config.TOWN_TAG, road.type.get(config.TYPE_TAG))
 
-        self.assertEqual("planView", road.road[2].tag)
-        self.assertEqual("elevationProfile", road.road[3].tag)
-        self.assertEqual("elevationProfile", road.elevation_profile.tag)
-        self.assertEqual("lateralProfile", road.road[4].tag)
-        self.assertEqual("lateralProfile", road.lateral_profile.tag)
-        self.assertEqual("lanes", road.road[5].tag)
-        self.assertEqual("lanes", road.lanes.tag)
+        self.assertEqual(config.PLAN_VIEW_TAG, road.road[2].tag)
+        self.assertEqual(config.ELEVATION_PROFILE_TAG, road.road[3].tag)
+        self.assertEqual(config.ELEVATION_PROFILE_TAG, road.elevation_profile.tag)
+        self.assertEqual(config.LATERAL_PROFILE_TAG, road.road[4].tag)
+        self.assertEqual(config.LATERAL_PROFILE_TAG, road.lateral_profile.tag)
+        self.assertEqual(config.LANES_TAG, road.road[5].tag)
+        self.assertEqual(config.LANES_TAG, road.lanes.tag)
 
         # assert lane_section
 
-        self.assertEqual("objects", road.road[6].tag)
-        self.assertEqual("objects", road.objects.tag)
-        self.assertEqual("signals", road.road[7].tag)
-        self.assertEqual("signals", road.signals.tag)
+        self.assertEqual(config.OBJECTS_TAG, road.road[6].tag)
+        self.assertEqual(config.OBJECTS_TAG, road.objects.tag)
+        self.assertEqual(config.SIGNALS_TAG, road.road[7].tag)
+        self.assertEqual(config.SIGNALS_TAG, road.signals.tag)
 
-        self.assertEqual("", road.road.attrib["name"])
-        self.assertEqual(str(21), road.road.attrib["id"])
-        self.assertEqual("-1", road.road.attrib["junction"])
+        self.assertEqual("", road.road.attrib[config.NAME_TAG])
+        self.assertEqual(str(21), road.road.attrib[config.ID_TAG])
+        self.assertEqual("-1", road.road.attrib[config.JUNCTION_TAG])
 
         expected_lane_indices = {'79.0.-3.-1': -1, '89.0.4.-1': 1}
-        self.assertEqual(expected_lane_indices, road.links["laneIndices"])
+        self.assertEqual(expected_lane_indices, road.links[config.LANE_INDICES_TAG])
 
     def test_add_junction_linkage_successor(self):
         # Given
@@ -102,21 +104,21 @@ class TestRoad(unittest.TestCase):
 
         lane_list = conversion_lanelet_network.lanelets
         number_of_lanes = 2
-        root = etree.Element("OpenDRIVE")
-        current = etree.Element("OpenDRIVE")
+        root = etree.Element(config.OPENDRIVE)
+        current = etree.Element(config.OPENDRIVE)
         junction_id = -1
-        road = Road(lane_list, number_of_lanes, root, current, junction_id)
+        road = Road(lane_list, number_of_lanes, root,  junction_id)
         id = 1
-        relation = "successor"
+        relation = config.SUCCESSOR_TAG
 
         # When
         road.add_junction_linkage(id, relation)
 
         # Then
-        self.assertEqual("successor", road.element_type.tag)
-        self.assertEqual("1", road.element_type.get("elementId"))
-        self.assertEqual("junction", road.element_type.get("elementType"))
-        self.assertEqual("start", road.element_type.get("contactPoint"))
+        self.assertEqual(config.SUCCESSOR_TAG, road.element_type.tag)
+        self.assertEqual("1", road.element_type.get(config.ELEMENT_ID_TAG))
+        self.assertEqual(config.JUNCTION_TAG, road.element_type.get(config.ELEMENT_TYPE_TAG))
+        self.assertEqual(config.START_TAG, road.element_type.get(config.CONTACT_POINT_TAG))
 
     def test_add_junction_linkage_predecessor(self):
         # Given
@@ -128,21 +130,21 @@ class TestRoad(unittest.TestCase):
 
         lane_list = conversion_lanelet_network.lanelets
         number_of_lanes = 2
-        root = etree.Element("OpenDRIVE")
-        current = etree.Element("OpenDRIVE")
+        root = etree.Element(config.OPENDRIVE)
+        current = etree.Element(config.OPENDRIVE)
         junction_id = -1
-        road = Road(lane_list, number_of_lanes, root, current, junction_id)
+        road = Road(lane_list, number_of_lanes, root,  junction_id)
         id = 1
-        relation = "predecessor"
+        relation = config.PREDECESSOR_TAG
 
         # When
         road.add_junction_linkage(id, relation)
 
         # Then
-        self.assertEqual("predecessor", road.element_type.tag)
-        self.assertEqual("1", road.element_type.get("elementId"))
-        self.assertEqual("junction", road.element_type.get("elementType"))
-        self.assertEqual("end", road.element_type.get("contactPoint"))
+        self.assertEqual(config.PREDECESSOR_TAG, road.element_type.tag)
+        self.assertEqual("1", road.element_type.get(config.ELEMENT_ID_TAG))
+        self.assertEqual(config.JUNCTION_TAG, road.element_type.get(config.ELEMENT_TYPE_TAG))
+        self.assertEqual(config.END_TAG, road.element_type.get(config.CONTACT_POINT_TAG))
 
     def test_add_simple_linkage(self):
         # Given
@@ -154,27 +156,26 @@ class TestRoad(unittest.TestCase):
 
         lane_list = conversion_lanelet_network.lanelets
         number_of_lanes = 2
-        root = etree.Element("OpenDRIVE")
-        current = etree.Element("OpenDRIVE")
+        root = etree.Element(config.OPENDRIVE)
+        current = etree.Element(config.OPENDRIVE)
         junction_id = -1
 
-        road = Road(lane_list, number_of_lanes, root, current, junction_id)
+        road = Road(lane_list, number_of_lanes, root, junction_id)
 
         key = 21
         links = {'succ': [22, 22, 22, 22, 22, 22, 22, 22, 22], 'pred': []}
         len_succ = 1
         len_pred = 0
-        curl_links_lanelets = {}
         lane_2_lane = {'succ': {0: [1]}, 'pred': {}}
 
         # When
-        road.add_simple_linkage(key, links, len_succ, len_pred, curl_links_lanelets, lane_2_lane)
+        road.add_simple_linkage(links, len_succ, len_pred, lane_2_lane)
 
         # Then
-        self.assertEqual("successor", road.link[-1].tag)
-        self.assertEqual("road", road.link[-1].get("elementType"))
-        self.assertEqual("22", road.link[-1].get("elementId"))
-        self.assertEqual("start", road.link[-1].get("contactPoint"))
+        self.assertEqual(config.SUCCESSOR_TAG, road.link[-1].tag)
+        self.assertEqual(config.ROAD_TAG, road.link[-1].get(config.ELEMENT_TYPE_TAG))
+        self.assertEqual("22", road.link[-1].get(config.ELEMENT_ID_TAG))
+        self.assertEqual(config.START_TAG, road.link[-1].get(config.CONTACT_POINT_TAG))
 
     def test_set_child_of_road(self):
         # Given
@@ -186,10 +187,10 @@ class TestRoad(unittest.TestCase):
 
         lane_list = conversion_lanelet_network.lanelets
         number_of_lanes = 2
-        root = etree.Element("OpenDRIVE")
-        current = etree.Element("OpenDRIVE")
+        root = etree.Element(config.OPENDRIVE)
+        current = etree.Element(config.OPENDRIVE)
         junction_id = -1
-        road = Road(lane_list, number_of_lanes, root, current, junction_id)
+        road = Road(lane_list, number_of_lanes, root,  junction_id)
         name = "child_name"
 
         # When
@@ -208,10 +209,10 @@ class TestRoad(unittest.TestCase):
 
         lane_list = conversion_lanelet_network.lanelets
         number_of_lanes = 2
-        root = etree.Element("OpenDRIVE")
-        current = etree.Element("OpenDRIVE")
+        root = etree.Element(config.OPENDRIVE)
+        current = etree.Element(config.OPENDRIVE)
         junction_id = -1
-        road = Road(lane_list, number_of_lanes, root, current, junction_id)
+        road = Road(lane_list, number_of_lanes, root,  junction_id)
         name = "child_name"
 
         # When
@@ -222,19 +223,19 @@ class TestRoad(unittest.TestCase):
         self.assertTrue((expected_center == road.center).all())
         self.assertEqual(2.0, last_item_arclength)
 
-        self.assertEqual("geometry", road.plan_view[-1].tag)
-        self.assertEqual(str.format("{0:.16e}", 1), road.plan_view[-1].get("s"))
-        self.assertEqual(str.format("{0:.16e}", 1), road.plan_view[-1].get("x"))
-        self.assertEqual(str.format("{0:.16e}", 1), road.plan_view[-1].get("y"))
-        self.assertEqual(str.format("{0:.16e}", 0), road.plan_view[-1].get("hdg"))
-        self.assertEqual(str.format("{0:.16e}", 1), road.plan_view[-1].get("length"))
+        self.assertEqual(config.GEOMETRY_TAG, road.plan_view[-1].tag)
+        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 1), road.plan_view[-1].get(config.GEOMETRY_S_COORDINATE_TAG))
+        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 1), road.plan_view[-1].get(config.GEOMETRY_X_COORDINATE_TAG))
+        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 1), road.plan_view[-1].get(config.GEOMETRY_Y_COORDINATE_TAG))
+        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0), road.plan_view[-1].get(config.GEOMETRY_HEADING_TAG))
+        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 1), road.plan_view[-1].get(config.LENGTH_TAG))
 
-        self.assertEqual("geometry", road.plan_view[-2].tag)
-        self.assertEqual(str.format("{0:.16e}", 0), road.plan_view[-2].get("s"))
-        self.assertEqual(str.format("{0:.16e}", 0), road.plan_view[-2].get("x"))
-        self.assertEqual(str.format("{0:.16e}", 1), road.plan_view[-2].get("y"))
-        self.assertEqual(str.format("{0:.16e}", 0), road.plan_view[-2].get("hdg"))
-        self.assertEqual(str.format("{0:.16e}", 1), road.plan_view[-2].get("length"))
+        self.assertEqual(config.GEOMETRY_TAG, road.plan_view[-2].tag)
+        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0), road.plan_view[-2].get(config.GEOMETRY_S_COORDINATE_TAG))
+        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0), road.plan_view[-2].get(config.GEOMETRY_X_COORDINATE_TAG))
+        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 1), road.plan_view[-2].get(config.GEOMETRY_Y_COORDINATE_TAG))
+        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0), road.plan_view[-2].get(config.GEOMETRY_HEADING_TAG))
+        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 1), road.plan_view[-2].get(config.LENGTH_TAG))
 
     def test_print_line(self):
         # Given
@@ -246,10 +247,10 @@ class TestRoad(unittest.TestCase):
 
         lane_list = conversion_lanelet_network.lanelets
         number_of_lanes = 2
-        root = etree.Element("OpenDRIVE")
-        current = etree.Element("OpenDRIVE")
+        root = etree.Element(config.OPENDRIVE)
+        current = etree.Element(config.OPENDRIVE)
         junction_id = -1
-        road = Road(lane_list, number_of_lanes, root, current, junction_id)
+        road = Road(lane_list, number_of_lanes, root,  junction_id)
         curv = compute_polyline_curvatures(road.center) if len(road.center) > 2 else np.array([[0.0], [0.0]])
         arclength = compute_polyline_lengths(road.center)
         hdg = compute_polyline_orientations(road.center)
@@ -264,12 +265,12 @@ class TestRoad(unittest.TestCase):
         road.print_line(s, x, y, hdg, length)
 
         # Then
-        self.assertEqual("geometry", road.plan_view[-1].tag)
-        self.assertEqual(str.format("{0:.16e}", s), road.plan_view[-1].get("s"))
-        self.assertEqual(str.format("{0:.16e}", x), road.plan_view[-1].get("x"))
-        self.assertEqual(str.format("{0:.16e}", y), road.plan_view[-1].get("y"))
-        self.assertEqual(str.format("{0:.16e}", hdg), road.plan_view[-1].get("hdg"))
-        self.assertEqual(str.format("{0:.16e}", length), road.plan_view[-1].get("length"))
+        self.assertEqual(config.GEOMETRY_TAG, road.plan_view[-1].tag)
+        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, s), road.plan_view[-1].get(config.GEOMETRY_S_COORDINATE_TAG))
+        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, x), road.plan_view[-1].get(config.GEOMETRY_X_COORDINATE_TAG))
+        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, y), road.plan_view[-1].get(config.GEOMETRY_Y_COORDINATE_TAG))
+        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, hdg), road.plan_view[-1].get(config.GEOMETRY_HEADING_TAG))
+        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, length), road.plan_view[-1].get(config.LENGTH_TAG))
 
     def test_print_spiral(self):
         # Given
@@ -281,10 +282,10 @@ class TestRoad(unittest.TestCase):
 
         lane_list = conversion_lanelet_network.lanelets
         number_of_lanes = 2
-        root = etree.Element("OpenDRIVE")
-        current = etree.Element("OpenDRIVE")
+        root = etree.Element(config.OPENDRIVE)
+        current = etree.Element(config.OPENDRIVE)
         junction_id = -1
-        road = Road(lane_list, number_of_lanes, root, current, junction_id)
+        road = Road(lane_list, number_of_lanes, root,  junction_id)
         s = 1.0
         x = 0.0
         y = 1.0
@@ -297,17 +298,17 @@ class TestRoad(unittest.TestCase):
         road.print_spiral(s, x, y, hdg, length, curv_start, curv_end)
 
         # Then
-        self.assertEqual("geometry", road.plan_view[-1].tag)
-        self.assertEqual(str.format("{0:.16e}", s), road.plan_view[-1].get("s"))
-        self.assertEqual(str.format("{0:.16e}", x), road.plan_view[-1].get("x"))
-        self.assertEqual(str.format("{0:.16e}", y), road.plan_view[-1].get("y"))
-        self.assertEqual(str.format("{0:.16e}", hdg), road.plan_view[-1].get("hdg"))
-        self.assertEqual(str.format("{0:.16e}", length), road.plan_view[-1].get("length"))
+        self.assertEqual(config.GEOMETRY_TAG, road.plan_view[-1].tag)
+        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, s), road.plan_view[-1].get(config.GEOMETRY_S_COORDINATE_TAG))
+        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, x), road.plan_view[-1].get(config.GEOMETRY_X_COORDINATE_TAG))
+        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, y), road.plan_view[-1].get(config.GEOMETRY_Y_COORDINATE_TAG))
+        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, hdg), road.plan_view[-1].get(config.GEOMETRY_HEADING_TAG))
+        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, length), road.plan_view[-1].get(config.LENGTH_TAG))
 
         spiral_elem = list(road.plan_view[-1].iter())[-1]
-        self.assertEqual("spiral", spiral_elem.tag)
-        self.assertEqual(str.format("{0:.16e}", curv_start), spiral_elem.get("curvStart"))
-        self.assertEqual(str.format("{0:.16e}", curv_end), spiral_elem.get("curvEnd"))
+        self.assertEqual(config.SPIRAL_TAG, spiral_elem.tag)
+        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, curv_start), spiral_elem.get(config.GEOMETRY_CURV_START_TAG))
+        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, curv_end), spiral_elem.get(config.GEOMETRY_CURV_END_TAG))
 
     def test_print_arc(self):
         # Given
@@ -319,10 +320,10 @@ class TestRoad(unittest.TestCase):
 
         lane_list = conversion_lanelet_network.lanelets
         number_of_lanes = 2
-        root = etree.Element("OpenDRIVE")
-        current = etree.Element("OpenDRIVE")
+        root = etree.Element(config.OPENDRIVE)
+        current = etree.Element(config.OPENDRIVE)
         junction_id = -1
-        road = Road(lane_list, number_of_lanes, root, current, junction_id)
+        road = Road(lane_list, number_of_lanes, root,  junction_id)
         s = 1.0
         x = 0.0
         y = 1.0
@@ -334,16 +335,16 @@ class TestRoad(unittest.TestCase):
         road.print_arc(s, x, y, hdg, length, curvature)
 
         # Then
-        self.assertEqual("geometry", road.plan_view[-1].tag)
-        self.assertEqual(str.format("{0:.16e}", s), road.plan_view[-1].get("s"))
-        self.assertEqual(str.format("{0:.16e}", x), road.plan_view[-1].get("x"))
-        self.assertEqual(str.format("{0:.16e}", y), road.plan_view[-1].get("y"))
-        self.assertEqual(str.format("{0:.16e}", hdg), road.plan_view[-1].get("hdg"))
-        self.assertEqual(str.format("{0:.16e}", length), road.plan_view[-1].get("length"))
+        self.assertEqual(config.GEOMETRY_TAG, road.plan_view[-1].tag)
+        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, s), road.plan_view[-1].get(config.GEOMETRY_S_COORDINATE_TAG))
+        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, x), road.plan_view[-1].get(config.GEOMETRY_X_COORDINATE_TAG))
+        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, y), road.plan_view[-1].get(config.GEOMETRY_Y_COORDINATE_TAG))
+        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, hdg), road.plan_view[-1].get(config.GEOMETRY_HEADING_TAG))
+        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, length), road.plan_view[-1].get(config.LENGTH_TAG))
 
         arc_elem = list(road.plan_view[-1].iter())[-1]
-        self.assertEqual("arc", arc_elem.tag)
-        self.assertEqual(str.format("{0:.16e}", curvature), arc_elem.get("curvature"))
+        self.assertEqual(config.ARC_TAG, arc_elem.tag)
+        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, curvature), arc_elem.get(config.GEOMETRY_CURVATURE_TAG))
 
     def test_print_signal(self):
         # Given
@@ -355,10 +356,10 @@ class TestRoad(unittest.TestCase):
 
         lane_list = conversion_lanelet_network.lanelets
         number_of_lanes = 2
-        root = etree.Element("OpenDRIVE")
-        current = etree.Element("OpenDRIVE")
+        root = etree.Element(config.OPENDRIVE)
+        current = etree.Element(config.OPENDRIVE)
         junction_id = -1
-        road = Road(lane_list, number_of_lanes, root, current, junction_id)
+        road = Road(lane_list, number_of_lanes, root,  junction_id)
         road_key = 21
         unique_id = 0
         element = TrafficSignElement(TrafficSignIDZamunda.WARNING_SLIPPERY_ROAD, [])
@@ -372,24 +373,24 @@ class TestRoad(unittest.TestCase):
         road.print_signal(signal)
 
         # Then
-        self.assertEqual("signal", road.signals[-1].tag)
+        self.assertEqual(config.SIGNAL_TAG, road.signals[-1].tag)
 
-        self.assertEqual("4.9000000000000004e+00", road.signals[-1].get("s"))
-        self.assertEqual("-1.1000000000000001e+00", road.signals[-1].get("t"))
-        self.assertEqual("0", road.signals[-1].get("id"))
-        self.assertEqual("Sign_0", road.signals[-1].get("name"))
-        self.assertEqual("no", road.signals[-1].get("dynamic"))
-        self.assertEqual("-", road.signals[-1].get("orientation"))
-        self.assertEqual("3.3885", road.signals[-1].get("zOffset"))
-        self.assertEqual("ZAMUNDA", road.signals[-1].get("country"))
-        self.assertEqual("114", road.signals[-1].get("type"))
-        self.assertEqual("-1", road.signals[-1].get("subtype"))
-        self.assertEqual("2021", road.signals[-1].get("countryRevision"))
-        self.assertEqual("-1", road.signals[-1].get("value"))
-        self.assertEqual("km/h", road.signals[-1].get("unit"))
-        self.assertEqual("0.77", road.signals[-1].get("width"))
-        self.assertEqual("0.77", road.signals[-1].get("height"))
-        self.assertEqual("0.0", road.signals[-1].get("hOffset"))
+        self.assertEqual("4.9000000000000004e+00", road.signals[-1].get(config.GEOMETRY_S_COORDINATE_TAG))
+        self.assertEqual("-1.1000000000000001e+00", road.signals[-1].get(config.SIGNAL_T_TAG))
+        self.assertEqual("0", road.signals[-1].get(config.ID_TAG))
+        self.assertEqual("Sign_0", road.signals[-1].get(config.NAME_TAG))
+        self.assertEqual(config.NO, road.signals[-1].get(config.SIGNAL_DYNAMIC_TAG))
+        self.assertEqual(config.MINUS_SIGN, road.signals[-1].get(config.SIGNAL_ORIENTATION_TAG))
+        self.assertEqual("3.3885", road.signals[-1].get(config.SIGNAL_ZOFFSET_TAG))
+        self.assertEqual("ZAMUNDA", road.signals[-1].get(config.SIGNAL_COUNTRY_TAG))
+        self.assertEqual("114", road.signals[-1].get(config.TYPE_TAG))
+        self.assertEqual("-1", road.signals[-1].get(config.SIGNAL_SUBTYPE_TAG))
+        self.assertEqual("2021", road.signals[-1].get(config.SIGNAL_COUNTRY_REVISION_TAG))
+        self.assertEqual("-1", road.signals[-1].get(config.SIGNAL_VALUE_TAG))
+        self.assertEqual("km/h", road.signals[-1].get(config.SIGNAL_UNIT_TAG))
+        self.assertEqual("0.77", road.signals[-1].get(config.SIGNAL_WIDTH_TAG))
+        self.assertEqual("0.77", road.signals[-1].get(config.SIGNAL_HEIGHT_TAG))
+        self.assertEqual(config.ZERO, road.signals[-1].get(config.SIGNAL_HOFFSET_TAG))
 
     def test_print_signal_ref(self):
         # Given
@@ -401,10 +402,10 @@ class TestRoad(unittest.TestCase):
 
         lane_list = conversion_lanelet_network.lanelets
         number_of_lanes = 2
-        root = etree.Element("OpenDRIVE")
-        current = etree.Element("OpenDRIVE")
+        root = etree.Element(config.OPENDRIVE)
+        current = etree.Element(config.OPENDRIVE)
         junction_id = -1
-        road = Road(lane_list, number_of_lanes, root, current, junction_id)
+        road = Road(lane_list, number_of_lanes, root,  junction_id)
         road_key = 21
         unique_id = 0
         element = TrafficSignElement(TrafficSignIDZamunda.WARNING_SLIPPERY_ROAD, [])
@@ -418,12 +419,12 @@ class TestRoad(unittest.TestCase):
         road.print_signal_ref(signal)
 
         # Then
-        self.assertEqual("signalReference", road.signals[-1].tag)
+        self.assertEqual(config.SIGNAL_REFERENCE_TAG, road.signals[-1].tag)
 
-        self.assertEqual("4.9000000000000004e+00", road.signals[-1].get("s"))
-        self.assertEqual("-1.1000000000000001e+00", road.signals[-1].get("t"))
-        self.assertEqual("0", road.signals[-1].get("id"))
-        self.assertEqual("-", road.signals[-1].get("orientation"))
+        self.assertEqual("4.9000000000000004e+00", road.signals[-1].get(config.GEOMETRY_S_COORDINATE_TAG))
+        self.assertEqual("-1.1000000000000001e+00", road.signals[-1].get(config.SIGNAL_T_TAG))
+        self.assertEqual("0", road.signals[-1].get(config.ID_TAG))
+        self.assertEqual(config.MINUS_SIGN, road.signals[-1].get(config.SIGNAL_ORIENTATION_TAG))
 
     def test_lane_sections(self):
         # Given
@@ -435,86 +436,86 @@ class TestRoad(unittest.TestCase):
 
         lane_list = conversion_lanelet_network.lanelets
         number_of_lanes = 2
-        root = etree.Element("OpenDRIVE")
-        current = etree.Element("OpenDRIVE")
+        root = etree.Element(config.OPENDRIVE)
+        current = etree.Element(config.OPENDRIVE)
         junction_id = -1
-        road = Road(lane_list, number_of_lanes, root, current, junction_id)
+        road = Road(lane_list, number_of_lanes, root,  junction_id)
 
         # When
         road.lane_sections()
 
         # Then
-        self.assertEqual("laneSection", road.lanes[-1].tag)
-        self.assertEqual(str.format("{0:.16e}", 0), road.lanes[-1].get("s"))
+        self.assertEqual(config.LANE_SECTION_TAG, road.lanes[-1].tag)
+        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0), road.lanes[-1].get(config.GEOMETRY_S_COORDINATE_TAG))
 
         center = road.lanes[-1][0]
-        self.assertEqual("center", center.tag)
+        self.assertEqual(config.LANE_SECTION_CENTER_TAG, center.tag)
         center_lane_pos = road.lanes[-1][0][0]
-        self.assertEqual("lane", center_lane_pos.tag)
-        self.assertEqual("0", center_lane_pos.get("id"))
-        self.assertEqual("driving", center_lane_pos.get("type"))
-        self.assertEqual("false", center_lane_pos.get("level"))
+        self.assertEqual(config.LANE_TAG, center_lane_pos.tag)
+        self.assertEqual("0", center_lane_pos.get(config.ID_TAG))
+        self.assertEqual("driving", center_lane_pos.get(config.TYPE_TAG))
+        self.assertEqual(config.FALSE, center_lane_pos.get(config.LEVEL_TAG))
 
         center_link = road.lanes[-1][0][0][0]
-        self.assertEqual("link", center_link.tag)
+        self.assertEqual(config.LINK_TAG, center_link.tag)
 
         center_roadmark = road.lanes[-1][0][0][1]
-        self.assertEqual(str.format("{0:.16e}", 0), center_roadmark.get("sOffset"))
-        self.assertEqual("solid", center_roadmark.get("type"))
-        self.assertEqual("standard", center_roadmark.get("weight"))
-        self.assertEqual("standard", center_roadmark.get("color"))
-        self.assertEqual(str.format("{0:.16e}", 0.13), center_roadmark.get("width"))
+        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0), center_roadmark.get(config.LANE_SOFFSET_TAG))
+        self.assertEqual(config.SOLID, center_roadmark.get(config.TYPE_TAG))
+        self.assertEqual(config.STANDARD, center_roadmark.get(config.ROAD_MARK_WEIGHT_TAG))
+        self.assertEqual(config.STANDARD, center_roadmark.get(config.ROAD_MARK_COLOR_TAG))
+        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0.13), center_roadmark.get(config.SIGNAL_WIDTH_TAG))
 
         left = road.lanes[-1][1]
-        self.assertEqual("left", left.tag)
+        self.assertEqual(config.LANE_SECTION_LEFT_TAG, left.tag)
         left_lane_pos = road.lanes[-1][1][0]
-        self.assertEqual("lane", left_lane_pos.tag)
-        self.assertEqual("1", left_lane_pos.get("id"))
-        self.assertEqual("driving", left_lane_pos.get("type"))
-        self.assertEqual("false", left_lane_pos.get("level"))
+        self.assertEqual(config.LANE_TAG, left_lane_pos.tag)
+        self.assertEqual("1", left_lane_pos.get(config.ID_TAG))
+        self.assertEqual("driving", left_lane_pos.get(config.TYPE_TAG))
+        self.assertEqual(config.FALSE, left_lane_pos.get(config.LEVEL_TAG))
 
         left_link = road.lanes[-1][1][0][0]
-        self.assertEqual("link", left_link.tag)
+        self.assertEqual(config.LINK_TAG, left_link.tag)
 
         left_width = road.lanes[-1][1][0][1]
-        self.assertEqual(str.format("{0:.16e}", 0), left_width.get("sOffset"))
-        self.assertEqual("1.9999999999999998e+00", left_width.get("a"))
-        self.assertEqual("-7.8504622934188746e-17", left_width.get("b"))
-        self.assertEqual(str.format("{0:.16e}", 0), left_width.get("c"))
-        self.assertEqual(str.format("{0:.16e}", 0), left_width.get("d"))
+        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0), left_width.get(config.LANE_SOFFSET_TAG))
+        self.assertEqual("1.9999999999999998e+00", left_width.get(config.LANE_A_TAG))
+        self.assertEqual("-7.8504622934188746e-17", left_width.get(config.LANE_B_TAG))
+        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0), left_width.get(config.LANE_C_TAG))
+        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0), left_width.get(config.LANE_D_TAG))
 
         left_roadmark = road.lanes[-1][1][0][2]
-        self.assertEqual(str.format("{0:.16e}", 0), left_roadmark.get("sOffset", ))
-        self.assertEqual("solid", left_roadmark.get("type"))
-        self.assertEqual("standard", left_roadmark.get("weight"))
-        self.assertEqual("standard", left_roadmark.get("color"))
-        self.assertEqual(str.format("{0:.16e}", 0.13), left_roadmark.get("width"))
+        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0), left_roadmark.get(config.LANE_SOFFSET_TAG, ))
+        self.assertEqual(config.SOLID, left_roadmark.get(config.TYPE_TAG))
+        self.assertEqual(config.STANDARD, left_roadmark.get(config.ROAD_MARK_WEIGHT_TAG))
+        self.assertEqual(config.STANDARD, left_roadmark.get(config.ROAD_MARK_COLOR_TAG))
+        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0.13), left_roadmark.get(config.SIGNAL_WIDTH_TAG))
 
         right = road.lanes[-1][2]
-        self.assertEqual("right", right.tag)
+        self.assertEqual(config.LANE_SECTION_RIGHT_TAG, right.tag)
 
         right_lane_pos = road.lanes[-1][2][0]
-        self.assertEqual("lane", right_lane_pos.tag)
-        self.assertEqual("-1", right_lane_pos.get("id"))
-        self.assertEqual("driving", right_lane_pos.get("type"))
-        self.assertEqual("false", right_lane_pos.get("level"))
+        self.assertEqual(config.LANE_TAG, right_lane_pos.tag)
+        self.assertEqual("-1", right_lane_pos.get(config.ID_TAG))
+        self.assertEqual("driving", right_lane_pos.get(config.TYPE_TAG))
+        self.assertEqual(config.FALSE, right_lane_pos.get(config.LEVEL_TAG))
 
         left_link = road.lanes[-1][2][0][0]
-        self.assertEqual("link", left_link.tag)
+        self.assertEqual(config.LINK_TAG, left_link.tag)
 
         left_width = road.lanes[-1][2][0][1]
-        self.assertEqual(str.format("{0:.16e}", 0), left_width.get("sOffset"))
-        self.assertEqual("1.9999999999999998e+00", left_width.get("a"))
-        self.assertEqual("-7.8504622934188746e-17", left_width.get("b"))
-        self.assertEqual(str.format("{0:.16e}", 0), left_width.get("c"))
-        self.assertEqual(str.format("{0:.16e}", 0), left_width.get("d"))
+        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0), left_width.get(config.LANE_SOFFSET_TAG))
+        self.assertEqual("1.9999999999999998e+00", left_width.get(config.LANE_A_TAG))
+        self.assertEqual("-7.8504622934188746e-17", left_width.get(config.LANE_B_TAG))
+        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0), left_width.get(config.LANE_C_TAG))
+        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0), left_width.get(config.LANE_D_TAG))
 
         left_roadmark = road.lanes[-1][2][0][2]
-        self.assertEqual(str.format("{0:.16e}", 0), left_roadmark.get("sOffset", ))
-        self.assertEqual("solid", left_roadmark.get("type"))
-        self.assertEqual("standard", left_roadmark.get("weight"))
-        self.assertEqual("standard", left_roadmark.get("color"))
-        self.assertEqual(str.format("{0:.16e}", 0.13), left_roadmark.get("width"))
+        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0), left_roadmark.get(config.LANE_SOFFSET_TAG, ))
+        self.assertEqual(config.SOLID, left_roadmark.get(config.TYPE_TAG))
+        self.assertEqual(config.STANDARD, left_roadmark.get(config.ROAD_MARK_WEIGHT_TAG))
+        self.assertEqual(config.STANDARD, left_roadmark.get(config.ROAD_MARK_COLOR_TAG))
+        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0.13), left_roadmark.get(config.SIGNAL_WIDTH_TAG))
 
     def test_lane_help(self):
         # Given
@@ -526,36 +527,36 @@ class TestRoad(unittest.TestCase):
 
         lane_list = conversion_lanelet_network.lanelets
         number_of_lanes = 2
-        root = etree.Element("OpenDRIVE")
-        current = etree.Element("OpenDRIVE")
+        root = etree.Element(config.OPENDRIVE)
+        current = etree.Element(config.OPENDRIVE)
         junction_id = -1
-        road = Road(lane_list, number_of_lanes, root, current, junction_id)
-        section = etree.SubElement(road.lanes, "laneSection")
-        section.set("s", str.format("{0:.16e}", 0))
+        road = Road(lane_list, number_of_lanes, root,  junction_id)
+        section = etree.SubElement(road.lanes, config.LANE_SECTION_TAG)
+        section.set(config.GEOMETRY_S_COORDINATE_TAG, str.format(config.DOUBLE_FORMAT_PATTERN, 0))
 
-        center = etree.SubElement(section, "center")
+        center = etree.SubElement(section, config.LANE_SECTION_CENTER_TAG)
 
         # When
-        road.lane_help(0, "driving", 0, center, np.array([]), [])
+        road.lane_help(0, "driving", 0, center, [], np.array([]))
 
         # Then
         self.assertEqual("lane", center[0].tag)
-        self.assertEqual("0", center[0].attrib["id"])
-        self.assertEqual("driving", center[0].attrib["type"])
-        self.assertEqual("false", center[0].attrib["level"])
+        self.assertEqual("0", center[0].attrib[config.ID_TAG])
+        self.assertEqual("driving", center[0].attrib[config.TYPE_TAG])
+        self.assertEqual(config.FALSE, center[0].attrib[config.LEVEL_TAG])
 
-        self.assertEqual("link", road.lane_link[0].tag)
+        self.assertEqual(config.LINK_TAG, road.lane_link[0].tag)
 
         link = list(center[-1].iter())[-2]
-        self.assertEqual("link", link.tag)
+        self.assertEqual(config.LINK_TAG, link.tag)
         # requires more careful check for parent nodes?
 
         roadmark = list(center[-1].iter())[-1]
-        self.assertEqual(str.format("{0:.16e}", 0), roadmark.get("sOffset", ))
-        self.assertEqual("solid", roadmark.get("type"))
-        self.assertEqual("standard", roadmark.get("weight"))
-        self.assertEqual("standard", roadmark.get("color"))
-        self.assertEqual(str.format("{0:.16e}", 0.13), roadmark.get("width"))
+        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0), roadmark.get(config.LANE_SOFFSET_TAG, ))
+        self.assertEqual(config.SOLID, roadmark.get(config.TYPE_TAG))
+        self.assertEqual(config.STANDARD, roadmark.get(config.ROAD_MARK_WEIGHT_TAG))
+        self.assertEqual(config.STANDARD, roadmark.get(config.ROAD_MARK_COLOR_TAG))
+        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0.13), roadmark.get(config.SIGNAL_WIDTH_TAG))
 
 
 if __name__ == '__main__':

@@ -141,14 +141,14 @@ class MapConversionToolbox(QDockWidget):
 
         :param graph: graph to convert
         """
-        try:
+        try:  
             graph = converter.step_collection_2(graph)
             graph = converter.step_collection_3(graph)
         except Exception as e:
             QMessageBox.warning(self, "Internal Error", "There was an error during the processing of the graph.\n\n{}"
                                 .format(e), QMessageBox.Ok)
             return
-        self.current_scenario = convert_to_scenario(graph)
+        self.current_scenario = convert_to_scenario(graph) 
         self.callback(self.current_scenario)
 
     def convert_osm_with_spinner(self, convert_function : Callable[[], None]) -> None:

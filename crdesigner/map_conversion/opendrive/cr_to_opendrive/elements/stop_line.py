@@ -2,8 +2,10 @@ import numpy as np
 from typing import Tuple
 
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.signal import Signal
-from commonroad.geometry.polyline_util import compute_polyline_initial_orientation
-from commonroad.scenario.lanelet import LaneletNetwork
+from commonroad.geometry.polyline_util import compute_polyline_initial_orientation # type: ignore
+from commonroad.scenario.lanelet import LaneletNetwork # type: ignore
+
+from crdesigner.map_conversion.opendrive.cr_to_opendrive.utils import config
 
 
 class StopLine(Signal):
@@ -11,6 +13,7 @@ class StopLine(Signal):
     This StopLine class inherits from Signal class
     which is used to convert CommonRoad stop lines to OpenDRIVE stop lines.
     """
+
     def __init__(self, road_key: int, unique_id: int, data, lane_list: LaneletNetwork) -> None:
         """
         This function let class StopLine to initialize the object with road_key, unique_id, data, lane_list and
@@ -23,10 +26,10 @@ class StopLine(Signal):
         """
         Signal.__init__(self, road_key, unique_id, data, lane_list)
 
-        self.name = "StopLine_" + str(self.id)
-        self.dynamic = "no"
-        self.country = "OPENDRIVE"
-        self.type = "294"
+        self.name = config.STOPLINE_PREFIX + str(self.id)
+        self.dynamic = config.NO
+        self.country = config.OPENDRIVE
+        self.type = config.STOPLINE_TYPE
         self.value = "-1"
 
         self.road.print_signal(self)
@@ -84,7 +87,4 @@ class StopLine(Signal):
         mean_right = np.mean(lanelet.right_vertices)
         left_dist = np.linalg.norm(mean_left - self.od_object.start)
         right_dist = np.linalg.norm(mean_right - self.od_object.start)
-        if left_dist - right_dist < 0:
-            return "-"
-        else:
-            return "+"
+        return config.MINUS_SIGN if (left_dist - right_dist < 0) else config.PLUS_SIGN
