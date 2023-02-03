@@ -248,7 +248,7 @@ class ObstacleToolboxUI(Toolbox):
         self.position_y_text_field.setPlaceholderText("Y")
         self.button_selected_position = PositionButton(self.position_x_text_field,
                                                                        self.position_y_text_field, self)
-        self.position_text_field_layout = QHBoxLayout(self)
+        self.position_text_field_layout = QHBoxLayout()
         self.position_text_field_layout.addWidget(self.position_x_text_field)
         self.position_text_field_layout.addWidget(self.position_y_text_field)
         self.position_label = QLabel("Position")
@@ -291,7 +291,7 @@ class ObstacleToolboxUI(Toolbox):
         self.initial_state_label.setFont(QFont("Arial", 9, QFont.Bold))
 
         # position edit fields, one for each x, y
-        self.initial_state_position_layout = QHBoxLayout(self)
+        self.initial_state_position_layout = QHBoxLayout()
         self.initial_state_position_x = QLineEdit(self)
         self.initial_state_position_x.setObjectName("x-position of dynamic obstacle")
         self.initial_state_position_x.setToolTip("Enter initial x-position of obstacle")

@@ -84,12 +84,11 @@ class ObstacleToolbox(QDockWidget):
         self._start_trajectory_recording = val
 
     @property
-    def active_obstacle(self):
+    def active_obstacle(self) -> DynamicObstacle:
         """Get the current active obstacle that has been selected via left mouse click on the canvas and is ready
         for trajectory recording.
 
         :return: The active DynamicObstacle.
-        :rtype: DynamicObstacle
         """
         return self._active_obstacle
 
@@ -101,7 +100,7 @@ class ObstacleToolbox(QDockWidget):
         :param obstacle: The obstacle that should be set active.
         :type obstacle: DynamicObstacle
         """
-        assert isinstance(obstacle, DynamicObstacle)
+
         self._active_obstacle = obstacle
 
     def init_canvas(self):
@@ -1194,6 +1193,8 @@ class ObstacleToolbox(QDockWidget):
                 self.obstacle_toolbox_ui.obstacle_width.setText(str(obstacle.obstacle_shape.width))
                 self.obstacle_toolbox_ui.obstacle_length.setText(str(obstacle.obstacle_shape.length))
                 if isinstance(obstacle, StaticObstacle):
+                    if self.obstacle_toolbox_ui.dynamic_obstacle_selection.isChecked():
+                        return
                     self.obstacle_toolbox_ui.position_x_text_field.setText(
                         str(obstacle.initial_state.__getattribute__("position")[0]))
                     self.obstacle_toolbox_ui.position_y_text_field.setText(
@@ -1211,6 +1212,8 @@ class ObstacleToolbox(QDockWidget):
 
                 self.obstacle_toolbox_ui.obstacle_radius.setText(str(obstacle.obstacle_shape.radius))
                 if isinstance(obstacle, StaticObstacle):
+                    if self.obstacle_toolbox_ui.dynamic_obstacle_selection.isChecked():
+                        return
                     self.obstacle_toolbox_ui.obstacle_x_Position.setText(
                         str(obstacle.initial_state.__getattribute__("position")[0]))
                     self.obstacle_toolbox_ui.obstacle_y_Position.setText(
@@ -1301,6 +1304,14 @@ class ObstacleToolbox(QDockWidget):
                 self.obstacle_toolbox_ui.static_obstacle_selection.isChecked()):
             self.obstacle_toolbox_ui.position_x_text_field.setText("")
             self.obstacle_toolbox_ui.position_y_text_field.setText("")
+        if(self.obstacle_toolbox_ui.obstacle_dyn_stat.currentText() == "Dynamic"):
+            self.obstacle_toolbox_ui.initial_state_position_x.setText("")
+            self.obstacle_toolbox_ui.initial_state_position_y.setText("")
+            self.obstacle_toolbox_ui.initial_state_orientation.setText("")
+            self.obstacle_toolbox_ui.initial_state_time.setText("")
+            self.obstacle_toolbox_ui.initial_state_velocity.setText("")
+            self.obstacle_toolbox_ui.initial_state_yaw_rate.setText("")
+            self.obstacle_toolbox_ui.initial_state_slip_angle.setText("")
 
     def start_sumo_simulation(self):
         num_time_steps = self.obstacle_toolbox_ui.sumo_simulation_length.value()
@@ -1345,7 +1356,7 @@ class ObstacleToolbox(QDockWidget):
         ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.1f}'))
         ax.set_xlabel("time [s]")
         ax.set_ylabel(self.resolve_y_label(state_variable_name))
-        self.obstacle_toolbox_ui.figure.tight_layout()
+
 
         # to get reasonable limits. If the difference is very small: it will be difficult to make changes
         ax.set_ylim([min(profile)-0.5, max(profile)+0.5])

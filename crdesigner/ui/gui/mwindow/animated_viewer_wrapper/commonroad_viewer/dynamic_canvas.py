@@ -731,10 +731,10 @@ class DynamicCanvas(FigureCanvas):
 
     def activate_trajectory_mode(self, is_active: bool):
         """
-               activates and deactivates trajectory mode
+        activates and deactivates trajectory mode
 
-               :param: bool to see if the trajectory mode is activated
-               """
+        :param: bool to see if the trajectory mode is activated
+        """
         if is_active:
             obstacle = self.parent.obstacle_toolbox.active_obstacle
             if obstacle is None:
