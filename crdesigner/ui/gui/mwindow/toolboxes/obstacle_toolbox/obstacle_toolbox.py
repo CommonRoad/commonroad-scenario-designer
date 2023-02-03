@@ -93,12 +93,12 @@ class ObstacleToolbox(QDockWidget):
         return self._active_obstacle
 
     @active_obstacle.setter
-    def active_obstacle(self, obstacle):
+    def active_obstacle(self, obstacle:DynamicObstacle):
         """Set the active obstacle for which a trajectory should be recorded by left clicking dynamic obstacle on
         canvas.
 
         :param obstacle: The obstacle that should be set active.
-        :type obstacle: DynamicObstacle
+
         """
 
         self._active_obstacle = obstacle
