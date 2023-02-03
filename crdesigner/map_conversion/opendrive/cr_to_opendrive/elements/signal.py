@@ -1,17 +1,19 @@
 import numpy as np
-from typing import List, Tuple
+from typing import List, Tuple # type: ignore
 
-import crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.road as road
+import crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.road as road # type: ignore
 
-from commonroad.scenario.lanelet import LaneletNetwork
-from commonroad.geometry.polyline_util import compute_polyline_initial_orientation
+from commonroad.scenario.lanelet import LaneletNetwork # type: ignore
+from commonroad.geometry.polyline_util import compute_polyline_initial_orientation # type: ignore
 
+from crdesigner.map_conversion.opendrive.cr_to_opendrive.utils import config
 
 class Signal:
     """
     This class converts CommonRoad traffic signal to OpenDRIVE traffic signal.
     Class serves as base class for different signal types.
     """
+
     def __init__(self, road_key: int, unique_id: int, data: List, lane_list: LaneletNetwork) -> None:
         """
         This function let class Signal to initialize the object with road_key, unique_id, data, lane_list and
@@ -27,13 +29,13 @@ class Signal:
         self.lane_list = lane_list
         self.od_object = data[0]
         self.lanelet_id = data[1]
-        self.zOffset = "3.3885"
-        self.subtype = "-1"
-        self.country_revision = "2021"
-        self.unit = "km/h"
-        self.width = "0.77"
-        self.height = "0.77"
-        self.hOffset = "0.0"
+        self.zOffset = config.SIGNAL_ZOFFSET_VALUE
+        self.subtype = config.SIGNAL_SUBTYPE
+        self.country_revision = config.SIGNAL_COUNTRY_REVISION_VALUE
+        self.unit = config.SIGNAL_UNIT_VALUE
+        self.width = config.SIGNAL_WIDTH_VALUE
+        self.height = config.SIGNAL_HEIGHT_VALUE
+        self.hOffset = config.SIGNAL_HOFFSET_VALUE
 
         self.s, self.t = self.compute_coordinate()
         self.orientation = self.get_orientation()
@@ -86,7 +88,4 @@ class Signal:
         mean_right = np.mean(lanelet.right_vertices)
         left_dist = np.linalg.norm(mean_left - self.od_object.position)
         right_dist = np.linalg.norm(mean_right - self.od_object.position)
-        if left_dist - right_dist < 0:
-            return "-"
-        else:
-            return "+"
+        return config.MINUS_SIGN if (left_dist - right_dist < 0) else config.PLUS_SIGN

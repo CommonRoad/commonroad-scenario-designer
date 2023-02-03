@@ -16,6 +16,8 @@ from commonroad.scenario.intersection import IntersectionIncomingElement
 from commonroad.scenario.scenario import Scenario
 from commonroad.scenario.lanelet import Lanelet
 
+from crdesigner.map_conversion.opendrive.cr_to_opendrive.utils import config
+
 
 class Converter:
     """
@@ -190,7 +192,7 @@ class Converter:
                 lanelet.predecessor[0]
             ].intersection_id
 
-        road = Road(road_lanes, len(road_lanes), self.writer.root, lanelet, junction_id)
+        road = Road(road_lanes, len(road_lanes), self.writer.root, junction_id)
 
         for i in range(road.number_of_lanes):
             if i <= road.center_number:
@@ -271,13 +273,13 @@ class Converter:
             road_succ_pred = {"succ": [], "pred": []}
             road_succ_pred_final = {"succ": [], "pred": []}
             for lanelet, lanelet_val in road_val.items():
-                if lanelet == "laneIndices":
+                if lanelet == config.LANE_INDICES_TAG:
                     continue
                 lane_id = Road.lane_to_lane[lanelet]
                 lane_2_lane[road_id]["succ"][lane_id] = []
                 lane_2_lane[road_id]["pred"][lane_id] = []
                 for links, links_val in lanelet_val.items():
-                    if int(link_map[road_id]["laneIndices"][lanelet]) < 0:
+                    if int(link_map[road_id][config.LANE_INDICES_TAG][lanelet]) < 0:
                         invert = False
                     else:
                         invert = True
@@ -327,8 +329,7 @@ class Converter:
         """
         for key, value in link_map.items():
             cur_links: dict = link_map[key]["roadLinkage"]
-            cur_links_lanelets: dict = link_map[key]
-            # lane_2_lane=link_map[key]["laneIndices"]
+            # lane_2_lane=link_map[key][config.LANE_INDICES_TAG]
             cur_key = key
             len_succ = len(set(cur_links["succ"]))
             len_pred = len(set(cur_links["pred"]))
@@ -341,7 +342,7 @@ class Converter:
             if len_succ == 1 or len_pred == 1:
                 # print("add_simple_linkage for road_id: ", key)
                 Road.roads[key].add_simple_linkage(
-                    cur_key, cur_links, len_succ, len_pred, cur_links_lanelets, lane_2_lane[key]
+                    cur_links, len_succ, len_pred, lane_2_lane[key]
                 )
 
     def add_junction_linkage(self, link_map: Dict[int, Dict[int, Dict[str, List[int]]]]) -> None:

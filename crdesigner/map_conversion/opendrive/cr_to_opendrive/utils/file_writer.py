@@ -2,6 +2,7 @@ from lxml import etree
 from datetime import datetime
 import numpy as np
 
+from crdesigner.map_conversion.opendrive.cr_to_opendrive.utils import config
 
 class Writer(object):
     """
@@ -16,7 +17,7 @@ class Writer(object):
         :param file_path_out: path of converted OpenDRIVE file to be stored
         """
         self.file_path_out = file_path_out
-        self.root = etree.Element("OpenDRIVE")
+        self.root = etree.Element(config.OPENDRIVE)
         etree.indent(self.root, space="    ")
         self.write_header()
         self.tree = etree.ElementTree(self.root)
@@ -40,22 +41,22 @@ class Writer(object):
         This function creates header child element with various attributes and add it to Opendrive root element.
         """
         name = self.file_path_out.split("/")[-1].split(".")[0]
-        self.header = etree.SubElement(self.root, "header")
-        self.header.set("revMajor", "1")
-        self.header.set("revMinor", "6")
-        self.header.set("version", "1.0")
-        self.header.set("name", name)
+        self.header = etree.SubElement(self.root, config.HEADER_TAG)
+        self.header.set(config.HEADER_REV_MAJOR_TAG, "1")
+        self.header.set(config.HEADER_REV_MINOR_TAG, "6")
+        self.header.set(config.HEADER_VERSION_TAG, "1.0")
+        self.header.set(config.NAME_TAG, name)
         mydate = datetime.now()
-        self.header.set("date", mydate.isoformat())
+        self.header.set(config.HEADER_DATE_TAG, mydate.isoformat())
         val = 0
-        self.header.set("north", str.format("{0:.16e}", val))
-        self.header.set("south", str.format("{0:.16e}", val))
-        self.header.set("east", str.format("{0:.16e}", val))
-        self.header.set("west", str.format("{0:.16e}", val))
-        self.geo_reference = etree.SubElement(self.header, "geoReference")
+        self.header.set(config.NORTH, str.format(config.DOUBLE_FORMAT_PATTERN, val))
+        self.header.set(config.SOUTH, str.format(config.DOUBLE_FORMAT_PATTERN, val))
+        self.header.set(config.EAST, str.format(config.DOUBLE_FORMAT_PATTERN, val))
+        self.header.set(config.WEST, str.format(config.DOUBLE_FORMAT_PATTERN, val))
+        self.geo_reference = etree.SubElement(self.header, config.GEO_REFFERENCE_TAG)
         # TODO: do we need to convert the gps latitude and longitude
         # into something like that:   <![CDATA[epsg:25833]]>    ?
-        self.geo_id = etree.SubElement(self.geo_reference, "TODO")
+        self.geo_id = etree.SubElement(self.geo_reference, config.TODO)
 
     def set_child_of_road(self, name: str) -> etree:
         """
@@ -71,28 +72,28 @@ class Writer(object):
         This function creates child elements for road parent element.
         """
         # sub-element link - TODO
-        self.link = self.set_child_of_road("link")
+        self.link = self.set_child_of_road(config.LINK_TAG)
 
         # sub-element type - TODO
-        self.type = self.set_child_of_road("type")
+        self.type = self.set_child_of_road(config.TYPE_TAG)
 
         # sub-element planeview - TODO
-        self.plane_view = self.set_child_of_road("planView")
+        self.plane_view = self.set_child_of_road(config.PLAN_VIEW_TAG)
 
         # sub-element elevationProfile - TODO
-        self.elevation_profile = self.set_child_of_road("elevationProfile")
+        self.elevation_profile = self.set_child_of_road(config.ELEVATION_PROFILE_TAG)
 
         # sub-element lateralProfile - TODO
-        self.lateral_profile = self.set_child_of_road("lateralProfile")
+        self.lateral_profile = self.set_child_of_road(config.LATERAL_PROFILE_TAG)
 
         # sub-element lanes - TODO
-        self.lanes = self.set_child_of_road("lanes")
+        self.lanes = self.set_child_of_road(config.LANES_TAG)
 
         # sub-element objects - TODO
-        self.objects = self.set_child_of_road("objects")
+        self.objects = self.set_child_of_road(config.OBJECTS_TAG)
 
         # sub-element signals - TODO
-        self.signals = self.set_child_of_road("signals")
+        self.signals = self.set_child_of_road(config.SIGNALS_TAG)
 
     # this will later take a road element
     def write_road(self) -> None:
@@ -101,24 +102,24 @@ class Writer(object):
         """
         # sub-element road
         # set self.road for every road so that we do not overwrite existing roads
-        self.road = etree.SubElement(self.root, "road")
+        self.road = etree.SubElement(self.root, config.ROAD_TAG)
         self.create_road_childs()
 
         # Write type - TODO
-        self.type.set("s", str.format("{0:.16e}", 0))
-        self.type.set("type", "town")
+        self.type.set(config.GEOMETRY_S_COORDINATE_TAG, str.format(config.DOUBLE_FORMAT_PATTERN, 0))
+        self.type.set(config.TYPE_TAG, config.TOWN_TAG)
 
         # road name - TODO
-        self.road.set("name", "")
+        self.road.set(config.NAME_TAG, "")
 
         # road length - TODO this needs to be stored in the road object
-        self.road.set("length", str.format("{0:.16e}", 10))  # road.length))
+        self.road.set(config.LENGTH_TAG, str.format(config.DOUBLE_FORMAT_PATTERN, 10))  # road.length))
 
         # road id - TODO this needs to be stored in the road object
-        self.road.set("id", str.format("{}", 100))  # road.counting))
+        self.road.set(config.ID_TAG, str.format(config.ID_FORMAT_PATTERN, 100))  # road.counting))
 
         # road junction - TODO this needs to be stored in the road object
-        self.road.set("junction", str.format("{}", -1))  # road.junction))
+        self.road.set(config.JUNCTION_TAG, str.format(config.ID_FORMAT_PATTERN, -1))  # road.junction))
 
     def print_line(self, s: np.float64, x: np.float64, y: np.float64, hdg: np.float64, length: np.float64) -> None:
         """
@@ -131,14 +132,14 @@ class Writer(object):
         :param hdg: Start orientation (inertial heading)
         :param length: Length of the element’s reference line
         """
-        geometry = etree.SubElement(self.plane_view, "geometry")
-        geometry.set("s", str.format("{0:.16e}", s))
-        geometry.set("x", str.format("{0:.16e}", x))
-        geometry.set("y", str.format("{0:.16e}", y))
-        geometry.set("hdg", str.format("{0:.16e}", hdg))
-        geometry.set("length", str.format("{0:.16e}", length))
+        geometry = etree.SubElement(self.plane_view, config.GEOMETRY_TAG)
+        geometry.set(config.GEOMETRY_S_COORDINATE_TAG, str.format(config.DOUBLE_FORMAT_PATTERN, s))
+        geometry.set(config.GEOMETRY_X_COORDINATE_TAG, str.format(config.DOUBLE_FORMAT_PATTERN, x))
+        geometry.set(config.GEOMETRY_Y_COORDINATE_TAG, str.format(config.DOUBLE_FORMAT_PATTERN, y))
+        geometry.set(config.GEOMETRY_HEADING_TAG, str.format(config.DOUBLE_FORMAT_PATTERN, hdg))
+        geometry.set(config.LENGTH_TAG, str.format(config.DOUBLE_FORMAT_PATTERN, length))
 
-        line = etree.SubElement(geometry, "line")
+        line = etree.SubElement(geometry, config.LINE_TAG)
 
     def print_spiral(self, s: np.float64, x: np.float64, y: np.float64, hdg: np.float64,
                      length: np.float64, curv_start: np.float64, curv_end: np.float64):
@@ -152,16 +153,16 @@ class Writer(object):
         :param hdg: Start orientation (inertial heading)
         :param length: Length of the element’s reference line
         """
-        geometry = etree.SubElement(self.plane_view, "geometry")
-        geometry.set("s", str.format("{0:.16e}", s))
-        geometry.set("x", str.format("{0:.16e}", x))
-        geometry.set("y", str.format("{0:.16e}", y))
-        geometry.set("hdg", str.format("{0:.16e}", hdg))
-        geometry.set("length", str.format("{0:.16e}", length))
+        geometry = etree.SubElement(self.plane_view, config.GEOMETRY_TAG)
+        geometry.set(config.GEOMETRY_S_COORDINATE_TAG, str.format(config.DOUBLE_FORMAT_PATTERN, s))
+        geometry.set(config.GEOMETRY_X_COORDINATE_TAG, str.format(config.DOUBLE_FORMAT_PATTERN, x))
+        geometry.set(config.GEOMETRY_Y_COORDINATE_TAG, str.format(config.DOUBLE_FORMAT_PATTERN, y))
+        geometry.set(config.GEOMETRY_HEADING_TAG, str.format(config.DOUBLE_FORMAT_PATTERN, hdg))
+        geometry.set(config.LENGTH_TAG, str.format(config.DOUBLE_FORMAT_PATTERN, length))
 
-        spiral = etree.SubElement(geometry, "spiral")
-        spiral.set("curvStart", str.format("{0:.16e}", curv_start))
-        spiral.set("curvEnd", str.format("{0:.16e}", curv_end))
+        spiral = etree.SubElement(geometry, config.SPIRAL_TAG)
+        spiral.set(config.GEOMETRY_CURV_START_TAG, str.format(config.DOUBLE_FORMAT_PATTERN, curv_start))
+        spiral.set(config.GEOMETRY_CURV_END_TAG, str.format(config.DOUBLE_FORMAT_PATTERN, curv_end))
 
     def print_arc(self, s: np.float64, x: np.float64, y: np.float64, hdg: np.float64,
                   length: np.float64, curvature: np.float64) -> None:
@@ -176,12 +177,12 @@ class Writer(object):
         :param length: Length of the element’s reference line
         :param curvature: Constant curvature throughout the element
         """
-        geometry = etree.SubElement(self.plane_view, "geometry")
-        geometry.set("s", str.format("{0:.16e}", s))
-        geometry.set("x", str.format("{0:.16e}", x))
-        geometry.set("y", str.format("{0:.16e}", y))
-        geometry.set("hdg", str.format("{0:.16e}", hdg))
-        geometry.set("length", str.format("{0:.16e}", length))
+        geometry = etree.SubElement(self.plane_view, config.GEOMETRY_TAG)
+        geometry.set(config.GEOMETRY_S_COORDINATE_TAG, str.format(config.DOUBLE_FORMAT_PATTERN, s))
+        geometry.set(config.GEOMETRY_X_COORDINATE_TAG, str.format(config.DOUBLE_FORMAT_PATTERN, x))
+        geometry.set(config.GEOMETRY_Y_COORDINATE_TAG, str.format(config.DOUBLE_FORMAT_PATTERN, y))
+        geometry.set(config.GEOMETRY_HEADING_TAG, str.format(config.DOUBLE_FORMAT_PATTERN, hdg))
+        geometry.set(config.LENGTH_TAG, str.format(config.DOUBLE_FORMAT_PATTERN, length))
 
-        arc = etree.SubElement(geometry, "arc")
-        arc.set("curvature", str.format("{0:.16e}", curvature))
+        arc = etree.SubElement(geometry, config.ARC_TAG)
+        arc.set(config.GEOMETRY_CURVATURE_TAG, str.format(config.DOUBLE_FORMAT_PATTERN, curvature))

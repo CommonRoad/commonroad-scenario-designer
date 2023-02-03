@@ -414,9 +414,7 @@ class Network:
         network.add_traffic_signs_to_network([traffic_sign])
         lanelet.add_traffic_sign_to_lanelet(traffic_sign.traffic_sign_id)
 
-    def export_commonroad_scenario(
-            self, dt: float = 0.1, map_name="OpenDrive", map_id=1, filter_types=None
-    ):
+    def export_commonroad_scenario(self, dt: float = 0.1, map_name="OpenDrive", map_id=1, filter_types=None):
         """Export a full CommonRoad scenario
 
         :param dt: Delta time step, default is 0.1

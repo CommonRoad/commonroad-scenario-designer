@@ -2,15 +2,17 @@ from typing import List
 
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.signal import Signal
 
-from commonroad.scenario.lanelet import LaneletNetwork
-from commonroad.scenario.traffic_sign import TrafficSign
+from commonroad.scenario.lanelet import LaneletNetwork # type: ignore
+from commonroad.scenario.traffic_sign import TrafficSign # type: ignore
 
+from crdesigner.map_conversion.opendrive.cr_to_opendrive.utils import config
 
 class Sign(Signal):
     """
     This traffic sign class inherits from Signal class
     which is used to convert CommonRoad sign to OpenDRIVE sign.
     """
+
     def __init__(self, road_key: int, unique_id: int, data: List[TrafficSign], lane_list: LaneletNetwork) -> None:
         """
         This function let class Sign to initialize the object with road_key, unique_id, data, lane_list and
@@ -22,8 +24,8 @@ class Sign(Signal):
         :param lane_list: collection of LaneletNetwork
         """
         super().__init__(road_key, unique_id, data, lane_list)
-        self.name = "Sign_" + str(self.id)
-        self.dynamic = "no"
+        self.name = config.SIGN_PREFIX + str(self.id)
+        self.dynamic = config.NO
         self.country = self.get_country()
         self.type = str(
             self.od_object.traffic_sign_elements[0].traffic_sign_element_id.value
@@ -69,4 +71,4 @@ class Sign(Signal):
         :return string: country code of the road.
         """
         base = str(self.od_object.traffic_sign_elements[0].traffic_sign_element_id)
-        return base.split("TrafficSignID")[1].split(".")[0].upper()
+        return base.split(config.TRAFFIC_SIGN_ID_TAG)[1].split(".")[0].upper()
