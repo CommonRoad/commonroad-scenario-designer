@@ -11,4 +11,4 @@ def is_big_map(lanelet_count: int, traffic_sign_count: int) -> bool:
     If the criteria for a "big map" is meet.
     Used to determine when to resize etc..
     """
-    return lanelet_count > 200 or traffic_sign_count > 200
+    return lanelet_count > 100 or traffic_sign_count > 50

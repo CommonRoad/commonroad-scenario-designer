@@ -259,7 +259,6 @@ class Network:
 
         self.find_lane_speed_changes(drivable_lanelets, lanelet_network)
         self.reference_traffic_signs_with_equal_speed(drivable_lanelets, lanelet_network)
-
         return convert_to_base_lanelet_network(lanelet_network)
 
     def relate_crosswalks_to_intersection(self, lanelet_network: ConversionLaneletNetwork):
@@ -467,7 +466,7 @@ class Network:
                 filter_types=filter_types
                 if isinstance(filter_types, list)
                 else ["driving", "restricted", "onRamp", "offRamp", "exit", "entry", "sidewalk", "shoulder",
-                      "crosswalk"]
+                      "crosswalk", "bidirectional"]
             )
         )
 

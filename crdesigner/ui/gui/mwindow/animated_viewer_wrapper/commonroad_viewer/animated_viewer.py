@@ -10,6 +10,7 @@ from commonroad.scenario.lanelet import Lanelet, LaneletNetwork
 from commonroad.visualization.mp_renderer import MPRenderer
 
 from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMO_AVAILABLE
+from .service_layer.draw_params_updater import DrawParamsCustom
 from ...service_layer import config
 
 if SUMO_AVAILABLE:
@@ -119,11 +120,10 @@ class AnimatedViewer:
             if time_start > time_end:
                 self.time_step.value = 0
 
-            draw_params = {
-                'time_begin': time_start,
-                'time_end': time_end,
-                'antialiased': True,
-            }
+            draw_params = DrawParamsCustom(time_begin=time_start, time_end=time_end)
+            draw_params.dynamic_obstacle.time_begin = draw_params.time_begin
+            draw_params.dynamic_obstacle.time_end = draw_params.time_end
+            draw_params.dynamic_obstacle.trajectory.draw_trajectory = False
             self.dynamic.draw_scenario(scenario=scenario, pps=pps, draw_params=draw_params)
 
         # Interval determines the duration of each frame in ms
@@ -186,16 +186,21 @@ class AnimatedViewer:
             )
             return
 
-    def _calc_max_timestep(self):
-        """calculate maximal time step of current scenario"""
+    def _calc_max_timestep(self) -> int:
+        """Calculates maximal time step of current scenario."""
         if self.current_scenario is None:
             return 0
-        timesteps = [
-            obstacle.prediction.occupancy_set[-1].time_step
-            for obstacle in self.current_scenario.dynamic_obstacles
-            for obstacle in self.current_scenario.dynamic_obstacles
-        ]
-        self.max_timestep = np.max(timesteps) if timesteps else 0
+
+        if len(self.current_scenario.dynamic_obstacles) > 0 \
+                and self.current_scenario.dynamic_obstacles[0].prediction is not None:
+            time_steps = [
+                obstacle.prediction.occupancy_set[-1].time_step
+                for obstacle in self.current_scenario.dynamic_obstacles
+            ]
+            self.max_timestep = np.max(time_steps) if time_steps else 0
+        else:
+            self.max_timestep = 0
+
         return self.max_timestep
 
     def update_plot(self,
@@ -226,14 +231,10 @@ class AnimatedViewer:
         ]
 
         if time_step_changed:
-            draw_params = {
-                'time_begin': time_step,
-            }
+            draw_params = DrawParamsCustom(time_begin=time_step)
         else:
-            draw_params = {
-                'time_begin': self.time_step.value - 1,
-            }
-
+            draw_params = DrawParamsCustom(time_begin=self.time_step.value - 1)
+        draw_params.dynamic_obstacle.trajectory.draw_trajectory = False
         self.dynamic.draw_scenario(self.current_scenario, self.current_pps, draw_params=draw_params)
 
         for lanelet in self.current_scenario.lanelet_network.lanelets:
@@ -386,4 +387,4 @@ class AnimatedViewer:
         )
 
     def update_window(self):
-        self.dynamic.setStyleSheet('background-color:' + self.parent.colorscheme()['secondbackground'] + '; color:' + self.parent.colorscheme()['color'] + ';font-size: ' + self.parent.colorscheme()['font-size'])
+        self.dynamic.setStyleSheet('background-color:' + self.parent.colorscheme().second_background + '; color:' + self.parent.colorscheme().color + ';font-size: ' + self.parent.colorscheme().font_size)

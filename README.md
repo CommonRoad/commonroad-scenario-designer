@@ -38,30 +38,27 @@ You need the following modules:
 From you Anaconda environment. For all the packages, we recommend to use the provided `requirements.txt`:
 ```bash
 pip install -r requirements.txt
-
-If you do not want to use Anaconda, some features for editing OSM graphs might not be available.
-
 ```
 
 If you want to use the SUMO conversion or to generate traffic using SUMO, please install 
 [SUMO](https://sumo.dlr.de/docs/index.html):
 ```bash
-sudo add-apt-repository ppa:sumo/stable
 sudo apt-get update
 sudo apt-get install sumo sumo-tools sumo-doc
 echo "export SUMO_HOME=/usr/share/sumo" >> ~/.bashrc
 echo 'export PYTHONPATH="$SUMO_HOME/tools:$PYTHONPATH"' >> ~/.bashrc
 ```
 If you use zsh, replace `.bashrc` with `.zshrc`.
+To install the _CommonRoad Scenario Designer_ from PyPI, please execute the following two command:
+```bash
+pip install commonroad-scenario-designer
+```
 
-To install the _CommonRoad Scenario Designer_, please execute one of the following two commands:
+To install the _CommonRoad Scenario Designer_ from source, please execute the following two command:
 ```bash
 pip install -e .
 ```
-or
-```bash
-python setup.py install
-```
+
 We will soon publish the toolbox on PyPI.
 
 ### Common Errors during installation
@@ -169,9 +166,8 @@ If you want to contribute to the toolbox, you can also post it in the [forum](ht
 
 ## Authors
 
-Responsible: Sebastian Maierhofer
-Contribution (in alphabetic order by last name): Daniel Asch, Hamza Begic, Tim Dang, Behtarin Ferdousi, Maximilian Fruehauf, Marcus Gabler,   
-Fabian Hoeltke, Aaron Kaefer, David Le, Gustaf Lindgren, Benjamin Orthen, Luisa Ortner, Benedikt Reinhard, Maximilian Rieger, Til Stotz, Stefan Urban
+Responsible: Sebastian Maierhofer, Sebastian Mair
+Contribution (in alphabetic order by last name): Daniel Asch, Hamza Begic, Florian Braunmiller, Tim Dang, Behtarin Ferdousi, Maximilian Fruehauf, Marcus Gabler, Fabian Hoeltke, Aaron Kaefer, David Le, Gustaf Lindgren, Benjamin Orthen, Luisa Ortner, Louis Pröbstle, Benedikt Reinhard, Maximilian Rieger, Til Stotz, Stefan Urban
 
 ## Credits
 We gratefully acknowledge partial financial support by
