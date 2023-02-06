@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.6.1] - 2023-0X-XX
+
+### Added
+
+### Changed
+
+### Fixed
+- GUI setting for axis visibility not changeable
+
+### Removed
+
 ## [0.6.0] - 2023-01-31
 
 ### Added

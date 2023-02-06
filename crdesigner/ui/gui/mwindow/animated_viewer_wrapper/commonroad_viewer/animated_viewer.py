@@ -231,9 +231,9 @@ class AnimatedViewer:
         ]
 
         if time_step_changed:
-            draw_params = DrawParamsCustom(time_begin=time_step)
+            draw_params = DrawParamsCustom(time_begin=time_step, color_schema=self.parent.colorscheme())
         else:
-            draw_params = DrawParamsCustom(time_begin=self.time_step.value - 1)
+            draw_params = DrawParamsCustom(time_begin=self.time_step.value - 1, color_schema=self.parent.colorscheme())
         draw_params.dynamic_obstacle.trajectory.draw_trajectory = False
         self.dynamic.draw_scenario(self.current_scenario, self.current_pps, draw_params=draw_params)
 
