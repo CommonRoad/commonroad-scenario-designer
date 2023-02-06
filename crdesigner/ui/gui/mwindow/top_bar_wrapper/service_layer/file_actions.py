@@ -61,12 +61,11 @@ def _open_scenario(mwindow, new_scenario, filename="new_scenario", pps=None):
     if SUMO_AVAILABLE:
         mwindow.animated_viewer_wrapper.cr_viewer.open_scenario(new_scenario,
                                                                 mwindow.obstacle_toolbox.sumo_simulation.config,
-                                                                planning_problem_set=pps)
+                                                                planning_problem_set=pps, new_file_added=True)
         mwindow.obstacle_toolbox.sumo_simulation.scenario = mwindow.animated_viewer_wrapper.cr_viewer.current_scenario
     else:
-        mwindow.animated_viewer_wrapper.cr_viewer.open_scenario(new_scenario, planning_problem_set=pps)
-
-    mwindow.animated_viewer_wrapper.update_view(focus_on_network=True)
+        mwindow.animated_viewer_wrapper.cr_viewer.open_scenario(new_scenario, planning_problem_set=pps, new_file_added=True)
+    mwindow.animated_viewer_wrapper.update_view(new_file_added=True)
     mwindow.store_scenario()
     mwindow.update_toolbox_scenarios()
     update_to_new_scenario(mwindow)

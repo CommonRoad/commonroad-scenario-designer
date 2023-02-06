@@ -33,6 +33,8 @@ IMAGE_SAVE_PATH = "files/imagery/"
 ZOOM_LEVEL = 19
 # The key to access bing maps
 BING_MAPS_KEY = ""
+# aerial image area threshold limiting the user input for the coordinates
+AERIAL_IMAGE_THRESHOLD = 0.01
 
 # Map download Settings
 # path to save downloaded files
