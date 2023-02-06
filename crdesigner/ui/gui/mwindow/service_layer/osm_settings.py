@@ -738,6 +738,8 @@ IMAGE_SAVE_PATH = \"{config.IMAGE_SAVE_PATH}\"
 ZOOM_LEVEL = {config.ZOOM_LEVEL}
 # The key to access bing maps
 BING_MAPS_KEY = \"{config.BING_MAPS_KEY}\"
+# aerial image area threshold limiting the user input for the coordinates
+AERIAL_IMAGE_THRESHOLD = \"{config.AERIAL_IMAGE_THRESHOLD}\"
 
 # Map download Settings
 # path to save downloaded files

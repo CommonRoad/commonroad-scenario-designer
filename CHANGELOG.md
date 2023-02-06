@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.7.0] - 2023-0X-XX
+
+### Added
+- Possibility to load aerial image from Bing in the background
+- 
+### Changed
+- Default matplotlib area
+- 
+### Fixed
+- Persisting zoomed scale
+
+### Removed
+
 ## [0.6.1] - 2023-0X-XX
 
 ### Added

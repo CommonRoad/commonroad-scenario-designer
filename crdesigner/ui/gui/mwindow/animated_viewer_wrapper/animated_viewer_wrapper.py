@@ -79,16 +79,15 @@ class AnimatedViewerWrapper:
 
         return draw_temporary_position
 
-    def update_view(self, focus_on_network=None):
+    def update_view(self, new_file_added: bool = None, focus_on_network=None):
         """
-        Update all components.
+        Update all components.  
+        :param new_file_added: if a new cr file was created or added
         """
         # reset selection of all other selectable elements
         if self.cr_viewer.current_scenario is None:
             return
-        if focus_on_network is None:
-            focus_on_network = config.AUTOFOCUS
-        self.cr_viewer.update_plot(focus_on_network=focus_on_network)
+        self.cr_viewer.update_plot(new_file_added=new_file_added)
 
     def update_window(self):
         self.toolbar.setStyleSheet('background-color:' + self.mwindow.colorscheme().background + '; color:' + self.mwindow.colorscheme().color + '; font-size:' + self.mwindow.colorscheme().font_size)
