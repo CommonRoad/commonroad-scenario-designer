@@ -2585,7 +2585,7 @@ class RoadNetworkToolbox(
                     selected_intersection_id
                 )
             )
-            self.current_scenario.remove_intersection(intersection)
+            self.current_scenario.remove_intersection_complete(intersection)
             self.set_default_road_network_list_information()
             self.callback(self.current_scenario)
 
