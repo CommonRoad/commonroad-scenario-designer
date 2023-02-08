@@ -467,7 +467,7 @@ class ParametricLaneGroup:
                     == self.line_marking_map(self.parametric_lanes[p].line_marking) and \
                     self.line_marking_map(plane.center_marking) \
                     == self.line_marking_map(self.parametric_lanes[p].center_marking):
-                plist[len(plist) - 1].append(plane)
+                plist[-1].append(plane)
             else:
                 plist.append([plane])
         for x in range(len(plist)):

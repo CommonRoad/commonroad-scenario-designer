@@ -405,7 +405,7 @@ class ParametricLane:
         :param split_vals: the split values given in the form list[tuple(category, value, offset)]
         :rtype: list[ParametricLane]
         """
-        plane_list = [[self.id_, self.border_group, self.type_, self.line_marking, self.side, self.speed, self.access,
+        plane_list = [[self.id_ + ".0", self.border_group, self.type_, self.line_marking, self.side, self.speed, self.access,
                        self.center_marking
                        ]]
         line_marking = self.line_marking
@@ -413,8 +413,15 @@ class ParametricLane:
         access = self.access
         center_marking = self.center_marking
         counter = 1
-        prev = 0
-        len_prev = [] if self.length is not None else [None] * len(split_vals)
+        # compute lengths
+        if self.length is None:
+            lens = [None] * (len(split_vals) + 1)
+        else:
+            arr = sorted([0] + list(map(lambda y: y[2], split_vals)) + [self.length])
+            arr = np.array(arr)
+            lens = arr[1:] - arr[:-1]
+
+        # changing the offset should be sufficient to define valid roads
         for category, value, offset in sorted(split_vals, key=lambda y: y[2]):
             inner_border_offset = self.border_group.inner_border_offset + offset
             outer_border_offset = self.border_group.outer_border_offset + offset
@@ -432,14 +439,11 @@ class ParametricLane:
                 center_marking = value
             else:
                 pass
+            # define the split index like this as it won't get pruned in the last conversion step
             plane_list.append([self.id_ + "." + str(counter), border_group, self.type_, line_marking, self.side,
                                speed, access, center_marking])
-            if self.length is not None:
-                len_prev.append(offset - prev)
-                prev = offset
             counter += 1
-        if self.length is not None:
-            len_prev.append(self.length - prev)
+        # create the actual split planes from the parameters
         for x in range(len(plane_list)):
             plane_list[x] = ParametricLane(id_=plane_list[x][0], border_group=plane_list[x][1],
                                            type_=plane_list[x][2],
@@ -448,6 +452,6 @@ class ParametricLane:
                                            speed=plane_list[x][5],
                                            access=plane_list[x][6],
                                            center_marking=plane_list[x][7],
-                                           length=len_prev[x])
+                                           length=lens[x])
             plane_list[x].reverse = self.reverse
         return plane_list
