@@ -28,27 +28,34 @@ class ConfigurationBuilder:
 
     @classmethod
     def build_configuration(cls) -> Configuration:
-        """Builds configuration from default files.
+        """
+        Builds configuration from default files.
+
+        Steps:
+            1. Load default files
+            2. Build Configuration object
 
         :return: configuration containing all relevant information
-        :rtype: Configuration
-        """
 
+        """
         # default configurations
         config_default = cls.construct_default_config()
+
         config_combined = OmegaConf.merge(config_default)
         config = Configuration(config_combined)
+
         return config
 
     @classmethod
     def construct_default_config(cls) -> Union[ListConfig, DictConfig]:
-        """Constructs default configuration by accumulating yaml files. Collects all default config files ending with
-        .yaml under path_config_default.
-
-        :return: The configuration created from the yaml file.
-        :rtype: Union[ListConfig, DictConfig]
         """
+        Constructs default configuration.
 
+        Accumulates yaml files.
+        Collects all default config files ending with .yaml under path_config_default.
+
+       :return: The configuration created from the yaml file.
+        """
         config_default = OmegaConf.create()
         ConfigurationBuilder.register_join_paths_resolver()
         for path_file in glob.glob(cls.path_config_default + "/*.yaml"):
@@ -56,7 +63,7 @@ class ConfigurationBuilder:
                 try:
                     config_partial = OmegaConf.load(file_config)
                     OmegaConf.resolve(config_partial)
-                    name_file = path_file.split("/")[-1].split(".")[0]
+                    name_file = path_file.split(os.sep)[-1].split(".")[0]
 
                 except Exception as e:
                     print(e)
@@ -68,11 +75,10 @@ class ConfigurationBuilder:
 
     @classmethod
     def register_join_paths_resolver(cls):
-        """
-        Registers Python functions to yaml configuration files using omega.conf's functionality.
-        """
+        """Registers Python functions to yaml configuration files using omega.conf's functionality."""
         try:
             OmegaConf.register_new_resolver("join_paths",
-                                            lambda base_path, additional_path: os.path.join(base_path, additional_path))
+                                            lambda base_path, additional_path:  # pylint: disable=unnecessary-lambda
+                                            os.path.join(base_path, additional_path))
         except ValueError:
             logging.debug("Re-attempting to register join_paths resolver exception is suppressed.")
