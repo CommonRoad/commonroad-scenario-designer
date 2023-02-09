@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.1] - 2023-02-09
+
+### Fixed
+- GUI setting for axis visibility not changeable
+- OpenDRIVE conversion endless loop speed limit mapping
+- Yaml configuration loading under Windows
+
 ## [0.6.0] - 2023-01-31
 
 ### Added

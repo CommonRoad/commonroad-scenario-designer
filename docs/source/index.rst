@@ -10,7 +10,7 @@ The toolbox includes a graphical user interface (GUI) for creating, editing, and
 and scenarios, a command line interface, and different Python APIs.
 
 .. note::
-    This release (v0.6.0) is still a BETA version.
+    This release (v0.6.1) is still a BETA version.
     In case you encounter errors or want to provide us feedback, please post them in our
     `forum <https://commonroad.in.tum.de/forum/c/scenario-designer/18>`_.
 
@@ -57,14 +57,14 @@ If you use zsh, replace `.bashrc` with `.zshrc`.
 Installation
 ============
 
-To install the *CommonRoad Scenario Designer*, please execute one of the following two commands: ::
+To install the *CommonRoad Scenario Designer* from PyPI, please execute the following two command: ::
+
+    pip install commonroad-scenario-designer
+
+To install the *CommonRoad Scenario Designer* from source, please execute the following command: ::
 
     pip install -e .
-or::
 
-    python setup.py install
-
-We will soon publish the toolbox on PyPI.
 
 Getting Started
 ===============

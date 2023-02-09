@@ -5,6 +5,7 @@ ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get update && apt-get -qq install \
     wget \
     git  \
+    ffmpeg \
     sumo sumo-tools sumo-doc \
     && rm -rf /var/lib/apt/lists/*
 

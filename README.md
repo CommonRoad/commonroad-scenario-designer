@@ -49,12 +49,12 @@ echo "export SUMO_HOME=/usr/share/sumo" >> ~/.bashrc
 echo 'export PYTHONPATH="$SUMO_HOME/tools:$PYTHONPATH"' >> ~/.bashrc
 ```
 If you use zsh, replace `.bashrc` with `.zshrc`.
-To install the _CommonRoad Scenario Designer_ from PyPI, please execute the following two command:
+To install the _CommonRoad Scenario Designer_ from PyPI, please execute the following command:
 ```bash
 pip install commonroad-scenario-designer
 ```
 
-To install the _CommonRoad Scenario Designer_ from source, please execute the following two command:
+To install the _CommonRoad Scenario Designer_ from source, please execute the following command:
 ```bash
 pip install -e .
 ```
@@ -149,18 +149,16 @@ The titles of module pages have to be set manually!
 The full documentation of the API and introducing examples can also be found [here](https://commonroad-scenario-designer.readthedocs.io/en/latest/).
 
 ## Changelog
-Compared to version 0.5, the following things have been added, fixed or changed:
+Compared to version 0.6.1, the following things have been added, fixed or changed:
 
-- Switching shape of dynamic obstacle
-- Adding adjacent lanelet which already exists
-- Lanelet translation with missing x- or y-coordinate
-- Missing location information when storing a scenario
-- Various small bug fixes
+- GUI setting for axis visibility not changeable
+- OpenDRIVE conversion endless loop speed limit mapping
+- Yaml configuration loading under Windows
 
 A detailed overview about the changes in each version is provided in the [Changelog](https://gitlab.lrz.de/tum-cps/commonroad-scenario-designer/-/blob/main/CHANGELOG.md).
 
 ## Bug and feature reporting
-This release (v0.6.0) is still a BETA version.  
+This release (v0.6.1) is still a BETA version.  
 In case you detect a bug or you want to suggest a new feature, please report it in our [forum](https://commonroad.in.tum.de/forum/c/scenario-designer/18).   
 If you want to contribute to the toolbox, you can also post it in the [forum](https://commonroad.in.tum.de/forum/c/scenario-designer/18) or contact [Sebastian Maierhofer](sebastian.maierhofer@tum.de).
 

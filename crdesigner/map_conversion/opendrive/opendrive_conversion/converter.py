@@ -19,12 +19,9 @@ class OpenDriveConverter:
 
         :param plan_view: PlanView object from OpenDrive which specifies the geometry
             of the reference path.
-        :type plan_view: :class:`PlanView`
         :param lane_offsets: Object which contains information about width offset of reference
             path the plain_view path.
-         :type lane_offsets: List
          :return: The reference border on which all other borders in this lane section are based upon.
-         :rtype: :class:`Border`
         """
 
         reference_border = Border()
@@ -57,9 +54,7 @@ class OpenDriveConverter:
         return reference_border
 
     @staticmethod
-    def lane_section_to_parametric_lanes(
-        lane_section, reference_border
-    ) -> List[ParametricLaneGroup]:
+    def lane_section_to_parametric_lanes(lane_section, reference_border) -> List[ParametricLaneGroup]:
         """Convert a whole lane section into a list of ParametricLane objects.
 
         :param lane_section: LaneSection from which to create the list of ParametricLane Objects
@@ -131,11 +126,10 @@ class OpenDriveConverter:
         return plane_groups
 
     @staticmethod
-    def create_parametric_lane(lane_borders, width, lane, side, mark_idx) -> ParametricLane:
+    def create_parametric_lane(lane_borders: List[Border], width, lane, side, mark_idx) -> ParametricLane:
         """Create a parametric lane for a certain width section.
 
         :param lane_borders: Array with already created lane borders.
-        :type lane_borders: list[:class:`Border`]
         :param width: Width section with offset and coefficient information.
         :type width: :class:`LaneWidth`
         :param lane: Lane in which new parametric lane is created.
@@ -190,7 +184,6 @@ class OpenDriveConverter:
             Right side is -1.
         :type coeff_factor: float
         :return: The created outer lane border.
-        :rtype: :class:`Border`
         """
 
         # Create outer lane border
@@ -221,7 +214,6 @@ class OpenDriveConverter:
         :param lane: Lane to find neighbors to.
         :type lane: :class:`Lane`
         :return: IDs of the inner and outer neighbor, and whether the inner neighbor has the same direction.
-        :rtype: Tuple[str, str, bool]
         """
         if abs(lane.id) > 1:
 
