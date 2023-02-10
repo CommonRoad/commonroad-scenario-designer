@@ -4,7 +4,7 @@
 
 ### Added
 - Possibility to load aerial image from Bing in the background
-- 
+
 ### Changed
 - Default matplotlib area
 - 
@@ -13,16 +13,12 @@
 
 ### Removed
 
-## [0.6.1] - 2023-0X-XX
-
-### Added
-
-### Changed
+## [0.6.1] - 2023-02-09
 
 ### Fixed
 - GUI setting for axis visibility not changeable
-
-### Removed
+- OpenDRIVE conversion endless loop speed limit mapping
+- Yaml configuration loading under Windows
 
 ## [0.6.0] - 2023-01-31
 
