@@ -11,7 +11,7 @@ import io
 import sys
 
 from commonroad.scenario.lanelet import StopLine, LineMarking, RoadUser, Lanelet, LaneletNetwork
-from commonroad.scenario.traffic_sign import TrafficSignIDGermany, TrafficSignElement
+from commonroad.scenario.traffic_sign import *
 from commonroad.scenario.scenario import Scenario, ScenarioID, TrafficSign, Location
 from crdesigner.map_conversion.lanelet2.lanelet2cr import Lanelet2CRConverter, _add_closest_traffic_sign_to_lanelet, _add_stop_line_to_lanelet
 from crdesigner.map_conversion.common.utils import generate_unique_id
@@ -19,7 +19,7 @@ from crdesigner.map_conversion.opendrive.opendrive_conversion.conversion_lanelet
 from crdesigner.map_conversion.lanelet2.lanelet2_parser import Lanelet2Parser
 from crdesigner.map_conversion.lanelet2.lanelet2cr import Lanelet2CRConverter, _two_vertices_coincide
 from crdesigner.map_conversion.opendrive.opendrive_conversion.conversion_lanelet_network import ConversionLaneletNetwork
-from crdesigner.map_conversion.lanelet2.lanelet2 import OSMLanelet, WayRelation, DEFAULT_PROJ_STRING, Node, Way, RightOfWayRelation
+from crdesigner.map_conversion.lanelet2.lanelet2 import OSMLanelet, WayRelation, DEFAULT_PROJ_STRING, Node, Way
 from crdesigner.map_conversion.osm2cr.converter_modules.utility.geometry import (
     point_to_line_distance,
     distance as point_to_polyline_distance
@@ -165,6 +165,7 @@ class TestLanelet2CRConverter(unittest.TestCase):
         self.assertCountEqual(lanelet2.stop_line.end,[11,0])
 
     def test__right_of_way_to_traffic_sign(self):
+        supportedCountryList = [TrafficSignIDGermany,TrafficSignIDUsa,TrafficSignIDSpain]
         l2cr = Lanelet2CRConverter() #object refered to as "self" in the source code
         l2cr(osm)
 
@@ -188,19 +189,17 @@ class TestLanelet2CRConverter(unittest.TestCase):
             y -= l2cr.origin_utm[1]
             for sign in signs:
                 #comparing the position so we know that those are the 2 same signs 
-                if sign.position[0] == x and sign.position[1]==y: 
+                if sign.position[0] == x and sign.position[1]==y:
                     #reformatting the priority to fit the cr format
-                    if traffic_sign_way.tag_dict.get("subtype") == "de206":
-                        traffic_sign_type = TrafficSignIDGermany.STOP
-                    elif traffic_sign_way.tag_dict.get("subtype") == "de102":
-                        traffic_sign_type = TrafficSignIDGermany.RIGHT_BEFORE_LEFT
-                    elif traffic_sign_way.tag_dict.get("subtype") == "de205":
-                        traffic_sign_type = TrafficSignIDGermany.YIELD
-                    elif traffic_sign_way.tag_dict.get("subtype") == "de301" or traffic_sign_way.tag_dict.get("subtype") =='right_of_way':
-                        traffic_sign_type = TrafficSignIDGermany.RIGHT_OF_WAY
-                    elif traffic_sign_way.tag_dict.get("subtype") == "de306":
-                        traffic_sign_type = TrafficSignIDGermany.PRIORITY
-                    else:
+                    subtype = traffic_sign_way.tag_dict.get("subtype")[2:] #from "de206" to "206"
+
+                    trafficSignFound = 0
+                    for country in supportedCountryList:
+                        for countrySign in country:
+                            if countrySign.value == subtype:
+                                traffic_sign_type = country(countrySign.value)
+                                trafficSignFound = 1
+                    if trafficSignFound == 0:
                         raise NotImplementedError(f"Lanelet type {traffic_sign_way.tag_dict['subtype']} not implemented")
                     self.assertEqual(traffic_sign_type,sign.traffic_sign_elements[0].traffic_sign_element_id) #testing the traffic sign type property
 

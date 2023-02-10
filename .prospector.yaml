@@ -49,6 +49,7 @@ pylint:
     - consider-using-f-string
     - missing-module-docstring
     - c-extension-no-member
+    - too-many-nested-blocks
 
 mypy:
   run: true

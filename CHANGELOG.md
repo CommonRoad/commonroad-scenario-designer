@@ -4,10 +4,13 @@
 
 ### Added
 - Possibility to load aerial image from Bing in the background
+- CommonRoad to Lanelet2 conversion: Conversion of regulatory elements
 
 ### Changed
 - Default matplotlib area
-- 
+- Generalized traffic sign conversion 
+- Lanelet2 to CommonRoad conversion: Generalize traffic sign conversion
+
 ### Fixed
 - Persisting zoomed scale
 

@@ -1,5 +1,5 @@
 from lxml import etree  # type: ignore
-from crdesigner.map_conversion.lanelet2.lanelet2 import OSMLanelet, Node, Way, WayRelation, RightOfWayRelation
+from crdesigner.map_conversion.lanelet2.lanelet2 import OSMLanelet, Node, Way, WayRelation, RegulatoryElement
 
 from commonroad.scenario.traffic_sign import TrafficSignIDGermany  # type: ignore
 
@@ -57,9 +57,9 @@ class Lanelet2Parser:
                     tag_dict = {tag.get("k"): tag.get("v") for tag in right_of_way_rel.xpath("./tag[@k and @v]") if
                                 tag.get("k") in ALLOWED_TAGS}
                     ref_lines = right_of_way_rel.xpath("./member[@role='ref_line']/@ref")
-                    osm.add_right_of_way_relation(
-                            RightOfWayRelation(right_of_way_rel.get("id"), traffic_signs, yield_lanelets,
-                                               right_of_way_lanelets, tag_dict, ref_lines))
+                    osm.add_regulatory_element(
+                            RegulatoryElement(right_of_way_rel.get("id"), traffic_signs, yield_lanelets,
+                                              right_of_way_lanelets, tag_dict, ref_lines))
                 except IndexError:
                     print(f"Right of way relation {right_of_way_rel.attrib.get('id')} has no traffic sign. "
                           f"Please check your data! Discarding.")

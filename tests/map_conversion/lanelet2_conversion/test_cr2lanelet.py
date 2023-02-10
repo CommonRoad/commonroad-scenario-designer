@@ -4,8 +4,9 @@ import os
 import unittest
 from crdesigner.map_conversion.lanelet2.cr2lanelet import CR2LaneletConverter, OSMLanelet, Node, Way, WayRelation
 from crdesigner.configurations.get_configs import get_configs
-from commonroad.scenario.lanelet import Lanelet
+from commonroad.scenario.lanelet import Lanelet, StopLine, LineMarking
 from commonroad.common.file_reader import CommonRoadFileReader
+from commonroad.scenario.traffic_sign import * 
 from pyproj import Proj
 
 #creating a testing vertices and a testing scenario from a test file (xml)
@@ -23,6 +24,7 @@ lanelet2._adj_left = 100
 
 #loading a file for a scenario
 commonroad_reader = CommonRoadFileReader(
+            #f"{os.path.dirname(os.path.realpath(__file__))}/../test_maps/lanelet2/traffic_speed_limit_utm.xml"
             f"{os.path.dirname(os.path.realpath(__file__))}/../test_maps/lanelet2/merging_lanelets_utm.xml"
         )
 
@@ -109,17 +111,17 @@ class TestCR2LaneletConverter(unittest.TestCase):
         cr1._convert_lanelet(lanelet)
       
         #getting the created ways from our lanelet
-        last_left_way = list(cr1.osm._ways)[-2]
-        last_right_way = list(cr1.osm._ways)[-1]
+        last_left_way = list(cr1.osm.ways)[-2]
+        last_right_way = list(cr1.osm.ways)[-1]
 
         #getting the first and the last nodes in a tuple
         leftNodeTuple = cr1._get_first_and_last_nodes_from_way(last_left_way,True) 
         rightNodeTuple = cr1._get_first_and_last_nodes_from_way(last_right_way,True)
 
-        self.assertEqual(cr1.osm._ways[last_left_way].nodes[0], leftNodeTuple[0]) #testing if the first node in the corresponding way is the same as the first node in the tuple
-        self.assertEqual(cr1.osm._ways[last_left_way].nodes[-1], leftNodeTuple[1]) #testing if the first node in the corresponding way is the same as the last node in the tuple
-        self.assertEqual(cr1.osm._ways[last_right_way].nodes[0], rightNodeTuple[0]) #testing if the first node in the corresponding way is the same as the first node in the tuple
-        self.assertEqual(cr1.osm._ways[last_right_way].nodes[-1], rightNodeTuple[1]) #testing if the first node in the corresponding way is the same as the last node in the tuple
+        self.assertEqual(cr1.osm.ways[last_left_way].nodes[0], leftNodeTuple[0]) #testing if the first node in the corresponding way is the same as the first node in the tuple
+        self.assertEqual(cr1.osm.ways[last_left_way].nodes[-1], leftNodeTuple[1]) #testing if the first node in the corresponding way is the same as the last node in the tuple
+        self.assertEqual(cr1.osm.ways[last_right_way].nodes[0], rightNodeTuple[0]) #testing if the first node in the corresponding way is the same as the first node in the tuple
+        self.assertEqual(cr1.osm.ways[last_right_way].nodes[-1], rightNodeTuple[1]) #testing if the first node in the corresponding way is the same as the last node in the tuple
 
     def test_create_nodes_from_vertices(self):
         cr1 = CR2LaneletConverter()
@@ -209,6 +211,250 @@ class TestCR2LaneletConverter(unittest.TestCase):
 
         #if the function works accordingly, the value of the "nodes" variable should be equal to the value of the cr1.first_nodes at the same index of our lanelet 2. 
         self.assertEqual(nodes,cr1.first_nodes[2])
+
+    def test__convert_traffic_sign(self):
+        #function takes a traffic sign and maps it as a way
+
+        cr1 = CR2LaneletConverter()
+        osm = cr1(scenario)
+
+        #traffic sign element list with one traffic sign
+        tse = TrafficSignElement(TrafficSignIDGermany.STOP)
+        list_tse = list()
+        list_tse.append(tse)
+
+        #position at the beginning of global lanelet
+        position = [0,0]
+
+        #creating the sign, referenced to global lanelet
+        sign = TrafficSign(1,list_tse,set({100}),position)
+
+        #before converting a sign
+        ways_before = len(cr1.osm.ways)
+        cr1._convert_traffic_sign(sign)
+        ways_after = len(cr1.osm.ways)
+        #there should be 1 more way in the osm
+        self.assertEqual(ways_before+1,ways_after)
+
+        #check the attributes of our way, do they match the sign
+
+        #get the id of our way, as it is the last one in the osm way list
+        id_converted_sign = list(cr1.osm.ways)[-1]
+
+        #get the way from the id
+        sign_as_way = cr1.osm.ways[id_converted_sign]
+
+        #extract the nodes
+        n1_id,n2_id  = sign_as_way.nodes
+        n1 = cr1.osm.nodes[n1_id]
+        n2 = cr1.osm.nodes[n2_id]
+
+        #compare the node coordinates
+        #transform the coordinates of the sign, should get the same coordinates as ones of the newly created way
+        sign_n1_lon,sign_n1_lat = cr1.proj(cr1.origin_utm[0] + sign.position[0], cr1.origin_utm[1] + sign.position[1], inverse=True)
+        
+        self.assertEqual(str(sign_n1_lon),n1.lon)
+        self.assertEqual(str(sign_n1_lat),n1.lat)
+        
+        #as stated in the original function, second node is created to match the L2 format
+        sign_n2_lon, sign_n2_lat = cr1.proj(cr1.origin_utm[0] + sign.position[1]+0.25, cr1.origin_utm[1] + sign.position[1]+0.25, inverse=True)
+        self.assertEqual(str(sign_n2_lon),n2.lon)
+        self.assertEqual(str(sign_n2_lat),n2.lat)
+
+        #check the type of way
+
+        type = sign_as_way.tag_dict["type"]
+        self.assertEqual(type,"traffic_sign")
+    
+    def test__add_rightOfWayRelation(self):
+        """
+        """
+        #working with the local scenario as it reflects the entire file if I change it globally
+        commonroad_reader = CommonRoadFileReader(
+            #f"{os.path.dirname(os.path.realpath(__file__))}/../test_maps/lanelet2/traffic_speed_limit_utm.xml"
+            f"{os.path.dirname(os.path.realpath(__file__))}/../test_maps/lanelet2/merging_lanelets_utm.xml"
+        )
+        scenario, _ = commonroad_reader.open()
+        cr1 = CR2LaneletConverter()
+        osm = cr1(scenario)
+
+        count_before = 0
+        for way_rel_id in cr1.osm.regulatory_elements:
+            way_rel = cr1.osm.find_right_of_way_by_id(way_rel_id)
+            if way_rel.tag_dict["subtype"] == "right_of_way":
+                for signs in way_rel.refers:
+                    count_before+=1
+        
+        #create a sign so it could be added to the right_of_way_relation
+        tse = TrafficSignElement(TrafficSignIDGermany.RIGHT_OF_WAY)
+        list_tse = list()
+        list_tse.append(tse)
+        #position at the beginning of global lanelet
+        position = [0,0]
+        #creating the sign, referenced to a random lanelet with id 1
+        sign = TrafficSign(1,list_tse,set({1}),position)
+
+        #add sign to lanelet_traffic_sign, then convert it
+        cr1.lanelet_network.lanelets[0].traffic_signs.add(1)
+        cr1.lanelet_network._traffic_signs.update({1:sign})
+        
+        #create a stop line and append it to our lanelet
+        cr1.lanelet_network.lanelets[0].stop_line = StopLine([0,0],[1,1],line_marking=LineMarking.DASHED,traffic_sign_ref=set({1}))
+
+        stop_lines_before = 0
+        for w in cr1.osm.ways:
+            if(len(cr1.osm.ways[w].tag_dict.keys())>0):
+                if(cr1.osm.ways[w].tag_dict["type"] == "stop_line"):
+                    stop_lines_before+=1
+
+        #convert the sign so that it maps to our osm file
+        cr1._convert_traffic_sign(sign)
+
+        #call the function, which should add a right_of_way regulatory element to the osm file
+        cr1._add_right_of_way_relation()
+        
+        count_after = 0
+        for way_rel_id in cr1.osm.regulatory_elements:
+            way_rel = cr1.osm.find_right_of_way_by_id(way_rel_id)
+            if way_rel.tag_dict["subtype"] == "right_of_way":
+                for wayid in way_rel.refers:
+                    #check if we have mapped correctly
+                    way = cr1.osm.ways[wayid]
+                    n1_id,n2_id = way.nodes
+                    n1 = cr1.osm.nodes[n1_id]
+                    n2 = cr1.osm.nodes[n2_id]
+                    sign_n1_lon,sign_n1_lat = cr1.proj(cr1.origin_utm[0] + sign.position[0], cr1.origin_utm[1] + sign.position[1], inverse=True)
+                    self.assertEqual(str(sign_n1_lon),n1.lon)
+                    self.assertEqual(str(sign_n1_lat),n1.lat)
+                    sign_n2_lon, sign_n2_lat = cr1.proj(cr1.origin_utm[0] + sign.position[1]+0.25, cr1.origin_utm[1] + sign.position[1]+0.25, inverse=True)
+                    self.assertEqual(str(sign_n2_lon),n2.lon)
+                    self.assertEqual(str(sign_n2_lat),n2.lat)
+                    count_after+=1
+        
+        #check if we have added the sign to the way relation
+        self.assertEqual(count_before+1,count_after)
+
+        
+        stop_lines_after = 0
+        for w in cr1.osm.ways:
+            if(len(cr1.osm.ways[w].tag_dict.keys())>0):
+                if(cr1.osm.ways[w].tag_dict["type"] == "stop_line"):
+                    stop_lines_after+=1
+        self.assertEqual(stop_lines_before+1,stop_lines_after)
+
+
+    def test__convert_traffic_light(self):
+        #working with the local scenario as it reflects the entire file if I change it globally
+        commonroad_reader = CommonRoadFileReader(
+            f"{os.path.dirname(os.path.realpath(__file__))}/../test_maps/lanelet2/merging_lanelets_utm.xml"
+        )
+        scenario, _ = commonroad_reader.open()
+        cr1 = CR2LaneletConverter()
+        osm = cr1(scenario)
+
+        #create a custom CR format traffic light
+        traffic_cycle_element_list = list()
+        traffic_cycle_element_list.append(TrafficLightCycleElement(TrafficLightState.RED,1))
+        traffic_light = TrafficLight(1,traffic_cycle_element_list,[0,0])
+        
+        nodes_before = len(cr1.osm.nodes)
+        ways_before = len(cr1.osm.ways)
+
+        #call the function to convert it to the osm format
+        #the osm should add 3 nodes for its position, along with creating a way, similar to traffic sign
+        cr1._convert_traffic_light(traffic_light)
+
+        nodes_after = len(cr1.osm.nodes)
+        ways_after = len(cr1.osm.ways)
+        
+        self.assertEqual(nodes_before+3,nodes_after)
+        self.assertEqual(ways_before+1,ways_after)
+        
+        #check if properties of the way are as they should be:
+
+        #check if the position of new nodes corresponds to the CR format (for now the position of the traffic light is diagonal)
+        x1,y1=cr1.proj(cr1.origin_utm[0] + traffic_light.position[0], cr1.origin_utm[1] + traffic_light.position[1], inverse=True)
+        #for now, the traffic light gets position with this formula (a diagonal line)
+        x2,y2=cr1.proj(cr1.origin_utm[0] + traffic_light.position[0]+0.1, cr1.origin_utm[1] + traffic_light.position[1]+0.1, inverse=True)
+        x3,y3=cr1.proj(cr1.origin_utm[0] + traffic_light.position[0]-0.1, cr1.origin_utm[1] + traffic_light.position[1]-0.1, inverse=True)
+
+        n3_id = list(cr1.osm.nodes)[-1]
+        n2_id = list(cr1.osm.nodes)[-2]
+        n1_id = list(cr1.osm.nodes)[-3]
+
+        n1 = cr1.osm.nodes[n1_id]
+        n2 = cr1.osm.nodes[n2_id]
+        n3 = cr1.osm.nodes[n3_id]
+
+        self.assertEqual(str(x1),n1.lon)
+        self.assertEqual(str(y1),n1.lat)
+        self.assertEqual(str(x2),n2.lon)
+        self.assertEqual(str(y2),n2.lat)
+        self.assertEqual(str(x3),n3.lon)
+        self.assertEqual(str(y3),n3.lat)
+
+        #check if the mapped nodes correspond to the newly created ones
+        last_created_way_id = list(cr1.osm.ways)[-1]
+        last_created_way = cr1.osm.ways[last_created_way_id]
+
+        self.assertEqual(n1_id, last_created_way.nodes[0])
+        self.assertEqual(n2_id, last_created_way.nodes[1])
+        self.assertEqual(n3_id, last_created_way.nodes[2])
+
+        #check if the type is traffic light
+
+        type = last_created_way.tag_dict["type"]
+        self.assertEqual("traffic_light",type)
+
+# test regulatory element left
+    def test__add_regulatoryElementForTrafficLights(self):
+        #working with the local scenario as it reflects the entire file if I change it globally
+        commonroad_reader = CommonRoadFileReader(
+            f"{os.path.dirname(os.path.realpath(__file__))}/../test_maps/lanelet2/merging_lanelets_utm.xml"
+        )
+        scenario, _ = commonroad_reader.open()
+        cr1 = CR2LaneletConverter()
+        osm = cr1(scenario)
+        
+        #create a custom CR format traffic light
+        traffic_cycle_element_list = list()
+        traffic_cycle_element_list.append(TrafficLightCycleElement(TrafficLightState.RED,1))
+        traffic_light = TrafficLight(1,traffic_cycle_element_list,[0,0])
+
+        #assign it to a lanelet
+        cr1.lanelet_network.lanelets[0].traffic_lights.add(1)
+
+        #assign it to the lanelet network
+        cr1.lanelet_network._traffic_lights.update({1:traffic_light})
+
+        #count the number of traffic lights before the function
+        count_before = 0
+        for way_rel_id in cr1.osm.regulatory_elements:
+            way_rel = cr1.osm.find_right_of_way_by_id(way_rel_id)
+            if way_rel.tag_dict["subtype"] == "traffic_light":
+                count_before+=1
+        
+        cr1._convert_traffic_light(traffic_light)
+        cr1._add_regulatory_element_for_traffic_lights()
+
+        #count the number of traffic lights after the function
+        count_after = 0
+        for way_rel_id in cr1.osm.regulatory_elements:
+            way_rel = cr1.osm.find_right_of_way_by_id(way_rel_id)
+            if way_rel.tag_dict["subtype"] == "traffic_light":
+                count_after+=1
+
+        #there should be one more
+        self.assertEqual(count_before+1,count_after)
+
+        #check if the traffic light has mapped correctly
+        for re in cr1.osm.regulatory_elements:
+            #it should refer to the newly created traffic light id
+            for tl in cr1.osm.ways:
+                if len(cr1.osm.ways[tl].tag_dict.keys())!=0:
+                    tl_id = str(tl)
+        
+        self.assertEqual(cr1.osm.regulatory_elements[re].refers[0],tl_id)
 
 if __name__ == '__main__':
     unittest.main()
