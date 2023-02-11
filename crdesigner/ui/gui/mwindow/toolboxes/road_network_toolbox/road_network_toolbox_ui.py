@@ -33,6 +33,72 @@ class RoadNetworkToolboxUI(Toolbox):
         self.sections.append(self.create_traffic_sign_widget())
         self.sections.append(self.create_traffic_light_widget())
         self.sections.append(self.create_intersection_widget())
+        self.sections.append(self.create_aerial_image_widget())
+
+    def create_aerial_image_widget(self):
+        """
+        create the Add aerial image widget
+        """
+        widget_aerial = QFrame(self.tree)
+        layout_aerial_image = QVBoxLayout(widget_aerial)
+        label_general = QLabel("Aerial map Attributes")
+        label_general.setFont(QFont("Arial", 11, QFont.Bold))
+
+
+        # GroupBox
+        self.aerial_image_groupbox = QGroupBox()
+        self.layout_aerial_image_groupbox = QFormLayout()
+        self.aerial_image_groupbox.setLayout(self.layout_aerial_image_groupbox)
+        self.layout_aerial_image_groupbox.addRow(label_general)
+
+        self.aerial_image_loading_status = QLabel("no file selected")
+        # Add button
+        self.button_add_aerial_image = QPushButton("Add")
+        # Remove button
+        self.button_remove_aerial_image = QPushButton("Remove")
+
+        # lat1
+        self.northern_bound= QLineEdit()
+        self.northern_bound.setValidator(self.float_validator)
+        self.northern_bound.setMaxLength(8)
+        self.northern_bound.setAlignment(Qt.AlignRight)
+        # lon1
+        self.western_bound = QLineEdit()
+        self.western_bound.setValidator(self.float_validator)
+        self.western_bound.setMaxLength(8)
+        self.western_bound.setAlignment(Qt.AlignRight)
+        # lat2
+        self.southern_bound = QLineEdit()
+        self.southern_bound.setValidator(self.float_validator)
+        self.southern_bound.setMaxLength(8)
+        self.southern_bound.setAlignment(Qt.AlignRight)
+        # lon2
+        self.eastern_bound = QLineEdit()
+        self.eastern_bound.setValidator(self.float_validator)
+        self.eastern_bound.setMaxLength(8)
+        self.eastern_bound.setAlignment(Qt.AlignRight)
+
+
+        self.layout_aerial_image_groupbox.insertRow(2, "Northern Bound [°]", self.northern_bound)
+        self.layout_aerial_image_groupbox.insertRow(3, "Western Bound [°]", self.western_bound)
+        self.layout_aerial_image_groupbox.insertRow(4, "Southern Bound [°]", self.southern_bound)
+        self.layout_aerial_image_groupbox.insertRow(5, "Eastern Bound [°]", self.eastern_bound)
+
+        # probably move the next 4 lines to init_aerial_widget or something
+        self.northern_bound.setText("48.263864")
+        self.western_bound.setText("11.655410")
+        self.southern_bound.setText("48.261424")
+        self.eastern_bound.setText("11.660930")
+
+        self.layout_aerial_image_groupbox.addRow(self.button_add_aerial_image)
+        self.layout_aerial_image_groupbox.addRow(self.aerial_image_loading_status)
+        self.layout_aerial_image_groupbox.addRow(self.button_remove_aerial_image)
+
+        layout_aerial_image.addWidget(self.aerial_image_groupbox)
+
+
+        widget_title = "Add Aerial Image"
+        return widget_title, widget_aerial
 
     def create_add_lanelet_widget(self):
         widget_lanelets = QFrame(self.tree)

@@ -222,7 +222,7 @@ def _time_step_change(mwindow, value):
 def _detect_slider_clicked(mwindow):
     mwindow.slider_clicked = True
     mwindow.animated_viewer_wrapper.cr_viewer.pause()
-    mwindow.animated_viewer_wrapper.cr_viewer.dynamic.update_plot()
+    mwindow.animated_viewer_wrapper.cr_viewer.dynamic.draw_idle()
 
 
 def _detect_slider_release(mwindow):

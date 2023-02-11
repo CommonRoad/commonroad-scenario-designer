@@ -38,30 +38,27 @@ You need the following modules:
 From you Anaconda environment. For all the packages, we recommend to use the provided `requirements.txt`:
 ```bash
 pip install -r requirements.txt
-
-If you do not want to use Anaconda, some features for editing OSM graphs might not be available.
-
 ```
 
 If you want to use the SUMO conversion or to generate traffic using SUMO, please install 
 [SUMO](https://sumo.dlr.de/docs/index.html):
 ```bash
-sudo add-apt-repository ppa:sumo/stable
 sudo apt-get update
 sudo apt-get install sumo sumo-tools sumo-doc
 echo "export SUMO_HOME=/usr/share/sumo" >> ~/.bashrc
 echo 'export PYTHONPATH="$SUMO_HOME/tools:$PYTHONPATH"' >> ~/.bashrc
 ```
 If you use zsh, replace `.bashrc` with `.zshrc`.
+To install the _CommonRoad Scenario Designer_ from PyPI, please execute the following command:
+```bash
+pip install commonroad-scenario-designer
+```
 
-To install the _CommonRoad Scenario Designer_, please execute one of the following two commands:
+To install the _CommonRoad Scenario Designer_ from source, please execute the following command:
 ```bash
 pip install -e .
 ```
-or
-```bash
-python setup.py install
-```
+
 We will soon publish the toolbox on PyPI.
 
 ### Common Errors during installation
@@ -152,25 +149,25 @@ The titles of module pages have to be set manually!
 The full documentation of the API and introducing examples can also be found [here](https://commonroad-scenario-designer.readthedocs.io/en/latest/).
 
 ## Changelog
-Compared to version 0.5, the following things have been added, fixed or changed:
+Compared to version 0.6.1, the following things have been added, fixed or changed:
 
-- Switching shape of dynamic obstacle
-- Adding adjacent lanelet which already exists
-- Lanelet translation with missing x- or y-coordinate
-- Missing location information when storing a scenario
-- Various small bug fixes
+- GUI setting for axis visibility not changeable
+- OpenDRIVE conversion endless loop speed limit mapping
+- Yaml configuration loading under Windows
 
 A detailed overview about the changes in each version is provided in the [Changelog](https://gitlab.lrz.de/tum-cps/commonroad-scenario-designer/-/blob/main/CHANGELOG.md).
 
 ## Bug and feature reporting
-This release (v0.6.0) is still a BETA version.  
+This release (v0.6.1) is still a BETA version.  
 In case you detect a bug or you want to suggest a new feature, please report it in our [forum](https://commonroad.in.tum.de/forum/c/scenario-designer/18).   
 If you want to contribute to the toolbox, you can also post it in the [forum](https://commonroad.in.tum.de/forum/c/scenario-designer/18) or contact [Sebastian Maierhofer](sebastian.maierhofer@tum.de).
 
 ## Authors
 
-Responsible: Sebastian Maierhofer
-Contribution (in alphabetic order by last name): Daniel Asch, Hamza Begic, Florian Braunmiller, Tim Dang, Behtarin Ferdousi, Maximilian Fruehauf, Marcus Gabler, Fabian Hoeltke, Aaron Kaefer, David Le, Gustaf Lindgren, Benjamin Orthen, Luisa Ortner, Louis Pröbstle, Benedikt Reinhard, Maximilian Rieger, Til Stotz, Stefan Urban
+Responsible: Sebastian Maierhofer, Sebastian Mair
+Contribution (in alphabetic order by last name): Daniel Asch, Hamza Begic, Florian Braunmiller, Tim Dang, 
+Behtarin Ferdousi, Maximilian Fruehauf, Marcus Gabler, Fabian Hoeltke, Aaron Kaefer, David Le, Gustaf Lindgren, 
+Sarra Ben Mohamed, Benjamin Orthen, Luisa Ortner, Louis Pröbstle, Benedikt Reinhard, Maximilian Rieger, Til Stotz, Stefan Urban
 
 ## Credits
 We gratefully acknowledge partial financial support by

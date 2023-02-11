@@ -28,9 +28,7 @@ def convert_to_base_lanelet_network(lanelet_network: ConversionLaneletNetwork) -
     """Converts a ConversionLaneletNetwork to a LaneletNetwork.
 
     :param lanelet_network: ConversionLaneletNetwork that should be converted to a LaneletNetwork.
-    :type lanelet_network: :class:`ConversionLaneletNetwork`
     :return: The converted LaneletNetwork.
-    :rtype: :class:`LaneletNetwork`
     """
     network = LaneletNetwork()
     for inter in lanelet_network.intersections:
@@ -72,7 +70,6 @@ class Network:
         """Assign country ID according to the ISO 3166-1 3 letter standard
 
         :param value: Nae of location as a string.
-        :type value: str
         """
         value = value.upper()
         if value in iso3166.countries_by_name:
@@ -88,7 +85,6 @@ class Network:
         """Load all elements of an OpenDRIVE network to a parametric lane representation
 
         :param opendrive: OpenDRIVE network whose elements should be loaded.
-        :type opendrive: :class:`OpenDrive`
         """
         # TODO: Extract location information from Geotranformation in opendrive
         # proj_string_transformed = Transformer.from_pipeline(opendrive.header.geo_reference)
@@ -161,15 +157,11 @@ class Network:
                     stop_line = StopLine(position_1, position_2, LineMarking.SOLID)
                     self._stop_lines.append(stop_line)
 
-    def export_lanelet_network(
-        self, filter_types: list = None
-    ) -> LaneletNetwork:
+    def export_lanelet_network(self, filter_types: list = None) -> LaneletNetwork:
         """Export network as lanelet network.
 
         :param filter_types: Types of ParametricLane objects to be filtered. Default value is None.
-        :type filter_types: list
         :return: The converted LaneletNetwork object.
-        :rtype: :class:`LaneletNetwork`
         """
 
         # Convert groups to lanelets
@@ -254,9 +246,8 @@ class Network:
         """
         Find for each crossing the intersection it belongs to
         :param lanelet_network: ConversionLaneletNetwork
-        :return:
         """
-        def generate_line(vertices) -> (float, float):
+        def generate_line(vertices: np.ndarray) -> (float, float):
             """
             generate a line from start to end of vertex
             :param vertices:
@@ -266,20 +257,20 @@ class Network:
             c = vertices[0][1] - m*vertices[0][0]
             return m, c
 
-        def find_intersect_point() :
+        def find_intersect_point() -> Union[int, None]:
             """
             find an intersection between a lane and a crosswalk. We can conclude that a crosswalk belongs to the same
             intersection as the lanelet it is crossing.
             :return: lanelet id
             """
             for incoming in intersection.incomings:
-                for lanelet in incoming.incoming_lanelets:
-                    vertices = lanelet_network.find_lanelet_by_id(lanelet).left_vertices
+                for la_id in incoming.incoming_lanelets:
+                    vertices = lanelet_network.find_lanelet_by_id(la_id).left_vertices
                     lanelet_m, lanelet_c = generate_line(vertices)
                     x_intersect = (lanelet_c - crosswalk_c) / (crosswalk_m - lanelet_m)
 
                     if x_intersect * lanelet_m + lanelet_c == x_intersect * crosswalk_m + crosswalk_c:
-                        return lanelet
+                        return la_id
             return None
 
         for crosswalk in self._crosswalks:
@@ -290,15 +281,12 @@ class Network:
                     intersection.crossings.add(crosswalk.lanelet_id)
                     break
 
-
     def reference_traffic_signs_with_equal_speed(self, lanelets: List[int], lanelet_network: ConversionLaneletNetwork):
         """If there are multiple lanelets that all have an equal lane speed, finds the first traffic sign of any
         predecessor with the same speed and references it for all lanelets.
 
         :param lanelets: The lanelets to be considered.
-        :type lanelets: List[int]
         :param lanelet_network: The lanelet network that the lanelets belong to.
-        :type lanelet_network: ConversionLaneletNetwork
         """
         visited = []
         for lane in lanelets:
@@ -315,6 +303,7 @@ class Network:
                 while not traffic_sign_found:
                     while predecessors:
                         pred = predecessors.popleft()
+                        visited.append(pred)
                         update_with_reference.append(pred)
                         # if we visited a predecessor, we can remove it from the lanelets, so we don't visit it twice
                         if pred in lanelets:
@@ -486,11 +475,10 @@ class LinkIndex:
     def intersection_maps(self):
         return self._intersections
 
-    def create_from_opendrive(self, opendrive):
+    def create_from_opendrive(self, opendrive: OpenDrive):
         """Create a LinkIndex from an OpenDrive object.
 
         :param opendrive: OpenDrive style object.
-        :type opendrive: :class:`OpenDrive`
         """
         self._add_junctions(opendrive)
 
@@ -570,18 +558,15 @@ class LinkIndex:
                                 predecessor_id, parametric_lane_id, lane.id >= 0
                             )
 
-    def add_intersection_link(self, parametric_lane_id, successor, reverse: bool = False):
+    def add_intersection_link(self, parametric_lane_id: str, successor: str, reverse: bool = False):
         """
         Similar to add_link, adds successors only in an intersection_dict.
         This is a temporary dictionary to accumulate junction information for each open drive junction as a dictionary
         and then store it as a list in the intersection attribute of this class
 
         :param parametric_lane_id: Lane_id as per concatenated format based on opendrive IDs.
-        :type parametric_lane_id: str
         :param successor: Successor of the opendrive lane.
-        :type successor: str
         :param reverse: Whether the direction is opposite. Default is False.
-        :type reverse: False
         """
         if reverse:
             self.add_intersection_link(successor, parametric_lane_id)
@@ -593,15 +578,12 @@ class LinkIndex:
         if successor not in self._intersection_dict[parametric_lane_id]:
             self._intersection_dict[parametric_lane_id].append(successor)
 
-    def add_link(self, parametric_lane_id, successor, reverse: bool = False):
+    def add_link(self, parametric_lane_id: str, successor: str, reverse: bool = False):
         """Adds links to a parametric lane.
 
         :param parametric_lane_id: The ID of the lane to which to add link.
-        :type parametric_lane_id: str
         :param successor: Successor of the lane.
-        :type successor: str
         :param reverse: Whether direction is reversed.
-        :type reverse: bool
         """
 
         # if reverse, call function recursively with switched parameters
@@ -615,11 +597,10 @@ class LinkIndex:
         if successor not in self._successors[parametric_lane_id]:
             self._successors[parametric_lane_id].append(successor)
 
-    def _add_junctions(self, opendrive):
+    def _add_junctions(self, opendrive: OpenDrive):
         """Adds junctions.
 
         :param opendrive: The opendrive object to which junctions should be added.
-        :type opendrive: :class:`OpenDrive`
         """
         # add junctions to link_index
         # if contact_point is start, and laneId from connecting_road is negative
@@ -678,11 +659,10 @@ class LinkIndex:
             # of previous junction
             self._intersection_dict = dict()
 
-    def remove(self, parametric_lane_id):
+    def remove(self, parametric_lane_id: str):
         """Removes a parametric lane from the opendrive network.
 
         :param parametric_lane_id: ID of lane that should be removed.
-        :type parametric_lane_id: str
         """
         # Delete key
         if parametric_lane_id in self._successors:
@@ -693,26 +673,22 @@ class LinkIndex:
             if parametric_lane_id in successors:
                 self._successors[successorsId].remove(parametric_lane_id)
 
-    def get_successors(self, parametric_lane_id: str) -> list:
+    def get_successors(self, parametric_lane_id: str) -> List:
         """Get successors of the specified parametric lane.
 
         :param parametric_lane_id: ID of ParametricLane for which to search successors.
-        :type parametric_lane_id: str
         :return: List of successors belonging to the ParametricLane
-        :rtype: list
         """
         if parametric_lane_id not in self._successors:
             return []
 
         return self._successors[parametric_lane_id]
 
-    def get_predecessors(self, parametric_lane_id: str) -> list:
+    def get_predecessors(self, parametric_lane_id: str) -> List:
         """Get predecessors of the specified parametric lane.
 
         :param parametric_lane_id: ID of ParametricLane for which to search predecessors.
-        :type parametric_lane_id: str
         :return: List of predecessors belonging to the ParametricLane
-        :rtype: list
         """
         predecessors = []
         for successor_plane_id, successors in self._successors.items():
@@ -726,12 +702,11 @@ class LinkIndex:
 
         return predecessors
 
-    def clean_intersections(self, parametric_lane_id):
+    def clean_intersections(self, parametric_lane_id: str):
         """
         Remove lanes that are not part of the lanelet network based on the filters.
 
         :param parametric_lane_id: ID of the lane that needs to be removed.
-        :type parametric_lane_id: str
         """
         for intersection in self._intersections:
             if parametric_lane_id in intersection.keys():

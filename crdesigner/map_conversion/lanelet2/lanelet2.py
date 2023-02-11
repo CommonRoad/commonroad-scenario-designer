@@ -41,7 +41,7 @@ class Way:
 
     def __init__(self, id_, nodes: list, tag_dict: Optional[dict] = None):
         """
-        Initiialization of Way
+        Initialization of Way
 
         :param id_: ID of the way
         :param nodes: list of the way node IDs
@@ -109,41 +109,45 @@ class WayRelation:
         left_way.set("type", "way")
         left_way.set("ref", self.left_way)
         left_way.set("role", "left")
+        for regulatory_element in self.regulatory_elements:
+            xml_node = etree.SubElement(rel, "member")
+            xml_node.set("type", "relation")
+            xml_node.set("ref", str(regulatory_element))
+            xml_node.set("role", "regulatory_element")
         for tag_key, tag_value in self.tag_dict.items():
             xml_node = etree.SubElement(rel, "tag")
             xml_node.set("k", tag_key)
             xml_node.set("v", tag_value)
-
         return rel
 
 
-class RightOfWayRelation:
-    """
-    Relation for a right of way relation with yield and right of way lines.
-    """
+# Class that as a subtype contains TrafficLight, TrafficSign and SpeedLimit
+class RegulatoryElement:
+    """Relation for a regulatory element (traffic light, traffic sign, speed limit)"""
 
-    def __init__(self, id_, refers: list, yield_ways: list, right_of_ways: list, tag_dict: Optional[dict] = None,
+    def __init__(self, id_, refers: Optional[list] = None, yield_ways: Optional[list] = None,
+                 right_of_ways: Optional[list] = None, tag_dict: Optional[dict] = None,
                  ref_line: Optional[list] = None):
         """
-        Initialization of RightOfWayRelation
+        Initialization of RegulatoryElement
         
-        :param id_: ID of the RightOfWayRelation
+        :param id_: ID of the RegulatoryElement
         :param refers: list of the way IDs that the relation refers to
         :param yield_ways: list of the yield way IDs that the relation contains
         :param right_of_ways: list of the right of way IDs that the relation contains
-        :param tag_dict: tag dictionary of the RightOfWayRelation
-        :param ref_line: list of the ref line IDs of the RightOfWayRelation
+        :param tag_dict: tag dictionary of the RegulatoryElement
+        :param ref_line: list of the ref line IDs of the RegulatoryElement
         """
         self.id_ = str(id_)
-        self.refers = [str(i) for i in refers]
-        self.yield_ways = [str(i) for i in yield_ways]
-        self.right_of_ways = [str(i) for i in right_of_ways]
+        self.refers = [str(i) for i in refers] if refers is not None else ()
+        self.yield_ways = [str(i) for i in yield_ways] if yield_ways is not None else ()
+        self.right_of_ways = [str(i) for i in right_of_ways] if right_of_ways is not None else ()
         self.ref_line = [str(i) for i in ref_line] if ref_line is not None else []
         self.tag_dict = tag_dict if tag_dict is not None else {}
 
     def serialize_to_xml(self) -> etree.Element:
         """
-        Serializes the RightOfWayRelation object to the xml format
+        Serializes the RegulatoryElement object to the xml format
         """
         rel = etree.Element("relation")
         rel.set("id", self.id_)
@@ -173,7 +177,6 @@ class RightOfWayRelation:
             xml_node = etree.SubElement(rel, "tag")
             xml_node.set("k", tag_key)
             xml_node.set("v", tag_value)
-
         return rel
 
 
@@ -183,14 +186,17 @@ class OSMLanelet:
     """
 
     def __init__(self):
-        """
-        Initalization of the OSMLanelet
-        """
+        """Initalization of the OSMLanelet"""
         self.nodes = {}
-        self._ways = {}
+        self.ways = {}
         self.way_relations = {}
+        self.regulatory_elements = {}
         self.right_of_way_relations = {}
-        self.speed_limit_signs = {}
+        self.speed_limit_relations = {}
+        self.traffic_light_relations = {}
+        self.speed_limit_signs = {}  # although that right_of_way_relations,traffic_light_relations and   #
+        # speed_limit_relations  # are all stored inside regulatory_elements, there are separate getters for them as
+        # it is easier to understand  # the code.
 
     def add_node(self, node: Node):
         """
@@ -206,7 +212,7 @@ class OSMLanelet:
 
         :param way: Way that will be added to the OSM object
         """
-        self._ways[way.id_] = way
+        self.ways[way.id_] = way
 
     def add_way_relation(self, way_relation: WayRelation):
         """
@@ -216,19 +222,30 @@ class OSMLanelet:
         """
         self.way_relations[way_relation.id_] = way_relation
 
-    def add_right_of_way_relation(self, right_of_way_relation: RightOfWayRelation):
+    def add_regulatory_element(self, regulatory_element: RegulatoryElement):
         """
-        Maps a right of way relation id with the right of way relation object and inserts it into the OSM object.
+        Maps a right of way relation id with the regulatory element object and inserts it into the OSM object.
 
-        :param right_of_way_relation: RightOfWayRelation that will be added to the OSM object
+        :param regulatory_element: RegulatoryElement that will be added to the OSM object
         """
-        self.right_of_way_relations[right_of_way_relation.id_] = right_of_way_relation
+        if regulatory_element.tag_dict["subtype"] == "right_of_way":
+            self.right_of_way_relations[regulatory_element.id_] = regulatory_element
+
+        if regulatory_element.tag_dict["subtype"] == "speed_limit":
+            self.speed_limit_relations[regulatory_element.id_] = regulatory_element
+
+        if regulatory_element.tag_dict["subtype"] == "traffic_light":
+            self.traffic_light_relations[regulatory_element.id_] = regulatory_element
+
+        self.regulatory_elements[regulatory_element.id_] = regulatory_element
 
     def add_speed_limit_sign(self, speed_limit_id: str, speed_limit_speed: str, traffic_sign_id):
         """
         Maps a speed limit id with the speed limit speed and the traffic sign id and inserts it into the OSM object.
 
-        :param right_of_way_relation: RightOfWayRelation that will be added to the OSM object
+        :param speed_limit_id: ID of speed limit sign
+        :param speed_limit_speed: Speed limit [m/s]
+        :param traffic_sign_id: ID of traffic sign
         """
         self.speed_limit_signs[speed_limit_id] = (speed_limit_speed, traffic_sign_id)
 
@@ -239,16 +256,25 @@ class OSMLanelet:
         :param way_id: id of the way
         :return: Way with the corresponding id
         """
-        return self._ways.get(way_id)
+        return self.ways.get(way_id)
 
-    def find_right_of_way_by_id(self, right_id: str) -> Optional[RightOfWayRelation]:
+    def find_regulatory_element_by_id(self, right_id: str) -> Optional[RegulatoryElement]:
         """
         Finds a right of way relation corresponding to its id.
         
         :param right_id: id of the right of way relation
-        :return: RightOfWayRelation with the corresponding id
+        :return: RegulatoryElement with the corresponding id
         """
-        return self.right_of_way_relations.get(right_id)
+        return self.regulatory_elements.get(right_id)
+
+    def find_right_of_way_by_id(self, right_id: str) -> Optional[RegulatoryElement]:
+        """
+        Finds a right of way relation corresponding to its id.
+        
+        :param right_id: id of the right of way relation
+        :return: RegulatoryElement with the corresponding id
+        """
+        return self.regulatory_elements.get(right_id)
 
     def find_node_by_id(self, node_id: str) -> Optional[Node]:
         """
@@ -280,13 +306,13 @@ class OSMLanelet:
         for node in self.nodes.values():
             osm.append(node.serialize_to_xml())
 
-        for way in self._ways.values():
+        for way in self.ways.values():
             osm.append(way.serialize_to_xml())
 
         for way_relation in self.way_relations.values():
             osm.append(way_relation.serialize_to_xml())
 
-        for right_of_way_relation in self.right_of_way_relations.values():
-            osm.append(right_of_way_relation.serialize_to_xml())
+        for regulatory_element in self.regulatory_elements.values():
+            osm.append(regulatory_element.serialize_to_xml())
 
         return osm

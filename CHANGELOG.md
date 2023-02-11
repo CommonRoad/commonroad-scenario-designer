@@ -1,6 +1,29 @@
 # Changelog
 
-## [0.6.0] - 2023-01-XX
+## [0.7.0] - 2023-0X-XX
+
+### Added
+- Possibility to load aerial image from Bing in the background
+- CommonRoad to Lanelet2 conversion: Conversion of regulatory elements
+
+### Changed
+- Default matplotlib area
+- Generalized traffic sign conversion 
+- Lanelet2 to CommonRoad conversion: Generalize traffic sign conversion
+
+### Fixed
+- Persisting zoomed scale
+
+### Removed
+
+## [0.6.1] - 2023-02-09
+
+### Fixed
+- GUI setting for axis visibility not changeable
+- OpenDRIVE conversion endless loop speed limit mapping
+- Yaml configuration loading under Windows
+
+## [0.6.0] - 2023-01-31
 
 ### Added
 - New test cases for the OpenDRIVE to CommonRoad conversion

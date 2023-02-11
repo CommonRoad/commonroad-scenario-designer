@@ -33,7 +33,7 @@ IMAGE_SAVE_PATH = "files/imagery/"
 # The zoom level of Bing Maps tiles
 ZOOM_LEVEL = 19
 # The key to access bing maps
-BING_MAPS_KEY = ""
+BING_MAPS_KEY = "AqoElLBbU2ydJjWlCvPQmJGgLcF05QHAXPGTDNgBY0bNWGxwJtRP5iLQqR155wW7"
 
 # Map download Settings
 # path to save downloaded files
