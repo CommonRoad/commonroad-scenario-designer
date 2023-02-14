@@ -39,7 +39,7 @@ class SectionExpandButton(QPushButton):
 
 
 class CheckableComboBox(QComboBox):
-    def __init__(self, mwindow=None):
+    def __init__(self, mwindow=None, pred_suc = False):
         super(CheckableComboBox, self).__init__()
         self.mwindow = mwindow
         self.view().pressed.connect(self.handle_item_pressed)

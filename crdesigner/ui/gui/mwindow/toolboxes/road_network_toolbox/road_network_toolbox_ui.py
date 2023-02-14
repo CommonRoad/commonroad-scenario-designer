@@ -602,6 +602,10 @@ class RoadNetworkToolboxUI(Toolbox):
         self.lanelet_width.setValidator(self.float_validator)
         self.lanelet_width.setMaxLength(5)
         self.lanelet_width.setAlignment(Qt.AlignRight)
+        self.lanelet_width.setDisabled(True)
+        self.lanelet_width.setStyleSheet(
+                'background-color: ' + self.mwindow.colorscheme().second_background + '; color: ' +
+                self.mwindow.colorscheme().disabled)
 
         self.layout_lanelet_adding_groupbox.insertRow(4, "Length [m]", self.lanelet_length)
         self.layout_lanelet_adding_groupbox.insertRow(5, "Width [m]", self.lanelet_width)
@@ -617,13 +621,12 @@ class RoadNetworkToolboxUI(Toolbox):
         self.layout_lanelet_adding_groupbox.insertRow(14, self.line2)
 
 
-
     def init_connect_to_predecessors_selection_fields(self):
         self.line1 = QFrame()
         self.line1.setFrameShape(QFrame.HLine)
         self.layout_lanelet_adding_groupbox.insertRow(2, self.line1)
 
-        self.predecessors = CheckableComboBox()
+        self.predecessors = CheckableComboBox(self)
         self.layout_lanelet_adding_groupbox.insertRow(4, "Predecessors:", self.predecessors)
 
         # Lanelet Length and Width
@@ -636,6 +639,10 @@ class RoadNetworkToolboxUI(Toolbox):
         self.lanelet_width.setValidator(self.float_validator)
         self.lanelet_width.setMaxLength(5)
         self.lanelet_width.setAlignment(Qt.AlignRight)
+        self.lanelet_width.setDisabled(True)
+        self.lanelet_width.setStyleSheet(
+                'background-color: ' + self.mwindow.colorscheme().second_background + '; color: ' +
+                self.mwindow.colorscheme().disabled)
 
         self.layout_lanelet_adding_groupbox.insertRow(5, "Length [m]", self.lanelet_length)
         self.layout_lanelet_adding_groupbox.insertRow(6, "Width [m]", self.lanelet_width)
@@ -668,6 +675,10 @@ class RoadNetworkToolboxUI(Toolbox):
         self.lanelet_width.setValidator(self.float_validator)
         self.lanelet_width.setMaxLength(5)
         self.lanelet_width.setAlignment(Qt.AlignRight)
+        self.lanelet_width.setDisabled(True)
+        self.lanelet_width.setStyleSheet(
+                'background-color: ' + self.mwindow.colorscheme().second_background + '; color: ' +
+                self.mwindow.colorscheme().disabled)
 
         self.layout_lanelet_adding_groupbox.insertRow(6, "Length [m]", self.lanelet_length)
         self.layout_lanelet_adding_groupbox.insertRow(7, "Width [m]", self.lanelet_width)
@@ -1437,3 +1448,11 @@ class RoadNetworkToolboxUI(Toolbox):
                 self.curved_check_button.button.setStyleSheet('background-color: '+ self.mwindow.colorscheme().second_background + '; color: ' + self.mwindow.colorscheme().disabled)
             else:
                 self.curved_check_button.button.setStyleSheet('background-color: '+ self.mwindow.colorscheme().second_background + '; color: ' + self.mwindow.colorscheme().color)
+
+        if hasattr(self, 'lanelet_width'):
+            if not self.place_at_position.isChecked():
+                self.lanelet_width.setStyleSheet(
+                'background-color: ' + self.mwindow.colorscheme().second_background + '; color: ' + self.mwindow.colorscheme().disabled)
+            else:
+                self.lanelet_width.setStyleSheet(
+                'background-color: ' + self.mwindow.colorscheme().second_background + '; color: ' + self.mwindow.colorscheme().color)

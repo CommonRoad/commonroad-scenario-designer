@@ -253,7 +253,7 @@ class AnimatedViewer:
 
         if new_file_added:
             # initialise the axis to a bigger range
-            self.dynamic.set_limits([0, 50, 0, 50])
+            self.dynamic.set_limits([-50, 50, -50, 50])
             self.dynamic.draw_idle()
         # otherwise keep previous limits (persist zoom)
         else:
