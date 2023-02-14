@@ -410,10 +410,7 @@ class RoadNetworkToolbox(QDockWidget, ):
         Initializes lanelet information fields according to the selected predecessor / successor when connect to predecessor / successor is selected
         selects always the first in the list of predecessors / successors
         """
-
-        if len(self.road_network_toolbox_ui.predecessors.get_checked_items()) == 0:
-            return
-        if len(self.road_network_toolbox_ui.successors.get_checked_items()) == 0:
+        if len(self.road_network_toolbox_ui.predecessors.get_checked_items()) == 0 and len(self.road_network_toolbox_ui.successors.get_checked_items()) == 0:
             return
         if self.road_network_toolbox_ui.connect_to_predecessors_selection.isChecked():
             pred = self.road_network_toolbox_ui.predecessors.get_checked_items()[0]
@@ -724,6 +721,8 @@ class RoadNetworkToolbox(QDockWidget, ):
                     rotation_angle = int(self.road_network_toolbox_ui.rotation_angle_end.text())
 
                 initial_vertex_x = lanelet.center_vertices[0]
+                if rotation_angle > 360:
+                    rotation_angle %= 360
                 lanelet.translate_rotate(np.array([0, 0]), np.deg2rad(rotation_angle))
                 lanelet.translate_rotate(initial_vertex_x - lanelet.center_vertices[0], 0.0)
 
@@ -959,6 +958,16 @@ class RoadNetworkToolbox(QDockWidget, ):
 
         @param lanelet: Currently selected lanelet.
         """
+        if self.road_network_toolbox_ui.connect_to_predecessors_selection.isChecked():
+            self.road_network_toolbox_ui.predecessors.setCurrentIndex(lanelet.lanelet_id)
+            self.road_network_toolbox_ui.predecessors.set_checked_items([str(lanelet.lanelet_id)])
+            self.initialize_predecessor_and_successor_fields()
+        elif self.road_network_toolbox_ui.connect_to_successors_selection.isChecked():
+            self.road_network_toolbox_ui.successors.setCurrentIndex(lanelet.lanelet_id)
+            self.road_network_toolbox_ui.successors.set_checked_items([str(lanelet.lanelet_id)])
+            self.initialize_predecessor_and_successor_fields()
+
+
         self.road_network_toolbox_ui.selected_lanelet_start_position_x.setText(
             str(0.0 if lanelet.center_vertices[0][0] == 1.0e-16 else lanelet.center_vertices[0][0]))
         self.road_network_toolbox_ui.selected_lanelet_start_position_y.setText(
@@ -1335,13 +1344,13 @@ class RoadNetworkToolbox(QDockWidget, ):
                 self.add_traffic_sign_element()
                 num_rows = self.road_network_toolbox_ui.traffic_sign_element_table.rowCount()
                 self.road_network_toolbox_ui.traffic_sign_element_table.cellWidget(num_rows - 1, 0).setCurrentText(
-                        country_signs(elem.traffic_sign_element_id).name)
+                    country_signs(elem.traffic_sign_element_id).name)
                 if len(elem.additional_values) > 0:
-                    self.road_network_toolbox_ui.traffic_sign_element_table.setItem(num_rows - 1, 1,
-                            QTableWidgetItem(str(elem.additional_values[0])))
+                    self.road_network_toolbox_ui.traffic_sign_element_table.setItem(
+                        num_rows - 1, 1, QTableWidgetItem(str(elem.additional_values[0])))
                 else:
-                    self.road_network_toolbox_ui.traffic_sign_element_table.setItem(num_rows - 1, 1,
-                            QTableWidgetItem(""))
+                    self.road_network_toolbox_ui.traffic_sign_element_table.setItem(
+                        num_rows - 1, 1, QTableWidgetItem(""))
         else:
             self.road_network_toolbox_ui.traffic_sign_virtual_selection.setChecked(False)
             self.road_network_toolbox_ui.x_position_traffic_sign.setText("0.0")
@@ -1361,15 +1370,14 @@ class RoadNetworkToolbox(QDockWidget, ):
             self.text_browser.append("_Warning:_ Add Referenced Lanelets")
             return
         # Check if only 'None' is selected - if yes -> Warning
-        if 'None' in self.road_network_toolbox_ui.referenced_lanelets_traffic_light.get_checked_items() and len(
-                self.road_network_toolbox_ui.referenced_lanelets_traffic_light.get_checked_items()) == 1:
+        if 'None' in self.road_network_toolbox_ui.referenced_lanelets_traffic_light.get_checked_items() and len(self.road_network_toolbox_ui.referenced_lanelets_traffic_light.get_checked_items()) == 1:
             self.text_browser.append("_Warning:_ Add Referenced Lanelets")
             return
         # Check if 'None' is and other items are selected -> Uncheck 'None'
         elif 'None' in self.road_network_toolbox_ui.referenced_lanelets_traffic_light.get_checked_items():
             self.road_network_toolbox_ui.referenced_lanelets_traffic_light.uncheck_items('None')
-        referenced_lanelets = {int(la) for la in
-                               self.road_network_toolbox_ui.referenced_lanelets_traffic_light.get_checked_items()}
+        referenced_lanelets = \
+            {int(la) for la in self.road_network_toolbox_ui.referenced_lanelets_traffic_light.get_checked_items()}
         if self.road_network_toolbox_ui.x_position_traffic_light.text():
             x_position = self.get_float(self.road_network_toolbox_ui.x_position_traffic_light)
         else:
@@ -1379,8 +1387,8 @@ class RoadNetworkToolbox(QDockWidget, ):
         else:
             y_position = 0
 
-        traffic_light_direction = TrafficLightDirection(
-            self.road_network_toolbox_ui.traffic_light_directions.currentText())
+        traffic_light_direction = \
+            TrafficLightDirection(self.road_network_toolbox_ui.traffic_light_directions.currentText())
         time_offset = int(self.road_network_toolbox_ui.time_offset.text())
         time_red = int(self.road_network_toolbox_ui.time_red.text())
         time_green = int(self.road_network_toolbox_ui.time_green.text())
@@ -1406,8 +1414,9 @@ class RoadNetworkToolbox(QDockWidget, ):
         if traffic_light_id is None:
             traffic_light_id = self.current_scenario.generate_object_id()
 
-        new_traffic_light = TrafficLight(traffic_light_id, traffic_light_cycle, np.array([x_position, y_position]),
-                                         time_offset, traffic_light_direction, traffic_light_active)
+        new_traffic_light = TrafficLight(traffic_light_id, traffic_light_cycle,
+                                         np.array([x_position, y_position]), time_offset, traffic_light_direction,
+                                         traffic_light_active)
 
         self.current_scenario.add_objects(new_traffic_light, referenced_lanelets)
         self.set_default_road_network_list_information()
@@ -1424,7 +1433,8 @@ class RoadNetworkToolbox(QDockWidget, ):
             selected_traffic_light_id = int(self.road_network_toolbox_ui.selected_traffic_light.currentText())
         else:
             return
-        traffic_light = self.current_scenario.lanelet_network.find_traffic_light_by_id(selected_traffic_light_id)
+        traffic_light = \
+            self.current_scenario.lanelet_network.find_traffic_light_by_id(selected_traffic_light_id)
         self.current_scenario.remove_traffic_light(traffic_light)
         self.set_default_road_network_list_information()
         self.callback(self.current_scenario)
@@ -1440,17 +1450,17 @@ class RoadNetworkToolbox(QDockWidget, ):
             self.text_browser.append("_Warning:_ Add Referenced Lanelets")
             return
         # Check if only 'None' is selected - if yes -> Warning
-        if 'None' in self.road_network_toolbox_ui.referenced_lanelets_traffic_light.get_checked_items() and len(
-                self.road_network_toolbox_ui.referenced_lanelets_traffic_light.get_checked_items()) == 1:
+        if 'None' in self.road_network_toolbox_ui.referenced_lanelets_traffic_light.get_checked_items() and len(self.road_network_toolbox_ui.referenced_lanelets_traffic_light.get_checked_items()) == 1:
             self.text_browser.append("_Warning:_ Add Referenced Lanelets")
-            return  # Check if 'None' is and other items are selected -> Uncheck 'None'
+            return # Check if 'None' is and other items are selected -> Uncheck 'None'
         elif 'None' in self.road_network_toolbox_ui.referenced_lanelets_traffic_light.get_checked_items():
             self.road_network_toolbox_ui.referenced_lanelets_traffic_light.uncheck_items('None')
         if self.road_network_toolbox_ui.selected_traffic_light.currentText() not in ["", "None"]:
             selected_traffic_light_id = int(self.road_network_toolbox_ui.selected_traffic_light.currentText())
         else:
             return
-        traffic_light = self.current_scenario.lanelet_network.find_traffic_light_by_id(selected_traffic_light_id)
+        traffic_light = \
+            self.current_scenario.lanelet_network.find_traffic_light_by_id(selected_traffic_light_id)
         self.current_scenario.remove_traffic_light(traffic_light)
         self.add_traffic_light(selected_traffic_light_id)
         self.set_default_road_network_list_information()
@@ -1462,7 +1472,8 @@ class RoadNetworkToolbox(QDockWidget, ):
         """
         if self.road_network_toolbox_ui.selected_traffic_light.currentText() not in ["", "None"]:
             selected_traffic_light_id = int(self.road_network_toolbox_ui.selected_traffic_light.currentText())
-            traffic_light = self.current_scenario.lanelet_network.find_traffic_light_by_id(selected_traffic_light_id)
+            traffic_light = \
+                self.current_scenario.lanelet_network.find_traffic_light_by_id(selected_traffic_light_id)
 
             self.road_network_toolbox_ui.x_position_traffic_light.setText(str(traffic_light.position[0]))
             self.road_network_toolbox_ui.y_position_traffic_light.setText(str(traffic_light.position[1]))
@@ -1491,8 +1502,9 @@ class RoadNetworkToolbox(QDockWidget, ):
 
             self.road_network_toolbox_ui.traffic_light_directions.setCurrentText(str(traffic_light.direction.value))
 
-            referenced_lanelets = [str(la.lanelet_id) for la in self.current_scenario.lanelet_network.lanelets if
-                                   selected_traffic_light_id in la.traffic_lights]
+            referenced_lanelets = [str(la.lanelet_id) for la in
+                                   self.current_scenario.lanelet_network.lanelets
+                                   if selected_traffic_light_id in la.traffic_lights]
             self.road_network_toolbox_ui.referenced_lanelets_traffic_light.set_checked_items(referenced_lanelets)
 
     def create_traffic_lights(self):
@@ -1504,7 +1516,8 @@ class RoadNetworkToolbox(QDockWidget, ):
         if not lanelet_ids:
             return
         self.road_network_toolbox_ui.referenced_lanelets_traffic_light.clear()
-        converter = CR2SumoMapConverter(self.current_scenario, SumoConfig.from_scenario(self.current_scenario))
+        converter = CR2SumoMapConverter(self.current_scenario,
+                                        SumoConfig.from_scenario(self.current_scenario))
         converter.create_sumo_files(self.tmp_folder)
         oks = []
         dt = self.current_scenario.dt
@@ -1517,8 +1530,10 @@ class RoadNetworkToolbox(QDockWidget, ):
 
         for lanelet_id in lanelet_ids:
             try:
-                ok = converter.auto_generate_traffic_light_system(lanelet_id, green_time=int(green * dt),
-                                                                  yellow_time=int(yellow * dt), all_red_time=0,
+                ok = converter.auto_generate_traffic_light_system(lanelet_id,
+                                                                  green_time=int(green * dt),
+                                                                  yellow_time=int(yellow * dt),
+                                                                  all_red_time=0,
                                                                   left_green_time=math.ceil(0.06 * total * dt),
                                                                   crossing_min_time=math.ceil(0.1 * total * dt),
                                                                   crossing_clearance_time=math.ceil(0.15 * total * dt),
@@ -1526,8 +1541,8 @@ class RoadNetworkToolbox(QDockWidget, ):
             except Exception:
                 ok = False
             oks.append(ok)
-            self.text_browser.append((
-                                         "Created" if ok else "ERROR: Could not create") + f" traffic light system for lanelet {lanelet_id}")
+            self.text_browser.append(
+                ("Created" if ok else "ERROR: Could not create") + f" traffic light system for lanelet {lanelet_id}")
 
         if any(oks):
             # update lanelet_network and boradcast change
@@ -1550,8 +1565,8 @@ class RoadNetworkToolbox(QDockWidget, ):
         self.road_network_toolbox_ui.intersection_incomings_table.insertRow(num_rows)
         lanelet_ids = [str(la_id) for la_id in self.collect_lanelet_ids()]
         if new_incoming:
-            self.road_network_toolbox_ui.intersection_incomings_table.setItem(num_rows, 0,
-                    QTableWidgetItem(str(self.current_scenario.generate_object_id())))
+            self.road_network_toolbox_ui.intersection_incomings_table.setItem(
+                num_rows, 0, QTableWidgetItem(str(self.current_scenario.generate_object_id())))
         combo_box_lanelets = CheckableComboBox()
         combo_box_lanelets.addItems(lanelet_ids)
         self.road_network_toolbox_ui.intersection_incomings_table.setCellWidget(num_rows, 1, combo_box_lanelets)
@@ -1574,15 +1589,15 @@ class RoadNetworkToolbox(QDockWidget, ):
         @param incoming_ids: List of available incoming IDs.
         """
         if incoming_ids is None:
-            incoming_ids = [self.road_network_toolbox_ui.intersection_incomings_table.item(row, 0).text() for row in
-                            range(self.road_network_toolbox_ui.intersection_incomings_table.rowCount())]
+            incoming_ids = [self.road_network_toolbox_ui.intersection_incomings_table.item(row, 0).text()
+                            for row in range(self.road_network_toolbox_ui.intersection_incomings_table.rowCount())]
         for row in range(self.road_network_toolbox_ui.intersection_incomings_table.rowCount()):
             combo_box_left_of = QComboBox()
             combo_box_left_of.addItems(incoming_ids)
             if row != self.road_network_toolbox_ui.intersection_incomings_table.rowCount() - 1:
                 index = self.road_network_toolbox_ui.intersection_incomings_table.cellWidget(row, 5).findText(
-                        self.road_network_toolbox_ui.intersection_incomings_table.cellWidget(row, 5).currentText(),
-                        Qt.MatchFixedString)
+                    self.road_network_toolbox_ui.intersection_incomings_table.cellWidget(row, 5).currentText(),
+                    Qt.MatchFixedString)
             else:
                 index = -1
             self.road_network_toolbox_ui.intersection_incomings_table.setCellWidget(row, 5, combo_box_left_of)
@@ -1599,7 +1614,8 @@ class RoadNetworkToolbox(QDockWidget, ):
 
         if self.road_network_toolbox_ui.selected_intersection.currentText() not in ["", "None"]:
             selected_intersection_id = int(self.road_network_toolbox_ui.selected_intersection.currentText())
-            intersection = self.current_scenario.lanelet_network.find_intersection_by_id(selected_intersection_id)
+            intersection = \
+                self.current_scenario.lanelet_network.find_intersection_by_id(selected_intersection_id)
             self.current_scenario.remove_intersection(intersection)
             self.set_default_road_network_list_information()
             self.callback(self.current_scenario)
@@ -1614,7 +1630,8 @@ class RoadNetworkToolbox(QDockWidget, ):
 
         if self.road_network_toolbox_ui.selected_intersection.currentText() not in ["", "None"]:
             selected_intersection_id = int(self.road_network_toolbox_ui.selected_intersection.currentText())
-            intersection = self.current_scenario.lanelet_network.find_intersection_by_id(selected_intersection_id)
+            intersection = \
+                self.current_scenario.lanelet_network.find_intersection_by_id(selected_intersection_id)
             self.current_scenario.remove_intersection(intersection)
             self.add_intersection(selected_intersection_id)
             self.set_default_road_network_list_information()
@@ -1633,30 +1650,30 @@ class RoadNetworkToolbox(QDockWidget, ):
         incomings = []
         for row in range(self.road_network_toolbox_ui.intersection_incomings_table.rowCount()):
             incoming_id = int(self.road_network_toolbox_ui.intersection_incomings_table.item(row, 0).text())
-            incoming_lanelets = {int(item) for item in
-                                 self.road_network_toolbox_ui.intersection_incomings_table.cellWidget(row,
-                                                                                                      1).get_checked_items()}
+            incoming_lanelets = \
+                {int(item) for item in
+                 self.road_network_toolbox_ui.intersection_incomings_table.cellWidget(row, 1).get_checked_items()}
             if len(incoming_lanelets) < 1:
                 self.text_browser.append("_Warning:_ An incoming must consist at least of one lanelet.")
                 print("road_network_toolbox.py/add_intersection: An incoming must consist at least of one lanelet.")
                 return
             successor_left = {int(item) for item in
-                              self.road_network_toolbox_ui.intersection_incomings_table.cellWidget(row,
-                                      2).get_checked_items()}
+                              self.road_network_toolbox_ui.intersection_incomings_table.cellWidget(
+                row, 2).get_checked_items()}
             successor_straight = {int(item) for item in
-                                  self.road_network_toolbox_ui.intersection_incomings_table.cellWidget(row,
-                                          3).get_checked_items()}
+                                  self.road_network_toolbox_ui.intersection_incomings_table.cellWidget(
+                                      row, 3).get_checked_items()}
             successor_right = {int(item) for item in
-                               self.road_network_toolbox_ui.intersection_incomings_table.cellWidget(row,
-                                       4).get_checked_items()}
+                               self.road_network_toolbox_ui.intersection_incomings_table.cellWidget(
+                                       row, 4).get_checked_items()}
             if len(successor_left) + len(successor_right) + len(successor_straight) < 1:
                 print("An incoming must consist at least of one successor")
                 return
-            left_of = int(self.road_network_toolbox_ui.intersection_incomings_table.cellWidget(row,
-                                                                                               5).currentText()) if self.road_network_toolbox_ui.intersection_incomings_table.cellWidget(
-                row, 5).currentText() != "" else None
-            incoming = IntersectionIncomingElement(incoming_id, incoming_lanelets, successor_right, successor_straight,
-                                                   successor_left, left_of)
+            left_of = int(self.road_network_toolbox_ui.intersection_incomings_table.cellWidget(row, 5).currentText()) \
+                if self.road_network_toolbox_ui.intersection_incomings_table.cellWidget(row, 5).currentText() != "" \
+                else None
+            incoming = IntersectionIncomingElement(incoming_id, incoming_lanelets, successor_right,
+                                                   successor_straight, successor_left, left_of)
             incomings.append(incoming)
         crossings = {int(item) for item in self.road_network_toolbox_ui.intersection_crossings.get_checked_items()}
 
@@ -1684,32 +1701,33 @@ class RoadNetworkToolbox(QDockWidget, ):
         """
         if self.road_network_toolbox_ui.selected_intersection.currentText() not in ["", "None"]:
             selected_intersection_id = int(self.road_network_toolbox_ui.selected_intersection.currentText())
-            intersection = self.current_scenario.lanelet_network.find_intersection_by_id(selected_intersection_id)
+            intersection = \
+                self.current_scenario.lanelet_network.find_intersection_by_id(selected_intersection_id)
             self.road_network_toolbox_ui.intersection_incomings_table.setRowCount(0)
             incoming_ids = [str(inc.incoming_id) for inc in intersection.incomings]
             for incoming in intersection.incomings:
                 self.add_incoming_to_table(False, incoming_ids)
                 num_rows = self.road_network_toolbox_ui.intersection_incomings_table.rowCount()
-                self.road_network_toolbox_ui.intersection_incomings_table.setItem(num_rows - 1, 0,
-                        QTableWidgetItem(str(incoming.incoming_id)))
-                self.road_network_toolbox_ui.intersection_incomings_table.cellWidget(num_rows - 1, 1).set_checked_items(
-                        [str(la_id) for la_id in incoming.incoming_lanelets])
-                self.road_network_toolbox_ui.intersection_incomings_table.cellWidget(num_rows - 1, 2).set_checked_items(
-                        [str(la_id) for la_id in incoming.successors_left])
-                self.road_network_toolbox_ui.intersection_incomings_table.cellWidget(num_rows - 1, 3).set_checked_items(
-                        [str(la_id) for la_id in incoming.successors_straight])
-                self.road_network_toolbox_ui.intersection_incomings_table.cellWidget(num_rows - 1, 4).set_checked_items(
-                        [str(la_id) for la_id in incoming.successors_right])
-                index = self.road_network_toolbox_ui.intersection_incomings_table.cellWidget(num_rows - 1, 5).findText(
-                    str(incoming.left_of))
-                self.road_network_toolbox_ui.intersection_incomings_table.cellWidget(num_rows - 1, 5).setCurrentIndex(
-                    index)
+                self.road_network_toolbox_ui.intersection_incomings_table.setItem(
+                    num_rows - 1, 0, QTableWidgetItem(str(incoming.incoming_id)))
+                self.road_network_toolbox_ui.intersection_incomings_table.cellWidget(
+                    num_rows - 1, 1).set_checked_items([str(la_id) for la_id in incoming.incoming_lanelets])
+                self.road_network_toolbox_ui.intersection_incomings_table.cellWidget(
+                    num_rows - 1, 2).set_checked_items([str(la_id) for la_id in incoming.successors_left])
+                self.road_network_toolbox_ui.intersection_incomings_table.cellWidget(
+                    num_rows - 1, 3).set_checked_items([str(la_id) for la_id in incoming.successors_straight])
+                self.road_network_toolbox_ui.intersection_incomings_table.cellWidget(
+                    num_rows - 1, 4).set_checked_items([str(la_id) for la_id in incoming.successors_right])
+                index = self.road_network_toolbox_ui.intersection_incomings_table.cellWidget(
+                    num_rows - 1, 5).findText(str(incoming.left_of))
+                self.road_network_toolbox_ui.intersection_incomings_table.cellWidget(
+                    num_rows - 1, 5).setCurrentIndex(index)
             self.road_network_toolbox_ui.intersection_crossings.set_checked_items(
-                    [str(cr) for cr in intersection.crossings])
+                [str(cr) for cr in intersection.crossings])
 
             self.road_network_toolbox_ui.intersection_lanelet_to_fit.clear()
             self.road_network_toolbox_ui.intersection_lanelet_to_fit.addItems(
-                    ["None"] + [str(item) for item in self.collect_incoming_lanelet_ids_from_intersection()])
+                ["None"] + [str(item) for item in self.collect_incoming_lanelet_ids_from_intersection()])
             self.road_network_toolbox_ui.intersection_lanelet_to_fit.setCurrentIndex(0)
 
     def connect_lanelets(self):
@@ -1721,7 +1739,7 @@ class RoadNetworkToolbox(QDockWidget, ):
             return
         if self.road_network_toolbox_ui.selected_lanelet_two.currentText() != "None":
             selected_lanelet_two = self.current_scenario.lanelet_network.find_lanelet_by_id(
-                    int(self.road_network_toolbox_ui.selected_lanelet_two.currentText()))
+                int(self.road_network_toolbox_ui.selected_lanelet_two.currentText()))
         else:
             self.text_browser.append("No lanelet selected for [2].")
             return
@@ -1743,7 +1761,7 @@ class RoadNetworkToolbox(QDockWidget, ):
             return
         if self.road_network_toolbox_ui.selected_lanelet_two.currentText() != "None":
             selected_lanelet_two = self.current_scenario.lanelet_network.find_lanelet_by_id(
-                    int(self.road_network_toolbox_ui.selected_lanelet_two.currentText()))
+                int(self.road_network_toolbox_ui.selected_lanelet_two.currentText()))
         else:
             self.text_browser.append("No lanelet selected for [2].")
             return
@@ -1801,9 +1819,9 @@ class RoadNetworkToolbox(QDockWidget, ):
         """
         Rotates and translates a complete intersection so that it is attached to a user-defined lanelet.
         """
-        if self.road_network_toolbox_ui.selected_intersection.currentText() not in ["",
-                                                                                    "None"] and self.road_network_toolbox_ui.other_lanelet_to_fit.currentText() not in [
-            "", "None"] and self.road_network_toolbox_ui.intersection_lanelet_to_fit.currentText() not in ["", "None"]:
+        if self.road_network_toolbox_ui.selected_intersection.currentText() not in ["", "None"] \
+            and self.road_network_toolbox_ui.other_lanelet_to_fit.currentText() not in ["", "None"] \
+                and self.road_network_toolbox_ui.intersection_lanelet_to_fit.currentText() not in ["", "None"]:
             selected_intersection_id = int(self.road_network_toolbox_ui.selected_intersection.currentText())
             intersection = self.current_scenario.lanelet_network.find_intersection_by_id(selected_intersection_id)
 
@@ -1816,59 +1834,3 @@ class RoadNetworkToolbox(QDockWidget, ):
             MapCreator.fit_intersection_to_predecessor(lanelet_predecessor, lanelet_successor, intersection,
                                                        self.current_scenario.lanelet_network)
             self.callback(self.current_scenario)
-
-    def hide_aerial_image(self):
-        """
-        remove the aerial image from the plot
-        """
-        if self.current_scenario is None:
-            self.text_browser.append("Please create first a new scenario.")
-            return
-        self.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.deactivate_aerial_image()
-
-        self.callback(self.current_scenario)
-
-    def verify_aerial_coordinate_input(self) -> bool:
-        """
-        check if user input of coordinates are in correct format and sane
-
-        :return: True if coordinates are valid
-        """
-
-        lat1 = self.road_network_toolbox_ui.northern_bound.text()
-        lon1 = self.road_network_toolbox_ui.western_bound.text()
-        lat2 = self.road_network_toolbox_ui.southern_bound.text()
-        lon2 = self.road_network_toolbox_ui.eastern_bound.text()
-        try:
-            lat1 = float(lat1)
-            lon1 = float(lon1)
-            lat2 = float(lat2)
-            lon2 = float(lon2)
-            if not (
-                    -90 <= lat1 <= 90 and -90 <= lat2 <= 90 and -180 <= lon1 <= 180 and -180 <= lon2 <= 180 and lat1 > lat2 and lon2 > lon1 and lat1 - lat2 < self.aerial_map_threshold and lon2 - lon1 < self.aerial_map_threshold):
-                raise ValueError
-            return True
-        except ValueError:
-            self.road_network_toolbox_ui.aerial_image_loading_status.setText("Cannot download, invalid coordinates")
-            return False
-
-    def show_aerial_image(self):
-        """
-        shows the aerial image in the background of central plot
-        """
-        if self.current_scenario is None:
-            self.text_browser.append("Please create first a new scenario.")
-            return
-
-        if not self.verify_aerial_coordinate_input():
-            QMessageBox.critical(self, "Warning", "cannot download, coordinates invalid or area threshold exceeded", QMessageBox.Ok)
-            return None
-        else:
-            lat1 = float(self.road_network_toolbox_ui.northern_bound.text())
-            lon1 = float(self.road_network_toolbox_ui.western_bound.text())
-            lat2 = float(self.road_network_toolbox_ui.southern_bound.text())
-            lon2 = float(self.road_network_toolbox_ui.eastern_bound.text())
-            self.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.activate_aerial_image(lat1, lon1, lat2, lon2)
-            self.road_network_toolbox_ui.aerial_image_loading_status.setText("map successfully downloaded")
-
-        self.callback(self.current_scenario)
