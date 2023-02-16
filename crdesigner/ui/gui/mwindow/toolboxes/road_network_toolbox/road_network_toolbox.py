@@ -1792,6 +1792,9 @@ class RoadNetworkToolbox(QDockWidget, ):
         x_translation = self.get_float(self.road_network_toolbox_ui.x_translation)
         y_translation = self.get_float(self.road_network_toolbox_ui.y_translation)
         selected_lanelet_one.translate_rotate(np.array([x_translation, y_translation]), 0)
+
+        self.current_scenario.remove_lanelet(selected_lanelet_one)
+        self.current_scenario.add_objects(selected_lanelet_one)
         self.callback(self.current_scenario)
 
     def merge_with_successor(self):

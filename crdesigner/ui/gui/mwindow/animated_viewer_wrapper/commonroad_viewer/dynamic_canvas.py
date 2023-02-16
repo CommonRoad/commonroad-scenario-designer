@@ -422,6 +422,7 @@ class DynamicCanvas(FigureCanvas):
         """
         if self.animated_viewer.current_scenario is None:
             return
+
         # as long as no new lanelet is added after adding a temporary position, no lanelet can be selected (because
         # calling update_plot removes all temporary lanelets)
         if len(self.animated_viewer.current_scenario.lanelet_network.lanelets) - self.num_lanelets != 0 or \
@@ -429,13 +430,14 @@ class DynamicCanvas(FigureCanvas):
             self.parent.road_network_toolbox.updated_lanelet = False
             self.draw_temporary_points = {}
 
+
         self.l_network = self.animated_viewer.current_scenario.lanelet_network
+
         if not lane_ids:
             # check if any mousepos was setted before
             if self.latest_mouse_pos is None:
                 return
             click_shape = Circle(radius=0.01, center=self.latest_mouse_pos)
-
             selected_l_id = self.l_network.find_lanelet_by_shape(click_shape)
 
             if not self.control_key:

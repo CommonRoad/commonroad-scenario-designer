@@ -15,6 +15,7 @@
 - Persisting zoomed scale
 - Connect to predecessor, previously added, and successor
 - Adding rotated lanelet (>360°)
+- Lanelet selection after translating a lanelet in the GUI
 
 ### Removed
 
