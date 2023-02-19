@@ -1,9 +1,9 @@
+import math
+
 from lxml import etree  # type: ignore
 import numpy as np
 import warnings
 from typing import List, Dict
-
-import crdesigner.map_conversion.opendrive.cr_to_opendrive.utils.commonroad_ccosy_geometry_util as util
 
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.utils import config
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.sign import Sign
@@ -11,7 +11,28 @@ from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.sign import Si
 from commonroad.scenario.lanelet import Lanelet  # type: ignore
 from commonroad.geometry.polyline_util import compute_polyline_orientations  # type: ignore
 from commonroad.geometry.polyline_util import resample_polyline_with_distance  # type: ignore
-from commonroad.geometry.polyline_util import compute_polyline_curvatures, compute_polyline_lengths  # type: ignore
+from commonroad.geometry.polyline_util import compute_polyline_lengths  # type: ignore
+from commonroad_dc.geometry.util import compute_curvature_from_polyline
+
+
+def compute_heading(polyline_left: np.ndarray, polyline_right: np.ndarray) -> np.ndarray:
+    """
+    Computes the orientation of a given polyline travelled from initial
+    to final coordinate. The orientation of the last coordinate is always
+    assigned with the computed orientation of the penultimate one.
+
+    :param polyline: Polyline with 2D points [[x_0, y_0], [x_1, y_1], ...]
+    :return: Orientations of the polyline for each coordinate [rad]
+    """
+    orientation = []
+    for i in range(len(polyline_left)):
+        pt_1 = polyline_left[i]
+        pt_2 = polyline_right[i]
+        tmp = pt_2 - pt_1
+        orient = np.arctan2(tmp[1], tmp[0])
+        orientation.append(orient + math.pi * 0.5)
+
+    return np.array(orientation)
 
 
 class Road:
@@ -29,8 +50,7 @@ class Road:
 
     link_map: dict = {}
 
-    def __init__(self, lane_list: List[Lanelet], number_of_lanes: int, root: etree._Element,
-                 junction_id: int) -> None:
+    def __init__(self, lane_list: List[Lanelet], number_of_lanes: int, root: etree._Element, junction_id: int) -> None:
         """
         This function let class road to intialize the object with lane_list, number_of_lanes, root etree element,
         current lanelet, junction_id and converts the CommonRoad roads into OpenDRIVE roads.
@@ -66,7 +86,9 @@ class Road:
             i += 1
 
         self.center_number = i
+
         self.center = self.lane_list[i].left_vertices
+        self.hdg = compute_heading(self.center,  self.lane_list[i].center_vertices)
 
         for i in range(0, number_of_lanes):
             Road.cr_id_to_od[lane_list[i].lanelet_id] = Road.counting
@@ -174,54 +196,33 @@ class Road:
     def set_plan_view(self) -> float:
         """
         This function compute geometric elements required for planview.
-        Geometric elements such as line, spiral, curve, arclength are computed.
+        Geometric elements such as line, spiral, curve, arc length are computed.
 
-        :return: Last item of arclength list
+        :return: Length of lanelet
         """
-        self.center = util.remove_duplicates_from_polyline(self.center)
-        self.center = resample_polyline_with_distance(self.center, 1)
-        curv = compute_polyline_curvatures(self.center) if len(self.center) > 2 else np.array([[0.0], [0.0]])
-        arclength = compute_polyline_lengths(self.center)
-        hdg = compute_polyline_orientations(self.center)
-
-        if len(self.center) < 1:
-            return
-
-        if abs(curv[0]) < config.EPSILON and abs(curv[1]) < config.EPSILON:
-            # start with line, if really low curvature
-            this_length = arclength[1] - arclength[0]
-            self.print_line(arclength[0], self.center[0][0], self.center[0][1], hdg[0], this_length, )
-
-        else:
-            # start with spiral if the curvature is slightly higher
-            this_length = arclength[1] - arclength[0]
-
-            self.print_spiral(arclength[0], self.center[0][0], self.center[0][1], hdg[0], this_length, curv[0],
-                    curv[1], )
+        curv = compute_curvature_from_polyline(self.center) if len(self.center) > 2 else np.array([[0.0], [0.0]])
+        arc_length = compute_polyline_lengths(self.center)
 
         # loop through all the points in the polyline check if
         # the delta curvature is below DEVIAT
         # could be more smooth, if needed, with resampling with a
-        # smaller stepsize
-        for i in range(2, len(self.center)):
-
-            if abs(curv[i] - curv[i - 1]) > config.DEVIAT:
-
-                this_length = arclength[i] - arclength[i - 1]
-                self.print_spiral(arclength[i - 1], self.center[i - 1][0], self.center[i - 1][1], hdg[i - 1],
-                        this_length, curv[i - 1], curv[i], )
+        # smaller step size
+        idx = 1
+        while idx <= len(self.center) - 1:
+            this_length = arc_length[idx] - arc_length[idx - 1]
+            if abs(curv[idx] - curv[idx - 1]) > config.DEVIAT:
+                self.print_spiral(arc_length[idx - 1], self.center[idx - 1][0], self.center[idx - 1][1],
+                                  self.hdg[idx - 1], this_length, curv[idx - 1], curv[idx])
 
             else:
-
-                this_length = arclength[i] - arclength[i - 1]
-                if abs(curv[i - 1]) < config.EPSILON:
-                    self.print_line(arclength[i - 1], self.center[i - 1][0], self.center[i - 1][1], hdg[i - 1],
-                            this_length, )
-
+                if abs(curv[idx - 1]) < config.EPSILON:
+                    self.print_line(arc_length[idx - 1], self.center[idx - 1][0], self.center[idx - 1][1],
+                                    self.hdg[idx - 1], this_length)
                 else:
-                    self.print_arc(arclength[i - 1], self.center[i - 1][0], self.center[i - 1][1], hdg[i - 1],
-                            this_length, curv[i - 1], )
-        return arclength[-1]
+                    self.print_arc(arc_length[idx - 1], self.center[idx - 1][0], self.center[idx - 1][1],
+                                   self.hdg[idx - 1], this_length, curv[idx - 1])
+            idx += 1
+        return arc_length[-1]
 
     # xodr for lines
     def print_line(self, s: float, x: float, y: float, hdg: float, length: float) -> None:
@@ -246,8 +247,8 @@ class Road:
         line = etree.SubElement(geometry, config.LINE_TAG)
 
     # xodr for spirals
-    def print_spiral(self, s: float, x: float, y: float, hdg: float, length: float,
-                     curv_start: float, curv_end: float) -> None:
+    def print_spiral(self, s: float, x: float, y: float, hdg: float, length: float, curv_start: float,
+                     curv_end: float) -> None:
         """
         This function print spiral on OpenDrive file.
         Geometry child element is created with corresponding attributes and added to planview parent element.
@@ -273,8 +274,7 @@ class Road:
         spiral.set(config.GEOMETRY_CURV_END_TAG, str.format(config.DOUBLE_FORMAT_PATTERN, curv_end))
 
     # xodr for arcs
-    def print_arc(self, s: float, x: float, y: float, hdg: float, length: float,
-                  curvature: float) -> None:
+    def print_arc(self, s: float, x: float, y: float, hdg: float, length: float, curvature: float) -> None:
         """
         This function print arc on OpenDrive file.
         Geometry child element is created with corresponding attributes and added to planview parent element.

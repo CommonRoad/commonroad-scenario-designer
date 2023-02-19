@@ -1,11 +1,11 @@
-from lxml import etree # type: ignore
+from lxml import etree  # type: ignore
 import numpy as np
 from typing import Dict
 
 from commonroad.geometry.shape import Shape, Rectangle, Circle, Polygon # type: ignore
-from commonroad.scenario.trajectory import State # type: ignore
-from commonroad.scenario.obstacle import ObstacleType # type: ignore
-from commonroad.geometry.polyline_util import compute_polyline_initial_orientation # type: ignore
+from commonroad.scenario.trajectory import State  # type: ignore
+from commonroad.scenario.obstacle import ObstacleType  # type: ignore
+from commonroad.geometry.polyline_util import compute_polyline_initial_orientation  # type: ignore
 
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.road import Road
 
