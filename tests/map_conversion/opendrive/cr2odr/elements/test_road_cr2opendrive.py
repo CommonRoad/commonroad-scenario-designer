@@ -10,7 +10,7 @@ from crdesigner.configurations.get_configs import get_configs
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.road import Road
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.sign import Sign
 from crdesigner.map_conversion.opendrive.opendrive_conversion.conversion_lanelet_network import ConversionLaneletNetwork
-from tests.map_conversion.opendrive_conversion.test_conversion_lanelet_network import init_lanelet_from_id, \
+from tests.map_conversion.opendrive.odr2cr.conversion.test_conversion_lanelet_network import init_lanelet_from_id, \
     add_lanelets_to_network
 
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.utils import config

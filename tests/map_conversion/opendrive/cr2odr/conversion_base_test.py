@@ -1,18 +1,13 @@
 import os
 import unittest
-import re
 import time
 from lxml import etree
 
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.dataloader import DataLoader
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.converter import Converter
-from crdesigner.map_conversion.opendrive.opendrive_parser.parser import parse_opendrive
 
 from tests.map_conversion.utils import elements_equal
 
-
-# to run the tests: pytest -v --cov=crdesigner.map_conversion.opendrive.cr_to_opendrive.converter --cov-report html
-# This also generates a coverage report, see rootdir/htmlcov -> index.html
 
 class ConversionBaseTestCases:
     class ConversionBaseTest(unittest.TestCase):
@@ -30,9 +25,10 @@ class ConversionBaseTestCases:
                             os.remove(os.path.join(dir_path, file))
 
             self.map_name = map_name
-            self.path_reference_xodr_file = f"commonroad_to_opendrive_test_files/reference_xodr_files/{self.map_name}.xodr"
+            self.path_reference_xodr_file = \
+                f"../../test_maps/cr2odr/reference_xodr_files/{self.map_name}.xodr"
             # absolute path for input
-            self.file_path_in = os.path.join(self.cwd_path, f"commonroad_to_opendrive_test_files/{self.map_name}.xml")
+            self.file_path_in = os.path.join(self.cwd_path, f"../../test_maps/cr2odr/{self.map_name}.xml")
             # absolute path for output
             self.file_path_out = os.path.join(self.cwd_path, f".pytest_cache/converted_xodr_files/{self.map_name}.xodr")
             # load the xml file and preprocess it
@@ -57,7 +53,3 @@ class ConversionBaseTestCases:
 
             # compare both element trees
             return elements_equal(converted_tree, reference_tree)
-
-
-    if __name__ == "__main__":
-        unittest.main()

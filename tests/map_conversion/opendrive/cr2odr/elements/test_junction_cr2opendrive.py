@@ -4,7 +4,7 @@ from lxml import etree
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.junction import Junction
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.road import Road
 import crdesigner.map_conversion.opendrive.cr_to_opendrive.utils.file_writer as fwr
-from tests.map_conversion.conversion_base_test import ConversionBaseTestCases
+from tests.map_conversion.opendrive.cr2odr.conversion_base_test import ConversionBaseTestCases
 
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.utils import config
 

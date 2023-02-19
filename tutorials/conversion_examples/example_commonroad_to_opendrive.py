@@ -4,8 +4,8 @@ from crdesigner.map_conversion.map_conversion_interface import commonroad_to_ope
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.dataloader import DataLoader
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.converter import Converter
 
-scenario_name = ""  # replace empty string
-input_folder = ""  # replace empty string
+scenario_name = "ZAM_Threewayintersection-1_1_T-1"  # replace empty string
+input_folder = "/media/sebastian/TUM/06_code/internal/scenario-designer/tests/map_conversion/test_maps/cr2odr"  # replace empty string
 output_folder = ""  # replace empty string
 input_file = os.path.join(input_folder, scenario_name + '.xml')
 output_file = os.path.join(output_folder, scenario_name + '.xodr')

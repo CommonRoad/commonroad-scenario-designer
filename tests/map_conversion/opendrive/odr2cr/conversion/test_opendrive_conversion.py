@@ -18,7 +18,7 @@ class TestOpenDriveToCommonRoadConversion(unittest.TestCase):
         """ Loads a .xodr file and converts it to the commonroad format."""
         generate_unique_id(0)  # reset ID counter
         scenario = opendrive_to_commonroad(
-            os.path.dirname(os.path.realpath(__file__)) + "/../test_maps/opendrive/{}.xodr".format(xodr_file_name))
+            os.path.dirname(os.path.realpath(__file__)) + f"/../../../test_maps/odr2cr/{xodr_file_name}.xodr")
 
         return scenario
 

@@ -1,15 +1,7 @@
 import os
 import unittest
-import re
-import time
-from lxml import etree
 
-from crdesigner.map_conversion.opendrive.cr_to_opendrive.dataloader import DataLoader
-from crdesigner.map_conversion.opendrive.cr_to_opendrive.converter import Converter
-from crdesigner.map_conversion.opendrive.opendrive_parser.parser import parse_opendrive
-from tests.map_conversion.conversion_base_test import ConversionBaseTestCases
-
-from tests.map_conversion.utils import elements_equal
+from tests.map_conversion.opendrive.cr2odr.conversion_base_test import ConversionBaseTestCases
 
 
 # to run the tests: pytest -v --cov=crdesigner.map_conversion.opendrive.cr_to_opendrive.converter --cov-report html
