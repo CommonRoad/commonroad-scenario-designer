@@ -14,7 +14,7 @@ class TestCommandLineInterface(unittest.TestCase):
     def test_opendrive(self):
         subprocess.Popen(['crdesigner', 'map-convert-opendrive',
                           '-i', os.path.dirname(os.path.realpath(__file__))
-                          + '/../map_conversion/test_maps/cr2odr/poly3_and_border_record.xodr',
+                          + '/../map_conversion/test_maps/odr2cr/poly3_and_border_record.xodr',
                           '-o', self.output_path + "/opendrive_command_line.xml", '-t', 'urban', 'highway'])
         time.sleep(10)
         exists = Path(self.output_path + "/opendrive_command_line.xml")
