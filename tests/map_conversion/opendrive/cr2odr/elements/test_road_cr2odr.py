@@ -18,7 +18,19 @@ def init_conversion_lanelet_network():
     conversion_lanelet_network = ConversionLaneletNetwork(get_configs().opendrive)
     conversion_lanelet_1 = init_lanelet_from_id('79.0.-3.-1')
     conversion_lanelet_2 = init_lanelet_from_id('89.0.4.-1')
-    return conversion_lanelet_1, conversion_lanelet_2, conversion_lanelet_network
+    add_lanelets_to_network(conversion_lanelet_network, [conversion_lanelet_1, conversion_lanelet_2])
+
+    return conversion_lanelet_network
+
+
+def init_road():
+    conversion_lanelet_network = init_conversion_lanelet_network()
+    lane_list = conversion_lanelet_network.lanelets
+    number_of_lanes = 2
+    root = etree.Element(config.OPENDRIVE)
+    junction_id = -1
+    road = Road(lane_list, number_of_lanes, root, junction_id)
+    return road, lane_list, number_of_lanes, root, conversion_lanelet_network
 
 
 class TestRoad(unittest.TestCase):
@@ -32,17 +44,7 @@ class TestRoad(unittest.TestCase):
 
     def test_initialize_road(self):
         # Given
-        conversion_lanelet_1, conversion_lanelet_2, conversion_lanelet_network = init_conversion_lanelet_network()
-
-        add_lanelets_to_network(conversion_lanelet_network, [conversion_lanelet_1, conversion_lanelet_2])
-
-        lane_list = conversion_lanelet_network.lanelets
-        number_of_lanes = 2
-        root = etree.Element(config.OPENDRIVE)
-        junction_id = -1
-
-        # When
-        road = Road(lane_list, number_of_lanes, root, junction_id)
+        road, lane_list, number_of_lanes, root, conversion_lanelet_network = init_road()
 
         # Then
         self.assertEqual(21, Road.counting)
@@ -99,20 +101,12 @@ class TestRoad(unittest.TestCase):
 
     def test_add_junction_linkage_successor(self):
         # Given
-        conversion_lanelet_1, conversion_lanelet_2, conversion_lanelet_network = init_conversion_lanelet_network()
-
-        add_lanelets_to_network(conversion_lanelet_network, [conversion_lanelet_1, conversion_lanelet_2])
-
-        lane_list = conversion_lanelet_network.lanelets
-        number_of_lanes = 2
-        root = etree.Element(config.OPENDRIVE)
-        junction_id = -1
-        road = Road(lane_list, number_of_lanes, root, junction_id)
-        id = 1
+        road, lane_list, number_of_lanes, root, conversion_lanelet_network = init_road()
+        element_id = 1
         relation = config.SUCCESSOR_TAG
 
         # When
-        road.add_junction_linkage(id, relation)
+        road.add_junction_linkage(element_id, relation)
 
         # Then
         self.assertEqual(config.SUCCESSOR_TAG, road.element_type.tag)
@@ -122,20 +116,12 @@ class TestRoad(unittest.TestCase):
 
     def test_add_junction_linkage_predecessor(self):
         # Given
-        conversion_lanelet_1, conversion_lanelet_2, conversion_lanelet_network = init_conversion_lanelet_network()
-
-        add_lanelets_to_network(conversion_lanelet_network, [conversion_lanelet_1, conversion_lanelet_2])
-
-        lane_list = conversion_lanelet_network.lanelets
-        number_of_lanes = 2
-        root = etree.Element(config.OPENDRIVE)
-        junction_id = -1
-        road = Road(lane_list, number_of_lanes, root, junction_id)
-        id = 1
+        road, lane_list, number_of_lanes, root, conversion_lanelet_network = init_road()
+        element_id = 1
         relation = config.PREDECESSOR_TAG
 
         # When
-        road.add_junction_linkage(id, relation)
+        road.add_junction_linkage(element_id, relation)
 
         # Then
         self.assertEqual(config.PREDECESSOR_TAG, road.element_type.tag)
@@ -145,15 +131,7 @@ class TestRoad(unittest.TestCase):
 
     def test_add_simple_linkage(self):
         # Given
-        conversion_lanelet_1, conversion_lanelet_2, conversion_lanelet_network = init_conversion_lanelet_network()
-
-        add_lanelets_to_network(conversion_lanelet_network, [conversion_lanelet_1, conversion_lanelet_2])
-
-        lane_list = conversion_lanelet_network.lanelets
-        number_of_lanes = 2
-        root = etree.Element(config.OPENDRIVE)
-        junction_id = -1
-        road = Road(lane_list, number_of_lanes, root, junction_id)
+        road, lane_list, number_of_lanes, root, conversion_lanelet_network = init_road()
 
         links = {'succ': [22, 22, 22, 22, 22, 22, 22, 22, 22], 'pred': []}
         len_succ = 1
@@ -171,15 +149,7 @@ class TestRoad(unittest.TestCase):
 
     def test_set_child_of_road(self):
         # Given
-        conversion_lanelet_1, conversion_lanelet_2, conversion_lanelet_network = init_conversion_lanelet_network()
-
-        add_lanelets_to_network(conversion_lanelet_network, [conversion_lanelet_1, conversion_lanelet_2])
-
-        lane_list = conversion_lanelet_network.lanelets
-        number_of_lanes = 2
-        root = etree.Element(config.OPENDRIVE)
-        junction_id = -1
-        road = Road(lane_list, number_of_lanes, root, junction_id)
+        road, lane_list, number_of_lanes, root, conversion_lanelet_network = init_road()
         name = "child_name"
 
         # When
@@ -190,15 +160,7 @@ class TestRoad(unittest.TestCase):
 
     def test_set_plan_view(self):
         # Given
-        conversion_lanelet_1, conversion_lanelet_2, conversion_lanelet_network = init_conversion_lanelet_network()
-
-        add_lanelets_to_network(conversion_lanelet_network, [conversion_lanelet_1, conversion_lanelet_2])
-
-        lane_list = conversion_lanelet_network.lanelets
-        number_of_lanes = 2
-        root = etree.Element(config.OPENDRIVE)
-        junction_id = -1
-        road = Road(lane_list, number_of_lanes, root, junction_id)
+        road, lane_list, number_of_lanes, root, conversion_lanelet_network = init_road()
 
         # When
         last_item_arclength = road.set_plan_view()
@@ -208,16 +170,7 @@ class TestRoad(unittest.TestCase):
         self.assertTrue((expected_center == road.center).all())
         self.assertEqual(2.0, last_item_arclength)
 
-        self.assertEqual(config.GEOMETRY_TAG, road.plan_view[-1].tag)
-        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 1),
-                         road.plan_view[-1].get(config.GEOMETRY_S_COORDINATE_TAG))
-        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 1),
-                         road.plan_view[-1].get(config.GEOMETRY_X_COORDINATE_TAG))
-        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 1),
-                         road.plan_view[-1].get(config.GEOMETRY_Y_COORDINATE_TAG))
-        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0),
-                         road.plan_view[-1].get(config.GEOMETRY_HEADING_TAG))
-        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 1), road.plan_view[-1].get(config.LENGTH_TAG))
+        self.compare_geometry(0, 1, road, 1, 1, 1)
 
         self.assertEqual(config.GEOMETRY_TAG, road.plan_view[-2].tag)
         self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0),
@@ -232,15 +185,7 @@ class TestRoad(unittest.TestCase):
 
     def test_print_line(self):
         # Given
-        conversion_lanelet_1, conversion_lanelet_2, conversion_lanelet_network = init_conversion_lanelet_network()
-
-        add_lanelets_to_network(conversion_lanelet_network, [conversion_lanelet_1, conversion_lanelet_2])
-
-        lane_list = conversion_lanelet_network.lanelets
-        number_of_lanes = 2
-        root = etree.Element(config.OPENDRIVE)
-        junction_id = -1
-        road = Road(lane_list, number_of_lanes, root, junction_id)
+        road, lane_list, number_of_lanes, root, conversion_lanelet_network = init_road()
         s = 1.0
         x = 0.
         y = 1.
@@ -251,28 +196,11 @@ class TestRoad(unittest.TestCase):
         road.print_line(s, x, y, hdg, length)
 
         # Then
-        self.assertEqual(config.GEOMETRY_TAG, road.plan_view[-1].tag)
-        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, s),
-                         road.plan_view[-1].get(config.GEOMETRY_S_COORDINATE_TAG))
-        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, x),
-                         road.plan_view[-1].get(config.GEOMETRY_X_COORDINATE_TAG))
-        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, y),
-                         road.plan_view[-1].get(config.GEOMETRY_Y_COORDINATE_TAG))
-        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, hdg),
-                         road.plan_view[-1].get(config.GEOMETRY_HEADING_TAG))
-        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, length), road.plan_view[-1].get(config.LENGTH_TAG))
+        self.compare_geometry(hdg, length, road, s, x, y)
 
     def test_print_spiral(self):
         # Given
-        conversion_lanelet_1, conversion_lanelet_2, conversion_lanelet_network = init_conversion_lanelet_network()
-
-        add_lanelets_to_network(conversion_lanelet_network, [conversion_lanelet_1, conversion_lanelet_2])
-
-        lane_list = conversion_lanelet_network.lanelets
-        number_of_lanes = 2
-        root = etree.Element(config.OPENDRIVE)
-        junction_id = -1
-        road = Road(lane_list, number_of_lanes, root, junction_id)
+        road, lane_list, number_of_lanes, root, conversion_lanelet_network = init_road()
         s = 1.0
         x = 0.0
         y = 1.0
@@ -285,6 +213,16 @@ class TestRoad(unittest.TestCase):
         road.print_spiral(s, x, y, hdg, length, curv_start, curv_end)
 
         # Then
+        self.compare_geometry(hdg, length, road, s, x, y)
+
+        spiral_elem = list(road.plan_view[-1].iter())[-1]
+        self.assertEqual(config.SPIRAL_TAG, spiral_elem.tag)
+        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, curv_start),
+                         spiral_elem.get(config.GEOMETRY_CURV_START_TAG))
+        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, curv_end),
+                         spiral_elem.get(config.GEOMETRY_CURV_END_TAG))
+
+    def compare_geometry(self, hdg, length, road, s, x, y):
         self.assertEqual(config.GEOMETRY_TAG, road.plan_view[-1].tag)
         self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, s),
                          road.plan_view[-1].get(config.GEOMETRY_S_COORDINATE_TAG))
@@ -296,24 +234,9 @@ class TestRoad(unittest.TestCase):
                          road.plan_view[-1].get(config.GEOMETRY_HEADING_TAG))
         self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, length), road.plan_view[-1].get(config.LENGTH_TAG))
 
-        spiral_elem = list(road.plan_view[-1].iter())[-1]
-        self.assertEqual(config.SPIRAL_TAG, spiral_elem.tag)
-        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, curv_start),
-                         spiral_elem.get(config.GEOMETRY_CURV_START_TAG))
-        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, curv_end),
-                         spiral_elem.get(config.GEOMETRY_CURV_END_TAG))
-
     def test_print_arc(self):
         # Given
-        conversion_lanelet_1, conversion_lanelet_2, conversion_lanelet_network = init_conversion_lanelet_network()
-
-        add_lanelets_to_network(conversion_lanelet_network, [conversion_lanelet_1, conversion_lanelet_2])
-
-        lane_list = conversion_lanelet_network.lanelets
-        number_of_lanes = 2
-        root = etree.Element(config.OPENDRIVE)
-        junction_id = -1
-        road = Road(lane_list, number_of_lanes, root, junction_id)
+        road, lane_list, number_of_lanes, root, conversion_lanelet_network = init_road()
         s = 1.0
         x = 0.0
         y = 1.0
@@ -325,16 +248,7 @@ class TestRoad(unittest.TestCase):
         road.print_arc(s, x, y, hdg, length, curvature)
 
         # Then
-        self.assertEqual(config.GEOMETRY_TAG, road.plan_view[-1].tag)
-        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, s),
-                         road.plan_view[-1].get(config.GEOMETRY_S_COORDINATE_TAG))
-        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, x),
-                         road.plan_view[-1].get(config.GEOMETRY_X_COORDINATE_TAG))
-        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, y),
-                         road.plan_view[-1].get(config.GEOMETRY_Y_COORDINATE_TAG))
-        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, hdg),
-                         road.plan_view[-1].get(config.GEOMETRY_HEADING_TAG))
-        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, length), road.plan_view[-1].get(config.LENGTH_TAG))
+        self.compare_geometry(hdg, length, road, s, x, y)
 
         arc_elem = list(road.plan_view[-1].iter())[-1]
         self.assertEqual(config.ARC_TAG, arc_elem.tag)
@@ -343,15 +257,7 @@ class TestRoad(unittest.TestCase):
 
     def test_print_signal(self):
         # Given
-        conversion_lanelet_1, conversion_lanelet_2, conversion_lanelet_network = init_conversion_lanelet_network()
-
-        add_lanelets_to_network(conversion_lanelet_network, [conversion_lanelet_1, conversion_lanelet_2])
-
-        lane_list = conversion_lanelet_network.lanelets
-        number_of_lanes = 2
-        root = etree.Element(config.OPENDRIVE)
-        junction_id = -1
-        road = Road(lane_list, number_of_lanes, root, junction_id)
+        road, lane_list, number_of_lanes, root, conversion_lanelet_network = init_road()
         road_key = 21
         unique_id = 0
         element = TrafficSignElement(TrafficSignIDZamunda.WARNING_SLIPPERY_ROAD, [])
@@ -386,15 +292,7 @@ class TestRoad(unittest.TestCase):
 
     def test_print_signal_ref(self):
         # Given
-        conversion_lanelet_1, conversion_lanelet_2, conversion_lanelet_network = init_conversion_lanelet_network()
-
-        add_lanelets_to_network(conversion_lanelet_network, [conversion_lanelet_1, conversion_lanelet_2])
-
-        lane_list = conversion_lanelet_network.lanelets
-        number_of_lanes = 2
-        root = etree.Element(config.OPENDRIVE)
-        junction_id = -1
-        road = Road(lane_list, number_of_lanes, root, junction_id)
+        road, lane_list, number_of_lanes, root, conversion_lanelet_network = init_road()
         road_key = 21
         unique_id = 0
         element = TrafficSignElement(TrafficSignIDZamunda.WARNING_SLIPPERY_ROAD, [])
@@ -417,15 +315,7 @@ class TestRoad(unittest.TestCase):
 
     def test_lane_sections(self):
         # Given
-        conversion_lanelet_1, conversion_lanelet_2, conversion_lanelet_network = init_conversion_lanelet_network()
-
-        add_lanelets_to_network(conversion_lanelet_network, [conversion_lanelet_1, conversion_lanelet_2])
-
-        lane_list = conversion_lanelet_network.lanelets
-        number_of_lanes = 2
-        root = etree.Element(config.OPENDRIVE)
-        junction_id = -1
-        road = Road(lane_list, number_of_lanes, root, junction_id)
+        road, lane_list, number_of_lanes, root, conversion_lanelet_network = init_road()
 
         # When
         road.lane_sections()
@@ -446,12 +336,8 @@ class TestRoad(unittest.TestCase):
         center_link = road.lanes[-1][0][0][0]
         self.assertEqual(config.LINK_TAG, center_link.tag)
 
-        center_roadmark = road.lanes[-1][0][0][1]
-        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0), center_roadmark.get(config.LANE_SOFFSET_TAG))
-        self.assertEqual(config.SOLID, center_roadmark.get(config.TYPE_TAG))
-        self.assertEqual(config.STANDARD, center_roadmark.get(config.ROAD_MARK_WEIGHT_TAG))
-        self.assertEqual(config.STANDARD, center_roadmark.get(config.ROAD_MARK_COLOR_TAG))
-        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0.13), center_roadmark.get(config.SIGNAL_WIDTH_TAG))
+        roadmark = road.lanes[-1][0][0][1]
+        self.compare_road_mark(roadmark)
 
         left = road.lanes[-1][1]
         self.assertEqual(config.LANE_SECTION_LEFT_TAG, left.tag)
@@ -471,12 +357,8 @@ class TestRoad(unittest.TestCase):
         self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0), left_width.get(config.LANE_C_TAG))
         self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0), left_width.get(config.LANE_D_TAG))
 
-        left_roadmark = road.lanes[-1][1][0][2]
-        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0), left_roadmark.get(config.LANE_SOFFSET_TAG, ))
-        self.assertEqual(config.SOLID, left_roadmark.get(config.TYPE_TAG))
-        self.assertEqual(config.STANDARD, left_roadmark.get(config.ROAD_MARK_WEIGHT_TAG))
-        self.assertEqual(config.STANDARD, left_roadmark.get(config.ROAD_MARK_COLOR_TAG))
-        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0.13), left_roadmark.get(config.SIGNAL_WIDTH_TAG))
+        roadmark = road.lanes[-1][1][0][2]
+        self.compare_road_mark(roadmark)
 
         right = road.lanes[-1][2]
         self.assertEqual(config.LANE_SECTION_RIGHT_TAG, right.tag)
@@ -497,25 +379,12 @@ class TestRoad(unittest.TestCase):
         self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0), left_width.get(config.LANE_C_TAG))
         self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0), left_width.get(config.LANE_D_TAG))
 
-        left_roadmark = road.lanes[-1][2][0][2]
-        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0), left_roadmark.get(config.LANE_SOFFSET_TAG, ))
-        self.assertEqual(config.SOLID, left_roadmark.get(config.TYPE_TAG))
-        self.assertEqual(config.STANDARD, left_roadmark.get(config.ROAD_MARK_WEIGHT_TAG))
-        self.assertEqual(config.STANDARD, left_roadmark.get(config.ROAD_MARK_COLOR_TAG))
-        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0.13), left_roadmark.get(config.SIGNAL_WIDTH_TAG))
+        roadmark = road.lanes[-1][2][0][2]
+        self.compare_road_mark(roadmark)
 
     def test_lane_help(self):
         # Given
-        conversion_lanelet_1, conversion_lanelet_2, conversion_lanelet_network = init_conversion_lanelet_network()
-
-        add_lanelets_to_network(conversion_lanelet_network, [conversion_lanelet_1, conversion_lanelet_2])
-
-        lane_list = conversion_lanelet_network.lanelets
-        number_of_lanes = 2
-        root = etree.Element(config.OPENDRIVE)
-        current = etree.Element(config.OPENDRIVE)
-        junction_id = -1
-        road = Road(lane_list, number_of_lanes, root, junction_id)
+        road, lane_list, number_of_lanes, root, conversion_lanelet_network = init_road()
         section = etree.SubElement(road.lanes, config.LANE_SECTION_TAG)
         section.set(config.GEOMETRY_S_COORDINATE_TAG, str.format(config.DOUBLE_FORMAT_PATTERN, 0))
 
@@ -537,8 +406,11 @@ class TestRoad(unittest.TestCase):
         # requires more careful check for parent nodes?
 
         roadmark = list(center[-1].iter())[-1]
-        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0), roadmark.get(config.LANE_SOFFSET_TAG, ))
-        self.assertEqual(config.SOLID, roadmark.get(config.TYPE_TAG))
-        self.assertEqual(config.STANDARD, roadmark.get(config.ROAD_MARK_WEIGHT_TAG))
-        self.assertEqual(config.STANDARD, roadmark.get(config.ROAD_MARK_COLOR_TAG))
-        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0.13), roadmark.get(config.SIGNAL_WIDTH_TAG))
+        self.compare_road_mark(roadmark)
+
+    def compare_road_mark(self, road_mark):
+        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0), road_mark.get(config.LANE_SOFFSET_TAG))
+        self.assertEqual(config.SOLID, road_mark.get(config.TYPE_TAG))
+        self.assertEqual(config.STANDARD, road_mark.get(config.ROAD_MARK_WEIGHT_TAG))
+        self.assertEqual(config.STANDARD, road_mark.get(config.ROAD_MARK_COLOR_TAG))
+        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0.13), road_mark.get(config.SIGNAL_WIDTH_TAG))
