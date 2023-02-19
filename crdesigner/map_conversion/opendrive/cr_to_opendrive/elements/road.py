@@ -224,7 +224,7 @@ class Road:
         return arclength[-1]
 
     # xodr for lines
-    def print_line(self, s: np.float64, x: np.float64, y: np.float64, hdg: np.float64, length: np.float64) -> None:
+    def print_line(self, s: float, x: float, y: float, hdg: float, length: float) -> None:
         """
         This function print line on OpenDrive file.
         Geometry child element is created with corresponding attributes and added to planview parent element.
@@ -246,8 +246,8 @@ class Road:
         line = etree.SubElement(geometry, config.LINE_TAG)
 
     # xodr for spirals
-    def print_spiral(self, s: np.float64, x: np.float64, y: np.float64, hdg: np.float64, length: np.float64,
-                     curv_start: np.float64, curv_end: np.float64) -> None:
+    def print_spiral(self, s: float, x: float, y: float, hdg: float, length: float,
+                     curv_start: float, curv_end: float) -> None:
         """
         This function print spiral on OpenDrive file.
         Geometry child element is created with corresponding attributes and added to planview parent element.
@@ -273,8 +273,8 @@ class Road:
         spiral.set(config.GEOMETRY_CURV_END_TAG, str.format(config.DOUBLE_FORMAT_PATTERN, curv_end))
 
     # xodr for arcs
-    def print_arc(self, s: np.float64, x: np.float64, y: np.float64, hdg: np.float64, length: np.float64,
-                  curvature: np.float64) -> None:
+    def print_arc(self, s: float, x: float, y: float, hdg: float, length: float,
+                  curvature: float) -> None:
         """
         This function print arc on OpenDrive file.
         Geometry child element is created with corresponding attributes and added to planview parent element.
