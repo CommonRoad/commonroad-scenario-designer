@@ -201,13 +201,14 @@ class Road:
 
         :return: Length of lanelet
         """
-        curv = compute_curvature_from_polyline(self.center) if len(self.center) > 2 else np.array([[0.0], [0.0]])
+        curv = compute_curvature_from_polyline(self.center)
         arc_length = compute_polyline_lengths(self.center)
-
+        curv_dif = np.ediff1d(curv)
         # loop through all the points in the polyline check if
         # the delta curvature is below DEVIAT
         # could be more smooth, if needed, with resampling with a
         # smaller step size
+
         class GeometryType(enum.Enum):
             LINE = 1
             ARC = 2
@@ -217,58 +218,60 @@ class Road:
         cur_idx = 1
         last_idx = 0
         cur_type = GeometryType.NONE
+        switch = GeometryType.NONE
 
-        while cur_idx <= len(self.center) - 1:
+        while cur_idx < len(self.center) - 1:
             if np.isclose(self.hdg[last_idx], self.hdg[cur_idx], 0.0174533) and cur_type in \
                     [GeometryType.LINE, GeometryType.NONE]:  # 0.1deg
-                cur_idx += 1
                 cur_type = GeometryType.LINE
-                continue
-            elif np.isclose(curv[last_idx], curv[cur_idx], 0.001) and cur_type in [GeometryType.ARC, GeometryType.NONE]:
-                cur_idx += 1
+            elif np.isclose(curv[last_idx], curv[cur_idx], 0.01) and cur_type in [GeometryType.ARC, GeometryType.NONE]:
                 cur_type = GeometryType.ARC
-                continue
-            elif np.isclose(curv[last_idx] * (cur_idx - last_idx), curv[cur_idx], 0.001) and cur_type in \
+            elif np.isclose(curv_dif[cur_idx], curv_dif[cur_idx - 1], 0.01) and cur_type in \
                     [GeometryType.SPIRAL, GeometryType.NONE]:
-                cur_idx += 1
                 cur_type = GeometryType.SPIRAL
-                continue
+            elif np.isclose(self.hdg[last_idx], self.hdg[cur_idx], 0.0174533) and cur_type not in \
+                    [GeometryType.LINE, GeometryType.NONE]:  # 0.1deg
+                switch = GeometryType.LINE
+            elif np.isclose(curv[last_idx], curv[cur_idx], 0.01) and cur_type not in \
+                    [GeometryType.ARC, GeometryType.NONE]:
+                switch = GeometryType.ARC
             else:
-                this_length = arc_length[cur_idx] - arc_length[last_idx]
-                if cur_idx - last_idx == 1:
-                    self.print_spiral(arc_length[cur_idx - 1], self.center[cur_idx - 1][0], self.center[cur_idx - 1][1],
-                                      self.hdg[cur_idx - 1], this_length, curv[cur_idx - 1], curv[cur_idx])
-                else:
-                    if cur_type == GeometryType.LINE:
-                        self.print_line(arc_length[last_idx], self.center[last_idx][0],
-                                        self.center[cur_idx - 1][1], self.hdg[last_idx], this_length)
-                    elif cur_type == GeometryType.ARC:
-                        self.print_arc(arc_length[last_idx], self.center[last_idx][0],
-                                       self.center[last_idx][1], self.hdg[last_idx], this_length,
-                                       curv[cur_idx - 1])
-                    elif cur_type == GeometryType.SPIRAL:
-                        self.print_spiral(arc_length[last_idx], self.center[last_idx][0],
-                                          self.center[last_idx][1], self.hdg[last_idx], this_length,
-                                          curv[last_idx], curv[cur_idx - 1])
-                    else:
-                        print("bug")
-                    if np.isclose(self.hdg[cur_idx], self.hdg[cur_idx - 1], 0.0174533) and cur_type in [
-                        GeometryType.LINE, GeometryType.NONE]:  # 0.1deg
-                        cur_type = GeometryType.LINE
-                        continue
-                    elif np.isclose(curv[last_idx], curv[cur_idx], 0.001) and cur_type in [GeometryType.ARC,
-                                                                                           GeometryType.NONE]:
-                        cur_type = GeometryType.ARC
-                        continue
-                    elif np.isclose(curv[last_idx] * (cur_idx - last_idx), curv[cur_idx], 0.001) and cur_type in [
-                        GeometryType.SPIRAL, GeometryType.NONE]:
-                        cur_type = GeometryType.SPIRAL
-                        continue
-                    else:
-                        cur_type = GeometryType.NONE
-                    last_idx = cur_idx
-                    cur_idx += 1
+                switch = GeometryType.SPIRAL
+            if switch != GeometryType.NONE:
+                # until last vertex
+                this_length = arc_length[cur_idx - 1] - arc_length[last_idx]
+                if cur_type == GeometryType.LINE:
+                    print("line", this_length)
+                    self.print_line(arc_length[cur_idx - 1], self.center[last_idx][0],
+                                    self.center[cur_idx - 1][1], self.hdg[last_idx], this_length)
+                elif cur_type == GeometryType.ARC:
+                    print("arc")
+                    self.print_arc(arc_length[last_idx], self.center[last_idx][0],
+                                   self.center[last_idx][1], self.hdg[last_idx], this_length,
+                                   curv[cur_idx - 1])
+                elif cur_type == GeometryType.SPIRAL:
+                    print("spiral")
+                    self.print_spiral(arc_length[last_idx], self.center[last_idx][0],
+                                      self.center[last_idx][1], self.hdg[last_idx], this_length,
+                                      curv[last_idx], curv[cur_idx - 1])
+                cur_type = switch
+                switch = GeometryType.NONE
+                last_idx = cur_idx - 1
             cur_idx += 1
+        if switch == GeometryType.NONE:
+            this_length = arc_length[cur_idx - 1] - arc_length[last_idx]
+            if cur_type == GeometryType.LINE:
+                print("line", this_length)
+                self.print_line(arc_length[cur_idx - 1], self.center[last_idx][0], self.center[last_idx - 1][1],
+                                self.hdg[last_idx], this_length)
+            elif cur_type == GeometryType.ARC:
+                print("arc")
+                self.print_arc(arc_length[last_idx], self.center[last_idx][0], self.center[last_idx][1],
+                               self.hdg[last_idx], this_length, curv[cur_idx - 1])
+            elif cur_type == GeometryType.SPIRAL:
+                print("spiral")
+                self.print_spiral(arc_length[last_idx], self.center[last_idx][0], self.center[last_idx][1],
+                                  self.hdg[last_idx], this_length, curv[last_idx], curv[cur_idx - 1])
         return arc_length[-1]
 
     # xodr for lines

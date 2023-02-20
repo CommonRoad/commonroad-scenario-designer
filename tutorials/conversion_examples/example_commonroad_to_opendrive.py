@@ -5,7 +5,8 @@ from crdesigner.map_conversion.opendrive.cr_to_opendrive.dataloader import DataL
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.converter import Converter
 
 scenario_name = "ZAM_Threewayintersection-1_1_T-1"  # replace empty string
-input_folder = "/media/sebastian/TUM/06_code/internal/scenario-designer/tests/map_conversion/test_maps/cr2odr"  # replace empty string
+input_folder = "/media/sebastian/TUM/06_code/internal/scenario-designer/tests/map_conversion/test_maps/cr2odr"
+# replace empty string
 output_folder = ""  # replace empty string
 input_file = os.path.join(input_folder, scenario_name + '.xml')
 output_file = os.path.join(output_folder, scenario_name + '.xodr')
@@ -17,8 +18,8 @@ commonroad_to_opendrive(input_file, output_file)
 # --------------------------------------- Option 2: CR2OpenDRIVE conversion APIs ---------------------------------------
 
 # load the xml file and preprocess it
-data = DataLoader(input_file)
-
-scenario, successors, ids = data.initialize()
-converter = Converter(input_file, scenario, successors, ids)
-converter.convert(output_file)
+# data = DataLoader(input_file)
+#
+# scenario, successors, ids = data.initialize()
+# converter = Converter(input_file, scenario, successors, ids)
+# converter.convert(output_file)
