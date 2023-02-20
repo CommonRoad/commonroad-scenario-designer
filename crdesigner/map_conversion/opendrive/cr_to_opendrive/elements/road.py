@@ -1,3 +1,4 @@
+import enum
 import math
 
 from lxml import etree  # type: ignore
@@ -207,21 +208,67 @@ class Road:
         # the delta curvature is below DEVIAT
         # could be more smooth, if needed, with resampling with a
         # smaller step size
-        idx = 1
-        while idx <= len(self.center) - 1:
-            this_length = arc_length[idx] - arc_length[idx - 1]
-            if abs(curv[idx] - curv[idx - 1]) > config.DEVIAT:
-                self.print_spiral(arc_length[idx - 1], self.center[idx - 1][0], self.center[idx - 1][1],
-                                  self.hdg[idx - 1], this_length, curv[idx - 1], curv[idx])
+        class GeometryType(enum.Enum):
+            LINE = 1
+            ARC = 2
+            SPIRAL = 3
+            NONE = 4
 
+        cur_idx = 1
+        last_idx = 0
+        cur_type = GeometryType.NONE
+
+        while cur_idx <= len(self.center) - 1:
+            if np.isclose(self.hdg[last_idx], self.hdg[cur_idx], 0.0174533) and cur_type in \
+                    [GeometryType.LINE, GeometryType.NONE]:  # 0.1deg
+                cur_idx += 1
+                cur_type = GeometryType.LINE
+                continue
+            elif np.isclose(curv[last_idx], curv[cur_idx], 0.001) and cur_type in [GeometryType.ARC, GeometryType.NONE]:
+                cur_idx += 1
+                cur_type = GeometryType.ARC
+                continue
+            elif np.isclose(curv[last_idx] * (cur_idx - last_idx), curv[cur_idx], 0.001) and cur_type in \
+                    [GeometryType.SPIRAL, GeometryType.NONE]:
+                cur_idx += 1
+                cur_type = GeometryType.SPIRAL
+                continue
             else:
-                if abs(curv[idx - 1]) < config.EPSILON:
-                    self.print_line(arc_length[idx - 1], self.center[idx - 1][0], self.center[idx - 1][1],
-                                    self.hdg[idx - 1], this_length)
+                this_length = arc_length[cur_idx] - arc_length[last_idx]
+                if cur_idx - last_idx == 1:
+                    self.print_spiral(arc_length[cur_idx - 1], self.center[cur_idx - 1][0], self.center[cur_idx - 1][1],
+                                      self.hdg[cur_idx - 1], this_length, curv[cur_idx - 1], curv[cur_idx])
                 else:
-                    self.print_arc(arc_length[idx - 1], self.center[idx - 1][0], self.center[idx - 1][1],
-                                   self.hdg[idx - 1], this_length, curv[idx - 1])
-            idx += 1
+                    if cur_type == GeometryType.LINE:
+                        self.print_line(arc_length[last_idx], self.center[last_idx][0],
+                                        self.center[cur_idx - 1][1], self.hdg[last_idx], this_length)
+                    elif cur_type == GeometryType.ARC:
+                        self.print_arc(arc_length[last_idx], self.center[last_idx][0],
+                                       self.center[last_idx][1], self.hdg[last_idx], this_length,
+                                       curv[cur_idx - 1])
+                    elif cur_type == GeometryType.SPIRAL:
+                        self.print_spiral(arc_length[last_idx], self.center[last_idx][0],
+                                          self.center[last_idx][1], self.hdg[last_idx], this_length,
+                                          curv[last_idx], curv[cur_idx - 1])
+                    else:
+                        print("bug")
+                    if np.isclose(self.hdg[cur_idx], self.hdg[cur_idx - 1], 0.0174533) and cur_type in [
+                        GeometryType.LINE, GeometryType.NONE]:  # 0.1deg
+                        cur_type = GeometryType.LINE
+                        continue
+                    elif np.isclose(curv[last_idx], curv[cur_idx], 0.001) and cur_type in [GeometryType.ARC,
+                                                                                           GeometryType.NONE]:
+                        cur_type = GeometryType.ARC
+                        continue
+                    elif np.isclose(curv[last_idx] * (cur_idx - last_idx), curv[cur_idx], 0.001) and cur_type in [
+                        GeometryType.SPIRAL, GeometryType.NONE]:
+                        cur_type = GeometryType.SPIRAL
+                        continue
+                    else:
+                        cur_type = GeometryType.NONE
+                    last_idx = cur_idx
+                    cur_idx += 1
+            cur_idx += 1
         return arc_length[-1]
 
     # xodr for lines
