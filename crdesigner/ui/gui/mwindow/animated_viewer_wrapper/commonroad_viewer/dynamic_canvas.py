@@ -1,6 +1,5 @@
 import copy
 from math import radians, sin, atan2, cos, sqrt
-from typing import List, Union, Set
 from typing import List, Union
 
 
@@ -11,7 +10,6 @@ from PyQt5.QtWidgets import QSizePolicy
 from PyQt5 import QtCore
 
 import numpy as np
-from matplotlib import image as mpimg, pyplot as plt
 from matplotlib.backend_bases import MouseButton
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
@@ -37,7 +35,7 @@ from .service_layer import resize_lanelet_network
 from crdesigner.ui.gui.mwindow.service_layer import config
 
 from ...service_layer.map_creator import MapCreator
-from ...service_layer.osm_gui_modules.aerial_data import get_aerial_image
+from crdesigner.ui.gui.mwindow.service_layer.aerial_data import get_aerial_image
 
 ZOOM_FACTOR = 1.2
 

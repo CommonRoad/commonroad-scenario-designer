@@ -19,9 +19,7 @@ from crdesigner.map_conversion.osm2cr import config
 from crdesigner.map_conversion.osm2cr.converter_modules.cr_operations.export import convert_to_scenario
 from crdesigner.map_conversion.osm2cr.converter_modules.graph_operations import road_graph as rg
 
-from crdesigner.ui.gui.mwindow.service_layer.osm_gui_modules.gui_embedding import EdgeEdit, LaneLinkEdit
 from crdesigner.ui.gui.mwindow.service_layer.converter_modules.osm_interface import OSMInterface
-from crdesigner.ui.gui.mwindow.service_layer.osm_gui_modules.gui import EdgeEditGUI, LaneLinkGUI
 
 from crdesigner.map_conversion.opendrive.opendrive_parser.parser import parse_opendrive
 from crdesigner.map_conversion.opendrive.opendrive_conversion.network import Network
@@ -104,27 +102,6 @@ class MapConversionToolbox(QDockWidget):
 
     def refresh_toolbox(self, scenario: Scenario):
         self.current_scenario = scenario
-
-    def load_osm_edit_state(self) -> None:
-        """
-        Loads an OSM edit state and opens it within a separate GUI.
-        """
-        filename, _ = QFileDialog.getOpenFileName(self, "Select a edit state file", "edit save *.save (*.save)",
-                                                  options=QFileDialog.Options())
-        if filename == "" or filename is None:
-            print("no file picked")
-        else:
-            with open(filename, "rb") as fd:
-                gui_state = pickle.load(fd)
-            if isinstance(gui_state, EdgeEditGUI):
-                EdgeEdit(self, None, gui_state)
-                self.osm_edit_window.show()
-            elif isinstance(gui_state, LaneLinkGUI):
-                LaneLinkEdit(self, None, gui_state)
-                self.osm_edit_window.show()
-            else:
-                QMessageBox.critical(self, "Warning", "Invalid GUI state.", QMessageBox.Ok)
-                return
 
     def load_osm_file(self) -> None:
         """
@@ -224,18 +201,7 @@ class MapConversionToolbox(QDockWidget):
     def startSpinner(self, spinner: QtWaitingSpinner):
         if(spinner.isSpinning()):
             spinner.stop() 
-        spinner.start()    
-
-    def lane_link_embedding(self, graph: rg.Graph):
-        """
-        sets lane link embedding as main window
-
-        :param graph: the graph to edit
-        :return:
-        """
-        if graph is not None:
-            self.lane_link_window = LaneLinkEdit(self, graph, None)
-            self.osm_edit_window.show()
+        spinner.start()
 
     def verify_osm_coordinate_input(self) -> bool:
         """
