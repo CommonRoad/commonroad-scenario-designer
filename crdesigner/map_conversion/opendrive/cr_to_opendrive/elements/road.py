@@ -97,10 +97,10 @@ class Road:
 
         self.center = self.lane_list[i].left_vertices
         self.hdg = compute_heading(self.center,  self.lane_list[i].center_vertices)
-        # self.center = np.insert(self.center, self.center.shape[0] - 1,
-        #                         np.array([self.center[-1][0] - np.cos(self.hdg[-1]) * 0.01,
-        #                                   self.center[-1][1] - np.sin(self.hdg[-1]) * 0.01]), 0)
-        # self.hdg = np.insert(self.hdg, self.hdg.shape[0] - 1, self.hdg[-1])
+        self.center = np.insert(self.center, self.center.shape[0] - 1,
+                                np.array([self.center[-1][0] - np.cos(self.hdg[-1]) * 0.01,
+                                          self.center[-1][1] - np.sin(self.hdg[-1]) * 0.01]), 0)
+        self.hdg = np.insert(self.hdg, self.hdg.shape[0] - 1, self.hdg[-1])
 
         for i in range(0, number_of_lanes):
             Road.cr_id_to_od[lane_list[i].lanelet_id] = Road.counting
@@ -225,16 +225,16 @@ class Road:
         cur_type = GeometryType.NONE
         switch = GeometryType.NONE
 
-        while cur_idx < len(self.center) - 1:
-            if np.isclose(self.hdg[last_idx], self.hdg[cur_idx], 0.0174533) and cur_type in \
+        while cur_idx <= len(self.center) - 1:
+            if np.isclose(self.hdg[cur_idx - 1], self.hdg[cur_idx], 0.0174533) and cur_type in \
                     [GeometryType.LINE, GeometryType.NONE]:  # 0.1deg
                 cur_type = GeometryType.LINE
             elif np.isclose(curv[last_idx], curv[cur_idx], 0.01) and cur_type in [GeometryType.ARC, GeometryType.NONE]:
                 cur_type = GeometryType.ARC
-            elif np.isclose(curv_dif[cur_idx], curv_dif[cur_idx - 1], 0.01) and cur_type in \
+            elif cur_idx == 1 and not np.isclose(curv_dif[cur_idx - 1], curv_dif[cur_idx - 2], 0.01) or cur_idx > 1 and np.isclose(curv_dif[cur_idx - 1], curv_dif[cur_idx - 2], 0.01) and cur_type in \
                     [GeometryType.SPIRAL, GeometryType.NONE]:
                 cur_type = GeometryType.SPIRAL
-            elif np.isclose(self.hdg[last_idx], self.hdg[cur_idx], 0.0174533) and cur_type not in \
+            elif np.isclose(self.hdg[cur_idx - 1], self.hdg[cur_idx], 0.0174533) and cur_type not in \
                     [GeometryType.LINE, GeometryType.NONE]:  # 0.1deg
                 switch = GeometryType.LINE
             elif np.isclose(curv[last_idx], curv[cur_idx], 0.01) and cur_type not in \
@@ -250,7 +250,7 @@ class Road:
                 last_idx = cur_idx - 1
             cur_idx += 1
         if switch == GeometryType.NONE:
-            self.print_geometry(arc_length, cur_idx, cur_type, curv, last_idx)
+            self.print_geometry(arc_length, cur_idx - 1, cur_type, curv, last_idx)
         return arc_length[-1]
 
     def print_geometry(self, path_length: np.ndarray, end_idx: int, geo_type: GeometryType, curv: np.ndarray,
