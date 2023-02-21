@@ -16,6 +16,13 @@ from commonroad.geometry.polyline_util import compute_polyline_lengths  # type: 
 from commonroad_dc.geometry.util import compute_curvature_from_polyline
 
 
+class GeometryType(enum.Enum):
+    LINE = 1
+    ARC = 2
+    SPIRAL = 3
+    NONE = 4
+
+
 def compute_heading(polyline_left: np.ndarray, polyline_right: np.ndarray) -> np.ndarray:
     """
     Computes the orientation of a given polyline travelled from initial
@@ -90,6 +97,10 @@ class Road:
 
         self.center = self.lane_list[i].left_vertices
         self.hdg = compute_heading(self.center,  self.lane_list[i].center_vertices)
+        # self.center = np.insert(self.center, self.center.shape[0] - 1,
+        #                         np.array([self.center[-1][0] - np.cos(self.hdg[-1]) * 0.01,
+        #                                   self.center[-1][1] - np.sin(self.hdg[-1]) * 0.01]), 0)
+        # self.hdg = np.insert(self.hdg, self.hdg.shape[0] - 1, self.hdg[-1])
 
         for i in range(0, number_of_lanes):
             Road.cr_id_to_od[lane_list[i].lanelet_id] = Road.counting
@@ -209,12 +220,6 @@ class Road:
         # could be more smooth, if needed, with resampling with a
         # smaller step size
 
-        class GeometryType(enum.Enum):
-            LINE = 1
-            ARC = 2
-            SPIRAL = 3
-            NONE = 4
-
         cur_idx = 1
         last_idx = 0
         cur_type = GeometryType.NONE
@@ -238,41 +243,31 @@ class Road:
             else:
                 switch = GeometryType.SPIRAL
             if switch != GeometryType.NONE:
-                # until last vertex
-                this_length = arc_length[cur_idx - 1] - arc_length[last_idx]
-                if cur_type == GeometryType.LINE:
-                    print("line", this_length)
-                    self.print_line(arc_length[cur_idx - 1], self.center[last_idx][0],
-                                    self.center[cur_idx - 1][1], self.hdg[last_idx], this_length)
-                elif cur_type == GeometryType.ARC:
-                    print("arc")
-                    self.print_arc(arc_length[last_idx], self.center[last_idx][0],
-                                   self.center[last_idx][1], self.hdg[last_idx], this_length,
-                                   curv[cur_idx - 1])
-                elif cur_type == GeometryType.SPIRAL:
-                    print("spiral")
-                    self.print_spiral(arc_length[last_idx], self.center[last_idx][0],
-                                      self.center[last_idx][1], self.hdg[last_idx], this_length,
-                                      curv[last_idx], curv[cur_idx - 1])
+
+                self.print_geometry(arc_length, cur_idx - 1, cur_type, curv, last_idx)
                 cur_type = switch
                 switch = GeometryType.NONE
                 last_idx = cur_idx - 1
             cur_idx += 1
         if switch == GeometryType.NONE:
-            this_length = arc_length[cur_idx - 1] - arc_length[last_idx]
-            if cur_type == GeometryType.LINE:
-                print("line", this_length)
-                self.print_line(arc_length[cur_idx - 1], self.center[last_idx][0], self.center[last_idx - 1][1],
-                                self.hdg[last_idx], this_length)
-            elif cur_type == GeometryType.ARC:
-                print("arc")
-                self.print_arc(arc_length[last_idx], self.center[last_idx][0], self.center[last_idx][1],
-                               self.hdg[last_idx], this_length, curv[cur_idx - 1])
-            elif cur_type == GeometryType.SPIRAL:
-                print("spiral")
-                self.print_spiral(arc_length[last_idx], self.center[last_idx][0], self.center[last_idx][1],
-                                  self.hdg[last_idx], this_length, curv[last_idx], curv[cur_idx - 1])
+            self.print_geometry(arc_length, cur_idx, cur_type, curv, last_idx)
         return arc_length[-1]
+
+    def print_geometry(self, path_length: np.ndarray, end_idx: int, geo_type: GeometryType, curv: np.ndarray,
+                       start_idx: int):
+        this_length = path_length[end_idx] - path_length[start_idx]
+        if geo_type == GeometryType.LINE:
+            print("line", this_length, start_idx, end_idx)
+            self.print_line(path_length[start_idx], self.center[start_idx][0], self.center[start_idx][1],
+                            self.hdg[start_idx], this_length)
+        elif geo_type == GeometryType.ARC:
+            print("arc", this_length, start_idx, end_idx)
+            self.print_arc(path_length[start_idx], self.center[start_idx][0], self.center[start_idx][1],
+                           self.hdg[start_idx], this_length, curv[end_idx])
+        elif geo_type == GeometryType.SPIRAL:
+            print("spiral", this_length, start_idx, end_idx)
+            self.print_spiral(path_length[start_idx], self.center[start_idx][0], self.center[start_idx][1],
+                              self.hdg[start_idx], this_length, curv[start_idx], curv[end_idx])
 
     # xodr for lines
     def print_line(self, s: float, x: float, y: float, hdg: float, length: float) -> None:
