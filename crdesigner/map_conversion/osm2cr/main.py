@@ -15,7 +15,6 @@ from crdesigner.map_conversion.osm2cr import config
 from crdesigner.map_conversion.osm2cr.converter_modules.intermediate_operations.intermediate_format import \
     IntermediateFormat
 from crdesigner.map_conversion.osm2cr.converter_modules.osm_operations.downloader import download_around_map
-from crdesigner.ui.gui.mwindow.service_layer.osm_gui_modules.gui_embedding import MainApp
 
 matplotlib.use("Qt5Agg")
 
@@ -73,11 +72,6 @@ def download_and_convert():
     scenario.save_as_cr(None)
 
 
-def start_gui(parent=None):
-    app = MainApp(parent)
-    app.start()
-
-
 def main():
     parser = argparse.ArgumentParser(
         description="download or open an OSM file and convert it to CR or use GUI"
@@ -98,8 +92,6 @@ def main():
         else:
             print("please provide a file to open")
             return
-    elif args.action == "g" or args.action == "gui":
-        start_gui()
     else:
         print("invalid arguments")
         return

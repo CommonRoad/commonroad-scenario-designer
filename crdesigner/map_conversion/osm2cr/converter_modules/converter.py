@@ -9,7 +9,6 @@ import matplotlib.pyplot as plt
 
 from crdesigner.map_conversion.osm2cr import config
 from crdesigner.map_conversion.osm2cr.converter_modules.cr_operations import export
-from crdesigner.ui.gui.mwindow.service_layer.osm_gui_modules import gui
 from crdesigner.map_conversion.osm2cr.converter_modules.osm_operations import osm_parser
 from crdesigner.map_conversion.osm2cr.converter_modules.utility import plots
 from crdesigner.map_conversion.osm2cr.converter_modules.graph_operations import (
@@ -103,15 +102,8 @@ class GraphScenario:
         logging.info("reading File and creating graph")
 
         graph = step_collection_1(file)
-        # HERE WE CAN EDIT THE NODES AND EDGES OF THE GRAPH
-        if config.USER_EDIT:
-            logging.info("editing the graph")
-            graph = gui.edit_graph_edges(graph)
         graph = step_collection_2(graph)
-        # HERE WE CAN EDIT LINKS IN THE GRAPH
-        if config.USER_EDIT:
-            logging.info("editing the graph")
-            graph = gui.edit_graph_links(graph)
+
         graph = step_collection_3(graph)
         self.graph: road_graph.Graph = graph
 

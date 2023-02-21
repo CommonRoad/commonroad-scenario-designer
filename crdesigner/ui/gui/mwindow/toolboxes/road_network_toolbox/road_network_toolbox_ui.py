@@ -19,6 +19,7 @@ class RoadNetworkToolboxUI(Toolbox):
         self.curved_check_button = None
         self.select_end_position = None
         self.end_position_method = None
+        self.lanelet_width = None
 
     def update(self) -> None:
         super(RoadNetworkToolboxUI, self).update()
@@ -1449,7 +1450,7 @@ class RoadNetworkToolboxUI(Toolbox):
             else:
                 self.curved_check_button.button.setStyleSheet('background-color: '+ self.mwindow.colorscheme().second_background + '; color: ' + self.mwindow.colorscheme().color)
 
-        if hasattr(self, 'lanelet_width'):
+        if self.place_at_position.isChecked() or self.connect_to_previous_selection.isChecked() or self.connect_to_predecessors_selection.isChecked() or self.connect_to_successors_selection.isChecked():
             if not self.place_at_position.isChecked():
                 self.lanelet_width.setStyleSheet(
                 'background-color: ' + self.mwindow.colorscheme().second_background + '; color: ' + self.mwindow.colorscheme().disabled)
