@@ -56,8 +56,10 @@ class CR2LaneletConverter:
         self.last_nodes = {}  # saves last left and right node
         self.left_ways = {}
         self.right_ways = {}
-        if abs(scenario.location.gps_longitude) <= 180 and abs(scenario.location.gps_latitude) <= 90:
+        if scenario.location is not None and not isinstance(scenario.location.gps_longitude, str) and abs(scenario.location.gps_longitude) <= 180 and abs(scenario.location.gps_latitude) <= 90:
             self.origin_utm = self.proj(scenario.location.gps_longitude, scenario.location.gps_latitude)
+        elif scenario.location is not None and isinstance(scenario.location.gps_longitude, str) and abs(float(scenario.location.gps_longitude)) <= 180 and abs(float(scenario.location.gps_latitude)) <= 90:
+            self.origin_utm = self.proj(float(scenario.location.gps_longitude), float(scenario.location.gps_latitude))
         else:
             self.proj = Proj(DEFAULT_PROJ_STRING)
             # set origin point (TUM MI building) in default UTM 32 zone

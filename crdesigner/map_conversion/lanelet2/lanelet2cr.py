@@ -1,5 +1,7 @@
 from collections import defaultdict
 from typing import List, Optional, Tuple
+
+from PyQt5.QtWidgets import QMessageBox
 from shapely.geometry import LineString  # type: ignore
 import numpy as np
 from pyproj import Proj
@@ -108,6 +110,9 @@ class Lanelet2CRConverter:
         self._left_way_ids, self._right_way_ids = defaultdict(list), defaultdict(list)
         self.first_left_pts, self.last_left_pts = defaultdict(list), defaultdict(list)
         self.first_right_pts, self.last_right_pts = defaultdict(list), defaultdict(list)
+        if len(self.osm.nodes.values()) == 0:
+            print("__Warning__: Selected Scenario is empty.")
+            return
 
         origin = next(iter(self.osm.nodes.values()))  # use a random node as origin
         self.origin_utm = self.proj(origin.lon, origin.lat)
