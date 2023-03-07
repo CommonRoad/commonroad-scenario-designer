@@ -7,6 +7,8 @@ from crdesigner.map_conversion.opendrive.opendrive_parser.parser import parse_op
 from crdesigner.configurations.get_configs import get_configs
 from lxml import etree
 
+from PyQt5.QtWidgets import QMessageBox
+
 
 def convert_net_to_cr(net_file: str, verbose: bool = False) -> Scenario:
     """
@@ -17,6 +19,9 @@ def convert_net_to_cr(net_file: str, verbose: bool = False) -> Scenario:
 
     :return: commonroad map file
     """
+    if net_file is None:
+        QMessageBox.warning(None, "Warning", "No file selected.", QMessageBox.Ok)
+        return
     assert isinstance(net_file, str)
 
     out_folder_tmp = os.path.dirname(net_file)

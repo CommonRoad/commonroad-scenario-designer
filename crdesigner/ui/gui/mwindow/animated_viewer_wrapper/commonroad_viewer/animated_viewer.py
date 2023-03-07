@@ -58,6 +58,7 @@ class AnimatedViewer:
         self.dynamic.initial_parameter_config_done = False  # reset so that for any map the parameters are set correctly
         self.current_scenario = scenario
         # safe here the original scenario -> this is needed for zooming in / out and for moving around
+
         self.original_lanelet_network = LaneletNetwork.create_from_lanelet_network(
                 lanelet_network=scenario.lanelet_network)
         self.current_pps = planning_problem_set

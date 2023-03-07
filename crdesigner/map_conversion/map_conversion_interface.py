@@ -97,6 +97,8 @@ def opendrive_to_commonroad(input_file: str) -> Scenario:
     configs = get_configs()
     road_network = Network(configs.opendrive)
     road_network.load_opendrive(opendrive)
+    for index in range(len(road_network._traffic_lights)):
+        road_network._traffic_lights[index]._traffic_light_id = abs(road_network._traffic_lights[index].traffic_light_id)
     return road_network.export_commonroad_scenario()
 
 
@@ -163,7 +165,8 @@ def osm_to_commonroad_using_sumo(input_file: str) -> Scenario:
     scenario_name = str(input_file_pth.name)
     opendrive_file = str(input_file_pth.parent / f"{scenario_name}.xodr")
     # convert to OpenDRIVE file using netconvert
-    subprocess.check_output(
+    try:
+        subprocess.check_output(
         [
             "netconvert",
             "--osm-files",
@@ -173,5 +176,8 @@ def osm_to_commonroad_using_sumo(input_file: str) -> Scenario:
             "--junctions.scurve-stretch",
             "1.0",
         ]
-    )
+        )
+    except Exception as e:
+        print("__Warning__: {}.".format(e))
+        return
     return opendrive_to_commonroad(opendrive_file)
