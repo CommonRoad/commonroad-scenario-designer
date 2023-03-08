@@ -1,7 +1,4 @@
-import math
 from typing import Tuple, List, Union
-
-import matplotlib.pyplot as plt
 import numpy as np
 import warnings
 
@@ -11,7 +8,7 @@ from crdesigner.map_conversion.opendrive.opendrive_parser.elements.geometry impo
     Spiral,
     ParamPoly3,
     Arc,
-    Poly3, CurvatureRes, calc_next_s,
+    Poly3, calc_next_s,
 )
 
 
@@ -284,7 +281,3 @@ class PlanView:
             # i += 1
 
         self._precalculation = np.array(_precalculation)
-        # plt.figure()
-        # plt.plot(self._precalculation[:,1], self._precalculation[:,2])
-        # plt.axis("equal")
-        # plt.show(block=True)
