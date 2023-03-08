@@ -75,4 +75,13 @@ class Lanelet2Parser:
                 traffic_sign_id = TrafficSignIDGermany.MAX_SPEED
                 osm.add_speed_limit_sign(speed_limit_id, speed, traffic_sign_id)
 
+            for traffic_light in reg_element_rel.xpath("./tag[@v='traffic_light' and @k='subtype']/.."):
+                traffic_lights = traffic_light.xpath("./member[@role='refers']/@ref")
+                ref_lines = traffic_light.xpath("./member[@role='ref_line']/@ref")
+                tag_dict = {tag.get("k"): tag.get("v") for tag in traffic_light.xpath("./tag[@k and @v]") if
+                            tag.get("k") in ALLOWED_TAGS}
+                    
+                osm.add_regulatory_element(RegulatoryElement(traffic_light.get('id'), ref_line=ref_lines,
+                                                             refers=traffic_lights, tag_dict=tag_dict))
+
         return osm

@@ -56,9 +56,11 @@ class CR2LaneletConverter:
         self.last_nodes = {}  # saves last left and right node
         self.left_ways = {}
         self.right_ways = {}
-        if scenario.location is not None and not isinstance(scenario.location.gps_longitude, str) and abs(scenario.location.gps_longitude) <= 180 and abs(scenario.location.gps_latitude) <= 90:
+        if scenario.location is not None and not isinstance(scenario.location.gps_longitude, str) and\
+                abs(scenario.location.gps_longitude) <= 180 and abs(scenario.location.gps_latitude) <= 90:
             self.origin_utm = self.proj(scenario.location.gps_longitude, scenario.location.gps_latitude)
-        elif scenario.location is not None and isinstance(scenario.location.gps_longitude, str) and abs(float(scenario.location.gps_longitude)) <= 180 and abs(float(scenario.location.gps_latitude)) <= 90:
+        elif scenario.location is not None and isinstance(scenario.location.gps_longitude, str) and\
+                abs(float(scenario.location.gps_longitude)) <= 180 and abs(float(scenario.location.gps_latitude)) <= 90:
             self.origin_utm = self.proj(float(scenario.location.gps_longitude), float(scenario.location.gps_latitude))
         else:
             self.proj = Proj(DEFAULT_PROJ_STRING)
@@ -116,9 +118,9 @@ class CR2LaneletConverter:
                 x, y = self._get_shared_last_nodes_from_other_lanelets(ll)
                 way_tl = Way(self.id_count, [x, y])
                 self.osm.add_way(way_tl)
-                lista = [way_tl.id_]
+                list = [way_tl.id_]
                 self.osm.add_regulatory_element(
-                    RegulatoryElement(self.id_count, traffic_light_reference_list, ref_line=lista,
+                    RegulatoryElement(self.id_count, traffic_light_reference_list, ref_line=list,
                                       tag_dict={"subtype": "traffic_light", "type": "regulatory_element"}))
 
     def _convert_traffic_light(self, light: TrafficLight):
@@ -289,7 +291,7 @@ class CR2LaneletConverter:
         traffic_sign_wayid = self.id_count
         virtual = sign.virtual
 
-        # extract the country name of the sign so we can map it to a dictionary
+        # extract the country name of the sign, so we can map it to a dictionary
         sign_country_name = str(type(sign.traffic_sign_elements[0].traffic_sign_element_id).__name__)
 
         # map the supported countries to their 2 letter prefixs
@@ -326,7 +328,7 @@ class CR2LaneletConverter:
             self.osm.add_way(right_way)
             right_way_id = right_way.id_
 
-        # lanelet2 subtypes of lanelet that are availabe in commonroad
+        # lanelet2 subtypes of lanelet that are available in commonroad
         l2_lanelet_subtypes = config.L2_LANELET_SUBTYPES
 
         # get the lanelet type of the lanelet we are converting
@@ -334,7 +336,7 @@ class CR2LaneletConverter:
         if len(lanelet.lanelet_type) > 0:
             subtype = list(lanelet.lanelet_type)[0].value
 
-        # have to convert the names as they are slighty different in both formats
+        # have to convert the names as they are slightly different in both formats
         subtype_in = False
         if subtype in l2_lanelet_subtypes:
             subtype_in = True
@@ -413,8 +415,8 @@ class CR2LaneletConverter:
         if right_way_id:
             first_right_node: Optional[str]
             last_right_node: Optional[str]
-            first_right_node, last_right_node = self._get_first_and_last_nodes_from_way(right_way_id,
-                                                                                        lanelet.adj_right_same_direction)
+            first_right_node, last_right_node = self._get_first_and_last_nodes_from_way\
+            (right_way_id, lanelet.adj_right_same_direction)
         else:
             first_right_node = pot_first_right_node
             last_right_node = pot_last_right_node
@@ -453,8 +455,8 @@ class CR2LaneletConverter:
         :return: Ids of nodes which were created.
         """
         nodes = []
-        for vertice in vertices:
-            lon, lat = self.proj(self.origin_utm[0] + vertice[0], self.origin_utm[1] + vertice[1], inverse=True)
+        for vertex in vertices:
+            lon, lat = self.proj(self.origin_utm[0] + vertex[0], self.origin_utm[1] + vertex[1], inverse=True)
             node = Node(self.id_count, lat, lon)
             nodes.append(node.id_)
             self.osm.add_node(node)

@@ -15,7 +15,7 @@ class Node:
         Initialization of Node
         
         :param lat: Latitude geo position information
-        :param lon: Longitutde geo position information
+        :param lon: Longitude geo position information
         """
         self.id_ = str(id_)
         self.lat = str(lat)
@@ -186,7 +186,7 @@ class OSMLanelet:
     """
 
     def __init__(self):
-        """Initalization of the OSMLanelet"""
+        """Initialization of the OSMLanelet"""
         self.nodes = {}
         self.ways = {}
         self.way_relations = {}
@@ -254,7 +254,7 @@ class OSMLanelet:
         Finds a way corresponding to its id.
 
         :param way_id: id of the way
-        :return: Way with the corresponding id
+        :return: way with the corresponding id
         """
         return self.ways.get(way_id)
 
