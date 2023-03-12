@@ -25,7 +25,7 @@ setup(
         "mercantile>=1.1.3",
         "utm>=0.5.0",
         "PyQt5>=5.12.2",
-        "matplotlib>=3.5",
+        "matplotlib>=3.5, <3.6",
         "shapely>=2.0.0",
         "sumocr==2023.1",
         "commonroad-io==2023.1",
