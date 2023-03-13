@@ -65,11 +65,6 @@ class Lanelet2Parser:
                           f"Please check your data! Discarding.")
 
             for speed_limit in reg_element_rel.xpath("./tag[@v='speed_limit' and @k='subtype']/.."):
-                # TODO : create a traffic sign and TrafficSignElement with speed limit as additional value
-                # wrap in a traffic sign or later wrap all sign in a Traffic Sign
-                # each lanelet with a relation to this speed limit needs a reference
-
-                # TODO find out if required to remove kmh or mph
                 speed = speed_limit.xpath("./tag[@k='sign_type']/@v")[0]  # [:-3]
                 speed_limit_id = speed_limit.attrib['id']
                 traffic_sign_id = TrafficSignIDGermany.MAX_SPEED
