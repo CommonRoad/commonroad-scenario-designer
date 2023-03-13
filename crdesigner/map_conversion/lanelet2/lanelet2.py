@@ -1,8 +1,6 @@
-from typing import Optional
+from typing import Optional, Dict
 from lxml import etree  # type: ignore
 from typing import List
-
-DEFAULT_PROJ_STRING = "+proj=utm +zone=32 +ellps=WGS84"
 
 
 class Node:
@@ -39,7 +37,7 @@ class Way:
     OSM Way
     """
 
-    def __init__(self, id_, nodes: list, tag_dict: Optional[dict] = None):
+    def __init__(self, id_, nodes: list, tag_dict: Optional[Dict[str, str]] = None):
         """
         Initialization of Way
 
@@ -75,7 +73,7 @@ class WayRelation:
     Relation for a lanelet with a left and a right way
     """
 
-    def __init__(self, id_, left_way, right_way, tag_dict: Optional[dict] = None,
+    def __init__(self, id_, left_way, right_way, tag_dict: Optional[Dict[str, str]] = None,
                  regulatory_elements: Optional[List[str]] = None):
         """
         Initialization of WayRelation
@@ -126,7 +124,7 @@ class RegulatoryElement:
     """Relation for a regulatory element (traffic light, traffic sign, speed limit)"""
 
     def __init__(self, id_, refers: Optional[list] = None, yield_ways: Optional[list] = None,
-                 right_of_ways: Optional[list] = None, tag_dict: Optional[dict] = None,
+                 right_of_ways: Optional[list] = None, tag_dict: Optional[Dict[str, str]] = None,
                  ref_line: Optional[list] = None):
         """
         Initialization of RegulatoryElement
