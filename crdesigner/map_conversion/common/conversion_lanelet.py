@@ -11,6 +11,7 @@ class ConversionLanelet(Lanelet):
     """Change some properties of the Lanelet class so that it can be used to conversions to Lanelet. This means
     especially that lanelet_ids can be other types than a natural number and that these ids can be changed
     more than once. Adjacent neighbors and pre- and successor can be changed more than once.
+    This class is being used in Opendrive and Lanelet2 format conversions
     """
 
     # optimal_join_split_factor = 20

@@ -13,9 +13,10 @@ from commonroad.scenario.traffic_sign import (TrafficSignElement, TrafficSignIDG
 from commonroad.scenario.scenario import Scenario, ScenarioID, TrafficSign, Location, TrafficLight  # type: ignore
 
 from crdesigner.map_conversion.common.utils import generate_unique_id
-from crdesigner.map_conversion.opendrive.opendrive_conversion.conversion_lanelet import ConversionLanelet
-from crdesigner.map_conversion.opendrive.opendrive_conversion.conversion_lanelet_network import \
-    ConversionLaneletNetwork, convert_to_new_lanelet_id
+from crdesigner.map_conversion.common.conversion_lanelet import ConversionLanelet
+from crdesigner.map_conversion.common.conversion_lanelet_network import \
+    ConversionLaneletNetwork
+from crdesigner.map_conversion.common.utils import convert_to_new_lanelet_id
 from crdesigner.map_conversion.lanelet2.lanelet2 import WayRelation, Node, RegulatoryElement, Way
 from crdesigner.map_conversion.osm2cr.converter_modules.utility.geometry import (point_to_line_distance,
                                                                                  distance as point_to_polyline_distance)

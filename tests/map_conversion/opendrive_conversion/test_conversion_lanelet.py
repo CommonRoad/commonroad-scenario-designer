@@ -1,6 +1,6 @@
 import unittest
 import numpy as np
-from crdesigner.map_conversion.opendrive.opendrive_conversion.conversion_lanelet import ConversionLanelet, LaneletType
+from crdesigner.map_conversion.common.conversion_lanelet import ConversionLanelet, LaneletType
 from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.plane_group import ParametricLane, \
     ParametricLaneGroup
 from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.plane import ParametricLaneBorderGroup, \

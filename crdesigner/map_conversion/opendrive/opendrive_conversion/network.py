@@ -10,8 +10,8 @@ from crdesigner.map_conversion.opendrive.opendrive_conversion import utils
 from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.crosswalks import get_crosswalks
 from crdesigner.map_conversion.opendrive.opendrive_parser.elements.opendrive import OpenDrive
 from crdesigner.map_conversion.opendrive.opendrive_conversion.utils import encode_road_section_lane_width_id
-from crdesigner.map_conversion.opendrive.opendrive_conversion.conversion_lanelet_network import \
-    ConversionLaneletNetwork, ConversionLanelet
+from crdesigner.map_conversion.common.conversion_lanelet_network import ConversionLaneletNetwork
+from crdesigner.map_conversion.common.conversion_lanelet import ConversionLanelet
 from crdesigner.map_conversion.opendrive.opendrive_conversion.converter import OpenDriveConverter
 from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.traffic_signals import get_traffic_signals
 from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.geo_reference import get_geo_reference

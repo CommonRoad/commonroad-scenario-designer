@@ -1,6 +1,6 @@
 import numpy as np
 from typing import List
-from crdesigner.map_conversion.opendrive.opendrive_conversion.conversion_lanelet import ConversionLanelet
+from crdesigner.map_conversion.common.conversion_lanelet import  ConversionLanelet
 
 
 def get_crosswalks(road) -> List[ConversionLanelet]:
