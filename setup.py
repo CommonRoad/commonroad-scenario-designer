@@ -34,7 +34,8 @@ setup(
         "iso3166>=1.0.1",
         "networkx>=2.5",
         "omegaconf>=2.2.2",
-        "pyyaml==6.0"
+        "pyyaml==6.0",
+        "pygeodesy>=23.3.18"
     ],
     extras_require={
         'doc': ['ipython>7.16.0',
@@ -56,8 +57,8 @@ setup(
                 'sphinx-gallery>=0.2.0',
                 'ipython>=6.5.0'],
         'tests': ['pytest>=5.3.2',
-                  'coverage>7.0.1'
-                  'parameterized>=0.7.4'
+                  'coverage>7.0.1',
+                  'parameterized>=0.7.4',
                   'pytest-qt>=4.0.2',
                   'prospector'],
         'tutorials': ['jupyter>=1.0.0'],

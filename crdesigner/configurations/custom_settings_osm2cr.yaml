@@ -121,7 +121,7 @@ speed_limits:
 split_at_corner: true
 sublayer_lanelettype: sidewalk
 tags: urban
-timestepsize: 0.1
+timestepsize: 0.0
 traffic_sign_keys:
 - traffic_sign
 - overtaking
