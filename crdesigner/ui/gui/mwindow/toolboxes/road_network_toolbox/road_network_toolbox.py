@@ -1,5 +1,4 @@
 from PyQt5.QtWidgets import *
-from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 import math
 
@@ -8,17 +7,31 @@ from commonroad.scenario.intersection import IntersectionIncomingElement, Inters
 from commonroad.scenario.scenario import Scenario
 from commonroad.scenario.traffic_sign import *
 
+from crdesigner.ui.gui.mwindow.service_layer.services.waitingspinnerwidget import QtWaitingSpinner
 from crdesigner.ui.gui.mwindow.toolboxes.toolbox_ui import CheckableComboBox
 from crdesigner.ui.gui.mwindow.service_layer.map_creator import MapCreator
 from crdesigner.ui.gui.mwindow.toolboxes.road_network_toolbox.road_network_toolbox_ui import RoadNetworkToolboxUI
 # from crdesigner.ui.gui.mwindow import AnimatedViewerWrapper
 from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMO_AVAILABLE
 from crdesigner.map_conversion.osm2cr import config
+from crdesigner.ui.gui.mwindow.service_layer import config as config_settings
 
 if SUMO_AVAILABLE:
     from crdesigner.map_conversion.sumo_map.cr2sumo.converter import CR2SumoMapConverter
     from crdesigner.map_conversion.map_conversion_interface import SumoConfig
 
+
+class RequestRunnable(QRunnable):
+    def __init__(self, fun, roadNetworkToolbox):
+        QRunnable.__init__(self)
+        self.fun = fun
+        self.roadNetworkToolbox = roadNetworkToolbox
+
+    def run(self):
+        self.fun()
+        QMetaObject.invokeMethod(self.roadNetworkToolbox, "stopSpinner",
+                                Qt.QueuedConnection,
+                                Q_ARG(str, "Conversion Ended"))
 
 class RoadNetworkToolbox(QDockWidget, ):
     def __init__(self, current_scenario: Scenario, text_browser, callback, tmp_folder: str, selection_changed_callback,
@@ -119,7 +132,8 @@ class RoadNetworkToolbox(QDockWidget, ):
         self.road_network_toolbox_ui.button_update_intersection.clicked.connect(lambda: self.update_intersection())
         # Aerial Image buttons
         self.road_network_toolbox_ui.button_add_aerial_image.clicked.connect(lambda: self.show_aerial_image())
-        self.road_network_toolbox_ui.button_remove_aerial_image.clicked.connect(lambda: self.hide_aerial_image())
+        self.road_network_toolbox_ui.button_remove_aerial_image.clicked.connect(lambda: self.remove_aerial_image())
+
 
     def refresh_toolbox(self, scenario: Scenario):
         self.current_scenario = scenario
@@ -1837,3 +1851,75 @@ class RoadNetworkToolbox(QDockWidget, ):
             MapCreator.fit_intersection_to_predecessor(lanelet_predecessor, lanelet_successor, intersection,
                                                        self.current_scenario.lanelet_network)
             self.callback(self.current_scenario)
+
+    def show_aerial_image(self):
+        if self.current_scenario is None:
+            self.text_browser.append("Please create first a new scenario.")
+            return
+        if float(self.road_network_toolbox_ui.northern_bound.text()) > 90 or float(self.road_network_toolbox_ui.northern_bound.text()) < -90:
+            self.text_browser.append("Invalid northern bound. Latitude has to be between -90 and 90.")
+            return
+        if float(self.road_network_toolbox_ui.southern_bound.text()) > 90 or float(self.road_network_toolbox_ui.southern_bound.text()) < -90:
+            self.text_browser.append("Invalid southern bound. Latitude has to be between -90 and 90.")
+            return
+        if float(self.road_network_toolbox_ui.western_bound.text()) > 180 or float(self.road_network_toolbox_ui.western_bound.text()) < -180:
+            self.text_browser.append("Invalid western bound. Longitude has to be between -180 and 180.")
+            return
+        if float(self.road_network_toolbox_ui.eastern_bound.text()) > 180 or float(self.road_network_toolbox_ui.eastern_bound.text()) < -180:
+            self.text_browser.append("Invalid eastern bound. Longitude has to be between -180 and 180.")
+            return
+        if float(self.road_network_toolbox_ui.southern_bound.text()) >= float(self.road_network_toolbox_ui.northern_bound.text()) \
+                or float(self.road_network_toolbox_ui.western_bound.text()) >= float(self.road_network_toolbox_ui.eastern_bound.text()):
+            self.text_browser.append("Invalid coordinate limits.")
+            return
+
+        if self.road_network_toolbox_ui.bing_selection.isChecked():
+            if config_settings.BING_MAPS_KEY == "":
+                print("_Warning__: No Bing Maps key specified. Go to settings and set password.")
+                warning_dialog = QMessageBox()
+                warning_dialog.warning(None, "Warning", "No Bing Maps key specified. Go to settings and set password.", QMessageBox.Ok,
+                                   QMessageBox.Ok)
+                warning_dialog.close()
+                return
+        elif self.road_network_toolbox_ui.ldbv_selection.isChecked():
+            if config_settings.LDBV_USERNAME == "" or config_settings.LDBV_PASSWORD == "":
+                print("_Warning__: LDBV username and password not specified. Go to settings and set them.")
+                warning_dialog = QMessageBox()
+                warning_dialog.warning(None, "Warning", "LDBV username and password not specified. Go to settings and set them.",
+                                       QMessageBox.Ok, QMessageBox.Ok)
+                warning_dialog.close()
+                return
+            if float(self.road_network_toolbox_ui.southern_bound.text()) > 50.6 or float(self.road_network_toolbox_ui.southern_bound.text()) < 47.2 \
+                    or float(self.road_network_toolbox_ui.northern_bound.text()) > 50.6 or float(self.road_network_toolbox_ui.northern_bound.text()) < 47.2 \
+                    or float(self.road_network_toolbox_ui.western_bound.text()) > 13.9 or float(self.road_network_toolbox_ui.western_bound.text()) < 8.9 \
+                    or float(self.road_network_toolbox_ui.eastern_bound.text()) > 13.9 or float(self.road_network_toolbox_ui.eastern_bound.text()) < 8.9:
+                self.text_browser.append("Coordinates are outside Bavaria. This tool works only for coordinates inside Bavaria.")
+                return
+
+        self.startSpinner(self.road_network_toolbox_ui.Spinner)
+        runnable = RequestRunnable(self.activate_aerial_image, self)
+        QThreadPool.globalInstance().start(runnable)
+
+
+    def activate_aerial_image(self):
+        self.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.activate_aerial_image(self.road_network_toolbox_ui.bing_selection.isChecked(),
+                                                                                 float(self.road_network_toolbox_ui.northern_bound.text()),
+                                                                                 float(self.road_network_toolbox_ui.western_bound.text()),
+                                                                                 float(self.road_network_toolbox_ui.southern_bound.text()),
+                                                                                 float(self.road_network_toolbox_ui.eastern_bound.text()),
+                                                                                     self.road_network_toolbox_ui.center_at_zero.isChecked())
+        self.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.show_aerial_image()
+    def remove_aerial_image(self):
+        self.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.deactivate_aerial_image()
+        self.callback(self.current_scenario)
+
+    @pyqtSlot(str)
+    def stopSpinner(self, data):
+        print(data)
+        self.callback(self.current_scenario)
+        self.road_network_toolbox_ui.Spinner.stop()
+
+    def startSpinner(self, spinner: QtWaitingSpinner):
+        if (spinner.isSpinning()):
+            spinner.stop()
+        spinner.start()

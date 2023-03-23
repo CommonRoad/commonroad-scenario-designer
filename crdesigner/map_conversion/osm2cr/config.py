@@ -31,8 +31,6 @@ AERIAL_IMAGES = False
 IMAGE_SAVE_PATH = "files/imagery/"
 # The zoom level of Bing Maps tiles
 ZOOM_LEVEL = 19
-# The key to access bing maps
-BING_MAPS_KEY = ""
 # aerial image area threshold limiting the user input for the coordinates
 AERIAL_IMAGE_THRESHOLD = 0.01
 

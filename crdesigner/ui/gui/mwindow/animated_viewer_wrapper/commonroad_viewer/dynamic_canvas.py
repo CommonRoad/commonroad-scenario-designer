@@ -1,7 +1,6 @@
 import copy
-from math import radians, sin, atan2, cos, sqrt
 from typing import List, Union
-
+from pygeodesy import flatLocal
 
 import PyQt5
 from PyQt5.QtCore import *
@@ -13,6 +12,7 @@ import numpy as np
 from matplotlib.backend_bases import MouseButton
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
+from utm import from_latlon
 
 from commonroad.planning.planning_problem import PlanningProblemSet
 from commonroad.common.util import Interval
@@ -35,7 +35,7 @@ from .service_layer import resize_lanelet_network
 from crdesigner.ui.gui.mwindow.service_layer import config
 
 from ...service_layer.map_creator import MapCreator
-from crdesigner.ui.gui.mwindow.service_layer.aerial_data import get_aerial_image
+from crdesigner.ui.gui.mwindow.service_layer.aerial_data import get_aerial_image_bing, get_aerial_image_ldbv
 
 ZOOM_FACTOR = 1.2
 
@@ -865,23 +865,33 @@ class DynamicCanvas(FigureCanvas):
         """
         shows the current (previously loaded) aerial image in the plot as a background
         """
-        self.ax.imshow(self.current_aerial_image, aspect= 'auto', extent=self.image_limits, alpha=0.75)
+        self.ax.imshow(self.current_aerial_image, aspect='auto', extent=self.image_limits, alpha=0.75)
 
-    def activate_aerial_image(self, lat1: float, lon1: float, lat2: float, lon2: float):
+    def activate_aerial_image(self, bing: bool, lat1: float, lon1: float, lat2: float, lon2: float,
+                              center_at_zero: bool):
         """
         loads the aerial image with the following gps coordinates
         :param lat1: northern bound
         :param lon1: western bound
         :param lat2: southern bound
         :param lon2: eastern bound
+        :param center_at_zero: Boolean indicating whether image should be centered at origin.
         and gets the corresponding plot limits for the image
         and activates its showing in the background by setting show_aerial on True
         """
         self.update_aerial_image(lat1, lon1, lat2, lon2)
-        self.current_aerial_image, extent = get_aerial_image(self.aerial_map_bounds[0], self.aerial_map_bounds[1], self.aerial_map_bounds[2],
-                                       self.aerial_map_bounds[3])
-        self.image_limits = self.get_aerial_image_limits(self.aerial_map_bounds[0], self.aerial_map_bounds[1],
-                                                    self.aerial_map_bounds[2], self.aerial_map_bounds[3])
+        if bing:
+            self.current_aerial_image, extent = \
+                get_aerial_image_bing(self.aerial_map_bounds[0], self.aerial_map_bounds[1], self.aerial_map_bounds[2],
+                                      self.aerial_map_bounds[3])
+        else:
+            self.current_aerial_image = \
+                get_aerial_image_ldbv(self.aerial_map_bounds[0], self.aerial_map_bounds[1], self.aerial_map_bounds[2],
+                                      self.aerial_map_bounds[3])
+        self.image_limits = \
+            self.get_aerial_image_limits(self.aerial_map_bounds[0], self.aerial_map_bounds[1],
+                                         self.aerial_map_bounds[2], self.aerial_map_bounds[3], center_at_zero)
+
         self.show_aerial = True
 
     def update_aerial_image(self, lat1: float, lon1: float, lat2: float, lon2: float):
@@ -897,34 +907,39 @@ class DynamicCanvas(FigureCanvas):
         self.aerial_map_bounds[2] = lat2
         self.aerial_map_bounds[3] = lon2
 
-    def get_aerial_image_limits(self, lat1: float, lon1: float, lat2: float, lon2: float) -> List[float]:
+    def get_aerial_image_limits(self, lat1: float, lon1: float, lat2: float, lon2: float, center_at_zero: bool) \
+            -> List[float]:
         """
-        converts the gps coordinates to limits array [0, dist, 0, dist] where dist is the measurement in meters
-         for the side of the square containing the area bound by these coordinates
+        converts the gps coordinates to limits array [0, dist width, 0, dist height] where dist is the measurement
+        in meters for the side of the rectangle containing the area bound by these coordinates
         :param lat1: northern bound
         :param lon1: western bound
         :param lat2: southern bound
         :param lon2: eastern bound
+        :param center_at_zero: Boolean indicating whether image should be centered at origin.
         :return: 2. limits of image (in meters)
         """
-        # Approximate radius of earth in km
-        R = 6373.0
-        lat1 = radians(lat1)
-        lon1 = radians(lon1)
-        lat2 = radians(lat2)
-        lon2 = radians(lon2)
 
-        dlon = lon2 - lon1
-        dlat = lat2 - lat1
+        # compute height out of distance between left upper (north-west) and left lower (south-west) vertex
+        height = flatLocal(lat1, lon1, lat2, lon1)
+        # compute width out of distance between right lower (south-east) and left lower (south-west) vertex
+        width = flatLocal(lat2, lon1, lat2, lon2)
 
-        a = sin(dlat / 2) ** 2 + cos(lat1) * cos(lat2) * sin(dlon / 2) ** 2
-        c = 2 * atan2(sqrt(a), sqrt(1 - a))
-        distance = R * c * 1000 / sqrt(2)
+        if not center_at_zero:
+            # compute UTM coordinates for lower left point
+            lower_lat = lat2 + (lat2 - lat1) / 2
+            left_lon = lon1 + (lon2 - lon1) / 2
 
-        return [0, distance, 0, distance]
+            (coord1, coord2, zone_num, zone_let) = from_latlon(lower_lat, left_lon)
+            print(coord1, coord2)
+        else:
+            coord1 = 0
+            coord2 = 0
+        return [coord1, coord1 + width, coord2, coord2 + height]
 
     def deactivate_aerial_image(self):
         """
         deactivate the showing of the aerial image, called when user clicks on Remove button in road network toolbox
         """
         self.show_aerial = False
+        self._update_map()
