@@ -57,8 +57,8 @@ setup(
                 'sphinx-gallery>=0.2.0',
                 'ipython>=6.5.0'],
         'tests': ['pytest>=5.3.2',
-                  'coverage>7.0.1'
-                  'parameterized>=0.7.4'
+                  'coverage>7.0.1',
+                  'parameterized>=0.7.4',
                   'pytest-qt>=4.0.2',
                   'prospector'],
         'tutorials': ['jupyter>=1.0.0'],
