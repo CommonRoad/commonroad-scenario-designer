@@ -7,7 +7,7 @@
 # WARNING! All changes made in this file will be lost!
 
 from PyQt5 import QtCore, QtWidgets, QtGui
-
+from crdesigner.ui.gui.mwindow.service_layer.gui_resources.size_policies import create_size_policy_for_settings_elements
 
 class UIGUISettings:
 
@@ -81,6 +81,7 @@ class UIGUISettings:
         self.cmb_axis_visible.addItem('None')
         self.cmb_axis_visible.setObjectName("cmb_axis_visible")
         self.cmb_axis_visible.setMinimumSize(self.widthm, self.height)
+        self.cmb_axis_visible.setSizePolicy(create_size_policy_for_settings_elements())
         self.hL_axis_visible.addWidget(self.label_axis_visible)
         self.hL_axis_visible.addWidget(self.cmb_axis_visible)
         self.hL_axis_visible.addWidget(QtWidgets.QLabel(self.content[column]))
@@ -183,8 +184,8 @@ class UIGUISettings:
         self.hL_5.addWidget(QtWidgets.QLabel(self.content[column]))
         self.formLayout[column].addRow(self.hL_5)
 
-        column = 1
         # intersection options
+        self.formLayout[column].addRow(QtWidgets.QLabel(self.content[column]))
         self.label_intersection = QtWidgets.QLabel(self.content[column])
         self.label_intersection.setFont(QtGui.QFont("Arial", 11, QtGui.QFont.Bold))
         self.label_intersection.setObjectName("label_intersections")
@@ -249,10 +250,11 @@ class UIGUISettings:
         self.hL_9.addWidget(self.chk_draw_intersection_label)
         self.hL_9.addWidget(QtWidgets.QLabel(self.content[column]))
         self.formLayout[column].addRow(self.hL_9)
-        
+
+        column = 1
 
         # other options
-        self.formLayout[column].addRow(QtWidgets.QLabel(self.content[column]))
+        #self.formLayout[column].addRow(QtWidgets.QLabel(self.content[column]))
         self.label_other = QtWidgets.QLabel(self.content[column])
         self.label_other.setFont(QtGui.QFont("Arial", 11, QtGui.QFont.Bold))
         self.label_other.setObjectName("label_other")
@@ -326,6 +328,53 @@ class UIGUISettings:
         self.hL_12.addWidget(QtWidgets.QLabel(self.content[column]))
         self.formLayout[column].addRow(self.hL_12)
 
+        self.hL_13 = QtWidgets.QHBoxLayout()
+        self.hL_13.setObjectName("hL_13")
+        self.label_bing_maps_key = QtWidgets.QLabel(self.content[column])
+        self.label_bing_maps_key.setObjectName("label_bing_maps_key")
+        self.label_bing_maps_key.setMinimumSize(self.widthf, self.height)
+        self.lineed_bing_maps_key = QtWidgets.QLineEdit(self.content[column])
+        self.lineed_bing_maps_key.setEchoMode(QtWidgets.QLineEdit.Password)
+        self.lineed_bing_maps_key.setSizePolicy(create_size_policy_for_settings_elements())
+        self.lineed_bing_maps_key.setMinimumSize(self.widthm, self.height)
+        self.lineed_bing_maps_key.setObjectName("lineed_bing_maps_key")
+        self.formLayout[column].addRow(self.label_bing_maps_key, self.lineed_bing_maps_key)
+        self.hL_13.addWidget(self.label_bing_maps_key)
+        self.hL_13.addWidget(self.lineed_bing_maps_key)
+        self.hL_13.addWidget(QtWidgets.QLabel(self.content[column]))
+        self.formLayout[column].addRow(self.hL_13)
+
+        self.hL_14 = QtWidgets.QHBoxLayout()
+        self.hL_14.setObjectName("hL_14")
+        self.label_ldbv_username = QtWidgets.QLabel(self.content[column])
+        self.label_ldbv_username.setObjectName("label_ldbv_username")
+        self.label_ldbv_username.setMinimumSize(self.widthf, self.height)
+        self.lineed_ldbv_username = QtWidgets.QLineEdit(self.content[column])
+        self.lineed_ldbv_username.setSizePolicy(create_size_policy_for_settings_elements())
+        self.lineed_ldbv_username.setMinimumSize(self.widthm, self.height)
+        self.lineed_ldbv_username.setObjectName("lineed_ldbv_username")
+        self.formLayout[column].addRow(self.label_ldbv_username, self.lineed_ldbv_username)
+        self.hL_14.addWidget(self.label_ldbv_username)
+        self.hL_14.addWidget(self.lineed_ldbv_username)
+        self.hL_14.addWidget(QtWidgets.QLabel(self.content[column]))
+        self.formLayout[column].addRow(self.hL_14)
+
+        self.hL_15 = QtWidgets.QHBoxLayout()
+        self.hL_15.setObjectName("hL_15")
+        self.label_ldbv_password = QtWidgets.QLabel(self.content[column])
+        self.label_ldbv_password.setObjectName("label_ldbv_password")
+        self.label_ldbv_password.setMinimumSize(self.widthf, self.height)
+        self.lineed_ldbv_password = QtWidgets.QLineEdit(self.content[column])
+        self.lineed_ldbv_password.setEchoMode(QtWidgets.QLineEdit.Password)
+        self.lineed_ldbv_password.setSizePolicy(create_size_policy_for_settings_elements())
+        self.lineed_ldbv_password.setMinimumSize(self.widthm, self.height)
+        self.lineed_ldbv_password.setObjectName("lineed_ldbv_password")
+        self.formLayout[column].addRow(self.label_ldbv_password, self.lineed_ldbv_password)
+        self.hL_15.addWidget(self.label_ldbv_password)
+        self.hL_15.addWidget(self.lineed_ldbv_password)
+        self.hL_15.addWidget(QtWidgets.QLabel(self.content[column]))
+        self.formLayout[column].addRow(self.hL_15)
+
         for i in range(self.columns):
             pass
 
@@ -354,6 +403,9 @@ class UIGUISettings:
         self.label_draw_incoming_lanelet.setText(_translate("MainWindow", "Draw incoming lanelets"))
         self.label_draw_successors.setText(_translate("MainWindow", "Draw successor lanelets"))
         self.label_draw_intersection_label.setText(_translate("MainWindow", "Draw intersection labels"))
+        self.label_bing_maps_key.setText(_translate("MainWindow", "Bing maps key"))
+        self.label_ldbv_username.setText(_translate("MainWindow", "LDBV username"))
+        self.label_ldbv_password.setText(_translate("MainWindow", "LDBV password"))
 
         self.label_obstacle.setText(_translate("MainWindow", "Obstacle visualization"))
         self.label_intersection.setText(_translate("MainWindow", "Intersection visualization"))

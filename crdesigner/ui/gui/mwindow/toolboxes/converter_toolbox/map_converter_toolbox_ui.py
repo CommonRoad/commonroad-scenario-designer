@@ -1,8 +1,7 @@
-from PyQt5 import QtCore
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
-from crdesigner.ui.gui.mwindow.toolboxes.converter_toolbox.waitingspinnerwidget import QtWaitingSpinner
+from crdesigner.ui.gui.mwindow.service_layer.services.waitingspinnerwidget import QtWaitingSpinner
 
 from crdesigner.ui.gui.mwindow.toolboxes.toolbox_ui import Toolbox
 

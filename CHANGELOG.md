@@ -4,6 +4,7 @@
 
 ### Added
 - Possibility to load aerial image from Bing in the background
+- Possibility to load aerial image from LDBV in the background
 - CommonRoad to Lanelet2 conversion: Conversion of regulatory elements
 - CommonRoad to Lanelet2 conversion: Conversion of lanelet types
 

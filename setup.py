@@ -34,7 +34,8 @@ setup(
         "iso3166>=1.0.1",
         "networkx>=2.5",
         "omegaconf>=2.2.2",
-        "pyyaml==6.0"
+        "pyyaml==6.0",
+        "pygeodesy>=23.3.18"
     ],
     extras_require={
         'doc': ['ipython>7.16.0',

@@ -11,6 +11,6 @@ draw_obstacle_signals: true
 draw_occupancy: false
 draw_successors: true
 draw_traffic_lights: true
-draw_traffic_signs: false
+draw_traffic_signs: true
 draw_trajectory: false
 legend: true

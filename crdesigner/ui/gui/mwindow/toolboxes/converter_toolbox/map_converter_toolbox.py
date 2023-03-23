@@ -1,5 +1,3 @@
-import pickle
-import subprocess
 from typing import Callable, Optional
 import warnings
 from lxml import etree
@@ -31,7 +29,7 @@ from crdesigner.map_conversion.lanelet2.cr2lanelet import CR2LaneletConverter
 from crdesigner.configurations.get_configs import get_configs
 
 from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMO_AVAILABLE
-from crdesigner.ui.gui.mwindow.toolboxes.converter_toolbox.waitingspinnerwidget import QtWaitingSpinner
+from crdesigner.ui.gui.mwindow.service_layer.services.waitingspinnerwidget import QtWaitingSpinner
 if SUMO_AVAILABLE:
     from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMOSimulation
     from crdesigner.ui.gui.mwindow.service_layer.sumo_settings import SUMOSettings
