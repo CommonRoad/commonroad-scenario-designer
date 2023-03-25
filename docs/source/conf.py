@@ -41,7 +41,6 @@ release = "0.5"
 # ones.
 extensions = [
     'sphinx.ext.autodoc',
-   # 'sphinx.ext.napoleon',
     'matplotlib.sphinxext.plot_directive',
     'IPython.sphinxext.ipython_directive',
     'IPython.sphinxext.ipython_console_highlighting',
@@ -54,7 +53,6 @@ extensions = [
     'sphinx.ext.mathjax',
     'sphinx.ext.ifconfig',
     'sphinx.ext.viewcode',
-    'sphinxcontrib.apidoc',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
