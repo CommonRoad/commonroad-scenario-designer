@@ -1,5 +1,6 @@
+****************************
 CommonRoad Scenario Designer
-======================================
+****************************
 
 The CommonRoad Scenario Designer provides a toolbox for creating and manipulating CommonRoad maps
 and scenarios as well as converting maps between different map formats.
@@ -14,56 +15,48 @@ and scenarios, a command line interface, and different Python APIs.
     In case you encounter errors or want to provide us feedback, please post them in our
     `forum <https://commonroad.in.tum.de/forum/c/scenario-designer/18>`_.
 
-The software is written in Python 3.7/3.8/3.9 and tested on Linux. The usage of the Anaconda_ Python distribution
-is strongly recommended.
+We have tested the toolbox with Python 3.8, 3.9, 3.10, and 3.11.
+The toolbox should work under Linux, macOS, and Windows.
 
-.. _Anaconda: http://www.anaconda.com/download/#download
+Prerequisites and Installation
+==============================
+We have tested the toolbox with Python 3.8, 3.9, 3.10, and 3.11.
+The toolbox should work under Linux, macOS, and Windows.
+Below we present two ways of installing the CommonRoad Scenario Designer:
 
-Requirements
-============
+- Only using the CommonRoad Scenario Designer, e.g.,the GUI or integrating the scenario designer APIs into your code
+- Developing code for the CommonRoad Scenario Designer
 
-The required dependencies for running the CommonRoad Scenario Designer are:
-
-* numpy>=1.16.4
-* lxml>=4.3.4
-* commonroad-io>=2021.4
-* pyproj>=2.2.0
-* scipy>=1.3.0
-* Pillow>=7.1.1
-* mercantile>=1.1.3
-* utm>=0.5.0
-* PyQt5>=5.12.2
-* matplotlib>=3.1.0
-* shapely>=1.7.0
-* sumocr>=2021.5
-* ordered-set>=4.0.2
-* enum34>=1.1.10
-* iso3166>=1.0.1
-* networkx>=2.5
-
-From your Anaconda environment. For all the packages, we recommend to use the provided `requirements.txt`::
-
-    pip install -r requirements.txt
-
-
-If you want to use the SUMO conversion or to generate traffic using SUMO, please install `SUMO <https://sumo.dlr.de/docs/index.html>`_::
-
+If you want to use the SUMO conversion or to generate traffic using SUMO, please install
+`SUMO <https://sumo.dlr.de/docs/index.html>`_::
+    sudo apt-get update
     sudo apt-get install sumo sumo-tools sumo-doc
     echo "export SUMO_HOME=/usr/share/sumo" >> ~/.bashrc
     echo 'export PYTHONPATH="$SUMO_HOME/tools:$PYTHONPATH"' >> ~/.bashrc
 
 If you use zsh, replace `.bashrc` with `.zshrc`.
 
-Installation
-============
-
-To install the *CommonRoad Scenario Designer* from PyPI, please execute the following two command: ::
+Using the CommonRoad Scenario Designer
+**************************************
+The recommended way of installation if you only want to use the scenario designer (i.e., you do not want to work with the code directly) is to use the PyPI package::
 
     pip install commonroad-scenario-designer
 
-To install the *CommonRoad Scenario Designer* from source, please execute the following command: ::
 
-    pip install -e .
+Development
+**********
+First, clone the repository.
+The usage of `Poetry <https://python-poetry.org/>`_ is recommended.
+Poetry can be installed using::
+
+    curl -sSL https://install.python-poetry.org | python3 -
+
+Create a new Python environment::
+
+    poetry shell
+    poetry install --with tests,docs,tutorials
+
+We recommend to use PyCharm (Professional) as IDE.
 
 
 Getting Started
