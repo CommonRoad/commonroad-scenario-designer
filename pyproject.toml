@@ -2,7 +2,7 @@
 name = "commonroad scenario designer"
 version = "0.6.1"
 description = "Toolbox for Map Conversion and Scenario Creation for Autonomous Vehicles"
-authors = ["TUM-CPS <commonroad@lists.lrz.de>"]
+authors = ["Cyber-Physical Systems Group, Technical University of Munich <commonroad@lists.lrz.de>"]
 license = "GPL-3.0-or-later"
 readme = "README.md"
 keywords= ["autonomous", "automated", "vehicles", "driving", "motion", "planning", "simulation", "map", "scenario"]
