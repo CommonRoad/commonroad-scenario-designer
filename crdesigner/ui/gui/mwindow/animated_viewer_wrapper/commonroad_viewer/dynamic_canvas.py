@@ -94,7 +94,7 @@ class DynamicCanvas(FigureCanvas):
 
         super().__init__(self.drawer)
 
-        self.parent = parent
+        self._parent = parent
         self.setParent(parent)
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
@@ -115,6 +115,9 @@ class DynamicCanvas(FigureCanvas):
 
         self.clear_axes()
 
+    def parent(self):
+        return self._parent
+
     def keyPressEvent(self, event):
         """
         On key press activate an event
@@ -124,11 +127,11 @@ class DynamicCanvas(FigureCanvas):
         if self.flag is True:
             # on backspace delete selected lanelet
             if event.key() == QtCore.Qt.Key.Key_Backspace:
-                self.parent.road_network_toolbox.remove_lanelet()
+                self._parent.road_network_toolbox.remove_lanelet()
                 return
             # on DEL key delete selected lanelet
             elif event.key() == QtCore.Qt.Key.Key_Delete:
-                self.parent.road_network_toolbox.remove_lanelet()
+                self._parent.road_network_toolbox.remove_lanelet()
                 return
 
     def clear_axes(self, keep_limits=False, clear_artists=False):
@@ -357,7 +360,7 @@ class DynamicCanvas(FigureCanvas):
             if self.flag:
                 self.mouse_coordinates = QPoint(QCursor.pos().x(), QCursor.pos().y())
                  # if lanelet selected
-                if self.parent.road_network_toolbox.selected_lanelet() != None:
+                if self._parent.road_network_toolbox.selected_lanelet() != None:
                     # create menu
                     menu = PyQt5.QtWidgets.QMenu()
                     edit = menu.addAction("Edit Attributes")
@@ -366,15 +369,15 @@ class DynamicCanvas(FigureCanvas):
                     action = menu.exec((self.mouse_coordinates))
                     # removes selected lanelet
                     if action == remove:
-                        self.parent.road_network_toolbox.remove_lanelet()
+                        self._parent.road_network_toolbox.remove_lanelet()
                     # opens edit attributes of lanelet
                     if action == edit:
-                        self.parent.road_network_toolbox.road_network_toolbox_ui.tree.collapseItem(
-                            self.parent.road_network_toolbox.road_network_toolbox_ui.tree.itemAt(1, 0))
-                        self.parent.road_network_toolbox.road_network_toolbox_ui.tree.expandItem(
-                            self.parent.road_network_toolbox.road_network_toolbox_ui.tree.itemAt(7, 30))
-                        if not self.parent.road_network_toolbox.road_network_toolbox_ui.attributes_button.toggle_checked:
-                            self.parent.road_network_toolbox.road_network_toolbox_ui.attributes_button.pressed()
+                        self._parent.road_network_toolbox.road_network_toolbox_ui.tree.collapseItem(
+                            self._parent.road_network_toolbox.road_network_toolbox_ui.tree.itemAt(1, 0))
+                        self._parent.road_network_toolbox.road_network_toolbox_ui.tree.expandItem(
+                            self._parent.road_network_toolbox.road_network_toolbox_ui.tree.itemAt(7, 30))
+                        if not self._parent.road_network_toolbox.road_network_toolbox_ui.attributes_button.toggle_checked:
+                            self._parent.road_network_toolbox.road_network_toolbox_ui.attributes_button.pressed()
 
     def dynamic_canvas_release_callback(self, mouse_clicked_event):
         """
@@ -424,8 +427,8 @@ class DynamicCanvas(FigureCanvas):
         # as long as no new lanelet is added after adding a temporary position, no lanelet can be selected (because
         # calling update_plot removes all temporary lanelets)
         if len(self.animated_viewer.current_scenario.lanelet_network.lanelets) - self.num_lanelets != 0 or \
-                self.parent.road_network_toolbox.updated_lanelet:
-            self.parent.road_network_toolbox.updated_lanelet = False
+                self._parent.road_network_toolbox.updated_lanelet:
+            self._parent.road_network_toolbox.updated_lanelet = False
             self.draw_temporary_points = {}
 
 
@@ -687,17 +690,17 @@ class DynamicCanvas(FigureCanvas):
         if self.split_index:
             current_lanelet = self.l_network.find_lanelet_by_id(self.selected_l_ids[0][0])
             MapCreator.split_lanelet(current_lanelet, self.split_index, self.scenario, self.l_network)
-            self.parent.road_network_toolbox.callback(self.scenario)
+            self._parent.road_network_toolbox.callback(self.scenario)
             self.reset_toolbar()
 
     def enable_lanelet_operations(self, number_of_selected_lanelets):
         """
         Enable or disable operations depending on the number of lanelets selected
         """
-        self.parent.top_bar_wrapper.toolbar_wrapper.enable_toolbar(number_of_selected_lanelets)
+        self._parent.top_bar_wrapper.toolbar_wrapper.enable_toolbar(number_of_selected_lanelets)
 
     def reset_toolbar(self):
-        self.parent.top_bar_wrapper.toolbar_wrapper.reset_toolbar()
+        self._parent.top_bar_wrapper.toolbar_wrapper.reset_toolbar()
 
     def add_adjacent(self, left_adj: bool, same_direction: bool = True):
         added_adjacent_lanelets = []
@@ -709,11 +712,11 @@ class DynamicCanvas(FigureCanvas):
                                                                   traffic_lights=lanelet.traffic_lights)
             if not adjacent_lanelet:
                 output = f"Adjacent for Lanelet {lanelet.lanelet_id} already exists!"
-                self.parent.crdesigner_console_wrapper.text_browser.append(output)
+                self._parent.crdesigner_console_wrapper.text_browser.append(output)
             else:
                 added_adjacent_lanelets.append(adjacent_lanelet)
         self.scenario.add_objects(added_adjacent_lanelets)
-        self.parent.road_network_toolbox.callback(self.scenario)
+        self._parent.road_network_toolbox.callback(self.scenario)
 
     def merge_lanelets(self):
         neighboured_lanelets = self.selected_lanelets.copy()
@@ -737,7 +740,7 @@ class DynamicCanvas(FigureCanvas):
                     break
         if last_merged_index:
             self._select_lanelet(False, [[last_merged_index]])
-        self.parent.road_network_toolbox.callback(self.scenario)
+        self._parent.road_network_toolbox.callback(self.scenario)
 
     def activate_drawing_mode(self, is_active):
         if is_active:
@@ -789,7 +792,7 @@ class DynamicCanvas(FigureCanvas):
                                                                  self.scenario.generate_object_id(), lanelet_type)
             except AssertionError:
                 output = "Length of Lanelet must be at least 1"
-                self.parent.crdesigner_console_wrapper.text_browser.append(output)
+                self._parent.crdesigner_console_wrapper.text_browser.append(output)
                 return
 
             drawn_vector = [draw_lanelet_second_point[0] - self.draw_lanelet_first_point[0],
@@ -808,8 +811,8 @@ class DynamicCanvas(FigureCanvas):
                 created_lanelet.translate_rotate(np.array(self.draw_lanelet_first_point), 0)
             self.add_to_selected = created_lanelet
             self.scenario.add_objects([created_lanelet])
-            self.parent.road_network_toolbox.callback(self.scenario)
-            self.parent.road_network_toolbox.last_added_lanelet_id = created_lanelet.lanelet_id
+            self._parent.road_network_toolbox.callback(self.scenario)
+            self._parent.road_network_toolbox.last_added_lanelet_id = created_lanelet.lanelet_id
 
             self.draw_lanelet_first_point = draw_lanelet_second_point
             self.draw_lanelet_first_point_object.pop(0).remove()
