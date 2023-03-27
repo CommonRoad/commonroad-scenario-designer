@@ -22,6 +22,7 @@ def file_new(mwindow):
     mwindow.animated_viewer_wrapper.cr_viewer.current_scenario = scenario
     mwindow.animated_viewer_wrapper.cr_viewer.current_pps = None
     _open_scenario(mwindow=mwindow, new_scenario=scenario)
+    mwindow.animated_viewer_wrapper.cr_viewer.dynamic.draw_temporary_points = {}
 
 
 def open_commonroad_file(mwindow):
