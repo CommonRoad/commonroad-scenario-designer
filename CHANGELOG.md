@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.7.0] - 2023-0X-XX
+## [0.7.0] - 2023-03-XX
 
 ### Added
 - Possibility to load aerial image from Bing in the background
@@ -12,6 +12,7 @@
 - Default matplotlib area
 - Generalized traffic sign conversion 
 - Lanelet2 to CommonRoad conversion: Generalize traffic sign conversion
+- Packaging using poetry
 
 ### Fixed
 - Persisting zoomed scale
