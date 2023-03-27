@@ -19,6 +19,7 @@
 - Adding rotated lanelet (>360°)
 - Lanelet selection after translating a lanelet in the GUI
 - Blue position waypoint in GUI is removed when new scenario is created
+- Video and matplotlib figure saving not working
 
 ### Removed
 
