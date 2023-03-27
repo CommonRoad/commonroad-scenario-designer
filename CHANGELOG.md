@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.7.0] - 2023-03-XX
+## [0.7.0] - 2023-03-28
 
 ### Added
 - Possibility to load aerial image from Bing in the background
