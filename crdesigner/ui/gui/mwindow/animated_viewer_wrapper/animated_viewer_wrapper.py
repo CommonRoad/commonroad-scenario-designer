@@ -1,19 +1,13 @@
 """Wrapper for the middle visualization."""
-from PyQt5 import QtGui
-from PyQt5.QtGui import QPalette, QBrush, QColor
 
 from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.commonroad_viewer import AnimatedViewer
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 
 from typing import Union
-from ..service_layer import config
 from commonroad.scenario.lanelet import Lanelet
 from commonroad.scenario.obstacle import Obstacle
 from crdesigner.ui.gui.mwindow.toolboxes.toolbox_ui import PosB
 from PyQt5.QtWidgets import *
-
-
-
 
 
 class AnimatedViewerWrapper:
@@ -24,7 +18,6 @@ class AnimatedViewerWrapper:
         # handle to the toolboxes and the console for the viewer callback
         self.viewer_dock = None
         self.mwindow = mwindow  # handle back to the main window
-
 
     def create_viewer_dock(self):
         """
@@ -40,7 +33,6 @@ class AnimatedViewerWrapper:
 
         self.viewer_dock.setLayout(layout)
         self.mwindow.setCentralWidget(self.viewer_dock)
-
 
     def viewer_callback(self, selected_object: Union[Lanelet, Obstacle], output: str, temporary_positions = None):
         """
@@ -61,14 +53,16 @@ class AnimatedViewerWrapper:
         elif isinstance(selected_object, PosB):
             for button in self.mwindow.road_network_toolbox.road_network_toolbox_ui.position_buttons:
                 if button.button_pressed:
-                    temporary_positions[id(button)] = (float(selected_object.x_position), float(selected_object.y_position))
+                    temporary_positions[id(button)] = (float(selected_object.x_position),
+                                                       float(selected_object.y_position))
                     button.button_release()
                     button.x_position.setText(selected_object.x_position)
                     button.y_position.setText(selected_object.y_position)
                     draw_temporary_position = True
             for button in self.mwindow.obstacle_toolbox.obstacle_toolbox_ui.position_buttons:
                 if button.button_pressed:
-                    temporary_positions[str(id(button))] = (float(selected_object.x_position), float(selected_object.y_position))
+                    temporary_positions[str(id(button))] = (float(selected_object.x_position),
+                                                            float(selected_object.y_position))
                     button.button_release()
                     button.x_position.setText(selected_object.x_position)
                     button.y_position.setText(selected_object.y_position)
@@ -79,19 +73,20 @@ class AnimatedViewerWrapper:
 
         return draw_temporary_position
 
-    def update_view(self, focus_on_network=None):
+    def update_view(self, new_file_added: bool = None, focus_on_network=None):
         """
-        Update all components.
+        Update all components.  
+        :param new_file_added: if a new cr file was created or added
         """
         # reset selection of all other selectable elements
         if self.cr_viewer.current_scenario is None:
             return
-        if focus_on_network is None:
-            focus_on_network = config.AUTOFOCUS
-        self.cr_viewer.update_plot(focus_on_network=focus_on_network)
+        self.cr_viewer.update_plot(new_file_added=new_file_added)
 
     def update_window(self):
-        self.toolbar.setStyleSheet('background-color:' + self.mwindow.colorscheme().background + '; color:' + self.mwindow.colorscheme().color + '; font-size:' + self.mwindow.colorscheme().font_size)
+        self.toolbar.setStyleSheet('background-color:' + self.mwindow.colorscheme().background +
+                                   '; color:' + self.mwindow.colorscheme().color + '; font-size:' +
+                                   self.mwindow.colorscheme().font_size)
         self.cr_viewer.update_window()
 
 

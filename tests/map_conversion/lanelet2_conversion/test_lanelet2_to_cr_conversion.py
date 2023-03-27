@@ -1,11 +1,11 @@
 import time
 import os
 import unittest
-from lxml import etree # type: ignore
+from lxml import etree  # type: ignore
 
-from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile # type: ignore
-from commonroad.planning.planning_problem import PlanningProblemSet # type: ignore
-from commonroad.scenario.scenario import Tag, Scenario # type: ignore
+from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile  # type: ignore
+from commonroad.planning.planning_problem import PlanningProblemSet  # type: ignore
+from commonroad.scenario.scenario import Tag, Scenario  # type: ignore
 
 from crdesigner.map_conversion.common.utils import generate_unique_id
 from crdesigner.map_conversion.lanelet2.lanelet2_parser import Lanelet2Parser

@@ -10,14 +10,10 @@ from typing import Dict, Union, List, Optional, Tuple
 from PyQt5.QtWidgets import QDialog, QFileDialog, QMessageBox
 
 from crdesigner.map_conversion.osm2cr import config
-from crdesigner.ui.gui.mwindow.service_layer.osm_gui_modules import config_default
-from crdesigner.ui.gui.mwindow.service_layer.osm_gui_modules.GUI_resources.lane_counts import Ui_Dialog as Lane_counts
-from crdesigner.ui.gui.mwindow.service_layer.osm_gui_modules.GUI_resources.lane_width import Ui_Dialog as Lane_width
+from crdesigner.ui.gui.mwindow.service_layer.services import config_default
 from crdesigner.ui.gui.mwindow.service_layer.gui_resources.osm_settings_ui import Ui_OSMSettings \
     as Settings_window
-from crdesigner.ui.gui.mwindow.service_layer.osm_gui_modules.GUI_resources.street_types import Ui_Dialog as Street_types
-from crdesigner.ui.gui.mwindow.service_layer.osm_gui_modules.GUI_resources.sublayer_types import Ui_Dialog \
-    as Sublayer_street_types
+from crdesigner.ui.gui.mwindow.service_layer.osm_settings_ui import Street_types, Lane_counts, Lane_width, Sublayer_street_types
 
 import yaml
 from crdesigner.ui.gui.mwindow.service_layer import transfer
@@ -738,6 +734,8 @@ IMAGE_SAVE_PATH = \"{config.IMAGE_SAVE_PATH}\"
 ZOOM_LEVEL = {config.ZOOM_LEVEL}
 # The key to access bing maps
 BING_MAPS_KEY = \"{config.BING_MAPS_KEY}\"
+# aerial image area threshold limiting the user input for the coordinates
+AERIAL_IMAGE_THRESHOLD = \"{config.AERIAL_IMAGE_THRESHOLD}\"
 
 # Map download Settings
 # path to save downloaded files

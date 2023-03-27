@@ -1,0 +1,76 @@
+[tool.poetry]
+name = "commonroad-scenario-designer"
+version = "0.7.0"
+description = "Toolbox for Map Conversion and Scenario Creation for Autonomous Vehicles"
+authors = ["Cyber-Physical Systems Group, Technical University of Munich <commonroad@lists.lrz.de>"]
+license = "GPL-3.0-or-later"
+readme = "README.md"
+keywords= ["autonomous", "automated", "vehicles", "driving", "motion", "planning", "simulation", "map", "scenario"]
+classifiers = [
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: MacOS",
+    "Operating System :: Microsoft :: Windows"
+]
+packages = [{include = "crdesigner"}]
+homepage = "https://commonroad.in.tum.de"
+
+[tool.poetry.urls]
+Documentation = "https://commonroad-scenario-designer.readthedocs.io/en/latest/"
+Forum = "https://commonroad.in.tum.de/forum/c/scenario-designer/"
+Source = "https://gitlab.lrz.de/tum-cps/commonroad-scenario-designer"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+commonroad-io = "2023.1"
+pyqt5 = ">=5.12.2"
+matplotlib = ">=3.5,<3.6"
+numpy = "^1.24.2"
+lxml = "^4.9.2"
+pyproj = "^3.4.1"
+utm = "^0.7.0"
+shapely = ">=2.0.1"
+ordered-set = "^4.1.0"
+sumocr = "2023.1"
+iso3166 = "^2.1.1"
+networkx = "^3.0"
+omegaconf = "^2.3.0"
+pyyaml = "6.0"
+pygeodesy = "^23.3.23"
+mercantile = "^1.2.1"
+
+[tool.poetry.group.docs]
+optional = true
+
+[tool.poetry.group.docs.dependencies]
+ipython = "^8.11.0"
+sphinx = ">=2.2.1"
+sphinx-autodoc-typehints = ">=1.11.0,<1.21.0"
+sphinx-rtd-theme = "^1.2.0"
+
+[tool.poetry.group.tests]
+optional = true
+
+[tool.poetry.group.tests.dependencies]
+pytest = "^7.2.2"
+coverage = "^7.2.2"
+prospector = {extras = ["with-mypy"], version = "^1.9.0"}
+pytest-qt = "^4.2.0"
+parameterized = "^0.8.1"
+
+[tool.poetry.group.tutorials]
+optional = true
+
+[tool.poetry.group.tutorials.dependencies]
+jupyter = "^1.0.0"
+
+[tool.poetry.scripts]
+crdesigner = 'crdesigner.ui.cli.command_line:main'
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

@@ -1,9 +1,10 @@
 import unittest
 
 import numpy as np
-import crdesigner.map_conversion.opendrive.opendrive_conversion.conversion_lanelet_network
-from crdesigner.map_conversion.opendrive.opendrive_conversion.conversion_lanelet_network import \
-    ConversionLaneletNetwork, ConversionLanelet, _JoinSplitTarget, _JoinSplitPair
+import crdesigner.map_conversion.common.conversion_lanelet_network
+from crdesigner.map_conversion.common.conversion_lanelet_network import  \
+    ConversionLaneletNetwork, _JoinSplitTarget, _JoinSplitPair
+from crdesigner.map_conversion.common.conversion_lanelet import ConversionLanelet
 from commonroad.scenario.lanelet import LaneletNetwork, StopLine
 from commonroad.scenario.traffic_sign import TrafficLight, TrafficSign
 from commonroad.scenario.intersection import Intersection, IntersectionIncomingElement
@@ -45,8 +46,8 @@ class TestConversionLanelet(unittest.TestCase):
         ids_assigned = {'69.0.-1.-1': 5, '89.0.4.-1': 6, '71.0.1.-1': 7, '71.0.-3.-1': 8}
         old_lanelet_id = '71.0.-3.-1'
         true_new_id = ids_assigned[old_lanelet_id]
-        self.assertEqual(true_new_id, crdesigner.map_conversion.opendrive.opendrive_conversion
-                          .conversion_lanelet_network.convert_to_new_lanelet_id(old_lanelet_id, ids_assigned))
+        self.assertEqual(true_new_id, crdesigner.map_conversion.common
+                          .utils.convert_to_new_lanelet_id(old_lanelet_id, ids_assigned))
 
     def test_init(self):
         conversion_lanelet_network = ConversionLaneletNetwork(get_configs().opendrive)

@@ -1,8 +1,8 @@
 import os
 import unittest
-from lxml import etree # type: ignore 
+from lxml import etree  # type: ignore
 
-from commonroad.common.file_reader import CommonRoadFileReader # type: ignore
+from commonroad.common.file_reader import CommonRoadFileReader  # type: ignore
 
 from crdesigner.map_conversion.lanelet2.cr2lanelet import CR2LaneletConverter
 from tests.map_conversion.utils import elements_equal

@@ -1,4 +1,13 @@
 # CommonRoad Scenario Designer
+[![Linux](https://svgshare.com/i/Zhy.svg)](https://svgshare.com/i/Zhy.svg)
+[![macOS](https://svgshare.com/i/ZjP.svg)](https://svgshare.com/i/ZjP.svg)
+[![Windows](https://svgshare.com/i/ZhY.svg)](https://svgshare.com/i/ZhY.svg)  
+[![PyPI pyversions](https://img.shields.io/pypi/pyversions/commonroad-scenario-designer.svg)](https://pypi.python.org/pypi/commonroad-scenario-designer/)  
+[![PyPI version fury.io](https://badge.fury.io/py/commonroad-scenario-designer.svg)](https://pypi.python.org/pypi/commonroad-scenario-designer/)
+[![PyPI download week](https://img.shields.io/pypi/dw/commonroad-scenario-designer.svg?label=PyPI%20downloads)](https://pypi.python.org/pypi/commonroad-scenario-designer/) 
+[![PyPI download month](https://img.shields.io/pypi/dm/commonroad-scenario-designer.svg?label=PyPI%20downloads)](https://pypi.python.org/pypi/commonroad-scenario-designer/)  
+[![PyPI license](https://img.shields.io/pypi/l/commonroad-scenario-designer.svg)](https://pypi.python.org/pypi/commonroad-scenario-designer/)
+[![Documentation Status](https://readthedocs.org/projects/commonroad-scenario-designer/badge/?version=latest)](http://commonroad-scenario-designer.readthedocs.io/?badge=latest) 
 
 This toolbox provides map converters for [OpenStreetMap](https://www.openstreetmap.de/karte.html) (OSM), 
 [Lanelet](https://www.mrt.kit.edu/software/libLanelet/libLanelet.html) / [Lanelet2](https://github.com/fzi-forschungszentrum-informatik/Lanelet2), 
@@ -16,29 +25,11 @@ CommonRoad maps and scenarios.
 |CR Scenario Designer GUI             |     `crdesigner/input_output/gui`     |    Multi-functional GUI for map conversion and scenario creation/editing.    |
 
 ## Prerequisites and Installation
-The usage of the Anaconda Python distribution is recommended. We have tested the toolbox with Python 3.7, 3.8, and 3.9.
-You need the following modules:
-- commonroad_io >= 2021.4
-- matplotlib >= 3.1.0
-- numpy >= 1.16.4
-- ordered-set >= 4.0.2
-- lxml >= 4.3.4
-- pyproj >= 2.2.0
-- scipy >= 1.3.0
-- mercantile >= 1.1.3
-- utm >= 0.5.0
-- PyQt5 >= 5.12.2
-- shapely>=1.7.0
-- sumocr>=2021.5
-- ordered-set>=4.0.2
-- enum34>=1.1.10
-- iso3166>=1.0.1
-- networkx>=2.5
-
-From you Anaconda environment. For all the packages, we recommend to use the provided `requirements.txt`:
-```bash
-pip install -r requirements.txt
-```
+We have tested the toolbox with Python 3.8, 3.9, 3.10, and 3.11.
+The toolbox should work under Linux, macOS, and Windows. 
+Below we present two ways of installing the CommonRoad Scenario Designer: 
+- Only using the CommonRoad Scenario Designer, e.g.,the GUI or integrating the scenario designer APIs into your code
+- Developing code for the CommonRoad Scenario Designer
 
 If you want to use the SUMO conversion or to generate traffic using SUMO, please install 
 [SUMO](https://sumo.dlr.de/docs/index.html):
@@ -49,17 +40,26 @@ echo "export SUMO_HOME=/usr/share/sumo" >> ~/.bashrc
 echo 'export PYTHONPATH="$SUMO_HOME/tools:$PYTHONPATH"' >> ~/.bashrc
 ```
 If you use zsh, replace `.bashrc` with `.zshrc`.
-To install the _CommonRoad Scenario Designer_ from PyPI, please execute the following command:
+
+### Using the CommonRoad Scenario Designer
+The recommended way of installation if you only want to use the scenario designer (i.e., you do not want to work with the code directly) is to use the PyPI package:
 ```bash
 pip install commonroad-scenario-designer
 ```
 
-To install the _CommonRoad Scenario Designer_ from source, please execute the following command:
+### Development
+First, clone the repository.
+The usage of [Poetry](https://python-poetry.org/) is recommended. 
+Poetry can be installed using:
 ```bash
-pip install -e .
+curl -sSL https://install.python-poetry.org | python3 -
 ```
-
-We will soon publish the toolbox on PyPI.
+Create a new Python environment:
+```bash
+poetry shell
+poetry install --with tests,docs,tutorials
+```
+We recommend to use PyCharm (Professional) as IDE.
 
 ### Common Errors during installation
 
@@ -80,13 +80,10 @@ The GUI can either be activated via a Python API, command line, or executing a P
 
 #### Python Script
 
-First you need to activate your python environment with the installed dependencies (we assume the environment 
-is called _commonroad_).  
+First you need to activate your python environment with the installed dependencies.  
 Afterward, you can start the _CommonRoad Scenario Designer_ and the GUI will open:
 
 ```bash
-$ conda activate commonroad
-# Run CR Scenario designer
 $ python crdesigner/start_gui.py
 ```
 
@@ -135,37 +132,27 @@ The tutorials include a jupyter notebook and exemplary Python scripts for each c
 To generate the documentation from source, first install the necessary dependencies with pip:
 
 ```bash
-pip install -r docs/doc_requirements.txt
+cd docs/source && sphinx-build -b html . ../../public
 ```
 
-Afterward run:
-
-```bash
-cd docs && ./docs_build_script.sh
-```
-
-The documentation can be accessed by opening `doc/_build/html/index.html`.  
+The documentation can be accessed by opening `public/index.html`.  
 The titles of module pages have to be set manually!  
 The full documentation of the API and introducing examples can also be found [here](https://commonroad-scenario-designer.readthedocs.io/en/latest/).
 
 ## Changelog
-Compared to version 0.6.1, the following things have been added, fixed or changed:
-
-- GUI setting for axis visibility not changeable
-- OpenDRIVE conversion endless loop speed limit mapping
-- Yaml configuration loading under Windows
-
 A detailed overview about the changes in each version is provided in the [Changelog](https://gitlab.lrz.de/tum-cps/commonroad-scenario-designer/-/blob/main/CHANGELOG.md).
 
 ## Bug and feature reporting
-This release (v0.6.1) is still a BETA version.  
+This release (v0.7.0) is still a BETA version.  
 In case you detect a bug or you want to suggest a new feature, please report it in our [forum](https://commonroad.in.tum.de/forum/c/scenario-designer/18).   
 If you want to contribute to the toolbox, you can also post it in the [forum](https://commonroad.in.tum.de/forum/c/scenario-designer/18) or contact [Sebastian Maierhofer](sebastian.maierhofer@tum.de).
 
 ## Authors
 
 Responsible: Sebastian Maierhofer, Sebastian Mair
-Contribution (in alphabetic order by last name): Daniel Asch, Hamza Begic, Florian Braunmiller, Tim Dang, Behtarin Ferdousi, Maximilian Fruehauf, Marcus Gabler, Fabian Hoeltke, Aaron Kaefer, David Le, Gustaf Lindgren, Benjamin Orthen, Luisa Ortner, Louis Pröbstle, Benedikt Reinhard, Maximilian Rieger, Til Stotz, Stefan Urban
+Contribution (in alphabetic order by last name): Daniel Asch, Hamza Begic, Florian Braunmiller, Tim Dang, 
+Behtarin Ferdousi, Maximilian Fruehauf, Marcus Gabler, Fabian Hoeltke, Aaron Kaefer, David Le, Gustaf Lindgren, 
+Sarra Ben Mohamed, Benjamin Orthen, Luisa Ortner, Louis Pröbstle, Benedikt Reinhard, Maximilian Rieger, Til Stotz, Stefan Urban
 
 ## Credits
 We gratefully acknowledge partial financial support by

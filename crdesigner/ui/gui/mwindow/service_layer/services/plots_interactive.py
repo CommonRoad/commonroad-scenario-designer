@@ -28,7 +28,6 @@ POINT_COLOR = "dimgrey"
 LANE_DIRECTION_COLOR = "blue"
 EDGE_DIRECTION_COLOR = "dimgrey"
 
-
 class InteractiveObject(ABC):
     """
     A custom class for interactive objects in a plot
@@ -69,7 +68,6 @@ class InteractiveObject(ABC):
         """
         self.plot_object.remove()
 
-
 class Link(InteractiveObject):
     """
     Represents a link between two lanes.
@@ -96,39 +94,6 @@ class Link(InteractiveObject):
         super().remove()
         self.from_lane.successors.remove(self.to_lane)
         self.to_lane.predecessors.remove(self.from_lane)
-
-
-class EndPoint(InteractiveObject):
-    """
-    The end of a lane.
-    Used for creating new links.
-    """
-
-    def __init__(self, point, lane: rg.Lane):
-        """
-
-        :param point: plot object
-        :param lane: lane in graph
-        """
-        super().__init__(point)
-        self.lane = lane
-
-    def unhighlight(self) -> None:
-        """
-        removes highlight by changing to default color
-
-        :return: None
-        """
-        self.plot_object.set_color(STANDARD_COLOR)
-
-    def remove(self) -> None:
-        """
-        the end point of a lane cannot be deleted
-
-        :return: None
-        """
-        print("This cannot be removed!")
-
 
 class Node(InteractiveObject):
     """
@@ -226,7 +191,6 @@ class Node(InteractiveObject):
         if self.highlighted_node is not None:
             self.highlight_single_node(self.highlighted_node)
 
-
 class PointList(InteractiveObject):
     """
     List of plotted points.
@@ -267,7 +231,6 @@ class PointList(InteractiveObject):
         :return: None
         """
         self.plot_object._facecolors[index, :] = to_rgba(HIGHLIGHT_COLOR)
-
 
 class Edge(InteractiveObject):
     """
@@ -480,7 +443,6 @@ class Edge(InteractiveObject):
         self.plot_object.ref = self
         self.highlight()
 
-
 def draw_nodes(graph: rg.Graph, ax: Axes, latlon: bool, origin: np.ndarray) -> Node:
     """
     scatters nodes of a graph
@@ -504,28 +466,6 @@ def draw_nodes(graph: rg.Graph, ax: Axes, latlon: bool, origin: np.ndarray) -> N
     )
     scatter_object.ref = Node(scatter_object, node_list, ax, latlon, origin)
     return scatter_object.ref
-
-
-def draw_lane_end_points(
-    lane: rg.Lane, ax: Axes, latlon: bool, origin: np.ndarray
-) -> None:
-    """
-    scatters end points of lanes
-    these points can be picked
-
-    :return: None
-    """
-    point1 = lane.waypoints[0]
-    point2 = lane.waypoints[-1]
-    if latlon:
-        point1 = geometry.cartesian_to_lon_lat(point1, origin)
-        point2 = geometry.cartesian_to_lon_lat(point2, origin)
-    for point in [point1, point2]:
-        scatter = ax.scatter(
-            point[0], point[1], color=STANDARD_COLOR, picker=PICKER_SIZE, s=SCATTER_SIZE
-        )
-        scatter.ref = EndPoint(scatter, lane)
-
 
 def draw_lane(lane: rg.Lane, ax: Axes, latlon: bool, origin: np.ndarray) -> None:
     """
@@ -596,7 +536,6 @@ def draw_all_lane_end_points(
     )
     return sc1, sc2, lane_list
 
-
 def draw_lanes(graph: rg.Graph, links: bool, ax: Axes, origin: np.ndarray) -> None:
     """
     draws center line of lanes in graph
@@ -614,7 +553,6 @@ def draw_lanes(graph: rg.Graph, links: bool, ax: Axes, origin: np.ndarray) -> No
         for lane in graph.lanelinks:
             draw_lane(lane, ax, True, origin)
     return
-
 
 def draw_single_arrow(
     lane: rg.Lane,
@@ -662,7 +600,6 @@ def draw_single_arrow(
     arrow.ref = Link(arrow, lane, successor)
     return arrow
 
-
 def get_arrow_size(latlon: bool) -> Tuple[float, float, float]:
     """
     gets the necessary parameters for an arrow
@@ -681,7 +618,6 @@ def get_arrow_size(latlon: bool) -> Tuple[float, float, float]:
         head_length = 4
         width = 1e-3
     return width, head_width, head_length
-
 
 def draw_lane_links(graph: rg.Graph, ax: Axes, latlon: bool, origin: np.ndarray):
     """
@@ -740,7 +676,6 @@ def draw_edge(
     )[0]
     return line
 
-
 def draw_edges(
     graph: rg.Graph, ax: Axes, latlon: bool, origin: np.ndarray, node_plot: Node
 ) -> Tuple[List[Line2D], Dict[rg.GraphNode, Set[Edge]]]:
@@ -764,7 +699,6 @@ def draw_edges(
         edge_sets_for_nodes[edge.node1].add(line.ref)
         edge_sets_for_nodes[edge.node2].add(line.ref)
     return lines, edge_sets_for_nodes
-
 
 def draw_point(
     position: np.ndarray, origin: np.ndarray, ax: Axes, latlon: bool

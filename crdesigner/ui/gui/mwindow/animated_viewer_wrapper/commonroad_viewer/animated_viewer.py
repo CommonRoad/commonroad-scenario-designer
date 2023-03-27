@@ -46,19 +46,19 @@ class AnimatedViewer:
         self.playing = False
 
     def open_scenario(self, scenario: Scenario, config: Observable = None,
-                      planning_problem_set: PlanningProblemSet = None):
+                      planning_problem_set: PlanningProblemSet = None,
+                      new_file_added: bool = None):
         """[summary]
         Open a scenario, setup any configuration.
+        :param new_file_added: if a new cr file was created or added
         :param scenario: [description]
-        :type scenario: [type]
         :param config: [description], defaults to None
-        :type config: SumoConfig, optional
         :param planning_problem_set: des,
-        :type planning_problem_set: PlanningProblemSet
         """
         self.dynamic.initial_parameter_config_done = False  # reset so that for any map the parameters are set correctly
         self.current_scenario = scenario
         # safe here the original scenario -> this is needed for zooming in / out and for moving around
+
         self.original_lanelet_network = LaneletNetwork.create_from_lanelet_network(
                 lanelet_network=scenario.lanelet_network)
         self.current_pps = planning_problem_set
@@ -80,7 +80,7 @@ class AnimatedViewer:
             self.time_step.value = 0
             self.animation.event_source.stop()
             self.animation = None
-        self.update_plot(focus_on_network=True, clear_artists=True)
+        self.update_plot(clear_artists=True, new_file_added=new_file_added)
 
     def _init_animation(self):
         if not self.current_scenario:
@@ -140,7 +140,7 @@ class AnimatedViewer:
         if not self.animation:
             self._init_animation()
 
-        self.dynamic.update_plot()
+        self.dynamic.draw_idle()
         self.animation.event_source.start()
 
     def pause(self):
@@ -156,7 +156,7 @@ class AnimatedViewer:
         print("set timestep: ", timestep)
         if not self.animation:
             self._init_animation()
-        self.dynamic.update_plot()
+        self.dynamic.draw_idle()
         # self.animation.event_source.start()
         self.time_step.silent_set(timestep)
 
@@ -207,10 +207,11 @@ class AnimatedViewer:
                     sel_lanelets: Lanelet = None,
                     sel_intersection: Intersection = None,
                     time_step_changed: bool = False,
-                    focus_on_network: bool = False,
                     time_step: int = 0,
-                    clear_artists=False):
+                    clear_artists: bool = False,
+                    new_file_added: bool = False):
         """ Update the plot accordingly to the selection of scenario elements
+        :param new_file_added: if a new cr file was created or added
         :param sel_lanelets: selected lanelet, defaults to None
         :param sel_intersection: selected intersection, defaults to None
         :param clear_artists: deletes artists from renderer (only required when opening new scenarios)
@@ -224,17 +225,16 @@ class AnimatedViewer:
         self.dynamic.clear_axes(clear_artists=clear_artists)
         ax = self.dynamic.get_axes()
 
-
-        network_limits = [
-            float("Inf"), -float("Inf"),
-            float("Inf"), -float("Inf")
-        ]
-
         if time_step_changed:
             draw_params = DrawParamsCustom(time_begin=time_step, color_schema=self.parent.colorscheme())
         else:
             draw_params = DrawParamsCustom(time_begin=self.time_step.value - 1, color_schema=self.parent.colorscheme())
         draw_params.dynamic_obstacle.trajectory.draw_trajectory = False
+
+        if new_file_added:
+            self.dynamic.show_aerial = False
+            self.new_file_added = False
+
         self.dynamic.draw_scenario(self.current_scenario, self.current_pps, draw_params=draw_params)
 
         for lanelet in self.current_scenario.lanelet_network.lanelets:
@@ -244,12 +244,7 @@ class AnimatedViewer:
             if color == "gray":
                 continue
 
-            lanelet_limits = draw_lanelet_polygon(lanelet, ax, color, alpha, zorder, label)
-            network_limits[0] = min(network_limits[0], lanelet_limits[0])
-            network_limits[1] = max(network_limits[1], lanelet_limits[1])
-            network_limits[2] = min(network_limits[2], lanelet_limits[2])
-            network_limits[3] = max(network_limits[3], lanelet_limits[3])
-
+            draw_lanelet_polygon(lanelet, ax, color, alpha, zorder, label)
             self.draw_lanelet_vertices(lanelet, ax)
 
         handles, labels = ax.get_legend_handles_labels()
@@ -257,22 +252,14 @@ class AnimatedViewer:
             legend = ax.legend(handles, labels)
             legend.set_zorder(50)
 
-        if focus_on_network:
-            # can we focus on a selection?
-            if all([abs(lim) < float("Inf") for lim in network_limits]):
-                # enlarge limits
-                border_x = (network_limits[1] - network_limits[0]) * 0.1 + 1
-                border_y = (network_limits[3] - network_limits[2]) * 0.1 + 1
-                network_limits[0] -= border_x
-                network_limits[1] += border_x
-                network_limits[2] -= border_y
-                network_limits[3] += border_y
-                self.dynamic.update_plot(network_limits)
-            # otherwise focus on the network
-            else:
-                self.dynamic.ax.autoscale()
+        if new_file_added:
+            # initialise the axis to a bigger range
+            self.dynamic.set_limits([-50, 50, -50, 50])
+            self.dynamic.draw_idle()
+        # otherwise keep previous limits (persist zoom)
         else:
-            self.dynamic.update_plot([x_lim[0], x_lim[1], y_lim[0], y_lim[1]])
+            self.dynamic.set_limits([x_lim[0], x_lim[1], y_lim[0], y_lim[1]])
+            self.dynamic.draw_idle()
 
         self.dynamic.drawer.tight_layout()
 

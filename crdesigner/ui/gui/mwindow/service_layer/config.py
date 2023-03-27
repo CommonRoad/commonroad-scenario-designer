@@ -1,5 +1,4 @@
 """ configuration of the Scenario Designer """
-
 # focus on the selection
 AUTOFOCUS = False
 MWINDOW_TMP_FOLDER_PATH = "/tmp/cr_designer/"
@@ -19,3 +18,8 @@ DRAW_INTERSECTION_LABELS = False
 DARKMODE = False
 AXIS_VISIBLE = 'All'
 LEGEND = True
+# The key to access bing maps
+BING_MAPS_KEY = ""
+# Username and password to access LDBV maps
+LDBV_USERNAME = ""
+LDBV_PASSWORD = ""

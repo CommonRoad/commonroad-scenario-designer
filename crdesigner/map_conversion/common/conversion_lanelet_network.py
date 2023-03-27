@@ -1,4 +1,4 @@
-"""Module to enhance LaneletNetwork class
+"""Module to enhance LaneletNetwork class,
 so it can be used for conversion from the opendrive format."""
 import itertools
 import warnings
@@ -13,40 +13,16 @@ from commonroad.scenario.traffic_sign import TrafficLightDirection, TrafficLight
 from crdesigner.map_conversion.osm2cr import config
 from crdesigner.map_conversion.osm2cr.converter_modules.utility import geometry
 
-from crdesigner.map_conversion.opendrive.opendrive_conversion.conversion_lanelet import ConversionLanelet
+from crdesigner.map_conversion.common.utils import convert_to_new_lanelet_id
+from crdesigner.map_conversion.common.conversion_lanelet import ConversionLanelet
 from crdesigner.map_conversion.common.utils import generate_unique_id
 
 
-def convert_to_new_lanelet_id(old_lanelet_id: str, ids_assigned: dict) -> int:
-    """
-    Convert the old lanelet ids (format 501.1.-1.-1) to newer, simpler ones (100, 101 etc.). Do this by consecutively
-    assigning numbers, starting at 100, to the old_lanelet_id strings. Save the assignments in the dict which is passed
-    to the function as ids_assigned.
-
-    :param old_lanelet_id: Old id with format '501.1.-1.-1'
-    :type old_lanelet_id: str
-    :param ids_assigned: Dict with all previous assignments
-    :type ids_assigned: dict
-    :return: The new lanelet id
-    :rtype: int
-    """
-
-    starting_lanelet_id = 100
-
-    if old_lanelet_id in ids_assigned.keys():
-        new_lanelet_id = ids_assigned[old_lanelet_id]
-    else:
-        try:
-            new_lanelet_id = generate_unique_id()
-        except ValueError:
-            new_lanelet_id = starting_lanelet_id
-        ids_assigned[old_lanelet_id] = new_lanelet_id
-
-    return new_lanelet_id
-
-
 class ConversionLaneletNetwork(LaneletNetwork):
-    """Add functions to LaneletNetwork which further enable it to modify its Lanelets."""
+    """
+    Add functions to LaneletNetwork which further enable it to modify its Lanelets.
+    This class is being used in Opendrive and Lanelet2 format conversions
+    """
 
     def __init__(self, config):
         """Initializes a ConversionLaneletNetwork"""
@@ -366,7 +342,7 @@ class ConversionLaneletNetwork(LaneletNetwork):
             self, lanelet: ConversionLanelet, successor_ids: List[str]
     ):
         """Add a successor to a lanelet, but add the lanelet also to the predecessor
-        of the succesor.
+        of the successor.
 
         :param lanelet: Lanelet to add successor to.
         :type lanelet: :class:`ConversionLanelet`
@@ -679,11 +655,11 @@ class ConversionLaneletNetwork(LaneletNetwork):
             # Also check if the successor of a incoming successor intersects with another successor of an incoming
             self.check_lanelet_type_for_successor_of_successor(successor_incoming_lanelet, intersection_map)
 
-    def check_lanelet_type_for_successor_of_successor(self, successor_incoming_lanelet:ConversionLanelet,
-                                                      intersection_map:dict):
+    def check_lanelet_type_for_successor_of_successor(self, successor_incoming_lanelet: ConversionLanelet,
+                                                      intersection_map: dict):
         """
         Check if the successor of an incoming successor in an intersection is also a part of the lanelet.
-        This is done by checking if this lanelet intersects with successors of all the incomigns in the intersection
+        This is done by checking if this lanelet intersects with successors of all the incomings in the intersection
         If the test passes, then the successor of the incoming successor is also set as intersection lanelet type
 
         :param successor_incoming_lanelet: Lanelet for which we require to test if it is a part of a particular
@@ -697,12 +673,12 @@ class ConversionLaneletNetwork(LaneletNetwork):
             if self.check_if_lanelet_in_intersection(successor_successor_incoming_lanelet, intersection_map):
                 successor_successor_incoming_lanelet.lanelet_type = "intersection"
 
-    def check_if_lanelet_in_intersection(self, lanelet:ConversionLanelet, intersection_map:dict) -> bool:
+    def check_if_lanelet_in_intersection(self, lanelet: ConversionLanelet, intersection_map: dict) -> bool:
         """
         Check if a particular lanelet intersects any of the lanelets that are part of a particular intersection
         using the shapely crosses method.
 
-        :param lanelet: Lanelet which is being tested for being part of the intersetion.
+        :param lanelet: Lanelet which is being tested for being part of the intersection.
         :type lanelet: :class:`ConversionLanelet`
         :param intersection_map: Dict of the particular intersection for which the test is being conducted.
         :type intersection_map: dict
@@ -724,10 +700,10 @@ class ConversionLaneletNetwork(LaneletNetwork):
         using the shapely crosses method.
 
         :param intersection_map: Dict of the particular intersection for which the test is being conducted.
-        :type intersecion_map: dict
+        :type intersection_map: dict
         :param successors_list: List of all the successors of an intersection
         :type successors_list: list
-        :return: True if successors of an incoming intersect with successors of other incmoing of the intersection,
+        :return: True if successors of an incoming intersect with successors of other incoming of the intersection,
             otherwise False.
         :rtype: bool
         """
@@ -793,7 +769,7 @@ class ConversionLaneletNetwork(LaneletNetwork):
                 else:
                     prev -= 1
 
-    def combine_common_incoming_lanelets(self, intersection_map:dict) -> List[Tuple]:
+    def combine_common_incoming_lanelets(self, intersection_map: dict) -> List[Tuple]:
         """
         Returns a list of tuples which are pairs of adj incoming lanelets and the union of their successors
 
@@ -839,7 +815,7 @@ class ConversionLaneletNetwork(LaneletNetwork):
 
     def get_successor_directions(self, incoming_lane) -> dict:
         """
-        Find all directions of a incoming lane's successors
+        Find all directions of an incoming lane's successors
 
         :param incoming_lane: incoming lane from intersection
         :type incoming_lane: :class:`ConversionLanelet`
@@ -941,7 +917,7 @@ class ConversionLaneletNetwork(LaneletNetwork):
 
         # Traffic light directions are assigned once all traffic lights are assigned to lanelets so that it can be
         # determined how directions need to be divided (i.e. the decision between left to one light and straight to
-        # one light instead of left-striaght)
+        # one light instead of left-straight)
         self.add_traffic_light_directions()
 
     def add_traffic_light_directions(self):
@@ -1119,7 +1095,7 @@ class _JoinSplitTarget:
     """Class to integrate joining/splitting of lanelet borders.
 
     Provides methods to determine the lanelets with which the
-    join and/or split can be performed. Additionally a method to
+    join and/or split can be performed. Additionally, a method to
     change the borders of the determined lanelets.
 
     :var :class:`ConversionLanelet` main_lanelet: Lanelet where split starts or join ends.
@@ -1477,7 +1453,7 @@ class _JoinSplitTarget:
     ) -> Optional[ConversionLanelet]:
         """Check next lanelet if it can act as adjacent lanelet to the main lanelet.
 
-        If not, add its left and right neighbor, if they exists, to the potential_adjacent_lanelets Queue.
+        If not, add its left and right neighbor, if they exist, to the potential_adjacent_lanelets Queue.
 
         :param potential_adjacent_lanelets: Queue with dicts containing the potential lanelets.
         :type potential_adjacent_lanelets: Queue

@@ -1,6 +1,6 @@
 import copy
 from typing import List, Union
-import numpy as np
+from pygeodesy import flatLocal
 
 import PyQt5
 from PyQt5.QtCore import *
@@ -8,9 +8,11 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import QSizePolicy
 from PyQt5 import QtCore
 
+import numpy as np
 from matplotlib.backend_bases import MouseButton
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
+from utm import from_latlon
 
 from commonroad.planning.planning_problem import PlanningProblemSet
 from commonroad.common.util import Interval
@@ -33,6 +35,7 @@ from .service_layer import resize_lanelet_network
 from crdesigner.ui.gui.mwindow.service_layer import config
 
 from ...service_layer.map_creator import MapCreator
+from crdesigner.ui.gui.mwindow.service_layer.aerial_data import get_aerial_image_bing, get_aerial_image_ldbv
 
 ZOOM_FACTOR = 1.2
 
@@ -44,8 +47,13 @@ class DynamicCanvas(FigureCanvas):
     obstacle_color_array = []
     scenario = None
     control_key = False
+    show_aerial = False
 
     def __init__(self, parent=None, width=5, height=5, dpi=100, animated_viewer=None):
+
+        self.image_limits = None
+        self.current_aerial_image = None
+        self.initial_limits = None
         self.flag = False
         if parent is not None:
             self.flag = True
@@ -81,10 +89,12 @@ class DynamicCanvas(FigureCanvas):
 
         self.draw_temporary_points = {}
         self.num_lanelets = 0
+        self.aerial_map_bounds = [48.263864, 11.655410, 48.261424, 11.660930]
+        self.show_aerial = False
 
         super().__init__(self.drawer)
 
-        self.parent = parent
+        self._parent = parent
         self.setParent(parent)
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
@@ -105,6 +115,9 @@ class DynamicCanvas(FigureCanvas):
 
         self.clear_axes()
 
+    def parent(self):
+        return self._parent
+
     def keyPressEvent(self, event):
         """
         On key press activate an event
@@ -114,11 +127,11 @@ class DynamicCanvas(FigureCanvas):
         if self.flag is True:
             # on backspace delete selected lanelet
             if event.key() == QtCore.Qt.Key.Key_Backspace:
-                self.parent.road_network_toolbox.remove_lanelet()
+                self._parent.road_network_toolbox.remove_lanelet()
                 return
             # on DEL key delete selected lanelet
             elif event.key() == QtCore.Qt.Key.Key_Delete:
-                self.parent.road_network_toolbox.remove_lanelet()
+                self._parent.road_network_toolbox.remove_lanelet()
                 return
 
     def clear_axes(self, keep_limits=False, clear_artists=False):
@@ -136,7 +149,8 @@ class DynamicCanvas(FigureCanvas):
         self.ax.set_axis_off()
         self.draw_idle()
         if keep_limits and limits:
-            self.update_plot(limits)
+            self.set_limits(limits)
+            self.draw_idle()
 
     def get_axes(self):
         return self.ax
@@ -146,11 +160,12 @@ class DynamicCanvas(FigureCanvas):
         y_lim = self.ax.get_ylim()
         return [x_lim[0], x_lim[1], y_lim[0], y_lim[1]]
 
-    def update_plot(self, limits: List[float] = None):
-        if limits:
-            self.ax.set(xlim=limits[0:2])
-            self.ax.set(ylim=limits[2:4])
-        self.draw_idle()
+    def set_limits(self, limits: List[float] = None):
+        """
+        sets the limits of the plot axis to the given parameter
+        :param limits: array in the form [x_min, x_max, y_min, y_max] indicating the axis limits
+        """
+        self.ax.set(xlim=limits[0:2], ylim=limits[2:4])
 
     def zoom(self, event):
         """
@@ -199,10 +214,13 @@ class DynamicCanvas(FigureCanvas):
                 original_lanelet_network=self.animated_viewer.original_lanelet_network, center_x=new_center_x,
                 center_y=new_center_y, dim_x=x_dim, dim_y=y_dim)
         self.animated_viewer.current_scenario.replace_lanelet_network(copy.deepcopy(lanelet_network))
-        self.update_plot([new_center_x - new_x_dim, new_center_x + new_x_dim, new_center_y - new_y_dim,
+
+        self.set_limits([new_center_x - new_x_dim, new_center_x + new_x_dim, new_center_y - new_y_dim,
                           new_center_y + new_y_dim])
+        self.draw_idle()
         if resized_lanelet_network or self.last_changed_sth:
             self.animated_viewer.update_plot()
+
         self.last_changed_sth = resized_lanelet_network
         # now also show any selected
         self._select_lanelet(True)
@@ -289,6 +307,9 @@ class DynamicCanvas(FigureCanvas):
             self.ax.tick_params(axis='x', colors=draw_params.color_schema.color)
             self.ax.tick_params(axis='y', colors=draw_params.color_schema.color)
 
+        if self.show_aerial:
+            self.show_aerial_image()
+
     def update_obstacles(self, scenario: Scenario, draw_params=None, plot_limits=None):
         """
         Redraw only the dynamic obstacles. This gives a large performance boost, when playing an animation
@@ -339,7 +360,7 @@ class DynamicCanvas(FigureCanvas):
             if self.flag:
                 self.mouse_coordinates = QPoint(QCursor.pos().x(), QCursor.pos().y())
                  # if lanelet selected
-                if self.parent.road_network_toolbox.selected_lanelet() != None:
+                if self._parent.road_network_toolbox.selected_lanelet() != None:
                     # create menu
                     menu = PyQt5.QtWidgets.QMenu()
                     edit = menu.addAction("Edit Attributes")
@@ -348,16 +369,15 @@ class DynamicCanvas(FigureCanvas):
                     action = menu.exec((self.mouse_coordinates))
                     # removes selected lanelet
                     if action == remove:
-                        self.parent.road_network_toolbox.remove_lanelet()
+                        self._parent.road_network_toolbox.remove_lanelet()
                     # opens edit attributes of lanelet
                     if action == edit:
-                        self.parent.road_network_toolbox.road_network_toolbox_ui.tree.collapseItem(
-                            self.parent.road_network_toolbox.road_network_toolbox_ui.tree.itemAt(1, 0))
-                        self.parent.road_network_toolbox.road_network_toolbox_ui.tree.expandItem(
-                            self.parent.road_network_toolbox.road_network_toolbox_ui.tree.itemAt(7, 30))
-                        if not self.parent.road_network_toolbox.road_network_toolbox_ui.attributes_button.toggle_checked:
-                            self.parent.road_network_toolbox.road_network_toolbox_ui.attributes_button.pressed()
-
+                        self._parent.road_network_toolbox.road_network_toolbox_ui.tree.collapseItem(
+                            self._parent.road_network_toolbox.road_network_toolbox_ui.tree.itemAt(1, 0))
+                        self._parent.road_network_toolbox.road_network_toolbox_ui.tree.expandItem(
+                            self._parent.road_network_toolbox.road_network_toolbox_ui.tree.itemAt(7, 30))
+                        if not self._parent.road_network_toolbox.road_network_toolbox_ui.attributes_button.toggle_checked:
+                            self._parent.road_network_toolbox.road_network_toolbox_ui.attributes_button.pressed()
 
     def dynamic_canvas_release_callback(self, mouse_clicked_event):
         """
@@ -403,19 +423,22 @@ class DynamicCanvas(FigureCanvas):
         """
         if self.animated_viewer.current_scenario is None:
             return
-        # as long as no new lanelet is added after adding a temporary position, no lanelet can be selected (because calling update_plot removes all temporary lanelets)
-        if len(self.animated_viewer.current_scenario.lanelet_network.lanelets) - self.num_lanelets != 0 or self.parent.road_network_toolbox.updated_lanelet:
-            self.parent.road_network_toolbox.updated_lanelet = False
+
+        # as long as no new lanelet is added after adding a temporary position, no lanelet can be selected (because
+        # calling update_plot removes all temporary lanelets)
+        if len(self.animated_viewer.current_scenario.lanelet_network.lanelets) - self.num_lanelets != 0 or \
+                self._parent.road_network_toolbox.updated_lanelet:
+            self._parent.road_network_toolbox.updated_lanelet = False
             self.draw_temporary_points = {}
 
 
         self.l_network = self.animated_viewer.current_scenario.lanelet_network
+
         if not lane_ids:
             # check if any mousepos was setted before
             if self.latest_mouse_pos is None:
                 return
             click_shape = Circle(radius=0.01, center=self.latest_mouse_pos)
-
             selected_l_id = self.l_network.find_lanelet_by_shape(click_shape)
 
             if not self.control_key:
@@ -607,7 +630,7 @@ class DynamicCanvas(FigureCanvas):
         else:
             if self.preview_line_object:
                 self.preview_line_object.pop(0).remove()
-                self.update_plot()
+                self.draw_idle()
             self.mpl_disconnect(self.motion_notify_event_cid)
             self.mpl_disconnect(self.button_press_event_cid)
             self.button_release_event_cid = self.mpl_connect('button_release_event',
@@ -651,7 +674,7 @@ class DynamicCanvas(FigureCanvas):
             self.preview_line_object = self.ax.plot([left_vertex[0], right_vertex[0]],
                                                     [left_vertex[1], right_vertex[1]], linestyle='dashed', color="blue",
                                                     linewidth=5, zorder=21)
-            self.update_plot()
+            self.draw_idle()
 
         elif self.preview_line_object:
             self.remove_line()
@@ -661,23 +684,23 @@ class DynamicCanvas(FigureCanvas):
         if not self.preview_line_object:
             return
         self.preview_line_object.pop(0).remove()
-        self.update_plot()
+        self.draw_idle()
 
     def split_lane(self, mouse_click):
         if self.split_index:
             current_lanelet = self.l_network.find_lanelet_by_id(self.selected_l_ids[0][0])
             MapCreator.split_lanelet(current_lanelet, self.split_index, self.scenario, self.l_network)
-            self.parent.road_network_toolbox.callback(self.scenario)
+            self._parent.road_network_toolbox.callback(self.scenario)
             self.reset_toolbar()
 
     def enable_lanelet_operations(self, number_of_selected_lanelets):
         """
         Enable or disable operations depending on the number of lanelets selected
         """
-        self.parent.top_bar_wrapper.toolbar_wrapper.enable_toolbar(number_of_selected_lanelets)
+        self._parent.top_bar_wrapper.toolbar_wrapper.enable_toolbar(number_of_selected_lanelets)
 
     def reset_toolbar(self):
-        self.parent.top_bar_wrapper.toolbar_wrapper.reset_toolbar()
+        self._parent.top_bar_wrapper.toolbar_wrapper.reset_toolbar()
 
     def add_adjacent(self, left_adj: bool, same_direction: bool = True):
         added_adjacent_lanelets = []
@@ -689,11 +712,11 @@ class DynamicCanvas(FigureCanvas):
                                                                   traffic_lights=lanelet.traffic_lights)
             if not adjacent_lanelet:
                 output = f"Adjacent for Lanelet {lanelet.lanelet_id} already exists!"
-                self.parent.crdesigner_console_wrapper.text_browser.append(output)
+                self._parent.crdesigner_console_wrapper.text_browser.append(output)
             else:
                 added_adjacent_lanelets.append(adjacent_lanelet)
         self.scenario.add_objects(added_adjacent_lanelets)
-        self.parent.road_network_toolbox.callback(self.scenario)
+        self._parent.road_network_toolbox.callback(self.scenario)
 
     def merge_lanelets(self):
         neighboured_lanelets = self.selected_lanelets.copy()
@@ -717,7 +740,7 @@ class DynamicCanvas(FigureCanvas):
                     break
         if last_merged_index:
             self._select_lanelet(False, [[last_merged_index]])
-        self.parent.road_network_toolbox.callback(self.scenario)
+        self._parent.road_network_toolbox.callback(self.scenario)
 
     def activate_drawing_mode(self, is_active):
         if is_active:
@@ -737,7 +760,7 @@ class DynamicCanvas(FigureCanvas):
                                                              self.dynamic_canvas_release_callback)
             self.button_press_event_cid = self.mpl_connect('button_press_event', self.dynamic_canvas_click_callback)
             self.reset_toolbar()
-            self.update_plot()
+            self.draw_idle()
 
     def draw_lanelet(self, mouse_event):
         x = mouse_event.xdata
@@ -755,7 +778,7 @@ class DynamicCanvas(FigureCanvas):
                 self.add_to_selected = self.add_to_selected_preview
             self.draw_lanelet_first_point_object = self.ax.plot(x, y, marker="x", color="blue", zorder=21)
             self.draw_lanelet_first_point = [x, y]
-            self.update_plot()
+            self.draw_idle()
         else:
             lanelet_type = {LaneletType(ty) for ty in ["None"] if ty != "None"}
             draw_lanelet_second_point = [x, y]
@@ -769,7 +792,7 @@ class DynamicCanvas(FigureCanvas):
                                                                  self.scenario.generate_object_id(), lanelet_type)
             except AssertionError:
                 output = "Length of Lanelet must be at least 1"
-                self.parent.crdesigner_console_wrapper.text_browser.append(output)
+                self._parent.crdesigner_console_wrapper.text_browser.append(output)
                 return
 
             drawn_vector = [draw_lanelet_second_point[0] - self.draw_lanelet_first_point[0],
@@ -788,14 +811,14 @@ class DynamicCanvas(FigureCanvas):
                 created_lanelet.translate_rotate(np.array(self.draw_lanelet_first_point), 0)
             self.add_to_selected = created_lanelet
             self.scenario.add_objects([created_lanelet])
-            self.parent.road_network_toolbox.callback(self.scenario)
-            self.parent.road_network_toolbox.last_added_lanelet_id = created_lanelet.lanelet_id
+            self._parent.road_network_toolbox.callback(self.scenario)
+            self._parent.road_network_toolbox.last_added_lanelet_id = created_lanelet.lanelet_id
 
             self.draw_lanelet_first_point = draw_lanelet_second_point
             self.draw_lanelet_first_point_object.pop(0).remove()
             self.draw_lanelet_first_point_object = self.ax.plot(x, y, marker="x", color="blue", zorder=21)
 
-            self.update_plot()
+            self.draw_idle()
 
     def drawing_mode_preview_line(self, mouse_move_event):
         x = mouse_move_event.xdata
@@ -806,7 +829,7 @@ class DynamicCanvas(FigureCanvas):
             self.draw_append_lanelet_preview.pop(0).remove()
             self.draw_append_lanelet_preview = None
             self.add_to_selected_preview = None
-            self.update_plot()
+            self.draw_idle()
         if self.draw_lanelet_preview or (self.draw_lanelet_preview and not x and not y):
             self.draw_lanelet_preview.pop(0).remove()
         if self.draw_lanelet_first_point:
@@ -829,8 +852,8 @@ class DynamicCanvas(FigureCanvas):
                     right_v = selected_l.right_vertices[-1]
                     self.add_to_selected_preview = selected_l
                     self.draw_append_lanelet_preview = self.ax.plot([left_v[0], right_v[0]], [left_v[1], right_v[1]],
-                                                             linewidth=3, color="blue", zorder=21)
-        self.update_plot()
+                                                                    linewidth=3, color="blue", zorder=21)
+        self.draw_idle()
 
     def draw_temporary_point(self):
         if self.animated_viewer.current_scenario is None:
@@ -838,5 +861,88 @@ class DynamicCanvas(FigureCanvas):
         for key in self.draw_temporary_points:
             (x, y) = self.draw_temporary_points[key]
             self.ax.plot(x, y, marker="x", color="blue", zorder=21)
-        self.update_plot()
+        self.draw_idle()
         self.num_lanelets = len(self.animated_viewer.current_scenario.lanelet_network.lanelets)
+
+    def show_aerial_image(self):
+        """
+        shows the current (previously loaded) aerial image in the plot as a background
+        """
+        self.ax.imshow(self.current_aerial_image, aspect='auto', extent=self.image_limits, alpha=0.75)
+
+    def activate_aerial_image(self, bing: bool, lat1: float, lon1: float, lat2: float, lon2: float,
+                              center_at_zero: bool):
+        """
+        loads the aerial image with the following gps coordinates
+        :param lat1: northern bound
+        :param lon1: western bound
+        :param lat2: southern bound
+        :param lon2: eastern bound
+        :param center_at_zero: Boolean indicating whether image should be centered at origin.
+        and gets the corresponding plot limits for the image
+        and activates its showing in the background by setting show_aerial on True
+        """
+        self.update_aerial_image(lat1, lon1, lat2, lon2)
+        if bing:
+            self.current_aerial_image, extent = \
+                get_aerial_image_bing(self.aerial_map_bounds[0], self.aerial_map_bounds[1], self.aerial_map_bounds[2],
+                                      self.aerial_map_bounds[3])
+        else:
+            self.current_aerial_image = \
+                get_aerial_image_ldbv(self.aerial_map_bounds[0], self.aerial_map_bounds[1], self.aerial_map_bounds[2],
+                                      self.aerial_map_bounds[3])
+        self.image_limits = \
+            self.get_aerial_image_limits(self.aerial_map_bounds[0], self.aerial_map_bounds[1],
+                                         self.aerial_map_bounds[2], self.aerial_map_bounds[3], center_at_zero)
+
+        self.show_aerial = True
+
+    def update_aerial_image(self, lat1: float, lon1: float, lat2: float, lon2: float):
+        """
+        updates the gps coordinates of the aerial image to be loaded then shown
+        :param lat1: northern bound
+        :param lon1: western bound
+        :param lat2: southern bound
+        :param lon2: eastern bound
+        """
+        self.aerial_map_bounds[0] = lat1
+        self.aerial_map_bounds[1] = lon1
+        self.aerial_map_bounds[2] = lat2
+        self.aerial_map_bounds[3] = lon2
+
+    def get_aerial_image_limits(self, lat1: float, lon1: float, lat2: float, lon2: float, center_at_zero: bool) \
+            -> List[float]:
+        """
+        converts the gps coordinates to limits array [0, dist width, 0, dist height] where dist is the measurement
+        in meters for the side of the rectangle containing the area bound by these coordinates
+        :param lat1: northern bound
+        :param lon1: western bound
+        :param lat2: southern bound
+        :param lon2: eastern bound
+        :param center_at_zero: Boolean indicating whether image should be centered at origin.
+        :return: 2. limits of image (in meters)
+        """
+
+        # compute height out of distance between left upper (north-west) and left lower (south-west) vertex
+        height = flatLocal(lat1, lon1, lat2, lon1)
+        # compute width out of distance between right lower (south-east) and left lower (south-west) vertex
+        width = flatLocal(lat2, lon1, lat2, lon2)
+
+        if not center_at_zero:
+            # compute UTM coordinates for lower left point
+            lower_lat = lat2 + (lat2 - lat1) / 2
+            left_lon = lon1 + (lon2 - lon1) / 2
+
+            (coord1, coord2, zone_num, zone_let) = from_latlon(lower_lat, left_lon)
+            print(coord1, coord2)
+        else:
+            coord1 = 0
+            coord2 = 0
+        return [coord1, coord1 + width, coord2, coord2 + height]
+
+    def deactivate_aerial_image(self):
+        """
+        deactivate the showing of the aerial image, called when user clicks on Remove button in road network toolbox
+        """
+        self.show_aerial = False
+        self._update_map()

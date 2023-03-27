@@ -1,3 +1,6 @@
+import math
+import sys
+
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
@@ -73,8 +76,18 @@ class ToolBarWrapper:
         mwindow.animated_viewer_wrapper.cr_viewer.time_step.subscribe(self.slider.setValue)
         self.tb4.addWidget(self.slider)
 
-        self.label1 = QLabel('  Time Stamp: 0', mwindow)
+        self.label1 = QLabel('  Time Stamp:', mwindow)
         self.tb4.addWidget(self.label1)
+
+        self.edit = QLineEdit()
+        validator = QIntValidator()
+        validator.setBottom(0)
+        self.edit.setValidator(validator)
+        self.edit.setText('0')
+        self.edit.setAlignment(Qt.AlignRight)
+        self.edit.textChanged.connect(lambda: _time_step_set(mwindow))
+        self.edit.setMaximumWidth(40)
+        self.tb4.addWidget(self.edit)
 
         self.label2 = QLabel(' / 0', mwindow)
         self.tb4.addWidget(self.label2)
@@ -215,14 +228,25 @@ def play_pause_animation(mwindow, open_commonroad_file):
 def _time_step_change(mwindow, value):
     if mwindow.animated_viewer_wrapper.cr_viewer.current_scenario:
         mwindow.animated_viewer_wrapper.cr_viewer.set_timestep(value)
-        mwindow.top_bar_wrapper.toolbar_wrapper.label1.setText('  Time Stamp: ' + str(value))
+        mwindow.top_bar_wrapper.toolbar_wrapper.edit.setText(str(value))
         mwindow.animated_viewer_wrapper.cr_viewer.animation.event_source.start()
+
+
+def _time_step_set(mwindow):
+    if mwindow.top_bar_wrapper.toolbar_wrapper.edit.text() == "":
+        return
+    if mwindow.animated_viewer_wrapper.cr_viewer.current_scenario:
+        mwindow.top_bar_wrapper.toolbar_wrapper.slider.setValue(
+                int(float(mwindow.top_bar_wrapper.toolbar_wrapper.edit.text())))
+        mwindow.animated_viewer_wrapper.cr_viewer.pause()
+        mwindow.animated_viewer_wrapper.cr_viewer.dynamic.draw_idle()
+        mwindow.animated_viewer_wrapper.update_view()
 
 
 def _detect_slider_clicked(mwindow):
     mwindow.slider_clicked = True
     mwindow.animated_viewer_wrapper.cr_viewer.pause()
-    mwindow.animated_viewer_wrapper.cr_viewer.dynamic.update_plot()
+    mwindow.animated_viewer_wrapper.cr_viewer.dynamic.draw_idle()
 
 
 def _detect_slider_release(mwindow):
@@ -236,7 +260,7 @@ def _save_video(mwindow, open_commonroad_file):
         messbox = QMessageBox()
         reply = messbox.warning(mwindow, "Warning", "Please load or create a CommonRoad scenario before saving a video",
                                 QMessageBox.Ok | QMessageBox.No, QMessageBox.Ok)
-        if (reply == QMessageBox.Ok):
+        if reply == QMessageBox.Ok:
             open_commonroad_file(mwindow)
         else:
             messbox.close()

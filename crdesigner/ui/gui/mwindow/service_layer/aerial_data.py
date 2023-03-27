@@ -1,20 +1,23 @@
 """
-This module provides methods to download and use areal images from Bing Maps
+This module provides methods to download and use aerial images from Bing Maps
 """
 import json
 import os
+import requests
+from requests.auth import HTTPBasicAuth
 from io import BytesIO
 from queue import Queue
 from threading import Thread
 from typing import List, Tuple
 from typing import Optional
-from urllib.request import urlopen
+from urllib.request import urlopen, HTTPBasicAuthHandler, build_opener, install_opener
 
 import mercantile
 from PIL import Image
 from PIL.JpegImagePlugin import JpegImageFile
 
 from crdesigner.map_conversion.osm2cr import config
+from crdesigner.ui.gui.mwindow.service_layer import config as config_settings
 
 IMAGE_RESOLUTION = 256
 
@@ -25,8 +28,7 @@ os.makedirs(config.IMAGE_SAVE_PATH, exist_ok=True)
 
 def store_tile(quadkey: str, image: JpegImageFile) -> None:
     """
-    This is useful for low internet connection speeds, but i think it is against the bing license agreements
-    It should be removed before publishing this application
+    This is useful for low internet connection speeds.
 
     :param quadkey: quadkey of tile
     :param image: the image
@@ -58,18 +60,61 @@ def get_bin_maps_api_response() -> None:
 
     :return: None
     """
+
     global bing_maps_api_response
-    bingMapsKey = config.BING_MAPS_KEY
-    request = "http://dev.virtualearth.net/REST/V1/Imagery/Metadata/Aerial?output=json&include=ImageryProviders&key={}".format(
-        bingMapsKey
-    )
-    # print(request)
+    bingMapsKey = config_settings.BING_MAPS_KEY
+    if bingMapsKey == "":
+        print("_Warning__: No Bing Maps key specified. Go to settings and set Password.")
+        return
+    request = "http://dev.virtualearth.net/REST/V1/Imagery/Metadata/Aerial?output=json&include=ImageryProviders&key={" \
+              "}".format(
+            bingMapsKey)
+
     response = urlopen(request).read()
     response = json.loads(response)
     response = response["resourceSets"][0]["resources"][0]
     bing_maps_api_response = response
     return
 
+
+def validate_bing_key() -> bool:
+    """
+    Validates the password specified by BING_MAPS_KEY in the config of the settings.
+    :return: bool: True for valid password, False for wrong password
+    """
+    bingMapsKey = config_settings.BING_MAPS_KEY
+    request = "http://dev.virtualearth.net/REST/V1/Imagery/Metadata/Aerial?output=json&include=ImageryProviders&key={" \
+              "}".format(bingMapsKey)
+
+    headers = {'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:80.0) Gecko/20100101 Firefox/80.0'}
+
+    with requests.session() as s:
+
+        # load cookies otherwise an HTTP error occurs
+        s.get("http://dev.virtualearth.net/?key={" \
+              "}".format(bingMapsKey), headers=headers)
+
+        # get data
+        data = s.get(request, headers=headers).json()
+        if data['authenticationResultCode'] == 'ValidCredentials':
+            return True
+    return False
+
+def validate_ldbv_credentials() -> bool:
+    url = "https://geoservices.bayern.de/wms/v2/ogc_dop20.cgi?service=wms&request=GetMap&version=1.1.1&bbox=11.65541,48.26142,11.66093,48.26386&width=100&height=100&layers=by_dop20c&format=image/jpeg&srs=EPSG:4326"
+    ldbv_username = config_settings.LDBV_USERNAME
+    ldbv_password = config_settings.LDBV_PASSWORD
+
+    try:
+        auth_handler = HTTPBasicAuthHandler()
+        auth_handler.add_password(realm='WMS DOP20', uri='https://geoservices.bayern.de/wms/v2/ogc_dop20.cgi',
+                                  user=ldbv_username, passwd=ldbv_password)
+        opener = build_opener(auth_handler)
+        install_opener(opener)
+        urlopen(url).read()
+    except:
+        return False
+    return True
 
 def get_tile(quadkey: str) -> JpegImageFile:
     """
@@ -87,6 +132,8 @@ def get_tile(quadkey: str) -> JpegImageFile:
         try:
             if bing_maps_api_response is None:
                 get_bin_maps_api_response()
+            if config_settings.BING_MAPS_KEY == "":
+                return
             request = bing_maps_api_response["imageUrl"]
             sub_domain = bing_maps_api_response["imageUrlSubdomains"][0]
             request = request.replace("{subdomain}", sub_domain)
@@ -100,9 +147,8 @@ def get_tile(quadkey: str) -> JpegImageFile:
     return image
 
 
-def get_required_quadkeys(
-    west: float, south: float, east: float, north: float, zoom: int
-) -> Tuple[List[str], int, int, List[float]]:
+def get_required_quadkeys(west: float, south: float, east: float, north: float, zoom: int) -> Tuple[
+    List[str], int, int, List[float]]:
     """
     gets quadkeys for all tiles in a region sorted by their x and y value
     returns also the number of different x and y values
@@ -121,7 +167,6 @@ def get_required_quadkeys(
     x_counts = {}
     y_counts = {}
     for tile in tiles:
-        # print(tile)
         x = tile.x
         if x in x_counts:
             x_counts[x] += 1
@@ -149,9 +194,7 @@ def get_required_quadkeys(
     vertical_max = lnglat_top_left.lat
 
     bbox_lower_right = mercantile.xy_bounds(tiles[-1])
-    lnglat_lower_right = mercantile.lnglat(
-        bbox_lower_right.right, bbox_lower_right.bottom
-    )
+    lnglat_lower_right = mercantile.lnglat(bbox_lower_right.right, bbox_lower_right.bottom)
     horizontal_max = lnglat_lower_right.lng
     vertical_min = lnglat_lower_right.lat
 
@@ -159,9 +202,7 @@ def get_required_quadkeys(
     return quadkeys, x_length, y_length, extent
 
 
-def put_images_together(
-    images: List[Image.Image], x_count: int, y_count: int
-) -> Image.Image:
+def put_images_together(images: List[Image.Image], x_count: int, y_count: int) -> Image.Image:
     """
     puts tiles together to one image
 
@@ -210,24 +251,20 @@ def download_all_images(quadkeys: List[str]) -> List[Image.Image]:
     for quadkey in quadkeys:
         q.put(quadkey)
 
-    # print("waiting for queue")
     q.join()
     for i in range(PARALLEL_REQUESTS):
         q.put(None)
-    # print("waiting for threads")
     for t in threads:
         t.join()
-    # print("threads joined")
 
     result = [images[quadkey] for quadkey in quadkeys]
     return result
 
 
-def get_aerial_image(
-    lat1: float, lon1: float, lat2: float, lon2: float, zoom: int = 19
-) -> Tuple[Image.Image, List[float]]:
+def get_aerial_image_bing(lat1: float, lon1: float, lat2: float, lon2: float, zoom: int = 19) -> Tuple[
+    Image.Image, List[float]]:
     """
-    gets the image and coordinates to a sepcified aera
+    gets the image and coordinates to a sepcified aera from bing
 
     :param lat1: northern  bound
     :param lon1: western bound
@@ -237,9 +274,49 @@ def get_aerial_image(
     :return: Tuple: 1. image, 2. extent of image
     """
     assert 1 <= zoom <= 23
+
     keys, x_count, y_count, extent = get_required_quadkeys(lon1, lat2, lon2, lat1, zoom)
     print("loading {} tiles".format(len(keys)))
     # images = [get_tile(key) for key in keys]
     images = download_all_images(keys)
     image = put_images_together(images, x_count, y_count)
     return image, extent
+
+def get_aerial_image_ldbv(lat1: float, lon1: float, lat2: float, lon2: float) -> Image.Image:
+    """
+    gets the image and coordinates to a sepcified aera from ldbv
+
+    :param lat1: northern  bound
+    :param lon1: western bound
+    :param lat2: southern bound
+    :param lon2: eastern bound
+    :return: Image
+    """
+    ldbv_username = config_settings.LDBV_USERNAME
+    ldbv_password = config_settings.LDBV_PASSWORD
+
+    lat_diff = lat1 - lat2
+    lon_diff = lon2 - lon1
+
+    # compute number of pixels of width and height based on coordinate limits (bigger side has always 4000 pixels)
+    if lat_diff > lon_diff:
+        onep = 4000 / lat_diff
+        lon_pixels = int(onep * lon_diff)
+        lat_pixels = 4000
+    else:
+        onep = 4000 / lon_diff
+        lat_pixels = int(onep * lat_diff)
+        lon_pixels = 4000
+
+    url = "https://geoservices.bayern.de/wms/v2/ogc_dop20.cgi?service=wms&request=GetMap&version=1.1.1&bbox={},{},{},{}&width={}&height={}&layers=by_dop20c&format=image/jpeg&srs=EPSG:4326".format(str(lon1), str(lat2), str(lon2), str(lat1), str(lat_pixels), str(lon_pixels))
+
+    auth_handler = HTTPBasicAuthHandler()
+    auth_handler.add_password(realm='WMS DOP20', uri='https://geoservices.bayern.de/wms/v2/ogc_dop20.cgi', user=ldbv_username, passwd=ldbv_password)
+    opener = build_opener(auth_handler)
+    install_opener(opener)
+    tile = urlopen(url).read()
+    image = Image.open(BytesIO(tile))
+
+    return image
+
+

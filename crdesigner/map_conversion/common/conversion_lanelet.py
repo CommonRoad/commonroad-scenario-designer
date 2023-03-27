@@ -1,4 +1,4 @@
-from typing import Tuple, Optional, Union
+from typing import Tuple, Optional, Union, Set
 import numpy as np
 from commonroad.scenario.lanelet import Lanelet, LaneletType, LineMarking, RoadUser
 from crdesigner.map_conversion.opendrive.opendrive_conversion.utils import CustomDefaultLaneletType
@@ -11,6 +11,7 @@ class ConversionLanelet(Lanelet):
     """Change some properties of the Lanelet class so that it can be used to conversions to Lanelet. This means
     especially that lanelet_ids can be other types than a natural number and that these ids can be changed
     more than once. Adjacent neighbors and pre- and successor can be changed more than once.
+    This class is being used in Opendrive and Lanelet2 format conversions
     """
 
     # optimal_join_split_factor = 20
@@ -45,10 +46,9 @@ class ConversionLanelet(Lanelet):
         if lanelet_type is None:
             lanelet_type = {LaneletType.UNKNOWN}
         self.parametric_lane_group = parametric_lane_group
-        self._default_lanelet_type = \
-            {LaneletType(custom_default_lanelet_types.general_lanelet_type)
-             if LaneletType(custom_default_lanelet_types.general_lanelet_type) is not None else LaneletType.UNKNOWN} \
-                if custom_default_lanelet_types.general_lanelet_type_activ else set()
+        self._default_lanelet_type = {LaneletType(custom_default_lanelet_types.general_lanelet_type) if LaneletType(
+                custom_default_lanelet_types.general_lanelet_type) is not None else LaneletType.UNKNOWN} if \
+            custom_default_lanelet_types.general_lanelet_type_activ else set()
         self._driving_default_lanelet_type = LaneletType(custom_default_lanelet_types.driving_default_lanelet_type) \
             if LaneletType(custom_default_lanelet_types.driving_default_lanelet_type) is not None \
             else LaneletType.UNKNOWN
@@ -101,7 +101,7 @@ class ConversionLanelet(Lanelet):
     """
 
     @property
-    def lanelet_type(self) -> LaneletType:
+    def lanelet_type(self) -> Set[LaneletType]:
         """Get the lanelet type
 
         :return: The lanelet type.

@@ -1,5 +1,30 @@
 # Changelog
 
+## [0.7.0] - 2023-03-28
+
+### Added
+- Possibility to load aerial image from Bing in the background
+- Possibility to load aerial image from LDBV in the background
+- CommonRoad to Lanelet2 conversion: Conversion of regulatory elements
+- CommonRoad to Lanelet2 conversion: Conversion of lanelet types
+- Visualized scenario time step can be set manually (no need to use slider anymore)
+
+### Changed
+- Default matplotlib area
+- Generalized traffic sign conversion 
+- Lanelet2 to CommonRoad conversion: Generalize traffic sign conversion
+- Packaging using poetry
+
+### Fixed
+- Persisting zoomed scale
+- Connect to predecessor, previously added, and successor
+- Adding rotated lanelet (>360°)
+- Lanelet selection after translating a lanelet in the GUI
+- Blue position waypoint in GUI is removed when new scenario is created
+- Video and matplotlib figure saving not working
+
+### Removed
+
 ## [0.6.1] - 2023-02-09
 
 ### Fixed

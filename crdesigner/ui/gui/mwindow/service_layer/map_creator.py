@@ -1,3 +1,4 @@
+import numpy as np
 from scipy.interpolate import interp1d
 from typing import Tuple
 
@@ -275,24 +276,28 @@ class MapCreator:
         @param successor: Lanelet which should be attached to the predecessor lanelet.
         """
 
+        len_suc = np.round(np.linalg.norm(successor.center_vertices[0] - successor.center_vertices[-1]), 2)
+        len_pred = np.round(np.linalg.norm(predecessor.center_vertices[0] - predecessor.center_vertices[-1]), 2)
+        wid_suc = np.round(np.linalg.norm(successor.left_vertices[0] - successor.right_vertices[0]), 2)
+        wid_pred = np.round(np.linalg.norm(predecessor.left_vertices[0] - predecessor.right_vertices[0]), 2)
+        same_length_width = len_suc == len_pred and wid_suc == wid_pred
 
-
-        if MapCreator.lanelet_is_straight(predecessor) and not intersection:
+        if MapCreator.lanelet_is_straight(predecessor) and MapCreator.lanelet_is_straight(successor) and not intersection and same_length_width:
             successor._left_vertices = predecessor.left_vertices
             successor._center_vertices = predecessor.center_vertices
             successor._right_vertices = predecessor.right_vertices
 
-
-        factor = (np.linalg.norm(successor.left_vertices[0, :] - successor.right_vertices[0, :]) / np.linalg.norm(
+        if same_length_width:
+            factor = (np.linalg.norm(successor.left_vertices[0, :] - successor.right_vertices[0, :]) / np.linalg.norm(
                     (predecessor.left_vertices[-1, :] - predecessor.right_vertices[-1, :])))
 
-
-        successor._left_vertices = successor.left_vertices / factor
-        successor._right_vertices = successor.right_vertices / factor
-        successor._center_vertices = successor.center_vertices / factor
+            successor._left_vertices = successor.left_vertices / factor
+            successor._right_vertices = successor.right_vertices / factor
+            successor._center_vertices = successor.center_vertices / factor
 
         ang = MapCreator.calc_angle_between_lanelets(predecessor, successor)
-        if not is_natural_number(ang) and not intersection:
+
+        if not is_natural_number(ang) and not intersection and same_length_width:
             ang = 0
             if not MapCreator.lanelet_is_straight(predecessor):
                 b = successor.right_vertices[0] - successor.center_vertices[0]
@@ -308,12 +313,33 @@ class MapCreator:
                     norms = np.linalg.norm(a) * np.linalg.norm(b)
                     cos = inner / norms
                     ang = np.arccos(np.clip(cos, -1.0, 1.0))
-
+            elif not MapCreator.lanelet_is_straight(successor):
+                b = successor.right_vertices[0] - successor.center_vertices[0]
+                a = predecessor.right_vertices[-1] - predecessor.center_vertices[-1]
+                inner = np.inner(a, b)
+                if inner == 0:
+                    sign = np.cross(a, b)
+                    if sign > 0:
+                        ang = - np.pi / 2
+                    else:
+                        ang = np.pi / 2
+                else:
+                    norms = np.linalg.norm(a) * np.linalg.norm(b)
+                    cos = inner / norms
+                    ang = np.arccos(np.clip(cos, -1.0, 1.0))
+                    if predecessor.center_vertices[0][1] > predecessor.center_vertices[-1][1]:
+                        ang = -ang
 
 
         successor.translate_rotate(np.array([0, 0]), ang)
         trans = predecessor.center_vertices[-1] - successor.center_vertices[0]
         successor.translate_rotate(trans, 0)
+        if not MapCreator.lanelet_is_straight(predecessor) and (
+                    np.round(predecessor.left_vertices[-1], 5) != np.round(successor.left_vertices[0], 5)).any():
+            ang *= -2
+            successor.translate_rotate(np.array([0, 0]), ang)
+            trans = predecessor.center_vertices[-1] - successor.center_vertices[0]
+            successor.translate_rotate(trans, 0)
 
         MapCreator.set_predecessor_successor_relation(predecessor, successor)
 
@@ -326,8 +352,16 @@ class MapCreator:
         @param successor: Lanelet to which given lanelet should be attached.
         @param predecessor: Lanelet which should be attached to the successor lanelet.
         """
-        straight = MapCreator.lanelet_is_straight(successor)
-        if straight:
+        pred_straight = MapCreator.lanelet_is_straight(predecessor)
+        suc_straight = MapCreator.lanelet_is_straight(successor)
+
+        len_suc = np.round(np.linalg.norm(successor.center_vertices[0] - successor.center_vertices[-1]), 2)
+        len_pred = np.round(np.linalg.norm(predecessor.center_vertices[0] - predecessor.center_vertices[-1]), 2)
+        wid_suc = np.round(np.linalg.norm(successor.left_vertices[0] - successor.right_vertices[0]), 2)
+        wid_pred = np.round(np.linalg.norm(predecessor.left_vertices[0] - predecessor.right_vertices[0]), 2)
+        same_length_width = len_suc == len_pred and wid_suc == wid_pred
+
+        if pred_straight and suc_straight and same_length_width:
             predecessor._left_vertices = successor.left_vertices
             predecessor._center_vertices = successor.center_vertices
             predecessor._right_vertices = successor.right_vertices
@@ -335,18 +369,31 @@ class MapCreator:
         ang = MapCreator.calc_angle_between_lanelets(predecessor, successor)
         if not is_natural_number(ang):
             ang = 0
-            if not straight:
+            if not suc_straight or not pred_straight or not same_length_width:
                 a = predecessor.right_vertices[-1] - predecessor.center_vertices[-1]
                 b = successor.right_vertices[0] - successor.center_vertices[0]
                 inner = np.inner(a, b)
                 norms = np.linalg.norm(a) * np.linalg.norm(b)
                 cos = inner / norms
                 ang = np.arccos(np.clip(cos, -1.0, 1.0))
+                if not pred_straight and successor.center_vertices[-1][0] > successor.center_vertices[0][0] \
+                        or not same_length_width and successor.center_vertices[-1][1] < successor.center_vertices[0][1]:
+                    ang = -ang
+
 
         predecessor.translate_rotate(np.array([0, 0]), ang)
 
-        if straight:
+        if pred_straight and suc_straight and same_length_width:
             trans = predecessor.center_vertices[0] - successor.center_vertices[-1]
+            predecessor.translate_rotate(trans, 0)
+        else:
+            trans = successor.center_vertices[0] - predecessor.center_vertices[-1]
+            predecessor.translate_rotate(trans, 0)
+
+        if not suc_straight and (np.round(predecessor.left_vertices[-1], 5) != np.round(successor.left_vertices[0], 5)).any() and same_length_width:
+            ang *= -2
+            predecessor.translate_rotate(np.array([0, 0]), ang)
+            trans = successor.center_vertices[0] - predecessor.center_vertices[-1]
             predecessor.translate_rotate(trans, 0)
 
         MapCreator.set_predecessor_successor_relation(predecessor, successor)

@@ -32,8 +32,6 @@ AERIAL_IMAGES = False
 IMAGE_SAVE_PATH = "files/imagery/"
 # The zoom level of Bing Maps tiles
 ZOOM_LEVEL = 19
-# The key to access bing maps
-BING_MAPS_KEY = ""
 
 # Map download Settings
 # path to save downloaded files

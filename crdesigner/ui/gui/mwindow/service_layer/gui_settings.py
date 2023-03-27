@@ -9,6 +9,8 @@ import os
 from crdesigner.configurations.definition import ROOT_DIR
 
 from crdesigner.ui.gui.mwindow.service_layer import transfer
+from crdesigner.ui.gui.mwindow.service_layer.aerial_data import validate_bing_key, validate_ldbv_credentials
+from PyQt5.QtWidgets import *
 class GUISettings:
 
     def __init__(self, parent):
@@ -62,6 +64,31 @@ class GUISettings:
         config.AXIS_VISIBLE = str(self.window.cmb_axis_visible.currentText())
         config.DARKMODE = self.window.chk_darkmode.isChecked()
         config.LEGEND = self.window.chk_legend.isChecked()
+        config.BING_MAPS_KEY = self.window.lineed_bing_maps_key.text()
+        if config.BING_MAPS_KEY != "":
+            check = validate_bing_key()
+            if not check:
+                print("_Warning__: Specified Bing Maps key is wrong.")
+                warning_dialog = QMessageBox()
+                warning_dialog.warning(None, "Warning",
+                                       "Specified Bing Maps key is wrong.",
+                                       QMessageBox.Ok, QMessageBox.Ok)
+                warning_dialog.close()
+                config.BING_MAPS_KEY = ""
+
+        config.LDBV_USERNAME = self.window.lineed_ldbv_username.text()
+        config.LDBV_PASSWORD = self.window.lineed_ldbv_password.text()
+        if config.LDBV_USERNAME != "" or config.LDBV_PASSWORD != "":
+            check = validate_ldbv_credentials()
+            if not check:
+                print("_Warning__: Specified LDBV username or password is wrong.")
+                warning_dialog = QMessageBox()
+                warning_dialog.warning(None, "Warning", "Specified LDBV username or password is wrong.", QMessageBox.Ok,
+                                       QMessageBox.Ok)
+                warning_dialog.close()
+                config.LDBV_USERNAME = ""
+                config.LDBV_PASSWORD = ""
+
 
     def has_valid_entries(self) -> bool:
         """

@@ -3,7 +3,8 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 import math
 
-from crdesigner.ui.gui.mwindow.toolboxes.toolbox_ui import Toolbox, CheckableComboBox, QHLine, CollapsibleButtonBox, CollapsibleArrowBox, CollapsibleCheckBox, PositionButton
+from crdesigner.ui.gui.mwindow.service_layer.services.waitingspinnerwidget import QtWaitingSpinner
+from crdesigner.ui.gui.mwindow.toolboxes.toolbox_ui import Toolbox, CheckableComboBox, CollapsibleArrowBox, CollapsibleCheckBox, PositionButton
 
 from commonroad.scenario.lanelet import LaneletType, RoadUser, LineMarking
 from commonroad.scenario.traffic_sign import *
@@ -19,6 +20,7 @@ class RoadNetworkToolboxUI(Toolbox):
         self.curved_check_button = None
         self.select_end_position = None
         self.end_position_method = None
+        self.lanelet_width = None
 
     def update(self) -> None:
         super(RoadNetworkToolboxUI, self).update()
@@ -33,6 +35,100 @@ class RoadNetworkToolboxUI(Toolbox):
         self.sections.append(self.create_traffic_sign_widget())
         self.sections.append(self.create_traffic_light_widget())
         self.sections.append(self.create_intersection_widget())
+        self.sections.append(self.create_aerial_image_widget())
+
+    def create_aerial_image_widget(self):
+        """
+        create the Add aerial image widget
+        """
+        widget_aerial = QFrame(self.tree)
+        layout_aerial_image = QVBoxLayout(widget_aerial)
+        label_general = QLabel("Aerial map Attributes")
+        label_general.setFont(QFont("Arial", 11, QFont.Bold))
+
+
+        # GroupBox
+        self.aerial_image_groupbox = QGroupBox()
+        self.layout_aerial_image_groupbox = QFormLayout()
+        self.aerial_image_groupbox.setLayout(self.layout_aerial_image_groupbox)
+        self.layout_aerial_image_groupbox.addRow(label_general)
+
+        # Add button
+        self.button_add_aerial_image = QPushButton("Add")
+        # Remove button
+        self.button_remove_aerial_image = QPushButton("Remove")
+
+        connecting_radio_button_group_aerial = QButtonGroup()
+        self.bing_selection = QRadioButton("Bing maps")
+        self.bing_selection.setChecked(True)
+        connecting_radio_button_group_aerial.addButton(self.bing_selection)
+
+        self.ldbv_selection = QRadioButton("LDBV maps")
+        connecting_radio_button_group_aerial.addButton(self.ldbv_selection)
+
+        self.aerial_selection = QGridLayout()
+        self.aerial_selection.addWidget(self.bing_selection, 1, 0)
+        self.aerial_selection.addWidget(self.ldbv_selection, 1, 1)
+
+        self.layout_aerial_image_groupbox.addRow(self.aerial_selection)
+
+
+        validator_latitude = QDoubleValidator(-90.0, 90.0, 1000)
+        validator_latitude.setLocale(QLocale("en_US"))
+        validator_longitude = QDoubleValidator(-180.0, 180.0, 1000)
+        validator_longitude.setLocale(QLocale("en_US"))
+
+
+        # lat1
+        self.northern_bound = QLineEdit()
+        self.northern_bound.setValidator(validator_latitude)
+        self.northern_bound.setMaxLength(8)
+        self.northern_bound.setAlignment(Qt.AlignRight)
+        # lon1
+        self.western_bound = QLineEdit()
+        self.western_bound.setValidator(validator_longitude)
+        self.western_bound.setMaxLength(8)
+        self.western_bound.setAlignment(Qt.AlignRight)
+        # lat2
+        self.southern_bound = QLineEdit()
+        self.southern_bound.setValidator(validator_latitude)
+        self.southern_bound.setMaxLength(8)
+        self.southern_bound.setAlignment(Qt.AlignRight)
+        # lon2
+        self.eastern_bound = QLineEdit()
+        self.eastern_bound.setValidator(validator_longitude)
+        self.eastern_bound.setMaxLength(8)
+        self.eastern_bound.setAlignment(Qt.AlignRight)
+
+
+        self.layout_aerial_image_groupbox.insertRow(3, "Northern Bound [°]", self.northern_bound)
+        self.layout_aerial_image_groupbox.insertRow(4, "Western Bound [°]", self.western_bound)
+        self.layout_aerial_image_groupbox.insertRow(5, "Southern Bound [°]", self.southern_bound)
+        self.layout_aerial_image_groupbox.insertRow(6, "Eastern Bound [°]", self.eastern_bound)
+
+        # probably move the next 4 lines to init_aerial_widget or something
+        self.northern_bound.setText("48.263864")
+        self.western_bound.setText("11.655410")
+        self.southern_bound.setText("48.261424")
+        self.eastern_bound.setText("11.660930")
+
+        self.center_at_zero = QCheckBox("Center at origin")
+        self.center_at_zero.setChecked(True)
+        self.layout_aerial_image_groupbox.addRow(self.center_at_zero)
+
+        self.Spinner = QtWaitingSpinner(self, centerOnParent=True)
+        self.Spinner.setInnerRadius(7)
+        self.Spinner.setNumberOfLines(10)
+        self.Spinner.setLineLength(7)
+        self.Spinner.setLineWidth(2)
+
+        self.layout_aerial_image_groupbox.addRow(self.button_add_aerial_image)
+        self.layout_aerial_image_groupbox.addRow(self.button_remove_aerial_image)
+
+        layout_aerial_image.addWidget(self.aerial_image_groupbox)
+
+        widget_title = "Add Aerial Image"
+        return widget_title, widget_aerial
 
     def create_add_lanelet_widget(self):
         widget_lanelets = QFrame(self.tree)
@@ -536,6 +632,10 @@ class RoadNetworkToolboxUI(Toolbox):
         self.lanelet_width.setValidator(self.float_validator)
         self.lanelet_width.setMaxLength(5)
         self.lanelet_width.setAlignment(Qt.AlignRight)
+        self.lanelet_width.setDisabled(True)
+        self.lanelet_width.setStyleSheet(
+                'background-color: ' + self.mwindow.colorscheme().second_background + '; color: ' +
+                self.mwindow.colorscheme().disabled)
 
         self.layout_lanelet_adding_groupbox.insertRow(4, "Length [m]", self.lanelet_length)
         self.layout_lanelet_adding_groupbox.insertRow(5, "Width [m]", self.lanelet_width)
@@ -551,13 +651,12 @@ class RoadNetworkToolboxUI(Toolbox):
         self.layout_lanelet_adding_groupbox.insertRow(14, self.line2)
 
 
-
     def init_connect_to_predecessors_selection_fields(self):
         self.line1 = QFrame()
         self.line1.setFrameShape(QFrame.HLine)
         self.layout_lanelet_adding_groupbox.insertRow(2, self.line1)
 
-        self.predecessors = CheckableComboBox()
+        self.predecessors = CheckableComboBox(self)
         self.layout_lanelet_adding_groupbox.insertRow(4, "Predecessors:", self.predecessors)
 
         # Lanelet Length and Width
@@ -570,6 +669,10 @@ class RoadNetworkToolboxUI(Toolbox):
         self.lanelet_width.setValidator(self.float_validator)
         self.lanelet_width.setMaxLength(5)
         self.lanelet_width.setAlignment(Qt.AlignRight)
+        self.lanelet_width.setDisabled(True)
+        self.lanelet_width.setStyleSheet(
+                'background-color: ' + self.mwindow.colorscheme().second_background + '; color: ' +
+                self.mwindow.colorscheme().disabled)
 
         self.layout_lanelet_adding_groupbox.insertRow(5, "Length [m]", self.lanelet_length)
         self.layout_lanelet_adding_groupbox.insertRow(6, "Width [m]", self.lanelet_width)
@@ -602,6 +705,10 @@ class RoadNetworkToolboxUI(Toolbox):
         self.lanelet_width.setValidator(self.float_validator)
         self.lanelet_width.setMaxLength(5)
         self.lanelet_width.setAlignment(Qt.AlignRight)
+        self.lanelet_width.setDisabled(True)
+        self.lanelet_width.setStyleSheet(
+                'background-color: ' + self.mwindow.colorscheme().second_background + '; color: ' +
+                self.mwindow.colorscheme().disabled)
 
         self.layout_lanelet_adding_groupbox.insertRow(6, "Length [m]", self.lanelet_length)
         self.layout_lanelet_adding_groupbox.insertRow(7, "Width [m]", self.lanelet_width)
@@ -1371,3 +1478,11 @@ class RoadNetworkToolboxUI(Toolbox):
                 self.curved_check_button.button.setStyleSheet('background-color: '+ self.mwindow.colorscheme().second_background + '; color: ' + self.mwindow.colorscheme().disabled)
             else:
                 self.curved_check_button.button.setStyleSheet('background-color: '+ self.mwindow.colorscheme().second_background + '; color: ' + self.mwindow.colorscheme().color)
+
+        if self.place_at_position.isChecked() or self.connect_to_previous_selection.isChecked() or self.connect_to_predecessors_selection.isChecked() or self.connect_to_successors_selection.isChecked():
+            if not self.place_at_position.isChecked():
+                self.lanelet_width.setStyleSheet(
+                'background-color: ' + self.mwindow.colorscheme().second_background + '; color: ' + self.mwindow.colorscheme().disabled)
+            else:
+                self.lanelet_width.setStyleSheet(
+                'background-color: ' + self.mwindow.colorscheme().second_background + '; color: ' + self.mwindow.colorscheme().color)
