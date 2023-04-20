@@ -11,7 +11,7 @@ The toolbox includes a graphical user interface (GUI) for creating, editing, and
 and scenarios, a command line interface, and different Python APIs.
 
 .. note::
-    This release (v0.6.1) is still a BETA version.
+    This release (v0.7.0) is still a BETA version.
     In case you encounter errors or want to provide us feedback, please post them in our
     `forum <https://commonroad.in.tum.de/forum/c/scenario-designer/18>`_.
 

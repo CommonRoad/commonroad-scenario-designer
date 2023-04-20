@@ -1,12 +1,13 @@
 # Changelog
 
-## [0.7.0] - 2023-03-XX
+## [0.7.0] - 2023-03-28
 
 ### Added
 - Possibility to load aerial image from Bing in the background
 - Possibility to load aerial image from LDBV in the background
 - CommonRoad to Lanelet2 conversion: Conversion of regulatory elements
 - CommonRoad to Lanelet2 conversion: Conversion of lanelet types
+- Visualized scenario time step can be set manually (no need to use slider anymore)
 
 ### Changed
 - Default matplotlib area
