@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.8.0] - 2023-07-XX
+
+### Changed
+- Versions of third-party packages
+
 ## [0.7.0] - 2023-03-28
 
 ### Added
@@ -22,8 +27,6 @@
 - Lanelet selection after translating a lanelet in the GUI
 - Blue position waypoint in GUI is removed when new scenario is created
 - Video and matplotlib figure saving not working
-
-### Removed
 
 ## [0.6.1] - 2023-02-09
 
