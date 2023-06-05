@@ -57,11 +57,13 @@ class CR2LaneletConverter:
     Class to convert CommonRoad lanelet to the OSM representation.
     """
 
-    def __init__(self, proj_string=None):
+    def __init__(self, proj_string=None, autoware: bool = False, use_local_coordinates: bool = False):
         """
         Initialization of CR2LaneletConverter
         
         :param proj_string: String name used for the initialization of the converter
+        :param autoware: Boolean indicating whether the conversion should be autoware compatible.
+        :param use_local_coordinates: Boolean indicating whether local coordinates should be added to Lanelet2.
         """
         if proj_string:
             self.proj = Proj(proj_string)
@@ -73,6 +75,8 @@ class CR2LaneletConverter:
         self.left_ways, self.right_ways = None, None
         self.lanelet_network = None
         self.origin_utm = None
+        self.autoware = autoware
+        self.use_local_coordinates = use_local_coordinates
 
     @property
     def id_count(self) -> int:
@@ -186,9 +190,9 @@ class CR2LaneletConverter:
         id3 = self.id_count
 
         # creating and adding those nodes to our osm
-        self.osm.add_node(Node(id1, y1, x1))
-        self.osm.add_node(Node(id2, y2, x2))
-        self.osm.add_node(Node(id3, y3, x3))
+        self.osm.add_node(Node(id1, y1, x1, autoware=self.autoware))
+        self.osm.add_node(Node(id2, y2, x2, autoware=self.autoware))
+        self.osm.add_node(Node(id3, y3, x3, autoware=self.autoware))
 
         # get the first light color as subtype
         traffic_light_subtype = light.cycle[0].state.value
@@ -264,8 +268,8 @@ class CR2LaneletConverter:
                 x_end, y_end = self.proj(self.origin_utm[0] + stop_line_end[0], self.origin_utm[1] + stop_line_end[1],
                                          inverse=True)
                 # create nodes from the points and add them to the osm
-                node_start = Node(self.id_count, y_start, x_start)
-                node_end = Node(self.id_count, y_end, x_end)
+                node_start = Node(self.id_count, y_start, x_start, autoware=self.autoware)
+                node_end = Node(self.id_count, y_end, x_end, autoware=self.autoware)
                 self.osm.add_node(node_start)
                 self.osm.add_node(node_end)
                 # create a way from newly created nodes and add it to the osm
@@ -337,8 +341,8 @@ class CR2LaneletConverter:
         id2 = self.id_count
 
         # creating and adding those nodes to our osm
-        self.osm.add_node(Node(id1, y1, x1))
-        self.osm.add_node(Node(id2, y2, x2))
+        self.osm.add_node(Node(id1, y1, x1, autoware=self.autoware))
+        self.osm.add_node(Node(id2, y2, x2, autoware=self.autoware))
 
         # matching the type of the traffic sign
         sign_id = sign.traffic_sign_elements[0].traffic_sign_element_id
@@ -489,7 +493,10 @@ class CR2LaneletConverter:
         nodes = []
         for vertex in vertices:
             lon, lat = self.proj(self.origin_utm[0] + vertex[0], self.origin_utm[1] + vertex[1], inverse=True)
-            node = Node(self.id_count, lat, lon)
+            if self.use_local_coordinates:
+                node = Node(self.id_count, lat, lon, autoware=self.autoware, local_x=vertex[0], local_y=vertex[1])
+            else:
+                node = Node(self.id_count, lat, lon, autoware=self.autoware)
             nodes.append(node.id_)
             self.osm.add_node(node)
         return nodes

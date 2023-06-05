@@ -33,6 +33,8 @@ def get_args() -> argparse.Namespace:
                                                                              "name as converted file")
     parser.add_argument("-t", "--tags", nargs="+", help="tags for the created scenario", default=set())
     parser.add_argument("--proj", help="proj-string to specify conversion for lanelet/lanelet2 format")
+    parser.add_argument("--autoware", help="create autoware-compatible lanelet2 map")
+    parser.add_argument("--local_coordinates", help="use local coordinates for lanelet2 map")
     parser.add_argument("--adjacencies", action="store_true", help="detect left and right adjacencies of "
                                                                    "lanelets if they do not share a common way "
                                                                    "(this is only used for lanelet/lanelet2 "
@@ -91,7 +93,7 @@ def main():
 
         if args.source_commonroad:
             if args.mode == "map-convert-lanelet":
-                commonroad_to_lanelet(input_file, output_file, args.proj)
+                commonroad_to_lanelet(input_file, output_file, args.proj, args.autoware, args.local_coordinates)
             if args.mode == "map-convert-sumo":
                 commonroad_to_sumo(input_file, output_file)
         else:

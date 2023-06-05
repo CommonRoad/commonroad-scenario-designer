@@ -37,10 +37,10 @@ def lanelet_to_commonroad(
     """
     Converts lanelet/lanelet2 file to CommonRoad
 
-    @param input_file: Path to lanelet/lanelet2 file
-    @param proj: proj-string
-    @param left_driving: Map describes left driving system.
-    @param adjacencies: Detect left and right adjacencies of lanelets if they do not share a common way
+    :param input_file: Path to lanelet/lanelet2 file
+    :param proj: proj-string
+    :param left_driving: Map describes left driving system.
+    :param adjacencies: Detect left and right adjacencies of lanelets if they do not share a common way
     @return: CommonRoad scenario
     """
     parser = Lanelet2Parser(etree.parse(input_file).getroot())
@@ -56,13 +56,15 @@ def lanelet_to_commonroad(
     return scenario
 
 
-def commonroad_to_lanelet(input_file: str, output_name: str, proj: str):
+def commonroad_to_lanelet(input_file: str, output_name: str, proj: str, autoware: bool, use_local_coordinates: bool):
     """
     Converts CommonRoad map to lanelet format
 
-    @param input_file: Path to CommonRoad map
-    @param output_name: Name and path of lanelet file.
-    @param proj: proj-string
+    :param input_file: Path to CommonRoad map
+    :param output_name: Name and path of lanelet file.
+    :param proj: proj-string
+    :param autoware: Boolean indicating whether lanelet2 map should be autoware compatible
+    :param use_local_coordinates: Boolean indicating whether local coordinates should be added to Lanelet2.
     """
     try:
         commonroad_reader = CommonRoadFileReader(input_file)
@@ -75,7 +77,7 @@ def commonroad_to_lanelet(input_file: str, output_name: str, proj: str):
         )
         return
 
-    l2osm = CR2LaneletConverter(proj)
+    l2osm = CR2LaneletConverter(proj, autoware, use_local_coordinates)
     osm = l2osm(scenario)
     with open(f"{output_name}", "wb") as file_out:
         file_out.write(
@@ -89,7 +91,7 @@ def opendrive_to_commonroad(input_file: str) -> Scenario:
     """
     Converts OpenDRIVE file to CommonRoad
 
-    @param input_file: Path to OpenDRIVE file
+    :param input_file: Path to OpenDRIVE file
     @return: CommonRoad scenario
     """
     opendrive = parse_opendrive(input_file)
@@ -106,7 +108,7 @@ def sumo_to_commonroad(input_file: str) -> Scenario:
     """
     Converts SUMO net file to CommonRoad
 
-    @param input_file: Path to SUMO net file
+    :param input_file: Path to SUMO net file
     @return: CommonRoad scenario
     """
     return convert_net_to_cr(input_file)
@@ -116,8 +118,8 @@ def commonroad_to_sumo(input_file: str, output_file: str):
     """
     Converts CommonRoad file to SUMO net file and stores it
 
-    @param input_file: Path to CommonRoad file
-    @param output_file: Path where files should be stored
+    :param input_file: Path to CommonRoad file
+    :param output_file: Path where files should be stored
     @return: CommonRoad scenario
     """
     try:
@@ -142,7 +144,7 @@ def osm_to_commonroad(input_file: str) -> Scenario:
     """
     Converts OpenStreetMap file to CommonRoad scenario
 
-    @param input_file: Path to OpenStreetMap file
+    :param input_file: Path to OpenStreetMap file
     @return: CommonRoad scenario
     """
     osm_graph = GraphScenario(input_file).graph
@@ -158,7 +160,7 @@ def osm_to_commonroad_using_sumo(input_file: str) -> Scenario:
     road-interpolation is different. Furthermore, motorway services ("Raststätten") are currently not parsed
     when using :osm_to_commonroad.
 
-    @param input_file: Path to OpenStreetMap file
+    :param input_file: Path to OpenStreetMap file
     @return: CommonRoad scenario
     """
     input_file_pth = Path(input_file)

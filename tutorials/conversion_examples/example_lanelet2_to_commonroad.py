@@ -1,7 +1,7 @@
 from lxml import etree
 import os
 
-from commonroad.scenario.scenario import Tag
+from commonroad.scenario.scenario import Tag, ScenarioID
 from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
 from commonroad.planning.planning_problem import PlanningProblemSet
 
@@ -13,7 +13,7 @@ from crdesigner.map_conversion.map_conversion_interface import lanelet_to_common
 input_path = ""  # replace empty string
 proj = ""  # replace empty string
 left_driving = False  # replace with favoured value
-adjacencies = False  # replace with favoured value
+adjacencies = True  # replace with favoured value
 
 # ----------------------------------------------- Option 1: General API ------------------------------------------------
 # load lanelet/lanelet2 file, parse it, and convert it to a CommonRoad scenario
@@ -39,6 +39,7 @@ lanelet2_content = parser.parse()
 # convert lanelet/lanelet2 map to CommonRoad
 lanelet2_converter = Lanelet2CRConverter(proj_string=proj)
 scenario = lanelet2_converter(lanelet2_content, detect_adjacencies=adjacencies, left_driving_system=left_driving)
+scenario.scenario_id = ScenarioID(country_id="ZAM", map_name="Lanelet")
 
 # store converted file as CommonRoad scenario
 writer = CommonRoadFileWriter(
