@@ -2,6 +2,9 @@
 
 ## [0.8.0] - 2023-07-XX
 
+### Added
+- Autoware-compatible Lanelet2 maps
+
 ### Changed
 - Versions of third-party packages
 
