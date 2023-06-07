@@ -43,7 +43,6 @@
     <successor ref="4"/>
     <adjacentLeft ref="5" drivingDir="opposite"/>
     <laneletType>urban</laneletType>
-    <laneletType>unknown</laneletType>
     <userBidirectional>priorityVehicle</userBidirectional>
   </lanelet>
   <lanelet id="5">
@@ -80,7 +79,6 @@
     <predecessor ref="8"/>
     <adjacentLeft ref="1" drivingDir="opposite"/>
     <laneletType>urban</laneletType>
-    <laneletType>unknown</laneletType>
     <userBidirectional>priorityVehicle</userBidirectional>
   </lanelet>
   <lanelet id="2">
@@ -172,7 +170,6 @@
     <successor ref="9"/>
     <adjacentLeft ref="6" drivingDir="opposite"/>
     <laneletType>urban</laneletType>
-    <laneletType>unknown</laneletType>
     <userBidirectional>priorityVehicle</userBidirectional>
   </lanelet>
   <lanelet id="6">
@@ -264,7 +261,6 @@
     <successor ref="5"/>
     <adjacentLeft ref="2" drivingDir="opposite"/>
     <laneletType>urban</laneletType>
-    <laneletType>unknown</laneletType>
     <userBidirectional>priorityVehicle</userBidirectional>
   </lanelet>
   <lanelet id="3">
@@ -300,7 +296,6 @@
     <successor ref="11"/>
     <adjacentLeft ref="7" drivingDir="opposite"/>
     <laneletType>urban</laneletType>
-    <laneletType>unknown</laneletType>
     <userBidirectional>priorityVehicle</userBidirectional>
   </lanelet>
   <lanelet id="7">
@@ -336,7 +331,6 @@
     <successor ref="5"/>
     <adjacentLeft ref="3" drivingDir="opposite"/>
     <laneletType>urban</laneletType>
-    <laneletType>unknown</laneletType>
     <userBidirectional>priorityVehicle</userBidirectional>
   </lanelet>
   <lanelet id="4">
@@ -444,7 +438,6 @@
     <successor ref="13"/>
     <adjacentLeft ref="8" drivingDir="opposite"/>
     <laneletType>urban</laneletType>
-    <laneletType>unknown</laneletType>
     <userBidirectional>priorityVehicle</userBidirectional>
   </lanelet>
   <lanelet id="8">
@@ -552,7 +545,6 @@
     <successor ref="5"/>
     <adjacentLeft ref="4" drivingDir="opposite"/>
     <laneletType>urban</laneletType>
-    <laneletType>unknown</laneletType>
     <userBidirectional>priorityVehicle</userBidirectional>
   </lanelet>
   <lanelet id="11">
@@ -597,7 +589,6 @@
     <predecessor ref="16"/>
     <adjacentLeft ref="12" drivingDir="opposite"/>
     <laneletType>urban</laneletType>
-    <laneletType>unknown</laneletType>
     <userBidirectional>priorityVehicle</userBidirectional>
   </lanelet>
   <lanelet id="12">
@@ -642,7 +633,6 @@
     <successor ref="18"/>
     <adjacentLeft ref="11" drivingDir="opposite"/>
     <laneletType>urban</laneletType>
-    <laneletType>unknown</laneletType>
     <userBidirectional>priorityVehicle</userBidirectional>
   </lanelet>
   <lanelet id="15">
@@ -726,7 +716,6 @@
     <successor ref="11"/>
     <adjacentLeft ref="17" drivingDir="opposite"/>
     <laneletType>urban</laneletType>
-    <laneletType>unknown</laneletType>
     <userBidirectional>priorityVehicle</userBidirectional>
   </lanelet>
   <lanelet id="17">
@@ -810,7 +799,6 @@
     <successor ref="9"/>
     <adjacentLeft ref="15" drivingDir="opposite"/>
     <laneletType>urban</laneletType>
-    <laneletType>unknown</laneletType>
     <userBidirectional>priorityVehicle</userBidirectional>
   </lanelet>
   <lanelet id="18">
@@ -910,7 +898,6 @@
     <successor ref="13"/>
     <adjacentLeft ref="16" drivingDir="opposite"/>
     <laneletType>urban</laneletType>
-    <laneletType>unknown</laneletType>
     <userBidirectional>priorityVehicle</userBidirectional>
   </lanelet>
   <lanelet id="16">
@@ -1010,7 +997,6 @@
     <successor ref="11"/>
     <adjacentLeft ref="18" drivingDir="opposite"/>
     <laneletType>urban</laneletType>
-    <laneletType>unknown</laneletType>
     <userBidirectional>priorityVehicle</userBidirectional>
   </lanelet>
   <lanelet id="14">
@@ -1111,7 +1097,6 @@
     <successor ref="19"/>
     <adjacentLeft ref="13" drivingDir="opposite"/>
     <laneletType>urban</laneletType>
-    <laneletType>unknown</laneletType>
     <userBidirectional>priorityVehicle</userBidirectional>
   </lanelet>
   <lanelet id="20">
@@ -1163,7 +1148,6 @@
     <successor ref="13"/>
     <adjacentLeft ref="19" drivingDir="opposite"/>
     <laneletType>urban</laneletType>
-    <laneletType>unknown</laneletType>
     <userBidirectional>priorityVehicle</userBidirectional>
   </lanelet>
   <lanelet id="19">
@@ -1215,7 +1199,6 @@
     <successor ref="9"/>
     <adjacentLeft ref="20" drivingDir="opposite"/>
     <laneletType>urban</laneletType>
-    <laneletType>unknown</laneletType>
     <userBidirectional>priorityVehicle</userBidirectional>
   </lanelet>
   <lanelet id="9">
@@ -1252,7 +1235,6 @@
     <predecessor ref="19"/>
     <adjacentLeft ref="10" drivingDir="opposite"/>
     <laneletType>urban</laneletType>
-    <laneletType>unknown</laneletType>
     <userBidirectional>priorityVehicle</userBidirectional>
   </lanelet>
   <lanelet id="10">
@@ -1289,7 +1271,6 @@
     <successor ref="15"/>
     <adjacentLeft ref="9" drivingDir="opposite"/>
     <laneletType>urban</laneletType>
-    <laneletType>unknown</laneletType>
     <userBidirectional>priorityVehicle</userBidirectional>
   </lanelet>
   <lanelet id="21">
@@ -1362,7 +1343,6 @@
       </point>
     </rightBound>
     <laneletType>urban</laneletType>
-    <laneletType>unknown</laneletType>
     <userBidirectional>priorityVehicle</userBidirectional>
   </lanelet>
   <lanelet id="13">
@@ -1463,7 +1443,6 @@
     <predecessor ref="18"/>
     <adjacentLeft ref="14" drivingDir="opposite"/>
     <laneletType>urban</laneletType>
-    <laneletType>unknown</laneletType>
     <userBidirectional>priorityVehicle</userBidirectional>
   </lanelet>
 </commonRoad>
