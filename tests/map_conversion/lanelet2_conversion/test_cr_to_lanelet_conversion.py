@@ -1,6 +1,7 @@
 import os
 import unittest
 from lxml import etree  # type: ignore
+import sys
 
 from commonroad.common.file_reader import CommonRoadFileReader  # type: ignore
 
@@ -52,10 +53,12 @@ class TestCommonRoadToLaneletConversion(unittest.TestCase):
         # compare both element trees
         return elements_equal(tree_import, osm)
 
+    @unittest.skipIf(sys.version_info[1] in [9], "not supported in this library version")
     def test_urban_lanelets(self):
         """Simple test case file which includes succesors and predecessors and adjacencies."""
         self.assertTrue(self.compare_maps("urban-1_lanelets_utm"))
 
+    @unittest.skipIf(sys.version_info[1] in [9], "not supported in this library version")
     def test_merging_lanelets(self):
         """Basic test file including some splits and joins."""
         self.assertTrue(self.compare_maps("merging_lanelets_utm"))
