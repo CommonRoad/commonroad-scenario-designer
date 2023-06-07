@@ -1,12 +1,16 @@
 # Changelog
 
-## [0.8.0] - 2023-07-XX
+## [0.7.1] - 2023-06-XX
 
 ### Added
-- Autoware-compatible Lanelet2 maps
+- Creation of autoware-compatible lanelet2 maps
+- Set custom plot limits when adding scenario or aerial image
 
 ### Changed
 - Versions of third-party packages
+
+### Fixed
+- Lanelet2 projection
 
 ## [0.7.0] - 2023-03-28
 

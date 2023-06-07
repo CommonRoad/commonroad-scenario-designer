@@ -40,7 +40,7 @@ class TestCR2LaneletConverter(unittest.TestCase):
         self.assertIsNone(cr1.left_ways) 
         self.assertIsNone(cr1.right_ways)
         self.assertIsNone(cr1.lanelet_network)
-        self.assertIsNone(cr1.origin_utm)
+        self.assertEqual(cr1.origin_utm, (0, 0))
         self.assertEqual(cr1.proj, Proj("+proj=utm +zone=32 +ellps=WGS84"))  # default proj
     
     def test_init_with_scenario(self):
@@ -72,7 +72,7 @@ class TestCR2LaneletConverter(unittest.TestCase):
         
         cr1(scenario)
         self.assertEqual(scenario.lanelet_network, cr1.lanelet_network)  # check the lanelet network of the scenario
-        self.assertEqual(cr1.origin_utm, cr1.proj(scenario.location.gps_longitude, scenario.location.gps_latitude))
+        self.assertEqual(cr1.origin_utm, (0,0))
 
     def test_convert_lanelet(self):
         cr1 = CR2LaneletConverter()

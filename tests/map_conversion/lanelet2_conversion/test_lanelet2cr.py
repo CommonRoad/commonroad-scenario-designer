@@ -66,13 +66,14 @@ class TestLanelet2CRConverter(unittest.TestCase):
     def test_call(self):
         l2cr = Lanelet2CRConverter()  # object referred to as "self" in the source code
         scenario = l2cr(osm)
+        origin_lat = min([node.lat for node in l2cr.osm.nodes.values()])
+        origin_lon = min([node.lon for node in l2cr.osm.nodes.values()])  # use left-most lower corner as origin
 
         # test if the osm is the same as the imported one
         self.assertEqual(l2cr.osm, osm)
 
-        # test the use of a random node as an origin
-        origin = next(iter(l2cr.osm.nodes.values()))
-        self.assertEqual(l2cr.origin_utm, l2cr.proj(origin.lon, origin.lat))
+        # test the use of leftmost bottom point as an origin
+        self.assertEqual(l2cr.origin_utm, (0, 0))
 
         # test the default scenario_id
         self.assertEqual(scenario.scenario_id.country_id, "ZAM")
@@ -81,7 +82,7 @@ class TestLanelet2CRConverter(unittest.TestCase):
 
         # test the scenario values given in the constructor
         self.assertEqual(scenario.dt, 0.1)
-        self.assertEqual(scenario.location, Location(gps_latitude=origin.lat, gps_longitude=origin.lon))
+        self.assertEqual(scenario.location, Location(gps_latitude=origin_lat, gps_longitude=origin_lon))
 
         # test the class of the lanelet network
         self.assertEqual(l2cr.lanelet_network.__class__, LaneletNetwork)

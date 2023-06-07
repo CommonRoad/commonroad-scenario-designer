@@ -12,7 +12,7 @@ import numpy as np
 from matplotlib.backend_bases import MouseButton
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
-from utm import from_latlon
+from pyproj import Proj
 
 from commonroad.planning.planning_problem import PlanningProblemSet
 from commonroad.common.util import Interval
@@ -869,6 +869,8 @@ class DynamicCanvas(FigureCanvas):
         shows the current (previously loaded) aerial image in the plot as a background
         """
         self.ax.imshow(self.current_aerial_image, aspect='auto', extent=self.image_limits, alpha=0.75)
+        self.ax.set_xlim(self.image_limits[0], self.image_limits[1])
+        self.ax.set_ylim(self.image_limits[2], self.image_limits[3])
 
     def activate_aerial_image(self, bing: bool, lat1: float, lon1: float, lat2: float, lon2: float,
                               center_at_zero: bool):
@@ -928,13 +930,10 @@ class DynamicCanvas(FigureCanvas):
         # compute width out of distance between right lower (south-east) and left lower (south-west) vertex
         width = flatLocal(lat2, lon1, lat2, lon2)
 
-        if not center_at_zero:
-            # compute UTM coordinates for lower left point
-            lower_lat = lat2 + (lat2 - lat1) / 2
-            left_lon = lon1 + (lon2 - lon1) / 2
+        proj = Proj("+proj=utm +zone=32 +north +ellps=GRS80 +units=m +no_defs +type=crs") # TODO replace with parameter
 
-            (coord1, coord2, zone_num, zone_let) = from_latlon(lower_lat, left_lon)
-            print(coord1, coord2)
+        if not center_at_zero:
+            coord1, coord2 = proj(latitude=lat2, longitude=lon1)
         else:
             coord1 = 0
             coord2 = 0

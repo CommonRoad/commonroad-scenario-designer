@@ -57,13 +57,16 @@ class CR2LaneletConverter:
     Class to convert CommonRoad lanelet to the OSM representation.
     """
 
-    def __init__(self, proj_string=None, autoware: bool = False, use_local_coordinates: bool = False):
+    def __init__(self, proj_string=None, autoware: bool = False, use_local_coordinates: bool = False,
+                 translate: bool = False):
         """
         Initialization of CR2LaneletConverter
         
         :param proj_string: String name used for the initialization of the converter
         :param autoware: Boolean indicating whether the conversion should be autoware compatible.
         :param use_local_coordinates: Boolean indicating whether local coordinates should be added to Lanelet2.
+        :param translate: Boolean indicating whether map should be translated by the location coordinate
+        specified in the CommonRoad map
         """
         if proj_string:
             self.proj = Proj(proj_string)
@@ -74,9 +77,10 @@ class CR2LaneletConverter:
         self.first_nodes, self.last_nodes = None, None
         self.left_ways, self.right_ways = None, None
         self.lanelet_network = None
-        self.origin_utm = None
+        self.origin_utm = (0, 0)
         self.autoware = autoware
         self.use_local_coordinates = use_local_coordinates
+        self.translate = translate
 
     @property
     def id_count(self) -> int:
@@ -102,16 +106,16 @@ class CR2LaneletConverter:
         self.last_nodes = {}  # saves last left and right node
         self.left_ways = {}
         self.right_ways = {}
-        if scenario.location is not None and not isinstance(scenario.location.gps_longitude, str) and\
-                abs(scenario.location.gps_longitude) <= 180 and abs(scenario.location.gps_latitude) <= 90:
-            self.origin_utm = self.proj(scenario.location.gps_longitude, scenario.location.gps_latitude)
-        elif scenario.location is not None and isinstance(scenario.location.gps_longitude, str) and\
-                abs(float(scenario.location.gps_longitude)) <= 180 and abs(float(scenario.location.gps_latitude)) <= 90:
-            self.origin_utm = self.proj(float(scenario.location.gps_longitude), float(scenario.location.gps_latitude))
-        else:
-            self.proj = Proj(DEFAULT_PROJ_STRING)
-            # set origin point (TUM MI building) in default UTM 32 zone
-            self.origin_utm = self.proj(config.TUM_MI_BUILDING_X, config.TUM_MI_BUILDING_Y)
+        if self.translate:
+            if scenario.location is not None and not isinstance(scenario.location.gps_longitude, str) and\
+                    abs(scenario.location.gps_longitude) <= 180 and abs(scenario.location.gps_latitude) <= 90:
+                self.origin_utm = self.proj(scenario.location.gps_longitude, scenario.location.gps_latitude)
+            elif scenario.location is not None and isinstance(scenario.location.gps_longitude, str) and\
+                    abs(float(scenario.location.gps_longitude)) <= 180 and abs(float(scenario.location.gps_latitude)) <= 90:
+                self.origin_utm = self.proj(float(scenario.location.gps_longitude), float(scenario.location.gps_latitude))
+            else:
+                self.proj = Proj(DEFAULT_PROJ_STRING)
+                self.origin_utm = self.proj(0, 0)
 
             # convert lanelets
         for lanelet in scenario.lanelet_network.lanelets:

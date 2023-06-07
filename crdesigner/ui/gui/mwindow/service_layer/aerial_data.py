@@ -100,6 +100,7 @@ def validate_bing_key() -> bool:
             return True
     return False
 
+
 def validate_ldbv_credentials() -> bool:
     url = "https://geoservices.bayern.de/wms/v2/ogc_dop20.cgi?service=wms&request=GetMap&version=1.1.1&bbox=11.65541,48.26142,11.66093,48.26386&width=100&height=100&layers=by_dop20c&format=image/jpeg&srs=EPSG:4326"
     ldbv_username = config_settings.LDBV_USERNAME
@@ -115,6 +116,7 @@ def validate_ldbv_credentials() -> bool:
     except:
         return False
     return True
+
 
 def get_tile(quadkey: str) -> JpegImageFile:
     """
@@ -281,6 +283,7 @@ def get_aerial_image_bing(lat1: float, lon1: float, lat2: float, lon2: float, zo
     images = download_all_images(keys)
     image = put_images_together(images, x_count, y_count)
     return image, extent
+
 
 def get_aerial_image_ldbv(lat1: float, lon1: float, lat2: float, lon2: float) -> Image.Image:
     """

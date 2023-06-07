@@ -56,7 +56,9 @@ def lanelet_to_commonroad(
     return scenario
 
 
-def commonroad_to_lanelet(input_file: str, output_name: str, proj: str, autoware: bool, use_local_coordinates: bool):
+def commonroad_to_lanelet(input_file: str, output_name: str, proj: str, autoware: bool = False,
+                          use_local_coordinates: bool = False,
+                          translate: bool = False):
     """
     Converts CommonRoad map to lanelet format
 
@@ -65,6 +67,8 @@ def commonroad_to_lanelet(input_file: str, output_name: str, proj: str, autoware
     :param proj: proj-string
     :param autoware: Boolean indicating whether lanelet2 map should be autoware compatible
     :param use_local_coordinates: Boolean indicating whether local coordinates should be added to Lanelet2.
+    :param translate: Boolean indicating whether map should be translated by the location coordinate
+        specified in the CommonRoad map
     """
     try:
         commonroad_reader = CommonRoadFileReader(input_file)
@@ -77,7 +81,7 @@ def commonroad_to_lanelet(input_file: str, output_name: str, proj: str, autoware
         )
         return
 
-    l2osm = CR2LaneletConverter(proj, autoware, use_local_coordinates)
+    l2osm = CR2LaneletConverter(proj, autoware, use_local_coordinates, translate)
     osm = l2osm(scenario)
     with open(f"{output_name}", "wb") as file_out:
         file_out.write(

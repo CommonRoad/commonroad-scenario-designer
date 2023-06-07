@@ -7,12 +7,11 @@ from crdesigner.map_conversion.map_conversion_interface import commonroad_to_lan
 input_path = ""  # replace empty string
 output_name = ""  # replace empty string
 proj = ""  # replace empty string
-autoware = False  # replace empty string
-use_local_coordinates = False
+autoware = False  # set to True if you want an autoware-compatible map
 
 # ----------------------------------------------- Option 1: General API ------------------------------------------------
 # load CommonRoad file and convert it to lanelet format
-commonroad_to_lanelet(input_path, output_name, proj, autoware, use_local_coordinates)
+commonroad_to_lanelet(input_path, output_name, proj, autoware)
 
 # ---------------------------------------- Option 2: Lanelet conversion APIs -------------------------------------------
 try:
@@ -26,7 +25,7 @@ except etree.XMLSyntaxError as xml_error:
     scenario = None
 
 if scenario:
-    l2osm = CR2LaneletConverter(proj, autoware, use_local_coordinates)
+    l2osm = CR2LaneletConverter(proj, autoware)
     osm = l2osm(scenario)
     with open(f"{output_name}", "wb") as file_out:
         file_out.write(

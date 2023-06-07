@@ -1,9 +1,9 @@
 from collections import defaultdict
 from typing import List, Optional, Tuple, Dict, Union
-
 from shapely.geometry import LineString  # type: ignore
 import numpy as np
 from pyproj import Proj
+import logging
 
 from commonroad.scenario.lanelet import StopLine, LineMarking, RoadUser, Lanelet, LaneletNetwork  # type: ignore
 from commonroad.scenario.traffic_sign import (TrafficSignElement, TrafficSignIDGermany,  # type: ignore
@@ -22,6 +22,11 @@ from crdesigner.map_conversion.osm2cr.converter_modules.utility.geometry import 
                                                                                  distance as point_to_polyline_distance)
 from crdesigner.configurations.get_configs import get_configs
 from crdesigner.map_conversion.lanelet2 import config
+
+
+date_strftime_format = "%d-%b-%y %H:%M:%S"
+message_format = "%(asctime)s - %(levelname)s - %(message)s"
+logging.basicConfig(level=logging.INFO, format=message_format, datefmt=date_strftime_format)
 
 
 def _add_closest_traffic_sign_to_lanelet(lanelets: List[Lanelet], traffic_signs: List[TrafficSign]) -> set:
@@ -199,8 +204,8 @@ class Lanelet2CRConverter:
         self.lanelet_network = None
         self.origin_utm = None
 
-    def __call__(self, osm, detect_adjacencies: bool = True, left_driving_system: bool = False, ) -> \
-            Union[Scenario, None]:
+    def __call__(self, osm, detect_adjacencies: bool = True, left_driving_system: bool = False,
+                 translate: bool = False) -> Union[Scenario, None]:
         """
         Convert OSM to Scenario.
         For each lanelet in OSM format, we have to save their first and last
@@ -211,6 +216,7 @@ class Lanelet2CRConverter:
         :param detect_adjacencies: Compare vertices which might be adjacent. Set
             to false if you consider it too computationally intensive.
         :param left_driving_system: Set to true if map describes a left_driving_system.
+        :param translate: Moves converted map to origin and set converted scenario accordingly
         :return: A scenario with a lanelet network which describes the
             same map as the osm input.
         """
@@ -222,15 +228,23 @@ class Lanelet2CRConverter:
         self.first_left_pts, self.last_left_pts = defaultdict(list), defaultdict(list)
         self.first_right_pts, self.last_right_pts = defaultdict(list), defaultdict(list)
         if len(self.osm.nodes.values()) == 0:
-            print("__Warning__: Selected Scenario is empty.")
+            logging.warning("Lanelet2CRConverter: Selected Scenario is empty.")
             return None
 
-        origin = next(iter(self.osm.nodes.values()))  # use a random node as origin
-        self.origin_utm = self.proj(origin.lon, origin.lat)
+        origin_lat = min([node.lat for node in self.osm.nodes.values()])
+        origin_lon = min([node.lon for node in self.osm.nodes.values()])  # use left-most lower corner as origin
+        logging.info("Lanelet2CRConverter OSM bounds - lower-left: {}/{} - "
+                     "upper right {}/{}".format(origin_lat, origin_lon,
+                                                max([node.lat for node in self.osm.nodes.values()]),
+                                                max([node.lon for node in self.osm.nodes.values()])))
+        if translate:
+            self.origin_utm = self.proj(longitude=origin_lon, latitude=origin_lat)
+        else:
+            self.origin_utm = (0, 0)
         scenario_id = ScenarioID(country_id=config.DEFAULT_SCENARIO_COUNTRY_ID,
                                  map_name=config.DEFAULT_SCENARIO_MAP_NAME, map_id=config.DEFAULT_SCENARIO_MAP_ID)
         scenario = Scenario(dt=config.GLOBAL_TIMESTEP, scenario_id=scenario_id,
-                            location=Location(gps_latitude=origin.lat, gps_longitude=origin.lon))
+                            location=Location(gps_latitude=origin_lat, gps_longitude=origin_lon))
         self.lanelet_network = ConversionLaneletNetwork(get_configs().opendrive)
 
         speed_limits = {}
@@ -238,7 +252,7 @@ class Lanelet2CRConverter:
         for speed_limit_key in osm.speed_limit_signs.keys():
             light_id = generate_unique_id()
             speed_limits[speed_limit_key] = light_id
-            speed_limit_lanelets[speed_limit_key] = []  # scenario.add_objects(speed_limit)
+            speed_limit_lanelets[speed_limit_key] = []
 
         for way_rel in osm.way_relations.values():
             # add traffic sign id to traffic signs for speed limit
@@ -271,7 +285,7 @@ class Lanelet2CRConverter:
                                                                    y.traffic_sign_id in yield_signs_stop_lines_id}):
                     self.lanelet_network.add_traffic_sign(s, set())
             except NotImplementedError as e:
-                print(str(e))
+                logging.error("Lanelet2CRConverter: " + str(e))
 
         # speed limit sign conversion
         for speed_limit_key in osm.speed_limit_signs.keys():
@@ -285,7 +299,6 @@ class Lanelet2CRConverter:
                                       position, True)
             self.lanelet_network.add_traffic_sign(speed_limit,
                                                   first_occurrence)
-            # scenario.add_objects(speed_limit, first_occurrence)
 
         # traffic light conversion
         for way in osm.ways:
@@ -295,7 +308,7 @@ class Lanelet2CRConverter:
         for la in self.lanelet_network.lanelets:
             la.__class__ = Lanelet
         self.lanelet_network.__class__ = LaneletNetwork
-        scenario.add_objects(self.lanelet_network)        
+        scenario.add_objects(self.lanelet_network)
 
         return scenario
     
@@ -387,7 +400,8 @@ class Lanelet2CRConverter:
             if i in new_lanelet_ids.keys():
                 priority_lanelets.append(new_lanelet_ids[i])
             else:
-                print(f"Warning: some priority sign references non-existing lanelet {i}")
+                logging.warning("Lanelet2CRConverter::_right_of_way_to_traffic_sign: some priority sign "
+                                "references non-existing lanelet {}".format(i))
 
         yield_lanelets = []
         for i in right_of_way_rel.yield_ways:
@@ -396,7 +410,8 @@ class Lanelet2CRConverter:
             if i in new_lanelet_ids.keys():
                 yield_lanelets.append(new_lanelet_ids[i])
             else:
-                print(f"Warning: some yield sign references non-existing lanelet {i}")
+                logging.warning("Lanelet2CRConverter::_right_of_way_to_traffic_sign: some yield sign "
+                                "references non-existing lanelet {}".format(i))
 
         stop_lines = []
         for stop_line in right_of_way_rel.ref_line:
@@ -516,13 +531,15 @@ class Lanelet2CRConverter:
         left_way = self.osm.find_way_by_id(way_rel.left_way)
         right_way = self.osm.find_way_by_id(way_rel.right_way)
         if len(left_way.nodes) != len(right_way.nodes):
-            print(f"Trying to fix relation {way_rel.id_}...")
+            logging.info("Lanelet2CRConverter::_way_rel_to_lanelet: Trying to fix relation {}...".format(way_rel.id_))
+
             self._fix_relation_unequal_ways(left_way, right_way)
 
         # If for some reason, relation couldn't be fixed, notify user
         if len(left_way.nodes) != len(right_way.nodes):
-            print(f"Error: Relation {way_rel.id_} has left and right ways which are not equally long! "
-                  f"Please check your data! Discarding this lanelet relation.")
+            logging.error("Lanelet2CRConverter::_way_rel_to_lanelet: Error: Relation {} has left and right "
+                          "ways which are not equally long! Please check your data! Discarding this "
+                          "lanelet relation.".format(way_rel.id_))
             return None
 
         # set only if not set before
@@ -796,7 +813,7 @@ class Lanelet2CRConverter:
         vertices = np.empty((len(way.nodes), 2))
         for i, node_id in enumerate(way.nodes):
             nd = self.osm.find_node_by_id(node_id)
-            x, y = self.proj(float(nd.lon), float(nd.lat))
+            x, y = self.proj(longitude=float(nd.lon), latitude=float(nd.lat))
             x -= self.origin_utm[0]
             y -= self.origin_utm[1]
             vertices[i] = [x, y]
