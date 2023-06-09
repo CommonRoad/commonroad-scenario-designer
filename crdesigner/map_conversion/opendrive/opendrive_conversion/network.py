@@ -15,7 +15,7 @@ from crdesigner.map_conversion.common.conversion_lanelet import ConversionLanele
 from crdesigner.map_conversion.opendrive.opendrive_conversion.converter import OpenDriveConverter
 from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.traffic_signals import get_traffic_signals
 from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.geo_reference import get_geo_reference
-from crdesigner.configurations.configuration import OpenDrive2CRConfiguration
+from crdesigner.config.config import OpenDRIVEConversionParams
 from commonroad.scenario.traffic_sign import TrafficSign, TrafficSignElement, TrafficSignIDGermany, \
     TrafficSignIDZamunda, TrafficSignIDUsa, TrafficSignIDChina, TrafficSignIDSpain, \
     TrafficSignIDRussia
@@ -52,9 +52,9 @@ class Network:
     which stores the neighbor relations between the parametric lanes.
     """
 
-    def __init__(self, config: OpenDrive2CRConfiguration):
+    def __init__(self, config: OpenDRIVEConversionParams = OpenDRIVEConversionParams()):
         """Initializes a network object."""
-        self.config = config
+        self._config = config
         self._planes = []
         self._link_index = None
         self._geo_ref = None
@@ -63,8 +63,6 @@ class Network:
         self._stop_lines = []
         self._crosswalks = []
         self._country_ID = None
-        self.error_tolerance = self.config.error_tolerance
-        self.min_delta_s = self.config.min_delta_s
 
     def assign_country_id(self, value: str):
         """Assign country ID according to the ISO 3166-1 3 letter standard
@@ -165,14 +163,14 @@ class Network:
         """
 
         # Convert groups to lanelets
-        lanelet_network = ConversionLaneletNetwork(self.config)
+        lanelet_network = ConversionLaneletNetwork(self._config)
 
         for parametric_lane in self._planes:
             if filter_types is not None and parametric_lane.type not in filter_types:
                 # Remove lanelets from intersections dictionary that do not fit the filtered type criterion
                 self._link_index.clean_intersections(parametric_lane.id_)
                 continue
-            lanelet = parametric_lane.to_lanelet(self.error_tolerance, self.min_delta_s)
+            lanelet = parametric_lane.to_lanelet(self._config.error_tolerance, self._config.min_delta_s)
             lanelet.predecessor = self._link_index.get_predecessors(parametric_lane.id_)
             lanelet.successor = self._link_index.get_successors(parametric_lane.id_)
             lanelet_network.add_lanelet(lanelet)
@@ -390,7 +388,7 @@ class Network:
         :type network: ConversionLaneletNetwork
         """
         traffic_sign_enum = utils.get_traffic_sign_enum_from_country(
-                utils.get_signal_country(network.config.default_country_id)
+                utils.get_signal_country(self._country_ID)
         )
         element_id = traffic_sign_enum.MAX_SPEED
         additional_values = [str(float(lanelet.speed))]

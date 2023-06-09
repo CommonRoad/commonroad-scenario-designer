@@ -6,7 +6,6 @@ from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.pla
 from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.plane import ParametricLaneBorderGroup, \
     Border
 from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadPlanView import PlanView
-from crdesigner.map_conversion.opendrive.opendrive_conversion.utils import CustomDefaultLaneletType
 
 
 def init_conversion_lanelet() -> ConversionLanelet:
@@ -67,23 +66,22 @@ class TestConversionLanelet(unittest.TestCase):
         self.assertEqual(true_type, lanelet1.lanelet_type)
 
         lanelet1.lanelet_type = "foo"
-        true_type = {LaneletType.UNKNOWN, LaneletType.URBAN}
+        true_type = {LaneletType.URBAN}
         self.assertEqual(true_type, lanelet1.lanelet_type)
 
         lanelet2 = \
             ConversionLanelet(None, np.array([[0.5, 0.5], [1, 0]]), np.array([[0.0, 0.0], [0.5, 0.5]]),
-                              np.array([[-0.5, -0.5], [1, 0]]), 1,
-                              custom_default_lanelet_types=CustomDefaultLaneletType(True, "interstate", "country", False))
+                              np.array([[-0.5, -0.5], [1, 0]]), 1)
         lanelet2.lanelet_type = "driving"
-        true_type = {LaneletType.COUNTRY}
+        true_type = {LaneletType.URBAN}
         self.assertEqual(true_type, lanelet2.lanelet_type)
 
         lanelet2.lanelet_type = "exit"
-        true_type = {LaneletType.EXIT_RAMP, LaneletType.INTERSTATE}
+        true_type = {LaneletType.EXIT_RAMP, LaneletType.URBAN}
         self.assertEqual(true_type, lanelet2.lanelet_type)
 
         lanelet2.lanelet_type = "foo"
-        true_type = {LaneletType.UNKNOWN, LaneletType.INTERSTATE}
+        true_type = {LaneletType.URBAN}
         self.assertEqual(true_type, lanelet2.lanelet_type)
 
     def test_lanelet_id(self):

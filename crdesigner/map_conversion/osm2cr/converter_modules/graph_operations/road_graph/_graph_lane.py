@@ -7,7 +7,8 @@ from typing import List, Set, Optional
 import numpy as np
 
 from commonroad.geometry.shape import Polygon
-from crdesigner.map_conversion.osm2cr.converter_modules.utility import geometry, idgenerator
+from crdesigner.map_conversion.osm2cr.converter_modules.utility import idgenerator
+from crdesigner.map_conversion.common import geometry
 
 from ._graph_node import GraphNode
 from ._graph_traffic_light import GraphTrafficLight

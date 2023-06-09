@@ -4,7 +4,7 @@ This module holds the classes required for the intermediate format
 
 __author__ = "Behtarin Ferdousi"
 
-from crdesigner.map_conversion.osm2cr.converter_modules.utility import geometry
+from crdesigner.map_conversion.common import geometry
 
 
 class Node:

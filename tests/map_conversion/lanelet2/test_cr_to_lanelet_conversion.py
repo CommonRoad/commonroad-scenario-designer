@@ -16,10 +16,6 @@ class TestCommonRoadToLaneletConversion(unittest.TestCase):
     This converted scenario should describe the same map as the osm file,
     by reading it, parsing it and then converting it to a CommonRoad file including a scenario.
     """
-    
-    def setUp(self) -> None:
-        self.proj_string = "+proj=utm +zone=32 +ellps=WGS84"
-
     def load_and_convert(self, xml_file_name: str) -> etree.Element:
         """Load the osm file and convert it to a scenario."""
         try:
@@ -27,7 +23,7 @@ class TestCommonRoadToLaneletConversion(unittest.TestCase):
                 f"{os.path.dirname(os.path.realpath(__file__))}/../test_maps/lanelet2/{xml_file_name}.xml"
             )
             scenario, _ = commonroad_reader.open()
-            l2osm = CR2LaneletConverter(self.proj_string)
+            l2osm = CR2LaneletConverter()
             osm = l2osm(scenario)
             return osm
         except etree.XMLSyntaxError as xml_error:

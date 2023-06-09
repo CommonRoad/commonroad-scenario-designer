@@ -15,7 +15,6 @@ from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.pla
     Border
 from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadPlanView import PlanView
 from typing import List
-from crdesigner.configurations.get_configs import get_configs
 from crdesigner.map_conversion.common.utils import generate_unique_id
 
 
@@ -50,17 +49,17 @@ class TestConversionLanelet(unittest.TestCase):
                           .utils.convert_to_new_lanelet_id(old_lanelet_id, ids_assigned))
 
     def test_init(self):
-        conversion_lanelet_network = ConversionLaneletNetwork(get_configs().opendrive)
+        conversion_lanelet_network = ConversionLaneletNetwork()
         self.assertTrue(issubclass(ConversionLaneletNetwork, LaneletNetwork))
         self.assertDictEqual({}, conversion_lanelet_network.old_lanelet_ids())
 
     def test_old_lanelet_ids(self):
-        conversion_lanelet_network = ConversionLaneletNetwork(get_configs().opendrive)
+        conversion_lanelet_network = ConversionLaneletNetwork()
         conversion_lanelet_network._old_lanelet_ids = {'69.0.-1.-1': 5, '89.0.4.-1': 6}
         self.assertDictEqual({'69.0.-1.-1': 5, '89.0.4.-1': 6}, conversion_lanelet_network.old_lanelet_ids())
 
     def test_remove_lanelet(self):
-        conversion_lanelet_network = ConversionLaneletNetwork(get_configs().opendrive)
+        conversion_lanelet_network = ConversionLaneletNetwork()
         conversion_lanelet_1 = init_lanelet_from_id('79.0.-3.-1')
         conversion_lanelet_2 = init_lanelet_from_id('89.0.4.-1')
 
@@ -88,7 +87,7 @@ class TestConversionLanelet(unittest.TestCase):
         self.assertListEqual([[]], [lanelet.predecessor for lanelet in conversion_lanelet_network.lanelets])
 
     def test_find_lanelet_by_id(self):
-        conversion_lanelet_network = ConversionLaneletNetwork(get_configs().opendrive)
+        conversion_lanelet_network = ConversionLaneletNetwork()
         conversion_lanelet_1 = init_lanelet_from_id('79.0.-3.-1')
 
         add_lanelets_to_network(conversion_lanelet_network, [conversion_lanelet_1])
@@ -98,7 +97,7 @@ class TestConversionLanelet(unittest.TestCase):
         self.assertIsNone(conversion_lanelet_network.find_lanelet_by_id('foo'))
 
     def test_find_traffic_light_by_id(self):
-        conversion_lanelet_network = ConversionLaneletNetwork(get_configs().opendrive)
+        conversion_lanelet_network = ConversionLaneletNetwork()
         t1 = TrafficLight(100, [])
         t2 = TrafficLight(101, [])
         traffic_light_dict = {100: t1, 101: t2}
@@ -107,7 +106,7 @@ class TestConversionLanelet(unittest.TestCase):
         self.assertEqual(t2, conversion_lanelet_network.find_traffic_light_by_id(101))
 
     def test_find_traffic_sign_by_id(self):
-        conversion_lanelet_network = ConversionLaneletNetwork(get_configs().opendrive)
+        conversion_lanelet_network = ConversionLaneletNetwork()
 
         sign1 = TrafficSign(0, [], set(), np.array([4.9, -0.1]), virtual=False)
         sign2 = TrafficSign(1, [], set(), np.array([0.1, 4.9]), virtual=False)
@@ -119,7 +118,7 @@ class TestConversionLanelet(unittest.TestCase):
         self.assertEqual(sign3, conversion_lanelet_network.find_traffic_sign_by_id(2))
 
     def test_convert_all_lanelet_ids(self):
-        conversion_lanelet_network = ConversionLaneletNetwork(get_configs().opendrive)
+        conversion_lanelet_network = ConversionLaneletNetwork()
         lanelet1 = init_lanelet_from_id('69.0.-1.-1')
         lanelet1.predecessor.append('89.0.4.-1')
         lanelet1.successor.append('71.0.1.-1')
@@ -147,7 +146,7 @@ class TestConversionLanelet(unittest.TestCase):
         self.assertEqual([6, 7, 2], new_lanelet_2.successor)
 
     def test_prune_network(self):
-        conversion_lanelet_network = ConversionLaneletNetwork(get_configs().opendrive)
+        conversion_lanelet_network = ConversionLaneletNetwork()
 
         plane_group = ParametricLaneGroup()
         inner_border = Border()
@@ -180,7 +179,7 @@ class TestConversionLanelet(unittest.TestCase):
         self.assertListEqual(['72.0.-1.-1'], conversion_lanelet_network.find_lanelet_by_id('72.0.-1.-1').successor)
 
     def test_delete_zero_width_parametric_lane(self):
-        conversion_lanelet_network = ConversionLaneletNetwork(get_configs().opendrive)
+        conversion_lanelet_network = ConversionLaneletNetwork()
         plane_group = ParametricLaneGroup()
         plane_group2 = ParametricLaneGroup()
 
@@ -216,7 +215,7 @@ class TestConversionLanelet(unittest.TestCase):
         self.assertEqual(1, conversion_lanelet_network.lanelets[0].lanelet_id)
 
     def test_update_lanelet_id_references(self):
-        conversion_lanelet_network = ConversionLaneletNetwork(get_configs().opendrive)
+        conversion_lanelet_network = ConversionLaneletNetwork()
 
         lanelet_1 = init_lanelet_empty_vertices_from_id(None, '71.0.-1.-1')
         lanelet_1.predecessor.append('91.0.1.-1')
@@ -243,7 +242,7 @@ class TestConversionLanelet(unittest.TestCase):
         self.assertEqual('102.0.0.-1', conversion_lanelet_network.find_lanelet_by_id('71.0.-1.-1').adj_right)
 
     def test_concatenate_possible_lanelets(self):
-        conversion_lanelet_network = ConversionLaneletNetwork(get_configs().opendrive)
+        conversion_lanelet_network = ConversionLaneletNetwork()
         plane_group = ParametricLaneGroup()
 
         lanelet_1 = init_lanelet_empty_vertices_from_id(plane_group, '50.0.0.0')
@@ -274,7 +273,7 @@ class TestConversionLanelet(unittest.TestCase):
                              replacement_ids)
 
     def test_concatenate_lanelet_pairs_group(self):
-        conversion_lanelet_network = ConversionLaneletNetwork(get_configs().opendrive)
+        conversion_lanelet_network = ConversionLaneletNetwork()
         plane_group = ParametricLaneGroup()
 
         left_vertices_1 = np.array([[0, 1], [1, 1]])
@@ -298,7 +297,7 @@ class TestConversionLanelet(unittest.TestCase):
         self.assertListEqual([[0, -1], [1, -1], [2, -1]], lanelet_1.right_vertices.tolist())
 
     def test_predecessor_is_neighbor_of_neighbors_predecessor(self):
-        conversion_lanelet_network = ConversionLaneletNetwork(get_configs().opendrive)
+        conversion_lanelet_network = ConversionLaneletNetwork()
 
         lanelet_1 = init_lanelet_empty_vertices_from_id(None, '50.0.0.0')
         lanelet_1_pred = init_lanelet_empty_vertices_from_id(None, '49.0.0.0')
@@ -310,7 +309,7 @@ class TestConversionLanelet(unittest.TestCase):
         self.assertTrue(conversion_lanelet_network.predecessor_is_neighbor_of_neighbors_predecessor(lanelet_1))
 
     def test_add_successors_to_lanelet(self):
-        conversion_lanelet_network = ConversionLaneletNetwork(get_configs().opendrive)
+        conversion_lanelet_network = ConversionLaneletNetwork()
         lanelet_1 = init_lanelet_empty_vertices_from_id(None, '50.0.0.0')
         lanelet_1_succ_1 = init_lanelet_empty_vertices_from_id(None, '51.0.0.-1')
         lanelet_1_succ_2 = init_lanelet_empty_vertices_from_id(None, '51.0.0.-2')
@@ -323,7 +322,7 @@ class TestConversionLanelet(unittest.TestCase):
         self.assertListEqual(['50.0.0.0'], lanelet_1_succ_2.predecessor)
 
     def test_add_predecessors_to_lanelet(self):
-        conversion_lanelet_network = ConversionLaneletNetwork(get_configs().opendrive)
+        conversion_lanelet_network = ConversionLaneletNetwork()
         lanelet_1 = init_lanelet_empty_vertices_from_id(None, '50.0.0.0')
         lanelet_1_pred_1 = init_lanelet_empty_vertices_from_id(None, '49.0.0.-1')
         lanelet_1_pred_2 = init_lanelet_empty_vertices_from_id(None, '49.0.0.-2')
@@ -336,7 +335,7 @@ class TestConversionLanelet(unittest.TestCase):
         self.assertListEqual(['50.0.0.0'], lanelet_1_pred_2.successor)
 
     def test_set_adjacent_left(self):
-        conversion_lanelet_network = ConversionLaneletNetwork(get_configs().opendrive)
+        conversion_lanelet_network = ConversionLaneletNetwork()
 
         lanelet_1 = init_lanelet_empty_vertices_from_id(None, '50.0.0.-2')
         lanelet_1_adj_left = init_lanelet_empty_vertices_from_id(None, '50.0.0.-1')
@@ -352,7 +351,7 @@ class TestConversionLanelet(unittest.TestCase):
         self.assertFalse(lanelet_1_adj_left.adj_left_same_direction)
 
     def test_set_adjacent_right(self):
-        conversion_lanelet_network = ConversionLaneletNetwork(get_configs().opendrive)
+        conversion_lanelet_network = ConversionLaneletNetwork()
 
         lanelet_1 = init_lanelet_empty_vertices_from_id(None, '50.0.0.1')
         lanelet_1_adj_right = init_lanelet_empty_vertices_from_id(None, '50.0.0.2')
@@ -368,7 +367,7 @@ class TestConversionLanelet(unittest.TestCase):
         self.assertFalse(lanelet_1_adj_right.adj_right_same_direction)
 
     def test_check_concatenation_potential(self):
-        conversion_lanelet_network = ConversionLaneletNetwork(get_configs().opendrive)
+        conversion_lanelet_network = ConversionLaneletNetwork()
 
         lanelet_1 = init_lanelet_empty_vertices_from_id(None, '50.0.0.0')
         lanelet_1_succ = init_lanelet_empty_vertices_from_id(None, '51.0.0.0')
@@ -400,7 +399,7 @@ class TestConversionLanelet(unittest.TestCase):
         self.assertListEqual([('50.0.0.0', '51.0.0.0'), ('50.0.0.-1', '51.0.0.-1')], mergeable_lanelets)
 
     def test_successor_is_neighbor_of_neighbors_successor(self):
-        conversion_lanelet_network = ConversionLaneletNetwork(get_configs().opendrive)
+        conversion_lanelet_network = ConversionLaneletNetwork()
 
         lanelet_1 = init_lanelet_empty_vertices_from_id(None, '50.0.0.0')
         lanelet_1_succ = init_lanelet_empty_vertices_from_id(None, '51.0.0.0')
@@ -428,7 +427,7 @@ class TestConversionLanelet(unittest.TestCase):
         self.assertTrue(conversion_lanelet_network.successor_is_neighbor_of_neighbors_successor(lanelet_1))
 
     def test_has_unique_pred_succ_relation(self):
-        conversion_lanelet_network = ConversionLaneletNetwork(get_configs().opendrive)
+        conversion_lanelet_network = ConversionLaneletNetwork()
         lanelet_1 = init_lanelet_empty_vertices_from_id(None, '69.0.-1.-1')
 
         self.assertFalse(conversion_lanelet_network.has_unique_pred_succ_relation(1, lanelet_1))
@@ -449,7 +448,7 @@ class TestConversionLanelet(unittest.TestCase):
         self.assertTrue(conversion_lanelet_network.has_unique_pred_succ_relation(1, lanelet_1))
 
     def test_adj_right_consistent_nb(self):
-        conversion_lanelet_network = ConversionLaneletNetwork(get_configs().opendrive)
+        conversion_lanelet_network = ConversionLaneletNetwork()
         lanelet_1 = init_lanelet_empty_vertices_from_id(None, '50.0.1.-1')
         lanelet_1.successor = ['51.0.1.-1']
         lanelet_1.adj_right_same_direction = True
@@ -469,7 +468,7 @@ class TestConversionLanelet(unittest.TestCase):
         self.assertTrue(conversion_lanelet_network.adj_right_consistent_nb(lanelet_1))
 
     def test_adj_left_consistent_nb(self):
-        conversion_lanelet_network = ConversionLaneletNetwork(get_configs().opendrive)
+        conversion_lanelet_network = ConversionLaneletNetwork()
         lanelet_1 = init_lanelet_empty_vertices_from_id(None, '50.0.1.1')
         lanelet_1.successor = ['51.0.1.1']
         lanelet_1.adj_left_same_direction = True
@@ -488,7 +487,7 @@ class TestConversionLanelet(unittest.TestCase):
         self.assertTrue(conversion_lanelet_network.adj_left_consistent_nb(lanelet_1))
 
     def test_combine_common_incoming_lanelets(self):
-        conversion_lanelet_network = ConversionLaneletNetwork(get_configs().opendrive)
+        conversion_lanelet_network = ConversionLaneletNetwork()
         intersection_map = {10: [100], 11: [None], 12: [None], 13: [None], 14: [101, 102, 103]}
 
         incoming_lanelet_1 = init_lanelet_empty_vertices_from_id(None, 10)
@@ -522,7 +521,7 @@ class TestConversionLanelet(unittest.TestCase):
                              conversion_lanelet_network.combine_common_incoming_lanelets(intersection_map))
 
     def test_check_lanelet_type_for_successor_of_successor(self):
-        conversion_lanelet_network = ConversionLaneletNetwork(get_configs().opendrive)
+        conversion_lanelet_network = ConversionLaneletNetwork()
         intersection_map = {0: [1]}
 
         lanelet_1 = init_lanelet_empty_vertices_from_id(None, -1)
@@ -554,7 +553,7 @@ class TestConversionLanelet(unittest.TestCase):
         self.assertEqual({LaneletType.INTERSECTION, LaneletType.URBAN}, lanelet_2.lanelet_type)
 
     def test_check_if_lanelet_in_intersection(self):
-        conversion_lanelet_network = ConversionLaneletNetwork(get_configs().opendrive)
+        conversion_lanelet_network = ConversionLaneletNetwork()
         intersection_map = {0: [1]}
 
         left_vertices = np.array([[453.90265159, 495.27523765], [455.77043119, 435.28374993],
@@ -582,7 +581,7 @@ class TestConversionLanelet(unittest.TestCase):
         self.assertTrue(conversion_lanelet_network.check_if_lanelet_in_intersection(lanelet_1, intersection_map))
 
     def test_check_if_successor_is_intersecting(self):
-        conversion_lanelet_network = ConversionLaneletNetwork(get_configs().opendrive)
+        conversion_lanelet_network = ConversionLaneletNetwork()
 
         intersection_map = {0: [5]}
         successor_list = [101]
@@ -626,7 +625,7 @@ class TestConversionLanelet(unittest.TestCase):
         self.assertTrue(conversion_lanelet_network.check_if_successor_is_intersecting(intersection_map, successor_list))
 
     def test_get_successor_directions(self):
-        conversion_lanelet_network = ConversionLaneletNetwork(get_configs().opendrive)
+        conversion_lanelet_network = ConversionLaneletNetwork()
 
         center_vertices = np.array([[0, 5.0], [1.0, 5.0],
                                     [2.0, 5.0], [3.0, 5.0],
@@ -679,7 +678,7 @@ class TestConversionLanelet(unittest.TestCase):
         traffic_signs = [sign1, sign2, sign3]
 
         # create conversion lanelet network and corresponding lanelets
-        conversion_lanelet_network = ConversionLaneletNetwork(get_configs().opendrive)
+        conversion_lanelet_network = ConversionLaneletNetwork()
         lanelet1 = ConversionLanelet(None, np.empty([5, 2]), np.array([[0, 0], [1, 0],
                                                                        [2, 0], [3, 0],
                                                                        [4, 0], [5, 0]]), np.empty([5, 2]), 0)
@@ -696,7 +695,7 @@ class TestConversionLanelet(unittest.TestCase):
         self.assertSetEqual(lanelet2_true_signs, lanelet2.traffic_signs)
 
     def test_add_stop_lines_to_network(self):
-        conversion_lanelet_network = ConversionLaneletNetwork(get_configs().opendrive)
+        conversion_lanelet_network = ConversionLaneletNetwork()
 
         lanelet_1 = ConversionLanelet(None, np.array([[4, 5], [5, 5]]), np.array([[4, 4], [5, 4]]),
                                       np.array([[4, 3], [5, 3]]), 0)
@@ -715,10 +714,9 @@ class TestConversionLanelet(unittest.TestCase):
 
 class TestJointSplitTarget(unittest.TestCase):
     def test_init(self):
-        conversion_lanelet_network = ConversionLaneletNetwork(get_configs().opendrive)
+        conversion_lanelet_network = ConversionLaneletNetwork()
         main_lanelet = init_lanelet_empty_vertices_from_id(None, 0)
-        join_split_target = _JoinSplitTarget(conversion_lanelet_network, main_lanelet, True, True,
-                                             get_configs().opendrive.precision)
+        join_split_target = _JoinSplitTarget(conversion_lanelet_network, main_lanelet, True, True)
         self.assertEqual(conversion_lanelet_network, join_split_target.lanelet_network)
         self.assertEqual(main_lanelet, join_split_target.main_lanelet)
 
@@ -728,99 +726,82 @@ class TestJointSplitTarget(unittest.TestCase):
         self.assertFalse(join_split_target._single_lanelet_operation)
         self.assertEqual(2, join_split_target._mode)
 
-        join_split_target = _JoinSplitTarget(conversion_lanelet_network, main_lanelet, True, False,
-                                             get_configs().opendrive.precision)
+        join_split_target = _JoinSplitTarget(conversion_lanelet_network, main_lanelet, True, False)
         self.assertEqual(1, join_split_target._mode)
 
-        join_split_target = _JoinSplitTarget(conversion_lanelet_network, main_lanelet, False, False,
-                                             get_configs().opendrive.precision)
+        join_split_target = _JoinSplitTarget(conversion_lanelet_network, main_lanelet, False, False)
         self.assertEqual(0, join_split_target._mode)
 
-        join_split_target = _JoinSplitTarget(conversion_lanelet_network, main_lanelet, False, True,
-                                             get_configs().opendrive.precision)
+        join_split_target = _JoinSplitTarget(conversion_lanelet_network, main_lanelet, False, True)
         self.assertEqual(0, join_split_target._mode)
 
     def test_split(self):
-        conversion_lanelet_network = ConversionLaneletNetwork(get_configs().opendrive)
+        conversion_lanelet_network = ConversionLaneletNetwork()
         main_lanelet = init_lanelet_empty_vertices_from_id(None, 0)
-        join_split_target = _JoinSplitTarget(conversion_lanelet_network, main_lanelet, True, True,
-                                             get_configs().opendrive.precision)
+        join_split_target = _JoinSplitTarget(conversion_lanelet_network, main_lanelet, True, True)
         self.assertTrue(join_split_target.split)
-        join_split_target = _JoinSplitTarget(conversion_lanelet_network, main_lanelet, False, True,
-                                             get_configs().opendrive.precision)
+        join_split_target = _JoinSplitTarget(conversion_lanelet_network, main_lanelet, False, True)
         self.assertFalse(join_split_target.split)
 
     def test_join(self):
-        conversion_lanelet_network = ConversionLaneletNetwork(get_configs().opendrive)
+        conversion_lanelet_network = ConversionLaneletNetwork()
         main_lanelet = init_lanelet_empty_vertices_from_id(None, 0)
-        join_split_target = _JoinSplitTarget(conversion_lanelet_network, main_lanelet, False, True,
-                                             get_configs().opendrive.precision)
+        join_split_target = _JoinSplitTarget(conversion_lanelet_network, main_lanelet, False, True)
         self.assertTrue(join_split_target.join)
-        join_split_target = _JoinSplitTarget(conversion_lanelet_network, main_lanelet, False, False,
-                                             get_configs().opendrive.precision)
+        join_split_target = _JoinSplitTarget(conversion_lanelet_network, main_lanelet, False, False)
         self.assertTrue(join_split_target.join)
-        join_split_target = _JoinSplitTarget(conversion_lanelet_network, main_lanelet, True, True,
-                                             get_configs().opendrive.precision)
+        join_split_target = _JoinSplitTarget(conversion_lanelet_network, main_lanelet, True, True)
         self.assertTrue(join_split_target.join)
-        join_split_target = _JoinSplitTarget(conversion_lanelet_network, main_lanelet, True, False,
-                                             get_configs().opendrive.precision)
+        join_split_target = _JoinSplitTarget(conversion_lanelet_network, main_lanelet, True, False)
         self.assertFalse(join_split_target.join)
 
     def test_split_and_join(self):
-        conversion_lanelet_network = ConversionLaneletNetwork(get_configs().opendrive)
+        conversion_lanelet_network = ConversionLaneletNetwork()
         main_lanelet = init_lanelet_empty_vertices_from_id(None, 0)
-        join_split_target = _JoinSplitTarget(conversion_lanelet_network, main_lanelet, True, True,
-                                             get_configs().opendrive.precision)
+        join_split_target = _JoinSplitTarget(conversion_lanelet_network, main_lanelet, True, True)
         self.assertTrue(join_split_target.join)
         main_lanelet = init_lanelet_empty_vertices_from_id(None, 0)
-        join_split_target = _JoinSplitTarget(conversion_lanelet_network, main_lanelet, False, True,
-                                             get_configs().opendrive.precision)
+        join_split_target = _JoinSplitTarget(conversion_lanelet_network, main_lanelet, False, True)
         self.assertFalse(join_split_target.split_and_join)
         main_lanelet = init_lanelet_empty_vertices_from_id(None, 0)
-        join_split_target = _JoinSplitTarget(conversion_lanelet_network, main_lanelet, True, False,
-                                             get_configs().opendrive.precision)
+        join_split_target = _JoinSplitTarget(conversion_lanelet_network, main_lanelet, True, False)
         self.assertFalse(join_split_target.split_and_join)
         main_lanelet = init_lanelet_empty_vertices_from_id(None, 0)
-        join_split_target = _JoinSplitTarget(conversion_lanelet_network, main_lanelet, False, False,
-                                             get_configs().opendrive.precision)
+        join_split_target = _JoinSplitTarget(conversion_lanelet_network, main_lanelet, False, False)
         self.assertFalse(join_split_target.split_and_join)
 
     def test_use_only_single_lanelet(self):
-        conversion_lanelet_network = ConversionLaneletNetwork(get_configs().opendrive)
+        conversion_lanelet_network = ConversionLaneletNetwork()
         main_lanelet = init_lanelet_empty_vertices_from_id(None, 0)
-        join_split_target = _JoinSplitTarget(conversion_lanelet_network, main_lanelet, True, True,
-                                             get_configs().opendrive.precision)
+        join_split_target = _JoinSplitTarget(conversion_lanelet_network, main_lanelet, True, True)
         join_split_target._single_lanelet_operation = True
         self.assertTrue(join_split_target.use_only_single_lanelet())
 
-        join_split_target = _JoinSplitTarget(conversion_lanelet_network, main_lanelet, True, True,
-                                             get_configs().opendrive.precision)
+        join_split_target = _JoinSplitTarget(conversion_lanelet_network, main_lanelet, True, True)
         join_split_target._single_lanelet_operation = False
         self.assertFalse(join_split_target.use_only_single_lanelet())
 
     def test_find_lanelet_by_id(self):
-        conversion_lanelet_network = ConversionLaneletNetwork(get_configs().opendrive)
+        conversion_lanelet_network = ConversionLaneletNetwork()
         main_lanelet = init_lanelet_empty_vertices_from_id(None, 0)
         lanelet = init_lanelet_empty_vertices_from_id(None, '88.0.3.-1')
         add_lanelets_to_network(conversion_lanelet_network, [lanelet])
-        join_split_target = _JoinSplitTarget(conversion_lanelet_network, main_lanelet, True, True,
-                                             get_configs().opendrive.precision)
+        join_split_target = _JoinSplitTarget(conversion_lanelet_network, main_lanelet, True, True)
         self.assertEqual(lanelet, join_split_target._find_lanelet_by_id('88.0.3.-1'))
 
     def test_complete_js_interval_length(self):
         l1 = init_lanelet_empty_vertices_from_id(None, 0)
         l2 = init_lanelet_empty_vertices_from_id(None, 1)
-        js_pair1 = _JoinSplitPair(l1, l2, [0, 95], get_configs().opendrive.precision)
+        js_pair1 = _JoinSplitPair(l1, l2, [0, 95])
         l3 = init_lanelet_empty_vertices_from_id(None, 2)
         l4 = init_lanelet_empty_vertices_from_id(None, 3)
-        js_pair2 = _JoinSplitPair(l3, l4, [95, 180], get_configs().opendrive.precision)
-        join_split_target = _JoinSplitTarget(None, None, True, True,
-                                             get_configs().opendrive.precision)
+        js_pair2 = _JoinSplitPair(l3, l4, [95, 180])
+        join_split_target = _JoinSplitTarget(None, None, True, True)
         join_split_target._js_pairs = [js_pair1, js_pair2]
         self.assertEqual(95+(180-95), join_split_target.complete_js_interval_length())
 
     def test_adjacent_width(self):
-        conversion_lanelet_network = ConversionLaneletNetwork(get_configs().opendrive)
+        conversion_lanelet_network = ConversionLaneletNetwork()
 
         lanelet = init_lanelet_empty_vertices_from_id(None, '88.0.2.-1')
 
@@ -842,11 +823,9 @@ class TestJointSplitTarget(unittest.TestCase):
 
         adjacent_lanelet = init_lanelet_empty_vertices_from_id(plane_group, '88.0.3.-1')
 
-        jspair = _JoinSplitPair(lanelet, adjacent_lanelet, [0, 95],
-                                get_configs().opendrive.precision)
+        jspair = _JoinSplitPair(lanelet, adjacent_lanelet, [0, 95])
 
-        join_split_target = _JoinSplitTarget(conversion_lanelet_network, lanelet, True, False,
-                                             get_configs().opendrive.precision)
+        join_split_target = _JoinSplitTarget(conversion_lanelet_network, lanelet, True, False)
 
         join_split_target._js_pairs = [jspair]
         join_split_target.adjacent_width(True)
@@ -855,16 +834,14 @@ class TestJointSplitTarget(unittest.TestCase):
         self.assertEqual(adjacent_lanelet.calc_width_at_end(), join_split_target.adjacent_width(False))
 
     def test_add_adjacent_predecessor_or_successor(self):
-        conversion_lanelet_network = ConversionLaneletNetwork(get_configs().opendrive)
+        conversion_lanelet_network = ConversionLaneletNetwork()
 
         lanelet = init_lanelet_empty_vertices_from_id(None, '88.0.2.-1')
         adjacent_lanelet = init_lanelet_empty_vertices_from_id(None, '88.0.3.-1')
         adjacent_lanelet_predecessor = init_lanelet_empty_vertices_from_id(None, '82.0.-1.-1')
         adjacent_lanelet.predecessor = ['82.0.-1.-1']
-        join_split_target = _JoinSplitTarget(conversion_lanelet_network, lanelet, True, False,
-                                             get_configs().opendrive.precision)
-        join_split_pair = _JoinSplitPair(lanelet, adjacent_lanelet, [0, 95],
-                                         get_configs().opendrive.precision)
+        join_split_target = _JoinSplitTarget(conversion_lanelet_network, lanelet, True, False)
+        join_split_pair = _JoinSplitPair(lanelet, adjacent_lanelet, [0, 95])
         join_split_target._js_pairs.append(join_split_pair)
 
         add_lanelets_to_network(conversion_lanelet_network, [adjacent_lanelet_predecessor])
@@ -875,7 +852,7 @@ class TestJointSplitTarget(unittest.TestCase):
         self.assertListEqual(['88.0.2.-1'], adjacent_lanelet_predecessor.successor)
 
     def test_move_borders_if_split_or_join(self):
-        conversion_lanelet_network = ConversionLaneletNetwork(get_configs().opendrive)
+        conversion_lanelet_network = ConversionLaneletNetwork()
 
         left_vertices = np.array(
                 [[456.37176199, 375.28599181], [456.6199314, 435.28795596], [457.65260563, 495.29380432]])
@@ -903,11 +880,9 @@ class TestJointSplitTarget(unittest.TestCase):
         lanelet = init_lanelet_empty_vertices_from_id(plane_group, '88.0.2.-1')
         adjacent_lanelet = ConversionLanelet(plane_group, left_vertices, center_vertices, right_vertices, '88.0.3.-1')
 
-        jspair = _JoinSplitPair(lanelet, adjacent_lanelet, [0, 95],
-                                get_configs().opendrive.precision)
+        jspair = _JoinSplitPair(lanelet, adjacent_lanelet, [0, 95])
         # test with split
-        join_split_target = _JoinSplitTarget(conversion_lanelet_network, lanelet, True, False,
-                                             get_configs().opendrive.precision)
+        join_split_target = _JoinSplitTarget(conversion_lanelet_network, lanelet, True, False)
 
         join_split_target._js_pairs = [jspair]
         join_split_target.change_width = 3.75
@@ -919,8 +894,7 @@ class TestJointSplitTarget(unittest.TestCase):
         self.assertListEqual(true_new_lanelet.center_vertices.tolist(), lanelet.center_vertices.tolist())
         self.assertListEqual(true_new_lanelet.right_vertices.tolist(), lanelet.right_vertices.tolist())
         # test with join
-        join_split_target = _JoinSplitTarget(conversion_lanelet_network, lanelet, False, True,
-                                             get_configs().opendrive.precision)
+        join_split_target = _JoinSplitTarget(conversion_lanelet_network, lanelet, False, True)
 
         join_split_target._js_pairs = [jspair]
         join_split_target.change_width = 3.75
@@ -939,8 +913,7 @@ class TestJoinSplitPair(unittest.TestCase):
         lanelet = init_lanelet_empty_vertices_from_id(None, '100.0.0.0')
         adjacent_lanelet = init_lanelet_empty_vertices_from_id(None, '100.0.1.0')
         change_interval = [0, 95]
-        join_split_pair = _JoinSplitPair(lanelet, adjacent_lanelet, change_interval,
-                                         get_configs().opendrive.precision)
+        join_split_pair = _JoinSplitPair(lanelet, adjacent_lanelet, change_interval)
         self.assertEqual(lanelet, join_split_pair.lanelet)
         self.assertEqual(adjacent_lanelet, join_split_pair.adjacent_lanelet)
         self.assertListEqual(change_interval, join_split_pair.change_interval)
@@ -967,8 +940,7 @@ class TestJoinSplitPair(unittest.TestCase):
 
         lanelet = init_lanelet_empty_vertices_from_id(plane_group, '88.0.2.-1')
         adjacent_lanelet = init_lanelet_empty_vertices_from_id(plane_group, '88.0.3.-1')
-        js_pair = _JoinSplitPair(lanelet, adjacent_lanelet, [0, 95],
-                                 get_configs().opendrive.precision)
+        js_pair = _JoinSplitPair(lanelet, adjacent_lanelet, [0, 95])
 
         linking_side = "left"
         js_pair.mirror_interval = [0, 95]

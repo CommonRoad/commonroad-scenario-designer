@@ -1,0 +1,4 @@
+general:
+  author: "test"
+opendrive:
+  error_tolerance: 0.5

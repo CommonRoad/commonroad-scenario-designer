@@ -20,7 +20,7 @@ class TestOSMToCommonRoadConversion(unittest.TestCase):
 
     def load_and_convert(self, osm_file_name: str) -> Tuple[Scenario, PlanningProblemSet, str]:
         path = os.path.dirname(os.path.realpath(
-            __file__)) + f"/test_maps/osm/{osm_file_name}.osm"
+            __file__)) + f"/../test_maps/osm/{osm_file_name}.osm"
 
         converted_path = os.path.join(self.out_path, osm_file_name + "_converted_scenario.xml")
 

@@ -9,6 +9,7 @@
 ### Changed
 - Versions of third-party packages
 - Use positive IDs for the cr2lanelet conversion
+- Structure for config parameters (similar as in commonroad-io)
 
 ### Fixed
 - Lanelet2 projection

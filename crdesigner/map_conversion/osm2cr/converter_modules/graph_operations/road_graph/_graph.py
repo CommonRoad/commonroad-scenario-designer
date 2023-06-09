@@ -8,7 +8,7 @@ from ordered_set import OrderedSet
 import numpy as np
 
 from crdesigner.map_conversion.osm2cr import config
-from crdesigner.map_conversion.osm2cr.converter_modules.utility import geometry
+from crdesigner.map_conversion.common import geometry
 
 from ._graph_node import GraphNode
 from ._graph_edge import GraphEdge

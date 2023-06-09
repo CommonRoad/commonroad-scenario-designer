@@ -1,6 +1,6 @@
 import subprocess
 from pathlib import Path
-
+from typing import Optional
 from lxml import etree
 import uuid
 import os
@@ -28,47 +28,40 @@ from crdesigner.map_conversion.osm2cr.converter_modules.cr_operations.export imp
     convert_to_scenario,
 )
 from crdesigner.map_conversion.osm2cr.converter_modules.converter import GraphScenario
-from crdesigner.configurations.get_configs import get_configs
+from crdesigner.config.config import Lanelet2ConversionParams, OpenDRIVEConversionParams
 
 
 def lanelet_to_commonroad(
-    input_file: str, proj: str, left_driving: bool = False, adjacencies: bool = False
+    input_file: str, config: Lanelet2ConversionParams = Lanelet2ConversionParams()
 ) -> Scenario:
     """
     Converts lanelet/lanelet2 file to CommonRoad
 
     :param input_file: Path to lanelet/lanelet2 file
-    :param proj: proj-string
-    :param left_driving: Map describes left driving system.
-    :param adjacencies: Detect left and right adjacencies of lanelets if they do not share a common way
-    @return: CommonRoad scenario
+    :param config: Lanelet2 config parameters.
+    :return: CommonRoad scenario
     """
     parser = Lanelet2Parser(etree.parse(input_file).getroot())
     lanelet2_content = parser.parse()
 
-    lanelet2_converter = Lanelet2CRConverter(proj_string=proj)
+    lanelet2_converter = Lanelet2CRConverter(config)
     scenario = lanelet2_converter(
         lanelet2_content,
-        detect_adjacencies=adjacencies,
-        left_driving_system=left_driving,
+        detect_adjacencies=config.adjacencies,
+        left_driving_system=config.left_driving,
     )
 
     return scenario
 
 
-def commonroad_to_lanelet(input_file: str, output_name: str, proj: str, autoware: bool = False,
-                          use_local_coordinates: bool = False,
-                          translate: bool = False):
+def commonroad_to_lanelet(input_file: str, output_name: str, 
+                          config: Lanelet2ConversionParams = Lanelet2ConversionParams()):
     """
     Converts CommonRoad map to lanelet format
 
     :param input_file: Path to CommonRoad map
     :param output_name: Name and path of lanelet file.
-    :param proj: proj-string
-    :param autoware: Boolean indicating whether lanelet2 map should be autoware compatible
-    :param use_local_coordinates: Boolean indicating whether local coordinates should be added to Lanelet2.
-    :param translate: Boolean indicating whether map should be translated by the location coordinate
-        specified in the CommonRoad map
+    :param config: Lanelet2 config parameters.
     """
     try:
         commonroad_reader = CommonRoadFileReader(input_file)
@@ -81,7 +74,7 @@ def commonroad_to_lanelet(input_file: str, output_name: str, proj: str, autoware
         )
         return
 
-    l2osm = CR2LaneletConverter(proj, autoware, use_local_coordinates, translate)
+    l2osm = CR2LaneletConverter(config)
     osm = l2osm(scenario)
     with open(f"{output_name}", "wb") as file_out:
         file_out.write(
@@ -91,20 +84,21 @@ def commonroad_to_lanelet(input_file: str, output_name: str, proj: str, autoware
         )
 
 
-def opendrive_to_commonroad(input_file: str) -> Scenario:
+def opendrive_to_commonroad(input_file: str, 
+                            config: OpenDRIVEConversionParams = OpenDRIVEConversionParams()) -> Scenario:
     """
     Converts OpenDRIVE file to CommonRoad
 
     :param input_file: Path to OpenDRIVE file
-    @return: CommonRoad scenario
+    :param config: OpenDRIVE config parameters.
+    :return: CommonRoad scenario
     """
     opendrive = parse_opendrive(input_file)
-    # load configs
-    configs = get_configs()
-    road_network = Network(configs.opendrive)
+    road_network = Network(config)
     road_network.load_opendrive(opendrive)
     for index in range(len(road_network._traffic_lights)):
-        road_network._traffic_lights[index]._traffic_light_id = abs(road_network._traffic_lights[index].traffic_light_id)
+        road_network._traffic_lights[index]._traffic_light_id = \
+            abs(road_network._traffic_lights[index].traffic_light_id)
     return road_network.export_commonroad_scenario()
 
 
@@ -113,7 +107,7 @@ def sumo_to_commonroad(input_file: str) -> Scenario:
     Converts SUMO net file to CommonRoad
 
     :param input_file: Path to SUMO net file
-    @return: CommonRoad scenario
+    :return: CommonRoad scenario
     """
     return convert_net_to_cr(input_file)
 
@@ -124,7 +118,7 @@ def commonroad_to_sumo(input_file: str, output_file: str):
 
     :param input_file: Path to CommonRoad file
     :param output_file: Path where files should be stored
-    @return: CommonRoad scenario
+    :return: CommonRoad scenario
     """
     try:
         commonroad_reader = CommonRoadFileReader(input_file)
@@ -149,13 +143,13 @@ def osm_to_commonroad(input_file: str) -> Scenario:
     Converts OpenStreetMap file to CommonRoad scenario
 
     :param input_file: Path to OpenStreetMap file
-    @return: CommonRoad scenario
+    :return: CommonRoad scenario
     """
     osm_graph = GraphScenario(input_file).graph
     return convert_to_scenario(osm_graph)
 
 
-def osm_to_commonroad_using_sumo(input_file: str) -> Scenario:
+def osm_to_commonroad_using_sumo(input_file: str) -> Optional[Scenario]:
     """
     Converts OpenStreetMap file to CommonRoad scenario using SUMO: SUMO offers the tool netconvert
     (https://sumo.dlr.de/docs/netconvert.html), which can be used to convert an OSM-file to OpenDrive (.xodr).
@@ -165,7 +159,7 @@ def osm_to_commonroad_using_sumo(input_file: str) -> Scenario:
     when using :osm_to_commonroad.
 
     :param input_file: Path to OpenStreetMap file
-    @return: CommonRoad scenario
+    :return: CommonRoad scenario
     """
     input_file_pth = Path(input_file)
     scenario_name = str(input_file_pth.name)
@@ -173,17 +167,17 @@ def osm_to_commonroad_using_sumo(input_file: str) -> Scenario:
     # convert to OpenDRIVE file using netconvert
     try:
         subprocess.check_output(
-        [
-            "netconvert",
-            "--osm-files",
-            input_file,
-            "--opendrive-output",
-            opendrive_file,
-            "--junctions.scurve-stretch",
-            "1.0",
-        ]
+                [
+                    "netconvert",
+                    "--osm-files",
+                    input_file,
+                    "--opendrive-output",
+                    opendrive_file,
+                    "--junctions.scurve-stretch",
+                    "1.0",
+                ]
         )
     except Exception as e:
         print("__Warning__: {}.".format(e))
-        return
+        return None
     return opendrive_to_commonroad(opendrive_file)
