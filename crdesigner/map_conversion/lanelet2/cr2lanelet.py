@@ -4,23 +4,23 @@ import numpy as np
 from pyproj import Proj
 from commonroad.scenario.lanelet import Lanelet  # type: ignore
 from commonroad.scenario.traffic_sign import TrafficLight, TrafficSign  # type: ignore
-from crdesigner.map_conversion.lanelet2 import config
 
+from crdesigner.config.config import Lanelet2ConversionParams
 from crdesigner.map_conversion.lanelet2.lanelet2 import OSMLanelet, Node, Way, WayRelation, RegulatoryElement
-from crdesigner.map_conversion.lanelet2.config import DEFAULT_PROJ_STRING
 
 
-def _convert_subtype_names(subtype: str) -> [str, bool]:
+def _convert_subtype_names(subtype: str, subtypes: List[str]) -> [str, bool]:
     """
     Function that converts names of some subtypes that are slightly different
     in two formats.
 
     :param subtype: name of the subtype of the lanelet
+    :param subtypes: lanelet2 subtypes that are available in commonroad
     :return: name of the subtype (converted if needed) and the boolean value that states if the subtype corresponds
         to one of the possible L2 format subtypes
     """
     subtype_in = False
-    if subtype in config.L2_LANELET_SUBTYPES:
+    if subtype in subtypes:
         subtype_in = True
         if subtype == "urban" or subtype == "country":
             subtype = "road"
@@ -35,19 +35,21 @@ def _convert_subtype_names(subtype: str) -> [str, bool]:
     return subtype, subtype_in
 
 
-def _vertices_are_equal(vertices1: List[np.ndarray], vertices2: List[np.ndarray]) -> bool:
+def _vertices_are_equal(vertices1: List[np.ndarray], vertices2: List[np.ndarray],
+                        ways_are_equal_tolerance: float) -> bool:
     """
     Checks if two list of vertices are equal up to a tolerance.
 
     :param vertices1: First vertices to compare.
     :param vertices2: Second vertices to compare.
+    :param ways_are_equal_tolerance: value of the tolerance for which we mark ways as equal
     :return: True if every vertex in one list is nearly equal to the
         corresponding vertices at the same position in the other list.
     """
     if len(vertices1) != len(vertices2):
         return False
     diff = np.array(vertices1) - np.array(vertices2)
-    if np.abs(np.max(diff)) < config.WAYS_ARE_EQUAL_TOLERANCE:
+    if np.abs(np.max(diff)) < ways_are_equal_tolerance:
         return True
     return False
 
@@ -57,30 +59,20 @@ class CR2LaneletConverter:
     Class to convert CommonRoad lanelet to the OSM representation.
     """
 
-    def __init__(self, proj_string=None, autoware: bool = False, use_local_coordinates: bool = False,
-                 translate: bool = False):
+    def __init__(self, config: Lanelet2ConversionParams = Lanelet2ConversionParams()):
         """
         Initialization of CR2LaneletConverter
         
-        :param proj_string: String name used for the initialization of the converter
-        :param autoware: Boolean indicating whether the conversion should be autoware compatible.
-        :param use_local_coordinates: Boolean indicating whether local coordinates should be added to Lanelet2.
-        :param translate: Boolean indicating whether map should be translated by the location coordinate
-        specified in the CommonRoad map
+        :param config: Lanelet2 config parameters.
         """
-        if proj_string:
-            self.proj = Proj(proj_string)
-        else:
-            self.proj = Proj(DEFAULT_PROJ_STRING)
+        self._config = config
+        self.proj = Proj(self._config.proj_string)
         self.osm = None
         self._id_count = 1
         self.first_nodes, self.last_nodes = None, None
         self.left_ways, self.right_ways = None, None
         self.lanelet_network = None
         self.origin_utm = (0, 0)
-        self.autoware = autoware
-        self.use_local_coordinates = use_local_coordinates
-        self.translate = translate
 
     @property
     def id_count(self) -> int:
@@ -106,7 +98,7 @@ class CR2LaneletConverter:
         self.last_nodes = {}  # saves last left and right node
         self.left_ways = {}
         self.right_ways = {}
-        if self.translate:
+        if self._config.translate:
             if scenario.location is not None and not isinstance(scenario.location.gps_longitude, str) and\
                     abs(scenario.location.gps_longitude) <= 180 and abs(scenario.location.gps_latitude) <= 90:
                 self.origin_utm = self.proj(scenario.location.gps_longitude, scenario.location.gps_latitude)
@@ -116,7 +108,7 @@ class CR2LaneletConverter:
                 self.origin_utm = \
                     self.proj(float(scenario.location.gps_longitude), float(scenario.location.gps_latitude))
             else:
-                self.proj = Proj(DEFAULT_PROJ_STRING)
+                self.proj = Proj(self._config.proj_string)
                 self.origin_utm = self.proj(0, 0)
 
             # convert lanelets
@@ -196,9 +188,9 @@ class CR2LaneletConverter:
         id3 = self.id_count
 
         # creating and adding those nodes to our osm
-        self.osm.add_node(Node(id1, y1, x1, autoware=self.autoware))
-        self.osm.add_node(Node(id2, y2, x2, autoware=self.autoware))
-        self.osm.add_node(Node(id3, y3, x3, autoware=self.autoware))
+        self.osm.add_node(Node(id1, y1, x1, autoware=self._config.autoware))
+        self.osm.add_node(Node(id2, y2, x2, autoware=self._config.autoware))
+        self.osm.add_node(Node(id3, y3, x3, autoware=self._config.autoware))
 
         # get the first light color as subtype
         traffic_light_subtype = light.cycle[0].state.value
@@ -274,8 +266,8 @@ class CR2LaneletConverter:
                 x_end, y_end = self.proj(self.origin_utm[0] + stop_line_end[0], self.origin_utm[1] + stop_line_end[1],
                                          inverse=True)
                 # create nodes from the points and add them to the osm
-                node_start = Node(self.id_count, y_start, x_start, autoware=self.autoware)
-                node_end = Node(self.id_count, y_end, x_end, autoware=self.autoware)
+                node_start = Node(self.id_count, y_start, x_start, autoware=self._config.autoware)
+                node_end = Node(self.id_count, y_end, x_end, autoware=self._config.autoware)
                 self.osm.add_node(node_start)
                 self.osm.add_node(node_end)
                 # create a way from newly created nodes and add it to the osm
@@ -306,7 +298,7 @@ class CR2LaneletConverter:
         # iterate through sign IDs to find the corresponding sign with that subtype
         sign_name = ""
         sign_found = False
-        for country in config.CR2LANELET_SUPPORTED_COUNTRIES_LIST:
+        for country in self._config.supported_countries:
             if sign_found is True:
                 break
             for countrySign in country:
@@ -347,13 +339,13 @@ class CR2LaneletConverter:
         id2 = self.id_count
 
         # creating and adding those nodes to our osm
-        self.osm.add_node(Node(id1, y1, x1, autoware=self.autoware))
-        self.osm.add_node(Node(id2, y2, x2, autoware=self.autoware))
+        self.osm.add_node(Node(id1, y1, x1, autoware=self._config.autoware))
+        self.osm.add_node(Node(id2, y2, x2, autoware=self._config.autoware))
 
         # matching the type of the traffic sign
         sign_id = sign.traffic_sign_elements[0].traffic_sign_element_id
         val = ""
-        for country in config.CR2LANELET_SUPPORTED_COUNTRIES_LIST:
+        for country in self._config.supported_countries:
             for k in country:
                 if k == sign_id:
                     val = k.value
@@ -365,7 +357,7 @@ class CR2LaneletConverter:
         sign_country_name = str(type(sign.traffic_sign_elements[0].traffic_sign_element_id).__name__)
 
         # map the supported countries to their 2 letter prefixs
-        country_prefix_dictionary = config.CR2LANELET_SUPPORTED_COUNTRIES_PREFIX_DICTIONARY
+        country_prefix_dictionary = self._config.supported_countries_prefixes
 
         subtype = country_prefix_dictionary[sign_country_name]
 
@@ -403,7 +395,7 @@ class CR2LaneletConverter:
         if len(lanelet.lanelet_type) > 0:
             subtype = list(lanelet.lanelet_type)[0].value
         # have to convert the names as they are slightly different in both formats
-        subtype, subtype_in = _convert_subtype_names(subtype)
+        subtype, subtype_in = _convert_subtype_names(subtype, self._config.supported_lanelet2_subtypes)
 
         # append left and right way
         self.left_ways[lanelet.lanelet_id] = left_way_id
@@ -499,10 +491,11 @@ class CR2LaneletConverter:
         nodes = []
         for vertex in vertices:
             lon, lat = self.proj(self.origin_utm[0] + vertex[0], self.origin_utm[1] + vertex[1], inverse=True)
-            if self.use_local_coordinates:
-                node = Node(self.id_count, lat, lon, autoware=self.autoware, local_x=vertex[0], local_y=vertex[1])
+            if self._config.use_local_coordinates:
+                node = Node(self.id_count, lat, lon, autoware=self._config.autoware, local_x=vertex[0],
+                            local_y=vertex[1])
             else:
-                node = Node(self.id_count, lat, lon, autoware=self.autoware)
+                node = Node(self.id_count, lat, lon, autoware=self._config.autoware)
             nodes.append(node.id_)
             self.osm.add_node(node)
         return nodes
@@ -524,7 +517,7 @@ class CR2LaneletConverter:
                 adj_right = self.lanelet_network.find_lanelet_by_id(lanelet.adj_right)
                 vertices = (
                     adj_right.left_vertices if lanelet.adj_right_same_direction else adj_right.right_vertices[::-1])
-                if _vertices_are_equal(lanelet.right_vertices, vertices):
+                if _vertices_are_equal(lanelet.right_vertices, vertices, self._config.ways_are_equal_tolerance):
                     return potential_right_way
 
         return None
@@ -546,7 +539,7 @@ class CR2LaneletConverter:
                 adj_left = self.lanelet_network.find_lanelet_by_id(lanelet.adj_left)
                 vertices = (
                     adj_left.right_vertices if lanelet.adj_left_same_direction else adj_left.left_vertices[::-1])
-                if _vertices_are_equal(lanelet.left_vertices, vertices):
+                if _vertices_are_equal(lanelet.left_vertices, vertices, self._config.ways_are_equal_tolerance):
                     return potential_left_way
 
         return None

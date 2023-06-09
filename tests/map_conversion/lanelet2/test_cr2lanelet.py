@@ -1,6 +1,6 @@
-
 import os
 import unittest
+from crdesigner.config.config import Lanelet2ConversionParams
 from crdesigner.map_conversion.lanelet2.cr2lanelet import CR2LaneletConverter
 from commonroad.scenario.lanelet import Lanelet, StopLine, LineMarking
 from commonroad.common.file_reader import CommonRoadFileReader
@@ -45,9 +45,10 @@ class TestCR2LaneletConverter(unittest.TestCase):
     
     def test_init_with_scenario(self):
         # test the initialization with the custom proj scenario
-        custom_proj_scen = "+proj=utm +zone=59 south"
-        cr1 = CR2LaneletConverter(custom_proj_scen)  # object referred to as "self" in the source code
-        self.assertEqual(cr1.proj, Proj(custom_proj_scen))
+        config = Lanelet2ConversionParams()
+        config.proj_string = "+proj=utm +zone=59 south"
+        cr1 = CR2LaneletConverter(config)  # object referred to as "self" in the source code
+        self.assertEqual(cr1.proj, Proj(config.proj_string))
 
     def test_id_count(self):
         # test assigning id

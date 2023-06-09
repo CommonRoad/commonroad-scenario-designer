@@ -10,9 +10,8 @@ from commonroad.scenario.lanelet import LaneletNetwork, StopLine
 from commonroad.scenario.intersection import IntersectionIncomingElement, Intersection
 from commonroad.scenario.traffic_sign import TrafficLightDirection, TrafficLight, TrafficSign
 
-from crdesigner.map_conversion.osm2cr import config
-from crdesigner.map_conversion.osm2cr.converter_modules.utility import geometry
-
+from crdesigner.config.config import OpenDRIVEConversionParams
+from crdesigner.map_conversion.common import geometry
 from crdesigner.map_conversion.common.utils import convert_to_new_lanelet_id
 from crdesigner.map_conversion.common.conversion_lanelet import ConversionLanelet
 from crdesigner.map_conversion.common.utils import generate_unique_id
@@ -24,10 +23,10 @@ class ConversionLaneletNetwork(LaneletNetwork):
     This class is being used in Opendrive and Lanelet2 format conversions
     """
 
-    def __init__(self, config):
+    def __init__(self, config: OpenDRIVEConversionParams = OpenDRIVEConversionParams()):
         """Initializes a ConversionLaneletNetwork"""
         super().__init__()
-        self.config = config
+        self._config = config
         self._old_lanelet_ids = {}
 
     def old_lanelet_ids(self) -> dict:
@@ -313,7 +312,7 @@ class ConversionLaneletNetwork(LaneletNetwork):
             if lanelet_join or lanelet_split:
                 js_targets.append(
                     _JoinSplitTarget(self, lanelet, lanelet_split, lanelet_join,
-                                     self.config.precision)
+                                     self._config.precision)
                 )
 
         for js_target in js_targets:
@@ -749,7 +748,7 @@ class ConversionLaneletNetwork(LaneletNetwork):
             angle = angles[index][1] - angles[prev][1]
             if angle < 0:
                 angle += 360
-            if angle > config.LANE_SEGMENT_ANGLE and angle <= 180 - config.LANE_SEGMENT_ANGLE and angle < min_angle:
+            if self._config.lane_segment_angle < angle <= 180 - self._config.lane_segment_angle and angle < min_angle:
                 # is left of the previous incoming
                 is_left_of = angles[prev][0]
                 data_index = angles[index][0]
@@ -822,7 +821,7 @@ class ConversionLaneletNetwork(LaneletNetwork):
         :return: Dict containing the directions "left", "right" or "through"
         :rtype: dict
         """
-        straight_threshold_angel = config.INTERSECTION_STRAIGHT_THRESHOLD
+        straight_threshold_angel = self._config.intersection_straight_threshold
         assert 0 < straight_threshold_angel < 90
 
         angels = {}
@@ -1116,7 +1115,7 @@ class _JoinSplitTarget:
         main_lanelet: ConversionLanelet,
         split: bool,
         join: bool,
-        precision: float,
+        precision: float = OpenDRIVEConversionParams.precision,
     ):
         self.main_lanelet = main_lanelet
         self.lanelet_network = lanelet_network
@@ -1492,7 +1491,8 @@ class _JoinSplitTarget:
 class _JoinSplitPair:
     """Pair of lanelet whose border is changed and its adjacent neighbor."""
 
-    def __init__(self, lanelet, adjacent_lanelet, change_interval, precision):
+    def __init__(self, lanelet, adjacent_lanelet, change_interval,
+                 precision: float = OpenDRIVEConversionParams.precision):
         self.lanelet = lanelet
         self.adjacent_lanelet = adjacent_lanelet
         self.change_interval = change_interval

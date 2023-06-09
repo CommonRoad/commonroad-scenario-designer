@@ -14,11 +14,7 @@ from crdesigner.map_conversion.lanelet2.lanelet2_parser import Lanelet2Parser
 from crdesigner.map_conversion.lanelet2.lanelet2cr import Lanelet2CRConverter, _two_vertices_coincide
 from crdesigner.map_conversion.lanelet2.lanelet2 import WayRelation, Node, Way, \
     RegulatoryElement
-
-NODE_DISTANCE_TOLERANCE = 0.01  # this is in meters
-PRIORITY_SIGNS = [TrafficSignIDGermany.PRIORITY, TrafficSignIDGermany.RIGHT_OF_WAY]
-
-ADJACENT_WAY_DISTANCE_TOLERANCE = 0.05
+from crdesigner.config.config import Lanelet2ConversionParams
 
 with open(f"{os.path.dirname(os.path.realpath(__file__))}/../test_maps/lanelet2/traffic_speed_limit_utm.osm") as fh:
     osm = Lanelet2Parser(etree.parse(fh).getroot()).parse()
@@ -42,6 +38,10 @@ map = {'-1775219': 31, '-1775268': 32, '-1775303': 33,
 
 
 class TestLanelet2CRConverter(unittest.TestCase):
+
+    def setUp(self) -> None:
+        self._config = Lanelet2ConversionParams()
+
     def test_init(self):
         l2cr = Lanelet2CRConverter()
         # testing the initialization values without opening the scenario
@@ -59,9 +59,9 @@ class TestLanelet2CRConverter(unittest.TestCase):
         self.assertEqual(l2cr.proj, Proj("+proj=utm +zone=32 +ellps=WGS84"))
 
     def test_custom_proj_string_init(self):
-        custom_proj_string = "+proj=utm +zone=59 +south"
-        l2cr = Lanelet2CRConverter(custom_proj_string)
-        self.assertEqual(l2cr.proj, Proj(custom_proj_string))
+        self._config.proj_string = "+proj=utm +zone=59 +south"
+        l2cr = Lanelet2CRConverter(self._config)
+        self.assertEqual(l2cr.proj, Proj(self._config.proj_string))
 
     def test_call(self):
         l2cr = Lanelet2CRConverter()  # object referred to as "self" in the source code
@@ -77,8 +77,8 @@ class TestLanelet2CRConverter(unittest.TestCase):
 
         # test the default scenario_id
         self.assertEqual(scenario.scenario_id.country_id, "ZAM")
-        self.assertEqual(scenario.scenario_id.map_name, "OpenDrive")
-        self.assertEqual(scenario.scenario_id.map_id, 123)
+        self.assertEqual(scenario.scenario_id.map_name, "MUC")
+        self.assertEqual(scenario.scenario_id.map_id, 1)
 
         # test the scenario values given in the constructor
         self.assertEqual(scenario.dt, 0.1)
@@ -521,11 +521,11 @@ class TestLanelet2CRConverter(unittest.TestCase):
     def test__two_vertices_coincide(self):
         v1 = np.array([[0, 0], [0, 1]])
         v2 = np.array([[0, 0], [0, 1]])
-        self.assertTrue(_two_vertices_coincide(v1, v2))
+        self.assertTrue(_two_vertices_coincide(v1, v2, self._config.adjacent_way_distance_tolerance))
 
         v1 = np.array([[5, 0], [5, 1]])
         v2 = np.array([[0, 0], [0, 1]])
-        self.assertFalse(_two_vertices_coincide(v1, v2))
+        self.assertFalse(_two_vertices_coincide(v1, v2, self._config.adjacent_way_distance_tolerance))
 
     def test_traffic_light_conversion(self):
         """

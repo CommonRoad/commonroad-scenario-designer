@@ -4,7 +4,7 @@ GraphNode class
 
 from typing import Set
 import numpy as np
-from crdesigner.map_conversion.osm2cr.converter_modules.utility import geometry
+from crdesigner.map_conversion.common import geometry
 
 
 class GraphNode:

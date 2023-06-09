@@ -7,7 +7,7 @@ from typing import List, Set, Tuple
 import numpy as np
 
 from crdesigner.map_conversion.osm2cr import config
-from crdesigner.map_conversion.osm2cr.converter_modules.utility import geometry
+from crdesigner.map_conversion.common import geometry
 
 
 def graph_search(center_node: "GraphNode") -> Tuple[Set["GraphNode"], Set["GraphEdge"]]:

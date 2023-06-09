@@ -7,7 +7,6 @@ from PyQt5.QtWidgets import QFileDialog, QMessageBox
 from crdesigner.map_conversion.opendrive.opendrive_parser.parser import parse_opendrive
 from crdesigner.map_conversion.opendrive.opendrive_conversion.network import Network
 from crdesigner.ui.gui.mwindow.service_layer.converter_modules.converter_interface import ConverterInterface
-from crdesigner.configurations.get_configs import get_configs
 
 
 class OpenDRIVEInterface(ConverterInterface):
@@ -57,7 +56,7 @@ class OpenDRIVEInterface(ConverterInterface):
             )
             return
 
-        self.loadedRoadNetwork = Network(get_configs().opendrive)
+        self.loadedRoadNetwork = Network()
         self.loadedRoadNetwork.load_opendrive(openDriveXml)
 
         self.cr_designer.text_browser.append(
