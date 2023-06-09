@@ -73,7 +73,7 @@ class CR2LaneletConverter:
         else:
             self.proj = Proj(DEFAULT_PROJ_STRING)
         self.osm = None
-        self._id_count = -1
+        self._id_count = 1
         self.first_nodes, self.last_nodes = None, None
         self.left_ways, self.right_ways = None, None
         self.lanelet_network = None
@@ -91,7 +91,7 @@ class CR2LaneletConverter:
         :return: current id count.
         """
         tmp = self._id_count
-        self._id_count -= 1
+        self._id_count += 1
         return tmp
 
     def __call__(self, scenario):
@@ -111,8 +111,10 @@ class CR2LaneletConverter:
                     abs(scenario.location.gps_longitude) <= 180 and abs(scenario.location.gps_latitude) <= 90:
                 self.origin_utm = self.proj(scenario.location.gps_longitude, scenario.location.gps_latitude)
             elif scenario.location is not None and isinstance(scenario.location.gps_longitude, str) and\
-                    abs(float(scenario.location.gps_longitude)) <= 180 and abs(float(scenario.location.gps_latitude)) <= 90:
-                self.origin_utm = self.proj(float(scenario.location.gps_longitude), float(scenario.location.gps_latitude))
+                    abs(float(scenario.location.gps_longitude)) <= 180 \
+                    and abs(float(scenario.location.gps_latitude)) <= 90:
+                self.origin_utm = \
+                    self.proj(float(scenario.location.gps_longitude), float(scenario.location.gps_latitude))
             else:
                 self.proj = Proj(DEFAULT_PROJ_STRING)
                 self.origin_utm = self.proj(0, 0)
@@ -455,8 +457,8 @@ class CR2LaneletConverter:
         if right_way_id:
             first_right_node: Optional[str]
             last_right_node: Optional[str]
-            first_right_node, last_right_node = self._get_first_and_last_nodes_from_way\
-            (right_way_id, lanelet.adj_right_same_direction)
+            first_right_node, last_right_node = \
+                self._get_first_and_last_nodes_from_way(right_way_id, lanelet.adj_right_same_direction)
         else:
             first_right_node = pot_first_right_node
             last_right_node = pot_last_right_node
