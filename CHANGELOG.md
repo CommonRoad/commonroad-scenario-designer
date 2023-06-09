@@ -8,6 +8,7 @@
 
 ### Changed
 - Versions of third-party packages
+- Use positive IDs for the cr2lanelet conversion
 
 ### Fixed
 - Lanelet2 projection

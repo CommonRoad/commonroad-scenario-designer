@@ -34,7 +34,7 @@ class TestCR2LaneletConverter(unittest.TestCase):
     def test_init(self):
         # test the initialization values without opening the scenario
         cr1 = CR2LaneletConverter()
-        self.assertEqual(cr1.id_count, -1)
+        self.assertEqual(cr1.id_count, 1)
         self.assertIsNone(cr1.first_nodes) 
         self.assertIsNone(cr1.last_nodes) 
         self.assertIsNone(cr1.left_ways) 
@@ -52,13 +52,13 @@ class TestCR2LaneletConverter(unittest.TestCase):
     def test_id_count(self):
         # test assigning id
         cr1 = CR2LaneletConverter()
-        self.assertEqual(cr1.id_count, -1)
-        self.assertEqual(cr1.id_count, -2)
-        self.assertEqual(cr1.id_count, -3)
+        self.assertEqual(cr1.id_count, 1)
+        self.assertEqual(cr1.id_count, 2)
+        self.assertEqual(cr1.id_count, 3)
         cr2 = CR2LaneletConverter()
-        self.assertEqual(cr2.id_count, -1)
-        self.assertEqual(cr2.id_count, -2)
-        self.assertEqual(cr2.id_count, -3)
+        self.assertEqual(cr2.id_count, 1)
+        self.assertEqual(cr2.id_count, 2)
+        self.assertEqual(cr2.id_count, 3)
     
     def test_call(self):
         # checking if the lanelet networks are the same
@@ -72,7 +72,7 @@ class TestCR2LaneletConverter(unittest.TestCase):
         
         cr1(scenario)
         self.assertEqual(scenario.lanelet_network, cr1.lanelet_network)  # check the lanelet network of the scenario
-        self.assertEqual(cr1.origin_utm, (0,0))
+        self.assertEqual(cr1.origin_utm, (0, 0))
 
     def test_convert_lanelet(self):
         cr1 = CR2LaneletConverter()
@@ -84,17 +84,17 @@ class TestCR2LaneletConverter(unittest.TestCase):
         len_of_way_relations_after = len(cr1.osm.way_relations)
         
         # save the id variable as the count rises at every call
-        idCount = cr1.id_count + 1 
+        idCount = cr1.id_count - 1
         last_way_relation = list(cr1.osm.way_relations)[-1]
 
         # testing if the function has added a way relation to the osm
         self.assertEqual(len_of_way_relations_after, len_of_way_relations_before+1)
 
         # testing the right id of the left way
-        self.assertEqual(cr1.osm.way_relations[last_way_relation].left_way, str(idCount+2))
+        self.assertEqual(cr1.osm.way_relations[last_way_relation].left_way, str(idCount - 2))
 
         # testing the right id of the right way
-        self.assertEqual(cr1.osm.way_relations[last_way_relation].right_way, str(idCount+1))
+        self.assertEqual(cr1.osm.way_relations[last_way_relation].right_way, str(idCount - 1))
 
         # testing the right id of the created way relation
         self.assertEqual(cr1.osm.way_relations[last_way_relation].id_, str(idCount))
