@@ -336,9 +336,7 @@ class Network:
         virtual speed sign is added to the lanelet.
 
         :param lanelets: The list of lanelets that is checked for changes in lane speeds.
-        :type lanelets: List[ConversionLanelet]
         :param lanelet_network: The lanelet network that the lanelets belong to.
-        :type lanelet_network: ConversionLaneletNetwork
         """
         visited = []
         for lane in lanelets:
@@ -358,18 +356,14 @@ class Network:
 
     def get_traffic_sign_with_equal_speed(
             self, lanelet: ConversionLanelet, lanelet_network: ConversionLaneletNetwork, speed: float
-    ) -> Union[TrafficSign, None]:
+    ) -> Optional[TrafficSign]:
         """Checks if the supplied lanelet has a traffic sign with a speed limit equal to the value given by the
         argument speed. If a sign was found, it is returned.
 
         :param lanelet: The lanelet to check for a sign with equal speed.
-        :type lanelet: ConversionLanelet
         :param lanelet_network: The lanelet network the lanelet belongs to.
-        :type lanelet_network: ConversionLanelet
         :param speed: The speed to compare the sign's speed to.
-        :type speed: float
         :return: The traffic sign with equal speed, if one is found. Returns None else.
-        :rtype: Union[TrafficSign, None]
         """
         for id in lanelet.traffic_signs:
             sign = lanelet_network.find_traffic_sign_by_id(id)
@@ -385,9 +379,7 @@ class Network:
         """Adds a virtual traffic sign to a lanelet.
 
         :param lanelet: Lanelet to add virtual traffic signal to.
-        :type lanelet: ConversionLanelet
         :param network: The lanelet network to which the lanelet belongs to.
-        :type network: ConversionLaneletNetwork
         """
         traffic_sign_enum = utils.get_traffic_sign_enum_from_country(
                 utils.get_signal_country(self._country_ID)
@@ -406,14 +398,8 @@ class Network:
     def export_commonroad_scenario(self, general_config: GeneralParams, opendrive_config: OpenDRIVEConversionParams):
         """Export a full CommonRoad scenario
 
-        :param dt: Delta time step, default is 0.1
-        :type dt: float
-        :param map_name: Name of the map in the scenario ID, default value is "OpenDrive".
-        :type map_name: str
-        :param map_id: Running index of the map in the scenario ID, default value is 1.
-        :type map_id: int
-        :param filter_types: Types of ParametricLanes to be filtered. Default is None.
-        :type filter_types: list
+        :param general_config: General config parameters.
+        :param opendrive_config: OpenDRIVE specific config parameters.
         """
         transformer = None
         if self._geo_ref is not None:
