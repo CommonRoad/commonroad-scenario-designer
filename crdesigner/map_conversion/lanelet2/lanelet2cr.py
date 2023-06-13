@@ -489,7 +489,12 @@ class Lanelet2CRConverter:
             for country in supported_country_list:
                 for countrySign in country:
                     if countrySign.value == filtered_traffic_sign_type_name:
-                        tsid = country(countrySign.value)
+                        # traffic sign ID 252 is replaced by 260
+                        if (country is TrafficSignIDGermany or country is TrafficSignIDZamunda) \
+                                and countrySign.value == "252":
+                            tsid = country("260")
+                        else:
+                            tsid = country(countrySign.value)
                         traffic_sign_found = True
                 if traffic_sign_found:
                     break
