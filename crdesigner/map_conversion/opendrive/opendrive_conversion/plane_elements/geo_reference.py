@@ -1,7 +1,8 @@
 import re
+from typing import Tuple, Optional
 
 
-def get_geo_reference(geo_reference: str) -> float:
+def get_geo_reference(geo_reference: str) -> Tuple[Optional[float], Optional[float]]:
     """Gets the geographic location information from the geo string extracted from opendrive files.
 
     :param geo_reference: Input string from which longitude and latitude should be extracted.

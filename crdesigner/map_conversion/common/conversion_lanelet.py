@@ -1,6 +1,7 @@
 import logging
 from typing import Tuple, Optional, Union, Set
 import numpy as np
+from pyproj import Transformer
 from commonroad.scenario.lanelet import Lanelet, LaneletType, LineMarking, RoadUser
 from crdesigner.config.config import OpenDRIVEConversionParams
 
@@ -144,7 +145,7 @@ class ConversionLanelet(Lanelet):
         elif value == 'driving':
             self._lanelet_type = {LaneletType(self._driving_default_lanelet_type)}
         else:
-            logging.warning("ConversionLanelet::lanelet_type: Unknown OpenDRIVE lane type: {}".format(value))
+            logging.warning("ConversionLanelet::lanelet_type: Unknown lane type: {}".format(value))
             self._lanelet_type = {LaneletType(self._driving_default_lanelet_type)}
 
     @property
@@ -438,26 +439,24 @@ class ConversionLanelet(Lanelet):
         mirror_interval: Tuple[float, float],
         distance: np.ndarray,
         adjacent_lanelet: "ConversionLanelet",
-        precision: float
+        precision: float,
+        transformer: Transformer
     ):
         """Move vertices of one border by mirroring other border with
         a specified distance.
 
         :param mirror_border: Which border to mirror, either 'left' or 'right'.
-        :type mirror_border: str
         :param mirror_interval: Tuple of two values, specifying start and end of mirroring.
-        :type mirror_interval: Tuple[float, float]
         :param distance: Specifying distance at start and at end of mirroring
-        :type distance: np.ndarray
         :param adjacent_lanelet: The adjacent conversion lanelet.
-        :type adjacent_lanelet: ConversionLanelet
         :param precision: Specifies precision with which to convert the plane group to lanelet w. mirroring
-        :type precision: float
+        :param transformer: Coordinate projection transformer.
         """
         if mirror_border == "left":
             distance[:] = [-1 * x for x in distance]
 
         lanelet = self.parametric_lane_group.to_lanelet_with_mirroring(
+            transformer=transformer,
             mirror_border=mirror_border,
             distance=distance,
             mirror_interval=mirror_interval,

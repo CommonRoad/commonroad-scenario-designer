@@ -35,7 +35,7 @@ class TestGeometry(unittest.TestCase):
         heading = 1.2
         curv_start = 1
         curv_end = 2
-        true_spiral = EulerSpiral.createFromLengthAndCurvature(length, curv_start, curv_end)
+        true_spiral = EulerSpiral.create_from_length_and_curvature(length, curv_start, curv_end)
 
         spiral = Spiral(start_position=start_position, heading=heading, length=length, curv_start=curv_start,
                         curv_end=curv_end)

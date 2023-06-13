@@ -1,7 +1,7 @@
 from typing import List, Optional, Tuple, Union, Dict
 
 import numpy as np
-from pyproj import Proj
+from pyproj import CRS, Transformer
 from commonroad.scenario.lanelet import Lanelet  # type: ignore
 from commonroad.scenario.traffic_sign import TrafficLight, TrafficSign  # type: ignore
 
@@ -66,7 +66,9 @@ class CR2LaneletConverter:
         :param config: Lanelet2 config parameters.
         """
         self._config = config
-        self.proj = Proj(self._config.proj_string)
+        crs_from = CRS(self._config.proj_string)
+        crs_to = CRS("ETRF89")
+        self.transformer = Transformer.from_proj(crs_from, crs_to)
         self.osm = None
         self._id_count = 1
         self.first_nodes, self.last_nodes = None, None
@@ -101,15 +103,16 @@ class CR2LaneletConverter:
         if self._config.translate:
             if scenario.location is not None and not isinstance(scenario.location.gps_longitude, str) and\
                     abs(scenario.location.gps_longitude) <= 180 and abs(scenario.location.gps_latitude) <= 90:
-                self.origin_utm = self.proj(scenario.location.gps_longitude, scenario.location.gps_latitude)
+                self.origin_utm = self.transformer.transform(scenario.location.gps_latitude,
+                                                              scenario.location.gps_longitude)
             elif scenario.location is not None and isinstance(scenario.location.gps_longitude, str) and\
                     abs(float(scenario.location.gps_longitude)) <= 180 \
                     and abs(float(scenario.location.gps_latitude)) <= 90:
                 self.origin_utm = \
-                    self.proj(float(scenario.location.gps_longitude), float(scenario.location.gps_latitude))
+                    self.transformer.transform(float(scenario.location.gps_latitude),
+                                                float(scenario.location.gps_longitude))
             else:
-                self.proj = Proj(self._config.proj_string)
-                self.origin_utm = self.proj(0, 0)
+                self.origin_utm = self.transformer.transform(0, 0)
 
             # convert lanelets
         for lanelet in scenario.lanelet_network.lanelets:
@@ -145,7 +148,7 @@ class CR2LaneletConverter:
                 # x,y = self.lanelet_network._traffic_lights[lightID].position
                 x, y = self.lanelet_network.find_traffic_light_by_id(lightID).position
 
-                xsign, ysign = self.proj(self.origin_utm[0] + x, self.origin_utm[1] + y, inverse=True)
+                xsign, ysign = self.transformer.transform(self.origin_utm[0] + x, self.origin_utm[1] + y)
                 for way in self.osm.ways:
                     if self.osm.find_way_by_id(way).tag_dict.get('type') == "traffic_light":
 
@@ -173,17 +176,18 @@ class CR2LaneletConverter:
         """
         traffic_light_id = self.id_count
         # create a node that represent the sign position
-        x1, y1 = self.proj(self.origin_utm[0] + light.position[0], self.origin_utm[1] + light.position[1], inverse=True)
+        x1, y1 = self.transformer.transform(self.origin_utm[0] + light.position[0],
+                                            self.origin_utm[1] + light.position[1])
 
         id1 = self.id_count
 
         # since 3 nodes are needed to represent the sign in the l2 format (only 1 in the cr format)
         # create another 2 nodes that are close to the first one
 
-        x2, y2 = self.proj(self.origin_utm[0] + light.position[0] + 0.1, self.origin_utm[1] + light.position[1] + 0.1,
-                           inverse=True)
-        x3, y3 = self.proj(self.origin_utm[0] + light.position[0] - 0.1, self.origin_utm[1] + light.position[1] - 0.1,
-                           inverse=True)
+        x2, y2 = self.transformer.transform(self.origin_utm[0] + light.position[0] + 0.1,
+                                             self.origin_utm[1] + light.position[1] + 0.1)
+        x3, y3 = self.transformer.transform(self.origin_utm[0] + light.position[0] - 0.1,
+                                             self.origin_utm[1] + light.position[1] - 0.1)
         id2 = self.id_count
         id3 = self.id_count
 
@@ -224,7 +228,7 @@ class CR2LaneletConverter:
                 for ll in self.lanelet_network.lanelets:
                     for traffic_sign_id in ll.traffic_signs:
                         x, y = self.lanelet_network.find_traffic_sign_by_id(traffic_sign_id).position
-                        x_sign, y_sign = self.proj(self.origin_utm[0] + x, self.origin_utm[1] + y, inverse=True)
+                        x_sign, y_sign = self.transformer.transform(self.origin_utm[0] + x, self.origin_utm[1] + y)
                         # have to map the signs based on the position,
                         # as the same 2 signs do not have the same ID in L2 and CR format
                         if nx == str(x_sign) and ny == str(y_sign):
@@ -261,10 +265,10 @@ class CR2LaneletConverter:
                 stop_line_start = stop_line.start
                 stop_line_end = stop_line.end
                 # transform the x and y coordinates to the L2 coordinate system
-                x_start, y_start = self.proj(self.origin_utm[0] + stop_line_start[0],
-                                             self.origin_utm[1] + stop_line_start[1], inverse=True)
-                x_end, y_end = self.proj(self.origin_utm[0] + stop_line_end[0], self.origin_utm[1] + stop_line_end[1],
-                                         inverse=True)
+                x_start, y_start = self.transformer.transform(self.origin_utm[0] + stop_line_start[0],
+                                                              self.origin_utm[1] + stop_line_start[1])
+                x_end, y_end = self.transformer.transform(self.origin_utm[0] + stop_line_end[0],
+                                                          self.origin_utm[1] + stop_line_end[1])
                 # create nodes from the points and add them to the osm
                 node_start = Node(self.id_count, y_start, x_start, autoware=self._config.autoware)
                 node_end = Node(self.id_count, y_end, x_end, autoware=self._config.autoware)
@@ -329,13 +333,14 @@ class CR2LaneletConverter:
         :param sign: Traffic Sign to be converted.
         """
         # create a node that represent the sign position
-        x1, y1 = self.proj(self.origin_utm[0] + sign.position[0], self.origin_utm[1] + sign.position[1], inverse=True)
+        x1, y1 = self.transformer.transform(self.origin_utm[0] + sign.position[0],
+                                             self.origin_utm[1] + sign.position[1])
         id1 = self.id_count
 
         # since 2 nodes are needed to represent the sign in the l2 format (only 1 in the cr format)
         # create another node that is close to the first one
-        x2, y2 = self.proj(self.origin_utm[0] + sign.position[0] + 0.25, self.origin_utm[1] + sign.position[1] + 0.25,
-                           inverse=True)
+        x2, y2 = self.transformer.transform(self.origin_utm[0] + sign.position[0] + 0.25,
+                                             self.origin_utm[1] + sign.position[1] + 0.25)
         id2 = self.id_count
 
         # creating and adding those nodes to our osm
@@ -490,7 +495,7 @@ class CR2LaneletConverter:
         """
         nodes = []
         for vertex in vertices:
-            lon, lat = self.proj(self.origin_utm[0] + vertex[0], self.origin_utm[1] + vertex[1], inverse=True)
+            lat, lon = self.transformer.transform(self.origin_utm[0] + vertex[0], self.origin_utm[1] + vertex[1])
             if self._config.use_local_coordinates:
                 node = Node(self.id_count, lat, lon, autoware=self._config.autoware, local_x=vertex[0],
                             local_y=vertex[1])

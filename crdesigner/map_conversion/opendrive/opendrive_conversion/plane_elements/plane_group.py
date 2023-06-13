@@ -3,6 +3,7 @@ from typing import Tuple, Optional, List
 import math
 import numpy as np
 import copy
+from pyproj import Transformer
 
 from crdesigner.map_conversion.common.conversion_lanelet import ConversionLanelet
 from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.plane import ParametricLane
@@ -133,15 +134,13 @@ class ParametricLaneGroup:
             [plane.has_zero_width_everywhere() for plane in self.parametric_lanes]
         )
 
-    def to_lanelet(self, error_tolerance, min_delta_s) -> ConversionLanelet:
+    def to_lanelet(self, error_tolerance, min_delta_s, transformer: Transformer) -> ConversionLanelet:
         """Convert a ParametricLaneGroup to a Lanelet.
 
         :param error_tolerance: Max. error between reference geometry and polyline of vertices.
-        :type error_tolerance: float
         :param min_delta_s: Min. step length between two sampling positions on the reference geometry
-        :type min_delta_s: float
+        :param transformer: Coordinate projection transformer.
         :return: Created Lanelet.
-        :rtype: 'class'`ConversionLanelet`
         """
         left_vertices, right_vertices = np.array([]), np.array([])
         line_marking_left_vertices = LineMarking.UNKNOWN
@@ -149,7 +148,7 @@ class ParametricLaneGroup:
 
         for parametric_lane in self.parametric_lanes:
             local_left_vertices, local_right_vertices = parametric_lane.calc_vertices(
-                error_tolerance=error_tolerance, min_delta_s=min_delta_s
+                error_tolerance=error_tolerance, min_delta_s=min_delta_s, transformer=transformer
             )
             # check whether parametric lane cannot be used,
             # e.g., if to small it is possible that no vertices are generated
@@ -312,23 +311,19 @@ class ParametricLaneGroup:
         mirror_interval: Tuple[float, float],
         adjacent_lanelet: ConversionLanelet,
         precision: float = 0.5,
+        transformer: Optional[Transformer] = None
     ):
         """Convert a ParametricLaneGroup to a Lanelet with mirroring one of the borders.
 
         :param mirror_border: Which lane to mirror, if performing merging or splitting of lanes.
-        :type mirror_border: str
         :param distance: Distance at start and end of lanelet, which mirroring lane should have from the other lane it
                         mirrors
-        :type distance: Tuple[float, float]
         :param mirror_interval: Position at start and end of mirroring
-        :type mirror_interval: Tuple[float, float]
         :param adjacent_lanelet: The adjacent lanelet.
-        :type adjacent_lanelet: :class:`opendrive.opendrive_conversion.conversion_lanelet.ConversionLanelet`
         :param precision: Number which indicates at which space interval (in curve parameter ds) the coordinates of the
                         boundaries should be calculated. Default is 0.5.
-        :type precision: float
+        :param transformer: Coordinate projection transformer.
         :return: Created Lanelet.
-        :rtype: :class:`opendrive.opendrive_conversion.conversion_lanelet.ConversionLanelet`
         """
         linear_distance_poly = np.polyfit(mirror_interval, distance, 1)
         distance_poly1d = np.poly1d(linear_distance_poly)
@@ -350,8 +345,12 @@ class ParametricLaneGroup:
             if (
                 pos < mirror_interval[0] or pos > mirror_interval[1]
             ) and not np.isclose(pos, mirror_interval[1]):
-                left_vertices.append(inner_pos)
-                right_vertices.append(outer_pos)
+                if transformer is not None:
+                    left_vertices.append(transformer.transform(inner_pos[0], inner_pos[1]))
+                    right_vertices.append(transformer.transform(outer_pos[0], outer_pos[1]))
+                else:
+                    left_vertices.append(inner_pos)
+                    right_vertices.append(outer_pos)
                 last_width_difference = 0
 
             else:
@@ -374,16 +373,27 @@ class ParametricLaneGroup:
                         math.copysign(1, local_width_offset) * last_width_difference
                     )
                     if modified_width < original_width:
-                        right_vertices.append(
-                            self.calc_border("outer", pos, local_width_offset)[0]
-                        )
+                        new_vertex = self.calc_border("outer", pos, local_width_offset)[0]
+                        if transformer is not None:
+                            right_vertices.append(transformer.transform(new_vertex[0], new_vertex[1]))
+                        else:
+                            right_vertices.append(new_vertex)
                     elif modified_width > original_width + adjacent_width:
-                        right_vertices.append(adj_outer_pos)
+                        if transformer is not None:
+                            right_vertices.append(transformer.transform(adj_outer_pos[0], adj_outer_pos[1]))
+                        else:
+                            right_vertices.append(adj_outer_pos)
                     else:
-                        right_vertices.append(new_outer_pos)
+                        if transformer is not None:
+                            right_vertices.append(transformer.transform(new_outer_pos[0], new_outer_pos[1]))
+                        else:
+                            right_vertices.append(new_outer_pos)
                         last_width_difference = abs(modified_width - original_width)
 
-                    left_vertices.append(inner_pos)
+                    if transformer is not None:
+                        left_vertices.append(transformer.transform(inner_pos[0], inner_pos[1]))
+                    else:
+                        left_vertices.append(inner_pos)
                 elif mirror_border == "right":
                     new_inner_pos = self.calc_border("outer", pos, local_width_offset)[
                         0
@@ -394,16 +404,27 @@ class ParametricLaneGroup:
                         math.copysign(1, local_width_offset) * last_width_difference
                     )
                     if modified_width < original_width:
-                        left_vertices.append(
-                            self.calc_border("inner", pos, local_width_offset)[0]
-                        )
+                        new_vertex = self.calc_border("inner", pos, local_width_offset)[0]
+                        if transformer is not None:
+                            left_vertices.append(transformer.transform(new_vertex[0], new_vertex[1]))
+                        else:
+                            left_vertices.append(new_vertex)
                     elif modified_width > original_width + adjacent_width:
-                        left_vertices.append(adj_inner_pos)
+                        if transformer is not None:
+                            left_vertices.append(transformer.transform(adj_inner_pos[0], adj_inner_pos[1]))
+                        else:
+                            left_vertices.append(adj_inner_pos)
                     else:
-                        left_vertices.append(new_inner_pos)
+                        if transformer is not None:
+                            left_vertices.append(transformer.transform(new_inner_pos[0], new_inner_pos[1]))
+                        else:
+                            left_vertices.append(new_inner_pos)
                         last_width_difference = abs(modified_width - original_width)
 
-                    right_vertices.append(outer_pos)
+                    if transformer is not None:
+                        right_vertices.append(transformer.transform(outer_pos[0], outer_pos[1]))
+                    else:
+                        right_vertices.append(outer_pos)
 
         left_vertices, right_vertices = (
             np.array(left_vertices),

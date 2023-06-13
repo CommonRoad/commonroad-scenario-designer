@@ -23,6 +23,33 @@ from .dynamic_canvas import DynamicCanvas
 from .helper import draw_lanelet_polygon
 
 
+def extract_plot_limits(lanelet_network: LaneletNetwork) -> Optional[List[float]]:
+    """
+    Extracts plot limits from a lanelet network
+
+    :param lanelet_network: CommonRoad lanelet network.
+    :return: Plot limits or none if lanelet network is empty.
+    """
+    margin = 50
+    if len(lanelet_network.lanelets) > 0:
+        x_lanelet_left = [point[0] for lanelet in lanelet_network.lanelets for point in
+                          lanelet.left_vertices]
+        y_lanelet_left = [point[1] for lanelet in lanelet_network.lanelets for point in
+                          lanelet.left_vertices]
+        x_lanelet_right = [point[0] for lanelet in lanelet_network.lanelets for point in
+                           lanelet.right_vertices]
+        y_lanelet_right = [point[1] for lanelet in lanelet_network.lanelets for point in
+                           lanelet.right_vertices]
+
+        x_min = min(x_lanelet_left + x_lanelet_right) - margin
+        y_min = min(y_lanelet_left + y_lanelet_right) - margin
+        x_max = max(x_lanelet_left + x_lanelet_right) + margin
+        y_max = max(y_lanelet_left + y_lanelet_right) + margin
+        return [x_min, x_max, y_min, y_max]
+    else:
+        return None
+
+
 class AnimatedViewer:
     def __init__(self, parent, callback_function):
 
@@ -75,7 +102,7 @@ class AnimatedViewer:
                 config.subscribe(set_config)
             self._config = config.value
 
-        plot_limits = self._extract_plot_limits(scenario.lanelet_network)
+        plot_limits = extract_plot_limits(scenario.lanelet_network)
 
         self._calc_max_timestep()
         if self.animation:
@@ -83,32 +110,6 @@ class AnimatedViewer:
             self.animation.event_source.stop()
             self.animation = None
         self.update_plot(clear_artists=True, new_file_added=new_file_added, plot_limits=plot_limits)
-
-    def _extract_plot_limits(self, lanelet_network: LaneletNetwork) -> Optional[List[float]]:
-        """
-        Extracts plot limits from a lanelet network
-
-        :param lanelet_network: CommonRoad lanelet network.
-        :return: Plot limits or none if lanelet network is empty.
-        """
-        margin = 50
-        if len(lanelet_network.lanelets) > 0:
-            x_lanelet_left = [point[0] for lanelet in lanelet_network.lanelets for point in
-                              lanelet.left_vertices]
-            y_lanelet_left = [point[1] for lanelet in lanelet_network.lanelets for point in
-                              lanelet.left_vertices]
-            x_lanelet_right = [point[0] for lanelet in lanelet_network.lanelets for point in
-                               lanelet.right_vertices]
-            y_lanelet_right = [point[1] for lanelet in lanelet_network.lanelets for point in
-                               lanelet.right_vertices]
-
-            x_min = min(x_lanelet_left + x_lanelet_right) - margin
-            y_min = min(y_lanelet_left + y_lanelet_right) - margin
-            x_max = max(x_lanelet_left + x_lanelet_right) + margin
-            y_max = max(y_lanelet_left + y_lanelet_right) + margin
-            return [x_min, x_max, y_min, y_max]
-        else:
-            return None
 
     def _init_animation(self):
         if not self.current_scenario:

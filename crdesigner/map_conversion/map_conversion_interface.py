@@ -28,7 +28,7 @@ from crdesigner.map_conversion.osm2cr.converter_modules.cr_operations.export imp
     convert_to_scenario,
 )
 from crdesigner.map_conversion.osm2cr.converter_modules.converter import GraphScenario
-from crdesigner.config.config import Lanelet2ConversionParams, OpenDRIVEConversionParams
+from crdesigner.config.config import Lanelet2ConversionParams, OpenDRIVEConversionParams, GeneralParams
 
 
 def lanelet_to_commonroad(
@@ -45,11 +45,8 @@ def lanelet_to_commonroad(
     lanelet2_content = parser.parse()
 
     lanelet2_converter = Lanelet2CRConverter(config)
-    scenario = lanelet2_converter(
-        lanelet2_content,
-        detect_adjacencies=config.adjacencies,
-        left_driving_system=config.left_driving,
-    )
+    scenario = lanelet2_converter(lanelet2_content,detect_adjacencies=config.adjacencies,
+                                  left_driving_system=config.left_driving, translate=config.translate)
 
     return scenario
 
@@ -84,22 +81,24 @@ def commonroad_to_lanelet(input_file: str, output_name: str,
         )
 
 
-def opendrive_to_commonroad(input_file: str, 
-                            config: OpenDRIVEConversionParams = OpenDRIVEConversionParams()) -> Scenario:
+def opendrive_to_commonroad(input_file: str,
+                            general_config: GeneralParams = GeneralParams(),
+                            odr_config: OpenDRIVEConversionParams = OpenDRIVEConversionParams()) -> Scenario:
     """
     Converts OpenDRIVE file to CommonRoad
 
     :param input_file: Path to OpenDRIVE file
-    :param config: OpenDRIVE config parameters.
+    :param general_config: General config parameters.
+    :param odr_config: OpenDRIVE config parameters.
     :return: CommonRoad scenario
     """
-    opendrive = parse_opendrive(input_file)
-    road_network = Network(config)
+    opendrive = parse_opendrive(input_file, odr_config)
+    road_network = Network(odr_config)
     road_network.load_opendrive(opendrive)
     for index in range(len(road_network._traffic_lights)):
         road_network._traffic_lights[index]._traffic_light_id = \
             abs(road_network._traffic_lights[index].traffic_light_id)
-    return road_network.export_commonroad_scenario()
+    return road_network.export_commonroad_scenario(general_config, odr_config)
 
 
 def sumo_to_commonroad(input_file: str) -> Scenario:

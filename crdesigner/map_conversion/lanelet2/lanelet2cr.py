@@ -2,7 +2,7 @@ from collections import defaultdict
 from typing import List, Optional, Tuple, Dict, Union
 from shapely.geometry import LineString  # type: ignore
 import numpy as np
-from pyproj import Proj
+from pyproj import Transformer, CRS
 import logging
 
 from commonroad.scenario.lanelet import StopLine, LineMarking, RoadUser, Lanelet, LaneletNetwork  # type: ignore
@@ -12,6 +12,7 @@ from commonroad.scenario.traffic_sign import (TrafficSignElement, TrafficSignIDG
                                               TrafficLightState, TrafficLightDirection)  # type: ignore
 from commonroad.scenario.scenario import Scenario, ScenarioID, TrafficSign, Location, TrafficLight  # type: ignore
 
+from crdesigner.map_conversion.lanelet2.lanelet2 import OSMLanelet
 from crdesigner.map_conversion.common.utils import generate_unique_id
 from crdesigner.map_conversion.common.conversion_lanelet import ConversionLanelet
 from crdesigner.map_conversion.common.conversion_lanelet_network import \
@@ -199,7 +200,9 @@ class Lanelet2CRConverter:
         """
         self._config = lanelet2_config
         self._cr_config = cr_config
-        self.proj = Proj(lanelet2_config.proj_string)
+        crs_from = CRS("ETRF89")
+        crs_to = CRS(self._config.proj_string)
+        self.transformer = Transformer.from_proj(crs_from, crs_to)
         self._left_way_ids, self._right_way_ids = None, None
         self.first_left_pts, self.last_left_pts = None, None
         self.first_right_pts, self.last_right_pts = None, None
@@ -207,7 +210,7 @@ class Lanelet2CRConverter:
         self.lanelet_network = None
         self.origin_utm = None
 
-    def __call__(self, osm, detect_adjacencies: bool = True, left_driving_system: bool = False,
+    def __call__(self, osm: OSMLanelet, detect_adjacencies: bool = True, left_driving_system: bool = False,
                  translate: bool = False) -> Union[Scenario, None]:
         """
         Convert OSM to Scenario.
@@ -241,7 +244,7 @@ class Lanelet2CRConverter:
                                                 max([node.lat for node in self.osm.nodes.values()]),
                                                 max([node.lon for node in self.osm.nodes.values()])))
         if translate:
-            self.origin_utm = self.proj(longitude=origin_lon, latitude=origin_lat)
+            self.origin_utm = self.transformer.transform(origin_lat, origin_lon)
         else:
             self.origin_utm = (0, 0)
         scenario_id = ScenarioID(country_id=self._cr_config.country_id,
@@ -311,6 +314,12 @@ class Lanelet2CRConverter:
         for la in self.lanelet_network.lanelets:
             la.__class__ = Lanelet
         self.lanelet_network.__class__ = LaneletNetwork
+
+        # if lanelet2 map is a sub-map of another map, relations could be wrong
+        self.lanelet_network.cleanup_lanelet_references()
+        self.lanelet_network.cleanup_traffic_sign_references()
+        self.lanelet_network.cleanup_traffic_light_references()
+
         scenario.add_objects(self.lanelet_network)
 
         return scenario
@@ -335,7 +344,7 @@ class Lanelet2CRConverter:
         node_y = node.lat
 
         # convert to CR space
-        x, y = self.proj(node_x, node_y)
+        x, y = self.transformer.transform(node_x, node_x)
         x -= self.origin_utm[0]
         y -= self.origin_utm[1]
         
@@ -491,7 +500,7 @@ class Lanelet2CRConverter:
             traffic_sign_element = TrafficSignElement(tsid, [])
 
             # extract position
-            x, y = self.proj(float(traffic_sign_node.lon), float(traffic_sign_node.lat))
+            x, y = self.transformer.transform(float(traffic_sign_node.lat), float(traffic_sign_node.lon))
             x -= self.origin_utm[0]
             y -= self.origin_utm[1]
             ref_t_id = convert_to_new_lanelet_id(traffic_sign_way.id_, new_lanelet_ids)
@@ -820,7 +829,7 @@ class Lanelet2CRConverter:
         vertices = np.empty((len(way.nodes), 2))
         for i, node_id in enumerate(way.nodes):
             nd = self.osm.find_node_by_id(node_id)
-            x, y = self.proj(longitude=float(nd.lon), latitude=float(nd.lat))
+            x, y = self.transformer.transform(float(nd.lat), float(nd.lon))
             x -= self.origin_utm[0]
             y -= self.origin_utm[1]
             vertices[i] = [x, y]
@@ -837,8 +846,8 @@ class Lanelet2CRConverter:
         """
         node1 = self.osm.find_node_by_id(node_id1)
         node2 = self.osm.find_node_by_id(node_id2)
-        vec1 = np.array(self.proj(float(node1.lon), float(node1.lat)))
-        vec2 = np.array(self.proj(float(node2.lon), float(node2.lat)))
+        vec1 = np.array(self.transformer.transform(float(node1.lat), float(node1.lon)))
+        vec2 = np.array(self.transformer.transform(float(node2.lat), float(node2.lon)))
         return np.linalg.norm(vec1 - vec2)
 
     def _find_lanelet_ids_of_suitable_nodes(self, nodes_dict: Dict[str, List[str]], node_id: str) -> List:

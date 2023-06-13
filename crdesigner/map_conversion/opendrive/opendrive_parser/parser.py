@@ -1,10 +1,10 @@
+import logging
 import warnings
-
+from typing import Optional
 import numpy as np
 from lxml import etree
 
 from crdesigner.map_conversion.common.utils import generate_unique_id
-
 from crdesigner.map_conversion.opendrive.opendrive_parser.elements.opendrive import OpenDrive, Header
 from crdesigner.map_conversion.opendrive.opendrive_parser.elements.road import Road
 from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadLink import Predecessor as RoadLinkPredecessor, \
@@ -24,14 +24,15 @@ from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadSignal im
     SignalReference
 from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadObject import Object as RoadObject, \
     ObjectOutlineCorner
-from typing import Optional, TypeVar
+from crdesigner.config.config import OpenDRIVEConversionParams
 
 
-def parse_opendrive(file_path: str) -> OpenDrive:
+def parse_opendrive(file_path: str, config: OpenDRIVEConversionParams = OpenDRIVEConversionParams()) -> OpenDrive:
     """
     Tries to parse XML tree, returns OpenDRIVE object
 
     :param file_path: path to opendrive
+    :param config: OpenDRIVE config parameters.
     :return: Object representing an OpenDrive specification
     """
     generate_unique_id(0)  # reset IDs
@@ -128,7 +129,7 @@ def parse_opendrive_road_geometry(new_road: Road, road_geometry: etree.ElementTr
     :param new_road: Road to append the parsed road geometry
     :param road_geometry: XML element which contains the information
     """
-    start_coord = [float(road_geometry.get("x")), float(road_geometry.get("y"))]
+    start_coord = np.array([float(road_geometry.get("x")), float(road_geometry.get("y"))])
 
     if road_geometry.find("line") is not None:
         new_road.planView.add_line(start_coord, float(road_geometry.get("hdg")), float(road_geometry.get("length")), )
@@ -343,7 +344,8 @@ def parse_opendrive_road_lane_section(new_road: Road, lane_section_id: int, lane
                 road_mark = RoadLaneRoadMark()
 
                 road_mark.type = mark.get("type")
-                road_mark.weight = mark.get("weight")
+                if mark.get("weight") is not None:
+                    road_mark.weight = mark.get("weight")
                 road_mark.SOffset = mark.get("sOffset")
 
                 new_lane.road_mark.append(road_mark)
@@ -549,7 +551,8 @@ def parse_opendrive_road_object(new_road: Road, obj: etree.ElementTree):
 
         road_object.outline = corners
     except:
-        print("Error during parsing of road objects.")
+        logging.error("parse_opendrive_road_object: Error during parsing of road objects. "
+                      "Object id {}".format(obj.attrib.get("id")))
 
     new_road.addObject(road_object)
 

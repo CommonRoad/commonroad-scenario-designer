@@ -1,10 +1,9 @@
-"""Module for parametric lanes, which is an intermediate step between OpenDRIVE lanes
-and lanelets."""
-from typing import Tuple
+from typing import Tuple, Optional, List
 import numpy as np
+from numpy.polynomial import polynomial
+from pyproj import Transformer
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadLanes import RoadMark
 from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.border import Border
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.geometry import calc_next_s
-from numpy.polynomial import polynomial as P
 
 
 class ParametricLaneBorderGroup:
@@ -14,17 +13,15 @@ class ParametricLaneBorderGroup:
     # should be possible
     def __init__(
         self,
-        inner_border=None,
-        inner_border_offset=None,
-        outer_border=None,
-        outer_border_offset=None,
+        inner_border: Optional[Border] = None,
+        inner_border_offset: Optional[float] = None,
+        outer_border: Optional[Border] = None,
+        outer_border_offset: Optional[float] = None,
     ):
         """Initializes a ParametricLaneBorderGroup object.
 
         :param inner_border: Inner Border of a ParametricLane
-        :type inner_border: :class:`opendrive.opendrive_conversion.plane_elements.border.Border`
         :param outer_border: Outer Border of a ParametricLane
-        :type outer_border: :class:`opendrive.opendrive_conversion.plane_elements.border.Border`
         :param inner_border_offset: Offset of start of parametric lane to start of border.
                                     This is necessary as a Border can be used by multiple ParametricLanes
         :type inner_border_offset: float
@@ -38,24 +35,16 @@ class ParametricLaneBorderGroup:
 
     def calc_border_position(
         self, border: str, s_pos: float, width_offset: float, is_last_pos: bool = False, reverse=False,
-            compute_curvature=True
-    ) -> Tuple[Tuple[float, float], float]:
+            compute_curvature: bool = True) -> Tuple[Tuple[float, float], float]:
         """Calc vertices point of inner or outer Border.
 
         :param border: Which border to calculate (inner or outer)
-        :type border: str
         :param s_pos: Position of parameter ds where to calc the cartesian coordinates
-        :type s_pos: float
         :param width_offset: Offset to add to calculated width in reference to the reference border
-        :type width_offset: float
         :param is_last_pos: Whether it's the last position, default is False
-        :type is_last_pos: bool
         :param reverse: Whether to calculate in reverse order
-        :type reverse: bool
         :param compute_curvature: Whether to computer curvature, default is True
-        :type compute_curvature: bool
         :return: Cartesian coordinates of point on inner border and tangential direction.
-        :rtype: Tuple[Tuple[float, float], float]
         """
         if border not in ("inner", "outer"):
             raise ValueError("Border specified must be 'inner' or 'outer'!")
@@ -70,11 +59,10 @@ class ParametricLaneBorderGroup:
             compute_curvature=compute_curvature
         )
 
-    def get_width_coefficients(self) -> list:
+    def get_width_coefficients(self) -> List:
         """Get the width coefficients which apply to this ParametricLane.
 
         :return: The width coefficients in format [a, b, c, distance_from_other_border]
-        :rtype: list
         """
         # TODO: expand implementation to consider border offset record
         return self.outer_border.get_next_width_coeffs(self.outer_border_offset)
@@ -89,30 +77,22 @@ class ParametricLane:
         id_: str,
         type_: str,
         border_group: ParametricLaneBorderGroup,
-        length: float = None,
-        line_marking = None,
-        side: str = None,
-        speed: float = None,
-        access: list = []
+        length: Optional[float] = None,
+        line_marking: Optional[RoadMark] = None,
+        side: Optional[str] = None,
+        speed: Optional[float] = None,
+        access: Optional[List] = None
     ):
         """Initializes a ParametricLane object.
 
         :param border_group: Reference to object which manages borders.
-        :type border_group: :class:`ParametricLaneBorderGroup`
         :param id_: Unique string identifier.
-        :type id_: str
         :param type_: Identifies type of ParametricLane
-        :type type_: str
         :param length: Length of ParametricLane, default is None
-        :type length: float
         :param line_marking: Line marking object. Default is None
-        :type line_marking: :class:`RoadMark`
         :param side: the side in lane section. Used for determining the line marking side. Default is None
-        :type side: str
         :param speed: Speed limit for this individual plane
-        :type speed: float
         :param access: equivalent to access restrictions from opendrive lanes
-        :type access: list
         """
         self.border_group = border_group
         self.id_ = id_
@@ -122,23 +102,18 @@ class ParametricLane:
         self.line_marking = line_marking
         self.side = side
         self.speed = speed
-        self.access = access
+        self.access = access if access is not None else []
 
     def calc_border(
-        self, border: str, s_pos: float, width_offset: float = 0.0, compute_curvature=True
+        self, border: str, s_pos: float, width_offset: float = 0.0, compute_curvature: bool = True
     ) -> Tuple[Tuple[float, float], float, float, float]:
         """Calc vertices point of inner or outer Border.
 
         :param border: Which border to calculate (inner or outer).
-        :type border: str
         :param s_pos: Position of parameter ds where to calc the cartesian coordinates
-        :type: float
         :param width_offset: Offset to add to calculated width in reference to the reference border. Default is 0.0.
-        :type width_offset: float
         :param compute_curvature: Whether to computer curvature. Default is True.
-        :type: bool
         :return: Cartesian coordinates of point on inner border and tangential direction.
-        :rtype: Tuple[Tuple[float, float], float, float, float]
         """
         if self.reverse:
             border_pos = self.length - s_pos
@@ -154,9 +129,7 @@ class ParametricLane:
         """Calc width of border at position s_pos.
 
         :param s_pos: Position of ParametricLane (in curve parameter ds) where width should be calculated.
-        :type: float
         :return: The width at position s_pos
-        :rtype: float
         """
         innerCoords = self.calc_border("inner", s_pos)
         outerCoords = self.calc_border("outer", s_pos)
@@ -167,7 +140,6 @@ class ParametricLane:
         """Checks if width is zero at every point of this ParametricLaneGroup.
 
         :return: True if every ParametricLane has width_coefficients equal to only zero.
-        :rtype: bool
         """
         # TODO: expand this method to include border offset records
         return self.border_group.get_width_coefficients() == [0, 0, 0, 0]
@@ -274,15 +246,14 @@ class ParametricLane:
     #         last_width_difference,
     #     )
 
-    def calc_vertices(self, error_tolerance, min_delta_s) -> Tuple[np.ndarray, np.ndarray]:
+    def calc_vertices(self, error_tolerance: float, min_delta_s: float,
+                      transformer: Optional[Transformer] = None) -> Tuple[np.ndarray, np.ndarray]:
         """Convert a ParametricLane to Lanelet.
 
         :param error_tolerance: Max. error between reference geometry and polyline of vertices.
-        :type error_tolerance: float
         :param min_delta_s: Min. step length between two sampling positions on the reference geometry
-        :type min_delta_s: float
+        :param transformer: Coordinate transformer/projection.
         :return: left and right vertices of the created Lanelet
-        :rtype: Tuple[np.ndarray, np.ndarray]
         """
         left_vertices = []
         right_vertices = []
@@ -306,8 +277,12 @@ class ParametricLane:
             # s_cache = s + 0.0
             inner_pos, _, curvature, max_geometry_length = self.calc_border("inner", s)
             outer_pos = self.calc_border("outer", s, compute_curvature=False)[0]
-            left_vertices.append(inner_pos)
-            right_vertices.append(outer_pos)
+            if transformer is not None:
+                left_vertices.append(transformer.transform(inner_pos[0], inner_pos[1]))
+                right_vertices.append(transformer.transform(outer_pos[0], outer_pos[1]))
+            else:
+                left_vertices.append(inner_pos)
+                right_vertices.append(outer_pos)
 
             # version with sampling
             # if s >= self.length:
@@ -333,7 +308,6 @@ class ParametricLane:
         """Position where the inner and outer Border have zero minimal distance change.
 
         :return: Positions (in curve parameter ds) where width change is zero.
-        :rtype: float
         """
 
         width_coefficients = self.border_group.get_width_coefficients()
@@ -345,7 +319,7 @@ class ParametricLane:
         # but useful because only start and end of ParametricLane should be considered
 
         # get roots of derivative
-        roots = P.polyroots(P.polyder(width_coefficients))
+        roots = polynomial.polyroots(polynomial.polyder(width_coefficients))
         real_roots = roots[(np.isreal(roots)) & (roots >= 0) & (roots <= self.length)]
         if self.reverse:
             real_roots[:] = [self.length - x for x in real_roots]
@@ -358,14 +332,12 @@ class ParametricLane:
 
         :param reverse: If True and there are two equal maxima, take maxima closer to the end of the ParametricLane.
                         Default is False.
-        :type reverse: bool
         :return: (pos, max) tuple of position and value of maximum
-        :rtype: Tuple[float, float]
         """
         width_coefficients = self.border_group.get_width_coefficients()
-        width_derivative = P.polyder(width_coefficients)
+        width_derivative = polynomial.polyder(width_coefficients)
         # width_second_derivative = P.polyder(width_derivative)
-        roots = P.polyroots(width_derivative)
+        roots = polynomial.polyroots(width_derivative)
         # is_local_maximum = P.polyval(roots, width_second_derivative) < 0
         restricted_roots = roots[
             (np.isreal(roots))
@@ -378,7 +350,7 @@ class ParametricLane:
         restricted_roots = np.append(restricted_roots, [0, self.length])
 
         # calculate maximum values
-        max_values = P.polyval(restricted_roots, width_coefficients)
+        max_values = polynomial.polyval(restricted_roots, width_coefficients)
 
         # width of one ParametricLane is either always positive or negative
         max_values = abs(max_values)

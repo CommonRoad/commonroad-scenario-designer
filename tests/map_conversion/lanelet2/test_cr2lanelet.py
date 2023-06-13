@@ -5,7 +5,7 @@ from crdesigner.map_conversion.lanelet2.cr2lanelet import CR2LaneletConverter
 from commonroad.scenario.lanelet import Lanelet, StopLine, LineMarking
 from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.scenario.traffic_sign import * 
-from pyproj import Proj
+from pyproj import CRS, Transformer
 
 # creating a testing vertices and a testing scenario from a test file (xml)
 right_vertices = np.array([[0, 0], [1, 0], [2, 0]])
@@ -41,14 +41,20 @@ class TestCR2LaneletConverter(unittest.TestCase):
         self.assertIsNone(cr1.right_ways)
         self.assertIsNone(cr1.lanelet_network)
         self.assertEqual(cr1.origin_utm, (0, 0))
-        self.assertEqual(cr1.proj, Proj("+proj=utm +zone=32 +ellps=WGS84"))  # default proj
+        crs_from = CRS(Lanelet2ConversionParams().proj_string)
+        crs_to = CRS("ETRF89")
+        transformer = Transformer.from_proj(crs_from, crs_to)
+        self.assertEqual(cr1.transformer.definition, transformer.definition)  # default proj
     
     def test_init_with_scenario(self):
         # test the initialization with the custom proj scenario
         config = Lanelet2ConversionParams()
         config.proj_string = "+proj=utm +zone=59 south"
         cr1 = CR2LaneletConverter(config)  # object referred to as "self" in the source code
-        self.assertEqual(cr1.proj, Proj(config.proj_string))
+        crs_from = CRS(config.proj_string)
+        crs_to = CRS("ETRF89")
+        transformer = Transformer.from_proj(crs_from, crs_to)
+        self.assertEqual(cr1.transformer.definition, transformer.definition)
 
     def test_id_count(self):
         # test assigning id
@@ -152,10 +158,10 @@ class TestCR2LaneletConverter(unittest.TestCase):
 
         # as I have some problems with the inverse of "proj" function, I have created testLonRight and testLatRight
         # variables with the coordinates of the first right node (0,0) and the last left node (2,1)
-        testLonRight, testLatRight = cr1.proj(cr1.origin_utm[0]+0, cr1.origin_utm[1]+0, inverse=True)
+        testLatRight, testLonRight = cr1.transformer.transform(cr1.origin_utm[0]+0, cr1.origin_utm[1]+0)
         self.assertEqual(str(testLonRight), cr1.osm.nodes[right_nodes[0]].lon)  # test the lon coordinates of the node
         self.assertEqual(str(testLatRight), cr1.osm.nodes[right_nodes[0]].lat)  # test the lat coordinate of the node
-        testLonLeft, testLatLeft = cr1.proj(cr1.origin_utm[0]+2, cr1.origin_utm[1]+1, inverse=True)
+        testLatLeft, testLonLeft = cr1.transformer.transform(cr1.origin_utm[0]+2, cr1.origin_utm[1]+1)
         self.assertEqual(str(testLonLeft), cr1.osm.nodes[left_nodes[2]].lon)  # test the lon coordinate of the node
         self.assertEqual(str(testLatLeft), cr1.osm.nodes[left_nodes[2]].lat)  # test the lat coordinate of the node
         
@@ -294,15 +300,15 @@ class TestCR2LaneletConverter(unittest.TestCase):
 
         # compare the node coordinates
         # transform the coordinates of the sign, should get the same coordinates as ones of the newly created way
-        sign_n1_lon, sign_n1_lat = cr1.proj(cr1.origin_utm[0] + sign.position[0],
-                                            cr1.origin_utm[1] + sign.position[1], inverse=True)
+        sign_n1_lon, sign_n1_lat = cr1.transformer.transform(cr1.origin_utm[0] + sign.position[0],
+                                            cr1.origin_utm[1] + sign.position[1])
         
         self.assertEqual(str(sign_n1_lon), n1.lon)
         self.assertEqual(str(sign_n1_lat), n1.lat)
         
         # as stated in the original function, second node is created to match the L2 format
-        sign_n2_lon, sign_n2_lat = cr1.proj(cr1.origin_utm[0] + sign.position[1]+0.25,
-                                            cr1.origin_utm[1] + sign.position[1]+0.25, inverse=True)
+        sign_n2_lon, sign_n2_lat = cr1.transformer.transform(cr1.origin_utm[0] + sign.position[1]+0.25,
+                                            cr1.origin_utm[1] + sign.position[1]+0.25)
         self.assertEqual(str(sign_n2_lon), n2.lon)
         self.assertEqual(str(sign_n2_lat), n2.lat)
 
@@ -367,12 +373,12 @@ class TestCR2LaneletConverter(unittest.TestCase):
                     n1_id, n2_id = way.nodes
                     n1 = cr1.osm.nodes[n1_id]
                     n2 = cr1.osm.nodes[n2_id]
-                    sign_n1_lon, sign_n1_lat = cr1.proj(cr1.origin_utm[0] + sign.position[0],
-                                                        cr1.origin_utm[1] + sign.position[1], inverse=True)
+                    sign_n1_lon, sign_n1_lat = cr1.transformer.transform(cr1.origin_utm[0] + sign.position[0],
+                                                                         cr1.origin_utm[1] + sign.position[1])
                     self.assertEqual(str(sign_n1_lon), n1.lon)
                     self.assertEqual(str(sign_n1_lat), n1.lat)
-                    sign_n2_lon, sign_n2_lat = cr1.proj(cr1.origin_utm[0] + sign.position[1]+0.25,
-                                                        cr1.origin_utm[1] + sign.position[1]+0.25, inverse=True)
+                    sign_n2_lon, sign_n2_lat = cr1.transformer.transform(cr1.origin_utm[0] + sign.position[1]+0.25,
+                                                                         cr1.origin_utm[1] + sign.position[1]+0.25)
                     self.assertEqual(str(sign_n2_lon), n2.lon)
                     self.assertEqual(str(sign_n2_lat), n2.lat)
                     count_after += 1
@@ -418,13 +424,13 @@ class TestCR2LaneletConverter(unittest.TestCase):
 
         # check if the position of new nodes corresponds to the CR format
         # (for now the position of the traffic light is diagonal)
-        x1, y1 = cr1.proj(cr1.origin_utm[0] + traffic_light.position[0],
-                          cr1.origin_utm[1] + traffic_light.position[1], inverse=True)
+        x1, y1 = cr1.transformer.transform(cr1.origin_utm[0] + traffic_light.position[0],
+                                           cr1.origin_utm[1] + traffic_light.position[1])
         # for now, the traffic light gets position with this formula (a diagonal line)
-        x2, y2 = cr1.proj(cr1.origin_utm[0] + traffic_light.position[0]+0.1,
-                          cr1.origin_utm[1] + traffic_light.position[1]+0.1, inverse=True)
-        x3, y3 = cr1.proj(cr1.origin_utm[0] + traffic_light.position[0]-0.1,
-                          cr1.origin_utm[1] + traffic_light.position[1]-0.1, inverse=True)
+        x2, y2 = cr1.transformer.transform(cr1.origin_utm[0] + traffic_light.position[0]+0.1,
+                                           cr1.origin_utm[1] + traffic_light.position[1]+0.1)
+        x3, y3 = cr1.transformer.transform(cr1.origin_utm[0] + traffic_light.position[0]-0.1,
+                                           cr1.origin_utm[1] + traffic_light.position[1]-0.1)
 
         n3_id = list(cr1.osm.nodes)[-1]
         n2_id = list(cr1.osm.nodes)[-2]

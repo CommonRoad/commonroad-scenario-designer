@@ -1,4 +1,4 @@
-from pyproj import Proj
+from pyproj import Transformer, CRS
 import unittest
 import os
 from lxml import etree
@@ -56,12 +56,18 @@ class TestLanelet2CRConverter(unittest.TestCase):
         self.assertIsNone(l2cr.origin_utm)
 
         # testing the default proj
-        self.assertEqual(l2cr.proj, Proj("+proj=utm +zone=32 +ellps=WGS84"))
+        crs_to = CRS(self._config.proj_string)
+        crs_from = CRS("ETRF89")
+        transformer = Transformer.from_proj(crs_from, crs_to)
+        self.assertEqual(l2cr.transformer.definition, transformer.definition)
 
     def test_custom_proj_string_init(self):
         self._config.proj_string = "+proj=utm +zone=59 +south"
+        crs_to = CRS(self._config.proj_string)
+        crs_from = CRS("ETRF89")
+        transformer = Transformer.from_proj(crs_from, crs_to)
         l2cr = Lanelet2CRConverter(self._config)
-        self.assertEqual(l2cr.proj, Proj(self._config.proj_string))
+        self.assertEqual(l2cr.transformer.definition, transformer.definition)
 
     def test_call(self):
         l2cr = Lanelet2CRConverter()  # object referred to as "self" in the source code
@@ -185,7 +191,7 @@ class TestLanelet2CRConverter(unittest.TestCase):
         for traffic_sign_way in traffic_sign_ways:
             # getting the positions of the way
             traffic_sign_node = osm.find_node_by_id(traffic_sign_way.nodes[0])
-            x, y = l2cr.proj(float(traffic_sign_node.lon), float(traffic_sign_node.lat))
+            x, y = l2cr.transformer.transform(float(traffic_sign_node.lat), float(traffic_sign_node.lon))
             x -= l2cr.origin_utm[0]
             y -= l2cr.origin_utm[1]
             for sign in signs:
@@ -357,8 +363,8 @@ class TestLanelet2CRConverter(unittest.TestCase):
         function_distance = l2cr.node_distance("1", "2")
 
         # calculating the distance based on our proj. and L2 distance
-        vec1 = np.array(l2cr.proj(float(nr1.lon), float(nr1.lat)))
-        vec2 = np.array(l2cr.proj(float(nr2.lon), float(nr2.lat)))
+        vec1 = np.array(l2cr.transformer.transform(float(nr1.lat), float(nr1.lon)))
+        vec2 = np.array(l2cr.transformer.transform(float(nr2.lat), float(nr2.lon)))
         real_dist = np.linalg.norm(vec1 - vec2)
         self.assertEqual(function_distance, real_dist)
 
@@ -392,7 +398,7 @@ class TestLanelet2CRConverter(unittest.TestCase):
         ctr = 0
         for v in vert:
             # getting the x and y coordinates
-            x, y = l2cr.proj(float(list[ctr].lon), float(list[ctr].lat))
+            x, y = l2cr.transformer.transform(float(list[ctr].lat), float(list[ctr].lon))
             ctr += 1
             # transforming the coordinates to match the vertices geolocation
             x -= l2cr.origin_utm[0]
@@ -510,7 +516,7 @@ class TestLanelet2CRConverter(unittest.TestCase):
         ctr = 0
         for v in lanelet:
             # getting the x and y coordinates
-            x, y = l2cr.proj(float(list[ctr].lon), float(list[ctr].lat))
+            x, y = l2cr.transformer.transform(float(list[ctr].lat), float(list[ctr].lon))
             ctr += 1
             # transforming the coordinates to match the vertices geolocation
             x -= l2cr.origin_utm[0]

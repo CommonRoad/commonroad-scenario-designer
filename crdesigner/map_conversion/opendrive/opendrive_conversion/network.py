@@ -2,11 +2,16 @@ import copy
 import numpy as np
 import iso3166
 from collections import deque
-from typing import Union
+from typing import Union, List, Optional
+from pyproj import CRS, Transformer
 from commonroad.scenario.scenario import Scenario, GeoTransformation, Location, ScenarioID
 from commonroad.scenario.lanelet import LaneletNetwork, Lanelet, StopLine, LineMarking
-from crdesigner.map_conversion.opendrive.opendrive_conversion import utils
+from commonroad.scenario.lanelet import LaneletType
+from commonroad.scenario.traffic_sign import TrafficSign, TrafficSignElement, TrafficSignIDGermany, \
+    TrafficSignIDZamunda, TrafficSignIDUsa, TrafficSignIDChina, TrafficSignIDSpain, \
+    TrafficSignIDRussia
 
+from crdesigner.map_conversion.opendrive.opendrive_conversion import utils
 from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.crosswalks import get_crosswalks
 from crdesigner.map_conversion.opendrive.opendrive_parser.elements.opendrive import OpenDrive
 from crdesigner.map_conversion.opendrive.opendrive_conversion.utils import encode_road_section_lane_width_id
@@ -15,13 +20,9 @@ from crdesigner.map_conversion.common.conversion_lanelet import ConversionLanele
 from crdesigner.map_conversion.opendrive.opendrive_conversion.converter import OpenDriveConverter
 from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.traffic_signals import get_traffic_signals
 from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.geo_reference import get_geo_reference
-from crdesigner.config.config import OpenDRIVEConversionParams
-from commonroad.scenario.traffic_sign import TrafficSign, TrafficSignElement, TrafficSignIDGermany, \
-    TrafficSignIDZamunda, TrafficSignIDUsa, TrafficSignIDChina, TrafficSignIDSpain, \
-    TrafficSignIDRussia
+from crdesigner.config.config import OpenDRIVEConversionParams, GeneralParams
 from crdesigner.map_conversion.common.utils import generate_unique_id
-from commonroad.scenario.lanelet import LaneletType
-from typing import List
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.road import Road
 
 
 def convert_to_base_lanelet_network(lanelet_network: ConversionLaneletNetwork) -> LaneletNetwork:
@@ -97,14 +98,13 @@ class Network:
 
         # Get country ID form signal data in openDrive and set it as attribute of the network object
         self.assign_country_id(Network.get_country_id_from_opendrive(opendrive.roads))
-
+        # transformed_start_coord = transformer.transform(float(road_geometry.get("x")), float(road_geometry.get("y")))
+        # start_coord = np.array([transformed_start_coord[0], transformed_start_coord[1]])
         # Convert all parts of a road to parametric lanes (planes)
         for road in opendrive.roads:
             road.planView.precalculate()
             # The reference border is the baseline for the whole road
-            reference_border = OpenDriveConverter.create_reference_border(
-                road.planView, road.lanes.laneOffsets
-            )
+            reference_border = OpenDriveConverter.create_reference_border(road.planView, road.lanes.laneOffsets)
             # Extracting signals, signs and stop lines from each road
 
             # signal_references = get_traffic_signal_references(road)
@@ -155,22 +155,24 @@ class Network:
                     stop_line = StopLine(position_1, position_2, LineMarking.SOLID)
                     self._stop_lines.append(stop_line)
 
-    def export_lanelet_network(self, filter_types: list = None) -> LaneletNetwork:
+    def export_lanelet_network(self, transformer: Transformer, filter_types: Optional[List[str]] = None) \
+            -> LaneletNetwork:
         """Export network as lanelet network.
 
+        :param transformer: Coordinate projection transformer.
         :param filter_types: Types of ParametricLane objects to be filtered. Default value is None.
         :return: The converted LaneletNetwork object.
         """
 
         # Convert groups to lanelets
-        lanelet_network = ConversionLaneletNetwork(self._config)
+        lanelet_network = ConversionLaneletNetwork(self._config, transformer)
 
         for parametric_lane in self._planes:
             if filter_types is not None and parametric_lane.type not in filter_types:
                 # Remove lanelets from intersections dictionary that do not fit the filtered type criterion
                 self._link_index.clean_intersections(parametric_lane.id_)
                 continue
-            lanelet = parametric_lane.to_lanelet(self._config.error_tolerance, self._config.min_delta_s)
+            lanelet = parametric_lane.to_lanelet(self._config.error_tolerance, self._config.min_delta_s, transformer)
             lanelet.predecessor = self._link_index.get_predecessors(parametric_lane.id_)
             lanelet.successor = self._link_index.get_successors(parametric_lane.id_)
             lanelet_network.add_lanelet(lanelet)
@@ -401,9 +403,7 @@ class Network:
         network.add_traffic_signs_to_network([traffic_sign])
         lanelet.add_traffic_sign_to_lanelet(traffic_sign.traffic_sign_id)
 
-    def export_commonroad_scenario(
-            self, dt: float = 0.1, map_name="OpenDrive", map_id=1, filter_types=None
-    ):
+    def export_commonroad_scenario(self, general_config: GeneralParams, opendrive_config: OpenDRIVEConversionParams):
         """Export a full CommonRoad scenario
 
         :param dt: Delta time step, default is 0.1
@@ -415,6 +415,7 @@ class Network:
         :param filter_types: Types of ParametricLanes to be filtered. Default is None.
         :type filter_types: list
         """
+        transformer = None
         if self._geo_ref is not None:
             longitude, latitude = get_geo_reference(self._geo_ref)
             geo_transformation = GeoTransformation(geo_reference=self._geo_ref)
@@ -427,35 +428,34 @@ class Network:
 
             else:
                 location = Location(geo_transformation=geo_transformation)
+            crs_from = CRS(self._geo_ref)
+            crs_to = CRS(self._config.proj_string)
+            transformer = Transformer.from_proj(crs_from, crs_to)
         else:
             location = Location()
 
-        scenario_id = ScenarioID(country_id=self._country_ID, map_name=map_name, map_id=map_id)
+        scenario_id = ScenarioID(
+                country_id=general_config.country_id if self._country_ID == "ZAM" else self._country_ID,
+                map_name=general_config.map_name,
+                map_id=general_config.map_id)
 
         scenario = Scenario(
-            dt=dt, scenario_id=scenario_id,
+            dt=general_config.time_step_size, scenario_id=scenario_id,
             location=location
         )
 
-        scenario.add_objects(
-            self.export_lanelet_network(
-                filter_types=filter_types
-                if isinstance(filter_types, list)
-                else ["driving", "restricted", "onRamp", "offRamp", "exit", "entry", "sidewalk", "shoulder",
-                      "crosswalk", "bidirectional"]
-            )
-        )
+        scenario.add_objects(self.export_lanelet_network(transformer=transformer,
+                                                         filter_types=opendrive_config.filter_types))
 
         return scenario
 
     @staticmethod
-    def get_country_id_from_opendrive(roads):
+    def get_country_id_from_opendrive(roads: List[Road]) -> str:
         """
         Get country id of a specific lanelet network
+
         :param roads: Roads from which country id should be returned.
-        :type roads: list[:class:`Road`]
         :return: The country id.
-        :rtype: str
         """
         for road in roads:
             for signal in road.signals:

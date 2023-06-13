@@ -1,10 +1,14 @@
 """Module to enhance LaneletNetwork class,
 so it can be used for conversion from the opendrive format."""
 import itertools
+import logging
 import warnings
 from typing import List, Optional, Tuple
 from queue import Queue
 import numpy as np
+import shapely
+from shapely.validation import make_valid
+from pyproj import Transformer
 
 from commonroad.scenario.lanelet import LaneletNetwork, StopLine
 from commonroad.scenario.intersection import IntersectionIncomingElement, Intersection
@@ -20,14 +24,21 @@ from crdesigner.map_conversion.common.utils import generate_unique_id
 class ConversionLaneletNetwork(LaneletNetwork):
     """
     Add functions to LaneletNetwork which further enable it to modify its Lanelets.
-    This class is being used in Opendrive and Lanelet2 format conversions
+    This class is being used in OpenDrive and Lanelet2 format conversions
     """
 
-    def __init__(self, config: OpenDRIVEConversionParams = OpenDRIVEConversionParams()):
-        """Initializes a ConversionLaneletNetwork"""
+    def __init__(self, config: OpenDRIVEConversionParams = OpenDRIVEConversionParams(),
+                 transformer: Optional[Transformer] = None):
+        """
+        Initializes a ConversionLaneletNetwork
+
+        :param config: OpenDRIVE config parameters.
+        :param transformer: Coordinate projection transformer.
+        """
         super().__init__()
         self._config = config
         self._old_lanelet_ids = {}
+        self._transformer = transformer
 
     def old_lanelet_ids(self) -> dict:
         """Get the old lanelet ids.
@@ -311,7 +322,7 @@ class ConversionLaneletNetwork(LaneletNetwork):
 
             if lanelet_join or lanelet_split:
                 js_targets.append(
-                    _JoinSplitTarget(self, lanelet, lanelet_split, lanelet_join,
+                    _JoinSplitTarget(self, lanelet, lanelet_split, lanelet_join, self._transformer,
                                      self._config.precision)
                 )
 
@@ -689,8 +700,19 @@ class ConversionLaneletNetwork(LaneletNetwork):
                 if successor != lanelet.lanelet_id:
                     successor_lane_polygon = self.find_lanelet_by_id(successor).polygon
                     lanelet_polygon = lanelet.polygon
-                    if successor_lane_polygon.shapely_object.intersects(lanelet_polygon.shapely_object):
-                        return True
+                    if not lanelet_polygon.shapely_object.is_valid:
+                        make_valid(lanelet_polygon.shapely_object)
+                    if not successor_lane_polygon.shapely_object.is_valid:
+                        make_valid(successor_lane_polygon.shapely_object)
+                    try:
+                        if successor_lane_polygon.shapely_object.intersects(lanelet_polygon.shapely_object):
+                            return True
+                    except shapely.errors.GEOSException:
+                        logging.error("ConversionLaneletNetwork::check_if_lanelet_in_intersection: "
+                                      "Invalid lanelet shape lanelet {} or {}. "
+                                      "We assume this lanelet is not part of "
+                                      "the intersection.".format(successor, lanelet.lanelet_id))
+                        continue
         return False
 
     def check_if_successor_is_intersecting(self, intersection_map, successors_list) -> bool:
@@ -1109,14 +1131,19 @@ class _JoinSplitTarget:
         join/split
     """
 
-    def __init__(
-        self,
-        lanelet_network: ConversionLaneletNetwork,
-        main_lanelet: ConversionLanelet,
-        split: bool,
-        join: bool,
-        precision: float = OpenDRIVEConversionParams.precision,
-    ):
+    def __init__(self,lanelet_network: ConversionLaneletNetwork, main_lanelet: ConversionLanelet, split: bool,
+                 join: bool, transformer: Optional[Transformer] = None,
+                 precision: float = OpenDRIVEConversionParams.precision):
+        """
+
+        :param lanelet_network: LaneletNetwork where join/split occurs.
+        :param main_lanelet: Lanelet where split starts or join ends.
+        :param split: Boolean indicating whether a lanelet split should be performed.
+        :param join: Boolean indicating whether a lanelet join should be performed.
+        :param transformer: Coordinate projection transformer.
+        :param precision: precision with which to convert plane group to lanelet
+        """
+
         self.main_lanelet = main_lanelet
         self.lanelet_network = lanelet_network
         if split and join:
@@ -1130,6 +1157,7 @@ class _JoinSplitTarget:
         self._js_pairs = []
         self._single_lanelet_operation = False
         self.precision = precision
+        self._transformer = transformer
 
     @property
     def split(self) -> bool:
@@ -1264,7 +1292,7 @@ class _JoinSplitTarget:
                 [0, length],
                 [width_start, width_end],
             )
-            js_pair.move_border(width=distance, linking_side=self.linking_side)
+            js_pair.move_border(width=distance, linking_side=self.linking_side, transformer=self._transformer)
             running_pos += pos_end - pos_start
 
     def _move_borders_if_split_and_join(self):
@@ -1498,15 +1526,14 @@ class _JoinSplitPair:
         self.change_interval = change_interval
         self.precision = precision
 
-    def move_border(self, width: np.ndarray, linking_side: str) -> ConversionLanelet:
+    def move_border(self, width: np.ndarray, linking_side: str,
+                    transformer: Optional[Transformer] = None) -> ConversionLanelet:
         """Move border of self.lanelet.
 
         :param width: Start and end value of new width of lanelet.
-        :type width: np.ndarray
         :param linking_side: Side on which the split/join happens, either "left" or "right"
-        :type linking_side: str
+        :param transformer: Coordinate projection transformer.
         :return: Resulting lanelet after border movement.
-        :rtype: :class:`ConversionLanelet`
         """
         self.lanelet.move_border(
             mirror_border=linking_side,
@@ -1514,5 +1541,6 @@ class _JoinSplitPair:
             distance=width,
             adjacent_lanelet=self.adjacent_lanelet,
             precision=self.precision,
+            transformer=transformer
         )
         return self.lanelet

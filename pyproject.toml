@@ -42,6 +42,7 @@ omegaconf = "^2.3.0"
 pyyaml = "6.0"
 pygeodesy = "^23.3.23"
 mercantile = "^1.2.1"
+urllib3 = "^2.0.3"
 
 [tool.poetry.group.docs]
 optional = true
