@@ -1,12 +1,13 @@
-import iso3166
 import numpy as np
-import warnings
+import logging
 import enum
 from crdesigner.map_conversion.opendrive.opendrive_conversion import utils
 from typing import Union, Tuple, List
 
 from crdesigner.map_conversion.opendrive.opendrive_parser.elements.road import Road
 from crdesigner.map_conversion.common.utils import generate_unique_id
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadLanes import LaneSection
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadSignal import Signal
 
 from commonroad.scenario.traffic_sign import TrafficSign, TrafficLight, TrafficSignElement, TrafficSignIDZamunda, \
     TrafficSignIDGermany, TrafficSignIDUsa, TrafficSignIDChina, TrafficSignIDSpain, TrafficSignIDRussia
@@ -19,22 +20,20 @@ def extract_traffic_element_id(signal_type: str, signal_subtype: str, traffic_si
     """Extract the traffic element id from the signal type and subtype string.
 
     :param signal_type: Signal type of the traffic element
-    :type signal_type: str
     :param signal_subtype: Subtype of the traffic element
-    :type signal_subtype: str
     :param traffic_sign_enum: Enumeration of country-specific traffic signs
-    :type traffic_sign_enum: enum
     :return: The extracted traffic element id.
-    :rtype: Union[TrafficSignIDZamunda, TrafficSignIDGermany, TrafficSignIDUsa, TrafficSignIDChina,
-                 TrafficSignIDSpain, TrafficSignIDRussia]
     """
     if signal_type in set(item.value for item in traffic_sign_enum):
         element_id = traffic_sign_enum(signal_type)
     elif signal_type + "-" + signal_subtype in set(item.value for item in traffic_sign_enum):
         element_id = traffic_sign_enum(signal_type + "-" + str(signal_subtype))
+    elif (traffic_sign_enum is TrafficSignIDGermany or traffic_sign_enum is TrafficSignIDZamunda) \
+            and signal_type == "252":  # traffic sign ID 252 is replaced by 260
+        element_id = traffic_sign_enum("260")
     else:
-        warnings.warn("OpenDRIVE/traffic_signals.py: Unknown {}"
-                      " of ID {} of subtype {}!".format(traffic_sign_enum.__name__, signal_type, signal_subtype))
+        logging.warning("OpenDRIVE/traffic_signals.py: Unknown {} of ID {} of subtype {}!".format(
+                traffic_sign_enum.__name__, signal_type, signal_subtype))
         element_id = traffic_sign_enum.UNKNOWN
 
     return element_id
@@ -44,9 +43,7 @@ def get_traffic_signals(road: Road) -> Tuple[List[TrafficLight], List[TrafficSig
     """Extracts traffic_lights, traffic_signs, stop_lines from a road.
 
     :param road: The road object from which to extract signals.
-    :type road: :class:`Road`
     :return: lists of traffic_lights, traffic_signs, stop_lines
-    :rtype: tuple[list[TrafficLight], list[TrafficSign], list[StopLine]]
     """
     traffic_signs = []
     traffic_lights = []
@@ -173,20 +170,16 @@ def get_traffic_signals(road: Road) -> Tuple[List[TrafficLight], List[TrafficSig
     return traffic_lights, traffic_signs, stop_lines
 
 
-def calculate_stop_line_position(lane_sections, signal, position, tangent) -> Tuple[np.ndarray, np.ndarray]:
+def calculate_stop_line_position(lane_sections: List[LaneSection], signal: Signal, position: np.ndarray,
+                                 tangent: float) -> Tuple[np.ndarray, np.ndarray]:
     """Function to calculate the 2 points that define the stop line which
     is a straight line from one edge of the road to the other.
 
     :param lane_sections: Opendrive lane_sections list containing the lane_section parsed lane_section class
-    :type lane_sections: list
     :param signal: Signal object, in this case the stop line.
-    :type signal: :class:`StopLine`
     :param position: initial position as calculated in the get_traffic_signals function
-    :type position: np.ndarray
     :param tangent: tangent value as calculated in the get_traffic_signals function
-    :type tangent: float
     :return: Positions of the stop line
-    :rtype: tuple[np.ndarray, np.ndarray]
     """
     total_width = 0
     for lane_section in lane_sections:
