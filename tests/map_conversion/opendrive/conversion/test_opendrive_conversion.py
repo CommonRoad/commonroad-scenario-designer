@@ -286,7 +286,7 @@ class TestOpenDriveToCommonRoadConversion(unittest.TestCase):
                          scenario.lanelet_network.find_lanelet_by_id(2).user_bidirectional)
 
     def test_access_mapping(self):
-        name = "straight_road_lane_access_autonomous" # testing ignored types
+        name = "straight_road_lane_access_autonomous"  # testing ignored types
         scenario = self.load_and_convert_opendrive(name)
         self.assertEqual({RoadUser.VEHICLE, RoadUser.BICYCLE, RoadUser.PEDESTRIAN, RoadUser.TRAIN},
                          scenario.lanelet_network.find_lanelet_by_id(2).user_one_way)
@@ -302,6 +302,11 @@ class TestOpenDriveToCommonRoadConversion(unittest.TestCase):
         scenario = self.load_and_convert_opendrive(name)
         self.assertEqual({RoadUser.TRUCK}, scenario.lanelet_network.find_lanelet_by_id(2).user_one_way)
 
+    def test_mona_east_projection(self):
+        name = "MONAEast"
+        scenario = self.load_and_convert_opendrive(name)
+        np.testing.assert_almost_equal(scenario.lanelet_network.find_lanelet_by_id(1).center_vertices[0],
+                                       np.array([692933.6754881, 5338901.6846093]))
 
 
 if __name__ == "__main__":

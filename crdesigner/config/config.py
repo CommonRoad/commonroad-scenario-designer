@@ -167,6 +167,12 @@ class OpenDRIVEConversionParams(BaseParam):
     # least angle for lane segment to be added to the graph in degrees.
     # if you edit the graph by hand, a value of 0 is recommended
     lane_segment_angle: float = 5.0
+    # string used for the initialization of projection
+    proj_string: str = "+proj=utm +zone=32 +ellps=WGS84"
+    # OpenDRIVE lane types which are considered for conversion
+    filter_types: List[str] = \
+        field(default_factory=lambda: ["driving", "restricted", "onRamp", "offRamp", "exit", "entry", "sidewalk",
+                                       "shoulder", "crosswalk", "bidirectional"])
 
 
 @dataclass

@@ -32,12 +32,12 @@ class TestEulerSpiral(unittest.TestCase):
 
         # length = 0
         length = 0
-        spiral = EulerSpiral.createFromLengthAndCurvature(length, curvStart, curvEnd)
+        spiral = EulerSpiral.create_from_length_and_curvature(length, curvStart, curvEnd)
         self.assertEqual(0, spiral._gamma)
 
         # length != 0
         length = 4
-        spiral = EulerSpiral.createFromLengthAndCurvature(length, curvStart, curvEnd)
+        spiral = EulerSpiral.create_from_length_and_curvature(length, curvStart, curvEnd)
         self.assertEqual(1, spiral._gamma)
 
     def test_calc(self):

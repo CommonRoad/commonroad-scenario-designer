@@ -1,5 +1,5 @@
 import unittest
-
+from pyproj.transformer import CRS, Transformer
 import numpy as np
 import crdesigner.map_conversion.common.conversion_lanelet_network
 from crdesigner.map_conversion.common.conversion_lanelet_network import  \
@@ -905,6 +905,74 @@ class TestJointSplitTarget(unittest.TestCase):
         self.assertListEqual(true_new_lanelet.left_vertices.tolist(), lanelet.left_vertices.tolist())
         self.assertListEqual(true_new_lanelet.center_vertices.tolist(), lanelet.center_vertices.tolist())
         self.assertListEqual(true_new_lanelet.right_vertices.tolist(), lanelet.right_vertices.tolist())
+
+    def test_move_borders_if_split_or_join_transformed(self):
+        crs_from = CRS("+proj=tmerc +a=6378137 +b=6378137 +lon_0=11.663999726157273 +x_0=-0 "
+                       "+y_0=-5372577.5788830593 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs")
+        crs_to = CRS("+proj=utm +zone=32 +ellps=WGS84")
+        transformer = Transformer.from_proj(crs_from, crs_to)
+        conversion_lanelet_network = ConversionLaneletNetwork()
+
+        left_vertices = np.array(
+                [[456.37176199, 375.28599181], [456.6199314, 435.28795596], [457.65260563, 495.29380432]])
+        center_vertices = np.array(
+                [[458.24673901, 375.29527514], [458.49490842, 435.29723929], [459.52758265, 495.30308766]])
+        right_vertices = np.array(
+                [[460.12171603, 375.30455848], [460.36988543, 435.30652262], [461.40255967, 495.31237099]])
+
+        plane_group = ParametricLaneGroup()
+        plane_group._add_geo_length(100, False)
+        reference_plan_view = PlanView()
+        reference_plan_view.add_line([0.0, 0.0], 0.5, 100)
+        inner_border = Border()
+        inner_border.reference = reference_plan_view
+        inner_border.width_coefficients.append([0, 0, 0, 0])
+        inner_border.width_coefficient_offsets.append(0.0)
+        outer_border = Border()
+        outer_border.reference = reference_plan_view
+        outer_border.width_coefficients.append([3.75, 0, 0, 0])
+        outer_border.width_coefficient_offsets.append(0.0)
+        border_group = ParametricLaneBorderGroup(inner_border, 0.0, outer_border, 0.0)
+        parametric_lane = ParametricLane("88.0.3.-1", "driving", border_group, 100, None, None)
+        plane_group.parametric_lanes.append(parametric_lane)
+
+        lanelet = init_lanelet_empty_vertices_from_id(plane_group, '88.0.2.-1')
+        adjacent_lanelet = ConversionLanelet(plane_group, left_vertices, center_vertices, right_vertices, '88.0.3.-1')
+
+        jspair = _JoinSplitPair(lanelet, adjacent_lanelet, [0, 95])
+        # test with split
+        join_split_target = _JoinSplitTarget(conversion_lanelet_network, lanelet, True, False)
+
+        join_split_target._js_pairs = [jspair]
+        join_split_target.change_width = 3.75
+        join_split_target._move_borders_if_split_or_join()
+
+        true_new_lanelet = lanelet.parametric_lane_group.to_lanelet_with_mirroring(None, [3.75, 3.75],
+                                                                                   [0, 95], adjacent_lanelet,
+                                                                                   transformer=transformer)
+
+        np.testing.assert_almost_equal(true_new_lanelet.left_vertices, np.array(
+                [transformer.transform(vert[0], vert[1]) for vert in lanelet.left_vertices.tolist()]))
+        np.testing.assert_almost_equal(true_new_lanelet.center_vertices, np.array(
+                [transformer.transform(vert[0], vert[1]) for vert in lanelet.center_vertices.tolist()]))
+        np.testing.assert_almost_equal(true_new_lanelet.right_vertices, np.array(
+                [transformer.transform(vert[0], vert[1]) for vert in lanelet.right_vertices.tolist()]))
+        # test with join
+        join_split_target = _JoinSplitTarget(conversion_lanelet_network, lanelet, False, True)
+
+        join_split_target._js_pairs = [jspair]
+        join_split_target.change_width = 3.75
+        join_split_target._move_borders_if_split_or_join()
+
+        true_new_lanelet = lanelet.parametric_lane_group.to_lanelet_with_mirroring(None, [3.75, 3.75],
+                                                                                   [0, 95], adjacent_lanelet,
+                                                                                   transformer=transformer)
+        np.testing.assert_almost_equal(true_new_lanelet.left_vertices, np.array(
+                [transformer.transform(vert[0], vert[1]) for vert in lanelet.left_vertices.tolist()]))
+        np.testing.assert_almost_equal(true_new_lanelet.center_vertices, np.array(
+                [transformer.transform(vert[0], vert[1]) for vert in lanelet.center_vertices.tolist()]))
+        np.testing.assert_almost_equal(true_new_lanelet.right_vertices, np.array(
+                [transformer.transform(vert[0], vert[1]) for vert in lanelet.right_vertices.tolist()]))
 
 
 class TestJoinSplitPair(unittest.TestCase):

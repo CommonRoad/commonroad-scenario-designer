@@ -36,6 +36,7 @@ class Node:
         node.set("id", self.id_)
         node.set("action", "modify")
         node.set("visible", "true")
+        node.set("version", "1")
         node.set("lat", self.lat)
         node.set("lon", self.lon)
         if self.local_x is not None and self.local_y is not None:
@@ -81,6 +82,7 @@ class Way:
         way.set("id", self.id_)
         way.set("action", "modify")
         way.set("visible", "true")
+        way.set("version", "1")
         for node in self.nodes:
             xml_node = etree.SubElement(way, "nd")
             xml_node.set("ref", node)
@@ -123,6 +125,7 @@ class WayRelation:
         rel.set("id", self.id_)
         rel.set("action", "modify")
         rel.set("visible", "true")
+        rel.set("version", "1")
         right_way = etree.SubElement(rel, "member")
         right_way.set("type", "way")
         right_way.set("ref", self.right_way)
@@ -174,6 +177,7 @@ class RegulatoryElement:
         rel = etree.Element("relation")
         rel.set("id", self.id_)
         rel.set("action", "modify")
+        rel.set("version", "1")
         rel.set("visible", "true")
         for r in self.refers:
             right_way = etree.SubElement(rel, "member")

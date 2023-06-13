@@ -158,7 +158,7 @@ class Spiral(Geometry):
         self._curv_end = curv_end
 
         super().__init__(start_position=start_position, heading=heading, length=length)
-        self._spiral = EulerSpiral.createFromLengthAndCurvature(
+        self._spiral = EulerSpiral.create_from_length_and_curvature(
             self.length, self._curv_start, self._curv_end
         )
 

@@ -17,14 +17,12 @@ class TestLanelet2ToCommonRoadConversion(unittest.TestCase):
     """Tests the conversion from an osm file to a CommonRoad xml file."""
 
     @staticmethod
-    def load_and_convert(osm_file_name: str) -> Scenario:
+    def load_and_convert(osm_file_name: str, translate: bool = False) -> Scenario:
         """Loads and converts osm file to a scenario
-        
-        Args:
-        osm_file_name: name of the osm file
 
-        Returns:
-        Scenario that corresponds to that osm file
+        :param osm_file_name: name of the osm file
+        :param translate: Boolean indicating whether the map should be moved to the origin
+        :return: Scenario that corresponds to that osm file
         """
         cwd_path = os.path.dirname(os.path.abspath(__file__))
         out_path = cwd_path + "/.pytest_cache"
@@ -41,25 +39,26 @@ class TestLanelet2ToCommonRoadConversion(unittest.TestCase):
             osm = Lanelet2Parser(etree.parse(fh).getroot()).parse()
 
         osm2l = Lanelet2CRConverter()
-        return osm2l(osm)
+        return osm2l(osm, translate=translate)
 
-    def compare_maps(self, file_name: str) -> bool:
+    def compare_maps(self, file_name: str, translate: bool = False) -> bool:
         """
         Test if the scenario is equal to the loaded xml file.
         Disregard the different dates.
         """
         xml_output_name = file_name
+        translated = "" if not translate else "_translated"
 
         with open(os.path.dirname(os.path.realpath(__file__))
-                  + f"/../test_maps/lanelet2/{xml_output_name}.xml", "r", ) as fh:
+                  + f"/../test_maps/lanelet2/{xml_output_name}{translated}.xml", "r", ) as fh:
             parser = etree.XMLParser(remove_blank_text=True)
             tree_import = etree.parse(fh, parser=parser).getroot()
-            writer = CommonRoadFileWriter(scenario=self.load_and_convert(file_name),
+            writer = CommonRoadFileWriter(scenario=self.load_and_convert(file_name, translate=translate),
                                           planning_problem_set=PlanningProblemSet(), author="", affiliation="",
                                           source="CommonRoad Scenario Designer", tags={Tag.URBAN, Tag.HIGHWAY}, )
             writer.write_to_file(
-                    os.path.dirname(os.path.abspath(__file__)) + "/.pytest_cache" + "/" + xml_output_name + ".xml",
-                    OverwriteExistingFile.ALWAYS)
+                    os.path.dirname(os.path.abspath(__file__)) + "/.pytest_cache" + "/" + xml_output_name
+                    + translated + ".xml", OverwriteExistingFile.ALWAYS)
 
             # set same date so this won't change the comparison
             date = time.strftime("%Y-%m-%d", time.localtime())
@@ -74,6 +73,10 @@ class TestLanelet2ToCommonRoadConversion(unittest.TestCase):
     def test_simple_map(self):
         """Simple test case file which includes successors and predecessors and adjacencies."""
         self.assertTrue(self.compare_maps("urban-1_lanelets_utm"))
+
+    def test_simple_map_translated(self):
+        """Simple test case file which includes successors and predecessors and adjacencies."""
+        self.assertTrue(self.compare_maps("urban-1_lanelets_utm", translate=True))
 
     def test_merging_lanelets(self):
         """Basic test file including some splits and joins."""
