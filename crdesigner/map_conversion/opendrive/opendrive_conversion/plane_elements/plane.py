@@ -24,9 +24,7 @@ class ParametricLaneBorderGroup:
         :param outer_border: Outer Border of a ParametricLane
         :param inner_border_offset: Offset of start of parametric lane to start of border.
                                     This is necessary as a Border can be used by multiple ParametricLanes
-        :type inner_border_offset: float
         :param outer_border_offset: Same concept as inner_border_offset, but for outer border.
-        :type outer_border_offset: float
         """
         self.inner_border: Border = inner_border
         self.inner_border_offset = inner_border_offset
@@ -131,10 +129,10 @@ class ParametricLane:
         :param s_pos: Position of ParametricLane (in curve parameter ds) where width should be calculated.
         :return: The width at position s_pos
         """
-        innerCoords = self.calc_border("inner", s_pos)
-        outerCoords = self.calc_border("outer", s_pos)
+        inner_coords = self.calc_border("inner", s_pos)
+        outer_coords = self.calc_border("outer", s_pos)
 
-        return np.linalg.norm(innerCoords[0] - outerCoords[0])
+        return np.linalg.norm(inner_coords[0] - outer_coords[0])
 
     def has_zero_width_everywhere(self) -> bool:
         """Checks if width is zero at every point of this ParametricLaneGroup.
@@ -258,8 +256,8 @@ class ParametricLane:
         left_vertices = []
         right_vertices = []
         # calculate left and right vertices of lanelet
-        s = 0
-        check_3 = True
+        # s = 0
+        # check_3 = True
 
         # old version from opendrive2lanelet start
         # no sampling of s and "distance" between two consecutive s is similar

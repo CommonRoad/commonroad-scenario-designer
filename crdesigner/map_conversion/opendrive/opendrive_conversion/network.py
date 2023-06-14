@@ -395,7 +395,8 @@ class Network:
         network.add_traffic_signs_to_network([traffic_sign])
         lanelet.add_traffic_sign_to_lanelet(traffic_sign.traffic_sign_id)
 
-    def export_commonroad_scenario(self, general_config: GeneralParams, opendrive_config: OpenDRIVEConversionParams):
+    def export_commonroad_scenario(self, general_config: GeneralParams = GeneralParams(),
+                                   opendrive_config: OpenDRIVEConversionParams = OpenDRIVEConversionParams()):
         """Export a full CommonRoad scenario
 
         :param general_config: General config parameters.
@@ -407,10 +408,8 @@ class Network:
             geo_transformation = GeoTransformation(geo_reference=self._geo_ref)
 
             if longitude is not None and latitude is not None:
-                location = Location(
-                    geo_transformation=geo_transformation,
-                    gps_latitude=latitude, gps_longitude=longitude
-                )
+                location = Location(geo_transformation=geo_transformation,
+                                    gps_latitude=latitude, gps_longitude=longitude)
 
             else:
                 location = Location(geo_transformation=geo_transformation)

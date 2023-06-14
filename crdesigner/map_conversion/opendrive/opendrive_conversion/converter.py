@@ -3,9 +3,11 @@ from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.pla
     ParametricLaneBorderGroup
 from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.plane_group import ParametricLaneGroup
 from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.border import Border
-from crdesigner.map_conversion.opendrive.opendrive_conversion.utils import encode_road_section_lane_width_id, encode_mark_lane_width_id
+from crdesigner.map_conversion.opendrive.opendrive_conversion.utils import encode_road_section_lane_width_id, \
+    encode_mark_lane_width_id
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadLanes import Lane
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadLanes import LaneSection, LaneWidth
 from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadPlanView import PlanView
-import numpy as np
 
 
 class OpenDriveConverter:
@@ -54,15 +56,13 @@ class OpenDriveConverter:
         return reference_border
 
     @staticmethod
-    def lane_section_to_parametric_lanes(lane_section, reference_border) -> List[ParametricLaneGroup]:
+    def lane_section_to_parametric_lanes(lane_section: LaneSection, reference_border: Border) \
+            -> List[ParametricLaneGroup]:
         """Convert a whole lane section into a list of ParametricLane objects.
 
         :param lane_section: LaneSection from which to create the list of ParametricLane Objects
-        :type lane_section: :class:`LaneSection`
         :param reference_border: The reference border of the lane section, created from create_reference_border()
-         :type reference_border: :class:`Border`
-         :return: The converted ParametricLane objects.
-         :rtype: List
+        :return: The converted ParametricLane objects.
         """
 
         plane_groups = []
@@ -126,20 +126,16 @@ class OpenDriveConverter:
         return plane_groups
 
     @staticmethod
-    def create_parametric_lane(lane_borders: List[Border], width, lane, side, mark_idx) -> ParametricLane:
+    def create_parametric_lane(lane_borders: List[Border], width: LaneWidth, lane: Lane, side: str, mark_idx: int) \
+            -> ParametricLane:
         """Create a parametric lane for a certain width section.
 
         :param lane_borders: Array with already created lane borders.
         :param width: Width section with offset and coefficient information.
-        :type width: :class:`LaneWidth`
         :param lane: Lane in which new parametric lane is created.
-        :type lane: :class:`Lane`
         :param side: Which side of the lane section where the parametric lane is created.
-        :type side: str
-        :param speed: Speed limit for this individual lane
-        :type speed: float
+        :param mark_idx: Index of line marking belonging to lane.
         :return: A ParametricLane object with specified borders and a unique id.
-        :rtype: :class:`ParametricLane`
         """
         if len(lane.road_mark) > 0:
             marking = lane.road_mark[mark_idx]
@@ -171,18 +167,15 @@ class OpenDriveConverter:
         return parametric_lane
 
     @staticmethod
-    def _create_outer_lane_border(lane_borders, lane, coeff_factor) -> Border:
+    def _create_outer_lane_border(lane_borders: List[Border], lane: Lane, coeff_factor: int) -> Border:
         """Create an outer lane border of a lane.
         InnerBorder is already saved in lane_borders, as it is
         the outer border of the inner neighbour of the lane.
 
         :param lane_borders: Previous calculated lane borders of more inner lanes.
-        :type lane_borders: list[:class:`Border`]
         :param lane: Lane for which outer border shall be created.
-        :type lane: :class:`Lane`
         :param coeff_factor: Factor of -1 or 1, depending on which side of the reference path the lane is.
             Right side is -1.
-        :type coeff_factor: float
         :return: The created outer lane border.
         """
 
@@ -208,11 +201,10 @@ class OpenDriveConverter:
         return border
 
     @staticmethod
-    def determine_neighbours(lane) -> Tuple[str, str, bool]:
+    def determine_neighbours(lane: Lane) -> Tuple[str, str, bool]:
         """Determines neighbors of a lane.
 
         :param lane: Lane to find neighbors to.
-        :type lane: :class:`Lane`
         :return: IDs of the inner and outer neighbor, and whether the inner neighbor has the same direction.
         """
         if abs(lane.id) > 1:

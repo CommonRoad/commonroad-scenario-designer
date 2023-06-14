@@ -17,7 +17,7 @@ class ParametricLaneGroup:
 
     def __init__(
         self,
-        id_=None,
+        id_: str = None,
         parametric_lanes=None,
         inner_neighbour=None,
         inner_neighbour_same_direction=True,
@@ -51,12 +51,11 @@ class ParametricLaneGroup:
             else:
                 self.append(parametric_lanes)
 
-    def append(self, parametric_lane):
-        """Append lane to start or end of interal list of ParametricLane objects. If the parametric_lane is reverse,
+    def append(self, parametric_lane: ParametricLane):
+        """Append lane to start or end of internal list of ParametricLane objects. If the parametric_lane is reverse,
         it is inserted at the start.
 
         :param parametric_lane: Lane to be inserted either at beginning or end of list.
-        :type parametric_lane: :class:`ParametricLane`
         """
         if parametric_lane.reverse:
             self.parametric_lanes.insert(0, parametric_lane)
@@ -82,9 +81,7 @@ class ParametricLaneGroup:
         the proper ParametricLane for calculating a position.
 
         :param length: Length of ParametricLane to be added.
-        :type length: float
         :param reverse: Whether the lane is reversed. Default is False.
-        :type reverse: bool
         """
         if reverse:
             self._geo_lengths = np.insert(self._geo_lengths, 1, length)
@@ -101,7 +98,6 @@ class ParametricLaneGroup:
         """Get type of ParametricLaneGroup.
 
         :return: Type of first ParametricLane in this group.
-        :rtype: str
         """
         return self.parametric_lanes[0].type_
 
@@ -110,7 +106,6 @@ class ParametricLaneGroup:
         """Length of all ParametricLanes which are collected in this ParametricLaneGroup.
 
         :return: Accumulated length of ParametricLaneGroup
-        :rtype: float
         """
 
         return sum([x.length for x in self.parametric_lanes])
@@ -128,7 +123,6 @@ class ParametricLaneGroup:
         """Checks if width is zero at every point of this ParametricLaneGroup.
 
         :return: True if every ParametricLane has width_coefficients equal to only zero
-        :rtype: bool
         """
         return all(
             [plane.has_zero_width_everywhere() for plane in self.parametric_lanes]
@@ -271,19 +265,15 @@ class ParametricLaneGroup:
 
         return lanelet
 
-    def calc_border(self, border: str, s_pos: float, width_offset: float = 0.0, compute_curvature=True):
+    def calc_border(self, border: str, s_pos: float, width_offset: float = 0.0, compute_curvature: bool = True) \
+            -> Tuple[Tuple[float, float], float, float, float]:
         """Calc vertices point of inner or outer Border.
 
         :param border: Which border to calculate (inner or outer)
-        :type border: str
         :param s_pos: Position of parameter ds where to calc the cartesian coordinates
-        :type s_pos: float
         :param width_offset: Offset to add to calculated width in reference to the reference border. Default is 0.0.
-        :type width_offset: float
         :param compute_curvature: Whether to computer curvature. Default is True.
-        :type compute_curvature: bool
         :return: Cartesian coordinates of point on inner border and tangential direction.
-        :rtype: Tuple[Tuple[float, float], float, float, float]
         """
         try:
             # get index of geometry which is at s_pos
@@ -450,9 +440,7 @@ class ParametricLaneGroup:
 
         :param precision: Number which indicates at which space interval (in curve parameter ds)
                         the coordinates of the boundaries should be calculated.
-        :type precision: float
         :return: Array with the ordered positions.
-        :rtype: np.ndarray
         """
         poses = np.array([])
         for i, parametric_lane in enumerate(self.parametric_lanes):
@@ -471,10 +459,11 @@ class ParametricLaneGroup:
         return poses
 
     def _set_adjacent_lanes(self, lanelet: ConversionLanelet):
-        """While converting a ParametricLaneGroup to a Lanelet, set
+        """
+        While converting a ParametricLaneGroup to a Lanelet, set
         the proper attributes relating to adjacent lanes.
+
         :param lanelet: The lanelet which is created from the ParametricLaneGroup
-        :type lanelet: :class:`ConversionLanelet`
         """
         if self.inner_neighbour is not None:
             lanelet.adj_left = self.inner_neighbour
@@ -488,7 +477,6 @@ class ParametricLaneGroup:
         """Get the maximum width of the lanelet.
 
         :return: Maximum width of all ParametricLanes in this group.
-        :rtype: float
         """
         total_maximum = 0
 
@@ -505,12 +493,9 @@ class ParametricLaneGroup:
         """Get the earliest point of the ParametricLaneGroup where the width change is zero.
 
         :param reverse: True if checking should start from end of lanelet. Default is False
-        :type reverse: bool
         :param reference_width: Width for which width at zero width change position has
                             to be greater as. Default is 0.0.
-        :type reference_width: float
         :return: Position of ParametricLaneGroup (in curve parameter ds) where width change is zero.
-        :rtype: Tuple[Optional[float], Optional[float]]
         """
         s_pos = 0
         positions = []
@@ -533,6 +518,6 @@ class ParametricLaneGroup:
             if val > 0.9 * reference_width or val > 0.9 * self.maximum_width():
                 if (pos == 0.0 and not reverse) or (pos == self.length and reverse):
                     continue
-                return (pos, val)
+                return pos, val
 
-        return (None, None)
+        return None, None
