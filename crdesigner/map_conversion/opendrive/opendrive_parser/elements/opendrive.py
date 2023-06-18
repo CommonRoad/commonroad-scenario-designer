@@ -160,3 +160,4 @@ class Header:
         self.west = west
         self.vendor = vendor
         self.geo_reference = None
+        self.offset = None  # {x: , y: , z: , hdg:}

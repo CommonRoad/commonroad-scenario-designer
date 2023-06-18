@@ -59,6 +59,7 @@ class Network:
         self._planes = []
         self._link_index = None
         self._geo_ref = None
+        self._offset = None
         self._traffic_lights = []
         self._traffic_signs = []
         self._stop_lines = []
@@ -91,10 +92,8 @@ class Network:
         self._link_index = LinkIndex()
         self._link_index.create_from_opendrive(opendrive)
 
-        try:
-            self._geo_ref = opendrive.header.geo_reference
-        except TypeError:
-            self._geo_ref = None
+        self._geo_ref = opendrive.header.geo_reference
+        self._offset = opendrive.header.offset
 
         # Get country ID form signal data in openDrive and set it as attribute of the network object
         self.assign_country_id(Network.get_country_id_from_opendrive(opendrive.roads))
@@ -431,6 +430,10 @@ class Network:
 
         scenario.add_objects(self.export_lanelet_network(transformer=transformer,
                                                          filter_types=opendrive_config.filter_types))
+
+        if self._offset is not None:
+            scenario.lanelet_network.translate_rotate(np.array([float(self._offset["x"]), float(self._offset["y"])]),
+                                                      float(self._offset["hdg"]))
 
         return scenario
 

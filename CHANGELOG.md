@@ -6,6 +6,7 @@
 - Creation of autoware-compatible lanelet2 maps
 - Set custom plot limits when adding scenario or aerial image
 - Map German traffic sign 252 to sign to 260
+- Consider OpenDRIVE offset
 
 ### Changed
 - Versions of third-party packages
