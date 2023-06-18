@@ -602,6 +602,10 @@ def parse_opendrive_header(opendrive: OpenDrive, header: etree.ElementTree):
     if header.find("geoReference") is not None:
         parsed_header.geo_reference = header.find("geoReference").text
 
+    # offset {x: , y: , z: , hdg:}
+    if header.find("offset") is not None:
+        parsed_header.offset = header.find("offset").attrib
+
     opendrive.header = parsed_header
 
 
