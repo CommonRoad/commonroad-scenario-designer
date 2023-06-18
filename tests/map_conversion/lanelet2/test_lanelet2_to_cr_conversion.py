@@ -10,6 +10,7 @@ from commonroad.scenario.scenario import Tag, Scenario  # type: ignore
 from crdesigner.map_conversion.common.utils import generate_unique_id
 from crdesigner.map_conversion.lanelet2.lanelet2_parser import Lanelet2Parser
 from crdesigner.map_conversion.lanelet2.lanelet2cr import Lanelet2CRConverter
+from crdesigner.config.config import Lanelet2ConversionParams
 from tests.map_conversion.utils import elements_equal
 
 
@@ -38,8 +39,10 @@ class TestLanelet2ToCommonRoadConversion(unittest.TestCase):
                   + f"/../test_maps/lanelet2/{osm_file_name}.osm", "r", ) as fh:
             osm = Lanelet2Parser(etree.parse(fh).getroot()).parse()
 
-        osm2l = Lanelet2CRConverter()
-        return osm2l(osm, translate=translate)
+        config = Lanelet2ConversionParams()
+        config.translate = translate
+        osm2l = Lanelet2CRConverter(lanelet2_config=config)
+        return osm2l(osm)
 
     def compare_maps(self, file_name: str, translate: bool = False) -> bool:
         """
