@@ -43,7 +43,7 @@ class TestCommandLineInterface(unittest.TestCase):
                           '-i', os.path.dirname(os.path.realpath(__file__))
                           + '/../map_conversion/test_maps/lanelet2/merging_lanelets_utm.xml',
                           '-o', self.output_path + "/cr_lanelet_command_line.osm", '--source_commonroad'])
-        time.sleep(5)
+        time.sleep(10)
         exists = Path(self.output_path + "/cr_lanelet_command_line.osm")
         self.assertTrue(exists.is_file())
 
