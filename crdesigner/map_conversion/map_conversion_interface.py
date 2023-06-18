@@ -32,21 +32,23 @@ from crdesigner.config.config import Lanelet2ConversionParams, OpenDRIVEConversi
 
 
 def lanelet_to_commonroad(
-    input_file: str, config: Lanelet2ConversionParams = Lanelet2ConversionParams()
+        input_file: str,
+        general_config: GeneralParams = GeneralParams(),
+        lanelet2_config: Lanelet2ConversionParams = Lanelet2ConversionParams()
 ) -> Scenario:
     """
     Converts lanelet/lanelet2 file to CommonRoad
 
     :param input_file: Path to lanelet/lanelet2 file
-    :param config: Lanelet2 config parameters.
+    :param general_config: General config parameters.
+    :param lanelet2_config: Lanelet2 config parameters.
     :return: CommonRoad scenario
     """
     parser = Lanelet2Parser(etree.parse(input_file).getroot())
     lanelet2_content = parser.parse()
 
-    lanelet2_converter = Lanelet2CRConverter(config)
-    scenario = lanelet2_converter(lanelet2_content,detect_adjacencies=config.adjacencies,
-                                  left_driving_system=config.left_driving, translate=config.translate)
+    lanelet2_converter = Lanelet2CRConverter(lanelet2_config=lanelet2_config, cr_config=general_config)
+    scenario = lanelet2_converter(lanelet2_content)
 
     return scenario
 

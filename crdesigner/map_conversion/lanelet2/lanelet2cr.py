@@ -210,8 +210,7 @@ class Lanelet2CRConverter:
         self.lanelet_network = None
         self.origin_utm = None
 
-    def __call__(self, osm: OSMLanelet, detect_adjacencies: bool = True, left_driving_system: bool = False,
-                 translate: bool = False) -> Union[Scenario, None]:
+    def __call__(self, osm: OSMLanelet) -> Union[Scenario, None]:
         """
         Convert OSM to Scenario.
         For each lanelet in OSM format, we have to save their first and last
@@ -219,10 +218,6 @@ class Lanelet2CRConverter:
         successors and adjacent neighbors.
 
         :param osm: OSM object which includes nodes, ways and lanelet relations.
-        :param detect_adjacencies: Compare vertices which might be adjacent. Set
-            to false if you consider it too computationally intensive.
-        :param left_driving_system: Set to true if map describes a left_driving_system.
-        :param translate: Moves converted map to origin and set converted scenario accordingly
         :return: A scenario with a lanelet network which describes the
             same map as the osm input.
         """
@@ -243,7 +238,7 @@ class Lanelet2CRConverter:
                      "upper right {}/{}".format(origin_lat, origin_lon,
                                                 max([node.lat for node in self.osm.nodes.values()]),
                                                 max([node.lon for node in self.osm.nodes.values()])))
-        if translate:
+        if self._config.translate:
             self.origin_utm = self.transformer.transform(origin_lat, origin_lon)
         else:
             self.origin_utm = (0, 0)
@@ -264,8 +259,8 @@ class Lanelet2CRConverter:
             # add traffic sign id to traffic signs for speed limit
             # create dictionary for mapping of osm id to cr id and keep id constant
             # later add speed limit as traffic sign
-            lanelet = self._way_rel_to_lanelet(way_rel, detect_adjacencies, left_driving_system, speed_limits,
-                                               speed_limit_lanelets)
+            lanelet = self._way_rel_to_lanelet(way_rel, self._config.adjacencies, self._config.left_driving,
+                                               speed_limits, speed_limit_lanelets)
             if lanelet is not None:
                 self.lanelet_network.add_lanelet(lanelet)
 

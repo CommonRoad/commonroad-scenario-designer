@@ -18,7 +18,7 @@ config.adjacencies = True
 
 # ----------------------------------------------- Option 1: General API ------------------------------------------------
 # load lanelet/lanelet2 file, parse it, and convert it to a CommonRoad scenario
-scenario = lanelet_to_commonroad(input_path, config)
+scenario = lanelet_to_commonroad(input_path, lanelet2_config=config)
 
 # store converted file as CommonRoad scenario
 writer = CommonRoadFileWriter(
@@ -39,8 +39,7 @@ lanelet2_content = parser.parse()
 
 # convert lanelet/lanelet2 map to CommonRoad
 lanelet2_converter = Lanelet2CRConverter(config)
-scenario = lanelet2_converter(lanelet2_content, detect_adjacencies=config.adjacencies,
-                              left_driving_system=config.left_driving)
+scenario = lanelet2_converter(lanelet2_content)
 scenario.scenario_id = ScenarioID(country_id="ZAM", map_name="Lanelet")
 
 # store converted file as CommonRoad scenario
