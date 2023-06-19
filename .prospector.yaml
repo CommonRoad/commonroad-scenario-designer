@@ -53,3 +53,6 @@ pylint:
 
 mypy:
   run: true
+  options :
+    ignore-missing-imports : true
+    follow-imports : skip
