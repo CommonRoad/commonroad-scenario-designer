@@ -402,21 +402,18 @@ class Network:
         :param opendrive_config: OpenDRIVE specific config parameters.
         """
         transformer = None
+        location_kwargs = {}
         if self._geo_ref is not None:
             longitude, latitude = get_geo_reference(self._geo_ref)
-            geo_transformation = GeoTransformation(geo_reference=self._geo_ref)
-
             if longitude is not None and latitude is not None:
-                location = Location(geo_transformation=geo_transformation,
-                                    gps_latitude=latitude, gps_longitude=longitude)
+                location_kwargs = dict(gps_latitude=latitude, gps_longitude=longitude)
 
-            else:
-                location = Location(geo_transformation=geo_transformation)
             crs_from = CRS(self._geo_ref)
             crs_to = CRS(self._config.proj_string)
             transformer = Transformer.from_proj(crs_from, crs_to)
-        else:
-            location = Location()
+
+        location = Location(geo_transformation=GeoTransformation(geo_reference=self._config.proj_string),
+                            **location_kwargs)
 
         scenario_id = ScenarioID(
                 country_id=general_config.country_id if self._country_ID == "ZAM" else self._country_ID,
@@ -430,10 +427,6 @@ class Network:
 
         scenario.add_objects(self.export_lanelet_network(transformer=transformer,
                                                          filter_types=opendrive_config.filter_types))
-
-        if self._offset is not None:
-            scenario.lanelet_network.translate_rotate(np.array([float(self._offset["x"]), float(self._offset["y"])]),
-                                                      float(self._offset["hdg"]))
 
         return scenario
 

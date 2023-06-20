@@ -6,6 +6,7 @@ from commonroad.scenario.lanelet import Lanelet  # type: ignore
 from commonroad.scenario.traffic_sign import TrafficLight, TrafficSign  # type: ignore
 
 from crdesigner.config.config import Lanelet2ConversionParams
+from crdesigner.map_conversion.common.utils import generate_unique_id
 from crdesigner.map_conversion.lanelet2.lanelet2 import OSMLanelet, Node, Way, WayRelation, RegulatoryElement
 
 
@@ -65,16 +66,28 @@ class CR2LaneletConverter:
         
         :param config: Lanelet2 config parameters.
         """
+        generate_unique_id(0)  # reset ID counter for next test case
         self._config = config
-        crs_from = CRS(self._config.proj_string)
-        crs_to = CRS("ETRF89")
-        self.transformer = Transformer.from_proj(crs_from, crs_to)
+        self.transformer = None
         self.osm = None
         self._id_count = 1
         self.first_nodes, self.last_nodes = None, None
         self.left_ways, self.right_ways = None, None
         self.lanelet_network = None
         self.origin_utm = (0, 0)
+
+    def _create_transformer(self, scenario):
+        # TODO: currently, we only consider `GeoTransformation.geo_reference`. The other specifications
+        #   there should be used if specified.
+        loc = scenario.location
+        proj_string_from = None
+        if loc is not None and loc.geo_transformation is not None:
+            proj_string_from = loc.geo_transformation.geo_reference
+        if proj_string_from is None:
+            proj_string_from = self._config.proj_string
+        crs_from = CRS(proj_string_from)
+        crs_to = CRS("ETRF89")
+        self.transformer = Transformer.from_proj(crs_from, crs_to)
 
     @property
     def id_count(self) -> int:
@@ -94,6 +107,7 @@ class CR2LaneletConverter:
 
         :param scenario: Scenario that will be used for conversion
         """
+        self._create_transformer(scenario)
         self.osm = OSMLanelet()
         self.lanelet_network = scenario.lanelet_network
         self.first_nodes = {}  # saves first left and right node | dict() but with a faster execution

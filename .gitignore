@@ -1,4 +1,3 @@
-*.xodr
 !tests/**/**/*.xodr
 #*.xml
 !test/**/**/*.xml

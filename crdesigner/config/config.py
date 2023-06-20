@@ -99,6 +99,13 @@ class GeneralParams(BaseParam):
     source: str = "CommonRoad Scenario Designer"
 
 
+class ProjectionMethods(str, Enum):
+    # projects the lane-network in a way that aligns well with aerial images
+    pseudo_mercator = "EPSG:3857"
+
+    utm_default = "+proj=utm +zone=32 +ellps=WGS84"
+
+
 @dataclass
 class Lanelet2ConversionParams(BaseParam):
     """Parameters specific for Lanelet2 conversion"""
@@ -130,7 +137,7 @@ class Lanelet2ConversionParams(BaseParam):
     # initial node ID
     start_node_id_value: int = 10
     # string used for the initialization of projection
-    proj_string: str = "+proj=utm +zone=32 +ellps=WGS84"
+    proj_string: str = ProjectionMethods.pseudo_mercator.value
     # boolean indicating whether the conversion should be autoware compatible
     autoware: bool = False
     # boolean indicating whether local coordinates should be added
@@ -168,7 +175,7 @@ class OpenDRIVEConversionParams(BaseParam):
     # if you edit the graph by hand, a value of 0 is recommended
     lane_segment_angle: float = 5.0
     # string used for the initialization of projection
-    proj_string: str = "+proj=utm +zone=32 +ellps=WGS84"
+    proj_string: str = ProjectionMethods.pseudo_mercator.value
     # OpenDRIVE lane types which are considered for conversion
     filter_types: List[str] = \
         field(default_factory=lambda: ["driving", "restricted", "onRamp", "offRamp", "exit", "entry", "sidewalk",

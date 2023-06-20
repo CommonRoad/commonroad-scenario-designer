@@ -7,7 +7,7 @@ import sys
 
 from commonroad.scenario.lanelet import StopLine, LineMarking, Lanelet, LaneletNetwork
 from commonroad.scenario.traffic_sign import *
-from commonroad.scenario.scenario import TrafficSign, Location
+from commonroad.scenario.scenario import TrafficSign, Location, GeoTransformation
 from crdesigner.map_conversion.lanelet2.lanelet2cr import _add_closest_traffic_sign_to_lanelet, \
     _add_stop_line_to_lanelet
 from crdesigner.map_conversion.lanelet2.lanelet2_parser import Lanelet2Parser
@@ -70,7 +70,8 @@ class TestLanelet2CRConverter(unittest.TestCase):
         self.assertEqual(l2cr.transformer.definition, transformer.definition)
 
     def test_call(self):
-        l2cr = Lanelet2CRConverter()  # object referred to as "self" in the source code
+        config = Lanelet2ConversionParams()
+        l2cr = Lanelet2CRConverter(lanelet2_config=config)  # object referred to as "self" in the source code
         scenario = l2cr(osm)
         origin_lat = min([node.lat for node in l2cr.osm.nodes.values()])
         origin_lon = min([node.lon for node in l2cr.osm.nodes.values()])  # use left-most lower corner as origin
@@ -88,7 +89,8 @@ class TestLanelet2CRConverter(unittest.TestCase):
 
         # test the scenario values given in the constructor
         self.assertEqual(scenario.dt, 0.1)
-        self.assertEqual(scenario.location, Location(gps_latitude=origin_lat, gps_longitude=origin_lon))
+        self.assertEqual(scenario.location, Location(gps_latitude=origin_lat, gps_longitude=origin_lon,
+                                                     geo_transformation=GeoTransformation(geo_reference=config.proj_string)))
 
         # test the class of the lanelet network
         self.assertEqual(l2cr.lanelet_network.__class__, LaneletNetwork)
