@@ -112,10 +112,6 @@ class RoadNetworkToolboxUI(Toolbox):
         self.southern_bound.setText("48.261424")
         self.eastern_bound.setText("11.660930")
 
-        self.center_at_zero = QCheckBox("Center at origin")
-        self.center_at_zero.setChecked(True)
-        self.layout_aerial_image_groupbox.addRow(self.center_at_zero)
-
         self.Spinner = QtWaitingSpinner(self, centerOnParent=True)
         self.Spinner.setInnerRadius(7)
         self.Spinner.setNumberOfLines(10)

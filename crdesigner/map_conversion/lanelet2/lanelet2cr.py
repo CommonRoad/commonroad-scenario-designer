@@ -10,7 +10,8 @@ from commonroad.scenario.traffic_sign import (TrafficSignElement, TrafficSignIDG
                                               TrafficSignIDUsa,  # type: ignore
                                               TrafficSignIDZamunda, TrafficLightCycleElement,
                                               TrafficLightState, TrafficLightDirection)  # type: ignore
-from commonroad.scenario.scenario import Scenario, ScenarioID, TrafficSign, Location, TrafficLight  # type: ignore
+from commonroad.scenario.scenario import Scenario, ScenarioID, TrafficSign, Location, TrafficLight, \
+    GeoTransformation  # type: ignore
 
 from crdesigner.map_conversion.lanelet2.lanelet2 import OSMLanelet
 from crdesigner.map_conversion.common.utils import generate_unique_id
@@ -316,6 +317,8 @@ class Lanelet2CRConverter:
         self.lanelet_network.cleanup_traffic_light_references()
 
         scenario.add_objects(self.lanelet_network)
+
+        scenario.location.geo_transformation = GeoTransformation(geo_reference=self._config.proj_string)
 
         return scenario
     

@@ -1935,8 +1935,7 @@ self.road_network_toolbox_ui.connect_to_previous_selection.isChecked() and not \
             float(self.road_network_toolbox_ui.northern_bound.text()),
             float(self.road_network_toolbox_ui.western_bound.text()),
             float(self.road_network_toolbox_ui.southern_bound.text()),
-            float(self.road_network_toolbox_ui.eastern_bound.text()),
-            self.road_network_toolbox_ui.center_at_zero.isChecked())
+            float(self.road_network_toolbox_ui.eastern_bound.text()))
         self.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.show_aerial_image()
 
     def remove_aerial_image(self):

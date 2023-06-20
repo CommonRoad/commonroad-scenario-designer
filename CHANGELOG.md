@@ -16,6 +16,10 @@
 
 ### Fixed
 - Lanelet2 projection
+- Visualization of aerial images
+
+### Removed
+- GUI button to center aerial image at origin
 
 ## [0.7.0] - 2023-03-28
 

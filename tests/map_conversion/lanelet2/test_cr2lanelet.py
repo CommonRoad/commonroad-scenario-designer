@@ -41,20 +41,6 @@ class TestCR2LaneletConverter(unittest.TestCase):
         self.assertIsNone(cr1.right_ways)
         self.assertIsNone(cr1.lanelet_network)
         self.assertEqual(cr1.origin_utm, (0, 0))
-        crs_from = CRS(Lanelet2ConversionParams().proj_string)
-        crs_to = CRS("ETRF89")
-        transformer = Transformer.from_proj(crs_from, crs_to)
-        self.assertEqual(cr1.transformer.definition, transformer.definition)  # default proj
-    
-    def test_init_with_scenario(self):
-        # test the initialization with the custom proj scenario
-        config = Lanelet2ConversionParams()
-        config.proj_string = "+proj=utm +zone=59 south"
-        cr1 = CR2LaneletConverter(config)  # object referred to as "self" in the source code
-        crs_from = CRS(config.proj_string)
-        crs_to = CRS("ETRF89")
-        transformer = Transformer.from_proj(crs_from, crs_to)
-        self.assertEqual(cr1.transformer.definition, transformer.definition)
 
     def test_id_count(self):
         # test assigning id
@@ -80,6 +66,16 @@ class TestCR2LaneletConverter(unittest.TestCase):
         cr1(scenario)
         self.assertEqual(scenario.lanelet_network, cr1.lanelet_network)  # check the lanelet network of the scenario
         self.assertEqual(cr1.origin_utm, (0, 0))
+
+        proj_string_from = None
+        if scenario.location is not None and scenario.location.geo_transformation is not None:
+            proj_string_from = scenario.location.geo_transformation.geo_reference
+        if proj_string_from is None:
+            proj_string_from = Lanelet2ConversionParams().proj_string
+        crs_from = CRS(proj_string_from)
+        crs_to = CRS("ETRF89")
+        transformer = Transformer.from_proj(crs_from, crs_to)
+        self.assertEqual(cr1.transformer.definition, transformer.definition)
 
     def test_convert_lanelet(self):
         cr1 = CR2LaneletConverter()

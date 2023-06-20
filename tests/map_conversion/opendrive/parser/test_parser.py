@@ -93,7 +93,8 @@ class TestParser(unittest.TestCase):
         geometry_xml = []
         for geometry in plan_view.findall("geometry"):
             geometry_xml.append(geometry)
-        parse_opendrive_road_geometry(new_road=road, road_geometry=geometry_xml[0])
+        parse_opendrive_road_geometry(new_road=road, road_geometry=geometry_xml[0],
+                                      offset={"x": "0.0", "y": "0.0", "z": "0.0", "hdg":  "0.0"})
 
         self.assertIsInstance(road.planView._geometries[0], Arc)
         np.testing.assert_equal(np.array([6.0599999427795410e+0, 7.4040000915527344e+1]),
@@ -315,7 +316,8 @@ class TestParser(unittest.TestCase):
         parse_opendrive_road_lane_section(road, lane_section_id=1,
                                           lane_section=road_xml.find("lanes").find("laneSection"))
         for x in road_xml.find("planView").findall("geometry"):
-            parse_opendrive_road_geometry(road, road_geometry=x)
+            parse_opendrive_road_geometry(road, road_geometry=x,
+                                          offset={"x": "0.0", "y": "0.0", "z": "0.0", "hdg":  "0.0"})
         self.assertEqual(0, road.planView._geometries[1]._curv_start)
         self.assertEqual(0, road.planView._geometries[2]._aU)
         self.assertEqual(1, road.planView._geometries[2]._bU)

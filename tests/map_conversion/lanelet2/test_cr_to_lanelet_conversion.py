@@ -5,6 +5,7 @@ import sys
 
 from commonroad.common.file_reader import CommonRoadFileReader  # type: ignore
 
+from crdesigner.config.config import Lanelet2ConversionParams, ProjectionMethods
 from crdesigner.map_conversion.lanelet2.cr2lanelet import CR2LaneletConverter
 from tests.map_conversion.utils import elements_equal
 
@@ -23,11 +24,12 @@ class TestCommonRoadToLaneletConversion(unittest.TestCase):
                 f"{os.path.dirname(os.path.realpath(__file__))}/../test_maps/lanelet2/{xml_file_name}.xml"
             )
             scenario, _ = commonroad_reader.open()
-            l2osm = CR2LaneletConverter()
+            params = Lanelet2ConversionParams(proj_string=ProjectionMethods.utm_default.value)
+            l2osm = CR2LaneletConverter(config=params)
             osm = l2osm(scenario)
             return osm
         except etree.XMLSyntaxError as xml_error:
-            print(f"SyntaxERror: {xml_error}")
+            print(f"SyntaxError: {xml_error}")
             print(
                 "There was an error during the loading of the selected CommonRoad file.\n"
             )
