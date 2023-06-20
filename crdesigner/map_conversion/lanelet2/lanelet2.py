@@ -42,10 +42,10 @@ class Node:
         if self.local_x is not None and self.local_y is not None:
             local_x = etree.SubElement(node, "tag")
             local_x.set("k", "local_x")
-            local_x.set("v", self.local_x)
+            local_x.set("v", str(self.local_x))
             local_y = etree.SubElement(node, "tag")
             local_y.set("k", "local_y")
-            local_y.set("v", self.local_y)
+            local_y.set("v", str(self.local_y))
             node.append(local_x)
             node.append(local_y)
         if self.ele != "0.0" or self.autoware:
