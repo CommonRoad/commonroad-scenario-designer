@@ -1377,11 +1377,11 @@ test = ["appdirs (==1.4.4)", "covdefaults (>=2.3)", "pytest (>=7.3.1)", "pytest-
 
 [[package]]
 name = "pluggy"
-version = "1.0.0"
+version = "1.2.0"
 description = "plugin and hook calling mechanisms for python"
 category = "dev"
 optional = false
-python-versions = ">=3.6"
+python-versions = ">=3.7"
 
 [package.extras]
 dev = ["pre-commit", "tox"]
@@ -2182,7 +2182,7 @@ tests = ["cython", "littleutils", "pygments", "pytest", "typeguard"]
 
 [[package]]
 name = "sumocr"
-version = "2023.1"
+version = "2023.2"
 description = "Python tool to interface with the SUMO traffic simulator"
 category = "main"
 optional = false
@@ -2434,7 +2434,7 @@ testing = ["big-O", "flake8 (<5)", "jaraco.functools", "jaraco.itertools", "more
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "1bc08681f7398d45db84ef0391a0b76f7af48ebdb78a3c21dd48ff2d8288da38"
+content-hash = "5837aa6b1c159b54de92b1f3c43e7fa8f04a666573f5766c1380bc494e9ca414"
 
 [metadata.files]
 alabaster = [
@@ -3582,8 +3582,8 @@ platformdirs = [
     {file = "platformdirs-3.7.0.tar.gz", hash = "sha256:87fbf6473e87c078d536980ba970a472422e94f17b752cfad17024c18876d481"},
 ]
 pluggy = [
-    {file = "pluggy-1.0.0-py2.py3-none-any.whl", hash = "sha256:74134bbf457f031a36d68416e1509f34bd5ccc019f0bcc952c7b909d06b37bd3"},
-    {file = "pluggy-1.0.0.tar.gz", hash = "sha256:4224373bacce55f955a878bf9cfa763c1e360858e330072059e10bad68531159"},
+    {file = "pluggy-1.2.0-py3-none-any.whl", hash = "sha256:c2fd55a7d7a3863cba1a013e4e2414658b1d07b6bc57b3919e0c63c9abb99849"},
+    {file = "pluggy-1.2.0.tar.gz", hash = "sha256:d12f0c4b579b15f5e054301bb226ee85eeeba08ffec228092f8defbaa3a4c4b3"},
 ]
 prometheus-client = [
     {file = "prometheus_client-0.17.0-py3-none-any.whl", hash = "sha256:a77b708cf083f4d1a3fb3ce5c95b4afa32b9c521ae363354a4a910204ea095ce"},
@@ -4200,8 +4200,8 @@ stack-data = [
     {file = "stack_data-0.6.2.tar.gz", hash = "sha256:32d2dd0376772d01b6cb9fc996f3c8b57a357089dec328ed4b6553d037eaf815"},
 ]
 sumocr = [
-    {file = "sumocr-2023.1-py3-none-any.whl", hash = "sha256:e74feb8e848fb507963655e49bfd506c57ac196cd19d6e0d65efc3285f4989a1"},
-    {file = "sumocr-2023.1.tar.gz", hash = "sha256:92a138e4e9b5e7a6b19c8906cfaf86d88ac1791e103fcc4a8e21a89365a49359"},
+    {file = "sumocr-2023.2-py3-none-any.whl", hash = "sha256:b42eff97b3c64c77e27b6cdfcc91a7eb4245a775ee9fbb8c5a923f3fc7e86114"},
+    {file = "sumocr-2023.2.tar.gz", hash = "sha256:b3db5892b5762aa49d0ad263371430828edc5744ad9b7c6cc1efe3c92c8961f2"},
 ]
 sumolib = [
     {file = "sumolib-1.17.0-py3-none-any.whl", hash = "sha256:f52b5669f2355e51c4f2f336015e79062ef5c3b74a8bfbf648edf388827ea807"},
