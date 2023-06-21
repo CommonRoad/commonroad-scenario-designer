@@ -3,8 +3,6 @@ This module provides methods to download and use aerial images from Bing Maps
 """
 import json
 import os
-import requests
-from requests.auth import HTTPBasicAuth
 from io import BytesIO
 from queue import Queue
 from threading import Thread
@@ -13,9 +11,13 @@ from typing import Optional
 from urllib.request import urlopen, HTTPBasicAuthHandler, build_opener, install_opener
 
 import mercantile
+import requests
 from PIL import Image
 from PIL.JpegImagePlugin import JpegImageFile
+from commonroad.scenario.scenario import Scenario
+from pyproj import Proj
 
+from crdesigner.config.config import ProjectionMethods
 from crdesigner.map_conversion.osm2cr import config
 from crdesigner.ui.gui.mwindow.service_layer import config as config_settings
 
@@ -100,6 +102,7 @@ def validate_bing_key() -> bool:
             return True
     return False
 
+
 def validate_ldbv_credentials() -> bool:
     url = "https://geoservices.bayern.de/wms/v2/ogc_dop20.cgi?service=wms&request=GetMap&version=1.1.1&bbox=11.65541,48.26142,11.66093,48.26386&width=100&height=100&layers=by_dop20c&format=image/jpeg&srs=EPSG:4326"
     ldbv_username = config_settings.LDBV_USERNAME
@@ -115,6 +118,7 @@ def validate_ldbv_credentials() -> bool:
     except:
         return False
     return True
+
 
 def get_tile(quadkey: str) -> JpegImageFile:
     """
@@ -148,7 +152,7 @@ def get_tile(quadkey: str) -> JpegImageFile:
 
 
 def get_required_quadkeys(west: float, south: float, east: float, north: float, zoom: int) -> Tuple[
-    List[str], int, int, List[float]]:
+    List[str], int, int, Tuple[float, float, float, float]]:
     """
     gets quadkeys for all tiles in a region sorted by their x and y value
     returns also the number of different x and y values
@@ -190,15 +194,16 @@ def get_required_quadkeys(west: float, south: float, east: float, north: float, 
     quadkeys = [mercantile.quadkey(tile) for tile in tiles]
 
     lnglat_top_left = mercantile.ul(tiles[0])
+
     horizontal_min = lnglat_top_left.lng
     vertical_max = lnglat_top_left.lat
 
     bbox_lower_right = mercantile.xy_bounds(tiles[-1])
     lnglat_lower_right = mercantile.lnglat(bbox_lower_right.right, bbox_lower_right.bottom)
+
     horizontal_max = lnglat_lower_right.lng
     vertical_min = lnglat_lower_right.lat
-
-    extent = [horizontal_min, horizontal_max, vertical_min, vertical_max]
+    extent = (vertical_max, horizontal_min, vertical_min, horizontal_max)
     return quadkeys, x_length, y_length, extent
 
 
@@ -261,19 +266,17 @@ def download_all_images(quadkeys: List[str]) -> List[Image.Image]:
     return result
 
 
-def get_aerial_image_bing(lat1: float, lon1: float, lat2: float, lon2: float, zoom: int = 19) -> Tuple[
-    Image.Image, List[float]]:
+def get_aerial_image_bing(bounds: Tuple[float, float, float, float], zoom: int = 19) -> Tuple[Image.Image,
+Tuple[float, float, float, float]]:
     """
-    gets the image and coordinates to a sepcified aera from bing
-
-    :param lat1: northern  bound
-    :param lon1: western bound
-    :param lat2: southern bound
-    :param lon2: eastern bound
+    gets the image and coordinates to a specified aera from bing
+    :param bounds: northern, western, southern and eastern bound
     :param zoom: zoom level
     :return: Tuple: 1. image, 2. extent of image
     """
     assert 1 <= zoom <= 23
+
+    lat1, lon1, lat2, lon2 = bounds
 
     keys, x_count, y_count, extent = get_required_quadkeys(lon1, lat2, lon2, lat1, zoom)
     print("loading {} tiles".format(len(keys)))
@@ -282,16 +285,15 @@ def get_aerial_image_bing(lat1: float, lon1: float, lat2: float, lon2: float, zo
     image = put_images_together(images, x_count, y_count)
     return image, extent
 
-def get_aerial_image_ldbv(lat1: float, lon1: float, lat2: float, lon2: float) -> Image.Image:
-    """
-    gets the image and coordinates to a sepcified aera from ldbv
 
-    :param lat1: northern  bound
-    :param lon1: western bound
-    :param lat2: southern bound
-    :param lon2: eastern bound
+def get_aerial_image_ldbv(bounds: Tuple[float, float, float, float]) -> Image.Image:
+    """
+    gets the image and coordinates to a specified area from LDBV
+
+    :param bounds: northern, western, southern and eastern bound
     :return: Image
     """
+    lat1, lon1, lat2, lon2 = bounds
     ldbv_username = config_settings.LDBV_USERNAME
     ldbv_password = config_settings.LDBV_PASSWORD
 
@@ -308,7 +310,11 @@ def get_aerial_image_ldbv(lat1: float, lon1: float, lat2: float, lon2: float) ->
         lat_pixels = int(onep * lat_diff)
         lon_pixels = 4000
 
-    url = "https://geoservices.bayern.de/wms/v2/ogc_dop20.cgi?service=wms&request=GetMap&version=1.1.1&bbox={},{},{},{}&width={}&height={}&layers=by_dop20c&format=image/jpeg&srs=EPSG:4326".format(str(lon1), str(lat2), str(lon2), str(lat1), str(lat_pixels), str(lon_pixels))
+    # Reference system of the bbox-coordinates. We use WGS 84 (i.e. the "normal" geodetic system with
+    #   longitude and latitude);
+    #   for other options, see https://geodatenonline.bayern.de/geodatenonline/seiten/wms_dop20cm?36
+    ref_system = "EPSG:4326"
+    url = f"https://geoservices.bayern.de/wms/v2/ogc_dop20.cgi?service=wms&request=GetMap&version=1.1.1&bbox={str(lon1)},{str(lat2)},{str(lon2)},{str(lat1)}&width={str(lat_pixels)}&height={str(lon_pixels)}&layers=by_dop20c&format=image/jpeg&srs={ref_system}"
 
     auth_handler = HTTPBasicAuthHandler()
     auth_handler.add_password(realm='WMS DOP20', uri='https://geoservices.bayern.de/wms/v2/ogc_dop20.cgi', user=ldbv_username, passwd=ldbv_password)
@@ -319,4 +325,23 @@ def get_aerial_image_ldbv(lat1: float, lon1: float, lat2: float, lon2: float) ->
 
     return image
 
+
+def get_aerial_image_limits(bounds: Tuple[float, float, float, float], scenario: Scenario) -> Tuple[float, float,
+    float, float]:
+    """
+    :param bounds: bounds of the image region as latitude/longitude: (northern, western, southern, eastern)
+    :param scenario: CommonRoad scenario
+    :return bounds in scenario coordinates: (left, right, bottom, top)
+    """
+    lat1, lon1, lat2, lon2 = bounds
+    proj_string = None
+    loc = scenario.location
+    if loc is not None and loc.geo_transformation is not None:
+        proj_string = loc.geo_transformation.geo_reference
+    if proj_string is None:
+        proj_string = ProjectionMethods.pseudo_mercator.value
+    proj = Proj(proj_string)
+    lower_left = proj(longitude=lon1, latitude=lat2)
+    upper_right = proj(longitude=lon2, latitude=lat1)
+    return lower_left[0], upper_right[0], lower_left[1], upper_right[1]
 

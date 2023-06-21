@@ -25,21 +25,21 @@ class EulerSpiral:
         return self._gamma * s + kappa0, self._gamma
 
     @staticmethod
-    def createFromLengthAndCurvature(length: float, curvStart: float, curvEnd: float) -> EulerSpiral:
+    def create_from_length_and_curvature(length: float, curv_start: float, curv_end: float) -> EulerSpiral:
         """
         Create an EulerSpiral from a given length with curveStart
         and curvEnd. This is how the OpenDrive format specifies
         EulerSpirals.
 
         :param length: Length of EulerSpiral
-        :param curvStart: Curvature at start of EulerSpiral
-        :param curvEnd: Curvature at end of EulerSpiral
-        :return: EulerSpiral - a new Clothoid
+        :param curv_start: Curvature at start of EulerSpiral
+        :param curv_end: Curvature at end of EulerSpiral
+        :return: EulerSpiral - a new clothoid
         """
         # if length is zero, assume zero curvature
         if length == 0:
             return EulerSpiral(0)
-        return EulerSpiral(1 * (curvEnd - curvStart) / length)
+        return EulerSpiral(1 * (curv_end - curv_start) / length)
 
     def calc(self, s: float, x0: float = 0, y0: float = 0, kappa0: float = 0, theta0: float = 0)\
             -> Tuple[float, float, float, Tuple[float, float]]:

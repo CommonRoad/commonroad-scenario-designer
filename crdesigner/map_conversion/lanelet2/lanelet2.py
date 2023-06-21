@@ -8,16 +8,25 @@ class Node:
     OSM Node.
     """
 
-    def __init__(self, id_, lat, lon):
+    def __init__(self, id_, lat, lon, ele: float = 0.0, autoware: bool = False,
+                 local_x: Optional[float] = None, local_y: Optional[float] = None):
         """
         Initialization of Node
         
         :param lat: Latitude geo position information
         :param lon: Longitude geo position information
+        :param ele: Elevation (height information)
+        :param autoware: Boolean indicating whether the map is autoware-compatible.
+        :param local_x: local x-position instead of latitude/longitude (lon/lat values have no meaning)
+        :param local_y: local y-position instead of latitude/longitude (lon/lat values have no meaning)
         """
         self.id_ = str(id_)
         self.lat = str(lat)
         self.lon = str(lon)
+        self.ele = str(ele)
+        self.autoware = autoware
+        self.local_x = local_x
+        self.local_y = local_y
 
     def serialize_to_xml(self) -> etree:
         """
@@ -27,8 +36,24 @@ class Node:
         node.set("id", self.id_)
         node.set("action", "modify")
         node.set("visible", "true")
+        node.set("version", "1")
         node.set("lat", self.lat)
         node.set("lon", self.lon)
+        if self.local_x is not None and self.local_y is not None:
+            local_x = etree.SubElement(node, "tag")
+            local_x.set("k", "local_x")
+            local_x.set("v", str(self.local_x))
+            local_y = etree.SubElement(node, "tag")
+            local_y.set("k", "local_y")
+            local_y.set("v", str(self.local_y))
+            node.append(local_x)
+            node.append(local_y)
+        if self.ele != "0.0" or self.autoware:
+            ele = etree.SubElement(node, "tag")
+            ele.set("k", "ele")
+            ele.set("v", self.ele)
+            node.append(ele)
+
         return node
 
 
@@ -57,6 +82,7 @@ class Way:
         way.set("id", self.id_)
         way.set("action", "modify")
         way.set("visible", "true")
+        way.set("version", "1")
         for node in self.nodes:
             xml_node = etree.SubElement(way, "nd")
             xml_node.set("ref", node)
@@ -99,6 +125,7 @@ class WayRelation:
         rel.set("id", self.id_)
         rel.set("action", "modify")
         rel.set("visible", "true")
+        rel.set("version", "1")
         right_way = etree.SubElement(rel, "member")
         right_way.set("type", "way")
         right_way.set("ref", self.right_way)
@@ -150,6 +177,7 @@ class RegulatoryElement:
         rel = etree.Element("relation")
         rel.set("id", self.id_)
         rel.set("action", "modify")
+        rel.set("version", "1")
         rel.set("visible", "true")
         for r in self.refers:
             right_way = etree.SubElement(rel, "member")

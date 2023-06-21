@@ -1,7 +1,7 @@
 """
 This module holds all methods necessary to cluster segments at intersections.
 """
-from crdesigner.map_conversion.osm2cr.converter_modules.utility import geometry
+from crdesigner.map_conversion.common import geometry
 from crdesigner.map_conversion.osm2cr.converter_modules.graph_operations import road_graph as rg
 from crdesigner.map_conversion.osm2cr import config
 

@@ -1,41 +1,37 @@
 import copy
 from typing import List, Union
-from pygeodesy import flatLocal
 
 import PyQt5
+import numpy as np
+from PyQt5 import QtCore
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import QSizePolicy
-from PyQt5 import QtCore
-
-import numpy as np
+from commonroad.common.util import Interval
+from commonroad.geometry.shape import Circle
+from commonroad.planning.planning_problem import PlanningProblemSet
+from commonroad.scenario.lanelet import Lanelet, LaneletType
+from commonroad.scenario.obstacle import StaticObstacle, DynamicObstacle
+from commonroad.scenario.scenario import Scenario
+from commonroad.visualization.draw_params import StaticObstacleParams, DynamicObstacleParams
+from commonroad.visualization.mp_renderer import MPRenderer
 from matplotlib.backend_bases import MouseButton
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
-from utm import from_latlon
 
-from commonroad.planning.planning_problem import PlanningProblemSet
-from commonroad.common.util import Interval
-from commonroad.scenario.scenario import Scenario
-from commonroad.visualization.mp_renderer import MPRenderer
-from commonroad.visualization.draw_params import StaticObstacleParams, DynamicObstacleParams
-from commonroad.geometry.shape import Circle
-from commonroad.scenario.obstacle import StaticObstacle, DynamicObstacle
-from commonroad.scenario.lanelet import Lanelet, LaneletType
-
-from crdesigner.ui.gui.mwindow.toolboxes.toolbox_ui import PosB
 from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.commonroad_viewer.service_layer.draw_params_updater import \
     DrawParamsCustom
-from .helper import _merge_dict, calculate_closest_vertices, calculate_euclidean_distance, angle_between
-from .service_layer import update_draw_params_dynamic_only_based_on_zoom
-from .service_layer import update_draw_params_based_on_zoom
-from .service_layer import update_draw_params_based_on_scenario
-from .service_layer import update_draw_params_dynamic_based_on_scenario
-from .service_layer import resize_lanelet_network
 from crdesigner.ui.gui.mwindow.service_layer import config
-
+from crdesigner.ui.gui.mwindow.service_layer.aerial_data import get_aerial_image_bing, get_aerial_image_ldbv, \
+    get_aerial_image_limits
+from crdesigner.ui.gui.mwindow.toolboxes.toolbox_ui import PosB
+from .helper import _merge_dict, calculate_closest_vertices, calculate_euclidean_distance, angle_between
+from .service_layer import resize_lanelet_network
+from .service_layer import update_draw_params_based_on_scenario
+from .service_layer import update_draw_params_based_on_zoom
+from .service_layer import update_draw_params_dynamic_based_on_scenario
+from .service_layer import update_draw_params_dynamic_only_based_on_zoom
 from ...service_layer.map_creator import MapCreator
-from crdesigner.ui.gui.mwindow.service_layer.aerial_data import get_aerial_image_bing, get_aerial_image_ldbv
 
 ZOOM_FACTOR = 1.2
 
@@ -89,7 +85,7 @@ class DynamicCanvas(FigureCanvas):
 
         self.draw_temporary_points = {}
         self.num_lanelets = 0
-        self.aerial_map_bounds = [48.263864, 11.655410, 48.261424, 11.660930]
+        self.aerial_map_bounds = (48.263864, 11.655410, 48.261424, 11.660930)
         self.show_aerial = False
 
         super().__init__(self.drawer)
@@ -868,32 +864,28 @@ class DynamicCanvas(FigureCanvas):
         """
         shows the current (previously loaded) aerial image in the plot as a background
         """
-        self.ax.imshow(self.current_aerial_image, aspect='auto', extent=self.image_limits, alpha=0.75)
+        self.ax.imshow(self.current_aerial_image, aspect='equal', extent=self.image_limits, alpha=0.75)
+        self.ax.set_xlim(self.image_limits[0], self.image_limits[1])
+        self.ax.set_ylim(self.image_limits[2], self.image_limits[3])
 
-    def activate_aerial_image(self, bing: bool, lat1: float, lon1: float, lat2: float, lon2: float,
-                              center_at_zero: bool):
+    def activate_aerial_image(self, bing: bool, lat1: float, lon1: float, lat2: float, lon2: float):
         """
-        loads the aerial image with the following gps coordinates
+        loads the aerial image with the following gps coordinates...
+        :param bing: whether image should be loaded from bing
         :param lat1: northern bound
         :param lon1: western bound
         :param lat2: southern bound
         :param lon2: eastern bound
-        :param center_at_zero: Boolean indicating whether image should be centered at origin.
-        and gets the corresponding plot limits for the image
+        ...and gets the corresponding plot limits for the image
         and activates its showing in the background by setting show_aerial on True
         """
         self.update_aerial_image(lat1, lon1, lat2, lon2)
+        extent = self.aerial_map_bounds
         if bing:
-            self.current_aerial_image, extent = \
-                get_aerial_image_bing(self.aerial_map_bounds[0], self.aerial_map_bounds[1], self.aerial_map_bounds[2],
-                                      self.aerial_map_bounds[3])
+            self.current_aerial_image, extent = get_aerial_image_bing(self.aerial_map_bounds)
         else:
-            self.current_aerial_image = \
-                get_aerial_image_ldbv(self.aerial_map_bounds[0], self.aerial_map_bounds[1], self.aerial_map_bounds[2],
-                                      self.aerial_map_bounds[3])
-        self.image_limits = \
-            self.get_aerial_image_limits(self.aerial_map_bounds[0], self.aerial_map_bounds[1],
-                                         self.aerial_map_bounds[2], self.aerial_map_bounds[3], center_at_zero)
+            self.current_aerial_image = get_aerial_image_ldbv(self.aerial_map_bounds)
+        self.image_limits = get_aerial_image_limits(extent, self.scenario)
 
         self.show_aerial = True
 
@@ -905,40 +897,7 @@ class DynamicCanvas(FigureCanvas):
         :param lat2: southern bound
         :param lon2: eastern bound
         """
-        self.aerial_map_bounds[0] = lat1
-        self.aerial_map_bounds[1] = lon1
-        self.aerial_map_bounds[2] = lat2
-        self.aerial_map_bounds[3] = lon2
-
-    def get_aerial_image_limits(self, lat1: float, lon1: float, lat2: float, lon2: float, center_at_zero: bool) \
-            -> List[float]:
-        """
-        converts the gps coordinates to limits array [0, dist width, 0, dist height] where dist is the measurement
-        in meters for the side of the rectangle containing the area bound by these coordinates
-        :param lat1: northern bound
-        :param lon1: western bound
-        :param lat2: southern bound
-        :param lon2: eastern bound
-        :param center_at_zero: Boolean indicating whether image should be centered at origin.
-        :return: 2. limits of image (in meters)
-        """
-
-        # compute height out of distance between left upper (north-west) and left lower (south-west) vertex
-        height = flatLocal(lat1, lon1, lat2, lon1)
-        # compute width out of distance between right lower (south-east) and left lower (south-west) vertex
-        width = flatLocal(lat2, lon1, lat2, lon2)
-
-        if not center_at_zero:
-            # compute UTM coordinates for lower left point
-            lower_lat = lat2 + (lat2 - lat1) / 2
-            left_lon = lon1 + (lon2 - lon1) / 2
-
-            (coord1, coord2, zone_num, zone_let) = from_latlon(lower_lat, left_lon)
-            print(coord1, coord2)
-        else:
-            coord1 = 0
-            coord2 = 0
-        return [coord1, coord1 + width, coord2, coord2 + height]
+        self.aerial_map_bounds = lat1, lon1, lat2, lon2
 
     def deactivate_aerial_image(self):
         """

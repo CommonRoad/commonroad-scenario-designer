@@ -1,10 +1,9 @@
+import logging
 from typing import Tuple, Optional, Union, Set
 import numpy as np
+from pyproj import Transformer
 from commonroad.scenario.lanelet import Lanelet, LaneletType, LineMarking, RoadUser
-from crdesigner.map_conversion.opendrive.opendrive_conversion.utils import CustomDefaultLaneletType
-from crdesigner.configurations.get_configs import get_configs
-
-config = get_configs()
+from crdesigner.config.config import OpenDRIVEConversionParams
 
 
 class ConversionLanelet(Lanelet):
@@ -37,22 +36,21 @@ class ConversionLanelet(Lanelet):
         user_bidirectional=None,
         traffic_signs=None,
         traffic_lights=None,
-        custom_default_lanelet_types=CustomDefaultLaneletType(config.opendrive.general_lanelet_type_activ,
-                                                              config.opendrive.general_lanelet_type,
-                                                              config.opendrive.driving_default_lanelet_type,
-                                                              config.opendrive.lanelet_types_backwards_compatible),
-            speed=None,
+        speed=None,
+        config: OpenDRIVEConversionParams = OpenDRIVEConversionParams(),
+
     ):
+
         if lanelet_type is None:
             lanelet_type = {LaneletType.UNKNOWN}
         self.parametric_lane_group = parametric_lane_group
-        self._default_lanelet_type = {LaneletType(custom_default_lanelet_types.general_lanelet_type) if LaneletType(
-                custom_default_lanelet_types.general_lanelet_type) is not None else LaneletType.UNKNOWN} if \
-            custom_default_lanelet_types.general_lanelet_type_activ else set()
-        self._driving_default_lanelet_type = LaneletType(custom_default_lanelet_types.driving_default_lanelet_type) \
-            if LaneletType(custom_default_lanelet_types.driving_default_lanelet_type) is not None \
+        self._default_lanelet_type = {LaneletType(config.general_lanelet_type) if LaneletType(
+                config.general_lanelet_type) is not None else LaneletType.UNKNOWN} if \
+            config.general_lanelet_type_activ else set()
+        self._driving_default_lanelet_type = LaneletType(config.driving_default_lanelet_type) \
+            if LaneletType(config.driving_default_lanelet_type) is not None \
             else LaneletType.UNKNOWN
-        self._lanelet_types_backwards_compatible = custom_default_lanelet_types.lanelet_types_backwards_compatible
+        self._lanelet_types_backwards_compatible = config.lanelet_types_backwards_compatible
         _user_bidirectional = None
         _user_one_way = None
         if user_one_way is not None:
@@ -147,7 +145,8 @@ class ConversionLanelet(Lanelet):
         elif value == 'driving':
             self._lanelet_type = {LaneletType(self._driving_default_lanelet_type)}
         else:
-            self._lanelet_type = {LaneletType.UNKNOWN}.union(self._default_lanelet_type)
+            logging.warning("ConversionLanelet::lanelet_type: Unknown lane type: {}".format(value))
+            self._lanelet_type = {LaneletType(self._driving_default_lanelet_type)}
 
     @property
     def lanelet_id(self) -> int:
@@ -440,26 +439,24 @@ class ConversionLanelet(Lanelet):
         mirror_interval: Tuple[float, float],
         distance: np.ndarray,
         adjacent_lanelet: "ConversionLanelet",
-        precision: float
+        precision: float,
+        transformer: Transformer
     ):
         """Move vertices of one border by mirroring other border with
         a specified distance.
 
         :param mirror_border: Which border to mirror, either 'left' or 'right'.
-        :type mirror_border: str
         :param mirror_interval: Tuple of two values, specifying start and end of mirroring.
-        :type mirror_interval: Tuple[float, float]
         :param distance: Specifying distance at start and at end of mirroring
-        :type distance: np.ndarray
         :param adjacent_lanelet: The adjacent conversion lanelet.
-        :type adjacent_lanelet: ConversionLanelet
         :param precision: Specifies precision with which to convert the plane group to lanelet w. mirroring
-        :type precision: float
+        :param transformer: Coordinate projection transformer.
         """
         if mirror_border == "left":
             distance[:] = [-1 * x for x in distance]
 
         lanelet = self.parametric_lane_group.to_lanelet_with_mirroring(
+            transformer=transformer,
             mirror_border=mirror_border,
             distance=distance,
             mirror_interval=mirror_interval,

@@ -8,7 +8,6 @@ from abc import ABC
 from typing import Tuple, List, Optional, Set, Dict, Union
 
 import numpy as np
-from PIL import Image
 from matplotlib.axes import Axes
 from matplotlib.collections import Collection, PathCollection
 from matplotlib.colors import to_rgba
@@ -17,7 +16,7 @@ from matplotlib.patches import FancyArrow, Polygon, Patch, PathPatch
 from matplotlib.path import Path
 
 from crdesigner.map_conversion.osm2cr.converter_modules.graph_operations import road_graph as rg
-from crdesigner.map_conversion.osm2cr.converter_modules.utility import geometry
+from crdesigner.map_conversion.common import geometry
 
 PICKER_SIZE = 2
 LINE_WIDTH = 2.5

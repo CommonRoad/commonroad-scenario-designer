@@ -6,6 +6,7 @@ from commonroad.planning.planning_problem import PlanningProblemSet
 from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
 from commonroad.scenario.scenario import Tag
 
+from crdesigner.config.config import Lanelet2ConversionParams, GeneralParams
 from crdesigner.start_gui import start_gui_new as start_gui
 from crdesigner.map_conversion.map_conversion_interface import commonroad_to_lanelet, lanelet_to_commonroad, \
     opendrive_to_commonroad, osm_to_commonroad, commonroad_to_sumo, sumo_to_commonroad
@@ -33,6 +34,8 @@ def get_args() -> argparse.Namespace:
                                                                              "name as converted file")
     parser.add_argument("-t", "--tags", nargs="+", help="tags for the created scenario", default=set())
     parser.add_argument("--proj", help="proj-string to specify conversion for lanelet/lanelet2 format")
+    parser.add_argument("--autoware", help="create autoware-compatible lanelet2 map")
+    parser.add_argument("--local_coordinates", help="use local coordinates for lanelet2 map")
     parser.add_argument("--adjacencies", action="store_true", help="detect left and right adjacencies of "
                                                                    "lanelets if they do not share a common way "
                                                                    "(this is only used for lanelet/lanelet2 "
@@ -91,7 +94,14 @@ def main():
 
         if args.source_commonroad:
             if args.mode == "map-convert-lanelet":
-                commonroad_to_lanelet(input_file, output_file, args.proj)
+                config = Lanelet2ConversionParams()
+                if args.proj:
+                    config.proj_string = args.proj
+                if args.autoware:
+                    config.autoware = args.autoware
+                if args.local_coordinates:
+                    config.local_coordinates = args.local_coordinates
+                commonroad_to_lanelet(input_file, output_file, config)
             if args.mode == "map-convert-sumo":
                 commonroad_to_sumo(input_file, output_file)
         else:
@@ -102,7 +112,15 @@ def main():
             elif args.mode == "map-convert-sumo":
                 scenario = sumo_to_commonroad(input_file)
             elif args.mode == "map-convert-lanelet":
-                scenario = lanelet_to_commonroad(input_file, args.proj, args.left_driving, args.adjacencies)
+                config_lanelet2 = Lanelet2ConversionParams()
+                config_general = GeneralParams()
+                if args.proj:
+                    config_lanelet2.proj_string = args.proj
+                if args.adjacencies:
+                    config_lanelet2.adjacencies = args.adjacencies
+                if args.left_driving:
+                    config_lanelet2.left_driving = args.left_driving
+                scenario = lanelet_to_commonroad(input_file, config_general)
             else:
                 return
             tags = set([Tag(t) for t in args.tags])

@@ -50,15 +50,17 @@ class Object:
 
     @type.setter
     def type(self, value):
-        road_types = ['barrier', 'bike', 'building', 'bus', 'car', 'crosswalk', 'gantry', 'motorbike', 'none',
-                      'obstacle', 'parkingSpace', 'patch', 'pedestrian', 'pole', 'railing', 'roadMark', 'soundBarrier',
-                      'streetLamp', 'trafficIsland', 'trailer', 'train', 'tram', 'tree', 'van', 'vegetation', 'wind']
+        road_types = ['barrier', 'bike', 'building', 'bus', 'car', 'crosswalk', 'ZebraCrossing', 'gantry', 'motorbike',
+                      'none', 'obstacle', 'parkingSpace', 'patch', 'pedestrian', 'pole', 'RoadSignPole', 'railing',
+                      'roadMark', 'roadmark', 'soundBarrier', 'streetLamp', 'Streetlamp', 'trafficIsland', 'trailer',
+                      'train', 'tram', 'tree', 'van', 'vegetation', 'wind', 'Guidepost']
         customs = ['permanentDelineator', 'emergencyCallBox', 'tunnel', 'arrowStraight', 'arrowRight', 'arrowMergeLeft',
-                   'arrowLeft', 'arrowLeftRight', 'arrowStraightLeft', 'arrowMergeRight', 'island', 'guidepost']
+                   'arrowLeft', 'arrowLeftRight', 'arrowStraightLeft', 'arrowMergeRight', 'island', 'guidepost',
+                   'roadpainting']
         if value == "-1":
             value = "none"
         if value not in road_types and value not in customs:
-            raise AttributeError("Value is not a valid object type!")
+            raise AttributeError("Value is not a supported object type!")
         self._type = str(value)
 
     @property

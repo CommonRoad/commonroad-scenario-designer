@@ -17,8 +17,6 @@ from crdesigner.map_conversion.osm2cr import config
 from crdesigner.map_conversion.osm2cr.converter_modules.cr_operations.export import convert_to_scenario
 from crdesigner.map_conversion.osm2cr.converter_modules.graph_operations import road_graph as rg
 
-from crdesigner.ui.gui.mwindow.service_layer.converter_modules.osm_interface import OSMInterface
-
 from crdesigner.map_conversion.opendrive.opendrive_parser.parser import parse_opendrive
 from crdesigner.map_conversion.opendrive.opendrive_conversion.network import Network
 
@@ -26,8 +24,7 @@ from crdesigner.map_conversion.lanelet2.lanelet2_parser import Lanelet2Parser
 from crdesigner.map_conversion.lanelet2.lanelet2cr import Lanelet2CRConverter
 from crdesigner.map_conversion.lanelet2.cr2lanelet import CR2LaneletConverter
 
-from crdesigner.configurations.get_configs import get_configs
-
+from crdesigner.ui.gui.mwindow.service_layer.converter_modules.osm_interface import OSMInterface
 from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMO_AVAILABLE
 from crdesigner.ui.gui.mwindow.service_layer.services.waitingspinnerwidget import QtWaitingSpinner
 if SUMO_AVAILABLE:
@@ -300,8 +297,7 @@ class MapConversionToolbox(QDockWidget):
         if self.open_drive_file is None:
             return
 
-        config = get_configs().opendrive
-        open_drive_network = Network(config)
+        open_drive_network = Network()
         open_drive_network.load_opendrive(self.open_drive_file)
 
         self.text_browser.append(
