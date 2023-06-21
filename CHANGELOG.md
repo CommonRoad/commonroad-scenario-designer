@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.7.1] - 2023-06-XX
+## [0.7.1] - 2023-06-21
 
 ### Added
 - Creation of autoware-compatible lanelet2 maps
