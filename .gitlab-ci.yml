@@ -88,7 +88,7 @@ build_and_test_python_3_11:
         path : coverage.xml
   needs : [ ]
 
-publish_pages:
+pages:
   # Push the latest documentation of the development branch to the GitLab Pages
   # at https://cps.pages.gitlab.lrz.de/commonroad-scenario-designer/
   stage: deploy
