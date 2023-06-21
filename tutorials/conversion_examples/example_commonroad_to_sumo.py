@@ -9,7 +9,7 @@ from commonroad.visualization.mp_renderer import MPRenderer
 
 from crdesigner.map_conversion.map_conversion_interface import commonroad_to_sumo
 
-from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMO_AVAILABLE
+from crdesigner.ui.gui.utilities.gui_sumo_simulation import SUMO_AVAILABLE
 if SUMO_AVAILABLE:
     from crdesigner.map_conversion.sumo_map.config import SumoConfig
     from crdesigner.map_conversion.sumo_map.cr2sumo.converter import CR2SumoMapConverter

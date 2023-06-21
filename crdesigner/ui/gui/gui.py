@@ -1,7 +1,7 @@
 import sys
 
 from PyQt5.QtWidgets import *
-from crdesigner.ui.gui.mwindow.mwindow import MWindow
+from crdesigner.ui.gui.controller.mwindow_controller import MWindowController
 
 
 def start_gui_new(input_file: str = None):
@@ -11,10 +11,10 @@ def start_gui_new(input_file: str = None):
     # application
     app = QApplication(sys.argv)
     if input_file:
-        w = MWindow(input_file)
+        w = MWindowController(input_file)
     else:
-        w = MWindow()
-    w.showMaximized()
+        w = MWindowController()
+    w.mwindow_ui.showMaximized()
     sys.exit(app.exec_())
 
 
