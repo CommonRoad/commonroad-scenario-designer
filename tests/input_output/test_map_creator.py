@@ -1,13 +1,11 @@
 import unittest
-import numpy as np
 
-from commonroad.scenario.intersection import Intersection
 from commonroad.scenario.traffic_sign import *
 from commonroad.scenario.intersection import IntersectionIncomingElement
 from commonroad.scenario.lanelet import Lanelet, LineMarking, LaneletNetwork, StopLine
 from commonroad.scenario.scenario import Scenario, ScenarioID
 
-from crdesigner.ui.gui.mwindow.service_layer.map_creator import MapCreator
+from crdesigner.ui.gui.utilities.map_creator import MapCreator
 
 
 class TestLanelet(unittest.TestCase):

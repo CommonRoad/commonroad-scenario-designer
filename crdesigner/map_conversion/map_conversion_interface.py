@@ -15,7 +15,7 @@ from crdesigner.map_conversion.lanelet2.lanelet2cr import Lanelet2CRConverter
 from crdesigner.map_conversion.lanelet2.lanelet2_parser import Lanelet2Parser
 from crdesigner.map_conversion.lanelet2.cr2lanelet import CR2LaneletConverter
 
-from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import (
+from crdesigner.ui.gui.utilities.gui_sumo_simulation import (
     SUMO_AVAILABLE,
 )
 

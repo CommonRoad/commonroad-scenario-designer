@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.0] - 2023-08-XX
+
+### Changed
+- GUI backend using MVC pattern
+
+## [0.7.2] - 2023-07-XX
+
 ## [0.7.1] - 2023-06-21
 
 ### Added
