@@ -394,6 +394,18 @@ class ScenarioModel(QObject):
             self.__current_scenario_index += 1
             self.notify_all()
 
+    def cropp_map(self, rectangle: Rectangle) -> None:
+        '''
+        Cropps the map and returns all lanelets which lay within the rectangle
+
+        :param rectangle: Rectangle in which the Objects should stay in
+        '''
+        self._update_scenario()
+        new_lanelet_network = self.get_lanelet_network().create_from_lanelet_network(
+                self.get_lanelet_network(),shape_input=rectangle)
+        self.replace_lanelet_network(new_lanelet_network)
+        self.notify_all()
+
     def hidden_osm_conversion(self, scenario: Scenario):
         self._update_scenario()
         self.set_scenario(scenario)

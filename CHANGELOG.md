@@ -5,6 +5,9 @@
 ### Changed
 - GUI backend using MVC pattern
 
+### Added
+- Cropping of a map in the GUI
+
 ## [0.7.2] - 2023-07-XX
 
 ## [0.7.1] - 2023-06-21
