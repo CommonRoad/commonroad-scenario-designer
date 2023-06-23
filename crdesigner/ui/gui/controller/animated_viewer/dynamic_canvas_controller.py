@@ -1,8 +1,11 @@
 import copy
 from typing import List, Union
 
-from commonroad.geometry.shape import Circle
+import matplotlib.pyplot as plt
+from commonroad.geometry.shape import Circle, Rectangle
+from matplotlib import patches
 from matplotlib.backend_bases import MouseButton
+from pygeodesy import flatLocal
 import PyQt5
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
@@ -82,6 +85,10 @@ class DynamicCanvasController(FigureCanvas):
         self.num_lanelets = 0
         self.aerial_map_bounds = (48.263864, 11.655410, 48.261424, 11.660930)
         self.show_aerial = False
+
+        # Cropping mode rectangle
+        self.coordinates_rectangle = [[0, 0], [0, 0]]
+        self.rectangle_cropp = None
 
         super().__init__(self.drawer)
 
@@ -599,7 +606,7 @@ class DynamicCanvasController(FigureCanvas):
         """
         removes obstacle from obstacle_color_array
 
-        :param: id of obstacle to be removed
+        :param obstacle_id id of obstacle to be removed
         """
         try:
             result = next(c for c in self.obstacle_color_array if c[0] == obstacle_id)
@@ -713,6 +720,84 @@ class DynamicCanvasController(FigureCanvas):
         if last_merged_index:
             self._select_lanelet(False, [[last_merged_index]])
         self.scenario_model.notify_all()
+
+    def activate_cropp_map(self, is_active: bool) -> None:
+        """
+        Enables the user to draw a rectangle and keep everything inside of it
+
+        Maps left-click to the draw_rectangle_function if the button is clicked and active, beforehand it sets the
+        selected lanelets to 0 and disables the lanelet operations, otherwise it disconnect
+        the callback and checks if the last_added lanelet is still in the scenario
+        Afterwards initializes the toolboxes
+
+        :param is_active: Boolean which gives the information if the button is clicked or not
+        """
+        if is_active:
+            self.selected_l_ids = []
+            self.selected_lanelets = []
+            self.enable_lanelet_operations(len(self.selected_l_ids))
+            self.mpl_disconnect(self.button_press_event_cid)
+            self.mpl_disconnect(self.button_release_event_cid)
+            self.button_press_event_cid = self.mpl_connect('button_press_event', self.draw_rectangle_for_cropping)
+        else:
+            self.mpl_disconnect(self.button_press_event_cid)
+            self.button_release_event_cid = self.mpl_connect('button_release_event',
+                                                             self.dynamic_canvas_release_callback)
+            self.button_press_event_cid = self.mpl_connect('button_press_event', self.dynamic_canvas_click_callback)
+            if not self._parent.road_network_toolbox.last_added_lanelet_id in self.scenario_model.collect_lanelet_ids():
+                self._parent.road_network_toolbox.last_added_lanelet_id = None
+            self.reset_toolbar()
+            self._parent.road_network_toolbox.initialize_road_network_toolbox()
+            self._parent.obstacle_toolbox.initialize_obstacle_information()
+
+    def draw_rectangle_for_cropping(self, mouse_event: QMouseEvent) -> None:
+        """
+        When first clicked, it sets the first corner of the rectangle and maps the Function on_mottion_rectangle
+        to the mouse-movement.
+        The second time it saves the second corner and calls the cropp_map Function in the scenario_model
+
+        :param mouse_event: event of the mouse -> Gives the coordinates of the mouse
+        """
+        if mouse_event.xdata is not None and mouse_event.ydata is not None:
+            if self.rectangle_cropp is None:
+                x_coordinate = mouse_event.xdata
+                y_coordinate = mouse_event.ydata
+                self.coordinates_rectangle[0][0] = x_coordinate
+                self.coordinates_rectangle[0][1] = y_coordinate
+                self.rectangle_cropp = patches.Rectangle((x_coordinate, y_coordinate), 0, 0, color="blue", alpha=0.3)
+                self.ax.add_patch(self.rectangle_cropp)
+                self.draw_idle()
+                self.motion_notify_event_cid = self.mpl_connect('motion_notify_event', self.on_motion_rectangle)
+            else:
+                self.coordinates_rectangle[1][0] = mouse_event.xdata
+                self.coordinates_rectangle[1][1] = mouse_event.ydata
+                length = self.coordinates_rectangle[1][0] - self.coordinates_rectangle[0][0]
+                width = self.coordinates_rectangle[1][1] - self.coordinates_rectangle[0][1]
+                x1, y1 = self.coordinates_rectangle[0]
+                x2, y2 = self.coordinates_rectangle[1]
+                center_x = (x1 + x2) / 2
+                center_y = (y1 + y2) / 2
+                center_point = np.array([center_x, center_y])
+                shape = Rectangle(length=length, width=width, center=center_point)
+                self.mpl_disconnect(self.motion_notify_event_cid)
+                self.rectangle_cropp = None
+                self.scenario_model.cropp_map(shape)
+
+    def on_motion_rectangle(self, mouse_event: QMouseEvent) -> None:
+        """
+        Tracks the mouse and shows the rectangle accordingly
+
+        :param mouse_event: event of the mouse -> Gives the coordinates of the mouse
+        """
+        if mouse_event.xdata is not None and mouse_event.ydata is not None:
+            self.coordinates_rectangle[1][0] = mouse_event.xdata
+            self.coordinates_rectangle[1][1] = mouse_event.ydata
+            width = self.coordinates_rectangle[1][0] - self.coordinates_rectangle[0][0]
+            height = self.coordinates_rectangle[1][1] - self.coordinates_rectangle[0][1]
+            self.rectangle_cropp.set_width(width)
+            self.rectangle_cropp.set_height(height)
+            self.rectangle_cropp.set_xy((self.coordinates_rectangle[0][0], self.coordinates_rectangle[0][1]))
+            self.draw_idle()
 
     def activate_drawing_mode(self, is_active):
         if is_active:
