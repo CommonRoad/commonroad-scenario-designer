@@ -1,5 +1,7 @@
+import logging
 import pathlib
 
+from PyQt5 import QtGui
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 

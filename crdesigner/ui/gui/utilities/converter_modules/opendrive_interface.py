@@ -9,7 +9,7 @@ from crdesigner.map_conversion.opendrive.opendrive_conversion.network import Net
 from crdesigner.ui.gui.utilities.converter_modules.converter_interface import ConverterInterface
 from crdesigner.configurations.get_configs import get_configs
 
-
+# TODO: UNCERTAIN (either it goes into the utilities or becomes part of a controller in a different form).
 class OpenDRIVEInterface(ConverterInterface):
 
     def __init__(self, parent):
