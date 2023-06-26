@@ -151,7 +151,8 @@ If you want to contribute to the toolbox, you can also post it in the [forum](ht
 Responsible: Sebastian Maierhofer, Sebastian Mair
 Contribution (in alphabetic order by last name): Daniel Asch, Hamza Begic, Florian Braunmiller, Tim Dang, 
 Behtarin Ferdousi, Maximilian Fruehauf, Marcus Gabler, Fabian Hoeltke, Aaron Kaefer, David Le, Gustaf Lindgren, 
-Sarra Ben Mohamed, Benjamin Orthen, Luisa Ortner, Louis Pröbstle, Benedikt Reinhard, Maximilian Rieger, Til Stotz, Stefan Urban
+Sarra Ben Mohamed, Benjamin Orthen, Luisa Ortner, Louis Pröbstle, Benedikt Reinhard, Maximilian Rieger, Til Stotz, Stefan Urban,
+Max Winkelhofer
 
 ## Credits
 We gratefully acknowledge partial financial support by
