@@ -12,7 +12,7 @@ from crdesigner.map_conversion.osm2cr import config
 from crdesigner.map_conversion.osm2cr.converter_modules.graph_operations import road_graph as rg
 from crdesigner.map_conversion.osm2cr.converter_modules.intermediate_operations.intermediate_format import \
     IntermediateFormat
-from crdesigner.map_conversion.osm2cr.converter_modules.utility import geometry
+from crdesigner.map_conversion.common import geometry
 from crdesigner.map_conversion.osm2cr.converter_modules.utility.idgenerator import get_id
 from crdesigner.map_conversion.osm2cr.converter_modules.utility.geonamesID import get_geonamesID
 from crdesigner.map_conversion.osm2cr.converter_modules.cr_operations.cleanup import sanitize

@@ -21,13 +21,13 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '../../..'))
 # -- Project information -----------------------------------------------------
 
 project = "CommonRoad Scenario Designer"
-copyright = "2021, Technical University of Munich"
+copyright = "2023, Technical University of Munich"
 author = "Sebastian Maierhofer"
 
 # The short X.Y version
-version = "0.5"
+version = "0.7.1"
 # The full version, including alpha/beta/rc tags
-release = "0.5"
+release = "0.7.1"
 
 
 # -- General configuration ---------------------------------------------------
@@ -41,7 +41,6 @@ release = "0.5"
 # ones.
 extensions = [
     'sphinx.ext.autodoc',
-   # 'sphinx.ext.napoleon',
     'matplotlib.sphinxext.plot_directive',
     'IPython.sphinxext.ipython_directive',
     'IPython.sphinxext.ipython_console_highlighting',
@@ -54,7 +53,6 @@ extensions = [
     'sphinx.ext.mathjax',
     'sphinx.ext.ifconfig',
     'sphinx.ext.viewcode',
-    'sphinxcontrib.apidoc',
 ]
 
 # Add any paths that contain templates here, relative to this directory.

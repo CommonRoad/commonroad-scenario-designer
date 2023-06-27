@@ -56,23 +56,22 @@ Python APIs
 
 .. code:: python
 
-    from lxml import etree
     import os
-
     from commonroad.scenario.scenario import Tag
     from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
     from commonroad.planning.planning_problem import PlanningProblemSet
-
     from crdesigner.map_conversion.opendrive.opendrive_parser.parser import parse_opendrive
     from crdesigner.map_conversion.opendrive.opendrive_conversion.network import Network
-
     from crdesigner.map_conversion.map_conversion_interface import opendrive_to_commonroad
-
+    from crdesigner.config.config import OpenDRIVEConversionParams
 
     input_path = ""  # replace empty string
+    config = OpenDRIVEConversionParams()
+    config.lanelet_types_backwards_compatible = False
 
-    # -------------------------------------- Option 1: General API --------------------------------------------
+    # ----------------------------------------------- Option 1: General API ------------------------------------------------
     # load OpenDRIVE file, parse it, and convert it to a CommonRoad scenario
+
     scenario = opendrive_to_commonroad(input_path)
 
     # store converted file as CommonRoad scenario
@@ -88,13 +87,12 @@ Python APIs
                          OverwriteExistingFile.ALWAYS)
 
 
-    # ------------------------------- Option 2: OpenDRIVE conversion APIs ------------------------------------
+    # --------------------------------------- Option 2: OpenDRIVE conversion APIs ------------------------------------------
     # OpenDRIVE parser to load file
-    with open("{}".format(input_path), "r") as file_in:
-        opendrive = parse_opendrive(etree.parse(file_in).getroot())
+    opendrive = parse_opendrive(input_path)
 
-    # create OpenDRIVE intermediate network object
-    road_network = Network()
+    # create OpenDRIVE intermediate network object from configuration
+    road_network = Network(config)
 
     # convert OpenDRIVE file
     road_network.load_opendrive(opendrive)
@@ -111,8 +109,9 @@ Python APIs
         source="CommonRoad Scenario Designer",
         tags={Tag.URBAN},
     )
-    writer.write_to_file(os.path.dirname(os.path.realpath(__file__)) + "/" + "ZAM_OpenDRIVETest-1_1-T1.xml",
+    writer.write_to_file(os.path.dirname(os.path.realpath(__file__)) + "/" + "ZAM_OpenDRIVETest-1_1-T2.xml",
                          OverwriteExistingFile.ALWAYS)
+
 
 
 Implementation Details

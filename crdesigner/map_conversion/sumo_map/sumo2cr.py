@@ -4,8 +4,9 @@ import subprocess
 from commonroad.scenario.scenario import Scenario
 from crdesigner.map_conversion.opendrive.opendrive_conversion.network import Network
 from crdesigner.map_conversion.opendrive.opendrive_parser.parser import parse_opendrive
-from crdesigner.configurations.get_configs import get_configs
 from lxml import etree
+
+from PyQt5.QtWidgets import QMessageBox
 
 
 def convert_net_to_cr(net_file: str, verbose: bool = False) -> Scenario:
@@ -17,6 +18,9 @@ def convert_net_to_cr(net_file: str, verbose: bool = False) -> Scenario:
 
     :return: CommonRoad map file
     """
+    if net_file is None:
+        QMessageBox.warning(None, "Warning", "No file selected.", QMessageBox.Ok)
+        return
     assert isinstance(net_file, str)
 
     out_folder_tmp = os.path.dirname(net_file)
@@ -37,8 +41,7 @@ def convert_net_to_cr(net_file: str, verbose: bool = False) -> Scenario:
     with open(opendrive_file, "r") as fi:
         open_drive = parse_opendrive(etree.parse(fi).getroot())
 
-    config = get_configs().opendrive
-    road_network = Network(config)
+    road_network = Network()
     road_network.load_opendrive(open_drive)
     scenario = road_network.export_commonroad_scenario()
     if verbose:

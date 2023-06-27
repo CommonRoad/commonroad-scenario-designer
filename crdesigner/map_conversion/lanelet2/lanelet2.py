@@ -1,8 +1,6 @@
-from typing import Optional
+from typing import Optional, Dict
 from lxml import etree  # type: ignore
 from typing import List
-
-DEFAULT_PROJ_STRING = "+proj=utm +zone=32 +ellps=WGS84"
 
 
 class Node:
@@ -10,16 +8,25 @@ class Node:
     OSM Node.
     """
 
-    def __init__(self, id_, lat, lon):
+    def __init__(self, id_, lat, lon, ele: float = 0.0, autoware: bool = False,
+                 local_x: Optional[float] = None, local_y: Optional[float] = None):
         """
         Initialization of Node
         
         :param lat: Latitude geo position information
-        :param lon: Longitutde geo position information
+        :param lon: Longitude geo position information
+        :param ele: Elevation (height information)
+        :param autoware: Boolean indicating whether the map is autoware-compatible.
+        :param local_x: local x-position instead of latitude/longitude (lon/lat values have no meaning)
+        :param local_y: local y-position instead of latitude/longitude (lon/lat values have no meaning)
         """
         self.id_ = str(id_)
         self.lat = str(lat)
         self.lon = str(lon)
+        self.ele = str(ele)
+        self.autoware = autoware
+        self.local_x = local_x
+        self.local_y = local_y
 
     def serialize_to_xml(self) -> etree:
         """
@@ -29,8 +36,24 @@ class Node:
         node.set("id", self.id_)
         node.set("action", "modify")
         node.set("visible", "true")
+        node.set("version", "1")
         node.set("lat", self.lat)
         node.set("lon", self.lon)
+        if self.local_x is not None and self.local_y is not None:
+            local_x = etree.SubElement(node, "tag")
+            local_x.set("k", "local_x")
+            local_x.set("v", str(self.local_x))
+            local_y = etree.SubElement(node, "tag")
+            local_y.set("k", "local_y")
+            local_y.set("v", str(self.local_y))
+            node.append(local_x)
+            node.append(local_y)
+        if self.ele != "0.0" or self.autoware:
+            ele = etree.SubElement(node, "tag")
+            ele.set("k", "ele")
+            ele.set("v", self.ele)
+            node.append(ele)
+
         return node
 
 
@@ -39,7 +62,7 @@ class Way:
     OSM Way
     """
 
-    def __init__(self, id_, nodes: list, tag_dict: Optional[dict] = None):
+    def __init__(self, id_, nodes: list, tag_dict: Optional[Dict[str, str]] = None):
         """
         Initialization of Way
 
@@ -59,6 +82,7 @@ class Way:
         way.set("id", self.id_)
         way.set("action", "modify")
         way.set("visible", "true")
+        way.set("version", "1")
         for node in self.nodes:
             xml_node = etree.SubElement(way, "nd")
             xml_node.set("ref", node)
@@ -75,7 +99,7 @@ class WayRelation:
     Relation for a lanelet with a left and a right way
     """
 
-    def __init__(self, id_, left_way, right_way, tag_dict: Optional[dict] = None,
+    def __init__(self, id_, left_way, right_way, tag_dict: Optional[Dict[str, str]] = None,
                  regulatory_elements: Optional[List[str]] = None):
         """
         Initialization of WayRelation
@@ -101,6 +125,7 @@ class WayRelation:
         rel.set("id", self.id_)
         rel.set("action", "modify")
         rel.set("visible", "true")
+        rel.set("version", "1")
         right_way = etree.SubElement(rel, "member")
         right_way.set("type", "way")
         right_way.set("ref", self.right_way)
@@ -126,7 +151,7 @@ class RegulatoryElement:
     """Relation for a regulatory element (traffic light, traffic sign, speed limit)"""
 
     def __init__(self, id_, refers: Optional[list] = None, yield_ways: Optional[list] = None,
-                 right_of_ways: Optional[list] = None, tag_dict: Optional[dict] = None,
+                 right_of_ways: Optional[list] = None, tag_dict: Optional[Dict[str, str]] = None,
                  ref_line: Optional[list] = None):
         """
         Initialization of RegulatoryElement
@@ -152,6 +177,7 @@ class RegulatoryElement:
         rel = etree.Element("relation")
         rel.set("id", self.id_)
         rel.set("action", "modify")
+        rel.set("version", "1")
         rel.set("visible", "true")
         for r in self.refers:
             right_way = etree.SubElement(rel, "member")
@@ -186,7 +212,7 @@ class OSMLanelet:
     """
 
     def __init__(self):
-        """Initalization of the OSMLanelet"""
+        """Initialization of the OSMLanelet"""
         self.nodes = {}
         self.ways = {}
         self.way_relations = {}
@@ -254,7 +280,7 @@ class OSMLanelet:
         Finds a way corresponding to its id.
 
         :param way_id: id of the way
-        :return: Way with the corresponding id
+        :return: way with the corresponding id
         """
         return self.ways.get(way_id)
 

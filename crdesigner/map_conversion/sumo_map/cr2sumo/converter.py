@@ -166,7 +166,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
     @classmethod
     def from_file(cls, file_path_cr, conf: SumoConfig):
         scenario, _ = CommonRoadFileReader(file_path_cr).open()
-        return cls(scenario.lanelet_network, conf)
+        return cls(scenario, conf)
 
     def _convert_map(self):
         self._find_lanes()

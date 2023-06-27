@@ -1,10 +1,10 @@
+import logging
 import warnings
-
+from typing import Optional, Dict
 import numpy as np
 from lxml import etree
 
 from crdesigner.map_conversion.common.utils import generate_unique_id
-
 from crdesigner.map_conversion.opendrive.opendrive_parser.elements.opendrive import OpenDrive, Header
 from crdesigner.map_conversion.opendrive.opendrive_parser.elements.road import Road
 from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadLink import Predecessor as RoadLinkPredecessor, \
@@ -24,7 +24,6 @@ from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadSignal im
     SignalReference
 from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadObject import Object as RoadObject, \
     ObjectOutlineCorner
-from typing import Optional, TypeVar
 
 
 def parse_opendrive(file_path: str) -> OpenDrive:
@@ -121,40 +120,39 @@ def defaultval(val: Optional[str], name: str, default: str = "0") -> str:
         return val
 
 
-def parse_opendrive_road_geometry(new_road: Road, road_geometry: etree.ElementTree):
+def parse_opendrive_road_geometry(new_road: Road, road_geometry: etree.ElementTree, offset: Dict[str, str]):
     """
     Parse OpenDRIVE road geometry and appends it to road object.
 
     :param new_road: Road to append the parsed road geometry
     :param road_geometry: XML element which contains the information
+    :param offset: Offset defined in OpenDRIVE.
     """
-    start_coord = [float(road_geometry.get("x")), float(road_geometry.get("y"))]
+    start_coord = np.array([float(road_geometry.get("x")) - float(offset["x"]),
+                            float(road_geometry.get("y")) - float(offset["y"])])
 
     if road_geometry.find("line") is not None:
-        new_road.planView.add_line(start_coord, float(road_geometry.get("hdg")), float(road_geometry.get("length")), )
+        new_road.planView.add_line(start_coord, float(road_geometry.get("hdg")) - float(offset["hdg"]),
+                                   float(road_geometry.get("length")))
 
     elif road_geometry.find("spiral") is not None:
         curv_start = float(defaultval(road_geometry.find("spiral").get("curvStart"), "spiral.curvStart"))
         curv_end = float(defaultval(road_geometry.find("spiral").get("curvEnd"), "spiral.curvEnd"))
         if np.isclose(curv_start, curv_end):
             raise AttributeError("Curvature at the start and at the end of a spiral must be different")
-        new_road.planView.add_spiral(start_coord, float(road_geometry.get("hdg")), float(road_geometry.get("length")),
-                                     curv_start,
-                                     curv_end,)
+        new_road.planView.add_spiral(start_coord, float(road_geometry.get("hdg")) - float(offset["hdg"]),
+                                     float(road_geometry.get("length")), curv_start, curv_end,)
     elif road_geometry.find("arc") is not None:
-        new_road.planView.add_arc(start_coord, float(road_geometry.get("hdg")), float(road_geometry.get("length")),
+        new_road.planView.add_arc(start_coord, float(road_geometry.get("hdg")) - float(offset["hdg"]),
+                                  float(road_geometry.get("length")),
                                   float(road_geometry.find("arc").get("curvature")),)
 
     elif road_geometry.find("poly3") is not None:
         new_road.planView.add_poly3(start_coord, float(road_geometry.get("hdg")), float(road_geometry.get("length")),
-                                    float(
-                                            defaultval(road_geometry.find("poly3").get("a"), "poly3.a")),
-                                    float(
-                                            defaultval(road_geometry.find("poly3").get("b"), "poly3.b")),
-                                    float(
-                                            defaultval(road_geometry.find("poly3").get("c"), "poly3.c")),
-                                    float(
-                                            defaultval(road_geometry.find("poly3").get("d"), "poly3.d")),)# raise
+                                    float(defaultval(road_geometry.find("poly3").get("a"), "poly3.a")),
+                                    float(defaultval(road_geometry.find("poly3").get("b"), "poly3.b")),
+                                    float(defaultval(road_geometry.find("poly3").get("c"), "poly3.c")),
+                                    float(defaultval(road_geometry.find("poly3").get("d"), "poly3.d")),)
         # NotImplementedError()
 
     elif road_geometry.find("paramPoly3") is not None:
@@ -343,7 +341,8 @@ def parse_opendrive_road_lane_section(new_road: Road, lane_section_id: int, lane
                 road_mark = RoadLaneRoadMark()
 
                 road_mark.type = mark.get("type")
-                road_mark.weight = mark.get("weight")
+                if mark.get("weight") is not None:
+                    road_mark.weight = mark.get("weight")
                 road_mark.SOffset = mark.get("sOffset")
 
                 new_lane.road_mark.append(road_mark)
@@ -449,7 +448,7 @@ def parse_opendrive_road(opendrive: OpenDrive, road: etree.ElementTree):
 
     # Plan view
     for road_geometry in road.find("planView").findall("geometry"):
-        parse_opendrive_road_geometry(new_road, road_geometry)
+        parse_opendrive_road_geometry(new_road, road_geometry, opendrive.header.offset)
     # Elevation profile
     road_elevation_profile = road.find("elevationProfile")
     if road_elevation_profile is not None:
@@ -549,7 +548,8 @@ def parse_opendrive_road_object(new_road: Road, obj: etree.ElementTree):
 
         road_object.outline = corners
     except:
-        print("Error during parsing of road objects.")
+        logging.error("parse_opendrive_road_object: Error during parsing of road objects. "
+                      "Object id {}".format(obj.attrib.get("id")))
 
     new_road.addObject(road_object)
 
@@ -598,6 +598,10 @@ def parse_opendrive_header(opendrive: OpenDrive, header: etree.ElementTree):
     # Reference
     if header.find("geoReference") is not None:
         parsed_header.geo_reference = header.find("geoReference").text
+
+    # offset {x: , y: , z: , hdg:}
+    if header.find("offset") is not None:
+        parsed_header.offset = header.find("offset").attrib
 
     opendrive.header = parsed_header
 

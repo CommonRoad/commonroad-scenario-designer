@@ -17,7 +17,7 @@ from crdesigner.map_conversion.osm2cr.converter_modules.graph_operations.restric
 from crdesigner.map_conversion.osm2cr.converter_modules.osm_operations import info_deduction as i_d
 from crdesigner.map_conversion.osm2cr.converter_modules.utility import idgenerator
 from crdesigner.map_conversion.osm2cr.converter_modules.utility.custom_types import Road_info
-from crdesigner.map_conversion.osm2cr.converter_modules.utility.geometry import (
+from crdesigner.map_conversion.common.geometry import (
     Point,
     is_corner,
     Area,

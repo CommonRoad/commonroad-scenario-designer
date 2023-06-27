@@ -1,27 +1,36 @@
 from collections import defaultdict
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Dict, Union
 from shapely.geometry import LineString  # type: ignore
 import numpy as np
-from pyproj import Proj
+from pyproj import Transformer, CRS
+import logging
 
 from commonroad.scenario.lanelet import StopLine, LineMarking, RoadUser, Lanelet, LaneletNetwork  # type: ignore
-from commonroad.scenario.traffic_sign import (TrafficSignElement, TrafficSignIDGermany,
+from commonroad.scenario.traffic_sign import (TrafficSignElement, TrafficSignIDGermany,  # type: ignore
                                               TrafficSignIDUsa,  # type: ignore
-                                              TrafficSignIDZamunda, )  # type: ignore
-from commonroad.scenario.scenario import Scenario, ScenarioID, TrafficSign, Location  # type: ignore
+                                              TrafficSignIDZamunda, TrafficLightCycleElement,
+                                              TrafficLightState, TrafficLightDirection)  # type: ignore
+from commonroad.scenario.scenario import Scenario, ScenarioID, TrafficSign, Location, TrafficLight, \
+    GeoTransformation  # type: ignore
 
+from crdesigner.map_conversion.lanelet2.lanelet2 import OSMLanelet
 from crdesigner.map_conversion.common.utils import generate_unique_id
-from crdesigner.map_conversion.opendrive.opendrive_conversion.conversion_lanelet import ConversionLanelet
-from crdesigner.map_conversion.opendrive.opendrive_conversion.conversion_lanelet_network import \
-    ConversionLaneletNetwork, convert_to_new_lanelet_id
-from crdesigner.map_conversion.lanelet2.lanelet2 import WayRelation, DEFAULT_PROJ_STRING, Node, RegulatoryElement
-from crdesigner.map_conversion.osm2cr.converter_modules.utility.geometry import (point_to_line_distance,
-                                                                                 distance as point_to_polyline_distance)
-from crdesigner.configurations.get_configs import get_configs
-from crdesigner.map_conversion.lanelet2 import config
+from crdesigner.map_conversion.common.conversion_lanelet import ConversionLanelet
+from crdesigner.map_conversion.common.conversion_lanelet_network import \
+    ConversionLaneletNetwork
+from crdesigner.map_conversion.common.utils import convert_to_new_lanelet_id
+from crdesigner.map_conversion.lanelet2.lanelet2 import WayRelation, Node, RegulatoryElement, Way
+from crdesigner.map_conversion.common.geometry import (point_to_line_distance,
+                                                       distance as point_to_polyline_distance)
+from crdesigner.config.config import Lanelet2ConversionParams, GeneralParams
 
 
-def _add_closest_traffic_sign_to_lanelet(lanelets: List[Lanelet], traffic_signs: List[TrafficSign]):
+date_strftime_format = "%d-%b-%y %H:%M:%S"
+message_format = "%(asctime)s - %(levelname)s - %(message)s"
+logging.basicConfig(level=logging.INFO, format=message_format, datefmt=date_strftime_format)
+
+
+def _add_closest_traffic_sign_to_lanelet(lanelets: List[Lanelet], traffic_signs: List[TrafficSign]) -> set:
     """
     Assumes that it is given traffic signs and lanelets that should get matched (all to each)
     Each lanelet gets assigned exactly the single traffic sign closest to it
@@ -44,13 +53,14 @@ def _add_closest_traffic_sign_to_lanelet(lanelets: List[Lanelet], traffic_signs:
     return used_signs
 
 
-def _add_stop_line_to_lanelet(lanelets: List[Lanelet], stop_lines: List[StopLine]):
+def _add_stop_line_to_lanelet(lanelets: List[Lanelet], stop_lines: List[StopLine]) -> set:
     """
     Assigns each lanelet the first stop line that it is found to intersect with
     Several lanelets may end up getting assigned the same stop line
 
     :param lanelets: list of the lanelets
     :param stop_lines: list of the stop lines
+    :return: set of yield signs
     """
     yield_signs = set()
     for la in lanelets:
@@ -65,21 +75,135 @@ def _add_stop_line_to_lanelet(lanelets: List[Lanelet], stop_lines: List[StopLine
     return yield_signs
 
 
+def _extract_special_meaning_to_lanelet(way_rel: WayRelation) -> Tuple[str, set, set]:
+    """
+        Extracts special meaning from the way relation (L2) to the converted lanelet (CR),
+        such as one_way/bidirectional users and the type of the lanelet
+
+        :param way_rel: way relation that is being converted
+        :return: Tuple that contains the lanelet type, and the bidirectional and one way users of the lanelet
+    """
+    lanelet_type = None
+    users_one_way = set()
+    users_bidirectional = set()
+    one_way_val = way_rel.tag_dict.get("one_way")
+    bidirectional, one_way = one_way_val == "no", one_way_val == "yes"
+    if way_rel.tag_dict.get("bicycle") == "yes":
+        if one_way:
+            users_one_way.add(RoadUser.BICYCLE)
+        else:
+            users_bidirectional.add(RoadUser.BICYCLE)
+    subtype = way_rel.tag_dict.get("subtype")
+    if subtype in {"bicycle_lane", "shared_walkway", "road"}:
+        users_one_way.add(RoadUser.BICYCLE)
+        if subtype != "road":
+            lanelet_type = 'biking'
+    if subtype in {"walkway", "shared_walkway"}:
+        users_bidirectional.add(RoadUser.PEDESTRIAN)
+        lanelet_type = "sidewalk"
+    if subtype == "crosswalk":
+        users_bidirectional.add(RoadUser.PEDESTRIAN)
+        lanelet_type = "crosswalk"
+    if subtype == "bus_lane":
+        users_one_way.add(RoadUser.BUS)
+        lanelet_type = "bus"
+    if subtype in {"road", "highway"}:
+        if bidirectional:
+            users_bidirectional.add(RoadUser.CAR)
+            users_bidirectional.add(RoadUser.MOTORCYCLE)
+        else:
+            users_one_way.add(RoadUser.CAR)
+            users_one_way.add(RoadUser.MOTORCYCLE)
+        location_val = way_rel.tag_dict.get("location")
+        if subtype == "highway":
+            lanelet_type = "highway"
+        elif location_val == "nonurban":
+            lanelet_type = 'country'
+        else:
+            lanelet_type = 'urban'
+
+    users_bidirectional.add(RoadUser.PRIORITY_VEHICLE)
+    return lanelet_type, users_one_way, users_bidirectional
+
+
+def _append_traffic_light_cycles(traffic_light_way: Way) -> List[TrafficLightCycleElement]:
+    """
+        Creates traffic light elements (CR) that correspond to the state of their L2 copy,
+        and adds them to the traffic light cycle list that is being used to create a
+        Traffic Light element in CR format
+
+        :param traffic_light_way: way that represents a traffic light in L2 format
+        :return: a list of traffic light cycle elements
+    """
+    # adding the cycles of the traffic light. As L2 format does not have timestamps
+    # the default value of a traffic light duration is 5 seconds.
+    cycle_list = []
+    state = traffic_light_way.tag_dict.get('subtype')
+    if state == 'red_yellow_green':
+        cycle_list.append(TrafficLightCycleElement(TrafficLightState.RED, 5))
+        cycle_list.append(TrafficLightCycleElement(TrafficLightState.YELLOW, 5))
+        cycle_list.append(TrafficLightCycleElement(TrafficLightState.GREEN, 5))
+    if state == "red_green":
+        cycle_list.append(TrafficLightCycleElement(TrafficLightState.RED, 5))
+        cycle_list.append(TrafficLightCycleElement(TrafficLightState.GREEN, 5))
+    if state == "red_yellow":
+        cycle_list.append(TrafficLightCycleElement(TrafficLightState.RED, 5))
+        cycle_list.append(TrafficLightCycleElement(TrafficLightState.YELLOW, 5))
+    if state == "red":
+        cycle_list.append(TrafficLightCycleElement(TrafficLightState.RED, 5))
+    if state == "yellow":
+        cycle_list.append(TrafficLightCycleElement(TrafficLightState.YELLOW, 5))
+    else:
+        cycle_list.append(TrafficLightCycleElement(TrafficLightState.INACTIVE, 5))
+    return cycle_list
+
+
+def _two_vertices_coincide(vertices1: np.ndarray, vertices2: np.ndarray,
+                           adjacent_way_distance_tolerance: float) -> bool:
+    """
+    Check if two vertices coincide and describe the same linestring.
+    For each vertex of vertices2 the minimal distance to the linestring
+    described by vertices1 is calculated. If this distance crosses a certain
+    threshold, the vertices are deemed to be different.
+
+    :param vertices1: List of vertices which describe first trajectory.
+    :param vertices2: List of vertices which describe second trajectory.
+    :param adjacent_way_distance_tolerance: Threshold indicating adjacent ways.
+    :return: True if the vertices coincide, else False.
+    """
+    segments = np.diff(vertices1, axis=0)
+
+    for vert in vertices2:
+        distances = np.empty([len(vertices1) + 1])
+        distances[0] = np.linalg.norm(vert - vertices1[0])
+        distances[-1] = np.linalg.norm(vert - vertices1[-1])
+        for i, diff in enumerate(segments):
+            distances[i + 1] = np.abs(np.cross(diff, vertices1[i] - vert)) / np.linalg.norm(diff)
+        if np.min(distances) > adjacent_way_distance_tolerance:
+            return False
+
+    return True
+
+
 class Lanelet2CRConverter:
     """
     Class to convert OSM to the Commonroad representation of Lanelets.
     """
 
-    def __init__(self, proj_string=None):
+    def __init__(self, lanelet2_config: Lanelet2ConversionParams = Lanelet2ConversionParams(),
+                 cr_config: GeneralParams = GeneralParams()):
         """
         Initialization of the Lanelet2CRConverter
 
-        :param proj_string:
+        :param proj_string: Projection string used for conversion.
+        :param lanelet2_config: Lanelet2 conversion parameters.
+        :param cr_config: General config parameters.
         """
-        if proj_string:
-            self.proj = Proj(proj_string)
-        else:
-            self.proj = Proj(DEFAULT_PROJ_STRING)
+        self._config = lanelet2_config
+        self._cr_config = cr_config
+        crs_from = CRS("ETRF89")
+        crs_to = CRS(self._config.proj_string)
+        self.transformer = Transformer.from_proj(crs_from, crs_to)
         self._left_way_ids, self._right_way_ids = None, None
         self.first_left_pts, self.last_left_pts = None, None
         self.first_right_pts, self.last_right_pts = None, None
@@ -87,7 +211,7 @@ class Lanelet2CRConverter:
         self.lanelet_network = None
         self.origin_utm = None
 
-    def __call__(self, osm, detect_adjacencies: bool = True, left_driving_system: bool = False, ) -> Scenario:
+    def __call__(self, osm: OSMLanelet) -> Union[Scenario, None]:
         """
         Convert OSM to Scenario.
         For each lanelet in OSM format, we have to save their first and last
@@ -95,9 +219,6 @@ class Lanelet2CRConverter:
         successors and adjacent neighbors.
 
         :param osm: OSM object which includes nodes, ways and lanelet relations.
-        :param detect_adjacencies: Compare vertices which might be adjacent. Set
-            to false if you consider it too computationally intensive.
-        :param left_driving_system: Set to true if map describes a left_driving_system.
         :return: A scenario with a lanelet network which describes the
             same map as the osm input.
         """
@@ -108,35 +229,46 @@ class Lanelet2CRConverter:
         self._left_way_ids, self._right_way_ids = defaultdict(list), defaultdict(list)
         self.first_left_pts, self.last_left_pts = defaultdict(list), defaultdict(list)
         self.first_right_pts, self.last_right_pts = defaultdict(list), defaultdict(list)
+        if len(self.osm.nodes.values()) == 0:
+            logging.warning("Lanelet2CRConverter: Selected Scenario is empty.")
+            return None
 
-        origin = next(iter(self.osm.nodes.values()))  # use a random node as origin
-        self.origin_utm = self.proj(origin.lon, origin.lat)
-        scenario_id = ScenarioID(country_id=config.DEFAULT_SCENARIO_COUNTRY_ID,
-                                 map_name=config.DEFAULT_SCENARIO_MAP_NAME, map_id=config.DEFAULT_SCENARIO_MAP_ID)
-
-        scenario = Scenario(dt=config.GLOBAL_TIMESTEP, scenario_id=scenario_id,
-                            location=Location(gps_latitude=origin.lat, gps_longitude=origin.lon))
-
-        self.lanelet_network = ConversionLaneletNetwork(get_configs().opendrive)
+        origin_lat = min([node.lat for node in self.osm.nodes.values()])
+        origin_lon = min([node.lon for node in self.osm.nodes.values()])  # use left-most lower corner as origin
+        logging.info("Lanelet2CRConverter OSM bounds - lower-left: {}/{} - "
+                     "upper right {}/{}".format(origin_lat, origin_lon,
+                                                max([node.lat for node in self.osm.nodes.values()]),
+                                                max([node.lon for node in self.osm.nodes.values()])))
+        if self._config.translate:
+            self.origin_utm = self.transformer.transform(origin_lat, origin_lon)
+        else:
+            self.origin_utm = (0, 0)
+        scenario_id = ScenarioID(country_id=self._cr_config.country_id,
+                                 map_name=self._cr_config.map_name, map_id=self._cr_config.map_id)
+        scenario = Scenario(dt=self._cr_config.time_step_size, scenario_id=scenario_id,
+                            location=Location(gps_latitude=origin_lat, gps_longitude=origin_lon))
+        self.lanelet_network = ConversionLaneletNetwork()
 
         speed_limits = {}
         speed_limit_lanelets = {}  # type: ignore
         for speed_limit_key in osm.speed_limit_signs.keys():
             light_id = generate_unique_id()
             speed_limits[speed_limit_key] = light_id
-            speed_limit_lanelets[speed_limit_key] = []  # scenario.add_objects(speed_limit)
+            speed_limit_lanelets[speed_limit_key] = []
 
         for way_rel in osm.way_relations.values():
             # add traffic sign id to traffic signs for speed limit
             # create dictionary for mapping of osm id to cr id and keep id constant
             # later add speed limit as traffic sign
-            lanelet = self._way_rel_to_lanelet(way_rel, detect_adjacencies, left_driving_system, speed_limits,
-                                               speed_limit_lanelets)
+            lanelet = self._way_rel_to_lanelet(way_rel, self._config.adjacencies, self._config.left_driving,
+                                               speed_limits, speed_limit_lanelets)
             if lanelet is not None:
                 self.lanelet_network.add_lanelet(lanelet)
 
+        # dictionary
         new_ids = self.lanelet_network.convert_all_lanelet_ids()
 
+        # right of way conversion
         for right_of_way_rel in osm.right_of_way_relations.values():
             try:
                 yield_signs, priority_signs, yield_lanelets, priority_lanelets, stop_lines = (
@@ -155,31 +287,90 @@ class Lanelet2CRConverter:
                                                                    y.traffic_sign_id in yield_signs_stop_lines_id}):
                     self.lanelet_network.add_traffic_sign(s, set())
             except NotImplementedError as e:
-                print(str(e))
+                logging.error("Lanelet2CRConverter: " + str(e))
 
+        # speed limit sign conversion
         for speed_limit_key in osm.speed_limit_signs.keys():
             speed, traffic_sign_id = osm.speed_limit_signs[speed_limit_key]
             light_id = speed_limits[speed_limit_key]
             first_occurrence = {self.lanelet_network._old_lanelet_ids[l_id] for l_id in
                                 speed_limit_lanelets[speed_limit_key]}
-
-            # TODO find better way to position speed limit
             position = self.lanelet_network.find_lanelet_by_id(
                     self.lanelet_network._old_lanelet_ids[speed_limit_lanelets[speed_limit_key][0]]).left_vertices[0]
             speed_limit = TrafficSign(light_id, [TrafficSignElement(traffic_sign_id, [speed])], first_occurrence,
                                       position, True)
             self.lanelet_network.add_traffic_sign(speed_limit,
-                                                  first_occurrence)  # scenario.add_objects(speed_limit,
-            # first_occurrence)
+                                                  first_occurrence)
+
+        # traffic light conversion
+        for way in osm.ways:
+            if osm.ways[way].tag_dict.get('type') == 'traffic_light':
+                self.traffic_light_conversion(osm.ways[way], new_ids)
 
         for la in self.lanelet_network.lanelets:
             la.__class__ = Lanelet
         self.lanelet_network.__class__ = LaneletNetwork
+
+        # if lanelet2 map is a sub-map of another map, relations could be wrong
+        self.lanelet_network.cleanup_lanelet_references()
+        self.lanelet_network.cleanup_traffic_sign_references()
+        self.lanelet_network.cleanup_traffic_light_references()
+
         scenario.add_objects(self.lanelet_network)
 
-        return scenario
+        scenario.location.geo_transformation = GeoTransformation(geo_reference=self._config.proj_string)
 
-    def _right_of_way_to_traffic_sign(self, right_of_way_rel: RegulatoryElement, new_lanelet_ids: dict):
+        return scenario
+    
+    def traffic_light_conversion(self, traffic_light_way: Way, new_lanelet_ids: Dict[str, int]):
+        """
+        Converting a traffic light, which is formatted as Way in Lanelet2 format, to
+        CommonRoad format
+
+        :param traffic_light_way: Way that is being used for conversion
+        :param new_lanelet_ids: Dictionary that appends new ids to newly created CR objects
+        """
+        # create a TrafficLight element (CR format) from the traffic light way (L2 format\<)
+        # id,cycle,position,offset,direction,active
+        new_id = convert_to_new_lanelet_id(traffic_light_way.id_, new_lanelet_ids)
+
+        cycle_list = _append_traffic_light_cycles(traffic_light_way)
+
+        # TL in L2 format is represented with 3 nodes, we will take the one in the middle
+        node = self.osm.nodes[traffic_light_way.nodes[1]]
+        node_x = node.lon
+        node_y = node.lat
+
+        # convert to CR space
+        x, y = self.transformer.transform(node_x, node_x)
+        x -= self.origin_utm[0]
+        y -= self.origin_utm[1]
+        
+        # need to assign lanelet to that trafficLight
+        # find the traffic_light_relations corresponding to our traffic_light_way and add them to the list
+        traffic_light_relations = []
+        for tl_relation in self.osm.traffic_light_relations:
+            for ref in self.osm.traffic_light_relations[tl_relation].refers:
+                if ref == traffic_light_way.id_:
+                    traffic_light_relations.append(tl_relation)
+
+        # now go through the lanelets and find the relation, which would match the traffic light and the lanelet
+        wr_lanelets = set()
+        for wr in self.osm.way_relations:
+            for re in self.osm.way_relations[wr].regulatory_elements:
+                if re in traffic_light_relations:
+                    # found the wr, now need to match it with corresponding lanelet
+                    # for that the "new_lanelet_ids" dict is used that is sent to this function
+                    wr_lanelets.add(new_lanelet_ids[wr])
+
+        # create the traffic light
+        traffic_light = TrafficLight(new_id, cycle_list, np.array([x, y]), 1, TrafficLightDirection.STRAIGHT, True)
+
+        # add the traffic light to our lanelet network
+        self.lanelet_network.add_traffic_light(traffic_light, wr_lanelets)
+
+    def _right_of_way_to_traffic_sign(self, right_of_way_rel: RegulatoryElement, new_lanelet_ids: Dict[str, int]) -> \
+            Tuple[List[TrafficSign], List[TrafficSign], List[int], List[int], List[StopLine]]:
         """
         One right_of_way regulatory element maps pretty well into commonroad scenarios
         it contains
@@ -202,14 +393,71 @@ class Lanelet2CRConverter:
 
         :param right_of_way_rel: corresponding RegulatoryElement object
         :param new_lanelet_ids: dictionary of the lanelet IDs
+        :return: Tuple with the relevant attributes extracted from the regulatory element
         """
-        priority_signs, yield_signs = [], []
 
         traffic_sign_ways = [self.osm.find_way_by_id(r) for r in right_of_way_rel.refers]
         # traffic signs will always be "ways"
         # https://github.com/fzi-forschungszentrum-informatik/Lanelet2/blob/master/lanelet2_core/doc
         # /LinestringTagging.md
 
+        priority_signs, yield_signs = self._traffic_sign_ways_to_traffic_signs(traffic_sign_ways, new_lanelet_ids)
+
+        priority_lanelets = []
+        for i in right_of_way_rel.right_of_ways:
+            # never create new lanelet ids here,
+            # if they don't exist yet, they are never created
+            if i in new_lanelet_ids.keys():
+                priority_lanelets.append(new_lanelet_ids[i])
+            else:
+                logging.warning("Lanelet2CRConverter::_right_of_way_to_traffic_sign: some priority sign "
+                                "references non-existing lanelet {}".format(i))
+
+        yield_lanelets = []
+        for i in right_of_way_rel.yield_ways:
+            # never create new lanelet ids here,
+            # if they don't exist yet, they are never created
+            if i in new_lanelet_ids.keys():
+                yield_lanelets.append(new_lanelet_ids[i])
+            else:
+                logging.warning("Lanelet2CRConverter::_right_of_way_to_traffic_sign: some yield sign "
+                                "references non-existing lanelet {}".format(i))
+
+        stop_lines = []
+        for stop_line in right_of_way_rel.ref_line:
+            # extract geometrical features
+            stop_line_way = self.osm.find_way_by_id(stop_line)
+            stop_line_way_vertices = self._convert_way_to_vertices(stop_line_way)
+            start = stop_line_way_vertices[0]
+            end = stop_line_way_vertices[-1]
+
+            # retrieve the closest yield traffic sign if any
+            # ref_t_id = None
+            ref_t_set_id = set()
+            _ref_t_min_dist = None
+            for ref_t in yield_signs:
+                d = point_to_line_distance(ref_t.position, start, end)
+                if _ref_t_min_dist is None or d < _ref_t_min_dist:
+                    ref_t_set_id = {ref_t.traffic_sign_id}
+                    _ref_t_min_dist = d
+
+            # initialize stop line
+            stop_line = StopLine(start=start, end=end, traffic_sign_ref=ref_t_set_id,
+                                 line_marking=LineMarking.BROAD_DASHED)
+            stop_lines.append(stop_line)
+        return yield_signs, priority_signs, yield_lanelets, priority_lanelets, stop_lines
+
+    def _traffic_sign_ways_to_traffic_signs(self, traffic_sign_ways: List, new_lanelet_ids: Dict[str, int]) \
+            -> Tuple[List[TrafficSign], List[TrafficSign]]:
+        """
+        Converts traffic sign ways (L2) into traffic signs (CR)
+
+        :param traffic_sign_ways: ways that will be converted into traffic signs
+        :param new_lanelet_ids: dictionary that will map the newly created traffic signs with their new ids
+        :return: tuple of lists that match according to the priority of the traffic sign.
+        """
+
+        priority_signs, yield_signs = [], []
         for traffic_sign_way in traffic_sign_ways:
             # distinguish yield and stop sign
             # also handles right of way and priority road
@@ -233,81 +481,49 @@ class Lanelet2CRConverter:
             # iterate through the list of enum classes to find the corresponding country based on the code
             supported_country_list = [TrafficSignIDGermany, TrafficSignIDUsa, TrafficSignIDZamunda]
 
+            # find the traffic sign
             traffic_sign_found = False
             tsid = TrafficSignIDZamunda.STOP  # default sign
             for country in supported_country_list:
                 for countrySign in country:
                     if countrySign.value == filtered_traffic_sign_type_name:
-                        tsid = country(countrySign.value)
+                        # traffic sign ID 252 is replaced by 260
+                        if (country is TrafficSignIDGermany or country is TrafficSignIDZamunda) \
+                                and countrySign.value == "252":
+                            tsid = country("260")
+                        else:
+                            tsid = country(countrySign.value)
                         traffic_sign_found = True
                 if traffic_sign_found:
                     break
-
             if traffic_sign_found == 0:
                 raise NotImplementedError(f"Lanelet type {traffic_sign_way.tag_dict['subtype']} not implemented")
 
+            # create the element of the traffic sign
             traffic_sign_element = TrafficSignElement(tsid, [])
 
             # extract position
-            x, y = self.proj(float(traffic_sign_node.lon), float(traffic_sign_node.lat))
+            x, y = self.transformer.transform(float(traffic_sign_node.lat), float(traffic_sign_node.lon))
             x -= self.origin_utm[0]
             y -= self.origin_utm[1]
-
             ref_t_id = convert_to_new_lanelet_id(traffic_sign_way.id_, new_lanelet_ids)
+
+            # create the traffic sign
             traffic_sign = TrafficSign(ref_t_id, traffic_sign_elements=[traffic_sign_element], first_occurrence=set(),
                                        position=np.array([x, y]), virtual=virtual)
+            # traffic sign names need to be universal(i.e."YIELD" should be the name of both German and USA Yield signs)
 
-            # traffic sign names need to be universal (i.e."YIELD" should be the name of both German and USA Yield
-            # signs)
-            if tsid.name in config.PRIORITY_SIGNS:
+            # append the sign to either priority or yield signs
+            if tsid.name in self._config.priority_signs:
                 priority_signs.append(traffic_sign)
             else:
                 yield_signs.append(traffic_sign)
 
-        priority_lanelets = []
-        for i in right_of_way_rel.right_of_ways:
-            # never create new lanelet ids here,
-            # if they don't exist yet, they are never created
-            if i in new_lanelet_ids.keys():
-                priority_lanelets.append(new_lanelet_ids[i])
-            else:
-                print(f"Warning: some priority sign references non-existing lanelet {i}")
-        yield_lanelets = []
-        for i in right_of_way_rel.yield_ways:
-            # never create new lanelet ids here,
-            # if they don't exist yet, they are never created
-            if i in new_lanelet_ids.keys():
-                yield_lanelets.append(new_lanelet_ids[i])
-            else:
-                print(f"Warning: some yield sign references non-existing lanelet {i}")
-
-        stop_lines = []
-        for stop_line in right_of_way_rel.ref_line:
-            # extract geometrical features
-            stop_line_way = self.osm.find_way_by_id(stop_line)
-            stop_line_way_vertices = self._convert_way_to_vertices(stop_line_way)
-            start = stop_line_way_vertices[0]
-            end = stop_line_way_vertices[-1]
-
-            # retrieve closest yield traffic sign if any
-            # ref_t_id = None
-            ref_t_set_id = set()
-            _ref_t_min_dist = None
-            for ref_t in yield_signs:
-                d = point_to_line_distance(ref_t.position, start, end)
-                if _ref_t_min_dist is None or d < _ref_t_min_dist:
-                    ref_t_set_id = {ref_t.traffic_sign_id}
-                    _ref_t_min_dist = d
-
-            # initialize stop line
-            stop_line = StopLine(start=start, end=end, traffic_sign_ref=ref_t_set_id,
-                                 # TODO distinguish linemarking types
-                                 line_marking=LineMarking.BROAD_DASHED)
-            stop_lines.append(stop_line)
-        return yield_signs, priority_signs, yield_lanelets, priority_lanelets, stop_lines
+        return priority_signs, yield_signs
 
     def _way_rel_to_lanelet(self, way_rel: WayRelation, detect_adjacencies, left_driving_system=False,
-                            speed_limit_dict: Optional[dict] = None, speed_limit_lanelts: Optional[dict] = None, ) \
+                            speed_limit_dict: Optional[Dict[int, int]] = None,
+                            speed_limit_lanelets: Optional[Dict[int, list]] = None, ) \
             -> Optional[ConversionLanelet]:
         """
         Convert a WayRelation to a Lanelet, add additional adjacency information.
@@ -318,25 +534,27 @@ class Lanelet2CRConverter:
         :param detect_adjacencies: Compare vertices which might be adjacent. Set
             to false if you consider it too computationally intensive.
         :param left_driving_system: Set to true if map describes a left_driving_system.
-        :param speed_limit_dict: Dictionary with reglatory_element_id to TrafficSign mapping
-        :param speed_limit_lanelts: mapping from speed_limit_ids to lanelets that use speed Limit
-        :return: A lanelet with a right and left vertice.
+        :param speed_limit_dict: Dictionary with regulatory_element_id to TrafficSign mapping
+        :param speed_limit_lanelets: mapping from speed_limit_ids to lanelets that use speed Limit
+        :return: A lanelet with a right and left vertex
         """
         if speed_limit_dict is None:
             speed_limit_dict = {}
-        if speed_limit_lanelts is None:
-            speed_limit_lanelts = {}
+        if speed_limit_lanelets is None:
+            speed_limit_lanelets = {}
 
         left_way = self.osm.find_way_by_id(way_rel.left_way)
         right_way = self.osm.find_way_by_id(way_rel.right_way)
         if len(left_way.nodes) != len(right_way.nodes):
-            print(f"Trying to fix relation {way_rel.id_}...")
+            logging.info("Lanelet2CRConverter::_way_rel_to_lanelet: Trying to fix relation {}...".format(way_rel.id_))
+
             self._fix_relation_unequal_ways(left_way, right_way)
 
         # If for some reason, relation couldn't be fixed, notify user
         if len(left_way.nodes) != len(right_way.nodes):
-            print(f"Error: Relation {way_rel.id_} has left and right ways which are not equally long! "
-                  f"Please check your data! Discarding this lanelet relation.")
+            logging.error("Lanelet2CRConverter::_way_rel_to_lanelet: Error: Relation {} has left and right "
+                          "ways which are not equally long! Please check your data! Discarding this "
+                          "lanelet relation.".format(way_rel.id_))
             return None
 
         # set only if not set before
@@ -356,8 +574,10 @@ class Lanelet2CRConverter:
 
         start_dist = np.linalg.norm(left_vertices[0] - right_vertices[0]) + np.linalg.norm(
                 left_vertices[-1] - right_vertices[-1])
+
         end_dist = np.linalg.norm(left_vertices[0] - right_vertices[-1]) + np.linalg.norm(
                 left_vertices[-1] - right_vertices[0])
+
         if start_dist > end_dist:
             if left_driving_system:
                 # reverse right vertices if right_way is reversed
@@ -367,61 +587,24 @@ class Lanelet2CRConverter:
                 # reverse left vertices if left_way is reversed
                 left_vertices = left_vertices[::-1]
                 first_left_node, last_left_node = (last_left_node, first_left_node)
+
+        # set first and last points
         self.first_left_pts[first_left_node].append(way_rel.id_)
         self.last_left_pts[last_left_node].append(way_rel.id_)
         self.first_right_pts[first_right_node].append(way_rel.id_)
         self.last_right_pts[last_right_node].append(way_rel.id_)
 
+        # set center vertices
         center_vertices = np.array([(l + r) / 2 for (l, r) in zip(left_vertices, right_vertices)])
 
-        # niels change
-        # extract special meaning like one way, road type
-        lanelet_type = None
-        users_one_way = set()
-        users_bidirectional = set()
-        one_way_val = way_rel.tag_dict.get("one_way")
-        bidirectional, one_way = one_way_val == "no", one_way_val == "yes"
-        if way_rel.tag_dict.get("bicycle") == "yes":
-            if one_way:
-                users_one_way.add(RoadUser.BICYCLE)
-            else:
-                users_bidirectional.add(RoadUser.BICYCLE)
-        subtype = way_rel.tag_dict.get("subtype")
-        if subtype in {"bicycle_lane", "shared_walkway", "road"}:
-            users_one_way.add(RoadUser.BICYCLE)
-            if subtype != "road":
-                lanelet_type = 'biking'
-        if subtype in {"walkway", "shared_walkway"}:
-            users_bidirectional.add(RoadUser.PEDESTRIAN)
-            lanelet_type = "sidewalk"
-        if subtype == "crosswalk":
-            users_bidirectional.add(RoadUser.PEDESTRIAN)
-            lanelet_type = "crosswalk"
-        if subtype == "bus_lane":
-            users_one_way.add(RoadUser.BUS)
-            lanelet_type = "bus"
-        if subtype in {"road", "highway"}:
-            if bidirectional:
-                users_bidirectional.add(RoadUser.CAR)
-                users_bidirectional.add(RoadUser.MOTORCYCLE)
-            else:
-                users_one_way.add(RoadUser.CAR)
-                users_one_way.add(RoadUser.MOTORCYCLE)
-            location_val = way_rel.tag_dict.get("location")
-            if subtype == "highway":
-                lanelet_type = "highway"
-            elif location_val == "nonurban":
-                lanelet_type = 'country'
-            else:
-                lanelet_type = 'urban'
-
-        users_bidirectional.add(RoadUser.PRIORITY_VEHICLE)
+        # extract special meaning like way, direction and road type
+        lanelet_type, users_one_way, users_bidirectional = _extract_special_meaning_to_lanelet(way_rel)
 
         traffic_signs = []
         for key in way_rel.regulatory_elements:
             if not speed_limit_dict.get(key) is None:
                 traffic_signs.append(speed_limit_dict[key])
-                speed_limit_lanelts[key].append(way_rel.id_)
+                speed_limit_lanelets[key].append(way_rel.id_)
 
         if len(traffic_signs) == 0:
             traffic_signs = set()
@@ -434,10 +617,6 @@ class Lanelet2CRConverter:
                                     lanelet_type=lanelet_type, traffic_signs=traffic_signs)
 
         self._check_right_and_left_neighbors(way_rel, lanelet)
-
-        if detect_adjacencies:
-            self._find_adjacencies_of_coinciding_ways(lanelet, first_left_node, first_right_node, last_left_node,
-                                                      last_right_node, )
 
         potential_successors = self._check_for_successors(last_left_node=last_left_node,
                                                           last_right_node=last_right_node)
@@ -456,66 +635,25 @@ class Lanelet2CRConverter:
         if potential_adj_right:
             self.lanelet_network.set_adjacent_right(lanelet, potential_adj_right[0], True)
 
+        if detect_adjacencies:
+            self._find_adjacencies_of_coinciding_ways(lanelet, first_left_node, first_right_node, last_left_node,
+                                                      last_right_node, )
+
         return lanelet
 
-    def _fix_relation_unequal_ways(self, left_way, right_way):
+    def _fix_relation_unequal_ways(self, left_way: Way, right_way: Way):
         """
         Fix the way relation if the nodes of the ways are not the same
 
         :param left_way:
         :param right_way:
         """
-        # Try to fix by adding some nodes by interpolation in the way with the least nodes...
-        # TODO: Maybe we should try to add the extra nodes close to the zone
-        #  where the other way has extra nodes? Or distribute evenly...
-        # For now, add between two central nodes
-        if (len(left_way.nodes) == len(right_way.nodes)):
+        if len(left_way.nodes) == len(right_way.nodes):
             return
-        if (len(left_way.nodes) < len(right_way.nodes)):
-            n = len(right_way.nodes) - len(left_way.nodes)
-            # Coordinates of two nodes in the middle to interpolate and add n nodes in between
-            mid = int(len(left_way.nodes) / 2)
-            start_node = self.osm.find_node_by_id(left_way.nodes[mid])
-            end_node = self.osm.find_node_by_id(left_way.nodes[mid - 1])
-            # Parse to nodes with numeric values
-            start_node_f = np.array([float(start_node.lat), float(start_node.lon)])
-            end_node_f = np.array([float(end_node.lat), float(end_node.lon)])
-            # Add n nodes, start from last one
-            for i in range(n, 0, -1):
-                # TODO: What to do with the node id? For now add some big number to start node id
-                k = 10
-                new_id = int(start_node.id_) + k * 100 + i
-                while self.osm.find_node_by_id(str(new_id)) is not None:
-                    k = k + 1
-                    new_id = int(start_node.id_) + k * 100 + i
-                # For Getting n additional nodes, we need to split the segment into n+1 smaller segments
-                new_lat = round(start_node_f[0] + (end_node_f[0] - start_node_f[0]) * i / (n + 1), 11)
-                new_lon = round(start_node_f[1] + (end_node_f[1] - start_node_f[1]) * i / (n + 1), 11)
-                new_node = Node(new_id, new_lat, new_lon)
-                self.osm.add_node(new_node)
-                left_way.nodes.insert(mid, new_node.id_)
+        if len(left_way.nodes) < len(right_way.nodes):
+            self.create_additional_nodes(left_way, right_way)
         else:
-            n = len(left_way.nodes) - len(right_way.nodes)
-            # Coordinates of two nodes in the middle to interpolate and add n nodes in between
-            mid = int(len(right_way.nodes) / 2)
-            start_node = self.osm.find_node_by_id(right_way.nodes[mid])
-            end_node = self.osm.find_node_by_id(right_way.nodes[mid - 1])
-            # Parse to nodes with numeric values
-            start_node_f = np.array([float(start_node.lat), float(start_node.lon)])
-            end_node_f = np.array([float(end_node.lat), float(end_node.lon)])
-            # Add n nodes, start from last one
-            for i in range(n, 0, -1):
-                k = config.DEFAULT_START_NODE_VALUE
-                new_id = int(start_node.id_) + k * 100 + i
-                while self.osm.find_node_by_id(str(new_id)) is not None:
-                    k = k + 1
-                    new_id = int(start_node.id_) + k * 100 + i
-                # For Getting n additional nodes, we need to split the segment into n+1 smaller segments
-                new_lat = round(start_node_f[0] + (end_node_f[0] - start_node_f[0]) * i / (n + 1), 11)
-                new_lon = round(start_node_f[1] + (end_node_f[1] - start_node_f[1]) * i / (n + 1), 11)
-                new_node = Node(new_id, new_lat, new_lon)
-                self.osm.add_node(new_node)
-                right_way.nodes.insert(mid, new_node.id_)
+            self.create_additional_nodes(right_way, left_way)
 
     def _check_for_split_and_join_adjacencies(self, first_left_node, first_right_node, last_left_node,
                                               last_right_node) -> Tuple[List, List]:
@@ -611,7 +749,8 @@ class Lanelet2CRConverter:
             potential_left_same_direction = list(set(potential_left_front) & set(potential_left_back))
             for lanelet_id in potential_left_same_direction:
                 nb_lanelet = self.lanelet_network.find_lanelet_by_id(lanelet_id)
-                if nb_lanelet is not None and _two_vertices_coincide(lanelet.left_vertices, nb_lanelet.right_vertices):
+                if nb_lanelet is not None and _two_vertices_coincide(lanelet.left_vertices, nb_lanelet.right_vertices,
+                                                                     self._config.adjacent_way_distance_tolerance):
                     self.lanelet_network.set_adjacent_left(lanelet, nb_lanelet.lanelet_id, True)
                     break
 
@@ -622,7 +761,8 @@ class Lanelet2CRConverter:
             potential_right_same_direction = list(set(potential_right_front) & set(potential_right_back))
             for lanelet_id in potential_right_same_direction:
                 nb_lanelet = self.lanelet_network.find_lanelet_by_id(lanelet_id)
-                if nb_lanelet is not None and _two_vertices_coincide(lanelet.right_vertices, nb_lanelet.left_vertices):
+                if nb_lanelet is not None and _two_vertices_coincide(lanelet.right_vertices, nb_lanelet.left_vertices,
+                                                                     self._config.adjacent_way_distance_tolerance):
                     self.lanelet_network.set_adjacent_right(lanelet, nb_lanelet.lanelet_id, True)
                     break
 
@@ -633,9 +773,10 @@ class Lanelet2CRConverter:
             potential_left_other_direction = list(set(potential_left_front) & set(potential_left_back))
             for lanelet_id in potential_left_other_direction:
                 nb_lanelet = self.lanelet_network.find_lanelet_by_id(lanelet_id)
-                # compare right vertice of nb_lanelet with left vertice of lanelet
+                # compare right vertex of nb_lanelet with left vertex of lanelet
                 if nb_lanelet is not None and _two_vertices_coincide(lanelet.left_vertices,
-                                                                     nb_lanelet.left_vertices[::-1]):
+                                                                     nb_lanelet.left_vertices[::-1],
+                                                                     self._config.adjacent_way_distance_tolerance):
                     self.lanelet_network.set_adjacent_left(lanelet, nb_lanelet.lanelet_id, False)
                     break
 
@@ -647,7 +788,8 @@ class Lanelet2CRConverter:
             for lanelet_id in potential_right_other_direction:
                 nb_lanelet = self.lanelet_network.find_lanelet_by_id(lanelet_id)
                 if nb_lanelet is not None and _two_vertices_coincide(lanelet.right_vertices,
-                                                                     nb_lanelet.right_vertices[::-1]):
+                                                                     nb_lanelet.right_vertices[::-1],
+                                                                     self._config.adjacent_way_distance_tolerance):
                     self.lanelet_network.set_adjacent_right(lanelet, nb_lanelet.lanelet_id, True)
                     break
 
@@ -685,13 +827,12 @@ class Lanelet2CRConverter:
         Convert a Way to a list of points.
 
         :param way: Way to be converted.
-        :param osm: OSM which includes the way and the nodes.
         :return: The vertices of the new lanelet border.
         """
         vertices = np.empty((len(way.nodes), 2))
         for i, node_id in enumerate(way.nodes):
             nd = self.osm.find_node_by_id(node_id)
-            x, y = self.proj(float(nd.lon), float(nd.lat))
+            x, y = self.transformer.transform(float(nd.lat), float(nd.lon))
             x -= self.origin_utm[0]
             y -= self.origin_utm[1]
             vertices[i] = [x, y]
@@ -708,11 +849,11 @@ class Lanelet2CRConverter:
         """
         node1 = self.osm.find_node_by_id(node_id1)
         node2 = self.osm.find_node_by_id(node_id2)
-        vec1 = np.array(self.proj(float(node1.lon), float(node1.lat)))
-        vec2 = np.array(self.proj(float(node2.lon), float(node2.lat)))
+        vec1 = np.array(self.transformer.transform(float(node1.lat), float(node1.lon)))
+        vec2 = np.array(self.transformer.transform(float(node2.lat), float(node2.lon)))
         return np.linalg.norm(vec1 - vec2)
 
-    def _find_lanelet_ids_of_suitable_nodes(self, nodes_dict: dict, node_id: str) -> List:
+    def _find_lanelet_ids_of_suitable_nodes(self, nodes_dict: Dict[str, List[str]], node_id: str) -> List:
         """
         Find values of a dict where the keys are node ids.
         Return the entries if there is a value in the node_dict
@@ -726,31 +867,36 @@ class Lanelet2CRConverter:
         suitable_lanelet_ids = []
         suitable_lanelet_ids.extend(nodes_dict.get(node_id, []))
         for nd, lanelet_ids in nodes_dict.items():
-            if self.node_distance(nd, node_id) < config.NODE_DISTANCE_TOLERANCE:
+            if self.node_distance(nd, node_id) < self._config.node_distance_tolerance:
                 suitable_lanelet_ids.extend(lanelet_ids)
         return suitable_lanelet_ids
 
+    def create_additional_nodes(self, shorter_way: Way, longer_way: Way):
+        """
+        Function that creates additional nodes and adds them to the shorter way in order
+        to fix the relation of unequal ways
 
-def _two_vertices_coincide(vertices1: np.ndarray, vertices2: np.ndarray) -> bool:
-    """
-    Check if two vertices coincide and describe the same trajectory.
-    For each vertex of vertices2 the minimal distance to the trajectory
-    described by vertices1 is calculated. If this distance crosses a certain
-    threshold, the vertices are deemed to be different.
-
-    :param vertices1: List of vertices which describe first trajectory.
-    :param vertices2: List of vertices which describe second trajectory.
-    :return: True if the vertices coincide, else False.
-    """
-    segments = np.diff(vertices1, axis=0)
-
-    for vert in vertices2:
-        distances = np.empty([len(vertices1) + 1])
-        distances[0] = np.linalg.norm(vert - vertices1[0])
-        distances[-1] = np.linalg.norm(vert - vertices1[-1])
-        for i, diff in enumerate(segments):
-            distances[i + 1] = np.abs(np.cross(diff, vertices1[i] - vert)) / np.linalg.norm(diff)
-        if np.min(distances) > config.ADJACENT_WAY_DISTANCE_TOLERANCE:
-            return False
-
-    return True
+        :param shorter_way: Way that has a shorter length than the other one
+        :param longer_way: Way that has a longer length than the other one
+        """
+        n = len(longer_way.nodes) - len(shorter_way.nodes)
+        # Coordinates of two nodes in the middle to interpolate and add n nodes in between
+        mid = int(len(shorter_way.nodes) / 2)
+        start_node = self.osm.find_node_by_id(shorter_way.nodes[mid])
+        end_node = self.osm.find_node_by_id(shorter_way.nodes[mid - 1])
+        # Parse to nodes with numeric values
+        start_node_f = np.array([float(start_node.lat), float(start_node.lon)])
+        end_node_f = np.array([float(end_node.lat), float(end_node.lon)])
+        # Add n nodes, start from last one
+        for i in range(n, 0, -1):
+            k = self._config.start_node_id_value
+            new_id = int(start_node.id_) + k * 100 + i
+            while self.osm.find_node_by_id(str(new_id)) is not None:
+                k = k + 1
+                new_id = int(start_node.id_) + k * 100 + i
+            # For Getting n additional nodes, we need to split the segment into n+1 smaller segments
+            new_lat = round(start_node_f[0] + (end_node_f[0] - start_node_f[0]) * i / (n + 1), 11)
+            new_lon = round(start_node_f[1] + (end_node_f[1] - start_node_f[1]) * i / (n + 1), 11)
+            new_node = Node(new_id, new_lat, new_lon)
+            self.osm.add_node(new_node)
+            shorter_way.nodes.insert(mid, new_node.id_)

@@ -1,6 +1,7 @@
 from __future__ import annotations
 from typing import Union
 from typing import TYPE_CHECKING
+import logging
 if TYPE_CHECKING:
     from crdesigner.map_conversion.opendrive.opendrive_parser.elements.road import Road
 
@@ -577,7 +578,7 @@ class RoadMark:
     def __init__(self):
         self._SOffset = None
         self._type = None
-        self._weight = None
+        self._weight = "standard"
         self._color = None
         self._material = None
         self._width = None
@@ -640,7 +641,8 @@ class RoadMark:
         :param value: Value the weight is set to
         """
         if value is None:
-            warnings.warn("Parser could not find value for road_mark.weight, standard is used per default.")
+            logging.warning(
+                    "RoadMark::weight: Parser could not find value for road_mark.weight, standard is used per default.")
             value = "standard"
         self._weight = str(value)
 
@@ -653,7 +655,7 @@ class RoadMark:
         :setter: sets the color of the road mark
         :type: string
         """
-        warnings.warn("Attribute color is not used for conversion!", DeprecationWarning)
+        logging.warning("RoadMark::color: Attribute color is not used for conversion!", DeprecationWarning)
         return self._color
 
     @color.setter
@@ -668,7 +670,7 @@ class RoadMark:
         :getter: returns material of the road mark
         :type: string
         """
-        warnings.warn("Attribute material is not used for conversion!", DeprecationWarning)
+        logging.warning("RoadMark::material: Attribute material is not used for conversion!", DeprecationWarning)
         return self._material
 
     @property
@@ -679,7 +681,7 @@ class RoadMark:
         :getter: returns the width of the road mark
         :type:
         """
-        warnings.warn("Attribute width is not used for conversion!", DeprecationWarning)
+        logging.warning("RoadMark::width: Attribute width is not used for conversion!", DeprecationWarning)
         return self._width
 
     @property
@@ -691,7 +693,7 @@ class RoadMark:
         :setter: sets lane_change
         :type: string
         """
-        warnings.warn("Attribute lane_change is not used for conversion", DeprecationWarning)
+        logging.warning("RoadMark::lane_change: Attribute lane_change is not used for conversion", DeprecationWarning)
         return self._lane_change
 
     @lane_change.setter
@@ -706,5 +708,5 @@ class RoadMark:
         :getter: returns the height of the road mark
         :type:
         """
-        warnings.warn("Attribute height is not used for conversion!", DeprecationWarning)
+        logging.warning("RoadMark::height: Attribute height is not used for conversion!", DeprecationWarning)
         return self._height

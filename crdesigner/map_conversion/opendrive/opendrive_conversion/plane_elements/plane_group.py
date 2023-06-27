@@ -3,8 +3,9 @@ from typing import Tuple, Optional, List
 import math
 import numpy as np
 import copy
+from pyproj import Transformer
 
-from crdesigner.map_conversion.opendrive.opendrive_conversion.conversion_lanelet import ConversionLanelet
+from crdesigner.map_conversion.common.conversion_lanelet import ConversionLanelet
 from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.plane import ParametricLane
 from commonroad.scenario.lanelet import LineMarking
 
@@ -16,7 +17,7 @@ class ParametricLaneGroup:
 
     def __init__(
         self,
-        id_=None,
+        id_: str = None,
         parametric_lanes=None,
         inner_neighbour=None,
         inner_neighbour_same_direction=True,
@@ -50,12 +51,11 @@ class ParametricLaneGroup:
             else:
                 self.append(parametric_lanes)
 
-    def append(self, parametric_lane):
-        """Append lane to start or end of interal list of ParametricLane objects. If the parametric_lane is reverse,
+    def append(self, parametric_lane: ParametricLane):
+        """Append lane to start or end of internal list of ParametricLane objects. If the parametric_lane is reverse,
         it is inserted at the start.
 
         :param parametric_lane: Lane to be inserted either at beginning or end of list.
-        :type parametric_lane: :class:`ParametricLane`
         """
         if parametric_lane.reverse:
             self.parametric_lanes.insert(0, parametric_lane)
@@ -81,9 +81,7 @@ class ParametricLaneGroup:
         the proper ParametricLane for calculating a position.
 
         :param length: Length of ParametricLane to be added.
-        :type length: float
         :param reverse: Whether the lane is reversed. Default is False.
-        :type reverse: bool
         """
         if reverse:
             self._geo_lengths = np.insert(self._geo_lengths, 1, length)
@@ -100,7 +98,6 @@ class ParametricLaneGroup:
         """Get type of ParametricLaneGroup.
 
         :return: Type of first ParametricLane in this group.
-        :rtype: str
         """
         return self.parametric_lanes[0].type_
 
@@ -109,7 +106,6 @@ class ParametricLaneGroup:
         """Length of all ParametricLanes which are collected in this ParametricLaneGroup.
 
         :return: Accumulated length of ParametricLaneGroup
-        :rtype: float
         """
 
         return sum([x.length for x in self.parametric_lanes])
@@ -127,21 +123,18 @@ class ParametricLaneGroup:
         """Checks if width is zero at every point of this ParametricLaneGroup.
 
         :return: True if every ParametricLane has width_coefficients equal to only zero
-        :rtype: bool
         """
         return all(
             [plane.has_zero_width_everywhere() for plane in self.parametric_lanes]
         )
 
-    def to_lanelet(self, error_tolerance, min_delta_s) -> ConversionLanelet:
+    def to_lanelet(self, error_tolerance, min_delta_s, transformer: Transformer) -> ConversionLanelet:
         """Convert a ParametricLaneGroup to a Lanelet.
 
         :param error_tolerance: Max. error between reference geometry and polyline of vertices.
-        :type error_tolerance: float
         :param min_delta_s: Min. step length between two sampling positions on the reference geometry
-        :type min_delta_s: float
+        :param transformer: Coordinate projection transformer.
         :return: Created Lanelet.
-        :rtype: 'class'`ConversionLanelet`
         """
         left_vertices, right_vertices = np.array([]), np.array([])
         line_marking_left_vertices = LineMarking.UNKNOWN
@@ -149,7 +142,7 @@ class ParametricLaneGroup:
 
         for parametric_lane in self.parametric_lanes:
             local_left_vertices, local_right_vertices = parametric_lane.calc_vertices(
-                error_tolerance=error_tolerance, min_delta_s=min_delta_s
+                error_tolerance=error_tolerance, min_delta_s=min_delta_s, transformer=transformer
             )
             # check whether parametric lane cannot be used,
             # e.g., if to small it is possible that no vertices are generated
@@ -272,19 +265,15 @@ class ParametricLaneGroup:
 
         return lanelet
 
-    def calc_border(self, border: str, s_pos: float, width_offset: float = 0.0, compute_curvature=True):
+    def calc_border(self, border: str, s_pos: float, width_offset: float = 0.0, compute_curvature: bool = True) \
+            -> Tuple[Tuple[float, float], float, float, float]:
         """Calc vertices point of inner or outer Border.
 
         :param border: Which border to calculate (inner or outer)
-        :type border: str
         :param s_pos: Position of parameter ds where to calc the cartesian coordinates
-        :type s_pos: float
         :param width_offset: Offset to add to calculated width in reference to the reference border. Default is 0.0.
-        :type width_offset: float
         :param compute_curvature: Whether to computer curvature. Default is True.
-        :type compute_curvature: bool
         :return: Cartesian coordinates of point on inner border and tangential direction.
-        :rtype: Tuple[Tuple[float, float], float, float, float]
         """
         try:
             # get index of geometry which is at s_pos
@@ -312,23 +301,19 @@ class ParametricLaneGroup:
         mirror_interval: Tuple[float, float],
         adjacent_lanelet: ConversionLanelet,
         precision: float = 0.5,
+        transformer: Optional[Transformer] = None
     ):
         """Convert a ParametricLaneGroup to a Lanelet with mirroring one of the borders.
 
         :param mirror_border: Which lane to mirror, if performing merging or splitting of lanes.
-        :type mirror_border: str
         :param distance: Distance at start and end of lanelet, which mirroring lane should have from the other lane it
                         mirrors
-        :type distance: Tuple[float, float]
         :param mirror_interval: Position at start and end of mirroring
-        :type mirror_interval: Tuple[float, float]
         :param adjacent_lanelet: The adjacent lanelet.
-        :type adjacent_lanelet: :class:`opendrive.opendrive_conversion.conversion_lanelet.ConversionLanelet`
         :param precision: Number which indicates at which space interval (in curve parameter ds) the coordinates of the
                         boundaries should be calculated. Default is 0.5.
-        :type precision: float
+        :param transformer: Coordinate projection transformer.
         :return: Created Lanelet.
-        :rtype: :class:`opendrive.opendrive_conversion.conversion_lanelet.ConversionLanelet`
         """
         linear_distance_poly = np.polyfit(mirror_interval, distance, 1)
         distance_poly1d = np.poly1d(linear_distance_poly)
@@ -350,8 +335,12 @@ class ParametricLaneGroup:
             if (
                 pos < mirror_interval[0] or pos > mirror_interval[1]
             ) and not np.isclose(pos, mirror_interval[1]):
-                left_vertices.append(inner_pos)
-                right_vertices.append(outer_pos)
+                if transformer is not None:
+                    left_vertices.append(transformer.transform(inner_pos[0], inner_pos[1]))
+                    right_vertices.append(transformer.transform(outer_pos[0], outer_pos[1]))
+                else:
+                    left_vertices.append(inner_pos)
+                    right_vertices.append(outer_pos)
                 last_width_difference = 0
 
             else:
@@ -374,16 +363,27 @@ class ParametricLaneGroup:
                         math.copysign(1, local_width_offset) * last_width_difference
                     )
                     if modified_width < original_width:
-                        right_vertices.append(
-                            self.calc_border("outer", pos, local_width_offset)[0]
-                        )
+                        new_vertex = self.calc_border("outer", pos, local_width_offset)[0]
+                        if transformer is not None:
+                            right_vertices.append(transformer.transform(new_vertex[0], new_vertex[1]))
+                        else:
+                            right_vertices.append(new_vertex)
                     elif modified_width > original_width + adjacent_width:
-                        right_vertices.append(adj_outer_pos)
+                        if transformer is not None:
+                            right_vertices.append(transformer.transform(adj_outer_pos[0], adj_outer_pos[1]))
+                        else:
+                            right_vertices.append(adj_outer_pos)
                     else:
-                        right_vertices.append(new_outer_pos)
+                        if transformer is not None:
+                            right_vertices.append(transformer.transform(new_outer_pos[0], new_outer_pos[1]))
+                        else:
+                            right_vertices.append(new_outer_pos)
                         last_width_difference = abs(modified_width - original_width)
 
-                    left_vertices.append(inner_pos)
+                    if transformer is not None:
+                        left_vertices.append(transformer.transform(inner_pos[0], inner_pos[1]))
+                    else:
+                        left_vertices.append(inner_pos)
                 elif mirror_border == "right":
                     new_inner_pos = self.calc_border("outer", pos, local_width_offset)[
                         0
@@ -394,16 +394,27 @@ class ParametricLaneGroup:
                         math.copysign(1, local_width_offset) * last_width_difference
                     )
                     if modified_width < original_width:
-                        left_vertices.append(
-                            self.calc_border("inner", pos, local_width_offset)[0]
-                        )
+                        new_vertex = self.calc_border("inner", pos, local_width_offset)[0]
+                        if transformer is not None:
+                            left_vertices.append(transformer.transform(new_vertex[0], new_vertex[1]))
+                        else:
+                            left_vertices.append(new_vertex)
                     elif modified_width > original_width + adjacent_width:
-                        left_vertices.append(adj_inner_pos)
+                        if transformer is not None:
+                            left_vertices.append(transformer.transform(adj_inner_pos[0], adj_inner_pos[1]))
+                        else:
+                            left_vertices.append(adj_inner_pos)
                     else:
-                        left_vertices.append(new_inner_pos)
+                        if transformer is not None:
+                            left_vertices.append(transformer.transform(new_inner_pos[0], new_inner_pos[1]))
+                        else:
+                            left_vertices.append(new_inner_pos)
                         last_width_difference = abs(modified_width - original_width)
 
-                    right_vertices.append(outer_pos)
+                    if transformer is not None:
+                        right_vertices.append(transformer.transform(outer_pos[0], outer_pos[1]))
+                    else:
+                        right_vertices.append(outer_pos)
 
         left_vertices, right_vertices = (
             np.array(left_vertices),
@@ -429,9 +440,7 @@ class ParametricLaneGroup:
 
         :param precision: Number which indicates at which space interval (in curve parameter ds)
                         the coordinates of the boundaries should be calculated.
-        :type precision: float
         :return: Array with the ordered positions.
-        :rtype: np.ndarray
         """
         poses = np.array([])
         for i, parametric_lane in enumerate(self.parametric_lanes):
@@ -450,10 +459,11 @@ class ParametricLaneGroup:
         return poses
 
     def _set_adjacent_lanes(self, lanelet: ConversionLanelet):
-        """While converting a ParametricLaneGroup to a Lanelet, set
+        """
+        While converting a ParametricLaneGroup to a Lanelet, set
         the proper attributes relating to adjacent lanes.
+
         :param lanelet: The lanelet which is created from the ParametricLaneGroup
-        :type lanelet: :class:`ConversionLanelet`
         """
         if self.inner_neighbour is not None:
             lanelet.adj_left = self.inner_neighbour
@@ -467,7 +477,6 @@ class ParametricLaneGroup:
         """Get the maximum width of the lanelet.
 
         :return: Maximum width of all ParametricLanes in this group.
-        :rtype: float
         """
         total_maximum = 0
 
@@ -484,12 +493,9 @@ class ParametricLaneGroup:
         """Get the earliest point of the ParametricLaneGroup where the width change is zero.
 
         :param reverse: True if checking should start from end of lanelet. Default is False
-        :type reverse: bool
         :param reference_width: Width for which width at zero width change position has
                             to be greater as. Default is 0.0.
-        :type reference_width: float
         :return: Position of ParametricLaneGroup (in curve parameter ds) where width change is zero.
-        :rtype: Tuple[Optional[float], Optional[float]]
         """
         s_pos = 0
         positions = []
@@ -512,6 +518,6 @@ class ParametricLaneGroup:
             if val > 0.9 * reference_width or val > 0.9 * self.maximum_width():
                 if (pos == 0.0 and not reverse) or (pos == self.length and reverse):
                     continue
-                return (pos, val)
+                return pos, val
 
-        return (None, None)
+        return None, None

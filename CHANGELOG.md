@@ -1,20 +1,59 @@
 # Changelog
 
-## [0.7.0] - 2023-0X-XX
+## [0.8.0] - 2023-08-XX
+
+### Changed
+- GUI backend using MVC pattern
+
+### Added
+- Cropping of a map in the GUI
+- Background saves and with restore functionality
+
+## [0.7.2] - 2023-07-XX
+
+## [0.7.1] - 2023-06-21
+
+### Added
+- Creation of autoware-compatible lanelet2 maps
+- Set custom plot limits when adding scenario or aerial image
+- Map German traffic sign 252 to sign to 260
+- Consider OpenDRIVE offset
+
+### Changed
+- Versions of third-party packages
+- Use positive IDs for the cr2lanelet conversion
+- Structure for config parameters (similar as in commonroad-io)
+- Add version to lanelet2 xml elements
+
+### Fixed
+- Lanelet2 projection
+- Visualization of aerial images
+
+### Removed
+- GUI button to center aerial image at origin
+
+## [0.7.0] - 2023-03-28
 
 ### Added
 - Possibility to load aerial image from Bing in the background
+- Possibility to load aerial image from LDBV in the background
 - CommonRoad to Lanelet2 conversion: Conversion of regulatory elements
+- CommonRoad to Lanelet2 conversion: Conversion of lanelet types
+- Visualized scenario time step can be set manually (no need to use slider anymore)
 
 ### Changed
 - Default matplotlib area
 - Generalized traffic sign conversion 
 - Lanelet2 to CommonRoad conversion: Generalize traffic sign conversion
+- Packaging using poetry
 
 ### Fixed
 - Persisting zoomed scale
-
-### Removed
+- Connect to predecessor, previously added, and successor
+- Adding rotated lanelet (>360°)
+- Lanelet selection after translating a lanelet in the GUI
+- Blue position waypoint in GUI is removed when new scenario is created
+- Video and matplotlib figure saving not working
 
 ## [0.6.1] - 2023-02-09
 
