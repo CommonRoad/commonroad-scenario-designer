@@ -114,7 +114,7 @@ class RoadNetworkController(QDockWidget, ):
         self.scenario_model.stop_spinner()
         self.road_network_toolbox_ui.Spinner.stop()
 
-    def startSpinner(self, spinner: QtWaitingSpinner):
-        if (spinner.isSpinning()):
+    def start_spinner(self, spinner: QtWaitingSpinner):
+        if (spinner.is_spinning()):
             spinner.stop()
         spinner.start()

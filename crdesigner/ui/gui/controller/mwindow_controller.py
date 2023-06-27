@@ -1,7 +1,6 @@
-import logging
+import os
 import pathlib
 
-from PyQt5 import QtGui
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 
@@ -15,6 +14,9 @@ from crdesigner.ui.gui.controller.top_bar.top_bar_controller import TopBarContro
 from crdesigner.ui.gui.model.scenario_model import ScenarioModel
 from crdesigner.ui.gui.model.settings.gui_settings_model import gui_settings
 from crdesigner.ui.gui.view.console.console_ui import ConsoleUI
+
+from crdesigner.ui.gui.autosaves.autosaves_setup import DIR_AUTOSAVE
+from crdesigner.ui.gui.utilities.file_actions import open_commonroad_file
 from crdesigner.ui.gui.utilities.gui_sumo_simulation import SUMO_AVAILABLE
 from crdesigner.ui.gui.utilities.util import *
 from crdesigner.ui.gui.view.mwindow_ui import MWindowUI
@@ -29,6 +31,7 @@ class MWindowController:
         self.filename = None
         self.slider_clicked = False
         self.play_activated = False
+        self.path_autosave = DIR_AUTOSAVE + "/autosave" + ".xml"
 
         # init scenario model
         self.scenario_model = ScenarioModel()
@@ -45,7 +48,8 @@ class MWindowController:
         self.mwindow_ui.closeEvent = self.close_event
 
         self.animated_viewer_wrapper = AnimatedViewerWrapperController(mwindow=self.mwindow_ui,
-                                                                       scenario_model=self.scenario_model)
+                                                                       scenario_model=self.scenario_model,
+                                                                       scenario_saving_dialog=self.scenario_saving_dialog)
         self.mwindow_ui.animated_viewer_wrapper = self.animated_viewer_wrapper
         self.animated_viewer_wrapper.create_viewer_dock()
 
@@ -73,8 +77,21 @@ class MWindowController:
         self.status = self.mwindow_ui.statusbar
         self.status.showMessage("Welcome to CR Scenario Designer")
 
+        self.check_for_autosaved_file()
         self.mwindow_ui.update_window()
         self.center()
+
+    def check_for_autosaved_file(self) -> None:
+        '''
+        Check for the existence of an autosaved file and handles it accordingly.
+        '''
+        if os.path.exists(self.path_autosave):
+            if self.mwindow_ui.ask_for_autosaved_file():
+                open_commonroad_file(self, self.path_autosave)
+                self.road_network_toolbox.initialize_road_network_toolbox()
+                self.obstacle_toolbox.initialize_obstacle_toolbox()
+            else:
+                os.remove(self.path_autosave)
 
     def check_scenario(self, scenario) -> int:
         """
@@ -172,9 +189,13 @@ class MWindowController:
 
     def close_event(self, event):
         """
-        See how to move this bad boy into the service layer.
+        Closes the app and deletes the autosaved file
         """
         event.ignore()
-        self.mwindow_ui.close_window()
+        close_app = self.mwindow_ui.close_window()
+        if close_app:
+            if os.path.exists(self.path_autosave):
+                os.remove(self.path_autosave)
+            qApp.quit()
 
 

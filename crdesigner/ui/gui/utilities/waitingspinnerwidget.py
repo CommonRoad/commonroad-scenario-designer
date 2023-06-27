@@ -47,7 +47,7 @@ class QtWaitingSpinner(QWidget):
         self._lineWidth = 2
         self._innerRadius = 10
         self._currentCounter = 0
-        self._isSpinning = False
+        self._is_spinning = False
 
         self._timer = QTimer(self)
         self._timer.timeout.connect(self.rotate)
@@ -85,7 +85,7 @@ class QtWaitingSpinner(QWidget):
 
     def start(self):
         self.updatePosition()
-        self._isSpinning = True
+        self._is_spinning = True
         self.show()
 
         if self.parentWidget and self._disableParentWhenSpinning:
@@ -96,7 +96,7 @@ class QtWaitingSpinner(QWidget):
             self._currentCounter = 0
 
     def stop(self):
-        self._isSpinning = False
+        self._is_spinning = False
         self.hide()
 
         if self.parentWidget() and self._disableParentWhenSpinning:
@@ -150,8 +150,8 @@ class QtWaitingSpinner(QWidget):
     def innerRadius(self):
         return self._innerRadius
 
-    def isSpinning(self):
-        return self._isSpinning
+    def is_spinning(self):
+        return self._is_spinning
 
     def setRoundness(self, roundness):
         self._roundness = max(0.0, min(100.0, roundness))
