@@ -14,10 +14,11 @@ from PyQt5.QtWidgets import *
 
 class AnimatedViewerWrapperController:
 
-    def __init__(self, mwindow, scenario_model: ScenarioModel):
+    def __init__(self, mwindow, scenario_model: ScenarioModel, scenario_saving_dialog):
         self.scenario_model = scenario_model
         self.scenario_model.scenario_changed.connect(self.update_scenario)
         self.cr_viewer = AnimatedViewerController(mwindow, self.viewer_callback, self.scenario_model)
+        self.scenario_saving_dialog = scenario_saving_dialog
 
         # handle to the toolboxes and the console for the viewer callback
         self.viewer_dock = None
@@ -27,6 +28,8 @@ class AnimatedViewerWrapperController:
         self.cr_viewer.open_scenario()
         self.update_view()
         self.mwindow.update_max_step()
+        #Autosave
+        self.scenario_saving_dialog.autosave(self.scenario_model.get_current_scenario())
 
     def create_viewer_dock(self):
         """

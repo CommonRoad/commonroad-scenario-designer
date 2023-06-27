@@ -1,12 +1,17 @@
+import logging
+import os
+import sys
 from typing import Optional
 
 from PyQt5.QtWidgets import *
 from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
-from commonroad.planning.planning_problem import PlanningProblemSet
-from commonroad.scenario.scenario import Environment, Tag, TimeOfDay, Weather, Underground, Time, Location
 
 from crdesigner.ui.gui.model.scenario_model import ScenarioModel
 from crdesigner.ui.gui.view.settings.scenario_saving_dialog_ui import ScenarioSavingDialogUI
+from commonroad.planning.planning_problem import PlanningProblemSet
+from commonroad.scenario.scenario import Environment, Tag, TimeOfDay, Weather, Underground, Time, Location, Scenario
+
+from crdesigner.ui.gui.autosaves.autosaves_setup import DIR_AUTOSAVE
 
 
 class ScenarioSavingDialogController:
@@ -92,6 +97,38 @@ class ScenarioSavingDialogController:
         if dir:
             self.save_window.label_directory.setText(self.directory)
 
+    def autosave(self, scenario: Scenario):
+        '''
+        Saves the file in a background file with default parameters
+
+        Disables the console output of the write to file methode that there is no clutter in the console
+        Enables it afterwards again
+
+        :param scenario: Scenario which should be saved
+        '''
+        try:
+            original_stdout = sys.stdout
+            original_stderr = sys.stderr
+            original_level = logging.getLogger().getEffectiveLevel()
+            logging.getLogger().setLevel(logging.ERROR)
+            sys.stdout = open(os.devnull, 'w')
+            sys.stderr = open(os.devnull, 'w')
+            writer = CommonRoadFileWriter(scenario=scenario, planning_problem_set=self.current_pps,
+                                          author="Default Author",
+                                          affiliation="Default Affiliation",
+                                          source="CommonRoad Scenario Designer",
+                                          tags=set())
+            filename = DIR_AUTOSAVE + "/autosave" + ".xml"
+            if self.current_pps is None:
+                writer.write_scenario_to_file(filename, OverwriteExistingFile.ALWAYS)
+            else:
+                writer.write_to_file(filename, OverwriteExistingFile.ALWAYS)
+            sys.stdout = original_stdout
+            sys.stderr = original_stderr
+            logging.getLogger().setLevel(original_level)
+        except IOError as e:
+            pass
+
     def save_scenario(self):
         self.update_scenario_meta_data()
         try:
@@ -105,6 +142,9 @@ class ScenarioSavingDialogController:
             else:
                 writer.write_to_file(filename, OverwriteExistingFile.ALWAYS)
             self.save_window.close()
+            filename_autosave = DIR_AUTOSAVE + "/autosave" + ".xml"
+            if os.path.exists(filename_autosave):
+                os.remove(filename_autosave)
         except IOError as e:
             QMessageBox.critical(self.save_window, "CommonRoad file not created!",
                                  "The CommonRoad file was not saved due to an error.\n\n" + "{}".format(e),

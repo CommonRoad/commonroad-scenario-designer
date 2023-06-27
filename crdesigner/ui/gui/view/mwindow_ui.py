@@ -7,14 +7,6 @@ from PyQt5.QtWidgets import *
 
 from crdesigner.ui.gui.model.settings.gui_settings_model import gui_settings
 from crdesigner.ui.gui.resources.MainWindow import Ui_mainWindow
-# TODO: from crdesigner.ui.gui.mwindow.crdesigner_console_wrapper.crdesigner_console_wrapper import
-#  CRDesignerConsoleWrapper
-# TODO: from crdesigner.ui.gui.mwindow.top_bar_wrapper.top_bar_wrapper import TopBarWrapper
-# TODO: from crdesigner.ui.gui.mwindow.toolboxes.road_network_toolbox.create_road_network_toolbox \
-# TODO:     import create_road_network_toolbox
-# TODO: from crdesigner.ui.gui.mwindow.toolboxes.converter_toolbox.create_converter_toolbox import
-#  create_converter_toolbox
-# TODO: from crdesigner.ui.gui.mwindow.toolboxes.obstacle_toolbox.create_obstacle_toolbox import create_obstacle_toolbox
 from crdesigner.ui.gui.utilities.draw_params_updater import ColorSchema
 from crdesigner.ui.gui.utilities.gui_sumo_simulation import SUMO_AVAILABLE
 
@@ -100,7 +92,7 @@ class MWindowUI(QMainWindow, Ui_mainWindow):
             'background-color: ' + self.colorscheme().second_background + '; color: ' + self.colorscheme().color)
 
 
-    def close_window(self):
+    def close_window(self) -> bool:
         """
         For closing the window.
         """
@@ -118,6 +110,33 @@ class MWindowUI(QMainWindow, Ui_mainWindow):
 
         message_box.exec_()
         reply = message_box.standardButton(message_box.clickedButton())
+        if reply == message_box.Yes:
+            return True
+        else:
+            return False
+
+    def ask_for_autosaved_file(self):
+        """
+        Asking if the user wants to restore the old scenario
+
+        @return: Boolean with the answer of the user
+        """
+        message_box = QMessageBox(QMessageBox.Warning, "Warning", "Do you wanna restore the last project?",
+                                  buttons=QMessageBox.Yes | QMessageBox.No, parent=self)
+
+        p = QtGui.QPalette()
+        p.setColor(QtGui.QPalette.ColorRole.Window, QtGui.QColor(self.colorscheme().background))
+        p.setColor(QtGui.QPalette.ColorRole.Base, QtGui.QColor(self.colorscheme().second_background))
+        p.setColor(QtGui.QPalette.ColorRole.Button, QtGui.QColor(self.colorscheme().highlight))
+        p.setColor(QtGui.QPalette.ColorRole.ButtonText, QtGui.QColor(self.colorscheme().highlight_text))
+        p.setColor(QtGui.QPalette.ColorRole.Text, QtGui.QColor(self.colorscheme().color))
+        p.setColor(QtGui.QPalette.ColorRole.WindowText, QtGui.QColor(self.colorscheme().color))
+        message_box.setPalette(p)
+
+        message_box.exec_()
+        reply = message_box.standardButton(message_box.clickedButton())
 
         if reply == message_box.Yes:
-            qApp.quit()
+            return True
+        else:
+            return False

@@ -965,3 +965,4 @@ class DynamicCanvasController(FigureCanvas):
         """
         self.show_aerial = False
         self._update_map()
+

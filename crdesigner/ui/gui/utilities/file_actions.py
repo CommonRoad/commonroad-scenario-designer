@@ -26,10 +26,12 @@ def file_new(mwindow):
     mwindow.animated_viewer_wrapper.cr_viewer.dynamic.draw_temporary_points = {}
 
 
-
-def open_commonroad_file(mwindow):
-    """ """
-    path, _ = QFileDialog.getOpenFileName(mwindow.mwindow_ui, "Open a CommonRoad scenario", "",
+def open_commonroad_file(mwindow, path=None):
+    """
+    Opens a file. If no path is given it opens a FileDialog, otherwise it uses the given Path
+    """
+    if path is None:
+        path, _ = QFileDialog.getOpenFileName(mwindow.mwindow_ui, "Open a CommonRoad scenario", "",
                                           "CommonRoad scenario *.xml file (*.xml);; "
                                           "CommonRoad scenario *.pb file (*.pb)", options=QFileDialog.Options(), )
     if not path:
