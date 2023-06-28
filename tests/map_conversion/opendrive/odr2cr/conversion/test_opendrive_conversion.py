@@ -20,12 +20,8 @@ class TestOpenDriveToCommonRoadConversion(unittest.TestCase):
         generate_unique_id(0)  # reset ID counter
         odr_config = OpenDRIVEConversionParams(proj_string=ProjectionMethods.utm_default.value)
         scenario = opendrive_to_commonroad(
-<<<<<<<< HEAD:tests/map_conversion/opendrive/odr2cr/conversion/test_opendrive_conversion.py
-            os.path.dirname(os.path.realpath(__file__)) + f"/../../../test_maps/odr2cr/{xodr_file_name}.xodr")
-========
-            os.path.dirname(os.path.realpath(__file__)) + "/../../test_maps/opendrive/{}.xodr".format(xodr_file_name),
+            os.path.dirname(os.path.realpath(__file__)) + "/../../../test_maps/odr2cr/{}.xodr".format(xodr_file_name),
             odr_config=odr_config)
->>>>>>>> origin/develop:tests/map_conversion/opendrive/conversion/test_opendrive_conversion.py
 
         return scenario
 

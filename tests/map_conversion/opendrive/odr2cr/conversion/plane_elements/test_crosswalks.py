@@ -86,11 +86,7 @@ class MyTestCase(unittest.TestCase):
         """Test the crosswalk conversion for four_way_crossing.xodr"""
         xodr_file_name = "four_way_crossing"
         scenario = opendrive_to_commonroad(os.path.dirname(os.path.realpath(__file__)) +
-<<<<<<<< HEAD:tests/map_conversion/opendrive/odr2cr/conversion/plane_elements/test_crosswalks.py
                                            "/../../../../test_maps/odr2cr/{}.xodr".format(xodr_file_name))
-========
-                                           "/../../../test_maps/opendrive/{}.xodr".format(xodr_file_name))
->>>>>>>> origin/develop:tests/map_conversion/opendrive/conversion/plane_elements/test_crosswalks.py
 
         lanelet_90 = None
         lanelet_91 = None
@@ -136,10 +132,7 @@ class MyTestCase(unittest.TestCase):
                                              [[4.52374715, 4.81936857], [-4.24610876, 4.80957293]])
 
         self.assertSetEqual(scenario.lanelet_network.find_intersection_by_id(68).crossings, {90, 91, 92, 93})
-<<<<<<<< HEAD:tests/map_conversion/opendrive/odr2cr/conversion/plane_elements/test_crosswalks.py
-========
 
 
 if __name__ == '__main__':
     unittest.main()
->>>>>>>> origin/develop:tests/map_conversion/opendrive/conversion/plane_elements/test_crosswalks.py
