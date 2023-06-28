@@ -5,7 +5,7 @@ from lxml import etree
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.road import Road
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.stop_line import StopLine
 from commonroad.scenario.lanelet import StopLine as Stop_line, LineMarking, LaneletNetwork
-from crdesigner.ui.gui.mwindow.service_layer.map_creator import MapCreator
+from crdesigner.ui.gui.utilities.map_creator import MapCreator
 
 
 class TestStopLine(unittest.TestCase):

@@ -8,6 +8,7 @@ from tests.map_conversion.opendrive.cr2odr.conversion_base_test import Conversio
 
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.utils import config
 
+
 class TestJunction(ConversionBaseTestCases.ConversionBaseTest):
     road_counting = 20
 
@@ -21,7 +22,7 @@ class TestJunction(ConversionBaseTestCases.ConversionBaseTest):
     def test_convert_init_junction(self):
         # Given
         # Initialization requires convertion, as it is the easiest way to create all needed elements
-        #TODO issue 432: Initialize all elements manually
+        # TODO issue 432: Initialize all elements manually
         Road.counting = 20
         self.prepare_conversion("ZAM_Threewayintersection-1_1_T-1")
         self.prepare_junctions()
@@ -30,17 +31,11 @@ class TestJunction(ConversionBaseTestCases.ConversionBaseTest):
 
         root = etree.Element(config.OPENDRIVE)
 
-        #When
-        junction = Junction(
-                intersection.incomings,
-                Road.cr_id_to_od,
-                Road.lane_to_lane,
-                self.converter.writer.root,
-                self.converter.scenario.lanelet_network,
-                intersection.intersection_id,
-        )
+        # When
+        junction = Junction(intersection.incomings, Road.cr_id_to_od, Road.lane_to_lane, self.converter.writer.root,
+                            self.converter.scenario.lanelet_network, intersection.intersection_id, )
 
-        #Then
+        # Then
         self.assertEqual(intersection.incomings, junction.incoming)
         self.assertEqual(root.tag, junction.root.tag)
         self.assertEqual(16, junction.id)
@@ -147,14 +142,16 @@ class TestJunction(ConversionBaseTestCases.ConversionBaseTest):
         self.assertEqual("-1", junction.root[1].get(config.JUNCTION_TAG))
         self.assertEqual(config.LINK_TAG, junction.root[1][0].tag)
         self.assertEqual(config.TYPE_TAG, junction.root[1][1].tag)
-        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0), junction.root[1][1].get(config.GEOMETRY_S_COORDINATE_TAG))
+        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0),
+                         junction.root[1][1].get(config.GEOMETRY_S_COORDINATE_TAG))
         self.assertEqual(config.TOWN_TAG, junction.root[1][1].get(config.TYPE_TAG))
         self.assertEqual(config.PLAN_VIEW_TAG, junction.root[1][2].tag)
         self.assertEqual(config.ELEVATION_PROFILE_TAG, junction.root[1][3].tag)
         self.assertEqual(config.LATERAL_PROFILE_TAG, junction.root[1][4].tag)
         self.assertEqual(config.LANES_TAG, junction.root[1][5].tag)
         self.assertEqual(config.LANE_SECTION_TAG, junction.root[1][5][0].tag)
-        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0), junction.root[1][5][0].get(config.GEOMETRY_S_COORDINATE_TAG))
+        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0),
+                         junction.root[1][5][0].get(config.GEOMETRY_S_COORDINATE_TAG))
         self.assertEqual(config.LANE_SECTION_CENTER_TAG, junction.root[1][5][0][0].tag)
         self.assertEqual(config.LANE_TAG, junction.root[1][5][0][0][0].tag)
         self.assertEqual("0", junction.root[1][5][0][0][0].get(config.ID_TAG))
@@ -162,11 +159,13 @@ class TestJunction(ConversionBaseTestCases.ConversionBaseTest):
         self.assertEqual(config.FALSE, junction.root[1][5][0][0][0].get(config.LEVEL_TAG))
         self.assertEqual(config.LINK_TAG, junction.root[1][5][0][0][0][0].tag)
         self.assertEqual(config.ROAD_MARK_TAG, junction.root[1][5][0][0][0][1].tag)
-        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0), junction.root[1][5][0][0][0][1].get(config.LANE_SOFFSET_TAG))
+        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0),
+                         junction.root[1][5][0][0][0][1].get(config.LANE_SOFFSET_TAG))
         self.assertEqual(config.SOLID, junction.root[1][5][0][0][0][1].get(config.TYPE_TAG))
         self.assertEqual(config.STANDARD, junction.root[1][5][0][0][0][1].get(config.ROAD_MARK_WEIGHT_TAG))
         self.assertEqual(config.STANDARD, junction.root[1][5][0][0][0][1].get(config.ROAD_MARK_COLOR_TAG))
-        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0.13), junction.root[1][5][0][0][0][1].get(config.SIGNAL_WIDTH_TAG))
+        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0.13),
+                         junction.root[1][5][0][0][0][1].get(config.SIGNAL_WIDTH_TAG))
         self.assertEqual(config.LANE_SECTION_LEFT_TAG, junction.root[1][5][0][1].tag)
         self.assertEqual(config.LANE_TAG, junction.root[1][5][0][1][0].tag)
         self.assertEqual('1', junction.root[1][5][0][1][0].get(config.ID_TAG))
@@ -174,17 +173,22 @@ class TestJunction(ConversionBaseTestCases.ConversionBaseTest):
         self.assertEqual(config.FALSE, junction.root[1][5][0][1][0].get(config.LEVEL_TAG))
         self.assertEqual(config.LINK_TAG, junction.root[1][5][0][1][0][0].tag)
         self.assertEqual(config.SIGNAL_WIDTH_TAG, junction.root[1][5][0][1][0][1].tag)
-        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0), junction.root[1][5][0][1][0][1].get(config.LANE_SOFFSET_TAG))
+        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0),
+                         junction.root[1][5][0][1][0][1].get(config.LANE_SOFFSET_TAG))
         self.assertEqual("2.9999999999999996e+00", junction.root[1][5][0][1][0][1].get(config.LANE_A_TAG))
         self.assertEqual("-1.5700924586837747e-17", junction.root[1][5][0][1][0][1].get(config.LANE_B_TAG))
-        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0), junction.root[1][5][0][1][0][1].get(config.LANE_C_TAG))
-        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0), junction.root[1][5][0][1][0][1].get(config.LANE_D_TAG))
+        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0),
+                         junction.root[1][5][0][1][0][1].get(config.LANE_C_TAG))
+        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0),
+                         junction.root[1][5][0][1][0][1].get(config.LANE_D_TAG))
         self.assertEqual(config.ROAD_MARK_TAG, junction.root[1][5][0][1][0][2].tag)
-        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0), junction.root[1][5][0][1][0][2].get(config.LANE_SOFFSET_TAG))
+        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0),
+                         junction.root[1][5][0][1][0][2].get(config.LANE_SOFFSET_TAG))
         self.assertEqual(config.SOLID, junction.root[1][5][0][1][0][2].get(config.TYPE_TAG))
         self.assertEqual(config.STANDARD, junction.root[1][5][0][1][0][2].get(config.ROAD_MARK_WEIGHT_TAG))
         self.assertEqual(config.STANDARD, junction.root[1][5][0][1][0][2].get(config.ROAD_MARK_COLOR_TAG))
-        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0.13), junction.root[1][5][0][1][0][2].get(config.SIGNAL_WIDTH_TAG))
+        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0.13),
+                         junction.root[1][5][0][1][0][2].get(config.SIGNAL_WIDTH_TAG))
         self.assertEqual(config.LANE_SECTION_RIGHT_TAG, junction.root[1][5][0][2].tag)
         self.assertEqual(config.LANE_TAG, junction.root[1][5][0][2][0].tag)
         self.assertEqual('-1', junction.root[1][5][0][2][0].get(config.ID_TAG))
@@ -192,46 +196,53 @@ class TestJunction(ConversionBaseTestCases.ConversionBaseTest):
         self.assertEqual(config.FALSE, junction.root[1][5][0][2][0].get(config.LEVEL_TAG))
         self.assertEqual(config.LINK_TAG, junction.root[1][5][0][2][0][0].tag)
         self.assertEqual(config.SIGNAL_WIDTH_TAG, junction.root[1][5][0][2][0][1].tag)
-        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0), junction.root[1][5][0][2][0][1].get(config.LANE_SOFFSET_TAG))
+        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0),
+                         junction.root[1][5][0][2][0][1].get(config.LANE_SOFFSET_TAG))
         self.assertEqual("2.9999999999999996e+00", junction.root[1][5][0][2][0][1].get(config.LANE_A_TAG))
         self.assertEqual("-1.5700924586837750e-17", junction.root[1][5][0][2][0][1].get(config.LANE_B_TAG))
-        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0), junction.root[1][5][0][2][0][1].get(config.LANE_C_TAG))
-        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0), junction.root[1][5][0][2][0][1].get(config.LANE_D_TAG))
+        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0),
+                         junction.root[1][5][0][2][0][1].get(config.LANE_C_TAG))
+        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0),
+                         junction.root[1][5][0][2][0][1].get(config.LANE_D_TAG))
         self.assertEqual(config.ROAD_MARK_TAG, junction.root[1][5][0][2][0][2].tag)
-        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0), junction.root[1][5][0][2][0][2].get(config.LANE_SOFFSET_TAG))
+        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0),
+                         junction.root[1][5][0][2][0][2].get(config.LANE_SOFFSET_TAG))
         self.assertEqual(config.SOLID, junction.root[1][5][0][2][0][2].get(config.TYPE_TAG))
         self.assertEqual(config.STANDARD, junction.root[1][5][0][2][0][2].get(config.ROAD_MARK_WEIGHT_TAG))
         self.assertEqual(config.STANDARD, junction.root[1][5][0][2][0][2].get(config.ROAD_MARK_COLOR_TAG))
-        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0.13), junction.root[1][5][0][1][0][2].get(config.SIGNAL_WIDTH_TAG))
+        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0.13),
+                         junction.root[1][5][0][1][0][2].get(config.SIGNAL_WIDTH_TAG))
         self.assertEqual(config.OBJECTS_TAG, junction.root[1][6].tag)
         self.assertEqual(config.SIGNALS_TAG, junction.root[1][7].tag)
 
     def checkJunctionRoot2(self, junction):
         self.assertEqual(config.ROAD_TAG, junction.root[2].tag)
         self.assertEqual("", junction.root[2].get(config.NAME_TAG))
-        self.assertEqual("7.8372339517747136e+00", junction.root[2].get(config.LENGTH_TAG))
+        self.assertEqual("7.8517087087861750e+00", junction.root[2].get(config.LENGTH_TAG))
         self.assertEqual("22", junction.root[2].get(config.ID_TAG))
         self.assertEqual("16", junction.root[2].get(config.JUNCTION_TAG))
         self.assertEqual(config.LINK_TAG, junction.root[2][0].tag)
         self.assertEqual(config.TYPE_TAG, junction.root[2][1].tag)
-        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0), junction.root[2][1].get(config.GEOMETRY_S_COORDINATE_TAG))
+        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0),
+                         junction.root[2][1].get(config.GEOMETRY_S_COORDINATE_TAG))
         self.assertEqual(config.TOWN_TAG, junction.root[2][1].get(config.TYPE_TAG))
         self.assertEqual(config.PLAN_VIEW_TAG, junction.root[2][2].tag)
         self.assertEqual(config.GEOMETRY_TAG, junction.root[2][2][0].tag)
-        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0), junction.root[2][2][0].get(config.GEOMETRY_S_COORDINATE_TAG))
+        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0),
+                         junction.root[2][2][0].get(config.GEOMETRY_S_COORDINATE_TAG))
         self.assertEqual("2.5000000000000000e+01", junction.root[2][2][0].get(config.GEOMETRY_X_COORDINATE_TAG))
         self.assertEqual("-3.5000000000000000e+00", junction.root[2][2][0].get(config.GEOMETRY_Y_COORDINATE_TAG))
-        self.assertEqual("1.6749660721724917e+00", junction.root[2][2][0].get(config.GEOMETRY_HEADING_TAG))
-        self.assertEqual("9.9819482603162135e-01", junction.root[2][2][0].get(config.LENGTH_TAG))
+        self.assertEqual("1.5707963267948966e+00", junction.root[2][2][0].get(config.GEOMETRY_HEADING_TAG))
+        self.assertEqual("8.2652530493413356e-01", junction.root[2][2][0].get(config.LENGTH_TAG))
         self.assertEqual(config.SPIRAL_TAG, junction.root[2][2][0][0].tag)
-        self.assertEqual("9.6613425352009230e-02", junction.root[2][2][0][0].get(config.GEOMETRY_CURV_START_TAG))
-        self.assertEqual("1.4818066253010340e-01", junction.root[2][2][0][0].get(config.GEOMETRY_CURV_END_TAG))
+        self.assertEqual("9.9797916522530394e-02", junction.root[2][2][0][0].get(config.GEOMETRY_CURV_START_TAG))
+        self.assertEqual("2.0008681885663243e-01", junction.root[2][2][0][0].get(config.GEOMETRY_CURV_END_TAG))
         self.assertEqual(config.GEOMETRY_TAG, junction.root[2][2][1].tag)
-        self.assertEqual("9.9819482603162135e-01", junction.root[2][2][1].get(config.GEOMETRY_S_COORDINATE_TAG))
-        self.assertEqual("2.4896206253854501e+01", junction.root[2][2][1].get(config.GEOMETRY_X_COORDINATE_TAG))
-        self.assertEqual("-2.5072161519356881e+00", junction.root[2][2][1].get(config.GEOMETRY_Y_COORDINATE_TAG))
-        self.assertEqual("1.8690916323796183e+00", junction.root[2][2][1].get(config.GEOMETRY_HEADING_TAG))
-        self.assertEqual("9.9803674030080702e-01", junction.root[2][2][1].get(config.LENGTH_TAG))
+        self.assertEqual("8.2652530493413356e-01", junction.root[2][2][1].get(config.GEOMETRY_S_COORDINATE_TAG))
+        self.assertEqual("2.4931799999999999e+01", junction.root[2][2][1].get(config.GEOMETRY_X_COORDINATE_TAG))
+        self.assertEqual("-2.6770000000000000e+00", junction.root[2][2][1].get(config.GEOMETRY_Y_COORDINATE_TAG))
+        self.assertEqual("1.7361532484880158e+00", junction.root[2][2][1].get(config.GEOMETRY_HEADING_TAG))
+        self.assertEqual("4.1329322520457523e-01", junction.root[2][2][1].get(config.LENGTH_TAG))
         self.assertEqual(config.SPIRAL_TAG, junction.root[2][2][1][0].tag)
         self.assertEqual("1.4818066253010340e-01", junction.root[2][2][1][0].get(config.GEOMETRY_CURV_START_TAG))
         self.assertEqual("1.9997720530768345e-01", junction.root[2][2][1][0].get(config.GEOMETRY_CURV_END_TAG))
@@ -289,7 +300,8 @@ class TestJunction(ConversionBaseTestCases.ConversionBaseTest):
         self.assertEqual(config.LATERAL_PROFILE_TAG, junction.root[2][4].tag)
         self.assertEqual(config.LANES_TAG, junction.root[2][5].tag)
         self.assertEqual(config.LANE_SECTION_TAG, junction.root[2][5][0].tag)
-        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0), junction.root[2][5][0].get(config.GEOMETRY_S_COORDINATE_TAG))
+        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0),
+                         junction.root[2][5][0].get(config.GEOMETRY_S_COORDINATE_TAG))
         self.assertEqual(config.LANE_SECTION_CENTER_TAG, junction.root[2][5][0][0].tag)
         self.assertEqual(config.LANE_TAG, junction.root[2][5][0][0][0].tag)
         self.assertEqual("0", junction.root[2][5][0][0][0].get(config.ID_TAG))
@@ -297,11 +309,13 @@ class TestJunction(ConversionBaseTestCases.ConversionBaseTest):
         self.assertEqual(config.FALSE, junction.root[2][5][0][0][0].get(config.LEVEL_TAG))
         self.assertEqual(config.LINK_TAG, junction.root[2][5][0][0][0][0].tag)
         self.assertEqual(config.ROAD_MARK_TAG, junction.root[2][5][0][0][0][1].tag)
-        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0), junction.root[2][5][0][0][0][1].get(config.LANE_SOFFSET_TAG))
+        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0),
+                         junction.root[2][5][0][0][0][1].get(config.LANE_SOFFSET_TAG))
         self.assertEqual(config.SOLID, junction.root[2][5][0][0][0][1].get(config.TYPE_TAG))
         self.assertEqual(config.STANDARD, junction.root[2][5][0][0][0][1].get(config.ROAD_MARK_WEIGHT_TAG))
         self.assertEqual(config.STANDARD, junction.root[2][5][0][0][0][1].get(config.ROAD_MARK_COLOR_TAG))
-        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0.13), junction.root[2][5][0][0][0][1].get(config.SIGNAL_WIDTH_TAG))
+        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0.13),
+                         junction.root[2][5][0][0][0][1].get(config.SIGNAL_WIDTH_TAG))
         self.assertEqual(config.LANE_SECTION_LEFT_TAG, junction.root[2][5][0][1].tag)
         self.assertEqual(config.LANE_TAG, junction.root[2][5][0][1][0].tag)
         self.assertEqual("1", junction.root[2][5][0][1][0].get(config.ID_TAG))
@@ -309,17 +323,22 @@ class TestJunction(ConversionBaseTestCases.ConversionBaseTest):
         self.assertEqual(config.FALSE, junction.root[2][5][0][1][0].get(config.LEVEL_TAG))
         self.assertEqual(config.LINK_TAG, junction.root[2][5][0][1][0][0].tag)
         self.assertEqual(config.SIGNAL_WIDTH_TAG, junction.root[2][5][0][1][0][1].tag)
-        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0), junction.root[2][5][0][1][0][1].get(config.LANE_SOFFSET_TAG))
+        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0),
+                         junction.root[2][5][0][1][0][1].get(config.LANE_SOFFSET_TAG))
         self.assertEqual("2.9999000016667212e+00", junction.root[2][5][0][1][0][1].get(config.LANE_A_TAG))
         self.assertEqual("1.8194390151268435e-05", junction.root[2][5][0][1][0][1].get(config.LANE_B_TAG))
-        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0), junction.root[2][5][0][1][0][1].get(config.LANE_C_TAG))
-        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0), junction.root[2][5][0][1][0][1].get(config.LANE_D_TAG))
+        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0),
+                         junction.root[2][5][0][1][0][1].get(config.LANE_C_TAG))
+        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0),
+                         junction.root[2][5][0][1][0][1].get(config.LANE_D_TAG))
         self.assertEqual(config.ROAD_MARK_TAG, junction.root[2][5][0][1][0][2].tag)
-        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0), junction.root[2][5][0][1][0][2].get(config.LANE_SOFFSET_TAG))
+        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0),
+                         junction.root[2][5][0][1][0][2].get(config.LANE_SOFFSET_TAG))
         self.assertEqual(config.SOLID, junction.root[2][5][0][1][0][2].get(config.TYPE_TAG))
         self.assertEqual(config.STANDARD, junction.root[2][5][0][1][0][2].get(config.ROAD_MARK_WEIGHT_TAG))
         self.assertEqual(config.STANDARD, junction.root[2][5][0][1][0][2].get(config.ROAD_MARK_COLOR_TAG))
-        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0.13), junction.root[2][5][0][1][0][2].get(config.SIGNAL_WIDTH_TAG))
+        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0.13),
+                         junction.root[2][5][0][1][0][2].get(config.SIGNAL_WIDTH_TAG))
         self.assertEqual(config.LANE_SECTION_RIGHT_TAG, junction.root[2][5][0][2].tag)
         self.assertEqual(config.LANE_TAG, junction.root[2][5][0][2][0].tag)
         self.assertEqual("-1", junction.root[2][5][0][2][0].get(config.ID_TAG))
@@ -704,7 +723,7 @@ class TestJunction(ConversionBaseTestCases.ConversionBaseTest):
         self.assertEqual("9.9818846834543962e-01", junction.root[5][2][0].get(config.LENGTH_TAG))
         self.assertEqual(config.SPIRAL_TAG, junction.root[5][2][0][0].tag)
         self.assertEqual("9.6661735391434467e-02", junction.root[5][2][0][0].get(config.GEOMETRY_CURV_START_TAG))
-        self.assertEqual("1.4823246264093384e-01", junction.root[5][2][0][0].get(config.GEOMETRY_CURV_END_TAG))
+        self.assertEqual("2.0008681885663243e-01", junction.root[5][2][0][0].get(config.GEOMETRY_CURV_END_TAG))
         self.assertEqual(config.GEOMETRY_TAG, junction.root[5][2][1].tag)
         self.assertEqual("9.9818846834543962e-01", junction.root[5][2][1].get(config.GEOMETRY_S_COORDINATE_TAG))
         self.assertEqual("2.0992785675628028e+01", junction.root[5][2][1].get(config.GEOMETRY_X_COORDINATE_TAG))

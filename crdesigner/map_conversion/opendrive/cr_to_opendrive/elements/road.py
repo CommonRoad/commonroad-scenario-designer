@@ -99,8 +99,9 @@ class Road:
         self.hdg = compute_heading(self.center,  self.lane_list[i].center_vertices)
         self.center = np.insert(self.center, self.center.shape[0] - 1,
                                 np.array([self.center[-1][0] - np.cos(self.hdg[-1]) * 0.01,
-                                          self.center[-1][1] - np.sin(self.hdg[-1]) * 0.01]), 0)
-        self.hdg = np.insert(self.hdg, self.hdg.shape[0] - 1, self.hdg[-1])
+                                          self.center[-1][1] - np.sin(self.hdg[-1]) * 0.01]), 0) \
+            if self.hdg[-1] != 0.0 else self.center
+        self.hdg = np.insert(self.hdg, self.hdg.shape[0] - 1, self.hdg[-1]) if self.hdg[-1] != 0.0 else self.hdg
 
         for i in range(0, number_of_lanes):
             Road.cr_id_to_od[lane_list[i].lanelet_id] = Road.counting

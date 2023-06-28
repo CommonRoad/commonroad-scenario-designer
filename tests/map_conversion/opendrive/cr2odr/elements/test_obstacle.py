@@ -7,7 +7,7 @@ from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.road import Ro
 from commonroad.geometry.shape import Rectangle, Circle, Polygon
 from commonroad.scenario.trajectory import InitialState
 from commonroad.scenario.obstacle import ObstacleType
-from crdesigner.ui.gui.mwindow.service_layer.map_creator import MapCreator
+from crdesigner.ui.gui.utilities.map_creator import MapCreator
 
 
 class TestObstacle(unittest.TestCase):

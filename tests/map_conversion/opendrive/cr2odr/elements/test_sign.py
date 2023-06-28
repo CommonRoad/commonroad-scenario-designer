@@ -7,7 +7,7 @@ from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.road import Ro
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.sign import Sign
 from commonroad.scenario.lanelet import LaneletNetwork, TrafficSign
 from commonroad.scenario.traffic_sign import TrafficSignIDGermany, TrafficSignElement
-from crdesigner.ui.gui.mwindow.service_layer.map_creator import MapCreator
+from crdesigner.ui.gui.utilities.map_creator import MapCreator
 
 
 class TestSign(unittest.TestCase):

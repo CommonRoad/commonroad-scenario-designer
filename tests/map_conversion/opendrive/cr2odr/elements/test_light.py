@@ -6,7 +6,7 @@ from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.road import Ro
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.light import Light
 from commonroad.scenario.lanelet import LaneletNetwork
 from commonroad.scenario.traffic_sign import TrafficLight, TrafficLightState, TrafficLightCycleElement
-from crdesigner.ui.gui.mwindow.service_layer.map_creator import MapCreator
+from crdesigner.ui.gui.utilities.map_creator import MapCreator
 
 
 class TestLight(unittest.TestCase):

@@ -4,10 +4,9 @@ import numpy as np
 from lxml import etree
 from commonroad.scenario.traffic_sign import TrafficSign, TrafficSignElement, TrafficSignIDZamunda
 
-from crdesigner.configurations.get_configs import get_configs
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.road import Road
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.sign import Sign
-from crdesigner.map_conversion.opendrive.opendrive_conversion.conversion_lanelet_network import ConversionLaneletNetwork
+from crdesigner.map_conversion.common.conversion_lanelet_network import ConversionLaneletNetwork
 from tests.map_conversion.opendrive.odr2cr.conversion.test_conversion_lanelet_network import init_lanelet_from_id, \
     add_lanelets_to_network
 
@@ -15,7 +14,7 @@ from crdesigner.map_conversion.opendrive.cr_to_opendrive.utils import config
 
 
 def init_conversion_lanelet_network():
-    conversion_lanelet_network = ConversionLaneletNetwork(get_configs().opendrive)
+    conversion_lanelet_network = ConversionLaneletNetwork()
     conversion_lanelet_1 = init_lanelet_from_id('79.0.-3.-1')
     conversion_lanelet_2 = init_lanelet_from_id('89.0.4.-1')
     add_lanelets_to_network(conversion_lanelet_network, [conversion_lanelet_1, conversion_lanelet_2])
