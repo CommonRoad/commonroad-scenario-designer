@@ -7,7 +7,7 @@ from crdesigner.map_conversion.opendrive.opendrive_conversion.network import Net
 from crdesigner.map_conversion.map_conversion_interface import opendrive_to_commonroad
 from crdesigner.config.config import OpenDRIVEConversionParams
 
-input_path = "/home/sebastian/Downloads/location1_new.xodr"  # replace empty string
+input_path = ""  # replace empty string
 config = OpenDRIVEConversionParams()
 config.lanelet_types_backwards_compatible = False
 
@@ -15,3 +15,41 @@ config.lanelet_types_backwards_compatible = False
 # load OpenDRIVE file, parse it, and convert it to a CommonRoad scenario
 
 scenario = opendrive_to_commonroad(input_path)
+
+# store converted file as CommonRoad scenario
+writer = CommonRoadFileWriter(
+    scenario=scenario,
+    planning_problem_set=PlanningProblemSet(),
+    author="Sebastian Maierhofer",
+    affiliation="Technical University of Munich",
+    source="CommonRoad Scenario Designer",
+    tags={Tag.URBAN},
+)
+writer.write_to_file(os.path.dirname(os.path.realpath(__file__)) + "/" + "ZAM_OpenDRIVETest-1_1-T1.xml",
+                     OverwriteExistingFile.ALWAYS)
+
+
+# --------------------------------------- Option 2: OpenDRIVE conversion APIs ------------------------------------------
+# OpenDRIVE parser to load file
+opendrive = parse_opendrive(input_path)
+
+# create OpenDRIVE intermediate network object from configuration
+road_network = Network(config)
+
+# convert OpenDRIVE file
+road_network.load_opendrive(opendrive)
+
+# export to CommonRoad scenario
+scenario = road_network.export_commonroad_scenario()
+
+# store converted file as CommonRoad scenario
+writer = CommonRoadFileWriter(
+    scenario=scenario,
+    planning_problem_set=PlanningProblemSet(),
+    author="Sebastian Maierhofer",
+    affiliation="Technical University of Munich",
+    source="CommonRoad Scenario Designer",
+    tags={Tag.URBAN},
+)
+writer.write_to_file(os.path.dirname(os.path.realpath(__file__)) + "/" + "ZAM_OpenDRIVETest-1_1-T2.xml",
+                     OverwriteExistingFile.ALWAYS)
