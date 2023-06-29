@@ -82,7 +82,6 @@ class AnimatedViewerController:
         """[summary]
         Open a scenario, setup any configuration.
         :param new_file_added: if a new cr file was created or added
-        :param scenario: [description]
         :param config: [description], defaults to None
         :param planning_problem_set: des,
         """

@@ -1,11 +1,9 @@
 import copy
 from typing import List, Union
 
-import matplotlib.pyplot as plt
 from commonroad.geometry.shape import Circle, Rectangle
 from matplotlib import patches
 from matplotlib.backend_bases import MouseButton
-from pygeodesy import flatLocal
 import PyQt5
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
@@ -36,6 +34,7 @@ from crdesigner.ui.gui.utilities.toolbox_ui import PosB
 
 
 ZOOM_FACTOR = 1.2
+
 
 class DynamicCanvasController(FigureCanvas):
     """
