@@ -1,9 +1,11 @@
 import numpy as np
+from commonroad.scenario.traffic_light import TrafficLight, TrafficLightCycleElement, TrafficLightState, \
+    TrafficLightCycle
 from scipy.interpolate import interp1d
 from typing import Tuple
 
 from commonroad.scenario.intersection import Intersection
-from commonroad.scenario.intersection import IntersectionIncomingElement
+from commonroad.scenario.intersection import IncomingGroup
 from commonroad.scenario.lanelet import RoadUser, LaneletNetwork, Lanelet, LineMarking, LaneletType, StopLine
 from commonroad.scenario.scenario import Scenario
 from commonroad.scenario.traffic_sign import *
@@ -592,22 +594,22 @@ class MapCreator:
         MapCreator.set_predecessor_successor_relation(new_lanelets[7], new_lanelets[5])
 
         incomings = [lanelet_ids[0], lanelet_ids[7], lanelet_ids[9], lanelet_ids[15]]
-        successors_right = [lanelet_ids[19], lanelet_ids[5], lanelet_ids[11], lanelet_ids[17]]
-        successors_straight = [lanelet_ids[2], lanelet_ids[12], lanelet_ids[3], lanelet_ids[13]]
-        successors_left = [lanelet_ids[4], lanelet_ids[10], lanelet_ids[16], lanelet_ids[18]]
+        outgoing_right = [lanelet_ids[19], lanelet_ids[5], lanelet_ids[11], lanelet_ids[17]]
+        outgoing_straight = [lanelet_ids[2], lanelet_ids[12], lanelet_ids[3], lanelet_ids[13]]
+        outgoing_left = [lanelet_ids[4], lanelet_ids[10], lanelet_ids[16], lanelet_ids[18]]
         incoming_ids = [scenario.generate_object_id() for i in range(len(incomings))]
         left_of = [incoming_ids[-1], incoming_ids[0], incoming_ids[1], incoming_ids[2]]
         map_incoming = []
 
         for n in range(len(incomings)):
             inc = {incomings[n]}
-            right = {successors_right[n]}
-            left = {successors_left[n]}
-            straight = {successors_straight[n]}
+            right = {outgoing_right[n]}
+            left = {outgoing_left[n]}
+            straight = {outgoing_straight[n]}
             incoming_id = incoming_ids[n]
-            map_incoming.append(IntersectionIncomingElement(incoming_id, incoming_lanelets=inc,
-                                                            successors_right=right, successors_straight=straight,
-                                                            successors_left=left, left_of=left_of[n]))
+            map_incoming.append(IncomingGroup(incoming_id, incoming_lanelets=inc,
+                                outgoing_right=right, outgoing_straight=straight,
+                                outgoing_left=left))
         intersection_id = scenario.generate_object_id()
         intersection = Intersection(intersection_id=intersection_id, incomings=map_incoming)
 
@@ -644,34 +646,40 @@ class MapCreator:
             sign_ids[3] = {sign_yield_two.traffic_sign_id}
 
         if add_traffic_lights:
-            traffic_light_cycle_one = [TrafficLightCycleElement(TrafficLightState.GREEN, 100),
-                                       TrafficLightCycleElement(TrafficLightState.YELLOW, 30),
-                                       TrafficLightCycleElement(TrafficLightState.RED, 100),
-                                       TrafficLightCycleElement(TrafficLightState.RED_YELLOW, 30)]
-            traffic_light_cycle_two = [TrafficLightCycleElement(TrafficLightState.RED, 100),
-                                       TrafficLightCycleElement(TrafficLightState.RED_YELLOW, 30),
-                                       TrafficLightCycleElement(TrafficLightState.GREEN, 100),
-                                       TrafficLightCycleElement(TrafficLightState.YELLOW, 30)]
-            traffic_light_one = TrafficLight(scenario.generate_object_id(), traffic_light_cycle_one,
-                                             new_lanelets[0].right_vertices[-1] + np.array([-1, -2]))
+            traffic_light_cycle_elements_one = [TrafficLightCycleElement(TrafficLightState.GREEN, 100),
+                                                TrafficLightCycleElement(TrafficLightState.YELLOW, 30),
+                                                TrafficLightCycleElement(TrafficLightState.RED, 100),
+                                                TrafficLightCycleElement(TrafficLightState.RED_YELLOW, 30)]
+            traffic_light_cycle_elements_two = [TrafficLightCycleElement(TrafficLightState.RED, 100),
+                                                TrafficLightCycleElement(TrafficLightState.RED_YELLOW, 30),
+                                                TrafficLightCycleElement(TrafficLightState.GREEN, 100),
+                                                TrafficLightCycleElement(TrafficLightState.YELLOW, 30)]
+            traffic_light_cycle_one = TrafficLightCycle(cycle_elements=traffic_light_cycle_elements_one)
+            traffic_light_cycle_two = TrafficLightCycle(cycle_elements=traffic_light_cycle_elements_two)
+            traffic_light_one = TrafficLight(scenario.generate_object_id(),
+                                             new_lanelets[0].right_vertices[-1] + np.array([-1, -2]),
+                                             traffic_light_cycle_one)
             new_traffic_lights.append(traffic_light_one)
             new_lanelets[0].add_traffic_light_to_lanelet(traffic_light_one.traffic_light_id)
             light_ids[0] = {traffic_light_one.traffic_light_id}
 
-            traffic_light_two = TrafficLight(scenario.generate_object_id(), traffic_light_cycle_one,
-                                             new_lanelets[9].right_vertices[-1] + np.array([1, 2]))
+            traffic_light_two = TrafficLight(scenario.generate_object_id(),
+                                             new_lanelets[9].right_vertices[-1] + np.array([1, 2]),
+                                             traffic_light_cycle_one)
             new_traffic_lights.append(traffic_light_two)
             new_lanelets[9].add_traffic_light_to_lanelet(traffic_light_two.traffic_light_id)
             light_ids[1] = {traffic_light_two.traffic_light_id}
 
-            traffic_light_three = TrafficLight(scenario.generate_object_id(), traffic_light_cycle_two,
-                                               new_lanelets[15].right_vertices[-1] + np.array([2, -2]))
+            traffic_light_three = TrafficLight(scenario.generate_object_id(),
+                                               new_lanelets[15].right_vertices[-1] + np.array([2, -2]),
+                                               traffic_light_cycle_two)
             new_traffic_lights.append(traffic_light_three)
             new_lanelets[15].add_traffic_light_to_lanelet(traffic_light_three.traffic_light_id)
             light_ids[2] = {traffic_light_three.traffic_light_id}
 
-            traffic_light_four = TrafficLight(scenario.generate_object_id(), traffic_light_cycle_two,
-                                              new_lanelets[7].right_vertices[-1] + np.array([-2, 2]))
+            traffic_light_four = TrafficLight(scenario.generate_object_id(),
+                                              new_lanelets[7].right_vertices[-1] + np.array([-2, 2]),
+                                              traffic_light_cycle_two)
             new_traffic_lights.append(traffic_light_four)
             new_lanelets[7].add_traffic_light_to_lanelet(traffic_light_four.traffic_light_id)
             light_ids[3] = {traffic_light_four.traffic_light_id}
@@ -785,22 +793,22 @@ class MapCreator:
         MapCreator.set_predecessor_successor_relation(new_lanelets[7], new_lanelets[4])
 
         incomings = [lanelet_ids[0], lanelet_ids[5], lanelet_ids[9]]
-        successors_right = [lanelet_ids[11], lanelet_ids[3], None]
-        successors_straight = [None, lanelet_ids[6], lanelet_ids[7]]
-        successors_left = [lanelet_ids[2], None, lanelet_ids[10]]
+        outgoing_right = [lanelet_ids[11], lanelet_ids[3], None]
+        outgoing_straight = [None, lanelet_ids[6], lanelet_ids[7]]
+        outgoing_left = [lanelet_ids[2], None, lanelet_ids[10]]
         incoming_ids = [scenario.generate_object_id() for i in range(len(incomings))]
         left_of = [incoming_ids[-1], incoming_ids[0], None]
         map_incoming = []
 
         for n in range(len(incomings)):
             inc = {incomings[n]}
-            right = {successors_right[n]} if successors_right[n] is not None else set()
-            left = {successors_left[n]} if successors_left[n] is not None else set()
-            straight = {successors_straight[n]} if successors_straight[n] is not None else set()
+            right = {outgoing_right[n]} if outgoing_right[n] is not None else set()
+            left = {outgoing_left[n]} if outgoing_left[n] is not None else set()
+            straight = {outgoing_straight[n]} if outgoing_straight[n] is not None else set()
             incoming_id = incoming_ids[n]
-            map_incoming.append(IntersectionIncomingElement(incoming_id, incoming_lanelets=inc,
-                                                            successors_right=right, successors_straight=straight,
-                                                            successors_left=left, left_of=left_of[n]))
+            map_incoming.append(IncomingGroup(incoming_id, incoming_lanelets=inc,
+                                outgoing_right=right, outgoing_straight=straight,
+                                outgoing_left=left))
 
         intersection_id = scenario.generate_object_id()
         intersection = Intersection(intersection_id=intersection_id, incomings=map_incoming)
@@ -832,28 +840,33 @@ class MapCreator:
             sign_ids[1] = {sign_yield_one.traffic_sign_id}
 
         if add_traffic_lights:
-            traffic_light_cycle_one = [TrafficLightCycleElement(TrafficLightState.GREEN, 100),
-                                       TrafficLightCycleElement(TrafficLightState.YELLOW, 30),
-                                       TrafficLightCycleElement(TrafficLightState.RED, 100),
-                                       TrafficLightCycleElement(TrafficLightState.RED_YELLOW, 30)]
-            traffic_light_cycle_two = [TrafficLightCycleElement(TrafficLightState.RED, 100),
-                                       TrafficLightCycleElement(TrafficLightState.RED_YELLOW, 30),
-                                       TrafficLightCycleElement(TrafficLightState.GREEN, 100),
-                                       TrafficLightCycleElement(TrafficLightState.YELLOW, 30)]
-            traffic_light_one = TrafficLight(scenario.generate_object_id(), traffic_light_cycle_one,
-                                             new_lanelets[5].right_vertices[-1] + np.array([-2, 2]))
+            traffic_light_cycle_elements_one = [TrafficLightCycleElement(TrafficLightState.GREEN, 100),
+                                                TrafficLightCycleElement(TrafficLightState.YELLOW, 30),
+                                                TrafficLightCycleElement(TrafficLightState.RED, 100),
+                                                TrafficLightCycleElement(TrafficLightState.RED_YELLOW, 30)]
+            traffic_light_cycle_elements_two = [TrafficLightCycleElement(TrafficLightState.RED, 100),
+                                                TrafficLightCycleElement(TrafficLightState.RED_YELLOW, 30),
+                                                TrafficLightCycleElement(TrafficLightState.GREEN, 100),
+                                                TrafficLightCycleElement(TrafficLightState.YELLOW, 30)]
+            traffic_light_cycle_one = TrafficLightCycle(cycle_elements=traffic_light_cycle_elements_one)
+            traffic_light_cycle_two = TrafficLightCycle(cycle_elements=traffic_light_cycle_elements_two)
+            traffic_light_one = TrafficLight(scenario.generate_object_id(),
+                                             new_lanelets[5].right_vertices[-1] + np.array([-2, 2],
+                                             traffic_light_cycle_one))
             new_traffic_lights.append(traffic_light_one)
             new_lanelets[5].add_traffic_light_to_lanelet(traffic_light_one.traffic_light_id)
             light_ids[0] = {traffic_light_one.traffic_light_id}
 
-            traffic_light_two = TrafficLight(scenario.generate_object_id(), traffic_light_cycle_one,
-                                             new_lanelets[9].right_vertices[-1] + np.array([2, -2]))
+            traffic_light_two = TrafficLight(scenario.generate_object_id(),
+                                             new_lanelets[9].right_vertices[-1] + np.array([2, -2]),
+                                             traffic_light_cycle_one)
             new_traffic_lights.append(traffic_light_two)
             new_lanelets[9].add_traffic_light_to_lanelet(traffic_light_two.traffic_light_id)
             light_ids[1] = {traffic_light_two.traffic_light_id}
 
-            traffic_light_three = TrafficLight(scenario.generate_object_id(), traffic_light_cycle_two,
-                                               new_lanelets[0].right_vertices[-1] + np.array([-1, -2]))
+            traffic_light_three = TrafficLight(scenario.generate_object_id(),
+                                               new_lanelets[0].right_vertices[-1] + np.array([-1, -2]),
+                                               traffic_light_cycle_two)
             new_traffic_lights.append(traffic_light_three)
             new_lanelets[0].add_traffic_light_to_lanelet(traffic_light_three.traffic_light_id)
             light_ids[2] = {traffic_light_three.traffic_light_id}
@@ -898,18 +911,18 @@ class MapCreator:
             lanelet_ids = []
             x = []
             for i in intersection.incomings:
-                if i._successors_left is not None:
-                    left = list(i._successors_left)
+                if i.outgoing_left is not None:
+                    left = list(i.outgoing_left)
                 else:
                     left = []
 
-                if i._successors_right is not None:
-                    right = list(i._successors_right)
+                if i._outgoing_right is not None:
+                    right = list(i._outgoing_right)
                 else:
                     right = []
 
-                if i._successors_straight is not None:
-                    straight = list(i._successors_straight)
+                if i._outgoing_straight is not None:
+                    straight = list(i._outgoing_straight)
                 else:
                     straight = []
 
