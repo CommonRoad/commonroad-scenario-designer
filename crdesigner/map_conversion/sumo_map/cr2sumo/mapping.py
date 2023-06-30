@@ -5,7 +5,7 @@ from enum import Enum, IntEnum
 from commonroad.scenario.lanelet import LaneletType
 from commonroad.scenario.obstacle import ObstacleType
 from commonroad.scenario.traffic_sign import SupportedTrafficSignCountry
-from commonroad.scenario.traffic_sign import TrafficLightState, TrafficLightDirection
+from commonroad.scenario.traffic_light import TrafficLightState, TrafficLightDirection
 from crdesigner.map_conversion.sumo_map.sumolib_net import EdgeTypes, EdgeType, VehicleType, SignalState, \
     ConnectionDirection
 

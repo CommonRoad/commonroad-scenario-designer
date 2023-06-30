@@ -2,7 +2,7 @@ from collections import defaultdict
 from typing import Set, List, Dict, Tuple
 
 import numpy as np
-from commonroad.scenario.traffic_sign import TrafficLight, TrafficLightCycleElement, TrafficLightState
+from commonroad.scenario.traffic_light import TrafficLight, TrafficLightCycleElement, TrafficLightState
 from crdesigner.map_conversion.sumo_map.sumolib_net import TLSProgram, Connection, NodeType, SignalState, Node, Phase
 from crdesigner.map_conversion.sumo_map.util import lines_intersect, compute_max_curvature_from_polyline
 
@@ -22,8 +22,7 @@ class TrafficLightEncoder:
         program_id = f"tl_program_{self.index}"
         traffic_light_id = str(node.id)
         node.type = NodeType.TRAFFIC_LIGHT
-
-        time_offset = max(tl.time_offset for tl in traffic_lights)
+        time_offset = max(tl.traffic_light_cycle.time_offset for tl in traffic_lights)
         tls_program = TLSProgram(traffic_light_id, time_offset * self.conf.dt, program_id)
 
         # sync and ungroup light states
@@ -87,8 +86,9 @@ def _sync_traffic_light_cycles(traffic_lights: List[TrafficLight]) -> List[List[
     :param traffic_lights:
     :return: list of synchronized states
     """
-    time_steps = np.lcm.reduce([sum(cycle.duration for cycle in tl.cycle) for tl in traffic_lights])
-    states = np.array([_cycles_to_states(traffic_light.cycle, time_steps)
+    time_steps = np.lcm.reduce([sum(cycle.duration for cycle in tl.traffic_light_cycle.cycle_elements)
+                                for tl in traffic_lights])
+    states = np.array([_cycles_to_states(traffic_light.traffic_light_cycle.cycle_elements, time_steps)
                        for traffic_light in traffic_lights]).T
     res: List[List[TrafficLightCycleElement]] = []
     i = 0
