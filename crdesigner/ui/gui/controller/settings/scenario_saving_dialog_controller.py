@@ -9,7 +9,8 @@ from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistin
 from crdesigner.ui.gui.model.scenario_model import ScenarioModel
 from crdesigner.ui.gui.view.settings.scenario_saving_dialog_ui import ScenarioSavingDialogUI
 from commonroad.planning.planning_problem import PlanningProblemSet
-from commonroad.scenario.scenario import Environment, Tag, TimeOfDay, Weather, Underground, Time, Location, Scenario
+from commonroad.common.common_scenario import TimeOfDay, Weather, Underground, Time, Location
+from commonroad.scenario.scenario import Environment, Tag, Scenario
 
 from crdesigner.ui.gui.autosaves.autosaves_setup import DIR_AUTOSAVE
 
@@ -42,9 +43,9 @@ class ScenarioSavingDialogController:
         self.current_pps = pps
         self.save_window.label_benchmark_id.setText(self.current_scenario.scenario_id.__str__())
 
-        self.save_window.scenario_author.setText(self.current_scenario.author)
-        self.save_window.scenario_affiliation.setText(self.current_scenario.affiliation)
-        self.save_window.scenario_source.setText(self.current_scenario.source)
+        self.save_window.scenario_author.setText(self.current_scenario.file_information.author)
+        self.save_window.scenario_affiliation.setText(self.current_scenario.file_information.affiliation)
+        self.save_window.scenario_source.setText(self.current_scenario.file_information.source)
         self.save_window.scenario_time_step_size.setText(str(self.current_scenario.dt))
         self.save_window.scenario_tags.set_checked_items(
                 [t.value for t in self.current_scenario.tags] if self.current_scenario.tags else [])
@@ -62,19 +63,19 @@ class ScenarioSavingDialogController:
                 self.current_scenario.scenario_id.prediction_id if self.current_scenario.scenario_id.prediction_id
                 else 1)
 
-        if self.current_scenario.location:
-            self.save_window.scenario_geo_anme_id.setText(str(self.current_scenario.location.geo_name_id))
-            self.save_window.scenario_latitude.setText(str(self.current_scenario.location.gps_latitude))
-            self.save_window.scenario_longitude.setText(str(self.current_scenario.location.gps_longitude))
-            if self.current_scenario.location.environment:
+        if self.current_scenario.lanelet_network.location:
+            self.save_window.scenario_geo_anme_id.setText(str(self.current_scenario.lanelet_network.location.geo_name_id))
+            self.save_window.scenario_latitude.setText(str(self.current_scenario.lanelet_network.location.gps_latitude))
+            self.save_window.scenario_longitude.setText(str(self.current_scenario.lanelet_network.location.gps_longitude))
+            if self.current_scenario.environment:
                 self.save_window.scenario_time_of_day.setCurrentText(
-                        self.current_scenario.location.environment.time_of_day.value)
+                        self.current_scenario.environment.time_of_day.value)
                 self.save_window.scenario_weather.setCurrentText(
-                        self.current_scenario.location.environment.weather.value)
+                        self.current_scenario.environment.weather.value)
                 self.save_window.scenario_underground.setCurrentText(
-                        self.current_scenario.location.environment.underground.value)
-                self.save_window.scenario_time_hour.setValue(self.current_scenario.location.environment.time.hours)
-                self.save_window.scenario_time_minute.setValue(self.current_scenario.location.environment.time.minutes)
+                        self.current_scenario.environment.underground.value)
+                self.save_window.scenario_time_hour.setValue(self.current_scenario.environment.time.hours)
+                self.save_window.scenario_time_minute.setValue(self.current_scenario.environment.time.minutes)
             else:
                 self.init_scenario_location_default()
         else:
@@ -132,11 +133,14 @@ class ScenarioSavingDialogController:
     def save_scenario(self):
         self.update_scenario_meta_data()
         try:
-            writer = CommonRoadFileWriter(scenario=self.current_scenario, planning_problem_set=self.current_pps,
-                                          author=self.current_scenario.author,
-                                          affiliation=self.current_scenario.affiliation,
-                                          source=self.current_scenario.source, tags=set(self.current_scenario.tags), )
-            filename = self.directory + "/" + self.current_scenario.scenario_id.__str__() + ".xml"
+            writer = CommonRoadFileWriter(scenario=self.current_scenario.get_current_scenario(),
+                                          planning_problem_set=self.current_pps,
+                                          author=self.current_scenario.get_current_scenario().file_information.author,
+                                          affiliation=self.current_scenario.get_current_scenario().file_information.affiliation,
+                                          source=self.current_scenario.get_current_scenario().file_information.source,
+                                          tags=set(self.current_scenario.get_current_scenario().tags), )
+            filename = self.directory + "/" + self.current_scenario.get_current_scenario().scenario_id.__str__() \
+                + ".xml"
             if self.current_pps is None:
                 writer.write_scenario_to_file(filename, OverwriteExistingFile.ALWAYS)
             else:
@@ -179,13 +183,13 @@ class ScenarioSavingDialogController:
             self.current_scenario.affiliation = self.save_window.scenario_affiliation.text()
             self.current_scenario.source = self.save_window.scenario_source.text()
             self.current_scenario.tags = [Tag(t) for t in self.save_window.scenario_tags.get_checked_items()]
-            self.current_scenario.scenario_id.configuration_id = int(self.save_window.scenario_config_id.text())
-            self.current_scenario.scenario_id.cooperative = self.save_window.cooperative_scenario.isChecked()
-            self.current_scenario.scenario_id.country_id = self.save_window.country.currentText()
-            self.current_scenario.scenario_id.map_id = int(self.save_window.scenario_scene_id.text())
-            self.current_scenario.scenario_id.map_name = self.save_window.scenario_scene_name.text()
-            self.current_scenario.scenario_id.obstacle_behavior = self.save_window.prediction_type.currentText()
-            self.current_scenario.scenario_id.prediction_id = int(self.save_window.scenario_prediction_id.text())
+            self.current_scenario.get_scenario_id().configuration_id = int(self.save_window.scenario_config_id.text())
+            self.current_scenario.get_scenario_id().cooperative = self.save_window.cooperative_scenario.isChecked()
+            self.current_scenario.get_scenario_id().country_id = self.save_window.country.currentText()
+            self.current_scenario.get_scenario_id().map_id = int(self.save_window.scenario_scene_id.text())
+            self.current_scenario.get_scenario_id().map_name = self.save_window.scenario_scene_name.text()
+            self.current_scenario.get_scenario_id().obstacle_behavior = self.save_window.prediction_type.currentText()
+            self.current_scenario.get_scenario_id().prediction_id = int(self.save_window.scenario_prediction_id.text())
             if self.location_equals_default() and self.current_scenario.location is None:
                 self.current_scenario.location = None
             elif self.environment_equals_default() and not self.location_equals_default():
@@ -196,12 +200,12 @@ class ScenarioSavingDialogController:
                 self.current_scenario.location = Location(self.save_window.scenario_geo_anme_id.text(),
                                                           self.save_window.scenario_latitude.text(),
                                                           self.save_window.scenario_longitude.text(),
-                                                          environment=Environment(
-                                                                  Time(int(self.save_window.scenario_time_hour.text()),
-                                                                       int(self.save_window.scenario_time_minute.text())),
-                                                                  TimeOfDay(
-                                                                          self.save_window.scenario_time_of_day.currentText()),
-                                                                  Weather(self.save_window.scenario_weather.currentText()),
-                                                                  Underground(
-                                                                          self.save_window.scenario_underground.currentText())))
-            self.save_window.label_benchmark_id.setText(str(self.current_scenario.scenario_id))
+                                                          )
+                self.current_scenario.get_current_scenario().environment = \
+                    Environment(Time(int(self.save_window.scenario_time_hour.text()),
+                                int(self.save_window.scenario_time_minute.text())),
+                                TimeOfDay(self.save_window.scenario_time_of_day.currentText()),
+                                Weather(self.save_window.scenario_weather.currentText()),
+                                Underground(self.save_window.scenario_underground.currentText()))
+
+            self.save_window.label_benchmark_id.setText(str(self.current_scenario.get_scenario_id()))

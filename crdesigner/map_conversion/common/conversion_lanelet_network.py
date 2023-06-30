@@ -11,8 +11,9 @@ from shapely.validation import make_valid
 from pyproj import Transformer
 
 from commonroad.scenario.lanelet import LaneletNetwork, StopLine
-from commonroad.scenario.intersection import IntersectionIncomingElement, Intersection
-from commonroad.scenario.traffic_sign import TrafficLightDirection, TrafficLight, TrafficSign
+from commonroad.scenario.intersection import IncomingGroup, Intersection
+from commonroad.scenario.traffic_light import TrafficLightDirection, TrafficLight
+from commonroad.scenario.traffic_sign import TrafficSign
 
 from crdesigner.config.config import OpenDRIVEConversionParams
 from crdesigner.map_conversion.common import geometry
@@ -111,9 +112,9 @@ class ConversionLaneletNetwork(LaneletNetwork):
 
         for lanelet in self.lanelets:
             lanelet.description = lanelet.lanelet_id
-            self.remove_lanelet(lanelet.lanelet_id)
+            self.remove_lanelet(str(lanelet.lanelet_id))
             lanelet.lanelet_id = convert_to_new_lanelet_id(
-                lanelet.lanelet_id, self._old_lanelet_ids
+                str(lanelet.lanelet_id), self._old_lanelet_ids
             )
             lanelet.predecessor = [
                 convert_to_new_lanelet_id(x, self._old_lanelet_ids)
@@ -125,11 +126,11 @@ class ConversionLaneletNetwork(LaneletNetwork):
             ]
             if lanelet.adj_left is not None:
                 lanelet.adj_left = convert_to_new_lanelet_id(
-                    lanelet.adj_left, self._old_lanelet_ids
+                    str(lanelet.adj_left), self._old_lanelet_ids
                 )
             if lanelet.adj_right is not None:
                 lanelet.adj_right = convert_to_new_lanelet_id(
-                    lanelet.adj_right, self._old_lanelet_ids
+                    str(lanelet.adj_right), self._old_lanelet_ids
                 )
             self.add_lanelet(lanelet)
 
@@ -192,7 +193,7 @@ class ConversionLaneletNetwork(LaneletNetwork):
                                 not lanelet.adj_right_same_direction
                             )
 
-                self.remove_lanelet(lanelet.lanelet_id, remove_references=True)
+                self.remove_lanelet(str(lanelet.lanelet_id), remove_references=True)
 
     def update_lanelet_id_references(self, old_id: str, new_id: str):
         """Update all references to the old lanelet_id with the new_lanelet_id.
@@ -291,7 +292,7 @@ class ConversionLaneletNetwork(LaneletNetwork):
             # each reference to lanelet_2 should point to lanelet_id
             # of new_lanelet instead
             self.update_lanelet_id_references(
-                lanelet_2.lanelet_id, lanelet_1.lanelet_id
+                str(lanelet_2.lanelet_id), str(lanelet_1.lanelet_id)
             )
             # update dict to show which lanelet_id changed to which
             new_lanelet_ids[pair[1]] = pair[0]
@@ -636,9 +637,11 @@ class ConversionLaneletNetwork(LaneletNetwork):
                     else:
                         print(direction)
                         warnings.warn("Incorrect direction assigned to successor of incoming lanelet in intersection")
-            intersection_incoming_lane = IntersectionIncomingElement(generate_unique_id(), incoming_lanelet_set,
-                                                                     successor_right, successor_straight,
-                                                                     successor_left)
+            intersection_incoming_lane = IncomingGroup(generate_unique_id(),
+                                                       incoming_lanelets=set(incoming_lanelet_set),
+                                                       outgoing_right=successor_right,
+                                                       outgoing_straight=successor_straight,
+                                                       outgoing_left=successor_left)
 
             intersection_incoming_lanes.append(intersection_incoming_lane)
             # TODO: Add crossings to intersections

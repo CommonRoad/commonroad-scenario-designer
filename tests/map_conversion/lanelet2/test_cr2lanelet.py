@@ -1,5 +1,9 @@
 import os
 import unittest
+
+from commonroad.scenario.traffic_light import TrafficLightCycleElement, TrafficLight, TrafficLightState, \
+    TrafficLightCycle
+
 from crdesigner.config.config import Lanelet2ConversionParams
 from crdesigner.map_conversion.lanelet2.cr2lanelet import CR2LaneletConverter
 from commonroad.scenario.lanelet import Lanelet, StopLine, LineMarking
@@ -68,8 +72,8 @@ class TestCR2LaneletConverter(unittest.TestCase):
         self.assertEqual(cr1.origin_utm, (0, 0))
 
         proj_string_from = None
-        if scenario.location is not None and scenario.location.geo_transformation is not None:
-            proj_string_from = scenario.location.geo_transformation.geo_reference
+        if scenario.lanelet_network.location is not None and scenario.lanelet_network.location.geo_transformation is not None:
+            proj_string_from = scenario.lanelet_network.location.geo_transformation.geo_reference
         if proj_string_from is None:
             proj_string_from = Lanelet2ConversionParams().proj_string
         crs_from = CRS(proj_string_from)
@@ -401,7 +405,8 @@ class TestCR2LaneletConverter(unittest.TestCase):
         # create a custom CR format traffic light
         traffic_cycle_element_list = list()
         traffic_cycle_element_list.append(TrafficLightCycleElement(TrafficLightState.RED, 1))
-        traffic_light = TrafficLight(1, traffic_cycle_element_list, np.array([0, 0]))
+        traffic_light_cycle = TrafficLightCycle(cycle_elements=traffic_cycle_element_list)
+        traffic_light = TrafficLight(1, np.array([0, 0]), traffic_light_cycle)
         
         nodes_before = len(cr1.osm.nodes)
         ways_before = len(cr1.osm.ways)
@@ -469,7 +474,8 @@ class TestCR2LaneletConverter(unittest.TestCase):
         # create a custom CR format traffic light
         traffic_cycle_element_list = list()
         traffic_cycle_element_list.append(TrafficLightCycleElement(TrafficLightState.RED, 1))
-        traffic_light = TrafficLight(1, traffic_cycle_element_list, np.array([0, 0]))
+        traffic_cycle = TrafficLightCycle(cycle_elements=traffic_cycle_element_list)
+        traffic_light = TrafficLight(1, np.array([0, 0]), traffic_cycle)
 
         # assign it to a lanelet
         cr1.lanelet_network.lanelets[0].traffic_lights.add(1)

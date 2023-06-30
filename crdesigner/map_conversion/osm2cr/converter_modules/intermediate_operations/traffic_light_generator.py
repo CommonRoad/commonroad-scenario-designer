@@ -1,6 +1,6 @@
 from crdesigner.map_conversion.osm2cr import config
-from commonroad.scenario.traffic_sign import TrafficLight, TrafficLightCycleElement, TrafficLightState, \
-    TrafficLightDirection
+from commonroad.scenario.traffic_light import TrafficLight, TrafficLightCycleElement, TrafficLightState, \
+    TrafficLightDirection, TrafficLightCycle
 
 
 class TrafficLightGenerator:
@@ -56,7 +56,7 @@ class TrafficLightGenerator:
         Method to create the new traffic light
         """
 
-        new_traffic_light = TrafficLight(traffic_light_id=new_id, cycle=self.get_cycle(), position=position,
-                                         time_offset=self.get_time_offset(), direction=TrafficLightDirection.ALL,
-                                         active=True)
+        light_cycle = TrafficLightCycle(cycle_elements=self.get_cycle(), time_offset=self.get_time_offset())
+        new_traffic_light = TrafficLight(traffic_light_id=new_id, position=position, traffic_light_cycle=light_cycle,
+                                         direction=TrafficLightDirection.ALL, active=True)
         return new_traffic_light

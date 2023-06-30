@@ -3,7 +3,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 import math
 
-from commonroad.scenario.traffic_sign import TrafficLightDirection
+from commonroad.scenario.traffic_light import TrafficLightDirection
 
 from crdesigner.ui.gui.utilities.toolbox_ui import CheckableComboBox, PositionButton
 

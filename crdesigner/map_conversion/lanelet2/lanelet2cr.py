@@ -5,13 +5,18 @@ import numpy as np
 from pyproj import Transformer, CRS
 import logging
 
-from commonroad.scenario.lanelet import StopLine, LineMarking, RoadUser, Lanelet, LaneletNetwork  # type: ignore
+from commonroad.scenario.lanelet import Lanelet, LaneletNetwork  # type: ignore
+from commonroad.scenario.traffic_light import TrafficLightCycleElement, TrafficLightState, TrafficLightDirection, \
+    TrafficLightCycle
 from commonroad.scenario.traffic_sign import (TrafficSignElement, TrafficSignIDGermany,  # type: ignore
                                               TrafficSignIDUsa,  # type: ignore
-                                              TrafficSignIDZamunda, TrafficLightCycleElement,
-                                              TrafficLightState, TrafficLightDirection)  # type: ignore
-from commonroad.scenario.scenario import Scenario, ScenarioID, TrafficSign, Location, TrafficLight, \
-    GeoTransformation  # type: ignore
+                                              TrafficSignIDZamunda)  # type: ignore
+from commonroad.common.common_scenario import Location, GeoTransformation
+from commonroad.scenario.traffic_sign import TrafficSign
+from commonroad.scenario.traffic_light import TrafficLight
+from commonroad.common.common_scenario import ScenarioID
+from commonroad.common.common_lanelet import StopLine, LineMarking, RoadUser
+from commonroad.scenario.scenario import Scenario
 
 from crdesigner.map_conversion.lanelet2.lanelet2 import OSMLanelet
 from crdesigner.map_conversion.common.utils import generate_unique_id
@@ -195,7 +200,6 @@ class Lanelet2CRConverter:
         """
         Initialization of the Lanelet2CRConverter
 
-        :param proj_string: Projection string used for conversion.
         :param lanelet2_config: Lanelet2 conversion parameters.
         :param cr_config: General config parameters.
         """
@@ -245,9 +249,10 @@ class Lanelet2CRConverter:
             self.origin_utm = (0, 0)
         scenario_id = ScenarioID(country_id=self._cr_config.country_id,
                                  map_name=self._cr_config.map_name, map_id=self._cr_config.map_id)
-        scenario = Scenario(dt=self._cr_config.time_step_size, scenario_id=scenario_id,
-                            location=Location(gps_latitude=origin_lat, gps_longitude=origin_lon))
+        scenario = Scenario(dt=self._cr_config.time_step_size, scenario_id=scenario_id)
+
         self.lanelet_network = ConversionLaneletNetwork()
+        self.lanelet_network.location = Location(gps_latitude=origin_lat, gps_longitude=origin_lon)
 
         speed_limits = {}
         speed_limit_lanelets = {}  # type: ignore
@@ -318,7 +323,7 @@ class Lanelet2CRConverter:
 
         scenario.add_objects(self.lanelet_network)
 
-        scenario.location.geo_transformation = GeoTransformation(geo_reference=self._config.proj_string)
+        scenario.lanelet_network.location.geo_transformation = GeoTransformation(geo_reference=self._config.proj_string)
 
         return scenario
     
@@ -364,7 +369,10 @@ class Lanelet2CRConverter:
                     wr_lanelets.add(new_lanelet_ids[wr])
 
         # create the traffic light
-        traffic_light = TrafficLight(new_id, cycle_list, np.array([x, y]), 1, TrafficLightDirection.STRAIGHT, True)
+
+        traffic_light_cycle = TrafficLightCycle(cycle_elements=cycle_list, time_offset=1)
+        traffic_light = TrafficLight(new_id, np.array([x, y]), traffic_light_cycle, None, True,
+                                     TrafficLightDirection.STRAIGHT)
 
         # add the traffic light to our lanelet network
         self.lanelet_network.add_traffic_light(traffic_light, wr_lanelets)

@@ -21,7 +21,8 @@ from crdesigner.map_conversion.osm2cr.converter_modules.cr_operations.cleanup im
 from commonroad.visualization.mp_renderer import MPRenderer
 from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
 from commonroad.common.file_reader import CommonRoadFileReader
-from commonroad.scenario.scenario import Scenario, Lanelet, Tag, Location
+from commonroad.scenario.scenario import Scenario, Lanelet, Tag
+from commonroad.common.common_scenario import Location
 
 
 def get_lanelet(lane: rg.Lane) -> Lanelet:

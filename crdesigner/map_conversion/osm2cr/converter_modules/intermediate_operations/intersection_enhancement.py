@@ -152,9 +152,9 @@ def check_pre_incoming_lane(lane, intermediate_format):
     for intersection in intermediate_format.intersections:
         all_succesors = set()
         for incoming in intersection.incomings:
-            all_succesors.update(incoming.successors_left)
-            all_succesors.update(incoming.successors_right)
-            all_succesors.update(incoming.successors_straight)
+            all_succesors.update(incoming.outgoing_left)
+            all_succesors.update(incoming.outgoing_right)
+            all_succesors.update(incoming.outgoing_straight)
         for pre in lane.predecessors:
             if pre in all_succesors:
                 return True

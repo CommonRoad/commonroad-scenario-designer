@@ -7,7 +7,8 @@ import sys
 
 from commonroad.scenario.lanelet import StopLine, LineMarking, Lanelet, LaneletNetwork
 from commonroad.scenario.traffic_sign import *
-from commonroad.scenario.scenario import TrafficSign, Location, GeoTransformation
+from commonroad.common.common_scenario import Location, GeoTransformation
+from commonroad.scenario.scenario import TrafficSign
 from crdesigner.map_conversion.lanelet2.lanelet2cr import _add_closest_traffic_sign_to_lanelet, \
     _add_stop_line_to_lanelet
 from crdesigner.map_conversion.lanelet2.lanelet2_parser import Lanelet2Parser
@@ -89,7 +90,7 @@ class TestLanelet2CRConverter(unittest.TestCase):
 
         # test the scenario values given in the constructor
         self.assertEqual(scenario.dt, 0.1)
-        self.assertEqual(scenario.location, Location(gps_latitude=origin_lat, gps_longitude=origin_lon,
+        self.assertEqual(scenario.lanelet_network.location, Location(gps_latitude=origin_lat, gps_longitude=origin_lon,
                                                      geo_transformation=GeoTransformation(geo_reference=config.proj_string)))
 
         # test the class of the lanelet network
@@ -555,18 +556,18 @@ class TestLanelet2CRConverter(unittest.TestCase):
         # check the cycle of the converted traffic light
         traffic_light = l2cr.lanelet_network.traffic_lights[0]
 
-        first_color = traffic_light.cycle[0]._state.value
-        first_duration = traffic_light.cycle[0].duration
+        first_color = traffic_light.traffic_light_cycle.cycle_elements[0]._state.value
+        first_duration = traffic_light.traffic_light_cycle.cycle_elements[0].duration
         self.assertEqual(first_color, 'red')
         self.assertEqual(first_duration, 5)
 
-        second_color = traffic_light.cycle[1]._state.value
-        second_duration = traffic_light.cycle[1].duration
+        second_color = traffic_light.traffic_light_cycle.cycle_elements[1]._state.value
+        second_duration = traffic_light.traffic_light_cycle.cycle_elements[1].duration
         self.assertEqual(second_color, 'yellow')
         self.assertEqual(second_duration, 5)
 
-        third_color = traffic_light.cycle[2]._state.value
-        third_duration = traffic_light.cycle[2].duration
+        third_color = traffic_light.traffic_light_cycle.cycle_elements[2]._state.value
+        third_duration = traffic_light.traffic_light_cycle.cycle_elements[2].duration
         self.assertEqual(third_color, 'green')
         self.assertEqual(third_duration, 5)
 

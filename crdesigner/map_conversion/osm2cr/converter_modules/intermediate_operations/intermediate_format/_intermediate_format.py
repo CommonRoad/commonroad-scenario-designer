@@ -13,8 +13,9 @@ import numpy as np
 from commonroad.scenario.lanelet import LaneletNetwork
 from commonroad.scenario.obstacle import Obstacle
 from commonroad.scenario.scenario import Scenario, ScenarioID
-from commonroad.scenario.traffic_sign import TrafficSign, TrafficLight
-from commonroad.scenario.intersection import Intersection, IntersectionIncomingElement
+from commonroad.scenario.traffic_light import TrafficLight
+from commonroad.scenario.traffic_sign import TrafficSign
+from commonroad.scenario.intersection import Intersection, IncomingGroup
 from commonroad.planning.planning_problem import PlanningProblem, PlanningProblemSet
 from commonroad.scenario.state import CustomState, InitialState
 from commonroad.planning.goal import GoalRegion
@@ -237,7 +238,7 @@ class IntermediateFormat:
         for lane in graph.lanelinks:
             node = lane.to_node
             # node with more than 2 edges or marked as crossing is an intersection
-            if (node.get_degree() > 2 or (node.is_crossing and node.get_degree() == 2)):
+            if node.get_degree() > 2 or (node.is_crossing and node.get_degree() == 2):
                 # keep track of added lanes to consider unique intersections
                 incoming = [p for p in lane.predecessors if p.id not in added_lanes]
 
@@ -324,14 +325,11 @@ class IntermediateFormat:
                 successors_right = set(incoming["right"])
                 successors_left = set(incoming["left"])
                 successors_straight = set(incoming['through']).union(set(incoming['none']))
-                is_left_of = incoming['isLeftOf']
-                incoming_element = IntersectionIncomingElement(incoming_ids[index],
-                                                               incoming_lanelets,
-                                                               successors_right,
-                                                               successors_straight,
-                                                               successors_left,
-                                                               is_left_of
-                                                               )
+                incoming_element = IncomingGroup(incoming_ids[index],
+                                                 incoming_lanelets=incoming_lanelets,
+                                                 outgoing_right=successors_right,
+                                                 outgoing_straight=successors_straight,
+                                                 outgoing_left=successors_left)
                 incoming_elements.append(incoming_element)
                 index += 1
             intersections_cr.append(Intersection(idgenerator.get_id(), incoming_elements))

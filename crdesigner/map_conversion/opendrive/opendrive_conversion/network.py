@@ -4,9 +4,10 @@ import iso3166
 from collections import deque
 from typing import Union, List, Optional
 from pyproj import CRS, Transformer
-from commonroad.scenario.scenario import Scenario, GeoTransformation, Location, ScenarioID
-from commonroad.scenario.lanelet import LaneletNetwork, Lanelet, StopLine, LineMarking
-from commonroad.scenario.lanelet import LaneletType
+from commonroad.common.common_scenario import GeoTransformation, Location, ScenarioID
+from commonroad.scenario.scenario import Scenario
+from commonroad.common.common_lanelet import StopLine, LineMarking, LaneletType
+from commonroad.scenario.lanelet import LaneletNetwork, Lanelet
 from commonroad.scenario.traffic_sign import TrafficSign, TrafficSignElement, TrafficSignIDGermany, \
     TrafficSignIDZamunda, TrafficSignIDUsa, TrafficSignIDChina, TrafficSignIDSpain, \
     TrafficSignIDRussia
@@ -277,7 +278,8 @@ class Network:
             for intersection in lanelet_network.intersections:
                 lanelet = find_intersect_point()
                 if lanelet is not None:
-                    intersection.crossings.add(crosswalk.lanelet_id)
+                    for incoming in intersection.incomings:
+                        incoming.crossings.add(crosswalk.lanelet_id)
                     break
 
     def reference_traffic_signs_with_equal_speed(self, lanelets: List[int], lanelet_network: ConversionLaneletNetwork):
@@ -421,13 +423,13 @@ class Network:
                 map_id=general_config.map_id)
 
         scenario = Scenario(
-            dt=general_config.time_step_size, scenario_id=scenario_id,
-            location=location
+            dt=general_config.time_step_size, scenario_id=scenario_id
         )
 
         scenario.add_objects(self.export_lanelet_network(transformer=transformer,
                                                          filter_types=opendrive_config.filter_types))
 
+        scenario.lanelet_network.location = location
         return scenario
 
     @staticmethod

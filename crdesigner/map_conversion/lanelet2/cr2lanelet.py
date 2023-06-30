@@ -3,7 +3,8 @@ from typing import List, Optional, Tuple, Union, Dict
 import numpy as np
 from pyproj import CRS, Transformer
 from commonroad.scenario.lanelet import Lanelet  # type: ignore
-from commonroad.scenario.traffic_sign import TrafficLight, TrafficSign  # type: ignore
+from commonroad.scenario.traffic_light import TrafficLight
+from commonroad.scenario.traffic_sign import TrafficSign  # type: ignore
 
 from crdesigner.config.config import Lanelet2ConversionParams
 from crdesigner.map_conversion.common.utils import generate_unique_id
@@ -79,7 +80,7 @@ class CR2LaneletConverter:
     def _create_transformer(self, scenario):
         # TODO: currently, we only consider `GeoTransformation.geo_reference`. The other specifications
         #   there should be used if specified.
-        loc = scenario.location
+        loc = scenario.lanelet_network.location
         proj_string_from = None
         if loc is not None and loc.geo_transformation is not None:
             proj_string_from = loc.geo_transformation.geo_reference
@@ -211,7 +212,7 @@ class CR2LaneletConverter:
         self.osm.add_node(Node(id3, y3, x3, autoware=self._config.autoware))
 
         # get the first light color as subtype
-        traffic_light_subtype = light.cycle[0].state.value
+        traffic_light_subtype = light.traffic_light_cycle.cycle_elements[0].state.value
 
         self.osm.add_way(Way(traffic_light_id, [id1, id2, id3],
                              tag_dict={"subtype": traffic_light_subtype, "type": "traffic_light"}))

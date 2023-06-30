@@ -7,7 +7,7 @@ import math
 
 
 from commonroad.scenario.lanelet import LineMarking, LaneletType, RoadUser, StopLine, Lanelet
-from commonroad.scenario.intersection import IntersectionIncomingElement, Intersection
+from commonroad.scenario.intersection import IncomingGroup, Intersection
 from commonroad.scenario.scenario import Scenario
 from commonroad.scenario.traffic_sign import *
 

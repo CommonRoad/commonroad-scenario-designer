@@ -5,6 +5,7 @@ from commonroad.scenario.intersection import Intersection
 from commonroad.scenario.scenario import Scenario
 from commonroad.scenario.lanelet import Lanelet, LaneletNetwork
 from commonroad.common.util import Interval
+from commonroad.scenario.traffic_light import TrafficLight
 
 from commonroad.scenario.traffic_sign import *
 from commonroad.scenario.obstacle import *

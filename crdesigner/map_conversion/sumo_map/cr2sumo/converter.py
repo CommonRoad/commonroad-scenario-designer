@@ -45,8 +45,9 @@ from commonroad.scenario.trajectory import State
 from commonroad.scenario.lanelet import LaneletNetwork, Lanelet, LineMarking, LaneletType
 from commonroad.scenario.obstacle import ObstacleRole, ObstacleType
 from commonroad.scenario.scenario import Scenario
-from commonroad.scenario.traffic_sign import SupportedTrafficSignCountry, TrafficLight, \
-    TrafficLightCycleElement, TrafficLightDirection, TrafficSign
+from commonroad.scenario.traffic_light import TrafficLight, TrafficLightCycleElement, TrafficLightDirection, \
+    TrafficLightCycle
+from commonroad.scenario.traffic_sign import SupportedTrafficSignCountry, TrafficSign
 from commonroad.scenario.traffic_sign_interpreter import TrafficSigInterpreter
 
 from sumocr.maps.scenario_wrapper import AbstractScenarioWrapper
@@ -1074,9 +1075,9 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                 connections_init = {}
                 if intersection is not None:
                     incoming_elem = intersection.map_incoming_lanelets[lanelet.lanelet_id]
-                    connections_init[TrafficLightDirection.STRAIGHT] = incoming_elem.successors_straight
-                    connections_init[TrafficLightDirection.LEFT] = incoming_elem.successors_left
-                    connections_init[TrafficLightDirection.RIGHT] = incoming_elem.successors_right
+                    connections_init[TrafficLightDirection.STRAIGHT] = incoming_elem.outgoing_straight
+                    connections_init[TrafficLightDirection.LEFT] = incoming_elem.outgoing_left
+                    connections_init[TrafficLightDirection.RIGHT] = incoming_elem.outgoing_right
                 elif len(lanelet.successor) == 1:
                     connections_init[TrafficLightDirection.STRAIGHT] = set(lanelet.successor)
                     connections_init[TrafficLightDirection.LEFT] = set(lanelet.successor)
@@ -1270,18 +1271,15 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
                 continue
             lanelet_id = self.lane_id2lanelet_id[connection.from_lane.id]
             lanelet = self.lanelet_network.find_lanelet_by_id(lanelet_id)
+            cycle = [TrafficLightCycleElement(state=traffic_light_states_SUMO2CR[phase.state[connection.tl_link]],
+                     duration=round(phase.duration / self.conf.dt)) for phase in connection.tls.phases]
+
+            traffic_cycle = TrafficLightCycle(cycle_elements=cycle, time_offset=time_offset)
             traffic_light = TrafficLight(
                 traffic_light_id=next_cr_id,
-                cycle=[
-                    TrafficLightCycleElement(
-                        state=traffic_light_states_SUMO2CR[phase.state[connection.tl_link]],
-                        duration=round(phase.duration / self.conf.dt)
-                    )
-                    for phase in connection.tls.phases
-                ],
-                direction=directions_SUMO2CR[connection.direction],
                 position=lanelet.right_vertices[-1],
-                time_offset=time_offset / self.conf.dt
+                traffic_light_cycle=traffic_cycle,
+                direction=directions_SUMO2CR[connection.direction],
             )
             next_cr_id += 1
             assert self.lanelet_network.add_traffic_light(traffic_light, {lanelet_id}), \
@@ -2376,7 +2374,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
             intersection {inter.intersection_id}:
             inc:{[inc.incoming_lanelets for inc in inter.incomings]}
             out:{list(itertools.chain.from_iterable(
-                    [inc.successors_straight | inc.successors_left | inc.successors_right for inc in inter.incomings]))}
+                    [inc.outgoing_straight| inc.outgoing_left| inc.outgoing_right for inc in inter.incomings]))}
             """
             pos = \
                 self.lanelet_network.find_lanelet_by_id(
