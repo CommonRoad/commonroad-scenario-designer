@@ -6,6 +6,7 @@ import logging
 from commonroad.scenario.scenario import Scenario
 from commonroad.scenario.lanelet import LaneletNetwork
 from commonroad.common.file_reader import CommonRoadFileReader, FileFormat
+
 from crdesigner.ui.gui.utilities.gui_sumo_simulation import SUMO_AVAILABLE
 
 if SUMO_AVAILABLE:
@@ -70,7 +71,7 @@ def _open_scenario(mwindow, new_scenario, filename="new_scenario", pps=None):
     else:
         mwindow.animated_viewer_wrapper.cr_viewer.open_scenario(planning_problem_set=pps,
                                                                 new_file_added=True)
-    mwindow.animated_viewer_wrapper.update_view(new_file_added=True)
+    mwindow.animated_viewer_wrapper.update_view()
     update_to_new_scenario(mwindow)
 
 

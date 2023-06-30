@@ -25,10 +25,10 @@ class AnimatedViewerWrapperController:
         self.mwindow = mwindow  # handle back to the main window
 
     def update_scenario(self):
-        self.cr_viewer.open_scenario()
+        self.cr_viewer.open_scenario(new_file_added=True)
         self.update_view()
         self.mwindow.update_max_step()
-        #Autosave
+        # Autosave
         self.scenario_saving_dialog.autosave(self.scenario_model.get_current_scenario())
 
     def create_viewer_dock(self):
@@ -85,15 +85,14 @@ class AnimatedViewerWrapperController:
 
         return draw_temporary_position
 
-    def update_view(self, new_file_added: bool = None, focus_on_network=None):
+    def update_view(self):
         """
-        Update all components.  
-        :param new_file_added: if a new cr file was created or added
+        Update all components.
         """
         # reset selection of all other selectable elements
         if not self.scenario_model.scenario_created():
             return
-        self.cr_viewer.update_plot(new_file_added=new_file_added)
+        self.cr_viewer.update_plot()
 
     def update_window(self):
         self.toolbar.setStyleSheet('background-color:' + self.mwindow.colorscheme().background +
