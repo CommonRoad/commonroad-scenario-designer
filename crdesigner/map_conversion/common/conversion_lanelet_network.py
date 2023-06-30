@@ -58,6 +58,7 @@ class ConversionLaneletNetwork(LaneletNetwork):
         :param remove_references: Also remove references which point to the removed lanelet. Default is False.
         :type remove_references: bool
         """
+
         del self._lanelets[lanelet_id]
         if remove_references:
             for lanelet in self.lanelets:
@@ -193,7 +194,7 @@ class ConversionLaneletNetwork(LaneletNetwork):
                                 not lanelet.adj_right_same_direction
                             )
 
-                self.remove_lanelet(str(lanelet.lanelet_id), remove_references=True)
+                self.remove_lanelet(lanelet.lanelet_id, remove_references=True)
 
     def update_lanelet_id_references(self, old_id: str, new_id: str):
         """Update all references to the old lanelet_id with the new_lanelet_id.

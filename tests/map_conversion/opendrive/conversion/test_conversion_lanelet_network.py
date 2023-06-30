@@ -6,8 +6,9 @@ from crdesigner.map_conversion.common.conversion_lanelet_network import  \
     ConversionLaneletNetwork, _JoinSplitTarget, _JoinSplitPair
 from crdesigner.map_conversion.common.conversion_lanelet import ConversionLanelet
 from commonroad.scenario.lanelet import LaneletNetwork, StopLine
-from commonroad.scenario.traffic_sign import TrafficLight, TrafficSign
-from commonroad.scenario.intersection import Intersection, IntersectionIncomingElement
+from commonroad.scenario.traffic_light import TrafficLight
+from commonroad.scenario.traffic_sign import TrafficSign
+from commonroad.scenario.intersection import Intersection, IncomingGroup
 from commonroad.scenario.lanelet import LaneletType
 from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.plane_group import \
     ParametricLane, ParametricLaneGroup
@@ -88,18 +89,18 @@ class TestConversionLanelet(unittest.TestCase):
 
     def test_find_lanelet_by_id(self):
         conversion_lanelet_network = ConversionLaneletNetwork()
-        conversion_lanelet_1 = init_lanelet_from_id('79.0.-3.-1')
+        conversion_lanelet_1 = init_lanelet_from_id(1)
 
         add_lanelets_to_network(conversion_lanelet_network, [conversion_lanelet_1])
 
-        self.assertEqual('79.0.-3.-1', conversion_lanelet_network.find_lanelet_by_id('79.0.-3.-1').lanelet_id)
+        self.assertEqual(1, conversion_lanelet_network.find_lanelet_by_id(1).lanelet_id)
 
-        self.assertIsNone(conversion_lanelet_network.find_lanelet_by_id('foo'))
+        self.assertIsNone(conversion_lanelet_network.find_lanelet_by_id(0))
 
     def test_find_traffic_light_by_id(self):
         conversion_lanelet_network = ConversionLaneletNetwork()
-        t1 = TrafficLight(100, [])
-        t2 = TrafficLight(101, [])
+        t1 = TrafficLight(100, np.ndarray([1, 1]))
+        t2 = TrafficLight(101, np.ndarray([1, 1]))
         traffic_light_dict = {100: t1, 101: t2}
         conversion_lanelet_network._traffic_lights = traffic_light_dict
         self.assertEqual(t1, conversion_lanelet_network.find_traffic_light_by_id(100))
@@ -703,7 +704,7 @@ class TestConversionLanelet(unittest.TestCase):
 
         add_lanelets_to_network(conversion_lanelet_network, [lanelet_1])
 
-        incoming_element = IntersectionIncomingElement(0, {0}, None, None, None, None)
+        incoming_element = IncomingGroup(0, {0}, None, None, None, None)
 
         intersection = Intersection(32, [incoming_element], None)
         conversion_lanelet_network.add_intersection(intersection)
@@ -717,7 +718,12 @@ class TestJointSplitTarget(unittest.TestCase):
         conversion_lanelet_network = ConversionLaneletNetwork()
         main_lanelet = init_lanelet_empty_vertices_from_id(None, 0)
         join_split_target = _JoinSplitTarget(conversion_lanelet_network, main_lanelet, True, True)
+
+        # Unit test fails although the lanelet networks are the same
+        # conversion_lanelet_network.meta_information = join_split_target.lanelet_network.meta_information
+        # print(conversion_lanelet_network.meta_information==join_split_target.lanelet_network.meta_information)
         self.assertEqual(conversion_lanelet_network, join_split_target.lanelet_network)
+
         self.assertEqual(main_lanelet, join_split_target.main_lanelet)
 
         self.assertIsNone(join_split_target.change_width)
@@ -864,7 +870,7 @@ class TestJointSplitTarget(unittest.TestCase):
         plane_group = ParametricLaneGroup()
         plane_group._add_geo_length(100, False)
         reference_plan_view = PlanView()
-        reference_plan_view.add_line([0.0, 0.0], 0.5, 100)
+        reference_plan_view.add_line(np.ndarray([2,]), 0.5, 100)
         inner_border = Border()
         inner_border.reference = reference_plan_view
         inner_border.width_coefficients.append([0, 0, 0, 0])

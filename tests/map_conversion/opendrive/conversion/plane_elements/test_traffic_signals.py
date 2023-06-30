@@ -94,13 +94,13 @@ class TestTrafficSignals(unittest.TestCase):
         # true traffic light
         position = np.array([15 * np.cos(0.785398) + (2 * np.cos(0.785398 + np.pi / 2)),
                              15 * np.sin(0.785398) + (2 * np.sin(0.785398 + np.pi / 2))])
-        traffic_light = TrafficLight(2003, [], position=position)
+        traffic_light = TrafficLight(2003, position=position)
         # true traffic sign
         position = np.array([20 * np.cos(0.785398) + (2 * np.cos(0.785398 + np.pi / 2)),
                              20 * np.sin(0.785398) + (2 * np.sin(0.785398 + np.pi / 2))])
         element = TrafficSignElement(TrafficSignIDZamunda.WARNING_SLIPPERY_ROAD, [])
         # noinspection PyTypeChecker
-        sign = TrafficSign(1, list([element]), None, position, virtual=False)
+        sign = TrafficSign(1, list([element]), set(), position, virtual=False)
         # get the traffic lights, signs and stop lines from the road
         traffic_lights, traffic_signs, stop_lines = get_traffic_signals(self.roadStraightLine)
         # check if the extracted traffic elements are equal to the true objects

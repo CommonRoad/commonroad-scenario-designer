@@ -58,6 +58,9 @@ class ConversionLanelet(Lanelet):
         if user_bidirectional is not None:
             _user_bidirectional = set(map(lambda x: RoadUser(x), user_bidirectional))
 
+        if lanelet_id is None:
+            lanelet_id = 0
+
         super().__init__(
             left_vertices=left_vertices,
             center_vertices=center_vertices,

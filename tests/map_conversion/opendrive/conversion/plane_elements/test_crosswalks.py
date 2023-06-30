@@ -131,7 +131,8 @@ class MyTestCase(unittest.TestCase):
         np.testing.assert_array_almost_equal(lanelet_93.center_vertices,
                                              [[4.52374715, 4.81936857], [-4.24610876, 4.80957293]])
 
-        self.assertSetEqual(scenario.lanelet_network.find_intersection_by_id(68).crossings, {90, 91, 92, 93})
+        incoming = scenario.lanelet_network.find_intersection_by_id(68).incomings[0].crossings
+        self.assertSetEqual(incoming, {90, 91, 92, 93})
 
 
 if __name__ == '__main__':
