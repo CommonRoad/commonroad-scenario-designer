@@ -10,6 +10,7 @@ import numpy as np
 import pytest
 from commonroad.common.file_reader import CommonRoadFileReader
 from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
+from commonroad.common.util import FileFormat
 from commonroad.scenario.obstacle import ObstacleType
 from crdesigner.map_conversion.sumo_map.config import SumoConfig
 from crdesigner.map_conversion.sumo_map.cr2sumo.converter import CR2SumoMapConverter
@@ -88,7 +89,8 @@ class TestCommonRoadToSUMOConversion(unittest.TestCase):
                              affiliation=self.scenario.file_information.affiliation,
                              source=self.scenario.file_information.source,
                              tags=self.scenario.tags,
-                             location=self.scenario.lanelet_network.location).write_scenario_to_file(
+                             location=self.scenario.lanelet_network.location,
+                             file_format=FileFormat.XML).write_scenario_to_file(
                              os.path.join(os.path.dirname(self.path), self.scenario_name + ".simulated.xml"),
                              overwrite_existing_file=OverwriteExistingFile.ALWAYS)
         return f.getvalue()

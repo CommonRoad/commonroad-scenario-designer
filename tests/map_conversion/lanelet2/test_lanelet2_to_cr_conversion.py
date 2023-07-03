@@ -1,6 +1,8 @@
 import time
 import os
 import unittest
+
+from commonroad.common.util import FileFormat
 from lxml import etree  # type: ignore
 
 from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile  # type: ignore
@@ -73,7 +75,8 @@ class TestLanelet2ToCommonRoadConversion(unittest.TestCase):
             writer = CommonRoadFileWriter(scenario=self.load_and_convert(file_name, translate=translate,
                                                                          file_path=file_path),
                                           planning_problem_set=PlanningProblemSet(), author="", affiliation="",
-                                          source="CommonRoad Scenario Designer", tags={Tag.URBAN, Tag.HIGHWAY}, )
+                                          source="CommonRoad Scenario Designer", tags={Tag.URBAN, Tag.HIGHWAY},
+                                          file_format=FileFormat.XML)
             writer.write_to_file(
                     get_tmp_dir() + xml_output_name
                     + translated + ".xml", OverwriteExistingFile.ALWAYS)
