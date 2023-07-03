@@ -5,6 +5,7 @@ from typing import Optional
 
 from PyQt5.QtWidgets import *
 from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
+from commonroad.common.util import FileFormat
 
 from crdesigner.ui.gui.model.scenario_model import ScenarioModel
 from crdesigner.ui.gui.view.settings.scenario_saving_dialog_ui import ScenarioSavingDialogUI
@@ -118,7 +119,8 @@ class ScenarioSavingDialogController:
                                           author="Default Author",
                                           affiliation="Default Affiliation",
                                           source="CommonRoad Scenario Designer",
-                                          tags=set())
+                                          tags=set(),
+                                          file_format=FileFormat.XML)
             filename = DIR_AUTOSAVE + "/autosave" + ".xml"
             if self.current_pps is None:
                 writer.write_scenario_to_file(filename, OverwriteExistingFile.ALWAYS)
@@ -138,7 +140,8 @@ class ScenarioSavingDialogController:
                                           author=self.current_scenario.get_current_scenario().file_information.author,
                                           affiliation=self.current_scenario.get_current_scenario().file_information.affiliation,
                                           source=self.current_scenario.get_current_scenario().file_information.source,
-                                          tags=set(self.current_scenario.get_current_scenario().tags), )
+                                          tags=set(self.current_scenario.get_current_scenario().tags),
+                                          file_format=FileFormat.XML)
             filename = self.directory + "/" + self.current_scenario.get_current_scenario().scenario_id.__str__() \
                 + ".xml"
             if self.current_pps is None:

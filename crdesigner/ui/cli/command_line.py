@@ -2,6 +2,7 @@ import os
 import argparse
 import sys
 
+from commonroad.common.util import FileFormat
 from commonroad.planning.planning_problem import PlanningProblemSet
 from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
 from commonroad.scenario.scenario import Tag
@@ -131,6 +132,7 @@ def main():
                 affiliation=args.affiliation,
                 source="CommonRoad Scenario Designer",
                 tags=tags,
+                file_format=FileFormat.XML
             )
             if args.force_overwrite:
                 writer.write_to_file(output_file, OverwriteExistingFile.ALWAYS)

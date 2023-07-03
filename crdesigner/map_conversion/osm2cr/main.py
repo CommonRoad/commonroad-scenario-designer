@@ -6,6 +6,7 @@ import os
 
 import matplotlib
 from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
+from commonroad.common.util import FileFormat
 from commonroad.planning.planning_problem import PlanningProblemSet
 from commonroad.scenario.scenario import Tag
 
@@ -45,7 +46,7 @@ def convert(filename_open, filename_store=None):
     file_path = config.SAVE_PATH + config.BENCHMARK_ID + ".xml"
     # in the current commonroad version the following line works
     file_writer = CommonRoadFileWriter(
-        scenario_cr, problemset, author, affiliation, source, tags, decimal_precision=16
+        scenario_cr, problemset, author, affiliation, source, tags, decimal_precision=16, file_format=FileFormat.XML
     )
     # file_writer = CommonRoadFileWriter(scenario, problemset, author, affiliation, source, tags)
     file_writer.write_scenario_to_file(file_path, OverwriteExistingFile.ALWAYS)

@@ -7,6 +7,7 @@ from typing import List, Tuple
 import logging
 import numpy as np
 import utm
+from commonroad.common.util import FileFormat
 
 from crdesigner.map_conversion.osm2cr import config
 from crdesigner.map_conversion.osm2cr.converter_modules.graph_operations import road_graph as rg
@@ -193,7 +194,8 @@ def export(
                         geo_transformation=None)
     # in the current commonroad version the following line works
     file_writer = CommonRoadFileWriter(
-        scenario, problemset, author, affiliation, source, tags, location, decimal_precision=16)
+        scenario, problemset, author, affiliation, source, tags, location, decimal_precision=16,
+        file_format=FileFormat.XML)
 
     # write scenario to file with planning problem
     file_writer.write_to_file(file_path, OverwriteExistingFile.ALWAYS)
