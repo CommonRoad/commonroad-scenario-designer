@@ -719,9 +719,6 @@ class TestJointSplitTarget(unittest.TestCase):
         main_lanelet = init_lanelet_empty_vertices_from_id(None, 0)
         join_split_target = _JoinSplitTarget(conversion_lanelet_network, main_lanelet, True, True)
 
-        # Unit test fails although the lanelet networks are the same
-        # conversion_lanelet_network.meta_information = join_split_target.lanelet_network.meta_information
-        # print(conversion_lanelet_network.meta_information==join_split_target.lanelet_network.meta_information)
         self.assertEqual(conversion_lanelet_network, join_split_target.lanelet_network)
 
         self.assertEqual(main_lanelet, join_split_target.main_lanelet)
