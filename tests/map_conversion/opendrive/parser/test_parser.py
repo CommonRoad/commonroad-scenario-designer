@@ -5,8 +5,8 @@ from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadLanes imp
 from crdesigner.map_conversion.opendrive.opendrive_parser.parser import *
 from crdesigner.map_conversion.opendrive.opendrive_parser.elements.geometry import *
 
-class TestParser(unittest.TestCase):
 
+class TestParser(unittest.TestCase):
 
     def test_parse_opendrive(self):
         file_path = os.path.dirname(os.path.abspath(__file__)) + '/../../test_maps/opendrive/CulDeSac.xodr'
@@ -329,7 +329,7 @@ class TestParser(unittest.TestCase):
         self.assertEqual(0, road.planView._geometries[2]._dV)
         latprof = road.lateralProfile
         for x in latprof.superelevations[0].polynomial_coefficients \
-                 + latprof.shapes[0].polynomial_coefficients + latprof.crossfalls[0].polynomial_coefficients:
+                + latprof.shapes[0].polynomial_coefficients + latprof.crossfalls[0].polynomial_coefficients:
             self.assertEqual(0, x)
         self.assertEqual("both", latprof.crossfalls[0].side)
         for x in road.elevationProfile.elevations[0].polynomial_coefficients \

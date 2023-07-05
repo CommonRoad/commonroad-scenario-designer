@@ -32,6 +32,7 @@ class TestLanelet2ToCommonRoadConversion(unittest.TestCase):
         :param osm_file_name: name of the osm file
         :param translate: Boolean indicating whether the map should be moved to the origin
         :param proj_string: string defining projection method from geo-coordinates
+        :param file_path: path of the file
         :return: Scenario that corresponds to that osm file
         """
         generate_unique_id(0)  # reset ID counter for next test case
@@ -68,7 +69,8 @@ class TestLanelet2ToCommonRoadConversion(unittest.TestCase):
         xml_output_name = file_name
         translated = "" if not translate else "_translated"
 
-        cr_file_path = os.path.dirname(os.path.realpath(__file__)) + f"/../test_maps/lanelet2/{xml_output_name}{translated}.xml"
+        cr_file_path = os.path.dirname(os.path.realpath(__file__)) + f"/../test_maps/lanelet2/{xml_output_name}" \
+                                                                     f"{translated}.xml"
         with open(cr_file_path, "r", ) as fh:
             parser = etree.XMLParser(remove_blank_text=True)
             tree_import = etree.parse(fh, parser=parser).getroot()
@@ -119,7 +121,7 @@ class TestLanelet2ToCommonRoadConversion(unittest.TestCase):
         to lanelet2, this stored projection method should be considered.
         """
         lanelet2_file_name = "urban-1_lanelets_utm"
-        proj_string=ProjectionMethods.utm_default.value
+        proj_string = ProjectionMethods.utm_default.value
 
         cr_scenario = self.load_and_convert(lanelet2_file_name, proj_string=proj_string)
         l2osm = CR2LaneletConverter()

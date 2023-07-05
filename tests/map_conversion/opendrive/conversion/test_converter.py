@@ -91,7 +91,6 @@ class TestConverter(unittest.TestCase):
         center_lane.id = 0
         center_lane.speed = 30
 
-
         left_lane1 = Lane(road, section)
         left_lane1.id = 1
         left_lane1.speed = 30
@@ -308,12 +307,3 @@ class TestConverter(unittest.TestCase):
         self.assertEqual(true_inner, inner_neighbour_id)
         self.assertEqual(true_outer, outer_neighbour_id)
         self.assertEqual(inner_neighbour_same_dir, True)
-
-
-
-
-
-
-
-
-

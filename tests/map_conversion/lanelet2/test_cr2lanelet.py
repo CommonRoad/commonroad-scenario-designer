@@ -72,7 +72,8 @@ class TestCR2LaneletConverter(unittest.TestCase):
         self.assertEqual(cr1.origin_utm, (0, 0))
 
         proj_string_from = None
-        if scenario.lanelet_network.location is not None and scenario.lanelet_network.location.geo_transformation is not None:
+        if scenario.lanelet_network.location is not None \
+                and scenario.lanelet_network.location.geo_transformation is not None:
             proj_string_from = scenario.lanelet_network.location.geo_transformation.geo_reference
         if proj_string_from is None:
             proj_string_from = Lanelet2ConversionParams().proj_string
@@ -301,14 +302,14 @@ class TestCR2LaneletConverter(unittest.TestCase):
         # compare the node coordinates
         # transform the coordinates of the sign, should get the same coordinates as ones of the newly created way
         sign_n1_lon, sign_n1_lat = cr1.transformer.transform(cr1.origin_utm[0] + sign.position[0],
-                                            cr1.origin_utm[1] + sign.position[1])
+                                                             cr1.origin_utm[1] + sign.position[1])
         
         self.assertEqual(str(sign_n1_lon), n1.lon)
         self.assertEqual(str(sign_n1_lat), n1.lat)
         
         # as stated in the original function, second node is created to match the L2 format
         sign_n2_lon, sign_n2_lat = cr1.transformer.transform(cr1.origin_utm[0] + sign.position[1]+0.25,
-                                            cr1.origin_utm[1] + sign.position[1]+0.25)
+                                                             cr1.origin_utm[1] + sign.position[1]+0.25)
         self.assertEqual(str(sign_n2_lon), n2.lon)
         self.assertEqual(str(sign_n2_lat), n2.lat)
 

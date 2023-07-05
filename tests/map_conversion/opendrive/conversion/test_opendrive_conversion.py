@@ -71,14 +71,18 @@ class TestOpenDriveToCommonRoadConversion(unittest.TestCase):
         np.testing.assert_equal(4, len(scenario.lanelet_network.traffic_signs))
         # 40mph
         np.testing.assert_almost_equal(17.881,
-                float(scenario.lanelet_network.traffic_signs[0].traffic_sign_elements[0].additional_values[0]), 2)
+                                       float(scenario.lanelet_network.traffic_signs[0].traffic_sign_elements[0]
+                                             .additional_values[0]), 2)
         np.testing.assert_almost_equal(17.881,
-                float(scenario.lanelet_network.traffic_signs[2].traffic_sign_elements[0].additional_values[0]), 2)
+                                       float(scenario.lanelet_network.traffic_signs[2].traffic_sign_elements[0].
+                                             additional_values[0]), 2)
         # 65 mph
         np.testing.assert_almost_equal(29.057,
-                float(scenario.lanelet_network.traffic_signs[1].traffic_sign_elements[0].additional_values[0]), 2)
+                                       float(scenario.lanelet_network.traffic_signs[1].traffic_sign_elements[0].
+                                             additional_values[0]), 2)
         np.testing.assert_almost_equal(29.057,
-                float(scenario.lanelet_network.traffic_signs[3].traffic_sign_elements[0].additional_values[0]), 2)
+                                       float(scenario.lanelet_network.traffic_signs[3].traffic_sign_elements[0].
+                                             additional_values[0]), 2)
 
         np.testing.assert_almost_equal(scenario.lanelet_network.find_lanelet_by_id(3).center_vertices[0],
                                        scenario.lanelet_network.traffic_signs[1].position)
@@ -193,7 +197,6 @@ class TestOpenDriveToCommonRoadConversion(unittest.TestCase):
         # self.assertEqual(3, len(network.find_lanelet_by_id(1).left_vertices))
         # np.testing.assert_almost_equal([[-72.84, -5.19], [-20.45, -4.77], [31.93, -4.35]],
         #                                network.find_lanelet_by_id(1).left_vertices, 2)
-
 
         # test successor / predecessor relation
         self.assertListEqual([2], network.find_lanelet_by_id(1).successor)

@@ -81,7 +81,7 @@ class TestGeometry(unittest.TestCase):
         pRange = 4
 
         param_poly3 = ParamPoly3(start_position=start_position, heading=heading, length=length,
-                                aU=aU, bU=bU, cU=cU, dU=dU, aV=aV, bV=bV, cV=cV, dV=dV, pRange=pRange)
+                                 aU=aU, bU=bU, cU=cU, dU=dU, aV=aV, bV=bV, cV=cV, dV=dV, pRange=pRange)
 
         np.testing.assert_equal(start_position, param_poly3.start_position)
         self.assertEqual(dV, param_poly3.curvature_derivative_max)
@@ -99,7 +99,7 @@ class TestGeometry(unittest.TestCase):
         pRange = None
 
         param_poly3 = ParamPoly3(start_position=start_position, heading=heading, length=length, aU=aU, bU=bU, cU=cU,
-                                dU=dU, aV=aV, bV=bV, cV=cV, dV=dV, pRange=pRange)
+                                 dU=dU, aV=aV, bV=bV, cV=cV, dV=dV, pRange=pRange)
 
         self.assertEqual(1, param_poly3._pRange)
 
@@ -169,7 +169,7 @@ class TestGeometry(unittest.TestCase):
         pRange = 4
 
         param_poly3 = ParamPoly3(start_position=start_position, heading=heading, length=length, aU=aU, bU=bU, cU=cU,
-                                dU=dU, aV=aV, bV=bV, cV=cV, dV=dV, pRange=pRange)
+                                 dU=dU, aV=aV, bV=bV, cV=cV, dV=dV, pRange=pRange)
         result = param_poly3.calc_position(2.5)
         self.assertAlmostEqual(2.70780194, result[0][0])
         self.assertAlmostEqual(14.58224029, result[0][1])

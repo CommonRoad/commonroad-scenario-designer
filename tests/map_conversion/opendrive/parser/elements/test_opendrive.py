@@ -1,6 +1,5 @@
 import unittest
 from crdesigner.map_conversion.opendrive.opendrive_parser.elements.opendrive import *
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.road import *
 from crdesigner.map_conversion.opendrive.opendrive_parser.elements.junction import *
 
 
@@ -32,7 +31,7 @@ class TestOpenDrive(unittest.TestCase):
 
         vendor = "test"
         header1 = Header(rev_major=revMajor, rev_minor=revMinor, name=name, version=version, date=date, north=north,
-                        south=south, east=east, west=west, vendor=vendor)
+                         south=south, east=east, west=west, vendor=vendor)
         self.assertEqual(vendor, header1.vendor)
 
     def test_initialize_openDrive(self):

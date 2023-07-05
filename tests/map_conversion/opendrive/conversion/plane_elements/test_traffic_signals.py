@@ -1,5 +1,4 @@
 import unittest
-from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadSignal import Signal
 from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.traffic_signals import *
 from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadLanes import *
 from commonroad.scenario.traffic_sign import TrafficSignIDGermany

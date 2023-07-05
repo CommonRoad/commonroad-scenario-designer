@@ -1,7 +1,6 @@
 import os
 import unittest
 from lxml import etree  # type: ignore
-import sys
 
 from commonroad.common.file_reader import CommonRoadFileReader  # type: ignore
 

@@ -92,7 +92,7 @@ class TestOSMToCommonRoadConversion(unittest.TestCase):
             planning_problem_set=cr_planning_problem,
             file_format=FileFormat.XML)
         fw.write_to_file(
-            filename=self.out_path + "/" +  osm_file_name + "_written.xml",
+            filename=self.out_path + "/" + osm_file_name + "_written.xml",
             overwrite_existing_file=OverwriteExistingFile.ALWAYS,
             check_validity=True)
 

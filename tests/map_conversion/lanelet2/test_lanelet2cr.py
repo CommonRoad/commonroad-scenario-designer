@@ -91,7 +91,8 @@ class TestLanelet2CRConverter(unittest.TestCase):
         # test the scenario values given in the constructor
         self.assertEqual(scenario.dt, 0.1)
         self.assertEqual(scenario.lanelet_network.location, Location(gps_latitude=origin_lat, gps_longitude=origin_lon,
-                                                     geo_transformation=GeoTransformation(geo_reference=config.proj_string)))
+                                                                     geo_transformation=GeoTransformation
+                                                                     (geo_reference=config.proj_string)))
 
         # test the class of the lanelet network
         self.assertEqual(l2cr.lanelet_network.__class__, LaneletNetwork)
