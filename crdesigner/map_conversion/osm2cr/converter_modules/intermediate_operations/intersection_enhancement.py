@@ -54,15 +54,15 @@ def intersection_enhancement(intermediate_format):
 
         # begin with incoming that is not left of any other
         left_of_map = {}
-        for incoming in intersection.incomings:
-            left_of_map[incoming] = incoming.left_of
+        # for incoming in intersection.incomings:
+        #     left_of_map[incoming] = incoming.left_of
 
         incoming = None
         # try to find incoming that is not right of any other incoming (3 incomings)
-        for key in left_of_map:
-            if key.incoming_id not in left_of_map.values() and key.left_of is not None:
-                incoming = key
-                break
+        # for key in left_of_map:
+        #     if key.incoming_id not in left_of_map.values() and key.left_of is not None:
+        #         incoming = key
+        #         break
         # if unable to find any than begin with any other incoming (4 incomings)
         if incoming is None:
             incoming = intersection.incomings[0]
@@ -94,7 +94,7 @@ def intersection_enhancement(intermediate_format):
             # process next left of current incoming
             processed_incomings.add(incoming)
             # new incoming is incoming with left_of id of current incoming, else None
-            incoming = next((i for i in intersection.incomings if i.incoming_id == incoming.left_of), None)
+            # incoming = next((i for i in intersection.incomings if i.incoming_id == incoming.left_of), None)
             # edge case if only 2 incomings were found:
             if len(intersection.incomings) == 2:
                 incoming = intersection.incomings[-1]
