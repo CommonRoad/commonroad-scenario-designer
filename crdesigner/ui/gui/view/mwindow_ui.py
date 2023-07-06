@@ -5,7 +5,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import *
 
-from crdesigner.ui.gui.model.settings.gui_settings_model import gui_settings
+from crdesigner.config.gui_config import gui_config
 from crdesigner.ui.gui.resources.MainWindow import Ui_mainWindow
 from crdesigner.ui.gui.utilities.draw_params_updater import ColorSchema
 from crdesigner.ui.gui.utilities.gui_sumo_simulation import SUMO_AVAILABLE
@@ -65,11 +65,11 @@ class MWindowUI(QMainWindow, Ui_mainWindow):
         # self.obstacle_toolbox.initialize_toolbox()
 
     def colorscheme(self) -> ColorSchema:
-        if gui_settings.DARKMODE:
-            colorscheme = ColorSchema(axis=gui_settings.AXIS_VISIBLE, background='#303030', color='#f0f0f0',
+        if gui_config.DARKMODE:
+            colorscheme = ColorSchema(axis=gui_config.AXIS_VISIBLE, background='#303030', color='#f0f0f0',
                                       highlight='#1e9678', second_background='#2c2c2c')
         else:
-            colorscheme = ColorSchema(axis=gui_settings.AXIS_VISIBLE)
+            colorscheme = ColorSchema(axis=gui_config.AXIS_VISIBLE)
 
         return colorscheme
 

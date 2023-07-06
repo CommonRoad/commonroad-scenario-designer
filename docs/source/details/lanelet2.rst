@@ -64,12 +64,11 @@ Python APIs
 
     from crdesigner.map_conversion.lanelet2.lanelet2cr import Lanelet2CRConverter
     from crdesigner.map_conversion.lanelet2.lanelet2_parser import Lanelet2Parser
-    from crdesigner.config.config import Lanelet2ConversionParams
 
     from crdesigner.map_conversion.map_conversion_interface import lanelet_to_commonroad
 
     input_path = ""  # replace empty string
-    config = Lanelet2ConversionParams()
+    config = lanelet2_config
     config.adjacencies = True
 
 
@@ -196,12 +195,11 @@ Python APIs
     from commonroad.common.file_reader import CommonRoadFileReader
     from crdesigner.map_conversion.lanelet2.cr2lanelet import CR2LaneletConverter
     from crdesigner.map_conversion.map_conversion_interface import commonroad_to_lanelet
-    from crdesigner.config.config import Lanelet2ConversionParams
 
 
     input_path = ""  # replace empty string
     output_name = ""  # replace empty string
-    config = Lanelet2ConversionParams()
+    config = lanelet2_config
     config.autoware = False
 
     # ----------------------------------------------- Option 1: General API ------------------------------------------------

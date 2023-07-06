@@ -10,7 +10,7 @@ import warnings
 import numpy as np
 
 from commonroad.scenario.lanelet import Lanelet, LaneletType
-from crdesigner.map_conversion.osm2cr import config
+from crdesigner.config.osm_config import osm_config as config
 
 from ._intermediate_node import Node
 

@@ -7,12 +7,13 @@ from PyQt5.QtCore import *
 from crdesigner.ui.gui.controller.animated_viewer.animated_viewer_wrapper_controller import \
     AnimatedViewerWrapperController
 from crdesigner.ui.gui.controller.settings.scenario_saving_dialog_controller import ScenarioSavingDialogController
+from crdesigner.ui.gui.controller.settings.settings_controller import SettingsController
 from crdesigner.ui.gui.controller.toolboxes.road_network_controller.road_network_controller import RoadNetworkController
 from crdesigner.ui.gui.controller.toolboxes.obstacle_toolbox.obstacle_controller import ObstacleController
 from crdesigner.ui.gui.controller.toolboxes.converter_toolbox.map_conversion_controller import MapConversionToolboxController
 from crdesigner.ui.gui.controller.top_bar.top_bar_controller import TopBarController
 from crdesigner.ui.gui.model.scenario_model import ScenarioModel
-from crdesigner.ui.gui.model.settings.gui_settings_model import gui_settings
+from crdesigner.config.gui_config import gui_config
 from crdesigner.ui.gui.view.console.console_ui import ConsoleUI
 
 from crdesigner.ui.gui.autosaves.autosaves_setup import DIR_AUTOSAVE
@@ -27,7 +28,7 @@ class MWindowController:
     def __init__(self, input_file=None):
 
         # init or set all attributes here
-        self.tmp_folder = gui_settings.MWINDOW_TMP_FOLDER_PATH
+        self.tmp_folder = gui_config.MWINDOW_TMP_FOLDER_PATH
         self.filename = None
         self.slider_clicked = False
         self.play_activated = False
@@ -70,6 +71,7 @@ class MWindowController:
         self.mwindow_ui.map_converter_toolbox = self.map_converter_toolbox
 
         self.mwindow_ui.top_bar = TopBarController(self)
+        self.settings = SettingsController(self)
 
         # IMPORTANT: this has to be after the toolboxes, otherwise the handle used in the fileactions to the viewer_dock
         # gets lost (by the setCentralWidget method)

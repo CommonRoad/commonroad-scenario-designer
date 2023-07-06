@@ -10,7 +10,7 @@ from crdesigner.map_conversion.sumo_map.config import SumoConfig
 class SUMOSettings:
     def __init__(self, parent, config: Observable = None):
         self.parent = parent
-        self.window = self.parent.window.sumo_settings
+        self.window = self.parent.window.sumo_config
         self.config = config
 
         def on_config_change(config):

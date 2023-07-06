@@ -17,7 +17,7 @@ from commonroad.planning.planning_problem import PlanningProblemSet
 from commonroad.scenario.scenario import Scenario
 from commonroad.visualization.mp_renderer import MPRenderer
 from commonroad.visualization.draw_params import StaticObstacleParams, DynamicObstacleParams
-from crdesigner.ui.gui.model.settings.gui_settings_model import gui_settings
+from crdesigner.config.gui_config import gui_config
 from commonroad.scenario.obstacle import StaticObstacle, DynamicObstacle
 from commonroad.scenario.lanelet import LaneletType
 
@@ -542,10 +542,10 @@ class DynamicCanvasController(FigureCanvas):
         """
         draw_params = DynamicObstacleParams()
         draw_params.occupancy.shape.facecolor = color
-        draw_params.show_label = gui_settings.DRAW_OBSTACLE_LABELS
-        draw_params.draw_icon = gui_settings.DRAW_OBSTACLE_ICONS
-        draw_params.draw_direction = gui_settings.DRAW_OBSTACLE_DIRECTION
-        draw_params.draw_signals = gui_settings.DRAW_OBSTACLE_SIGNALS
+        draw_params.show_label = gui_config.DRAW_OBSTACLE_LABELS
+        draw_params.draw_icon = gui_config.DRAW_OBSTACLE_ICONS
+        draw_params.draw_direction = gui_config.DRAW_OBSTACLE_DIRECTION
+        draw_params.draw_signals = gui_config.DRAW_OBSTACLE_SIGNALS
 
         return draw_params
 

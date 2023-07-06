@@ -5,8 +5,7 @@ from crdesigner.ui.gui.model.scenario_model import ScenarioModel
 from crdesigner.ui.gui.view.toolboxes.road_network_toolbox.road_network_toolbox_ui.road_network_toolbox_ui import \
     RoadNetworkToolboxUI
 
-from crdesigner.map_conversion.osm2cr import config
-from crdesigner.ui.gui.model.settings.gui_settings_model import gui_settings as config_settings
+from crdesigner.config.gui_config import gui_config as config_settings
 
 class RequestRunnable(QRunnable):
     def __init__(self, fun, roadNetworkController):

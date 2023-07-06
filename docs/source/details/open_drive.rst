@@ -63,10 +63,9 @@ Python APIs
     from crdesigner.map_conversion.opendrive.opendrive_parser.parser import parse_opendrive
     from crdesigner.map_conversion.opendrive.opendrive_conversion.network import Network
     from crdesigner.map_conversion.map_conversion_interface import opendrive_to_commonroad
-    from crdesigner.config.config import OpenDRIVEConversionParams
 
     input_path = ""  # replace empty string
-    config = OpenDRIVEConversionParams()
+    config = open_drive_config
     config.lanelet_types_backwards_compatible = False
 
     # ----------------------------------------------- Option 1: General API ------------------------------------------------

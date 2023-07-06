@@ -6,7 +6,8 @@ from commonroad.planning.planning_problem import PlanningProblemSet
 from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
 from commonroad.scenario.scenario import Tag
 
-from crdesigner.config.config import Lanelet2ConversionParams, GeneralParams
+from crdesigner.config.general_config import general_config
+from crdesigner.config.lanelet2_config import lanelet2_config
 from crdesigner.start_gui import start_gui_new as start_gui
 from crdesigner.map_conversion.map_conversion_interface import commonroad_to_lanelet, lanelet_to_commonroad, \
     opendrive_to_commonroad, osm_to_commonroad, commonroad_to_sumo, sumo_to_commonroad
@@ -94,14 +95,14 @@ def main():
 
         if args.source_commonroad:
             if args.mode == "map-convert-lanelet":
-                config = Lanelet2ConversionParams()
+                config = lanelet2_config
                 if args.proj:
                     config.proj_string = args.proj
                 if args.autoware:
                     config.autoware = args.autoware
                 if args.local_coordinates:
                     config.local_coordinates = args.local_coordinates
-                commonroad_to_lanelet(input_file, output_file, config)
+                commonroad_to_lanelet(input_file, output_file)
             if args.mode == "map-convert-sumo":
                 commonroad_to_sumo(input_file, output_file)
         else:
@@ -112,15 +113,15 @@ def main():
             elif args.mode == "map-convert-sumo":
                 scenario = sumo_to_commonroad(input_file)
             elif args.mode == "map-convert-lanelet":
-                config_lanelet2 = Lanelet2ConversionParams()
-                config_general = GeneralParams()
+                config_lanelet2 = lanelet2_config
+                config_general = general_config
                 if args.proj:
                     config_lanelet2.proj_string = args.proj
                 if args.adjacencies:
                     config_lanelet2.adjacencies = args.adjacencies
                 if args.left_driving:
                     config_lanelet2.left_driving = args.left_driving
-                scenario = lanelet_to_commonroad(input_file, config_general)
+                scenario = lanelet_to_commonroad(input_file)
             else:
                 return
             tags = set([Tag(t) for t in args.tags])
