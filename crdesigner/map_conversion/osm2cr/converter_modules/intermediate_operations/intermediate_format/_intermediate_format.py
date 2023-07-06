@@ -22,7 +22,7 @@ from commonroad.common.util import Interval
 from commonroad.geometry.shape import Rectangle, Circle
 
 from crdesigner.map_conversion.osm2cr.converter_modules.graph_operations.road_graph import Graph
-from crdesigner.map_conversion.osm2cr import config
+from crdesigner.config.osm_config import osm_config as config
 from crdesigner.map_conversion.osm2cr.converter_modules.utility import idgenerator
 from crdesigner.map_conversion.common import geometry
 from crdesigner.map_conversion.osm2cr.converter_modules.intermediate_operations.intersection_enhancement import \

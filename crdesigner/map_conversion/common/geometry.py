@@ -5,7 +5,7 @@ from typing import List, Tuple, Optional, Iterable
 
 import numpy as np
 import scipy.special
-from crdesigner.map_conversion.osm2cr import config
+from crdesigner.config.osm_config import osm_config as config
 
 
 class Point:

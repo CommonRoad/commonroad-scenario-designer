@@ -2,13 +2,14 @@ import os
 from commonroad.scenario.scenario import Tag
 from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
 from commonroad.planning.planning_problem import PlanningProblemSet
+
+from crdesigner.config.opendrive_config import open_drive_config
 from crdesigner.map_conversion.opendrive.opendrive_parser.parser import parse_opendrive
 from crdesigner.map_conversion.opendrive.opendrive_conversion.network import Network
 from crdesigner.map_conversion.map_conversion_interface import opendrive_to_commonroad
-from crdesigner.config.config import OpenDRIVEConversionParams
 
 input_path = ""  # replace empty string
-config = OpenDRIVEConversionParams()
+config = open_drive_config
 config.lanelet_types_backwards_compatible = False
 
 # ----------------------------------------------- Option 1: General API ------------------------------------------------
@@ -34,7 +35,7 @@ writer.write_to_file(os.path.dirname(os.path.realpath(__file__)) + "/" + "ZAM_Op
 opendrive = parse_opendrive(input_path)
 
 # create OpenDRIVE intermediate network object from configuration
-road_network = Network(config)
+road_network = Network()
 
 # convert OpenDRIVE file
 road_network.load_opendrive(opendrive)

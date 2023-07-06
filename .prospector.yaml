@@ -50,9 +50,11 @@ pylint:
     - missing-module-docstring
     - c-extension-no-member
     - too-many-nested-blocks
+    - no-name-in-module
 
 mypy:
   run: true
   options :
     ignore-missing-imports : true
     follow-imports : skip
+

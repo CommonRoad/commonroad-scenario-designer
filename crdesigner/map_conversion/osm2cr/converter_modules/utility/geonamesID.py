@@ -1,13 +1,13 @@
 """
 This module is used to retrieve a geonamesID for a given coordinate.
-An Internet connection is needed and a valid geonames username has to be provided in the config.py file
+An Internet connection is needed and a valid geonames username has to be provided in the osm_config.py file
 """
 
 import json
 import logging
 from urllib.request import urlopen
 from urllib.error import URLError
-from crdesigner.map_conversion.osm2cr import config
+from crdesigner.config.osm_config import osm_config as config
 
 
 def get_geonamesID(lat: float, lng: float):

@@ -7,7 +7,7 @@ from urllib.request import urlopen
 
 import numpy as np
 
-from crdesigner.map_conversion.osm2cr import config
+from crdesigner.config.osm_config import osm_config as config
 
 
 def write_bounds_to_file(

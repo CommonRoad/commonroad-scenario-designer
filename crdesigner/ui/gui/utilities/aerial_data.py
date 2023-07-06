@@ -17,9 +17,8 @@ from PIL.JpegImagePlugin import JpegImageFile
 from commonroad.scenario.scenario import Scenario
 from pyproj import Proj
 
-from crdesigner.config.config import ProjectionMethods
-from crdesigner.map_conversion.osm2cr import config
-from crdesigner.ui.gui.model.settings.gui_settings_model import gui_settings as config_settings
+from crdesigner.config.osm_config import osm_config as config
+from crdesigner.config.gui_config import gui_config as config_settings, gui_config
 
 # Moved to services/arial data
 
@@ -340,7 +339,7 @@ def get_aerial_image_limits(bounds: Tuple[float, float, float, float], scenario:
     if loc is not None and loc.geo_transformation is not None:
         proj_string = loc.geo_transformation.geo_reference
     if proj_string is None:
-        proj_string = ProjectionMethods.pseudo_mercator.value
+        proj_string = gui_config.pseudo_mercator
     proj = Proj(proj_string)
     lower_left = proj(longitude=lon1, latitude=lat2)
     upper_right = proj(longitude=lon2, latitude=lat1)

@@ -4,6 +4,8 @@
 
 ### Changed
 - GUI backend using MVC pattern
+- New config model.
+- And automated creation of settings windows.
 
 ### Added
 - Cropping of a map in the GUI

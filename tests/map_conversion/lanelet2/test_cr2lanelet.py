@@ -1,6 +1,7 @@
 import os
 import unittest
-from crdesigner.config.config import Lanelet2ConversionParams
+
+from crdesigner.config.lanelet2_config import lanelet2_config
 from crdesigner.map_conversion.lanelet2.cr2lanelet import CR2LaneletConverter
 from commonroad.scenario.lanelet import Lanelet, StopLine, LineMarking
 from commonroad.common.file_reader import CommonRoadFileReader
@@ -71,7 +72,7 @@ class TestCR2LaneletConverter(unittest.TestCase):
         if scenario.location is not None and scenario.location.geo_transformation is not None:
             proj_string_from = scenario.location.geo_transformation.geo_reference
         if proj_string_from is None:
-            proj_string_from = Lanelet2ConversionParams().proj_string
+            proj_string_from = lanelet2_config.proj_string
         crs_from = CRS(proj_string_from)
         crs_to = CRS("ETRF89")
         transformer = Transformer.from_proj(crs_from, crs_to)

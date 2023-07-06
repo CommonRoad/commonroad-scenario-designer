@@ -8,13 +8,14 @@ import sys
 from commonroad.scenario.lanelet import StopLine, LineMarking, Lanelet, LaneletNetwork
 from commonroad.scenario.traffic_sign import *
 from commonroad.scenario.scenario import TrafficSign, Location, GeoTransformation
+
+from crdesigner.config.lanelet2_config import lanelet2_config
 from crdesigner.map_conversion.lanelet2.lanelet2cr import _add_closest_traffic_sign_to_lanelet, \
     _add_stop_line_to_lanelet
 from crdesigner.map_conversion.lanelet2.lanelet2_parser import Lanelet2Parser
 from crdesigner.map_conversion.lanelet2.lanelet2cr import Lanelet2CRConverter, _two_vertices_coincide
 from crdesigner.map_conversion.lanelet2.lanelet2 import WayRelation, Node, Way, \
     RegulatoryElement
-from crdesigner.config.config import Lanelet2ConversionParams
 
 with open(f"{os.path.dirname(os.path.realpath(__file__))}/../test_maps/lanelet2/traffic_speed_limit_utm.osm") as fh:
     osm = Lanelet2Parser(etree.parse(fh).getroot()).parse()
@@ -40,7 +41,7 @@ map = {'-1775219': 31, '-1775268': 32, '-1775303': 33,
 class TestLanelet2CRConverter(unittest.TestCase):
 
     def setUp(self) -> None:
-        self._config = Lanelet2ConversionParams()
+        self._config = lanelet2_config
 
     def test_init(self):
         l2cr = Lanelet2CRConverter()
@@ -66,12 +67,11 @@ class TestLanelet2CRConverter(unittest.TestCase):
         crs_to = CRS(self._config.proj_string)
         crs_from = CRS("ETRF89")
         transformer = Transformer.from_proj(crs_from, crs_to)
-        l2cr = Lanelet2CRConverter(self._config)
+        l2cr = Lanelet2CRConverter()
         self.assertEqual(l2cr.transformer.definition, transformer.definition)
 
     def test_call(self):
-        config = Lanelet2ConversionParams()
-        l2cr = Lanelet2CRConverter(lanelet2_config=config)  # object referred to as "self" in the source code
+        l2cr = Lanelet2CRConverter()  # object referred to as "self" in the source code
         scenario = l2cr(osm)
         origin_lat = min([node.lat for node in l2cr.osm.nodes.values()])
         origin_lon = min([node.lon for node in l2cr.osm.nodes.values()])  # use left-most lower corner as origin
@@ -90,7 +90,7 @@ class TestLanelet2CRConverter(unittest.TestCase):
         # test the scenario values given in the constructor
         self.assertEqual(scenario.dt, 0.1)
         self.assertEqual(scenario.location, Location(gps_latitude=origin_lat, gps_longitude=origin_lon,
-                                                     geo_transformation=GeoTransformation(geo_reference=config.proj_string)))
+                                                     geo_transformation=GeoTransformation(geo_reference=lanelet2_config.proj_string)))
 
         # test the class of the lanelet network
         self.assertEqual(l2cr.lanelet_network.__class__, LaneletNetwork)

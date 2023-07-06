@@ -1,7 +1,7 @@
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QMessageBox
 
-from crdesigner.ui.gui.model.settings.gui_settings_model import gui_settings as config
+from crdesigner.config.gui_config import gui_config as config
 from crdesigner.ui.gui.utilities.file_actions import file_save, open_commonroad_file, file_new
 from crdesigner.ui.gui.view.top_bar.tool_bar_ui import ToolBarUI
 
