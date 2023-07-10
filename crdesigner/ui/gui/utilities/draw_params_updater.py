@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 
-#TODO: import change
+# TODO: import change
 from crdesigner.ui.gui.utilities.general_services import detailed_drawing_params_threshold_zoom_met
 from crdesigner.ui.gui.utilities.general_services import is_big_map
 
@@ -10,6 +10,7 @@ from commonroad.visualization.draw_params import MPDrawParams, LaneletNetworkPar
 
 modified_draw_params = False
 PARAMS_OBSTACLE_CUSTOM = None
+
 
 @dataclass
 class ColorSchema:
@@ -25,7 +26,8 @@ class ColorSchema:
 
 @dataclass
 class DrawParamsCustom(MPDrawParams):
-     color_schema: ColorSchema = field(default_factory=ColorSchema)
+    color_schema: ColorSchema = field(default_factory=ColorSchema)
+
 
 def update_draw_params_based_on_scenario(lanelet_count: int, traffic_sign_count: int) -> DrawParamsCustom():
     """
@@ -47,6 +49,7 @@ def update_draw_params_based_on_scenario(lanelet_count: int, traffic_sign_count:
     else:
         return PARAMS_DRAW_DETAILED
 
+
 def update_draw_params_dynamic_based_on_scenario(lanelet_count: int, traffic_sign_count: int) -> DrawParamsCustom():
     """
     Same as update_draw_params_based_on_scenario, but returns parameters for dynamic visualizations.
@@ -64,6 +67,7 @@ def update_draw_params_dynamic_based_on_scenario(lanelet_count: int, traffic_sig
         return PARAMS_DRAW_DYNAMIC_UNDETAILED
     else:
         return PARAMS_DRAW_DYNAMIC_DETAILED
+
 
 def update_draw_params_based_on_zoom(x: float, y: float) -> DrawParamsCustom():
     """
@@ -85,6 +89,7 @@ def update_draw_params_based_on_zoom(x: float, y: float) -> DrawParamsCustom():
     else:
         return PARAMS_DRAW_UNDETAILED
 
+
 def update_draw_params_dynamic_only_based_on_zoom(x: float, y: float):
     """
     Same as update_draw_params_based_on_zoom but returns parameter for Dynamic Visualization.
@@ -102,6 +107,7 @@ def update_draw_params_dynamic_only_based_on_zoom(x: float, y: float):
     # else render only the lanelets
     else:
         return PARAMS_DRAW_DYNAMIC_UNDETAILED
+
 
 def set_draw_params(trajectory: bool, intersection: bool, obstacle_label: bool,
                     obstacle_icon: bool, obstacle_direction: bool,
@@ -127,7 +133,6 @@ def set_draw_params(trajectory: bool, intersection: bool, obstacle_label: bool,
     global modified_draw_params
     modified_draw_params = True
 
-
     global PARAMS_DRAW_CUSTOM
     PARAMS_DRAW_CUSTOM = DrawParamsCustom(color_schema=colorscheme, lanelet_network=LaneletNetworkParams(
             traffic_sign=TrafficSignParams(draw_traffic_signs=traffic_signs),
@@ -144,7 +149,7 @@ def set_draw_params(trajectory: bool, intersection: bool, obstacle_label: bool,
             lanelet=LaneletParams(draw_start_and_direction=False, draw_stop_line=False, draw_center_bound=False,
                                   draw_right_bound=False, draw_left_bound=False),
             traffic_sign=TrafficSignParams(draw_traffic_signs=True),
-            intersection=IntersectionParams(draw_intersections=False)))
+            intersection=IntersectionParams(draw_intersections=True)))
 
 
 PARAMS_DRAW_DETAILED = DrawParamsCustom(dynamic_obstacle=DynamicObstacleParams(
@@ -175,4 +180,3 @@ PARAMS_DRAW_DYNAMIC_UNDETAILED = DrawParamsCustom(dynamic_obstacle=DynamicObstac
                               draw_right_bound=False, draw_left_bound=False, fill_lanelet=False,
                               draw_line_markings=False)),
         traffic_light=TrafficLightParams(draw_traffic_lights=False))
-
