@@ -123,10 +123,12 @@ class ScenarioModel(QObject):
         return lanelets
 
     def scenario_created(self) -> bool:
-        if not self.__current_scenario_index == -1:
-            return True
-        else:
-            return False
+        """
+        Returns whether scenario exists.
+
+        :return: Boolean indicating whether scenario exists.
+        """
+        return not self.__current_scenario_index == -1
 
     def add_lanelet(self, lanelet):
         self._update_scenario()
