@@ -6,7 +6,7 @@ import networkx as nx
 from ordered_set import OrderedSet
 import logging
 from scipy import interpolate
-from crdesigner.map_conversion.osm2cr import config
+from crdesigner.config.osm_config import osm_config as config
 from commonroad.scenario.scenario import Scenario, Lanelet, LaneletNetwork
 from commonroad.scenario.traffic_sign import LEFT_HAND_TRAFFIC
 

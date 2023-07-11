@@ -6,7 +6,7 @@ from commonroad.scenario.lanelet import Lanelet  # type: ignore
 from commonroad.scenario.traffic_light import TrafficLight
 from commonroad.scenario.traffic_sign import TrafficSign  # type: ignore
 
-from crdesigner.config.config import Lanelet2ConversionParams
+from crdesigner.config.lanelet2_config import lanelet2_config, Lanelet2Config
 from crdesigner.map_conversion.common.utils import generate_unique_id
 from crdesigner.map_conversion.lanelet2.lanelet2 import OSMLanelet, Node, Way, WayRelation, RegulatoryElement
 
@@ -61,7 +61,7 @@ class CR2LaneletConverter:
     Class to convert CommonRoad lanelet to the OSM representation.
     """
 
-    def __init__(self, config: Lanelet2ConversionParams = Lanelet2ConversionParams()):
+    def __init__(self, config: Lanelet2Config = lanelet2_config):
         """
         Initialization of CR2LaneletConverter
         

@@ -6,7 +6,7 @@ from queue import Queue
 from typing import List, Set, Tuple
 import numpy as np
 
-from crdesigner.map_conversion.osm2cr import config
+from crdesigner.config.osm_config import osm_config as config
 from crdesigner.map_conversion.common import geometry
 
 

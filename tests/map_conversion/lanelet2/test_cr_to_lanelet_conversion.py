@@ -4,7 +4,8 @@ from lxml import etree  # type: ignore
 
 from commonroad.common.file_reader import CommonRoadFileReader  # type: ignore
 
-from crdesigner.config.config import Lanelet2ConversionParams, ProjectionMethods
+from crdesigner.config.gui_config import gui_config
+from crdesigner.config.lanelet2_config import lanelet2_config
 from crdesigner.map_conversion.lanelet2.cr2lanelet import CR2LaneletConverter
 from tests.map_conversion.utils import elements_equal
 
@@ -23,8 +24,8 @@ class TestCommonRoadToLaneletConversion(unittest.TestCase):
                 f"{os.path.dirname(os.path.realpath(__file__))}/../test_maps/lanelet2/{xml_file_name}.xml"
             )
             scenario, _ = commonroad_reader.open()
-            params = Lanelet2ConversionParams(proj_string=ProjectionMethods.utm_default.value)
-            l2osm = CR2LaneletConverter(config=params)
+            lanelet2_config.proj_string=gui_config.utm_default
+            l2osm = CR2LaneletConverter()
             osm = l2osm(scenario)
             return osm
         except etree.XMLSyntaxError as xml_error:

@@ -15,7 +15,7 @@ from commonroad.scenario.intersection import IncomingGroup, Intersection
 from commonroad.scenario.traffic_light import TrafficLightDirection, TrafficLight
 from commonroad.scenario.traffic_sign import TrafficSign
 
-from crdesigner.config.config import OpenDRIVEConversionParams
+from crdesigner.config.opendrive_config import open_drive_config, OpenDriveConfig
 from crdesigner.map_conversion.common import geometry
 from crdesigner.map_conversion.common.utils import convert_to_new_lanelet_id
 from crdesigner.map_conversion.common.conversion_lanelet import ConversionLanelet
@@ -28,8 +28,7 @@ class ConversionLaneletNetwork(LaneletNetwork):
     This class is being used in OpenDrive and Lanelet2 format conversions
     """
 
-    def __init__(self, config: OpenDRIVEConversionParams = OpenDRIVEConversionParams(),
-                 transformer: Optional[Transformer] = None):
+    def __init__(self, config: OpenDriveConfig = open_drive_config, transformer: Optional[Transformer] = None):
         """
         Initializes a ConversionLaneletNetwork
 
@@ -1137,7 +1136,7 @@ class _JoinSplitTarget:
 
     def __init__(self,lanelet_network: ConversionLaneletNetwork, main_lanelet: ConversionLanelet, split: bool,
                  join: bool, transformer: Optional[Transformer] = None,
-                 precision: float = OpenDRIVEConversionParams.precision):
+                 precision: float = open_drive_config.precision):
         """
 
         :param lanelet_network: LaneletNetwork where join/split occurs.
@@ -1524,7 +1523,7 @@ class _JoinSplitPair:
     """Pair of lanelet whose border is changed and its adjacent neighbor."""
 
     def __init__(self, lanelet, adjacent_lanelet, change_interval,
-                 precision: float = OpenDRIVEConversionParams.precision):
+                 precision: float = open_drive_config.precision):
         self.lanelet = lanelet
         self.adjacent_lanelet = adjacent_lanelet
         self.change_interval = change_interval

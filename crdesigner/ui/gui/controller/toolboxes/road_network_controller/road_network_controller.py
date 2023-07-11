@@ -19,7 +19,7 @@ from crdesigner.ui.gui.utilities.waitingspinnerwidget import QtWaitingSpinner
 
 from crdesigner.ui.gui.view.toolboxes.road_network_toolbox.road_network_toolbox_ui.road_network_toolbox_ui \
     import RoadNetworkToolboxUI
-from crdesigner.map_conversion.osm2cr import config
+from crdesigner.config.osm_config import osm_config as config
 
 
 class RoadNetworkController(QDockWidget, ):

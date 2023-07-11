@@ -18,6 +18,8 @@ from commonroad.common.common_scenario import ScenarioID
 from commonroad.common.common_lanelet import StopLine, LineMarking, RoadUser
 from commonroad.scenario.scenario import Scenario
 
+from crdesigner.config.general_config import general_config, GeneralConfig
+from crdesigner.config.lanelet2_config import lanelet2_config, Lanelet2Config
 from crdesigner.map_conversion.lanelet2.lanelet2 import OSMLanelet
 from crdesigner.map_conversion.common.utils import generate_unique_id
 from crdesigner.map_conversion.common.conversion_lanelet import ConversionLanelet
@@ -27,7 +29,6 @@ from crdesigner.map_conversion.common.utils import convert_to_new_lanelet_id
 from crdesigner.map_conversion.lanelet2.lanelet2 import WayRelation, Node, RegulatoryElement, Way
 from crdesigner.map_conversion.common.geometry import (point_to_line_distance,
                                                        distance as point_to_polyline_distance)
-from crdesigner.config.config import Lanelet2ConversionParams, GeneralParams
 
 
 date_strftime_format = "%d-%b-%y %H:%M:%S"
@@ -195,15 +196,14 @@ class Lanelet2CRConverter:
     Class to convert OSM to the Commonroad representation of Lanelets.
     """
 
-    def __init__(self, lanelet2_config: Lanelet2ConversionParams = Lanelet2ConversionParams(),
-                 cr_config: GeneralParams = GeneralParams()):
+    def __init__(self, config: Lanelet2Config = lanelet2_config, cr_config: GeneralConfig = general_config):
         """
         Initialization of the Lanelet2CRConverter
 
-        :param lanelet2_config: Lanelet2 conversion parameters.
+        :param config: Lanelet2 conversion parameters.
         :param cr_config: General config parameters.
         """
-        self._config = lanelet2_config
+        self._config = config
         self._cr_config = cr_config
         crs_from = CRS("ETRF89")
         crs_to = CRS(self._config.proj_string)

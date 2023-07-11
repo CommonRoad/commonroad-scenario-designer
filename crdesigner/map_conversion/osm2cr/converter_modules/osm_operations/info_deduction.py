@@ -4,7 +4,7 @@ This module provides the main two methods to complete missing info of roads.
 from typing import Tuple
 from math import ceil
 
-from crdesigner.map_conversion.osm2cr import config
+from crdesigner.config.osm_config import osm_config as config
 from crdesigner.map_conversion.osm2cr.converter_modules.utility.custom_types import (
     Road_info,
     Assumption_info,

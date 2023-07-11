@@ -5,7 +5,6 @@ from PyQt5.QtWidgets import QFileDialog, QMessageBox
 from commonroad.planning.planning_problem import PlanningProblemSet
 
 from commonroad.scenario.intersection import Intersection
-from commonroad.scenario.scenario import Scenario
 from commonroad.scenario.lanelet import Lanelet, LaneletNetwork
 from commonroad.visualization.mp_renderer import MPRenderer
 
@@ -13,7 +12,7 @@ from crdesigner.ui.gui.controller.animated_viewer.dynamic_canvas_controller impo
 from crdesigner.ui.gui.utilities.gui_sumo_simulation import SUMO_AVAILABLE
 from crdesigner.ui.gui.utilities.draw_params_updater import DrawParamsCustom
 from crdesigner.ui.gui.utilities.helper import draw_lanelet_polygon
-from crdesigner.ui.gui.model.settings.gui_settings_model import gui_settings
+from crdesigner.config.gui_config import gui_config
 
 if SUMO_AVAILABLE:
     from crdesigner.map_conversion.sumo_map.config import SumoConfig
@@ -266,7 +265,7 @@ class AnimatedViewerController:
             self.view.draw_lanelet_vertices(lanelet, ax)
 
         handles, labels = ax.get_legend_handles_labels()
-        if sel_lanelets != None and gui_settings.LEGEND:
+        if sel_lanelets != None and gui_config.LEGEND:
             legend = ax.legend(handles, labels)
             legend.set_zorder(50)
 

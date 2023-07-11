@@ -5,20 +5,19 @@ from commonroad.scenario.scenario import Tag, ScenarioID
 from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
 from commonroad.planning.planning_problem import PlanningProblemSet
 
+from crdesigner.config.lanelet2_config import lanelet2_config
 from crdesigner.map_conversion.lanelet2.lanelet2cr import Lanelet2CRConverter
 from crdesigner.map_conversion.lanelet2.lanelet2_parser import Lanelet2Parser
-from crdesigner.config.config import Lanelet2ConversionParams
 
 from crdesigner.map_conversion.map_conversion_interface import lanelet_to_commonroad
 
 input_path = ""  # replace empty string
-config = Lanelet2ConversionParams()
-config.adjacencies = True
+lanelet2_config.adjacencies = True
 
 
 # ----------------------------------------------- Option 1: General API ------------------------------------------------
 # load lanelet/lanelet2 file, parse it, and convert it to a CommonRoad scenario
-scenario = lanelet_to_commonroad(input_path, lanelet2_config=config)
+scenario = lanelet_to_commonroad(input_path)
 
 # store converted file as CommonRoad scenario
 writer = CommonRoadFileWriter(
@@ -38,7 +37,7 @@ parser = Lanelet2Parser(etree.parse(input_path).getroot())
 lanelet2_content = parser.parse()
 
 # convert lanelet/lanelet2 map to CommonRoad
-lanelet2_converter = Lanelet2CRConverter(config)
+lanelet2_converter = Lanelet2CRConverter()
 scenario = lanelet2_converter(lanelet2_content)
 scenario.scenario_id = ScenarioID(country_id="ZAM", map_name="Lanelet")
 

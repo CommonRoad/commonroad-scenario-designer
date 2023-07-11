@@ -3,7 +3,7 @@ from PyQt5 import QtGui
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
-from crdesigner.ui.gui.model.settings.gui_settings_model import gui_settings as config
+from crdesigner.config.gui_config import gui_config as config
 
 
 class QHLine(QFrame):

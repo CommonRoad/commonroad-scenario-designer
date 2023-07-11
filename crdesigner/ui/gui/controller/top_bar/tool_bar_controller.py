@@ -1,7 +1,7 @@
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QMessageBox
 
-from crdesigner.ui.gui.model.settings.gui_settings_model import gui_settings as config
+from crdesigner.config.gui_config import gui_config as config
 from crdesigner.ui.gui.utilities.file_actions import file_save, open_commonroad_file, file_new
 from crdesigner.ui.gui.view.top_bar.tool_bar_ui import ToolBarUI
 
@@ -84,28 +84,28 @@ class ToolBarController:
             self.mwindow.animated_viewer_wrapper.cr_viewer.play()
             self.mwindow.crdesigner_console_wrapper.text_browser.append("Playing the animation")
             if config.DARKMODE:
-                self.mwindow_ui.top_bar.toolbar_wrapper.button_play_pause.setIcon(QIcon(":/icons/pause_darkmode.png"))
+                self.mwindow_ui.top_bar.toolbar_wrapper.tool_bar_ui.button_play_pause.setIcon(QIcon(":/icons/pause_darkmode.png"))
             else:
-                self.mwindow_ui.top_bar.toolbar_wrapper.button_play_pause.setIcon(QIcon(":/icons/pause.png"))
+                self.mwindow_ui.top_bar.toolbar_wrapper.tool_bar_ui.button_play_pause.setIcon(QIcon(":/icons/pause.png"))
             self.mwindow.play_activated = True
         else:
             self.mwindow.animated_viewer_wrapper.cr_viewer.pause()
             self.mwindow.crdesigner_console_wrapper.text_browser.append("Pause the animation")
-            self.mwindow.top_bar.toolbar_wrapper.button_play_pause.setIcon(QIcon(":/icons/play.png"))
+            self.mwindow_ui.top_bar.toolbar_wrapper.tool_bar_ui.button_play_pause.setIcon(QIcon(":/icons/play.png"))
             self.mwindow.play_activated = False
 
     def _time_step_change(self, value):
-        if self.mwindow.scenario_model.is_not_empty():
+        if self.mwindow.scenario_model.scenario_created():
             self.mwindow.animated_viewer_wrapper.cr_viewer.set_timestep(value)
-            self.mwindow.top_bar.toolbar_wrapper.edit.setText(str(value))
+            self.mwindow_ui.top_bar.toolbar_wrapper.tool_bar_ui.edit.setText(str(value))
             self.mwindow.animated_viewer_wrapper.cr_viewer.animation.event_source.start()
 
     def _time_step_set(self):
-        if self.mwindow.top_bar.toolbar_wrapper.edit.text() == "":
+        if self.mwindow_ui.top_bar.toolbar_wrapper.tool_bar_ui.edit.text() == "":
             return
-        if self.mwindow.scenario_model.is_not_empty():
-            self.mwindow.top_bar.toolbar_wrapper.slider.setValue(
-                int(float(self.mwindow.top_bar.toolbar_wrapper.edit.text())))
+        if self.mwindow.scenario_model.scenario_created():
+            self.mwindow_ui.top_bar.toolbar_wrapper.tool_bar_ui.slider.setValue(
+                int(float(self.mwindow_ui.top_bar.toolbar_wrapper.tool_bar_ui.edit.text())))
             self.mwindow.animated_viewer_wrapper.cr_viewer.pause()
             self.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.draw_idle()
             self.mwindow.animated_viewer_wrapper.update_view()
@@ -132,7 +132,7 @@ class ToolBarController:
                 messbox.close()
         else:
             self.mwindow.crdesigner_console_wrapper.text_browser.append("Save video for scenario with ID " + str(
-                    self.mwindow.animated_viewer_wrapper.cr_viewer.current_scenario.scenario_id))
+                    self.mwindow.scenario_model.get_scenario_id()))
             self.mwindow.animated_viewer_wrapper.cr_viewer.save_animation()
             self.mwindow.crdesigner_console_wrapper.text_browser.append("Saving the video finished.")
 

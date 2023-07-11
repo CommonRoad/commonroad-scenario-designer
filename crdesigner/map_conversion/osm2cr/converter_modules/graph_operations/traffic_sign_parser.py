@@ -1,6 +1,6 @@
 from typing import Dict
 from commonroad.scenario.traffic_sign import TrafficSignElement, TrafficSignIDZamunda
-from crdesigner.map_conversion.osm2cr import config
+from crdesigner.config.osm_config import osm_config as config
 
 
 class TrafficSignParser:

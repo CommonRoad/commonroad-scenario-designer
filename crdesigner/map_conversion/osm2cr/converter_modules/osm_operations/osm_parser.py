@@ -11,7 +11,7 @@ from collections import OrderedDict
 import logging
 import numpy as np
 
-from crdesigner.map_conversion.osm2cr import config
+from crdesigner.config.osm_config import osm_config as config
 from crdesigner.map_conversion.osm2cr.converter_modules.graph_operations import road_graph as rg
 from crdesigner.map_conversion.osm2cr.converter_modules.graph_operations.restrictions import Restriction
 from crdesigner.map_conversion.osm2cr.converter_modules.osm_operations import info_deduction as i_d
@@ -350,7 +350,7 @@ def parse_file(filename: str, accepted_highways: List[str], rejected_tags: Dict[
 def parse_turnlane(turnlane: str) -> str:
     """
     parses a turnlane to a simple and defined format
-    all possible turnlanes are found in config.py
+    all possible turnlanes are found in osm_config.py
 
     :param turnlane: string, a turnlane
     :type turnlane: str
@@ -861,6 +861,28 @@ def get_crossing_points(
     return new_crossing_nodes, already_contained
 
 
+def _value_set(layer: Dict[str, bool]) -> Set[str]:
+    """
+    Extracts the street layer from the given layer dict.
+    """
+    street_layer = set()
+    for key, value in layer.items():
+        if value:
+            street_layer.add(key)
+    return street_layer
+
+
+def _value_list(layer: Dict[str, bool]) -> List[str]:
+    """
+    Extracts the street layer from the given layer dict.
+    """
+    street_layer = []
+    for key, value in layer.items():
+        if value:
+            street_layer.append(key)
+    return street_layer
+
+
 def create_graph(file_path: str) -> rg.Graph:
     """
     Create a graph from the given osm file.
@@ -885,22 +907,22 @@ def create_graph(file_path: str) -> rg.Graph:
     idgenerator.reset()
 
     if config.EXTRACT_SUBLAYER:
-        if set(config.ACCEPTED_HIGHWAYS_MAINLAYER) & set(config.ACCEPTED_HIGHWAYS_SUBLAYER):
+        if _value_set(config.ACCEPTED_HIGHWAYS_MAINLAYER) & _value_set(config.ACCEPTED_HIGHWAYS_SUBLAYER):
             raise RuntimeError(
                 "main layer types and sublayer types have equal elements")
 
         #  get combined graph
         logging.info("extract combined layer")
-        all_accepted_ways = config.ACCEPTED_HIGHWAYS_MAINLAYER.copy()
-        all_accepted_ways.extend(config.ACCEPTED_HIGHWAYS_SUBLAYER)
+        all_accepted_ways = _value_list(config.ACCEPTED_HIGHWAYS_MAINLAYER)
+        all_accepted_ways.extend(_value_list(config.ACCEPTED_HIGHWAYS_SUBLAYER))
         combined_g, _ = _create_graph(file_path, all_accepted_ways)
 
         # get crossing nodes
         main_g, main_crossing_points = _create_graph(file_path,
-                                                     config.ACCEPTED_HIGHWAYS_MAINLAYER, combined_g.bounds)
+                                                     _value_list(config.ACCEPTED_HIGHWAYS_MAINLAYER), combined_g.bounds)
         logging.info("extract sub layer")
         sub_g, sub_crossing_points = _create_graph(file_path,
-                                                   config.ACCEPTED_HIGHWAYS_SUBLAYER, combined_g.bounds)
+                                                   _value_list(config.ACCEPTED_HIGHWAYS_SUBLAYER), combined_g.bounds)
         new_crossing_nodes, already_contained = get_crossing_points(
             combined_g, main_g, main_crossing_points, sub_crossing_points
         )
@@ -908,7 +930,7 @@ def create_graph(file_path: str) -> rg.Graph:
         # create the main graph with additional crossing nodes
         extended_main_graph, _ = _create_graph(
             file_path,
-            config.ACCEPTED_HIGHWAYS_MAINLAYER,
+            _value_list(config.ACCEPTED_HIGHWAYS_MAINLAYER),
             combined_g.bounds,
             new_crossing_nodes
         )
@@ -929,6 +951,6 @@ def create_graph(file_path: str) -> rg.Graph:
 
     else:
         logging.info("extract main layer")
-        main_g, _ = _create_graph(file_path, config.ACCEPTED_HIGHWAYS_MAINLAYER)
+        main_g, _ = _create_graph(file_path, _value_list(config.ACCEPTED_HIGHWAYS_MAINLAYER))
 
     return main_g

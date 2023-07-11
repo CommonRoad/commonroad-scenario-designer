@@ -12,6 +12,8 @@ from commonroad.scenario.traffic_sign import TrafficSign, TrafficSignElement, Tr
     TrafficSignIDZamunda, TrafficSignIDUsa, TrafficSignIDChina, TrafficSignIDSpain, \
     TrafficSignIDRussia
 
+from crdesigner.config.general_config import general_config, GeneralConfig
+from crdesigner.config.opendrive_config import open_drive_config, OpenDriveConfig
 from crdesigner.map_conversion.opendrive.opendrive_conversion import utils
 from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.crosswalks import get_crosswalks
 from crdesigner.map_conversion.opendrive.opendrive_parser.elements.opendrive import OpenDrive
@@ -21,7 +23,6 @@ from crdesigner.map_conversion.common.conversion_lanelet import ConversionLanele
 from crdesigner.map_conversion.opendrive.opendrive_conversion.converter import OpenDriveConverter
 from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.traffic_signals import get_traffic_signals
 from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.geo_reference import get_geo_reference
-from crdesigner.config.config import OpenDRIVEConversionParams, GeneralParams
 from crdesigner.map_conversion.common.utils import generate_unique_id
 from crdesigner.map_conversion.opendrive.opendrive_parser.elements.road import Road
 
@@ -54,7 +55,7 @@ class Network:
     which stores the neighbor relations between the parametric lanes.
     """
 
-    def __init__(self, config: OpenDRIVEConversionParams = OpenDRIVEConversionParams()):
+    def __init__(self, config: OpenDriveConfig = open_drive_config):
         """Initializes a network object."""
         self._config = config
         self._planes = []
@@ -396,12 +397,12 @@ class Network:
         network.add_traffic_signs_to_network([traffic_sign])
         lanelet.add_traffic_sign_to_lanelet(traffic_sign.traffic_sign_id)
 
-    def export_commonroad_scenario(self, general_config: GeneralParams = GeneralParams(),
-                                   opendrive_config: OpenDRIVEConversionParams = OpenDRIVEConversionParams()):
+    def export_commonroad_scenario(self, g_config: GeneralConfig = general_config,
+                                   od_config: OpenDriveConfig = open_drive_config):
         """Export a full CommonRoad scenario
 
-        :param general_config: General config parameters.
-        :param opendrive_config: OpenDRIVE specific config parameters.
+        :param g_config: General config parameters.
+        :param od_config: OpenDRIVE specific config parameters.
         """
         transformer = None
         location_kwargs = {}
@@ -418,16 +419,16 @@ class Network:
                             **location_kwargs)
 
         scenario_id = ScenarioID(
-                country_id=general_config.country_id if self._country_ID == "ZAM" else self._country_ID,
-                map_name=general_config.map_name,
-                map_id=general_config.map_id)
+                country_id=g_config.country_id if self._country_ID == "ZAM" else self._country_ID,
+                map_name=g_config.map_name,
+                map_id=g_config.map_id)
 
         scenario = Scenario(
-            dt=general_config.time_step_size, scenario_id=scenario_id
+            dt=g_config.time_step_size, scenario_id=scenario_id
         )
 
         scenario.add_objects(self.export_lanelet_network(transformer=transformer,
-                                                         filter_types=opendrive_config.filter_types))
+                                                         filter_types=od_config.filter_types))
 
         scenario.lanelet_network.location = location
         return scenario

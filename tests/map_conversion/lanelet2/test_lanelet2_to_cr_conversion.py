@@ -9,7 +9,8 @@ from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistin
 from commonroad.planning.planning_problem import PlanningProblemSet  # type: ignore
 from commonroad.scenario.scenario import Tag, Scenario  # type: ignore
 
-from crdesigner.config.config import Lanelet2ConversionParams, ProjectionMethods
+from crdesigner.config.gui_config import gui_config
+from crdesigner.config.lanelet2_config import lanelet2_config
 from crdesigner.map_conversion.common.utils import generate_unique_id
 from crdesigner.map_conversion.lanelet2.cr2lanelet import CR2LaneletConverter
 from crdesigner.map_conversion.lanelet2.lanelet2_parser import Lanelet2Parser
@@ -23,6 +24,10 @@ def get_tmp_dir():
 
 class TestLanelet2ToCommonRoadConversion(unittest.TestCase):
     """Tests the conversion from an osm file to a CommonRoad xml file."""
+
+    @classmethod
+    def setUpClass(cls):
+        lanelet2_config.reset_settings()
 
     @staticmethod
     def load_and_convert(osm_file_name: str, translate: bool = False, proj_string: str = None,
@@ -52,13 +57,11 @@ class TestLanelet2ToCommonRoadConversion(unittest.TestCase):
         with open(file_path, "r", ) as fh:
             osm = Lanelet2Parser(etree.parse(fh).getroot()).parse()
 
-        params_kwargs = {
-            'proj_string': proj_string,
-            'translate': translate
-        }
-        params_kwargs = {k: v for k, v in params_kwargs.items() if v is not None}
-        params = Lanelet2ConversionParams(**params_kwargs)
-        osm2l = Lanelet2CRConverter(lanelet2_config=params)
+        if proj_string is not None:
+            lanelet2_config.proj_string = proj_string
+        if translate is not None:
+            lanelet2_config.translate = translate
+        osm2l = Lanelet2CRConverter()
         return osm2l(osm)
 
     def compare_maps(self, file_name: str, translate: bool = False, file_path: str = None) -> bool:
@@ -121,7 +124,7 @@ class TestLanelet2ToCommonRoadConversion(unittest.TestCase):
         to lanelet2, this stored projection method should be considered.
         """
         lanelet2_file_name = "urban-1_lanelets_utm"
-        proj_string = ProjectionMethods.utm_default.value
+        proj_string = gui_config.utm_default
 
         cr_scenario = self.load_and_convert(lanelet2_file_name, proj_string=proj_string)
         l2osm = CR2LaneletConverter()
