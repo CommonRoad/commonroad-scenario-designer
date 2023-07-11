@@ -112,7 +112,7 @@ class MapConversionToolboxController(QDockWidget):
         if filename != "":
             self.osm_file = filename
 
-    #TODO is line 121 correct ?
+
     def hidden_osm_conversion(self, graph: rg.Graph) -> None:
         """
         Performs a OSM conversion without user edit.
@@ -141,7 +141,6 @@ class MapConversionToolboxController(QDockWidget):
         """
         Starts the OSM conversion process by picking a file or downloading a map and showing the edge edit GUI.
         """
-
         if self.converter_toolbox.load_local_file.isChecked():
             self.load_osm_file()
         else:
@@ -209,7 +208,7 @@ class MapConversionToolboxController(QDockWidget):
         self.scenario_model.stop_spinner()
         self.converter_toolbox.Spinner.stop()
 
-    # TODO: MODEL
+
     def start_spinner(self, spinner: QtWaitingSpinner):
         if spinner.is_spinning():
             spinner.stop()
@@ -293,19 +292,14 @@ class MapConversionToolboxController(QDockWidget):
         open_drive_network = Network()
         open_drive_network.load_opendrive(self.open_drive_file)
 
-        self.text_browser.append(
-            """Name: {}<br>Version: {}<br>Date: {}<br><br>OpenDRIVE
-            Version {}.{}""".format(
+        self.text_browser.append("""Name: {}<br>Version: {}<br>Date: {}<br><br>OpenDRIVE
+                Version {}.{}""".format(
                 self.open_drive_file.header.name if self.open_drive_file.header.name else "<i>unset</i>",
-                self.open_drive_file.header.version,
-                self.open_drive_file.header.date,
-                self.open_drive_file.header.revMajor,
-                self.open_drive_file.header.revMinor,
-                len(self.open_drive_file.roads),
-            )
-        )
+                self.open_drive_file.header.version, self.open_drive_file.header.date,
+                self.open_drive_file.header.revMajor, self.open_drive_file.header.revMinor,
+                len(self.open_drive_file.roads), ))
         self.open_drive_file = None
-        exported_commonroad_scenario=open_drive_network.export_commonroad_scenario()
+        exported_commonroad_scenario = open_drive_network.export_commonroad_scenario()
         self.scenario_model.set_scenario(exported_commonroad_scenario)
 
     def load_open_drive(self):
@@ -375,20 +369,20 @@ class MapConversionToolboxController(QDockWidget):
             return
 
         self.convert_lanelet2_to_cr()
-
     def convert_lanelet2_to_cr(self):
         """
         Starts the Lanelet to CommonRoad conversion process.
         """
-        if self.lanelet2_file is None:
-            QMessageBox.warning(None, "Warning", "No file selected.", QMessageBox.Ok)
-            return
-
-        scenario = self.lanelet2_to_cr_converter(self.lanelet2_file)
-        self.lanelet2_file = None
-        #TODO how to update the scenaroi in MVC ?
-        self.callback(scenario)
-
+        try:
+            if self.lanelet2_file is None:
+                QMessageBox.warning(None, "Warning", "No file selected.", QMessageBox.Ok)
+                return
+            scenario = self.lanelet2_to_cr_converter(self.lanelet2_file)
+            self.lanelet2_file = None
+            self.scenario_model.convert_lanelet2_to_cr(scenario)
+            self.text_browser.append("Conversion from Lanelet2 to CommonRoad is done")
+        except Exception as e:
+            print("An error occurred:")
     def convert_cr_to_lanelet2(self):
         """
         Starts the CommonRoad to Lanelet conversion process.
@@ -397,7 +391,7 @@ class MapConversionToolboxController(QDockWidget):
 
         if not self.scenario_model.scenario_created or directory == "":
             return
-        path = directory + "/" + str(self.scenario_model.scenario_id) + ".osm"
+        path = directory + "/" + str(self.scenario_model.get_scenario_id()) + ".osm"
         l2osm = CR2LaneletConverter()
         osm = l2osm(self.scenario_model.get_current_scenario())
         with open(f"{path}", "wb") as file_out:
@@ -406,7 +400,7 @@ class MapConversionToolboxController(QDockWidget):
                     osm, xml_declaration=True, encoding="UTF-8", pretty_print=True
                 )
             )
-
+        self.text_browser.append("Conversion from CommonRoad to Lanelet2 is done")
     def load_sumo(self):
         """
         Allows to select a SUMO file from the file system and loads it and calls conversion.
