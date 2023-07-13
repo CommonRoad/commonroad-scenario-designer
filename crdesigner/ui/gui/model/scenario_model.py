@@ -398,14 +398,14 @@ class ScenarioModel(QObject):
             self.notify_all()
 
     def cropp_map(self, rectangle: Rectangle) -> None:
-        '''
+        """
         Cropps the map and returns all lanelets which lay within the rectangle
 
         :param rectangle: Rectangle in which the Objects should stay in
-        '''
+        """
         self._update_scenario()
         new_lanelet_network = self.get_lanelet_network().create_from_lanelet_network(
-                self.get_lanelet_network(),shape_input=rectangle)
+                self.get_lanelet_network(), shape_input=rectangle)
         self.replace_lanelet_network(new_lanelet_network)
         self.notify_all()
 
@@ -419,7 +419,22 @@ class ScenarioModel(QObject):
         self.set_scenario(osm_to_commonroad_using_sumo)
         self.notify_all()
 
-    def convert_open_drive_to_cr(self, scenario: Scenario):
+    def convert_lanelet2_to_cr(self, scenario: Scenario):
+        """
+        Shows the new scenario that is converted from a Lanelet2 file in the gui
+
+        :param scenario: CommonRoad scenario to be showed
+        """
+        self._update_scenario()
+        self.set_scenario(scenario)
+        self.notify_all()
+
+    def convert_open_drive_to_cr(self, scenario: Scenario) -> None:
+        """
+        Shows the new scenario that is converted from a OpenDRIVE file in the gui
+
+        :param scenario: CommonRoad scenario to be showed
+        """
         self._update_scenario()
         self.set_scenario(scenario)
         self.notify_all()
