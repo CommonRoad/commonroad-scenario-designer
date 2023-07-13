@@ -67,12 +67,12 @@ class TestOSMToCommonRoadConversion(unittest.TestCase):
         converted = etree.parse(converted_path, parser=parser).getroot()
 
         location = converted.find('location')
-        # # test geonamesID
-        # self.assertEqual(location.find('geoNameId').text, '-999')
-        # # test if lat was set
-        # self.assertNotEqual(location.find('gpsLatitude').text, '999')
-        # # test if lng was set
-        # self.assertNotEqual(location.find('gpsLongitude').text, '999')
+        # test geonamesID
+        self.assertEqual(location.find('geoNameId').text, '-999')
+        # test if lat was set
+        self.assertNotEqual(location.find('gpsLatitude').text, '999')
+        # test if lng was set
+        self.assertNotEqual(location.find('gpsLongitude').text, '999')
 
     def osm2cr_conversion_lane_width(self, cr_scenario: Scenario):
         """Test if every lanelet is wider than the given minimum distance of 2.5 meters"""

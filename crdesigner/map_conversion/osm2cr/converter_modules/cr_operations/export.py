@@ -188,13 +188,14 @@ def export(
         source += ", Mapillary"
     tags = create_tags(config.TAGS)
     # create location tag automatically. Retreive geonamesID from the Internet.
-    location = Location(gps_latitude=graph.center_point[0],
-                        gps_longitude=graph.center_point[1],
-                        geo_name_id=get_geonamesID(graph.center_point[0], graph.center_point[1]),
-                        geo_transformation=None)
+    scenario.lanelet_network.location = Location(gps_latitude=graph.center_point[0],
+                                                 gps_longitude=graph.center_point[1],
+                                                 geo_name_id=get_geonamesID(graph.center_point[0],
+                                                                            graph.center_point[1]),
+                                                 geo_transformation=None)
     # in the current commonroad version the following line works
     file_writer = CommonRoadFileWriter(
-        scenario, problemset, author, affiliation, source, tags, location, decimal_precision=16,
+        scenario, problemset, author, affiliation, source, tags, decimal_precision=16,
         file_format=FileFormat.XML)
 
     # write scenario to file with planning problem
