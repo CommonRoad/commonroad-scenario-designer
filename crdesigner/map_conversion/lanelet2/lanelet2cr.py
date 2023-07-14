@@ -252,8 +252,8 @@ class Lanelet2CRConverter:
         speed_limits = {}
         speed_limit_lanelets = {}  # type: ignore
         for speed_limit_key in osm.speed_limit_signs.keys():
-            light_id = generate_unique_id()
-            speed_limits[speed_limit_key] = light_id
+            sign_id = generate_unique_id()
+            speed_limits[speed_limit_key] = sign_id
             speed_limit_lanelets[speed_limit_key] = []
 
         for way_rel in osm.way_relations.values():
@@ -332,7 +332,7 @@ class Lanelet2CRConverter:
         """
         # create a TrafficLight element (CR format) from the traffic light way (L2 format\<)
         # id,cycle,position,offset,direction,active
-        new_id = convert_to_new_lanelet_id(traffic_light_way.id_, new_lanelet_ids)
+        new_id = generate_unique_id()
 
         cycle_list = _append_traffic_light_cycles(traffic_light_way)
 
@@ -342,7 +342,7 @@ class Lanelet2CRConverter:
         node_y = node.lat
 
         # convert to CR space
-        x, y = self.transformer.transform(node_x, node_x)
+        x, y = self.transformer.transform(node_x, node_y)
         x -= self.origin_utm[0]
         y -= self.origin_utm[1]
         
@@ -506,7 +506,7 @@ class Lanelet2CRConverter:
             x, y = self.transformer.transform(float(traffic_sign_node.lat), float(traffic_sign_node.lon))
             x -= self.origin_utm[0]
             y -= self.origin_utm[1]
-            ref_t_id = convert_to_new_lanelet_id(traffic_sign_way.id_, new_lanelet_ids)
+            ref_t_id = generate_unique_id()
 
             # create the traffic sign
             traffic_sign = TrafficSign(ref_t_id, traffic_sign_elements=[traffic_sign_element], first_occurrence=set(),

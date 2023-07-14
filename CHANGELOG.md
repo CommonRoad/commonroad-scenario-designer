@@ -1,5 +1,11 @@
 # Changelog
 
+
+## [0.7.2] - 2023-07-XX
+
+### Fixed
+- ID assignment lanelet2cr conversion
+
 ## [0.7.1] - 2023-06-21
 
 ### Added
