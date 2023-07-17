@@ -87,7 +87,7 @@ class AddAerialImageController:
                     "Coordinates are outside Bavaria. This tool works only for coordinates inside Bavaria.")
                 return
 
-        self.road_network_controller.start_spinner(self.road_network_toolbox_ui.Spinner)
+        self.road_network_controller.startSpinner(self.road_network_toolbox_ui.Spinner)
         runnable = RequestRunnable(self.activate_aerial_image, self.road_network_controller)
         QThreadPool.globalInstance().start(runnable)
 

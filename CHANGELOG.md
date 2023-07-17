@@ -6,6 +6,7 @@
 - GUI backend using MVC pattern
 - New config model.
 - And automated creation of settings windows.
+- New way to edit an add curved lanelets
 
 ### Added
 - Cropping of a map in the GUI

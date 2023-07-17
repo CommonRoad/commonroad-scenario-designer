@@ -108,13 +108,48 @@ class RoadNetworkController(QDockWidget, ):
     def selected_lanelet(self) -> Union[Lanelet, None]:
         return self.lanelet_controller.selected_lanelet()
 
+    def disable_show_of_curved_lanelet(self, button_title: str = "") -> None:
+        """
+        If a section of the road network toolbox is pressed it is checked if the curved_lanelet should be shown
+
+        :param button_title: Title of the section to differentiate which button is clicked
+        """
+        place_at_position = self.road_network_toolbox_ui.place_at_position.isChecked()
+        connect_to_last_selection = self.road_network_toolbox_ui.connect_to_previous_selection.isChecked()
+        connect_to_predecessors_selection = self.road_network_toolbox_ui.connect_to_predecessors_selection.isChecked()
+        connect_to_successors_selection = self.road_network_toolbox_ui.connect_to_successors_selection.isChecked()
+        if button_title == "Add Lanelet" and (place_at_position or connect_to_last_selection or
+                                              connect_to_predecessors_selection or connect_to_successors_selection):
+            if self.road_network_toolbox_ui.curved_check_button is not None:
+                self.road_network_toolbox_ui.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.display_curved_lanelet(
+                    self.road_network_toolbox_ui.curved_check_button.button.isChecked(),
+                    self.road_network_toolbox_ui.curved_check_button, True)
+
+        elif button_title == "Lanelet Attributes" and \
+                self.road_network_toolbox_ui.selected_curved_checkbox.button.isChecked() and \
+                self.road_network_toolbox_ui.selected_curved_checkbox.button.isEnabled():
+            self.road_network_toolbox_ui.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.display_curved_lanelet(
+                    self.road_network_toolbox_ui.selected_curved_checkbox.button.isChecked(),
+                    self.road_network_toolbox_ui.selected_curved_checkbox, False)
+
+        elif place_at_position or connect_to_last_selection or \
+                connect_to_predecessors_selection or connect_to_successors_selection:
+            if self.road_network_toolbox_ui.curved_check_button is not None:
+                self.road_network_toolbox_ui.mwindow.animated_viewer_wrapper.cr_viewer.dynamic\
+                    .display_curved_lanelet(False, None)
+                self.road_network_toolbox_ui.curved_check_button.setChecked(False)
+        else:
+            self.road_network_toolbox_ui.mwindow.animated_viewer_wrapper.cr_viewer.dynamic \
+                .display_curved_lanelet(False, None)
+            self.road_network_toolbox_ui.selected_curved_checkbox.setChecked(False)
+
     @pyqtSlot(str)
     def stopSpinner(self, data):
         print(data)
         self.scenario_model.stop_spinner()
         self.road_network_toolbox_ui.Spinner.stop()
 
-    def start_spinner(self, spinner: QtWaitingSpinner):
+    def startSpinner(self, spinner: QtWaitingSpinner):
         if (spinner.is_spinning()):
             spinner.stop()
         spinner.start()
