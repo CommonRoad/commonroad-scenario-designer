@@ -435,6 +435,10 @@ class AddLaneletWidget():
             self.toolbox.advanced_button.remove()
             self.toolbox.layout_lanelet_adding_groupbox.removeRow(self.toolbox.line2)
 
+        #TODO: Maybe change
+        if self.toolbox.curved_check_button is not None:
+            self.toolbox.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.display_curved_lanelet(False, None)
+
     def init_length_width(self):
         self.toolbox.lanelet_length = QLineEdit()
         self.toolbox.lanelet_length.setValidator(self.toolbox.float_validator)
@@ -459,6 +463,8 @@ class AddLaneletWidget():
             self.toolbox.layout_lanelet_adding_groupbox.removeRow(self.toolbox.lanelet_rotation)
 
     def add_curved_fields(self, index):
+        self.toolbox.select_direction = QPushButton("Switch Direction")
+
         self.toolbox.lanelet_radius = QLineEdit()
         self.toolbox.lanelet_radius.setValidator(self.toolbox.float_validator)
         self.toolbox.lanelet_radius.setMaxLength(6)
@@ -475,6 +481,7 @@ class AddLaneletWidget():
 
         layout_curved_box = QFormLayout()
 
+        layout_curved_box.addRow(self.toolbox.select_direction)
         layout_curved_box.addRow("Curve radius [m]", self.toolbox.lanelet_radius)
         layout_curved_box.addRow("Curve angle [deg]", self.toolbox.lanelet_angle)
         layout_curved_box.addRow("Number Vertices:", self.toolbox.number_vertices)
@@ -483,8 +490,22 @@ class AddLaneletWidget():
         self.toolbox.lanelet_angle.setText("90.0")
         self.toolbox.number_vertices.setText("20")
 
+        # Signals to update the temporary lanelet when the values changed in the toolbox
+        self.toolbox.select_direction.clicked.connect(lambda: self.toolbox.mwindow.animated_viewer_wrapper.cr_viewer
+                                                      .dynamic.change_direction_of_curve())
         self.toolbox.curved_check_button = CollapsibleCheckBox("Curved Lanelet", layout_curved_box,
                                                                self.toolbox.layout_lanelet_adding_groupbox, index)
+        self.toolbox.lanelet_radius.textChanged.connect(lambda: self.toolbox.mwindow.animated_viewer_wrapper.cr_viewer.
+                                                        dynamic.draw_curved_lanelet())
+        self.toolbox.lanelet_angle.textChanged.connect(lambda: self.toolbox.mwindow.animated_viewer_wrapper.cr_viewer.
+                                                       dynamic.draw_curved_lanelet())
+        self.toolbox.number_vertices.textChanged.connect(lambda: self.toolbox.mwindow.animated_viewer_wrapper.cr_viewer.
+                                                         dynamic.draw_curved_lanelet())
+        self.toolbox.curved_check_button.button.clicked.connect(
+                lambda: self.toolbox.mwindow.animated_viewer_wrapper.cr_viewer.
+                dynamic.display_curved_lanelet(self.toolbox.curved_check_button.isChecked(),
+                                               self.toolbox.curved_check_button, True))
+
         if self.toolbox.place_at_position.isChecked():
             self.toolbox.curved_check_button.button.clicked.connect(lambda: self.disable_curved_select_end_pos())
 

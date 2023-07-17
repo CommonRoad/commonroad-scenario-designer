@@ -50,12 +50,6 @@ class RoadNetworkToolboxUI(Toolbox):
     def update(self) -> None:
         super(RoadNetworkToolboxUI, self).update()
 
-    def adjust_selected_stop_line_position(self):
-        self.lanelet_attributes_widget.adjust_selected_stop_line_position()
-
-    def adjust_add_sections(self):
-        self.add_lanelet_widget.adjust_add_sections()
-
     def update_window(self):
         super().update_window()
         if self.place_at_position.isChecked():

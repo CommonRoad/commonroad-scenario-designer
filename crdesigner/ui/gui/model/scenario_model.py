@@ -178,8 +178,9 @@ class ScenarioModel(QObject):
         MapCreator.fit_to_predecessor(lanelet_two, lanelet_one)
         self.notify_all()
 
-    def rotate_lanelet(self, lanelet: Lanelet, rotation_angle: int):
+    def rotate_lanelet(self, lanelet_id: int, rotation_angle: int):
         self._update_scenario()
+        lanelet = self.find_lanelet_by_id(lanelet_id)
         initial_vertex = lanelet.center_vertices[0]
         lanelet.translate_rotate(np.array([0, 0]), np.deg2rad(rotation_angle))
         lanelet.translate_rotate(initial_vertex - lanelet.center_vertices[0], 0.0)
@@ -437,3 +438,11 @@ class ScenarioModel(QObject):
         self._update_scenario()
         self.set_scenario(scenario)
         self.notify_all()
+
+    def convert_open_drive_to_cr(self,scenario :Scenario):
+        self._update_scenario()
+        self.set_scenario(scenario)
+        self.notify_all()
+
+    def get_copy_of_scenario(self):
+        return copy.deepcopy(self._current_scenario())

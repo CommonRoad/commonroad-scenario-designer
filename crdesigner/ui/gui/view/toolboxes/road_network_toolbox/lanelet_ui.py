@@ -1,9 +1,15 @@
+import math
+
 from PyQt5.QtCore import *
+from commonroad.geometry.polyline_util import compute_polyline_curvatures, compute_polyline_orientations, \
+    compute_polyline_initial_orientation
 
 from commonroad.scenario.lanelet import LineMarking, LaneletType, RoadUser, StopLine, Lanelet
 from commonroad.scenario.traffic_sign import *
+from numpy import ndarray
 
 from crdesigner.ui.gui.model.scenario_model import ScenarioModel
+from crdesigner.ui.gui.utilities.helper import angle_between
 from crdesigner.ui.gui.view.toolboxes.road_network_toolbox.road_network_toolbox_ui.road_network_toolbox_ui import \
     RoadNetworkToolboxUI
 
@@ -14,9 +20,9 @@ class AddLaneletUI:
         self.road_network_toolbox_ui = road_network_toolbox_ui
         self.scenario_model = scenario_model
 
-
-    def lanelet_selection_changed(self):
-        return
+    #TODO check for deletion
+    # def lanelet_selection_changed(self):
+    #     return
 
     def initialize_basic_lanelet_information(self, last_added_lanelet_id):
         """
@@ -298,33 +304,42 @@ class AddLaneletUI:
 
 
         self.road_network_toolbox_ui.selected_lanelet_start_position_x.setText(
-            str(0.0 if lanelet.center_vertices[0][0] == 1.0e-16 else lanelet.center_vertices[0][0]))
+            str(0.0 if lanelet.center_vertices[0][0] == 1.0e-16 else round(lanelet.center_vertices[0][0], 4)))
         self.road_network_toolbox_ui.selected_lanelet_start_position_y.setText(
-            str(0.0 if lanelet.center_vertices[0][1] == 1.0e-16 else lanelet.center_vertices[0][1]))
+            str(0.0 if lanelet.center_vertices[0][1] == 1.0e-16 else round(lanelet.center_vertices[0][1], 4)))
         self.road_network_toolbox_ui.selected_lanelet_end_position_x.setText(
             str(0.0 if lanelet.center_vertices[len(lanelet.center_vertices) - 1][0] == 1.0e-16 else
-                lanelet.center_vertices[len(lanelet.center_vertices) - 1][0]))
+                round(lanelet.center_vertices[len(lanelet.center_vertices) - 1][0], 4)))
         self.road_network_toolbox_ui.selected_lanelet_end_position_y.setText(
             str(0.0 if lanelet.center_vertices[len(lanelet.center_vertices) - 1][1] == 1.0e-16 else
-                lanelet.center_vertices[len(lanelet.center_vertices) - 1][1]))
+                round(lanelet.center_vertices[len(lanelet.center_vertices) - 1][1], 4)))
         self.road_network_toolbox_ui.selected_lanelet_width.setText(self.get_width(lanelet))
         self.road_network_toolbox_ui.selected_lanelet_length.setText(self.get_length(lanelet))
 
-        #TODO: Bug of curved lanelet goes to the default parameters
-        # curved lanelet attributes
+        self.road_network_toolbox_ui.selected_lanelet_radius.setText("10.0")
+        self.road_network_toolbox_ui.selected_lanelet_angle.setText("90.0")
+        self.road_network_toolbox_ui.selected_number_vertices.setText(str(len(lanelet.center_vertices)))
+
         if not self.lanelet_is_straight(lanelet):
-            self.road_network_toolbox_ui.selected_curved_checkbox.setChecked(True)
-            self.road_network_toolbox_ui.selected_curved_checkbox.box.setMaximumSize(0, 0)
-            self.road_network_toolbox_ui.selected_curved_checkbox.button.setDisabled(True)
+            if self.lanelet_has_constant_curvature(lanelet):
+                angle = self.calculate_angle(lanelet)
+                self.road_network_toolbox_ui.selected_curved_checkbox.button.setEnabled(True)
+                self.road_network_toolbox_ui.selected_curved_checkbox.setChecked(True)
+                self.road_network_toolbox_ui.selected_curved_checkbox.box.setMaximumSize(1000, 1000)
+                radius = self.calculate_curve_radius(angle, lanelet.center_vertices[0], lanelet.center_vertices[-1])
+                self.road_network_toolbox_ui.selected_lanelet_radius.setText(str(radius))
+                self.road_network_toolbox_ui.selected_lanelet_angle.setText(str(angle))
+                self.road_network_toolbox_ui.mwindow.animated_viewer_wrapper.cr_viewer.dynamic \
+                    .display_curved_lanelet(True, self.road_network_toolbox_ui.selected_curved_checkbox, False)
+            else:
+                self.road_network_toolbox_ui.selected_curved_checkbox.setChecked(True)
+                self.road_network_toolbox_ui.selected_curved_checkbox.box.setMaximumSize(0, 0)
+                self.road_network_toolbox_ui.selected_curved_checkbox.button.setDisabled(True)
+
         else:
             self.road_network_toolbox_ui.selected_curved_checkbox.button.setEnabled(True)
             self.road_network_toolbox_ui.selected_curved_checkbox.setChecked(False)
             self.road_network_toolbox_ui.selected_curved_checkbox.box.setMaximumSize(0, 0)
-
-        self.road_network_toolbox_ui.selected_lanelet_radius.setText("10.0")
-        self.road_network_toolbox_ui.selected_lanelet_angle.setText("90.0")
-
-        self.road_network_toolbox_ui.selected_number_vertices.setText(str(len(lanelet.center_vertices)))
 
         self.road_network_toolbox_ui.selected_line_marking_left.setCurrentText(lanelet.line_marking_left_vertices.value)
         self.road_network_toolbox_ui.selected_line_marking_right.setCurrentText(
@@ -359,14 +374,14 @@ class AddLaneletUI:
             if all(lanelet.stop_line.start == lanelet.left_vertices[0]) and all(
                     lanelet.stop_line.end == lanelet.right_vertices[0]):
                 self.road_network_toolbox_ui.selected_stop_line_beginning.setChecked(True)
-                self.road_network_toolbox_ui.adjust_selected_stop_line_position()
+                self.road_network_toolbox_ui.lanelet_attributes_widget.adjust_selected_stop_line_position()
             elif all(lanelet.stop_line.start == lanelet.left_vertices[len(lanelet.left_vertices) - 1]) and all(
                     lanelet.stop_line.end == lanelet.right_vertices[len(lanelet.right_vertices) - 1]):
                 self.road_network_toolbox_ui.selected_stop_line_end.setChecked(True)
-                self.road_network_toolbox_ui.adjust_selected_stop_line_position()
+                self.road_network_toolbox_ui.lanelet_attributes_widget.adjust_selected_stop_line_position()
             else:
                 self.road_network_toolbox_ui.selected_stop_line_select_position.setChecked(True)
-                self.road_network_toolbox_ui.adjust_selected_stop_line_position()
+                self.road_network_toolbox_ui.lanelet_attributes_widget.adjust_selected_stop_line_position()
                 self.road_network_toolbox_ui.selected_stop_line_start_x.setText(str(lanelet.stop_line.start[0]))
                 self.road_network_toolbox_ui.selected_stop_line_start_y.setText(str(lanelet.stop_line.start[1]))
                 self.road_network_toolbox_ui.selected_stop_line_end_x.setText(str(lanelet.stop_line.end[0]))
@@ -376,10 +391,10 @@ class AddLaneletUI:
         else:
             self.road_network_toolbox_ui.selected_stop_line_box.setChecked(True)
             self.road_network_toolbox_ui.selected_stop_line_beginning.setChecked(True)
-            self.road_network_toolbox_ui.adjust_selected_stop_line_position()
+            self.road_network_toolbox_ui.lanelet_attributes_widget.adjust_selected_stop_line_position()
             self.road_network_toolbox_ui.selected_stop_line_box.setChecked(False)
 
-    def lanelet_is_straight(self, lanelet: Lanelet = None):
+    def lanelet_is_straight(self, lanelet: Lanelet = None) -> bool:
         """
         Checks wether lanelet is straight
 
@@ -393,3 +408,65 @@ class AddLaneletUI:
         y_end = round(lanelet.left_vertices[len(lanelet.left_vertices) - 1][1] -
                       lanelet.right_vertices[len(lanelet.right_vertices) - 1][1], 3)
         return x_start == x_end and y_start == y_end
+
+    def lanelet_has_constant_curvature(self, lanelet: Lanelet) -> bool:
+        """
+        calculates if the given lanelet has a constant curvature and can be therefore edited
+
+        :param lanelet: Lanelet of witch checks if the curvature is constant
+        :return: Boolean if the lanelet has a constant curvature
+        """
+        if len(lanelet.center_vertices) < 10:
+            return False
+        curvature = compute_polyline_curvatures(lanelet.right_vertices)
+        ang = compute_polyline_orientations(lanelet.center_vertices)
+        curvature = curvature[2:-2]  # Ignore the first 2 and las 2 Entries
+        rounded_values_curvature = [round(x, 2) for x in curvature]
+        if len(set(rounded_values_curvature)) == 1:
+            return True
+        else:
+            return False
+
+    def calculate_angle(self, lanelet: Lanelet) -> float:
+        """
+        Calculates the angle of a given Lanelet, with vectors of the start and end of the lanelet.
+
+        :param lanelet: lanelet of which the angle should be computed
+        :return: Degrees of the angle of the lanelet
+        """
+        vertices_middle = round(len(lanelet.center_vertices) / 2)
+
+        vec_start = [lanelet.left_vertices[0][0] - lanelet.right_vertices[0][0],
+                     lanelet.left_vertices[0][1] - lanelet.right_vertices[0][1]]
+
+        vec_mid = [lanelet.left_vertices[vertices_middle][0] - lanelet.right_vertices[vertices_middle][0],
+                   lanelet.left_vertices[vertices_middle][1] - lanelet.right_vertices[vertices_middle][1]]
+
+        vec_end = [lanelet.left_vertices[-1][0] - lanelet.right_vertices[-1][0],
+                   lanelet.left_vertices[-1][1] - lanelet.right_vertices[-1][1]]
+
+        angle_mid = math.degrees(angle_between(vec_mid, vec_start))
+        angle_total = math.degrees(angle_between(vec_end, vec_start))
+        direction = 1
+        if angle_mid < 0:
+            direction = -1
+
+        if abs(angle_mid) > 90:
+            return direction * (180 + (180 - abs(angle_total)))
+        else:
+            return angle_total
+
+    def calculate_curve_radius(self, angle: float, start_point: ndarray, end_point:ndarray) -> float:
+        """
+        Calculates the radius of a given angle, start and endpoint of a lanelet
+
+        :param angle: angle in degrees of the lanelet
+        :param start_point: Start Point of the lanelet
+        :param end_point: End Point of the lanelet
+        :return: radius as a float
+        """
+        distance = math.sqrt((end_point[0] - start_point[0]) ** 2 + (end_point[1] - start_point[1]) ** 2)
+
+        radius = distance / (2 * math.sin(math.radians(abs(angle) / 2)))
+
+        return radius

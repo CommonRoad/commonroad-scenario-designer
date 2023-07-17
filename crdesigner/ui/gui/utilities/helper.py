@@ -3,7 +3,6 @@ import numpy as np
 from matplotlib.path import Path
 from matplotlib.patches import PathPatch
 
-# TODO: Controller
 def _merge_dict(source, destination):
     """deeply merges two dicts
     """
@@ -16,7 +15,6 @@ def _merge_dict(source, destination):
             destination[key] = value
     return destination
 
-# TODO: View
 def draw_lanelet_polygon(lanelet, ax, color, alpha, zorder, label) -> Tuple[float, float, float, float]:
     # TODO efficiency
     verts = []
@@ -45,7 +43,6 @@ def draw_lanelet_polygon(lanelet, ax, color, alpha, zorder, label) -> Tuple[floa
 
     return [xlim1, xlim2, ylim1, ylim2]
 
-# TODO: Controller
 def calculate_closest_vertices(point, vertices):
     distances = np.array([])
     for vertex in vertices:
@@ -54,16 +51,13 @@ def calculate_closest_vertices(point, vertices):
     shortest_distance_index = np.argmin(distances)
     return shortest_distance_index
 
-# TODO: Controller
 def calculate_euclidean_distance(point1, point2):
     distance = np.sqrt(np.power(point1[0] - point2[0], 2) + np.power(point1[1] - point2[1], 2))
     return distance
 
-# TODO: Controller
 def unit_vector(vector):
     return vector / np.linalg.norm(vector)
 
-# TODO: Controller
 def angle_between(v1, v2):
     v1_u = unit_vector(v1)
     v2_u = unit_vector(v2)

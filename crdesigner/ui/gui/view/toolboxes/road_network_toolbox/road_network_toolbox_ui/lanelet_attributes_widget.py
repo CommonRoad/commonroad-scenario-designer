@@ -109,6 +109,7 @@ class LaneletAttributesWidget():
         layout_attributes.addRow("Width [m]", self.toolbox.selected_lanelet_width)
 
         # curved lanelet
+        self.toolbox.selected_select_direction = QPushButton("Switch Direction")
         self.toolbox.selected_lanelet_radius = QLineEdit()
         self.toolbox.selected_lanelet_radius.setValidator(self.toolbox.float_validator)
         self.toolbox.selected_lanelet_radius.setMaxLength(6)
@@ -124,18 +125,33 @@ class LaneletAttributesWidget():
         self.toolbox.selected_number_vertices.setAlignment(Qt.AlignRight)
 
         layout_curved = QFormLayout()
+        layout_curved.addRow(self.toolbox.selected_select_direction)
         layout_curved.addRow("Curve radius [m]", self.toolbox.selected_lanelet_radius)
         layout_curved.addRow("Curve angle [deg]", self.toolbox.selected_lanelet_angle)
         layout_curved.addRow("Number Vertices:", self.toolbox.selected_number_vertices)
 
+        self.toolbox.selected_select_direction.clicked.connect(lambda: self.toolbox.mwindow.animated_viewer_wrapper
+                                                               .cr_viewer.dynamic.change_direction_of_curve())
+        self.toolbox.selected_lanelet_radius.textChanged.connect(
+            lambda: self.toolbox.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.draw_curved_lanelet())
+        self.toolbox.selected_lanelet_angle.textChanged.connect(
+            lambda: self.toolbox.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.draw_curved_lanelet())
+        self.toolbox.selected_number_vertices.textChanged.connect(
+            lambda: self.toolbox.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.draw_curved_lanelet())
         self.toolbox.selected_curved_checkbox = CollapsibleCheckBox("Curved Lanelet",
                                                                     layout_curved, layout_attributes, 4)
+        self.toolbox.selected_curved_checkbox.button\
+            .clicked.connect(lambda:self.toolbox.mwindow.animated_viewer_wrapper.cr_viewer.dynamic
+                             .display_curved_lanelet(self.toolbox.selected_curved_checkbox.isChecked(),
+                                                     self.toolbox.selected_curved_checkbox, False))
 
         self.add_selected_line_markings(layout_attributes)
         self.add_selected_neighboring_fields(layout_attributes)
         self.add_selected_advanced_fields(layout_attributes)
 
-        self.toolbox.attributes_button = CollapsibleArrowBox("Lanelet Attributes", layout_attributes, self.toolbox.layout_lanelet_attributes_groupbox, 3, self.toolbox.mwindow, self.toolbox)
+        self.toolbox.attributes_button = CollapsibleArrowBox("Lanelet Attributes", layout_attributes,
+                                                             self.toolbox.layout_lanelet_attributes_groupbox, 3,
+                                                             self.toolbox.mwindow, self.toolbox)
 
     def add_selected_line_markings(self, layout_attributes):
         line_markings = [e.value for e in LineMarking]
