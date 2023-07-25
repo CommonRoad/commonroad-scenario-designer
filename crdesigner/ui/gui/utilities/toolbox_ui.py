@@ -32,8 +32,10 @@ class SectionExpandButton(QPushButton):
     def on_clicked(self):
         """toggle expand/collapse of section by clicking"""
         if self.section.isExpanded():
+            self.mwindow.road_network_toolbox.disable_show_of_curved_lanelet()
             self.section.setExpanded(False)
         else:
+            self.mwindow.road_network_toolbox.disable_show_of_curved_lanelet(self.text())
             self.section.setExpanded(True)
 
 class CheckableComboBox(QComboBox):
