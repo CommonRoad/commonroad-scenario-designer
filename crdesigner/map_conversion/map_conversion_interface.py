@@ -9,6 +9,7 @@ from commonroad.scenario.scenario import Scenario
 from commonroad.common.file_reader import CommonRoadFileReader
 
 from crdesigner.config.opendrive_config import open_drive_config
+from crdesigner.config.lanelet2_config import lanelet2_config
 from crdesigner.map_conversion.opendrive.opendrive_parser.parser import parse_opendrive
 from crdesigner.map_conversion.opendrive.opendrive_conversion.network import Network
 
@@ -49,7 +50,7 @@ def lanelet_to_commonroad( input_file: str) -> Scenario:
     return scenario
 
 
-def commonroad_to_lanelet(input_file: str, output_name: str):
+def commonroad_to_lanelet(input_file: str, output_name: str, config: lanelet2_config = lanelet2_config):
     """
     Converts CommonRoad map to lanelet format
 
@@ -68,7 +69,7 @@ def commonroad_to_lanelet(input_file: str, output_name: str):
         )
         return
 
-    l2osm = CR2LaneletConverter()
+    l2osm = CR2LaneletConverter(config=config)
     osm = l2osm(scenario)
     with open(f"{output_name}", "wb") as file_out:
         file_out.write(
