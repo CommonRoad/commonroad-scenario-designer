@@ -33,8 +33,8 @@ from crdesigner.map_conversion.osm2cr.converter_modules.cr_operations.export imp
 from crdesigner.map_conversion.osm2cr.converter_modules.converter import GraphScenario
 
 
-def lanelet_to_commonroad( input_file: str, general_conf: general_config = general_config,
-                           lanelet2_conf: lanelet2_config = lanelet2_config) -> Scenario:
+def lanelet_to_commonroad(input_file: str, general_conf: general_config = general_config,
+                          lanelet2_conf: lanelet2_config = lanelet2_config) -> Scenario:
     """
     Converts lanelet/lanelet2 file to CommonRoad
 
