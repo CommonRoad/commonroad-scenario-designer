@@ -43,7 +43,7 @@ def lanelet_to_commonroad(input_file: str, general_conf: general_config = genera
     :param lanelet2_conf: Lanelet2 config parameters.
     :return: CommonRoad scenario
     """
-    parser = Lanelet2Parser(etree.parse(input_file).getroot())
+    parser = Lanelet2Parser(etree.parse(input_file).getroot(), lanelet2_conf)
     lanelet2_content = parser.parse()
 
     lanelet2_converter = Lanelet2CRConverter(lanelet2_conf, general_conf)

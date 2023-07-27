@@ -1,9 +1,7 @@
 from lxml import etree  # type: ignore
 from crdesigner.map_conversion.lanelet2.lanelet2 import OSMLanelet, Node, Way, WayRelation, RegulatoryElement
-
+from crdesigner.config.lanelet2_config import lanelet2_config
 from commonroad.scenario.traffic_sign import TrafficSignIDGermany  # type: ignore
-
-ALLOWED_TAGS = {"type", "subtype", "one_way", "virtual", "location", "bicycle", 'highway', }
 
 
 class Lanelet2Parser:
@@ -12,11 +10,15 @@ class Lanelet2Parser:
     Only extracts relevant information for conversion to Lanelet.
     """
 
-    def __init__(self, xml_doc: etree.Element):
+    def __init__(self, xml_doc: etree.Element, config: lanelet2_config = lanelet2_config):
         """
         Inits Lanelet2Parser
+
+        :param xml_doc: XML tree.
+        :param config: Lanelet2 conversion parameters.
         """
         self.xml = xml_doc
+        self.config = config
 
     def parse(self):
         """
@@ -24,12 +26,17 @@ class Lanelet2Parser:
         """
         osm = OSMLanelet()
         for node in self.xml.xpath("//node[@lat and @lon and @id]"):
-            osm.add_node(Node(node.get("id"), node.get("lat"), node.get("lon")))
+            for tag in node.findall("./tag"):
+                if tag.attrib.get("k") == "ele":
+                    osm.add_node(Node(node.get("id"), node.get("lat"), node.get("lon"), tag.attrib.get("v")))
+                    break
+            else:
+                osm.add_node(Node(node.get("id"), node.get("lat"), node.get("lon")))
 
         for way in self.xml.xpath("//way[@id]"):
             node_ids = [nd.get("ref") for nd in way.xpath("./nd")]
             tag_dict = {tag.get("k"): tag.get("v") for tag in way.xpath("./tag[@k and @v]") if
-                        tag.get("k") in ALLOWED_TAGS}
+                        tag.get("k") in self.config.allowed_tags}
 
             osm.add_way(Way(way.get("id"), node_ids, tag_dict))
 
@@ -38,7 +45,7 @@ class Lanelet2Parser:
                 left_way = way_rel.xpath("./member[@type='way' and @role='left']/@ref")[0]
                 right_way = way_rel.xpath("./member[@type='way' and @role='right']/@ref")[0]
                 tag_dict = {tag.get("k"): tag.get("v") for tag in way_rel.xpath("./tag[@k and @v]") if
-                            tag.get("k") in ALLOWED_TAGS}
+                            tag.get("k") in self.config.allowed_tags}
                 regulatory_elements = list(way_rel.xpath("./member[@role='regulatory_element']/@ref"))
                 osm.add_way_relation(WayRelation(way_rel.get("id"), left_way, right_way, tag_dict, regulatory_elements))
             except IndexError:
@@ -55,7 +62,7 @@ class Lanelet2Parser:
                     # Reference line is optional
                     # defaults to last line of yield lanelets
                     tag_dict = {tag.get("k"): tag.get("v") for tag in right_of_way_rel.xpath("./tag[@k and @v]") if
-                                tag.get("k") in ALLOWED_TAGS}
+                                tag.get("k") in self.config.allowed_tags}
                     ref_lines = right_of_way_rel.xpath("./member[@role='ref_line']/@ref")
                     osm.add_regulatory_element(
                             RegulatoryElement(right_of_way_rel.get("id"), traffic_signs, yield_lanelets,
@@ -74,7 +81,7 @@ class Lanelet2Parser:
                 traffic_lights = traffic_light.xpath("./member[@role='refers']/@ref")
                 ref_lines = traffic_light.xpath("./member[@role='ref_line']/@ref")
                 tag_dict = {tag.get("k"): tag.get("v") for tag in traffic_light.xpath("./tag[@k and @v]") if
-                            tag.get("k") in ALLOWED_TAGS}
+                            tag.get("k") in self.config.allowed_tags}
                     
                 osm.add_regulatory_element(RegulatoryElement(traffic_light.get('id'), ref_line=ref_lines,
                                                              refers=traffic_lights, tag_dict=tag_dict))
