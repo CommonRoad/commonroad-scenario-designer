@@ -94,7 +94,7 @@ class TestTrafficSignals(unittest.TestCase):
         # true traffic light
         position = np.array([15 * np.cos(0.785398) + (2 * np.cos(0.785398 + np.pi / 2)),
                              15 * np.sin(0.785398) + (2 * np.sin(0.785398 + np.pi / 2))])
-        traffic_light = TrafficLight(2003, [], position=position)
+        traffic_light = TrafficLight(2003, position=position)
         # true traffic sign
         position = np.array([20 * np.cos(0.785398) + (2 * np.cos(0.785398 + np.pi / 2)),
                              20 * np.sin(0.785398) + (2 * np.sin(0.785398 + np.pi / 2))])

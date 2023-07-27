@@ -1,9 +1,11 @@
 import math
+import numpy as np
 from crdesigner.ui.gui.model.scenario_model import ScenarioModel
 from crdesigner.ui.gui.view.toolboxes.road_network_toolbox.road_network_toolbox_ui.road_network_toolbox_ui import \
     RoadNetworkToolboxUI
 from crdesigner.ui.gui.view.toolboxes.road_network_toolbox.traffic_lights_ui import AddTrafficLightsUI
-from commonroad.scenario.traffic_sign import *
+from commonroad.scenario.traffic_light import (TrafficLight, TrafficLightState, TrafficLightDirection,
+                                               TrafficLightCycleElement, TrafficLightCycle)
 from crdesigner.ui.gui.utilities.gui_sumo_simulation import SUMO_AVAILABLE
 
 if SUMO_AVAILABLE:
@@ -19,7 +21,6 @@ class AddTrafficLightsController:
         self.road_network_toolbox_ui = road_network_toolbox_ui
         self.road_network_controller = road_network_controller
         self.traffic_lights_ui = AddTrafficLightsUI(self.scenario_model, self.road_network_toolbox_ui)
-
 
     def connect_gui_traffic_lights(self):
         self.road_network_toolbox_ui.button_add_traffic_light.clicked.connect(lambda: self.add_traffic_light())
@@ -87,8 +88,10 @@ class AddTrafficLightsController:
         if traffic_light_id is None:
             traffic_light_id = self.scenario_model.generate_object_id()
 
-        new_traffic_light = TrafficLight(traffic_light_id, traffic_light_cycle, np.array([x_position, y_position]),
-                                         time_offset, traffic_light_direction, traffic_light_active)
+        new_traffic_light = TrafficLight(traffic_light_id, np.array([x_position, y_position]),
+                                         TrafficLightCycle(traffic_light_cycle, time_offset=time_offset,
+                                                           active=traffic_light_active),
+                                         direction=traffic_light_direction, active=traffic_light_active)
 
         self.scenario_model.add_traffic_light(new_traffic_light, referenced_lanelets)
         self.road_network_controller.set_default_road_network_list_information()
@@ -166,7 +169,7 @@ class AddTrafficLightsController:
                 ok = False
             oks.append(ok)
             self.road_network_controller.text_browser.append(("Created" if ok else "ERROR: Could not create") +
-                                     f" traffic light system for lanelet {lanelet_id}")
+                                                             f" traffic light system for lanelet {lanelet_id}")
 
         if any(oks):
             self.scenario_model.create_traffic_lights(converter.lanelet_network)

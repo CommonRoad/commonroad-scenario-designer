@@ -48,7 +48,7 @@ class Node:
             local_y.set("v", str(self.local_y))
             node.append(local_x)
             node.append(local_y)
-        if self.ele != "0.0" or self.autoware:
+        if (self.ele != "0.0" and self.ele != '0') or self.autoware:
             ele = etree.SubElement(node, "tag")
             ele.set("k", "ele")
             ele.set("v", self.ele)

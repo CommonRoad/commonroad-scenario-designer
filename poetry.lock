@@ -251,11 +251,11 @@ typing = ["mypy (>=0.990)"]
 
 [[package]]
 name = "commonroad-io"
-version = "2023.1"
+version = "2023.2"
 description = "Python tool to read, write, and visualize CommonRoad scenarios and solutions for automated vehicles."
 category = "main"
 optional = false
-python-versions = ">=3.7,<4.0"
+python-versions = ">=3.8,<4.0"
 
 [package.dependencies]
 commonroad-vehicle-models = ">=2.0.0"
@@ -1602,14 +1602,14 @@ plugins = ["importlib-metadata"]
 
 [[package]]
 name = "pylint"
-version = "2.17.4"
+version = "2.17.5"
 description = "python code static checker"
 category = "dev"
 optional = false
 python-versions = ">=3.7.2"
 
 [package.dependencies]
-astroid = ">=2.15.4,<=2.17.0-dev0"
+astroid = ">=2.15.6,<=2.17.0-dev0"
 colorama = {version = ">=0.4.5", markers = "sys_platform == \"win32\""}
 dill = [
     {version = ">=0.2", markers = "python_version < \"3.11\""},
@@ -2338,7 +2338,7 @@ python-versions = ">=3.7"
 
 [[package]]
 name = "tomlkit"
-version = "0.11.8"
+version = "0.12.0"
 description = "Style preserving TOML library"
 category = "dev"
 optional = false
@@ -2505,7 +2505,7 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "5837aa6b1c159b54de92b1f3c43e7fa8f04a666573f5766c1380bc494e9ca414"
+content-hash = "a2c28ce979bad201db2e181a5b0602314e9fa41a6b77da565567fe4ec4f03860"
 
 [metadata.files]
 alabaster = [
@@ -2746,8 +2746,8 @@ comm = [
     {file = "comm-0.1.3.tar.gz", hash = "sha256:a61efa9daffcfbe66fd643ba966f846a624e4e6d6767eda9cf6e993aadaab93e"},
 ]
 commonroad-io = [
-    {file = "commonroad_io-2023.1-py3-none-any.whl", hash = "sha256:768d9fa6005bb10e3bd404190736d7564aaca596925fa171d32718770fc02eb9"},
-    {file = "commonroad_io-2023.1.tar.gz", hash = "sha256:ad2aa75823a201db91b2dd5e9e11f76e5a1f37a96c82ec15715cc6e631353141"},
+    {file = "commonroad_io-2023.2-py3-none-any.whl", hash = "sha256:f42fe19d2e06f67da073cad001ca2b594723231966988c8d6b3afa8ae39d0513"},
+    {file = "commonroad_io-2023.2.tar.gz", hash = "sha256:68c56bf2d0b615991c825ecf85638a56e1f789aab3eea76c90d46883e9b6c8b1"},
 ]
 commonroad-vehicle-models = [
     {file = "commonroad-vehicle-models-3.0.2.tar.gz", hash = "sha256:874de3b173f7b39869b69ec8da71690f849766af8623525e3e96f8a33d034f8e"},
@@ -3756,8 +3756,8 @@ pygments = [
     {file = "Pygments-2.15.1.tar.gz", hash = "sha256:8ace4d3c1dd481894b2005f560ead0f9f19ee64fe983366be1a21e171d12775c"},
 ]
 pylint = [
-    {file = "pylint-2.17.4-py3-none-any.whl", hash = "sha256:7a1145fb08c251bdb5cca11739722ce64a63db479283d10ce718b2460e54123c"},
-    {file = "pylint-2.17.4.tar.gz", hash = "sha256:5dcf1d9e19f41f38e4e85d10f511e5b9c35e1aa74251bf95cdd8cb23584e2db1"},
+    {file = "pylint-2.17.5-py3-none-any.whl", hash = "sha256:73995fb8216d3bed149c8d51bba25b2c52a8251a2c8ac846ec668ce38fab5413"},
+    {file = "pylint-2.17.5.tar.gz", hash = "sha256:f7b601cbc06fef7e62a754e2b41294c2aa31f1cb659624b9a85bcba29eaf8252"},
 ]
 pylint-celery = [
     {file = "pylint-celery-0.3.tar.gz", hash = "sha256:41e32094e7408d15c044178ea828dd524beedbdbe6f83f712c5e35bde1de4beb"},
@@ -4381,8 +4381,8 @@ tomli = [
     {file = "tomli-2.0.1.tar.gz", hash = "sha256:de526c12914f0c550d15924c62d72abc48d6fe7364aa87328337a31007fe8a4f"},
 ]
 tomlkit = [
-    {file = "tomlkit-0.11.8-py3-none-any.whl", hash = "sha256:8c726c4c202bdb148667835f68d68780b9a003a9ec34167b6c673b38eff2a171"},
-    {file = "tomlkit-0.11.8.tar.gz", hash = "sha256:9330fc7faa1db67b541b28e62018c17d20be733177d290a13b24c62d1614e0c3"},
+    {file = "tomlkit-0.12.0-py3-none-any.whl", hash = "sha256:926f1f37a1587c7a4f6c7484dae538f1345d96d793d9adab5d3675957b1d0766"},
+    {file = "tomlkit-0.12.0.tar.gz", hash = "sha256:01f0477981119c7d8ee0f67ebe0297a7c95b14cf9f4b102b45486deb77018716"},
 ]
 tornado = [
     {file = "tornado-6.3.2-cp38-abi3-macosx_10_9_universal2.whl", hash = "sha256:c367ab6c0393d71171123ca5515c61ff62fe09024fa6bf299cd1339dc9456829"},

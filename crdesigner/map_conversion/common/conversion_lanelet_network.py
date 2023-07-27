@@ -12,7 +12,8 @@ from pyproj import Transformer
 
 from commonroad.scenario.lanelet import LaneletNetwork, StopLine
 from commonroad.scenario.intersection import IntersectionIncomingElement, Intersection
-from commonroad.scenario.traffic_sign import TrafficLightDirection, TrafficLight, TrafficSign
+from commonroad.scenario.traffic_sign import TrafficSign
+from commonroad.scenario.traffic_light import TrafficLight, TrafficLightDirection
 
 from crdesigner.config.opendrive_config import open_drive_config, OpenDriveConfig
 from crdesigner.map_conversion.common import geometry

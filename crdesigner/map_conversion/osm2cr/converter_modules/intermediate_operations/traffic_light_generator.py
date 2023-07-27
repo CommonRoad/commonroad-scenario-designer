@@ -1,6 +1,6 @@
 from crdesigner.config.osm_config import osm_config as config
-from commonroad.scenario.traffic_sign import TrafficLight, TrafficLightCycleElement, TrafficLightState, \
-    TrafficLightDirection
+from commonroad.scenario.traffic_light import TrafficLight, TrafficLightCycleElement, TrafficLightState, \
+    TrafficLightDirection, TrafficLightCycle
 
 
 class TrafficLightGenerator:
@@ -23,7 +23,7 @@ class TrafficLightGenerator:
         self.cycle_length = sum(self.cycle.values())
         self.current_time_offset = 0
 
-    def get_cycle(self):
+    def get_cycle(self) -> TrafficLightCycle:
         """
         Cycle that is applied to all traffic lights
         """
@@ -32,7 +32,7 @@ class TrafficLightGenerator:
                  (TrafficLightState.GREEN, self.cycle['green_phase']),
                  (TrafficLightState.YELLOW, self.cycle['yellow_phase'])]
         cycle_element_list = [TrafficLightCycleElement(state[0], state[1]) for state in cycle]
-        return cycle_element_list
+        return TrafficLightCycle(cycle_element_list, time_offset=self.get_time_offset())
 
     def get_time_offset(self):
         """
@@ -56,7 +56,7 @@ class TrafficLightGenerator:
         Method to create the new traffic light
         """
 
-        new_traffic_light = TrafficLight(traffic_light_id=new_id, cycle=self.get_cycle(), position=position,
-                                         time_offset=self.get_time_offset(), direction=TrafficLightDirection.ALL,
+        new_traffic_light = TrafficLight(traffic_light_id=new_id, position=position,
+                                         traffic_light_cycle=self.get_cycle(), direction=TrafficLightDirection.ALL,
                                          active=True)
         return new_traffic_light
