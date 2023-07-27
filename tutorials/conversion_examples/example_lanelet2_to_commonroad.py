@@ -33,7 +33,7 @@ writer.write_to_file(os.path.dirname(os.path.realpath(__file__)) + "/" + "ZAM_La
 
 # ---------------------------------------- Option 2: Lanelet conversion APIs -------------------------------------------
 # read and parse lanelet/lanelet2 file
-parser = Lanelet2Parser(etree.parse(input_path).getroot())
+parser = Lanelet2Parser(etree.parse(input_path).getroot(), lanelet2_config)
 lanelet2_content = parser.parse()
 
 # convert lanelet/lanelet2 map to CommonRoad

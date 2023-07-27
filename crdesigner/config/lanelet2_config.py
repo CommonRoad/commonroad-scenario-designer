@@ -38,9 +38,9 @@ class Lanelet2Config(BaseConfig):
     adjacent_way_distance_tolerance = Attribute(0.05, "Adjacent way distance tolerance",
                                                 "Threshold indicating adjacent way")
 
-    start_node_id_value = Attribute(10, "Start node ID", "Initial node ID")
+    start_node_id_value = Attribute(10, "Start Node ID", "Initial node ID")
 
-    left_driving = Attribute(False, "Left driving", "Map describes left driving system")
+    left_driving = Attribute(False, "Left Driving", "Map describes left driving system")
 
     adjacencies = Attribute(True, "Adjacencies",
                             "Detect left and right adjacencies of lanelets if they do not share a common way")
@@ -52,11 +52,15 @@ class Lanelet2Config(BaseConfig):
                           "Boolean indicating whether map should be translated by the location coordinate specified "
                           "in the CommonRoad map")
 
+    allowed_tags = Attribute(["type", "subtype", "one_way", "virtual", "location", "bicycle", 'highway'],
+                             "Allowed Tags", "Lanelet tags which are considered for conversion. "
+                                             "Lanelets with other tags are not converted.")
+
     LAYOUT = [["CommonRoad To Lanelet2", ways_are_equal_tolerance, autoware,
                use_local_coordinates, supported_countries, supported_countries_prefixes, supported_lanelet2_subtypes,
                "General", proj_string, translate, left_driving],
               ["Lanelet2 To CommonRoad", node_distance_tolerance, adjacent_way_distance_tolerance, start_node_id_value,
-               priority_signs, adjacencies]]
+               priority_signs, adjacencies, allowed_tags]]
 
 
 lanelet2_config = Lanelet2Config()
