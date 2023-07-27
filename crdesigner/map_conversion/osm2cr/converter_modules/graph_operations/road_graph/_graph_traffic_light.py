@@ -5,7 +5,7 @@ GraphTrafficLight class
 from typing import Dict
 import numpy as np
 
-from commonroad.scenario.traffic_sign import TrafficLight
+from commonroad.scenario.traffic_light import TrafficLight
 from crdesigner.map_conversion.osm2cr.converter_modules.utility import idgenerator
 
 from ._graph_node import GraphNode
@@ -36,5 +36,5 @@ class GraphTrafficLight:
         if self.node is not None:
             position_point = self.node.get_point()
             position = np.array([position_point.x, position_point.y])
-        traffic_light = TrafficLight(self.id, cycle=[], position=position)
+        traffic_light = TrafficLight(self.id, position=position)
         return traffic_light

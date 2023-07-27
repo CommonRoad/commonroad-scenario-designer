@@ -5,11 +5,11 @@ import numpy as np
 from pyproj import Transformer, CRS
 import logging
 
-from commonroad.scenario.lanelet import StopLine, LineMarking, RoadUser, Lanelet, LaneletNetwork  # type: ignore
-from commonroad.scenario.traffic_sign import (TrafficSignElement, TrafficSignIDGermany,  # type: ignore
-                                              TrafficSignIDUsa,  # type: ignore
-                                              TrafficSignIDZamunda, TrafficLightCycleElement,
-                                              TrafficLightState, TrafficLightDirection)  # type: ignore
+from commonroad.scenario.lanelet import StopLine, LineMarking, RoadUser, Lanelet, LaneletNetwork
+from commonroad.scenario.traffic_sign import (TrafficSignElement, TrafficSignIDGermany, TrafficSignIDUsa,
+                                              TrafficSignIDZamunda)
+from commonroad.scenario.traffic_light import (TrafficLightCycleElement, TrafficLightState, TrafficLightDirection,
+                                               TrafficLightCycle)
 from commonroad.scenario.scenario import Scenario, ScenarioID, TrafficSign, Location, TrafficLight, \
     GeoTransformation  # type: ignore
 
@@ -20,10 +20,8 @@ from crdesigner.map_conversion.common.utils import generate_unique_id
 from crdesigner.map_conversion.common.conversion_lanelet import ConversionLanelet
 from crdesigner.map_conversion.common.conversion_lanelet_network import \
     ConversionLaneletNetwork
-from crdesigner.map_conversion.common.utils import convert_to_new_lanelet_id
 from crdesigner.map_conversion.lanelet2.lanelet2 import WayRelation, Node, RegulatoryElement, Way
-from crdesigner.map_conversion.common.geometry import (point_to_line_distance,
-                                                       distance as point_to_polyline_distance)
+from crdesigner.map_conversion.common.geometry import point_to_line_distance, distance as point_to_polyline_distance
 
 
 date_strftime_format = "%d-%b-%y %H:%M:%S"
@@ -289,11 +287,13 @@ class Lanelet2CRConverter:
         for speed_limit_key in osm.speed_limit_signs.keys():
             speed, traffic_sign_id = osm.speed_limit_signs[speed_limit_key]
             light_id = speed_limits[speed_limit_key]
-            first_occurrence = {self.lanelet_network._old_lanelet_ids[l_id] for l_id in
-                                speed_limit_lanelets[speed_limit_key]}
+            first_occurrence = \
+                {self.lanelet_network._old_lanelet_ids[l_id] for l_id in speed_limit_lanelets[speed_limit_key]}
             position = self.lanelet_network.find_lanelet_by_id(
                     self.lanelet_network._old_lanelet_ids[speed_limit_lanelets[speed_limit_key][0]]).left_vertices[0]
-            speed_limit = TrafficSign(light_id, [TrafficSignElement(traffic_sign_id, [speed])], first_occurrence,
+            speed_limit = TrafficSign(light_id,
+                                      [TrafficSignElement(traffic_sign_id, [speed])],
+                                      first_occurrence,
                                       position, True)
             self.lanelet_network.add_traffic_sign(speed_limit,
                                                   first_occurrence)
@@ -360,7 +360,8 @@ class Lanelet2CRConverter:
                     wr_lanelets.add(new_lanelet_ids[wr])
 
         # create the traffic light
-        traffic_light = TrafficLight(new_id, cycle_list, np.array([x, y]), 1, TrafficLightDirection.STRAIGHT, True)
+        traffic_light = TrafficLight(new_id, np.array([x, y]), TrafficLightCycle(cycle_list, 1), active=True,
+                                     direction=TrafficLightDirection.STRAIGHT)
 
         # add the traffic light to our lanelet network
         self.lanelet_network.add_traffic_light(traffic_light, wr_lanelets)
@@ -397,7 +398,7 @@ class Lanelet2CRConverter:
         # https://github.com/fzi-forschungszentrum-informatik/Lanelet2/blob/master/lanelet2_core/doc
         # /LinestringTagging.md
 
-        priority_signs, yield_signs = self._traffic_sign_ways_to_traffic_signs(traffic_sign_ways, new_lanelet_ids)
+        priority_signs, yield_signs = self._traffic_sign_ways_to_traffic_signs(traffic_sign_ways)
 
         priority_lanelets = []
         for i in right_of_way_rel.right_of_ways:
@@ -443,13 +444,12 @@ class Lanelet2CRConverter:
             stop_lines.append(stop_line)
         return yield_signs, priority_signs, yield_lanelets, priority_lanelets, stop_lines
 
-    def _traffic_sign_ways_to_traffic_signs(self, traffic_sign_ways: List, new_lanelet_ids: Dict[str, int]) \
+    def _traffic_sign_ways_to_traffic_signs(self, traffic_sign_ways: List) \
             -> Tuple[List[TrafficSign], List[TrafficSign]]:
         """
         Converts traffic sign ways (L2) into traffic signs (CR)
 
         :param traffic_sign_ways: ways that will be converted into traffic signs
-        :param new_lanelet_ids: dictionary that will map the newly created traffic signs with their new ids
         :return: tuple of lists that match according to the priority of the traffic sign.
         """
 

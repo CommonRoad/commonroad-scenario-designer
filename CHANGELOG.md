@@ -14,6 +14,9 @@
 
 ## [0.7.2] - 2023-07-XX
 
+### Added
+- Lanelet2 conversion considers z-coordinate/elevation
+
 ### Fixed
 - ID assignment lanelet2cr conversion
 

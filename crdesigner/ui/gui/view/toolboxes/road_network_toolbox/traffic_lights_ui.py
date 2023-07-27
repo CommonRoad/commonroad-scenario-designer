@@ -1,4 +1,4 @@
-from commonroad.scenario.traffic_sign import TrafficLightState
+from commonroad.scenario.traffic_light import TrafficLightState
 
 from crdesigner.ui.gui.model.scenario_model import ScenarioModel
 from crdesigner.ui.gui.view.toolboxes.road_network_toolbox.road_network_toolbox_ui.road_network_toolbox_ui import \
@@ -21,11 +21,11 @@ class AddTrafficLightsUI:
 
             self.road_network_toolbox_ui.x_position_traffic_light.setText(str(traffic_light.position[0]))
             self.road_network_toolbox_ui.y_position_traffic_light.setText(str(traffic_light.position[1]))
-            self.road_network_toolbox_ui.time_offset.setText(str(traffic_light.time_offset))
+            self.road_network_toolbox_ui.time_offset.setText(str(traffic_light.traffic_light_cycle.time_offset))
             self.road_network_toolbox_ui.traffic_light_active.setChecked(True)
 
             cycle_order = ""
-            for elem in traffic_light.cycle:
+            for elem in traffic_light.traffic_light_cycle.cycle_elements:
                 if elem.state is TrafficLightState.RED:
                     cycle_order += "r-"
                     self.road_network_toolbox_ui.time_red.setText(str(elem.duration))

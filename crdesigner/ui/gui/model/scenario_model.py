@@ -5,9 +5,10 @@ from commonroad.scenario.intersection import Intersection
 from commonroad.scenario.scenario import Scenario
 from commonroad.scenario.lanelet import Lanelet, LaneletNetwork
 from commonroad.common.util import Interval
-
 from commonroad.scenario.traffic_sign import *
-from commonroad.scenario.obstacle import *
+from commonroad.scenario.obstacle import DynamicObstacle, Obstacle, StaticObstacle
+from commonroad.scenario.traffic_light import TrafficLight
+from commonroad.geometry.shape import Shape, Rectangle
 
 from crdesigner.ui.gui.utilities.map_creator import MapCreator
 
@@ -273,7 +274,8 @@ class ScenarioModel(QObject):
         self._current_scenario().replace_lanelet_network(lanelet_network)
         self.notify_all()
 
-    def create_three_way_intersection(self, width, diameter, incoming_length, add_traffic_signs, add_traffic_lights):
+    def create_three_way_intersection(self, width: float, diameter: int, incoming_length: int,
+                                      add_traffic_signs: bool, add_traffic_lights: bool):
         self._update_scenario()
         country_signs = globals()[
             "TrafficSignID" + SupportedTrafficSignCountry(self.get_country_id()).name.capitalize()]
@@ -286,7 +288,8 @@ class ScenarioModel(QObject):
         self._current_scenario().add_objects(new_traffic_lights)
         self.notify_all()
 
-    def create_four_way_intersection(self, width, diameter, incoming_length, add_traffic_signs, add_traffic_lights):
+    def create_four_way_intersection(self, width: float, diameter: int, incoming_length: int,
+                                     add_traffic_signs: bool, add_traffic_lights: bool):
         self._update_scenario()
         country_signs = globals()[
             "TrafficSignID" + SupportedTrafficSignCountry(self.get_country_id()).name.capitalize()]
