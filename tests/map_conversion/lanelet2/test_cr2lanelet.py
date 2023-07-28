@@ -285,7 +285,7 @@ class TestCR2LaneletConverter(unittest.TestCase):
         # equal to the value of the cr1.first_nodes at the same index of our lanelet 2.
         self.assertEqual(nodes, cr1.first_nodes[2])
 
-    def test__convert_traffic_sign(self):
+    def test_convert_traffic_sign(self):
         # function takes a traffic sign and maps it as a way
 
         cr1 = CR2LaneletConverter()
@@ -322,15 +322,15 @@ class TestCR2LaneletConverter(unittest.TestCase):
 
         # compare the node coordinates
         # transform the coordinates of the sign, should get the same coordinates as ones of the newly created way
-        sign_n1_lon, sign_n1_lat = cr1.transformer.transform(cr1.origin_utm[0] + sign.position[0],
-                                            cr1.origin_utm[1] + sign.position[1])
+        sign_n1_lat, sign_n1_lon = cr1.transformer.transform(cr1.origin_utm[0] + sign.position[0],
+                                                             cr1.origin_utm[1] + sign.position[1])
         
         self.assertEqual(str(sign_n1_lon), n1.lon)
         self.assertEqual(str(sign_n1_lat), n1.lat)
         
         # as stated in the original function, second node is created to match the L2 format
-        sign_n2_lon, sign_n2_lat = cr1.transformer.transform(cr1.origin_utm[0] + sign.position[1]+0.25,
-                                            cr1.origin_utm[1] + sign.position[1]+0.25)
+        sign_n2_lat, sign_n2_lon = cr1.transformer.transform(cr1.origin_utm[0] + sign.position[1]+0.25,
+                                                             cr1.origin_utm[1] + sign.position[1]+0.25)
         self.assertEqual(str(sign_n2_lon), n2.lon)
         self.assertEqual(str(sign_n2_lat), n2.lat)
 
@@ -376,7 +376,7 @@ class TestCR2LaneletConverter(unittest.TestCase):
         traffic_sign_type = sign_as_way_z.tag_dict["type"]
         self.assertEqual(traffic_sign_type, "traffic_sign")
 
-    def test__add_rightOfWayRelation(self):
+    def test_add_rightOfWayRelation(self):
         """
         """
         # working with the local scenario as it reflects the entire file if I change it globally
@@ -432,11 +432,11 @@ class TestCR2LaneletConverter(unittest.TestCase):
                     n1_id, n2_id = way.nodes
                     n1 = cr1.osm.nodes[n1_id]
                     n2 = cr1.osm.nodes[n2_id]
-                    sign_n1_lon, sign_n1_lat = cr1.transformer.transform(cr1.origin_utm[0] + sign.position[0],
+                    sign_n1_lat, sign_n1_lon = cr1.transformer.transform(cr1.origin_utm[0] + sign.position[0],
                                                                          cr1.origin_utm[1] + sign.position[1])
                     self.assertEqual(str(sign_n1_lon), n1.lon)
                     self.assertEqual(str(sign_n1_lat), n1.lat)
-                    sign_n2_lon, sign_n2_lat = cr1.transformer.transform(cr1.origin_utm[0] + sign.position[1]+0.25,
+                    sign_n2_lat, sign_n2_lon = cr1.transformer.transform(cr1.origin_utm[0] + sign.position[1]+0.25,
                                                                          cr1.origin_utm[1] + sign.position[1]+0.25)
                     self.assertEqual(str(sign_n2_lon), n2.lon)
                     self.assertEqual(str(sign_n2_lat), n2.lat)
