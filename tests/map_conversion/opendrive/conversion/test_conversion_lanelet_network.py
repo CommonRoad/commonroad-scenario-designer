@@ -6,7 +6,8 @@ from crdesigner.map_conversion.common.conversion_lanelet_network import  \
     ConversionLaneletNetwork, _JoinSplitTarget, _JoinSplitPair
 from crdesigner.map_conversion.common.conversion_lanelet import ConversionLanelet
 from commonroad.scenario.lanelet import LaneletNetwork, StopLine
-from commonroad.scenario.traffic_sign import TrafficLight, TrafficSign
+from commonroad.scenario.traffic_sign import TrafficSign
+from commonroad.scenario.traffic_light import TrafficLight
 from commonroad.scenario.intersection import Intersection, IntersectionIncomingElement
 from commonroad.scenario.lanelet import LaneletType
 from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.plane_group import \
@@ -98,8 +99,8 @@ class TestConversionLanelet(unittest.TestCase):
 
     def test_find_traffic_light_by_id(self):
         conversion_lanelet_network = ConversionLaneletNetwork()
-        t1 = TrafficLight(100, [])
-        t2 = TrafficLight(101, [])
+        t1 = TrafficLight(100, np.ndarray([0, 0]))
+        t2 = TrafficLight(101, np.ndarray([0, 0]))
         traffic_light_dict = {100: t1, 101: t2}
         conversion_lanelet_network._traffic_lights = traffic_light_dict
         self.assertEqual(t1, conversion_lanelet_network.find_traffic_light_by_id(100))

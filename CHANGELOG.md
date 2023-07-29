@@ -3,8 +3,12 @@
 
 ## [0.7.2] - 2023-07-XX
 
+### Added
+- Lanelet2 conversion considers z-coordinate/elevation
+
 ### Fixed
 - ID assignment lanelet2cr conversion
+- lanelet2cr stop line projection
 
 ## [0.7.1] - 2023-06-21
 

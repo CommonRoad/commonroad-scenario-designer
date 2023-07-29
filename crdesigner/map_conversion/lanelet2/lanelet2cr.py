@@ -5,11 +5,11 @@ import numpy as np
 from pyproj import Transformer, CRS
 import logging
 
-from commonroad.scenario.lanelet import StopLine, LineMarking, RoadUser, Lanelet, LaneletNetwork  # type: ignore
-from commonroad.scenario.traffic_sign import (TrafficSignElement, TrafficSignIDGermany,  # type: ignore
-                                              TrafficSignIDUsa,  # type: ignore
-                                              TrafficSignIDZamunda, TrafficLightCycleElement,
-                                              TrafficLightState, TrafficLightDirection)  # type: ignore
+from commonroad.scenario.lanelet import StopLine, LineMarking, RoadUser, Lanelet, LaneletNetwork
+from commonroad.scenario.traffic_sign import (TrafficSignElement, TrafficSignIDGermany, TrafficSignIDUsa,
+                                              TrafficSignIDZamunda)
+from commonroad.scenario.traffic_light import (TrafficLightCycleElement, TrafficLightState, TrafficLightDirection,
+                                               TrafficLightCycle)
 from commonroad.scenario.scenario import Scenario, ScenarioID, TrafficSign, Location, TrafficLight, \
     GeoTransformation  # type: ignore
 
@@ -293,11 +293,13 @@ class Lanelet2CRConverter:
         for speed_limit_key in osm.speed_limit_signs.keys():
             speed, traffic_sign_id = osm.speed_limit_signs[speed_limit_key]
             light_id = speed_limits[speed_limit_key]
-            first_occurrence = {self.lanelet_network._old_lanelet_ids[l_id] for l_id in
-                                speed_limit_lanelets[speed_limit_key]}
+            first_occurrence = \
+                {self.lanelet_network._old_lanelet_ids[l_id] for l_id in speed_limit_lanelets[speed_limit_key]}
             position = self.lanelet_network.find_lanelet_by_id(
                     self.lanelet_network._old_lanelet_ids[speed_limit_lanelets[speed_limit_key][0]]).left_vertices[0]
-            speed_limit = TrafficSign(light_id, [TrafficSignElement(traffic_sign_id, [speed])], first_occurrence,
+            speed_limit = TrafficSign(light_id,
+                                      [TrafficSignElement(traffic_sign_id, [speed])],
+                                      first_occurrence,
                                       position, True)
             self.lanelet_network.add_traffic_sign(speed_limit,
                                                   first_occurrence)
@@ -338,14 +340,14 @@ class Lanelet2CRConverter:
 
         # TL in L2 format is represented with 3 nodes, we will take the one in the middle
         node = self.osm.nodes[traffic_light_way.nodes[1]]
-        node_x = node.lon
-        node_y = node.lat
 
         # convert to CR space
-        x, y = self.transformer.transform(node_x, node_y)
+        x, y = self.transformer.transform(node.lon, node.lat)
         x -= self.origin_utm[0]
         y -= self.origin_utm[1]
-        
+
+        position = np.array([x, y, float(node.ele)]) if node.ele != "0.0" else np.array([x, y])
+
         # need to assign lanelet to that trafficLight
         # find the traffic_light_relations corresponding to our traffic_light_way and add them to the list
         traffic_light_relations = []
@@ -364,7 +366,8 @@ class Lanelet2CRConverter:
                     wr_lanelets.add(new_lanelet_ids[wr])
 
         # create the traffic light
-        traffic_light = TrafficLight(new_id, cycle_list, np.array([x, y]), 1, TrafficLightDirection.STRAIGHT, True)
+        traffic_light = TrafficLight(new_id, position, TrafficLightCycle(cycle_list, 1), active=True,
+                                     direction=TrafficLightDirection.STRAIGHT)
 
         # add the traffic light to our lanelet network
         self.lanelet_network.add_traffic_light(traffic_light, wr_lanelets)
@@ -401,7 +404,7 @@ class Lanelet2CRConverter:
         # https://github.com/fzi-forschungszentrum-informatik/Lanelet2/blob/master/lanelet2_core/doc
         # /LinestringTagging.md
 
-        priority_signs, yield_signs = self._traffic_sign_ways_to_traffic_signs(traffic_sign_ways, new_lanelet_ids)
+        priority_signs, yield_signs = self._traffic_sign_ways_to_traffic_signs(traffic_sign_ways)
 
         priority_lanelets = []
         for i in right_of_way_rel.right_of_ways:
@@ -447,13 +450,12 @@ class Lanelet2CRConverter:
             stop_lines.append(stop_line)
         return yield_signs, priority_signs, yield_lanelets, priority_lanelets, stop_lines
 
-    def _traffic_sign_ways_to_traffic_signs(self, traffic_sign_ways: List, new_lanelet_ids: Dict[str, int]) \
+    def _traffic_sign_ways_to_traffic_signs(self, traffic_sign_ways: List) \
             -> Tuple[List[TrafficSign], List[TrafficSign]]:
         """
         Converts traffic sign ways (L2) into traffic signs (CR)
 
         :param traffic_sign_ways: ways that will be converted into traffic signs
-        :param new_lanelet_ids: dictionary that will map the newly created traffic signs with their new ids
         :return: tuple of lists that match according to the priority of the traffic sign.
         """
 
@@ -507,10 +509,12 @@ class Lanelet2CRConverter:
             x -= self.origin_utm[0]
             y -= self.origin_utm[1]
             ref_t_id = generate_unique_id()
+            position = np.array([x, y, float(traffic_sign_node.ele)]) \
+                if traffic_sign_node.ele != "0.0" else np.array([x, y])
 
             # create the traffic sign
             traffic_sign = TrafficSign(ref_t_id, traffic_sign_elements=[traffic_sign_element], first_occurrence=set(),
-                                       position=np.array([x, y]), virtual=virtual)
+                                       position=position, virtual=virtual)
             # traffic sign names need to be universal(i.e."YIELD" should be the name of both German and USA Yield signs)
 
             # append the sign to either priority or yield signs
@@ -822,20 +826,23 @@ class Lanelet2CRConverter:
             if potential_right_adj is not None:
                 self.lanelet_network.set_adjacent_right(lanelet, potential_right_adj, False)
 
-    def _convert_way_to_vertices(self, way) -> np.ndarray:
+    def _convert_way_to_vertices(self, way: Way) -> np.ndarray:
         """
         Convert a Way to a list of points.
 
         :param way: Way to be converted.
         :return: The vertices of the new lanelet border.
         """
-        vertices = np.empty((len(way.nodes), 2))
+        if any([self.osm.find_node_by_id(node_id).ele != "0.0" for node_id in way.nodes]):
+            vertices = np.empty((len(way.nodes), 3))
+        else:
+            vertices = np.empty((len(way.nodes), 2))
         for i, node_id in enumerate(way.nodes):
             nd = self.osm.find_node_by_id(node_id)
             x, y = self.transformer.transform(float(nd.lat), float(nd.lon))
             x -= self.origin_utm[0]
             y -= self.origin_utm[1]
-            vertices[i] = [x, y]
+            vertices[i] = [x, y, float(nd.ele)] if nd.ele != "0.0" else [x, y]
 
         return vertices
 
@@ -885,8 +892,8 @@ class Lanelet2CRConverter:
         start_node = self.osm.find_node_by_id(shorter_way.nodes[mid])
         end_node = self.osm.find_node_by_id(shorter_way.nodes[mid - 1])
         # Parse to nodes with numeric values
-        start_node_f = np.array([float(start_node.lat), float(start_node.lon)])
-        end_node_f = np.array([float(end_node.lat), float(end_node.lon)])
+        start_node_f = np.array([float(start_node.lat), float(start_node.lon), float(start_node.ele)])
+        end_node_f = np.array([float(end_node.lat), float(end_node.lon), float(end_node.ele)])
         # Add n nodes, start from last one
         for i in range(n, 0, -1):
             k = self._config.start_node_id_value
@@ -897,6 +904,7 @@ class Lanelet2CRConverter:
             # For Getting n additional nodes, we need to split the segment into n+1 smaller segments
             new_lat = round(start_node_f[0] + (end_node_f[0] - start_node_f[0]) * i / (n + 1), 11)
             new_lon = round(start_node_f[1] + (end_node_f[1] - start_node_f[1]) * i / (n + 1), 11)
-            new_node = Node(new_id, new_lat, new_lon)
+            new_ele = round(start_node_f[2] + (end_node_f[2] - start_node_f[2]) * i / (n + 1), 11)
+            new_node = Node(new_id, new_lat, new_lon, new_ele)
             self.osm.add_node(new_node)
             shorter_way.nodes.insert(mid, new_node.id_)

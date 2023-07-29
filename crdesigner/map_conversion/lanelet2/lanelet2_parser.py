@@ -24,7 +24,12 @@ class Lanelet2Parser:
         """
         osm = OSMLanelet()
         for node in self.xml.xpath("//node[@lat and @lon and @id]"):
-            osm.add_node(Node(node.get("id"), node.get("lat"), node.get("lon")))
+            for tag in node.findall("./tag"):
+                if tag.attrib.get("k") == "ele":
+                    osm.add_node(Node(node.get("id"), node.get("lat"), node.get("lon"), tag.attrib.get("v")))
+                    break
+            else:
+                osm.add_node(Node(node.get("id"), node.get("lat"), node.get("lon")))
 
         for way in self.xml.xpath("//way[@id]"):
             node_ids = [nd.get("ref") for nd in way.xpath("./nd")]

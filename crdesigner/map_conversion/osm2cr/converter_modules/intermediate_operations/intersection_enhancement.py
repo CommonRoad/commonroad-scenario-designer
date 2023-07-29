@@ -1,7 +1,3 @@
-"""
-This module is used to enhance intersections with traffic lights.
-"""
-
 from crdesigner.map_conversion.osm2cr.converter_modules.utility import idgenerator
 from crdesigner.map_conversion.common import geometry
 from crdesigner.map_conversion.osm2cr.converter_modules.intermediate_operations.traffic_light_generator import \
