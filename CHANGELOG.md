@@ -10,6 +10,9 @@
 - ID assignment lanelet2cr conversion
 - lanelet2cr stop line projection
 
+### Changed
+- minimum cr-io version: 2023.2
+
 ## [0.7.1] - 2023-06-21
 
 ### Added

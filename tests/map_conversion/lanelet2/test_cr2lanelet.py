@@ -1,5 +1,6 @@
 import os
 import unittest
+import numpy as np
 from crdesigner.config.config import Lanelet2ConversionParams
 from crdesigner.map_conversion.lanelet2.cr2lanelet import CR2LaneletConverter
 from commonroad.scenario.lanelet import Lanelet, StopLine, LineMarking
