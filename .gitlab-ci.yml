@@ -43,41 +43,24 @@ prospector_tutorials:
   allow_failure: true
   needs: []
 
-build_and_test_python_3_8:
-  image: python:3.8
+build_and_test_python:
+  image : python:$PYTHON_VERSIONS
   stage: test
+  parallel :
+    matrix :
+      - PYTHON_VERSIONS : [ "3.8", "3.9", "3.10" ]
   variables:
     QT_QPA_PLATFORM : "offscreen"
   script:
     - *run-test-with-coverage
   needs: []
 
-build_and_test_python_3_9:
-  image: python:3.9
-  stage: test
-  variables:
-    QT_QPA_PLATFORM : "offscreen"
-  script:
-    - *run-test-with-coverage
-  needs: []
-
-build_and_test_python_3_10:
-  image: python:3.10
-  stage: test
-  variables:
-    QT_QPA_PLATFORM : "offscreen"
-  script:
-    - poetry env use 3.10
-    - *run-test-with-coverage
-  needs: []
-
-build_and_test_python_3_11:
+build_and_test_with_coverage:
   image: python:3.11
   stage : test
   variables :
     QT_QPA_PLATFORM : "offscreen"
   script :
-    - poetry env use 3.11
     - *run-test-with-coverage
     - coverage xml
   coverage : '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'

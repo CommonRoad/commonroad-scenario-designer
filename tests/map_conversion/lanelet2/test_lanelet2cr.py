@@ -7,6 +7,7 @@ import sys
 
 from commonroad.scenario.lanelet import StopLine, LineMarking, Lanelet, LaneletNetwork
 from commonroad.scenario.traffic_sign import *
+from commonroad.scenario.traffic_light import TrafficLight
 from commonroad.scenario.scenario import TrafficSign, Location, GeoTransformation
 from crdesigner.map_conversion.lanelet2.lanelet2cr import _add_closest_traffic_sign_to_lanelet, \
     _add_stop_line_to_lanelet
@@ -553,20 +554,20 @@ class TestLanelet2CRConverter(unittest.TestCase):
         self.assertEqual(tl_before+1, tl_after)
 
         # check the cycle of the converted traffic light
-        traffic_light = l2cr.lanelet_network.traffic_lights[0]
+        traffic_light: TrafficLight = l2cr.lanelet_network.traffic_lights[0]
 
-        first_color = traffic_light.cycle[0]._state.value
-        first_duration = traffic_light.cycle[0].duration
+        first_color = traffic_light.traffic_light_cycle.cycle_elements[0].state.value
+        first_duration = traffic_light.traffic_light_cycle.cycle_elements[0].duration
         self.assertEqual(first_color, 'red')
         self.assertEqual(first_duration, 5)
 
-        second_color = traffic_light.cycle[1]._state.value
-        second_duration = traffic_light.cycle[1].duration
+        second_color = traffic_light.traffic_light_cycle.cycle_elements[1]._state.value
+        second_duration = traffic_light.traffic_light_cycle.cycle_elements[1].duration
         self.assertEqual(second_color, 'yellow')
         self.assertEqual(second_duration, 5)
 
-        third_color = traffic_light.cycle[2]._state.value
-        third_duration = traffic_light.cycle[2].duration
+        third_color = traffic_light.traffic_light_cycle.cycle_elements[2]._state.value
+        third_duration = traffic_light.traffic_light_cycle.cycle_elements[2].duration
         self.assertEqual(third_color, 'green')
         self.assertEqual(third_duration, 5)
 

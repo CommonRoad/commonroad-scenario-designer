@@ -6,6 +6,7 @@ from commonroad.scenario.lanelet import LineMarking, LaneletType, RoadUser, Stop
 from commonroad.scenario.intersection import IntersectionIncomingElement, Intersection
 from commonroad.scenario.scenario import Scenario
 from commonroad.scenario.traffic_sign import *
+from commonroad.scenario.traffic_light import TrafficLightDirection, TrafficLightCycle, TrafficLight, TrafficLightCycleElement, TrafficLightState
 
 from crdesigner.ui.gui.mwindow.service_layer.services.waitingspinnerwidget import QtWaitingSpinner
 from crdesigner.ui.gui.mwindow.toolboxes.toolbox_ui import CheckableComboBox
@@ -1452,8 +1453,11 @@ self.road_network_toolbox_ui.connect_to_previous_selection.isChecked() and not \
         if traffic_light_id is None:
             traffic_light_id = self.current_scenario.generate_object_id()
 
-        new_traffic_light = TrafficLight(traffic_light_id, traffic_light_cycle, np.array([x_position, y_position]),
-                                         time_offset, traffic_light_direction, traffic_light_active)
+        new_traffic_light = TrafficLight(traffic_light_id, np.array([x_position, y_position]),
+                                         TrafficLightCycle(traffic_light_cycle, time_offset=time_offset,
+                                                           active=traffic_light_active),
+                                         direction=traffic_light_direction, active=traffic_light_active)
+
 
         self.current_scenario.add_objects(new_traffic_light, referenced_lanelets)
         self.set_default_road_network_list_information()

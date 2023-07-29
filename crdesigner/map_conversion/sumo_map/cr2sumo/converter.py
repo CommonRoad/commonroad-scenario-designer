@@ -45,8 +45,8 @@ from commonroad.scenario.trajectory import State
 from commonroad.scenario.lanelet import LaneletNetwork, Lanelet, LineMarking, LaneletType
 from commonroad.scenario.obstacle import ObstacleRole, ObstacleType
 from commonroad.scenario.scenario import Scenario
-from commonroad.scenario.traffic_sign import SupportedTrafficSignCountry, TrafficLight, \
-    TrafficLightCycleElement, TrafficLightDirection, TrafficSign
+from commonroad.scenario.traffic_sign import SupportedTrafficSignCountry, TrafficSign
+from commonroad.scenario.traffic_light import TrafficLight, TrafficLightCycleElement, TrafficLightDirection
 from commonroad.scenario.traffic_sign_interpreter import TrafficSigInterpreter
 
 from sumocr.maps.scenario_wrapper import AbstractScenarioWrapper
@@ -166,7 +166,7 @@ class CR2SumoMapConverter(AbstractScenarioWrapper):
     @classmethod
     def from_file(cls, file_path_cr, conf: SumoConfig):
         scenario, _ = CommonRoadFileReader(file_path_cr).open()
-        return cls(scenario.lanelet_network, conf)
+        return cls(scenario, conf)
 
     def _convert_map(self):
         self._find_lanes()

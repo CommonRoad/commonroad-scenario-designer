@@ -7,7 +7,7 @@ from crdesigner.ui.gui.mwindow.service_layer.services.waitingspinnerwidget impor
 from crdesigner.ui.gui.mwindow.toolboxes.toolbox_ui import Toolbox, CheckableComboBox, CollapsibleArrowBox, CollapsibleCheckBox, PositionButton
 
 from commonroad.scenario.lanelet import LaneletType, RoadUser, LineMarking
-from commonroad.scenario.traffic_sign import *
+from commonroad.scenario.traffic_light import TrafficLightDirection
 
 
 class RoadNetworkToolboxUI(Toolbox):

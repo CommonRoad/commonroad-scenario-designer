@@ -1,7 +1,4 @@
 # CommonRoad Scenario Designer
-[![Linux](https://svgshare.com/i/Zhy.svg)](https://svgshare.com/i/Zhy.svg)
-[![macOS](https://svgshare.com/i/ZjP.svg)](https://svgshare.com/i/ZjP.svg)
-[![Windows](https://svgshare.com/i/ZhY.svg)](https://svgshare.com/i/ZhY.svg)  
 [![PyPI pyversions](https://img.shields.io/pypi/pyversions/commonroad-scenario-designer.svg)](https://pypi.python.org/pypi/commonroad-scenario-designer/)  
 [![PyPI version fury.io](https://badge.fury.io/py/commonroad-scenario-designer.svg)](https://pypi.python.org/pypi/commonroad-scenario-designer/)
 [![PyPI download week](https://img.shields.io/pypi/dw/commonroad-scenario-designer.svg?label=PyPI%20downloads)](https://pypi.python.org/pypi/commonroad-scenario-designer/) 
@@ -147,11 +144,11 @@ In case you detect a bug or you want to suggest a new feature, please report it 
 If you want to contribute to the toolbox, you can also post it in the [forum](https://commonroad.in.tum.de/forum/c/scenario-designer/18) or contact [Sebastian Maierhofer](sebastian.maierhofer@tum.de).
 
 ## Authors
-
-Responsible: Sebastian Maierhofer, Sebastian Mair
-Contribution (in alphabetic order by last name): Daniel Asch, Hamza Begic, Florian Braunmiller, Tim Dang, 
-Behtarin Ferdousi, Maximilian Fruehauf, Marcus Gabler, Fabian Hoeltke, Aaron Kaefer, David Le, Gustaf Lindgren, 
-Sarra Ben Mohamed, Benjamin Orthen, Luisa Ortner, Louis Pröbstle, Benedikt Reinhard, Maximilian Rieger, Til Stotz, Stefan Urban
+Responsible: Sebastian Maierhofer, Sebastian Mair  
+Contribution (in alphabetic order by last name): Daniel Asch, Hamza Begic, Mohamed Bouhali, Florian Braunmiller, 
+Tim Dang, Behtarin Ferdousi, Maximilian Fruehauf, Marcus Gabler, Fabian Hoeltke, Tom Irion, Aaron Kaefer, Anton Kluge, 
+David Le, Gustaf Lindgren, Sarra Ben Mohamed, Benjamin Orthen, Luisa Ortner, Louis Pröbstle, Benedikt Reinhard, 
+Maximilian Rieger, Til Stotz, Stefan Urban, Max Winklhofer
 
 ## Credits
 We gratefully acknowledge partial financial support by
