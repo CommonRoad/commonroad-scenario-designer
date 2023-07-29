@@ -12,7 +12,7 @@
 - Cropping of a map in the GUI
 - Background saves and with restore functionality
 
-## [0.7.2] - 2023-07-XX
+## [0.7.2] - 2023-07-29
 
 ### Added
 - Lanelet2 conversion considers z-coordinate/elevation
