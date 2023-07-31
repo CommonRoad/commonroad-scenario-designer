@@ -37,7 +37,7 @@ class RequestRunnable(QRunnable):
 
     def run(self):
         self.fun()
-        QMetaObject.invokeMethod(self.mapConversionToolboxController, "stopSpinner", Qt.QueuedConnection,
+        QMetaObject.invokeMethod(self.mapConversionToolboxController, "stop_spinner", Qt.QueuedConnection,
                                  Q_ARG(str, "Conversion Ended"))
 
 
@@ -112,7 +112,6 @@ class MapConversionToolboxController(QDockWidget):
         filename = select_local_file(self, "OSM", "osm")
         if filename != "":
             self.osm_file = filename
-
 
     def hidden_osm_conversion(self, graph: rg.Graph) -> None:
         """
@@ -208,7 +207,6 @@ class MapConversionToolboxController(QDockWidget):
         print(data)
         self.scenario_model.stop_spinner()
         self.converter_toolbox.Spinner.stop()
-
 
     def start_spinner(self, spinner: QtWaitingSpinner):
         if spinner.is_spinning():
