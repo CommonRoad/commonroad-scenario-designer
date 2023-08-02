@@ -174,10 +174,10 @@ def _two_vertices_coincide(vertices1: np.ndarray, vertices2: np.ndarray,
 
     for vert in vertices2:
         distances = np.empty([len(vertices1) + 1])
-        distances[0] = np.linalg.norm(vert - vertices1[0])
-        distances[-1] = np.linalg.norm(vert - vertices1[-1])
+        distances[0] = np.linalg.norm(vert[0:2] - vertices1[0][0:2])
+        distances[-1] = np.linalg.norm(vert[0:2] - vertices1[-1][0:2])
         for i, diff in enumerate(segments):
-            distances[i + 1] = np.abs(np.cross(diff, vertices1[i] - vert)) / np.linalg.norm(diff)
+            distances[i + 1] = np.abs(np.cross(diff[0:2], vertices1[i][0:2] - vert[0:2])) / np.linalg.norm(diff[0:2])
         if np.min(distances) > adjacent_way_distance_tolerance:
             return False
 
