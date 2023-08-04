@@ -1,5 +1,6 @@
 import copy
 import math
+import warnings
 from typing import List, Union
 
 from commonroad.geometry.shape import Circle, Rectangle
@@ -59,6 +60,8 @@ class DynamicCanvasController(FigureCanvas):
         self.drawer.set_facecolor('None')
         self.drawer.set_edgecolor('None')
         self.rnd = MPRenderer(ax=self.ax)
+        #Ignore the warning which shows up if the figure layout has changed produced by the method drawer.tight_layout()
+        warnings.filterwarnings("ignore", message="The figure layout has changed to tight")
 
         self._handles = {}
         self.initial_parameter_config_done = False  # This is used to only once set the parameter based on the scenario
@@ -939,13 +942,16 @@ class DynamicCanvasController(FigureCanvas):
         self.draw_idle()
         self.num_lanelets = len(self.scenario_model.get_lanelets())
 
-    def show_aerial_image(self):
+    def show_aerial_image(self, new_image_added: bool = False):
         """
         shows the current (previously loaded) aerial image in the plot as a background
+
+        :param new_image_added: Indicator if a new image has been displayed
         """
         self.ax.imshow(self.current_aerial_image, aspect='equal', extent=self.image_limits, alpha=0.75)
-        self.ax.set_xlim(self.image_limits[0], self.image_limits[1])
-        self.ax.set_ylim(self.image_limits[2], self.image_limits[3])
+        if new_image_added:
+            self.ax.set_xlim(self.image_limits[0], self.image_limits[1])
+            self.ax.set_ylim(self.image_limits[2], self.image_limits[3])
 
     def activate_aerial_image(self, bing: bool, lat1: float, lon1: float, lat2: float, lon2: float):
         """

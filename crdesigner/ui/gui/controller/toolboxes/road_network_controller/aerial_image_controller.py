@@ -102,5 +102,5 @@ class AddAerialImageController:
             float(self.road_network_toolbox_ui.western_bound.text()),
             float(self.road_network_toolbox_ui.southern_bound.text()),
             float(self.road_network_toolbox_ui.eastern_bound.text()))
-        self.road_network_controller.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.show_aerial_image()
+        self.road_network_controller.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.show_aerial_image(True)
 

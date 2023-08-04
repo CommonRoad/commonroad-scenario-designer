@@ -25,7 +25,7 @@ class AnimatedViewerWrapperController:
         self.mwindow = mwindow  # handle back to the main window
 
     def update_scenario(self):
-        self.cr_viewer.open_scenario(new_file_added=True)
+        self.cr_viewer.open_scenario()
         self.update_view()
         self.mwindow.update_max_step()
         # Autosave
