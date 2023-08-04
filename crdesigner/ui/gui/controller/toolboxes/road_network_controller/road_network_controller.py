@@ -114,6 +114,10 @@ class RoadNetworkController(QDockWidget, ):
 
         :param button_title: Title of the section to differentiate which button is clicked
         """
+        if self.road_network_toolbox_ui.mwindow.animated_viewer_wrapper.cr_viewer.dynamic\
+                .current_curved_lanelet_scenario is None:
+            return
+
         place_at_position = self.road_network_toolbox_ui.place_at_position.isChecked()
         connect_to_last_selection = self.road_network_toolbox_ui.connect_to_previous_selection.isChecked()
         connect_to_predecessors_selection = self.road_network_toolbox_ui.connect_to_predecessors_selection.isChecked()
