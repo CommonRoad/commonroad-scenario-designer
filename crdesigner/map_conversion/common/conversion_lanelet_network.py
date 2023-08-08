@@ -57,7 +57,6 @@ class ConversionLaneletNetwork(LaneletNetwork):
         :param remove_references: Also remove references which point to the removed lanelet. Default is False.
         :type remove_references: bool
         """
-
         del self._lanelets[lanelet_id]
         if remove_references:
             for lanelet in self.lanelets:

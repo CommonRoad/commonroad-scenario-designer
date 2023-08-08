@@ -9,9 +9,9 @@ from crdesigner.map_conversion.common.utils import generate_unique_id
 from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadLanes import LaneSection
 from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadSignal import Signal
 
-from commonroad.scenario.traffic_light import TrafficLight
 from commonroad.scenario.traffic_sign import TrafficSign, TrafficSignElement, TrafficSignIDZamunda, \
     TrafficSignIDGermany, TrafficSignIDUsa, TrafficSignIDChina, TrafficSignIDSpain, TrafficSignIDRussia
+from commonroad.scenario.traffic_light import TrafficLight
 from commonroad.scenario.lanelet import StopLine, LineMarking
 
 

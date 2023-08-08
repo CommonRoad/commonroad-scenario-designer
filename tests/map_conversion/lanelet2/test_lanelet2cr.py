@@ -554,9 +554,9 @@ class TestLanelet2CRConverter(unittest.TestCase):
         self.assertEqual(tl_before+1, tl_after)
 
         # check the cycle of the converted traffic light
-        traffic_light = l2cr.lanelet_network.traffic_lights[0]
+        traffic_light: TrafficLight = l2cr.lanelet_network.traffic_lights[0]
 
-        first_color = traffic_light.traffic_light_cycle.cycle_elements[0]._state.value
+        first_color = traffic_light.traffic_light_cycle.cycle_elements[0].state.value
         first_duration = traffic_light.traffic_light_cycle.cycle_elements[0].duration
         self.assertEqual(first_color, 'red')
         self.assertEqual(first_duration, 5)

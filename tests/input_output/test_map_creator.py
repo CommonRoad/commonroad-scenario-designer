@@ -1,7 +1,8 @@
 import unittest
+import numpy as np
 
+from commonroad.scenario.traffic_sign import TrafficSignIDZamunda
 from commonroad.scenario.traffic_light import TrafficLightState, TrafficLightDirection
-from commonroad.scenario.traffic_sign import *
 from commonroad.scenario.intersection import IncomingGroup
 from commonroad.scenario.lanelet import Lanelet, LineMarking, LaneletNetwork, StopLine
 from commonroad.scenario.scenario import Scenario, ScenarioID
@@ -213,7 +214,7 @@ class TestLanelet(unittest.TestCase):
         sc = Scenario(dt=0.1)
 
         intersection, traffic_signs, traffic_lights, lanelets = \
-            MapCreator.create_four_way_intersection(3, 20, 30, sc, True, True, TrafficSignIDZamunda)
+            MapCreator.create_four_way_intersection(3, 20, 30, sc, True, True, TrafficSignIDZamunda.YIELD)
 
         # check intersection
         self.assertEqual(intersection.intersection_id, 25)
@@ -275,12 +276,11 @@ class TestLanelet(unittest.TestCase):
         self.assertEqual(traffic_lights[0].active, True)
         self.assertEqual(traffic_lights[2].active, True)
         self.assertEqual(len(traffic_lights[0].traffic_light_cycle.cycle_elements), 4)
-        self.assertEqual(len(traffic_lights[1].traffic_light_cycle.cycle_elements), 4)
+        self.assertEqual(len(traffic_lights[2].traffic_light_cycle.cycle_elements), 4)
         self.assertEqual(traffic_lights[0].traffic_light_cycle.cycle_elements[0].state, TrafficLightState.GREEN)
         self.assertEqual(traffic_lights[2].traffic_light_cycle.cycle_elements[0].state, TrafficLightState.RED)
         self.assertEqual(traffic_lights[0].traffic_light_cycle.cycle_elements[1].state, TrafficLightState.YELLOW)
-        self.assertEqual(traffic_lights[2].traffic_light_cycle.cycle_elements[1].state,
-                         TrafficLightState.RED_YELLOW)
+        self.assertEqual(traffic_lights[2].traffic_light_cycle.cycle_elements[1].state, TrafficLightState.RED_YELLOW)
         self.assertEqual(traffic_lights[0].traffic_light_cycle.cycle_elements[0].duration, 100)
         self.assertEqual(traffic_lights[0].traffic_light_cycle.cycle_elements[2].duration, 100)
         self.assertEqual(traffic_lights[2].traffic_light_cycle.cycle_elements[0].duration, 100)

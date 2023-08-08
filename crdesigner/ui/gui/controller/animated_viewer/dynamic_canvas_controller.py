@@ -1,8 +1,10 @@
 import copy
+import math
+import warnings
 from typing import List, Union
 
 from commonroad.geometry.shape import Circle, Rectangle
-from matplotlib import patches
+from matplotlib import patches, pyplot as plt
 from matplotlib.backend_bases import MouseButton
 import PyQt5
 from PyQt5.QtCore import *
@@ -14,10 +16,11 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 
 from commonroad.planning.planning_problem import PlanningProblemSet
-from commonroad.scenario.scenario import Scenario
 from commonroad.visualization.mp_renderer import MPRenderer
 from commonroad.visualization.draw_params import StaticObstacleParams, DynamicObstacleParams
 from crdesigner.config.gui_config import gui_config
+from numpy import ndarray
+
 from commonroad.scenario.obstacle import StaticObstacle, DynamicObstacle
 from commonroad.scenario.lanelet import LaneletType
 
@@ -30,8 +33,7 @@ from crdesigner.ui.gui.utilities.helper import _merge_dict, calculate_closest_ve
     angle_between
 from crdesigner.ui.gui.utilities.map_creator import MapCreator
 from crdesigner.ui.gui.utilities.scenario_resizer import resize_lanelet_network
-from crdesigner.ui.gui.utilities.toolbox_ui import PosB
-
+from crdesigner.ui.gui.utilities.toolbox_ui import PosB, CollapsibleCheckBox
 
 ZOOM_FACTOR = 1.2
 
@@ -58,6 +60,8 @@ class DynamicCanvasController(FigureCanvas):
         self.drawer.set_facecolor('None')
         self.drawer.set_edgecolor('None')
         self.rnd = MPRenderer(ax=self.ax)
+        #Ignore the warning which shows up if the figure layout has changed produced by the method drawer.tight_layout()
+        warnings.filterwarnings("ignore", message="The figure layout has changed to tight")
 
         self._handles = {}
         self.initial_parameter_config_done = False  # This is used to only once set the parameter based on the scenario
@@ -111,6 +115,14 @@ class DynamicCanvasController(FigureCanvas):
         self.mouse_coordinates = QPoint(0, 0)
 
         self.clear_axes()
+
+        #Parameters for curved lanlet adding
+        self.current_curved_lanelet_scenario = None
+        self.temp_curved_lanelet = None
+        self.circle_radius = None
+        self.circle_angle = None
+        self.new_lanelet = False
+
 
     def parent(self):
         return self._parent
@@ -225,19 +237,21 @@ class DynamicCanvasController(FigureCanvas):
                       draw_params: DrawParamsCustom = DrawParamsCustom(), plot_limits=None,
                       draw_dynamic_only=False):
         """[summary]
-        :param scenario: [description]
         :param pps: PlanningProblemSet of the scenario,defaults to None
         :type pps: PlanningProblemSet
-        :type scenario: Scenario
         :param draw_params: [description], defaults to None
         :type draw_params: [type], optional
         :param plot_limits: [description], defaults to None
         :type plot_limits: [type], optional
         :param draw_dynamic_only: reuses static artists
         """
+        if self.current_curved_lanelet_scenario is None:
+            current_scenario = self.scenario_model.get_current_scenario()
+        else:
+            current_scenario = self.current_curved_lanelet_scenario
         # want to update immediatly if change gui settings
-        lanelet_count = len(self.scenario_model.get_lanelets())
-        traffic_signs_count = len(self.scenario_model.get_traffic_signs())
+        lanelet_count = len(current_scenario.lanelet_network.lanelets)
+        traffic_signs_count = len(current_scenario.lanelet_network.traffic_signs)
         self.draw_params = update_draw_params_based_on_scenario(lanelet_count=lanelet_count,
                                                                 traffic_sign_count=traffic_signs_count)
 
@@ -263,12 +277,12 @@ class DynamicCanvasController(FigureCanvas):
         if draw_dynamic_only is True:
             draw_params_merged = _merge_dict(self.draw_params_dynamic_only.copy(), draw_params)
             draw_params_merged.dynamic_obstacle.draw_initial_state = False
-            self.scenario_model.get_current_scenario().draw(renderer=self.rnd, draw_params=draw_params_merged)
+            current_scenario.draw(renderer=self.rnd, draw_params=draw_params_merged)
             self.draw_obstacles(draw_params=draw_params_merged)
             self.rnd.render(keep_static_artists=True)
         else:
             draw_params_merged.dynamic_obstacle.draw_initial_state = False
-            self.scenario_model.get_current_scenario().draw(renderer=self.rnd, draw_params=draw_params_merged)
+            current_scenario.draw(renderer=self.rnd, draw_params=draw_params_merged)
             if pps is not None:
                 pps.draw(renderer=self.rnd, draw_params=draw_params_merged)
             self.draw_obstacles(draw_params=draw_params_merged)
@@ -305,6 +319,9 @@ class DynamicCanvasController(FigureCanvas):
 
         if self.show_aerial:
             self.show_aerial_image()
+
+        if self.current_curved_lanelet_scenario is not None and self.temp_curved_lanelet is not None:
+            self.draw_moving_points()
 
     def update_obstacles(self, draw_params=None, plot_limits=None):
         """
@@ -362,7 +379,7 @@ class DynamicCanvasController(FigureCanvas):
                     action = menu.exec((self.mouse_coordinates))
                     # removes selected lanelet
                     if action == remove:
-                        self._parent.road_network_toolbox.remove_lanelet()
+                        self._parent.road_network_toolbox.lanelet_controller.remove_lanelet()
                     # opens edit attributes of lanelet
                     if action == edit:
                         self._parent.road_network_toolbox.road_network_toolbox_ui.tree.collapseItem(
@@ -474,6 +491,8 @@ class DynamicCanvasController(FigureCanvas):
             elif len(self.selected_lanelets) == 1:
                 selection = " Lanelet with ID " + str(self.selected_lanelets[0].lanelet_id) + " is selected."
                 self.animated_viewer.callback_function(self.selected_lanelets[0], output + selection)
+        if len(self.selected_lanelets) == 0:
+            self.parent().road_network_toolbox.initialize_road_network_toolbox()
         self.draw_temporary_point()
 
     def get_center_and_axes_values(self) -> ((float, float), float, float, (float, float), (float, float)):
@@ -686,6 +705,7 @@ class DynamicCanvasController(FigureCanvas):
                                      self.scenario_model.get_lanelet_network())
             self.scenario_model.notify_all()
             self.reset_toolbar()
+            self.parent().road_network_toolbox.initialize_road_network_toolbox()
 
     def enable_lanelet_operations(self, number_of_selected_lanelets):
         """
@@ -711,6 +731,7 @@ class DynamicCanvasController(FigureCanvas):
             else:
                 added_adjacent_lanelets.append(adjacent_lanelet)
         self.scenario_model.add_lanelet(added_adjacent_lanelets)
+        self.parent().road_network_toolbox.initialize_road_network_toolbox()
 
     def merge_lanelets(self):
         neighboured_lanelets = self.selected_lanelets.copy()
@@ -719,6 +740,7 @@ class DynamicCanvasController(FigureCanvas):
         if last_merged_index:
             self._select_lanelet(False, [[last_merged_index]])
         self.scenario_model.notify_all()
+        self.parent().road_network_toolbox.initialize_road_network_toolbox()
 
     def activate_cropp_map(self, is_active: bool) -> None:
         """
@@ -867,6 +889,7 @@ class DynamicCanvasController(FigureCanvas):
                 created_lanelet.translate_rotate(np.array(self.draw_lanelet_first_point), 0)
             self.add_to_selected = created_lanelet
             self.scenario_model.add_lanelet([created_lanelet])
+            self.parent().road_network_toolbox.initialize_road_network_toolbox()
             self._parent.road_network_toolbox.last_added_lanelet_id = created_lanelet.lanelet_id
 
             self.draw_lanelet_first_point = draw_lanelet_second_point
@@ -919,13 +942,16 @@ class DynamicCanvasController(FigureCanvas):
         self.draw_idle()
         self.num_lanelets = len(self.scenario_model.get_lanelets())
 
-    def show_aerial_image(self):
+    def show_aerial_image(self, new_image_added: bool = False):
         """
         shows the current (previously loaded) aerial image in the plot as a background
+
+        :param new_image_added: Indicator if a new image has been displayed
         """
         self.ax.imshow(self.current_aerial_image, aspect='equal', extent=self.image_limits, alpha=0.75)
-        self.ax.set_xlim(self.image_limits[0], self.image_limits[1])
-        self.ax.set_ylim(self.image_limits[2], self.image_limits[3])
+        if new_image_added:
+            self.ax.set_xlim(self.image_limits[0], self.image_limits[1])
+            self.ax.set_ylim(self.image_limits[2], self.image_limits[3])
 
     def activate_aerial_image(self, bing: bool, lat1: float, lon1: float, lat2: float, lon2: float):
         """
@@ -965,3 +991,383 @@ class DynamicCanvasController(FigureCanvas):
         self.show_aerial = False
         self._update_map()
 
+    def display_curved_lanelet(self, is_checked: bool, ui_button: CollapsibleCheckBox, new_lanelet: bool = True,
+                               mouse_event: QMouseEvent = None) -> None:
+        """
+        Initializes the show of the curved_lanlet preview or disables it.
+
+        :param is_checked: boolean if the button is checked and therefore the lanelet view should be shown
+        :param ui_button: ui_button of the curved_lanelet checkbox
+        :param new_lanelet: Indicator if the lanelet already exists or is added as a new lanelet
+        :param mouse_event: Mouse parameters -> to prevent if you select a lanelet in the GUI to click twice to deselect
+        """
+
+        if not self.scenario_model.scenario_created():
+            self.parent().road_network_toolbox.text_browser.append("Please create first a new scenario")
+            if ui_button is not None:
+                ui_button.setChecked(False)
+            return
+
+        if self.parent().road_network_toolbox.road_network_toolbox_ui.connect_to_successors_selection.isChecked():
+            self.parent().road_network_toolbox.text_browser.append("Preview not available yet!")
+            return
+
+        if is_checked:
+            self.new_lanelet = new_lanelet
+            self.current_curved_lanelet_scenario = self.scenario_model.get_copy_of_scenario()
+            self.temp_curved_lanelet = self.parent().road_network_toolbox.lanelet_controller.get_lanelet_from_toolbox(
+                    self.new_lanelet)
+            if self.temp_curved_lanelet is None:
+                self.parent().road_network_toolbox.text_browser.append(
+                        "Something went wrong! Please ensure that the information of the lanlet is given")
+                ui_button.setChecked(False)
+                return
+            if(self.current_curved_lanelet_scenario.lanelet_network.find_lanelet_by_id(
+                    self.temp_curved_lanelet.lanelet_id) is not None):
+                self.current_curved_lanelet_scenario.remove_lanelet(self.temp_curved_lanelet)
+            middle_lanelet = self.temp_curved_lanelet.center_vertices
+            count_vertices = len(middle_lanelet)
+            self.current_curved_lanelet_scenario.add_objects(self.temp_curved_lanelet)
+            self.circle_radius = plt.Circle(middle_lanelet[round(count_vertices / 2)], 0.25, color='blue', zorder=100)
+            # Code for connect to successor to change the angle dot of the angle
+            # if self.parent().road_network_toolbox.road_network_toolbox_ui.connect_to_successors_selection.isChecked():
+            #     self.circle_angle = plt.Circle(middle_lanelet[0], 0.25, color='blue', zorder=100)
+            self.circle_angle = plt.Circle(middle_lanelet[count_vertices - 1], 0.25, color='blue', zorder=100)
+            self.draw_scenario()
+            self.mpl_disconnect(self.button_press_event_cid)
+            self.mpl_disconnect(self.motion_notify_event_cid)
+            self.button_press_event_cid = self.mpl_connect('button_press_event',self.click_on_curved_lanelet)
+            self.motion_notify_event_cid = self.mpl_connect('motion_notify_event', self.move_cursor_curved_lanelet)
+        else:
+            self.current_curved_lanelet_scenario = None
+            self.mpl_disconnect(self.button_press_event_cid)
+            self.mpl_disconnect(self.button_release_event_cid)
+            self.mpl_disconnect(self.motion_notify_event_cid)
+            self.button_release_event_cid = self.mpl_connect('button_release_event',
+                                                             self.dynamic_canvas_release_callback)
+            self.button_press_event_cid = self.mpl_connect('button_press_event', self.dynamic_canvas_click_callback)
+            if mouse_event is not None:
+                self.dynamic_canvas_click_callback(mouse_event)
+                self.dynamic_canvas_release_callback(mouse_event)
+            self.draw_scenario()
+            self.draw()
+
+    def draw_curved_lanelet(self) -> None:
+        """
+        Draws the temporary scenario with the curved lanelet. Collects the information of the lanelet of the
+        lanelet-Controller, deletes the old temporary lanelet of the temmporary scenario and adds it with the updated
+        properties.
+        """
+        if self.temp_curved_lanelet is None or self.current_curved_lanelet_scenario is None:
+            return
+        self.temp_curved_lanelet = self.parent().road_network_toolbox.lanelet_controller.get_lanelet_from_toolbox(
+                self.new_lanelet)
+
+        if (self.current_curved_lanelet_scenario.lanelet_network.find_lanelet_by_id(
+                self.temp_curved_lanelet.lanelet_id) is not None):
+            self.current_curved_lanelet_scenario.remove_lanelet(self.temp_curved_lanelet)
+
+        self.current_curved_lanelet_scenario.add_objects(self.temp_curved_lanelet)
+        self.draw_scenario()
+
+    def draw_moving_points(self) -> None:
+        """
+        Draw the Points to manipulate the radius or angle of the lanelet
+        """
+        middle_lanelet = self.temp_curved_lanelet.center_vertices
+        count_vertices = len(middle_lanelet)
+        self.circle_radius.set_center(middle_lanelet[round(count_vertices / 2)])
+
+        # Code for adding a successor
+        # if self.parent().road_network_toolbox.road_network_toolbox_ui.connect_to_successors_selection.isChecked():
+        #     self.circle_angle.set_center(middle_lanelet[0])
+        self.circle_angle.set_center(middle_lanelet[count_vertices - 1])
+
+        self.ax.add_patch(self.circle_radius)
+        self.ax.add_patch(self.circle_angle)
+        self.draw()
+
+    def change_direction_of_curve(self) -> None:
+        """
+        changes direction of a curved lanelet
+
+        :param left_curve: boolean if the curve should be a left turn. If False it is a right turn
+        """
+        if self.new_lanelet:
+            lanelet_angle = self.parent().road_network_toolbox.get_float(
+                    self.parent().road_network_toolbox.road_network_toolbox_ui.lanelet_angle)
+            if lanelet_angle < 0:
+                self.parent().road_network_toolbox.road_network_toolbox_ui.lanelet_angle.setText(
+                        str(abs(lanelet_angle)))
+            else:
+                self.parent().road_network_toolbox.road_network_toolbox_ui.lanelet_angle.setText(
+                        "-" + str(abs(lanelet_angle)))
+        else:
+            lanelet_angle = self.parent().road_network_toolbox.get_float(
+                    self.parent().road_network_toolbox.road_network_toolbox_ui.selected_lanelet_angle)
+            if lanelet_angle < 0:
+                self.parent().road_network_toolbox.road_network_toolbox_ui.selected_lanelet_angle.setText(
+                        str(abs(lanelet_angle)))
+            else:
+                self.parent().road_network_toolbox.road_network_toolbox_ui.selected_lanelet_angle.setText(
+                        "-" + str(abs(lanelet_angle)))
+
+    def click_on_curved_lanelet(self, mouse_event: QMouseEvent) -> None:
+        """
+        Method which handles the event if you click with the mouse in the coordinate system. Decides if the cursor is
+        on the angle or the radius buttton
+
+        :param mouse_event: mouse parameters
+        """
+        if self.circle_radius.contains(mouse_event)[0]:
+            self.circle_radius.set_color('lightblue')
+            self.mpl_disconnect(self.motion_notify_event_cid)
+            self.mpl_disconnect(self.button_release_event_cid)
+            self.setCursor(QtCore.Qt.SizeAllCursor)
+            rotation_lanelet = self.calc_angle(np.array([0, 1]), np.array([0, 0]),
+                                               self.temp_curved_lanelet.left_vertices[0],
+                                               self.temp_curved_lanelet.right_vertices[0])
+            count_vertices = len(self.temp_curved_lanelet.left_vertices)
+            angle_25_lanelet = self.calc_angle(self.temp_curved_lanelet.left_vertices[0],
+                                            self.temp_curved_lanelet.right_vertices[0],
+                                            self.temp_curved_lanelet.left_vertices[round(count_vertices * 0.25)],
+                                            self.temp_curved_lanelet.right_vertices[round(count_vertices * 0.25)])
+            self.motion_notify_event_cid = self.mpl_connect('motion_notify_event',
+                                                            lambda event: self.on_motion_radius(event, angle_25_lanelet,
+                                                                                                rotation_lanelet))
+            self.button_release_event_cid = self.mpl_connect('button_release_event', self.on_release_curved_lanelet)
+            self.draw_curved_lanelet()
+
+        elif self.circle_angle.contains(mouse_event)[0]:
+            self.circle_angle.set_color('lightblue')
+            self.mpl_disconnect(self.motion_notify_event_cid)
+            self.mpl_disconnect(self.button_release_event_cid)
+            rotation_lanelet = self.calc_angle(np.array([0, 1]), np.array([0, 0]),
+                                               self.temp_curved_lanelet.left_vertices[0],
+                                               self.temp_curved_lanelet.right_vertices[0])
+            self.setCursor(QtCore.Qt.SizeAllCursor)
+            self.motion_notify_event_cid = self.mpl_connect('motion_notify_event', lambda event: self.on_motion_angle(
+                    event, rotation_lanelet))
+            self.button_release_event_cid = self.mpl_connect('button_release_event', self.on_release_curved_lanelet)
+
+        elif not self.new_lanelet:
+            self.display_curved_lanelet(False, None, False, mouse_event)
+
+
+    def on_motion_radius(self, mouse_event: QMouseEvent, angle_25_lanelet: float, rotation_lanelet: float) -> None:
+        """
+        Handles the moment, when you drag the radius circle
+
+        :param mouse_event: Parameter with the information about the mouse
+        :param angle_25_lanelet: Angle of the off 25% of the lanelet to gain an intuitive way to drag the mouse
+        :param rotation_lanelet: Offset of the lanelet to the origin
+        """
+        start_x = self.circle_radius.get_center()[0]
+        start_y = self.circle_radius.get_center()[1]
+        self.setCursor(QtCore.Qt.SizeAllCursor)
+
+        if mouse_event.xdata is not None and mouse_event.ydata is not None:
+            # Calculate the angle of mouse movement
+            dx = mouse_event.xdata - start_x
+            dy = mouse_event.ydata - start_y
+            angle = math.degrees(math.atan2(dy, dx))
+
+            # Ensure angle is between 0 and 360
+            if angle < 0:
+                angle += 360
+
+            angle = angle - rotation_lanelet
+
+            if self.new_lanelet:
+                old_radius = self.parent().road_network_toolbox.get_float(
+                    self.parent().road_network_toolbox.road_network_toolbox_ui.lanelet_radius)
+            else:
+                old_radius = self.parent().road_network_toolbox.get_float(
+                        self.parent().road_network_toolbox.road_network_toolbox_ui.selected_lanelet_radius)
+
+            # Code to change the radius when adding to successor selection
+            # if self.parent().road_network_toolbox.road_network_toolbox_ui.connect_to_successors_selection.isChecked():
+            #     if self._is_within_growth(angle_lanelet, angle):
+            #         new_radius = old_radius - self._calculate_distance(start_x, start_y, mouse_event.xdata,
+            #                                                            mouse_event.ydata)
+            #     else:
+            #         new_radius = old_radius + self._calculate_distance(start_x, start_y, mouse_event.xdata,
+            #                                                            mouse_event.ydata)
+            # else:
+            if self._in_same_direction(angle_25_lanelet, angle):
+                new_radius = old_radius + self._calculate_distance(start_x, start_y, mouse_event.xdata,
+                                                                   mouse_event.ydata)
+            else:
+                new_radius = old_radius - self._calculate_distance(start_x, start_y, mouse_event.xdata,
+                                                                   mouse_event.ydata)
+            if new_radius > 0:
+                if self.new_lanelet:
+                    self.parent().road_network_toolbox.road_network_toolbox_ui.lanelet_radius.\
+                        setText(str(new_radius))
+                else:
+                    self.parent().road_network_toolbox.road_network_toolbox_ui.selected_lanelet_end_position_x.setText(
+                            str(self.temp_curved_lanelet.center_vertices[-1][0]))
+                    self.parent().road_network_toolbox.road_network_toolbox_ui.selected_lanelet_end_position_y.setText(
+                            str(self.temp_curved_lanelet.center_vertices[-1][1]))
+                    self.parent().road_network_toolbox.road_network_toolbox_ui.selected_lanelet_radius.\
+                        setText(str(new_radius))
+            else:
+                self.parent().road_network_toolbox.text_browser.append("The radius has to be greater than 0")
+
+    def on_motion_angle(self, mouse_event: QMouseEvent, rotation_lanelet: float) -> None:
+        """
+        Handles the moment, when you drag the angle circle
+
+        :param mouse_event: Parameter with the information about the mouse
+        :param rotation_lanelet: Offset of the lanelet to the origin
+        """
+        start_x = self.circle_angle.get_center()[0]
+        start_y = self.circle_angle.get_center()[1]
+        self.setCursor(QtCore.Qt.SizeAllCursor)
+
+        if mouse_event.xdata is not None and mouse_event.ydata is not None:
+            # Calculate the angle of mouse movement
+            dx = mouse_event.xdata - start_x
+            dy = mouse_event.ydata - start_y
+            angle = math.degrees(math.atan2(dy, dx))
+
+            # Ensure angle is between 0 and 360
+            if angle < 0:
+                angle += 360
+
+            angle_lanelet = self.calc_angle(self.temp_curved_lanelet.left_vertices[0],
+                                            self.temp_curved_lanelet.right_vertices[0],
+                                            self.temp_curved_lanelet.left_vertices[-1],
+                                            self.temp_curved_lanelet.right_vertices[-1])
+            if self.new_lanelet:
+                old_angle = self.parent().road_network_toolbox.get_float(
+                    self.parent().road_network_toolbox.road_network_toolbox_ui.lanelet_angle)
+            else:
+                old_angle = self.parent().road_network_toolbox.get_float(
+                        self.parent().road_network_toolbox.road_network_toolbox_ui.selected_lanelet_angle)
+
+            # Code for adding to successor to change the angle -> Could contain errors due to the fact that the feature
+                # could not be tested
+            # if self.parent().road_network_toolbox.road_network_toolbox_ui.connect_to_successors_selection.isChecked() \
+            #         and self.new_lanelet:
+            #     if self._is_within_growth(angle_lanelet, angle) and old_angle > 0:
+            #         new_angle = old_angle + self._calculate_distance(start_x, start_y, mouse_event.xdata,
+            #                                                          mouse_event.ydata)
+            #     elif not self._is_within_growth(angle_lanelet, angle) and old_angle > 0:
+            #         new_angle = old_angle - self._calculate_distance(start_x, start_y, mouse_event.xdata,
+            #                                                          mouse_event.ydata)
+            #     elif self._is_within_growth(angle_lanelet, angle) and old_angle < 0:
+            #         new_angle = old_angle - self._calculate_distance(start_x, start_y, mouse_event.xdata,
+            #                                                          mouse_event.ydata)
+            #     else:
+            #         new_angle = old_angle + self._calculate_distance(start_x, start_y, mouse_event.xdata,
+            #                                                          mouse_event.ydata)
+            # else:
+            angle = angle - rotation_lanelet
+            if self._in_same_direction(angle_lanelet, angle) and old_angle > 0:
+                new_angle = old_angle + self._calculate_distance(start_x, start_y, mouse_event.xdata,
+                                                                 mouse_event.ydata)
+            elif not self._in_same_direction(angle_lanelet, angle) and old_angle > 0:
+                new_angle = old_angle - self._calculate_distance(start_x, start_y, mouse_event.xdata,
+                                                                 mouse_event.ydata)
+            elif self._in_same_direction(angle_lanelet, angle) and old_angle < 0:
+                new_angle = old_angle - self._calculate_distance(start_x, start_y, mouse_event.xdata,
+                                                                 mouse_event.ydata)
+            else:
+                new_angle = old_angle + self._calculate_distance(start_x, start_y, mouse_event.xdata,
+                                                                 mouse_event.ydata)
+            if abs(new_angle) > 360:
+                self.parent().road_network_toolbox.text_browser.append("The angle can't be greater than 360 or smaller"
+                                                                       " than -360")
+            else:
+                if self.new_lanelet:
+                    self.parent().road_network_toolbox.road_network_toolbox_ui.lanelet_angle.setText(str(new_angle))
+                else:
+                    self.parent().road_network_toolbox.road_network_toolbox_ui.selected_lanelet_end_position_x.setText(
+                            str(self.temp_curved_lanelet.center_vertices[-1][0]))
+                    self.parent().road_network_toolbox.road_network_toolbox_ui.selected_lanelet_end_position_y.setText(
+                            str(self.temp_curved_lanelet.center_vertices[-1][1]))
+                    self.parent().road_network_toolbox.road_network_toolbox_ui.selected_lanelet_angle.\
+                        setText(str(new_angle))
+
+    def move_cursor_curved_lanelet(self, mouse_event: QMouseEvent) -> None:
+        """
+        Shows a moveable Cursor if the mouse hovers over a point which is moveable
+
+        :param mouse_event: Datastructure which contains information about the mouse
+        """
+        if self.circle_radius.contains(mouse_event)[0]:
+            self.setCursor(QtCore.Qt.SizeAllCursor)
+        elif self.circle_angle.contains(mouse_event)[0]:
+            self.setCursor(QtCore.Qt.SizeAllCursor)
+        else:
+            self.setCursor(QtCore.Qt.ArrowCursor)
+
+    def on_release_curved_lanelet(self, mouse_event: QMouseEvent) -> None:
+        """
+        Handles the moment, when you release the mouse button,to deactive the movement
+
+        :param mouse_event: Parameter with the Information about the mouse
+        """
+        self.mpl_disconnect(self.motion_notify_event_cid)
+        self.circle_angle.set_color('blue')
+        self.circle_radius.set_color('blue')
+        self.draw_curved_lanelet()
+        self.motion_notify_event_cid = self.mpl_connect('motion_notify_event', self.move_cursor_curved_lanelet)
+
+    def calc_angle(self, left_vertice_point_one: ndarray, right_vertice_point_one: ndarray,
+                    left_vertice_point_two: ndarray, right_vertice_point_two: ndarray) -> float:
+        """
+        Calculates the angle between two given lines
+
+        :param left_vertice_point_one: left point of the first line
+        :param right_vertice_point_one: right point of the first line
+        :param left_vertice_point_two: left point of the second line
+        :param right_vertice_point_two: right point of the second line
+
+        :return: Angle between the 2 lines as a float
+        """
+        line_origin = left_vertice_point_one - right_vertice_point_one
+        line_lanelet = left_vertice_point_two - right_vertice_point_two
+        norm_predecessor = np.linalg.norm(line_origin)
+        norm_lanelet = np.linalg.norm(line_lanelet)
+        dot_prod = np.dot(line_origin, line_lanelet)
+        sign = line_lanelet[1] * line_origin[0] - line_lanelet[0] * line_origin[1]
+        angle = np.arccos(dot_prod / (norm_predecessor * norm_lanelet))
+        if sign > 0:
+            angle = 2 * np.pi - angle
+        return 360 - angle * (180 / math.pi)
+
+    def _calculate_distance(self, start_x: float, start_y: float, end_x: float, end_y: float) -> float:
+        """
+        Calculates the distance between two given points
+
+        :param start_x: x-Coordinate of the start point
+        :param start_y: y-Coordinate of the start point
+        :param end_x: x-Coordinate of the end point
+        :param end_y: y-Coordinate of the end point
+
+        :returns: Distance as a float
+        """
+        dx = end_x - start_x
+        dy = end_y - start_y
+        distance = math.sqrt(dx ** 2 + dy ** 2)
+
+        return distance
+
+    def _in_same_direction(self, first_angle: float, second_angle: float) -> bool:
+        """
+        Calculates if the second angle is within 90 degrees to the left or right of the first_angle
+
+        :param first_angle: Angle of which the direction is handled
+        :param second_angle: Angle to check if it is within 180 degrees
+        :return: boolean if the angle is within the 90 degrees to both sides
+        """
+        first_angle = first_angle % 360
+        second_angle = second_angle % 360
+        diff = abs(first_angle - second_angle)
+
+        if diff <= 90 or diff >= 270:
+            return True
+        else:
+            return False

@@ -6,12 +6,23 @@
 - GUI backend using MVC pattern
 - New config model.
 - And automated creation of settings windows.
+- New way to edit an add curved lanelets
 
 ### Added
 - Cropping of a map in the GUI
 - Background saves and with restore functionality
 
-## [0.7.2] - 2023-07-XX
+## [0.7.2] - 2023-07-29
+
+### Added
+- Lanelet2 conversion considers z-coordinate/elevation
+
+### Fixed
+- ID assignment lanelet2cr conversion
+- lanelet2cr stop line projection
+
+### Changed
+- minimum cr-io version: 2023.2
 
 ## [0.7.1] - 2023-06-21
 

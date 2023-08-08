@@ -69,7 +69,7 @@ def remove_duplicate_traffic_signs(scenario: Scenario) -> None:
                 sign = net.find_traffic_sign_by_id(lanelet_sign)
                 #  Adding a default position to the sign
                 if sign.position is None:
-                    sign.position = np.ndarray([0, 0])
+                    sign.position = la.right_vertices[0]
                 filtered_signs.add(sign)
     for sign in filtered_signs:
         scenario.remove_traffic_sign(sign)

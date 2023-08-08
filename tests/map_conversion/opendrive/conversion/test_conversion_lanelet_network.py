@@ -40,7 +40,7 @@ def add_lanelets_to_network(network: ConversionLaneletNetwork,  lanelets: List[C
 class TestConversionLanelet(unittest.TestCase):
 
     def setUp(self) -> None:
-        generate_unique_id(0)  # reset ID counter
+        generate_unique_id(0) # reset ID counter
 
     def test_convert_to_new_lanelet_id(self):
         ids_assigned = {'69.0.-1.-1': 5, '89.0.4.-1': 6, '71.0.1.-1': 7, '71.0.-3.-1': 8}
@@ -89,18 +89,18 @@ class TestConversionLanelet(unittest.TestCase):
 
     def test_find_lanelet_by_id(self):
         conversion_lanelet_network = ConversionLaneletNetwork()
-        conversion_lanelet_1 = init_lanelet_from_id(1)
+        conversion_lanelet_1 = init_lanelet_from_id('79.0.-3.-1')
 
         add_lanelets_to_network(conversion_lanelet_network, [conversion_lanelet_1])
 
-        self.assertEqual(1, conversion_lanelet_network.find_lanelet_by_id(1).lanelet_id)
+        self.assertEqual('79.0.-3.-1', conversion_lanelet_network.find_lanelet_by_id('79.0.-3.-1').lanelet_id)
 
-        self.assertIsNone(conversion_lanelet_network.find_lanelet_by_id(0))
+        self.assertIsNone(conversion_lanelet_network.find_lanelet_by_id('foo'))
 
     def test_find_traffic_light_by_id(self):
         conversion_lanelet_network = ConversionLaneletNetwork()
-        t1 = TrafficLight(100, np.ndarray([1, 1]))
-        t2 = TrafficLight(101, np.ndarray([1, 1]))
+        t1 = TrafficLight(100, np.ndarray([0, 0]))
+        t2 = TrafficLight(101, np.ndarray([0, 0]))
         traffic_light_dict = {100: t1, 101: t2}
         conversion_lanelet_network._traffic_lights = traffic_light_dict
         self.assertEqual(t1, conversion_lanelet_network.find_traffic_light_by_id(100))
