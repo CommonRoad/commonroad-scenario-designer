@@ -3,9 +3,10 @@ from PyQt5.QtGui import *
 import os
 import logging
 
+from commonroad.planning.planning_problem import PlanningProblemSet
 from commonroad.scenario.scenario import Scenario
 from commonroad.scenario.lanelet import LaneletNetwork
-from commonroad.common.file_reader import CommonRoadFileReader, FileFormat
+from commonroad.common.file_reader import CommonRoadFileReader, FileFormat, CommonRoadReadAll, CommonRoadMapFileReader
 
 from crdesigner.ui.gui.utilities.gui_sumo_simulation import SUMO_AVAILABLE
 
@@ -17,7 +18,7 @@ def file_new(mwindow):
     """
     Function passed to the fileNewAction to create the action in the menu bar.
     """
-    scenario = Scenario(0.1, affiliation="Technical University of Munich", source="CommonRoad Scenario Designer")
+    scenario = Scenario(0.1)
     net = LaneletNetwork()
     scenario.replace_lanelet_network(net)
     mwindow.scenario_model.set_scenario(scenario)
@@ -33,8 +34,10 @@ def open_commonroad_file(mwindow, path=None):
     """
     if path is None:
         path, _ = QFileDialog.getOpenFileName(mwindow.mwindow_ui, "Open a CommonRoad scenario", "",
-                                          "CommonRoad scenario *.xml file (*.xml);; "
-                                          "CommonRoad scenario *.pb file (*.pb)", options=QFileDialog.Options(), )
+                                              "CommonRoad scenario *.xml file (*.xml);; "
+                                              "CommonRoad scenario *-SC.pb file (*-SC.pb);; "
+                                              "CommonRoad map *.pb file (*.pb);; ",
+                                              options=QFileDialog.Options(), )
     if not path:
         return
     _open_path(mwindow=mwindow, path=path)
@@ -42,14 +45,23 @@ def open_commonroad_file(mwindow, path=None):
 
 def _open_path(mwindow, path):
     """ """
+    scenario = Scenario(0.1)
+    pps = PlanningProblemSet()
     try:
-        if ".pb" in path:
-            commonroad_reader = CommonRoadFileReader(path, file_format=FileFormat.PROTOBUF)
-        else:
+        if "-SC.pb" in path:
+            commonroad_reader = CommonRoadReadAll(path, file_format=FileFormat.PROTOBUF)
+            scenario, pps, _ = commonroad_reader.open()
+        elif "-SC.pb" not in path and path.split("/")[-1].count("_") == 1:
+            commonroad_reader = CommonRoadMapFileReader(path, file_format=FileFormat.PROTOBUF)
+            scenario.replace_lanelet_network(commonroad_reader.open())
+        elif ".xml" in path:
             commonroad_reader = CommonRoadFileReader(path, file_format=FileFormat.XML)
-        scenario, pps = commonroad_reader.open()
+            scenario, pps = commonroad_reader.open()
+        else:
+            raise FileExistsError("Unknown File type.")
+
     except Exception as e:
-        QMessageBox.warning(mwindow, "CommonRoad XML error",
+        QMessageBox.warning(mwindow, "CommonRoad opening error",
                             "There was an error during the loading of the selected CommonRoad file.\n\n" +
                             "Syntax Error: {}".format(e), QMessageBox.Ok, )
         return
