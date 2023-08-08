@@ -10,8 +10,8 @@ from commonroad.scenario.traffic_sign import (TrafficSignElement, TrafficSignIDG
                                               TrafficSignIDZamunda)
 from commonroad.scenario.traffic_light import (TrafficLightCycleElement, TrafficLightState, TrafficLightDirection,
                                                TrafficLightCycle)
-from commonroad.scenario.scenario import Scenario, ScenarioID, TrafficSign, Location, TrafficLight, \
-    GeoTransformation  # type: ignore
+from commonroad.scenario.scenario import Scenario, ScenarioID, TrafficSign, TrafficLight
+from commonroad.common.common_scenario import Location, GeoTransformation
 
 from crdesigner.config.general_config import general_config, GeneralConfig
 from crdesigner.config.lanelet2_config import lanelet2_config, Lanelet2Config
