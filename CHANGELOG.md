@@ -4,15 +4,15 @@
 
 ### Changed
 - GUI backend using MVC pattern
-- New config model.
-- And automated creation of settings windows.
-- New way to edit an add curved lanelets
+- Config model
+- Automated creation of settings windows
 
 ### Added
 - Cropping of a map in the GUI
 - Background saves and with restore functionality
-- Addition of the Scenario Toolbox to specify a start and a goal positions
-- Addition of a Settings widget to edit settings of the scenario
+- Scenario Toolbox to specify planning problems
+- Widget to edit settings of scenario
+- Editing and adding curved lanelet via matplotlib visualization
 
 ## [0.7.2] - 2023-07-29
 
