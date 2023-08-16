@@ -167,6 +167,7 @@ We gratefully acknowledge partial financial support by
 	title = {CommonRoad Scenario Designer: An Open-Source Toolbox for Map Conversion and Scenario Creation for Autonomous Vehicles},
 	booktitle = {Proc. of the IEEE Int. Conf. on Intelligent Transportation Systems },
 	year = {2021},
+	pages = {3176-3182},
 	abstract = {Maps are essential for testing autonomous driving functions. Several map and scenario formats are 
                     available. However, they are usually not compatible with each other, limiting their usability.  
                     In this paper, we address this problem using our open-source toolbox that provides map converters  
@@ -184,6 +185,7 @@ We gratefully acknowledge partial financial support by
 	title = {Automatic Conversion of Road Networks from OpenDRIVE to Lanelets},
 	booktitle = {Proc. of the IEEE International Conference on Service Operations and Logistics, and Informatics},
 	year = {2018},
+	pages = {157--162},
 	abstract = {Detailed road maps are an important building block for autonomous driving. They accelerate creating a 
 	            semantic environment model within the vehicle and serve as a backup solution when sensors are occluded 
 	            or otherwise impaired. Due to the required detail of maps for autonomous driving and virtual test 
