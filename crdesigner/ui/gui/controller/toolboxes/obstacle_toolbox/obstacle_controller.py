@@ -1,7 +1,5 @@
 from typing import Union
 import matplotlib as mpl
-import math
-import numpy as np
 from PyQt5.QtWidgets import *
 from crdesigner.ui.gui.model.scenario_model import ScenarioModel
 from commonroad.prediction.prediction import TrajectoryPrediction
@@ -13,7 +11,7 @@ from commonroad.scenario.state import InitialState, State, PMState, KSState
 
 
 from PyQt5.QtCore import *
-from crdesigner.ui.gui.view.toolboxes.obstacle_toolbox.obstacle_toolbox_ui.obstacle_toolbox_ui import ObstacleToolboxUI
+from crdesigner.ui.gui.view.toolboxes.obstacle_toolbox.obstacle_toolbox_ui import ObstacleToolboxUI
 
 
  #TODO to change the call

@@ -74,6 +74,7 @@ the different usage methods.
 
 ![GUI_Screenshot](docs/source/details/images/gui_screenshot.png)
 
+The recommended aspect ratio is 16:9 with a scaling of 100%. 
 Within the GUI, you can also execute the different converters.
 The GUI can either be activated via a Python API, command line, or executing a Python script.
 

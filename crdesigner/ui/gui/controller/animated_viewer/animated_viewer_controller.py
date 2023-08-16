@@ -9,6 +9,7 @@ from commonroad.scenario.lanelet import Lanelet, LaneletNetwork
 from commonroad.visualization.mp_renderer import MPRenderer
 
 from crdesigner.ui.gui.controller.animated_viewer.dynamic_canvas_controller import DynamicCanvasController
+from crdesigner.ui.gui.model.planning_problem_set_model import PlanningProblemSetModel
 from crdesigner.ui.gui.utilities.gui_sumo_simulation import SUMO_AVAILABLE
 from crdesigner.ui.gui.utilities.draw_params_updater import DrawParamsCustom
 from crdesigner.ui.gui.utilities.helper import draw_lanelet_polygon
@@ -51,16 +52,17 @@ def extract_plot_limits(lanelet_network: LaneletNetwork) -> Optional[List[float]
         return None
 
 class AnimatedViewerController:
-    def __init__(self, parent, callback_function, scenario_model):
+    def __init__(self, mwindow, callback_function, scenario_model):
 
         # create view object
         self.view = AnimatedViewerUI()
 
         #self.current_scenario = None
-        self.current_pps = None
-        self.parent = parent
+        self.pps_model: PlanningProblemSetModel = mwindow.pps_model
+        self.parent = mwindow.mwindow_ui
         self.scenario_model = scenario_model
-        self.dynamic = DynamicCanvasController(parent, self.scenario_model, width=5, height=10, dpi=100, animated_viewer=self)
+        self.dynamic = DynamicCanvasController(self.parent, self.scenario_model,
+                                               width=5, height=10, dpi=100, animated_viewer=self)
         self.callback_function = callback_function
         self.original_lanelet_network = None
         self.update_window()
@@ -76,8 +78,8 @@ class AnimatedViewerController:
         # if playing or not
         self.playing = False
 
-    def open_scenario(self, config: Observable = None,
-                      planning_problem_set: PlanningProblemSet = None, new_file_added: bool = None):
+
+    def open_scenario(self, config: Observable = None, new_file_added: bool = None):
         """[summary]
         Open a scenario, setup any configuration.
         :param new_file_added: if a new cr file was created or added
@@ -90,7 +92,6 @@ class AnimatedViewerController:
 
         self.original_lanelet_network = LaneletNetwork.create_from_lanelet_network(
                 lanelet_network=self.scenario_model.get_lanelet_network())
-        self.current_pps = planning_problem_set
 
         # if we have not subscribed already, subscribe now
         if config is not None:
@@ -116,7 +117,7 @@ class AnimatedViewerController:
             return
 
         print('init animation')
-        pps = self.current_pps
+        pps = self.pps_model.get_selected_pp()
         self.dynamic.clear_axes(keep_limits=True)
 
         start = self.min_time_step
@@ -253,7 +254,7 @@ class AnimatedViewerController:
             self.dynamic.show_aerial = False
             self.new_file_added = False
 
-        self.dynamic.draw_scenario(self.current_pps, draw_params=draw_params)
+        self.dynamic.draw_scenario(self.pps_model.get_selected_pp(), draw_params=draw_params)
 
         for lanelet in self.scenario_model.get_lanelets():
 

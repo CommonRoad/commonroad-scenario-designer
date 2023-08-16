@@ -11,6 +11,8 @@
 ### Added
 - Cropping of a map in the GUI
 - Background saves and with restore functionality
+- Addition of the Scenario Toolbox to specify a start and a goal positions
+- Addition of a Settings widget to edit settings of the scenario
 
 ## [0.7.2] - 2023-07-29
 

@@ -22,7 +22,10 @@ class MWindowUI(QMainWindow, Ui_mainWindow):
         self.setup_mwindow()
         self.obstacle_toolbox = None
         self.road_network_toolbox = None
+        self.map_converter_toolbox = None
+        self.scenario_toolbox = None
         self.crdesigner_console_wrapper = None
+
 
         self.animated_viewer_wrapper = None
 

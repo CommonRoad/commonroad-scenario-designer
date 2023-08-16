@@ -15,7 +15,8 @@ import numpy as np
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 
-from commonroad.planning.planning_problem import PlanningProblemSet
+from commonroad.planning.planning_problem import PlanningProblemSet, PlanningProblem
+from commonroad.scenario.scenario import Scenario
 from commonroad.visualization.mp_renderer import MPRenderer
 from commonroad.visualization.draw_params import StaticObstacleParams, DynamicObstacleParams
 from crdesigner.config.gui_config import gui_config
@@ -233,16 +234,14 @@ class DynamicCanvasController(FigureCanvas):
         # now also show any selected
         self._select_lanelet(True)
 
-    def draw_scenario(self, pps: PlanningProblemSet = None,
-                      draw_params: DrawParamsCustom = DrawParamsCustom(), plot_limits=None,
-                      draw_dynamic_only=False):
+    def draw_scenario(self, pps: PlanningProblem = None,
+                      draw_params: DrawParamsCustom = DrawParamsCustom(),
+                      plot_limits=None,
+                      draw_dynamic_only:bool =False):
         """[summary]
-        :param pps: PlanningProblemSet of the scenario,defaults to None
-        :type pps: PlanningProblemSet
+        :param pps: PlanningProblem of the scenario, defaults to None
         :param draw_params: [description], defaults to None
-        :type draw_params: [type], optional
         :param plot_limits: [description], defaults to None
-        :type plot_limits: [type], optional
         :param draw_dynamic_only: reuses static artists
         """
         if self.current_curved_lanelet_scenario is None:

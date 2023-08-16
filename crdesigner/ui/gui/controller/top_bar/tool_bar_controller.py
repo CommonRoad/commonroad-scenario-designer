@@ -24,6 +24,7 @@ class ToolBarController:
         self.tool_bar_ui.action_road_network_toolbox.triggered.connect(lambda: self._road_network_toolbox_show())
         self.tool_bar_ui.action_obstacle_toolbox.triggered.connect(lambda: self._obstacle_toolbox_show())
         self.tool_bar_ui.action_converter_toolbox.triggered.connect(lambda: self._map_converter_toolbox_show())
+        self.tool_bar_ui.action_scenario_toolbox.triggered.connect(lambda: self._scenario_toolbox_show())
 
         # Undo / Redo
         self.tool_bar_ui.action_redo.triggered.connect(lambda: self.mwindow.scenario_model.redo())
@@ -69,6 +70,12 @@ class ToolBarController:
             Show the Map converter Toolbox.
         """
         self.mwindow_ui.map_converter_toolbox.show()
+
+    def _scenario_toolbox_show(self):
+        """
+            Show the Scenario Toolbox.
+        """
+        self.mwindow_ui.scenario_toolbox.show()
 
     def play_pause_animation(self, open_cr_file):
         """Function connected with the play button in the sumo-toolbar_wrapper."""
@@ -158,3 +165,5 @@ class ToolBarController:
         :param is_checked: Boolean which states whether the button is clicked or not
         """
         self.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.activate_cropp_map(is_checked)
+
+

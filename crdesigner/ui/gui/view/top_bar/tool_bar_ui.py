@@ -39,6 +39,11 @@ class ToolBarUI:
         self.action_converter_toolbox = QAction(QIcon(":/icons/tools.ico"), "Open Map Converter Toolbox", mwindow_ui)
         self.tb2.addAction(self.action_converter_toolbox)
 
+        self.action_scenario_toolbox = QAction(QIcon(":/icons/scenario_toolbox.png"), "Open Scenario Toolbox",
+                                               mwindow_ui)
+        self.tb2.addAction(self.action_scenario_toolbox)
+
+
         # Undo / Redo
         self.tb2.addSeparator()
         self.tb3 = self.mwindow_ui.addToolBar("Undo/Redo")

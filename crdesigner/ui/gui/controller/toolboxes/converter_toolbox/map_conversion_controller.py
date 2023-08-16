@@ -16,7 +16,7 @@ from crdesigner.ui.gui.utilities.gui_sumo_simulation import SUMO_AVAILABLE
 from crdesigner.ui.gui.utilities.util import select_local_file
 from crdesigner.ui.gui.utilities import config
 from crdesigner.ui.gui.utilities.waitingspinnerwidget import QtWaitingSpinner
-from crdesigner.ui.gui.view.toolboxes.converter_toolbox.converter_toolbox_ui.converter_toolbox_ui import \
+from crdesigner.ui.gui.view.toolboxes.converter_toolbox.converter_toolbox_ui import \
     MapConversionToolboxUI
 from PyQt5.QtCore import Qt, QRunnable, QThreadPool, QMetaObject, Q_ARG, pyqtSlot
 from crdesigner.map_conversion.osm2cr.converter_modules.graph_operations import road_graph as rg

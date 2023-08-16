@@ -5,14 +5,14 @@ from PyQt5.QtCore import *
 from commonroad.scenario.lanelet import Lanelet
 from commonroad.scenario.traffic_sign import *
 
-from crdesigner.ui.gui.controller.toolboxes.road_network_controller.aerial_image_controller import \
+from crdesigner.ui.gui.controller.toolboxes.road_network_toolbox.aerial_image_controller import \
     AddAerialImageController
-from crdesigner.ui.gui.controller.toolboxes.road_network_controller.intersections_controller import \
+from crdesigner.ui.gui.controller.toolboxes.road_network_toolbox.intersections_controller import \
     AddIntersectionController
-from crdesigner.ui.gui.controller.toolboxes.road_network_controller.lanelet_controller import AddLaneletController
-from crdesigner.ui.gui.controller.toolboxes.road_network_controller.traffic_lights_controller import \
+from crdesigner.ui.gui.controller.toolboxes.road_network_toolbox.lanelet_controller import AddLaneletController
+from crdesigner.ui.gui.controller.toolboxes.road_network_toolbox.traffic_lights_controller import \
     AddTrafficLightsController
-from crdesigner.ui.gui.controller.toolboxes.road_network_controller.traffic_signs_controller import \
+from crdesigner.ui.gui.controller.toolboxes.road_network_toolbox.traffic_signs_controller import \
     AddTrafficSignController
 from crdesigner.ui.gui.model.scenario_model import ScenarioModel
 from crdesigner.ui.gui.utilities.waitingspinnerwidget import QtWaitingSpinner

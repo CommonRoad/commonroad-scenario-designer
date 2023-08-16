@@ -6,6 +6,7 @@ from typing import Optional
 from PyQt5.QtWidgets import *
 from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
 
+from crdesigner.ui.gui.model.planning_problem_set_model import PlanningProblemSetModel
 from crdesigner.ui.gui.model.scenario_model import ScenarioModel
 from crdesigner.ui.gui.view.settings.scenario_saving_dialog_ui import ScenarioSavingDialogUI
 from commonroad.planning.planning_problem import PlanningProblemSet
@@ -15,16 +16,21 @@ from crdesigner.ui.gui.autosaves.autosaves_setup import DIR_AUTOSAVE
 
 
 class ScenarioSavingDialogController:
+    """Controller for the scenario saving dialog."""
 
-    def __init__(self):
+    def __init__(self, scenario_model: ScenarioModel, pps_model: PlanningProblemSetModel):
+        """Constructor of the scenario-saving dialog controller."""
         self.save_window = ScenarioSavingDialogUI()
         self.connect_gui_elements()
-        self.current_scenario: Optional[ScenarioModel] = None
-        self.current_pps: Optional[PlanningProblemSet] = None
+        self.current_scenario_model: ScenarioModel = scenario_model
+        self.current_scenario: Optional[Scenario] = scenario_model.get_current_scenario()
+        self.current_pps_model: PlanningProblemSetModel = pps_model
+        self.current_pps: Optional[PlanningProblemSet] = pps_model.get_pps()
         self.directory = ""
         self.initialized = False
 
     def connect_gui_elements(self):
+        """Connect the GUI elements with the corresponding methods."""
         self.save_window.country.currentTextChanged.connect(lambda: self.update_scenario_meta_data())
         self.save_window.scenario_scene_name.textChanged.connect(lambda: self.update_scenario_meta_data())
         self.save_window.scenario_scene_id.valueChanged.connect(lambda: self.update_scenario_meta_data())
@@ -36,11 +42,14 @@ class ScenarioSavingDialogController:
         self.save_window.button_directory.clicked.connect(lambda: self.select_directory())
         self.save_window.button_save.clicked.connect(lambda: self.save_scenario())
 
-    def show(self, scenario: ScenarioModel, pps: PlanningProblemSet):
+    def show(self):
+        """Show the scenario saving dialog."""
         self.initialized = False
-        self.current_scenario = scenario.get_current_scenario()
-        self.current_pps = pps
-        self.save_window.label_benchmark_id.setText(self.current_scenario.scenario_id.__str__())
+
+        self.current_scenario = self.current_scenario_model.get_current_scenario()
+        self.current_pps = self.current_pps_model.get_pps()
+
+        self.save_window.label_benchmark_id.setText(str(self.current_scenario.scenario_id))
 
         self.save_window.scenario_author.setText(self.current_scenario.author)
         self.save_window.scenario_affiliation.setText(self.current_scenario.affiliation)
@@ -86,6 +95,7 @@ class ScenarioSavingDialogController:
         self.initialized = True
 
     def init_scenario_location_default(self):
+        """Initialize the scenario location with default values."""
         self.save_window.scenario_time_of_day.setCurrentText(TimeOfDay.UNKNOWN.value)
         self.save_window.scenario_weather.setCurrentText(Weather.UNKNOWN.value)
         self.save_window.scenario_underground.setCurrentText(Underground.UNKNOWN.value)
@@ -93,31 +103,36 @@ class ScenarioSavingDialogController:
         self.save_window.scenario_time_minute.setValue(0)
 
     def select_directory(self):
+        """Select the directory where the scenario should be saved."""
         self.directory = QFileDialog.getExistingDirectory(self.save_window, "Dir", options=QFileDialog.Options())
-        if dir:
+        if self.directory:
             self.save_window.label_directory.setText(self.directory)
 
     def autosave(self, scenario: Scenario):
-        '''
+        """
         Saves the file in a background file with default parameters
 
-        Disables the console output of the write to file methode that there is no clutter in the console
-        Enables it afterwards again
+        Disables the console output of the writing to file methode that there is no clutter in the console
+        Enables it afterward again
 
         :param scenario: Scenario which should be saved
-        '''
+        """
+        if scenario is None:
+            return
+
         try:
+            self.current_pps = self.current_pps_model.get_pps()
+
             original_stdout = sys.stdout
             original_stderr = sys.stderr
             original_level = logging.getLogger().getEffectiveLevel()
             logging.getLogger().setLevel(logging.ERROR)
             sys.stdout = open(os.devnull, 'w')
             sys.stderr = open(os.devnull, 'w')
-            writer = CommonRoadFileWriter(scenario=scenario, planning_problem_set=self.current_pps,
-                                          author="Default Author",
-                                          affiliation="Default Affiliation",
-                                          source="CommonRoad Scenario Designer",
-                                          tags=set())
+            writer = CommonRoadFileWriter(scenario=scenario,
+                                          planning_problem_set=self.current_pps,
+                                          author="Default Author", affiliation="Default Affiliation",
+                                          source="CommonRoad Scenario Designer", tags=set())
             filename = DIR_AUTOSAVE + "/autosave" + ".xml"
             if self.current_pps is None:
                 writer.write_scenario_to_file(filename, OverwriteExistingFile.ALWAYS)
@@ -126,13 +141,15 @@ class ScenarioSavingDialogController:
             sys.stdout = original_stdout
             sys.stderr = original_stderr
             logging.getLogger().setLevel(original_level)
-        except IOError as e:
+        except IOError:
             pass
 
     def save_scenario(self):
         self.update_scenario_meta_data()
         try:
-            writer = CommonRoadFileWriter(scenario=self.current_scenario, planning_problem_set=self.current_pps,
+            self.current_pps = self.current_pps_model.get_pps()
+            writer = CommonRoadFileWriter(scenario=self.current_scenario,
+                                          planning_problem_set=self.current_pps,
                                           author=self.current_scenario.author,
                                           affiliation=self.current_scenario.affiliation,
                                           source=self.current_scenario.source, tags=set(self.current_scenario.tags), )
@@ -149,6 +166,8 @@ class ScenarioSavingDialogController:
             QMessageBox.critical(self.save_window, "CommonRoad file not created!",
                                  "The CommonRoad file was not saved due to an error.\n\n" + "{}".format(e),
                                  QMessageBox.Ok, )
+
+        self.current_scenario_model.notify_all()
 
     def environment_equals_default(self):
         """
@@ -174,6 +193,9 @@ class ScenarioSavingDialogController:
             return False
 
     def update_scenario_meta_data(self):
+        """Updates the metadata of the current scenario."""
+        self.current_scenario = self.current_scenario_model.get_current_scenario()
+
         if self.initialized:
             self.current_scenario.author = self.save_window.scenario_author.text()
             self.current_scenario.affiliation = self.save_window.scenario_affiliation.text()
@@ -201,7 +223,9 @@ class ScenarioSavingDialogController:
                                                                        int(self.save_window.scenario_time_minute.text())),
                                                                   TimeOfDay(
                                                                           self.save_window.scenario_time_of_day.currentText()),
-                                                                  Weather(self.save_window.scenario_weather.currentText()),
+                                                                  Weather(
+                                                                      self.save_window.scenario_weather.currentText()),
                                                                   Underground(
                                                                           self.save_window.scenario_underground.currentText())))
             self.save_window.label_benchmark_id.setText(str(self.current_scenario.scenario_id))
+            self.current_scenario_model.notify_all()
