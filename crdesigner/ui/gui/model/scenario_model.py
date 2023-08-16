@@ -1,3 +1,5 @@
+from typing import Callable, Optional
+
 from PyQt5.QtCore import QObject, pyqtSignal
 import copy
 
@@ -44,7 +46,7 @@ class ScenarioModel(QObject):
             self.__scenarios.append(copy.deepcopy(new_scenario))
             self.__updated_scenario = True
 
-    def _current_scenario(self):
+    def _current_scenario(self) -> Optional[Scenario]:
         """ Private function to make the calls in this class better readable"""
         if self.__current_scenario_index == -1:
             return None
@@ -55,7 +57,12 @@ class ScenarioModel(QObject):
         self.__updated_scenario = False
         self.scenario_changed.emit()
 
+    def subscribe(self, callback: Callable[[], None]):
+        """Allows subscription without exposing the signal."""
+        self.scenario_changed.connect(callback)
+
     def get_current_scenario(self) -> Scenario:
+        """Returns the current scenario."""
         return self._current_scenario()
 
     def store_scenario_service_layer(self, scenario):
