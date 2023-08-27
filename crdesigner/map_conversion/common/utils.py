@@ -1,3 +1,5 @@
+from commonroad.scenario.traffic_light import TrafficLightState, TrafficLightCycleElement, TrafficLightCycle
+
 
 def generate_unique_id(set_id: int = None) -> int:
     """
@@ -33,3 +35,15 @@ def convert_to_new_lanelet_id(old_lanelet_id: str, ids_assigned: dict) -> int:
         ids_assigned[old_lanelet_id] = new_lanelet_id
 
     return new_lanelet_id
+
+
+def get_default_cycle() -> TrafficLightCycle:
+    """
+    Defines default traffic light cycle in case no cycle is provided
+
+    _:returns traffic light cycle element
+    """
+    cycle = [(TrafficLightState.RED, 60), (TrafficLightState.RED_YELLOW, 10), (TrafficLightState.GREEN, 60),
+             (TrafficLightState.YELLOW, 10)]
+    cycle_element_list = [TrafficLightCycleElement(state[0], state[1]) for state in cycle]
+    return TrafficLightCycle(cycle_element_list)

@@ -19,6 +19,7 @@
 ### Fixed
 - KeyError when yield sign has no stop line in cr2lanelet2 conversion
 - Adaption of commonroad-io traffic light color usage in cr2lanelet2 conversion
+- Add default traffic light cycle for OpenDRIVE conversion to support 2020a format
 
 ## [0.7.2] - 2023-07-29
 
