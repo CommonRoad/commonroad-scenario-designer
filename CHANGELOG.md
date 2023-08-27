@@ -14,6 +14,12 @@
 - Widget to edit settings of scenario
 - Editing and adding curved lanelet via matplotlib visualization
 
+## [0.7.3] - 2023-09-XX
+
+### Fixed
+- KeyError when yield sign has no stop line in cr2lanelet2 conversion
+- Adaption of commonroad-io traffic light color usage in cr2lanelet2 conversion
+
 ## [0.7.2] - 2023-07-29
 
 ### Added

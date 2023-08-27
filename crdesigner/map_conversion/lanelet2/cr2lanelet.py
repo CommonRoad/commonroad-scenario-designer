@@ -1,3 +1,4 @@
+import logging
 from typing import List, Optional, Tuple, Union, Dict
 
 import numpy as np
@@ -222,7 +223,11 @@ class CR2LaneletConverter:
         self.osm.add_node(Node(id3, lat3, lon3, z, autoware=self._config.autoware))
 
         # get the first light color as subtype
-        traffic_light_subtype = light.traffic_light_cycle.cycle_elements[0].state.value
+        traffic_light_subtype = ""
+        for col in light.color:
+            traffic_light_subtype += f"{col}_"
+        traffic_light_subtype = traffic_light_subtype[::-2]
+        # traffic_light_subtype = light.traffic_light_cycle.cycle_elements[0].state.value
 
         self.osm.add_way(Way(traffic_light_id, [id1, id2, id3],
                              tag_dict={"subtype": traffic_light_subtype, "type": "traffic_light"}))
@@ -267,7 +272,7 @@ class CR2LaneletConverter:
                         if n_lon == str(lon_sign) and n_lat == str(lat_sign) and n_ele == str(z):
                             # position matches, found the corresponding lanelet with selected sign
                             # extract the way that corresponds to our lanelet
-                            # sign -> lanelet -> way (right+left) -> wayrelation
+                            # sign -> lanelet -> way (right+left) -> way relation
                             right_way_id = self.right_ways[ll.lanelet_id]
                             left_way_id = self.left_ways[ll.lanelet_id]
                             for way_rel in self.osm.way_relations:
@@ -359,7 +364,8 @@ class CR2LaneletConverter:
         if sign_name in ("YIELD", "STOP"):
             yield_ways.append(way_rel)
             # what if it does not have a stop line? Or it must have it?
-            stop_line_way = dict_stop_lines[ll.lanelet_id]
+            logging.info("cr2lanelet::_append_from_sign: lanelet with yield sign has no")
+            stop_line_way = dict_stop_lines.get(ll.lanelet_id)
             if stop_line_way:
                 ref_line.append(stop_line_way)
         elif sign_name in ("RIGHT_OF_WAY", "PRIORITY"):
