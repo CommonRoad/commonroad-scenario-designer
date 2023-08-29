@@ -337,6 +337,8 @@ class AddLaneletUI:
                 self.road_network_toolbox_ui.selected_curved_checkbox.button.setDisabled(True)
 
         else:
+            self.road_network_toolbox_ui.mwindow.animated_viewer_wrapper.cr_viewer.dynamic \
+                .display_curved_lanelet(False, None)
             self.road_network_toolbox_ui.selected_curved_checkbox.button.setEnabled(True)
             self.road_network_toolbox_ui.selected_curved_checkbox.setChecked(False)
             self.road_network_toolbox_ui.selected_curved_checkbox.box.setMaximumSize(0, 0)
