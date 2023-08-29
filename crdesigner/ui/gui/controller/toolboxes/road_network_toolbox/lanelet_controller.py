@@ -391,7 +391,7 @@ class AddLaneletController:
                 Attaches a lanelet to another lanelet.
                 @return:
                 """
-        selected_lanelet_one = self.selected_lanelet()
+        selected_lanelet_one = self.selected_lanelet(True)
         if selected_lanelet_one is None:
             return
         if self.road_network_toolbox_ui.selected_lanelet_two.currentText() != "None":
@@ -409,7 +409,7 @@ class AddLaneletController:
         """
         Create adjacent lanelet given a selected lanelet
         """
-        selected_lanelet = self.selected_lanelet()
+        selected_lanelet = self.selected_lanelet(True)
         if selected_lanelet is None:
             return
         if selected_lanelet.predecessor:
@@ -486,7 +486,7 @@ class AddLaneletController:
         """
         Connects two lanelets by adding a new lanelet using cubic spline interpolation.
         """
-        selected_lanelet_one = self.selected_lanelet()
+        selected_lanelet_one = self.selected_lanelet(True)
         if selected_lanelet_one is None:
             return
         if self.road_network_toolbox_ui.selected_lanelet_two.currentText() != "None":
@@ -509,7 +509,7 @@ class AddLaneletController:
         """
         Rotates lanelet by a user-defined angle.
         """
-        selected_lanelet_one = self.selected_lanelet()
+        selected_lanelet_one = self.selected_lanelet(True)
         if selected_lanelet_one is None:
             return
 
@@ -521,7 +521,7 @@ class AddLaneletController:
         """
         Translates lanelet by user-defined x- and y-values.
         """
-        selected_lanelet_one = self.selected_lanelet()
+        selected_lanelet_one = self.selected_lanelet(True)
         if selected_lanelet_one is None:
             return
 
@@ -670,7 +670,7 @@ class AddLaneletController:
         """
          Merges a lanelet with its successor. If several successors exist, a new lanelet is created for each successor.
         """
-        selected_lanelet_one = self.selected_lanelet()
+        selected_lanelet_one = self.selected_lanelet(True)
         if selected_lanelet_one is None:
             return
 
@@ -780,9 +780,11 @@ class AddLaneletController:
             angle = 2 * np.pi - angle
         return 360 - angle * (180 / math.pi)
 
-    def selected_lanelet(self) -> Union[Lanelet, None]:
+    def selected_lanelet(self, lanelet_operation: bool = False) -> Union[Lanelet, None]:
         """
         Extracts the selected lanelet one
+        :param lanelet_operation: is set to true if the request comes from the lanelet_opeartions widgete
+
         @return: Selected lanelet object.
         """
         if not self.road_network_controller.initialized:
@@ -790,12 +792,24 @@ class AddLaneletController:
         if not self.scenario_model.scenario_created():
             self.road_network_controller.text_browser.append("create a new file")
             return None
-        if self.road_network_toolbox_ui.selected_lanelet_update.currentText() not in ["None", ""]:
-            selected_lanelet = self.scenario_model.find_lanelet_by_id(
-                    int(self.road_network_toolbox_ui.selected_lanelet_update.currentText()))
-            return selected_lanelet
-        elif self.road_network_toolbox_ui.selected_lanelet_update.currentText() in ["None", ""] and not \
-                self.road_network_controller.update:
-            self.road_network_controller.text_browser.append("No lanelet selected.")
-            return None
+
+        if lanelet_operation:
+            if self.road_network_toolbox_ui.selected_lanelet_one.currentText() not in ["None", ""]:
+                selected_lanelet = self.scenario_model.find_lanelet_by_id(
+                        int(self.road_network_toolbox_ui.selected_lanelet_one.currentText()))
+                return selected_lanelet
+            elif self.road_network_toolbox_ui.selected_lanelet_one.currentText() in ["None", ""] and not \
+                    self.road_network_controller.update:
+                self.road_network_controller.text_browser.append("No lanelet selected.")
+                return None
+
+        else:
+            if self.road_network_toolbox_ui.selected_lanelet_update.currentText() not in ["None", ""]:
+                selected_lanelet = self.scenario_model.find_lanelet_by_id(
+                        int(self.road_network_toolbox_ui.selected_lanelet_update.currentText()))
+                return selected_lanelet
+            elif self.road_network_toolbox_ui.selected_lanelet_update.currentText() in ["None", ""] and not \
+                    self.road_network_controller.update:
+                self.road_network_controller.text_browser.append("No lanelet selected.")
+                return None
 
