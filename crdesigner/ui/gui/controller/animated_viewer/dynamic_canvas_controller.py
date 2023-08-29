@@ -1039,6 +1039,7 @@ class DynamicCanvasController(FigureCanvas):
             self.motion_notify_event_cid = self.mpl_connect('motion_notify_event', self.move_cursor_curved_lanelet)
         else:
             self.current_curved_lanelet_scenario = None
+            self.new_lanelet = None
             self.mpl_disconnect(self.button_press_event_cid)
             self.mpl_disconnect(self.button_release_event_cid)
             self.mpl_disconnect(self.motion_notify_event_cid)

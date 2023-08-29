@@ -381,6 +381,8 @@ class AddLaneletController:
         if selected_lanelet.lanelet_id == self.road_network_controller.last_added_lanelet_id:
             self.road_network_controller.last_added_lanelet_id = None
 
+        self.road_network_controller.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.display_curved_lanelet(False, None)
+
         self.scenario_model.remove_lanelet(selected_lanelet.lanelet_id)
         self.road_network_controller.set_default_road_network_list_information()
 
@@ -399,6 +401,8 @@ class AddLaneletController:
             self.road_network_controller.text_browser.append("No lanelet selected for [2].")
             return
 
+        self.road_network_controller.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.display_curved_lanelet(False, None)
+
         self.scenario_model.attach_to_other_lanelet(selected_lanelet_one, selected_lanelet_two)
 
     def create_adjacent(self):
@@ -409,11 +413,13 @@ class AddLaneletController:
         if selected_lanelet is None:
             return
         if selected_lanelet.predecessor:
-            self.road_network_controller.text_browser.append(selected_lanelet.predecessor.pop())
+            self.road_network_controller.text_browser.append(str(selected_lanelet.predecessor.pop()))
         if selected_lanelet.successor:
-            self.road_network_controller.text_browser.append(selected_lanelet.successor.pop())
+            self.road_network_controller.text_browser.append(str(selected_lanelet.successor.pop()))
         if selected_lanelet is None:
             return
+
+        self.road_network_controller.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.display_curved_lanelet(False, None)
 
         adjacent_left = self.road_network_toolbox_ui.create_adjacent_left_selection.isChecked()
         adjacent_same_direction = self.road_network_toolbox_ui.create_adjacent_same_direction_selection.isChecked()
@@ -490,6 +496,8 @@ class AddLaneletController:
             self.road_network_controller.text_browser.append("No lanelet selected for [2].")
             return
 
+        self.road_network_controller.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.display_curved_lanelet(False, None)
+
         connected_lanelet = MapCreator.connect_lanelets(selected_lanelet_one, selected_lanelet_two,
                                                         self.scenario_model.generate_object_id())
 
@@ -504,6 +512,8 @@ class AddLaneletController:
         selected_lanelet_one = self.selected_lanelet()
         if selected_lanelet_one is None:
             return
+
+        self.road_network_controller.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.display_curved_lanelet(False, None)
         rotation_angle = int(self.road_network_toolbox_ui.rotation_angle.text())
         self.scenario_model.rotate_lanelet(selected_lanelet_one.lanelet_id, rotation_angle)
 
@@ -514,6 +524,8 @@ class AddLaneletController:
         selected_lanelet_one = self.selected_lanelet()
         if selected_lanelet_one is None:
             return
+
+        self.road_network_controller.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.display_curved_lanelet(False, None)
         x_translation = self.road_network_controller.get_float(self.road_network_toolbox_ui.x_translation)
         y_translation = self.road_network_controller.get_float(self.road_network_toolbox_ui.y_translation)
         selected_lanelet_one.translate_rotate(np.array([x_translation, y_translation]), 0)
@@ -661,6 +673,8 @@ class AddLaneletController:
         selected_lanelet_one = self.selected_lanelet()
         if selected_lanelet_one is None:
             return
+
+        self.road_network_controller.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.display_curved_lanelet(False, None)
         self.scenario_model.merge_with_successor(selected_lanelet_one)
 
     def get_x_position_lanelet_start(self, update=False) -> float:

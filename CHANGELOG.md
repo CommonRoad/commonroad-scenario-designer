@@ -2,6 +2,9 @@
 
 ## [0.8.0] - 2023-08-XX
 
+### Fixed
+- Issue when creating adjacent lanelets through Lanelet Operations
+
 ### Changed
 - GUI backend using MVC pattern
 - Config model
