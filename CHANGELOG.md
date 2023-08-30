@@ -5,6 +5,7 @@
 ### Fixed
 - Issue when creating adjacent lanelets through Lanelet Operations
 - No recognition of the selected lanelet of the Lanelet Operations Widget
+- Fixed the bug that changes to some lanelets messed up the lanelet
 
 ### Changed
 - GUI backend using MVC pattern
