@@ -51,7 +51,7 @@ class ToolBarController:
         self.tool_bar_ui.merge_lanelet.triggered.connect(lambda: self._merge_lanelets())
 
         # Cropp Map
-        self.tool_bar_ui.cropp_map.triggered.connect(lambda: self._cropp_map(self.tool_bar_ui.cropp_map.isChecked()))
+        self.tool_bar_ui.crop_map.triggered.connect(lambda: self._crop_map(self.tool_bar_ui.crop_map.isChecked()))
 
     def _road_network_toolbox_show(self):
         """
@@ -158,12 +158,12 @@ class ToolBarController:
     def _merge_lanelets(self):
         self.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.merge_lanelets()
 
-    def _cropp_map(self, is_checked: bool) -> None:
+    def _crop_map(self, is_checked: bool) -> None:
         """
         Private function to call the activate_cropp_map function of the DynamicCanvasController
 
         :param is_checked: Boolean which states whether the button is clicked or not
         """
-        self.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.activate_cropp_map(is_checked)
+        self.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.activate_crop_map(is_checked)
 
 

@@ -407,7 +407,7 @@ class ScenarioModel(QObject):
             self.__current_scenario_index += 1
             self.notify_all()
 
-    def cropp_map(self, rectangle: Rectangle) -> None:
+    def crop_map(self, rectangle: Rectangle) -> None:
         """
         Cropps the map and returns all lanelets which lay within the rectangle
 
@@ -416,6 +416,10 @@ class ScenarioModel(QObject):
         self._update_scenario()
         new_lanelet_network = self.get_lanelet_network().create_from_lanelet_network(
                 self.get_lanelet_network(), shape_input=rectangle)
+        obstacles = self.get_obstacles()
+        for obs in obstacles:
+            if isinstance(obs, StaticObstacle) and not rectangle.contains_point(obs.initial_state.position):
+                self._current_scenario().remove_obstacle(obs)
         self.replace_lanelet_network(new_lanelet_network)
         self.notify_all()
 
