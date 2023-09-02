@@ -92,7 +92,7 @@ class DynamicCanvasController(FigureCanvas):
 
         # Cropping mode rectangle
         self.coordinates_rectangle = [[0, 0], [0, 0]]
-        self.rectangle_cropp = None
+        self.rectangle_crop = None
 
         super().__init__(self.drawer)
 
@@ -741,7 +741,7 @@ class DynamicCanvasController(FigureCanvas):
         self.scenario_model.notify_all()
         self.parent().road_network_toolbox.initialize_road_network_toolbox()
 
-    def activate_cropp_map(self, is_active: bool) -> None:
+    def activate_crop_map(self, is_active: bool) -> None:
         """
         Enables the user to draw a rectangle and keep everything inside of it
 
@@ -774,18 +774,18 @@ class DynamicCanvasController(FigureCanvas):
         """
         When first clicked, it sets the first corner of the rectangle and maps the Function on_mottion_rectangle
         to the mouse-movement.
-        The second time it saves the second corner and calls the cropp_map Function in the scenario_model
+        The second time it saves the second corner and calls the crop_map Function in the scenario_model
 
         :param mouse_event: event of the mouse -> Gives the coordinates of the mouse
         """
         if mouse_event.xdata is not None and mouse_event.ydata is not None:
-            if self.rectangle_cropp is None:
+            if self.rectangle_crop is None:
                 x_coordinate = mouse_event.xdata
                 y_coordinate = mouse_event.ydata
                 self.coordinates_rectangle[0][0] = x_coordinate
                 self.coordinates_rectangle[0][1] = y_coordinate
-                self.rectangle_cropp = patches.Rectangle((x_coordinate, y_coordinate), 0, 0, color="blue", alpha=0.3)
-                self.ax.add_patch(self.rectangle_cropp)
+                self.rectangle_crop = patches.Rectangle((x_coordinate, y_coordinate), 0, 0, color="blue", alpha=0.3)
+                self.ax.add_patch(self.rectangle_crop)
                 self.draw_idle()
                 self.motion_notify_event_cid = self.mpl_connect('motion_notify_event', self.on_motion_rectangle)
             else:
@@ -800,8 +800,8 @@ class DynamicCanvasController(FigureCanvas):
                 center_point = np.array([center_x, center_y])
                 shape = Rectangle(length=length, width=width, center=center_point)
                 self.mpl_disconnect(self.motion_notify_event_cid)
-                self.rectangle_cropp = None
-                self.scenario_model.cropp_map(shape)
+                self.rectangle_crop = None
+                self.scenario_model.crop_map(shape)
 
     def on_motion_rectangle(self, mouse_event: QMouseEvent) -> None:
         """
@@ -814,9 +814,9 @@ class DynamicCanvasController(FigureCanvas):
             self.coordinates_rectangle[1][1] = mouse_event.ydata
             width = self.coordinates_rectangle[1][0] - self.coordinates_rectangle[0][0]
             height = self.coordinates_rectangle[1][1] - self.coordinates_rectangle[0][1]
-            self.rectangle_cropp.set_width(width)
-            self.rectangle_cropp.set_height(height)
-            self.rectangle_cropp.set_xy((self.coordinates_rectangle[0][0], self.coordinates_rectangle[0][1]))
+            self.rectangle_crop.set_width(width)
+            self.rectangle_crop.set_height(height)
+            self.rectangle_crop.set_xy((self.coordinates_rectangle[0][0], self.coordinates_rectangle[0][1]))
             self.draw_idle()
 
     def activate_drawing_mode(self, is_active):

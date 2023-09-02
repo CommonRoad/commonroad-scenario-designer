@@ -113,9 +113,9 @@ class ToolBarUI:
         self.tb5.addAction(self.merge_lanelet)
         self.merge_lanelet.setDisabled(True)
 
-        self.cropp_map = QAction(QIcon(":/icons/cropp_map.png"), "crop map", mwindow_ui)
-        self.tb5.addAction(self.cropp_map)
-        self.cropp_map.setCheckable(True)
+        self.crop_map = QAction(QIcon(":/icons/crop_map.png"), "crop map", mwindow_ui)
+        self.tb5.addAction(self.crop_map)
+        self.crop_map.setCheckable(True)
 
     def reset_toolbar(self):
         if self.split_lanelet.isChecked():

@@ -6,6 +6,7 @@
 - Issue when creating adjacent lanelets through Lanelet Operations
 - No recognition of the selected lanelet of the Lanelet Operations Widget
 - Fixed the bug that changes to some lanelets messed up the lanelet
+- Obstacles will get deleted now as well within the crop Function/ Crop symbol is shown
 
 ### Changed
 - GUI backend using MVC pattern
