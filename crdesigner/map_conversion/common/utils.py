@@ -1,3 +1,5 @@
+import warnings
+
 from commonroad.scenario.traffic_light import TrafficLightState, TrafficLightCycleElement, TrafficLightCycle
 
 
@@ -47,3 +49,23 @@ def get_default_cycle() -> TrafficLightCycle:
              (TrafficLightState.YELLOW, 10)]
     cycle_element_list = [TrafficLightCycleElement(state[0], state[1]) for state in cycle]
     return TrafficLightCycle(cycle_element_list)
+
+
+def clean_projection_string(proj_str: str) -> str:
+    """
+    Removes parts from projection string which are not supported by our used projection package.
+
+    :param proj_str: Original projection string.
+    :returns: Updated projection string.
+    """
+    final_str = ""
+    if "geoidgrids" in proj_str:
+        for tmp_str in proj_str.split("+"):
+            if "geoidgrids" in tmp_str:
+                warnings.warn("geoidgrids removed from projection string")
+                continue
+            final_str += f"+{tmp_str}" if tmp_str is not '' else ''
+    else:
+        final_str = proj_str
+    final_str = final_str.replace("\n", "").lstrip().rstrip()
+    return final_str

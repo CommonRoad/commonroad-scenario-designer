@@ -100,7 +100,7 @@ class TestOpenDriveToCommonRoadConversion(unittest.TestCase):
 
         # test length of lanelet
         # test for calculating the vertices without sampling
-        np.testing.assert_almost_equal(network.find_lanelet_by_id(50).distance[2], 1.003, 3)
+        np.testing.assert_almost_equal(network.find_lanelet_by_id(50).distance[2], 0.981, 3)
         # test for calculating the vertices with sampling
         # np.testing.assert_almost_equal(network.find_lanelet_by_id(50).distance[2], 90.7, 1)
 
@@ -111,7 +111,7 @@ class TestOpenDriveToCommonRoadConversion(unittest.TestCase):
         self.assertEqual(12, len(network.traffic_lights))
 
         # test position of a traffic light
-        np.testing.assert_almost_equal(network.find_traffic_light_by_id(2067).position, [0.145, 8.317], 3)
+        np.testing.assert_almost_equal(network.find_traffic_light_by_id(9).position, [0.145, 8.317], 3)
 
     def test_roundabout(self):
         """Test the file roundabout.xodr"""
@@ -217,12 +217,12 @@ class TestOpenDriveToCommonRoadConversion(unittest.TestCase):
 
         # test type of traffic signs
         self.assertEqual(TrafficSignIDZamunda.U_TURN,
-                         network.find_traffic_sign_by_id(1).traffic_sign_elements[0].traffic_sign_element_id)
+                         network.find_traffic_sign_by_id(8).traffic_sign_elements[0].traffic_sign_element_id)
         self.assertEqual(TrafficSignIDZamunda.U_TURN,
-                         network.find_traffic_sign_by_id(2).traffic_sign_elements[0].traffic_sign_element_id)
+                         network.find_traffic_sign_by_id(15).traffic_sign_elements[0].traffic_sign_element_id)
 
         # test position of a traffic light
-        np.testing.assert_almost_equal(network.find_traffic_light_by_id(2093).position, [13.15, 12.32], 2)
+        np.testing.assert_almost_equal(network.find_traffic_light_by_id(1).position, [13.15, 12.32], 2)
 
     def test_opendrive_1(self):
         """Test the file opendrive-1.xodr"""
@@ -240,16 +240,16 @@ class TestOpenDriveToCommonRoadConversion(unittest.TestCase):
         # test correct traffic signs
         self.assertEqual(4, len(network.traffic_signs))
         self.assertEqual(TrafficSignIDZamunda.PRIORITY,
-                         network.find_traffic_sign_by_id(1).traffic_sign_elements[0].traffic_sign_element_id)
-        self.assertEqual(TrafficSignIDZamunda.YIELD,
-                         network.find_traffic_sign_by_id(2).traffic_sign_elements[0].traffic_sign_element_id)
-        self.assertEqual(TrafficSignIDZamunda.PRIORITY,
                          network.find_traffic_sign_by_id(3).traffic_sign_elements[0].traffic_sign_element_id)
         self.assertEqual(TrafficSignIDZamunda.YIELD,
-                         network.find_traffic_sign_by_id(4).traffic_sign_elements[0].traffic_sign_element_id)
+                         network.find_traffic_sign_by_id(6).traffic_sign_elements[0].traffic_sign_element_id)
+        self.assertEqual(TrafficSignIDZamunda.PRIORITY,
+                         network.find_traffic_sign_by_id(9).traffic_sign_elements[0].traffic_sign_element_id)
+        self.assertEqual(TrafficSignIDZamunda.YIELD,
+                         network.find_traffic_sign_by_id(12).traffic_sign_elements[0].traffic_sign_element_id)
 
         # test position of traffic sign
-        np.testing.assert_almost_equal(network.find_traffic_sign_by_id(3).position, [5.86, 13.78], 2)
+        np.testing.assert_almost_equal(network.find_traffic_sign_by_id(9).position, [5.86, 13.78], 2)
 
         # test number of intersections
         self.assertEqual(1, len(network.intersections))
