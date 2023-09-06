@@ -4,7 +4,7 @@ from typing import Optional, Dict
 import numpy as np
 from lxml import etree
 
-from crdesigner.map_conversion.common.utils import generate_unique_id
+from crdesigner.map_conversion.common.utils import generate_unique_id, clean_projection_string
 from crdesigner.map_conversion.opendrive.opendrive_parser.elements.opendrive import OpenDrive, Header
 from crdesigner.map_conversion.opendrive.opendrive_parser.elements.road import Road
 from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadLink import Predecessor as RoadLinkPredecessor, \
@@ -597,7 +597,7 @@ def parse_opendrive_header(opendrive: OpenDrive, header: etree.ElementTree):
 
     # Reference
     if header.find("geoReference") is not None:
-        parsed_header.geo_reference = header.find("geoReference").text
+        parsed_header.geo_reference = clean_projection_string(header.find("geoReference").text)
 
     # offset {x: , y: , z: , hdg:}
     if header.find("offset") is not None:

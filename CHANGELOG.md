@@ -1,12 +1,16 @@
 # Changelog
 
-## [0.8.0] - 2023-08-XX
+## [0.8.0] - 2023-09-XX
 
 ### Fixed
 - Issue when creating adjacent lanelets through Lanelet Operations
 - No recognition of the selected lanelet of the Lanelet Operations Widget
 - Fixed the bug that changes to some lanelets messed up the lanelet
 - Obstacles will get deleted now as well within the crop Function/ Crop symbol is shown
+- KeyError when yield sign has no stop line in cr2lanelet2 conversion
+- Adaption of commonroad-io traffic light color usage in cr2lanelet2 conversion
+- Add default traffic light cycle for OpenDRIVE conversion to support 2020a format
+- Command-line interface main function call
 
 ### Changed
 - GUI backend using MVC pattern
@@ -19,13 +23,7 @@
 - Scenario Toolbox to specify planning problems
 - Widget to edit settings of scenario
 - Editing and adding curved lanelet via matplotlib visualization
-
-## [0.7.3] - 2023-09-XX
-
-### Fixed
-- KeyError when yield sign has no stop line in cr2lanelet2 conversion
-- Adaption of commonroad-io traffic light color usage in cr2lanelet2 conversion
-- Add default traffic light cycle for OpenDRIVE conversion to support 2020a format
+- Handling projection strings which contain elements which third-party does not support
 
 ## [0.7.2] - 2023-07-29
 

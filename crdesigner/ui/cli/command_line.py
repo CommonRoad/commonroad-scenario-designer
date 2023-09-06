@@ -6,7 +6,6 @@ from commonroad.planning.planning_problem import PlanningProblemSet
 from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
 from commonroad.scenario.scenario import Tag
 
-from crdesigner.config.general_config import general_config
 from crdesigner.config.lanelet2_config import lanelet2_config
 from crdesigner.start_gui import start_gui_new as start_gui
 from crdesigner.map_conversion.map_conversion_interface import commonroad_to_lanelet, lanelet_to_commonroad, \
@@ -114,7 +113,6 @@ def main():
                 scenario = sumo_to_commonroad(input_file)
             elif args.mode == "map-convert-lanelet":
                 config_lanelet2 = lanelet2_config
-                config_general = general_config
                 if args.proj:
                     config_lanelet2.proj_string = args.proj
                 if args.adjacencies:
@@ -137,3 +135,7 @@ def main():
                 writer.write_to_file(output_file, OverwriteExistingFile.ALWAYS)
             else:
                 writer.write_to_file(output_file, OverwriteExistingFile.SKIP)
+
+
+if __name__ == '__main__':
+    main()

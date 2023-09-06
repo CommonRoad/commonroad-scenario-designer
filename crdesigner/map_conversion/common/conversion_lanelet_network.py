@@ -137,6 +137,7 @@ class ConversionLaneletNetwork(LaneletNetwork):
         for key in self._old_lanelet_ids.keys():
             if old_ids.get(key, False) is False:
                 new_lanelet_ids_assigned[key] = self._old_lanelet_ids[key]
+                generate_unique_id(self._old_lanelet_ids[key])
         return new_lanelet_ids_assigned
 
     def prune_network(self):
@@ -755,7 +756,7 @@ class ConversionLaneletNetwork(LaneletNetwork):
         # calculate all incoming angle from the reference incoming vector
         for index in range(1, len(incomings)):
             new_v = self.find_lanelet_by_id(list(incomings[index].incoming_lanelets)[0]).center_vertices[-1] - \
-                    self.find_lanelet_by_id(list(incomings[index].incoming_lanelets)[0]).center_vertices[-3]
+                    self.find_lanelet_by_id(list(incomings[index].incoming_lanelets)[0]).center_vertices[-2]
             angle = geometry.get_angle(ref, new_v)
             if angle < 0:
                 angle += 360

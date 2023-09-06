@@ -162,7 +162,7 @@ def get_traffic_signals(road: Road) -> Tuple[List[TrafficLight], List[TrafficSig
             # we ignore such signals in order not cause trouble in traffic simulation
             if signal.type != ("1000002" or "1000007" or "1000013"):
 
-                traffic_light = TrafficLight(traffic_light_id=signal.id + 2000, position=position,
+                traffic_light = TrafficLight(traffic_light_id=generate_unique_id(), position=position,
                                              traffic_light_cycle=get_default_cycle())  # TODO remove for new CR-Format
 
                 traffic_lights.append(traffic_light)
