@@ -64,7 +64,7 @@ def clean_projection_string(proj_str: str) -> str:
             if "geoidgrids" in tmp_str:
                 warnings.warn("geoidgrids removed from projection string")
                 continue
-            final_str += f"+{tmp_str}" if tmp_str is not '' else ''
+            final_str += f"+{tmp_str}" if tmp_str != '' else ''
     else:
         final_str = proj_str
     final_str = final_str.replace("\n", "").lstrip().rstrip()
