@@ -125,6 +125,62 @@ class TestCR2LaneletConverter(unittest.TestCase):
         # testing the right entry in the dict for z-coordinate lanelet
         self.assertEqual(cr1.osm.way_relations[last_way_relation].tag_dict, {'type': 'lanelet'})
 
+    def test_convert_line_marking(self):
+        cr1 = CR2LaneletConverter()
+        cr1(scenario)
+        # default
+        self.assertEqual(list(cr1.osm.ways.values())[0].tag_dict, {})
+
+        scenario.lanelet_network.lanelets[0].line_marking_left_vertices = LineMarking.DASHED
+        cr1(scenario)
+        self.assertEqual(list(cr1.osm.ways.values())[0].tag_dict, {'type': 'line_thin', 'subtype': 'dashed'})
+
+        scenario.lanelet_network.lanelets[0].line_marking_left_vertices = LineMarking.SOLID
+        cr1(scenario)
+        self.assertEqual(list(cr1.osm.ways.values())[0].tag_dict, {'type': 'line_thin', 'subtype': 'solid'})
+
+        scenario.lanelet_network.lanelets[0].line_marking_left_vertices = LineMarking.BROAD_DASHED
+        cr1(scenario)
+        self.assertEqual(list(cr1.osm.ways.values())[0].tag_dict, {'type': 'line_thick', 'subtype': 'dashed'})
+
+        scenario.lanelet_network.lanelets[0].line_marking_left_vertices = LineMarking.BROAD_SOLID
+        cr1(scenario)
+        self.assertEqual(list(cr1.osm.ways.values())[0].tag_dict, {'type': 'line_thick', 'subtype': 'solid'})
+
+        scenario.lanelet_network.lanelets[0].line_marking_left_vertices = LineMarking.NO_MARKING
+        cr1(scenario)
+        self.assertEqual(list(cr1.osm.ways.values())[0].tag_dict, {})
+
+        scenario.lanelet_network.lanelets[0].line_marking_left_vertices = LineMarking.UNKNOWN
+        cr1(scenario)
+        self.assertEqual(list(cr1.osm.ways.values())[0].tag_dict, {})
+
+        # lanelet[1] is adjacent left to lanelet[0] and in same direction
+        scenario.lanelet_network.lanelets[0].line_marking_left_vertices = LineMarking.SOLID
+        scenario.lanelet_network.lanelets[1].line_marking_right_vertices = LineMarking.SOLID
+        cr1(scenario)
+        self.assertEqual(list(cr1.osm.ways.values())[0].tag_dict, {'type': 'line_thin', 'subtype': 'solid_solid'})
+
+        scenario.lanelet_network.lanelets[0].line_marking_left_vertices = LineMarking.DASHED
+        scenario.lanelet_network.lanelets[1].line_marking_right_vertices = LineMarking.SOLID
+        cr1(scenario)
+        self.assertEqual(list(cr1.osm.ways.values())[0].tag_dict, {'type': 'line_thin', 'subtype': 'solid_dashed'})
+
+        scenario.lanelet_network.lanelets[0].line_marking_left_vertices = LineMarking.UNKNOWN
+        scenario.lanelet_network.lanelets[1].line_marking_right_vertices = LineMarking.SOLID
+        cr1(scenario)
+        self.assertEqual(list(cr1.osm.ways.values())[0].tag_dict, {'type': 'line_thin', 'subtype': 'solid'})
+
+        scenario.lanelet_network.lanelets[0].line_marking_left_vertices = LineMarking.SOLID
+        scenario.lanelet_network.lanelets[1].line_marking_right_vertices = LineMarking.UNKNOWN
+        cr1(scenario)
+        self.assertEqual(list(cr1.osm.ways.values())[0].tag_dict, {'type': 'line_thin', 'subtype': 'solid'})
+
+        scenario.lanelet_network.lanelets[0].line_marking_left_vertices = LineMarking.NO_MARKING
+        scenario.lanelet_network.lanelets[1].line_marking_right_vertices = LineMarking.UNKNOWN
+        cr1(scenario)
+        self.assertEqual(list(cr1.osm.ways.values())[0].tag_dict, {})
+
     def test_create_nodes(self):
         cr = CR2LaneletConverter()
         cr(scenario)
@@ -602,9 +658,8 @@ class TestCR2LaneletConverter(unittest.TestCase):
         for re in cr1.osm.regulatory_elements:
             # it should refer to the newly created traffic light id
             for tl in cr1.osm.ways:
-                if len(cr1.osm.ways[tl].tag_dict.keys()) != 0:
+                if 'traffic_light' in cr1.osm.ways[tl].tag_dict.values():
                     tl_id = str(tl)
-        
                     self.assertEqual(cr1.osm.regulatory_elements[re].refers[0], tl_id)
 
 
