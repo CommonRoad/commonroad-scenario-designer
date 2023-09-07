@@ -2,6 +2,7 @@ import logging
 from typing import List, Optional, Tuple, Union, Dict
 
 import numpy as np
+from commonroad.common.common_lanelet import LineMarking
 from pyproj import CRS, Transformer
 from commonroad.scenario.lanelet import Lanelet
 from commonroad.scenario.traffic_sign import TrafficSign
@@ -10,6 +11,31 @@ from commonroad.scenario.traffic_light import TrafficLight
 from crdesigner.config.lanelet2_config import lanelet2_config, Lanelet2Config
 from crdesigner.map_conversion.common.utils import generate_unique_id
 from crdesigner.map_conversion.lanelet2.lanelet2 import OSMLanelet, Node, Way, WayRelation, RegulatoryElement
+
+
+def _line_marking_to_type_subtype_vertices(line_marking: LineMarking) -> [str, str]:
+    """
+    Function that converts CR line marking of left or right vertices to an L2 format
+
+    :param line_marking: line marking
+    :return: tuple of strings that represent type and subtype of way based on CR line markings in L2 format
+    """
+    lanelet2_type = 'unknown'  # default type, empty dict for 'unknown' and 'no_marking' as they don't exist in L2 format
+    subtype = 'unknown'  # default subtype, empty dict for 'unknown' and 'no_marking' as they don't exist in L2 format
+    if line_marking is LineMarking.DASHED:
+        lanelet2_type = 'line_thin'
+        subtype = 'dashed'
+    if line_marking is LineMarking.BROAD_DASHED:
+        lanelet2_type = 'line_thick'
+        subtype = 'dashed'
+    if line_marking is LineMarking.SOLID:
+        lanelet2_type = 'line_thin'
+        subtype = 'solid'
+    if line_marking is LineMarking.BROAD_SOLID:
+        lanelet2_type = 'line_thick'
+        subtype = 'solid'
+
+    return lanelet2_type, subtype
 
 
 def _convert_subtype_names(subtype: str, subtypes: List[str]) -> [str, bool]:
@@ -441,10 +467,16 @@ class CR2LaneletConverter:
 
         if not left_way_id:
             left_way = Way(self.id_count, left_nodes)
+            lanelet2_type, subtype = _line_marking_to_type_subtype_vertices(lanelet.line_marking_left_vertices)
+            if lanelet2_type != 'unknown':
+                left_way.tag_dict = {"type": lanelet2_type, "subtype": subtype}
             self.osm.add_way(left_way)
             left_way_id = left_way.id_
         if not right_way_id:
             right_way = Way(self.id_count, right_nodes)
+            lanelet2_type, subtype = _line_marking_to_type_subtype_vertices(lanelet.line_marking_right_vertices)
+            if lanelet2_type != 'unknown':
+                right_way.tag_dict = {"type": lanelet2_type, "subtype": subtype}
             self.osm.add_way(right_way)
             right_way_id = right_way.id_
 
@@ -579,6 +611,32 @@ class CR2LaneletConverter:
                 vertices = (
                     adj_right.left_vertices if lanelet.adj_right_same_direction else adj_right.right_vertices[::-1])
                 if _vertices_are_equal(lanelet.right_vertices, vertices, self._config.ways_are_equal_tolerance):
+                    # if the shared way is found, we update its tag_dict with lanelet line markings
+
+                    # extract the relevant line marking, so we can convert it to L2 format
+                    adj_right_line_marking = (adj_right.line_marking_left_vertices if lanelet.adj_right_same_direction
+                                              else adj_right.line_marking_right_vertices)
+
+                    # converting line markings to L2 format
+                    type_lanelet, subtype_lanelet = (_line_marking_to_type_subtype_vertices
+                                                     (lanelet.line_marking_right_vertices))
+                    type_adj_right, subtype_adj_right = _line_marking_to_type_subtype_vertices(adj_right_line_marking)
+
+                    # update the tag dict accordingly
+                    if type_lanelet != 'unknown':
+                        if type_adj_right != 'unknown':
+                            # if there are two linemarking types, add the subtypes together to match the L2 notation
+                            # as the type should be the same, the type of the first lanelet line marking is used
+                            subtype = subtype_lanelet + '_' + subtype_adj_right
+                        else:
+                            subtype = subtype_lanelet
+                        self.osm.ways[potential_right_way].tag_dict = {"type": type_lanelet, "subtype": subtype}
+                    else:
+                        if type_adj_right != 'unknown':
+                            subtype = subtype_adj_right
+                            self.osm.ways[potential_right_way].tag_dict = {"type": type_adj_right, "subtype": subtype}
+
+                    # if both lanelet types are unknown (cr default), a tag_dict is not created
                     return potential_right_way
 
         return None
@@ -601,6 +659,32 @@ class CR2LaneletConverter:
                 vertices = (
                     adj_left.right_vertices if lanelet.adj_left_same_direction else adj_left.left_vertices[::-1])
                 if _vertices_are_equal(lanelet.left_vertices, vertices, self._config.ways_are_equal_tolerance):
+                    # if the shared way is found, we update its tag_dict with lanelet line markings
+
+                    # extract the relevant CR line marking, so we can convert it to L2 format
+                    adj_left_line_marking = (adj_left.line_marking_right_vertices if lanelet.adj_left_same_direction
+                                             else adj_left.line_marking_left_vertices)
+
+                    # converting CR line markings to L2 format
+                    type_lanelet, subtype_lanelet = (_line_marking_to_type_subtype_vertices
+                                                     (lanelet.line_marking_left_vertices))
+                    type_adj_left, subtype_adj_left = _line_marking_to_type_subtype_vertices(adj_left_line_marking)
+
+                    # update the tag dict accordingly
+                    if type_lanelet != 'unknown':
+                        if type_adj_left != 'unknown':
+                            # if there are two linemarking types, add the subtypes together to match the L2 notation
+                            # as the type should be the same, the type of the first lanelet line marking is used
+                            subtype = subtype_adj_left + '_' + subtype_lanelet
+                        else:
+                            subtype = subtype_lanelet
+                        self.osm.ways[potential_left_way].tag_dict = {"type": type_lanelet, "subtype": subtype}
+                    else:
+                        if type_adj_left != 'unknown':
+                            subtype = subtype_adj_left
+                            self.osm.ways[potential_left_way].tag_dict = {"type": type_adj_left, "subtype": subtype}
+
+                    # if both lanelet types are unknown (cr default), a tag_dict is not created
                     return potential_left_way
 
         return None
