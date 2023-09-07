@@ -852,8 +852,8 @@ class AddLaneletController:
 
         :return: Angle between the 2 lines as a float
         """
-        line_origin = left_vertice_point_one - right_vertice_point_one
-        line_lanelet = left_vertice_point_two - right_vertice_point_two
+        line_origin = left_vertice_point_one[:2] - right_vertice_point_one[:2]
+        line_lanelet = left_vertice_point_two[:2] - right_vertice_point_two[:2]
         norm_predecessor = np.linalg.norm(line_origin)
         norm_lanelet = np.linalg.norm(line_lanelet)
         dot_prod = np.dot(line_origin, line_lanelet)

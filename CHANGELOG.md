@@ -24,6 +24,7 @@
 - Widget to edit settings of scenario
 - Editing and adding curved lanelet via matplotlib visualization
 - Handling projection strings which contain elements which third-party does not support
+- Support for visualizing scenarios with 3D coordinates on 2D plane
 
 ## [0.7.2] - 2023-07-29
 

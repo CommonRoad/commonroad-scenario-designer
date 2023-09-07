@@ -2,7 +2,6 @@ from typing import List, Optional, Union
 import numpy as np
 
 from PyQt5.QtWidgets import QFileDialog, QMessageBox
-from commonroad.planning.planning_problem import PlanningProblemSet
 
 from commonroad.scenario.intersection import Intersection
 from commonroad.scenario.lanelet import Lanelet, LaneletNetwork
@@ -21,9 +20,8 @@ from crdesigner.ui.gui.utilities.util import Observable
 
 from matplotlib.animation import FuncAnimation
 
-
-#new imports
 from crdesigner.ui.gui.view.animated_viewer.animated_viewer_ui import AnimatedViewerUI
+
 
 def extract_plot_limits(lanelet_network: LaneletNetwork) -> Optional[List[float]]:
     """
@@ -51,13 +49,14 @@ def extract_plot_limits(lanelet_network: LaneletNetwork) -> Optional[List[float]
     else:
         return None
 
+
 class AnimatedViewerController:
     def __init__(self, mwindow, callback_function, scenario_model):
 
         # create view object
         self.view = AnimatedViewerUI()
 
-        #self.current_scenario = None
+        # self.current_scenario = None
         self.pps_model: PlanningProblemSetModel = mwindow.pps_model
         self.parent = mwindow.mwindow_ui
         self.scenario_model = scenario_model
@@ -77,7 +76,6 @@ class AnimatedViewerController:
         self.animation: FuncAnimation = None
         # if playing or not
         self.playing = False
-
 
     def open_scenario(self, config: Observable = None, new_file_added: bool = None):
         """[summary]
@@ -186,8 +184,9 @@ class AnimatedViewerController:
 
     def save_animation(self):
         path, _ = QFileDialog.getSaveFileName(caption="QFileDialog.getSaveFileName()",
-                directory=self.scenario_model.get_scenario_id().__str__() + ".mp4",
-                filter="MP4 (*.mp4);;GIF (*.gif);; AVI (*avi)", options=QFileDialog.Options(), )
+                                              directory=self.scenario_model.get_scenario_id().__str__() + ".mp4",
+                                              filter="MP4 (*.mp4);;GIF (*.gif);; AVI (*avi)",
+                                              options=QFileDialog.Options(), )
         if not path:
             return
 
@@ -195,13 +194,15 @@ class AnimatedViewerController:
             rnd = MPRenderer()
             with open(path, "w"):
                 QMessageBox.about(None, "Information",
-                                  "Exporting the video will take few minutes, please wait until process is finished!")
-                rnd.create_video([self.scenario_model.get_current_scenario()], path, draw_params=self.dynamic.draw_params)
+                                  "Exporting the video will take few minutes, please wait "
+                                  "until process is finished!")
+                rnd.create_video([self.scenario_model.get_current_scenario()], path,
+                                 draw_params=self.dynamic.draw_params)
                 print("finished")
         except IOError as e:
             QMessageBox.critical(self, "CommonRoad file not created!",
-                    "The CommonRoad scenario was not saved as video due to an error.\n\n{}".format(e),
-                    QMessageBox.Ok, )
+                                 "The CommonRoad scenario was not saved as video due to an error.\n\n{}".format(e),
+                                 QMessageBox.Ok, )
             return
 
     def _calc_max_timestep(self) -> int:
@@ -283,8 +284,7 @@ class AnimatedViewerController:
 
         self.dynamic.drawer.tight_layout()
 
-    def get_paint_parameters(self, lanelet: Lanelet, selected_lanelets: Lanelet,
-                             selected_intersection: Intersection):
+    def get_paint_parameters(self, lanelet: Lanelet, selected_lanelets: Lanelet, selected_intersection: Intersection):
         """
         Return the parameters for painting a lanelet regarding the selected lanelet.
         """
@@ -319,14 +319,16 @@ class AnimatedViewerController:
                     color = "yellow"
                     alpha = 0.5
                     zorder = 10
-                    label = "{} adj left of {} ({})".format(lanelet.lanelet_id, selected_lanelet.lanelet_id,
-                                                            "same" if selected_lanelet.adj_left_same_direction else "opposite", )
+                    label = "{} adj left of {} ({})".format(
+                            lanelet.lanelet_id, selected_lanelet.lanelet_id,
+                            "same" if selected_lanelet.adj_left_same_direction else "opposite", )
                 elif lanelet.lanelet_id == selected_lanelet.adj_right:
                     color = "orange"
                     alpha = 0.5
                     zorder = 10
-                    label = "{} adj right of {} ({})".format(lanelet.lanelet_id, selected_lanelet.lanelet_id,
-                                                             "same" if selected_lanelet.adj_right_same_direction else "opposite", )
+                    label = "{} adj right of {} ({})".format(
+                            lanelet.lanelet_id, selected_lanelet.lanelet_id,
+                            "same" if selected_lanelet.adj_right_same_direction else "opposite", )
                 else:
                     color = "gray"
                     alpha = 0.3
@@ -381,4 +383,5 @@ class AnimatedViewerController:
 
     def update_window(self):
         self.dynamic.setStyleSheet(
-            'background-color:' + self.parent.colorscheme().second_background + '; color:' + self.parent.colorscheme().color + ';font-size: ' + self.parent.colorscheme().font_size)
+            'background-color:' + self.parent.colorscheme().second_background + '; color:' +
+            self.parent.colorscheme().color + ';font-size: ' + self.parent.colorscheme().font_size)
