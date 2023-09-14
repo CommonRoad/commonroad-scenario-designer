@@ -99,7 +99,6 @@ class SettingsUI:
         self.frameLayout.addWidget(self.button_cancel)
         self.frameLayout.addWidget(self.button_ok)
         self.frameLayout.addWidget(self.button_set_to_default)
-        self.frameLayout.addItem(spacer_fixed)
 
         # add frame
         self.centralLayout.addWidget(self.frame)
