@@ -1,6 +1,7 @@
 import os
 import unittest
 import numpy as np
+from commonroad.common.common_lanelet import LaneletType
 
 from crdesigner.config.lanelet2_config import lanelet2_config
 from crdesigner.map_conversion.lanelet2.cr2lanelet import CR2LaneletConverter
@@ -124,6 +125,54 @@ class TestCR2LaneletConverter(unittest.TestCase):
 
         # testing the right entry in the dict for z-coordinate lanelet
         self.assertEqual(cr1.osm.way_relations[last_way_relation].tag_dict, {'type': 'lanelet'})
+
+    def test_convert_lanelet_type_and_location(self):
+        cr1 = CR2LaneletConverter()
+        cr1(scenario)
+
+        # Only one lanelet type, present in L2 format
+        lanelet.lanelet_type = {LaneletType.URBAN}
+        cr1._convert_lanelet(lanelet)
+        last_way_relation = list(cr1.osm.way_relations)[-1]
+        self.assertEqual(cr1.osm.way_relations[last_way_relation].tag_dict['subtype'], 'road')
+        self.assertEqual(cr1.osm.way_relations[last_way_relation].tag_dict['location'], 'urban')
+
+        # More than one lanelet type, all present in L2 format
+        lanelet.lanelet_type = {LaneletType.URBAN, LaneletType.BICYCLE_LANE, LaneletType.BUS_LANE}
+        cr1._convert_lanelet(lanelet)
+        last_way_relation = list(cr1.osm.way_relations)[-1]
+        self.assertEqual(cr1.osm.way_relations[last_way_relation].tag_dict['subtype'], 'bicycle_lane')
+        self.assertEqual(cr1.osm.way_relations[last_way_relation].tag_dict['location'], 'urban')
+
+        # More than one lanelet type, all present in L2 format, nonurban location tag
+        lanelet.lanelet_type = {LaneletType.COUNTRY, LaneletType.HIGHWAY, LaneletType.BUS_LANE}
+        cr1._convert_lanelet(lanelet)
+        last_way_relation = list(cr1.osm.way_relations)[-1]
+        self.assertEqual(cr1.osm.way_relations[last_way_relation].tag_dict['subtype'], 'bus_lane')
+        self.assertEqual(cr1.osm.way_relations[last_way_relation].tag_dict['location'], 'nonurban')
+
+        # All lanelet types present in L2 format
+        lanelet.lanelet_type = {LaneletType.SIDEWALK, LaneletType.BUS_LANE, LaneletType.COUNTRY,
+                                LaneletType.HIGHWAY, LaneletType.BICYCLE_LANE, LaneletType.EXIT_RAMP,
+                                LaneletType.CROSSWALK}
+        cr1._convert_lanelet(lanelet)
+        last_way_relation = list(cr1.osm.way_relations)[-1]
+        self.assertEqual(cr1.osm.way_relations[last_way_relation].tag_dict['subtype'], 'walkway')
+        self.assertEqual(cr1.osm.way_relations[last_way_relation].tag_dict['location'], 'nonurban')
+
+        # Lanelet types not present in L2 format
+        lanelet.lanelet_type = {LaneletType.ACCESS_RAMP, LaneletType.BORDER}
+        cr1._convert_lanelet(lanelet)
+        last_way_relation = list(cr1.osm.way_relations)[-1]
+        self.assertFalse('subtype' in cr1.osm.way_relations[last_way_relation].tag_dict)
+        self.assertFalse('location' in cr1.osm.way_relations[last_way_relation].tag_dict)
+
+        # No lanelet types
+        lanelet.lanelet_type = set()
+        cr1._convert_lanelet(lanelet)
+        last_way_relation = list(cr1.osm.way_relations)[-1]
+        self.assertFalse('subtype' in cr1.osm.way_relations[last_way_relation].tag_dict)
+        self.assertFalse('location' in cr1.osm.way_relations[last_way_relation].tag_dict)
 
     def test_convert_line_marking(self):
         cr1 = CR2LaneletConverter()

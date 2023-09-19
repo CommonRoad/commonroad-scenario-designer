@@ -2,7 +2,7 @@ import logging
 from typing import List, Optional, Tuple, Union, Dict
 
 import numpy as np
-from commonroad.common.common_lanelet import LineMarking
+from commonroad.common.common_lanelet import LineMarking, LaneletType
 from pyproj import CRS, Transformer
 from commonroad.scenario.lanelet import Lanelet
 from commonroad.scenario.traffic_sign import TrafficSign
@@ -38,30 +38,37 @@ def _line_marking_to_type_subtype_vertices(line_marking: LineMarking) -> [str, s
     return lanelet2_type, subtype
 
 
-def _convert_subtype_names(subtype: str, subtypes: List[str]) -> [str, bool]:
+def _extract_and_convert_subtype_name(cr_subtypes: List[str], l2_subtypes: List[str]) -> [str, bool]:
     """
-    Function that converts names of some subtypes that are slightly different
-    in two formats.
+    Function that extracts the most specific lanelet type and, if needed, converts its name as it could slightly differ
+    between formats.
 
-    :param subtype: name of the subtype of the lanelet
-    :param subtypes: lanelet2 subtypes that are available in commonroad
-    :return: name of the subtype (converted if needed) and the boolean value that states if the subtype corresponds
-        to one of the possible L2 format subtypes
+    :param cr_subtypes: list of the subtype names of the lanelet
+    :param l2_subtypes: lanelet2 subtypes that are available in commonroad
+    :return: name of the most specific subtype (converted if needed)
+    and the boolean value that states if the subtype corresponds to one of the possible L2 format subtypes
     """
-    subtype_in = False
-    if subtype in subtypes:
-        subtype_in = True
-        if subtype == "urban" or subtype == "country":
-            subtype = "road"
-        elif subtype == "busLane":
-            subtype = "bus_lane"
-        elif subtype == "bicycleLane":
-            subtype = "bicycle_lane"
-        elif subtype == "exitRamp":
-            subtype = "exit"
-        elif subtype == "sidewalk":
-            subtype = "walkway"
-    return subtype, subtype_in
+    # extracting lanelet types that exist in L2 format
+    common_subtypes = list(set(cr_subtypes).intersection(l2_subtypes))
+    # if there is not a single common lanelet type, return False
+    if len(common_subtypes) == 0:
+        return "", False
+
+    # return the most specific lanelet type
+    if "sidewalk" in common_subtypes:
+        return "walkway", True
+    if "crosswalk" in common_subtypes:
+        return "crosswalk", True
+    if "bicycleLane" in common_subtypes:
+        return "bicycle_lane", True
+    if "exitRamp" in common_subtypes:
+        return "exit", True
+    if "busLane" in common_subtypes:
+        return "bus_lane", True
+    if "highway" in common_subtypes or "interstate" in common_subtypes:
+        return "highway", True
+    if "urban" in common_subtypes or "country" in common_subtypes:
+        return "road", True
 
 
 def _vertices_are_equal(vertices1: List[np.ndarray], vertices2: List[np.ndarray],
@@ -479,12 +486,13 @@ class CR2LaneletConverter:
             self.osm.add_way(right_way)
             right_way_id = right_way.id_
 
-        # get the lanelet type of the lanelet we are converting
-        subtype = ""
-        if len(lanelet.lanelet_type) > 0:
-            subtype = list(lanelet.lanelet_type)[0].value
-        # have to convert the names as they are slightly different in both formats
-        subtype, subtype_in = _convert_subtype_names(subtype, self._config.supported_lanelet2_subtypes)
+        # create a list of lanelet type values, so we can extract the most specific one to convert it to L2 format
+        lanelet_types = []
+        for type_enum in list(lanelet.lanelet_type):
+            lanelet_types.append(type_enum.value)
+
+        # extracting and converting the most specific lanelet type
+        subtype, subtype_in = _extract_and_convert_subtype_name(lanelet_types, self._config.supported_lanelet2_subtypes)
 
         # append left and right way
         self.left_ways[lanelet.lanelet_id] = left_way_id
@@ -499,6 +507,12 @@ class CR2LaneletConverter:
         # update the way relation with the subtype, if it exists
         if subtype_in is True:
             way_rel.tag_dict.update({"subtype": subtype})
+
+            # set the location tag
+            if LaneletType.URBAN in lanelet.lanelet_type:
+                way_rel.tag_dict['location'] = 'urban'
+            else:
+                way_rel.tag_dict["location"] = "nonurban"
 
         # add the way relation to the osm
         self.osm.add_way_relation(way_rel)
