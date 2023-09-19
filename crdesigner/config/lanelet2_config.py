@@ -26,7 +26,7 @@ class Lanelet2Config(BaseConfig):
             "Prefix dictionary for supported countries for traffic sign cr2lanelet conversion")
 
     supported_lanelet2_subtypes = Attribute(
-            ["urban", "country", "highway", "busLane", "bicycleLane", "exitRamp", "sidewalk", "crosswalk"],
+            ["urban", "country", "highway", "interstate", "busLane", "bicycleLane", "exitRamp", "sidewalk", "crosswalk"],
             "Supported lanelet2 subtypes", "Lanelet2 subtypes that are available in commonroad")
 
     # lanelet2cr
