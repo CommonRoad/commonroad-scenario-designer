@@ -391,8 +391,7 @@ class CR2LaneletConverter:
             yield_ways.append(way_rel)
             # what if it does not have a stop line? Or it must have it?
             logging.info("cr2lanelet::_append_from_sign: lanelet with yield sign has no")
-            stop_line_way = dict_stop_lines.get(ll.lanelet_id)
-            if stop_line_way:
+            if (stop_line_way := dict_stop_lines.get(ll.lanelet_id) is not None):
                 ref_line.append(stop_line_way)
         elif sign_name in ("RIGHT_OF_WAY", "PRIORITY"):
             right_of_ways.append(way_rel)
