@@ -4,6 +4,8 @@ Sublayered Graph class
 
 from typing import List, Set, Tuple, Optional
 
+from pyproj import Transformer
+
 from ._graph import Graph
 from ._graph_node import GraphNode
 from ._graph_edge import GraphEdge
@@ -19,12 +21,13 @@ class SublayeredGraph(Graph):
         edges: Set[GraphEdge],
         center_point: Tuple[float, float],
         bounds: Tuple[float, float, float, float],
+        transformer: Transformer,
         traffic_signs: List[GraphTrafficSign],
         traffic_lights: List[GraphTrafficLight],
         sublayer_graph: Graph
     ):
         super().__init__(
-            nodes, edges, center_point, bounds, traffic_signs, traffic_lights
+            nodes, edges, center_point, bounds, transformer, traffic_signs, traffic_lights
         )
         # graph that is connected by crossings only (e.g. pedestrian path)
         self.sublayer_graph = sublayer_graph

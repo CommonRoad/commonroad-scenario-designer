@@ -6,6 +6,7 @@ import logging
 from typing import List, Set, Tuple, Optional
 from ordered_set import OrderedSet
 import numpy as np
+from pyproj import Transformer
 
 from crdesigner.config.osm_config import osm_config as config
 from crdesigner.map_conversion.common import geometry
@@ -31,6 +32,7 @@ class Graph:
         edges: Set[GraphEdge],
         center_point: Tuple[float, float],
         bounds: Tuple[float, float, float, float],
+        transformer: Transformer,
         traffic_signs: List[GraphTrafficSign],
         traffic_lights: List[GraphTrafficLight]
     ) -> None:
@@ -39,14 +41,14 @@ class Graph:
 
         :param nodes: nodes of the graph
         :param edges: edges of the graph
-        :param center_point: gps coordinates of the origin
         :return: None
         """
         self.nodes = nodes
         self.edges = edges
-        self.lanelinks: Set[Lane] = OrderedSet()
         self.center_point = center_point
         self.bounds = bounds
+        self.transformer = transformer
+        self.lanelinks: Set[Lane] = OrderedSet()
         self.traffic_signs = traffic_signs
         self.traffic_lights = traffic_lights
 
@@ -707,7 +709,8 @@ class Graph:
         :param2 direction: optional filter to only return edge with corresponding direction
         :return: GraphEdge which is closest to the given lat_lng coordinates
         """
-        given_point = np.asarray(lat_lng)
+        given_point = self.transformer.transform(lat_lng[0], lat_lng[1])
+        given_point = np.array(given_point)
         edges = list(self.edges)
 
         # edge coordinates need to be converted to lat lng before comparsion
@@ -715,17 +718,10 @@ class Graph:
         points_to_edge = dict()
         for edge in edges:
             edge_orientation = edge.get_compass_degrees()
-            if direction is not None and abs(edge_orientation-direction) < 60:  # degrees threshold
+            if direction is None or abs(edge_orientation-direction) < 60:  # degrees threshold
                 for waypoint in edge.get_waypoints():
-                    cartesian_waypoint = geometry.cartesian_to_lon_lat(waypoint, self.center_point)
-                    points.append(cartesian_waypoint)
-                    points_to_edge[tuple(cartesian_waypoint)] = edge
-            elif direction is None:
-                for waypoint in edge.get_waypoints():
-                    cartesian_waypoint = geometry.cartesian_to_lon_lat(waypoint, self.center_point)
-                    points.append(cartesian_waypoint)
-                    points_to_edge[tuple(cartesian_waypoint)] = edge
-                    # second_closest_index = np.argpartition(dist_2, 1)[1]
+                    points.append(waypoint)
+                    points_to_edge[tuple(waypoint)] = edge
         try:
             points = np.asarray(points)
             # https://codereview.stackexchange.com/a/28210

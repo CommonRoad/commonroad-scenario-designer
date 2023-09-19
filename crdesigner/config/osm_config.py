@@ -1,4 +1,5 @@
 from crdesigner.config.config_base import BaseConfig, Attribute
+from crdesigner.config.gui_config import gui_config
 
 
 class OsmConfig(BaseConfig):
@@ -24,6 +25,13 @@ class OsmConfig(BaseConfig):
     MAPILLARY_CLIENT_ID = Attribute("demo", "Mapillary Client ID")
     # time step size for the benchmark in seconds
     TIMESTEPSIZE = Attribute(0.1, "Timestep Size")
+
+    # Proj string used by OSM; should not be changed in general.
+    # See: https://osmdata.openstreetmap.de/info/projections.html
+    PROJ_STRING_FROM = Attribute(
+            "+proj=tmerc +lat_0=%.6f +lon_0=%.6f +k=1 +x_0=0 +y_0=0 +datum=WGS84 +units=m +vunits=m +no_defs",
+                                 "Projection string", "String describing the projection of the OSM map")
+    PROJ_STRING_TO = Attribute(gui_config.pseudo_mercator, "Projection string", "String used for the initialization of projection")
 
     # Lanelet type each lanelet should have
     LANELETTYPE = Attribute("urban", "Lanelet Type")
@@ -103,6 +111,7 @@ class OsmConfig(BaseConfig):
     # allowed inaccuracy of exported lines to reduce number of way points in meters
     COMPRESSION_THRESHOLD = Attribute(0.05, "Compression Threshold")
     # export the scenario in UTM coordinates
+    # TODO can probably be removed --> PROJ_STRING_TO can be used for that feature
     EXPORT_IN_UTM = Attribute(False, "Export in UTM")
     # toggle filtering of negligible waypoints
     FILTER = Attribute(True, "Filter")

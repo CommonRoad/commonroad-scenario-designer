@@ -14,7 +14,7 @@ from crdesigner.ui.gui.model.scenario_model import ScenarioModel
 from crdesigner.ui.gui.utilities.converter_modules.osm_interface import OSMInterface
 from crdesigner.ui.gui.utilities.gui_sumo_simulation import SUMO_AVAILABLE
 from crdesigner.ui.gui.utilities.util import select_local_file
-from crdesigner.ui.gui.utilities import config
+from crdesigner.config.osm_config import osm_config as config
 from crdesigner.ui.gui.utilities.waitingspinnerwidget import QtWaitingSpinner
 from crdesigner.ui.gui.view.toolboxes.converter_toolbox.converter_toolbox_ui import \
     MapConversionToolboxUI

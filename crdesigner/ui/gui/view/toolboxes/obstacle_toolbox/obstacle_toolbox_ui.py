@@ -2,7 +2,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from crdesigner.ui.gui.utilities.toolbox_ui import Toolbox
-from crdesigner.ui.gui.utilities import config
+from crdesigner.config.gui_config import gui_config as config
 from commonroad.scenario.obstacle import ObstacleType
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar

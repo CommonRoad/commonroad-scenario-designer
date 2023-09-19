@@ -5,14 +5,14 @@ This module holds the classes required for the intermediate format
 __author__ = "Behtarin Ferdousi"
 
 import copy
-from typing import List, Set, Dict
+from typing import List, Set, Dict, Tuple
 
 import commonroad
 import numpy as np
 
 from commonroad.scenario.lanelet import LaneletNetwork
 from commonroad.scenario.obstacle import Obstacle
-from commonroad.scenario.scenario import Scenario, ScenarioID
+from commonroad.scenario.scenario import Scenario, ScenarioID, Location, GeoTransformation
 from commonroad.scenario.traffic_sign import TrafficSign
 from commonroad.scenario.traffic_light import TrafficLight
 from commonroad.scenario.intersection import Intersection, IntersectionIncomingElement
@@ -23,7 +23,7 @@ from commonroad.common.util import Interval
 from commonroad.geometry.shape import Rectangle, Circle
 
 from crdesigner.map_conversion.osm2cr.converter_modules.graph_operations.road_graph import Graph
-from crdesigner.config.osm_config import osm_config as config
+from crdesigner.config.osm_config import osm_config as config, osm_config
 from crdesigner.map_conversion.osm2cr.converter_modules.utility import idgenerator
 from crdesigner.map_conversion.common import geometry
 from crdesigner.map_conversion.osm2cr.converter_modules.intermediate_operations.intersection_enhancement import \
@@ -38,14 +38,15 @@ Crossings = Dict[int, Set[int]]
 
 
 class IntermediateFormat:
+
     """
     Class that represents the intermediate format
 
     """
-
     def __init__(self,
                  nodes: List[Node],
                  edges: List[Edge],
+                 center_point: Tuple[float, float],
                  traffic_signs: List[TrafficSign] = None,
                  traffic_lights: List[TrafficLight] = None,
                  obstacles: List[Obstacle] = None,
@@ -64,6 +65,7 @@ class IntermediateFormat:
         self.nodes = nodes
         self.edges = edges
         self.intersections = intersections
+        self.center_point = center_point
         if self.intersections is None:
             self.intersections = []
         self.traffic_signs = traffic_signs
@@ -344,8 +346,13 @@ class IntermediateFormat:
 
         :return: CommonRoad Scenario
         """
+        location_kwargs = dict(gps_latitude=self.center_point[0], gps_longitude=self.center_point[1])
+        location = Location(geo_transformation=GeoTransformation(geo_reference=osm_config.PROJ_STRING_TO),
+                            **location_kwargs)
+
         scenario = Scenario(config.TIMESTEPSIZE,
-                            ScenarioID.from_benchmark_id(config.BENCHMARK_ID, commonroad.SCENARIO_VERSION))
+                            ScenarioID.from_benchmark_id(config.BENCHMARK_ID, commonroad.SCENARIO_VERSION),
+                            location=location)
         net = LaneletNetwork()
 
         # Add edges
@@ -392,6 +399,7 @@ class IntermediateFormat:
 
         return IntermediateFormat(nodes,
                                   edges,
+                                  graph.center_point,
                                   traffic_signs,
                                   traffic_lights,
                                   intersections=intersections)
@@ -412,7 +420,7 @@ class IntermediateFormat:
         crossings = dict()
         for crossed_lanelet in crossed_lane_network.lanelets:
             crossing_lanelet_ids = crossing_lane_network.find_lanelet_by_shape(
-                crossed_lanelet.polygon)
+                    crossed_lanelet.polygon)
             crossings[crossed_lanelet.lanelet_id] = set(crossing_lanelet_ids)
         return crossings
 
@@ -428,7 +436,7 @@ class IntermediateFormat:
         goal_region = GoalRegion([CustomState(time_step=Interval(0, 1), velocity=Interval(0.0, 1), position=rectangle),
                                   CustomState(time_step=Interval(1, 2), velocity=Interval(0.0, 1), position=circ)])
         planning_problem = PlanningProblem(pp_id, InitialState(velocity=0.1, position=np.array([[0], [0]]), orientation=0,
-                                                       yaw_rate=0, slip_angle=0, time_step=0), goal_region)
+                                                               yaw_rate=0, slip_angle=0, time_step=0), goal_region)
 
         return PlanningProblemSet(list([planning_problem]))
 
@@ -438,9 +446,9 @@ class IntermediateFormat:
         non existing elements.
         """
         traffic_light_ids = {tlight.traffic_light_id for tlight in
-                        self.traffic_lights}
+                             self.traffic_lights}
         traffic_sign_ids = {tsign.traffic_sign_id for tsign in
-                        self.traffic_signs}
+                            self.traffic_signs}
         for edge in self.edges:
             for t_light_ref in set(edge.traffic_lights):
                 if not t_light_ref in traffic_light_ids:
