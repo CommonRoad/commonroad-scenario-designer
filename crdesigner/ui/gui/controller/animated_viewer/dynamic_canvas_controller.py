@@ -15,11 +15,10 @@ import numpy as np
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 
-from commonroad.planning.planning_problem import PlanningProblemSet, PlanningProblem
-from commonroad.scenario.scenario import Scenario
+from commonroad.planning.planning_problem import  PlanningProblem
 from commonroad.visualization.mp_renderer import MPRenderer
 from commonroad.visualization.draw_params import StaticObstacleParams, DynamicObstacleParams
-from crdesigner.config.gui_config import gui_config
+from crdesigner.config.gui_config import gui_config, DrawParamsCustom
 from numpy import ndarray
 
 from commonroad.scenario.obstacle import StaticObstacle, DynamicObstacle
@@ -27,9 +26,6 @@ from commonroad.scenario.lanelet import LaneletType
 
 from crdesigner.ui.gui.utilities.aerial_data import get_aerial_image_bing, get_aerial_image_ldbv, \
     get_aerial_image_limits
-from crdesigner.ui.gui.utilities.draw_params_updater import update_draw_params_based_on_zoom, \
-    update_draw_params_dynamic_only_based_on_zoom, DrawParamsCustom, update_draw_params_based_on_scenario, \
-    update_draw_params_dynamic_based_on_scenario
 from crdesigner.ui.gui.utilities.helper import _merge_dict, calculate_closest_vertices, calculate_euclidean_distance, \
     angle_between
 from crdesigner.ui.gui.utilities.map_creator import MapCreator
@@ -67,7 +63,6 @@ class DynamicCanvasController(FigureCanvas):
         self._handles = {}
         self.initial_parameter_config_done = False  # This is used to only once set the parameter based on the scenario
         self.draw_params = None  # needed later - here for reference
-        self.draw_params_dynamic_only = None  # needed later - here for reference
         # used for efficiently monitoring of we switched from detailed to undetailed params
         self.selected_l_ids = []
         self.selected_lanelets = []
@@ -218,26 +213,27 @@ class DynamicCanvasController(FigureCanvas):
             new_center_y = center[1]
         # update the parameters for drawing based on the zoom -> this is for performance,
         # not all details need to be rendered when you are zoomed out
-        self.draw_params = update_draw_params_based_on_zoom(x=new_x_dim, y=new_y_dim)
-        self.draw_params_dynamic_only = update_draw_params_dynamic_only_based_on_zoom(x=new_x_dim, y=new_y_dim)
+        gui_config.set_zoom_treshold(x = new_x_dim, y= new_y_dim)
         lanelet_network, resized_lanelet_network = resize_lanelet_network(
                 original_lanelet_network=self.animated_viewer.original_lanelet_network, center_x=new_center_x,
-                center_y=new_center_y, dim_x=x_dim, dim_y=y_dim)
+                center_y=new_center_y, dim_x=new_x_dim, dim_y=new_y_dim)
         self.scenario_model.replace_lanelet_network(copy.deepcopy(lanelet_network))
         self.set_limits([new_center_x - new_x_dim, new_center_x + new_x_dim, new_center_y - new_y_dim, new_center_y +
                          new_y_dim])
         self.draw_idle()
         if resized_lanelet_network or self.last_changed_sth:
-            self.animated_viewer.update_plot()
+            if self.latest_mouse_pos is None:
+                self.animated_viewer.update_plot()
+            self._select_lanelet(True)
 
         self.last_changed_sth = resized_lanelet_network
         # now also show any selected
-        self._select_lanelet(True)
+        #self._select_lanelet(True)
 
     def draw_scenario(self, pps: PlanningProblem = None,
                       draw_params: DrawParamsCustom = DrawParamsCustom(),
                       plot_limits=None,
-                      draw_dynamic_only:bool =False):
+                      draw_dynamic_only:bool = False, time_begin = None):
         """[summary]
         :param pps: PlanningProblem of the scenario, defaults to None
         :param draw_params: [description], defaults to None
@@ -251,19 +247,27 @@ class DynamicCanvasController(FigureCanvas):
         # want to update immediatly if change gui settings
         lanelet_count = len(current_scenario.lanelet_network.lanelets)
         traffic_signs_count = len(current_scenario.lanelet_network.traffic_signs)
-        self.draw_params = update_draw_params_based_on_scenario(lanelet_count=lanelet_count,
-                                                                traffic_sign_count=traffic_signs_count)
+        if not draw_dynamic_only:
+            draw_params = gui_config.get_draw_params()
+            if time_begin is not None:
+                draw_params.time_begin = time_begin
+            else:
+                draw_params.time_begin = max(0, self.parent().animated_viewer_wrapper.cr_viewer.time_step.value)
+
+        lanelet_params = gui_config.get_undetailed_params(lanelet_count, traffic_signs_count)
+
+        if lanelet_params is not None:
+            draw_params.lanelet_network.lanelet = lanelet_params
+
+        if not gui_config.show_dynamic_obstacles():
+            draw_params.time_begin = -1
+            draw_params.dynamic_obstacle.trajectory.draw_trajectory = False
 
         xlim = self.ax.get_xlim()
         ylim = self.ax.get_ylim()
         # update the parameters based on the number of lanelets and traffic signs - but only once during starting
         if not self.initial_parameter_config_done:
-            self.draw_params = update_draw_params_based_on_scenario(
-                    lanelet_count=lanelet_count,
-                    traffic_sign_count=traffic_signs_count)
-            self.draw_params_dynamic_only = update_draw_params_dynamic_based_on_scenario(
-                    lanelet_count=lanelet_count,
-                    traffic_sign_count=traffic_signs_count)
+            self.draw_params = gui_config.get_draw_params()
             self.initial_parameter_config_done = True
         if draw_dynamic_only is True:
             self.rnd.remove_dynamic()  # self.rnd.ax.clear()  # self.ax.clear()
@@ -273,14 +277,11 @@ class DynamicCanvasController(FigureCanvas):
         draw_params_merged = copy.deepcopy(draw_params)
         self.rnd.plot_limits = plot_limits
         self.rnd.ax = self.ax
-        if draw_dynamic_only is True:
-            draw_params_merged = _merge_dict(self.draw_params_dynamic_only.copy(), draw_params)
-            draw_params_merged.dynamic_obstacle.draw_initial_state = False
+        if draw_dynamic_only:
             current_scenario.draw(renderer=self.rnd, draw_params=draw_params_merged)
             self.draw_obstacles(draw_params=draw_params_merged)
             self.rnd.render(keep_static_artists=True)
         else:
-            draw_params_merged.dynamic_obstacle.draw_initial_state = False
             current_scenario.draw(renderer=self.rnd, draw_params=draw_params_merged)
             if pps is not None:
                 pps.draw(renderer=self.rnd, draw_params=draw_params_merged)
@@ -500,8 +501,8 @@ class DynamicCanvasController(FigureCanvas):
 
         :returns :
         center := tuple (x,y) of center,
-        x_dim := absolut size of x-axis,
-        y_dim := absolut size of y-axis,
+        x_dim := half size of x-axis,
+        y_dim := half size of y-axis,
         xlim := tuple of x-axis limits (x_min, x_max),
         ylim := tuple of y-axis limits (y_min, y_max)
         """
@@ -633,6 +634,10 @@ class DynamicCanvasController(FigureCanvas):
             pass
 
     def activate_split_lanelet(self, is_checked: bool):
+        if self.parent().play_activated:
+            self.parent().road_network_toolbox.text_browser.append("Please stop the animation")
+            return
+
         if is_checked:
             self.mpl_disconnect(self.button_press_event_cid)
             self.mpl_disconnect(self.button_release_event_cid)
@@ -716,6 +721,10 @@ class DynamicCanvasController(FigureCanvas):
         self._parent.top_bar.toolbar_wrapper.tool_bar_ui.reset_toolbar()
 
     def add_adjacent(self, left_adj: bool, same_direction: bool = True):
+        if self.parent().play_activated:
+            self.parent().road_network_toolbox.text_browser.append("Please stop the animation")
+            return
+
         added_adjacent_lanelets = []
         for lanelet in self.selected_lanelets:
             adjacent_lanelet = MapCreator.create_adjacent_lanelet(left_adj, lanelet,
@@ -733,6 +742,9 @@ class DynamicCanvasController(FigureCanvas):
         self.parent().road_network_toolbox.initialize_road_network_toolbox()
 
     def merge_lanelets(self):
+        if self.parent().play_activated:
+            self.parent().road_network_toolbox.text_browser.append("Please stop the animation")
+            return
         neighboured_lanelets = self.selected_lanelets.copy()
         last_merged_index = self.scenario_model.merge_lanelets_dynamic_canvas(neighboured_lanelets)
 
@@ -752,6 +764,10 @@ class DynamicCanvasController(FigureCanvas):
 
         :param is_active: Boolean which gives the information if the button is clicked or not
         """
+        if self.parent().play_activated:
+            self.parent().road_network_toolbox.text_browser.append("Please stop the animation")
+            return
+
         if is_active:
             self.selected_l_ids = []
             self.selected_lanelets = []
@@ -820,6 +836,10 @@ class DynamicCanvasController(FigureCanvas):
             self.draw_idle()
 
     def activate_drawing_mode(self, is_active):
+        if self.parent().play_activated:
+            self.parent().road_network_toolbox.text_browser.append("Please stop the animation")
+            return
+
         if is_active:
             self.mpl_disconnect(self.button_press_event_cid)
             self.mpl_disconnect(self.button_release_event_cid)
@@ -933,6 +953,10 @@ class DynamicCanvasController(FigureCanvas):
         self.draw_idle()
 
     def draw_temporary_point(self):
+        if self.parent().play_activated:
+            self.parent().road_network_toolbox.text_browser.append("Please stop the animation")
+            return
+
         if not self.scenario_model.scenario_created():
             return
         for key in self.draw_temporary_points:
@@ -1000,6 +1024,9 @@ class DynamicCanvasController(FigureCanvas):
         :param new_lanelet: Indicator if the lanelet already exists or is added as a new lanelet
         :param mouse_event: Mouse parameters -> to prevent if you select a lanelet in the GUI to click twice to deselect
         """
+        if self.parent().play_activated:
+            self.parent().road_network_toolbox.text_browser.append("Please stop the animation")
+            return
 
         if not self.scenario_model.scenario_created():
             self.parent().road_network_toolbox.text_browser.append("Please create first a new scenario")

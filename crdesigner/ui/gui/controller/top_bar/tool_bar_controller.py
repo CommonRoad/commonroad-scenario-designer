@@ -1,7 +1,7 @@
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QMessageBox
 
-from crdesigner.config.gui_config import gui_config as config
+from crdesigner.config.gui_config import gui_config as config, gui_config
 from crdesigner.ui.gui.utilities.file_actions import file_save, open_commonroad_file, file_new
 from crdesigner.ui.gui.view.top_bar.tool_bar_ui import ToolBarUI
 
@@ -87,19 +87,29 @@ class ToolBarController:
             if reply == QMessageBox.Ok:
                 open_cr_file(self.mwindow)
             return
+        if not gui_config.show_dynamic_obstacles():
+            messagebox = QMessageBox()
+            messagebox.warning(self.mwindow_ui, "Warning",
+                               "Please enable the display of dynamic obstacles in the settings ", QMessageBox.Ok)
+
+            return
         if not self.mwindow.play_activated:
             self.mwindow.animated_viewer_wrapper.cr_viewer.play()
             self.mwindow.crdesigner_console_wrapper.text_browser.append("Playing the animation")
             if config.DARKMODE:
-                self.mwindow_ui.top_bar.toolbar_wrapper.tool_bar_ui.button_play_pause.setIcon(QIcon(":/icons/pause_darkmode.png"))
+                self.mwindow_ui.top_bar.toolbar_wrapper.tool_bar_ui.button_play_pause.setIcon(QIcon(
+                        ":/icons/pause_darkmode.png"))
             else:
-                self.mwindow_ui.top_bar.toolbar_wrapper.tool_bar_ui.button_play_pause.setIcon(QIcon(":/icons/pause.png"))
+                self.mwindow_ui.top_bar.toolbar_wrapper.tool_bar_ui.button_play_pause.setIcon(QIcon(
+                        ":/icons/pause.png"))
             self.mwindow.play_activated = True
+            self.mwindow_ui.play_activated = True
         else:
             self.mwindow.animated_viewer_wrapper.cr_viewer.pause()
             self.mwindow.crdesigner_console_wrapper.text_browser.append("Pause the animation")
             self.mwindow_ui.top_bar.toolbar_wrapper.tool_bar_ui.button_play_pause.setIcon(QIcon(":/icons/play.png"))
             self.mwindow.play_activated = False
+            self.mwindow_ui.play_activated = False
 
     def _time_step_change(self, value):
         if self.mwindow.scenario_model.scenario_created():
@@ -115,7 +125,6 @@ class ToolBarController:
                 int(float(self.mwindow_ui.top_bar.toolbar_wrapper.tool_bar_ui.edit.text())))
             self.mwindow.animated_viewer_wrapper.cr_viewer.pause()
             self.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.draw_idle()
-            self.mwindow.animated_viewer_wrapper.update_view()
 
     def _detect_slider_clicked(self):
         self.mwindow.slider_clicked = True

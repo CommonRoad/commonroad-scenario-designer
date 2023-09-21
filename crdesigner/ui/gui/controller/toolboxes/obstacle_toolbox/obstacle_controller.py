@@ -47,6 +47,7 @@ class ObstacleController(QDockWidget, ):
         self.amount_obstacles = 0
         self.canvas = DynamicCanvasController()
         self.obstacle_color = None
+        self.mwindow = mwindow
 
         # for profile visualisation
         self.sel_point = None
@@ -111,11 +112,6 @@ class ObstacleController(QDockWidget, ):
 
         if SUMO_AVAILABLE:
             self.obstacle_toolbox_ui.button_start_simulation.clicked.connect(lambda: self.start_sumo_simulation())
-
-
-    def refresh_toolbox(self, model: ScenarioModel):
-        self.scenario_model = model
-        self.initialize_toolbox()
 
 
     def static_obstacle_details(self, obstacle_id: int):
@@ -385,6 +381,10 @@ class ObstacleController(QDockWidget, ):
         generates an object_id (id for obstacle) and then calls function
         to create a static or dynamic obstacle
         """
+        if self.mwindow.play_activated:
+            self.text_browser.append("Please stop the animation first.")
+            return
+
         if self.scenario_model.scenario_created() :
             obstacle_id = self.scenario_model.generate_object_id()
             self.amount_obstacles = self.scenario_model.generate_object_id()
@@ -408,6 +408,10 @@ class ObstacleController(QDockWidget, ):
         """
         updates obstacle by deleting it and then adding it again with same id
         """
+        if self.mwindow.play_activated:
+            self.text_browser.append("Please stop the animation first.")
+            return
+
         selected_obstacle = self.get_current_obstacle()
         obstacle_id = self.get_current_obstacle_id()
         self.temp_obstacle = selected_obstacle
@@ -1161,6 +1165,10 @@ class ObstacleController(QDockWidget, ):
         """
         Removes the selected obstacle from the scenario.
         """
+        if self.mwindow.play_activated:
+            self.text_browser.append("Please stop the animation first.")
+            return
+
         if self.obstacle_toolbox_ui.selected_obstacle.currentText() not in ["", "None"]:
             try:
                 obstacle_id = self.get_current_obstacle_id()

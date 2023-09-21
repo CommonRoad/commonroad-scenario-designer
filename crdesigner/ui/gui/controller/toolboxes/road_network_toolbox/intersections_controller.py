@@ -40,6 +40,10 @@ class AddIntersectionController:
         """
         Updates information of intersection widget based on intersection ID selected by the user.
         """
+        if self.road_network_controller.mwindow.play_activated:
+            self.road_network_controller.text_browser.append("Please stop the animation first.")
+            return
+
         if self.road_network_toolbox_ui.selected_intersection.currentText() not in ["", "None"]:
             selected_intersection_id = int(self.road_network_toolbox_ui.selected_intersection.currentText())
             intersection = self.scenario_model.find_intersection_by_id(selected_intersection_id)
@@ -76,6 +80,10 @@ class AddIntersectionController:
         """
         Adds a four-way intersection to the scenario.
         """
+        if self.road_network_controller.mwindow.play_activated:
+            self.road_network_controller.text_browser.append("Please stop the animation first.")
+            return
+
         if not self.scenario_model.scenario_created():
             self.road_network_controller.text_browser.append("_Warning:_ Create a new file")
             return
@@ -93,6 +101,10 @@ class AddIntersectionController:
         """
         Adds a three-way intersection to the scenario.
         """
+        if self.road_network_controller.mwindow.play_activated:
+            self.road_network_controller.text_browser.append("Please stop the animation first.")
+            return
+
         if not self.scenario_model.scenario_created():
             self.road_network_controller.text_browser.append("_Warning:_ Create a new file")
             return
@@ -110,6 +122,10 @@ class AddIntersectionController:
         """
          Rotates and translates a complete intersection so that it is attached to a user-defined lanelet.
         """
+        if self.road_network_controller.mwindow.play_activated:
+            self.road_network_controller.text_browser.append("Please stop the animation first.")
+            return
+
         if self.road_network_toolbox_ui.selected_intersection.currentText() not in ["","None"] \
                 and self.road_network_toolbox_ui.other_lanelet_to_fit.currentText() not in ["", "None"] \
                 and self.road_network_toolbox_ui.intersection_lanelet_to_fit.currentText() not in ["", "None"]:
@@ -123,6 +139,10 @@ class AddIntersectionController:
         """
         Adds an intersection to the scenario.
         """
+        if self.road_network_controller.mwindow.play_activated:
+            self.road_network_controller.text_browser.append("Please stop the animation first.")
+            return
+
         if not self.scenario_model.scenario_created():
             self.road_network_controller.text_browser.append("_Warning:_ Create a new file")
             return
@@ -174,6 +194,10 @@ class AddIntersectionController:
         """
         Removes selected intersection from lanelet network.
         """
+        if self.road_network_controller.mwindow.play_activated:
+            self.road_network_controller.text_browser.append("Please stop the animation first.")
+            return
+
         if not self.scenario_model.scenario_created():
             self.road_network_controller.text_browser.append("_Warning:_ Create a new file")
             return
@@ -187,6 +211,10 @@ class AddIntersectionController:
         """
         Updates a selected intersection from the scenario.
         """
+        if self.road_network_controller.mwindow.play_activated:
+            self.road_network_controller.text_browser.append("Please stop the animation first.")
+            return
+
         if not self.scenario_model.scenario_created():
             self.road_network_controller.text_browser.append("_Warning:_ Create a new file")
             return
@@ -209,6 +237,10 @@ class AddIntersectionController:
         @param new_incoming: Boolean indicating whether this will be an new incoming or from a new intersection
         @param incoming_ids: List of available incoming IDs.
         """
+        if self.road_network_controller.mwindow.play_activated:
+            self.road_network_controller.text_browser.append("Please stop the animation first.")
+            return
+
         if not self.scenario_model.scenario_created():
             self.road_network_controller.text_browser.append("_Warning:_ Create a new file")
             return

@@ -1,8 +1,7 @@
 from PyQt5 import QtCore, QtWidgets
 
 from crdesigner.config.gui_config import gui_config as gui_settings_model
-from crdesigner.config.settings_config import settings as settings_model, CONFIGS_TO_RENDER
-from crdesigner.ui.gui.utilities.draw_params_updater import set_draw_params
+from crdesigner.config.settings_config import settings as settings_model, CONFIGS_TO_RENDER, settings
 from crdesigner.ui.gui.view.settings.settings_ui import SettingsUI
 
 
@@ -19,6 +18,7 @@ class SettingsController:
         self.cr_designer = parent.mwindow_ui
         self.scenario_model = parent.scenario_model
         self.canvas = parent.animated_viewer_wrapper.cr_viewer.dynamic
+        self.parent = parent
 
         self.settings_ui = SettingsUI(self.cr_designer)
 
@@ -57,6 +57,9 @@ class SettingsController:
             return
         _save_all_to_yaml()
         self._hide_and_update()
+        if self.scenario_model.scenario_created():
+            self.scenario_model.notify_all()
+        self.parent.mwindow_ui.update_window()
 
     def show(self):
         """
@@ -66,24 +69,7 @@ class SettingsController:
         self.settings_ui.settings.show()
 
     def _hide_and_update(self):
-        self._update_all_dependents()
         self.settings_ui.settings.hide()
-
-    def _update_all_dependents(self):
-        # GUI updates
-        set_draw_params(trajectory=gui_settings_model.DRAW_TRAJECTORY,
-                        intersection=gui_settings_model.DRAW_INTERSECTIONS,
-                        obstacle_label=gui_settings_model.DRAW_OBSTACLE_LABELS,
-                        obstacle_icon=gui_settings_model.DRAW_OBSTACLE_ICONS,
-                        obstacle_direction=gui_settings_model.DRAW_OBSTACLE_DIRECTION,
-                        obstacle_signal=gui_settings_model.DRAW_OBSTACLE_SIGNALS,
-                        occupancy=gui_settings_model.DRAW_OCCUPANCY,
-                        traffic_signs=gui_settings_model.DRAW_TRAFFIC_SIGNS,
-                        traffic_lights=gui_settings_model.DRAW_TRAFFIC_LIGHTS,
-                        incoming_lanelets=gui_settings_model.DRAW_INCOMING_LANELETS,
-                        successors=gui_settings_model.DRAW_SUCCESSORS,
-                        intersection_labels=gui_settings_model.DRAW_INTERSECTION_LABELS,
-                        colorscheme=self.cr_designer.colorscheme())
 
 
 def _set_default():

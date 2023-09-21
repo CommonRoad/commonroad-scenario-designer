@@ -184,3 +184,6 @@ class MapConversionToolboxUI(Toolbox):
         elif self.chosen_method == "sumo":
             self.layout_con_groupbox.removeRow(self.button_convert_sumo_to_cr)
             self.layout_con_groupbox.removeRow(self.button_convert_cr_to_sumo)
+
+    def update_window(self):
+        super().update_window()

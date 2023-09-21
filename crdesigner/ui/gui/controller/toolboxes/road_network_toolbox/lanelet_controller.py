@@ -74,6 +74,10 @@ class AddLaneletController:
             self.road_network_controller.text_browser.append("Please create first a new scenario.")
             return
 
+        if self.road_network_controller.mwindow.play_activated:
+            self.road_network_controller.text_browser.append("Please stop the animation first.")
+            return
+
         if not self.road_network_toolbox_ui.place_at_position.isChecked() and not \
                 self.road_network_toolbox_ui.connect_to_previous_selection.isChecked() and not \
                 self.road_network_toolbox_ui.connect_to_successors_selection.isChecked() and not \
@@ -228,6 +232,9 @@ class AddLaneletController:
         """
         Updates a given lanelet based on the information configured by the user.
         """
+        if self.road_network_controller.mwindow.play_activated:
+            self.road_network_controller.text_browser.append("Please stop the animation first.")
+            return
 
         selected_lanelet = self.selected_lanelet()
         if selected_lanelet is None:
@@ -457,6 +464,10 @@ class AddLaneletController:
         """
                Removes a selected lanelet from the scenario.
                """
+        if self.road_network_controller.mwindow.play_activated:
+            self.road_network_controller.text_browser.append("Please stop the animation first.")
+            return
+
         selected_lanelet = self.selected_lanelet()
         if selected_lanelet is None:
             return
@@ -471,9 +482,13 @@ class AddLaneletController:
 
     def attach_to_other_lanelet(self):
         """
-                Attaches a lanelet to another lanelet.
-                @return:
-                """
+        Attaches a lanelet to another lanelet.
+        @return:
+        """
+        if self.road_network_controller.mwindow.play_activated:
+            self.road_network_controller.text_browser.append("Please stop the animation first.")
+            return
+
         selected_lanelet_one = self.selected_lanelet(True)
         if selected_lanelet_one is None:
             return
@@ -492,6 +507,10 @@ class AddLaneletController:
         """
         Create adjacent lanelet given a selected lanelet
         """
+        if self.road_network_controller.mwindow.play_activated:
+            self.road_network_controller.text_browser.append("Please stop the animation first.")
+            return
+
         selected_lanelet = self.selected_lanelet(True)
         if selected_lanelet is None:
             return
@@ -569,6 +588,10 @@ class AddLaneletController:
         """
         Connects two lanelets by adding a new lanelet using cubic spline interpolation.
         """
+        if self.road_network_controller.mwindow.play_activated:
+            self.road_network_controller.text_browser.append("Please stop the animation first.")
+            return
+
         selected_lanelet_one = self.selected_lanelet(True)
         if selected_lanelet_one is None:
             return
@@ -592,6 +615,10 @@ class AddLaneletController:
         """
         Rotates lanelet by a user-defined angle.
         """
+        if self.road_network_controller.mwindow.play_activated:
+            self.road_network_controller.text_browser.append("Please stop the animation first.")
+            return
+
         selected_lanelet_one = self.selected_lanelet(True)
         if selected_lanelet_one is None:
             return
@@ -604,6 +631,10 @@ class AddLaneletController:
         """
         Translates lanelet by user-defined x- and y-values.
         """
+        if self.road_network_controller.mwindow.play_activated:
+            self.road_network_controller.text_browser.append("Please stop the animation first.")
+            return
+
         selected_lanelet_one = self.selected_lanelet(True)
         if selected_lanelet_one is None:
             return
@@ -753,6 +784,10 @@ class AddLaneletController:
         """
          Merges a lanelet with its successor. If several successors exist, a new lanelet is created for each successor.
         """
+        if self.road_network_controller.mwindow.play_activated:
+            self.road_network_controller.text_browser.append("Please stop the animation first.")
+            return
+
         selected_lanelet_one = self.selected_lanelet(True)
         if selected_lanelet_one is None:
             return
