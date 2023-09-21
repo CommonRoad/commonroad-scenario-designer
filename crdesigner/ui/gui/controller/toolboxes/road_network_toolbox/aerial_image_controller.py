@@ -32,25 +32,34 @@ class AddAerialImageController:
         self.road_network_toolbox_ui.button_remove_aerial_image.clicked.connect(lambda: self.remove_aerial_image())
 
     def show_aerial_image(self):
+        if self.road_network_controller.mwindow.play_activated:
+            self.road_network_controller.text_browser.append("Please stop the animation first.")
+            return
+
         if not self.scenario_model.scenario_created():
             self.road_network_controller.text_browser.append("Please create first a new scenario.")
             return
+
         if float(self.road_network_toolbox_ui.northern_bound.text()) > 90 or float(
                 self.road_network_toolbox_ui.northern_bound.text()) < -90:
             self.road_network_controller.text_browser.append("Invalid northern bound. Latitude has to be between -90 and 90.")
             return
+
         if float(self.road_network_toolbox_ui.southern_bound.text()) > 90 or float(
                 self.road_network_toolbox_ui.southern_bound.text()) < -90:
             self.road_network_controller.text_browser.append("Invalid southern bound. Latitude has to be between -90 and 90.")
             return
+
         if float(self.road_network_toolbox_ui.western_bound.text()) > 180 or float(
                 self.road_network_toolbox_ui.western_bound.text()) < -180:
             self.road_network_controller.text_browser.append("Invalid western bound. Longitude has to be between -180 and 180.")
             return
+
         if float(self.road_network_toolbox_ui.eastern_bound.text()) > 180 or float(
                 self.road_network_toolbox_ui.eastern_bound.text()) < -180:
             self.road_network_controller.text_browser.append("Invalid eastern bound. Longitude has to be between -180 and 180.")
             return
+
         if float(self.road_network_toolbox_ui.southern_bound.text()) >= float(
                 self.road_network_toolbox_ui.northern_bound.text()) or float(
                 self.road_network_toolbox_ui.western_bound.text()) >= float(
@@ -66,6 +75,7 @@ class AddAerialImageController:
                                        QMessageBox.Ok, QMessageBox.Ok)
                 warning_dialog.close()
                 return
+
         elif self.road_network_toolbox_ui.ldbv_selection.isChecked():
             if config_settings.LDBV_USERNAME == "" or config_settings.LDBV_PASSWORD == "":
                 print("_Warning__: LDBV username and password not specified. Go to settings and set them.")
@@ -75,6 +85,7 @@ class AddAerialImageController:
                                        QMessageBox.Ok, QMessageBox.Ok)
                 warning_dialog.close()
                 return
+
             if float(self.road_network_toolbox_ui.southern_bound.text()) > 50.6 or float(
                     self.road_network_toolbox_ui.southern_bound.text()) < 47.2 or float(
                     self.road_network_toolbox_ui.northern_bound.text()) > 50.6 or float(

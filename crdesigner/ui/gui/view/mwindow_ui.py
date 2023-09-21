@@ -5,9 +5,8 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import *
 
-from crdesigner.config.gui_config import gui_config
+from crdesigner.config.gui_config import gui_config, ColorSchema
 from crdesigner.ui.gui.resources.MainWindow import Ui_mainWindow
-from crdesigner.ui.gui.utilities.draw_params_updater import ColorSchema
 from crdesigner.ui.gui.utilities.gui_sumo_simulation import SUMO_AVAILABLE
 
 if SUMO_AVAILABLE:
@@ -62,19 +61,12 @@ class MWindowUI(QMainWindow, Ui_mainWindow):
         self.status.showMessage(q.text() + ' is triggered')
 
     def initialize_toolboxes(self):
-        pass
-        # TODO: fix with toolboxes
-        # self.road_network_toolbox.initialize_road_network_toolbox()
-        # self.obstacle_toolbox.initialize_toolbox()
+        self.road_network_toolbox.initialize_road_network_toolbox()
+        self.obstacle_toolbox.initialize_obstacle_information()
+        self.scenario_toolbox.initialize_toolbox()
 
     def colorscheme(self) -> ColorSchema:
-        if gui_config.DARKMODE:
-            colorscheme = ColorSchema(axis=gui_config.AXIS_VISIBLE, background='#303030', color='#f0f0f0',
-                                      highlight='#1e9678', second_background='#2c2c2c')
-        else:
-            colorscheme = ColorSchema(axis=gui_config.AXIS_VISIBLE)
-
-        return colorscheme
+        return gui_config.get_colorscheme()
 
     def update_window(self):
         p = QtGui.QPalette()
@@ -88,12 +80,12 @@ class MWindowUI(QMainWindow, Ui_mainWindow):
         self.setPalette(p)
 
         self.road_network_toolbox.road_network_toolbox_ui.update_window()
-        # TODO: self.obstacle_toolbox.obstacle_toolbox_ui.update_window()
-        # TODO: self.converter_toolbox.converter_toolbox.update_window()
+        self.obstacle_toolbox.obstacle_toolbox_ui.update_window()
+        self.map_converter_toolbox.converter_toolbox_ui.update_window()
+        self.scenario_toolbox.scenario_toolbox_ui.update_window()
         self.animated_viewer_wrapper.update_window()
         self.menubar.setStyleSheet(
             'background-color: ' + self.colorscheme().second_background + '; color: ' + self.colorscheme().color)
-
 
     def close_window(self) -> bool:
         """

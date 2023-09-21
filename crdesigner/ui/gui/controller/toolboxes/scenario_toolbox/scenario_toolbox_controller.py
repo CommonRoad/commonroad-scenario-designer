@@ -201,6 +201,10 @@ class ScenarioToolboxController(QDockWidget):
 
     def add_planning_problem(self) -> None:
         """adds a new planning problem to current_pps"""
+        if self.mwindow.play_activated:
+            self.text_browser.append("Please stop the animation first.")
+            return
+
         if not self.mwindow.scenario_model.scenario_created():
             self.text_browser.append("Please create first a Scenario")
             return
@@ -229,6 +233,10 @@ class ScenarioToolboxController(QDockWidget):
 
     def remove_planning_problem(self) -> None:
         """removes planning problem"""
+        if self.mwindow.play_activated:
+            self.text_browser.append("Please stop the animation first.")
+            return
+
         if self.scenario_toolbox_ui.planning_problems_list_table.currentItem() != None:
             self.pps_model.remove_pp(
                     int(self.scenario_toolbox_ui.planning_problems_list_table.currentItem().text()))
@@ -284,6 +292,10 @@ class ScenarioToolboxController(QDockWidget):
 
     def add_goal_state(self) -> None:
         """Add goal state to PPl."""
+        if self.mwindow.play_activated:
+            self.text_browser.append("Please stop the animation first.")
+            return
+
         if not self.mwindow.scenario_model.scenario_created():
             self.text_browser.append("Please create first a Scenario")
             return
@@ -303,6 +315,10 @@ class ScenarioToolboxController(QDockWidget):
 
     def remove_goal_state(self) -> None:
         """Removes goal state from PPl."""
+        if self.mwindow.play_activated:
+            self.text_browser.append("Please stop the animation first.")
+            return
+
         if self.scenario_toolbox_ui.goal_states_list_table.currentItem() != None:
             current_planning_problem_id = int(
                     self.scenario_toolbox_ui.planning_problems_list_table.currentItem().text())
@@ -318,6 +334,10 @@ class ScenarioToolboxController(QDockWidget):
 
         :param current_goal_state_id: ID which was just added and the values of the toolbox are for
         """
+        if self.mwindow.play_activated:
+            self.text_browser.append("Please stop the animation first.")
+            return
+
         if self.scenario_toolbox_ui.planning_problems_list_table.currentItem() == None:
             self.text_browser.append("Please create and/or select a planning problem.")
             return
@@ -778,6 +798,10 @@ class ScenarioToolboxController(QDockWidget):
     def update_initial_state(self) -> None:
         """updates initial state of selected planning problem. If no planning problem is selected new planning
         problem is created"""
+        if self.mwindow.play_activated:
+            self.text_browser.append("Please stop the animation first.")
+            return
+
         if self.scenario_toolbox_ui.planning_problems_list_table.currentItem() == None:
             self.text_browser.append("Please create and/or select a planning problem.")
             return
@@ -1000,6 +1024,11 @@ class ScenarioToolboxController(QDockWidget):
 
     def update_scenario_meta_data(self) -> None:
         """Updates the edited meta data in the scenario"""
+        if self.mwindow.play_activated:
+            self.text_browser.append("Please stop the animation first.")
+            self.update_settings()
+            return
+
         if self.init_settings is not True:
             if self.current_scenario.get_current_scenario() is not None:
                 self.current_scenario.get_current_scenario().author = (self.scenario_toolbox_ui.scenario_author.text())

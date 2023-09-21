@@ -10,7 +10,6 @@ from commonroad.visualization.mp_renderer import MPRenderer
 from crdesigner.ui.gui.controller.animated_viewer.dynamic_canvas_controller import DynamicCanvasController
 from crdesigner.ui.gui.model.planning_problem_set_model import PlanningProblemSetModel
 from crdesigner.ui.gui.utilities.gui_sumo_simulation import SUMO_AVAILABLE
-from crdesigner.ui.gui.utilities.draw_params_updater import DrawParamsCustom
 from crdesigner.ui.gui.utilities.helper import draw_lanelet_polygon
 from crdesigner.config.gui_config import gui_config
 
@@ -85,7 +84,6 @@ class AnimatedViewerController:
         :param planning_problem_set: des,
         """
         self.dynamic.initial_parameter_config_done = False  # reset so that for any map the parameters are set correctly
-        # self.current_scenario = scenario
         # safe here the original scenario -> this is needed for zooming in / out and for moving around
 
         self.original_lanelet_network = LaneletNetwork.create_from_lanelet_network(
@@ -105,9 +103,12 @@ class AnimatedViewerController:
 
         self._calc_max_timestep()
         if self.animation:
-            self.time_step.value = 0
+            #self.time_step.value = 0
             self.animation.event_source.stop()
             self.animation = None
+        else:
+            self.time_step.value = 0
+
         self.update_plot(clear_artists=True, new_file_added=new_file_added, plot_limits=plot_limits)
 
     def _init_animation(self):
@@ -146,11 +147,16 @@ class AnimatedViewerController:
             if time_start > time_end:
                 self.time_step.value = 0
 
-            draw_params = DrawParamsCustom(time_begin=time_start, time_end=time_end)
-            draw_params.dynamic_obstacle.time_begin = draw_params.time_begin
-            draw_params.dynamic_obstacle.time_end = draw_params.time_end
-            draw_params.dynamic_obstacle.trajectory.draw_trajectory = False
-            self.dynamic.draw_scenario(pps=pps, draw_params=draw_params)
+            draw_params = gui_config.get_draw_params()
+
+            #draw_params.dynamic_obstacle = gui_config.get_obstacle_params()
+            draw_params.time_begin = time_start
+            draw_params.time_end = time_end
+            draw_params.dynamic_obstacle.trajectory.time_begin = time_start
+            draw_params.dynamic_obstacle.trajectory.time_end = end
+            draw_params.trajectory.time_begin = time_start
+            draw_params.trajectory.time_end = end
+            self.dynamic.draw_scenario(pps=pps, draw_params=draw_params, draw_dynamic_only=True)
 
         # Interval determines the duration of each frame in ms
         interval = 1000 * dt
@@ -164,6 +170,7 @@ class AnimatedViewerController:
 
         self.dynamic.draw_idle()
         self.animation.event_source.start()
+        self.playing = True
 
     def pause(self):
         """ pauses the animation if playing """
@@ -172,6 +179,7 @@ class AnimatedViewerController:
             return
 
         self.animation.event_source.stop()
+        self.playing = False
 
     def set_timestep(self, timestep: int):
         """ sets the animation to the current timestep """
@@ -210,8 +218,8 @@ class AnimatedViewerController:
         if not self.scenario_model.scenario_created():
             return 0
 
-        if len(self.scenario_model.get_dynamic_obstacles()) > 0 and self.scenario_model.get_dynamic_obstacles()[
-            0].prediction is not None:
+        if len(self.scenario_model.get_dynamic_obstacles()) > 0 and self.scenario_model.get_dynamic_obstacles()[0]\
+                .prediction is not None:
             time_steps = [obstacle.prediction.occupancy_set[-1].time_step for obstacle in
                 self.scenario_model.get_dynamic_obstacles()]
             self.max_timestep = np.max(time_steps) if time_steps else 0
@@ -245,17 +253,19 @@ class AnimatedViewerController:
         ax = self.dynamic.get_axes()
 
         if time_step_changed:
-            draw_params = DrawParamsCustom(time_begin=time_step, color_schema=self.parent.colorscheme())
+            time_begin = time_step
         else:
-            draw_params = DrawParamsCustom(time_begin=self.time_step.value - 1,
-                                           color_schema=self.parent.colorscheme())
-        draw_params.dynamic_obstacle.trajectory.draw_trajectory = False
+            time_begin = max(0, self.time_step.value - 1)
 
         if new_file_added:
             self.dynamic.show_aerial = False
             self.new_file_added = False
+            if plot_limits is not None:
+                x_dim = (plot_limits[1] - plot_limits[0]) / 2
+                y_dim = (plot_limits[3] - plot_limits[2]) / 2
+                gui_config.set_zoom_treshold(x_dim, y_dim)
 
-        self.dynamic.draw_scenario(self.pps_model.get_selected_pp(), draw_params=draw_params)
+        self.dynamic.draw_scenario(self.pps_model.get_selected_pp(), time_begin=time_begin)
 
         for lanelet in self.scenario_model.get_lanelets():
 

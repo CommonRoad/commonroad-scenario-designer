@@ -36,9 +36,14 @@ class AddTrafficLightsController:
 
           @param traffic_light_id: Id which the new traffic sign should have.
         """
+        if self.road_network_controller.mwindow.play_activated:
+            self.road_network_controller.text_browser.append("Please stop the animation first.")
+            return
+
         if not self.scenario_model.scenario_created():
             self.road_network_controller.text_browser.append("_Warning:_ Create a new file")
             return
+
         if len(self.road_network_toolbox_ui.referenced_lanelets_traffic_light.get_checked_items()) == 0:
             self.road_network_controller.text_browser.append("_Warning:_ Add Referenced Lanelets")
             return
@@ -100,6 +105,10 @@ class AddTrafficLightsController:
         """
         Updates a traffic light from the scenario based on the user selection.
         """
+        if self.road_network_controller.mwindow.play_activated:
+            self.road_network_controller.text_browser.append("Please stop the animation first.")
+            return
+
         if not self.scenario_model.scenario_created():
             self.road_network_controller.text_browser.append("_Warning:_ Create a new file")
             return
@@ -125,6 +134,10 @@ class AddTrafficLightsController:
         """
         Removes a traffic light from the scenario.
         """
+        if self.road_network_controller.mwindow.play_activated:
+            self.road_network_controller.text_browser.append("Please stop the animation first.")
+            return
+
         if not self.scenario_model.scenario_created():
             self.road_network_controller.text_browser.append("_Warning:_ Create a new file")
             return
@@ -137,6 +150,10 @@ class AddTrafficLightsController:
         self.road_network_controller.set_default_road_network_list_information()
 
     def create_traffic_lights(self):
+        if self.road_network_controller.mwindow.play_activated:
+            self.road_network_controller.text_browser.append("Please stop the animation first.")
+            return
+
         if not SUMO_AVAILABLE:
             self.road_network_controller.text_browser.append("SUMO is not installed correctly!")
             return

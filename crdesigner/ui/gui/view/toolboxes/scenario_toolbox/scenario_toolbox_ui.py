@@ -863,3 +863,6 @@ class ScenarioToolboxUI(Toolbox):
 
         for j in range(self.amount_vertices):
             self.polygon_label[j].setText("Vertice " + str(j))
+
+    def update_window(self):
+        super().update_window()

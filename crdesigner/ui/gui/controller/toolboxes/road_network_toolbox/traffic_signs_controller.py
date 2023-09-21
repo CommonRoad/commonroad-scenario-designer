@@ -28,6 +28,10 @@ class AddTrafficSignController:
         """
         Removes last entry in traffic sign element table of a traffic sign.
         """
+        if self.road_network_controller.mwindow.play_activated:
+            self.road_network_controller.text_browser.append("Please stop the animation first.")
+            return
+
         num_rows = self.road_network_toolbox_ui.traffic_sign_element_table.rowCount()
         self.road_network_toolbox_ui.traffic_sign_element_table.removeRow(num_rows - 1)
 
@@ -37,6 +41,10 @@ class AddTrafficSignController:
 
         @param traffic_sign_id: Id which the new traffic sign should have.
         """
+        if self.road_network_controller.mwindow.play_activated:
+            self.road_network_controller.text_browser.append("Please stop the animation first.")
+            return
+
         if not self.scenario_model.scenario_created():
             self.road_network_controller.text_browser.append("_Warning:_ Create a new file")
             return  # Check if list is empty -> Warning
@@ -88,6 +96,10 @@ class AddTrafficSignController:
         """
        Removes selected traffic sign from scenario.
        """
+        if self.road_network_controller.mwindow.play_activated:
+            self.road_network_controller.text_browser.append("Please stop the animation first.")
+            return
+
         if not self.scenario_model.scenario_created():
             self.road_network_controller.text_browser.append("_Warning:_ Create a new file")
             return
@@ -103,6 +115,10 @@ class AddTrafficSignController:
         """
         Updates information of selected traffic sign.
         """
+        if self.road_network_controller.mwindow.play_activated:
+            self.road_network_controller.text_browser.append("Please stop the animation first.")
+            return
+
         if not self.scenario_model.scenario_created():
             self.road_network_controller.text_browser.append("_Warning:_ Create a new file")
             return

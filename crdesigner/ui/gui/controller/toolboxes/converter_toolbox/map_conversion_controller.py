@@ -44,8 +44,9 @@ class RequestRunnable(QRunnable):
 class MapConversionToolboxController(QDockWidget):
     def __init__(self,  mwindow):
         super().__init__("Map Converter Toolbox")
-        self.converter_toolbox = MapConversionToolboxUI(mwindow)
+        self.converter_toolbox_ui = MapConversionToolboxUI(mwindow)
         self.scenario_model = mwindow.scenario_model
+        self.mwindow = mwindow
         self.text_browser = mwindow.crdesigner_console_wrapper.text_browser
         self.adjust_ui()
         self.osm_edit_window = QMainWindow(self)
@@ -68,39 +69,40 @@ class MapConversionToolboxController(QDockWidget):
         self.setFloating(True)
         self.setFeatures(QDockWidget.AllDockWidgetFeatures)
         self.setAllowedAreas(Qt.RightDockWidgetArea)
-        self.setWidget(self.converter_toolbox)
-        self.converter_toolbox.setMinimumWidth(450)
+        self.setWidget(self.converter_toolbox_ui)
+        self.converter_toolbox_ui.setMinimumWidth(450)
 
     def adjust_sections(self):
         """
         Adjust sections depending on the selection of the radiobuttons.
         Connects buttons with corresponding functions.
         """
-        self.converter_toolbox.adjust_sections()
 
-        if self.converter_toolbox.open_drive.isChecked():
-            self.converter_toolbox.button_convert_opendrive.clicked.connect(lambda: self.load_open_drive())
-        elif self.converter_toolbox.lanelet.isChecked():
-            self.converter_toolbox.button_convert_lanelet2_to_cr.clicked.connect(lambda: self.load_lanelet2())
-            self.converter_toolbox.button_convert_cr_to_lanelet2.clicked.connect(lambda: self.convert_cr_to_lanelet2())
-        elif self.converter_toolbox.osm.isChecked():
-            self.converter_toolbox.button_start_osm_conversion.clicked.connect(
+        self.converter_toolbox_ui.adjust_sections()
+
+        if self.converter_toolbox_ui.open_drive.isChecked():
+            self.converter_toolbox_ui.button_convert_opendrive.clicked.connect(lambda: self.load_open_drive())
+        elif self.converter_toolbox_ui.lanelet.isChecked():
+            self.converter_toolbox_ui.button_convert_lanelet2_to_cr.clicked.connect(lambda: self.load_lanelet2())
+            self.converter_toolbox_ui.button_convert_cr_to_lanelet2.clicked.connect(lambda: self.convert_cr_to_lanelet2())
+        elif self.converter_toolbox_ui.osm.isChecked():
+            self.converter_toolbox_ui.button_start_osm_conversion.clicked.connect(
                     lambda: self.convert_osm_with_spinner(self.convert_osm_to_cr))
-            self.converter_toolbox.button_start_osm_conversion_with_sumo_parser.clicked.connect(
+            self.converter_toolbox_ui.button_start_osm_conversion_with_sumo_parser.clicked.connect(
                     lambda: self.convert_osm_with_spinner(self.convert_osm_to_cr_with_sumo))
-        elif self.converter_toolbox.sumo.isChecked():
-            self.converter_toolbox.button_convert_sumo_to_cr.clicked.connect(lambda: self.load_sumo())
-            self.converter_toolbox.button_convert_cr_to_sumo.clicked.connect(lambda: self.convert_cr_to_sumo())
+        elif self.converter_toolbox_ui.sumo.isChecked():
+            self.converter_toolbox_ui.button_convert_sumo_to_cr.clicked.connect(lambda: self.load_sumo())
+            self.converter_toolbox_ui.button_convert_cr_to_sumo.clicked.connect(lambda: self.convert_cr_to_sumo())
 
     def connect_gui_elements(self):
         """
         Connects radiobuttons with function to adjust sections.
         Relevant fields gets shown and unnecessary fields gets hidden on click.
         """
-        self.converter_toolbox.open_drive.clicked.connect(lambda: self.adjust_sections())
-        self.converter_toolbox.lanelet.clicked.connect(lambda: self.adjust_sections())
-        self.converter_toolbox.osm.clicked.connect(lambda: self.adjust_sections())
-        self.converter_toolbox.sumo.clicked.connect(lambda: self.adjust_sections())
+        self.converter_toolbox_ui.open_drive.clicked.connect(lambda: self.adjust_sections())
+        self.converter_toolbox_ui.lanelet.clicked.connect(lambda: self.adjust_sections())
+        self.converter_toolbox_ui.osm.clicked.connect(lambda: self.adjust_sections())
+        self.converter_toolbox_ui.sumo.clicked.connect(lambda: self.adjust_sections())
 
     def refresh_toolbox(self, model: ScenarioModel):
         self.scenario_model = model
@@ -133,7 +135,11 @@ class MapConversionToolboxController(QDockWidget):
         Calls function in new thread ands shows spinner.
         :param convert_function: Function which should be called
         """
-        self.start_spinner(self.converter_toolbox.Spinner)
+        if self.mwindow.play_activated:
+            self.text_browser.append("Please stop the animation first.")
+            return
+
+        self.start_spinner(self.converter_toolbox_ui.Spinner)
         runnable = RequestRunnable(convert_function, self)
         QThreadPool.globalInstance().start(runnable)
 
@@ -141,7 +147,11 @@ class MapConversionToolboxController(QDockWidget):
         """
         Starts the OSM conversion process by picking a file or downloading a map and showing the edge edit GUI.
         """
-        if self.converter_toolbox.load_local_file.isChecked():
+        if self.mwindow.play_activated:
+            self.text_browser.append("Please stop the animation first.")
+            return
+
+        if self.converter_toolbox_ui.load_local_file.isChecked():
             self.load_osm_file()
         else:
             self.download_osm_map()
@@ -176,7 +186,7 @@ class MapConversionToolboxController(QDockWidget):
         """
         Starts the OSM conversion process using SUMO Parser by picking a file and showing the edge edit GUI.
         """
-        if self.converter_toolbox.load_local_file.isChecked():
+        if self.converter_toolbox_ui.load_local_file.isChecked():
             self.load_osm_file()
         else:
             self.download_osm_map()
@@ -206,7 +216,7 @@ class MapConversionToolboxController(QDockWidget):
     def stop_spinner(self, data):
         print(data)
         self.scenario_model.stop_spinner()
-        self.converter_toolbox.Spinner.stop()
+        self.converter_toolbox_ui.Spinner.stop()
 
     def start_spinner(self, spinner: QtWaitingSpinner):
         if spinner.is_spinning():
@@ -219,8 +229,8 @@ class MapConversionToolboxController(QDockWidget):
 
         :return: True if coordinates are valid
         """
-        lat = self.converter_toolbox.osm_conversion_coordinate_latitude.text()
-        lon = self.converter_toolbox.osm_conversion_coordinate_longitude.text()
+        lat = self.converter_toolbox_ui.osm_conversion_coordinate_latitude.text()
+        lon = self.converter_toolbox_ui.osm_conversion_coordinate_longitude.text()
         try:
             lat = float(lat)
             lon = float(lon)
@@ -228,7 +238,7 @@ class MapConversionToolboxController(QDockWidget):
                 raise ValueError
             return True
         except ValueError:
-            self.converter_toolbox.osm_loading_status.setText("Cannot download, invalid Coordinates")
+            self.converter_toolbox_ui.osm_loading_status.setText("Cannot download, invalid Coordinates")
             return False
 
     def download_osm_map(self) -> Optional[str]:
@@ -247,9 +257,9 @@ class MapConversionToolboxController(QDockWidget):
             return None
         else:
             download_around_map(
-                name, float(self.converter_toolbox.osm_conversion_coordinate_latitude.text()),
-                float(self.converter_toolbox.osm_conversion_coordinate_longitude.text()),
-                self.converter_toolbox.osm_download_map_range.value()
+                name, float(self.converter_toolbox_ui.osm_conversion_coordinate_latitude.text()),
+                float(self.converter_toolbox_ui.osm_conversion_coordinate_longitude.text()),
+                self.converter_toolbox_ui.osm_download_map_range.value()
             )
             self.osm_file = config.SAVE_PATH + name
 
@@ -274,7 +284,7 @@ class MapConversionToolboxController(QDockWidget):
         Starts the OpenDRIVE conversion process by picking a file and converting it while showing a spinner.
         """
         if self.open_drive_file is not None:
-            self.start_spinner(self.converter_toolbox.Spinner)
+            self.start_spinner(self.converter_toolbox_ui.Spinner)
             runnable = RequestRunnable(self.convert_open_drive_to_cr, self)
             QThreadPool.globalInstance().start(runnable)
         else:
@@ -305,6 +315,10 @@ class MapConversionToolboxController(QDockWidget):
         """
         Allows to select an OpenDRIVE file from the file system and loads it and afterwards calls conversion.
         """
+        if self.mwindow.play_activated:
+            self.text_browser.append("Please stop the animation first.")
+            return
+
         file_path = select_local_file(self, "OpenDRIVE", "xodr")
         if not file_path:
             return
@@ -337,6 +351,10 @@ class MapConversionToolboxController(QDockWidget):
         """
         Allows to select a lanelet file from the file system and loads it and calls conversion.
         """
+        if self.mwindow.play_activated:
+            self.text_browser.append("Please stop the animation first.")
+            return
+
         file_path = select_local_file(self, "Lanelet/Lanelet2", "osm")
         if not file_path:
             return
@@ -386,6 +404,10 @@ class MapConversionToolboxController(QDockWidget):
         """
         Starts the CommonRoad to Lanelet conversion process.
         """
+        if self.mwindow.play_activated:
+            self.text_browser.append("Please stop the animation first.")
+            return
+
         directory = QFileDialog.getExistingDirectory(self, "Dir", options=QFileDialog.Options())
 
         if not self.scenario_model.scenario_created or directory == "":
@@ -404,6 +426,10 @@ class MapConversionToolboxController(QDockWidget):
         """
         Allows to select a SUMO file from the file system and loads it and calls conversion.
         """
+        if self.mwindow.play_activated:
+            self.text_browser.append("Please stop the animation first.")
+            return
+
         if SUMO_AVAILABLE:
             self.path_sumo_file = select_local_file(self, "SUMO", "net.xml")
 
@@ -418,6 +444,10 @@ class MapConversionToolboxController(QDockWidget):
         """
         Starts the CommonRoad to SUMO conversion process.
         """
+        if self.mwindow.play_activated:
+            self.text_browser.append("Please stop the animation first.")
+            return
+
         if SUMO_AVAILABLE:
             directory = QFileDialog.getExistingDirectory(self, "Dir", options=QFileDialog.Options())
             if not directory:

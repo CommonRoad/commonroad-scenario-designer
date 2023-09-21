@@ -11,6 +11,7 @@
 - Adaption of commonroad-io traffic light color usage in cr2lanelet2 conversion
 - Add default traffic light cycle for OpenDRIVE conversion to support 2020a format
 - Command-line interface main function call
+- GUI Settings will be regarded when the scenario is drawn
 
 ### Changed
 - GUI backend using MVC pattern
