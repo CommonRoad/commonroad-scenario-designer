@@ -13,6 +13,31 @@ from crdesigner.map_conversion.common.utils import generate_unique_id
 from crdesigner.map_conversion.lanelet2.lanelet2 import OSMLanelet, Node, Way, WayRelation, RegulatoryElement
 
 
+def _set_overriding_tags_for_bidirectional_users(lanelet: Lanelet, way_rel: WayRelation):
+    """
+    Function that extracts bidirectional users from CR lanelet and creates according overriding tags for L2 lanelet
+
+    :param lanelet: Lanelet in CR format from which bidirectional users are extracted
+    :param way_rel: WayRelation for which the tag_dict is updated with overriding tags according to extracted
+    bidirectional users
+    """
+    for user_bidirectional in lanelet.user_bidirectional:
+        user_bidirectional_value = user_bidirectional.value
+
+        # change due to differences in cr and l2 formats
+        if user_bidirectional_value == "priorityVehicle":
+            user_bidirectional_value = "emergency"
+
+        if user_bidirectional_value in lanelet2_config.supported_lanelet2_vehicles:
+            way_rel.tag_dict['one_way:' + "vehicle:" + user_bidirectional_value] = "no"
+
+        elif user_bidirectional_value is "vehicle":
+            way_rel.tag_dict['one_way:vehicle'] = 'no'
+
+        elif user_bidirectional_value == "bicycle" or user_bidirectional_value == "pedestrian":
+            way_rel.tag_dict['one_way:' + user_bidirectional_value] = "no"
+
+
 def _line_marking_to_type_subtype_vertices(line_marking: LineMarking) -> [str, str]:
     """
     Function that converts CR line marking of left or right vertices to an L2 format
@@ -513,6 +538,9 @@ class CR2LaneletConverter:
                 way_rel.tag_dict['location'] = 'urban'
             else:
                 way_rel.tag_dict["location"] = "nonurban"
+
+        # set the overriding tags for bidirectional users
+        _set_overriding_tags_for_bidirectional_users(lanelet, way_rel)
 
         # add the way relation to the osm
         self.osm.add_way_relation(way_rel)

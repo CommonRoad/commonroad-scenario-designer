@@ -26,6 +26,7 @@
 - Handling projection strings which contain elements which third-party does not support
 - Support for visualizing scenarios with 3D coordinates on 2D plane
 - cr2lanelet line marking conversion
+- cr2lanelet bidirectional users conversion
 
 ## [0.7.2] - 2023-07-29
 

@@ -528,6 +528,7 @@
     <tag k="type" v="lanelet"/>
     <tag k="subtype" v="road"/>
     <tag k="location" v="urban"/>
+    <tag k="one_way:vehicle:emergency" v="no"/>
   </relation>
   <relation id="47" action="modify" visible="true" version="1">
     <member type="way" ref="29" role="right"/>
@@ -535,6 +536,7 @@
     <tag k="type" v="lanelet"/>
     <tag k="subtype" v="road"/>
     <tag k="location" v="urban"/>
+    <tag k="one_way:vehicle:emergency" v="no"/>
   </relation>
   <relation id="70" action="modify" visible="true" version="1">
     <member type="way" ref="69" role="right"/>
@@ -542,6 +544,7 @@
     <tag k="type" v="lanelet"/>
     <tag k="subtype" v="road"/>
     <tag k="location" v="urban"/>
+    <tag k="one_way:vehicle:emergency" v="no"/>
   </relation>
   <relation id="82" action="modify" visible="true" version="1">
     <member type="way" ref="68" role="right"/>
@@ -549,6 +552,7 @@
     <tag k="type" v="lanelet"/>
     <tag k="subtype" v="road"/>
     <tag k="location" v="urban"/>
+    <tag k="one_way:vehicle:emergency" v="no"/>
   </relation>
   <relation id="107" action="modify" visible="true" version="1">
     <member type="way" ref="106" role="right"/>
@@ -556,6 +560,7 @@
     <tag k="type" v="lanelet"/>
     <tag k="subtype" v="road"/>
     <tag k="location" v="urban"/>
+    <tag k="one_way:vehicle:emergency" v="no"/>
   </relation>
   <relation id="120" action="modify" visible="true" version="1">
     <member type="way" ref="119" role="right"/>
@@ -563,6 +568,7 @@
     <tag k="type" v="lanelet"/>
     <tag k="subtype" v="road"/>
     <tag k="location" v="urban"/>
+    <tag k="one_way:vehicle:emergency" v="no"/>
   </relation>
   <relation id="127" action="modify" visible="true" version="1">
     <member type="way" ref="118" role="right"/>
@@ -570,6 +576,7 @@
     <tag k="type" v="lanelet"/>
     <tag k="subtype" v="road"/>
     <tag k="location" v="urban"/>
+    <tag k="one_way:vehicle:emergency" v="no"/>
   </relation>
   <relation id="134" action="modify" visible="true" version="1">
     <member type="way" ref="126" role="right"/>
@@ -577,6 +584,7 @@
     <tag k="type" v="lanelet"/>
     <tag k="subtype" v="road"/>
     <tag k="location" v="urban"/>
+    <tag k="one_way:vehicle:emergency" v="no"/>
   </relation>
   <relation id="147" action="modify" visible="true" version="1">
     <member type="way" ref="146" role="right"/>
@@ -584,6 +592,7 @@
     <tag k="type" v="lanelet"/>
     <tag k="subtype" v="road"/>
     <tag k="location" v="urban"/>
+    <tag k="one_way:vehicle:emergency" v="no"/>
   </relation>
   <relation id="194" action="modify" visible="true" version="1">
     <member type="way" ref="193" role="right"/>
@@ -591,6 +600,7 @@
     <tag k="type" v="lanelet"/>
     <tag k="subtype" v="road"/>
     <tag k="location" v="urban"/>
+    <tag k="one_way:vehicle:emergency" v="no"/>
   </relation>
   <relation id="218" action="modify" visible="true" version="1">
     <member type="way" ref="192" role="right"/>
@@ -598,6 +608,7 @@
     <tag k="type" v="lanelet"/>
     <tag k="subtype" v="road"/>
     <tag k="location" v="urban"/>
+    <tag k="one_way:vehicle:emergency" v="no"/>
   </relation>
   <relation id="242" action="modify" visible="true" version="1">
     <member type="way" ref="217" role="right"/>
@@ -605,6 +616,7 @@
     <tag k="type" v="lanelet"/>
     <tag k="subtype" v="road"/>
     <tag k="location" v="urban"/>
+    <tag k="one_way:vehicle:emergency" v="no"/>
   </relation>
   <relation id="266" action="modify" visible="true" version="1">
     <member type="way" ref="241" role="right"/>
@@ -612,5 +624,6 @@
     <tag k="type" v="lanelet"/>
     <tag k="subtype" v="road"/>
     <tag k="location" v="urban"/>
+    <tag k="one_way:vehicle:emergency" v="no"/>
   </relation>
 </osm>
