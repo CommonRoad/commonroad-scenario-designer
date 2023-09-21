@@ -1,7 +1,7 @@
 import os
 import unittest
 import numpy as np
-from commonroad.common.common_lanelet import LaneletType
+from commonroad.common.common_lanelet import LaneletType, RoadUser
 
 from crdesigner.config.lanelet2_config import lanelet2_config
 from crdesigner.map_conversion.lanelet2.cr2lanelet import CR2LaneletConverter
@@ -173,6 +173,48 @@ class TestCR2LaneletConverter(unittest.TestCase):
         last_way_relation = list(cr1.osm.way_relations)[-1]
         self.assertFalse('subtype' in cr1.osm.way_relations[last_way_relation].tag_dict)
         self.assertFalse('location' in cr1.osm.way_relations[last_way_relation].tag_dict)
+
+    def test_user_bidirectional(self):
+        cr1 = CR2LaneletConverter()
+        cr1(scenario)
+
+        # only RoadUser.Vehicle is a bidirectional user
+        lanelet.user_bidirectional = {RoadUser.VEHICLE}
+        cr1._convert_lanelet(lanelet)
+        last_way_relation = list(cr1.osm.way_relations)[-1]
+        print(cr1.osm.way_relations[last_way_relation].tag_dict)
+        self.assertEqual(cr1.osm.way_relations[last_way_relation].tag_dict['one_way:vehicle'], 'no')
+
+        # other vehicles are bidirectional users
+        lanelet.user_bidirectional = {RoadUser.BUS, RoadUser.CAR, RoadUser.PRIORITY_VEHICLE}
+        cr1._convert_lanelet(lanelet)
+        last_way_relation = list(cr1.osm.way_relations)[-1]
+        print(cr1.osm.way_relations[last_way_relation].tag_dict)
+        self.assertEqual(cr1.osm.way_relations[last_way_relation].tag_dict['one_way:vehicle:bus'], 'no')
+        self.assertEqual(cr1.osm.way_relations[last_way_relation].tag_dict['one_way:vehicle:car'], 'no')
+        self.assertEqual(cr1.osm.way_relations[last_way_relation].tag_dict['one_way:vehicle:emergency'], 'no')
+
+        # non-vehicles are bidirectional users
+        lanelet.user_bidirectional = {RoadUser.BICYCLE, RoadUser.PEDESTRIAN}
+        cr1._convert_lanelet(lanelet)
+        last_way_relation = list(cr1.osm.way_relations)[-1]
+        print(cr1.osm.way_relations[last_way_relation].tag_dict)
+        self.assertEqual(cr1.osm.way_relations[last_way_relation].tag_dict['one_way:pedestrian'], 'no')
+        self.assertEqual(cr1.osm.way_relations[last_way_relation].tag_dict['one_way:bicycle'], 'no')
+
+        # no bidirectional users
+        lanelet.user_bidirectional = set()
+        cr1._convert_lanelet(lanelet)
+        last_way_relation = list(cr1.osm.way_relations)[-1]
+        # no additional tags are created
+        self.assertTrue(cr1.osm.way_relations[last_way_relation].tag_dict == {'type': 'lanelet'})
+
+        # bidirectional users that are not available in L2 format
+        lanelet.user_bidirectional = {RoadUser.TRAIN}
+        cr1._convert_lanelet(lanelet)
+        last_way_relation = list(cr1.osm.way_relations)[-1]
+        # no additional tags are created
+        self.assertTrue(cr1.osm.way_relations[last_way_relation].tag_dict == {'type': 'lanelet'})
 
     def test_convert_line_marking(self):
         cr1 = CR2LaneletConverter()
