@@ -31,7 +31,7 @@ def _set_overriding_tags_for_bidirectional_users(lanelet: Lanelet, way_rel: WayR
         if user_bidirectional_value in lanelet2_config.supported_lanelet2_vehicles:
             way_rel.tag_dict['one_way:' + "vehicle:" + user_bidirectional_value] = "no"
 
-        elif user_bidirectional_value is "vehicle":
+        elif user_bidirectional_value == "vehicle":
             way_rel.tag_dict['one_way:vehicle'] = 'no'
 
         elif user_bidirectional_value == "bicycle" or user_bidirectional_value == "pedestrian":

@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.8.0] - 2023-09-XX
+## [0.8.0] - 2023-10-XX
 
 ### Fixed
 - Issue when creating adjacent lanelets through Lanelet Operations
@@ -12,11 +12,13 @@
 - Add default traffic light cycle for OpenDRIVE conversion to support 2020a format
 - Command-line interface main function call
 - GUI Settings will be regarded when the scenario is drawn
+- OpenDRIVE/Lanelet2 conversion intersection incoming lanelets as set instead of list/tuple
 
 ### Changed
 - GUI backend using MVC pattern
 - Config model
 - Automated creation of settings windows
+- Support for commonroad-io 2023.3
 
 ### Added
 - Cropping of a map in the GUI
