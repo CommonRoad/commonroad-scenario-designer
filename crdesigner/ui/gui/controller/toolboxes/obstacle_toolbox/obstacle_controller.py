@@ -388,7 +388,7 @@ class ObstacleController(QDockWidget, ):
         """
         obstacle_id = self.get_current_obstacle_id()
         if obstacle_id is not None:
-            selected_obstacle = self.scenario_model.obstacle_by_id(obstacle_id)
+            selected_obstacle = self.scenario_model.find_obstacle_by_id(obstacle_id)
             return selected_obstacle
         else:
             return None

@@ -27,10 +27,13 @@ class AnimatedViewerWrapperController:
         self.viewer_dock = None
         self.mwindow = mwindow.mwindow_ui  # handle back to the main window
 
+    def update_scenario(self, new_file_added: bool = False):
+        """
+        Notifies the GUI that the sceanrio has changed.
 
-
-    def update_scenario(self):
-        self.cr_viewer.open_scenario()
+        @param new_file_added: Indikator if the added file is a complete new scenario
+        """
+        self.cr_viewer.open_scenario(new_file_added=new_file_added)
         self.update_view()
         self.mwindow.update_max_step()
         # Autosave

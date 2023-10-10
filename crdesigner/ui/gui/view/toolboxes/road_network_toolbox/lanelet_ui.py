@@ -415,6 +415,17 @@ class AddLaneletUI:
             self.road_network_toolbox_ui.lanelet_attributes_widget.adjust_selected_stop_line_position()
             self.road_network_toolbox_ui.selected_stop_line_box.setChecked(False)
 
+    def set_default_lanelet_operation_information(self):
+        """
+        Resets the fields to the default values.
+        """
+        self.road_network_toolbox_ui.create_adjacent_left_selection.setChecked(True)
+        self.road_network_toolbox_ui.create_adjacent_left_selection.setChecked(False)
+        self.road_network_toolbox_ui.create_adjacent_same_direction_selection.setChecked(True)
+        self.road_network_toolbox_ui.rotation_angle.setValue(0)
+        self.road_network_toolbox_ui.x_translation.setText("")
+        self.road_network_toolbox_ui.y_translation.setText("")
+
     def lanelet_is_straight(self, lanelet: Lanelet = None) -> bool:
         """
         Checks wether lanelet is straight

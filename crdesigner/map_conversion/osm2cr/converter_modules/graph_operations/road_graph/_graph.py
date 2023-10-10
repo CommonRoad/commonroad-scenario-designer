@@ -632,7 +632,7 @@ class Graph:
                 sign.node.add_traffic_sign(sign)
             for edge in sign.edges:
                 for sub_edge in edge:
-                    sub_edge.add_traffic_sign(sign)
+                    sub_edge.add_traffic_sign(sign, )
 
     def apply_traffic_lights(self) -> None:
         # for each traffic light

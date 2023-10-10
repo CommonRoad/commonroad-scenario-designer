@@ -150,7 +150,7 @@ class RoadNetworkController(QDockWidget, ):
     @pyqtSlot(str)
     def stopSpinner(self, data):
         print(data)
-        self.scenario_model.stop_spinner()
+        self.scenario_model.notify_all()
         self.road_network_toolbox_ui.Spinner.stop()
 
     def startSpinner(self, spinner: QtWaitingSpinner):

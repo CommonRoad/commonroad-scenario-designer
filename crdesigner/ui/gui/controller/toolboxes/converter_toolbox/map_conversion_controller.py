@@ -128,7 +128,7 @@ class MapConversionToolboxController(QDockWidget):
                                 .format(e), QMessageBox.Ok)
             return
         converted_to_scenario=convert_to_scenario(graph)
-        self.scenario_model.hidden_osm_conversion(converted_to_scenario)
+        self.scenario_model.add_converted_scenario(converted_to_scenario)
 
     def convert_osm_with_spinner(self, convert_function: Callable[[], None]) -> None:
         """
@@ -194,7 +194,7 @@ class MapConversionToolboxController(QDockWidget):
         try:
             if self.osm_file is not None:
                 osm_to_commonroad_using_sumo_= osm_to_commonroad_using_sumo(self.osm_file)
-                self.scenario_model.convert_osm_to_cr_with_sumo(osm_to_commonroad_using_sumo_)
+                self.scenario_model.add_converted_scenario(osm_to_commonroad_using_sumo_)
 
             else:
                 QMessageBox.warning(
@@ -215,7 +215,7 @@ class MapConversionToolboxController(QDockWidget):
     @pyqtSlot(str)
     def stop_spinner(self, data):
         print(data)
-        self.scenario_model.stop_spinner()
+        self.scenario_model.notify_all()
         self.converter_toolbox_ui.Spinner.stop()
 
     def start_spinner(self, spinner: QtWaitingSpinner):
@@ -309,7 +309,7 @@ class MapConversionToolboxController(QDockWidget):
                 len(self.open_drive_file.roads), ))
         self.open_drive_file = None
         exported_commonroad_scenario = open_drive_network.export_commonroad_scenario()
-        self.scenario_model.set_scenario(exported_commonroad_scenario)
+        self.scenario_model.add_converted_scenario(exported_commonroad_scenario)
 
     def load_open_drive(self):
         """
@@ -397,7 +397,7 @@ class MapConversionToolboxController(QDockWidget):
                 return
             scenario = self.lanelet2_to_cr_converter(self.lanelet2_file)
             self.lanelet2_file = None
-            self.scenario_model.convert_lanelet2_to_cr(scenario)
+            self.scenario_model.add_converted_scenario(scenario)
             self.text_browser.append("Conversion from Lanelet2 to CommonRoad is done")
         except Exception as e:
             print("An error occurred:")

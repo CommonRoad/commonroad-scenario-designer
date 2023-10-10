@@ -11,7 +11,7 @@ class PlanningProblemSetModel(QObject):
     :ivar _planing_set_changed: Signal that is emitted when the planning set has changed.
     """
 
-    _planing_set_changed = pyqtSignal()
+    _planing_set_changed = pyqtSignal(bool)
     new_pps = pyqtSignal()
 
     def __init__(self, planing_problem_set: PlanningProblemSet = None):
@@ -128,7 +128,7 @@ class PlanningProblemSetModel(QObject):
 
     def notify_all(self):
         """Notifies all observers of the model."""
-        self._planing_set_changed.emit()
+        self._planing_set_changed.emit(False)
 
     def subscribe(self, callback: Callable[[], None]):
         """

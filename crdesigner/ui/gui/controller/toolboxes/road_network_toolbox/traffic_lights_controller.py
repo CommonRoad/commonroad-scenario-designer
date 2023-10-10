@@ -26,7 +26,7 @@ class AddTrafficLightsController:
         self.road_network_toolbox_ui.button_add_traffic_light.clicked.connect(lambda: self.add_traffic_light())
         self.road_network_toolbox_ui.button_update_traffic_light.clicked.connect(lambda: self.update_traffic_light())
         self.road_network_toolbox_ui.button_remove_traffic_light.clicked.connect(lambda: self.remove_traffic_light())
-        self.road_network_toolbox_ui.button_create_traffic_lights.clicked.connect(lambda: self.create_traffic_lights())
+        self.road_network_toolbox_ui.button_create_traffic_lights.clicked.connect(lambda: self.create_traffic_light_for_referenced_lanelets())
         self.road_network_toolbox_ui.selected_traffic_light.currentTextChanged.connect(
                 lambda: self.traffic_lights_ui.update_traffic_light_information())
 
@@ -149,7 +149,7 @@ class AddTrafficLightsController:
         self.scenario_model.remove_traffic_light(selected_traffic_light_id)
         self.road_network_controller.set_default_road_network_list_information()
 
-    def create_traffic_lights(self):
+    def create_traffic_light_for_referenced_lanelets(self):
         if self.road_network_controller.mwindow.play_activated:
             self.road_network_controller.text_browser.append("Please stop the animation first.")
             return
@@ -189,4 +189,4 @@ class AddTrafficLightsController:
                                                              f" traffic light system for lanelet {lanelet_id}")
 
         if any(oks):
-            self.scenario_model.create_traffic_lights(converter.lanelet_network)
+            self.scenario_model.create_traffic_lights_for_referenced_lanelets(converter.lanelet_network)
