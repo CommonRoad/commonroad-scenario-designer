@@ -7,7 +7,7 @@ from PyQt5.QtWidgets import *
 
 from crdesigner.ui.gui.model.scenario_model import ScenarioModel
 from crdesigner.ui.gui.utilities.toolbox_ui import Toolbox
-from crdesigner.ui.gui.utilities import config
+from crdesigner.config.gui_config import gui_config
 from commonroad.geometry.shape import Rectangle, Circle, Polygon
 from commonroad.scenario.obstacle import ObstacleType, Obstacle, StaticObstacle, DynamicObstacle
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
@@ -393,7 +393,7 @@ class ObstacleToolboxUI(Toolbox):
         self.polygon_row[i].addWidget(self.vertices_y[i])
 
         self.remove_vertice_btn.append(QPushButton())
-        if config.DARKMODE:
+        if gui_config.DARKMODE:
             self.remove_vertice_btn[i].setIcon(QIcon(":icons/iconmonstr-trash-can-darkmode.png"))
         else:
             self.remove_vertice_btn[i].setIcon(QIcon(":icons/iconmonstr-trash-can.svg"))
@@ -450,7 +450,7 @@ class ObstacleToolboxUI(Toolbox):
     def update_window(self):
         super().update_window()
         if self.remove_vertice_btn:
-            if config.DARKMODE:
+            if gui_config.DARKMODE:
                 for btn in self.remove_vertice_btn:
                     btn.setIcon(QIcon(":icons/iconmonstr-trash-can-darkmode.png"))
             else:

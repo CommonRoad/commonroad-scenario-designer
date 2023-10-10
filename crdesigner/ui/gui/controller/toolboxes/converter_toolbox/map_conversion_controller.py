@@ -14,7 +14,7 @@ from crdesigner.ui.gui.model.scenario_model import ScenarioModel
 from crdesigner.ui.gui.utilities.converter_modules.osm_interface import OSMInterface
 from crdesigner.ui.gui.utilities.gui_sumo_simulation import SUMO_AVAILABLE
 from crdesigner.ui.gui.utilities.util import select_local_file
-from crdesigner.ui.gui.utilities import config
+from crdesigner.config.osm_config import osm_config
 from crdesigner.ui.gui.utilities.waitingspinnerwidget import QtWaitingSpinner
 from crdesigner.ui.gui.view.toolboxes.converter_toolbox.converter_toolbox_ui import \
     MapConversionToolboxUI
@@ -74,7 +74,7 @@ class MapConversionToolboxController(QDockWidget):
 
     def adjust_sections(self):
         """
-        Adjust sections depending on the selection of the radiobuttons.
+        Adjust sections depending on the selection of the radio buttons.
         Connects buttons with corresponding functions.
         """
 
@@ -261,7 +261,7 @@ class MapConversionToolboxController(QDockWidget):
                 float(self.converter_toolbox_ui.osm_conversion_coordinate_longitude.text()),
                 self.converter_toolbox_ui.osm_download_map_range.value()
             )
-            self.osm_file = config.SAVE_PATH + name
+            self.osm_file = osm_config.SAVE_PATH + name
 
     def read_osm_file(self, file: str) -> Optional[Exception]:
         """
