@@ -239,11 +239,10 @@ class AddLaneletController:
         selected_lanelet = self.selected_lanelet()
         if selected_lanelet is None:
             return
-        old_lanelet_id = selected_lanelet.lanelet_id
         new_lanelet = self.update_lanelet_information(self.selected_lanelet())
 
         self.road_network_controller.updated_lanelet = True
-        self.scenario_model.update_lanelet(old_lanelet_id, selected_lanelet, new_lanelet)
+        self.scenario_model.update_lanelet(selected_lanelet, new_lanelet)
         self.road_network_controller.set_default_road_network_list_information()
         self.road_network_toolbox_ui.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.display_curved_lanelet(False,
                                                                                                               None)
@@ -462,8 +461,8 @@ class AddLaneletController:
 
     def remove_lanelet(self):
         """
-               Removes a selected lanelet from the scenario.
-               """
+        Removes a selected lanelet from the scenario.
+        """
         if self.road_network_controller.mwindow.play_activated:
             self.road_network_controller.text_browser.append("Please stop the animation first.")
             return
@@ -502,6 +501,7 @@ class AddLaneletController:
         self.road_network_controller.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.display_curved_lanelet(False, None)
 
         self.scenario_model.attach_to_other_lanelet(selected_lanelet_one, selected_lanelet_two)
+        self.lanelet_ui.set_default_lanelet_operation_information()
 
     def create_adjacent(self):
         """
@@ -580,6 +580,7 @@ class AddLaneletController:
             self.last_added_lanelet_id = adjacent_lanelet.lanelet_id
             self.scenario_model.add_lanelet(adjacent_lanelet)
             self.road_network_controller.set_default_road_network_list_information()
+            self.lanelet_ui.set_default_lanelet_operation_information()
         else:
             self.road_network_controller.text_browser.append("Adjacent lanelet already exists.")
 
@@ -609,6 +610,7 @@ class AddLaneletController:
         self.road_network_controller.last_added_lanelet_id = connected_lanelet.lanelet_id
         self.scenario_model.add_lanelet(connected_lanelet)
         self.road_network_controller.set_default_road_network_list_information()
+        self.lanelet_ui.set_default_lanelet_operation_information()
 
     def rotate_lanelet(self):
         """
@@ -625,6 +627,7 @@ class AddLaneletController:
         self.road_network_controller.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.display_curved_lanelet(False, None)
         rotation_angle = int(self.road_network_toolbox_ui.rotation_angle.text())
         self.scenario_model.rotate_lanelet(selected_lanelet_one.lanelet_id, rotation_angle)
+        self.lanelet_ui.set_default_lanelet_operation_information()
 
     def translate_lanelet(self):
         """
@@ -644,6 +647,7 @@ class AddLaneletController:
         selected_lanelet_one.translate_rotate(np.array([x_translation, y_translation]), 0)
 
         self.scenario_model.translate_lanelet(selected_lanelet_one)
+        self.lanelet_ui.set_default_lanelet_operation_information()
 
     def get_lanelet_from_toolbox(self, new_lanelet: bool) -> Lanelet:
         '''
@@ -793,6 +797,7 @@ class AddLaneletController:
 
         self.road_network_controller.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.display_curved_lanelet(False, None)
         self.scenario_model.merge_with_successor(selected_lanelet_one)
+        self.lanelet_ui.set_default_lanelet_operation_information()
 
     def get_x_position_lanelet_start(self, update=False) -> float:
         """
@@ -929,4 +934,3 @@ class AddLaneletController:
                     self.road_network_controller.update:
                 self.road_network_controller.text_browser.append("No lanelet selected.")
                 return None
-

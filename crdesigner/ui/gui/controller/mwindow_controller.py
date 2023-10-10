@@ -133,7 +133,7 @@ class MWindowController:
     def store_scenario_service_layer(self):
         """Store the current scenario in the view in the scenario model."""
         scenario = self.mwindow_ui.animated_viewer_wrapper.cr_viewer.current_scenario
-        self.scenario_model.store_scenario_service_layer(scenario)
+        self.scenario_model.set_scenario(scenario)
 
         # TODO: move as signal update  # self.mwindow_ui.update_toolbox_scenarios()
 

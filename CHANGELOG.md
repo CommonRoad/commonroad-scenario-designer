@@ -12,6 +12,7 @@
 - Add default traffic light cycle for OpenDRIVE conversion to support 2020a format
 - Command-line interface main function call
 - GUI Settings will be regarded when the scenario is drawn
+- Fixed Bug when rotating a lanelet leads to that the rotated lanelet wasn't able to be selected through the canvas
 - OpenDRIVE/Lanelet2 conversion intersection incoming lanelets as set instead of list/tuple
 - Obstacle information as Graph no longer crashes when a static obstacle or a missing value is asked for
 

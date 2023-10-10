@@ -103,13 +103,13 @@ class AnimatedViewerController:
 
         self._calc_max_timestep()
         if self.animation:
-            #self.time_step.value = 0
             self.animation.event_source.stop()
             self.animation = None
         else:
             self.time_step.value = 0
 
-        self.update_plot(clear_artists=True, new_file_added=new_file_added, plot_limits=plot_limits)
+        if new_file_added:
+            self.update_plot(clear_artists=True, new_file_added=new_file_added, plot_limits=plot_limits)
 
     def _init_animation(self):
         if not self.scenario_model.scenario_created():
@@ -245,7 +245,6 @@ class AnimatedViewerController:
         """
         if not isinstance(sel_lanelets, list) and sel_lanelets:
             sel_lanelets = [sel_lanelets]
-
         x_lim = self.dynamic.get_axes().get_xlim()
         y_lim = self.dynamic.get_axes().get_ylim()
 
@@ -265,7 +264,7 @@ class AnimatedViewerController:
                 y_dim = (plot_limits[3] - plot_limits[2]) / 2
                 gui_config.set_zoom_treshold(x_dim, y_dim)
 
-        self.dynamic.draw_scenario(self.pps_model.get_selected_pp(), time_begin=time_begin)
+
 
         for lanelet in self.scenario_model.get_lanelets():
 
@@ -292,6 +291,7 @@ class AnimatedViewerController:
             self.dynamic.set_limits([x_lim[0], x_lim[1], y_lim[0], y_lim[1]])
             self.dynamic.draw_idle()
 
+        self.dynamic.draw_scenario(self.pps_model.get_selected_pp(), time_begin=time_begin)
         self.dynamic.drawer.tight_layout()
 
     def get_paint_parameters(self, lanelet: Lanelet, selected_lanelets: Lanelet, selected_intersection: Intersection):
