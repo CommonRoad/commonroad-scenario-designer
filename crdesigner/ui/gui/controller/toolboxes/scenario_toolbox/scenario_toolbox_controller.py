@@ -74,7 +74,7 @@ class ScenarioToolboxController(QDockWidget):
         self.current_lanelets = []
         self.current_shapes = []
         self.reset_toolbox()
-        self.initialize_initial_state()
+        self.scenario_toolbox_ui.initialize_initial_state()
         self.initialize_goal_state()
         self.scenario_toolbox_ui.goal_states_list_table.setRowCount(0)
         self.scenario_toolbox_ui.goal_states_list_table.clearSelection()
@@ -82,28 +82,9 @@ class ScenarioToolboxController(QDockWidget):
         self.set_planning_problem_information()
         self.initialized = True
 
-    def initialize_initial_state(self) -> None:
-        """Initializes initial position GUI elements with information."""
-        self.scenario_toolbox_ui.initial_position_x.setText("0.0")
-        self.scenario_toolbox_ui.initial_position_y.setText("0.0")
-        self.scenario_toolbox_ui.initial_velocity.setText("0.0")
-        self.scenario_toolbox_ui.initial_orientation.setText("0.0")
-        self.scenario_toolbox_ui.initial_yawRate.setText("0.0")
-        self.scenario_toolbox_ui.initial_slipAngle.setText("0.0")
-        self.scenario_toolbox_ui.initial_time.setText("0")
-        self.scenario_toolbox_ui.initial_acceleration.setText("0.0")
-
     def initialize_goal_state(self) -> None:
         """Initializes goal position GUI elements with information."""
-        self.scenario_toolbox_ui.goal_time_start.setText("0")
-        self.scenario_toolbox_ui.goal_time_end.setText("0")
-        self.scenario_toolbox_ui.goal_velocity_selected.setChecked(False)
-        self.scenario_toolbox_ui.goal_velocity_start.setText("0.0")
-        self.scenario_toolbox_ui.goal_velocity_end.setText("0.0")
-        self.scenario_toolbox_ui.goal_orientation_selected.setChecked(False)
-        self.scenario_toolbox_ui.goal_orientation_start.setText("0")
-        self.scenario_toolbox_ui.goal_orientation_end.setText("0")
-        self.scenario_toolbox_ui.type.setCurrentText("None")
+        self.scenario_toolbox_ui.initialize_goal_state_fields()
         self.set_goal_state_information()
         self.set_goal_state_information_toggle_type()
 
@@ -267,11 +248,13 @@ class ScenarioToolboxController(QDockWidget):
         """sets current planning problem id and the corresponding initial state and goal state or resets
         initial state and goal state if planning problem is deleted"""
         if self.scenario_toolbox_ui.planning_problems_list_table.currentItem() != None:
-            self.set_initial_state_information()
+            initial_state = self.collect_initial_state(
+                    planning_problem_id=int(self.scenario_toolbox_ui.planning_problems_list_table.currentItem().text()))
+            self.scenario_toolbox_ui.set_initial_state_information(initial_state)
             self.set_goal_states_information()
         else:
             """Resets initial state and goal states GUI"""
-            self.initialize_initial_state()
+            self.scenario_toolbox_ui.initialize_initial_state()
             self.initialize_goal_state()
 
         self.pps_model.notify_all()
@@ -421,7 +404,8 @@ class ScenarioToolboxController(QDockWidget):
             self.collect_goal_states(planning_problem_id=current_planning_problem_id)[
                 current_goal_state_id].position = self.shape_group_from_lanelets(self.current_lanelets)
 
-            self.pps_model.get_pp(int(self.scenario_toolbox_ui.planning_problems_list_table.currentItem().text())).goal.lanelets_of_goal_position[current_goal_state_id] = list(self.current_lanelets)
+            self.pps_model.get_pp(int(self.scenario_toolbox_ui.planning_problems_list_table.currentItem().text())) \
+                .goal.lanelets_of_goal_position[current_goal_state_id] = list(self.current_lanelets)
 
         self.pps_model.notify_all()
         self.set_goal_states_information()
@@ -827,27 +811,7 @@ class ScenarioToolboxController(QDockWidget):
 
         self.pps_model.notify_all()
 
-    """Initial State GUI Manaement"""
-
-    def set_initial_state_information(self) -> None:
-        """updates initial state widget with data from the selected planning problem"""
-        initial_state = self.collect_initial_state(
-                planning_problem_id=int(self.scenario_toolbox_ui.planning_problems_list_table.currentItem().text()))
-        if initial_state.has_value("position"):
-            self.scenario_toolbox_ui.initial_position_x.setText(str(initial_state.position[0]))
-            self.scenario_toolbox_ui.initial_position_y.setText(str(initial_state.position[1]))
-        if initial_state.has_value("velocity"):
-            self.scenario_toolbox_ui.initial_velocity.setText(str(initial_state.velocity))
-        if initial_state.has_value("orientation"):
-            self.scenario_toolbox_ui.initial_orientation.setText(str(math.degrees(initial_state.orientation)))
-        if initial_state.has_value("yaw_rate"):
-            self.scenario_toolbox_ui.initial_yawRate.setText(str(initial_state.yaw_rate))
-        if initial_state.has_value("slip_angle"):
-            self.scenario_toolbox_ui.initial_slipAngle.setText(str(initial_state.slip_angle))
-        if initial_state.has_value("time_step"):
-            self.scenario_toolbox_ui.initial_time.setText(str(initial_state.time_step))
-        if initial_state.has_value("acceleration"):
-            self.scenario_toolbox_ui.initial_acceleration.setText(str(initial_state.acceleration))
+    """Initial State GUI Managment"""
 
     def get_float(self, str) -> float:
         """

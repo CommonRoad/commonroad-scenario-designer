@@ -1,9 +1,15 @@
+import math
+from typing import Optional
+
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
+
+from crdesigner.ui.gui.model.scenario_model import ScenarioModel
 from crdesigner.ui.gui.utilities.toolbox_ui import Toolbox
 from crdesigner.ui.gui.utilities import config
-from commonroad.scenario.obstacle import ObstacleType
+from commonroad.geometry.shape import Rectangle, Circle, Polygon
+from commonroad.scenario.obstacle import ObstacleType, Obstacle, StaticObstacle, DynamicObstacle
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
@@ -15,8 +21,9 @@ if SUMO_AVAILABLE:
 
 
 class ObstacleToolboxUI(Toolbox):
-    def __init__(self, text_browser, mwindow):
+    def __init__(self, scenario_model: ScenarioModel, text_browser, mwindow):
         super().__init__(mwindow)
+        self.scenario_model = scenario_model
         self.remove_vertice_btn = []
         self.text_browser = text_browser
         self.change_color = False
@@ -138,6 +145,114 @@ class ObstacleToolboxUI(Toolbox):
             title_sumo = "Sumo Simulation"
             self.sections.append((title_sumo, widget_sumo))
 
+    def initialize_obstacle_information(self):
+        """
+        Initializes GUI elements with intersection information.
+        """
+        self.clear_obstacle_fields()
+
+        self.selected_obstacle.clear()
+        self.selected_obstacle.addItems(
+                ["None"] + [str(item) for item in self.scenario_model.collect_obstacle_ids()])
+        self.selected_obstacle.setCurrentIndex(0)
+
+    def update_obstacle_information_ui(self, obstacle: Optional[Obstacle] = None):
+        """
+        Updates the obstacle related information in the obstacle Toolbox
+
+        :param obstacle: obstacle which information should be displayed in the toolbox. 
+        """
+        if isinstance(obstacle.obstacle_shape, Rectangle):
+
+            if self.obstacle_shape.currentText() != "Rectangle":
+                self.obstacle_shape.setCurrentIndex(0)
+
+            self.obstacle_width.setText(str(obstacle.obstacle_shape.width))
+            self.obstacle_length.setText(str(obstacle.obstacle_shape.length))
+            if isinstance(obstacle, StaticObstacle):
+                self.obstacle_x_Position.setText(
+                        str(obstacle.initial_state.__getattribute__("position")[0]))
+                self.obstacle_y_Position.setText(
+                        str(obstacle.initial_state.__getattribute__("position")[1]))
+                self.obstacle_orientation.setText(
+                        str(math.degrees(obstacle.initial_state.__getattribute__("orientation"))))
+            else:
+                self.obstacle_orientation.setText(
+                        str(math.degrees(obstacle.obstacle_shape.__getattribute__("orientation"))))
+
+        elif isinstance(obstacle.obstacle_shape, Circle):
+
+            if self.obstacle_shape.currentText() != "Circle":
+                self.obstacle_shape.setCurrentIndex(1)
+
+            self.obstacle_radius.setText(str(obstacle.obstacle_shape.radius))
+            if isinstance(obstacle, StaticObstacle):
+                self.obstacle_x_Position.setText(
+                        str(obstacle.initial_state.__getattribute__("position")[0]))
+                self.obstacle_y_Position.setText(
+                        str(obstacle.initial_state.__getattribute__("position")[1]))
+
+        elif isinstance(obstacle.obstacle_shape, Polygon):
+            if self.obstacle_shape.currentText() != "Polygon":
+                self.obstacle_shape.setCurrentIndex(2)
+
+                # because numpy array has weird formatting I want to get rid of
+            temp = obstacle.obstacle_shape.vertices
+            vertices = temp.tolist()
+
+            # remove extra vertice(s) in toolbox
+            if len(vertices) - 1 < self.amount_vertices:
+                j = self.amount_vertices - (len(vertices) - 1)
+                for i in range(j):
+                    self.remove_vertice(i)
+
+            for i in range(len(vertices) - 1):
+                # adds another vertice if there are too few in the toolbox
+                if i >= self.amount_vertices:
+                    self.add_vertice()
+
+                vertice_string_x = str(vertices[i][0])
+                vertice_string_y = str(vertices[i][1])
+                self.vertices_x[i].setText(vertice_string_x)
+                self.vertices_y[i].setText(vertice_string_y)
+
+        if isinstance(obstacle, DynamicObstacle):
+            if self.obstacle_dyn_stat.currentText() != "Dynamic":
+                self.obstacle_dyn_stat.setCurrentIndex(1)
+
+        elif self.obstacle_dyn_stat.currentText() != "Static":
+            self.obstacle_dyn_stat.setCurrentIndex(0)
+
+        self.obstacle_type.setCurrentText(obstacle.obstacle_type.value)
+        self.obstacle_state_variable.clear()
+        state_variables = [var for var in obstacle.initial_state.attributes if var not in ["position", "time_step"]]
+
+        if "position" in obstacle.initial_state.attributes:
+            state_variables += ["x-position", "y-position"]
+
+        self.obstacle_state_variable.addItems(state_variables)
+
+    def clear_obstacle_fields(self):
+        """
+        clears the obstacle QLineEdits
+        """
+        if self.obstacle_shape.currentText() == "Circle":
+            self.obstacle_radius.setText("")
+
+        elif self.obstacle_shape.currentText() == "Rectangle":
+            self.obstacle_width.setText("")
+            self.obstacle_length.setText("")
+            self.obstacle_orientation.setText("")
+
+        elif self.obstacle_shape.currentText() == "Polygon":
+            for i in range(self.obstacle_toolbox_ui.amount_vertices):
+                self.vertices_x[i].setText("")
+                self.vertices_y[i].setText("")
+        if (self.obstacle_dyn_stat.currentText() == "Static" and
+                self.obstacle_shape.currentText() != "Polygon"):
+            self.obstacle_x_Position.setText("")
+            self.obstacle_y_Position.setText("")
+
     def init_rectangle_fields(self):
         """
         function that creates the fields for the rectangle shape
@@ -161,8 +276,6 @@ class ObstacleToolboxUI(Toolbox):
         self.layout_shape_groupbox.insertRow(3, "Length [m]", self.obstacle_length)
         self.layout_shape_groupbox.insertRow(4, "Orientation [deg]", self.obstacle_orientation)
 
-
-
     def remove_rectangle_fields(self):
         """
         removes the fields unique to the rectangle shape
@@ -173,7 +286,6 @@ class ObstacleToolboxUI(Toolbox):
             self.layout_shape_groupbox.removeRow(self.obstacle_orientation)
         except Exception:
             pass
-
 
     def init_circle_fields(self):
         """
@@ -186,7 +298,6 @@ class ObstacleToolboxUI(Toolbox):
 
         self.layout_shape_groupbox.insertRow(2, "Radius [m]", self.obstacle_radius)
 
-
     def remove_circle_fields(self):
         """
         removes the fields for the circle shape
@@ -195,7 +306,6 @@ class ObstacleToolboxUI(Toolbox):
             self.layout_shape_groupbox.removeRow(self.obstacle_radius)
         except Exception:
             pass
-
 
     def remove_polygon_fields(self):
         """
@@ -209,7 +319,6 @@ class ObstacleToolboxUI(Toolbox):
         except Exception:
             pass
 
-    # TODO: in view?
     def init_position(self):
         """
         adds the position fields
@@ -231,7 +340,6 @@ class ObstacleToolboxUI(Toolbox):
             self.layout_obstacle_information_groupbox.insertRow(4, "X-Position", self.obstacle_x_Position)
             self.layout_obstacle_information_groupbox.insertRow(5, "Y-Position", self.obstacle_y_Position)
 
-
     def remove_position(self):
         """
         removes the position fields
@@ -242,65 +350,25 @@ class ObstacleToolboxUI(Toolbox):
         except Exception:
             pass
 
-
-    def toggle_dynamic_static(self):
-        """
-        adds/removes fields unique for the dynamic obstacle
-        """
-        if self.obstacle_dyn_stat.currentText() == "Dynamic":
-            self.remove_position()
-        elif self.obstacle_dyn_stat.currentText() == "Static":
-            self.init_position()
-
-
-    def toggle_sections(self):
+    def init_polygon_fields(self):
         """
         changes toolbox based on what shapes that are selected
         """
-        if self.obstacle_shape.currentText() == "Circle":
+        self.vertices_x = []
+        self.vertices_y = []
+        self.polygon_row = []
+        self.remove_vertice_btn = []
+        self.polygon_label = []
+        self.amount_vertices = 0
 
-            self.remove_rectangle_fields()
-            self.remove_polygon_fields()
-            self.remove_position()
+        for i in range(3):
+            self.add_vertice()
 
-            self.init_circle_fields()
-            self.init_position()
+        self.add_vertice_btn = QPushButton("Add Vertice")
+        self.add_vertice_btn.clicked.connect(
+            lambda: self.add_vertice())
+        self.layout_shape_groupbox.insertRow(len(self.vertices_x) + 2, self.add_vertice_btn)
 
-        elif self.obstacle_shape.currentText() == "Rectangle":
-
-            self.remove_circle_fields()
-            self.remove_polygon_fields()
-            self.remove_position()
-
-            self.init_rectangle_fields()
-            self.init_position()
-
-        elif self.obstacle_shape.currentText() == "Polygon":
-
-            self.remove_circle_fields()
-            self.remove_rectangle_fields()
-            self.remove_position()
-
-            self.vertices_x = []
-            self.vertices_y = []
-            self.polygon_row = []
-            self.remove_vertice_btn = []
-            self.polygon_label = []
-            self.amount_vertices = 0
-
-            for i in range(3):
-                self.add_vertice()
-
-            self.add_vertice_btn = QPushButton("Add Vertice")
-            self.add_vertice_btn.clicked.connect(
-                lambda: self.add_vertice())
-            self.layout_shape_groupbox.insertRow(len(self.vertices_x) + 2, self.add_vertice_btn)
-
-        if self.obstacle_dyn_stat.currentText() == "Dynamic":
-            self.toggle_dynamic_static()
-
-
-    # add vertices for the polygon shape, i is the place in the array
     def add_vertice(self):
         """
         add vertices for the polygon shape, i is the place in the array
@@ -337,7 +405,6 @@ class ObstacleToolboxUI(Toolbox):
         self.layout_shape_groupbox.insertRow(i+2, self.polygon_row[i])
         self.amount_vertices = self.amount_vertices + 1
 
-
     def remove_vertice(self, i: int = -1):
         """
         removes one vertice field
@@ -361,7 +428,6 @@ class ObstacleToolboxUI(Toolbox):
         for j in range(self.amount_vertices):
             self.polygon_label[j].setText("Vertice " + str(j))
 
-
     def color_picker(self):
         """
         opens color dialogue window
@@ -373,7 +439,6 @@ class ObstacleToolboxUI(Toolbox):
             "QWidget { border:1px solid black; background-color: %s}" % self.obstacle_color.name())
         self.change_color = True
 
-
     def set_default_color(self):
         """
         sets default color for the color display square
@@ -381,7 +446,6 @@ class ObstacleToolboxUI(Toolbox):
         if self.default_color.isChecked():
             self.selected_color.setStyleSheet(
                 "QWidget { border:1px solid black; background-color: white}")
-
 
     def update_window(self):
         super().update_window()

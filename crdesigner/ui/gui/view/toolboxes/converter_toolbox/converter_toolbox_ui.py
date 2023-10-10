@@ -77,8 +77,6 @@ class MapConversionToolboxUI(Toolbox):
         title_con = "Conversions"
         return title_con, widget_con
 
-
-
     def adjust_sections(self):
         self.remove_fields()
 
@@ -95,18 +93,15 @@ class MapConversionToolboxUI(Toolbox):
             self.chosen_method = "sumo"
             self.init_sumo()
 
-
     def init_open_drive(self):
         self.button_convert_opendrive = QPushButton("Convert OpenDRIVE to CommonRoad")
         self.layout_con_groupbox.insertRow(1, self.button_convert_opendrive)
-
 
     def init_lanelet(self):
         self.button_convert_lanelet2_to_cr = QPushButton("Convert Lanelet/Lanelet2 to CommonRoad")
         self.button_convert_cr_to_lanelet2 = QPushButton("Convert CommonRoad to Lanelet/Lanelet2")
         self.layout_con_groupbox.insertRow(2, self.button_convert_lanelet2_to_cr)
         self.layout_con_groupbox.insertRow(3, self.button_convert_cr_to_lanelet2)
-
 
     def init_osm(self):
         self.button_start_osm_conversion = QPushButton("Convert OSM to CommonRoad")
@@ -134,7 +129,6 @@ class MapConversionToolboxUI(Toolbox):
         self.layout_con_groupbox.insertRow(4, self.button_start_osm_conversion)
         self.layout_con_groupbox.insertRow(5, self.button_start_osm_conversion_with_sumo_parser)
 
-
     def adjust_osm_fields(self):
         if self.download_file.isChecked():
             self.osm_conversion_coordinate_latitude = QLineEdit()
@@ -160,14 +154,11 @@ class MapConversionToolboxUI(Toolbox):
         else:
             self.layout_con_groupbox.removeRow(self.osm_range_groupbox)
 
-
     def init_sumo(self):
         self.button_convert_sumo_to_cr = QPushButton("Convert SUMO to CommonRoad")
         self.button_convert_cr_to_sumo = QPushButton("Convert CommonRoad to SUMO")
         self.layout_con_groupbox.insertRow(4, self.button_convert_sumo_to_cr)
         self.layout_con_groupbox.insertRow(5, self.button_convert_cr_to_sumo)
-
-
 
     def remove_fields(self):
         if self.chosen_method == "open_drive":

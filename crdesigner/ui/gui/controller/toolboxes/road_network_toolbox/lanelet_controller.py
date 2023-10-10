@@ -541,7 +541,6 @@ class AddLaneletController:
             stop_line_marking = selected_lanelet.stop_line.line_marking
             if all(selected_lanelet.stop_line.start == selected_lanelet.left_vertices[0]) and all(
                     selected_lanelet.stop_line.end == selected_lanelet.right_vertices[0]):
-                # stop line at beginning
                 stop_line_at_end = False
                 stop_line_at_beginning = True
                 stop_line = StopLine(np.array([0, 0]), np.array([0, 0]), stop_line_marking, set(), set())

@@ -108,7 +108,7 @@ class MWindowController:
             if self.mwindow_ui.ask_for_autosaved_file():
                 open_commonroad_file(self, self.path_autosave)
                 self.road_network_toolbox.initialize_road_network_toolbox()
-                self.obstacle_toolbox.initialize_obstacle_toolbox()
+                self.obstacle_toolbox.obstacle_toolbox_ui.initialize_obstacle_information()
             else:
                 os.remove(self.path_autosave)
 
