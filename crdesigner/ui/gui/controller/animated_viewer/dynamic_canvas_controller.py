@@ -551,7 +551,7 @@ class DynamicCanvasController(FigureCanvas):
         draw_params = StaticObstacleParams()
         draw_params.occupancy.shape.facecolor = color
 
-        return
+        return draw_params
 
     def create_dyn_obstacle_draw_params(self, color: str) -> DynamicObstacleParams:
         """
@@ -784,7 +784,7 @@ class DynamicCanvasController(FigureCanvas):
                 self._parent.road_network_toolbox.last_added_lanelet_id = None
             self.reset_toolbar()
             self._parent.road_network_toolbox.initialize_road_network_toolbox()
-            self._parent.obstacle_toolbox.initialize_obstacle_information()
+            self._parent.obstacle_toolbox.obstacle_toolbox_ui.initialize_obstacle_information()
 
     def draw_rectangle_for_cropping(self, mouse_event: QMouseEvent) -> None:
         """

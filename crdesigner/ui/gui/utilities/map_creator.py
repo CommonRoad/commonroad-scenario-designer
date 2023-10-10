@@ -352,7 +352,6 @@ class MapCreator:
 
         MapCreator.set_predecessor_successor_relation(predecessor, successor)
 
-
     @staticmethod
     def fit_to_successor(successor: Lanelet, predecessor: Lanelet):
         """
@@ -389,7 +388,6 @@ class MapCreator:
                         or not same_length_width and successor.center_vertices[-1][1] < successor.center_vertices[0][1]:
                     ang = -ang
 
-
         predecessor.translate_rotate(np.array([0, 0]), ang)
 
         if pred_straight and suc_straight and same_length_width:
@@ -407,7 +405,6 @@ class MapCreator:
             predecessor.translate_rotate(trans, 0)
 
         MapCreator.set_predecessor_successor_relation(predecessor, successor)
-
 
     @staticmethod
     def calc_angle_between_lanelets(predecessor: Lanelet, lanelet: Lanelet):

@@ -1,6 +1,5 @@
 """Wrapper for the middle visualization."""
 from crdesigner.ui.gui.controller.animated_viewer.animated_viewer_controller import AnimatedViewerController
-#from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.commonroad_viewer import AnimatedViewer
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 
 from typing import Union

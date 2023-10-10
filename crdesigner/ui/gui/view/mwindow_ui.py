@@ -62,7 +62,7 @@ class MWindowUI(QMainWindow, Ui_mainWindow):
 
     def initialize_toolboxes(self):
         self.road_network_toolbox.initialize_road_network_toolbox()
-        self.obstacle_toolbox.initialize_obstacle_information()
+        self.obstacle_toolbox.obstacle_toolbox_ui.initialize_obstacle_information()
         self.scenario_toolbox.initialize_toolbox()
 
     def colorscheme(self) -> ColorSchema:

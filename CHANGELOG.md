@@ -13,6 +13,7 @@
 - Command-line interface main function call
 - GUI Settings will be regarded when the scenario is drawn
 - OpenDRIVE/Lanelet2 conversion intersection incoming lanelets as set instead of list/tuple
+- Obstacle information as Graph no longer crashes when a static obstacle or a missing value is asked for
 
 ### Changed
 - GUI backend using MVC pattern

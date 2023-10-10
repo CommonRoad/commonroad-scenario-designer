@@ -1,10 +1,11 @@
-
+import math
 from typing import Tuple
 
 from PyQt5 import QtCore
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
+from commonroad.scenario.state import InitialState
 
 from crdesigner.ui.gui.utilities.toolbox_ui import (
     Toolbox,
@@ -581,6 +582,49 @@ class ScenarioToolboxUI(Toolbox):
         except Exception:
             pass
 
+    def initialize_initial_state(self) -> None:
+        """Initializes initial position GUI elements with information."""
+        self.initial_position_x.setText("0.0")
+        self.initial_position_y.setText("0.0")
+        self.initial_velocity.setText("0.0")
+        self.initial_orientation.setText("0.0")
+        self.initial_yawRate.setText("0.0")
+        self.initial_slipAngle.setText("0.0")
+        self.initial_time.setText("0")
+        self.initial_acceleration.setText("0.0")
+
+    def initialize_goal_state_fields(self) -> None:
+        """Initializes the initial goal_state paramters"""
+        self.goal_time_start.setText("0")
+        self.goal_time_end.setText("0")
+        self.goal_velocity_selected.setChecked(False)
+        self.goal_velocity_start.setText("0.0")
+        self.goal_velocity_end.setText("0.0")
+        self.goal_orientation_selected.setChecked(False)
+        self.goal_orientation_start.setText("0")
+        self.goal_orientation_end.setText("0")
+        self.type.setCurrentText("None")
+
+    def set_initial_state_information(self, initial_state: InitialState) -> None:
+        """updates initial state widget with data from the selected planning problem
+
+        :param initial_state: InitialState of the pps"""
+        if initial_state.has_value("position"):
+            self.initial_position_x.setText(str(initial_state.position[0]))
+            self.initial_position_y.setText(str(initial_state.position[1]))
+        if initial_state.has_value("velocity"):
+            self.initial_velocity.setText(str(initial_state.velocity))
+        if initial_state.has_value("orientation"):
+            self.initial_orientation.setText(str(math.degrees(initial_state.orientation)))
+        if initial_state.has_value("yaw_rate"):
+            self.initial_yawRate.setText(str(initial_state.yaw_rate))
+        if initial_state.has_value("slip_angle"):
+            self.initial_slipAngle.setText(str(initial_state.slip_angle))
+        if initial_state.has_value("time_step"):
+            self.initial_time.setText(str(initial_state.time_step))
+        if initial_state.has_value("acceleration"):
+            self.initial_acceleration.setText(str(initial_state.acceleration))
+
     def init_goal_state_lanelet_fields(self) -> None:
         """Lanelet selection"""
         self.goal_states_lanelet_widget = QWidget()
@@ -625,6 +669,8 @@ class ScenarioToolboxUI(Toolbox):
         self.layout_goal_state_information_groupbox.insertRow(
             11, self.goal_states_lanelet_widget
         )
+
+
 
     def remove_goal_state_lanelet_fields(self) -> None:
         """Removes the Lanelet fields"""

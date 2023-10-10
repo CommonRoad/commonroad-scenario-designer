@@ -386,6 +386,7 @@ class MapConversionToolboxController(QDockWidget):
             return
 
         self.convert_lanelet2_to_cr()
+
     def convert_lanelet2_to_cr(self):
         """
         Starts the Lanelet to CommonRoad conversion process.
@@ -400,6 +401,7 @@ class MapConversionToolboxController(QDockWidget):
             self.text_browser.append("Conversion from Lanelet2 to CommonRoad is done")
         except Exception as e:
             print("An error occurred:")
+
     def convert_cr_to_lanelet2(self):
         """
         Starts the CommonRoad to Lanelet conversion process.
@@ -422,6 +424,7 @@ class MapConversionToolboxController(QDockWidget):
                 )
             )
         self.text_browser.append("Conversion from CommonRoad to Lanelet2 is done")
+
     def load_sumo(self):
         """
         Allows to select a SUMO file from the file system and loads it and calls conversion.
@@ -469,8 +472,7 @@ class MapConversionToolboxController(QDockWidget):
         if SUMO_AVAILABLE:
             try:
                 scenario = convert_net_to_cr(self.path_sumo_file)
-                #TODO update scenario in MVC ?
-                self.callback(scenario)
+                self.scenario_model.set_scenario(scenario)
             except Exception as e:
                 QMessageBox.warning(self, "Internal Error",
                                     "There was an error during the processing of the graph.\n\n{}".format(e),

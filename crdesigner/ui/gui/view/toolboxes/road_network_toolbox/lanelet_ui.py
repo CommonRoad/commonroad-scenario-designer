@@ -26,8 +26,8 @@ class AddLaneletUI:
 
     def initialize_basic_lanelet_information(self, last_added_lanelet_id):
         """
-                Initializes lanelet GUI elements with lanelet information.
-                """
+        Initializes lanelet GUI elements with lanelet information.
+        """
 
         if not self.road_network_toolbox_ui.place_at_position.isChecked() and not \
                 self.road_network_toolbox_ui.connect_to_previous_selection.isChecked() and not\
