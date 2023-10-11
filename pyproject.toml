@@ -27,6 +27,7 @@ Source = "https://gitlab.lrz.de/tum-cps/commonroad-scenario-designer"
 [tool.poetry.dependencies]
 python = "^3.8"
 commonroad-io = "2023.3"
+# commonroad-drivability-checker = "2023.1"
 pyqt5 = ">=5.15.9"
 matplotlib = ">=3.6.0"
 numpy = "^1.24.2"
@@ -43,6 +44,8 @@ pyyaml = "6.0"
 pygeodesy = "^23.3.23"
 mercantile = "^1.2.1"
 urllib3 = "^2.0.3"
+typer = "^0.9.0"
+typing-extensions = "^4.8.0"
 
 [tool.poetry.group.docs]
 optional = true
@@ -70,7 +73,7 @@ optional = true
 jupyter = "^1.0.0"
 
 [tool.poetry.scripts]
-crdesigner = 'crdesigner.ui.cli.command_line:main'
+crdesigner = 'crdesigner.command_line:cli'
 
 [build-system]
 requires = ["poetry-core"]

@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 from commonroad.scenario.scenario import Tag
 from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
 from commonroad.planning.planning_problem import PlanningProblemSet
@@ -15,7 +16,7 @@ config.lanelet_types_backwards_compatible = False
 # ----------------------------------------------- Option 1: General API ------------------------------------------------
 # load OpenDRIVE file, parse it, and convert it to a CommonRoad scenario
 
-scenario = opendrive_to_commonroad(input_path)
+scenario = opendrive_to_commonroad(Path(input_path))
 
 # store converted file as CommonRoad scenario
 writer = CommonRoadFileWriter(
@@ -32,7 +33,7 @@ writer.write_to_file(os.path.dirname(os.path.realpath(__file__)) + "/" + "ZAM_Op
 
 # --------------------------------------- Option 2: OpenDRIVE conversion APIs ------------------------------------------
 # OpenDRIVE parser to load file
-opendrive = parse_opendrive(input_path)
+opendrive = parse_opendrive(Path(input_path))
 
 # create OpenDRIVE intermediate network object from configuration
 road_network = Network()

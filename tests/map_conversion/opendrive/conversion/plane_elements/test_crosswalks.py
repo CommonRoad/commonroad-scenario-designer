@@ -1,6 +1,6 @@
 import os
 import unittest
-
+from pathlib import Path
 import numpy as np
 
 from crdesigner.map_conversion.map_conversion_interface import opendrive_to_commonroad
@@ -85,8 +85,8 @@ class MyTestCase(unittest.TestCase):
     def test_four_way_crossing(self):
         """Test the crosswalk conversion for four_way_crossing.xodr"""
         xodr_file_name = "four_way_crossing"
-        scenario = opendrive_to_commonroad(os.path.dirname(os.path.realpath(__file__)) +
-                                           "/../../../test_maps/opendrive/{}.xodr".format(xodr_file_name))
+        scenario = opendrive_to_commonroad(Path(os.path.dirname(os.path.realpath(__file__)) +
+                                           "/../../../test_maps/opendrive/{}.xodr".format(xodr_file_name)))
 
         lanelet_7 = scenario.lanelet_network.find_lanelet_by_id(7)
         lanelet_6 = scenario.lanelet_network.find_lanelet_by_id(6)

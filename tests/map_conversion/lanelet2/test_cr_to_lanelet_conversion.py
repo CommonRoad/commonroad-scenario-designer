@@ -1,7 +1,6 @@
 import os
 import unittest
-
-from commonroad.common.writer.file_writer_interface import OverwriteExistingFile
+from pathlib import Path
 from lxml import etree  # type: ignore
 
 from commonroad.common.file_reader import CommonRoadFileReader  # type: ignore
@@ -76,6 +75,6 @@ class TestOpenDRIVEToLaneletConversion(unittest.TestCase):
 
     def test_crossing_complex8_course(self):
         input_path = f"{os.path.dirname(os.path.realpath(__file__))}/../test_maps/opendrive/CrossingComplex8Course.xodr"
-        scenario = opendrive_to_commonroad(input_path)
+        scenario = opendrive_to_commonroad(Path(input_path))
         l2osm = CR2LaneletConverter(lanelet2_config)
         self.assertIsNotNone(l2osm(scenario))  # TODO better evaluation

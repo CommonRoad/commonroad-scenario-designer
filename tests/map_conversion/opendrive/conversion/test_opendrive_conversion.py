@@ -1,5 +1,6 @@
 import os
 import unittest
+from pathlib import Path
 import numpy as np
 
 from commonroad.scenario.scenario import Scenario
@@ -17,7 +18,7 @@ def load_and_convert_opendrive(xodr_file_name: str) -> Scenario:
     generate_unique_id(0)  # reset ID counter
     opendrive_config.proj_string = gui_config.utm_default
     scenario = opendrive_to_commonroad(
-        os.path.dirname(os.path.realpath(__file__)) + "/../../test_maps/opendrive/{}.xodr".format(xodr_file_name))
+        Path(os.path.dirname(os.path.realpath(__file__)) + "/../../test_maps/opendrive/{}.xodr".format(xodr_file_name)))
 
     return scenario
 

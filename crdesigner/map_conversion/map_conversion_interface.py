@@ -81,7 +81,7 @@ def commonroad_to_lanelet(input_file: str, output_name: str, config: lanelet2_co
         )
 
 
-def opendrive_to_commonroad(input_file: str, general_conf: general_config = general_config,
+def opendrive_to_commonroad(input_file: Path, general_conf: general_config = general_config,
                             odr_conf: open_drive_config = open_drive_config) -> Scenario:
     """
     Converts OpenDRIVE file to CommonRoad

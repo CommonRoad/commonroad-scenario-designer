@@ -21,6 +21,7 @@
 - Config model
 - Automated creation of settings windows
 - Support for commonroad-io 2023.3
+- Commandline interface to use typer
 
 ### Added
 - Cropping of a map in the GUI
