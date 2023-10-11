@@ -3,6 +3,7 @@ import warnings
 from typing import Optional, Dict
 import numpy as np
 from lxml import etree
+from pathlib import Path
 
 from crdesigner.map_conversion.common.utils import generate_unique_id, clean_projection_string
 from crdesigner.map_conversion.opendrive.opendrive_parser.elements.opendrive import OpenDrive, Header
@@ -26,7 +27,7 @@ from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadObject im
     ObjectOutlineCorner
 
 
-def parse_opendrive(file_path: str) -> OpenDrive:
+def parse_opendrive(file_path: Path) -> OpenDrive:
     """
     Tries to parse XML tree, returns OpenDRIVE object
 
@@ -35,7 +36,7 @@ def parse_opendrive(file_path: str) -> OpenDrive:
     """
     generate_unique_id(0)  # reset IDs
 
-    with open("{}".format(file_path), "r") as file_in:
+    with file_path.open("r") as file_in:
         root_node = etree.parse(file_in)
 
         for elem in root_node.getiterator():

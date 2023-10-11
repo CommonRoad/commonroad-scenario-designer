@@ -22,7 +22,6 @@ before_script:
 # static_check
 prospector_source:
   stage: static_check
-  image: python:3.11
   script:
     - prospector crdesigner/
   allow_failure: true
@@ -30,7 +29,6 @@ prospector_source:
 
 prospector_test:
   stage: static_check
-  image: python:3.11
   script:
     - prospector tests/
   allow_failure: true
@@ -38,7 +36,6 @@ prospector_test:
 
 prospector_tutorials:
   stage: static_check
-  image: python:3.11
   script:
     - prospector tutorials/
   allow_failure: true
@@ -49,7 +46,7 @@ build_and_test_python:
   stage: test
   parallel :
     matrix :
-      - PYTHON_VERSIONS : [ "3.8", "3.9", "3.10" ]
+      - PYTHON_VERSIONS : [ "3.8", "3.9", "3.10"]
   variables:
     QT_QPA_PLATFORM : "offscreen"
   script:
@@ -57,7 +54,6 @@ build_and_test_python:
   needs: []
 
 build_and_test_with_coverage:
-  image: python:3.11
   stage : test
   variables :
     QT_QPA_PLATFORM : "offscreen"

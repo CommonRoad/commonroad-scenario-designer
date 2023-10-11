@@ -93,7 +93,41 @@ The GUI can be started from command line via the following two options:
 $ crdesigner
 $ crdesigner gui
 ```
-Note that you have to activate first the Python environment in which the CommonRoad Scenario Designer is installed.
+Note that you have to activate first the Python environment in which the CommonRoad Scenario Designer is installed.  
+You can also execute a map conversion via the commandline interface, e.g.,   
+`crdesigner --input-file /input/path/l2file.osm  --output-file /output/path/crfile.xml lanelet2cr`.  
+The output of `crdesigner --help` looks as follows:
+```bash
+Usage: crdesigner [OPTIONS] COMMAND [ARGS]...
+
+  Toolbox for Map Conversion and Scenario Creation for Autonomous Vehicles
+
+Options:
+  --input-file PATH               Path to OpenDRIVE map
+  --output-file PATH              Path where CommonRoad map should be stored
+  --force-overwrite / --no-force-overwrite
+                                  Overwrite existing CommonRoad file
+                                  [default: force-overwrite]
+  --author TEXT                   Your name
+  --affiliation TEXT              Your affiliation, e.g., university, research
+                                  institute, company
+  --tags TEXT                     Tags for the created map
+  --install-completion [bash|zsh|fish|powershell|pwsh]
+                                  Install completion for the specified shell.
+  --show-completion [bash|zsh|fish|powershell|pwsh]
+                                  Show completion for the specified shell, to
+                                  copy it or customize the installation.
+  --help                          Show this message and exit.
+
+Commands:
+  crlanelet2
+  crsumo
+  gui
+  lanelet2cr
+  odrcr
+  osmcr
+  sumocr`
+```
 
 ### Map Converters
 You can execute the different converters either via command line, calling them within your Python program via an API, 
