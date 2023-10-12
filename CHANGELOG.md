@@ -14,6 +14,7 @@
 - GUI Settings will be regarded when the scenario is drawn
 - Fixed Bug when rotating a lanelet leads to that the rotated lanelet wasn't able to be selected through the canvas
 - OpenDRIVE/Lanelet2 conversion intersection incoming lanelets as set instead of list/tuple
+- Fixed the relationship of predecessor/ successor when creating adjacent lanelets
 - Obstacle information as Graph no longer crashes when a static obstacle or a missing value is asked for
 
 ### Changed
