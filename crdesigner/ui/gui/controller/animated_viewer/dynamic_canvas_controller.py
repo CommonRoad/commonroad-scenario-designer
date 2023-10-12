@@ -720,26 +720,18 @@ class DynamicCanvasController(FigureCanvas):
     def reset_toolbar(self):
         self._parent.top_bar.toolbar_wrapper.tool_bar_ui.reset_toolbar()
 
-    def add_adjacent(self, left_adj: bool, same_direction: bool = True):
+    def add_adjacent(self, left_adj: bool):
+        """
+        Adds an adjacent lanelet to the selected lanelet
+
+        @param left_adj: Indicator if the lanelet should be added on the left or right side of the selected lanelet
+        """
+
         if self.parent().play_activated:
             self.parent().road_network_toolbox.text_browser.append("Please stop the animation")
             return
-
-        added_adjacent_lanelets = []
-        for lanelet in self.selected_lanelets:
-            adjacent_lanelet = MapCreator.create_adjacent_lanelet(left_adj, lanelet,
-                                                                  self.scenario_model.generate_object_id(),
-                                                                  same_direction, 3.0, lanelet.lanelet_type,
-                                                                  lanelet.predecessor, lanelet.successor,
-                                                                  traffic_signs=lanelet.traffic_signs,
-                                                                  traffic_lights=lanelet.traffic_lights)
-            if not adjacent_lanelet:
-                output = f"Adjacent for Lanelet {lanelet.lanelet_id} already exists!"
-                self._parent.crdesigner_console_wrapper.text_browser.append(output)
-            else:
-                added_adjacent_lanelets.append(adjacent_lanelet)
-        self.scenario_model.add_lanelet(added_adjacent_lanelets)
-        self.parent().road_network_toolbox.initialize_road_network_toolbox()
+        if len(self.selected_lanelets) > 0:
+            self._parent.road_network_toolbox.lanelet_controller.create_adjacent(self.selected_lanelets, left_adj)
 
     def merge_lanelets(self):
         if self.parent().play_activated:

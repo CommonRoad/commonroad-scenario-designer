@@ -150,11 +150,11 @@ class ScenarioModel(QObject):
         """
         return not self.__current_scenario_index == -1
 
-    def add_lanelet(self, lanelet):
+    def add_lanelet(self, lanelet: Union[Lanelet, List[Lanelet]]):
         """
         Adds a lanelet to the Scenario.
 
-        @param lanelet: lanelet which should be added to the scenario
+        @param lanelet: lanelet or List of Lanelets which should be added to the scenario
         """
         self._update_scenario()
         self._current_scenario().add_objects(lanelet)
@@ -478,6 +478,26 @@ class ScenarioModel(QObject):
         MapCreator.fit_intersection_to_predecessor(lanelet_predecessor, lanelet_successor, intersection,
                                                    self._current_scenario().lanelet_network)
         self.notify_all()
+
+    def add_successor_to_lanelet(self, lanelet_id: int, successor_id: int):
+        """
+        Adds a succesor id to the lanelets successor list
+
+        @param lanelet_id: Id of the lanelt to witch the successor should be added
+        @param successor_id: Id of the successor which should be addded
+        """
+        lanelet = self.find_lanelet_by_id(lanelet_id)
+        lanelet.successor.append(successor_id)
+
+    def add_predecessor_to_lanelet(self, lanelet_id: int, predecessor_id: int):
+        """
+        Adds a succesor id to the lanelets predecessor list
+
+        @param lanelet_id: Id of the lanelt to witch the predecessor should be added
+        @param predecessor_id: Id of the predecessor which should be addded
+        """
+        lanelet = self.find_lanelet_by_id(lanelet_id)
+        lanelet.predecessor.append(predecessor_id)
 
     def generate_object_id(self) -> int:
         """

@@ -264,7 +264,7 @@ class AnimatedViewerController:
                 y_dim = (plot_limits[3] - plot_limits[2]) / 2
                 gui_config.set_zoom_treshold(x_dim, y_dim)
 
-
+        self.dynamic.draw_scenario(self.pps_model.get_selected_pp(), time_begin=time_begin)
 
         for lanelet in self.scenario_model.get_lanelets():
 
@@ -291,7 +291,7 @@ class AnimatedViewerController:
             self.dynamic.set_limits([x_lim[0], x_lim[1], y_lim[0], y_lim[1]])
             self.dynamic.draw_idle()
 
-        self.dynamic.draw_scenario(self.pps_model.get_selected_pp(), time_begin=time_begin)
+
         self.dynamic.drawer.tight_layout()
 
     def get_paint_parameters(self, lanelet: Lanelet, selected_lanelets: Lanelet, selected_intersection: Intersection):

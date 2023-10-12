@@ -503,82 +503,149 @@ class AddLaneletController:
         self.scenario_model.attach_to_other_lanelet(selected_lanelet_one, selected_lanelet_two)
         self.lanelet_ui.set_default_lanelet_operation_information()
 
-    def create_adjacent(self):
+    def create_adjacent(self, selected_lanelets: List[Lanelet] = None, adj_left: bool = True):
         """
         Create adjacent lanelet given a selected lanelet
+
+        @param selected_lanelets: List of Lanelets that should be added to the scenario
+        @param adj_left: Indicator whether to add the lanelet on the left or right side of the lanelet
         """
+        if selected_lanelets is None:
+            selected_lanelets = []
         if self.road_network_controller.mwindow.play_activated:
             self.road_network_controller.text_browser.append("Please stop the animation first.")
             return
-
-        selected_lanelet = self.selected_lanelet(True)
-        if selected_lanelet is None:
-            return
-        if selected_lanelet.predecessor:
-            self.road_network_controller.text_browser.append(str(selected_lanelet.predecessor.pop()))
-        if selected_lanelet.successor:
-            self.road_network_controller.text_browser.append(str(selected_lanelet.successor.pop()))
-        if selected_lanelet is None:
-            return
-
-        self.road_network_controller.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.display_curved_lanelet(False, None)
-
-        adjacent_left = self.road_network_toolbox_ui.create_adjacent_left_selection.isChecked()
-        adjacent_same_direction = self.road_network_toolbox_ui.create_adjacent_same_direction_selection.isChecked()
-        lanelet_width = float(str(np.linalg.norm(selected_lanelet.left_vertices[0]-selected_lanelet.right_vertices[0])))
-        line_marking_left = selected_lanelet.line_marking_left_vertices
-        line_marking_right = selected_lanelet.line_marking_right_vertices
-        predecessors = selected_lanelet.predecessor
-        successors = selected_lanelet.successor
-        lanelet_type = selected_lanelet.lanelet_type
-        user_one_way = selected_lanelet.user_one_way
-        user_bidirectional = selected_lanelet.user_bidirectional
-        traffic_signs = selected_lanelet.traffic_signs
-        traffic_lights = selected_lanelet.traffic_lights
-        stop_line_at_end = False
-        stop_line = None
-        if selected_lanelet.stop_line is not None:
-            stop_line_marking = selected_lanelet.stop_line.line_marking
-            if all(selected_lanelet.stop_line.start == selected_lanelet.left_vertices[0]) and all(
-                    selected_lanelet.stop_line.end == selected_lanelet.right_vertices[0]):
-                stop_line_at_end = False
-                stop_line_at_beginning = True
-                stop_line = StopLine(np.array([0, 0]), np.array([0, 0]), stop_line_marking, set(), set())
-            elif all(selected_lanelet.stop_line.start == selected_lanelet.left_vertices[
-                len(selected_lanelet.left_vertices) - 1]) and all(
-                    selected_lanelet.stop_line.end == selected_lanelet.right_vertices[
-                        len(selected_lanelet.right_vertices) - 1]):
-                stop_line_at_end = True
-                stop_line_at_beginning = False
-                stop_line = StopLine(np.array([0, 0]), np.array([0, 0]), stop_line_marking, set(), set())
-            else:
-                stop_line_start_x = selected_lanelet.stop_line.start[0]
-                stop_line_end_x = selected_lanelet.stop_line.end[0]
-                stop_line_start_y = selected_lanelet.stop_line.start[1]
-                stop_line_end_y = selected_lanelet.stop_line.end[1]
-                stop_line = StopLine(np.array([stop_line_start_x, stop_line_start_y]),
-                                     np.array([stop_line_end_x, stop_line_end_y]), stop_line_marking, set(), set())
-
-        if adjacent_left:
-            adjacent_lanelet = MapCreator.create_adjacent_lanelet(adjacent_left, selected_lanelet,
-                                                                  self.scenario_model.generate_object_id(),
-                                                                  adjacent_same_direction, lanelet_width, lanelet_type,
-                                                                  predecessors, successors, user_one_way,
-                                                                  user_bidirectional, line_marking_left,
-                                                                  line_marking_right, stop_line, traffic_signs,
-                                                                  traffic_lights, stop_line_at_end)
+        if len(selected_lanelets) > 0:
+            adjacent_left = adj_left
         else:
-            adjacent_lanelet = MapCreator.create_adjacent_lanelet(adjacent_left, selected_lanelet,
-                                                                  self.scenario_model.generate_object_id(),
-                                                                  adjacent_same_direction, lanelet_width, lanelet_type,
-                                                                  predecessors, successors, user_one_way,
-                                                                  user_bidirectional, line_marking_left,
-                                                                  line_marking_right, stop_line, traffic_signs,
-                                                                  traffic_lights, stop_line_at_end)
+            selected_lanelets.append(self.selected_lanelet(True))
+            adjacent_left = self.road_network_toolbox_ui.create_adjacent_left_selection.isChecked()
 
-        if adjacent_lanelet is not None:
-            self.last_added_lanelet_id = adjacent_lanelet.lanelet_id
-            self.scenario_model.add_lanelet(adjacent_lanelet)
+        added_lanelets = []
+
+        for selected_lanelet in selected_lanelets:
+            if selected_lanelet is None:
+                return
+            if selected_lanelet.predecessor:
+                self.road_network_controller.text_browser.append(str(selected_lanelet.predecessor))
+            if selected_lanelet.successor:
+                self.road_network_controller.text_browser.append(str(selected_lanelet.successor))
+            if ((selected_lanelet.adj_left is not None and adjacent_left) or
+                    (selected_lanelet.adj_right is not None and not adjacent_left)):
+                self.road_network_controller.text_browser.append("The Lanelet has already an adjacent Lanelet")
+                return
+
+            self.road_network_controller.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.display_curved_lanelet(False, None)
+
+            adjacent_same_direction = self.road_network_toolbox_ui.create_adjacent_same_direction_selection.isChecked()
+            lanelet_width = float(str(np.linalg.norm(selected_lanelet.left_vertices[0]-selected_lanelet.right_vertices[0])))
+            line_marking_left = selected_lanelet.line_marking_left_vertices
+            line_marking_right = selected_lanelet.line_marking_right_vertices
+            lanelet_type = selected_lanelet.lanelet_type
+            user_one_way = selected_lanelet.user_one_way
+            user_bidirectional = selected_lanelet.user_bidirectional
+            traffic_signs = selected_lanelet.traffic_signs
+            traffic_lights = selected_lanelet.traffic_lights
+            stop_line_at_end = False
+            stop_line = None
+            if selected_lanelet.stop_line is not None:
+                stop_line_marking = selected_lanelet.stop_line.line_marking
+                if all(selected_lanelet.stop_line.start == selected_lanelet.left_vertices[0]) and all(
+                        selected_lanelet.stop_line.end == selected_lanelet.right_vertices[0]):
+                    # stop line at beginning
+                    stop_line_at_end = False
+                    stop_line_at_beginning = True
+                    stop_line = StopLine(np.array([0, 0]), np.array([0, 0]), stop_line_marking, set(), set())
+                elif all(selected_lanelet.stop_line.start == selected_lanelet.left_vertices[
+                    len(selected_lanelet.left_vertices) - 1]) and all(
+                        selected_lanelet.stop_line.end == selected_lanelet.right_vertices[
+                            len(selected_lanelet.right_vertices) - 1]):
+                    stop_line_at_end = True
+                    stop_line_at_beginning = False
+                    stop_line = StopLine(np.array([0, 0]), np.array([0, 0]), stop_line_marking, set(), set())
+                else:
+                    stop_line_start_x = selected_lanelet.stop_line.start[0]
+                    stop_line_end_x = selected_lanelet.stop_line.end[0]
+                    stop_line_start_y = selected_lanelet.stop_line.start[1]
+                    stop_line_end_y = selected_lanelet.stop_line.end[1]
+                    stop_line = StopLine(np.array([stop_line_start_x, stop_line_start_y]),
+                                         np.array([stop_line_end_x, stop_line_end_y]), stop_line_marking, set(), set())
+            id_of_new_lanelet = self.scenario_model.generate_object_id()
+
+            predecessors = []
+            successors = []
+
+            for pre_id in selected_lanelet.predecessor:
+                predecessor = self.scenario_model.find_lanelet_by_id(int(pre_id))
+                if predecessor.adj_left is not None and adjacent_left:
+                    if predecessor.adj_left_same_direction != adjacent_same_direction:
+                        self.road_network_controller.text_browser.append("The adjacents predecessor has not the same"
+                                                                         " direction!")
+                        return
+                    if predecessor.adj_left_same_direction:
+                        predecessors.append(predecessor.adj_left)
+                        self.scenario_model.add_successor_to_lanelet(predecessor.adj_left, id_of_new_lanelet)
+                    else:
+                        successors.append(predecessor.adj_left)
+                        self.scenario_model.add_predecessor_to_lanelet(predecessor.adj_left, id_of_new_lanelet)
+                elif predecessor.adj_right is not None and not adjacent_left:
+                    if predecessor.adj_right_same_direction != adjacent_same_direction:
+                        self.road_network_controller.text_browser.append("The adjacents predecessor has not the same"
+                                                                         " direction!")
+                        return
+                    if predecessor.adj_right_same_direction:
+                        predecessors.append(predecessor.adj_right)
+                        self.scenario_model.add_successor_to_lanelet(predecessor.adj_right, id_of_new_lanelet)
+                    else:
+                        successors.append(predecessor.adj_right)
+                        self.scenario_model.add_predecessor_to_lanelet(predecessor.adj_right, id_of_new_lanelet)
+
+            for suc_id in selected_lanelet.successor:
+                successor = self.scenario_model.find_lanelet_by_id(int(suc_id))
+                if successor.adj_left is not None and adjacent_left:
+                    if successor.adj_left_same_direction != adjacent_same_direction:
+                        self.road_network_controller.text_browser.append("The adjacents successor has not the same"
+                                                                         " direction!")
+                        return
+                    if successor.adj_left_same_direction:
+                        successors.append(successor.adj_left)
+                        self.scenario_model.add_predecessor_to_lanelet(successor.adj_left, id_of_new_lanelet)
+                    else:
+                        predecessors.append(successor.adj_left)
+                        self.scenario_model.add_successor_to_lanelet(successor.adj_left, id_of_new_lanelet)
+                elif successor.adj_right is not None and not adjacent_left:
+                    if successor.adj_right_same_direction != adjacent_same_direction:
+                        self.road_network_controller.text_browser.append("The adjacents successor has not the same"
+                                                                         " direction!")
+                        return
+                    if successor.adj_right_same_direction:
+                        successors.append(successor.adj_right)
+                        self.scenario_model.add_predecessor_to_lanelet(successor.adj_right, id_of_new_lanelet)
+                    else:
+                        predecessors.append(successor.adj_right)
+                        self.scenario_model.add_successor_to_lanelet(successor.adj_right, id_of_new_lanelet)
+
+            if adjacent_left:
+                adjacent_lanelet = MapCreator.create_adjacent_lanelet(adjacent_left, selected_lanelet,
+                                                                      id_of_new_lanelet,
+                                                                      adjacent_same_direction, lanelet_width, lanelet_type,
+                                                                      predecessors, successors, user_one_way,
+                                                                      user_bidirectional, line_marking_left,
+                                                                      line_marking_right, stop_line, traffic_signs,
+                                                                      traffic_lights, stop_line_at_end)
+            else:
+                adjacent_lanelet = MapCreator.create_adjacent_lanelet(adjacent_left, selected_lanelet,
+                                                                      id_of_new_lanelet,
+                                                                      adjacent_same_direction, lanelet_width, lanelet_type,
+                                                                      predecessors, successors, user_one_way,
+                                                                      user_bidirectional, line_marking_left,
+                                                                      line_marking_right, stop_line, traffic_signs,
+                                                                      traffic_lights, stop_line_at_end)
+            added_lanelets.append(adjacent_lanelet)
+
+        if len(added_lanelets) > 0:
+            self.last_added_lanelet_id = added_lanelets[len(added_lanelets) - 1].lanelet_id
+            self.scenario_model.add_lanelet(added_lanelets)
             self.road_network_controller.set_default_road_network_list_information()
             self.lanelet_ui.set_default_lanelet_operation_information()
         else:
@@ -934,3 +1001,4 @@ class AddLaneletController:
                     self.road_network_controller.update:
                 self.road_network_controller.text_browser.append("No lanelet selected.")
                 return None
+
