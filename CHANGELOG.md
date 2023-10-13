@@ -34,6 +34,7 @@
 - Support for visualizing scenarios with 3D coordinates on 2D plane
 - cr2lanelet line marking conversion
 - cr2lanelet bidirectional users conversion
+- Map verification and repairing
 
 ## [0.7.2] - 2023-07-29
 

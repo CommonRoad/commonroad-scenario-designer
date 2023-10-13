@@ -195,7 +195,24 @@ We gratefully acknowledge partial financial support by
 - Central Innovation Programme of the German Federal Government under grant no. ZF4086007BZ8
 
 ## Citation
-**If you use our code for research, please consider to cite our paper:**
+**If you use our code for research, please consider to cite our papers:**
+```
+@inproceedings{Maierhofer2023,
+	author = {Maierhofer, Sebastian and  Ballnath, Yannick and  Althoff, Matthias},
+	title = {Map Verification and Repairing Using Formalized Map Specifications},
+	booktitle = {2023 IEEE International Conference on Intelligent Transportation Systems (ITSC)},
+	year = {2023},
+	pages = {},
+	abstract = {Autonomous vehicles benefit from correct maps to participate in traffic safely, but often maps are not verified before their usage. 
+                    We address this problem by providing an approach to verify and repair maps automatically based on a formalization of map specifications in higher-order logic. 
+                    Unlike previous work, we provide a collection of map specifications. 
+                    We can verify and repair all possible map parts, from geometric to semantic elements, e.g., adjacency relationships, lane types, road boundaries, traffic signs, and intersections. 
+                    Due to the modular design of our approach, one can integrate additional logics. 
+                    We compare ontologies, answer set programming, and satisfiability modulo theories with our higher-order logic verification algorithm. 
+                    Our evaluation shows that our approach can efficiently verify and repair maps from several data sources and of different map sizes. 
+                    We provide our tool as part of the CommonRoad Scenario Designer toolbox available at commonroad.in.tum.de.},
+}
+```
 ```
 @inproceedings{Maierhofer2021,
 	author = {Sebastian Maierhofer, Moritz Klischat, and Matthias Althoff},
