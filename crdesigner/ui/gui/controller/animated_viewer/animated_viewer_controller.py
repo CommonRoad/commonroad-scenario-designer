@@ -291,7 +291,6 @@ class AnimatedViewerController:
             self.dynamic.set_limits([x_lim[0], x_lim[1], y_lim[0], y_lim[1]])
             self.dynamic.draw_idle()
 
-
         self.dynamic.drawer.tight_layout()
 
     def get_paint_parameters(self, lanelet: Lanelet, selected_lanelets: Lanelet, selected_intersection: Intersection):

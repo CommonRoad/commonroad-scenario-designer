@@ -22,12 +22,12 @@ from crdesigner.config.gui_config import gui_config, DrawParamsCustom
 from numpy import ndarray
 
 from commonroad.scenario.obstacle import StaticObstacle, DynamicObstacle
-from commonroad.scenario.lanelet import LaneletType
+from commonroad.scenario.lanelet import LaneletType, Lanelet
 
 from crdesigner.ui.gui.utilities.aerial_data import get_aerial_image_bing, get_aerial_image_ldbv, \
     get_aerial_image_limits
 from crdesigner.ui.gui.utilities.helper import _merge_dict, calculate_closest_vertices, calculate_euclidean_distance, \
-    angle_between
+    angle_between, draw_lanelet_polygon
 from crdesigner.ui.gui.utilities.map_creator import MapCreator
 from crdesigner.ui.gui.utilities.scenario_resizer import resize_lanelet_network
 from crdesigner.ui.gui.utilities.toolbox_ui import PosB, CollapsibleCheckBox
@@ -443,8 +443,8 @@ class DynamicCanvasController(FigureCanvas):
             self.draw_temporary_points = {}
 
         if not lane_ids:
-            # check if any mousepos was setted before
-            if self.latest_mouse_pos is None:
+            # check if any mousepos was setted before or the mouse position is not within the canvas
+            if self.latest_mouse_pos is None or self.latest_mouse_pos[0] is None:
                 return
             click_shape = Circle(radius=0.01, center=self.latest_mouse_pos)
             selected_l_id = self.scenario_model.find_lanelet_by_shape(click_shape)
@@ -1007,7 +1007,7 @@ class DynamicCanvasController(FigureCanvas):
         self._update_map()
 
     def display_curved_lanelet(self, is_checked: bool, ui_button: CollapsibleCheckBox, new_lanelet: bool = True,
-                               mouse_event: QMouseEvent = None) -> None:
+                            mouse_event: QMouseEvent = None, selected_lanelet: Lanelet = None) -> None:
         """
         Initializes the show of the curved_lanlet preview or disables it.
 
@@ -1015,6 +1015,7 @@ class DynamicCanvasController(FigureCanvas):
         :param ui_button: ui_button of the curved_lanelet checkbox
         :param new_lanelet: Indicator if the lanelet already exists or is added as a new lanelet
         :param mouse_event: Mouse parameters -> to prevent if you select a lanelet in the GUI to click twice to deselect
+        @param selected_lanelet: Selected Lanelet of the UI
         """
         if self.parent().play_activated:
             self.parent().road_network_toolbox.text_browser.append("Please stop the animation")
@@ -1040,6 +1041,9 @@ class DynamicCanvasController(FigureCanvas):
                         "Something went wrong! Please ensure that the information of the lanlet is given")
                 ui_button.setChecked(False)
                 return
+            if not new_lanelet:
+                self.selected_lanelets.append(selected_lanelet)
+                self.current_curved_lanelet_scenario.remove_lanelet(self.selected_lanelets[0])
             if(self.current_curved_lanelet_scenario.lanelet_network.find_lanelet_by_id(
                     self.temp_curved_lanelet.lanelet_id) is not None):
                 self.current_curved_lanelet_scenario.remove_lanelet(self.temp_curved_lanelet)
@@ -1051,7 +1055,7 @@ class DynamicCanvasController(FigureCanvas):
             # if self.parent().road_network_toolbox.road_network_toolbox_ui.connect_to_successors_selection.isChecked():
             #     self.circle_angle = plt.Circle(middle_lanelet[0], 0.25, color='blue', zorder=100)
             self.circle_angle = plt.Circle(middle_lanelet[count_vertices - 1], 0.25, color='blue', zorder=100)
-            self.draw_scenario()
+            self.draw_curved_lanelet()
             self.mpl_disconnect(self.button_press_event_cid)
             self.mpl_disconnect(self.motion_notify_event_cid)
             self.button_press_event_cid = self.mpl_connect('button_press_event',self.click_on_curved_lanelet)
@@ -1088,6 +1092,27 @@ class DynamicCanvasController(FigureCanvas):
 
         self.current_curved_lanelet_scenario.add_objects(self.temp_curved_lanelet)
         self.draw_scenario()
+
+        if not self.new_lanelet:
+            for lanelet in self.scenario_model.get_lanelets():
+
+                color, alpha, zorder, label = self.animated_viewer.get_paint_parameters(lanelet, self.selected_lanelets,
+                                                                                        None)
+                if lanelet.lanelet_id == self.selected_lanelets[0].lanelet_id:
+                    draw_lanelet_polygon(self.temp_curved_lanelet, self.ax, color, alpha, zorder, label)
+                    self.animated_viewer.view.draw_lanelet_vertices(self.temp_curved_lanelet, self.ax)
+                else:
+                    if color == "gray":
+                        continue
+
+                    draw_lanelet_polygon(lanelet, self.ax, color, alpha, zorder, label)
+                    self.animated_viewer.view.draw_lanelet_vertices(lanelet, self.ax)
+
+            handles, labels = self.ax.get_legend_handles_labels()
+
+            legend = self.ax.legend(handles, labels)
+            legend.set_zorder(50)
+            self.draw_idle()
 
     def draw_moving_points(self) -> None:
         """

@@ -343,7 +343,8 @@ class AddLaneletUI:
                 self.road_network_toolbox_ui.selected_lanelet_radius.setText(str(radius))
                 self.road_network_toolbox_ui.selected_lanelet_angle.setText(str(angle))
                 self.road_network_toolbox_ui.mwindow.animated_viewer_wrapper.cr_viewer.dynamic \
-                    .display_curved_lanelet(True, self.road_network_toolbox_ui.selected_curved_checkbox, False)
+                    .display_curved_lanelet(True, self.road_network_toolbox_ui.selected_curved_checkbox, False,
+                                            selected_lanelet=lanelet)
             else:
                 self.road_network_toolbox_ui.selected_curved_checkbox.setChecked(True)
                 self.road_network_toolbox_ui.selected_curved_checkbox.box.setMaximumSize(0, 0)
