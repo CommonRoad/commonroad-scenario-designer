@@ -1,22 +1,18 @@
 # Changelog
 
-## [0.8.0] - 2023-10-XX
+## [0.8.0] - 2023-10-16
 
-### Fixed
-- Issue when creating adjacent lanelets through Lanelet Operations
-- No recognition of the selected lanelet of the Lanelet Operations Widget
-- Fixed the bug that changes to some lanelets messed up the lanelet
-- Obstacles will get deleted now as well within the crop Function/ Crop symbol is shown
-- KeyError when yield sign has no stop line in cr2lanelet2 conversion
-- Adaption of commonroad-io traffic light color usage in cr2lanelet2 conversion
-- Add default traffic light cycle for OpenDRIVE conversion to support 2020a format
-- Command-line interface main function call
-- GUI Settings will be regarded when the scenario is drawn
-- Fixed Bug when rotating a lanelet leads to that the rotated lanelet wasn't able to be selected through the canvas
-- OpenDRIVE/Lanelet2 conversion intersection incoming lanelets as set instead of list/tuple
-- Fixed the relationship of predecessor/ successor when creating adjacent lanelets
-- Obstacle information as Graph no longer crashes when a static obstacle or a missing value is asked for
-- Fixed the issue where the curved_lanelet was not highlighted in red and legend wasn't shown
+### Added
+- Cropping of a map in the GUI
+- Background saves with restore functionality
+- Scenario toolbox to specify planning problems
+- Widget to edit settings of scenario
+- Editing and adding curved lanelet via matplotlib visualization
+- Support for visualizing scenarios with 3D coordinates on 2D plane
+- cr2lanelet line marking conversion
+- cr2lanelet bidirectional users conversion
+- Tool for CommonRoad map verification and repairing
+
 
 ### Changed
 - GUI backend using MVC pattern
@@ -25,17 +21,19 @@
 - Support for commonroad-io 2023.3
 - Commandline interface to use typer
 
-### Added
-- Cropping of a map in the GUI
-- Background saves and with restore functionality
-- Scenario Toolbox to specify planning problems
-- Widget to edit settings of scenario
-- Editing and adding curved lanelet via matplotlib visualization
-- Handling projection strings which contain elements which third-party does not support
-- Support for visualizing scenarios with 3D coordinates on 2D plane
-- cr2lanelet line marking conversion
-- cr2lanelet bidirectional users conversion
-- Map verification and repairing
+### Fixed
+- Handling of projection strings which contain elements which third-party tool does not support
+- Issue when creating adjacent lanelets through *lanelet operations*
+- No recognition of the selected lanelet by the *lanelet operations* widget
+- Changes to some lanelets messing up the lanelet
+- KeyError when yield sign has no stop line in cr2lanelet2 conversion
+- Adaption of commonroad-io traffic light color usage in CommonRoad to lanelet2 conversion
+- Add default traffic light cycle for OpenDRIVE conversion to support 2020a format
+- Rotating lanelet cannot be selected through canvas anymore
+- OpenDRIVE/Lanelet2 conversion intersection incoming lanelets as set instead of list/tuple
+- Relationship of predecessor/successor when creating adjacent lanelets
+- Obstacle information no longer crashes when selecting static obstacle or required state value is missing
+
 
 ## [0.7.2] - 2023-07-29
 

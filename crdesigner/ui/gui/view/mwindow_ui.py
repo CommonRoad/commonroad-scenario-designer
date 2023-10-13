@@ -116,7 +116,7 @@ class MWindowUI(QMainWindow, Ui_mainWindow):
 
         @return: Boolean with the answer of the user
         """
-        message_box = QMessageBox(QMessageBox.Warning, "Warning", "Do you wanna restore the last project?",
+        message_box = QMessageBox(QMessageBox.Warning, "Warning", "Do you want to restore the last project?",
                                   buttons=QMessageBox.Yes | QMessageBox.No, parent=self)
 
         p = QtGui.QPalette()

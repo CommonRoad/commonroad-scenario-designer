@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "commonroad-scenario-designer"
-version = "0.7.2"
+version = "0.8.0"
 description = "Toolbox for Map Conversion and Scenario Creation for Autonomous Vehicles"
 authors = ["Cyber-Physical Systems Group, Technical University of Munich <commonroad@lists.lrz.de>"]
 license = "GPL-3.0-or-later"

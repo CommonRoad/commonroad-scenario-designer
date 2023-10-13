@@ -137,17 +137,6 @@ or the GUI.
 The main APIs to execute the pure conversions are located under `crdesigner/map_conversion/map_conversion_interface.py`.   
 For many conversions we provide further APIs, e.g., for downloading a map from OSM.
 
-#### Command Line
-Note that you have to activate first the Python environment in which the CommonRoad Scenario Designer was installed.  
-Converting a file from OpenDRIVE to CommonRoad with the command line:
-```bash
-crdesigner [mode] -i [input_file] -o [output_file] -c -f -t [tags] --proj [proj-string] --adjacencies --left-driving --author --affiliation
-```
-For a description of the command line arguments please execute 
-```bash
-crdesigner -h
-```
-
 #### GUI
 The GUI provides a toolbox with which contains functionality to load maps given in formats other the CommonRoad format   
 and to convert CommonRoad maps to other formats or the other formats to the CommonRoad format.
@@ -177,7 +166,7 @@ The full documentation of the API and introducing examples can also be found [he
 A detailed overview about the changes in each version is provided in the [Changelog](https://gitlab.lrz.de/tum-cps/commonroad-scenario-designer/-/blob/main/CHANGELOG.md).
 
 ## Bug and feature reporting
-This release (v0.7.1) is still a BETA version.  
+This release (v0.8.9) is still a BETA version.  
 In case you detect a bug or you want to suggest a new feature, please report it in our [forum](https://commonroad.in.tum.de/forum/c/scenario-designer/18).   
 If you want to contribute to the toolbox, you can also post it in the [forum](https://commonroad.in.tum.de/forum/c/scenario-designer/18) or contact [Sebastian Maierhofer](sebastian.maierhofer@tum.de).
 
