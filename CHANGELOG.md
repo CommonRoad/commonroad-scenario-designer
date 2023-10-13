@@ -16,6 +16,7 @@
 - OpenDRIVE/Lanelet2 conversion intersection incoming lanelets as set instead of list/tuple
 - Fixed the relationship of predecessor/ successor when creating adjacent lanelets
 - Obstacle information as Graph no longer crashes when a static obstacle or a missing value is asked for
+- Fixed the issue where the curved_lanelet was not highlighted in red and legend wasn't shown
 
 ### Changed
 - GUI backend using MVC pattern
