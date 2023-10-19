@@ -525,8 +525,13 @@ class DynamicCanvasController(FigureCanvas):
             try:
                 result = next(c for c in DynamicCanvasController.obstacle_color_array if c[0] == obj.obstacle_id)
                 obstacle_draw_params = result[1]
-                draw_params_merged = _merge_dict(draw_params.copy(), obstacle_draw_params.copy())
-            except Exception:
+                if isinstance(obj, DynamicObstacle):
+                    draw_params.dynamic_obstacle.vehicle_shape.occupancy.shape.facecolor = result[2]
+                elif isinstance(obj, StaticObstacle):
+                    draw_params.static_obstacle.occupancy.shape.facecolor = result[2]
+                draw_params_merged = draw_params
+
+            except Exception as e:
                 draw_params_merged = draw_params
             obj.draw(renderer=self.rnd, draw_params=draw_params_merged)
 

@@ -22,6 +22,7 @@ if SUMO_AVAILABLE:
 
 class ObstacleToolboxUI(Toolbox):
     def __init__(self, scenario_model: ScenarioModel, text_browser, mwindow):
+        self.position_initialized = False
         super().__init__(mwindow)
         self.scenario_model = scenario_model
         self.remove_vertice_btn = []
@@ -162,6 +163,9 @@ class ObstacleToolboxUI(Toolbox):
 
         :param obstacle: obstacle which information should be displayed in the toolbox. 
         """
+        if isinstance(obstacle, StaticObstacle):
+            self.init_position()
+
         if isinstance(obstacle.obstacle_shape, Rectangle):
 
             if self.obstacle_shape.currentText() != "Rectangle":
@@ -232,6 +236,10 @@ class ObstacleToolboxUI(Toolbox):
 
         self.obstacle_state_variable.addItems(state_variables)
 
+        if obstacle is None:
+            self.obstacle_type.setCurrentIndex(0)
+            self.selected_obstacle.setCurrentIndex(0)
+
     def clear_obstacle_fields(self):
         """
         clears the obstacle QLineEdits
@@ -245,13 +253,15 @@ class ObstacleToolboxUI(Toolbox):
             self.obstacle_orientation.setText("")
 
         elif self.obstacle_shape.currentText() == "Polygon":
-            for i in range(self.obstacle_toolbox_ui.amount_vertices):
+            for i in range(self.amount_vertices):
                 self.vertices_x[i].setText("")
                 self.vertices_y[i].setText("")
         if (self.obstacle_dyn_stat.currentText() == "Static" and
                 self.obstacle_shape.currentText() != "Polygon"):
             self.obstacle_x_Position.setText("")
             self.obstacle_y_Position.setText("")
+        if not self.default_color.isChecked():
+            self.default_color.setChecked(True)
 
     def init_rectangle_fields(self):
         """
@@ -323,22 +333,24 @@ class ObstacleToolboxUI(Toolbox):
         """
         adds the position fields
         """
-        self.obstacle_x_Position = QLineEdit()
-        self.obstacle_x_Position.setValidator(self.float_validator)
-        self.obstacle_x_Position.setMaxLength(4)
-        self.obstacle_x_Position.setAlignment(Qt.AlignRight)
+        if not self.position_initialized:
+            self.obstacle_x_Position = QLineEdit()
+            self.obstacle_x_Position.setValidator(self.float_validator)
+            self.obstacle_x_Position.setMaxLength(4)
+            self.obstacle_x_Position.setAlignment(Qt.AlignRight)
 
-        self.obstacle_y_Position = QLineEdit()
-        self.obstacle_y_Position.setValidator(self.float_validator)
-        self.obstacle_y_Position.setMaxLength(4)
-        self.obstacle_y_Position.setAlignment(Qt.AlignRight)
+            self.obstacle_y_Position = QLineEdit()
+            self.obstacle_y_Position.setValidator(self.float_validator)
+            self.obstacle_y_Position.setMaxLength(4)
+            self.obstacle_y_Position.setAlignment(Qt.AlignRight)
 
-        if self.obstacle_shape.currentText() == "Rectangle":
-            self.layout_obstacle_information_groupbox.insertRow(4, "X-Position", self.obstacle_x_Position)
-            self.layout_obstacle_information_groupbox.insertRow(5, "Y-Position", self.obstacle_y_Position)
-        elif self.obstacle_shape.currentText() == "Circle":
-            self.layout_obstacle_information_groupbox.insertRow(4, "X-Position", self.obstacle_x_Position)
-            self.layout_obstacle_information_groupbox.insertRow(5, "Y-Position", self.obstacle_y_Position)
+            if self.obstacle_shape.currentText() == "Rectangle":
+                self.layout_obstacle_information_groupbox.insertRow(4, "X-Position", self.obstacle_x_Position)
+                self.layout_obstacle_information_groupbox.insertRow(5, "Y-Position", self.obstacle_y_Position)
+            elif self.obstacle_shape.currentText() == "Circle":
+                self.layout_obstacle_information_groupbox.insertRow(4, "X-Position", self.obstacle_x_Position)
+                self.layout_obstacle_information_groupbox.insertRow(5, "Y-Position", self.obstacle_y_Position)
+            self.position_initialized = True
 
     def remove_position(self):
         """
@@ -347,6 +359,7 @@ class ObstacleToolboxUI(Toolbox):
         try:
             self.layout_obstacle_information_groupbox.removeRow(self.obstacle_x_Position)
             self.layout_obstacle_information_groupbox.removeRow(self.obstacle_y_Position)
+            self.position_initialized = False
         except Exception:
             pass
 

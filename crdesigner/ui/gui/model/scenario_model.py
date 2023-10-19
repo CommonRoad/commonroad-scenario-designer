@@ -41,7 +41,7 @@ class ScenarioModel(QObject):
         if not self.__updated_scenario:
             self.__current_scenario_index += 1
         self.__scenarios.append(copy.deepcopy(scenario))
-        self.notify_all()
+        self.notify_all(True)
 
     def _update_scenario(self):
         """

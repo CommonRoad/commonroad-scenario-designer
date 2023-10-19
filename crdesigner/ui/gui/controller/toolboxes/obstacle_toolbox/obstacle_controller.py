@@ -7,8 +7,7 @@ from commonroad.geometry.polyline_util import *
 from commonroad.geometry.shape import Rectangle, Circle, Polygon
 from commonroad.scenario.obstacle import Obstacle, StaticObstacle, ObstacleType, DynamicObstacle
 from commonroad.scenario.trajectory import Trajectory
-from commonroad.scenario.state import InitialState, State, PMState, KSState
-
+from commonroad.scenario.state import InitialState, State, ExtendedPMState
 
 from PyQt5.QtCore import *
 from crdesigner.ui.gui.view.toolboxes.obstacle_toolbox.obstacle_toolbox_ui import ObstacleToolboxUI
@@ -182,14 +181,10 @@ class ObstacleController(QDockWidget, ):
 
         if self.obstacle_toolbox_ui.default_color.isChecked():
             self.canvas.set_static_obstacle_color(static_obstacle.obstacle_id)
-        else:
-            if self.obstacle_color is not None and not self.obstacle_toolbox_ui.change_color:
-                self.canvas.set_static_obstacle_color(static_obstacle.obstacle_id,
-                                                      self.obstacle_color)
-            else:
-                self.canvas.set_static_obstacle_color(static_obstacle.obstacle_id,
-                                                      self.obstacle_toolbox_ui.obstacle_color.name())
-        #self.obstacle_color = None
+        elif self.obstacle_color is not None and not self.obstacle_toolbox_ui.change_color:
+                self.canvas.set_static_obstacle_color(static_obstacle.obstacle_id, self.obstacle_color.name())
+
+        self.obstacle_color = None
         self.scenario_model.add_obstacle(static_obstacle)
         self.obstacle_toolbox_ui.initialize_obstacle_information()
 
@@ -291,13 +286,9 @@ class ObstacleController(QDockWidget, ):
 
         if self.obstacle_toolbox_ui.default_color.isChecked():
             self.canvas.set_dynamic_obstacle_color(dynamic_obstacle.obstacle_id)
-        else:
-            if self.obstacle_color is not None and not self.obstacle_toolbox_ui.change_color:
+        elif self.obstacle_color is not None and not self.obstacle_toolbox_ui.change_color:
                 self.canvas.set_dynamic_obstacle_color(dynamic_obstacle.obstacle_id,
-                                                       self.obstacle_color)
-            else:
-                self.canvas.set_dynamic_obstacle_color(dynamic_obstacle.obstacle_id,
-                                                      self.obstacle_toolbox_ui.obstacle_color.name())
+                                                       self.obstacle_color.name())
         self.obstacle_color = None
         self.scenario_model.add_obstacle(dynamic_obstacle)
         self.obstacle_toolbox_ui.initialize_obstacle_information()
@@ -326,7 +317,7 @@ class ObstacleController(QDockWidget, ):
                 if self.xyova[j][6] is not None:
                     state_dictionary.update({'slip_angle': self.xyova[j][6]})
 
-                new_state = PMState(**state_dictionary)
+                new_state = ExtendedPMState(**state_dictionary)
                 state_list.append(new_state)
             return state_list
 
@@ -346,7 +337,7 @@ class ObstacleController(QDockWidget, ):
                 if "slip_angle" in state.attributes:
                     state_dictionary.update({'slip_angle': state.__getattribute__("slip_angle")})
 
-                new_state = KSState(**state_dictionary)
+                new_state = ExtendedPMState(**state_dictionary)
                 state_list.append(new_state)
             return state_list
 
@@ -1057,6 +1048,8 @@ class ObstacleController(QDockWidget, ):
                 self.obstacle_color = color
                 if color == "#d95558" or color == "#1d7eea":
                     self.obstacle_toolbox_ui.default_color.setChecked(True)
+                else:
+                    self.obstacle_toolbox_ui.default_color.setChecked(False)
             self.obstacle_toolbox_ui.change_color = False
 
         # if set to "None": clear QLineEdits
