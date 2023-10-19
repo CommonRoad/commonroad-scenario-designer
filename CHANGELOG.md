@@ -33,7 +33,7 @@
 - OpenDRIVE/Lanelet2 conversion intersection incoming lanelets as set instead of list/tuple
 - Relationship of predecessor/successor when creating adjacent lanelets
 - Obstacle information no longer crashes when selecting static obstacle or required state value is missing
-
+- Visualization of the obstacles colors works fixed
 
 ## [0.7.2] - 2023-07-29
 
