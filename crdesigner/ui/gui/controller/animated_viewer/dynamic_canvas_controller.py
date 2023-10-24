@@ -253,6 +253,7 @@ class DynamicCanvasController(FigureCanvas):
                 draw_params.time_begin = time_begin
             else:
                 draw_params.time_begin = max(0, self.parent().animated_viewer_wrapper.cr_viewer.time_step.value)
+            draw_params.time_end = draw_params.time_begin
 
         lanelet_params = gui_config.get_undetailed_params(lanelet_count, traffic_signs_count)
 
