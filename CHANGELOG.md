@@ -34,6 +34,7 @@
 - Relationship of predecessor/successor when creating adjacent lanelets
 - Obstacle information no longer crashes when selecting static obstacle or required state value is missing
 - Visualization of the obstacles colors works fixed
+- Resolved bug where the obstacles where not shown after time step 200
 
 ## [0.7.2] - 2023-07-29
 
