@@ -29,7 +29,10 @@ python = "^3.8"
 commonroad-io = "2023.3"
 # commonroad-drivability-checker = "2023.1"
 pyqt5 = ">=5.15.9"
-PyQt5-Qt5 = "<5.15.11"
+PyQt5-Qt5 = [
+    {version = "<5.15.11", platform = 'linux'},
+    {version = "<5.15.11", platform = 'win64'},
+    {version = "=5.15.11", platform = 'darwin'}]
 matplotlib = ">=3.6.0"
 numpy = "^1.24.2"
 lxml = "^4.9.2"
