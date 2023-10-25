@@ -900,10 +900,12 @@ class ScenarioToolboxController(QDockWidget):
         self.init_settings = True
         if self.current_scenario.get_current_scenario() is not None:
             # self.initialized = False
-            self.scenario_toolbox_ui.scenario_author.setText(self.current_scenario.get_current_scenario().author)
+            self.scenario_toolbox_ui.scenario_author.setText(
+                    self.current_scenario.get_current_scenario().file_information.author)
             self.scenario_toolbox_ui.scenario_affiliation.setText \
-                (self.current_scenario.get_current_scenario().affiliation)
-            self.scenario_toolbox_ui.scenario_source.setText(self.current_scenario.get_current_scenario().source)
+                (self.current_scenario.get_current_scenario().file_information.affiliation)
+            self.scenario_toolbox_ui.scenario_source.setText(
+                    self.current_scenario.get_current_scenario().file_information.source)
             self.scenario_toolbox_ui.scenario_time_step_size.setText \
                 (str(self.current_scenario.get_current_scenario().dt))
             self.scenario_toolbox_ui.scenario_tags.set_checked_items(
@@ -927,24 +929,32 @@ class ScenarioToolboxController(QDockWidget):
                     self.current_scenario.get_current_scenario().scenario_id.prediction_id if
                     self.current_scenario.get_current_scenario().scenario_id.prediction_id else 1)
 
-            if self.current_scenario.get_current_scenario().location:
-                self.scenario_toolbox_ui.scenario_geo_anme_id.setText \
-                    (str(self.current_scenario.get_current_scenario().location.geo_name_id))
-                self.scenario_toolbox_ui.scenario_latitude.setText \
-                    (str(self.current_scenario.get_current_scenario().location.gps_latitude))
-                self.scenario_toolbox_ui.scenario_longitude.setText \
-                    (str(self.current_scenario.get_current_scenario().location.gps_longitude))
-                if self.current_scenario.get_current_scenario().location.environment:
+            if self.current_scenario.get_current_scenario().lanelet_network.location:
+                self.scenario_toolbox_ui.scenario_geo_anme_id.setText(
+                        str(self.current_scenario.get_current_scenario().lanelet_network.location.geo_name_id))
+                self.scenario_toolbox_ui.scenario_latitude.setText(
+                        str(self.current_scenario.get_current_scenario().lanelet_network.location.gps_latitude))
+                self.scenario_toolbox_ui.scenario_longitude.setText(
+                        str(self.current_scenario.get_current_scenario().lanelet_network.location.gps_longitude))
+                if self.current_scenario.get_current_scenario().environment:
                     self.scenario_toolbox_ui.scenario_time_of_day.setCurrentText(
-                            self.current_scenario.get_current_scenario().location.environment.time_of_day.value)
+                            self.current_scenario.get_current_scenario().environment.time_of_day.value)
                     self.scenario_toolbox_ui.scenario_weather.setCurrentText(
-                            self.current_scenario.get_current_scenario().location.environment.weather.value)
+                            self.current_scenario.get_current_scenario(
+
+                            ).lanelet_network.location.environment.weather.value)
                     self.scenario_toolbox_ui.scenario_underground.setCurrentText(
-                            self.current_scenario.get_current_scenario().location.environment.underground.value)
+                            self.current_scenario.get_current_scenario(
+
+                            ).lanelet_network.location.environment.underground.value)
                     self.scenario_toolbox_ui.scenario_time_hour.setValue(
-                            self.current_scenario.get_current_scenario().location.environment.time.hours)
+                            self.current_scenario.get_current_scenario(
+
+                            ).lanelet_network.location.environment.time.hours)
                     self.scenario_toolbox_ui.scenario_time_minute.setValue(
-                            self.current_scenario.get_current_scenario().location.environment.time.minutes)
+                            self.current_scenario.get_current_scenario(
+
+                            ).lanelet_network.location.environment.time.minutes)
                 else:
                     self.init_scenario_location_default()
             else:

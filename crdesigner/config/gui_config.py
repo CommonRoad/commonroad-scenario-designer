@@ -100,7 +100,7 @@ class GuiConfig(BaseConfig):
     DRAW_TRAFFIC_SIGNS: Attribute = Attribute(False, "Draw traffic signs")
     DRAW_TRAFFIC_LIGHTS: Attribute = Attribute(True, "Draw traffic lights")
     DRAW_INCOMING_LANELETS: Attribute = Attribute(True, "Draw incoming lanelets")
-    DRAW_SUCCESSORS: Attribute = Attribute(True, "Draw successors")
+    DRAW_OUTGOINGS: Attribute = Attribute(True, "Draw outgoings")
     DRAW_INTERSECTION_LABELS: Attribute = Attribute(False, "Draw intersection labels")
     DARKMODE: Attribute = Attribute(False, "Darkmode")
     AXIS_VISIBLE: Attribute = Attribute(value='All', display_name="Axis visible",
@@ -119,8 +119,8 @@ class GuiConfig(BaseConfig):
     # The layout of the settings window
     LAYOUT = [
         ["Appearance", DARKMODE, AXIS_VISIBLE, LEGEND, "Obstacle visualization", DRAW_DYNAMIC_OBSTACLES,
-         DRAW_TRAJECTORY, DRAW_OBSTACLE_LABELS,DRAW_OBSTACLE_ICONS, DRAW_OBSTACLE_DIRECTION, DRAW_OBSTACLE_SIGNALS,
-         "Intersection visualization",DRAW_INCOMING_LANELETS, DRAW_SUCCESSORS, DRAW_INTERSECTION_LABELS, ],
+         DRAW_TRAJECTORY, DRAW_OBSTACLE_LABELS, DRAW_OBSTACLE_ICONS, DRAW_OBSTACLE_DIRECTION, DRAW_OBSTACLE_SIGNALS,
+         "Intersection visualization", DRAW_INCOMING_LANELETS, DRAW_OUTGOINGS, DRAW_INTERSECTION_LABELS, ],
         ["Other", ENABLE_UNDETAILED_DISPLAY, DRAW_OCCUPANCY, DRAW_TRAFFIC_SIGNS, DRAW_TRAFFIC_LIGHTS, BING_MAPS_KEY, LDBV_USERNAME,
          LDBV_PASSWORD]]
 
@@ -132,7 +132,7 @@ class GuiConfig(BaseConfig):
                 traffic_sign=TrafficSignParams(draw_traffic_signs=self.DRAW_TRAFFIC_SIGNS),
                 intersection=IntersectionParams(draw_intersections=True,
                                                 draw_incoming_lanelets=self.DRAW_INCOMING_LANELETS,
-                                                draw_successors=self.DRAW_SUCCESSORS,
+                                                draw_outgoings=self.DRAW_OUTGOINGS,
                                                 show_label=self.DRAW_INTERSECTION_LABELS),
                 traffic_light=TrafficLightParams(draw_traffic_lights=self.DRAW_TRAFFIC_LIGHTS)),
                                 trajectory=TrajectoryParams(draw_trajectory=self.DRAW_TRAJECTORY),
