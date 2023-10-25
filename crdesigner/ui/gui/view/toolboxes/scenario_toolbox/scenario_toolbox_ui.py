@@ -14,7 +14,8 @@ from crdesigner.ui.gui.utilities.toolbox_ui import (
 )
 
 from pyparsing import Literal
-from commonroad.scenario.scenario import Tag, TimeOfDay, Weather, Underground
+from commonroad.common.common_scenario import TimeOfDay, Weather, Underground
+from commonroad.scenario.scenario import Tag
 from commonroad.scenario.traffic_sign import *
 
 

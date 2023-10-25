@@ -8,10 +8,10 @@ from PyQt5.QtWidgets import QDockWidget, QTableWidgetItem
 from commonroad.common.util import Interval
 from commonroad.geometry.shape import ShapeGroup, Circle, Rectangle, Polygon, Shape
 from commonroad.planning.goal import GoalRegion
-from commonroad.planning.planning_problem import PlanningProblemSet, PlanningProblem
+from commonroad.planning.planning_problem import PlanningProblem
 from commonroad.scenario.state import InitialState, CustomState, TraceState
-from commonroad.scenario.scenario import Scenario, Location, Environment, Time
-from commonroad.scenario.scenario import Tag, TimeOfDay, Weather, Underground
+from commonroad.common.common_scenario import Location, Environment, Time, TimeOfDay, Weather, Underground
+from commonroad.scenario.scenario import Tag
 
 from crdesigner.ui.gui.model.planning_problem_set_model import PlanningProblemSetModel
 from crdesigner.ui.gui.view.toolboxes.scenario_toolbox.scenario_toolbox_ui import ScenarioToolboxUI
