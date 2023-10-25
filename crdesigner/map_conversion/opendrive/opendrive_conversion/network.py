@@ -2,7 +2,9 @@ import copy
 import numpy as np
 import iso3166
 from collections import deque
-from typing import Union, List, Optional
+from typing import List, Optional
+
+from commonroad.scenario.intersection import IncomingGroup, CrossingGroup
 from pyproj import CRS, Transformer
 from commonroad.common.common_scenario import GeoTransformation, Location, ScenarioID
 from commonroad.scenario.scenario import Scenario
@@ -258,29 +260,29 @@ class Network:
             c = vertices[0][1] - m*vertices[0][0]
             return m, c
 
-        def find_intersect_point() -> Union[int, None]:
+        def find_incoming(inc: IncomingGroup) -> bool:
             """
             find an intersection between a lane and a crosswalk. We can conclude that a crosswalk belongs to the same
             intersection as the lanelet it is crossing.
             :return: lanelet id
             """
-            for incoming in intersection.incomings:
-                for la_id in incoming.incoming_lanelets:
-                    vertices = lanelet_network.find_lanelet_by_id(la_id).left_vertices
-                    lanelet_m, lanelet_c = generate_line(vertices)
-                    x_intersect = (lanelet_c - crosswalk_c) / (crosswalk_m - lanelet_m)
+            for la_id in inc.incoming_lanelets:
+                vertices = lanelet_network.find_lanelet_by_id(la_id).left_vertices
+                lanelet_m, lanelet_c = generate_line(vertices)
+                x_intersect = (lanelet_c - crosswalk_c) / (crosswalk_m - lanelet_m)
 
-                    if x_intersect * lanelet_m + lanelet_c == x_intersect * crosswalk_m + crosswalk_c:
-                        return la_id
-            return None
+                if x_intersect * lanelet_m + lanelet_c == x_intersect * crosswalk_m + crosswalk_c:
+                    return True
+            return False
 
         for crosswalk in self._crosswalks:
             crosswalk_m, crosswalk_c = generate_line(crosswalk.left_vertices)
             for intersection in lanelet_network.intersections:
-                lanelet = find_intersect_point()
-                if lanelet is not None:
-                    for incoming in intersection.incomings:
-                        incoming.crossings.add(crosswalk.lanelet_id)
+                for incoming in intersection.incomings:
+                    if find_incoming(incoming):
+                        crossing_group = CrossingGroup(generate_unique_id(), {crosswalk.lanelet_id},
+                                                       incoming_group_id=incoming.incoming_id)
+                        intersection.crossings.append(crossing_group)
                     break
 
     def reference_traffic_signs_with_equal_speed(self, lanelets: List[int], lanelet_network: ConversionLaneletNetwork):
