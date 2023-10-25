@@ -23,7 +23,8 @@ def file_new(mwindow):
     scenario.replace_lanelet_network(net)
     mwindow.scenario_model.set_scenario(scenario)
 
-    mwindow.animated_viewer_wrapper.cr_viewer.current_pps = None
+    mwindow.animated_viewer_wrapper.cr_viewer.pps_model.clear()
+    mwindow.scenario_toolbox.initialize_toolbox()
     _open_scenario(mwindow=mwindow, new_scenario=scenario)
     mwindow.animated_viewer_wrapper.cr_viewer.dynamic.draw_temporary_points = {}
 
@@ -61,34 +62,34 @@ def _open_path(mwindow, path):
             raise FileExistsError("Unknown File type.")
 
     except Exception as e:
-        QMessageBox.warning(mwindow, "CommonRoad opening error",
+        QMessageBox.warning(mwindow.mwindow_ui, "CommonRoad opening error",
                             "There was an error during the loading of the selected CommonRoad file.\n\n" +
                             "Syntax Error: {}".format(e), QMessageBox.Ok, )
         return
 
     filename = os.path.splitext(os.path.basename(path))[0]
     mwindow.scenario_model.set_scenario(scenario)
-    _open_scenario(mwindow, scenario, filename, pps)
+    mwindow.pps_model.set_planing_problem_set(pps)
+    _open_scenario(mwindow, scenario, filename)
 
 
-def _open_scenario(mwindow, new_scenario, filename="new_scenario", pps=None):
+def _open_scenario(mwindow, new_scenario, filename="new_scenario"):
     if mwindow.check_scenario(new_scenario) >= 2:
         mwindow.crdesigner_console_wrapper.text_browser.append("loading aborted")
         return
     mwindow.filename = filename
     if SUMO_AVAILABLE:
         mwindow.animated_viewer_wrapper.cr_viewer.open_scenario(mwindow.obstacle_toolbox.sumo_simulation.config,
-                                                                planning_problem_set=pps, new_file_added=True)
+                                                                new_file_added=True)
         mwindow.obstacle_toolbox.sumo_simulation.scenario = mwindow.scenario_model.get_current_scenario()
     else:
-        mwindow.animated_viewer_wrapper.cr_viewer.open_scenario(planning_problem_set=pps,
-                                                                new_file_added=True)
+        mwindow.animated_viewer_wrapper.cr_viewer.open_scenario(new_file_added=True)
     mwindow.animated_viewer_wrapper.update_view()
     update_to_new_scenario(mwindow)
 
 
 def update_to_new_scenario(mwindow):
-    """"""
+    """Updates to new scenario and planning problem"""
     update_max_step(mwindow)
     mwindow.mwindow_ui.initialize_toolboxes()
     mwindow.animated_viewer_wrapper.viewer_dock.setWindowIcon(QIcon(":/icons/cr1.ico"))
@@ -104,8 +105,7 @@ def file_save(mwindow):
         messbox.close()
         return
 
-    mwindow.scenario_saving_dialog.show(mwindow.scenario_model,
-                                        mwindow.animated_viewer_wrapper.cr_viewer.current_pps)
+    mwindow.scenario_saving_dialog.show()
 
 
 def update_max_step(mwindow, value: int = -1):

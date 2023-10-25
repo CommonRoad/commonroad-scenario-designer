@@ -1,6 +1,7 @@
 import os
 import unittest
 import numpy as np
+from commonroad.common.common_lanelet import LaneletType, RoadUser
 
 from crdesigner.config.lanelet2_config import lanelet2_config
 from crdesigner.map_conversion.lanelet2.cr2lanelet import CR2LaneletConverter
@@ -125,6 +126,152 @@ class TestCR2LaneletConverter(unittest.TestCase):
 
         # testing the right entry in the dict for z-coordinate lanelet
         self.assertEqual(cr1.osm.way_relations[last_way_relation].tag_dict, {'type': 'lanelet'})
+
+    def test_convert_lanelet_type_and_location(self):
+        cr1 = CR2LaneletConverter()
+        cr1(scenario)
+
+        # Only one lanelet type, present in L2 format
+        lanelet.lanelet_type = {LaneletType.URBAN}
+        cr1._convert_lanelet(lanelet)
+        last_way_relation = list(cr1.osm.way_relations)[-1]
+        self.assertEqual(cr1.osm.way_relations[last_way_relation].tag_dict['subtype'], 'road')
+        self.assertEqual(cr1.osm.way_relations[last_way_relation].tag_dict['location'], 'urban')
+
+        # More than one lanelet type, all present in L2 format
+        lanelet.lanelet_type = {LaneletType.URBAN, LaneletType.BICYCLE_LANE, LaneletType.BUS_LANE}
+        cr1._convert_lanelet(lanelet)
+        last_way_relation = list(cr1.osm.way_relations)[-1]
+        self.assertEqual(cr1.osm.way_relations[last_way_relation].tag_dict['subtype'], 'bicycle_lane')
+        self.assertEqual(cr1.osm.way_relations[last_way_relation].tag_dict['location'], 'urban')
+
+        # More than one lanelet type, all present in L2 format, nonurban location tag
+        lanelet.lanelet_type = {LaneletType.COUNTRY, LaneletType.HIGHWAY, LaneletType.BUS_LANE}
+        cr1._convert_lanelet(lanelet)
+        last_way_relation = list(cr1.osm.way_relations)[-1]
+        self.assertEqual(cr1.osm.way_relations[last_way_relation].tag_dict['subtype'], 'bus_lane')
+        self.assertEqual(cr1.osm.way_relations[last_way_relation].tag_dict['location'], 'nonurban')
+
+        # All lanelet types present in L2 format
+        lanelet.lanelet_type = {LaneletType.SIDEWALK, LaneletType.BUS_LANE, LaneletType.COUNTRY,
+                                LaneletType.HIGHWAY, LaneletType.BICYCLE_LANE, LaneletType.EXIT_RAMP,
+                                LaneletType.CROSSWALK}
+        cr1._convert_lanelet(lanelet)
+        last_way_relation = list(cr1.osm.way_relations)[-1]
+        self.assertEqual(cr1.osm.way_relations[last_way_relation].tag_dict['subtype'], 'walkway')
+        self.assertEqual(cr1.osm.way_relations[last_way_relation].tag_dict['location'], 'nonurban')
+
+        # Lanelet types not present in L2 format
+        lanelet.lanelet_type = {LaneletType.ACCESS_RAMP, LaneletType.BORDER}
+        cr1._convert_lanelet(lanelet)
+        last_way_relation = list(cr1.osm.way_relations)[-1]
+        self.assertFalse('subtype' in cr1.osm.way_relations[last_way_relation].tag_dict)
+        self.assertFalse('location' in cr1.osm.way_relations[last_way_relation].tag_dict)
+
+        # No lanelet types
+        lanelet.lanelet_type = set()
+        cr1._convert_lanelet(lanelet)
+        last_way_relation = list(cr1.osm.way_relations)[-1]
+        self.assertFalse('subtype' in cr1.osm.way_relations[last_way_relation].tag_dict)
+        self.assertFalse('location' in cr1.osm.way_relations[last_way_relation].tag_dict)
+
+    def test_user_bidirectional(self):
+        cr1 = CR2LaneletConverter()
+        cr1(scenario)
+
+        # only RoadUser.Vehicle is a bidirectional user
+        lanelet.user_bidirectional = {RoadUser.VEHICLE}
+        cr1._convert_lanelet(lanelet)
+        last_way_relation = list(cr1.osm.way_relations)[-1]
+        print(cr1.osm.way_relations[last_way_relation].tag_dict)
+        self.assertEqual(cr1.osm.way_relations[last_way_relation].tag_dict['one_way:vehicle'], 'no')
+
+        # other vehicles are bidirectional users
+        lanelet.user_bidirectional = {RoadUser.BUS, RoadUser.CAR, RoadUser.PRIORITY_VEHICLE}
+        cr1._convert_lanelet(lanelet)
+        last_way_relation = list(cr1.osm.way_relations)[-1]
+        print(cr1.osm.way_relations[last_way_relation].tag_dict)
+        self.assertEqual(cr1.osm.way_relations[last_way_relation].tag_dict['one_way:vehicle:bus'], 'no')
+        self.assertEqual(cr1.osm.way_relations[last_way_relation].tag_dict['one_way:vehicle:car'], 'no')
+        self.assertEqual(cr1.osm.way_relations[last_way_relation].tag_dict['one_way:vehicle:emergency'], 'no')
+
+        # non-vehicles are bidirectional users
+        lanelet.user_bidirectional = {RoadUser.BICYCLE, RoadUser.PEDESTRIAN}
+        cr1._convert_lanelet(lanelet)
+        last_way_relation = list(cr1.osm.way_relations)[-1]
+        print(cr1.osm.way_relations[last_way_relation].tag_dict)
+        self.assertEqual(cr1.osm.way_relations[last_way_relation].tag_dict['one_way:pedestrian'], 'no')
+        self.assertEqual(cr1.osm.way_relations[last_way_relation].tag_dict['one_way:bicycle'], 'no')
+
+        # no bidirectional users
+        lanelet.user_bidirectional = set()
+        cr1._convert_lanelet(lanelet)
+        last_way_relation = list(cr1.osm.way_relations)[-1]
+        # no additional tags are created
+        self.assertTrue(cr1.osm.way_relations[last_way_relation].tag_dict == {'type': 'lanelet'})
+
+        # bidirectional users that are not available in L2 format
+        lanelet.user_bidirectional = {RoadUser.TRAIN}
+        cr1._convert_lanelet(lanelet)
+        last_way_relation = list(cr1.osm.way_relations)[-1]
+        # no additional tags are created
+        self.assertTrue(cr1.osm.way_relations[last_way_relation].tag_dict == {'type': 'lanelet'})
+
+    def test_convert_line_marking(self):
+        cr1 = CR2LaneletConverter()
+        cr1(scenario)
+        # default
+        self.assertEqual(list(cr1.osm.ways.values())[0].tag_dict, {})
+
+        scenario.lanelet_network.lanelets[0].line_marking_left_vertices = LineMarking.DASHED
+        cr1(scenario)
+        self.assertEqual(list(cr1.osm.ways.values())[0].tag_dict, {'type': 'line_thin', 'subtype': 'dashed'})
+
+        scenario.lanelet_network.lanelets[0].line_marking_left_vertices = LineMarking.SOLID
+        cr1(scenario)
+        self.assertEqual(list(cr1.osm.ways.values())[0].tag_dict, {'type': 'line_thin', 'subtype': 'solid'})
+
+        scenario.lanelet_network.lanelets[0].line_marking_left_vertices = LineMarking.BROAD_DASHED
+        cr1(scenario)
+        self.assertEqual(list(cr1.osm.ways.values())[0].tag_dict, {'type': 'line_thick', 'subtype': 'dashed'})
+
+        scenario.lanelet_network.lanelets[0].line_marking_left_vertices = LineMarking.BROAD_SOLID
+        cr1(scenario)
+        self.assertEqual(list(cr1.osm.ways.values())[0].tag_dict, {'type': 'line_thick', 'subtype': 'solid'})
+
+        scenario.lanelet_network.lanelets[0].line_marking_left_vertices = LineMarking.NO_MARKING
+        cr1(scenario)
+        self.assertEqual(list(cr1.osm.ways.values())[0].tag_dict, {})
+
+        scenario.lanelet_network.lanelets[0].line_marking_left_vertices = LineMarking.UNKNOWN
+        cr1(scenario)
+        self.assertEqual(list(cr1.osm.ways.values())[0].tag_dict, {})
+
+        # lanelet[1] is adjacent left to lanelet[0] and in same direction
+        scenario.lanelet_network.lanelets[0].line_marking_left_vertices = LineMarking.SOLID
+        scenario.lanelet_network.lanelets[1].line_marking_right_vertices = LineMarking.SOLID
+        cr1(scenario)
+        self.assertEqual(list(cr1.osm.ways.values())[0].tag_dict, {'type': 'line_thin', 'subtype': 'solid_solid'})
+
+        scenario.lanelet_network.lanelets[0].line_marking_left_vertices = LineMarking.DASHED
+        scenario.lanelet_network.lanelets[1].line_marking_right_vertices = LineMarking.SOLID
+        cr1(scenario)
+        self.assertEqual(list(cr1.osm.ways.values())[0].tag_dict, {'type': 'line_thin', 'subtype': 'solid_dashed'})
+
+        scenario.lanelet_network.lanelets[0].line_marking_left_vertices = LineMarking.UNKNOWN
+        scenario.lanelet_network.lanelets[1].line_marking_right_vertices = LineMarking.SOLID
+        cr1(scenario)
+        self.assertEqual(list(cr1.osm.ways.values())[0].tag_dict, {'type': 'line_thin', 'subtype': 'solid'})
+
+        scenario.lanelet_network.lanelets[0].line_marking_left_vertices = LineMarking.SOLID
+        scenario.lanelet_network.lanelets[1].line_marking_right_vertices = LineMarking.UNKNOWN
+        cr1(scenario)
+        self.assertEqual(list(cr1.osm.ways.values())[0].tag_dict, {'type': 'line_thin', 'subtype': 'solid'})
+
+        scenario.lanelet_network.lanelets[0].line_marking_left_vertices = LineMarking.NO_MARKING
+        scenario.lanelet_network.lanelets[1].line_marking_right_vertices = LineMarking.UNKNOWN
+        cr1(scenario)
+        self.assertEqual(list(cr1.osm.ways.values())[0].tag_dict, {})
 
     def test_create_nodes(self):
         cr = CR2LaneletConverter()
@@ -603,9 +750,8 @@ class TestCR2LaneletConverter(unittest.TestCase):
         for re in cr1.osm.regulatory_elements:
             # it should refer to the newly created traffic light id
             for tl in cr1.osm.ways:
-                if len(cr1.osm.ways[tl].tag_dict.keys()) != 0:
+                if 'traffic_light' in cr1.osm.ways[tl].tag_dict.values():
                     tl_id = str(tl)
-        
                     self.assertEqual(cr1.osm.regulatory_elements[re].refers[0], tl_id)
 
 

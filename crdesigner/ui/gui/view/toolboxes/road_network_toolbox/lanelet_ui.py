@@ -26,8 +26,8 @@ class AddLaneletUI:
 
     def initialize_basic_lanelet_information(self, last_added_lanelet_id):
         """
-                Initializes lanelet GUI elements with lanelet information.
-                """
+        Initializes lanelet GUI elements with lanelet information.
+        """
 
         if not self.road_network_toolbox_ui.place_at_position.isChecked() and not \
                 self.road_network_toolbox_ui.connect_to_previous_selection.isChecked() and not\
@@ -228,6 +228,13 @@ class AddLaneletUI:
                 ["None"] + [str(item) for item in self.scenario_model.collect_lanelet_ids()])
         self.road_network_toolbox_ui.selected_lanelet_two.setCurrentIndex(0)
 
+        self.road_network_toolbox_ui.selected_lanelet_start_position_x.setEnabled(True)
+        self.road_network_toolbox_ui.selected_lanelet_start_position_y.setEnabled(True)
+        self.road_network_toolbox_ui.selected_lanelet_end_position_x.setEnabled(True)
+        self.road_network_toolbox_ui.selected_lanelet_end_position_y.setEnabled(True)
+        self.road_network_toolbox_ui.selected_lanelet_width.setEnabled(True)
+        self.road_network_toolbox_ui.selected_lanelet_length.setEnabled(True)
+
     def initialize_predecessor_and_successor_fields(self):
         """
         Initializes lanelet information fields according to the selected predecessor / successor when connect to
@@ -302,6 +309,12 @@ class AddLaneletUI:
             self.road_network_toolbox_ui.successors.set_checked_items([str(lanelet.lanelet_id)])
             self.initialize_predecessor_and_successor_fields()
 
+        self.road_network_toolbox_ui.selected_lanelet_start_position_x.setEnabled(True)
+        self.road_network_toolbox_ui.selected_lanelet_start_position_y.setEnabled(True)
+        self.road_network_toolbox_ui.selected_lanelet_end_position_x.setEnabled(True)
+        self.road_network_toolbox_ui.selected_lanelet_end_position_y.setEnabled(True)
+        self.road_network_toolbox_ui.selected_lanelet_width.setEnabled(True)
+        self.road_network_toolbox_ui.selected_lanelet_length.setEnabled(True)
 
         self.road_network_toolbox_ui.selected_lanelet_start_position_x.setText(
             str(0.0 if lanelet.center_vertices[0][0] == 1.0e-16 else round(lanelet.center_vertices[0][0], 4)))
@@ -330,13 +343,22 @@ class AddLaneletUI:
                 self.road_network_toolbox_ui.selected_lanelet_radius.setText(str(radius))
                 self.road_network_toolbox_ui.selected_lanelet_angle.setText(str(angle))
                 self.road_network_toolbox_ui.mwindow.animated_viewer_wrapper.cr_viewer.dynamic \
-                    .display_curved_lanelet(True, self.road_network_toolbox_ui.selected_curved_checkbox, False)
+                    .display_curved_lanelet(True, self.road_network_toolbox_ui.selected_curved_checkbox, False,
+                                            selected_lanelet=lanelet)
             else:
                 self.road_network_toolbox_ui.selected_curved_checkbox.setChecked(True)
                 self.road_network_toolbox_ui.selected_curved_checkbox.box.setMaximumSize(0, 0)
                 self.road_network_toolbox_ui.selected_curved_checkbox.button.setDisabled(True)
+                self.road_network_toolbox_ui.selected_lanelet_start_position_x.setDisabled(True)
+                self.road_network_toolbox_ui.selected_lanelet_start_position_y.setDisabled(True)
+                self.road_network_toolbox_ui.selected_lanelet_end_position_x.setDisabled(True)
+                self.road_network_toolbox_ui.selected_lanelet_end_position_y.setDisabled(True)
+                self.road_network_toolbox_ui.selected_lanelet_width.setDisabled(True)
+                self.road_network_toolbox_ui.selected_lanelet_length.setDisabled(True)
 
         else:
+            self.road_network_toolbox_ui.mwindow.animated_viewer_wrapper.cr_viewer.dynamic \
+                .display_curved_lanelet(False, None)
             self.road_network_toolbox_ui.selected_curved_checkbox.button.setEnabled(True)
             self.road_network_toolbox_ui.selected_curved_checkbox.setChecked(False)
             self.road_network_toolbox_ui.selected_curved_checkbox.box.setMaximumSize(0, 0)
@@ -393,6 +415,17 @@ class AddLaneletUI:
             self.road_network_toolbox_ui.selected_stop_line_beginning.setChecked(True)
             self.road_network_toolbox_ui.lanelet_attributes_widget.adjust_selected_stop_line_position()
             self.road_network_toolbox_ui.selected_stop_line_box.setChecked(False)
+
+    def set_default_lanelet_operation_information(self):
+        """
+        Resets the fields to the default values.
+        """
+        self.road_network_toolbox_ui.create_adjacent_left_selection.setChecked(True)
+        self.road_network_toolbox_ui.create_adjacent_left_selection.setChecked(False)
+        self.road_network_toolbox_ui.create_adjacent_same_direction_selection.setChecked(True)
+        self.road_network_toolbox_ui.rotation_angle.setValue(0)
+        self.road_network_toolbox_ui.x_translation.setText("")
+        self.road_network_toolbox_ui.y_translation.setText("")
 
     def lanelet_is_straight(self, lanelet: Lanelet = None) -> bool:
         """

@@ -1,7 +1,5 @@
 from typing import Union
 import matplotlib as mpl
-import math
-import numpy as np
 from PyQt5.QtWidgets import *
 from crdesigner.ui.gui.model.scenario_model import ScenarioModel
 from commonroad.prediction.prediction import TrajectoryPrediction
@@ -9,11 +7,10 @@ from commonroad.geometry.polyline_util import *
 from commonroad.geometry.shape import Rectangle, Circle, Polygon
 from commonroad.scenario.obstacle import Obstacle, StaticObstacle, ObstacleType, DynamicObstacle
 from commonroad.scenario.trajectory import Trajectory
-from commonroad.scenario.state import InitialState, State, PMState, KSState
-
+from commonroad.scenario.state import InitialState, State, ExtendedPMState
 
 from PyQt5.QtCore import *
-from crdesigner.ui.gui.view.toolboxes.obstacle_toolbox.obstacle_toolbox_ui.obstacle_toolbox_ui import ObstacleToolboxUI
+from crdesigner.ui.gui.view.toolboxes.obstacle_toolbox.obstacle_toolbox_ui import ObstacleToolboxUI
 
 
  #TODO to change the call
@@ -22,24 +19,14 @@ if SUMO_AVAILABLE:
     from crdesigner.ui.gui.utilities.gui_sumo_simulation import SUMOSimulation
 from crdesigner.ui.gui.controller.animated_viewer.dynamic_canvas_controller import DynamicCanvasController
 
-#TODO: Controller
-def create_obstacle_toolbox(mwindow):
-    """ Create the obstacle toolbar_wrapper."""
-    mwindow.obstacle_toolbox = ObstacleController(
-        scenario_model=mwindow.animated_viewer_wrapper.cr_viewer.scenario_model,
-        text_browser=mwindow.crdesigner_console_wrapper.text_browser, mwindow=mwindow)
-    mwindow.addDockWidget(Qt.RightDockWidgetArea, mwindow.obstacle_toolbox)
-    return mwindow.obstacle_toolbox
-
-
 class ObstacleController(QDockWidget, ):
 
     def __init__(self, mwindow):
         super().__init__("Obstacle Toolbox")
 
         self.scenario_model = mwindow.scenario_model
-        #self.callback = callback
-        self.obstacle_toolbox_ui = ObstacleToolboxUI(mwindow.crdesigner_console_wrapper.text_browser, mwindow)
+        self.obstacle_toolbox_ui = ObstacleToolboxUI(self.scenario_model,
+                                                     mwindow.crdesigner_console_wrapper.text_browser, mwindow)
         self.adjust_ui()
         self.connect_gui_elements()
         self.tmp_folder = mwindow.tmp_folder
@@ -49,6 +36,7 @@ class ObstacleController(QDockWidget, ):
         self.amount_obstacles = 0
         self.canvas = DynamicCanvasController()
         self.obstacle_color = None
+        self.mwindow = mwindow
 
         # for profile visualisation
         self.sel_point = None
@@ -86,7 +74,7 @@ class ObstacleController(QDockWidget, ):
         """
         adds functionality to gui elements like buttons, menus etc
         """
-        self.initialize_obstacle_information()
+        self.obstacle_toolbox_ui.initialize_obstacle_information()
 
         self.obstacle_toolbox_ui.selected_obstacle.currentTextChanged.connect(
                 lambda: self.update_obstacle_information())
@@ -100,13 +88,13 @@ class ObstacleController(QDockWidget, ):
         self.obstacle_toolbox_ui.button_add_static_obstacle.clicked.connect(lambda: self.add_obstacle())
 
         self.obstacle_toolbox_ui.obstacle_shape.currentTextChanged.connect(
-            lambda: self.obstacle_toolbox_ui.toggle_sections())
+            lambda: self.toggle_sections())
 
         self.obstacle_toolbox_ui.obstacle_dyn_stat.currentTextChanged.connect(
-            lambda: self.obstacle_toolbox_ui.toggle_dynamic_static())
+            lambda: self.toggle_dynamic_static())
 
         self.obstacle_toolbox_ui.color_btn.clicked.connect(
-            lambda: self.obstacle_toolbox_ui.color_picker())
+            lambda: self.color_picker())
 
         self.obstacle_toolbox_ui.default_color.stateChanged.connect(
             lambda: self.obstacle_toolbox_ui.set_default_color())
@@ -114,18 +102,52 @@ class ObstacleController(QDockWidget, ):
         if SUMO_AVAILABLE:
             self.obstacle_toolbox_ui.button_start_simulation.clicked.connect(lambda: self.start_sumo_simulation())
 
+    def toggle_sections(self):
+        """
+        Depending on the selected shape of the obstacle the specific fields of the toolbox are displayed 
+        """
+        if self.obstacle_toolbox_ui.obstacle_shape.currentText() == "Circle":
 
-    def refresh_toolbox(self, model: ScenarioModel):
-        self.scenario_model = model
-        self.initialize_toolbox()
+            self.obstacle_toolbox_ui.remove_rectangle_fields()
+            self.obstacle_toolbox_ui.remove_polygon_fields()
+            self.obstacle_toolbox_ui.remove_position()
 
+            self.obstacle_toolbox_ui.init_circle_fields()
+            self.obstacle_toolbox_ui.init_position()
+
+        elif self.obstacle_toolbox_ui.obstacle_shape.currentText() == "Rectangle":
+
+            self.obstacle_toolbox_ui.remove_circle_fields()
+            self.obstacle_toolbox_ui.remove_polygon_fields()
+            self.obstacle_toolbox_ui.remove_position()
+
+            self.obstacle_toolbox_ui.init_rectangle_fields()
+            self.obstacle_toolbox_ui.init_position()
+
+        elif self.obstacle_toolbox_ui.obstacle_shape.currentText() == "Polygon":
+
+            self.obstacle_toolbox_ui.remove_circle_fields()
+            self.obstacle_toolbox_ui.remove_rectangle_fields()
+            self.obstacle_toolbox_ui.remove_position()
+            self.obstacle_toolbox_ui.init_polygon_fields()
+
+        if self.obstacle_toolbox_ui.obstacle_dyn_stat.currentText() == "Dynamic":
+            self.toggle_dynamic_static()
+
+    def toggle_dynamic_static(self):
+        """
+        adds/removes fields unique for the dynamic obstacle
+        """
+        if self.obstacle_toolbox_ui.obstacle_dyn_stat.currentText() == "Dynamic":
+            self.obstacle_toolbox_ui.remove_position()
+        elif self.obstacle_toolbox_ui.obstacle_dyn_stat.currentText() == "Static":
+            self.obstacle_toolbox_ui.init_position()
 
     def static_obstacle_details(self, obstacle_id: int):
         """
         Creates static obstacles
         :param obstacle_id: id of static obstacle to be created
         """
-        # TODO: Controller
         if self.obstacle_toolbox_ui.obstacle_shape.currentText() == "Rectangle":
             static_obstacle = StaticObstacle(obstacle_id=obstacle_id,
                                              obstacle_type=ObstacleType(
@@ -150,37 +172,21 @@ class ObstacleController(QDockWidget, ):
                                                       float(self.obstacle_toolbox_ui.obstacle_y_Position.text())]),
                                                  'orientation': 0, 'time_step': 1}))
         elif self.obstacle_toolbox_ui.obstacle_shape.currentText() == "Polygon":
-            static_obstacle = StaticObstacle(
-                obstacle_id=obstacle_id,
+            static_obstacle = StaticObstacle(obstacle_id=obstacle_id,
+                                             obstacle_type=ObstacleType(
+                                                     self.obstacle_toolbox_ui.obstacle_type.currentText()),
+                                             obstacle_shape=Polygon(vertices=self.polygon_array()),
+                                             initial_state=InitialState(**{'position': np.array([0,0]),
+                                                                           'orientation': 0, 'time_step': 1}))
 
-                obstacle_type=ObstacleType(self.obstacle_toolbox_ui.obstacle_type.currentText()),
-                obstacle_shape=Polygon(
-                    vertices=self.polygon_array()
-                ),
-
-                initial_state=InitialState(**{'position': np.array([
-                                        0,
-                                        0
-                                    ]),
-                                    'orientation': 0,
-                                    'time_step': 1
-                                    })
-            )
-        # TODO: CONTROLLER
         if self.obstacle_toolbox_ui.default_color.isChecked():
             self.canvas.set_static_obstacle_color(static_obstacle.obstacle_id)
-        else:
-            if self.obstacle_color is not None and not self.obstacle_toolbox_ui.change_color:
-                self.canvas.set_static_obstacle_color(static_obstacle.obstacle_id,
-                                                      self.obstacle_color)
-            else:
-                self.canvas.set_static_obstacle_color(static_obstacle.obstacle_id,
-                                                      self.obstacle_toolbox_ui.obstacle_color.name())
+        elif self.obstacle_color is not None and not self.obstacle_toolbox_ui.change_color:
+                self.canvas.set_static_obstacle_color(static_obstacle.obstacle_id, self.obstacle_color.name())
+
         self.obstacle_color = None
         self.scenario_model.add_obstacle(static_obstacle)
-        self.initialize_obstacle_toolbox()
-
-
+        self.obstacle_toolbox_ui.initialize_obstacle_information()
 
     def dynamic_obstacle_details(self, obstacle_id: int):
         """
@@ -280,15 +286,12 @@ class ObstacleController(QDockWidget, ):
 
         if self.obstacle_toolbox_ui.default_color.isChecked():
             self.canvas.set_dynamic_obstacle_color(dynamic_obstacle.obstacle_id)
-        else:
-            if self.obstacle_color is not None and not self.obstacle_toolbox_ui.change_color:
+        elif self.obstacle_color is not None and not self.obstacle_toolbox_ui.change_color:
                 self.canvas.set_dynamic_obstacle_color(dynamic_obstacle.obstacle_id,
-                                                       self.obstacle_color)
-            else:
-                self.canvas.set_dynamic_obstacle_color(dynamic_obstacle.obstacle_id,
-                                                      self.obstacle_toolbox_ui.obstacle_color.name())
+                                                       self.obstacle_color.name())
         self.obstacle_color = None
         self.scenario_model.add_obstacle(dynamic_obstacle)
+        self.obstacle_toolbox_ui.initialize_obstacle_information()
 
 
     def calc_state_list(self) -> List[State]:
@@ -314,7 +317,7 @@ class ObstacleController(QDockWidget, ):
                 if self.xyova[j][6] is not None:
                     state_dictionary.update({'slip_angle': self.xyova[j][6]})
 
-                new_state = PMState(**state_dictionary)
+                new_state = ExtendedPMState(**state_dictionary)
                 state_list.append(new_state)
             return state_list
 
@@ -334,7 +337,7 @@ class ObstacleController(QDockWidget, ):
                 if "slip_angle" in state.attributes:
                     state_dictionary.update({'slip_angle': state.__getattribute__("slip_angle")})
 
-                new_state = KSState(**state_dictionary)
+                new_state = ExtendedPMState(**state_dictionary)
                 state_list.append(new_state)
             return state_list
 
@@ -376,7 +379,7 @@ class ObstacleController(QDockWidget, ):
         """
         obstacle_id = self.get_current_obstacle_id()
         if obstacle_id is not None:
-            selected_obstacle = self.scenario_model.obstacle_by_id(obstacle_id)
+            selected_obstacle = self.scenario_model.find_obstacle_by_id(obstacle_id)
             return selected_obstacle
         else:
             return None
@@ -387,6 +390,10 @@ class ObstacleController(QDockWidget, ):
         generates an object_id (id for obstacle) and then calls function
         to create a static or dynamic obstacle
         """
+        if self.mwindow.play_activated:
+            self.text_browser.append("Please stop the animation first.")
+            return
+
         if self.scenario_model.scenario_created() :
             obstacle_id = self.scenario_model.generate_object_id()
             self.amount_obstacles = self.scenario_model.generate_object_id()
@@ -403,13 +410,17 @@ class ObstacleController(QDockWidget, ):
                     self.text_browser.append("Error when adding static obstacle")
         else:
             self.text_browser.append("Warning: Scenario does not exist yet. Please create or load a scenario first.")
-        self.initialize_obstacle_toolbox()
+        self.obstacle_toolbox_ui.initialize_obstacle_information()
 
 
     def update_obstacle(self):
         """
         updates obstacle by deleting it and then adding it again with same id
         """
+        if self.mwindow.play_activated:
+            self.text_browser.append("Please stop the animation first.")
+            return
+
         selected_obstacle = self.get_current_obstacle()
         obstacle_id = self.get_current_obstacle_id()
         self.temp_obstacle = selected_obstacle
@@ -437,11 +448,6 @@ class ObstacleController(QDockWidget, ):
                 self.text_browser.append("Error when updating dynamic obstacle")
         self.temp_obstacle = None
 
-
-    def initialize_obstacle_toolbox(self):
-        self.initialize_obstacle_information()
-
-
     def calc_velocity(self, point1: float, point2: float) -> float:
         """
         calculates velocity based on two points
@@ -451,26 +457,11 @@ class ObstacleController(QDockWidget, ):
         velocity = distance / self.scenario_model.get_scenario_dt()
         return velocity
 
-
     def calc_acceleration(self, velocity1: float, velocity2: float) -> float:
         """calculates acceleration based on the velocity at 2 points"""
         delta_v = velocity2 - velocity1
         acceleration = delta_v / self.scenario_model.get_scenario_dt()
         return acceleration
-
-
-    def initialize_obstacle_information(self):
-        """
-        Initializes GUI elements with intersection information.
-        """
-        self.clear_obstacle_fields()
-
-        self.obstacle_toolbox_ui.selected_obstacle.clear()
-        self.obstacle_toolbox_ui.selected_obstacle.addItems(
-                ["None"] + [str(item) for item in self.scenario_model.collect_obstacle_ids()])
-        self.obstacle_toolbox_ui.selected_obstacle.setCurrentIndex(0)
-
-
 
     def delete_point(self):
         """
@@ -918,10 +909,10 @@ class ObstacleController(QDockWidget, ):
         If non updated changes, these values come from the xyova array,
         otherwise directly from the obstacle state_list
         """
-        # TODO: CONTROLLER
         if self.obstacle_toolbox_ui.selected_obstacle.currentText() not in ["", "None"] and not self.update_ongoing:
             obstacle = self.get_current_obstacle()
             state_variable_name = self.obstacle_toolbox_ui.obstacle_state_variable.currentText()
+            message = "This Graph is only available for dynamic obstacles"
             if state_variable_name == "x-position":
                 if isinstance(obstacle, StaticObstacle):
                     profile = [obstacle.initial_state.__getattribute__("position")[0]]
@@ -954,26 +945,32 @@ class ObstacleController(QDockWidget, ):
             elif (state_variable_name == "acceleration" and isinstance(obstacle, DynamicObstacle)):
                 if self.xyova:
                     profile = [j[4] for j in self.xyova]
-                else:
+                elif "acceleration" in obstacle.prediction.trajectory.final_state.attributes:
                     profile = [obstacle.initial_state.__getattribute__("acceleration")]
                     profile += [state.__getattribute__("acceleration") for state in
                                 obstacle.prediction.trajectory.state_list]
+                else:
+                    message = "This Obstacle has no information about the Acceleration"
 
             elif state_variable_name == "yaw_rate" and isinstance(obstacle, DynamicObstacle):
                 if self.xyova:
                     profile = [j[5] for j in self.xyova]
-                else:
+                elif "yaw_rate" in obstacle.prediction.trajectory.final_state.attributes:
                     profile = [obstacle.initial_state.__getattribute__("yaw_rate")]
                     profile += [state.__getattribute__("yaw_rate") for state in
                                 obstacle.prediction.trajectory.state_list]
+                else:
+                    message = "This Obstacle has no information about the yaw_rate"
 
             elif (state_variable_name == "slip_angle" and isinstance(obstacle, DynamicObstacle)):
                 if self.xyova:
                     profile = [j[6] for j in self.xyova]
-                else:
+                elif "slip_angle" in obstacle.prediction.trajectory.final_state.attributes:
                     profile = [obstacle.initial_state.__getattribute__("slip_angle")]
                     profile += [state.__getattribute__("slip_angle") for state in
-                                obstacle.prediction.trajectory.state_list]
+                                    obstacle.prediction.trajectory.state_list]
+                else:
+                    message = "This Obstacle has no information about the slip_angle"
 
             elif state_variable_name == "orientation":
                 if isinstance(obstacle, StaticObstacle):
@@ -999,7 +996,10 @@ class ObstacleController(QDockWidget, ):
             self.xmax = None
             self.ymin = None
             self.ymax = None
-            self.draw_plot(time, profile)
+            if "profile" in locals():
+                self.draw_plot(time, profile)
+            else:
+                self.text_browser.append(message)
 
     @staticmethod
     def resolve_y_label(state_variable_name: str) -> str:
@@ -1022,7 +1022,6 @@ class ObstacleController(QDockWidget, ):
         else:
             return ""
 
-
     def update_obstacle_information(self):
         """
         retrieves obstacle details to the gui when an obstacle is pressed or the id
@@ -1033,77 +1032,7 @@ class ObstacleController(QDockWidget, ):
             self.update_ongoing = True
             obstacle = self.get_current_obstacle()
             obstacle_id = self.get_current_obstacle_id()
-
-            if isinstance(obstacle.obstacle_shape, Rectangle):
-
-                if self.obstacle_toolbox_ui.obstacle_shape.currentText() != "Rectangle":
-                    self.obstacle_toolbox_ui.obstacle_shape.setCurrentIndex(0)
-
-                self.obstacle_toolbox_ui.obstacle_width.setText(str(obstacle.obstacle_shape.width))
-                self.obstacle_toolbox_ui.obstacle_length.setText(str(obstacle.obstacle_shape.length))
-                if isinstance(obstacle, StaticObstacle):
-                    self.obstacle_toolbox_ui.obstacle_x_Position.setText(
-                        str(obstacle.initial_state.__getattribute__("position")[0]))
-                    self.obstacle_toolbox_ui.obstacle_y_Position.setText(
-                        str(obstacle.initial_state.__getattribute__("position")[1]))
-                    self.obstacle_toolbox_ui.obstacle_orientation.setText(
-                        str(math.degrees(obstacle.initial_state.__getattribute__("orientation"))))
-                else:
-                    self.obstacle_toolbox_ui.obstacle_orientation.setText(
-                        str(math.degrees(obstacle.obstacle_shape.__getattribute__("orientation"))))
-
-            elif isinstance(obstacle.obstacle_shape, Circle):
-
-                if self.obstacle_toolbox_ui.obstacle_shape.currentText() != "Circle":
-                    self.obstacle_toolbox_ui.obstacle_shape.setCurrentIndex(1)
-
-                self.obstacle_toolbox_ui.obstacle_radius.setText(str(obstacle.obstacle_shape.radius))
-                if isinstance(obstacle, StaticObstacle):
-                    self.obstacle_toolbox_ui.obstacle_x_Position.setText(
-                        str(obstacle.initial_state.__getattribute__("position")[0]))
-                    self.obstacle_toolbox_ui.obstacle_y_Position.setText(
-                        str(obstacle.initial_state.__getattribute__("position")[1]))
-
-            elif isinstance(obstacle.obstacle_shape, Polygon):
-                if self.obstacle_toolbox_ui.obstacle_shape.currentText() != "Polygon":
-                    self.obstacle_toolbox_ui.obstacle_shape.setCurrentIndex(2)
-
-                    # because numpy array has weird formatting I want to get rid of
-                temp = obstacle.obstacle_shape.vertices
-                vertices = temp.tolist()
-
-                # remove extra vertice(s) in toolbox
-                if len(vertices) - 1 < self.obstacle_toolbox_ui.amount_vertices:
-                    j = self.obstacle_toolbox_ui.amount_vertices - (len(vertices) - 1)
-                    for i in range(j):
-                        self.obstacle_toolbox_ui.remove_vertice(i)
-
-                for i in range(len(vertices) - 1):
-                    # adds another vertice if there are too few in the toolbox
-                    if i >= self.obstacle_toolbox_ui.amount_vertices:
-                        self.obstacle_toolbox_ui.add_vertice()
-
-                    vertice_string_x = str(vertices[i][0])
-                    vertice_string_y = str(vertices[i][1])
-                    self.obstacle_toolbox_ui.vertices_x[i].setText(vertice_string_x)
-                    self.obstacle_toolbox_ui.vertices_y[i].setText(vertice_string_y)
-
-            if isinstance(obstacle, DynamicObstacle):
-
-                if self.obstacle_toolbox_ui.obstacle_dyn_stat.currentText() != "Dynamic":
-                    self.obstacle_toolbox_ui.obstacle_dyn_stat.setCurrentIndex(1)
-
-            elif self.obstacle_toolbox_ui.obstacle_dyn_stat.currentText() != "Static":
-                self.obstacle_toolbox_ui.obstacle_dyn_stat.setCurrentIndex(0)
-
-            self.obstacle_toolbox_ui.obstacle_type.setCurrentText(obstacle.obstacle_type.value)
-            self.obstacle_toolbox_ui.obstacle_state_variable.clear()
-            state_variables = [var for var in obstacle.initial_state.attributes if var not in ["position", "time_step"]]
-
-            if "position" in obstacle.initial_state.attributes:
-                state_variables += ["x-position", "y-position"]
-
-            self.obstacle_toolbox_ui.obstacle_state_variable.addItems(state_variables)
+            self.obstacle_toolbox_ui.update_obstacle_information_ui(obstacle)
             self.update_ongoing = False
             # clear xyo if switch to another obstacle
             self.xyova.clear()
@@ -1119,50 +1048,30 @@ class ObstacleController(QDockWidget, ):
                 self.obstacle_color = color
                 if color == "#d95558" or color == "#1d7eea":
                     self.obstacle_toolbox_ui.default_color.setChecked(True)
+                else:
+                    self.obstacle_toolbox_ui.default_color.setChecked(False)
             self.obstacle_toolbox_ui.change_color = False
 
         # if set to "None": clear QLineEdits
         else:
-            self.clear_obstacle_fields()
+            self.obstacle_toolbox_ui.clear_obstacle_fields()
             self.obstacle_toolbox_ui.obstacle_state_variable.clear()
             self.obstacle_toolbox_ui.figure.clear()
             self.obstacle_toolbox_ui.canvas.draw()
-
-
-    def clear_obstacle_fields(self):
-
-        """
-        clears the obstacle QLineEdits
-        """
-        if self.obstacle_toolbox_ui.obstacle_shape.currentText() == "Circle":
-            self.obstacle_toolbox_ui.obstacle_radius.setText("")
-
-
-        elif self.obstacle_toolbox_ui.obstacle_shape.currentText() == "Rectangle":
-            self.obstacle_toolbox_ui.obstacle_width.setText("")
-            self.obstacle_toolbox_ui.obstacle_length.setText("")
-            self.obstacle_toolbox_ui.obstacle_orientation.setText("")
-
-        elif self.obstacle_toolbox_ui.obstacle_shape.currentText() == "Polygon":
-            for i in range(self.obstacle_toolbox_ui.amount_vertices):
-                self.obstacle_toolbox_ui.vertices_x[i].setText("")
-                self.obstacle_toolbox_ui.vertices_y[i].setText("")
-        if (self.obstacle_toolbox_ui.obstacle_dyn_stat.currentText() == "Static" and
-                self.obstacle_toolbox_ui.obstacle_shape.currentText() != "Polygon"):
-            self.obstacle_toolbox_ui.obstacle_x_Position.setText("")
-            self.obstacle_toolbox_ui.obstacle_y_Position.setText("")
-
 
     def start_sumo_simulation(self):
         num_time_steps = self.obstacle_toolbox_ui.sumo_simulation_length.value()
         self.sumo_simulation.set_simulation_length(num_time_steps)
         self.sumo_simulation.simulate()
 
-
     def remove_obstacle(self):
         """
         Removes the selected obstacle from the scenario.
         """
+        if self.mwindow.play_activated:
+            self.text_browser.append("Please stop the animation first.")
+            return
+
         if self.obstacle_toolbox_ui.selected_obstacle.currentText() not in ["", "None"]:
             try:
                 obstacle_id = self.get_current_obstacle_id()
@@ -1176,8 +1085,7 @@ class ObstacleController(QDockWidget, ):
 
         if not self.scenario_model.scenario_created():
             self.text_browser.append("Warning: Scenario does not exist yet. Please create or load a scenario first.")
-        self.initialize_obstacle_toolbox()
-
+        self.obstacle_toolbox_ui.initialize_obstacle_information()
 
     def draw_plot(self, time, profile, xmin: float = None,
                   xmax: float = None, ymin: float = None, ymax: float = None):
@@ -1214,3 +1122,14 @@ class ObstacleController(QDockWidget, ):
         self.obstacle_toolbox_ui.canvas.draw()
         #ax.callbacks.connect('xlim_changed', self.on_xlim_change)
         #ax.callbacks.connect('ylim_changed', self.on_ylim_change)
+
+    def color_picker(self):
+        """
+        opens color dialogue window
+        """
+        self.obstacle_color = QColorDialog.getColor()
+
+        self.obstacle_toolbox_ui.default_color.setChecked(False)
+        self.obstacle_toolbox_ui.selected_color.setStyleSheet(
+            "QWidget { border:1px solid black; background-color: %s}" % self.obstacle_color.name())
+        self.change_color = True

@@ -1,7 +1,7 @@
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QMessageBox
 
-from crdesigner.config.gui_config import gui_config as config
+from crdesigner.config.gui_config import gui_config as config, gui_config
 from crdesigner.ui.gui.utilities.file_actions import file_save, open_commonroad_file, file_new
 from crdesigner.ui.gui.view.top_bar.tool_bar_ui import ToolBarUI
 
@@ -24,6 +24,7 @@ class ToolBarController:
         self.tool_bar_ui.action_road_network_toolbox.triggered.connect(lambda: self._road_network_toolbox_show())
         self.tool_bar_ui.action_obstacle_toolbox.triggered.connect(lambda: self._obstacle_toolbox_show())
         self.tool_bar_ui.action_converter_toolbox.triggered.connect(lambda: self._map_converter_toolbox_show())
+        self.tool_bar_ui.action_scenario_toolbox.triggered.connect(lambda: self._scenario_toolbox_show())
 
         # Undo / Redo
         self.tool_bar_ui.action_redo.triggered.connect(lambda: self.mwindow.scenario_model.redo())
@@ -50,7 +51,7 @@ class ToolBarController:
         self.tool_bar_ui.merge_lanelet.triggered.connect(lambda: self._merge_lanelets())
 
         # Cropp Map
-        self.tool_bar_ui.cropp_map.triggered.connect(lambda: self._cropp_map(self.tool_bar_ui.cropp_map.isChecked()))
+        self.tool_bar_ui.crop_map.triggered.connect(lambda: self._crop_map(self.tool_bar_ui.crop_map.isChecked()))
 
     def _road_network_toolbox_show(self):
         """
@@ -70,6 +71,12 @@ class ToolBarController:
         """
         self.mwindow_ui.map_converter_toolbox.show()
 
+    def _scenario_toolbox_show(self):
+        """
+            Show the Scenario Toolbox.
+        """
+        self.mwindow_ui.scenario_toolbox.show()
+
     def play_pause_animation(self, open_cr_file):
         """Function connected with the play button in the sumo-toolbar_wrapper."""
         if not self.mwindow.scenario_model.scenario_created():
@@ -80,19 +87,29 @@ class ToolBarController:
             if reply == QMessageBox.Ok:
                 open_cr_file(self.mwindow)
             return
+        if not gui_config.show_dynamic_obstacles():
+            messagebox = QMessageBox()
+            messagebox.warning(self.mwindow_ui, "Warning",
+                               "Please enable the display of dynamic obstacles in the settings ", QMessageBox.Ok)
+
+            return
         if not self.mwindow.play_activated:
             self.mwindow.animated_viewer_wrapper.cr_viewer.play()
             self.mwindow.crdesigner_console_wrapper.text_browser.append("Playing the animation")
             if config.DARKMODE:
-                self.mwindow_ui.top_bar.toolbar_wrapper.tool_bar_ui.button_play_pause.setIcon(QIcon(":/icons/pause_darkmode.png"))
+                self.mwindow_ui.top_bar.toolbar_wrapper.tool_bar_ui.button_play_pause.setIcon(QIcon(
+                        ":/icons/pause_darkmode.png"))
             else:
-                self.mwindow_ui.top_bar.toolbar_wrapper.tool_bar_ui.button_play_pause.setIcon(QIcon(":/icons/pause.png"))
+                self.mwindow_ui.top_bar.toolbar_wrapper.tool_bar_ui.button_play_pause.setIcon(QIcon(
+                        ":/icons/pause.png"))
             self.mwindow.play_activated = True
+            self.mwindow_ui.play_activated = True
         else:
             self.mwindow.animated_viewer_wrapper.cr_viewer.pause()
             self.mwindow.crdesigner_console_wrapper.text_browser.append("Pause the animation")
             self.mwindow_ui.top_bar.toolbar_wrapper.tool_bar_ui.button_play_pause.setIcon(QIcon(":/icons/play.png"))
             self.mwindow.play_activated = False
+            self.mwindow_ui.play_activated = False
 
     def _time_step_change(self, value):
         if self.mwindow.scenario_model.scenario_created():
@@ -108,7 +125,6 @@ class ToolBarController:
                 int(float(self.mwindow_ui.top_bar.toolbar_wrapper.tool_bar_ui.edit.text())))
             self.mwindow.animated_viewer_wrapper.cr_viewer.pause()
             self.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.draw_idle()
-            self.mwindow.animated_viewer_wrapper.update_view()
 
     def _detect_slider_clicked(self):
         self.mwindow.slider_clicked = True
@@ -151,10 +167,12 @@ class ToolBarController:
     def _merge_lanelets(self):
         self.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.merge_lanelets()
 
-    def _cropp_map(self, is_checked: bool) -> None:
+    def _crop_map(self, is_checked: bool) -> None:
         """
         Private function to call the activate_cropp_map function of the DynamicCanvasController
 
         :param is_checked: Boolean which states whether the button is clicked or not
         """
-        self.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.activate_cropp_map(is_checked)
+        self.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.activate_crop_map(is_checked)
+
+

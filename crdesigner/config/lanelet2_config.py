@@ -17,17 +17,17 @@ class Lanelet2Config(BaseConfig):
     use_local_coordinates = Attribute(False, "Use local coordinates",
                                       "Boolean indicating whether local coordinates should be added")
 
-    supported_countries = Attribute([TrafficSignIDGermany, TrafficSignIDZamunda, TrafficSignIDUsa],
-                                    "Supported countries", "Supported countries for traffic sign cr2lanelet conversion")
+    supported_countries = [TrafficSignIDGermany, TrafficSignIDZamunda, TrafficSignIDUsa]
 
-    supported_countries_prefixes = Attribute(
-            {"TrafficSignIDZamunda": "de", "TrafficSignIDGermany": "de", "TrafficSignIDUsa": "us"},
-            "Supported countries prefixes",
-            "Prefix dictionary for supported countries for traffic sign cr2lanelet conversion")
+    supported_countries_prefixes = {"TrafficSignIDZamunda": "de", "TrafficSignIDGermany": "de",
+                                    "TrafficSignIDUsa": "us"}
 
     supported_lanelet2_subtypes = Attribute(
-            ["urban", "country", "highway", "busLane", "bicycleLane", "exitRamp", "sidewalk", "crosswalk"],
+            ["urban", "country", "highway", "interstate", "busLane", "bicycleLane", "exitRamp", "sidewalk",
+             "crosswalk"],
             "Supported lanelet2 subtypes", "Lanelet2 subtypes that are available in commonroad")
+
+    supported_lanelet2_vehicles = ["car", "truck", "bus", "emergency", "motorcycle", "taxi"]
 
     # lanelet2cr
     node_distance_tolerance = Attribute(0.01, "Node distance tolerance",
@@ -57,8 +57,7 @@ class Lanelet2Config(BaseConfig):
                                              "Lanelets with other tags are not converted.")
 
     LAYOUT = [["CommonRoad To Lanelet2", ways_are_equal_tolerance, autoware,
-               use_local_coordinates, supported_countries, supported_countries_prefixes, supported_lanelet2_subtypes,
-               "General", proj_string, translate, left_driving],
+               use_local_coordinates, supported_lanelet2_subtypes, "General", proj_string, translate, left_driving],
               ["Lanelet2 To CommonRoad", node_distance_tolerance, adjacent_way_distance_tolerance, start_node_id_value,
                priority_signs, adjacencies, allowed_tags]]
 

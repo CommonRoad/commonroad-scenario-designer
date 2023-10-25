@@ -1,6 +1,6 @@
 import os
 import unittest
-
+from pathlib import Path
 import numpy as np
 
 from crdesigner.map_conversion.map_conversion_interface import opendrive_to_commonroad
@@ -85,54 +85,43 @@ class MyTestCase(unittest.TestCase):
     def test_four_way_crossing(self):
         """Test the crosswalk conversion for four_way_crossing.xodr"""
         xodr_file_name = "four_way_crossing"
-        scenario = opendrive_to_commonroad(os.path.dirname(os.path.realpath(__file__)) +
-                                           "/../../../test_maps/opendrive/{}.xodr".format(xodr_file_name))
+        scenario = opendrive_to_commonroad(Path(os.path.dirname(os.path.realpath(__file__)) +
+                                           "/../../../test_maps/opendrive/{}.xodr".format(xodr_file_name)))
 
-        lanelet_90 = None
-        lanelet_91 = None
-        lanelet_92 = None
-        lanelet_93 = None
+        lanelet_7 = scenario.lanelet_network.find_lanelet_by_id(7)
+        lanelet_6 = scenario.lanelet_network.find_lanelet_by_id(6)
+        lanelet_11 = scenario.lanelet_network.find_lanelet_by_id(11)
+        lanelet_12 = scenario.lanelet_network.find_lanelet_by_id(12)
 
-        for lanelet in scenario.lanelet_network.lanelets:
-            if lanelet.lanelet_id == 90:
-                lanelet_90 = lanelet
-            if lanelet.lanelet_id == 91:
-                lanelet_91 = lanelet
-            if lanelet.lanelet_id == 92:
-                lanelet_92 = lanelet
-            if lanelet.lanelet_id == 93:
-                lanelet_93 = lanelet
-
-        np.testing.assert_array_almost_equal(lanelet_90.left_vertices,
+        np.testing.assert_array_almost_equal(lanelet_7.left_vertices,
                                              [[4.30983202, -4.85975667], [4.34835011, 3.56917188]])
-        np.testing.assert_array_almost_equal(lanelet_90.right_vertices,
+        np.testing.assert_array_almost_equal(lanelet_7.right_vertices,
                                              [[6.80830036, -5.20064224], [6.84993415, 3.91009668]])
-        np.testing.assert_array_almost_equal(lanelet_90.center_vertices,
+        np.testing.assert_array_almost_equal(lanelet_7.center_vertices,
                                              [[5.55906619, -5.03019945], [5.59914213, 3.73963428]])
 
-        np.testing.assert_array_almost_equal(lanelet_91.left_vertices,
+        np.testing.assert_array_almost_equal(lanelet_6.left_vertices,
                                              [[-4.11917897, -4.86917131], [4.30983202, -4.85975667]])
-        np.testing.assert_array_almost_equal(lanelet_91.right_vertices,
+        np.testing.assert_array_almost_equal(lanelet_6.right_vertices,
                                              [[-4.46997289, -7.36956469], [4.64072751, -7.35938864]])
-        np.testing.assert_array_almost_equal(lanelet_91.center_vertices,
+        np.testing.assert_array_almost_equal(lanelet_6.center_vertices,
                                              [[-4.29457593, -6.119368], [4.47527977, -6.10957265]])
 
-        np.testing.assert_array_almost_equal(lanelet_92.left_vertices,
+        np.testing.assert_array_almost_equal(lanelet_11.left_vertices,
                                              [[-4.08066122, 3.55975695], [-4.11917897, -4.86917131]])
-        np.testing.assert_array_almost_equal(lanelet_92.right_vertices,
+        np.testing.assert_array_almost_equal(lanelet_11.right_vertices,
                                              [[-6.57912958, 3.90064261], [-6.620763, -5.21009635]])
-        np.testing.assert_array_almost_equal(lanelet_92.center_vertices,
+        np.testing.assert_array_almost_equal(lanelet_11.center_vertices,
                                              [[-5.3298954, 3.73019978], [-5.36997099, -5.03963383]])
 
-        np.testing.assert_array_almost_equal(lanelet_93.left_vertices,
+        np.testing.assert_array_almost_equal(lanelet_12.left_vertices,
                                              [[4.34835011, 3.56917188], [-4.08066122, 3.55975695]])
-        np.testing.assert_array_almost_equal(lanelet_93.right_vertices,
+        np.testing.assert_array_almost_equal(lanelet_12.right_vertices,
                                              [[4.6991442, 6.06956526], [-4.4115563, 6.05938891]])
-        np.testing.assert_array_almost_equal(lanelet_93.center_vertices,
+        np.testing.assert_array_almost_equal(lanelet_12.center_vertices,
                                              [[4.52374715, 4.81936857], [-4.24610876, 4.80957293]])
 
-        incoming = scenario.lanelet_network.find_intersection_by_id(68).incomings[0].crossings
-        self.assertSetEqual(incoming, {90, 91, 92, 93})
+        self.assertSetEqual(scenario.lanelet_network.find_intersection_by_id(84).crossings, {6, 7, 11, 12})
 
 
 if __name__ == '__main__':

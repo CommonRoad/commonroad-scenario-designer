@@ -1,5 +1,6 @@
 import unittest
 import os
+from pathlib import Path
 
 from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadLanes import RoadMark
 from crdesigner.map_conversion.opendrive.opendrive_parser.parser import *
@@ -9,12 +10,12 @@ from crdesigner.map_conversion.opendrive.opendrive_parser.elements.geometry impo
 class TestParser(unittest.TestCase):
 
     def test_parse_opendrive(self):
-        file_path = os.path.dirname(os.path.abspath(__file__)) + '/../../test_maps/opendrive/CulDeSac.xodr'
+        file_path = Path(os.path.dirname(os.path.abspath(__file__)) + '/../../test_maps/opendrive/CulDeSac.xodr')
         xodr_file = parse_opendrive(file_path)
         self.assertIsInstance(xodr_file, OpenDrive)
 
     def test_parse_opendrive_header(self):
-        file_path = os.path.dirname(os.path.abspath(__file__)) + '/../../test_maps/opendrive/CulDeSac.xodr'
+        file_path = Path(os.path.dirname(os.path.abspath(__file__)) + '/../../test_maps/opendrive/CulDeSac.xodr')
         odr = parse_opendrive(file_path)
 
         self.assertIsInstance(odr.header, Header)
@@ -31,7 +32,7 @@ class TestParser(unittest.TestCase):
         self.assertEqual(None, odr.header.geo_reference)
 
     def test_parse_opendrive_junction(self):
-        file_path = os.path.dirname(os.path.abspath(__file__)) + '/../../test_maps/opendrive/FourWaySignal.xodr'
+        file_path = Path(os.path.dirname(os.path.abspath(__file__)) + '/../../test_maps/opendrive/FourWaySignal.xodr')
         odr = parse_opendrive(file_path)
 
         for i in odr.junctions:
@@ -243,8 +244,8 @@ class TestParser(unittest.TestCase):
         self.assertEqual("+", road.signalReference[0].orientation)
 
     def test_parse_opendrive_road(self):
-        file_path = os.path.dirname(os.path.abspath(__file__)) \
-                    + '/../../test_maps/opendrive/CrossingComplex8Course.xodr'
+        file_path = Path(os.path.dirname(os.path.abspath(__file__)) \
+                    + '/../../test_maps/opendrive/CrossingComplex8Course.xodr')
         odr = parse_opendrive(file_path)
 
         self.assertEqual("", odr.roads[0].name)

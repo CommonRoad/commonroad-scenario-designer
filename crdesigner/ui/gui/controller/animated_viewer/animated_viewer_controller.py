@@ -2,15 +2,14 @@ from typing import List, Optional, Union
 import numpy as np
 
 from PyQt5.QtWidgets import QFileDialog, QMessageBox
-from commonroad.planning.planning_problem import PlanningProblemSet
 
 from commonroad.scenario.intersection import Intersection
 from commonroad.scenario.lanelet import Lanelet, LaneletNetwork
 from commonroad.visualization.mp_renderer import MPRenderer
 
 from crdesigner.ui.gui.controller.animated_viewer.dynamic_canvas_controller import DynamicCanvasController
+from crdesigner.ui.gui.model.planning_problem_set_model import PlanningProblemSetModel
 from crdesigner.ui.gui.utilities.gui_sumo_simulation import SUMO_AVAILABLE
-from crdesigner.ui.gui.utilities.draw_params_updater import DrawParamsCustom
 from crdesigner.ui.gui.utilities.helper import draw_lanelet_polygon
 from crdesigner.config.gui_config import gui_config
 
@@ -20,9 +19,8 @@ from crdesigner.ui.gui.utilities.util import Observable
 
 from matplotlib.animation import FuncAnimation
 
-
-#new imports
 from crdesigner.ui.gui.view.animated_viewer.animated_viewer_ui import AnimatedViewerUI
+
 
 def extract_plot_limits(lanelet_network: LaneletNetwork) -> Optional[List[float]]:
     """
@@ -50,17 +48,19 @@ def extract_plot_limits(lanelet_network: LaneletNetwork) -> Optional[List[float]
     else:
         return None
 
+
 class AnimatedViewerController:
-    def __init__(self, parent, callback_function, scenario_model):
+    def __init__(self, mwindow, callback_function, scenario_model):
 
         # create view object
         self.view = AnimatedViewerUI()
 
-        #self.current_scenario = None
-        self.current_pps = None
-        self.parent = parent
+        # self.current_scenario = None
+        self.pps_model: PlanningProblemSetModel = mwindow.pps_model
+        self.parent = mwindow.mwindow_ui
         self.scenario_model = scenario_model
-        self.dynamic = DynamicCanvasController(parent, self.scenario_model, width=5, height=10, dpi=100, animated_viewer=self)
+        self.dynamic = DynamicCanvasController(self.parent, self.scenario_model,
+                                               width=5, height=10, dpi=100, animated_viewer=self)
         self.callback_function = callback_function
         self.original_lanelet_network = None
         self.update_window()
@@ -76,8 +76,7 @@ class AnimatedViewerController:
         # if playing or not
         self.playing = False
 
-    def open_scenario(self, config: Observable = None,
-                      planning_problem_set: PlanningProblemSet = None, new_file_added: bool = None):
+    def open_scenario(self, config: Observable = None, new_file_added: bool = None):
         """[summary]
         Open a scenario, setup any configuration.
         :param new_file_added: if a new cr file was created or added
@@ -85,12 +84,10 @@ class AnimatedViewerController:
         :param planning_problem_set: des,
         """
         self.dynamic.initial_parameter_config_done = False  # reset so that for any map the parameters are set correctly
-        # self.current_scenario = scenario
         # safe here the original scenario -> this is needed for zooming in / out and for moving around
 
         self.original_lanelet_network = LaneletNetwork.create_from_lanelet_network(
                 lanelet_network=self.scenario_model.get_lanelet_network())
-        self.current_pps = planning_problem_set
 
         # if we have not subscribed already, subscribe now
         if config is not None:
@@ -106,17 +103,20 @@ class AnimatedViewerController:
 
         self._calc_max_timestep()
         if self.animation:
-            self.time_step.value = 0
             self.animation.event_source.stop()
             self.animation = None
-        self.update_plot(clear_artists=True, new_file_added=new_file_added, plot_limits=plot_limits)
+        else:
+            self.time_step.value = 0
+
+        if new_file_added:
+            self.update_plot(clear_artists=True, new_file_added=new_file_added, plot_limits=plot_limits)
 
     def _init_animation(self):
         if not self.scenario_model.scenario_created():
             return
 
         print('init animation')
-        pps = self.current_pps
+        pps = self.pps_model.get_selected_pp()
         self.dynamic.clear_axes(keep_limits=True)
 
         start = self.min_time_step
@@ -147,11 +147,16 @@ class AnimatedViewerController:
             if time_start > time_end:
                 self.time_step.value = 0
 
-            draw_params = DrawParamsCustom(time_begin=time_start, time_end=time_end)
-            draw_params.dynamic_obstacle.time_begin = draw_params.time_begin
-            draw_params.dynamic_obstacle.time_end = draw_params.time_end
-            draw_params.dynamic_obstacle.trajectory.draw_trajectory = False
-            self.dynamic.draw_scenario(pps=pps, draw_params=draw_params)
+            draw_params = gui_config.get_draw_params()
+
+            #draw_params.dynamic_obstacle = gui_config.get_obstacle_params()
+            draw_params.time_begin = time_start
+            draw_params.time_end = time_end
+            draw_params.dynamic_obstacle.trajectory.time_begin = time_start
+            draw_params.dynamic_obstacle.trajectory.time_end = end
+            draw_params.trajectory.time_begin = time_start
+            draw_params.trajectory.time_end = end
+            self.dynamic.draw_scenario(pps=pps, draw_params=draw_params, draw_dynamic_only=True)
 
         # Interval determines the duration of each frame in ms
         interval = 1000 * dt
@@ -165,6 +170,7 @@ class AnimatedViewerController:
 
         self.dynamic.draw_idle()
         self.animation.event_source.start()
+        self.playing = True
 
     def pause(self):
         """ pauses the animation if playing """
@@ -173,6 +179,7 @@ class AnimatedViewerController:
             return
 
         self.animation.event_source.stop()
+        self.playing = False
 
     def set_timestep(self, timestep: int):
         """ sets the animation to the current timestep """
@@ -185,8 +192,9 @@ class AnimatedViewerController:
 
     def save_animation(self):
         path, _ = QFileDialog.getSaveFileName(caption="QFileDialog.getSaveFileName()",
-                directory=self.scenario_model.get_scenario_id().__str__() + ".mp4",
-                filter="MP4 (*.mp4);;GIF (*.gif);; AVI (*avi)", options=QFileDialog.Options(), )
+                                              directory=self.scenario_model.get_scenario_id().__str__() + ".mp4",
+                                              filter="MP4 (*.mp4);;GIF (*.gif);; AVI (*avi)",
+                                              options=QFileDialog.Options(), )
         if not path:
             return
 
@@ -194,13 +202,15 @@ class AnimatedViewerController:
             rnd = MPRenderer()
             with open(path, "w"):
                 QMessageBox.about(None, "Information",
-                                  "Exporting the video will take few minutes, please wait until process is finished!")
-                rnd.create_video([self.scenario_model.get_current_scenario()], path, draw_params=self.dynamic.draw_params)
+                                  "Exporting the video will take few minutes, please wait "
+                                  "until process is finished!")
+                rnd.create_video([self.scenario_model.get_current_scenario()], path,
+                                 draw_params=self.dynamic.draw_params)
                 print("finished")
         except IOError as e:
             QMessageBox.critical(self, "CommonRoad file not created!",
-                    "The CommonRoad scenario was not saved as video due to an error.\n\n{}".format(e),
-                    QMessageBox.Ok, )
+                                 "The CommonRoad scenario was not saved as video due to an error.\n\n{}".format(e),
+                                 QMessageBox.Ok, )
             return
 
     def _calc_max_timestep(self) -> int:
@@ -208,8 +218,8 @@ class AnimatedViewerController:
         if not self.scenario_model.scenario_created():
             return 0
 
-        if len(self.scenario_model.get_dynamic_obstacles()) > 0 and self.scenario_model.get_dynamic_obstacles()[
-            0].prediction is not None:
+        if len(self.scenario_model.get_dynamic_obstacles()) > 0 and self.scenario_model.get_dynamic_obstacles()[0]\
+                .prediction is not None:
             time_steps = [obstacle.prediction.occupancy_set[-1].time_step for obstacle in
                 self.scenario_model.get_dynamic_obstacles()]
             self.max_timestep = np.max(time_steps) if time_steps else 0
@@ -235,25 +245,27 @@ class AnimatedViewerController:
         """
         if not isinstance(sel_lanelets, list) and sel_lanelets:
             sel_lanelets = [sel_lanelets]
-
         x_lim = self.dynamic.get_axes().get_xlim()
         y_lim = self.dynamic.get_axes().get_ylim()
 
         self.dynamic.clear_axes(clear_artists=clear_artists)
         ax = self.dynamic.get_axes()
+        self.dynamic.drawer.tight_layout(pad=4.5)
 
         if time_step_changed:
-            draw_params = DrawParamsCustom(time_begin=time_step, color_schema=self.parent.colorscheme())
+            time_begin = time_step
         else:
-            draw_params = DrawParamsCustom(time_begin=self.time_step.value - 1,
-                                           color_schema=self.parent.colorscheme())
-        draw_params.dynamic_obstacle.trajectory.draw_trajectory = False
+            time_begin = max(0, self.time_step.value - 1)
 
         if new_file_added:
             self.dynamic.show_aerial = False
             self.new_file_added = False
+            if plot_limits is not None:
+                x_dim = (plot_limits[1] - plot_limits[0]) / 2
+                y_dim = (plot_limits[3] - plot_limits[2]) / 2
+                gui_config.set_zoom_treshold(x_dim, y_dim)
 
-        self.dynamic.draw_scenario(self.current_pps, draw_params=draw_params)
+        self.dynamic.draw_scenario(self.pps_model.get_selected_pp(), time_begin=time_begin)
 
         for lanelet in self.scenario_model.get_lanelets():
 
@@ -280,10 +292,7 @@ class AnimatedViewerController:
             self.dynamic.set_limits([x_lim[0], x_lim[1], y_lim[0], y_lim[1]])
             self.dynamic.draw_idle()
 
-        self.dynamic.drawer.tight_layout()
-
-    def get_paint_parameters(self, lanelet: Lanelet, selected_lanelets: Lanelet,
-                             selected_intersection: Intersection):
+    def get_paint_parameters(self, lanelet: Lanelet, selected_lanelets: Lanelet, selected_intersection: Intersection):
         """
         Return the parameters for painting a lanelet regarding the selected lanelet.
         """
@@ -318,14 +327,16 @@ class AnimatedViewerController:
                     color = "yellow"
                     alpha = 0.5
                     zorder = 10
-                    label = "{} adj left of {} ({})".format(lanelet.lanelet_id, selected_lanelet.lanelet_id,
-                                                            "same" if selected_lanelet.adj_left_same_direction else "opposite", )
+                    label = "{} adj left of {} ({})".format(
+                            lanelet.lanelet_id, selected_lanelet.lanelet_id,
+                            "same" if selected_lanelet.adj_left_same_direction else "opposite", )
                 elif lanelet.lanelet_id == selected_lanelet.adj_right:
                     color = "orange"
                     alpha = 0.5
                     zorder = 10
-                    label = "{} adj right of {} ({})".format(lanelet.lanelet_id, selected_lanelet.lanelet_id,
-                                                             "same" if selected_lanelet.adj_right_same_direction else "opposite", )
+                    label = "{} adj right of {} ({})".format(
+                            lanelet.lanelet_id, selected_lanelet.lanelet_id,
+                            "same" if selected_lanelet.adj_right_same_direction else "opposite", )
                 else:
                     color = "gray"
                     alpha = 0.3
@@ -380,4 +391,5 @@ class AnimatedViewerController:
 
     def update_window(self):
         self.dynamic.setStyleSheet(
-            'background-color:' + self.parent.colorscheme().second_background + '; color:' + self.parent.colorscheme().color + ';font-size: ' + self.parent.colorscheme().font_size)
+            'background-color:' + self.parent.colorscheme().second_background + '; color:' +
+            self.parent.colorscheme().color + ';font-size: ' + self.parent.colorscheme().font_size)
