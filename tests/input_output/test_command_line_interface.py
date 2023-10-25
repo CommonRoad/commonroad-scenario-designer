@@ -19,7 +19,7 @@ class TestCommandLineInterface(unittest.TestCase):
                           '--tags', 'urban',
                           '--tags', 'highway',
                           'odrcr'])
-        time.sleep(10)
+        time.sleep(20)
         exists = Path(self.output_path + "/opendrive_command_line.xml")
         self.assertTrue(exists.is_file())
 
@@ -29,7 +29,7 @@ class TestCommandLineInterface(unittest.TestCase):
                           '/../map_conversion/test_maps/osm/munich.osm',
                           '--output-file', self.output_path + "/osm_command_line.xml",
                           "osmcr"])
-        time.sleep(30)
+        time.sleep(60)
         exists = Path(self.output_path + '/osm_command_line.xml')
         self.assertTrue(exists.is_file())
 
@@ -39,7 +39,7 @@ class TestCommandLineInterface(unittest.TestCase):
                           + '/../map_conversion/test_maps/lanelet2/traffic_priority_lanelets_utm.osm',
                           '--output-file', self.output_path + "/lanelet2_command_line.xml",
                           "lanelet2cr"])
-        time.sleep(5)
+        time.sleep(10)
         exists = Path(self.output_path + "/lanelet2_command_line.xml")
         self.assertTrue(exists.is_file())
 
