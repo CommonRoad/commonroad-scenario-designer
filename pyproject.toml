@@ -79,8 +79,9 @@ optional = true
 [tool.poetry.group.tutorials.dependencies]
 jupyter = "^1.0.0"
 
-[tool.poetry.scripts]
-crdesigner = 'crdesigner.command_line:cli'
+# remove until to pass ci
+# [tool.poetry.scripts]
+# crdesigner = 'crdesigner.command_line:cli'
 
 [build-system]
 requires = ["poetry-core"]

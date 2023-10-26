@@ -29,7 +29,7 @@ def store_scenario(sc: Scenario, output_file: str, force_overwrite: bool, author
     @param affiliation: Affiliation of author of CommonRoad scenario.
     @param tags: Tags of CommonRoad scenario.
     """
-    print(output_file)
+
     tags = set([Tag(t) for t in tags]) if tags is not None else None
     writer = CommonRoadFileWriter(scenario=sc, planning_problem_set=PlanningProblemSet(), author=author,
                                   affiliation=affiliation, source="CommonRoad Scenario Designer", tags=tags)
