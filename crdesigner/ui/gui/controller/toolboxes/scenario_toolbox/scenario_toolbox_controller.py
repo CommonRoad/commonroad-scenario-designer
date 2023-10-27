@@ -32,7 +32,7 @@ class ScenarioToolboxController(QDockWidget):
         Initialize the controller.
         :param mwindow: The main window controller.
         """
-        super().__init__()
+        super().__init__("Scenario Toolbox")
         self.mwindow = mwindow
         self.mwindow_ui = mwindow.mwindow_ui
 

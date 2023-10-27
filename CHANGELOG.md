@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.8.0] - 2023-10-16
+## [0.8.0] - 2023-10-31
 
 ### Added
 - Cropping of a map in the GUI
@@ -12,6 +12,7 @@
 - cr2lanelet line marking conversion
 - cr2lanelet bidirectional users conversion
 - Tool for CommonRoad map verification and repairing
+- Possibility to change look of the GUI into a more modern style
 
 
 ### Changed
