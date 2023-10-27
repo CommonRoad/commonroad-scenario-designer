@@ -103,6 +103,7 @@ class GuiConfig(BaseConfig):
     DRAW_SUCCESSORS: Attribute = Attribute(True, "Draw successors")
     DRAW_INTERSECTION_LABELS: Attribute = Attribute(False, "Draw intersection labels")
     DARKMODE: Attribute = Attribute(False, "Darkmode")
+    MODERN_LOOK: Attribute = Attribute(True, display_name="Modern Look")
     AXIS_VISIBLE: Attribute = Attribute(value='All', display_name="Axis visible",
                                         options=['All', 'Left/Bottom', 'None'])
     LEGEND: Attribute = Attribute(True, "Legend")
@@ -118,7 +119,7 @@ class GuiConfig(BaseConfig):
 
     # The layout of the settings window
     LAYOUT = [
-        ["Appearance", DARKMODE, AXIS_VISIBLE, LEGEND, "Obstacle visualization", DRAW_DYNAMIC_OBSTACLES,
+        ["Appearance", DARKMODE, MODERN_LOOK, AXIS_VISIBLE, LEGEND, "Obstacle visualization", DRAW_DYNAMIC_OBSTACLES,
          DRAW_TRAJECTORY, DRAW_OBSTACLE_LABELS,DRAW_OBSTACLE_ICONS, DRAW_OBSTACLE_DIRECTION, DRAW_OBSTACLE_SIGNALS,
          "Intersection visualization",DRAW_INCOMING_LANELETS, DRAW_SUCCESSORS, DRAW_INTERSECTION_LABELS, ],
         ["Other", ENABLE_UNDETAILED_DISPLAY, DRAW_OCCUPANCY, DRAW_TRAFFIC_SIGNS, DRAW_TRAFFIC_LIGHTS, BING_MAPS_KEY, LDBV_USERNAME,
@@ -208,5 +209,132 @@ class GuiConfig(BaseConfig):
             colorscheme = ColorSchema(axis=gui_config.AXIS_VISIBLE)
 
         return colorscheme
+
+    def get_stylesheet(self) -> str:
+        """
+        @returns: A string for the stylesheet of the app
+        """
+        if gui_config.MODERN_LOOK:
+            if gui_config.DARKMODE:
+                stylesheet = """
+                                QWidget {
+                                    background-color: 	#303030;  /* White */
+                                    font-family: "Verdana";
+                                    font-size: 10pt;
+                                    color: #FFFFFF
+                                }
+                                QPushButton {
+                                    background-color: #0000FF;  /* Blue */
+                                    color: #FFFFFF;  /* White */
+                                    border: 1px;
+                                    border-style: solid;
+                                    border-color: black;
+                                    border-radius: 10px;
+                                    padding-top: 5px;
+                                    padding-bottom: 5px;
+                                    padding-left: 1px;
+                                    padding-right: 1px;
+                                    margin: 2px;
+
+                                }
+                                QPushButton:hover {
+                                    background-color: #6495ED;  /* Cornflower Blue */
+                                }
+                                QPushButton:pressed {
+                                    background-color: #0000FF;  /* Blue */
+
+                                }
+                                QLabel {
+                                    color: #FFFFFF;  /* Midnight Blue */
+                                    margin: 0px;
+                                }
+                                QProgressBar {
+                                    border: 2px solid #191970;  /* Midnight Blue */
+                                    border-radius: 5px;
+                                    text-align: center;
+                                }
+                                QProgressBar::chunk {
+                                    background-color: #1E90FF;  /* Dodger Blue */
+                                }
+                                QComboBox {
+                                    background-color: #87CEFA;  /* Light Sky Blue */
+                                    color: #191970;  /* Midnight Blue */
+                                    border-radius: 5px;
+                                    padding: 2px;
+                                }
+                                QComboBox QAbstractItemView {
+                                    background-color: #87CEFA;  /* Light Sky Blue */
+                                    color: #191970;  /* Midnight Blue */
+                                    selection-background-color: #1E90FF;  /* Dodger Blue */
+                                    selection-color: #FFFFFF;  /* White */
+                                }
+                                QComboBox::drop-down {
+                                    border: none;
+                                }
+                                QLineEdit {
+                                    color: #FFFFFF;
+                                }
+
+                            """
+            else:
+                stylesheet = """
+                                    QWidget {
+                                        background-color: 	#FFFFFF;  /* White */
+                                        font-family: "Verdana";
+                                        font-size: 10pt;
+                                    }
+                                    QPushButton {
+                                        background-color: #0000FF;  /* Blue */
+                                        color: #FFFFFF;  /* White */
+                                        border: 1px;
+                                        border-style: solid;
+                                        border-color: black;
+                                        border-radius: 10px;
+                                        padding-top: 5px;
+                                        padding-bottom: 5px;
+                                        padding-left: 1px;
+                                        padding-right: 1px;
+                                        margin: 2px;
+
+                                    }
+                                    QPushButton:hover {
+                                        background-color: #6495ED;  /* Cornflower Blue */
+                                    }
+                                    QPushButton:pressed {
+                                        background-color: #0000FF;  /* Blue */
+
+                                    }
+                                    QLabel {
+                                        color: #191970;  /* Midnight Blue */
+                                        margin: 0px;
+                                    }
+                                    QProgressBar {
+                                        border: 2px solid #191970;  /* Midnight Blue */
+                                        border-radius: 5px;
+                                        text-align: center;
+                                    }
+                                    QProgressBar::chunk {
+                                        background-color: #1E90FF;  /* Dodger Blue */
+                                    }
+                                    QComboBox {
+                                        background-color: #87CEFA;  /* Light Sky Blue */
+                                        color: #191970;  /* Midnight Blue */
+                                        border-radius: 5px;
+                                        padding: 2px;
+                                    }
+                                    QComboBox QAbstractItemView {
+                                        background-color: #87CEFA;  /* Light Sky Blue */
+                                        color: #191970;  /* Midnight Blue */
+                                        selection-background-color: #1E90FF;  /* Dodger Blue */
+                                        selection-color: #FFFFFF;  /* White */
+                                    }
+                                    QComboBox::drop-down {
+                                        border: none;
+                                    }
+
+                                """
+            return stylesheet
+        else:
+            return ""
 
 gui_config = GuiConfig()

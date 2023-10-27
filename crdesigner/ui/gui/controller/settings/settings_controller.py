@@ -1,6 +1,6 @@
 from PyQt5 import QtCore, QtWidgets
 
-from crdesigner.config.gui_config import gui_config as gui_settings_model
+from crdesigner.config.gui_config import gui_config as gui_settings_model, gui_config
 from crdesigner.config.settings_config import settings as settings_model, CONFIGS_TO_RENDER, settings
 from crdesigner.ui.gui.view.settings.settings_ui import SettingsUI
 
@@ -59,6 +59,7 @@ class SettingsController:
         self._hide_and_update()
         if self.scenario_model.scenario_created():
             self.scenario_model.notify_all()
+        self.parent.mwindow_ui.set_stylesheet(gui_config.get_stylesheet())
         self.parent.mwindow_ui.update_window()
 
     def show(self):

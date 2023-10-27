@@ -100,6 +100,7 @@ class MWindowController:
         self.mwindow_ui.update_window()
         self.center()
 
+
     def check_for_auto_saved_file(self) -> None:
         """
         Check for the existence of an auto saved file and handles it accordingly.
