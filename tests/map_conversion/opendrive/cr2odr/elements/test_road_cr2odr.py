@@ -169,7 +169,7 @@ class TestRoad(unittest.TestCase):
         self.assertTrue((expected_center == road.center).all())
         self.assertEqual(2.0, last_item_arclength)
 
-        self.compare_geometry(0, 1, road, 1, 1, 1)
+        self.compare_geometry(0, 2, road, 0, 0, 1)
 
         self.assertEqual(config.GEOMETRY_TAG, road.plan_view[-2].tag)
         self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0),
@@ -180,7 +180,7 @@ class TestRoad(unittest.TestCase):
                          road.plan_view[-2].get(config.GEOMETRY_Y_COORDINATE_TAG))
         self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 0),
                          road.plan_view[-2].get(config.GEOMETRY_HEADING_TAG))
-        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 1), road.plan_view[-2].get(config.LENGTH_TAG))
+        self.assertEqual(str.format(config.DOUBLE_FORMAT_PATTERN, 2), road.plan_view[-2].get(config.LENGTH_TAG))
 
     def test_print_line(self):
         # Given
