@@ -3,7 +3,7 @@ from PyQt5 import QtGui
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
-from crdesigner.ui.gui.model.settings.gui_settings_model import gui_settings as config
+from crdesigner.config.gui_config import gui_config as config
 
 
 class QHLine(QFrame):
@@ -32,8 +32,10 @@ class SectionExpandButton(QPushButton):
     def on_clicked(self):
         """toggle expand/collapse of section by clicking"""
         if self.section.isExpanded():
+            self.mwindow.road_network_toolbox.disable_show_of_curved_lanelet()
             self.section.setExpanded(False)
         else:
+            self.mwindow.road_network_toolbox.disable_show_of_curved_lanelet(self.text())
             self.section.setExpanded(True)
 
 class CheckableComboBox(QComboBox):

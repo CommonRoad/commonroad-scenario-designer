@@ -1,6 +1,5 @@
 """Wrapper for the middle visualization."""
 from crdesigner.ui.gui.controller.animated_viewer.animated_viewer_controller import AnimatedViewerController
-#from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.commonroad_viewer import AnimatedViewer
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 
 from typing import Union
@@ -15,20 +14,29 @@ from PyQt5.QtWidgets import *
 class AnimatedViewerWrapperController:
 
     def __init__(self, mwindow, scenario_model: ScenarioModel, scenario_saving_dialog):
+
         self.scenario_model = scenario_model
         self.scenario_model.scenario_changed.connect(self.update_scenario)
+        self.pps_model = mwindow.pps_model
+        self.pps_model.subscribe(self.update_scenario)
+
         self.cr_viewer = AnimatedViewerController(mwindow, self.viewer_callback, self.scenario_model)
         self.scenario_saving_dialog = scenario_saving_dialog
 
         # handle to the toolboxes and the console for the viewer callback
         self.viewer_dock = None
-        self.mwindow = mwindow  # handle back to the main window
+        self.mwindow = mwindow.mwindow_ui  # handle back to the main window
 
-    def update_scenario(self):
-        self.cr_viewer.open_scenario()
+    def update_scenario(self, new_file_added: bool = False):
+        """
+        Notifies the GUI that the sceanrio has changed.
+
+        @param new_file_added: Indikator if the added file is a complete new scenario
+        """
+        self.cr_viewer.open_scenario(new_file_added=new_file_added)
         self.update_view()
         self.mwindow.update_max_step()
-        #Autosave
+        # Autosave
         self.scenario_saving_dialog.autosave(self.scenario_model.get_current_scenario())
 
     def create_viewer_dock(self):
@@ -85,15 +93,14 @@ class AnimatedViewerWrapperController:
 
         return draw_temporary_position
 
-    def update_view(self, new_file_added: bool = None, focus_on_network=None):
+    def update_view(self):
         """
-        Update all components.  
-        :param new_file_added: if a new cr file was created or added
+        Update all components.
         """
         # reset selection of all other selectable elements
         if not self.scenario_model.scenario_created():
             return
-        self.cr_viewer.update_plot(new_file_added=new_file_added)
+        self.cr_viewer.update_plot()
 
     def update_window(self):
         self.toolbar.setStyleSheet('background-color:' + self.mwindow.colorscheme().background +

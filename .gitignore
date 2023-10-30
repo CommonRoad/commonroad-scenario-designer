@@ -113,3 +113,4 @@ ENV/
 # projectile
 .projectile
 *.save
+/crdesigner/config/custom_settings.yaml

@@ -1,12 +1,12 @@
 """
 This module is used to retrieve a Mapillary data from the Mapillary open API.
-An Internet connection is needed and a valid Mapillary ClinetID has to be provided in the config.py file
+An Internet connection is needed and a valid Mapillary ClinetID has to be provided in the osm_config.py file
 """
 
 import json
 from urllib.error import URLError
 from urllib.request import urlopen
-from crdesigner.map_conversion.osm2cr import config
+from crdesigner.config.osm_config import osm_config as config
 from crdesigner.map_conversion.osm2cr.converter_modules.graph_operations import road_graph as rg
 
 

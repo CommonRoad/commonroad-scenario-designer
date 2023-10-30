@@ -1,89 +1,132 @@
+from typing import Union, List
+
 from PyQt5 import QtCore, QtWidgets, QtGui
+from PyQt5.QtWidgets import QMainWindow
+
+from crdesigner.config.config_base import Attribute
+from crdesigner.config.settings_config import settings
+from crdesigner.ui.gui.view.settings.settings_tab_ui import SettingsTabUI
 
 HEIGHT = 25
-COLUMNS = 2
 WIDTHF = 280
 WIDTHM = 390
-FACTOR = 0.7
+FACTOR = 0.9
+FONT_SIZE = 9
 
 
-class SettingsUI(object):
-    def setupUi(self, Settings, mwindow):
+class SettingsUI:
+    """
+    This class creates the settings window and handles the saving and loading of the settings.
+    """
+
+    def __init__(self, mwindow):
+        """Initialize the settings window and all tabs."""
+        # create settings window
         self.mwindow = mwindow
-        self.settings = Settings
+        self.settings = QMainWindow()
         self.settings.setObjectName("Settings")
-        self.settings.resize(int(1820 * FACTOR), int(1150 * FACTOR))
-        self.centralwidget = QtWidgets.QWidget(Settings)
-        self.centralwidget.setObjectName("centralwidget")
-        self.centralLayout = QtWidgets.QVBoxLayout(self.centralwidget)
-        self.centralwidget.setObjectName("centralLayout")
-        self.tabWidget = QtWidgets.QTabWidget(self.centralwidget)
+        self.settings.resize(int(1820 * FACTOR), int(1400 * FACTOR))
+
+        # Define a stylesheet with the desired font size and apply it to the settings window
+        stylesheet = "QWidget { font-size: %dpt; }" % FONT_SIZE
+        self.settings.setStyleSheet(stylesheet)
+
+        # create central widget
+        self.central_widget = QtWidgets.QWidget(self.settings)
+        self.central_widget.setObjectName("centralwidget")
+        self.centralLayout = QtWidgets.QVBoxLayout(self.central_widget)
+        self.centralLayout.setContentsMargins(0, 0, 0, 0)  # No margins
+        self.central_widget.setObjectName("centralLayout")
+
+        # create tab widget
+        self.tabWidget = QtWidgets.QTabWidget(self.central_widget)
         self.centralLayout.addWidget(self.tabWidget)
         self.tabBar = QtWidgets.QTabBar()
         self.tabWidget.setTabBar(self.tabBar)
 
-        self.frame = QtWidgets.QFrame(self.centralwidget)
+        # create tab gui
+        self.frame = QtWidgets.QFrame(self.central_widget)
         self.frameLayout = QtWidgets.QHBoxLayout(self.frame)
+        self.frameLayout.setContentsMargins(0, 0, 0, 0)  # No margins
         self.frame.setLayout(self.frameLayout)
-        self.frame.setMaximumSize(int(1700 * FACTOR), 43)
         self.frame.setMinimumSize(int(1700 * FACTOR), 43)
 
+        # button cancel
         self.button_cancel = QtWidgets.QPushButton(self.frame)
         self.button_cancel.setObjectName("button_cancel")
+        self.button_cancel.setMinimumSize(150, 40)
         self.button_cancel.setMaximumSize(150, 40)
 
+        # button ok
         self.button_ok = QtWidgets.QPushButton(self.frame)
         self.button_ok.setObjectName("button_ok")
+        self.button_ok.setMinimumSize(150, 40)
         self.button_ok.setMaximumSize(150, 40)
 
         # button set to default
-        self.button_settodefault = QtWidgets.QPushButton(self.frame)
-        self.button_settodefault.setObjectName("button_set_to_default")
-        self.button_settodefault.setMaximumSize(150, 40)
+        self.button_set_to_default = QtWidgets.QPushButton(self.frame)
+        self.button_set_to_default.setObjectName("button_set_to_default")
+        self.button_set_to_default.setMinimumSize(150, 40)
+        self.button_set_to_default.setMaximumSize(150, 40)
 
-        self.space = QtWidgets.QLabel()
-        self.frameLayout.addWidget(self.space)
+        # spacer
+        spacer_fixed = QtWidgets.QSpacerItem(20, 1, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+        spacer_expanding = QtWidgets.QSpacerItem(1, 1, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+
+        # button select directory
+        self.button_select_directory = QtWidgets.QPushButton(self.frame)
+        self.button_select_directory.setObjectName("button_select_directory")
+        self.button_select_directory.setText("Select Directory")
+        self.button_select_directory.setMinimumSize(180, 40)
+        self.button_select_directory.setMaximumSize(180, 40)
+
+        # label settings directory
+        self.label_settings_directory = QtWidgets.QLabel(self.frame)
+        self.label_settings_directory.setObjectName("label_settings_directory")
+        self.label_settings_directory.setText(settings.CUSTOM_SETTINGS_DIR)
+        self.label_settings_directory.setMinimumSize(500, 40)
+        settings.get_attribute("CUSTOM_SETTINGS_DIR").subscribe(self.label_settings_directory.setText)
+
+        # create directory selection layout
+        self.frameLayout.addItem(spacer_fixed)
+        self.frameLayout.addWidget(self.button_select_directory)
+        self.frameLayout.addWidget(self.label_settings_directory)
+
+        # create expanding spacer
+        self.frameLayout.addItem(spacer_expanding)
+
+        # add buttons
         self.frameLayout.addWidget(self.button_cancel)
         self.frameLayout.addWidget(self.button_ok)
-        self.frameLayout.addWidget(self.button_settodefault)
+        self.frameLayout.addWidget(self.button_set_to_default)
 
+        # add frame
         self.centralLayout.addWidget(self.frame)
 
-        Settings.setCentralWidget(self.centralwidget)
-        self.menubar = QtWidgets.QMenuBar(Settings)
+        # tab gui
+        self.settings.setCentralWidget(self.central_widget)
+        self.menubar = QtWidgets.QMenuBar(self.settings)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 990, 23))
         self.menubar.setObjectName("menubar")
-        Settings.setMenuBar(self.menubar)
-        self.statusbar = QtWidgets.QStatusBar(Settings)
+        self.settings.setMenuBar(self.menubar)
+        self.statusbar = QtWidgets.QStatusBar(self.settings)
         self.statusbar.setObjectName("statusbar")
-        Settings.setStatusBar(self.statusbar)
+        self.settings.setStatusBar(self.statusbar)
 
-        # adding different setting tabs
-        self.gui_settings = None
-        # self.gui_settings.setupUi(self.tabWidget)
-        # self.tabWidget.addTab(self.gui_settings.scrollArea, "GUI")
-        #
-        self.sumo_settings = None
-        # self.sumo_settings.setupUi(self.tabWidget)
-        # self.tabWidget.addTab(self.sumo_settings.scrollArea, "SUMO")
-        #
-        self.osm_settings = None  # self.osm_settings.setupUi(self.tabWidget)  # self.tabWidget.addTab(
-        # self.osm_settings.scrollArea, "OSM")
-
-    def retranslateUi(self, MainWindow):
+    def _retranslate_ui(self, mwindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "Settings"))
+
+        mwindow.setWindowTitle(_translate("MainWindow", "Settings"))
         self.button_ok.setText(_translate("MainWindow", "Ok"))
         self.button_cancel.setText(_translate("MainWindow", "Cancel"))
-        # set to default
-        self.button_settodefault.setText(_translate("MainWindow", "Set to default"))
-
-        self.gui_settings.retranslateUi(self.tabWidget)
-        self.sumo_settings.retranslateUi(self.tabWidget)
-        self.osm_settings.retranslateUi(self.tabWidget)
+        self.button_set_to_default.setText(_translate("MainWindow", "Set to default"))
 
     def update_window(self):
+        """This function updates the settings window by setting all necessary colors."""
+        # get colorscheme
         p = QtGui.QPalette()
+
+        # set colors for settings window
         p.setColor(QtGui.QPalette.ColorRole.Window, QtGui.QColor(self.mwindow.colorscheme().background))
         p.setColor(QtGui.QPalette.ColorRole.Base, QtGui.QColor(self.mwindow.colorscheme().second_background))
         p.setColor(QtGui.QPalette.ColorRole.Button, QtGui.QColor(self.mwindow.colorscheme().background))
@@ -92,13 +135,20 @@ class SettingsUI(object):
         p.setColor(QtGui.QPalette.ColorRole.WindowText, QtGui.QColor(self.mwindow.colorscheme().color))
         p.setColor(QtGui.QPalette.ColorRole.Link, QtGui.QColor(self.mwindow.colorscheme().background))
 
+        # set colors for tab bar
         self.settings.setPalette(p)
 
+        # set colors for elements
         p.setColor(QtGui.QPalette.ColorRole.Button, QtGui.QColor(self.mwindow.colorscheme().highlight))
         p.setColor(QtGui.QPalette.ColorRole.Foreground, QtGui.QColor(self.mwindow.colorscheme().highlight_text))
         p.setColor(QtGui.QPalette.ColorRole.ButtonText, QtGui.QColor(self.mwindow.colorscheme().highlight_text))
+
+        # set colors for buttons
         self.tabBar.setPalette(p)
         self.button_ok.setPalette(p)
         self.button_cancel.setPalette(p)
-        # set_to_default_button
-        self.button_settodefault.setPalette(p)
+        self.button_set_to_default.setPalette(p)
+
+    def _add_tab(self, name: str, layout: List[List[Union[Attribute, str]]]):
+        tab = SettingsTabUI(layout, self, FACTOR, WIDTHF, WIDTHM, HEIGHT, FONT_SIZE)
+        self.tabWidget.addTab(tab.scrollArea, name)

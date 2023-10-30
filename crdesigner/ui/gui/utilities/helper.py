@@ -1,9 +1,9 @@
-from typing import Tuple
+from typing import List
 import numpy as np
 from matplotlib.path import Path
 from matplotlib.patches import PathPatch
 
-# TODO: Controller
+
 def _merge_dict(source, destination):
     """deeply merges two dicts
     """
@@ -16,8 +16,8 @@ def _merge_dict(source, destination):
             destination[key] = value
     return destination
 
-# TODO: View
-def draw_lanelet_polygon(lanelet, ax, color, alpha, zorder, label) -> Tuple[float, float, float, float]:
+
+def draw_lanelet_polygon(lanelet, ax, color, alpha, zorder, label) -> List[float]:
     # TODO efficiency
     verts = []
     codes = [Path.MOVETO]
@@ -27,7 +27,7 @@ def draw_lanelet_polygon(lanelet, ax, color, alpha, zorder, label) -> Tuple[floa
     ylim1 = float("Inf")
     ylim2 = -float("Inf")
 
-    for x, y in np.vstack([lanelet.left_vertices, lanelet.right_vertices[::-1]]):
+    for x, y in np.vstack([lanelet.left_vertices[:, :2], lanelet.right_vertices[::-1, :2]]):
         verts.append([x, y])
         codes.append(Path.LINETO)
 
@@ -41,11 +41,11 @@ def draw_lanelet_polygon(lanelet, ax, color, alpha, zorder, label) -> Tuple[floa
 
     path = Path(verts, codes)
 
-    ax.add_patch(PathPatch(path, facecolor=color, edgecolor="black", lw=0.0, alpha=alpha, zorder=zorder, label=label, ))
+    ax.add_patch(PathPatch(path, facecolor=color, edgecolor="black", lw=0.0, alpha=alpha, zorder=zorder, label=label))
 
     return [xlim1, xlim2, ylim1, ylim2]
 
-# TODO: Controller
+
 def calculate_closest_vertices(point, vertices):
     distances = np.array([])
     for vertex in vertices:
@@ -54,16 +54,16 @@ def calculate_closest_vertices(point, vertices):
     shortest_distance_index = np.argmin(distances)
     return shortest_distance_index
 
-# TODO: Controller
+
 def calculate_euclidean_distance(point1, point2):
     distance = np.sqrt(np.power(point1[0] - point2[0], 2) + np.power(point1[1] - point2[1], 2))
     return distance
 
-# TODO: Controller
+
 def unit_vector(vector):
     return vector / np.linalg.norm(vector)
 
-# TODO: Controller
+
 def angle_between(v1, v2):
     v1_u = unit_vector(v1)
     v2_u = unit_vector(v2)

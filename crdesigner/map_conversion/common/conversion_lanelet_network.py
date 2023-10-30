@@ -12,9 +12,10 @@ from pyproj import Transformer
 
 from commonroad.scenario.lanelet import LaneletNetwork, StopLine
 from commonroad.scenario.intersection import IntersectionIncomingElement, Intersection
-from commonroad.scenario.traffic_sign import TrafficLightDirection, TrafficLight, TrafficSign
+from commonroad.scenario.traffic_sign import TrafficSign
+from commonroad.scenario.traffic_light import TrafficLight, TrafficLightDirection
 
-from crdesigner.config.config import OpenDRIVEConversionParams
+from crdesigner.config.opendrive_config import open_drive_config, OpenDriveConfig
 from crdesigner.map_conversion.common import geometry
 from crdesigner.map_conversion.common.utils import convert_to_new_lanelet_id
 from crdesigner.map_conversion.common.conversion_lanelet import ConversionLanelet
@@ -27,8 +28,7 @@ class ConversionLaneletNetwork(LaneletNetwork):
     This class is being used in OpenDrive and Lanelet2 format conversions
     """
 
-    def __init__(self, config: OpenDRIVEConversionParams = OpenDRIVEConversionParams(),
-                 transformer: Optional[Transformer] = None):
+    def __init__(self, config: OpenDriveConfig = open_drive_config, transformer: Optional[Transformer] = None):
         """
         Initializes a ConversionLaneletNetwork
 
@@ -137,6 +137,7 @@ class ConversionLaneletNetwork(LaneletNetwork):
         for key in self._old_lanelet_ids.keys():
             if old_ids.get(key, False) is False:
                 new_lanelet_ids_assigned[key] = self._old_lanelet_ids[key]
+                generate_unique_id(self._old_lanelet_ids[key])
         return new_lanelet_ids_assigned
 
     def prune_network(self):
@@ -636,7 +637,7 @@ class ConversionLaneletNetwork(LaneletNetwork):
                     else:
                         print(direction)
                         warnings.warn("Incorrect direction assigned to successor of incoming lanelet in intersection")
-            intersection_incoming_lane = IntersectionIncomingElement(generate_unique_id(), incoming_lanelet_set,
+            intersection_incoming_lane = IntersectionIncomingElement(generate_unique_id(), set(incoming_lanelet_set),
                                                                      successor_right, successor_straight,
                                                                      successor_left)
 
@@ -755,7 +756,7 @@ class ConversionLaneletNetwork(LaneletNetwork):
         # calculate all incoming angle from the reference incoming vector
         for index in range(1, len(incomings)):
             new_v = self.find_lanelet_by_id(list(incomings[index].incoming_lanelets)[0]).center_vertices[-1] - \
-                    self.find_lanelet_by_id(list(incomings[index].incoming_lanelets)[0]).center_vertices[-3]
+                    self.find_lanelet_by_id(list(incomings[index].incoming_lanelets)[0]).center_vertices[-2]
             angle = geometry.get_angle(ref, new_v)
             if angle < 0:
                 angle += 360
@@ -1133,7 +1134,7 @@ class _JoinSplitTarget:
 
     def __init__(self,lanelet_network: ConversionLaneletNetwork, main_lanelet: ConversionLanelet, split: bool,
                  join: bool, transformer: Optional[Transformer] = None,
-                 precision: float = OpenDRIVEConversionParams.precision):
+                 precision: float = open_drive_config.precision):
         """
 
         :param lanelet_network: LaneletNetwork where join/split occurs.
@@ -1520,7 +1521,7 @@ class _JoinSplitPair:
     """Pair of lanelet whose border is changed and its adjacent neighbor."""
 
     def __init__(self, lanelet, adjacent_lanelet, change_interval,
-                 precision: float = OpenDRIVEConversionParams.precision):
+                 precision: float = open_drive_config.precision):
         self.lanelet = lanelet
         self.adjacent_lanelet = adjacent_lanelet
         self.change_interval = change_interval

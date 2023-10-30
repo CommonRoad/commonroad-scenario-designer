@@ -7,7 +7,7 @@ import sys
 import logging
 import matplotlib.pyplot as plt
 
-from crdesigner.map_conversion.osm2cr import config
+from crdesigner.config.osm_config import osm_config as config
 from crdesigner.map_conversion.osm2cr.converter_modules.cr_operations import export
 from crdesigner.map_conversion.osm2cr.converter_modules.osm_operations import osm_parser
 from crdesigner.map_conversion.osm2cr.converter_modules.utility import plots

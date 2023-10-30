@@ -11,7 +11,7 @@ The toolbox includes a graphical user interface (GUI) for creating, editing, and
 and scenarios, a command line interface, and different Python APIs.
 
 .. note::
-    This release (v0.7.1) is still a BETA version.
+    This release (v0.8.0) is still a BETA version.
     In case you encounter errors or want to provide us feedback, please post them in our
     `forum <https://commonroad.in.tum.de/forum/c/scenario-designer/18>`_.
 
@@ -65,15 +65,40 @@ Getting Started
 A tutorial on the Python APIs can be found in the form of jupyter notebooks in the tutorials folder.
 We also provide exemplary Python scripts for each conversion within the same folder.
 
-Subsequently, we briefly explain how to use the command line interface.
-Note that you have to activate first the Python environment in which the CommonRoad Scenario Designer was installed.
-Converting a file from OpenDRIVE to CommonRoad with the command line::
+Note that you have to activate first the Python environment in which the CommonRoad Scenario Designer is installed.
+You can also execute a map conversion via the commandline interface, e.g.,
+`crdesigner --input-file /input/path/l2file.osm  --output-file /output/path/crfile.xml lanelet2cr`.
+The output of `crdesigner --help` looks as follows::
 
-    crdesigner [mode] -i [input_file] -o [output_file] -c -f -t [tags] --proj [proj-string] --adjacencies --left-driving --author --affiliation
+    Usage: crdesigner [OPTIONS] COMMAND [ARGS]...
 
-For a description of the command line arguments please execute::
+    Toolbox for Map Conversion and Scenario Creation for Autonomous Vehicles
 
-    crdesigner -h
+        Options:
+          --input-file PATH               Path to OpenDRIVE map
+          --output-file PATH              Path where CommonRoad map should be stored
+          --force-overwrite / --no-force-overwrite
+                                          Overwrite existing CommonRoad file
+                                          [default: force-overwrite]
+          --author TEXT                   Your name
+          --affiliation TEXT              Your affiliation, e.g., university, research
+                                          institute, company
+          --tags TEXT                     Tags for the created map
+          --install-completion [bash|zsh|fish|powershell|pwsh]
+                                          Install completion for the specified shell.
+          --show-completion [bash|zsh|fish|powershell|pwsh]
+                                          Show completion for the specified shell, to
+                                          copy it or customize the installation.
+          --help                          Show this message and exit.
+
+        Commands:
+          crlanelet2
+          crsumo
+          gui
+          lanelet2cr
+          odrcr
+          osmcr
+          sumocr`
 
 The GUI can be started from command line via the following two options::
 
@@ -82,8 +107,6 @@ The GUI can be started from command line via the following two options::
 or::
 
     crdesigner gui
-
-
 
 We provide more detailed information and examples under the following links, e.g., information about implementation details, API usage, or limitations:
 

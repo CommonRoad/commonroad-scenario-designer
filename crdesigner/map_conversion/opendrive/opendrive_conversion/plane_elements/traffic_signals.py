@@ -5,12 +5,13 @@ from crdesigner.map_conversion.opendrive.opendrive_conversion import utils
 from typing import Union, Tuple, List
 
 from crdesigner.map_conversion.opendrive.opendrive_parser.elements.road import Road
-from crdesigner.map_conversion.common.utils import generate_unique_id
+from crdesigner.map_conversion.common.utils import generate_unique_id, get_default_cycle
 from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadLanes import LaneSection
 from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadSignal import Signal
 
-from commonroad.scenario.traffic_sign import TrafficSign, TrafficLight, TrafficSignElement, TrafficSignIDZamunda, \
+from commonroad.scenario.traffic_sign import TrafficSign, TrafficSignElement, TrafficSignIDZamunda, \
     TrafficSignIDGermany, TrafficSignIDUsa, TrafficSignIDChina, TrafficSignIDSpain, TrafficSignIDRussia
+from commonroad.scenario.traffic_light import TrafficLight
 from commonroad.scenario.lanelet import StopLine, LineMarking
 
 
@@ -161,7 +162,8 @@ def get_traffic_signals(road: Road) -> Tuple[List[TrafficLight], List[TrafficSig
             # we ignore such signals in order not cause trouble in traffic simulation
             if signal.type != ("1000002" or "1000007" or "1000013"):
 
-                traffic_light = TrafficLight(traffic_light_id=signal.id + 2000, cycle=[], position=position)
+                traffic_light = TrafficLight(traffic_light_id=generate_unique_id(), position=position,
+                                             traffic_light_cycle=get_default_cycle())  # TODO remove for new CR-Format
 
                 traffic_lights.append(traffic_light)
             else:

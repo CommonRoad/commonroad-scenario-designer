@@ -2,7 +2,6 @@ from PyQt5.QtCore import QUrl
 from PyQt5.QtGui import QIcon, QKeySequence, QDesktopServices
 from PyQt5.QtWidgets import QAction
 
-from crdesigner.ui.gui.controller.settings.settings_controller import SettingsController
 from crdesigner.ui.gui.utilities.file_actions import file_new, open_commonroad_file, file_save
 
 
@@ -17,8 +16,14 @@ def open_cr_forum():
 
 
 class MenuBarUI:
+    """
+    Class to create the menu bar of the main window.
+    """
 
     def __init__(self, mwindow):
+        """
+        Constructor of the menu bar.
+        """
         self.mwindow_ui = mwindow.mwindow_ui
         self.mwindow = mwindow
 
@@ -91,6 +96,6 @@ class MenuBarUI:
 
     def show_settings(self):
         """
-                Show the settings.
+        Show the settings.
         """
-        self.mwindow_ui.settings = SettingsController(self.mwindow)
+        self.mwindow.settings.show()

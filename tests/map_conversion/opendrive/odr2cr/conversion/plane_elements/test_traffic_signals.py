@@ -89,12 +89,13 @@ class TestTrafficSignals(unittest.TestCase):
         self.assertEqual(element_id, TrafficSignIDGermany.UNKNOWN)
 
     def test_get_traffic_signals(self):
+        generate_unique_id(0)
         # true stop line
         line = StopLine(np.array([2.828427818, 4.242640225]), np.array([2.828427818, 4.242640225]), LineMarking.SOLID)
         # true traffic light
         position = np.array([15 * np.cos(0.785398) + (2 * np.cos(0.785398 + np.pi / 2)),
                              15 * np.sin(0.785398) + (2 * np.sin(0.785398 + np.pi / 2))])
-        traffic_light = TrafficLight(2003, [], position=position)
+        traffic_light = TrafficLight(1, position=position, traffic_light_cycle=get_default_cycle())
         # true traffic sign
         position = np.array([20 * np.cos(0.785398) + (2 * np.cos(0.785398 + np.pi / 2)),
                              20 * np.sin(0.785398) + (2 * np.sin(0.785398 + np.pi / 2))])

@@ -1,6 +1,7 @@
 import numpy as np
 from typing import List
-from crdesigner.map_conversion.common.conversion_lanelet import  ConversionLanelet
+from crdesigner.map_conversion.common.conversion_lanelet import ConversionLanelet
+from crdesigner.map_conversion.common.utils import generate_unique_id
 
 
 def get_crosswalks(road) -> List[ConversionLanelet]:
@@ -37,7 +38,7 @@ def get_crosswalks(road) -> List[ConversionLanelet]:
 
         center_vertices = (left_vertices + right_vertices) / 2
         # create ConversionLanelet
-        lanelet = ConversionLanelet(None, left_vertices, center_vertices, right_vertices, crosswalk.id,
-                                    lanelet_type='crosswalk')
+        lanelet = ConversionLanelet(None, left_vertices, center_vertices, right_vertices,
+                                    generate_unique_id(), lanelet_type='crosswalk')
         crosswalks.append(lanelet)
     return crosswalks

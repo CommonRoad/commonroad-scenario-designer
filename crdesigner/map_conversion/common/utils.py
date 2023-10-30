@@ -1,3 +1,7 @@
+import warnings
+
+from commonroad.scenario.traffic_light import TrafficLightState, TrafficLightCycleElement, TrafficLightCycle
+
 
 def generate_unique_id(set_id: int = None) -> int:
     """
@@ -18,27 +22,50 @@ def generate_unique_id(set_id: int = None) -> int:
 
 def convert_to_new_lanelet_id(old_lanelet_id: str, ids_assigned: dict) -> int:
     """
-    Convert the old lanelet ids (format 501.1.-1.-1) to newer, simpler ones (100, 101 etc.). Do this by consecutively
-    assigning numbers, starting at 100, to the old_lanelet_id strings. Save the assignments in the dict which is passed
-    to the function as ids_assigned.
+    Convert the old lanelet ids (format 501.1.-1.-1) to newer, simpler ones (100, 101 etc.).
+    Save the assignments in the dict which is passed to the function as ids_assigned.
 
     :param old_lanelet_id: Old id with format '501.1.-1.-1'
-    :type old_lanelet_id: str
     :param ids_assigned: Dict with all previous assignments
-    :type ids_assigned: dict
     :return: The new lanelet id
-    :rtype: int
     """
-
-    starting_lanelet_id = 100
 
     if old_lanelet_id in ids_assigned.keys():
         new_lanelet_id = ids_assigned[old_lanelet_id]
     else:
-        try:
-            new_lanelet_id = generate_unique_id()
-        except ValueError:
-            new_lanelet_id = starting_lanelet_id
+        new_lanelet_id = generate_unique_id()
         ids_assigned[old_lanelet_id] = new_lanelet_id
 
     return new_lanelet_id
+
+
+def get_default_cycle() -> TrafficLightCycle:
+    """
+    Defines default traffic light cycle in case no cycle is provided
+
+    _:returns traffic light cycle element
+    """
+    cycle = [(TrafficLightState.RED, 60), (TrafficLightState.RED_YELLOW, 10), (TrafficLightState.GREEN, 60),
+             (TrafficLightState.YELLOW, 10)]
+    cycle_element_list = [TrafficLightCycleElement(state[0], state[1]) for state in cycle]
+    return TrafficLightCycle(cycle_element_list)
+
+
+def clean_projection_string(proj_str: str) -> str:
+    """
+    Removes parts from projection string which are not supported by our used projection package.
+
+    :param proj_str: Original projection string.
+    :returns: Updated projection string.
+    """
+    final_str = ""
+    if "geoidgrids" in proj_str:
+        for tmp_str in proj_str.split("+"):
+            if "geoidgrids" in tmp_str:
+                warnings.warn("geoidgrids removed from projection string")
+                continue
+            final_str += f"+{tmp_str}" if tmp_str != '' else ''
+    else:
+        final_str = proj_str
+    final_str = final_str.replace("\n", "").lstrip().rstrip()
+    return final_str

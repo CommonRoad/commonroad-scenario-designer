@@ -39,6 +39,11 @@ class ToolBarUI:
         self.action_converter_toolbox = QAction(QIcon(":/icons/tools.ico"), "Open Map Converter Toolbox", mwindow_ui)
         self.tb2.addAction(self.action_converter_toolbox)
 
+        self.action_scenario_toolbox = QAction(QIcon(":/icons/scenario_toolbox.png"), "Open Scenario Toolbox",
+                                               mwindow_ui)
+        self.tb2.addAction(self.action_scenario_toolbox)
+
+
         # Undo / Redo
         self.tb2.addSeparator()
         self.tb3 = self.mwindow_ui.addToolBar("Undo/Redo")
@@ -108,9 +113,9 @@ class ToolBarUI:
         self.tb5.addAction(self.merge_lanelet)
         self.merge_lanelet.setDisabled(True)
 
-        self.cropp_map = QAction(QIcon(":/icons/cropp_map.png"), "crop map", mwindow_ui)
-        self.tb5.addAction(self.cropp_map)
-        self.cropp_map.setCheckable(True)
+        self.crop_map = QAction(QIcon(":/icons/crop_map.png"), "crop map", mwindow_ui)
+        self.tb5.addAction(self.crop_map)
+        self.crop_map.setCheckable(True)
 
     def reset_toolbar(self):
         if self.split_lanelet.isChecked():

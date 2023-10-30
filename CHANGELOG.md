@@ -1,15 +1,53 @@
 # Changelog
 
-## [0.8.0] - 2023-08-XX
-
-### Changed
-- GUI backend using MVC pattern
+## [0.8.0] - 2023-10-31
 
 ### Added
 - Cropping of a map in the GUI
-- Background saves and with restore functionality
+- Background saves with restore functionality
+- Scenario toolbox to specify planning problems
+- Widget to edit settings of scenario
+- Editing and adding curved lanelet via matplotlib visualization
+- Support for visualizing scenarios with 3D coordinates on 2D plane
+- cr2lanelet line marking conversion
+- cr2lanelet bidirectional users conversion
+- Tool for CommonRoad map verification and repairing
+- Possibility to change look of the GUI into a more modern style
 
-## [0.7.2] - 2023-07-XX
+
+### Changed
+- GUI backend using MVC pattern
+- Config model
+- Automated creation of settings windows
+- Support for commonroad-io 2023.3
+- Commandline interface to use typer
+
+### Fixed
+- Handling of projection strings which contain elements which third-party tool does not support
+- Issue when creating adjacent lanelets through *lanelet operations*
+- No recognition of the selected lanelet by the *lanelet operations* widget
+- Changes to some lanelets messing up the lanelet
+- KeyError when yield sign has no stop line in cr2lanelet2 conversion
+- Adaption of commonroad-io traffic light color usage in CommonRoad to lanelet2 conversion
+- Add default traffic light cycle for OpenDRIVE conversion to support 2020a format
+- Rotating lanelet cannot be selected through canvas anymore
+- OpenDRIVE/Lanelet2 conversion intersection incoming lanelets as set instead of list/tuple
+- Relationship of predecessor/successor when creating adjacent lanelets
+- Obstacle information no longer crashes when selecting static obstacle or required state value is missing
+- Visualization of the obstacles colors works fixed
+- Resolved bug where the obstacles where not shown after time step 200
+
+## [0.7.2] - 2023-07-29
+
+### Added
+- Lanelet2 conversion considers z-coordinate/elevation
+
+### Fixed
+- ID assignment lanelet2cr conversion
+- lanelet2cr stop line projection
+
+### Changed
+- minimum cr-io version: 2023.2
 
 ## [0.7.1] - 2023-06-21
 

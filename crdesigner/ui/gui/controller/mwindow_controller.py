@@ -7,12 +7,17 @@ from PyQt5.QtCore import *
 from crdesigner.ui.gui.controller.animated_viewer.animated_viewer_wrapper_controller import \
     AnimatedViewerWrapperController
 from crdesigner.ui.gui.controller.settings.scenario_saving_dialog_controller import ScenarioSavingDialogController
-from crdesigner.ui.gui.controller.toolboxes.road_network_controller.road_network_controller import RoadNetworkController
+from crdesigner.ui.gui.controller.settings.settings_controller import SettingsController
+from crdesigner.ui.gui.controller.toolboxes.road_network_toolbox.road_network_controller import RoadNetworkController
 from crdesigner.ui.gui.controller.toolboxes.obstacle_toolbox.obstacle_controller import ObstacleController
-from crdesigner.ui.gui.controller.toolboxes.converter_toolbox.map_conversion_controller import MapConversionToolboxController
+from crdesigner.ui.gui.controller.toolboxes.converter_toolbox.map_conversion_controller import \
+    MapConversionToolboxController
+from crdesigner.ui.gui.controller.toolboxes.scenario_toolbox.scenario_toolbox_controller import \
+    ScenarioToolboxController
 from crdesigner.ui.gui.controller.top_bar.top_bar_controller import TopBarController
+from crdesigner.ui.gui.model.planning_problem_set_model import PlanningProblemSetModel
 from crdesigner.ui.gui.model.scenario_model import ScenarioModel
-from crdesigner.ui.gui.model.settings.gui_settings_model import gui_settings
+from crdesigner.config.gui_config import gui_config
 from crdesigner.ui.gui.view.console.console_ui import ConsoleUI
 
 from crdesigner.ui.gui.autosaves.autosaves_setup import DIR_AUTOSAVE
@@ -22,12 +27,20 @@ from crdesigner.ui.gui.utilities.util import *
 from crdesigner.ui.gui.view.mwindow_ui import MWindowUI
 
 
+def setup_tmp(tmp_folder_path: str):
+    """
+    Set up the tmp folder of the MWindow at the given Path.
+    """
+    pathlib.Path(tmp_folder_path).mkdir(parents=True, exist_ok=True)
+
+
 class MWindowController:
+    """Controller for the main window of the GUI."""
 
-    def __init__(self, input_file=None):
-
+    def __init__(self):
+        """Constructor of the main window controller."""
         # init or set all attributes here
-        self.tmp_folder = gui_settings.MWINDOW_TMP_FOLDER_PATH
+        self.tmp_folder = gui_config.MWINDOW_TMP_FOLDER_PATH
         self.filename = None
         self.slider_clicked = False
         self.play_activated = False
@@ -35,19 +48,20 @@ class MWindowController:
 
         # init scenario model
         self.scenario_model = ScenarioModel()
+        self.pps_model = PlanningProblemSetModel()
 
         # init any objects here
-        self.scenario_saving_dialog = ScenarioSavingDialogController()
+        self.scenario_saving_dialog = ScenarioSavingDialogController(self.scenario_model, self.pps_model)
         # scenario_model is given
 
         # call the setup methods in the service layer
-        self.setup_tmp(tmp_folder_path=self.tmp_folder)
+        setup_tmp(tmp_folder_path=self.tmp_folder)
 
         # init UI
         self.mwindow_ui = MWindowUI()
         self.mwindow_ui.closeEvent = self.close_event
 
-        self.animated_viewer_wrapper = AnimatedViewerWrapperController(mwindow=self.mwindow_ui,
+        self.animated_viewer_wrapper = AnimatedViewerWrapperController(mwindow=self,
                                                                        scenario_model=self.scenario_model,
                                                                        scenario_saving_dialog=self.scenario_saving_dialog)
         self.mwindow_ui.animated_viewer_wrapper = self.animated_viewer_wrapper
@@ -69,7 +83,12 @@ class MWindowController:
         self.mwindow_ui.addDockWidget(Qt.RightDockWidgetArea, self.map_converter_toolbox)
         self.mwindow_ui.map_converter_toolbox = self.map_converter_toolbox
 
+        self.scenario_toolbox = ScenarioToolboxController(mwindow=self)
+        self.mwindow_ui.addDockWidget(Qt.RightDockWidgetArea, self.scenario_toolbox)
+        self.mwindow_ui.scenario_toolbox = self.scenario_toolbox
+
         self.mwindow_ui.top_bar = TopBarController(self)
+        self.settings = SettingsController(self)
 
         # IMPORTANT: this has to be after the toolboxes, otherwise the handle used in the fileactions to the viewer_dock
         # gets lost (by the setCentralWidget method)
@@ -77,19 +96,20 @@ class MWindowController:
         self.status = self.mwindow_ui.statusbar
         self.status.showMessage("Welcome to CR Scenario Designer")
 
-        self.check_for_autosaved_file()
+        self.check_for_auto_saved_file()
         self.mwindow_ui.update_window()
         self.center()
 
-    def check_for_autosaved_file(self) -> None:
-        '''
-        Check for the existence of an autosaved file and handles it accordingly.
-        '''
+
+    def check_for_auto_saved_file(self) -> None:
+        """
+        Check for the existence of an auto saved file and handles it accordingly.
+        """
         if os.path.exists(self.path_autosave):
             if self.mwindow_ui.ask_for_autosaved_file():
                 open_commonroad_file(self, self.path_autosave)
                 self.road_network_toolbox.initialize_road_network_toolbox()
-                self.obstacle_toolbox.initialize_obstacle_toolbox()
+                self.obstacle_toolbox.obstacle_toolbox_ui.initialize_obstacle_information()
             else:
                 os.remove(self.path_autosave)
 
@@ -104,12 +124,6 @@ class MWindowController:
         """
         return self.check_scenario_service_layer(scenario=scenario)
 
-    def setup_tmp(self, tmp_folder_path: str):
-        """
-        Set up the tmp folder of the MWindow at the given Path.
-        """
-        pathlib.Path(tmp_folder_path).mkdir(parents=True, exist_ok=True)
-
     def center(self):
         """Function that makes sure the main window is in the center of screen."""
         screen = QDesktopWidget().screenGeometry()
@@ -118,19 +132,15 @@ class MWindowController:
 
     # TODO: MODEL
     def store_scenario_service_layer(self):
-        # Moved to scenario_model.py
-        #TODO: resolve access to MVC
+        """Store the current scenario in the view in the scenario model."""
         scenario = self.mwindow_ui.animated_viewer_wrapper.cr_viewer.current_scenario
-        self.scenario_model.store_scenario_service_layer(scenario)
+        self.scenario_model.set_scenario(scenario)
 
         # TODO: move as signal update  # self.mwindow_ui.update_toolbox_scenarios()
 
     def update_toolbox_scenarios_service_layer(self):
-        #TODO: Update to scenario_model
+        # TODO: Update to scenario_model
         scenario = self.mwindow_ui.animated_viewer_wrapper.cr_viewer.current_scenario
-        self.mwindow_ui.road_network_toolbox.refresh_toolbox(scenario)
-        self.mwindow_ui.obstacle_toolbox.refresh_toolbox(scenario)
-        self.mwindow_ui.map_converter_toolbox.refresh_toolbox(scenario)
         if SUMO_AVAILABLE:
             self.mwindow_ui.obstacle_toolbox.sumo_simulation.scenario = scenario
             self.mwindow_ui.map_converter_toolbox.sumo_simulation.scenario = scenario
@@ -158,7 +168,7 @@ class MWindowController:
         if found_ids and verbose:
             error_score = max(error_score, fatal_error)
             self.mwindow_ui.crdesigner_console_wrapper.text_browser.append(
-                "invalid traffic light refs: " + str(found_ids))
+                    "invalid traffic light refs: " + str(found_ids))
             QMessageBox.critical(self.mwindow_ui, "CommonRoad XML error",
                                  "Scenario contains invalid traffic light refenence(s): " + str(found_ids),
                                  QMessageBox.Ok, )
@@ -167,7 +177,7 @@ class MWindowController:
         if found_ids and verbose:
             error_score = max(error_score, fatal_error)
             self.mwindow_ui.crdesigner_console_wrapper.text_browser.append(
-                "invalid traffic sign refs: " + str(found_ids))
+                    "invalid traffic sign refs: " + str(found_ids))
             QMessageBox.critical(self.mwindow_ui, "CommonRoad XML error",
                                  "Scenario contains invalid traffic sign refenence(s): " + str(found_ids),
                                  QMessageBox.Ok, )
@@ -197,5 +207,3 @@ class MWindowController:
             if os.path.exists(self.path_autosave):
                 os.remove(self.path_autosave)
             qApp.quit()
-
-

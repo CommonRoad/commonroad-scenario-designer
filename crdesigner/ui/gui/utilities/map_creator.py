@@ -1,12 +1,19 @@
-import numpy as np
 from scipy.interpolate import interp1d
-from typing import Tuple
+from typing import Tuple, Union, Set, List
+import numpy as np
 
 from commonroad.scenario.intersection import Intersection
 from commonroad.scenario.intersection import IntersectionIncomingElement
 from commonroad.scenario.lanelet import RoadUser, LaneletNetwork, Lanelet, LineMarking, LaneletType, StopLine
 from commonroad.scenario.scenario import Scenario
-from commonroad.scenario.traffic_sign import *
+from commonroad.scenario.traffic_sign import (
+    TrafficSign, TrafficSignElement, TrafficSignIDArgentina, TrafficSignIDBelgium, TrafficSignIDChina,
+    TrafficSignIDCroatia, TrafficSignIDFrance, TrafficSignIDGermany, TrafficSignIDGreece, TrafficSignIDItaly,
+    TrafficSignIDPuertoRico, TrafficSignIDRussia, TrafficSignIDSpain, TrafficSignIDUsa,  TrafficSignIDZamunda)
+from commonroad.scenario.traffic_light import (TrafficLight, TrafficLightCycleElement, TrafficLightState,
+                                               TrafficLightCycle)
+from commonroad.common.util import is_natural_number
+
 
 # TODO: UNCERTAIN (either controller or model)
 class MapCreator:
@@ -47,7 +54,8 @@ class MapCreator:
         @param traffic_lights: Referenced traffic lights by new lanelet.
         @param backwards: Boolean indicating whether lanelet should be rotated by 180°.
         @param stop_line_at_end: Boolean indicating whether stop line positions should correspond with end of lanelet.
-        @param stop_line_at_beginning: Boolean indicating whether stop line positions should correspond with beginning of lanelet.
+        @param stop_line_at_beginning: Boolean indicating whether stop line positions should correspond
+        with beginning of lanelet.
         @return: Newly created lanelet.
         """
         eps = 0.1e-15
@@ -282,7 +290,8 @@ class MapCreator:
         wid_pred = np.round(np.linalg.norm(predecessor.left_vertices[0] - predecessor.right_vertices[0]), 2)
         same_length_width = len_suc == len_pred and wid_suc == wid_pred
 
-        if MapCreator.lanelet_is_straight(predecessor) and MapCreator.lanelet_is_straight(successor) and not intersection and same_length_width:
+        if (MapCreator.lanelet_is_straight(predecessor) and
+                MapCreator.lanelet_is_straight(successor) and not intersection and same_length_width):
             successor._left_vertices = predecessor.left_vertices
             successor._center_vertices = predecessor.center_vertices
             successor._right_vertices = predecessor.right_vertices
@@ -343,7 +352,6 @@ class MapCreator:
 
         MapCreator.set_predecessor_successor_relation(predecessor, successor)
 
-
     @staticmethod
     def fit_to_successor(successor: Lanelet, predecessor: Lanelet):
         """
@@ -380,7 +388,6 @@ class MapCreator:
                         or not same_length_width and successor.center_vertices[-1][1] < successor.center_vertices[0][1]:
                     ang = -ang
 
-
         predecessor.translate_rotate(np.array([0, 0]), ang)
 
         if pred_straight and suc_straight and same_length_width:
@@ -390,14 +397,14 @@ class MapCreator:
             trans = successor.center_vertices[0] - predecessor.center_vertices[-1]
             predecessor.translate_rotate(trans, 0)
 
-        if not suc_straight and (np.round(predecessor.left_vertices[-1], 5) != np.round(successor.left_vertices[0], 5)).any() and same_length_width:
+        if not suc_straight and (np.round(predecessor.left_vertices[-1], 5) !=
+                                 np.round(successor.left_vertices[0], 5)).any() and same_length_width:
             ang *= -2
             predecessor.translate_rotate(np.array([0, 0]), ang)
             trans = successor.center_vertices[0] - predecessor.center_vertices[-1]
             predecessor.translate_rotate(trans, 0)
 
         MapCreator.set_predecessor_successor_relation(predecessor, successor)
-
 
     @staticmethod
     def calc_angle_between_lanelets(predecessor: Lanelet, lanelet: Lanelet):
@@ -652,26 +659,30 @@ class MapCreator:
                                        TrafficLightCycleElement(TrafficLightState.RED_YELLOW, 30),
                                        TrafficLightCycleElement(TrafficLightState.GREEN, 100),
                                        TrafficLightCycleElement(TrafficLightState.YELLOW, 30)]
-            traffic_light_one = TrafficLight(scenario.generate_object_id(), traffic_light_cycle_one,
-                                             new_lanelets[0].right_vertices[-1] + np.array([-1, -2]))
+            traffic_light_one = TrafficLight(scenario.generate_object_id(),
+                                             new_lanelets[0].right_vertices[-1] + np.array([-1, -2]),
+                                             TrafficLightCycle(traffic_light_cycle_one))
             new_traffic_lights.append(traffic_light_one)
             new_lanelets[0].add_traffic_light_to_lanelet(traffic_light_one.traffic_light_id)
             light_ids[0] = {traffic_light_one.traffic_light_id}
 
-            traffic_light_two = TrafficLight(scenario.generate_object_id(), traffic_light_cycle_one,
-                                             new_lanelets[9].right_vertices[-1] + np.array([1, 2]))
+            traffic_light_two = TrafficLight(scenario.generate_object_id(),
+                                             new_lanelets[9].right_vertices[-1] + np.array([1, 2]),
+                                             TrafficLightCycle(traffic_light_cycle_one))
             new_traffic_lights.append(traffic_light_two)
             new_lanelets[9].add_traffic_light_to_lanelet(traffic_light_two.traffic_light_id)
             light_ids[1] = {traffic_light_two.traffic_light_id}
 
-            traffic_light_three = TrafficLight(scenario.generate_object_id(), traffic_light_cycle_two,
-                                               new_lanelets[15].right_vertices[-1] + np.array([2, -2]))
+            traffic_light_three = TrafficLight(scenario.generate_object_id(),
+                                               new_lanelets[15].right_vertices[-1] + np.array([2, -2]),
+                                               TrafficLightCycle(traffic_light_cycle_two))
             new_traffic_lights.append(traffic_light_three)
             new_lanelets[15].add_traffic_light_to_lanelet(traffic_light_three.traffic_light_id)
             light_ids[2] = {traffic_light_three.traffic_light_id}
 
-            traffic_light_four = TrafficLight(scenario.generate_object_id(), traffic_light_cycle_two,
-                                              new_lanelets[7].right_vertices[-1] + np.array([-2, 2]))
+            traffic_light_four = TrafficLight(scenario.generate_object_id(),
+                                              new_lanelets[7].right_vertices[-1] + np.array([-2, 2]),
+                                              TrafficLightCycle(traffic_light_cycle_two))
             new_traffic_lights.append(traffic_light_four)
             new_lanelets[7].add_traffic_light_to_lanelet(traffic_light_four.traffic_light_id)
             light_ids[3] = {traffic_light_four.traffic_light_id}
@@ -714,7 +725,8 @@ class MapCreator:
                                                        {LaneletType.UNKNOWN}, road_user_one_way={RoadUser.VEHICLE},
                                                        line_marking_left=LineMarking.DASHED,
                                                        line_marking_right=LineMarking.SOLID))
-        new_lanelets.append(MapCreator.create_adjacent_lanelet(True, new_lanelets[0], lanelet_ids[1], False, width,
+        new_lanelets.append(MapCreator.create_adjacent_lanelet(True, new_lanelets[0], lanelet_ids[1],
+                                                               False, width,
                                                                {LaneletType.UNKNOWN},
                                                                road_user_one_way={RoadUser.VEHICLE},
                                                                line_marking_left=LineMarking.DASHED,
@@ -725,7 +737,8 @@ class MapCreator:
                                                     line_marking_left=LineMarking.NO_MARKING,
                                                     line_marking_right=LineMarking.NO_MARKING))
         MapCreator.fit_to_predecessor(new_lanelets[0], new_lanelets[2], True)
-        new_lanelets.append(MapCreator.create_adjacent_lanelet(True, new_lanelets[2], lanelet_ids[3], False, width,
+        new_lanelets.append(MapCreator.create_adjacent_lanelet(True, new_lanelets[2], lanelet_ids[3],
+                                                               False, width,
                                                                {LaneletType.INTERSECTION},
                                                                road_user_one_way={RoadUser.VEHICLE},
                                                                line_marking_left=LineMarking.NO_MARKING,
@@ -736,7 +749,8 @@ class MapCreator:
                                                        line_marking_left=LineMarking.DASHED,
                                                        line_marking_right=LineMarking.SOLID))
         MapCreator.fit_to_predecessor(new_lanelets[2], new_lanelets[4], True)
-        new_lanelets.append(MapCreator.create_adjacent_lanelet(True, new_lanelets[4], lanelet_ids[5], False, width,
+        new_lanelets.append(MapCreator.create_adjacent_lanelet(True, new_lanelets[4], lanelet_ids[5],
+                                                               False, width,
                                                                {LaneletType.UNKNOWN},
                                                                road_user_one_way={RoadUser.VEHICLE},
                                                                line_marking_left=LineMarking.DASHED,
@@ -747,7 +761,8 @@ class MapCreator:
                                                        line_marking_left=LineMarking.DASHED,
                                                        line_marking_right=LineMarking.NO_MARKING))
         MapCreator.fit_to_predecessor(new_lanelets[5], new_lanelets[6], True)
-        new_lanelets.append(MapCreator.create_adjacent_lanelet(True, new_lanelets[6], lanelet_ids[7], False, width,
+        new_lanelets.append(MapCreator.create_adjacent_lanelet(True, new_lanelets[6], lanelet_ids[7],
+                                                               False, width,
                                                                {LaneletType.INTERSECTION},
                                                                road_user_one_way={RoadUser.VEHICLE},
                                                                line_marking_left=LineMarking.DASHED,
@@ -758,7 +773,8 @@ class MapCreator:
                                                        line_marking_left=LineMarking.DASHED,
                                                        line_marking_right=LineMarking.SOLID))
         MapCreator.fit_to_predecessor(new_lanelets[6], new_lanelets[8], True)
-        new_lanelets.append(MapCreator.create_adjacent_lanelet(True, new_lanelets[8], lanelet_ids[9], False, width,
+        new_lanelets.append(MapCreator.create_adjacent_lanelet(True, new_lanelets[8], lanelet_ids[9],
+                                                               False, width,
                                                                {LaneletType.UNKNOWN},
                                                                road_user_one_way={RoadUser.VEHICLE},
                                                                line_marking_left=LineMarking.DASHED,
@@ -769,7 +785,8 @@ class MapCreator:
                                                     line_marking_left=LineMarking.NO_MARKING,
                                                     line_marking_right=LineMarking.NO_MARKING))
         MapCreator.fit_to_predecessor(new_lanelets[9], new_lanelets[10], True)
-        new_lanelets.append(MapCreator.create_adjacent_lanelet(True, new_lanelets[10], lanelet_ids[11], False, width,
+        new_lanelets.append(MapCreator.create_adjacent_lanelet(True, new_lanelets[10], lanelet_ids[11]
+                                                               , False, width,
                                                                {LaneletType.INTERSECTION},
                                                                road_user_one_way={RoadUser.VEHICLE},
                                                                line_marking_left=LineMarking.NO_MARKING,
@@ -840,20 +857,23 @@ class MapCreator:
                                        TrafficLightCycleElement(TrafficLightState.RED_YELLOW, 30),
                                        TrafficLightCycleElement(TrafficLightState.GREEN, 100),
                                        TrafficLightCycleElement(TrafficLightState.YELLOW, 30)]
-            traffic_light_one = TrafficLight(scenario.generate_object_id(), traffic_light_cycle_one,
-                                             new_lanelets[5].right_vertices[-1] + np.array([-2, 2]))
+            traffic_light_one = TrafficLight(scenario.generate_object_id(),
+                                             new_lanelets[5].right_vertices[-1] + np.array([-2, 2]),
+                                             TrafficLightCycle(traffic_light_cycle_one))
             new_traffic_lights.append(traffic_light_one)
             new_lanelets[5].add_traffic_light_to_lanelet(traffic_light_one.traffic_light_id)
             light_ids[0] = {traffic_light_one.traffic_light_id}
 
-            traffic_light_two = TrafficLight(scenario.generate_object_id(), traffic_light_cycle_one,
-                                             new_lanelets[9].right_vertices[-1] + np.array([2, -2]))
+            traffic_light_two = TrafficLight(scenario.generate_object_id(),
+                                             new_lanelets[9].right_vertices[-1] + np.array([2, -2]),
+                                             TrafficLightCycle(traffic_light_cycle_one))
             new_traffic_lights.append(traffic_light_two)
             new_lanelets[9].add_traffic_light_to_lanelet(traffic_light_two.traffic_light_id)
             light_ids[1] = {traffic_light_two.traffic_light_id}
 
-            traffic_light_three = TrafficLight(scenario.generate_object_id(), traffic_light_cycle_two,
-                                               new_lanelets[0].right_vertices[-1] + np.array([-1, -2]))
+            traffic_light_three = TrafficLight(scenario.generate_object_id(),
+                                               new_lanelets[0].right_vertices[-1] + np.array([-1, -2]),
+                                               TrafficLightCycle(traffic_light_cycle_two))
             new_traffic_lights.append(traffic_light_three)
             new_lanelets[0].add_traffic_light_to_lanelet(traffic_light_three.traffic_light_id)
             light_ids[2] = {traffic_light_three.traffic_light_id}

@@ -7,7 +7,7 @@ from typing import List, Set, Tuple, Optional
 from ordered_set import OrderedSet
 import numpy as np
 
-from crdesigner.map_conversion.osm2cr import config
+from crdesigner.config.osm_config import osm_config as config
 from crdesigner.map_conversion.common import geometry
 from crdesigner.map_conversion.osm2cr.converter_modules.utility.custom_types import (
     Road_info,

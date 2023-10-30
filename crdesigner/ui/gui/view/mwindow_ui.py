@@ -5,9 +5,8 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import *
 
-from crdesigner.ui.gui.model.settings.gui_settings_model import gui_settings
+from crdesigner.config.gui_config import gui_config, ColorSchema
 from crdesigner.ui.gui.resources.MainWindow import Ui_mainWindow
-from crdesigner.ui.gui.utilities.draw_params_updater import ColorSchema
 from crdesigner.ui.gui.utilities.gui_sumo_simulation import SUMO_AVAILABLE
 
 if SUMO_AVAILABLE:
@@ -22,6 +21,8 @@ class MWindowUI(QMainWindow, Ui_mainWindow):
         self.setup_mwindow()
         self.obstacle_toolbox = None
         self.road_network_toolbox = None
+        self.map_converter_toolbox = None
+        self.scenario_toolbox = None
         self.crdesigner_console_wrapper = None
 
         self.animated_viewer_wrapper = None
@@ -31,6 +32,9 @@ class MWindowUI(QMainWindow, Ui_mainWindow):
         self.viewer_dock = None
         self.sumo_settings = None
         self.gui_settings = None
+
+        # Sets stylesheet of the Application
+        self.set_stylesheet(gui_config.get_stylesheet())
 
     def setup_mwindow(self):
         """
@@ -59,19 +63,12 @@ class MWindowUI(QMainWindow, Ui_mainWindow):
         self.status.showMessage(q.text() + ' is triggered')
 
     def initialize_toolboxes(self):
-        pass
-        # TODO: fix with toolboxes
-        # self.road_network_toolbox.initialize_road_network_toolbox()
-        # self.obstacle_toolbox.initialize_toolbox()
+        self.road_network_toolbox.initialize_road_network_toolbox()
+        self.obstacle_toolbox.obstacle_toolbox_ui.initialize_obstacle_information()
+        self.scenario_toolbox.initialize_toolbox()
 
     def colorscheme(self) -> ColorSchema:
-        if gui_settings.DARKMODE:
-            colorscheme = ColorSchema(axis=gui_settings.AXIS_VISIBLE, background='#303030', color='#f0f0f0',
-                                      highlight='#1e9678', second_background='#2c2c2c')
-        else:
-            colorscheme = ColorSchema(axis=gui_settings.AXIS_VISIBLE)
-
-        return colorscheme
+        return gui_config.get_colorscheme()
 
     def update_window(self):
         p = QtGui.QPalette()
@@ -85,12 +82,12 @@ class MWindowUI(QMainWindow, Ui_mainWindow):
         self.setPalette(p)
 
         self.road_network_toolbox.road_network_toolbox_ui.update_window()
-        # TODO: self.obstacle_toolbox.obstacle_toolbox_ui.update_window()
-        # TODO: self.converter_toolbox.converter_toolbox.update_window()
+        self.obstacle_toolbox.obstacle_toolbox_ui.update_window()
+        self.map_converter_toolbox.converter_toolbox_ui.update_window()
+        self.scenario_toolbox.scenario_toolbox_ui.update_window()
         self.animated_viewer_wrapper.update_window()
         self.menubar.setStyleSheet(
             'background-color: ' + self.colorscheme().second_background + '; color: ' + self.colorscheme().color)
-
 
     def close_window(self) -> bool:
         """
@@ -121,7 +118,7 @@ class MWindowUI(QMainWindow, Ui_mainWindow):
 
         @return: Boolean with the answer of the user
         """
-        message_box = QMessageBox(QMessageBox.Warning, "Warning", "Do you wanna restore the last project?",
+        message_box = QMessageBox(QMessageBox.Warning, "Warning", "Do you want to restore the last project?",
                                   buttons=QMessageBox.Yes | QMessageBox.No, parent=self)
 
         p = QtGui.QPalette()
@@ -140,3 +137,11 @@ class MWindowUI(QMainWindow, Ui_mainWindow):
             return True
         else:
             return False
+
+    def set_stylesheet(self, sheet: str):
+        """
+        Sets the stylesheet to a modern look or the old look
+
+        @param sheet: new staylesheet which should be set
+        """
+        qApp.setStyleSheet(sheet)
