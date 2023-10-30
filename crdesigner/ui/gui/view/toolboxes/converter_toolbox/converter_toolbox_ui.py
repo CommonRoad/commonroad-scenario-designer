@@ -19,7 +19,6 @@ class MapConversionToolboxUI(Toolbox):
         """
         self.sections.append(self.create_conversion_widget())
 
-
     def create_conversion_widget(self):
         widget_con = QFrame(self.tree)
         layout_con = QVBoxLayout(widget_con)

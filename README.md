@@ -84,7 +84,7 @@ First you need to activate your python environment with the installed dependenci
 Afterward, you can start the _CommonRoad Scenario Designer_ and the GUI will open:
 
 ```bash
-$ python crdesigner/start_gui.py
+$ python crdesigner/ui/gui/start_gui.py
 ```
 
 #### Command Line
