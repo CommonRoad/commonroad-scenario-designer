@@ -5,7 +5,8 @@ from lxml import etree
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.road import Road
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.light import Light
 from commonroad.scenario.lanelet import LaneletNetwork
-from commonroad.scenario.traffic_sign import TrafficLight, TrafficLightState, TrafficLightCycleElement
+from commonroad.scenario.traffic_light import TrafficLight, TrafficLightState, TrafficLightCycleElement, \
+    TrafficLightCycle
 from crdesigner.ui.gui.utilities.map_creator import MapCreator
 
 
@@ -16,7 +17,8 @@ class TestLight(unittest.TestCase):
 
         cycle = [(TrafficLightState.RED, 100), (TrafficLightState.GREEN, 100), (TrafficLightState.YELLOW, 100)]
         cycle_element_list = [TrafficLightCycleElement(state[0], state[1]) for state in cycle]
-        self.traffic_light = TrafficLight(traffic_light_id=123, cycle=cycle_element_list, position=np.array([1.0, 0.5]))
+        self.traffic_light = TrafficLight(traffic_light_id=123, position=np.array([1.0, 0.5]),
+                                          traffic_light_cycle=TrafficLightCycle(cycle_element_list))
 
         self.network = LaneletNetwork()
         self.network.add_lanelet(self.lanelet)

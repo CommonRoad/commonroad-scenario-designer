@@ -2,10 +2,11 @@ from typing import List
 
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.elements.signal import Signal
 
-from commonroad.scenario.lanelet import LaneletNetwork # type: ignore
-from commonroad.scenario.traffic_sign import TrafficLight # type: ignore
+from commonroad.scenario.lanelet import LaneletNetwork  # type: ignore
+from commonroad.scenario.traffic_light import TrafficLight  # type: ignore
 
 from crdesigner.map_conversion.opendrive.cr_to_opendrive.utils import config
+
 
 class Light(Signal):
     """

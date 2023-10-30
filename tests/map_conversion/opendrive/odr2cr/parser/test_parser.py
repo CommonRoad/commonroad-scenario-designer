@@ -9,12 +9,12 @@ from crdesigner.map_conversion.opendrive.opendrive_parser.elements.geometry impo
 
 class TestParser(unittest.TestCase):
     def test_parse_opendrive(self):
-        file_path = Path(os.path.dirname(os.path.abspath(__file__)) + '/../../test_maps/odr2cr/CulDeSac.xodr')
+        file_path = Path(os.path.dirname(os.path.abspath(__file__)) + '/../../../test_maps/odr2cr/CulDeSac.xodr')
         xodr_file = parse_opendrive(file_path)
         self.assertIsInstance(xodr_file, OpenDrive)
 
     def test_parse_opendrive_header(self):
-        file_path = Path(os.path.dirname(os.path.abspath(__file__)) + '/../../test_maps/odr2cr/CulDeSac.xodr')
+        file_path = Path(os.path.dirname(os.path.abspath(__file__)) + '/../../../test_maps/odr2cr/CulDeSac.xodr')
         odr = parse_opendrive(file_path)
 
         self.assertIsInstance(odr.header, Header)
@@ -31,7 +31,7 @@ class TestParser(unittest.TestCase):
         self.assertEqual(None, odr.header.geo_reference)
 
     def test_parse_opendrive_junction(self):
-        file_path = Path(os.path.dirname(os.path.abspath(__file__)) + '/../../test_maps/odr2cr/FourWaySignal.xodr')
+        file_path = Path(os.path.dirname(os.path.abspath(__file__)) + '/../../../test_maps/odr2cr/FourWaySignal.xodr')
         odr = parse_opendrive(file_path)
 
         for i in odr.junctions:

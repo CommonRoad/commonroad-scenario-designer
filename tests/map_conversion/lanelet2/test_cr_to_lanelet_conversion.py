@@ -74,7 +74,7 @@ class TestOpenDRIVEToLaneletConversion(unittest.TestCase):
     """
 
     def test_crossing_complex8_course(self):
-        input_path = f"{os.path.dirname(os.path.realpath(__file__))}/../test_maps/opendrive/CrossingComplex8Course.xodr"
+        input_path = Path(__file__).parent.parent / Path("test_maps/odr2cr/CrossingComplex8Course.xodr")
         scenario = opendrive_to_commonroad(Path(input_path))
         l2osm = CR2LaneletConverter(lanelet2_config)
         self.assertIsNotNone(l2osm(scenario))  # TODO better evaluation
