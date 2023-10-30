@@ -1,9 +1,9 @@
 import unittest
 from typing import List
 
-from crdesigner.crmapver.verification.hol.formula import Formula
-from crdesigner.crmapver.verification.hol.context import Context
-from crdesigner.crmapver.verification.hol.parser.parser import Parser
+from crdesigner.verification_repairing.verification.hol.formula import Formula
+from crdesigner.verification_repairing.verification.hol.context import Context
+from crdesigner.verification_repairing.verification.hol.parser.parser import Parser
 
 
 class TestEvaluation(unittest.TestCase):

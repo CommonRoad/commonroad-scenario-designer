@@ -1,4 +1,4 @@
-image: python:3.11
+image: python:3.10
 
 stages:
     - static_check
@@ -46,7 +46,7 @@ build_and_test_python:
   stage: test
   parallel :
     matrix :
-      - PYTHON_VERSIONS : [ "3.8", "3.9", "3.10"]
+      - PYTHON_VERSIONS : [ "3.8", "3.9"]
   variables:
     QT_QPA_PLATFORM : "offscreen"
   script:
