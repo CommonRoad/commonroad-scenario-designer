@@ -33,6 +33,11 @@ class ObstacleToolboxUI(Toolbox):
             "Dynamic": ["pedestrian", "bicycle", "priorityVehicle", "train",
                         "motorcycle", "taxi", "car", "bus", "truck"]
         }
+        # Add missing ObstacleType values to the "Static" category in case they've been added to the enum but not here
+        for obstacle_type in ObstacleType:
+            if obstacle_type.value not in self.obstacle_mapping["Static"] and obstacle_type.value not in \
+                    self.obstacle_mapping["Dynamic"]:
+                self.obstacle_mapping["Static"].append(obstacle_type.value)
         self.obstacle_dyn_stat.currentTextChanged.connect(self.on_dyn_stat_changed)
 
     def define_sections(self):
