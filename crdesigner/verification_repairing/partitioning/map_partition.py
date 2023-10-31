@@ -5,10 +5,15 @@ from abc import ABC
 from functools import reduce
 from typing import Tuple, List
 import logging
-
 import numpy as np
-import pymetis
+
 from commonroad.scenario.lanelet import LaneletNetwork
+
+try:
+    import pymetis
+    pymetis_imported = True
+except:
+    pymetis_imported = False
 
 LaneletBlock = List[int]
 TrafficSignBlock = List[int]

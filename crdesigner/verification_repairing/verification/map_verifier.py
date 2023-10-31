@@ -1,5 +1,6 @@
 import copy
 import enum
+import logging
 import multiprocessing
 from multiprocessing import Process
 from typing import List, Tuple
@@ -8,7 +9,8 @@ from commonroad.scenario.lanelet import LaneletNetwork
 
 from crdesigner.verification_repairing.config import MapVerParams
 from crdesigner.verification_repairing.partitioning.map_partition import LaneletPartitioning, TrafficSignPartitioning, \
-    TrafficLightPartitioning, LaneletBlock, TrafficSignBlock, TrafficLightBlock, IntersectionBlock, Partition
+    TrafficLightPartitioning, LaneletBlock, TrafficSignBlock, TrafficLightBlock, IntersectionBlock, Partition, \
+    pymetis_imported
 from crdesigner.verification_repairing.verification.hol.mapping import HOLMapping
 from crdesigner.verification_repairing.verification.hol.satisfaction import HOLVerificationChecker
 
@@ -36,7 +38,9 @@ class MapVerifier:
 
         :return: Invalid states.
         """
-        if self._config.evaluation.partitioned:
+        if self._config.evaluation.partitioned and pymetis_imported:
+            if not pymetis_imported:
+                logging.error("MapVerifier::verify: pymetis could not be imported for partitioning.")
             invalid_states = self._partitioned_verify()
         else:
             invalid_states = self._unpartitioned_verify()
