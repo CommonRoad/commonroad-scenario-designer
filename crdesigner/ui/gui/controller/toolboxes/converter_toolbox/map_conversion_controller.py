@@ -1,7 +1,6 @@
-import warnings
 from lxml import etree
 from typing import Callable, Optional
-
+import logging
 
 from crdesigner.map_conversion.lanelet2.cr2lanelet import CR2LaneletConverter
 from crdesigner.map_conversion.lanelet2.lanelet2_parser import Lanelet2Parser
@@ -441,7 +440,8 @@ class MapConversionToolboxController(QDockWidget):
 
             self.convert_sumo_to_cr()
         else:
-            warnings.warn("Cannot import SUMO, simulation will not be offered in Scenario Designer!")
+            logging.warning("Cannot import SUMO. SUMO simulation will not be offered in Scenario Designer GUI. "
+                    "The GUI and other map conversions should work.")
 
     def convert_cr_to_sumo(self):
         """
@@ -457,13 +457,15 @@ class MapConversionToolboxController(QDockWidget):
                 return
             self.sumo_simulation.convert(directory)
         else:
-            warnings.warn("Cannot import SUMO, simulation will not be offered in Scenario Designer!")
+            logging.warning("Cannot import SUMO. SUMO simulation will not be offered in Scenario Designer GUI. "
+                    "The GUI and other map conversions should work.")
 
     def open_sumo_settings(self):
         if SUMO_AVAILABLE:
             SUMOSettings(self, config=self.sumo_simulation.config)
         else:
-            warnings.warn("Cannot import SUMO, simulation will not be offered in Scenario Designer!")
+            logging.warning("Cannot import SUMO. SUMO simulation will not be offered in Scenario Designer GUI. "
+                    "The GUI and other map conversions should work.")
 
     def convert_sumo_to_cr(self):
         """
@@ -479,4 +481,5 @@ class MapConversionToolboxController(QDockWidget):
                                     QMessageBox.Ok)
                 return
         else:
-            warnings.warn("Cannot import SUMO, simulation will not be offered in Scenario Designer!")
+            logging.warning("Cannot import SUMO. SUMO simulation will not be offered in Scenario Designer GUI. "
+                    "The GUI and other map conversions should work.")
