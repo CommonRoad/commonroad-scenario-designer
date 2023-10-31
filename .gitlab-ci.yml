@@ -1,4 +1,4 @@
-image: python:3.11
+image: python:3.10
 
 stages:
     - static_check
@@ -9,6 +9,7 @@ before_script:
   - pip install poetry
   - poetry config installer.modern-installation false # this should be removed in the future, required because of invalid third-party wheels (https://github.com/python-poetry/poetry/issues/7686)
   - poetry config virtualenvs.in-project true
+  - git config --global url."https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.lrz.de/".insteadOf "git@gitlab.lrz.de:"
   - poetry install --with tests,docs,tutorials
   - source .venv/bin/activate
 
@@ -21,7 +22,6 @@ before_script:
 # static_check
 prospector_source:
   stage: static_check
-  image: python:3.11
   script:
     - prospector crdesigner/
   allow_failure: true
@@ -29,7 +29,6 @@ prospector_source:
 
 prospector_test:
   stage: static_check
-  image: python:3.11
   script:
     - prospector tests/
   allow_failure: true
@@ -37,7 +36,6 @@ prospector_test:
 
 prospector_tutorials:
   stage: static_check
-  image: python:3.11
   script:
     - prospector tutorials/
   allow_failure: true
@@ -48,7 +46,7 @@ build_and_test_python:
   stage: test
   parallel :
     matrix :
-      - PYTHON_VERSIONS : [ "3.8", "3.9", "3.10" ]
+      - PYTHON_VERSIONS : [ "3.8", "3.9"]
   variables:
     QT_QPA_PLATFORM : "offscreen"
   script:
@@ -56,7 +54,6 @@ build_and_test_python:
   needs: []
 
 build_and_test_with_coverage:
-  image: python:3.11
   stage : test
   variables :
     QT_QPA_PLATFORM : "offscreen"
@@ -117,7 +114,7 @@ push_to_external_pipy_test_registry:
   script:
     - poetry config repositories.test https://test.pypi.org/legacy/
     - poetry build
-    - poetry publish --repository test -u ${CR_PYPI_TEST_USERNAME} -p ${CR_PYPI_TEST_PASSWORD}
+    - poetry publish --repository test -u __token__ -p ${CR_PYPI_TEST_API_TOKEN}
 
 push_to_external_pipy_release_registry:
   stage: deploy
@@ -126,4 +123,4 @@ push_to_external_pipy_release_registry:
     - master
   script:
     - poetry build
-    - poetry publish -u ${CR_PYPI_RELEASE_USERNAME} -p ${CR_PYPI_RELEASE_PASSWORD}
+    - poetry publish -u __token__ -p ${CR_PYPI_RELEASE_API_TOKEN}

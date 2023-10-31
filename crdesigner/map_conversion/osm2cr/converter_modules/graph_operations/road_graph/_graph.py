@@ -7,7 +7,7 @@ from typing import List, Set, Tuple, Optional
 from ordered_set import OrderedSet
 import numpy as np
 
-from crdesigner.map_conversion.osm2cr import config
+from crdesigner.config.osm_config import osm_config as config
 from crdesigner.map_conversion.common import geometry
 
 from ._graph_node import GraphNode
@@ -632,7 +632,7 @@ class Graph:
                 sign.node.add_traffic_sign(sign)
             for edge in sign.edges:
                 for sub_edge in edge:
-                    sub_edge.add_traffic_sign(sign)
+                    sub_edge.add_traffic_sign(sign, )
 
     def apply_traffic_lights(self) -> None:
         # for each traffic light

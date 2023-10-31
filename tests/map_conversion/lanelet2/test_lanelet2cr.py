@@ -9,13 +9,14 @@ from commonroad.scenario.lanelet import StopLine, LineMarking, Lanelet, LaneletN
 from commonroad.scenario.traffic_sign import *
 from commonroad.scenario.traffic_light import TrafficLight
 from commonroad.scenario.scenario import TrafficSign, Location, GeoTransformation
+
+from crdesigner.config.lanelet2_config import lanelet2_config
 from crdesigner.map_conversion.lanelet2.lanelet2cr import _add_closest_traffic_sign_to_lanelet, \
     _add_stop_line_to_lanelet
 from crdesigner.map_conversion.lanelet2.lanelet2_parser import Lanelet2Parser
 from crdesigner.map_conversion.lanelet2.lanelet2cr import Lanelet2CRConverter, _two_vertices_coincide
 from crdesigner.map_conversion.lanelet2.lanelet2 import WayRelation, Node, Way, \
     RegulatoryElement
-from crdesigner.config.config import Lanelet2ConversionParams
 
 with open(f"{os.path.dirname(os.path.realpath(__file__))}/../test_maps/lanelet2/traffic_speed_limit_utm.osm") as fh:
     osm = Lanelet2Parser(etree.parse(fh).getroot()).parse()
@@ -41,7 +42,7 @@ map = {'-1775219': 31, '-1775268': 32, '-1775303': 33,
 class TestLanelet2CRConverter(unittest.TestCase):
 
     def setUp(self) -> None:
-        self._config = Lanelet2ConversionParams()
+        self._config = lanelet2_config
 
     def test_init(self):
         l2cr = Lanelet2CRConverter()
@@ -67,12 +68,11 @@ class TestLanelet2CRConverter(unittest.TestCase):
         crs_to = CRS(self._config.proj_string)
         crs_from = CRS("ETRF89")
         transformer = Transformer.from_proj(crs_from, crs_to)
-        l2cr = Lanelet2CRConverter(self._config)
+        l2cr = Lanelet2CRConverter()
         self.assertEqual(l2cr.transformer.definition, transformer.definition)
 
     def test_call(self):
-        config = Lanelet2ConversionParams()
-        l2cr = Lanelet2CRConverter(lanelet2_config=config)  # object referred to as "self" in the source code
+        l2cr = Lanelet2CRConverter()  # object referred to as "self" in the source code
         scenario = l2cr(osm)
         origin_lat = min([node.lat for node in l2cr.osm.nodes.values()])
         origin_lon = min([node.lon for node in l2cr.osm.nodes.values()])  # use left-most lower corner as origin
@@ -91,7 +91,7 @@ class TestLanelet2CRConverter(unittest.TestCase):
         # test the scenario values given in the constructor
         self.assertEqual(scenario.dt, 0.1)
         self.assertEqual(scenario.location, Location(gps_latitude=origin_lat, gps_longitude=origin_lon,
-                                                     geo_transformation=GeoTransformation(geo_reference=config.proj_string)))
+                                                     geo_transformation=GeoTransformation(geo_reference=lanelet2_config.proj_string)))
 
         # test the class of the lanelet network
         self.assertEqual(l2cr.lanelet_network.__class__, LaneletNetwork)
@@ -261,12 +261,12 @@ class TestLanelet2CRConverter(unittest.TestCase):
 
         # creating nodes for the right way
         nr1 = Node(1, 0, 0)
-        nr2 = Node(2, 1, 0)
-        nr3 = Node(3, 2, 0)
+        nr2 = Node(2, 1e-5, 0)
+        nr3 = Node(3, 2e-5, 0)
 
         # creating nodes for the left way, which will have a node that is missing on position (1,1) 
-        nl1 = Node(4, 0, 1)
-        nl2 = Node(5, 2, 1)
+        nl1 = Node(4, 0, 1e-5)
+        nl2 = Node(5, 2e-5, 1e-5)
 
         # creating ways
         right_way = Way(1, ["1", "2", "3"])
@@ -288,8 +288,8 @@ class TestLanelet2CRConverter(unittest.TestCase):
         self.assertEqual(len(left_way.nodes), 3)
 
         # check the position of the new node / it should be in (1,1) 
-        self.assertEqual(float(l2cr.osm.nodes["1006"].lat), 1.0)
-        self.assertEqual(float(l2cr.osm.nodes["1006"].lon), 1.0)
+        self.assertEqual(float(l2cr.osm.nodes["1006"].lat), 1e-5)
+        self.assertEqual(float(l2cr.osm.nodes["1006"].lon), 1e-5)
 
         # note: when the longer path had (1,2,3), and shorter (1,2) - the function did not create the third on 3.
 
@@ -320,8 +320,8 @@ class TestLanelet2CRConverter(unittest.TestCase):
 
         # creating nodes
         nr1 = Node("1", 0, 0)
-        nr2 = Node("2", 1, 0)
-        nr3 = Node("3", 2, 0)
+        nr2 = Node("2", 1e-5, 0)
+        nr3 = Node("3", 2e-5, 0)
 
         # adding the nodes to the osm
         osm.add_node(nr1)
@@ -356,7 +356,7 @@ class TestLanelet2CRConverter(unittest.TestCase):
 
         # creating our nodes
         nr1 = Node("1", 0, 0)
-        nr2 = Node("2", 1, 0)
+        nr2 = Node("2", 1e-5, 0)
 
         # adding the nodes to the osm
         osm.add_node(nr1)
@@ -377,9 +377,9 @@ class TestLanelet2CRConverter(unittest.TestCase):
 
         # creating nodes
         nr1 = Node(1, 0, 0)
-        nr2 = Node(2, 0, 1)
-        nl1 = Node(3, 1, 0)
-        nl2 = Node(4, 1, 1)
+        nr2 = Node(2, 0, 1e-51)
+        nl1 = Node(3, 1e-5, 0)
+        nl2 = Node(4, 1e-5, 1e-5)
 
         # adding the nodes to the osm
         osm.add_node(nr1)
@@ -415,9 +415,9 @@ class TestLanelet2CRConverter(unittest.TestCase):
 
         # creating custom nodes
         n1r1 = Node(1, 0, 0)
-        n1r2 = Node(2, 0, 1)
-        n1l1 = Node(3, 1, 0)
-        n1l2 = Node(4, 1, 1)
+        n1r2 = Node(2, 0, 1e-5)
+        n1l1 = Node(3, 1e-5, 0)
+        n1l2 = Node(4, 1e-5, 1e-5)
 
         # adding those nose to the osm
         osm.add_node(n1r1)
@@ -436,8 +436,8 @@ class TestLanelet2CRConverter(unittest.TestCase):
         osm.add_way_relation(wayrel)
 
         # creating the nodes that have the same location as the ones already in our way_relation/lanelet
-        n2r1 = Node("5", 0, 1)
-        n2l1 = Node("6", 1, 1)
+        n2r1 = Node("5", 0, 1e-5)
+        n2l1 = Node("6", 1e-5, 1e-5)
         osm.add_node(n2r1)
         osm.add_node(n2l1)
 
@@ -456,9 +456,9 @@ class TestLanelet2CRConverter(unittest.TestCase):
 
         # creating custom nodes
         n1r1 = Node(1, 0, 0)
-        n1r2 = Node(2, 0, 1)
-        n1l1 = Node(3, 1, 0)
-        n1l2 = Node(4, 1, 1)
+        n1r2 = Node(2, 0, 1e-5)
+        n1l1 = Node(3, 1e-5, 0)
+        n1l2 = Node(4, 1e-5, 1e-5)
 
         # adding those nose to the osm
         osm.add_node(n1r1)
@@ -478,7 +478,7 @@ class TestLanelet2CRConverter(unittest.TestCase):
 
         # creating the nodes that have the same location as the ones already in our way_relation/lanelet
         n2r1 = Node("5", 0, 0)
-        n2l1 = Node("6", 1, 0)
+        n2l1 = Node("6", 1e-5, 0)
         osm.add_node(n2r1)
         osm.add_node(n2l1)
 
@@ -497,9 +497,9 @@ class TestLanelet2CRConverter(unittest.TestCase):
 
         # creating custom nodes
         n1r1 = Node(100, 0, 0)
-        n1r2 = Node(200, 0, 1)
-        n1l1 = Node(300, 1, 0)
-        n1l2 = Node(400, 1, 1)
+        n1r2 = Node(200, 0, 1e-5)
+        n1l1 = Node(300, 1e-5, 0)
+        n1l2 = Node(400, 1e-5, 1e-5)
 
         # adding those nose to the osm
         osm.add_node(n1r1)
@@ -537,8 +537,6 @@ class TestLanelet2CRConverter(unittest.TestCase):
         self.assertFalse(_two_vertices_coincide(v1, v2, self._config.adjacent_way_distance_tolerance))
 
     def test_traffic_light_conversion(self):
-        """
-        """
         l2cr = Lanelet2CRConverter()
         l2cr(osm)
         tl_way = Way(1, list(osm.nodes)[0:3], {'type': 'traffic_light', 'subtype': 'red_yellow_green'})

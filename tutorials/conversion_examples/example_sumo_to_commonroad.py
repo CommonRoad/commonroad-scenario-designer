@@ -6,7 +6,7 @@ from commonroad.scenario.scenario import Tag
 from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
 from commonroad.planning.planning_problem import PlanningProblemSet
 
-from crdesigner.ui.gui.mwindow.animated_viewer_wrapper.gui_sumo_simulation import SUMO_AVAILABLE
+from crdesigner.ui.gui.utilities.gui_sumo_simulation import SUMO_AVAILABLE
 if SUMO_AVAILABLE:
     from crdesigner.map_conversion.sumo_map.sumo2cr import convert_net_to_cr
 

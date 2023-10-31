@@ -5,7 +5,7 @@ from typing import List, Tuple, Optional, Union, Dict
 
 import numpy as np
 
-from crdesigner.map_conversion.osm2cr import config
+from crdesigner.config.osm_config import osm_config as config
 from crdesigner.map_conversion.osm2cr.converter_modules.graph_operations import road_graph as rg
 
 
@@ -58,7 +58,6 @@ def find_edges_to_combine(
     :param node: The node at which the combination is applied
     :return:
     """
-    # TODO move threshold to config.py?
     combine_angle_threshold = np.pi / 360.0 * 10.0
     result = []
     combine_with_next = [False] * len(edges)

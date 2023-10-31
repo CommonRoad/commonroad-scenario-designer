@@ -1,5 +1,6 @@
 from collections import defaultdict
 from typing import List, Optional, Tuple, Dict, Union
+
 from shapely.geometry import LineString  # type: ignore
 import numpy as np
 from pyproj import Transformer, CRS
@@ -13,17 +14,17 @@ from commonroad.scenario.traffic_light import (TrafficLightCycleElement, Traffic
 from commonroad.scenario.scenario import Scenario, ScenarioID, TrafficSign, Location, TrafficLight, \
     GeoTransformation  # type: ignore
 
+from crdesigner.config.general_config import general_config, GeneralConfig
+from crdesigner.config.lanelet2_config import lanelet2_config, Lanelet2Config
 from crdesigner.map_conversion.lanelet2.lanelet2 import OSMLanelet
 from crdesigner.map_conversion.common.utils import generate_unique_id
 from crdesigner.map_conversion.common.conversion_lanelet import ConversionLanelet
 from crdesigner.map_conversion.common.conversion_lanelet_network import \
     ConversionLaneletNetwork
-from crdesigner.map_conversion.common.utils import convert_to_new_lanelet_id
 from crdesigner.map_conversion.lanelet2.lanelet2 import WayRelation, Node, RegulatoryElement, Way
-from crdesigner.map_conversion.common.geometry import (point_to_line_distance,
-                                                       distance as point_to_polyline_distance)
-from crdesigner.config.config import Lanelet2ConversionParams, GeneralParams
-
+from crdesigner.map_conversion.common.geometry import point_to_line_distance, distance as point_to_polyline_distance
+from crdesigner.verification_repairing.verification.hol.functions.predicates.lanelet_predicates import \
+    _wrong_left_right_boundary_side
 
 date_strftime_format = "%d-%b-%y %H:%M:%S"
 message_format = "%(asctime)s - %(levelname)s - %(message)s"
@@ -175,10 +176,10 @@ def _two_vertices_coincide(vertices1: np.ndarray, vertices2: np.ndarray,
 
     for vert in vertices2:
         distances = np.empty([len(vertices1) + 1])
-        distances[0] = np.linalg.norm(vert - vertices1[0])
-        distances[-1] = np.linalg.norm(vert - vertices1[-1])
+        distances[0] = np.linalg.norm(vert[0:2] - vertices1[0][0:2])
+        distances[-1] = np.linalg.norm(vert[0:2] - vertices1[-1][0:2])
         for i, diff in enumerate(segments):
-            distances[i + 1] = np.abs(np.cross(diff, vertices1[i] - vert)) / np.linalg.norm(diff)
+            distances[i + 1] = np.abs(np.cross(diff[0:2], vertices1[i][0:2] - vert[0:2])) / np.linalg.norm(diff[0:2])
         if np.min(distances) > adjacent_way_distance_tolerance:
             return False
 
@@ -190,16 +191,11 @@ class Lanelet2CRConverter:
     Class to convert OSM to the Commonroad representation of Lanelets.
     """
 
-    def __init__(self, lanelet2_config: Lanelet2ConversionParams = Lanelet2ConversionParams(),
-                 cr_config: GeneralParams = GeneralParams()):
+    def __init__(self, config: Lanelet2Config = lanelet2_config, cr_config: GeneralConfig = general_config):
         """
         Initialization of the Lanelet2CRConverter
-
-        :param proj_string: Projection string used for conversion.
-        :param lanelet2_config: Lanelet2 conversion parameters.
-        :param cr_config: General config parameters.
         """
-        self._config = lanelet2_config
+        self._config = config
         self._cr_config = cr_config
         crs_from = CRS("ETRF89")
         crs_to = CRS(self._config.proj_string)
@@ -600,6 +596,10 @@ class Lanelet2CRConverter:
 
         # set center vertices
         center_vertices = np.array([(l + r) / 2 for (l, r) in zip(left_vertices, right_vertices)])
+
+        if _wrong_left_right_boundary_side(center_vertices, left_vertices, right_vertices, lanelet2_config):
+            left_vertices, right_vertices = np.flip(left_vertices, axis=0), np.flip(right_vertices, axis=0)
+            center_vertices = (left_vertices + right_vertices) / 2
 
         # extract special meaning like way, direction and road type
         lanelet_type, users_one_way, users_bidirectional = _extract_special_meaning_to_lanelet(way_rel)

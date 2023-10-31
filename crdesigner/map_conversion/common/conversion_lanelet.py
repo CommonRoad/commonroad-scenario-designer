@@ -3,7 +3,9 @@ from typing import Tuple, Optional, Union, Set
 import numpy as np
 from pyproj import Transformer
 from commonroad.scenario.lanelet import Lanelet, LaneletType, LineMarking, RoadUser
-from crdesigner.config.config import OpenDRIVEConversionParams
+
+from crdesigner.config.config_base import Config
+from crdesigner.config.opendrive_config import open_drive_config, OpenDriveConfig
 
 
 class ConversionLanelet(Lanelet):
@@ -37,8 +39,7 @@ class ConversionLanelet(Lanelet):
         traffic_signs=None,
         traffic_lights=None,
         speed=None,
-        config: OpenDRIVEConversionParams = OpenDRIVEConversionParams(),
-
+        config: OpenDriveConfig = open_drive_config,
     ):
 
         if lanelet_type is None:

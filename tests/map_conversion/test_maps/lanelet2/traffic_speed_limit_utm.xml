@@ -15,8 +15,8 @@
     </geoTransformation>
   </location>
   <scenarioTags>
-    <urban/>
     <highway/>
+    <urban/>
   </scenarioTags>
   <lanelet id="2">
     <leftBound>
@@ -56,8 +56,8 @@
       <trafficSignRef ref="31"/>
     </stopLine>
     <laneletType>urban</laneletType>
-    <userOneWay>motorcycle</userOneWay>
     <userOneWay>bicycle</userOneWay>
+    <userOneWay>motorcycle</userOneWay>
     <userOneWay>car</userOneWay>
     <userBidirectional>priorityVehicle</userBidirectional>
     <trafficSignRef ref="31"/>
@@ -89,30 +89,30 @@
     <adjacentLeft ref="2" drivingDir="opposite"/>
     <adjacentRight ref="10" drivingDir="same"/>
     <laneletType>country</laneletType>
-    <userOneWay>motorcycle</userOneWay>
     <userOneWay>bicycle</userOneWay>
+    <userOneWay>motorcycle</userOneWay>
     <userOneWay>car</userOneWay>
     <userBidirectional>priorityVehicle</userBidirectional>
   </lanelet>
   <lanelet id="11">
     <leftBound>
       <point>
-        <x>675851.5759</x>
-        <y>6582821.4444</y>
-      </point>
-      <point>
         <x>675878.4483</x>
         <y>6582791.5115</y>
+      </point>
+      <point>
+        <x>675851.5759</x>
+        <y>6582821.4444</y>
       </point>
     </leftBound>
     <rightBound>
       <point>
-        <x>675855.3082</x>
-        <y>6582827.7520</y>
-      </point>
-      <point>
         <x>675882.9270</x>
         <y>6582798.8268</y>
+      </point>
+      <point>
+        <x>675855.3082</x>
+        <y>6582827.7520</y>
       </point>
     </rightBound>
     <adjacentLeft ref="12" drivingDir="opposite"/>
@@ -179,8 +179,8 @@
     <adjacentLeft ref="18" drivingDir="opposite"/>
     <adjacentRight ref="19" drivingDir="same"/>
     <laneletType>urban</laneletType>
-    <userOneWay>motorcycle</userOneWay>
     <userOneWay>bicycle</userOneWay>
+    <userOneWay>motorcycle</userOneWay>
     <userOneWay>car</userOneWay>
     <userBidirectional>priorityVehicle</userBidirectional>
   </lanelet>
@@ -222,8 +222,8 @@
       <trafficSignRef ref="29"/>
     </stopLine>
     <laneletType>urban</laneletType>
-    <userOneWay>motorcycle</userOneWay>
     <userOneWay>bicycle</userOneWay>
+    <userOneWay>motorcycle</userOneWay>
     <userOneWay>car</userOneWay>
     <userBidirectional>priorityVehicle</userBidirectional>
     <trafficSignRef ref="29"/>
@@ -350,22 +350,22 @@
   <lanelet id="25">
     <leftBound>
       <point>
-        <x>675825.0767</x>
-        <y>6582838.4636</y>
-      </point>
-      <point>
         <x>675848.3661</x>
         <y>6582814.5770</y>
+      </point>
+      <point>
+        <x>675825.0767</x>
+        <y>6582838.4636</y>
       </point>
     </leftBound>
     <rightBound>
       <point>
-        <x>675829.3688</x>
-        <y>6582843.9874</y>
-      </point>
-      <point>
         <x>675851.5759</x>
         <y>6582821.4444</y>
+      </point>
+      <point>
+        <x>675829.3688</x>
+        <y>6582843.9874</y>
       </point>
     </rightBound>
     <adjacentRight ref="22" drivingDir="same"/>
@@ -754,8 +754,8 @@
       </point>
     </rightBound>
     <adjacentLeft ref="12" drivingDir="same"/>
-    <laneletType>urban</laneletType>
     <laneletType>busLane</laneletType>
+    <laneletType>urban</laneletType>
     <userOneWay>bus</userOneWay>
     <userBidirectional>priorityVehicle</userBidirectional>
   </lanelet>
@@ -902,17 +902,17 @@
     </position>
     <virtual>false</virtual>
   </trafficSign>
-  <trafficSign id="31">
+  <trafficSign id="30">
     <trafficSignElement>
-      <trafficSignID>205</trafficSignID>
+      <trafficSignID>301</trafficSignID>
     </trafficSignElement>
     <position>
       <point>
-        <x>675840.0889</x>
-        <y>6582813.4342</y>
+        <x>675859.0023</x>
+        <y>6582824.6519</y>
       </point>
     </position>
-    <virtual>true</virtual>
+    <virtual>false</virtual>
   </trafficSign>
   <trafficSign id="28">
     <trafficSignElement>
@@ -926,17 +926,17 @@
     </position>
     <virtual>false</virtual>
   </trafficSign>
-  <trafficSign id="30">
+  <trafficSign id="31">
     <trafficSignElement>
-      <trafficSignID>301</trafficSignID>
+      <trafficSignID>205</trafficSignID>
     </trafficSignElement>
     <position>
       <point>
-        <x>675859.0023</x>
-        <y>6582824.6519</y>
+        <x>675840.0889</x>
+        <y>6582813.4342</y>
       </point>
     </position>
-    <virtual>false</virtual>
+    <virtual>true</virtual>
   </trafficSign>
   <trafficSign id="1">
     <trafficSignElement>

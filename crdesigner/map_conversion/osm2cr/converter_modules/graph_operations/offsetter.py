@@ -3,7 +3,7 @@ This module provides a method to offset roads at certain occasions to smooth the
 """
 from crdesigner.map_conversion.osm2cr.converter_modules.graph_operations import road_graph as rg, lane_linker
 from crdesigner.map_conversion.common import geometry
-from crdesigner.map_conversion.osm2cr import config
+from crdesigner.config.osm_config import osm_config as config
 
 
 def offset_graph(graph: rg.Graph) -> None:
