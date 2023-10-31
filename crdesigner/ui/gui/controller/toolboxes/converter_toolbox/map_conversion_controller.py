@@ -221,7 +221,6 @@ class MapConversionToolboxController(QDockWidget):
 
     @pyqtSlot(str)
     def stop_spinner(self, data):
-        print(data)
         self.scenario_model.notify_all()
         self.converter_toolbox_ui.Spinner.stop()
 

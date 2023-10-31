@@ -1,19 +1,20 @@
 import logging
 from typing import Tuple, Set
-
+from shapely.geometry import LineString, Point
+from shapely.ops import nearest_points
 import numpy as np
+
 from commonroad.common.common_lanelet import StopLine
 from commonroad.scenario.lanelet import LaneletNetwork
 from commonroad.scenario.scenario import ScenarioID
 from commonroad.scenario.traffic_light import TrafficLight
 from commonroad.scenario.traffic_sign import TrafficSign
-from commonroad_dc.geometry.util import compute_orientation_from_polyline
-from shapely.geometry import LineString, Point
-from shapely.ops import nearest_points
 
 from crdesigner.verification_repairing.repairing.repairing import ElementRepairing
 from crdesigner.verification_repairing.repairing.tools.geometry_tools import insert_vertices, \
     check_intersected_lines, fill_number_of_vertices, average_vertices, check_line_intersection_efficient
+
+from commonroad_dc.geometry.util import compute_orientation_from_polyline
 
 
 class LaneletRepairing(ElementRepairing):
