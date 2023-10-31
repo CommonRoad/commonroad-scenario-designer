@@ -1,6 +1,7 @@
 from lxml import etree
 from typing import Callable, Optional
 import logging
+from pathlib import Path
 
 from crdesigner.map_conversion.lanelet2.cr2lanelet import CR2LaneletConverter
 from crdesigner.map_conversion.lanelet2.lanelet2_parser import Lanelet2Parser
@@ -38,6 +39,12 @@ class RequestRunnable(QRunnable):
         self.fun()
         QMetaObject.invokeMethod(self.mapConversionToolboxController, "stop_spinner", Qt.QueuedConnection,
                                  Q_ARG(str, "Conversion Ended"))
+
+
+def start_spinner(spinner: QtWaitingSpinner):
+    if spinner.is_spinning():
+        spinner.stop()
+    spinner.start()
 
 
 class MapConversionToolboxController(QDockWidget):
@@ -83,7 +90,8 @@ class MapConversionToolboxController(QDockWidget):
             self.converter_toolbox_ui.button_convert_opendrive.clicked.connect(lambda: self.load_open_drive())
         elif self.converter_toolbox_ui.lanelet.isChecked():
             self.converter_toolbox_ui.button_convert_lanelet2_to_cr.clicked.connect(lambda: self.load_lanelet2())
-            self.converter_toolbox_ui.button_convert_cr_to_lanelet2.clicked.connect(lambda: self.convert_cr_to_lanelet2())
+            self.converter_toolbox_ui.button_convert_cr_to_lanelet2.clicked.connect(lambda:
+                                                                                    self.convert_cr_to_lanelet2())
         elif self.converter_toolbox_ui.osm.isChecked():
             self.converter_toolbox_ui.button_start_osm_conversion.clicked.connect(
                     lambda: self.convert_osm_with_spinner(self.convert_osm_to_cr))
@@ -126,7 +134,7 @@ class MapConversionToolboxController(QDockWidget):
             QMessageBox.warning(self, "Internal Error", "There was an error during the processing of the graph.\n\n{}"
                                 .format(e), QMessageBox.Ok)
             return
-        converted_to_scenario=convert_to_scenario(graph)
+        converted_to_scenario = convert_to_scenario(graph)
         self.scenario_model.add_converted_scenario(converted_to_scenario)
 
     def convert_osm_with_spinner(self, convert_function: Callable[[], None]) -> None:
@@ -138,7 +146,7 @@ class MapConversionToolboxController(QDockWidget):
             self.text_browser.append("Please stop the animation first.")
             return
 
-        self.start_spinner(self.converter_toolbox_ui.Spinner)
+        start_spinner(self.converter_toolbox_ui.Spinner)
         runnable = RequestRunnable(convert_function, self)
         QThreadPool.globalInstance().start(runnable)
 
@@ -154,7 +162,7 @@ class MapConversionToolboxController(QDockWidget):
             self.load_osm_file()
         else:
             self.download_osm_map()
-        e = ""
+
         try:
             if self.osm_file is not None:
                 e = self.read_osm_file(self.osm_file)
@@ -192,7 +200,7 @@ class MapConversionToolboxController(QDockWidget):
 
         try:
             if self.osm_file is not None:
-                osm_to_commonroad_using_sumo_= osm_to_commonroad_using_sumo(self.osm_file)
+                osm_to_commonroad_using_sumo_ = osm_to_commonroad_using_sumo(self.osm_file)
                 self.scenario_model.add_converted_scenario(osm_to_commonroad_using_sumo_)
 
             else:
@@ -216,11 +224,6 @@ class MapConversionToolboxController(QDockWidget):
         print(data)
         self.scenario_model.notify_all()
         self.converter_toolbox_ui.Spinner.stop()
-
-    def start_spinner(self, spinner: QtWaitingSpinner):
-        if spinner.is_spinning():
-            spinner.stop()
-        spinner.start()
 
     def verify_osm_coordinate_input(self) -> bool:
         """
@@ -283,7 +286,7 @@ class MapConversionToolboxController(QDockWidget):
         Starts the OpenDRIVE conversion process by picking a file and converting it while showing a spinner.
         """
         if self.open_drive_file is not None:
-            self.start_spinner(self.converter_toolbox_ui.Spinner)
+            start_spinner(self.converter_toolbox_ui.Spinner)
             runnable = RequestRunnable(self.convert_open_drive_to_cr, self)
             QThreadPool.globalInstance().start(runnable)
         else:
@@ -324,7 +327,7 @@ class MapConversionToolboxController(QDockWidget):
 
         # Load road network and print some statistics
         try:
-            self.open_drive_file = parse_opendrive(file_path)
+            self.open_drive_file = parse_opendrive(Path(file_path))
         except etree.XMLSyntaxError as e:
             error_message = "XML Syntax Error: {}".format(e)
             QMessageBox.warning(
@@ -399,7 +402,7 @@ class MapConversionToolboxController(QDockWidget):
             self.scenario_model.add_converted_scenario(scenario)
             self.text_browser.append("Conversion from Lanelet2 to CommonRoad is done")
         except Exception as e:
-            print("An error occurred:")
+            logging.error(f"MapConversionToolboxController::convert_lanelet2_to_cr: {e}")
 
     def convert_cr_to_lanelet2(self):
         """
@@ -441,7 +444,7 @@ class MapConversionToolboxController(QDockWidget):
             self.convert_sumo_to_cr()
         else:
             logging.warning("Cannot import SUMO. SUMO simulation will not be offered in Scenario Designer GUI. "
-                    "The GUI and other map conversions should work.")
+                            "The GUI and other map conversions should work.")
 
     def convert_cr_to_sumo(self):
         """
@@ -458,14 +461,14 @@ class MapConversionToolboxController(QDockWidget):
             self.sumo_simulation.convert(directory)
         else:
             logging.warning("Cannot import SUMO. SUMO simulation will not be offered in Scenario Designer GUI. "
-                    "The GUI and other map conversions should work.")
+                            "The GUI and other map conversions should work.")
 
     def open_sumo_settings(self):
         if SUMO_AVAILABLE:
             SUMOSettings(self, config=self.sumo_simulation.config)
         else:
             logging.warning("Cannot import SUMO. SUMO simulation will not be offered in Scenario Designer GUI. "
-                    "The GUI and other map conversions should work.")
+                            "The GUI and other map conversions should work.")
 
     def convert_sumo_to_cr(self):
         """
@@ -482,4 +485,4 @@ class MapConversionToolboxController(QDockWidget):
                 return
         else:
             logging.warning("Cannot import SUMO. SUMO simulation will not be offered in Scenario Designer GUI. "
-                    "The GUI and other map conversions should work.")
+                            "The GUI and other map conversions should work.")
