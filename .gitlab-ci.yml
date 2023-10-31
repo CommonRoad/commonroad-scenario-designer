@@ -114,7 +114,7 @@ push_to_external_pipy_test_registry:
   script:
     - poetry config repositories.test https://test.pypi.org/legacy/
     - poetry build
-    - poetry publish --repository test -u ${CR_PYPI_TEST_USERNAME} -p ${CR_PYPI_TEST_PASSWORD}
+    - poetry publish --repository test -u __token__ -p ${CR_PYPI_TEST_API_TOKEN}
 
 push_to_external_pipy_release_registry:
   stage: deploy
@@ -123,4 +123,4 @@ push_to_external_pipy_release_registry:
     - master
   script:
     - poetry build
-    - poetry publish -u ${CR_PYPI_RELEASE_USERNAME} -p ${CR_PYPI_RELEASE_PASSWORD}
+    - poetry publish -u __token__ -p ${CR_PYPI_RELEASE_API_TOKEN}
