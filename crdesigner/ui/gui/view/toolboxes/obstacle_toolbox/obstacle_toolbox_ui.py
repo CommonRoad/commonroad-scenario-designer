@@ -28,6 +28,12 @@ class ObstacleToolboxUI(Toolbox):
         self.remove_vertice_btn = []
         self.text_browser = text_browser
         self.change_color = False
+        self.obstacle_mapping = {
+            "Static": ["parkedVehicle", "building", "pillar", "median_strip", "constructionZone", "roadBoundary"],
+            "Dynamic": ["pedestrian", "bicycle", "priorityVehicle", "train",
+                        "motorcycle", "taxi", "car", "bus", "truck"]
+        }
+        self.obstacle_dyn_stat.currentTextChanged.connect(self.on_dyn_stat_changed)
 
     def define_sections(self):
         """defines the sections in the obstacle toolbox
@@ -146,6 +152,11 @@ class ObstacleToolboxUI(Toolbox):
 
             title_sumo = "Sumo Simulation"
             self.sections.append((title_sumo, widget_sumo))
+
+    def on_dyn_stat_changed(self, text):
+        current_obstacle_types = self.obstacle_mapping.get(text, [])
+        self.obstacle_type.clear()
+        self.obstacle_type.addItems(current_obstacle_types)
 
     def initialize_obstacle_information(self):
         """
