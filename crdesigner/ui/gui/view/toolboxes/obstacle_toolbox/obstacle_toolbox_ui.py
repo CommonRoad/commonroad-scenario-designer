@@ -66,6 +66,13 @@ class ObstacleToolboxUI(Toolbox):
         self.button_remove_obstacle = QPushButton("Remove")
         self.button_add_static_obstacle = QPushButton("Add")
 
+        layout_obstacle_buttons = QFormLayout()
+        layout_obstacle_buttons.addRow("Selected Obstacle ID:", self.selected_obstacle)
+        layout_obstacle_buttons.addRow(self.button_update_obstacle)
+        layout_obstacle_buttons.addRow(self.button_remove_obstacle)
+        layout_obstacle_buttons.addRow(self.button_add_static_obstacle)
+        self.layout_obstacles.addLayout(layout_obstacle_buttons)
+
         self.vis_settings_container = QFormLayout()
         self.vis_settings_label = QLabel("Visualization settings")
         self.vis_settings_label.setFont(QFont("Arial", 11, QFont.Bold))
@@ -118,12 +125,6 @@ class ObstacleToolboxUI(Toolbox):
         self.layout_obstacle_information_groupbox.addRow(obstacle_state_vis_groupbox)
         self.layout_obstacles.addWidget(self.obstacle_information_groupbox)
 
-        layout_obstacle_buttons = QFormLayout()
-        layout_obstacle_buttons.addRow("Selected Obstacle ID:", self.selected_obstacle)
-        layout_obstacle_buttons.addRow(self.button_update_obstacle)
-        layout_obstacle_buttons.addRow(self.button_remove_obstacle)
-        layout_obstacle_buttons.addRow(self.button_add_static_obstacle)
-        self.layout_obstacles.addLayout(layout_obstacle_buttons)
         self.layout_obstacles.addLayout(self.vis_settings_container)
 
         title_obstacle = "Obstacle"
