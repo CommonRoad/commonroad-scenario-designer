@@ -866,7 +866,7 @@ class LaneletRepairing(ElementRepairing):
 
         orientation = compute_orientation_from_polyline(non_intersecting_vertices)
         orientation_dif = [abs(orientation[i + 1] - orientation[i]) for i in range(len(orientation) - 1)]
-        while np.isclose(np.max(orientation_dif), np.pi):
+        while np.isclose(np.max(orientation_dif), np.pi, 0.01):
             idx = np.argmax(orientation_dif)
             non_intersecting_vertices[idx + 1] = (
                     (non_intersecting_vertices[idx] + non_intersecting_vertices[idx + 2]) / 2)
