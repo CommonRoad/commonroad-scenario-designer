@@ -19,7 +19,7 @@ def load_and_convert(xml_file_name: str) -> etree.Element:
             f"{os.path.dirname(os.path.realpath(__file__))}/../test_maps/lanelet2/{xml_file_name}.xml"
         )
         scenario, _ = commonroad_reader.open()
-        lanelet2_config.proj_string = gui_config.utm_default
+        lanelet2_config.proj_string_l2 = gui_config.utm_default
         l2osm = CR2LaneletConverter()
         osm = l2osm(scenario)
         return osm
