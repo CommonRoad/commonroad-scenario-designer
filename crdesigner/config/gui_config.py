@@ -8,6 +8,10 @@ from commonroad.visualization.draw_params import LaneletNetworkParams, Intersect
 
 from crdesigner.config.config_base import BaseConfig, Attribute
 
+pseudo_mercator = "EPSG:3857"
+utm_default = "+proj=utm +zone=32 +ellps=WGS84"
+
+
 @dataclass
 class ColorSchema:
     axis: str = 'all'
@@ -19,9 +23,11 @@ class ColorSchema:
     second_background: str = '#ffffff'
     disabled: str = '#959595'
 
+
 @dataclass
 class DrawParamsCustom(MPDrawParams):
     color_schema: ColorSchema = field(default_factory=ColorSchema)
+
 
 def validate_bing_key(key) -> bool:
     """
@@ -114,16 +120,16 @@ class GuiConfig(BaseConfig):
     LDBV_PASSWORD: Attribute = Attribute(value="", display_name="LDBV password", validation=validate_ldbv_credentials)
 
     # projects the lane-network in a way that aligns well with aerial images
-    pseudo_mercator = Attribute("EPSG:3857", "Pseudo Mercator")
-    utm_default = Attribute("+proj=utm +zone=32 +ellps=WGS84", "UTM Default")
+    pseudo_mercator = Attribute(pseudo_mercator, "Pseudo Mercator")
+    utm_default = Attribute(utm_default, "UTM Default")
 
     # The layout of the settings window
     LAYOUT = [
         ["Appearance", DARKMODE, MODERN_LOOK, AXIS_VISIBLE, LEGEND, "Obstacle visualization", DRAW_DYNAMIC_OBSTACLES,
          DRAW_TRAJECTORY, DRAW_OBSTACLE_LABELS,DRAW_OBSTACLE_ICONS, DRAW_OBSTACLE_DIRECTION, DRAW_OBSTACLE_SIGNALS,
          "Intersection visualization",DRAW_INCOMING_LANELETS, DRAW_SUCCESSORS, DRAW_INTERSECTION_LABELS, ],
-        ["Other", ENABLE_UNDETAILED_DISPLAY, DRAW_OCCUPANCY, DRAW_TRAFFIC_SIGNS, DRAW_TRAFFIC_LIGHTS, BING_MAPS_KEY, LDBV_USERNAME,
-         LDBV_PASSWORD]]
+        ["Other", ENABLE_UNDETAILED_DISPLAY, DRAW_OCCUPANCY, DRAW_TRAFFIC_SIGNS, DRAW_TRAFFIC_LIGHTS, BING_MAPS_KEY,
+         LDBV_USERNAME, LDBV_PASSWORD]]
 
     def get_draw_params(self) -> DrawParamsCustom:
         """

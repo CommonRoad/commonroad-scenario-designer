@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.8.1] - 2023-12-XX
+
+### Added
+- Test cases for GUI
+
+### Fixed
+- Adding existing obstacles again
+
 ## [0.8.0] - 2023-10-31
 
 ### Added
@@ -13,7 +21,6 @@
 - cr2lanelet line marking conversion
 - cr2lanelet bidirectional users conversion
 - Possibility to change look of the GUI into a more modern style
-
 
 ### Changed
 - GUI backend using MVC pattern

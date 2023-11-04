@@ -111,7 +111,7 @@ def lanelet2cr(ctx: typer.Context,
                                                 "system, e.g., in Great Britain")] = False):
     config_lanelet2 = lanelet2_config
     if proj is not None:
-        config_lanelet2.proj_string = proj
+        config_lanelet2.proj_string_l2 = proj
     config_lanelet2.adjacencies = adjacencies
     config_lanelet2.left_driving = left_driving
     scenario = lanelet_to_commonroad(ctx.obj["input_file"], lanelet2_conf=config_lanelet2)
@@ -128,7 +128,7 @@ def crlanelet2(ctx: typer.Context,
                    bool, typer.Option(..., help="Overwrite existing CommonRoad file")] = False):
     config = lanelet2_config
     if proj is not None:
-        config.proj_string = proj
+        config.proj_string_l2 = proj
     config.autoware = autoware
     config.use_local_coordinates = local_coordinates
     commonroad_to_lanelet(ctx.obj["input_file"], ctx.obj["output_file"], config=config)

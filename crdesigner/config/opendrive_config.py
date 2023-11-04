@@ -1,5 +1,5 @@
 from crdesigner.config.config_base import BaseConfig, Attribute
-from crdesigner.config.gui_config import gui_config
+from crdesigner.config.gui_config import pseudo_mercator
 
 
 class OpenDriveConfig(BaseConfig):
@@ -37,14 +37,14 @@ class OpenDriveConfig(BaseConfig):
                                                               "graph in degrees. If you edit the graph by hand, "
                                                               "a value of 0 is recommended")
 
-    proj_string = Attribute(gui_config.pseudo_mercator, "Proj string", "String used for the initialization of "
-                                                                       "projection")
+    proj_string_odr = Attribute(pseudo_mercator, "Proj string", "String used for the "
+                                                                "initialization of projection")
 
     filter_types = Attribute(
             ["driving", "restricted", "onRamp", "offRamp", "exit", "entry", "sidewalk", "shoulder", "crosswalk",
              "bidirectional"], "Filter types", "OpenDRIVE lane types which are considered for conversion")
 
-    LAYOUT = [["Conversion Parameters", error_tolerance, min_delta_s, precision, proj_string,
+    LAYOUT = [["Conversion Parameters", error_tolerance, min_delta_s, precision, proj_string_odr,
                "Intersection and Lane Segment Parameters", intersection_straight_threshold, lane_segment_angle],
               ["Lanelet Type Configuration", driving_default_lanelet_type, general_lanelet_type_activ,
                general_lanelet_type, lanelet_types_backwards_compatible, filter_types]]

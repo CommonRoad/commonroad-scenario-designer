@@ -1,7 +1,7 @@
 from commonroad.scenario.traffic_sign import TrafficSignIDGermany, TrafficSignIDZamunda, TrafficSignIDUsa
 
 from crdesigner.config.config_base import BaseConfig, Attribute
-from crdesigner.config.gui_config import gui_config
+from crdesigner.config.gui_config import pseudo_mercator
 
 
 class Lanelet2Config(BaseConfig):
@@ -12,7 +12,8 @@ class Lanelet2Config(BaseConfig):
     ways_are_equal_tolerance = Attribute(0.001, "Ways are equal tolerance",
                                          "Value of the tolerance for which we mark ways as equal")
 
-    autoware = Attribute(False, "Autoware", "Boolean indicating whether the conversion should be autoware compatible")
+    autoware = Attribute(False, "Autoware", "Boolean indicating whether the conversion "
+                                            "should be autoware compatible")
 
     use_local_coordinates = Attribute(False, "Use local coordinates",
                                       "Boolean indicating whether local coordinates should be added")
@@ -45,8 +46,8 @@ class Lanelet2Config(BaseConfig):
     adjacencies = Attribute(True, "Adjacencies",
                             "Detect left and right adjacencies of lanelets if they do not share a common way")
 
-    proj_string = Attribute(gui_config.pseudo_mercator, "Projection string",
-                            "String used for the initialization of projection")
+    proj_string_l2 = Attribute(pseudo_mercator, "Projection string",
+                               "String used for the initialization of projection")
 
     translate = Attribute(False, "Translate",
                           "Boolean indicating whether map should be translated by the location coordinate specified "
@@ -57,15 +58,15 @@ class Lanelet2Config(BaseConfig):
                                              "Lanelets with other tags are not converted.")
 
     eps2_values = Attribute(
-            [1, 5, 10, 20, 50],"CCS Eps2 Values",
+            [1, 5, 10, 20, 50], "CCS Eps2 Values",
             "Possible values for length of additional segments of curvilinear coordinate system.")
 
     max_polyline_resampling_step_values = Attribute(
-            [2, 0.25, 0.5, 1, 5, 10, 20, 25],"Max. Polyline Resampling Step Values",
+            [2, 0.25, 0.5, 1, 5, 10, 20, 25], "Max. Polyline Resampling Step Values",
             "Possible values for resampling step size of reference for curvilinear coordinate system.")
 
     chaikins_initial_refinements = Attribute(
-            5,"Initial CCS Refinements",
+            5, "Initial CCS Refinements",
             "Number of initial refinements of chaikins corner cutting algorithms "
             "for curvilinear coordinate system.")
 
@@ -87,7 +88,7 @@ class Lanelet2Config(BaseConfig):
             "Min. percentage of correctly assigned vertices to each polyline of lanelet.")
 
     LAYOUT = [["CommonRoad To Lanelet2", ways_are_equal_tolerance, autoware,
-               use_local_coordinates, supported_lanelet2_subtypes, "General", proj_string, translate, left_driving],
+               use_local_coordinates, supported_lanelet2_subtypes, "General", proj_string_l2, translate, left_driving],
               ["Lanelet2 To CommonRoad", node_distance_tolerance, adjacent_way_distance_tolerance, start_node_id_value,
                priority_signs, adjacencies, allowed_tags]]
 

@@ -198,7 +198,7 @@ class Lanelet2CRConverter:
         self._config = config
         self._cr_config = cr_config
         crs_from = CRS("ETRF89")
-        crs_to = CRS(self._config.proj_string)
+        crs_to = CRS(self._config.proj_string_l2)
         self.transformer = Transformer.from_proj(crs_from, crs_to)
         self._left_way_ids, self._right_way_ids = None, None
         self.first_left_pts, self.last_left_pts = None, None
@@ -316,7 +316,7 @@ class Lanelet2CRConverter:
 
         scenario.add_objects(self.lanelet_network)
 
-        scenario.location.geo_transformation = GeoTransformation(geo_reference=self._config.proj_string)
+        scenario.location.geo_transformation = GeoTransformation(geo_reference=self._config.proj_string_l2)
 
         return scenario
     

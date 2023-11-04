@@ -58,14 +58,14 @@ class TestLanelet2CRConverter(unittest.TestCase):
         self.assertIsNone(l2cr.origin_utm)
 
         # testing the default proj
-        crs_to = CRS(self._config.proj_string)
+        crs_to = CRS(self._config.proj_string_l2)
         crs_from = CRS("ETRF89")
         transformer = Transformer.from_proj(crs_from, crs_to)
         self.assertEqual(l2cr.transformer.definition, transformer.definition)
 
     def test_custom_proj_string_init(self):
-        self._config.proj_string = "+proj=utm +zone=59 +south"
-        crs_to = CRS(self._config.proj_string)
+        self._config.proj_string_l2 = "+proj=utm +zone=59 +south"
+        crs_to = CRS(self._config.proj_string_l2)
         crs_from = CRS("ETRF89")
         transformer = Transformer.from_proj(crs_from, crs_to)
         l2cr = Lanelet2CRConverter()
@@ -91,7 +91,8 @@ class TestLanelet2CRConverter(unittest.TestCase):
         # test the scenario values given in the constructor
         self.assertEqual(scenario.dt, 0.1)
         self.assertEqual(scenario.location, Location(gps_latitude=origin_lat, gps_longitude=origin_lon,
-                                                     geo_transformation=GeoTransformation(geo_reference=lanelet2_config.proj_string)))
+                                                     geo_transformation=GeoTransformation(
+                                                             geo_reference=lanelet2_config.proj_string_l2)))
 
         # test the class of the lanelet network
         self.assertEqual(l2cr.lanelet_network.__class__, LaneletNetwork)
