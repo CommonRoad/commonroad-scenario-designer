@@ -43,10 +43,13 @@ prospector_tutorials:
 
 build_and_test_python:
   image : python:$PYTHON_VERSIONS
+  tags :
+    - $SYSTEM_TAGS
   stage: test
   parallel :
     matrix :
       - PYTHON_VERSIONS : [ "3.8", "3.9"]
+      - SYSTEM_TAGS : [ "x86", "arm"]
   variables:
     QT_QPA_PLATFORM : "offscreen"
   script:
