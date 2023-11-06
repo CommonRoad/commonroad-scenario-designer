@@ -1,5 +1,6 @@
 from collections import defaultdict
 from typing import List, Optional, Tuple, Dict, Union
+
 from shapely.geometry import LineString  # type: ignore
 import numpy as np
 from pyproj import Transformer, CRS
@@ -22,7 +23,8 @@ from crdesigner.map_conversion.common.conversion_lanelet_network import \
     ConversionLaneletNetwork
 from crdesigner.map_conversion.lanelet2.lanelet2 import WayRelation, Node, RegulatoryElement, Way
 from crdesigner.map_conversion.common.geometry import point_to_line_distance, distance as point_to_polyline_distance
-
+from crdesigner.verification_repairing.verification.hol.functions.predicates.lanelet_predicates import \
+    _wrong_left_right_boundary_side
 
 date_strftime_format = "%d-%b-%y %H:%M:%S"
 message_format = "%(asctime)s - %(levelname)s - %(message)s"
@@ -196,7 +198,7 @@ class Lanelet2CRConverter:
         self._config = config
         self._cr_config = cr_config
         crs_from = CRS("ETRF89")
-        crs_to = CRS(self._config.proj_string)
+        crs_to = CRS(self._config.proj_string_l2)
         self.transformer = Transformer.from_proj(crs_from, crs_to)
         self._left_way_ids, self._right_way_ids = None, None
         self.first_left_pts, self.last_left_pts = None, None
@@ -314,7 +316,7 @@ class Lanelet2CRConverter:
 
         scenario.add_objects(self.lanelet_network)
 
-        scenario.location.geo_transformation = GeoTransformation(geo_reference=self._config.proj_string)
+        scenario.location.geo_transformation = GeoTransformation(geo_reference=self._config.proj_string_l2)
 
         return scenario
     
@@ -594,6 +596,10 @@ class Lanelet2CRConverter:
 
         # set center vertices
         center_vertices = np.array([(l + r) / 2 for (l, r) in zip(left_vertices, right_vertices)])
+
+        if _wrong_left_right_boundary_side(center_vertices, left_vertices, right_vertices, lanelet2_config):
+            left_vertices, right_vertices = np.flip(left_vertices, axis=0), np.flip(right_vertices, axis=0)
+            center_vertices = (left_vertices + right_vertices) / 2
 
         # extract special meaning like way, direction and road type
         lanelet_type, users_one_way, users_bidirectional = _extract_special_meaning_to_lanelet(way_rel)

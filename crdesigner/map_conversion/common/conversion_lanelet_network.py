@@ -635,7 +635,6 @@ class ConversionLaneletNetwork(LaneletNetwork):
                         successor_straight.add(successor)
                         successors.append(successor)
                     else:
-                        print(direction)
                         warnings.warn("Incorrect direction assigned to successor of incoming lanelet in intersection")
             intersection_incoming_lane = IntersectionIncomingElement(generate_unique_id(), set(incoming_lanelet_set),
                                                                      successor_right, successor_straight,

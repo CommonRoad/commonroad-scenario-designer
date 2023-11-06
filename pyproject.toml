@@ -10,7 +10,7 @@ classifiers = [
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
+#    "Programming Language :: Python :: 3.11",
     "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
     "Operating System :: POSIX :: Linux",
     "Operating System :: MacOS",
@@ -25,11 +25,14 @@ Forum = "https://commonroad.in.tum.de/forum/c/scenario-designer/"
 Source = "https://gitlab.lrz.de/tum-cps/commonroad-scenario-designer"
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = ">=3.8,<3.11"
 commonroad-io = "2023.3"
-# commonroad-drivability-checker = "2023.1"
+commonroad-drivability-checker = "2023.1"
 pyqt5 = ">=5.15.9"
-PyQt5-Qt5 = "<5.15.11"
+PyQt5-Qt5 = [
+    {version = "<5.15.11", platform = 'linux'},
+    {version = "<5.15.11", platform = 'win64'},
+    {version = "=5.15.11", platform = 'darwin'}]
 matplotlib = ">=3.6.0"
 numpy = "^1.24.2"
 lxml = "^4.9.2"
@@ -77,7 +80,7 @@ optional = true
 jupyter = "^1.0.0"
 
 [tool.poetry.scripts]
-crdesigner = 'crdesigner.command_line:cli'
+crdesigner = 'crdesigner.ui.command_line:cli'
 
 [build-system]
 requires = ["poetry-core"]

@@ -22,6 +22,7 @@ class TestCommandLineInterface(unittest.TestCase):
         time.sleep(10)
         exists = Path(self.output_path + "/opendrive_command_line.xml")
         self.assertTrue(exists.is_file())
+        exists.unlink()
 
     def test_osm(self):
         subprocess.Popen(['crdesigner',
@@ -32,6 +33,7 @@ class TestCommandLineInterface(unittest.TestCase):
         time.sleep(30)
         exists = Path(self.output_path + '/osm_command_line.xml')
         self.assertTrue(exists.is_file())
+        exists.unlink()
 
     def test_lanelet2_to_cr(self):
         subprocess.Popen(['crdesigner',
@@ -42,6 +44,7 @@ class TestCommandLineInterface(unittest.TestCase):
         time.sleep(5)
         exists = Path(self.output_path + "/lanelet2_command_line.xml")
         self.assertTrue(exists.is_file())
+        exists.unlink()
 
     def test_cr_to_lanelet(self):
         subprocess.Popen(['crdesigner',
@@ -52,6 +55,7 @@ class TestCommandLineInterface(unittest.TestCase):
         time.sleep(5)
         exists = Path(self.output_path + "/cr_lanelet_command_line.osm")
         self.assertTrue(exists.is_file())
+        exists.unlink()
 
     # def test_cr_to_sumo(self):
     #     if not os.path.isdir(self.output_path + '/cr_sumo_command_line'):
@@ -72,3 +76,33 @@ class TestCommandLineInterface(unittest.TestCase):
         process = subprocess.Popen(['crdesigner', 'gui'])
         time.sleep(5)
         process.terminate()
+
+    def test_map_ver_scenario(self):
+        path = Path(__file__).parent.parent / "map_verification/test_maps/paper_test_maps/DEU_Guetersloh-20_1_T-1.xml"
+        path_repaired = path.parent / "DEU_Guetersloh-20_1_T-1-repaired.xml"
+        process = subprocess.Popen(['crdesigner',
+                                    '--input-file', str(path),
+                                   'verify-map'])
+        time.sleep(15)
+        process.terminate()
+        self.assertTrue(path_repaired.exists())
+        path_repaired.unlink()
+
+    def test_map_ver_dir(self):
+        path = Path(__file__).parent.parent / "map_verification/test_maps/paper_test_maps"
+        path_1 = path / "DEU_Guetersloh-20_1_T-1-repaired.xml"
+        path_2 = path / "DEU_BadEssen-3_1_T-1-repaired.xml"
+        path_3 = path / "DEU_Reutlingen-1_1_T-1-repaired.xml"
+        process = subprocess.Popen(
+                ['crdesigner',
+                 '--input-file', str(path),
+                 'verify-dir'])
+        time.sleep(30)
+        process.terminate()
+        self.assertTrue(path_1.exists())
+        self.assertTrue(path_2.exists())
+        self.assertTrue(path_3.exists())
+
+        path_1.unlink()
+        path_2.unlink()
+        path_3.unlink()

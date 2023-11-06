@@ -300,7 +300,6 @@ class ObstacleController(QDockWidget, ):
         self.scenario_model.add_obstacle(dynamic_obstacle)
         self.obstacle_toolbox_ui.initialize_obstacle_information()
 
-
     def calc_state_list(self) -> List[State]:
         """
         Calculates the trajectory, orientation, yaw_rate, slip_angle, etc
@@ -348,7 +347,6 @@ class ObstacleController(QDockWidget, ):
                 state_list.append(new_state)
             return state_list
 
-
     def polygon_array(self) -> Union[List[float], None]:
         """
         Stores values from gui menu as floats (vertice coordinates)
@@ -369,7 +367,6 @@ class ObstacleController(QDockWidget, ):
         vertices = np.asarray(vertices)
         return vertices
 
-
     def get_current_obstacle_id(self) -> Union[int, None]:
         """
         :return: obstacle_id of current selected obstacle
@@ -378,7 +375,6 @@ class ObstacleController(QDockWidget, ):
             return int(self.obstacle_toolbox_ui.selected_obstacle.currentText())
         else:
             return None
-
 
     def get_current_obstacle(self) -> Union[Obstacle, None]:
         """
@@ -391,7 +387,6 @@ class ObstacleController(QDockWidget, ):
         else:
             return None
 
-
     def add_obstacle(self):
         """
         generates an object_id (id for obstacle) and then calls function
@@ -401,7 +396,11 @@ class ObstacleController(QDockWidget, ):
             self.text_browser.append("Please stop the animation first.")
             return
 
-        if self.scenario_model.scenario_created() :
+        if self.obstacle_toolbox_ui.selected_obstacle.currentText() != "None":
+            self.text_browser.append("The obstacle already exists. Please update the obstacle!")
+            return
+
+        if self.scenario_model.scenario_created():
             obstacle_id = self.scenario_model.generate_object_id()
             self.amount_obstacles = self.scenario_model.generate_object_id()
 
@@ -418,7 +417,6 @@ class ObstacleController(QDockWidget, ):
         else:
             self.text_browser.append("Warning: Scenario does not exist yet. Please create or load a scenario first.")
         self.obstacle_toolbox_ui.initialize_obstacle_information()
-
 
     def update_obstacle(self):
         """

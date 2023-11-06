@@ -14,7 +14,8 @@ try:
 
     SUMO_AVAILABLE = True
 except ImportError:
-    logging.warning("Cannot import SUMO, simulation will not be offered in Scenario Designer")
+    logging.warning("Cannot import SUMO. SUMO simulation will not be offered in Scenario Designer GUI. "
+                    "The GUI and other map conversions should work.")
     SUMO_AVAILABLE = False
 
 from PyQt5.QtWidgets import QMessageBox, QFrame

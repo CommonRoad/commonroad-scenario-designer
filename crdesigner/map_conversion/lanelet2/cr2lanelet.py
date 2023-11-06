@@ -144,7 +144,7 @@ class CR2LaneletConverter:
         if loc is not None and loc.geo_transformation is not None:
             proj_string_from = loc.geo_transformation.geo_reference
         if proj_string_from is None:
-            proj_string_from = self._config.proj_string
+            proj_string_from = self._config.proj_string_l2
         crs_from = CRS(proj_string_from)
         crs_to = CRS("ETRF89")
         self.transformer = Transformer.from_proj(crs_from, crs_to)

@@ -38,10 +38,10 @@ def open_commonroad_file(mwindow, path=None):
                                           "CommonRoad scenario *.pb file (*.pb)", options=QFileDialog.Options(), )
     if not path:
         return
-    _open_path(mwindow=mwindow, path=path)
+    open_path(mwindow=mwindow, path=path)
 
 
-def _open_path(mwindow, path):
+def open_path(mwindow, path):
     """ """
     try:
         if ".pb" in path:
