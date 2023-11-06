@@ -1,4 +1,6 @@
 import math
+import yaml
+import os
 from typing import Optional
 
 from PyQt5.QtCore import *
@@ -14,8 +16,10 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
 
+
 # try to import sumo functionality
 from crdesigner.ui.gui.utilities.gui_sumo_simulation import SUMO_AVAILABLE
+
 if SUMO_AVAILABLE:
     from crdesigner.ui.gui.utilities.gui_sumo_simulation import SUMOSimulation
 
@@ -28,6 +32,10 @@ class ObstacleToolboxUI(Toolbox):
         self.remove_vertice_btn = []
         self.text_browser = text_browser
         self.change_color = False
+
+        with open(os.getcwd() + "/obstacle_type_spec.yaml", "r") as f:
+            self.obstacle_spec = yaml.safe_load(f)
+
 
     def define_sections(self):
         """defines the sections in the obstacle toolbox
@@ -153,9 +161,34 @@ class ObstacleToolboxUI(Toolbox):
         self.clear_obstacle_fields()
 
         self.selected_obstacle.clear()
-        self.selected_obstacle.addItems(
-                ["None"] + [str(item) for item in self.scenario_model.collect_obstacle_ids()])
+        self.selected_obstacle.addItems(["None"] + [str(item) for item in self.scenario_model.collect_obstacle_ids()])
         self.selected_obstacle.setCurrentIndex(0)
+
+        self.init_obstacle_defaults()
+
+    def init_obstacle_defaults(self):
+        selected_obs_spec = self.obstacle_spec.get(self.obstacle_type.currentText())
+        if selected_obs_spec == None:
+            return
+
+        self.obstacle_shape.setCurrentText(selected_obs_spec["shape"])
+
+        # self.obstacle_type.setCurrentIndex(1)  # default car
+        if self.obstacle_shape.currentText() == "Rectangle":
+            self.obstacle_length.setText(selected_obs_spec["length"])
+            self.obstacle_orientation.setText("0")
+            self.obstacle_width.setText(selected_obs_spec["width"])
+        elif self.obstacle_shape.currentText() == "Circle":
+            self.obstacle_radius.setText(selected_obs_spec["radius"])
+        elif self.obstacle_shape.currentText() == "Polygon":
+            for lineEdit in self.vertices_x:
+                lineEdit.setText("0")
+            for lineEdit in self.vertices_y:
+                lineEdit.setText("0")
+        if (self.obstacle_dyn_stat.currentText() == "Static" and
+                not self.obstacle_shape.currentText() == "Polygon"):
+            self.obstacle_x_Position.setText("0.5")
+            self.obstacle_y_Position.setText("0.5")
 
     def update_obstacle_information_ui(self, obstacle: Optional[Obstacle] = None):
         """
@@ -174,10 +207,8 @@ class ObstacleToolboxUI(Toolbox):
             self.obstacle_width.setText(str(obstacle.obstacle_shape.width))
             self.obstacle_length.setText(str(obstacle.obstacle_shape.length))
             if isinstance(obstacle, StaticObstacle):
-                self.obstacle_x_Position.setText(
-                        str(obstacle.initial_state.__getattribute__("position")[0]))
-                self.obstacle_y_Position.setText(
-                        str(obstacle.initial_state.__getattribute__("position")[1]))
+                self.obstacle_x_Position.setText(str(obstacle.initial_state.__getattribute__("position")[0]))
+                self.obstacle_y_Position.setText(str(obstacle.initial_state.__getattribute__("position")[1]))
                 self.obstacle_orientation.setText(
                         str(math.degrees(obstacle.initial_state.__getattribute__("orientation"))))
             else:
@@ -191,10 +222,8 @@ class ObstacleToolboxUI(Toolbox):
 
             self.obstacle_radius.setText(str(obstacle.obstacle_shape.radius))
             if isinstance(obstacle, StaticObstacle):
-                self.obstacle_x_Position.setText(
-                        str(obstacle.initial_state.__getattribute__("position")[0]))
-                self.obstacle_y_Position.setText(
-                        str(obstacle.initial_state.__getattribute__("position")[1]))
+                self.obstacle_x_Position.setText(str(obstacle.initial_state.__getattribute__("position")[0]))
+                self.obstacle_y_Position.setText(str(obstacle.initial_state.__getattribute__("position")[1]))
 
         elif isinstance(obstacle.obstacle_shape, Polygon):
             if self.obstacle_shape.currentText() != "Polygon":
@@ -256,8 +285,7 @@ class ObstacleToolboxUI(Toolbox):
             for i in range(self.amount_vertices):
                 self.vertices_x[i].setText("")
                 self.vertices_y[i].setText("")
-        if (self.obstacle_dyn_stat.currentText() == "Static" and
-                self.obstacle_shape.currentText() != "Polygon"):
+        if (self.obstacle_dyn_stat.currentText() == "Static" and self.obstacle_shape.currentText() != "Polygon"):
             self.obstacle_x_Position.setText("")
             self.obstacle_y_Position.setText("")
         if not self.default_color.isChecked():
@@ -271,16 +299,19 @@ class ObstacleToolboxUI(Toolbox):
         self.obstacle_length.setValidator(self.float_validator)
         self.obstacle_length.setMaxLength(6)
         self.obstacle_length.setAlignment(Qt.AlignRight)
+        # self.obstacle_length.setText("3.5")
 
         self.obstacle_width = QLineEdit()
         self.obstacle_width.setValidator(self.float_validator)
         self.obstacle_width.setMaxLength(4)
         self.obstacle_width.setAlignment(Qt.AlignRight)
+        # self.obstacle_width.setText("1.6")
 
         self.obstacle_orientation = QLineEdit()
         self.obstacle_orientation.setValidator(QIntValidator())
         self.obstacle_orientation.setMaxLength(4)
         self.obstacle_orientation.setAlignment(Qt.AlignRight)
+        # self.obstacle_orientation.setText("0")
 
         self.layout_shape_groupbox.insertRow(2, "Width [m]", self.obstacle_width)
         self.layout_shape_groupbox.insertRow(3, "Length [m]", self.obstacle_length)
@@ -307,6 +338,8 @@ class ObstacleToolboxUI(Toolbox):
         self.obstacle_radius.setAlignment(Qt.AlignRight)
 
         self.layout_shape_groupbox.insertRow(2, "Radius [m]", self.obstacle_radius)
+
+        # self.obstacle_radius.setText("3")
 
     def remove_circle_fields(self):
         """
@@ -352,6 +385,13 @@ class ObstacleToolboxUI(Toolbox):
                 self.layout_obstacle_information_groupbox.insertRow(5, "Y-Position", self.obstacle_y_Position)
             self.position_initialized = True
 
+        """
+        if self.obstacle_dyn_stat.currentText() == "Static":
+            self.obstacle_x_Position.setText("0.5")
+            self.obstacle_y_Position.setText("0.5")
+        """
+
+
     def remove_position(self):
         """
         removes the position fields
@@ -378,9 +418,14 @@ class ObstacleToolboxUI(Toolbox):
             self.add_vertice()
 
         self.add_vertice_btn = QPushButton("Add Vertice")
-        self.add_vertice_btn.clicked.connect(
-            lambda: self.add_vertice())
+        self.add_vertice_btn.clicked.connect(lambda: self.add_vertice())
         self.layout_shape_groupbox.insertRow(len(self.vertices_x) + 2, self.add_vertice_btn)
+        """
+        for lineEdit in self.vertices_x:
+            lineEdit.setText("0")
+        for lineEdit in self.vertices_y:
+            lineEdit.setText("0")
+        """
 
     def add_vertice(self):
         """
@@ -395,11 +440,13 @@ class ObstacleToolboxUI(Toolbox):
         self.vertices_x[i].setValidator(self.float_validator)
         self.vertices_x[i].setMaxLength(6)
         self.vertices_x[i].setAlignment(Qt.AlignRight)
+        self.vertices_x[i].setText("0")
 
         self.vertices_y.append(QLineEdit())
         self.vertices_y[i].setValidator(self.float_validator)
         self.vertices_y[i].setMaxLength(6)
         self.vertices_y[i].setAlignment(Qt.AlignRight)
+        self.vertices_y[i].setText("0")
 
         self.polygon_row[i].addWidget(self.polygon_label[i])
         self.polygon_row[i].addWidget(self.vertices_x[i])
@@ -411,11 +458,10 @@ class ObstacleToolboxUI(Toolbox):
         else:
             self.remove_vertice_btn[i].setIcon(QIcon(":icons/iconmonstr-trash-can.svg"))
 
-        self.remove_vertice_btn[i].clicked.connect(
-            lambda: self.remove_vertice())
+        self.remove_vertice_btn[i].clicked.connect(lambda: self.remove_vertice())
         self.polygon_row[i].addWidget(self.remove_vertice_btn[i])
 
-        self.layout_shape_groupbox.insertRow(i+2, self.polygon_row[i])
+        self.layout_shape_groupbox.insertRow(i + 2, self.polygon_row[i])
         self.amount_vertices = self.amount_vertices + 1
 
     def remove_vertice(self, i: int = -1):
@@ -449,7 +495,7 @@ class ObstacleToolboxUI(Toolbox):
 
         self.default_color.setChecked(False)
         self.selected_color.setStyleSheet(
-            "QWidget { border:1px solid black; background-color: %s}" % self.obstacle_color.name())
+                "QWidget { border:1px solid black; background-color: %s}" % self.obstacle_color.name())
         self.change_color = True
 
     def set_default_color(self):
@@ -457,8 +503,7 @@ class ObstacleToolboxUI(Toolbox):
         sets default color for the color display square
         """
         if self.default_color.isChecked():
-            self.selected_color.setStyleSheet(
-                "QWidget { border:1px solid black; background-color: white}")
+            self.selected_color.setStyleSheet("QWidget { border:1px solid black; background-color: white}")
 
     def update_window(self):
         super().update_window()
