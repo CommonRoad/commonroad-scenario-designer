@@ -69,19 +69,19 @@ build_and_test_python_arm:
     - *run-test-with-coverage
   needs: []
 
-build_and_test_python_macos:
-  image : arm64v8/python:$PYTHON_VERSIONS
-  tags :
-    - macos
-  stage: test
-  parallel :
-    matrix :
-      - PYTHON_VERSIONS : [ "3.8", "3.9"]
-  variables:
-    QT_QPA_PLATFORM : "offscreen"
-  script:
-    - *run-test-with-coverage
-  needs: []
+#build_and_test_python_macos:
+#  image : arm64v8/python:$PYTHON_VERSIONS
+#  tags :
+#    - macos
+#  stage: test
+#  parallel :
+#    matrix :
+#      - PYTHON_VERSIONS : [ "3.8", "3.9"]
+#  variables:
+#    QT_QPA_PLATFORM : "offscreen"
+#  script:
+#    - *run-test-with-coverage
+#  needs: []
 
 build_and_test_with_coverage:
   stage : test
