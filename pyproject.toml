@@ -31,7 +31,7 @@ commonroad-drivability-checker = "2023.1"
 pyqt5 = ">=5.15.9"
 PyQt5-Qt5 = [
   {markers = "platform_machine == 'arm64'", version = "=5.15.11"},
-  {markers = "sys_platform == 'linux'", version = "<5.15.11"},
+  {markers = "sys_platform == 'linux' and platform_machine != 'arm64'", version = "<5.15.11"},
   {markers = "sys_platform == 'win64'", version = "<5.15.11"}
 ]
 
