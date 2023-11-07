@@ -76,7 +76,7 @@ class TestCR2LaneletConverter(unittest.TestCase):
                 and scenario.lanelet_network.location.geo_transformation is not None:
             proj_string_from = scenario.lanelet_network.location.geo_transformation.geo_reference
         if proj_string_from is None:
-            proj_string_from = lanelet2_config.proj_string
+            proj_string_from = lanelet2_config.proj_string_l2
         crs_from = CRS(proj_string_from)
         crs_to = CRS("ETRF89")
         transformer = Transformer.from_proj(crs_from, crs_to)

@@ -1,20 +1,20 @@
 import unittest
-from typing import List
-import os
+
 import numpy as np
 import warnings
-from commonroad.common.file_reader import CommonRoadFileReader
-from commonroad.scenario.lanelet import Lanelet, LaneletType, StopLine, LineMarking, LaneletNetwork
+
+from commonroad.common.common_lanelet import LaneletType
+from commonroad.scenario.lanelet import Lanelet, StopLine, LineMarking, LaneletNetwork
 from commonroad.scenario.scenario import ScenarioID
 from commonroad.scenario.traffic_sign import TrafficSign, TrafficSignElement, TrafficSignIDGermany
 from commonroad.scenario.traffic_light import TrafficLight, TrafficLightState, TrafficLightCycleElement, \
     TrafficLightCycle
 
-from crdesigner.crmapver.verification.formula_ids import FormulaID, LaneletFormulaID, \
-    TrafficSignFormulaID, TrafficLightFormulaID, IntersectionFormulaID, GeneralFormulaID
-from crdesigner.crmapver.verification.hol.mapping import HOLMapping
-from crdesigner.crmapver.verification.hol.satisfaction import HOLVerificationChecker
-from crdesigner.crmapver.config import VerificationParams
+from crdesigner.verification_repairing.verification.formula_ids import FormulaID, LaneletFormulaID, \
+    TrafficSignFormulaID, TrafficLightFormulaID, GeneralFormulaID
+from crdesigner.verification_repairing.verification.hol.mapping import HOLMapping
+from crdesigner.verification_repairing.verification.hol.satisfaction import HOLVerificationChecker
+from crdesigner.verification_repairing.config import VerificationParams
 
 warnings.filterwarnings("ignore")
 
@@ -97,15 +97,6 @@ class TestLaneletFormulaPool(TestFormulaPool):
         self.network = LaneletNetwork()
         self.network.add_lanelet(self.lanelet_1)
         self.network.add_lanelet(self.lanelet_2)
-
-    def test_unique_id(self):
-        formula_id = LaneletFormulaID.UNIQUE_ID
-
-        self.check_sat(formula_id, self.network, expected=False)
-
-        self.lanelet_2.lanelet_id = 1
-
-        self.check_sat(formula_id, self.network, expected=True)
 
     def test_same_vertices_size(self):
         formula_id = LaneletFormulaID.SAME_VERTICES_SIZE
@@ -459,47 +450,75 @@ class TestLaneletFormulaPool(TestFormulaPool):
 
         self.check_sat(formula_id, self.network, expected=True)
 
-    # def test_polylines_intersection(self):
-    #     formula_id = LaneletFormulaID.POLYLINES_INTERSECTION
-    #
-    #     self.check_sat(formula_id, self.network, [Solver.HOL], expected=False)
-    #
-    #     self.lanelet_1.left_vertices = np.array([[0., 1.], [0.5, 0.], [1., -1.]])
-    #
-    #     self.check_sat(formula_id, self.network, [Solver.HOL], expected=True)
-    #
-    # def test_left_self_intersection(self):
-    #     formula_id = LaneletFormulaID.LEFT_SELF_INTERSECTION
-    #
-    #     self.check_sat(formula_id, self.network, [Solver.HOL], expected=False)
-    #
-    #     self.lanelet_1.left_vertices = np.array([[0., 1.], [0.5, 1.], [0.5, 1.5], [0.25, 1.5], [0.25, 1.5], [0.5, 1.]])
-    #
-    #     self.check_sat(formula_id, self.network, [Solver.HOL], expected=True)
-    #
-    # def test_right_self_intersection(self):
-    #     formula_id = LaneletFormulaID.RIGHT_SELF_INTERSECTION
-    #
-    #     self.check_sat(formula_id, self.network, [Solver.HOL], expected=False)
-    #
-    #     self.lanelet_1.right_vertices = np.array([[0., 1.], [0.5, 1.], [0.5, 1.5], [0.25, 1.5], [0.25, 1.5], [0.5, 1.]])
-    #
-    #     self.check_sat(formula_id, self.network, [Solver.HOL], expected=True)
+    def test_polylines_intersection(self):
+        formula_id = LaneletFormulaID.POLYLINES_INTERSECTION
+
+        self.check_sat(formula_id, self.network, expected=False)
+
+        self.lanelet_1.left_vertices = np.array([[0., 1.], [0.5, 0.], [1., -1.]])
+
+        self.check_sat(formula_id, self.network, expected=True)
+
+    def test_left_self_intersection(self):
+        formula_id = LaneletFormulaID.LEFT_SELF_INTERSECTION
+
+        self.check_sat(formula_id, self.network, expected=False)
+
+        self.lanelet_1.left_vertices = np.array([[0., 1.], [0.5, 1.], [0.5, 1.5], [0.25, 1.5], [0.25, 1.5], [0.5, 1.]])
+        self.check_sat(formula_id, self.network, expected=True)
+
+        self.lanelet_1.left_vertices = np.array([[0.0, 1.], [0.5, 1.], [0.25, 1.0], [0.75, 1.0]])
+        self.check_sat(formula_id, self.network, expected=True)
+
+        self.lanelet_1.left_vertices = np.array([[0.0, 1.], [0.5, 1.], [0.5, 1.0], [0.75, 1.0]])
+        self.check_sat(formula_id, self.network, expected=True)
+
+    def test_right_self_intersection(self):
+        formula_id = LaneletFormulaID.RIGHT_SELF_INTERSECTION
+
+        self.check_sat(formula_id, self.network, expected=False)
+
+        self.lanelet_1.right_vertices = np.array([[0., 1.], [0.5, 1.], [0.5, 1.5], [0.25, 1.5], [0.25, 1.5], [0.5, 1.]])
+        self.check_sat(formula_id, self.network, expected=True)
+
+        self.lanelet_1.right_vertices = np.array([[0.0, 1.0], [0.5, 1.0], [0.25, 1.0], [0.75, 1.0]])
+        self.check_sat(formula_id, self.network, expected=True)
+
+        self.lanelet_1.right_vertices = np.array([[0.0, 1.0], [0.5, 1.0], [0.5, 1.0], [0.75, 1.0]])
+        self.check_sat(formula_id, self.network, expected=True)
 
     # def test_lanelet_types_combination(self):
     #     formula_id = LaneletFormulaID.LANELET_TYPES_COMBINATION
     #
     #     self.lanelet_1.lanelet_type = {LaneletType.DRIVE_WAY, LaneletType.SIDEWALK}
     #
-    #     self.check_sat(formula_id, self.network, [Solver.Z3], expected=False)
+    #     self.check_sat(formula_id, self.network, expected=False)
     #
     #     self.lanelet_1.lanelet_type = {LaneletType.CROSSWALK, LaneletType.INTERSTATE, LaneletType.URBAN}
     #     self.lanelet_2.lanelet_type = {LaneletType.BUS_STOP, LaneletType.INTERSTATE}
     #
-    #     self.check_sat(formula_id, self.network, [Solver.Z3], expected=True)
+    #     self.check_sat(formula_id, self.network, expected=True)
 
-    def test_referenced_intersecting_lanelets(self):
-        pass
+    def test_conflicting_lanelet_directions(self):
+        formula_id = LaneletFormulaID.LEFT_RIGHT_BOUNDARY_ASSIGNMENT
+
+        self.check_sat(formula_id, self.network, expected=False)
+
+        self.network.add_lanelet(
+            Lanelet(np.array([[2., 1.], [1., 1.]]), np.array([[2., 0.5], [1., 0.5]]), np.array([[2., 0.], [1., 0.]]),
+                    1111))
+
+        self.check_sat(formula_id, self.network, expected=True)
+
+    def test_left_right_boundary_assignment(self):
+        formula_id = LaneletFormulaID.LEFT_RIGHT_BOUNDARY_ASSIGNMENT
+
+        self.check_sat(formula_id, self.network, expected=False)
+
+        self.lanelet_1.right_vertices, self.lanelet_1.left_vertices = np.flip(self.lanelet_1.left_vertices), \
+            np.flip(self.lanelet_1.right_vertices)
+
+        self.check_sat(formula_id, self.network, expected=True)
 
     def test_existence_traffic_signs(self):
         formula_id = LaneletFormulaID.EXISTENCE_TRAFFIC_SIGNS
@@ -809,48 +828,6 @@ class TestTrafficLightFormulaPool(TestFormulaPool):
 #         incoming_element.incoming_lanelets = {7}
 #
 #         self.check_sat(formula_id, self.network, [Solver.HOL], expected=True)
-
-
-class TestAll(unittest.TestCase):
-
-    def verify(self, formula_ids: List[FormulaID]):
-        expected = None
-        num_errors = 0
-        for sc_name in self.network_names:
-            lanelet_network = \
-                CommonRoadFileReader(self.network_path + "/../test_maps/" + sc_name + ".xml").open_lanelet_network()
-            mapping = HOLMapping(lanelet_network)
-
-            mapping.map_verification_paras()
-            mapping.map_lanelet_network()
-
-            verifier = HOLVerificationChecker(mapping, formula_ids)
-
-            invalid_states = []
-            config = VerificationParams()
-            verifier.check_validity(config, invalid_states)
-
-            if expected is None:
-                expected = bool(invalid_states[0])
-                num_errors = len(invalid_states)
-            else:
-                self.assertEqual(expected, bool(invalid_states[0]))
-                self.assertEqual(num_errors, len(invalid_states))
-
-    def setUp(self) -> None:
-        self.network_names = ["DEU_BadEssen-3_1_T-1", "DEU_Guetersloh-20_1_T-1", "DEU_Reutlingen-1_1_T-1"]
-        self.network_path = os.path.dirname(os.path.realpath(__file__))
-        self.base_formula_ids = [LaneletFormulaID.UNIQUE_ID, LaneletFormulaID.SAME_VERTICES_SIZE,
-                                 LaneletFormulaID.VERTICES_MORE_THAN_ONE,
-                                 LaneletFormulaID.EXISTENCE_RIGHT_ADJ, LaneletFormulaID.EXISTENCE_LEFT_ADJ,
-                                 LaneletFormulaID.EXISTENCE_PREDECESSOR, LaneletFormulaID.EXISTENCE_SUCCESSOR,
-                                 LaneletFormulaID.EXISTENCE_TRAFFIC_SIGNS, LaneletFormulaID.EXISTENCE_TRAFFIC_LIGHTS,
-                                 LaneletFormulaID.POLYLINES_INTERSECTION, LaneletFormulaID.LEFT_SELF_INTERSECTION,
-                                 LaneletFormulaID.RIGHT_SELF_INTERSECTION]
-
-    def test_compare_real_scenarios(self):
-        formula_ids = self.base_formula_ids
-        self.verify(formula_ids)
 
 
 if __name__ == '__main__':

@@ -414,10 +414,10 @@ class Network:
                 location_kwargs = dict(gps_latitude=latitude, gps_longitude=longitude)
 
             crs_from = CRS(self._geo_ref)
-            crs_to = CRS(self._config.proj_string)
+            crs_to = CRS(self._config.proj_string_odr)
             transformer = Transformer.from_proj(crs_from, crs_to)
 
-        location = Location(geo_transformation=GeoTransformation(geo_reference=self._config.proj_string),
+        location = Location(geo_transformation=GeoTransformation(geo_reference=self._config.proj_string_odr),
                             **location_kwargs)
 
         scenario_id = ScenarioID(

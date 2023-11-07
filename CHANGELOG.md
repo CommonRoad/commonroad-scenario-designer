@@ -1,8 +1,17 @@
 # Changelog
 
-## [0.8.0] - 2023-10-16
+## [0.8.1] - 2023-12-XX
 
 ### Added
+- Test cases for GUI
+
+### Fixed
+- Adding existing obstacles again
+
+## [0.8.0] - 2023-10-31
+
+### Added
+- CommonRoad map verification and repairing
 - Cropping of a map in the GUI
 - Background saves with restore functionality
 - Scenario toolbox to specify planning problems
@@ -11,8 +20,7 @@
 - Support for visualizing scenarios with 3D coordinates on 2D plane
 - cr2lanelet line marking conversion
 - cr2lanelet bidirectional users conversion
-- Tool for CommonRoad map verification and repairing
-
+- Possibility to change look of the GUI into a more modern style
 
 ### Changed
 - GUI backend using MVC pattern
@@ -33,8 +41,8 @@
 - OpenDRIVE/Lanelet2 conversion intersection incoming lanelets as set instead of list/tuple
 - Relationship of predecessor/successor when creating adjacent lanelets
 - Obstacle information no longer crashes when selecting static obstacle or required state value is missing
-- Visualization of the obstacles colors works fixed
-- Resolved bug where the obstacles where not shown after time step 200
+- Visualization of obstacle colors
+- Obstacles are not shown after time step 200
 
 ## [0.7.2] - 2023-07-29
 

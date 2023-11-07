@@ -9,7 +9,7 @@ from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistin
 from commonroad.planning.planning_problem import PlanningProblemSet  # type: ignore
 from commonroad.scenario.scenario import Tag, Scenario  # type: ignore
 
-from crdesigner.config.gui_config import gui_config
+from crdesigner.config.gui_config import utm_default, pseudo_mercator
 from crdesigner.config.lanelet2_config import lanelet2_config
 from crdesigner.map_conversion.common.utils import generate_unique_id
 from crdesigner.map_conversion.lanelet2.cr2lanelet import CR2LaneletConverter
@@ -27,7 +27,7 @@ class TestLanelet2ToCommonRoadConversion(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        lanelet2_config.reset_settings()
+        lanelet2_config.proj_string_l2 = pseudo_mercator
 
     @staticmethod
     def load_and_convert(osm_file_name: str, translate: bool = False, proj_string: str = None,
@@ -58,7 +58,7 @@ class TestLanelet2ToCommonRoadConversion(unittest.TestCase):
             osm = Lanelet2Parser(etree.parse(fh).getroot()).parse()
 
         if proj_string is not None:
-            lanelet2_config.proj_string = proj_string
+            lanelet2_config.proj_string_l2 = proj_string
         if translate is not None:
             lanelet2_config.translate = translate
         osm2l = Lanelet2CRConverter()
@@ -124,7 +124,7 @@ class TestLanelet2ToCommonRoadConversion(unittest.TestCase):
         to lanelet2, this stored projection method should be considered.
         """
         lanelet2_file_name = "urban-1_lanelets_utm"
-        proj_string = gui_config.utm_default
+        proj_string = utm_default
 
         cr_scenario = self.load_and_convert(lanelet2_file_name, proj_string=proj_string)
         l2osm = CR2LaneletConverter()

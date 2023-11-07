@@ -41,10 +41,10 @@ def open_commonroad_file(mwindow, path=None):
                                               options=QFileDialog.Options(), )
     if not path:
         return
-    _open_path(mwindow=mwindow, path=path)
+    open_path(mwindow=mwindow, path=path)
 
 
-def _open_path(mwindow, path):
+def open_path(mwindow, path):
     """ """
     scenario = Scenario(0.1)
     pps = PlanningProblemSet()

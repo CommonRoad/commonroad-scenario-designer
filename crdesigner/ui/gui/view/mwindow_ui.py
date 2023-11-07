@@ -25,7 +25,6 @@ class MWindowUI(QMainWindow, Ui_mainWindow):
         self.scenario_toolbox = None
         self.crdesigner_console_wrapper = None
 
-
         self.animated_viewer_wrapper = None
 
         # GUI attributes
@@ -33,6 +32,9 @@ class MWindowUI(QMainWindow, Ui_mainWindow):
         self.viewer_dock = None
         self.sumo_settings = None
         self.gui_settings = None
+
+        # Sets stylesheet of the Application
+        self.set_stylesheet(gui_config.get_stylesheet())
 
     def setup_mwindow(self):
         """
@@ -135,3 +137,11 @@ class MWindowUI(QMainWindow, Ui_mainWindow):
             return True
         else:
             return False
+
+    def set_stylesheet(self, sheet: str):
+        """
+        Sets the stylesheet to a modern look or the old look
+
+        @param sheet: new staylesheet which should be set
+        """
+        qApp.setStyleSheet(sheet)

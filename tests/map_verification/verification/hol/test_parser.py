@@ -1,6 +1,6 @@
 import unittest
 
-from crdesigner.crmapver.verification.hol.parser.parser import Parser
+from crdesigner.verification_repairing.verification.hol.parser.parser import Parser
 
 
 class TestParser(unittest.TestCase):

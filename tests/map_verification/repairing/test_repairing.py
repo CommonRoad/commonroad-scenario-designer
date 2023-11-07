@@ -9,10 +9,10 @@ from commonroad.scenario.traffic_sign import TrafficSign, TrafficSignElement, Tr
 from commonroad.scenario.traffic_light import TrafficLight, TrafficLightCycleElement, TrafficLightState, \
     TrafficLightCycle
 
-from crdesigner.crmapver.repairing.traffic_light_repairing import TrafficLightRepairing
-from crdesigner.crmapver.repairing.traffic_sign_repairing import TrafficSignRepairing
-from crdesigner.crmapver.repairing.lanelet_repairing import LaneletRepairing
-from crdesigner.crmapver.repairing.general_repairing import GeneralRepairing
+from crdesigner.verification_repairing.repairing.traffic_light_repairing import TrafficLightRepairing
+from crdesigner.verification_repairing.repairing.traffic_sign_repairing import TrafficSignRepairing
+from crdesigner.verification_repairing.repairing.lanelet_repairing import LaneletRepairing
+from crdesigner.verification_repairing.repairing.general_repairing import GeneralRepairing
 
 
 class TestGeneralRepairing(unittest.TestCase):
@@ -336,23 +336,38 @@ class TestLaneletRepairing(unittest.TestCase):
 
     def test_left_self_intersection(self):
         self.lanelet_1.left_vertices = np.array([[-2., -2.], [-1., -1.], [0.5, 0.], [-0.5, 0], [1., -1.], [2., -2.]])
-
         self.lanelet_repairer.repair_left_self_intersection((1,))
-
         self.assertEqual([[-2., -2.], [-1.3171572875253812, -1.3171572875253812], [-0.4828427124746193, -1.0],
                           [0.4828427124746184, -1.], [1.3171572875253807, -1.3171572875253807],
                           [2., -2.]], self.lanelet_1.left_vertices.tolist())
 
+        self.lanelet_1.left_vertices = np.array([[0.0, 1.0], [0.5, 1.0], [0.25, 1.0], [0.75, 1.0]])
+        self.lanelet_repairer.repair_left_self_intersection((1,))
+        self.assertEqual([[0.0, 1.0], [0.16666666666666669, 1.], [0.33333333333333337, 1.0], [0.75, 1.0]],
+                         self.lanelet_1.left_vertices.tolist())
+
+        self.lanelet_1.left_vertices = np.array([[0.0, 1.0], [0.5, 1.0], [0.5, 1.0], [0.75, 1.0]])
+        self.lanelet_repairer.repair_left_self_intersection((1,))
+        self.assertEqual([[0.0, 1.0], [0.25, 1.], [0.5, 1.0], [0.75, 1.0]],
+                         self.lanelet_1.left_vertices.tolist())
+
     def test_right_self_intersection(self):
         self.lanelet_1.right_vertices = np.array([[0., 0.], [1., 0.], [2., 0.], [3., 0], [2., 0.5],
                                                  [2., -0.5], [3, -0.5], [4, -0.5]])
-
         self.lanelet_repairer.repair_right_self_intersection((1,))
-
         self.assertEqual([[0.0, 0.0], [0.5882905698214136, 0.0], [1.1579389727142977, -0.0789694863571489],
                           [1.6841220545714046, -0.3420610272857023], [2.2351282905357595, -0.5],
                           [2.8234188603571733, -0.5], [3.4117094301785866, -0.5],
                           [4.0, -0.5]], self.lanelet_1.right_vertices.tolist())
+
+        self.lanelet_1.right_vertices = np.array([[0.0, 1.0], [0.5, 1.0], [0.5, 1.0], [0.75, 1.0]])
+        self.lanelet_repairer.repair_right_self_intersection((1,))
+        self.assertEqual([[0.0, 1.0], [0.25, 1.0], [0.5, 1.0], [0.75, 1.0]], self.lanelet_1.right_vertices.tolist())
+
+        self.lanelet_1.right_vertices = np.array([[0.0, 1.0], [0.5, 1.0], [0.25, 1.0], [0.75, 1.0]])
+        self.lanelet_repairer.repair_right_self_intersection((1,))
+        self.assertEqual([[0.0, 1.0], [0.16666666666666669, 1.0], [0.33333333333333337, 1.0], [0.75, 1.0]],
+                         self.lanelet_1.right_vertices.tolist())
 
     def test_lanelet_types_combination(self):
         pass
@@ -410,7 +425,7 @@ class TestLaneletRepairing(unittest.TestCase):
 
         self.lanelet_repairer.repair_included_stop_line_traffic_signs((1, 2))
 
-        self.assertEqual({1, 2, 3}, self.lanelet_1.traffic_signs)
+        self.assertEqual({1, 3}, self.lanelet_1.traffic_signs)
 
     def test_zero_or_two_points_stop_line(self):
         stop_line = StopLine(np.array([0., 0.]), None, LineMarking.NO_MARKING, set(), set())
