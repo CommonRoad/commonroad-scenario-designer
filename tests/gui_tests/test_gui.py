@@ -43,11 +43,11 @@ def test_pyqt_framework(qtbot):
     # -- MENUBAR
     execute_menubar_test(window)
     # -- Load Scenario
-    execute_load_sceanrio_test(window)
+    execute_load_scenario_test(window)
 
     # -- FINISH
     app.closeAllWindows()
-    app.quit()
+    app.exit(0)
 
     if os.path.exists(path_autosave):
         os.remove(path_autosave)
@@ -86,7 +86,7 @@ def execute_menubar_test(window):
 
     assert file_new_success
     assert menubar_wrapper_setting_successful
-    #assert menubar_wrapper_gui_setting_sumo_successful
+    # assert menubar_wrapper_gui_setting_sumo_successful
 
 
 def execute_toolbar_test(window):
@@ -152,6 +152,7 @@ def execute_toolbar_test(window):
     assert redo_action_success
     assert undo_action_success
     assert toolbar_wrapper_action_new_successful
+
 
 def execute_scenario_tests(window):
     # Tests for adding a Lanelet to a Scenario
@@ -228,7 +229,7 @@ def execute_add_obstacle_test(window):
                                        obstacle_type=ObstacleType("unknown"),
                                        obstacle_shape=Rectangle(length=5.0, width=5.0),
                                        initial_state=InitialState(**{'position': np.array(
-                                                 [0.0,0.0]),'orientation': math.radians(0.0),'time_step': 1}))
+                                                 [0.0, 0.0]), 'orientation': math.radians(0.0), 'time_step': 1}))
 
     actual_obstacle = None
 
@@ -242,16 +243,16 @@ def execute_add_obstacle_test(window):
         actual_obstacle = window.scenario_model.find_obstacle_by_id(2)
 
     except Exception as e:
-        print(f"Add Obstacle failed with excepetion: {str(e)}.")
+        print(f"Add Obstacle failed with exception: {str(e)}.")
 
     assert expected_obstacle == actual_obstacle
 
     
-def execute_load_sceanrio_test(window):
+def execute_load_scenario_test(window):
     parent_directory = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), os.pardir))
     path_to_test = parent_directory + "/map_conversion/test_maps/sumo/ARG_Carcarana-10_2_T-1.xml"
     expected_count_lanelets = 94
-    expecetd_count_traffic_signs = 8
+    expected_count_traffic_signs = 8
     actual_count_lanelets = 0
     actual_count_traffic_signs = 0
 
@@ -263,5 +264,4 @@ def execute_load_sceanrio_test(window):
         print(f"Opening a file failed with exception {str(e)}")
 
     assert expected_count_lanelets == actual_count_lanelets
-    assert expecetd_count_traffic_signs == actual_count_traffic_signs
-
+    assert expected_count_traffic_signs == actual_count_traffic_signs
