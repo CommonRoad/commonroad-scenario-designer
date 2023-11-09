@@ -1,7 +1,7 @@
 import math
 import os
-
 import numpy as np
+
 from commonroad.common.common_lanelet import LineMarking
 from commonroad.scenario.lanelet import LaneletNetwork
 from commonroad.scenario.obstacle import StaticObstacle, ObstacleType
@@ -11,9 +11,6 @@ from commonroad.scenario.state import InitialState
 
 from crdesigner.ui.gui.autosaves.autosaves_setup import DIR_AUTOSAVE
 from crdesigner.ui.gui.controller.mwindow_controller import MWindowController
-import sys
-from PyQt5.QtWidgets import *
-
 from crdesigner.ui.gui.utilities.file_actions import open_commonroad_file
 from crdesigner.ui.gui.utilities.map_creator import MapCreator
 
@@ -23,14 +20,13 @@ def test_pyqt_framework(qtbot):
     Test the correct link between functionality and GUI - this does NOT test the functionality!
     """
 
-    # init the app and the qtbot
-    app = QApplication(sys.argv)
+    # do not create an QApplication() here: https://github.com/pytest-dev/pytest-qt/issues/504
 
     path_autosave = DIR_AUTOSAVE + "/autosave" + ".xml"
     if os.path.exists(path_autosave):
         os.remove(path_autosave)
 
-    window = MWindowController()
+    window = MWindowController(test=True)
     qtbot.addWidget(window.mwindow_ui)
 
     # ----- PERFORM TESTS ------ #
@@ -44,10 +40,6 @@ def test_pyqt_framework(qtbot):
     execute_menubar_test(window)
     # -- Load Scenario
     execute_load_scenario_test(window)
-
-    # -- FINISH
-    app.closeAllWindows()
-    app.exit(0)
 
     if os.path.exists(path_autosave):
         os.remove(path_autosave)

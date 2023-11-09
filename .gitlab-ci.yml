@@ -41,17 +41,17 @@ prospector_tutorials:
   allow_failure: true
   needs: []
 
-#build_and_test_python:
-#  image : python:$PYTHON_VERSIONS
-#  stage: test
-#  parallel :
-#    matrix :
-#      - PYTHON_VERSIONS : [ "3.8", "3.9"]
-#  variables:
-#    QT_QPA_PLATFORM : "offscreen"
-#  script:
-#    - *run-test-with-coverage
-#  needs: []
+build_and_test_python:
+  image : python:$PYTHON_VERSIONS
+  stage: test
+  parallel :
+    matrix :
+      - PYTHON_VERSIONS : [ "3.8", "3.9"]
+  variables:
+    QT_QPA_PLATFORM : "offscreen"
+  script:
+    - *run-test-with-coverage
+  needs: []
 
 build_and_test_with_coverage:
   stage : test
