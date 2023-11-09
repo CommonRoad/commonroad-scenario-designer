@@ -1,4 +1,9 @@
 # Changelog
+## [0.8.1] - 2023-12-22
+
+### Changed
+- Removed unnecessary lanelet2 and opendrive 'api' in conversion example files
+
 
 ## [0.8.1] - 2023-12-XX
 

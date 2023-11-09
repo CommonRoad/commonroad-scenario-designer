@@ -37,9 +37,14 @@ def setup_tmp(tmp_folder_path: str):
 class MWindowController:
     """Controller for the main window of the GUI."""
 
-    def __init__(self):
-        """Constructor of the main window controller."""
+    def __init__(self, test: bool = False):
+        """
+        Constructor of the main window controller.
+
+        :param test: Boolean indicating whether called from test case.
+        """
         # init or set all attributes here
+        self._test = test
         self.tmp_folder = gui_config.MWINDOW_TMP_FOLDER_PATH
         self.filename = None
         self.slider_clicked = False
@@ -202,7 +207,7 @@ class MWindowController:
         Closes the app and deletes the autosaved file
         """
         event.ignore()
-        close_app = self.mwindow_ui.close_window()
+        close_app = self.mwindow_ui.close_window() if not self._test else True
         if close_app:
             if os.path.exists(self.path_autosave):
                 os.remove(self.path_autosave)
