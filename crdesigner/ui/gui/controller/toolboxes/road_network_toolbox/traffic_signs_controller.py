@@ -1,3 +1,6 @@
+from PyQt5.QtWidgets import QComboBox
+
+from crdesigner.config.logging import logger
 from crdesigner.ui.gui.model.scenario_model import ScenarioModel
 from crdesigner.ui.gui.view.toolboxes.road_network_toolbox.road_network_toolbox_ui.road_network_toolbox_ui import \
     RoadNetworkToolboxUI
@@ -24,6 +27,7 @@ class AddTrafficSignController:
         self.road_network_toolbox_ui.selected_traffic_sign.currentTextChanged.connect(
                 lambda: self.traffic_sign_ui.update_traffic_sign_information(self.road_network_controller.text_browser))
 
+    @logger.log
     def remove_traffic_sign_element(self):
         """
         Removes last entry in traffic sign element table of a traffic sign.
@@ -35,6 +39,23 @@ class AddTrafficSignController:
         num_rows = self.road_network_toolbox_ui.traffic_sign_element_table.rowCount()
         self.road_network_toolbox_ui.traffic_sign_element_table.removeRow(num_rows - 1)
 
+    @logger.log
+    def add_traffic_sign_element(self, text_browser):
+        """
+        Adds traffic sign element to traffic sign.
+        Only a default entry is created the user has to specify the traffic sign ID manually afterward.
+        """
+        if not self.scenario_model.scenario_created():
+            text_browser.append("_Warning:_ Create a new file")
+            return
+        num_rows = self.road_network_toolbox_ui.traffic_sign_element_table.rowCount()
+        self.road_network_toolbox_ui.traffic_sign_element_table.insertRow(num_rows)
+        combo_box = QComboBox()
+        combo_box.addItems([elem.name for elem in globals()[
+            "TrafficSignID" + SupportedTrafficSignCountry(self.scenario_model.get_country_id()).name.capitalize()]])
+        self.road_network_toolbox_ui.traffic_sign_element_table.setCellWidget(num_rows, 0, combo_box)
+
+    @logger.log
     def add_traffic_sign(self, traffic_sign_id: int = None):
         """
         Adds a traffic sign to a CommonRoad scenario.
@@ -92,6 +113,7 @@ class AddTrafficSignController:
         self.scenario_model.add_traffic_sign(new_sign, referenced_lanelets)
         self.road_network_controller.set_default_road_network_list_information()
 
+    @logger.log
     def remove_traffic_sign(self):
         """
        Removes selected traffic sign from scenario.
@@ -111,6 +133,7 @@ class AddTrafficSignController:
         self.scenario_model.remove_traffic_sign(selected_traffic_sign_id)
         self.road_network_controller.set_default_road_network_list_information()
 
+    @logger.log
     def update_traffic_sign(self):
         """
         Updates information of selected traffic sign.

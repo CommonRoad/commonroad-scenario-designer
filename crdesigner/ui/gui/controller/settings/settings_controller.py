@@ -1,6 +1,7 @@
 from PyQt5 import QtCore, QtWidgets
 
 from crdesigner.config.gui_config import gui_config as gui_settings_model, gui_config
+from crdesigner.config.logging import logger
 from crdesigner.config.settings_config import settings as settings_model, CONFIGS_TO_RENDER, settings
 from crdesigner.ui.gui.view.settings.settings_ui import SettingsUI
 
@@ -36,11 +37,12 @@ class SettingsController:
         """
         Connect buttons to callables.
         """
-        self.settings_ui.button_select_directory.clicked.connect(_select_directory)
-        self.settings_ui.button_ok.clicked.connect(self.apply_close)
-        self.settings_ui.button_cancel.clicked.connect(self.close)
-        self.settings_ui.button_set_to_default.clicked.connect(_set_default)
+        self.settings_ui.button_select_directory.clicked.connect(lambda: _select_directory())
+        self.settings_ui.button_ok.clicked.connect(lambda: self.apply_close())
+        self.settings_ui.button_cancel.clicked.connect(lambda: self.close())
+        self.settings_ui.button_set_to_default.clicked.connect(lambda: _set_default())
 
+    @logger.log
     def close(self):
         """
         Reset the settings to their previous values and close the settings window.
@@ -49,6 +51,7 @@ class SettingsController:
 
         self._hide_and_update()
 
+    @logger.log
     def apply_close(self):
         """
         Save the settings to their respective files and close the settings window.
@@ -72,7 +75,7 @@ class SettingsController:
     def _hide_and_update(self):
         self.settings_ui.settings.hide()
 
-
+@logger.log
 def _set_default():
     """
     Sets the default settings for all settings models.
@@ -80,7 +83,7 @@ def _set_default():
     for config in CONFIGS_TO_RENDER:
         config.reset_settings()
 
-
+@logger.log
 def _select_directory():
     """
     Opens a file dialog to select a directory. If a directory is selected, the

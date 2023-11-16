@@ -1,8 +1,8 @@
 from PyQt5.QtWidgets import QTableWidgetItem
 from commonroad.scenario.intersection import IntersectionIncomingElement, Intersection
 
+from crdesigner.config.logging import logger
 from crdesigner.ui.gui.model.scenario_model import ScenarioModel
-from crdesigner.ui.gui.utilities.toolbox_ui import CheckableComboBox
 from crdesigner.ui.gui.view.toolboxes.road_network_toolbox.intersections_ui import AddIntersectionUI
 from crdesigner.ui.gui.view.toolboxes.road_network_toolbox.road_network_toolbox_ui.road_network_toolbox_ui import \
     RoadNetworkToolboxUI
@@ -34,6 +34,7 @@ class AddIntersectionController:
         self.road_network_toolbox_ui.button_remove_intersection.clicked.connect(lambda: self.remove_intersection())
         self.road_network_toolbox_ui.button_update_intersection.clicked.connect(lambda: self.update_intersection())
 
+    @logger.log
     def add_four_way_intersection(self):
         """
         Adds a four-way intersection to the scenario.
@@ -55,6 +56,7 @@ class AddIntersectionController:
                                                           add_traffic_lights)
         self.road_network_controller.set_default_road_network_list_information()
 
+    @logger.log
     def add_three_way_intersection(self):
         """
         Adds a three-way intersection to the scenario.
@@ -76,6 +78,7 @@ class AddIntersectionController:
                                                           add_traffic_lights)
         self.road_network_controller.set_default_road_network_list_information()
 
+    @logger.log
     def fit_intersection(self):
         """
          Rotates and translates a complete intersection so that it is attached to a user-defined lanelet.
@@ -93,6 +96,7 @@ class AddIntersectionController:
 
             self.scenario_model.fit_intersection(selected_intersection_id, predecessor_id, successor_id)
 
+    @logger.log
     def add_intersection(self, intersection_id: int = None):
         """
         Adds an intersection to the scenario.
@@ -148,6 +152,7 @@ class AddIntersectionController:
             print("intersections_controller.py/add_intersection: An intersection must consist at least of two "
                   "incomings.")
 
+    @logger.log
     def remove_intersection(self):
         """
         Removes selected intersection from lanelet network.
@@ -165,6 +170,7 @@ class AddIntersectionController:
             self.scenario_model.remove_intersection(selected_intersection_id)
             self.road_network_controller.set_default_road_network_list_information()
 
+    @logger.log
     def update_intersection(self):
         """
         Updates a selected intersection from the scenario.

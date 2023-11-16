@@ -3,6 +3,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 import math
 
+from crdesigner.config.logging import logger
 from crdesigner.ui.gui.utilities.toolbox_ui import PositionButton, CheckableComboBox, CollapsibleCheckBox, \
     CollapsibleArrowBox
 
@@ -78,6 +79,7 @@ class AddLaneletWidget():
         widget_title = "Add Lanelet"
         return widget_title, widget_lanelets
 
+    @logger.log
     def adjust_add_sections(self):
         self.remove_adding_method_fields()
 

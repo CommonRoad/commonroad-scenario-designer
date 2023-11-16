@@ -4,6 +4,7 @@
 
 ### Added
 - Test cases for GUI
+- Logging actions of users
 - OpenDRIVE to CommonRoad conversion: considering line markings of inner shared lanelet boundaries
 
 ### Changed

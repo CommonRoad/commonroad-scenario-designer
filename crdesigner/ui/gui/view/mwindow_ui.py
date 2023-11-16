@@ -16,7 +16,7 @@ if SUMO_AVAILABLE:
 class MWindowUI(QMainWindow, Ui_mainWindow):
     """The Main window of the CR Scenario Designer."""
 
-    def __init__(self, path=None):
+    def __init__(self):
         super().__init__()
         self.setup_mwindow()
         self.obstacle_toolbox = None
@@ -112,14 +112,17 @@ class MWindowUI(QMainWindow, Ui_mainWindow):
         else:
             return False
 
-    def ask_for_autosaved_file(self):
+    def ask_for_autosaved_file(self, save_log_enabled: bool = True):
         """
         Asking if the user wants to restore the old scenario
 
         @return: Boolean with the answer of the user
         """
-        message_box = QMessageBox(QMessageBox.Warning, "Warning", "Do you want to restore the last project?",
-                                  buttons=QMessageBox.Yes | QMessageBox.No, parent=self)
+        message_box = QMessageBox(QMessageBox.Warning, "Warning", "Do you want to restore the last project? \n \n Do you want to save the logging file?",
+                                  buttons=QMessageBox.Yes | QMessageBox.Save | QMessageBox.No, parent=self)
+
+        if not save_log_enabled:
+            message_box.button(QMessageBox.Save).setEnabled(False)
 
         p = QtGui.QPalette()
         p.setColor(QtGui.QPalette.ColorRole.Window, QtGui.QColor(self.colorscheme().background))
@@ -133,10 +136,7 @@ class MWindowUI(QMainWindow, Ui_mainWindow):
         message_box.exec_()
         reply = message_box.standardButton(message_box.clickedButton())
 
-        if reply == message_box.Yes:
-            return True
-        else:
-            return False
+        return reply
 
     def set_stylesheet(self, sheet: str):
         """
