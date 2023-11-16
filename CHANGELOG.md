@@ -1,17 +1,16 @@
 # Changelog
-## [0.8.1] - 2023-12-22
-
-### Changed
-- Removed unnecessary lanelet2 and opendrive 'api' in conversion example files
-
 
 ## [0.8.1] - 2023-12-XX
 
 ### Added
 - Test cases for GUI
 
+### Changed
+- Remove second conversion option for Lanelet2 and OpenDRIVE conversion example files
+
 ### Fixed
 - Adding existing obstacles again
+- Selecting obstacles with set-based prediction
 
 ## [0.8.0] - 2023-10-31
 
