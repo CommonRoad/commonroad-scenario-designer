@@ -2,7 +2,7 @@ from typing import Union
 import matplotlib as mpl
 from PyQt5.QtWidgets import *
 from crdesigner.ui.gui.model.scenario_model import ScenarioModel
-from commonroad.prediction.prediction import TrajectoryPrediction
+from commonroad.prediction.prediction import TrajectoryPrediction, SetBasedPrediction
 from commonroad.geometry.polyline_util import *
 from commonroad.geometry.shape import Rectangle, Circle, Polygon
 from commonroad.scenario.obstacle import Obstacle, StaticObstacle, ObstacleType, DynamicObstacle
@@ -911,6 +911,8 @@ class ObstacleController(QDockWidget, ):
             obstacle = self.get_current_obstacle()
             state_variable_name = self.obstacle_toolbox_ui.obstacle_state_variable.currentText()
             message = "This Graph is only available for dynamic obstacles"
+            if isinstance(obstacle.prediction, SetBasedPrediction):
+                return
             if state_variable_name == "x-position":
                 if isinstance(obstacle, StaticObstacle):
                     profile = [obstacle.initial_state.__getattribute__("position")[0]]

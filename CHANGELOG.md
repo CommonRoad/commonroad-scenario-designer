@@ -1,20 +1,17 @@
 # Changelog
-## [0.8.1] - 2023-12-22
-
-### Added
-- odr2cr conversion of line markings for inner shared lanelet vertices
-
-### Changed
-- Removed unnecessary 'api' in conversion example files
-
 
 ## [0.8.1] - 2023-12-XX
 
 ### Added
 - Test cases for GUI
+- OpenDRIVE to CommonRoad conversion: considering line markings of inner shared lanelet boundaries
+
+### Changed
+- Remove second conversion option for Lanelet2 and OpenDRIVE conversion example files
 
 ### Fixed
 - Adding existing obstacles again
+- Selecting obstacles with set-based prediction
 
 ## [0.8.0] - 2023-10-31
 
