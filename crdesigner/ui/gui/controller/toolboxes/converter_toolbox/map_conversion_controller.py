@@ -3,6 +3,7 @@ from typing import Callable, Optional
 import logging
 from pathlib import Path
 
+from crdesigner.config.logging import logger
 from crdesigner.map_conversion.lanelet2.cr2lanelet import CR2LaneletConverter
 from crdesigner.map_conversion.lanelet2.lanelet2_parser import Lanelet2Parser
 from crdesigner.map_conversion.lanelet2.lanelet2cr import Lanelet2CRConverter
@@ -137,6 +138,7 @@ class MapConversionToolboxController(QDockWidget):
         converted_to_scenario = convert_to_scenario(graph)
         self.scenario_model.add_converted_scenario(converted_to_scenario)
 
+    @logger.log
     def convert_osm_with_spinner(self, convert_function: Callable[[], None]) -> None:
         """
         Calls function in new thread ands shows spinner.
@@ -150,6 +152,7 @@ class MapConversionToolboxController(QDockWidget):
         runnable = RequestRunnable(convert_function, self)
         QThreadPool.globalInstance().start(runnable)
 
+    @logger.log
     def convert_osm_to_cr(self) -> None:
         """
         Starts the OSM conversion process by picking a file or downloading a map and showing the edge edit GUI.
@@ -189,6 +192,7 @@ class MapConversionToolboxController(QDockWidget):
         self.hidden_osm_conversion(self.graph)
         self.osm_file = None
 
+    @logger.log
     def convert_osm_to_cr_with_sumo(self) -> None:
         """
         Starts the OSM conversion process using SUMO Parser by picking a file and showing the edge edit GUI.
@@ -312,6 +316,7 @@ class MapConversionToolboxController(QDockWidget):
         exported_commonroad_scenario = open_drive_network.export_commonroad_scenario()
         self.scenario_model.add_converted_scenario(exported_commonroad_scenario)
 
+    @logger.log
     def load_open_drive(self):
         """
         Allows to select an OpenDRIVE file from the file system and loads it and afterwards calls conversion.
@@ -348,6 +353,7 @@ class MapConversionToolboxController(QDockWidget):
 
         self.convert_open_drive_to_cr_with_spinner()
 
+    @logger.log
     def load_lanelet2(self):
         """
         Allows to select a lanelet file from the file system and loads it and calls conversion.
@@ -403,6 +409,7 @@ class MapConversionToolboxController(QDockWidget):
         except Exception as e:
             logging.error(f"MapConversionToolboxController::convert_lanelet2_to_cr: {e}")
 
+    @logger.log
     def convert_cr_to_lanelet2(self):
         """
         Starts the CommonRoad to Lanelet conversion process.
@@ -426,6 +433,7 @@ class MapConversionToolboxController(QDockWidget):
             )
         self.text_browser.append("Conversion from CommonRoad to Lanelet2 is done")
 
+    @logger.log
     def load_sumo(self):
         """
         Allows to select a SUMO file from the file system and loads it and calls conversion.
@@ -445,6 +453,7 @@ class MapConversionToolboxController(QDockWidget):
             logging.warning("Cannot import SUMO. SUMO simulation will not be offered in Scenario Designer GUI. "
                             "The GUI and other map conversions should work.")
 
+    @logger.log
     def convert_cr_to_sumo(self):
         """
         Starts the CommonRoad to SUMO conversion process.

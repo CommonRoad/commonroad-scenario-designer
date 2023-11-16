@@ -95,6 +95,7 @@ class GuiConfig(BaseConfig):
     # focus on the selection
     ENABLE_UNDETAILED_DISPLAY: Attribute = Attribute(True, "Enable undetailed display")
     MWINDOW_TMP_FOLDER_PATH: Attribute = Attribute("/tmp/cr_designer/", "Temporary folder path")
+    LOG_ACTIONS_OF_THE_USER: Attribute = Attribute(True, "Log user actions")
     # default values in default_draw_params
     DRAW_TRAJECTORY: Attribute = Attribute(False, "Draw trajectory")
     DRAW_DYNAMIC_OBSTACLES: Attribute = Attribute(True, "Draw dynamic obstacles")
@@ -129,7 +130,7 @@ class GuiConfig(BaseConfig):
          DRAW_TRAJECTORY, DRAW_OBSTACLE_LABELS,DRAW_OBSTACLE_ICONS, DRAW_OBSTACLE_DIRECTION, DRAW_OBSTACLE_SIGNALS,
          "Intersection visualization",DRAW_INCOMING_LANELETS, DRAW_SUCCESSORS, DRAW_INTERSECTION_LABELS, ],
         ["Other", ENABLE_UNDETAILED_DISPLAY, DRAW_OCCUPANCY, DRAW_TRAFFIC_SIGNS, DRAW_TRAFFIC_LIGHTS, BING_MAPS_KEY,
-         LDBV_USERNAME, LDBV_PASSWORD]]
+         LDBV_USERNAME, LDBV_PASSWORD, LOG_ACTIONS_OF_THE_USER]]
 
     def get_draw_params(self) -> DrawParamsCustom:
         """
@@ -215,6 +216,9 @@ class GuiConfig(BaseConfig):
             colorscheme = ColorSchema(axis=gui_config.AXIS_VISIBLE)
 
         return colorscheme
+
+    def logging(self):
+        return gui_config.LOG_ACTIONS_OF_THE_USER
 
     def get_stylesheet(self) -> str:
         """
