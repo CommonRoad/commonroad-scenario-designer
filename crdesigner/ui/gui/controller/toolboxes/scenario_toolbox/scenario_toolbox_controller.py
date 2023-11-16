@@ -13,6 +13,7 @@ from commonroad.scenario.state import InitialState, CustomState, TraceState
 from commonroad.scenario.scenario import Scenario, Location, Environment, Time
 from commonroad.scenario.scenario import Tag, TimeOfDay, Weather, Underground
 
+from crdesigner.config.logging import logger
 from crdesigner.ui.gui.model.planning_problem_set_model import PlanningProblemSetModel
 from crdesigner.ui.gui.view.toolboxes.scenario_toolbox.scenario_toolbox_ui import ScenarioToolboxUI
 
@@ -95,6 +96,7 @@ class ScenarioToolboxController(QDockWidget):
             self.selection_changed_callback(sel_lanelets=selected_lanelet)
             self.update_lanelet_information(selected_lanelet)
 
+    @logger.log
     def _selected_planning_problem_changed(self) -> None:
         row = self.scenario_toolbox_ui.planning_problems_list_table.currentItem()
         if row is not None:
@@ -106,10 +108,10 @@ class ScenarioToolboxController(QDockWidget):
         self.initialized = False
 
         # Planning Problems Overview
-        self.scenario_toolbox_ui.planning_problems_list_table.currentCellChanged.connect(
-                self.update_current_planning_problem)
-        self.scenario_toolbox_ui.planning_problems_list_table.currentCellChanged.connect(
-                self._selected_planning_problem_changed)
+        self.scenario_toolbox_ui.planning_problems_list_table.currentCellChanged.connect(lambda:
+                self.update_current_planning_problem())
+        self.scenario_toolbox_ui.planning_problems_list_table.currentCellChanged.connect(lambda:
+                self._selected_planning_problem_changed())
 
         self.scenario_toolbox_ui.button_add_planning_problems.clicked.connect(lambda: self.add_planning_problem())
 
@@ -180,6 +182,7 @@ class ScenarioToolboxController(QDockWidget):
 
     """Planning Problem Data Management"""
 
+    @logger.log
     def add_planning_problem(self) -> None:
         """adds a new planning problem to current_pps"""
         if self.mwindow.play_activated:
@@ -212,6 +215,7 @@ class ScenarioToolboxController(QDockWidget):
         self.pps_model.set_selected_pp_id(id)
         self.set_planning_problem_information()
 
+    @logger.log
     def remove_planning_problem(self) -> None:
         """removes planning problem"""
         if self.mwindow.play_activated:
@@ -244,6 +248,7 @@ class ScenarioToolboxController(QDockWidget):
             self.scenario_toolbox_ui.planning_problems_list_table.setItem(
                     self.scenario_toolbox_ui.planning_problems_list_table_row_count, 0, item)
 
+    @logger.log
     def update_current_planning_problem(self) -> None:
         """sets current planning problem id and the corresponding initial state and goal state or resets
         initial state and goal state if planning problem is deleted"""
@@ -263,6 +268,7 @@ class ScenarioToolboxController(QDockWidget):
     Goal State
     """
 
+    @logger.log
     def update_current_goal_state(self) -> None:
         """sets current goal state id and the corresponding goal state to id and planning problem"""
         self.set_goal_state_information()
@@ -273,6 +279,7 @@ class ScenarioToolboxController(QDockWidget):
 
     """Goal State Data Management"""
 
+    @logger.log
     def add_goal_state(self) -> None:
         """Add goal state to PPl."""
         if self.mwindow.play_activated:
@@ -296,6 +303,7 @@ class ScenarioToolboxController(QDockWidget):
         self.collect_goal_states(planning_problem_id=current_planning_problem_id).append(new_gs)
         self.update_goal_state(len(self.collect_goal_states(current_planning_problem_id)) - 1)
 
+    @logger.log
     def remove_goal_state(self) -> None:
         """Removes goal state from PPl."""
         if self.mwindow.play_activated:
@@ -312,6 +320,7 @@ class ScenarioToolboxController(QDockWidget):
             self.set_goal_states_information()
             self.initialize_goal_state()
 
+    @logger.log
     def update_goal_state(self, current_goal_state_id: int = None) -> None:
         """Updates selected goal state or adds a state
 
@@ -411,6 +420,7 @@ class ScenarioToolboxController(QDockWidget):
         self.set_goal_states_information()
         self.initialize_goal_state()
 
+    @logger.log
     def add_goal_state_lanelet(self) -> None:
         """Add lanelet to goal state in GUI and backend (current_lanelets)"""
         selected_lanelet_button = (self.scenario_toolbox_ui.goal_state_position_lanelet_update.currentText())
@@ -422,6 +432,7 @@ class ScenarioToolboxController(QDockWidget):
                     self.scenario_toolbox_ui.goal_states_lanelet_list_table_row_count, 0,
                     QTableWidgetItem(selected_lanelet_button), )
 
+    @logger.log
     def remove_goal_state_lanelet(self) -> None:
         """Removes shape from backend (current_lanelets) and GUI Table."""
         if (
@@ -433,6 +444,7 @@ class ScenarioToolboxController(QDockWidget):
             self.scenario_toolbox_ui.goal_states_lanelet_list_table.removeRow(
                     self.scenario_toolbox_ui.goal_states_lanelet_list_table.currentRow())
 
+    @logger.log
     def add_goal_state_shape(self) -> None:
         """Adds created shape to list in backend (self.current_shapes) and GUI. If adding was successful the fields
         are reset."""
@@ -510,6 +522,7 @@ class ScenarioToolboxController(QDockWidget):
                     self.scenario_toolbox_ui.vertices_x[i].clear()
                     self.scenario_toolbox_ui.vertices_y[i].clear()
 
+    @logger.log
     def remove_goal_state_shape(self) -> None:
         """Removes shape from backend (current_shapes) and GUI Table."""
         if (
@@ -520,6 +533,7 @@ class ScenarioToolboxController(QDockWidget):
             self.scenario_toolbox_ui.goal_states_shape_list_table.removeRow(
                     self.scenario_toolbox_ui.goal_states_shape_list_table.currentRow())
 
+    @logger.log
     def update_goal_state_shape(self) -> None:
         """Updates the selected shape with the new shape values. If no shape is selected a new one is created. Goal
         State is not automatically updated with the new shape values!"""
@@ -626,6 +640,7 @@ class ScenarioToolboxController(QDockWidget):
                 self.scenario_toolbox_ui.type.setCurrentText("None")
                 self.scenario_toolbox_ui.toggle_goal_state_position_type()
 
+    @logger.log
     def set_goal_state_information_toggle_type(self) -> None:
         """Adds and removes widgets corresponding to the selected type."""
         self.scenario_toolbox_ui.toggle_goal_state_position_type()
@@ -703,10 +718,12 @@ class ScenarioToolboxController(QDockWidget):
             self.scenario_toolbox_ui.button_goal_state_position_update_shape.clicked.connect(
                     lambda: self.update_goal_state_shape())
 
+    @logger.log
     def set_goal_state_information_toggle_shape(self) -> None:
         """Adds and removes widgets corresponding to the selected shape."""
         self.scenario_toolbox_ui.toggle_sections_shape()
 
+    @logger.log
     def set_goal_state_shape_information(self) -> None:
         """Updates shape information of the selected goal state position."""
         if (
@@ -742,6 +759,7 @@ class ScenarioToolboxController(QDockWidget):
                     self.scenario_toolbox_ui.vertices_y[index].setText(str(vertice[1]))
                     index += 1
 
+    @logger.log
     def set_goal_state_lanelet_information(self) -> None:
         """Updates lanelet information of the selected goal state position."""
         if (
@@ -779,6 +797,7 @@ class ScenarioToolboxController(QDockWidget):
 
     """Initial State Data Management"""
 
+    @logger.log
     def update_initial_state(self) -> None:
         """updates initial state of selected planning problem. If no planning problem is selected new planning
         problem is created"""
@@ -895,6 +914,7 @@ class ScenarioToolboxController(QDockWidget):
         vertices = np.asarray(vertices)
         return vertices
 
+    @logger.log
     def update_settings(self) -> None:
         """initialize scenario settings widget and updates it"""
         self.init_settings = True
@@ -986,6 +1006,7 @@ class ScenarioToolboxController(QDockWidget):
         self.scenario_toolbox_ui.scenario_time_hour.setValue(0)
         self.scenario_toolbox_ui.scenario_time_minute.setValue(0)
 
+    @logger.log
     def update_scenario_meta_data(self) -> None:
         """Updates the edited meta data in the scenario"""
         if self.mwindow.play_activated:

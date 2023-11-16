@@ -1,9 +1,11 @@
+from datetime import datetime
 import os
 import pathlib
 
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 
+from crdesigner.config.logging import logger
 from crdesigner.ui.gui.controller.animated_viewer.animated_viewer_wrapper_controller import \
     AnimatedViewerWrapperController
 from crdesigner.ui.gui.controller.settings.scenario_saving_dialog_controller import ScenarioSavingDialogController
@@ -49,7 +51,8 @@ class MWindowController:
         self.filename = None
         self.slider_clicked = False
         self.play_activated = False
-        self.path_autosave = DIR_AUTOSAVE + "/autosave" + ".xml"
+        self.path_autosave = DIR_AUTOSAVE + "/autosave.xml"
+        self.path_logging = DIR_AUTOSAVE + "/logging_file.txt"
 
         # init scenario model
         self.scenario_model = ScenarioModel()
@@ -105,18 +108,35 @@ class MWindowController:
         self.mwindow_ui.update_window()
         self.center()
 
-
     def check_for_auto_saved_file(self) -> None:
         """
         Check for the existence of an auto saved file and handles it accordingly.
+        As well it handles the events fpr the logging file.
         """
         if os.path.exists(self.path_autosave):
-            if self.mwindow_ui.ask_for_autosaved_file():
+            reply = self.mwindow_ui.ask_for_autosaved_file()
+            if reply == QMessageBox.Save:
+                self.directory = QFileDialog.getExistingDirectory(self.scenario_saving_dialog.save_window, "Dir",
+                                                                  options=QFileDialog.Options())
+                if self.directory:
+                    if os.path.exists(self.path_logging):
+                        time = datetime.now()
+                        with open(self.path_logging, 'r') as fp1, \
+                             open(self.directory + "/logging_file_" + time.strftime("%d-%b-%y %H:%M:%S"), 'w') as fp2:
+                            results = fp1.read()
+                            fp2.write(results)
+                reply = self.mwindow_ui.ask_for_autosaved_file(False)
+
+            if reply == QMessageBox.Yes:
                 open_commonroad_file(self, self.path_autosave)
                 self.road_network_toolbox.initialize_road_network_toolbox()
                 self.obstacle_toolbox.obstacle_toolbox_ui.initialize_obstacle_information()
-            else:
+            elif reply == QMessageBox.No:
                 os.remove(self.path_autosave)
+
+        if os.path.exists(self.path_logging):
+            os.remove(self.path_logging)
+        logger.set_initialized()
 
     def check_scenario(self, scenario) -> int:
         """

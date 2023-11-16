@@ -8,6 +8,7 @@ from commonroad.scenario.lanelet import LineMarking, LaneletType, RoadUser, Stop
 from commonroad.scenario.traffic_sign import *
 from numpy import ndarray
 
+from crdesigner.config.logging import logger
 from crdesigner.ui.gui.model.scenario_model import ScenarioModel
 from crdesigner.ui.gui.utilities.helper import angle_between
 from crdesigner.ui.gui.view.toolboxes.road_network_toolbox.road_network_toolbox_ui.road_network_toolbox_ui import \
@@ -23,7 +24,7 @@ class AddLaneletUI:
     #TODO check for deletion
     # def lanelet_selection_changed(self):
     #     return
-
+    @logger.log
     def initialize_basic_lanelet_information(self, last_added_lanelet_id):
         """
         Initializes lanelet GUI elements with lanelet information.

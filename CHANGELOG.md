@@ -4,6 +4,7 @@
 
 ### Added
 - Test cases for GUI
+- Logging actions of users
 
 ### Changed
 - Remove second conversion option for Lanelet2 and OpenDRIVE conversion example files
