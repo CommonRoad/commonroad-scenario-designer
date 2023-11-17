@@ -33,8 +33,11 @@ class ObstacleToolboxUI(Toolbox):
         self.text_browser = text_browser
         self.change_color = False
 
+        """
         with open(os.getcwd() + "/obstacle_type_spec.yaml", "r") as f:
             self.obstacle_spec = yaml.safe_load(f)
+        """
+        self.obstacle_spec = gui_config.OBSTACLE_SPECS
 
 
     def define_sections(self):
