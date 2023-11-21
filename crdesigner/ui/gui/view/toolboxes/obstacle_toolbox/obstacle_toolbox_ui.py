@@ -1,6 +1,4 @@
 import math
-import yaml
-import os
 from typing import Optional
 
 from PyQt5.QtCore import *
