@@ -597,7 +597,10 @@ class Lanelet2CRConverter:
         # set center vertices
         center_vertices = np.array([(l + r) / 2 for (l, r) in zip(left_vertices, right_vertices)])
 
-        if _wrong_left_right_boundary_side(center_vertices, left_vertices, right_vertices, lanelet2_config):
+        wrong_left_right_boundary_side = \
+            _wrong_left_right_boundary_side(center_vertices, left_vertices, right_vertices, lanelet2_config)
+
+        if wrong_left_right_boundary_side:
             left_vertices, right_vertices = np.flip(left_vertices, axis=0), np.flip(right_vertices, axis=0)
             center_vertices = (left_vertices + right_vertices) / 2
 
@@ -621,13 +624,18 @@ class Lanelet2CRConverter:
                                     lanelet_type=lanelet_type, traffic_signs=traffic_signs)
 
         self._check_right_and_left_neighbors(way_rel, lanelet)
+        if not wrong_left_right_boundary_side:
+            potential_successors = self._check_for_successors(last_left_node=last_left_node,
+                                                              last_right_node=last_right_node)
+            potential_predecessors = self._check_for_predecessors(first_left_node=first_left_node,
+                                                                  first_right_node=first_right_node)
+        else:
+            potential_predecessors = self._check_for_successors(last_left_node=last_left_node,
+                                                                last_right_node=last_right_node)
+            potential_successors = self._check_for_predecessors(first_left_node=first_left_node,
+                                                                first_right_node=first_right_node)
 
-        potential_successors = self._check_for_successors(last_left_node=last_left_node,
-                                                          last_right_node=last_right_node)
         self.lanelet_network.add_successors_to_lanelet(lanelet, potential_successors)
-
-        potential_predecessors = self._check_for_predecessors(first_left_node=first_left_node,
-                                                              first_right_node=first_right_node)
         self.lanelet_network.add_predecessors_to_lanelet(lanelet, potential_predecessors)
 
         potential_adj_left, potential_adj_right = self._check_for_split_and_join_adjacencies(first_left_node,
