@@ -588,12 +588,6 @@ class Lanelet2CRConverter:
                 left_vertices = left_vertices[::-1]
                 first_left_node, last_left_node = (last_left_node, first_left_node)
 
-        # set first and last points
-        self.first_left_pts[first_left_node].append(way_rel.id_)
-        self.last_left_pts[last_left_node].append(way_rel.id_)
-        self.first_right_pts[first_right_node].append(way_rel.id_)
-        self.last_right_pts[last_right_node].append(way_rel.id_)
-
         # set center vertices
         center_vertices = np.array([(l + r) / 2 for (l, r) in zip(left_vertices, right_vertices)])
 
@@ -603,6 +597,14 @@ class Lanelet2CRConverter:
         if wrong_left_right_boundary_side:
             left_vertices, right_vertices = np.flip(left_vertices, axis=0), np.flip(right_vertices, axis=0)
             center_vertices = (left_vertices + right_vertices) / 2
+            first_left_node, last_left_node = (last_left_node, first_left_node)
+            first_right_node, last_right_node = (last_right_node, first_right_node)
+
+        # set first and last points
+        self.first_left_pts[first_left_node].append(way_rel.id_)
+        self.last_left_pts[last_left_node].append(way_rel.id_)
+        self.first_right_pts[first_right_node].append(way_rel.id_)
+        self.last_right_pts[last_right_node].append(way_rel.id_)
 
         # extract special meaning like way, direction and road type
         lanelet_type, users_one_way, users_bidirectional = _extract_special_meaning_to_lanelet(way_rel)
@@ -624,18 +626,13 @@ class Lanelet2CRConverter:
                                     lanelet_type=lanelet_type, traffic_signs=traffic_signs)
 
         self._check_right_and_left_neighbors(way_rel, lanelet)
-        if not wrong_left_right_boundary_side:
-            potential_successors = self._check_for_successors(last_left_node=last_left_node,
-                                                              last_right_node=last_right_node)
-            potential_predecessors = self._check_for_predecessors(first_left_node=first_left_node,
-                                                                  first_right_node=first_right_node)
-        else:
-            potential_predecessors = self._check_for_successors(last_left_node=last_left_node,
-                                                                last_right_node=last_right_node)
-            potential_successors = self._check_for_predecessors(first_left_node=first_left_node,
-                                                                first_right_node=first_right_node)
 
+        potential_successors = self._check_for_successors(last_left_node=last_left_node,
+                                                          last_right_node=last_right_node)
         self.lanelet_network.add_successors_to_lanelet(lanelet, potential_successors)
+
+        potential_predecessors = self._check_for_predecessors(first_left_node=first_left_node,
+                                                              first_right_node=first_right_node)
         self.lanelet_network.add_predecessors_to_lanelet(lanelet, potential_predecessors)
 
         potential_adj_left, potential_adj_right = self._check_for_split_and_join_adjacencies(first_left_node,
