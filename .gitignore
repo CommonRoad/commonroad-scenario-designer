@@ -116,3 +116,5 @@ ENV/
 /crdesigner/config/custom_settings.yaml
 /crdesigner/ui/gui/autosaves/autosave.xml
 /crdesigner/ui/gui/autosaves/logging_file.txt
+
+*.whl
