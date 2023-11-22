@@ -24,6 +24,7 @@ from numpy import ndarray
 from commonroad.scenario.obstacle import StaticObstacle, DynamicObstacle
 from commonroad.scenario.lanelet import LaneletType, Lanelet
 
+from crdesigner.config.logging import logger
 from crdesigner.ui.gui.utilities.aerial_data import get_aerial_image_bing, get_aerial_image_ldbv, \
     get_aerial_image_limits
 from crdesigner.ui.gui.utilities.helper import _merge_dict, calculate_closest_vertices, calculate_euclidean_distance, \
@@ -123,6 +124,7 @@ class DynamicCanvasController(FigureCanvas):
     def parent(self):
         return self._parent
 
+    @logger.log
     def keyPressEvent(self, event):
         """
         On key press activate an event
@@ -172,6 +174,7 @@ class DynamicCanvasController(FigureCanvas):
         """
         self.ax.set(xlim=limits[0:2], ylim=limits[2:4])
 
+    @logger.log
     def zoom(self, event):
         """
         Zoom in / out function in Dynamic Canvas by using mouse wheel.
@@ -341,11 +344,12 @@ class DynamicCanvasController(FigureCanvas):
             obj.draw(renderer=self.rnd, draw_params=draw_params_merged)
             self.rnd.render(show=True)
 
+    @logger.log
     def dynamic_canvas_click_callback(self, mouse_clicked_event):
         """
         General callback for clicking in the dynamic canvas, two things are checked:
         1. If the lanelet network of the current network should be resized.
-        2. When a lanelet was selected execute the logic behind it.
+        2. When a lanelet was selected execute the logger.logic behind it.
         b) Select lanelets by clicking on the canvas. Selects only one of the lanelets that contains the click
         position.
         3. Check for rightclicked. If rightclicked and lanelet selected open context menu
@@ -493,7 +497,7 @@ class DynamicCanvasController(FigureCanvas):
                 selection = " Lanelet with ID " + str(self.selected_lanelets[0].lanelet_id) + " is selected."
                 self.animated_viewer.callback_function(self.selected_lanelets[0], output + selection)
         if len(self.selected_lanelets) == 0:
-            self.parent().road_network_toolbox.initialize_road_network_toolbox()
+            self.parent().road_network_toolbox.lanelet_controller.lanelet_ui.set_default_lanelet_information()
         self.draw_temporary_point()
 
     def get_center_and_axes_values(self) -> ((float, float), float, float, (float, float), (float, float)):
@@ -1012,6 +1016,7 @@ class DynamicCanvasController(FigureCanvas):
         self.show_aerial = False
         self._update_map()
 
+    @logger.log
     def display_curved_lanelet(self, is_checked: bool, ui_button: CollapsibleCheckBox, new_lanelet: bool = True,
                             mouse_event: QMouseEvent = None, selected_lanelet: Lanelet = None) -> None:
         """

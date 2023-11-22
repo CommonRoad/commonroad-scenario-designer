@@ -1,5 +1,7 @@
 import math
 import numpy as np
+
+from crdesigner.config.logging import logger
 from crdesigner.ui.gui.model.scenario_model import ScenarioModel
 from crdesigner.ui.gui.view.toolboxes.road_network_toolbox.road_network_toolbox_ui.road_network_toolbox_ui import \
     RoadNetworkToolboxUI
@@ -30,6 +32,7 @@ class AddTrafficLightsController:
         self.road_network_toolbox_ui.selected_traffic_light.currentTextChanged.connect(
                 lambda: self.traffic_lights_ui.update_traffic_light_information())
 
+    @logger.log
     def add_traffic_light(self, traffic_light_id: int = None):
         """
           Adds a new traffic light to the scenario based on the user selection.
@@ -101,6 +104,7 @@ class AddTrafficLightsController:
         self.scenario_model.add_traffic_light(new_traffic_light, referenced_lanelets)
         self.road_network_controller.set_default_road_network_list_information()
 
+    @logger.log
     def update_traffic_light(self):
         """
         Updates a traffic light from the scenario based on the user selection.
@@ -130,6 +134,7 @@ class AddTrafficLightsController:
         self.scenario_model.update_traffic_light(selected_traffic_light_id)
         self.add_traffic_light(selected_traffic_light_id)
 
+    @logger.log
     def remove_traffic_light(self):
         """
         Removes a traffic light from the scenario.
@@ -149,6 +154,7 @@ class AddTrafficLightsController:
         self.scenario_model.remove_traffic_light(selected_traffic_light_id)
         self.road_network_controller.set_default_road_network_list_information()
 
+    @logger.log
     def create_traffic_light_for_referenced_lanelets(self):
         if self.road_network_controller.mwindow.play_activated:
             self.road_network_controller.text_browser.append("Please stop the animation first.")

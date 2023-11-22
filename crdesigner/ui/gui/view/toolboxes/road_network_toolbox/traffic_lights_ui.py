@@ -1,5 +1,6 @@
 from commonroad.scenario.traffic_light import TrafficLightState
 
+from crdesigner.config.logging import logger
 from crdesigner.ui.gui.model.scenario_model import ScenarioModel
 from crdesigner.ui.gui.view.toolboxes.road_network_toolbox.road_network_toolbox_ui.road_network_toolbox_ui import \
     RoadNetworkToolboxUI
@@ -11,6 +12,7 @@ class AddTrafficLightsUI:
         self.road_network_toolbox_ui = road_network_toolbox_ui
         self.scenario_model = scenario_model
 
+    @logger.log
     def update_traffic_light_information(self):
         """
         Updates information of traffic light widget based on traffic light ID selected by the user.

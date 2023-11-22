@@ -1,3 +1,4 @@
+import logging
 import subprocess
 from pathlib import Path
 from typing import Optional
@@ -107,7 +108,10 @@ def sumo_to_commonroad(input_file: str) -> Scenario:
     :param input_file: Path to SUMO net file
     :return: CommonRoad scenario
     """
-    return convert_net_to_cr(input_file)
+    if SUMO_AVAILABLE:
+        return convert_net_to_cr(input_file)
+    else:
+        logging.error("Cannot import SUMO. SUMO simulation cannot be offered.")
 
 
 def commonroad_to_sumo(input_file: str, output_file: str):
@@ -134,6 +138,8 @@ def commonroad_to_sumo(input_file: str, output_file: str):
         config.scenario_name = file_name.partition(".")[0]
         converter = CR2SumoMapConverter(scenario, config)
         converter.create_sumo_files(path)
+    else:
+        logging.error("Cannot import SUMO. SUMO simulation cannot be offered.")
 
 
 def osm_to_commonroad(input_file: str) -> Scenario:
@@ -178,4 +184,4 @@ def osm_to_commonroad_using_sumo(input_file: str) -> Optional[Scenario]:
     except Exception as e:
         print("__Warning__: {}.".format(e))
         return None
-    return opendrive_to_commonroad(opendrive_file)
+    return opendrive_to_commonroad(Path(opendrive_file))

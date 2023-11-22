@@ -1,4 +1,5 @@
 """Wrapper for the middle visualization."""
+from crdesigner.config.logging import logger
 from crdesigner.ui.gui.controller.animated_viewer.animated_viewer_controller import AnimatedViewerController
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 
@@ -16,7 +17,7 @@ class AnimatedViewerWrapperController:
     def __init__(self, mwindow, scenario_model: ScenarioModel, scenario_saving_dialog):
 
         self.scenario_model = scenario_model
-        self.scenario_model.scenario_changed.connect(self.update_scenario)
+        self.scenario_model.subscribe(self.update_scenario)
         self.pps_model = mwindow.pps_model
         self.pps_model.subscribe(self.update_scenario)
 
@@ -27,13 +28,14 @@ class AnimatedViewerWrapperController:
         self.viewer_dock = None
         self.mwindow = mwindow.mwindow_ui  # handle back to the main window
 
-    def update_scenario(self, new_file_added: bool = False):
+    def update_scenario(self):
         """
         Notifies the GUI that the sceanrio has changed.
 
         @param new_file_added: Indikator if the added file is a complete new scenario
         """
-        self.cr_viewer.open_scenario(new_file_added=new_file_added)
+
+        self.cr_viewer.open_scenario(new_file_added=self.scenario_model.is_new_file_added())
         self.update_view()
         self.mwindow.update_max_step()
         # Autosave
@@ -54,6 +56,7 @@ class AnimatedViewerWrapperController:
         self.viewer_dock.setLayout(layout)
         self.mwindow.setCentralWidget(self.viewer_dock)
 
+    @logger.log
     def viewer_callback(self, selected_object: Union[Lanelet, Obstacle], output: str, temporary_positions = None):
         """
         Callback when the user clicks a lanelet, an obstacle or a position inside the scenario visualization.

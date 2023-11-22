@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import QTableWidgetItem, QComboBox
 from commonroad.scenario.traffic_sign import *
 
+from crdesigner.config.logging import logger
 from crdesigner.ui.gui.model.scenario_model import ScenarioModel
 from crdesigner.ui.gui.view.toolboxes.road_network_toolbox.road_network_toolbox_ui.road_network_toolbox_ui import \
     RoadNetworkToolboxUI
@@ -11,6 +12,7 @@ class AddTrafficSignUI:
         self.road_network_toolbox_ui = road_network_toolbox_ui
         self.scenario_model = scenario_model
 
+    @logger.log
     def update_traffic_sign_information(self, text_browser):
         """
         Updates information of traffic sign widget based on traffic sign ID selected by the user.
@@ -44,22 +46,6 @@ class AddTrafficSignUI:
             self.road_network_toolbox_ui.x_position_traffic_sign.setText("0.0")
             self.road_network_toolbox_ui.y_position_traffic_sign.setText("0.0")
             self.road_network_toolbox_ui.traffic_sign_element_table.setRowCount(0)
-
-    def add_traffic_sign_element(self, text_browser):
-        """
-        Adds traffic sign element to traffic sign.
-        Only a default entry is created the user has to specify the traffic sign ID manually afterward.
-        """
-        if not self.scenario_model.scenario_created():
-            text_browser.append("_Warning:_ Create a new file")
-            return
-        num_rows = self.road_network_toolbox_ui.traffic_sign_element_table.rowCount()
-        self.road_network_toolbox_ui.traffic_sign_element_table.insertRow(num_rows)
-        combo_box = QComboBox()
-        combo_box.addItems([elem.name for elem in
-                            globals()["TrafficSignID" + SupportedTrafficSignCountry(
-                                    self.scenario_model.get_country_id()).name.capitalize()]])
-        self.road_network_toolbox_ui.traffic_sign_element_table.setCellWidget(num_rows, 0, combo_box)
 
     def set_default_traffic_sign_information(self):
         self.road_network_toolbox_ui.referenced_lanelets_traffic_sign.clear()
