@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<commonRoad timeStepSize="0.1" commonRoadVersion="2020a" author="" affiliation="" source="CommonRoad Scenario Designer" benchmarkID="ZAM_MUC-1" date="2023-06-14">
+<commonRoad timeStepSize="0.1" commonRoadVersion="2020a" author="" affiliation="" source="CommonRoad Scenario Designer" benchmarkID="ZAM_MUC-1" date="2023-11-22">
   <location>
     <geoNameId>-999</geoNameId>
     <gpsLatitude>50.78177191291</gpsLatitude>
@@ -15,8 +15,8 @@
     </geoTransformation>
   </location>
   <scenarioTags>
-    <urban/>
     <highway/>
+    <urban/>
   </scenarioTags>
   <lanelet id="1">
     <leftBound>
@@ -115,14 +115,17 @@
         <y>6582827.7520</y>
       </point>
     </rightBound>
-    <adjacentLeft ref="11" drivingDir="opposite"/>
+    <successor ref="8"/>
+    <successor ref="11"/>
+    <successor ref="12"/>
+    <adjacentLeft ref="13" drivingDir="opposite"/>
     <laneletType>highway</laneletType>
     <userOneWay>car</userOneWay>
     <userOneWay>motorcycle</userOneWay>
     <userBidirectional>priorityVehicle</userBidirectional>
     <trafficSignRef ref="29"/>
   </lanelet>
-  <lanelet id="11">
+  <lanelet id="13">
     <leftBound>
       <point>
         <x>675851.5759</x>
@@ -144,15 +147,15 @@
       </point>
     </rightBound>
     <predecessor ref="3"/>
-    <predecessor ref="12"/>
+    <predecessor ref="14"/>
     <adjacentLeft ref="10" drivingDir="opposite"/>
-    <adjacentRight ref="13" drivingDir="same"/>
+    <adjacentRight ref="15" drivingDir="same"/>
     <laneletType>highway</laneletType>
     <userOneWay>car</userOneWay>
     <userOneWay>motorcycle</userOneWay>
     <userBidirectional>priorityVehicle</userBidirectional>
   </lanelet>
-  <lanelet id="14">
+  <lanelet id="16">
     <leftBound>
       <point>
         <x>675851.7252</x>
@@ -173,18 +176,18 @@
         <y>6582864.2163</y>
       </point>
     </rightBound>
-    <predecessor ref="16"/>
+    <predecessor ref="17"/>
     <predecessor ref="2"/>
-    <predecessor ref="15"/>
-    <adjacentLeft ref="17" drivingDir="opposite"/>
-    <adjacentRight ref="18" drivingDir="same"/>
+    <predecessor ref="12"/>
+    <adjacentLeft ref="18" drivingDir="opposite"/>
+    <adjacentRight ref="19" drivingDir="same"/>
     <laneletType>urban</laneletType>
     <userOneWay>car</userOneWay>
     <userOneWay>bicycle</userOneWay>
     <userOneWay>motorcycle</userOneWay>
     <userBidirectional>priorityVehicle</userBidirectional>
   </lanelet>
-  <lanelet id="17">
+  <lanelet id="18">
     <leftBound>
       <point>
         <x>675868.7443</x>
@@ -205,10 +208,10 @@
         <y>6582850.8547</y>
       </point>
     </rightBound>
-    <successor ref="19"/>
-    <successor ref="12"/>
+    <successor ref="20"/>
     <successor ref="6"/>
-    <adjacentLeft ref="14" drivingDir="opposite"/>
+    <successor ref="14"/>
+    <adjacentLeft ref="16" drivingDir="opposite"/>
     <stopLine>
       <point>
         <x>675849.1873</x>
@@ -228,7 +231,7 @@
     <userBidirectional>priorityVehicle</userBidirectional>
     <trafficSignRef ref="28"/>
   </lanelet>
-  <lanelet id="20">
+  <lanelet id="21">
     <leftBound>
       <point>
         <x>675829.3688</x>
@@ -265,9 +268,9 @@
         <y>6582877.2793</y>
       </point>
     </rightBound>
-    <predecessor ref="19"/>
+    <predecessor ref="11"/>
+    <predecessor ref="20"/>
     <predecessor ref="4"/>
-    <predecessor ref="21"/>
     <adjacentLeft ref="22" drivingDir="opposite"/>
     <laneletType>highway</laneletType>
     <userOneWay>car</userOneWay>
@@ -311,9 +314,9 @@
         <y>6582838.4636</y>
       </point>
     </rightBound>
+    <successor ref="17"/>
     <successor ref="7"/>
-    <successor ref="15"/>
-    <adjacentLeft ref="20" drivingDir="opposite"/>
+    <adjacentLeft ref="21" drivingDir="opposite"/>
     <adjacentRight ref="23" drivingDir="same"/>
     <laneletType>highway</laneletType>
     <userOneWay>car</userOneWay>
@@ -321,7 +324,7 @@
     <userBidirectional>priorityVehicle</userBidirectional>
     <trafficSignRef ref="27"/>
   </lanelet>
-  <lanelet id="21">
+  <lanelet id="11">
     <leftBound>
       <point>
         <x>675851.5759</x>
@@ -342,7 +345,8 @@
         <y>6582850.8547</y>
       </point>
     </rightBound>
-    <successor ref="20"/>
+    <predecessor ref="10"/>
+    <successor ref="21"/>
     <adjacentLeft ref="24" drivingDir="same"/>
     <laneletType>urban</laneletType>
     <userBidirectional>priorityVehicle</userBidirectional>
@@ -368,7 +372,7 @@
         <y>6582843.9874</y>
       </point>
     </rightBound>
-    <adjacentRight ref="21" drivingDir="same"/>
+    <adjacentRight ref="11" drivingDir="same"/>
     <laneletType>urban</laneletType>
     <userBidirectional>priorityVehicle</userBidirectional>
   </lanelet>
@@ -393,7 +397,7 @@
         <y>6582827.7146</y>
       </point>
     </rightBound>
-    <predecessor ref="17"/>
+    <predecessor ref="18"/>
     <successor ref="5"/>
     <adjacentLeft ref="2" drivingDir="opposite"/>
     <laneletType>urban</laneletType>
@@ -421,7 +425,7 @@
       </point>
     </rightBound>
     <predecessor ref="1"/>
-    <successor ref="14"/>
+    <successor ref="16"/>
     <adjacentLeft ref="6" drivingDir="opposite"/>
     <laneletType>urban</laneletType>
     <userBidirectional>priorityVehicle</userBidirectional>
@@ -462,7 +466,7 @@
     <laneletType>urban</laneletType>
     <userBidirectional>priorityVehicle</userBidirectional>
   </lanelet>
-  <lanelet id="15">
+  <lanelet id="17">
     <leftBound>
       <point>
         <x>675829.3688</x>
@@ -492,8 +496,8 @@
       </point>
     </rightBound>
     <predecessor ref="22"/>
-    <successor ref="14"/>
-    <adjacentLeft ref="19" drivingDir="opposite"/>
+    <successor ref="16"/>
+    <adjacentLeft ref="20" drivingDir="opposite"/>
     <laneletType>urban</laneletType>
     <userBidirectional>priorityVehicle</userBidirectional>
   </lanelet>
@@ -526,12 +530,13 @@
         <y>6582827.7146</y>
       </point>
     </rightBound>
+    <predecessor ref="10"/>
     <successor ref="5"/>
     <adjacentLeft ref="3" drivingDir="opposite"/>
     <laneletType>urban</laneletType>
     <userBidirectional>priorityVehicle</userBidirectional>
   </lanelet>
-  <lanelet id="16">
+  <lanelet id="12">
     <leftBound>
       <point>
         <x>675851.5759</x>
@@ -560,12 +565,13 @@
         <y>6582841.3374</y>
       </point>
     </rightBound>
-    <successor ref="14"/>
-    <adjacentLeft ref="12" drivingDir="opposite"/>
+    <predecessor ref="10"/>
+    <successor ref="16"/>
+    <adjacentLeft ref="14" drivingDir="opposite"/>
     <laneletType>urban</laneletType>
     <userBidirectional>priorityVehicle</userBidirectional>
   </lanelet>
-  <lanelet id="19">
+  <lanelet id="20">
     <leftBound>
       <point>
         <x>675851.7252</x>
@@ -594,13 +600,13 @@
         <y>6582850.8547</y>
       </point>
     </rightBound>
-    <predecessor ref="17"/>
-    <successor ref="20"/>
-    <adjacentLeft ref="15" drivingDir="opposite"/>
+    <predecessor ref="18"/>
+    <successor ref="21"/>
+    <adjacentLeft ref="17" drivingDir="opposite"/>
     <laneletType>urban</laneletType>
     <userBidirectional>priorityVehicle</userBidirectional>
   </lanelet>
-  <lanelet id="12">
+  <lanelet id="14">
     <leftBound>
       <point>
         <x>675851.7252</x>
@@ -629,9 +635,9 @@
         <y>6582814.5770</y>
       </point>
     </rightBound>
-    <predecessor ref="17"/>
-    <successor ref="11"/>
-    <adjacentLeft ref="16" drivingDir="opposite"/>
+    <predecessor ref="18"/>
+    <successor ref="13"/>
+    <adjacentLeft ref="12" drivingDir="opposite"/>
     <laneletType>urban</laneletType>
     <userBidirectional>priorityVehicle</userBidirectional>
   </lanelet>
@@ -665,7 +671,7 @@
       </point>
     </rightBound>
     <predecessor ref="1"/>
-    <successor ref="11"/>
+    <successor ref="13"/>
     <adjacentLeft ref="8" drivingDir="opposite"/>
     <laneletType>urban</laneletType>
     <userBidirectional>priorityVehicle</userBidirectional>
@@ -700,12 +706,12 @@
       </point>
     </rightBound>
     <predecessor ref="1"/>
-    <successor ref="20"/>
+    <successor ref="21"/>
     <adjacentLeft ref="7" drivingDir="opposite"/>
     <laneletType>urban</laneletType>
     <userBidirectional>priorityVehicle</userBidirectional>
   </lanelet>
-  <lanelet id="18">
+  <lanelet id="19">
     <leftBound>
       <point>
         <x>675856.1293</x>
@@ -726,12 +732,12 @@
         <y>6582862.1261</y>
       </point>
     </rightBound>
-    <adjacentLeft ref="14" drivingDir="same"/>
+    <adjacentLeft ref="16" drivingDir="same"/>
     <laneletType>bicycleLane</laneletType>
     <userOneWay>bicycle</userOneWay>
     <userBidirectional>priorityVehicle</userBidirectional>
   </lanelet>
-  <lanelet id="13">
+  <lanelet id="15">
     <leftBound>
       <point>
         <x>675848.3661</x>
@@ -752,9 +758,9 @@
         <y>6582782.1061</y>
       </point>
     </rightBound>
-    <adjacentLeft ref="11" drivingDir="same"/>
-    <laneletType>busLane</laneletType>
+    <adjacentLeft ref="13" drivingDir="same"/>
     <laneletType>urban</laneletType>
+    <laneletType>busLane</laneletType>
     <userOneWay>bus</userOneWay>
     <userBidirectional>priorityVehicle</userBidirectional>
   </lanelet>
@@ -889,17 +895,17 @@
     <userBidirectional>priorityVehicle</userBidirectional>
     <userBidirectional>pedestrian</userBidirectional>
   </lanelet>
-  <trafficSign id="30">
+  <trafficSign id="29">
     <trafficSignElement>
-      <trafficSignID>205</trafficSignID>
+      <trafficSignID>301</trafficSignID>
     </trafficSignElement>
     <position>
       <point>
-        <x>675840.0889</x>
-        <y>6582813.4342</y>
+        <x>675859.0023</x>
+        <y>6582824.6519</y>
       </point>
     </position>
-    <virtual>true</virtual>
+    <virtual>false</virtual>
   </trafficSign>
   <trafficSign id="28">
     <trafficSignElement>
@@ -913,17 +919,17 @@
     </position>
     <virtual>false</virtual>
   </trafficSign>
-  <trafficSign id="29">
+  <trafficSign id="30">
     <trafficSignElement>
-      <trafficSignID>301</trafficSignID>
+      <trafficSignID>205</trafficSignID>
     </trafficSignElement>
     <position>
       <point>
-        <x>675859.0023</x>
-        <y>6582824.6519</y>
+        <x>675840.0889</x>
+        <y>6582813.4342</y>
       </point>
     </position>
-    <virtual>false</virtual>
+    <virtual>true</virtual>
   </trafficSign>
   <trafficSign id="27">
     <trafficSignElement>
