@@ -12,6 +12,7 @@
 ### Fixed
 - Adding existing obstacles again
 - Selecting obstacles with set-based prediction
+- lanelet2cr wrong final vertice assignment 
 
 ## [0.8.0] - 2023-10-31
 
