@@ -124,16 +124,17 @@ class GuiConfig(BaseConfig):
     pseudo_mercator = Attribute(pseudo_mercator, "Pseudo Mercator")
     utm_default = Attribute(utm_default, "UTM Default")
 
-    OBSTACLE_SPECS = {'car': {'width': '1.610', 'length': '4.508', 'shape': 'Rectangle'},
-     'truck': {'width': '2.550', 'length': '16.50', 'shape': 'Rectangle'},
-     'bus': {'width': '2.550', 'length': '11.95', 'shape': 'Rectangle'},
-     'bicycle': {'width': '0.64', 'length': '1.75', 'shape': 'Rectangle'},
-     'pedestrian': {'shape': 'Circle', 'radius': '0.3'},
-     'priorityVehicle': {'width': '1.610', 'length': '4.508', 'shape': 'Rectangle'},
-     'parkedVehicle': {'width': '1.610', 'length': '4.508', 'shape': 'Rectangle'},
-     'motorcycle': {'width': '1.016', 'length': '2.540', 'shape': 'Rectangle'},
-     'taxi': {'width': '1.610', 'length': '4.508', 'shape': 'Rectangle'},
-                      }
+    OBSTACLE_SPECS = {
+        'car': {'width': '1.610', 'length': '4.508', 'shape': 'Rectangle'},
+        'truck': {'width': '2.550', 'length': '16.50', 'shape': 'Rectangle'},
+        'bus': {'width': '2.550', 'length': '11.95', 'shape': 'Rectangle'},
+        'bicycle': {'width': '0.64', 'length': '1.75', 'shape': 'Rectangle'},
+        'pedestrian': {'shape': 'Circle', 'radius': '0.3'},
+        'priorityVehicle': {'width': '1.610', 'length': '4.508', 'shape': 'Rectangle'},
+        'parkedVehicle': {'width': '1.610', 'length': '4.508', 'shape': 'Rectangle'},
+        'motorcycle': {'width': '1.016', 'length': '2.540', 'shape': 'Rectangle'},
+        'taxi': {'width': '1.610', 'length': '4.508', 'shape': 'Rectangle'},
+    }
 
     # The layout of the settings window
     LAYOUT = [
