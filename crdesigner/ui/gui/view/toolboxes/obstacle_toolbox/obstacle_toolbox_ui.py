@@ -32,10 +32,6 @@ class ObstacleToolboxUI(Toolbox):
         self.text_browser = text_browser
         self.change_color = False
 
-        """
-        with open(os.getcwd() + "/obstacle_type_spec.yaml", "r") as f:
-            self.obstacle_spec = yaml.safe_load(f)
-        """
         self.obstacle_spec = gui_config.OBSTACLE_SPECS
 
 
@@ -175,7 +171,6 @@ class ObstacleToolboxUI(Toolbox):
 
         self.obstacle_shape.setCurrentText(selected_obs_spec["shape"])
 
-        # self.obstacle_type.setCurrentIndex(1)  # default car
         if self.obstacle_shape.currentText() == "Rectangle":
             self.obstacle_length.setText(selected_obs_spec["length"])
             self.obstacle_orientation.setText("0")
@@ -301,19 +296,16 @@ class ObstacleToolboxUI(Toolbox):
         self.obstacle_length.setValidator(self.float_validator)
         self.obstacle_length.setMaxLength(6)
         self.obstacle_length.setAlignment(Qt.AlignRight)
-        # self.obstacle_length.setText("3.5")
 
         self.obstacle_width = QLineEdit()
         self.obstacle_width.setValidator(self.float_validator)
         self.obstacle_width.setMaxLength(4)
         self.obstacle_width.setAlignment(Qt.AlignRight)
-        # self.obstacle_width.setText("1.6")
 
         self.obstacle_orientation = QLineEdit()
         self.obstacle_orientation.setValidator(QIntValidator())
         self.obstacle_orientation.setMaxLength(4)
         self.obstacle_orientation.setAlignment(Qt.AlignRight)
-        # self.obstacle_orientation.setText("0")
 
         self.layout_shape_groupbox.insertRow(2, "Width [m]", self.obstacle_width)
         self.layout_shape_groupbox.insertRow(3, "Length [m]", self.obstacle_length)
@@ -341,7 +333,6 @@ class ObstacleToolboxUI(Toolbox):
 
         self.layout_shape_groupbox.insertRow(2, "Radius [m]", self.obstacle_radius)
 
-        # self.obstacle_radius.setText("3")
 
     def remove_circle_fields(self):
         """
@@ -387,12 +378,6 @@ class ObstacleToolboxUI(Toolbox):
                 self.layout_obstacle_information_groupbox.insertRow(5, "Y-Position", self.obstacle_y_Position)
             self.position_initialized = True
 
-        """
-        if self.obstacle_dyn_stat.currentText() == "Static":
-            self.obstacle_x_Position.setText("0.5")
-            self.obstacle_y_Position.setText("0.5")
-        """
-
 
     def remove_position(self):
         """
@@ -422,12 +407,7 @@ class ObstacleToolboxUI(Toolbox):
         self.add_vertice_btn = QPushButton("Add Vertice")
         self.add_vertice_btn.clicked.connect(lambda: self.add_vertice())
         self.layout_shape_groupbox.insertRow(len(self.vertices_x) + 2, self.add_vertice_btn)
-        """
-        for lineEdit in self.vertices_x:
-            lineEdit.setText("0")
-        for lineEdit in self.vertices_y:
-            lineEdit.setText("0")
-        """
+
 
     @logger.log
     def add_vertice(self):
@@ -443,13 +423,11 @@ class ObstacleToolboxUI(Toolbox):
         self.vertices_x[i].setValidator(self.float_validator)
         self.vertices_x[i].setMaxLength(6)
         self.vertices_x[i].setAlignment(Qt.AlignRight)
-        self.vertices_x[i].setText("0")
 
         self.vertices_y.append(QLineEdit())
         self.vertices_y[i].setValidator(self.float_validator)
         self.vertices_y[i].setMaxLength(6)
         self.vertices_y[i].setAlignment(Qt.AlignRight)
-        self.vertices_y[i].setText("0")
 
         self.polygon_row[i].addWidget(self.polygon_label[i])
         self.polygon_row[i].addWidget(self.vertices_x[i])
