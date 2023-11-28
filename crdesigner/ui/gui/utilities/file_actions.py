@@ -3,6 +3,7 @@ from PyQt5.QtGui import *
 import os
 import logging
 
+from commonroad.common.common_scenario import FileInformation
 from commonroad.planning.planning_problem import PlanningProblemSet
 from commonroad.scenario.scenario import Scenario
 from commonroad.scenario.lanelet import LaneletNetwork
@@ -18,7 +19,9 @@ def file_new(mwindow):
     """
     Function passed to the fileNewAction to create the action in the menu bar.
     """
-    scenario = Scenario(0.1)
+    scenario = Scenario(0.1,
+                        file_information=FileInformation(affiliation="Technical University of Munich",
+                                                         source="CommonRoad Scenario Designer"))
     net = LaneletNetwork()
     scenario.replace_lanelet_network(net)
     mwindow.scenario_model.set_scenario(scenario)
