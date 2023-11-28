@@ -74,6 +74,9 @@ class ObstacleController(QDockWidget, ):
         """
         adds functionality to gui elements like buttons, menus etc
         """
+        self.obstacle_toolbox_ui.obstacle_type.currentTextChanged.connect(
+                lambda :self.obstacle_toolbox_ui.init_obstacle_defaults())
+
         self.obstacle_toolbox_ui.initialize_obstacle_information()
 
         self.obstacle_toolbox_ui.selected_obstacle.currentTextChanged.connect(
@@ -135,6 +138,8 @@ class ObstacleController(QDockWidget, ):
         if self.obstacle_toolbox_ui.obstacle_dyn_stat.currentText() == "Dynamic":
             self.toggle_dynamic_static()
 
+        self.obstacle_toolbox_ui.init_obstacle_defaults()
+
     @logger.log
     def toggle_dynamic_static(self):
         """
@@ -144,6 +149,8 @@ class ObstacleController(QDockWidget, ):
             self.obstacle_toolbox_ui.remove_position()
         elif self.obstacle_toolbox_ui.obstacle_dyn_stat.currentText() == "Static":
             self.obstacle_toolbox_ui.init_position()
+
+        self.obstacle_toolbox_ui.init_obstacle_defaults()
 
     def static_obstacle_details(self, obstacle_id: int):
         """
@@ -449,6 +456,8 @@ class ObstacleController(QDockWidget, ):
             except Exception as e:
                 self.text_browser.append("Error when updating dynamic obstacle")
         self.temp_obstacle = None
+
+
 
     def calc_velocity(self, point1: float, point2: float) -> float:
         """
