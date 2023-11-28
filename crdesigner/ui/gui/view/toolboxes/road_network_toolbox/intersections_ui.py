@@ -100,13 +100,13 @@ class AddIntersectionUI:
                 self.road_network_toolbox_ui.intersection_incomings_table.cellWidget(num_rows - 1, 1).set_checked_items(
                         [str(la_id) for la_id in incoming.incoming_lanelets])
                 self.road_network_toolbox_ui.intersection_incomings_table.cellWidget(num_rows - 1, 2).set_checked_items(
-                        [str(la_id) for la_id in incoming.successors_left])
+                        [str(la_id) for la_id in incoming.outgoing_left])
                 self.road_network_toolbox_ui.intersection_incomings_table.cellWidget(num_rows - 1, 3).set_checked_items(
-                        [str(la_id) for la_id in incoming.successors_straight])
+                        [str(la_id) for la_id in incoming.outgoing_straight])
                 self.road_network_toolbox_ui.intersection_incomings_table.cellWidget(num_rows - 1, 4).set_checked_items(
-                        [str(la_id) for la_id in incoming.successors_right])
+                        [str(la_id) for la_id in incoming.outgoing_right])
                 index = self.road_network_toolbox_ui.intersection_incomings_table.cellWidget(num_rows - 1, 5).findText(
-                        str(incoming.left_of))
+                        str(incoming.outgoing_left))
                 self.road_network_toolbox_ui.intersection_incomings_table.cellWidget(num_rows - 1, 5).setCurrentIndex(
                         index)
             self.road_network_toolbox_ui.intersection_crossings.set_checked_items(

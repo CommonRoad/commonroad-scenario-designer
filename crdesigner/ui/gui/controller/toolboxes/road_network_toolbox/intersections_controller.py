@@ -165,7 +165,11 @@ class AddIntersectionController:
 
         if self.road_network_toolbox_ui.selected_intersection.currentText() not in ["", "None"]:
             selected_intersection_id = int(self.road_network_toolbox_ui.selected_intersection.currentText())
+            selected_intersection = self.scenario_model.find_intersection_by_id(selected_intersection_id)
+            lanelet_set = self.compute_member_lanelets(selected_intersection)
             self.scenario_model.remove_intersection(selected_intersection_id)
+            for lanelet in lanelet_set:
+                self.scenario_model.remove_lanelet(lanelet)
             self.road_network_controller.set_default_road_network_list_information()
 
     def update_intersection(self):
@@ -184,3 +188,44 @@ class AddIntersectionController:
             selected_intersection_id = int(self.road_network_toolbox_ui.selected_intersection.currentText())
             self.scenario_model.update_intersection(selected_intersection_id)
             self.add_intersection(selected_intersection_id)
+
+    def compute_member_lanelets(self, intersection: Intersection):
+        outgoing_lanelets = []
+        incoming_lanelets = []
+        intermediate_lanelets = []
+
+        for incoming_group in intersection.incomings:
+            incoming_lanelets += list(incoming_group.incoming_lanelets)
+
+            outgoing_lanelets += list(incoming_group.outgoing_left)
+            for lanelet_id in incoming_group.outgoing_left:
+                outgoing_lanelets += self.scenario_model.find_lanelet_by_id(lanelet_id).successor
+
+            outgoing_lanelets += list(incoming_group.outgoing_right)
+            for lanelet_id in incoming_group.outgoing_right:
+                outgoing_lanelets += self.scenario_model.find_lanelet_by_id(lanelet_id).successor
+
+            outgoing_lanelets += list(incoming_group.outgoing_straight)
+            for lanelet_id in incoming_group.outgoing_straight:
+                outgoing_lanelets += self.scenario_model.find_lanelet_by_id(lanelet_id).successor
+
+        if intersection.outgoings is not None:
+            for outgoing_group in intersection.outgoings:
+                if outgoing_group.outgoing_lanelets is not None:
+                    outgoing_lanelets += list(outgoing_group.outgoing_lanelets)
+        # find all intermediate lanelets in the intersection
+        for inc_lanelet in incoming_lanelets:
+
+            tmp_lanelets = set()
+            tmp_lanelets.add(inc_lanelet)
+            while len(tmp_lanelets) > 0:
+                tmp_lanelet = tmp_lanelets.pop()
+                if tmp_lanelet not in outgoing_lanelets:
+                    intermediate_lanelets.append(tmp_lanelet)
+                    tmp_succesor_lanelets = self.scenario_model.find_lanelet_by_id(tmp_lanelet).successor
+                    if tmp_succesor_lanelets is not None:
+                        for tmp_suc_lanelet in tmp_succesor_lanelets:
+                            if tmp_suc_lanelet not in outgoing_lanelets:
+                                intermediate_lanelets.append(tmp_suc_lanelet)
+
+        return set(incoming_lanelets + intermediate_lanelets + outgoing_lanelets)
