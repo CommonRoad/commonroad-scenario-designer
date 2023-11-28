@@ -45,7 +45,8 @@ def _line_marking_to_type_subtype_vertices(line_marking: LineMarking) -> [str, s
     :param line_marking: line marking
     :return: tuple of strings that represent type and subtype of way based on CR line markings in L2 format
     """
-    lanelet2_type = 'unknown'  # default type, empty dict for 'unknown' and 'no_marking' as they don't exist in L2 format
+    lanelet2_type = 'unknown'  # default type, empty dict for 'unknown' and 'no_marking'
+    # as they don't exist in L2 format
     subtype = 'unknown'  # default subtype, empty dict for 'unknown' and 'no_marking' as they don't exist in L2 format
     if line_marking is LineMarking.DASHED:
         lanelet2_type = 'line_thin'

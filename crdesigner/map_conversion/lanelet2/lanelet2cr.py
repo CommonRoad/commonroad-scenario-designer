@@ -592,18 +592,23 @@ class Lanelet2CRConverter:
                 left_vertices = left_vertices[::-1]
                 first_left_node, last_left_node = (last_left_node, first_left_node)
 
+        # set center vertices
+        center_vertices = np.array([(l + r) / 2 for (l, r) in zip(left_vertices, right_vertices)])
+
+        wrong_left_right_boundary_side = \
+            _wrong_left_right_boundary_side(center_vertices, left_vertices, right_vertices, lanelet2_config)
+
+        if wrong_left_right_boundary_side:
+            left_vertices, right_vertices = np.flip(left_vertices, axis=0), np.flip(right_vertices, axis=0)
+            center_vertices = (left_vertices + right_vertices) / 2
+            first_left_node, last_left_node = (last_left_node, first_left_node)
+            first_right_node, last_right_node = (last_right_node, first_right_node)
+
         # set first and last points
         self.first_left_pts[first_left_node].append(way_rel.id_)
         self.last_left_pts[last_left_node].append(way_rel.id_)
         self.first_right_pts[first_right_node].append(way_rel.id_)
         self.last_right_pts[last_right_node].append(way_rel.id_)
-
-        # set center vertices
-        center_vertices = np.array([(l + r) / 2 for (l, r) in zip(left_vertices, right_vertices)])
-
-        if _wrong_left_right_boundary_side(center_vertices, left_vertices, right_vertices, lanelet2_config):
-            left_vertices, right_vertices = np.flip(left_vertices, axis=0), np.flip(right_vertices, axis=0)
-            center_vertices = (left_vertices + right_vertices) / 2
 
         # extract special meaning like way, direction and road type
         lanelet_type, users_one_way, users_bidirectional = _extract_special_meaning_to_lanelet(way_rel)

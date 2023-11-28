@@ -1,7 +1,7 @@
 import math
 import os
-
 import numpy as np
+
 from commonroad.common.common_lanelet import LineMarking
 from commonroad.common.common_scenario import FileInformation
 from commonroad.scenario.lanelet import LaneletNetwork
@@ -12,9 +12,6 @@ from commonroad.scenario.state import InitialState
 
 from crdesigner.ui.gui.autosaves.autosaves_setup import DIR_AUTOSAVE
 from crdesigner.ui.gui.controller.mwindow_controller import MWindowController
-import sys
-from PyQt5.QtWidgets import *
-
 from crdesigner.ui.gui.utilities.file_actions import open_commonroad_file
 from crdesigner.ui.gui.utilities.map_creator import MapCreator
 
@@ -24,14 +21,13 @@ def test_pyqt_framework(qtbot):
     Test the correct link between functionality and GUI - this does NOT test the functionality!
     """
 
-    # init the app and the qtbot
-    app = QApplication(sys.argv)
+    # do not create an QApplication() here: https://github.com/pytest-dev/pytest-qt/issues/504
 
     path_autosave = DIR_AUTOSAVE + "/autosave" + ".xml"
     if os.path.exists(path_autosave):
         os.remove(path_autosave)
 
-    window = MWindowController()
+    window = MWindowController(test=True)
     qtbot.addWidget(window.mwindow_ui)
 
     # ----- PERFORM TESTS ------ #
@@ -44,11 +40,7 @@ def test_pyqt_framework(qtbot):
     # -- MENUBAR
     execute_menubar_test(window)
     # -- Load Scenario
-    execute_load_sceanrio_test(window)
-
-    # -- FINISH
-    app.closeAllWindows()
-    app.quit()
+    execute_load_scenario_test(window)
 
     if os.path.exists(path_autosave):
         os.remove(path_autosave)
@@ -247,16 +239,16 @@ def execute_add_obstacle_test(window):
         actual_obstacle = window.scenario_model.find_obstacle_by_id(2)
 
     except Exception as e:
-        print(f"Add Obstacle failed with excepetion: {str(e)}.")
+        print(f"Add Obstacle failed with exception: {str(e)}.")
 
     assert expected_obstacle == actual_obstacle
 
     
-def execute_load_sceanrio_test(window):
+def execute_load_scenario_test(window):
     parent_directory = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), os.pardir))
     path_to_test = parent_directory + "/map_conversion/test_maps/sumo/ARG_Carcarana-10_2_T-1.xml"
     expected_count_lanelets = 94
-    expecetd_count_traffic_signs = 8
+    expected_count_traffic_signs = 8
     actual_count_lanelets = 0
     actual_count_traffic_signs = 0
 
@@ -268,4 +260,4 @@ def execute_load_sceanrio_test(window):
         print(f"Opening a file failed with exception {str(e)}")
 
     assert expected_count_lanelets == actual_count_lanelets
-    assert expecetd_count_traffic_signs == actual_count_traffic_signs
+    assert expected_count_traffic_signs == actual_count_traffic_signs

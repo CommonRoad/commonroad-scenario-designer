@@ -1,4 +1,5 @@
 import itertools
+import logging
 from collections import Counter
 import numpy as np
 from shapely import LineString
@@ -8,8 +9,12 @@ from commonroad.scenario.lanelet import Lanelet, StopLine
 from commonroad.scenario.traffic_sign import TrafficSign
 from commonroad.scenario.traffic_light import TrafficLight
 
-from commonroad_dc.geometry.util import resample_polyline, chaikins_corner_cutting, compute_orientation_from_polyline
-from commonroad_dc.geometry.geometry import CurvilinearCoordinateSystem
+try:
+    from commonroad_dc.geometry.util import resample_polyline, chaikins_corner_cutting, \
+        compute_orientation_from_polyline
+    from commonroad_dc.geometry.geometry import CurvilinearCoordinateSystem
+except ModuleNotFoundError:
+    logging.error("MapVerification: Please install CommonRoad Drivability Checker manually.")
 
 from crdesigner.config.lanelet2_config import Lanelet2Config
 

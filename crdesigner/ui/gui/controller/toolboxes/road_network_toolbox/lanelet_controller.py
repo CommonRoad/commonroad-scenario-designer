@@ -2,6 +2,7 @@ import copy
 
 from numpy import ndarray
 
+from crdesigner.config.logging import logger
 from crdesigner.ui.gui.utilities.map_creator import MapCreator
 from crdesigner.ui.gui.view.toolboxes.road_network_toolbox.lanelet_ui import AddLaneletUI
 from crdesigner.ui.gui.model.scenario_model import ScenarioModel
@@ -63,6 +64,7 @@ class AddLaneletController:
         self.road_network_toolbox_ui.button_translate_lanelet.clicked.connect(lambda: self.translate_lanelet())
         self.road_network_toolbox_ui.button_merge_lanelets.clicked.connect(lambda: self.merge_with_successor())
 
+    @logger.log
     def add_lanelet(self, lanelet_id: int = None, left_vertices: np.array = None, right_vertices: np.array = None):
         """
                Adds a lanelet to the scenario based on the selected parameters by the user.
@@ -230,6 +232,7 @@ class AddLaneletController:
         self.road_network_toolbox_ui.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.display_curved_lanelet(False,
                                                                                                               None)
 
+    @logger.log
     def update_lanelet(self):
         """
         Updates a given lanelet based on the information configured by the user.
@@ -461,6 +464,7 @@ class AddLaneletController:
             self.road_network_controller.last_added_lanelet_id = lanelet_id
         return lanelet
 
+    @logger.log
     def remove_lanelet(self):
         """
         Removes a selected lanelet from the scenario.
@@ -481,6 +485,7 @@ class AddLaneletController:
         self.scenario_model.remove_lanelet(selected_lanelet.lanelet_id)
         self.road_network_controller.set_default_road_network_list_information()
 
+    @logger.log
     def attach_to_other_lanelet(self):
         """
         Attaches a lanelet to another lanelet.
@@ -505,6 +510,7 @@ class AddLaneletController:
         self.scenario_model.attach_to_other_lanelet(selected_lanelet_one, selected_lanelet_two)
         self.lanelet_ui.set_default_lanelet_operation_information()
 
+    @logger.log
     def create_adjacent(self, selected_lanelets: List[Lanelet] = None, adj_left: bool = True):
         """
         Create adjacent lanelet given a selected lanelet
@@ -653,6 +659,7 @@ class AddLaneletController:
         else:
             self.road_network_controller.text_browser.append("Adjacent lanelet already exists.")
 
+    @logger.log
     def connect_lanelets(self):
         """
         Connects two lanelets by adding a new lanelet using cubic spline interpolation.
@@ -681,6 +688,7 @@ class AddLaneletController:
         self.road_network_controller.set_default_road_network_list_information()
         self.lanelet_ui.set_default_lanelet_operation_information()
 
+    @logger.log
     def rotate_lanelet(self):
         """
         Rotates lanelet by a user-defined angle.
@@ -698,6 +706,7 @@ class AddLaneletController:
         self.scenario_model.rotate_lanelet(selected_lanelet_one.lanelet_id, rotation_angle)
         self.lanelet_ui.set_default_lanelet_operation_information()
 
+    @logger.log
     def translate_lanelet(self):
         """
         Translates lanelet by user-defined x- and y-values.
@@ -852,6 +861,7 @@ class AddLaneletController:
                 lanelet.translate_rotate(initial_vertex_x - lanelet.center_vertices[0], 0.0)
         return lanelet
 
+    @logger.log
     def merge_with_successor(self):
         """
          Merges a lanelet with its successor. If several successors exist, a new lanelet is created for each successor.

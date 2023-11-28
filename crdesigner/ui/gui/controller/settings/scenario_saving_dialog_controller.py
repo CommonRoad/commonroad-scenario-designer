@@ -7,6 +7,7 @@ from PyQt5.QtWidgets import *
 from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile
 from commonroad.common.util import FileFormat
 
+from crdesigner.config.logging import logger
 from crdesigner.ui.gui.model.planning_problem_set_model import PlanningProblemSetModel
 from crdesigner.ui.gui.model.scenario_model import ScenarioModel
 from crdesigner.ui.gui.view.settings.scenario_saving_dialog_ui import ScenarioSavingDialogUI
@@ -104,6 +105,7 @@ class ScenarioSavingDialogController:
         self.save_window.scenario_time_hour.setValue(0)
         self.save_window.scenario_time_minute.setValue(0)
 
+    @logger.log
     def select_directory(self):
         """Select the directory where the scenario should be saved."""
         self.directory = QFileDialog.getExistingDirectory(self.save_window, "Dir", options=QFileDialog.Options())
@@ -147,6 +149,7 @@ class ScenarioSavingDialogController:
         except IOError:
             pass
 
+    @logger.log
     def save_scenario(self):
         self.update_scenario_meta_data()
         try:
@@ -196,6 +199,7 @@ class ScenarioSavingDialogController:
         else:
             return False
 
+    @logger.log
     def update_scenario_meta_data(self):
         """Updates the metadata of the current scenario."""
         self.current_scenario = self.current_scenario_model.get_current_scenario()

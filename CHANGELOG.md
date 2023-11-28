@@ -4,9 +4,15 @@
 
 ### Added
 - Test cases for GUI
+- Logging actions of users
+
+### Changed
+- Remove second conversion option for Lanelet2 and OpenDRIVE conversion example files
 
 ### Fixed
 - Adding existing obstacles again
+- Selecting obstacles with set-based prediction
+- lanelet2cr wrong final vertice assignment 
 
 ## [0.8.0] - 2023-10-31
 

@@ -3,6 +3,7 @@ from typing import Optional
 from PyQt5 import Qt
 from PyQt5.QtWidgets import QTableWidgetItem, QComboBox
 
+from crdesigner.config.logging import logger
 from crdesigner.ui.gui.model.scenario_model import ScenarioModel
 from crdesigner.ui.gui.utilities.toolbox_ui import CheckableComboBox
 from crdesigner.ui.gui.view.toolboxes.road_network_toolbox.road_network_toolbox_ui.road_network_toolbox_ui import \
@@ -29,6 +30,7 @@ class AddIntersectionUI:
         for inc in selected_intersection.incomings:
             self.road_network_toolbox_ui.intersection_incomings_table.setItem(0, 0, inc.incoming_id)
 
+    @logger.log
     def remove_incoming(self):
         """
         Removes a row from the intersection incoming table.
@@ -118,6 +120,7 @@ class AddIntersectionUI:
                                       self.scenario_model.collect_incoming_lanelet_ids_from_intersection(current_text)])
             self.road_network_toolbox_ui.intersection_lanelet_to_fit.setCurrentIndex(0)
 
+    @logger.log
     def add_incoming_to_table(self, new_incoming: bool = True, incoming_ids: Optional[List[str]] = None):
         """
         Adds a row to the intersection incoming table.

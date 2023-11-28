@@ -5,6 +5,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
+from crdesigner.config.logging import logger
 from crdesigner.ui.gui.model.scenario_model import ScenarioModel
 from crdesigner.ui.gui.utilities.toolbox_ui import Toolbox
 from crdesigner.config.gui_config import gui_config
@@ -382,6 +383,7 @@ class ObstacleToolboxUI(Toolbox):
             lambda: self.add_vertice())
         self.layout_shape_groupbox.insertRow(len(self.vertices_x) + 2, self.add_vertice_btn)
 
+    @logger.log
     def add_vertice(self):
         """
         add vertices for the polygon shape, i is the place in the array
@@ -418,6 +420,7 @@ class ObstacleToolboxUI(Toolbox):
         self.layout_shape_groupbox.insertRow(i+2, self.polygon_row[i])
         self.amount_vertices = self.amount_vertices + 1
 
+    @logger.log
     def remove_vertice(self, i: int = -1):
         """
         removes one vertice field
@@ -452,6 +455,7 @@ class ObstacleToolboxUI(Toolbox):
             "QWidget { border:1px solid black; background-color: %s}" % self.obstacle_color.name())
         self.change_color = True
 
+    @logger.log
     def set_default_color(self):
         """
         sets default color for the color display square

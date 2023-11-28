@@ -2,6 +2,7 @@ from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QMessageBox
 
 from crdesigner.config.gui_config import gui_config as config, gui_config
+from crdesigner.config.logging import logger
 from crdesigner.ui.gui.utilities.file_actions import file_save, open_commonroad_file, file_new
 from crdesigner.ui.gui.view.top_bar.tool_bar_ui import ToolBarUI
 
@@ -77,6 +78,7 @@ class ToolBarController:
         """
         self.mwindow_ui.scenario_toolbox.show()
 
+    @logger.log
     def play_pause_animation(self, open_cr_file):
         """Function connected with the play button in the sumo-toolbar_wrapper."""
         if not self.mwindow.scenario_model.scenario_created():
@@ -152,21 +154,27 @@ class ToolBarController:
             self.mwindow.animated_viewer_wrapper.cr_viewer.save_animation()
             self.mwindow.crdesigner_console_wrapper.text_browser.append("Saving the video finished.")
 
+    @logger.log
     def _split_lanelet(self, is_checked):
         self.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.activate_split_lanelet(is_checked)
 
+    @logger.log
     def _drawing_mode(self, is_checked):
         self.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.activate_drawing_mode(is_checked)
 
+    @logger.log
     def _add_adj_left(self):
         self.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.add_adjacent(True)
 
+    @logger.log
     def _add_adj_right(self):
         self.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.add_adjacent(False)
 
+    @logger.log
     def _merge_lanelets(self):
         self.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.merge_lanelets()
 
+    @logger.log
     def _crop_map(self, is_checked: bool) -> None:
         """
         Private function to call the activate_cropp_map function of the DynamicCanvasController
