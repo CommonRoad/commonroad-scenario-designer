@@ -3,6 +3,7 @@ import os
 
 import numpy as np
 from commonroad.common.common_lanelet import LineMarking
+from commonroad.common.common_scenario import FileInformation
 from commonroad.scenario.lanelet import LaneletNetwork
 from commonroad.scenario.obstacle import StaticObstacle, ObstacleType
 from commonroad.scenario.scenario import Scenario
@@ -86,13 +87,15 @@ def execute_menubar_test(window):
 
     assert file_new_success
     assert menubar_wrapper_setting_successful
-    #assert menubar_wrapper_gui_setting_sumo_successful
+    # assert menubar_wrapper_gui_setting_sumo_successful
 
 
 def execute_toolbar_test(window):
     # action_new
     toolbar_wrapper_action_new_successful = False
-    scenario = Scenario(0.1, affiliation="Technical University of Munich", source="CommonRoad Scenario Designer")
+    scenario = Scenario(0.1,
+                        file_information=FileInformation(affiliation="Technical University of Munich",
+                                                         source="CommonRoad Scenario Designer"))
     net = LaneletNetwork()
     scenario.replace_lanelet_network(net)
     scenario_in_app = None
@@ -153,9 +156,11 @@ def execute_toolbar_test(window):
     assert undo_action_success
     assert toolbar_wrapper_action_new_successful
 
+
 def execute_scenario_tests(window):
     # Tests for adding a Lanelet to a Scenario
-    scenario = Scenario(0.1, affiliation="Technical University of Munich", source="CommonRoad Scenario Designer")
+    scenario = Scenario(0.1, file_information=FileInformation(affiliation="Technical University of Munich",
+                                                              source="CommonRoad Scenario Designer"))
     net = LaneletNetwork()
     scenario.replace_lanelet_network(net)
     lanelet_start_pos_x = 0.0
@@ -228,7 +233,7 @@ def execute_add_obstacle_test(window):
                                        obstacle_type=ObstacleType("unknown"),
                                        obstacle_shape=Rectangle(length=5.0, width=5.0),
                                        initial_state=InitialState(**{'position': np.array(
-                                                 [0.0,0.0]),'orientation': math.radians(0.0),'time_step': 1}))
+                                                 [0.0, 0.0]), 'orientation': math.radians(0.0), 'time_step': 1}))
 
     actual_obstacle = None
 
@@ -264,4 +269,3 @@ def execute_load_sceanrio_test(window):
 
     assert expected_count_lanelets == actual_count_lanelets
     assert expecetd_count_traffic_signs == actual_count_traffic_signs
-
