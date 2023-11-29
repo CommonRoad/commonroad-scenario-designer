@@ -300,7 +300,7 @@ tqdm = ">=4.64"
 type = "git"
 url = "git@gitlab.lrz.de:cps/commonroad-io.git"
 reference = "develop"
-resolved_reference = "670f6b63c9acd4049afabdd3a4f5c11de295aff1"
+resolved_reference = "b5543029c9a44f274d0354ebe3dd5e8bf8a3b83e"
 
 [[package]]
 name = "commonroad-vehicle-models"
