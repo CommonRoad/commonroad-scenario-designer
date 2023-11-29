@@ -109,8 +109,8 @@ class AddLaneletUI:
             # Length and width
             self.road_network_toolbox_ui.lanelet_length.setText("10.0")
             self.road_network_toolbox_ui.lanelet_width.setText("3.0")
-            self.road_network_toolbox_ui.line_marking_right.setCurrentIndex(4)
-            self.road_network_toolbox_ui.line_marking_left.setCurrentIndex(4)
+            self.road_network_toolbox_ui.line_marking_right.setCurrentIndex(8)
+            self.road_network_toolbox_ui.line_marking_left.setCurrentIndex(8)
 
             # Advanced fields
             for i in range(0, len(road_user_list) - 1):
