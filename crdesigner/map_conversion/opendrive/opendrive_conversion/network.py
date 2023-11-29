@@ -26,14 +26,14 @@ from crdesigner.map_conversion.common.utils import generate_unique_id
 from crdesigner.map_conversion.opendrive.opendrive_parser.elements.road import Road
 
 
-def update_line_markings(lanelet_network: LaneletNetwork) -> LaneletNetwork:
+def update_line_markings(lanelet_network: ConversionLaneletNetwork) -> ConversionLaneletNetwork:
     """
-    Updates line markings of lanelets vertices in the lanelet network, as Opendrive format only supports line markings
-    for the outer vertices of the lanelet.
+    Updates line markings of lanelets vertices in the conversion lanelet network,
+    as Opendrive format only supports line markings for the outer vertices of the lanelet.
     If the two lanelets are adjacent, corresponding line marking of the shared vertices should be the same.
 
-    :param lanelet_network: LaneletNetwork that should be updated.
-    :return: Updated LaneletNetwork.
+    :param lanelet_network: ConversionLaneletNetwork that should be updated.
+    :return: Updated ConversionLaneletNetwork.
     """
     for la in lanelet_network.lanelets:
         # left vertices line marking
@@ -82,7 +82,6 @@ def convert_to_base_lanelet_network(lanelet_network: ConversionLaneletNetwork) -
                                     la.line_marking_left_vertices, la.line_marking_right_vertices, la.stop_line,
                                     la.lanelet_type, la.user_one_way, la.user_bidirectional, la.traffic_signs,
                                     la.traffic_lights))
-    network = update_line_markings(network)
     return network
 
 
@@ -277,6 +276,7 @@ class Network:
 
         self.find_lane_speed_changes(drivable_lanelets, lanelet_network)
         self.reference_traffic_signs_with_equal_speed(drivable_lanelets, lanelet_network)
+        lanelet_network = update_line_markings(lanelet_network)
         return convert_to_base_lanelet_network(lanelet_network)
 
     def relate_crosswalks_to_intersection(self, lanelet_network: ConversionLaneletNetwork):

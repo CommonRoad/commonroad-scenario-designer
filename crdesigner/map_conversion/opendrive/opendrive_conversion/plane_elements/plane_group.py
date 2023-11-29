@@ -9,6 +9,43 @@ from crdesigner.map_conversion.common.conversion_lanelet import ConversionLanele
 from crdesigner.map_conversion.opendrive.opendrive_conversion.plane_elements.plane import ParametricLane
 from commonroad.scenario.lanelet import LineMarking
 
+from crdesigner.map_conversion.opendrive.opendrive_parser.elements.roadLanes import RoadMark
+
+
+def convert_line_marking(plane_line_marking: RoadMark) -> LineMarking:
+    """
+    Function that converts the Opendrive road mark type to the corresponding CommonRoad lanelet linemarking type.
+    :param plane_line_marking: road mark of the parametric lane
+    :return: corresponding linemarking type
+    """
+    mark = LineMarking.UNKNOWN
+
+    if plane_line_marking.type == "solid":
+        if plane_line_marking.weight == "standard":
+            mark = LineMarking.SOLID
+        elif plane_line_marking.weight == "bold":
+            mark = LineMarking.BROAD_SOLID
+
+    elif plane_line_marking.type == "broken":
+        if plane_line_marking.weight == "standard":
+            mark = LineMarking.DASHED
+        elif plane_line_marking.weight == "bold":
+            mark = LineMarking.BROAD_DASHED
+
+    elif plane_line_marking.type == "solid_solid":
+        mark = LineMarking.SOLID_SOLID
+
+    elif plane_line_marking.type == "broken_broken":
+        mark = LineMarking.DASHED_DASHED
+
+    elif plane_line_marking.type == "curb":
+        mark = LineMarking.CURB
+
+    elif plane_line_marking.type == "none":
+        mark = LineMarking.NO_MARKING
+
+    return mark
+
 
 class ParametricLaneGroup:
     """A group of parametric_lanes can be converted to a
@@ -161,48 +198,12 @@ class ParametricLaneGroup:
                 right_vertices = local_right_vertices
 
         for parametric_lane in self.parametric_lanes:
-            mark = LineMarking.UNKNOWN
             line_marking = parametric_lane.line_marking
-
             if line_marking is not None:
-
                 if parametric_lane.side == "left":
-
-                    if line_marking.type == "solid":
-                        if line_marking.weight == "standard":
-                            mark = LineMarking.SOLID
-                        elif line_marking.weight == "bold":
-                            mark = LineMarking.BROAD_SOLID
-
-                    elif line_marking.type == "broken":
-                        if line_marking.weight == "standard":
-                            mark = LineMarking.DASHED
-                        elif line_marking.weight == "bold":
-                            mark = LineMarking.BROAD_DASHED
-
-                    else:
-                        mark = LineMarking.UNKNOWN
-
-                    line_marking_left_vertices = mark
-
+                    line_marking_left_vertices = convert_line_marking(line_marking)
                 elif parametric_lane.side == "right":
-
-                    if line_marking.type == "solid":
-                        if line_marking.weight == "standard":
-                            mark = LineMarking.SOLID
-                        elif line_marking.weight == "bold":
-                            mark = LineMarking.BROAD_SOLID
-
-                    elif line_marking.type == "broken":
-                        if line_marking.weight == "standard":
-                            mark = LineMarking.DASHED
-                        elif line_marking.weight == "bold":
-                            mark = LineMarking.BROAD_DASHED
-
-                    else:
-                        mark = LineMarking.UNKNOWN
-
-                    line_marking_right_vertices = mark
+                    line_marking_right_vertices = convert_line_marking(line_marking)
             else:
                 pass
 
