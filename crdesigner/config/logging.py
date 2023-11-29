@@ -49,7 +49,8 @@ class Logger():
                 result = func(*args, **kwargs)
                 return result
             except Exception as e:
-                print("There has been an error with the Function due to logging the file: " + str(e))
+                print(f"There has been an error with the Function {func.__name__} with args {signature} with "
+                      f"the actions: {str(e)}")
 
         return wrapper
 

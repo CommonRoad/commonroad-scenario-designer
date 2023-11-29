@@ -64,6 +64,8 @@ class SettingsController:
             self.scenario_model.notify_all()
         self.parent.mwindow_ui.set_stylesheet(gui_config.get_stylesheet())
         self.parent.mwindow_ui.update_window()
+        for config in CONFIGS_TO_RENDER:
+            config.notify_all()
 
     def show(self):
         """
