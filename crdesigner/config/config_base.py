@@ -114,6 +114,9 @@ class Attribute(Generic[T], QObject):
         """
         self.attribute_changed.connect(lambda: callback(self.value))
 
+    def disconnect_methods(self):
+        self.attribute_changed.disconnect()
+
     def notify(self):
         """Notifies all subscribers of this Attribute that the value has changed."""
         self.attribute_changed.emit()
