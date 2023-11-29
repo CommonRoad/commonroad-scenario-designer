@@ -96,6 +96,7 @@ class GuiConfig(BaseConfig):
     ENABLE_UNDETAILED_DISPLAY: Attribute = Attribute(True, "Enable undetailed display")
     MWINDOW_TMP_FOLDER_PATH: Attribute = Attribute("/tmp/cr_designer/", "Temporary folder path")
     LOG_ACTIONS_OF_THE_USER: Attribute = Attribute(True, "Log user actions")
+    ENABLE_EDITING_CURVED_LANELETS: Attribute = Attribute(True, "Enable editing of curved lanelets")
     # default values in default_draw_params
     DRAW_TRAJECTORY: Attribute = Attribute(False, "Draw trajectory")
     DRAW_DYNAMIC_OBSTACLES: Attribute = Attribute(True, "Draw dynamic obstacles")
@@ -124,12 +125,24 @@ class GuiConfig(BaseConfig):
     pseudo_mercator = Attribute(pseudo_mercator, "Pseudo Mercator")
     utm_default = Attribute(utm_default, "UTM Default")
 
+    OBSTACLE_SPECS = {
+        'car': {'width': '1.610', 'length': '4.508', 'shape': 'Rectangle'},
+        'truck': {'width': '2.550', 'length': '16.50', 'shape': 'Rectangle'},
+        'bus': {'width': '2.550', 'length': '11.95', 'shape': 'Rectangle'},
+        'bicycle': {'width': '0.64', 'length': '1.75', 'shape': 'Rectangle'},
+        'pedestrian': {'shape': 'Circle', 'radius': '0.3'},
+        'priorityVehicle': {'width': '1.610', 'length': '4.508', 'shape': 'Rectangle'},
+        'parkedVehicle': {'width': '1.610', 'length': '4.508', 'shape': 'Rectangle'},
+        'motorcycle': {'width': '1.016', 'length': '2.540', 'shape': 'Rectangle'},
+        'taxi': {'width': '1.610', 'length': '4.508', 'shape': 'Rectangle'},
+    }
+
     # The layout of the settings window
     LAYOUT = [
         ["Appearance", DARKMODE, MODERN_LOOK, AXIS_VISIBLE, LEGEND, "Obstacle visualization", DRAW_DYNAMIC_OBSTACLES,
          DRAW_TRAJECTORY, DRAW_OBSTACLE_LABELS,DRAW_OBSTACLE_ICONS, DRAW_OBSTACLE_DIRECTION, DRAW_OBSTACLE_SIGNALS,
          "Intersection visualization",DRAW_INCOMING_LANELETS, DRAW_SUCCESSORS, DRAW_INTERSECTION_LABELS, ],
-        ["Other", ENABLE_UNDETAILED_DISPLAY, DRAW_OCCUPANCY, DRAW_TRAFFIC_SIGNS, DRAW_TRAFFIC_LIGHTS, BING_MAPS_KEY,
+        ["Other", ENABLE_EDITING_CURVED_LANELETS, ENABLE_UNDETAILED_DISPLAY, DRAW_OCCUPANCY, DRAW_TRAFFIC_SIGNS, DRAW_TRAFFIC_LIGHTS, BING_MAPS_KEY,
          LDBV_USERNAME, LDBV_PASSWORD, LOG_ACTIONS_OF_THE_USER]]
 
     def get_draw_params(self) -> DrawParamsCustom:
@@ -219,6 +232,16 @@ class GuiConfig(BaseConfig):
 
     def logging(self):
         return gui_config.LOG_ACTIONS_OF_THE_USER
+
+    def enabled_curved_lanelet(self):
+        return gui_config.ENABLE_EDITING_CURVED_LANELETS
+
+    def sub_curved(self, method_to_sub=None):
+        for list_layout in gui_config.LAYOUT:
+            for attribute in list_layout:
+                if isinstance(attribute, Attribute) and attribute.display_name == "Enable editing of curved lanelets":
+                    attribute.subscribe(method_to_sub)
+                    return
 
     def get_stylesheet(self) -> str:
         """

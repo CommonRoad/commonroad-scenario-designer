@@ -6,6 +6,7 @@
 - Test cases for GUI
 - Logging actions of users
 - OpenDRIVE to CommonRoad conversion: considering line markings of inner shared lanelet boundaries
+- Checkbox in the settings to enable the manipulation of curved lanelets in the GUI
 
 ### Changed
 - Remove second conversion option for Lanelet2 and OpenDRIVE conversion example files
@@ -13,6 +14,7 @@
 ### Fixed
 - Adding existing obstacles again
 - Selecting obstacles with set-based prediction
+- Bug when editing curved lanelets in the canvas
 - lanelet2cr wrong final vertice assignment 
 
 ## [0.8.0] - 2023-10-31

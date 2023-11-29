@@ -124,6 +124,7 @@ class LaneletAttributesWidget():
         self.toolbox.selected_number_vertices.setMaxLength(2)
         self.toolbox.selected_number_vertices.setAlignment(Qt.AlignRight)
 
+
         layout_curved = QFormLayout()
         layout_curved.addRow(self.toolbox.selected_select_direction)
         layout_curved.addRow("Curve radius [m]", self.toolbox.selected_lanelet_radius)
@@ -136,14 +137,11 @@ class LaneletAttributesWidget():
             lambda: self.toolbox.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.draw_curved_lanelet())
         self.toolbox.selected_lanelet_angle.textChanged.connect(
             lambda: self.toolbox.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.draw_curved_lanelet())
-        self.toolbox.selected_number_vertices.textChanged.connect(
-            lambda: self.toolbox.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.draw_curved_lanelet())
         self.toolbox.selected_curved_checkbox = CollapsibleCheckBox("Curved Lanelet",
                                                                     layout_curved, layout_attributes, 4)
         self.toolbox.selected_curved_checkbox.button\
-            .clicked.connect(lambda:self.toolbox.mwindow.animated_viewer_wrapper.cr_viewer.dynamic
-                             .display_curved_lanelet(self.toolbox.selected_curved_checkbox.isChecked(),
-                                                     self.toolbox.selected_curved_checkbox, False))
+            .clicked.connect(lambda: self.toolbox.mwindow.animated_viewer_wrapper.cr_viewer.dynamic
+                             .display_curved_lanelet(self.toolbox.selected_curved_checkbox.isChecked(), False))
 
         self.add_selected_line_markings(layout_attributes)
         self.add_selected_neighboring_fields(layout_attributes)
