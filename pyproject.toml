@@ -26,22 +26,28 @@ Source = "https://gitlab.lrz.de/tum-cps/commonroad-scenario-designer"
 
 [tool.poetry.dependencies]
 python = "^3.8"
-commonroad-io = {git = "git@gitlab.lrz.de:cps/commonroad-io.git", rev = "develop"}
+commonroad-io = {git = "git@gitlab.lrz.de:cps/commonroad-io.git", rev = "feature/extend-dependencies"}
 commonroad-drivability-checker = {git = "git@gitlab.lrz.de:cps/commonroad-drivability-checker.git", rev = "development"}
-
 pyqt5 = ">=5.15.9"
 PyQt5-Qt5 = [
     {version = "<5.15.11", platform = 'linux'},
     {version = "<5.15.11", platform = 'win64'},
     {version = "=5.15.11", platform = 'darwin'}]
 matplotlib = ">=3.6.0"
-numpy = "^1.24.2"
+numpy = [
+    {version = ">=1.22, <1.26", python = "3.8"},
+    {version = "^1.26", python = ">=3.9,<3.13"}
+]
+scipy = [
+    {version = ">=1.5.2,<1.11", python = "3.8"},
+    {version = "^1.11", python = ">=3.9,<3.13"}
+]
 lxml = "^4.9.2"
 pyproj = "^3.4.1"
 utm = "^0.7.0"
 shapely = ">=2.0.1"
 ordered-set = "^4.1.0"
-sumocr = "2023.2"
+sumocr = {git = "git@gitlab.lrz.de:cps/sumo-interface.git", rev = "update_python_versions"}
 iso3166 = "^2.1.1"
 networkx = "^3.0"
 omegaconf = "^2.3.0"
