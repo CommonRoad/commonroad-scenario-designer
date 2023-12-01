@@ -521,7 +521,7 @@ matplotlib = ">=3.0.0"
 networkx = ">=2.2"
 numpy = [
     {version = ">=1.22,<1.26", markers = "python_version == \"3.8\""},
-    {version = ">=1.26,<2.0", markers = "python_version >= \"3.9\" and python_version < \"3.13\""},
+    {version = ">=1.26.1,<2.0.0", markers = "python_version >= \"3.9\" and python_version < \"3.13\""},
 ]
 omegaconf = ">=2.0"
 Pillow = ">=7.0.0"
@@ -529,7 +529,7 @@ protobuf = "==3.20.1"
 rtree = ">=0.8.3"
 scipy = [
     {version = ">=1.5.2,<1.11", markers = "python_version == \"3.8\""},
-    {version = ">=1.11,<2.0", markers = "python_version >= \"3.9\" and python_version < \"3.13\""},
+    {version = ">=1.11.3,<2.0.0", markers = "python_version >= \"3.9\" and python_version < \"3.13\""},
 ]
 shapely = "^2.0.1"
 tqdm = ">=4.64"
@@ -537,8 +537,8 @@ tqdm = ">=4.64"
 [package.source]
 type = "git"
 url = "git@gitlab.lrz.de:cps/commonroad-io.git"
-reference = "feature/extend-dependencies"
-resolved_reference = "8cdd183117cccdf14d2a2e33ef9c87ab4ea00eae"
+reference = "200-support-for-python-3-12"
+resolved_reference = "d711c144fd7569472a90f2c14bc8e7160246d7e4"
 
 [[package]]
 name = "commonroad-vehicle-models"
@@ -4583,4 +4583,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8"
-content-hash = "b3413306947e77b59bebb91c5b19355a5a818372b6e863381ebc88ed9003c83f"
+content-hash = "0ed3f199c6a53a112609cb7104750b4e4c5de3c423a98fb5da46933ecd70af1b"
