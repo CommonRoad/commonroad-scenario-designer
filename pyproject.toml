@@ -10,7 +10,7 @@ classifiers = [
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
-#    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.11",
     "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
     "Operating System :: POSIX :: Linux",
     "Operating System :: MacOS",
@@ -25,11 +25,9 @@ Forum = "https://commonroad.in.tum.de/forum/c/scenario-designer/"
 Source = "https://gitlab.lrz.de/tum-cps/commonroad-scenario-designer"
 
 [tool.poetry.dependencies]
-python = ">=3.8,<3.11"
+python = "^3.8"
 commonroad-io = {git = "git@gitlab.lrz.de:cps/commonroad-io.git", rev = "develop"}
-commonroad-drivability-checker = [
-    {version = "2023.1", platform = 'linux'}
-     ]
+commonroad-drivability-checker = {git = "git@gitlab.lrz.de:cps/commonroad-drivability-checker.git", rev = "development"}
 
 pyqt5 = ">=5.15.9"
 PyQt5-Qt5 = [
