@@ -561,8 +561,8 @@ tqdm = ">=4.64"
 [package.source]
 type = "git"
 url = "git@gitlab.lrz.de:cps/commonroad-io.git"
-reference = "200-support-for-python-3-12"
-resolved_reference = "7f3472331f52d66b226ce55416c1df77c2200a91"
+reference = "develop"
+resolved_reference = "9f0dacad324918fb6c89de9859902c3ed1f84e2c"
 
 [[package]]
 name = "commonroad-vehicle-models"
@@ -2721,13 +2721,13 @@ files = [
 
 [[package]]
 name = "platformdirs"
-version = "4.0.0"
+version = "4.1.0"
 description = "A small Python package for determining appropriate platform-specific dirs, e.g. a \"user data dir\"."
 optional = false
-python-versions = ">=3.7"
+python-versions = ">=3.8"
 files = [
-    {file = "platformdirs-4.0.0-py3-none-any.whl", hash = "sha256:118c954d7e949b35437270383a3f2531e99dd93cf7ce4dc8340d3356d30f173b"},
-    {file = "platformdirs-4.0.0.tar.gz", hash = "sha256:cb633b2bcf10c51af60beb0ab06d2f1d69064b43abf4c185ca6b28865f3f9731"},
+    {file = "platformdirs-4.1.0-py3-none-any.whl", hash = "sha256:11c8f37bcca40db96d8144522d925583bdb7a31f7b0e37e3ed4318400a8e2380"},
+    {file = "platformdirs-4.1.0.tar.gz", hash = "sha256:906d548203468492d432bcb294d4bc2fff751bf84971fbb2c10918cc206ee420"},
 ]
 
 [package.extras]
@@ -4261,7 +4261,7 @@ tests = ["cython", "littleutils", "pygments", "pytest", "typeguard"]
 
 [[package]]
 name = "sumocr"
-version = "2023.3"
+version = "2023.4"
 description = "Python tool to interface with the SUMO traffic simulator"
 optional = false
 python-versions = "^3.8"
@@ -4289,7 +4289,7 @@ shapely = "^2.0.0"
 type = "git"
 url = "git@gitlab.lrz.de:cps/sumo-interface.git"
 reference = "update_python_versions"
-resolved_reference = "0a0814b8045d91a87c527f8643ed33c85013af72"
+resolved_reference = "af668108ae15507bf8c6fda9ec246c0adc982633"
 
 [[package]]
 name = "sumolib"
@@ -4701,4 +4701,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8"
-content-hash = "9d337327a83483d852db2f5984a099a7b44a10317650b4ae83b99fb5b4c4909c"
+content-hash = "732a1ccf776818c42cb1765ee5f3f1092c5fa300cad572b73f029452daddf36f"
