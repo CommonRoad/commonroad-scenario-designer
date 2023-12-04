@@ -50,7 +50,7 @@ pyproj = "^3.4.1"
 utm = "^0.7.0"
 shapely = ">=2.0.1"
 ordered-set = "^4.1.0"
-sumocr = {git = "git@gitlab.lrz.de:cps/sumo-interface.git", rev = "update_python_versions"}
+sumocr = "^2023.4"
 iso3166 = "^2.1.1"
 networkx = "^3.0"
 omegaconf = "^2.3.0"
