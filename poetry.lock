@@ -4264,32 +4264,28 @@ name = "sumocr"
 version = "2023.4"
 description = "Python tool to interface with the SUMO traffic simulator"
 optional = false
-python-versions = "^3.8"
-files = []
-develop = false
+python-versions = ">=3.8,<4.0"
+files = [
+    {file = "sumocr-2023.4-py3-none-any.whl", hash = "sha256:da6bcd29733c467bc7123410a03673836e1d88bc01132a103559280945870962"},
+    {file = "sumocr-2023.4.tar.gz", hash = "sha256:b79a17fdfc43090ac13bda896c0f7d47759bb5da5f87b1c84d99148dff655a39"},
+]
 
 [package.dependencies]
-commonroad-io = "^2023.3"
-docker = "^6.1"
-ffmpeg = "^1.4"
-grpcio = "^1.27"
-ipython = "^8.8"
-libsumo = "^1.12.0"
-lxml = "^4.2.2"
-matplotlib = "^3.0.0"
+commonroad-io = ">=2023.3,<2024.0"
+docker = ">=6.1,<7.0"
+ffmpeg = ">=1.4,<2.0"
+grpcio = ">=1.27,<2.0"
+ipython = ">=8.8,<9.0"
+libsumo = ">=1.12.0,<2.0.0"
+lxml = ">=4.2.2,<5.0.0"
+matplotlib = ">=3.0.0,<4.0.0"
 numpy = [
     {version = ">=1.22,<2.0", markers = "python_version == \"3.8\""},
     {version = ">=1.26,<2.0", markers = "python_version >= \"3.9\" and python_version < \"4.0\""},
 ]
-packaging = "^23.2"
-Pillow = "^8.0.0"
-shapely = "^2.0.0"
-
-[package.source]
-type = "git"
-url = "git@gitlab.lrz.de:cps/sumo-interface.git"
-reference = "update_python_versions"
-resolved_reference = "af668108ae15507bf8c6fda9ec246c0adc982633"
+packaging = ">=23.2,<24.0"
+Pillow = ">=8.0.0,<9.0.0"
+shapely = ">=2.0.0,<3.0.0"
 
 [[package]]
 name = "sumolib"
@@ -4701,4 +4697,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8"
-content-hash = "732a1ccf776818c42cb1765ee5f3f1092c5fa300cad572b73f029452daddf36f"
+content-hash = "619dc3030c26cbd1762106ae19c9f08bee87a1178774cc88c44e1f8f5788568d"
