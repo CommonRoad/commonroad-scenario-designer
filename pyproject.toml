@@ -62,6 +62,8 @@ pymetis = [
     {version = ">=2020.1", platform = 'linux'}
      ]
 similaritymeasures = ">=0.4.4"
+kdtree = "^0.16"
+pandas = "2.0.2"
 
 [tool.poetry.group.docs]
 optional = true
