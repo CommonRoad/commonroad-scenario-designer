@@ -439,7 +439,7 @@ class AddLaneletWidget():
 
         #TODO: Maybe change
         if self.toolbox.curved_check_button is not None:
-            self.toolbox.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.display_curved_lanelet(False, None)
+            self.toolbox.mwindow.animated_viewer_wrapper.cr_viewer.dynamic.display_curved_lanelet(False)
 
     def init_length_width(self):
         self.toolbox.lanelet_length = QLineEdit()
@@ -466,7 +466,6 @@ class AddLaneletWidget():
 
     def add_curved_fields(self, index):
         self.toolbox.select_direction = QPushButton("Switch Direction")
-
         self.toolbox.lanelet_radius = QLineEdit()
         self.toolbox.lanelet_radius.setValidator(self.toolbox.float_validator)
         self.toolbox.lanelet_radius.setMaxLength(6)
@@ -501,12 +500,9 @@ class AddLaneletWidget():
                                                         dynamic.draw_curved_lanelet())
         self.toolbox.lanelet_angle.textChanged.connect(lambda: self.toolbox.mwindow.animated_viewer_wrapper.cr_viewer.
                                                        dynamic.draw_curved_lanelet())
-        self.toolbox.number_vertices.textChanged.connect(lambda: self.toolbox.mwindow.animated_viewer_wrapper.cr_viewer.
-                                                         dynamic.draw_curved_lanelet())
         self.toolbox.curved_check_button.button.clicked.connect(
                 lambda: self.toolbox.mwindow.animated_viewer_wrapper.cr_viewer.
-                dynamic.display_curved_lanelet(self.toolbox.curved_check_button.isChecked(),
-                                               self.toolbox.curved_check_button, True))
+                dynamic.display_curved_lanelet(self.toolbox.curved_check_button.isChecked(), True))
 
         if self.toolbox.place_at_position.isChecked():
             self.toolbox.curved_check_button.button.clicked.connect(lambda: self.disable_curved_select_end_pos())

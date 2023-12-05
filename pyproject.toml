@@ -10,7 +10,7 @@ classifiers = [
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
-#    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.11",
     "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
     "Operating System :: POSIX :: Linux",
     "Operating System :: MacOS",
@@ -25,24 +25,32 @@ Forum = "https://commonroad.in.tum.de/forum/c/scenario-designer/"
 Source = "https://gitlab.lrz.de/tum-cps/commonroad-scenario-designer"
 
 [tool.poetry.dependencies]
-python = ">=3.8,<3.11"
+python = "^3.8"
 commonroad-io = {git = "git@gitlab.lrz.de:cps/commonroad-io.git", rev = "release-2024-1"}
 commonroad-drivability-checker = [
-    {version = "2023.1", platform = 'linux'}
-     ]
+    {version = "2023.1", python = "<3.11"},
+    {git = "git@gitlab.lrz.de:cps/commonroad-drivability-checker.git", rev = "development", python = ">=3.11"}
+]
 pyqt5 = ">=5.15.9"
 PyQt5-Qt5 = [
     {version = "<5.15.11", platform = 'linux'},
     {version = "<5.15.11", platform = 'win64'},
     {version = "=5.15.11", platform = 'darwin'}]
 matplotlib = ">=3.6.0"
-numpy = "^1.24.2"
+numpy = [
+    {version = ">=1.22, <1.26", python = "3.8"},
+    {version = "^1.26", python = ">=3.9,<3.13"}
+]
+scipy = [
+    {version = ">=1.5.2,<1.11", python = "3.8"},
+    {version = "^1.11", python = ">=3.9,<3.13"}
+]
 lxml = "^4.9.2"
 pyproj = "^3.4.1"
 utm = "^0.7.0"
 shapely = ">=2.0.1"
 ordered-set = "^4.1.0"
-sumocr = "2023.2"
+sumocr = "^2023.4"
 iso3166 = "^2.1.1"
 networkx = "^3.0"
 omegaconf = "^2.3.0"
@@ -57,6 +65,8 @@ pymetis = [
     {version = ">=2020.1", platform = 'linux'}
      ]
 similaritymeasures = ">=0.4.4"
+kdtree = "^0.16"
+pandas = "2.0.2"
 
 [tool.poetry.group.docs]
 optional = true

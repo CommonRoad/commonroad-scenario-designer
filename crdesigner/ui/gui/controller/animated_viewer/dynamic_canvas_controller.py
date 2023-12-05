@@ -114,11 +114,14 @@ class DynamicCanvasController(FigureCanvas):
         self.clear_axes()
 
         #Parameters for curved lanlet adding
+        self.button_is_checked = False
         self.current_curved_lanelet_scenario = None
         self.temp_curved_lanelet = None
         self.circle_radius = None
         self.circle_angle = None
         self.new_lanelet = False
+
+        gui_config.sub_curved(self.enable)
 
 
     def parent(self):
@@ -1016,9 +1019,14 @@ class DynamicCanvasController(FigureCanvas):
         self.show_aerial = False
         self._update_map()
 
+    def enable(self, enable_curved_lanelet):
+        if self.parent() is not None:
+            self.display_curved_lanelet(enable_curved_lanelet, self.new_lanelet)
+
+
     @logger.log
-    def display_curved_lanelet(self, is_checked: bool, ui_button: CollapsibleCheckBox, new_lanelet: bool = True,
-                            mouse_event: QMouseEvent = None, selected_lanelet: Lanelet = None) -> None:
+    def display_curved_lanelet(self, is_checked: bool, new_lanelet: bool = True,
+                            mouse_event: QMouseEvent = None) -> None:
         """
         Initializes the show of the curved_lanlet preview or disables it.
 
@@ -1034,15 +1042,14 @@ class DynamicCanvasController(FigureCanvas):
 
         if not self.scenario_model.scenario_created():
             self.parent().road_network_toolbox.text_browser.append("Please create first a new scenario")
-            if ui_button is not None:
-                ui_button.setChecked(False)
             return
 
         if self.parent().road_network_toolbox.road_network_toolbox_ui.connect_to_successors_selection.isChecked():
             self.parent().road_network_toolbox.text_browser.append("Preview not available yet!")
             return
 
-        if is_checked:
+        if is_checked and gui_config.enabled_curved_lanelet():
+            self.button_is_checked = True
             self.new_lanelet = new_lanelet
             self.current_curved_lanelet_scenario = self.scenario_model.get_copy_of_scenario()
             self.temp_curved_lanelet = self.parent().road_network_toolbox.lanelet_controller.get_lanelet_from_toolbox(
@@ -1050,11 +1057,13 @@ class DynamicCanvasController(FigureCanvas):
             if self.temp_curved_lanelet is None:
                 self.parent().road_network_toolbox.text_browser.append(
                         "Something went wrong! Please ensure that the information of the lanlet is given")
-                ui_button.setChecked(False)
                 return
             if not new_lanelet:
+                self.selected_lanelets = []
+                selected_lanelet = self.scenario_model.find_lanelet_by_id(int(
+                        self.parent().road_network_toolbox.road_network_toolbox_ui.selected_lanelet_update.currentText()))
                 self.selected_lanelets.append(selected_lanelet)
-                self.current_curved_lanelet_scenario.remove_lanelet(self.selected_lanelets[0])
+                self.current_curved_lanelet_scenario.remove_lanelet(selected_lanelet)
             if(self.current_curved_lanelet_scenario.lanelet_network.find_lanelet_by_id(
                     self.temp_curved_lanelet.lanelet_id) is not None):
                 self.current_curved_lanelet_scenario.remove_lanelet(self.temp_curved_lanelet)
@@ -1072,8 +1081,8 @@ class DynamicCanvasController(FigureCanvas):
             self.button_press_event_cid = self.mpl_connect('button_press_event',self.click_on_curved_lanelet)
             self.motion_notify_event_cid = self.mpl_connect('motion_notify_event', self.move_cursor_curved_lanelet)
         else:
+            self.button_is_checked = False
             self.current_curved_lanelet_scenario = None
-            self.new_lanelet = None
             self.mpl_disconnect(self.button_press_event_cid)
             self.mpl_disconnect(self.button_release_event_cid)
             self.mpl_disconnect(self.motion_notify_event_cid)
@@ -1206,7 +1215,7 @@ class DynamicCanvasController(FigureCanvas):
             self.button_release_event_cid = self.mpl_connect('button_release_event', self.on_release_curved_lanelet)
 
         elif not self.new_lanelet:
-            self.display_curved_lanelet(False, None, False, mouse_event)
+            self.display_curved_lanelet(False, False, mouse_event)
 
 
     def on_motion_radius(self, mouse_event: QMouseEvent, angle_25_lanelet: float, rotation_lanelet: float) -> None:
