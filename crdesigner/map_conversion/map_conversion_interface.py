@@ -179,8 +179,8 @@ def osm_to_commonroad_using_sumo(input_file: str) -> Optional[Scenario]:
                     opendrive_file,
                     "--junctions.scurve-stretch",
                     "1.0",
-                #    "--xml-validation",
-                #    "never"
+                    "--xml-validation",  # TODO remove if dependency is fixed
+                    "never"  # TODO remove if dependency is fixed
                 ]
         )
     except Exception as e:
