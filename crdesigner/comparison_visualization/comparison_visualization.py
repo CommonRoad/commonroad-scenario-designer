@@ -1,11 +1,13 @@
 import warnings
-import numpy as np
+import os
 
 # third party
 from lxml import etree  # type: ignore
 from shapely import Polygon as ShapelyPolygon
-from shapely import Point as ShapelyPoint
 from shapely import MultiPoint as ShapelyMultiPoint
+from ruamel.yaml import YAML
+import mgrs
+import utm
 
 # commonroad
 from commonroad.common.file_writer import CommonRoadFileWriter, OverwriteExistingFile  # type: ignore
@@ -15,6 +17,9 @@ from commonroad.common.file_reader import CommonRoadFileReader  # type: ignore
 
 # cr-designer
 from crdesigner.map_conversion.lanelet2.lanelet2_parser import Lanelet2Parser
+from crdesigner.config.lanelet2_config import lanelet2_config
+from crdesigner.config.general_config import general_config
+
 
 
 # own code base
@@ -23,113 +28,112 @@ from crdesigner.comparison_visualization.visualization import plot_comparison
 
 
 # typing
-from typing import List, Dict, Tuple
+from typing import List
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from crdesigner.map_conversion.lanelet2.lanelet2 import OSMLanelet
     from commonroad.scenario.scenario import Scenario
 
 
-
-
-def check_intersection(l2_nodes: List[Lanelet2VisNode], cr_scenario: "Scenario") -> None:
+class Commonroad2Lanelet2Comparison:
     """
-    Checks whether the convex hull of l2_nodes and cr_lanelet network intersect
+    Utility Class for debugging Lanelet2 to CommonRoad conversions.
     """
 
-    cr_road_network: ShapelyPolygon = None
-    for lanelet_polygon in cr_scenario.lanelet_network.lanelet_polygons:
-        if(cr_road_network is None):
-            cr_road_network = lanelet_polygon.shapely_object
+    def __init__(self, lanelet2_path: str, commonroad_xml_path:str):
+        self.lanelet2_path: str = lanelet2_path
+        self.cr_path: str = commonroad_xml_path
+
+        # Loaded from scenario
+        self.l2_parsing: "OSMLanelet" = None
+        self.cr_scenario: "Scenario" = None
+        self._load_scenario()
+
+        # set in visualize_comparison
+        self.l2_vis_nodes: List["Lanelet2VisNode"] = None
+
+
+    def _load_scenario(self) -> None:
+        """
+        Loads osm and xml files and saves them in member.
+        """
+        with open(lanelet2_path, "r", ) as fh:
+            self.l2_parsing: "OSMLanelet" = Lanelet2Parser(etree.parse(fh).getroot()).parse()
+
+        commonroad_reader = CommonRoadFileReader(xml_path)
+        self.cr_scenario, _ = commonroad_reader.open()
+
+
+    def visualize_comparison(self) -> None:
+        """
+        Visualizes both a lanelet2 map and its converted commonroad map into on figure.
+        """
+
+        self.l2_vis_nodes: List[Lanelet2VisNode] = list()
+        # Compute plot limits and create L2visnodes
+        for id, node in self.l2_parsing.nodes.items():
+            if(node.local_x is not None):
+                x: float = float(node.local_x)
+                y: float = float(node.local_y)
+                l2_node: Lanelet2VisNode = Lanelet2VisNode(x, y)
+                self.l2_vis_nodes.append(l2_node)
+
+        if(len(self.l2_vis_nodes) < 100):
+            warnings.warn(f'Could only find {len(self.l2_vis_nodes)}. That seems a bit too few')
+        plot_comparison(lanelet2_nodes=self.l2_vis_nodes, cr_scenario=self.cr_scenario)
+
+
+    def check_intersection(self) :
+        """
+        Checks whether the convex hull of l2_nodes and cr_lanelet network intersect,
+        """
+
+        raise NotImplementedError(f'Currently shapely bug')
+
+        # FIXME: Currently shapely bug
+
+        cr_road_network: ShapelyPolygon = None
+        for lanelet_polygon in self.cr_scenario.lanelet_network.lanelet_polygons:
+            if(cr_road_network is None):
+                cr_road_network = lanelet_polygon.shapely_object
+            else:
+                try:
+                    cr_road_network.union(lanelet_polygon.shapely_object)
+                except:
+                    warnings.warn(f"problems when trying to access the polygon")
+
+        points: List[List[float]] = list()
+        for node in self.l2_nodes:
+            p = [node.x, node.y]
+            points.append(p)
+
+        l2_road_network: ShapelyPolygon = ShapelyMultiPoint(points).convex_hull
+
+
+        if(not cr_road_network.intersects(l2_road_network)):
+            warnings.warn(f'Commonroad road network and lanelet2 road network do not intersect')
+
         else:
-            cr_road_network.union(lanelet_polygon.shapely_object)
+            cr_area: float = cr_road_network.area
+            l2_area: float = l2_road_network.area
+            intersection_area: float = cr_road_network.intersection(l2_road_network).area
 
-    points: List[List[float]] = list()
-    for node in l2_nodes:
-        p = [node.x, node.y]
-        points.append(p)
+            percentage_intersection_cr: float = intersection_area / cr_area
+            percentage_intersection_l2: float = intersection_area / l2_area
 
-    l2_road_network: ShapelyPolygon = ShapelyMultiPoint(points).convex_hull
-
-    if(not cr_road_network.intersects(l2_road_network)):
-        warnings.warn(f'Commonroad road network and lanelet2 road network do not intersect')
-
-    else:
-        cr_area: float = cr_road_network.area
-        l2_area: float = l2_road_network.area
-        intersection_area: float = cr_road_network.intersection(l2_road_network).area
-
-        percentage_intersection_cr: float = intersection_area / cr_area
-        percentage_intersection_l2: float = intersection_area / l2_area
-
-        print(f'cr-intersection: {percentage_intersection_cr}%  --  l2-intersection: {percentage_intersection_l2}')
+            print(f'cr-intersection: {percentage_intersection_cr}%  --  l2-intersection: {percentage_intersection_l2}')
 
 
-
-
-def visualize_comparison(lanelet2_path: str, xml_path: str) -> None:
-    """
-    Visualizes both a lanelet2 map and its converted commonroad map into on figure.
-    """
-
-    with open(lanelet2_path, "r", ) as fh:
-        l2_parsing: "OSMLanelet" = Lanelet2Parser(etree.parse(fh).getroot()).parse()
-
-    l2_vis_nodes: List[Lanelet2VisNode] = list()
-
-    commonroad_reader = CommonRoadFileReader(xml_path)
-    cr_scenario, _ = commonroad_reader.open()
-    cr_scenario: Scenario = cr_scenario
-
-    # get min, max x and y values
-
-    min_x: float = np.inf
-    min_y: float = np.inf
-    max_x: float = -np.inf
-    max_y: float = -np.inf
-
-
-    # Compute plot limits and create L2visnodes
-    for id, node in l2_parsing.nodes.items():
-        x: float = float(node.lon)
-        y: float = float(node.lat)
-
-
-        l2_node: Lanelet2VisNode = Lanelet2VisNode(x, y)
-        l2_vis_nodes.append(l2_node)
-
-        min_x = min(min_x, x)
-        min_y = min(min_y, y)
-        max_x = max(max_x, x)
-        max_y = max(max_y, y)
-
-
-
-    for lanelet_polygon in cr_scenario.lanelet_network.lanelet_polygons:
-        for idx in range(lanelet_polygon.vertices.shape[0]):
-            x: float = lanelet_polygon.vertices[idx, 0]
-            y: float = lanelet_polygon.vertices[idx, 1]
-
-            min_x = min(min_x, x)
-            min_y = min(min_y, y)
-            max_x = max(max_x, x)
-            max_y = max(max_y, y)
-
-
-    check_intersection(l2_vis_nodes, cr_scenario)
-
-    plot_comparison(l2_vis_nodes, None, [min_x, max_x, min_y, max_y])
-
-
-    x = 3
 
 
 
 if __name__ == "__main__":
     root_dir: str = "/home/tmasc/mapconversion/example_files"
-    lanelet2_path = root_dir + "/planning_sim.osm"
-    xml_path = root_dir + "/planning_sim.xml"
-    visualize_comparison(lanelet2_path, xml_path)
+    lanelet2_path = root_dir + "/campus.osm"
+    xml_path = root_dir + "/campus.xml"
+
+    comp_helper = Commonroad2Lanelet2Comparison(lanelet2_path, xml_path)
+    comp_helper.visualize_comparison()
 
 
 

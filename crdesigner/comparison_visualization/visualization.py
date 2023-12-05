@@ -24,7 +24,7 @@ def convert_scenario_params():
     draw_params = MPDrawParams()
     draw_params.dynamic_obstacle.draw_icon = True
     draw_params.dynamic_obstacle.show_label = False
-    draw_params.lanelet_network.lanelet.show_label = True
+    draw_params.lanelet_network.lanelet.show_label = False
     draw_params.planning_problem.initial_state.state.draw_arrow = True
     draw_params.planning_problem.goal_region.draw_occupancies = True
     return draw_params
@@ -42,10 +42,8 @@ def convert_planning_to_new_crio_param_version():
 
 
 def plot_comparison(
-        lanelet2_nodes: List["Lanelet2VisNode"],
-        cr_scenario: "Scenario",
-        plot_limits_xminmax_yminmax: List[float]
-
+        lanelet2_nodes: List["Lanelet2VisNode"]=None,
+        cr_scenario: "Scenario"=None,
 ):
     """
     Summary
@@ -53,28 +51,24 @@ def plot_comparison(
     Plots scenario with computed reachable sets for cooperative vehicle.
     """
 
+    if (lanelet2_nodes is None and cr_scenario is None):
+        raise ValueError(f'Both lanelet2 and cr args are None')
+
     # create figure
     figsize = (25, 15)
-    plot_limits = None
 
-    renderer = MPRenderer(plot_limits=plot_limits, figsize=figsize)
-
+    # renderer and draw params
+    renderer = MPRenderer(figsize=figsize)
     draw_params = convert_scenario_params()
 
-    try:
-        # plot cr scenario
+    # plot cr scenario
+    if(cr_scenario is not None):
         cr_scenario.draw(renderer, draw_params=draw_params)
-    except:
-        pass
 
-    try:
-        # plot nodes
+    # plot nodes
+    if(lanelet2_nodes is not None):
         for node in lanelet2_nodes:
             draw_lanelet2_node(node, renderer, draw_params)#
-    except:
-        pass
-
-
 
     # settings and adjustments
     plt.rc("axes", axisbelow=True)
@@ -92,7 +86,7 @@ def plot_comparison(
 
 
 
-def draw_lanelet2_node(node: "Lanelet2VisNode", renderer, draw_params):
+def draw_lanelet2_node(node: "Lanelet2VisNode", renderer, draw_params, point_size_l2: float = 1):
     """
     Draw target state as pink, opace polygon
     """
@@ -104,8 +98,8 @@ def draw_lanelet2_node(node: "Lanelet2VisNode", renderer, draw_params):
 
 
     center = np.asarray([node.x, node.y])
-    width = 0.00001
-    length = 0.00001
+    width = point_size_l2
+    length = point_size_l2
     Rectangle(length, width, center).draw(renderer, draw_params=dp)
 
 
