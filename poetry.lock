@@ -560,7 +560,7 @@ tqdm = ">=4.64"
 
 [package.source]
 type = "git"
-url = "git@github.com:CommonRoad/commonroad-io.git"
+url = "https://github.com/CommonRoad/commonroad-io.git"
 reference = "develop"
 resolved_reference = "26b245717cfa711c85645bbb6bab730ba24bd454"
 
@@ -4605,4 +4605,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8"
-content-hash = "79037a07c4c1d071d0001914c6e2db6cef62e9ac8bb011db0768e0c651b6878e"
+content-hash = "919842df0cf6d4a43ea0fd31ef1b384ca2df1cca3d8670cccd62622a8f60ab15"
