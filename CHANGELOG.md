@@ -11,6 +11,7 @@
 
 ### Changed
 - Remove second conversion option for Lanelet2 and OpenDRIVE conversion example files
+- osm2cr: virtual traffic sign have position assigned
 
 ### Fixed
 - Adding existing obstacles again
