@@ -1,4 +1,5 @@
 import warnings
+import mgrs
 
 from commonroad.scenario.traffic_light import TrafficLightState, TrafficLightCycleElement, TrafficLightCycle
 
@@ -69,3 +70,17 @@ def clean_projection_string(proj_str: str) -> str:
         final_str = proj_str
     final_str = final_str.replace("\n", "").lstrip().rstrip()
     return final_str
+
+
+def create_mgrs_code(lat: float, lon: float) -> str:
+    """
+    Creates the MGRS code of the provided lat/lon position
+
+    :param lat: lateral WGS84 position
+    :param lon: longitudinal WGS84 position
+    :return: mgrs code of position as string
+    """
+    mgrs_converter = mgrs.MGRS()
+    mgrs_code = mgrs_converter.toMGRS(latitude=lat, longitude=lon)
+
+    return mgrs_code
