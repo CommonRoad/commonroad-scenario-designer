@@ -64,3 +64,19 @@ class AddTrafficSignUI:
         """
         self.road_network_toolbox_ui.x_position_traffic_sign.setText("0.0")
         self.road_network_toolbox_ui.y_position_traffic_sign.setText("0.0")
+
+    @logger.log
+    def add_traffic_sign_element(self, text_browser):
+        """
+        Adds traffic sign element to traffic sign.
+        Only a default entry is created the user has to specify the traffic sign ID manually afterward.
+        """
+        if not self.scenario_model.scenario_created():
+            text_browser.append("_Warning:_ Create a new file")
+            return
+        num_rows = self.road_network_toolbox_ui.traffic_sign_element_table.rowCount()
+        self.road_network_toolbox_ui.traffic_sign_element_table.insertRow(num_rows)
+        combo_box = QComboBox()
+        combo_box.addItems([elem.name for elem in globals()[
+            "TrafficSignID" + SupportedTrafficSignCountry(self.scenario_model.get_country_id()).name.capitalize()]])
+        self.road_network_toolbox_ui.traffic_sign_element_table.setCellWidget(num_rows, 0, combo_box)
